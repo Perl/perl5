@@ -1555,9 +1555,16 @@ or casts
 
 #  define HIGHEST_REGCOMP_DOT_H_SYNC_ CC_VERTSPACE_
 
-/* The members of the third group below do not need to be coordinated with data
- * structures in regcomp.[ch] and regexec.c. */
-#  define CC_IDFIRST_                  16
+/* These three follow immediately after the final function that has a version
+ * defined by C, like isascii(), so they overlap with anything else.  They are
+ * used in the 'PL_libc_char_fcns' data structure, along with the ones above
+ * them */
+# define CC_IDFIRST_  16
+# define CC_TOLOWER_  (CC_IDFIRST_ + 1)
+# define CC_TOUPPER_  (CC_TOLOWER_ + 1)
+
+/* The members of the fourth group below do not need to be coordinated with
+ * data structures in regcomp.[ch] and regexec.c. */
 #  define CC_CHARNAME_CONT_            17
 #  define CC_NONLATIN1_FOLD_           18
 #  define CC_NONLATIN1_SIMPLE_FOLD_    19
@@ -2025,7 +2032,7 @@ END_EXTERN_C
 #  define is_posix_XDIGIT(c)        isxdigit((U8) (c))
 #endif
 
-/* Below is the next level up, which currently expands to nothing more
+/* Below is the next level up, which on most platforms expands to nothing more
  * than the previous layer.  These are the macros to use if you really need
  * something whose input domain is a byte, and the locale isn't UTF-8; that is,
  * where you normally would have to use things like bare isalnum().
@@ -2037,7 +2044,13 @@ END_EXTERN_C
  * (Note, proper general operation of the bare libc functions requires you to
  * cast to U8.  These do that for you automatically.) */
 
+/* In this one circumstance, the macro is implemented with a lock; otherwise it
+ * expands to just the layer below */
+#ifdef EMULATE_THREAD_SAFE_LOCALES
+#  define WRAP_U8_LC_(c, classnum, posix)  posix_LC_foo_((c), (classnum))
+#else
 #  define WRAP_U8_LC_(c, classnum, posix)  posix(c)
+#endif
 
 #define isU8_ALPHANUMERIC_LC(c)                                                \
               WRAP_U8_LC_((c), CC_ALPHANUMERIC_, is_posix_ALPHANUMERIC)

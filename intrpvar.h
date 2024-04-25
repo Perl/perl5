@@ -758,7 +758,15 @@ PERLVARI(I, cur_locale_obj, locale_t, LC_GLOBAL_LOCALE)
  * is almost always toggled into the C locale, and the locale it nominally is
  * is stored as PL_numeric_name. */
 PERLVARA(I, curlocales, LOCALE_CATEGORIES_COUNT_ + 1, const char *)
+#endif
+#ifdef EMULATE_THREAD_SAFE_LOCALES
+PERLVARA(I, restore_locale, LOCALE_CATEGORIES_COUNT_, const char *)
+PERLVARA(I, restore_locale_depth, LOCALE_CATEGORIES_COUNT_, Size_t)
+PERLVARI(I, NUMERIC_toggle_depth, int, 0)
+#endif
 
+#if defined(USE_LOCALE) && (defined(WIN32) || ! defined(USE_THREAD_SAFE_LOCALE))
+PERLVARI(I, perl_controls_locale, bool, true)
 #endif
 #ifdef USE_PL_CUR_LC_ALL
 PERLVARI(I, cur_LC_ALL, const char *, NULL)

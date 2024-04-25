@@ -68,6 +68,7 @@ BEGIN {
 }
 
 use constant PLATFORM => $ARGS{PLATFORM};
+use constant LIBC => uc $Config{libc} =~ s/^-l//r;
 
 # This makes us able to use, e.g., $define{WIN32}, so you don't have to
 # remember what things came from %ARGS.
@@ -175,8 +176,8 @@ if (   $define{HAS_POSIX_2008_LOCALE}
 
 if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     if (    $define{USE_POSIX_2008_LOCALE}
-        || ($define{WIN32} && (   $cctype !~ /\D/
-                               && $cctype >= 80)))
+        || ($define{WIN32} && (   ($cctype eq "GCC" && LIBC eq "UCRT")
+                               || ($cctype !~ /\D/  && $cctype >= 80))))
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
     }
@@ -203,7 +204,7 @@ if ($define{WIN32})
         $define{USE_PL_CUR_LC_ALL} = 1;
     }
 
-    if ($cctype < 140) {
+    if ($cctype =~ /\D/ || $cctype < 140) {
         $define{TS_W32_BROKEN_LOCALECONV} = 1;
     }
 }
@@ -489,6 +490,25 @@ unless ($define{USE_PL_CUR_LC_ALL})
 {
     ++$skip{$_} foreach qw(
         PL_cur_LC_ALL
+    );
+}
+
+unless ($define{USE_LOCALE} && (     $define{WIN32}
+                                || ! $define{USE_THREAD_SAFE_LOCALE}))
+{
+    ++$skip{$_} foreach qw(
+        PL_perl_controls_locale
+    );
+}
+
+unless ($define{EMULATE_THREAD_SAFE_LOCALES})
+{
+    ++$skip{$_} foreach qw(
+        PL_restore_locale
+        PL_restore_locale_depth
+        PL_NUMERIC_toggle_depth
+        Perl_category_lock
+        Perl_category_unlock
     );
 }
 

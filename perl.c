@@ -1140,6 +1140,12 @@ perl_destruct(pTHXx)
         PL_curlocales[i] = NULL;
     }
 #endif
+#if defined(EMULATE_THREAD_SAFE_LOCALES)
+    for (i = 0; i < (int) C_ARRAY_LENGTH(PL_restore_locale); i++) {
+        Safefree(PL_restore_locale[i]);
+        PL_restore_locale[i] = NULL;
+    }
+#endif
 #if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
     {
         /* This also makes sure we aren't using a locale object that gets freed

@@ -318,6 +318,49 @@ S_PerlEnv_putenv(pTHX_ char * str)
 
 #endif
 
+/* ------------------------------- handy.h ------------------------------- */
+
+#ifdef EMULATE_THREAD_SAFE_LOCALES
+
+PERL_STATIC_INLINE int
+Perl_posix_LC_foo_(pTHX_ const int c, const U8 classnum) {
+    int result;
+
+    ISALPHA_LOCK;   /* All classes have same expansion */
+
+    /* All calls to this (so far) are with a 'classnum' known at compile time,
+     * so the compiler should constant fold this down to a single assignment */
+    switch (classnum) {
+      case CC_ALPHANUMERIC_:result = (bool) is_posix_ALPHANUMERIC(c); break;
+      case CC_ALPHA_:       result = (bool) is_posix_ALPHA(c);        break;
+      case CC_ASCII_:       result = (bool) is_posix_ASCII(c);        break;
+      case CC_BLANK_:       result = (bool) is_posix_BLANK(c);        break;
+      case CC_CASED_:       result = (bool) is_posix_CASED(c);        break;
+      case CC_CNTRL_:       result = (bool) is_posix_CNTRL(c);        break;
+      case CC_DIGIT_:       result = (bool) is_posix_DIGIT(c);        break;
+      case CC_GRAPH_:       result = (bool) is_posix_GRAPH(c);        break;
+      case CC_LOWER_:       result = (bool) is_posix_LOWER(c);        break;
+      case CC_PRINT_:       result = (bool) is_posix_PRINT(c);        break;
+      case CC_PUNCT_:       result = (bool) is_posix_PUNCT(c);        break;
+      case CC_SPACE_:       result = (bool) is_posix_SPACE(c);        break;
+      case CC_UPPER_:       result = (bool) is_posix_UPPER(c);        break;
+      case CC_WORDCHAR_:    result = (bool) is_posix_WORDCHAR(c);     break;
+      case CC_XDIGIT_:      result = (bool) is_posix_XDIGIT(c);       break;
+      case CC_IDFIRST_:     result = (bool) is_posix_IDFIRST(c);      break;
+      case CC_TOLOWER_:     result =        to_posix_LOWER(c);        break;
+      case CC_TOUPPER_:     result =        to_posix_UPPER(c);        break;
+
+      default:
+        ISALPHA_UNLOCK;
+        locale_panic_(Perl_form(aTHX_ "Unknown charclass %d", classnum));
+    }
+
+    ISALPHA_UNLOCK;
+    return result;
+}
+
+#endif
+
 /* ------------------------------- mg.h ------------------------------- */
 
 #if defined(PERL_CORE) || defined(PERL_EXT)

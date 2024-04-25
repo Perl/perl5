@@ -59,9 +59,6 @@
 #  undef _UCRT
 #  ifndef NO_LOCALE
 #    define TS_W32_BROKEN_LOCALECONV
-#    ifdef USE_THREADS
-#      define EMULATE_THREAD_SAFE_LOCALES
-#    endif
 #  endif
 #endif
 
@@ -1297,8 +1294,11 @@ typedef enum {
 #  endif
 
    /* POSIX 2008 has no means of finding out the current locale without a
-    * querylocale; so must keep track of it ourselves */
-#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
+    * querylocale; so must keep track of it ourselves.  And for thread-safe
+    * emulation, we keep track because the system doesn't have per-thread
+    * information */
+#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))        \
+   ||  defined(EMULATE_THREAD_SAFE_LOCALES)
 #    define USE_PL_CURLOCALES
 #  endif
 
@@ -7321,17 +7321,17 @@ typedef struct am_table_short AMTS;
  */
 
 /* Locale/thread synchronization macros. */
-#define GENr_LCw_LOCK_(cat)         error_unexpected_GENr_LCw_LOCK_macro
-#define GENr_ENVr_LCw_LOCK_(cat)    error_unexpected_GENr_ENVr_LCw_LOCK_macro
-#define GENr_ENVw_LCr_LOCK_(cat)    error_unexpected_GENr_ENVw_LCr_LOCK_macro
-#define GENr_ENVw_LCw_LOCK_(cat)    error_unexpected_GENr_ENVw_LCw_LOCK_macro
+#define GENr_LCw_LOCK_(m)           error_unexpected_GENr_LCw_LOCK_macro
+#define GENr_ENVr_LCw_LOCK_(m)      error_unexpected_GENr_ENVr_LCw_LOCK_macro
+#define GENr_ENVw_LCr_LOCK_(m)      error_unexpected_GENr_ENVw_LCr_LOCK_macro
+#define GENr_ENVw_LCw_LOCK_(m)      error_unexpected_GENr_ENVw_LCw_LOCK_macro
 #define GENr_ENVw_LOCK_             error_unexpected_GENr_ENVw_LOCK_macro
-#define GENw_LCw_LOCK_(cat)         error_unexpected_GENw_LCw_LOCK_macro
-#define GENw_ENVr_LCw_LOCK_(cat)    error_unexpected_GENw_ENVr_LCw_LOCK_macro
-#define GENw_ENVw_LCr_LOCK_(cat)    error_unexpected_GENw_ENVw_LCr_LOCK_macro
-#define GENw_ENVw_LCw_LOCK_(cat)    error_unexpected_GENw_ENVw_LCw_LOCK_macro
+#define GENw_LCw_LOCK_(m)           error_unexpected_GENw_LCw_LOCK_macro
+#define GENw_ENVr_LCw_LOCK_(m)      error_unexpected_GENw_ENVr_LCw_LOCK_macro
+#define GENw_ENVw_LCr_LOCK_(m)      error_unexpected_GENw_ENVw_LCr_LOCK_macro
+#define GENw_ENVw_LCw_LOCK_(m)      error_unexpected_GENw_ENVw_LCw_LOCK_macro
 #define GENw_ENVw_LOCK_             error_unexpected_GENw_ENVw_LOCK_macro
-#define ENVw_LCw_LOCK_(cat)         error_unexpected_ENVw_LCw_LOCK_macro
+#define ENVw_LCw_LOCK_(m)           error_unexpected_ENVw_LCw_LOCK_macro
 
 #ifndef USE_LOCALE_THREADS
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)  NOOP
@@ -7381,22 +7381,22 @@ typedef struct am_table_short AMTS;
 #  define GENw_UNLOCK_                  LOCALE_UNLOCK_
 
     /* The read-locks involving locale reduce to the equivalent without it */
-#  define GENr_LCr_LOCK_(cat)           GENr_LOCK_
-#  define GENr_LCr_UNLOCK_(cat)         GENr_UNLOCK_
-#  define GENw_LCr_LOCK_(cat)           GENw_LOCK_
-#  define GENw_LCr_UNLOCK_(cat)         GENw_UNLOCK_
-#  define GENr_ENVr_LCr_LOCK_(cat)      GENr_ENVr_LOCK_
-#  define GENr_ENVr_LCr_UNLOCK_(cat)    GENr_ENVr_UNLOCK_
-#  define GENw_ENVr_LCr_LOCK_(cat)      GENw_ENVr_LOCK_
-#  define GENw_ENVr_LCr_UNLOCK_(cat)    GENw_ENVr_UNLOCK_
+#  define GENr_LCr_LOCK_(m)             GENr_LOCK_
+#  define GENr_LCr_UNLOCK_(m)           GENr_UNLOCK_
+#  define GENw_LCr_LOCK_(m)             GENw_LOCK_
+#  define GENw_LCr_UNLOCK_(m)           GENw_UNLOCK_
+#  define GENr_ENVr_LCr_LOCK_(m)        GENr_ENVr_LOCK_
+#  define GENr_ENVr_LCr_UNLOCK_(m)      GENr_ENVr_UNLOCK_
+#  define GENw_ENVr_LCr_LOCK_(m)        GENw_ENVr_LOCK_
+#  define GENw_ENVr_LCr_UNLOCK_(m)      GENw_ENVr_UNLOCK_
 
     /* The locale write-locks do need an exclusive locale mutex.  Treat them as
      * the (repurposed) generic lock */
-#  define LCw_LOCK_(cat)                GENw_LOCK_
-#  define LCw_UNLOCK_(cat)              GENw_LOCK_
+#  define LCw_LOCK_(m)                  GENw_LOCK_
+#  define LCw_UNLOCK_(m)                GENw_LOCK_
 
-#  define ENVr_LCw_LOCK_(cat)           GENw_ENVr_LOCK_
-#  define ENVr_LCw_UNLOCK_(cat)         GENw_ENVr_UNLOCK_
+#  define ENVr_LCw_LOCK_(m)             GENw_ENVr_LOCK_
+#  define ENVr_LCw_UNLOCK_(m)           GENw_ENVr_UNLOCK_
 
     /* The generic non-locale but with environment locks are as you would
      * expect */
@@ -7423,14 +7423,14 @@ typedef struct am_table_short AMTS;
 
     /* The remaining locks not involving the generic one reduce to the locale
      * one being a no-op. */
-#  define LCr_LOCK_(cat)                NOOP
-#  define LCr_UNLOCK_(cat)              NOOP
+#  define LCr_LOCK_(m)                  NOOP
+#  define LCr_UNLOCK_(m)                NOOP
 
-#  define ENVr_LCr_LOCK_(cat)           ENVr_LOCK_
-#  define ENVr_LCr_UNLOCK_(cat)         ENVr_UNLOCK_
+#  define ENVr_LCr_LOCK_(m)             ENVr_LOCK_
+#  define ENVr_LCr_UNLOCK_(m)           ENVr_UNLOCK_
 
-#  define ENVw_LCr_LOCK_(cat)           ENVw_LOCK_
-#  define ENVw_LCr_UNLOCK_(cat)         ENVw_UNLOCK_
+#  define ENVw_LCr_LOCK_(m)             ENVw_LOCK_
+#  define ENVw_LCr_UNLOCK_(m)           ENVw_UNLOCK_
 
 #  define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)    NOOP
 #  define LC_NUMERIC_UNLOCK       NOOP
@@ -7444,42 +7444,36 @@ typedef struct am_table_short AMTS;
      *
      * First, the locks not involving the generic one are as you would expect,
      * with any env lock being done before any locale one. */
-#  define LCr_LOCK_(cat)                LOCALE_READ_LOCK
-#  define LCr_UNLOCK_(cat)              LOCALE_READ_UNLOCK
-
-#  define LCw_LOCK_(cat)                LOCALE_LOCK_(cat)
-#  define LCw_UNLOCK_(cat)              LOCALE_UNLOCK_
-
-#  define ENVr_LCr_LOCK_(cat)                                               \
+#  define ENVr_LCr_LOCK_(m)                                                 \
                            STMT_START {                                     \
                                         ENVr_LOCK_;                         \
-                                        LCr_LOCK_(cat);                     \
+                                        LCr_LOCK_(m);                       \
                            } STMT_END
-#  define ENVr_LCr_UNLOCK_(cat)                                             \
+#  define ENVr_LCr_UNLOCK_(m)                                               \
                            STMT_START {                                     \
-                                        LCr_UNLOCK_(cat);                   \
+                                        LCr_UNLOCK_(m);                     \
                                         ENVr_UNLOCK_;                       \
                            } STMT_END
 
-#  define ENVw_LCr_LOCK_(cat)                                               \
+#  define ENVw_LCr_LOCK_(m)                                                 \
                            STMT_START {                                     \
                                         ENVw_LOCK_;                         \
-                                        LCr_LOCK_(cat);                     \
+                                        LCr_LOCK_(m);                       \
                            } STMT_END
-#  define ENVw_LCr_UNLOCK_(cat)                                             \
+#  define ENVw_LCr_UNLOCK_(m)                                               \
                            STMT_START {                                     \
-                                        LCr_UNLOCK_(cat);                   \
+                                        LCr_UNLOCK_(m);                     \
                                         ENVw_UNLOCK_;                       \
                            } STMT_END
 
-#  define ENVr_LCw_LOCK_(cat)                                               \
+#  define ENVr_LCw_LOCK_(m)                                                 \
                            STMT_START {                                     \
                                         ENVr_LOCK_;                         \
-                                        LOCALE_LOCK_(cat);                  \
+                                        LCw_LOCK(m);                        \
                            } STMT_END
-#  define ENVr_LCw_UNLOCK_(cat)                                             \
+#  define ENVr_LCw_UNLOCK_(m)                                               \
                            STMT_START {                                     \
-                                        LOCALE_UNLOCK_;                     \
+                                        LCw_UNLOCK(m);                      \
                                         ENVr_UNLOCK_;                       \
                            } STMT_END
 
@@ -7496,21 +7490,53 @@ typedef struct am_table_short AMTS;
 #  define GENw_ENVr_LOCK_               ENVw_LOCK_
 #  define GENw_ENVr_UNLOCK_             ENVw_UNLOCK_
 
-#  define GENr_LCr_LOCK_(cat)           ENVr_LCr_LOCK_(cat)
-#  define GENr_LCr_UNLOCK_(cat)         ENVr_LCr_UNLOCK_(cat)
+#  define GENr_LCr_LOCK_(m)             ENVr_LCr_LOCK_(m)  
+#  define GENr_LCr_UNLOCK_(m)           ENVr_LCr_UNLOCK_(m)  
 
-#  define GENw_LCr_LOCK_(cat)           ENVw_LCr_LOCK_(cat)
-#  define GENw_LCr_UNLOCK_(cat)         ENVw_LCr_UNLOCK_(cat)
+#  define GENw_LCr_LOCK_(m)             ENVw_LCr_LOCK_(m)  
+#  define GENw_LCr_UNLOCK_(m)           ENVw_LCr_UNLOCK_(m)  
 
-#  define GENr_ENVr_LCr_LOCK_(cat)      ENVr_LCr_LOCK_(cat)
-#  define GENr_ENVr_LCr_UNLOCK(cat)     ENVr_LCr_UNLOCK_(cat)
+#  define GENr_ENVr_LCr_LOCK_(m)        ENVr_LCr_LOCK_(m)  
+#  define GENr_ENVr_LCr_UNLOCK(m)       ENVr_LCr_UNLOCK_(m)  
 
-#  define GENw_ENVr_LCr_LOCK_(cat)      ENVw_LCr_LOCK_(cat)
-#  define GENw_ENVr_LCr_UNLOCK_(cat)    ENVw_LCr_UNLOCK_(cat)
+#  define GENw_ENVr_LCr_LOCK_(m)        ENVw_LCr_LOCK_(m)  
+#  define GENw_ENVr_LCr_UNLOCK_(m)      ENVw_LCr_UNLOCK_(m)  
 
-#  define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+#  ifndef EMULATE_THREAD_SAFE_LOCALES
+#    define LCr_LOCK_(m)                LOCALE_READ_LOCK
+#    define LCr_UNLOCK_(m)              LOCALE_READ_UNLOCK
+
+#    define LCw_LOCK_(m)                LOCALE_LOCK_(0)  
+#    define LCw_UNLOCK_(m)              LOCALE_UNLOCK_
+
+#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
                LOCALE_LOCK_(cond_to_panic_if_already_locked)
-#  define LC_NUMERIC_UNLOCK       LOCALE_UNLOCK_
+#    define LC_NUMERIC_UNLOCK           LOCALE_UNLOCK_
+
+#    define TSE_TOGGLE_(m)              NOOP
+#    define TSE_UNTOGGLE_(m)            NOOP
+#  else
+
+     /* Here, are emulating safe locales; everything has to be treated as a
+      * write lock, as everything is done in the global locale, so we can't
+      * have another thread changing it, and this thread may well have to
+      * toggle the locale */
+#    define LCr_LOCK_(m)                LCw_LOCK_(m)
+#    define LCr_UNLOCK_(m)              LCw_UNLOCK_(m)
+
+#    define LCw_LOCK_(m)                category_lock(  m, __FILE__, __LINE__)
+#    define LCw_UNLOCK_(m)              category_unlock(m, __FILE__, __LINE__)
+
+#    define TSE_TOGGLE_(m)              LCw_LOCK_(m)
+#    define TSE_UNTOGGLE_(m)            LCw_UNLOCK_(m)
+
+#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+                               LCw_LOCK_(  LC_INDEX_TO_BIT(LC_NUMERIC_INDEX_))
+#    define LC_NUMERIC_UNLOCK  LCw_UNLOCK_(LC_INDEX_TO_BIT(LC_NUMERIC_INDEX_))
+
+#    define LC_INDEX_TO_BIT_(i) (1 << (i))
+
+#  endif
 #endif
 
 #include "lock_definitions.h"

@@ -3824,6 +3824,16 @@ p	|void	|dump_sv_child	|NN SV *sv
 CRTip	|unsigned int|variant_byte_number				\
 				|PERL_UINTMAX_T word
 #endif
+#if defined(EMULATE_THREAD_SAFE_LOCALES)
+Cp	|void	|category_lock	|const UV mask				\
+				|NN const char *file			\
+				|const line_t caller_line
+Cp	|void	|category_unlock|const UV mask				\
+				|NN const char *file			\
+				|const line_t caller_line
+Cip	|int	|posix_LC_foo_	|const int c				\
+				|const U8 classnum
+#endif
 #if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 ARdp	|I32	|my_chsize	|int fd 				\
 				|Off_t length
@@ -4515,6 +4525,13 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|NULLOK const char *retval		\
 				|const line_t line
 #   endif
+#   if   defined(EMULATE_THREAD_SAFE_LOCALES) || \
+       ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
+S	|void	|update_PL_curlocales_i 				\
+				|const locale_category_index index	\
+				|NN const char *new_locale		\
+				|const line_t caller_line
+#   endif
 #   if   defined(HAS_LOCALECONV) && \
        ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
 S	|void	|populate_hash_from_localeconv				\
@@ -4579,14 +4596,8 @@ S	|const char *|querylocale_2008_i				\
 				|const locale_category_index index	\
 				|const line_t line
 S	|locale_t|use_curlocale_scratch
-#     if !defined(USE_QUERYLOCALE)
-S	|void	|update_PL_curlocales_i 				\
-				|const locale_category_index index	\
-				|NN const char *new_locale		\
-				|const line_t caller_line
-#     endif
-#   elif  defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
+#   elif !defined(EMULATE_THREAD_SAFE_LOCALES) && \
+          defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE)
 S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char *locale

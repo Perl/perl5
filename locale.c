@@ -42,13 +42,6 @@
  * platform than it actually is.  This allows you to make changes and catch
  * some errors without having access to those other platforms.
  *
- * This code now has multi-thread-safe locale handling on systems that support
- * that.  This is completely transparent to most XS code.  On earlier systems,
- * it would be possible to emulate thread-safe locales, but this likely would
- * involve a lot of locale switching, and would require XS code changes.
- * Macros could be written so that the code wouldn't have to know which type of
- * system is being used.
- *
  * Table-driven code is used for simplicity and clarity, as many operations
  * differ only in which category is being worked on.  However the system
  * categories need not be small contiguous integers, so do not lend themselves
@@ -69,6 +62,16 @@
  * bool_setlocale_2008_i() function is used to hide the different API from the
  * outside.  This makes it completely transparent to most XS code.
  *
+ * On other threaded-systems, the code here, in conjunction with other code in
+ * the system, emulates thread-safe locales by using mutexes to lock other
+ * threads out, and change the global locale to the desired per-thread value
+ * just before operations that care about it.  All such operations must declare
+ * their need before executing, or it won't work.  All of the Perl core does
+ * this, which makes pure Perl code locale thread-safe.  XS code can be
+ * extended to work by using the macros for the purpose in perl.h.  The need
+ * for mutexes means that in these platforms, much of the code in this file
+ * must be done while in critical sections.
+ *
  * A huge complicating factor is that the LC_NUMERIC category is normally held
  * in the C locale, except during those relatively rare times when it needs to
  * be in the underlying locale.  There is a bunch of code to accomplish this,
@@ -79,7 +82,7 @@
  * opportunities for avoiding work.  We don't have to necessarily create a safe
  * copy to return if no return is desired.
  *
- * There are 3.5 major implementations here; which one chosen depends on what
+ * There are 4.5 major implementations here; which one chosen depends on what
  * the platform has available, and Configuration options.
  *
  * 1) Raw posix_setlocale().  This implementation is basically the libc
@@ -102,7 +105,9 @@
  *
  * 2) An implementation that adds a minimal layer above implementation 1),
  *    making that implementation uninterruptible and returning a
- *    per-thread/per-category value.
+ *    per-thread/per-category value.  Currently, this is for threaded perls
+ *    on platforms where layers 3a and 3b are not available, and where layer 4
+ *    has not been selected.
  *
  * 3a and 3b) An implementation of POSIX 2008 thread-safe locale handling,
  *    hiding from the programmer the completely different API for this.
@@ -119,7 +124,32 @@
  *    are buggy, in one way or another.  There are workarounds encoded here,
  *    where feasible, for platforms where the bugs are amenable to that
  *    (glibc, for example).  But other platforms instead don't use this
- *    implementation.
+ *    implementation, but the next one below.
+ *
+ * 4) A thread-safe emulation implementation that, in conjunction with changes
+ *    to C code, makes locale handling thread-safe.  Those changes are simply
+ *    to wrap locale-dependent system calls with macros that delimit a critical
+ *    section in which they change the global locale to the one the thread
+ *    expects.  The perl core has made those changes, so pure perl programs
+ *    become thread-safe.  Well-behaved XS code also keeps things thread-safe,
+ *    either by not using locale-dependent system calls, or by changing to use
+ *    the wrapper macros.  This layer is not chosen if the platform has native
+ *    thread-safe locale handling.  Also, currently perl must have been
+ *    Configured with "-Accflags=-DEMULATE_THREAD_SAFE_LOCALES".
+ *
+ *    This implementation is based on the observation that the underlying
+ *    locale matters only to relatively few libc calls, and only during their
+ *    execution.  It can be anything at all at any other time.  What the proper
+ *    locale should be for each category is kept in the array PL_curlocales[].
+ *    Each locale-dependent operation must be wrapped in mutex lock/unlock
+ *    operations.  The lock additionally compares what libc knows the locale to
+ *    be, and what it should be for this thread at this time, and changes the
+ *    actual locale to the proper value if necessary.  That's all that is
+ *    needed.  However additionally, the unlock restores the locale to what it
+ *    was at the time of the lock.  This improves the chances that a thread not
+ *    under perl's control (such as Gtk) will still work.  (If mutex calls are
+ *    added to lock out that thread from running when the other threads are
+ *    using locale-dependent functions, then things should completely work.)
  *
  * z/OS (os390) is an outlier.  Locales really don't work under threads when
  * either the radix character isn't a dot, or attempts are made to change
@@ -227,10 +257,10 @@
  *          crippled locale implementation.
  *
  *      -Accflags=-DNO_THREAD_SAFE_LOCALE
- *          Even if thread-safe operations are available on this platform and
- *          would otherwise be used (because this is a perl with multiplicity),
- *          perl is compiled to not use them.  This could be useful on
- *          platforms where the libc is buggy.
+ *          Don't use the thread-safe operations on this platform (should they
+ *          be available) nor try to emulate them (if they are not available)
+ *          even on a threaded perl.  This could be useful on platforms where
+ *          the libc is buggy, or the emulation runs into problems.
  *
  *      -Accflags=-DNO_POSIX_2008_LOCALE
  *          Even if the libc locale operations specified by the Posix 2008
@@ -268,6 +298,13 @@
  *          If the named category(ies) does(do) not exist on this platform,
  *          these have no effect.  Otherwise they cause perl to be compiled to
  *          always keep the named category(ies) in the C locale.
+ *
+ *      -Accflags=-DEMULATE_THREAD_SAFE_LOCALES
+ *          This has no effect on unthreaded perls, nor when perl thinks that
+ *          the platform has thread-safe locale handling.  But otherwise, it
+ *          enables the code to emulate thread-safe locale handling.
+ *          Effectively it chooses implementation 4) instead of implementation
+ *          2) from the list above.
  *
  *      -Accflags=-DHAS_BROKEN_SETLOCALE_QUERY_LC_ALL
  *          This would be set in a hints file to tell perl that doing a libc
@@ -384,8 +421,8 @@ static int debug_initialization = 0;
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
-#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
-#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+//#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
+//#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
 
 /* Some platforms require LC_CTYPE to be congruent with the category we are
  * looking for.  XXX This still presumes that we have to match COLLATE and
@@ -393,10 +430,19 @@ static int debug_initialization = 0;
 #if defined(USE_LOCALE_CTYPE) && ! defined(LIBC_HANDLES_MISMATCHED_CTYPE)
 #  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE    /* no longer used; kept for
                                                    possible future use */
+
+#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
+#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+
 #  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)                          \
         const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale)
 #  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)                            \
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#elif defined(EMULATE_THREAD_SAFE_LOCALES)
+#  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)                       \
+                                            TOGGLE_LOCK(LC_CTYPE_INDEX_)
+#  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)                         \
+                                          TOGGLE_UNLOCK(LC_CTYPE_INDEX_)
 #else
 #  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)
 #  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)
@@ -596,6 +642,7 @@ S_positional_setlocale(int cat, const char * locale)
 STATIC locale_t
 S_positional_newlocale(int mask, const char * locale, locale_t base)
 {
+// ENV constant newlocale.html env prob. "" XXX fix in locale.c
     assert(locale);
 
     if (mask != LC_ALL_MASK) return newlocale(mask, locale, base);
@@ -1050,7 +1097,7 @@ Perl_force_locale_unlock(pTHX)
     }
 
     if (PL_locale_mutex_depth > 0) {
-        LOCALE_UNLOCK_;
+        gwLOCALE_UNLOCK;
     }
 
 #endif
@@ -1648,6 +1695,9 @@ S_posix_setlocale_with_complications(pTHX_ const int cat,
 
 #endif
 
+#define POSIX_SETLOCALE_LOCK      SETLOCALE_LOCK
+#define POSIX_SETLOCALE_UNLOCK    SETLOCALE_UNLOCK
+
 /* End of posix layer
  *==========================================================================
  *
@@ -1938,7 +1988,8 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
 
 /*===========================================================================*/
 #elif   defined(USE_LOCALE_THREADS)                 \
-   && ! defined(USE_THREAD_SAFE_LOCALE)
+   && ! defined(USE_THREAD_SAFE_LOCALE)             \
+   && ! defined(EMULATE_THREAD_SAFE_LOCALES)
 
    /* Here, there are threads, and there is no support for thread-safe
     * operation.  This is a dangerous situation, which perl is documented as
@@ -2001,6 +2052,416 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define TOGGLING_LOCKS  1
 #  define TOGGLE_LOCK(i)    POSIX_SETLOCALE_LOCK
 #  define TOGGLE_UNLOCK(i)  POSIX_SETLOCALE_UNLOCK
+
+/*===========================================================================*/
+#elif defined(EMULATE_THREAD_SAFE_LOCALES)
+
+/* Here, use our emulation of thread safe locales.  PL_curlocales[] keeps what
+ * the name of the locale should be for each category in the current thread.
+ * And so, S_bool_setlocale_emulate_safe_r() wraps each call to the system's
+ * setlocale() with saving the return into PL_curlocales.
+ *
+ * The locale is changed to the one specified by PL_curlocales[] just before
+ * any libc call affected by it, and restored just afterwards. */
+
+#  define querylocale_i(i)    S_querylocale_emulate_safe_i(aTHX_ i, __LINE__)
+
+STATIC const char *
+S_querylocale_emulate_safe_i(pTHX_ const locale_category_index  cat_index,
+                                   const line_t caller_line)
+{
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           " querylocale_emulate_safe_i(%u: %s);"
+                           " called from %" LINE_Tf "\n",
+                           cat_index, category_names[cat_index], caller_line));
+
+#  ifdef LC_ALL
+
+    /* It can be somewhat expensive to calculate LC_ALL from its constituent
+     * categories, and the value might change many times before it is actually
+     * used.  Therefore, it is only done as needed.  This is such a place */
+    if (   cat_index == LC_ALL_INDEX_
+        && PL_curlocales[LC_ALL_INDEX_] == NULL)
+    {
+        /* Call just for its side effect */
+        (void) calculate_LC_ALL_string(PL_curlocales, INTERNAL_FORMAT,
+                                       WANT_TEMP_PV,
+                                       caller_line);
+    }
+
+#  endif
+
+    return mortalized_pv_copy(PL_curlocales[cat_index]);
+}
+
+/*---------------------------------------------------------------------------*/
+
+#  define bool_setlocale_r(cat, locale)                                     \
+            S_bool_setlocale_emulate_safe_r(aTHX_ cat, locale, __LINE__)
+
+STATIC bool
+S_bool_setlocale_emulate_safe_r(pTHX_
+                                const int category,
+                                const char * wanted_locale,
+                                const line_t caller_line)
+{
+    /* Set the locale to 'wanted_locale' for the category given by our internal
+     * index number, and save the result for later use. */
+
+    assert(wanted_locale);
+
+    STDIZED_SETLOCALE_LOCK;
+    const char * new_locale = savepv(stdized_setlocale(category,
+                                                       wanted_locale));
+    STDIZED_SETLOCALE_UNLOCK;
+
+    if (! new_locale) {
+        SET_EINVAL;
+        return false;
+    }
+
+    update_PL_curlocales_i(get_category_index(category),
+                           new_locale, caller_line);
+    Safefree(new_locale);
+
+    return true;
+}
+/*---------------------------------------------------------------------------*/
+
+/* When the locale is toggled in this file, automatically enter a critical
+ * section and call category_lock() to make sure the category is in the proper
+ * locale for this thread.  LC_NUMERIC is handled specially, so
+ * PL_NUMERIC_toggle_depth is used */
+#  define TOGGLING_LOCKS  1
+#  define DEBUG_TOGGLE(i)                                                   \
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,                              \
+                               "new depth=%d, index=%d, caller=%" LINE_Tf   \
+                               "\n", PL_NUMERIC_toggle_depth, i, __LINE__))
+#  ifdef USE_LOCALE_NUMERIC
+#    define TOGGLE_NUMERIC(i)                                               \
+         STMT_START {                                                       \
+            if (i == LC_NUMERIC_INDEX_) PL_NUMERIC_toggle_depth++;          \
+         } STMT_END
+#    define UNTOGGLE_NUMERIC(i)                                             \
+         STMT_START {                                                       \
+            if (i == LC_NUMERIC_INDEX_) {                                   \
+                if (PL_NUMERIC_toggle_depth <= 0) {                         \
+                    locale_panic_("toggling down failed");                  \
+                }                                                           \
+                PL_NUMERIC_toggle_depth--;                                  \
+            }                                                               \
+         } STMT_END
+#  else
+#    define TOGGLE_NUMERIC(i)
+#    define UNTOGGLE_NUMERIC(i)
+#  endif
+#  define TOGGLE_LOCK(i)                                                    \
+         STMT_START {                                                       \
+            TOGGLE_NUMERIC(i);                                              \
+            DEBUG_TOGGLE(i);                                                \
+            LC_LOCK_i_(i);                                                  \
+         } STMT_END
+#  define TOGGLE_UNLOCK(i)                                                  \
+         STMT_START {                                                       \
+            LC_UNLOCK_i_(i);                                                \
+            UNTOGGLE_NUMERIC(i);                                            \
+            DEBUG_TOGGLE(i);                                                \
+         } STMT_END
+/*---------------------------------------------------------------------------*/
+/* utility functions for emulating thread-safe locales.
+ *
+ * When emulating thread-safe locales, our per-thread data structures get set
+ * up as normal, but the actual locale is global to all threads.  All functions
+ * that depend on the locale need to be protected by critical sections
+ * surrounded by these two functions that lock, and then unlock after the
+ * operation is completed.  The first function does a lock and then changes the
+ * locale to the desired one for this thread, based on the per-thread data
+ * structures.  The restore function restores to what the locale on original
+ * entry was, and unlocks.  This is effectively a just-in-time locale setting
+ * scheme.
+ *
+ * There are two mechanisms to accommodate the need for more than one category
+ * being used by a function.
+ *  1)  Its parameter is a mask of all the categories this call is to set.  The
+ *      bit position in the mask corresponds to our category index.  The
+ *      function loops over all the set bits in the mask.
+ *  2)  In case that the control flow doesn't allow for all categories to be
+ *      known at the same call, this also implements a stack.  The lock is
+ *      called for each needed category.  Since the locks are general
+ *      semaphores, only the first call results in an actual lock.  Each call
+ *      thus changes the locale for its category(ies) to the desired one(s),
+ *      pushing onto the stack what it should be restored to afterwards.  The
+ *      paired unlock calls unwind the stack until the final one causes the
+ *      mutex to be released.  Most libc call require one or two categories.
+ *
+ * One could argue that there is no reason to restore afterwards, that the next
+ * just-in-time call will set the locale to the correct one.  But doing the
+ * restore allows this scheme to work like truly thread-safe implementations
+ * when one thread is in the global locale.  By restoring, we leave code not
+ * under this scheme to have the global thread for itself.  There is a big
+ * caveat here, though.  That thread must run in a critical section.  This
+ * isn't the case with the other thread-safe implementations. */
+
+void
+Perl_category_lock(pTHX_ const UV mask,
+                         const char * file,
+                         const line_t caller_line)
+{
+    PERL_ARGS_ASSERT_CATEGORY_LOCK;
+
+    /* The highest set bit needs to correspond to a legal index; LC_ALL_INDEX_
+     * is the biggest such one */
+    assert(mask != 0);
+    assert((mask & ~(LC_INDEX_TO_BIT_(LC_ALL_INDEX_ + 1) - 1)) == 0);
+
+    dSAVE_ERRNO;
+
+#  ifndef DEBUGGING
+    PERL_UNUSED_ARG(file);
+#  endif
+
+    if (UNLIKELY(! PL_perl_controls_locale)) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "Entering category_lock but outside of perl"
+                               " controlling the locale: nothing done;"
+                               " called from %s: %d\n", file, caller_line));
+        RESTORE_ERRNO;
+        return;
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "Entering category_lock; mask=%" UVxf
+                           ", called from %s: %d\n", mask, file, caller_line));
+
+    gwLOCALE_LOCK;
+
+    UV working_mask = mask;
+
+    /* Unlikely, but handle the case of being called with LC_ALL by changing
+     * the mask to all ones for the individual categories.  This works because
+     * LC_ALL_INDEX_ is 1 greater than the highest individual category index,
+     * and they are all consecutive */
+    if (working_mask & LC_INDEX_TO_BIT_(LC_ALL_INDEX_)) {
+        working_mask = LC_INDEX_TO_BIT_(LC_ALL_INDEX_) - 1;
+    }
+
+    while (working_mask) {
+
+        /* Get the bit position of the next lowest set bit.  That is our
+         * internal index for the category being locked this iteration.
+         * Turn the bit off so we don't work on this category again in this
+         * function call. */
+        const locale_category_index cat_index
+                              = (locale_category_index) lsbit_pos(working_mask);
+        working_mask &= ~ (1 << cat_index);
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "category_lock; processing %s\n",
+                               category_names[cat_index]));
+
+        /* The term 'toggled' is overloaded here.  Sorry.  Alone of the
+         * categories, LC_NUMERIC is kept in a locale indistinguishable from
+         * the C locale with respect to numeric operations.  This is primarily
+         * so that XS code doesn't have to consider that the radix character
+         * could be a comma.  But there are times when it is toggled to the
+         * real underlying locale for the program.  For the purposes of these
+         * comments, this will be referred to as toggling_1.
+         *
+         * Independently, code in this file may temporarily switch the locale
+         * for any category to some other locale.  This is also called
+         * toggling.  For the purposes of these comments, this will be referred
+         * to as toggling_2.
+         *
+         * For this emulation implementation, what the locale for
+         * any category should be is kept in PL_curlocales[].  The toggling_2
+         * functions simply change the appropriate array elements, and this
+         * function makes sure to change to it for the duration of a libc call
+         * that needs it to be in the correct locale.  Afterwards, the element
+         * is restored to its previous value.
+         *
+         * But it's more complicated for LC_NUMERIC.  When toggled by one of
+         * the toggling_2 functions in this file, LC_NUMERIC is also given by
+         * PL_curlocales[].  PL_NUMERIC_toggle_depth > 0 indicates this.
+         * Otherwise, the toggling_1 mechanism is in effect.  Comments at
+         * S_new_numeric describe this */
+#  ifndef USE_LOCALE_NUMERIC
+        const char * wanted = PL_curlocales[cat_index];
+#  else
+        const char * wanted;
+        if (cat_index != LC_NUMERIC_INDEX_ || PL_NUMERIC_toggle_depth > 0) {
+            wanted = PL_curlocales[cat_index];
+        }
+        else if (PL_numeric_underlying) {
+            wanted = PL_numeric_name;
+        }
+        else /* Here we want an LC_NUMERIC locale equivalent to C.  This
+                next conditional may save us from having to toggle below */
+             if (PL_numeric_underlying_is_standard)
+        {
+            wanted = PL_numeric_name;
+        }
+        else {
+            wanted = "C";
+        }
+
+#  endif
+
+        assert(wanted);
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "%s: wanted=%s\n",
+                               category_names[cat_index], wanted));
+
+        /* Get the category desired, and what its current locale is */
+        const int cat = categories[cat_index];
+        const char * currently = stdized_setlocale(cat, NULL);
+
+        /* If we aren't in the desired locale, change to it, saving a copy of
+         * the one we actually are in before the change */
+        if (strNE(currently, wanted)) {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                     "%s:%d: Calling setlocale(%d, %s)\n", file, caller_line,
+                     cat, wanted));
+            if (stdized_setlocale(cat, wanted) == NULL) {
+                setlocale_failure_panic_i(cat_index, currently, wanted,
+                                          __LINE__, caller_line);
+                NOT_REACHED; /* NOTREACHED */
+            }
+        }
+        else {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                    "%s: %d: Category %d already was %s\n",
+                    file, caller_line, cat, wanted));
+        }
+
+        /* Here, we have toggled to the desired locale, so 'currently' eq
+         * 'wanted'
+         *
+         * This may be a recursive call.  Everything remains locked during the
+         * recursion.  We restore to the original locale after the recursion
+         * gets unwound.  The intermediate values aren't needed. */
+        if (PL_restore_locale_depth[cat_index] == 0) {
+
+            /* Only need to change what's there if no current value or differs
+             * from the new one */
+            if (   PL_restore_locale[cat_index] == NULL
+                || strNE(wanted, PL_restore_locale[cat_index]))
+            {
+                Safefree(PL_restore_locale[cat_index]);
+                PL_restore_locale[cat_index] = savepv(wanted);
+            }
+        }
+
+        /* Indicate our new recursion depth */
+        PL_restore_locale_depth[cat_index]++;
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "%s:%d: PL_restore is now %s,"
+                               " recursion depth=%zu\n",
+                               file, caller_line, PL_restore_locale[cat_index],
+                               PL_restore_locale_depth[cat_index]));
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Leaving category_lock\n"));
+
+    RESTORE_ERRNO;
+}
+
+void
+Perl_category_unlock(pTHX_ const UV mask,
+                             const char * file,
+                             const line_t caller_line)
+{
+    PERL_ARGS_ASSERT_CATEGORY_UNLOCK;
+    assert(mask != 0);
+    assert((mask & ~(LC_INDEX_TO_BIT_(LC_ALL_INDEX_ + 1) - 1)) == 0);
+
+    /* Undoes a matching category_lock().  Note that must be locked on input.
+     * Will unlock when recursion entirely gets unwound */
+
+    dSAVE_ERRNO;
+
+#  ifndef DEBUGGING
+    PERL_UNUSED_ARG(file);
+#  endif
+
+    if (UNLIKELY(! PL_perl_controls_locale)) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "Entering category_unlock but outside of perl"
+                               " controlling the locale: nothing done;"
+                               " called from %s: %d\n", file, caller_line));
+        RESTORE_ERRNO;
+        return;
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                          "Entering category_unlock; mask=%" UVxf
+                          ", called from %s: %d\n", mask, file, caller_line));
+
+    unsigned int working_mask = mask;
+    if (working_mask & LC_INDEX_TO_BIT_(LC_ALL_INDEX_)) {
+        working_mask = LC_INDEX_TO_BIT_(LC_ALL_INDEX_) - 1;
+    }
+
+    while (working_mask) {
+
+        /* Get the bit position of the next lowest set bit.  That is our
+         * internal index for the category being unlocked this iteration.
+         * Turn the bit off so we don't work on this category again in this
+         * function call. */
+        const locale_category_index cat_index
+                              = (locale_category_index) lsbit_pos(working_mask);
+        working_mask &= ~ (1 << cat_index);
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "category_unlock; processing %s\n",
+                               category_names[cat_index]));
+
+        const int cat = categories[cat_index];
+
+        /* Un-recursing */
+        PL_restore_locale_depth[cat_index]--;
+
+        /* Only restore when the depth gets back to 0 */
+        if (PL_restore_locale_depth[cat_index] == 0) {
+
+            /* What we currently are */
+            const char * currently = stdized_setlocale(cat, NULL);
+
+            /* And what we need to be changed to */
+            const char * wanted = PL_restore_locale[cat_index];
+
+            /* If we need to change, do it */
+            if (strNE(currently, wanted)) {
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                         "%s:%d: Calling setlocale(%d, %s)\n",
+                         file, caller_line, cat, wanted));
+                if (stdized_setlocale(cat, wanted) == NULL) {
+                    setlocale_failure_panic_via_i(cat_index,
+                                                  currently,
+                                                  wanted,
+                                                  __LINE__, 0,
+                                                  file, caller_line);
+                }
+            }
+            else {
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s: %d: Category %d already was %s\n",
+                        file, caller_line, cat, wanted));
+            }
+
+            Safefree(wanted);
+            PL_restore_locale[cat_index] = NULL;
+        }
+    }
+
+    /* Doesn't actually unlock until recursion fully unwound */
+    gwLOCALE_UNLOCK;
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Leaving category_unlock\n"));
+
+    RESTORE_ERRNO;
+}
 
 /*===========================================================================*/
 
@@ -2187,8 +2648,8 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
 #      define QUERYLOCALE_LOCK
 #      define QUERYLOCALE_UNLOCK
 #    else
-#      define QUERYLOCALE_LOCK    gwLOCALE_LOCK
-#      define QUERYLOCALE_UNLOCK  gwLOCALE_UNLOCK
+#      define QUERYLOCALE_LOCK    /*XXX*/gwLOCALE_LOCK
+#      define QUERYLOCALE_UNLOCK  /*XXX*/gwLOCALE_UNLOCK
 #    endif
 
     /* Finally, everything is ready, so here is the 'else' clause to implement
@@ -2796,10 +3257,21 @@ S_update_PL_curlocales_i(pTHX_
                          const char * new_locale,
                          const line_t caller_line)
 {
-    /* Update PL_curlocales[], which is parallel to the other ones indexed by
-     * our mapping of libc category number to our internal equivalents. */
-
     PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I;
+
+    /* There are two implementations that use PL_curlocales[], an array
+     * parallel to the other ones indexed by our mapping of libc category
+     * number to our internal equivalents.
+     *
+     * This function updates the 'index'th element to be 'new_locale'.  It
+     * knows about the requirements of each implementation.  In the POSIX 2008
+     * case, everything is already calculated, so never does an element have to
+     * be checked for needing to stay in the "C" locale.  In the thread-safe
+     * emulation case, no checking has yet been done, so this routine needs to
+     * do it */
+#  ifndef LC_ALL
+    PERL_UNUSED_ARG(caller_line);
+#  else
 
     if (index == LC_ALL_INDEX_) {
 
@@ -2807,15 +3279,26 @@ S_update_PL_curlocales_i(pTHX_
          * including the LC_ALL element */
         for (unsigned int i = 0; i <= LC_ALL_INDEX_; i++) {
             Safefree(PL_curlocales[i]);
-            PL_curlocales[i] = NULL;
         }
+
+        /* In the POSIX 2008 case, everything is already calculated, so never
+         * does an element have to be checked for needing to stay in the "C"
+         * locale.  In the thread-safe emulation case, no checking has yet been
+         * done, so this routine needs to do it */
+
+#    if ! defined(HAS_IGNORED_LOCALE_CATEGORIES_) || defined(USE_POSIX_2008)
+
+        const parse_LC_ALL_STRING_action  action = no_override;
+
+#    else
+
+        const parse_LC_ALL_STRING_action  action = override_if_ignored;
+
+#    endif
 
         switch (parse_LC_ALL_string(new_locale,
                                     (const char **) &PL_curlocales,
-                                    check_that_overridden,  /* things should
-                                                               have already
-                                                               been overridden
-                                                               */
+                                    action,
                                     true,   /* Always fill array */
                                     true,   /* Panic if fails, as to get here
                                                it earlier had to have succeeded
@@ -2835,7 +3318,11 @@ S_update_PL_curlocales_i(pTHX_
             PL_curlocales[LC_ALL_INDEX_] = savepv(new_locale);
         }
     }
-    else {  /* Not LC_ALL */
+    else
+
+#  endif
+
+    {   /* Not LC_ALL */
 
         /* Update the single category's record */
         Safefree(PL_curlocales[index]);
@@ -3509,7 +3996,13 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * handling, so that all the libc functions that are affected by LC_NUMERIC
      * will work as expected.  This can be skipped if we already know that the
      * locale is indistinguishable from the C locale. */
-    if (! force && strEQ(PL_numeric_name, newnum)) {
+    if (   (! force && strEQ(PL_numeric_name, newnum))
+
+#    if defined(USE_LOCALE) && ! defined(USE_THREAD_SAFE_LOCALE)
+        || ! PL_perl_controls_locale
+#    endif
+
+       ) {
         if (! PL_numeric_underlying_is_standard) {
             set_numeric_standard(__FILE__, __LINE__);
         }
@@ -3729,6 +4222,8 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
          * Turkic.  Make sure these two are the only anomalies.  (We don't
          * require towupper and towlower because they aren't in C89.) */
 
+        TOWUPPER_LOCK;
+
 #    if defined(HAS_TOWUPPER) && defined (HAS_TOWLOWER)
 
         if (towupper('i') == 0x130 && towlower('I') == 0x131)
@@ -3744,6 +4239,8 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
             check_for_problems = TRUE;
             maybe_utf8_turkic = TRUE;
         }
+
+        TOWUPPER_UNLOCK;
     }
     else {  /* Not a canned locale we know the values for.  Compute them */
 
@@ -3848,7 +4345,9 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
      * locale requires more than one byte, there are going to be BIG problems.
      * */
 
+    MB_CUR_MAX_LOCK;
     const int mb_cur_max = MB_CUR_MAX;
+    MB_CUR_MAX_UNLOCK;
 
     if (mb_cur_max > 1 && ! PL_in_utf8_CTYPE_locale
 
@@ -5207,7 +5706,8 @@ be dealt with immediately.
 #if  defined(USE_THREADS)                               \
  && (   ! defined(LOCALECONV_IS_THREAD_SAFE)            \
      || ! defined(USE_THREAD_SAFE_LOCALE)               \
-     ||   defined(TS_W32_BROKEN_LOCALECONV))
+     ||   defined(TS_W32_BROKEN_LOCALECONV)             \
+     ||   defined(USE_THREAD_SAFE_EMULATION))
 #  define LOCALECONV_NEEDS_CRITICAL_SECTION
 #endif
 
@@ -5921,7 +6421,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
                 restore_toggled_locale_c(LC_MONETARY, orig_MONETARY_locale);\
             }                                                               \
          } STMT_END
-
 #    endif
 
     }
@@ -5938,10 +6437,10 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
      /* Otherwise, the gwLOCALE_LOCK macro expands to whatever locking is
       * needed (none if there is only a single perl instance) */
-    gwLOCALE_LOCK;
+    /*XXX*/gwLOCALE_LOCK;
 
 #    undef LOCALECONV_UNLOCK
-#    define LOCALECONV_UNLOCK  gwLOCALE_UNLOCK
+#    define LOCALECONV_UNLOCK  /*XXX*/gwLOCALE_UNLOCK
 #  endif
 #  if ! defined(TS_W32_BROKEN_LOCALECONV) || ! defined(USE_THREAD_SAFE_LOCALE)
 #    define WIN32_TEARDOWN
@@ -6580,9 +7079,9 @@ S_langinfo_sv_i(pTHX_
        {
         /* An ugly API; only the first byte of the returned char* address means
          * anything */
-        gwLOCALE_LOCK;
+        /*XXX*/gwLOCALE_LOCK;
         char char_value = nl_langinfo(item)[0];
-        gwLOCALE_UNLOCK;
+        /*XXX*/gwLOCALE_UNLOCK;
 
         sv_setuv(sv, char_value);
        }
@@ -6613,9 +7112,9 @@ S_langinfo_sv_i(pTHX_
 
        {    /* A slightly less ugly API; the int portion of the returned char*
              * address is an integer. */
-        gwLOCALE_LOCK;
+        /*XXX*/gwLOCALE_LOCK;
         int int_value = (int) PTR2UV(nl_langinfo(item));
-        gwLOCALE_UNLOCK;
+        /*XXX*/gwLOCALE_UNLOCK;
 
         sv_setuv(sv, int_value);
        }
@@ -6644,7 +7143,7 @@ S_langinfo_sv_i(pTHX_
 
         /* The rest of the possibilities deliver a true char* pointer to a
          * string (or sequence of strings in the case of ALT_DIGITS) */
-        gwLOCALE_LOCK;
+        /*XXX*/gwLOCALE_LOCK;
 
         retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
@@ -6740,7 +7239,7 @@ S_langinfo_sv_i(pTHX_
 
         sv_setpvn(sv, retval, total_len);
 
-        gwLOCALE_UNLOCK;
+        /*XXX*/gwLOCALE_UNLOCK;
 
         /* Convert the ALT_DIGITS separator to a semi-colon if not already */
         if (UNLIKELY(item == ALT_DIGITS) && total_len > 0 && separator != ';') {
@@ -7103,6 +7602,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
 
         const char * orig_CTYPE_locale;
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+
         Perl_sv_setpvf(aTHX_ sv, CODE_PAGE_FORMAT, CODE_PAGE_FUNCTION);
         retval_type = RETVAL_IN_sv;
 
@@ -8629,7 +9129,8 @@ S_give_perl_locale_control(pTHX_
 
 #  endif
 #  if ! defined(USE_THREAD_SAFE_LOCALE)                               \
-   && ! defined(USE_POSIX_2008_LOCALE)
+   && ! defined(USE_POSIX_2008_LOCALE)                                \
+   && ! defined(EMULATE_THREAD_SAFE_LOCALES)
 #    if defined(LC_ALL)
     PERL_UNUSED_ARG(lc_all_string);
 #    else
@@ -8650,6 +9151,13 @@ S_give_perl_locale_control(pTHX_
     }
 
 #    endif
+#  endif
+#  if defined(USE_LOCALE) && ! defined(USE_THREAD_SAFE_LOCALE)
+
+    /* This routine converts Perl to controlling the locale, and we need to
+     * tell this before calling new_LC_ALL() */
+    PL_perl_controls_locale = true;
+
 #  endif
 
     /* Finally, update our remaining records.  'true' => force recalculation.
@@ -8885,6 +9393,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     PL_cur_LC_ALL = savepv("C");
 
+#  endif
+#  ifdef EMULATE_THREAD_SAFE_LOCALES
+    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        PL_restore_locale[i] = NULL;
+    }
 #  endif
 #  if ! defined(PERL_LC_ALL_USES_NAME_VALUE_PAIRS) && defined(LC_ALL)
 
@@ -9931,12 +10444,16 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
     for (;;) {
+        //LC_LOCK_CTYPE_AND_c_(LC_COLLATE);
+        STRXFRM_LOCK;
 
         errno = 0;
         *xlen = my_strxfrm(xbuf + COLLXFRM_HDR_LEN,
                            s,
                            xAlloc - COLLXFRM_HDR_LEN);
+        STRXFRM_UNLOCK;
 
+        //LC_UNLOCK_CTYPE_AND_c_(LC_COLLATE);
 
         /* If the transformed string occupies less space than we told strxfrm()
          * was available, it means it transformed the whole string. */
@@ -10217,12 +10734,19 @@ Perl_strxfrm(pTHX_ SV * src)
  * qualifies), these yield the correct one */
 #if defined(USE_LOCALE_CTYPE)
 #  define WHICH_LC_INDEX LC_CTYPE_INDEX_
+#  define WHICH_LOCK     LCr_LOCK_(LC_CTYPE)
+#  define WHICH_UNLOCK   LCr_UNLOCK_(LC_CTYPE)
 #elif defined(USE_LOCALE_MESSAGES)
 #  define WHICH_LC_INDEX LC_MESSAGES_INDEX_
+#  define WHICH_LOCK     LCr_LOCK_(LC_MESSAGES)
+#  define WHICH_UNLOCK   LCr_UNLOCK_(LC_MESSAGES)
 #endif
 
 /*===========================================================================*/
 /* First set of implementations, when have strerror_l() */
+
+#define MY_STRERROR_LOCK    LC_MESSAGES_LOCK
+#define MY_STRERROR_UNLOCK  LC_MESSAGES_UNLOCK
 
 #if defined(USE_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
 
@@ -10326,7 +10850,12 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
     DEBUG_STRERROR_ENTER(errnum, 0);
 
+    STRERROR_LOCK;
+
     const char *errstr = savepv(Strerror(errnum));
+
+    STRERROR_UNLOCK;
+
     *utf8ness = UTF8NESS_IMMATERIAL;
 
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
@@ -10351,22 +10880,25 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
     const char *errstr;
     if (IN_LC(categories[WHICH_LC_INDEX])) {
+        WHICH_LOCK;
+        STRERROR_LOCK;
         errstr = savepv(Strerror(errnum));
+        STRERROR_UNLOCK;
+        WHICH_UNLOCK;
+
         *utf8ness = get_locale_string_utf8ness_i(errstr,
                                                  LOCALE_UTF8NESS_UNKNOWN,
                                                  NULL, WHICH_LC_INDEX);
     }
     else {
 
-        gwLOCALE_LOCK;
-
         const char * orig_locale = toggle_locale_i(WHICH_LC_INDEX, "C");
 
+        STRERROR_LOCK;
         errstr = savepv(Strerror(errnum));
+        STRERROR_UNLOCK;
 
         restore_toggled_locale_i(WHICH_LC_INDEX, orig_locale);
-
-        gwLOCALE_UNLOCK;
 
         *utf8ness = UTF8NESS_IMMATERIAL;
     }
@@ -10395,18 +10927,16 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                                   : "C";
     /* XXX Can fail on z/OS */
 
-    gwLOCALE_LOCK;
-
     const char* orig_CTYPE_locale    = toggle_locale_c(LC_CTYPE,
                                                        desired_locale);
     const char* orig_MESSAGES_locale = toggle_locale_c(LC_MESSAGES,
                                                        desired_locale);
+    STRERROR_LOCK;
     const char *errstr = savepv(Strerror(errnum));
+    STRERROR_UNLOCK;
 
     restore_toggled_locale_c(LC_MESSAGES, orig_MESSAGES_locale);
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-
-    gwLOCALE_UNLOCK;
 
     *utf8ness = get_locale_string_utf8ness_i(errstr, LOCALE_UTF8NESS_UNKNOWN,
                                              desired_locale,
@@ -10463,10 +10993,21 @@ To return to Perl control, and restart the gotcha prevention services, call
 C<L</sync_locale>>.  Behavior is undefined for any pure Perl code that executes
 while the switch is in effect.
 
-The global locale and the per-thread locales are independent.  As long as just
-one thread converts to the global locale, everything works smoothly.  But if
-more than one does, they can easily interfere with each other, and races are
-likely.  On Windows systems prior to Visual Studio 15 (at which point Microsoft
+On perls without per thread-locales, there is only the global locale; so
+calling this function effectively just disables the gotcha prevention services.
+
+On perls with per-thread locales, they are independent from the global locale.
+As long as just one thread converts to the global locale, everything works
+smoothly.  But if more than one does, they can easily interfere with each
+other, and races are likely.
+
+On perls that emulate per-thread locales, there is, behind the scenes, actually
+just the global locale.  Unlike the native per-thread locale platforms, any
+thread that calls this function is likely to have races with the remaining
+threads when calling locale-dependent libc functions, unless appropriate
+mutexes have been inserted.
+
+On Windows systems prior to Visual Studio 15 (at which point Microsoft
 fixed a bug), races can occur (even if only one thread has been converted to
 the global locale), but only if you use the following operations:
 
@@ -10517,6 +11058,9 @@ handle all cases of single- vs multi-thread, POSIX 2008-supported or not.
             freelocale(old_locale);                                     \
         }                                                               \
     } STMT_END
+#elif defined(EMULATE_THREAD_SAFE_LOCALES)
+#  define CHANGE_SYSTEM_LOCALE_TO_GLOBAL                                \
+    PL_perl_controls_locale = false
 #else
 #  define CHANGE_SYSTEM_LOCALE_TO_GLOBAL
 #endif
@@ -10546,7 +11090,7 @@ Perl_switch_to_global_locale(pTHX)
 
 #  else
 
-    const bool perl_controls = false;
+    const bool perl_controls = PL_perl_controls_locale;
 
 #  endif
 
@@ -10555,7 +11099,12 @@ Perl_switch_to_global_locale(pTHX)
         return;
     }
 
-#  ifdef LC_ALL
+#  if ! defined(USE_POSIX_2008_LOCALE) && ! defined(USE_THREAD_SAFE_LOCALE)
+
+    PL_perl_controls_locale = false;
+
+#  else
+#    ifdef LC_ALL
 
     const char * thread_locale = calculate_LC_ALL_string(NULL,
                                                          EXTERNAL_FORMAT_FOR_SET,
@@ -10564,7 +11113,7 @@ Perl_switch_to_global_locale(pTHX)
     CHANGE_SYSTEM_LOCALE_TO_GLOBAL;
     posix_setlocale(LC_ALL, thread_locale);
 
-#  else   /* Must be USE_POSIX_2008_LOCALE) */
+#    else
 
     const char * cur_thread_locales[LC_ALL_INDEX_];
 
@@ -10582,6 +11131,7 @@ Perl_switch_to_global_locale(pTHX)
     }
     POSIX_SETLOCALE_UNLOCK;
 
+#    endif
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
@@ -10602,9 +11152,9 @@ Perl_switch_to_global_locale(pTHX)
 
 This function copies the state of the program global locale into the calling
 thread, and converts that thread to using per-thread locales, if it wasn't
-already, and the platform supports them.  The LC_NUMERIC locale is toggled into
-the standard state (using the C locale's conventions), if not within the
-lexical scope of S<C<use locale>>.
+already, and the platform supports them or perl is Configured to emulate them.
+The LC_NUMERIC locale is toggled into the standard state (using the C locale's
+conventions), if not within the lexical scope of S<C<use locale>>.
 
 Perl will now consider itself to have control of the locale.
 
@@ -10625,8 +11175,11 @@ multi-threaded systems that don't have multi-thread safe locale operations.
 Using the libc L<C<setlocale(3)>> function should be avoided.  Nevertheless,
 certain non-Perl libraries called from XS, do call it, and their behavior may
 not be able to be changed.  This function, along with
-C<L</switch_to_global_locale>>, can be used to get seamless behavior in these
-circumstances, as long as only one thread is involved.
+C<L</switch_to_global_locale>>, can be used to get seamless behavior on systems
+with per-thread locale handling, as long as only one thread is involved.
+To get seamless behavior on platforms where perl emulates per-thread locale
+handling, mutexes would have to be added to wrap that thread's locale-dependent
+functions.
 
 If the library has an option to turn off its locale manipulation, doing that is
 preferable to using this mechanism.  C<Gtk> is such a library.
@@ -10647,9 +11200,18 @@ Perl_sync_locale(pTHX)
 
 #else
 
-    bool was_in_global = TRUE;
+    /* First, switch to the global locale, and note if we were already there */
 
-#  ifdef USE_THREAD_SAFE_LOCALE
+    bool was_in_global;
+
+#  if ! defined(USE_THREAD_SAFE_LOCALE)
+
+    /* When not using thread-safe locales, as far as the system is concerned,
+     * there only is the global locale. */
+
+    was_in_global = PL_perl_controls_locale;
+
+#  else /* Below is thread-safe */
 #    if defined(WIN32)
 
     int config_return = _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
@@ -10658,7 +11220,7 @@ Perl_sync_locale(pTHX)
     }
     was_in_global = (config_return == _DISABLE_PER_THREAD_LOCALE);
 
-#    elif defined(USE_POSIX_2008_LOCALE)
+#    elif defined(USE_POSIX_2008_LOCALE)    /* Thread-safe POSIX 2008 */
 
     was_in_global = (LC_GLOBAL_LOCALE == uselocale(LC_GLOBAL_LOCALE));
 
@@ -10714,7 +11276,10 @@ Perl_switch_locale_context(pTHX)
      *
      * There are two implementations where this is an issue.  For the other
      * implementations, it doesn't matter because libc is using global values
-     * that all threads know about.
+     * that all threads know about.  This is true even for the thread-safe
+     * emulation, as everything to libc is still a global, and we use
+     * PL_curlocales (for example) to know what the correct locale(s) should
+     * be, and this variable is under control of aTHX.
      *
      * The two implementations are where libc keeps thread-specific information
      * on its own.  These are
@@ -10752,9 +11317,19 @@ Perl_switch_locale_context(pTHX)
 
 #  elif defined(WIN32)
 
-    if (! bool_setlocale_c(LC_ALL, PL_cur_LC_ALL)) {
-        locale_panic_(Perl_form(aTHX_ "Can't setlocale(%s)", PL_cur_LC_ALL));
+    if (! PL_perl_controls_locale) {
+        return;
     }
+
+    if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
+
+    const char * lc_all_copy = savepv(PL_cur_LC_ALL);
+    if (! bool_setlocale_c(LC_ALL, lc_all_copy)) {
+        locale_panic_(Perl_form(aTHX_ "Can't setlocale(%s)", lc_all_copy));
+    }
+    Safefree(lc_all_copy);
 
 #  endif
 
@@ -10766,13 +11341,16 @@ Perl_switch_locale_context(pTHX)
 void
 Perl_thread_locale_init(pTHX)
 {
+    /* Called from a thread on startup. */
 
-#  ifdef USE_THREAD_SAFE_LOCALE
-#    ifdef USE_POSIX_2008_LOCALE
+#  ifdef EMULATE_THREAD_SAFE_LOCALES
 
-    /* Called from a thread on startup.
-     *
-     * The operations here have to be done from within the calling thread, as
+    PL_perl_controls_locale = TRUE;
+    void_setlocale_c(LC_ALL, "C");
+
+#  elif defined(USE_POSIX_2008_LOCALE)
+
+    /* The operations here have to be done from within the calling thread, as
      * they affect libc's knowledge of the thread; libc has no knowledge of
      * aTHX */
 
@@ -10792,15 +11370,16 @@ Perl_thread_locale_init(pTHX)
 
     PL_cur_locale_obj = PL_C_locale_obj;
 
-#    elif defined(WIN32)
+#  elif defined(WIN32)
 
     /* On Windows, make sure new thread has per-thread locales enabled */
     if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
         locale_panic_("_configthreadlocale returned an error");
     }
+
+    PL_perl_controls_locale = true;
     void_setlocale_c(LC_ALL, "C");
 
-#    endif
 #  endif
 
 }
@@ -10832,6 +11411,11 @@ Perl_thread_locale_term(pTHX)
     }
 
     PL_cur_locale_obj = LC_GLOBAL_LOCALE;
+
+#  endif
+#  if defined(EMULATE_THREAD_SAFE_LOCALES)
+
+    assert(aTHX == 0 || PL_NUMERIC_toggle_depth == 0);
 
 #  endif
 #  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES

@@ -5444,6 +5444,24 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
 
 # endif
 #endif
+#if defined(EMULATE_THREAD_SAFE_LOCALES)
+PERL_CALLCONV void
+Perl_category_lock(pTHX_ const UV mask, const char *file, const line_t caller_line);
+# define PERL_ARGS_ASSERT_CATEGORY_LOCK         \
+        assert(file)
+
+PERL_CALLCONV void
+Perl_category_unlock(pTHX_ const UV mask, const char *file, const line_t caller_line);
+# define PERL_ARGS_ASSERT_CATEGORY_UNLOCK       \
+        assert(file)
+
+# if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE int
+Perl_posix_LC_foo_(pTHX_ const int c, const U8 classnum);
+#   define PERL_ARGS_ASSERT_POSIX_LC_FOO_
+
+# endif
+#endif /* defined(EMULATE_THREAD_SAFE_LOCALES) */
 #if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 PERL_CALLCONV I32
 Perl_my_chsize(pTHX_ int fd, Off_t length)
@@ -7116,6 +7134,14 @@ S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const
 #     define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
 
 #   endif
+#   if   defined(EMULATE_THREAD_SAFE_LOCALES) || \
+       ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
+STATIC void
+S_update_PL_curlocales_i(pTHX_ const locale_category_index index, const char *new_locale, const line_t caller_line);
+#     define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I \
+        assert(new_locale)
+
+#   endif
 #   if   defined(HAS_LOCALECONV) && \
        ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
 STATIC void
@@ -7208,16 +7234,9 @@ STATIC locale_t
 S_use_curlocale_scratch(pTHX);
 #     define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
 
-#     if !defined(USE_QUERYLOCALE)
-STATIC void
-S_update_PL_curlocales_i(pTHX_ const locale_category_index index, const char *new_locale, const line_t caller_line);
-#       define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I \
-        assert(new_locale)
-
-#     endif
-#   elif  defined(USE_LOCALE_THREADS) &&                  \
-         !defined(USE_THREAD_SAFE_LOCALE) &&              \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
+#   elif !defined(EMULATE_THREAD_SAFE_LOCALES) && \
+          defined(USE_LOCALE_THREADS) &&          \
+         !defined(USE_THREAD_SAFE_LOCALE) /* &&
          !defined(USE_POSIX_2008_LOCALE) */
 STATIC bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char *locale);
@@ -7228,10 +7247,10 @@ STATIC const char *
 S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale);
 #     define PERL_ARGS_ASSERT_LESS_DICEY_SETLOCALE_R
 
-#   endif /*  defined(USE_LOCALE_THREADS) &&
+#   endif /* !defined(EMULATE_THREAD_SAFE_LOCALES) &&
+              defined(USE_LOCALE_THREADS) &&
              !defined(USE_POSIX_2008_LOCALE) &&
-             !defined(USE_THREAD_SAFE_LOCALE) &&
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) */
+             !defined(USE_THREAD_SAFE_LOCALE) */
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 STATIC wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char *byte_string);
