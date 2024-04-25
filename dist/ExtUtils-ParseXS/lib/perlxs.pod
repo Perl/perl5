@@ -2110,29 +2110,90 @@ Note that these macros will only work together within the I<same> source
 file; that is, a dMY_CTX in one source file will access a different structure
 than a dMY_CTX in another source file.
 
-=head2 Thread-aware system interfaces
+=head2 More on dealing with threads (and MULTIPLICITY)
 
-Starting from Perl 5.8, in C/C++ level Perl knows how to wrap
-system/library interfaces that have thread-aware versions
-(e.g. getpwent_r()) into frontend macros (e.g. getpwent()) that
-correctly handle the multithreaded interaction with the Perl
-interpreter.  This will happen transparently, the only thing
-you need to do is to instantiate a Perl interpreter.
+MULTIPLICITY is a way to embed a Perl interpreter as part of an
+application; it is described in
+L<perlguts/How multiple interpreters and concurrency are supported>.
+Multiple Perl interpreters may be embedded.
 
-This wrapping happens always when compiling Perl core source
-(PERL_CORE is defined) or the Perl core extensions (PERL_EXT is
-defined).  When compiling XS code outside of the Perl core, the wrapping
-does not take place before Perl 5.28.  Starting in that release you can
+Perl's implementation of threading requires MULTIPLICITY, but not the
+other way around.
 
- #define PERL_REENTRANT
+MULTIPLICITY without threading means that only one thing runs at a time,
+so there are no concurrency issues, but each component can affect the global
+state, potentially interfering with the execution of other components.
+This can happen if one component:
 
-in your code to enable the wrapping.  It is advisable to do so if you
-are using such functions, as intermixing the C<_r>-forms (as Perl compiled
-for multithreaded operation will do) and the C<_r>-less forms is neither
-well-defined (inconsistent results, data corruption, or even crashes
-become more likely), nor is it very portable.  Unfortunately, not all
-systems have all the C<_r> forms, but using this C<#define> gives you
-whatever protection that Perl is aware is available on each system.
+=over
+
+=item *
+
+changes the current working directory
+
+=item *
+
+changes the process's environment
+
+=item *
+
+changes the global locale the process is operating under
+
+=item *
+
+writes to shared memory or to a shared file
+
+=item *
+
+uses a shared file descriptor (including a database iterator)
+
+=back
+
+If your code doesn't do any of these things, nor depends on any of their
+values, then Congratulations!!, you don't have to worry about MULTIPLICITY
+nor threading.  But wait, a surprising number of libc functions do
+depend on data global to the process in some way that may not be
+immediately obvious.  The section 3 ones we know about are given at the
+beginning of the the file F<lock_definitions.h>.  For example, perhaps
+unexpectedly, calling C<L<strtok(3)>> changes the global state of a
+process, and thus needs special attention.
+
+There are two main approaches to coping with these issues, each suitable
+for different circumstances:
+
+=over
+
+=item *
+
+Do all your business before any other code can change things.  If you
+make changes, change back before returning.
+
+=item *
+
+Save the result of a query of global information to a per-instance area
+before allowing another instance to execute.  Then you can work on it at
+your leisure.  This might be an automatic C variable for non-pointers,
+or something as described above in
+C<L</Safely Storing Static Data in XS>>.
+
+=back
+
+Without threading, you don't have to worry about being interrupted by
+the system giving control to another thread.  With threading, you can
+use the locking macros C<#define>d in F<lock_definitions.h> to prevent
+such interruptions, thus making the code suitable for both plain
+MULTIPLICITY and threading without needing to know which is the case.
+
+There are some exceptions.  There are a few functions that are
+completely unsuitable for threaded environments.  Some of these have
+alternatives that are suitable.  A few others need to be called at least
+once upon process start-up to initialize, and then subsequent calls are
+thread-safe.
+
+F<lock_definitions.h> lists all such cases.  It is a generated file that
+can be customized to the platform it is running on, and so the rest of
+the documentation that would otherwise be here is instead included
+there.
 
 =head1 EXAMPLES
 
