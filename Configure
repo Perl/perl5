@@ -9123,12 +9123,12 @@ case "$man3dir" in
 	;;
 esac
 
-: determine where library module manual pages go
+: determine where miscellaneous manual pages go
 set man7dir man7dir none
 eval $prefixit
 $cat <<EOM
 
-$spackage has manual pages for many of the library modules.
+$spackage has many miscellaneous manual pages.
 EOM
 
 case "$nroff" in
@@ -9154,24 +9154,7 @@ esac
 echo "If you don't want the manual sources installed, answer 'none'."
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$man7dir" in
-'')	dflt=`echo "$man1dir" | $sed -e 's/man1/man7/g' -e 's/man\.1/man\.7/g'`
-	if $test -d "$privlib/man/man7"; then
-		cat <<EOM >&4
-
-WARNING:  Previous versions of perl installed man7 pages into
-$privlib/man/man7.  This version will suggest a
-new default of $dflt.
-EOM
-		tdflt=$dflt
-		dflt='n'
-		rp='Do you wish to preserve the old behavior?(y/n)'
-		. ./myread
-		case "$ans" in
-		y*) dflt="$privlib/man/man7" ;;
-		*)  dflt=$tdflt ;;
-		esac
-    fi
-	;;
+'')	dflt=`echo "$man1dir" | $sed -e 's/man1/man7/g' -e 's/man\.1/man\.7/g'` ;;
 *)	dflt="$man7dir" ;;
 esac
 case "$dflt" in
@@ -9179,7 +9162,7 @@ case "$dflt" in
 esac
 echo " "
 fn=dn+~
-rp="Where do the $package library man pages (source) go?"
+rp="Where do the $package miscellaneous man pages (source) go?"
 . ./getfile
 prefixvar=man7dir
 . ./setprefixvar
@@ -9195,7 +9178,7 @@ case "$man7dir" in
 	man7ext='0'
 	;;
 *)
-	rp="What suffix should be used for the $package library man pages?"
+	rp="What suffix should be used for the $package miscellaneous man pages?"
 	case "$man7ext" in
 	'')	case "$man7dir" in
 		*7)  dflt=7 ;;
@@ -9702,7 +9685,7 @@ rp='Pathname where the site-specific library html pages should be installed?'
 prefixvar=sitehtml3dir
 . ./setprefixvar
 
-: determine where add-on library html pages go
+: determine where add-on miscellaneous html pages go
 : There is no standard location, so try to copy the previously-selected
 : directory structure for the core html pages.
 case "$sitehtml7dir" in
@@ -9713,7 +9696,7 @@ case "$dflt" in
 ''|' ') dflt=none ;;
 esac
 fn=dn+~
-rp='Pathname where the site-specific library html pages should be installed?'
+rp='Pathname where the site-specific miscellaneous html pages should be installed?'
 . ./getfile
 prefixvar=sitehtml7dir
 . ./setprefixvar
@@ -9746,7 +9729,7 @@ rp='Pathname where the site-specific library manual pages should be installed?'
 prefixvar=siteman3dir
 . ./setprefixvar
 
-: determine where add-on library man pages go
+: determine where add-on miscellaneous man pages go
 case "$siteman7dir" in
 '')	dflt=`echo $man7dir | $sed "s#^$prefix#$siteprefix#"` ;;
 *)	dflt=$siteman7dir ;;
@@ -9755,7 +9738,7 @@ case "$dflt" in
 ''|' ') dflt=none ;;
 esac
 fn=dn+~
-rp='Pathname where the site-specific library manual pages should be installed?'
+rp='Pathname where the site-specific miscellaneous manual pages should be installed?'
 . ./getfile
 prefixvar=siteman7dir
 . ./setprefixvar
@@ -10151,7 +10134,7 @@ case "$vendorprefix" in
 '')	vendorhtml7dir=''
 	vendorhtml7direxp=''
 	;;
-*)	: determine where vendor-supplied module html pages go.
+*)	: determine where vendor-supplied miscellanenous html pages go.
 	: There is no standard location, so try to copy the previously-selected
 	: directory structure for the core html pages.
 	: XXX Better default suggestions would be welcome.
@@ -10163,7 +10146,7 @@ case "$vendorprefix" in
 	''|' ') dflt=none ;;
 	esac
 	fn=dn+~
-	rp='Pathname for the vendor-supplied html pages?'
+	rp='Pathname for miscellanenous vendor-supplied html pages?'
 	. ./getfile
 	vendorhtml7dir="$ans"
 	vendorhtml7direxp="$ansexp"
@@ -10229,7 +10212,7 @@ case "$vendorprefix" in
 '')	vendorman7dir=''
 	vendorman7direxp=''
 	;;
-*)	: determine where vendor-supplied module manual pages go.
+*)	: determine where vendor-supplied miscellaneous manual pages go.
 	case "$vendorman7dir" in
 	'') dflt=`echo "$man7dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
 	*)	dflt=$vendorman7dir ;;
