@@ -4062,6 +4062,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     else {
         PL_hints = saveop->op_private & OPpEVAL_COPHH
                      ? oldcurcop->cop_hints : (U32)saveop->op_targ;
+        PL_prevailing_version = 0; /* we might change this below */
 
         /* making 'use re eval' not be in scope when compiling the
          * qr/mabye_has_runtime_code_block/ ensures that we don't get
@@ -4076,6 +4077,11 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
             SvREFCNT_dec(GvHV(PL_hintgv));
             GvHV(PL_hintgv) = hh;
             FETCHFEATUREBITSHH(hh);
+            SV *versv, **svp;
+            if((svp = hv_fetchs(hh, "CORE/prevailing_version", 0)) && (versv = *svp) && SvOK(versv)) {
+                SAVEI16(PL_prevailing_version);
+                PL_prevailing_version = SvUV(versv);
+            }
         }
     }
     SAVECOMPILEWARNINGS();

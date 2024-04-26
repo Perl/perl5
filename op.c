@@ -12416,6 +12416,8 @@ Perl_ck_eval(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_EVAL;
 
     PL_hints |= HINT_BLOCK_SCOPE;
+    if(PL_prevailing_version != 0)
+        PL_hints |= HINT_LOCALIZE_HH;
     if (o->op_flags & OPf_KIDS) {
         SVOP * const kid = cSVOPx(cUNOPo->op_first);
         assert(kid);
@@ -12457,6 +12459,7 @@ Perl_ck_eval(pTHX_ OP *o)
      && !(o->op_private & OPpEVAL_COPHH) && GvHV(PL_hintgv)) {
         /* Store a copy of %^H that pp_entereval can pick up. */
         HV *hh = hv_copy_hints_hv(GvHV(PL_hintgv));
+        hv_stores(hh, "CORE/prevailing_version", newSVuv(PL_prevailing_version));
         OP *hhop;
         hhop = newSVOP(OP_HINTSEVAL, 0, MUTABLE_SV(hh));
         /* append hhop to only child  */
