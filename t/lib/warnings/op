@@ -2180,3 +2180,9 @@ use v5.12;
 use v5.12;
 # expect no warning because same version
 EXPECT
+########
+# GH #22121
+use v5.20;
+use test_22121;
+# expect no warning because different scope
+EXPECT
