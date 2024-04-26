@@ -3510,6 +3510,16 @@ html3direxp (html3dir.U):
 	This variable is the same as the html3dir variable, but is filename
 	expanded at configuration time, for convenient use in makefiles.
 
+html7dir (html7dir.U):
+	This variable contains the name of the directory in which html
+	source pages are to be put.  This directory is for miscellaneous
+	pages that don't correspond ot scripts, modules or libraries.  It
+	is intended to correspond roughly to section 7 of the Unix manuals.
+
+html7direxp (html7dir.U):
+	This variable is the same as the html7dir variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
 i16size (perlxv.U):
 	This variable is the size of an I16 in bytes.
 
@@ -3965,6 +3975,11 @@ installhtml3dir (html3dir.U):
 	using a different installprefix.  For extra portability, you
 	should only use this variable within your makefiles.
 
+installhtml7dir (html7dir.U):
+	This variable is really the same as html7direxp, unless you are
+	using a different installprefix.  For extra portability, you
+	should only use this variable within your makefiles.
+
 installman1dir (man1dir.U):
 	This variable is really the same as man1direxp, unless you are using
 	AFS in which case it points to the read/write location whereas
@@ -3975,6 +3990,12 @@ installman3dir (man3dir.U):
 	This variable is really the same as man3direxp, unless you are using
 	AFS in which case it points to the read/write location whereas
 	man3direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
+installman7dir (man7dir.U):
+	This variable is really the same as man7direxp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	man7direxp only points to the read-only access location. For extra
 	portability, you should only use this variable within your makefiles.
 
 installprefix (installprefix.U):
@@ -4021,6 +4042,12 @@ installsitehtml3dir (sitehtml3dir.U):
 	html3direxp only points to the read-only access location. For extra
 	portability, you should only use this variable within your makefiles.
 
+installsitehtml7dir (sitehtml7dir.U):
+	This variable is really the same as sitehtml7direxp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	html7direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
 installsitelib (sitelib.U):
 	This variable is really the same as sitelibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -4036,6 +4063,12 @@ installsiteman3dir (siteman3dir.U):
 	This variable is really the same as siteman3direxp, unless you are using
 	AFS in which case it points to the read/write location whereas
 	man3direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
+installsiteman7dir (siteman7dir.U):
+	This variable is really the same as siteman7direxp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	man7direxp only points to the read-only access location. For extra
 	portability, you should only use this variable within your makefiles.
 
 installsitescript (sitescript.U):
@@ -4104,6 +4137,11 @@ installvendorhtml3dir (vendorhtml3dir.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+installvendorhtml7dir (vendorhtml7dir.U):
+	This variable is really the same as vendorhtml7direxp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
 installvendorlib (vendorlib.U):
 	This variable is really the same as vendorlibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -4116,6 +4154,11 @@ installvendorman1dir (vendorman1dir.U):
 
 installvendorman3dir (vendorman3dir.U):
 	This variable is really the same as vendorman3direxp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
+installvendorman7dir (vendorman7dir.U):
+	This variable is really the same as vendorman7direxp but may differ on
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
@@ -4417,6 +4460,21 @@ man3ext (man3dir.U):
 	This variable contains the extension that the manual page should
 	have: one of 'n', 'l', or '3'.  The Makefile must supply the '.'.
 	See man3dir.
+
+man7dir (man7dir.U):
+	This variable contains the name of the directory in which manual
+	source pages are to be put.  It is the responsibility of the
+	Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+
+man7direxp (man7dir.U):
+	This variable is the same as the man7dir variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
+man7ext (man7dir.U):
+	This variable contains the extension that the manual page should
+	have: one of 'n', 'l', or '7'.  The Makefile must supply the '.'.
+	See man7dir.
 
 mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.
@@ -5140,6 +5198,21 @@ sitehtml3direxp (sitehtml3dir.U):
 	This variable is the same as the sitehtml3dir variable, but is filename
 	expanded at configuration time, for convenient use in makefiles.
 
+sitehtml7dir (sitehtml7dir.U):
+	This variable contains the name of the directory in which site-specific
+	miscellaneous html source pages are to be put.  It is the responsibility
+	of the Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	miscellaneous html pages in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+sitehtml7direxp (sitehtml7dir.U):
+	This variable is the same as the sitehtml7dir variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
 sitelib (sitelib.U):
 	This variable contains the eventual value of the SITELIB symbol,
 	which is the name of the private library for this package.  It may
@@ -5188,6 +5261,21 @@ siteman3dir (siteman3dir.U):
 
 siteman3direxp (siteman3dir.U):
 	This variable is the same as the siteman3dir variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
+siteman7dir (siteman7dir.U):
+	This variable contains the name of the directory in which site-specific
+	miscellaneous man source pages are to be put.  It is the responsibility
+	of the Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	man7 pages in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+siteman7direxp (siteman7dir.U):
+	This variable is the same as the siteman7dir variable, but is filename
 	expanded at configuration time, for convenient use in makefiles.
 
 siteprefix (siteprefix.U):
@@ -5869,6 +5957,19 @@ vendorhtml3direxp (vendorhtml3dir.U):
 	This variable is the ~name expanded version of vendorhtml3dir, so that you
 	may use it directly in Makefiles or shell scripts.
 
+vendorhtml7dir (vendorhtml7dir.U):
+	This variable contains the name of the directory for
+	miscellaneous html pages.  It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	miscellanenous html pages in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor
+	or equivalent.  See INSTALL for details.
+
+vendorhtml7direxp (vendorhtml7dir.U):
+	This variable is the ~name expanded version of vendorhtml7dir, so that you
+	may use it directly in Makefiles or shell scripts.
+
 vendorlib (vendorlib.U):
 	This variable contains the eventual value of the VENDORLIB symbol,
 	which is the name of the private library for this package.
@@ -5911,6 +6012,19 @@ vendorman3dir (vendorman3dir.U):
 
 vendorman3direxp (vendorman3dir.U):
 	This variable is the ~name expanded version of vendorman3dir, so that you
+	may use it directly in Makefiles or shell scripts.
+
+vendorman7dir (vendorman7dir.U):
+	This variable contains the name of the directory for man7
+	pages.  It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	man7 pages in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor
+	or equivalent.  See INSTALL for details.
+
+vendorman7direxp (vendorman7dir.U):
+	This variable is the ~name expanded version of vendorman7dir, so that you
 	may use it directly in Makefiles or shell scripts.
 
 vendorprefix (vendorprefix.U):
