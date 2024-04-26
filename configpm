@@ -371,25 +371,30 @@ if (fetch_string({},'userelocatableinc')) {
 			 archlibexp
 			 html1direxp
 			 html3direxp
+			 html7direxp
 			 man1direxp
 			 man3direxp
+			 man7direxp
 			 privlibexp
 			 scriptdirexp
 			 sitearchexp
 			 sitebinexp
 			 sitehtml1direxp
 			 sitehtml3direxp
+			 sitehtml7direxp
 			 sitelibexp
 			 siteman1direxp
-			 siteman3direxp
+			 siteman7direxp
 			 sitescriptexp
 			 vendorarchexp
 			 vendorbinexp
 			 vendorhtml1direxp
 			 vendorhtml3direxp
+			 vendorhtml7direxp
 			 vendorlibexp
 			 vendorman1direxp
 			 vendorman3direxp
+			 vendorman7direxp
 			 vendorscriptexp
 
 			 siteprefixexp
@@ -399,8 +404,10 @@ if (fetch_string({},'userelocatableinc')) {
 			 installarchlib
 			 installhtml1dir
 			 installhtml3dir
+			 installhtml7dir
 			 installman1dir
 			 installman3dir
+			 installman7dir
 			 installprefix
 			 installprefixexp
 			 installprivlib
@@ -409,17 +416,21 @@ if (fetch_string({},'userelocatableinc')) {
 			 installsitebin
 			 installsitehtml1dir
 			 installsitehtml3dir
+			 installsitehtml7dir
 			 installsitelib
 			 installsiteman1dir
 			 installsiteman3dir
+			 installsiteman7dir
 			 installsitescript
 			 installvendorarch
 			 installvendorbin
 			 installvendorhtml1dir
 			 installvendorhtml3dir
+			 installvendorhtml7dir
 			 installvendorlib
 			 installvendorman1dir
 			 installvendorman3dir
+			 installvendorman7dir
 			 installvendorscript
 			 )) {
 	push @need_relocation, $what if fetch_string({}, $what) =~ m!^\.\.\./!;

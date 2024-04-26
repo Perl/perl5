@@ -304,6 +304,8 @@ man1dir = $man1dir
 man1ext = $man1ext
 man3dir = $man3dir
 man3ext = $man3ext
+man7dir = $man7dir
+man7ext = $man7ext
 
 # The following are used to build and install shared libraries for
 # dynamic loading.

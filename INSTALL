@@ -764,8 +764,10 @@ variables are in the file Porting/Glossary.
     $archlibexp		$prefixexp/lib/perl5/$version/$archname
     $man1direxp		$prefixexp/man/man1
     $man3direxp		$prefixexp/man/man3
+    $man7direxp		$prefixexp/man/man7
     $html1direxp	(none)
     $html3direxp	(none)
+    $html7direxp	(none)
 
 $prefixexp is generated from $prefix, with ~ expansion done to convert
 home directories into absolute paths. Similarly for the other variables
@@ -795,8 +797,10 @@ be used for installing those add-on modules and scripts.
                $siteprefixexp/lib/perl5/site_perl/$version/$archname
  $siteman1direxp   $siteprefixexp/man/man1
  $siteman3direxp   $siteprefixexp/man/man3
+ $siteman7direxp   $siteprefixexp/man/man7
  $sitehtml1direxp  (none)
  $sitehtml3direxp  (none)
+ $sitehtml7direxp  (none)
 
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
@@ -820,8 +824,10 @@ for you to use to distribute add-on modules.
            $vendorprefixexp/lib/perl5/vendor_perl/$version/$archname
  $vendorman1direxp   $vendorprefixexp/man/man1
  $vendorman3direxp   $vendorprefixexp/man/man3
+ $vendorman7direxp   $vendorprefixexp/man/man7
  $vendorhtml1direxp  (none)
  $vendorhtml3direxp  (none)
+ $vendorhtml7direxp  (none)
 
 These are normally empty, but may be set as needed.  For example,
 a vendor might choose the following settings:
@@ -838,6 +844,7 @@ This would have the effect of setting the following:
  $archlibexp       /usr/lib/perl5/$version/$archname
  $man1direxp       /usr/man/man1
  $man3direxp       /usr/man/man3
+ $man7direxp       /usr/man/man7
 
  $sitebinexp       /usr/local/bin
  $sitescriptexp    /usr/local/bin
@@ -845,6 +852,7 @@ This would have the effect of setting the following:
  $sitearchexp      /usr/local/lib/perl5/site_perl/$version/$archname
  $siteman1direxp   /usr/local/man/man1
  $siteman3direxp   /usr/local/man/man3
+ $siteman7direxp   /usr/local/man/man7
 
  $vendorbinexp     /usr/bin
  $vendorscriptexp  /usr/bin
@@ -852,6 +860,7 @@ This would have the effect of setting the following:
  $vendorarchexp    /usr/lib/perl5/vendor_perl/$version/$archname
  $vendorman1direxp /usr/man/man1
  $vendorman3direxp /usr/man/man3
+ $vendorman7direxp /usr/man/man7
 
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end user are in
@@ -925,8 +934,8 @@ entries to @INC.
 
 =item Man Pages
 
-By default, man pages will be installed in $man1dir and $man3dir, which
-are normally /usr/local/man/man1 and /usr/local/man/man3.  If you
+By default, man pages will be installed in $man1dir, $man3dir and $man7dir,
+which are normally /usr/local/man/man1 and /usr/local/man/man3.  If you
 want to use a .3pm suffix for perl man pages, you can do that with
 
 	sh Configure -Dman3ext=3pm

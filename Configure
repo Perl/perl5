@@ -991,6 +991,9 @@ installhtml1dir=''
 html3dir=''
 html3direxp=''
 installhtml3dir=''
+html7dir=''
+html7direxp=''
+installhtml7dir=''
 i_arpainet=''
 i_bfd=''
 i_crypt=''
@@ -1172,6 +1175,10 @@ installman3dir=''
 man3dir=''
 man3direxp=''
 man3ext=''
+installman7dir=''
+man7dir=''
+man7direxp=''
+man7ext=''
 doublemantbits=''
 longdblmantbits=''
 nvmantbits=''
@@ -1310,6 +1317,9 @@ sitehtml1direxp=''
 installsitehtml3dir=''
 sitehtml3dir=''
 sitehtml3direxp=''
+installsitehtml7dir=''
+sitehtml7dir=''
+sitehtml7direxp=''
 installsitelib=''
 sitelib=''
 sitelib_stem=''
@@ -1320,6 +1330,9 @@ siteman1direxp=''
 installsiteman3dir=''
 siteman3dir=''
 siteman3direxp=''
+installsiteman7dir=''
+siteman7dir=''
+siteman7direxp=''
 siteprefix=''
 siteprefixexp=''
 installsitescript=''
@@ -1399,6 +1412,9 @@ vendorhtml1direxp=''
 installvendorhtml3dir=''
 vendorhtml3dir=''
 vendorhtml3direxp=''
+installvendorhtml7dir=''
+vendorhtml7dir=''
+vendorhtml7direxp=''
 d_vendorlib=''
 installvendorlib=''
 vendorlib=''
@@ -1410,6 +1426,9 @@ vendorman1direxp=''
 installvendorman3dir=''
 vendorman3dir=''
 vendorman3direxp=''
+installvendorman7dir=''
+vendorman7dir=''
+vendorman7direxp=''
 usevendorprefix=''
 vendorprefix=''
 vendorprefixexp=''
@@ -8278,6 +8297,29 @@ prefixvar=html3dir
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$html3dir" = "X" && html3dir=' '
 
+: determine where html pages for libraries and modules go
+set html7dir html7dir none
+eval $prefixit
+$cat <<EOM
+
+If you wish to install html files for modules associated with $spackage,
+indicate the appropriate directory here.  To skip installing html files,
+answer "none".
+EOM
+: There is no obvious default.  If they have specified html1dir, then
+: try to key off that, possibly changing .../html1 into .../html7.
+case "$html7dir" in
+'') html7dir=`echo "$html1dir" | $sed 's/1$/7$/'` ;;
+*) dflt=$html7dir ;;
+esac
+fn=dn+~
+rp="Directory for the $spackage module html pages?"
+. ./getfile
+prefixvar=html7dir
+. ./setprefixvar
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$html7dir" = "X" && html7dir=' '
+
 : determine whether to install perl also as /usr/bin/perl
 
 echo " "
@@ -9081,6 +9123,101 @@ case "$man3dir" in
 	;;
 esac
 
+: determine where library module manual pages go
+set man7dir man7dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages for many of the library modules.
+EOM
+
+case "$nroff" in
+nroff)
+	$cat <<'EOM'
+However, you don't have nroff, so they're probably useless to you.
+EOM
+	case "$man7dir" in
+	'') man7dir="none";;
+	esac;;
+esac
+
+case "$d_flexfnam" in
+undef)
+	$cat <<'EOM'
+However, your system can't handle the long file names like File::Basename.7.
+EOM
+	case "$man7dir" in
+	'') man7dir="none";;
+	esac;;
+esac
+
+echo "If you don't want the manual sources installed, answer 'none'."
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$man7dir" in
+'')	dflt=`echo "$man1dir" | $sed -e 's/man1/man7/g' -e 's/man\.1/man\.7/g'`
+	if $test -d "$privlib/man/man7"; then
+		cat <<EOM >&4
+
+WARNING:  Previous versions of perl installed man7 pages into
+$privlib/man/man7.  This version will suggest a
+new default of $dflt.
+EOM
+		tdflt=$dflt
+		dflt='n'
+		rp='Do you wish to preserve the old behavior?(y/n)'
+		. ./myread
+		case "$ans" in
+		y*) dflt="$privlib/man/man7" ;;
+		*)  dflt=$tdflt ;;
+		esac
+    fi
+	;;
+*)	dflt="$man7dir" ;;
+esac
+case "$dflt" in
+' ') dflt=none ;;
+esac
+echo " "
+fn=dn+~
+rp="Where do the $package library man pages (source) go?"
+. ./getfile
+prefixvar=man7dir
+. ./setprefixvar
+
+case "$man7dir" in
+'')	man7dir=' '
+	installman7dir='';;
+esac
+
+: What suffix to use on installed man pages
+case "$man7dir" in
+' ')
+	man7ext='0'
+	;;
+*)
+	rp="What suffix should be used for the $package library man pages?"
+	case "$man7ext" in
+	'')	case "$man7dir" in
+		*7)  dflt=7 ;;
+		*7p) dflt=7p ;;
+		*7pm) dflt=7pm ;;
+		*l) dflt=l;;
+		*n) dflt=n;;
+		*o) dflt=o;;
+		*p) dflt=p;;
+		*C) dflt=C;;
+		*L) dflt=L;;
+		*L7) dflt=L7;;
+		*) dflt=7;;
+		esac
+		;;
+	*)	dflt="$man7ext";;
+	esac
+	. ./myread
+	man7ext="$ans"
+	;;
+esac
+
 : see if we have to deal with yellow pages, now NIS.
 if $test -d /usr/etc/yp || $test -d /etc/yp || $test -d /usr/lib/yp; then
 	case "$hostcat" in
@@ -9565,6 +9702,22 @@ rp='Pathname where the site-specific library html pages should be installed?'
 prefixvar=sitehtml3dir
 . ./setprefixvar
 
+: determine where add-on library html pages go
+: There is no standard location, so try to copy the previously-selected
+: directory structure for the core html pages.
+case "$sitehtml7dir" in
+'')    dflt=`echo "$html7dir" | $sed "s#^$prefix#$siteprefix#"` ;;
+*)     dflt=$sitehtml7dir ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+fn=dn+~
+rp='Pathname where the site-specific library html pages should be installed?'
+. ./getfile
+prefixvar=sitehtml7dir
+. ./setprefixvar
+
 : determine where add-on manual pages go
 case "$siteman1dir" in
 '')	dflt=`echo $man1dir | $sed "s#^$prefix#$siteprefix#"` ;;
@@ -9591,6 +9744,20 @@ fn=dn+~
 rp='Pathname where the site-specific library manual pages should be installed?'
 . ./getfile
 prefixvar=siteman3dir
+. ./setprefixvar
+
+: determine where add-on library man pages go
+case "$siteman7dir" in
+'')	dflt=`echo $man7dir | $sed "s#^$prefix#$siteprefix#"` ;;
+*)	dflt=$siteman7dir ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+fn=dn+~
+rp='Pathname where the site-specific library manual pages should be installed?'
+. ./getfile
+prefixvar=siteman7dir
 . ./setprefixvar
 
 : determine where add-on public executable scripts go
@@ -9979,6 +10146,34 @@ $test X"$vendorhtml3dir" = "X" && vendorhtml3dir=' '
 prefixvar=vendorhtml3dir
 . ./installprefix
 
+: Set the vendorhtml7dir variables
+case "$vendorprefix" in
+'')	vendorhtml7dir=''
+	vendorhtml7direxp=''
+	;;
+*)	: determine where vendor-supplied module html pages go.
+	: There is no standard location, so try to copy the previously-selected
+	: directory structure for the core html pages.
+	: XXX Better default suggestions would be welcome.
+	case "$vendorhtml7dir" in
+	'')	dflt=`echo "$html7dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
+	*)	dflt=$vendorhtml7dir ;;
+	esac
+	case "$dflt" in
+	''|' ') dflt=none ;;
+	esac
+	fn=dn+~
+	rp='Pathname for the vendor-supplied html pages?'
+	. ./getfile
+	vendorhtml7dir="$ans"
+	vendorhtml7direxp="$ansexp"
+	;;
+esac
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$vendorhtml7dir" = "X" && vendorhtml7dir=' '
+prefixvar=vendorhtml7dir
+. ./installprefix
+
 : Set the vendorman1dir variables
 case "$vendorprefix" in
 '')	vendorman1dir=''
@@ -10027,6 +10222,31 @@ esac
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$vendorman3dir" = "X" && vendorman3dir=' '
 prefixvar=vendorman3dir
+. ./installprefix
+
+: Set the vendorman7dir variables
+case "$vendorprefix" in
+'')	vendorman7dir=''
+	vendorman7direxp=''
+	;;
+*)	: determine where vendor-supplied module manual pages go.
+	case "$vendorman7dir" in
+	'') dflt=`echo "$man7dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
+	*)	dflt=$vendorman7dir ;;
+	esac
+	case "$dflt" in
+	''|' ') dflt=none ;;
+	esac
+	fn=nd~+
+	rp='Pathname for the vendor-supplied manual section 7 pages?'
+	. ./getfile
+	vendorman7dir="$ans"
+	vendorman7direxp="$ansexp"
+	;;
+esac
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$vendorman7dir" = "X" && vendorman7dir=' '
+prefixvar=vendorman7dir
 . ./installprefix
 
 : Set the vendorscript variables
@@ -25572,6 +25792,8 @@ html1dir='$html1dir'
 html1direxp='$html1direxp'
 html3dir='$html3dir'
 html3direxp='$html3direxp'
+html7dir='$html7dir'
+html7direxp='$html7direxp'
 i16size='$i16size'
 i16type='$i16type'
 i32dformat='$i32dformat'
@@ -25676,8 +25898,10 @@ installarchlib='$installarchlib'
 installbin='$installbin'
 installhtml1dir='$installhtml1dir'
 installhtml3dir='$installhtml3dir'
+installhtml7dir='$installhtml7dir'
 installman1dir='$installman1dir'
 installman3dir='$installman3dir'
+installman7dir='$installman7dir'
 installprefix='$installprefix'
 installprefixexp='$installprefixexp'
 installprivlib='$installprivlib'
@@ -25686,9 +25910,11 @@ installsitearch='$installsitearch'
 installsitebin='$installsitebin'
 installsitehtml1dir='$installsitehtml1dir'
 installsitehtml3dir='$installsitehtml3dir'
+installsitehtml7dir='$installsitehtml7dir'
 installsitelib='$installsitelib'
 installsiteman1dir='$installsiteman1dir'
 installsiteman3dir='$installsiteman3dir'
+installsiteman7dir='$installsiteman7dir'
 installsitescript='$installsitescript'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
@@ -25696,9 +25922,11 @@ installvendorarch='$installvendorarch'
 installvendorbin='$installvendorbin'
 installvendorhtml1dir='$installvendorhtml1dir'
 installvendorhtml3dir='$installvendorhtml3dir'
+installvendorhtml7dir='$installvendorhtml7dir'
 installvendorlib='$installvendorlib'
 installvendorman1dir='$installvendorman1dir'
 installvendorman3dir='$installvendorman3dir'
+installvendorman7dir='$installvendorman7dir'
 installvendorscript='$installvendorscript'
 intsize='$intsize'
 issymlink='$issymlink'
@@ -25758,6 +25986,9 @@ man1ext='$man1ext'
 man3dir='$man3dir'
 man3direxp='$man3direxp'
 man3ext='$man3ext'
+man7dir='$man7dir'
+man7direxp='$man7direxp'
+man7ext='$man7ext'
 mips_type='$mips_type'
 mistrustnm='$mistrustnm'
 mkdir='$mkdir'
@@ -25897,6 +26128,8 @@ sitehtml1dir='$sitehtml1dir'
 sitehtml1direxp='$sitehtml1direxp'
 sitehtml3dir='$sitehtml3dir'
 sitehtml3direxp='$sitehtml3direxp'
+sitehtml7dir='$sitehtml7dir'
+sitehtml7direxp='$sitehtml7direxp'
 sitelib='$sitelib'
 sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
@@ -25904,6 +26137,8 @@ siteman1dir='$siteman1dir'
 siteman1direxp='$siteman1direxp'
 siteman3dir='$siteman3dir'
 siteman3direxp='$siteman3direxp'
+siteman7dir='$siteman7dir'
+siteman7direxp='$siteman7direxp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
 sitescript='$sitescript'
@@ -26031,6 +26266,8 @@ vendorhtml1dir='$vendorhtml1dir'
 vendorhtml1direxp='$vendorhtml1direxp'
 vendorhtml3dir='$vendorhtml3dir'
 vendorhtml3direxp='$vendorhtml3direxp'
+vendorhtml7dir='$vendorhtml7dir'
+vendorhtml7direxp='$vendorhtml7direxp'
 vendorlib='$vendorlib'
 vendorlib_stem='$vendorlib_stem'
 vendorlibexp='$vendorlibexp'
@@ -26038,6 +26275,8 @@ vendorman1dir='$vendorman1dir'
 vendorman1direxp='$vendorman1direxp'
 vendorman3dir='$vendorman3dir'
 vendorman3direxp='$vendorman3direxp'
+vendorman7dir='$vendorman7dir'
+vendorman7direxp='$vendorman7direxp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'
 vendorscript='$vendorscript'

@@ -3672,9 +3672,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	systems that use a positional notation.  After element [0] is
  *	LC_ALL_SEPARATOR, then the category given by element [1] and so on.
  */
-#$d_perl_lc_all_uses_name_value_pairs PERL_LC_ALL_USES_NAME_VALUE_PAIRS  	/**/
-#$d_perl_lc_all_separator  PERL_LC_ALL_SEPARATOR $perl_lc_all_separator	/**/
-#$d_perl_lc_all_category_positions_init  PERL_LC_ALL_CATEGORY_POSITIONS_INIT  $perl_lc_all_category_positions_init	/**/
+#$d_perl_lc_all_uses_name_value_pairs PERL_LC_ALL_USES_NAME_VALUE_PAIRS
+#define  PERL_LC_ALL_SEPARATOR $perl_lc_all_separator
+#define  PERL_LC_ALL_CATEGORY_POSITIONS_INIT  $perl_lc_all_category_positions_init
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
