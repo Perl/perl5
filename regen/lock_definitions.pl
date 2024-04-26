@@ -749,10 +749,11 @@ print $l <<EOT;
  * run in a thread and work alongside other threads.  In most Configurations,
  * the global locale doesn't interfere with any per-thread one, so if only one
  * thread is switched into it, it effectively acts as an extra per-thread one,
- * and no conflicts arise and no code changes to it are required.  However any
- * setlocale() and _wsetlocale() calls should be wrapped for future proofing.
- * You can use the macros for each function, or POSIX_SETLOCALE_LOCK (and
- * _UNLOCK) work on either.
+ * and no conflicts arise and no code changes to it are required.  However,
+ * any setlocale() and_wsetlocale() calls should be wrapped to handle
+ * Configurations where thread-safe locales are emulated.  You can use the
+ * macros for each function, or POSIX_SETLOCALE_LOCK (and _UNLOCK) work on
+ * either.
  *
  * It is possible for XS code to change any thread to use the global locale.
  * The macros are INVALID if this is done.  Perl_switch_to_global_locale()
@@ -1012,6 +1013,56 @@ EOT
 # increases the possibility of deadlock, unless the code is carefully
 # crafted (and remains so during future maintenance).
 #
+
+# The locale macros take a mask parameter with each affected category having a
+# bit set in it.  The mask for LC_ALL is the same across all platforms.
+print $l <<~EOT;
+
+/* The macros that include locale locking need to know (in some
+ * Configurations) which locale categories are affected.  This is done by
+ * passing a bit mask argument to them, with each affected category having a
+ * corresponding bit set.  The definitions below convert from category to its
+ * bit position. */
+#define LC_ALLb_  LC_INDEX_TO_BIT_(LC_ALL_INDEX_)
+EOT
+
+print $l <<~EOT;
+
+/*  On platforms where the locale for a given category must be matched by the
+ *  LC_CTYPE locale to avoid potential mojibake, set things up to also
+ *  automatically include the LC_CTYPE bit. */
+#if defined(LC_CTYPE) && defined(PERL_MUST_DEAL_WITH_MISMATCHED_CTYPE)
+#  define INCLUDE_CTYPE_  LC_INDEX_TO_BIT_(LC_CTYPE_INDEX_)
+#else
+#  define INCLUDE_CTYPE_  0
+#endif
+
+/* Then #define the bit position for each category on the system that can play
+ * a part in the locking macro definitions */
+EOT
+
+# Create the mask for each category found in the DATA
+foreach my $cat (sort keys %categories) {
+    next if $cat eq "LC_ALL";
+    if ($cat eq "LC_CTYPE") {
+        print $l <<~EOT;
+            #ifdef LC_CTYPE
+            #  define LC_CTYPEb_  LC_INDEX_TO_BIT_(LC_CTYPE_INDEX_)
+            #else
+            #  define LC_CTYPEb_  LC_ALLb_
+            #endif
+            EOT
+    }
+    else {
+        print $l <<~EOT;
+            #ifdef $cat
+            #  define ${cat}b_  LC_INDEX_TO_BIT_(${cat}_INDEX_)|INCLUDE_CTYPE_
+            #else
+            #  define ${cat}b_  LC_CTYPEb_
+            #endif
+            EOT
+    }
+}
 
 print $l <<~EOT;
 
@@ -1279,19 +1330,20 @@ foreach my $use (sort name_order keys %uses) {
                     EOT
             }
             else {
+                my $cats = join "|", map { "${_}b_" } $entry->{categories}->@*;
                 if ($name || $locale_lock) {
                     $name .= "_" if $name;
                     $locale_lock = "r" unless $locale_lock;
                     $name .= "LC$locale_lock";
                     print $l <<~EOT;
-                        #${dindent}define ${USE}_LOCK    ${name}_LOCK_()
-                        #${dindent}define ${USE}_UNLOCK  ${name}_UNLOCK_()
+                        #${dindent}define ${USE}_LOCK    ${name}_LOCK_(  $cats)
+                        #${dindent}define ${USE}_UNLOCK  ${name}_UNLOCK_($cats)
                         EOT
                 }
                 else {
                     print $l <<~EOT;
-                        #${dindent}define ${USE}_LOCK
-                        #${dindent}define ${USE}_UNLOCK
+                        #${dindent}define ${USE}_LOCK    TSE_TOGGLE_(  $cats)
+                        #${dindent}define ${USE}_UNLOCK  TSE_UNTOGGLE_($cats)
                         EOT
                 }
                 $name .= $locale_lock;
