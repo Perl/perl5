@@ -938,8 +938,7 @@ C<-Dusemultiplicity> option otherwise some interpreter variables may
 not be initialized correctly between consecutive runs and your
 application may crash.
 
-See also L<perlxs/Dealing with MULTIPLICITY and threads>.
-
+See also L<perlxs/Thread-aware system interfaces>.
 
 Using C<-Dusethreads -Duseithreads> rather than C<-Dusemultiplicity>
 is more appropriate if you intend to run multiple interpreters
