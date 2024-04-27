@@ -772,6 +772,7 @@ the strings?).
  Max       5.39.7       2024-Jan-20
  Renee     5.39.8       2024-Feb-23
  Paul E    5.39.9       2024-Mar-20
+ Paul E    5.39.10      2024-Apr-29
 
 =head2 SELECTED RELEASE SIZES
 
