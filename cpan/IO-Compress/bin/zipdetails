@@ -29,7 +29,7 @@ use Encode;
 use Getopt::Long;
 use List::Util qw(min max);
 
-my $VERSION = '4.000' ;
+my $VERSION = '4.002' ;
 
 sub fatal_tryWalk;
 sub fatal_truncated ;
@@ -614,7 +614,7 @@ sub out
 
     my $size = length($data) ;
 
-    $ENDS_AT = offset($OFFSET + $size - 1) ;
+    $ENDS_AT = offset($OFFSET + ($size ? $size - 1 : 0)) ;
     $OFF     = prOff($size);
     $LENGTH  = offset($size) ;
     $CONTENT = hexDump($data);
@@ -634,7 +634,7 @@ sub out0
     my $text = shift;
     my $format = shift;
 
-    $ENDS_AT = offset($OFFSET + $size - 1) ;
+    $ENDS_AT = offset($OFFSET + ($size ? $size - 1 : 0)) ;
     $OFF     = prOff($size);
     $LENGTH  = offset($size) ;
     $CONTENT = '...';
@@ -672,7 +672,7 @@ sub out2
     my $format = shift;
 
     my $size = length($data) ;
-    $ENDS_AT = offset($OFFSET + $size - 1) ;
+    $ENDS_AT = offset($OFFSET + ($size ? $size - 1 : 0)) ;
     $OFF     = prOff($size);
     $LENGTH  = offset($size);
     $CONTENT = hexDump($data);
@@ -1310,10 +1310,9 @@ else
 
 
             # check for an APK header directly before the first central header
-            if (Signatures::isCentralHeader($expectedSignature) && $START_APK && ! $processedAPK )
+            # Make sure not to miss a streaming data descriptor
+            if ($signature != ZIP_DATA_HDR_SIG && Signatures::isCentralHeader($expectedSignature) && $START_APK && ! $processedAPK )
             {
-                # my ($START_APK, $APK, $APK_LEN) = chckForAPKSigningBlock($FH, $here, 0) ;
-
                 seekTo($here+4);
                 # rewindRelative(4);
                 scanApkBlock();
@@ -1707,7 +1706,7 @@ sub dislayMessages
                     ['extractVersion',       7, 'Extract Zip Spec',     sub { decimalHex0xUndef($_[0]) . " " . decodeZipVer($_[0]) }, ],
                     ['generalPurposeFlags',  8, 'General Purpose Flag', \&decimalHex0xUndef, ],
                     ['compressedMethod',    10, 'Compression Method',   sub { decimalHex0xUndef($_[0]) . " " . getcompressionMethodName($_[0]) }, ],
-                    ['lastModDateTime',     12, 'Last Mod Date/Time',   sub { decimalHex0xUndef($_[0]) . " " . LastModTime($_[0]) }, ],
+                    ['lastModDateTime',     12, 'Modification Time',    sub { decimalHex0xUndef($_[0]) . " " . LastModTime($_[0]) }, ],
                     ['crc32',               16, 'CRC32',                \&decimalHex0xUndef, ],
                     ['compressedSize',      20, 'Compressed Size',      \&decimalHex0xUndef, ],
                     ['uncompressedSize',    24, 'Uncompressed Size',    \&decimalHex0xUndef, ],
@@ -1724,7 +1723,7 @@ sub dislayMessages
                     my $localValue = $localEntry->{$field} ;
                     my $centralValue = $centralEntry->{$field};
 
-                    if (($localValue // '-1') ne $centralValue)
+                    if (($localValue // '-1') ne ($centralValue // '-2'))
                     {
                         if ($stringify)
                         {
@@ -2034,7 +2033,7 @@ sub LocalHeader
     info $FH->tell() - 2, "Unknown 'Compression Method' ID " . decimalHex0x($compressedMethod, 2)
         if ! defined $ZIP_CompressionMethods{$compressedMethod} ;
 
-    my $lastMod = out_V "Last Mod Date/Time", sub { LastModTime($_[0]) };
+    my $lastMod = out_V "Modification Time", sub { LastModTime($_[0]) };
 
     my $crc              = out_V "CRC";
     warning $FH->tell() - 4, "CRC field should be zero when streaming is enabled"
@@ -2165,11 +2164,16 @@ sub LocalHeader
         {
             error $FH->tell,
                   "file truncated while reading 'PAYLOAD'",
-                  "Expected " . decimalHex0x($CDcompressedSize) . " bytes, but only " . decimalHex0x($available) . " available" ;
+                  expectedMessage($CDcompressedSize, $available);
 
             $CDcompressedSize = $available;
         }
     }
+
+    # Next block can decrement the CDcompressedSize
+    # possiblty to zero. Need to remember if it started out
+    # as a non-zero value
+    my $haveCDcompressedSize = $CDcompressedSize;
 
     if ($compressedMethod == 99 && $localEntry->aesValid) # AES Encryption
     {
@@ -2190,7 +2194,7 @@ sub LocalHeader
         $CDcompressedSize -= DecryptionHeader();
     }
 
-    if ($CDcompressedSize) {
+    if ($haveCDcompressedSize) {
 
         if ($compressedMethod == 92 && $CDcompressedSize == 20) {
             # Payload for a Reference is the SHA-1 hash of the uncompressed content
@@ -2423,18 +2427,29 @@ sub validateFilename
 
     # Portability (mostly with Windows)
 
-    # see https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
-    state $badDosFilename = join '|', map { quotemeta }
-                            qw(CON  PRN  AUX  NUL
-                               COM1 COM2 COM3 COM4 COM5 COM6 COM7 COM8 COM9
-                               LPT1 LPT2 LPT3 LPT4 LPT5 LPT6 LPT7 LPT8 LPT9
-                               ) ;
-    return "Portability Issue: '$1' is a reserved Windows device name"
-        if $filename =~ /^($badDosFilename)$/io ;
+    {
+        # see https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+        state $badDosFilename = join '|', map { quotemeta }
+                                qw(CON  PRN  AUX  NUL
+                                COM1 COM2 COM3 COM4 COM5 COM6 COM7 COM8 COM9
+                                LPT1 LPT2 LPT3 LPT4 LPT5 LPT6 LPT7 LPT8 LPT9
+                                ) ;
 
-    # Can't have the device name with an extension either
-    return "Portability Issue: '$1' is a reserved Windows device name"
-        if $filename =~ /^($badDosFilename)\./io ;
+        # if $filename contains any invalid codepoints, we will get a warning like this
+        #
+        #   Operation "pattern match (m//)" returns its argument for non-Unicode code point
+        #
+        # so silence it for now.
+
+        no warnings;
+
+        return "Portability Issue: '$1' is a reserved Windows device name"
+            if $filename =~ /^($badDosFilename)$/io ;
+
+        # Can't have the device name with an extension either
+        return "Portability Issue: '$1' is a reserved Windows device name"
+            if $filename =~ /^($badDosFilename)\./io ;
+    }
 
     state $illegal_windows_chars = join '|', map { quotemeta } qw( < > : " | ? * );
     return "Portability Issue: Windows filename cannot contain '$1'"
@@ -2578,7 +2593,7 @@ sub CentralHeader
     info $FH->tell() - 2, "Unknown 'Compression Method' ID " . decimalHex0x($compressedMethod, 2)
         if ! defined $ZIP_CompressionMethods{$compressedMethod} ;
 
-    my $lastMod = out_V "Last Mod Date/Time", sub { LastModTime($_[0]) };
+    my $lastMod = out_V "Modification Time", sub { LastModTime($_[0]) };
 
     my $crc                = out_V "CRC";
     my $compressedSize   = out_V "Compressed Size";
@@ -2776,6 +2791,9 @@ sub CentralHeader
 sub decodeZipVer
 {
     my $ver = shift ;
+
+    return ""
+        if ! defined $ver;
 
     my $sHi = int($ver /10) ;
     my $sLo = $ver % 10 ;
@@ -3019,7 +3037,7 @@ sub EndCentralHeader
         {
             error $here,
                   "file truncated while reading 'Comment' field in '" . Signatures::name($signature) . "'",
-                  "Expected " . decimalHex0x($comment_length) . " bytes, but only " . decimalHex0x($available) . " available" ;
+                  expectedMessage($comment_length, $available);
             $comment_length = $available;
         }
 
@@ -3093,7 +3111,7 @@ sub DataDescriptor
     # Ignore header payload if nested (assume 64-bit descriptor)
     if (Nesting::isNested( $here - 4, $here - 4 + 24 - 1))
     {
-        out "",  "Skipping nested payload";
+        out "",  "Skipping Nested Payload";
         return {};
     }
 
@@ -3389,8 +3407,17 @@ sub myRead
     }
 
     my $len = length $$got;
-    fatal undef, "Truncated file (got $len, wanted $wantSize): $!"
+    # fatal undef, "Truncated file (got $len, wanted $wantSize): $!"
+    fatal undef, "Unexpected zip file truncation",
+                expectedMessage($wantSize, $len)
         if length $$got != $wantSize;
+}
+
+sub expectedMessage
+{
+    my $expected = shift;
+    my $got = shift;
+    return "Expected " . decimalHex0x($expected) . " bytes, but only " . decimalHex0x($got) . " available"
 }
 
 sub need
@@ -3408,14 +3435,16 @@ sub need
 
         if ($field)
         {
-            push @message, "file truncated while reading '$field' field in '$message'";
+            push @message, "Unexpected zip file truncation while reading '$field' field in '$message'";
         }
         else
         {
-            push @message, "file truncated while reading '$message'";
+            push @message, "Unexpected zip file truncation while reading '$message'";
         }
 
-        push @message, sprintf("Expected 0x%X bytes, but only 0x%X available", $byteCount, $available);
+
+        push @message, expectedMessage($byteCount, $available);
+        # push @message, sprintf("Expected 0x%X bytes, but only 0x%X available", $byteCount, $available);
         push @message, "Try running with --walk' or '--scan' options"
             if ! $opt_scan && ! $opt_walk ;
 
@@ -3550,13 +3579,6 @@ sub checkOffsetValue
     $OFFSET = $keepOFFSET;
 
     return $offset + $PREFIX_DELTA;
-
-}
-
-sub fatal_truncated
-{
-    my $message = shift;
-    fatal_tryWalk(undef, "truncated file", $message, @_);
 
 }
 
@@ -4463,7 +4485,7 @@ sub _dosToUnixTime
     or do
     {
         my $dosDecode = $year+1900 . sprintf "-%02u-%02u %02u:%02u:%02u", $mon, $mday, $hour, $min, $sec;
-        warning $FH->tell(), "'Last Mod Date/Time' value " . decimalHex0x($dt, 4) .  "  decodes to '$dosDecode': not a valid DOS date/time" ;
+        warning $FH->tell(), "'Modification Time' value " . decimalHex0x($dt, 4) .  "  decodes to '$dosDecode': not a valid DOS date/time" ;
         return undef
     };
 
@@ -4496,9 +4518,9 @@ sub decode_UT
 
     my $v = Value_C $flags;
     my @f ;
-    push @f, "mod"    if $flags & 1;
-    push @f, "access" if $flags & 2;
-    push @f, "change" if $flags & 4;
+    push @f, "Modification"    if $flags & 1;
+    push @f, "Access" if $flags & 2;
+    push @f, "Creation" if $flags & 4;
     $v .= " '" . join(' ', @f) . "'"
         if @f;
 
@@ -4513,27 +4535,27 @@ sub decode_UT
     {
         if ($remaining == 0 )
         {
-            # Central Dir only has mod time
-            error $FH->tell(), extraFieldIdentifier($extraID) . ": Missing field 'Mod Time'" ;
+            # Central Dir only has Modification Time
+            error $FH->tell(), extraFieldIdentifier($extraID) . ": Missing field 'Modification Time'" ;
             return;
         }
         else
         {
-            info $FH->tell(), extraFieldIdentifier($extraID) .  ": Unexpected 'Mod Time' present"
+            info $FH->tell(), extraFieldIdentifier($extraID) .  ": Unexpected 'Modification Time' present"
                 if ! ($flags & 1)  ;
 
             if ($remaining < 4)
             {
                 outSomeData $remaining, "  Extra Data";
                 error $FH->tell() - $remaining,
-                    extraFieldIdentifier($extraID) .  ": Truncated reading 'Mod Time'",
-                    "Expected " . decimalHex0x(4) . " bytes, got " .  decimalHex0x($remaining) . " bytes";
+                    extraFieldIdentifier($extraID) .  ": Truncated reading 'Modification Time'",
+                    expectedMessage(4, $remaining);
                 return;
             }
 
             my ($data, $time) = read_V();
 
-            out2 $data, "Mod Time",    Value_V($time) . " " . getTime($time) ;
+            out2 $data, "Modification Time",    Value_V($time) . " " . getTime($time) ;
 
             $remaining -= 4 ;
         }
@@ -4557,7 +4579,7 @@ sub decode_UT
                 outSomeData $remaining, "  Extra Data";
                 error $FH->tell() - $remaining,
                     extraFieldIdentifier($extraID) . ": Truncated reading 'Access Time'" ,
-                    "Expected " . decimalHex0x(4) . " bytes, got " .  decimalHex0x($remaining) . " bytes";
+                    expectedMessage(4, $remaining);
 
                 return;
             }
@@ -4573,11 +4595,11 @@ sub decode_UT
     {
         if ($remaining == 0 && $entry->inCentralDir)
         {
-            # Central Dir doesn't have change time
+            # Central Dir doesn't have creation time
         }
         else
         {
-            info $FH->tell(), extraFieldIdentifier($extraID) . ": Unexpected 'Change Time' present"
+            info $FH->tell(), extraFieldIdentifier($extraID) . ": Unexpected 'Creation Time' present"
                 if ! ($flags & 4) || $entry->inCentralDir ;
 
             if ($remaining < 4)
@@ -4585,15 +4607,15 @@ sub decode_UT
                 outSomeData $remaining, "  Extra Data";
 
                 error  $FH->tell() - $remaining,
-                    extraFieldIdentifier($extraID) . ": Truncated reading 'Change Time'" ,
-                    "Expected " . decimalHex0x(4) . " bytes, got " .  decimalHex0x($remaining) . " bytes";
+                    extraFieldIdentifier($extraID) . ": Truncated reading 'Creation Time'" ,
+                    expectedMessage(4, $remaining);
 
                 return;
             }
 
             my ($data, $time) = read_V();
 
-            out2 $data, "Change Time",    Value_V($time) . " " . getTime($time) ;
+            out2 $data, "Creation Time",    Value_V($time) . " " . getTime($time) ;
         }
     }
 }
@@ -4846,10 +4868,10 @@ sub decode_UX
     return if $len == 0 ;
 
     my ($data, $time) = read_V();
-    out2 $data, "Access Time",    Value_V($time) . " " . getTime($time) ;
+    out2 $data, "Access Time", Value_V($time) . " " . getTime($time) ;
 
     ($data, $time) = read_V();
-    out2 $data, "Mod Time",    Value_V($time) . " " . getTime($time) ;
+    out2 $data, "Modification Time", Value_V($time) . " " . getTime($time) ;
 
     if (! $inCentralHdr ) {
         out_v "  UID" ;
@@ -4920,7 +4942,7 @@ sub decode_ux
             outSomeData($available, "  Bad Extra Data");
             error $FH->tell() - $available,
                 extraFieldIdentifier($extraID) . ": truncated reading 'UID'",
-                "Expected " . decimalHex0x($uidSize) . " bytes, got " .  decimalHex0x($available) . " bytes";
+                expectedMessage($uidSize, $available);
             return;
         }
 
@@ -4933,7 +4955,7 @@ sub decode_ux
     {
         error $FH->tell(),
                     extraFieldIdentifier($extraID) . ": truncated reading 'GID Size'",
-                    "Expected " . decimalHex0x($uidSize) . " bytes, got " .  decimalHex0x($available) . " bytes";
+                    expectedMessage($uidSize, $available);
         return ;
     }
 
@@ -4946,7 +4968,7 @@ sub decode_ux
             outSomeData($available, "  Bad Extra Data");
             error $FH->tell() - $available,
                         extraFieldIdentifier($extraID) . ": truncated reading 'GID'",
-                        "Expected " . decimalHex0x($gidSize) . " bytes, got " .  decimalHex0x($available) . " bytes";
+                        expectedMessage($gidSize, $available);
             return;
         }
 
@@ -5145,7 +5167,7 @@ sub decode_Xceed_unicode
 
             error $FH->tell() - $remaining,
                 extraFieldIdentifier($extraID) .  ": Truncated reading 'UTF16LE Filename'",
-                "Expected " . decimalHex0x($filenameLength) . " bytes, got " .  decimalHex0x($remaining) . " bytes";
+                expectedMessage($filenameLength, $remaining);
             return undef;
         }
 
@@ -5165,7 +5187,7 @@ sub decode_Xceed_unicode
 
             error $FH->tell() - $remaining,
                 extraFieldIdentifier($extraID) .  ": Truncated reading 'UTF16LE Comment'",
-                "Expected " . decimalHex0x($filenameLength) . " bytes, got " .  decimalHex0x($remaining) . " bytes";
+                expectedMessage($filenameLength, $remaining);
             return undef;
         }
 
@@ -5468,7 +5490,7 @@ sub chckForAPKSigningBlock
     # APK Signing Block comes directy before the Central directory
     # See https://source.android.com/security/apksigning/v2
 
-    # If offset less than
+    # If offset available is less than 44, it isn't an APK signing block
     #
     #   len1     8
     #   id       4
@@ -5488,13 +5510,16 @@ sub chckForAPKSigningBlock
     return (0, 0, '')
         if $buffer ne "APK Sig Block 42" ;
 
-    # Step 2 - read the two length fields
-    #          and check they are identical
+    # Step 2 - read the second length field
+    #          and check that it looks ok
     $buffer = readFromOffset($cdOffset - 16 - 8, 8);
     my $len2 = unpack("Q<", $buffer);
 
     return (0, 0, '')
-        if $len2 == 0 ;
+        if $len2 == 0 || $len2 > $FILELEN;
+
+    # Step 3 - read the first length field.
+    #          It should be identical to the second one.
 
     my $startApkOffset = $cdOffset -  8 - $len2 ;
 
@@ -5525,7 +5550,7 @@ sub scanApkBlock
     print "\n";
     out "", "APK SIGNING BLOCK";
 
-    scanApkPadding('');
+    scanApkPadding();
     out_Q "Block Length Copy #1";
     my $ix = 1;
 
@@ -5553,22 +5578,23 @@ sub scanApkBlock
 
 sub scanApkPadding
 {
-    my $bytes = shift ;
-
-    # padding
     my $here = $FH->tell();
-    my $got;
-    myRead($got, $APK - $here);
-    $got = $bytes . $got;
-    if ($got =~ /^(\x00+)($APK_LEN)?/)
+
+    return
+        if $here == $START_APK;
+
+    # found some padding
+
+    my $delta = $START_APK - $here;
+    my $padding = peekAtOffset($here, $delta);
+
+    if ($padding =~ /^\x00+$/)
     {
-        my $len = length $1 ;
-        seekTo($here - length($bytes));
-        outSomeData($len, "Null Padding");
+        outSomeData($delta, "Null Padding");
     }
     else
     {
-        seekTo($here);
+        outHexdump($delta, "Unexpected Padding");
     }
 }
 
@@ -5706,7 +5732,8 @@ sub offsetFromZip64
     #### Zip64 end of central directory locator
 
     # check enough bytes available for zip64 locator record
-    fatal_truncated "Cannot find signature for " .  Signatures::nameAndHex(ZIP64_END_CENTRAL_LOC_HDR_SIG) # 'Zip64 end of central directory locator': 0x07064b50"
+    fatal_tryWalk undef, "Cannot find signature for " .  Signatures::nameAndHex(ZIP64_END_CENTRAL_LOC_HDR_SIG), # 'Zip64 end of central directory locator': 0x07064b50"
+                         "Possible truncated or corrupt zip file"
         if $here < ZIP64_END_CENTRAL_LOC_HDR_SIZE ;
 
     $fh->seek($here - ZIP64_END_CENTRAL_LOC_HDR_SIZE, SEEK_SET) ;
@@ -5909,6 +5936,8 @@ sub findCentralDirectoryOffset
     return (0, 0)
         if  $totalEntries == 0 && $entriesOnThisDisk == 0;
 
+    # APK Signing Block is directly before the first CD entry
+    # Check if it is present
     ($START_APK, $APK, $APK_LEN) = chckForAPKSigningBlock($fh, $centralDirOffset, ZIP_EOCD_MIN_SIZE + $commentLength);
 
     return ($centralDirOffset, $centralDirSize) ;
@@ -6432,7 +6461,7 @@ sub nibbles
         my $offset = shift ;
 
         # TODO - what happens if none exists?
-        my $entry = $self->{byLocalOffset}{$offset} ;
+        my $entry = $self->{byLocalOffset}{$offset - $PREFIX_DELTA} ;
         return $entry ;
     }
 
@@ -6442,7 +6471,7 @@ sub nibbles
         my $offset = shift ;
 
         # TODO - what happens if none exists?
-        return $self->{byLocalOffset}{$offset} ;
+        return $self->{byLocalOffset}{$offset - $PREFIX_DELTA} ;
     }
 
     sub getNextLocalOffset
@@ -6942,8 +6971,9 @@ sub displayFileInfo
         # TODO - check for badly formed content
         if ($LanguageEncodingFlag && $opt_use_LanguageEncodingFlag)
         {
-            eval { $name = Encode::decode('utf8', $name, Encode::FB_CROAK ) } ;
-            ::warning $FH->tell() - length $name, "Could not decode 'utf8' $type: " . cleanEval $@
+            # use "utf-8-strict" to catch invalid codepoints
+            eval { $name = Encode::decode('utf-8-strict', $name, Encode::FB_CROAK ) } ;
+            ::warning $FH->tell() - length $name, "Could not decode 'UTF-8' $type: " . cleanEval $@
                 if $@ ;
         }
         else
@@ -7618,7 +7648,7 @@ Running C<zipdetails> will gives this output
     0006 General Purpose Flag  0000 (0)
          [Bits 1-2]            0 'Normal Compression'
     0008 Compression Method    0008 (8) 'Deflated'
-    000A Last Mod Date/Time    5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
+    000A Modification Time     5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
     000E CRC                   F90EE7FF (4178503679)
     0012 Compressed Size       0000010E (270)
     0016 Uncompressed Size     000001BE (446)
@@ -7635,7 +7665,7 @@ Running C<zipdetails> will gives this output
     013D General Purpose Flag  0000 (0)
          [Bits 1-2]            0 'Normal Compression'
     013F Compression Method    0008 (8) 'Deflated'
-    0141 Last Mod Date/Time    5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
+    0141 Modification Time     5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
     0145 CRC                   F90EE7FF (4178503679)
     0149 Compressed Size       0000010E (270)
     014D Uncompressed Size     000001BE (446)
@@ -7710,7 +7740,7 @@ C<-v> option:
     0006 0007 0002 00 00       General Purpose Flag  0000 (0)
                                [Bits 1-2]            0 'Normal Compression'
     0008 0009 0002 08 00       Compression Method    0008 (8) 'Deflated'
-    000A 000D 0004 72 A0 76 56 Last Mod Date/Time    5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
+    000A 000D 0004 72 A0 76 56 Modification Time     5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
     000E 0011 0004 FF E7 0E F9 CRC                   F90EE7FF (4178503679)
     0012 0015 0004 0E 01 00 00 Compressed Size       0000010E (270)
     0016 0019 0004 BE 01 00 00 Uncompressed Size     000001BE (446)
@@ -7729,7 +7759,7 @@ C<-v> option:
     013D 013E 0002 00 00       General Purpose Flag  0000 (0)
                                [Bits 1-2]            0 'Normal Compression'
     013F 0140 0002 08 00       Compression Method    0008 (8) 'Deflated'
-    0141 0144 0004 72 A0 76 56 Last Mod Date/Time    5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
+    0141 0144 0004 72 A0 76 56 Modification Time     5676A072 (1450614898) 'Wed Mar 22 20:03:36 2023'
     0145 0148 0004 FF E7 0E F9 CRC                   F90EE7FF (4178503679)
     0149 014C 0004 0E 01 00 00 Compressed Size       0000010E (270)
     014D 0150 0004 BE 01 00 00 Uncompressed Size     000001BE (446)
