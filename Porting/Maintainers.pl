@@ -211,7 +211,8 @@ our %Modules = (
     },
 
     'Compress::Raw::Bzip2' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.210.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.211.tar.gz',
+        'SYNCINFO'     => 'LeoNerd on Sat Apr 27 10:29:39 2024',
         'SYNCINFO'     => 'jkeenan on Mon Feb 26 09:07:43 2024',
         'SYNCINFO'     => 'yorton on Tue Jul 25 20:45:42 2023',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
