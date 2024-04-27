@@ -352,16 +352,16 @@ static void my_CvCONST_off(pTHX_ CV *cv)
  * cannot distinguish between failure and a local broadcast address.
  */
 static int
-my_inet_aton(register const char *cp, struct in_addr *addr)
+my_inet_aton(const char *cp, struct in_addr *addr)
 {
     dTHX;
-    register U32 val;
-    register int base;
-    register char c;
+    U32 val;
+    int base;
+    char c;
     int nparts;
     const char *s;
     unsigned int parts[4];
-    register unsigned int *pp = parts;
+    unsigned int *pp = parts;
 
     if (!cp || !*cp)
         return 0;
@@ -935,8 +935,8 @@ unpack_sockaddr_un(sun_sv)
         if (!SvOK(sun_sv))
             croak("Undefined address for %s", "Socket::unpack_sockaddr_un");
         sun_ad = SvPVbyte(sun_sv,sockaddrlen);
-#   if defined(__linux__) || defined(__CYGWIN__) || defined(HAS_SOCKADDR_SA_LEN)
-        /* On Linux, Cygwin or *BSD sockaddrlen on sockets returned by accept,
+#   if defined(__linux__) || defined(__CYGWIN__) || defined(sun) || defined(HAS_SOCKADDR_SA_LEN)
+        /* On Linux, Cygwin, Solaris or *BSD sockaddrlen on sockets returned by accept,
          * recvfrom, getpeername and getsockname is not equal to sizeof(addr). */
         if (sockaddrlen < sizeof(addr)) {
             Copy(sun_ad, &addr, sockaddrlen, char);

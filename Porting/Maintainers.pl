@@ -1032,7 +1032,8 @@ our %Modules = (
     },
 
     'Socket' => {
-        'DISTRIBUTION' => 'PEVANS/Socket-2.037.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.038.tar.gz',
+        'SYNCINFO'     => 'LeoNerd on Sat Apr 27 09:57:02 2024',
         'FILES'        => q[cpan/Socket],
         'EXCLUDED'     => ['.editorconfig'],
     },
