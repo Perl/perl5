@@ -984,9 +984,9 @@ cpan/Encode/ucm/viscii.ucm				Unicode Character Map
 cpan/Encode/Unicode/Makefile.PL				Encode extension
 cpan/Encode/Unicode/Unicode.pm				Encode extension
 cpan/Encode/Unicode/Unicode.xs				Encode extension
-cpan/experimental/lib/experimental.pm
-cpan/experimental/lib/stable.pm
-cpan/experimental/t/basic.t
+cpan/experimental/lib/experimental.pm	Module related to experimental
+cpan/experimental/lib/stable.pm		Module related to experimental
+cpan/experimental/t/basic.t		Test file related to experimental
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
