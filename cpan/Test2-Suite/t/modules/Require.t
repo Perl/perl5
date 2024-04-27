@@ -6,7 +6,7 @@ pass "Loaded Test2::Require";
 like(
     dies { Test2::Require->skip() },
     qr/Class 'Test2::Require' needs to implement 'skip\(\)'/,
-    "skip must be overriden"
+    "skip must be overridden"
 );
 
 my $x;

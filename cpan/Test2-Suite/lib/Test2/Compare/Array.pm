@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Test2::Util::HashBase qw/inref meta ending items order for_each/;
 
@@ -143,6 +143,7 @@ sub deltas {
 
             # check-all goes here so we hit each item, even unspecified ones.
             for my $check (@$for_each) {
+                last if $overflow; # avoid doing 'for each' checks beyond array bounds
                 $check = $convert->($check);
                 push @deltas => $check->run(
                     id      => [ARRAY => $state],

@@ -79,7 +79,7 @@ like($foo, qr/xxx/, "overload");
 
 my $thing = bless {}, 'Foo::Bar';
 
-# Test cmp_ok in a seperate package so we have access to the better tools.
+# Test cmp_ok in a separate package so we have access to the better tools.
 package main2;
 
 use Test2::Bundle::Extended;

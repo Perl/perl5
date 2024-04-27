@@ -15,7 +15,7 @@ spec_defaults case  => (iso => 1, async => 1);
 spec_defaults tests => (iso => 1, async => 1);
 
 tests outside => sub {
-    isnt(get_ids(), $orig, "In child (lexial)");
+    isnt(get_ids(), $orig, "In child (lexical)");
 };
 
 describe wrapper => sub {
@@ -24,7 +24,7 @@ describe wrapper => sub {
     };
 
     case 'bar', {iso => 0, async => 0} => sub {
-        is(get_ids(), $orig, "In orig (overriden)")
+        is(get_ids(), $orig, "In orig (overridden)")
     };
 
     tests a => sub { ok(1, 'stub') };

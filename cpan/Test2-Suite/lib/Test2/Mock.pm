@@ -2,12 +2,12 @@ package Test2::Mock;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Carp qw/croak confess/;
 our @CARP_NOT = (__PACKAGE__);
 
-use Scalar::Util qw/weaken reftype blessed/;
+use Scalar::Util qw/weaken reftype blessed set_prototype/;
 use Test2::Util qw/pkg_to_file/;
 use Test2::Util::Stash qw/parse_symbol slot_to_sig get_symbol get_stash purge_symbol/;
 use Test2::Util::Sub qw/gen_accessor gen_reader gen_writer/;
@@ -222,44 +222,50 @@ sub before {
     my $self = shift;
     my ($name, $sub) = @_;
     $self->_check();
-    my $orig = $self->current($name);
-    $self->_inject({}, $name => sub { $sub->(@_); $orig->(@_) });
+    my $orig = $self->current($name, required => 1);
+    $self->_inject({}, $name => set_prototype(sub { $sub->(@_); $orig->(@_) }, prototype $sub));
 }
 
 sub after {
     my $self = shift;
     my ($name, $sub) = @_;
     $self->_check();
-    my $orig = $self->current($name);
-    $self->_inject({}, $name => sub {
-        my @out;
+    my $orig = $self->current($name, required => 1);
+    $self->_inject(
+        {},
+        $name => set_prototype(
+            sub {
+                my @out;
 
-        my $want = wantarray;
+                my $want = wantarray;
 
-        if ($want) {
-            @out = $orig->(@_);
-        }
-        elsif(defined $want) {
-            $out[0] = $orig->(@_);
-        }
-        else {
-            $orig->(@_);
-        }
+                if ($want) {
+                    @out = $orig->(@_);
+                }
+                elsif (defined $want) {
+                    $out[0] = $orig->(@_);
+                }
+                else {
+                    $orig->(@_);
+                }
 
-        $sub->(@_);
+                $sub->(@_);
 
-        return @out    if $want;
-        return $out[0] if defined $want;
-        return;
-    });
+                return @out    if $want;
+                return $out[0] if defined $want;
+                return;
+            },
+            prototype $sub,
+        )
+    );
 }
 
 sub around {
     my $self = shift;
     my ($name, $sub) = @_;
     $self->_check();
-    my $orig = $self->current($name);
-    $self->_inject({}, $name => sub { $sub->($orig, @_) });
+    my $orig = $self->current($name, required => 1);
+    $self->_inject({}, $name => set_prototype(sub { $sub->($orig, @_) }, prototype $sub));
 }
 
 sub add {
@@ -282,9 +288,13 @@ sub set {
 
 sub current {
     my $self = shift;
-    my ($sym) = @_;
+    my ($sym, %params) = @_;
 
-    return get_symbol($sym, $self->{+CLASS});
+    my $out = get_symbol($sym, $self->{+CLASS});
+    return $out unless $params{required};
+    confess "Attempt to modify a sub that does not exist '$self->{+CLASS}\::$sym' (Mock operates on packages, not classes, are you looking for a symbol in a parent class?)"
+        unless $out;
+    return $out;
 }
 
 sub orig {

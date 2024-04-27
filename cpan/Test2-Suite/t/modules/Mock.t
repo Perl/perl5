@@ -553,7 +553,7 @@ subtest 'override and orig' => sub {
     EOT
 
     my $check_initial = sub {
-        is(Fake14->$_, 'old', "$_ is not overriden") for qw/new foo bar baz DATA reader writer rsub nsub/;
+        is(Fake14->$_, 'old', "$_ is not overridden") for qw/new foo bar baz DATA reader writer rsub nsub/;
         ok(eval <<'        EOT', "Ran glob checks") || diag "Error: $@";
             is($Fake14::UHG,  'old',  'old package scalar (UHG)');
             is($Fake14::DATA, 'old', "Old package scalar (DATA)");
@@ -930,6 +930,51 @@ subtest tracking => sub {
     $mock = undef;
 
     is(My::Track->foo, 'foo', "Original restored");
+};
+
+subtest prototypes => sub {
+    sub foo_022 ($) { $_[0] }    # Because this is test 22.
+
+    # NOTE that we make use of the prototype in the following code.
+
+    is(foo_022 'bar', 'bar', 'foo_022 returns its argument');
+
+    my $one = Test2::Mock->new(class => __PACKAGE__);
+
+    my $warning = warnings {
+        $one->before(foo_022 => sub ($) { warn "Before foo_022( '$_[0]' )" });
+        is(foo_022 'baz', 'baz', 'foo_022 still returns its argument');
+    };
+    is(
+        $warning, [
+            match qr/\ABefore foo_022\( 'baz' \)/,
+        ],
+        'Got warning from before() hook'
+    );
+    $one->reset_all();
+
+    $warning = warnings {
+        is(foo_022 'foo', 'foo', 'foo_022 persists in returning its argument');
+    };
+    is $warning, [], 'No warnings after resetting mock';
+
+    $warning = warnings {
+        $one->after(foo_022 => sub ($) { warn "After foo_022( '$_[0]' )" });
+        is(foo_022 'plugh', 'plugh', 'foo_022 steadfastly returns its argument');
+    };
+    is(
+        $warning, [
+            match qr/\AAfter foo_022\( 'plugh' \)/,
+        ],
+        'Got warning from after() hook'
+    );
+    $one->reset_all();
+
+    $warning = warnings {
+        $one->around(foo_022 => sub ($) { return $_[0]->($_[1]) x 2 });
+        is foo_022 '42', '4242', 'With around(), foo_022 now doubles its return';
+    };
+    is($warning, [], 'around() produced no warnings');
 };
 
 done_testing;

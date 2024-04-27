@@ -2,7 +2,7 @@ package Test2::Tools::AsyncSubtest;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Test2::IPC;
 use Test2::AsyncSubtest;
@@ -140,6 +140,13 @@ Create an async subtest. Run the codeblock in a thread.
 =over 4
 
 =item Async Subtests are always buffered.
+
+Always buffered.
+
+=item Do not use done_testing() yourself.
+
+using done_testing() inside an async subtest will not work properly, the async
+subtest must be finalized by calling C<< $st->finish >>.
 
 =back
 

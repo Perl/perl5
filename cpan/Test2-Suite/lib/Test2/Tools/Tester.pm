@@ -2,13 +2,17 @@ package Test2::Tools::Tester;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Carp qw/croak/;
 use Test2::Util::Ref qw/rtype/;
 
 BEGIN {
-    if (eval { require Module::Pluggable; 1 }) {
+    if (eval {
+        no warnings 'deprecated';
+        require Module::Pluggable;
+        1;
+    }) {
         Module::Pluggable->import(search_path => ['Test2::EventFacet'], require => 1);
     }
     else {

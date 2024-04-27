@@ -2,7 +2,7 @@ package Test2::Plugin::SRand;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Carp qw/carp/;
 
@@ -127,6 +127,12 @@ If you use this plugin you probably want to use it as the first, or near-first
 plugin. C<srand> is not called until the plugin is loaded, so other plugins
 loaded first may already be making use of random numbers before your seed
 takes effect.
+
+=head1 CAVEATS
+
+When srand is on (default) it can cause problems with things like L<File::Temp>
+which will end up attempting the same "random" filenames for every test process
+started on a given day (or sharing the same seed).
 
 =head1 SOURCE
 

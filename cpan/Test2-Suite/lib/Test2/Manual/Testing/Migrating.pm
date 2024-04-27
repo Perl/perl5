@@ -2,7 +2,7 @@ package Test2::Manual::Testing::Migrating;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 1;
 
@@ -115,6 +115,17 @@ will want to replace L<Test::More> with the L<Test2::V0> bundle.
 B<Note:> You should always double check the latest L<Test2> to see if there is
 a new recommended bundle. When writing a new test you should always use the
 newest Test::V# module. Higher numbers are newer version.
+
+=item NOTE: srand
+
+When srand is on (default) it can cause problems with things like L<File::Temp>
+which will end up attempting the same "random" filenames for every test process
+started on a given day (or sharing the same seed).
+
+If this is a problem for you then please disable srand when loading
+L<Test2::V0>:
+
+    use Test2::V0 -no_srand => 1;
 
 =item Stop using use_ok()
 

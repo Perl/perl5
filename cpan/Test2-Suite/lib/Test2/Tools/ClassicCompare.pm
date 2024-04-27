@@ -2,7 +2,7 @@ package Test2::Tools::ClassicCompare;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 our @EXPORT = qw/is is_deeply isnt like unlike cmp_ok/;
 use base 'Exporter';
@@ -165,7 +165,7 @@ sub is_deeply($$;$@) {
                 join "\n",
                 "!!! NOTICE OF BEHAVIOR CHANGE !!!",
                 "This test uses at least 1 $type check without using end() or etc().",
-                "The exising behavior is to default to etc() when inside is_deeply().",
+                "The existing behavior is to default to etc() when inside is_deeply().",
                 "The new behavior is to default to end().",
                 "This test will soon start to fail with the following diagnostics:",
                 $delta->diag->as_string,
@@ -320,7 +320,7 @@ unlike the L<Test2::Tools::Compare> plugin which has modified them.
     use Test2::Tools::ClassicCompare qw/is is_deeply isnt like unlike cmp_ok/;
 
     is($got, $expect, "These are the same when stringified");
-    isnt($got, $unexpect, "These are not the same when stringified");
+    isnt($got, $unexpected, "These are not the same when stringified");
 
     like($got, qr/.../, "'got' matches the pattern");
     unlike($got, qr/.../, "'got' does not match the pattern");

@@ -2,7 +2,7 @@ package Test2::Tools::Compare;
 use strict;
 use warnings;
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Carp qw/croak/;
 use Scalar::Util qw/reftype/;
@@ -783,7 +783,7 @@ your data. There are both 'strict' and 'relaxed' versions of the tools.
     # regex to approximate a field.
     like(
         $some_hash,
-        {a => 1, b => qr/[0-9]+/},
+        {a => 1, b => qr/\A[0-9]+\z/},
         "'a' is 1, 'b' is an integer, we don't care about 'c'."
     );
 
@@ -856,7 +856,7 @@ provided and converted to a specification for you.
         $some_hash,
         hash {    # Note: the hash function is not exported by default
             field a => 1;
-            field b => match(qr/[0-9]+/);    # Note: The match function is not exported by default
+            field b => match(qr/\A[0-9]+\z/);    # Note: The match function is not exported by default
             # Don't care about other fields.
         },
         "The hash comparison is not strict"
@@ -875,7 +875,8 @@ refers back to itself at some point. If this happens, an exception will be
 thrown to break an otherwise infinite recursion.
 
 B<Note>: Non-reference values will be compared as strings using C<eq>, so that
-means '2.0' and '2' will match.
+means strings '2.0' and '2' will not match, but numeric 2.0 and 2 will, since
+they are both stringified to '2'.
 
 =item $bool = isnt($got, $expect)
 
@@ -908,7 +909,7 @@ In this tool regexes will stringify the thing they are checking.
 
     like(
         $some_hash,
-        {a => 1, b => qr/[0-9]+/},
+        {a => 1, b => qr/\A[0-9]+\z/},
         "'a' is 1, 'b' is an integer, we don't care about other fields"
     );
 
@@ -1777,7 +1778,7 @@ Check for details about the event:
         # Check the file the event reports to
         prop file => 'foo.t';
 
-        # Check the line number the event reports o
+        # Check the line number the event reports to
         prop line => '42';
 
         # You can check the todo/skip values as well:

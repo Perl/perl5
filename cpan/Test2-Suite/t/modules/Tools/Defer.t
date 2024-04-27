@@ -119,7 +119,7 @@ sub oops { die 'oops' }
 
 my $line2 = __LINE__ + 1;
 def oops => (1);
-like( dies { do_def() }, <<EOT, "Exceptions in the test are propogated");
+like( dies { do_def() }, <<EOT, "Exceptions in the test are propagated");
 Exception: oops at $file line $line1.
 --eval--
 package main;

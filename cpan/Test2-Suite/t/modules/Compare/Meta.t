@@ -7,7 +7,7 @@ subtest simple => sub {
     isa_ok($one, $CLASS, 'Test2::Compare::Base');
     is($one->items, [], "generated an empty items array");
     is($one->name, '<META CHECKS>', "sane name");
-    is($one->verify(exists => 0), 0, "Does not verify for non-existant values");
+    is($one->verify(exists => 0), 0, "Does not verify for non-existent values");
     is($one->verify(exists => 1), 1, "always verifies for existing values");
     ok(defined $CLASS->new(items => []), "Can provide items");
 };

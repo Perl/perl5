@@ -6,7 +6,7 @@ use Carp qw/confess/;
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '0.000159';
+our $VERSION = '0.000162';
 
 use Test2::Util::HashBase;
 
