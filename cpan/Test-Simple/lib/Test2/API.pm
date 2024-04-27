@@ -10,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302198';
+our $VERSION = '1.302199';
 
 
 my $INST;
@@ -1360,7 +1360,7 @@ when testing is done.
 
 Disable IPC.
 
-=item $bool = test2_ipc_diabled
+=item $bool = test2_ipc_disabled
 
 Check if IPC is disabled.
 

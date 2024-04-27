@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302198';
+our $VERSION = '1.302199';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -2020,13 +2020,13 @@ the perl-qa gang.
 
 =head1 BUGS
 
-See F<https://github.com/Test-More/test-more/issues> to report and view bugs.
+See L<https://github.com/Test-More/test-more/issues> to report and view bugs.
 
 
 =head1 SOURCE
 
 The source code repository for Test::More can be found at
-F<http://github.com/Test-More/test-more/>.
+L<https://github.com/Test-More/test-more/>.
 
 
 =head1 COPYRIGHT
@@ -2036,7 +2036,7 @@ Copyright 2001-2008 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
-See F<http://www.perl.com/perl/misc/Artistic.html>
+See L<https://dev.perl.org/licenses/>
 
 =cut
 

@@ -251,7 +251,7 @@ if (CAN_THREAD && $] ge '5.010') {
 {
     my $one = $CLASS->new;
     $one->stack->top;
-    $one->no_wait(1);
+    $one->set_no_wait(1);
     local $? = 0;
     $one->set_exit;
     is($?, 0, "no errors on exit");
@@ -530,7 +530,7 @@ if (CAN_REALLY_FORK) {
     like(
         exception { $one->ipc_disable },
         qr/Attempt to disable IPC after it has been initialized/,
-        "Cannot diable IPC once it is initialized"
+        "Cannot disable IPC once it is initialized"
     );
 
     $one->reset;
