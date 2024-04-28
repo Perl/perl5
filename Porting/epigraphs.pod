@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.10 - Fernando Pessoa
+
+L<Announced on 2024-04-28 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2024/04/msg268159.html>
+
+  The value of things is not the time they last, but the intensity
+  with which they occur. That is why there are unforgettable moments
+  and unique people!
+
 =head2 v5.39.9 - Terry Pratchett, Sourcery
 
 L<Announced on 2024-03-20 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2024/03/msg268073.html>
