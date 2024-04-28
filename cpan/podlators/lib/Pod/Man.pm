@@ -30,7 +30,8 @@ BEGIN {
 }
 
 our @ISA = qw(Pod::Simple);
-our $VERSION = '5.01_01';
+our $VERSION = '5.01_02';
+$VERSION =~ tr/_//d;
 
 # Ensure that $Pod::Simple::nbsp and $Pod::Simple::shy are available.  Code
 # taken from Pod::Simple 3.32, but was only added in 3.30.

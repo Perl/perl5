@@ -24,7 +24,8 @@ use Exporter ();
 use Pod::Simple ();
 
 our @ISA = qw(Pod::Simple Exporter);
-our $VERSION = '5.01_01';
+our $VERSION = '5.01_02';
+$VERSION =~ tr/_//d;
 
 # We have to export pod2text for backward compatibility.
 our @EXPORT = qw(pod2text);
