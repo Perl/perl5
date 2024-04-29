@@ -54,12 +54,12 @@ Perl continues to support the old non UTF-8 locales as well.  There are
 currently no UTF-8 locales for EBCDIC platforms.
 
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
-L<http://cldr.unicode.org/> which includes more types of information than
+L<https://cldr.unicode.org/> which includes more types of information than
 are available in the POSIX locale system.  At the time of this writing,
 there was no CPAN module that provides access to this XML-encoded data.
 However, it is possible to compute the POSIX locale data from them, and
 earlier CLDR versions had these already extracted for you as UTF-8 locales
-L<http://unicode.org/Public/cldr/2.0.1/>.)
+L<https://unicode.org/Public/cldr/2.0.1/>.)
 
 =head1 WHAT IS A LOCALE
 
@@ -1483,7 +1483,7 @@ locales, available at
   https://unicode.org/Public/cldr/2.0.1/
 
 (Newer versions of CLDR require you to compute the POSIX data yourself.
-See L<http://unicode.org/Public/cldr/latest/>.)
+See L<https://unicode.org/Public/cldr/latest/>.)
 
 There is a large collection of locale definitions at:
 

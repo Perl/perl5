@@ -1151,7 +1151,8 @@ Jon Orwant <F<orwant@media.mit.edu>> and Doug MacEachern
 Christiansen, Guy Decoux, Hallvard Furuseth, Dov Grobgeld, and Ilya
 Zakharevich.
 
-Doug MacEachern has an article on embedding in Volume 1, Issue 4 of
+Doug MacEachern has an article on embedding in Volume 1,
+L<Issue 4|https://www.foo.be/docs/tpj/issues/vol1_4/ewtoc.html> of
 The Perl Journal ( L<http://www.tpj.com/> ).  Doug is also the developer of the
 most widely-used Perl embedding: the mod_perl system
 (perl.apache.org), which embeds Perl in the Apache web server.
