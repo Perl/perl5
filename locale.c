@@ -1907,6 +1907,9 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * our records, do nothing.  (Our records can be wrong when sync'ing to the
      * locale set up by an external library, hence the 'force' parameter) */
     if (! force && strEQ(PL_numeric_name, newnum)) {
+        if (! PL_numeric_underlying_is_standard) {
+            set_numeric_standard();
+        }
         return;
     }
 
