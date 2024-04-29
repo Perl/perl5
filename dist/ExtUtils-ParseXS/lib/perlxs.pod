@@ -1391,7 +1391,7 @@ register with the overload magic.
 Since blessed objects are actually stored as RV's, it is useful
 to use the typemap features to preprocess parameters and extract
 the actual SV stored within the blessed RV.  See the sample for
-T_PTROBJ_SPECIAL below.
+T_PTROBJ_SPECIAL in L<perlxstypemap>.
 
 To use the OVERLOAD: keyword, create an XS function which takes
 three input parameters (or use the C-style '...' definition) like
