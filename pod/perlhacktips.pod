@@ -1448,7 +1448,7 @@ the flags (see above).
 
 =head2 Coverity
 
-Coverity (L<http://www.coverity.com/>) is a product similar to lint and
+Coverity (L<https://www.coverity.com/>) is a product similar to lint and
 as a testbed for their product they periodically check several open
 source projects, and they give out accounts to open source developers
 to the defect databases.

@@ -1540,7 +1540,7 @@ locales, available at
   https://unicode.org/Public/cldr/2.0.1/
 
 (Newer versions of CLDR require you to compute the POSIX data yourself.
-See L<http://unicode.org/Public/cldr/latest/>.)
+See L<https://unicode.org/Public/cldr/latest/>.)
 
 There is a large collection of locale definitions at:
 

@@ -198,13 +198,13 @@ C<\w> matches [a-zA-Z0-9_].
 Which rules apply are determined as described in L<perlre/Which character set modifier is in effect?>.
 
 There are a number of security issues with the full Unicode list of word
-characters.  See L<http://unicode.org/reports/tr36>.
+characters.  See L<https://unicode.org/reports/tr36>.
 
 Also, for a somewhat finer-grained set of characters that are in programming
 language identifiers beyond the ASCII range, you may wish to instead use the
 more customized L</Unicode Properties>, C<\p{ID_Start}>,
 C<\p{ID_Continue}>, C<\p{XID_Start}>, and C<\p{XID_Continue}>.  See
-L<http://unicode.org/reports/tr31>.
+L<https://unicode.org/reports/tr31>.
 
 Any character not matched by C<\w> is matched by C<\W>.
 
