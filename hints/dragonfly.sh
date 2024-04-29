@@ -90,5 +90,5 @@ esac
 
 # Dragonfly leaks with a newlocale/freelocale combination.  See
 # https://bugs.dragonflybsd.org/issues/3361
-ccflags="$ccflags -DNO_POSIX_2008"
+ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
 
