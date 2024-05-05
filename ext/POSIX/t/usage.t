@@ -45,4 +45,13 @@ foreach my $func (qw(printf sprintf)) {
 	 "POSIX::$func for 0 arguments gives expected error");
 }
 
+foreach my $func (qw(cos exp fabs log sin sqrt)) {
+    local $_ = 3;
+    is(
+        eval "POSIX::$func(); 1",
+        undef,
+        "POSIX::$func() fails; needs explicit argument"
+    );
+}
+
 done_testing();
