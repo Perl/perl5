@@ -54,4 +54,17 @@ foreach my $func (qw(cos exp fabs log sin sqrt)) {
     );
 }
 
+{
+    my ($current_umask, $umask_is_now);
+    $current_umask = umask();
+    $umask_is_now  = POSIX::umask($current_umask);
+    is($umask_is_now, $current_umask,
+        "POSIX::umask, when provided with current umask, returns same as builtin umask()");
+    is(
+        eval "$umask_is_now  = POSIX::umask($current_umask); 1",
+        undef,
+        "POSIX::umask() fails; needs explicit argument"
+    );
+}
+
 done_testing();
