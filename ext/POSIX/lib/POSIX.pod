@@ -2187,9 +2187,18 @@ functions.
 
 =item C<umask>
 
-This is identical to Perl's builtin C<umask()> function
-for setting (and querying) the file creation permission mask,
-see L<perlfunc/umask>.
+This is identical to Perl's builtin C<umask()> function for setting (and
+querying) the file creation permission mask -- except that C<POSIX::umask()>
+must be provided with an explicit value (rather than relying on an implicit
+C<$_>):
+
+    $current = umask();                 # good
+
+    $now  = POSIX::umask($current);     # good
+
+    $now  = POSIX::umask();             # throws exception
+
+See L<perlfunc/umask>.
 
 =item C<uname>
 
