@@ -113,7 +113,8 @@ struct reg_code_block {
 
 struct reg_code_blocks {
     int refcnt; /* we may be pointed to from a regex and from the savestack */
-    int  count;    /* how many code blocks */
+    int  count; /* how many code block slots currently in use */
+    int  size;  /* how many slots allocated in code_block[]  */
     struct reg_code_block *cb; /* array of reg_code_block's */
 };
 
