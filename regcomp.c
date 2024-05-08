@@ -758,6 +758,9 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
              */
             struct reg_code_blocks *cbs =  pRExC_state->code_blocks;
             if (cbs) {
+                for (int n = 0; n < cbs->count; n++) {
+                    SvREFCNT_dec(cbs->cb[n].src_regex);
+                }
                 cbs->count = 0;
             }
         }
