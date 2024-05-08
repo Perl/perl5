@@ -3,14 +3,14 @@ package locale;
 use strict;
 use warnings;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
 
 =head1 NAME
 
-locale - Perl pragma to use or avoid POSIX locales for built-in operations
+locale - Perl pragma to use or avoid locales for built-in operations
 
 =head1 SYNOPSIS
 
@@ -42,7 +42,7 @@ locale - Perl pragma to use or avoid POSIX locales for built-in operations
 
 =head1 DESCRIPTION
 
-This pragma tells the compiler to enable (or disable) the use of POSIX
+This pragma tells the compiler to enable (or disable) the use of
 locales for built-in operations (for example, C<LC_CTYPE> for regular
 expressions, C<LC_COLLATE> for string comparison, and C<LC_NUMERIC> for number
 formatting).  Each C<use locale> or C<no locale>
