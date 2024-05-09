@@ -9054,11 +9054,9 @@ and the C<S_I*> functions are
     S_ISREG($mode) S_ISDIR($mode) S_ISLNK($mode)
     S_ISBLK($mode) S_ISCHR($mode) S_ISFIFO($mode) S_ISSOCK($mode)
 
-    # No direct -X operator counterpart, but for the first one
-    # the -g operator is often equivalent.  The ENFMT stands for
-    # record flocking enforcement, a platform-dependent feature.
+    # No direct -X operator counterpart.
 
-    S_ISENFMT($mode) S_ISWHT($mode)
+    S_ISWHT($mode)
 
 See your native L<chmod(2)> and L<stat(2)> documentation for more details
 about the C<S_I*> constants.  To get status info for a symbolic link
