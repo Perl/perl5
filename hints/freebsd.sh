@@ -345,11 +345,8 @@ ccflags="${ccflags} -DNO_POSIX_2008_LOCALE"
 # Reported in 11.0-CURRENT with g++-4.8.5:
 # If using g++, the Configure scan for dlopen() fails.
 # Easier for now to just to forcibly set it.
-#case "$cc" in
-#*g++*)
-#  d_dlopen='define'
-#  ;;
-#esac
+# 2024-05-09 update: FreeBSD now appears to compile and pass all tests without
+# assigning 'define' to d_dlopen.
 
 case `uname -p` in
 arm|mips)
