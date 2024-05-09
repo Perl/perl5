@@ -8956,8 +8956,8 @@ The L<File::stat> module provides a convenient, by-name access mechanism:
            $filename, $sb->size, $sb->mode & 07777,
            scalar localtime $sb->mtime;
 
-You can import symbolic mode constants (C<S_IF*>) and functions
-(C<S_IS*>) from the L<Fcntl> module:
+You can import symbolic mode constants and functions
+(C<S_I*>) from the L<Fcntl> module:
 
     use Fcntl ':mode';
 
@@ -8973,7 +8973,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     my $is_directory  =  S_ISDIR($mode);
 
 You could write the last two using the C<-u> and C<-d> operators.
-Commonly available C<S_IF*> constants are:
+Commonly available C<S_I*> constants are:
 
     # Permissions: read, write, execute, for user, group, others.
 
@@ -8981,30 +8981,31 @@ Commonly available C<S_IF*> constants are:
     S_IRWXG S_IRGRP S_IWGRP S_IXGRP
     S_IRWXO S_IROTH S_IWOTH S_IXOTH
 
-    # Setuid/Setgid/Stickiness/SaveText.
+    # Setuid/Setgid/Stickiness/SaveText/EnforcedLocks.
     # Note that the exact meaning of these is system-dependent.
 
-    S_ISUID S_ISGID S_ISVTX S_ISTXT
+    S_ISUID S_ISGID S_ISVTX S_ISTXT S_ENFMT
 
     # File types.  Not all are necessarily available on
     # your system.
 
     S_IFREG S_IFDIR S_IFLNK S_IFBLK S_IFCHR
-    S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
+    S_IFIFO S_IFSOCK S_IFWHT
 
     # The following are compatibility aliases for S_IRUSR,
     # S_IWUSR, and S_IXUSR.
 
     S_IREAD S_IWRITE S_IEXEC
 
-and the C<S_IF*> functions are
+and the C<S_I*> functions are
 
     S_IMODE($mode)    the part of $mode containing the permission
                       bits and the setuid/setgid/sticky bits
 
-    S_IFMT($mode)     the part of $mode containing the file type
-                      which can be bit-anded with (for example)
-                      S_IFREG or with the following functions
+    S_IFMT($mode)     the part of $mode containing the file type,
+                      which will match one of the S_IF* constants
+                      (e.g. S_IFMT($mode) == S_IFDIR for directories),
+                      but see the following helper functions
 
     # The operators -f, -d, -l, -b, -c, -p, and -S.
 
@@ -9018,7 +9019,7 @@ and the C<S_IF*> functions are
     S_ISENFMT($mode) S_ISWHT($mode)
 
 See your native L<chmod(2)> and L<stat(2)> documentation for more details
-about the C<S_*> constants.  To get status info for a symbolic link
+about the C<S_I*> constants.  To get status info for a symbolic link
 instead of the target file behind the link, use the
 L<C<lstat>|/lstat FILEHANDLE> function.
 
