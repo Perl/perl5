@@ -2248,6 +2248,10 @@ AMbdp	|CV *	|newSUB 	|I32 floor				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *block
 ARdp	|SV *	|newSV		|const STRLEN len
+: Perl_new_sv is inline, so needs to be visible outside of sv.c
+Ciop	|SV *	|new_sv 	|NN const char *file			\
+				|int line				\
+				|NN const char *func
 Rp	|SV *	|newSVavdefelem |NN AV *av				\
 				|SSize_t ix				\
 				|bool extendible
