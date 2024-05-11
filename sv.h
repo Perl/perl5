@@ -193,7 +193,7 @@ typedef enum {
 #  define HVAUX_ARENA_ROOT_IX   SVt_IV
 #endif
 #ifdef PERL_IN_SV_C
-#  define SVt_FIRST SVt_NULL	/* the type of SV that new_SV() in sv.c returns */
+#  define SVt_FIRST SVt_NULL	/* the type of SV that new_SV() in sv_inline.h returns */
 #endif
 
 #define PERL_ARENA_ROOTS_SIZE	(SVt_LAST)

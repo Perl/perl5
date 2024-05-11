@@ -9851,6 +9851,11 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
         __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
 
+PERL_STATIC_INLINE SV *
+Perl_new_sv(pTHX_ const char *file, int line, const char *func);
+# define PERL_ARGS_ASSERT_NEW_SV                \
+        assert(file); assert(func)
+
 PERL_STATIC_INLINE void
 Perl_pop_stackinfo(pTHX);
 # define PERL_ARGS_ASSERT_POP_STACKINFO
