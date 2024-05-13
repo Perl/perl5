@@ -318,6 +318,7 @@ enable this, run
 	sh Configure -Dusethreads
 
 The default is to compile without thread support.
+C<-Duseithreads> is currently synonymous with C<-Dusethreads>.
 
 Perl used to have two different internal threads implementations.  The
 current model (available internally since 5.6, and as a user-level module
