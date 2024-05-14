@@ -141,6 +141,7 @@ struct RExC_state_t {
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     I32         in_lookaround;
+    I32         has_cutgroup;
     I32         contains_locale;
     I32         override_recoding;
     I32         recode_x_to_native;
@@ -238,6 +239,7 @@ struct RExC_state_t {
 #define RExC_study_chunk_recursed_bytes  \
                                    (pRExC_state->study_chunk_recursed_bytes)
 #define RExC_in_lookaround      (pRExC_state->in_lookaround)
+#define RExC_has_cutgroup       (pRExC_state->has_cutgroup)
 #define RExC_contains_locale    (pRExC_state->contains_locale)
 #define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
 
