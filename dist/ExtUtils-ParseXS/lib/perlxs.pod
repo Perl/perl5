@@ -2346,6 +2346,39 @@ handled.
 
 =item Locale-aware XS code
 
+An XS module that is locale-dependent could have been written under the
+assumption that it will never be called in a multi-threaded environment,
+and so uses other non-locale constructs that aren't multi-thread-safe.
+See L<perlxs/Thread-aware system interfaces>.
+
+=head2 Finding the existing locale for a category
+
+POSIX does not yet define a way to get the name of the current per-thread
+locale.  Some systems, such as Darwin and FreeBSD do implement a
+function, L<querylocale(3)> to do this.  On non-Windows systems without
+it, such as Linux, there are some additional caveats:
+
+=over
+
+=item *
+
+An embedded perl needs to be started up while the global locale is in
+effect.  See L<perlembed/Using embedded Perl with POSIX locales>.
+
+=item *
+
+It becomes more important for perl to know about all the possible
+locale categories on the platform, even if they aren't apparently used
+in your program.  Perl knows all of the Linux ones.  If your platform
+has others, you can submit an issue at
+L<https://github.com/Perl/perl5/issues> for
+inclusion of it in the next release.  In the meantime, it is possible to
+edit the Perl source to teach it about the category, and then recompile.
+Search for instances of, say, C<LC_PAPER> in the source, and use that as
+a template to add the omitted one.
+
+=back
+
 If the locale from the user's environment is desired, there should be no
 need for XS code to set the locale except for C<LC_NUMERIC>, as perl has
 already set the others up.  XS code should avoid changing the locale, as

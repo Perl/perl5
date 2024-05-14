@@ -130,6 +130,8 @@ sub perl_macro_family {
 # Our data comes internally
 my @DATA = <DATA>;
 close DATA;
+my %envs;
+my %locales;
 
 while (defined (my $line = shift @DATA)) {
 
@@ -359,6 +361,7 @@ while (defined (my $line = shift @DATA)) {
         my %entry;
         $entry{preprocessor} = $preprocessor;
         push $entry{categories}->@*, @categories if @categories;
+            $locales{$use} = 1 if @categories;
 
         foreach my $race (@races) {
 
@@ -385,6 +388,12 @@ while (defined (my $line = shift @DATA)) {
         if (@signals) {
             push $entry{signals}->@*, @signals;
             $signal_issues{$use} = 1;
+        }
+
+        for my $lock (keys %locks) {
+            next unless $locks{$lock} eq 'r';
+            $locales{$use} = 1 if $lock eq 'locale';
+            $envs{$use} = 1, if $lock eq 'env';
         }
 
         $entry{locks}{$_} = $locks{$_} for keys %locks;
@@ -607,6 +616,8 @@ print $l <<EOT;
  * appear here.
 EOT
 
+output_list_with_heading($l, display_names_ref(keys %locales), "locales\n", "###\n");
+output_list_with_heading($l, display_names_ref(keys %envs), "envs\n", "###\n");
 output_list_with_heading($l, display_names_ref(keys %uses), <<EOT1, <<EOT2);
  *
  * But there are still many uses that do have multi-thread issues.  The ones
@@ -1412,15 +1423,13 @@ read_only_bottom_close_and_rename($l);
 #       multi-thread mode.  The presence of this field precludes any other
 #       field but comment ones.
 #
-#   b)  The character 'M' means that the items in the uses column aren't
-#       actually functions, but macros.  The only current practical effect of
-#       this field is that each item is listed in the generated comments as
-#       not being a function.
+#   b)  The character 'M' means that uses column contains macros, not
+#       functions.  The only current practical effect of this field is that
+#       each item is listed in the generated comments as not being a function.
 #
-#   c)  The character 'V' means that the items in the uses column aren't
-#       actually functions, but variables.  The only current practical effect
-#       of this field is that each item is listed in the generated comments as
-#       not being a function.
+#   c)  The character 'V' means that uses column contains variables, not
+#       functions.  The only current practical effect of this field is that
+#       each item is listed in the generated comments as not being a function.
 #
 #   d)  The character 'X' means that the functions in the uses column are
 #       non-Standard; they don't appear in any modern version of the POSIX
@@ -1428,13 +1437,13 @@ read_only_bottom_close_and_rename($l);
 #
 #   e)  The character 'O' or that character followed by either a double-quote
 #       enclosed "string" or a comma-separated list of function names.  This
-#       means that the uses in the uses column in the first field
-#       are considered obsolete.  If the 'O' stands alone, there is no simple
-#       replacement for the obsolete functions.  If the 'O' is followed by a
-#       comma-separated list, the list gives preferred alternatives that
-#       should be used instead.  The "string" is displayed literally for
-#       situations where a comma-separated list is inadequate.  "string" may
-#       not contain the '"' character internally.
+#       means that the uses in the uses column are considered obsolete.  If
+#       the 'O' stands alone, there is no simple replacement for the obsolete
+#       functions.  If the 'O' is followed by a comma-separated list, the list
+#       gives preferred alternatives that should be used instead.  The
+#       "string" is displayed literally for situations where a comma-separated
+#       list is inadequate.  "string" may not contain the '"' character
+#       internally.
 #
 #   f)  The string "PF" followed by a name.  This means that the name is
 #       preferred over the functions (symbolized by the 'P'), and that it
@@ -1443,13 +1452,13 @@ read_only_bottom_close_and_rename($l);
 #
 #   g)  The character 'P', followed by a comma-separated list of function.
 #       names (not beginning with 'F').  The functions in this list are
-#       preferred over the use in the first-field uses column.
+#       preferred over the ones in the uses column.
 
-#   h)  The string "init".  This means that the functions in the functions
-#       column are unsafe the first time they are called, but after that can
-#       be made thread-safe by following the dictates of any remaining fields.
-#       Hence these functions must be called at least once during
-#       single-thread startup.
+#   h)  The string "init".  This means that the functions in the uses column
+#       are unsafe the first time they are called, but after that can be made
+#       thread-safe by following the dictates of any remaining fields.  Hence
+#       these functions must be called at least once during single-thread
+#       startup.
 #
 #   i)  The string "sig:" followed by the name of a signal.  For example
 #       "sig:ALRM".  This means the functions are vulnerable to the SIGALRM
