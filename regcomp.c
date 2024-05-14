@@ -3038,6 +3038,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
     I32 was_in_lookaround = RExC_in_lookaround;
+    I32 had_cutgroup      = RExC_has_cutgroup;
     I32 fake_eval = 0; /* matches paren */
 
     /* The difference between the following variables can be seen with  *
@@ -3204,6 +3205,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if ( memEQs(start_verb, verb_len,"THEN") ) {
                     op = CUTGROUP;
                     RExC_seen |= REG_CUTGROUP_SEEN;
+                    RExC_has_cutgroup = 1;
                 }
                 break;
             case 'a':
@@ -3982,6 +3984,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     {
                         REQUIRE_BRANCHJ(flagp, 0);
                     }
+                    RExC_has_cutgroup = 0;
                     br = regbranch(pRExC_state, &flags, 1, depth+1);
                     if (br == 0) {
                         RETURN_FAIL_ON_RESTART(flags,flagp);
@@ -4005,6 +4008,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         lastbr = reg1node(pRExC_state, IFTHEN, 0);
 
                         if (!regbranch(pRExC_state, &flags, 1, depth+1)) {
+                            RExC_has_cutgroup  = had_cutgroup;
                             RETURN_FAIL_ON_RESTART(flags, flagp);
                             FAIL2("panic: regbranch returned failure, flags=%#" UVxf,
                                   (UV) flags);
@@ -4050,6 +4054,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                     For large programs it seems to be required
                                     but I can't figure out why. -- dmq*/
 #endif
+                    RExC_has_cutgroup  = had_cutgroup;
                     return ret;
                 }
                 RExC_parse_inc_safe();
@@ -4179,6 +4184,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     /* Pick up the branches, linking them together. */
     segment_parse_start = RExC_parse;
     I32 npar_before_regbranch = RExC_npar - 1;
+    RExC_has_cutgroup = 0;
     br = regbranch(pRExC_state, &flags, 1, depth+1);
 
     /*     branch_len = (paren != 0); */
@@ -4192,11 +4198,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             reginsert(pRExC_state, BRANCHJ, br, depth+1);
             ARG2a_SET(REGNODE_p(br), npar_before_regbranch);
             ARG2b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else {
             reginsert(pRExC_state, BRANCH, br, depth+1);
             ARG1a_SET(REGNODE_p(br), (U16)npar_before_regbranch);
             ARG1b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         have_branch = 1;
     }
@@ -4230,6 +4238,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 after_freeze = RExC_logical_npar;
             RExC_logical_npar = freeze_paren;
         }
+
+        RExC_has_cutgroup = 0;
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
         if (br == 0) {
@@ -4246,6 +4256,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 ARG1b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
             else
                 ARG2b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
+            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else
         if (OP(REGNODE_p(br)) == BRANCHJ) {
@@ -4253,6 +4264,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 ARG1b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
             else
                 ARG2b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
+            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
         }
 
         lastbr = br;
@@ -4457,6 +4469,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         RExC_logical_npar = after_freeze;
 
     RExC_in_lookaround = was_in_lookaround;
+    RExC_has_cutgroup  = had_cutgroup;
 
     return(ret);
 }
