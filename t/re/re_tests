@@ -2164,6 +2164,9 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 [^\W\S]*	a	y	$&	
 [^\W\S]?	a	y	$&	
 
+/\A(?:.|..)(*THEN)c/	abc	n	-	-
+/ ^ a (?: (?: (??{""}) b | bc (*ACCEPT) ) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	abcd
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
