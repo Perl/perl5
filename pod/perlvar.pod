@@ -73,7 +73,8 @@ Nevertheless, if you wish to use long variable names, you need only say:
 
 at the top of your program.  This aliases all the short names to the long
 names in the current package.  Some even have medium names, generally
-borrowed from B<awk>.  For more info, please see L<English>.
+borrowed from B<awk>.  They will be aliased too. For more info,
+please see L<English>.
 
 Before you continue, note the sort order for variables.  In general, we
 first list the variables in case-insensitive, almost-lexigraphical
