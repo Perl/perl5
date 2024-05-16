@@ -1722,7 +1722,7 @@ fix_win32_tzenv(void)
         newenv = (char*)malloc((strlen(perl_tz_env) + 4) * sizeof(char));
         if (newenv != NULL) {
             sprintf(newenv, "TZ=%s", perl_tz_env);
-            putenv(newenv);
+            _putenv(newenv);
             if (oldenv != NULL)
                 free(oldenv);
             oldenv = newenv;
