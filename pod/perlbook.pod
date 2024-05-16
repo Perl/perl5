@@ -11,8 +11,8 @@ L<https://www.perl.org/books/library.html> . We list some of the books here, and
 listing a book implies our
 endorsement, don't think that not including a book means anything.
 
-Most of these books are available online through Safari Books Online
-( L<https://safaribooksonline.com/> ).
+Most of these books are available online through O'Reilly Online Learning
+( L<https://www.oreilly.com> ).
 
 =head2 The most popular books
 
@@ -94,7 +94,7 @@ You might want to keep these desktop references close by your keyboard:
  by Richard Foley
  ISBN 978-0-596-00503-0 [1st edition January 2004]
  ISBN 978-0-596-55625-9 [ebook]
- https://oreilly.com/catalog/9780596005030/
+ https://www.oreilly.com/library/view/-/9781449311186/
 
 =item I<Regular Expression Pocket Reference>
 
@@ -260,13 +260,13 @@ You might want to keep these desktop references close by your keyboard:
 
  by Tim Jenness and Simon Cozens
  ISBN 1-930110-82-0 [1st edition August 2002 & ebook]
- https://www.manning.com/jenness>
+ https://www.manning.com/jenness
 
 =item I<Pro Perl Debugging>
 
  by Richard Foley with Andy Lester
  ISBN 1-59059-454-1 [1st edition July 2005 & ebook]
- https://www.apress.com/9781590594544>
+ https://www.apress.com/9781590594544
 
 =back
 
