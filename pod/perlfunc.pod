@@ -4549,6 +4549,10 @@ and attributes are handled using the L<attributes> pragma, or starting
 from Perl 5.8.0 also via the L<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details.
 
+(C<push my @bar, @baz> etc. is also possible, but like many other shortcuts
+in Perl, we don't document them because they are too easy for the user
+to mess up. Just stick to C<my @bar; push @bar, @baz> and you'll be safe.)
+
 =item next LABEL
 X<next> X<continue>
 
