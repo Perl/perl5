@@ -4178,6 +4178,24 @@ block, file, or eval.  If more than one value is listed, the list must
 be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
 for details, including issues with tied arrays and hashes.
 
+Like L<C<my>|/my VARLIST>, L<C<state>|/state VARLIST>, and
+L<C<our>|/our VARLIST>, L<C<local>|/local EXPR> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+Unlike the other declarations, the effect of L<C<local>|/local EXPR> happens
+at runtime, and so it will apply to additional uses of the same variable
+executed after the declaration, even within the same statement. Note that
+this does not include uses within an expression assigned to the variable
+when it is localized, because the assigned expression is evaluated before
+the localization.
+
+    package main;
+    our $x = 2;
+    {
+      foo($x, local $x = $x + 1, $x); # foo() receives (2, 3, 3)
+      # $main::x is 3 within the call to foo()
+    }
+    foo($x); # foo() receives (2) and $main::x is 2
+
 The C<delete local EXPR> construct can also be used to localize the deletion
 of array/hash elements to the current block.
 See L<perlsub/"Localized deletion of elements of composite types">.
@@ -4534,6 +4552,19 @@ as a dummy placeholder, for example to skip assignment of initial
 values:
 
     my ( undef, $min, $hour ) = localtime;
+
+Like L<C<state>|/state VARLIST>, L<C<local>|/local EXPR>, and
+L<C<our>|/our VARLIST>, L<C<my>|/my VARLIST> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+The declaration will not apply to additional uses of the same variable until
+the next statement. This means additional uses of that variable within the
+same statement will act as they would have before that declaration occurred,
+or result in a strict 'vars' error, as appropriate.
+
+    package main;
+    our $x = 2;
+    foo($x, my $x = $x + 1, $x); # foo() receives (2, 3, 2)
+    foo($x, $main::x);           # foo() receives (3, 2)
 
 Redeclaring a variable in the same scope or statement will "shadow" the
 previous declaration, creating a new instance and preventing access to
@@ -5274,6 +5305,21 @@ If more than one variable is listed, the list must be placed
 in parentheses.
 
     our($bar, $baz);
+
+Like L<C<my>|/my VARLIST>, L<C<state>|/state VARLIST>, and
+L<C<local>|/local EXPR>, L<C<our>|/our VARLIST> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+The declaration will not apply to additional uses of the same variable until
+the next statement. This means additional uses of that variable within the
+same statement will act as they would have before that declaration occurred,
+with the exception that it will still satisfy strict 'vars' and interpret that
+variable as the newly aliased package variable if it was not yet declared in
+that scope.
+
+    package main;
+    my $x = 2;
+    foo($x, our $x = $x + 1, $x); # foo() receives (2, 3, 2)
+    foo($x, our $z = 5, $z);      # foo() receives (3, 5, 5)
 
 An L<C<our>|/our VARLIST> declaration declares an alias for a package
 variable that will be visible
@@ -9047,6 +9093,20 @@ parentheses.  With a parenthesised list, L<C<undef>|/undef EXPR> can be
 used as a
 dummy placeholder.  However, since initialization of state variables in
 such lists is currently not possible this would serve no purpose.
+
+Like L<C<my>|/my VARLIST>, L<C<local>|/local EXPR>, and
+L<C<our>|/our VARLIST>, L<C<state>|/state VARLIST> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+The declaration will not apply to additional uses of the same variable until
+the next statement. This means additional uses of that variable within the
+same statement will act as they would have before that declaration occurred,
+or result in a strict 'vars' error, as appropriate.
+
+    package main;
+    use feature 'state';
+    our $x = 2;
+    foo($x, state $x = $x + 1, $x); # foo() receives (2, 3, 2)
+    foo($x, $main::x);              # foo() receives (3, 2)
 
 Redeclaring a variable in the same scope or statement will "shadow" the
 previous declaration, creating a new instance and preventing access to
