@@ -364,7 +364,34 @@ well.
 
 =item *
 
-XXX
+C<PERL_RC_STACK> build option added.
+
+This new build option is highly experimental and is not enabled by
+default. Perl can be built with it by using the F<Configure> option
+C<-Accflags='-DPERL_RC_STACK'>.
+
+It makes the argument stack bump the reference count of SVs pushed onto
+it. It is mostly functional, but currently slow and incomplete.
+
+It is intended in the long term that this build option will become
+the default option, and then finally the only option; but this will be
+many releases away.
+
+In particular, there is currently no support within XS code for using
+these new features. So under this build option, all XS functions are
+called via a backwards-compatibility wrapper which slows down such calls.
+
+In future releases, better support for XS code is intended to be added.
+It is expected that straightforward XS code will eventually be able to
+make use of a reference-counted stack without modification, with any heavy
+lifting being handled by the XS compiler (C<xsubpp>) and the macros which
+it outputs. But code which implements PP() functions will eventually have
+to be modified to use a new PP API: rpp_foo() rather than PUSHs() etc. But
+this new API is not yet stable, nor has it yet been back-ported via
+C<Devel::PPPort>.
+
+See L<perlguts|perlguts/"Reference-counted argument stack"> for more
+details.
 
 =back
 
