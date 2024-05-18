@@ -249,6 +249,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
     IV code = 0;
     PerlIO *n;
     SSize_t avail;
+    bool already_retried = false;
 
     if (PerlIO_flush(f) != 0)
 	return -1;
@@ -380,7 +381,12 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    s = SvPV(e->dataSV,len);
 	    sv_setpvn(e->dataSV,s,len);
 	    PerlIO_set_ptrcnt(n, ptr+use, (avail-use));
-	    goto retry;
+            if (! already_retried) {
+                already_retried = true;
+                goto retry;
+            }
+
+            code = -1;
 	}
     }
     else {
