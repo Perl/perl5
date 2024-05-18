@@ -6637,6 +6637,7 @@ t/run/switchx.aux			Data for switchx.t
 t/run/switchx.t				Test the -x switch
 t/run/switchx2.aux			Data for switchx.t
 t/run/switchx3.aux			Data for switchx.t
+t/run/todo.t				TODO tests
 t/TEST					The regression tester
 t/test.pl				Simple testing library
 t/test_pl/_num_to_alpha.t		Tests for the simple testing library
