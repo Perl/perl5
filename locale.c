@@ -464,7 +464,7 @@ static int debug_initialization = 0;
  * This is a self-commenting no-op that works around this restriction */
 #define  NOOP_TO_SEPARATE_LABEL_FROM_DECLARATION  NOOP
 
-#if PERL_VERSION_GT(5,39,10)
+#if PERL_VERSION_GT(5,41,3)
 #  error Revert the commit following the one that added this line, then revert this one
 #endif
 
