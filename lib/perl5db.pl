@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.80';
+$VERSION = '1.81';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -2491,8 +2491,7 @@ sub _DB__handle_watch_expressions
 
             # Fix context DB::eval() wants to return an array, but
             # we need a scalar here.
-            my ($val) = join( "', '", DB::eval(@_) );
-            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
+            my $val = join( ", ", map { defined ? "'$_'" : "undef" } DB::eval(@_) );
 
             # Did it change?
             if ( $val ne $DB::old_watch[$n] ) {
@@ -6061,8 +6060,7 @@ sub _add_watch_expr {
     # return a list value.
     $evalarg = $expr;
     # The &-call is here to ascertain the mutability of @_.
-    my ($val) = join( ' ', &DB::eval);
-    $val = ( defined $val ) ? "'$val'" : 'undef';
+    my $val = join( ", ", map { defined ? "'$_'" : "undef" } &DB::eval );
 
     # Save the current value of the expression.
     push @old_watch, $val;
