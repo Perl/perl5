@@ -7,11 +7,14 @@ typedef struct win32_cond { LONG waiters; HANDLE sem; } perl_cond;
 typedef DWORD perl_key;
 typedef HANDLE perl_os_thread;
 
-#ifndef DONT_USE_CRITICAL_SECTION
+#if ! defined(DONT_USE_CRITICAL_SECTION         \
+ &&  (defined(_MSC_VER) || defined(_UCRT))
 
 /* Critical Sections used instead of mutexes: lightweight,
  * but can't be communicated to child processes, and can't get
- * HANDLE to it for use elsewhere.
+ * HANDLE to it for use elsewhere.  And they are buggy on MingW without UCRT.
+ * (Unclear in what msvc version the bugs were fixed; assuming they are fixed
+ * in any version recent enough to have _MSC_VER defined.)
  */
 typedef CRITICAL_SECTION perl_mutex;
 #define MUTEX_INIT(m) InitializeCriticalSection(m)
