@@ -3781,6 +3781,9 @@ the L<C<sprintf>|/sprintf FORMAT, LIST>,
 L<C<printf>|/printf FILEHANDLE FORMAT, LIST>, or the
 L<C<POSIX::floor>|POSIX/C<floor>> and L<C<POSIX::ceil>|POSIX/C<ceil>>
 functions will serve you better than will L<C<int>|/int EXPR>.
+Moreover, C<int 'Inf'> produces Inf (see
+L<perldata/Special floating point: infinity (Inf) and not-a-number (NaN)>
+for explanation), but so do all the alternative methods mentioned above.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 X<ioctl>
