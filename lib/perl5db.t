@@ -1838,7 +1838,6 @@ DebugWrap->new({
             [
                 'n',
                 'w $foo',
-                'W $foo',
                 'c',
                 'print "\nIDX=<$idx>\n"',
                 'q',
@@ -1847,16 +1846,45 @@ DebugWrap->new({
         }
     );
 
-    $wrapper->contents_unlike(qr#
-        \$foo\ changed:
+
+    $wrapper->contents_like(qr#
+        \$foo\ changed:\n
+        \s+old\ value:\s+'1'\n
+        \s+new\ value:\s+'2'\n
         #msx,
-        'W command - watchpoint was deleted',
+        'w command - watchpoint changed',
+    );
+    $wrapper->output_like(qr#
+        \nIDX=<20>\n
+        #msx,
+        "w command - correct output from IDX",
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'w @foo',
+                'c',
+                'q',
+            ],
+            prog => \<<'PROG',
+my @foo;
+push @foo, undef;
+push @foo, "x";
+print @foo;
+PROG
+        }
     );
 
-    $wrapper->output_like(qr#
-        \nIDX=<>\n
+    $wrapper->contents_like(qr#
+        Watchpoint\ 0:\s+\@foo\ changed:\n
+        \s+old\ value:\s+\n
+        \s+new\ value:\s+undef\n
         #msx,
-        "W command - stopped at end.",
+        'w command - distinguish () from (undef)',
     );
 }
 
