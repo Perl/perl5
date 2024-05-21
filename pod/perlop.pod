@@ -3850,7 +3850,6 @@ The complete list of accepted paired delimiters as of Unicode 14.0 is:
  {  }    U+007B, U+007D   LEFT/RIGHT CURLY BRACKET
  «  »    U+00AB, U+00BB   LEFT/RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
  »  «    U+00BB, U+00AB   RIGHT/LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
- ܆  ܇    U+0706, U+0707   SYRIAC COLON SKEWED LEFT/RIGHT
  ༺  ༻    U+0F3A, U+0F3B   TIBETAN MARK GUG RTAGS GYON,  TIBETAN MARK GUG
                           RTAGS GYAS
  ༼  ༽    U+0F3C, U+0F3D   TIBETAN MARK ANG KHANG GYON,  TIBETAN MARK ANG
@@ -4231,5 +4230,4 @@ The complete list of accepted paired delimiters as of Unicode 14.0 is:
  🢩  🢨    U+1F8A9, U+1F8A8 RIGHT/LEFTWARDS BACK-TILTED SHADOWED WHITE ARROW
  🢫  🢪    U+1F8AB, U+1F8AA RIGHT/LEFTWARDS FRONT-TILTED SHADOWED WHITE
                           ARROW
-
 =cut
