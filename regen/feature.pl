@@ -67,7 +67,7 @@ use constant V5_35  => sort grep {; $_ ne 'switch'
 
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
 
-use constant V5_39  => sort ( +V5_37, qw{try extra_paired_delimiters} );
+use constant V5_39  => sort ( +V5_37, qw{try} );
 
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
@@ -541,7 +541,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.88';
+our $VERSION = '1.89';
 
 FEATURES
 
