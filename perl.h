@@ -2676,11 +2676,8 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #       endif
 #   endif
 #   ifndef Perl_isnan
-#       if defined(HAS_ISNANL) && !(defined(isnan) && defined(HAS_C99))
-#           define Perl_isnan(x) isnanl(x)
-#       elif defined(__sgi) && defined(__c99)  /* XXX Configure test needed */
-#           define Perl_isnan(x) isnan(x)
-#       endif
+        /* C99 requites that isnan() also support long double */
+#       define Perl_isnan(x) isnan(x)
 #   endif
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINFL) && !(defined(isinf) && defined(HAS_C99))
