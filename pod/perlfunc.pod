@@ -10179,24 +10179,24 @@ If the specified Perl version is 5.39.0 or higher, builtin functions are
 imported lexically as with L<C<use builtin>|builtin> with a corresponding
 version bundle.
 
-Later use of C<use VERSION> will override most behavior of a previous
-C<use VERSION>, possibly removing the C<strict>, C<warnings> and C<feature>
-effects added by it.  Because C<builtin> functions are created as lexical
-subroutines in the current scope, it is not possible to remove those again
-and therefore a C<use VERSION> will I<not> remove any that happen to be
-visible but would not have been imported by it.
+Use of C<use VERSION> while another is in effect is not allowed with a
+C<use v5.39;> or greater version.  For lower versions, C<use VERSION> will
+override most behavior of a previous C<use VERSION>, possibly removing
+C<warnings> and C<feature> effects added by it. This behavior is deprecated,
+and a future release of perl will disallow changing the version once one has
+been declared.  Additionally, a C<use VERSION> with a version less than 5.11
+is not allowed after a C<use VERSION> with a version greater than 5.11.
 
 C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, F<warnings.pm>
 or F<builtin.pm> files.
 
-In the current implementation, any explicit use of C<use strict> or
-C<no strict> overrides C<use VERSION>, even if it comes before it.
-However, this may be subject to change in a future release of Perl, so new
-code should not rely on this fact.  It is recommended that a
-C<use VERSION> declaration be the first significant statement within a
-file (possibly after a C<package> statement or any amount of whitespace or
-comment), so that its effects happen first, and other pragmata are applied
-after it.
+In the current implementation, any explicit use of C<no strict> overrides
+C<use VERSION>, even if it comes before it. However, this may be subject to
+change in a future release of Perl, so new code should not rely on this fact.
+It is recommended that a C<use VERSION> declaration be the first significant
+statement within a file (possibly after a C<package> statement or any amount
+of whitespace or comment), so that its effects happen first, and other pragmata
+are applied after it.
 
 Specifying VERSION as a numeric argument of the form 5.024001 should
 generally be avoided as older less readable syntax compared to
