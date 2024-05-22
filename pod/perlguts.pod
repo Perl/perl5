@@ -2894,7 +2894,7 @@ The macro that controls the major Perl build flavor is MULTIPLICITY.  The
 MULTIPLICITY build has a C structure that packages all the interpreter
 state, which is being passed to various perl functions as a "hidden"
 first argument. MULTIPLICITY makes multi-threaded perls possible (with the
-ithreads threading model, related to the macro USE_ITHREADS.)
+threads threading model, related to the macro USE_THREADS.)
 
 PERL_IMPLICIT_CONTEXT is a legacy synonym for MULTIPLICITY.
 
