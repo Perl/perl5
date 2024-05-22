@@ -163,8 +163,7 @@ POSIX character classes and their Unicode and Perl equivalents:
  blank   PosixBlank       XPosixBlank   \h       Horizontal whitespace;
                                                    full-range also
                                                    written as
-                                                   \p{HorizSpace} (GNU
-                                                   extension)
+                                                   \p{HorizSpace}
  cntrl   PosixCntrl       XPosixCntrl            Control characters
  digit   PosixDigit       XPosixDigit   \d       Decimal digits
  graph   PosixGraph       XPosixGraph            'alnum' plus 'punct'

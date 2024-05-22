@@ -795,7 +795,8 @@ Perl recognizes the following POSIX character classes:
  alpha  Any alphabetical character (e.g., [A-Za-z]).
  alnum  Any alphanumeric character (e.g., [A-Za-z0-9]).
  ascii  Any character in the ASCII character set.
- blank  A GNU extension, equal to a space or a horizontal tab ("\t").
+ blank  Any horizontal whitespace character (e.g. space or horizontal
+        tab ("\t")).
  cntrl  Any control character.  See Note [2] below.
  digit  Any decimal digit (e.g., [0-9]), equivalent to "\d".
  graph  Any printable character, excluding a space.  See Note [3] below.
