@@ -251,7 +251,8 @@ This applies as well to L<I18N::Langinfo>.
 
 XS modules for all categories but C<LC_NUMERIC> get the underlying
 locale, and hence any C library functions they call will use that
-underlying locale.  For more discussion, see L<perlxs/CAVEATS>.
+underlying locale.  For more discussion, see
+L<perlclib/Dealing with locales>.
 
 =back
 
@@ -577,7 +578,7 @@ automatically use their thread's locale.
 This should be completely transparent to any applications written
 entirely in Perl (minus a few rarely encountered caveats given in the
 L</Multi-threaded> section).  Information for XS module writers is given
-in L<perlxs/Locale-aware XS code>.
+in L<perlclib/Dealing with locales>.
 
 =head2 Finding locales
 
@@ -1747,7 +1748,7 @@ You should not change the locale after startup on a platform where
 C<${^SAFE_LOCALES}> is 0.  It will always be 1 on an unthreaded
 platform.
 
-XS writers should refer to L<perlxs/Thread-aware system interfaces>.
+XS writers should refer to L<perlclib/Dealing with embedded perls and threads>.
 
 =head2 Broken systems
 

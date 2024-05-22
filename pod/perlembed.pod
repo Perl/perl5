@@ -12,7 +12,7 @@ Do you want to:
 
 =item B<Use C from Perl?>
 
-Read L<perlxstut>, L<perlxs>, L<h2xs>, L<perlguts>, and L<perlapi>.
+Read L<perlxstut>, L<perlxs>, L<perlclib>, L<h2xs>, L<perlguts>, and L<perlapi>.
 
 =item B<Use a Unix program from Perl?>
 
@@ -938,7 +938,7 @@ C<-Dusemultiplicity> option otherwise some interpreter variables may
 not be initialized correctly between consecutive runs and your
 application may crash.
 
-See also L<perlxs/Thread-aware system interfaces>.
+See also L<perlclib/Dealing with embedded perls and threads>.
 
 Using C<-Dusethreads -Duseithreads> rather than C<-Dusemultiplicity>
 is more appropriate if you intend to run multiple interpreters
@@ -1091,7 +1091,7 @@ B<ExtUtils::Embed> can also automate writing the I<xs_init> glue code.
  % cc -c interp.c  `perl -MExtUtils::Embed -e ccopts`
  % cc -o interp perlxsi.o interp.o `perl -MExtUtils::Embed -e ldopts`
 
-Consult L<perlxs>, L<perlguts>, and L<perlapi> for more details.
+Consult L<perlxs>, L<perlclib>, L<perlguts>, and L<perlapi> for more details.
 
 =head2 Using embedded Perl with POSIX locales
 

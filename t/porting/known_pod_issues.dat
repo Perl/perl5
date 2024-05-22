@@ -288,6 +288,7 @@ printf(3)
 provide
 ptar(1)
 ptargrep(1)
+pthreads(7)
 pwd_mkdb(8)
 querylocale(3)
 RDF::Trine
@@ -343,6 +344,7 @@ String::Base
 String::Scanf
 String::Util
 strstr(3)
+strtok(3)
 strtol(3)
 Switch
 tar(1)
@@ -410,7 +412,7 @@ ext/pod-html/corpus/perlvar-copy.pod	Verbatim line length including indents exce
 ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 78 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
 install	Verbatim line length including indents exceeds 78 by	2
-pod/perl.pod	Verbatim line length including indents exceeds 78 by	6
+pod/perl.pod	Verbatim line length including indents exceeds 78 by	5
 pod/perlandroid.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perldebguts.pod	Verbatim line length including indents exceeds 78 by	-1
 pod/perldebtut.pod	Verbatim line length including indents exceeds 78 by	2

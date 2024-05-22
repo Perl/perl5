@@ -736,6 +736,18 @@ C<rpp_replace_at_norc_NN(sp, sv)>
 
 =back
 
+=head3 L<perlclib>
+
+=over 4
+
+=item *
+
+Extensive guidance has been added for interfacing with the standard C
+library, including many more functions to avoid, and how to cope with
+locales and threads.
+
+=back
+
 =head3 L<perlhacktips>
 
 =over 4
