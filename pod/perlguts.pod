@@ -3269,7 +3269,9 @@ and
 There are also
 
  PTR2nat(pointer)   /* pointer to integer of PTRSIZE */
- PTR2ul(pointer)    /* pointer to unsigned long */
+ PTR2ul(pointer)    /* pointer to unsigned long (unsafe) */
+
+PTR2ul() is unsafe, since a pointer may be larger than unsigned long.
 
 =for apidoc Amh|IV|PTR2nat|void *
 =for apidoc Amh|unsigned long|PTR2ul|void *
