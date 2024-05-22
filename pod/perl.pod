@@ -155,7 +155,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlxstut           Perl XS tutorial
     perlxs              Perl XS application programming interface
     perlxstypemap       Perl XS C/Perl type conversion tools
-    perlclib            Internal replacements for standard C library functions
+    perlclib            Interacting with standard C library functions
     perlguts            Perl internal functions for those doing extensions
     perlcall            Perl calling conventions from C
     perlmroapi          Perl method resolution plugin interface

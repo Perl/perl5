@@ -2909,6 +2909,8 @@ to be a no-op.
 
 =head2 How do I use all this in extensions?
 
+See also L<perlclib/Dealing with embedded perls and threads>.
+
 When Perl is built with MULTIPLICITY, extensions that call
 any functions in the Perl API will need to pass the initial context
 argument somehow.  The kicker is that you will need to write it in
