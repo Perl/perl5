@@ -345,6 +345,7 @@ updated to include examples and descriptions of their effects within
 a statement.
 
 =back
+
 =head3 L<perlguts>
 
 =over 4
@@ -483,7 +484,7 @@ of C<input>, C<output> or C<detail>, followed by a boolean.
 L<UNIVERSAL does not export anything|perldiag/"UNIVERSAL does not export anything">
 
 (F) You asked UNIVERSAL to export something, but UNIVERSAL is the
-base class for all classes and contains not exportable symbols.
+base class for all classes and contains no exportable symbols.
 
 =item *
 
@@ -766,7 +767,7 @@ Out of the box support for Serenity OS was added.
 Eliminated several header build warnings under MSVC with C</W4> to reduce noise
 for embedders.  [L<GH #21031|https://github.com/Perl/perl5/issues/21031>]
 
-Workaround a bug in most 32-bit Mingw builds, where the generated
+Work around a bug in most 32-bit Mingw builds, where the generated
 code, including the code in the gcc support library, assumes 16-byte
 stack alignment, which 32-bit Windows does not preserve. [L<GH #21313|https://github.com/Perl/perl5/issues/21313>]
 
@@ -774,7 +775,7 @@ Enable C<copysign>, C<signbit>, C<acosh>, C<asinh>, C<atanh>, C<exp2>,
 C<tgamma> in the bundled configuration used for MSVC.  [L<GH #21610|https://github.com/Perl/perl5/issues/21610>]
 
 The build process no longer supports Visual Studio 2013.  This was
-failing to build at a very basic level and there has been no reports
+failing to build at a very basic level and there have been no reports
 of such failures.  [L<GH #21624|https://github.com/Perl/perl5/issues/21624>]
 
 =item MacOS/Darwin
@@ -1168,7 +1169,6 @@ A string eval() operation in the scope of a C<use VERSION> declaration would
 sometimes emit spurious "Changing use VERSION" warnings due to an
 inconsistency in the way the version number was stored.  This is now fixed.
 [L<github #22121|https://github.com/Perl/perl5/issues/22121>]
->>>>>>> edc2631bd4 (merge perldelta files)
 
 =back
 
