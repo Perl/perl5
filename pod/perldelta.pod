@@ -415,7 +415,18 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Tne delimiter C<SYRIAC COLON SKEWED LEFT/RIGHT> pair has been removed
+from the ones recognized by the C<extra_paired_delimiters> feature.
+(See L<perlop/Quote and Quote-like Operators>.)  This is because those
+characters are normally written right-to-left, and this could be
+visually confusing [GH #22228].  The change was actually to forbid any
+right-to-left delimiters, but this pair is the only current instance
+that meets this criterion.  By policy, this change means that the
+C<extra_paired_delimiters> feature cannot be considered to have been
+stable long enough for its experimental status to be removed.  This in
+turn means that it is no longer automatically enabled by the 5.40
+feature bundle.  The bottom line is that the 5.40 cumulative perldelta
+should not reference this feature except for the removal of this pair.
 
 =back
 
