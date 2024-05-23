@@ -13,6 +13,25 @@
 
 static int not_here(const char *s);
 
+#if defined(__MINGW32__) && !defined(USE_QUADMATH)
+
+/* If nvtype is long double, the bessel functions still
+ * operate at "double precision" only - as in the past.
+ * Mingw's math.h makes no provision for j0l, y0l, etc.
+ *
+ * Unfortunately the mingw64 supplied headers cannot be
+ * convinced to declare these functions with -std=c99.
+ */
+   double __cdecl _hypot(double x, double y);
+   double __cdecl _j0(double d);
+   double __cdecl _j1(double d);
+   double __cdecl _jn(int n, double d);
+   double __cdecl _y0(double d);
+   double __cdecl _y1(double d);
+   double __cdecl _yn(int n, double d);
+
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 #  undef signal
 #  undef open
@@ -572,7 +591,7 @@ static int not_here(const char *s);
 #  undef c99_trunc
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (defined(__MINGW32__) && !defined(USE_QUADMATH))
 
 /* Some APIs exist under Win32 with "underbar" names. */
 #  undef c99_hypot
