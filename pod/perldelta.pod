@@ -338,6 +338,10 @@ source tree.
 
 =over 4
 
+=item Linux
+
+The hints file has been updated to handle the oneAPI DPC++/C++ compiler from Intel.
+
 =item XXX-some-platform
 
 XXX
