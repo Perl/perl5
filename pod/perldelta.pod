@@ -178,10 +178,10 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-The documentation for L<C<local>|/local EXPR>, L<C<my>|/my VARLIST>,
-L<C<our>|/our VARLIST>, and L<C<state>|/state VARLIST>, has been
-updated to include examples and descriptions of their effects within
-a statement.
+The documentation for L<C<local>|perlfunc/local EXPR>,
+L<C<my>|perlfunc/my VARLIST>, L<C<our>|perlfunc/our VARLIST>, and
+L<C<state>|perlfunc/state VARLIST>, has been updated to include examples
+and descriptions of their effects within a statement.
 
 =back
 
