@@ -137,7 +137,7 @@ C<m?pattern?>.
 
 =head2 Calling the import method of an unknown package produces a warning
 
-Historically, it has been possible to call the import() or unimport() method of
+Historically, it has been possible to call the C<import> or C<unimport> method of
 any class, including ones which have not been defined, with an argument and not
 experience an error.  For instance, this code will not throw an error in Perl
 5.38:
@@ -150,11 +150,11 @@ do nothing. For instance,
 
     Class::That::Does::Not::Exist->import();
 
-will continue to not throw an error.  This is because every class implicitly
-inherits from the class UNIVERSAL which now defines an import method.  In older
-perls there was no such method defined, and instead the method calls for
-C<import> and C<unimport> were special cased to not throw errors if there was
-no such method defined.
+will continue to not throw an error.  This is because every class
+implicitly inherits from the class L<UNIVERSAL> which now defines an
+C<import> method.  In older perls there was no such method defined,
+and instead the method calls for C<import> and C<unimport> were special
+cased to not throw errors if there was no such method defined.
 
 This change has been added because it makes it easier to detect case typos in
 C<use> statements when running on case-insensitive file systems.  For instance,
@@ -163,8 +163,8 @@ the following code
 
     use STRICT 'refs';
 
-would silently do nothing as the module is actually called 'strict.pm', not
-'STRICT.pm', so it would be loaded but its import method would never be called.
+would silently do nothing as the module is actually called F<strict.pm>, not
+F<STRICT.pm>, so it would be loaded but its import method would never be called.
 It will also detect cases where a user passes an argument when using a package
 that does not provide its own import, for instance most "pure" class
 definitions do not define an import method.
@@ -249,7 +249,7 @@ and will be removed completely in Perl 5.42.  [L<GH #21601|https://github.com/Pe
 
 =item *
 
-The negation OPs have been modified to support the generic TARGMY optimization.
+The negation OPs have been modified to support the generic C<TARGMY> optimization.
 [L<GH #21442|https://github.com/Perl/perl5/issues/21442>]
 
 =back
