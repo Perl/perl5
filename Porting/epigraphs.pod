@@ -132,6 +132,24 @@ in a Civil War, they embarked on the construction of the Metropolitan
 Line knowing only one thing for certain - there was no way they were
 going to be able to run steam trains through it.
 
+=head2 v5.38.2 - Kim Stanley Robinson
+
+(Same epigraph as for v5.34.3 and v5.36.3, as it was a joint release.)
+
+L<Announced on 2023-11-29 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267400.html>
+
+You can never properly predict the future as it really turns out. So
+you are doing something a little different when you write science
+fiction. You are trying to take a different perspective on now.
+
+=head2 v5.38.1 - Kim Stanley Robinson, Blue Mars
+
+L<Announced on 2023-11-25 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267354.html>
+
+Michel had a curious expression on his face. “You’re a very accurate
+person, Sax.” “It’s just statistics,” Sax said defensively. “Every once
+in a while language allows you to say things precisely.”
+
 =head2 v5.38.0 - Miguel de Cervantes, "Don Quixote"
 
 L<Announced on 2023-07-02 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2023/07/msg266602.html>
@@ -257,6 +275,13 @@ Remember: Rip it! Roll it! And punch it!
 L<Announced on 2022-05-27 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2022/05/msg263786.html>
 
 I have nothing to say, and I am saying it.
+
+=head2 v5.36.2 - Kim Stanley Robinson, Green Mars
+
+L<Announced on 2023-11-25 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267353.html>
+
+Any physical action, properly studied and practiced, could no doubt be
+accomplished with a reasonable amount of skill, if not flair.
 
 =head2 v5.36.1 - Louis Kentner, "Piano"
 
@@ -501,6 +526,13 @@ L<Announced on 2021-05-20 by Ricardo Signes|https://www.nntp.perl.org/group/perl
 
 We should try to be the parents of our future rather than the offspring of our
 past.
+
+=head2 v5.34.2 - Kim Stanley Robinson, Red Mars
+
+L<Announced on 2023-11-25 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267352.html>
+
+Each of us have a gift, you see, given us freely by the universe. And
+each of us with every breath gives something back
 
 =head2 v5.34.1 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": Limericks published in "More Nonsense"
 
