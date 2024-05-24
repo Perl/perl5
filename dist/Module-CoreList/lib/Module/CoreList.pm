@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20240520';
+our $VERSION = '5.20240524';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -422,7 +422,7 @@ sub changes_between {
     5.039008 => '2024-02-23',
     5.039009 => '2024-03-20',
     5.039010 => '2024-04-27',
-    5.039011 => '2024-05-20',
+    5.040000 => '2024-05-24',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -21610,13 +21610,24 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.039011 => {
+    5.040000 => {
         delta_from => 5.039010,
         changed => {
-            'B::Op_private'         => '5.039011',
-            'Config'                => '5.039011',
-            'Module::CoreList'      => '5.20240520',
-            'Module::CoreList::Utils'=> '5.20240520',
+            'B::Op_private'         => '5.040000',
+            'Config'                => '5.04',
+            'Fcntl'                 => '1.18',
+            'Module::CoreList'      => '5.20240524',
+            'Module::CoreList::Utils'=> '5.20240524',
+            'POSIX'                 => '2.20',
+            'Pod::Man'              => '5.01_02',
+            'Pod::ParseLink'        => '5.01_02',
+            'Pod::Text'             => '5.01_02',
+            'Pod::Text::Color'      => '5.01_02',
+            'Pod::Text::Overstrike' => '5.01_02',
+            'Pod::Text::Termcap'    => '5.01_02',
+            'UNIVERSAL'             => '1.17',
+            'feature'               => '1.89',
+            'stable'                => '0.033',
         },
         removed => {
         }
@@ -23134,8 +23145,8 @@ sub is_core
         removed => {
         }
     },
-    5.039011 => {
-        delta_from => 5.03901,
+    5.040000 => {
+        delta_from => 5.039010,
         changed => {
         },
         removed => {
