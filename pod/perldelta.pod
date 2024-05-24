@@ -230,7 +230,7 @@ continue to do so:
     # SomeClass resolved as a class
     SomeClass->binmode;
 
-[L<github #19426|https://github.com/Perl/perl5/issues/19426>]
+[L<GH #19426|https://github.com/Perl/perl5/issues/19426>]
 
 =head1 Deprecations
 
@@ -911,7 +911,7 @@ object at compile time before the class is complete:
   eval "class Foo {"; Foo->new; # error
   class Bar { BEGIN { Bar->new } }; # error
 
-Previously perl would assert or crash. [L<github #22159|https://github.com/Perl/perl5/issues/22159>]
+Previously perl would assert or crash. [L<GH #22159|https://github.com/Perl/perl5/issues/22159>]
 
 =back
 
@@ -1031,7 +1031,7 @@ L<Old package separator "'" deprecated|perldiag/"Old package separator "'" depre
 Prevent this warning appearing spuriously when checking the heuristic for the
 L<You need to quote "%s"|perldiag/"You need to quote "%s""> warning.
 
-[L<github #22145|https://github.com/Perl/perl5/issues/22145>]
+[L<GH #22145|https://github.com/Perl/perl5/issues/22145>]
 
 =back
 
@@ -1054,7 +1054,7 @@ locales introduced in 5.39.2.  [L<GH #21451|https://github.com/Perl/perl5/issues
 You can now separately enable high water mark checks for non-DEBUGGING
 or disable them for DEBUGGING builds with C<-Accflags=-DPERL_USE_HWM>
 or C<-Accflags=-DPERL_NO_HWM> respectively.  The default remains the
-same.  [L<github #16607|https://github.com/Perl/perl5/issues/16607>]
+same.  [L<GH #16607|https://github.com/Perl/perl5/issues/16607>]
 
 =back
 
@@ -1503,7 +1503,7 @@ active subroutine" error would be thrown.  For example:
     }
     outer(2);
 
-[L<github #18606|https://github.com/Perl/perl5/issues/18606>]
+[L<GH #18606|https://github.com/Perl/perl5/issues/18606>]
 
 =item *
 
@@ -1525,7 +1525,7 @@ inner recursive call:
     }
     outer("outer");
 
-[L<github #21987|https://github.com/Perl/perl5/issues/21987>]
+[L<GH #21987|https://github.com/Perl/perl5/issues/21987>]
 
 =back
 
@@ -1534,7 +1534,7 @@ inner recursive call:
 prepare_export_lexical() was separately saving C<PL_comppad> and
 C<PL_curpad>, this could result in C<PL_curpad> being restored to a no
 longer valid value, resulting in a panic when importing lexicals in
-some cases.  [L<github #21981|https://github.com/Perl/perl5/issues/21981>]
+some cases.  [L<GH #21981|https://github.com/Perl/perl5/issues/21981>]
 
 =item *
 
@@ -1542,7 +1542,7 @@ A string eval() operation in the scope of a C<use VERSION> declaration would
 sometimes emit spurious "Downgrading a use VERSION declaration" warnings due
 to an inconsistency in the way the version number was stored.  This is now
 fixed.
-[L<github #22121|https://github.com/Perl/perl5/issues/22121>]
+[L<GH #22121|https://github.com/Perl/perl5/issues/22121>]
 
 =back
 
@@ -1579,7 +1579,7 @@ approximately 110,000 lines of changes to 1,200 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant
 community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.38.1:
+contributed the improvements that became Perl 5.40.0:
 
 Abe Timmerman, Alexander Kanavin, Amory Meltzer, Aristotle Pagaltzis,
 Beckett Normington, Bernard Quatermass, Bernd, Bruno Meneguele, Chad Granum,
