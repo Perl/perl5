@@ -1879,10 +1879,10 @@ CORE::do({});
 >>>>
 () = (return 1);
 () = (return ($1 + $2) * $3);
-() = (return ($a xor $b));
+() = (return $a ^^ $b);
 () = (do 'file') + time;
 () = (do ($1 + $2) * $3) + time;
-() = (do ($1 xor $2)) + time;
+() = (do ($1 ^^ $2)) + time;
 () = (goto 1);
 () = (require 'foo') + 3;
 () = (require foo) + 3;
@@ -1911,6 +1911,8 @@ require v5.16;
 ####
 # [perl #97476] not() *does* follow the llafr
 $_ = ($a xor not +($1 || 2) ** 2);
+>>>>
+$_ = $a ^^ !($1 || 2) ** 2;
 ####
 # Precedence conundrums with argument-less function calls
 () = (eof) + 1;
