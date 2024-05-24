@@ -123,7 +123,7 @@ sub testit {
 
 
 # Deparse can't distinguish 'and' from '&&' etc
-my %infix_map = qw(and && or ||);
+my %infix_map = (and => '&&', or => '||', xor => '^^');
 
 # Test a keyword that is a binary infix operator, like 'cmp'.
 # $parens - "$a op $b" is deparsed as "($a op $b)"
@@ -686,4 +686,4 @@ wantarray        0     -
 warn             @     p1
 write            01    -
 x                B     -
-xor              B     p
+xor              B     -
