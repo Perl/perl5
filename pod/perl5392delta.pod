@@ -164,7 +164,7 @@ of C<input>, C<output> or C<detail>, followed by a boolean.
 L<UNIVERSAL does not export anything|perldiag/"UNIVERSAL does not export anything">
 
 (F) You asked UNIVERSAL to export something, but UNIVERSAL is the
-base class for all classes and contains not exportable symbols.
+base class for all classes and contains no exportable symbols.
 
 =back
 
