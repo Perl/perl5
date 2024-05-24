@@ -935,8 +935,8 @@ L<Attempt to call undefined %s method with arguments ("%s"%s) via package "%s" (
 (D deprecated::missing_import_called_with_args) You called the
 C<import()> or C<unimport()> method of a class that has no import method
 defined in its inheritance graph, and passed an argument to the method.
-This is very often the sign of a mispelled package name in a use or
-require statement that has silently succeded due to a case insensitive
+This is very often the sign of a misspelled package name in a use or
+require statement that has silently succeeded due to a case insensitive
 file system.
 
 Another common reason this may happen is when mistakenly attempting to
