@@ -1539,8 +1539,9 @@ some cases.  [L<github #21981|https://github.com/Perl/perl5/issues/21981>]
 =item *
 
 A string eval() operation in the scope of a C<use VERSION> declaration would
-sometimes emit spurious "Changing use VERSION" warnings due to an
-inconsistency in the way the version number was stored.  This is now fixed.
+sometimes emit spurious "Downgrading a use VERSION declaration" warnings due
+to an inconsistency in the way the version number was stored.  This is now
+fixed.
 [L<github #22121|https://github.com/Perl/perl5/issues/22121>]
 
 =back
