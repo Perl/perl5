@@ -2162,7 +2162,7 @@ use warnings;
 use v5.12;
 use v5.20;
 EXPECT
-Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at - line 3.
+Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.44 at - line 3.
 ########
 use warnings;
 use v5.8;
@@ -2173,7 +2173,7 @@ use warnings;
 use v5.10;
 use v5.8;
 EXPECT
-Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at - line 3.
+Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.44 at - line 3.
 ########
 use warnings;
 use v5.12;
