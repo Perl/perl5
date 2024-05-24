@@ -120,8 +120,7 @@ version will print a deprecation warning. For example,
 
     use v5.10;        # This prints a warning
 
-This behaviour will be removed in Perl 5.40; such a subsequent request will
-become a compile-time error.
+This was deprecated in Perl 5.36 and is now fatal.
 
 This is because of an intended related change to the interaction between
 C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
