@@ -35,23 +35,6 @@ but a deprecated warning will be generated.
 
 Category: "deprecated::dot_in_inc"
 
-=head3 Goto Block Construct
-
-C<goto LABEL;> will produce a deprecated warning when jumping into the body
-of a loop or other block construct from outside. For instance
-
-    while (should_loop($x)) {
-        LABEL:
-            do_stuff();
-    }
-    goto LABEL;
-
-will produce a warning that this behavior is deprecated. In general you should
-just avoid doing this; the people that maintain your code will be grateful for
-your restraint.
-
-Category: "deprecated::goto_construct"
-
 =head3 Unicode Property Name
 
 Various types of unicode property name will generate deprecated warnings
@@ -98,6 +81,23 @@ as the smartmatch operator C<~~>. The feature will be removed entirely in the
 Perl 5.42.0 production release.
 
 Category: "deprecated::smartmatch"
+
+=head3 Goto Block Construct
+
+C<goto LABEL;> will produce a deprecated warning when jumping into the body
+of a loop or other block construct from outside. For instance
+
+    while (should_loop($x)) {
+        LABEL:
+            do_stuff();
+    }
+    goto LABEL;
+
+will produce a warning that this behavior is deprecated. In general you should
+just avoid doing this; the people that maintain your code will be grateful for
+your restraint.
+
+Category: "deprecated::goto_construct"
 
 =head3 Use of C<'> as a global name separator
 
