@@ -737,6 +737,16 @@ functions, C<newANONLIST()>, C<newANONHASH()>, C<newSVREF()> and similar.
 
 =back
 
+=head3 L<perlclass>
+
+=over 4
+
+=item *
+
+Added a list of known bugs in the experimental C<class> feature.
+
+=back
+
 =head3 L<perlfunc>
 
 =over 4
