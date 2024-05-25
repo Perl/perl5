@@ -7,6 +7,7 @@ typedef struct win32_cond { LONG waiters; HANDLE sem; } perl_cond;
 typedef DWORD perl_key;
 typedef HANDLE perl_os_thread;
 
+//#define DONT_USE_CRITICAL_SECTION
 #ifndef DONT_USE_CRITICAL_SECTION
 
 /* Critical Sections used instead of mutexes: lightweight,
