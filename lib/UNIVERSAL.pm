@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 # UNIVERSAL.pm should not contain any methods/subs, they
 # are all defined in universal.c
@@ -82,8 +82,8 @@ reference. The L<C<isa> operator|perlop/"Class Instance Operator"> is an
 alternative that simply returns false in this case, so the C<eval> is not
 needed.
 
-If you want to be sure that you're calling C<isa> as a method, not a class,
-check the invocand with C<blessed> from L<Scalar::Util> first:
+If you want to be sure that you're calling C<isa> on an instance, not a class,
+check the invocant with C<blessed> from L<Scalar::Util> first:
 
   use Scalar::Util 'blessed';
 

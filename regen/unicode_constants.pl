@@ -378,6 +378,7 @@ my $unpaired = "Didn't find a mirror";
 my $illegal = "Mirror illegal";
 my $no_encoded_mate = "Mirrored, but Unicode has no encoded mirror";
 my $bidirectional = "Bidirectional";
+my $r2l = "Is in a Right to Left script";
 
 my %unused_bidi_pairs;
 my %inverted_unused_bidi_pairs;
@@ -630,6 +631,15 @@ foreach my $list (qw(Punctuation Symbol)) {
         {
             $discards{$code_point} = { reason => $illegal,
                                         mirror => $mirror_code_point
+                                     };
+            next;
+        }
+
+        # Exclude characters that are R to L ordering, as this can cause
+        # confusion.  See GH #22228
+        if ($chr =~ / (?[ \p{Bidi_Class:R} + \p{Bidi_Class:AL} ]) /x) {
+            $discards{$code_point} = { reason => $r2l,
+                                       mirror => $mirror_code_point
                                      };
             next;
         }

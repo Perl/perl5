@@ -281,9 +281,15 @@ a directory handle, see L<perlfunc/closedir>.
 
 =item C<cos>
 
-This is identical to Perl's builtin C<cos()> function, for returning
-the cosine of its numerical argument, see L<perlfunc/cos>.
-See also L<Math::Trig>.
+This is identical to Perl's builtin C<cos()> function for returning the cosine
+of its numerical argument -- except that C<POSIX::cos()> must be provided with
+an explicit value (rather than relying on an implicit C<$_>):
+
+    $cosine = POSIX::cos(3);    # good
+
+    $cosine = POSIX::cos();     # throws exception
+
+See L<perlfunc/cos>;  see also L<Math::Trig>.
 
 =item C<cosh>
 
@@ -406,9 +412,16 @@ program, see L<perlfunc/exit>.
 
 =item C<exp>
 
-This is identical to Perl's builtin C<exp()> function for
-returning the exponent (I<e>-based) of the numerical argument,
-see L<perlfunc/exp>.
+This is identical to Perl's builtin C<exp()> function for returning the
+exponent (I<e>-based) of the numerical argument -- except that C<POSIX::exp()>
+must be provided with an explicit value (rather than relying on an implicit
+C<$_>):
+
+    $exp = POSIX::exp(3);    # good
+
+    $exp = POSIX::exp();     # throws exception
+
+See L<perlfunc/exp>.
 
 =item C<expm1>
 
@@ -419,9 +432,17 @@ See also L</log1p>.
 
 =item C<fabs>
 
-This is identical to Perl's builtin C<abs()> function for returning
-the absolute value of the numerical argument, see L<perlfunc/abs>.
+This is identical to Perl's builtin C<abs()> function for returning the
+absolute value of the numerical argument -- except that C<POSIX::fabs()> must
+be provided with an explicit value (rather than relying on an implicit C<$_>):
 
+    $absolute_value = POSIX::fabs(3);    # good
+
+    $absolute_value = POSIX::fabs();     # throws exception
+
+See L<perlfunc/abs>.
+
+This is identical to Perl's builtin C<cos()> function for returning the cosine
 =item C<fclose>
 
 Not implemented.  Use method C<IO::Handle::close()> instead, or see L<perlfunc/close>.
@@ -1042,9 +1063,16 @@ relying on an implicit C<$_>):
 
 =item C<log>
 
-This is identical to Perl's builtin C<log()> function,
-returning the natural (I<e>-based) logarithm of the numerical argument,
-see L<perlfunc/log>.
+This is identical to Perl's builtin C<log()> function for returning the
+natural (I<e>-based) logarithm of the numerical argument -- except that
+C<POSIX::log()> must be provided with an explicit value (rather than relying
+on an implicit C<$_>):
+
+    $log = POSIX::log(3);    # good
+
+    $log = POSIX::log();     # throws exception
+
+See L<perlfunc/log>.
 
 =item C<log10>
 
@@ -1737,9 +1765,15 @@ Returns C<undef> on failure.
 
 =item C<sin>
 
-This is identical to Perl's builtin C<sin()> function
-for returning the sine of the numerical argument,
-see L<perlfunc/sin>.  See also L<Math::Trig>.
+This is identical to Perl's builtin C<sin()> function, for returning the sine
+of its numerical argument -- except that C<POSIX::sin()> must be provided with
+an explicit value (rather than relying on an implicit C<$_>):
+
+    $sine = POSIX::sin(3);    # good
+
+    $sine = POSIX::sin();     # throws exception
+
+See L<perlfunc/sin>;  see also L<Math::Trig>.
 
 =item C<sinh>
 
@@ -1764,9 +1798,15 @@ see L<perlfunc/sprintf>.
 
 =item C<sqrt>
 
-This is identical to Perl's builtin C<sqrt()> function.
-for returning the square root of the numerical argument,
-see L<perlfunc/sqrt>.
+This is identical to Perl's builtin C<sqrt()> function for returning the
+square root of the numerical argument -- except that C<POSIX::sqrt()>
+must be provided with an explicit value (rather than relying on an implicit C<$_>):
+
+    $square_root = POSIX::sqrt(3);    # good
+
+    $square_root = POSIX::sqrt();     # throws exception
+
+See L<perlfunc/sqrt>.
 
 =item C<srand>
 
@@ -2147,9 +2187,18 @@ functions.
 
 =item C<umask>
 
-This is identical to Perl's builtin C<umask()> function
-for setting (and querying) the file creation permission mask,
-see L<perlfunc/umask>.
+This is identical to Perl's builtin C<umask()> function for setting (and
+querying) the file creation permission mask -- except that C<POSIX::umask()>
+must be provided with an explicit value (rather than relying on an implicit
+C<$_>):
+
+    $current = umask();                 # good
+
+    $now  = POSIX::umask($current);     # good
+
+    $now  = POSIX::umask();             # throws exception
+
+See L<perlfunc/umask>.
 
 =item C<uname>
 

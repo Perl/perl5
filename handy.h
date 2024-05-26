@@ -2628,7 +2628,7 @@ Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
 =for apidoc_item |void*|safecalloc|size_t nitems|size_t item_size
 
-The XSUB-writer's interface to the C C<malloc> function.  The allocated
+The XSUB-writer's interface to the C C<calloc> function.  The allocated
 memory is zeroed with C<memzero>.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.

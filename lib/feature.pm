@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.88';
+our $VERSION = '1.89';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -39,7 +39,7 @@ our %feature_bundle = (
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
-    "5.39"    => [qw(bitwise current_sub evalbytes extra_paired_delimiters fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
+    "5.39"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -598,10 +598,9 @@ The following feature bundles are available:
             module_true postderef_qq say signatures
             state unicode_eval unicode_strings
 
-  :5.40     bitwise current_sub evalbytes
-            extra_paired_delimiters fc isa module_true
-            postderef_qq say signatures state try
-            unicode_eval unicode_strings
+  :5.40     bitwise current_sub evalbytes fc isa
+            module_true postderef_qq say signatures
+            state try unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
