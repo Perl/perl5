@@ -10350,6 +10350,7 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 
 /*
 
+=for apidoc_section $locale
 =for apidoc switch_to_global_locale
 
 This function copies the locale state of the calling thread into the program's
