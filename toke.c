@@ -11796,6 +11796,16 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         close_delim_str = legal_paired_closing_delims
                         + (tmps - legal_paired_opening_delims);
 
+        /* The list of paired delimiters contains all the ASCII ones that have
+         * always been legal, and no other ASCIIs.  Don't raise a message if
+         * using one of these */
+        if (! isASCII(open_delim_code)) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS),
+                             "Use of '%" UTF8f "' is experimental as a string delimiter",
+                             UTF8fARG(UTF, delim_byte_len, open_delim_str));
+        }
+
         close_delim_code = (UTF)
                            ? valid_utf8_to_uvchr((U8 *) close_delim_str, NULL)
                            : * (U8 *) close_delim_str;

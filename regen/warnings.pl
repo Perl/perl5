@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.69';
+$VERSION = '1.70';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -196,7 +196,6 @@ my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
   experimental::smartmatch
   experimental::const_attr
   experimental::for_list
-  experimental::extra_paired_delimiters
 );
 
 ###########################################################################
