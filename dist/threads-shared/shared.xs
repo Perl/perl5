@@ -1080,6 +1080,14 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
+static int
+sharedsv_elem_mg_free(pTHX_ SV* nsv, MAGIC *mg)
+{
+    if (mg->mg_private)
+        sharedsv_elem_mg_DELETE(aTHX_ nsv, mg);
+    return (0);
+}
+
 /* Called during cloning of PERL_MAGIC_tiedelem(p) magic in new
  * thread */
 
@@ -1092,16 +1100,26 @@ sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
+static int
+sharedsv_elem_mg_local(pTHX_ SV* nsv, MAGIC *mg)
+{
+    MAGIC* magic = sv_magicext(nsv, mg->mg_obj, mg->mg_type, mg->mg_virtual,
+                           mg->mg_ptr, mg->mg_len);
+    magic->mg_flags   = mg->mg_flags;
+    magic->mg_private = mg_find(nsv, PERL_MAGIC_shared_scalar) ? 0 : 1;
+    return (0);
+}
+
 const MGVTBL sharedsv_elem_vtbl = {
     sharedsv_elem_mg_FETCH,     /* get */
     sharedsv_elem_mg_STORE,     /* set */
     0,                          /* len */
     sharedsv_elem_mg_DELETE,    /* clear */
-    0,                          /* free */
+    sharedsv_elem_mg_free,      /* free */
     0,                          /* copy */
     sharedsv_elem_mg_dup,       /* dup */
 #ifdef MGf_LOCAL
-    0,                          /* local */
+    sharedsv_elem_mg_local,     /* local */
 #endif
 };
 
@@ -1191,7 +1209,11 @@ sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
                             toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
                             name, namlen);
     PERL_UNUSED_ARG(sv);
-    nmg->mg_flags |= MGf_DUP;
+    nmg->mg_flags |= MGf_DUP
+#ifdef MGf_LOCAL
+        |MGf_LOCAL
+#endif
+    ;
     return (1);
 }
 
