@@ -10244,7 +10244,8 @@ been declared.  Additionally, a C<use VERSION> with a version less than 5.11
 is not allowed after a C<use VERSION> with a version greater than 5.11.
 
 C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, F<warnings.pm>
-or F<builtin.pm> files.
+or F<builtin.pm> files, but instead implements the equivalent functionality
+directly.
 
 In the current implementation, any explicit use of C<no strict> overrides
 C<use VERSION>, even if it comes before it. However, this may be subject to
