@@ -64,7 +64,7 @@ L<builtin>.  A deprecation warning has also been added for any other
 subsequent C<use VERSION> declaration below version 5.39, to warn that it
 will no longer be permitted in Perl version 5.44.
 
-=head2 New C<builtin::inf> and C<builtin::nan> functions
+=head2 New C<builtin::inf> and C<builtin::nan> functions (experimental)
 
 Two new functions, C<inf> and C<nan>, have been added to the C<builtin>
 namespace.  These act like constants that yield the floating-point infinity
