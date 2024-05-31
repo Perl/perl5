@@ -80,6 +80,22 @@ of Perl adds the final C<^^> operator, completing the set.
 
     $x ^^ $y and say "One of x or y is true, but not both";
 
+=head2 C<try>/C<catch> feature is no longer experimental
+
+Prior to this release, the C<try>/C<catch> feature for handling errors was
+considered experimental. Introduced in Perl version 5.34.0, this is now
+considered a stable language feature and its use no longer prints a warning.
+It still must be enabled with L<the 'try' feature|feature/The 'try' feature>.
+
+See L<perlsyn/Try Catch Exception Handling>.
+
+=head2 C<for> iterating over multiple values at a time is no longer experimental
+
+Prior to this release, iterating over multiple values at a time with C<for> was
+considered experimental. Introduced in Perl version 5.36.0, this is now
+considered a stable language feature and its use no longer prints a warning.
+See L<perlsyn/Compound Statements>.
+
 =head2 The C<:5.40> feature bundle adds C<try>
 
 The latest version feature bundle now contains the recently-stablized feature
