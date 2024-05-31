@@ -96,6 +96,13 @@ considered experimental. Introduced in Perl version 5.36.0, this is now
 considered a stable language feature and its use no longer prints a warning.
 See L<perlsyn/Compound Statements>.
 
+=head2 C<builtin> module is no longer experimental
+
+Prior to this release, the L<builtin> module and all of its functions were
+considered experimental. Introduced in Perl version 5.36.0, this module is now
+considered stable its use no longer prints a warning. However, several of its
+functions are still considered experimental.
+
 =head2 The C<:5.40> feature bundle adds C<try>
 
 The latest version feature bundle now contains the recently-stablized feature
