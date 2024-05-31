@@ -520,13 +520,14 @@ sub autodoc ($$) { # parse a file and extract documentation info
         }
         elsif ($in=~ /^ =for [ ]+ apidoc \B /x) {   # Otherwise better be a
                                                     # plain apidoc line
-            die "Unknown apidoc-type line '$in'" unless $in=~ /^=for apidoc_item/;
+            die "Unknown apidoc-type line '$in'"
+                                               unless $in=~ /^=for apidoc_item/;
             die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
         }
         else {  # Plain apidoc
 
             ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
-                                                = check_api_doc_line($file, $in);
+                                               = check_api_doc_line($file, $in);
             # Override this line with any info in embed.fnc
             my ($embed_flags, $embed_ret_type, @embed_args)
                                                 = embed_override($element_name);
@@ -543,14 +544,15 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $missing{$element_name} = $file;
             }
 
-            die "flag '$1' is not legal (for function $element_name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSsUuvWXxy;#] ) /x;
+            die "flag '$1' is not legal (for function $element_name"
+              . " (from $file))"
+                  if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSsUuvWXxy;#] ) /x;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
-                                            if $flags =~ /u/ && $flags !~ /[my]/;
+                                           if $flags =~ /u/ && $flags !~ /[my]/;
             warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
-                        if $flags !~ /N/ &&
-                           $element_name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
+                   if $flags !~ /N/
+                   && $element_name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
 
             if ($flags =~ /#/) {
                 die "Return type must be empty for '$element_name'"
@@ -559,7 +561,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
 
             if (exists $seen{$element_name} && $flags !~ /h/) {
-                die ("'$element_name' in $file was already documented in $seen{$element_name}");
+                die ("'$element_name' in $file was already documented in"
+                   . " $seen{$element_name}");
             }
             else {
                 $seen{$element_name} = $file;
@@ -657,10 +660,12 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Here, we have accumulated into $text, the pod for $element_name
             my $where = $flags =~ /A/ ? 'api' : 'intern';
 
-            die "No =for apidoc_section nor =head1 in $file for '$element_name'\n"
-                                                    unless defined $section;
+            die "No =for apidoc_section nor =head1 in $file for"
+              . "'$element_name'\n" unless defined $section;
             my $is_link_only = ($flags =~ /h/);
-            if (! $is_link_only && exists $docs{$where}{$section}{$element_name}) {
+            if (   ! $is_link_only
+                && exists $docs{$where}{$section}{$element_name})
+            {
                 warn "$0: duplicate API entry for '$element_name' in"
                     . " $where/$section\n";
                 next;
@@ -670,17 +675,18 @@ sub autodoc ($$) { # parse a file and extract documentation info
             if ($is_link_only) {
                 if ($file_is_C) {
                     die "Can't currently handle link with items to it:\n$in"
-                                                                       if @items;
+                                                                      if @items;
                     $docs{$where}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
                 }
 
-                # Here, is an 'h' flag in pod.  We add a reference to the pod (and
-                # nothing else) to perlapi/intern.  (It would be better to add a
-                # reference to the correct =item,=header, but something that makes
-                # it harder is that it that might be a duplicate, like '=item *';
-                # so that is a future enhancement XXX.  Another complication is
-                # there might be more than one deserving candidates.)
+                # Here, is an 'h' flag in pod.  We add a reference to the pod
+                # (and nothing else) to perlapi/intern.  (It would be better
+                # to add a reference to the correct =item,=header, but
+                # something that makes it harder is that it that might be a
+                # duplicate, like '=item *'; so that is a future enhancement
+                # XXX.  Another complication is there might be more than one
+                # deserving candidates.)
                 my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
                 $podname =~ s/\.pod//;
                 $text = "Described in L<$podname>.\n";
@@ -805,8 +811,8 @@ sub parse_config_h {
                 else {
                     $configs{$name}{verbatim} = 1;
 
-                    # The first verbatim line in a run of them is separated by an
-                    # empty line from the flowing lines above it
+                    # The first verbatim line in a run of them is separated by
+                    # an empty line from the flowing lines above it
                     push @description, "\n" if $description[-1] =~ /^\S/;
 
                     $_ = Text::Tabs::expand($_);
@@ -827,7 +833,8 @@ sub parse_config_h {
                       \# \s* define \s+ ( \w+ ) # $1 is the name
                   (   \s* )                     # $2 indicates if args or not
                   (   .*? )                     # $3 is any definition
-                  (?: / \s* \* \* / )?          # Optional trailing /**/ or / **/
+                  (?: / \s* \* \* / )?          # Optional trailing /**/
+                                                # or / **/
                   $
                 !x)
         {
@@ -1144,9 +1151,11 @@ sub parse_config_h {
                 $configs{$name}{'section'} = $site_scn;
             }
             elsif (   $pod =~ / \b floating $dash_or_spaces point \b /ix
-                   || $pod =~ / \b (double | single) $dash_or_spaces precision \b /ix
+                   || $pod =~ / \b (double | single) $dash_or_spaces
+                                precision \b /ix
                    || $pod =~ / \b doubles \b /ix
-                   || $pod =~ / \b (?: a | the | long ) \s+ (?: double | NV ) \b /ix)
+                   || $pod =~ / \b (?: a | the | long ) \s+
+                                (?: double | NV ) \b /ix)
             {
                 $configs{$name}{'section'} =
                                     $floating_scn;
@@ -1653,7 +1662,7 @@ sub output {
 
         if ($podname eq 'perlapi') {
             print $fh "\n", $valid_sections{$section_name}{header}, "\n"
-                                if defined $valid_sections{$section_name}{header};
+                 if defined $valid_sections{$section_name}{header};
 
             # Output any heading-level documentation and delete so won't get in
             # the way later
@@ -1705,7 +1714,8 @@ sub output {
 foreach (@{(setup_embed())[0]}) {
     my $embed= $_->{embed}
         or next;
-    my ($flags, $ret_type, $func, $args) = @{$embed}{qw(flags return_type name args)};
+    my ($flags, $ret_type, $func, $args) =
+                                 @{$embed}{qw(flags return_type name args)};
     my @munged_args= @$args;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
@@ -1775,13 +1785,17 @@ my $places_other_than_api = join ", ",
             map { "L<$_>" } sort dictionary_order 'perlintern', @other_places;
 
 # The S< > makes things less densely packed, hence more readable
-my $has_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_defs;
-my $has_r_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_r_defs;
+my $has_defs_text .= join ",S< > ", map { "C<$_>" }
+                                             sort dictionary_order @has_defs;
+my $has_r_defs_text .= join ",S< > ", map { "C<$_>" }
+                                             sort dictionary_order @has_r_defs;
 $valid_sections{$genconfig_scn}{footer} =~ s/__HAS_LIST__/$has_defs_text/;
 $valid_sections{$genconfig_scn}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
 
-my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @include_defs;
-$valid_sections{$genconfig_scn}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
+my $include_defs_text .= join ",S< > ", map { "C<$_>" }
+                                            sort dictionary_order @include_defs;
+$valid_sections{$genconfig_scn}{footer}
+                                      =~ s/__INCLUDE_LIST__/$include_defs_text/;
 
 my $section_list = join "\n\n", map { "=item L</$_>" }
                                 sort(dictionary_order keys %valid_sections),
