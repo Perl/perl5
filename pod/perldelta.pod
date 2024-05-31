@@ -109,6 +109,11 @@ The latest version feature bundle now contains the recently-stablized feature
 C<try>. As this feature bundle is used by the C<-E> commandline switch, these
 are immediately available in C<-E> scripts.
 
+=head2 C<use v5.40;> imports builtin functions
+
+In addition to importing a feature bundle, C<use v5.40;> (or later versions)
+imports the corresponding L<builtin version bundle|builtin/Version Bundles>.
+
 =head1 Security
 
 =head2 CVE-2023-47038 - Write past buffer end via illegal user-defined Unicode property
