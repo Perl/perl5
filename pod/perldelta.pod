@@ -756,11 +756,8 @@ and descriptions of their effects within a statement.
 
 =item *
 
-Documented new functions supporting the C<PERL_RC_STACK> build option:
-C<rpp_replace_at_norc()>, C<rpp_popfree_1_NN()>, C<rpp_popfree_2_NN()>,
-C<rpp_popfree_to_NN(svp)>, C<rpp_replace_1_1_NN(sv)>,
-C<rpp_replace_2_1_NN(sv)>, C<rpp_replace_at_NN(sp, sv)>,
-C<rpp_replace_at_norc_NN(sp, sv)>
+A new section has been added which describes the experimental
+reference-counted argument stack build option (C<PERL_RC_STACK>).
 
 =back
 
