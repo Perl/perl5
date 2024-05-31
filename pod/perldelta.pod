@@ -175,20 +175,20 @@ The C<return> operator syntax now rejects indirect objects.  In most
 cases this would compile and even run, but wasn't documented and could
 produce confusing results, for example:
 
-  # note that sum hasn't been defined
-  sub sum_positive {
-    return sum grep $_ > 0, @_;
-    # unexpectedly parsed as:
-    #   return *sum, grep $_ > 0, @_;
-    # ... with the bareword acting like an extra (typeglob) argument
-  }
-  say for sum_positive(-1, 2, 3)
+    # note that sum hasn't been defined
+    sub sum_positive {
+        return sum grep $_ > 0, @_;
+        # unexpectedly parsed as:
+        #   return *sum, grep $_ > 0, @_;
+        # ... with the bareword acting like an extra (typeglob) argument
+    }
+    say for sum_positive(-1, 2, 3)
 
 produced:
 
-  *main::sum
-  2
-  3
+    *main::sum
+    2
+    3
 
 [L<GH #21716|https://github.com/Perl/perl5/issues/21716>]
 
