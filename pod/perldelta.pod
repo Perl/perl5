@@ -529,7 +529,7 @@ L<Math::BigInt::FastCalc> has been upgraded from version 0.5013 to 0.5018.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20230520 to 5.20240524.
+L<Module::CoreList> has been upgraded from version 5.20230520 to 5.20240604.
 
 =item *
 
