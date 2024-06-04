@@ -1995,7 +1995,7 @@ to know 1) how to represent Unicode characters in a regexp and 2) that
 a matching operation will treat the string to be searched as a sequence
 of characters, not bytes.  The answer to 1) is that Unicode characters
 greater than C<chr(255)> are represented using the C<\x{hex}> notation, because
-C<\x>I<XY> (without curly braces and I<XY> are two hex digits) doesn't
+C<\x>I<XY> (specified as two hex digits without curly braces) doesn't
 go further than 255.  (Starting in Perl 5.14, if you're an octal fan,
 you can also use C<\o{oct}>.)
 
