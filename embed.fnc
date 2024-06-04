@@ -742,7 +742,7 @@ Adp	|int	|bytes_cmp_utf8 |NN const U8 *b 			\
 AMdp	|U8 *	|bytes_from_utf8|NN const U8 *s 			\
 				|NN STRLEN *lenp			\
 				|NN bool *is_utf8p
-CTdpx	|U8 *	|bytes_from_utf8_loc					\
+CTdp	|U8 *	|bytes_from_utf8_loc					\
 				|NN const U8 *s 			\
 				|NN STRLEN *lenp			\
 				|NN bool *is_utf8p			\
