@@ -467,7 +467,7 @@ don't tell anyone I said that.
 
 =head1 NOTES
 
-The Perl motto is "There's more than one way to do it."  Divining
+The Perl motto is "There's more than one way to do it."  Defining
 how many more is left as an exercise to the reader.
 
 The three principal virtues of a programmer are Laziness,
