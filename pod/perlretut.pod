@@ -2853,7 +2853,7 @@ for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the entire string has been inspected.
 (It's remarkable that an alternative solution using something like
 
-   $count{lc($_)}++ for split('', "supercalifragilisticexpialidocious");
+   $count2{lc($_)}++ for split('', "supercalifragilisticexpialidocious");
    printf "%3d '%s'\n", $count2{$_}, $_ for ( qw{ a e i o u } );
 
 is considerably slower.)
