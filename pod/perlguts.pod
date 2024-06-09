@@ -629,7 +629,7 @@ AVs that meet the following criteria:
 
 =item * are not readonly
 
-=item * are "real" (refcounted) AVs
+=item * are "real" AVs (see next section)
 
 =item * have an av_top_index value > -2
 
@@ -644,6 +644,42 @@ Note that some interpreter functions may attach magic to an AV as part
 of normal operations. It is therefore safest, unless you are sure of the
 lifecycle of an AV, to only use these new functions close to the point
 of AV creation.
+
+=head3 Real AVs - and those that are not
+
+The standard or typical AV is sometime referred to as being a "real" AV,
+a state that can be checked for with the C<AvREAL> macro. What this state
+basically signifies is that:
+
+=over
+
+=item * Every accessible element in the array is either initialized but
+empty or contains a pointer to a live SV.
+
+=item * When a SV* is assigned to an array element, the reference count on
+the SV is incremented. Conversely, when the element is unset, or assigned
+a different SV*, the reference count of the expelled SV is decremented.
+
+=back
+
+"Fake" AVs are intended for specific, limited use cases only. Use outside
+of core perl is strongly discouraged.
+
+For example, the interpreter's argument stack is implemented as an AV,
+but it is not C<AvREAL>. Its elements were historically not reference
+counted, which gives rise to the "stack-not-refcounted" class of bugs
+when SVs are freed during the execution of a statement but still needed
+later in that statement. Efforts are currently underway to move to a
+refcounted stack to fix this class of bugs: see the L</"Reference-counted argument stack">
+section in this document.
+
+A "fake" AV can be converted into a "real" AV by C<av_reify>. Conversion
+must occur if the AV has the C<SVpav_REIFY> flag set, which can be checked
+for using the C<AvREIFY()> macro. Trying to store a SV* into, or delete
+from, an AV usually involves an C<AvREIFY()> check and conversion if needed.
+
+See comments in F<av.h> and the functions in F<av.c> if you really
+want to know more.
 
 =head2 Working with HVs
 
