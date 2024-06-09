@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.40.0 - Neil Gaiman, Coraline
+
+L<Annnounched on 2024-06-09 by Graham Knop|https://www.nntp.perl.org/group/perl.perl5.porters/2024/06/msg268252.html>
+
+  “What’s your name,” Coraline asked the cat. “Look, I’m Coraline. Okay?”
+  “Cats don’t have names,” it said.
+  “No?” said Coraline.
+  “No,” said the cat. “Now you people have names. That’s because you
+  don’t know who you are. We know who we are, so we don’t need names.”
+
 =head2 v5.39.10 - Fernando Pessoa
 
 L<Announced on 2024-04-28 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2024/04/msg268159.html>
