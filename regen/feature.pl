@@ -68,6 +68,7 @@ use constant V5_35  => sort grep {; $_ ne 'switch'
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
 
 use constant V5_39  => sort ( +V5_37, qw{try} );
+use constant V5_41  => sort ( +V5_39 );
 
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
@@ -100,6 +101,8 @@ my %feature_bundle = (
     "5.37"  => [ +V5_37 ],
     # using 5.39 features bundle
     "5.39"  => [ +V5_39 ],
+    # using 5.41 features bundle
+    "5.41"  => [ +V5_41 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -541,7 +544,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.89';
+our $VERSION = '1.90';
 
 FEATURES
 
