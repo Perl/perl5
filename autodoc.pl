@@ -567,12 +567,21 @@ sub autodoc ($$) { # parse a file and extract documentation info
             else {
                 $seen{$element_name} = $file;
             }
+
+            # For uniformity of handling, this element is set to be
+            # just the first of any remaining ones in the group.  Setting the
+            # flags for this item are deferred because further processing may
+            # modify them
+            push @items, { name     => $element_name,
+                           ret_type => $ret_type,
+                           args     => [ @args ],
+                         };
         }
 
         # Here we have processed the initial line in the heading text or API
-        # element, and have saved the important information from it into the
-        # corresponding variables.  Now accumulate the text that applies to it
-        # up to a terminating line, which is one of:
+        # element, and have saved the important information from it into
+        # $items[0].  Now accumulate the text that applies to it up to a
+        # terminating line, which is one of:
         # 1) =cut
         # 2) =head (in a C file only =head1)
         # 3) an end comment line in a C file: m:^\s*\*/:
@@ -675,7 +684,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             if ($is_link_only) {
                 if ($file_is_C) {
                     die "Can't currently handle link with items to it:\n$in"
-                                                                      if @items;
+                                                                if @items > 1;
                     $docs{$where}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
                 }
@@ -700,11 +709,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 push $described_elsewhere{$podname}->@*, $podname;
             }
 
-            $docs{$where}{$section}{$element_name}{flags} = $flags;
             $docs{$where}{$section}{$element_name}{pod} = $text;
             $docs{$where}{$section}{$element_name}{file} = $file;
-            $docs{$where}{$section}{$element_name}{ret_type} = $ret_type;
-            push $docs{$where}{$section}{$element_name}{args}->@*, @args;
+            $items[0]{flags} = $flags;
             push $docs{$where}{$section}{$element_name}{items}->@*, @items;
         }
         elsif ($text) {
@@ -1212,14 +1219,14 @@ sub parse_config_h {
             $flags .= 'U' unless defined $configs{$name}{usage};
 
             # All the information has been gathered; save it
-            $docs{'api'}{$section}{$name}{flags} = $flags;
+            $docs{'api'}{$section}{$name}{items}[0]->{flags} = $flags;
+            $docs{'api'}{$section}{$name}{items}[0]->{name} = $name;
             $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
-            $docs{'api'}{$section}{$name}{ret_type} = "";
+            $docs{'api'}{$section}{$name}{items}[0]{ret_type} = "";
             $docs{'api'}{$section}{$name}{file} = 'config.h';
             $docs{'api'}{$section}{$name}{usage}
                 = $configs{$name}{usage} if defined $configs{$name}{usage};
-            push $docs{'api'}{$section}{$name}{args}->@*, ();
-            push $docs{'api'}{$section}{$name}{items}->@*, ();
+            push $docs{'api'}{$section}{$name}{items}[0]{args}->@*, ();
         }
     }
 }
@@ -1257,19 +1264,11 @@ sub docout ($$$) { # output the docs for one function group
     # Trim trailing space
     $element_name =~ s/\s*$//;
 
-    my $flags = $docref->{flags};
     my $pod = $docref->{pod} // "";
     my $file = $docref->{file};
 
     my @items = $docref->{items}->@*;
-
-    # Make the main element the first of the items.  This allows uniform
-    # treatment below
-    unshift @items, {   name => $element_name,
-                        flags => $flags,
-                        ret_type => $docref->{ret_type},
-                        args => [ $docref->{args}->@* ],
-                    };
+    my $flags = $items[0]{flags};
 
     warn("Empty pod for $element_name (from $file)") unless $pod =~ /\S/;
 
