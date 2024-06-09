@@ -11,9 +11,13 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Steering Council.
 
+=head2 Perl 5.42
+
+  2024-??-??  5.42.0
+
 =head2 Perl 5.40
 
-  2024-05-20  5.40.0          ?
+  2024-06-09  5.40.0          Graham Knop
   2024-??-??  5.40.1
 
 =head2 Perl 5.38
@@ -21,13 +25,6 @@ deemed necessary by the Steering Council.
   2023-07-01  5.38.0  ✓       Ricardo Signes
   2023-11-29  5.38.2  ✓       Paul Evans
   2024-??-??  5.38.3
-
-=head2 Perl 5.36
-
-  2022-05-27  5.36.0  ✓       Ricardo Signes
-  2023-04-23  5.36.1  ✓       Steve Hay
-  2023-11-29  5.36.3  ✓       Paul Evans
-  2024-??-??  5.36.4
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
@@ -43,23 +40,23 @@ When shipping a release, you should include the schedule for (at least)
 the next four releases. If a stable version of Perl is released,
 you should reset the version numbers to the next blead series.
 
-=head2 Perl 5.39
+=head2 Perl 5.41
 
-  2023-07-02  5.39.0  ✓       Ricardo Signes
-                              (tag only)
-  2023-07-20  5.39.1  ✓       Steve Hay
-  2023-08-20  5.39.2  ✓       Paul Evans
-  2023-09-20  5.39.3  ✓       Matthew Horsfall
-  2023-10-25  5.39.4  ✓       Graham Knop
-  2023-11-20  5.39.5  ✓       Karen Etheridge
-  2023-12-20  5.39.6  ✓       Philippe Bruhat
-  2024-01-20  5.39.7  ✓       Max Maischein
-  2024-02-23  5.39.8  ✓       Renée Bäcker      Contentious changes freeze
-  2024-03-20  5.39.9  ✓       Paul Evans        User-visible changes to
+  2024-06-20  5.41.0          ?
+  2024-07-20  5.41.1          ?
+  2024-08-20  5.41.2          ?
+  2024-09-20  5.41.3          ?
+  2024-10-20  5.41.4          ?
+  2024-11-20  5.41.5          ?
+  2024-12-20  5.41.6          ?
+  2025-01-20  5.41.7          ?
+  2025-02-20  5.41.8          ?
+  2025-03-20  5.41.9          ?                 Contentious changes freeze
+  2025-04-20  5.41.10         ?                 User-visible changes to
                                                 correctly functioning
                                                 programs freeze
-  2024-04-20  5.39.10         ?                 Full program freeze
-  2024-05-20  5.40.0          ?                 New perl!
+  2025-05-20  5.41.11         ?                 Full program freeze
+  2025-06-20  5.42.0          ?                 New perl!
 
 =head1 VICTIMS
 
