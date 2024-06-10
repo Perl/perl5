@@ -1145,9 +1145,13 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 }
 
 /*
-=for apidoc lex_stuff_pvn
+=for apidoc      lex_stuff_pv
+=for apidoc_item lex_stuff_pvn
+=for apidoc_item lex_stuff_pvs
+=for apidoc_item lex_stuff_sv
 
-Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
+These each insert characters into the lexer buffer
+(L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
 reallocating the buffer if necessary.  This means that lexing code that
 runs later will see the characters as if they had appeared in the input.
@@ -1155,13 +1159,23 @@ It is not recommended to do this as part of normal parsing, and most
 uses of this facility run the risk of the inserted characters being
 interpreted in an unintended manner.
 
-The string to be inserted is represented by C<len> octets starting
-at C<pv>.  These octets are interpreted as either UTF-8 or Latin-1,
-according to whether the C<LEX_STUFF_UTF8> flag is set in C<flags>.
-The characters are recoded for the lexer buffer, according to how the
-buffer is currently being interpreted (L</lex_bufutf8>).  If a string
-to be inserted is available as a Perl scalar, the L</lex_stuff_sv>
-function is more convenient.
+In C<lex_stuff_pvs>, the string to be inserted is a literal C string, enclosed
+in double quotes.
+
+In C<lex_stuff_pv> and C<lex_stuff_pvn>, the string to be inserted is
+represented by the octets starting at C<pv>.  In C<lex_stuff_pv>, the first NUL
+octet terminates the string.  In C<lex_stuff_pvn>, C<len> octets will be used,
+hence the string may contain embedded NUL characters.
+
+In all three cases, these octets are interpreted as either UTF-8 or Latin-1,
+according to whether or not the C<LEX_STUFF_UTF8> flag is set in C<flags>.
+
+In C<lex_stuff_sv>, the string to be inserted is the string value of C<sv>.
+C<flags> must be 0.  The string is interpreted as either UTF-8 or Latin-1,
+according to whether or not C<sv> has its UTF-8 flag set.
+
+In all three forms, the characters are recoded for the lexer buffer, according
+to how the buffer is currently being interpreted (L</lex_bufutf8>).
 
 =for apidoc Amnh||LEX_STUFF_UTF8
 
@@ -1240,54 +1254,12 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
     }
 }
 
-/*
-=for apidoc lex_stuff_pv
-
-Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
-immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
-reallocating the buffer if necessary.  This means that lexing code that
-runs later will see the characters as if they had appeared in the input.
-It is not recommended to do this as part of normal parsing, and most
-uses of this facility run the risk of the inserted characters being
-interpreted in an unintended manner.
-
-The string to be inserted is represented by octets starting at C<pv>
-and continuing to the first nul.  These octets are interpreted as either
-UTF-8 or Latin-1, according to whether the C<LEX_STUFF_UTF8> flag is set
-in C<flags>.  The characters are recoded for the lexer buffer, according
-to how the buffer is currently being interpreted (L</lex_bufutf8>).
-If it is not convenient to nul-terminate a string to be inserted, the
-L</lex_stuff_pvn> function is more appropriate.
-
-=cut
-*/
-
 void
 Perl_lex_stuff_pv(pTHX_ const char *pv, U32 flags)
 {
     PERL_ARGS_ASSERT_LEX_STUFF_PV;
     lex_stuff_pvn(pv, strlen(pv), flags);
 }
-
-/*
-=for apidoc lex_stuff_sv
-
-Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
-immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
-reallocating the buffer if necessary.  This means that lexing code that
-runs later will see the characters as if they had appeared in the input.
-It is not recommended to do this as part of normal parsing, and most
-uses of this facility run the risk of the inserted characters being
-interpreted in an unintended manner.
-
-The string to be inserted is the string value of C<sv>.  The characters
-are recoded for the lexer buffer, according to how the buffer is currently
-being interpreted (L</lex_bufutf8>).  If a string to be inserted is
-not already a Perl scalar, the L</lex_stuff_pvn> function avoids the
-need to construct a scalar.
-
-=cut
-*/
 
 void
 Perl_lex_stuff_sv(pTHX_ SV *sv, U32 flags)

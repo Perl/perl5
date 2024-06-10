@@ -430,11 +430,6 @@ Like C<hv_fetch>, but takes a literal string instead of a
 string/length pair.
 =for apidoc_section $lexer
 
-=for apidoc Amx|void|lex_stuff_pvs|"pv"|U32 flags
-
-Like L</lex_stuff_pvn>, but takes a literal string instead of
-a string/length pair.
-
 =cut
 */
 
@@ -483,6 +478,11 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define  gv_fetchpvn  gv_fetchpvn_flags
 
 
+/*
+=for apidoc_defn x|void|lex_stuff_pvs|"pv"|U32 flags
+
+=cut
+*/
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 
 #define get_cvs(str, flags)					\
