@@ -2695,15 +2695,12 @@ again) that hopefully catches attempts to access uninitialized memory.
 
 =for apidoc Am|void|PoisonNew|void* dest|int nitems|type
 
-PoisonWith(0xAB) for catching access to allocated but uninitialized memory.
+C<PoisonWith(0xAB)> for catching access to allocated but uninitialized memory.
 
-=for apidoc Am|void|PoisonFree|void* dest|int nitems|type
+=for apidoc   Am|void|PoisonFree|void* dest|int nitems|type
+=for apidoc_item|void|Poison    |void* dest|int nitems|type
 
-PoisonWith(0xEF) for catching access to freed memory.
-
-=for apidoc Am|void|Poison|void* dest|int nitems|type
-
-PoisonWith(0xEF) for catching access to freed memory.
+These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 =cut */
 
