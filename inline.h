@@ -2365,40 +2365,96 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
 /*
 
-=for apidoc isUTF8_CHAR
+=for apidoc      isUTF8_CHAR
+=for apidoc_item isSTRICT_UTF8_CHAR
+=for apidoc_item isC9_STRICT_UTF8_CHAR
+=for apidoc_item isUTF8_CHAR_flags
+=for apidoc_item is_utf8_char_buf
 
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
-that represents some code point; otherwise it evaluates to 0.  If non-zero, the
-value gives how many bytes starting at C<s> comprise the code point's
-representation.  Any bytes remaining before C<e>, but beyond the ones needed to
-form the first code point in C<s>, are not examined.
+These each evaluate to non-zero if the first few bytes of the string starting
+at C<s> and looking no further than S<C<e - 1>> are well-formed UTF-8 that
+represents some code point, for varying degrees of strictness.  Otherwise they
+evaluate to 0.  If non-zero, the value gives how many bytes starting at C<s>
+comprise the code point's representation.  Any bytes remaining before C<e>, but
+beyond the ones needed to form the first code point in C<s>, are not examined.
 
-The code point can be any that will fit in an IV on this machine, using Perl's
-extension to official UTF-8 to represent those higher than the Unicode maximum
-of 0x10FFFF.  That means that this macro is used to efficiently decide if the
-next few bytes in C<s> is legal UTF-8 for a single character.
+These are used to efficiently decide if the next few bytes in C<s> are
+legal UTF-8 for a single character.
 
-Use C<L</isSTRICT_UTF8_CHAR>> to restrict the acceptable code points to those
-defined by Unicode to be fully interchangeable across applications;
-C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
-#9|http://www.unicode.org/versions/corrigendum9.html> definition of allowable
-code points; and C<L</isUTF8_CHAR_flags>> for a more customized definition.
+With C<isUTF8_CHAR>, the code point can be any that will fit in an IV on this
+machine, using Perl's extension to official UTF-8 to represent those higher
+than the Unicode maximum of 0x10FFFF.  That means that this will consider valid
+bytes that are unrecognized or considered illegal by non-Perl applications.
 
-Use C<L</is_utf8_string>>, C<L</is_utf8_string_loc>>, and
-C<L</is_utf8_string_loclen>> to check entire strings.
+With C<L</isSTRICT_UTF8_CHAR>>, acceptable code points are restricted to those
+defined by Unicode to be fully interchangeable across applications.
+This means code points above the Unicode range (max legal is 0x10FFFF),
+surrogates, and non-character code points are rejected.
+
+With C<L</isC9_STRICT_UTF8_CHAR>>, acceptable code points are restricted to
+those defined by Unicode to be fully interchangeable within an application.
+This means code points above the Unicode range and surrogates are rejected, but
+non-character code points are accepted.  See L<Unicode Corrigendum
+#9|http://www.unicode.org/versions/corrigendum9.html>.
+
+Use C<L</isUTF8_CHAR_flags>> to customize what code points are acceptable.
+If C<flags> is 0, this gives the same results as C<L</isUTF8_CHAR>>;
+if C<flags> is C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, this gives the same results
+as C<L</isSTRICT_UTF8_CHAR>>;
+and if C<flags> is C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, this gives
+the same results as C<L</isC9_STRICT_UTF8_CHAR>>.
+Otherwise C<flags> may be any combination of the C<UTF8_DISALLOW_I<foo>> flags
+understood by C<L</utf8n_to_uvchr>>, with the same meanings.
+
+The three alternative macros are for the most commonly needed validations; they
+are likely to run somewhat faster than this more general one, as they can be
+inlined into your code.
+
+Use one of the C<L</is_utf8_string>> forms to check entire strings.
 
 Note also that a UTF-8 "invariant" character (i.e. ASCII on non-EBCDIC
 machines) is a valid UTF-8 character.
 
+C<is_utf8_char_buf> is the old name for C<isUTF8_CHAR>.  Do not use it in new
+code.
+
 =cut
 
-This uses an adaptation of the table and algorithm given in
-https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
-documentation of the original version.  A copyright notice for the original
-version is given at the beginning of this file.  The Perl adaptation is
-documented at the definition of PL_extended_utf8_dfa_tab[].
+All the functions except isUTF8_CHAR_flags) use adaptations of the table and
+algorithm given in https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which
+provides comprehensive documentation of the original version.  A copyright
+notice for the original version is given at the beginning of this file.
+
+The Perl adaptation for isUTF8_CHAR is documented at the definition of
+PL_extended_utf8_dfa_tab[].
+
+The Perl adaptation for isSTRICT_UTF8_CHAR is documented at the definition of
+PL_strict_utf8_dfa_tab[];
+
+The Perl adaptation for isC9_STRICT_UTF8_CHAR is documented at the definition
+of PL_c9_utf8_dfa_tab[].
+
 */
+
+PERL_STATIC_INLINE Size_t
+Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
+{
+    PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR;
+
+    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_strict_utf8_dfa_tab,
+                          DFA_RETURN_SUCCESS_,
+                          goto check_hanguls,
+                          DFA_RETURN_FAILURE_);
+  check_hanguls:
+
+    /* Here, we didn't return success, but dropped out of the loop.  In the
+     * case of PL_strict_utf8_dfa_tab, this means the input is either
+     * malformed, or was for certain Hanguls; handle them specially */
+
+    /* The dfa above drops out for incomplete or illegal inputs, and certain
+     * legal Hanguls; check and return accordingly */
+    return is_HANGUL_ED_utf8_safe(s0, e);
+}
 
 PERL_STATIC_INLINE Size_t
 Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
@@ -2432,98 +2488,6 @@ Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 #endif
 
 }
-
-/*
-
-=for apidoc isSTRICT_UTF8_CHAR
-
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
-Unicode code point completely acceptable for open interchange between all
-applications; otherwise it evaluates to 0.  If non-zero, the value gives how
-many bytes starting at C<s> comprise the code point's representation.  Any
-bytes remaining before C<e>, but beyond the ones needed to form the first code
-point in C<s>, are not examined.
-
-The largest acceptable code point is the Unicode maximum 0x10FFFF, and must not
-be a surrogate nor a non-character code point.  Thus this excludes any code
-point from Perl's extended UTF-8.
-
-This is used to efficiently decide if the next few bytes in C<s> is
-legal Unicode-acceptable UTF-8 for a single character.
-
-Use C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
-#9|http://www.unicode.org/versions/corrigendum9.html> definition of allowable
-code points; C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8;
-and C<L</isUTF8_CHAR_flags>> for a more customized definition.
-
-Use C<L</is_strict_utf8_string>>, C<L</is_strict_utf8_string_loc>>, and
-C<L</is_strict_utf8_string_loclen>> to check entire strings.
-
-=cut
-
-This uses an adaptation of the tables and algorithm given in
-https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
-documentation of the original version.  A copyright notice for the original
-version is given at the beginning of this file.  The Perl adaptation is
-documented at the definition of strict_extended_utf8_dfa_tab[].
-
-*/
-
-PERL_STATIC_INLINE Size_t
-Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
-{
-    PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR;
-
-    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_strict_utf8_dfa_tab,
-                          DFA_RETURN_SUCCESS_,
-                          goto check_hanguls,
-                          DFA_RETURN_FAILURE_);
-  check_hanguls:
-
-    /* Here, we didn't return success, but dropped out of the loop.  In the
-     * case of PL_strict_utf8_dfa_tab, this means the input is either
-     * malformed, or was for certain Hanguls; handle them specially */
-
-    /* The dfa above drops out for incomplete or illegal inputs, and certain
-     * legal Hanguls; check and return accordingly */
-    return is_HANGUL_ED_utf8_safe(s0, e);
-}
-
-/*
-
-=for apidoc isC9_STRICT_UTF8_CHAR
-
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
-Unicode non-surrogate code point; otherwise it evaluates to 0.  If non-zero,
-the value gives how many bytes starting at C<s> comprise the code point's
-representation.  Any bytes remaining before C<e>, but beyond the ones needed to
-form the first code point in C<s>, are not examined.
-
-The largest acceptable code point is the Unicode maximum 0x10FFFF.  This
-differs from C<L</isSTRICT_UTF8_CHAR>> only in that it accepts non-character
-code points.  This corresponds to
-L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
-which said that non-character code points are merely discouraged rather than
-completely forbidden in open interchange.  See
-L<perlunicode/Noncharacter code points>.
-
-Use C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8; and
-C<L</isUTF8_CHAR_flags>> for a more customized definition.
-
-Use C<L</is_c9strict_utf8_string>>, C<L</is_c9strict_utf8_string_loc>>, and
-C<L</is_c9strict_utf8_string_loclen>> to check entire strings.
-
-=cut
-
-This uses an adaptation of the tables and algorithm given in
-https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
-documentation of the original version.  A copyright notice for the original
-version is given at the beginning of this file.  The Perl adaptation is
-documented at the definition of PL_c9_utf8_dfa_tab[].
-
-*/
 
 PERL_STATIC_INLINE Size_t
 Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
@@ -3004,36 +2968,6 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
         return utf8_hop_back(s, off, start);
     }
 }
-
-/*
-
-=for apidoc isUTF8_CHAR_flags
-
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
-that represents some code point, subject to the restrictions given by C<flags>;
-otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
-starting at C<s> comprise the code point's representation.  Any bytes remaining
-before C<e>, but beyond the ones needed to form the first code point in C<s>,
-are not examined.
-
-If C<flags> is 0, this gives the same results as C<L</isUTF8_CHAR>>;
-if C<flags> is C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, this gives the same results
-as C<L</isSTRICT_UTF8_CHAR>>;
-and if C<flags> is C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, this gives
-the same results as C<L</isC9_STRICT_UTF8_CHAR>>.
-Otherwise C<flags> may be any combination of the C<UTF8_DISALLOW_I<foo>> flags
-understood by C<L</utf8n_to_uvchr>>, with the same meanings.
-
-The three alternative macros are for the most commonly needed validations; they
-are likely to run somewhat faster than this more general one, as they can be
-inlined into your code.
-
-Use L</is_utf8_string_flags>, L</is_utf8_string_loc_flags>, and
-L</is_utf8_string_loclen_flags> to check entire strings.
-
-=cut
-*/
 
 PERL_STATIC_INLINE STRLEN
 Perl_isUTF8_CHAR_flags(const U8 * const s0, const U8 * const e, const U32 flags)
