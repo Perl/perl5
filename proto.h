@@ -3037,7 +3037,7 @@ Perl_newSVpvf(pTHX_ const char * const pat, ...)
         assert(pat)
 
 PERL_CALLCONV SV *
-Perl_newSVpvn(pTHX_ const char * const buffer, const STRLEN len)
+Perl_newSVpvn(pTHX_ const char * const s, const STRLEN len)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVPVN
 

@@ -2289,7 +2289,7 @@ ARdp	|SV *	|newSVpv	|NULLOK const char * const s		\
 				|const STRLEN len
 ARdfpv	|SV *	|newSVpvf	|NN const char * const pat		\
 				|...
-ARdp	|SV *	|newSVpvn	|NULLOK const char * const buffer	\
+ARdp	|SV *	|newSVpvn	|NULLOK const char * const s		\
 				|const STRLEN len
 ARdp	|SV *	|newSVpvn_flags |NULLOK const char * const s		\
 				|const STRLEN len			\
