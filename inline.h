@@ -3780,13 +3780,20 @@ Perl_newPADxVOP(pTHX_ I32 type, I32 flags, PADOFFSET padix)
 /*
 =for apidoc_section $string
 
-=for apidoc foldEQ
+=for apidoc      foldEQ
+=for apidoc_item foldEQ_locale
 
-Returns true if the leading C<len> bytes of the strings C<s1> and C<s2> are the
-same
-case-insensitively; false otherwise.  Uppercase and lowercase ASCII range bytes
-match themselves and their opposite case counterparts.  Non-cased and non-ASCII
-range bytes match only themselves.
+These each return true if the leading C<len> bytes of the strings C<s1> and
+C<s2> are the same case-insensitively; false otherwise.
+
+In C<foldEQ>, uppercase and lowercase ASCII range bytes match themselves and
+their opposite case counterparts.  Non-cased and non-ASCII range bytes match
+only themselves.
+
+In C<foldEQ_locale>, the comparison is based on the current locale.
+If that locale is UTF-8, the results are the same as C<foldEQ>, leading to
+incorrect values for non-ASCII range code points.  Use C<L</foldEQ_utf8>>
+instead.
 
 =cut
 */
@@ -3836,16 +3843,6 @@ Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
     }
     return 1;
 }
-
-/*
-=for apidoc_section $locale
-=for apidoc foldEQ_locale
-
-Returns true if the leading C<len> bytes of the strings C<s1> and C<s2> are the
-same case-insensitively in the current locale; false otherwise.
-
-=cut
-*/
 
 PERL_STATIC_INLINE I32
 Perl_foldEQ_locale(pTHX_ const char *s1, const char *s2, I32 len)
