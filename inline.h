@@ -3002,17 +3002,20 @@ Perl_isUTF8_CHAR_flags(const U8 * const s0, const U8 * const e, const U32 flags)
 
 /*
 
-=for apidoc is_utf8_valid_partial_char
+=for apidoc      is_utf8_valid_partial_char
+=for apidoc_item is_utf8_valid_partial_char_flags
 
-Returns 0 if the sequence of bytes starting at C<s> and looking no further than
-S<C<e - 1>> is the UTF-8 encoding, as extended by Perl, for one or more code
-points.  Otherwise, it returns 1 if there exists at least one non-empty
-sequence of bytes that when appended to sequence C<s>, starting at position
-C<e> causes the entire sequence to be the well-formed UTF-8 of some code point;
-otherwise returns 0.
+These each return FALSE if the sequence of bytes starting at C<s> and looking no
+further than S<C<e - 1>> is the UTF-8 encoding for one or more code points.
+That is, FALSE is returned if C<s> points to at least one entire UTF-8 encoded
+character.
 
-In other words this returns TRUE if C<s> points to a partial UTF-8-encoded code
-point.
+Otherwise, they return TRUE if there exists at least one non-empty sequence of
+bytes that when appended to sequence C<s>, starting at position C<e> causes the
+entire sequence to be the well-formed UTF-8 of some code point
+
+In other words they return TRUE if C<s> points to an incomplete UTF-8-encoded
+code point; FALSE otherwise.
 
 This is useful when a fixed-length buffer is being tested for being well-formed
 UTF-8, but the final few bytes in it don't comprise a full character; that is,
@@ -3023,31 +3026,23 @@ function is used to verify that the final bytes in the current buffer are in
 fact the legal beginning of some code point, so that if they aren't, the
 failure can be signalled without having to wait for the next read.
 
+C<is_utf8_valid_partial_char> behaves identically to
+C<is_utf8_valid_partial_char_flags> when the latter is called with a zero
+C<flags> parameter.  This parameter is used to restrict the classes of code
+points that are considered to be valid.  When zero, Perl's extended UTF-8 is
+used.  Otherwise C<flags> can be any combination of the C<UTF8_DISALLOW_I<foo>>
+flags accepted by C<L</utf8n_to_uvchr>>.  If there is any sequence of bytes
+that can complete the input partial character in such a way that a
+non-prohibited character is formed, the function returns TRUE; otherwise FALSE.
+Non-character code points cannot be determined based on partial character
+input, so TRUE is always returned if C<s> looks like it could be the beginning
+on one of those.  But many  of the other possible excluded types can be
+determined from just the first one or two bytes.
+
 =cut
 */
 #define is_utf8_valid_partial_char(s, e)                                    \
                                 is_utf8_valid_partial_char_flags(s, e, 0)
-
-/*
-
-=for apidoc is_utf8_valid_partial_char_flags
-
-Like C<L</is_utf8_valid_partial_char>>, it returns a boolean giving whether
-or not the input is a valid UTF-8 encoded partial character, but it takes an
-extra parameter, C<flags>, which can further restrict which code points are
-considered valid.
-
-If C<flags> is 0, this behaves identically to
-C<L</is_utf8_valid_partial_char>>.  Otherwise C<flags> can be any combination
-of the C<UTF8_DISALLOW_I<foo>> flags accepted by C<L</utf8n_to_uvchr>>.  If
-there is any sequence of bytes that can complete the input partial character in
-such a way that a non-prohibited character is formed, the function returns
-TRUE; otherwise FALSE.  Non character code points cannot be determined based on
-partial character input.  But many  of the other possible excluded types can be
-determined from just the first one or two bytes.
-
-=cut
- */
 
 PERL_STATIC_INLINE bool
 Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, const U32 flags)
@@ -3083,7 +3078,7 @@ Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, c
     if (   *s0 != I8_TO_NATIVE_UTF8(0xFF)
         || (flags & (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_PERL_EXTENDED)))
     {
-        return 0;
+        return FALSE;
     }
 
     return is_utf8_FF_helper_(s0, e,
