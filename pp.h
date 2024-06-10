@@ -177,12 +177,11 @@ See C<L</PUSHMARK>> and L<perlcall> for other uses.
 =for apidoc Amn|SV*|POPs
 Pops an SV off the stack.
 
-=for apidoc Amn|char*|POPp
-Pops a string off the stack.
+=for apidoc      Amn|char*|POPp
+=for apidoc_item    |char*|POPpx
 
-=for apidoc Amn|char*|POPpx
-Pops a string off the stack.  Identical to POPp.  There are two names for
-historical reasons.
+These each pop a string off the stack.
+There are two names for historical reasons.
 
 =for apidoc Amn|char*|POPpbytex
 Pops a string off the stack which must consist of bytes i.e. characters < 256.
