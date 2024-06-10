@@ -7904,12 +7904,39 @@ S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const target,
 }
 
 /*
-=for apidoc sv_pos_b2u_flags
 
-Converts C<offset> from a count of bytes from the start of the string, to
-a count of the equivalent number of UTF-8 chars.  Handles type coercion.
-C<flags> is passed to C<SvPV_flags>, and usually should be
-C<SV_GMAGIC|SV_CONST_RETURN> to handle magic.
+=for apidoc      sv_pos_b2u
+=for apidoc_item sv_pos_b2u_flags
+
+These each count the number of UTF-8 encoded characters in the PV of C<sv>.
+The entire PV is not necessarily looked at, just the first so-many bytes.
+The byte count is given by C<*offsetp> in C<sv_pos_b2u>, and by C<offset> in
+C<sv_pos_b2u_flags>.
+
+The caller must ensure that the PV contains at least as many bytes as the count
+passed in.
+
+C<sv_pos_b2u> returns C<void>, instead updating C<*offsetp> to the character
+count.
+C<sv_pos_b2u_flags> returns the character count.
+
+C<sv_pos_b2u_flags> is preferred as C<offsetp> is a C<*I32>, which limits the
+size it can handle to 2Gb.
+
+Both handle type coercion.
+
+C<sv_pos_b2u> always handles 'get' magic.
+C<sv_pos_b2u_flags> only handles 'get' magic when C<flags> contains
+C<SV_GMAGIC>.
+
+In fact, C<sv_pos_b2u_flags> passes C<flags> to C<SvPV_flags>, and C<flags>
+usually should be C<SV_GMAGIC|SV_CONST_RETURN>.
+C<sv_pos_b2u> automatically causes C<SV_CONST_RETURN> to be passed to
+C<SvPV_flags>.
+
+Both functions use and update C<PERL_MAGIC_utf8>.
+
+=for apidoc Amnh||PERL_MAGIC_utf8
 
 =cut
 */
@@ -8006,19 +8033,6 @@ Perl_sv_pos_b2u_flags(pTHX_ SV *const sv, STRLEN const offset, U32 flags)
 
     return len;
 }
-
-/*
-=for apidoc sv_pos_b2u
-
-Converts the value pointed to by C<offsetp> from a count of bytes from the
-start of the string, to a count of the equivalent number of UTF-8 chars.
-Handles magic and type coercion.
-
-Use C<sv_pos_b2u_flags> in preference, which correctly handles strings
-longer than 2Gb.
-
-=cut
-*/
 
 /*
  * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
