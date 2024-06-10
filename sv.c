@@ -9535,17 +9535,18 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
     } STMT_END
 
 /*
-=for apidoc sv_mortalcopy
+=for apidoc      sv_mortalcopy
+=for apidoc_item sv_mortalcopy_flags
 
-Creates a new SV which is a copy of the original SV (using C<sv_setsv>).
-The new SV is marked as mortal.  It will be destroyed "soon", either by an
+These each create a new SV which is a copy of the original SV (using
+C<L</sv_setsv>>).  The new SV is marked as mortal.  It will be destroyed
+"soon", either by an
 explicit call to C<FREETMPS>, or by an implicit call at places such as
 statement boundaries.  See also C<L</sv_newmortal>> and C<L</sv_2mortal>>.
 
-=for apidoc sv_mortalcopy_flags
-
-Like C<sv_mortalcopy>, but the extra C<flags> are passed to the
-C<sv_setsv_flags>.
+The two forms are identical, except C<sv_mortalcopy_flags> has an extra
+C<flags> parameter, the contents of which are passed along to
+C<L</sv_setsv_flags>>.
 
 =cut
 */
