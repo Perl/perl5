@@ -11583,20 +11583,60 @@ Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 =for apidoc_item sv_setpvf_mg
 =for apidoc_item sv_setpvf_mg_nocontext
 =for apidoc_item sv_setpvf_nocontext
+=for apidoc_item sv_vsetpvf
+=for apidoc_item sv_vsetpvf_mg
+=for apidoc_item sv_vsetpvfn
 
-These work like C<L</sv_catpvf>> but copy the text into the SV instead of
-appending it.
+These each set C<sv> to the result of formatting their arguments using
+C<pat> as the C<sprintf>-like pattern.  They assume that C<pat> has the same
+UTF8ness as C<sv>.  It's the caller's responsibility to ensure that this is
+so.
 
-The differences between these are:
+The forms differ in how their arguments are specified and in the handling of
+magic.
 
-C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> perform 'set' magic; C<sv_setpvf>
-and C<sv_setpvf_nocontext> skip all magic.
+C<sv_vsetpvfn> is the most general, and all the other forms are implemented by
+eventually calling it.  It does not handle magic; the forms whose name contains
+C<_mg> additionally handle 'set' magic after calling it.
 
-C<sv_setpvf_nocontext> and C<sv_setpvf_mg_nocontext> do not take a thread
+It has two sets of argument lists, only one of which is used in any given call.
+The first set, C<args>, is an encapsulated argument list of pointers to C
+strings.  If it is NULL, the other list, C<svargs>, is used; it is an array
+of pointers to SV's.  C<sv_count> gives how many there are in the list.
+
+See L<C<sprintf(3)>> for details on how the formatting is done.  Some
+platforms support extensions to the standard C99 definition of this function.
+None of those are supported by Perl.  For example, neither C<'> (to get digit
+grouping), nor C<I> (to get alternate digits) are supported.
+
+Also, argument reordering (using format specifiers like C<%2$d> or C<%*2$d>) is
+supported only when using the C<svargs> array of SVs; an exception is raised if
+C<arg> is not NULL and C<pat> contains the C<$> reordering specifier.
+
+S<C<* maybe_tainted>> is supposed to be set when running with taint checks
+enabled if the results are untrustworthy (often due to the use of locales).
+However, this is not currently implemented.  This argument is not used.
+
+C<patlen> gives the length in bytes of C<pat>.  Currently, the pattern must be
+NUL-terminated anyway.
+
+When using the C<svargs> array, if any of the SVs in it have their UTF-8 flag
+set, C<sv> will be converted to be so too, as necessary.
+
+None of the remaining forms use the C<svargs> array, meaning argument
+reordering is not possible with them.  The arguments are generally considered
+to be the same UTF8ness as the destination C<sv>, though certain Perl
+extensions to the standard set of %formats can override this  (see
+L<perlguts/Formatted Printing of Strings> and adjacent sections).
+
+The forms whose name contains C<_no_context> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
 doesn't already have the thread context.
 
-B<The UTF-8 flag is not changed by these functions.>
+The forms whose name contains C<vset> use an encapsulated argument list, the
+other forms use C<sprintf>-style arguments.
+
+There are no other differences between the forms.
 
 =cut
 */
@@ -11612,24 +11652,6 @@ Perl_sv_setpvf(pTHX_ SV *const sv, const char *const pat, ...)
     sv_vsetpvf(sv, pat, &args);
     va_end(args);
 }
-
-/*
-=for apidoc sv_vsetpvf
-=for apidoc_item sv_vsetpvf_mg
-
-These work like C<L</sv_vcatpvf>> but copy the text into the SV instead of
-appending it.
-
-They differ only in that C<sv_vsetpvf_mg> performs 'set' magic;
-C<sv_vsetpvf> skips all magic.
-
-They are usually used via their frontends, C<L</sv_setpvf>> and
-C<L</sv_setpvf_mg>>.
-
-B<The UTF-8 flag is not changed by these functions.>
-
-=cut
-*/
 
 void
 Perl_sv_vsetpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
@@ -11819,20 +11841,6 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const arg
     sv_vcatpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     SvSETMAGIC(sv);
 }
-
-/*
-=for apidoc sv_vsetpvfn
-
-Works like C<sv_vcatpvfn> but copies the text into the SV instead of
-appending it.
-
-B<The UTF-8 flag is not changed by this function.>
-
-Usually used via one of its frontends L</C<sv_vsetpvf>> and
-L</C<sv_vsetpvf_mg>>.
-
-=cut
-*/
 
 void
 Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
