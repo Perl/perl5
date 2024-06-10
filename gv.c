@@ -618,7 +618,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_finally:
     case KEY_for     : case KEY_foreach: case KEY_format: case KEY_ge     :
     case KEY_given   : case KEY_goto   : case KEY_grep  : case KEY_gt     :
-    case KEY_if      : case KEY_isa    : 
+    case KEY_if      : case KEY_isa    :
     case KEY_last   :
     case KEY_le      : case KEY_local  : case KEY_lt    : case KEY_m      :
     case KEY_map     : case KEY_method : case KEY_my    :
@@ -1325,8 +1325,8 @@ In C<gv_autoload_sv>, C<*namesv> is an SV, and the name is the PV extracted
 from that using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the
 extracted PV will also be.
 
-The other way to indicate that the name is encoded as UTF-8 is to set the 
-C<SVf_UTF8> bit in C<flags> for the forms that have that parameter.  
+The other way to indicate that the name is encoded as UTF-8 is to set the
+C<SVf_UTF8> bit in C<flags> for the forms that have that parameter.
 The name is never considered to be UTF-8 in C<gv_autoload4>.
 
 The C<method> parameter in C<gv_autoload4> is used only to indicate that the
