@@ -1947,25 +1947,6 @@ Perl_croak_popstack(void)
     my_exit(1);
 }
 
-/*
-=for apidoc warn_sv
-
-This is an XS interface to Perl's C<warn> function.
-
-C<baseex> is the error message or object.  If it is a reference, it
-will be used as-is.  Otherwise it is used as a string, and if it does
-not end with a newline then it will be extended with some indication of
-the current location in the code, as described for L</mess_sv>.
-
-The error message or object will by default be written to standard error,
-but this is subject to modification by a C<$SIG{__WARN__}> handler.
-
-To warn with a simple string message, the L</warn> function may be
-more convenient.
-
-=cut
-*/
-
 void
 Perl_warn_sv(pTHX_ SV *baseex)
 {
@@ -1974,19 +1955,6 @@ Perl_warn_sv(pTHX_ SV *baseex)
     if (!invoke_exception_hook(ex, TRUE))
         write_to_stderr(ex);
 }
-
-/*
-=for apidoc vwarn
-
-This is an XS interface to Perl's C<warn> function.
-
-This is like C<L</warn>>, but C<args> are an encapsulated
-argument list.
-
-Unlike with L</vcroak>, C<pat> is not permitted to be null.
-
-=cut
-*/
 
 void
 Perl_vwarn(pTHX_ const char* pat, va_list *args)
@@ -1998,22 +1966,31 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 }
 
 /*
-=for apidoc warn
+=for apidoc      warn
 =for apidoc_item warn_nocontext
+=for apidoc_item warn_sv
+=for apidoc_item vwarn
 
 These are XS interfaces to Perl's C<warn> function.
 
-They take a sprintf-style format pattern and argument list, which  are used to
-generate a string message.  If the message does not end with a newline, then it
-will be extended with some indication of the current location in the code, as
-described for C<L</mess_sv>>.
+The arguments are used to generate a string message.  If the message does not
+end with a newline, it will be extended with some indication of the current
+location in the code, as described for C<L</mess_sv>>.
 
-The error message or object will by default be written to standard error,
+The message or object will by default be written to standard error,
 but this is subject to modification by a C<$SIG{__WARN__}> handler.
 
-Unlike with C<L</croak>>, C<pat> is not permitted to be null.
+In C<warn_sv>, C<baseex> is the message or object.  If it
+is a reference, it will be used as-is.  Otherwise it is used as a string.
 
 __PLAIN_vs_NOCONTEXT_wording__(warn)
+
+The arguments to C<vwarn> are specified as a C<va_list>.  The arguments to the
+remaining forms are specified as a sprintf-style list of arguments.
+
+Unlike with the C<L</croak>> functions, C<pat> is not permitted to be null.
+
+See also C<L</warner>>.
 
 =cut
 */
