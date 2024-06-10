@@ -2738,22 +2738,23 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 }
 
 /*
-=for apidoc sv_dump
+=for apidoc      sv_dump
+=for apidoc_item sv_dump_depth
 
-Dumps the contents of an SV to the C<STDERR> filehandle.
+These each dump the contents of an SV to the C<STDERR> filehandle.
 
-For an example of its output, see L<Devel::Peek>. If
-the item is an SvROK it will dump items to a depth of 4,
-otherwise it will dump only the top level item, which
-means that it will not dump the contents of an AV * or
-HV *. For that use C<av_dump()> or C<hv_dump()>.
+C<sv_dump_depth> is a more flexible variant of C<sv_dump>, taking an extra
+parameter giving the maximum depth to dump.
 
-=for apidoc sv_dump_depth
+C<sv_dump> is limited to dumping items to a depth of 4 if the item is an SvROK,
+and dumping only the top level item otherwise.  This means that it will not
+dump the contents of an S<C<AV *>> or S<C<HV *>>. For that use C<L</av_dump>>
+or C<L</hv_dump>>.
 
-Dumps the contents of an SV to the C<STDERR> filehandle
-to the depth requested. This function can be used on any
-SV derived type (GV, HV, AV) with an appropriate cast.
-This is a more flexible variant of sv_dump(). For example
+For an example of its output, see L<Devel::Peek>.
+
+In contrast, C<sv_dump_depth> can be used on any SV derived type (GV, HV, AV)
+with an appropriate cast:
 
     HV *hv = ...;
     sv_dump_depth((SV*)hv, 2);
