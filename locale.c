@@ -6030,29 +6030,35 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 /*
 
-=for apidoc      Perl_langinfo
+=for apidoc_section $locale
+=for apidoc      sv_langinfo
+=for apidoc_item Perl_langinfo
 =for apidoc_item Perl_langinfo8
 
-C<Perl_langinfo> is an (almost) drop-in replacement for the system
-C<L<nl_langinfo(3)>>, taking the same C<item> parameter values, and returning
-the same information.  But it is more thread-safe than regular
-C<nl_langinfo()>, and hides the quirks of Perl's locale handling from your
-code, and can be used on systems that lack a native C<nl_langinfo>.
+These perform the equivalent functionality as the system C<L<nl_langinfo(3)>>,
+taking the same C<item> parameter values, but are preferred over calling that
+directly because they are portable to platforms lacking that function, are
+thread-safe, and can automatically handle UTF-8 strings.
 
-However, you should instead use either the improved version of this,
-L</Perl_langinfo8>, or even better, L</sv_langinfo>.  The latter returns an SV,
-handling all the possible non-standard returns of C<nl_langinfo()>, including
-the UTF8ness of any returned string.
+The simplest to use is C<sv_langinfo>.  It returns an SV containing the correct
+PV and UTF8ness, requiring no extra muss or fuss from you.  New code should use
+this form.
+
+C<Perl_langinfo> and C<Perl_langinfo8> are retained for backwards
+compatibility.  C<Perl_langinfo> is an (almost) drop-in replacement for the
+system C<L<nl_langinfo(3)>>, but exists on systems that lack a native
+C<nl_langinfo>.
 
 C<Perl_langinfo8> is identical to C<Perl_langinfo> except for an additional
-parameter, a pointer to a variable declared as L</C<utf8ness_t>>, into which it
+parameter, a pointer to a variable declared as C<L</utf8ness_t>>, into which it
 returns to you how you should treat the returned string with regards to it
 being encoded in UTF-8 or not.
 
-These two functions share private per-thread memory that will be changed the
-next time either one of them is called with any input, but not before.
+C<Perl_langinfo> and C<Perl_langinfo8> share private per-thread memory that
+will be changed the next time either one of them is called with any input, but
+not before.
 
-Concerning the differences between these and plain C<nl_langinfo()>:
+Concerning the differences between these functions and plain C<nl_langinfo()>:
 
 =over
 
@@ -6081,14 +6087,15 @@ the other advantages of C<Perl_langinfo()>; not keeping C<LC_NUMERIC> in the C
 
 The system function they replace can have its static return buffer trashed,
 not only by a subsequent call to that function, but by a C<freelocale>,
-C<setlocale>, or other locale change.  The returned buffer of these functions
-is not changed until the next call to one or the other, so the buffer is never
-in a trashed state.
+C<setlocale>, or other locale change.  C<sv_langinfo> sidesteps this problem
+entirely; the returned buffer of the other two is not changed until the next
+call to one or the other, so the buffer is never in a trashed state.
 
 =item d.
 
-The return buffer is per-thread, so it also is never overwritten by a call to
-these functions from another thread;  unlike the function it replaces.
+The return buffer of C<Perl_langinfo> and C<Perl_langinfo8> is per-thread  so
+it also is never overwritten by a call to these functions from another thread;
+unlike the function they replace.
 
 =item e.
 
@@ -6119,22 +6126,6 @@ L<C<POSIX::localeconv()>|POSIX/localeconv>, which is also thread-safe.
 The details for those items which may deviate from what this emulation returns
 and what a native C<nl_langinfo()> would return are specified in
 L<I18N::Langinfo>.
-
-=for apidoc  sv_langinfo
-
-This is the preferred interface for accessing the data that L<nl_langinfo(3)>
-provides (or Perl's emulation of it on platforms lacking it), returning an SV.
-Unlike, the earlier-defined interfaces to this (L</Perl_langinfo> and
-L</Perl_langinfo8>), which return strings, the UTF8ness of the result is
-automatically handled for you.  And like them, it is thread-safe and
-automatically handles getting the proper values for the C<RADIXCHAR> and
-C<THOUSEP> items (that calling the plain libc C<nl_langinfo()> could give the
-wrong results for).  Like them, this also doesn't play well with the libc
-C<localeconv()>; use L<C<POSIX::localeconv()>|POSIX/localeconv> instead.
-
-There are a few deviations from what a native C<nl_langinfo()> would return and
-what this returns on platforms that don't implement that function.  These are
-detailed in L<I18N::Langinfo>.
 
 =cut
 
