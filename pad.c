@@ -53,7 +53,7 @@ AV which is C<@_>.  Other entries are storage for variables and op targets.
 
 Iterating over the PADNAMELIST iterates over all possible pad
 items.  Pad slots for targets (C<SVs_PADTMP>)
-and GVs end up having &PL_padname_undef "names", while slots for constants 
+and GVs end up having &PL_padname_undef "names", while slots for constants
 have C<&PL_padname_const> "names" (see C<L</pad_alloc>>).  That
 C<&PL_padname_undef>
 and C<&PL_padname_const> are used is an implementation detail subject to
@@ -581,15 +581,17 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 }
 
 /*
-=for apidoc pad_add_name_pvn
+=for apidoc      pad_add_name_pv
+=for apidoc_item pad_add_name_pvn
+=for apidoc_item pad_add_name_sv
 
-Allocates a place in the currently-compiling pad for a named lexical
-variable.  Stores the name and other metadata in the name part of the
-pad, and makes preparations to manage the variable's lexical scoping.
-Returns the offset of the allocated pad slot.
+These each allocate a place in the currently-compiling pad for a named lexical
+variable.  They store the name and other metadata in the name part of the
+pad, and make preparations to manage the variable's lexical scoping.
+They return the offset of the allocated pad slot.
 
-C<namepv>/C<namelen> specify the variable's name in UTF-8, including
-leading sigil.
+They differ only in how the input variable's name is specified.
+
 If C<typestash> is non-null, the name is for a typed lexical, and this
 identifies the type.  If C<ourstash> is non-null, it's a lexical reference
 to a package variable, and this identifies the package.  The following
@@ -599,6 +601,18 @@ flags can be OR'ed together:
  padadd_STATE        variable will retain value persistently
  padadd_NO_DUP_CHECK skip check for lexical shadowing
  padadd_FIELD        specifies that the lexical is a field for a class
+
+In all forms, the variable name must include the leading sigil.
+
+In C<pad_add_name_sv>, the input name is taken from the SV parameter using
+C<L</SvPVutf8>()>.
+
+In C<pad_add_name_pv>, the input name is a NUL-terminated string, which must be
+encoded in UTF-8.
+
+In C<pad_add_name_pvn>, C<namelen> gives the length of the input name in bytes,
+which means it may contain embedded NUL characters.  Again, it must be encoded
+in UTF-8.
 
 =cut
 */
@@ -654,15 +668,6 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     return offset;
 }
 
-/*
-=for apidoc pad_add_name_pv
-
-Exactly like L</pad_add_name_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
-
 PADOFFSET
 Perl_pad_add_name_pv(pTHX_ const char *name,
                      const U32 flags, HV *typestash, HV *ourstash)
@@ -670,15 +675,6 @@ Perl_pad_add_name_pv(pTHX_ const char *name,
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PV;
     return pad_add_name_pvn(name, strlen(name), flags, typestash, ourstash);
 }
-
-/*
-=for apidoc pad_add_name_sv
-
-Exactly like L</pad_add_name_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
-
-=cut
-*/
 
 PADOFFSET
 Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
