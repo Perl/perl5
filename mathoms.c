@@ -804,14 +804,6 @@ Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
     sv_copypv_flags(dsv, ssv, SV_GMAGIC);
 }
 
-/*
-=for apidoc_section $unicode
-=for apidoc is_utf8_char_buf
-
-This is identical to the macro L<perlapi/isUTF8_CHAR>.
-
-=cut */
-
 STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 {
