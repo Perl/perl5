@@ -144,22 +144,6 @@ Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
     }
 }
 
-/*
-=for apidoc av_push_simple
-
-This is a cut-down version of av_push that assumes that the array is very
-straightforward - no magic, not readonly, and AvREAL - and that C<key> is
-not less than -1. This function MUST NOT be used in situations where any
-of those assumptions may not hold.
-
-Pushes an SV (transferring control of one reference count) onto the end of the
-array.  The array will grow automatically to accommodate the addition.
-
-Perl equivalent: C<push @myarray, $val;>.
-
-=cut
-*/
-
 PERL_STATIC_INLINE void
 Perl_av_push_simple(pTHX_ AV *av, SV *val)
 {
