@@ -331,9 +331,13 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *st)
 }
 
 /*
-=for apidoc gv_init_pvn
 
-Converts a scalar into a typeglob.  This is an incoercible typeglob;
+=for apidoc      gv_init
+=for apidoc_item gv_init_pv
+=for apidoc_item gv_init_pvn
+=for apidoc_item gv_init_sv
+
+These each convert a scalar into a typeglob.  This is an incoercible typeglob;
 assigning a reference to it will assign to one of its slots, instead of
 overwriting it as happens with typeglobs created by C<SvSetSV>.  Converting
 any scalar that is C<SvOK()> may produce unpredictable results and is reserved
@@ -343,34 +347,33 @@ C<gv> is the scalar to be converted.
 
 C<stash> is the parent stash/package, if any.
 
-C<name> and C<len> give the name.  The name must be unqualified;
-that is, it must not include the package name.  If C<gv> is a
-stash element, it is the caller's responsibility to ensure that the name
-passed to this function matches the name of the element.  If it does not
-match, perl's internal bookkeeping will get out of sync.
+In C<gv_init> and C<gv_init_pvn>, C<name> and C<len> give the name.  The name
+must be unqualified; that is, it must not include the package name.  If C<gv>
+is a stash element, it is the caller's responsibility to ensure that the name
+passed to this function matches the name of the element.  If it does not match,
+perl's internal bookkeeping will get out of sync. C<name> may contain embedded
+NUL characters.
 
-C<flags> can be set to C<SVf_UTF8> if C<name> is a UTF-8 string, or
-the return value of SvUTF8(sv).  It can also take the
-C<GV_ADDMULTI> flag, which means to pretend that the GV has been
-seen before (i.e., suppress "Used once" warnings).
+C<gv_init_pv> is identical to C<gv_init_pvn>, but takes a NUL-terminated string
+for the name instead of separate char * and length parameters.
+
+In C<gv_init_sv>, the name is given by C<sv>.
+
+All but C<gv_init> take a C<flags> parameter.  Set C<flags> to include
+C<SVf_UTF8> if C<name> is a UTF-8 string.  In C<gv_init_sv>, if C<SvUTF8(sv)>
+is non-zero, name will be also be considered to be a UTF-8 string.  It's
+unlikely to be a good idea to pass this particular flag to C<gv_init_sv>, as
+that would potentially override the (presumaby known) state of C<sv>.
+
+C<flags> can also take the C<GV_ADDMULTI> flag, which means to pretend that the
+GV has been seen before (i.e., suppress "Used once" warnings).
+
+C<gv_init> is the old form of C<gv_init_pvn>.  It does not work with UTF-8
+strings, as it has no flags parameter.  Setting the C<multi> parameter to
+non-zero has the same effect as setting the C<GV_ADDMULTI> flag in the other
+forms.
 
 =for apidoc Amnh||GV_ADDMULTI
-
-=for apidoc gv_init
-
-The old form of C<gv_init_pvn()>.  It does not work with UTF-8 strings, as it
-has no flags parameter.  If the C<multi> parameter is set, the
-C<GV_ADDMULTI> flag will be passed to C<gv_init_pvn()>.
-
-=for apidoc gv_init_pv
-
-Same as C<gv_init_pvn()>, but takes a nul-terminated string for the name
-instead of separate char * and length parameters.
-
-=for apidoc gv_init_sv
-
-Same as C<gv_init_pvn()>, but takes an SV * for the name instead of separate
-char * and length parameters.  C<flags> is currently unused.
 
 =cut
 */
