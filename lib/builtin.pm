@@ -1,13 +1,11 @@
-package builtin 0.014;
+package builtin 0.015;
 
-use strict;
-use warnings;
+use v5.40;
 
 # All code, including &import, is implemented by always-present
 # functions in the perl interpreter itself.
 # See also `builtin.c` in perl source
 
-1;
 __END__
 
 =head1 NAME
