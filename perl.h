@@ -3110,10 +3110,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #define my_atof2(a,b) my_atof3(a,b,0)
 
 /*
-=for apidoc AmTR|NV|Atof|NN const char * const s
-
-This is a synonym for L</C<my_atof>>.
-
+=for apidoc_defn AmTR|NV|Atof|NN const char * const s
 =cut
 
 */
