@@ -1470,19 +1470,24 @@ Perl_vform(pTHX_ const char *pat, va_list *args)
 /*
 =for apidoc mess
 =for apidoc_item mess_nocontext
+=for apidoc_item vmess
 
-These take a sprintf-style format pattern and argument list, which are used to
-generate a string message.  If the message does not end with a newline, then it
-will be extended with some indication of the current location in the code, as
-described for C<L</mess_sv>>.
+These each take a sprintf-style format pattern and argument list, which are
+used to generate a string message.  If the message does not end with a newline,
+then it will be extended with some indication of the current location in the
+code, as described for C<L</mess_sv>>.
+
+C<mess> and C<mess_nocontext> differ only in that C<mess_nocontext> does
+not take a thread context (C<aTHX>) parameter, so is used in situations where
+the caller doesn't already have the thread context.
+
+C<vmess> is the same as C<mess> except the arguments are an encapsulated
+argument list.  It needs a thread context parameter only when called with the
+C<Perl_> prefix.
 
 Normally, the resulting message is returned in a new mortal SV.
 But during global destruction a single SV may be shared between uses of
 this function.
-
-The two forms differ only in that C<mess_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
 
 =cut
 */
@@ -1656,23 +1661,6 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
     }
     return sv;
 }
-
-/*
-=for apidoc vmess
-
-C<pat> and C<args> are a sprintf-style format pattern and encapsulated
-argument list, respectively.  These are used to generate a string message.  If
-the
-message does not end with a newline, then it will be extended with
-some indication of the current location in the code, as described for
-L</mess_sv>.
-
-Normally, the resulting message is returned in a new mortal SV.
-During global destruction a single SV may be shared between uses of
-this function.
-
-=cut
-*/
 
 SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
