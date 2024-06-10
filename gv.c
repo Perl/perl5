@@ -723,55 +723,101 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 
 /*
 =for apidoc      gv_fetchmeth
+=for apidoc_item gv_fetchmeth_autoload
 =for apidoc_item gv_fetchmeth_pv
+=for apidoc_item gv_fetchmeth_pv_autoload
 =for apidoc_item gv_fetchmeth_pvn
+=for apidoc_item gv_fetchmeth_pvn_autoload
 =for apidoc_item gv_fetchmeth_sv
+=for apidoc_item gv_fetchmeth_sv_autoload
 
 These each look for a glob with name C<name>, containing a defined subroutine,
 returning the GV of that glob if found, or C<NULL> if not.
 
-C<stash> is always searched (first), unless it is C<NULL>.
+You probably want to use the C<L</gv_fetchmethod>> family of functions
+instead.
 
-If C<stash> is NULL, or was searched but nothing was found in it, and the
-C<GV_SUPER> bit is set in C<flags>, stashes accessible via C<@ISA> are searched
-next.  Searching is conducted according to L<C<MRO> order|perlmroapi>.
+Searching is always done in the following order, with some steps skipped
+depending on various criteria.  The first match found is used, ending the
+search.  C<gv_fetchmeth_pv> and C<gv_fetchmeth_pv_autoload> lack a flags
+parameter, so in the following, consider C<flags> to be zero for those two
+functions.
 
-Finally, if no matches were found so far, and the C<GV_NOUNIVERSAL> flag in
-C<flags> is not set,  C<UNIVERSAL::> is searched.
+=over
 
-The argument C<level> should be either 0 or -1.  If -1, the function will
-return without any side effects or caching.  If 0, the function makes sure
-there is a glob named C<name> in C<stash>, creating one if necessary.
-The subroutine slot in the glob will be set to any subroutine found in the
-C<stash> and C<SUPER::> search, hence caching any C<SUPER::> result.  Note that
-subroutines found in C<UNIVERSAL::> are not cached.
+=item 1
+
+C<stash> is searched first, unless C<stash> either is NULL or C<GV_SUPER> is
+set in C<flags>.
+
+=item 2
+
+Stashes accessible via C<@ISA> are searched next.
+
+Searching is conducted according to L<C<MRO> order|perlmroapi>.
+
+=item 3
+
+C<UNIVERSAL::> is searched unless C<GV_NOUNIVERSAL> is set.
+
+=item 4
+
+Autoloaded subroutines are then looked for, but only for the forms whose names
+end in C<_autoload>, and when C<stash> is not NULL and C<GV_SUPER> is not set.
+
+=back
+
+The argument C<level> should be either 0 or -1.
+
+=over
+
+=item If -1
+
+No method caching is done.
+
+=item If 0
+
+If C<GV_SUPER> is not set in C<flags>, the method found is cached in C<stash>.
+
+If C<GV_SUPER> is set in C<flags>, the method is cached in the super
+cache for C<stash>.
+
+If the method is not found a negative cache entry is added.
+
+Note that subroutines found in C<UNIVERSAL::> are not cached,
+though this may change.
+
+=back
 
 The GV returned from these may be a method cache entry, which is not visible to
-Perl code.  So when calling C<call_sv>, you should not use the GV directly;
+Perl code.  So when calling C<L</call_sv>>, you should not use the GV directly;
 instead, you should use the method's CV, which can be obtained from the GV with
-the C<GvCV> macro.
+the C<GvCV> macro.  For an autoloaded subroutine without a stub, C<GvCV()> of
+the result may be zero.
 
 The only other significant value for C<flags> is C<SVf_UTF8>, indicating that
-C<name> is to be treated as being encoded in UTF-8.
+C<name> is to be treated as being encoded in UTF-8.  Since plain
+C<gv_fetchmeth> and C<gv_fetchmeth_autoload> lack a C<flags> parameter, C<name>
+is never UTF-8.
 
-Plain C<gv_fetchmeth> lacks a C<flags> parameter, hence always searches in
-C<stash>, then C<UNIVERSAL::>, and C<name> is never UTF-8.  Otherwise it is
-exactly like C<gv_fetchmeth_pvn>.
+Otherwise, the functions behave identically, except as noted below.
 
-The other forms do have a C<flags> parameter, and differ only in how the glob
-name is specified.
+In C<gv_fetchmeth_pv> and C<gv_fetchmeth_pv_autoload>, C<name> is a C language
+NUL-terminated string.
 
-In C<gv_fetchmeth_pv>, C<name> is a C language NUL-terminated string.
+In C<gv_fetchmeth>, C<gv_fetchmeth_pvn>, C<gv_fetchmeth_autoload>, and
+C<gv_fetchmeth_pvn_autoload>, C<name> points to the first byte of the name, and
+an additional parameter, C<len>, specifies its length in bytes.  Hence, the
+name may contain embedded-NUL characters.
 
-In C<gv_fetchmeth_pvn>, C<name> points to the first byte of the name, and an
-additional parameter, C<len>, specifies its length in bytes.  Hence, the name
-may contain embedded-NUL characters.
-
-In C<gv_fetchmeth_sv>, C<*name> is an SV, and the name is the PV extracted from
-that, using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the extracted
-PV will also be.
+In C<gv_fetchmeth_sv> and C<gv_fetchmeth_sv_autoload>, C<*name> is an SV, and
+the name is the PV extracted from that, using C<L</SvPV>>.  If the SV is marked
+as being in UTF-8, the extracted PV will also be.  Including C<SVf_UTF8> in
+C<flags> will force the name to be considered to be UTF-8 even if the SV is
+not so marked.
 
 =for apidoc Amnh||GV_SUPER
+=for apidoc Amnh||GV_NOUNIVERSAL
 
 =cut
 */
@@ -996,20 +1042,6 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     return gv_fetchmeth_internal(stash, NULL, name, len, level, flags);
 }
 
-/*
-=for apidoc gv_fetchmeth_autoload
-
-This is the old form of L</gv_fetchmeth_pvn_autoload>, which has no flags
-parameter.
-
-=for apidoc gv_fetchmeth_sv_autoload
-
-Exactly like L</gv_fetchmeth_pvn_autoload>, but takes the name string in the form
-of an SV instead of a string/length pair.
-
-=cut
-*/
-
 GV *
 Perl_gv_fetchmeth_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 {
@@ -1022,36 +1054,12 @@ Perl_gv_fetchmeth_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
    return gv_fetchmeth_pvn_autoload(stash, namepv, namelen, level, flags);
 }
 
-/*
-=for apidoc gv_fetchmeth_pv_autoload
-
-Exactly like L</gv_fetchmeth_pvn_autoload>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
-
 GV *
 Perl_gv_fetchmeth_pv_autoload(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
 {
     PERL_ARGS_ASSERT_GV_FETCHMETH_PV_AUTOLOAD;
     return gv_fetchmeth_pvn_autoload(stash, name, strlen(name), level, flags);
 }
-
-/*
-=for apidoc gv_fetchmeth_pvn_autoload
-
-Same as C<gv_fetchmeth_pvn()>, but looks for autoloaded subroutines too.
-Returns a glob for the subroutine.
-
-For an autoloaded subroutine without a GV, will create a GV even
-if C<level < 0>.  For an autoloaded subroutine without a stub, C<GvCV()>
-of the result may be zero.
-
-Currently, the only significant value for C<flags> is C<SVf_UTF8>.
-
-=cut
-*/
 
 GV *
 Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
