@@ -8220,21 +8220,23 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 }
 
 /*
-=for apidoc sv_numeq_flags
 
-Returns a boolean indicating whether the numbers in the two SVs are
-identical. If the flags argument has the C<SV_GMAGIC> bit set, it handles
-get-magic too. Will coerce its args to numbers if necessary. Treats
-C<NULL> as undef.
+=for apidoc      sv_numeq
+=for apidoc_item sv_numeq_flags
 
-If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
-C<==> overloading will be made. If such overloading does not exist or the
-flag is set, then regular numerical comparison will be used instead.
+These each return a boolean indicating whether the numbers in the two SV
+arguments are identical.  Those arguments will be coerced to numbers if
+necessary.  A C<NULL> SV is treated as C<undef>.
 
-=for apidoc sv_numeq
+In C<sv_numeq_flags>, if C<flags> has the C<SV_GMAGIC> bit set, 'get' magic is
+handled.
 
-A convenient shortcut for calling C<sv_numeq_flags> with the C<SV_GMAGIC>
-flag. This function basically behaves like the Perl code C<$sv1 == $sv2>.
+And unless C<flags> has the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
+C<==> overloading will be made. If such overloading does not exist or the flag
+is set, then regular numerical comparison will be used instead.
+
+C<sv_numeq> merely calls C<sv_numeq_flags> with just the C<SV_GMAGIC> bit set.
+This function basically behaves like the Perl code C<$sv1 == $sv2>.
 
 =cut
 */
