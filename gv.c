@@ -1084,10 +1084,12 @@ Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I3
 }
 
 /*
-=for apidoc gv_fetchmethod_autoload
 
-Returns the glob which contains the subroutine to call to invoke the method
-on the C<stash>.  In fact in the presence of autoloading this may be the
+=for apidoc      gv_fetchmethod
+=for apidoc_item gv_fetchmethod_autoload
+
+These each return the glob which contains the subroutine to call to invoke the
+method on the C<stash>.  In fact in the presence of autoloading this may be the
 glob for "AUTOLOAD".  In this case the corresponding variable C<$AUTOLOAD> is
 already setup.
 
