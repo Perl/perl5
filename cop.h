@@ -488,11 +488,12 @@ doesn't already exist.
 =for apidoc Am|SV *|CopFILESV|const COP * c
 Returns the SV associated with the C<COP> C<c>
 
-=for apidoc Am|void|CopFILE_set|COP * c|const char * pv
-Makes C<pv> the name of the file associated with the C<COP> C<c>
-
-=for apidoc Am|void|CopFILE_setn|COP * c|const char * pv|STRLEN len
-Makes C<pv> the name of the file associated with the C<COP> C<c>
+=for apidoc   Am|void|CopFILE_set|COP * c|const char * pv
+=for apidoc_item|void|CopFILE_setn|COP * c|const char * pv|STRLEN len
+These each make C<pv> the name of the file associated with the C<COP> C<c>.
+In the plain C<CopFILE_set> form, C<pv> is a C language NUL-terminated string.
+In C<CopFILE_setn>, C<len> is the length of C<pv>, which hence may contain
+embedded NUL characters.
 
 =for apidoc Am|void|CopFILE_copy|COP * dst|COP * src
 Efficiently copies the cop file name from one COP to another. Wraps
