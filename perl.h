@@ -789,8 +789,8 @@ Now a placeholder that declares nothing
 
 /*
 =for apidoc_section $directives
-=for apidoc AmnUu|void|STMT_END
-=for apidoc_item |    |STMT_START
+=for apidoc AmnUu|void|STMT_START
+=for apidoc_item |    |STMT_END
 
 These allow a series of statements in a macro to be used as a single statement,
 as in
