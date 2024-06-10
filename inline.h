@@ -3095,56 +3095,43 @@ Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, c
 
 /*
 
-=for apidoc is_utf8_fixed_width_buf_flags
+=for apidoc      is_utf8_fixed_width_buf_flags
+=for apidoc_item is_utf8_fixed_width_buf_loc_flags
+=for apidoc_item is_utf8_fixed_width_buf_loclen_flags
 
-Returns TRUE if the fixed-width buffer starting at C<s> with length C<len>
-is entirely valid UTF-8, subject to the restrictions given by C<flags>;
-otherwise it returns FALSE.
+These each return TRUE if the fixed-width buffer starting at C<s> with length
+C<len> is entirely valid UTF-8, subject to the restrictions given by C<flags>;
+otherwise they return FALSE.
 
 If C<flags> is 0, any well-formed UTF-8, as extended by Perl, is accepted
 without restriction.  If the final few bytes of the buffer do not form a
 complete code point, this will return TRUE anyway, provided that
 C<L</is_utf8_valid_partial_char_flags>> returns TRUE for them.
 
-If C<flags> in non-zero, it can be any combination of the
-C<UTF8_DISALLOW_I<foo>> flags accepted by C<L</utf8n_to_uvchr>>, and with the
-same meanings.
+C<flags> can be zero or any combination of the C<UTF8_DISALLOW_I<foo>> flags
+accepted by C<L</utf8n_to_uvchr>>, and with the same meanings.
 
-This function differs from C<L</is_utf8_string_flags>> only in that the latter
+The functions differ from C<L</is_utf8_string_flags>> only in that the latter
 returns FALSE if the final few bytes of the string don't form a complete code
 point.
+
+C<is_utf8_fixed_width_buf_loc_flags>> does all the preceding, but takes an
+extra parameter, C<ep> into which it stores the location of the failure, if
+C<ep> is not NULL.  If instead the function returns TRUE, C<*ep> will point to
+the beginning of any partial character at the end of the buffer; if there is no
+partial character C<*ep> will contain C<s>+C<len>.
+
+C<is_utf8_fixed_width_buf_loclen_flags>> does all the preceding, but takes
+another extra parameter, C<el> into which it stores the number of complete,
+valid characters found, if C<el> is not NULL.
 
 =cut
  */
 #define is_utf8_fixed_width_buf_flags(s, len, flags)                        \
                 is_utf8_fixed_width_buf_loclen_flags(s, len, 0, 0, flags)
 
-/*
-
-=for apidoc is_utf8_fixed_width_buf_loc_flags
-
-Like C<L</is_utf8_fixed_width_buf_flags>> but stores the location of the
-failure in the C<ep> pointer.  If the function returns TRUE, C<*ep> will point
-to the beginning of any partial character at the end of the buffer; if there is
-no partial character C<*ep> will contain C<s>+C<len>.
-
-See also C<L</is_utf8_fixed_width_buf_loclen_flags>>.
-
-=cut
-*/
-
 #define is_utf8_fixed_width_buf_loc_flags(s, len, loc, flags)               \
                 is_utf8_fixed_width_buf_loclen_flags(s, len, loc, 0, flags)
-
-/*
-
-=for apidoc is_utf8_fixed_width_buf_loclen_flags
-
-Like C<L</is_utf8_fixed_width_buf_loc_flags>> but stores the number of
-complete, valid characters found in the C<el> pointer.
-
-=cut
-*/
 
 PERL_STATIC_INLINE bool
 Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
