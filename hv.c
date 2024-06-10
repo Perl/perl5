@@ -1252,28 +1252,26 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
 /*
 =for apidoc      hv_delete
 =for apidoc_item hv_deletes
+=for apidoc_item hv_delete_ent
 
-These delete a key/value pair in the hash.  The value's SV is removed from
+These each delete a key/value pair in the hash.  The value's SV is removed from
 the hash, made mortal, and returned to the caller.
 
 In C<hv_deletes>, the key must be a C language string literal, enclosed in
 double quotes.  It is never treated as being in UTF-8.  There is no
 length_parameter.
 
-In C<hv_delete>, the absolute value of C<klen> is the length of the key.  If
-C<klen> is negative the key is assumed to be in UTF-8-encoded Unicode.
+In C<hv_delete>, the absolute value of C<klen> is the length of the key; hence
+the key may contain embedded NUL characters.  If C<klen> is negative the key
+is assumed to be in UTF-8-encoded Unicode.
 
-In both, the C<flags> value will normally be zero; if set to C<G_DISCARD> then
-C<NULL> will be returned.  C<NULL> will also be returned if the key is not
+In C<hv_delete_ent>, the key is the PV in C<keysv>, including its length and
+UTF8ness.  C<hash> can be a valid precomputed hash value, or 0 to ask for it to
+be computed.
+
+In all three, the C<flags> value will normally be zero; if set to C<G_DISCARD>
+then C<NULL> will be returned.  C<NULL> will also be returned if the key is not
 found.
-
-=for apidoc hv_delete_ent
-
-Deletes a key/value pair in the hash.  The value SV is removed from the hash,
-made mortal, and returned to the caller.  The C<flags> value will normally be
-zero; if set to C<G_DISCARD> then C<NULL> will be returned.  C<NULL> will also
-be returned if the key is not found.  C<hash> can be a valid precomputed hash
-value, or 0 to ask for it to be computed.
 
 =cut
 */
