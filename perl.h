@@ -8230,12 +8230,7 @@ EXTERN_C int flock(int fd, int op);
 #define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
 /*
-=for apidoc_section $numeric
-
-=for apidoc AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
-
-A synonym for L</grok_numeric_radix>
-
+=for apidoc_defn AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
 =cut
 */
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
