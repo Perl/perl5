@@ -11185,28 +11185,78 @@ Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 
 /*
 =for apidoc sv_catpvf
+=for apidoc_item sv_catpvf_nocontext
 =for apidoc_item sv_catpvf_mg
 =for apidoc_item sv_catpvf_mg_nocontext
-=for apidoc_item sv_catpvf_nocontext
+=for apidoc_item sv_vcatpvf
+=for apidoc_item sv_vcatpvf_mg
+=for apidoc_item sv_vcatpvfn
+=for apidoc_item sv_vcatpvfn_flags
 
-These process their arguments like C<sprintf>, and append the formatted
-output to an SV.  As with C<sv_vcatpvfn>, argument reordering is not supporte
-when called with a non-null C-style variable argument list.
+These each append to C<sv> the result of formatting their arguments using
+C<pat> as the C<sprintf>-like pattern.  They assume that C<pat> has the same
+UTF8ness as C<sv>.  It's the caller's responsibility to ensure that this is
+so.
 
-If the appended data contains "wide" characters
-(including, but not limited to, SVs with a UTF-8 PV formatted with C<%s>,
-and characters >255 formatted with C<%c>), the original SV might get
-upgraded to UTF-8.
+If the destination C<sv> isn't already in UTF-8, but the appended data contains
+"wide" characters, C<sv> will be converted to be UTF-8.  An example is the
+C<%c> format with the code point > 255.  (This is an enhancement to what libc
+C<sprintf> would do in this situation.)  Other examples are given below.
 
-If the original SV was UTF-8, the pattern should be
-valid UTF-8; if the original SV was bytes, the pattern should be too.
+The forms differ in how their arguments are specified and in the handling of
+magic.
 
-All perform 'get' magic, but only C<sv_catpvf_mg> and C<sv_catpvf_mg_nocontext>
-perform 'set' magic.
+C<sv_vcatpvfn_flags> is the most general, and all the other forms are
+implemented by eventually calling it.
 
-C<sv_catpvf_nocontext> and C<sv_catpvf_mg_nocontext> do not take a thread
+It has two sets of argument lists, only one of which is used in any given call.
+The first set, C<args>, is an encapsulated argument list of pointers to C
+strings.  If it is NULL, the other list, C<svargs>, is used; it is an array
+of pointers to SV's.  C<sv_count> gives how many there are in the list.
+
+See L<C<sprintf(3)>> for details on how the formatting is done.  Some
+platforms support extensions to the standard C99 definition of this function.
+None of those are supported by Perl.  For example, neither C<'> (to get digit
+grouping), nor C<I> (to get alternate digits) are supported.
+
+Also, argument reordering (using format specifiers like C<%2$d> or C<%*2$d>) is
+supported only when using the C<svargs> array of SVs; an exception is raised if
+C<arg> is not NULL and C<pat> contains the C<$> reordering specifier.
+
+S<C<* maybe_tainted>> is supposed to be set when running with taint checks
+enabled if the results are untrustworthy (often due to the use of locales).
+However, this is not currently implemented.  This argument is not used.
+
+C<patlen> gives the length in bytes of C<pat>.  Currently, the pattern must be
+NUL-terminated anyway.
+
+C<flags> is used to specify which magic to handle or to skip, by setting or
+clearing the C<SV_GMAGIC> and/or S<SV_SMAGIC> flags.
+
+Plain C<sv_vcatpvfn> just calls C<sv_vcatpvfn_flags> setting both the
+C<SV_GMAGIC> and S<SV_SMAGIC> flags, so it always handles both set and get
+magic.
+
+All the remaining forms handle 'get' magic; the forms whose name contains
+C<_mg> additionally handle 'set' magic.
+
+When using the C<svargs> array, if any of the SVs in it have their UTF-8 flag
+set, C<sv> will be converted to be so too, as necessary.
+
+None of the remaining forms use the C<svargs> array, meaning argument
+reordering is not possible with them.  The arguments are generally considered
+to be the same UTF8ness as the destination C<sv>, though certain Perl
+extensions to the standard set of %formats can override this  (see
+L<perlguts/Formatted Printing of Strings> and adjacent sections).
+
+The forms whose name contains C<_no_context> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
 doesn't already have the thread context.
+
+The forms whose name contains C<vcat> use an encapsulated argument list, the
+other forms use C<sprintf>-style arguments.
+
+There are no other differences between the forms.
 
 =cut
 */
@@ -11222,24 +11272,6 @@ Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
     sv_vcatpvfn_flags(sv, pat, strlen(pat), &args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
     va_end(args);
 }
-
-/*
-=for apidoc sv_vcatpvf
-=for apidoc_item sv_vcatpvf_mg
-
-These process their arguments like C<sv_vcatpvfn> called with a non-null
-C-style variable argument list, and append the formatted output to C<sv>.
-
-They differ only in that C<sv_vcatpvf_mg> performs 'set' magic;
-C<sv_vcatpvf> skips 'set' magic.
-
-Both perform 'get' magic.
-
-They are usually accessed via their frontends C<L</sv_catpvf>> and
-C<L</sv_catpvf_mg>>.
-
-=cut
-*/
 
 void
 Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
@@ -12160,34 +12192,6 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     }
     return elen;
 }
-
-/*
-=for apidoc sv_vcatpvfn
-=for apidoc_item sv_vcatpvfn_flags
-
-These process their arguments like C<L<vsprintf(3)>> and append the formatted output
-to an SV.  They use an array of SVs if the C-style variable argument list is
-missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d> or
-C<%*2$d>) is supported only when using an array of SVs; using a C-style
-C<va_list> argument list with a format string that uses argument reordering
-will yield an exception.
-
-When running with taint checks enabled, they indicate via C<maybe_tainted> if
-results are untrustworthy (often due to the use of locales).
-
-They assume that C<pat> has the same utf8-ness as C<sv>.  It's the caller's
-responsibility to ensure that this is so.
-
-They differ in that C<sv_vcatpvfn_flags> has a C<flags> parameter in which you
-can set or clear the C<SV_GMAGIC> and/or S<SV_SMAGIC> flags, to specify which
-magic to handle or not handle; whereas plain C<sv_vcatpvfn> always specifies
-both 'get' and 'set' magic.
-
-They are usually used via one of the frontends L</C<sv_vcatpvf>> and
-L</C<sv_vcatpvf_mg>>.
-
-=cut
-*/
 
 
 void
