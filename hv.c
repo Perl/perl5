@@ -2664,7 +2664,7 @@ In C<hv_name_sets>, the name is a literal C string, enclosed in double quotes.
 
 In C<hv_name_set>, C<name> points to the first byte of the name, and an
 additional parameter, C<len>, specifies its length in bytes.  Hence, the name
-may contain embedded-NUL characters.
+may contain embedded NUL characters.
 
 If C<SVf_UTF8> is set in C<flags>, the name is treated as being in UTF-8;
 otherwise not.
