@@ -253,12 +253,39 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 }
 
 /*
-=for apidoc sv_does_sv
+=for apidoc      sv_does
+=for apidoc_item sv_does_pv
+=for apidoc_item sv_does_pvn
+=for apidoc_item sv_does_sv
 
-Returns a boolean indicating whether the SV performs a specific, named role.
-The SV can be a Perl object or the name of a Perl class.
+These each return a boolean indicating whether C<sv> performs a specific, named
+role.
+
+C<sv> can be a Perl object or the name of a Perl class.
+
+The forms differ in how the role is specified.
+
+In C<sv_does> and C<sv_does_pv>, the role is in C<name>, which is a
+NUL-terminated string, which means that it may not contain embedded NUL
+characters.
+
+In C<sv_does_pvn>, the role is in C<name> whose length is given by C<len>.
+Hence it may contain embedded NUL characters.
+
+In C<sv_does_sv>, the role is extracted from C<namesv>.  Its C<flags> argument
+is currently ignored.
+
+You can pass C<SVf_UTF8> to the other functions that have a C<flags> argument
+to indicate that C<name> is encoded as UTF-8.  C<sv_does> does not have a
+C<flags> argument, so its role is never considered to be UTF-8.
 
 =cut
+
+The above is based on the behavior of newSVpvn_flags at the time of this
+writing.  It only recognizes SVs_TEMP and SVf_UTF8.
+
+XXX extracted in sv_does_sv is more complicated than the hand waving above
+
 */
 
 #include "XSUB.h"
@@ -318,14 +345,6 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     return does_it;
 }
 
-/*
-=for apidoc sv_does
-
-Like L</sv_does_pv>, but doesn't take a C<flags> parameter.
-
-=cut
-*/
-
 bool
 Perl_sv_does(pTHX_ SV *sv, const char *const name)
 {
@@ -333,29 +352,12 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
     return sv_does_sv(sv, newSVpvn_flags(name, strlen(name), SVs_TEMP), 0);
 }
 
-/*
-=for apidoc sv_does_pv
-
-Like L</sv_does_sv>, but takes a nul-terminated string instead of an SV.
-
-=cut
-*/
-
-
 bool
 Perl_sv_does_pv(pTHX_ SV *sv, const char *const name, U32 flags)
 {
     PERL_ARGS_ASSERT_SV_DOES_PV;
     return sv_does_sv(sv, newSVpvn_flags(name, strlen(name), SVs_TEMP | flags), flags);
 }
-
-/*
-=for apidoc sv_does_pvn
-
-Like L</sv_does_sv>, but takes a string/length pair instead of an SV.
-
-=cut
-*/
 
 bool
 Perl_sv_does_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
