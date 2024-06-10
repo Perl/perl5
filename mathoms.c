@@ -87,18 +87,6 @@ Perl_ref(pTHX_ OP *o, I32 type)
     return doref(o, type, TRUE);
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_unref
-
-Unsets the RV status of the SV, and decrements the reference count of
-whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<L</SvROK_off>>.
-
-=cut
-*/
-
 void
 Perl_sv_unref(pTHX_ SV *sv)
 {
