@@ -228,17 +228,6 @@ Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
     return sv_2pvutf8(sv, NULL);
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_force_normal
-
-Undo various types of fakery on an SV: if the PV is a shared string, make
-a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an C<xpvmg>.  See also C<L</sv_force_normal_flags>>.
-
-=cut
-*/
-
 void
 Perl_sv_force_normal(pTHX_ SV *sv)
 {
