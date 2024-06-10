@@ -42,7 +42,7 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.41
 
-  2024-06-10  5.41.0          ?
+  2024-06-10  5.41.0          Graham K          (tag only)
   2024-06-20  5.41.1          ?
   2024-07-20  5.41.2          ?
   2024-08-20  5.41.3          ?
