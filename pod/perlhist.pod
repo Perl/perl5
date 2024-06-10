@@ -778,6 +778,8 @@ the strings?).
  Graham K  5.40.0-RC2   2024-Jun-04
  Graham K  5.40.0       2024-Jun-09
 
+ Graham K  5.41.0       2024-Jun-10     The 5.41 development track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
