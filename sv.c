@@ -8593,20 +8593,19 @@ Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2,
 #ifdef USE_LOCALE_COLLATE
 
 /*
-=for apidoc sv_collxfrm
+=for apidoc      sv_collxfrm
+=for apidoc_item sv_collxfrm_flags
 
-This calls C<sv_collxfrm_flags> with the SV_GMAGIC flag.  See
-C<L</sv_collxfrm_flags>>.
-
-=for apidoc sv_collxfrm_flags
-
-Add Collate Transform magic to an SV if it doesn't already have it.  If the
-flags contain C<SV_GMAGIC>, it handles get-magic.
+These each add Collate Transform magic to an SV if it doesn't already have it.
 
 Any scalar variable may carry C<PERL_MAGIC_collxfrm> magic that contains the
 scalar data of the variable, but transformed to such a format that a normal
 memory comparison can be used to compare the data according to the locale
 settings.
+
+C<sv_collxfrm> always handles 'get' magic.
+C<sv_collxfrm_flags> only does so if C<flags> contains C<SV_GMAGIC>.
+Otherwise, the two forms behave identically.
 
 =cut
 */
