@@ -655,7 +655,10 @@ Perl_scan_hex(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 }
 
 /*
-=for apidoc grok_numeric_radix
+=for apidoc      grok_numeric_radix
+=for apidoc_item GROK_NUMERIC_RADIX
+
+These are identical.
 
 Scan and skip for a numeric decimal separator (radix).
 
