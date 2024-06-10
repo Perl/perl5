@@ -410,15 +410,6 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
     gv_efullname4(sv, gv, prefix, TRUE);
 }
 
-/*
-=for apidoc_section $GV
-=for apidoc gv_fetchmethod
-
-See L</gv_fetchmethod_autoload>.
-
-=cut
-*/
-
 GV *
 Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
 {
