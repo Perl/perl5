@@ -1415,8 +1415,9 @@ Perl_form_nocontext(const char* pat, ...)
 =for apidoc_section $display
 =for apidoc form
 =for apidoc_item form_nocontext
+=for apidoc_item vform
 
-These take a sprintf-style format pattern and conventional
+These each take a sprintf-style format pattern and conventional
 (non-SV) arguments and return the formatted string.
 
     (char *) Perl_form(aTHX_ const char* pat, ...)
@@ -1433,15 +1434,14 @@ This is contrary to the incorrect previous documentation of these that claimed
 that the return was a single per-thread buffer.  That was (and is) actually
 true only when these are called during global destruction.
 
-The two forms differ only in that C<form_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+C<form> and C<form_nocontext> differ only in that C<form_nocontext> does
+not take a thread context (C<aTHX>) parameter, so is used in situations where
+the caller doesn't already have the thread context (and can be called without
+the C<Perl_> prefix.
 
-C<L</vform>> is the same except the arguments are an encapsulated argument list.
-
-=for apidoc vform
-
-Like C<L</form>> except the arguments are an encapsulated argument list.
+C<vform> is the same as C<form> except the arguments are an encapsulated
+argument list.  It does need a thread context parameter, but that is supplied
+automatically when called without the C<Perl_> prefix.
 
 =cut
 */
