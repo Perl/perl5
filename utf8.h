@@ -740,70 +740,53 @@ uppercase/lowercase/titlecase/fold into.
 
 /*
 
-=for apidoc Am|STRLEN|UTF8SKIP|char* s
-returns the number of bytes a non-malformed UTF-8 encoded character whose first
-(perhaps only) byte is pointed to by C<s>.
+=for apidoc      Am|STRLEN|UTF8SKIP|const char* s
+=for apidoc_item   |STRLEN|UTF8_SKIP|const char* s
+=for apidoc_item   |STRLEN|UTF8_CHK_SKIP|const char* s
+=for apidoc_item   |STRLEN|UTF8_SAFE_SKIP|const char* s|const char* e
+
+Each of these returns the number of bytes in the UTF-8 encoded character
+whose first (perhaps only) byte is pointed to by C<s>.
+
+C<UTF8SKIP> and C<UTF8_SKIP> are synonyms.  Use them when there is no
+possibility that the character pointed to by C<s> is malformed.
 
 If there is a possibility of malformed input, use instead:
 
 =over
 
-=item C<L</UTF8_SAFE_SKIP>> if you know the maximum ending pointer in the
-buffer pointed to by C<s>; or
+=item C<L</UTF8_SAFE_SKIP>> if you know the maximum ending pointer in the buffer pointed to by C<s>
 
-=item C<L</UTF8_CHK_SKIP>> if you don't know it.
+If the buffer has enough bytes to hold the character, it returns the
+same value as C<UTF8SKIP> and C<UTF8_SKIP> would.  If the buffer has
+fewer bytes than can fit, it returns the number of bytes available in
+the buffer, which could be 0 if S<C<s E<gt>= e>>.  On DEBUGGING builds,
+it asserts that S<C<s E<lt>= e>>.
 
-=back
+=item C<L</UTF8_CHK_SKIP>> if you don't know the maximum ending pointer
 
-It is better to restructure your code so the end pointer is passed down so that
-you know what it actually is at the point of this call, but if that isn't
-possible, C<L</UTF8_CHK_SKIP>> can minimize the chance of accessing beyond the end
-of the input buffer.
-
-=cut
- */
-#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(ASSERT_IS_PTR(s))]
-
-/*
-=for apidoc Am|STRLEN|UTF8_SKIP|char* s
-This is a synonym for C<L</UTF8SKIP>>
-
-=cut
-*/
-
-#define UTF8_SKIP(s) UTF8SKIP(s)
-
-/*
-=for apidoc Am|STRLEN|UTF8_CHK_SKIP|char* s
-
-This is a safer version of C<L</UTF8SKIP>>, but still not as safe as
-C<L</UTF8_SAFE_SKIP>>.  This version doesn't blindly assume that the input
-string pointed to by C<s> is well-formed, but verifies that there isn't a NUL
-terminating character before the expected end of the next character in C<s>.
-The length C<UTF8_CHK_SKIP> returns stops just before any such NUL.
+This version doesn't blindly assume that the input string pointed to by
+C<s> is well-formed, but verifies that there isn't a NUL terminating
+character before the expected end of the next character in C<s>.  The
+length C<UTF8_CHK_SKIP> returns stops just before any such NUL.
 
 Perl tends to add NULs, as an insurance policy, after the end of strings in
-SV's, so it is likely that using this macro will prevent inadvertent reading
-beyond the end of the input buffer, even if it is malformed UTF-8.
+SV's, so it is likely that using this macro on an SV string will prevent
+inadvertent reading beyond the end of the input buffer, even if it is
+malformed UTF-8.
 
 This macro is intended to be used by XS modules where the inputs could be
 malformed, and it isn't feasible to restructure to use the safer
 C<L</UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 
-=cut
-*/
-
-#define UTF8_CHK_SKIP(s)                                                       \
-           (UNLIKELY(s[0] == '\0') ? 1 : my_strnlen((const char *) (s), UTF8SKIP(s)))
-/*
-
-=for apidoc Am|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
-returns 0 if S<C<s E<gt>= e>>; otherwise returns the number of bytes in the
-UTF-8 encoded character whose first  byte is pointed to by C<s>.  But it never
-returns beyond C<e>.  On DEBUGGING builds, it asserts that S<C<s E<lt>= e>>.
+=back
 
 =cut
  */
+#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(ASSERT_IS_PTR(s))]
+#define UTF8_SKIP(s) UTF8SKIP(s)
+#define UTF8_CHK_SKIP(s)                                                       \
+     (UNLIKELY(s[0] == '\0') ? 1 : my_strnlen((const char *) (s), UTF8SKIP(s)))
 #define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                \
                               UNLIKELY(((e) - (s)) <= 0)            \
                                ? 0                                  \
