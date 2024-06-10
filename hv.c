@@ -397,10 +397,12 @@ C<hv_store> in preference to C<hv_store_ent>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=for apidoc hv_exists
-=for apidoc_item ||hv_existss|HV *hv|"key"
+=for apidoc      hv_exists
+=for apidoc_item hv_existss
+=for apidoc_item hv_exists_ent
 
-These return a boolean indicating whether the specified hash key exists.
+These each return a boolean indicating whether the specified hash key exists.
+They differ only in how the key is specified.
 
 In C<hv_existss>, the key must be a C language string literal, enclosed in
 double quotes.  It is never treated as being in UTF-8.  There is no
@@ -408,6 +410,11 @@ length_parameter.
 
 In C<hv_exists>, the absolute value of C<klen> is the length of the key.  If
 C<klen> is negative the key is assumed to be in UTF-8-encoded Unicode.
+C<key> may contain embedded NUL characters.
+
+In C<hv_exists_ent>, the key is specified by the SV C<keysv>; its UTF8ness is
+the same as that SV.  There is an additional parameter, C<hash>, which can be a
+valid precomputed hash value, or 0 to ask for it to be computed.
 
 =for apidoc hv_fetch
 =for apidoc_item ||hv_fetchs|HV *hv|"key"|I32 lval
@@ -429,13 +436,6 @@ dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
-
-=for apidoc hv_exists_ent
-
-Returns a boolean indicating whether
-the specified hash key exists.  C<hash>
-can be a valid precomputed hash value, or 0 to ask for it to be
-computed.
 
 =cut
 */
