@@ -6811,6 +6811,11 @@ results against a class name doesn't perform a class membership test:
 a class's members also include objects blessed into subclasses, for
 which C<ref> will return the name of the subclass.  Also beware that
 class names can clash with the built-in type names (described below).
+Use L<the C<isa> method|UNIVERSAL/C<< $obj->isa( TYPE ) >>> to test
+class membership of a class name or blessed object, after ensuring it
+is one of these things.  Alternatively, the
+L<C<isa> operator|perlop/"Class Instance Operator"> can test class
+membership without checking blessedness first.
 
 If the operand is a reference to an unblessed object, then the return
 value indicates the type of object.  If the unblessed referent is not
@@ -6825,15 +6830,15 @@ these built-in type names can also be used as
 class names, so C<ref> returning one of these names doesn't unambiguously
 indicate that the referent is of the kind to which the name refers.
 
-The ambiguity between built-in type names and class names significantly
-limits the utility of C<ref>.  For unambiguous information, use
-L<C<Scalar::Util::blessed()>|Scalar::Util/blessed> for information about
-blessing, and L<C<Scalar::Util::reftype()>|Scalar::Util/reftype> for
-information about physical types.  Use L<the C<isa> method|UNIVERSAL/C<<
-$obj->isa( TYPE ) >>> for class membership tests, though one must be
-sure of blessedness before attempting a method call.  Alternatively, the
-L<C<isa> operator|perlop/"Class Instance Operator"> can test class
-membership without checking blessedness first.
+The ambiguity between built-in type names and class names may limit the
+utility of C<ref>, but in practice, such clashes rarely occur unless
+intentionally engineered.  For unambiguous information, use
+L<builtin/blessed> for information about blessing, and L<builtin/reftype>
+for information about physical types.  But beware that the physical type
+returned by C<reftype> does not indicate how a blessed object is meant to
+be used, and the appropriate dereference operations for an object
+(whether to access the blessed structure directly, or via an L<overload>)
+will be described by the documentation for the object class.
 
 See also L<perlref> and L<perlobj>.
 
