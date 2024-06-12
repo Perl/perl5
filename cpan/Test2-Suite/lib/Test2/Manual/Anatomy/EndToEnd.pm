@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::EndToEnd;
 use strict;
 use warnings;
 
-our $VERSION = '0.000162';
+our $VERSION = '0.000163';
 
 1;
 
@@ -10,7 +10,7 @@ __END__
 
 =head1 NAME
 
-Test2::Manual::EndToEnd - Overview of Test2 from load to finish.
+Test2::Manual::Anatomy::EndToEnd - Overview of Test2 from load to finish.
 
 =head1 DESCRIPTION
 

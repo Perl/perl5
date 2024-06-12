@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Require';
 
-our $VERSION = '0.000162';
+our $VERSION = '0.000163';
 
 use Test2::Util qw/CAN_REALLY_FORK/;
 
@@ -43,11 +43,11 @@ and exit true.
 
 =over 4
 
-=item L<Test2::Require::Canfork>
+=item L<Test2::Require::Fork>
 
 Similar to this module, but will allow fork emulation.
 
-=item L<Test2::Require::CanThread>
+=item L<Test2::Require::Threads>
 
 Skip the test file if the system does not support threads.
 
