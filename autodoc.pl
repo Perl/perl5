@@ -1788,6 +1788,8 @@ foreach (@{(setup_embed())[0]}) {
 
 # glob() picks up docs from extra .c or .h files that may be in unclean
 # development trees.
+my @headers;
+my @non_headers;
 open my $fh, '<', 'MANIFEST'
     or die "Can't open MANIFEST: $!";
 while (my $line = <$fh>) {
@@ -1797,11 +1799,20 @@ while (my $line = <$fh>) {
     next if $file =~ m! ^ ( cpan | dist | ext ) / !x
          && ! defined $extra_input_pods{$file};
 
-    open F, '<', $file or die "Cannot open $file for docs: $!\n";
-    autodoc(\*F,$file);
-    close F or die "Error closing $file: $!\n";
+    if ($file =~ /\.h/) {
+        push @headers, $file;
+    }
+    else {
+        push @non_headers, $file;
+    }
 }
 close $fh or die "Error whilst reading MANIFEST: $!";
+
+for my $file (@headers, @non_headers) {
+    open my $fh, '<', $file or die "Cannot open $file for docs: $!\n";
+    autodoc($fh, $file);
+    close $fh or die "Error closing $file: $!\n";
+}
 
 parse_config_h();
 
