@@ -22,8 +22,6 @@ use warnings;
 # it is redundant to the test demonstrating the bug that was intentionally
 # fixed, so can be removed altogether.)
 
-my $switches = "";
-
 our $TODO;
 TODO: {
     local $TODO = "GH 16250";
@@ -33,7 +31,10 @@ TODO: {
         "abcde5678" =~ / b .* (*plb:(*plb:(.{4}))? (.{5}) ) .$ /x;
         print $1 // "undef", ":", $2 // "undef", "\n";
         EOF
-    "undef:de567\nundef:de567", { $switches }, "");
+        "undef:de567\nundef:de567",
+        {}, # Anonymous hash must have even number of elements
+        ""
+    );
 }
 
 done_testing();
