@@ -726,8 +726,6 @@ Adp	|SV **	|av_store	|NN AV *av				\
 Cdip	|SV **	|av_store_simple|NN AV *av				\
 				|SSize_t key				\
 				|NULLOK SV *val
-ARdm	|SSize_t|av_tindex	|NN AV *av
-ARdm	|SSize_t|av_top_index	|NN AV *av
 Adp	|void	|av_undef	|NN AV *av
 Adp	|void	|av_unshift	|NN AV *av				\
 				|SSize_t num

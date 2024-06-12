@@ -967,8 +967,10 @@ Perl_av_shift(pTHX_ AV *av)
 }
 
 /*
-=for apidoc av_tindex
-=for apidoc_item av_top_index
+=for apidoc      av_top_index
+=for apidoc_item av_tindex
+=for apidoc_item AvFILL
+=for apidoc_item av_len
 
 These behave identically.
 If the array C<av> is empty, these return -1; otherwise they return the maximum
@@ -979,15 +981,10 @@ They process 'get' magic.
 
 The Perl equivalent for these is C<$#av>.
 
-Use C<L</av_count>> to get the number of elements in an array.
-
-=for apidoc av_len
-
-Same as L</av_top_index>.  Note that, unlike what the name implies, it returns
+Note that, unlike what the name C<av_len> implies, it returns
 the maximum index in the array.  This is unlike L</sv_len>, which returns what
-you would expect.
-
-B<To get the true number of elements in the array, instead use C<L</av_count>>>.
+you would expect.  To get the actual number of elements in an array, use
+C<L</av_count>>.
 
 =cut
 */
