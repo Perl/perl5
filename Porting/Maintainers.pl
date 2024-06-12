@@ -610,7 +610,8 @@ our %Modules = (
     },
 
     'Getopt::Long' => {
-        'DISTRIBUTION' => 'JV/Getopt-Long-2.57.tar.gz',
+        'DISTRIBUTION' => 'JV/Getopt-Long-2.58.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Jun 12 08:25:08 2024',
         'SYNCINFO'     => 'jkeenan on Sat Nov 11 13:09:21 2023',
         'FILES'        => q[cpan/Getopt-Long],
         'EXCLUDED'     => [
