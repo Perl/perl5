@@ -515,7 +515,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             $section = $1;
             if ($section =~ / ^ \$ /x) {
-                $section .= '_scn' unless $section =~ / _scn $ /;
+                $section .= '_scn' unless $section =~ / _scn $ /x;
                 $section = eval "$section";
                 die "Unknown \$section variable '$section' in $file: $@" if $@;
             }
