@@ -53,9 +53,6 @@ Null AV pointer.
 
 (deprecated - use C<(AV *)NULL> instead)
 
-=for apidoc Am|SSize_t|AvFILL|AV* av
-Same as C<L</av_top_index>> or C<L</av_tindex>>.
-
 =for apidoc Cm|SSize_t|AvFILLp|AV* av
 
 If the array C<av> is empty, this returns -1; otherwise it returns the maximum
@@ -93,6 +90,12 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 
 #define AvREALISH(av)	(SvFLAGS(av) & (SVpav_REAL|SVpav_REIFY))
                                           
+/*
+=for apidoc_defn ARm|SSize_t|AvFILL       |NN AV* av
+=for apidoc_defn ARm|SSize_t|av_tindex    |NN AV *av
+=for apidoc_defn ARm|SSize_t|av_top_index |NN AV *av
+=cut
+*/
 #define AvFILL(av)	((SvRMAGICAL((const SV *) (av))) \
                          ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
 #define av_top_index(av) AvFILL(av)
