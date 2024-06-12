@@ -1710,19 +1710,25 @@ sub output {
     read_only_bottom_close_and_rename($fh);
 }
 
+sub add_defn  {
+    my ($func, $flags, $ret_type, $args_ref) = @_;
+
+    my @munged_args= $args_ref->@*;
+    s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
+
+    $funcflags{$func} = {
+                          flags => $flags,
+                          ret_type => $ret_type,
+                          args => \@munged_args,
+                        };
+}
+
 foreach (@{(setup_embed())[0]}) {
     my $embed= $_->{embed}
         or next;
     my ($flags, $ret_type, $func, $args) =
                                  @{$embed}{qw(flags return_type name args)};
-    my @munged_args= @$args;
-    s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
-
-    $funcflags{$func} = {
-                         flags => $flags,
-                         ret_type => $ret_type,
-                         args => \@munged_args,
-                        };
+    add_defn($func, $flags, $ret_type, $args);
 }
 
 # glob() picks up docs from extra .c or .h files that may be in unclean
