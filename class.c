@@ -805,14 +805,78 @@ Perl_class_seal_stash(pTHX_ HV *stash)
         aux->xhv_class_initfields_cv = initfields;
     }
     else {
-        /* we had errors, clean up and don't populate initfields */
+        /* we had errors, clean up */
+
+        SvREFCNT_dec(aux->xhv_class_superclass);
+        aux->xhv_class_superclass = NULL;
+
+        /* clean up adjust blocks */
+        SvREFCNT_dec(aux->xhv_class_adjust_blocks);
+        aux->xhv_class_adjust_blocks = NULL;
+
+        /* name to slot index */
+        SvREFCNT_dec(aux->xhv_class_param_map);
+        aux->xhv_class_param_map = NULL;
+
+        /* clean up the ops for defaults for fields, if any, since
+           padname_free() doesn't.
+         */
         PADNAMELIST *fieldnames = aux->xhv_class_fields;
         if (fieldnames) {
             for(SSize_t i = PadnamelistMAX(fieldnames); i >= 0 ; i--) {
                 PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
                 op_free(PadnameFIELDINFO(pn)->defop);
+                PadnameFIELDINFO(pn)->defop = NULL;
             }
+            PadnamelistREFCNT_dec(fieldnames);
+            aux->xhv_class_fields = NULL;
         }
+
+        /* clean up methods */
+        /* should we keep a separate list of these instead? */
+        if (hv_iterinit(stash)) {
+            HE *he;
+            while ((he = hv_iternext(stash)) != NULL) {
+                STRLEN klen;
+                const char * const kpv = HePV(he, klen);
+                SV *entry = HeVAL(he);
+                CV *cv = NULL;
+                if (SvTYPE(entry) == SVt_PVGV
+                    && (cv = GvCV((GV*)entry))
+                    && (CvIsMETHOD(cv) || memEQs(kpv, klen, "new"))) {
+                    SvREFCNT_dec(cv);
+                    GvCV_set((GV*)entry, NULL);
+                }
+                else if (SvTYPE(entry) == SVt_PVCV
+                         && (CvIsMETHOD((CV*)entry) || memEQs(kpv, klen, "new"))) {
+                    (void)hv_delete(stash, kpv, HeUTF8(he) ? -(I32)klen : (I32)klen,
+                                    G_DISCARD);
+                }
+            }
+            ++PL_sub_generation;
+        }
+
+        /* field clean up */
+        resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
+        SvREFCNT_dec(PL_compcv);
+        Safefree(aux->xhv_class_suspended_initfields_compcv);
+        aux->xhv_class_suspended_initfields_compcv = NULL;
+
+        /* remove any ISA entries */
+        SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
+        sv_2mortal(isaname);
+        AV *isa = get_av(SvPV_nolen(isaname), (SvFLAGS(isaname) & SVf_UTF8));
+        if (isa) {
+            /* we make this read-only above since class-keyword
+               classes manage ISA themselves, the class has failed to
+               load, so we no longer manage it.
+            */
+            SvREADONLY_off((SV *)isa);
+            av_clear(isa);
+        }
+        
+        /* no longer a class */
+        aux->xhv_aux_flags &= ~HvAUXf_IS_CLASS;
     }
 }
 
