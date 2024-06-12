@@ -521,19 +521,18 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
             die "Unknown section name '$section' in $file near line $.\n"
                                     unless defined $valid_sections{$section};
-
         }
-        elsif ($in=~ /^ =for [ ]+ apidoc \B /x) {   # Otherwise better be a
-                                                    # plain apidoc line
+        elsif ($in !~ /^ =for [ ]+ apidoc \b /x) {
             die "Unknown apidoc-type line '$in'"
                                                unless $in=~ /^=for apidoc_item/;
             die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
         }
-        else {  # Plain apidoc
+        else {
 
             ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
                                                = check_api_doc_line($file, $in);
-            # Override this line with any info in embed.fnc
+            # Here, is plain apidoc.  Override this line with any info in
+            # embed.fnc
             my ($embed_flags, $embed_ret_type, @embed_args)
                                                 = embed_override($element_name);
             if ($embed_ret_type) {
@@ -544,8 +543,14 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $ret_type = $embed_ret_type;
                 @args = @embed_args;
             }
-            elsif ($flags !~ /[my]/)  { # Not in embed.fnc, is missing if not
-                                        # a macro or typedef
+            elsif ($flags =~ /[my]/)  {
+
+                # Macros and typedefs are allowed to not be in embed.fnc.
+            }
+            else {
+
+                # Not in embed.fnc, and is not a macro nor typedef, so the
+                # actual definition is missing.
                 $missing{$element_name} = $file;
             }
 
@@ -584,9 +589,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
         }
 
         # Here we have processed the initial line in the heading text or API
-        # element, and have saved the important information from it into
-        # $items[0].  Now accumulate the text that applies to it up to a
-        # terminating line, which is one of:
+        # element, and in the latter case, have saved the important
+        # information from it into $items[0].
+        # Now accumulate the text that applies to it up to a terminating line,
+        # which is one of:
         # 1) =cut
         # 2) =head (in a C file only =head1)
         # 3) an end comment line in a C file: m:^\s*\*/:
