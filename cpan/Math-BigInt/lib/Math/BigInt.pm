@@ -24,7 +24,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '2.003002';
+our $VERSION = '2.003003';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -3198,21 +3198,18 @@ sub bnok {
         }
     }
 
-    # Some backends, e.g., Math::BigInt::GMP do not allow values of n and k
-    # that are larger than the largest unsigned integer, so check for this, and
-    # use the simpler and slower generic method in the superclass if n and/or k
-    # are larger than the largest unsigned integer.
+    # Some backends, e.g., Math::BigInt::GMP, can't handle the case when k is
+    # very large, so if k > n/2, or, equivalently, 2*k > n, perform range
+    # reduction by computing nok(n, k) as nok(n, n-k).
 
-    my $uintmax = $LIB -> _new(~0);
-    if ($LIB -> _acmp($n->{value}, $uintmax) > 0 ||
-        $LIB -> _acmp($k->{value}, $uintmax) > 0)
-    {
-        $n->{value} = $LIB -> SUPER::_nok($n->{value}, $k->{value});
-    } else {
-        $n->{value} = $LIB -> _nok($n->{value}, $k->{value});
+    my $k_val = $k->{value};
+    my $two_k = $LIB -> _mul($LIB -> _two(), $k_val);
+    if ($LIB -> _acmp($two_k, $n->{value}) > 0) {
+        $k_val = $LIB -> _sub($LIB -> _copy($n->{value}), $k_val);
     }
-    $n = $n -> bneg() if $sign == -1;
 
+    $n->{value} = $LIB -> _nok($n->{value}, $k_val);
+    $n = $n -> bneg() if $sign == -1;
     $n -> round(@r);
 }
 

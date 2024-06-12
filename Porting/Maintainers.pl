@@ -759,7 +759,8 @@ our %Modules = (
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003002.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003003.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Jun 12 08:50:03 2024',
         'SYNCINFO'     => 'corion on Thu Jan 11 20:23:12 2024',
         'SYNCINFO'     => 'book on Tue Dec 26 22:44:58 2023',
         'FILES'        => q[cpan/Math-BigInt],
