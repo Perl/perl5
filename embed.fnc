@@ -136,29 +136,48 @@
 :
 : Scattered around the perl source are lines of the form:
 :
-:   =for apidoc name
-:   =for apidoc_item name
+:   =for apidoc name ...
+:   =for apidoc_item name ...
+:   =for apidoc_defn name ...
 :
-: followed by pod for that function.  The purpose of these lines and the text
-: that immediately follows them is to furnish documentation for functions
-: and macros listed here in embed.fnc.  The lines tend to be placed near the
-: source for the item they describe.  autodoc.pl is run as part of the standard
-: build process to extract this documentation and build perlapi.pod from the
-: elements that are in the API (flagged as A in this file), and perlintern.pod
-: from the other elements.
+: The purpose of these lines is to furnish documentation for functions and
+: macros.  The lines tend to be placed near the source for the item they
+: describe.  autodoc.pl is run as part of the standard build process to
+: extract this documentation and build either perlapi.pod (from the elements
+: that are flagged as A in this file), or perlintern.pod (from the other
+: elements.
 :
-: 'name' in the apidoc line corresponds to an item listed in this file, so that
-: the signature and flags need only be specified once, here, and automatically
-: they get placed into the generated pod.
+: Functions need to be specified in this file, but macros may not necessarily
+: be.  The information in this file is sufficient to generate a usage line for
+: the element to be documented; otherwise that information needs to be
+: specified in the apidoc-ish lines.
 :
-: 'apidoc_item' is used for subsidiary entries, which share the same pod as the
-: plain apidoc one does.  Thus the documentation for functions which do
-: essentially the same thing, but with minor differences can all be placed in
-: the same entry.  This avoids needless repetition, making the pod shorter, and
-: makes it easier to compare and contrast the different forms, and less jumping
-: around the pod file for the person reading it.  The apidoc_item lines must
-: all come after the apidoc line and before the pod for the entry.  There need
-: not be empty lines between the apidoc line and any of its apidoc_item lines.
+: 'apidoc_defn' was added to supplement, for macros, the information in this
+: file.  It is designed to be placed at the point of definition of the macro
+: it is for, so that the information can easily be checked for correctness,
+: and you know at a glance that the macro actually has documentation.  It
+: doesn't by itself create any documentation; instead the other apidoc lines
+: pull in information specified by these lines.  Many of the lines in this
+: file for macros could be pulled out of here and replaced by these lines
+: throughout the source.  It is a goal to do that as convenience dictates.
+:
+: The other apidoc lines either have the usage data as part of the line, or
+: pull in the data from this file or apidoc_defn lines.
+:
+: Many macros and functions are variants of each other.  It makes sense to use
+: a single group to document such elements so their similarities and
+: differences stand out, with less repetition than if there were separate
+: entries.  Such groups start with a plain 'apidoc' line, followed by any
+: number of 'apidoc_item' lines.  These indicate that the macro or function
+: listed as 'name' on each is part of the group whose head entry is the one
+: specified by 'name' on the apidoc line.
+:
+: After the block of apidoc-like statements, is the text that is the
+: documentation, ending with the next =cut or '=for apidoc foo' lines.
+:
+: The apidoc_item lines must all come after the apidoc line and before the pod
+: text for the entry.  There need not be empty lines between the apidoc line
+: and any of its apidoc_item lines.
 :
 : The entries in this file that have corresponding '=for apidoc' entries must
 : have the 'd' flag set in this file.
@@ -175,8 +194,8 @@
 : it, and perlapi or perlintern.  That may be what you want, but it gives you
 : the flexibility to choose that, or instead have just a link to the source pod
 : inserted in perlapi or perlintern.  This allows single-source browsing for
-: someone; they don't have to scan multiple pods trying to find something
-: suitable.
+: someone; they don't have to scan multiple pods trying to find whether
+: something suitable exists.
 :
 : There are also lines of this form scattered around the perl
 : source:
@@ -184,7 +203,9 @@
 :   =for apidoc_section Section Name
 :   =head1 Section Name
 :
-: These aren't tied to this embed.fnc file, and so are documented in autodoc.pl.
+: These organize the resultant pod file into major subgroups of related
+: functionality, but aren't tied to this embed.fnc file, and so are documented
+: in autodoc.pl.
 :
 : What goes into the documentation of a particular function ends with the next
 : line that begins with an '='.  In particular, an '=cut' line ends that
@@ -197,17 +218,19 @@
 :
 :   =for apidoc flags|return_type|name|arg1|arg2|...|argN
 :   =for apidoc_item flags|return_type|name|arg1|arg2|...|argN
+:   =for apidoc_defn flags|return_type|name|arg1|arg2|...|argN
 :
 : The 'name' in any such line must not be the same as any in this file (i.e.,
 : no redundant definitions), and one of the flags on the apidoc lines must be
 : 'm' or 'y', indicating it is not a function.
 :
 : All but the name field of an apidoc_item line are optional, and if empty,
-: inherits from the controlling plain apidoc line.   The flags field is
+: inherits from a corresponding apidoc_defn line, if one exists, or the
+: controlling plain apidoc line if none such exist.   The flags field is
 : generally empty, and in fact, the only flags it can have are ones directly
 : related to its display.  For example it might have the T flag to indicate no
-: thread context parameter is used, whereas the apidoc entry does have a thread
-: context.  Here is an example:
+: thread context parameter is used, whereas the apidoc entry does have a
+: thread context.  Here is an example:
 :
 : =for apidoc    Am|char*      |SvPV       |SV* sv|STRLEN len
 : =for apidoc_item |const char*|SvPV_const |SV* sv|STRLEN len
