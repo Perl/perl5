@@ -478,6 +478,11 @@ my %initial_file_section = (
                             'vutil.c' => $versioning_scn,
                            );
 
+sub output_file ($) {
+    my $flags = shift;
+    return $flags =~ /A/ ? 'api' : 'intern';
+}
+
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
     my($in, $line_num, $header, $section);
@@ -667,7 +672,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         if ($element_name) {
 
             # Here, we have accumulated into $text, the pod for $element_name
-            my $where = $flags =~ /A/ ? 'api' : 'intern';
+            my $where = output_file($flags);
 
             die "No =for apidoc_section nor =head1 in $file for"
               . "'$element_name'\n" unless defined $section;
