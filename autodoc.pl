@@ -100,6 +100,8 @@ my %described_elsewhere;
 my %docs;
 my %seen;
 my %funcflags;
+my %deferreds;  # Elements whose usage hasn't been found by the time they are
+                # parsed
 my %missing;
 my %missing_macros;
 
@@ -379,7 +381,7 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (=?)             # $2
                       (\s*)            # $3
                       for (\s*)        # $4
-                      apidoc (_item)?  # $5
+                      apidoc (_item | _defn )?  # $5
                       (\s*)            # $6
                       (.*?)            # $7
                       \s* \n /x;
@@ -391,7 +393,7 @@ sub check_api_doc_line ($$) {
 
     return unless $in =~ $apidoc_re;
 
-    my $is_item = defined $5;
+    my $is_item = defined $5 && $5 eq "_item";
     my $is_in_proper_form = length $1 == 0
                          && length $2 > 0
                          && length $3 == 0
@@ -411,7 +413,7 @@ Expected:
   =for apidoc flags|returntype|name|arg|arg|...
   =for apidoc flags|returntype|name
   =for apidoc name
-(or 'apidoc_item')
+(or 'apidoc_item' or any of the above instead with 'apidoc_defn')
 EOS
 
     die "Only [$display_flags] allowed in apidoc_item:\n$in"
@@ -507,8 +509,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # Either it is for an API element, or heading text which we expect
         # will be used for elements later in the file
 
-        my ($text, $element_name, $flags, $ret_type, $is_item, $proto_in_file);
+        my ($text, $element_name, $ret_type, $is_item, $proto_in_file);
         my (@args, @items);
+        my $group_is_deferred = 0;
+        my $flags = "";
 
         # If the line starts a new section ...
         if ($in=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
@@ -522,15 +526,31 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "Unknown section name '$section' in $file near line $.\n"
                                     unless defined $valid_sections{$section};
         }
-        elsif ($in !~ /^ =for [ ]+ apidoc \b /x) {
+        elsif ($in !~ /^ =for [ ]+ ( apidoc (?: _defn)? ) \b /x) {
             die "Unknown apidoc-type line '$in'"
                                                unless $in=~ /^=for apidoc_item/;
             die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
         }
         else {
-
+            my $line_type = $1;
             ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
                                                = check_api_doc_line($file, $in);
+
+            # Handle apidoc_defn line
+            if ($line_type eq "apidoc_defn") {
+                if (defined $funcflags{$element_name}) {
+                    warn "Using embed.fnc entry for $element_name";
+                }
+                else {
+                    # We expect this line to furnish the information to a
+                    # corresponding apidoc line elsewhere in the source.
+                    # Hence, we can say that this macro is documented.  (A
+                    # warning will be raised if the mate line is missing.)
+                    add_defn($element_name, $flags . "d", $ret_type, \@args);
+                }
+                next;
+            }
+
             # Here, is plain apidoc.  Override this line with any info in
             # embed.fnc
             my ($embed_flags, $embed_ret_type, @embed_args)
@@ -546,6 +566,12 @@ sub autodoc ($$) { # parse a file and extract documentation info
             elsif ($flags =~ /[my]/)  {
 
                 # Macros and typedefs are allowed to not be in embed.fnc.
+            }
+            elsif ($flags eq "")  {
+
+                # No flags at all here means this item's definition isn't yet
+                # known.  Defer it to later.
+                $group_is_deferred = 1;
             }
             else {
 
@@ -591,6 +617,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # Here we have processed the initial line in the heading text or API
         # element, and in the latter case, have saved the important
         # information from it into $items[0].
+        #
+        # Defer placing the group if no information found for it so far;
+        # otherwise calculate the output pod.
+        my $where = ($group_is_deferred) ? 'unknown' : output_file($flags);
+
         # Now accumulate the text that applies to it up to a terminating line,
         # which is one of:
         # 1) =cut
@@ -663,6 +694,20 @@ sub autodoc ($$) { # parse a file and extract documentation info
                            args     => [ @item_args ],
                          };
 
+            # If we have no information about this item, it is because its
+            # definition has yet to be encountered.  Add it to the list of
+            # such, with a bread crumb trail so that later we can easily find
+            # where it all fits
+            if ("$item_ret_type$item_flags@item_args" eq "") {
+                push $deferreds{$element_name}->@*,
+                     {
+                        name => $item_name,
+                        section => $section,
+                        pod     => $where,
+                        file    => $file,   # Just for any error message
+                     };
+            }
+
             # This line shows that this element is documented.
             delete $funcflags{$item_name};
         }
@@ -678,7 +723,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
         if ($element_name) {
 
             # Here, we have accumulated into $text, the pod for $element_name
-            my $where = output_file($flags);
 
             die "No =for apidoc_section nor =head1 in $file for"
               . "'$element_name'\n" unless defined $section;
@@ -1761,14 +1805,98 @@ close $fh or die "Error whilst reading MANIFEST: $!";
 
 parse_config_h();
 
+# Any apidoc group whose leader element's documentation wasn't known by the
+# time it was parsed has been placed in 'unknown' member of %docs.  We should
+# now be able to figure out which real pod file to place it in, and its usage.
+my $unknown = $docs{unknown};
+foreach my $section_name (keys $unknown->%*) {
+    foreach my $group_name (keys $unknown->{$section_name}->%*) {
+
+        # The leader is always the 0th element in the 'items' array.
+        my $item_name = $unknown->{$section_name}{$group_name}{items}[0]{name};
+
+        # We should have a usage definition by now.
+        my $corrected = delete $funcflags{$item_name};
+        if (! defined $corrected) {
+            die "=for apidoc line without any usage definition $item_name in"
+              . " $unknown->{$section_name}{$group_name}{file}";
+        }
+
+        my $where = output_file($corrected->{flags});
+
+        # $where now gives the correct pod for this group.  Prepare to move it
+        # to there
+        die "$where unexpectedly has an entry in $section_name for $group_name"
+                          if defined $docs{$where}{$section_name}{$group_name};
+        $docs{$where}{$section_name}{$group_name} =
+                                 delete $unknown->{$section_name}{$group_name};
+
+        # And fill in the leader item with the saved values
+        my $new = $docs{$where}{$section_name}{$group_name}{items}[0];
+        $new->{name} = $item_name;
+        $new->{args} = $corrected->{args};
+        $new->{flags} = $corrected->{flags};
+        $new->{ret_type} = $corrected->{ret_type};
+    }
+}
+
+# Now that any leaders have been filled in, we can do the same for all the
+# deferred non-leaders
+for my $group_name (keys %deferreds) {
+    my $group = delete $deferreds{$group_name};
+    foreach my $item ($group->@*) {
+        my $item_name = $item->{name};
+
+        # We should have a usage definition by now.
+        my $corrected = delete $funcflags{$item_name};
+        if (! $corrected) {
+            die "=for apidoc line without any usage definition $item_name in"
+              . " $item->{file}";
+        }
+
+        my $section = $item->{section};
+        my $flags = $corrected->{flags};
+
+        my $where = output_file($flags);
+
+        # We know where this element is that needs to be updated.  It better
+        # exist, or something is badly wrong
+        my $dest = $docs{$where}{$section}{$group_name};
+        if (! defined $dest) {
+            die "Unexpectedly didn't find an entry for"
+              . " $where->$section->$group_name";
+        }
+
+        # Look through the item list for this one, and correct it.
+        my $found = 0;
+        for my $dest_item ($dest->{items}->@*) {
+            next unless $dest_item->{name} eq $item_name;
+            $dest_item->{args} = $corrected->{args};
+            $dest_item->{flags} = $corrected->{flags};
+            $dest_item->{ret_type} = $corrected->{ret_type};
+            $found = 1;
+        }
+
+        if (! $found) {
+            die "Unexpectedly didn't find an entry for"
+              . " $where->$section->$group_name->$item_name";
+        }
+    }
+}
+
 for (sort keys %funcflags) {
     next unless $funcflags{$_}{flags} =~ /d/;
     next if $funcflags{$_}{flags} =~ /h/;
     warn "no docs for $_\n";
 }
 
+for my $key (sort keys %deferreds) {
+    warn "no docs for $key\n";
+}
+
 foreach (sort keys %missing) {
-    warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc";
+    warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc"
+       . " nor in the source";
 }
 
 # List of funcs in the public API that aren't also marked as core-only,
