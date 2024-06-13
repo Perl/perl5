@@ -264,6 +264,8 @@ that are fundamentally stringlike versus numberlike in nature.
 
     $str = stringify($val);
 
+This function is currently B<experimental>.
+
 Returns a new plain perl string that represents the given argument.
 
 When given a value that is already a string, a copy of this value is returned
