@@ -2107,13 +2107,13 @@ sub generate_init {
     }
     if ($self->{defaults}->{$var} eq 'NO_INIT') {
       $self->{deferred} .= $self->eval_input_typemap_code(
-        qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/,
+        qq/qq\a\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n\a/,
         $eval_vars
       );
     }
     else {
       $self->{deferred} .= $self->eval_input_typemap_code(
-        qq/"\\n\\tif (items < $num)\\n\\t    $var = $self->{defaults}->{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/,
+        qq/qq\a\\n\\tif (items < $num)\\n\\t    $var = $self->{defaults}->{$var};\\n\\telse {\\n$expr;\\n\\t}\\n\a/,
         $eval_vars
       );
     }
@@ -2123,15 +2123,15 @@ sub generate_init {
       print ";\n";
     }
     else {
-      $self->eval_input_typemap_code(qq/print "\\t$var;\\n"/, $eval_vars);
+      $self->eval_input_typemap_code(qq/print qq\a\\t$var;\\n\a/, $eval_vars);
     }
     $self->{deferred}
-      .= $self->eval_input_typemap_code(qq/"\\n$expr;\\n"/, $eval_vars);
+      .= $self->eval_input_typemap_code(qq/qq\a\\n$expr;\\n\a/, $eval_vars);
   }
   else {
     die "panic: do not know how to handle this branch for function pointers"
       if $printed_name;
-    $self->eval_input_typemap_code(qq/print "$expr;\\n"/, $eval_vars);
+    $self->eval_input_typemap_code(qq/print qq\a$expr;\\n\a/, $eval_vars);
   }
 }
 
