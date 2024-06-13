@@ -4217,7 +4217,7 @@ implementation stolen from PostgreSQL.
 PERL_STATIC_INLINE Size_t
 Perl_my_strnlen(const char *str, Size_t maxlen)
 {
-    const char *end = (char *) memchr(str, '\0', maxlen);
+    const char *end = (const char *) memchr(str, '\0', maxlen);
 
     PERL_ARGS_ASSERT_MY_STRNLEN;
 
