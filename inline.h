@@ -2283,7 +2283,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
  * conditional, same as the calling code checking for invariance ahead of time.
  * And having the calling code remove that conditional speeds up by that
  * conditional, the case where it wasn't invariant.  So there's no reason to
- * check before caling this.
+ * check before calling this.
  *
  * But we don't know this for non-core calls, so have to retain the check for
  * them. */
