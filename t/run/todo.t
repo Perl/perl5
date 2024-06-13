@@ -33,7 +33,7 @@ TODO: {
         "abcde5678" =~ / b .* (*plb:(*plb:(.{4}))? (.{5}) ) .$ /x;
         print $1 // "undef", ":", $2 // "undef", "\n";
         EOF
-    "undef:de567\nundef:de567", { $switches }, "");
+    "undef:de567\nundef:de567", { eval $switches }, "");
 }
 
 done_testing();
