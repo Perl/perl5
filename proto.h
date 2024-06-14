@@ -7773,10 +7773,6 @@ S_destroy_matcher(pTHX_ PMOP *matcher);
         assert(matcher)
 
 STATIC OP *
-S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied);
-# define PERL_ARGS_ASSERT_DO_SMARTMATCH
-
-STATIC OP *
 S_docatch(pTHX_ Perl_ppaddr_t firstpp)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DOCATCH
