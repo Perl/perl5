@@ -18,22 +18,6 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
-=item Smart match (C<~~>)
-
-Introduced in Perl 5.10.0
-
-Modified in Perl 5.10.1, 5.12.0
-
-Deprecated in 5.38.0
-
-Will be removed in 5.42.0
-
-Using this feature triggers warnings in the category
-C<deprecated>.
-
-The ticket for this experiment is
-L<[perl #13173]|https://github.com/Perl/perl5/issues/13173>.
-
 =item Pluggable keywords
 
 Introduced in Perl 5.11.2
@@ -453,6 +437,21 @@ Removed in Perl 5.28.0
 Introduced in Perl 5.8.0 (or before)
 
 Removed in Perl 5.36.0
+
+=item Smart match (C<~~>)
+
+Introduced in Perl 5.10.0
+
+Modified in Perl 5.10.1, 5.12.0
+
+Made experimental (and discouraged) in 5.18.0
+
+Deprecated in 5.38.0
+
+Removed in 5.42.0
+
+The ticket for this experiment is
+L<[perl #13173]|https://github.com/Perl/perl5/issues/13173>.
 
 =back
 

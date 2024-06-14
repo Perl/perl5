@@ -2741,10 +2741,9 @@ L<perlfunc/getsockopt>.
 arguments are provided in key/value pairs, with the keys being one
 of C<input>, C<output> or C<detail>, followed by a boolean.
 
-=item given is deprecated
+=item given is no longer supported as of Perl 5.42
 
-(D deprecated::smartmatch) C<given> depends on smartmatch, which is
-deprecated. It will be removed in Perl 5.42. See the explanation under
+(F) C<given> has been removed in Perl 5.42. See the explanation under
 L<perlsyn/Experimental Details on given and when>.
 
 =item Global symbol "%s" requires explicit package name (did you forget to
@@ -6180,13 +6179,9 @@ so there can't be any left to fill later parameters.
 overload it: Perl refuses to use the object's underlying structure
 for the smart match.
 
-=item Smartmatch is deprecated
+=item Smartmatch is no longer supported as of Perl 5.42
 
-(D deprecated::smartmatch) This warning is emitted if you
-use the smartmatch (C<~~>) operator.  This is a deprecated
-feature.  Particularly, its behavior is noticed for being
-unnecessarily complex and unintuitive, and it will be removed
-in Perl 5.42.
+(F) The smartmatch (C<~~>) operator was removed in Perl 5.42.
 
 =item Sorry, hash keys must be smaller than 2**31 bytes
 
@@ -8189,12 +8184,9 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item when is deprecated
+=item when is no longer supported as of Perl 5.42
 
-(D deprecated::smartmatch) C<when> depends on smartmatch, which is
-deprecated.  Additionally, it has several special cases that may
-not be immediately obvious, and it will be removed in Perl 5.42.
-See the explanation
+(F) C<when> was removed in Perl 5.42.  See the explanation
 under L<perlsyn/Experimental Details on given and when>.
 
 =item Wide character in %s
