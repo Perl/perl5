@@ -106,7 +106,7 @@ ANYOFRb     ANYOFR,     packed 1  S ; Like ANYOFR, but all matches share the sam
 # the range.  The fast DFA we now use to do the conversion is slower than
 # comparing the strings, but not by much, and negligible in 2 or 3 byte
 # operations.  (We don't have to compare the final byte as it has to be
-# different or else this wouldn't be a range.)  So we might as well displense
+# different or else this wouldn't be a range.)  So we might as well dispense
 # with the comparisons that ANYOFRs would do, and go directly to do the
 # conversion .
 
@@ -125,7 +125,7 @@ NPOSIXD     NPOSIXD,    none 0 S   ; complement of POSIXD, [[:^class:]]
 NPOSIXL     NPOSIXD,    none 0 S   ; complement of POSIXL, [[:^class:]]
 NPOSIXU     NPOSIXD,    none 0 S   ; complement of POSIXU, [[:^class:]]
 NPOSIXA     NPOSIXD,    none 0 S   ; complement of POSIXA, [[:^class:]]
-# End of order is important
+# End of order being important
 
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
