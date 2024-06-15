@@ -296,13 +296,17 @@ PP(pp_methstart)
             PADOFFSET padix   = (aux++)->uv;
             U32       fieldix = (aux++)->uv;
 
-            assert(fieldp[fieldix]);
-
-            /* TODO: There isn't a convenient SAVE macro for doing both these
-             * steps in one go. Add one. */
-            SAVESPTR(PAD_SVl(padix));
-            SV *sv = PAD_SVl(padix) = SvREFCNT_inc(fieldp[fieldix]);
-            save_freesv(sv);
+            /* Defend against fields that don't yet exist; e.g. because of
+             * method invoked during DESTROY of an aborted constructor
+             *   See also https://github.com/Perl/perl5/issues/22278
+             */
+            if(fieldp[fieldix]) {
+              /* TODO: There isn't a convenient SAVE macro for doing both these
+               * steps in one go. Add one. */
+              SAVESPTR(PAD_SVl(padix));
+              SV *sv = PAD_SVl(padix) = SvREFCNT_inc(fieldp[fieldix]);
+              save_freesv(sv);
+            }
         }
     }
 
