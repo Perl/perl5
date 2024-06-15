@@ -2252,6 +2252,27 @@ sub output($) {     # Output a complete pod file
         }
 
         if ($section_info && keys $section_info->%*) {
+            my $leader_name;
+            my $leader_pod;
+
+            # To make things even more compact, go through the list, and
+            # combine adjacent elements that have identical pod.
+            for my $next_name (sort dictionary_order keys %$section_info) {
+                my $this_pod = $section_info->{$next_name}{pod};
+
+                # Combine if are the same pod
+                if ($leader_pod && $this_pod && $leader_pod eq $this_pod) {
+                    push $section_info->{$leader_name}{items}->@*,
+                         $section_info->{$next_name}{items}->@*;
+                    delete $section_info->{$next_name};
+                }
+                else {  # Set new pod otherwise
+                    $leader_pod = $this_pod;
+                    $leader_name = $next_name;
+                }
+            }
+
+            # Then, output everything.
             for my $function_name (sort dictionary_order keys %$section_info) {
                 docout($fh, $function_name, $section_info->{$function_name});
             }
