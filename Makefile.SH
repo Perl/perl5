@@ -1263,6 +1263,7 @@ CHMOD_W = chmod +w
 #	warnings.pl:	warnings.h lib/warnings.pm
 #	feature.pl:	feature.h lib/feature.pm
 #	locale.pl:	locale_table.h
+#	lock_definitions.pl: lock_definitions.h
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
 # To force them to be regenerated, run
