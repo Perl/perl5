@@ -8241,17 +8241,17 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
  && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
 
     const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
-    struct tm mytm2 = *mytm;
+    struct tm aux_tm = *mytm;
     MKTIME_LOCK;
-    mktime(&mytm2);
+    mktime(&aux_tm);
     MKTIME_UNLOCK;
     restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
 #  ifdef HAS_TM_TM_GMTOFF
-    mytm->tm_gmtoff = mytm2.tm_gmtoff;
+    mytm->tm_gmtoff = aux_tm.tm_gmtoff;
 #  endif
 #  ifdef HAS_TM_TM_ZONE
-    mytm->tm_zone = mytm2.tm_zone;
+    mytm->tm_zone = aux_tm.tm_zone;
 #  endif
 #endif
 
