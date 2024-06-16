@@ -3582,8 +3582,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	int		isdst
     CODE:
 	{
-            SV *sv = sv_strftime_ints(fmt, sec, min, hour, mday, mon, year,
-                                      wday, yday, isdst);
+            SV *sv = sv_strftime_ints(fmt, sec, min, hour, mday, mon, year, 0);
 	    if (sv) {
                 sv = sv_2mortal(sv);
             }

@@ -7504,7 +7504,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
         /* The year was deliberately chosen so that January 1 is on the
         * first day of the week.  Since we're only getting one thing at a
         * time, it all works */
-        ints_to_tm(&mytm, locale, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
+        ints_to_tm(&mytm, locale, 30, 30, hour, mday, mon, 2011, 0);
         bool succeeded;
         if (utf8ness) {
             succeeded = strftime8(format,
@@ -7648,7 +7648,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
             /* Do the strftime.  Once we have determined the UTF8ness (if
             * we want it), assume the rest will be the same, and use
             * strftime_tm(), which doesn't recalculate UTF8ness */
-            ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0, 0, 0);
+            ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0);
             if (utf8ness && is_utf8 != UTF8NESS_NO && is_utf8 != UTF8NESS_YES) {
                 succeeded = strftime8(fmts[j],
                                       alt_dig_sv,
@@ -8075,16 +8075,25 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 /*
 =for apidoc_section $time
 =for apidoc      sv_strftime_tm
+=for apidoc_item sv_strftime_ints
 =for apidoc_item my_strftime
 
 These implement the libc strftime().
 
 On failure, they return NULL, and set C<errno> to C<EINVAL>.
 
-C<sv_strftime_tm> is preferred, as it transparently handles the UTF-8ness of
-the current locale, the input C<fmt>, and the returned result.  Only if the
-current C<LC_TIME> locale is a UTF-8 one (and S<C<use bytes>> is not in effect)
-will the result be marked as UTF-8.
+C<sv_strftime_tm> and C<sv_strftime_ints> are preferred, as they transparently
+handle the UTF-8ness of the current locale, the input C<fmt>, and the returned
+result.  Only if the current C<LC_TIME> locale is a UTF-8 one (and S<C<use
+bytes>> is not in effect) will the result be marked as UTF-8.
+
+C<my_strftime> is kept for backwards compatibility.  Knowing if its result
+should be considered UTF-8 or not requires significant extra logic.
+
+Note that all three functions are always executed in the underlying
+C<LC_TIME> locale of the program, giving results based on that locale.
+
+The functions differ as follows:
 
 C<sv_strftime_tm> takes a pointer to a filled-in S<C<struct tm>> parameter.  It
 ignores the values of the C<wday> and C<yday> fields in it.  The other fields
@@ -8093,22 +8102,37 @@ that purpose.
 
 The caller assumes ownership of the returned SV with a reference count of 1.
 
-C<my_strftime> is kept for backwards compatibility.  Knowing if its result
-should be considered UTF-8 or not requires significant extra logic.
+C<sv_strftime_ints> takes a bunch of integer parameters that together
+completely define a given time.  It calculates the S<C<struct tm>> to pass to
+libc strftime(), and calls that function.  Setting C<isdst> to 0 causes the
+date to be calculated as if there is no daylight savings time in effect; any
+other value causes the possibility of daylight savings time to be considered.
+A positive value is a hint to the function that daylight savings is likely to
+be in effect for the passed-in time.
 
-The return value is a pointer to the formatted result (which MUST be arranged
-to be FREED BY THE CALLER).  This allows this function to increase the buffer
-size as needed, so that the caller doesn't have to worry about that, unlike
-libc C<strftime()>.
+The caller assumes ownership of the returned SV with a reference count of 1.
 
-The C<wday>, C<yday>, and C<isdst> parameters are ignored by C<my_strftime>.
-Daylight savings time is never considered to exist, and the values returned for
-the other two fields (if C<fmt> even calls for them) are calculated from the
-other parameters, without need for referencing these.
+C<my_strftime> is like C<sv_strftime_ints> except that:
 
-Note that both functions are always executed in the underlying
-C<LC_TIME> locale of the program, giving results based on that locale.
+=over
 
+=item The C<fmt> parameter and the return are S<C<char *>> instead of
+S<C<SV *>>.
+
+This means the UTF-8ness of the result is unspecified.  The result MUST be
+arranged to be FREED BY THE CALLER).
+
+=item It has extra parameters C<yday>, C<wday> and C<is_dst>.
+
+These are completely ignored, and exist only for historical reasons.
+
+Daylight savings time is never considered to be in effect, and C<yday> and
+C<wday> are calculated from the other arguments.
+
+=back
+
+Note that all three functions are always executed in the underlying C<LC_TIME>
+locale of the program, giving results based on that locale.
 =cut
  */
 
@@ -8118,6 +8142,9 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
                        int isdst)
 {   /* Documented above */
     PERL_ARGS_ASSERT_MY_STRFTIME;
+    PERL_UNUSED_ARG(wday);
+    PERL_UNUSED_ARG(yday);
+    PERL_UNUSED_ARG(isdst);
 
 #ifdef USE_LOCALE_TIME
     const char * locale = querylocale_c(LC_TIME);
@@ -8126,8 +8153,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 #endif
 
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, wday, yday,
-               isdst);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0);
     if (! strftime_tm(fmt, PL_scratch_langinfo, locale, &mytm)) {
         return NULL;
     }
@@ -8137,8 +8163,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 
 SV *
 Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
-                            int mday, int mon, int year, int wday,
-                            int yday, int isdst)
+                            int mday, int mon, int year, int isdst)
 {   /* Documented above */
     PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
 
@@ -8149,8 +8174,7 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
 #endif
 
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, wday, yday,
-               isdst);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, isdst);
     return sv_strftime_common(fmt, locale, &mytm);
 }
 
@@ -8212,10 +8236,14 @@ STATIC void
 S_ints_to_tm(pTHX_ struct tm * mytm,
                    const char * locale,
                    int sec, int min, int hour, int mday, int mon, int year,
-                   int wday, int yday, int isdst)
+                   int isdst)
 {
     /* Create a struct tm structure from the input time-related integer
-     * variables for 'locale' */
+     * variables for 'locale'.  Unlike mini_mktime(), this populates the
+     * tm_gmtoff and tm_zone fields of the structure if the platform has those;
+     * and unlike mktime(), it allows you to specify to not consider the
+     * possibility of there being daylight savings time.  This is done by
+     * calling with 'isdst' set to 0 */
 
     /* Override with the passed-in values */
     Zero(mytm, 1, struct tm);
@@ -8225,34 +8253,84 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
     mytm->tm_mday = mday;
     mytm->tm_mon = mon;
     mytm->tm_year = year;
-    mytm->tm_wday = wday;
-    mytm->tm_yday = yday;
-    mytm->tm_isdst = isdst;
 
-    /* Long-standing behavior is to ignore the effects of locale (in
-     * particular, daylight savings time) on the input, so we use mini_mktime.
-     * See GH #22062. */
+    struct tm * which_tm = mytm;
+    struct tm aux_tm;
+
+#ifndef HAS_MKTIME
+
     mini_mktime(mytm);
 
-    /* But some of those effect are deemed desirable, so use libc to get the
-     * values for tm_gmtoff and tm_zone on platforms that have them [perl
-     * #18238] */
-#if  defined(HAS_MKTIME)                                      \
- && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
+#else
 
-    const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
-    struct tm aux_tm = *mytm;
-    MKTIME_LOCK;
-    mktime(&aux_tm);
-    MKTIME_UNLOCK;
-    restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+    /* On platforms that have either of these two fields, we have to run the
+     * libc mktime() in order to set them, as mini_mktime() doesn't deal with
+     * them.  [perl #18238] */
+#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+#    define ALWAYS_RUN_MKTIME
+#  endif
 
-#  ifdef HAS_TM_TM_GMTOFF
-    mytm->tm_gmtoff = aux_tm.tm_gmtoff;
+    /* When isdst is 0, it means to consider daylight savings time as never
+     * being in effect.  Many libc implementations of mktime() do not allow
+     * this; they always consider the possibility of dst.  But mini_mktime()
+     * never considers dst, so use it under this condition. */
+    if (isdst == 0) {
+        mini_mktime(mytm);
+
+#  ifndef ALWAYS_RUN_MKTIME
+
+    /* When we don't always need libc mktime(), we call it only when we didn't
+     * call mini_mktime() */
+    } else {
+
+#  else
+        /* Here will have to run libc mktime() in order to get the values of
+         * some fields that mini_mktime doesn't populate.  We don't want
+         * mktime's side effect of looking for dst, so we have to have a
+         * separate tm structure from which we copy just those fields into the
+         * returned structure.  Initialize its values.  mytm should now be a
+         * normalized version of the input. */
+        aux_tm = *mytm;
+        aux_tm.tm_isdst = isdst;
+        which_tm = &aux_tm;
+
 #  endif
-#  ifdef HAS_TM_TM_ZONE
-    mytm->tm_zone = aux_tm.tm_zone;
+
+        /* Here, we need to run libc mktime(), either because we want to take
+         * dst into consideration, or because it calculates one or two fields
+         * that we need that mini_mktime() doesn't handle.
+         *
+         * Unlike mini_mktime(), it does consider the locale, so have to switch
+         * to the correct one. */
+        const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+        MKTIME_LOCK;
+
+        /* which_tm points to an auxiliary copy if we ran mini_mktime().
+         * Otherwise it points to the passed-in one which now gets populated
+         * directly. */
+        (void) mktime(which_tm);
+
+        MKTIME_UNLOCK;
+        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+    }
+
+#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+
+    /* And use the saved libc values for tm_gmtoff and tm_zone if we used an
+     * auxiliary struct to get them */
+    if (which_tm != mytm) {
+
+#    ifdef HAS_TM_TM_GMTOFF
+        mytm->tm_gmtoff = aux_tm.tm_gmtoff;
+#    endif
+#    ifdef HAS_TM_TM_ZONE
+        mytm->tm_zone = aux_tm.tm_zone;
+#    endif
+
+    }
+
 #  endif
+#  undef ALWAYS_RUN_MKTIME
 #endif
 
     return;

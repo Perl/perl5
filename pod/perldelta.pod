@@ -348,7 +348,12 @@ well.
 
 =item *
 
-XXX
+The L<perlapi/C<sv_strftime_ints>> function is introduced.  This is an
+enhanced version of L<perlapi/C<my_strftime>>, which is retained for
+backwards compatibility.  Both are to call L<strftime(3)> when you have
+the year, month, hour, etc.  The new function handles UTF8ness for you,
+and allows you to specify if you want the possibility of daylight
+savings time to be considered.  C<my_strftime> never considers DST.
 
 =back
 

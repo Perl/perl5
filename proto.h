@@ -4900,7 +4900,7 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_STREQ_FLAGS
 
 PERL_CALLCONV SV *
-Perl_sv_strftime_ints(pTHX_ SV *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
+Perl_sv_strftime_ints(pTHX_ SV *fmt, int sec, int min, int hour, int mday, int mon, int year, int isdst);
 #define PERL_ARGS_ASSERT_SV_STRFTIME_INTS       \
         assert(fmt)
 
@@ -6999,7 +6999,7 @@ S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t
 # define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
 
 STATIC void
-S_ints_to_tm(pTHX_ struct tm *my_tm, const char *locale, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
+S_ints_to_tm(pTHX_ struct tm *my_tm, const char *locale, int sec, int min, int hour, int mday, int mon, int year, int isdst);
 # define PERL_ARGS_ASSERT_INTS_TO_TM            \
         assert(my_tm); assert(locale)
 
