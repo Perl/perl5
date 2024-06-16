@@ -5071,9 +5071,9 @@ freeing is typically of benefit only for programs that make significant use of
 string eval.
 
 =for apidoc_section $concurrency
-=for apidoc  Cmnh|    |CVf_SLABBED
-=for apidoc_item |OP *|CvROOT|CV * sv
-=for apidoc_item |OP *|CvSTART|CV * sv
+=for apidoc Cmnh|    |CVf_SLABBED
+=for apidoc Cmh |OP *|CvROOT|CV * sv
+=for apidoc Cmh |OP *|CvSTART|CV * sv
 
 When the C<CVf_SLABBED> flag is set, the CV takes responsibility for freeing
 the slab. If C<CvROOT> is not set when the CV is freed or undeffed, it is
