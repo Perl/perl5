@@ -8019,6 +8019,10 @@ If the subroutine is an XSUB, the elements to be compared are pushed on
 to the stack, the way arguments are usually passed to XSUBs.  C<$a> and
 C<$b> are not set.
 
+If two or more elements of LIST compare the same (i.e. the comparison
+operation returns 0 for them), they retain the relative order they had
+in LIST. In other words, sorting is stable (and has been since v5.8.0).
+
 The values to be compared are always passed by reference and should not
 be modified.
 
@@ -8037,10 +8041,6 @@ modifying an element of a list returned by L<C<sort>|/sort SUBNAME LIST>
 L<C<grep>|/grep BLOCK LIST>)
 actually modifies the element in the original list.  This is usually
 something to be avoided when writing clear code.
-
-Historically Perl has varied in whether sorting is stable by default.
-If stability matters, it can be controlled explicitly by using the
-L<sort> pragma.
 
 Examples:
 
@@ -8131,10 +8131,6 @@ Examples:
 
     my @new = sort function_with_signature @old;
 
-    # guarantee stability
-    use sort 'stable';
-    my @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-
 Warning: syntactical care is required when sorting the list returned from
 a function.  If you want to sort the list returned by the function call
 C<find_records(@key)>, you can use:
@@ -8223,8 +8219,8 @@ eliminate any C<NaN>s from the input list.
 
     my @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
-In this version of F<perl>, the C<sort> function is implemented via the
-mergesort algorithm.
+In the current version of Perl, the C<sort> function is implemented via
+the mergesort algorithm.
 
 =item splice ARRAY,OFFSET,LENGTH,LIST
 X<splice>
@@ -10176,11 +10172,11 @@ pragmas are:
     use constant;
     use diagnostics;
     use integer;
+    use feature  qw(say signatures bitwise);
     use sigtrap  qw(SEGV BUS);
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
     use warnings qw(all);
-    use sort     qw(stable);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like L<C<strict>|strict> or L<C<integer>|integer>, unlike
