@@ -3434,7 +3434,7 @@ Adm	|bool	|sv_streq	|NULLOK SV *sv1 			\
 Adp	|bool	|sv_streq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
-EXpx	|SV *	|sv_strftime_ints					\
+Adp	|SV *	|sv_strftime_ints					\
 				|NN SV *fmt				\
 				|int sec				\
 				|int min				\
@@ -3442,8 +3442,6 @@ EXpx	|SV *	|sv_strftime_ints					\
 				|int mday				\
 				|int mon				\
 				|int year				\
-				|int wday				\
-				|int yday				\
 				|int isdst
 Adp	|SV *	|sv_strftime_tm |NN SV *fmt				\
 				|NN const struct tm *mytm
@@ -4444,8 +4442,6 @@ S	|void	|ints_to_tm	|NN struct tm *my_tm			\
 				|int mday				\
 				|int mon				\
 				|int year				\
-				|int wday				\
-				|int yday				\
 				|int isdst
 S	|bool	|is_locale_utf8 |NN const char *locale
 S	|HV *	|my_localeconv	|const int item
