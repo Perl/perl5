@@ -29,6 +29,24 @@ fresh_perl_like(<<~'EOT',
                 qr/Use of non-ASCII character 0x[[:xdigit:]]{2} illegal/,
                 { }, "Fails on non-ASCII input when ASCII is required");
 
+if (fresh_perl_like(<<~'EOT',
+                 use v5.41.0;
+                 my $var = "¶";
+                 EOT
+                qr/Use of non-ASCII character 0x[[:xdigit:]]{2} illegal/,
+                { }, ">= 'use 5.39' implies use source::encoding 'ascii'")
+   ) {
+    fresh_perl_is(<<~'EOT',
+                    use v5.41.0;
+                    my $var = "A";
+                    no source::encoding;
+                    $var = "¶";
+                    EOT
+                "",
+                { }, "source encoding can be turned off");
+}
+else { # Above test depends on the previous one; if that failed, use this
+       # alternate one
     fresh_perl_is(<<~'EOT',
                     use source::encoding 'ascii';
                     my $var = "A";
@@ -37,6 +55,7 @@ fresh_perl_like(<<~'EOT',
                     EOT
                 "",
                 { }, "source encoding can be turned off");
+}
 
 fresh_perl_is(<<~'EOT',
                my $var = "A";

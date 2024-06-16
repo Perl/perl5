@@ -39,6 +39,9 @@ may be used interchangeably with that.
 The purpose of this pragma is to catch cases early where you forgot to
 specify S<C<use utf8>>.
 
+S<C<use source::encoding 'ascii'>> is automatically enabled within the
+lexical scope of a S<C<use v5.41.0>> or higher.
+
 S<C<no source::encoding>> turns off all this checking for the remainder of
 its lexical scope.  The meaning of non-ASCII characters is then undefined.
 
