@@ -801,7 +801,7 @@ C<L</UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 */
 
 #define UTF8_CHK_SKIP(s)                                                       \
-           (UNLIKELY(s[0] == '\0') ? 1 : my_strnlen((char *) (s), UTF8SKIP(s)))
+           (UNLIKELY(s[0] == '\0') ? 1 : my_strnlen((const char *) (s), UTF8SKIP(s)))
 /*
 
 =for apidoc Am|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
