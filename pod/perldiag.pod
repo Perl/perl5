@@ -1287,7 +1287,7 @@ via package "%s" (Perhaps you forgot to load the package?)
 (D deprecated::missing_import_called_with_args) You called the
 C<import()> or C<unimport()> method of a class that has no import method
 defined in its inheritance graph, and passed an argument to the method.
-This is very often the sign of a mispelled package name in a use or
+This is very often the sign of a misspelled package name in a use or
 require statement that has silently succeded due to a case insensitive
 file system.
 
