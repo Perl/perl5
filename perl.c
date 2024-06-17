@@ -1998,6 +1998,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_COPY_ON_WRITE
                              " PERL_COPY_ON_WRITE"
 #  endif
+#  ifdef PERL_CV_OVERRIDE
+                             " PERL_CV_OVERRIDE"
+#  endif
 #  ifdef PERL_DISABLE_PMC
                              " PERL_DISABLE_PMC"
 #  endif

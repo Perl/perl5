@@ -4182,10 +4182,177 @@ Perl_rpeep(pTHX_ OP *o)
     LEAVE;
 }
 
+#ifdef PERL_CV_OVERRIDE
+
+static bool
+S_defgv_hek_accessor(pTHX_ CV *cv)
+{
+    dSP;
+    SV **mark = PL_stack_base + TOPMARK;
+
+    if ( SP - MARK != 2 )
+    {
+        return false;
+    }
+
+    /* This completely replaces MDEREF_INDEX_const | MDEREF_AV_gvav_aelem */
+    /* as we don't need to place this sv onto PL_defgv just to find it again */
+    mark = PL_stack_base + POPMARK;
+    SV *sv = *(MARK+1);
+    SV *keysv = CvSUBOVERRIDEAUX(cv);
+
+    SP = MARK;
+    PUTBACK;
+
+    /* MDEREF_HV_vivify_rv2hv_helem */
+    sv = vivify_ref(sv, OPpDEREF_HV);
+    SvGETMAGIC(sv);
+    if (LIKELY(SvROK(sv))) {
+        if (UNLIKELY(SvAMAGIC(sv))) {
+            sv = amagic_deref_call(sv, to_hv_amg);
+        }
+        sv = SvRV(sv);
+        if (UNLIKELY(SvTYPE(sv) != SVt_PVHV))
+            DIE(aTHX_ "Not a HASH reference");
+    }
+    else if (SvTYPE(sv) != SVt_PVHV) {
+        /* Let the real multi-deref handle softref2xv */
+        if (!isGV_with_GP(sv))
+            return false;
+        sv = MUTABLE_SV(GvHVn((GV*)sv));
+    }
+
+    /* MDEREF_INDEX_const */
+    SV **svp;
+    HV * const hv = (HV*)sv;
+    HE* he;
+
+    he = hv_fetch_ent(hv, keysv, 0, 0);
+    svp = he ? &HeVAL(he) : NULL;
+
+    sv = (svp && *svp ? *svp : &PL_sv_undef);
+    /* see note in pp_helem() */
+    if (SvRMAGICAL(hv) && SvGMAGICAL(sv))
+        mg_get(sv);
+
+#ifdef PERL_RC_STACK
+    SvREFCNT_inc(sv);
+#endif
+    XPUSHs(sv);
+    PUTBACK;
+    return true;
+}
+
+#define GV_AV_HV_CONST_MDEREF (\
+    (MDEREF_FLAG_last | MDEREF_INDEX_const | MDEREF_HV_vivify_rv2hv_helem)  \
+        << MDEREF_SHIFT                                                     \
+    | (MDEREF_INDEX_const | MDEREF_AV_gvav_aelem)                           \
+    )
+
+static void
+S_cv_override_create(pTHX_ OP *o)
+{
+    OP *no;
+    OP *topop;
+    CV *cv;
+
+    cv = PL_compcv;
+
+    if ( o != (OP *)CvSTART(cv) )
+        return;
+
+    if ( CvIsSUBOVERRIDE(cv) )
+        return;
+
+    topop = o->op_next;
+    no = o->op_next;
+
+    while ( topop && topop->op_type == OP_NULL )
+        topop = topop->op_next;
+
+    if ( !topop || !topop->op_next )
+        return;
+
+    /* Skip any intial OP_NEXTSTATE */
+    if ( topop->op_type == OP_NEXTSTATE )
+        topop = topop->op_next;
+
+
+    OP *multideref = NULL;
+    OP *maybe_md = NULL;
+
+    /* return $_[0]{foo} */
+    if ( !multideref
+        && (no = topop)       && no->op_type == OP_MULTIDEREF && ( maybe_md = no )
+        && (no = no->op_next) && no->op_type == OP_LEAVESUB
+    )
+    {
+      multideref = maybe_md;
+    }
+
+    /* @_ >  1 && ...; $_[0]{foo} */
+    /* @_ != 1 && ...; $_[0]{foo} */
+    if ( !multideref
+        && (no = topop)       && no->op_type == OP_GV && cGVOPx_gv(no) == PL_defgv
+        && (no = no->op_next) && no->op_type == OP_RV2AV
+        && (no = no->op_next) && no->op_type == OP_CONST && SvIV(cSVOPx_sv(no)) == 1
+        && (no = no->op_next) && ( no->op_type == OP_GT ||  no->op_type == OP_NE )
+        && (no = no->op_next) && ( no->op_type == OP_AND || no->op_type == OP_COND_EXPR )
+        && (no = no->op_next) && no->op_type == OP_NEXTSTATE
+        && (no = no->op_next) && no->op_type == OP_MULTIDEREF && ( maybe_md = no )
+        && (no = no->op_next) && no->op_type == OP_LEAVESUB
+    )
+    {
+      multideref = maybe_md;
+    }
+
+    /* return $_[0]{foo} if @_ == 1 */
+    if ( !multideref
+        && (no = topop)       && no->op_type == OP_GV && cGVOPx_gv(no) == PL_defgv
+        && (no = no->op_next) && no->op_type == OP_RV2AV
+        && (no = no->op_next) && no->op_type == OP_CONST && SvIV(cSVOPx_sv(no)) == 1
+        && (no = no->op_next) && ( no->op_type == OP_GT ||  no->op_type == OP_NE )
+        && (no = no->op_next) && ( no->op_type == OP_AND || no->op_type == OP_COND_EXPR )
+        && (no = no->op_next) && no->op_type == OP_MULTIDEREF && ( maybe_md = no )
+        && (no = no->op_next) && no->op_type == OP_LEAVESUB
+    )
+    {
+      multideref = maybe_md;
+    }
+
+    if ( multideref )
+    {
+        UNOP_AUX_item *items = cUNOP_AUXx(multideref)->op_aux;
+        Size_t size = (items-1)->ssize;
+        UV actions = items->uv;
+        if ( size == 4 && actions == GV_AV_HV_CONST_MDEREF )
+        {
+            SV *sv = UNOP_AUX_item_sv(++items);
+            IV elem = (++items)->iv;
+
+            if ( sv == (SV *)PL_defgv && elem == 0
+                && !( multideref->op_private & (OPpMULTIDEREF_EXISTS|OPpMULTIDEREF_DELETE))
+                && !( multideref->op_flags & OPf_MOD)
+                && !( multideref->op_private & OPpLVAL_DEFER)
+                && !( multideref->op_private & OPpLVAL_INTRO) )
+            {
+                SV *keysv = UNOP_AUX_item_sv(++items);
+                CvIsSUBOVERRIDE_on(cv);
+                CvSUBOVERRIDE(cv) = S_defgv_hek_accessor;
+                CvSUBOVERRIDEAUX(cv) = keysv;
+            }
+        }
+    }
+}
+#endif
+
 void
 Perl_peep(pTHX_ OP *o)
 {
     CALL_RPEEP(o);
+#ifdef PERL_CV_OVERRIDE
+    S_cv_override_create(aTHX_ o);
+#endif
 }
 
 /*
