@@ -119,6 +119,10 @@ distinguished boolean value.
 
 This gives an equivalent value to expressions like C<!!1> or C<!0>.
 
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
 =head2 false
 
     $val = false;
@@ -128,6 +132,10 @@ considered "false" by perl, this one is special in that L</is_bool> considers
 it to be a distinguished boolean value.
 
 This gives an equivalent value to expressions like C<!!0> or C<!1>.
+
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
 
 =head2 is_bool
 
@@ -144,6 +152,8 @@ or any variable containing one of these results.
 This function used to be named C<isbool>. A compatibility alias is provided
 currently but will be removed in a later version.
 
+Available starting with Perl 5.36.
+
 =head2 inf
 
     $num = inf;
@@ -152,6 +162,8 @@ This function is currently B<experimental>.
 
 Returns the floating-point infinity value.
 
+Available starting with Perl 5.40.
+
 =head2 nan
 
     $num = nan;
@@ -159,6 +171,8 @@ Returns the floating-point infinity value.
 This function is currently B<experimental>.
 
 Returns the floating-point "Not-a-Number" value.
+
+Available starting with Perl 5.40.
 
 =head2 weaken
 
@@ -169,11 +183,19 @@ count of its referent. If only weakened references to a referent remain, it
 will be disposed of, and all remaining weak references to it will have their
 value set to C<undef>.
 
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
 =head2 unweaken
 
     unweaken($ref);
 
 Strengthens a reference, undoing the effects of a previous call to L</weaken>.
+
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
 
 =head2 is_weak
 
@@ -185,12 +207,20 @@ not weak.
 This function used to be named C<isweak>. A compatibility alias is provided
 currently but will be removed in a later version.
 
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
 =head2 blessed
 
     $str = blessed($ref);
 
 Returns the package name for an object reference, or C<undef> for a
 non-reference or reference that is not an object.
+
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
 
 =head2 refaddr
 
@@ -200,6 +230,10 @@ Returns the memory address for a reference, or C<undef> for a non-reference.
 This value is not likely to be very useful for pure Perl code, but is handy as
 a means to test for referential identity or uniqueness.
 
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
 =head2 reftype
 
     $str = reftype($ref);
@@ -207,6 +241,10 @@ a means to test for referential identity or uniqueness.
 Returns the basic container type of the referent of a reference, or C<undef>
 for a non-reference. This is returned as a string in all-capitals, such as
 C<ARRAY> for array references, or C<HASH> for hash references.
+
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
 
 =head2 created_as_string
 
@@ -230,6 +268,8 @@ strings. For example
     my $val = URI->new( "https://metacpan.org/" );
 
     if( created_as_string $val ) { ... }    # this will not execute
+
+Available starting with Perl 5.36.
 
 =head2 created_as_number
 
@@ -260,6 +300,8 @@ serialisation modules such as JSON encoders or similar situations, where
 language interoperability concerns require making a distinction between values
 that are fundamentally stringlike versus numberlike in nature.
 
+Available starting with Perl 5.36.
+
 =head2 stringify
 
     $str = stringify($val);
@@ -282,6 +324,8 @@ overload will return a string that names the underlying container type of
 the reference, its memory address, and possibly its class name if it is an
 object.
 
+Available starting with Perl 5.40.
+
 =head2 ceil
 
     $num = ceil($num);
@@ -289,12 +333,20 @@ object.
 Returns the smallest integer value greater than or equal to the given
 numerical argument.
 
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
 =head2 floor
 
     $num = floor($num);
 
 Returns the largest integer value less than or equal to the given numerical
 argument.
+
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
 
 =head2 indexed
 
@@ -324,6 +376,10 @@ C<foreach> loop syntax; as
 In scalar context this function returns the size of the list that it would
 otherwise have returned, and provokes a warning in the C<scalar> category.
 
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
 =head2 trim
 
     $stripped = trim($string);
@@ -351,7 +407,11 @@ C<trim> is equivalent to:
 
     $str =~ s/\A\s+|\s+\z//urg;
 
-For Perl versions where this feature is not available look at the
+Available starting with Perl 5.36. Since Perl 5.40, it is no longer
+experimental and it is included in the 5.40 and higher builtin version
+bundles.
+
+For Perl versions where this function is not available look at the
 L<String::Util> module for a comparable implementation.
 
 =head2 is_tainted
@@ -359,6 +419,8 @@ L<String::Util> module for a comparable implementation.
     $bool = is_tainted($var);
 
 Returns true when given a tainted variable.
+
+Available starting with Perl 5.38.
 
 =head2 export_lexically
 
@@ -391,6 +453,8 @@ This must be called at compile time; which typically means during a C<BEGIN>
 block. Usually this would be used as part of an C<import> method of a module,
 when invoked as part of a C<use ...> statement.
 
+Available starting with Perl 5.38.
+
 =head2 load_module
 
     load_module($module_name);
@@ -409,6 +473,8 @@ L<the C<module_true> feature|feature/"The 'module_true' feature">.
 
 C<load_module> can't be used to require a particular version of Perl, nor can
 it be given a bareword module name as an argument.
+
+Available starting with Perl 5.40.
 
 =head1 SEE ALSO
 
