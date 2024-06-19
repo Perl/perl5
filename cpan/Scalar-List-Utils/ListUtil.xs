@@ -1947,8 +1947,10 @@ PREINIT:
     STRLEN namelen;
     const char* nameptr = SvPV(name, namelen);
     int utf8flag = SvUTF8(name);
+#if PERL_VERSION_LT(5, 41, 0)
     int quotes_seen = 0;
     bool need_subst = FALSE;
+#endif
 PPCODE:
     if (!SvROK(sub) && SvGMAGICAL(sub))
         mg_get(sub);
@@ -1971,19 +1973,24 @@ PPCODE:
         if (s > nameptr && *s == ':' && s[-1] == ':') {
             end = s - 1;
             begin = ++s;
+#if PERL_VERSION_LT(5, 41, 0)
             if (quotes_seen)
                 need_subst = TRUE;
+#endif
         }
+#if PERL_VERSION_LT(5, 41, 0)
         else if (s > nameptr && *s != '\0' && s[-1] == '\'') {
             end = s - 1;
             begin = s;
             if (quotes_seen++)
                 need_subst = TRUE;
         }
+#endif
     }
     s--;
     if (end) {
         SV* tmp;
+#if PERL_VERSION_LT(5, 41, 0)
         if (need_subst) {
             STRLEN length = end - nameptr + quotes_seen - (*end == '\'' ? 1 : 0);
             char* left;
@@ -2002,6 +2009,7 @@ PPCODE:
             stash = gv_stashpvn(left, length, GV_ADD | utf8flag);
         }
         else
+#endif
             stash = gv_stashpvn(nameptr, end - nameptr, GV_ADD | utf8flag);
         nameptr = begin;
         namelen -= begin - nameptr;
