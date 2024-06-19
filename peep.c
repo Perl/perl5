@@ -3934,6 +3934,11 @@ Perl_rpeep(pTHX_ OP *o)
                   * child (PADSV), and gets to it via op_other rather
                   * than op_next. Don't try to optimize this. */
                  && (lval != rhs)
+                 /* For efficiency, pp_padsv_store() doesn't push its
+                  * result onto the stack. For the relatively rare case of
+                  * the $lex assignment not in void context, we just do it
+                  * the old slow way. */
+                 && OP_GIMME(o,0) == G_VOID
                ) {
                 /* SASSIGN's bitfield flags, such as op_moresib and
                  * op_slabbed, will be carried over unchanged. */
