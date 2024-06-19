@@ -1440,11 +1440,9 @@ sub docout ($$$) { # output the docs for one function group
                                                    && $item->{name} =~ /^Perl_/;
             }
 
-            # Look through all the items in this entry.  If all have the same
-            # return type and arguments (including thread context), only the
-            # main entry is displayed.
-            # Also, find the longest return type and longest name so that if
-            # multiple ones are shown, they can be vertically aligned nicely
+            # Look through all the items in this entry.  Find the longest
+            # return type and longest name so that if multiple ones are shown,
+            # they can be nicely vertically aligned.
             my $need_individual_usage = 0;
             my $longest_name_length = length $items[0]->{name};
             my $base_ret_type = $items[0]->{ret_type};
@@ -1453,13 +1451,6 @@ sub docout ($$$) { # output the docs for one function group
             my $base_thread_context = $items[0]->{flags} =~ /T/;
             for (my $i = 1; $i < @items; $i++) {
                 my $item = $items[$i];
-                my $args_are_equal = $item->{args}->@* == @base_args
-                  && !grep $item->{args}[$_] ne $base_args[$_], keys @base_args;
-                $need_individual_usage = 1
-                                    if    $item->{ret_type} ne $base_ret_type
-                                    || !  $args_are_equal
-                                    ||   (   $item->{flags} =~ /T/
-                                          != $base_thread_context);
                 my $ret_length = length $item->{ret_type};
                 $longest_ret = $ret_length if $ret_length > $longest_ret;
                 my $name_length = length $item->{name};
@@ -1467,9 +1458,6 @@ sub docout ($$$) { # output the docs for one function group
                                         if $name_length > $longest_name_length;
             }
 
-            # If we're only showing one entry, only its length matters.
-            $longest_name_length = length($items[0]->{name})
-                                                unless $need_individual_usage;
             print $fh "\n";
 
             my $indent = 1;     # 1 is sufficient for verbatim; =over is used
@@ -1586,9 +1574,6 @@ sub docout ($$$) { # output the docs for one function group
 
                 print $fh ";" if $item_flags =~ /;/; # semicolon: "dTHR;"
                 print $fh "\n";
-
-                # Only the first entry is normally displayed
-                last unless $need_individual_usage;
             }
         }
 
@@ -1982,10 +1967,7 @@ my $api_hdr = <<"_EOB_";
 |serves for multiple functions which all do basically the same thing, but have
 |some slight differences.  For example, one form might process magic, while
 |another doesn't.  The name of each variation is listed at the top of the
-|single entry.  But if all have the same signature (arguments and return type)
-|except for their names, only the usage for the base form is shown.  If any
-|one of the forms has a different signature (such as returning C<const> or
-|not) every function's signature is explicitly displayed.
+|single entry.
 |
 |Anything not listed here or in the other mentioned pods is not part of the
 |public API, and should not be used by extension writers at all.  For these
