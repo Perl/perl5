@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 208); # some tests are run in BEGIN block
+    plan (tests => 209); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -674,6 +674,14 @@ foreach my $sig (qw(__WARN__ INT)) {
     is delete $SIG{$sig}, 'main::' . lc $sig, "Can delete from $sig";
     is $SIG{$sig}, undef, "$sig is now gone";
     is delete $SIG{$sig}, undef, "$sig remains gone";
+}
+
+# test Perl_magic_setsig main:: qualification
+# this previously did it for names containing '
+{
+    local $SIG{INT} = "foo'bar";
+    is($SIG{INT}, "main::foo'bar",
+       "' in signal handler name no longer a package separator");
 }
 
 # And now one which doesn't exist;
