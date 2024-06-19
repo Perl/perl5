@@ -3564,6 +3564,7 @@ dist/Data-Dumper/t/overload.t			See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t			See if Data::Dumper pair separator works
 dist/Data-Dumper/t/perl-74170.t			Regression test for stack reallocation
 dist/Data-Dumper/t/purity_deepcopy_maxdepth.t	See if three Data::Dumper functions work
+dist/Data-Dumper/t/qquote.t				See if Data::Dumper::qquote() works
 dist/Data-Dumper/t/qr.t				See if Data::Dumper works with qr|/|
 dist/Data-Dumper/t/quotekeys.t			See if Data::Dumper::Quotekeys works
 dist/Data-Dumper/t/recurse.t			See if Data::Dumper::Maxrecurse works
