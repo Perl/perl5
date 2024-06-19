@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw(../lib));
 }
 
-plan( tests => 5 );
+plan( tests => 3 );
 
 my $long  = 'x' x 100;
 my $short = 'abcd';
@@ -14,9 +14,7 @@ my $short = 'abcd';
 my @tests = (
     [ $long, 'long package name: one word' ],
     [ join( '::', $long, $long ), 'long package name: multiple words' ],
-    [ join( q['], $long, $long ), q[long package name: multiple words using "'" separator] ],
     [ join( '::', $long, $short, $long ), 'long & short package name: multiple words' ],
-    [ join( q['], $long, $short, $long ), q[long & short package name: multiple words using "'" separator] ],
 );
 
 foreach my $t (@tests) {

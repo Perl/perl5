@@ -69,21 +69,6 @@ colon: C<$Package::Variable>.  If the package name is null, the
 C<main> package is assumed.  That is, C<$::sail> is equivalent to
 C<$main::sail>.
 
-The old package delimiter was a single quote, but double colon is now the
-preferred delimiter, in part because it's more readable to humans, and
-in part because it's more readable to B<emacs> macros.  It also makes C++
-programmers feel like they know what's going on--as opposed to using the
-single quote as separator, which was there to make Ada programmers feel
-like they knew what was going on.  Because the old-fashioned syntax is still
-supported for backwards compatibility, if you try to use a string like
-C<"This is $owner's house">, you'll be accessing C<$owner::s>; that is,
-the $s variable in package C<owner>, which is probably not what you meant.
-Use braces to disambiguate, as in C<"This is ${owner}'s house">.
-X<::> X<'>
-
-Using C<'> as a package separator is deprecated and will be removed in
-Perl 5.40.
-
 Packages may themselves contain package separators, as in
 C<$OUTER::INNER::var>.  This implies nothing about the order of
 name lookups, however.  There are no relative packages: all symbols
@@ -93,6 +78,9 @@ within package C<OUTER> that C<$INNER::var> refers to
 C<$OUTER::INNER::var>.  C<INNER> refers to a totally
 separate global package. The custom of treating package names as a
 hierarchy is very strong, but the language in no way enforces it.
+
+Previously you could use C<'> as a package separator, this was removed
+in Perl 5.42.
 
 Only identifiers starting with letters (or underscore) are stored
 in a package's symbol table.  All other symbols are kept in package
