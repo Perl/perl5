@@ -16,7 +16,7 @@
 #   - CI_FORCE_LINUX: if set to a true value: run the 'linux' job;
 #   - CI_FORCE_LINUX_I386: if set to a true value: run the 'linux-i386' job;
 #   - CI_FORCE_INSTALL: if set to a true value: run the 'install' job;
-#   - CI_FORCE_MACOS: if set to a true value: run the 'smoke-macos-catalina-xcode12' job;
+#   - CI_FORCE_MACOS: if set to a true value: run the 'smoke-macos-12' job;
 #   - CI_FORCE_MSVC142: if set to a true value: run the 'windows-msvc142' job;
 #   - CI_FORCE_MINGW64: if set to a true value: run the 'mingw64' job;
 #   - CI_FORCE_CYGWIN: if set to a true value: run the 'cygwin' job;
@@ -422,9 +422,9 @@ jobs:
   # | '  \/ _` / _| (_) \__ \
   # |_|_|_\__,_\__|\___/|___/
 
-  smoke-macos-big-sur-xcode13:
-    name: "macOS (big sur) xcode 13"
-    runs-on: macos-11
+  smoke-macos-12:
+    name: "macOS (Monterey) 12"
+    runs-on: macos-12
     timeout-minutes: 120
     needs: sanity_check
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_macos == 'true'))
@@ -832,7 +832,7 @@ jobs:
   dist-modules-sys-macos:
     name: "Test dist/ modules on MacOS system perl"
     needs: sanity_check
-    runs-on: macos-11
+    runs-on: macos-12
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_dist_modules == 'true'))
 
     env:
