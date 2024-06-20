@@ -8113,12 +8113,14 @@ S<C<SV *>>.
 This means the UTF-8ness of the result is unspecified.  The result MUST be
 arranged to be FREED BY THE CALLER).
 
-=item It has extra parameters C<yday>, C<wday> and C<is_dst>.
+=item The C<is_dst> parameter is ignored.
 
-These are completely ignored, and exist only for historical reasons.
+Daylight savings time is never considered to be in effect.
 
-Daylight savings time is never considered to be in effect, and C<yday> and
-C<wday> are calculated from the other arguments.
+=item It has extra parameters C<yday> and C<wday> that are ignored.
+
+These exist only for historical reasons; the values for the corresponding
+fields in S<C<struct tm>> are calculated from the other arguments.
 
 =back
 
