@@ -1655,6 +1655,7 @@ sub docout ($$$) { # output the docs for one function group
         # nicely vertically aligned.
         my $max_name_len = 0;
         my $max_retlen = 0;
+        my $any_has_pTHX_ = 0;
 
         for my $item (@items) {
             my $name = $item->{name};
@@ -1736,6 +1737,7 @@ sub docout ($$$) { # output the docs for one function group
                         print $fh "with an C<aTHX_> parameter";
                         $this_has_pTHX = 1;
                         unshift @args, "pTHX";
+                        $any_has_pTHX_ = 1 if @args > 1;
                     }
 
                     print $fh ".\n";
@@ -1851,6 +1853,11 @@ sub docout ($$$) { # output the docs for one function group
                     # the +1 in the excess width calculation
                     my $hanging_indent = $args_column;
 
+                    # Continuation lines begin past the pTHX.  This makes all
+                    # the "real" parameters be output in a vertically aligned
+                    # block.
+                    $hanging_indent += 6 if $any_has_pTHX_;
+
                     # See if there is an argument too wide to fit
                     my $excess_width = $hanging_indent
                                      + 1  # To space past the '('
@@ -1858,7 +1865,25 @@ sub docout ($$$) { # output the docs for one function group
                                      - $usage_max_width;
 
                     # Outdent if necessary
-                    $hanging_indent -= $excess_width if $excess_width > 0;
+                    if ($excess_width > 0) {
+                        $hanging_indent -= $excess_width;
+                    }
+                    elsif (     $any_has_pTHX_
+                           &&   $element->{args}->@*
+                           && ! $element->{has_pTHX}) {
+
+                        # If this item has arguments but not a pTHX, but
+                        # others do, indent the args for this one so that
+                        # their block starts in the column as the ones with
+                        # pTHX.  Typically, the arguments will be the same
+                        # except for the pTHX, and this causes them to all
+                        # line up, like so:
+                        #
+                        #  void  Perl_deb     (pTHX_ const char *pat, ...)
+                        #  void  deb_nocontext(      const char *pat, ...)
+                        $running_length += 6;
+                        push @usage, " " x 6;
+                    }
 
                     # Go through the argument list.  Calculate how much space
                     # each takes, and start a new line if this won't fit on
