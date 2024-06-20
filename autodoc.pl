@@ -76,9 +76,13 @@ if (@ARGV >= 2 && $ARGV[0] eq "-c") {
 }
 
 my $nroff_min_indent = 4;   # for non-heading lines
-# 80 column terminal - 2 for pager adding 2 columns;
+# 80 column terminal - 2 for pager using 2 columns for itself;
 my $max_width = 80 - 2 - $nroff_min_indent;
 my $standard_indent = 4;  # Any additional indentations
+
+# In the usage (signature) section of entries, how many spaces should separate
+# the return type from the name of the function.
+my $usage_ret_name_sep_len = 2;
 
 if (@ARGV) {
     my $workdir = shift;
@@ -1429,9 +1433,8 @@ sub docout ($$$) { # output the docs for one function group
             # using the "Perl_" long form.  So it must be the first parameter
             # to the function.
             if ($item_flags !~ /T/) {
-                unshift $item->{args}->@*, (($item->{args}->@*)
-                                            ? "pTHX_"
-                                            : "pTHX");
+                $item->{has_pTHX} = 1;
+                unshift $item->{args}->@*, "pTHX";
                 print $fh "with an C<aTHX_> parameter";
             }
 
@@ -1439,159 +1442,229 @@ sub docout ($$$) { # output the docs for one function group
         }
     }
 
-    if ($flags =~ /[Uy]/) { # no usage; typedefs are considered simple enough
-                            # to never warrant a usage line
-        warn("U and ; flags are incompatible")
-                                            if $flags =~ /U/ && $flags =~ /;/;
-        # nothing
-    } else {
+    # Accumulate the usage section of the entry into this array.  Output below
+    # only when non-empty
+    my @usage;
+    if (defined $docref->{usage}) {     # An override of the usage section
+        push @usage, ($docref->{usage} =~ s/^/ /mrg), "\n";
+    }
+    else {
+        my @outputs;    # The items actually to output, annotated
 
-        print $fh "\n=over $usage_indent\n";
+        # Look through all the items in this entry.  Find the longest of
+        # certain fields, so that if multiple items are shown, they can be
+        # nicely vertically aligned.
+        my $max_name_len = 0;
+        my $max_retlen = 0;
 
-        if (defined $docref->{usage}) {     # An override of the usage section
-            print $fh "\n", ($docref->{usage} =~ s/^/ /mrg), "\n";
-        }
-        else {
+        for my $item (@items) {
+            my $name = $item->{name};
+            my $flags = $item->{flags};
+            my $has_U_flag = $flags =~ /U/;
 
-            # Look through all the items in this entry.  If they all have the
-            # same return type and arguments (including thread context), only
-            # the main entry is displayed.
-            # Also, find the longest return type and longest name so that if
-            # multiple ones are shown, they can be vertically aligned nicely.
-            my $need_individual_usage = 0;
-            my $longest_name_length = length $items[0]->{name};
-            my $base_ret_type = $items[0]->{ret_type};
-            my $longest_ret = length $base_ret_type;
-            my @base_args = $items[0]->{args}->@*;
-            my $base_thread_context = $items[0]->{flags} =~ /T/;
-            for (my $i = 1; $i < @items; $i++) {
-                my $item = $items[$i];
-                my $ret_length = length $item->{ret_type};
-                $longest_ret = $ret_length if $ret_length > $longest_ret;
-                my $name_length = length $item->{name};
-                $longest_name_length = $name_length
-                                        if $name_length > $longest_name_length;
+            warn("'U' and ';' flags are incompatible") if $has_U_flag
+                                                       && $flags =~ /;/;
+
+            # U means to not display the prototype; and there really isn't a
+            # single good canonical signature for a typedef, so they aren't
+            # displayed
+            next if $has_U_flag || $flags =~ /y/;
+
+            my $has_semicolon = $flags =~ /;/;
+            my $has_args = $flags !~ /n/;
+            my $ret = $item->{ret_type} // "";
+
+            # If none of these exist, the prototype will be trivial, just
+            # the name of the item, so don't display it.
+            next unless $ret|| $has_semicolon || $has_args;
+
+            if (! $has_args) {
+                warn("$file: $name: n flag without m") unless $flags =~ /m/;
+
+                if ($item->{args}->@*) {
+                    warn("$file: $name: n flag but apparently has args");
+                    $has_args = 1;
+                }
             }
 
-            print $fh "\n";
+            my @args = $item->{args}->@* if $has_args;
+            my $this_has_pTHX = defined $item->{has_pTHX};
 
-            my $indent = 1;     # 1 is sufficient for verbatim; =over is used
-                                # for more
-            my $ret_name_sep_length = 2; # spaces between return type and name
-            my $name_indent = $indent + $longest_ret;
-            $name_indent += $ret_name_sep_length if $longest_ret;
+            my $retlen = length $ret;
+            $max_retlen = $retlen if $retlen > $max_retlen;
 
-            my $this_max_width =
-                               $max_width - $description_indent - $usage_indent;
+            my $name_len = length $name;
+            $max_name_len = $name_len if $name_len > $max_name_len;
 
-            for my $item (@items) {
-                my $ret_type = $item->{ret_type};
-                my @args = $item->{args}->@*;
-                my $name = $item->{name};
-                my $item_flags = $item->{flags};
+            # Start creating this item's hash to guide its output
+            push @outputs, {
+                            ret => $ret, retlen => $retlen,
+                            name => $name, name_len => $name_len,
+                            has_pTHX => $this_has_pTHX,
+                           };
 
-                # The return type
-                print $fh (" " x $indent), $ret_type;
+            $outputs[-1]->{args}->@* = @args if $has_args;
+            $outputs[-1]->{semicolon} = ";" if $has_semicolon;
+        }
 
-                print $fh " " x (  $ret_name_sep_length
-                                 + $longest_ret - length $ret_type);
-                print $fh $name;
+        my $indent = 1; # Minimum space to get a verbatim block.
 
-                if ($item_flags =~ /n/) { # no args
-                    warn("$file: $element_name: n flag without m")
-                                                    unless $item_flags =~ /m/;
-                    warn("$file: $name: n flag but apparently has args")
-                                                                    if @args;
+        # Above, we went through all the items in the group, discarding the
+        # ones with trivial usage/prototype lines.  Now go through the
+        # remaining ones, and add them to the list of output text.
+        if (@outputs) {
+
+            # We have available to us the remaining portion of the line after
+            # subtracting all the indents this text is subject to.
+            my $usage_max_width = $max_width
+                                - $description_indent
+                                - $usage_indent
+                                - $indent;
+
+            # Basically, there are three columns.  The first column is always
+            # a blank to make this a verbatim block, and the return type
+            # starts in the column after that.  The name column follows a
+            # little to the right of the widest return type entry.
+            my $name_column = $indent + $max_retlen + $usage_ret_name_sep_len;
+
+            # And the arguments column follows immediately to the right of the
+            # widest name entry.
+            my $args_column = $name_column + $max_name_len;
+
+            for my $element (@outputs) {
+
+                # $running_length keeps track of which column we are currently
+                # at.
+                push @usage, " " x $indent;
+                my $running_length = $indent;
+
+                # Output the return type, followed by enough blanks to get us
+                # to the beginning of the name
+                push @usage, $element->{ret} if $element->{retlen};
+                $running_length += $element->{retlen};
+                push @usage, " " x ($name_column - $running_length);
+
+                # Then output the name
+                push @usage, $element->{name};
+                $running_length = $name_column + $element->{name_len};
+
+                # If there aren't any arguments, we are done, except for maybe
+                # a semi-colon.
+                if (! defined $element->{args}) {
+                    push @usage, $element->{semicolon} // "";
                 }
                 else {
-                    # +1 for the '('
-                    my $arg_indent = $name_indent + $longest_name_length + 1;
 
-                    # Align the argument lists of the items
-                    print $fh " " x ($longest_name_length - length($name));
-                    print $fh "(";
+                    # Otherwise get to the first arguments column and output
+                    # the left parenthesis
+                    push @usage, " " x ($args_column - $running_length);
+                    push @usage, "(";
+                    $running_length = $args_column + 1;
 
-                    # Display as many of the arguments on the same line as
-                    # will fit.
-                    my $total_length = $arg_indent;
-                    my $first_line = 1;
-                    for (my $i = 0; $i < @args; $i++) {
-                        my $arg = $args[$i];
-                        my $arg_length = length($arg);
+                    # We know the final ending text.
+                    my $tail = ")" . ($element->{semicolon} // "");
 
-                        # All but the first arg are preceded by a blank
-                        my $use_blank = $i > 0;
+                    # Now ready to output the arguments.  It's quite possible
+                    # that not all will fit on the remainder of the line, so
+                    # will have to be wrapped onto subsequent line(s) with a
+                    # hanging indent to make them into an aligned block.  It
+                    # also does happen that one single argument can be so wide
+                    # that it won't fit in the remainder of the line by
+                    # itself.  In this case, we outdent the entire block by
+                    # the excess width; this retains vertical alignment, like
+                    # so:
+                    #                   void  function_name(pTHX_ short1,
+                    #                                    short2,
+                    #                                    very_long_argument,
+                    #                                    short3)
+                    #
+                    # First we have to find the width of the widest argument.
+                    my $max_arg_len = 0;
+                    for my $arg ($element->{args}->@*) {
 
-                        # +1 here and below because either the argument has a
-                        # trailing comma or trailing ')'
-                        $total_length += $arg_length + $use_blank + 1;
+                        # +1 because of attached comma or right paren
+                        my $arg_len = 1 + length $arg;
 
-                        # We want none of the arguments to be positioned so
-                        # they extend too far to the right.  Ideally, they
-                        # should all start in the same column as the arguments
-                        # on the first line of the function display do.  But, if
-                        # necessary, outdent them so that they all start in
-                        # another column, with the longest ending at the right
-                        # margin, like so:
-                        #                   void  function_name(pTHX_ short1,
-                        #                                    short2,
-                        #                                    very_long_argument,
-                        #                                    short3)
-                        if ($total_length > $this_max_width) {
+                        $max_arg_len = $arg_len if $arg_len > $max_arg_len;
+                    }
 
-                            # If this is the first continuation line,
-                            # calculate the longest argument; this will be the
-                            # one we may have to outdent for.
-                            if ($first_line) {
-                                $first_line = 0;
+                    # Set the hanging indent to get to the '(' column.  All
+                    # arguments but the first are output with a space
+                    # separating them from the previous argument.  This is
+                    # done even when not all arguments fit on the first line,
+                    # so there is a second (etc.) line.  The first argument on
+                    # those lines will have a leading space which causes those
+                    # lines to automatically align to the next column after
+                    # the '(', without us having to consider it further than
+                    # the +1 in the excess width calculation
+                    my $hanging_indent = $args_column;
 
-                                # We will need at least as much as the current
-                                # argument
-                                my $longest_arg_length = $arg_length
-                                                       + $use_blank + 1;
+                    # See if there is an argument too wide to fit
+                    my $excess_width = $hanging_indent
+                                     + 1  # To space past the '('
+                                     + $max_arg_len
+                                     - $usage_max_width;
 
-                                # Look through the rest of the args to see if
-                                # any are longer than this one.
-                                for (my $j = $i + 1; $j < @args; $j++) {
+                    # Outdent if necessary
+                    $hanging_indent -= $excess_width if $excess_width > 0;
 
-                                    # Include the trailing ',' or ')' in the
-                                    # length.  No need to concern ourselves
-                                    # with a leading blank, as the argument
-                                    # would be positioned first on the next
-                                    # line
-                                    my $peek_arg_length = length ($args[$j])
-                                                        + 1;
-                                    $longest_arg_length = $peek_arg_length
-                                      if $peek_arg_length > $longest_arg_length;
-                                }
+                    # Go through the argument list.  Calculate how much space
+                    # each takes, and start a new line if this won't fit on
+                    # the current one.
+                    for (my $i = 0; $i < $element->{args}->@*; $i++) {
+                        my $arg = $element->{args}[$i];
+                        my $is_final = $i == $element->{args}->@* - 1;
 
-                                # Calculate the new indent if necessary.
-                                $arg_indent =
-                                        $this_max_width - $longest_arg_length
-                                        if $arg_indent + $longest_arg_length
-                                                            > $this_max_width;
-                            }
+                        # +1 for the comma or right paren afterwards
+                        my $this_length = 1 + length $arg;
 
-                            print $fh "\n", (" " x $arg_indent);
-                            $total_length = $arg_indent + $arg_length + 1;
-                            $use_blank = 0;
+                        # All but the first one have a blank separating them
+                        # from the previous argument.
+                        $this_length += 1 if $i != 0;
+
+                        # With an extra +1 for the final one if needs a
+                        # semicolon
+                        $this_length += 1 if defined $element->{semicolon}
+                                          && $is_final;
+
+                        # If this argument doesn't fit on the line, start a
+                        # new line, with the appropriate indentation.  Note
+                        # that this value has been calculated above so that
+                        # the argument will definitely fit on this new line.
+                        if ($running_length + $this_length > $usage_max_width) {
+                            push @usage, "\n", " " x $hanging_indent;
+                            $running_length = $hanging_indent;
                         }
 
-                        # Display this argument
-                        print $fh " " if $use_blank;
-                        print $fh $arg;
-                        print $fh "," if $i < @args - 1 && $args[$i] ne 'pTHX_';
+                        # Ready to output; first a blank separator for all but
+                        # the first item
+                        push @usage, " " if $i != 0;
 
-                    } # End of loop through args
+                        push @usage, $arg;
 
-                    print $fh ")";
+                        # A comma-equivalent character for all but the final
+                        # one indicates there is more to come; "pTHX" has an
+                        # underscore, not a comma
+                        if (! $is_final) {
+                            push @usage, ($i == 0 && $element->{has_pTHX})
+                                         ? "_"
+                                         : ",";
+                        }
+
+                        $running_length += $this_length;
+                    }
+
+                    push @usage, $tail;
                 }
 
-                print $fh ";" if $item_flags =~ /;/; # semicolon: "dTHR;"
-                print $fh "\n";
+                push @usage, "\n";
             }
         }
+    }
 
+    if (grep { /\S/ } @usage) {
+        print $fh "\n=over $usage_indent\n\n";
+        print $fh join "", @usage;
         print $fh "\n=back\n";
     }
 
