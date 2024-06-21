@@ -4498,19 +4498,49 @@ Perl_padnamelist_refcnt_inc(PADNAMELIST *pnl)
 
 /*
 =for apidoc_section $string
-=for apidoc savepv
+=for apidoc      savepv
+=for apidoc_item savepvn
+=for apidoc_item savepvs
+=for apidoc_item savesvpv
+=for apidoc_item savesharedpv
+=for apidoc_item savesharedpvn
+=for apidoc_item savesharedpvs
+=for apidoc_item savesharedsvpv
 
-Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
-string which is a duplicate of C<pv>.  The size of the string is
-determined by C<strlen()>, which means it may not contain embedded C<NUL>
-characters and must have a trailing C<NUL>.  To prevent memory leaks, the
-memory allocated for the new string needs to be freed when no longer needed.
-This can be done with the C<L</Safefree>> function, or
-L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
+Perl's version of C<strdup()> (or C<strndup()> would be if it existed).
 
-On some platforms, Windows for example, all allocated memory owned by a thread
-is deallocated when that thread ends.  So if you need that not to happen, you
-need to use the shared memory functions, such as C<L</savesharedpv>>.
+These each return a pointer to a newly allocated string which is a duplicate of
+the input string.
+
+The forms differ in how the string to be copied is specified, and where the new
+memory is allocated from.
+
+To prevent memory leaks, the memory allocated for the new string needs to be
+freed when no longer needed.  This can be done with the C<L</Safefree>>
+function, or L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
+
+The forms whose names contain C<shared> differ from the corresponding form
+without that in its name, only in that the memory in the former comes from
+memory shared between threads.  This is needed, because on some platforms,
+Windows for example, all allocated memory owned by a thread is deallocated when
+that thread ends.  So if you need that not to happen, you need to use the
+shared memory forms.
+
+The string to copy in C<savepvs> is a C language string literal surrounded by
+double quotes.
+
+The string to copy in the forms whose name contains C<svpv> comes from the PV
+in the SV argument C<sv>, using C<SvPV()>
+
+The string to copy in the remaining forms comes from the C<pv> argument.
+
+In the case of C<savepv>, the size of the string is determined by C<strlen()>,
+which means it may not contain embedded C<NUL> characters, and must have a
+trailing C<NUL>.
+
+In the case of C<savepvn>, C<len> gives the length of C<pv>, hence it may
+contain embedded C<NUL> characters.  The copy will be guaranteed to have a
+trailing NUL added if not already present.
 
 =cut
 */
@@ -4531,22 +4561,6 @@ Perl_savepv(pTHX_ const char *pv)
 
 /* same thing but with a known length */
 
-/*
-=for apidoc savepvn
-
-Perl's version of what C<strndup()> would be if it existed.  Returns a
-pointer to a newly allocated string which is a duplicate of the first
-C<len> bytes from C<pv>, plus a trailing
-C<NUL> byte.  The memory allocated for
-the new string can be freed with the C<Safefree()> function.
-
-On some platforms, Windows for example, all allocated memory owned by a thread
-is deallocated when that thread ends.  So if you need that not to happen, you
-need to use the shared memory functions, such as C<L</savesharedpvn>>.
-
-=cut
-*/
-
 PERL_STATIC_INLINE char *
 Perl_savepvn(pTHX_ const char *pv, Size_t len)
 {
@@ -4565,19 +4579,6 @@ Perl_savepvn(pTHX_ const char *pv, Size_t len)
     }
 }
 
-/*
-=for apidoc savesvpv
-
-A version of C<savepv()>/C<savepvn()> which gets the string to duplicate from
-the passed in SV using C<SvPV()>
-
-On some platforms, Windows for example, all allocated memory owned by a thread
-is deallocated when that thread ends.  So if you need that not to happen, you
-need to use the shared memory functions, such as C<L</savesharedsvpv>>.
-
-=cut
-*/
-
 PERL_STATIC_INLINE char *
 Perl_savesvpv(pTHX_ SV *sv)
 {
@@ -4591,15 +4592,6 @@ Perl_savesvpv(pTHX_ SV *sv)
     Newx(newaddr,len,char);
     return (char *) CopyD(pv,newaddr,len,char);
 }
-
-/*
-=for apidoc savesharedsvpv
-
-A version of C<savesharedpv()> which allocates the duplicate string in
-memory which is shared between threads.
-
-=cut
-*/
 
 PERL_STATIC_INLINE char *
 Perl_savesharedsvpv(pTHX_ SV *sv)
