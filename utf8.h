@@ -127,19 +127,8 @@ typedef enum {
 #define FOLD_FLAGS_NOMIX_ASCII  0x4
 
 /*
-=for apidoc is_ascii_string
-
-This is a misleadingly-named synonym for L</is_utf8_invariant_string>.
-On ASCII-ish platforms, the name isn't misleading: the ASCII-range characters
-are exactly the UTF-8 invariants.  But EBCDIC machines have more invariants
-than just the ASCII characters, so C<is_utf8_invariant_string> is preferred.
-
-=for apidoc is_invariant_string
-
-This is a somewhat misleadingly-named synonym for L</is_utf8_invariant_string>.
-C<is_utf8_invariant_string> is preferred, as it indicates under what conditions
-the string is invariant.
-
+=for apidoc_defn is_ascii_string     bool|NN const U8 * const s|STRLEN len
+=for apidoc_defn is_invariant_string bool|NN const U8 * const s|STRLEN len
 =cut
 */
 #define is_ascii_string(s, len)     is_utf8_invariant_string(s, len)
