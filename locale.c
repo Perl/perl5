@@ -4434,6 +4434,7 @@ S_native_querylocale_i(pTHX_ const locale_category_index cat_index)
 #endif      /* USE_LOCALE */
 
 /*
+=for apidoc_section $locale
 =for apidoc Perl_setlocale
 
 This is an (almost) drop-in replacement for the system C<L<setlocale(3)>>,
@@ -5176,6 +5177,7 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 }
 
 /*
+=for apidoc_section $locale
 =for apidoc Perl_localeconv
 
 This is a thread-safe version of the libc L<localeconv(3)>.  It is the same as
@@ -10836,6 +10838,7 @@ Perl_switch_to_global_locale(pTHX)
 
 /*
 
+=for apidoc_section $locale
 =for apidoc sync_locale
 
 This function copies the state of the program global locale into the calling
