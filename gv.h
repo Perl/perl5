@@ -262,7 +262,8 @@ Return the CV from the GV.
 #define GV_NOUNIVERSAL  0x2000  /* Skip UNIVERSAL lookup */
 
 /* Flags for gv_autoload_*/
-#define GV_AUTOLOAD_ISMETHOD 1	/* autoloading a method? */
+#define GV_AUTOLOAD_ISMETHOD 1	/* autoloading a method?  gv_autoload4 will
+                                   break if this is changed from being 1 */
 
 /*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
         as a flag to various gv_* functions, so ensure it lies
@@ -289,10 +290,9 @@ Return the CV from the GV.
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
 
 /*
-=for apidoc gv_autoload4
-Equivalent to C<L</gv_autoload_pvn>>.
-
+=for apidoc_defn ARdp|GV *|gv_autoload4|NULLOK HV *stash|NN const char *name|STRLEN len|I32 method
 =cut
+
 */
 #define gv_autoload4(stash, name, len, autoload) \
         gv_autoload_pvn(stash, name, len, cBOOL(autoload))

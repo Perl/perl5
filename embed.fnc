@@ -1291,10 +1291,6 @@ Adp	|GV *	|gv_add_by_type |NULLOK GV *gv				\
 				|svtype type
 Adp	|int	|Gv_AMupdate	|NN HV *stash				\
 				|bool destructing
-ARdm	|GV *	|gv_autoload4	|NULLOK HV *stash			\
-				|NN const char *name			\
-				|STRLEN len				\
-				|I32 method
 ARdp	|GV *	|gv_autoload_pv |NULLOK HV *stash			\
 				|NN const char *namepv			\
 				|U32 flags
