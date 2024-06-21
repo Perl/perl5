@@ -1396,18 +1396,14 @@ sub docout ($$$) { # output the docs for one function group
     chomp $pod;     # Make sure prints pod with a single trailing \n
     print $fh "\n", $pod, "\n";
 
-    for my $item (@items) {
-        my $item_flags = $item->{flags};
-        my $item_name = $item->{name};
-
-        print $fh "\nNOTE: the C<perl_$item_name()> form is B<deprecated>.\n"
-                                                    if $item_flags =~ /O/;
-    }
-
     # Accumulate the usage section of the entry into this array.  Output below
     # only when non-empty
     my @usage;
-    if (defined $docref->{usage}) {     # An override of the usage section
+    if (defined $docref->{usage}) {
+
+        # A complete override of the usage section.  Note that the check for
+        # the O flag isn't checked for, as that usage is never output in this
+        # case
         push @usage, ($docref->{usage} =~ s/^/ /mrg), "\n";
     }
     else {
@@ -1426,6 +1422,9 @@ sub docout ($$$) { # output the docs for one function group
 
             warn("'U' and ';' flags are incompatible") if $has_U_flag
                                                        && $flags =~ /;/;
+
+            print $fh "\nNOTE: the C<perl_$name()> form is",
+                      " B<deprecated>.\n" if $flags =~ /O/;
 
             # U means to not display the prototype; and there really isn't a
             # single good canonical signature for a typedef, so they aren't
