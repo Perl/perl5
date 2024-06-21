@@ -1292,36 +1292,41 @@ Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 }
 
 /*
-=for apidoc is_utf8_invariant_string
+=for apidoc      is_utf8_invariant_string
+=for apidoc_item is_utf8_invariant_string_loc
+=for apidoc_item is_ascii_string
+=for apidoc_item is_invariant_string
 
-Returns TRUE if the first C<len> bytes of the string C<s> are the same
-regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
-EBCDIC machines); otherwise it returns FALSE.  That is, it returns TRUE if they
-are UTF-8 invariant.  On ASCII-ish machines, all the ASCII characters and only
-the ASCII characters fit this definition.  On EBCDIC machines, the ASCII-range
-characters are invariant, but so also are the C1 controls.
+These each return TRUE if the first C<len> bytes of the string C<s> are the
+same regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
+EBCDIC machines); otherwise they returns FALSE.  That is, they return TRUE if
+they are UTF-8 invariant.  On ASCII-ish machines, all the ASCII characters and
+only the ASCII characters fit this definition.  On EBCDIC machines, the
+ASCII-range characters are invariant, but so also are the C1 controls.
 
 If C<len> is 0, it will be calculated using C<strlen(s)>, (which means if you
 use this option, that C<s> can't have embedded C<NUL> characters and has to
 have a terminating C<NUL> byte).
 
+All forms except C<is_utf8_invariant_string_loc> have identical behavior.  The
+only difference with it is that it has an extra pointer parameter, C<ep>, into
+which, if it isn't NULL, the location of the first UTF-8 variant character in
+the C<ep> pointer will be stored upon failure.  If all characters are UTF-8
+invariant, this function does not change the contents of C<*ep>.
+
+C<is_invariant_string> is somewhat misleadingly named.
+C<is_utf8_invariant_string> is preferred, as it indicates under what conditions
+the string is invariant.
+
+C<is_ascii_string> is misleadingly-named.  On ASCII-ish platforms, the name
+isn't misleading: the ASCII-range characters are exactly the UTF-8 invariants.
+But EBCDIC machines have more UTF-8 invariants than just the ASCII characters,
+so the name C<is_utf8_invariant_string> is preferred.
+
 See also
-C<L</is_utf8_string>>,
-C<L</is_utf8_string_flags>>,
-C<L</is_utf8_string_loc>>,
-C<L</is_utf8_string_loc_flags>>,
-C<L</is_utf8_string_loclen>>,
-C<L</is_utf8_string_loclen_flags>>,
-C<L</is_utf8_fixed_width_buf_flags>>,
-C<L</is_utf8_fixed_width_buf_loc_flags>>,
-C<L</is_utf8_fixed_width_buf_loclen_flags>>,
-C<L</is_strict_utf8_string>>,
-C<L</is_strict_utf8_string_loc>>,
-C<L</is_strict_utf8_string_loclen>>,
-C<L</is_c9strict_utf8_string>>,
-C<L</is_c9strict_utf8_string_loc>>,
-and
-C<L</is_c9strict_utf8_string_loclen>>.
+C<L</is_utf8_string>> and C<L</is_utf8_fixed_width_buf_flags>>.
+
+=for apidoc_defn is_utf8_invariant_string bool|NN const U8 * const s|STRLEN len
 
 =cut
 
@@ -1329,17 +1334,6 @@ C<L</is_c9strict_utf8_string_loclen>>.
 
 #define is_utf8_invariant_string(s, len)                                    \
                                 is_utf8_invariant_string_loc(s, len, NULL)
-
-/*
-=for apidoc is_utf8_invariant_string_loc
-
-Like C<L</is_utf8_invariant_string>> but upon failure, stores the location of
-the first UTF-8 variant character in the C<ep> pointer; if all characters are
-UTF-8 invariant, this function does not change the contents of C<*ep>.
-
-=cut
-
-*/
 
 PERL_STATIC_INLINE bool
 Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
