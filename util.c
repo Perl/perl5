@@ -1320,14 +1320,6 @@ Perl_cntrl_to_mnemonic(const U8 c)
     return NULL;
 }
 
-/*
-=for apidoc savesharedpv
-
-A version of C<savepv()> which allocates the duplicate string in memory
-which is shared between threads.
-
-=cut
-*/
 char *
 Perl_savesharedpv(pTHX_ const char *pv)
 {
@@ -1347,15 +1339,6 @@ Perl_savesharedpv(pTHX_ const char *pv)
     return (char*)memcpy(newaddr, pv, pvlen);
 }
 
-/*
-=for apidoc savesharedpvn
-
-A version of C<savepvn()> which allocates the duplicate string in memory
-which is shared between threads.  (With the specific difference that a C<NULL>
-pointer is not acceptable)
-
-=cut
-*/
 char *
 Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {
