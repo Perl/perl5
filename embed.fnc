@@ -583,12 +583,12 @@
 :        should not be added to newly-added functions as they will have no such
 :        compatibility issues.
 :
-:   'W'  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH argument
-:        to the function calls. This means that under DEBUGGING a depth
-:        argument is added to the functions, which is used for example by the
-:        regex engine for debugging and trace output. A non DEBUGGING build
-:        will not pass the unused argument. Currently restricted to functions
-:        with at least one argument.
+:   'W'  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH
+:	 argument to the function calls. This means that under DEBUGGING a
+:	 depth argument is added to the functions, which is used for example by
+:	 the regex engine for debugging and trace output. A non DEBUGGING build
+:	 will not pass the unused argument. Currently restricted to functions
+:	 with at least one argument.
 :
 :   'X'  Explicitly exported:
 :
