@@ -1548,30 +1548,28 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
     S_require_tie_mod(aTHX_ gv, varname, STR_WITH_LEN(name), flags)
 
 /*
-=for apidoc gv_stashpv
+=for apidoc      gv_stashpv
+=for apidoc_item gv_stashpvn
+=for apidoc_item gv_stashpvs
+=for apidoc_item gv_stashsv
 
-Returns a pointer to the stash for a specified package.  Uses C<strlen> to
-determine the length of C<name>, then calls C<gv_stashpvn()>.
+Note C<gv_stashsv> is strongly preferred for performance reasons.
 
-=cut
-*/
+These each return a pointer to the stash for a specified package.
 
-HV*
-Perl_gv_stashpv(pTHX_ const char *name, I32 create)
-{
-    PERL_ARGS_ASSERT_GV_STASHPV;
-    return gv_stashpvn(name, strlen(name), create);
-}
+In C<gv_stashsv>, the package is specified by C<sv>.
 
-/*
-=for apidoc gv_stashpvn
+In C<gv_stashpvs>, the package is specified by the literal C string enclosed in
+double quotes.
 
-Returns a pointer to the stash for a specified package.  The C<namelen>
-parameter indicates the length of the C<name>, in bytes.  C<flags> is passed
-to C<gv_fetchpvn_flags()>, so if set to C<GV_ADD> then the package will be
-created if it does not already exist.  If the package does not exist and
-C<flags> is 0 (or any other setting that does not create packages) then C<NULL>
-is returned.
+In the other forms, C<name> specifies the package.  In C<gv_stashpvn>,
+C<namelen> gives the length of the name in bytes, so it may include embedded
+NUL characters.  In C<gv_stashpv>, C<name> ends at the first NUL character.
+
+C<flags> is passed to C<gv_fetchpvn_flags()>, so if set to C<GV_ADD> then the
+package will be created if it does not already exist.  If the package does not
+exist and C<flags> is 0 (or any other setting that does not create packages)
+then C<NULL> is returned.
 
 Flags may be one of:
 
@@ -1585,9 +1583,6 @@ Flags may be one of:
 
 The most important of which are probably C<GV_ADD> and C<SVf_UTF8>.
 
-Note, use of C<gv_stashsv> instead of C<gv_stashpvn> where possible is strongly
-recommended for performance reasons.
-
 =for apidoc Amnh||GV_ADD
 =for apidoc Amnh||GV_NOADD_NOINIT
 =for apidoc Amnh||GV_NOINIT
@@ -1598,11 +1593,19 @@ recommended for performance reasons.
 =cut
 */
 
+HV*
+Perl_gv_stashpv(pTHX_ const char *name, I32 create)
+{
+    PERL_ARGS_ASSERT_GV_STASHPV;
+    return gv_stashpvn(name, strlen(name), create);
+}
+
 /*
 gv_stashpvn_internal
 
 Perform the internal bits of gv_stashsvpvn_cached. You could think of this
-as being one half of the logic. Not to be called except from gv_stashsvpvn_cached().
+as being one half of the logic. Not to be called except from
+gv_stashsvpvn_cached().
 
 */
 
@@ -1717,18 +1720,6 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     PERL_ARGS_ASSERT_GV_STASHPVN;
     return gv_stashsvpvn_cached(NULL, name, namelen, flags);
 }
-
-/*
-=for apidoc gv_stashsv
-
-Returns a pointer to the stash for a specified package.  See
-C<L</gv_stashpvn>>.
-
-Note this interface is strongly preferred over C<gv_stashpvn> for performance
-reasons.
-
-=cut
-*/
 
 HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
