@@ -4655,6 +4655,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 }
 
 /*
+=for apidoc_section $string
 =for apidoc my_strlcat
 
 The C library C<strlcat> if available, or a Perl implementation of it.
