@@ -1398,21 +1398,43 @@ sub docout ($$$) { # output the docs for one function group
 
         print $fh "\nNOTE: the C<perl_$item_name()> form is B<deprecated>.\n"
                                                     if $item_flags =~ /O/;
-        # Is Perl_, but no #define foo # Perl_foo
-        if (   ($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
 
-                # Can't handle threaded varargs
-            || (   $item_flags =~ /f/
-                && $item_flags !~ /T/
-                && $item_name !~ /strftime/))
-        {
+        # If only the Perl_foo form is to be displayed, change the name of
+        # this item to be that.  This happens for either of two reasons:
+        #   1) The flags say we want "Perl_", but also to not create an entry
+        #      in embed.h to #define a short name for it.
+        my $needs_Perl_entry = (   $item_flags =~ /p/
+                                && $item_flags =~ /o/
+                                && $item_flags !~ /M/);
+
+        #   2) The function takes a format string and a thread context
+        #      parameter.  We can't cope with that because our macros expect
+        #      both the thread context and the format to be the first
+        #      parameter to the function; and only one can be in that
+        #      position.
+        my $cant_use_short_name = (   $item_flags =~ /f/
+                                   && $item_flags !~ /T/
+                                   && $item_name !~ /strftime/);
+
+        if ($needs_Perl_entry || $cant_use_short_name) {
             $item->{name} = "Perl_$item_name";
+
             print $fh <<~"EOT";
 
                 NOTE: C<$item_name> must be explicitly called as
                 C<$item->{name}>
                 EOT
-            print $fh "with an C<aTHX_> parameter" if $item_flags !~ /T/;
+
+            # We can't hide the existence of any thread context parameter when
+            # using the "Perl_" long form.  So it must be the first parameter
+            # to the function.
+            if ($item_flags !~ /T/) {
+                unshift $item->{args}->@*, (($item->{args}->@*)
+                                            ? "pTHX_"
+                                            : "pTHX");
+                print $fh "with an C<aTHX_> parameter";
+            }
+
             print $fh ".\n";
         }
     }
@@ -1431,18 +1453,11 @@ sub docout ($$$) { # output the docs for one function group
         }
         else {
 
-            # Add the thread context formal parameter on expanded-out names
-            for my $item (@items) {
-                unshift $item->{args}->@*, (($item->{args}->@*)
-                                            ? "pTHX_"
-                                            : "pTHX")
-                                                   if $item->{flags} !~ /T/
-                                                   && $item->{name} =~ /^Perl_/;
-            }
-
-            # Look through all the items in this entry.  Find the longest
-            # return type and longest name so that if multiple ones are shown,
-            # they can be nicely vertically aligned.
+            # Look through all the items in this entry.  If they all have the
+            # same return type and arguments (including thread context), only
+            # the main entry is displayed.
+            # Also, find the longest return type and longest name so that if
+            # multiple ones are shown, they can be vertically aligned nicely.
             my $need_individual_usage = 0;
             my $longest_name_length = length $items[0]->{name};
             my $base_ret_type = $items[0]->{ret_type};
