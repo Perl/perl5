@@ -1402,44 +1402,6 @@ sub docout ($$$) { # output the docs for one function group
 
         print $fh "\nNOTE: the C<perl_$item_name()> form is B<deprecated>.\n"
                                                     if $item_flags =~ /O/;
-
-        # If only the Perl_foo form is to be displayed, change the name of
-        # this item to be that.  This happens for either of two reasons:
-        #   1) The flags say we want "Perl_", but also to not create an entry
-        #      in embed.h to #define a short name for it.
-        my $needs_Perl_entry = (   $item_flags =~ /p/
-                                && $item_flags =~ /o/
-                                && $item_flags !~ /M/);
-
-        #   2) The function takes a format string and a thread context
-        #      parameter.  We can't cope with that because our macros expect
-        #      both the thread context and the format to be the first
-        #      parameter to the function; and only one can be in that
-        #      position.
-        my $cant_use_short_name = (   $item_flags =~ /f/
-                                   && $item_flags !~ /T/
-                                   && $item_name !~ /strftime/);
-
-        if ($needs_Perl_entry || $cant_use_short_name) {
-            $item->{name} = "Perl_$item_name";
-
-            print $fh <<~"EOT";
-
-                NOTE: C<$item_name> must be explicitly called as
-                C<$item->{name}>
-                EOT
-
-            # We can't hide the existence of any thread context parameter when
-            # using the "Perl_" long form.  So it must be the first parameter
-            # to the function.
-            if ($item_flags !~ /T/) {
-                $item->{has_pTHX} = 1;
-                unshift $item->{args}->@*, "pTHX";
-                print $fh "with an C<aTHX_> parameter";
-            }
-
-            print $fh ".\n";
-        }
     }
 
     # Accumulate the usage section of the entry into this array.  Output below
@@ -1488,8 +1450,50 @@ sub docout ($$$) { # output the docs for one function group
                 }
             }
 
-            my @args = $item->{args}->@* if $has_args;
-            my $this_has_pTHX = defined $item->{has_pTHX};
+            my @args;
+            my $this_has_pTHX = 0;
+            if ($has_args) {
+                @args = $item->{args}->@*;
+
+                # If only the Perl_foo form is to be displayed, change the
+                # name of this item to be that.  This happens for either of
+                # two reasons:
+                #   1) The flags say we want "Perl_", but also to not create
+                #      an entry in embed.h to #define a short name for it.
+                my $needs_Perl_entry = (   $flags =~ /p/
+                                        && $flags =~ /o/
+                                        && $flags !~ /M/);
+
+                #   2) The function takes a format string and a thread context
+                #      parameter.  We can't cope with that because our macros
+                #      expect both the thread context and the format to be the
+                #      first parameter to the function; and only one can be in
+                #      that position.
+                my $cant_use_short_name = (   $flags =~ /f/
+                                           && $flags !~ /T/
+                                           && $name !~ /strftime/);
+                if ($needs_Perl_entry || $cant_use_short_name) {
+                    my $short_name = $name;
+                    $name = "Perl_$short_name";
+
+                    print $fh <<~"EOT";
+
+                        NOTE: C<$short_name> must be explicitly called as
+                        C<$name>
+                        EOT
+
+                    # We can't hide the existence of any thread context
+                    # parameter when using the "Perl_" long form.  So it must
+                    # be the first parameter to the function.
+                    if ($flags !~ /T/) {
+                        print $fh "with an C<aTHX_> parameter";
+                        $this_has_pTHX = 1;
+                        unshift @args, "pTHX";
+                    }
+
+                    print $fh ".\n";
+                }
+            }
 
             my $retlen = length $ret;
             $max_retlen = $retlen if $retlen > $max_retlen;
