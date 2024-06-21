@@ -1358,10 +1358,6 @@ PERL_CALLCONV GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type);
 #define PERL_ARGS_ASSERT_GV_ADD_BY_TYPE
 
-/* PERL_CALLCONV GV *
-gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
-        __attribute__warn_unused_result__; */
-
 PERL_CALLCONV GV *
 Perl_gv_autoload_pv(pTHX_ HV *stash, const char *namepv, U32 flags)
         __attribute__warn_unused_result__;

@@ -1296,34 +1296,51 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     return gv;
 }
 
-
 /*
 =for apidoc      gv_autoload_pv
 =for apidoc_item gv_autoload_pvn
 =for apidoc_item gv_autoload_sv
+=for apidoc_item gv_autoload4
 
 These each search for an C<AUTOLOAD> method, returning NULL if not found, or
 else returning a pointer to its GV, while setting the package
-L<C<$AUTOLOAD>|perlobj/AUTOLOAD> variable to C<name> (fully qualified).  Also,
-if found and the GV's CV is an XSUB, the CV's PV will be set to C<name>, and
+L<C<$AUTOLOAD>|perlobj/AUTOLOAD> variable to the name (fully qualified).  Also,
+if found and the GV's CV is an XSUB, the CV's PV will be set to the name, and
 its stash will be set to the stash of the GV.
 
 Searching is done in L<C<MRO> order|perlmroapi>, as specified in
 L</C<gv_fetchmeth>>, beginning with C<stash> if it isn't NULL.
 
-The forms differ only in how C<name> is specified.
+C<gv_autoload4>) has a C<method> parameter; the others a C<flags> one  (both
+types explained below).  Otherwise, the forms differ only in how the name is
+specified.
 
 In C<gv_autoload_pv>, C<namepv> is a C language NUL-terminated string.
 
-In C<gv_autoload_pvn>, C<name> points to the first byte of the name, and an
-additional parameter, C<len>, specifies its length in bytes.  Hence, C<*name>
-may contain embedded-NUL characters.
+In C<gv_autoload_pvn> and C<gv_autoload4>), C<name> points to the first byte of
+the name, and an additional parameter, C<len>, specifies its length in bytes.
+Hence, C<*name> may contain embedded-NUL characters.
 
 In C<gv_autoload_sv>, C<*namesv> is an SV, and the name is the PV extracted
 from that using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the
 extracted PV will also be.
 
+The other way to indicate that the name is encoded as UTF-8 is to set the 
+C<SVf_UTF8> bit in C<flags> for the forms that have that parameter.  
+The name is never considered to be UTF-8 in C<gv_autoload4>.
+
+The C<method> parameter in C<gv_autoload4> is used only to indicate that the
+name is for a method (non-zero), or not (zero).  The other forms use the
+C<GV_AUTOLOAD_ISMETHOD> bit in C<flags> to indicate this.
+
+The only other significant value in C<flags> currently is C<GV_SUPER>
+to indicate, if set, to skip searching for the name in C<stash>.
+
 =cut
+
+=for apidoc Amnh||GV_AUTOLOAD_ISMETHOD
+=for apidoc Amnh||SVf_UTF8
+=for apidoc Amnh||GV_SUPER
 */
 
 GV*
