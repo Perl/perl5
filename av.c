@@ -767,8 +767,8 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 }
 
 /*
-=for apidoc av_push
-=for apidoc av_push_simple
+=for apidoc      av_push
+=for apidoc_item av_push_simple
 
 These each push an SV (transferring control of one reference count) onto the
 end of the array.  The array will grow automatically to accommodate the
