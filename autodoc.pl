@@ -1761,18 +1761,20 @@ sub dictionary_order {
     return $a cmp $b;
 }
 
-sub output {
-    my ($podname, $header, $dochash, $footer, @missings_refs) = @_;
-    #
-    # strip leading '|' from each line which had been used to hide
-    # pod from pod checkers.
-    s/^\|//gm for $header, $footer, @missings_refs;
+sub output($) {
+    my $where = shift;
+    my $podname = $where->{podname};
+    my $dochash = $where->{docs};
+
+    # strip leading '|' from each line which had been used to hide pod from
+    # pod checkers.
+    s/^\|//gm for $where->{hdr}, $where->{footer};
 
     my $fh = open_new("pod/$podname.pod", undef,
                       {by => "$0 extracting documentation",
                        from => 'the C source files'}, 1);
 
-    print $fh $header, "\n";
+    print $fh $where->{hdr}, "\n";
 
     for my $section_name (sort dictionary_order keys %valid_sections) {
         my $section_info = $dochash->{$section_name};
@@ -1819,25 +1821,33 @@ sub output {
                             && defined $valid_sections{$section_name}{footer};
     }
 
+    print $fh <<~EOT;
 
-    my $first_time = 1;
-    while (1) {
-        my $missings_hdr = shift @missings_refs or last;
-        my $missings_ref = shift @missings_refs or die "Foo";
+        =head1 $undocumented_scn
 
-        if ($first_time) {
-            $first_time = 0;
-            print $fh <<~EOT;
+        EOT
 
-                =head1 $undocumented_scn
+    # The missings section has multiple subsections, described by an array.
+    # The first two items in the array give first the name of the variable
+    # containing the text for the heading for the first subsection to output,
+    # and the second is a reference to a list of names of items in that
+    # subsection.
+    #
+    # The next two items are for the next output subsection, and so forth.
+    while ($where->{missings}->@*) {
+        my $hdr_name = shift $where->{missings}->@*;
+        my $hdr = $where->{$hdr_name};
 
-                EOT
-        }
+        # strip leading '|' from each line which had been used to hide pod
+        # from pod checkers.
+        $hdr =~  s/^\|//gm;
 
-        print $fh construct_missings_section($missings_hdr, $missings_ref);
+        my $ref = shift $where->{missings}->@*;
+
+        print $fh construct_missings_section($hdr, $ref);
     }
 
-    print $fh "\n$footer\n=cut\n";
+    print $fh "\n$where->{footer}\n=cut\n";
 
     read_only_bottom_close_and_rename($fh);
 }
@@ -1984,28 +1994,35 @@ foreach (sort keys %missing) {
        . " nor in the source";
 }
 
+my %api    = ( podname => 'perlapi',    docs => $docs{'api'} );
+my %intern = ( podname => 'perlintern', docs => $docs{'intern'} );
+
 # List of funcs in the public API that aren't also marked as core-only,
 # experimental nor deprecated.
-
 my @undocumented_api =    grep {        $elements{$_}{flags} =~ /A/
                                    && ! $docs{api}{$_}
                                } keys %elements;
+# Same for perlintern
 my @undocumented_intern = grep {        $elements{$_}{flags} !~ /[AS]/
                                    && ! $docs{intern}{$_}
                                } keys %elements;
-my @undocumented_deprecated_api    = grep { $elements{$_}{flags} =~ /D/ }
-                                                            @undocumented_api;
-my @undocumented_deprecated_intern = grep { $elements{$_}{flags} =~ /D/ }
-                                                           @undocumented_intern;
-my @undocumented_experimental_api    =  grep { $elements{$_}{flags} =~ /x/ }
-                                                            @undocumented_api;
-my @undocumented_experimental_intern =  grep { $elements{$_}{flags} =~ /x/ }
-                                                           @undocumented_intern;
-my @missing_api = grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_api;
-push @missing_api, keys %missing_macros;
 
-my @missing_intern = grep { $elements{$_}{flags} !~ /[xD]/ }
-                                                           @undocumented_intern;
+unshift $api{missings}->@*,
+ (deprecated_hdr => [ grep { $elements{$_}{flags} =~ /[D]/ } @undocumented_api]);
+unshift $intern{missings}->@*,
+ (deprecated_hdr => [ grep { $elements{$_}{flags} =~ /[D]/ } @undocumented_intern]);
+
+unshift $api{missings}->@*,
+ (experimental_hdr => [ grep { $elements{$_}{flags} =~ /[x]/ } @undocumented_api]);
+unshift $intern{missings}->@*,
+(experimental_hdr => [ grep { $elements{$_}{flags} =~ /[x]/ } @undocumented_intern]);
+
+unshift $api{missings}->@*,
+ (missings_hdr => [ grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_api]);
+push $api{missings}[1]->@*, keys %missing_macros;
+
+unshift $intern{missings}->@*,
+ (missings_hdr => [ grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_intern]);
 
 my @other_places = ( qw(perlclib ), keys %described_elsewhere );
 my $places_other_than_intern = join ", ",
@@ -2032,7 +2049,7 @@ my $section_list = join "\n\n", map { "=item L</$_>" }
 
 # Leading '|' is to hide these lines from pod checkers.  khw is unsure if this
 # is still needed.
-my $api_hdr = <<"_EOB_";
+$api{hdr} = <<"_EOB_";
 |=encoding UTF-8
 |
 |=head1 NAME
@@ -2115,7 +2132,7 @@ my $api_hdr = <<"_EOB_";
 |The listing below is alphabetical, case insensitive.
 _EOB_
 
-my $api_footer = <<"_EOE_";
+$api{footer} = <<"_EOE_";
 |=head1 AUTHORS
 |
 |Until May 1997, this document was maintained by Jeff Okamoto
@@ -2135,7 +2152,7 @@ my $api_footer = <<"_EOE_";
 |F<config.h>, $places_other_than_api
 _EOE_
 
-my $api_missings_hdr = <<'_EOT_';
+$api{missings_hdr} = <<'_EOT_';
 |The following functions have been flagged as part of the public
 |API, but are currently undocumented.  Use them at your own risk,
 |as the interfaces are subject to change.  Functions that are not
@@ -2153,7 +2170,7 @@ my $api_missings_hdr = <<'_EOT_';
 |usable by you.
 _EOT_
 
-my $api_experimental_hdr = <<"_EOT_";
+$api{experimental_hdr} = <<"_EOT_";
 |
 |Next are the API-flagged elements that are considered experimental.  Using one
 |of these is even more risky than plain undocumented ones.  They are listed
@@ -2161,19 +2178,15 @@ my $api_experimental_hdr = <<"_EOT_";
 |lost) and this is the best place for them.
 _EOT_
 
-my $api_deprecated_hdr = <<"_EOT_";
+$api{deprecated_hdr} = <<"_EOT_";
 |
 |Finally are deprecated undocumented API elements.
 |Do not use any for new code; remove all occurrences of all of these from
 |existing code.
 _EOT_
+output(\%api);
 
-output('perlapi', $api_hdr, $docs{api}, $api_footer,
-       $api_missings_hdr, \@missing_api,
-       $api_experimental_hdr, \@undocumented_experimental_api,
-       $api_deprecated_hdr, \@undocumented_deprecated_api);
-
-my $intern_hdr = <<"_EOB_";
+$intern{hdr} = <<"_EOB_";
 |=head1 NAME
 |
 |perlintern - autogenerated documentation of purely B<internal>
@@ -2191,7 +2204,7 @@ my $intern_hdr = <<"_EOB_";
 |
 _EOB_
 
-my $intern_footer = <<"_EOE_";
+$intern{footer} = <<"_EOE_";
 |
 |=head1 AUTHORS
 |
@@ -2204,7 +2217,7 @@ my $intern_footer = <<"_EOE_";
 |F<config.h>, $places_other_than_intern
 _EOE_
 
-my $intern_missings_hdr = <<"_EOT_";
+$intern{missings_hdr} = <<"_EOT_";
 |
 |This section lists the elements that are otherwise undocumented.  If you use
 |any of them, please consider creating and submitting documentation for it.
@@ -2214,13 +2227,13 @@ my $intern_missings_hdr = <<"_EOT_";
 |
 _EOT_
 
-my $intern_experimental_hdr = <<"_EOT_";
+$intern{experimental_hdr} = <<"_EOT_";
 |
 |Next are the experimental undocumented elements
 |
 _EOT_
 
-my $intern_deprecated_hdr = <<"_EOT_";
+$intern{deprecated_hdr} = <<"_EOT_";
 |
 |Finally are the deprecated undocumented elements.
 |Do not use any for new code; remove all occurrences of all of these from
@@ -2228,8 +2241,4 @@ my $intern_deprecated_hdr = <<"_EOT_";
 |
 _EOT_
 
-output('perlintern', $intern_hdr, $docs{intern}, $intern_footer,
-       $intern_missings_hdr, \@missing_intern,
-       $intern_experimental_hdr, \@undocumented_experimental_intern,
-       $intern_deprecated_hdr, \@undocumented_deprecated_intern
-      );
+output(\%intern);
