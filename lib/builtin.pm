@@ -152,6 +152,17 @@ This function is currently B<experimental>.
 
 Returns the floating-point infinity value.
 
+=head2 is_inf
+
+    $inf = is_inf($val);
+
+This function is currently B<experimental>.
+
+Returns true when given the postive or negative floating-point infinity values,
+false if not. A floating-point infinity value can be generated when certain
+floating-point operations are performed, based on platform-specific floating
+point handling.
+
 =head2 nan
 
     $num = nan;
@@ -159,6 +170,16 @@ Returns the floating-point infinity value.
 This function is currently B<experimental>.
 
 Returns the floating-point "Not-a-Number" value.
+
+=head2 is_nan
+
+    $nan = is_nan($val);
+
+This function is currently B<experimental>.
+
+Returns true when given the floating-point "Not-A-Number" value, false if not.
+The floating-point NaN value can be generated when certain floating-point
+operations are performed, based on platform-specific floating point handling.
 
 =head2 weaken
 
