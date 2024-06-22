@@ -103,7 +103,7 @@ my %described_elsewhere;
 
 my %docs;
 my %seen;
-my %funcflags;
+my %elements;
 my %deferreds;  # Elements whose usage hasn't been found by the time they are
                 # parsed
 my %missing;
@@ -431,7 +431,7 @@ sub embed_override($) {
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
-    my $embed_docref = delete $funcflags{$element_name};
+    my $embed_docref = delete $elements{$element_name};
 
     return unless $embed_docref and %$embed_docref;
 
@@ -542,7 +542,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             # Handle apidoc_defn line
             if ($line_type eq "apidoc_defn") {
-                if (defined $funcflags{$element_name}) {
+                if (defined $elements{$element_name}) {
                     warn "Using embed.fnc entry for $element_name";
                 }
                 else {
@@ -713,7 +713,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
 
             # This line shows that this element is documented.
-            delete $funcflags{$item_name};
+            delete $elements{$item_name};
         }
 
         # Here, are done accumulating the text for this item.  Trim it
@@ -1848,11 +1848,11 @@ sub add_defn  {
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
-    $funcflags{$func} = {
-                          flags => $flags,
-                          ret_type => $ret_type,
-                          args => \@munged_args,
-                        };
+    $elements{$func} = {
+                        flags => $flags,
+                        ret_type => $ret_type,
+                        args => \@munged_args,
+                       };
 }
 
 foreach (@{(setup_embed())[0]}) {
@@ -1904,7 +1904,7 @@ foreach my $section_name (keys $unknown->%*) {
         my $item_name = $unknown->{$section_name}{$group_name}{items}[0]{name};
 
         # We should have a usage definition by now.
-        my $corrected = delete $funcflags{$item_name};
+        my $corrected = delete $elements{$item_name};
         if (! defined $corrected) {
             die "=for apidoc line without any usage definition $item_name in"
               . " $unknown->{$section_name}{$group_name}{file}";
@@ -1936,7 +1936,7 @@ for my $group_name (keys %deferreds) {
         my $item_name = $item->{name};
 
         # We should have a usage definition by now.
-        my $corrected = delete $funcflags{$item_name};
+        my $corrected = delete $elements{$item_name};
         if (! $corrected) {
             die "=for apidoc line without any usage definition $item_name in"
               . " $item->{file}";
@@ -1972,9 +1972,9 @@ for my $group_name (keys %deferreds) {
     }
 }
 
-for (sort keys %funcflags) {
-    next unless $funcflags{$_}{flags} =~ /d/;
-    next if $funcflags{$_}{flags} =~ /h/;
+for (sort keys %elements) {
+    next unless $elements{$_}{flags} =~ /d/;
+    next if $elements{$_}{flags} =~ /h/;
     warn "no docs for $_\n";
 }
 
@@ -1987,24 +1987,24 @@ foreach (sort keys %missing) {
 # List of funcs in the public API that aren't also marked as core-only,
 # experimental nor deprecated.
 
-my @undocumented_api =    grep {        $funcflags{$_}{flags} =~ /A/
+my @undocumented_api =    grep {        $elements{$_}{flags} =~ /A/
                                    && ! $docs{api}{$_}
-                               } keys %funcflags;
-my @undocumented_intern = grep {        $funcflags{$_}{flags} !~ /[AS]/
+                               } keys %elements;
+my @undocumented_intern = grep {        $elements{$_}{flags} !~ /[AS]/
                                    && ! $docs{intern}{$_}
-                               } keys %funcflags;
-my @undocumented_deprecated_api    = grep { $funcflags{$_}{flags} =~ /D/ }
+                               } keys %elements;
+my @undocumented_deprecated_api    = grep { $elements{$_}{flags} =~ /D/ }
                                                             @undocumented_api;
-my @undocumented_deprecated_intern = grep { $funcflags{$_}{flags} =~ /D/ }
+my @undocumented_deprecated_intern = grep { $elements{$_}{flags} =~ /D/ }
                                                            @undocumented_intern;
-my @undocumented_experimental_api    =  grep { $funcflags{$_}{flags} =~ /x/ }
+my @undocumented_experimental_api    =  grep { $elements{$_}{flags} =~ /x/ }
                                                             @undocumented_api;
-my @undocumented_experimental_intern =  grep { $funcflags{$_}{flags} =~ /x/ }
+my @undocumented_experimental_intern =  grep { $elements{$_}{flags} =~ /x/ }
                                                            @undocumented_intern;
-my @missing_api = grep { $funcflags{$_}{flags} !~ /[xD]/ } @undocumented_api;
+my @missing_api = grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_api;
 push @missing_api, keys %missing_macros;
 
-my @missing_intern = grep { $funcflags{$_}{flags} !~ /[xD]/ }
+my @missing_intern = grep { $elements{$_}{flags} !~ /[xD]/ }
                                                            @undocumented_intern;
 
 my @other_places = ( qw(perlclib ), keys %described_elsewhere );
