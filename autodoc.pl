@@ -69,6 +69,13 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 use strict;
 use warnings;
 
+use constant {
+              ILLEGAL_APIDOC     =>  0,  # Must be 0 so evaluates to 'false'
+              APIDOC_DEFN        =>  1,
+              PLAIN_APIDOC       =>  2,
+              APIDOC_ITEM        =>  3,
+             };
+
 my $config_h = 'config.h';
 if (@ARGV >= 2 && $ARGV[0] eq "-c") {
     shift;
@@ -397,14 +404,23 @@ sub check_api_doc_line ($$$) {
 
     return unless $in =~ $apidoc_re;
 
-    my $is_item = defined $5 && $5 eq "_item";
-    my $is_in_proper_form = length $1 == 0
+    my $type = (! defined $5)
+               ? PLAIN_APIDOC
+               : ($5 eq '_item')
+                 ? APIDOC_ITEM
+                 : ($5 eq '_defn')
+                   ? APIDOC_DEFN
+                   : ILLEGAL_APIDOC;
+
+    my $is_in_proper_form = $type != ILLEGAL_APIDOC
+                         && length $1 == 0
                          && length $2 > 0
                          && length $3 == 0
                          && length $4 > 0
                          && length $7 > 0
                          && (    length $6 > 0
-                             || ($is_item && substr($7, 0, 1) eq '|'));
+                             || (   $type == APIDOC_ITEM
+                                 && substr($7, 0, 1) eq '|'));
     my $proto_in_file = $7;
     my $proto = $proto_in_file;
     $proto = "||$proto" if $proto !~ /\|/;
@@ -421,9 +437,9 @@ Expected:
 EOS
 
     die "Only [$display_flags] allowed in apidoc_item:\n$in"
-                            if $is_item && $flags =~ /[^$display_flags]/;
+                    if $type == APIDOC_ITEM && $flags =~ /[^$display_flags]/;
 
-    return ($name, $flags, $ret_type, $is_item, $proto_in_file, @args);
+    return ($name, $flags, $ret_type, $type, $proto_in_file, @args);
 }
 
 sub embed_override($) {
@@ -513,7 +529,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # Either it is for an API element, or heading text which we expect
         # will be used for elements later in the file
 
-        my ($text, $element_name, $ret_type, $is_item, $proto_in_file);
+        my ($text, $element_name, $ret_type, $line_type, $proto_in_file);
         my (@args, @items);
         my $group_is_deferred = 0;
         my $flags = "";
@@ -536,13 +552,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
         }
         else {
-            my $line_type = $1;
-            ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
-                                          = check_api_doc_line($file, $line_num,
-                                                               $in);
+            ($element_name, $flags, $ret_type, $line_type,
+             $proto_in_file, @args) = check_api_doc_line($file, $., $in);
 
             # Handle apidoc_defn line
-            if ($line_type eq "apidoc_defn") {
+            if ($line_type == APIDOC_DEFN) {
                 if (defined $elements{$element_name}) {
                     warn "Using embed.fnc entry for $element_name";
                 }
@@ -658,10 +672,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # the text being accumulated.
             last if $in !~ / ^ =for [ ]+ apidoc_item /x;
 
-            my ($item_name, $item_flags, $item_ret_type, $is_item,
+            my ($item_name, $item_flags, $item_ret_type, $line_type,
                 $item_proto, @item_args) = check_api_doc_line($file, $line_num,
                                                               $in);
-            last unless $is_item;
+            last unless $line_type == APIDOC_ITEM;
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
