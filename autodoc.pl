@@ -654,7 +654,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             # Here, the line is an apidoc line.  All but apidoc_item terminate
             # the text being accumulated.
-            last if $in =~ / ^ =for [ ]+ apidoc_section /x;
+            last if $in !~ / ^ =for [ ]+ apidoc_item /x;
 
             my ($item_name, $item_flags, $item_ret_type, $is_item,
                     $item_proto, @item_args) = check_api_doc_line($file, $in);
