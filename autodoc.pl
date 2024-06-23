@@ -392,8 +392,8 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
 # Only certain flags, dealing with display, are acceptable for apidoc_item
 my $display_flags = "fFnDopTx;";
 
-sub check_api_doc_line ($$) {
-    my ($file, $in) = @_;
+sub check_api_doc_line ($$$) {
+    my ($file, $line_num, $in) = @_;
 
     return unless $in =~ $apidoc_re;
 
@@ -411,7 +411,7 @@ sub check_api_doc_line ($$) {
     my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
 
     $name && $is_in_proper_form or die <<EOS;
-Bad apidoc at $file line $.:
+Bad apidoc at $file line $line_num:
   $in
 Expected:
   =for apidoc flags|returntype|name|arg|arg|...
@@ -527,7 +527,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $section = eval "$section";
                 die "Unknown \$section variable '$section' in $file: $@" if $@;
             }
-            die "Unknown section name '$section' in $file near line $.\n"
+            die "Unknown section name '$section' in $file near line $line_num\n"
                                     unless defined $valid_sections{$section};
         }
         elsif ($in !~ /^ =for [ ]+ ( apidoc (?: _defn)? ) \b /x) {
@@ -538,7 +538,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
         else {
             my $line_type = $1;
             ($element_name, $flags, $ret_type, $is_item, $proto_in_file, @args)
-                                               = check_api_doc_line($file, $in);
+                                          = check_api_doc_line($file, $line_num,
+                                                               $in);
 
             # Handle apidoc_defn line
             if ($line_type eq "apidoc_defn") {
@@ -550,7 +551,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
                     # corresponding apidoc line elsewhere in the source.
                     # Hence, we can say that this macro is documented.  (A
                     # warning will be raised if the mate line is missing.)
-                    add_defn($element_name, $flags . "d", $ret_type, \@args);
+                    add_defn($element_name, $file, $line_num, $flags . "d",
+                             $ret_type, \@args);
                 }
                 next;
             }
@@ -657,7 +659,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
             last if $in !~ / ^ =for [ ]+ apidoc_item /x;
 
             my ($item_name, $item_flags, $item_ret_type, $is_item,
-                    $item_proto, @item_args) = check_api_doc_line($file, $in);
+                $item_proto, @item_args) = check_api_doc_line($file, $line_num,
+                                                              $in);
             last unless $is_item;
 
             # Here, is an apidoc_item_line; They can only come within apidoc
@@ -1853,7 +1856,7 @@ sub output($) {
 }
 
 sub add_defn  {
-    my ($func, $flags, $ret_type, $args_ref) = @_;
+    my ($func, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
 
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
@@ -1862,15 +1865,20 @@ sub add_defn  {
                         flags => $flags,
                         ret_type => $ret_type,
                         args => \@munged_args,
+                        file => $file,
+                        line_num => $line_num // 0,
                        };
 }
 
 foreach (@{(setup_embed())[0]}) {
     my $embed= $_->{embed}
         or next;
+    my $file = $_->{source};
     my ($flags, $ret_type, $func, $args) =
                                  @{$embed}{qw(flags return_type name args)};
-    add_defn($func, $flags, $ret_type, $args);
+    add_defn($func, $file,
+             undef,     # Unknown line number in embed.fnc
+             $flags, $ret_type, $args);
 }
 
 # glob() picks up docs from extra .c or .h files that may be in unclean
