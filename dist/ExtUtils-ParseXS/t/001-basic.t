@@ -369,6 +369,10 @@ EOF_CONTENT
         "The version in perlxs.pod should match the version of ExtUtils::ParseXS");
 }
 
+# Basic test of the death() method.
+# Run some code which will trigger a call to death(). Check that we get
+# the expected error message (and as an exception rather than being on
+# stderr.)
 {
     my $pxs = ExtUtils::ParseXS->new;
     tie *FH, 'Capture';
@@ -383,7 +387,7 @@ EOF_CONTENT
         } or $exception = $@;
     });
     is($stderr, undef, "should fail to parse");
-    like($exception, qr/Could not find a typemap for C type 'S \*'/,
+    like($exception, qr/Error: Unterminated TYPEMAP section/,
          "check we throw rather than trying to deref '2'");
 }
 
