@@ -649,81 +649,78 @@ sub current_line_number {
   return $line_number;
 }
 
-=head2 C<Warn()>
 
-=over 4
 
-=item * Purpose
+=head2 Error handling methods
 
-Print warnings with line number details at the end.
+There are four main methods for reporting warnings and errors.
 
-=item * Arguments
+=over
 
-List of text to output.
+=item C<< $self->Warn(@messages) >>
 
-=item * Return Value
+This is equivalent to:
 
-None.
+  warn "@messages in foo.xs, line 123\n";
+
+The file and line number are based on the file currently being parsed. It
+is intended for use where you wish to warn, but can continue parsing and
+still generate a correct C output file.
+
+=item C<< $self->blurt(@messages) >>
+
+This is equivalent to C<Warn>, except that it also increments the internal
+error count (which can be retrieved with C<report_error_count()>). It is
+used to report an error, but where parsing can continue (so typically for
+a semantic error rather than a syntax error). It is expected that the
+caller will eventually signal failure in some fashion. For example,
+C<xsubpp> has this as its last line:
+
+  exit($self->report_error_count() ? 1 : 0);
+
+=item C<< $self->death(@messages) >>
+
+This normally equivalent to:
+
+  $self->Warn(@messages);
+  exit(1);
+
+It is used for something like a syntax error, where parsing can't
+continue.  However, this is inconvenient for testing purposes, as the
+error can't be trapped. So if C<$self> is created with the C<die_on_error>
+flag, or if C<$ExtUtils::ParseXS::DIE_ON_ERROR> is true when process_file()
+is called, then instead it will die() with that message.
+
+=item C<< $self->WarnHint(@messages, $hints) >>
+
+This is a more obscure twin to C<Warn>, which does the same as C<Warn>,
+but afterwards, outputs any lines contained in the C<$hints> string, with
+each line wrapped in parentheses. For example:
+
+  $self->WarnHint(@messages,
+    "Have you set the foo switch?\nSee the manual for further info");
 
 =back
 
 =cut
+
+
+# see L</Error handling methods> above
 
 sub Warn {
   my ($self)=shift;
   $self->WarnHint(@_,undef);
 }
 
-=head2 C<WarnHint()>
 
-=over 4
-
-=item * Purpose
-
-Prints warning with line number details. The last argument is assumed
-to be a hint string.
-
-=item * Arguments
-
-List of strings to warn, followed by one argument representing a hint.
-If that argument is defined then it will be split on newlines and output
-line by line after the main warning.
-
-=item * Return Value
-
-None.
-
-=back
-
-=cut
+# see L</Error handling methods> above
 
 sub WarnHint {
   warn _MsgHint(@_);
 }
 
-=head2 C<_MsgHint()>
 
-=over 4
-
-=item * Purpose
-
-Constructs an exception message with line number details. The last argument is
-assumed to be a hint string.
-
-=item * Arguments
-
-List of strings to warn, followed by one argument representing a hint.
-If that argument is defined then it will be split on newlines and concatenated
-line by line (parenthesized) after the main message.
-
-=item * Return Value
-
-The constructed string.
-
-=back
-
-=cut
-
+# see L</Error handling methods> above
 
 sub _MsgHint {
   my $self = shift;
@@ -736,19 +733,8 @@ sub _MsgHint {
   return $ret;
 }
 
-=head2 C<blurt()>
 
-=over 4
-
-=item * Purpose
-
-=item * Arguments
-
-=item * Return Value
-
-=back
-
-=cut
+# see L</Error handling methods> above
 
 sub blurt {
   my $self = shift;
@@ -756,19 +742,8 @@ sub blurt {
   $self->{errors}++
 }
 
-=head2 C<death()>
 
-=over 4
-
-=item * Purpose
-
-=item * Arguments
-
-=item * Return Value
-
-=back
-
-=cut
+# see L</Error handling methods> above
 
 sub death {
   my ($self) = (@_);
@@ -780,6 +755,7 @@ sub death {
   }
   exit 1;
 }
+
 
 =head2 C<check_conditional_preprocessor_statements()>
 
@@ -888,6 +864,7 @@ sub report_typemap_failure {
   $self->$error_method($err);
   return();
 }
+
 
 1;
 
