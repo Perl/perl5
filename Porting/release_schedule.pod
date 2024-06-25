@@ -50,8 +50,8 @@ you should reset the version numbers to the next blead series.
   2024-10-20  5.41.5          Richard Leach
   2024-11-20  5.41.6          Thibault Duponchelle
   2024-12-20  5.41.7          Max Maischein
-  2025-01-20  5.41.8          ?
-  2025-02-20  5.41.9          ?                 Contentious changes freeze
+  2025-01-20  5.41.8          Steve Hay
+  2025-02-20  5.41.9          Paul Evans        Contentious changes freeze
   2025-03-20  5.41.10         ?                 User-visible changes to
                                                 correctly functioning
                                                 programs freeze
