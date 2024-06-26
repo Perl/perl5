@@ -344,6 +344,7 @@ String::Base
 String::Scanf
 String::Util
 strstr(3)
+strtod(3)
 strtok(3)
 strtol(3)
 Switch

@@ -7910,9 +7910,7 @@ END_EXTERN_C
 
 =for apidoc_section $numeric
 
-=for apidoc AmTR|NV|Strtod|NN const char * const s|NULLOK char ** e
-
-This is a synonym for L</my_strtod>.
+=for apidoc_defn AmTR|NV|Strtod|NN const char * const s|NULLOK char **e
 
 =for apidoc AmTR|NV|Strtol|NN const char * const s|NULLOK char ** e|int base
 
