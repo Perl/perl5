@@ -76,18 +76,34 @@ S_strtod(pTHX_ const char * const s, char ** e)
 
 /*
 
-=for apidoc my_strtod
+=for apidoc      my_strtod
+=for apidoc_item Strtod
 
-This function is equivalent to the libc strtod() function, and is available
-even on platforms that lack plain strtod().  Its return value is the best
-available precision depending on platform capabilities and F<Configure>
-options.
+These are identical.
 
-It properly handles the locale radix character, meaning it expects a dot except
-when called from within the scope of S<C<use locale>>, in which case the radix
-character should be that specified by the current locale.
+They act like the libc C<L<strtod(3)>> function, with three exceptions:
 
-The synonym Strtod() may be used instead.
+=over
+
+=item 1.
+
+Their return value is an NV.  Plain C<strod> returns a double precision value.
+
+=item 2.
+
+Plain C<strtod> always is expecting the radix character (or string) to be the
+one specified by the underlying locale the program is executing in.  This is
+almost universally a dot (U+002E) or a comma (U+002C).
+
+In contrast, these expect the radix to be a dot, except when called from within
+the scope of S<C<use locale>>, in which case they act like plain C<strtod>,
+expecting the radix to be that specified by the current locale.
+
+=item 3.
+
+These are are available even on platforms that lack plain strtod().
+
+=back
 
 =cut
 
