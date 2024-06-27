@@ -4169,7 +4169,6 @@ valid.
 =for apidoc  Cmnh||CXt_BLOCK
 =for apidoc_item ||CXt_EVAL
 =for apidoc_item ||CXt_FORMAT
-=for apidoc_item ||CXt_GIVEN
 =for apidoc_item ||CXt_LOOP_ARY
 =for apidoc_item ||CXt_LOOP_LAZYIV
 =for apidoc_item ||CXt_LOOP_LAZYSV
@@ -4178,7 +4177,6 @@ valid.
 =for apidoc_item ||CXt_NULL
 =for apidoc_item ||CXt_SUB
 =for apidoc_item ||CXt_SUBST
-=for apidoc_item ||CXt_WHEN
 
 The main division in the context struct is between a substitution scope
 (C<CXt_SUBST>) and block scopes, which are everything else. The former is

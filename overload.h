@@ -86,9 +86,8 @@ enum {
     repeat_ass_amg,	/* 0x45 x=       */
     concat_amg,		/* 0x46 .        */
     concat_ass_amg,	/* 0x47 .=       */
-    smart_amg,		/* 0x48 ~~       */
-    ftest_amg,		/* 0x49 -X       */
-    regexp_amg,		/* 0x4a qr       */
+    ftest_amg,		/* 0x48 -X       */
+    regexp_amg,		/* 0x49 qr       */
     max_amg_code
     /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };

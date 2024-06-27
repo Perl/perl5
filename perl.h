@@ -5687,9 +5687,7 @@ EXTCONST unsigned char PL_latin1_lc[];
 #ifdef DOINIT
 EXTCONST char* const PL_block_type[] = {
         "NULL",
-        "WHEN",
         "BLOCK",
-        "GIVEN",
         "LOOP_ARY",
         "LOOP_LAZYSV",
         "LOOP_LAZYIV",

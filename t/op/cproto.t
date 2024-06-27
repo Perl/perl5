@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 254;
+plan tests => 249;
 
 while (<DATA>) {
     chomp;
@@ -51,7 +51,6 @@ atan2 ($$)
 bind (*$)
 binmode (*;$)
 bless ($;$)
-break ()
 caller (;$)
 chdir (;$)
 chmod (@)
@@ -64,12 +63,10 @@ close (;*)
 closedir (*)
 cmp undef
 connect (*$)
-continue ()
 cos (_)
 crypt ($$)
 dbmclose (\%)
 dbmopen (\%$$)
-default undef
 defined undef
 delete undef
 die (@)
@@ -128,7 +125,6 @@ getservbyport ($$)
 getservent ()
 getsockname (*)
 getsockopt (*$$)
-given undef
 glob (_;)
 gmtime (;$)
 goto undef
@@ -278,7 +274,6 @@ wait ()
 waitpid ($$)
 wantarray ()
 warn (@)
-when undef
 while undef
 write (;*)
 x undef

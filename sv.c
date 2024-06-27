@@ -15170,13 +15170,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
                 ncx->blk_format.dfoutgv	= gv_dup_inc(ncx->blk_format.dfoutgv,
                                                      param);
                 break;
-            case CXt_GIVEN:
-                ncx->blk_givwhen.defsv_save =
-                                sv_dup_inc(ncx->blk_givwhen.defsv_save, param);
-                break;
             case CXt_BLOCK:
             case CXt_NULL:
-            case CXt_WHEN:
             case CXt_DEFER:
                 break;
             }
@@ -17551,7 +17546,6 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_DOFILE:
     case OP_PROTOTYPE:
     case OP_NCMP:
-    case OP_SMARTMATCH:
     case OP_UNPACK:
     case OP_SYSOPEN:
     case OP_SYSSEEK:

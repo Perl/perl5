@@ -254,7 +254,6 @@ EXTCONST char* const PL_op_name[] INIT({
 	"complement",
 	"ncomplement",
 	"scomplement",
-	"smartmatch",
 	"atan2",
 	"sin",
 	"cos",
@@ -366,12 +365,6 @@ EXTCONST char* const PL_op_name[] INIT({
 	"method_super",
 	"method_redir",
 	"method_redir_super",
-	"entergiven",
-	"leavegiven",
-	"enterwhen",
-	"leavewhen",
-	"break",
-	"continue",
 	"open",
 	"close",
 	"pipe_op",
@@ -680,7 +673,6 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"1's complement (~)",
 	"numeric 1's complement (~)",
 	"string 1's complement (~)",
-	"smart match",
 	"atan2",
 	"sin",
 	"cos",
@@ -792,12 +784,6 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"super with known name",
 	"redirect method with known name",
 	"redirect super method with known name",
-	"given()",
-	"leave given block",
-	"when()",
-	"leave when block",
-	"break",
-	"continue",
 	"open",
 	"close",
 	"pipe",
@@ -1111,7 +1097,6 @@ INIT({
 	Perl_pp_complement,
 	Perl_pp_ncomplement,
 	Perl_pp_scomplement,
-	Perl_pp_smartmatch,
 	Perl_pp_atan2,
 	Perl_pp_sin,
 	Perl_pp_cos,	/* implemented by Perl_pp_sin */
@@ -1223,12 +1208,6 @@ INIT({
 	Perl_pp_method_super,
 	Perl_pp_method_redir,
 	Perl_pp_method_redir_super,
-	Perl_pp_entergiven,
-	Perl_pp_leavegiven,
-	Perl_pp_enterwhen,
-	Perl_pp_leavewhen,
-	Perl_pp_break,
-	Perl_pp_continue,
 	Perl_pp_open,
 	Perl_pp_close,
 	Perl_pp_pipe_op,
@@ -1537,7 +1516,6 @@ INIT({
 	Perl_ck_bitop,		/* complement */
 	Perl_ck_bitop,		/* ncomplement */
 	Perl_ck_null,		/* scomplement */
-	Perl_ck_smartmatch,	/* smartmatch */
 	Perl_ck_fun,		/* atan2 */
 	Perl_ck_fun,		/* sin */
 	Perl_ck_fun,		/* cos */
@@ -1649,12 +1627,6 @@ INIT({
 	Perl_ck_null,		/* method_super */
 	Perl_ck_null,		/* method_redir */
 	Perl_ck_null,		/* method_redir_super */
-	Perl_ck_null,		/* entergiven */
-	Perl_ck_null,		/* leavegiven */
-	Perl_ck_null,		/* enterwhen */
-	Perl_ck_null,		/* leavewhen */
-	Perl_ck_null,		/* break */
-	Perl_ck_null,		/* continue */
 	Perl_ck_open,		/* open */
 	Perl_ck_fun,		/* close */
 	Perl_ck_fun,		/* pipe_op */
@@ -1962,7 +1934,6 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x0000110e,	/* complement */
 	0x0000111e,	/* ncomplement */
 	0x0000111e,	/* scomplement */
-	0x00000204,	/* smartmatch */
 	0x0001141e,	/* atan2 */
 	0x00009b9e,	/* sin */
 	0x00009b9e,	/* cos */
@@ -2074,12 +2045,6 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00000e40,	/* method_super */
 	0x00000e40,	/* method_redir */
 	0x00000e40,	/* method_redir_super */
-	0x00000340,	/* entergiven */
-	0x00000100,	/* leavegiven */
-	0x00000340,	/* enterwhen */
-	0x00000100,	/* leavewhen */
-	0x00000000,	/* break */
-	0x00000000,	/* continue */
 	0x0029640d,	/* open */
 	0x0000eb04,	/* close */
 	0x00066404,	/* pipe_op */
@@ -2680,7 +2645,6 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      106, /* complement */
      104, /* ncomplement */
       79, /* scomplement */
-      13, /* smartmatch */
      102, /* atan2 */
       79, /* sin */
       79, /* cos */
@@ -2792,12 +2756,6 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      210, /* method_super */
      210, /* method_redir */
      210, /* method_redir_super */
-       0, /* entergiven */
-       0, /* leavegiven */
-       0, /* enterwhen */
-       0, /* leavewhen */
-      -1, /* break */
-      -1, /* continue */
      212, /* open */
       56, /* close */
       56, /* pipe_op */
@@ -3012,13 +2970,13 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
     0x3bfc, 0x4fd9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x065e, 0x0554, 0x1b70, 0x508c, 0x4c28, 0x4125, /* const */
     0x3bfc, 0x4459, /* gvsv */
     0x19d5, /* gv */
-    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, smartmatch, lslice, xor, isa */
+    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, lslice, xor, isa */
     0x3bfc, 0x4fd8, 0x03d7, /* padsv */
     0x3bfc, 0x4fd8, 0x0003, /* padsv_store, lvavref */
     0x3bfc, 0x4fd8, 0x06d4, 0x3cec, 0x4da9, /* padav */
@@ -3208,7 +3166,6 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* COMPLEMENT */ (OPpUSEINT),
     /* NCOMPLEMENT */ (OPpUSEINT|OPpTARGET_MY),
     /* SCOMPLEMENT */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* SMARTMATCH */ (OPpARG2_MASK),
     /* ATAN2      */ (OPpARG4_MASK|OPpTARGET_MY),
     /* SIN        */ (OPpARG1_MASK|OPpTARGET_MY),
     /* COS        */ (OPpARG1_MASK|OPpTARGET_MY),
@@ -3320,12 +3277,6 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* METHOD_SUPER */ (OPpARG1_MASK|OPpMETH_NO_BAREWORD_IO),
     /* METHOD_REDIR */ (OPpARG1_MASK|OPpMETH_NO_BAREWORD_IO),
     /* METHOD_REDIR_SUPER */ (OPpARG1_MASK|OPpMETH_NO_BAREWORD_IO),
-    /* ENTERGIVEN */ (OPpARG1_MASK),
-    /* LEAVEGIVEN */ (OPpARG1_MASK),
-    /* ENTERWHEN  */ (OPpARG1_MASK),
-    /* LEAVEWHEN  */ (OPpARG1_MASK),
-    /* BREAK      */ (0),
-    /* CONTINUE   */ (0),
     /* OPEN       */ (OPpARG4_MASK|OPpOPEN_IN_RAW|OPpOPEN_IN_CRLF|OPpOPEN_OUT_RAW|OPpOPEN_OUT_CRLF),
     /* CLOSE      */ (OPpARG4_MASK),
     /* PIPE_OP    */ (OPpARG4_MASK),

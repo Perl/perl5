@@ -3,7 +3,7 @@ package overload;
 use strict;
 no strict 'refs';
 
-our $VERSION = '1.37';
+our $VERSION = '1.38';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -19,7 +19,6 @@ our %ops = (
     iterators           => '<>',
     filetest            => "-X",
     dereferencing       => '${} @{} %{} &{} *{}',
-    matching            => '~~',
     special             => 'nomethod fallback =',
 );
 
@@ -376,7 +375,6 @@ hash C<%overload::ops>:
     iterators           => '<>',
     filetest            => '-X',
     dereferencing       => '${} @{} %{} &{} *{}',
-    matching            => '~~',
     special             => 'nomethod fallback =',
 
 Most of the overloadable operators map one-to-one to these keys.
@@ -520,37 +518,6 @@ result of the last C<stat>, C<lstat> or unoverloaded filetest.
 
 This overload was introduced in Perl 5.12.
 
-=item * I<Matching>
-
-The key C<"~~"> allows you to override the smart matching logic used by
-the C<~~> operator and the switch construct (C<given>/C<when>).  See
-L<perlsyn/Switch Statements> and L<feature>.
-
-Unusually, the overloaded implementation of the smart match operator
-does not get full control of the smart match behaviour.
-In particular, in the following code:
-
-    package Foo;
-    use overload '~~' => 'match';
-
-    my $obj =  Foo->new();
-    $obj ~~ [ 1,2,3 ];
-
-the smart match does I<not> invoke the method call like this:
-
-    $obj->match([1,2,3],0);
-
-rather, the smart match distributive rule takes precedence, so $obj is
-smart matched against each array element in turn until a match is found,
-so you may see between one and three of these calls instead:
-
-    $obj->match(1,0);
-    $obj->match(2,0);
-    $obj->match(3,0);
-
-Consult the match table in  L<perlop/"Smartmatch Operator"> for
-details of when overloading is invoked.
-
 =item * I<Dereferencing>
 
     ${}  @{}  %{}  &{}  *{}
@@ -679,7 +646,6 @@ expects.  The minimal set is:
     & | ^ ~ &. |. ^. ~.
     atan2 cos sin exp log sqrt int
     "" 0+ bool
-    ~~
 
 Of the conversions, only one of string, boolean or numeric is
 needed because each can be generated from either of the other two.
@@ -882,8 +848,7 @@ skipped.
 
 There are exceptions to the above rules for dereference operations
 (which, if Step 1 fails, always fall back to the normal, built-in
-implementations - see Dereferencing), and for C<~~> (which has its
-own set of rules - see C<Matching> under L</Overloadable Operations>
+implementations - see Dereferencing) under L</Overloadable Operations>
 above).
 
 Note on Step 7: some operators have a different semantic depending
