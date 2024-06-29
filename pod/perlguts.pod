@@ -238,6 +238,16 @@ Break this sort of statement up into separate assignments:
     ptr = SvPVbyte(s, len);
     foo(ptr, len);
 
+The reverse is also incorrect C<SvPVbyte(foo(x), len));> and must be split into
+separate assignments.
+
+   char *ptr;
+   STRLEN len;
+   SV *s = foo(x);
+   ptr = SvPVbyte(s, len);
+
+Failure to do so will likely result in a Segmentation fault.
+
 =back
 
 If you want to know if the scalar value is TRUE, you can use:
