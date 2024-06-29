@@ -557,6 +557,10 @@ whether it is valid to call C<HvAUX()>.
 #define hv_existss(hv, key) \
     hv_exists((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1))
 
+/*
+=for apidoc_defn Am|SV**|hv_fetchs|HV* hv|"key"|I32 lval
+=cut
+*/
 #define hv_fetchs(hv, key, lval) \
     hv_fetch((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (lval))
 
