@@ -1310,7 +1310,7 @@ so the name C<is_utf8_invariant_string> is preferred.
 See also
 C<L</is_utf8_string>> and C<L</is_utf8_fixed_width_buf_flags>>.
 
-=for apidoc_defn is_utf8_invariant_string bool|NN const U8 * const s|STRLEN len
+=for apidoc_defn ARTm|bool|is_utf8_invariant_string|NN const U8 * const s|STRLEN len
 
 =cut
 

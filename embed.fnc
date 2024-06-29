@@ -1614,8 +1614,6 @@ p	|bool	|io_close	|NN IO *io				\
 				|NULLOK GV *gv				\
 				|bool is_explicit			\
 				|bool warn_on_fail
-APRTdm	|bool	|is_ascii_string|NN const U8 * const s			\
-				|STRLEN len
 ARTdip	|Size_t |isC9_STRICT_UTF8_CHAR					\
 				|NN const U8 * const s0 		\
 				|NN const U8 * const e
@@ -1637,9 +1635,6 @@ dp	|bool	|isinfnansv	|NN SV *sv
 Cp	|bool	|_is_in_locale_category 				\
 				|const bool compiling			\
 				|const int category
-APRTdm	|bool	|is_invariant_string					\
-				|NN const U8 * const s			\
-				|STRLEN len
 ARdp	|I32	|is_lvalue_sub
 : used to check for NULs in pathnames and other names
 ARdip	|bool	|is_safe_syscall|NN const char *pv			\
@@ -1702,9 +1697,6 @@ ATdip	|bool	|is_utf8_fixed_width_buf_loclen_flags			\
 CRp	|bool	|_is_utf8_FOO	|const U8 classnum			\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
-ARTdmo	|bool	|is_utf8_invariant_string				\
-				|NN const U8 * const s			\
-				|STRLEN len
 ARTdip	|bool	|is_utf8_invariant_string_loc				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
