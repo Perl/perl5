@@ -1815,21 +1815,11 @@ Perl_io_close(pTHX_ IO *io, GV *gv, bool is_explicit, bool warn_on_fail)
         assert(io)
 
 /* PERL_CALLCONV bool
-is_ascii_string(const U8 * const s, STRLEN len)
-        __attribute__warn_unused_result__
-        __attribute__pure__; */
-
-/* PERL_CALLCONV bool
 is_c9strict_utf8_string(const U8 *s, STRLEN len)
         __attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool
 is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
-
-/* PERL_CALLCONV bool
-is_invariant_string(const U8 * const s, STRLEN len)
-        __attribute__warn_unused_result__
-        __attribute__pure__; */
 
 PERL_CALLCONV I32
 Perl_is_lvalue_sub(pTHX)
@@ -1862,10 +1852,6 @@ is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags); 
 
 /* PERL_CALLCONV bool
 is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
-
-/* PERL_CALLCONV bool
-is_utf8_invariant_string(const U8 * const s, STRLEN len)
-        __attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool
 is_utf8_string(const U8 *s, STRLEN len)

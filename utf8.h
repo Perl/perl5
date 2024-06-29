@@ -127,8 +127,8 @@ typedef enum {
 #define FOLD_FLAGS_NOMIX_ASCII  0x4
 
 /*
-=for apidoc_defn is_ascii_string     bool|NN const U8 * const s|STRLEN len
-=for apidoc_defn is_invariant_string bool|NN const U8 * const s|STRLEN len
+=for apidoc_defn APRTdm|bool|is_ascii_string|NN const U8 * const s|STRLEN len
+=for apidoc_defn APRTdm|bool|is_invariant_string|NN const U8 * const s|STRLEN len
 =cut
 */
 #define is_ascii_string(s, len)     is_utf8_invariant_string(s, len)
