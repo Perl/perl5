@@ -407,13 +407,6 @@ string/length pair.
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
 
-=for apidoc_section $HV
-
-=for apidoc Am|SV**|hv_fetchs|HV* tb|"key"|I32 lval
-Like C<hv_fetch>, but takes a literal string instead of a
-string/length pair.
-=for apidoc_section $lexer
-
 =cut
 */
 
