@@ -939,16 +939,38 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
 
 /*
-=for apidoc pad_findmy_pvn
+=for apidoc      pad_findmy_pv
+=for apidoc_item pad_findmy_pvn
+=for apidoc_item pad_findmy_pvs
+=for apidoc_item pad_findmy_sv
 
-Given the name of a lexical variable, find its position in the
-currently-compiling pad.
-C<namepv>/C<namelen> specify the variable's name, including leading sigil.
-C<flags> is reserved and must be zero.
+Given the name of a lexical variable, including its leading sigil, find its
+position in the currently-compiling pad.
+
 If it is not in the current pad but appears in the pad of any lexically
 enclosing scope, then a pseudo-entry for it is added in the current pad.
-Returns the offset in the current pad,
-or C<NOT_IN_PAD> if no such lexical is in scope.
+
+These each return the offset in the current pad, or C<NOT_IN_PAD> if no such
+lexical is in scope.
+
+The forms differ only in how the variable's name is specified.
+
+In C<pad_findmy_pvs>, the variable name is a C language string literal,
+enclosed in double quotes.
+
+In plain C<pad_findmy_pv>, the variable name is a C language NUL-terminated
+string.
+
+In C<pad_findmy_pvn>, C<len> gives the length of the variable name in bytes,
+so it may contain embedded-NUL characters.  The caller must make sure C<namepv>
+contains at least C<len> bytes.
+
+In C<pad_findmy_sv>, the variable name is taken from the SV parameter using
+C<L</SvPVutf8>()>.
+
+C<flags> is reserved and must be zero.
+
+=for apidoc Amnh||NOT_IN_PAD
 
 =cut
 */
@@ -1001,30 +1023,12 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     return NOT_IN_PAD;
 }
 
-/*
-=for apidoc pad_findmy_pv
-
-Exactly like L</pad_findmy_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
-
 PADOFFSET
 Perl_pad_findmy_pv(pTHX_ const char *name, U32 flags)
 {
     PERL_ARGS_ASSERT_PAD_FINDMY_PV;
     return pad_findmy_pvn(name, strlen(name), flags);
 }
-
-/*
-=for apidoc pad_findmy_sv
-
-Exactly like L</pad_findmy_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
-
-=cut
-*/
 
 PADOFFSET
 Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
