@@ -27,6 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 More CORE:: subs
+
+C<chdir> has been added as a subroutine to the CORE:: namespace.
+
+Previously, code like C<&CORE::chdir($dir)> or C<< my $ref = \&CORE::chdir;
+$ref->($dir) >> would throw an error saying C<&CORE::chdir cannot be called
+directly>. These cases are now fully supported.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
