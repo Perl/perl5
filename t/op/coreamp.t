@@ -405,6 +405,29 @@ sub {
   ::caller_test();
 }->();
 
+use if !is_miniperl, File::Spec::Functions, qw(curdir);
+
+test_proto 'chdir';
+unless (is_miniperl) {
+    $tests += 7;
+    my $good_dir = curdir();
+    my $bad_dir = 'no_such_dir+*?~';
+    is mychdir($good_dir), 1, 'mychdir(".") succeeds';
+    is mychdir($bad_dir), 0, 'mychdir($bad_dir) fails';
+    is &CORE::chdir($good_dir), 1, '&chdir(".") succeeds';
+    is &CORE::chdir($bad_dir), 0, '&chdir($bad_dir) fails';
+    {
+        local $ENV{HOME} = $good_dir;
+        is &CORE::chdir(), 1, '&chdir() succeeds with $ENV{HOME} = "."';
+        $ENV{HOME} = $bad_dir;
+        is &CORE::chdir(), 0, '&chdir() fails with $ENV{HOME} = $bad_dir';
+    }
+    {
+        delete local @ENV{qw(HOME LOGDIR SYS$LOGIN)};
+        is &CORE::chdir(), 0, '&chdir() fails with @ENV{qw(HOME LOGDIR SYS$LOGIN)} unset';
+    }
+}
+
 test_proto 'chmod';
 $tests += 3;
 is &CORE::chmod(), 0, '&chmod with no args';

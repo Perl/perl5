@@ -3905,9 +3905,11 @@ PP_wrapped(pp_chdir, MAXARG, 0)
     dSP; dTARGET;
     const char *tmps = NULL;
     GV *gv = NULL;
+    /* pp_coreargs pushes a NULL to indicate no args passed to
+     * CORE::chdir() */
+    SV * const sv = MAXARG == 1 ? POPs : NULL;
 
-    if( MAXARG == 1 ) {
-        SV * const sv = POPs;
+    if (sv) {
         if (PL_op->op_flags & OPf_SPECIAL) {
             gv = gv_fetchsv(sv, 0, SVt_PVIO);
             if (!gv) {
