@@ -1819,6 +1819,9 @@ sub docout ($$$) { # output the docs for one function group
                     }
 
                     $additional_long_form = 0;
+
+                    # This will already be outdented
+                    $may_need_extra_indent = 0;
                 }
                 elsif ($flags =~ /p/ && $flags !~ /o/) {
 
@@ -1827,6 +1830,14 @@ sub docout ($$$) { # output the docs for one function group
                     # iteration adds the short form; the redo causes its long
                     # form equivalent to be added too.
                     $additional_long_form = 1;
+                    $any_has_additional_long_form = 1;
+
+                    # Will need to indent this item to vertically align
+                    $may_need_extra_indent = 1;
+                }
+                else {
+                    # May need to indent this item to vertically align
+                    $may_need_extra_indent = 1;
                 }
             }
 
@@ -1836,11 +1847,18 @@ sub docout ($$$) { # output the docs for one function group
             my $name_len = length $name;
             $max_name_len = $name_len if $name_len > $max_name_len;
 
+            # length("Perl_") is 5
+            if ($may_need_extra_indent) {
+                $max_name_len_if_needs_extra_indent = $name_len + 5
+                        if $name_len + 5 > $max_name_len_if_needs_extra_indent;
+            }
+
             # Start creating this item's hash to guide its output
             push @outputs, {
                             ret => $ret, retlen => $retlen,
                             name => $name, name_len => $name_len,
                             has_pTHX => $this_has_pTHX,
+                            may_need_extra_indent => $may_need_extra_indent,
                            };
 
             $outputs[-1]->{args}->@* = @args if $has_args;
@@ -1870,8 +1888,13 @@ sub docout ($$$) { # output the docs for one function group
             my $name_column = $indent + $max_retlen + $usage_ret_name_sep_len;
 
             # And the arguments column follows immediately to the right of the
-            # widest name entry.
-            my $args_column = $name_column + $max_name_len;
+            # widest name entry.  Use the correct maximum calculated above for
+            # the two cases of this group having or not having an entry that
+            # requires 'Perl_' to be outdented.
+            my $args_column = $name_column
+                            + (($any_has_additional_long_form)
+                               ? $max_name_len_if_needs_extra_indent
+                               : $max_name_len);
 
             for my $element (@outputs) {
 
@@ -1886,9 +1909,20 @@ sub docout ($$$) { # output the docs for one function group
                 $running_length += $element->{retlen};
                 push @usage, " " x ($name_column - $running_length);
 
+                # If the group has a 'Perl_' long form entry, and this element
+                # is not such a one, it will need to be indented past that
+                # prefix.
+                my $extra_indent = (   $any_has_additional_long_form
+                                    && $element->{may_need_extra_indent})
+                                   ? 5
+                                   : 0;
+                push @usage, " " x $extra_indent;
+
                 # Then output the name
                 push @usage, $element->{name};
-                $running_length = $name_column + $element->{name_len};
+                $running_length = $extra_indent
+                                + $name_column
+                                + $element->{name_len};
 
                 # If there aren't any arguments, we are done, except for maybe
                 # a semi-colon.
