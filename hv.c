@@ -352,20 +352,20 @@ C<hv_store> has another extra parameter, C<hash>, a precomputed hash of the key
 string, or zero if it has not been precomputed.  This parameter is omitted from
 C<hv_stores>, as it is computed automatically at compile time.
 
-If <hv> is NULL, NULL is returned and no action is taken.
+If C<hv> is NULL, NULL is returned and no action is taken.
 
 If C<val> is NULL, it is treated as being C<undef>; otherwise the caller is
 responsible for suitably incrementing the reference count of C<val> before
 the call, and decrementing it if the function returned C<NULL>.  Effectively
 a successful C<hv_store> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, C<hv_store>
+if all your code does is create SVs and store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
 anything further to tidy up.
 
 C<hv_store> is not implemented as a call to L</C<hv_store_ent>>, and does not
 create a temporary SV for the key, so if your key data is not already in SV
-form then use C<hv_store> in preference to C<hv_store_ent>.
+form, then use C<hv_store> in preference to C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -373,7 +373,7 @@ information on how to use this function on tied hashes.
 =for apidoc hv_store_ent
 
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
-parameter is the precomputed hash value; if it is zero then Perl will
+parameter is the precomputed hash value; if it is zero, then Perl will
 compute it.  The return value is the new hash entry so created.  It will be
 C<NULL> if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise the
@@ -383,15 +383,15 @@ incrementing the reference count of C<val> before the call, and
 decrementing it if the function returned NULL.  Effectively a successful
 C<hv_store_ent> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, C<hv_store>
+if all your code does is create SVs and store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
 anything further to tidy up.  Note that C<hv_store_ent> only reads the C<key>;
 unlike C<val> it does not take ownership of it, so maintaining the correct
 reference count on C<key> is entirely the caller's responsibility.  The reason
-it does not take ownership, is that C<key> is not used after this function
+it does not take ownership is that C<key> is not used after this function
 returns, and so can be freed immediately.  C<hv_store>
 is not implemented as a call to C<hv_store_ent>, and does not create a temporary
-SV for the key, so if your key data is not already in SV form then use
+SV for the key, so if your key data is not already in SV form, then use
 C<hv_store> in preference to C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
