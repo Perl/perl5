@@ -2153,7 +2153,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00006c04,	/* fttty */
 	0x00006c84,	/* fttext */
 	0x00006c84,	/* ftbinary */
-	0x00009b1c,	/* chdir */
+	0x00009b04,	/* chdir */
 	0x0000241d,	/* chown */
 	0x00009b9c,	/* chroot */
 	0x0000249d,	/* unlink */
@@ -2871,7 +2871,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      222, /* fttty */
      222, /* fttext */
      222, /* ftbinary */
-     102, /* chdir */
+      56, /* chdir */
      102, /* chown */
       79, /* chroot */
      102, /* unlink */
@@ -3028,7 +3028,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x3cec, 0x0003, /* av2arylen, akeys, values, keys */
     0x3fbc, 0x1198, 0x0ef4, 0x014c, 0x5388, 0x5084, 0x0003, /* rv2cv */
     0x06d4, 0x0770, 0x0003, /* ref, blessed */
-    0x018f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
+    0x018f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, chdir, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
     0x463c, 0x4558, 0x2e74, 0x2db0, 0x0003, /* backtick */
     0x06d5, /* subst */
     0x129c, 0x2558, 0x0ad4, 0x4eec, 0x28e8, 0x5724, 0x08e1, /* trans, transr */
@@ -3041,7 +3041,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x1658, 0x0067, /* repeat */
     0x3ed8, 0x5430, 0x0067, /* concat */
     0x3bfc, 0x0338, 0x1e34, 0x5430, 0x516c, 0x0003, /* multiconcat */
-    0x5430, 0x018f, /* stringify, atan2, rand, srand, crypt, push, unshift, flock, chdir, chown, unlink, chmod, utime, rename, link, symlink, mkdir, waitpid, system, exec, kill, getpgrp, setpgrp, getpriority, setpriority, sleep */
+    0x5430, 0x018f, /* stringify, atan2, rand, srand, crypt, push, unshift, flock, chown, unlink, chmod, utime, rename, link, symlink, mkdir, waitpid, system, exec, kill, getpgrp, setpgrp, getpriority, setpriority, sleep */
     0x5430, 0x5649, /* left_shift, right_shift, nbit_and, nbit_xor, nbit_or, ncomplement */
     0x5649, /* bit_and, bit_xor, bit_or, sbit_and, sbit_xor, sbit_or, complement */
     0x06d4, 0x5430, 0x0003, /* length */
@@ -3399,7 +3399,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* FTTTY      */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
     /* FTTEXT     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
     /* FTBINARY   */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* CHDIR      */ (OPpARG4_MASK|OPpTARGET_MY),
+    /* CHDIR      */ (OPpARG4_MASK),
     /* CHOWN      */ (OPpARG4_MASK|OPpTARGET_MY),
     /* CHROOT     */ (OPpARG1_MASK|OPpTARGET_MY),
     /* UNLINK     */ (OPpARG4_MASK|OPpTARGET_MY),
