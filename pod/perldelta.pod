@@ -15,10 +15,6 @@ release.
 If you are upgrading from an earlier release such as 5.40.0, first read
 L<perl5410delta>, which describes differences between 5.40.0 and 5.41.0.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
 
 XXX New core language features go here.  Summarize user-visible core language
@@ -97,7 +93,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Various optimizations related to handling of C<CONST>s.
+
+=item *
+
+C<Perl_leave_adjust_stacks>: additional efficiency for mortal copies.
 
 =back
 
@@ -133,9 +133,13 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Fcntl> has been upgraded from version 1.18 to 1.19.
 
-XXX If there was something important to note about this change, include that here.
+Removed pointless C<S_ISENFMT> function.
+
+=item *
+
+Document when each L<builtin> function was first available and stabilized.
 
 =back
 
@@ -174,13 +178,39 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Combined the documentation for several groups of related functions
+into single entries.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Clarified the description of C<ref> and C<reftype> in relation
+to built-in types and class names.
+
+=item *
+
+Clarified that perl C<sort> is stable (and has been since v5.8.0).
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Added some description of "real" C<AV>s compared to "fake" C<AV>s.
 
 =back
 
@@ -291,7 +321,8 @@ made:
 
 =item *
 
-XXX
+A new F<t/run/todo.t> test script was added as a place for TODO tests
+for known unfixed bugs.
 
 =back
 
@@ -363,6 +394,11 @@ the year, month, hour, etc.  The new function handles UTF8ness for you,
 and allows you to specify if you want the possibility of daylight
 savings time to be considered.  C<my_strftime> never considers DST.
 
+=item *
+
+The C<bytes_to_utf8>, C<bytes_from_utf8>, and C<bytes_from_utf8_loc>
+functions are no longer experimental.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -379,7 +415,11 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Fix null pointer dereference in S_SvREFCNT_dec [GH #16627].
+
+=item *
+
+Fix feature 'class' Segmentation fault in DESTROY [GH #22278].
 
 =back
 
