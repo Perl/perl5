@@ -8095,11 +8095,27 @@ The caller assumes ownership of the returned SV with a reference count of 1.
 
 C<sv_strftime_ints> takes a bunch of integer parameters that together
 completely define a given time.  It calculates the S<C<struct tm>> to pass to
-libc strftime(), and calls that function.  Setting C<isdst> to 0 causes the
-date to be calculated as if there is no daylight savings time in effect; any
-other value causes the possibility of daylight savings time to be considered.
-A positive value is a hint to the function that daylight savings is likely to
-be in effect for the passed-in time.
+libc strftime(), and calls that function.
+
+The value of C<isdst> is used as follows:
+
+=over
+
+=item 0
+
+No daylight savings time is in effect
+
+=item E<gt>0
+
+Check if daylight savings time is in effect, and adjust the results
+accordingly.
+
+=item E<lt>0
+
+This value is reserved for internal use by the L<POSIX> module for backwards
+compatibility purposes.
+
+=back
 
 The caller assumes ownership of the returned SV with a reference count of 1.
 
@@ -8166,8 +8182,15 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
     const char * locale = "C";
 #endif
 
+    /* A negative 'isdst' triggers backwards compatibility mode for
+     * POSIX::strftime(), in which 0 is always passed to ints_to_tm() so that
+     * the possibility of daylight savings time is never considered,  But, a 1
+     * is eventually passed to libc strftime() so that it returns the results
+     * it always has for a non-zero 'isdst'.  See GH #22351 */
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, isdst);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year,
+                              MAX(0, isdst));
+    mytm.tm_isdst = MIN(1, abs(isdst));
     return sv_strftime_common(fmt, locale, &mytm);
 }
 
