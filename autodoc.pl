@@ -454,7 +454,8 @@ EOS
             # corresponding apidoc line elsewhere in the source.  Hence, we
             # can say that this macro is documented.  (A warning will be
             # raised if the mate line is missing.)
-            add_defn($name, $file, $line_num, $flags . "d", $ret_type, \@args);
+            check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
+                                     $ret_type, \@args);
         }
     }
     elsif ($existing_proto) {
@@ -1850,19 +1851,19 @@ sub output($) {
     read_only_bottom_close_and_rename($fh);
 }
 
-sub add_defn  {
-    my ($func, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
+sub check_and_add_proto_defn {
+    my ($element, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
 
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
-    $elements{$func} = {
-                        flags => $flags,
-                        ret_type => $ret_type,
-                        args => \@munged_args,
-                        file => $file,
-                        line_num => $line_num // 0,
-                       };
+    $elements{$element} = {
+                            flags => $flags,
+                            ret_type => $ret_type,
+                            args => \@munged_args,
+                            file => $file,
+                            line_num => $line_num // 0,
+                          };
 }
 
 foreach (@{(setup_embed())[0]}) {
@@ -1871,9 +1872,9 @@ foreach (@{(setup_embed())[0]}) {
     my $file = $_->{source};
     my ($flags, $ret_type, $func, $args) =
                                  @{$embed}{qw(flags return_type name args)};
-    add_defn($func, $file,
-             undef,     # Unknown line number in embed.fnc
-             $flags, $ret_type, $args);
+    check_and_add_proto_defn($func, $file,
+                             undef,     # Unknown line number in embed.fnc
+                             $flags, $ret_type, $args);
 }
 
 # glob() picks up docs from extra .c or .h files that may be in unclean
