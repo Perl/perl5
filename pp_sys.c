@@ -3950,23 +3950,17 @@ PP_wrapped(pp_chdir, MAXARG, 0)
     if (gv) {
 #ifdef HAS_FCHDIR
         IO* const io = GvIO(gv);
-        if (io) {
-            if (IoDIRP(io)) {
-                PUSHs(boolSV(fchdir(my_dirfd(IoDIRP(io))) >= 0));
-            } else if (IoIFP(io)) {
-                int fd = PerlIO_fileno(IoIFP(io));
-                if (fd < 0) {
-                    goto nuts;
-                }
-                PUSHs(boolSV(fchdir(fd) >= 0));
-            }
-            else {
-                goto nuts;
-            }
-        } else {
-            goto nuts;
+        const int fd =
+            !io        ? -1 :
+            IoDIRP(io) ? my_dirfd(IoDIRP(io)) :
+            IoIFP(io)  ? PerlIO_fileno(IoIFP(io)) :
+                         -1;
+        if (fd < 0) {
+            report_evil_fh(gv);
+            SETERRNO(EBADF,RMS_IFI);
+            RETPUSHNO;
         }
-
+        PUSHs(boolSV(fchdir(fd) >= 0));
 #else
         DIE(aTHX_ PL_no_func, "fchdir");
 #endif
@@ -3979,13 +3973,6 @@ PP_wrapped(pp_chdir, MAXARG, 0)
     hv_delete(GvHVn(PL_envgv),"DEFAULT",7,G_DISCARD);
 #endif
     RETURN;
-
-#ifdef HAS_FCHDIR
- nuts:
-    report_evil_fh(gv);
-    SETERRNO(EBADF,RMS_IFI);
-    RETPUSHNO;
-#endif
 }
 
 
