@@ -3588,7 +3588,7 @@ difftime(time1, time2)
 #     sv_setpv(TARG, ...) could be used rather than
 #     ST(0) = sv_2mortal(newSVpv(...))
 void
-strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
+strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = 0)
 	SV *		fmt
 	int		sec
 	int		min
@@ -3603,9 +3603,11 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	{
             PERL_UNUSED_ARG(wday);
             PERL_UNUSED_ARG(yday);
-            PERL_UNUSED_ARG(isdst);
 
-            SV *sv = sv_strftime_ints(fmt, sec, min, hour, mday, mon, year, 0);
+            /* -isdst triggers backwards compatibility mode for non-zero
+             * 'isdst' */
+            SV *sv = sv_strftime_ints(fmt, sec, min, hour, mday, mon, year,
+                                           -abs(isdst));
 	    if (sv) {
                 sv = sv_2mortal(sv);
             }
