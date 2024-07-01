@@ -421,8 +421,8 @@ sub check_api_doc_line ($$$) {
                          && (    length $6 > 0
                              || (   $type == APIDOC_ITEM
                                  && substr($7, 0, 1) eq '|'));
-    my $proto_in_file = $7;
-    my $proto = $proto_in_file;
+    my $proto_as_written = $7;
+    my $proto = $proto_as_written;
     $proto = "||$proto" if $proto !~ /\|/;
     my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
 
@@ -439,7 +439,7 @@ EOS
     die "Only [$display_flags] allowed in apidoc_item:\n$input"
                     if $type == APIDOC_ITEM && $flags =~ /[^$display_flags]/;
 
-    return ($name, $flags, $ret_type, $type, $proto_in_file, @args)
+    return ($name, $flags, $ret_type, $type, $proto_as_written, @args)
                                                 if $type == ILLEGAL_APIDOC;
 
     # If the entry is also in embed.fnc, it should be defined
@@ -463,7 +463,7 @@ EOS
                                     unless $existing_proto->{'flags'} =~ /d/;
 
         warn "embed.fnc entry overrides redundant information in"
-           . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
+           . " '$proto_as_written' in $file" if $flags || $ret_type || @args;
 
         $flags = $existing_proto->{flags};
         $ret_type = $existing_proto->{ret_type};
@@ -474,7 +474,7 @@ EOS
         delete $elements{$name};
     }
 
-    return ($name, $flags, $ret_type, $type, $proto_in_file, @args);
+    return ($name, $flags, $ret_type, $type, $proto_as_written, @args);
 }
 
 # The section that is in effect at the beginning of the given file.  If not
@@ -547,7 +547,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # Either it is for an API element, or heading text which we expect
         # will be used for elements later in the file
 
-        my ($text, $element_name, $ret_type, $line_type, $proto_in_file);
+        my ($text, $element_name, $ret_type, $line_type, $proto_as_written);
         my (@args, @items);
         my $group_is_deferred = 0;
         my $flags = "";
@@ -571,9 +571,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
               . " '$input'";
         }
         else {
-            ($element_name, $flags, $ret_type, $line_type,
-             $proto_in_file, @args) = check_api_doc_line($file, $line_num,
-                                                         $input);
+            ($element_name, $flags, $ret_type, $line_type, $proto_as_written,
+             @args) = check_api_doc_line($file, $line_num, $input);
             next if $line_type == APIDOC_DEFN;
             if ($ret_type) {
             }
@@ -600,7 +599,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                            if $flags =~ /u/ && $flags !~ /[my]/;
-            warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
+            warn ("'$element_name' not \\w+ in '$proto_as_written' in $file")
                    if $flags !~ /N/
                    && $element_name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
 
