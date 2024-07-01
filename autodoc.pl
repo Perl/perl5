@@ -69,6 +69,11 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 use strict;
 use warnings;
 
+my $known_flags_re = qr/[AabCDdEeFfGhiIMmNnTOoPpRrSsUuvWXxy;#]/;
+
+# Only certain flags, dealing with display, are acceptable for apidoc_item
+my $item_flags_re = qr/[fFnDopTx;]/;
+
 use constant {
               ILLEGAL_APIDOC     =>  0,  # Must be 0 so evaluates to 'false'
               APIDOC_DEFN        =>  1,
@@ -396,8 +401,6 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (\s*)            # $6
                       (.*?)            # $7
                       \s* \n /x;
-# Only certain flags, dealing with display, are acceptable for apidoc_item
-my $display_flags = "fFnDopTx;";
 
 sub check_api_doc_line ($$$) {
     my ($file, $line_num, $input) = @_;
@@ -436,8 +439,9 @@ Expected:
 (or 'apidoc_item' or any of the above instead with 'apidoc_defn')
 EOS
 
-    die "Only [$display_flags] allowed in apidoc_item:\n$input"
-                    if $type == APIDOC_ITEM && $flags =~ /[^$display_flags]/;
+    my $non_item_flags = $flags =~ s/$item_flags_re//gr;
+    die "[$non_item_flags] illegal in apidoc_item:\n$input"
+                                    if $type == APIDOC_ITEM && $non_item_flags;
 
     return ($name, $flags, $ret_type, $type, $proto_as_written, @args)
                                                 if $type == ILLEGAL_APIDOC;
@@ -594,9 +598,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $missing{$element_name} = $file;
             }
 
-            die "flag '$1' is not legal (for function $element_name"
-              . " (from $file))"
-                  if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSsUuvWXxy;#] ) /x;
+            my $illegal_flags = $flags =~ s/$known_flags_re//gr;
+            die "flags [$illegal_flags] not legal (for function"
+              . " $element_name (from $file))"
+                                                if $illegal_flags;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                            if $flags =~ /u/ && $flags !~ /[my]/;
@@ -684,7 +689,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Use the base entry flags if none for this item; otherwise add in
             # any non-display base entry flags.
             if ($item_flags) {
-                $item_flags .= $flags =~ s/[$display_flags]//rg;
+                $item_flags .= $flags =~ s/$item_flags_re//rg;
             }
             else {
                 $item_flags = $flags;
