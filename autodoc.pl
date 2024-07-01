@@ -498,13 +498,26 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 
-    # Count lines easier
-    my $get_next_line = sub { $line_num++; return <$fh> };
+    # Count lines easier and handle apidoc continuation lines
+    my $get_next_line = sub {
+            my $contents = <$fh>;
+            return unless defined $contents;
+
+            $line_num++;
+            while ($contents =~ s/ ^ ( =for \ apidoc .*) \s* \\ \n /$1/x) {
+                my $next = <$fh>;
+                last unless defined $next;
+                chomp $contents;
+
+                $line_num++;
+                $contents .= $next;
+            }
+
+            return $contents;
+    };
 
     # Read the file
-    while ($in = $get_next_line->()) {
-        last unless defined $in;
-
+    while (defined ($in = $get_next_line->())) {
         next unless (    $in =~ / ^ =for [ ]+ apidoc /x
                                       # =head1 lines only have effect in C files
                      || ($file_is_C && $in =~ /^=head1/));
