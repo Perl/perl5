@@ -174,8 +174,6 @@ sub clean_env {
 }
 
 END {
-    no warnings 'uninitialized';
-
     # Restore the environment for VMS (and doesn't hurt for anyone else)
     @ENV{@magic_envs} = @Saved_Env{@magic_envs};
 
@@ -186,9 +184,6 @@ END {
 
 
 foreach my $key (@magic_envs) {
-    # We're going to be using undefs a lot here.
-    no warnings 'uninitialized';
-
     clean_env;
     $ENV{$key} = catdir $Cwd, 'op';
 
