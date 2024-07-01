@@ -388,7 +388,11 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+C<chdir> now returns real booleans (as its documentation describes), not
+integers. This means the result of a failed C<chdir> now stringifies to C<''>,
+not C<'0'>.
+
+[GH #22365]
 
 =back
 
