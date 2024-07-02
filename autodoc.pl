@@ -442,8 +442,9 @@ EOS
     return ($name, $flags, $ret_type, $type, $proto_in_file, @args);
 }
 
-sub embed_override($) {
-    my ($element_name) = shift;
+sub embed_override($$$$$@) {
+    my ($element_name, $caller_file, $caller_proto, $caller_flags,
+        $caller_ret_type, @caller_args) = @_;
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
@@ -454,6 +455,10 @@ sub embed_override($) {
     my $flags = $embed_docref->{'flags'};
     warn "embed.fnc entry '$element_name' missing 'd' flag"
                                             unless $flags =~ /d/;
+
+    warn "embed.fnc entry overrides redundant information in"
+       . " '$caller_proto' in $caller_file"
+                if $caller_flags || $caller_ret_type || @caller_args;
 
     return ($flags, $embed_docref->{'ret_type'}, $embed_docref->{args}->@*);
 }
@@ -574,11 +579,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Here, is plain apidoc.  Override this line with any info in
             # embed.fnc
             my ($embed_flags, $embed_ret_type, @embed_args)
-                                                = embed_override($element_name);
+                    = embed_override($element_name, $file, $proto_in_file,
+                                     $flags, $ret_type, @args);
             if ($embed_ret_type) {
-                warn "embed.fnc entry overrides redundant information in"
-                    . " '$proto_in_file' in $file"
-                                               if $flags || $ret_type || @args;
                 $flags = $embed_flags;
                 $ret_type = $embed_ret_type;
                 @args = @embed_args;
@@ -688,12 +691,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
                                                             if $text =~ /\S/;
             # Override this line with any info in embed.fnc
             my ($embed_flags, $embed_ret_type, @embed_args)
-                                                = embed_override($item_name);
+                = embed_override($item_name, $file, $item_proto, $item_flags,
+                                 $item_ret_type, @item_args);
             if ($embed_ret_type) {
-                warn "embed.fnc entry overrides redundant information in"
-                    . " '$item_proto' in $file"
-                                if $item_flags || $item_ret_type || @item_args;
-
                 $item_flags = $embed_flags;
                 $item_ret_type = $embed_ret_type;
                 @item_args = @embed_args;
