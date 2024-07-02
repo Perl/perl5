@@ -23,6 +23,6 @@ https://metacpan.org/release/[AUTHOR]/perl-5.[VERSION.SUBVERSION]/view/pod/perld
 [ACKNOWLEDGEMENTS SECTION FROM PERLDELTA]
 
 We expect to release version 5.[NEXT BLEAD VERSION.SUBVERSION] on [FUTURE DATE].
-The next major stable release of Perl should appear in the first half of 2024.
+The next major stable release of Perl should appear in the first half of 2025.
 
 [YOUR SALUTATION HERE]
