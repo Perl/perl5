@@ -454,9 +454,9 @@ EOS
     warn "embed.fnc entry '$name' missing 'd' flag"
                                             unless $embed_flags =~ /d/;
 
-    warn "embed.fnc entry overrides redundant information in"
-       . " '$proto_in_file' in $file"
-                                        if $flags || $ret_type || @args;
+        warn "embed.fnc entry overrides redundant information in"
+           . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
+
 
     return ($name, $embed_flags, $existing_proto->{'ret_type'},
             $type, $proto_in_file, $existing_proto->{args}->@*);
