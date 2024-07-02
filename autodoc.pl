@@ -450,7 +450,8 @@ sub embed_override($$$$$@) {
     # completely there, but not here
     my $embed_docref = delete $elements{$element_name};
 
-    return unless $embed_docref and %$embed_docref;
+    return ($caller_flags, $caller_ret_type, @caller_args)
+                                    unless $embed_docref and %$embed_docref;
 
     my $flags = $embed_docref->{'flags'};
     warn "embed.fnc entry '$element_name' missing 'd' flag"
@@ -578,13 +579,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             # Here, is plain apidoc.  Override this line with any info in
             # embed.fnc
-            my ($embed_flags, $embed_ret_type, @embed_args)
+            ($flags, $ret_type, @args)
                     = embed_override($element_name, $file, $proto_in_file,
                                      $flags, $ret_type, @args);
-            if ($embed_ret_type) {
-                $flags = $embed_flags;
-                $ret_type = $embed_ret_type;
-                @args = @embed_args;
+            if ($ret_type) {
             }
             elsif ($flags =~ /[my]/)  {
 
@@ -690,14 +688,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
               . " '$element_name' in $file"
                                                             if $text =~ /\S/;
             # Override this line with any info in embed.fnc
-            my ($embed_flags, $embed_ret_type, @embed_args)
+            ($item_flags, $item_ret_type, @item_args)
                 = embed_override($item_name, $file, $item_proto, $item_flags,
-                                 $item_ret_type, @item_args);
-            if ($embed_ret_type) {
-                $item_flags = $embed_flags;
-                $item_ret_type = $embed_ret_type;
-                @item_args = @embed_args;
-            }
+                        $item_ret_type, @item_args);
 
             # Use the base entry flags if none for this item; otherwise add in
             # any non-display base entry flags.
