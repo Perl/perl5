@@ -443,25 +443,24 @@ EOS
 }
 
 sub embed_override($$$$$@) {
-    my ($element_name, $caller_file, $caller_proto, $caller_flags,
-        $caller_ret_type, @caller_args) = @_;
+    my ($name, $file, $proto_in_file, $flags, $ret_type, @args) = @_;
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
-    my $embed_docref = delete $elements{$element_name};
+    my $existing_proto = delete $elements{$name};
 
-    return ($caller_flags, $caller_ret_type, @caller_args)
-                                    unless $embed_docref and %$embed_docref;
+    return ($flags, $ret_type, @args)
+                                 unless $existing_proto and %$existing_proto;
 
-    my $flags = $embed_docref->{'flags'};
-    warn "embed.fnc entry '$element_name' missing 'd' flag"
-                                            unless $flags =~ /d/;
+    my $embed_flags = $existing_proto->{'flags'};
+    warn "embed.fnc entry '$name' missing 'd' flag"
+                                            unless $embed_flags =~ /d/;
 
     warn "embed.fnc entry overrides redundant information in"
-       . " '$caller_proto' in $caller_file"
-                if $caller_flags || $caller_ret_type || @caller_args;
+       . " '$proto_in_file' in $file"
+                                        if $flags || $ret_type || @args;
 
-    return ($flags, $embed_docref->{'ret_type'}, $embed_docref->{args}->@*);
+    return ($embed_flags, $existing_proto->{'ret_type'}, $existing_proto->{args}->@*);
 }
 
 # The section that is in effect at the beginning of the given file.  If not
