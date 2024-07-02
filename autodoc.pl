@@ -440,13 +440,24 @@ EOS
                     if $type == APIDOC_ITEM && $flags =~ /[^$display_flags]/;
 
     return ($name, $flags, $ret_type, $type, $proto_in_file, @args)
-                                                if $type == APIDOC_DEFN
-                                                || $type == ILLEGAL_APIDOC;
+                                                if $type == ILLEGAL_APIDOC;
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
-    my $existing_proto = delete $elements{$name};
-    if ($existing_proto) {
+    my $existing_proto = $elements{$name};
+    if ($type == APIDOC_DEFN) {
+        if ($existing_proto) {
+            warn "Using embed.fnc entry for $name";
+        }
+        else {
+            # We expect this line to furnish the information to a
+            # corresponding apidoc line elsewhere in the source.  Hence, we
+            # can say that this macro is documented.  (A warning will be
+            # raised if the mate line is missing.)
+            add_defn($name, $file, $line_num, $flags . "d", $ret_type, \@args);
+        }
+    }
+    elsif ($existing_proto) {
         # This line indicates we're about to document $name
         warn "embed.fnc entry '$name' missing 'd' flag"
                                     unless $existing_proto->{'flags'} =~ /d/;
@@ -457,6 +468,10 @@ EOS
         $flags = $existing_proto->{flags};
         $ret_type = $existing_proto->{ret_type};
         @args = $existing_proto->{args}->@*;
+
+        # Deleting the line from the hash indicates it will no longer be
+        # an orphan
+        delete $elements{$name};
     }
 
     return ($name, $flags, $ret_type, $type, $proto_in_file, @args);
@@ -557,23 +572,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
         }
         else {
             ($element_name, $flags, $ret_type, $line_type,
-             $proto_in_file, @args) = check_api_doc_line($file, $., $in);
-
-            if ($line_type == APIDOC_DEFN) {
-                if (defined $elements{$element_name}) {
-                    warn "Using embed.fnc entry for $element_name";
-                }
-                else {
-                    # We expect this line to furnish the information to a
-                    # corresponding apidoc line elsewhere in the source.
-                    # Hence, we can say that this macro is documented.  (A
-                    # warning will be raised if the mate line is missing.)
-                    add_defn($element_name, $file, $line_num, $flags . "d",
-                             $ret_type, \@args);
-                }
-                next;
-            }
-
+             $proto_in_file, @args) = check_api_doc_line($file, $line_num, $in);
+            next if $line_type == APIDOC_DEFN;
             if ($ret_type) {
             }
             elsif ($flags =~ /[my]/)  {
