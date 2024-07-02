@@ -2036,12 +2036,11 @@ sub docout ($$$) { # output the docs for one function group
                                      - $usage_max_width;
 
                     # Outdent if necessary
-                    if ($excess_width > 0) {
-                        $hanging_indent -= $excess_width;
-                    }
-                    elsif (     $any_has_pTHX_
-                           &&   $element->{args}->@*
-                           && ! $element->{has_pTHX}) {
+                    $hanging_indent -= $excess_width if $excess_width > 0;
+
+                    if (     $any_has_pTHX_
+                        &&   $element->{args}->@*
+                        && ! $element->{has_pTHX}) {
 
                         # If this item has arguments but not a pTHX, but
                         # others do, indent the args for this one so that
@@ -2052,8 +2051,21 @@ sub docout ($$$) { # output the docs for one function group
                         #
                         #  void  Perl_deb     (pTHX_ const char *pat, ...)
                         #  void  deb_nocontext(      const char *pat, ...)
-                        $running_length += 6;
-                        push @usage, " " x 6;
+                        #
+                        # But, don't indent the full amount if any next lines
+                        # would begin before that amount.  That leaves
+                        # all lines indented to the same amount.  -1 to
+                        # account for the left parenthesis
+                        if ($running_length + 6 - 1 <= $hanging_indent) {
+                            push @usage, " " x 6;
+                            $running_length += 6;
+                        }
+                        elsif ($running_length < $hanging_indent) {
+                            push @usage, (" " x (  1
+                                                 + $hanging_indent
+                                                 - $running_length));
+                            $running_length = $hanging_indent;
+                        }
                     }
 
                     # Go through the argument list.  Calculate how much space
