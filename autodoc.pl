@@ -446,20 +446,20 @@ EOS
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
     my $existing_proto = delete $elements{$name};
-
-    return ($name, $flags, $ret_type, $type, $proto_in_file, @args)
-                                 unless $existing_proto and %$existing_proto;
-
-    my $embed_flags = $existing_proto->{'flags'};
-    warn "embed.fnc entry '$name' missing 'd' flag"
-                                            unless $embed_flags =~ /d/;
+    if ($existing_proto) {
+        # This line indicates we're about to document $name
+        warn "embed.fnc entry '$name' missing 'd' flag"
+                                    unless $existing_proto->{'flags'} =~ /d/;
 
         warn "embed.fnc entry overrides redundant information in"
            . " '$proto_in_file' in $file" if $flags || $ret_type || @args;
 
+        $flags = $existing_proto->{flags};
+        $ret_type = $existing_proto->{ret_type};
+        @args = $existing_proto->{args}->@*;
+    }
 
-    return ($name, $embed_flags, $existing_proto->{'ret_type'},
-            $type, $proto_in_file, $existing_proto->{args}->@*);
+    return ($name, $flags, $ret_type, $type, $proto_in_file, @args);
 }
 
 # The section that is in effect at the beginning of the given file.  If not
