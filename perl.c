@@ -3040,6 +3040,16 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
 #else
                 0;
 #endif
+    /* For a reference counted stack the arguments are cleaned up
+     * when the stack is popped.
+     */
+    if (!is_rc && (flags & G_DISCARD) != 0) {
+        ENTER;
+        SAVETMPS;
+        /* leave G_DISCARD on to clean up any return values
+         * from the stack in call_sv().
+         */
+    }
     PUSHMARK(PL_stack_sp);
     while (*argv) {
         SV *newsv = newSVpv(*argv,0);
@@ -3049,7 +3059,15 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
             sv_2mortal(newsv);
         argv++;
     }
-    return call_pv(sub_name, flags);
+
+    SSize_t count = call_pv(sub_name, flags);
+
+    if (!is_rc && (flags & G_DISCARD) != 0) {
+        FREETMPS;
+        LEAVE;
+    }
+
+    return count;
 }
 
 /*
