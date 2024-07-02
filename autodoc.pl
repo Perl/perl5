@@ -439,17 +439,15 @@ EOS
     die "Only [$display_flags] allowed in apidoc_item:\n$in"
                     if $type == APIDOC_ITEM && $flags =~ /[^$display_flags]/;
 
-    return ($name, $flags, $ret_type, $type, $proto_in_file, @args);
-}
-
-sub embed_override($$$$$@) {
-    my ($name, $file, $proto_in_file, $flags, $ret_type, @args) = @_;
+    return ($name, $flags, $ret_type, $type, $proto_in_file, @args)
+                                                if $type == APIDOC_DEFN
+                                                || $type == ILLEGAL_APIDOC;
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
     my $existing_proto = delete $elements{$name};
 
-    return ($flags, $ret_type, @args)
+    return ($name, $flags, $ret_type, $type, $proto_in_file, @args)
                                  unless $existing_proto and %$existing_proto;
 
     my $embed_flags = $existing_proto->{'flags'};
@@ -460,7 +458,8 @@ sub embed_override($$$$$@) {
        . " '$proto_in_file' in $file"
                                         if $flags || $ret_type || @args;
 
-    return ($embed_flags, $existing_proto->{'ret_type'}, $existing_proto->{args}->@*);
+    return ($name, $embed_flags, $existing_proto->{'ret_type'},
+            $type, $proto_in_file, $existing_proto->{args}->@*);
 }
 
 # The section that is in effect at the beginning of the given file.  If not
@@ -560,16 +559,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             ($element_name, $flags, $ret_type, $line_type,
              $proto_in_file, @args) = check_api_doc_line($file, $., $in);
 
-            if ($line_type != APIDOC_DEFN) {
-
-            # Here, is plain apidoc.  Override this line with any info in
-            # embed.fnc
-            ($flags, $ret_type, @args)
-                    = embed_override($element_name, $file, $proto_in_file,
-                                     $flags, $ret_type, @args);
-
-            }
-            else {  # Handle apidoc_defn line
+            if ($line_type == APIDOC_DEFN) {
                 if (defined $elements{$element_name}) {
                     warn "Using embed.fnc entry for $element_name";
                 }
@@ -680,11 +670,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
                                                               $in);
 
             last unless $line_type == APIDOC_ITEM;
-
-            # Override this line with any info in embed.fnc
-            ($item_flags, $item_ret_type, @item_args)
-                = embed_override($item_name, $file, $item_proto, $item_flags,
-                        $item_ret_type, @item_args);
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
