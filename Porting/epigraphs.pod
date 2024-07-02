@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.1 - Charles F. Kettering
+
+L<Annnounched on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2024/07/msg268328.html>
+
+  We find that in research a certain amount of intelligent ignorance
+  is essential to progress; for, if you know too much, you won't try
+  the thing.
+
 =head2 v5.40.0 - Neil Gaiman, Coraline
 
 L<Annnounched on 2024-06-09 by Graham Knop|https://www.nntp.perl.org/group/perl.perl5.porters/2024/06/msg268252.html>
