@@ -400,9 +400,9 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
 my $display_flags = "fFnDopTx;";
 
 sub check_api_doc_line ($$$) {
-    my ($file, $line_num, $in) = @_;
+    my ($file, $line_num, $input) = @_;
 
-    return unless $in =~ $apidoc_re;
+    return unless $input =~ $apidoc_re;
 
     my $type = (! defined $5)
                ? PLAIN_APIDOC
@@ -428,7 +428,7 @@ sub check_api_doc_line ($$$) {
 
     $name && $is_in_proper_form or die <<EOS;
 Bad apidoc at $file line $line_num:
-  $in
+  $input
 Expected:
   =for apidoc flags|returntype|name|arg|arg|...
   =for apidoc flags|returntype|name
@@ -436,7 +436,7 @@ Expected:
 (or 'apidoc_item' or any of the above instead with 'apidoc_defn')
 EOS
 
-    die "Only [$display_flags] allowed in apidoc_item:\n$in"
+    die "Only [$display_flags] allowed in apidoc_item:\n$input"
                     if $type == APIDOC_ITEM && $flags =~ /[^$display_flags]/;
 
     return ($name, $flags, $ret_type, $type, $proto_in_file, @args)
@@ -526,7 +526,7 @@ sub output_file ($) {
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($in, $line_num, $header, $section);
+    my($input, $line_num, $header, $section);
 
     $section = $initial_file_section{$file}
                                     if defined $initial_file_section{$file};
@@ -537,12 +537,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
     my $get_next_line = sub { $line_num++; return <$fh> };
 
     # Read the file
-    while ($in = $get_next_line->()) {
-        last unless defined $in;
-
-        next unless (    $in =~ / ^ =for [ ]+ apidoc /x
+    while ($input = $get_next_line->()) {
+        last unless defined $input;
+        next unless (    $input =~ / ^ =for [ ]+ apidoc /x
                                       # =head1 lines only have effect in C files
-                     || ($file_is_C && $in =~ /^=head1/));
+                     || ($file_is_C && $input =~ /^=head1/));
 
         # Here, the line introduces a portion of the input that we care about.
         # Either it is for an API element, or heading text which we expect
@@ -554,7 +553,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         my $flags = "";
 
         # If the line starts a new section ...
-        if ($in=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
+        if ($input=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
 
             $section = $1;
             if ($section =~ / ^ \$ /x) {
@@ -565,14 +564,16 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "Unknown section name '$section' in $file near line $line_num\n"
                                     unless defined $valid_sections{$section};
         }
-        elsif ($in !~ /^ =for [ ]+ ( apidoc (?: _defn)? ) \b /x) {
-            die "Unknown apidoc-type line '$in'"
-                                               unless $in=~ /^=for apidoc_item/;
-            die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
+        elsif ($input !~ /^ =for [ ]+ ( apidoc (?: _defn)? ) \b /x) {
+            die "Unknown apidoc-type line '$input'"
+                                            unless $input=~ /^=for apidoc_item/;
+            die "apidoc_item doesn't immediately follow an apidoc entry:"
+              . " '$input'";
         }
         else {
             ($element_name, $flags, $ret_type, $line_type,
-             $proto_in_file, @args) = check_api_doc_line($file, $line_num, $in);
+             $proto_in_file, @args) = check_api_doc_line($file, $line_num,
+                                                         $input);
             next if $line_type == APIDOC_DEFN;
             if ($ret_type) {
             }
@@ -643,32 +644,31 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # 4) =for apidoc... (except apidoc_item lines)
         $text = "";
         my $head_ender_num = ($file_is_C) ? 1 : "";
-        while (defined($in = $get_next_line->())) {
+        while (defined($input = $get_next_line->())) {
 
-            last if $in =~ /^=cut/x;
-            last if $in =~ /^=head$head_ender_num/;
+            last if $input =~ /^=cut/x;
+            last if $input =~ /^=head$head_ender_num/;
 
-            if ($file_is_C && $in =~ m: ^ \s* \* / $ :x) {
+            if ($file_is_C && $input =~ m: ^ \s* \* / $ :x) {
 
                 # End of comment line in C files is a fall-back terminator,
                 # but warn only if there actually is some accumulated text
-                warn "=cut missing? $file:$line_num:$in" if $text =~ /\S/;
+                warn "=cut missing? $file:$line_num:$input" if $text =~ /\S/;
                 last;
             }
 
-            if ($in !~ / ^ =for [ ]+ apidoc /x) {
-                $text .= $in;
+            if ($input !~ / ^ =for [ ]+ apidoc /x) {
+                $text .= $input;
                 next;
             }
 
             # Here, the line is an apidoc line.  All but apidoc_item terminate
             # the text being accumulated.
-            last if $in !~ / ^ =for [ ]+ apidoc_item /x;
+            last if $input !~ / ^ =for [ ]+ apidoc_item /x;
 
             my ($item_name, $item_flags, $item_ret_type, $line_type,
                 $item_proto, @item_args) = check_api_doc_line($file, $line_num,
-                                                              $in);
-
+                                                              $input);
             last unless $line_type == APIDOC_ITEM;
 
             # Here, is an apidoc_item_line; They can only come within apidoc
@@ -741,7 +741,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Override the text with just a link if the flags call for that
             if ($is_link_only) {
                 if ($file_is_C) {
-                    die "Can't currently handle link with items to it:\n$in"
+                    die "Can't currently handle link with items to it:\n$input"
                                                                 if @items > 1;
                     $docs{$where}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
@@ -778,7 +778,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             $valid_sections{$section}{header} .= "\n$text";
         }
 
-        # We already have the first line of what's to come in $in
+        # We already have the first line of what's to come in $input
         redo;
 
     } # End of loop through input
@@ -1883,8 +1883,8 @@ my @headers;
 my @non_headers;
 open my $fh, '<', 'MANIFEST'
     or die "Can't open MANIFEST: $!";
-while (my $line = <$fh>) {
-    next unless my ($file) = $line =~ /^(\S+\.(?:[ch]|pod))\t/;
+while (my $input = <$fh>) {
+    next unless my ($file) = $input =~ /^(\S+\.(?:[ch]|pod))\t/;
 
     # Don't pick up pods from these.
     next if $file =~ m! ^ ( cpan | dist | ext ) / !x
