@@ -5891,22 +5891,22 @@ Perl_sv_2uv(pTHX_ SV *sv);
         assert(sv)
 
 PERL_CALLCONV void
-Perl_sv_catpvn(pTHX_ SV *dsv, const char *sstr, STRLEN len);
+Perl_sv_catpvn(pTHX_ SV * const dsv, const char *sstr, STRLEN len);
 # define PERL_ARGS_ASSERT_SV_CATPVN             \
         assert(dsv); assert(sstr)
 
 PERL_CALLCONV void
-Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len);
+Perl_sv_catpvn_mg(pTHX_ SV * const dsv, const char *sstr, STRLEN len);
 # define PERL_ARGS_ASSERT_SV_CATPVN_MG          \
         assert(dsv); assert(sstr)
 
 PERL_CALLCONV void
-Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr);
+Perl_sv_catsv(pTHX_ SV * const dsv, SV * const sstr);
 # define PERL_ARGS_ASSERT_SV_CATSV              \
         assert(dsv)
 
 PERL_CALLCONV void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *sstr);
+Perl_sv_catsv_mg(pTHX_ SV * const dsv, SV * const sstr);
 # define PERL_ARGS_ASSERT_SV_CATSV_MG           \
         assert(dsv)
 

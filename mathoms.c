@@ -256,7 +256,7 @@ Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len)
  */
 
 void
-Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr)
+Perl_sv_catsv(pTHX_ SV *dsv, SV * const sstr)
 {
     PERL_ARGS_ASSERT_SV_CATSV;
 
@@ -264,7 +264,7 @@ Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr)
 }
 
 void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *sstr)
+Perl_sv_catsv_mg(pTHX_ SV *dsv, SV * const sstr)
 {
     PERL_ARGS_ASSERT_SV_CATSV_MG;
 
