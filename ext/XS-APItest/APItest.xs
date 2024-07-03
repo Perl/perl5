@@ -3147,6 +3147,17 @@ bool
 sv_setsv_cow_hashkey_notcore()
 
 void
+sv_grow(SV *sv, UV len)
+    CODE:
+        sv_force_normal(sv);
+        SvGROW(sv, len);
+
+void
+sv_force_normal(SV *sv)
+    CODE:
+        sv_force_normal(sv);
+
+void
 sv_set_deref(SV *sv, SV *sv2, int which)
     CODE:
     {

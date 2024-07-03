@@ -3534,7 +3534,9 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             else {
                 /* create new COW SV to share string */
                 RXp_MATCH_COPY_FREE(prog);
-                RXp_SAVED_COPY(prog) = sv_setsv_cow(RXp_SAVED_COPY(prog), sv);
+                /* sv_setsv_cow() might not COW for some reason */
+                if (!sv_setsv_cow(&RXp_SAVED_COPY(prog), sv))
+                    goto didnt_cow;
             }
             RXp_SUBBEG(prog) = (char *)SvPVX_const(RXp_SAVED_COPY(prog));
             assert (SvPOKp(RXp_SAVED_COPY(prog)));
@@ -3544,6 +3546,9 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         } else
 #endif
         {
+#ifdef PERL_ANY_COW
+        didnt_cow: ;
+#endif
             SSize_t min = 0;
             SSize_t max = strend - strbeg;
             SSize_t sublen;

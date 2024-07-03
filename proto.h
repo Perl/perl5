@@ -6045,10 +6045,10 @@ Perl_sv_collxfrm(pTHX_ SV * const sv, STRLEN * const nxp);
 # endif
 #endif /* !defined(NO_MATHOMS) */
 #if defined(PERL_ANY_COW)
-PERL_CALLCONV SV *
-Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv);
+PERL_CALLCONV bool
+Perl_sv_setsv_cow(pTHX_ SV **pdsv, SV *ssv);
 # define PERL_ARGS_ASSERT_SV_SETSV_COW          \
-        assert(ssv)
+        assert(pdsv); assert(ssv)
 
 #endif
 #if defined(PERL_CORE)
