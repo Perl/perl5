@@ -1348,17 +1348,10 @@ If we have unlinkat(), renameat(), fchmodat(), dirfd() we also keep:
    6: the DIR * for the current directory when we open the file, stored as an IV
  */
 
-static const MGVTBL argvout_vtbl =
-    {
-        NULL, /* svt_get */
-        NULL, /* svt_set */
-        NULL, /* svt_len */
-        NULL, /* svt_clear */
-        S_argvout_free, /* svt_free */
-        NULL, /* svt_copy */
-        S_argvout_dup,  /* svt_dup */
-        NULL /* svt_local */
-    };
+static const MGVTBL argvout_vtbl = {
+    .svt_free = S_argvout_free,
+    .svt_dup  = S_argvout_dup,
+};
 
 static bool
 S_is_fork_open(const char *name) {

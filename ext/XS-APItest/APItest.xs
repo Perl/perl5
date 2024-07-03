@@ -174,8 +174,8 @@ S_myset_set_dies(pTHX_ SV* sv, MAGIC* mg)
 
 
 static MGVTBL vtbl_foo, vtbl_bar;
-static MGVTBL vtbl_myset = { 0, S_myset_set, 0, 0, 0, 0, 0, 0 };
-static MGVTBL vtbl_myset_dies = { 0, S_myset_set_dies, 0, 0, 0, 0, 0, 0 };
+static MGVTBL vtbl_myset = { .svt_set = S_myset_set };
+static MGVTBL vtbl_myset_dies = { .svt_set = S_myset_set_dies };
 
 static int
 S_mycopy_copy(pTHX_ SV *sv, MAGIC* mg, SV *nsv, const char *name, I32 namlen) {
@@ -192,7 +192,7 @@ S_mycopy_copy(pTHX_ SV *sv, MAGIC* mg, SV *nsv, const char *name, I32 namlen) {
     return 0;
 }
 
-STATIC MGVTBL vtbl_mycopy = { 0, 0, 0, 0, 0, S_mycopy_copy, 0, 0 };
+STATIC MGVTBL vtbl_mycopy = { .svt_copy = S_mycopy_copy };
 
 /* indirect functions to test the [pa]MY_CXT macros */
 

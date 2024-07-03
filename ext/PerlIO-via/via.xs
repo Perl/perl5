@@ -38,7 +38,7 @@ typedef struct
  CV *UTF8;
 } PerlIOVia;
 
-static const MGVTBL PerlIOVia_tag = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static const MGVTBL PerlIOVia_tag = {0};
 
 #define MYMethod(x) #x,&s->x
 
