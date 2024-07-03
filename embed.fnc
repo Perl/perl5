@@ -3071,7 +3071,7 @@ Adp	|void	|sv_catpv	|NN SV * const dsv			\
 Adfpv	|void	|sv_catpvf	|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
-Adp	|void	|sv_catpv_flags |NN SV *dsv				\
+Adp	|void	|sv_catpv_flags |NN SV * const dsv			\
 				|NN const char *sstr			\
 				|const I32 flags
 Adfpv	|void	|sv_catpvf_mg	|NN SV * const sv			\

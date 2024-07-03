@@ -4380,7 +4380,7 @@ Perl_sv_catpv(pTHX_ SV * const dsv, const char *sstr);
         assert(dsv)
 
 PERL_CALLCONV void
-Perl_sv_catpv_flags(pTHX_ SV *dsv, const char *sstr, const I32 flags);
+Perl_sv_catpv_flags(pTHX_ SV * const dsv, const char *sstr, const I32 flags);
 #define PERL_ARGS_ASSERT_SV_CATPV_FLAGS         \
         assert(dsv); assert(sstr)
 
