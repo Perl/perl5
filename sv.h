@@ -2207,6 +2207,14 @@ immediately written again.
 #define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
 #define sv_utf8_downgrade(sv, fail_ok) sv_utf8_downgrade_flags(sv, fail_ok, SV_GMAGIC)
 #define sv_utf8_downgrade_nomg(sv, fail_ok) sv_utf8_downgrade_flags(sv, fail_ok, 0)
+/*
+=for apidoc_defn Am|void|sv_catpvn_nomg|NN SV * const dsv               \
+                                       |NULLOK const char * sstr        \
+                                       |const STRLEN len
+=for apidoc_defn Am|void|sv_catpv_nomg|NN SV * const dsv                \
+                                      |NULLOK const char * sstr
+=cut
+*/
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
 #define sv_catpv_nomg(dsv, sstr) sv_catpv_flags(dsv, sstr, 0)
 #define sv_setsv(dsv, ssv) \
@@ -2262,6 +2270,14 @@ immediately written again.
             sv_utf8_upgrade(nsv);			\
             sv_catsv_nomg(dsv, nsv);			\
         } STMT_END
+
+/*
+=for apidoc_defn Adm|void|sv_catpvn_nomg_maybeutf8|NN SV * const dsv    \
+                                                  |NN const char *sstr  \
+                                                  |const STRLEN len     \
+                                                  |const I32 flags
+=cut
+*/
 #define sv_catpvn_nomg_maybeutf8(dsv, sstr, len, is_utf8) \
         sv_catpvn_flags(dsv, sstr, len, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
 

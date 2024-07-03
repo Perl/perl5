@@ -389,22 +389,6 @@ a string/length pair.
 Like C<newSVpvn_share>, but takes a literal string instead of
 a string/length pair and omits the hash parameter.
 
-=for apidoc Am|void|sv_catpvs_flags|SV* sv|"literal string"|I32 flags
-Like C<sv_catpvn_flags>, but takes a literal string instead
-of a string/length pair.
-
-=for apidoc Am|void|sv_catpvs_nomg|SV* sv|"literal string"
-Like C<sv_catpvn_nomg>, but takes a literal string instead of
-a string/length pair.
-
-=for apidoc Am|void|sv_catpvs|SV* sv|"literal string"
-Like C<sv_catpvn>, but takes a literal string instead of a
-string/length pair.
-
-=for apidoc Am|void|sv_catpvs_mg|SV* sv|"literal string"
-Like C<sv_catpvn_mg>, but takes a literal string instead of a
-string/length pair.
-
 =for apidoc Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
@@ -435,16 +419,24 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define newSVpvs_flags(str,flags)	\
     Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN(str), flags)
 #define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
-#define sv_catpvs_flags(sv, str, flags) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), flags)
-#define sv_catpvs_nomg(sv, str) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), 0)
-#define sv_catpvs(sv, str) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC)
-#define sv_catpvs_mg(sv, str) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC|SV_SMAGIC)
-#define sv_setpvs(sv, str) Perl_sv_setpvn(aTHX_ sv, STR_WITH_LEN(str))
-#define sv_setpvs_mg(sv, str) Perl_sv_setpvn_mg(aTHX_ sv, STR_WITH_LEN(str))
+
+/*
+=for apidoc_defn Am|void|sv_catpvs_flags|SV * const dsv|"literal string"|I32 flags
+=for apidoc_defn Am|void|sv_catpvs_nomg|SV * const dsv|"literal string"
+=for apidoc_defn Am|void|sv_catpvs|SV * const dsv|"literal string"
+=for apidoc_defn Am|void|sv_catpvs_mg|SV * const dsv|"literal string"
+=cut
+*/
+#define sv_catpvs_flags(dsv, str, flags) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), flags)
+#define sv_catpvs_nomg(dsv, str) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), 0)
+#define sv_catpvs(dsv, str) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), SV_GMAGIC)
+#define sv_catpvs_mg(dsv, str) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), SV_GMAGIC|SV_SMAGIC)
+#define sv_setpvs(dsv, str) Perl_sv_setpvn(aTHX_ dsv, STR_WITH_LEN(str))
+#define sv_setpvs_mg(dsv, str) Perl_sv_setpvn_mg(aTHX_ dsv, STR_WITH_LEN(str))
 #define sv_setref_pvs(rv, classname, str) \
     Perl_sv_setref_pvn(aTHX_ rv, classname, STR_WITH_LEN(str))
 
