@@ -121,6 +121,23 @@ S_maybe_protect_ro(pTHX_ struct perl_memory_debug_header *header)
 # endif
 #endif
 
+/* Sanity check: Format strings must not be empty */
+STATIC_ASSERT_DECL(sizeof I32df > 1);
+STATIC_ASSERT_DECL(sizeof U32of > 1);
+STATIC_ASSERT_DECL(sizeof U32uf > 1);
+STATIC_ASSERT_DECL(sizeof U32xf > 1);
+STATIC_ASSERT_DECL(sizeof U32Xf > 1);
+STATIC_ASSERT_DECL(sizeof IVdf > 1);
+STATIC_ASSERT_DECL(sizeof UVuf > 1);
+STATIC_ASSERT_DECL(sizeof UVof > 1);
+STATIC_ASSERT_DECL(sizeof UVxf > 1);
+STATIC_ASSERT_DECL(sizeof UVXf > 1);
+STATIC_ASSERT_DECL(sizeof NVef > 1);
+STATIC_ASSERT_DECL(sizeof NVff > 1);
+STATIC_ASSERT_DECL(sizeof NVgf > 1);
+STATIC_ASSERT_DECL(sizeof Gid_t_f > 1);
+STATIC_ASSERT_DECL(sizeof Uid_t_f > 1);
+
 /*
 =for apidoc_section $memory
 =for apidoc safesysmalloc
