@@ -3491,6 +3491,80 @@ EOS
     $wrapper->output_like(qr/\bOK\b/, "check the line is IOK");
 }
 
+{
+    # https://github.com/Perl/perl5/issues/799
+    my $prog = <<'EOS';
+sub problem {
+    $SIG{__DIE__} = sub {
+        die "<b problem> will set a break point here.\n";
+    };    # The break point _should_ be set here.
+    warn "This line will run even if you enter <c problem>.\n";
+}
+&problem;
+EOS
+
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "b problem",
+                "c",
+                "q"
+            ],
+            prog => \$prog
+        }
+    );
+    $wrapper->contents_like(qr/The break point _should_/, "break at right place (b)");
+    $wrapper->output_unlike(qr/This line will run even if you enter <c problem>\./,
+                            "didn't run the wrong code (b)");
+
+    $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "c problem",
+                "q"
+            ],
+            prog => \$prog
+        }
+    );
+    $wrapper->contents_like(qr/The break point _should_/, "break at right place (c)");
+    $wrapper->output_unlike(qr/This line will run even if you enter <c problem>\./,
+                            "didn't run the wrong code (c)");
+
+    $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "c unknown",
+                "q"
+            ],
+            prog => \$prog
+        }
+    );
+    $wrapper->contents_like(qr/Subroutine main::unknown not found/, "fail to continue to unknown");
+    $wrapper->contents_unlike(qr/DB::subroutine_first_breakable_line/,
+                              "no backtrace for the error message");
+
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "b B::svref_2object",
+                "q"
+            ],
+            prog => \<<'EOS'
+use B;
+print "Hello\n";
+EOS
+        }
+    );
+    $wrapper->contents_like(qr/Cannot break on XSUB B::svref_2object/, "can't break on XSUB");
+}
+
 done_testing();
 
 END {
