@@ -1974,9 +1974,6 @@ for (sort keys %funcflags) {
     warn "no docs for $_\n";
 }
 
-for my $key (sort keys %deferreds) {
-    warn "no docs for $key\n";
-}
 
 foreach (sort keys %missing) {
     warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc"
