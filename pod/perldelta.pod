@@ -366,7 +366,11 @@ well.
 
 =item *
 
-XXX
+Calls to L<call_argv()|perlapi/call_argv> with the C<G_DISCARD> flag
+set also ensure the SV parameters constructed from the C<argv>
+parameter are released before C<call_argv()> returns.  Previously they
+were released on the next L<FREETMPS|perlapi/FREETMPS>. [GH
+#22255]
 
 =back
 
