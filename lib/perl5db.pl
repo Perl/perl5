@@ -8847,9 +8847,9 @@ sub CvGV_name_or_bust {
 A utility routine used in various places; finds the file where a subroutine
 was defined, and returns that filename and a line-number range.
 
-Tries to use C<@sub> first; if it can't find it there, it tries building a
+Tries to use C<%sub> first; if it can't find it there, it tries building a
 reference to the subroutine and uses C<CvGV_name_or_bust> to locate it,
-loading it into C<@sub> as a side effect (XXX I think). If it can't find it
+loading it into C<%sub> as a side effect (XXX I think). If it can't find it
 this way, it brute-force searches C<%sub>, checking for identical references.
 
 =cut
