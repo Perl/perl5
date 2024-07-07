@@ -9,8 +9,7 @@ plan(skip_all => "POSIX is unavailable")
 
 require POSIX;
 
-foreach ([atexit => 'C-specific: use END {} instead'],
-	 [atof => 'C-specific, stopped'],
+foreach ([atof => 'C-specific, stopped'],
 	 [atoi => 'C-specific, stopped'],
 	 [atol => 'C-specific, stopped'],
 	 [bsearch => 'not supplied'],

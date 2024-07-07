@@ -25,7 +25,6 @@ XSLoader::load();
 
 my %replacement = (
     L_tmpnam    => undef,
-    atexit      => 'END {}',
     atof        => undef,
     atoi        => undef,
     atol        => undef,
@@ -245,6 +244,18 @@ sub printf {
 sub sprintf {
     usage "sprintf(pattern, args...)" if @_ == 0;
     CORE::sprintf(shift,@_);
+}
+
+my @_atexit;
+
+END {
+    my $f;
+    $f->() while $f = pop @_atexit;
+}
+
+sub atexit {
+    usage "atexit(sub { ... })" if @_ != 1;
+    push @_atexit, $_[0];
 }
 
 sub load_imports {
