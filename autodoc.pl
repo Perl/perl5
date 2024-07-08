@@ -401,6 +401,30 @@ sub where_from_string($;$) {
     return "at $file, line $line_num";
 }
 
+sub check_and_add_proto_defn {
+    my ($element, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
+
+    my @munged_args= $args_ref->@*;
+    s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
+
+    my $flags_sans_d = $flags;
+    my $docs_expected = $flags_sans_d =~ s/d//g;
+
+    $elements{$element} = {
+                            name => $element,
+                            flags => $flags,
+                            ret_type => $ret_type,
+                            args => \@munged_args,
+                            file => $file,
+                            line_num => $line_num // 0,
+                            docs_expected => $docs_expected,
+                            proto_defined => {
+                                              file     => $file,
+                                              line_num => $line_num // 0,
+                                             },
+                          };
+}
+
 # Somewhat loose match for an apidoc line so we can catch minor typos.
 # Parentheses are used to capture portions so that below we verify
 # that things are the actual correct syntax.
@@ -1887,30 +1911,6 @@ sub output($) {
     print $fh "\n$where->{footer}\n=cut\n";
 
     read_only_bottom_close_and_rename($fh);
-}
-
-sub check_and_add_proto_defn {
-    my ($element, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
-
-    my @munged_args= $args_ref->@*;
-    s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
-
-    my $flags_sans_d = $flags;
-    my $docs_expected = $flags_sans_d =~ s/d//g;
-
-    $elements{$element} = {
-                            name => $element,
-                            flags => $flags,
-                            ret_type => $ret_type,
-                            args => \@munged_args,
-                            file => $file,
-                            line_num => $line_num // 0,
-                            docs_expected => $docs_expected,
-                            proto_defined => {
-                                              file     => $file,
-                                              line_num => $line_num // 0,
-                                             },
-                          };
 }
 
 foreach (@{(setup_embed())[0]}) {
