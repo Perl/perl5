@@ -404,6 +404,12 @@ sub where_from_string($;$) {
 sub check_and_add_proto_defn {
     my ($element, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
 
+    my $illegal_flags = $flags =~ s/$known_flags_re//gr;
+    if ($illegal_flags) {
+        die "flags [$illegal_flags] not legal for function"
+          . " $element " . where_from_string($file, $line_num);
+    }
+
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
@@ -635,11 +641,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 # actual definition is missing.
                 $missing{$element_name} = $file;
             }
-
-            my $illegal_flags = $flags =~ s/$known_flags_re//gr;
-            die "flags [$illegal_flags] not legal (for function"
-              . " $element_name (from $file))"
-                                                if $illegal_flags;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                            if $flags =~ /u/ && $flags !~ /[my]/;
