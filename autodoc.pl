@@ -395,6 +395,12 @@ my %valid_sections = (
     $XS_scn => {},
 );
 
+sub where_from_string($;$) {
+    my ($file, $line_num) = @_;
+    return "in $file" unless $line_num;
+    return "at $file, line $line_num";
+}
+
 # Somewhat loose match for an apidoc line so we can catch minor typos.
 # Parentheses are used to capture portions so that below we verify
 # that things are the actual correct syntax.
@@ -445,8 +451,9 @@ Expected:
 EOS
 
     my $non_item_flags = $flags =~ s/$item_flags_re//gr;
-    die "[$non_item_flags] illegal in apidoc_item:\n$input"
-                                    if $type == APIDOC_ITEM && $non_item_flags;
+    die "[$non_item_flags] illegal in apidoc_item "
+      . where_from_string($file, $line_num)
+      . " :\n$input"                if $type == APIDOC_ITEM && $non_item_flags;
 
     return ($name, $flags, $ret_type, $type, $proto_as_written, @args)
                                                 if $type == ILLEGAL_APIDOC;
@@ -569,16 +576,18 @@ sub autodoc ($$) { # parse a file and extract documentation info
             if ($section =~ / ^ \$ /x) {
                 $section .= '_scn' unless $section =~ / _scn $ /x;
                 $section = eval "$section";
-                die "Unknown \$section variable '$section' in $file: $@" if $@;
+                die "Unknown \$section variable '$section' "
+                  . where_from_string($file, $line_num) . "\n$@"  if $@;
             }
             die "Unknown section name '$section' in $file near line $line_num\n"
                                     unless defined $valid_sections{$section};
         }
         elsif ($input !~ /^ =for [ ]+ ( apidoc (?: _defn)? ) \b /x) {
-            die "Unknown apidoc-type line '$input'"
+            die "Unknown apidoc-type line '$input' "
+              . where_from_string($file, $line_num)
                                             unless $input=~ /^=for apidoc_item/;
             die "apidoc_item doesn't immediately follow an apidoc entry:"
-              . " '$input'";
+              . " '$input' " . where_from_string($file, $line_num);
         }
         else {
             ($element_name, $flags, $ret_type, $line_type, $proto_as_written,
@@ -663,7 +672,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
                 # End of comment line in C files is a fall-back terminator,
                 # but warn only if there actually is some accumulated text
-                warn "=cut missing? $file:$line_num:$input" if $text =~ /\S/;
+                warn "=cut missing? "
+                   . where_from_string($file, $line_num)
+                   . "\n$input"                           if $text =~ /\S/;
                 last;
             }
 
@@ -684,11 +695,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
             die "Unexpected api_doc_item line '$item_proto'"
-                                                        unless $element_name;
+              . where_from_string($file, $line_num)     unless $element_name;
 
             # We accept blank lines between these, but nothing else;
             die "apidoc_item lines must immediately follow apidoc lines for "
-              . " '$element_name' in $file"
+              . " '$element_name' " . where_from_string($file, $line_num)
                                                             if $text =~ /\S/;
 
             # Use the base entry flags if none for this item; otherwise add in
@@ -737,22 +748,24 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             # Here, we have accumulated into $text, the pod for $element_name
 
-            die "No =for apidoc_section nor =head1 in $file for"
-              . "'$element_name'\n" unless defined $section;
+            die "No =for apidoc_section nor =head1 "
+              . where_from_string($file, $line_num)
+              . " for'$element_name'\n"             unless defined $section;
             my $is_link_only = ($flags =~ /h/);
             if (   ! $is_link_only
                 && exists $docs{$where}{$section}{$element_name})
             {
-                warn "$0: duplicate API entry for '$element_name' in"
-                    . " $where/$section\n";
+                warn "$0: duplicate API entry for '$element_name'"
+                   . " $where/$section " . where_from_string($file, $line_num);
                 next;
             }
 
             # Override the text with just a link if the flags call for that
             if ($is_link_only) {
                 if ($file_is_C) {
-                    die "Can't currently handle link with items to it:\n$input"
-                                                                if @items > 1;
+                    die "Can't currently handle link with items to it "
+                      . where_from_string($file, $line_num)
+                      . ":\n$input"                         if @items > 1;
                     $docs{$where}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
                 }
@@ -1058,7 +1071,8 @@ sub parse_config_h {
                 }
             }
 
-            warn "$name has no documentation\n";
+            warn "$name has no documentation "
+               . where_from_string($config_h, $configs{$name}{defn_line_num});
             $missing_macros{$name} = 'config.h';
 
             next;
@@ -1341,7 +1355,11 @@ sub docout ($$$) { # output the docs for one function group
     my @items = $docref->{items}->@*;
     my $flags = $items[0]{flags};
 
-    warn("Empty pod for $element_name (from $file)") unless $pod =~ /\S/;
+    if ($pod !~ /\S/) {
+        warn "Empty pod for $element_name ("
+           . where_from_string($file)
+           . ')';
+    }
 
     print $fh "\n=over $description_indent\n";
     print $fh "\n=item C<$_->{name}>\n" for @items;
@@ -1452,10 +1470,12 @@ sub docout ($$$) { # output the docs for one function group
             next unless $ret|| $has_semicolon || $has_args;
 
             if (! $has_args) {
-                warn("$file: $name: n flag without m") unless $flags =~ /m/;
+                warn "$name: n flag without m"
+                   . where_from_string($file) unless $flags =~ /m/;
 
                 if ($item->{args} && $item->{args}->@*) {
-                    warn("$file: $name: n flag but apparently has args");
+                    warn "$name: n flag but apparently has args"
+                       . where_from_string($file);
                     $flags =~ s/n//g;
                     $has_args = 1;
                 }
