@@ -1,6 +1,7 @@
 package POSIX;
 use strict;
 use warnings;
+use overload ();
 
 our ($AUTOLOAD, %SIGRT);
 
@@ -252,11 +253,12 @@ END {
     pop(@_atexit)->() while @_atexit;
 }
 
-use builtin qw(reftype);
-
 sub atexit {
     usage "atexit(sub { ... })"
-        unless @_ == 1 && (reftype($_[0]) // '') eq 'CODE';
+        unless @_ == 1 && (
+            (builtin::reftype($_[0]) // '') eq 'CODE'
+            || (builtin::blessed($_[0]) && overload::Method($_[0], '&{}'))
+        );
     push @_atexit, $_[0];
 }
 
