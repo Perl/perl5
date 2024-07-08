@@ -655,9 +655,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $missing{$element_name} = $file;
             }
 
-            die "'u' flag must also have 'm' or 'y' flags' for $element_name"
-                                           if $flags =~ /u/ && $flags !~ /[my]/;
-
             if (exists $seen{$element_name} && $flags !~ /h/) {
                 die ("'$element_name' in $file was already documented in"
                    . " $seen{$element_name}");
@@ -1490,6 +1487,11 @@ sub docout ($$$) { # output the docs for one function group
 
             print $fh "\nNOTE: the C<perl_$name()> form is",
                       " B<deprecated>.\n" if $flags =~ /O/;
+
+            die "'u' flag must also have 'm' or 'y' flags' for $name "
+              . where_from_string($item->{proto_defined}{file},
+                                  $item->{proto_defined}{line_num})
+                                        if $flags =~ /u/ && $flags !~ /[my]/;
 
             # U means to not display the prototype; and there really isn't a
             # single good canonical signature for a typedef, so they aren't
