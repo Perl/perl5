@@ -490,6 +490,17 @@ EOS
     return ($name, $flags, $ret_type, $type, $proto_as_written, @args)
                                                 if $type == ILLEGAL_APIDOC;
 
+    if ($flags =~ /#/) {
+        die "Return type must be empty for '$name' "
+          . where_from_string($file, $line_num) if $ret_type;
+        $ret_type = '#ifdef';
+    }
+
+    warn ("'$name' not \\w+ in '$proto_as_written' "
+       .  where_from_string($file, $line_num))
+                        if $flags !~ /N/
+                        && $name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
+
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
     my $existing_proto = $elements{$name};
@@ -646,15 +657,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                            if $flags =~ /u/ && $flags !~ /[my]/;
-            warn ("'$element_name' not \\w+ in '$proto_as_written' in $file")
-                   if $flags !~ /N/
-                   && $element_name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
-
-            if ($flags =~ /#/) {
-                die "Return type must be empty for '$element_name'"
-                                                                   if $ret_type;
-                $ret_type = '#ifdef';
-            }
 
             if (exists $seen{$element_name} && $flags !~ /h/) {
                 die ("'$element_name' in $file was already documented in"
