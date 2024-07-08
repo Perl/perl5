@@ -1345,9 +1345,9 @@ Portability issues: L<perlport/chroot>.
 =for Pod::Functions declare a separate global namespace that is an object class
 
 Declares the BLOCK or the rest of the compilation unit as being in the given
-namespace, which implements an object class.  This behaves similarly to
-L<C<package>|/package NAMESPACE>, except that the newly-created package behaves
-as a class.
+namespace, which implements an object class (see L<perlclass>).  This
+behaves similarly to L<C<package>|/package NAMESPACE>, except that the
+newly-created package behaves as a class.
 
 =item close FILEHANDLE
 X<close>
