@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 use Test::More tests => 4;
 use POSIX qw(atexit);
 
@@ -21,8 +24,8 @@ if ($child_pid) {
 } else {
     close $fr;
 
-    atexit(sub { printf $fw "child $$ exit (1)\n" });
-    atexit(sub { printf $fw "child $$ exit (2)\n" });
-    atexit(sub { printf $fw "child $$ exit (3)\n" });
+    atexit(sub { print $fw "child $$ exit (1)\n" });
+    atexit(sub { print $fw "child $$ exit (2)\n" });
+    atexit(sub { print $fw "child $$ exit (3)\n" });
     exit(0);
 }
