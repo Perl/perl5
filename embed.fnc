@@ -470,7 +470,7 @@
 :        characters, and a warning is raised otherwise. This flag suppresses
 :        that warning, so that weird things can be documented
 :
-:   'n'  Has no arguments (used only in =for apidoc entries)
+:   'n'  Has no argument list (used only in =for apidoc entries)
 :
 :        The macro (it can't be a function) is used without any parameters nor
 :        empty parentheses.
