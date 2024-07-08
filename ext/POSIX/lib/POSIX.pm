@@ -252,8 +252,11 @@ END {
     pop(@_atexit)->() while @_atexit;
 }
 
+use builtin qw(reftype);
+
 sub atexit {
-    usage "atexit(sub { ... })" if @_ != 1;
+    usage "atexit(sub { ... })"
+        unless @_ == 1 && defined($_[0]) && (reftype($_[0]) // '') eq 'CODE';
     push @_atexit, $_[0];
 }
 

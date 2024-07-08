@@ -1,15 +1,54 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 9;
 use POSIX qw(atexit);
 
+note "Exactly one coderef is expected. Other type of arguments should all result in errors";
+
+eval {
+    atexit();
+    1;
+} or do {
+    pass "wrong number of arguments";
+};
+
+eval {
+    atexit(sub {}, sub {});
+    1;
+} or do {
+    pass "wrong number of arguments";
+};
+
+eval {
+    atexit(bless {});
+    1;
+} or do {
+    pass "non-coderef should result in errors";
+};
+
+eval {
+    atexit("str");
+    1;
+} or do {
+    pass "non-coderef should result in errors";
+};
+
+eval {
+    atexit(sub {});
+    pass "coderef ok";
+    1;
+} or do {
+    fail "a single coderef should not result in errors";
+};
+
+
+note "The following code test the order of execution, which should be the reverse of insertion order.";
 pipe my $fr, my $fw;
 
 my $child_pid = fork();
 if ($child_pid) {
     close $fw;
-
     my $pid = wait();
     is $pid, $child_pid;
 
