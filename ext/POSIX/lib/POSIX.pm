@@ -249,8 +249,7 @@ sub sprintf {
 my @_atexit;
 
 END {
-    my $f;
-    $f->() while $f = pop @_atexit;
+    pop(@_atexit)->() while @_atexit;
 }
 
 sub atexit {
