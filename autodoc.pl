@@ -680,7 +680,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         #
         # Defer placing the group if no information found for it so far;
         # otherwise calculate the output pod.
-        my $where = ($group_is_deferred) ? 'unknown' : destination_pod($flags);
+        my $destpod = ($group_is_deferred) ? 'unknown' : destination_pod($flags);
 
         # Now accumulate the text that applies to it up to a terminating line,
         # which is one of:
@@ -754,7 +754,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                      {
                         name => $item_name,
                         section => $section,
-                        pod     => $where,
+                        pod     => $destpod,
                         file    => $file,   # Just for any error message
                      };
             }
@@ -780,10 +780,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
               . " for'$element_name'\n"             unless defined $section;
             my $is_link_only = ($flags =~ /h/);
             if (   ! $is_link_only
-                && exists $docs{$where}{$section}{$element_name})
+                && exists $docs{$destpod}{$section}{$element_name})
             {
                 warn "$0: duplicate API entry for '$element_name'"
-                   . " $where/$section " . where_from_string($file, $line_num);
+                   . " $destpod/$section "
+                   . where_from_string($file, $line_num);
                 next;
             }
 
@@ -793,7 +794,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                     die "Can't currently handle link with items to it "
                       . where_from_string($file, $line_num)
                       . ":\n$input"                         if @items > 1;
-                    $docs{$where}{$section}{X_tags}{$element_name} = $file;
+                    $docs{$destpod}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
                 }
 
@@ -817,10 +818,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 push $described_elsewhere{$podname}->@*, $podname;
             }
 
-            $docs{$where}{$section}{$element_name}{pod} = $text;
-            $docs{$where}{$section}{$element_name}{file} = $file;
+            $docs{$destpod}{$section}{$element_name}{pod} = $text;
+            $docs{$destpod}{$section}{$element_name}{file} = $file;
             $items[0]{flags} = $flags;
-            push $docs{$where}{$section}{$element_name}{items}->@*, @items;
+            push $docs{$destpod}{$section}{$element_name}{items}->@*, @items;
         }
         elsif ($text) {
             $valid_sections{$section}{header} = "" unless
@@ -1826,19 +1827,19 @@ sub dictionary_order {
 }
 
 sub output($) {
-    my $where = shift;
-    my $podname = $where->{podname};
-    my $dochash = $where->{docs};
+    my $destpod = shift;
+    my $podname = $destpod->{podname};
+    my $dochash = $destpod->{docs};
 
     # strip leading '|' from each line which had been used to hide pod from
     # pod checkers.
-    s/^\|//gm for $where->{hdr}, $where->{footer};
+    s/^\|//gm for $destpod->{hdr}, $destpod->{footer};
 
     my $fh = open_new("pod/$podname.pod", undef,
                       {by => "$0 extracting documentation",
                        from => 'the C source files'}, 1);
 
-    print $fh $where->{hdr}, "\n";
+    print $fh $destpod->{hdr}, "\n";
 
     for my $section_name (sort dictionary_order keys %valid_sections) {
         my $section_info = $dochash->{$section_name};
@@ -1898,20 +1899,20 @@ sub output($) {
     # subsection.
     #
     # The next two items are for the next output subsection, and so forth.
-    while ($where->{missings}->@*) {
-        my $hdr_name = shift $where->{missings}->@*;
-        my $hdr = $where->{$hdr_name};
+    while ($destpod->{missings}->@*) {
+        my $hdr_name = shift $destpod->{missings}->@*;
+        my $hdr = $destpod->{$hdr_name};
 
         # strip leading '|' from each line which had been used to hide pod
         # from pod checkers.
         $hdr =~  s/^\|//gm;
 
-        my $ref = shift $where->{missings}->@*;
+        my $ref = shift $destpod->{missings}->@*;
 
         print $fh construct_missings_section($hdr, $ref);
     }
 
-    print $fh "\n$where->{footer}\n=cut\n";
+    print $fh "\n$destpod->{footer}\n=cut\n";
 
     read_only_bottom_close_and_rename($fh);
 }
@@ -1974,17 +1975,17 @@ foreach my $section_name (keys $unknown->%*) {
               . " $unknown->{$section_name}{$group_name}{file}";
         }
 
-        my $where = destination_pod($corrected->{flags});
+        my $destpod = destination_pod($corrected->{flags});
 
-        # $where now gives the correct pod for this group.  Prepare to move it
+        # $destpod now gives the correct pod for this group.  Prepare to move it
         # to there
-        die "$where unexpectedly has an entry in $section_name for $group_name"
-                          if defined $docs{$where}{$section_name}{$group_name};
-        $docs{$where}{$section_name}{$group_name} =
+        die "$destpod unexpectedly has an entry in $section_name for $group_name"
+                          if defined $docs{$destpod}{$section_name}{$group_name};
+        $docs{$destpod}{$section_name}{$group_name} =
                                  delete $unknown->{$section_name}{$group_name};
 
         # And fill in the leader item with the saved values
-        my $new = $docs{$where}{$section_name}{$group_name}{items}[0];
+        my $new = $docs{$destpod}{$section_name}{$group_name}{items}[0];
         $new->{name} = $item_name;
         $new->{args} = $corrected->{args};
         $new->{flags} = $corrected->{flags};
@@ -2009,14 +2010,14 @@ for my $group_name (keys %deferreds) {
         my $section = $item->{section};
         my $flags = $corrected->{flags};
 
-        my $where = destination_pod($flags);
+        my $destpod = destination_pod($flags);
 
         # We know where this element is that needs to be updated.  It better
         # exist, or something is badly wrong
-        my $dest = $docs{$where}{$section}{$group_name};
+        my $dest = $docs{$destpod}{$section}{$group_name};
         if (! defined $dest) {
             die "Unexpectedly didn't find an entry for"
-              . " $where->$section->$group_name";
+              . " $destpod->$section->$group_name";
         }
 
         # Look through the item list for this one, and correct it.
@@ -2031,7 +2032,7 @@ for my $group_name (keys %deferreds) {
 
         if (! $found) {
             die "Unexpectedly didn't find an entry for"
-              . " $where->$section->$group_name->$item_name";
+              . " $destpod->$section->$group_name->$item_name";
         }
     }
 }
