@@ -1364,19 +1364,23 @@ sub docout ($$$) { # output the docs for one function group
     print $fh "\n=over $description_indent\n";
     print $fh "\n=item C<$_->{name}>\n" for @items;
 
-    # If we're printing only a link to an element, this isn't the major entry,
-    # so no X<> here.
-    if ($flags !~ /h/) {
-        print $fh "X<$_->{name}>" for @items;
-        print $fh "\n";
-    }
-
     my @deprecated;
     my @experimental;
+    my @xrefs;
+
     for my $item (@items) {
-        push @deprecated,   "C<$item->{name}>" if $item->{flags} =~ /D/;
-        push @experimental, "C<$item->{name}>" if $item->{flags} =~ /x/;
+        my $name = $item->{name};
+
+        # If we're printing only a link to an element, this isn't the major
+        # entry, so no X<> here.
+        push @xrefs, $name unless $item->{flags} =~ /h/;
+
+        push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
+        push @experimental, "C<$name>" if $item->{flags} =~ /x/;
     }
+
+    print $fh format_pod_indexes(\@xrefs);
+    print $fh "\n" if @xrefs;
 
     for my $which (\@deprecated, \@experimental) {
         if ($which->@*) {
@@ -1820,7 +1824,7 @@ sub output($) {
         print $fh "\n=head1 $section_name\n";
 
         if ($section_info->{X_tags}) {
-            print $fh "X<$_>" for sort keys $section_info->{X_tags}->%*;
+            print $fh format_pod_indexes([ keys $section_info->{X_tags}->%* ]);
             print $fh "\n";
             delete $section_info->{X_tags};
         }
