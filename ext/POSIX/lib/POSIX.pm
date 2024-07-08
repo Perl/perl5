@@ -5,7 +5,7 @@ use overload ();
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '2.21';
+our $VERSION = '2.22';
 
 require XSLoader;
 
