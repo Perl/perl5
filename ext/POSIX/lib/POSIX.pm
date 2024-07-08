@@ -256,7 +256,7 @@ use builtin qw(reftype);
 
 sub atexit {
     usage "atexit(sub { ... })"
-        unless @_ == 1 && defined($_[0]) && (reftype($_[0]) // '') eq 'CODE';
+        unless @_ == 1 && (reftype($_[0]) // '') eq 'CODE';
     push @_atexit, $_[0];
 }
 
