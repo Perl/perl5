@@ -560,7 +560,7 @@ my %initial_file_section = (
                             'vutil.c' => $versioning_scn,
                            );
 
-sub output_file ($) {
+sub destination_pod ($) {
     my $flags = shift;
     return $flags =~ /A/ ? 'api' : 'intern';
 }
@@ -677,7 +677,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         #
         # Defer placing the group if no information found for it so far;
         # otherwise calculate the output pod.
-        my $where = ($group_is_deferred) ? 'unknown' : output_file($flags);
+        my $where = ($group_is_deferred) ? 'unknown' : destination_pod($flags);
 
         # Now accumulate the text that applies to it up to a terminating line,
         # which is one of:
@@ -1971,7 +1971,7 @@ foreach my $section_name (keys $unknown->%*) {
               . " $unknown->{$section_name}{$group_name}{file}";
         }
 
-        my $where = output_file($corrected->{flags});
+        my $where = destination_pod($corrected->{flags});
 
         # $where now gives the correct pod for this group.  Prepare to move it
         # to there
@@ -2006,7 +2006,7 @@ for my $group_name (keys %deferreds) {
         my $section = $item->{section};
         my $flags = $corrected->{flags};
 
-        my $where = output_file($flags);
+        my $where = destination_pod($flags);
 
         # We know where this element is that needs to be updated.  It better
         # exist, or something is badly wrong
