@@ -2956,9 +2956,9 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 /*
 =for apidoc_section $CV
 
-=for apidoc            get_cv
-=for apidoc_item       get_cvn_flags
-=for apidoc_item |CV *|get_cvs|"string"|I32 flags
+=for apidoc      get_cv
+=for apidoc_item get_cvn_flags
+=for apidoc_item get_cvs
 
 These return the CV of the specified Perl subroutine.  C<flags> are passed to
 C<gv_fetchpvn_flags>.  If C<GV_ADD> is set and the Perl subroutine does not
