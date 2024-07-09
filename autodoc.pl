@@ -411,6 +411,8 @@ sub check_and_add_proto_defn {
           . " $element " . where_from_string($file, $line_num);
     }
 
+    $flags .= "m" if $flags =~ /M/;
+
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
