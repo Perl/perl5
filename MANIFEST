@@ -4967,6 +4967,7 @@ ext/POSIX/lib/POSIX.pm			POSIX extension Perl module
 ext/POSIX/lib/POSIX.pod			POSIX extension documentation
 ext/POSIX/Makefile.PL			POSIX extension makefile writer
 ext/POSIX/POSIX.xs			POSIX extension external subroutines
+ext/POSIX/t/atexit.t			See if POSIX::atexit() works
 ext/POSIX/t/export.t			Test @EXPORT and @EXPORT_OK
 ext/POSIX/t/fenv.t			Floating-point rounding mode tests for POSIX
 ext/POSIX/t/iscrash			See if POSIX isxxx() crashes with threads on Win32
