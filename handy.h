@@ -435,8 +435,15 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
     Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), SV_GMAGIC)
 #define sv_catpvs_mg(dsv, str) \
     Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), SV_GMAGIC|SV_SMAGIC)
+
+/*
+=for apidoc_defn Am|void|sv_setpvs   |SV *const sv|"literal string"
+=for apidoc_defn Am|void|sv_setpvs_mg|SV *const sv|"literal string"
+=cut
+*/
 #define sv_setpvs(dsv, str) Perl_sv_setpvn(aTHX_ dsv, STR_WITH_LEN(str))
 #define sv_setpvs_mg(dsv, str) Perl_sv_setpvn_mg(aTHX_ dsv, STR_WITH_LEN(str))
+
 #define sv_setref_pvs(rv, classname, str) \
     Perl_sv_setref_pvn(aTHX_ rv, classname, STR_WITH_LEN(str))
 
