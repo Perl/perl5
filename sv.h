@@ -297,14 +297,14 @@ struct object {
 Returns the value of the object's reference count. Exposed
 to perl code via Internals::SvREFCNT().
 
-=for apidoc            SvREFCNT_inc
-=for apidoc_item       SvREFCNT_inc_NN
-=for apidoc_item |SV* |SvREFCNT_inc_simple|SV* sv
-=for apidoc_item |SV* |SvREFCNT_inc_simple_NN|SV* sv
-=for apidoc_item |void|SvREFCNT_inc_simple_void|SV* sv
-=for apidoc_item |void|SvREFCNT_inc_simple_void_NN|SV* sv
-=for apidoc_item       SvREFCNT_inc_void
-=for apidoc_item |void|SvREFCNT_inc_void_NN|SV* sv
+=for apidoc      SvREFCNT_inc
+=for apidoc_item SvREFCNT_inc_NN
+=for apidoc_item SvREFCNT_inc_simple
+=for apidoc_item SvREFCNT_inc_simple_NN
+=for apidoc_item SvREFCNT_inc_simple_void
+=for apidoc_item SvREFCNT_inc_simple_void_NN
+=for apidoc_item SvREFCNT_inc_void
+=for apidoc_item SvREFCNT_inc_void_NN
 
 These all increment the reference count of the given SV.
 The ones without C<void> in their names return the SV.
@@ -374,12 +374,22 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
+/*
+=for apidoc_defn Am|SV *|SvREFCNT_inc_simple|SV *sv
+=cut
+*/
 #define SvREFCNT_inc(sv)		Perl_SvREFCNT_inc(MUTABLE_SV(sv))
 #define SvREFCNT_inc_simple(sv)		SvREFCNT_inc(sv)
 #define SvREFCNT_inc_NN(sv)		Perl_SvREFCNT_inc_NN(MUTABLE_SV(sv))
 #define SvREFCNT_inc_void(sv)		Perl_SvREFCNT_inc_void(MUTABLE_SV(sv))
 
-/* These guys don't need the curly blocks */
+/*
+=for apidoc_defn Am|void|SvREFCNT_inc_simple_void|SV *sv
+
+These guys don't need the curly blocks
+
+=cut
+*/
 #define SvREFCNT_inc_simple_void(sv)	                                \
         STMT_START {                                                    \
             SV * sv_ = MUTABLE_SV(sv);                                  \
@@ -387,6 +397,12 @@ perform the upgrade if necessary.  See C<L</svtype>>.
                 SvREFCNT(sv_)++;                                        \
         } STMT_END
 
+/*
+=for apidoc_defn Am|SV *|SvREFCNT_inc_simple_NN|SV *sv
+=for apidoc_defn Am|void|SvREFCNT_inc_void_NN|SV *sv
+=for apidoc_defn Am|void|SvREFCNT_inc_simple_void_NN|SV *sv
+=cut
+*/
 #define SvREFCNT_inc_simple_NN(sv)	(++(SvREFCNT(sv)),MUTABLE_SV(sv))
 #define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
