@@ -462,8 +462,14 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define gv_stashpvs(str, create) \
     Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
 
-#define gv_fetchpvs(namebeg, flags, sv_type) \
-    Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), flags, sv_type)
+
+/*
+=for apidoc_defn Am|GV *|gv_fetchpvs|"name"|I32 flags|const svtype sv_type
+=for apidoc_defn Am|GV *|gv_fetchpvn|const char * nambeg|STRLEN full_len|I32 flags|const svtype sv_type
+=cut
+*/
+#define gv_fetchpvs(name, flags, sv_type)                                   \
+            Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(name), flags, sv_type)
 #define  gv_fetchpvn  gv_fetchpvn_flags
 
 

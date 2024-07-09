@@ -2529,12 +2529,12 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
 }
 
 /*
-=for apidoc gv_fetchpv
-=for apidoc_item |GV *|gv_fetchpvn|const char * nambeg|STRLEN full_len|I32 flags|const svtype sv_type
-=for apidoc_item ||gv_fetchpvn_flags
-=for apidoc_item |GV *|gv_fetchpvs|"name"|I32 flags|const svtype sv_type
-=for apidoc_item ||gv_fetchsv
-=for apidoc_item |GV *|gv_fetchsv_nomg|SV *name|I32 flags|const svtype sv_type
+=for apidoc      gv_fetchpv
+=for apidoc_item gv_fetchpvn
+=for apidoc_item gv_fetchpvn_flags
+=for apidoc_item gv_fetchpvs
+=for apidoc_item gv_fetchsv
+=for apidoc_item gv_fetchsv_nomg
 
 These all return the GV of type C<sv_type> whose name is given by the inputs,
 or NULL if no GV of that name and type could be found.  See L<perlguts/Stashes
