@@ -11,10 +11,15 @@ use Config;
 
 my $continue;
 my $separate;
+my $install;
 GetOptions("c|continue" => \$continue,
            "s|separate" => \$separate,
+           "i|install"  => \$install,
            "h|help"     => \&usage)
   or die "Unknown options\n";
+
+$separate
+  and warn "-s / -separate is now the default\n";
 
 $|++;
 
@@ -28,7 +33,7 @@ my @failures = ();
 
 my @config;
 my $install_path;
-if ($separate) {
+unless ($install) {
     # require EU::MM 6.31 or later
     my $install_base = tempdir( CLEANUP => 1 );
     push @config, "INSTALL_BASE=$install_base";

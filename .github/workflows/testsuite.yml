@@ -853,5 +853,5 @@ jobs:
         run: /usr/bin/perl -V
       - name: Build and test dist modules
         run:
-          /usr/bin/perl Porting/test-dist-modules.pl -continue -separate
+          /usr/bin/perl Porting/test-dist-modules.pl -continue
 
