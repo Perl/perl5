@@ -587,7 +587,9 @@ S_ithread_run(void * arg)
     S_set_sigmask(&thread->initial_sigmask);
 #endif
 
+#if PERL_VERSION_GE(5, 27, 9)
     thread_locale_init();
+#endif
 
     PL_perl_destruct_level = 2;
 
@@ -689,7 +691,9 @@ S_ithread_run(void * arg)
     MUTEX_UNLOCK(&thread->mutex);
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
+#if PERL_VERSION_GE(5, 27, 9)
     thread_locale_term();
+#endif
 
     /* Exit application if required */
     if (exit_app) {
