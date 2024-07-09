@@ -467,6 +467,10 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 */
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 
+/*
+=for apidoc_defn Am|CV *|get_cvs|"name"|I32 flags
+=cut
+*/
 #define get_cvs(str, flags)					\
         Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
