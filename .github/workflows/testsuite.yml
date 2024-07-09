@@ -795,9 +795,9 @@ jobs:
   #  \__,_|_|___/\__|    |_| |_| |_|\___/ \__,_|\__,_|_|\___||___/
 
   dist-modules:
-    name: dist-modules
+    name: dist ${{ matrix.os.label }} ${{ matrix.perl-version }} ${{ matrix.threads.label }}
     needs: sanity_check
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os.id }}
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_dist_modules == 'true'))
 
     env:
@@ -812,17 +812,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # once some failures are resolved we may be able to add Windows to this
+        os:
+          - id: ubuntu-latest
+            label: Linux
         perl-version:
-          - 'latest'
+          - '5.38'
           - '5.24'
           - '5.10'
           - '5.8'
-
-    container:
-      image: perldocker/perl-tester:${{ matrix.perl-version }}
+        threads:
+          - enable: true
+            label: -Dusethreads
+          - enable: false
+            label: -Uusethreads
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1.30.0
+        with:
+          perl-version: ${{ matrix.perl-version }}
+          multi-thread: ${{ matrix.threads.id }}
+          install-modules:
+            ExtUtils::MakeMaker
+            Perl::OSType
+            Scalar::Util
+            Socket
+            version
       - name: perl -V
         run: perl -V
       - name: Build and test dist modules
