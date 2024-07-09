@@ -2609,8 +2609,8 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 }
 
 /*
-=for apidoc        hv_name_set
-=for apidoc_item ||hv_name_sets|HV *hv|"name"|U32 flags
+=for apidoc      hv_name_set
+=for apidoc_item hv_name_sets
 
 These each set the name of stash C<hv> to the specified name.
 
