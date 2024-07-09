@@ -8003,6 +8003,8 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
                     : newSVOP(OP_RUNCV, 0, &PL_sv_undef));
 
     case KEY___CLASS__:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__CLASS), "__CLASS__ is experimental");
         FUN0(OP_CLASSNAME);
 
     case KEY_AUTOLOAD:
