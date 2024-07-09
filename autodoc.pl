@@ -1890,12 +1890,21 @@ sub check_and_add_proto_defn {
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
+    my $flags_sans_d = $flags;
+    my $docs_expected = $flags_sans_d =~ s/d//g;
+
     $elements{$element} = {
+                            name => $element,
                             flags => $flags,
                             ret_type => $ret_type,
                             args => \@munged_args,
                             file => $file,
                             line_num => $line_num // 0,
+                            docs_expected => $docs_expected,
+                            proto_defined => {
+                                              file     => $file,
+                                              line_num => $line_num // 0,
+                                             },
                           };
 }
 
@@ -2020,7 +2029,7 @@ for my $group_name (keys %deferreds) {
 }
 
 for (sort keys %elements) {
-    next unless $elements{$_}{flags} =~ /d/;
+    next unless $elements{$_}{docs_expected};
     next if $elements{$_}{flags} =~ /h/;
     warn "no docs for $_\n";
 }
