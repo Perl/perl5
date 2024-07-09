@@ -44,6 +44,12 @@ letter.
 
 =over 4
 
+=item __CLASS__ is experimental
+
+(S experimental::class) This warning is emitted if you use the C<__CLASS__>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item accept() on closed socket %s
 
 (W closed) You tried to do an accept on a closed socket.  Did you forget
