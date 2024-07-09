@@ -581,7 +581,9 @@ my %initial_file_section = (
 
 sub destination_pod ($) {
     my $flags = shift;
-    return $flags =~ /A/ ? 'api' : 'intern';
+    return "unknown" if $flags eq "";
+    return "api" if $flags =~ /A/;
+    return "intern";
 }
 
 sub autodoc ($$) { # parse a file and extract documentation info
@@ -609,7 +611,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
         my ($text, $element_name, $ret_type, $line_type, $proto_as_written);
         my (@args, @items);
-        my $group_is_deferred = 0;
         my $flags = "";
 
         # If the line starts a new section ...
@@ -642,13 +643,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
                 # Macros and typedefs are allowed to not be in embed.fnc.
             }
-            elsif ($flags eq "")  {
-
-                # No flags at all here means this item's definition isn't yet
-                # known.  Defer it to later.
-                $group_is_deferred = 1;
-            }
-            else {
+            elsif ($flags ne "")  {
 
                 # Not in embed.fnc, and is not a macro nor typedef, so the
                 # actual definition is missing.
@@ -676,10 +671,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # Here we have processed the initial line in the heading text or API
         # element, and in the latter case, have saved the important
         # information from it into $items[0].
-        #
-        # Defer placing the group if no information found for it so far;
-        # otherwise calculate the output pod.
-        my $destpod = ($group_is_deferred) ? 'unknown' : destination_pod($flags);
+        # Calculate the output pod.
+        my $destpod = destination_pod($flags);
 
         # Now accumulate the text that applies to it up to a terminating line,
         # which is one of:
