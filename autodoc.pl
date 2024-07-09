@@ -419,20 +419,18 @@ sub check_and_add_proto_defn {
     my $flags_sans_d = $flags;
     my $docs_expected = $flags_sans_d =~ s/d//g;
 
-    $elements{$element} = {
-                            name => $element,
-                            raw_flags => $raw_flags, # Keep for debugging, etc.
-                            flags => $flags,
-                            ret_type => $ret_type,
-                            args => \@munged_args,
-                            file => $file,
-                            line_num => $line_num // 0,
-                            docs_expected => $docs_expected,
-                            proto_defined => {
-                                              file     => $file,
-                                              line_num => $line_num // 0,
-                                             },
-                          };
+        $elements{$element}{name} = $element;
+        $elements{$element}{raw_flags} = $raw_flags; # Keep for debugging, etc.
+        $elements{$element}{flags} = $flags;
+        $elements{$element}{ret_type} =$ret_type;
+        $elements{$element}{args} = \@munged_args;
+        $elements{$element}{file} = $file;
+        $elements{$element}{line_num} = $line_num // 0;
+        $elements{$element}{docs_expected} = $docs_expected;
+            $elements{$element}{proto_defined} = {
+                                                  file     => $file,
+                                                  line_num => $line_num // 0,
+                                                 };
 }
 
 # Somewhat loose match for an apidoc line so we can catch minor typos.
