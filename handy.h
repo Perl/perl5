@@ -363,10 +363,6 @@ a string/length pair.
 Like C<newSVpvn_share>, but takes a literal string instead of
 a string/length pair and omits the hash parameter.
 
-=for apidoc Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
-Like C<sv_setref_pvn>, but takes a literal string instead of
-a string/length pair.
-
 =cut
 */
 
@@ -418,6 +414,12 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define sv_setpvs(dsv, str) Perl_sv_setpvn(aTHX_ dsv, STR_WITH_LEN(str))
 #define sv_setpvs_mg(dsv, str) Perl_sv_setpvn_mg(aTHX_ dsv, STR_WITH_LEN(str))
 
+/*
+=for apidoc_defn Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
+a string/length pair.
+
+=cut
+*/
 #define sv_setref_pvs(rv, classname, str) \
     Perl_sv_setref_pvn(aTHX_ rv, classname, STR_WITH_LEN(str))
 

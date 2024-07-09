@@ -10901,16 +10901,24 @@ Perl_sv_setref_nv(pTHX_ SV *const rv, const char *const classname, const NV nv)
 }
 
 /*
-=for apidoc sv_setref_pvn
+=for apidoc      sv_setref_pvn
+=for apidoc_item sv_setref_pvs
 
-Copies a string into a new SV, optionally blessing the SV.  The length of the
-string must be specified with C<n>.  The C<rv> argument will be upgraded to
-an RV.  That RV will be modified to point to the new SV.  The C<classname>
-argument indicates the package for the blessing.  Set C<classname> to
-C<NULL> to avoid the blessing.  The new SV will have a reference count
-of 1, and the RV will be returned.
+These each copy a string into a new SV, optionally blessing the SV.
+The C<rv> argument will be upgraded to an RV.  That RV will be modified to
+point to the new SV.
+The C<classname> argument indicates the package for the blessing.
+Set C<classname> to C<NULL> to avoid the blessing.
+The new SV will have a reference count of 1, and the RV will be returned.
 
-Note that C<sv_setref_pv> copies the pointer while this copies the string.
+The forms differ only in how the source string is specified.
+
+C<sv_setref_pvs> takes a C string literal enclosed in double quotes.
+
+In C<sv_setref_pvn>, C<n> is the length of the string parameter C<pv> in
+bytes.  Hence the latter may contain embedded NUL characters.
+
+Note that C<L</sv_setref_pv>> copies the pointer while these copy the string.
 
 =cut
 */
