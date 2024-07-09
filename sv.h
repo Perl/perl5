@@ -2061,6 +2061,11 @@ END_EXTERN_C
 #define SvPVutf8x_force(sv, len) sv_pvutf8n_force(sv, &len)
 #define SvPVbytex_force(sv, len) sv_pvbyten_force(sv, &len)
 
+/*
+=for apidoc_defn Am|bool|SvTRUEx|SV *sv
+=for apidoc_defn Am|bool|SvTRUE_nomg_NN|SV *sv
+=cut
+*/
 #define SvTRUEx(sv)        SvTRUE(sv)
 #define SvTRUEx_nomg(sv)   SvTRUE_nomg(sv)
 #define SvTRUE_nomg_NN(sv) SvTRUE_common(sv, TRUE)
