@@ -1404,47 +1404,47 @@ sub docout ($$$) { # output the docs for one function group
     print $fh "\n" if @xrefs;
 
     for my $which (\@deprecated, \@experimental) {
-        if ($which->@*) {
-            my $is;
-            my $it;
-            my $list;
+        next unless $which->@*;
 
-            if ($which->@* == 1) {
-                $is = 'is';
-                $it = 'it';
-                $list = $which->[0];
-            }
-            elsif ($which->@* == @items) {
-                $is = 'are';
-                $it = 'them';
-                $list = (@items == 2)
-                         ? "both forms"
-                         : "all these forms";
-            }
-            else {
-                $is = 'are';
-                $it = 'them';
-                my $final = pop $which->@*;
-                $list = "the " . join ", ", $which->@*;
-                $list .= "," if $which->@* > 1;
-                $list .= " and $final forms";
-            }
+        my $is;
+        my $it;
+        my $list;
 
-            if ($which == \@deprecated) {
-                print $fh <<~"EOT";
+        if ($which->@* == 1) {
+            $is = 'is';
+            $it = 'it';
+            $list = $which->[0];
+        }
+        elsif ($which->@* == @items) {
+            $is = 'are';
+            $it = 'them';
+            $list = (@items == 2)
+                        ? "both forms"
+                        : "all these forms";
+        }
+        else {
+            $is = 'are';
+            $it = 'them';
+            my $final = pop $which->@*;
+            $list = "the " . join ", ", $which->@*;
+            $list .= "," if $which->@* > 1;
+            $list .= " and $final forms";
+        }
 
-                    C<B<DEPRECATED!>>  It is planned to remove $list
-                    from a future release of Perl.  Do not use $it for
-                    new code; remove $it from existing code.
-                    EOT
-            }
-            else {
-                print $fh <<~"EOT";
+        if ($which == \@deprecated) {
+            print $fh <<~"EOT";
 
-                    NOTE: $list $is B<experimental> and may change or be
-                    removed without notice.
-                    EOT
-            }
+                C<B<DEPRECATED!>>  It is planned to remove $list
+                from a future release of Perl.  Do not use $it for
+                new code; remove $it from existing code.
+                EOT
+        }
+        else {
+            print $fh <<~"EOT";
+
+                NOTE: $list $is B<experimental> and may change or be
+                removed without notice.
+                EOT
         }
     }
 
