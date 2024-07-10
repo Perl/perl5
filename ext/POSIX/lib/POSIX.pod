@@ -183,7 +183,19 @@ coordinate and the I<x> coordinate.  See also L<Math::Trig>.
 
 =item C<atexit>
 
-Not implemented.  C<atexit()> is C-specific: use C<END {}> instead, see L<perlmod>.
+The C<atexit()> function takes exactly one function to be called at
+process termination. Multiple function can be registered within the
+same process and they are all called in the reverse order of their
+registration; that is: last in, first out (LIFO).
+
+When a child process is created via C<fork()>, it inherits all
+registrated functions from its parent.
+
+The registration would croak if the function is neither a function
+(coderef) nor a object that overloads C<&{}>.
+
+See also L<perlmod> about C<END {}>, the native Perl syntax that is
+the alternative to C<atexit()>.
 
 =item C<atof>
 
