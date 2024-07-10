@@ -10,11 +10,11 @@ INSTALL - Build and Installation guide for perl 5.
 
 =head1 SYNOPSIS
 
-First, make sure you have an up-to-date version of Perl.  If you
-didn't get your Perl source from CPAN, check the latest version at
+First, make sure you have an up-to-date version of the Perl source code.  If
+you didn't get your Perl source from CPAN, check the latest version at
 L<https://www.cpan.org/src/>.  Perl uses a version scheme where even-numbered
-subreleases (like 5.8.x and 5.10.x) are stable maintenance releases and
-odd-numbered subreleases (like 5.7.x and 5.9.x) are unstable
+subreleases (like 5.38.x and 5.40.x) are stable maintenance releases and
+odd-numbered subreleases (like 5.39.x and 5.41.x) are unstable
 development releases.  Development releases should not be used in
 production environments.  Fixes and new features are first carefully
 tested in development releases and only if they prove themselves to be
