@@ -33,10 +33,10 @@ Each of these is explained in further detail below.
 The above commands will install Perl to F</usr/local> (or some other
 platform-specific directory -- see the appropriate file in F<hints/>.)
 If that's not okay with you, you can run Configure interactively, by
-just typing "sh Configure" (without the -de args). You can also specify
-any prefix location by adding C<"-Dprefix='/some/dir'"> to Configure's args.
+just typing C<sh Configure> (without the C<-de> argument). You can also specify
+any prefix location by adding C<-Dprefix='/some/dir'> to Configure's arguments.
 To explicitly name the perl binary, use the command
-"make install PERLNAME=myperl".
+C<make install PERLNAME=myperl>.
 
 Building perl from source requires an ANSI compliant C compiler.
 C89 with a minimal subset of C99 features is required. Some other
