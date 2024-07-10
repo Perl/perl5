@@ -1098,7 +1098,7 @@ is "@119797", "4 5 6", 'writing to array returned by bare block';
 }
 
 # v5.18 fails to return correct value from lvalue subroutine which returns
-# vec() and are called twice in rvalue context of one expression
+# vec() and is called twice in rvalue context of one expression
 {
     my $vec = '';
     sub wrap_vec : lvalue {
