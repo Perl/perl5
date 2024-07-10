@@ -3053,7 +3053,7 @@ When presented with something that might have several different
 interpretations, Perl uses the B<DWIM> (that's "Do What I Mean")
 principle to pick the most probable interpretation.  This strategy
 is so successful that Perl programmers often do not suspect the
-ambivalence of what they write.  But from time to time, Perl's
+ambiguity of what they write.  But from time to time, Perl's
 notions differ substantially from what the author honestly meant.
 
 This section hopes to clarify how Perl handles quoted constructs.
