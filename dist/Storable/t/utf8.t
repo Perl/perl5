@@ -22,32 +22,32 @@ use Storable qw(thaw freeze);
 use Test::More tests => 6;
 
 my $x = chr(1234);
-is($x, ${thaw freeze \$x});
+is($x, ${thaw freeze \$x}, "round trip one unicode character");
 
 # Long scalar
 $x = join '', map {chr $_} (0..1023);
-is($x, ${thaw freeze \$x});
+is($x, ${thaw freeze \$x}, "round trip Unicode string");
 
 # Char in the range 127-255 (probably) in utf8.  This just won't work for
 # EBCDIC for early Perls.
 $x = ($] lt 5.007_003) ? chr(175) : chr(utf8::unicode_to_native(175))
    . chr (256);
 chop $x;
-is($x, ${thaw freeze \$x});
+is($x, ${thaw freeze \$x}, "round strip a 128-255 character");
 
 # Storable needs to cope if a frozen string happens to be internal utf8
 # encoded
 
 $x = chr 256;
 my $data = freeze \$x;
-is($x, ${thaw $data});
+is($x, ${thaw $data}, "sanity check for upgraded frozen data");
 
 $data .= chr 256;
 chop $data;
-is($x, ${thaw $data});
+is($x, ${thaw $data}, "test for upgraded frozen data");
 
 
 $data .= chr 256;
 # This definitely isn't valid
 eval {thaw $data};
-like($@, qr/corrupt.*characters outside/);
+like($@, qr/corrupt.*characters outside/, "check error handling for added 256 code point");
