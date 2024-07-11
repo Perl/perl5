@@ -445,7 +445,7 @@ sub classify_input_line ($$$) {
                              (=?)             # $2
                              (\s*)            # $3
                              for (\s*)        # $4
-                             apidoc (_item | _defn)? # $5
+                             apidoc (\w*)     # $5
                              (\s*)            # $6
                              (.*?)            # $7
                              \s* \n
@@ -456,7 +456,7 @@ sub classify_input_line ($$$) {
     my $type_name = $5;
     my $arg = $7;
 
-    my $type = (! defined $type_name)
+    my $type = ($type_name eq "")
                ? PLAIN_APIDOC
                : ($type_name eq '_item')
                  ? APIDOC_ITEM
