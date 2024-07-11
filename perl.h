@@ -4398,9 +4398,6 @@ intrinsic function, see its documents for more details.
 void init_os_extras(void);
 #endif
 
-#ifdef UNION_ANY_DEFINITION
-UNION_ANY_DEFINITION;
-#else
 union any {
     void*       any_ptr;
     SV*         any_sv;
@@ -4423,7 +4420,6 @@ union any {
     void        (*any_dptr) (void*);
     void        (*any_dxptr) (pTHX_ void*);
 };
-#endif
 
 typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 
