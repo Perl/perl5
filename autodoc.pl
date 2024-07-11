@@ -454,11 +454,11 @@ sub classify_input_line ($$$) {
     my $type_name = $5;
     my $arg = $7;
 
-    my $type = (! defined $5)
+    my $type = (! defined $type_name)
                ? PLAIN_APIDOC
-               : ($5 eq '_item')
+               : ($type_name eq '_item')
                  ? APIDOC_ITEM
-                 : ($5 eq '_defn')
+                 : ($type_name eq '_defn')
                    ? APIDOC_DEFN
                    : ILLEGAL_APIDOC;
 
