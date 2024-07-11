@@ -224,7 +224,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<__CLASS__ is experimental|perldiag/"__CLASS__ is experimental">
+
+(S experimental::class) This warning is emitted if you use the C<__CLASS__>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
 
 =back
 
