@@ -49,18 +49,13 @@
  *
  * and add the 'b' flag in embed.fnc.
  *
- * The compilation of this file can be suppressed; see INSTALL
+ * The compilation of this file and the functions within it can be suppressed
+ * by adding this option to Configure:
  *
- * Some blurb for perlapi.pod:
-
- head1 Obsolete backwards compatibility functions
-
-Some of these are also deprecated.  You can exclude these from
-your compiled Perl by adding this option to Configure:
-C<-Accflags='-DNO_MATHOMS'>
-
-=cut
-
+ *      -Accflags='-DNO_MATHOMS'
+ *
+ * Some of the functions here are also deprecated.
+ *
  */
 
 
