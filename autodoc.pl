@@ -80,6 +80,7 @@ my $irrelevant_flags_re = qr/[ab eE G iI P rR vX?]/xx;
 my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
 
 use constant {
+              NOT_APIDOC         => -1,
               ILLEGAL_APIDOC     =>  0,  # Must be 0 so evaluates to 'false'
               APIDOC_DEFN        =>  1,
               PLAIN_APIDOC       =>  2,
@@ -445,10 +446,13 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (.*?)            # $7
                       \s* \n /x;
 
-sub check_api_doc_line ($$$) {
+sub classify_input_line ($$$) {
     my ($file, $line_num, $input) = @_;
 
-    return unless $input =~ $apidoc_re;
+    return (NOT_APIDOC, $input) unless $input =~ $apidoc_re;
+
+    my $type_name = $5;
+    my $arg = $7;
 
     my $type = (! defined $5)
                ? PLAIN_APIDOC
@@ -467,12 +471,8 @@ sub check_api_doc_line ($$$) {
                          && (    length $6 > 0
                              || (   $type == APIDOC_ITEM
                                  && substr($7, 0, 1) eq '|'));
-    my $proto_as_written = $7;
-    my $proto = $proto_as_written;
-    $proto = "||$proto" if $proto !~ /\|/;
-    my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
 
-    $name && $is_in_proper_form or die <<EOS;
+    $type != ILLEGAL_APIDOC && $is_in_proper_form or die <<EOS;
 Bad apidoc at $file line $line_num:
   $input
 Expected:
@@ -482,13 +482,27 @@ Expected:
 (or 'apidoc_item' or any of the above instead with 'apidoc_defn')
 EOS
 
-    my $non_item_flags = $flags =~ s/$item_flags_re//gr;
-    die "[$non_item_flags] illegal in apidoc_item "
-      . where_from_string($file, $line_num)
-      . " :\n$input"                if $type == APIDOC_ITEM && $non_item_flags;
+    return ($type, $arg);
+}
+
+sub check_api_doc_line ($$$) {
+    my ($file, $line_num, $input) = @_;
+
+    my ($type, $arg) = classify_input_line($file, $line_num, $input);
+    return if $type == NOT_APIDOC;
+
+    my $proto_as_written = $arg;
+    my $proto = $proto_as_written;
+    $proto = "||$proto" if $proto !~ /\|/;
+    my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
 
     return ($name, $flags, $ret_type, $type, $proto_as_written, @args)
                                                 if $type == ILLEGAL_APIDOC;
+
+    my $non_item_flags = $flags =~ s/$item_flags_re//gr;
+    die "[$non_item_flags] illegal in apidoc_item "
+      . where_from_string($file, $line_num)
+      . " :\n$arg"                  if $type == APIDOC_ITEM && $non_item_flags;
 
     if ($flags =~ /#/) {
         die "Return type must be empty for '$name' "
