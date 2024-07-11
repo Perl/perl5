@@ -472,7 +472,9 @@ sub classify_input_line ($$$) {
                              || (   $type == APIDOC_ITEM
                                  && substr($7, 0, 1) eq '|'));
 
-    $type != ILLEGAL_APIDOC && $is_in_proper_form or die <<EOS;
+    return ($type, $arg) if $is_in_proper_form;
+
+    die <<EOS;
 Bad apidoc at $file line $line_num:
   $input
 Expected:
@@ -482,7 +484,6 @@ Expected:
 (or 'apidoc_item' or any of the above instead with 'apidoc_defn')
 EOS
 
-    return ($type, $arg);
 }
 
 sub check_api_doc_line ($$$) {
