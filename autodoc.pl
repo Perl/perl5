@@ -434,20 +434,22 @@ sub check_and_add_proto_defn {
                                                  };
 }
 
-# Somewhat loose match for an apidoc line so we can catch minor typos.
-# Parentheses are used to capture portions so that below we verify
-# that things are the actual correct syntax.
-my $apidoc_re = qr/ ^ (\s*)            # $1
-                      (=?)             # $2
-                      (\s*)            # $3
-                      for (\s*)        # $4
-                      apidoc (_item | _defn )?  # $5
-                      (\s*)            # $6
-                      (.*?)            # $7
-                      \s* \n /x;
-
 sub classify_input_line ($$$) {
     my ($file, $line_num, $input) = @_;
+
+    # Somewhat loose match for an apidoc line so we can catch minor typos.
+    # Parentheses are used to capture portions so that just below we verify
+    # that things are the actual correct syntax.
+    my $apidoc_re = qr/ ^
+                             (\s*)            # $1
+                             (=?)             # $2
+                             (\s*)            # $3
+                             for (\s*)        # $4
+                             apidoc (_item | _defn)? # $5
+                             (\s*)            # $6
+                             (.*?)            # $7
+                             \s* \n
+                           /x;
 
     return (NOT_APIDOC, $input) unless $input =~ $apidoc_re;
 
