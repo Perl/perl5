@@ -474,16 +474,18 @@ sub classify_input_line ($$$) {
 
     return ($type, $arg) if $is_in_proper_form;
 
-    die <<EOS;
-Bad apidoc at $file line $line_num:
-  $input
-Expected:
-  =for apidoc flags|returntype|name|arg|arg|...
-  =for apidoc flags|returntype|name
-  =for apidoc name
-(or 'apidoc_item' or any of the above instead with 'apidoc_defn')
-EOS
+    chomp $input;
+    my $where_from = where_from_string($file, $line_num);
+    die <<~EOS;
+        '$input' $where_from is not of proper form
 
+        Expected ([...] means optional; | is literal, not a meta char):
+        =for apidoc         name
+        =for apidoc         [flags] | [returntype] | name [|arg1] [|arg2] [|...]
+        =for apidoc_item    name
+        =for apidoc_item    [flags] | [returntype] | name [|arg1] [|arg2] [|...]
+        =for apidoc_defn    flags|returntype|name[|arg|arg|...]
+        EOS
 }
 
 sub check_api_doc_line ($$$) {
