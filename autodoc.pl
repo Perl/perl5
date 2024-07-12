@@ -564,19 +564,12 @@ sub classify_input_line ($$$$) {
         EOS
 }
 
-sub check_api_doc_line ($$$) {
-    my ($file, $line_num, $input) = @_;
-
-    my ($type, $arg) = classify_input_line($file, $line_num, $input, 0);
-    return if $type == NOT_APIDOC;
-
+sub handle_apidoc_line ($$$$) {
+    my ($file, $line_num, $type, $arg) = @_;
     my $proto_as_written = $arg;
     my $proto = $proto_as_written;
     $proto = "||$proto" if $proto !~ /\|/;
     my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
-
-    return ($name, $flags, $ret_type, $type, $proto_as_written, @args)
-                                                if $type == ILLEGAL_APIDOC;
 
     my $non_item_flags = $flags =~ s/$item_flags_re//gr;
     die "[$non_item_flags] illegal in apidoc_item "
@@ -712,9 +705,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
               . " '$arg' " . where_from_string($file, $line_num);
         }
         elsif ($outer_line_type == APIDOC_DEFN) {
-            ($element_name, $flags, $ret_type, $line_type, @args) =
-                                check_api_doc_line($file, $line_num, $input);
-            next;
+            handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
+            next;   # 'handle_apidoc_line' handled everything for this type
         }
         elsif ($outer_line_type == APIDOC_SECTION) {
 
@@ -731,8 +723,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         }
         elsif ($outer_line_type == PLAIN_APIDOC) {
             ($element_name, $flags, $ret_type, $line_type, @args) =
-                                check_api_doc_line($file, $line_num, $input);
-            next if $line_type == APIDOC_DEFN;
+                  handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
             if ($ret_type) {
             }
             elsif ($flags =~ /[my]/)  {
@@ -811,7 +802,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             last if $inner_line_type != APIDOC_ITEM;
 
             my ($item_name, $item_flags, $item_ret_type, $line_type, @item_args)
-                                = check_api_doc_line($file, $line_num, $input);
+                = handle_apidoc_line($file, $line_num, $inner_line_type, $arg);
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
