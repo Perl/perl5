@@ -707,7 +707,16 @@ sub autodoc ($$) { # parse a file and extract documentation info
                                                           $input, $file_is_C);
         next if $outer_line_type == NOT_APIDOC;
 
-        if ($outer_line_type == APIDOC_SECTION) {
+        if ($outer_line_type == APIDOC_ITEM) {
+            die "apidoc_item doesn't immediately follow an apidoc entry:"
+              . " '$arg' " . where_from_string($file, $line_num);
+        }
+        elsif ($outer_line_type == APIDOC_DEFN) {
+            ($element_name, $flags, $ret_type, $line_type, @args) =
+                                check_api_doc_line($file, $line_num, $input);
+            next;
+        }
+        elsif ($outer_line_type == APIDOC_SECTION) {
 
             # Here the line starts a new section ...
             $section = $arg;
@@ -719,15 +728,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
             die "Unknown section name '$section' in $file near line $line_num\n"
                                     unless defined $valid_sections{$section};
-        }
-        elsif ($outer_line_type == APIDOC_ITEM) {
-            die "apidoc_item doesn't immediately follow an apidoc entry:"
-              . " '$input' " . where_from_string($file, $line_num);
-        }
-        elsif ($outer_line_type == APIDOC_DEFN) {
-            ($element_name, $flags, $ret_type, $line_type, @args) =
-                                check_api_doc_line($file, $line_num, $input);
-            next;
         }
         elsif ($outer_line_type == PLAIN_APIDOC) {
             ($element_name, $flags, $ret_type, $line_type, @args) =
