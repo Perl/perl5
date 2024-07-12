@@ -858,7 +858,14 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # And treat all-spaces as nothing at all
         undef $text unless $text =~ /\S/;
 
-        if ($element_name) {
+        if ($outer_line_type == APIDOC_SECTION) {
+            if ($text) {
+                $valid_sections{$section}{header} = "" unless
+                                    defined $valid_sections{$section}{header};
+                $valid_sections{$section}{header} .= "\n$text";
+            }
+        }
+        else {
 
             # Here, we have accumulated into $text, the pod for $element_name
 
@@ -909,11 +916,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
             $docs{$destpod}{$section}{$element_name}{file} = $file;
             $items[0]{flags} = $flags;
             push $docs{$destpod}{$section}{$element_name}{items}->@*, @items;
-        }
-        elsif ($text) {
-            $valid_sections{$section}{header} = "" unless
-                                    defined $valid_sections{$section}{header};
-            $valid_sections{$section}{header} .= "\n$text";
         }
 
         # We already have the first line of what's to come in $input
