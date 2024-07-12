@@ -720,10 +720,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "Unknown section name '$section' in $file near line $line_num\n"
                                     unless defined $valid_sections{$section};
         }
-        elsif ($outer_line_type == ILLEGAL_APIDOC) {
-            die "Unknown apidoc-type line '$arg' "
-              . where_from_string($file, $line_num);
-        }
         elsif ($outer_line_type == APIDOC_ITEM) {
             die "apidoc_item doesn't immediately follow an apidoc entry:"
               . " '$input' " . where_from_string($file, $line_num);
@@ -733,7 +729,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                                 check_api_doc_line($file, $line_num, $input);
             next;
         }
-        else {
+        elsif ($outer_line_type == PLAIN_APIDOC) {
             ($element_name, $flags, $ret_type, $line_type, @args) =
                                 check_api_doc_line($file, $line_num, $input);
             next if $line_type == APIDOC_DEFN;
@@ -766,6 +762,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
                            ret_type => $ret_type,
                            args     => [ @args ],
                          };
+        }
+        else {
+            die "Unknown apidoc-type line '$arg' "
+              . where_from_string($file, $line_num);
         }
 
         # Here we have processed the initial line in the heading text or API
