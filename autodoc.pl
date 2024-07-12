@@ -720,10 +720,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "Unknown section name '$section' in $file near line $line_num\n"
                                     unless defined $valid_sections{$section};
         }
-        elsif ($input !~ /^ =for [ ]+ ( apidoc (?: _defn)? ) \b /x) {
-            die "Unknown apidoc-type line '$input' "
-              . where_from_string($file, $line_num)
-                                            unless $input=~ /^=for apidoc_item/;
+        elsif ($outer_line_type == ILLEGAL_APIDOC) {
+            die "Unknown apidoc-type line '$arg' "
+              . where_from_string($file, $line_num);
+        }
+        elsif ($outer_line_type == APIDOC_ITEM) {
             die "apidoc_item doesn't immediately follow an apidoc entry:"
               . " '$input' " . where_from_string($file, $line_num);
         }
