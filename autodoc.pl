@@ -783,7 +783,12 @@ sub autodoc ($$) { # parse a file and extract documentation info
         $text = "";
         my $head_ender_num = ($file_is_C) ? 1 : "";
         while (defined($input = $get_next_line->())) {
+                (my $inner_line_type, $arg) = classify_input_line($file,
+                                                                  $line_num,
+                                                                  $input,
+                                                                  $file_is_C);
 
+            if ($inner_line_type == NOT_APIDOC) {
             last if $input =~ /^=cut/x;
             last if $input =~ /^=head$head_ender_num/;
 
@@ -797,18 +802,16 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 last;
             }
 
-            if ($input !~ / ^ =for [ ]+ apidoc /x) {
                 $text .= $input;
                 next;
             }
 
             # Here, the line is an apidoc line.  All but apidoc_item terminate
             # the text being accumulated.
-            last if $input !~ / ^ =for [ ]+ apidoc_item /x;
+            last if $inner_line_type != APIDOC_ITEM;
 
             my ($item_name, $item_flags, $item_ret_type, $line_type, @item_args)
                                 = check_api_doc_line($file, $line_num, $input);
-            last unless $line_type == APIDOC_ITEM;
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
