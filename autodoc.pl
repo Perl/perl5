@@ -681,7 +681,7 @@ sub destination_pod ($) {
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($input, $line_num, $header, $section);
+    my($line_num, $section);
 
     $section = $initial_file_section{$file}
                                     if defined $initial_file_section{$file};
@@ -691,25 +691,26 @@ sub autodoc ($$) { # parse a file and extract documentation info
     # Count lines easier
     my $get_next_line = sub { $line_num++; return <$fh> };
 
-    # Read the file
-    while ($input = $get_next_line->()) {
-        last unless defined $input;
-        next unless (    $input =~ / ^ =for [ ]+ apidoc /x
-                                      # =head1 lines only have effect in C files
-                     || ($file_is_C && $input =~ /^=head1/));
+    # Read the file.  Most lines are of no interest to this program, but
+    # individual 'apidoc_defn' lines are, as well as are blocks introduced by
+    # 'apidoc_section' and 'apidoc'.  Text in those blocks is used
+    # respectively for the section heading or pod.  Between plain 'apidoc'
+    # lines and its pod, may be any number of 'apidoc_item' lines that give
+    # additional api elements that the pod applies to.
 
-        # Here, the line introduces a portion of the input that we care about.
-        # Either it is for an API element, or heading text which we expect
-        # will be used for elements later in the file
-
+    while (defined (my $input = $get_next_line->())) {
         my ($text, $element_name, $ret_type, $line_type, $proto_as_written);
         my (@args, @items);
         my $flags = "";
 
-        # If the line starts a new section ...
-        if ($input=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
+        my ($outer_line_type, $arg) = classify_input_line($file, $line_num,
+                                                          $input, $file_is_C);
+        next if $outer_line_type == NOT_APIDOC;
 
-            $section = $1;
+        if ($outer_line_type == APIDOC_SECTION) {
+
+            # Here the line starts a new section ...
+            $section = $arg;
             if ($section =~ / ^ \$ /x) {
                 $section .= '_scn' unless $section =~ / _scn $ /x;
                 $section = eval "$section";
