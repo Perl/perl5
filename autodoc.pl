@@ -408,6 +408,36 @@ sub check_and_add_proto_defn {
         $definition_type
        ) = @_;
 
+    # This function constructs a hash describing what we know so far about the
+    # API element '$element', as determined by 'apidoc'-type lines scattered
+    # throughout the source code tree.
+    #
+    # This includes how to use it, and if documentation is expected for it,
+    # and if any such documentation has been found.  (The documentation itself
+    # is stored separately, as any number of elements may share the same pod.)
+    #
+    # Except in limited circumstances, only one definition is allowed; that is
+    # checked for.
+    #
+    # The parameters: $flags, $ret_type, and $args_ref are sufficient to
+    # define the usage.  They are checked for legality, to the limited extent
+    # possible.  The arguments may include conventions like NN, which is a
+    # hint internal to embed.fnc, but which someone using the API should not
+    # be expected to know.  This function strips those.
+    #
+    # As we parse the source, we may find an apidoc-type line that refers to
+    # $element before we have found the usage information.  A hash is
+    # constructed in this case that is effectively a place-holder for the
+    # usage, waiting to be filled in later in the parse.  A place-holder call
+    # is signalled by all three mentioned parameters being empty.  These
+    # lines, however, are markers in the code where $element is documented.
+    # So they indicate that there is pod available for it.  That information
+    # is added to the hash.
+    #
+    # It is possible for this to be called with a line that both defines the
+    # usage signature for $element, and marks the place in the source where
+    # the documentation is found.  Handling that happens naturally here.
+
     my $flags = $raw_flags =~ s/$irrelevant_flags_re//gr;
     my $illegal_flags = $flags =~ s/$known_flags_re//gr;
     if ($illegal_flags) {
@@ -424,8 +454,20 @@ sub check_and_add_proto_defn {
     my $docs_expected = $flags_sans_d =~ s/d//g;
     my $docs_hidden = $flags =~ /h/;
 
+    # Does this call define the signature for $element?  It always does for
+    # APIDOC_DEFN lines, and for the other types when one of the usage
+    # parameters is non-empty, except when the flags indicate the actual
+    # definition is in some other pod.
+    my $is_usage_defining_occurrence =
+            (    $definition_type == APIDOC_DEFN
+             || (   ! $docs_hidden
+                 && (   $flags_sans_d
+                     || $ret_type
+                     || ($args_ref && $args_ref->@*))));
+
     # Check this new entry against an existing one.
-    if ($elements{$element})
+    if (   $is_usage_defining_occurrence
+        && $elements{$element} && $elements{$element}{proto_defined})
     {
             # Some functions in embed.fnc have multiple definitions depending
             # on the platform's Configuration.  Currently we just use the
@@ -445,6 +487,10 @@ sub check_and_add_proto_defn {
               . " new one is " . where_from_string($file, $line_num);
     }
 
+    # Here, any existing entry for this element is a placeholder.  If none,
+    # create one.  If a placeholder entry, override it with this new
+    # information.
+    if ($is_usage_defining_occurrence || ! $elements{$element}) {
         $elements{$element}{name} = $element;
         $elements{$element}{raw_flags} = $raw_flags; # Keep for debugging, etc.
         $elements{$element}{flags} = $flags;
@@ -452,12 +498,25 @@ sub check_and_add_proto_defn {
         $elements{$element}{args} = \@munged_args;
         $elements{$element}{file} = $file;
         $elements{$element}{line_num} = $line_num // 0;
-        $elements{$element}{docs_expected} = $docs_expected;
+
+        # Don't reset expecting documentation.
+        $elements{$element}{docs_expected} = $docs_expected
+                                      unless $elements{$element}{docs_expected};
+
+        if ($is_usage_defining_occurrence) {
             $elements{$element}{proto_defined} = {
                                                   type => $definition_type,
                                                   file     => $file,
                                                   line_num => $line_num // 0,
                                                  };
+        }
+    }
+
+    # All but this type are for defining pod
+    if ($definition_type != APIDOC_DEFN) {
+            $elements{$element}{docs_found}{file} = $file;
+            $elements{$element}{docs_found}{line_num} = $line_num // 0;
+    }
 }
 
 sub classify_input_line ($$$$) {
