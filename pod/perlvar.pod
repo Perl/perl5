@@ -2626,7 +2626,7 @@ X<$#>
 
 C<$#> was a variable that could be used to format printed numbers.
 After a deprecation cycle, its magic was removed in Perl v5.10.0 and
-using it now triggers a warning: C<$# is no longer supported>.
+using it now triggers a compilation error: C<$# is no longer supported>.
 
 This is not the sigil you use in front of an array name to get the
 last index, like C<$#array>.  That's still how you get the last index
@@ -2641,7 +2641,7 @@ X<$*>
 
 C<$*> was a variable that you could use to enable multiline matching.
 After a deprecation cycle, its magic was removed in Perl v5.10.0.
-Using it now triggers a warning: C<$* is no longer supported>.
+Using it now triggers a compilation error: C<$* is no longer supported>.
 You should use the C</s> and C</m> regexp modifiers instead.
 
 Deprecated in Perl 5.
