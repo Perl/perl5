@@ -654,10 +654,13 @@ sub handle_apidoc_line ($$$$) {
     $proto = "||$proto" if $proto !~ /\|/;
     my ($flags, $ret_type, $name, @args) = split /\s*\|\s*/, $proto;
 
-    my $non_item_flags = $flags =~ s/$item_flags_re//gr;
-    die "[$non_item_flags] illegal in apidoc_item "
-      . where_from_string($file, $line_num)
-      . " :\n$arg"                  if $type == APIDOC_ITEM && $non_item_flags;
+    if ($type == APIDOC_ITEM) {
+        if (my $non_item_flags = $flags =~ s/$item_flags_re//gr) {
+            die "[$non_item_flags] illegal in apidoc_item "
+              . where_from_string($file, $line_num)
+              . " :\n$arg";
+        }
+    }
 
     if ($flags =~ /#/) {
         die "Return type must be empty for '$name' "
