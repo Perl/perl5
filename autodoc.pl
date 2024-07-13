@@ -121,7 +121,6 @@ my %described_elsewhere;
 #
 
 my %docs;
-my %seen;
 my %elements;
 my %deferreds;  # Elements whose usage hasn't been found by the time they are
                 # parsed
@@ -513,8 +512,20 @@ sub check_and_add_proto_defn {
 
     # All but this type are for defining pod
     if ($definition_type != APIDOC_DEFN) {
+        if (   $elements{$element}{docs_found}
+            && ! $docs_hidden
+            && $elements{$element}{flags} !~ /h/ )
+        {
+            die "Attempting to document '$element' "
+              .  where_from_string($file, $line_num)
+              . "; it was already documented "
+              . where_from_string($elements{$element}{docs_found}{file},
+                                  $elements{$element}{docs_found}{line_num});
+        }
+        else {
             $elements{$element}{docs_found}{file} = $file;
             $elements{$element}{docs_found}{line_num} = $line_num // 0;
+        }
     }
 }
 
@@ -685,11 +696,6 @@ sub handle_apidoc_line ($$$$) {
                                      $ret_type, \@args, APIDOC_DEFN);
     }
     else {
-        if ($existing_proto) {
-            # This line indicates we're about to document $name
-            warn "embed.fnc entry '$name' missing 'd' flag"
-                                    unless $existing_proto->{docs_expected};
-        }
         check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
                                  $ret_type, \@args, $type);
 
@@ -805,14 +811,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
         elsif ($outer_line_type == PLAIN_APIDOC) {
             ($element_name, $flags, $ret_type, $line_type, @args) =
                   handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
-
-            if (exists $seen{$element_name} && $flags !~ /h/) {
-                die ("'$element_name' in $file was already documented in"
-                   . " $seen{$element_name}");
-            }
-            else {
-                $seen{$element_name} = $file;
-            }
 
             # For uniformity of handling, this element is set to be
             # just the first of any remaining ones in the group.  Setting the
