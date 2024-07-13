@@ -965,11 +965,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 $podname =~ s/\.pod//;
                 $text = "Described in L<$podname>.\n";
 
-                # Don't output a usage example for linked to documentation if
-                # it is trivial (has no arguments) and we aren't to add a
-                # semicolon
-                $flags .= 'U' if $flags =~ /n/ && $flags !~ /[U;]/;
-
                 # Keep track of all the pod files that we refer to.
                 push $described_elsewhere{$podname}->@*, $podname;
             }
