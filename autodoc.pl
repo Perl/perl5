@@ -404,7 +404,9 @@ sub where_from_string($;$) {
 }
 
 sub check_and_add_proto_defn {
-    my ($element, $file, $line_num, $raw_flags, $ret_type, $args_ref) = @_;
+    my ($element, $file, $line_num, $raw_flags, $ret_type, $args_ref,
+        $definition_type
+       ) = @_;
 
     my $flags = $raw_flags =~ s/$irrelevant_flags_re//gr;
     my $illegal_flags = $flags =~ s/$known_flags_re//gr;
@@ -452,6 +454,7 @@ sub check_and_add_proto_defn {
         $elements{$element}{line_num} = $line_num // 0;
         $elements{$element}{docs_expected} = $docs_expected;
             $elements{$element}{proto_defined} = {
+                                                  type => $definition_type,
                                                   file     => $file,
                                                   line_num => $line_num // 0,
                                                  };
@@ -618,7 +621,7 @@ sub handle_apidoc_line ($$$$) {
             # can say that this macro is documented.  (A warning will be
             # raised if the mate line is missing.)
             check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
-                                     $ret_type, \@args);
+                                     $ret_type, \@args, APIDOC_DEFN);
     }
     elsif ($existing_proto) {
         # This line indicates we're about to document $name
@@ -2034,7 +2037,13 @@ foreach (@{(setup_embed())[0]}) {
                                  @{$embed}{qw(flags return_type name args)};
     check_and_add_proto_defn($func, $file,
                              undef,     # Unknown line number in embed.fnc
-                             $flags, $ret_type, $args);
+                             $flags, $ret_type, $args,
+
+                             # This is like an 'apidoc_defn' line, in that it
+                             # defines the prototype without furnishing any
+                             # documentation
+                             APIDOC_DEFN
+                            );
 }
 
 # glob() picks up docs from extra .c or .h files that may be in unclean
