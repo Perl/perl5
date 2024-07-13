@@ -125,7 +125,6 @@ my %seen;
 my %elements;
 my %deferreds;  # Elements whose usage hasn't been found by the time they are
                 # parsed
-my %missing;
 my %missing_macros;
 
 my $link_text = "Described in";
@@ -493,7 +492,7 @@ sub check_and_add_proto_defn {
     if ($is_usage_defining_occurrence || ! $elements{$element}) {
         $elements{$element}{name} = $element;
         $elements{$element}{raw_flags} = $raw_flags; # Keep for debugging, etc.
-        $elements{$element}{flags} = $flags;
+        $elements{$element}{flags} = $flags_sans_d;
         $elements{$element}{ret_type} =$ret_type;
         $elements{$element}{args} = \@munged_args;
         $elements{$element}{file} = $file;
@@ -682,21 +681,21 @@ sub handle_apidoc_line ($$$$) {
             check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
                                      $ret_type, \@args, APIDOC_DEFN);
     }
-    elsif ($existing_proto) {
-        # This line indicates we're about to document $name
-        warn "embed.fnc entry '$name' missing 'd' flag"
-                                    unless $existing_proto->{'flags'} =~ /d/;
+    else {
+        if ($existing_proto) {
+            # This line indicates we're about to document $name
+            warn "embed.fnc entry '$name' missing 'd' flag"
+                                    unless $existing_proto->{docs_expected};
+        }
+        check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
+                                 $ret_type, \@args, $type);
 
-        warn "embed.fnc entry overrides redundant information in"
-           . " '$proto_as_written' in $file" if $flags || $ret_type || @args;
-
+        $existing_proto = $elements{$name};
         $flags = $existing_proto->{flags};
         $ret_type = $existing_proto->{ret_type};
-        @args = $existing_proto->{args}->@*;
-
-        # Deleting the line from the hash indicates it will no longer be
-        # an orphan
-        delete $elements{$name};
+        @args = ($existing_proto->{args})
+                ? $existing_proto->{args}->@*
+                : ();
     }
 
     return ($name, $flags, $ret_type, $type, @args);
@@ -810,10 +809,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 # Macros and typedefs are allowed to not be in embed.fnc.
             }
             elsif ($flags ne "")  {
-
-                # Not in embed.fnc, and is not a macro nor typedef, so the
-                # actual definition is missing.
-                $missing{$element_name} = $file;
             }
 
             if (exists $seen{$element_name} && $flags !~ /h/) {
@@ -922,9 +917,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
                         file    => $file,   # Just for any error message
                      };
             }
-
-            # This line shows that this element is documented.
-            delete $elements{$item_name};
         }
 
         # Here, are done accumulating the text for this item.  Trim it
@@ -2214,12 +2206,17 @@ for my $group_name (keys %deferreds) {
     }
 }
 
+my %missing;
 for (sort keys %elements) {
-    next unless $elements{$_}{docs_expected};
+    next unless $elements{$_}{docs_expected} xor $elements{$_}{docs_found};
+    if ($elements{$_}{docs_found}) {
+        $missing{$_} = $elements{$_}{file};
+        next;
+    }
+
     next if $elements{$_}{flags} =~ /h/;
     warn "no docs for $_\n";
 }
-
 
 foreach (sort keys %missing) {
     warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc"
@@ -2232,10 +2229,12 @@ my %intern = ( podname => 'perlintern', docs => $docs{'intern'} );
 # List of funcs in the public API that aren't also marked as core-only,
 # experimental nor deprecated.
 my @undocumented_api =    grep {        $elements{$_}{flags} =~ /A/
+                                   && ! $elements{$_}{docs_found}
                                    && ! $docs{api}{$_}
                                } keys %elements;
 # Same for perlintern
 my @undocumented_intern = grep {        $elements{$_}{flags} !~ /[AS]/
+                                   && ! $elements{$_}{docs_found}
                                    && ! $docs{intern}{$_}
                                } keys %elements;
 
