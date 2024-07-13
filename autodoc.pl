@@ -805,14 +805,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
         elsif ($outer_line_type == PLAIN_APIDOC) {
             ($element_name, $flags, $ret_type, $line_type, @args) =
                   handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
-            if ($ret_type) {
-            }
-            elsif ($flags =~ /[my]/)  {
-
-                # Macros and typedefs are allowed to not be in embed.fnc.
-            }
-            elsif ($flags ne "")  {
-            }
 
             if (exists $seen{$element_name} && $flags !~ /h/) {
                 die ("'$element_name' in $file was already documented in"
