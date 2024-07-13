@@ -420,6 +420,28 @@ sub check_and_add_proto_defn {
 
     my $flags_sans_d = $flags;
     my $docs_expected = $flags_sans_d =~ s/d//g;
+    my $docs_hidden = $flags =~ /h/;
+
+    # Check this new entry against an existing one.
+    if ($elements{$element})
+    {
+            # Some functions in embed.fnc have multiple definitions depending
+            # on the platform's Configuration.  Currently we just use the
+            # first one encountered in that file.
+            return if $file eq 'embed.fnc'
+                                   && $elements{$element}{file} eq 'embed.fnc';
+
+            # Use the existing entry if both it and this new attempt to create
+            # one have the 'h' flag set.  This flag indicates that the entry
+            # is just a reference to the pod where the element is actually
+            # documented, so multiple such lines can peacefuly coexist.
+            return if $docs_hidden && $elements{$element}{flags} =~ /h/;
+
+            die "There already is an existing prototype for '$element' defined "
+              . where_from_string($elements{$element}{proto_defined}{file},
+                                  $elements{$element}{proto_defined}{line_num})
+              . " new one is " . where_from_string($file, $line_num);
+    }
 
         $elements{$element}{name} = $element;
         $elements{$element}{raw_flags} = $raw_flags; # Keep for debugging, etc.
@@ -591,17 +613,12 @@ sub handle_apidoc_line ($$$$) {
     # completely there, but not here
     my $existing_proto = $elements{$name};
     if ($type == APIDOC_DEFN) {
-        if ($existing_proto) {
-            warn "Using embed.fnc entry for $name";
-        }
-        else {
             # We expect this line to furnish the information to a
             # corresponding apidoc line elsewhere in the source.  Hence, we
             # can say that this macro is documented.  (A warning will be
             # raised if the mate line is missing.)
             check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
                                      $ret_type, \@args);
-        }
     }
     elsif ($existing_proto) {
         # This line indicates we're about to document $name
