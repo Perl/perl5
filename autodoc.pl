@@ -1687,10 +1687,6 @@ sub docout ($$$) { # output the docs for one function group
             my $item = $$item_ref;
             my $name = $item->{name};
             my $flags = $item->{flags};
-            my $has_U_flag = $flags =~ /U/;
-
-            warn("'U' and ';' flags are incompatible") if $has_U_flag
-                                                       && $flags =~ /;/;
 
             print $fh "\nNOTE: the C<perl_$name()> form is",
                       " B<deprecated>.\n" if $flags =~ /O/;
@@ -1700,12 +1696,16 @@ sub docout ($$$) { # output the docs for one function group
                                   $item->{proto_defined}{line_num})
                                         if $flags =~ /u/ && $flags !~ /[my]/;
 
+            my $has_semicolon = $flags =~ /;/;
+            warn "'U' and ';' flags are incompatible"
+               . where_from_string($item->{file}, $item->{line_num})
+                                            if $flags =~ /U/ && $has_semicolon;
+
             # U means to not display the prototype; and there really isn't a
             # single good canonical signature for a typedef, so they aren't
             # displayed
-            next if $has_U_flag || $flags =~ /y/;
+            next if $flags =~ /[Uy]/;
 
-            my $has_semicolon = $flags =~ /;/;
             my $has_args = $flags !~ /n/;
             my $ret = $item->{ret_type} // "";
 
