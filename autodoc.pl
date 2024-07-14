@@ -888,8 +888,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
         elsif ($outer_line_type == PLAIN_APIDOC) {
             my $leader_ref =
                   handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
-            $element_name = $$leader_ref->{name};
-            $flags = $$leader_ref->{flags};
             $destpod = destination_pod($$leader_ref->{flags});
 
             push @items, $leader_ref;
@@ -978,13 +976,15 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
         }
         else {
+            my $item0 = ${$items[0]};
+            my $element_name = $item0->{name};
 
             # Here, we have accumulated into $text, the pod for $element_name
 
             die "No =for apidoc_section nor =head1 "
               . where_from_string($file, $line_num)
               . " for'$element_name'\n"             unless defined $section;
-            my $is_link_only = ($flags =~ /h/);
+            my $is_link_only = ($item0->{flags} =~ /h/);
             if (   ! $is_link_only
                 && exists $docs{$destpod}{$section}{$element_name})
             {
