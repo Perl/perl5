@@ -13,7 +13,7 @@ BEGIN {
 use utf8;
 use open qw( :utf8 :std );
 
-plan tests => 90;
+plan tests => 103;
 
 $a = {};
 bless $a, "Bòb";
@@ -159,4 +159,39 @@ ok (!splàtt->isa('plòp'));
 ok (!splàtt->isa('zlòpp'));
 ok (splàtt->isa('plòp'));
 
+#
+# Check that ->can() can now accept a list of methods
+#
 
+package Parent {
+    sub new { return bless {}, shift }
+    sub foo { return __PACKAGE__ }
+    sub bar { return __PACKAGE__ }
+}
+package Child {
+    our @ISA = qw(Parent);
+    sub bar { return __PACKAGE__ }
+    sub baz { return __PACKAGE__ }
+}
+
+my $foo        = \&Parent::foo;
+my $parent_bar = \&Parent::bar;
+my $child_bar  = \&Child::bar;
+my $baz        = \&Child::baz;
+
+ok( my @methods = Child->can(qw(foo bar baz)) );
+is(scalar @methods, 3, 'should return 3 methods');
+is( builtin::refaddr($methods[0]), builtin::refaddr($foo), 'foo should return our parent method' );
+is( builtin::refaddr($methods[1]), builtin::refaddr($child_bar), 'bar should return our child method');
+is( builtin::refaddr($methods[2]), builtin::refaddr($baz), 'baz should return our child method' );
+ok( Child->can(qw(foo bar baz)), 'can(@methods) in scalar content should return a true value' );
+
+my $child = Child->new;
+ok( @methods = $child->can(qw(bar baz)) );
+is(scalar @methods, 2, 'should return 2 methods');
+is( builtin::refaddr($methods[0]), builtin::refaddr($child_bar), 'bar should return our child method' );
+is( builtin::refaddr($methods[1]), builtin::refaddr($baz), 'baz should return our child method' );
+ok( scalar $child->can(qw(bar baz)), 'can(@methods) in scalar content should return a true value' );
+
+ok( !Child->can(qw(foo baz no_such_method)), 'can(@methods) with non-existent methods should already return nothing' );
+ok( !scalar Child->can(qw(foo baz no_such_method)), 'can(@methods) with non-existent methods should return false in scalar context' );

@@ -469,21 +469,19 @@ XS(XS_UNIVERSAL_import_unimport)
     XSRETURN_EMPTY;
 }
 
-
 XS(XS_UNIVERSAL_can); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_can)
 {
     dXSARGS;
     SV   *sv;
-    SV   *rv;
     HV   *pkg = NULL;
     GV   *iogv;
+    int i;
 
-    if (items != 2)
-        croak_xs_usage(cv, "object-ref, method");
+    if (items < 2)
+        croak_xs_usage(cv, "object-ref, method, ...");
 
     sv = ST(0);
-
     SvGETMAGIC(sv);
 
     /* Reject undef and empty string.  Note that the string form takes
@@ -491,8 +489,6 @@ XS(XS_UNIVERSAL_can)
        invocant as the empty string, though it is a dualvar. */
     if (!SvOK(sv) || (SvPOK(sv) && !SvCUR(sv)))
         XSRETURN_UNDEF;
-
-    rv = &PL_sv_undef;
 
     if (SvROK(sv)) {
         sv = MUTABLE_SV(SvRV(sv));
@@ -512,13 +508,21 @@ XS(XS_UNIVERSAL_can)
     }
 
     if (pkg) {
-        GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(1), 0);
-        if (gv && isGV(gv))
-            rv = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
+        for (i = 1; i < items; i++) {
+            GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(i), 0);
+            if (!gv || !isGV(gv) || !GvCV(gv))
+                XSRETURN_UNDEF;
+        }
+
+        EXTEND(SP, items - 1);
+        for (i = 1; i < items; i++) {
+            GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(i), 0);
+            ST(i-1) = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
+        }
+        XSRETURN(items - 1);
     }
 
-    ST(0) = rv;
-    XSRETURN(1);
+    XSRETURN_UNDEF;
 }
 
 XS(XS_UNIVERSAL_DOES); /* prototype to pass -Wmissing-prototypes */
