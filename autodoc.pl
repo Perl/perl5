@@ -1708,11 +1708,6 @@ sub docout ($$$) { # output the docs for one function group
 
             my $has_args = $flags !~ /n/;
             my $ret = $item->{ret_type} // "";
-
-            # If none of these exist, the prototype will be trivial, just
-            # the name of the item, so don't display it.
-            next unless $ret|| $has_semicolon || $has_args;
-
             if (! $has_args) {
                 warn "$name: n flag without m"
                    . where_from_string($item->{file}, $item->{line_num})
@@ -1728,6 +1723,11 @@ sub docout ($$$) { # output the docs for one function group
 
             my @args;
             my $this_has_pTHX = 0;
+
+            # If none of these exist, the prototype will be trivial, just
+            # the name of the item, so don't display it.
+            next unless $ret || $has_semicolon || $has_args;
+
             if ($has_args) {
                 @args = $item->{args}->@*;
 
