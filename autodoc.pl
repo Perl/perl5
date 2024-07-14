@@ -1322,6 +1322,7 @@ sub format_pod_indexes($) {
     # Output the X<> references to the names, packed since they don't get
     # displayed, but not too many per line so that when someone is editing the
     # file, it doesn't run on
+    return "" unless $entries_ref && $entries_ref->@*;
 
     my $text ="";
     my $line_length = 0;
