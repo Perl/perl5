@@ -1707,7 +1707,6 @@ sub docout ($$$) { # output the docs for one function group
             next if $flags =~ /[Uy]/;
 
             my $has_args = $flags !~ /n/;
-            my $ret = $item->{ret_type} // "";
             if (! $has_args) {
                 warn "$name: n flag without m"
                    . where_from_string($item->{file}, $item->{line_num})
@@ -1721,6 +1720,7 @@ sub docout ($$$) { # output the docs for one function group
                 }
             }
 
+            my $ret = $item->{ret_type} // "";
             my @args;
             my $this_has_pTHX = 0;
 
