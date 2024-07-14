@@ -150,6 +150,10 @@ my %docs;
 # the SEE ALSO section
 my %described_elsewhere;
 
+# keys are the full 'Perl_FOO' names in proto.h.  values are currently
+# unlooked at
+my %protos;
+
 my $link_text = "Described in";
 
 my $description_indent = 4;
@@ -1788,9 +1792,19 @@ sub docout ($$$) { # output the docs for one function group
             my $name = $item->{name};
             my $flags = $item->{flags};
 
-            print $fh "\nNOTE: the C<perl_$name()> form is",
-                      " B<deprecated>.\n"
-                                 if $additional_long_form && $flags =~ /O/;
+            if (! $additional_long_form && $flags =~ /O/) {
+                my $real_proto = delete $protos{"perl_$name"};
+                if (! $real_proto) {
+                    warn "Unexpectedly there isn't a 'perl_$name' even though"
+                       . " there is an 'O' flag "
+                       . where_from_string($item->{file}, $item->{line_num})
+                       . "; omitting the deprecation warning";
+                }
+                else {
+                    print $fh "\nNOTE: the C<perl_$name()> form is",
+                              " B<deprecated>.\n"
+                }
+            }
 
             die "'u' flag must also have 'm' or 'y' flags' for $name "
               . where_from_string($item->{proto_defined}{file},
@@ -1875,11 +1889,22 @@ sub docout ($$$) { # output the docs for one function group
                 elsif ($flags =~ /p/ && $flags !~ /o/) {
 
                     # Here, has a long name and we didn't create one just
-                    # above.  Set up to redo the loop at the end.  This
-                    # iteration adds the short form; the redo causes its long
-                    # form equivalent to be added too.
-                    $additional_long_form = 1;
-                    $any_has_additional_long_form = 1;
+                    # above.  Check that there really is a long name entry.
+                    my $real_proto = delete $protos{"Perl_$name"};
+                    if ($real_proto) {
+
+                        # Set up to redo the loop at the end.  This iteration
+                        # adds the short form; the redo causes its long form
+                        # equivalent to be added too.
+                        $additional_long_form = 1;
+                        $any_has_additional_long_form = 1;
+                    }
+                    else {
+                        warn "$name unexpectedly doesn't have a long name;"
+                           . " only short name used\n("
+                           . where_from_string($item->{file}, $item->{line_num})
+                           . ')';
+                    }
 
                     # Will need to indent this item to vertically align
                     $may_need_extra_indent = 1;
@@ -2365,7 +2390,49 @@ while (my $input = <$fh>) {
     next if $file =~ m! ^ ( cpan | dist | ext ) / !x
          && ! defined $extra_input_pods{$file};
 
-    if ($file =~ /\.h/) {
+    # Process these two special files immediately.  Otherwise we add the file to
+    # the appropriate list.
+    if ($file eq "proto.h") {
+
+        # proto.h won't have any apidoc lines in it.  Instead look for real
+        # prototypes.  Then we can check later that a prototype actually
+        # exists when we add a line to the pod that claims there is.
+        open my $fh, '<', $file or die "Cannot open $file for docs: $!\n";
+        my $prev = "";
+        while (defined (my $input = <$fh>)) {
+
+            # Look for a prototype.  As an extra little nicety, make sure that
+            # the line previous to the prototype is one of the ones that
+            # declares the return type of the function.  This is to try to
+            # eliminate false positives.
+            $protos{$1} = $2 if $input =~ s/ ^ \s* 
+                                             ( [Pp]erl_\w* )
+                                             ( .* ) 
+                                             \n
+                                           /$1/x
+                           && $prev =~ / ^ \s*
+                                         PERL_ (?: CALLCONV
+                                                 | STATIC (?: _FORCE)? _INLINE
+                                               )
+                                       /x;
+            $prev = $input;
+        }
+        close $fh or die "Error closing $file: $!\n";
+    }
+    elsif ($file eq "embed.h") {
+
+        # embed.h won't have any apidoc lines in it.  Instead look for lines
+        # that define the obsolete 'perl_' lines.  Then we can check later
+        # that such a definition actually exists when we encounter input that
+        # claims there is
+        open my $fh, '<', $file or die "Cannot open $file for docs: $!\n";
+        while (defined (my $input = <$fh>)) {
+            $protos{$1} = $2
+                if $input =~ / ^\# \s* define \s+ ( perl_\w+ ) ( [^)]* \) ) /x;
+        }
+        close $fh or die "Error closing $file: $!\n";
+    }
+    elsif ($file =~ /\.h/) {
         push @headers, $file;
     }
     else {
