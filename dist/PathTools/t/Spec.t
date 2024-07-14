@@ -862,6 +862,12 @@ my @path_tests = (
   [ 'File::Spec::Unix->path()', "/some/path:", '/some/path,.' ],
   [ 'File::Spec::Unix->path()', "/some/path::", '/some/path,.,.' ],
   [ 'File::Spec::Unix->path()', ":/some/path:", '.,/some/path,.' ],
+
+  [ 'File::Spec::OS2->path()', "", '' ],
+  [ 'File::Spec::OS2->path()', ";", '.,.' ],
+  [ 'File::Spec::OS2->path()', "/some/path;", '/some/path,.' ],
+  [ 'File::Spec::OS2->path()', "/some/path;;", '/some/path,.,.' ],
+  [ 'File::Spec::OS2->path()', ";/some/path;", '.,/some/path,.' ],
 );
 
 for ( @path_tests ) {
