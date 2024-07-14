@@ -25,7 +25,7 @@ sub file_name_is_absolute {
 sub path {
     my $path = $ENV{PATH};
     $path =~ s:\\:/:g;
-    my @path = split(';',$path);
+    my @path = split(';',$path,-1);
     foreach (@path) { $_ = '.' if $_ eq '' }
     return @path;
 }
