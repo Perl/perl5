@@ -192,7 +192,7 @@ When a child process is created via C<fork()>, it inherits all
 registrated functions from its parent.
 
 The registration would croak if the function is neither a function
-(coderef) nor a object that overloads C<&{}>.
+(coderef) nor an object that overloads C<&{}>.
 
 See also L<perlmod> about C<END {}>, the native Perl syntax that is
 the alternative to C<atexit()>.
