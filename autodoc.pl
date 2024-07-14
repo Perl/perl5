@@ -2219,6 +2219,8 @@ foreach my $section_name (keys $unknown->%*) {
         }
 
         my $destpod = destination_pod($corrected->{flags});
+        warn "The destination pod for $item_name remains unknown."
+          . "  It should have been determined by now" if $destpod eq "unknown";
 
         # $destpod now gives the correct pod for this group.  Prepare to move it
         # to there
