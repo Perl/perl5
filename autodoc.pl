@@ -470,14 +470,16 @@ sub check_and_add_proto_defn {
             # Some functions in embed.fnc have multiple definitions depending
             # on the platform's Configuration.  Currently we just use the
             # first one encountered in that file.
-            return if $file eq 'embed.fnc'
+            return $elements{$element}
+                                   if $file eq 'embed.fnc'
                                    && $elements{$element}{file} eq 'embed.fnc';
 
             # Use the existing entry if both it and this new attempt to create
             # one have the 'h' flag set.  This flag indicates that the entry
             # is just a reference to the pod where the element is actually
             # documented, so multiple such lines can peacefuly coexist.
-            return if $docs_hidden && $elements{$element}{flags} =~ /h/;
+            return $elements{$element} if $docs_hidden
+                                       && $elements{$element}{flags} =~ /h/;
 
             die "There already is an existing prototype for '$element' defined "
               . where_from_string($elements{$element}{proto_defined}{file},
@@ -527,6 +529,8 @@ sub check_and_add_proto_defn {
             $elements{$element}{docs_found}{line_num} = $line_num // 0;
         }
     }
+
+    return $elements{$element};
 }
 
 sub classify_input_line ($$$$) {
@@ -686,7 +690,6 @@ sub handle_apidoc_line ($$$$) {
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
-    my $existing_proto = $elements{$name};
     if ($type == APIDOC_DEFN) {
             # We expect this line to furnish the information to a
             # corresponding apidoc line elsewhere in the source.  Hence, we
@@ -696,14 +699,14 @@ sub handle_apidoc_line ($$$$) {
                                      $ret_type, \@args, APIDOC_DEFN);
     }
     else {
-        check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
-                                 $ret_type, \@args, $type);
-
-        $existing_proto = $elements{$name};
-        $flags = $existing_proto->{flags};
-        $ret_type = $existing_proto->{ret_type};
-        @args = ($existing_proto->{args})
-                ? $existing_proto->{args}->@*
+    my $updated = check_and_add_proto_defn($name, $file, $line_num,
+                    $flags . "d",
+                    $ret_type, \@args,
+                    $type);
+        $flags = $updated->{flags};
+        $ret_type = $updated->{ret_type};
+        @args = ($updated->{args})
+                ? $updated->{args}->@*
                 : ();
     }
 
