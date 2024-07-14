@@ -512,13 +512,11 @@ XS(XS_UNIVERSAL_can)
             GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(i), 0);
             if (!gv || !isGV(gv) || !GvCV(gv))
                 XSRETURN_UNDEF;
+            else {
+                ST(i-1) = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
+            }
         }
-
         EXTEND(SP, items - 1);
-        for (i = 1; i < items; i++) {
-            GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(i), 0);
-            ST(i-1) = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
-        }
         XSRETURN(items - 1);
     }
 
