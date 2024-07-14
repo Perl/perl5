@@ -107,7 +107,9 @@ my %metadata = (
 
     # Clean some additional files.
     clean     => { FILES => File::Spec->catdir('t', 'tmp') },
-    realclean => { FILES => scalar(scripts('pod2text', 'pod2man')) },
+    realclean => { FILES => [ scripts('pod2text', 'pod2man') ] },
+
+
 
     # Dependencies on other modules.
     PREREQ_PM => { 'Pod::Simple' => 3.26 },
