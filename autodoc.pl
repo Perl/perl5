@@ -714,24 +714,16 @@ sub handle_apidoc_line ($$$$) {
                         if $flags !~ /N/
                         && $name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
 
-    # If the entry is also in embed.fnc, it should be defined
-    # completely there, but not here
-    my $updated;
-    if ($type == APIDOC_DEFN) {
-            # We expect this line to furnish the information to a
-            # corresponding apidoc line elsewhere in the source.  Hence, we
-            # can say that this macro is documented.  (A warning will be
-            # raised if the mate line is missing.)
-            $updated = check_and_add_proto_defn($name, $file, $line_num,
-                                     $flags . "d",
-                                     $ret_type, \@args, APIDOC_DEFN);
-    }
-    else {
-    $updated = check_and_add_proto_defn($name, $file, $line_num,
+    # Here, done handling any existing information about this element.  Add
+    # this definition (which has the side effect of cleaning up any NN or
+    # NULLOK in @args)
+    my $updated = check_and_add_proto_defn($name, $file, $line_num,
+
+                    # The fact that we have this line somewhere in the source
+                    # code means we implicitly have the 'd' flag
                     $flags . "d",
                     $ret_type, \@args,
                     $type);
-    }
 
     return $updated;
 }
