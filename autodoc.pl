@@ -2220,53 +2220,51 @@ for my $which_pod (keys %docs) {
     }
 }
 
-my %missing;
-for (sort keys %elements) {
-    next unless $elements{$_}{docs_expected} xor $elements{$_}{docs_found};
-    if ($elements{$_}{docs_found}) {
-        $missing{$_} = $elements{$_}{file};
-        next;
-    }
-
-    next if $elements{$_}{flags} =~ /h/;
-    warn "no docs for $_\n";
-}
-
-foreach (sort keys %missing) {
-    warn "Function '$_', documented in $missing{$_}, not listed in embed.fnc"
-       . " nor in the source";
-}
-
-my %api    = ( podname => 'perlapi',    docs => $docs{'api'} );
+my %api    = ( podname => 'perlapi', docs => $docs{'api'} );
 my %intern = ( podname => 'perlintern', docs => $docs{'intern'} );
 
-# List of funcs in the public API that aren't also marked as core-only,
-# experimental nor deprecated.
-my @undocumented_api =    grep {        $elements{$_}{flags} =~ /A/
-                                   && ! $elements{$_}{docs_found}
-                                   && ! $docs{api}{$_}
-                               } keys %elements;
-# Same for perlintern
-my @undocumented_intern = grep {        $elements{$_}{flags} !~ /[AS]/
-                                   && ! $elements{$_}{docs_found}
-                                   && ! $docs{intern}{$_}
-                               } keys %elements;
+for my $which (\%api, \%intern) {
+    my (@deprecated, @experimental, @missings);
+    for my $name (sort dictionary_order keys %elements) {
+        my $element = $elements{$name};
 
-unshift $api{missings}->@*,
- (deprecated_hdr => [ grep { $elements{$_}{flags} =~ /[D]/ } @undocumented_api]);
-unshift $intern{missings}->@*,
- (deprecated_hdr => [ grep { $elements{$_}{flags} =~ /[D]/ } @undocumented_intern]);
+        next if $which == \%api && $element->{flags} !~ /A/;
+        next if $which == \%intern && $element->{flags} =~ /A/;
 
-unshift $api{missings}->@*,
- (experimental_hdr => [ grep { $elements{$_}{flags} =~ /[x]/ } @undocumented_api]);
-unshift $intern{missings}->@*,
-(experimental_hdr => [ grep { $elements{$_}{flags} =~ /[x]/ } @undocumented_intern]);
+        if ($element->{docs_found}) {
+            warn "'$name' missing 'd' flag"
+               . where_from_string($element->{file}, $element->{line_num})
+                                               if ! $element->{docs_expected};
+        }
+        elsif ($element->{docs_expected}) { # But no docs found
+            warn "No documentation was found for $name, even though "
+               . where_from_string($element->{file}, $element->{line_num})
+               . " says there should be some available"
+        }
+        else {  # No documentation found, nor expected.  Is a problem only if
+                # the flags indicate it is public
+            if (   ($which == \%api && $element->{flags} =~ /A/)
+                || ($which == \%intern && $element->{flags} !~ /[AS]/)
+               ) {
+                if ($element->{flags} =~ /D/) {
+                    push @deprecated, $name;
+                }
+                elsif ($element->{flags} =~ /x/) {
+                    push @experimental, $name;
+                }
+                else {
+                    push @missings, $name;
+                }
+            }
+        }
+    }
 
-unshift $api{missings}->@*,
- (missings_hdr => [ grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_api]);
-
-unshift $intern{missings}->@*,
- (missings_hdr => [ grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_intern]);
+    $which->{missings}->@* = (
+                               missings_hdr     => \@missings,
+                               experimental_hdr => \@experimental,
+                               deprecated_hdr   => \@deprecated,
+                             );
+}
 
 my @other_places = ( qw(perlclib ), keys %described_elsewhere );
 my $places_other_than_intern = join ", ",
