@@ -497,10 +497,6 @@
 :
 :          embed.h: suppress "#define foo Perl_foo"
 :
-:        autodoc.pl adds a note that this function must be explicitly called as
-:        Perl_$name, and with an aTHX_ parameter unless the 'T' flag is also
-:        specified.
-:
 :        mnemonic: 'omit' generated macro
 :
 :   'P'  Pure function:
