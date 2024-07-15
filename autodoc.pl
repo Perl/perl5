@@ -132,8 +132,6 @@ my %described_elsewhere;
 
 my %docs;
 my %elements;
-my %deferreds;  # Elements whose usage hasn't been found by the time they are
-                # parsed
 my %missing_macros;
 
 my $link_text = "Described in";
@@ -495,7 +493,7 @@ sub check_and_add_proto_defn {
             # Some functions in embed.fnc have multiple definitions depending
             # on the platform's Configuration.  Currently we just use the
             # first one encountered in that file.
-            return $elements{$element}
+            return \$elements{$element}
                                    if $file eq 'embed.fnc'
                                    && $elements{$element}{file} eq 'embed.fnc';
 
@@ -503,7 +501,7 @@ sub check_and_add_proto_defn {
             # one have the 'h' flag set.  This flag indicates that the entry
             # is just a reference to the pod where the element is actually
             # documented, so multiple such lines can peacefuly coexist.
-            return $elements{$element} if $docs_hidden
+            return \$elements{$element} if $docs_hidden
                                        && $elements{$element}{flags} =~ /h/;
 
             die "There already is an existing prototype for '$element' defined "
@@ -553,9 +551,13 @@ sub check_and_add_proto_defn {
             $elements{$element}{docs_found}{file} = $file;
             $elements{$element}{docs_found}{line_num} = $line_num // 0;
         }
+
+        if ($definition_type == PLAIN_APIDOC) {
+            $elements{$element}{is_leader} = 1;
+        }
     }
 
-    return $elements{$element};
+    return \$elements{$element};
 }
 
 sub classify_input_line ($$$$) {
@@ -715,27 +717,24 @@ sub handle_apidoc_line ($$$$) {
 
     # If the entry is also in embed.fnc, it should be defined
     # completely there, but not here
+    my $updated;
     if ($type == APIDOC_DEFN) {
             # We expect this line to furnish the information to a
             # corresponding apidoc line elsewhere in the source.  Hence, we
             # can say that this macro is documented.  (A warning will be
             # raised if the mate line is missing.)
-            check_and_add_proto_defn($name, $file, $line_num, $flags . "d",
+            $updated = check_and_add_proto_defn($name, $file, $line_num,
+                                     $flags . "d",
                                      $ret_type, \@args, APIDOC_DEFN);
     }
     else {
-    my $updated = check_and_add_proto_defn($name, $file, $line_num,
+    $updated = check_and_add_proto_defn($name, $file, $line_num,
                     $flags . "d",
                     $ret_type, \@args,
                     $type);
-        $flags = $updated->{flags};
-        $ret_type = $updated->{ret_type};
-        @args = ($updated->{args})
-                ? $updated->{args}->@*
-                : ();
     }
 
-    return ($name, $flags, $ret_type, $type, @args);
+    return $updated;
 }
 
 # The section that is in effect at the beginning of the given file.  If not
@@ -807,7 +806,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
     # additional api elements that the pod applies to.
 
     while (defined (my $input = $get_next_line->())) {
-        my ($text, $element_name, $ret_type, $line_type);
+        my ($text, $element_name, $line_type);
         my (@args, @items);
         my $flags = "";
 
@@ -837,17 +836,12 @@ sub autodoc ($$) { # parse a file and extract documentation info
                                     unless defined $valid_sections{$section};
         }
         elsif ($outer_line_type == PLAIN_APIDOC) {
-            ($element_name, $flags, $ret_type, $line_type, @args) =
+            my $leader_ref =
                   handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
+            $element_name = $$leader_ref->{name};
+            $flags = $$leader_ref->{flags};
 
-            # For uniformity of handling, this element is set to be
-            # just the first of any remaining ones in the group.  Setting the
-            # flags for this item are deferred because further processing may
-            # modify them
-            push @items, { name     => $element_name,
-                           ret_type => $ret_type,
-                           args     => [ @args ],
-                         };
+            push @items, $leader_ref;
         }
         else {
             die "Unknown apidoc-type line '$arg' "
@@ -896,8 +890,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # the text being accumulated.
             last if $inner_line_type != APIDOC_ITEM;
 
-            my ($item_name, $item_flags, $item_ret_type, $line_type, @item_args)
-                = handle_apidoc_line($file, $line_num, $inner_line_type, $arg);
+            my $item =
+                  handle_apidoc_line($file, $line_num, $inner_line_type, $arg);
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
@@ -908,36 +902,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "apidoc_item lines must immediately follow apidoc lines for "
               . " '$element_name' " . where_from_string($file, $line_num)
                                                             if $text =~ /\S/;
-
-            # Use the base entry flags if none for this item; otherwise add in
-            # any non-display base entry flags.
-            if ($item_flags) {
-                $item_flags .= $flags =~ s/$item_flags_re//rg;
-            }
-            else {
-                $item_flags = $flags;
-            }
-            $item_ret_type = $ret_type unless $item_ret_type;
-            @item_args = @args unless @item_args;
-            push @items, { name     => $item_name,
-                           ret_type => $item_ret_type,
-                           flags    => $item_flags,
-                           args     => [ @item_args ],
-                         };
-
-            # If we have no information about this item, it is because its
-            # definition has yet to be encountered.  Add it to the list of
-            # such, with a bread crumb trail so that later we can easily find
-            # where it all fits
-            if ("$item_ret_type$item_flags@item_args" eq "") {
-                push $deferreds{$element_name}->@*,
-                     {
-                        name => $item_name,
-                        section => $section,
-                        pod     => $destpod,
-                        file    => $file,   # Just for any error message
-                     };
-            }
+            push @items, $item;
         }
 
         # Here, are done accumulating the text for this item.  Trim it
@@ -999,8 +964,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             $docs{$destpod}{$section}{$element_name}{pod} = $text;
             $docs{$destpod}{$section}{$element_name}{file} = $file;
-            $items[0]{flags} = $flags;
-            push $docs{$destpod}{$section}{$element_name}{items}->@*, @items;
+            $docs{$destpod}{$section}{$element_name}{items} = \@items;
         }
 
         # We already have the first line of what's to come in $input
@@ -1560,7 +1524,9 @@ sub docout ($$$) { # output the docs for one function group
     my $file = $docref->{file};
 
     my @items = $docref->{items}->@*;
-    my $flags = $items[0]{flags};
+
+    my $item0 = ${$items[0]};
+    my $flags = $item0->{flags};
 
     if ($pod !~ /\S/) {
         warn "Empty pod for $element_name ("
@@ -1569,13 +1535,14 @@ sub docout ($$$) { # output the docs for one function group
     }
 
     print $fh "\n=over $description_indent\n";
-    print $fh "\n=item C<$_->{name}>\n" for @items;
+    print $fh "\n=item C<${$_}->{name}>\n" for @items;
 
     my @deprecated;
     my @experimental;
     my @xrefs;
 
-    for my $item (@items) {
+    for my $item_ref (@items) {
+        my $item = $$item_ref;
         my $name = $item->{name};
 
         # If we're printing only a link to an element, this isn't the major
@@ -1657,7 +1624,8 @@ sub docout ($$$) { # output the docs for one function group
         my $max_retlen = 0;
         my $any_has_pTHX_ = 0;
 
-        for my $item (@items) {
+        for my $item_ref (@items) {
+            my $item = $$item_ref;
             my $name = $item->{name};
             my $flags = $item->{flags};
             my $has_U_flag = $flags =~ /U/;
@@ -2180,10 +2148,11 @@ foreach my $section_name (keys $unknown->%*) {
     foreach my $group_name (keys $unknown->{$section_name}->%*) {
 
         # The leader is always the 0th element in the 'items' array.
-        my $item_name = $unknown->{$section_name}{$group_name}{items}[0]{name};
+        my $leader_ref = $unknown->{$section_name}{$group_name}{items}[0];
+        my $item_name = $$leader_ref->{name};
 
         # We should have a usage definition by now.
-        my $corrected = delete $elements{$item_name};
+        my $corrected = $elements{$item_name};
         if (! defined $corrected) {
             die "=for apidoc line without any usage definition $item_name in"
               . " $unknown->{$section_name}{$group_name}{file}";
@@ -2197,56 +2166,57 @@ foreach my $section_name (keys $unknown->%*) {
                           if defined $docs{$destpod}{$section_name}{$group_name};
         $docs{$destpod}{$section_name}{$group_name} =
                                  delete $unknown->{$section_name}{$group_name};
-
-        # And fill in the leader item with the saved values
-        my $new = $docs{$destpod}{$section_name}{$group_name}{items}[0];
-        $new->{name} = $item_name;
-        $new->{args} = $corrected->{args};
-        $new->{flags} = $corrected->{flags};
-        $new->{ret_type} = $corrected->{ret_type};
     }
 }
 
-# Now that any leaders have been filled in, we can do the same for all the
-# deferred non-leaders
-for my $group_name (keys %deferreds) {
-    my $group = delete $deferreds{$group_name};
-    foreach my $item ($group->@*) {
-        my $item_name = $item->{name};
+# For convenience of the typist (and it makes the code easier to read),
+# 'apidoc_item' lines often have empty fields in the source code, signifying
+# that those values are inherited from the plain 'apidoc' leader.
+#
+# Now that all the deferred elements have been resolved, we can go through and
+# fill in those inherited values.
+for my $which_pod (keys %docs) {
+    for my $section (keys $docs{$which_pod}->%*) {
+        for my $group (keys $docs{$which_pod}{$section}->%*) {
+            next unless $docs{$which_pod}{$section}{$group}{items};
 
-        # We should have a usage definition by now.
-        my $corrected = delete $elements{$item_name};
-        if (! $corrected) {
-            die "=for apidoc line without any usage definition $item_name in"
-              . " $item->{file}";
-        }
+            my $leader;
+            for my $element_ref ($docs{$which_pod}{$section}{$group}{items}->@*)
+            {
+                my $element = $$element_ref;
+                # If this element is a plain 'apidoc', it is the leader, and
+                # its data do not need to be adjusted.
+                if ($element->{is_leader}) {
+                    $leader = $element;
+                    next;
+                }
+                next if $element->{proto_defined}
+                     && $element->{proto_defined}{type} != APIDOC_ITEM;
 
-        my $section = $item->{section};
-        my $flags = $corrected->{flags};
+                # Otherwise, it is from an 'apidoc_item' line.  If it is
+                # lacking 'flags', copy the leader's into it; otherwise add
+                # the important ones.  We don't add flags that would change
+                # how this item is displayed.
+                if ($element->{flags}) {
+                    $element->{flags} .=
+                                       $leader->{flags} =~ s/$item_flags_re//r;
+                }
+                else {
+                    $element->{flags} = $leader->{flags};
+                }
 
-        my $destpod = destination_pod($flags);
+                $element->{ret_type} = $leader->{ret_type}
+                                                    unless $element->{ret_type};
 
-        # We know where this element is that needs to be updated.  It better
-        # exist, or something is badly wrong
-        my $dest = $docs{$destpod}{$section}{$group_name};
-        if (! defined $dest) {
-            die "Unexpectedly didn't find an entry for"
-              . " $destpod->$section->$group_name";
-        }
-
-        # Look through the item list for this one, and correct it.
-        my $found = 0;
-        for my $dest_item ($dest->{items}->@*) {
-            next unless $dest_item->{name} eq $item_name;
-            $dest_item->{args} = $corrected->{args};
-            $dest_item->{flags} = $corrected->{flags};
-            $dest_item->{ret_type} = $corrected->{ret_type};
-            $found = 1;
-        }
-
-        if (! $found) {
-            die "Unexpectedly didn't find an entry for"
-              . " $destpod->$section->$group_name->$item_name";
+                if ($element->{flags}) {
+                    if (      $element->{flags} !~ /n/
+                        &&    $leader->{args}
+                        && (! $element->{args} || $element->{args}->@* == 0)
+                    ) {
+                        push $element->{args}->@*, $leader->{args}->@*;
+                    }
+                }
+            }
         }
     }
 }
