@@ -488,7 +488,7 @@ XS(XS_UNIVERSAL_can)
        precedence here over the numeric form, as (!1)->foo treats the
        invocant as the empty string, though it is a dualvar. */
     if (!SvOK(sv) || (SvPOK(sv) && !SvCUR(sv)))
-        XSRETURN_UNDEF;
+        XSRETURN_EMPTY;
 
     if (SvROK(sv)) {
         sv = MUTABLE_SV(SvRV(sv));
@@ -512,7 +512,7 @@ XS(XS_UNIVERSAL_can)
         for (i = 1; i < items; i++) {
             GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(i), 0);
             if (!gv || !isGV(gv) || !GvCV(gv))
-                XSRETURN_UNDEF;
+                XSRETURN_EMPTY;
             else {
                 ST(i-1) = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
             }
@@ -520,7 +520,7 @@ XS(XS_UNIVERSAL_can)
         XSRETURN(items - 1);
     }
 
-    XSRETURN_UNDEF;
+    XSRETURN_EMPTY;
 }
 
 XS(XS_UNIVERSAL_DOES); /* prototype to pass -Wmissing-prototypes */

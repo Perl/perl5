@@ -13,7 +13,7 @@ BEGIN {
 use utf8;
 use open qw( :utf8 :std );
 
-plan tests => 103;
+plan tests => 105;
 
 $a = {};
 bless $a, "Bòb";
@@ -195,3 +195,11 @@ ok( scalar $child->can(qw(bar baz)), 'can(@methods) in scalar content should ret
 
 ok( !Child->can(qw(foo baz no_such_method)), 'can(@methods) with non-existent methods should already return nothing' );
 ok( !scalar Child->can(qw(foo baz no_such_method)), 'can(@methods) with non-existent methods should return false in scalar context' );
+
+#
+# Check that can() returns an empty list when called with missing methods
+#
+@methods = Child->can(qw(no_such_method));
+ok( !@methods, 'can(@methods) with non-existent methods should already return nothing even when assigned to an array' );
+@methods = $child->can(qw(no_such_method));
+ok( !@methods, 'can(@methods) with non-existent methods should return even when assigned to an array' );
