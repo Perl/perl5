@@ -627,7 +627,7 @@ sub check_api_doc_line ($$$) {
         delete $elements{$name};
     }
 
-    return ($name, $flags, $ret_type, $type, $proto_as_written, @args);
+    return ($name, $flags, $ret_type, $type, @args);
 }
 
 # The section that is in effect at the beginning of the given file.  If not
@@ -699,7 +699,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
     # additional api elements that the pod applies to.
 
     while (defined (my $input = $get_next_line->())) {
-        my ($text, $element_name, $ret_type, $line_type, $proto_as_written);
+        my ($text, $element_name, $ret_type, $line_type);
         my (@args, @items);
         my $flags = "";
 
@@ -729,8 +729,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
               . " '$input' " . where_from_string($file, $line_num);
         }
         else {
-            ($element_name, $flags, $ret_type, $line_type, $proto_as_written,
-             @args) = check_api_doc_line($file, $line_num, $input);
+            ($element_name, $flags, $ret_type, $line_type, @args) =
+                                check_api_doc_line($file, $line_num, $input);
             next if $line_type == APIDOC_DEFN;
             if ($ret_type) {
             }
@@ -801,14 +801,15 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # the text being accumulated.
             last if $input !~ / ^ =for [ ]+ apidoc_item /x;
 
-            my ($item_name, $item_flags, $item_ret_type, $line_type,
-                $item_proto, @item_args) = check_api_doc_line($file, $line_num,
-                                                              $input);
+            my ($item_name, $item_flags, $item_ret_type, $line_type, @item_args)
+                                = check_api_doc_line($file, $line_num, $input);
             last unless $line_type == APIDOC_ITEM;
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
-            die "Unexpected api_doc_item line '$item_proto'"
+            die "Unexpected api_doc_item line '"
+              . ($input =~ s/\s*\n//r)
+              . "'"
               . where_from_string($file, $line_num)     unless $element_name;
 
             # We accept blank lines between these, but nothing else;
