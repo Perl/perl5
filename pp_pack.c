@@ -3076,7 +3076,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
                                        "Attempt to pack pointer to temporary value");
                     }
-                    if (SvPOK(fromstr) || SvNIOK(fromstr))
+                    if (SvREADONLY(fromstr))
                         aptr = SvPV_nomg_const_nolen(fromstr);
                     else
                         aptr = SvPV_force_flags_nolen(fromstr, 0);
