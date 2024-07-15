@@ -728,6 +728,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "apidoc_item doesn't immediately follow an apidoc entry:"
               . " '$input' " . where_from_string($file, $line_num);
         }
+        elsif ($outer_line_type == APIDOC_DEFN) {
+            ($element_name, $flags, $ret_type, $line_type, @args) =
+                                check_api_doc_line($file, $line_num, $input);
+            next;
+        }
         else {
             ($element_name, $flags, $ret_type, $line_type, @args) =
                                 check_api_doc_line($file, $line_num, $input);
