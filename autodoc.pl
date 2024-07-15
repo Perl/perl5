@@ -789,7 +789,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 # but warn only if there actually is some accumulated text
                 warn "=cut missing? "
                    . where_from_string($file, $line_num)
-                   . "\n$input"                           if $text =~ /\S/;
+                   . "\n$arg"                             if $text =~ /\S/;
                 last;
             }
 
@@ -806,9 +806,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
-            die "Unexpected api_doc_item line '"
-              . ($input =~ s/\s*\n//r)
-              . "'"
+            die "Unexpected api_doc_item line '$arg' "
               . where_from_string($file, $line_num)     unless $element_name;
 
             # We accept blank lines between these, but nothing else;
@@ -887,7 +885,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 if ($file_is_C) {
                     die "Can't currently handle link with items to it "
                       . where_from_string($file, $line_num)
-                      . ":\n$input"                         if @items > 1;
+                      . ":\n$arg"                           if @items > 1;
                     $docs{$destpod}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
                 }
