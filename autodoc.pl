@@ -853,14 +853,16 @@ sub autodoc ($$) { # parse a file and extract documentation info
     # lines and its pod, may be any number of 'apidoc_item' lines that give
     # additional api elements that the pod applies to.
 
+    my $destpod;
     while (1) {
         my ($outer_line_type, $arg) = $get_next_line->();
         last unless defined $outer_line_type;
         next if $outer_line_type == NOT_APIDOC;
 
-        my ($text, $element_name);
-        my (@args, @items);
+        my $element_name;
+        my @items;
         my $flags = "";
+        my $text = "";
 
         if ($outer_line_type == APIDOC_ITEM) {
             die "apidoc_item doesn't immediately follow an apidoc entry:"
@@ -888,67 +890,76 @@ sub autodoc ($$) { # parse a file and extract documentation info
                   handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
             $element_name = $$leader_ref->{name};
             $flags = $$leader_ref->{flags};
+            $destpod = destination_pod($$leader_ref->{flags});
 
             push @items, $leader_ref;
+
+            # Now look for any 'apidoc_item' lines.  These are in a block
+            # consisting solely of them, or all-blank lines
+            while (1) {
+                (my $item_line_type, $arg) = $get_next_line->();
+                last unless defined $item_line_type;
+
+                # Absorb blank lines
+                if ($item_line_type == NOT_APIDOC && $arg !~ /\S/) {
+                    $text .= $arg;
+                    next;
+                }
+
+                last unless $item_line_type == APIDOC_ITEM;
+
+                # Reset $text; those blank lines it contains merely are
+                # separating 'apidoc_item' lines
+                $text = "";
+
+                my $item_ref =
+                  handle_apidoc_line($file, $line_num, $item_line_type, $arg);
+
+                push @items, $item_ref;
+            }
+
+            # Put back the line that terminated this block of items, so that
+            # the code below will get it as the first line.
+            $unget_next_line->();
+
+            # Drop down to accumulate the pod for this group.  $text contains
+            # any blank lines that follow the final 'apidoc_item' line.
+            # $input is the next line to process
         }
         else {
             die "Unknown apidoc-type line '$arg' "
               . where_from_string($file, $line_num);
         }
 
-        # Here we have processed the initial line in the heading text or API
-        # element, and in the latter case, have saved the important
-        # information from it into $items[0].
-        # Calculate the output pod.
-        my $destpod = destination_pod($flags);
-
-        # Now accumulate the text that applies to it up to a terminating line,
-        # which is one of:
+        # Here, we are ready to accumulate text into either a heading, or the
+        # pod for an apidoc line.  $text may already contain blank lines that
+        # are part ot this text.
+        #
+        # Accumulation stops at a terminating line, which is one of:
         # 1) =cut
         # 2) =head (in a C file only =head1)
         # 3) an end comment line in a C file: m:^\s*\*/:
         # 4) =for apidoc... (except apidoc_item lines)
-        $text = "";
         my $head_ender_num = ($file_is_C) ? 1 : "";
         while (1) {
-            (my $inner_line_type, $arg) = $get_next_line->();
+            my ($inner_line_type, $inner_arg) = $get_next_line->();
             last unless defined $inner_line_type;
 
-            if ($inner_line_type == NOT_APIDOC) {
-            last if $arg =~ /^=cut/x;
-            last if $arg =~ /^=head$head_ender_num/;
+            last unless $inner_line_type == NOT_APIDOC;
+            last if $inner_arg =~ /^=cut/x;
+            last if $inner_arg =~ /^=head$head_ender_num/;
 
-            if ($file_is_C && $arg =~ m: ^ \s* \* / $ :x) {
+            if ($file_is_C && $inner_arg =~ m: ^ \s* \* / $ :x) {
 
                 # End of comment line in C files is a fall-back terminator,
                 # but warn only if there actually is some accumulated text
                 warn "=cut missing? "
                    . where_from_string($file, $line_num)
-                   . "\n$arg"                             if $text =~ /\S/;
+                   . "\n$inner_arg"                             if $text =~ /\S/;
                 last;
             }
 
-                $text .= $arg;
-                next;
-            }
-
-            # Here, the line is an apidoc line.  All but apidoc_item terminate
-            # the text being accumulated.
-            last if $inner_line_type != APIDOC_ITEM;
-
-            my $item =
-                handle_apidoc_line($file, $line_num, $inner_line_type, $arg);
-
-            # Here, is an apidoc_item_line; They can only come within apidoc
-            # paragraphs.
-            die "Unexpected api_doc_item line '$arg' "
-              . where_from_string($file, $line_num)     unless $element_name;
-
-            # We accept blank lines between these, but nothing else;
-            die "apidoc_item lines must immediately follow apidoc lines for "
-              . " '$element_name' " . where_from_string($file, $line_num)
-                                                            if $text =~ /\S/;
-            push @items, $item;
+            $text .= $inner_arg;
         }
 
         # Here, are done accumulating the text for this item.  Trim it
