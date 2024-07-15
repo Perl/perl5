@@ -1250,7 +1250,6 @@ handles:
   char IoTYPE(io);
   U8 IoFLAGS(io);
 
- =for apidoc_sections $io_scn, $formats_section
 =for apidoc_section $reports
 =for apidoc Amh|IV|IoLINES|IO *io
 =for apidoc Amh|IV|IoPAGE|IO *io
