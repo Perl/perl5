@@ -508,6 +508,7 @@ XS(XS_UNIVERSAL_can)
     }
 
     if (pkg) {
+        EXTEND(SP, items - 1);
         for (i = 1; i < items; i++) {
             GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(i), 0);
             if (!gv || !isGV(gv) || !GvCV(gv))
@@ -516,7 +517,6 @@ XS(XS_UNIVERSAL_can)
                 ST(i-1) = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
             }
         }
-        EXTEND(SP, items - 1);
         XSRETURN(items - 1);
     }
 
