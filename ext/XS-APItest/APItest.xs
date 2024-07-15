@@ -4941,7 +4941,11 @@ rc_add(sv1, sv2)
         rpp_replace_2_1(r);
         return;
 
-
+void
+modify_pv(IV pi, IV sz)
+    PPCODE:
+        /* used by op/pack.t when testing pack "p" */
+        memset(INT2PTR(char *, pi), 'y', sz);
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
