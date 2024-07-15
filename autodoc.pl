@@ -809,8 +809,10 @@ sub parse_config_h {
 
         # Look for lines like /* FOO_BAR:
         # By convention all config.h descriptions begin like that
+        my $line_num = $.;
         if (m[ ^ /\* [ ] ( [[:alpha:]] \w+ ) : \s* $ ]ax) {
             my $name = $1;
+            $configs{$name}{docs_line_num} = $line_num;
 
             # Here we are starting the description for $name in config.h.  We
             # accumulate the entire description for it into @description.
@@ -921,6 +923,7 @@ sub parse_config_h {
             $configs{$name}{has_args} ||= $2 eq "";
             $configs{$name}{has_defn} //= $3 ne "";
             $configs{$name}{has_defn} ||= $3 ne "";
+            $configs{$name}{defn_line_num} = $line_num;
         }
     }
 
