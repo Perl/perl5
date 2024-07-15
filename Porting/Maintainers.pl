@@ -981,7 +981,8 @@ our %Modules = (
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-5.01.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-v6.0.2.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Jul 14 20:06:07 2024',
         'MAIN_MODULE'  => 'Pod::Man',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
         'EXCLUDED'     => [
