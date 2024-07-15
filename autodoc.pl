@@ -86,6 +86,16 @@ use constant {
               PLAIN_APIDOC       =>  2,
               APIDOC_ITEM        =>  3,
               APIDOC_SECTION     =>  4,
+
+              # This is the line type used for elements parsed in config.h.
+              # Since that file is parsed after everything else, everything is
+              # resolved by then; and this is just a way to allow prototypes
+              # elsewhere in the source code to override the simplistic
+              # prototypes that config.h mostly deals with.  Hence Configure
+              # doesn't have to get involved.  There are just a few of these,
+              # with little likelihood of changes needed.  They were manually
+              # added to handy.h via 51b56f5c7c7.
+              CONDITIONAL_APIDOC =>  5,
              };
 
 my $config_h = 'config.h';
@@ -435,6 +445,21 @@ sub check_and_add_proto_defn {
     # It is possible for this to be called with a line that both defines the
     # usage signature for $element, and marks the place in the source where
     # the documentation is found.  Handling that happens naturally here.
+
+    # This is currently used only by config.h.  See comments at the definition
+    # of this line type.  If there is an existing prototype definition, defer
+    # to that (by setting the parameters to empty); otherwise use the one
+    # passed in.
+    if ($definition_type == CONDITIONAL_APIDOC) {
+        if (exists $elements{$element}) {
+            my @dummy;
+            $raw_flags = "";
+            $ret_type = "";
+            $args_ref = \@dummy;
+        }
+
+        $definition_type = PLAIN_APIDOC;
+    }
 
     my $flags = $raw_flags =~ s/$irrelevant_flags_re//gr;
     my $illegal_flags = $flags =~ s/$known_flags_re//gr;
@@ -1479,16 +1504,20 @@ sub parse_config_h {
                             unless grep { $_ eq $section } keys %valid_sections;
             $flags .= 'AdmnT';
             $flags .= 'U' unless defined $configs{$name}{usage};
+            my $data = check_and_add_proto_defn($name, $config_h,
+                                     $configs{$name}{defn_line_num},
+                                     $flags,
+                                     "void",    # No return type
+                                     [],
+                                     CONDITIONAL_APIDOC
+                                    );
 
             # All the information has been gathered; save it
-            $docs{'api'}{$section}{$name}{items}[0]->{flags} = $flags;
-            $docs{'api'}{$section}{$name}{items}[0]->{name} = $name;
+            push $docs{'api'}{$section}{$name}{items}->@*, $data;
             $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
-            $docs{'api'}{$section}{$name}{items}[0]{ret_type} = "";
             $docs{'api'}{$section}{$name}{file} = $config_h;
             $docs{'api'}{$section}{$name}{usage}
                 = $configs{$name}{usage} if defined $configs{$name}{usage};
-            push $docs{'api'}{$section}{$name}{items}[0]{args}->@*, ();
         }
     }
 }
