@@ -1715,13 +1715,33 @@ sub docout ($$$) { # output the docs for one function group
         my $max_retlen = 0;
         my $any_has_pTHX_ = 0;
 
+        # All functions (but not macros) have long names that begin with
+        # 'Perl_'.  Many have short names as well, without the 'Perl_' prefix.
+        # All legal styles are displayed.  The short name is first, then any
+        # long one.  This is accomplished by redoing the loop with the long
+        # name.  This variable controls if to do that.
+        my $additional_long_form = 0;
+
+        # Each group of elements is displayed nicely vertically aligned so
+        # that any 'Perl_' prefix is outdented from the rest.  That is
+        # accomplished by instead doing an extra indent on the short name.
+        # A short name may hence occupy more space than its name indicates.
+        # As we go through the names, we determine what the name column width
+        # should be should this group need to have the outdented 'Perl_'.
+        # This is done in parallel with the calculations using the variables
+        # above.  At the end, one or the other set is selected.
+        my $any_has_additional_long_form = 0;
+        my $max_name_len_if_needs_extra_indent = 0;
+
+        my $may_need_extra_indent = 1;
         for my $item_ref (@items) {
             my $item = $$item_ref;
             my $name = $item->{name};
             my $flags = $item->{flags};
 
             print $fh "\nNOTE: the C<perl_$name()> form is",
-                      " B<deprecated>.\n" if $flags =~ /O/;
+                      " B<deprecated>.\n"
+                                 if $additional_long_form && $flags =~ /O/;
 
             die "'u' flag must also have 'm' or 'y' flags' for $name "
               . where_from_string($item->{proto_defined}{file},
@@ -1780,27 +1800,33 @@ sub docout ($$$) { # output the docs for one function group
                 my $cant_use_short_name = (   $flags =~ /f/
                                            && $flags !~ /T/
                                            && $name !~ /strftime/);
-                if ($needs_Perl_entry || $cant_use_short_name) {
-                    my $short_name = $name;
-                    $name = "Perl_$short_name";
 
-                    print $fh <<~"EOT";
-
-                        NOTE: C<$short_name> must be explicitly called as
-                        C<$name>
-                        EOT
+                # We also create a 'Perl_foo' entry if $additional_long_form
+                # is set, as that explicitly indicates we want one
+                if (   $additional_long_form
+                    || $needs_Perl_entry
+                    || $cant_use_short_name)
+                {
+                    $name = "Perl_$name";
 
                     # We can't hide the existence of any thread context
                     # parameter when using the "Perl_" long form.  So it must
                     # be the first parameter to the function.
                     if ($flags !~ /T/) {
-                        print $fh "with an C<aTHX_> parameter";
                         $this_has_pTHX = 1;
                         unshift @args, "pTHX";
                         $any_has_pTHX_ = 1 if @args > 1;
                     }
 
-                    print $fh ".\n";
+                    $additional_long_form = 0;
+                }
+                elsif ($flags =~ /p/ && $flags !~ /o/) {
+
+                    # Here, has a long name and we didn't create one just
+                    # above.  Set up to redo the loop at the end.  This
+                    # iteration adds the short form; the redo causes its long
+                    # form equivalent to be added too.
+                    $additional_long_form = 1;
                 }
             }
 
@@ -1819,6 +1845,8 @@ sub docout ($$$) { # output the docs for one function group
 
             $outputs[-1]->{args}->@* = @args if $has_args;
             $outputs[-1]->{semicolon} = ";" if $has_semicolon;
+
+            redo if $additional_long_form;
         }
 
         my $indent = 1; # Minimum space to get a verbatim block.
@@ -2426,6 +2454,16 @@ $api{hdr} = <<"_EOB_";
 |some slight differences.  For example, one form might process magic, while
 |another doesn't.  The name of each variation is listed at the top of the
 |single entry.
+|
+|The names of all API functions begin with the prefix C<Perl_> so as to
+|prevent any name collisions with your code.  But, unless
+|C<-Accflags=-DPERL_NO_SHORT_NAMES> has been specified in compiling your code
+|(see L<perlembed/Hiding Perl_>), synonymous macros are also available to you
+|that don't have this prefix, and also hide from you the need (or not) to have
+|a thread context parameter passed to the function.  Generally, code is easier
+|to write and to read when the short form is used, so in practice that
+|compilation flag is not used.  Not all functions have the short form; both
+|are listed here when available.
 |
 |Anything not listed here or in the other mentioned pods is not part of the
 |public API, and should not be used by extension writers at all.  For these
