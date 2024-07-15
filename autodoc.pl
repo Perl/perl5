@@ -132,7 +132,6 @@ my %described_elsewhere;
 
 my %docs;
 my %elements;
-my %missing_macros;
 
 my $link_text = "Described in";
 
@@ -1239,7 +1238,6 @@ sub parse_config_h {
 
             warn "$name has no documentation "
                . where_from_string($config_h, $configs{$name}{defn_line_num});
-            $missing_macros{$name} = 'config.h';
 
             next;
         }
@@ -2266,7 +2264,6 @@ unshift $intern{missings}->@*,
 
 unshift $api{missings}->@*,
  (missings_hdr => [ grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_api]);
-push $api{missings}[1]->@*, keys %missing_macros;
 
 unshift $intern{missings}->@*,
  (missings_hdr => [ grep { $elements{$_}{flags} !~ /[xD]/ } @undocumented_intern]);
