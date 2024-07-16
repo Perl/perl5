@@ -147,6 +147,15 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+=item *
+
+The podlators distribution, which provides the L<Pod::Man> and L<Pod::Text>
+modules and the L<pod2man> and L<pod2text> command-line utilities, has been
+upgraded from version 5.01 to v6.0.2.  The distribution now uses semantic
+versioning for the package and module versions, with a C<v> prefix to work
+with Perl's packaging system.  L<Pod::Man>, in particular, has received a
+variety of improvements.
+
 =back
 
 =head2 Removed Modules and Pragmata
