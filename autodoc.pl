@@ -1628,20 +1628,69 @@ sub docout ($$$) { # output the docs for one function group
     print $fh "\n=over $description_indent\n";
     print $fh "\n=item C<${$_}->{name}>\n" for @items;
 
+    my @where_froms;
     my @deprecated;
     my @experimental;
     my @xrefs;
 
-    for my $item_ref (@items) {
-        my $item = $$item_ref;
+    for (my $i = 0; $i < @items; $i++) {
+        my $item = ${$items[$i]};
         my $name = $item->{name};
 
-        # If we're printing only a link to an element, this isn't the major
-        # entry, so no X<> here.
-        push @xrefs, $name unless $item->{flags} =~ /h/;
+        if ($item->{flags}) {
 
-        push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
-        push @experimental, "C<$name>" if $item->{flags} =~ /x/;
+            # If we're printing only a link to an element, this isn't the major
+            # entry, so no X<> here.
+            push @xrefs, $name unless $item->{flags} =~ /h/;
+
+            push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
+            push @experimental, "C<$name>" if $item->{flags} =~ /x/;
+        }
+
+        # While we're going though the items, construct a nice list of where
+        # things are declared and documented.  Spend a bit of time to make it
+        # easier on the humans who later read it.
+        my $entry = "";
+        if ($item->{proto_defined}) {
+            $entry .= "declared "
+                   .  where_from_string($item->{proto_defined}{file},
+                                        $item->{proto_defined}{line_num});
+        }
+
+        if ($item->{docs_found}) {
+            if ($i == 0) {
+                # Special consolidated text if a single item in the list, and
+                # it's declared and documented in the same place.
+                if (   $entry
+                    && @items == 1
+                    && $item->{proto_defined}
+                    && $item->{docs_found}
+                    && $item->{proto_defined}{file} eq $item->{docs_found}{file}
+                    && $item->{proto_defined}{line_num} eq
+                                                $item->{docs_found}{line_num})
+                {
+                    $entry =~ s/declared/declared and documented/;
+                }
+                else {
+                    $entry .= "; " if $entry;
+                    $entry .= "all in group " if @items > 1;
+                    $entry .= "documented "
+                        .  where_from_string($item->{docs_found}{file},
+                                             $item->{docs_found}{line_num});
+                }
+            }
+        }
+
+        # If there is a single item in the group, no need to give the name,
+        # bu`t capitalize the first word.
+        if (@items == 1) {
+            $entry = ucfirst($entry);
+        }
+        else {
+            $entry = "$name $entry";
+        }
+
+        push @where_froms, $entry;
     }
 
     print $fh format_pod_indexes(\@xrefs);
@@ -2068,7 +2117,9 @@ sub docout ($$$) { # output the docs for one function group
     }
 
     print $fh "\n=back\n";
-    print $fh "\n=for hackers\nFound in file $file\n";
+    print $fh "\n=for hackers\n";
+    print $fh join "\n", @where_froms;
+    print $fh "\n";
 }
 
 sub construct_missings_section {
