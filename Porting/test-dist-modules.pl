@@ -1,6 +1,9 @@
 #!perl
 # this should be perl 5.8 compatible, since it will be used
 # with old perls while testing dist modules on those perls
+#
+# see C<perldoc Porting/test-dist-modules.pl>
+
 use strict;
 use warnings;
 use File::Temp "tempdir";
@@ -320,6 +323,87 @@ Test the various threads distributions, continue on failure:
 EOS
     exit;
 }
+
+=head2 NAME
+
+test-dist-modules.pl - test modules in dist/ against the perl invoked with
+
+=head1 SYNOPSIS
+
+  # from a checked out clean perl source tree
+  # test all dist/ modules, abort on first failure
+  path/to/perl test-dist-modules.pl
+
+  # test all dist/ modules, continue on failure
+  path/to/perl test-dist-modules.pl -c
+
+  # test all dist/ modules, and install into path/to/perl's site_perl
+  path/to/perl test-dist-modules.pl -i
+
+=head1 DESCRIPTION
+
+F<Porting/test-dist-modules.pl> is used by the Github workflow to test
+modules from F<dist/> against the perl it is invoked with, within a
+git clone of a development perl.  This clone must be a clean clone,
+ie. as with C<git clean -dxf> .
+
+That perl should have any prerequisites needed by those modules
+installed, at this point this includes sufficiently recent versions
+of:
+
+ ExtUtils::MakeMaker
+ Perl::OSType
+ Scalar::Util
+ Socket
+ version
+
+F<test-dist-modules.pl> will always test F<Devel::PPPort> first and
+then use that when testing the other modules, even if invoked with a
+distribution list.
+
+=head1 INVOKING F<test-dist-modules.pl>
+
+By default F<test-dist-modules.pl> will test each directory in
+F<dist/>, but you can test specific distributions by supplying them on
+the command-line:
+
+  path/to/perl test-dist-modules.pl threads
+
+which will test F<Devel-PPPort> and F<threads>.
+
+Options:
+
+=over
+
+=item * C<-i>
+
+=item * C<-install>
+
+Install the modules to the invoking perl's F<site_perl>.  This may
+require privileges such as running as C<root>.
+
+=item * C<-c>
+
+=item * C<-continue>
+
+Continue testing modules even if one fails.
+
+=item * C<-s>
+
+=item * C<-separate>
+
+Install to a temp tree instead of to the invoking perl's F<site_perl>.
+This is now the default.
+
+=item * C<-h>
+
+=item * C<-help>
+
+Produce a help message.
+
+=back
+
+=cut
 
 __DATA__
 -- t/test.pl --
