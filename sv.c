@@ -16890,7 +16890,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
 
 /*
-=apidoc_section $warning
+=for apidoc_section $warning
 =for apidoc find_uninit_var
 
 Find the name of the undefined variable (if any) that caused the operator
