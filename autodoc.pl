@@ -85,6 +85,7 @@ use constant {
               APIDOC_DEFN        =>  1,
               PLAIN_APIDOC       =>  2,
               APIDOC_ITEM        =>  3,
+              APIDOC_SECTION     =>  4,
              };
 
 my $config_h = 'config.h';
@@ -434,8 +435,8 @@ sub check_and_add_proto_defn {
                                                  };
 }
 
-sub classify_input_line ($$$) {
-    my ($file, $line_num, $input) = @_;
+sub classify_input_line ($$$$) {
+    my ($file, $line_num, $input, $is_file_C) = @_;
 
     # Looks at an input line and classifies it as to if it is of use to us or
     # not, and if so, what class of apidoc line it is.  It looks for common
@@ -452,10 +453,38 @@ sub classify_input_line ($$$) {
     # For NOT_APIDOC only, the returned argument is not trimmed; it is the
     # whole line, including any \n.
     #
+    # In C files only, a =head1 line is equivalent to an apidoc_section line,
+    # so the latter is returned for this case.
 
-    # Use a simple pattern to quickly rule out lines that are of no interest to
+    # Use simple patterns to quickly rule out lines that are of no interest to
     # us, which are the vast majority.
-    return (NOT_APIDOC, $input) if $input !~ / api [-_]? doc /x;
+    return (NOT_APIDOC, $input)
+                    if                   $input !~ / api [-_]? doc /x
+                    and (! $is_file_C || $input !~ / head \s* 1 \s+ (.) /x);
+
+    # Only the head1 lines have a capture group.  That capture was done solely
+    # to be able to use its existence as a shortcut to distinguish between the
+    # patterns here.
+    if (defined $1) {
+
+        # We repeat the match above, to handle the case where there is more
+        # than one head1 strings on the line
+        return (NOT_APIDOC, $input) unless $input =~ / ^
+                                                       (\s*)  # $1
+                                                       (=?)   # $2
+                                                       head
+                                                       (\s*)  # $3
+                                                       1 \s+
+                                                       (.*)   # $4
+                                                     /x;
+        # Here, it looks like the line was meant to be a =head1.  This is
+        # equivalent to an apidoc_section line if properly formed
+        return (APIDOC_SECTION, $4) if length $1 == 0
+                                    && length $2 == 1
+                                    && length $3 == 0;
+        # Drop down to give error
+    }
+    else {
 
         # Here, the input has something like 'apidoc' in it.  See if we think
         # it was meant to be one.
@@ -483,7 +512,9 @@ sub classify_input_line ($$$) {
                      ? APIDOC_ITEM
                      : ($type_name eq 'defn')
                        ? APIDOC_DEFN
-                       : ILLEGAL_APIDOC;
+                       : ($type_name eq 'section')
+                         ? APIDOC_SECTION
+                         : ILLEGAL_APIDOC;
 
         return ($type, $arg)
                     if $type != ILLEGAL_APIDOC
@@ -504,6 +535,7 @@ sub classify_input_line ($$$) {
                     && (   length $9 != 0
                         || (   $type == APIDOC_ITEM
                             && substr($10, 0, 1) eq '|'));
+    }
 
     chomp $input;
     my $where_from = where_from_string($file, $line_num);
@@ -516,13 +548,15 @@ sub classify_input_line ($$$) {
         =for apidoc_item    name
         =for apidoc_item    [flags] | [returntype] | name [|arg1] [|arg2] [|...]
         =for apidoc_defn    flags|returntype|name[|arg|arg|...]
+        =for apidoc_section name
+        =for apidoc_section \$variable
         EOS
 }
 
 sub check_api_doc_line ($$$) {
     my ($file, $line_num, $input) = @_;
 
-    my ($type, $arg) = classify_input_line($file, $line_num, $input);
+    my ($type, $arg) = classify_input_line($file, $line_num, $input, 0);
     return if $type == NOT_APIDOC;
 
     my $proto_as_written = $arg;
