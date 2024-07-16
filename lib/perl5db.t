@@ -3602,6 +3602,38 @@ EOS
                             "didn't run the wrong code");
 }
 
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "b compile problem",
+                "L",
+                "c",
+                "q"
+            ],
+            prog => \<<'EOS'
+print "1\n";
+eval <<'EOC';
+sub problem {
+    $SIG{__DIE__} = sub {
+        die "<b problem> will set a break point here.\n";
+    };    # The break point _should_ be set here.
+    warn "This line will run even if you enter <c problem>.\n";
+}
+EOC
+print "2\n";
+problem();
+print "3\n";
+EOS
+        }
+    );
+    $wrapper->contents_like(qr/Postponed\ breakpoints\ in\ subroutines:
+                               \s+main::problem\s+compile/x,
+                            "check compiled breakpoint present");
+    $wrapper->contents_like(qr/print "2\\n"/, "break immediately after defining problem");
+}
+
 done_testing();
 
 END {
