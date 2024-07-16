@@ -516,9 +516,8 @@ sub classify_input_line ($$$$) {
                          ? APIDOC_SECTION
                          : ILLEGAL_APIDOC;
 
-        return ($type, $arg)
-                    if $type != ILLEGAL_APIDOC
-                    && length $1 == 0       # Must be left justified
+        my $mostly_proper_form =
+                   (   $type != ILLEGAL_APIDOC
                     && length $2 == 1       # Must have '='
                     && length $3 == 0       # Must not have space after '='
                     && defined $4           # Must have 'for'
@@ -534,7 +533,19 @@ sub classify_input_line ($$$$) {
                         # apidoc_item and first char of arg is '|'
                     && (   length $9 != 0
                         || (   $type == APIDOC_ITEM
-                            && substr($10, 0, 1) eq '|'));
+                            && substr($10, 0, 1) eq '|')));
+        if ($mostly_proper_form) {
+            return ($type, $arg) if length $1 == 0; # Is fully correct if left
+                                                    # justified
+
+            # Ordinarily not being left justified is an error, but special
+            # case perlguts which has examples of how to use apidoc in
+            # verbatim blocks, which we don't want to confuse with a real
+            # instance and reject because it isn't left justified.  Use a
+            # precise indent to get the precise lines that have this.
+            return (NOT_APIDOC, $input) if length $1 == 1
+                                        && $file eq 'pod/perlguts.pod';
+        }
     }
 
     chomp $input;
