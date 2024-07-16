@@ -402,6 +402,48 @@ my %valid_sections = (
     $XS_scn => {},
 );
 
+# The section that is in effect at the beginning of the given file.  If not
+# listed here, an apidoc_section line must precede any apidoc lines.
+# This allows the files listed here that generally are single-purpose, to not
+# have to worry about the autodoc section
+my %initial_file_section = (
+                            'av.c' => $AV_scn,
+                            'av.h' => $AV_scn,
+                            'cv.h' => $CV_scn,
+                            'deb.c' => $debugging_scn,
+                            'dist/ExtUtils-ParseXS/lib/perlxs.pod' => $XS_scn,
+                            'doio.c' => $io_scn,
+                            'gv.c' => $GV_scn,
+                            'gv.h' => $GV_scn,
+                            'hv.h' => $HV_scn,
+                            'locale.c' => $locale_scn,
+                            'malloc.c' => $memory_scn,
+                            'numeric.c' => $numeric_scn,
+                            'opnames.h' => $optree_construction_scn,
+                            'pad.h'=> $pad_scn,
+                            'patchlevel.h' => $versioning_scn,
+                            'perlio.h' => $io_scn,
+                            'pod/perlapio.pod' => $io_scn,
+                            'pod/perlcall.pod' => $callback_scn,
+                            'pod/perlembed.pod' => $embedding_scn,
+                            'pod/perlfilter.pod' => $filters_scn,
+                            'pod/perliol.pod' => $io_scn,
+                            'pod/perlmroapi.pod' => $MRO_scn,
+                            'pod/perlreguts.pod' => $regexp_scn,
+                            'pp_pack.c' => $pack_scn,
+                            'pp_sort.c' => $SV_scn,
+                            'regcomp.c' => $regexp_scn,
+                            'regexp.h' => $regexp_scn,
+                            'sv.h' => $SV_scn,
+                            'sv.c' => $SV_scn,
+                            'sv_inline.h' => $SV_scn,
+                            'taint.c' => $tainting_scn,
+                            'unicode_constants.h' => $unicode_scn,
+                            'utf8.c' => $unicode_scn,
+                            'utf8.h' => $unicode_scn,
+                            'vutil.c' => $versioning_scn,
+                           );
+
 sub where_from_string($;$) {
     my ($file, $line_num) = @_;
     return "in $file" unless $line_num;
@@ -727,48 +769,6 @@ sub handle_apidoc_line ($$$$) {
 
     return $updated;
 }
-
-# The section that is in effect at the beginning of the given file.  If not
-# listed here, an apidoc_section line must precede any apidoc lines.
-# This allows the files listed here that generally are single-purpose, to not
-# have to worry about the autodoc section
-my %initial_file_section = (
-                            'av.c' => $AV_scn,
-                            'av.h' => $AV_scn,
-                            'cv.h' => $CV_scn,
-                            'deb.c' => $debugging_scn,
-                            'dist/ExtUtils-ParseXS/lib/perlxs.pod' => $XS_scn,
-                            'doio.c' => $io_scn,
-                            'gv.c' => $GV_scn,
-                            'gv.h' => $GV_scn,
-                            'hv.h' => $HV_scn,
-                            'locale.c' => $locale_scn,
-                            'malloc.c' => $memory_scn,
-                            'numeric.c' => $numeric_scn,
-                            'opnames.h' => $optree_construction_scn,
-                            'pad.h'=> $pad_scn,
-                            'patchlevel.h' => $versioning_scn,
-                            'perlio.h' => $io_scn,
-                            'pod/perlapio.pod' => $io_scn,
-                            'pod/perlcall.pod' => $callback_scn,
-                            'pod/perlembed.pod' => $embedding_scn,
-                            'pod/perlfilter.pod' => $filters_scn,
-                            'pod/perliol.pod' => $io_scn,
-                            'pod/perlmroapi.pod' => $MRO_scn,
-                            'pod/perlreguts.pod' => $regexp_scn,
-                            'pp_pack.c' => $pack_scn,
-                            'pp_sort.c' => $SV_scn,
-                            'regcomp.c' => $regexp_scn,
-                            'regexp.h' => $regexp_scn,
-                            'sv.h' => $SV_scn,
-                            'sv.c' => $SV_scn,
-                            'sv_inline.h' => $SV_scn,
-                            'taint.c' => $tainting_scn,
-                            'unicode_constants.h' => $unicode_scn,
-                            'utf8.c' => $unicode_scn,
-                            'utf8.h' => $unicode_scn,
-                            'vutil.c' => $versioning_scn,
-                           );
 
 sub destination_pod ($) {
     my $flags = shift;
