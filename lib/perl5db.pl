@@ -6273,13 +6273,23 @@ sub postponed_sub {
 
         # find_sub's value is 'fullpath-filename:start-stop'. It's
         # possible that the filename might have colons in it too.
-        my ( $file, $i ) = ( find_sub($subname) =~ /^(.*):(\d+)-.*$/ );
+        my ($file, $i);
+        local $\ = '';
+        if ( $offset =~ /^\+?0$/) {
+            ( $file, $i ) = eval { subroutine_first_breakable_line($subname) }
+              or print $OUT $@;
+        }
+        else {
+            if (( $file, $i ) = ( find_sub($subname) =~ /^(.*):(\d+)-.*$/ )) {
+                # We got the start line. Add the offset '+<n>' from
+                # $postponed{subname}.
+                $i += $offset;
+            }
+            else {
+                print $OUT "Subroutine $subname not found.\n";
+            }
+        }
         if ($i) {
-
-            # We got the start line. Add the offset '+<n>' from
-            # $postponed{subname}.
-            $i += $offset;
-
             # Switch to the file this sub is in, temporarily.
             local *dbline = $main::{ '_<' . $file };
 
@@ -6298,13 +6308,9 @@ sub postponed_sub {
 
             # Copy the breakpoint in and delete it from %postponed.
             $dbline{$i} = delete $postponed{$subname};
-        } ## end if ($i)
 
-        # find_sub didn't find the sub.
-        else {
-            local $\ = '';
-            print $OUT "Subroutine $subname not found.\n";
-        }
+            _set_breakpoint_enabled_status($file, $i, 1);
+        } ## end if ($i)
         return;
     } ## end if ($postponed{$subname...
     elsif ( $postponed{$subname} eq 'compile' ) { $signal = 1 }
