@@ -3565,6 +3565,43 @@ EOS
     $wrapper->contents_like(qr/Cannot break on XSUB B::svref_2object/, "can't break on XSUB");
 }
 
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "b problem", # should fail
+                "b postpone problem",
+                "L",
+                "c",
+                "q"
+            ],
+            prog => \<<'EOS'
+print "1\n";
+eval <<'EOC';
+sub problem {
+    $SIG{__DIE__} = sub {
+        die "<b problem> will set a break point here.\n";
+    };    # The break point _should_ be set here.
+    warn "This line will run even if you enter <c problem>.\n";
+}
+EOC
+print "2\n";
+problem();
+print "3\n";
+EOS
+        }
+    );
+    $wrapper->contents_like(qr/Subroutine main::problem not found/,
+                            "problem not defined yet");
+    $wrapper->contents_like(qr/Postponed\ breakpoints\ in\ subroutines:
+                               \s+main::problem\s+break\s\+0\sif\s1/x,
+                            "check postponed breakpoint present");
+    $wrapper->contents_like(qr/The break point _should_/, "break at right place (c)");
+    $wrapper->output_unlike(qr/This line will run even if you enter <c problem>\./,
+                            "didn't run the wrong code");
+}
+
 done_testing();
 
 END {
