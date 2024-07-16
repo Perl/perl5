@@ -16,7 +16,7 @@ GetOptions("c|continue" => \$continue,
            "s|separate" => \$separate,
            "i|install"  => \$install,
            "h|help"     => \&usage)
-  or die "Unknown options\n";
+  or usage("Unknown options");
 
 $separate
   and warn "-s / -separate is now the default\n";
@@ -301,8 +301,8 @@ Usage: $^X $0 [options] [distnames]
  -c | -continue
      Continue processing after failures
      Devel::PPPort must successfully build to continue.
- -s | -separate
-     Install to a work path, not to perl's site_perl.
+ -i | -install
+     Install to perl's site_perl.
  -h | -help
      Display this message.
 
@@ -312,12 +312,13 @@ Devel-PPPort is always tested.
 
 Test all of the distributions, stop on the first failure:
 
-   $^X $0 -s
+   $^X $0
 
 Test the various threads distributions, continue on failure:
 
-   $^X $0 -s -c threads threads-shared Thread-Queue Thread-Semaphore
+   $^X $0 -c threads threads-shared Thread-Queue Thread-Semaphore
 EOS
+    exit;
 }
 
 __DATA__
