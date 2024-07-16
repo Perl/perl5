@@ -437,44 +437,73 @@ sub check_and_add_proto_defn {
 sub classify_input_line ($$$) {
     my ($file, $line_num, $input) = @_;
 
-    # Somewhat loose match for an apidoc line so we can catch minor typos.
-    # Parentheses are used to capture portions so that just below we verify
-    # that things are the actual correct syntax.
-    my $apidoc_re = qr/ ^
-                             (\s*)            # $1
-                             (=?)             # $2
-                             (\s*)            # $3
-                             for (\s*)        # $4
-                             apidoc (\w*)     # $5
-                             (\s*)            # $6
-                             (.*?)            # $7
-                             \s* \n
-                           /x;
+    # Looks at an input line and classifies it as to if it is of use to us or
+    # not, and if so, what class of apidoc line it is.  It looks for common
+    # typos in the input lines in order to do the classification, but dies
+    # when one is encountered.
+    #
+    # It returns a pair of values.  The first is the classification; the
+    # second the trailing text of the input line, trimmed of leading and
+    # trailing spaces.  This is viewed as the argument.
+    #
+    # The returned classification is one of the constants defined at the
+    # beginning of the program, like NOT_APIDOC.
+    #
+    # For NOT_APIDOC only, the returned argument is not trimmed; it is the
+    # whole line, including any \n.
+    #
 
-    return (NOT_APIDOC, $input) unless $input =~ $apidoc_re;
+    # Use a simple pattern to quickly rule out lines that are of no interest to
+    # us, which are the vast majority.
+    return (NOT_APIDOC, $input) if $input !~ / api [-_]? doc /x;
 
-    my $type_name = $5;
-    my $arg = $7;
+        # Here, the input has something like 'apidoc' in it.  See if we think
+        # it was meant to be one.
+        return (NOT_APIDOC, $input) unless $input =~ / ^
+                                                       (\s*)      # $1
+                                                       (=?)       # $2
+                                                       (\s*)      # $3
+                                                       (for)?     # $4
+                                                       (\s*)      # $5
+                                                       api
+                                                       ([_-]?)    # $6
+                                                       doc
+                                                       ([-_]?)    # $7
+                                                       (\w*)      # $8
+                                                       (\s*)      # $9
+                                                       (.*?)      # $10
+                                                       \s* \n
+                                                     /x;
+        my $type_name = $8;
+        my $arg = $10;
 
-    my $type = ($type_name eq "")
-               ? PLAIN_APIDOC
-               : ($type_name eq '_item')
-                 ? APIDOC_ITEM
-                 : ($type_name eq '_defn')
-                   ? APIDOC_DEFN
-                   : ILLEGAL_APIDOC;
+        my $type = ($type_name eq "")
+                   ? PLAIN_APIDOC
+                   : ($type_name eq 'item')
+                     ? APIDOC_ITEM
+                     : ($type_name eq 'defn')
+                       ? APIDOC_DEFN
+                       : ILLEGAL_APIDOC;
 
-    my $is_in_proper_form = $type != ILLEGAL_APIDOC
-                         && length $1 == 0
-                         && length $2 > 0
-                         && length $3 == 0
-                         && length $4 > 0
-                         && length $7 > 0
-                         && (    length $6 > 0
-                             || (   $type == APIDOC_ITEM
-                                 && substr($7, 0, 1) eq '|'));
+        return ($type, $arg)
+                    if $type != ILLEGAL_APIDOC
+                    && length $1 == 0       # Must be left justified
+                    && length $2 == 1       # Must have '='
+                    && length $3 == 0       # Must not have space after '='
+                    && defined $4           # Must have 'for'
+                    && length $5 > 0        # Must have space after =for
+                    && length $6 == 0       # 'apidoc' is one word
 
-    return ($type, $arg) if $is_in_proper_form;
+                        # plain apidoc has no trailing underscore; others have
+                        # an underscore separator
+                    && (   ($type == PLAIN_APIDOC && length $7 == 0)
+                        || ($type != PLAIN_APIDOC && $7 eq '_'))
+
+                        # Must have space before argument except if
+                        # apidoc_item and first char of arg is '|'
+                    && (   length $9 != 0
+                        || (   $type == APIDOC_ITEM
+                            && substr($10, 0, 1) eq '|'));
 
     chomp $input;
     my $where_from = where_from_string($file, $line_num);
