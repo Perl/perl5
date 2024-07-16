@@ -148,6 +148,15 @@ L<Win32> has been upgraded from version 0.59 to 0.59_01.
 Imported an upstream PR that fixes symbolic link support detection on
 32-bit Windows.  [GH #22393]
 
+=item *
+
+The podlators distribution, which provides the L<Pod::Man> and L<Pod::Text>
+modules and the L<pod2man> and L<pod2text> command-line utilities, has been
+upgraded from version 5.01 to v6.0.2.  The distribution now uses semantic
+versioning for the package and module versions, with a C<v> prefix to work
+with Perl's packaging system.  L<Pod::Man>, in particular, has received a
+variety of improvements.
+
 =back
 
 =head2 Removed Modules and Pragmata
