@@ -1059,7 +1059,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
 
             $docs{$destpod}{$section}{$element_name}{pod} = $text;
-            $docs{$destpod}{$section}{$element_name}{file} = $file;
             $docs{$destpod}{$section}{$element_name}{items} = \@items;
         }
 
@@ -1574,7 +1573,6 @@ sub parse_config_h {
             # All the information has been gathered; save it
             push $docs{'api'}{$section}{$name}{items}->@*, $data;
             $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
-            $docs{'api'}{$section}{$name}{file} = $config_h;
             $docs{'api'}{$section}{$name}{usage}
                 = $configs{$name}{usage} if defined $configs{$name}{usage};
         }
@@ -1616,8 +1614,6 @@ sub docout ($$$) { # output the docs for one function group
     $element_name =~ s/\s*$//;
 
     my $pod = $docref->{pod} // "";
-    my $file = $docref->{file};
-
     my @items = $docref->{items}->@*;
 
     my $item0 = ${$items[0]};
