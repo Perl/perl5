@@ -20,7 +20,7 @@ use warnings;
 use 5.010;
 use Config;
 
-plan tests => 2514;  # Update this when adding/deleting tests.
+plan tests => 2518;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1167,6 +1167,39 @@ EOP
 		my $result = grep /b\x{1c0}ss0/i, qw{ xxxx xxxx0 };
 		ok($result == 0);
 	}
+
+    {
+        use Encode;
+        #use Devel::Peek;
+        
+        my $line = "\xe2\x90\x0a";
+        chomp(my $str = "\xe2\x90\x0a");
+        
+        Encode::_utf8_on($line);
+        Encode::_utf8_on($str);
+        
+        for ($line, $str) {
+            #    Dump($_);
+            {
+                # Doesn't crash
+                local $@;
+                eval { $_ =~ /(.*)/; };
+                ok(! $@, 'no panic: GH #10194');
+            }
+        }
+        # List context
+        {
+            local $@;
+            eval { () = $line =~ /(.*)/; };
+            ok(! $@, 'no panic, list context: GH #10194');
+        }
+        TODO: {
+            todo_skip 'GH #10194', 1;
+            local $@;
+            eval { () = $str =~ /(.*)/; };
+            ok(! $@, 'no panic, list context: GH #10194');
+        }
+    }
 
 } # End of sub run_tests
 
