@@ -402,8 +402,9 @@ sub where_from_string($;$) {
 }
 
 sub check_and_add_proto_defn {
-    my ($element, $file, $line_num, $flags, $ret_type, $args_ref) = @_;
+    my ($element, $file, $line_num, $raw_flags, $ret_type, $args_ref) = @_;
 
+    my $flags = $raw_flags =~ s/$irrelevant_flags_re//gr;
     my $illegal_flags = $flags =~ s/$known_flags_re//gr;
     if ($illegal_flags) {
         die "flags [$illegal_flags] not legal for function"
@@ -418,6 +419,7 @@ sub check_and_add_proto_defn {
 
     $elements{$element} = {
                             name => $element,
+                            raw_flags => $raw_flags, # Keep for debugging, etc.
                             flags => $flags,
                             ret_type => $ret_type,
                             args => \@munged_args,
