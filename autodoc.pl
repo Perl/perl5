@@ -1530,7 +1530,7 @@ sub docout ($$$) { # output the docs for one function group
 
     if ($pod !~ /\S/) {
         warn "Empty pod for $element_name ("
-           . where_from_string($file)
+           . where_from_string($item0->{file}, $item0->{line_num})
            . ')';
     }
 
@@ -1656,11 +1656,12 @@ sub docout ($$$) { # output the docs for one function group
 
             if (! $has_args) {
                 warn "$name: n flag without m"
-                   . where_from_string($file) unless $flags =~ /m/;
+                   . where_from_string($item->{file}, $item->{line_num})
+                                                        unless $flags =~ /m/;
 
                 if ($item->{args} && $item->{args}->@*) {
                     warn "$name: n flag but apparently has args"
-                       . where_from_string($file);
+                       . where_from_string($item->{file}, $item->{line_num});
                     $flags =~ s/n//g;
                     $has_args = 1;
                 }
