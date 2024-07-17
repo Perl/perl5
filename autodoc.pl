@@ -69,10 +69,11 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 use strict;
 use warnings;
 
-my $known_flags_re = qr/[AabCDdEeFfGhiIMmNnTOoPpRrSsUuvWXxy;#]/;
+my $known_flags_re =
+                qr/[aA bC dD eE fF Gh iI mM nN oO pP rR sS T uU vW xX y;#?]/xx;
 
 # Only certain flags, dealing with display, are acceptable for apidoc_item
-my $item_flags_re = qr/[fFnDopTx;]/;
+my $item_flags_re = qr/[D fF nopTx;]/xx;
 
 use constant {
               ILLEGAL_APIDOC     =>  0,  # Must be 0 so evaluates to 'false'
