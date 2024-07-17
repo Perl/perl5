@@ -143,9 +143,10 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Win32> has been upgraded from version 0.59 to 0.59_01.
 
-XXX If there was something important to note about this change, include that here.
+Imported an upstream PR that fixes symbolic link support detection on
+32-bit Windows.  [GH #22393]
 
 =back
 
