@@ -1483,6 +1483,7 @@ sub docout ($$$) { # output the docs for one function group
 
                 if ($item->{args}->@*) {
                     warn("$file: $name: n flag but apparently has args");
+                    $flags =~ s/n//g;
                     $has_args = 1;
                 }
             }
