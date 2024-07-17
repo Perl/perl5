@@ -72,8 +72,12 @@ use warnings;
 my $known_flags_re =
                 qr/[aA bC dD eE fF Gh iI mM nN oO pP rR sS T uU vW xX y;#?]/xx;
 
-# Only certain flags, dealing with display, are acceptable for apidoc_item
-my $item_flags_re = qr/[D fF nopTx;]/xx;
+# Flags that don't apply to this program, like implementation details.
+my $irrelevant_flags_re = qr/[ab eE G iI P rR vX?]/xx;
+
+# Only certain flags dealing with what gets displayed, are acceptable for
+# apidoc_item
+my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
 
 use constant {
               ILLEGAL_APIDOC     =>  0,  # Must be 0 so evaluates to 'false'
