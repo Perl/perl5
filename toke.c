@@ -839,9 +839,10 @@ S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
                                 is_utf8_invariant_string_loc(s, len, ep)
 #else
 STATIC bool
-S_is_ascii_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+S_is_ascii_string_loc(const U8 * const s0, STRLEN len, const U8 ** ep)
 {
-    const U8* send = s + len;
+    const U8 * s = s0;
+    const U8 * send = s0 + len;
 
     while (s < send) {
         if (isASCII(*s)) {
