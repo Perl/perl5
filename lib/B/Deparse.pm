@@ -3126,16 +3126,6 @@ sub pp_padsv_store {
     return $self->maybe_parens("$var = $val", $cx, 7);
 }
 
-sub pp_smartmatch {
-    my ($self, $op, $cx) = @_;
-    if (($op->flags & OPf_SPECIAL) && $self->{expand} < 2) {
-	return $self->deparse($op->last, $cx);
-    }
-    else {
-	binop(@_, "~~", 14);
-    }
-}
-
 # '.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
 # programmer had written '($a . $b) .= $c', except legal.
@@ -5130,7 +5120,7 @@ sub retscalar {
                  |i_subtract|concat|multiconcat|stringify|left_shift|right_shift|lt
                  |i_lt|gt|i_gt|le|i_le|ge|i_ge|eq|i_eq|ne|i_ne|ncmp|i_ncmp
                  |slt|sgt|sle|sge|seq|sne|scmp|[sn]?bit_(?:and|x?or)|negate
-                 |i_negate|not|[sn]?complement|smartmatch|atan2|sin|cos
+                 |i_negate|not|[sn]?complement|atan2|sin|cos
                  |rand|srand|exp|log|sqrt|int|hex|oct|abs|length|substr
                  |vec|index|rindex|sprintf|formline|ord|chr|crypt|ucfirst
                  |lcfirst|uc|lc|quotemeta|aelemfast|aelem|exists|helem

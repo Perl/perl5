@@ -178,8 +178,6 @@ complement	1's complement (~)	ck_bitop	fst1	S
 ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
 scomplement	string 1's complement (~)	ck_null	fsT1	S
 
-smartmatch	smart match		ck_smartmatch	s2
-
 # High falutin' math.
 
 atan2		atan2			ck_fun		fsT@	S S

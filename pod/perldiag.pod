@@ -6132,20 +6132,6 @@ requested.
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
 
-=item Smart matching a non-overloaded object breaks encapsulation
-
-(F) You should not use the C<~~> operator on an object that does not
-overload it: Perl refuses to use the object's underlying structure
-for the smart match.
-
-=item Smartmatch is deprecated
-
-(D deprecated::smartmatch) This warning is emitted if you
-use the smartmatch (C<~~>) operator.  This is a deprecated
-feature.  Particularly, its behavior is noticed for being
-unnecessarily complex and unintuitive, and it will be removed
-in Perl 5.42.
-
 =item Sorry, hash keys must be smaller than 2**31 bytes
 
 (F) You tried to create a hash containing a very large key, where "very

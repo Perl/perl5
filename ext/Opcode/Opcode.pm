@@ -434,8 +434,6 @@ These are a hotchpotch of opcodes still waiting to be considered
     entertry leavetry -- can be used to 'hide' fatal errors
     entertrycatch poptry catch leavetrycatch -- similar
 
-    smartmatch
-
     pushdefer
 
     custom -- where should this go

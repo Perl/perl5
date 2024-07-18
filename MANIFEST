@@ -6404,7 +6404,6 @@ t/op/signatures.t			See if sub signatures work
 t/op/sigsystem.t			See if system and SIGCHLD handlers play together nicely
 t/op/sleep.t				See if sleep works
 t/op/smartkve.t				See if smart deref for keys/values/each works
-t/op/smartmatch.t			See if the ~~ operator works
 t/op/sort.t				See if sort works
 t/op/splice.t				See if splice works
 t/op/split.t				See if split works

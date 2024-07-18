@@ -202,6 +202,5 @@ repeat		(x
 repeat_ass	(x=
 concat		(.
 concat_ass	(.=
-smart		(~~
 ftest           (-X
 regexp          (qr
