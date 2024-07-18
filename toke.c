@@ -6815,15 +6815,6 @@ static int
 yyl_tilde(pTHX_ char *s)
 {
     bool bof;
-    if (s[1] == '~' && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR)) {
-        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
-            TOKEN(0);
-        s += 2;
-        Perl_ck_warner_d(aTHX_
-            packWARN(WARN_DEPRECATED__SMARTMATCH),
-            "Smartmatch is deprecated");
-        NCEop(OP_SMARTMATCH);
-    }
     s++;
     if ((bof = FEATURE_BITWISE_IS_ENABLED) && *s == '.') {
         s++;

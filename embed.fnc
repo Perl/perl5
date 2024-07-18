@@ -4750,8 +4750,6 @@ S	|bool	|process_special_blocks 				\
 				|NN const char * const fullname 	\
 				|NN GV * const gv			\
 				|NN CV * const cv
-S	|OP *	|ref_array_or_hash					\
-				|NULLOK OP *cond
 S	|OP *	|refkids	|NULLOK OP *o				\
 				|I32 type
 S	|OP *	|scalarboolean	|NN OP *o
@@ -4929,7 +4927,6 @@ p	|UV	|_to_upper_title_latin1 				\
 #if defined(PERL_IN_PP_CTL_C)
 RS	|PerlIO *|check_type_and_open					\
 				|NN SV *name
-S	|void	|destroy_matcher|NN PMOP *matcher
 RSd	|OP *	|docatch	|Perl_ppaddr_t firstpp
 S	|bool	|doeval_compile |U8 gimme				\
 				|NULLOK CV *outside			\
@@ -4949,13 +4946,6 @@ RS	|I32	|dopoptolabel	|NN const char *label			\
 RS	|I32	|dopoptoloop	|I32 startingblock
 RS	|I32	|dopoptosub_at	|NN const PERL_CONTEXT *cxstk		\
 				|I32 startingblock
-S	|OP *	|do_smartmatch	|NULLOK HV *seen_this			\
-				|NULLOK HV *seen_other			\
-				|const bool copied
-RS	|PMOP * |make_matcher	|NN REGEXP *re
-RS	|bool	|matcher_matches_sv					\
-				|NN PMOP *matcher			\
-				|NN SV *sv
 RST	|bool	|num_overflow	|NV value				\
 				|I32 fldsize				\
 				|I32 frcsize

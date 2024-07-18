@@ -558,12 +558,6 @@ eval{$1=eval{a:}};
 eval "map+map";
 eval "grep+grep";
 
-# ALso failed an assertion [perl #123848]
-{
- local $SIG{__WARN__} = sub{};
- eval 'my $_; m// ~~ 0';
-}
-
 # Used to crash [perl #125679]
 eval 'BEGIN {$^H=-1} \eval=time';
 

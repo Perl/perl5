@@ -6461,13 +6461,6 @@ Perl_ck_shift(pTHX_ OP *o)
         assert(o)
 
 PERL_CALLCONV OP *
-Perl_ck_smartmatch(pTHX_ OP *o)
-        __attribute__warn_unused_result__
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_CK_SMARTMATCH         \
-        assert(o)
-
-PERL_CALLCONV OP *
 Perl_ck_sort(pTHX_ OP *o)
         __attribute__warn_unused_result__
         __attribute__visibility__("hidden");
@@ -7403,10 +7396,6 @@ S_process_special_blocks(pTHX_ I32 floor, const char * const fullname, GV * cons
         assert(fullname); assert(gv); assert(cv)
 
 STATIC OP *
-S_ref_array_or_hash(pTHX_ OP *cond);
-# define PERL_ARGS_ASSERT_REF_ARRAY_OR_HASH
-
-STATIC OP *
 S_refkids(pTHX_ OP *o, I32 type);
 # define PERL_ARGS_ASSERT_REFKIDS
 
@@ -7719,15 +7708,6 @@ S_check_type_and_open(pTHX_ SV *name)
 # define PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN   \
         assert(name)
 
-STATIC void
-S_destroy_matcher(pTHX_ PMOP *matcher);
-# define PERL_ARGS_ASSERT_DESTROY_MATCHER       \
-        assert(matcher)
-
-STATIC OP *
-S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied);
-# define PERL_ARGS_ASSERT_DO_SMARTMATCH
-
 STATIC OP *
 S_docatch(pTHX_ Perl_ppaddr_t firstpp)
         __attribute__warn_unused_result__;
@@ -7769,18 +7749,6 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DOPOPTOSUB_AT         \
         assert(cxstk)
-
-STATIC PMOP *
-S_make_matcher(pTHX_ REGEXP *re)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_MAKE_MATCHER          \
-        assert(re)
-
-STATIC bool
-S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_MATCHER_MATCHES_SV    \
-        assert(matcher); assert(sv)
 
 STATIC bool
 S_num_overflow(NV value, I32 fldsize, I32 frcsize)

@@ -418,7 +418,6 @@ eval { getgrgid 1 };	# OP_GGRGID
 eval { getpwnam 1 };	# OP_GPWNAM
 eval { getpwuid 1 };	# OP_GPWUID
 prototype "foo";	# OP_PROTOTYPE
-$a ~~ $b;		# OP_SMARTMATCH
 $a <=> $b;		# OP_NCMP
 "dsatrewq";
 "diatrewq";
@@ -467,13 +466,12 @@ Useless use of getgrgid in void context at - line 51.
 Useless use of getpwnam in void context at - line 52.
 Useless use of getpwuid in void context at - line 53.
 Useless use of subroutine prototype in void context at - line 54.
-Useless use of smart match in void context at - line 55.
-Useless use of numeric comparison (<=>) in void context at - line 56.
-Useless use of a constant ("dsatrewq") in void context at - line 57.
-Useless use of a constant ("diatrewq") in void context at - line 58.
-Useless use of a constant ("igatrewq") in void context at - line 59.
-Useless use of __SUB__ in void context at - line 61.
-Useless use of anonymous array ([]) in void context at - line 62.
+Useless use of numeric comparison (<=>) in void context at - line 55.
+Useless use of a constant ("dsatrewq") in void context at - line 56.
+Useless use of a constant ("diatrewq") in void context at - line 57.
+Useless use of a constant ("igatrewq") in void context at - line 58.
+Useless use of __SUB__ in void context at - line 60.
+Useless use of anonymous array ([]) in void context at - line 61.
 ########
 # op.c
 use warnings 'scalar' ; close STDIN ;

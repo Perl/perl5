@@ -25,7 +25,7 @@ if ($NoTaintSupport) {
     exit 0;
 }
 
-plan tests => 1059;
+plan tests => 1057;
 
 $| = 1;
 
@@ -2452,14 +2452,6 @@ EOF
     my $ix = index(undef, C);
     is( $ix, -1, q[index(undef, C)] );
     ok(!tainted "", "tainting still works after index() of the constant");
-}
-
-# Tainted values with smartmatch
-# [perl #93590] S_do_smartmatch stealing its own string buffers
-{
-no warnings 'deprecated';
-ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
-ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
 }
 
 # Tainted values and ref()
