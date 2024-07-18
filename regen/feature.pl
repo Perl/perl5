@@ -26,7 +26,6 @@ use warnings;
 my %feature = (
     say                     => 'say',
     state                   => 'state',
-    switch                  => 'switch',
     bitwise                 => 'bitwise',
     evalbytes               => 'evalbytes',
     current_sub             => '__SUB__',
@@ -55,14 +54,13 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles};
+use constant V5_9_5 => sort qw{say state indirect multidimensional bareword_filehandles};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
 use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
-use constant V5_35  => sort grep {; $_ ne 'switch'
-                                 && $_ ne 'indirect'
+use constant V5_35  => sort grep {; $_ ne 'indirect'
                                  && $_ ne 'multidimensional' } +V5_27, qw{isa signatures};
 
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
@@ -106,7 +104,7 @@ my %feature_bundle = (
 );
 
 my @noops = qw( postderef lexical_subs );
-my @removed = qw( array_base );
+my @removed = qw( array_base switch );
 
 
 ###########################################################################
@@ -544,7 +542,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.90';
+our $VERSION = '1.91';
 
 FEATURES
 
@@ -636,21 +634,10 @@ This feature is available starting with Perl 5.10.
 
 =head2 The 'switch' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::smartmatch";
-
-C<use feature 'switch'> tells the compiler to enable the Raku
+C<use feature 'switch'> told the compiler to enable the Raku
 given/when construct.
 
-See L<perlsyn/"Switch Statements"> for details.
-
-This feature is available starting with Perl 5.10.
-It is deprecated starting with Perl 5.38, and using
-C<given>, C<when> or smartmatch will throw a warning.
-It will be removed in Perl 5.42.
+This feature was removed in Perl 5.42.
 
 =head2 The 'unicode_strings' feature
 

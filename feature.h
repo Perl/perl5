@@ -30,10 +30,9 @@
 #define FEATURE_SAY_BIT                     0x8000
 #define FEATURE_SIGNATURES_BIT              0x10000
 #define FEATURE_STATE_BIT                   0x20000
-#define FEATURE_SWITCH_BIT                  0x40000
-#define FEATURE_TRY_BIT                     0x80000
-#define FEATURE_UNIEVAL_BIT                 0x100000
-#define FEATURE_UNICODE_BIT                 0x200000
+#define FEATURE_TRY_BIT                     0x40000
+#define FEATURE_UNIEVAL_BIT                 0x80000
+#define FEATURE_UNICODE_BIT                 0x100000
 
 #define FEATURE_BUNDLE_DEFAULT	0
 #define FEATURE_BUNDLE_510	1
@@ -112,14 +111,6 @@
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_539) \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_STATE_BIT)) \
-    )
-
-#define FEATURE_SWITCH_IS_ENABLED \
-    ( \
-	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_510 && \
-	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_527) \
-     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
-	 FEATURE_IS_ENABLED_MASK(FEATURE_SWITCH_BIT)) \
     )
 
 #define FEATURE_BITWISE_IS_ENABLED \
@@ -409,11 +400,6 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
                 mask = FEATURE_STATE_BIT;
                 break;
             }
-            else if (keylen == sizeof("feature_switch")-1
-                 && memcmp(subf+1, "witch", keylen - sizeof("feature_")) == 0) {
-                mask = FEATURE_SWITCH_BIT;
-                break;
-            }
             return;
 
         case 't':
@@ -566,12 +552,6 @@ PL_feature_bits[] = {
         "feature_state",
         STRLENs("feature_state"),
         FEATURE_STATE_BIT
-    },
-    {
-        /* feature switch */
-        "feature_switch",
-        STRLENs("feature_switch"),
-        FEATURE_SWITCH_BIT
     },
     {
         /* feature try */
