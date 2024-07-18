@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.77;
+package B::Deparse 1.78;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -2325,10 +2325,6 @@ my %feature_keywords = (
   # keyword => 'feature',
     state   => 'state',
     say     => 'say',
-    given   => 'switch',
-    when    => 'switch',
-    default => 'switch',
-    break   => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
@@ -2637,34 +2633,6 @@ sub pp_ggrnam { unop(@_, "getgrnam") }
 sub pp_ggrgid { unop(@_, "getgrgid") }
 
 sub pp_lock { unop(@_, "lock") }
-
-sub pp_continue { unop(@_, "continue"); }
-sub pp_break { unop(@_, "break"); }
-
-sub givwhen {
-    my $self = shift;
-    my($op, $cx, $givwhen) = @_;
-
-    my $enterop = $op->first;
-    my ($head, $block);
-    if ($enterop->flags & OPf_SPECIAL) {
-	$head = $self->keyword("default");
-	$block = $self->deparse($enterop->first, 0);
-    }
-    else {
-	my $cond = $enterop->first;
-	my $cond_str = $self->deparse($cond, 1);
-	$head = "$givwhen ($cond_str)";
-	$block = $self->deparse($cond->sibling, 0);
-    }
-
-    return "$head {\n".
-	"\t$block\n".
-	"\b}\cK";
-}
-
-sub pp_leavegiven { givwhen(@_, $_[0]->keyword("given")); }
-sub pp_leavewhen  { givwhen(@_, $_[0]->keyword("when")); }
 
 sub pp_exists {
     my $self = shift;

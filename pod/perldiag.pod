@@ -868,15 +868,6 @@ object instance.
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
 
-=item Can't "break" in a loop topicalizer
-
-(F) You called C<break>, but you're in a C<foreach> block rather than
-a C<given> block.  You probably meant to use C<next> or C<last>.
-
-=item Can't "break" outside a given block
-
-(F) You called C<break>, but you're not inside a C<given> block.
-
 =item Can't call destructor for 0x%p in global destruction
 
 (S) This should not happen. Internals code has set up a destructor
@@ -943,11 +934,6 @@ You CAN say
 
 but then $foo no longer contains a glob.
 
-=item Can't "continue" outside a when block
-
-(F) You called C<continue>, but you're not inside a C<when>
-or C<default> block.
-
 =item can't convert empty path
 
 (F) On Cygwin, you called a path conversion function with an empty path.
@@ -962,13 +948,6 @@ quotas or other plumbing problems.
 
 (F) Only scalar, array, and hash variables may be declared as "my", "our" or
 "state" variables.  They must have ordinary identifiers as names.
-
-=item Can't "default" outside a topicalizer
-
-(F) You have used a C<default> block that is neither inside a
-C<foreach> loop nor a C<given> block.  (Note that this error is
-issued on exit from the C<default> block, so you won't get the
-error if you use an explicit C<continue>.)
 
 =item Can't determine class of operator %s, assuming BASEOP
 
@@ -1167,11 +1146,6 @@ error occurs in cases such as these:
 
 (F) A C<goto> statement was executed to jump into the scope of a C<defer>
 block.  This is not permitted.
-
-=item Can't "goto" into a "given" block
-
-(F) A "goto" statement was executed to jump into the middle of a C<given>
-block.  You can't get there from here.  See L<perlfunc/goto>.
 
 =item Can't "goto" into the middle of a foreach loop
 
@@ -1700,13 +1674,6 @@ instead.
 
 (F) You attempted to weaken something that was not a reference.  Only
 references can be weakened.
-
-=item Can't "when" outside a topicalizer
-
-(F) You have used a when() block that is neither inside a C<foreach>
-loop nor a C<given> block.  (Note that this error is issued on exit
-from the C<when> block, so you won't get the error if the match fails,
-or if you use an explicit C<continue>.)
 
 =item Can't x= to read-only value
 
@@ -2755,12 +2722,6 @@ L<perlfunc/getsockopt>.
 (F) You called PerlIO::get_layers() with an unknown argument. Legal
 arguments are provided in key/value pairs, with the keys being one
 of C<input>, C<output> or C<detail>, followed by a boolean.
-
-=item given is deprecated
-
-(D deprecated::smartmatch) C<given> depends on smartmatch, which is
-deprecated. It will be removed in Perl 5.42. See the explanation under
-L<perlsyn/Experimental Details on given and when>.
 
 =item Global symbol "%s" requires explicit package name (did you forget to
 declare "my %s"?)
@@ -8184,14 +8145,6 @@ but in actual fact, you got
     rand(+5);
 
 So put in parentheses to say what you really mean.
-
-=item when is deprecated
-
-(D deprecated::smartmatch) C<when> depends on smartmatch, which is
-deprecated.  Additionally, it has several special cases that may
-not be immediately obvious, and it will be removed in Perl 5.42.
-See the explanation
-under L<perlsyn/Experimental Details on given and when>.
 
 =item Wide character in %s
 

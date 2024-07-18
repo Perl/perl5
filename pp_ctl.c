@@ -1480,14 +1480,12 @@ PP_wrapped(pp_flop, (GIMME_V == G_LIST) ? 2 : 1, 0)
 
 static const char * const context_name[] = {
     "pseudo-block",
-    NULL, /* CXt_WHEN never actually needs "block" */
     NULL, /* CXt_BLOCK never actually needs "block" */
-    NULL, /* CXt_GIVEN never actually needs "block" */
-    NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
-    NULL, /* CXt_LOOP_LAZYIV never actually needs "loop" */
-    NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
-    NULL, /* CXt_LOOP_LIST never actually needs "loop" */
     NULL, /* CXt_LOOP_ARY never actually needs "loop" */
+    NULL, /* CXt_LOOP_LAZYSV never actually needs "loop" */
+    NULL, /* CXt_LOOP_LAZYIV never actually needs "loop" */
+    NULL, /* CXt_LOOP_LIST never actually needs "loop" */
+    NULL, /* CXt_LOOP_PLAIN never actually needs "loop" */
     "subroutine",
     "format",
     "eval",
@@ -1706,53 +1704,6 @@ S_dopoptoloop(pTHX_ I32 startingblock)
     return i;
 }
 
-/* find the next GIVEN or FOR (with implicit $_) loop context block */
-
-STATIC I32
-S_dopoptogivenfor(pTHX_ I32 startingblock)
-{
-    I32 i;
-    for (i = startingblock; i >= 0; i--) {
-        const PERL_CONTEXT *cx = &cxstack[i];
-        switch (CxTYPE(cx)) {
-        default:
-            continue;
-        case CXt_GIVEN:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found given at cx=%ld)\n", (long)i));
-            return i;
-        case CXt_LOOP_PLAIN:
-            assert(!(cx->cx_type & CXp_FOR_DEF));
-            break;
-        case CXt_LOOP_LAZYIV:
-        case CXt_LOOP_LAZYSV:
-        case CXt_LOOP_LIST:
-        case CXt_LOOP_ARY:
-            if (cx->cx_type & CXp_FOR_DEF) {
-                DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found foreach at cx=%ld)\n", (long)i));
-                return i;
-            }
-        }
-    }
-    return i;
-}
-
-STATIC I32
-S_dopoptowhen(pTHX_ I32 startingblock)
-{
-    I32 i;
-    for (i = startingblock; i >= 0; i--) {
-        const PERL_CONTEXT *cx = &cxstack[i];
-        switch (CxTYPE(cx)) {
-        default:
-            continue;
-        case CXt_WHEN:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptowhen(): found when at cx=%ld)\n", (long)i));
-            return i;
-        }
-    }
-    return i;
-}
-
 /* dounwind(): pop all contexts above (but not including) cxix.
  * Note that it clears the savestack frame associated with each popped
  * context entry, but doesn't free any temps.
@@ -1796,12 +1747,6 @@ Perl_dounwind(pTHX_ I32 cxix)
         case CXt_LOOP_LIST:
         case CXt_LOOP_ARY:
             cx_poploop(cx);
-            break;
-        case CXt_WHEN:
-            cx_popwhen(cx);
-            break;
-        case CXt_GIVEN:
-            cx_popgiven(cx);
             break;
         case CXt_BLOCK:
         case CXt_NULL:
@@ -3060,8 +3005,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
         o->op_type == OP_SCOPE ||
         o->op_type == OP_LEAVELOOP ||
         o->op_type == OP_LEAVESUB ||
-        o->op_type == OP_LEAVETRY ||
-        o->op_type == OP_LEAVEGIVEN)
+        o->op_type == OP_LEAVETRY)
     {
         *ops++ = cUNOPo->op_first;
     }
@@ -3153,9 +3097,6 @@ S_check_op_type(pTHX_ OP * const o)
     if (o->op_type == OP_ENTERITER)
         Perl_croak(aTHX_
                   "Can't \"goto\" into the middle of a foreach loop");
-    if (o->op_type == OP_ENTERGIVEN)
-        Perl_croak(aTHX_
-                  "Can't \"goto\" into a \"given\" block");
 }
 
 /* also used for: pp_dump() */
@@ -3496,8 +3437,6 @@ PP(pp_goto)
             case CXt_LOOP_LAZYSV:
             case CXt_LOOP_LIST:
             case CXt_LOOP_ARY:
-            case CXt_GIVEN:
-            case CXt_WHEN:
                 gotoprobe = OpSIBLING(cx->blk_oldcop);
                 break;
             case CXt_SUBST:
@@ -5706,46 +5645,6 @@ PP(pp_leavetry)
     return retop;
 }
 
-PP(pp_entergiven)
-{
-    PERL_CONTEXT *cx;
-    const U8 gimme = GIMME_V;
-    SV *origsv = DEFSV;
-    
-    assert(!PL_op->op_targ); /* used to be set for lexical $_ */
-    GvSV(PL_defgv) = rpp_pop_1_norc();
-
-    cx = cx_pushblock(CXt_GIVEN, gimme, PL_stack_sp, PL_savestack_ix);
-    cx_pushgiven(cx, origsv);
-
-    return NORMAL;
-}
-
-PP(pp_leavegiven)
-{
-    PERL_CONTEXT *cx;
-    U8 gimme;
-    SV **oldsp;
-    PERL_UNUSED_CONTEXT;
-
-    cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_GIVEN);
-    oldsp = PL_stack_base + cx->blk_oldsp;
-    gimme = cx->blk_gimme;
-
-    if (gimme == G_VOID)
-        rpp_popfree_to_NN(oldsp);
-    else
-        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
-
-    CX_LEAVE_SCOPE(cx);
-    cx_popgiven(cx);
-    cx_popblock(cx);
-    CX_POP(cx);
-
-    return NORMAL;
-}
-
 /* Helper routines used by pp_smartmatch */
 STATIC PMOP *
 S_make_matcher(pTHX_ REGEXP *re)
@@ -6259,124 +6158,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     return NORMAL;
 }
 
-
-PP(pp_enterwhen)
-{
-    PERL_CONTEXT *cx;
-    const U8 gimme = GIMME_V;
-
-    /* This is essentially an optimization: if the match
-       fails, we don't want to push a context and then
-       pop it again right away, so we skip straight
-       to the op that follows the leavewhen.
-    */
-    if (!(PL_op->op_flags & OPf_SPECIAL)) { /* SPECIAL implies no condition */
-        bool tr = SvTRUEx(*PL_stack_sp);
-        rpp_popfree_1_NN();
-        if (!tr) {
-            if (gimme == G_SCALAR)
-                rpp_push_IMM(&PL_sv_undef);
-            return cLOGOP->op_other->op_next;
-        }
-    }
-
-    cx = cx_pushblock(CXt_WHEN, gimme, PL_stack_sp, PL_savestack_ix);
-    cx_pushwhen(cx);
-
-    return NORMAL;
-}
-
-PP(pp_leavewhen)
-{
-    I32 cxix;
-    PERL_CONTEXT *cx;
-    U8 gimme;
-    SV **oldsp;
-
-    cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_WHEN);
-    gimme = cx->blk_gimme;
-
-    cxix = dopoptogivenfor(cxstack_ix);
-    if (cxix < 0)
-        /* diag_listed_as: Can't "when" outside a topicalizer */
-        DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
-                   PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
-
-    oldsp = PL_stack_base + cx->blk_oldsp;
-    if (gimme == G_VOID)
-        rpp_popfree_to_NN(oldsp);
-    else
-        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
-
-    /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
-    assert(cxix < cxstack_ix);
-    dounwind(cxix);
-
-    cx = &cxstack[cxix];
-
-    if (CxFOREACH(cx)) {
-        /* emulate pp_next. Note that any stack(s) cleanup will be
-         * done by the pp_unstack which op_nextop should point to */
-        cx = CX_CUR();
-        cx_topblock(cx);
-        PL_curcop = cx->blk_oldcop;
-        return cx->blk_loop.my_op->op_nextop;
-    }
-    else {
-        PERL_ASYNC_CHECK();
-        assert(cx->blk_givwhen.leave_op->op_type == OP_LEAVEGIVEN);
-        return cx->blk_givwhen.leave_op;
-    }
-}
-
-PP(pp_continue)
-{
-    I32 cxix;
-    PERL_CONTEXT *cx;
-    OP *nextop;
-    
-    cxix = dopoptowhen(cxstack_ix); 
-    if (cxix < 0)   
-        DIE(aTHX_ "Can't \"continue\" outside a when block");
-
-    if (cxix < cxstack_ix)
-        dounwind(cxix);
-    
-    cx = CX_CUR();
-    assert(CxTYPE(cx) == CXt_WHEN);
-    rpp_popfree_to_NN(PL_stack_base + cx->blk_oldsp);
-    CX_LEAVE_SCOPE(cx);
-    cx_popwhen(cx);
-    cx_popblock(cx);
-    nextop = cx->blk_givwhen.leave_op->op_next;
-    CX_POP(cx);
-
-    return nextop;
-}
-
-PP(pp_break)
-{
-    I32 cxix;
-    PERL_CONTEXT *cx;
-
-    cxix = dopoptogivenfor(cxstack_ix);
-    if (cxix < 0)
-        DIE(aTHX_ "Can't \"break\" outside a given block");
-
-    cx = &cxstack[cxix];
-    if (CxFOREACH(cx))
-        DIE(aTHX_ "Can't \"break\" in a loop topicalizer");
-
-    if (cxix < cxstack_ix)
-        dounwind(cxix);
-
-    /* Restore the sp at the time we entered the given block */
-    cx = CX_CUR();
-    rpp_popfree_to_NN(PL_stack_base + cx->blk_oldsp);
-
-    return cx->blk_givwhen.leave_op;
-}
 
 static void
 _invoke_defer_block(pTHX_ U8 type, void *_arg)
