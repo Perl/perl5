@@ -445,12 +445,10 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL,  KW_CATCH),
     DEBUG_TOKEN (IVAL,  KW_CLASS),
     DEBUG_TOKEN (IVAL,  KW_CONTINUE),
-    DEBUG_TOKEN (IVAL,  KW_DEFAULT),
     DEBUG_TOKEN (IVAL,  KW_DO),
     DEBUG_TOKEN (IVAL,  KW_ELSE),
     DEBUG_TOKEN (IVAL,  KW_ELSIF),
     DEBUG_TOKEN (IVAL,  KW_FIELD),
-    DEBUG_TOKEN (IVAL,  KW_GIVEN),
     DEBUG_TOKEN (IVAL,  KW_FOR),
     DEBUG_TOKEN (IVAL,  KW_FORMAT),
     DEBUG_TOKEN (IVAL,  KW_IF),
@@ -468,7 +466,6 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL,  KW_USE_or_NO),
     DEBUG_TOKEN (IVAL,  KW_UNLESS),
     DEBUG_TOKEN (IVAL,  KW_UNTIL),
-    DEBUG_TOKEN (IVAL,  KW_WHEN),
     DEBUG_TOKEN (IVAL,  KW_WHILE),
     DEBUG_TOKEN (OPVAL, LABEL),
     DEBUG_TOKEN (OPNUM, LOOPEX),
@@ -8054,9 +8051,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_bless:
         LOP(OP_BLESS,XTERM);
 
-    case KEY_break:
-        FUN0(OP_BREAK);
-
     case KEY_catch:
         PREBLOCK(KW_CATCH);
 
@@ -8074,16 +8068,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         TOKEN(KW_CLASS);
 
     case KEY_continue:
-        /* We have to disambiguate the two senses of
-          "continue". If the next token is a '{' then
-          treat it as the start of a continue block;
-          otherwise treat it as a control operator.
-         */
-        s = skipspace(s);
-        if (*s == '{')
-            PREBLOCK(KW_CONTINUE);
-        else
-            FUN0(OP_CONTINUE);
+        PREBLOCK(KW_CONTINUE);
 
     case KEY_chdir:
         /* may use HOME */
@@ -8125,9 +8110,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_chroot:
         UNI(OP_CHROOT);
-
-    case KEY_default:
-        PREBLOCK(KW_DEFAULT);
 
     case KEY_defer:
         Perl_ck_warner_d(aTHX_
@@ -8361,12 +8343,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_getlogin:
         FUN0(OP_GETLOGIN);
-
-    case KEY_given:
-        pl_yylval.ival = CopLINE(PL_curcop);
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED__SMARTMATCH),
-                         "given is deprecated");
-        OPERATOR(KW_GIVEN);
 
     case KEY_glob:
         LOP( orig_keyword==KEY_glob ? -OP_GLOB : OP_GLOB, XTERM );
@@ -8879,15 +8855,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_vec:
         LOP(OP_VEC,XTERM);
-
-    case KEY_when:
-        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
-            return REPORT(0);
-        pl_yylval.ival = CopLINE(PL_curcop);
-        Perl_ck_warner_d(aTHX_
-            packWARN(WARN_DEPRECATED__SMARTMATCH),
-            "when is deprecated");
-        OPERATOR(KW_WHEN);
 
     case KEY_while:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)

@@ -1375,8 +1375,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_DORASSIGN:
     case OP_ANDASSIGN:
     case OP_ARGDEFELEM:
-    case OP_ENTERGIVEN:
-    case OP_ENTERWHEN:
     case OP_ENTERTRY:
     case OP_ONCE:
         S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");

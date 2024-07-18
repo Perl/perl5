@@ -25,7 +25,7 @@ if ($NoTaintSupport) {
     exit 0;
 }
 
-plan tests => 1065;
+plan tests => 1059;
 
 $| = 1;
 
@@ -2438,32 +2438,6 @@ EOF
     is_tainted $dest, "uc(tainted) taints its return value";
     $dest = ucfirst $source;
     is_tainted $dest, "ucfirst(tainted) taints its return value";
-}
-
-{
-    # Taintedness of values returned from given()
-    use feature 'switch';
-    no warnings 'experimental::smartmatch';
-
-    my @descriptions = ('when', 'given end', 'default');
-
-    for (qw<x y z>) {
-	my $letter = "$_$TAINT";
-
-	my $desc = "tainted value returned from " . shift(@descriptions);
-
-	my $res = do {
-	    no warnings 'deprecated';
-	    given ($_) {
-		when ('x') { $letter }
-		when ('y') { goto leavegiven }
-		default    { $letter }
-		leavegiven:  $letter
-	    }
-	};
-	is         $res, $letter, "$desc is correct";
-	is_tainted $res,          "$desc stays tainted";
-    }
 }
 
 

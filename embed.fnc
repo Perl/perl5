@@ -2170,9 +2170,6 @@ ARdp	|OP *	|newFOROP	|I32 flags				\
 				|NN OP *expr				\
 				|NULLOK OP *block			\
 				|NULLOK OP *cont
-ARdp	|OP *	|newGIVENOP	|NN OP *cond				\
-				|NN OP *block				\
-				|PADOFFSET defsv_off
 : Used in scope.c
 eopx	|GP *	|newGP		|NN GV * const gv
 Adm	|GV *	|newGVgen	|NN const char *pack
@@ -2316,8 +2313,6 @@ ERXopx	|char * |new_warnings_bitfield					\
 				|NULLOK char *buffer			\
 				|NN const char * const bits		\
 				|STRLEN size
-ARdp	|OP *	|newWHENOP	|NULLOK OP *cond			\
-				|NN OP *block
 ARdp	|OP *	|newWHILEOP	|I32 flags				\
 				|I32 debuggable 			\
 				|NULLOK LOOP *loop			\
@@ -4726,7 +4721,6 @@ RST	|bool	|is_handle_constructor					\
 Ti	|bool	|is_standard_filehandle_name				\
 				|NN const char *fhname
 S	|OP *	|listkids	|NULLOK OP *o
-S	|bool	|looks_like_bool|NN const OP *o
 S	|OP *	|modkids	|NULLOK OP *o				\
 				|I32 type
 S	|void	|move_proto_attr|NN OP **proto				\
@@ -4736,11 +4730,6 @@ S	|void	|move_proto_attr|NN OP **proto				\
 S	|OP *	|my_kid 	|NULLOK OP *o				\
 				|NULLOK OP *attrs			\
 				|NN OP **imopsp
-S	|OP *	|newGIVWHENOP	|NULLOK OP *cond			\
-				|NN OP *block				\
-				|I32 enter_opcode			\
-				|I32 leave_opcode			\
-				|PADOFFSET entertarg
 RS	|OP *	|new_logop	|I32 type				\
 				|I32 flags				\
 				|NN OP **firstp 			\
@@ -4954,14 +4943,12 @@ RS	|OP *	|dofindlabel	|NN OP *o				\
 				|NN OP **oplimit
 S	|MAGIC *|doparseform	|NN SV *sv
 RS	|I32	|dopoptoeval	|I32 startingblock
-RS	|I32	|dopoptogivenfor|I32 startingblock
 RS	|I32	|dopoptolabel	|NN const char *label			\
 				|STRLEN len				\
 				|U32 flags
 RS	|I32	|dopoptoloop	|I32 startingblock
 RS	|I32	|dopoptosub_at	|NN const PERL_CONTEXT *cxstk		\
 				|I32 startingblock
-RS	|I32	|dopoptowhen	|I32 startingblock
 S	|OP *	|do_smartmatch	|NULLOK HV *seen_this			\
 				|NULLOK HV *seen_other			\
 				|const bool copied
@@ -6082,13 +6069,11 @@ CTp	|Malloc_t|mem_log_realloc					\
 Cipx	|void	|cx_popblock	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_popeval	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_popformat	|NN PERL_CONTEXT *cx
-Cipx	|void	|cx_popgiven	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_poploop	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_popsub	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_popsub_args |NN PERL_CONTEXT *cx
 Cipx	|void	|cx_popsub_common					\
 				|NN PERL_CONTEXT *cx
-Cipx	|void	|cx_popwhen	|NN PERL_CONTEXT *cx
 Cipx	|PERL_CONTEXT *|cx_pushblock					\
 				|U8 type				\
 				|U8 gimme				\
@@ -6101,8 +6086,6 @@ Cipx	|void	|cx_pushformat	|NN PERL_CONTEXT *cx			\
 				|NN CV *cv				\
 				|NULLOK OP *retop			\
 				|NULLOK GV *gv
-Cipx	|void	|cx_pushgiven	|NN PERL_CONTEXT *cx			\
-				|NULLOK SV *orig_defsv
 Cipx	|void	|cx_pushloop_for|NN PERL_CONTEXT *cx			\
 				|NN void *itervarp			\
 				|NULLOK SV *itersave
@@ -6114,7 +6097,6 @@ Cipx	|void	|cx_pushsub	|NN PERL_CONTEXT *cx			\
 				|bool hasargs
 Cipx	|void	|cx_pushtry	|NN PERL_CONTEXT *cx			\
 				|NULLOK OP *retop
-Cipx	|void	|cx_pushwhen	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_topblock	|NN PERL_CONTEXT *cx
 Cipx	|U8	|gimme_V
 #endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */

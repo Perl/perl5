@@ -6107,7 +6107,6 @@ t/lib/feature/multidimensional		Tests for enabling/disabling $foo{$x, $y} => $fo
 t/lib/feature/nonesuch			Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed			Tests for enabling/disabling removed feature
 t/lib/feature/say			Tests for enabling/disabling say feature
-t/lib/feature/switch			Tests for enabling/disabling switch feature
 t/lib/h2ph.h				Test header file for h2ph
 t/lib/h2ph.pht				Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1			Part of locale.t in Latin 1
@@ -6430,7 +6429,6 @@ t/op/substr_thr.t			See if substr works in another thread
 t/op/svflags.t				See if POK is set as expected.
 t/op/svleak.pl				Test file for svleak.t
 t/op/svleak.t				See if stuff leaks SVs
-t/op/switch.t				See if switches (given/when) work
 t/op/symbolcache.t			See if undef/delete works on stashes with functions
 t/op/sysio.t				See if sysread and syswrite work
 t/op/taint.t				See if tainting works
