@@ -1,7 +1,8 @@
 #!./perl
 
 #
-# test the bit operators '&', '|', '^', '~', '<<', and '>>'
+# test the bit operators '&', '&.', '|', '|.', '^', '^.', '~', '~.',
+# '<<', and '>>'
 #
 
 BEGIN {
@@ -14,11 +15,11 @@ BEGIN {
 
 use warnings;
 
-# Tests don't have names yet.
+# Some tests don't have names yet.
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 510;
+plan tests => 510 + 6 * 2;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -364,7 +365,6 @@ SKIP: {
 # New string- and number-specific bitwise ops
 {
     use feature "bitwise";
-    no warnings "experimental::bitwise";
     is "22" & "66", 2,    'numeric & with strings';
     is "22" | "66", 86,   'numeric | with strings';
     is "22" ^ "66", 84,   'numeric ^ with strings';
@@ -407,6 +407,29 @@ SKIP: {
         do { use integer; 1 << ($bits - 1) } == -$cusp);
     ok (($cusp >> 1) == ($cusp / 2) &&
         do { use integer; abs($cusp >> 1) } == ($cusp / 2));
+
+    # GH #22412
+    for my $op (qw( & ^ | &. ^. |. )) {
+        my ($x, $y) = $op =~ /\./
+            ? ("z", ">")
+            : (0x7a, 0x3e);
+
+        my $expected = $x;
+        my $code_simple = "\$expected $op= \$y";
+        eval $code_simple;
+        unless ($@ eq '') {
+            # sanity check
+            chomp $@;
+            die "Internal error: $code_simple failed: $@";
+        }
+        $expected .= 'x';
+
+        my $code = "(\$x $op= \$y) .= 'x';";
+        eval $code;
+        is $@, '', "$code runs without errors";
+
+        is $x, $expected, "$code produces expected results";
+    }
 }
 # Repeat some of those, with 'use v5.27'
 {
