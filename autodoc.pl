@@ -785,8 +785,9 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 
-    # Count lines easier
+    # Count lines easier and handle apidoc continuation lines
     my $line_num;
+    my $prev_type;
     my $prev_arg;
     my $do_unget = 0;
 
@@ -795,19 +796,54 @@ sub autodoc ($$) { # parse a file and extract documentation info
         $do_unget = 1;
     };
 
+    # Reads, categorizes, and returns the relevant portion of the next input
+    # line, while joining apidoc-type lines that have continuations into a
+    # single line.  For non-apidoc-type lines, the possibility of continuation
+    # lines is not considered (avoiding unintended consequences).  For these,
+    # the entire line is returned, including trailing \n.
+    #
+    # For apidoc-type lines, only the argument portion of the line is
+    # returned, chomped.  (The returned type tells you what the beginning
+    # was.)  A continuation happens when the final non-space character on it
+    # is a backslash.
+    #
+    # (If a non-api-doc line ends with a backslash, and the next line looks
+    # like an apidoc-ish line, this algorithm causes it to be treated as an
+    # apidoc line.  This might be considered a bug, or the right thing to do.)
     my $get_next_line = sub {
+
             if ($do_unget) {
                 $do_unget = 0;
-                return $prev_arg;
+                return ($prev_type, $prev_arg);
             }
 
-            $prev_arg = <$fh>;
-            if (! defined $prev_arg) {
+            my $contents = <$fh>;
+            if (! defined $contents) {
+                undef $prev_type;
+                undef $prev_arg;
                 return;
             }
 
             $line_num++;
-            return $prev_arg;
+            ($prev_type, $prev_arg) = classify_input_line($file, $line_num,
+                                                          $contents,
+                                                          $file_is_C);
+            return ($prev_type, $prev_arg) if $prev_type == NOT_APIDOC;
+
+            # Replace all spaces around a backslash at the end of a line with
+            # a single space to prepare for the continuation line to be joined
+            # with this.  (This includes lines with spaces betweeen the
+            # backslash and \n, since a human reader would not readily see the
+            # distinction.)
+            while ($prev_arg =~ s/ \s* \\ \s* $ / /x) {
+                my $next = <$fh>;
+                last unless defined $next;
+
+                $line_num++;
+                $prev_arg .= $next;
+            }
+
+            return ($prev_type, $prev_arg);
     };
 
     # Read the file.  Most lines are of no interest to this program, but
@@ -817,14 +853,14 @@ sub autodoc ($$) { # parse a file and extract documentation info
     # lines and its pod, may be any number of 'apidoc_item' lines that give
     # additional api elements that the pod applies to.
 
-    while (defined (my $input = $get_next_line->())) {
-        my ($text, $element_name, $line_type);
+    while (1) {
+        my ($outer_line_type, $arg) = $get_next_line->();
+        last unless defined $outer_line_type;
+        next if $outer_line_type == NOT_APIDOC;
+
+        my ($text, $element_name);
         my (@args, @items);
         my $flags = "";
-
-        my ($outer_line_type, $arg) = classify_input_line($file, $line_num,
-                                                          $input, $file_is_C);
-        next if $outer_line_type == NOT_APIDOC;
 
         if ($outer_line_type == APIDOC_ITEM) {
             die "apidoc_item doesn't immediately follow an apidoc entry:"
@@ -874,17 +910,15 @@ sub autodoc ($$) { # parse a file and extract documentation info
         # 4) =for apidoc... (except apidoc_item lines)
         $text = "";
         my $head_ender_num = ($file_is_C) ? 1 : "";
-        while (defined($input = $get_next_line->())) {
-                (my $inner_line_type, $arg) = classify_input_line($file,
-                                                                  $line_num,
-                                                                  $input,
-                                                                  $file_is_C);
+        while (1) {
+            (my $inner_line_type, $arg) = $get_next_line->();
+            last unless defined $inner_line_type;
 
             if ($inner_line_type == NOT_APIDOC) {
-            last if $input =~ /^=cut/x;
-            last if $input =~ /^=head$head_ender_num/;
+            last if $arg =~ /^=cut/x;
+            last if $arg =~ /^=head$head_ender_num/;
 
-            if ($file_is_C && $input =~ m: ^ \s* \* / $ :x) {
+            if ($file_is_C && $arg =~ m: ^ \s* \* / $ :x) {
 
                 # End of comment line in C files is a fall-back terminator,
                 # but warn only if there actually is some accumulated text
@@ -894,7 +928,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 last;
             }
 
-                $text .= $input;
+                $text .= $arg;
                 next;
             }
 
@@ -903,7 +937,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             last if $inner_line_type != APIDOC_ITEM;
 
             my $item =
-                  handle_apidoc_line($file, $line_num, $inner_line_type, $arg);
+                handle_apidoc_line($file, $line_num, $inner_line_type, $arg);
 
             # Here, is an apidoc_item_line; They can only come within apidoc
             # paragraphs.
@@ -982,7 +1016,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             $docs{$destpod}{$section}{$element_name}{items} = \@items;
         }
 
-        # We already have the first line of what's to come in $input
+        # We already have the first line of what's to come in $arg
         $unget_next_line->();
 
     } # End of loop through input
