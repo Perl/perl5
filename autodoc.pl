@@ -779,14 +779,14 @@ sub destination_pod ($) {
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($line_num, $section);
 
-    $section = $initial_file_section{$file}
+    my $section = $initial_file_section{$file}
                                     if defined $initial_file_section{$file};
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 
     # Count lines easier
+    my $line_num;
     my $get_next_line = sub { $line_num++; return <$fh> };
 
     # Read the file.  Most lines are of no interest to this program, but
