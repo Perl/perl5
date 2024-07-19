@@ -16,6 +16,24 @@ struct xpvcv {
 };
 
 /*
+=for apidoc_section $CV
+
+=for apidoc      Am|CV *|CvREFCNT_inc|CV *cv
+=for apidoc_item   |CV *|CvREFCNT_inc_simple|CV *cv
+=for apidoc_item   |CV *|CvREFCNT_inc_simple_NN|CV *cv
+
+These all increment the reference count of the given SV, which must be a CV.
+They are useful when assigning the result into a typed pointer as they avoid
+the need to cast the result to the appropriate type.
+
+=cut
+*/
+
+#define CvREFCNT_inc(cv)            ((CV *)SvREFCNT_inc((SV *)cv))
+#define CvREFCNT_inc_simple(cv)     ((CV *)SvREFCNT_inc_simple((SV *)cv))
+#define CvREFCNT_inc_simple_NN(cv)  ((CV *)SvREFCNT_inc_simple_NN((SV *)cv))
+
+/*
 =for apidoc Ayh||CV
 
 =for apidoc ADmnU||Nullcv

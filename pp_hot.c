@@ -6395,7 +6395,7 @@ PP(pp_entersub)
 
             defavp = &GvAV(PL_defgv);
             cx->blk_sub.savearray = *defavp;
-            *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
+            *defavp = AvREFCNT_inc_simple_NN(av);
 
             /* it's the responsibility of whoever leaves a sub to ensure
              * that a clean, empty AV is left in pad[0]. This is normally

@@ -928,11 +928,11 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->rsfp_filters =
       !(flags & LEX_START_SAME_FILTER) || !oparser
         ? NULL
-        : MUTABLE_AV(SvREFCNT_inc(
+        : AvREFCNT_inc(
             oparser->rsfp_filters
              ? oparser->rsfp_filters
              : (oparser->rsfp_filters = newAV())
-          ));
+          );
 
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
@@ -2004,8 +2004,8 @@ S_incline(pTHX_ const char *s, const char *end)
                        alias the saved lines that are in the array.
                        Otherwise alias the whole array. */
                     if (CopLINE(PL_curcop) == line_num) {
-                        GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(cfgv)));
-                        GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(cfgv)));
+                        GvHV(gv2) = HvREFCNT_inc(GvHV(cfgv));
+                        GvAV(gv2) = AvREFCNT_inc(GvAV(cfgv));
                     }
                     else if (GvAV(cfgv)) {
                         AV * const av = GvAV(cfgv);
@@ -12860,7 +12860,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
-    CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outsidecv));
+    CvOUTSIDE(PL_compcv) = CvREFCNT_inc_simple(outsidecv);
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
     if (outsidecv && CvPADLIST(outsidecv))
         CvPADLIST(PL_compcv)->xpadl_outid = CvPADLIST(outsidecv)->xpadl_id;

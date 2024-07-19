@@ -23,6 +23,24 @@ struct gp {
     HEK *	gp_file_hek;	/* file first declared in (for -w) */
 };
 
+/*
+=for apidoc_section $GV
+
+=for apidoc      Am|GV *|GvREFCNT_inc|GV *gv
+=for apidoc_item   |GV *|GvREFCNT_inc_simple|GV *gv
+=for apidoc_item   |GV *|GvREFCNT_inc_simple_NN|GV *gv
+
+These all increment the reference count of the given SV, which must be a GV.
+They are useful when assigning the result into a typed pointer as they avoid
+the need to cast the result to the appropriate type.
+
+=cut
+*/
+
+#define GvREFCNT_inc(gv)            ((GV *)SvREFCNT_inc((SV *)gv))
+#define GvREFCNT_inc_simple(gv)     ((GV *)SvREFCNT_inc_simple((SV *)gv))
+#define GvREFCNT_inc_simple_NN(gv)  ((GV *)SvREFCNT_inc_simple_NN((SV *)gv))
+
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
 
 

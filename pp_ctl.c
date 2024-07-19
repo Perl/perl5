@@ -3427,7 +3427,7 @@ PP(pp_goto)
                        exit, so point it at arg again. */
                     if (arg != GvAV(PL_defgv)) {
                         AV * const av = GvAV(PL_defgv);
-                        GvAV(PL_defgv) = (AV *)SvREFCNT_inc_simple(arg);
+                        GvAV(PL_defgv) = AvREFCNT_inc_simple(arg);
                         SvREFCNT_dec(av);
                     }
                 }
@@ -4008,7 +4008,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     CX_CUR()->blk_gimme = gimme;
 
     CvOUTSIDE_SEQ(evalcv) = seq;
-    CvOUTSIDE(evalcv) = MUTABLE_CV(SvREFCNT_inc_simple(outside));
+    CvOUTSIDE(evalcv) = CvREFCNT_inc_simple(outside);
 
     /* set up a scratch pad */
 

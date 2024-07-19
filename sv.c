@@ -1248,7 +1248,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
             DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
             hv_clear(PL_stashcache);
 
-            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            SvSTASH_set(io, HvREFCNT_inc(GvHV(iogv)));
             IoPAGE_LEN(sv) = 60;
         }
         if (old_type < SVt_PV) {
@@ -6687,7 +6687,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 
     CvANON_on(cv);
     CvCVGV_RC_on(cv);
-    SvANY(cv)->xcv_gv_u.xcv_gv = MUTABLE_GV(SvREFCNT_inc(anongv));
+    SvANY(cv)->xcv_gv_u.xcv_gv = GvREFCNT_inc_simple(anongv);
 }
 
 
@@ -10923,7 +10923,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     }
     SvOBJECT_on(tmpRef);
     SvUPGRADE(tmpRef, SVt_PVMG);
-    SvSTASH_set(tmpRef, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
+    SvSTASH_set(tmpRef, HvREFCNT_inc_simple(stash));
     SvREFCNT_dec(oldstash);
 
     if(SvSMAGICAL(tmpRef))
@@ -14623,9 +14623,9 @@ S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
         ? NULL
         : saux->xhv_backreferences
             ? (SvTYPE(saux->xhv_backreferences) == SVt_PVAV)
-                ? MUTABLE_AV(SvREFCNT_inc(
+                ? AvREFCNT_inc(
                       sv_dup_inc((const SV *)
-                        saux->xhv_backreferences, param)))
+                        saux->xhv_backreferences, param))
                 : MUTABLE_AV(sv_dup((const SV *)
                         saux->xhv_backreferences, param))
             : 0;
