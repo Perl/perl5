@@ -173,6 +173,24 @@ struct xpvhv_with_aux {
 };
 
 /*
+=for apidoc_section $HV
+
+=for apidoc      Am|HV *|HvREFCNT_inc|HV *hv
+=for apidoc_item   |HV *|HvREFCNT_inc_simple|HV *hv
+=for apidoc_item   |HV *|HvREFCNT_inc_simple_NN|HV *hv
+
+These all increment the reference count of the given SV, which must be a HV.
+They are useful when assigning the result into a typed pointer as they avoid
+the need to cast the result to the appropriate type.
+
+=cut
+*/
+
+#define HvREFCNT_inc(hv)            ((HV *)SvREFCNT_inc((SV *)hv))
+#define HvREFCNT_inc_simple(hv)     ((HV *)SvREFCNT_inc_simple((SV *)hv))
+#define HvREFCNT_inc_simple_NN(hv)  ((HV *)SvREFCNT_inc_simple_NN((SV *)hv))
+
+/*
 =for apidoc AmnU||HEf_SVKEY
 This flag, used in the length slot of hash entries and magic structures,
 specifies the structure contains an C<SV*> pointer where a C<char*> pointer

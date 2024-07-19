@@ -1888,8 +1888,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                     if (SvTYPE(*gv) != SVt_PVGV) {
                         gv_init_pvn(*gv, PL_defstash, "main::", 6,
                                     GV_ADDMULTI);
-                        GvHV(*gv) =
-                            MUTABLE_HV(SvREFCNT_inc_simple(PL_defstash));
+                        GvHV(*gv) = HvREFCNT_inc_simple(PL_defstash);
                     }
                 }
                 goto ok;
@@ -3294,7 +3293,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
             cv = MUTABLE_CV(gv);
             filled = 1;
         }
-        amt.table[i]=MUTABLE_CV(SvREFCNT_inc_simple(cv));
+        amt.table[i] = CvREFCNT_inc_simple(cv);
 
         if (gv) {
             switch (i) {
@@ -3878,7 +3877,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                 SvOBJECT_on(newref);
                 /* No need to do SvAMAGIC_on here, as SvAMAGIC macros
                    delegate to the stash. */
-                SvSTASH_set(newref, MUTABLE_HV(SvREFCNT_inc(SvSTASH(tmpRef))));
+                SvSTASH_set(newref, HvREFCNT_inc(SvSTASH(tmpRef)));
                 return newref;
              }
            }

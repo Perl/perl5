@@ -2325,7 +2325,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         RExC_rx->intflags |= PREGf_USE_RE_EVAL;
 
     if (RExC_paren_names)
-        RXp_PAREN_NAMES(RExC_rx) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
+        RXp_PAREN_NAMES(RExC_rx) = HvREFCNT_inc(RExC_paren_names);
     else
         RXp_PAREN_NAMES(RExC_rx) = NULL;
 
