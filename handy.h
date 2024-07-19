@@ -112,6 +112,7 @@ blindly casts away const.
 =for apidoc_section $SV
 =for apidoc   Am |AV *|AV_FROM_REF|SV * ref
 =for apidoc_item |CV *|CV_FROM_REF|SV * ref
+=for apidoc_item |GV *|GV_FROM_REF|SV * ref
 =for apidoc_item |HV *|HV_FROM_REF|SV * ref
 
 The C<I<*>V_FROM_REF> macros extract the C<SvRV()> from a given reference SV
@@ -134,6 +135,7 @@ definitely a reference SV that refers to an SV of the right type.
 
 #define AV_FROM_REF(ref)  xV_FROM_REF(AV, ref)
 #define CV_FROM_REF(ref)  xV_FROM_REF(CV, ref)
+#define GV_FROM_REF(ref)  xV_FROM_REF(GV, ref)
 #define HV_FROM_REF(ref)  xV_FROM_REF(HV, ref)
 
 #ifndef __cplusplus
