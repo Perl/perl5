@@ -787,7 +787,28 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
     # Count lines easier
     my $line_num;
-    my $get_next_line = sub { $line_num++; return <$fh> };
+    my $prev_arg;
+    my $do_unget = 0;
+
+    my $unget_next_line = sub () {
+        die "Attempt to unget more than one line" if $do_unget;
+        $do_unget = 1;
+    };
+
+    my $get_next_line = sub {
+            if ($do_unget) {
+                $do_unget = 0;
+                return $prev_arg;
+            }
+
+            $prev_arg = <$fh>;
+            if (! defined $prev_arg) {
+                return;
+            }
+
+            $line_num++;
+            return $prev_arg;
+    };
 
     # Read the file.  Most lines are of no interest to this program, but
     # individual 'apidoc_defn' lines are, as well as are blocks introduced by
@@ -935,7 +956,10 @@ sub autodoc ($$) { # parse a file and extract documentation info
                       . where_from_string($file, $line_num)
                       . ":\n$arg"                           if @items > 1;
                     $docs{$destpod}{$section}{X_tags}{$element_name} = $file;
-                    redo;    # Don't put anything if C source
+
+                    # Don't put anything if C source
+                    $unget_next_line->();
+                    next;
                 }
 
                 # Here, is an 'h' flag in pod.  We add a reference to the pod
@@ -959,7 +983,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         }
 
         # We already have the first line of what's to come in $input
-        redo;
+        $unget_next_line->();
 
     } # End of loop through input
 }
