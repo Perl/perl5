@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.2 - John Dryden
+
+L<Announced on 2024-07-20 by Karen Etheridge (Ether)|https://www.nntp.perl.org/group/perl.perl5.porters/2024/07/msg268542.html>
+
+  Errors, like straws, upon the surface flow; He who would search for
+  pearls must dive down below.
+
 =head2 v5.41.1 - Charles F. Kettering
 
 L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2024/07/msg268328.html>
