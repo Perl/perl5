@@ -391,7 +391,7 @@ PP(pp_rv2cv)
     if (cv) NOOP;
     else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
         cv = SvTYPE(SvRV(gv)) == SVt_PVCV
-            ? MUTABLE_CV(SvRV(gv))
+            ? CV_FROM_REF((SV *)gv)
             : MUTABLE_CV(gv);
     }
     else

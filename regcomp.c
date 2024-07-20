@@ -12320,7 +12320,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
             }
 
             SV * const rv = MUTABLE_SV(RExC_rxi->data->data[i]);
-            AV * const av = MUTABLE_AV(SvRV(rv));
+            AV * const av = AV_FROM_REF(rv);
 
             /* If the already encountered class has data that won't be known
              * until runtime (stored in the final element of the array), we
@@ -12461,7 +12461,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 
         if (data->what[n] == 's') {
             SV * const rv = MUTABLE_SV(data->data[n]);
-            AV * const av = MUTABLE_AV(SvRV(rv));
+            AV * const av = AV_FROM_REF(rv);
             SV **const ary = AvARRAY(av);
 
             invlist = ary[INVLIST_INDEX];
