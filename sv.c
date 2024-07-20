@@ -13049,7 +13049,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * vectorize happen normally
                  */
                 if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
-                    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
+                    if ( hv_existss(HV_FROM_REF(vecsv), "alpha") ) {
                         Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
                         "vector argument not supported with alpha versions");
                         vecsv = &PL_sv_no;

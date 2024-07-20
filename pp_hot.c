@@ -1658,7 +1658,7 @@ PP(pp_readline)
     /* is it *FOO, $fh, or 'FOO' ? */
     if (!isGV_with_GP(PL_last_in_gv)) {
         if (SvROK(PL_last_in_gv) && isGV_with_GP(SvRV(PL_last_in_gv)))
-            PL_last_in_gv = MUTABLE_GV(SvRV(PL_last_in_gv));
+            PL_last_in_gv = GV_FROM_REF((SV *)PL_last_in_gv);
         else {
             rpp_xpush_1(MUTABLE_SV(PL_last_in_gv));
             Perl_pp_rv2gv(aTHX);
@@ -6217,7 +6217,7 @@ PP(pp_entersub)
 
     /* a non-magic-RV -> CV ? */
     if (LIKELY( (SvFLAGS(sv) & (SVf_ROK|SVs_GMG)) == SVf_ROK)) {
-        cv = MUTABLE_CV(SvRV(sv));
+        cv = MUTABLE_CV(SvRV(sv));  /* might not actually be a CV */
         if (UNLIKELY(SvOBJECT(cv))) /* might be overloaded */
             goto do_ref;
     }
@@ -6265,7 +6265,7 @@ PP(pp_entersub)
                 cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
                 break;
             }
-            cv = MUTABLE_CV(SvRV(sv));
+            cv = MUTABLE_CV(SvRV(sv));  /* might not actually be a CV */
             if (LIKELY(SvTYPE(cv) == SVt_PVCV))
                 break;
             /* FALLTHROUGH */

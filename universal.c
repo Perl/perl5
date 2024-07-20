@@ -763,7 +763,7 @@ XS(XS_Internals_hv_clear_placehold)
     if (items != 1 || !SvROK(ST(0)))
         croak_xs_usage(cv, "hv");
     else {
-        HV * const hv = MUTABLE_HV(SvRV(ST(0)));
+        HV * const hv = HV_FROM_REF(ST(0));
         hv_clear_placeholders(hv);
         XSRETURN(0);
     }
@@ -1015,7 +1015,7 @@ XS(XS_re_regnames)
     if (!ret)
         XSRETURN_UNDEF;
 
-    av = MUTABLE_AV(SvRV(ret));
+    av = AV_FROM_REF(ret);
     length = av_count(av);
 
     EXTEND(SP, length); /* better extend stack just once */

@@ -3697,7 +3697,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
         }
     }
     /* sv_2cv is too complicated, try a simpler variant first: */
-    if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
+    if (!SvROK(PL_psig_ptr[sig]) || !(cv = CV_FROM_REF(PL_psig_ptr[sig]))
         || SvTYPE(cv) != SVt_PVCV) {
         HV *st;
         cv = sv_2cv(PL_psig_ptr[sig], &st, &gv, GV_ADD);

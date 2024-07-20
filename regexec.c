@@ -12093,7 +12093,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
             return newSViv(HvTOTALKEYS(RXp_PAREN_NAMES(rx)));
         } else if (flags & RXapif_ONE) {
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
-            av = MUTABLE_AV(SvRV(ret));
+            av = AV_FROM_REF(ret);
             length = av_count(av);
             SvREFCNT_dec_NN(ret);
             return newSViv(length);
