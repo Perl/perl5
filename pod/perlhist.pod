@@ -780,6 +780,7 @@ the strings?).
 
  Graham K  5.41.0       2024-Jun-10     The 5.41 development track
  Philippe  5.41.1       2024-Jul-02
+ Ether     5.41.2       2024-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
