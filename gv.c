@@ -317,17 +317,17 @@ Perl_cvgv_from_hek(pTHX_ CV *cv)
 /* Assign CvSTASH(cv) = st, handling weak references. */
 
 void
-Perl_cvstash_set(pTHX_ CV *cv, HV *st)
+Perl_cvstash_set(pTHX_ CV *cv, HV *stash)
 {
-    HV *oldst = CvSTASH(cv);
+    HV *oldstash = CvSTASH(cv);
     PERL_ARGS_ASSERT_CVSTASH_SET;
-    if (oldst == st)
+    if (oldstash == stash)
         return;
-    if (oldst)
-        sv_del_backref(MUTABLE_SV(oldst), MUTABLE_SV(cv));
-    SvANY(cv)->xcv_stash = st;
-    if (st)
-        Perl_sv_add_backref(aTHX_ MUTABLE_SV(st), MUTABLE_SV(cv));
+    if (oldstash)
+        sv_del_backref(MUTABLE_SV(oldstash), MUTABLE_SV(cv));
+    SvANY(cv)->xcv_stash = stash;
+    if (stash)
+        Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(cv));
 }
 
 /*
