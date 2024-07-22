@@ -1596,6 +1596,7 @@
 #   if defined(PERL_IN_PP_SYS_C)
 #     define doform(a,b,c)                      S_doform(aTHX_ a,b,c)
 #     define space_join_names_mortal(a)         S_space_join_names_mortal(aTHX_ a)
+#     define warn_not_dirhandle(a)              S_warn_not_dirhandle(aTHX_ a)
 #     if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #       define dooneliner(a,b)                  S_dooneliner(aTHX_ a,b)
 #     endif

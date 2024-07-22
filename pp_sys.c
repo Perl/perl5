@@ -4285,6 +4285,23 @@ PP_wrapped(pp_open_dir, 2, 0)
 #endif
 }
 
+static void
+S_warn_not_dirhandle(pTHX_ GV *gv) {
+    IO *io = GvIOn(gv);
+
+    if (IoIFP(io)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+                       "%s() attempted on handle %" HEKf
+                       " opened with open()",
+                       OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
+    }
+    else {
+        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+                       "%s() attempted on invalid dirhandle %" HEKf,
+                       OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
+    }
+}
+
 PP_wrapped(pp_readdir, 1, 0)
 {
 #if !defined(Direntry_t) || !defined(HAS_READDIR)
@@ -4302,9 +4319,7 @@ PP_wrapped(pp_readdir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "readdir() attempted on invalid dirhandle %" HEKf,
-                            HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
 
@@ -4352,9 +4367,7 @@ PP_wrapped(pp_telldir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "telldir() attempted on invalid dirhandle %" HEKf,
-                            HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
 
@@ -4378,9 +4391,7 @@ PP_wrapped(pp_seekdir, 2, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "seekdir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
     (void)PerlDir_seek(IoDIRP(io), along);
@@ -4403,9 +4414,7 @@ PP_wrapped(pp_rewinddir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "rewinddir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
     (void)PerlDir_rewind(IoDIRP(io));
@@ -4427,9 +4436,7 @@ PP_wrapped(pp_closedir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "closedir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
 #ifdef VOID_CLOSEDIR
