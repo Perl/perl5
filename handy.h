@@ -124,10 +124,10 @@ definitely a reference SV that refers to an SV of the right type.
 
 #if defined(DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define xV_FROM_REF(XV, ref)  \
-    ({ SV *_ref = ref; \
-       assert(SvROK(_ref)); \
-       assert(SvTYPE(SvRV(_ref)) == SVt_PV ## XV); \
-       (XV *)(SvRV(_ref)); })
+    ({ SV *ref_ = ref; \
+       assert(SvROK(ref_)); \
+       assert(SvTYPE(SvRV(ref_)) == SVt_PV ## XV); \
+       (XV *)(SvRV(ref_)); })
 #else
 #  define xV_FROM_REF(XV, ref)  ((XV *)(SvRV(ref)))
 #endif
