@@ -995,30 +995,28 @@ L<https://sourceforge.net/p/predef/wiki/Home/>.
 Assuming the contents of static memory pointed to by the return values
 of Perl wrappers for C library functions doesn't change.  Many C
 library functions return pointers to static storage that can be
-overwritten by subsequent calls to the same or related functions.  Perl
-has wrappers for some of these functions.  Originally many of those
-wrappers returned those volatile pointers.  But over time almost all of
-them have evolved to return stable copies.  To cope with the remaining
-ones, do a L<perlapi/savepv> to make a copy, thus avoiding these
-problems.  You will have to free the copy when you're done to avoid
-memory leaks.  If you don't have control over when it gets freed,
-you'll need to make the copy in a mortal scalar, like so
+overwritten by subsequent calls to the same or related functions.  If
+you handle those returns before one of those functions that share the
+storage gets called, this is fine, but in embedded perls, or when using
+threads, such a function may get called before you get a chance to
+handle it.
 
- SvPVX(sv_2mortal(newSVpv(volatile_string, 0)))
+L<perlclib/Dealing with embedded perls and threads> contains a list of
+problematic functions with good advice as to how to cope with them.
 
 =back
 
 =head2 Problematic System Interfaces
 
-=over 4
+There are lots of issues with using various C library functions,
+including security ones.  You should read L<perlclib> which covers
+things in detail.
 
-=item *
-
-Perl strings are NOT the same as C strings:  They may contain C<NUL>
-characters, whereas a C string is terminated by the first C<NUL>. That
-is why Perl API functions that deal with strings generally take a
-pointer to the first byte and either a length or a pointer to the byte
-just beyond the final one.
+Remember that Perl strings are NOT the same as C strings:  They may
+contain C<NUL> characters, whereas a C string is terminated by the first
+C<NUL>. That is why Perl API functions that deal with strings generally
+take a pointer to the first byte and either a length or a pointer to the
+byte just beyond the final one.
 
 And this is the reason that many of the C library string handling
 functions should not be used.  They don't cope with the full generality
@@ -1044,84 +1042,6 @@ if C<c> is in C<"list"> and works even if C<c> is C<NUL>.  These
 functions need an additional parameter to give the string length. In
 the case of literal string parameters, perl has defined macros that
 calculate the length for you.  See L<perlapi/String Handling>.
-
-=item *
-
-malloc(0), realloc(0), calloc(0, 0) are non-portable.  To be portable
-allocate at least one byte.  (In general you should rarely need to work
-at this low level, but instead use the various malloc wrappers.)
-
-=item *
-
-snprintf() - the return type is unportable.  Use my_snprintf() instead.
-
-=back
-
-=head2 Security problems
-
-Last but not least, here are various tips for safer coding. See also
-L<perlclib> for libc/stdio replacements one should use.
-
-=over 4
-
-=item *
-
-Do not use gets()
-
-Or we will publicly ridicule you.  Seriously.
-
-=item *
-
-Do not use tmpfile()
-
-Use mkstemp() instead.
-
-=item *
-
-Do not use strcpy() or strcat() or strncpy() or strncat()
-
-Use my_strlcpy() and my_strlcat() instead: they either use the native
-implementation, or Perl's own implementation (borrowed from the public
-domain implementation of INN).
-
-=item *
-
-Do not use sprintf() or vsprintf()
-
-If you really want just plain byte strings, use my_snprintf() and
-my_vsnprintf() instead, which will try to use snprintf() and
-vsnprintf() if those safer APIs are available.  If you want something
-fancier than a plain byte string, use L<C<Perl_form>()|perlapi/form> or
-SVs and L<C<Perl_sv_catpvf()>|perlapi/sv_catpvf>.
-
-Note that glibc C<printf()>, C<sprintf()>, etc. are buggy before glibc
-version 2.17.  They won't allow a C<%.s> format with a precision to
-create a string that isn't valid UTF-8 if the current underlying locale
-of the program is UTF-8.  What happens is that the C<%s> and its
-operand are simply skipped without any notice.
-L<https://sourceware.org/bugzilla/show_bug.cgi?id=6530>.
-
-=item *
-
-Do not use atoi()
-
-Use grok_atoUV() instead.  atoi() has ill-defined behavior on
-overflows, and cannot be used for incremental parsing.  It is also
-affected by locale, which is bad.
-
-=item *
-
-Do not use strtol() or strtoul()
-
-Use grok_atoUV() instead.  strtol() or strtoul() (or their
-IV/UV-friendly macro disguises, Strtol() and Strtoul(), or Atol() and
-Atoul() are affected by locale, which is bad.
-
-=for apidoc_section $numeric
-=for apidoc AmhD||Atol|const char * nptr
-=for apidoc AmhD||Atoul|const char * nptr
-
-=back
 
 =head1 DEBUGGING
 
