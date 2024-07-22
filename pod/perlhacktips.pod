@@ -362,8 +362,11 @@ It's best then to:
 
 =over
 
-=item B<Don't begin a symbol name with an underscore>; (I<e.g.>, don't
+=item B<Don't begin a file-level symbol name with an underscore>; (I<e.g.>, don't
 use: C<_FOOBAR>)
+
+It is fine to have a symbol in a function or block like C<_ref>,
+beginning with an underscore followed by a lowercase letter.
 
 =item B<Don't use two consecutive underscores in a symbol name>;
 (I<e.g.>, don't use C<FOO__BAR>)
