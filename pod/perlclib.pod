@@ -166,6 +166,10 @@ There is no equivalent to C<fgets>; one should use C<sv_gets> instead:
   memcpy(dst, src, n)            Copy(src, dst, n, t)
   memmove(dst, src, n)           Move(src, dst, n, t)
   memcpy(dst, src, sizeof(t))    StructCopy(src, dst, t)
+
+Notice the different order of arguments to C<Copy> and C<Move> than used
+in C<memcpy> and C<memmove>.
+
   memset(dst, 0, n * sizeof(t))  Zero(dst, n, t)
   memzero(dst, 0)                Zero(dst, n, char)
   free(p)                        Safefree(p)
@@ -173,38 +177,6 @@ There is no equivalent to C<fgets>; one should use C<sv_gets> instead:
   strdup(p)                      savepv(p)
   strndup(p, n)                  savepvn(p, n) (Hey, strndup doesn't
                                                 exist!)
-
-  strstr(big, little)            instr(big, little)
-  memmem(big, blen, little, len) ninstr(big, bigend, little, little_end)
-  strcmp(s1, s2)                 strLE(s1, s2) / strEQ(s1, s2)
-                                               / strGT(s1,s2)
-  strncmp(s1, s2, n)             strnNE(s1, s2, n) / strnEQ(s1, s2, n)
-
-  memcmp(p1, p2, n)              memNE(p1, p2, n)
-  !memcmp(p1, p2, n)             memEQ(p1, p2, n)
-
-Notice the different order of arguments to C<Copy> and C<Move> than used
-in C<memcpy> and C<memmove>.
-
-Most of the time, though, you'll want to be dealing with SVs internally
-instead of raw C<char *> strings:
-
-  strlen(s)                   sv_len(sv)
-  strcpy(dt, src)             sv_setpv(sv, s)
-  strncpy(dt, src, n)         sv_setpvn(sv, s, n)
-  strcat(dt, src)             sv_catpv(sv, s)
-  strncat(dt, src)            sv_catpvn(sv, s)
-  sprintf(s, fmt, ...)        sv_setpvf(sv, fmt, ...)
-
-If you do need raw strings, some platforms have safer interfaces, and
-Perl makes sure a version of these are available on all platforms:
-
-  strlcat(dt, src, sizeof(dt)) my_strlcat(dt, src, sizeof(dt))
-  strlcpy(dt, src, sizeof(dt)) my_strlcpy(dt, src, sizeof(dt))
-  strnlen(s)                   my_strnlen(s, maxlen)
-
-Note also the existence of C<sv_catpvf> and C<sv_vcatpvfn>, combining
-concatenation with formatting.
 
 Sometimes instead of zeroing the allocated heap by using Newxz() you
 should consider "poisoning" the data.  This means writing a bit
@@ -218,6 +190,39 @@ macros, which have similar arguments to Zero():
   PoisonNew(dst, n, t)        equal to PoisonWith(dst, n, t, 0xAB)
   PoisonFree(dst, n, t)       equal to PoisonWith(dst, n, t, 0xEF)
   Poison(dst, n, t)           equal to PoisonFree(dst, n, t)
+
+  strstr(big, little)            instr(big, little)
+  memmem(big, blen, little, len) ninstr(big, bigend, little, little_end)
+  strcmp(s1, s2)                 strLE(s1, s2) / strEQ(s1, s2)
+                                               / strGT(s1,s2)
+  strncmp(s1, s2, n)             strnNE(s1, s2, n) / strnEQ(s1, s2, n)
+
+  memcmp(p1, p2, n)              memNE(p1, p2, n)
+  !memcmp(p1, p2, n)             memEQ(p1, p2, n)
+
+Most of the time, though, you'll want to be dealing with SVs internally
+instead of raw C<char *> strings:
+
+  strlen(s)                   sv_len(sv)
+  strcpy(dt, src)             sv_setpv(sv, s)
+  strncpy(dt, src, n)         sv_setpvn(sv, s, n)
+  strcat(dt, src)             sv_catpv(sv, s)
+  strncat(dt, src)            sv_catpvn(sv, s)
+
+If you do need raw strings, use these instead:
+
+  my_strnlen(s, maxlen)
+  my_strlcpy(dt, src, sizeof(dt))
+  my_strlcat(dt, src, sizeof(dt))
+
+Similiarly, you can use SVs for creating strings from formats
+
+  sprintf(s, fmt, ...)         sv_setpvf(sv, fmt, ...)
+
+
+Note also the existence of C<sv_catpvf> and C<sv_vcatpvfn>, combining
+concatenation with formatting.
+
 
 =head2 Character Class Tests
 
