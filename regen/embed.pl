@@ -334,12 +334,13 @@ sub generate_proto_h {
 
                 my $line = "";
                 while(@asserts) {
-                    if(length $line > 70) {
+                    my $assert = shift @asserts;
+
+                    if(length($line) + length($assert) > 78) {
                         $ret .= $line . "; \\\n";
                         $line = "";
                     }
 
-                    my $assert = shift @asserts;
                     $line .= " " x 8 if !length $line;
                     $line .= "; " if $line =~ m/\S/;
                     $line .= $assert;

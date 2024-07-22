@@ -814,12 +814,14 @@ Perl_delete_eval_scope(pTHX)
 PERL_CALLCONV char *
 Perl_delimcpy(char *to, const char *to_end, const char *from, const char *from_end, const int delim, I32 *retlen);
 #define PERL_ARGS_ASSERT_DELIMCPY               \
-        assert(to); assert(to_end); assert(from); assert(from_end); assert(retlen)
+        assert(to); assert(to_end); assert(from); assert(from_end); \
+        assert(retlen)
 
 PERL_CALLCONV char *
 Perl_delimcpy_no_escape(char *to, const char *to_end, const char *from, const char *from_end, const int delim, I32 *retlen);
 #define PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE     \
-        assert(to); assert(to_end); assert(from); assert(from_end); assert(retlen)
+        assert(to); assert(to_end); assert(from); assert(from_end); \
+        assert(retlen)
 
 PERL_CALLCONV void
 Perl_despatch_signals(pTHX);
@@ -3278,7 +3280,8 @@ Perl_package_version(pTHX_ OP *v)
 PERL_CALLCONV void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist);
 #define PERL_ARGS_ASSERT_PACKLIST               \
-        assert(cat); assert(pat); assert(patend); assert(beglist); assert(endlist)
+        assert(cat); assert(pat); assert(patend); assert(beglist); \
+        assert(endlist)
 
 PERL_CALLCONV PADOFFSET
 Perl_pad_add_anon(pTHX_ CV *func, I32 optype);
@@ -3759,7 +3762,8 @@ Perl_regdump(pTHX_ const regexp *r);
 PERL_CALLCONV I32
 Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend, char *strbeg, SSize_t minend, SV *sv, void *data, U32 flags);
 #define PERL_ARGS_ASSERT_REGEXEC_FLAGS          \
-        assert(rx); assert(stringarg); assert(strend); assert(strbeg); assert(sv)
+        assert(rx); assert(stringarg); assert(strend); assert(strbeg); \
+        assert(sv)
 
 PERL_CALLCONV void
 Perl_regfree_internal(pTHX_ REGEXP * const rx);
@@ -6641,8 +6645,8 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 STATIC IO *
 S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp, int *savefd, char *savetype);
 # define PERL_ARGS_ASSERT_OPENN_SETUP           \
-        assert(gv); assert(mode); assert(saveifp); assert(saveofp); assert(savefd); \
-        assert(savetype)
+        assert(gv); assert(mode); assert(saveifp); assert(saveofp); \
+        assert(savefd); assert(savetype)
 
 # if !defined(DOSISH)
 STATIC bool
@@ -7002,7 +7006,8 @@ S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 wh
 STATIC bool
 S_strftime8(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool called_externally);
 # define PERL_ARGS_ASSERT_STRFTIME8             \
-        assert(fmt); assert(sv); assert(locale); assert(mytm); assert(result_utf8ness)
+        assert(fmt); assert(sv); assert(locale); assert(mytm); \
+        assert(result_utf8ness)
 
 STATIC bool
 S_strftime_tm(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm *mytm)
@@ -8103,7 +8108,8 @@ PERL_CALLCONV U32
 Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *unfolded_multi_char, U32 flags, regnode *val, U32 depth)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_JOIN_EXACT            \
-        assert(pRExC_state); assert(scan); assert(min_subtract); assert(unfolded_multi_char)
+        assert(pRExC_state); assert(scan); assert(min_subtract); \
+        assert(unfolded_multi_char)
 
 PERL_CALLCONV I32
 Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth)
@@ -8802,8 +8808,8 @@ STATIC I32
 S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, char *loceol, regmatch_info * const reginfo, I32 max comma_pDEPTH)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_REGREPEAT             \
-        assert(prog); assert(startposp); assert(p); assert(loceol); assert(reginfo); \
-        assert(max)
+        assert(prog); assert(startposp); assert(p); assert(loceol); \
+        assert(reginfo); assert(max)
 
 STATIC bool
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
@@ -9049,7 +9055,8 @@ S_sv_pos_u2b_cached(pTHX_ SV * const sv, MAGIC ** const mgp, const U8 * const st
 STATIC STRLEN
 S_sv_pos_u2b_forwards(const U8 * const start, const U8 * const send, STRLEN * const uoffset, bool * const at_end, bool *canonical_position);
 # define PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS   \
-        assert(start); assert(send); assert(uoffset); assert(at_end); assert(canonical_position)
+        assert(start); assert(send); assert(uoffset); assert(at_end); \
+        assert(canonical_position)
 
 STATIC STRLEN
 S_sv_pos_u2b_midway(const U8 * const start, const U8 *send, STRLEN uoffset, const STRLEN uend);
@@ -9393,7 +9400,8 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char *name, const STRLEN
 STATIC UV
 S__to_utf8_case(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
 # define PERL_ARGS_ASSERT__TO_UTF8_CASE         \
-        assert(ustrp); assert(lenp); assert(invlist); assert(invmap); assert(normal)
+        assert(ustrp); assert(lenp); assert(invlist); assert(invmap); \
+        assert(normal)
 
 STATIC UV
 S_check_locale_boundary_crossing(pTHX_ const U8 * const p, const UV result, U8 * const ustrp, STRLEN *lenp)
