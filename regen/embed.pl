@@ -243,8 +243,9 @@ sub generate_proto_h {
                      && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
                     die_at_end "$func: $arg ($n) doesn't have a name\n";
                 }
-                if (defined $1 && ($nn||$nz) && !($commented_out && !$binarycompat)) {
-                    push @names_of_nn, $1;
+                my $argname = $1;
+                if (defined $argname && ($nn||$nz) && !($commented_out && !$binarycompat)) {
+                    push @names_of_nn, $argname;
                 }
             }
             $ret .= join ", ", @$args;
@@ -325,19 +326,27 @@ sub generate_proto_h {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
             if (@names_of_nn) {
                 $ret .= " \\\n";
-                my $def = " " x 8;
+
+                my @asserts;
                 foreach my $ix (0..$#names_of_nn) {
-                    $def .= "assert($names_of_nn[$ix])";
-                    if ($ix == $#names_of_nn) {
-                        $def .= "\n";
-                    } elsif (length $def > 70) {
-                        $ret .= $def . "; \\\n";
-                        $def = " " x 8;
-                    } else {
-                        $def .= "; ";
-                    }
+                    push @asserts, "assert($names_of_nn[$ix])";
                 }
-                $ret .= $def;
+
+                my $line = "";
+                while(@asserts) {
+                    if(length $line > 70) {
+                        $ret .= $line . "; \\\n";
+                        $line = "";
+                    }
+
+                    my $assert = shift @asserts;
+                    $line .= " " x 8 if !length $line;
+                    $line .= "; " if $line =~ m/\S/;
+                    $line .= $assert;
+                }
+
+                $ret .= $line if length $line;
+                $ret .= "\n";
             }
         }
         $ret .= "\n";
