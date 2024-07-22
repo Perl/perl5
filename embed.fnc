@@ -5086,6 +5086,8 @@ S	|OP *	|doform 	|NN CV *cv				\
 				|NULLOK OP *retop
 S	|SV *	|space_join_names_mortal				\
 				|NULLOK char * const *array
+S	|void	|warn_not_dirhandle					\
+				|NN GV *gv
 # if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 RS	|int	|dooneliner	|NN const char *cmd			\
 				|NN const char *filename

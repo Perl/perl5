@@ -8063,6 +8063,11 @@ STATIC SV *
 S_space_join_names_mortal(pTHX_ char * const *array);
 # define PERL_ARGS_ASSERT_SPACE_JOIN_NAMES_MORTAL
 
+STATIC void
+S_warn_not_dirhandle(pTHX_ GV *gv);
+# define PERL_ARGS_ASSERT_WARN_NOT_DIRHANDLE    \
+        assert(gv)
+
 # if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int
 S_dooneliner(pTHX_ const char *cmd, const char *filename)
