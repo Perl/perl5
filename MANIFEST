@@ -4454,11 +4454,11 @@ dist/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
 dist/Storable/hints/linux.pl		Hint for Storable for named architecture
+dist/Storable/lib/Storable.pm		Storable perl module
 dist/Storable/Makefile.PL		Storable extension
 dist/Storable/MANIFEST.SKIP		Storable extension
 dist/Storable/README			Storable extension
 dist/Storable/stacksize			compute stack sizes
-dist/Storable/Storable.pm		Storable perl module
 dist/Storable/Storable.xs		Storable extension
 dist/Storable/t/attach.t		Check STORABLE_attach doesn't create objects unnecessarily
 dist/Storable/t/attach_errors.t		Trigger and test STORABLE_attach errors

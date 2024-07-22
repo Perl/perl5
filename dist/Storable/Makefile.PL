@@ -19,8 +19,8 @@ WriteMakefile(
         XSLoader => 0,
     },
     INSTALLDIRS         => ($] >= 5.007 && $] < 5.012) ? 'perl' : 'site',
-    VERSION_FROM        => 'Storable.pm',
-    ABSTRACT_FROM       => 'Storable.pm',
+    VERSION_FROM        => 'lib/Storable.pm',
+    ABSTRACT_FROM       => 'lib/Storable.pm',
     CONFIGURE_REQUIRES  => {
         'ExtUtils::MakeMaker' => '6.31',
     },
@@ -37,8 +37,8 @@ WriteMakefile(
         },
         provides    => {
             'Storable'  => {
-                file        => 'Storable.pm',
-                version     => MM->parse_version('Storable.pm'),
+                file        => 'lib/Storable.pm',
+                version     => MM->parse_version('lib/Storable.pm'),
             },
         },
     },
