@@ -45,7 +45,7 @@ plan(tests => scalar @op + 3);
 sub testop {
     my ($op, $opname, $code) = @_;
     pass("$op : skipped") and return if $code =~ /^SKIP/;
-    pass("$op : skipped") and return if $code =~ m://|~~: && $] < 5.010;
+    pass("$op : skipped") and return if $code eq "//" && $] < 5.010;
     my $c = new Safe;
     $c->deny_only($op);
     $c->reval($code);
@@ -453,7 +453,6 @@ dor		$x // $y
 dorassign	$x //= $y
 once		SKIP {use feature 'state'; state $foo = 42;}
 say		SKIP {use feature 'say'; say "foo";}
-smartmatch	no warnings 'deprecated'; $x ~~ $y
 aeach		SKIP each @t
 akeys		SKIP keys @t
 avalues		SKIP values @t
