@@ -9,7 +9,7 @@ BEGIN {
 use feature "isa";
 
 my @cheqop = qw(== != eq ne);
-my @nceqop = qw(<=> cmp ~~);
+my @nceqop = qw(<=> cmp);
 my @chrelop = qw(< > <= >= lt gt le ge);
 my @ncrelop = qw(isa);
 
