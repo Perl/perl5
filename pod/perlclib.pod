@@ -10,7 +10,7 @@ C<libc>.  This document gives some guidance on interfacing with that
 library.
 
 One thing Perl porters should note is that F<perl> doesn't tend to use that
-much of the C standard library internally; you'll see very little use of, 
+much of the C standard library internally; you'll see very little use of,
 for example, the F<ctype.h> functions in there. This is because Perl
 tends to reimplement or abstract standard library functions, so that we
 know exactly how they're going to operate.
@@ -104,7 +104,7 @@ C<sv>, C<av>, C<hv>, etc. represent variables of their respective types.
 
 Instead of the F<stdio.h> functions, you should use the Perl abstraction
 layer. Instead of C<FILE*> types, you need to be handling C<PerlIO*>
-types.  Don't forget that with the new PerlIO layered I/O abstraction 
+types.  Don't forget that with the new PerlIO layered I/O abstraction
 C<FILE*> types may not even be available. See also the C<perlapio>
 documentation for more information about the following functions:
 
@@ -628,7 +628,7 @@ MULTIPLICITY, but not the other way around.
 MULTIPLICITY without threading means that only one thing runs at a time,
 so there are no concurrency issues, but each component or instance can
 affect the global state, potentially interfering with the execution of
-other instance.  This can happen if one instance:
+other instances.  This can happen if one instance:
 
 =over
 
