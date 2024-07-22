@@ -138,7 +138,8 @@ different from their C library counterparts:
 
   fputs(s, stream)            PerlIO_puts(perlio, s)
 
-There is no equivalent to C<fgets>; one should use C<sv_gets> instead:
+There is no equivalent to C<fgets> (or the deprecated C<gets>); one
+should use C<sv_gets> instead:
 
   fgets(s, n, stream)         sv_gets(sv, perlio, append)
 
@@ -163,6 +164,10 @@ There is no equivalent to C<fgets>; one should use C<sv_gets> instead:
   t* p = malloc(n)               Newx(p, n, t)
   t* p = calloc(n, s)            Newxz(p, n, t)
   p = realloc(p, n)              Renew(p, n, t)
+
+It is not portable to try to allocate 0 bytes; allocating 1 or more is
+portable.
+
   memcpy(dst, src, n)            Copy(src, dst, n, t)
   memmove(dst, src, n)           Move(src, dst, n, t)
   memcpy(dst, src, sizeof(t))    StructCopy(src, dst, t)
@@ -218,11 +223,24 @@ If you do need raw strings, use these instead:
 Similiarly, you can use SVs for creating strings from formats
 
   sprintf(s, fmt, ...)         sv_setpvf(sv, fmt, ...)
+  vsprintf(str, fmt, va_list)  sv_vsetpvf(sv, fmt, va_list)
 
+Or for raw strings,
+
+  my_snprintf(dt, len, fmt, ...)
+  my_vsnprintf(dt, len, fmt, va_list)
+  vsprintf(str, fmt, va_list)  sv_vsnprintf(sv, fmt, va_list)
 
 Note also the existence of C<sv_catpvf> and C<sv_vcatpvfn>, combining
-concatenation with formatting.
+concatenation with formatting; and L<C<Perl_form>()|perlapi/form> for
+another form of formatted populating.
 
+Note that glibc C<printf()>, C<sprintf()>, etc. are buggy before glibc
+version 2.17.  They won't allow a C<%.s> format with a precision to
+create a string that isn't valid UTF-8 if the current underlying locale
+of the program is UTF-8.  What happens is that the C<%s> and its
+operand are simply skipped without any notice.
+L<https://sourceware.org/bugzilla/show_bug.cgi?id=6530>.
 
 =head2 Character Class Tests
 
@@ -293,7 +311,8 @@ for collation.
   strtol(s, &p, n)            Strtol(s, &p, b)
   strtoul(s, &p, n)           Strtoul(s, &p, b)
 
-But note that these are subject to locale; see L</Dealing with locales>.
+But note that even the alternative functions are subject to locale; see
+L</Dealing with locales>.
 
 Typical use is to do range checks on C<uv> before casting:
 
@@ -386,9 +405,9 @@ think you do, use the C<JMPENV> stack in F<scope.h> instead.
   strftime()             Perl_sv_strftime_tm()
   strtod()               my_strtod() or Strtod()
   system(s)              Don't. Look at pp_system or use my_popen.
- ~tempnam()              mkstemp() or tmpfile()
- ~tmpnam()               mkstemp() or tmpfile()
-  tmpnam_r()             mkstemp() or tmpfile()
+ ~tempnam()              mkstemp()
+ ~tmpnam()               mkstemp()
+  tmpnam_r()             mkstemp()
   uselocale()            Perl_setlocale()
   vsnprintf()            my_vsnprintf()
   wctob()                wcrtomb()
