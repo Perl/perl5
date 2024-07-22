@@ -6666,16 +6666,16 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         assert(sv); assert(tbl)
 
 STATIC Size_t
-S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const map)
+S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DO_TRANS_COUNT_INVMAP \
-        assert(sv); assert(map)
+        assert(sv); assert(invmap)
 
 STATIC Size_t
-S_do_trans_invmap(pTHX_ SV * const sv, AV * const map)
+S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DO_TRANS_INVMAP       \
-        assert(sv); assert(map)
+        assert(sv); assert(invmap)
 
 STATIC Size_t
 S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)

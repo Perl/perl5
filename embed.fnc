@@ -4173,9 +4173,9 @@ RS	|Size_t |do_trans_count |NN SV * const sv			\
 				|NN const OPtrans_map * const tbl
 RS	|Size_t |do_trans_count_invmap					\
 				|NN SV * const sv			\
-				|NN AV * const map
+				|NN AV * const invmap
 RS	|Size_t |do_trans_invmap|NN SV * const sv			\
-				|NN AV * const map
+				|NN AV * const invmap
 RS	|Size_t |do_trans_simple|NN SV * const sv			\
 				|NN const OPtrans_map * const tbl
 #endif
