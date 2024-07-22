@@ -306,6 +306,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     CV cvbody;/*CV body will never be realloced inside this func,
                so don't read it more than once, use fake CV so existing macros
                will work, the indirection and CV head struct optimized away*/
+#ifdef DEBUGGING
+    SvFLAGS(&cvbody) = SVt_PVCV;
+#endif
     SvANY(&cvbody) = SvANY(cv);
 
     PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
