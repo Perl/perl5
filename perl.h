@@ -4832,12 +4832,12 @@ Gid_t getegid (void);
 #define DEBUG_C_FLAG		0x00200000 /*2097152 */
 #define DEBUG_A_FLAG		0x00400000 /*4194304 */
 #define DEBUG_q_FLAG		0x00800000 /*8388608 */
-#define DEBUG_M_FLAG		0x01000000 /*16777216*/
+/* was smartmatch, now free     0x01000000  16777216 */
 #define DEBUG_B_FLAG		0x02000000 /*33554432*/
 #define DEBUG_L_FLAG		0x04000000 /*67108864*/
 #define DEBUG_i_FLAG		0x08000000 /*134217728*/
 #define DEBUG_y_FLAG		0x10000000 /*268435456*/
-#define DEBUG_MASK		0x1FFFEFFF /* mask of all the standard flags */
+#define DEBUG_MASK		0x1EFFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* -D was given --> PL_debug |= FLAG */
@@ -4871,7 +4871,6 @@ Gid_t getegid (void);
 #  define DEBUG_C_TEST_ UNLIKELY(PL_debug & DEBUG_C_FLAG)
 #  define DEBUG_A_TEST_ UNLIKELY(PL_debug & DEBUG_A_FLAG)
 #  define DEBUG_q_TEST_ UNLIKELY(PL_debug & DEBUG_q_FLAG)
-#  define DEBUG_M_TEST_ UNLIKELY(PL_debug & DEBUG_M_FLAG)
 #  define DEBUG_B_TEST_ UNLIKELY(PL_debug & DEBUG_B_FLAG)
 
 /* Locale initialization comes earlier than PL_debug gets set,
@@ -4918,7 +4917,6 @@ Gid_t getegid (void);
 #  define DEBUG_C_TEST DEBUG_C_TEST_
 #  define DEBUG_A_TEST DEBUG_A_TEST_
 #  define DEBUG_q_TEST DEBUG_q_TEST_
-#  define DEBUG_M_TEST DEBUG_M_TEST_
 #  define DEBUG_B_TEST DEBUG_B_TEST_
 #  define DEBUG_L_TEST DEBUG_L_TEST_
 #  define DEBUG_i_TEST DEBUG_i_TEST_
@@ -5017,7 +5015,6 @@ Gid_t getegid (void);
 #  define DEBUG_C(a) DEBUG__(DEBUG_C_TEST, a)
 #  define DEBUG_A(a) DEBUG__(DEBUG_A_TEST, a)
 #  define DEBUG_q(a) DEBUG__(DEBUG_q_TEST, a)
-#  define DEBUG_M(a) DEBUG__(DEBUG_M_TEST, a)
 #  define DEBUG_B(a) DEBUG__(DEBUG_B_TEST, a)
 #  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 #  define DEBUG_i(a) DEBUG__(DEBUG_i_TEST, a)
@@ -5049,7 +5046,6 @@ Gid_t getegid (void);
 #  define DEBUG_C_TEST (0)
 #  define DEBUG_A_TEST (0)
 #  define DEBUG_q_TEST (0)
-#  define DEBUG_M_TEST (0)
 #  define DEBUG_B_TEST (0)
 #  define DEBUG_L_TEST (0)
 #  define DEBUG_i_TEST (0)
@@ -5085,7 +5081,6 @@ Gid_t getegid (void);
 #  define DEBUG_C(a)
 #  define DEBUG_A(a)
 #  define DEBUG_q(a)
-#  define DEBUG_M(a)
 #  define DEBUG_B(a)
 #  define DEBUG_L(a)
 #  define DEBUG_i(a)

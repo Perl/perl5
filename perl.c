@@ -3621,7 +3621,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
          * impacting the definitions of all the other flags in perl.h
          * However because the logic is guarded by isWORDCHAR we can
          * fill in holes with non-wordchar characters instead. */
-        static const char debopts[] = "psltocPmfrxuUhXDSTRJvCAqMBLiy";
+        static const char debopts[] = "psltocPmfrxuUhXDSTRJvCAq BLiy";
 
         for (; isWORDCHAR(**s); (*s)++) {
             const char * const d = strchr(debopts,**s);
