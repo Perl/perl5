@@ -7412,6 +7412,14 @@ typedef struct am_table_short AMTS;
                              PL_locale_mutex_depth,                         \
                              PL_locale_mutex_readers)
 
+#  define LOCALE_READ_LOCK    PERL_REENTRANT_READ_LOCK("locale",            \
+                                                    &PL_locale_mutex,       \
+                                                    PL_locale_mutex_depth,  \
+                                                    PL_locale_mutex_readers)
+#  define LOCALE_READ_UNLOCK  PERL_REENTRANT_READ_UNLOCK("locale",          \
+                                                    &PL_locale_mutex,       \
+                                                    PL_locale_mutex_depth,  \
+                                                    PL_locale_mutex_readers)
 #  ifdef USE_THREAD_SAFE_LOCALE
     /* But for most situations, we use the macro name without a trailing
      * underscore.
@@ -7475,15 +7483,6 @@ typedef struct am_table_short AMTS;
 #  define gwENVr_LOCALEr_LOCK           ENV_LOCK
 #  define gwENVr_LOCALEr_UNLOCK         ENV_UNLOCK
 #endif
-
-      /* On systems that don't have per-thread locales, even though we don't
-       * think we are changing the locale ourselves, behind the scenes it does
-       * get changed to whatever the thread's should be, so it has to be an
-       * exclusive lock.  By defining it here with this name, we can, for the
-       * most part, hide this detail from the rest of the code */
-/* Currently, the read lock is an exclusive lock */
-#define LOCALE_READ_LOCK                LOCALE_LOCK
-#define LOCALE_READ_UNLOCK              LOCALE_UNLOCK
 
 /* setlocale() generally returns in a global static buffer, but not on Windows
  * when operating in thread-safe mode */
