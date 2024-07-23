@@ -6484,6 +6484,7 @@ INIT({
             DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                            "%s: %d: locking " name "; new lock depth=1\n",\
                                __FILE__, __LINE__));                        \
+            assert(xcounter == 0);                                          \
             PERL_WRITE_LOCK(mutex);                                         \
             xcounter = 1;                                                   \
             DEBUG_Kv(PerlIO_printf(Perl_debug_log,                          \
