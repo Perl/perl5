@@ -6514,8 +6514,8 @@ INIT({
             DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                           "%s: %d: unlocking " name "; new lock depth=0\n", \
                           __FILE__, __LINE__));                             \
-            xcounter = 0;                                                   \
             PERL_WRITE_UNLOCK(mutex);                                       \
+            xcounter = 0;                                                   \
         }                                                                   \
         else if (xcounter <= 0) {                                           \
             Perl_croak_nocontext("panic: %s: %d: attempting to unlock"      \
