@@ -453,6 +453,7 @@ functions are fully supported in modern compilers.
 Nevertheless, there are situations where a function won't do, and a
 macro is required.  One example is when a parameter can be any of
 several types.  A function has to be declared with a single explicit
+parameter type, so a macro may be called for.
 
 Or maybe the code involved is so trivial that a function would be just
 complicating overkill, such as when the macro simply creates a mnemonic
@@ -550,7 +551,7 @@ L<https://perlmonks.org/?node_id=11144355>.
 =head2 Portability problems
 
 The following are common causes of compilation and/or execution
-failures, not common to Perl as such.  The C FAQ is good bedtime
+failures, not specific to Perl as such.  The C FAQ is good bedtime
 reading.  Please test your changes with as many C compilers and
 platforms as possible; we will, anyway, and it's nice to save oneself
 from public embarrassment.
@@ -601,7 +602,7 @@ C<long long> is not even guaranteed to be any wider than C<long>.)
 
 Instead, use the definitions C<IV>, C<UV>, C<IVSIZE>, C<I32SIZE>, and
 so forth. Avoid things like C<I32> because they are B<not> guaranteed
-to be I<exactly> 32 bits, they are I<at least> 32 bits, nor are they
+to be I<exactly> 32 bits (they are I<at least> 32 bits), nor are they
 guaranteed to be C<int> or C<long>.  If you explicitly need 64-bit
 variables, use C<I64> and C<U64>.
 
@@ -879,7 +880,8 @@ intelligence, but for many types the right format is available as with
 either 'f' or '_f' suffix, for example:
 
    IVdf /* IV in decimal */
-   UVxf /* UV is hexadecimal */
+   UVxf /* UV in hexadecimal */
+   U32of /* A U32 in octal */
 
    printf("i = %"IVdf"\n", i); /* The IVdf is a string constant. */
 
