@@ -6535,7 +6535,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (counter <= 0) {                                                 \
-            assert(count == 0);                                             \
+            assert(counter == 0);                                             \
             PERL_READ_UNLOCK(mutex);                                        \
         }                                                                   \
         else if (LIKELY((mutex)->readers_count > 0)) {                      \
