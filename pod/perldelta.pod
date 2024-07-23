@@ -125,9 +125,10 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from version 1.80 to 1.81.
 
-XXX If there was something important to note about this change, include that here.
+C<b subname>, C<c subname>, C<b postpone subname> will now break on
+the first line that is expected to execute in the sub. [github #799]
 
 =back
 
@@ -283,7 +284,9 @@ made:
 
 =item *
 
-XXX
+Added testing of the perl headers against the C++ compiler
+corresponding to the C compiler perl is being built with.  [github
+#22232]
 
 =back
 
