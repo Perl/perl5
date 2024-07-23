@@ -10482,6 +10482,13 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 bool
 Perl_is_in_locale_category_(pTHX_ const bool compiling, const int category)
 {
+
+#ifndef USE_LOCALE
+
+    return false;
+
+#else
+
     /* Internal function which returns if we are in the scope of a pragma that
      * enables the locale category 'category'.  'compiling' should indicate if
      * this is during the compilation phase (TRUE) or not (FALSE). */
@@ -10501,6 +10508,9 @@ Perl_is_in_locale_category_(pTHX_ const bool compiling, const int category)
      * a valid unsigned */
     assert(category >= -1);
     return cBOOL(SvUV(these_categories) & (1U << (category + 1)));
+
+#endif
+
 }
 
 /*
