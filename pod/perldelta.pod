@@ -284,7 +284,9 @@ made:
 
 =item *
 
-XXX
+Added testing of the perl headers against the C++ compiler
+corresponding to the C compiler perl is being built with.  [github
+#22232]
 
 =back
 
