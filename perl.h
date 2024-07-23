@@ -7309,6 +7309,19 @@ typedef struct am_table_short AMTS;
 
 #define PERLDB_LINE_OR_SAVESRC (PL_perldb & (PERLDBf_LINE | PERLDBf_SAVESRC))
 
+/* Any process-wide changeable value, such as the environment, is potentially
+ * an issue for thread-safe access to it.  In most cases, this can be solved by
+ * executing those changes in an uninteruptible critical section, controlled by
+ * a mutex.  Doing this precludes the possibility that the value will get
+ * zapped by one thread at just the wrong time for another thread.
+ *
+ * There are cases where mutexes won't solve the problem.  Neither the POSIX
+ * Standard nor the Linux man pages list any.  But any thread executing
+ * chdir(), for example, is likely to screw up any other thread which cares
+ * about this value.  https://stackoverflow.com/questions/78056645
+ * Perl doesn't try to solve this kind of issue.  But it does have mutexes for
+ * the other cases. */
+
 #ifdef USE_THREADS
 #  define KEYWORD_PLUGIN_MUTEX_INIT    MUTEX_INIT(&PL_keyword_plugin_mutex)
 #  define KEYWORD_PLUGIN_MUTEX_LOCK    MUTEX_LOCK(&PL_keyword_plugin_mutex)
@@ -7339,8 +7352,15 @@ typedef struct am_table_short AMTS;
                                                     &PL_env_mutex,          \
                                                     PL_env_mutex_depth,     \
                                                     PL_env_mutex_readers)
-#  define ENV_READ_LOCK       ENV_LOCK
-#  define ENV_READ_UNLOCK     ENV_UNLOCK
+#  define ENV_READ_LOCK       PERL_REENTRANT_READ_LOCK("env",               \
+                                                       &PL_env_mutex,       \
+                                                       PL_env_mutex_depth,  \
+                                                       PL_env_mutex_readers)
+#  define ENV_READ_UNLOCK     PERL_REENTRANT_READ_UNLOCK("env",             \
+                                                         &PL_env_mutex,     \
+                                                         PL_env_mutex_depth,\
+                                                         PL_env_mutex_readers)
+
 #  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
 #  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
 
