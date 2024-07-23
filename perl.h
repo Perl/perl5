@@ -6508,21 +6508,6 @@ INIT({
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#  define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter)                   \
-    STMT_START {                                                            \
-        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {                                                \
-            assert(xcounter == 0);                                          \
-            PERL_READ_LOCK(mutex);                                          \
-        }                                                                   \
-        else {                                                              \
-            /* This thread already has an exclusive lock on this mutex.     \
-             * Just increment the number of readers it has */               \
-            (mutex)->readers_count++;                                       \
-        }                                                                   \
-        CLANG_DIAG_RESTORE                                                  \
-    } STMT_END
-
 #  define PERL_REENTRANT_UNLOCK(name, mutex, xcounter)                      \
     STMT_START {                                                            \
         if (LIKELY(xcounter == 1)) {                                        \
@@ -6544,6 +6529,21 @@ INIT({
                 "%s: %d: avoided unlocking " name "; new lock depth=%d\n",  \
                 __FILE__, __LINE__, xcounter));                             \
         }                                                                   \
+    } STMT_END
+
+#  define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter)                   \
+    STMT_START {                                                            \
+        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (xcounter <= 0) {                                                \
+            assert(xcounter == 0);                                          \
+            PERL_READ_LOCK(mutex);                                          \
+        }                                                                   \
+        else {                                                              \
+            /* This thread already has an exclusive lock on this mutex.     \
+             * Just increment the number of readers it has */               \
+            (mutex)->readers_count++;                                       \
+        }                                                                   \
+        CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
 #  define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter)                 \
