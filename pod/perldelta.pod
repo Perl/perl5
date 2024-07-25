@@ -351,7 +351,16 @@ well.
 
 =item *
 
-XXX
+When built with the C<-DDEBUGGING> compile option, perl API functions that
+take pointers to distinct types of SVs (AVs, HVs or CVs) will check the
+C<SvTYPE()> of the passed values to ensure they are valid.  Additionally,
+internal code within core functions that attempts to extract AVs, HVs or CVs
+from reference values passed in will also perform such checks.
+
+While this has been entirely tested by normal Perl CI testing, there may
+still be some corner-cases where these constraints are violated in
+otherwise-valid calls.  These may require further investigation if they are
+found, and specific code to be adjusted to account for it.
 
 =back
 
