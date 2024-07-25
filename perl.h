@@ -6449,10 +6449,10 @@ INIT({
 /* Perl has recursive locking for both exclusive access to a resource, and
  * read-only access where other readers may simultaneously be using it.  These
  * macros define that.  They should not be used directly.  Instead
- * lock_definitions.h contains lock/unlock definitions specific to every libc
- * function that we know about that can benefit from locking, and are amenable
- * to such locks.  Those have been crafted to avoid deadlock as long as you
- * don't have more than one of those locks in effect at the same time.
+ * perl_lock_definitions.h contains lock/unlock definitions specific to every
+ * libc function that we know about that can benefit from locking, and are
+ * amenable to such locks.  Those have been crafted to avoid deadlock as long
+ * as you don't have more than one of those locks in effect at the same time.
  *
  * These macros simulate a general (or recursive) semaphore on 'mutex' whose
  * name will be displayed as 'name' in any messages.  Thus they can be used on
@@ -7395,11 +7395,12 @@ typedef struct am_table_short AMTS;
 #  define LOCALE_UNLOCK_      NOOP
 #  define LOCALE_LOCK         NOOP
 #  define LOCALE_UNLOCK       NOOP
-#else   /* Below: Threaded, and locales are supported */
+#else   /* Below: Threaded */
 
-    /* A locale mutex is required on all such threaded builds for at least
-     * situations where there is a global static buffer.  This base lock that
-     * handles these has a trailing underscore in the name */
+    /* The locale mutex is required on all threaded builds, even if there is no
+     * locale handling enabled, because it gets repurposed for other uses
+     * below.  This base lock that handles these has a trailing underscore in
+     * the name */
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
        PERL_REENTRANT_LOCK("locale",                                        \
                            &PL_locale_mutex,                                \
@@ -7441,48 +7442,416 @@ typedef struct am_table_short AMTS;
 #  endif
 #endif
 
-/* There are some locale-related functions which may need locking only because
- * they share some common memory across threads, and hence there is the
- * potential for a race in accessing that space.  Most are because their return
- * points to a global static buffer, but some just use some common space
- * internally.  All functions accessing a given space need to have a critical
- * section to prevent any other thread from accessing it at the same time.
- * Ideally, there would be a separate mutex for each such space, so that
- * another thread isn't unnecessarily blocked.  But, most of them need to be
- * locked against the locale changing while accessing that space, and it is not
- * expected that any will be called frequently, and the locked interval should
- * be short, and modern platforms will have reentrant versions (which don't
- * lock) for almost all of them, so khw thinks a single mutex should suffice.
- * Having a single mutex facilitates that, avoiding potential deadlock
- * situations.
+/* The POSIX Standard says:
  *
- * This will be a no-op iff the perl is unthreaded. 'gw' stands for 'global
+ *    "... any function dependent on any environment variable is not thread-safe
+ *     if another thread is modifying the environment"
+ *
+ * Perl accesses the environment at will, so there is a need to make such
+ * accesses thread safe.
+ *
+ * Perl also frequently changes the locale under 'use locale'.  Linux glibc
+ * requires the locale to be held constant for more than a few libc function
+ * calls.  This is not explicitly in the 2017 Standard, but khw thinks that
+ * may be mostly an oversight.  Those functions in the Standard are listed as
+ * not needing to be thread-safe.  It makes sense in most such functions, that
+ * if the locale changed in the middle of executing it, an implementation could
+ * reasonably get confused.  This should be a problem, though, only if the
+ * locale is currently the global process-wide one.  A per-thread locale isn't
+ * changed by another thread, so there should be no race.
+ *
+ * There are functions that have other potential races.  Perl has a mutex to
+ * handle these.  It uses the same mutex, named GEN or generic below, for all
+ * of them.  The advantage of this is it becomes possible to completely avoid
+ * deadlock.  The downside is that functions can get held up needlessly because
+ * another thread is accessing an unrelated resource, but there is only one
+ * mutex between them.  Each race of this type affects relatively fewer
+ * functions than the environment and locale races.  And the functions are more
+ * specialized.  This solution is likely adequate for most purposes.
+ *
+ * Some of these functions also require the environment and locale to be locked
+ * as well.  It becomes a problem to lock up to three resources without
+ * potential deadlock.  The solutions to this are isolated to the code below,
+ * and this header file: */
+#include "perl_lock_definitions.h" /* Thread synchronization macros */
+
+/* The header file documents every function known to have issues with
+ * thread-safety, and additionally generates locking/unlocking macros for all
+ * the ones for which it thinks it can solve those issues.  It maps C library
+ * function names into their appropriate locks.
+ *
+ * Most libc functions are thread-safe, and so no macro is generated for them.
+ * The others need to lock any combination of the three mutexes: environment
+ * (marked as ENV below), locale (LC), and generic (GEN).  There are three
+ * possible states for each of those mutexes:
+ *  1) unused by this function
+ *  2) the function accesses the corresponding resource read-only
+ *  3  the function can modify the resource.
+ *
+ * Since there are 3 mutexes, that leads to 3 cubed combinations, but the one
+ * where all three mutexes aren't used is empty, leaving 26.  The above header
+ * defines a bunch of macros, each of which expands to one of the 26 macros.
+ * Those macros aren't defined in the header, but are below.  The 26 macros are
+ * exclusively for use by that header; all other code should refer to the
+ * macros defined in it.
+ *
+ * The definitions of the 26 macros depend on the platform's capabilities and
+ * the current Configuration.  The general form of the macro names is
+ *
+ *  PERL_GENa_ENVb_LCc_LOCK_(m)
+ *  PERL_GENa_ENVb_LCc_UNLOCK_(m)
+ *
+ * where the 'a', 'b', and 'c' suffixes each can take on one of the two values
+ * 'x' and 'r'.  Each of the underscore-separated components indicates a mutex
+ * that needs to be locked either exclusively (if that component's suffix is
+ * 'x', or for read-only access (the suffix is 'r').  The components are always
+ * in the order specified by the example.  There are many cases where something
+ * doesn't need to be locked with all three mutexes; that is indicated by
+ * simply not including the unneeded component in the name.  PERL_LCx_LOCK(m),
+ * for example requests an exclusive lock on just the LOCALE mutex.  The
+ * parameter 'm' is needed for future use, but only on macros that have the LC
+ * component.  So, GENx_ENVr_LOCK_ requests an exclusive lock on the generic
+ * mutex, and a read lock on the ENV one, and nothing at all for the locale
+ * one.
+ *
+ * Perl assumes that other platforms follow POSIX and Linux.  Change the code
+ * if experience shows this to be wrong.  Too often, the vendor man pages omit
+ * such details.  POSIX has a list of the functions that are allowed to not be
+ * thread-safe, reproduced at the bottom of regen/lock_definitions.pl.
+ * This is unfortunately incomplete.  It doesn't include the ones that just
+ * access environment variables, for example.  Linux documents some more as
+ * well; some of those might just be documentating that the Linux
+ * implementation is non-compliant; or it might be it is an oversight in POSIX.
+ *
+ * The macros only work when you unlock before requesting another lock.
+ * Otherwise, deadlock is possible.  The macros are crafted so that they safely
+ * will lock all the resources needed for their corresponding function, without
+ * the possibility of deadlock.
+ *
+ * Suppose thread 1 holds mutex A, then requests mutex B; and at the same time
+ * thread 2 holds B, then requests A.  Deadlock happens.  But this is avoided
+ * if either:
+ *
+ *  1)  you never request A while holding B
+ *          Once you hold a mutex, do your business and release it without
+ *          seeking to lock another mutex.
+ *
+ *  2)  you never request B without first holding A
+ *          The above scenario would not happen because thread 2 would never
+ *          hold B without also first holding A.
+ *
+ * The perl core does some of each strategy.  Most mutexes are acquired, the
+ * libc function is called, and the mutex immediately released.  Hence strategy
+ * 1) works for these cases.
+ *
+ * But the combination of both the locale and environment needing to be held
+ * constant occurs over and over in the Linux man pages, sometimes with one or
+ * the other also being written to.  Strategy 1) is insufficient for these
+ * cases.  So strategy 2) is called for, also handling the case where another
+ * resource needs to be locked.  The macros defined in perl_lock_definitions.h
+ * know which strategy is needed for which function.
+ *
+ * It is actually not true that there is a third GEN mutex.  The macros cause
+ * either the ENV or LOCALE mutex to simulate it.  That is, a request to lock
+ * it is instead mapped into a request to lock one of the two real mutexes.
+ * Which is chosen depends on the macro, the platform, and the Configuration.
+ * This is not as scary as it sounds.  On some platforms, the locale mutex may
+ * be needed only during process start up.  There is no performance issue at
+ * all on these.  On the others, we assume the environment is rarely changed.
+ * Most environment accesses are read-only, which means they don't lock out
+ * other read-only accesses.  The macros that could adversely affect
+ * performance are hence limited to the ones that contain GENx, and not ENVx
+ * nor LCx.  Many of these are for older functions for which better
+ * alternatives are now available, such as getnameinfo() is better than
+ * gethostbyaddr(); or many of the encryption/randomness ones which have been
+ * superceded by better algorithms; or rarely used ones, such as the gamma()
+ * group; or unlikely to be used with Perl, such as hash manimpulation ones,
+ * like hcreate().  The two most likely to occur in Perl programs are
+ * strftime() and readdir().  (Posix 2024 requires readdir() to be thread-safe
+ * unless called from different threads with the same stream, which would mean
+ * that the application somehow is sharing the return of opendir() across
+ * multiple threads.  We shouldn't have to guard against this reckless coding
+ * practice.  The Linux man page says that most modern implementations of
+ * readdir() anticipate the Posix 2024 requirements, so that failure to lock
+ * readdir() calls is harmless.)
+ *
+ * The 26 macros are:
+ *
+ *      LCr_LOCK       LCx_LOCK
+ *      ENVr_LOCK      ENVx_LOCK
+ *      GENr_LOCK      GENx_LOCK
+ *
+ *      ENVr_LCr_LOCK   ENVr_LCx_LOCK     ENVx_LCr_LOCK   ENVx_LCx_LOCK
+ *      GENr_LCr_LOCK   GENr_LCx_LOCK     GENx_LCr_LOCK   GENx_LCx_LOCK
+ *      GENr_ENVr_LOCK  GENr_ENVx_LOCK    GENx_ENVr_LOCK  GENx_ENVx_LOCK
+ *
+ *      GENr_ENVr_LCr_LOCK     GENr_ENVr_LCx_LOCK
+ *      GENr_ENVx_LCr_LOCK     GENr_ENVx_LCx_LOCK
+ *      GENx_ENVr_LCr_LOCK     GENx_ENVr_LCx_LOCK
+ *      GENx_ENVx_LCr_LOCK     GENx_ENVx_LCx_LOCK
+ *
+ * (Each actually has 'PERL_' prefixed to its name)
+ */
+
+#if defined(USE_THREAD_SAFE_LOCALE) || ! defined(USE_LOCALE)
+
+     /* Without locale handling at all, the locale mutex is completely unused;
+      * with thread-safe locales, it is unused except for interacting with the
+      * global locale.  The only libc function that accesses that is
+      * setlocale(), generally called by perl only once, at startup, or should
+      * a thread call switch_to_global_locale().  Therefore repurpose the
+      * locale mutex to be used as the generic mutex.
+      *
+      * What that means is that for this implementation:
+      *     All GEN components of a lock macro use the LOCALE mutex
+      *     Any LCr component of a lock macro is a no-op
+      *     XXX Any LCx component of a lock macro is a no-op
+      *
+      * All macros that need to lock the two mutexes first lock the generic
+      * (locale) mutex, then the environment one.  This prevents deadlock.
+      */
+
+#  define PERL_LCr_LOCK(m)                      NOOP
+#  define PERL_LCr_UNLOCK(m)                    NOOP
+
+#  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
+#  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
+
+#  define PERL_ENVr_LOCK                        ENV_READ_LOCK
+#  define PERL_ENVr_UNLOCK                      ENV_READ_UNLOCK
+
+#  define PERL_ENVx_LOCK                        ENV_LOCK
+#  define PERL_ENVx_UNLOCK                      ENV_UNLOCK
+
+#  define PERL_GENr_LOCK                        LOCALE_READ_LOCK
+#  define PERL_GENr_UNLOCK                      LOCALE_READ_UNLOCK
+
+#  define PERL_GENx_LOCK                        PERL_LCx_LOCK(0)
+#  define PERL_GENx_UNLOCK                      PERL_LCx_UNLOCK(0)
+
+#  define PERL_ENVr_LCr_LOCK(m)                 PERL_ENVr_LOCK
+#  define PERL_ENVr_LCr_UNLOCK(m)               PERL_ENVr_UNLOCK
+
+#  define PERL_ENVr_LCx_LOCK(m)                 PERL_ENVr_LOCK
+#  define PERL_ENVr_LCx_UNLOCK(m)               PERL_ENVr_UNLOCK
+
+#  define PERL_ENVx_LCr_LOCK(m)                 PERL_ENVx_LOCK
+#  define PERL_ENVx_LCr_UNLOCK(m)               PERL_ENVx_UNLOCK
+
+#  define PERL_ENVx_LCx_LOCK(m)                 PERL_ENVx_LOCK
+#  define PERL_ENVx_LCx_UNLOCK(m)               PERL_ENVx_UNLOCK
+
+#  define PERL_GENr_LCr_LOCK(m)                 PERL_GENr_LOCK
+#  define PERL_GENr_LCr_UNLOCK(m)               PERL_GENr_UNLOCK
+
+#  define PERL_GENr_LCx_LOCK(m)                 PERL_GENx_LOCK
+#  define PERL_GENr_LCx_UNLOCK(m)               PERL_GENx_UNLOCK
+
+#  define PERL_GENx_LCr_LOCK(m)                 PERL_GENx_LOCK
+#  define PERL_GENx_LCr_UNLOCK(m)               PERL_GENx_UNLOCK
+
+#  define PERL_GENx_LCx_LOCK(m)                 PERL_GENx_LOCK
+#  define PERL_GENx_LCx_UNLOCK(m)               PERL_GENx_UNLOCK
+
+#  define PERL_GENr_ENVr_LOCK               STMT_START {                    \
+                                                PERL_GENr_LOCK;             \
+                                                PERL_ENVr_LOCK;             \
+                                            } STMT_END
+#  define PERL_GENr_ENVr_UNLOCK             STMT_START {                    \
+                                                PERL_ENVr_UNLOCK;           \
+                                                PERL_GENr_UNLOCK;           \
+                                            } STMT_END
+
+#  define PERL_GENr_ENVx_LOCK               STMT_START {                    \
+                                                PERL_GENr_LOCK;             \
+                                                PERL_ENVx_LOCK;             \
+                                            } STMT_END
+#  define PERL_GENr_ENVx_UNLOCK             STMT_START {                    \
+                                                PERL_ENVx_UNLOCK;           \
+                                                PERL_GENr_UNLOCK;           \
+                                            } STMT_END
+#  define PERL_GENx_ENVr_LOCK               STMT_START {                    \
+                                                PERL_GENx_LOCK;             \
+                                                PERL_ENVr_LOCK;             \
+                                            } STMT_END
+#  define PERL_GENx_ENVr_UNLOCK             STMT_START {                    \
+                                                PERL_ENVr_UNLOCK;           \
+                                                PERL_GENx_UNLOCK;           \
+                                            } STMT_END
+#  define PERL_GENx_ENVx_LOCK               STMT_START {                    \
+                                                PERL_GENx_LOCK;             \
+                                                PERL_ENVx_LOCK;             \
+                                            } STMT_END
+#  define PERL_GENx_ENVx_UNLOCK             STMT_START {                    \
+                                                PERL_ENVx_UNLOCK;           \
+                                                PERL_GENx_UNLOCK;           \
+                                            } STMT_END
+
+#  define PERL_GENr_ENVr_LCr_LOCK(m)            PERL_GENr_ENVr_LOCK
+#  define PERL_GENr_ENVr_LCr_UNLOCK(m)          PERL_GENr_ENVr_UNLOCK
+
+#  define PERL_GENr_ENVr_LCx_LOCK(m)            PERL_GENr_ENVr_LOCK
+#  define PERL_GENr_ENVr_LCx_UNLOCK(m)          PERL_GENr_ENVr_UNLOCK
+
+#  define PERL_GENr_ENVx_LCr_LOCK(m)            PERL_GENr_ENVx_LOCK
+#  define PERL_GENr_ENVx_LCr_UNLOCK(m)          PERL_GENr_ENVx_UNLOCK
+
+#  define PERL_GENr_ENVx_LCx_LOCK(m)            PERL_GENr_ENVx_LOCK
+#  define PERL_GENr_ENVx_LCx_UNLOCK(m)          PERL_GENr_ENVx_UNLOCK
+
+#  define PERL_GENx_ENVr_LCr_LOCK(m)            PERL_GENx_ENVr_LOCK
+#  define PERL_GENx_ENVr_LCr_UNLOCK(m)          PERL_GENx_ENVr_UNLOCK
+
+#  define PERL_GENx_ENVr_LCx_LOCK(m)            PERL_GENx_ENVr_LOCK
+#  define PERL_GENx_ENVr_LCx_UNLOCK(m)          PERL_GENx_ENVr_UNLOCK
+
+#  define PERL_GENx_ENVx_LCr_LOCK(m)            PERL_GENx_ENVx_LOCK
+#  define PERL_GENx_ENVx_LCr_UNLOCK(m)          PERL_GENx_ENVx_UNLOCK
+
+#  define PERL_GENx_ENVx_LCx_LOCK(m)            PERL_GENx_ENVx_LOCK
+#  define PERL_GENx_ENVx_LCx_UNLOCK(m)          PERL_GENx_ENVx_UNLOCK
+
+#define gwLOCALE_LOCK           PERL_LCx_LOCK(0)
+#define gwLOCALE_UNLOCK         PERL_LCx_UNLOCK(0)
+
+#else
+
+    /* In contrast, on platforms without thread-safe locales, the generic lock
+     * mostly uses the env mutex.  This is mainly because the core perl code is
+     * structured so that the ENV mutex is most often locked just around a
+     * single libc call, whereas the locale mutex can be locked around
+     * recursive calls.
+     *
+     * First, the locks not involving the generic one are as you would expect,
+     * Second, GENr_ENV? converts to ENV? for either value of '?'
+     *         GENx_ENV? converts to ENVx for either value of '?'
+     * Third is a bit harder to understand.  In GENr_LCr, the GEN is protecting
+     * against some other thread simultaneously writing to some resource, say
+     * it is a global static buffer.  ENV is used to protect against all such
+     * accesses that don't involve locales, so this has to change to ENVr_LCr.
+     * It might be tempting to think plain LCr would work, but if there is a
+     * function that accesses that buffer without caring about locale, it would
+     * be using a plain GENr, and wouldn't block.  Similarly for the others.
+     *
+     * All macros that need to lock the two mutexes first lock the environment
+     * one, then the locale one.  This prevents deadlock.  It is unclear to khw
+     * if this order is best.
+     */
+
+#  define PERL_LCr_LOCK(m)                      LOCALE_READ_LOCK
+#  define PERL_LCr_UNLOCK(m)                    LOCALE_READ_UNLOCK
+
+#  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
+#  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
+
+#  define PERL_ENVr_LOCK                        ENV_READ_LOCK
+#  define PERL_ENVr_UNLOCK                      ENV_READ_UNLOCK
+
+#  define PERL_ENVx_LOCK                        ENV_LOCK
+#  define PERL_ENVx_UNLOCK                      ENV_UNLOCK
+
+#  define PERL_GENr_LOCK                        PERL_ENVr_LOCK
+#  define PERL_GENr_UNLOCK                      PERL_ENVr_UNLOCK
+
+#  define PERL_GENx_LOCK                        PERL_ENVx_LOCK
+#  define PERL_GENx_UNLOCK                      PERL_ENVx_UNLOCK
+
+#  define PERL_ENVr_LCr_LOCK(m)             STMT_START {                    \
+                                                PERL_ENVr_LOCK;             \
+                                                LOCALE_READ_LOCK;           \
+                                            } STMT_END
+#  define PERL_ENVr_LCr_UNLOCK(m)           STMT_START {                    \
+                                                LOCALE_READ_UNLOCK;         \
+                                                PERL_ENVr_UNLOCK;           \
+                                            } STMT_END
+#  define PERL_ENVr_LCx_LOCK(m)             STMT_START {                    \
+                                                PERL_ENVr_LOCK;             \
+                                                PERL_LCx_LOCK(m);           \
+                                            } STMT_END
+#  define PERL_ENVr_LCx_UNLOCK(m)           STMT_START {                    \
+                                                PERL_LCx_UNLOCK(m);         \
+                                                PERL_ENVr_UNLOCK;           \
+                                            } STMT_END
+#  define PERL_ENVx_LCr_LOCK(m)             STMT_START {                    \
+                                                PERL_ENVx_LOCK;             \
+                                                PERL_LCr_LOCK(m);           \
+                                            } STMT_END
+#  define PERL_ENVx_LCr_UNLOCK(m)           STMT_START {                    \
+                                                PERL_LCr_UNLOCK(m);         \
+                                                PERL_ENVx_UNLOCK ;          \
+                                            } STMT_END
+#  define PERL_ENVx_LCx_LOCK(m)             STMT_START {                    \
+                                                PERL_ENVx_LOCK;             \
+                                                PERL_LCx_LOCK(m);           \
+                                            } STMT_END
+#  define PERL_ENVx_LCx_UNLOCK(m)           STMT_START {                    \
+                                                PERL_LCx_UNLOCK(m);         \
+                                                PERL_ENVx_UNLOCK;           \
+                                            } STMT_END
+
+#  define PERL_GENr_LCr_LOCK(m)                 PERL_ENVr_LCr_LOCK(m)
+#  define PERL_GENr_LCr_UNLOCK(m)               PERL_ENVr_LCr_UNLOCK(m)
+
+#  define PERL_GENr_LCx_LOCK(m)                 PERL_ENVr_LCx_LOCK(m)
+#  define PERL_GENr_LCx_UNLOCK(m)               PERL_ENVr_LCx_UNLOCK(m)
+
+#  define PERL_GENx_LCr_LOCK(m)                 PERL_ENVx_LCr_LOCK(m)
+#  define PERL_GENx_LCr_UNLOCK(m)               PERL_ENVx_LCr_UNLOCK(m)
+
+#  define PERL_GENx_LCx_LOCK(m)                 PERL_ENVx_LCx_LOCK(m)
+#  define PERL_GENx_LCx_UNLOCK(m)               PERL_ENVx_LCx_UNLOCK(m)
+
+#  define PERL_GENr_ENVr_LOCK                   PERL_ENVr_LOCK
+#  define PERL_GENr_ENVr_UNLOCK                 PERL_ENVr_UNLOCK
+
+#  define PERL_GENx_ENVr_LOCK                   PERL_ENVx_LOCK
+#  define PERL_GENx_ENVr_UNLOCK                 PERL_ENVx_UNLOCK
+
+#  define PERL_GENr_ENVx_LOCK                   PERL_ENVx_LOCK
+#  define PERL_GENr_ENVx_UNLOCK                 PERL_ENVx_UNLOCK
+
+#  define PERL_GENx_ENVx_LOCK                   PERL_ENVx_LOCK
+#  define PERL_GENx_ENVx_UNLOCK                 PERL_ENVx_UNLOCK
+
+#  define PERL_GENr_ENVr_LCr_LOCK(m)            PERL_ENVr_LCr_LOCK(m)
+#  define PERL_GENr_ENVr_LCr_UNLOCK(m)          PERL_ENVr_LCr_UNLOCK(m)
+
+#  define PERL_GENr_ENVr_LCx_LOCK(m)            PERL_ENVr_LCr_LOCK(m)
+#  define PERL_GENr_ENVr_LCx_UNLOCK(m)          PERL_ENVr_LCr_UNLOCK(m)
+
+#  define PERL_GENr_ENVx_LCr_LOCK(m)            PERL_ENVx_LCr_LOCK(m)
+#  define PERL_GENr_ENVx_LCr_UNLOCK(m)          PERL_ENVx_LCr_UNLOCK(m)
+
+#  define PERL_GENr_ENVx_LCx_LOCK(m)            PERL_ENVx_LCx_LOCK(m)
+#  define PERL_GENr_ENVx_LCx_UNLOCK(m)          PERL_ENVx_LCx_UNLOCK(m)
+
+#  define PERL_GENx_ENVr_LCr_LOCK(m)            PERL_ENVx_LCr_LOCK(m)
+#  define PERL_GENx_ENVr_LCr_UNLOCK(m)          PERL_ENVx_LCr_UNLOCK(m)
+
+#  define PERL_GENx_ENVr_LCx_LOCK(m)            PERL_ENVx_LCx_LOCK(m)
+#  define PERL_GENx_ENVr_LCx_UNLOCK(m)          PERL_ENVx_LCx_UNLOCK(m)
+
+#  define PERL_GENx_ENVx_LCr_LOCK(m)            PERL_ENVx_LCr_LOCK(m)
+#  define PERL_GENx_ENVx_LCr_UNLOCK(m)          PERL_ENVx_LCr_UNLOCK(m)
+
+#  define PERL_GENx_ENVx_LCx_LOCK(m)            PERL_ENVx_LCx_LOCK(m)
+#  define PERL_GENx_ENVx_LCx_UNLOCK(m)          PERL_ENVx_LCx_UNLOCK(m)
+#endif
+
+/* This will be a no-op iff the perl is unthreaded. 'gw' stands for 'global
  * write', to indicate the caller wants to be able to access memory that isn't
  * thread specific, either to write to itself, or to prevent anyone else from
  * writing. */
-#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
-#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+#define gwLOCALE_LOCK           PERL_LCx_LOCK(0)
+#define gwLOCALE_UNLOCK         PERL_LCx_UNLOCK(0)
 
 /* Similar to gwLOCALE_LOCK, there are functions that require both the locale
  * and environment to be constant during their execution, and don't change
  * either of those things, but do write to some sort of shared global space.
  * They require some sort of exclusive lock against similar functions, and a
- * read lock on both the locale and environment.  However, on systems which
- * have per-thread locales, the locale is constant during the execution of
- * these functions, and so no locale lock is necessary.  For such systems, an
- * exclusive ENV lock is necessary and sufficient.  On systems where the locale
- * could change out from under us, we use an exclusive LOCALE lock to prevent
- * that, and a read ENV lock to prevent other threads that have nothing to do
- * with locales here from changing the environment. */
-#ifdef LOCALE_LOCK_DOES_SOMETHING
-#  define gwENVr_LOCALEr_LOCK                                               \
-                    STMT_START { LOCALE_LOCK; ENV_READ_LOCK; } STMT_END
-#  define gwENVr_LOCALEr_UNLOCK                                             \
-                STMT_START { ENV_READ_UNLOCK; LOCALE_UNLOCK; } STMT_END
-#else
-#  define gwENVr_LOCALEr_LOCK           ENV_LOCK
-#  define gwENVr_LOCALEr_UNLOCK         ENV_UNLOCK
-#endif
+ * read lock on both the locale and environment. */
+#define gwENVr_LOCALEr_LOCK     PERL_GENx_ENVr_LCr_LOCK(0)
+#define gwENVr_LOCALEr_UNLOCK   PERL_GENx_ENVr_LCr_UNLOCK(0)
 
 /* setlocale() generally returns in a global static buffer, but not on Windows
  * when operating in thread-safe mode */
@@ -7535,15 +7904,8 @@ typedef struct am_table_short AMTS;
 #  define LC_COLLATE_LOCK               LOCALE_LOCK
 #  define LC_COLLATE_UNLOCK             LOCALE_UNLOCK
 
-/* Some critical sections need to lock both the locale and the environment from
- * changing, while allowing for any number of readers.  To avoid deadlock, this
- * is always done in the same order.  These should always be invoked, like all
- * locks really, at such a low level that its just a libc call that is wrapped,
- * so as to prevent recursive calls which could deadlock. */
-#define ENVr_LOCALEr_LOCK                                               \
-            STMT_START { LOCALE_READ_LOCK; ENV_READ_LOCK; } STMT_END
-#define ENVr_LOCALEr_UNLOCK                                             \
-        STMT_START { ENV_READ_UNLOCK; LOCALE_READ_UNLOCK; } STMT_END
+#define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK()
+#define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK()
 
 #define STRFTIME_LOCK                   ENVr_LOCALEr_LOCK
 #define STRFTIME_UNLOCK                 ENVr_LOCALEr_UNLOCK
