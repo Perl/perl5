@@ -176,7 +176,7 @@ Put together, a grammar to match a basic identifier becomes
             | (?aa) (?!\d) \w+
           )
       )
-      (?<sigil> [&*\$\@\%])
+      (?<sigil> \$\# | [&*\$\@%])
       (?<Perl_XIDS> (?[ ( \p{Word} & \p{XID_Start} ) + [_] ]) )
       (?<Perl_XIDC> (?[ \p{Word} & \p{XID_Continue} ]) )
   )
