@@ -369,6 +369,26 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Compound assignment operators return lvalues that can be further modified:
+
+    ($x &= $y) += $z;
+    # Equivalent to:
+    #  $x &= $y;
+    #  $x += $z;
+
+However, the separate numeric/string bitwise operators provided by L<the
+C<bitwise> feature|feature/The 'bitwise' feature>, C<< &= ^= |= &.= ^.= |.= >>,
+did not do so:
+
+    use feature qw(bitwise);
+    ($x &= $y) += $z;
+    # Used to die:
+    #  Can't modify numeric bitwise and (&) in addition (+) at ...
+
+This has been corrected. [GH #22412]
+
+=item *
+
 XXX
 
 =back
