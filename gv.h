@@ -308,7 +308,10 @@ Return the CV from the GV.
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
 
 /*
-=for apidoc_defn ARdp|GV *|gv_autoload4|NULLOK HV *stash|NN const char *name|STRLEN len|I32 method
+=for apidoc_defn ARmd|GV *|gv_autoload4|NULLOK HV *stash                    \
+                                       |NN const char *name                 \
+                                       |STRLEN len                          \
+                                       |I32 method
 =cut
 
 */
