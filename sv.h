@@ -2315,8 +2315,8 @@ immediately written again.
 #endif
 
 /*
-=for apidoc newRV
-=for apidoc_item ||newRV_inc|
+=for apidoc         newRV
+=for apidoc_item m||newRV_inc|
 
 These are identical.  They create an RV wrapper for an SV.  The reference count
 for the original SV is incremented.
