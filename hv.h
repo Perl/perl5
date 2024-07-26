@@ -577,6 +577,7 @@ whether it is valid to call C<HvAUX()>.
 
 /*
 =for apidoc_defn Am|SV**|hv_fetchs|HV* hv|"key"|I32 lval
+=for apidoc_defn Am|SV *|hv_deletes|HV *hv|"key"|U32 flags
 =cut
 */
 #define hv_fetchs(hv, key, lval) \
