@@ -9,7 +9,7 @@ WriteMakefile(
     VERSION_FROM => 'lib/Exporter.pm',
     ( $] > 5.011 ) ? () : ( INSTALLDIRS => 'perl' ),    # CPAN sourced versions should now install to site
     PREREQ_PM => {
-        'Carp' => '1.05',
+        'Carp' => '1.50',
     },
     ABSTRACT_FROM => 'lib/Exporter.pm',
     ( $EUMM_VERSION >= 6.31 ? ( LICENSE => 'perl_5' ) : () ),
