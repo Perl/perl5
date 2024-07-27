@@ -2242,6 +2242,7 @@ immediately written again.
         sv_setsv_flags(dsv, ssv, SV_GMAGIC|SV_DO_COW_SVSETSV)
 /*
 =for apidoc_defn Am|void|sv_setsv_nomg|SV *dsv|SV *ssv
+=for apidoc_defn Am|void|sv_catsv_nomg|SV *dsv|SV *ssv
 =cut
 */
 #define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_DO_COW_SVSETSV)
