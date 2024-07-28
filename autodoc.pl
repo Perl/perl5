@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+use v5.41;
+no feature 'signatures';    # For the time being, to avoid converting
 use Text::Tabs;
 
 # Unconditionally regenerate:
@@ -2196,48 +2198,42 @@ sub dictionary_order {
 
     no warnings 'non_unicode';
 
-    local $a = $a;
-    local $b = $b;
+    my $mod_string_for_dictionary_order = sub {
+        my $string = shift;
 
-    # Convert all digit sequences to same length with leading zeros, so for
-    # example, 8 will compare less than 16 (using a fill length value that
-    # should be longer than any sequence in the input).
-    $a =~ s/(\d+)/sprintf "%06d", $1/ge;
-    $b =~ s/(\d+)/sprintf "%06d", $1/ge;
+        # Convert all digit sequences to be the same length with leading
+        # zeros, so that, for example '8' will sort before '16' (using a fill
+        # length value that should be longer than any sequence in the input).
+        $string =~ s/(\d+)/sprintf "%06d", $1/ge;
 
-    # Translate any underscores and digits so they compare after all Unicode
-    # characters
-    $a =~ tr[_0-9]/\x{110000}-\x{11000A}/;
-    $b =~ tr[_0-9]/\x{110000}-\x{11000A}/;
+        # Translate any underscores so they sort lowest.  This causes
+        # 'word1_word2' to sort before 'word1word2' for all words.  And
+        # translate any digits so they come after anything else.  This causes
+        # digits to sort highest)
+        $string =~ tr[_0-9]/\0\x{110000}-\x{110009}/;
 
-    use feature 'state';
-    # Modify \w, \W to reflect the changes.
-    state $ud = '\x{110000}-\x{11000A}';    # xlated underscore, digits
-    state $w = "\\w$ud";                    # new \w string
+        # Then move leading underscores to the end, translating them to above
+        # everything else.  This causes '_word_' to compare just after 'word_'
+        $string .= "\x{11000A}" x length $1 if $string =~ s/ ^ (\0+) //x;
+
+        return $string;
+    };
+
+    # Modify \w, \W to reflect what the above sub does.
+    state $w = "\\w\0\x{110000}-\x{11000A}";   # new \w string
     state $mod_w = qr/[$w]/;
     state $mod_W = qr/[^$w]/;
 
-    # Only \w for initial comparison
-    my $a_only_word = uc($a =~ s/$mod_W//gr);
-    my $b_only_word = uc($b =~ s/$mod_W//gr);
+    local $a = $mod_string_for_dictionary_order->($a);
+    local $b = $mod_string_for_dictionary_order->($b);
 
-    # And not initial nor interior underscores nor digits (by squeezing them
-    # out)
-    my $a_stripped = $a_only_word =~ s/ (*atomic:[$ud]+) (*pla: $mod_w ) //grxx;
-    my $b_stripped = $b_only_word =~ s/ (*atomic:[$ud]+) (*pla: $mod_w ) //grxx;
-
-    # If the stripped versions differ, use that as the comparison.
-    my $cmp = $a_stripped cmp $b_stripped;
+    # If the strings stripped of \W differ, use that as the comparison.
+    my $cmp = lc ($a =~ s/$mod_W//gr) cmp lc ($b =~ s/$mod_W//gr);
     return $cmp if $cmp;
 
-    # For the first tie breaker, repeat, but consider initial and interior
-    # underscores and digits, again having those compare after all Unicode
-    # characters
-    $cmp = $a_only_word cmp $b_only_word;
-    return $cmp if $cmp;
-
-    # Next tie breaker is just a caseless comparison
-    $cmp = uc($a) cmp uc($b);
+    # For the first tie breaker use a plain caseless comparison of the
+    # modified strings
+    $cmp = lc $a  cmp lc $b;
     return $cmp if $cmp;
 
     # Finally a straight comparison
