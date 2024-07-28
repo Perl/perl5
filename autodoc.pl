@@ -154,7 +154,7 @@ my %described_elsewhere;
 # unlooked at
 my %protos;
 
-my $link_text = "Described in";
+my $described_in = "Described in";
 
 my $description_indent = 4;
 my $usage_indent = 3;   # + initial verbatim block blank yields 4 total
@@ -1052,7 +1052,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 # deserving candidates.)
                 my $podname = $file =~ s!.*/!!r;    # Rmv directory name(s)
                 $podname =~ s/\.pod//;
-                $text = "Described in L<$podname>.\n";
+                $text = "$described_in L<$podname>.\n";
 
                 # Keep track of all the pod files that we refer to.
                 push $described_elsewhere{$podname}->@*, $podname;
@@ -1350,7 +1350,7 @@ sub parse_config_h {
                 my $was = $docs{'api'}{$section}{$name}->{pod};
                 $was = "" unless $was;
                 chomp $was;
-                if ($was ne "" && $was !~ m/$link_text/) {
+                if ($was ne "" && $was !~ m/$described_in/) {
                     die "Multiple descriptions for $name\n"
                       . "The '$section' section contained\n'$was'";
                 }
