@@ -233,6 +233,27 @@ my $XS_scn = 'XS';
 # Kept separate at end
 my $undocumented_scn = 'Undocumented elements';
 
+my @has_defs;
+my @has_r_defs;     # Reentrant symbols
+my @include_defs;
+my %list_only = (
+      has_defs     => {
+                        list => \@has_defs,
+                        header => "List of capability C<HAS_I<foo>> symbols",
+                        placement => '__HAS_LIST__',
+                      },
+      has_r_defs   => {
+                        list => \@has_r_defs,
+                        header => "List of capability C<HAS_I<foo>> symbols",
+                        placement => '__HAS_R_LIST__',
+                       },
+      include_defs => {
+                        list => \@include_defs,
+                        header => "List of C<#include> needed symbols",
+                        placement => '__INCLUDE_LIST__',
+                       },
+);
+
 my %valid_sections = (
     $AV_scn => {},
     $callback_scn => {},
@@ -282,7 +303,7 @@ my %valid_sections = (
 
         footer => <<~EOT,
 
-            =head2 List of capability C<HAS_I<foo>> symbols
+            =head2 $list_only{has_defs}{header}
 
             This is a list of those symbols that dont appear elsewhere in this
             document that indicate if the current platform has a certain
@@ -301,11 +322,11 @@ my %valid_sections = (
             split so that the ones that indicate there is a reentrant version
             of a capability are listed separately
 
-            __HAS_LIST__
+            $list_only{has_defs}{placement}
 
             And, the reentrant capabilities:
 
-            __HAS_R_LIST__
+            $list_only{has_r_defs}{placement}
 
             Example usage:
 
@@ -319,7 +340,7 @@ my %valid_sections = (
 
             =back
 
-            =head2 List of C<#include> needed symbols
+            =head2 $list_only{include_defs}{header}
 
             This list contains symbols that indicate if certain C<#include>
             files are present on the platform.  If your code accesses the
@@ -327,7 +348,7 @@ my %valid_sections = (
             C<#include> it if the symbol on this list is C<#define>d.  For
             more detail, see the corresponding entry in F<$config_h>.
 
-            __INCLUDE_LIST__
+            $list_only{include_defs}{placement}
 
             Example usage:
 
@@ -1070,9 +1091,6 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
 }
 
 my %configs;
-my @has_defs;
-my @has_r_defs;     # Reentrant symbols
-my @include_defs;
 
 sub parse_config_h {
     use re '/aa';   # Everything is ASCII in this file
@@ -2742,18 +2760,18 @@ my $places_other_than_intern = join ", ",
 my $places_other_than_api = join ", ",
             map { "L<$_>" } sort dictionary_order 'perlintern', @other_places;
 
-# The S< > makes things less densely packed, hence more readable
-my $has_defs_text .= join ",S< > ", map { "C<$_>" }
-                                             sort dictionary_order @has_defs;
-my $has_r_defs_text .= join ",S< > ", map { "C<$_>" }
-                                             sort dictionary_order @has_r_defs;
-$valid_sections{$genconfig_scn}{footer} =~ s/__HAS_LIST__/$has_defs_text/;
-$valid_sections{$genconfig_scn}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
 
-my $include_defs_text .= join ",S< > ", map { "C<$_>" }
-                                            sort dictionary_order @include_defs;
-$valid_sections{$genconfig_scn}{footer}
-                                      =~ s/__INCLUDE_LIST__/$include_defs_text/;
+foreach my $name (keys %list_only) {
+    my @this_list = $list_only{$name}{list}->@*;
+    my $text = "";
+    foreach my $entry (sort dictionary_order @this_list) {
+        $text .= ",S< > " if $text; # The S< > makes things less densely
+                                    # packed, hence more readable
+        $text .= "C<$entry>";
+    }
+    $valid_sections{$genconfig_scn}{footer}
+                                    =~ s/$list_only{$name}{placement}/$text/;
+}
 
 my $section_list = join "\n\n", map { "=item L</$_>" }
                                 sort(dictionary_order keys %valid_sections),
