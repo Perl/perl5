@@ -5,15 +5,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-use Config;
-
-sub BEGIN {
-    unshift @INC, 't';
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-}
 
 use Storable qw(freeze thaw dclone);
 

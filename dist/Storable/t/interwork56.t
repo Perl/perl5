@@ -12,13 +12,9 @@
 # This test checks whether the kludge to interwork with 5.6 Storables compiled
 # on Unix systems with IV as long long works.
 
+use Config;
 sub BEGIN {
     unshift @INC, 't';
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
     unless ($Config{ivsize} and $Config{ivsize} > $Config{longsize}) {
         print "1..0 # Skip: Your IVs are no larger than your longs\n";
         exit 0;

@@ -6,13 +6,8 @@
 #  in the README file that comes with the distribution.
 #
 
-sub BEGIN {
+BEGIN {
     unshift @INC, 't';
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
 }
 
 use Storable qw(freeze thaw);

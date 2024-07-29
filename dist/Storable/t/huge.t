@@ -8,8 +8,6 @@ use Storable qw(dclone);
 use Test::More;
 
 BEGIN {
-    plan skip_all => 'Storable was not built'
-        if $ENV{PERL_CORE} && $Config{'extensions'} !~ /\b Storable \b/x;
     plan skip_all => 'Need 64-bit pointers for this test'
         if $Config{ptrsize} < 8 and $] > 5.013;
     plan skip_all => 'Need 64-bit int for this test on older versions'

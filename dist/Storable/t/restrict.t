@@ -7,21 +7,12 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    if ($ENV{PERL_CORE}){
-        require Config;
-        if ($Config::Config{'extensions'} !~ /\bStorable\b/) {
-            print "1..0 # Skip: Storable was not built\n";
+    if (!eval "require Hash::Util") {
+        if ($@ =~ /Can\'t locate Hash\/Util\.pm in \@INC/s) {
+            print "1..0 # Skip: No Hash::Util:\n";
             exit 0;
-        }
-    } else {
-        if (!eval "require Hash::Util") {
-            if ($@ =~ /Can\'t locate Hash\/Util\.pm in \@INC/s) {
-                print "1..0 # Skip: No Hash::Util:\n";
-                exit 0;
-            } else {
-                die;
-            }
+        } else {
+            die;
         }
     }
 }

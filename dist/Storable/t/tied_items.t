@@ -10,15 +10,6 @@
 # Tests ref to items in tied hash/array structures.
 #
 
-sub BEGIN {
-    unshift @INC, 't';
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-}
-
 $^W = 0;
 
 use Storable qw(dclone);

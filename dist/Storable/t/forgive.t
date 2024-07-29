@@ -9,25 +9,10 @@
 # (C) Copyright 1997, Universitat Dortmund, all rights reserved.
 #
 
-sub BEGIN {
-    unshift @INC, 't';
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-}
-
 use Storable qw(store retrieve);
 use Test::More;
 
-# problems with 5.00404 when in an BEGIN block, so this is defined here
-if (!eval { require File::Spec; 1 } || $File::Spec::VERSION < 0.8) {
-    plan(skip_all => "File::Spec 0.8 needed");
-    # Mention $File::Spec::VERSION again, as 5.00503's harness seems to have
-    # warnings on.
-    exit $File::Spec::VERSION;
-}
+use File::Spec;
 
 plan(tests => 8);
 

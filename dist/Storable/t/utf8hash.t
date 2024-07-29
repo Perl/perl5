@@ -5,14 +5,6 @@ sub BEGIN {
         print "1..0 # Skip: no utf8 hash key support\n";
         exit 0;
     }
-    unshift @INC, 't';
-    require Config; import Config;
-    if ($ENV{PERL_CORE}){
-        if($Config{'extensions'} !~ /\bStorable\b/) {
-            print "1..0 # Skip: Storable was not built\n";
-            exit 0;
-        }
-    }
 }
 
 use strict;

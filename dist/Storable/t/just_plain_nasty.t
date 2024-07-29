@@ -5,30 +5,17 @@
 
 #  Everyone's invited! :-D
 
-sub BEGIN {
-    unshift @INC, 't';
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-}
-
 use strict;
+use Test::More;
+use File::Spec;
+
 BEGIN {
     if (!eval q{
-        use Test::More;
         use B::Deparse 0.61;
-        use 5.006;
         1;
     }) {
-        print "1..0 # skip: tests only work with B::Deparse 0.61 and at least perl 5.6.0\n";
+        print "1..0 # skip: tests only work with B::Deparse 0.61\n";
         exit;
-    }
-    require File::Spec;
-    if ($File::Spec::VERSION < 0.8) {
-        print "1..0 # Skip: newer File::Spec needed\n";
-        exit 0;
     }
 }
 

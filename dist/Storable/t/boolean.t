@@ -8,15 +8,6 @@ BEGIN {
     $false_ref = \!!0;
 }
 
-BEGIN {
-    unshift @INC, 't';
-    require Config;
-    if ($ENV{PERL_CORE} and $Config::Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-}
-
 use Test::More tests => 12;
 use Storable qw(thaw freeze);
 
