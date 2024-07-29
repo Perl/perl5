@@ -1,4 +1,4 @@
-#!perl -w
+#!./perl -w
 use strict;
 use Storable "dclone";
 use Test::More;

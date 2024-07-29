@@ -1,3 +1,4 @@
+#!./perl
 use Test::More tests => 1;
 
 package dumb_thing;

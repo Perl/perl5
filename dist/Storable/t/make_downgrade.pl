@@ -1,5 +1,6 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/env perl
 use strict;
+use warnings;
 
 use 5.007003;
 use Hash::Util qw(lock_hash unlock_hash lock_keys);

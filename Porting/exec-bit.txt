@@ -21,6 +21,9 @@ dist/Devel-PPPort/devel/scanprov
 dist/Devel-PPPort/devel/update_release_date.pl
 dist/Devel-PPPort/soak
 dist/ExtUtils-ParseXS/author/mksnapshot.pl
+dist/Storable/t/make_56_interwork.pl
+dist/Storable/t/make_downgrade.pl
+dist/Storable/t/make_overload.pl
 dist/Thread-Queue/examples/callback.pl
 dist/Thread-Queue/examples/queue.pl
 installperl

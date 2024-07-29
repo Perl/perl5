@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!./perl
 
 # This is a test suite to cover all the nasty and horrible data
 # structures that cause bizarre corner cases.
