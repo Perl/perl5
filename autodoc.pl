@@ -6,6 +6,9 @@ use Text::Tabs;
 #
 #    pod/perlintern.pod
 #    pod/perlapi.pod
+
+my $api = "pod/perlapi.pod";
+my $intern = "pod/perlintern.pod";
 #
 # from information stored in
 #
@@ -805,8 +808,8 @@ sub destination_pod ($) {   # Into which pod should the element go whose flags
                             # are $1
     my $flags = shift;
     return "unknown" if $flags eq "";
-    return "api" if $flags =~ /A/;
-    return "intern";
+    return $api if $flags =~ /A/;
+    return $intern;
 }
 
 sub autodoc ($$) { # parse a file and extract documentation info
@@ -1344,20 +1347,20 @@ sub parse_config_h {
         # Check if any section already has an entry for this element.
         # If so, it better be a placeholder, in which case we replace it
         # with this entry.
-        foreach my $section (keys $docs{'api'}->%*) {
-            if (exists $docs{'api'}{$section}{$name}) {
-                my $was = $docs{'api'}{$section}{$name}->{pod};
+        foreach my $section (keys $docs{$api}->%*) {
+            if (exists $docs{$api}{$section}{$name}) {
+                my $was = $docs{$api}{$section}{$name}->{pod};
                 $was = "" unless $was;
                 chomp $was;
                 if ($was ne "" && $was !~ m/$described_in/) {
                     die "Multiple descriptions for $name\n"
                       . "The '$section' section contained\n'$was'";
                 }
-                $docs{'api'}{$section}{$name}->{pod} = $configs{$name}{pod};
+                $docs{$api}{$section}{$name}->{pod} = $configs{$name}{pod};
                 $configs{$name}{section} = $section;
                 last;
             }
-            elsif (exists $docs{'intern'}{$section}{$name}) {
+            elsif (exists $docs{$intern}{$section}{$name}) {
                 die "'$name' is in '$config_h' meaning it is part of the API,\n"
                   . " but it is also in 'perlintern', meaning it isn't API\n";
             }
@@ -1571,9 +1574,9 @@ sub parse_config_h {
                                     );
 
             # All the information has been gathered; save it
-            push $docs{'api'}{$section}{$name}{items}->@*, $data;
-            $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
-            $docs{'api'}{$section}{$name}{usage}
+            push $docs{$api}{$section}{$name}{items}->@*, $data;
+            $docs{$api}{$section}{$name}{pod} = $configs{$name}{pod};
+            $docs{$api}{$section}{$name}{usage}
                 = $configs{$name}{usage} if defined $configs{$name}{usage};
         }
     }
@@ -2249,7 +2252,7 @@ sub output($) {     # Output a complete pod file
     # pod checkers.
     s/^\|//gm for $destpod->{hdr}, $destpod->{footer};
 
-    my $fh = open_new("pod/$podname.pod", undef,
+    my $fh = open_new($podname, undef,
                       {by => "$0 extracting documentation",
                        from => 'the C source files'}, 1);
 
@@ -2259,7 +2262,7 @@ sub output($) {     # Output a complete pod file
         my $section_info = $dochash->{$section_name};
 
         # We allow empty sections in perlintern.
-        if (! $section_info && $podname eq 'perlapi') {
+        if (! $section_info && $podname eq $api) {
             warn "Empty section '$section_name' for $podname; skipped";
             next;
         }
@@ -2272,7 +2275,7 @@ sub output($) {     # Output a complete pod file
             delete $section_info->{X_tags};
         }
 
-        if ($podname eq 'perlapi') {
+        if ($podname eq $api) {
             print $fh "\n", $valid_sections{$section_name}{header}, "\n"
                  if defined $valid_sections{$section_name}{header};
 
@@ -2311,13 +2314,13 @@ sub output($) {     # Output a complete pod file
             }
         }
         else {
-            my $pod_type = ($podname eq 'api') ? "public" : "internal";
+            my $pod_type = ($podname eq $api) ? "public" : "internal";
             print $fh "\nThere are currently no $pod_type API items in ",
                       $section_name, "\n";
         }
 
         print $fh "\n", $valid_sections{$section_name}{footer}, "\n"
-                            if $podname eq 'perlapi'
+                            if $podname eq $api
                             && defined $valid_sections{$section_name}{footer};
     }
 
@@ -2534,8 +2537,8 @@ for my $which_pod (keys %docs) {
 
 # Here %docs is populated; and we're ready to output
 
-my %api    = ( podname => 'perlapi', docs => $docs{'api'} );
-my %intern = ( podname => 'perlintern', docs => $docs{'intern'} );
+my %api    = ( podname => $api, docs => $docs{$api} );
+my %intern = ( podname => $intern, docs => $docs{$intern} );
 
 # But first, look for inconsistencies and populate the lists of elements whose
 # documentation is missing
