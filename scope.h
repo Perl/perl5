@@ -253,6 +253,13 @@ scope has the given name. C<name> must be a literal string.
 
 #define SAVECOPLINE(c)		SAVEI32(CopLINE(c))
 
+#ifdef PERL_CORE
+
+#define SAVE_LAST_IN() \
+    save_pushptr(SvREFCNT_inc(PL_last_in_gv), SAVEt_LAST_IN)
+
+#endif
+
 /*
 =for apidoc_section $stack
 =for apidoc    Am|SSize_t|SSNEW  |Size_t size

@@ -1391,6 +1391,19 @@ Perl_leave_scope(pTHX_ I32 base)
             Safefree(a0.any_ptr);
             break;
 
+        case SAVEt_LAST_IN:
+            a0 = ap[0];
+            PL_last_in_gv = (GV*)a0.any_gv;
+            /* the various functions that set PL_last_in_gv are
+             * incautious, so don't check PL_last_in_gv is a GV with GP.
+             */
+            PL_last_in_io = GvIO(PL_last_in_gv);
+            /* this will set PL_last_in_gv to NULL if it is freed,
+             * similarly for PL_last_in_io
+             */
+            SvREFCNT_dec(PL_last_in_gv);
+            break;
+
         case SAVEt_CLEARPADRANGE:
         {
             I32 i;

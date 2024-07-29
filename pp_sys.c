@@ -506,8 +506,7 @@ PP(pp_glob)
     }
 #endif /* !VMS */
 
-    SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
-    SAVESPTR(PL_last_in_io);
+    SAVE_LAST_IN();
     PL_last_in_gv = gv;
     PL_last_in_io = NULL;
 

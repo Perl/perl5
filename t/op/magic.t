@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 212); # some tests are run in BEGIN block
+    plan (tests => 213); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -775,6 +775,17 @@ my \$fh;
 print \$. == 42 ? "ok\n" : "not ok \$.\n";
 EOS
 }
+
+# check a saved (localized) ${^LAST_FH} isn't freed out from
+# under us, this code would assert
+# [github #19124]
+fresh_perl_is(<<'EOS', "ok\n", undef, "last_fh on save stack not orphaned");
+open my $x, "<", "op/magic.t" or die;
+<$x>;
+{ local $.; undef $x; }
+seek ${^LAST_FH}, 0, 0;
+print "ok\n";
+EOS
 
 # $|
 fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']},

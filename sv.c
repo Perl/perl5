@@ -15331,6 +15331,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
         case SAVEt_FREESV:
         case SAVEt_MORTALIZESV:
         case SAVEt_READONLY_OFF:
+        case SAVEt_LAST_IN:
             sv = (const SV *)POPPTR(ss,ix);
             TOPPTR(nss,ix) = sv_dup_inc(sv, param);
             break;

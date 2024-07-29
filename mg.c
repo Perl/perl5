@@ -3208,8 +3208,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '.':
         if (PL_localizing) {
             if (PL_localizing == 1) {
-                SAVESPTR(PL_last_in_gv);
-                SAVESPTR(PL_last_in_io);
+                SAVE_LAST_IN();
             }
         }
         else if (SvOK(sv) && (gv = last_in_gv()) && GvIO(gv))
