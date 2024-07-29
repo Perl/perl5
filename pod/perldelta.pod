@@ -207,7 +207,14 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<%s() attempted on handle %s opened with open()|perldiag/"%s() attempted on handle %s opened with open()">
+
+(W io) You called readdir(), telldir(), seekdir(), rewinddir() or
+closedir() on a handle that was opened with open().  If you want to
+use these functions to traverse the contents of a directory, you need
+to open the handle with opendir().
+
+[github #22394]
 
 =back
 
@@ -219,7 +226,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<%s() attempted on invalid dirhandle %s|perldiag/"%s() attempted on invalid dirhandle %s">
+
+This was consolidated from separate messages for readdir(), telldir(),
+seekdir(), rewinddir() and closedir() as part of refactoring for
+[github #22394].
 
 =back
 
