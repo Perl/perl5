@@ -4261,80 +4261,12 @@ PP_wrapped(pp_rmdir, 1, 0)
 
 PP_wrapped(pp_open_dir, 2, 0)
 {
-#if defined(Direntry_t) && defined(HAS_READDIR)
-    dSP;
-    const char * const dirname = POPpconstx;
-    GV * const gv = MUTABLE_GV(POPs);
-    IO * const io = GvIOn(gv);
-
-    if ((IoIFP(io) || IoOFP(io)))
-        Perl_croak(aTHX_ "Cannot open %" HEKf " as a dirhandle: it is already open as a filehandle",
-                         HEKfARG(GvENAME_HEK(gv)));
-    if (IoDIRP(io))
-        PerlDir_close(IoDIRP(io));
-    if (!(IoDIRP(io) = PerlDir_open(dirname)))
-        goto nope;
-
-    RETPUSHYES;
-  nope:
-    if (!errno)
-        SETERRNO(EBADF,RMS_DIR);
-    RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_dir_func, "opendir");
-#endif
+#	include PERL_PLATFORM_open_dir
 }
 
 PP_wrapped(pp_readdir, 1, 0)
 {
-#if !defined(Direntry_t) || !defined(HAS_READDIR)
-    DIE(aTHX_ PL_no_dir_func, "readdir");
-#else
-#if !defined(I_DIRENT) && !defined(VMS)
-    Direntry_t *readdir (DIR *);
-#endif
-    dSP;
-
-    SV *sv;
-    const U8 gimme = GIMME_V;
-    GV * const gv = MUTABLE_GV(POPs);
-    const Direntry_t *dp;
-    IO * const io = GvIOn(gv);
-
-    if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "readdir() attempted on invalid dirhandle %" HEKf,
-                            HEKfARG(GvENAME_HEK(gv)));
-        goto nope;
-    }
-
-    do {
-        dp = (Direntry_t *)PerlDir_read(IoDIRP(io));
-        if (!dp)
-            break;
-#ifdef DIRNAMLEN
-        sv = newSVpvn(dp->d_name, dp->d_namlen);
-#else
-        sv = newSVpv(dp->d_name, 0);
-#endif
-        if (!(IoFLAGS(io) & IOf_UNTAINT))
-            SvTAINTED_on(sv);
-        mXPUSHs(sv);
-    } while (gimme == G_LIST);
-
-    if (!dp && gimme != G_LIST)
-        RETPUSHUNDEF;
-
-    RETURN;
-
-  nope:
-    if (!errno)
-        SETERRNO(EBADF,RMS_ISI);
-    if (gimme == G_LIST)
-        RETURN;
-    else
-        RETPUSHUNDEF;
-#endif
+#	include PERL_PLATFORM_readdir
 }
 
 PP_wrapped(pp_telldir, 1, 0)
@@ -4421,35 +4353,7 @@ PP_wrapped(pp_rewinddir, 1, 0)
 
 PP_wrapped(pp_closedir, 1, 0)
 {
-#if defined(Direntry_t) && defined(HAS_READDIR)
-    dSP;
-    GV * const gv = MUTABLE_GV(POPs);
-    IO * const io = GvIOn(gv);
-
-    if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "closedir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
-        goto nope;
-    }
-#ifdef VOID_CLOSEDIR
-    PerlDir_close(IoDIRP(io));
-#else
-    if (PerlDir_close(IoDIRP(io)) < 0) {
-        IoDIRP(io) = 0; /* Don't try to close again--coredumps on SysV */
-        goto nope;
-    }
-#endif
-    IoDIRP(io) = 0;
-
-    RETPUSHYES;
-  nope:
-    if (!errno)
-        SETERRNO(EBADF,RMS_IFI);
-    RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_dir_func, "closedir");
-#endif
+#	include PERL_PLATFORM_closedir
 }
 
 /* Process control. */
