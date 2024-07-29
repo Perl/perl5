@@ -194,9 +194,10 @@ if ($] > 5.007002) {
         cmp_ok ($l, '==', $r, sprintf "key length %d", length $_);
         cmp_ok ($l, '==', $_ eq "ch${a_circumflex}teau" ? 0 : 1);
     }
-    if (eval "use Hash::Util; 1") {
+    {
+        require Hash::Util;
         print "# We have Hash::Util, so test that the restricted utf8 hash is valid\n";
-    my $hash = thaw_hash ('Locked hash with utf8 keys', \%U_HASH);
+        my $hash = thaw_hash ('Locked hash with utf8 keys', \%U_HASH);
         for (keys %$hash) {
             my $l = 0 + /^\w+$/;
             my $r = 0 + $hash->{$_} =~ /^\w+$/;
@@ -204,10 +205,6 @@ if ($] > 5.007002) {
             cmp_ok ($l, '==', $_ eq "ch${a_circumflex}teau" ? 0 : 1);
         }
         test_locked_hash ($hash);
-    } else {
-        print "# We don't have Hash::Util, so test that the utf8 hash downgrades\n";
-        fail ("You can't get here [perl version $]]. This is a bug in the test.
-# Please send the output of perl -V to perlbug\@perl.org");
     }
 } else {
     print "# We don't have utf8 hashes, so test that the utf8 hashes downgrade\n";
@@ -218,20 +215,14 @@ if ($] > 5.007002) {
     thaw_hash ('Hash with utf8 keys', $expect);
     #foreach (keys %$expect) { print "'$_':\t'$expect->{$_}'\n"; }
     #foreach (keys %$got) { print "'$_':\t'$got->{$_}'\n"; }
-    if (eval "use Hash::Util; 1") {
-        print "# We have Hash::Util, so test that the restricted hashes in <DATA> are valid\n";
-        fail ("You can't get here [perl version $]]. This is a bug in the test.
-# Please send the output of perl -V to perlbug\@perl.org");
-    } else {
-        print "# We don't have Hash::Util, so test that the restricted hashes downgrade\n";
-        my $hash = thaw_hash ('Locked hash with utf8 keys', $expect);
-        test_newkey ($hash);
-        local $Storable::downgrade_restricted = 0;
-        thaw_fail ('Locked hash with utf8 keys', $RESTRICTED_CROAK);
-        # Which croak comes first is a bit of an implementation issue :-)
-        local $Storable::drop_utf8 = 0;
-        thaw_fail ('Locked hash with utf8 keys', $RESTRICTED_CROAK);
-    }
+    print "# We don't have Hash::Util, so test that the restricted hashes downgrade\n";
+    my $hash = thaw_hash ('Locked hash with utf8 keys', $expect);
+    test_newkey ($hash);
+    local $Storable::downgrade_restricted = 0;
+    thaw_fail ('Locked hash with utf8 keys', $RESTRICTED_CROAK);
+    # Which croak comes first is a bit of an implementation issue :-)
+    local $Storable::drop_utf8 = 0;
+    thaw_fail ('Locked hash with utf8 keys', $RESTRICTED_CROAK);
 }
 __END__
 # A whole run of 2.x nfreeze data, uuencoded. The "mode bits" are the octal
