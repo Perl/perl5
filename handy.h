@@ -32,24 +32,20 @@ Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 Below are signatures of functions from config.h which can't easily be gleaned
 from it, and are very unlikely to change
 
-=for apidoc_section $signals
-=for apidoc Am|int|Sigsetjmp|jmp_buf env|int savesigs
-=for apidoc Am|void|Siglongjmp|jmp_buf env|int val
+=for apidoc_defn Am|int|Sigsetjmp|jmp_buf env|int savesigs
+=for apidoc_defn Am|void|Siglongjmp|jmp_buf env|int val
 
-=for apidoc_section $filesystem
-=for apidoc Am|void *|FILE_ptr|FILE * f
-=for apidoc Am|Size_t|FILE_cnt|FILE * f
-=for apidoc Am|void *|FILE_base|FILE * f
-=for apidoc Am|Size_t|FILE_bufsiz|FILE *f
+=for apidoc_defn Am|void *|FILE_ptr|FILE * f
+=for apidoc_defn Am|Size_t|FILE_cnt|FILE * f
+=for apidoc_defn Am|void *|FILE_base|FILE * f
+=for apidoc_defn Am|Size_t|FILE_bufsiz|FILE *f
 
-=for apidoc_section $string
-=for apidoc Amu|token|CAT2|token x|token y
-=for apidoc Amu|string|STRINGIFY|token x
+=for apidoc_defn Amu|token|CAT2|token x|token y
+=for apidoc_defn Amu|string|STRINGIFY|token x
 
-=for apidoc_section $numeric
-=for apidoc Am|double|Drand01
-=for apidoc Am|void|seedDrand01|Rand_seed_t x
-=for apidoc Am|char *|Gconvert|double x|Size_t n|bool t|char * b
+=for apidoc_defn Am|double|Drand01
+=for apidoc_defn Am|void|seedDrand01|Rand_seed_t x
+=for apidoc_defn Am|char *|Gconvert|double x|Size_t n|bool t|char * b
 
 =cut
 */
