@@ -5210,12 +5210,12 @@ ext/XS-APItest/t/xsub_h.t			Tests for XSUB.h
 ext/XS-APItest/typemap
 ext/XS-APItest/XSUB-redefined-macros.xs		XS code needing redefined macros.
 ext/XS-APItest/XSUB-undef-XS_VERSION.xs		XS code needing #undef XS_VERSION
-ext/XS-Typemap/Makefile.PL		XS::Typemap extension
-ext/XS-Typemap/README			XS::Typemap extension
-ext/XS-Typemap/stdio.c			XS::Typemap extension
+ext/XS-Typemap/Makefile.PL		non-installed XS::Typemap extension
+ext/XS-Typemap/README			non-installed XS::Typemap extension
+ext/XS-Typemap/stdio.c			non-installed XS::Typemap extension
 ext/XS-Typemap/t/Typemap.t		test that typemaps work
-ext/XS-Typemap/Typemap.pm		XS::Typemap extension
-ext/XS-Typemap/Typemap.xs		XS::Typemap extension
+ext/XS-Typemap/Typemap.pm		non-installed XS::Typemap extension
+ext/XS-Typemap/Typemap.xs		non-installed XS::Typemap extension
 h2pl/cbreak.pl				cbreak routines using .ph
 h2pl/cbreak2.pl				cbreak routines using .pl
 h2pl/eg/sizeof.ph			Sample sizeof array initialization
