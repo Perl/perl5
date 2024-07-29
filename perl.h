@@ -8010,22 +8010,7 @@ END_EXTERN_C
 
 =for apidoc_defn AmTR|NV|Strtod|NN const char * const s|NULLOK char **e
 
-=for apidoc AmTR|NV|Strtol|NN const char * const s|NULLOK char ** e|int base
-
-Platform and configuration independent C<strtol>.  This expands to the
-appropriate C<strotol>-like function based on the platform and F<Configure>
-options>.  For example it could expand to C<strtoll> or C<strtoq> instead of
-C<strtol>.
-
-=for apidoc AmTR|NV|Strtoul|NN const char * const s|NULLOK char ** e|int base
-
-Platform and configuration independent C<strtoul>.  This expands to the
-appropriate C<strotoul>-like function based on the platform and F<Configure>
-options>.  For example it could expand to C<strtoull> or C<strtouq> instead of
-C<strtoul>.
-
 =cut
-
 */
 
 #define Strtod                          my_strtod
@@ -8037,6 +8022,17 @@ C<strtoul>.
 #  define Perl_strtod   Strtod
 #endif
 
+
+/*
+=for apidoc AmTR|NV|Strtol|NN const char * const s|NULLOK char ** e|int base
+
+Platform and configuration independent C<strtol>.  This expands to the
+appropriate C<strotol>-like function based on the platform and F<Configure>
+options>.  For example it could expand to C<strtoll> or C<strtoq> instead of
+C<strtol>.
+
+=cut
+*/
 #if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && \
         (QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
 #    ifdef __hpux
@@ -8071,6 +8067,18 @@ C<strtoul>.
 #   endif
 #endif
 
+
+/*
+=for apidoc AmTR|NV|Strtoul|NN const char * const s|NULLOK char ** e|int base
+
+Platform and configuration independent C<strtoul>.  This expands to the
+appropriate C<strotoul>-like function based on the platform and F<Configure>
+options>.  For example it could expand to C<strtoull> or C<strtouq> instead of
+C<strtoul>.
+
+=cut
+
+*/
 #if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && \
         (QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
 #    ifdef __hpux
