@@ -1,5 +1,5 @@
 use Test::More tests => 1;
- 
+
 package dumb_thing;
 
 use strict; use warnings;

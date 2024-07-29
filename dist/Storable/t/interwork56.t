@@ -70,15 +70,15 @@ SKIP: {
         print << "EOM";
 # No test data for Storable 1.x for:
 #
-# byteorder	 '$Config{byteorder}'
-# sizeof(int)	 $$header{intsize}
-# sizeof(long)	 $$header{longsize}
-# sizeof(char *) $$header{ptrsize}
-# sizeof(NV)	 $$header{nvsize}
+# byteorder         '$Config{byteorder}'
+# sizeof(int)       $$header{intsize}
+# sizeof(long)      $$header{longsize}
+# sizeof(char *)    $$header{ptrsize}
+# sizeof(NV)        $$header{nvsize}
 
 # If you have Storable 1.x built with perl 5.6.x on this platform, please
 # make_56_interwork.pl to generate test data, and append the test data to
-# this test. 
+# this test.
 # You may find that make_56_interwork.pl reports that your platform has no
 # interworking problems, in which case you need do nothing.
 EOM
@@ -87,7 +87,7 @@ EOM
     my $result = eval {thaw $real_thing};
     is ($result, undef, "By default should not be able to thaw");
     like ($@, qr/Byte order is not compatible/,
-          "because the header byte order strings differ");
+        "because the header byte order strings differ");
     local $Storable::interwork_56_64bit = 1;
     $result = eval {thaw $real_thing};
     isa_ok ($result, 'ARRAY', "With flag should now thaw");
@@ -99,8 +99,8 @@ EOM
 
     is (@$result, 4, "4 elements in array");
     like ($$result[0],
-          qr/^This file was written with [0-9.]+ on perl [0-9.]+\z/,
-         "1st element");
+        qr/^This file was written with [0-9.]+ on perl [0-9.]+\z/,
+        "1st element");
     is ($$result[1], "$kingdom was correct", "2nd element");
     cmp_ok ($$result[2] ^ $value, '==', 0, "3rd element") or
         printf "# expected %#X, got %#X\n", $value, $$result[2];
@@ -121,12 +121,12 @@ my $test_kludge;
 my $header_kludge = Storable::read_magic ($test_kludge);
 
 cmp_ok (length ($header_kludge->{byteorder}), '==', $Config{longsize},
-        "With 5.6 interwork kludge byteorder string should be same size as long"
-       );
+    "With 5.6 interwork kludge byteorder string should be same size as long"
+);
 $result = eval {thaw $test_kludge};
 is ($result, undef, "By default should not be able to thaw");
 like ($@, qr/Byte order is not compatible/,
-      "because the header byte order strings differ");
+    "because the header byte order strings differ");
 
 $result = eval {thaw $test};
 isa_ok ($result, 'SCALAR', "CHORUS: check thawing test data");
@@ -144,7 +144,7 @@ is ($$result, 'Hell', "        and gives the expected data");
     $result = eval {thaw $test};
     is ($result, undef, "But now can't thaw real data");
     like ($@, qr/Byte order is not compatible/,
-          "because the header byte order strings differ");
+        "because the header byte order strings differ");
 }
 
 #  All together now:

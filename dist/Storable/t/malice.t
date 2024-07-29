@@ -59,183 +59,207 @@ my %hash = (perl => 'rules', chr 256, '');
 delete $hash{chr 256};
 
 sub test_hash {
-  my $clone = shift;
-  is (ref $clone, "HASH", "Get hash back");
-  is (scalar keys %$clone, 1, "with 1 key");
-  is ((keys %$clone)[0], "perl", "which is correct");
-  is ($clone->{perl}, "rules", "Got expected value when looking up key in clone");
+    my $clone = shift;
+    is (ref $clone, "HASH", "Get hash back");
+    is (scalar keys %$clone, 1, "with 1 key");
+    is ((keys %$clone)[0], "perl", "which is correct");
+    is ($clone->{perl}, "rules", "Got expected value when looking up key in clone");
 }
 
 sub test_header {
-  my ($header, $isfile, $isnetorder) = @_;
-  is (!!$header->{file}, !!$isfile, "is file");
-  is ($header->{major}, $major, "major number");
-  is ($header->{minor}, $minor_write, "minor number");
-  is (!!$header->{netorder}, !!$isnetorder, "is network order");
-  if ($isnetorder) {
-    # Network order header has no sizes
-  } else {
-    is ($header->{byteorder}, $byteorder, "byte order");
-    is ($header->{intsize}, $Config{intsize}, "int size");
-    is ($header->{longsize}, $Config{longsize}, "long size");
- SKIP: {
-	skip ("No \$Config{prtsize} on this perl version ($])", 1)
-	    unless defined $Config{ptrsize};
-	is ($header->{ptrsize}, $Config{ptrsize}, "long size");
+    my ($header, $isfile, $isnetorder) = @_;
+    is (!!$header->{file}, !!$isfile, "is file");
+    is ($header->{major}, $major, "major number");
+    is ($header->{minor}, $minor_write, "minor number");
+    is (!!$header->{netorder}, !!$isnetorder, "is network order");
+    if ($isnetorder) {
+        # Network order header has no sizes
     }
-    is ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
-        "nv size"); # 5.00405 doesn't even have doublesize in config.
-  }
+    else {
+        is ($header->{byteorder}, $byteorder, "byte order");
+        is ($header->{intsize}, $Config{intsize}, "int size");
+        is ($header->{longsize}, $Config{longsize}, "long size");
+        SKIP: {
+            skip ("No \$Config{prtsize} on this perl version ($])", 1)
+                unless defined $Config{ptrsize};
+            is ($header->{ptrsize}, $Config{ptrsize}, "long size");
+        }
+        is ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
+            "nv size"); # 5.00405 doesn't even have doublesize in config.
+    }
 }
 
 sub test_truncated {
-  my ($data, $sub, $magic_len, $what) = @_;
-  for my $i (0 .. length ($data) - 1) {
-    my $short = substr $data, 0, $i;
+    my ($data, $sub, $magic_len, $what) = @_;
+    for my $i (0 .. length ($data) - 1) {
+        my $short = substr $data, 0, $i;
 
-    # local $Storable::DEBUGME = 1;
-    my $clone = &$sub($short);
-    is (defined ($clone), '', "truncated $what to $i should fail");
-    if ($i < $magic_len) {
-      like ($@, "/^Magic number checking on storable $what failed/",
-          "Should croak with magic number warning");
-    } else {
-      is ($@, "", "Should not set \$\@");
+        # local $Storable::DEBUGME = 1;
+        my $clone = &$sub($short);
+        is (defined ($clone), '', "truncated $what to $i should fail");
+        if ($i < $magic_len) {
+            like ($@, "/^Magic number checking on storable $what failed/",
+                "Should croak with magic number warning");
+        }
+        else {
+            is ($@, "", "Should not set \$\@");
+        }
     }
-  }
 }
 
 sub test_corrupt {
-  my ($data, $sub, $what, $name) = @_;
+    my ($data, $sub, $what, $name) = @_;
 
-  my $clone = &$sub($data);
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-  is (defined ($clone), '', "$name $what should fail");
-  like ($@, $what, $name);
+    my $clone = &$sub($data);
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    is (defined ($clone), '', "$name $what should fail");
+    like ($@, $what, $name);
 }
 
 sub test_things {
-  my ($contents, $sub, $what, $isnetwork) = @_;
-  my $isfile = $what eq 'file';
-  my $file_magic = $isfile ? length $file_magic_str : 0;
+    my ($contents, $sub, $what, $isnetwork) = @_;
+    my $isfile = $what eq 'file';
+    my $file_magic = $isfile ? length $file_magic_str : 0;
 
-  my $header = Storable::read_magic ($contents);
-  test_header ($header, $isfile, $isnetwork);
+    my $header = Storable::read_magic ($contents);
+    test_header ($header, $isfile, $isnetwork);
 
-  # Test that if we re-write it, everything still works:
-  my $clone = &$sub ($contents);
+    # Test that if we re-write it, everything still works:
+    my $clone = &$sub ($contents);
 
-  is ($@, "", "There should be no error");
+    is ($@, "", "There should be no error");
 
-  test_hash ($clone);
-
-  # Now lets check the short version:
-  test_truncated ($contents, $sub, $file_magic
-                  + ($isnetwork ? $network_magic : $other_magic), $what);
-
-  my $copy;
-  if ($isfile) {
-    $copy = $contents;
-    substr ($copy, 0, 4) = 'iron';
-    test_corrupt ($copy, $sub, "/^File is not a perl storable/",
-                  "magic number");
-  }
-
-  $copy = $contents;
-  # Needs to be more than 1, as we're already coding a spread of 1 minor version
-  # number on writes (2.5, 2.4). May increase to 2 if we figure we can do 2.3
-  # on 5.005_03 (No utf8).
-  # 4 allows for a small safety margin
-  # Which we've now exhausted given that Storable 2.25 is writing 2.8
-  # (Joke:
-  # Question: What is the value of pi?
-  # Mathematician answers "It's pi, isn't it"
-  # Physicist answers "3.1, within experimental error"
-  # Engineer answers "Well, allowing for a small safety margin,   18"
-  # )
-  my $minor6 = $header->{minor} + 6;
-  substr ($copy, $file_magic + 1, 1) = chr $minor6;
-  {
-    # Now by default newer minor version numbers are not a pain.
-    $clone = &$sub($copy);
-    is ($@, "", "by default no error on higher minor");
     test_hash ($clone);
 
-    local $Storable::accept_future_minor = 0;
-    test_corrupt ($copy, $sub,
-                  "/^Storable binary image v$header->{major}\.$minor6 more recent than I am \\(v$header->{major}\.$minor\\)/",
-                  "higher minor");
-  }
+    # Now lets check the short version:
+    test_truncated ($contents, $sub, $file_magic
+                    + ($isnetwork ? $network_magic : $other_magic), $what);
 
-  $copy = $contents;
-  my $major1 = $header->{major} + 1;
-  substr ($copy, $file_magic, 1) = chr 2*$major1;
-  test_corrupt ($copy, $sub,
-                "/^Storable binary image v$major1\.$header->{minor} more recent than I am \\(v$header->{major}\.$minor\\)/",
-                "higher major");
-
-  # Continue messing with the previous copy
-  my $minor1 = $header->{minor} - 1;
-  substr ($copy, $file_magic + 1, 1) = chr $minor1;
-  test_corrupt ($copy, $sub,
-                "/^Storable binary image v$major1\.$minor1 more recent than I am \\(v$header->{major}\.$minor\\)/",
-              "higher major, lower minor");
-
-  my $where;
-  if (!$isnetwork) {
-    # All these are omitted from the network order header.
-    # I'm not sure if it's correct to omit the byte size stuff.
-    $copy = $contents;
-    substr ($copy, $file_magic + 3, length $header->{byteorder})
-      = reverse $header->{byteorder};
-
-    test_corrupt ($copy, $sub, "/^Byte order is not compatible/",
-                  "byte order");
-    $where = $file_magic + 3 + length $header->{byteorder};
-    foreach (['intsize', "Integer"],
-             ['longsize', "Long integer"],
-             ['ptrsize', "Pointer"],
-             ['nvsize', "Double"]) {
-      my ($key, $name) = @$_;
-      $copy = $contents;
-      substr ($copy, $where++, 1) = chr 0;
-      test_corrupt ($copy, $sub, "/^$name size is not compatible/",
-                    "$name size");
+    my $copy;
+    if ($isfile) {
+        $copy = $contents;
+        substr ($copy, 0, 4) = 'iron';
+        test_corrupt(
+            $copy, $sub, "/^File is not a perl storable/",
+            "magic number"
+        );
     }
-  } else {
-    $where = $file_magic + $network_magic;
-  }
 
-  # Just the header and a tag 255. As 34 is currently the highest tag, this
-  # is "unexpected"
-  $copy = substr ($contents, 0, $where) . chr 255;
+    $copy = $contents;
+    # Needs to be more than 1, as we're already coding a spread of 1 minor version
+    # number on writes (2.5, 2.4). May increase to 2 if we figure we can do 2.3
+    # on 5.005_03 (No utf8).
+    # 4 allows for a small safety margin
+    # Which we've now exhausted given that Storable 2.25 is writing 2.8
+    # (Joke:
+    # Question: What is the value of pi?
+    # Mathematician answers "It's pi, isn't it"
+    # Physicist answers "3.1, within experimental error"
+    # Engineer answers "Well, allowing for a small safety margin,   18"
+    # )
+    my $minor6 = $header->{minor} + 6;
+    substr ($copy, $file_magic + 1, 1) = chr $minor6;
+    {
+        # Now by default newer minor version numbers are not a pain.
+        $clone = &$sub($copy);
+        is ($@, "", "by default no error on higher minor");
+        test_hash ($clone);
 
-  test_corrupt ($copy, $sub,
-                "/^Corrupted storable $what \\(binary v$header->{major}.$header->{minor}\\)/",
-                "bogus tag");
+        local $Storable::accept_future_minor = 0;
+        test_corrupt(
+            $copy, $sub,
+            "/^Storable binary image v$header->{major}\.$minor6 more recent than I am \\(v$header->{major}\.$minor\\)/",
+            "higher minor"
+        );
+    }
 
-  # Now drop the minor version number
-  substr ($copy, $file_magic + 1, 1) = chr $minor1;
+    $copy = $contents;
+    my $major1 = $header->{major} + 1;
+    substr ($copy, $file_magic, 1) = chr 2*$major1;
+    test_corrupt(
+        $copy, $sub,
+        "/^Storable binary image v$major1\.$header->{minor} more recent than I am \\(v$header->{major}\.$minor\\)/",
+        "higher major"
+    );
 
-  test_corrupt ($copy, $sub,
-                "/^Corrupted storable $what \\(binary v$header->{major}.$minor1\\)/",
-                "bogus tag, minor less 1");
-  # Now increase the minor version number
-  substr ($copy, $file_magic + 1, 1) = chr $minor6;
+    # Continue messing with the previous copy
+    my $minor1 = $header->{minor} - 1;
+    substr ($copy, $file_magic + 1, 1) = chr $minor1;
+    test_corrupt(
+        $copy, $sub,
+        "/^Storable binary image v$major1\.$minor1 more recent than I am \\(v$header->{major}\.$minor\\)/",
+        "higher major, lower minor"
+    );
 
-  # local $Storable::DEBUGME = 1;
-  # This is the delayed croak
-  test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}.$minor6 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 35/",
-                "bogus tag, minor plus 4");
-  # And check again that this croak is not delayed:
-  {
+    my $where;
+    if (!$isnetwork) {
+        # All these are omitted from the network order header.
+        # I'm not sure if it's correct to omit the byte size stuff.
+        $copy = $contents;
+        substr ($copy, $file_magic + 3, length $header->{byteorder})
+            = reverse $header->{byteorder};
+
+        test_corrupt(
+            $copy, $sub, "/^Byte order is not compatible/",
+            "byte order"
+        );
+        $where = $file_magic + 3 + length $header->{byteorder};
+        foreach (
+            ['intsize', "Integer"],
+            ['longsize', "Long integer"],
+            ['ptrsize', "Pointer"],
+            ['nvsize', "Double"]
+        ) {
+            my ($key, $name) = @$_;
+            $copy = $contents;
+            substr ($copy, $where++, 1) = chr 0;
+            test_corrupt(
+                $copy, $sub, "/^$name size is not compatible/",
+                "$name size"
+            );
+        }
+    } else {
+        $where = $file_magic + $network_magic;
+    }
+
+    # Just the header and a tag 255. As 34 is currently the highest tag, this
+    # is "unexpected"
+    $copy = substr ($contents, 0, $where) . chr 255;
+
+    test_corrupt(
+        $copy, $sub,
+        "/^Corrupted storable $what \\(binary v$header->{major}.$header->{minor}\\)/",
+        "bogus tag"
+    );
+
+    # Now drop the minor version number
+    substr ($copy, $file_magic + 1, 1) = chr $minor1;
+
+    test_corrupt(
+        $copy, $sub,
+        "/^Corrupted storable $what \\(binary v$header->{major}.$minor1\\)/",
+        "bogus tag, minor less 1"
+    );
+    # Now increase the minor version number
+    substr ($copy, $file_magic + 1, 1) = chr $minor6;
+
     # local $Storable::DEBUGME = 1;
-    local $Storable::accept_future_minor = 0;
-    test_corrupt ($copy, $sub,
-                  "/^Storable binary image v$header->{major}\.$minor6 more recent than I am \\(v$header->{major}\.$minor\\)/",
-                  "higher minor");
-  }
+    # This is the delayed croak
+    test_corrupt(
+        $copy, $sub,
+        "/^Storable binary image v$header->{major}.$minor6 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 35/",
+        "bogus tag, minor plus 4"
+    );
+    # And check again that this croak is not delayed:
+    {
+        # local $Storable::DEBUGME = 1;
+        local $Storable::accept_future_minor = 0;
+        test_corrupt(
+            $copy, $sub,
+            "/^Storable binary image v$header->{major}\.$minor6 more recent than I am \\(v$header->{major}\.$minor\\)/",
+            "higher minor"
+        );
+    }
 }
 
 ok (defined store(\%hash, $file), "store() returned defined value");
@@ -244,10 +268,10 @@ my $expected = 20 + length ($file_magic_str) + $other_magic + $fancy;
 my $length = -s $file;
 
 die "Don't seem to have written file '$file' as I can't get its length: $!"
-  unless defined $file;
+    unless defined $file;
 
 die "Expected file to be $expected bytes (sizeof long is $Config{longsize}) but it is $length"
-  unless $length == $expected;
+    unless $length == $expected;
 
 # Read the contents into memory:
 my $contents = slurp ($file);
@@ -272,10 +296,10 @@ $expected = 20 + length ($file_magic_str) + $network_magic + $fancy;
 $length = -s $file;
 
 die "Don't seem to have written file '$file' as I can't get its length: $!"
-  unless defined $file;
+    unless defined $file;
 
 die "Expected file to be $expected bytes (sizeof long is $Config{longsize}) but it is $length"
-  unless $length == $expected;
+    unless $length == $expected;
 
 # Read the contents into memory:
 $contents = slurp ($file);

@@ -1,7 +1,7 @@
 #!./perl -w
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -31,7 +31,7 @@ is($x, ${thaw freeze \$x}, "round trip Unicode string");
 # Char in the range 127-255 (probably) in utf8.  This just won't work for
 # EBCDIC for early Perls.
 $x = ($] lt 5.007_003) ? chr(175) : chr(utf8::unicode_to_native(175))
-   . chr (256);
+    . chr (256);
 chop $x;
 is($x, ${thaw freeze \$x}, "round strip a 128-255 character");
 

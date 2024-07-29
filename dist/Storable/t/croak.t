@@ -7,32 +7,32 @@
 
 sub BEGIN {
     if ($ENV{PERL_CORE}) {
-	require Config; import Config;
-	%Config=%Config if 0; # cease -w
-	if ($Config{'extensions'} !~ /\bStorable\b/) {
-	    print "1..0 # Skip: Storable was not built\n";
-	    exit 0;
-	}
+        require Config; import Config;
+        %Config=%Config if 0; # cease -w
+        if ($Config{'extensions'} !~ /\bStorable\b/) {
+            print "1..0 # Skip: Storable was not built\n";
+            exit 0;
+        }
     }
 }
 
 use strict;
 
 BEGIN {
-  die "Oi! No! Don't change this test so that Carp is used before Storable"
-    if defined &Carp::carp;
+    die "Oi! No! Don't change this test so that Carp is used before Storable"
+        if defined &Carp::carp;
 }
 use Storable qw(freeze thaw);
 
 print "1..2\n";
 
 for my $test (1,2) {
-  eval {thaw "\xFF\xFF"};
-  if ($@ =~ /Storable binary image v127.255 more recent than I am \(v2\.\d+\)/)
-    {
-      print "ok $test\n";
-    } else {
-      chomp $@;
-      print "not ok $test # Expected a meaningful croak. Got '$@'\n";
+    eval {thaw "\xFF\xFF"};
+    if ($@ =~ /Storable binary image v127.255 more recent than I am \(v2\.\d+\)/) {
+        print "ok $test\n";
+    }
+    else {
+        chomp $@;
+        print "not ok $test # Expected a meaningful croak. Got '$@'\n";
     }
 }

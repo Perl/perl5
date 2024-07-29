@@ -1,7 +1,7 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -28,7 +28,7 @@ $c = bless {}, CLASS;
 $c->{attribute} = 'attrval';
 %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
 @a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
-	$b, \$a, $a, $c, \$c, \%a);
+    $b, \$a, $a, $c, \$c, \%a);
 
 my $aref = dclone(\@a);
 isnt($aref, undef);
@@ -44,9 +44,9 @@ is($got, $dumped);
 package FOO; @ISA = qw(Storable);
 
 sub make {
-	my $self = bless {};
-	$self->{key} = \%main::a;
-	return $self;
+    my $self = bless {};
+    $self->{key} = \%main::a;
+    return $self;
 };
 
 package main;
@@ -86,9 +86,9 @@ is($$clone, '');
 SKIP: {
 # Do not fail if Tie::Hash and/or Tie::StdHash is not available
     skip 'No Tie::StdHash available', 2
-	unless eval { require Tie::Hash; scalar keys %Tie::StdHash:: };
+        unless eval { require Tie::Hash; scalar keys %Tie::StdHash:: };
     skip 'This version of perl has problems with Tie::StdHash', 2
-	if $] eq "5.008";
+        if $] eq "5.008";
     tie my %tie, "Tie::StdHash" or die $!;
     $tie{array} = [1,2,3,4];
     $tie{hash} = {1,2,3,4};

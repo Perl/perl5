@@ -1,7 +1,7 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -45,8 +45,8 @@ $Storable::forgive_me=1;
 my $devnull = File::Spec->devnull;
 
 open(SAVEERR, ">&STDERR");
-open(STDERR, '>', $devnull) or 
-  ( print SAVEERR "Unable to redirect STDERR: $!\n" and exit(1) );
+open(STDERR, '>', $devnull) or
+    ( print SAVEERR "Unable to redirect STDERR: $!\n" and exit(1) );
 
 eval {$result = store ($bad , "store$$")};
 

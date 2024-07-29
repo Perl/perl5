@@ -1,10 +1,10 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
-#  
+#
 
 sub BEGIN {
     unshift @INC, 't';
@@ -25,7 +25,7 @@ use Test::More tests => 19;
 package OVERLOADED;
 
 use overload
-	'""' => sub { $_[0][0] };
+    '""' => sub { $_[0][0] };
 
 package main;
 
@@ -48,27 +48,27 @@ is("$d->[1]", "78");
 package REF_TO_OVER;
 
 sub make {
-	my $self = bless {}, shift;
-	my ($over) = @_;
-	$self->{over} = $over;
-	return $self;
+    my $self = bless {}, shift;
+    my ($over) = @_;
+    $self->{over} = $over;
+    return $self;
 }
 
 package OVER;
 
 use overload
-	'+'		=> \&plus,
-	'""'	=> sub { ref $_[0] };
+    '+'     => \&plus,
+    '""'    => sub { ref $_[0] };
 
 sub plus {
-	return 314;
+    return 314;
 }
 
 sub make {
-	my $self = bless {}, shift;
-	my $ref = REF_TO_OVER->make($self);
-	$self->{ref} = $ref;
-	return $self;
+    my $self = bless {}, shift;
+    my $ref = REF_TO_OVER->make($self);
+    $self->{ref} = $ref;
+    return $self;
 }
 
 package main;
@@ -86,7 +86,8 @@ is($b + $b, 314);
 my $f = '';
 if (ord ('A') == 193) { # EBCDIC.
     $f = unpack 'u', q{7!084$0S(P>)MUN7%V=/6P<0*!**5EJ8`};
-}else {
+}
+else {
     $f = unpack 'u', q{7!084$0Q(05-?3U9%4DQ/040*!'-N;W<`};
 }
 
@@ -103,12 +104,11 @@ is($$$t, 'snow');
 #---
 # blessed reference to overloaded object.
 {
-  my $a = bless [88], 'OVERLOADED';
-  my $c = thaw freeze bless \$a, 'main';
-  is(ref $c, 'main');
-  is(ref $$c, 'OVERLOADED');
-  is("$$c", "88");
-
+    my $a = bless [88], 'OVERLOADED';
+    my $c = thaw freeze bless \$a, 'main';
+    is(ref $c, 'main');
+    is(ref $$c, 'OVERLOADED');
+    is("$$c", "88");
 }
 
 1;

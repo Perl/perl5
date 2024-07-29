@@ -1,10 +1,10 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
-#  
+#
 use Config;
 
 sub BEGIN {
@@ -196,10 +196,10 @@ sub new {
     my $class = shift;
     return bless {
         a => 'dummy',
-        b => [ 
+        b => [
             Foo->new(1),
-            Foo->new(2), # Second instance of a Foo 
-          ]
+            Foo->new(2), # Second instance of a Foo
+        ]
     }, $class;
 }
 
@@ -351,7 +351,7 @@ eval {
     dclone $t;
 };
 like $@, qr/Max\. recursion depth with nested structures exceeded/,
-      'Caught aref stack overflow '.MAX_DEPTH*2;
+    'Caught aref stack overflow '.MAX_DEPTH*2;
 
 if ($ENV{APPVEYOR} and length(pack "p", "") >= 8) {
     # TODO: need to repro this fail on a small machine.
@@ -366,7 +366,7 @@ else {
         dclone $t;
     };
     like $@, qr/Max\. recursion depth with nested structures exceeded/,
-      'Caught href stack overflow '.MAX_DEPTH_HASH*2;
+        'Caught href stack overflow '.MAX_DEPTH_HASH*2;
 }
 
 {
@@ -378,5 +378,5 @@ else {
         push @tt, $t;
     }
     ok(eval { dclone \@tt; 1 },
-       "low depth structure shouldn't be treated as nested");
+        "low depth structure shouldn't be treated as nested");
 }

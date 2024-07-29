@@ -24,61 +24,61 @@ use Storable qw(thaw freeze);
 use constant CORE_BOOLS => defined &builtin::is_bool;
 
 {
-  my $x = $true_ref;
-  my $y = ${thaw freeze \$x};
-  is($y, $x);
-  eval {
-    $$y = 2;
-  };
-  isnt $@, '',
-    'immortal true maintained as immortal';
+    my $x = $true_ref;
+    my $y = ${thaw freeze \$x};
+    is($y, $x);
+    eval {
+        $$y = 2;
+    };
+    isnt $@, '',
+        'immortal true maintained as immortal';
 }
 
 {
-  my $x = $false_ref;
-  my $y = ${thaw freeze \$x};
-  is($y, $x);
-  eval {
-    $$y = 2;
-  };
-  isnt $@, '',
-    'immortal false maintained as immortal';
+    my $x = $false_ref;
+    my $y = ${thaw freeze \$x};
+    is($y, $x);
+    eval {
+        $$y = 2;
+    };
+    isnt $@, '',
+        'immortal false maintained as immortal';
 }
 
 {
-  my $true = $$true_ref;
-  my $x = \$true;
-  my $y = ${thaw freeze \$x};
-  is($$y, $$x);
-  is($$y, '1');
-  SKIP: {
-    skip "perl $] does not support tracking boolean values", 1
-      unless CORE_BOOLS;
-    BEGIN { CORE_BOOLS and warnings->unimport('experimental::builtin') }
-    ok builtin::is_bool($$y);
-  }
-  eval {
-    $$y = 2;
-  };
-  is $@, '',
-    'mortal true maintained as mortal';
+    my $true = $$true_ref;
+    my $x = \$true;
+    my $y = ${thaw freeze \$x};
+    is($$y, $$x);
+    is($$y, '1');
+    SKIP: {
+        skip "perl $] does not support tracking boolean values", 1
+            unless CORE_BOOLS;
+        BEGIN { CORE_BOOLS and warnings->unimport('experimental::builtin') }
+        ok builtin::is_bool($$y);
+    }
+    eval {
+        $$y = 2;
+    };
+    is $@, '',
+        'mortal true maintained as mortal';
 }
 
 {
-  my $false = $$false_ref;
-  my $x = \$false;
-  my $y = ${thaw freeze \$x};
-  is($$y, $$x);
-  is($$y, '');
-  SKIP: {
-    skip "perl $] does not support tracking boolean values", 1
-      unless CORE_BOOLS;
-    BEGIN { CORE_BOOLS and warnings->unimport('experimental::builtin') }
-    ok builtin::is_bool($$y);
-  }
-  eval {
-    $$y = 2;
-  };
-  is $@, '',
-    'mortal true maintained as mortal';
+    my $false = $$false_ref;
+    my $x = \$false;
+    my $y = ${thaw freeze \$x};
+    is($$y, $$x);
+    is($$y, '');
+    SKIP: {
+        skip "perl $] does not support tracking boolean values", 1
+            unless CORE_BOOLS;
+        BEGIN { CORE_BOOLS and warnings->unimport('experimental::builtin') }
+        ok builtin::is_bool($$y);
+    }
+    eval {
+        $$y = 2;
+    };
+    is $@, '',
+        'mortal true maintained as mortal';
 }

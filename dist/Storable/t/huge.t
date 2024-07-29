@@ -23,8 +23,8 @@ my $huge = int(2 ** 31);
 # v5.24.1c/v5.25.1c switched to die earlier with "Too many elements",
 # which is much safer.
 my $has_too_many = ($Config{usecperl} and
-      (($] >= 5.024001 and $] < 5.025000)
-       or $] >= 5.025001)) ? 1 : 0;
+    (($] >= 5.024001 and $] < 5.025000)
+    or $] >= 5.025001)) ? 1 : 0;
 
 # These overlarge sizes are enabled only since Storable 3.00 and some
 # cases need cperl support. Perl5 (as of 5.24) has some internal
@@ -41,28 +41,34 @@ my $has_too_many = ($Config{usecperl} and
 # hash key: I32
 
 my @cases;
-@cases = (
-    ['huge string',
-     sub { my $s = 'x' x $huge; \$s }],
+    [
+        'huge string',
+        sub { my $s = 'x' x $huge; \$s }
+    ],
 
-    ['array with huge element',
-     sub { my $s = 'x' x $huge; [$s] }],
+    [
+        'array with huge element',
+        sub { my $s = 'x' x $huge; [$s] }
+    ],
 
-    ['hash with huge value',
-     sub { my $s = 'x' x $huge; +{ foo => $s } }],
+    [
+        'hash with huge value',
+        sub { my $s = 'x' x $huge; +{ foo => $s } }
+    ],
 
     # There's no huge key, limited to I32.
-  ) if $Config{ptrsize} > 4;
+) if $Config{ptrsize} > 4;
 
 
 # An array with a huge number of elements requires several gigabytes of
 # virtual memory. On darwin it is evtl killed.
 if ($Config{ptrsize} > 4 and !$has_too_many) {
-    # needs 20-55G virtual memory, 4.6M heap and several minutes on a fast machine 
+    # needs 20-55G virtual memory, 4.6M heap and several minutes on a fast machine
     if ($ENV{PERL_TEST_MEMORY} >= 55) {
-        push @cases,
-          [ 'huge array',
-            sub { my @x; $x[$huge] = undef; \@x } ];
+        push @cases, [
+            'huge array',
+            sub { my @x; $x[$huge] = undef; \@x }
+        ];
     } else {
         diag "skip huge array, need PERL_TEST_MEMORY >= 55";
     }
@@ -75,9 +81,10 @@ if (!$has_too_many) {
     # needs >90G virtual mem, and is evtl. killed
     if ($ENV{PERL_TEST_MEMORY} >= 96) {
         # number of keys >I32. impossible to handle with perl5, but Storable can.
-        push @cases,
-          ['huge hash',
-           sub { my %x = (0 .. $huge); \%x } ];
+        push @cases, [
+            'huge hash',
+            sub { my %x = (0 .. $huge); \%x }
+        ];
     } else {
         diag "skip huge hash, need PERL_TEST_MEMORY >= 96";
     }

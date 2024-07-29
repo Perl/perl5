@@ -44,11 +44,11 @@ BEGIN {
 
 {
     package Banana;
-    use overload   
-	'<=>' => \&compare,
-	    '==' => \&equal,
-		'""' => \&real,
-		fallback => 1;
+    use overload
+        '<=>' => \&compare,
+        '==' => \&equal,
+        '""' => \&real,
+        fallback => 1;
     sub compare { return int(rand(3))-1 };
     sub equal { return 1 if rand(1) > 0.5 }
     sub real { return "keep it so" }
@@ -56,14 +56,14 @@ BEGIN {
 
 my (@a);
 
-for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
-                       # nasty means having a reference to the object
-                       # directly within itself. otherwise it's in the
-                       # second array.
+for my $dbun (1, 0) {   # dbun - don't be utterly nasty - being utterly
+                        # nasty means having a reference to the object
+                        # directly within itself. otherwise it's in the
+                        # second array.
     my $nasty = [
-		 ($a[0] = bless [ ], "Banana"),
-		 ($a[1] = [ ]),
-		];
+        ($a[0] = bless [ ], "Banana"),
+        ($a[1] = [ ]),
+    ];
 
     $a[$dbun]->[0] = $a[0];
 
@@ -135,8 +135,8 @@ for my $dbun (1, 0) {  # dbun - don't be utterly nasty - being utterly
 
 sub headit {
 
-    return;  # comment out to get headings - useful for scanning
-             # output with $Storable::DEBUGME = 1
+    return;     # comment out to get headings - useful for scanning
+                # output with $Storable::DEBUGME = 1
 
     my $title = shift;
 
@@ -144,6 +144,6 @@ sub headit {
     my $size_right = (67 - length($title)) >> 1;
 
     print "# ".("-" x $size_left). " $title "
-	.("-" x $size_right)."\n";
+        .("-" x $size_right)."\n";
 }
 

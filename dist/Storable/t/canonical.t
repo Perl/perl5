@@ -1,10 +1,10 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
-#  
+#
 
 sub BEGIN {
     unshift @INC, 't';
@@ -43,39 +43,41 @@ if ($debugging) {
     $gotdd  = !$@;
 }
 
-@fixed_strings = ("January", "February", "March", "April", "May", "June",
-		  "July", "August", "September", "October", "November", "December" );
+@fixed_strings = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+);
 
 # Build some arbitrarily complex data structure starting with a top level hash
 # (deeper levels contain scalars, references to hashes or references to arrays);
 
 for (my $i = 0; $i < $hashsize; $i++) {
-	my($k) = int(rand(1_000_000));
-	$k = Digest::MD5::md5_hex($k) if $gotmd5 and int(rand(2));
-	$a1{$k} = { key => "$k", "value" => $i };
+    my($k) = int(rand(1_000_000));
+    $k = Digest::MD5::md5_hex($k) if $gotmd5 and int(rand(2));
+    $a1{$k} = { key => "$k", "value" => $i };
 
-	# A third of the elements are references to further hashes
+    # A third of the elements are references to further hashes
 
-	if (int(rand(1.5))) {
-		my($hash2) = {};
-		my($hash2size) = int(rand($maxhash2size));
-		while ($hash2size--) {
-			my($k2) = $k . $i . int(rand(100));
-			$hash2->{$k2} = $fixed_strings[rand(int(@fixed_strings))];
-		}
-		$a1{$k}->{value} = $hash2;
-	}
+    if (int(rand(1.5))) {
+        my($hash2) = {};
+        my($hash2size) = int(rand($maxhash2size));
+        while ($hash2size--) {
+            my($k2) = $k . $i . int(rand(100));
+            $hash2->{$k2} = $fixed_strings[rand(int(@fixed_strings))];
+        }
+        $a1{$k}->{value} = $hash2;
+    }
 
-	# A further third are references to arrays
+    # A further third are references to arrays
 
-	elsif (int(rand(2))) {
-		my($arr_ref) = [];
-		my($arraysize) = int(rand($maxarraysize));
-		while ($arraysize--) {
-			push(@$arr_ref, $fixed_strings[rand(int(@fixed_strings))]);
-		}
-		$a1{$k}->{value} = $arr_ref;
-	}	
+    elsif (int(rand(2))) {
+        my($arr_ref) = [];
+        my($arraysize) = int(rand($maxarraysize));
+        while ($arraysize--) {
+            push(@$arr_ref, $fixed_strings[rand(int(@fixed_strings))]);
+        }
+        $a1{$k}->{value} = $arr_ref;
+    }
 }
 
 
@@ -101,8 +103,8 @@ $x1 = freeze(\%a1);
 $x2 = freeze(\%a2);
 $x3 = freeze($a3);
 
-cmp_ok(length $x1, '>', $hashsize);	# sanity check
-is(length $x1, length $x2);		# idem
+cmp_ok(length $x1, '>', $hashsize);     # sanity check
+is(length $x1, length $x2);             # idem
 is($x1, $x2);
 is($x1, $x3);
 
