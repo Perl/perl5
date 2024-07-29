@@ -1,3 +1,9 @@
+# This file is the standard typemap for the perl distribution
+# and is included by XS files by default.
+#
+# It contains definitions for common C types (such as char *),
+# and for basic perl-defined C types (such as IV,  SV*).
+
 # basic C types
 int			T_IV
 unsigned		T_UV
