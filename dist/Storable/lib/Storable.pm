@@ -8,9 +8,11 @@
 #  in the README file that comes with the distribution.
 #
 
-BEGIN { require XSLoader }
-require Exporter;
 package Storable;
+use strict;
+
+use XSLoader ();
+use Exporter ();
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(store retrieve);
@@ -88,9 +90,9 @@ sub FLAGS_COMPAT () { BLESS_OK | TIE_OK }
 
 # By default restricted hashes are downgraded on earlier perls.
 
-$Storable::flags = FLAGS_COMPAT;
-$Storable::downgrade_restricted = 1;
-$Storable::accept_future_minor = 1;
+our $flags = FLAGS_COMPAT;
+our $downgrade_restricted = 1;
+our $accept_future_minor = 1;
 
 BEGIN { XSLoader::load('Storable') };
 
@@ -315,6 +317,10 @@ sub _store_fd {
     logcroak "too many arguments" unless @_ == 1;       # No @foo in arglist
     my $fd = fileno($file);
     logcroak "not a valid file descriptor" unless defined $fd;
+    $file = do {
+        no strict 'refs';
+        \*{ $file };
+    };
     my $da = $@;                # Don't mess if called from exception handler
     my $ret;
     # Call C routine nstore or pstore, depending on network order
