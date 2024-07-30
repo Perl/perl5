@@ -4455,7 +4455,7 @@ dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
 dist/Storable/hints/linux.pl		Hint for Storable for named architecture
 dist/Storable/Makefile.PL		Storable extension
-dist/Storable/MANIFEST			Storable MANIFEST file
+dist/Storable/MANIFEST.SKIP		Storable extension
 dist/Storable/README			Storable extension
 dist/Storable/stacksize			compute stack sizes
 dist/Storable/Storable.pm		Storable perl module
