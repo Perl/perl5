@@ -544,7 +544,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.90';
+our $VERSION = '1.91';
 
 FEATURES
 
@@ -870,6 +870,8 @@ previous versions, it was simply on all the time.  To disallow (or
 warn on) indirect object syntax on older Perls, see the L<indirect>
 CPAN module.
 
+This feature is disabled starting with the C<:5.36> feature bundle.
+
 =head2 The 'multidimensional' feature
 
 This feature enables multidimensional array emulation, a perl 4 (or
@@ -883,9 +885,10 @@ will report a compilation error.
 
 This feature is available under this name from Perl 5.34 onwards. In
 previous versions, it was simply on all the time.
-
 You can use the L<multidimensional> module on CPAN to disable
 multidimensional array emulation for older versions of Perl.
+
+This feature is disabled starting with the C<:5.36> feature bundle.
 
 =head2 The 'bareword_filehandles' feature
 
@@ -899,9 +902,10 @@ C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
 This feature is available under this name from Perl 5.34 onwards.  In
 previous versions it was simply on all the time.
-
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
+
+This feature is disabled starting with the C<:5.38> feature bundle.
 
 =head2 The 'try' feature
 
