@@ -6,6 +6,8 @@
 #  Everyone's invited! :-D
 
 use strict;
+use warnings;
+
 use Test::More;
 use File::Spec;
 

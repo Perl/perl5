@@ -6,11 +6,16 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 use Test::More tests => 8;
 
 use Storable qw(freeze nfreeze thaw);
 
 package TIED_HASH;
+
+our $hash_fetch;
 
 sub TIEHASH {
     my $self = bless {}, shift;
@@ -20,7 +25,7 @@ sub TIEHASH {
 sub FETCH {
     my $self = shift;
     my ($key) = @_;
-    $main::hash_fetch++;
+    $hash_fetch++;
     return $self->{$key};
 }
 
@@ -43,7 +48,7 @@ package ROOT;
 
 sub make {
     my $self = bless {}, shift;
-    my $h = tie %hash, TIED_HASH;
+    my $h = tie my %hash, 'TIED_HASH';
     $self->{h} = $h;
     $self->{ref} = \%hash;
     my @pool;
@@ -102,7 +107,7 @@ is(nfreeze($y), nfreeze($r));
 
 is($y->ref->{key1}, 'val1');
 is($y->ref->{key2}, 'val2');
-is($hash_fetch, 2);
+is($TIED_HASH::hash_fetch, 2);
 
 my $num = $r->num;
 my $ok = 1;

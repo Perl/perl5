@@ -11,6 +11,8 @@
 # It also acts as a test for read_header
 
 use strict;
+use warnings;
+
 use Config;
 
 BEGIN {

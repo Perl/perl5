@@ -1,5 +1,8 @@
 #!perl -w
 
+use strict;
+use warnings;
+
 use Config;
 BEGIN {
     if ($Config{byteorder} ne "1234") {
@@ -8,7 +11,6 @@ BEGIN {
     }
 }
 
-use strict;
 use Storable qw(retrieve);
 use Test::More;
 

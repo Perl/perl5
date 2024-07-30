@@ -9,9 +9,11 @@
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 
+use strict;
+use warnings;
+
 use Test::More;
 use Storable qw (dclone store retrieve freeze thaw nstore nfreeze);
-use strict;
 
 my $max_uv = ~0;
 my $max_uv_m1 = ~0 ^ 1;
@@ -23,6 +25,7 @@ my $lots_of_9C = do {
     my $temp = sprintf "%#x", ~0;
     $temp =~ s/ff/9c/g;
     local $^W;
+    no warnings 'portable';
     eval $temp;
 };
 

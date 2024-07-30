@@ -6,18 +6,23 @@
 #  in the README file that comes with the distribution.
 #
 
+my %immortals;
+
 BEGIN {
     # Do this as the very first thing, in order to avoid problems with the
     # PADTMP flag on pre-5.19.3 threaded Perls.  On those Perls, compiling
     # code that contains a constant-folded canonical truth value breaks
     # the ability to take a reference to that canonical truth value later.
-    $::false = 0;
-    %::immortals = (
+    my $false = 0;
+    %immortals = (
         'u' => \undef,
-        'y' => \!$::false,
-        'n' => \!!$::false,
+        'y' => \!$false,
+        'n' => \!!$false,
     );
 }
+
+use strict;
+use warnings;
 
 BEGIN {
     unshift @INC, 't/lib';
@@ -29,7 +34,7 @@ use STTestLib qw(tempfilename);
 
 use Storable qw(freeze thaw store retrieve fd_retrieve);
 
-%::weird_refs = (
+my %weird_refs = (
     REF            => \(my $aref    = []),
     VSTRING        => \(my $vstring = v1.2.3),
     'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),
@@ -37,7 +42,7 @@ use Storable qw(freeze thaw store retrieve fd_retrieve);
 );
 
 my $test = 18;
-my $tests = $test + 41 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
+my $tests = $test + 41 + (2 * 6 * keys %immortals) + (3 * keys %weird_refs);
 plan(tests => $tests);
 
 package SHORT_NAME;
@@ -71,14 +76,14 @@ my $longname = "LONG_NAME_" . ('xxxxxxxxxxxxx::' x $m) . "final";
 eval <<EOC;
 package $longname;
 
-\@ISA = ("SHORT_NAME");
+our \@ISA = ("SHORT_NAME");
 EOC
 is($@, '');
 
 eval <<EOC;
 package ${longname}_WITH_HOOK;
 
-\@ISA = ("SHORT_NAME_WITH_HOOK");
+our \@ISA = ("SHORT_NAME_WITH_HOOK");
 EOC
 is($@, '');
 
@@ -128,7 +133,7 @@ sub STORABLE_freeze {
     # Some reference some number of times.
     my $self = shift;
     my ($what, $times) = @$self;
-    return ("$what$times", ($::immortals{$what}) x $times);
+    return ("$what$times", ($immortals{$what}) x $times);
 }
 
 sub STORABLE_thaw {
@@ -138,7 +143,7 @@ sub STORABLE_thaw {
     my ($what, $times) = $x =~ /(.)(\d+)/;
     die "'$x' didn't match" unless defined $times;
     main::is(scalar @refs, $times);
-    my $expect = $::immortals{$what};
+    my $expect = $immortals{$what};
     die "'$x' did not give a reference" unless ref $expect;
     my $fail;
     foreach (@refs) {
@@ -155,7 +160,7 @@ package main;
 my $count;
 foreach $count (1..3) {
     my $immortal;
-    foreach $immortal (keys %::immortals) {
+    foreach $immortal (keys %immortals) {
         print "# $immortal x $count\n";
         my $i =  RETURNS_IMMORTALS->make ($immortal, $count);
 
@@ -175,8 +180,8 @@ foreach $count (1..3) {
 
 package HAS_HOOK;
 
-$loaded_count = 0;
-$thawed_count = 0;
+our $loaded_count = 0;
+our $thawed_count = 0;
 
 sub make {
     bless [];
@@ -211,6 +216,9 @@ is(ref $t, 'HAS_HOOK');
 
 {
     package STRESS_THE_STACK;
+
+    our $freeze_count = 0;
+    our $thaw_count = 0;
 
     my $stress;
     sub make {
@@ -296,7 +304,10 @@ is(ref $t, 'STRESS_THE_STACK');
             # It is not just Storable that did not support vstrings. :-)
             # See https://rt.cpan.org/Ticket/Display.html?id=78678
             my $newver = "version"->can("new")
-                            ? sub { "version"->new(shift) }
+                            ? sub {
+                              no warnings;
+                              "version"->new(shift)
+                            }
                             : sub { "" };
             if (!ok
                 $$thawn eq $$obj && &$newver($$thawn) eq &$newver($$obj),

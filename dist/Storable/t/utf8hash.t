@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 sub BEGIN {
     if ($] < 5.007) {
         print "1..0 # Skip: no utf8 hash key support\n";
@@ -7,7 +10,6 @@ sub BEGIN {
     }
 }
 
-use strict;
 our $DEBUGME = shift || 0;
 use Storable qw(store nstore retrieve thaw freeze);
 {

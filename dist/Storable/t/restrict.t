@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 sub BEGIN {
     if (!eval "require Hash::Util") {
         if ($@ =~ /Can\'t locate Hash\/Util\.pm in \@INC/s) {

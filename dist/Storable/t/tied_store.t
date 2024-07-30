@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 use Storable ();
 use Test::More tests => 3;
 

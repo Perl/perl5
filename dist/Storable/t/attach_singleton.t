@@ -9,6 +9,9 @@
 # Tests freezing/thawing structures containing Singleton objects,
 # which should see both structs pointing to the same object.
 
+use strict;
+use warnings;
+
 use Test::More tests => 16;
 use Storable ();
 

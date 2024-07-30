@@ -9,6 +9,9 @@
 # (C) Copyright 1997, Universitat Dortmund, all rights reserved.
 #
 
+use strict;
+use warnings;
+
 use Storable qw(store retrieve);
 use Test::More;
 

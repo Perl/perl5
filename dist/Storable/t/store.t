@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 sub BEGIN {
     unshift @INC, 't/lib';
 }
@@ -16,70 +19,70 @@ use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
 use Test::More tests => 25;
 
-$a = 'toto';
-$b = \$a;
-$c = bless {}, CLASS;
+my $a = 'toto';
+my $b = \$a;
+my $c = bless {}, 'CLASS';
 $c->{attribute} = 'attrval';
-%a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
+my %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
+my @a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
     $b, \$a, $a, $c, \$c, \%a);
 
 isnt(store(\@a, "store$$"), undef);
 
-$dumped = stdump(\@a);
+my $dumped = stdump(\@a);
 isnt($dumped, undef);
 
-$root = retrieve("store$$");
+my $root = retrieve("store$$");
 isnt($root, undef);
 
-$got = stdump($root);
+my $got = stdump($root);
 isnt($got, undef);
 
 is($got, $dumped);
 
 1 while unlink "store$$";
 
-package FOO; @ISA = qw(Storable);
+package FOO; our @ISA = qw(Storable);
 
 sub make {
     my $self = bless {};
-    $self->{key} = \%main::a;
+    $self->{key} = \%a;
     return $self;
 };
 
 package main;
 
-$foo = FOO->make;
+my $foo = FOO->make;
 isnt($foo->store("store$$"), undef);
 
-isnt(open(OUT, '>>', "store$$"), undef);
-binmode OUT;
+isnt(open(my $OUT, '>>', "store$$"), undef);
+binmode $OUT;
 
-isnt(store_fd(\@a, ::OUT), undef);
-isnt(nstore_fd($foo, ::OUT), undef);
-isnt(nstore_fd(\%a, ::OUT), undef);
+isnt(store_fd(\@a, $OUT), undef);
+isnt(nstore_fd($foo, $OUT), undef);
+isnt(nstore_fd(\%a, $OUT), undef);
 
-isnt(close(OUT), undef);
+isnt(close($OUT), undef);
 
-isnt(open(OUT, "store$$"), undef);
+isnt(open($OUT, '<', "store$$"), undef);
 
-$r = fd_retrieve(::OUT);
+my $r = fd_retrieve($OUT);
 isnt($r, undef);
 is(stdump($r), stdump($foo));
 
-$r = fd_retrieve(::OUT);
+$r = fd_retrieve($OUT);
 isnt($r, undef);
 is(stdump($r), stdump(\@a));
 
-$r = fd_retrieve(main::OUT);
+$r = fd_retrieve($OUT);
 isnt($r, undef);
 is(stdump($r), stdump($foo));
 
-$r = fd_retrieve(::OUT);
+$r = fd_retrieve($OUT);
 isnt($r, undef);
 is(stdump($r), stdump(\%a));
 
-eval { $r = fd_retrieve(::OUT); };
+eval { $r = fd_retrieve($OUT); };
 isnt($@, '');
 
 {
@@ -106,5 +109,5 @@ isnt($@, '');
 
 }
 
-close OUT or die "Could not close: $!";
+close $OUT or die "Could not close: $!";
 END { 1 while unlink "store$$" }

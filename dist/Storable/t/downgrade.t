@@ -9,10 +9,12 @@
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 
+use strict;
+use warnings;
+
 use Test::More;
 use Storable 'thaw';
 
-use strict;
 our (%U_HASH, $UTF8_CROAK, $RESTRICTED_CROAK);
 
 our @RESTRICT_TESTS = (

@@ -1,4 +1,8 @@
 package HAS_OVERLOAD;
+use strict;
+use warnings;
+
+our $loaded_count;
 
 use overload
     '""'        => sub { ${$_[0]} }, fallback => 1;

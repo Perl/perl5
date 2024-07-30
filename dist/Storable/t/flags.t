@@ -1,11 +1,11 @@
 #!./perl
 
+use strict;
+use warnings;
+
 use Test::More tests => 16;
 
 use Storable ();
-
-use warnings;
-use strict;
 
 package TEST;
 

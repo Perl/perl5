@@ -7,6 +7,7 @@
 #
 
 use strict;
+use warnings;
 
 use Storable qw(thaw freeze);
 use Test::More tests => 6;

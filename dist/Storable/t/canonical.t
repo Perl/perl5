@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 use Storable qw(freeze thaw dclone);
 our ($debugging, $verbose);
 
@@ -15,30 +18,33 @@ use Test::More tests => 8;
 # (you may want to reduce the size of the hashes too)
 # $debugging = 1;
 
-$hashsize = 100;
-$maxhash2size = 100;
-$maxarraysize = 100;
+my $hashsize = 100;
+my $maxhash2size = 100;
+my $maxarraysize = 100;
 
 # Use Digest::MD5 if its available to make random string keys
 
 eval { require Digest::MD5; };
-$gotmd5 = !$@;
+my $gotmd5 = !$@;
 note "Will use Digest::MD5" if $gotmd5;
 
 # Use Data::Dumper if debugging and it is available to create an ASCII dump
 
+my $gotdd;
 if ($debugging) {
     eval { require "Data/Dumper.pm" };
     $gotdd  = !$@;
 }
 
-@fixed_strings = (
+my @fixed_strings = (
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 );
 
 # Build some arbitrarily complex data structure starting with a top level hash
 # (deeper levels contain scalars, references to hashes or references to arrays);
+
+my %a1;
 
 for (my $i = 0; $i < $hashsize; $i++) {
     my($k) = int(rand(1_000_000));
@@ -75,22 +81,24 @@ print STDERR Data::Dumper::Dumper(\%a1) if ($verbose and $gotdd);
 
 # Copy the hash, element by element in order of the keys
 
-foreach $k (sort keys %a1) {
+my %a2;
+
+foreach my $k (sort keys %a1) {
     $a2{$k} = { key => "$k", "value" => $a1{$k}->{value} };
 }
 
 # Deep clone the hash
 
-$a3 = dclone(\%a1);
+my $a3 = dclone(\%a1);
 
 # In canonical mode the frozen representation of each of the hashes
 # should be identical
 
 $Storable::canonical = 1;
 
-$x1 = freeze(\%a1);
-$x2 = freeze(\%a2);
-$x3 = freeze($a3);
+my $x1 = freeze(\%a1);
+my $x2 = freeze(\%a2);
+my $x3 = freeze($a3);
 
 cmp_ok(length $x1, '>', $hashsize);     # sanity check
 is(length $x1, length $x2);             # idem

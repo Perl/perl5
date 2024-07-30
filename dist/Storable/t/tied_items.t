@@ -10,6 +10,9 @@
 # Tests ref to items in tied hash/array structures.
 #
 
+use strict;
+use warnings;
+
 $^W = 0;
 
 use Storable qw(dclone);
@@ -17,27 +20,27 @@ use Test::More tests => 8;
 
 $Storable::flags = Storable::FLAGS_COMPAT;
 
-$h_fetches = 0;
+my $h_fetches = 0;
 
 sub H::TIEHASH { bless \(my $x), "H" }
 sub H::FETCH { $h_fetches++; $_[1] - 70 }
 
-tie %h, "H";
+tie my %h, "H";
 
-$ref = \$h{77};
-$ref2 = dclone $ref;
+my $ref = \$h{77};
+my $ref2 = dclone $ref;
 
 is($h_fetches, 0);
 is($$ref2, $$ref);
 is($$ref2, 7);
 is($h_fetches, 2);
 
-$a_fetches = 0;
+my $a_fetches = 0;
 
 sub A::TIEARRAY { bless \(my $x), "A" }
 sub A::FETCH { $a_fetches++; $_[1] - 70 }
 
-tie @a, "A";
+tie my @a, "A";
 
 $ref = \$a[78];
 $ref2 = dclone $ref;

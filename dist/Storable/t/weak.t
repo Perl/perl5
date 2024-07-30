@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 use Config;
 sub BEGIN {
     if ($Config{extensions} !~ /\bList\/Util\b/) {
@@ -28,8 +31,6 @@ BEGIN {
 use Test::More 'no_plan';
 use Storable qw (store retrieve freeze thaw nstore nfreeze dclone);
 use STTestLib qw(write_and_retrieve tempfilename slurp);
-our $file;
-use strict;
 
 # $Storable::flags = Storable::FLAGS_COMPAT;
 

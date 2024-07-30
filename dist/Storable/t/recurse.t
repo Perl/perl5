@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 use Storable qw(freeze thaw dclone);
 
 $Storable::flags = Storable::FLAGS_COMPAT;
@@ -16,7 +19,7 @@ package OBJ_REAL;
 
 use Storable qw(freeze thaw);
 
-@x = ('a', 1);
+my @x = ('a', 1);
 
 sub make { bless [], shift }
 
@@ -96,9 +99,9 @@ package OBJ_REAL2;
 
 use Storable qw(freeze thaw);
 
-$MAX = 20;
-$recursed = 0;
-$hook_called = 0;
+our $MAX = 20;
+our $recursed = 0;
+our $hook_called = 0;
 
 sub make { bless [], shift }
 

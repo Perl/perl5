@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 sub BEGIN {
     unshift @INC, 't/lib';
 }
@@ -17,50 +20,50 @@ $Storable::flags = Storable::FLAGS_COMPAT;
 
 use Test::More tests => 21;
 
-$a = 'toto';
-$b = \$a;
-$c = bless {}, CLASS;
+my $a = 'toto';
+my $b = \$a;
+my $c = bless {}, 'CLASS';
 $c->{attribute} = $b;
-$d = {};
-$e = [];
+my $d = {};
+my $e = [];
 $d->{'a'} = $e;
 $e->[0] = $d;
-%a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', undef, 3, -4, -3.14159, 456, 4.5, $d, \$d, \$e, $e,
+my %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
+my @a = ('first', undef, 3, -4, -3.14159, 456, 4.5, $d, \$d, \$e, $e,
     $b, \$a, $a, $c, \$c, \%a);
 
 my $f1 = freeze(\@a);
 isnt($f1, undef);
 
-$dumped = stdump(\@a);
+my $dumped = stdump(\@a);
 isnt($dumped, undef);
 
-$root = thaw($f1);
+my $root = thaw($f1);
 isnt($root, undef);
 
-$got = stdump($root);
+my $got = stdump($root);
 isnt($got, undef);
 
 is($got, $dumped);
 
-package FOO; @ISA = qw(Storable);
+package FOO; our @ISA = qw(Storable);
 
 sub make {
     my $self = bless {};
-    $self->{key} = \%main::a;
+    $self->{key} = \%a;
     return $self;
 };
 
 package main;
 
-$foo = FOO->make;
+my $foo = FOO->make;
 my $f2 = $foo->freeze;
 isnt($f2, undef);
 
 my $f3 = $foo->nfreeze;
 isnt($f3, undef);
 
-$root3 = thaw($f3);
+my $root3 = thaw($f3);
 isnt($root3, undef);
 
 is(stdump($foo), stdump($root3));
@@ -70,13 +73,13 @@ is(stdump($foo), stdump($root));
 
 is(stdump($root3), stdump($root));
 
-$other = freeze($root);
+my $other = freeze($root);
 is(length$other, length $f2);
 
-$root2 = thaw($other);
+my $root2 = thaw($other);
 is(stdump($root2), stdump($root));
 
-$VAR1 = [
+my $VAR1 = [
     'method',
     1,
     'prepare',
@@ -84,8 +87,8 @@ $VAR1 = [
         where table_owner != \'$ingres\' and table_owner != \'DBA\''
 ];
 
-$x = nfreeze($VAR1);
-$VAR2 = thaw($x);
+my $x = nfreeze($VAR1);
+my $VAR2 = thaw($x);
 is($VAR2->[3], $VAR1->[3]);
 
 # Test the workaround for LVALUE bug in perl 5.004_04 -- from Gisle Aas

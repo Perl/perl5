@@ -2,6 +2,9 @@
 #
 # This file tests that Storable correctly uses STORABLE_attach hooks
 
+use strict;
+use warnings;
+
 use Test::More tests => 3;
 use Storable ();
 

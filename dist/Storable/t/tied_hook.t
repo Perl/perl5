@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 sub BEGIN {
     unshift @INC, 't/lib';
 }
@@ -18,7 +21,11 @@ $Storable::flags = Storable::FLAGS_COMPAT;
 
 use Test::More tests => 28;
 
-($scalar_fetch, $array_fetch, $hash_fetch) = (0, 0, 0);
+my (
+  $scalar_fetch, $scalar_hook1, $scalar_hook2,
+  $array_fetch, $array_hook1, $array_hook2,
+  $hash_fetch, $hash_hook1, $hash_hook2,
+) = (0) x 9;
 
 package TIED_HASH;
 
@@ -30,7 +37,7 @@ sub TIEHASH {
 sub FETCH {
     my $self = shift;
     my ($key) = @_;
-    $main::hash_fetch++;
+    $hash_fetch++;
     return $self->{$key};
 }
 
@@ -53,7 +60,7 @@ sub NEXTKEY {
 
 sub STORABLE_freeze {
     my $self = shift;
-    $main::hash_hook1++;
+    $hash_hook1++;
     return join(":", keys %$self) . ";" . join(":", values %$self);
 }
 
@@ -65,7 +72,7 @@ sub STORABLE_thaw {
     for (my $i = 0; $i < @keys; $i++) {
         $self->{$keys[$i]} = $values[$i];
     }
-    $main::hash_hook2++;
+    $hash_hook2++;
 }
 
 package TIED_ARRAY;
@@ -78,7 +85,7 @@ sub TIEARRAY {
 sub FETCH {
     my $self = shift;
     my ($idx) = @_;
-    $main::array_fetch++;
+    $array_fetch++;
     return $self->[$idx];
 }
 
@@ -95,14 +102,14 @@ sub FETCHSIZE {
 
 sub STORABLE_freeze {
     my $self = shift;
-    $main::array_hook1++;
+    $array_hook1++;
     return join(":", @$self);
 }
 
 sub STORABLE_thaw {
     my ($self, $cloning, $frozen) = @_;
     @$self = split(/:/, $frozen);
-    $main::array_hook2++;
+    $array_hook2++;
 }
 
 package TIED_SCALAR;
@@ -115,7 +122,7 @@ sub TIESCALAR {
 
 sub FETCH {
     my $self = shift;
-    $main::scalar_fetch++;
+    $scalar_fetch++;
     return $$self;
 }
 
@@ -127,24 +134,24 @@ sub STORE {
 
 sub STORABLE_freeze {
     my $self = shift;
-    $main::scalar_hook1++;
+    $scalar_hook1++;
     return $$self;
 }
 
 sub STORABLE_thaw {
     my ($self, $cloning, $frozen) = @_;
     $$self = $frozen;
-    $main::scalar_hook2++;
+    $scalar_hook2++;
 }
 
 package main;
 
-$a = 'toto';
-$b = \$a;
+my $a = 'toto';
+my $b = \$a;
 
-$c = tie %hash, TIED_HASH;
-$d = tie @array, TIED_ARRAY;
-tie $scalar, TIED_SCALAR;
+my $c = tie my %hash, 'TIED_HASH';
+my $d = tie my @array, 'TIED_ARRAY';
+tie my $scalar, 'TIED_SCALAR';
 
 $scalar = 'foo';
 $hash{'attribute'} = 'plain value';
@@ -153,41 +160,41 @@ $array[1] = $c;
 $array[2] = \@array;
 $array[3] = "plaine scalaire";
 
-@tied = (\$scalar, \@array, \%hash);
-%a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$a, 'scalarref', \$scalar);
-@a = ('first', 3, -4, -3.14159, 456, 4.5, $d, \$d,
+my @tied = (\$scalar, \@array, \%hash);
+my %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$a, 'scalarref', \$scalar);
+my @a = ('first', 3, -4, -3.14159, 456, 4.5, $d, \$d,
     $b, \$a, $a, $c, \$c, \%a, \@array, \%hash, \@tied);
 
 my $f = freeze(\@a);
 isnt($f, undef);
-$dumped = stdump(\@a);
+my $dumped = stdump(\@a);
 isnt($dumped, undef);
 
-$root = thaw($f);
+my $root = thaw($f);
 isnt($root, undef);
 
-$got = stdump($root);
+my $got = stdump($root);
 isnt($got, undef);
 
 isnt($got, $dumped);            # our hooks did not handle refs in array
 
-$g = freeze($root);
+my $g = freeze($root);
 is(length $f, length $g);
 
 # Ensure the tied items in the retrieved image work
-@old = ($scalar_fetch, $array_fetch, $hash_fetch);
-@tied = ($tscalar, $tarray, $thash) = @{$root->[$#{$root}]};
-@type = qw(SCALAR  ARRAY  HASH);
+my @old = ($scalar_fetch, $array_fetch, $hash_fetch);
+@tied = my ($tscalar, $tarray, $thash) = @{$root->[$#{$root}]};
+my @type = qw(SCALAR  ARRAY  HASH);
 
 is(ref tied $$tscalar, 'TIED_SCALAR');
 is(ref tied @$tarray, 'TIED_ARRAY');
 is(ref tied %$thash, 'TIED_HASH');
 
-@new = ($$tscalar, $tarray->[0], $thash->{'attribute'});
+my @new = ($$tscalar, $tarray->[0], $thash->{'attribute'});
 @new = ($scalar_fetch, $array_fetch, $hash_fetch);
 
 # Tests 10..15
-for ($i = 0; $i < @new; $i++) {
+for (my $i = 0; $i < @new; $i++) {
     is($new[$i], $old[$i] + 1);         # Tests 10,12,14
     is(ref $tied[$i], $type[$i]);       # Tests 11,13,15
 }

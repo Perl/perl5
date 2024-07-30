@@ -6,6 +6,9 @@
 #  in the README file that comes with the distribution.
 #
 
+use strict;
+use warnings;
+
 sub BEGIN {
     unshift @INC, 't/lib';
 }
@@ -16,36 +19,36 @@ use Storable qw(dclone);
 
 use Test::More tests => 14;
 
-$a = 'toto';
-$b = \$a;
-$c = bless {}, CLASS;
+my $a = 'toto';
+my $b = \$a;
+my $c = bless {}, 'CLASS';
 $c->{attribute} = 'attrval';
-%a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
+my %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
+my @a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
     $b, \$a, $a, $c, \$c, \%a);
 
 my $aref = dclone(\@a);
 isnt($aref, undef);
 
-$dumped = stdump(\@a);
+my $dumped = stdump(\@a);
 isnt($dumped, undef);
 
-$got = stdump($aref);
+my $got = stdump($aref);
 isnt($got, undef);
 
 is($got, $dumped);
 
-package FOO; @ISA = qw(Storable);
+package FOO; our @ISA = qw(Storable);
 
 sub make {
     my $self = bless {};
-    $self->{key} = \%main::a;
+    $self->{key} = \%a;
     return $self;
 };
 
 package main;
 
-$foo = FOO->make;
+my $foo = FOO->make;
 my $r = $foo->dclone;
 isnt($r, undef);
 

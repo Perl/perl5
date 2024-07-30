@@ -16,6 +16,9 @@
 # Storable::init_perinterp() to create a new context for each new
 # thread when it starts
 
+use strict;
+use warnings;
+
 use Config;
 sub BEGIN {
     unless ($Config{'useithreads'} and eval { require threads; 1 }) {
@@ -36,8 +39,6 @@ sub BEGIN {
 }
 
 use Test::More;
-
-use strict;
 
 use threads;
 use Storable qw(nfreeze);

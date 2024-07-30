@@ -1,4 +1,7 @@
 # [perl #118139] crash in global destruction when accessing the freed cxt.
+use strict;
+use warnings;
+
 use Test::More tests => 1;
 use Storable;
 BEGIN {
@@ -15,6 +18,6 @@ DESTROY {
 
 package main;
 # print "# $^X\n";
-$x = foo->new();
+my $x = foo->new();
 
 ok(1);

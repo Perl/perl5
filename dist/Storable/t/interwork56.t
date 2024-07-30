@@ -9,6 +9,9 @@
 # This test checks whether the kludge to interwork with 5.6 Storables compiled
 # on Unix systems with IV as long long works.
 
+use strict;
+use warnings;
+
 use Config;
 sub BEGIN {
     unshift @INC, 't/lib';
@@ -19,7 +22,6 @@ sub BEGIN {
 }
 
 use Storable qw(freeze thaw);
-use strict;
 use Test::More tests=>30;
 
 our (%tests);

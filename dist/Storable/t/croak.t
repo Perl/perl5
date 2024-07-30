@@ -6,6 +6,7 @@
 # In particular, don't use Test; as this covers up the problem.
 
 use strict;
+#use warnings;  # ancient warnings will load Carp
 
 BEGIN {
     die "Oi! No! Don't change this test so that Carp is used before Storable"

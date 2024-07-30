@@ -6,7 +6,12 @@
 #  in the README file that comes with the distribution.
 #
 
+# before strict/warnings to make the life for Safe->reval easier
+sub code { "JAPH" }
+my $coderef = sub { 6*7 };
+
 use strict;
+use warnings;
 
 BEGIN {
     if (!eval q{
@@ -33,17 +38,12 @@ our ($freezed, $thawed, @obj, @res, $blessed_code);
 $blessed_code = bless sub { "blessed" }, "Some::Package";
 { package Another::Package; sub foo { __PACKAGE__ } }
 
-{
-    no strict; # to make the life for Safe->reval easier
-    sub code { "JAPH" }
-}
-
 local *FOO;
 
 @obj = (
     [
         \&code,                   # code reference
-        sub { 6*7 },
+        $coderef,
         $blessed_code,            # blessed code reference
         \&Another::Package::foo,  # code in another package
         sub ($$;$) { 0 },         # prototypes
@@ -245,6 +245,7 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
             my $source = $_[1];
             # Here you can apply some nifty regexpes to ensure the
             # safeness of the source code.
+            no warnings;
             my $coderef = eval $source;
             $coderef;
         }
