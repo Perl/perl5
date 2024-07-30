@@ -6,9 +6,6 @@
 #  in the README file that comes with the distribution.
 #
 
-# I ought to keep this test easily backwards compatible to 5.004, so no
-# qr//;
-
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 

@@ -40,6 +40,7 @@ $recursion_limit_hash = 256
     unless defined $recursion_limit_hash;
 
 use Carp;
+use Fcntl qw(LOCK_SH LOCK_EX);
 
 BEGIN {
     if (eval {
@@ -73,21 +74,6 @@ BEGIN {
     }
     unless ($Storable::{logcarp} && *{$Storable::{logcarp}}{CODE}) {
         *logcarp = \&Carp::carp;
-    }
-}
-
-#
-# They might miss :flock in Fcntl
-#
-
-BEGIN {
-    if (eval { require Fcntl; 1 } && exists $Fcntl::EXPORT_TAGS{'flock'}) {
-        Fcntl->import(':flock');
-    } else {
-        eval q{
-            sub LOCK_SH () { 1 }
-            sub LOCK_EX () { 2 }
-        };
     }
 }
 

@@ -6,9 +6,6 @@
 #  in the README file that comes with the distribution.
 #
 
-# I ought to keep this test easily backwards compatible to 5.004, so no
-# qr//;
-
 # This test checks whether the kludge to interwork with 5.6 Storables compiled
 # on Unix systems with IV as long long works.
 

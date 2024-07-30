@@ -6,9 +6,6 @@
 #  in the README file that comes with the distribution.
 #
 
-# I'm trying to keep this test easily backwards compatible to 5.004, so no
-# qr//;
-
 # This test tries to craft malicious data to test out as many different
 # error traps in Storable as possible
 # It also acts as a test for read_header
