@@ -29,6 +29,7 @@ WriteMakefile(
     },
     TEST_REQUIRES       => {
         'Test::More' => '0.82',
+        'File::Temp' => '0',
     },
     META_MERGE          => {
         "meta-spec" => { version => 2 },

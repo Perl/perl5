@@ -20,11 +20,12 @@ BEGIN {
 }
 
 BEGIN {
-    unshift @INC, 't';
+    unshift @INC, 't/lib';
 }
 
 use Config;
 use Test::More;
+use STTestLib qw(tempfilename);
 
 use Storable qw(freeze thaw store retrieve fd_retrieve);
 
@@ -248,10 +249,7 @@ is($STRESS_THE_STACK::thaw_count, 1);
 isnt($t, undef);
 is(ref $t, 'STRESS_THE_STACK');
 
-my $file = "storable-testfile.$$";
-die "Temporary file '$file' already exists" if -e $file;
-
-END { while (-f $file) {unlink $file or die "Can't unlink '$file': $!" }}
+my $file = tempfilename();
 
 $STRESS_THE_STACK::freeze_count = 0;
 $STRESS_THE_STACK::thaw_count = 0;

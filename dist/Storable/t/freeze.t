@@ -7,10 +7,10 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
 
+use STDump;
 use Storable qw(freeze nfreeze thaw);
 
 $Storable::flags = Storable::FLAGS_COMPAT;
@@ -32,13 +32,13 @@ $e->[0] = $d;
 my $f1 = freeze(\@a);
 isnt($f1, undef);
 
-$dumped = &dump(\@a);
+$dumped = stdump(\@a);
 isnt($dumped, undef);
 
 $root = thaw($f1);
 isnt($root, undef);
 
-$got = &dump($root);
+$got = stdump($root);
 isnt($got, undef);
 
 is($got, $dumped);
@@ -63,18 +63,18 @@ isnt($f3, undef);
 $root3 = thaw($f3);
 isnt($root3, undef);
 
-is(&dump($foo), &dump($root3));
+is(stdump($foo), stdump($root3));
 
 $root = thaw($f2);
-is(&dump($foo), &dump($root));
+is(stdump($foo), stdump($root));
 
-is(&dump($root3), &dump($root));
+is(stdump($root3), stdump($root));
 
 $other = freeze($root);
 is(length$other, length $f2);
 
 $root2 = thaw($other);
-is(&dump($root2), &dump($root));
+is(stdump($root2), stdump($root));
 
 $VAR1 = [
     'method',

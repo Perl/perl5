@@ -8,11 +8,10 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
 
-
+use STDump;
 use Storable qw(store retrieve nstore);
 use Test::More tests => 20;
 
@@ -38,9 +37,9 @@ $nroot = retrieve('nstore');
 isnt($root, undef);
 is(Storable::last_op_in_netorder(), 1);
 
-$d1 = &dump($root);
+$d1 = stdump($root);
 isnt($d1, undef);
-$d2 = &dump($nroot);
+$d2 = stdump($nroot);
 isnt($d2, undef);
 
 is($d1, $d2);

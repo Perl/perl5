@@ -17,7 +17,7 @@ use strict;
 use Config;
 
 BEGIN {
-    unshift @INC, 't';
+    unshift @INC, 't/lib';
 }
 
 our $byteorder = $Config{byteorder};
@@ -29,6 +29,7 @@ our $major = 2;
 our $minor = 12;
 our $minor_write = $] >= 5.019 ? 11 : $] > 5.008 ? 9 : $] > 5.005_50 ? 8 : 4;
 
+use STTestLib qw(slurp write_and_retrieve tempfilename);
 use Test::More;
 
 # If it's 5.7.3 or later the hash will be stored with flags, which is
@@ -42,8 +43,6 @@ our $fancy = ($] > 5.007 ? 2 : 0);
 plan tests => 372 + length ($byteorder) * 4 + $fancy * 8;
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
-require 'testlib.pl';
-our $file;
 
 # The chr 256 is a hack to force the hash to always have the utf8 keys flag
 # set on 5.7.3 and later. Otherwise the test fails if run with -Mutf8 because
@@ -256,6 +255,7 @@ sub test_things {
     }
 }
 
+my $file = tempfilename();
 ok (defined store(\%hash, $file), "store() returned defined value");
 
 my $expected = 20 + length ($file_magic_str) + $other_magic + $fancy;
@@ -275,11 +275,11 @@ my $clone = retrieve $file;
 test_hash ($clone);
 
 # Then test it.
-test_things($contents, \&store_and_retrieve, 'file');
+test_things($contents, \&write_and_retrieve, 'file');
 
 # And now try almost everything again with a Storable string
 my $stored = freeze \%hash;
-test_things($stored, \&freeze_and_thaw, 'string');
+test_things($stored, sub { eval { thaw $_[0] } }, 'string');
 
 # Network order.
 unlink $file or die "Can't unlink '$file': $!";
@@ -303,11 +303,11 @@ $clone = retrieve $file;
 test_hash ($clone);
 
 # Then test it.
-test_things($contents, \&store_and_retrieve, 'file', 1);
+test_things($contents, \&write_and_retrieve, 'file', 1);
 
 # And now try almost everything again with a Storable string
 $stored = nfreeze \%hash;
-test_things($stored, \&freeze_and_thaw, 'string', 1);
+test_things($stored, sub { eval { thaw $_[0] } }, 'string', 1);
 
 # Test that the bug fixed by #20587 doesn't affect us under some older
 # Perl. AMS 20030901
@@ -322,7 +322,7 @@ test_things($stored, \&freeze_and_thaw, 'string', 1);
 }
 
 # Unusual in that the empty string is stored with an SX_LSCALAR marker
-my $hash = store_and_retrieve("pst0\5\6\3\0\0\0\1\1\0\0\0\0\0\0\0\5empty");
+my $hash = write_and_retrieve("pst0\5\6\3\0\0\0\1\1\0\0\0\0\0\0\0\5empty");
 ok(!$@, "no exception");
 is(ref($hash), "HASH", "got a hash");
 is($hash->{empty}, "", "got empty element");

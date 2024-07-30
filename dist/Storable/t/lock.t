@@ -7,10 +7,10 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
 
+use STDump;
 use Test::More;
 use Storable qw(lock_store lock_retrieve);
 
@@ -27,13 +27,13 @@ plan(tests => 5);
 #
 
 isnt(lock_store(\@a, "store$$"), undef);
-my $dumped = &dump(\@a);
+my $dumped = stdump(\@a);
 isnt($dumped, undef);
 
 $root = lock_retrieve("store$$");
 is(ref $root, 'ARRAY');
 is(scalar @a, scalar @$root);
-is(&dump($root), $dumped);
+is(stdump($root), $dumped);
 
 END { 1 while unlink "store$$" }
 

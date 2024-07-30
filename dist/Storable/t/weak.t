@@ -22,12 +22,12 @@ sub BEGIN {
 }
 
 BEGIN {
-    unshift @INC, 't';
+    unshift @INC, 't/lib';
 }
 
 use Test::More 'no_plan';
 use Storable qw (store retrieve freeze thaw nstore nfreeze dclone);
-require 'testlib.pl';
+use STTestLib qw(write_and_retrieve tempfilename slurp);
 our $file;
 use strict;
 
@@ -126,23 +126,25 @@ foreach (@tests) {
 
     tester($input, sub {return shift}, $testsub, 'nothing');
 
+    my $file = tempfilename();
+
     ok (defined store($input, $file));
 
     # Read the contents into memory:
     my $contents = slurp ($file);
 
-    tester($contents, \&store_and_retrieve, $testsub, 'file');
+    tester($contents, \&write_and_retrieve, $testsub, 'file');
 
     # And now try almost everything again with a Storable string
     my $stored = freeze $input;
-    tester($stored, \&freeze_and_thaw, $testsub, 'string');
+    tester($stored, sub { eval { thaw $_[0] } }, $testsub, 'string');
 
     ok (defined nstore($input, $file));
 
-    tester($contents, \&store_and_retrieve, $testsub, 'network file');
+    tester($contents, \&write_and_retrieve, $testsub, 'network file');
 
     $stored = nfreeze $input;
-    tester($stored, \&freeze_and_thaw, $testsub, 'network string');
+    tester($stored, sub { eval { thaw $_[0] } }, $testsub, 'network string');
 }
 
 {

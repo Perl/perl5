@@ -7,7 +7,7 @@
 #
 
 BEGIN {
-    unshift @INC, 't';
+    unshift @INC, 't/lib';
 }
 
 use Storable qw(freeze thaw);

@@ -7,10 +7,10 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
 
+use STDump;
 
 use Storable qw(dclone);
 
@@ -27,10 +27,10 @@ $c->{attribute} = 'attrval';
 my $aref = dclone(\@a);
 isnt($aref, undef);
 
-$dumped = &dump(\@a);
+$dumped = stdump(\@a);
 isnt($dumped, undef);
 
-$got = &dump($aref);
+$got = stdump($aref);
 isnt($got, undef);
 
 is($got, $dumped);
@@ -49,7 +49,7 @@ $foo = FOO->make;
 my $r = $foo->dclone;
 isnt($r, undef);
 
-is(&dump($foo), &dump($r));
+is(stdump($foo), stdump($r));
 
 # Ensure refs to "undef" values are properly shared during cloning
 my $hash;

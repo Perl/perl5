@@ -14,7 +14,7 @@
 
 use Config;
 sub BEGIN {
-    unshift @INC, 't';
+    unshift @INC, 't/lib';
     unless ($Config{ivsize} and $Config{ivsize} > $Config{longsize}) {
         print "1..0 # Skip: Your IVs are no larger than your longs\n";
         exit 0;

@@ -7,9 +7,10 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
+
+use STDump;
 
 use Storable qw(freeze thaw);
 
@@ -159,13 +160,13 @@ $array[3] = "plaine scalaire";
 
 my $f = freeze(\@a);
 isnt($f, undef);
-$dumped = &dump(\@a);
+$dumped = stdump(\@a);
 isnt($dumped, undef);
 
 $root = thaw($f);
 isnt($root, undef);
 
-$got = &dump($root);
+$got = stdump($root);
 isnt($got, undef);
 
 isnt($got, $dumped);            # our hooks did not handle refs in array

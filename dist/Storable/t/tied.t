@@ -7,10 +7,9 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
-
+use STDump;
 use Storable qw(freeze thaw);
 $Storable::flags = Storable::FLAGS_COMPAT;
 
@@ -127,9 +126,9 @@ tie $scalar, TIED_SCALAR;
 
 ### If I say
 ###   $hash{'attribute'} = $d;
-### below, then dump() incorrectly dumps the hash value as a string the second
+### below, then stdump() incorrectly dumps the hash value as a string the second
 ### time it is reached. I have not investigated enough to tell whether it's
-### a bug in my dump() routine or in the Perl tieing mechanism.
+### a bug in my stdump() routine or in the Perl tieing mechanism.
 $scalar = 'foo';
 $hash{'attribute'} = 'plain value';
 $array[0] = \$scalar;
@@ -144,13 +143,13 @@ $array[2] = \@array;
 my $f = freeze(\@a);
 isnt($f, undef);
 
-$dumped = &dump(\@a);
+$dumped = stdump(\@a);
 isnt($dumped, undef);
 
 $root = thaw($f);
 isnt($root, undef);
 
-$got = &dump($root);
+$got = stdump($root);
 isnt($got, undef);
 
 ### Used to see the manifestation of the bug documented above.

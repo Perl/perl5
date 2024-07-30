@@ -7,10 +7,10 @@
 #
 
 sub BEGIN {
-    unshift @INC, 't';
-    require 'st-dump.pl';
+    unshift @INC, 't/lib';
 }
 
+use STDump;
 # $Storable::DEBUGME = 1;
 use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
@@ -26,13 +26,13 @@ $c->{attribute} = 'attrval';
 
 isnt(store(\@a, "store$$"), undef);
 
-$dumped = &dump(\@a);
+$dumped = stdump(\@a);
 isnt($dumped, undef);
 
 $root = retrieve("store$$");
 isnt($root, undef);
 
-$got = &dump($root);
+$got = stdump($root);
 isnt($got, undef);
 
 is($got, $dumped);
@@ -65,19 +65,19 @@ isnt(open(OUT, "store$$"), undef);
 
 $r = fd_retrieve(::OUT);
 isnt($r, undef);
-is(&dump($r), &dump($foo));
+is(stdump($r), stdump($foo));
 
 $r = fd_retrieve(::OUT);
 isnt($r, undef);
-is(&dump($r), &dump(\@a));
+is(stdump($r), stdump(\@a));
 
 $r = fd_retrieve(main::OUT);
 isnt($r, undef);
-is(&dump($r), &dump($foo));
+is(stdump($r), stdump($foo));
 
 $r = fd_retrieve(::OUT);
 isnt($r, undef);
-is(&dump($r), &dump(\%a));
+is(stdump($r), stdump(\%a));
 
 eval { $r = fd_retrieve(::OUT); };
 isnt($@, '');
