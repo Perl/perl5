@@ -5787,7 +5787,7 @@ These are called mid-endian, middle-endian, mixed-endian, or just weird.
 
 You can determine your system endianness with this incantation:
 
-    printf("%#02x ", $_) for unpack("W*", pack L=>0x12345678);
+    printf("%#02x ", $_) for unpack("W*", pack("L", 0x12345678));
 
 The byteorder on the platform where Perl was built is also available
 via L<Config>:
@@ -5932,7 +5932,9 @@ L<C<unpack>|/unpack TEMPLATE,EXPR>, also via the C</>
 template character.  Within each repetition of a group, positioning with
 C<@> starts over at 0.  Therefore, the result of
 
-    pack("@1A((@2A)@3A)", qw[X Y Z])
+    # note: single quotes around the template string to prevent
+    # array interpolation of @1, @2, @3
+    pack('@1A((@2A)@3A)', qw[X Y Z])
 
 is the string C<"\0X\0\0YZ">.
 
