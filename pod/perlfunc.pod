@@ -5699,14 +5699,14 @@ the I<length-item> is the string length, not the number of strings.  With
 an explicit repeat count for pack, the packed string is adjusted to that
 length.  For example:
 
- This code:                             gives this result:
+    This code:                              gives this result:
 
- unpack("W/a", "\004Gurusamy")          ("Guru")
- unpack("a3/A A*", "007 Bond  J ")      (" Bond", "J")
- unpack("a3 x2 /A A*", "007: Bond, J.") ("Bond, J", ".")
+    unpack("W/a", "\004Gurusamy")           ("Guru")
+    unpack("a3/A A*", "007 Bond  J ")       (" Bond", "J")
+    unpack("a3 x2 /A A*", "007: Bond, J.")  ("Bond, J", ".")
 
- pack("n/a* w/a","hello,","world")     "\000\006hello,\005world"
- pack("a/W2", ord("a") .. ord("z"))    "2ab"
+    pack("n/a* w/a", "hi,", "world")        "\000\003hi,\005world"
+    pack("a/W2", ord("a") .. ord("z"))      "2ab"
 
 The I<length-item> is not returned explicitly from
 L<C<unpack>|/unpack TEMPLATE,EXPR>.
@@ -5726,10 +5726,10 @@ may be larger.  This is mainly an issue on 64-bit platforms.  You can
 see whether using C<!> makes any difference this way:
 
     printf "format s is %d, s! is %d\n",
-	length pack("s"), length pack("s!");
+        length pack("s"), length pack("s!");
 
     printf "format l is %d, l! is %d\n",
-	length pack("l"), length pack("l!");
+        length pack("l"), length pack("l!");
 
 
 C<i!> and C<I!> are also allowed, but only for completeness' sake:
@@ -5747,11 +5747,11 @@ the command line:
 
 or programmatically via the L<C<Config>|Config> module:
 
-       use Config;
-       print $Config{shortsize},    "\n";
-       print $Config{intsize},      "\n";
-       print $Config{longsize},     "\n";
-       print $Config{longlongsize}, "\n";
+    use Config;
+    print $Config{shortsize},    "\n";
+    print $Config{intsize},      "\n";
+    print $Config{longsize},     "\n";
+    print $Config{longlongsize}, "\n";
 
 C<$Config{longlongsize}> is undefined on systems without
 long long support.
@@ -5780,14 +5780,14 @@ Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980.
 
 Some systems may have even weirder byte orders such as
 
-   0x56 0x78 0x12 0x34
-   0x34 0x12 0x78 0x56
+    0x56 0x78 0x12 0x34
+    0x34 0x12 0x78 0x56
 
 These are called mid-endian, middle-endian, mixed-endian, or just weird.
 
 You can determine your system endianness with this incantation:
 
-   printf("%#02x ", $_) for unpack("W*", pack L=>0x12345678);
+    printf("%#02x ", $_) for unpack("W*", pack L=>0x12345678);
 
 The byteorder on the platform where Perl was built is also available
 via L<Config>:
@@ -5944,9 +5944,9 @@ characters.  For example, to L<C<pack>|/pack TEMPLATE,LIST> or
 L<C<unpack>|/unpack TEMPLATE,EXPR> a C structure like
 
     struct {
-	char   c;    /* one signed, 8-bit character */
-	double d;
-	char   cc[2];
+        char   c;    /* one signed, 8-bit character */
+        double d;
+        char   cc[2];
     }
 
 one may need to use the template C<c x![d] d c[2]>.  This assumes that
