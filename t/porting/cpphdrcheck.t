@@ -124,7 +124,7 @@ sub find_ccpp ($cc) {
         # intel C, Sun C
         # Sun C sends -V output to stderr
         my $ver = `$cc -V 2>&1`;
-        unless ($ver) {
+        if (!$ver || ($? && $ver =~ /\berror\b/)) {
             # gcc, clang
             $ver = `$cc --version 2>$devnull`;
         }
