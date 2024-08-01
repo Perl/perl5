@@ -2405,16 +2405,14 @@ while (my $input = <$fh>) {
             # the line previous to the prototype is one of the ones that
             # declares the return type of the function.  This is to try to
             # eliminate false positives.
-            $protos{$1} = $2 if $input =~ s/ ^ \s* 
-                                             ( [Pp]erl_\w* )
-                                             ( .* ) 
-                                             \n
-                                           /$1/x
-                           && $prev =~ / ^ \s*
-                                         PERL_ (?: CALLCONV
-                                                 | STATIC (?: _FORCE)? _INLINE
-                                               )
-                                       /x;
+            if ($prev =~ / ^ \s*  PERL_ (?: CALLCONV
+                                          | STATIC (?: _FORCE)? _INLINE
+                                        )
+                         /x)
+            {
+                $protos{$1} = $2
+                            if $input =~ s/ ^ \s* ( [Pp]erl_\w* ) (.*) \n /$1/x;
+            }
             $prev = $input;
         }
         close $fh or die "Error closing $file: $!\n";
