@@ -208,7 +208,8 @@ SKIP: {
  
 SKIP: {
     skip "'%s' not implemented in strftime", 1 if $^O eq "VMS"
-                                               || $^O eq "MSWin32";
+                                               || $^O eq "MSWin32"
+                                               || $^O eq "os390";
     # Somewhat arbitrarily, put in 60 seconds of slack;  if this fails, it
     # will likely be off by 1 hour
     ok(abs(POSIX::strftime('%s', localtime) - time) < 60,
