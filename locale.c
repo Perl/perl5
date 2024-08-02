@@ -274,6 +274,16 @@
  *          correct results.  This is known to be a problem in earlier AIX
  *          versions
  *
+ *      -Accflags=-DHAS_BROKEN_LANGINFO_CODESET
+ *          This would be set in a hints file to tell perl that doing a libc
+ *              nl_langinfo(CODESET)
+ *          can give empty results.  This causes perl to be compiled to not use
+ *          nl_langinfo() to determine if the current locale is a UTF-8 one or
+ *          not.  Perl continues to presume that a non-empty return from
+ *          nl_langinfo() is correct, and empty returns are just passed on to
+ *          the caller.  khw can't figure out a workaround for this portion of
+ *          the bug.  The bug exists on Darwin.
+ *
  *      -Accflags=-DHAS_LF_IN_SETLOCALE_RETURN
  *          This would be set in a hints file to tell perl that a libc
  *          setlocale() can return results containing \n characters that need
@@ -4833,11 +4843,12 @@ S_is_locale_utf8(pTHX_ const char * locale)
         return false;
     }
 
-#    if ! defined(HAS_SOME_LANGINFO) && ! defined(WIN32)
+#    if  ! defined(WIN32)                                                   \
+     && (! defined(HAS_SOME_LANGINFO) || defined HAS_BROKEN_LANGINFO_CODESET)
 
-    /* On non-Windows without nl_langinfo(), we have to do some digging to get
-     * the answer.  First, toggle to the desired locale so can query its state
-     * */
+    /* On non-Windows without a fully functioning nl_langinfo(), we have to do
+     * some digging to get the answer.  First, toggle to the desired locale so
+     * can query its state */
     const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
 
 #      define TEARDOWN_FOR_IS_LOCALE_UTF8                                   \
@@ -4887,10 +4898,10 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #      endif
 #    else
 
-     /* On Windows or on platforms with nl_langinfo(), there is a direct way to
-      * get the locale's codeset, which will be some form of 'UTF-8' for a
-      * UTF-8 locale.  langinfo_c() handles this, and we will call that
-      * below */
+     /* On Windows or on platforms with a fully functioning nl_langinfo(),
+      * there is a direct way to get the locale's codeset, which will be some
+      * form of 'UTF-8' for a UTF-8 locale.  langinfo_c() handles this, and we
+      * will call that below */
 #      define HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 #      define USE_LANGINFO_FOR_UTF8NESS
 #      define TEARDOWN_FOR_IS_LOCALE_UTF8
@@ -6553,6 +6564,49 @@ S_langinfo_sv_i(pTHX_
 
         retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
+
+        /* nl_langinfo() is not supposed to return empty for the items below
+         * when the locale is legal.  But we have experienced it happening.
+         * THe panic below includes enough information to do further debugging.
+         * */
+        if (UNLIKELY(total_len == 0)) switch (item) {
+            case RADIXCHAR:
+            case ABDAY_1: case ABDAY_2: case ABDAY_3: case ABDAY_4:
+            case ABDAY_5: case ABDAY_6: case ABDAY_7:
+            case ABMON_1: case ABMON_2: case ABMON_3: case ABMON_4:
+            case ABMON_5: case ABMON_6: case ABMON_7: case ABMON_8:
+            case ABMON_9: case ABMON_10: case ABMON_11: case ABMON_12:
+            case DAY_1: case DAY_2: case DAY_3: case DAY_4:
+            case DAY_5: case DAY_6: case DAY_7:
+            case MON_1: case MON_2: case MON_3: case MON_4: case MON_5:
+            case MON_6: case MON_7: case MON_8: case MON_9: case MON_10:
+            case MON_11: case MON_12:
+
+#  ifndef HAS_BROKEN_LANGINFO_CODESET
+            /* On Darwin, this can easily happen, so don't panic.  The code in
+             * this file looks at the above #define, and institutes a
+             * workaround for finding if the codeset is UTF-8.  In many cases,
+             * the function works properly; but otherwise you are at the mercy
+             * of this bug */
+            case CODESET:
+#  endif
+                locale_panic_(Perl_form(aTHX_
+                                        "nl_langinfo returned empty for %ld"
+                                        " in supposed locale \n'%s';"
+                                        " which really is\n'%s'\n"
+                                        " codeset is '%s';"
+                                        " radix='%s';"
+                                        " January='%s';"
+                                        " strtod(1,5)=%g, strtod(1.5)=%g\n",
+                                        (long) item,
+                                        locale, querylocale_c(LC_ALL),
+                                        nl_langinfo(CODESET),
+                                        nl_langinfo(RADIXCHAR),
+                                        nl_langinfo(MON_1),
+                                        strtod("1,5", NULL),
+                                        strtod("1.5", NULL)
+                                      ));
+        }
 
         /* Initialized only to silence some dumber compilers warning that
          * might be uninitialized */
