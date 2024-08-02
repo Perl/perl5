@@ -355,12 +355,12 @@ EOM
 
   my $BootCode_ref = [];  # lines to emit for the boot sub
 
-  my $XSS_work_idx = 0;   # Index of the current top-most '#if' on the
+  my $XSS_top_if_idx = 0; # Index of the current top-most '#if' on the
                           # XSStack. Note that it's not necessarily the
                           # top element of the stack, since that also
                           # includes elements for each INCLUDE etc.
 
-  my $cpp_next_tmp = 'XSubPPtmpAAAA';
+  my $cpp_next_tmp_define = 'XSubPPtmpAAAA';
 
 
   # ----------------------------------------------------------------
@@ -384,15 +384,15 @@ EOM
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
-      ( $self, $XSS_work_idx, $BootCode_ref ) =
+      ( $self, $XSS_top_if_idx, $BootCode_ref ) =
         analyze_preprocessor_statements(
-          $self, $statement, $XSS_work_idx, $BootCode_ref
+          $self, $statement, $XSS_top_if_idx, $BootCode_ref
         );
     }
 
     next PARAGRAPH unless @{ $self->{line} };
 
-    if ($XSS_work_idx && !$self->{XSStack}->[$XSS_work_idx]{varname}) {
+    if ($XSS_top_if_idx && !$self->{XSStack}->[$XSS_top_if_idx]{varname}) {
       # We are inside an #if, but have not yet #defined its xsubpp variable.
       #
       # At the start of every '#if ...' which is external to an XSUB,
@@ -403,10 +403,10 @@ EOM
       #        newXS(...);
       #    #endif
       # So that only the defined XSUBs get added to the symbol table.
-      print "#define $cpp_next_tmp 1\n\n";
-      push(@{ $self->{InitFileCode} }, "#if $cpp_next_tmp\n");
-      push(@{ $BootCode_ref },     "#if $cpp_next_tmp");
-      $self->{XSStack}->[$XSS_work_idx]{varname} = $cpp_next_tmp++;
+      print "#define $cpp_next_tmp_define 1\n\n";
+      push(@{ $self->{InitFileCode} }, "#if $cpp_next_tmp_define\n");
+      push(@{ $BootCode_ref },     "#if $cpp_next_tmp_define");
+      $self->{XSStack}->[$XSS_top_if_idx]{varname} = $cpp_next_tmp_define++;
     }
 
     # This will die on something like
@@ -505,8 +505,8 @@ EOM
     $self->{ScopeThisXSUB}             = 0;
     $self->{OverloadsThisXSUB}         = {};
 
-    # used for emitting XSRETURN($xsreturn) if > 0, or XSRETURN_EMPTY
-    my $xsreturn = 0;
+    # used for emitting XSRETURN($XSRETURN_count) if > 0, or XSRETURN_EMPTY
+    my $XSRETURN_count = 0;
 
     # Process next line
 
@@ -641,7 +641,7 @@ EOM
     }
 
     # mark C function name as used
-    $self->{XSStack}->[$XSS_work_idx]{functions}{ $self->{Full_func_name} }++;
+    $self->{XSStack}->[$XSS_top_if_idx]{functions}{ $self->{Full_func_name} }++;
 
     # initialise more per-XSUB state
     delete $self->{XsubAliases};           # ALIAS: ...
@@ -764,7 +764,7 @@ EOM
           s/^\s+//;
           s/\s+$//;
           my ($arg, $default) = ($_ =~ m/ ( [^=]* ) ( (?: = .* )? ) /x);
-          my ($pre, $len_name) = ($arg =~ /(.*?) \s*
+          my ($pre, $name_or_lenname) = ($arg =~ /(.*?) \s*
                              \b ( \w+ | length\( \s*\w+\s* \) )
                              \s* $ /x);
           next unless defined($pre) && length($pre);
@@ -781,30 +781,30 @@ EOM
             $pre =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
           }
 
-          my $islength;
+          my $is_length;
 
-          if ($len_name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-            $len_name = "XSauto_length_of_$1";
-            $islength = 1;
+          if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
+            $name_or_lenname = "XSauto_length_of_$1";
+            $is_length = 1;
             die "Default value on length() argument: '$_'"
               if length $default;
           }
 
-          if (length $pre or $islength) { # 'int foo' or 'length(foo)'
-            if ($islength) {
+          if (length $pre or $is_length) { # 'int foo' or 'length(foo)'
+            if ($is_length) {
               push @fake_INPUT_pre, $arg;
             }
             else {
               push @fake_INPUT, $arg;
             }
 
-            $self->{argtype_seen}->{$len_name}++;
-            $_ = "$len_name$default"; # Assigns to @args
+            $self->{argtype_seen}->{$name_or_lenname}++;
+            $_ = "$name_or_lenname$default"; # Assigns to @args
           }
 
-          $only_C_inlist_ref->{$_} = 1 if $out_type eq "OUTLIST" or $islength;
-          push @{ $outlist_ref }, $len_name if $out_type =~ /OUTLIST$/;
-          $self->{in_out}->{$len_name} = $out_type if $out_type;
+          $only_C_inlist_ref->{$_} = 1 if $out_type eq "OUTLIST" or $is_length;
+          push @{ $outlist_ref }, $name_or_lenname if $out_type =~ /OUTLIST$/;
+          $self->{in_out}->{$name_or_lenname} = $out_type if $out_type;
         }
       }
       else {
@@ -849,14 +849,14 @@ EOM
       unshift(@args, $arg0);
     }
 
-    my $num_args = 0;
+    my $args_count = 0;
     my $report_args = ''; # the arg's description as used by croak()
     my $seen_ellipsis;
-    my $min_args;
+    my $min_arg_count;
 
     {
-      my $extra_args = 0;
-      my @args_num = ();
+      my $optional_args_count = 0;
+      my @map_param_idx_to_arg_idx = ();
 
       foreach my $i (0 .. $#args) {
 
@@ -872,20 +872,20 @@ EOM
           }
         }
 
-        # @args_num: maps param index to expected arg index,
+        # @map_param_idx_to_arg_idx maps param index to expected arg index,
         # with undef indicating a fake parameter that isn't assigned
         # to an arg
         if ($only_C_inlist_ref->{$args[$i]}) {
-          push @args_num, undef;
+          push @map_param_idx_to_arg_idx, undef;
         }
         else {
-          push @args_num, ++$num_args;
+          push @map_param_idx_to_arg_idx, ++$args_count;
             $report_args .= ", $args[$i]";
         }
 
         # process default values, e.g. (int foo = 1)
         if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
-          $extra_args++;
+          $optional_args_count++;
           $args[$i] = $1; # delete the '= ...' from $arg[$i]
           $self->{defaults}->{$args[$i]} = $2;
           $self->{defaults}->{$args[$i]} =~ s/"/\\"/g; # escape double quotes
@@ -896,7 +896,7 @@ EOM
       } # end foreach $i
 
 
-      $min_args = $num_args - $extra_args;
+      $min_arg_count = $args_count - $optional_args_count;
       $report_args =~ s/"/\\"/g;
       $report_args =~ s/^,\s+//;
 
@@ -905,7 +905,7 @@ EOM
       $self->{func_args} = assign_func_args($self, \@args, $class);
 
       # map argument names to indexes
-      @{ $self->{args_match} }{@args} = @args_num;
+      @{ $self->{args_match} }{@args} = @map_param_idx_to_arg_idx;
     }
 
 
@@ -948,7 +948,7 @@ EOM
 
     my $seen_INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
 
-    $xsreturn = 1 if $EXPLICIT_RETURN;
+    $XSRETURN_count = 1 if $EXPLICIT_RETURN;
 
 
     # ----------------------------------------------------------------
@@ -974,7 +974,7 @@ EOF
 #    dXSFUNCTION($self->{ret_type});
 EOF
 
-    $self->{cond} = set_cond($seen_ellipsis, $min_args, $num_args);
+    $self->{cond} = set_cond($seen_ellipsis, $min_arg_count, $args_count);
 
     print Q(<<"EOF") if $self->{except}; # "-except" cmd line switch
 #    char errbuf[1024];
@@ -1096,10 +1096,10 @@ EOF
       # These are set later if OUTPUT is found and/or CODE using RETVAL
       $self->{have_OUTPUT} = $self->{have_CODE_with_RETVAL} = 0;
 
-      # (bool) indicates that a bodiless XSUB has a non-void return value,
-      # so needs to reuturn RETVAL; or to put it another way, $wantRETVAL
-      # indicates an implicit "OUTPUT:\n\tRETVAL".
-      my ($wantRETVAL);
+      # $implicit_OUTPUT_RETVAL (bool) indicates that a bodiless XSUB has
+      # a non-void return value, so needs to return RETVAL; or to put it
+      # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
+      my $implicit_OUTPUT_RETVAL;
 
       # do code
       if (/^\s*NOT_IMPLEMENTED_YET/) {
@@ -1216,7 +1216,7 @@ EOF
 
           if ($self->{ret_type} ne "void") {
             print "RETVAL = ";
-            $wantRETVAL = 1;
+            $implicit_OUTPUT_RETVAL = 1;
           }
 
           if (defined($seen_static)) { # it has a return type of 'static foo'
@@ -1262,9 +1262,10 @@ EOF
       # If SXUB was declared as NO_OUTPUT, then:
       # - we don't need to return RETVAL to the caller, even if the
       #   auto-generated call to the library function indicates it was seen
-      #   ($wantRETVAL).
+      #   ($implicit_OUTPUT_RETVAL).
       # - Also from this point on, treat the (non-void) return type as void.
-      ($wantRETVAL, $self->{ret_type}) = (0, 'void') if $seen_NO_RETURN;
+      ($implicit_OUTPUT_RETVAL, $self->{ret_type}) =
+                                    (0, 'void') if $seen_NO_RETURN;
 
       # used by OUTPUT_handler() to detect duplicate OUTPUT var lines
       undef %{ $self->{outargs} };
@@ -1296,7 +1297,7 @@ EOF
       my $outlist_count = @{ $outlist_ref };
       if ($outlist_count) {
         my $ext = $outlist_count;
-        ++$ext if $self->{gotRETVAL} || $wantRETVAL;
+        ++$ext if $self->{gotRETVAL} || $implicit_OUTPUT_RETVAL;
         print "\tXSprePUSH;";
         print "\tEXTEND(SP,$ext);\n";
       }
@@ -1306,8 +1307,8 @@ EOF
       # OUTPUT_handler() will have skipped any RETVAL line, just setting
       # $self->{gotRETVAL} to true and setting $self->{RETVAL_code} to the
       # overridden typemap code on the RETVAL line, if any.
-      # Also, $wantRETVAL indicates that an implicit RETVAL should
-      # be generated, due to a non-void CODE-less XSUB.
+      # Also, $implicit_OUTPUT_RETVAL indicates that an implicit RETVAL
+      # should be generated, due to a non-void CODE-less XSUB.
       # ----------------------------------------------------------------
 
       if ($self->{gotRETVAL} && $self->{RETVAL_code}) {
@@ -1315,7 +1316,7 @@ EOF
         print "\t$self->{RETVAL_code}\n";
         print "\t++SP;\n" if $outlist_count;
       }
-      elsif ($self->{gotRETVAL} || $wantRETVAL) {
+      elsif ($self->{gotRETVAL} || $implicit_OUTPUT_RETVAL) {
         # Deferred or implicit RETVAL with standard typemap
 
         # Examine the typemap entry to determine whether it's possible
@@ -1331,23 +1332,23 @@ EOF
         #               ? PAD_SV(PL_op->op_targ) : sv_newmortal()
 
         my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
-        my $trgt = $self->{optimize} && $outputmap && $outputmap->targetable;
+        my $target = $self->{optimize} && $outputmap && $outputmap->targetable;
         my $var = 'RETVAL';
         my $type = $self->{ret_type};
 
-        if ($trgt) {
+        if ($target) {
           # Emit targ optimisation: basically, emit a PUSHi() or whatever,
           # which will set TARG to the value and push it.
 
-          # $trgt->{what} is something like '(IV)$var': the part of the
+          # $target->{what} is something like '(IV)$var': the part of the
           # typemap which contains the value the TARG should be set to.
           # Expand it via eval.
           my $what = $self->eval_output_typemap_code(
-            qq("$trgt->{what}"),
+            qq("$target->{what}"),
             {var => $var, type => $self->{ret_type}}
           );
 
-          if (not $trgt->{with_size} and $trgt->{type} eq 'p') {
+          if (not $target->{with_size} and $target->{type} eq 'p') {
               # Handle sv_setpv() manually. (sv_setpvn() is handled
               # by the generic code below, via PUSHp().)
               print "\tsv_setpv(TARG, $what);\n";
@@ -1362,7 +1363,7 @@ EOF
             # Eval it so that the result can be passed as the 2nd arg to
             # PUSHp().
             # XXX this could be skipped if $tsize is empty
-            my $tsize = $trgt->{what_size};
+            my $tsize = $target->{what_size};
             $tsize = '' unless defined $tsize;
             $tsize = $self->eval_output_typemap_code(
               qq("$tsize"),
@@ -1370,7 +1371,7 @@ EOF
             );
 
             print "\tXSprePUSH;\n" unless $outlist_count;
-            print "\tPUSH$trgt->{type}($what$tsize);\n";
+            print "\tPUSH$target->{type}($what$tsize);\n";
           }
         }
         else {
@@ -1386,9 +1387,9 @@ EOF
         }
       }
 
-      $xsreturn = 1 if $self->{ret_type} ne "void";
-      my $num = $xsreturn;
-      $xsreturn += $outlist_count;
+      $XSRETURN_count = 1 if $self->{ret_type} ne "void";
+      my $num = $XSRETURN_count;
+      $XSRETURN_count += $outlist_count;
 
       # Now that RETVAL is on the stack, also push any OUTLIST vars too
       $self->generate_output( {
@@ -1468,9 +1469,9 @@ EOF
           "#endif\n"
       if $^O eq "hpux";
 
-    if ($xsreturn) {
+    if ($XSRETURN_count) {
       print Q(<<"EOF") unless $seen_PPCODE;
-#    XSRETURN($xsreturn);
+#    XSRETURN($XSRETURN_count);
 EOF
     }
     else {
@@ -1522,12 +1523,12 @@ EOF
       elsif ($self->{ProtoThisXSUB} eq 1) {
         # Protoype enabled, but to be auto-generated by us
         my $s = ';';
-        if ($min_args < $num_args)  {
+        if ($min_arg_count < $args_count)  {
           $s = '';
           # $self->{proto_arg} was populated during argument / typemap
           # processing.  Each element contains the prototype for that arg,
           # typically '$'.
-          $self->{proto_arg}->[$min_args] .= ";";
+          $self->{proto_arg}->[$min_arg_count] .= ";";
         }
         push @{ $self->{proto_arg} }, "$s\@"
           if $seen_ellipsis; # '...' was seen in XSUB signature
