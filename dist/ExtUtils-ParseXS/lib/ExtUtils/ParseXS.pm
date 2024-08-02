@@ -1284,13 +1284,18 @@ EOF
       # Process any OUT vars: i.e. vars that are declared OUT in
       # the XSUB's signature rather than in an OUTPUT section.
 
-      $self->generate_output( {
-        type        => $self->{var_types}->{$_},
-        num         => $self->{args_match}->{$_},
-        var         => $_,
-        do_setmagic => $self->{DoSetMagic},
-        do_push     => undef,
-      } ) for grep $self->{in_out}->{$_} =~ /OUT$/, sort keys %{ $self->{in_out} };
+      for my $var (grep $self->{in_out}->{$_} =~ /OUT$/,
+                              sort keys %{ $self->{in_out} })
+      {
+        $self->generate_output( {
+            type        => $self->{var_types}->{$var},
+            num         => $self->{args_match}->{$var},
+            var         => $var,
+            do_setmagic => $self->{DoSetMagic},
+            do_push     => undef,
+          }
+        );
+      }
 
       # If there are any OUTLIST vars to be pushed, first extend the
       # stack, to fit all OUTLIST vars + RETVAL
@@ -1392,13 +1397,17 @@ EOF
       $XSRETURN_count += $outlist_count;
 
       # Now that RETVAL is on the stack, also push any OUTLIST vars too
-      $self->generate_output( {
-        type        => $self->{var_types}->{$_},
-        num         => $num++,
-        var         => $_,
-        do_setmagic => 0,
-        do_push     => 1,
-      } ) for @OUTLIST_vars;
+      for my $var (@OUTLIST_vars) {
+        $self->generate_output(
+          {
+            type        => $self->{var_types}->{$var},
+            num         => $num++,
+            var         => $var,
+            do_setmagic => 0,
+            do_push     => 1,
+          }
+        );
+      }
 
 
       # ----------------------------------------------------------------
