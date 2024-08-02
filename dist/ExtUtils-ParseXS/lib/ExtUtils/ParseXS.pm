@@ -159,11 +159,11 @@ sub process_file {
     $self = $Singleton;
   }
 
-  my %options = @_;
-  $self->{ProtoUsed} = exists $options{prototypes};
+  my %opts = @_;
+  $self->{ProtoUsed} = exists $opts{prototypes};
 
   # Set defaults.
-  my %args = (
+  my %Options = (
     argtypes        => 1,
     csuffix         => '.c',
     except          => 0,
@@ -178,9 +178,9 @@ sub process_file {
     FH              => Symbol::gensym(),
     die_on_error    => $DIE_ON_ERROR, # if true we die() and not exit() after errors
     author_warnings    => $AUTHOR_WARNINGS,
-    %options,
+    %opts,
   );
-  $args{except} = $args{except} ? ' TRY' : '';
+  $Options{except} = $Options{except} ? ' TRY' : '';
 
   # Global Constants
 
@@ -208,31 +208,31 @@ sub process_file {
 
   # Most of the 1500 lines below uses these globals.  We'll have to
   # clean this up sometime, probably.  For now, we just pull them out
-  # of %args.  -Ken
+  # of %Options.  -Ken
 
-  $self->{RetainCplusplusHierarchicalTypes} = $args{hiertype};
-  $self->{WantPrototypes} = $args{prototypes};
-  $self->{WantVersionChk} = $args{versioncheck};
-  $self->{WantLineNumbers} = $args{linenumbers};
+  $self->{RetainCplusplusHierarchicalTypes} = $Options{hiertype};
+  $self->{WantPrototypes} = $Options{prototypes};
+  $self->{WantVersionChk} = $Options{versioncheck};
+  $self->{WantLineNumbers} = $Options{linenumbers};
   $self->{IncludedFiles} = {};
 
-  $self->{die_on_error} = $args{die_on_error};
-  $self->{author_warnings} = $args{author_warnings};
+  $self->{die_on_error} = $Options{die_on_error};
+  $self->{author_warnings} = $Options{author_warnings};
 
-  die "Missing required parameter 'filename'" unless $args{filename};
+  die "Missing required parameter 'filename'" unless $Options{filename};
 
-  $self->{filepathname} = $args{filename};
+  $self->{filepathname} = $Options{filename};
   ($self->{dir}, $self->{filename}) =
-    (dirname($args{filename}), basename($args{filename}));
+    (dirname($Options{filename}), basename($Options{filename}));
   $self->{filepathname} =~ s/\\/\\\\/g;
-  $self->{IncludedFiles}->{$args{filename}}++;
+  $self->{IncludedFiles}->{$Options{filename}}++;
 
   # Open the output file if given as a string.  If they provide some
   # other kind of reference, trust them that we can print to it.
-  if (not ref $args{output}) {
-    open my($fh), "> $args{output}" or die "Can't create $args{output}: $!";
-    $args{outfile} = $args{output};
-    $args{output} = $fh;
+  if (not ref $Options{output}) {
+    open my($fh), "> $Options{output}" or die "Can't create $Options{output}: $!";
+    $Options{outfile} = $Options{output};
+    $Options{output} = $fh;
   }
 
   # Really, we shouldn't have to chdir() or select() in the first
@@ -242,31 +242,31 @@ sub process_file {
 
   chdir($self->{dir});
   my $pwd = cwd();
-  my $csuffix = $args{csuffix};
+  my $csuffix = $Options{csuffix};
 
   if ($self->{WantLineNumbers}) {
     my $cfile;
-    if ( $args{outfile} ) {
-      $cfile = $args{outfile};
+    if ( $Options{outfile} ) {
+      $cfile = $Options{outfile};
     }
     else {
-      $cfile = $args{filename};
+      $cfile = $Options{filename};
       $cfile =~ s/\.xs$/$csuffix/i or $cfile .= $csuffix;
     }
-    tie(*PSEUDO_STDOUT, 'ExtUtils::ParseXS::CountLines', $cfile, $args{output});
+    tie(*PSEUDO_STDOUT, 'ExtUtils::ParseXS::CountLines', $cfile, $Options{output});
     select PSEUDO_STDOUT;
   }
   else {
-    select $args{output};
+    select $Options{output};
   }
 
-  $self->{typemap} = process_typemaps( $args{typemap}, $pwd );
+  $self->{typemap} = process_typemaps( $Options{typemap}, $pwd );
 
   # Move more settings from parameters to object
   foreach my $datum ( qw| argtypes except inout optimize | ) {
-    $self->{$datum} = $args{$datum};
+    $self->{$datum} = $Options{$datum};
   }
-  $self->{strip_c_func_prefix} = $args{s};
+  $self->{strip_c_func_prefix} = $Options{s};
 
   # Identify the version of xsubpp used
   print <<EOM;
@@ -285,7 +285,7 @@ EOM
     if $self->{WantLineNumbers};
 
   # Open the input file (using $self->{filename} which
-  # is a basename'd $args{filename} due to chdir above)
+  # is a basename'd $Options{filename} due to chdir above)
   open($self->{FH}, '<', $self->{filename}) or die "cannot open $self->{filename}: $!\n";
 
   # ----------------------------------------------------------------
