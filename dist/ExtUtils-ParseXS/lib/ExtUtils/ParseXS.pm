@@ -533,7 +533,7 @@ EOM
       # BOOT: is a file-scoped keyword which consumes all the lines
       # following it.
 
-      # Check all the @{ $self->{line}}} lines for balance: all the
+      # Check all the @{ $self->{line}} lines for balance: all the
       # #if, #else, #endif etc within the BOOT should balance out.
       check_conditional_preprocessor_statements($self);
 
@@ -1009,7 +1009,7 @@ EOF
 
     $_ = '';
 
-    # Check all the @{ $self->{line}}} lines for balance: all the
+    # Check all the @{ $self->{line}} lines for balance: all the
     # #if, #else, #endif etc within the XSUB should balance out.
     check_conditional_preprocessor_statements();
 
@@ -1664,7 +1664,7 @@ MAKE_FETCHMETHOD_WORK
 
   print Q(<<"EOF");
 ##ifdef __cplusplus
-#extern "C" {
+#extern "C" [[
 ##endif
 EOF
 
@@ -1741,7 +1741,7 @@ EOF
   #      XSINTERFACE_FUNC_SET(cv, $value);
 
   print Q(<<"EOF") if defined $self->{XsubAliases} or defined $self->{interfaces};
-#    {
+#    [[
 #        CV * cv;
 #
 EOF
@@ -1785,7 +1785,7 @@ EOF
   # Emit closing scope for the 'CV *cv' declaration
 
   print Q(<<"EOF") if defined $self->{XsubAliases} or defined $self->{interfaces};
-#    }
+#    ]]
 EOF
 
   # Emit any lines derived from BOOT: sections. By putting the lines back
@@ -1815,7 +1815,7 @@ EOF
 #]]
 #
 ##ifdef __cplusplus
-#}
+#]]
 ##endif
 EOF
 
