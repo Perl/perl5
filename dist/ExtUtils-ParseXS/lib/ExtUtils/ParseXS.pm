@@ -772,8 +772,6 @@ EOM
           # Process $pre: either a C type or IN_OUT etc (or both)
 
           my $out_type = '';
-          my $inout_var;
-
           if ($self->{inout} and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//) {
             my $type = $1;
             $out_type = $type if $type ne 'IN';
@@ -941,14 +939,16 @@ EOM
     # the 'void' return type.
     #
     # XXX this searches the whole XSUB, not just the CODE: section
-    my $EXPLICIT_RETURN = ($seen_CODE &&
+    {
+      my $EXPLICIT_RETURN = ($seen_CODE &&
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
+      $XSRETURN_count = 1 if $EXPLICIT_RETURN;
+    }
 
     $self->{ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
 
     my $seen_INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
 
-    $XSRETURN_count = 1 if $EXPLICIT_RETURN;
 
 
     # ----------------------------------------------------------------
