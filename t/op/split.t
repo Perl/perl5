@@ -10,6 +10,7 @@ BEGIN {
 plan tests => 219;
 
 $FS = ':';
+our $IS_ASCII;
 
 $_ = 'a:b:c';
 
@@ -728,8 +729,12 @@ SKIP: {
 
 # gh18032: check that `split " "` does not get converted to `split ""`
 SKIP: {
-    my @skipwhite= ('split " "', 'split "\x20"', 'split "\N{SPACE}"',
-        'split "$e$sp$e"', 'split');
+    my @skipwhite = ( 'split " "',
+                       ($::IS_ASCII) ? 'split "\x20"' : 'split "\x40"',
+                      'split "\N{SPACE}"',
+                      'split "$e$sp$e"',
+                      'split'
+                    );
     my @noskipwhite= (
         'split / /', 'split m/ /', 'split qr/ /',
         'split /$e$sp$e/', 'split m/$e$sp$e/', 'split qr/$e$sp$e/'
