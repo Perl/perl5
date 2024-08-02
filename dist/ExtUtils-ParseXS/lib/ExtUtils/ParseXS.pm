@@ -371,8 +371,6 @@ EOM
 
  PARAGRAPH:
   while ($self->fetch_para()) {
-    my $outlist_ref  = [];
-
     # Process and emit any initial C-preprocessor lines and blank
     # lines.  Also, keep track of #if/#else/#endif nesting, updating:
     #    $self->{XSStack}
@@ -699,10 +697,10 @@ EOM
     #
     # Vars which aren't passed from perl call args:
     #
-    #  $only_C_inlist_ref->{XSauto_length_of_s} = 1; # because of length()
-    #  $only_C_inlist_ref->{'size= 10'}         = 1; # because of OUTLIST
+    #  $only_C_inlist{XSauto_length_of_s} = 1; # because of length()
+    #  $only_C_inlist{'size= 10'}         = 1; # because of OUTLIST
     #
-    #  @{$outlist_ref} = ('size');                   # OUTLIST vars
+    #  @OUTLIST_vars = ('size');              # OUTLIST vars
     #
     # Parameters which included a C type:
     #
@@ -725,7 +723,9 @@ EOM
     my (@fake_INPUT_pre);       # For length(var) generated variables
     my (@fake_INPUT);           # For normal parameters
 
-    my $only_C_inlist_ref = {}; # Not in the signature of Perl function
+    my %only_C_inlist;          # Not in the signature of Perl function
+    my @OUTLIST_vars;           # list of vars declared as OUTLIST
+
 
 
     if ($self->{argtypes} and $orig_args =~ /\S/) {
@@ -800,8 +800,8 @@ EOM
             $_ = "$name_or_lenname$default"; # Assigns to @args
           }
 
-          $only_C_inlist_ref->{$_} = 1 if $out_type eq "OUTLIST" or $is_length;
-          push @{ $outlist_ref }, $name_or_lenname if $out_type =~ /OUTLIST$/;
+          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $is_length;
+          push @OUTLIST_vars, $name_or_lenname if $out_type =~ /OUTLIST$/;
           $self->{in_out}->{$name_or_lenname} = $out_type if $out_type;
         }
       }
@@ -826,9 +826,9 @@ EOM
         if ($self->{inout} and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//) {
           my $out_type = $1;
           next if $out_type eq 'IN';
-          $only_C_inlist_ref->{$_} = 1 if $out_type eq "OUTLIST";
+          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
           if ($out_type =~ /OUTLIST$/) {
-              push @{ $outlist_ref }, undef;
+              push @OUTLIST_vars, undef;
           }
           $self->{in_out}->{$_} = $out_type;
         }
@@ -873,7 +873,7 @@ EOM
         # @map_param_idx_to_arg_idx maps param index to expected arg index,
         # with undef indicating a fake parameter that isn't assigned
         # to an arg
-        if ($only_C_inlist_ref->{$args[$i]}) {
+        if ($only_C_inlist{$args[$i]}) {
           push @map_param_idx_to_arg_idx, undef;
         }
         else {
@@ -889,7 +889,7 @@ EOM
           $self->{defaults}->{$args[$i]} =~ s/"/\\"/g; # escape double quotes
         }
 
-        $self->{proto_arg}->[$i+1] = '$' unless $only_C_inlist_ref->{$args[$i]};
+        $self->{proto_arg}->[$i+1] = '$' unless $only_C_inlist{$args[$i]};
 
       } # end foreach $i
 
@@ -1294,7 +1294,7 @@ EOF
 
       # If there are any OUTLIST vars to be pushed, first extend the
       # stack, to fit all OUTLIST vars + RETVAL
-      my $outlist_count = @{ $outlist_ref };
+      my $outlist_count = @OUTLIST_vars;
       if ($outlist_count) {
         my $ext = $outlist_count;
         ++$ext if $self->{gotRETVAL} || $implicit_OUTPUT_RETVAL;
@@ -1398,7 +1398,7 @@ EOF
         var         => $_,
         do_setmagic => 0,
         do_push     => 1,
-      } ) for @{ $outlist_ref };
+      } ) for @OUTLIST_vars;
 
 
       # ----------------------------------------------------------------
