@@ -1730,9 +1730,8 @@ EOF
 
   # Emit assorted declarations
 
-  print Q("#\n"); # blank line
-
   print Q(<<"EOF");
+#
 #    PERL_UNUSED_VAR(cv); /* -W */
 #    PERL_UNUSED_VAR(items); /* -W */
 EOF
