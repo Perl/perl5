@@ -159,11 +159,14 @@ sub process_file {
     $self = $Singleton;
   }
 
+  my %Options;
+
+  {
   my %opts = @_;
   $self->{ProtoUsed} = exists $opts{prototypes};
 
   # Set defaults.
-  my %Options = (
+  %Options = (
     argtypes        => 1,
     csuffix         => '.c',
     except          => 0,
@@ -180,6 +183,8 @@ sub process_file {
     author_warnings    => $AUTHOR_WARNINGS,
     %opts,
   );
+  }
+
   $Options{except} = $Options{except} ? ' TRY' : '';
 
   # Global Constants
@@ -242,9 +247,9 @@ sub process_file {
 
   chdir($self->{dir});
   my $pwd = cwd();
-  my $csuffix = $Options{csuffix};
 
   if ($self->{WantLineNumbers}) {
+    my $csuffix = $Options{csuffix};
     my $cfile;
     if ( $Options{outfile} ) {
       $cfile = $Options{outfile};
@@ -583,6 +588,9 @@ EOM
     my $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
     my $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
 
+    my ($class, $orig_args);
+
+    {
     my $func_header = shift(@{ $self->{line} });
 
     # Decompose the function declaration: match a line like
@@ -596,8 +604,8 @@ EOM
     $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-    my ($class, $orig_args);
     ($class, $self->{func_name}, $orig_args) =  ($1, $2, $3);
+
     $class = "$4 $class" if $4;
     ($self->{pname} = $self->{func_name}) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
     my $clean_func_name;
@@ -628,6 +636,7 @@ EOM
       next unless defined $tmp->{functions}{ $self->{Full_func_name} };
       Warn( $self, "Warning: duplicate function definition '$clean_func_name' detected");
       last;
+    }
     }
 
     # mark C function name as used
@@ -839,11 +848,14 @@ EOM
       unshift(@args, $arg0);
     }
 
-    my $extra_args = 0;
-    my @args_num = ();
     my $num_args = 0;
     my $report_args = ''; # the arg's description as used by croak()
     my $ellipsis;
+    my $min_args;
+
+    {
+    my $extra_args = 0;
+    my @args_num = ();
 
     foreach my $i (0 .. $#args) {
 
@@ -883,7 +895,7 @@ EOM
     } # end foreach $i
 
 
-    my $min_args = $num_args - $extra_args;
+    $min_args = $num_args - $extra_args;
     $report_args =~ s/"/\\"/g;
     $report_args =~ s/^,\s+//;
 
@@ -893,6 +905,7 @@ EOM
 
     # map argument names to indexes
     @{ $self->{args_match} }{@args} = @args_num;
+    }
 
 
     # ----------------------------------------------------------------
