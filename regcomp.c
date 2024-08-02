@@ -12179,7 +12179,7 @@ S_optimize_regclass(pTHX_
 
                             /* The base code point is from the start byte */
                             TWO_BYTE_UTF8_TO_NATIVE(low_utf8[0],
-                                                    UTF_CONTINUATION_MARK | 0),
+                                                    UTF8_MIN_CONTINUATION_BYTE),
 
                             ((struct regnode_bbm *) REGNODE_p(*ret))->bitmap,
                             REGNODE_BBM_BITMAP_LEN);
@@ -13195,7 +13195,7 @@ Perl_get_ANYOFHbbm_contents(pTHX_ const regnode * n) {
 
               /* The base cp is from the start byte plus a zero continuation */
               TWO_BYTE_UTF8_TO_NATIVE(FIRST_BYTE((struct regnode_bbm *) n),
-                                      UTF_CONTINUATION_MARK | 0));
+                                      UTF8_MIN_CONTINUATION_BYTE));
     return cp_list;
 }
 #endif /* PERL_RE_BUILD_AUX */
