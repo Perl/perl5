@@ -162,27 +162,28 @@ sub process_file {
   my %Options;
 
   {
-  my %opts = @_;
-  $self->{ProtoUsed} = exists $opts{prototypes};
+    my %opts = @_;
+    $self->{ProtoUsed} = exists $opts{prototypes};
 
-  # Set defaults.
-  %Options = (
-    argtypes        => 1,
-    csuffix         => '.c',
-    except          => 0,
-    hiertype        => 0,
-    inout           => 1,
-    linenumbers     => 1,
-    optimize        => 1,
-    output          => \*STDOUT,
-    prototypes      => 0,
-    typemap         => [],
-    versioncheck    => 1,
-    FH              => Symbol::gensym(),
-    die_on_error    => $DIE_ON_ERROR, # if true we die() and not exit() after errors
-    author_warnings    => $AUTHOR_WARNINGS,
-    %opts,
-  );
+    # Set defaults.
+    %Options = (
+      argtypes        => 1,
+      csuffix         => '.c',
+      except          => 0,
+      hiertype        => 0,
+      inout           => 1,
+      linenumbers     => 1,
+      optimize        => 1,
+      output          => \*STDOUT,
+      prototypes      => 0,
+      typemap         => [],
+      versioncheck    => 1,
+      FH              => Symbol::gensym(),
+      die_on_error    => $DIE_ON_ERROR, # if true we die() and not exit()
+                                        # after errors
+      author_warnings    => $AUTHOR_WARNINGS,
+      %opts,
+    );
   }
 
   $Options{except} = $Options{except} ? ' TRY' : '';
@@ -591,52 +592,52 @@ EOM
     my ($class, $orig_args);
 
     {
-    my $func_header = shift(@{ $self->{line} });
+      my $func_header = shift(@{ $self->{line} });
 
-    # Decompose the function declaration: match a line like
-    #   Some::Class::foo_bar(  args  ) const ;
-    #   -----------  -------   ----    ----- --
-    #       $1        $2        $3      $4   $5
-    #
-    # where everything except $2 and $3 are optional and the 'const'
-    # is for C++ functions.
+      # Decompose the function declaration: match a line like
+      #   Some::Class::foo_bar(  args  ) const ;
+      #   -----------  -------   ----    ----- --
+      #       $1        $2        $3      $4   $5
+      #
+      # where everything except $2 and $3 are optional and the 'const'
+      # is for C++ functions.
 
-    $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
-      unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
+      $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
+        unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-    ($class, $self->{func_name}, $orig_args) =  ($1, $2, $3);
+      ($class, $self->{func_name}, $orig_args) =  ($1, $2, $3);
 
-    $class = "$4 $class" if $4;
-    ($self->{pname} = $self->{func_name}) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
-    my $clean_func_name;
-    ($clean_func_name = $self->{func_name}) =~ s/^$self->{Prefix}//;
-    $self->{Full_func_name} = "$self->{Packid}_$clean_func_name";
-    if ($Is_VMS) {
-      $self->{Full_func_name} = $SymSet->addsym( $self->{Full_func_name} );
-    }
+      $class = "$4 $class" if $4;
+      ($self->{pname} = $self->{func_name}) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
+      my $clean_func_name;
+      ($clean_func_name = $self->{func_name}) =~ s/^$self->{Prefix}//;
+      $self->{Full_func_name} = "$self->{Packid}_$clean_func_name";
+      if ($Is_VMS) {
+        $self->{Full_func_name} = $SymSet->addsym( $self->{Full_func_name} );
+      }
 
-    # At this point, supposing that the input so far was:
-    #
-    #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
-    #   int
-    #   Some::Class::foo_bar(  args  ) const ;
-    #
-    # we should have:
-    #
-    # $class                  'const Some::Class'
-    # $orig_args               args
-    # $self->{func_name}      'foo_bar'
-    # $self->{pname}          'BAR::BAZ::bar' # full Perl function name
-    # $self->{Full_func_name} 'BAR__BAZ_bar'; # full C function name
+      # At this point, supposing that the input so far was:
+      #
+      #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
+      #   int
+      #   Some::Class::foo_bar(  args  ) const ;
+      #
+      # we should have:
+      #
+      # $class                  'const Some::Class'
+      # $orig_args               args
+      # $self->{func_name}      'foo_bar'
+      # $self->{pname}          'BAR::BAZ::bar' # full Perl function name
+      # $self->{Full_func_name} 'BAR__BAZ_bar'; # full C function name
 
 
-    # Check for a duplicate function definition, but ignoring multiple
-    # definitions within the branches of an #if/#else/#endif
-    for my $tmp (@{ $self->{XSStack} }) {
-      next unless defined $tmp->{functions}{ $self->{Full_func_name} };
-      Warn( $self, "Warning: duplicate function definition '$clean_func_name' detected");
-      last;
-    }
+      # Check for a duplicate function definition, but ignoring multiple
+      # definitions within the branches of an #if/#else/#endif
+      for my $tmp (@{ $self->{XSStack} }) {
+        next unless defined $tmp->{functions}{ $self->{Full_func_name} };
+        Warn( $self, "Warning: duplicate function definition '$clean_func_name' detected");
+        last;
+      }
     }
 
     # mark C function name as used
@@ -854,57 +855,57 @@ EOM
     my $min_args;
 
     {
-    my $extra_args = 0;
-    my @args_num = ();
+      my $extra_args = 0;
+      my @args_num = ();
 
-    foreach my $i (0 .. $#args) {
+      foreach my $i (0 .. $#args) {
 
-      # Handle trailing ellipsis, e.g. (foo, bar, ...)
-      # XXX this code deletes any embedded '...' from any of the other args
-      # too, which is almost certainly wrong.
-      if ($args[$i] =~ s/\.\.\.//) {
-        $ellipsis = 1;
-        if ($args[$i] eq '' && $i == $#args) {
-          $report_args .= ", ...";
-          pop(@args);
-          last;
+        # Handle trailing ellipsis, e.g. (foo, bar, ...)
+        # XXX this code deletes any embedded '...' from any of the other args
+        # too, which is almost certainly wrong.
+        if ($args[$i] =~ s/\.\.\.//) {
+          $ellipsis = 1;
+          if ($args[$i] eq '' && $i == $#args) {
+            $report_args .= ", ...";
+            pop(@args);
+            last;
+          }
         }
-      }
 
-      # @args_num: maps param index to expected arg index,
-      # with undef indicating a fake parameter that isn't assigned
-      # to an arg
-      if ($only_C_inlist_ref->{$args[$i]}) {
-        push @args_num, undef;
-      }
-      else {
-        push @args_num, ++$num_args;
-          $report_args .= ", $args[$i]";
-      }
+        # @args_num: maps param index to expected arg index,
+        # with undef indicating a fake parameter that isn't assigned
+        # to an arg
+        if ($only_C_inlist_ref->{$args[$i]}) {
+          push @args_num, undef;
+        }
+        else {
+          push @args_num, ++$num_args;
+            $report_args .= ", $args[$i]";
+        }
 
-      # process default values, e.g. (int foo = 1)
-      if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
-        $extra_args++;
-        $args[$i] = $1; # delete the '= ...' from $arg[$i]
-        $self->{defaults}->{$args[$i]} = $2;
-        $self->{defaults}->{$args[$i]} =~ s/"/\\"/g; # escape double quotes
-      }
+        # process default values, e.g. (int foo = 1)
+        if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
+          $extra_args++;
+          $args[$i] = $1; # delete the '= ...' from $arg[$i]
+          $self->{defaults}->{$args[$i]} = $2;
+          $self->{defaults}->{$args[$i]} =~ s/"/\\"/g; # escape double quotes
+        }
 
-      $self->{proto_arg}->[$i+1] = '$' unless $only_C_inlist_ref->{$args[$i]};
+        $self->{proto_arg}->[$i+1] = '$' unless $only_C_inlist_ref->{$args[$i]};
 
-    } # end foreach $i
+      } # end foreach $i
 
 
-    $min_args = $num_args - $extra_args;
-    $report_args =~ s/"/\\"/g;
-    $report_args =~ s/^,\s+//;
+      $min_args = $num_args - $extra_args;
+      $report_args =~ s/"/\\"/g;
+      $report_args =~ s/^,\s+//;
 
-    # The args to pass to the wrapped library function. Basically
-    # join(',' @args) but with '&' prepended for any *OUT* args.
-    $self->{func_args} = assign_func_args($self, \@args, $class);
+      # The args to pass to the wrapped library function. Basically
+      # join(',' @args) but with '&' prepended for any *OUT* args.
+      $self->{func_args} = assign_func_args($self, \@args, $class);
 
-    # map argument names to indexes
-    @{ $self->{args_match} }{@args} = @args_num;
+      # map argument names to indexes
+      @{ $self->{args_match} }{@args} = @args_num;
     }
 
 
