@@ -6554,6 +6554,25 @@ S_langinfo_sv_i(pTHX_
         retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
 
+        if (UNLIKELY(total_len == 0)) switch (item) {
+            case CODESET:
+            case RADIXCHAR:
+            case ABDAY_1: case ABDAY_2: case ABDAY_3: case ABDAY_4:
+            case ABDAY_5: case ABDAY_6: case ABDAY_7:
+            case ABMON_1: case ABMON_2: case ABMON_3: case ABMON_4:
+            case ABMON_5: case ABMON_6: case ABMON_7: case ABMON_8:
+            case ABMON_9: case ABMON_10: case ABMON_11: case ABMON_12:
+            case DAY_1: case DAY_2: case DAY_3: case DAY_4:
+            case DAY_5: case DAY_6: case DAY_7:
+            case MON_1: case MON_2: case MON_3: case MON_4: case MON_5:
+            case MON_6: case MON_7: case MON_8: case MON_9: case MON_10:
+            case MON_11: case MON_12:
+                locale_panic_(Perl_form(aTHX_
+                                        "nl_langinfo returned empty for %ld"
+                                        " in locale '%s'",
+                                        (long) item, locale));
+        }
+
         /* Initialized only to silence some dumber compilers warning that
          * might be uninitialized */
         char separator = ';';
