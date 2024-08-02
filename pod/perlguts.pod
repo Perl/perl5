@@ -521,6 +521,96 @@ IV with loss, SvIOKp, SvNOKp and SvNOK will be set, while SvIOK wont be.
 
 In general, though, it's best to use the C<Sv*V> macros.
 
+=head2 Read-Only Values
+
+In Perl 5.16 and earlier, copy-on-write (see the next section) shared a
+flag bit with read-only scalars.  So the only way to test whether
+C<sv_setsv>, etc., will raise a "Modification of a read-only value" error
+in those versions is:
+
+    SvREADONLY(sv) && !SvIsCOW(sv)
+
+Under Perl 5.18 and later, SvREADONLY only applies to read-only variables,
+and, under 5.20, copy-on-write scalars can also be read-only, so the above
+check is incorrect.  You just want:
+
+    SvREADONLY(sv)
+
+If you need to do this check often, define your own macro like this:
+
+    #if PERL_VERSION >= 18
+    # define SvTRULYREADONLY(sv) SvREADONLY(sv)
+    #else
+    # define SvTRULYREADONLY(sv) (SvREADONLY(sv) && !SvIsCOW(sv))
+    #endif
+
+Or better yet, read about THINKFIRST macros below.
+
+=head2 Copy on Write
+
+Perl implements a copy-on-write (COW) mechanism for scalars, in which
+string copies are not immediately made when requested, but are deferred
+until made necessary by one or the other scalar changing.  This is mostly
+transparent, but one must take care not to modify string buffers that are
+shared by multiple SVs.
+
+You can test whether an SV is using copy-on-write with C<SvIsCOW(sv)>.
+
+You can force an SV to make its own copy of its string buffer by calling
+C<sv_force_normal(sv)> or SvPV_force_nolen(sv).
+
+If you want to make the SV drop its string buffer, use
+C<sv_force_normal_flags(sv, SV_COW_DROP_PV)> or simply
+C<sv_setsv(sv, NULL)>.
+
+All of these functions will croak on read-only scalars (see the previous
+section for more on those).
+
+To test that your code is behaving correctly and not modifying COW buffers,
+on systems that support L<mmap(2)> (e.g. Unix, Linux, BSDs, macOS) you can
+configure perl with C<-Accflags=-DPERL_DEBUG_READONLY_COW> and it will turn
+buffer violations into crashes.  You will find it to be marvellously slow,
+so you may want to skip perl's own tests.
+
+=head2 THINKFIRST before writing to a string buffer
+
+You are more likely to (and usually I<should>) see the C<SvTHINKFIRST(sv)>
+macro used to check whether an SV is ready to be written to, as this is a
+combined single check to see if the SV:
+
+=over 4
+
+=item *
+Points to a COW buffer
+
+=item *
+Is READONLY
+
+=item *
+Contains a reference
+
+=item *
+Has some relevant magic assigned
+
+=back
+
+Two related macros can be used to perform those checks and, if required,
+also perform some action:
+
+=over 4
+
+=item *
+C<SV_CHECK_THINKFIRST(sv)> calls C<sv_force_normal(sv)> to copy the
+string buffer, turning it into a mutable string.
+
+=item *
+C<SV_CHECK_THINKFIRST_COW_DROP(sv)> calls C<sv_force_normal_flags(sv, SV_COW_DROP_PV)>
+which drops any string buffer pointed to by C<sv>. This is usually
+used to avoid copying any COW string to a new buffer, prior to
+writing some completely new string to C<sv>.
+
+=back
+
 =head2 Working with AVs
 
 There are two main, longstanding ways to create and load an AV.  The first
@@ -1325,54 +1415,6 @@ following code:
 
 If the order of C<sv_setiv> and C<sv_setpv> had been reversed, then the
 macro C<SvPOK_on> would need to be called instead of C<SvIOK_on>.
-
-=head2 Read-Only Values
-
-In Perl 5.16 and earlier, copy-on-write (see the next section) shared a
-flag bit with read-only scalars.  So the only way to test whether
-C<sv_setsv>, etc., will raise a "Modification of a read-only value" error
-in those versions is:
-
-    SvREADONLY(sv) && !SvIsCOW(sv)
-
-Under Perl 5.18 and later, SvREADONLY only applies to read-only variables,
-and, under 5.20, copy-on-write scalars can also be read-only, so the above
-check is incorrect.  You just want:
-
-    SvREADONLY(sv)
-
-If you need to do this check often, define your own macro like this:
-
-    #if PERL_VERSION >= 18
-    # define SvTRULYREADONLY(sv) SvREADONLY(sv)
-    #else
-    # define SvTRULYREADONLY(sv) (SvREADONLY(sv) && !SvIsCOW(sv))
-    #endif
-
-=head2 Copy on Write
-
-Perl implements a copy-on-write (COW) mechanism for scalars, in which
-string copies are not immediately made when requested, but are deferred
-until made necessary by one or the other scalar changing.  This is mostly
-transparent, but one must take care not to modify string buffers that are
-shared by multiple SVs.
-
-You can test whether an SV is using copy-on-write with C<SvIsCOW(sv)>.
-
-You can force an SV to make its own copy of its string buffer by calling C<sv_force_normal(sv)> or SvPV_force_nolen(sv).
-
-If you want to make the SV drop its string buffer, use
-C<sv_force_normal_flags(sv, SV_COW_DROP_PV)> or simply
-C<sv_setsv(sv, NULL)>.
-
-All of these functions will croak on read-only scalars (see the previous
-section for more on those).
-
-To test that your code is behaving correctly and not modifying COW buffers,
-on systems that support L<mmap(2)> (i.e., Unix) you can configure perl with
-C<-Accflags=-DPERL_DEBUG_READONLY_COW> and it will turn buffer violations
-into crashes.  You will find it to be marvellously slow, so you may want to
-skip perl's own tests.
 
 =head2 Magic Variables
 
