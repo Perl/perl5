@@ -373,8 +373,12 @@ are in the character. */
  * One could solve for two linear equations and come up with it.) */
 #define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
 
-/* This value is clearer in some contexts */
+/* This value is clearer in some contexts; still applies to UTF, not UTF-8 */
 #define UTF_MIN_CONTINUATION_BYTE  UTF_CONTINUATION_MARK
+
+/* This is the name to use if you are working in UTF-8, as opposed to plain
+ * 'UTF', which is I8 on EBCDIC platforms */
+#define UTF8_MIN_CONTINUATION_BYTE  I8_TO_NATIVE_UTF8(UTF_MIN_CONTINUATION_BYTE)
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof? */
