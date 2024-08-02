@@ -4479,7 +4479,6 @@ dist/Storable/t/file_magic.t		See if file_magic function works
 dist/Storable/t/flags.t			See if Storable works
 dist/Storable/t/forgive.t		See if Storable works
 dist/Storable/t/freeze.t		See if Storable works
-dist/Storable/t/HAS_ATTACH.pm		For auto-requiring of modules for STORABLE_attach
 dist/Storable/t/HAS_HOOK.pm		For auto-requiring of modules for STORABLE_thaw
 dist/Storable/t/HAS_OVERLOAD.pm		For auto-requiring of mdoules for overload
 dist/Storable/t/huge.t			See how Storable handles huge data
