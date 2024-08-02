@@ -564,7 +564,7 @@ EOM
     # function to be on the same line.)
     ($self->{ret_type}) = ExtUtils::Typemaps::tidy_type($_);
 
-    my $RETVAL_no_return = 1 if $self->{ret_type} =~ s/^NO_OUTPUT\s+//;
+    my $seen_NO_RETURN = 1 if $self->{ret_type} =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line declarations. This splits a single line like:
     #    int foo(....)
@@ -586,8 +586,8 @@ EOM
     $self->blurt("Error: Function definition too short '$self->{ret_type}'"), next PARAGRAPH
       unless @{ $self->{line} };
 
-    my $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
-    my $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
+    my $seen_extern_C = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
+    my $seen_static   = 1 if $self->{ret_type} =~ s/^static\s+//;
 
     my ($class, $orig_args);
 
@@ -844,14 +844,14 @@ EOM
 
     # For C++ type methods, add fake method arg to beginning
     if (defined($class)) {
-      my $arg0 = ((defined($static) or $self->{func_name} eq 'new')
+      my $arg0 = ((defined($seen_static) or $self->{func_name} eq 'new')
           ? "CLASS" : "THIS");
       unshift(@args, $arg0);
     }
 
     my $num_args = 0;
     my $report_args = ''; # the arg's description as used by croak()
-    my $ellipsis;
+    my $seen_ellipsis;
     my $min_args;
 
     {
@@ -864,7 +864,7 @@ EOM
         # XXX this code deletes any embedded '...' from any of the other args
         # too, which is almost certainly wrong.
         if ($args[$i] =~ s/\.\.\.//) {
-          $ellipsis = 1;
+          $seen_ellipsis = 1;
           if ($args[$i] eq '' && $i == $#args) {
             $report_args .= ", ...";
             pop(@args);
@@ -914,8 +914,8 @@ EOM
     # that are needed to be known early.
     # ----------------------------------------------------------------
 
-    my $PPCODE = grep(/^\s*PPCODE\s*:/, @{ $self->{line} });
-    my $CODE = grep(/^\s*CODE\s*:/, @{ $self->{line} });
+    my $seen_PPCODE = grep(/^\s*PPCODE\s*:/, @{ $self->{line} });
+    my $seen_CODE   = grep(/^\s*CODE\s*:/,   @{ $self->{line} });
 
     # Horrible 'void' return arg count hack.
     #
@@ -941,12 +941,12 @@ EOM
     # the 'void' return type.
     #
     # XXX this searches the whole XSUB, not just the CODE: section
-    my $EXPLICIT_RETURN = ($CODE &&
+    my $EXPLICIT_RETURN = ($seen_CODE &&
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
 
     $self->{ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
 
-    my $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
+    my $seen_INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
 
     $xsreturn = 1 if $EXPLICIT_RETURN;
 
@@ -955,11 +955,11 @@ EOM
     # Emit initial C code for the XSUB
     # ----------------------------------------------------------------
 
-    $externC = $externC ? qq[extern "C"] : "";
+    $seen_extern_C = $seen_extern_C ? qq[extern "C"] : "";
 
     # Emit function header
     print Q(<<"EOF");
-#$externC
+#$seen_extern_C
 #XS_EUPXS(XS_$self->{Full_func_name}); /* prototype to pass -Wmissing-prototypes */
 #XS_EUPXS(XS_$self->{Full_func_name})
 #[[
@@ -970,11 +970,11 @@ EOF
 #    dXSI32;
 EOF
 
-    print Q(<<"EOF") if $INTERFACE;
+    print Q(<<"EOF") if $seen_INTERFACE;
 #    dXSFUNCTION($self->{ret_type});
 EOF
 
-    $self->{cond} = set_cond($ellipsis, $min_args, $num_args);
+    $self->{cond} = set_cond($seen_ellipsis, $min_args, $num_args);
 
     print Q(<<"EOF") if $self->{except}; # "-except" cmd line switch
 #    char errbuf[1024];
@@ -1000,11 +1000,11 @@ EOF
     # dXSARGS) is unused.
     # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     # but such a move could break third-party extensions
-    print Q(<<"EOF") if $PPCODE;
+    print Q(<<"EOF") if $seen_PPCODE;
 #    PERL_UNUSED_VAR(ax); /* -Wall */
 EOF
 
-    print Q(<<"EOF") if $PPCODE;
+    print Q(<<"EOF") if $seen_PPCODE;
 #    SP -= items;
 EOF
 
@@ -1071,7 +1071,7 @@ EOF
       # Emit a 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
       if (!$self->{thisdone} && defined($class)) {
-        if (defined($static) or $self->{func_name} eq 'new') {
+        if (defined($seen_static) or $self->{func_name} eq 'new') {
           print "\tchar *";
           $self->{var_types}->{"CLASS"} = "char *";
           $self->generate_init( {
@@ -1219,7 +1219,7 @@ EOF
             $wantRETVAL = 1;
           }
 
-          if (defined($static)) { # it has a return type of 'static foo'
+          if (defined($seen_static)) { # it has a return type of 'static foo'
             if ($self->{func_name} eq 'new') {
               $self->{func_name} = "$class";
             }
@@ -1264,7 +1264,7 @@ EOF
       #   auto-generated call to the library function indicates it was seen
       #   ($wantRETVAL).
       # - Also from this point on, treat the (non-void) return type as void.
-      ($wantRETVAL, $self->{ret_type}) = (0, 'void') if $RETVAL_no_return;
+      ($wantRETVAL, $self->{ret_type}) = (0, 'void') if $seen_NO_RETURN;
 
       # used by OUTPUT_handler() to detect duplicate OUTPUT var lines
       undef %{ $self->{outargs} };
@@ -1417,7 +1417,7 @@ EOF
 #   ]]
 EOF
 
-      print Q(<<"EOF") if $self->{ScopeThisXSUB} and not $PPCODE;
+      print Q(<<"EOF") if $self->{ScopeThisXSUB} and not $seen_PPCODE;
 #   LEAVE;
 EOF
 
@@ -1469,12 +1469,12 @@ EOF
       if $^O eq "hpux";
 
     if ($xsreturn) {
-      print Q(<<"EOF") unless $PPCODE;
+      print Q(<<"EOF") unless $seen_PPCODE;
 #    XSRETURN($xsreturn);
 EOF
     }
     else {
-      print Q(<<"EOF") unless $PPCODE;
+      print Q(<<"EOF") unless $seen_PPCODE;
 #    XSRETURN_EMPTY;
 EOF
     }
@@ -1530,7 +1530,7 @@ EOF
           $self->{proto_arg}->[$min_args] .= ";";
         }
         push @{ $self->{proto_arg} }, "$s\@"
-          if $ellipsis; # '...' was seen in XSUB signature
+          if $seen_ellipsis; # '...' was seen in XSUB signature
 
         $self->{proto} = join ("", grep defined, @{ $self->{proto_arg} } );
       }
