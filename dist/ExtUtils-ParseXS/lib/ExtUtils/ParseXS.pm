@@ -141,9 +141,267 @@ my $END = "!End!\n\n";
 my $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
 
 
+# All the valid fields of an ExtUtils::ParseXS hash object. The 'use
+# fields' enables compile-time or run-time errors if code attempts to
+# use a key which isn't listed here.
+
+my $USING_FIELDS;
+
+BEGIN {
+  my @fields = (
+
+  # I/O:
+
+  'dir',                # The directory component of the main input file:
+                        # we will normally chdir() to this directory.
+
+  'filepathname',       # The full pathname of the current input file.
+  'filename',           # The filename      of the current input file.
+  'FH',                 # The filehandle    of the current input file.
+
+  'IncludedFiles',      # Bool hash of INCLUDEd filenames (plus main file).
+
+  'line',               # Array of lines recently read in and being processed.
+                        # Typically one XSUB's worth of lines.
+  'line_no',            # Array of line nums corresponding to @{$self->{line}}.
+
+  'lastline',           # The contents of the line most recently read in
+                        # but not yet processed.
+  'lastline_no',        # The line number of lastline.
+
+
+  # File-scoped configuration state:
+
+  'RetainCplusplusHierarchicalTypes', # Bool: "-hiertype" switch value:
+                                      # it stops the typemap code doing
+                                      # $type =~ tr/:/_/.
+
+  'WantLineNumbers',    # Bool: (default true): "-nolinenumbers" switch not
+                        # present: causes '#line NNN' lines to be emitted.
+
+  'die_on_error',       # Bool: make death() call die() rather than exit().
+                        # It is set initially from the die_on_error option
+                        # or from the $ExtUtils::ParseXS::DIE_ON_ERROR global.
+
+  'author_warnings',    # Bool: enables some warnings only useful to
+                        # ParseXS.pm's authors rather than module creators.
+                        # Set from Options or $AUTHOR_WARNINGS env var.
+
+  'strip_c_func_prefix',# The discouraged -strip=... switch.
+
+  'argtypes',           # Bool: (default true): "-noargtypes" switch not
+                        # present. Enables ANSI-like arg types to be
+                        # included in the XSUB signature.
+
+  'inout',              # Bool: (default true): "-noinout" switch not present.
+                        # Enables processing of IN/OUT/etc arg modifiers.
+
+  'except',             # Initially a bool from the '-except' switch.
+                        # Then turned into 'TRY' / '' so acts still
+                        # kind of as a boolean, but can be output
+                        # directly.
+
+  'optimize',           # Bool: (default true): "-nooptimize" switch not
+                        # present. Enables optimizations (currently just
+                        # the TARG one).
+
+
+  # File-scoped parsing state:
+
+  'typemap',            # An ExtUtils::Typemaps object: the result of
+                        # reading in the standard (or other) typemap.
+
+  'errors',             # Num: count of number of errors seen so far.
+
+  'XSStack',            # Array of hashes: nested INCLUDE and #if states.
+
+  'Module_cname',       # MODULE  canonical name (i.e. after s/\W/_/g).
+  'Package',            # PACKAGE name.
+  'Packid',             #             Ditto, but with tr/:/_/.
+  'Packprefix',         #             Ditto, but with '::' appended.
+  'Prefix',             # PREFIX value, but after quotemeta().
+
+  'Overloaded',         # Hash: for every PACKAGE which has at least one
+                        # overloaded XSUB, add a (Package => Packid)
+                        # entry.
+
+  'Fallback',           # Hash: for every package, maps it to the
+                        # overload fallback state for that package (if
+                        # specified). Each value is one of the strings
+                        # "&PL_sv_yes", "&PL_sv_no", "&PL_sv_undef".
+
+  'ProtoUsed',          # Bool: at least one PROTOTYPE(S) keyword seen.
+
+  'WantPrototypes',     # Bool: most recent PROTOTYPES: value. Defaults to
+                        # the value of the "-prototypes" switch.
+
+  'WantVersionChk',     # Bool: most recent VERSIONCHECK: value. Defaults
+                        # to the value of the "-noversioncheck" switch.
+
+  'interfaces',         # Bool: at least one INTERFACE/INTERFACE_MACRO
+                        # has been seen anywhere.
+
+
+  # File-scoped code-emitting state:
+
+  'InitFileCode',       # Array of lines to emit early in boot XSUB.
+
+
+  # Per-XSUB parsing state:
+
+  'proto_in_this_xsub', # Bool: PROTOTYPE keyword seen (for dup warning).
+  
+  'scope_in_this_xsub', # Bool: SCOPE keyword seen (for dup warning).
+  
+  'ALIAS',              # Bool: ALIAS keyword seen in this XSUB.
+
+  'interface',          # Bool: INTERFACE or INTERFACE_MACRO seen in this XSUB.
+  
+  'interface_macro',    # Str: current interface extraction macro.
+  
+  'interface_macro_set',# Str: current interface setting macro.
+  
+  'ProtoThisXSUB',      # Str: is set to either the global PROTOTYPES
+                        #  values (0 or 1), or to what's been
+                        #  overridden for this XSUB with PROTOTYPE
+                        #    "0": DISABLE
+                        #    "1": ENABLE
+                        #    "2": empty prototype
+                        #    other: a specific prototype.
+
+  'ScopeThisXSUB',      # Bool: SCOPE ENABLEd
+
+  'ret_type',           # The return type of this XSUB (whitespace-tidied).
+
+  'func_name',          # The name of this XSUB,        e.g. 'f'
+  'pname',              # its full Perl function name,  e.g. 'Foo::Bar::f'
+  'Full_func_name',     # its full C function name,     e.g. 'Foo__Bar__f'
+
+  'args_match',         # Hash: Map argument names to indexes.
+
+  'var_types',          # Hash: map argument names to types, such as
+                        # 'int *'. Names include special ones like 'RETVAL'.
+
+  'defaults',           # Hash: map argument names to default expressions
+                        # (if any).
+  
+  'argtype_seen',       # Hash: of bools: indicates argument name seen in
+                        # signature(for duplicate spotting).
+  
+  'in_out',             # Hash: map argument names to 'OUTLIST' etc.
+                        # Includes generated argument names like
+                        # 'XSauto_length_of_foo' for 'length(foo)'.
+  
+  'lengthof',           # Hash: indicates (by existence, not value)
+                        # whether argument was declared as 'length(foo)'.
+  
+  'proto_arg',          # Array: maps argument index to prototype (such as
+                        # '$'). Always populated, even if prototypes
+                        # aren't being used for this XSUB.
+  
+  'cond',               # Most recent CASE string.
+                        # Also used temporarily elsewhere.
+
+  'condnum',            # number of CASE keywords encountered.
+                        # Zero indicates none encountered yet.
+
+  'processing_arg_with_types', # Bool: INPUT_handler() is being called
+                               # with fake lines generated by the
+                               # ANSI-signature parsing code.
+  
+  'func_args',          # The args to pass to any wrapped library function.
+                        # Basically join(',' @args) but with '&' prepended
+                        # for any OUT args.
+
+  'OverloadsThisXSUB',  # Hash: maps each overload method name (such as '<=>')
+                        # to a boolean indicating whether that method has
+                        # been listed by OVERLOAD (for duplicate
+                        # spotting).
+   
+  'Interfaces',         # Hash: for each INTERFACE name, map the short
+                        # (PREFIX removed) name to the original name.
+
+  'Attributes',         # Array of strings: all ATTRIBUTE keywords
+                        # (possibly multiple space-separated keywords per
+                        # string).
+
+  'have_CODE_with_RETVAL', # Have seen 'RETVAL' within a CODE block.
+
+  'XsubAliases',         # Hash: maps ALIAS name to value.
+  'XsubAliasValues',     # Hash of hash of bools: indicates which alias
+                         # names have been used for each value.
+  'XsubAliasValueClashHinted', # Bool: an ALIAS warning-hint has been emitted.
+  'XsubAlias',           # XXX this field is almost certainly a typo
+                         # for XsubAliases.
+
+
+  # Per-XSUB INPUT section parsing state:
+
+  'arg_list',           # Hash: map argument names to a 'seen in INPUT'
+                        # boolean (for duplicate spotting).
+  
+  'thisdone',           # Seen a var called 'THIS' in an INPUT section.
+
+  'retvaldone',         # Seen a var called 'RETVAL' in an INPUT section.
+
+  'var_num',            # Num: the index number of the parameter. The
+                        # counting starts at 1 and skips fake parameters
+                        # like 'length(s)' (zero is used for RETVAL).
+                        # XXX This should really just be a lex var
+
+
+  # Per-XSUB OUTPUT section parsing state:
+
+  'have_OUTPUT',        # Bool: have seen an OUTPUT section.
+
+  'DoSetMagic',         # Bool: most recent value of SETMAGIC in an OUTPUT
+                        # section.
+
+  'outargs',            # Hash of bools: indicates which var names have been
+                        # seen in an OUTPUT section.
+
+  'gotRETVAL',          # Seen a var called 'RETVAL' in an OUTPUT section.
+
+  'RETVAL_code',        # deferred typemap code from an OUTPUT section
+                        # "RETVAL output-code" line (deferred because
+                        # RETVAL code is emitted after any arg update
+                        # code).
+
+
+  # Per-XSUB code-emitting state:
+
+  'deferred',            # A multi-line string containing lines of code to
+                         # be emitted *after* all INPUT and PREINIT
+                         # keywords have been processed.
+
+  'proto',               # These three are used when generating the
+  'newXS',               #   newXS code. They should really be just
+  'file',                #   lexical vars.
+
+  );
+
+  # do 'use fields', except: fields needs Hash::Util which is XS, which
+  # needs us. So only 'use fields' on systems where Hash::Util has already
+  # been built.
+  if (eval 'require Hash::Util (); 1;') {
+    require 'fields.pm';
+    $USING_FIELDS = 1;
+    fields->import(@fields);
+  }
+}
+
 
 sub new {
-  return bless {} => shift;
+  my ExtUtils::ParseXS $self = shift;
+  unless (ref $self) {
+      if ($USING_FIELDS) {
+        $self = fields::new($self);
+      }
+      else {
+        $self = bless {} => $self;
+      }
+  }
+  return $self;
 }
 
 our $Singleton = __PACKAGE__->new;
@@ -152,7 +410,7 @@ our $Singleton = __PACKAGE__->new;
 # The big method which does all the input parsing and output generation
 
 sub process_file {
-  my $self;
+  my ExtUtils::ParseXS $self;
   # Allow for $package->process_file(%hash), $obj->process_file, and process_file()
   if (@_ % 2) {
     my $invocant = shift;
@@ -429,65 +687,6 @@ EOM
       if $self->{line}->[0] =~ /^\s/;
 
     # Initialize some per-XSUB instance variables:
-    #
-    #
-    # args_match         (hash)  Map argument names to indexes
-    #
-    # var_types          (hash)  Map argument names to types,  such as
-    #                            'int *'. Includes special names like 'RETVAL'.
-    #
-    # defaults           (hash)  Map argument names to default expressions
-    #                            (if any)
-    #
-    # arg_list           (hash)  Map argument names to a 'seen in INPUT'
-    #                            boolean (for duplicate spotting)
-    #
-    # argtype_seen       (hash)  Map argument names to a 'seen in
-    #                            signature with a type' boolean
-    #                            (for duplicate spotting)
-    #
-    # in_out             (hash)  Map argument names to 'OUTLIST' etc
-    #                            Includes generated argument names like
-    #                            'XSauto_length_of_foo' for 'length(foo)'.
-    #
-    # lengthof           (hash)  Indicates (by existence, not value)
-    #                            whether argument was declared as
-    #                            'length(foo)'
-    #
-    # proto_arg          (array) Maps argument index to prototype (such as
-    #                            '$'). Always populated, even if
-    #                            prototypes aren't being used for this
-    #                            XSUB.
-    #
-    # processing_arg_with_types
-    #                    (bool)  INPUT_handler() being called with fake
-    #                            lines generated by the ANSI-signature
-    #                            parsing code
-    #
-    # proto_in_this_xsub (bool)  PROTOTYPE keyword seen (for dup warning)
-    #
-    # scope_in_this_xsub (bool)  SCOPE keyword seen (for dup warning)
-    #
-    # interface          (bool)  INTERFACE/INTERFACE_MACRO seen
-    #
-    # interface_macro    (str)   Current interface extraction macro
-    #
-    # interface_macro_set(str)   Current interface setting macro
-    #
-    # ProtoThisXSUB      (str)   Set to either the global PROTOTYPES:
-    #                            values (0 or 1), or to what's been
-    #                            overridden for this XSUB with PROTOTYPE:
-    #                              "0": DISABLE
-    #                              "1": ENABLE
-    #                              "2": empty prototype
-    #                              other: a specific prototype
-    #
-    # ScopeThisXSUB      (bool)  SCOPE ENABLEd
-    #
-    # OverloadsThisXSUB  (hash)  maps each overload method name (such as '<=>')
-    #                            to a boolean indicating whether that
-    #                            method has been listed by OVERLOAD
-    #                            (for duplicate spotting)
 
     foreach my $member (qw(args_match var_types defaults arg_list
                            argtype_seen in_out lengthof))
@@ -1881,7 +2080,7 @@ sub report_error_count {
 # otherwise.
 
 sub check_keyword {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   # skip blank lines
   $_ = shift(@{ $self->{line} }) while !/\S/ && @{ $self->{line} };
 
@@ -1895,7 +2094,7 @@ sub check_keyword {
 # extra '#line' type stuff.
 
 sub print_section {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
 
   # Strip leading blank lines. The "do" is required for the right semantics
   do { $_ = shift(@{ $self->{line} }) } while !/\S/ && @{ $self->{line} };
@@ -1926,7 +2125,7 @@ sub print_section {
 # until the next directive (including $_ as the first line).
 
 sub merge_section {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   my $in = '';
 
   # skip blank lines
@@ -1946,7 +2145,8 @@ sub merge_section {
 # pattern, by calling the FOO_handler() method for each keyword.
 
 sub process_keyword {
-  my($self, $pattern) = @_;
+  my ExtUtils::ParseXS $self = shift;
+  my ($pattern) = @_;
 
   while (my $kwd = $self->check_keyword($pattern)) {
     my $method = $kwd . "_handler";
@@ -1960,7 +2160,7 @@ sub process_keyword {
 # 'else if (condition)' style line of C
 
 sub CASE_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
   $self->blurt("Error: 'CASE:' after unconditional 'CASE:'")
     if $self->{condnum} && $self->{cond} eq '';
@@ -1981,7 +2181,7 @@ sub CASE_handler {
 # $self->{processing_arg_with_types} true.
 
 sub INPUT_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
 
   # In this loop: process each line until the next keyword or end of
@@ -2162,7 +2362,7 @@ sub INPUT_handler {
 # Process the lines following the OUTPUT: keyword.
 
 sub OUTPUT_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $self->{have_OUTPUT} = 1;
 
   $_ = shift;
@@ -2233,7 +2433,7 @@ sub OUTPUT_handler {
 # (including $_).
 
 sub C_ARGS_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
   my $in = $self->merge_section();
 
@@ -2246,7 +2446,7 @@ sub C_ARGS_handler {
 # one or two macros names.
 
 sub INTERFACE_MACRO_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
   my $in = $self->merge_section();
 
@@ -2264,7 +2464,7 @@ sub INTERFACE_MACRO_handler {
 
 
 sub INTERFACE_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
   my $in = $self->merge_section();
 
@@ -2284,25 +2484,25 @@ EOF
 
 
 sub CLEANUP_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $self->print_section();
 }
 
 
 sub PREINIT_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $self->print_section();
 }
 
 
 sub POSTCALL_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $self->print_section();
 }
 
 
 sub INIT_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $self->print_section();
 }
 
@@ -2325,7 +2525,7 @@ sub INIT_handler {
 #   $self->{XsubAliasValues}->{$value}{$alias}++;
 
 sub get_aliases {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   my ($line) = @_;
   my ($orig) = $line;
 
@@ -2416,7 +2616,7 @@ sub get_aliases {
 # string to pass to apply_attrs_string().
 
 sub ATTRS_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
 
   for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
@@ -2430,7 +2630,7 @@ sub ATTRS_handler {
 # Process the line(s) following the ALIAS: keyword
 
 sub ALIAS_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
 
   # Consume and process alias lines until the next  directive.
@@ -2447,7 +2647,7 @@ sub ALIAS_handler {
 # the $self->{OverloadsThisXSUB} hash.
 
 sub OVERLOAD_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
 
   for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
@@ -2461,7 +2661,8 @@ sub OVERLOAD_handler {
 
 
 sub FALLBACK_handler {
-  my ($self, $setting) = @_;
+  my ExtUtils::ParseXS $self = shift;
+  my ($setting) = @_;
 
   # the rest of the current line should contain either TRUE,
   # FALSE or UNDEF
@@ -2483,8 +2684,9 @@ sub FALLBACK_handler {
 
 
 sub REQUIRE_handler {
+  my ExtUtils::ParseXS $self = shift;
   # the rest of the current line should contain a version number
-  my ($self, $ver) = @_;
+  my ($ver) = @_;
 
   trim_whitespace($ver);
 
@@ -2501,9 +2703,10 @@ sub REQUIRE_handler {
 
 
 sub VERSIONCHECK_handler {
+  my ExtUtils::ParseXS $self = shift;
   # the rest of the current line should contain either ENABLE or
   # DISABLE
-  my ($self, $setting) = @_;
+  my ($setting) = @_;
 
   trim_whitespace($setting);
 
@@ -2526,7 +2729,7 @@ sub VERSIONCHECK_handler {
 # It's probably a design flaw that more than one entry can be processed.
 
 sub PROTOTYPE_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
 
   my $specified;
@@ -2563,8 +2766,9 @@ sub PROTOTYPE_handler {
 # Set $self->{ScopeThisXSUB} to a boolean value based on DISABLE/ENABLE.
 
 sub SCOPE_handler {
+  my ExtUtils::ParseXS $self = shift;
   # Rest of line should be either ENABLE or DISABLE
-  my ($self, $setting) = @_;
+  my ($setting) = @_;
 
   $self->death("Error: Only 1 SCOPE declaration allowed per xsub")
     if $self->{scope_in_this_xsub}++;
@@ -2577,9 +2781,10 @@ sub SCOPE_handler {
 
 
 sub PROTOTYPES_handler {
+  my ExtUtils::ParseXS $self = shift;
   # the rest of the current line should contain either ENABLE or
   # DISABLE
-  my ($self, $setting) = @_;
+  my ($setting) = @_;
 
   trim_whitespace($setting);
 
@@ -2594,9 +2799,10 @@ sub PROTOTYPES_handler {
 
 
 sub EXPORT_XSUB_SYMBOLS_handler {
+  my ExtUtils::ParseXS $self = shift;
   # the rest of the current line should contain either ENABLE or
   # DISABLE
-  my ($self, $setting) = @_;
+  my ($setting) = @_;
 
   trim_whitespace($setting);
 
@@ -2624,7 +2830,7 @@ EOF
 # doesn't handle type => 'if' style entries, only file entries.)
 
 sub PushXSStack {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   my %args = @_;
   # Save the current file context.
   push(@{ $self->{XSStack} }, {
@@ -2644,7 +2850,7 @@ sub PushXSStack {
 
 
 sub INCLUDE_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
   # the rest of the current line should contain a valid filename
 
@@ -2741,7 +2947,7 @@ sub QuoteArgs {
 
 
 sub INCLUDE_COMMAND_handler {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   $_ = shift;
   # the rest of the current line should contain a valid command
 
@@ -2797,7 +3003,7 @@ EOF
 # former state.
 
 sub PopFile {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
 
   return 0 unless $self->{XSStack}->[-1]{type} eq 'file';
 
@@ -2853,7 +3059,8 @@ sub Q {
 # Process "MODULE = Foo ..." lines and update global state accordingly
 
 sub _process_module_xs_line {
-  my ($self, $module, $pkg, $prefix) = @_;
+  my ExtUtils::ParseXS $self = shift;
+  my ($module, $pkg, $prefix) = @_;
 
   ($self->{Module_cname} = $module) =~ s/\W/_/g;
 
@@ -2872,7 +3079,7 @@ sub _process_module_xs_line {
 # Skip any embedded POD sections, reading in lines from {FH} as necessary.
 
 sub _maybe_skip_pod {
-  my ($self) = @_;
+  my ExtUtils::ParseXS $self = shift;
 
   while ($self->{lastline} =~ /^=/) {
     while ($self->{lastline} = readline($self->{FH})) {
@@ -2890,7 +3097,7 @@ sub _maybe_skip_pod {
 # block syntax).
 
 sub _maybe_parse_typemap_block {
-  my ($self) = @_;
+  my ExtUtils::ParseXS $self = shift;
 
   # This is special cased from the usual paragraph-handler logic
   # due to the HEREdoc-ish syntax.
@@ -3012,7 +3219,7 @@ sub _maybe_parse_typemap_block {
 
 
 sub fetch_para {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
 
   # unmatched #if at EOF
   $self->death("Error: Unterminated '#if/#ifdef/#ifndef'")
@@ -3137,7 +3344,7 @@ sub fetch_para {
 # $init is empty.
 
 sub output_init {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
 
   my ($type, $num, $var, $init, $printed_name)
@@ -3203,7 +3410,7 @@ sub output_init {
 # $type.
 
 sub generate_init {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
 
   my ($type, $num, $var, $printed_name)
@@ -3431,7 +3638,7 @@ sub generate_init {
 # private and shouldn't be referenced within XS code or typemaps.
 
 sub generate_output {
-  my $self = shift;
+  my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
   my ($type, $num, $var, $do_setmagic, $do_push)
     = @{$argsref}{qw(type num var do_setmagic do_push)};
@@ -3747,12 +3954,14 @@ sub generate_output {
 # OUTPUT line such as 'int foo = SvIV($arg)'
 
 sub eval_output_typemap_code {
-  my ($self, $code, $other) = @_;
+  my ExtUtils::ParseXS $self = shift;
+  my ($code, $other) = @_;
   return ExtUtils::ParseXS::Eval::eval_output_typemap_code($self, $code, $other);
 }
 
 sub eval_input_typemap_code {
-  my ($self, $code, $other) = @_;
+  my ExtUtils::ParseXS $self = shift;
+  my ($code, $other) = @_;
   return ExtUtils::ParseXS::Eval::eval_input_typemap_code($self, $code, $other);
 }
 
