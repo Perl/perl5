@@ -81,6 +81,9 @@ print "# \$^O = $^O\n";
 print "# \$Config{archname} = $Config{archname}\n";
 print "# \$Config{cc} = $Config{cc}\n";
 print "# libperl = $libperl_a\n";
+my $nocommon = $Config{ccflags} =~ /-fno-common/ ? 1 : 0;
+print "# nocommon = $nocommon\n";
+
 
 my $nm;
 my $nm_opt = '';
@@ -418,6 +421,8 @@ unless (exists $symbols{text}) {
 
 # do an ok(), but on failure, print some diagnostic info about that symbol
 
+my $common_was_aliased;
+
 sub has_symbol {
     my ($sym, $ok, $desc) = @_;
     ok($ok, $desc);
@@ -432,6 +437,11 @@ sub has_symbol {
         diag "Didn't find the symbol '$sym' where expected,",
             "nor was it seen elsewhere in the nm output";
     }
+    diag sprintf("\$symbols{data}{common} %s aliased to \$symbols{data}{bss}",
+            defined $common_was_aliased
+                ? $common_was_aliased ? "was" : "wasn't"
+                : "not yet");
+    diag "-fno-common " . ($nocommon ? "present" : "not present");
 }
 
 
@@ -447,10 +457,6 @@ ok(exists $symbols{data}{const}, "has data const symbols");
 has_symbol('PL_no_modify', $symbols{data}{const}{PL_no_modify}{'globals.o'},
             "has PL_no_modify");
 
-my $nocommon = $Config{ccflags} =~ /-fno-common/ ? 1 : 0;
-
-print "# nocommon = $nocommon\n";
-
 my %data_symbols;
 
 for my $dtype (sort keys %{$symbols{data}}) {
@@ -463,6 +469,10 @@ if ( !$symbols{data}{common} ) {
     # This is likely because Perl was compiled with
     # -Accflags="-fno-common"
     $symbols{data}{common} = $symbols{data}{bss};
+    $common_was_aliased = 1;
+}
+else {
+    $common_was_aliased = 0;
 }
 
 has_symbol('PL_hash_seed_w',
