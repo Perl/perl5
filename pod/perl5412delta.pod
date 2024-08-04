@@ -1,0 +1,299 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5412delta - what is new for perl v5.41.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.41.1 release and the 5.41.2
+release.
+
+If you are upgrading from an earlier release such as 5.41.0, first read
+L<perl5411delta>, which describes differences between 5.41.0 and 5.41.1.
+
+=head1 Core Enhancements
+
+=head2 New pragma C<L<source::encoding>>
+
+This allows you to declare that the portion of a program for the
+remainder of the lexical scope of this pragma is encoded either entirely
+in ASCII (for S<C<use source::encoding 'ascii'>>) or if UTF-8 is allowed
+as well (for S<C<use source::encoding 'utf8'>>). No other encodings are
+accepted. The second form is entirely equivalent to S<C<use utf8>>, and
+may be used interchangeably with that.
+
+The purpose of this pragma is to catch cases early where you forgot to
+specify S<C<use utf8>>.
+
+S<C<use source::encoding 'ascii'>> is automatically enabled within the
+lexical scope of a S<C<use v5.41.0>> or higher.
+
+S<C<no source::encoding>> turns off all this checking for the remainder of
+its lexical scope. The meaning of non-ASCII characters is then undefined.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.76 to 1.77.
+
+Now understands the new C<^^> operator (high-precedence xor).
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.72 to 3.73.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.90 to 3.92.
+
+=item *
+
+L<locale> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20240620 to 5.20240720.
+
+=item *
+
+C<podlators> has been upgraded from version 5.01_02 to v6.0.2.
+
+This distribution provides the L<Pod::Man> and L<Pod::Text>
+modules and the L<pod2man> and L<pod2text> command-line utilities.
+The distribution now uses semantic
+versioning for the package and module versions, with a C<v> prefix to work
+with Perl's packaging system. L<Pod::Man>, in particular, has received a
+variety of improvements.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.21 to 2.22.
+
+=item *
+
+L<Storable> has been upgraded from version 3.32 to 3.33.
+
+=item *
+
+L<threads> has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+L<utf8> has been upgraded from version 1.25 to 1.27.
+
+=item *
+
+L<Win32> has been upgraded from version 0.59 to 0.59_01.
+
+Imported an upstream PR that fixes symbolic link support detection on
+32-bit Windows. [L<GH #22393|https://github.com/Perl/perl5/issues/22393>]
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.36 to 1.37.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document. If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+All forms of C<gv_fetchmeth()> are now documented together.
+
+=item *
+
+C<gv_autoload4> is now documented with C<gv_autoload_pv> and additional notes added.
+
+=back
+
+=head3 L<perlgov>
+
+=over 4
+
+=item *
+
+The list of Steering Council and Core Team members have been updated, following the conclusion of
+the latest election on 2024-07-17.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Entries for C<$#> and C<$*> have been amended to note that use of them result in a compilation
+error, not a warning.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages. For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Use of non-ASCII character 0x%X illegal when 'use source::encoding "ascii"' is in effect|perldiag/Use of non-ASCII character 0x%X illegal when 'use source::encoding "ascii"' is in effect>
+
+(F) This pragma forbids non-ASCII characters within its scope.
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<__CLASS__ is experimental|perldiag/"__CLASS__ is experimental">
+
+(S experimental::class) This warning is emitted if you use the C<__CLASS__>
+keyword of C<use feature 'class'>. This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=back
+
+=head1 Utility Changes
+
+=head2 F<Porting/test-dist-modules.pl>
+
+=over 4
+
+=item *
+
+Separate installation (without overwriting installed modules) is now the default
+
+=item *
+
+Documentation is significantly enhanced
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Calls to L<call_argv()|perlapi/call_argv> with the C<G_DISCARD> flag
+set also ensure the SV parameters constructed from the C<argv>
+parameter are released before C<call_argv()> returns. Previously they
+were released on the next L<FREETMPS|perlapi/FREETMPS>. [L<GH #22255|https://github.com/Perl/perl5/issues/22255>]
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<chdir> now returns real booleans (as its documentation describes), not
+integers. This means the result of a failed C<chdir> now stringifies to C<''>,
+not C<'0'>.
+
+[L<GH #22365|https://github.com/Perl/perl5/issues/22365>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.41.2 represents approximately 3 weeks of development since Perl
+5.41.1 and contains approximately 4,100 lines of changes across 180 files
+from 13 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 1,900 lines of changes to 95 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.41.2:
+
+Aaron Dill, Dagfinn Ilmari Mannsåker, Elvin Aslanov, Erik Huelsmann, Graham
+Knop, H.Merijn Brand, James E Keenan, Karen Etheridge, Karl Williamson,
+Lukas Mai, Philippe Bruhat (BooK), Russ Allbery, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

@@ -2031,7 +2031,7 @@ cpan/Pod-Usage/t/pod/testcmp.pl
 cpan/Pod-Usage/t/pod/testp2pt.pl
 cpan/Pod-Usage/t/pod/usage.pod
 cpan/Pod-Usage/t/pod/usage2.pod
-cpan/podlators/docs/docknot.yaml
+cpan/podlators/docs/docknot.yaml				podlators
 cpan/podlators/lib/Pod/Man.pm					Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm				Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text.pm					Pod-Parser - convert POD data to formatted ASCII text
@@ -2047,127 +2047,132 @@ cpan/podlators/t/data/basic.man					podlators test
 cpan/podlators/t/data/basic.ovr					podlators test
 cpan/podlators/t/data/basic.pod					podlators test
 cpan/podlators/t/data/basic.txt					podlators test
-cpan/podlators/t/data/man/encoding.groff
-cpan/podlators/t/data/man/encoding.pod
-cpan/podlators/t/data/man/encoding.roff
-cpan/podlators/t/data/man/encoding.utf8
+cpan/podlators/t/data/man/encoding.groff			podlators
+cpan/podlators/t/data/man/encoding.pod				podlators
+cpan/podlators/t/data/man/encoding.roff				podlators
+cpan/podlators/t/data/man/encoding.utf8				podlators
 cpan/podlators/t/data/perl.conf					podlators test
-cpan/podlators/t/data/perlcriticrc
-cpan/podlators/t/data/perltidyrc
-cpan/podlators/t/data/regenerate-data
-cpan/podlators/t/data/snippets/color/escape-wrapping
-cpan/podlators/t/data/snippets/color/tag-width
-cpan/podlators/t/data/snippets/color/tag-wrapping
-cpan/podlators/t/data/snippets/color/width
-cpan/podlators/t/data/snippets/color/wrapping
-cpan/podlators/t/data/snippets/man/agrave
-cpan/podlators/t/data/snippets/man/backslash-man-ref
-cpan/podlators/t/data/snippets/man/bullet-after-nonbullet
-cpan/podlators/t/data/snippets/man/bullets
-cpan/podlators/t/data/snippets/man/c-in-header
-cpan/podlators/t/data/snippets/man/c-in-name
-cpan/podlators/t/data/snippets/man/cpp
-cpan/podlators/t/data/snippets/man/dollar-magic
-cpan/podlators/t/data/snippets/man/error-die
-cpan/podlators/t/data/snippets/man/error-none
-cpan/podlators/t/data/snippets/man/error-normal
-cpan/podlators/t/data/snippets/man/error-pod
-cpan/podlators/t/data/snippets/man/error-stderr
-cpan/podlators/t/data/snippets/man/error-stderr-opt
-cpan/podlators/t/data/snippets/man/eth
-cpan/podlators/t/data/snippets/man/fixed-font
-cpan/podlators/t/data/snippets/man/fixed-font-in-item
-cpan/podlators/t/data/snippets/man/for-blocks
-cpan/podlators/t/data/snippets/man/guesswork
-cpan/podlators/t/data/snippets/man/guesswork-all
-cpan/podlators/t/data/snippets/man/guesswork-no-quoting
-cpan/podlators/t/data/snippets/man/guesswork-none
-cpan/podlators/t/data/snippets/man/guesswork-partial
-cpan/podlators/t/data/snippets/man/guesswork-quoting
-cpan/podlators/t/data/snippets/man/hyphen-in-s
-cpan/podlators/t/data/snippets/man/iso-8859-1
-cpan/podlators/t/data/snippets/man/iso-8859-1-error-die
-cpan/podlators/t/data/snippets/man/iso-8859-1-error-pod
-cpan/podlators/t/data/snippets/man/iso-8859-1-roff
-cpan/podlators/t/data/snippets/man/item-fonts
-cpan/podlators/t/data/snippets/man/language
-cpan/podlators/t/data/snippets/man/link-quoting
-cpan/podlators/t/data/snippets/man/link-to-url
-cpan/podlators/t/data/snippets/man/long-quote
-cpan/podlators/t/data/snippets/man/lquote-and-quote
-cpan/podlators/t/data/snippets/man/lquote-rquote
-cpan/podlators/t/data/snippets/man/markup-in-name
-cpan/podlators/t/data/snippets/man/multiline-x
-cpan/podlators/t/data/snippets/man/naive
-cpan/podlators/t/data/snippets/man/naive-groff
-cpan/podlators/t/data/snippets/man/name-guesswork
-cpan/podlators/t/data/snippets/man/name-quotes
-cpan/podlators/t/data/snippets/man/name-quotes-none
-cpan/podlators/t/data/snippets/man/nested-lists
-cpan/podlators/t/data/snippets/man/newlines-in-c
-cpan/podlators/t/data/snippets/man/non-ascii
-cpan/podlators/t/data/snippets/man/nonbreaking-space-l
-cpan/podlators/t/data/snippets/man/not-bullet
-cpan/podlators/t/data/snippets/man/not-numbers
-cpan/podlators/t/data/snippets/man/nourls
-cpan/podlators/t/data/snippets/man/periods
-cpan/podlators/t/data/snippets/man/quote-escaping
-cpan/podlators/t/data/snippets/man/rquote-none
-cpan/podlators/t/data/snippets/man/soft-hyphens
-cpan/podlators/t/data/snippets/man/trailing-space
-cpan/podlators/t/data/snippets/man/true-false
-cpan/podlators/t/data/snippets/man/utf8-nonbreaking
-cpan/podlators/t/data/snippets/man/utf8-verbatim
-cpan/podlators/t/data/snippets/man/x-whitespace
-cpan/podlators/t/data/snippets/man/x-whitespace-entry
-cpan/podlators/t/data/snippets/man/zero-width-space
-cpan/podlators/t/data/snippets/overstrike/tag-width
-cpan/podlators/t/data/snippets/overstrike/wrapping
-cpan/podlators/t/data/snippets/README.md
-cpan/podlators/t/data/snippets/termcap/escape-wrapping
-cpan/podlators/t/data/snippets/termcap/tag-width
-cpan/podlators/t/data/snippets/termcap/tag-wrapping
-cpan/podlators/t/data/snippets/termcap/term-unknown
-cpan/podlators/t/data/snippets/termcap/width
-cpan/podlators/t/data/snippets/termcap/wrapping
-cpan/podlators/t/data/snippets/text/alt
-cpan/podlators/t/data/snippets/text/c-with-spaces
-cpan/podlators/t/data/snippets/text/code
+cpan/podlators/t/data/perlcriticrc				podlators
+cpan/podlators/t/data/perltidyrc				podlators
+cpan/podlators/t/data/regenerate-data				podlators
+cpan/podlators/t/data/snippets/color/escape-wrapping		podlators
+cpan/podlators/t/data/snippets/color/nonbreaking-wrap		podlators
+cpan/podlators/t/data/snippets/color/tag-width			podlators
+cpan/podlators/t/data/snippets/color/tag-wrapping		podlators
+cpan/podlators/t/data/snippets/color/width			podlators
+cpan/podlators/t/data/snippets/color/wrapping			podlators
+cpan/podlators/t/data/snippets/man/agrave			podlators
+cpan/podlators/t/data/snippets/man/backslash-man-ref		podlators
+cpan/podlators/t/data/snippets/man/bullet-after-nonbullet	podlators
+cpan/podlators/t/data/snippets/man/bullets			podlators
+cpan/podlators/t/data/snippets/man/c-in-header			podlators
+cpan/podlators/t/data/snippets/man/c-in-name			podlators
+cpan/podlators/t/data/snippets/man/cpp				podlators
+cpan/podlators/t/data/snippets/man/dollar-magic			podlators
+cpan/podlators/t/data/snippets/man/error-die			podlators
+cpan/podlators/t/data/snippets/man/error-none			podlators
+cpan/podlators/t/data/snippets/man/error-normal			podlators
+cpan/podlators/t/data/snippets/man/error-pod			podlators
+cpan/podlators/t/data/snippets/man/error-stderr			podlators
+cpan/podlators/t/data/snippets/man/error-stderr-opt		podlators
+cpan/podlators/t/data/snippets/man/eth				podlators
+cpan/podlators/t/data/snippets/man/fixed-font			podlators
+cpan/podlators/t/data/snippets/man/fixed-font-in-item		podlators
+cpan/podlators/t/data/snippets/man/for-blocks			podlators
+cpan/podlators/t/data/snippets/man/guesswork			podlators
+cpan/podlators/t/data/snippets/man/guesswork-all		podlators
+cpan/podlators/t/data/snippets/man/guesswork-no-quoting		podlators
+cpan/podlators/t/data/snippets/man/guesswork-none		podlators
+cpan/podlators/t/data/snippets/man/guesswork-partial		podlators
+cpan/podlators/t/data/snippets/man/guesswork-quoting		podlators
+cpan/podlators/t/data/snippets/man/iso-8859-1			podlators
+cpan/podlators/t/data/snippets/man/iso-8859-1-error-die		podlators
+cpan/podlators/t/data/snippets/man/iso-8859-1-error-pod		podlators
+cpan/podlators/t/data/snippets/man/iso-8859-1-roff		podlators
+cpan/podlators/t/data/snippets/man/item-fonts			podlators
+cpan/podlators/t/data/snippets/man/item-spacing			podlators
+cpan/podlators/t/data/snippets/man/language			podlators
+cpan/podlators/t/data/snippets/man/link-quoting			podlators
+cpan/podlators/t/data/snippets/man/link-to-url			podlators
+cpan/podlators/t/data/snippets/man/long-quote			podlators
+cpan/podlators/t/data/snippets/man/lquote-and-quote		podlators
+cpan/podlators/t/data/snippets/man/lquote-rquote		podlators
+cpan/podlators/t/data/snippets/man/man-l			podlators
+cpan/podlators/t/data/snippets/man/markup-in-name		podlators
+cpan/podlators/t/data/snippets/man/multiline-x			podlators
+cpan/podlators/t/data/snippets/man/naive			podlators
+cpan/podlators/t/data/snippets/man/naive-groff			podlators
+cpan/podlators/t/data/snippets/man/name-guesswork		podlators
+cpan/podlators/t/data/snippets/man/name-quotes			podlators
+cpan/podlators/t/data/snippets/man/name-quotes-none		podlators
+cpan/podlators/t/data/snippets/man/nested-lists			podlators
+cpan/podlators/t/data/snippets/man/newlines-in-c		podlators
+cpan/podlators/t/data/snippets/man/non-ascii			podlators
+cpan/podlators/t/data/snippets/man/nonbreaking-space-l		podlators
+cpan/podlators/t/data/snippets/man/not-bullet			podlators
+cpan/podlators/t/data/snippets/man/not-numbers			podlators
+cpan/podlators/t/data/snippets/man/nourls			podlators
+cpan/podlators/t/data/snippets/man/periods			podlators
+cpan/podlators/t/data/snippets/man/quote-escaping		podlators
+cpan/podlators/t/data/snippets/man/rquote-none			podlators
+cpan/podlators/t/data/snippets/man/soft-hyphens			podlators
+cpan/podlators/t/data/snippets/man/trailing-space		podlators
+cpan/podlators/t/data/snippets/man/true-false			podlators
+cpan/podlators/t/data/snippets/man/utf8-nonbreaking		podlators
+cpan/podlators/t/data/snippets/man/utf8-verbatim		podlators
+cpan/podlators/t/data/snippets/man/x-whitespace			podlators
+cpan/podlators/t/data/snippets/man/x-whitespace-entry		podlators
+cpan/podlators/t/data/snippets/man/zero-width-space		podlators
+cpan/podlators/t/data/snippets/overstrike/nonbreaking-wrap	podlators
+cpan/podlators/t/data/snippets/overstrike/tag-width		podlators
+cpan/podlators/t/data/snippets/overstrike/wrapping		podlators
+cpan/podlators/t/data/snippets/README.md			podlators
+cpan/podlators/t/data/snippets/termcap/escape-wrapping		podlators
+cpan/podlators/t/data/snippets/termcap/nonbreaking-wrap		podlators
+cpan/podlators/t/data/snippets/termcap/tag-width		podlators
+cpan/podlators/t/data/snippets/termcap/tag-wrapping		podlators
+cpan/podlators/t/data/snippets/termcap/term-unknown		podlators
+cpan/podlators/t/data/snippets/termcap/width			podlators
+cpan/podlators/t/data/snippets/termcap/wrapping			podlators
+cpan/podlators/t/data/snippets/text/alt				podlators
+cpan/podlators/t/data/snippets/text/c-with-spaces		podlators
+cpan/podlators/t/data/snippets/text/code			podlators
 cpan/podlators/t/data/snippets/text/cpp				podlators test
-cpan/podlators/t/data/snippets/text/empty
-cpan/podlators/t/data/snippets/text/error-die
-cpan/podlators/t/data/snippets/text/error-none
-cpan/podlators/t/data/snippets/text/error-normal
-cpan/podlators/t/data/snippets/text/error-pod
-cpan/podlators/t/data/snippets/text/error-stderr
-cpan/podlators/t/data/snippets/text/error-stderr-opt
-cpan/podlators/t/data/snippets/text/for
-cpan/podlators/t/data/snippets/text/guesswork-no-quoting
-cpan/podlators/t/data/snippets/text/guesswork-quoting
-cpan/podlators/t/data/snippets/text/iso-8859-1
-cpan/podlators/t/data/snippets/text/iso-8859-1-error-die
-cpan/podlators/t/data/snippets/text/iso-8859-1-error-pod
-cpan/podlators/t/data/snippets/text/iso-8859-1-utf8
-cpan/podlators/t/data/snippets/text/late-encoding
-cpan/podlators/t/data/snippets/text/link-rt
-cpan/podlators/t/data/snippets/text/link-url
-cpan/podlators/t/data/snippets/text/margin
-cpan/podlators/t/data/snippets/text/naive
-cpan/podlators/t/data/snippets/text/name-quotes
-cpan/podlators/t/data/snippets/text/name-quotes-none
-cpan/podlators/t/data/snippets/text/non-latin
-cpan/podlators/t/data/snippets/text/nonbreaking-space
-cpan/podlators/t/data/snippets/text/nonbreaking-space-l
-cpan/podlators/t/data/snippets/text/nourls
-cpan/podlators/t/data/snippets/text/periods
-cpan/podlators/t/data/snippets/text/quotes-opt
-cpan/podlators/t/data/snippets/text/s-whitespace
-cpan/podlators/t/data/snippets/text/sentence-spacing
-cpan/podlators/t/data/snippets/text/utf8
-cpan/podlators/t/data/snippets/text/utf8-iso
-cpan/podlators/t/data/snippets/text/verbatim
+cpan/podlators/t/data/snippets/text/empty			podlators
+cpan/podlators/t/data/snippets/text/error-die			podlators
+cpan/podlators/t/data/snippets/text/error-none			podlators
+cpan/podlators/t/data/snippets/text/error-normal		podlators
+cpan/podlators/t/data/snippets/text/error-pod			podlators
+cpan/podlators/t/data/snippets/text/error-stderr		podlators
+cpan/podlators/t/data/snippets/text/error-stderr-opt		podlators
+cpan/podlators/t/data/snippets/text/for				podlators
+cpan/podlators/t/data/snippets/text/guesswork-no-quoting	podlators
+cpan/podlators/t/data/snippets/text/guesswork-quoting		podlators
+cpan/podlators/t/data/snippets/text/iso-8859-1			podlators
+cpan/podlators/t/data/snippets/text/iso-8859-1-error-die	podlators
+cpan/podlators/t/data/snippets/text/iso-8859-1-error-pod	podlators
+cpan/podlators/t/data/snippets/text/iso-8859-1-utf8		podlators
+cpan/podlators/t/data/snippets/text/late-encoding		podlators
+cpan/podlators/t/data/snippets/text/link-rt			podlators
+cpan/podlators/t/data/snippets/text/link-url			podlators
+cpan/podlators/t/data/snippets/text/margin			podlators
+cpan/podlators/t/data/snippets/text/naive			podlators
+cpan/podlators/t/data/snippets/text/name-quotes			podlators
+cpan/podlators/t/data/snippets/text/name-quotes-none		podlators
+cpan/podlators/t/data/snippets/text/non-latin			podlators
+cpan/podlators/t/data/snippets/text/nonbreaking-space		podlators
+cpan/podlators/t/data/snippets/text/nonbreaking-space-l		podlators
+cpan/podlators/t/data/snippets/text/nonbreaking-wrap		podlators
+cpan/podlators/t/data/snippets/text/nourls			podlators
+cpan/podlators/t/data/snippets/text/periods			podlators
+cpan/podlators/t/data/snippets/text/quotes-opt			podlators
+cpan/podlators/t/data/snippets/text/s-whitespace		podlators
+cpan/podlators/t/data/snippets/text/sentence-spacing		podlators
+cpan/podlators/t/data/snippets/text/utf8			podlators
+cpan/podlators/t/data/snippets/text/utf8-iso			podlators
+cpan/podlators/t/data/snippets/text/verbatim			podlators
 cpan/podlators/t/data/termcap					podlators test
-cpan/podlators/t/docs/changes.t
+cpan/podlators/t/docs/changes.t					Test file related to podlators
 cpan/podlators/t/docs/pod.t					podlators test
 cpan/podlators/t/docs/pod-spelling.t				podlators test
 cpan/podlators/t/docs/spdx-license.t				podlators test
@@ -2182,26 +2187,26 @@ cpan/podlators/t/lib/Test/RRA/ModuleVersion.pm			podlators test
 cpan/podlators/t/man/devise-date.t				podlators test
 cpan/podlators/t/man/devise-title.t				podlators test
 cpan/podlators/t/man/empty.t					podlators test
-cpan/podlators/t/man/encoding.t
+cpan/podlators/t/man/encoding.t					Test file related to podlators
 cpan/podlators/t/man/heading.t					podlators test
 cpan/podlators/t/man/iso-8859-1.t				podlators test
 cpan/podlators/t/man/no-encode.t				podlators test
 cpan/podlators/t/man/snippets.t					podlators test
 cpan/podlators/t/man/utf8-io.t					podlators test
 cpan/podlators/t/parselink/basic.t				podlators test
-cpan/podlators/t/style/critic.t
-cpan/podlators/t/style/kwalitee.t
+cpan/podlators/t/style/critic.t					Test file related to podlators
+cpan/podlators/t/style/kwalitee.t				Test file related to podlators
 cpan/podlators/t/style/minimum-version.t			podlators test
 cpan/podlators/t/style/module-version.t				podlators test
-cpan/podlators/t/style/obsolete-strings.t
+cpan/podlators/t/style/obsolete-strings.t			Test file related to podlators
 cpan/podlators/t/style/strict.t					podlators test
 cpan/podlators/t/text/color.t					podlators test
-cpan/podlators/t/text/invalid.t
-cpan/podlators/t/text/iso-8859-1.t
+cpan/podlators/t/text/invalid.t					Test file related to podlators
+cpan/podlators/t/text/iso-8859-1.t				Test file related to podlators
 cpan/podlators/t/text/overstrike.t				podlators test
-cpan/podlators/t/text/snippets.t
+cpan/podlators/t/text/snippets.t				Test file related to podlators
 cpan/podlators/t/text/termcap.t					podlators test
-cpan/podlators/t/text/utf8-io.t
+cpan/podlators/t/text/utf8-io.t					Test file related to podlators
 cpan/Scalar-List-Utils/lib/List/Util.pm		List::Util
 cpan/Scalar-List-Utils/lib/List/Util/XS.pm	List::Util
 cpan/Scalar-List-Utils/lib/Scalar/Util.pm	Scalar::Util
@@ -3564,6 +3569,7 @@ dist/Data-Dumper/t/overload.t			See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t			See if Data::Dumper pair separator works
 dist/Data-Dumper/t/perl-74170.t			Regression test for stack reallocation
 dist/Data-Dumper/t/purity_deepcopy_maxdepth.t	See if three Data::Dumper functions work
+dist/Data-Dumper/t/qquote.t			See if Data::Dumper::qquote() works
 dist/Data-Dumper/t/qr.t				See if Data::Dumper works with qr|/|
 dist/Data-Dumper/t/quotekeys.t			See if Data::Dumper::Quotekeys works
 dist/Data-Dumper/t/recurse.t			See if Data::Dumper::Maxrecurse works
@@ -4151,6 +4157,7 @@ dist/ExtUtils-CBuilder/t/01-basic.t					tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/02-link.t					tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/03-cplusplus.t					tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/04-base.t					tests for ExtUtils::CBuilder
+dist/ExtUtils-ParseXS/author/mksnapshot.pl			Utility for detecting before/after changes to xsubpp output
 dist/ExtUtils-ParseXS/Changes					ExtUtils::ParseXS change log
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm			converts Perl XS code into C code
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod			ExtUtils::ParseXS documentation
@@ -5204,12 +5211,12 @@ ext/XS-APItest/t/xsub_h.t			Tests for XSUB.h
 ext/XS-APItest/typemap
 ext/XS-APItest/XSUB-redefined-macros.xs		XS code needing redefined macros.
 ext/XS-APItest/XSUB-undef-XS_VERSION.xs		XS code needing #undef XS_VERSION
-ext/XS-Typemap/Makefile.PL		XS::Typemap extension
-ext/XS-Typemap/README			XS::Typemap extension
-ext/XS-Typemap/stdio.c			XS::Typemap extension
+ext/XS-Typemap/Makefile.PL		non-installed XS::Typemap extension
+ext/XS-Typemap/README			non-installed XS::Typemap extension
+ext/XS-Typemap/stdio.c			non-installed XS::Typemap extension
 ext/XS-Typemap/t/Typemap.t		test that typemaps work
-ext/XS-Typemap/Typemap.pm		XS::Typemap extension
-ext/XS-Typemap/Typemap.xs		XS::Typemap extension
+ext/XS-Typemap/Typemap.pm		non-installed XS::Typemap extension
+ext/XS-Typemap/Typemap.xs		non-installed XS::Typemap extension
 h2pl/cbreak.pl				cbreak routines using .ph
 h2pl/cbreak2.pl				cbreak routines using .pl
 h2pl/eg/sizeof.ph			Sample sizeof array initialization
@@ -5465,6 +5472,8 @@ lib/sigtrap.pm				For trapping an abort and giving traceback
 lib/sigtrap.t				See if sigtrap works
 lib/sort.pm				For "use sort"
 lib/sort.t				See if "use sort" works
+lib/source/encoding.pm			use source::encoding
+lib/source/source_encoding.t		test "use source::encoding"
 lib/strict.pm				For "use strict"
 lib/strict.t				See if strictures work
 lib/subs.pm				Declare overriding subs
@@ -5717,17 +5726,10 @@ pod/perl5363delta.pod			Perl changes in version 5.36.3
 pod/perl5380delta.pod			Perl changes in version 5.38.0
 pod/perl5381delta.pod			Perl changes in version 5.38.1
 pod/perl5382delta.pod			Perl changes in version 5.38.2
-pod/perl5390delta.pod			Perl changes in version 5.39.0
-pod/perl53910delta.pod			Perl changes in version 5.39.10
-pod/perl5391delta.pod			Perl changes in version 5.39.1
-pod/perl5392delta.pod			Perl changes in version 5.39.2
-pod/perl5393delta.pod			Perl changes in version 5.39.3
-pod/perl5394delta.pod			Perl changes in version 5.39.4
-pod/perl5395delta.pod			Perl changes in version 5.39.5
-pod/perl5396delta.pod			Perl changes in version 5.39.6
-pod/perl5397delta.pod			Perl changes in version 5.39.7
-pod/perl5398delta.pod			Perl changes in version 5.39.8
-pod/perl5399delta.pod			Perl changes in version 5.39.9
+pod/perl5400delta.pod			Perl changes in version 5.40.0
+pod/perl5410delta.pod			Perl changes in version 5.41.0
+pod/perl5411delta.pod			Perl changes in version 5.41.1
+pod/perl5412delta.pod			Perl changes in version 5.41.2
 pod/perl561delta.pod			Perl changes in version 5.6.1
 pod/perl56delta.pod			Perl changes in version 5.6
 pod/perl581delta.pod			Perl changes in version 5.8.1
@@ -5749,7 +5751,7 @@ pod/perlcall.pod			Perl calling conventions from C
 pod/perlcheat.pod			Perl cheat sheet
 pod/perlclass.pod			Perl class syntax
 pod/perlclassguts.pod			Internals of class syntax
-pod/perlclib.pod			Internal replacements for standard C library functions
+pod/perlclib.pod			Interacting with standard C library functions
 pod/perlcommunity.pod			Perl community information
 pod/perldata.pod			Perl data structures
 pod/perldbmfilter.pod			Perl DBM filters
@@ -6078,6 +6080,7 @@ t/lib/croak/class			Test croak calls from class.c
 t/lib/croak/gv				Test croak calls from gv.c
 t/lib/croak/mg				Test croak calls from mg.c
 t/lib/croak/op				Test croak calls from op.c
+t/lib/croak/parser			Test parser errors
 t/lib/croak/pp				Test croak calls from pp.c
 t/lib/croak/pp_ctl			Test croak calls from pp_ctl.c
 t/lib/croak/pp_hot			Test croak calls from pp_hot.c
@@ -6493,6 +6496,7 @@ t/porting/checkcfgvar.t			Check that all config.sh-like files are good
 t/porting/cmp_version.t			Test whether all changed module files have their VERSION bumped
 t/porting/copyright.t			Check that copyright years match
 t/porting/corelist.t			Check that Module-CoreList has perl versions for the current perl
+t/porting/cpphdrcheck.t			Test headers on the C++ variant of $Config{cc}
 t/porting/customized.dat		Data file for porting/customized.t
 t/porting/customized.t			Check all CUSTOMIZED files are as they should be
 t/porting/deprecation.t			Test that deprecation warnings are handled right
@@ -6636,6 +6640,7 @@ t/run/switchx.aux			Data for switchx.t
 t/run/switchx.t				Test the -x switch
 t/run/switchx2.aux			Data for switchx.t
 t/run/switchx3.aux			Data for switchx.t
+t/run/todo.t				TODO tests
 t/TEST					The regression tester
 t/test.pl				Simple testing library
 t/test_pl/_num_to_alpha.t		Tests for the simple testing library

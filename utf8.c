@@ -365,60 +365,32 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 }
 
 /*
-=for apidoc uvchr_to_utf8
+=for apidoc      uvchr_to_utf8
+=for apidoc_item uvchr_to_utf8_flags
 
-Adds the UTF-8 representation of the native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
+These each add the UTF-8 representation of the native code point C<uv> to the
+end of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
 C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
 the byte after the end of the new character.  In other words,
 
     d = uvchr_to_utf8(d, uv);
 
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-This function accepts any code point from 0..C<IV_MAX> as input.
-C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
-
-It is possible to forbid or warn on non-Unicode code points, or those that may
-be problematic by using L</uvchr_to_utf8_flags>.
-
-=cut
-*/
-
-/* This is also a macro */
-PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
-
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return uvchr_to_utf8(d, uv);
-}
-
-/*
-=for apidoc uvchr_to_utf8_flags
-
-Adds the UTF-8 representation of the native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
-C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
-the byte after the end of the new character.  In other words,
-
-    d = uvchr_to_utf8_flags(d, uv, flags);
-
-or, in most cases,
-
-    d = uvchr_to_utf8_flags(d, uv, 0);
-
 This is the Unicode-aware way of saying
 
     *(d++) = uv;
 
-If C<flags> is 0, this function accepts any code point from 0..C<IV_MAX> as
-input.  C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
+C<flags> is used to make some classes of code points problematic in some way.
+C<uvchr_to_utf8> is effectively the same as calling C<uvchr_to_utf8_flags>
+with C<flags> set to 0, meaning no class of code point is considered
+problematic.  That means any input code point from 0..C<IV_MAX> is considered
+to be fine.  C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
 
-Specifying C<flags> can further restrict what is allowed and not warned on, as
-follows:
+A code point can be problematic in one of two ways.  Its use could just raise a
+warning, and/or it could be forbidden with the function failing, and returning
+NULL.
+
+The potential classes of problematic code points and the flags that make them
+so are:
 
 If C<uv> is a Unicode surrogate code point and C<UNICODE_WARN_SURROGATE> is set,
 the function will raise a warning, provided UTF8 warnings are enabled.  If
@@ -481,6 +453,15 @@ The new names accurately describe the situation in all cases.
 
 =cut
 */
+
+/* This is also a macro */
+PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
+
+U8 *
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    return uvchr_to_utf8(d, uv);
+}
 
 /* This is also a macro */
 PERL_CALLCONV U8*       Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);

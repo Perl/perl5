@@ -131,7 +131,7 @@ XS(injected_constructor)
 {
     dXSARGS;
 
-    HV *stash = (HV *)XSANY.any_sv;
+    HV *stash = CvSTASH(cv);
     assert(HvSTASH_IS_CLASS(stash));
 
     struct xpvhv_aux *aux = HvAUX(stash);
@@ -168,7 +168,7 @@ XS(injected_constructor)
 
     SV *instance = newSVobject(aux->xhv_class_next_fieldix);
     SvOBJECT_on(instance);
-    SvSTASH_set(instance, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
+    SvSTASH_set(instance, HvREFCNT_inc_simple(stash));
 
     SV *self = sv_2mortal(newRV_noinc(instance));
 
@@ -296,13 +296,17 @@ PP(pp_methstart)
             PADOFFSET padix   = (aux++)->uv;
             U32       fieldix = (aux++)->uv;
 
-            assert(fieldp[fieldix]);
-
-            /* TODO: There isn't a convenient SAVE macro for doing both these
-             * steps in one go. Add one. */
-            SAVESPTR(PAD_SVl(padix));
-            SV *sv = PAD_SVl(padix) = SvREFCNT_inc(fieldp[fieldix]);
-            save_freesv(sv);
+            /* Defend against fields that don't yet exist; e.g. because of
+             * method invoked during DESTROY of an aborted constructor
+             *   See also https://github.com/Perl/perl5/issues/22278
+             */
+            if(fieldp[fieldix]) {
+              /* TODO: There isn't a convenient SAVE macro for doing both these
+               * steps in one go. Add one. */
+              SAVESPTR(PAD_SVl(padix));
+              SV *sv = PAD_SVl(padix) = SvREFCNT_inc(fieldp[fieldix]);
+              save_freesv(sv);
+            }
         }
     }
 
@@ -367,8 +371,7 @@ Perl_class_setup_stash(pTHX_ HV *stash)
         SAVEFREESV(newname);
 
         CV *newcv = newXS_flags(SvPV_nolen(newname), injected_constructor, __FILE__, NULL, nameflags);
-        CvXSUBANY(newcv).any_sv = (SV *)stash;
-        CvREFCOUNTED_ANYSV_on(newcv);
+        CvSTASH_set(newcv, stash);
     }
 
     /* TODO:

@@ -5,7 +5,7 @@ use Exporter;
 use File::Spec;
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.51';
+our $VERSION = '3.53';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -289,25 +289,13 @@ sub process_typemaps {
   return $typemap;
 }
 
-=head2 C<map_type()>
 
-=over 4
+=head2 C<map_type($self, $type, $varname)>
 
-=item * Purpose
-
-Performs a mapping at several places inside C<PARAGRAPH> loop.
-
-=item * Arguments
-
-  $type = map_type($self, $type, $varname);
-
-List of three arguments.
-
-=item * Return Value
-
-String holding augmented version of second argument.
-
-=back
+Returns a mapped version of the C type C<$type>. In particular, it
+converts C<Foo::bar> to C<Foo__bar>, converts the special C<array(type,n)>
+into C<type *>, and inserts C<$varname> (if present) into any function
+pointer type. So C<...(*)...> becomes C<...(* foo)...>.
 
 =cut
 
@@ -316,7 +304,10 @@ sub map_type {
 
   # C++ has :: in types too so skip this
   $type =~ tr/:/_/ unless $self->{RetainCplusplusHierarchicalTypes};
+
+  # map the special return type 'array(type, n)' to 'type *'
   $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
+
   if ($varname) {
     if ($type =~ / \( \s* \* (?= \s* \) ) /xg) {
       (substr $type, pos $type, 0) = " $varname ";
@@ -327,6 +318,7 @@ sub map_type {
   }
   return $type;
 }
+
 
 =head2 C<standard_XS_defs()>
 
@@ -507,17 +499,22 @@ EOF
 
 =item * Purpose
 
-Perform assignment to the C<func_args> attribute.
+Generate the argument list to be applied to the call to the "real" C
+library function which is wrapped by the xsub. It is is the same as the
+xsub's arguments, except that any initial method pointer is deleted, and
+args marked as C<*OUT*> are prefixed with '&'.
 
 =item * Arguments
 
   $string = assign_func_args($self, $argsref, $class);
 
-List of three elements.  Second is an array reference; third is a string.
+C<$argref> is an array reference containing the xsub's parameters.
+
+C<$class> if defined, indicates that this is a method.
 
 =item * Return Value
 
-String.
+A string such as C<'foo, &bar, baz'>
 
 =back
 
@@ -534,14 +531,31 @@ sub assign_func_args {
   return join(", ", @func_args);
 }
 
+
 =head2 C<analyze_preprocessor_statements()>
 
 =over 4
 
 =item * Purpose
 
-Within each function inside each Xsub, print to the F<.c> output file certain
-preprocessor statements.
+Process a CPP conditional line (C<#if> etc), to keep track of conditional
+nesting.  In particular, it updates C<< @{$self->{XSStack}} >> which
+contains the current list of nested conditions. So an C<#if> pushes, an
+C<#endif> pops, an C<#else> modifies etc. Each element is a hash of the
+form:
+
+  {
+    type      => 'if',
+    varname   => 'XSubPPtmpAAAA', # maintained by caller
+
+                  # XS functions defined within this branch of the
+                  # conditional (maintained by caller)
+    functions =>  {
+                    'Foo::Bar::baz' => 1,
+                    ...
+                  }
+                  # XS functions seen within any previous branch
+    other_functions => {... }
 
 =item * Arguments
 
@@ -550,12 +564,15 @@ preprocessor statements.
           $self, $statement, $XSS_work_idx, $BootCode_ref
         );
 
-List of four elements.
+<$XSS_work_idx> is the current depth of #if nesting.
+
+<$BootCode_ref> is an array reference of lines to be output in the boot code.
+This function may add additional lines to it.
 
 =item * Return Value
 
-Modifed values of three of the arguments passed to the function.  In
-particular, the C<XSStack> and C<InitFileCode> attributes are modified.
+Returns a modified C<$XSS_work_idx>, Also (for no very good reason) it
+returns the original values of C<$self> and C<$BootCode_ref>.
 
 =back
 
@@ -565,34 +582,47 @@ sub analyze_preprocessor_statements {
   my ($self, $statement, $XSS_work_idx, $BootCode_ref) = @_;
 
   if ($statement eq 'if') {
+    # #if or #ifdef
     $XSS_work_idx = @{ $self->{XSStack} };
     push(@{ $self->{XSStack} }, {type => 'if'});
   }
   else {
+    # An #else/#elsif/#endif.
+
     $self->death("Error: '$statement' with no matching 'if'")
       if $self->{XSStack}->[-1]{type} ne 'if';
+
     if ($self->{XSStack}->[-1]{varname}) {
+      # close any '#ifdef XSubPPtmpAAAA' inserted earlier into boot code.
       push(@{ $self->{InitFileCode} }, "#endif\n");
-      push(@{ $BootCode_ref },     "#endif");
+      push(@{ $BootCode_ref },         "#endif");
     }
 
     my(@fns) = keys %{$self->{XSStack}->[-1]{functions}};
+
     if ($statement ne 'endif') {
-      # Hide the functions defined in other #if branches, and reset.
+      # Add current functions to the hash of functions seen in previous
+      # branch limbs, then reset for this next limb of the branch.
       @{$self->{XSStack}->[-1]{other_functions}}{@fns} = (1) x @fns;
       @{$self->{XSStack}->[-1]}{qw(varname functions)} = ('', {});
     }
     else {
+      # #endif - pop stack and update new top entry
       my($tmp) = pop(@{ $self->{XSStack} });
       0 while (--$XSS_work_idx
            && $self->{XSStack}->[$XSS_work_idx]{type} ne 'if');
-      # Keep all new defined functions
+
+      # For all functions declared within any limb of the just-popped
+      # if/endif, mark them as having appeared within this limb of the
+      # outer nested branch.
       push(@fns, keys %{$tmp->{other_functions}});
       @{$self->{XSStack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
     }
   }
+
   return ($self, $XSS_work_idx, $BootCode_ref);
 }
+
 
 =head2 C<set_cond()>
 
@@ -600,9 +630,21 @@ sub analyze_preprocessor_statements {
 
 =item * Purpose
 
+Return a string containing a snippet of C code which tests for the 'wrong
+number of arguments passed' condition, depending on whether there are
+default arguments or ellipsis.
+
 =item * Arguments
 
+C<ellipsis> true if the xsub's signature has a trailing C<, ...>.
+
+C<$min_args> the smallest number of args which may be passed.
+
+C<$num_args> the number of parameters in the signature.
+
 =item * Return Value
+
+The text of a short C code snippet.
 
 =back
 
@@ -649,81 +691,78 @@ sub current_line_number {
   return $line_number;
 }
 
-=head2 C<Warn()>
 
-=over 4
 
-=item * Purpose
+=head2 Error handling methods
 
-Print warnings with line number details at the end.
+There are four main methods for reporting warnings and errors.
 
-=item * Arguments
+=over
 
-List of text to output.
+=item C<< $self->Warn(@messages) >>
 
-=item * Return Value
+This is equivalent to:
 
-None.
+  warn "@messages in foo.xs, line 123\n";
+
+The file and line number are based on the file currently being parsed. It
+is intended for use where you wish to warn, but can continue parsing and
+still generate a correct C output file.
+
+=item C<< $self->blurt(@messages) >>
+
+This is equivalent to C<Warn>, except that it also increments the internal
+error count (which can be retrieved with C<report_error_count()>). It is
+used to report an error, but where parsing can continue (so typically for
+a semantic error rather than a syntax error). It is expected that the
+caller will eventually signal failure in some fashion. For example,
+C<xsubpp> has this as its last line:
+
+  exit($self->report_error_count() ? 1 : 0);
+
+=item C<< $self->death(@messages) >>
+
+This normally equivalent to:
+
+  $self->Warn(@messages);
+  exit(1);
+
+It is used for something like a syntax error, where parsing can't
+continue.  However, this is inconvenient for testing purposes, as the
+error can't be trapped. So if C<$self> is created with the C<die_on_error>
+flag, or if C<$ExtUtils::ParseXS::DIE_ON_ERROR> is true when process_file()
+is called, then instead it will die() with that message.
+
+=item C<< $self->WarnHint(@messages, $hints) >>
+
+This is a more obscure twin to C<Warn>, which does the same as C<Warn>,
+but afterwards, outputs any lines contained in the C<$hints> string, with
+each line wrapped in parentheses. For example:
+
+  $self->WarnHint(@messages,
+    "Have you set the foo switch?\nSee the manual for further info");
 
 =back
 
 =cut
+
+
+# see L</Error handling methods> above
 
 sub Warn {
   my ($self)=shift;
   $self->WarnHint(@_,undef);
 }
 
-=head2 C<WarnHint()>
 
-=over 4
-
-=item * Purpose
-
-Prints warning with line number details. The last argument is assumed
-to be a hint string.
-
-=item * Arguments
-
-List of strings to warn, followed by one argument representing a hint.
-If that argument is defined then it will be split on newlines and output
-line by line after the main warning.
-
-=item * Return Value
-
-None.
-
-=back
-
-=cut
+# see L</Error handling methods> above
 
 sub WarnHint {
   warn _MsgHint(@_);
 }
 
-=head2 C<_MsgHint()>
 
-=over 4
-
-=item * Purpose
-
-Constructs an exception message with line number details. The last argument is
-assumed to be a hint string.
-
-=item * Arguments
-
-List of strings to warn, followed by one argument representing a hint.
-If that argument is defined then it will be split on newlines and concatenated
-line by line (parenthesized) after the main message.
-
-=item * Return Value
-
-The constructed string.
-
-=back
-
-=cut
-
+# see L</Error handling methods> above
 
 sub _MsgHint {
   my $self = shift;
@@ -736,19 +775,8 @@ sub _MsgHint {
   return $ret;
 }
 
-=head2 C<blurt()>
 
-=over 4
-
-=item * Purpose
-
-=item * Arguments
-
-=item * Return Value
-
-=back
-
-=cut
+# see L</Error handling methods> above
 
 sub blurt {
   my $self = shift;
@@ -756,19 +784,8 @@ sub blurt {
   $self->{errors}++
 }
 
-=head2 C<death()>
 
-=over 4
-
-=item * Purpose
-
-=item * Arguments
-
-=item * Return Value
-
-=back
-
-=cut
+# see L</Error handling methods> above
 
 sub death {
   my ($self) = (@_);
@@ -781,15 +798,23 @@ sub death {
   exit 1;
 }
 
+
 =head2 C<check_conditional_preprocessor_statements()>
 
 =over 4
 
 =item * Purpose
 
+Warn if the lines in C<< @{ $self->{line} } >> don't have balanced C<#if>,
+C<endif> etc.
+
 =item * Arguments
 
+None
+
 =item * Return Value
+
+None
 
 =back
 
@@ -888,6 +913,7 @@ sub report_typemap_failure {
   $self->$error_method($err);
   return();
 }
+
 
 1;
 

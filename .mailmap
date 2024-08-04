@@ -252,6 +252,7 @@ Dave Cross <dave@mag-sol.com> Dave Cross <dave@dave.org.uk>
 Dave Cross <dave@mag-sol.com> Dave Cross <dave@perlhacks.com>
 Dave Shariff Yadallee <doctor@doctor.nl2k.ab.ca> The Doctor <doctor@doctor.nl2k.ab.ca>
 David <david@dhaller.de> david@dhaller.de <david@dhaller.de>
+David Dyck <david.dyck@fluke.com> David Dyck <david.dyck@gmail.com>
 David Dyck <david.dyck@fluke.com> David Dyck <dcd@tc.fluke.com>
 David Formosa <dformosa@dformosa.zeta.org.au> dformosa@dformosa.zeta.org.au <dformosa@dformosa.zeta.org.au>
 David Gay <dgay@acm.org> dgay@acm.org <dgay@acm.org>
@@ -339,15 +340,17 @@ Greg Ward <gward@ase.com> <gward@ase.com>
 Greg Ward <gward@ase.com> Greg Ward <greg@bic.mni.mcgill.ca>
 Gurusamy Sarathy <gsar@cpan.org> <gsar@activestate.com>
 Gurusamy Sarathy <gsar@cpan.org> Gurusamy Sarathy <gsar@engin.umich.edu>
-H. Merijn Brand <perl5@tux.freedom.nl> <perl5@tux.freedom.nl>
-H.Merijn Brand <h.m.brand@xs4all.nl> <h.m.brand@hccnet.nl>
-H.Merijn Brand <h.m.brand@xs4all.nl> <h.m.brand@procura.nl>
-H.Merijn Brand <h.m.brand@xs4all.nl> <merijn.brand@procura.nl>
-H.Merijn Brand <h.m.brand@xs4all.nl> H.M. Brand <merijn@a5.(none)>
-H.Merijn Brand <h.m.brand@xs4all.nl> H.M. Brand <merijn@l1.procura.nl>
-H.Merijn Brand <h.m.brand@xs4all.nl> H.Merijn Brand <[mailto:h.m.brand@xs4all.nl]>
-H.Merijn Brand <h.m.brand@xs4all.nl> H.Merijn Brand <github@tux.freedom.nl>
-H.Merijn Brand <h.m.brand@xs4all.nl> H.Merijn Brand <perl5@tux.freedom.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> <h.m.brand@hccnet.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> <h.m.brand@procura.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> <merijn.brand@procura.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> <merijn.brand@shift2.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> <perl5@tux.freedom.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> H. Merijn Brand <perl5@tux.freedom.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> H.M. Brand <merijn@a5.(none)>
+H.Merijn Brand <perl5@tux.freedom.nl> H.M. Brand <merijn@l1.procura.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> H.Merijn Brand <[mailto:h.m.brand@xs4all.nl]>
+H.Merijn Brand <perl5@tux.freedom.nl> H.Merijn Brand <github@tux.freedom.nl>
+H.Merijn Brand <perl5@tux.freedom.nl> H.Merijn Brand <h.m.brand@xs4all.nl>
 Hans Mulder <hansmu@xs4all.nl> <hans@icgroup.nl>
 Hans Mulder <hansmu@xs4all.nl> <hansm@euro.net>
 Hans Mulder <hansmu@xs4all.nl> <hansm@icgroup.nl>
@@ -641,6 +644,8 @@ Nicolas Mendoza <mendoza@pvv.ntnu.no> Nicolas Mendoza <nico@mobitech.no>
 Nicolas R <atoomic@cpan.org> Nicolas R <cpan@atoomic.org>
 Nicolas R <atoomic@cpan.org> Nicolas R <nicolas@atoomic.org>
 Nicolas R <atoomic@cpan.org> Nicolas R. <@atoomic>
+Nicolas R <atoomic@cpan.org> Nicolas R. <atoomic@cpan.org>
+Nicolas R <atoomic@cpan.org> Nicolas R. <nicolas@atoomic.org>
 Nicolas R <atoomic@cpan.org> ℕicolas ℝ <nicolas@atoomic.org>
 Nicolas R <atoomic@cpan.org> ☢ ℕicolas ℝ <nicolas@atoomic.org>
 Nobuhiro Iwamatsu <unknown> Nobuhiro Iwamatsu <>
@@ -762,7 +767,8 @@ Ronald J. Kimball <rjk@linguist.dartmouth.edu> <rjk-perl-p5p@tamias.net>
 Ronald J. Kimball <rjk@linguist.dartmouth.edu> <rjk@linguist.thayer.dartmouth.edu>
 Ronald J. Kimball <rjk@linguist.dartmouth.edu> Ronald J Kimball <rjk@tamias.net>
 Ronald Schmidt <ronaldws@aol.com> RonaldWS@aol.com <ronaldws@aol.com>
-Russ Allbery <rra@stanford.edu> Russ Allbery <rra@cpan.org>
+Russ Allbery <eagle@eyrie.org> Russ Allbery <rra@cpan.org>
+Russ Allbery <eagle@eyrie.org> Russ Allbery <rra@stanford.edu>
 Salvador Fandiño <sfandino@yahoo.com> Salvador Fandino <sfandino@yahoo.com>
 Salvador Fandiño <sfandino@yahoo.com> Salvador FandiXXo <unknown>
 Scott Henry <scotth@sgi.com> <schotth@sgi.com>
@@ -771,6 +777,7 @@ Scott Lanning <lannings@who.int> <lannings@gmail.com>
 Scott Lanning <lannings@who.int> Lanning, Scott <lannings@who.int>
 Scott Lanning <lannings@who.int> Scott Lanning <slanning@cpan.org>
 Scott Wiersdorf <scott@perlcode.org> scott@perlcode.org <scott@perlcode.org>
+Sean Davis <dive@endersgame.net> Sean Davis <dive@ender.com>
 Sebastian Schmidt <yath@yath.de> <yath@yath.de>
 Sebastian Schmidt <yath@yath.de> yath-perlbug@yath.de <yath-perlbug@yath.de>
 Sergey Zhmylove <zhmylove@narod.ru> zhmylove <zhmylove@narod.ru>

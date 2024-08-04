@@ -610,7 +610,8 @@ our %Modules = (
     },
 
     'Getopt::Long' => {
-        'DISTRIBUTION' => 'JV/Getopt-Long-2.57.tar.gz',
+        'DISTRIBUTION' => 'JV/Getopt-Long-2.58.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Jun 12 08:25:08 2024',
         'SYNCINFO'     => 'jkeenan on Sat Nov 11 13:09:21 2023',
         'FILES'        => q[cpan/Getopt-Long],
         'EXCLUDED'     => [
@@ -758,7 +759,8 @@ our %Modules = (
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003002.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003003.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Jun 12 08:50:03 2024',
         'SYNCINFO'     => 'corion on Thu Jan 11 20:23:12 2024',
         'SYNCINFO'     => 'book on Tue Dec 26 22:44:58 2023',
         'FILES'        => q[cpan/Math-BigInt],
@@ -827,7 +829,7 @@ our %Modules = (
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20240420.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20240720.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -979,21 +981,13 @@ our %Modules = (
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-5.01.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-v6.0.2.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Jul 14 20:06:07 2024',
         'MAIN_MODULE'  => 'Pod::Man',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
         'EXCLUDED'     => [
             qr{^\.github/dependabot\.yml},
             qr{^\.github/workflows/build\.yaml},
-        ],
-        'CUSTOMIZED'   => [
-            # https://github.com/rra/podlators/pull/28
-            'lib/Pod/Man.pm',
-            'lib/Pod/ParseLink.pm',
-            'lib/Pod/Text.pm',
-            'lib/Pod/Text/Color.pm',
-            'lib/Pod/Text/Overstrike.pm',
-            'lib/Pod/Text/Termcap.pm'
         ],
         'MAP' => {
             ''                 => 'cpan/podlators/',
@@ -1118,6 +1112,10 @@ our %Modules = (
                 t/lib/if.pm
                 ),
         ],
+        'CUSTOMIZED'   => [
+            # https://github.com/Perl-Toolchain-Gang/Test-Harness/pull/132
+            'cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm',
+        ],
     },
 
     'Test::Simple' => {
@@ -1137,7 +1135,8 @@ our %Modules = (
     },
 
     'Test2::Suite' => {
-        'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000162.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000163.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Jun 12 09:17:44 2024',
         'SYNCINFO'     => 'LeoNerd on Sat Apr 27 10:12:36 2024',
         'SYNCINFO'     => 'jkeenan on Wed Nov  1 20:18:33 2023',
         'FILES'        => q[cpan/Test2-Suite],
@@ -1148,6 +1147,14 @@ our %Modules = (
 
             # https://github.com/Test-More/Test2-Suite/issues/208
             't/acceptance/Workflow-Acceptance.t',
+        ],
+        'CUSTOMIZED'   => [
+            # https://github.com/Test-More/Test2-Suite/pull/296
+            't/modules/Require/AutomatedTesting.t',
+            't/modules/Require/ExtendedTesting.t',
+            't/modules/Require/NonInteractiveTesting.t',
+            't/modules/Require/ReleaseTesting.t',
+            't/regression/291-async-subtest-done-testing.t',
         ],
     },
 
@@ -1509,6 +1516,8 @@ our %Modules = (
                 lib/perlbug.t
                 lib/sigtrap.{pm,t}
                 lib/sort.{pm,t}
+                lib/source/encoding.pm
+                lib/source/source_encoding.t
                 lib/strict.{pm,t}
                 lib/subs.{pm,t}
                 lib/unicore/

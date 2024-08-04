@@ -106,6 +106,21 @@ case "`${cc:-cc} -V 2>&1`" in
     '') optimize='-O3' ;;
     esac
     ;;
+
+# the new Intel C/C++ compiler, LLVM based, replaces ICC which
+# is no longer maintained from around October 2023
+*"Intel(R) oneAPI DPC++/C++ Compiler"*)
+    # version from end of first line, like:
+    # Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+    ccversion=`${cc:-cc} --version | sed -n -e 's/^Intel.*(\(.*\))/\1/p'`
+    # If we're using ICX, we usually want the best performance
+    case "$optimize" in
+    '') optimize='-O3' ;;
+    esac
+    # fp-model defaults to "fast" which mis-handles NaNs
+    ccflags="-fp-model=precise $ccflags"
+    ;;
+
 *" Sun "*"C"*)
     # Sun's C compiler, which might have a 'tag' name between
     # 'Sun' and the 'C':  Examples:

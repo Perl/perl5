@@ -112,6 +112,7 @@ blindly casts away const.
 =for apidoc_section $SV
 =for apidoc   Am |AV *|AV_FROM_REF|SV * ref
 =for apidoc_item |CV *|CV_FROM_REF|SV * ref
+=for apidoc_item |GV *|GV_FROM_REF|SV * ref
 =for apidoc_item |HV *|HV_FROM_REF|SV * ref
 
 The C<I<*>V_FROM_REF> macros extract the C<SvRV()> from a given reference SV
@@ -124,16 +125,17 @@ definitely a reference SV that refers to an SV of the right type.
 
 #if defined(DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define xV_FROM_REF(XV, ref)  \
-    ({ SV *_ref = ref; \
-       assert(SvROK(_ref)); \
-       assert(SvTYPE(SvRV(_ref)) == SVt_PV ## XV); \
-       (XV *)(SvRV(_ref)); })
+    ({ SV *ref_ = ref; \
+       assert(SvROK(ref_)); \
+       assert(SvTYPE(SvRV(ref_)) == SVt_PV ## XV); \
+       (XV *)(SvRV(ref_)); })
 #else
 #  define xV_FROM_REF(XV, ref)  ((XV *)(SvRV(ref)))
 #endif
 
 #define AV_FROM_REF(ref)  xV_FROM_REF(AV, ref)
 #define CV_FROM_REF(ref)  xV_FROM_REF(CV, ref)
+#define GV_FROM_REF(ref)  xV_FROM_REF(GV, ref)
 #define HV_FROM_REF(ref)  xV_FROM_REF(HV, ref)
 
 #ifndef __cplusplus
@@ -387,52 +389,8 @@ a string/length pair.
 Like C<newSVpvn_share>, but takes a literal string instead of
 a string/length pair and omits the hash parameter.
 
-=for apidoc Am|void|sv_catpvs_flags|SV* sv|"literal string"|I32 flags
-Like C<sv_catpvn_flags>, but takes a literal string instead
-of a string/length pair.
-
-=for apidoc Am|void|sv_catpvs_nomg|SV* sv|"literal string"
-Like C<sv_catpvn_nomg>, but takes a literal string instead of
-a string/length pair.
-
-=for apidoc Am|void|sv_catpvs|SV* sv|"literal string"
-Like C<sv_catpvn>, but takes a literal string instead of a
-string/length pair.
-
-=for apidoc Am|void|sv_catpvs_mg|SV* sv|"literal string"
-Like C<sv_catpvn_mg>, but takes a literal string instead of a
-string/length pair.
-
 =for apidoc Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
 Like C<sv_setref_pvn>, but takes a literal string instead of
-a string/length pair.
-
-=for apidoc_section $string
-
-=for apidoc Ama|char*|savepvs|"literal string"
-Like C<savepvn>, but takes a literal string instead of a
-string/length pair.
-
-=for apidoc Ama|char*|savesharedpvs|"literal string"
-A version of C<savepvs()> which allocates the duplicate string in memory
-which is shared between threads.
-
-=for apidoc_section $GV
-
-=for apidoc Am|HV*|gv_stashpvs|"name"|I32 create
-Like C<gv_stashpvn>, but takes a literal string instead of a
-string/length pair.
-
-=for apidoc_section $HV
-
-=for apidoc Am|SV**|hv_fetchs|HV* tb|"key"|I32 lval
-Like C<hv_fetch>, but takes a literal string instead of a
-string/length pair.
-=for apidoc_section $lexer
-
-=for apidoc Amx|void|lex_stuff_pvs|"pv"|U32 flags
-
-Like L</lex_stuff_pvn>, but takes a literal string instead of
 a string/length pair.
 
 =cut
@@ -461,30 +419,71 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define newSVpvs_flags(str,flags)	\
     Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN(str), flags)
 #define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
-#define sv_catpvs_flags(sv, str, flags) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), flags)
-#define sv_catpvs_nomg(sv, str) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), 0)
-#define sv_catpvs(sv, str) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC)
-#define sv_catpvs_mg(sv, str) \
-    Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC|SV_SMAGIC)
-#define sv_setpvs(sv, str) Perl_sv_setpvn(aTHX_ sv, STR_WITH_LEN(str))
-#define sv_setpvs_mg(sv, str) Perl_sv_setpvn_mg(aTHX_ sv, STR_WITH_LEN(str))
+
+/*
+=for apidoc_defn Am|void|sv_catpvs_flags|SV * const dsv|"literal string"|I32 flags
+=for apidoc_defn Am|void|sv_catpvs_nomg|SV * const dsv|"literal string"
+=for apidoc_defn Am|void|sv_catpvs|SV * const dsv|"literal string"
+=for apidoc_defn Am|void|sv_catpvs_mg|SV * const dsv|"literal string"
+=cut
+*/
+#define sv_catpvs_flags(dsv, str, flags) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), flags)
+#define sv_catpvs_nomg(dsv, str) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), 0)
+#define sv_catpvs(dsv, str) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), SV_GMAGIC)
+#define sv_catpvs_mg(dsv, str) \
+    Perl_sv_catpvn_flags(aTHX_ dsv, STR_WITH_LEN(str), SV_GMAGIC|SV_SMAGIC)
+
+/*
+=for apidoc_defn Am|void|sv_setpvs   |SV *const sv|"literal string"
+=for apidoc_defn Am|void|sv_setpvs_mg|SV *const sv|"literal string"
+=cut
+*/
+#define sv_setpvs(dsv, str) Perl_sv_setpvn(aTHX_ dsv, STR_WITH_LEN(str))
+#define sv_setpvs_mg(dsv, str) Perl_sv_setpvn_mg(aTHX_ dsv, STR_WITH_LEN(str))
+
 #define sv_setref_pvs(rv, classname, str) \
     Perl_sv_setref_pvn(aTHX_ rv, classname, STR_WITH_LEN(str))
+
+/*
+=for apidoc_defn Ama|char*|savepvs|"literal string"
+=for apidoc_defn Ama|char*|savesharedpvs|"literal string"
+=cut
+*/
 #define savepvs(str) Perl_savepvn(aTHX_ STR_WITH_LEN(str))
 #define savesharedpvs(str) Perl_savesharedpvn(aTHX_ STR_WITH_LEN(str))
+
+/*
+=for apidoc_defn Am|HV*|gv_stashpvs|"name"|I32 create
+=cut
+*/
 #define gv_stashpvs(str, create) \
     Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
 
-#define gv_fetchpvs(namebeg, flags, sv_type) \
-    Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), flags, sv_type)
+
+/*
+=for apidoc_defn Am|GV *|gv_fetchpvs|"name"|I32 flags|const svtype sv_type
+=for apidoc_defn Am|GV *|gv_fetchpvn|const char * nambeg|STRLEN full_len|I32 flags|const svtype sv_type
+=cut
+*/
+#define gv_fetchpvs(name, flags, sv_type)                                   \
+            Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(name), flags, sv_type)
 #define  gv_fetchpvn  gv_fetchpvn_flags
 
 
+/*
+=for apidoc_defn x|void|lex_stuff_pvs|"pv"|U32 flags
+
+=cut
+*/
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 
+/*
+=for apidoc_defn Am|CV *|get_cvs|"name"|I32 flags
+=cut
+*/
 #define get_cvs(str, flags)					\
         Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
@@ -2628,7 +2627,7 @@ Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
 =for apidoc_item |void*|safecalloc|size_t nitems|size_t item_size
 
-The XSUB-writer's interface to the C C<malloc> function.  The allocated
+The XSUB-writer's interface to the C C<calloc> function.  The allocated
 memory is zeroed with C<memzero>.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
@@ -2698,15 +2697,12 @@ again) that hopefully catches attempts to access uninitialized memory.
 
 =for apidoc Am|void|PoisonNew|void* dest|int nitems|type
 
-PoisonWith(0xAB) for catching access to allocated but uninitialized memory.
+C<PoisonWith(0xAB)> for catching access to allocated but uninitialized memory.
 
-=for apidoc Am|void|PoisonFree|void* dest|int nitems|type
+=for apidoc   Am|void|PoisonFree|void* dest|int nitems|type
+=for apidoc_item|void|Poison    |void* dest|int nitems|type
 
-PoisonWith(0xEF) for catching access to freed memory.
-
-=for apidoc Am|void|Poison|void* dest|int nitems|type
-
-PoisonWith(0xEF) for catching access to freed memory.
+These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 =cut */
 

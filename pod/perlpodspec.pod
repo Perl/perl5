@@ -467,6 +467,12 @@ See the brief discussion in L<perlpod/"Formatting Codes">.
 
 See the brief discussion in L<perlpod/"Formatting Codes">.
 
+=item C<UE<lt>textE<gt>> -- underline text
+
+See the brief discussion in L<perlpod/"Formatting Codes">.
+
+This was added in 2024 and might not be supported on all Pod parsers.
+
 =item C<CE<lt>codeE<gt>> -- code text
 
 See the brief discussion in L<perlpod/"Formatting Codes">.

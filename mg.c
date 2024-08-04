@@ -3091,9 +3091,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             U32 save_hints = PL_hints;
             PL_hints = SvUV(sv);
 
-            /* If wasn't UTF-8, and now is, notify the parser */
-            if ((PL_hints & HINT_UTF8) && ! (save_hints & HINT_UTF8)) {
-                notify_parser_that_changed_to_utf8();
+            if (   (PL_hints   & (HINT_UTF8|HINT_ASCII_ENCODING))
+                != (save_hints & (HINT_UTF8|HINT_ASCII_ENCODING)))
+            {
+                notify_parser_that_encoding_changed();
             }
         }
         break;
@@ -3695,7 +3696,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
         }
     }
     /* sv_2cv is too complicated, try a simpler variant first: */
-    if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
+    if (!SvROK(PL_psig_ptr[sig]) || !(cv = CV_FROM_REF(PL_psig_ptr[sig]))
         || SvTYPE(cv) != SVt_PVCV) {
         HV *st;
         cv = sv_2cv(PL_psig_ptr[sig], &st, &gv, GV_ADD);

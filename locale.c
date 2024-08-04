@@ -2265,7 +2265,7 @@ S_bool_setlocale_2008_i(pTHX_
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "bool_setlocale_2008_i: input=%d (%s), mask=0x%x,"
                            " new locale=\"%s\", current locale=\"%s\","
-                           " index=%d, entry object=%p;"
+                           " index=%d, entry object=0x%p;"
                            " called from %" LINE_Tf "\n",
                            categories[index], category_names[index], mask,
                            ((new_locale == NULL) ? "(nil)" : new_locale),
@@ -2377,7 +2377,7 @@ S_bool_setlocale_2008_i(pTHX_
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "bool_setlocale_2008_i: now using C"
-                           " object=%p\n", PL_C_locale_obj));
+                           " object=0x%p\n", PL_C_locale_obj));
 
     /* These two objects are special:
      *  LC_GLOBAL_LOCALE    because it is undefined behavior to call
@@ -2431,21 +2431,21 @@ S_bool_setlocale_2008_i(pTHX_
             }
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                                   "bool_setlocale_2008_i created %p by"
+                                   "bool_setlocale_2008_i created 0x%p by"
                                    " duping the input\n", basis_obj));
         }
 
 #  define DEBUG_NEW_OBJECT_CREATED(category, locale, new, old, caller_line) \
       DEBUG_Lv(PerlIO_printf(Perl_debug_log,                                \
-                             "bool_setlocale_2008_i(%s, %s): created %p"    \
-                             " while freeing %p; called from %" LINE_Tf     \
+                             "bool_setlocale_2008_i(%s, %s): created 0x%p"  \
+                             " while freeing 0x%p; called from %" LINE_Tf   \
                              " via %" LINE_Tf "\n",                         \
                              category, locale, new, old,                    \
                              caller_line, (line_t)__LINE__))
 #  define DEBUG_NEW_OBJECT_FAILED(category, locale, basis_obj)              \
       DEBUG_L(PerlIO_printf(Perl_debug_log,                                 \
                             "bool_setlocale_2008_i: creating new object"    \
-                            " for (%s '%s') from %p failed; called from %"  \
+                            " for (%s '%s') from 0x%p failed; called from %"\
                             LINE_Tf " via %" LINE_Tf "\n",                  \
                             category, locale, basis_obj,                    \
                             caller_line, (line_t)__LINE__));
@@ -2575,7 +2575,7 @@ S_bool_setlocale_2008_i(pTHX_
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "bool_setlocale_2008_i: now using %p\n", new_obj));
+                           "bool_setlocale_2008_i: now using 0x%p\n", new_obj));
 
 #  ifdef MULTIPLICITY   /* Unlikely, but POSIX 2008 functions could be
                            Configured to be used on unthreaded perls, in which
@@ -2585,7 +2585,7 @@ S_bool_setlocale_2008_i(pTHX_
         if (PL_cur_locale_obj != new_obj) {
             PerlIO_printf(Perl_debug_log,
                           "bool_setlocale_2008_i: PL_cur_locale_obj"
-                          " was %p, now is %p\n",
+                          " was 0x%p, now is 0x%p\n",
                           PL_cur_locale_obj, new_obj);
         }
     }
@@ -4589,7 +4589,7 @@ S_my_setlocale_debug_string_i(pTHX_
     }
 
 #  ifdef MULTIPLICITY
-#    define THREAD_FORMAT "%p:"
+#    define THREAD_FORMAT "0x%p:"
 #    define THREAD_ARGUMENT aTHX_
 #  else
 #    define THREAD_FORMAT
@@ -5049,7 +5049,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
 #  ifdef DEBUGGING
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                         "Copying '%s' to %p\n",
+                         "Copying '%s' to 0x%p\n",
                          ((is_strict_utf8_string((U8 *) string, 0))
                           ? string
                           :_byte_dump_string((U8 *) string, strlen(string), 0)),
@@ -6030,29 +6030,35 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 /*
 
-=for apidoc      Perl_langinfo
+=for apidoc_section $locale
+=for apidoc      sv_langinfo
+=for apidoc_item Perl_langinfo
 =for apidoc_item Perl_langinfo8
 
-C<Perl_langinfo> is an (almost) drop-in replacement for the system
-C<L<nl_langinfo(3)>>, taking the same C<item> parameter values, and returning
-the same information.  But it is more thread-safe than regular
-C<nl_langinfo()>, and hides the quirks of Perl's locale handling from your
-code, and can be used on systems that lack a native C<nl_langinfo>.
+These perform the equivalent functionality as the system C<L<nl_langinfo(3)>>,
+taking the same C<item> parameter values, but are preferred over calling that
+directly because they are portable to platforms lacking that function, are
+thread-safe, and can automatically handle UTF-8 strings.
 
-However, you should instead use either the improved version of this,
-L</Perl_langinfo8>, or even better, L</sv_langinfo>.  The latter returns an SV,
-handling all the possible non-standard returns of C<nl_langinfo()>, including
-the UTF8ness of any returned string.
+The simplest to use is C<sv_langinfo>.  It returns an SV containing the correct
+PV and UTF8ness, requiring no extra muss or fuss from you.  New code should use
+this form.
+
+C<Perl_langinfo> and C<Perl_langinfo8> are retained for backwards
+compatibility.  C<Perl_langinfo> is an (almost) drop-in replacement for the
+system C<L<nl_langinfo(3)>>, but exists on systems that lack a native
+C<nl_langinfo>.
 
 C<Perl_langinfo8> is identical to C<Perl_langinfo> except for an additional
-parameter, a pointer to a variable declared as L</C<utf8ness_t>>, into which it
+parameter, a pointer to a variable declared as C<L</utf8ness_t>>, into which it
 returns to you how you should treat the returned string with regards to it
 being encoded in UTF-8 or not.
 
-These two functions share private per-thread memory that will be changed the
-next time either one of them is called with any input, but not before.
+C<Perl_langinfo> and C<Perl_langinfo8> share private per-thread memory that
+will be changed the next time either one of them is called with any input, but
+not before.
 
-Concerning the differences between these and plain C<nl_langinfo()>:
+Concerning the differences between these functions and plain C<nl_langinfo()>:
 
 =over
 
@@ -6081,14 +6087,15 @@ the other advantages of C<Perl_langinfo()>; not keeping C<LC_NUMERIC> in the C
 
 The system function they replace can have its static return buffer trashed,
 not only by a subsequent call to that function, but by a C<freelocale>,
-C<setlocale>, or other locale change.  The returned buffer of these functions
-is not changed until the next call to one or the other, so the buffer is never
-in a trashed state.
+C<setlocale>, or other locale change.  C<sv_langinfo> sidesteps this problem
+entirely; the returned buffer of the other two is not changed until the next
+call to one or the other, so the buffer is never in a trashed state.
 
 =item d.
 
-The return buffer is per-thread, so it also is never overwritten by a call to
-these functions from another thread;  unlike the function it replaces.
+The return buffer of C<Perl_langinfo> and C<Perl_langinfo8> is per-thread  so
+it also is never overwritten by a call to these functions from another thread;
+unlike the function they replace.
 
 =item e.
 
@@ -6119,22 +6126,6 @@ L<C<POSIX::localeconv()>|POSIX/localeconv>, which is also thread-safe.
 The details for those items which may deviate from what this emulation returns
 and what a native C<nl_langinfo()> would return are specified in
 L<I18N::Langinfo>.
-
-=for apidoc  sv_langinfo
-
-This is the preferred interface for accessing the data that L<nl_langinfo(3)>
-provides (or Perl's emulation of it on platforms lacking it), returning an SV.
-Unlike, the earlier-defined interfaces to this (L</Perl_langinfo> and
-L</Perl_langinfo8>), which return strings, the UTF8ness of the result is
-automatically handled for you.  And like them, it is thread-safe and
-automatically handles getting the proper values for the C<RADIXCHAR> and
-C<THOUSEP> items (that calling the plain libc C<nl_langinfo()> could give the
-wrong results for).  Like them, this also doesn't play well with the libc
-C<localeconv()>; use L<C<POSIX::localeconv()>|POSIX/localeconv> instead.
-
-There are a few deviations from what a native C<nl_langinfo()> would return and
-what this returns on platforms that don't implement that function.  These are
-detailed in L<I18N::Langinfo>.
 
 =cut
 
@@ -7504,7 +7495,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
         /* The year was deliberately chosen so that January 1 is on the
         * first day of the week.  Since we're only getting one thing at a
         * time, it all works */
-        ints_to_tm(&mytm, locale, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
+        ints_to_tm(&mytm, locale, 30, 30, hour, mday, mon, 2011, 0);
         bool succeeded;
         if (utf8ness) {
             succeeded = strftime8(format,
@@ -7648,7 +7639,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
             /* Do the strftime.  Once we have determined the UTF8ness (if
             * we want it), assume the rest will be the same, and use
             * strftime_tm(), which doesn't recalculate UTF8ness */
-            ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0, 0, 0);
+            ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0);
             if (utf8ness && is_utf8 != UTF8NESS_NO && is_utf8 != UTF8NESS_YES) {
                 succeeded = strftime8(fmts[j],
                                       alt_dig_sv,
@@ -8075,16 +8066,25 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 /*
 =for apidoc_section $time
 =for apidoc      sv_strftime_tm
+=for apidoc_item sv_strftime_ints
 =for apidoc_item my_strftime
 
 These implement the libc strftime().
 
 On failure, they return NULL, and set C<errno> to C<EINVAL>.
 
-C<sv_strftime_tm> is preferred, as it transparently handles the UTF-8ness of
-the current locale, the input C<fmt>, and the returned result.  Only if the
-current C<LC_TIME> locale is a UTF-8 one (and S<C<use bytes>> is not in effect)
-will the result be marked as UTF-8.
+C<sv_strftime_tm> and C<sv_strftime_ints> are preferred, as they transparently
+handle the UTF-8ness of the current locale, the input C<fmt>, and the returned
+result.  Only if the current C<LC_TIME> locale is a UTF-8 one (and S<C<use
+bytes>> is not in effect) will the result be marked as UTF-8.
+
+C<my_strftime> is kept for backwards compatibility.  Knowing if its result
+should be considered UTF-8 or not requires significant extra logic.
+
+Note that all three functions are always executed in the underlying
+C<LC_TIME> locale of the program, giving results based on that locale.
+
+The functions differ as follows:
 
 C<sv_strftime_tm> takes a pointer to a filled-in S<C<struct tm>> parameter.  It
 ignores the values of the C<wday> and C<yday> fields in it.  The other fields
@@ -8093,22 +8093,55 @@ that purpose.
 
 The caller assumes ownership of the returned SV with a reference count of 1.
 
-C<my_strftime> is kept for backwards compatibility.  Knowing if its result
-should be considered UTF-8 or not requires significant extra logic.
+C<sv_strftime_ints> takes a bunch of integer parameters that together
+completely define a given time.  It calculates the S<C<struct tm>> to pass to
+libc strftime(), and calls that function.
 
-The return value is a pointer to the formatted result (which MUST be arranged
-to be FREED BY THE CALLER).  This allows this function to increase the buffer
-size as needed, so that the caller doesn't have to worry about that, unlike
-libc C<strftime()>.
+The value of C<isdst> is used as follows:
 
-The C<wday>, C<yday>, and C<isdst> parameters are ignored by C<my_strftime>.
-Daylight savings time is never considered to exist, and the values returned for
-the other two fields (if C<fmt> even calls for them) are calculated from the
-other parameters, without need for referencing these.
+=over
 
-Note that both functions are always executed in the underlying
-C<LC_TIME> locale of the program, giving results based on that locale.
+=item 0
 
+No daylight savings time is in effect
+
+=item E<gt>0
+
+Check if daylight savings time is in effect, and adjust the results
+accordingly.
+
+=item E<lt>0
+
+This value is reserved for internal use by the L<POSIX> module for backwards
+compatibility purposes.
+
+=back
+
+The caller assumes ownership of the returned SV with a reference count of 1.
+
+C<my_strftime> is like C<sv_strftime_ints> except that:
+
+=over
+
+=item The C<fmt> parameter and the return are S<C<char *>> instead of
+S<C<SV *>>.
+
+This means the UTF-8ness of the result is unspecified.  The result MUST be
+arranged to be FREED BY THE CALLER).
+
+=item The C<is_dst> parameter is ignored.
+
+Daylight savings time is never considered to be in effect.
+
+=item It has extra parameters C<yday> and C<wday> that are ignored.
+
+These exist only for historical reasons; the values for the corresponding
+fields in S<C<struct tm>> are calculated from the other arguments.
+
+=back
+
+Note that all three functions are always executed in the underlying C<LC_TIME>
+locale of the program, giving results based on that locale.
 =cut
  */
 
@@ -8118,6 +8151,9 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
                        int isdst)
 {   /* Documented above */
     PERL_ARGS_ASSERT_MY_STRFTIME;
+    PERL_UNUSED_ARG(wday);
+    PERL_UNUSED_ARG(yday);
+    PERL_UNUSED_ARG(isdst);
 
 #ifdef USE_LOCALE_TIME
     const char * locale = querylocale_c(LC_TIME);
@@ -8126,8 +8162,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 #endif
 
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, wday, yday,
-               isdst);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0);
     if (! strftime_tm(fmt, PL_scratch_langinfo, locale, &mytm)) {
         return NULL;
     }
@@ -8137,8 +8172,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 
 SV *
 Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
-                            int mday, int mon, int year, int wday,
-                            int yday, int isdst)
+                            int mday, int mon, int year, int isdst)
 {   /* Documented above */
     PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
 
@@ -8148,9 +8182,15 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
     const char * locale = "C";
 #endif
 
+    /* A negative 'isdst' triggers backwards compatibility mode for
+     * POSIX::strftime(), in which 0 is always passed to ints_to_tm() so that
+     * the possibility of daylight savings time is never considered,  But, a 1
+     * is eventually passed to libc strftime() so that it returns the results
+     * it always has for a non-zero 'isdst'.  See GH #22351 */
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, wday, yday,
-               isdst);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year,
+                              MAX(0, isdst));
+    mytm.tm_isdst = MIN(1, abs(isdst));
     return sv_strftime_common(fmt, locale, &mytm);
 }
 
@@ -8212,10 +8252,14 @@ STATIC void
 S_ints_to_tm(pTHX_ struct tm * mytm,
                    const char * locale,
                    int sec, int min, int hour, int mday, int mon, int year,
-                   int wday, int yday, int isdst)
+                   int isdst)
 {
     /* Create a struct tm structure from the input time-related integer
-     * variables for 'locale' */
+     * variables for 'locale'.  Unlike mini_mktime(), this populates the
+     * tm_gmtoff and tm_zone fields of the structure if the platform has those;
+     * and unlike mktime(), it allows you to specify to not consider the
+     * possibility of there being daylight savings time.  This is done by
+     * calling with 'isdst' set to 0 */
 
     /* Override with the passed-in values */
     Zero(mytm, 1, struct tm);
@@ -8225,34 +8269,84 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
     mytm->tm_mday = mday;
     mytm->tm_mon = mon;
     mytm->tm_year = year;
-    mytm->tm_wday = wday;
-    mytm->tm_yday = yday;
-    mytm->tm_isdst = isdst;
 
-    /* Long-standing behavior is to ignore the effects of locale (in
-     * particular, daylight savings time) on the input, so we use mini_mktime.
-     * See GH #22062. */
+    struct tm * which_tm = mytm;
+    struct tm aux_tm;
+
+#ifndef HAS_MKTIME
+
     mini_mktime(mytm);
 
-    /* But some of those effect are deemed desirable, so use libc to get the
-     * values for tm_gmtoff and tm_zone on platforms that have them [perl
-     * #18238] */
-#if  defined(HAS_MKTIME)                                      \
- && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
+#else
 
-    const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
-    struct tm mytm2 = *mytm;
-    MKTIME_LOCK;
-    mktime(&mytm2);
-    MKTIME_UNLOCK;
-    restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+    /* On platforms that have either of these two fields, we have to run the
+     * libc mktime() in order to set them, as mini_mktime() doesn't deal with
+     * them.  [perl #18238] */
+#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+#    define ALWAYS_RUN_MKTIME
+#  endif
 
-#  ifdef HAS_TM_TM_GMTOFF
-    mytm->tm_gmtoff = mytm2.tm_gmtoff;
+    /* When isdst is 0, it means to consider daylight savings time as never
+     * being in effect.  Many libc implementations of mktime() do not allow
+     * this; they always consider the possibility of dst.  But mini_mktime()
+     * never considers dst, so use it under this condition. */
+    if (isdst == 0) {
+        mini_mktime(mytm);
+
+#  ifndef ALWAYS_RUN_MKTIME
+
+    /* When we don't always need libc mktime(), we call it only when we didn't
+     * call mini_mktime() */
+    } else {
+
+#  else
+        /* Here will have to run libc mktime() in order to get the values of
+         * some fields that mini_mktime doesn't populate.  We don't want
+         * mktime's side effect of looking for dst, so we have to have a
+         * separate tm structure from which we copy just those fields into the
+         * returned structure.  Initialize its values.  mytm should now be a
+         * normalized version of the input. */
+        aux_tm = *mytm;
+        aux_tm.tm_isdst = isdst;
+        which_tm = &aux_tm;
+
 #  endif
-#  ifdef HAS_TM_TM_ZONE
-    mytm->tm_zone = mytm2.tm_zone;
+
+        /* Here, we need to run libc mktime(), either because we want to take
+         * dst into consideration, or because it calculates one or two fields
+         * that we need that mini_mktime() doesn't handle.
+         *
+         * Unlike mini_mktime(), it does consider the locale, so have to switch
+         * to the correct one. */
+        const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+        MKTIME_LOCK;
+
+        /* which_tm points to an auxiliary copy if we ran mini_mktime().
+         * Otherwise it points to the passed-in one which now gets populated
+         * directly. */
+        (void) mktime(which_tm);
+
+        MKTIME_UNLOCK;
+        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+    }
+
+#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+
+    /* And use the saved libc values for tm_gmtoff and tm_zone if we used an
+     * auxiliary struct to get them */
+    if (which_tm != mytm) {
+
+#    ifdef HAS_TM_TM_GMTOFF
+        mytm->tm_gmtoff = aux_tm.tm_gmtoff;
+#    endif
+#    ifdef HAS_TM_TM_ZONE
+        mytm->tm_zone = aux_tm.tm_zone;
+#    endif
+
+    }
+
 #  endif
+#  undef ALWAYS_RUN_MKTIME
 #endif
 
     return;
@@ -8850,7 +8944,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * overridden below  */
     if (! uselocale(PL_C_locale_obj)) {
         locale_panic_(Perl_form(aTHX_
-                                "Can't uselocale(%p), LC_ALL supposed to"
+                                "Can't uselocale(0x%p), LC_ALL supposed to"
                                 " be 'C'",
                                 PL_C_locale_obj));
     }
@@ -9245,8 +9339,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "finished Perl_init_i18nl10n; actual obj=%p,"
-                           " expected obj=%p, initial=%s\n",
+                           "finished Perl_init_i18nl10n; actual obj=0x%p,"
+                           " expected obj=0x%p, initial=%s\n",
                            uselocale(0), PL_cur_locale_obj,
                            get_LC_ALL_display()));
 #  endif
@@ -10329,7 +10423,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 #endif   /* end of all the my_strerror() implementations */
 
 bool
-Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
+Perl_is_in_locale_category_(pTHX_ const bool compiling, const int category)
 {
     /* Internal function which returns if we are in the scope of a pragma that
      * enables the locale category 'category'.  'compiling' should indicate if
@@ -10342,6 +10436,10 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
         return FALSE;
     }
 
+    if (category == PERL_IN_UNRESTRICTED_LOCALE_) {
+        return SvUV(these_categories) == 0;
+    }
+
     /* The pseudo-category 'not_characters' is -1, so just add 1 to each to get
      * a valid unsigned */
     assert(category >= -1);
@@ -10350,6 +10448,7 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 
 /*
 
+=for apidoc_section $locale
 =for apidoc switch_to_global_locale
 
 This function copies the locale state of the calling thread into the program's
@@ -10652,7 +10751,7 @@ Perl_switch_locale_context(pTHX)
 
     if (! uselocale(PL_cur_locale_obj)) {
         locale_panic_(Perl_form(aTHX_
-                                "Can't uselocale(%p), LC_ALL supposed to"
+                                "Can't uselocale(0x%p), LC_ALL supposed to"
                                 " be '%s'",
                                 PL_cur_locale_obj, get_LC_ALL_display()));
     }
@@ -10693,7 +10792,7 @@ Perl_thread_locale_init(pTHX)
         /* Not being able to change to the C locale is severe; don't keep
          * going.  */
         locale_panic_(Perl_form(aTHX_
-                                "Can't uselocale(%p), 'C'", PL_C_locale_obj));
+                                "Can't uselocale(0x%p), 'C'", PL_C_locale_obj));
         NOT_REACHED; /* NOTREACHED */
     }
 

@@ -563,12 +563,16 @@ to these new elements.
 
 Here are some other functions:
 
+    Size_t  av_count(AV*);
     SSize_t av_top_index(AV*);
     SV**    av_fetch(AV*, SSize_t key, I32 lval);
     SV**    av_store(AV*, SSize_t key, SV* val);
 
+C<av_count> returns the number of elements in the array (including
+any empty slots (undefined ones) that are intermixed with filled-in ones).
 The C<av_top_index> function returns the highest index value in an array (just
-like $#array in Perl).  If the array is empty, -1 is returned.  The
+like $#array in Perl).  If the array is empty, -1 is returned.  It is
+always equal to S<C<av_count() - 1>>.  The
 C<av_fetch> function returns the value at index C<key>, but if C<lval>
 is non-zero, then C<av_fetch> will store an undef value at that index.
 The C<av_store> function stores the value C<val> at index C<key>, and does
@@ -625,7 +629,7 @@ AVs that meet the following criteria:
 
 =item * are not readonly
 
-=item * are "real" (refcounted) AVs
+=item * are "real" AVs (see next section)
 
 =item * have an av_top_index value > -2
 
@@ -640,6 +644,42 @@ Note that some interpreter functions may attach magic to an AV as part
 of normal operations. It is therefore safest, unless you are sure of the
 lifecycle of an AV, to only use these new functions close to the point
 of AV creation.
+
+=head3 Real AVs - and those that are not
+
+The standard or typical AV is sometime referred to as being a "real" AV,
+a state that can be checked for with the C<AvREAL> macro. What this state
+basically signifies is that:
+
+=over
+
+=item * Every accessible element in the array is either initialized but
+empty or contains a pointer to a live SV.
+
+=item * When a SV* is assigned to an array element, the reference count on
+the SV is incremented. Conversely, when the element is unset, or assigned
+a different SV*, the reference count of the expelled SV is decremented.
+
+=back
+
+"Fake" AVs are intended for specific, limited use cases only. Use outside
+of core perl is strongly discouraged.
+
+For example, the interpreter's argument stack is implemented as an AV,
+but it is not C<AvREAL>. Its elements were historically not reference
+counted, which gives rise to the "stack-not-refcounted" class of bugs
+when SVs are freed during the execution of a statement but still needed
+later in that statement. Efforts are currently underway to move to a
+refcounted stack to fix this class of bugs: see the L</"Reference-counted argument stack">
+section in this document.
+
+A "fake" AV can be converted into a "real" AV by C<av_reify>. Conversion
+must occur if the AV has the C<SVpav_REIFY> flag set, which can be checked
+for using the C<AvREIFY()> macro. Trying to store a SV* into, or delete
+from, an AV usually involves an C<AvREIFY()> check and conversion if needed.
+
+See comments in F<av.h> and the functions in F<av.c> if you really
+want to know more.
 
 =head2 Working with HVs
 
@@ -1210,7 +1250,6 @@ handles:
   char IoTYPE(io);
   U8 IoFLAGS(io);
 
- =for apidoc_sections $io_scn, $formats_section
 =for apidoc_section $reports
 =for apidoc Amh|IV|IoLINES|IO *io
 =for apidoc Amh|IV|IoPAGE|IO *io
@@ -2905,6 +2944,8 @@ to be a no-op.
 
 =head2 How do I use all this in extensions?
 
+See also L<perlclib/Dealing with embedded perls and threads>.
+
 When Perl is built with MULTIPLICITY, extensions that call
 any functions in the Perl API will need to pass the initial context
 argument somehow.  The kicker is that you will need to write it in
@@ -3265,7 +3306,9 @@ and
 There are also
 
  PTR2nat(pointer)   /* pointer to integer of PTRSIZE */
- PTR2ul(pointer)    /* pointer to unsigned long */
+ PTR2ul(pointer)    /* pointer to unsigned long (unsafe) */
+
+PTR2ul() is unsafe, since a pointer may be larger than unsigned long.
 
 =for apidoc Amh|IV|PTR2nat|void *
 =for apidoc Amh|unsigned long|PTR2ul|void *
@@ -5029,9 +5072,9 @@ freeing is typically of benefit only for programs that make significant use of
 string eval.
 
 =for apidoc_section $concurrency
-=for apidoc  Cmnh|    |CVf_SLABBED
-=for apidoc_item |OP *|CvROOT|CV * sv
-=for apidoc_item |OP *|CvSTART|CV * sv
+=for apidoc Cmnh|    |CVf_SLABBED
+=for apidoc Cmh |OP *|CvROOT|CV * sv
+=for apidoc Cmh |OP *|CvSTART|CV * sv
 
 When the C<CVf_SLABBED> flag is set, the CV takes responsibility for freeing
 the slab. If C<CvROOT> is not set when the CV is freed or undeffed, it is

@@ -44,6 +44,12 @@ letter.
 
 =over 4
 
+=item __CLASS__ is experimental
+
+(S experimental::class) This warning is emitted if you use the C<__CLASS__>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item accept() on closed socket %s
 
 (W closed) You tried to do an accept on a closed socket.  Did you forget
@@ -668,6 +674,20 @@ version.
 (F) A subroutine invoked from an external package via call_sv()
 exited by calling exit.
 
+=item %s() attempted on invalid dirhandle %s
+
+(W io) You called readdir(), telldir(), seekdir(), rewinddir() or
+closedir() on a handle that has not been opened, or is now closed.  A
+handle must be successfully opened with opendir() to be used with
+these functions.  Check your control flow.
+
+=item %s() attempted on handle %s opened with open()
+
+(W io) You called readdir(), telldir(), seekdir(), rewinddir() or
+closedir() on a handle that was opened with open().  If you want to
+use these functions to traverse the contents of a directory, you need
+to open the handle with opendir().
+
 =item %s() called too early to check prototype
 
 (W prototype) You've called a function that has a prototype before the
@@ -1287,7 +1307,7 @@ via package "%s" (Perhaps you forgot to load the package?)
 (D deprecated::missing_import_called_with_args) You called the
 C<import()> or C<unimport()> method of a class that has no import method
 defined in its inheritance graph, and passed an argument to the method.
-This is very often the sign of a mispelled package name in a use or
+This is very often the sign of a misspelled package name in a use or
 require statement that has silently succeded due to a case insensitive
 file system.
 
@@ -1876,11 +1896,6 @@ keyword.
 =item Cloning substitution context is unimplemented
 
 (F) Creating a new thread inside the C<s///> operator is not supported.
-
-=item closedir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you tried to close is either closed or not really
-a dirhandle.  Check your control flow.
 
 =item close() on unopened filehandle %s
 
@@ -5640,11 +5655,6 @@ range, and at least one of the end points is a decimal digit.  Under the
 stricter rules, when this happens, both end points should be digits in
 the same group of 10 consecutive digits.
 
-=item readdir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you're reading from is either closed or not really
-a dirhandle.  Check your control flow.
-
 =item readline() on closed filehandle %s
 
 (W closed) The filehandle you're reading from got itself closed sometime
@@ -5845,11 +5855,6 @@ for the character.
 (W syntax) You wrote your assignment operator backwards.  The = must
 always come last, to avoid ambiguity with subsequent unary operators.
 
-=item rewinddir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you tried to do a rewinddir() on is either closed
-or not really a dirhandle.  Check your control flow.
-
 =item Scalars leaked: %d
 
 (S internal) Something went wrong in Perl's internal bookkeeping
@@ -5898,11 +5903,6 @@ Note that since Perl 5.10.0 a // can also be the I<defined-or>
 construct, not just the empty search pattern.  Therefore code written
 in Perl 5.10.0 or later that uses the // as the I<defined-or> can be
 misparsed by pre-5.10.0 Perls as a non-terminated search pattern.
-
-=item seekdir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you are doing a seekdir() on is either closed or not
-really a dirhandle.  Check your control flow.
 
 =item %sseek() on unopened filehandle
 
@@ -6488,11 +6488,6 @@ know about your kind of stdio.  You'll have to use a filename instead.
 (F) You tried to use C<goto> to reach a label that was too deeply nested
 for Perl to reach.  Perl is doing you a favor by refusing.
 
-=item telldir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you tried to telldir() is either closed or not really
-a dirhandle.  Check your control flow.
-
 =item tell() on unopened filehandle
 
 (W unopened) You tried to use the tell() function on a filehandle that
@@ -6796,7 +6791,7 @@ use it to restrict permissions for yourself (EXPR & 0700).
 =item UNIVERSAL does not export anything
 
 (F) You asked UNIVERSAL to export something, but UNIVERSAL is the
-base class for all classes and contains not exportable symbols.
+base class for all classes and contains no exportable symbols.
 
 =item Unbalanced context: %d more PUSHes than POPs
 
@@ -7756,6 +7751,15 @@ will no longer compile in a future version of Perl.  Or you can turn on
 S<C<use feature 'extra_paired_delimiters'>> and use the character that
 is the mirror image of this one for the closing string delimiter.
 
+=item Use of '%s' is experimental as a string delimiter
+
+(S experimental::extra_paired_delimiters)   This warning is emitted if
+you use as a string delimiter one of the non-ASCII mirror image ones
+enabled by S<C<use feature 'extra_paired_delimiters'>>.  Simply suppress
+the warning if you want to use the feature, but know that in doing so
+you are taking the risk of using an experimental feature which may
+change or be removed in a future Perl version:
+
 =item Use of %s is not allowed in Unicode property wildcard
 subpatterns in regex; marked by S<<-- HERE> in m/%s/
 
@@ -7770,6 +7774,10 @@ See L<perlunicode/Wildcards in Property Values>.
 (W io) A filehandle represents an opened file, and when you opened the file
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
+
+=item Use of non-ASCII character 0x%X illegal when 'use source::encoding "ascii"' is in effect
+
+(F) This pragma forbids non-ASCII characters within its scope.
 
 =item Use of reference "%s" as array index
 

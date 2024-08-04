@@ -381,6 +381,38 @@ including an ability for them to provide new class or field attributes.
 
 =back
 
+=head1 KNOWN BUGS
+
+The following bugs have been found in the experimental C<class> feature:
+
+=over 4
+
+=item *
+
+Since Perl v5.38, inheriting from a parent class which is declared in the same
+file and which hadn't already been sealed can cause a segmentation fault.
+[L<GH #20890|https://github.com/Perl/perl5/issues/20890>]
+
+=item *
+
+Since Perl v5.38 and with the experimental C<refaliasing> feature, trying to
+replace a field variable causes a segmentation fault.
+[L<GH #20947|https://github.com/Perl/perl5/issues/20947>]
+
+=item *
+
+Since Perl v5.38, it's possible to craft a class with leaky encapsulation,
+which can cause a segmentation fault.
+[L<GH #20956|https://github.com/Perl/perl5/issues/20956>]
+
+=item *
+
+In Perl v5.38, inheriting from a class would not always attempt to load the
+parent class (fixed in Perl v5.40).
+[L<GH #21332|https://github.com/Perl/perl5/issues/21332>]
+
+=back
+
 =head1 AUTHORS
 
 Paul Evans

@@ -581,13 +581,12 @@ or C<do>/C<require>/C<use>'d file.  If more than one value is listed, the
 list must be placed in parentheses.  All listed elements must be
 legal lvalues.  Only alphanumeric identifiers may be lexically
 scoped--magical built-ins like C<$/> must currently be C<local>ized
-with C<local> instead.
+with C<local> instead to limit their scope dynamically.
 
-Unlike dynamic variables created by the C<local> operator, lexical
-variables declared with C<my> are totally hidden from the outside
-world, including any called subroutines.  This is true if it's the
-same subroutine called from itself or elsewhere--every call gets
-its own copy.
+Unlike global or package variables localized by the C<local> operator,
+lexical variables declared with C<my> are totally hidden from the outside
+world, including any called subroutines.  This is true if it's the same
+subroutine called from itself or elsewhere--every call gets its own copy.
 X<local>
 
 This doesn't mean that a C<my> variable declared in a statically
@@ -721,13 +720,13 @@ allowed to try to make a package variable (or other global) lexical:
 
     my $pack::var;      # ERROR!  Illegal syntax
 
-In fact, a dynamic variable (also known as package or global variables)
-are still accessible using the fully qualified C<::> notation even while a
-lexical of the same name is also visible:
+In fact, a package or global variable is still accessible using the
+fully qualified C<::> notation even while a lexical of the same name
+is also visible:
 
     package main;
-    local $x = 10;
-    my    $x = 20;
+    our $x = 10;
+    my  $x = 20;
     print "$x and $::x\n";
 
 That will print out C<20> and C<10>.

@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(542);
+    plan(544);
     use_ok('XS::APItest')
 };
 use Config;
@@ -34,6 +34,13 @@ sub i {
 }
 call_sv_C();
 is($call_sv_count, 7, "call_sv_C passes");
+
+my $did_argv;
+sub called_by_argv_cleanup {
+    $did_argv++ if @_;
+}
+ok(call_argv_cleanup(), "call_argv() cleans up temps if asked to");
+ok($did_argv, "call_argv_cleanup() did the actual call with arguments");
 
 sub d {
     die "its_dead_jim\n";

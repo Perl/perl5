@@ -352,20 +352,20 @@ C<hv_store> has another extra parameter, C<hash>, a precomputed hash of the key
 string, or zero if it has not been precomputed.  This parameter is omitted from
 C<hv_stores>, as it is computed automatically at compile time.
 
-If <hv> is NULL, NULL is returned and no action is taken.
+If C<hv> is NULL, NULL is returned and no action is taken.
 
 If C<val> is NULL, it is treated as being C<undef>; otherwise the caller is
 responsible for suitably incrementing the reference count of C<val> before
 the call, and decrementing it if the function returned C<NULL>.  Effectively
 a successful C<hv_store> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, C<hv_store>
+if all your code does is create SVs and store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
 anything further to tidy up.
 
 C<hv_store> is not implemented as a call to L</C<hv_store_ent>>, and does not
 create a temporary SV for the key, so if your key data is not already in SV
-form then use C<hv_store> in preference to C<hv_store_ent>.
+form, then use C<hv_store> in preference to C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -373,7 +373,7 @@ information on how to use this function on tied hashes.
 =for apidoc hv_store_ent
 
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
-parameter is the precomputed hash value; if it is zero then Perl will
+parameter is the precomputed hash value; if it is zero, then Perl will
 compute it.  The return value is the new hash entry so created.  It will be
 C<NULL> if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise the
@@ -383,24 +383,26 @@ incrementing the reference count of C<val> before the call, and
 decrementing it if the function returned NULL.  Effectively a successful
 C<hv_store_ent> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, C<hv_store>
+if all your code does is create SVs and store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
 anything further to tidy up.  Note that C<hv_store_ent> only reads the C<key>;
 unlike C<val> it does not take ownership of it, so maintaining the correct
 reference count on C<key> is entirely the caller's responsibility.  The reason
-it does not take ownership, is that C<key> is not used after this function
+it does not take ownership is that C<key> is not used after this function
 returns, and so can be freed immediately.  C<hv_store>
 is not implemented as a call to C<hv_store_ent>, and does not create a temporary
-SV for the key, so if your key data is not already in SV form then use
+SV for the key, so if your key data is not already in SV form, then use
 C<hv_store> in preference to C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-=for apidoc hv_exists
-=for apidoc_item ||hv_existss|HV *hv|"key"
+=for apidoc      hv_exists
+=for apidoc_item hv_existss
+=for apidoc_item hv_exists_ent
 
-These return a boolean indicating whether the specified hash key exists.
+These each return a boolean indicating whether the specified hash key exists.
+They differ only in how the key is specified.
 
 In C<hv_existss>, the key must be a C language string literal, enclosed in
 double quotes.  It is never treated as being in UTF-8.  There is no
@@ -408,11 +410,17 @@ length_parameter.
 
 In C<hv_exists>, the absolute value of C<klen> is the length of the key.  If
 C<klen> is negative the key is assumed to be in UTF-8-encoded Unicode.
+C<key> may contain embedded NUL characters.
 
-=for apidoc hv_fetch
-=for apidoc_item ||hv_fetchs|HV *hv|"key"|I32 lval
+In C<hv_exists_ent>, the key is specified by the SV C<keysv>; its UTF8ness is
+the same as that SV.  There is an additional parameter, C<hash>, which can be a
+valid precomputed hash value, or 0 to ask for it to be computed.
 
-These return the SV which corresponds to the specified key in the hash.
+=for apidoc      hv_fetch
+=for apidoc_item hv_fetchs
+
+These each return the SV which corresponds to the specified key in the hash.
+They differ only in how the key is specified.
 
 In C<hv_fetchs>, the key must be a C language string literal, enclosed in
 double quotes.  It is never treated as being in UTF-8.  There is no
@@ -420,6 +428,7 @@ length_parameter.
 
 In C<hv_fetch>, the absolute value of C<klen> is the length of the key.  If
 C<klen> is negative the key is assumed to be in UTF-8-encoded Unicode.
+C<key> may contain embedded NUL characters.
 
 In both, if C<lval> is set, then the fetch will be part of a store.  This means
 that if there is no value in the hash associated with the given key, then one
@@ -429,13 +438,6 @@ dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
-
-=for apidoc hv_exists_ent
-
-Returns a boolean indicating whether
-the specified hash key exists.  C<hash>
-can be a valid precomputed hash value, or 0 to ask for it to be
-computed.
 
 =cut
 */
@@ -1248,8 +1250,8 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
 }
 
 /*
-=for apidoc hv_delete
-=for apidoc_item ||hv_deletes|HV *hv|"key"|U32 flags
+=for apidoc      hv_delete
+=for apidoc_item hv_deletes
 
 These delete a key/value pair in the hash.  The value's SV is removed from
 the hash, made mortal, and returned to the caller.
@@ -2607,8 +2609,8 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 }
 
 /*
-=for apidoc        hv_name_set
-=for apidoc_item ||hv_name_sets|HV *hv|"name"|U32 flags
+=for apidoc      hv_name_set
+=for apidoc_item hv_name_sets
 
 These each set the name of stash C<hv> to the specified name.
 

@@ -106,6 +106,7 @@
 # define PL_efloatsize                          (vTHX->Iefloatsize)
 # define PL_endav                               (vTHX->Iendav)
 # define PL_Env                                 (vTHX->IEnv)
+# define PL_env_mutex_depth                     (vTHX->Ienv_mutex_depth)
 # define PL_envgv                               (vTHX->Ienvgv)
 # define PL_errgv                               (vTHX->Ierrgv)
 # define PL_errors                              (vTHX->Ierrors)

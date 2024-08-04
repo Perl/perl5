@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.88';
+our $VERSION = '1.90';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -39,7 +39,7 @@ our %feature_bundle = (
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
-    "5.39"    => [qw(bitwise current_sub evalbytes extra_paired_delimiters fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
+    "5.39"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -67,6 +67,8 @@ $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.36"} = $feature_bundle{"5.35"};
 $feature_bundle{"5.38"} = $feature_bundle{"5.37"};
 $feature_bundle{"5.40"} = $feature_bundle{"5.39"};
+$feature_bundle{"5.41"} = $feature_bundle{"5.39"};
+$feature_bundle{"5.42"} = $feature_bundle{"5.39"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -477,6 +479,12 @@ This feature is available starting in Perl 5.36.
 
 =head2 The 'extra_paired_delimiters' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::extra_paired_delimiters";
+
 This feature enables the use of more paired string delimiters than the
 traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.  When
 this feature is on, for example, you can say S<C<qrE<171>patE<187>>>.
@@ -485,16 +493,7 @@ As with any usage of non-ASCII delimiters in a UTF-8-encoded source file, you
 will want to ensure the parser will decode the source code from UTF-8 bytes
 with a declaration such as C<use utf8>.
 
-This feature is available starting in Perl 5.36.  From Perl 5.36 to 5.38,
-it was classed as experimental, and Perl emitted a warning for its usage,
-except when explicitly disabled:
-
-    no warnings "experimental::extra_paired_delimiters";
-
-As of Perl 5.40, use of this feature no longer triggers a warning (though the
-C<experimental::extra_paired_delimiters> warning category still exists for
-compatibility with code that disables it). This feature is now considered
-stable.
+This feature is available starting in Perl 5.36.
 
 For a full list of the available characters, see
 L<perlop/List of Extra Paired Delimiters>.
@@ -598,10 +597,13 @@ The following feature bundles are available:
             module_true postderef_qq say signatures
             state unicode_eval unicode_strings
 
-  :5.40     bitwise current_sub evalbytes
-            extra_paired_delimiters fc isa module_true
-            postderef_qq say signatures state try
-            unicode_eval unicode_strings
+  :5.40     bitwise current_sub evalbytes fc isa
+            module_true postderef_qq say signatures
+            state try unicode_eval unicode_strings
+
+  :5.42     bitwise current_sub evalbytes fc isa
+            module_true postderef_qq say signatures
+            state try unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

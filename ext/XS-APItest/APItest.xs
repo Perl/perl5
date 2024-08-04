@@ -2820,6 +2820,18 @@ call_argv(subname, flags, ...)
         EXTEND(SP, 1);
         PUSHs(sv_2mortal(newSViv(i)));
 
+bool
+call_argv_cleanup()
+  CODE:
+    IV old_count = PL_sv_count;
+    char one[] = "one"; /* non const strings */
+    char two[] = "two";
+    char *args[] = { one, two, NULL };
+    Perl_call_argv(aTHX_ "called_by_argv_cleanup", G_DISCARD | G_LIST, args);
+    RETVAL = PL_sv_count == old_count;
+  OUTPUT:
+    RETVAL
+
 void
 call_method(methname, flags, ...)
     char* methname

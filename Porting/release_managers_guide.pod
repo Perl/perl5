@@ -428,6 +428,14 @@ If you decide any should be fixed, after that gets done, run
 to make sure those fixes were successful, and follow the directions in
 the output about regenerating the data base.
 
+=for checklist skip BLEAD-FINAL BLEAD-POINT RC
+
+=head3 Update perlgov
+
+When doing a MAINT release, check that perlgov lists the I<current>
+Perl Steering Council and Core Team members, in case they have changed
+since the corresponding stable release has been shipped.
+
 =head3 Update perldelta
 
 Get perldelta in a mostly finished state.

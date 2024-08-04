@@ -3182,7 +3182,7 @@ PP(pp_goto)
             /* This egregious kludge implements goto &subroutine */
             I32 cxix;
             PERL_CONTEXT *cx;
-            CV *cv = MUTABLE_CV(SvRV(sv));
+            CV *cv = CV_FROM_REF(sv);
             AV *arg = GvAV(PL_defgv);
             CV *old_cv = NULL;
 
@@ -3427,7 +3427,7 @@ PP(pp_goto)
                        exit, so point it at arg again. */
                     if (arg != GvAV(PL_defgv)) {
                         AV * const av = GvAV(PL_defgv);
-                        GvAV(PL_defgv) = (AV *)SvREFCNT_inc_simple(arg);
+                        GvAV(PL_defgv) = AvREFCNT_inc_simple(arg);
                         SvREFCNT_dec(av);
                     }
                 }
@@ -4008,7 +4008,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     CX_CUR()->blk_gimme = gimme;
 
     CvOUTSIDE_SEQ(evalcv) = seq;
-    CvOUTSIDE(evalcv) = MUTABLE_CV(SvREFCNT_inc_simple(outside));
+    CvOUTSIDE(evalcv) = CvREFCNT_inc_simple(outside);
 
     /* set up a scratch pad */
 
@@ -4399,7 +4399,7 @@ S_require_version(pTHX_ SV *sv)
             SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
 
             /* get the left hand term */
-            lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
+            lav = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(req), "version", FALSE));
 
             first  = SvIV(*av_fetch(lav,0,0));
             if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
@@ -4720,7 +4720,7 @@ S_require_file(pTHX_ SV *sv)
                     if (SvTYPE(SvRV(loader)) == SVt_PVAV
                         && !SvOBJECT(SvRV(loader)))
                     {
-                        loader = *av_fetch(MUTABLE_AV(SvRV(loader)), 0, TRUE);
+                        loader = *av_fetch(AV_FROM_REF(loader), 0, TRUE);
                         if (SvGMAGICAL(loader)) {
                             SvGETMAGIC(loader);
                             SV *l = sv_newmortal();
@@ -5936,12 +5936,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
             /* Check that the key-sets are identical */
             HE *he;
-            HV *other_hv = MUTABLE_HV(SvRV(d));
+            HV *other_hv = HV_FROM_REF(d);
             bool tied;
             bool other_tied;
             U32 this_key_count  = 0,
                 other_key_count = 0;
-            HV *hv = MUTABLE_HV(SvRV(e));
+            HV *hv = HV_FROM_REF(e);
 
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Hash\n"));
             /* Tied hashes don't know how many keys they have. */
@@ -5989,10 +5989,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 goto ret_yes;
         }
         else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
-            AV * const other_av = MUTABLE_AV(SvRV(d));
+            AV * const other_av = AV_FROM_REF(d);
             const Size_t other_len = av_count(other_av);
             Size_t i;
-            HV *hv = MUTABLE_HV(SvRV(e));
+            HV *hv = HV_FROM_REF(e);
 
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Hash\n"));
             for (i = 0; i < other_len; ++i) {
@@ -6011,7 +6011,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             {
                 PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
                 HE *he;
-                HV *hv = MUTABLE_HV(SvRV(e));
+                HV *hv = HV_FROM_REF(e);
 
                 (void) hv_iterinit(hv);
                 while ( (he = hv_iternext(hv)) ) {
@@ -6029,7 +6029,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         else {
           sm_any_hash:
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash\n"));
-            if (hv_exists_ent(MUTABLE_HV(SvRV(e)), d, 0))
+            if (hv_exists_ent(HV_FROM_REF(e), d, 0))
                 goto ret_yes;
             else
                 goto ret_no;
@@ -6041,7 +6041,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             goto sm_any_array; /* Treat objects like scalars */
         }
         else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
-            AV * const other_av = MUTABLE_AV(SvRV(e));
+            AV * const other_av = AV_FROM_REF(e);
             const Size_t other_len = av_count(other_av);
             Size_t i;
 
@@ -6051,16 +6051,16 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
                 DEBUG_M(Perl_deb(aTHX_ "        testing for key existence...\n"));
                 if (svp) {	/* ??? When can this not happen? */
-                    if (hv_exists_ent(MUTABLE_HV(SvRV(d)), *svp, 0))
+                    if (hv_exists_ent(HV_FROM_REF(d), *svp, 0))
                         goto ret_yes;
                 }
             }
             goto ret_no;
         }
         if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
-            AV *other_av = MUTABLE_AV(SvRV(d));
+            AV *other_av = AV_FROM_REF(d);
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Array\n"));
-            if (av_count(MUTABLE_AV(SvRV(e))) != av_count(other_av))
+            if (av_count(AV_FROM_REF(e)) != av_count(other_av))
                 goto ret_no;
             else {
                 Size_t i;
@@ -6073,7 +6073,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                     seen_other = (HV*)newSV_type_mortal(SVt_PVHV);
                 }
                 for(i = 0; i < other_len; ++i) {
-                    SV * const * const this_elem = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+                    SV * const * const this_elem = av_fetch(AV_FROM_REF(e), i, FALSE);
                     SV * const * const other_elem = av_fetch(other_av, i, FALSE);
 
                     if (!this_elem || !other_elem) {
@@ -6115,11 +6115,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
           sm_regex_array:
             {
                 PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
-                const Size_t this_len = av_count(MUTABLE_AV(SvRV(e)));
+                const Size_t this_len = av_count(AV_FROM_REF(e));
                 Size_t i;
 
                 for(i = 0; i < this_len; ++i) {
-                    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+                    SV * const * const svp = av_fetch(AV_FROM_REF(e), i, FALSE);
                     DEBUG_M(Perl_deb(aTHX_ "        testing element against pattern...\n"));
                     if (svp && matcher_matches_sv(matcher, *svp)) {
                         destroy_matcher(matcher);
@@ -6132,12 +6132,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         }
         else if (!SvOK(d)) {
             /* undef ~~ array */
-            const Size_t this_len = av_count(MUTABLE_AV(SvRV(e)));
+            const Size_t this_len = av_count(AV_FROM_REF(e));
             Size_t i;
 
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Undef-Array\n"));
             for (i = 0; i < this_len; ++i) {
-                SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+                SV * const * const svp = av_fetch(AV_FROM_REF(e), i, FALSE);
                 DEBUG_M(Perl_deb(aTHX_ "        testing for undef element...\n"));
                 if (!svp || !SvOK(*svp))
                     goto ret_yes;
@@ -6148,11 +6148,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
           sm_any_array:
             {
                 Size_t i;
-                const Size_t this_len = av_count(MUTABLE_AV(SvRV(e)));
+                const Size_t this_len = av_count(AV_FROM_REF(e));
 
                 DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Array\n"));
                 for (i = 0; i < this_len; ++i) {
-                    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
+                    SV * const * const svp = av_fetch(AV_FROM_REF(e), i, FALSE);
                     if (!svp)
                         continue;
 

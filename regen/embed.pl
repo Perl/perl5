@@ -81,6 +81,20 @@ sub open_buf_out {
     return $fh;
 }
 
+my %type_asserts = (
+    # Templates for argument type checking for different argument types.
+    # __arg__ will be replaced by the parameter variable name
+
+    'AV*' => "SvTYPE(__arg__) == SVt_PVAV",
+    'HV*' => "SvTYPE(__arg__) == SVt_PVHV",
+
+    # Any CV* might point at a PVCV or PVFM
+    'CV*' => "SvTYPE(__arg__) == SVt_PVCV || SvTYPE(__arg__) == SVt_PVFM",
+
+    # We don't check GV*s for now because too many functions
+    # take non-initialised GV pointers
+);
+
 # generate proto.h
 sub generate_proto_h {
     my ($all)= @_;
@@ -114,6 +128,7 @@ sub generate_proto_h {
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = ( $flags !~ /R/ ) && ( $flags !~ /P/ ) && !$is_malloc;
         my @names_of_nn;
+        my @typed_args;
         my $func;
 
         if (! $can_ignore && $retval eq 'void') {
@@ -234,8 +249,13 @@ sub generate_proto_h {
 
                 my $nullok = ( $arg =~ s/\s*\bNULLOK\b\s+// ); # strip NULLOK with no effect
 
+                my $nocheck = ( $arg =~ s/\s*\bNOCHECK\b\s+// );
+
                 # Make sure each arg has at least a type and a var name.
                 # An arg of "int" is valid C, but want it to be "int foo".
+                my $argtype = ( $arg =~ m/^(\w+(?:\s*\*+)?)/ )[0];
+                defined $argtype and $argtype =~ s/\s+//g;
+
                 my $temp_arg = $arg;
                 $temp_arg =~ s/\*//g;
                 $temp_arg =~ s/\s*\bstruct\b\s*/ /g;
@@ -243,8 +263,12 @@ sub generate_proto_h {
                      && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
                     die_at_end "$func: $arg ($n) doesn't have a name\n";
                 }
-                if (defined $1 && ($nn||$nz) && !($commented_out && !$binarycompat)) {
-                    push @names_of_nn, $1;
+                my $argname = $1;
+                if (!$nocheck and defined $argtype and exists $type_asserts{$argtype}) {
+                    push @typed_args, [ $argtype, $argname ];
+                }
+                if (defined $argname && ($nn||$nz) && !($commented_out && !$binarycompat)) {
+                    push @names_of_nn, $argname;
                 }
             }
             $ret .= join ", ", @$args;
@@ -325,19 +349,37 @@ sub generate_proto_h {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
             if (@names_of_nn) {
                 $ret .= " \\\n";
-                my $def = " " x 8;
+
+                my @asserts;
                 foreach my $ix (0..$#names_of_nn) {
-                    $def .= "assert($names_of_nn[$ix])";
-                    if ($ix == $#names_of_nn) {
-                        $def .= "\n";
-                    } elsif (length $def > 70) {
-                        $ret .= $def . "; \\\n";
-                        $def = " " x 8;
-                    } else {
-                        $def .= "; ";
-                    }
+                    push @asserts, "assert($names_of_nn[$ix])";
                 }
-                $ret .= $def;
+                foreach (@typed_args) {
+                    my ($argtype, $argname) = @$_;
+                    my $nullok = !grep { $_ eq $argname } @names_of_nn;
+                    my $type_assert =
+                        $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
+                    push @asserts,
+                        $nullok ? "assert(!$argname || $type_assert)"
+                                : "assert($type_assert)";
+                }
+
+                my $line = "";
+                while(@asserts) {
+                    my $assert = shift @asserts;
+
+                    if(length($line) + length($assert) > 78) {
+                        $ret .= $line . "; \\\n";
+                        $line = "";
+                    }
+
+                    $line .= " " x 8 if !length $line;
+                    $line .= "; " if $line =~ m/\S/;
+                    $line .= $assert;
+                }
+
+                $ret .= $line if length $line;
+                $ret .= "\n";
             }
         }
         $ret .= "\n";

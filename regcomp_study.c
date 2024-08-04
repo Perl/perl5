@@ -447,7 +447,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     else if (ANYOF_HAS_AUX(node)) {
         const U32 n = ARG1u(node);
         SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
-        AV * const av = MUTABLE_AV(SvRV(rv));
+        AV * const av = AV_FROM_REF(rv);
         SV **const ary = AvARRAY(av);
 
         if (av_tindex_skip_len_mg(av) >= DEFERRED_USER_DEFINED_INDEX) {

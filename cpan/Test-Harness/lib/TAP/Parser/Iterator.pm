@@ -11,11 +11,11 @@ TAP::Parser::Iterator - Base class for TAP source iterators
 
 =head1 VERSION
 
-Version 3.48
+Version 3.48_01
 
 =cut
 
-our $VERSION = '3.48';
+our $VERSION = '3.48_01';
 
 =head1 SYNOPSIS
 

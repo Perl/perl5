@@ -601,7 +601,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
 
     /* Benchmarking seems to indicate that we gain if:
      * * we optimise at least two actions into a single multiconcat
-     *    (e.g concat+concat, sassign+concat);
+     *    (e.g., concat+concat, sassign+concat);
      * * or if we can eliminate at least 1 OP_CONST;
      * * or if we can eliminate a padsv via OPpTARGET_MY
      */
@@ -3934,6 +3934,11 @@ Perl_rpeep(pTHX_ OP *o)
                   * child (PADSV), and gets to it via op_other rather
                   * than op_next. Don't try to optimize this. */
                  && (lval != rhs)
+                 /* For efficiency, pp_padsv_store() doesn't push its
+                  * result onto the stack. For the relatively rare case of
+                  * the $lex assignment not in void context, we just do it
+                  * the old slow way. */
+                 && OP_GIMME(o,0) == G_VOID
                ) {
                 /* SASSIGN's bitfield flags, such as op_moresib and
                  * op_slabbed, will be carried over unchanged. */

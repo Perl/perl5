@@ -88,7 +88,6 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nexttype		(PL_parser->nexttype)
 #  define PL_nextval		(PL_parser->nextval)
 
-
 #define SvEVALED(sv) \
     (SvTYPE(sv) >= SVt_PVNV \
     && ((XPVIV*)SvANY(sv))->xiv_u.xivu_eval_seen)
@@ -107,6 +106,8 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #else
 #   define UTF cBOOL((PL_linestr && DO_UTF8(PL_linestr)) || ( !(PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS) && (PL_hints & HINT_UTF8)))
 #endif
+#define ONLY_ASCII (PL_hints & HINT_ASCII_ENCODING)
+#define ALLOW_NON_ASCII (! ONLY_ASCII)
 
 /* The maximum number of characters preceding the unrecognized one to display */
 #define UNRECOGNIZED_PRECEDE_COUNT 10
@@ -773,6 +774,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         }
         s = tmpbuf;
     }
+
     q = memchr(s, '"', len) ? '\'' : '"';
     Perl_croak(aTHX_ "Can't find string terminator %c%" UTF8f "%c"
                      " anywhere before EOF", q, UTF8fARG(uni, len, s), q);
@@ -819,6 +821,43 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
         strip_return(sv);
     return count;
 }
+#endif
+
+STATIC void
+S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
+{
+    PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE;
+
+    yyerror_pv(Perl_form(aTHX_ "Use of non-ASCII character 0x%02X"
+                               " illegal when 'use source::encoding"
+                               " \"ascii\"' is in effect", *s), 0);
+}
+
+#ifndef EBCDIC  /* On ASCII platforms, invariants are identical to ASCII; can
+                   use faster method */
+#  define is_ascii_string_loc(s, len, ep)                               \
+                                is_utf8_invariant_string_loc(s, len, ep)
+#else
+STATIC bool
+S_is_ascii_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+{
+    const U8* send = s + len;
+
+    while (s < send) {
+        if (isASCII(*s)) {
+            s++;
+            continue;
+        }
+
+        *ep = s;
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+#  define is_ascii_string_loc(s, len, ep)                              \
+                                    S_is_ascii_string_loc(s, len, ep)
 #endif
 
 /*
@@ -885,15 +924,15 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
-    parser->recheck_utf8_validity = TRUE;
+    parser->recheck_charset_validity = TRUE;
     parser->rsfp_filters =
       !(flags & LEX_START_SAME_FILTER) || !oparser
         ? NULL
-        : MUTABLE_AV(SvREFCNT_inc(
+        : AvREFCNT_inc(
             oparser->rsfp_filters
              ? oparser->rsfp_filters
              : (oparser->rsfp_filters = newAV())
-          ));
+          );
 
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
@@ -916,6 +955,13 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
                                               0,
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
+        }
+        else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
+                                                        (const U8 *) s,
+                                                        SvCUR(line),
+                                                        &first_bad_char_loc)))
+        {
+            yyerror_non_ascii_message(first_bad_char_loc);
         }
 
         parser->linestr = flags & LEX_START_COPIED
@@ -1145,9 +1191,13 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 }
 
 /*
-=for apidoc lex_stuff_pvn
+=for apidoc      lex_stuff_pv
+=for apidoc_item lex_stuff_pvn
+=for apidoc_item lex_stuff_pvs
+=for apidoc_item lex_stuff_sv
 
-Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
+These each insert characters into the lexer buffer
+(L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
 reallocating the buffer if necessary.  This means that lexing code that
 runs later will see the characters as if they had appeared in the input.
@@ -1155,13 +1205,23 @@ It is not recommended to do this as part of normal parsing, and most
 uses of this facility run the risk of the inserted characters being
 interpreted in an unintended manner.
 
-The string to be inserted is represented by C<len> octets starting
-at C<pv>.  These octets are interpreted as either UTF-8 or Latin-1,
-according to whether the C<LEX_STUFF_UTF8> flag is set in C<flags>.
-The characters are recoded for the lexer buffer, according to how the
-buffer is currently being interpreted (L</lex_bufutf8>).  If a string
-to be inserted is available as a Perl scalar, the L</lex_stuff_sv>
-function is more convenient.
+In C<lex_stuff_pvs>, the string to be inserted is a literal C string, enclosed
+in double quotes.
+
+In C<lex_stuff_pv> and C<lex_stuff_pvn>, the string to be inserted is
+represented by the octets starting at C<pv>.  In C<lex_stuff_pv>, the first NUL
+octet terminates the string.  In C<lex_stuff_pvn>, C<len> octets will be used,
+hence the string may contain embedded NUL characters.
+
+In all three cases, these octets are interpreted as either UTF-8 or Latin-1,
+according to whether or not the C<LEX_STUFF_UTF8> flag is set in C<flags>.
+
+In C<lex_stuff_sv>, the string to be inserted is the string value of C<sv>.
+C<flags> must be 0.  The string is interpreted as either UTF-8 or Latin-1,
+according to whether or not C<sv> has its UTF-8 flag set.
+
+In all three forms, the characters are recoded for the lexer buffer, according
+to how the buffer is currently being interpreted (L</lex_bufutf8>).
 
 =for apidoc Amnh||LEX_STUFF_UTF8
 
@@ -1240,54 +1300,12 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
     }
 }
 
-/*
-=for apidoc lex_stuff_pv
-
-Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
-immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
-reallocating the buffer if necessary.  This means that lexing code that
-runs later will see the characters as if they had appeared in the input.
-It is not recommended to do this as part of normal parsing, and most
-uses of this facility run the risk of the inserted characters being
-interpreted in an unintended manner.
-
-The string to be inserted is represented by octets starting at C<pv>
-and continuing to the first nul.  These octets are interpreted as either
-UTF-8 or Latin-1, according to whether the C<LEX_STUFF_UTF8> flag is set
-in C<flags>.  The characters are recoded for the lexer buffer, according
-to how the buffer is currently being interpreted (L</lex_bufutf8>).
-If it is not convenient to nul-terminate a string to be inserted, the
-L</lex_stuff_pvn> function is more appropriate.
-
-=cut
-*/
-
 void
 Perl_lex_stuff_pv(pTHX_ const char *pv, U32 flags)
 {
     PERL_ARGS_ASSERT_LEX_STUFF_PV;
     lex_stuff_pvn(pv, strlen(pv), flags);
 }
-
-/*
-=for apidoc lex_stuff_sv
-
-Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
-immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
-reallocating the buffer if necessary.  This means that lexing code that
-runs later will see the characters as if they had appeared in the input.
-It is not recommended to do this as part of normal parsing, and most
-uses of this facility run the risk of the inserted characters being
-interpreted in an unintended manner.
-
-The string to be inserted is the string value of C<sv>.  The characters
-are recoded for the lexer buffer, according to how the buffer is currently
-being interpreted (L</lex_bufutf8>).  If a string to be inserted is
-not already a Perl scalar, the L</lex_stuff_pvn> function avoids the
-need to construct a scalar.
-
-=cut
-*/
 
 void
 Perl_lex_stuff_sv(pTHX_ SV *sv, U32 flags)
@@ -1421,20 +1439,21 @@ Perl_lex_discard_to(pTHX_ char *ptr)
 }
 
 void
-Perl_notify_parser_that_changed_to_utf8(pTHX)
+Perl_notify_parser_that_encoding_changed(pTHX)
 {
-    /* Called when $^H is changed to indicate that HINT_UTF8 has changed from
-     * off to on.  At compile time, this has the effect of entering a 'use
-     * utf8' section.  This means that any input was not previously checked for
-     * UTF-8 (because it was off), but now we do need to check it, or our
+    /* Called when $^H is changed to indicate that HINT_UTF8 or
+     * HINT_ASCII_ENCODING has changed from off to on.  At compile time, this
+     * has the effect of entering a 'use utf8' or 'use source::encoding'
+     * section.  This means that any input was not previously checked for
+     * compliance (because it was off), but now we do need to check it, or our
      * assumptions about the input being sane could be wrong, and we could
      * segfault.  This routine just sets a flag so that the next time we look
-     * at the input we do the well-formed UTF-8 check.  If we aren't in the
-     * proper phase, there may not be a parser object, but if there is, setting
-     * the flag is harmless */
+     * at the input we do the check.  If we aren't in the proper phase, there
+     * may not be a parser object, but if there is, setting the flag is
+     * harmless */
 
     if (PL_parser) {
-        PL_parser->recheck_utf8_validity = TRUE;
+        PL_parser->recheck_charset_validity = TRUE;
     }
 }
 
@@ -1541,12 +1560,12 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     PL_parser->bufend = buf + new_bufend_pos;
     PL_parser->bufptr = buf + bufptr_pos;
 
+    const U8* first_bad_char_loc;
     if (UTF) {
-        const U8* first_bad_char_loc;
         if (UNLIKELY(! is_utf8_string_loc(
                             (U8 *) PL_parser->bufptr,
-                                   PL_parser->bufend - PL_parser->bufptr,
-                                   &first_bad_char_loc)))
+                            PL_parser->bufend - PL_parser->bufptr,
+                            &first_bad_char_loc)))
         {
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
@@ -1554,6 +1573,13 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
         }
+    }
+    else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
+                                        (U8 *) PL_parser->bufptr,
+                                        PL_parser->bufend - PL_parser->bufptr,
+                                        &first_bad_char_loc)))
+    {
+        yyerror_non_ascii_message(first_bad_char_loc);
     }
 
     PL_parser->oldbufptr = buf + oldbufptr_pos;
@@ -1978,8 +2004,8 @@ S_incline(pTHX_ const char *s, const char *end)
                        alias the saved lines that are in the array.
                        Otherwise alias the whole array. */
                     if (CopLINE(PL_curcop) == line_num) {
-                        GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(cfgv)));
-                        GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(cfgv)));
+                        GvHV(gv2) = HvREFCNT_inc(GvHV(cfgv));
+                        GvAV(gv2) = AvREFCNT_inc(GvAV(cfgv));
                     }
                     else if (GvAV(cfgv)) {
                         AV * const av = GvAV(cfgv);
@@ -7977,6 +8003,8 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
                     : newSVOP(OP_RUNCV, 0, &PL_sv_undef));
 
     case KEY___CLASS__:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__CLASS), "__CLASS__ is experimental");
         FUN0(OP_CLASSNAME);
 
     case KEY_AUTOLOAD:
@@ -9702,7 +9730,7 @@ Perl_yylex(pTHX)
 {
     char *s = PL_bufptr;
 
-    if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
+    if (UNLIKELY(PL_parser->recheck_charset_validity)) {
         const U8* first_bad_char_loc;
         if (UTF && UNLIKELY(! is_utf8_string_loc((U8 *) PL_bufptr,
                                                         PL_bufend - PL_bufptr,
@@ -9714,7 +9742,14 @@ Perl_yylex(pTHX)
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
         }
-        PL_parser->recheck_utf8_validity = FALSE;
+        else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
+                                                        (U8 *) PL_bufptr,
+                                                        PL_bufend - PL_bufptr,
+                                                        &first_bad_char_loc)))
+        {
+            yyerror_non_ascii_message(first_bad_char_loc);
+        }
+        PL_parser->recheck_charset_validity = FALSE;
     }
     DEBUG_T( {
         SV* tmp = newSVpvs("");
@@ -11796,6 +11831,16 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         close_delim_str = legal_paired_closing_delims
                         + (tmps - legal_paired_opening_delims);
 
+        /* The list of paired delimiters contains all the ASCII ones that have
+         * always been legal, and no other ASCIIs.  Don't raise a message if
+         * using one of these */
+        if (! isASCII(open_delim_code)) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS),
+                             "Use of '%" UTF8f "' is experimental as a string delimiter",
+                             UTF8fARG(UTF, delim_byte_len, open_delim_str));
+        }
+
         close_delim_code = (UTF)
                            ? valid_utf8_to_uvchr((U8 *) close_delim_str, NULL)
                            : * (U8 *) close_delim_str;
@@ -12815,7 +12860,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
-    CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outsidecv));
+    CvOUTSIDE(PL_compcv) = CvREFCNT_inc_simple(outsidecv);
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
     if (outsidecv && CvPADLIST(outsidecv))
         CvPADLIST(PL_compcv)->xpadl_outid = CvPADLIST(outsidecv)->xpadl_id;

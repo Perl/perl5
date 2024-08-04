@@ -40,7 +40,7 @@ man3ext='3pm'
 test -z "$use64bitint" && use64bitint='define'
 test -z "$useithreads" && useithreads='define'
 test -z "$usemymalloc" && usemymalloc='undef'
-ccflags="$ccflags -U__STRICT_ANSI__ -D_GNU_SOURCE"
+ccflags="$ccflags -D_GNU_SOURCE"
 # - otherwise i686-cygwin
 archname='cygwin'
 

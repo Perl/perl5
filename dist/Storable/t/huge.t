@@ -40,7 +40,8 @@ my $has_too_many = ($Config{usecperl} and
 #    U32     5.25c -
 # hash key: I32
 
-my @cases = (
+my @cases;
+@cases = (
     ['huge string',
      sub { my $s = 'x' x $huge; \$s }],
 

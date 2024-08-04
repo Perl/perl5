@@ -14,9 +14,6 @@
 #ifndef sv_dup_inc
 #  define sv_dup_inc(s,t) SvREFCNT_inc(sv_dup(s,t))
 #endif
-#ifndef SvREFCNT_dec_NN
-#  define SvREFCNT_dec_NN(x)  SvREFCNT_dec(x)
-#endif
 #ifndef PERL_UNUSED_RESULT
 #  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
 #    define PERL_UNUSED_RESULT(v) STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
@@ -587,7 +584,9 @@ S_ithread_run(void * arg)
     S_set_sigmask(&thread->initial_sigmask);
 #endif
 
+#if PERL_VERSION_GE(5, 27, 9)
     thread_locale_init();
+#endif
 
     PL_perl_destruct_level = 2;
 
@@ -689,7 +688,9 @@ S_ithread_run(void * arg)
     MUTEX_UNLOCK(&thread->mutex);
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
+#if PERL_VERSION_GE(5, 27, 9)
     thread_locale_term();
+#endif
 
     /* Exit application if required */
     if (exit_app) {

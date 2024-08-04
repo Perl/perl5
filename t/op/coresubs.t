@@ -170,8 +170,13 @@ $tests++;
 # This subroutine is outside the warnings scope:
 sub foo { goto &CORE::abs }
 use warnings;
-$SIG{__WARN__} = sub { like shift, qr\^Use of uninitialized\ };
-foo(undef);
+{
+  local $SIG{__WARN__} = sub { like shift, qr\^Use of uninitialized\ };
+  foo(undef);
+}
+
+$tests++;
+is eval('mychdir(curdir())'), 1, "inlined chdir with parenthesized args accepts a string";
 
 $tests+=2;
 is runperl(prog => 'print CORE->lc, qq-\n-'), "core\n",

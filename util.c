@@ -121,6 +121,23 @@ S_maybe_protect_ro(pTHX_ struct perl_memory_debug_header *header)
 # endif
 #endif
 
+/* Sanity check: Format strings must not be empty */
+STATIC_ASSERT_DECL(sizeof I32df > 1);
+STATIC_ASSERT_DECL(sizeof U32of > 1);
+STATIC_ASSERT_DECL(sizeof U32uf > 1);
+STATIC_ASSERT_DECL(sizeof U32xf > 1);
+STATIC_ASSERT_DECL(sizeof U32Xf > 1);
+STATIC_ASSERT_DECL(sizeof IVdf > 1);
+STATIC_ASSERT_DECL(sizeof UVuf > 1);
+STATIC_ASSERT_DECL(sizeof UVof > 1);
+STATIC_ASSERT_DECL(sizeof UVxf > 1);
+STATIC_ASSERT_DECL(sizeof UVXf > 1);
+STATIC_ASSERT_DECL(sizeof NVef > 1);
+STATIC_ASSERT_DECL(sizeof NVff > 1);
+STATIC_ASSERT_DECL(sizeof NVgf > 1);
+STATIC_ASSERT_DECL(sizeof Gid_t_f > 1);
+STATIC_ASSERT_DECL(sizeof Uid_t_f > 1);
+
 /*
 =for apidoc_section $memory
 =for apidoc safesysmalloc
@@ -1320,14 +1337,6 @@ Perl_cntrl_to_mnemonic(const U8 c)
     return NULL;
 }
 
-/*
-=for apidoc savesharedpv
-
-A version of C<savepv()> which allocates the duplicate string in memory
-which is shared between threads.
-
-=cut
-*/
 char *
 Perl_savesharedpv(pTHX_ const char *pv)
 {
@@ -1347,15 +1356,6 @@ Perl_savesharedpv(pTHX_ const char *pv)
     return (char*)memcpy(newaddr, pv, pvlen);
 }
 
-/*
-=for apidoc savesharedpvn
-
-A version of C<savepvn()> which allocates the duplicate string in memory
-which is shared between threads.  (With the specific difference that a C<NULL>
-pointer is not acceptable)
-
-=cut
-*/
 char *
 Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {

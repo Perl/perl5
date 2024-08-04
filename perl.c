@@ -2956,9 +2956,9 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 /*
 =for apidoc_section $CV
 
-=for apidoc            get_cv
-=for apidoc_item       get_cvn_flags
-=for apidoc_item |CV *|get_cvs|"string"|I32 flags
+=for apidoc      get_cv
+=for apidoc_item get_cvn_flags
+=for apidoc_item get_cvs
 
 These return the CV of the specified Perl subroutine.  C<flags> are passed to
 C<gv_fetchpvn_flags>.  If C<GV_ADD> is set and the Perl subroutine does not
@@ -3040,6 +3040,16 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
 #else
                 0;
 #endif
+    /* For a reference counted stack the arguments are cleaned up
+     * when the stack is popped.
+     */
+    if (!is_rc && (flags & G_DISCARD) != 0) {
+        ENTER;
+        SAVETMPS;
+        /* leave G_DISCARD on to clean up any return values
+         * from the stack in call_sv().
+         */
+    }
     PUSHMARK(PL_stack_sp);
     while (*argv) {
         SV *newsv = newSVpv(*argv,0);
@@ -3049,7 +3059,15 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
             sv_2mortal(newsv);
         argv++;
     }
-    return call_pv(sub_name, flags);
+
+    SSize_t count = call_pv(sub_name, flags);
+
+    if (!is_rc && (flags & G_DISCARD) != 0) {
+        FREETMPS;
+        LEAVE;
+    }
+
+    return count;
 }
 
 /*
@@ -4112,7 +4130,7 @@ S_init_main_stash(pTHX)
        of the SvREFCNT_dec, only to add it again with hv_name_set */
     SvREFCNT_dec(GvHV(gv));
     hv_name_sets(PL_defstash, "main", 0);
-    GvHV(gv) = MUTABLE_HV(SvREFCNT_inc_simple(PL_defstash));
+    GvHV(gv) = HvREFCNT_inc_simple(PL_defstash);
     SvREADONLY_on(gv);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpvs("INC", GV_ADD|GV_NOTQUAL,
                                              SVt_PVAV)));
@@ -4457,15 +4475,9 @@ Perl_init_debugger(pTHX)
     PL_curstash = (HV *)SvREFCNT_inc_simple(PL_debstash);
 
     Perl_init_dbargs(aTHX);
-    PL_DBgv = MUTABLE_GV(
-        SvREFCNT_inc(gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV))
-    );
-    PL_DBline = MUTABLE_GV(
-        SvREFCNT_inc(gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV))
-    );
-    PL_DBsub = MUTABLE_GV(SvREFCNT_inc(
-        gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV))
-    ));
+    PL_DBgv = GvREFCNT_inc(gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV));
+    PL_DBline = GvREFCNT_inc(gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV));
+    PL_DBsub = GvREFCNT_inc(gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV)));
     PL_DBsingle = GvSV((gv_fetchpvs("DB::single", GV_ADDMULTI, SVt_PV)));
     if (!SvIOK(PL_DBsingle))
         sv_setiv(PL_DBsingle, 0);

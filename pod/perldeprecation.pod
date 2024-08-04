@@ -35,23 +35,6 @@ but a deprecated warning will be generated.
 
 Category: "deprecated::dot_in_inc"
 
-=head3 Goto Block Construct
-
-C<goto LABEL;> will produce a deprecated warning when jumping into the body
-of a loop or other block construct from outside. For instance
-
-    while (should_loop($x)) {
-        LABEL:
-            do_stuff();
-    }
-    goto LABEL;
-
-will produce a warning that this behavior is deprecated. In general you should
-just avoid doing this; the people that maintain your code will be grateful for
-your restraint.
-
-Category: "deprecated::goto_construct"
-
 =head3 Unicode Property Name
 
 Various types of unicode property name will generate deprecated warnings
@@ -59,19 +42,6 @@ when used in a regex pattern. For instance surrogate characters will result
 in deprecation warnings.
 
 Category: "deprecated::unicode_property_name"
-
-=head2 Perl 5.46
-
-=head3 Changing C<use VERSION> while another C<use VERSION> is in scope
-
-A C<use VERSION> declaration has many implicit effects on the surrounding
-scope, such as L<strict> and L<feature> flags, or importing L<builtin>
-functions. Once you have a C<use VERSION> statement in scope, another
-C<use VERSION> statement with a different version is now deprecated since
-Perl 5.39.8, due to the increasing complexity of swapping from one
-prevailing version to another.
-
-Category: "deprecated::subsequent_use_version"
 
 =head2 Perl 5.44
 
@@ -88,6 +58,17 @@ will always be safe.)
 
 Category: "deprecated::missing_import_called_with_args"
 
+=head3 Changing C<use VERSION> while another C<use VERSION> is in scope
+
+A C<use VERSION> declaration has many implicit effects on the surrounding
+scope, such as L<strict> and L<feature> flags, or importing L<builtin>
+functions. Once you have a C<use VERSION> statement in scope, another
+C<use VERSION> statement with a different version is now deprecated since
+Perl 5.39.8, due to the increasing complexity of swapping from one
+prevailing version to another.
+
+Category: "deprecated::subsequent_use_version"
+
 =head2 Perl 5.42
 
 =head3 Smartmatch
@@ -98,6 +79,23 @@ as the smartmatch operator C<~~>. The feature will be removed entirely in the
 Perl 5.42.0 production release.
 
 Category: "deprecated::smartmatch"
+
+=head3 Goto Block Construct
+
+C<goto LABEL;> will produce a deprecated warning when jumping into the body
+of a loop or other block construct from outside. For instance
+
+    while (should_loop($x)) {
+        LABEL:
+            do_stuff();
+    }
+    goto LABEL;
+
+will produce a warning that this behavior is deprecated. In general you should
+just avoid doing this; the people that maintain your code will be grateful for
+your restraint.
+
+Category: "deprecated::goto_construct"
 
 =head3 Use of C<'> as a global name separator
 
@@ -122,8 +120,7 @@ version will print a deprecation warning. For example,
 
     use v5.10;        # This prints a warning
 
-This behaviour will be removed in Perl 5.40; such a subsequent request will
-become a compile-time error.
+This was deprecated in Perl 5.36 and is now fatal.
 
 This is because of an intended related change to the interaction between
 C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is

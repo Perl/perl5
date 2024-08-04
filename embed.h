@@ -114,7 +114,6 @@
 # define SvUV(a)                                Perl_SvUV(aTHX_ a)
 # define SvUV_nomg(a)                           Perl_SvUV_nomg(aTHX_ a)
 # define _force_out_malformed_utf8_message(a,b,c,d) Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
-# define _is_in_locale_category(a,b)            Perl__is_in_locale_category(aTHX_ a,b)
 # define _is_uni_FOO(a,b)                       Perl__is_uni_FOO(aTHX_ a,b)
 # define _is_uni_perl_idcont(a)                 Perl__is_uni_perl_idcont(aTHX_ a)
 # define _is_uni_perl_idstart(a)                Perl__is_uni_perl_idstart(aTHX_ a)
@@ -314,6 +313,7 @@
 # define isUTF8_CHAR                            Perl_isUTF8_CHAR
 # define isUTF8_CHAR_flags                      Perl_isUTF8_CHAR_flags
 # define is_c9strict_utf8_string_loclen         Perl_is_c9strict_utf8_string_loclen
+# define is_in_locale_category_(a,b)            Perl_is_in_locale_category_(aTHX_ a,b)
 # define is_lvalue_sub()                        Perl_is_lvalue_sub(aTHX)
 # define is_safe_syscall(a,b,c,d)               Perl_is_safe_syscall(aTHX_ a,b,c,d)
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen
@@ -748,6 +748,7 @@
 # define sv_setuv(a,b)                          Perl_sv_setuv(aTHX_ a,b)
 # define sv_setuv_mg(a,b)                       Perl_sv_setuv_mg(aTHX_ a,b)
 # define sv_streq_flags(a,b,c)                  Perl_sv_streq_flags(aTHX_ a,b,c)
+# define sv_strftime_ints(a,b,c,d,e,f,g,h)      Perl_sv_strftime_ints(aTHX_ a,b,c,d,e,f,g,h)
 # define sv_strftime_tm(a,b)                    Perl_sv_strftime_tm(aTHX_ a,b)
 # define sv_string_from_errnum(a,b)             Perl_sv_string_from_errnum(aTHX_ a,b)
 # define sv_tainted(a)                          Perl_sv_tainted(aTHX_ a)
@@ -1065,7 +1066,7 @@
 #   define nextargv(a,b)                        Perl_nextargv(aTHX_ a,b)
 #   define no_bareword_filehandle(a)            Perl_no_bareword_filehandle(aTHX_ a)
 #   define noperl_die                           Perl_noperl_die
-#   define notify_parser_that_changed_to_utf8() Perl_notify_parser_that_changed_to_utf8(aTHX)
+#   define notify_parser_that_encoding_changed() Perl_notify_parser_that_encoding_changed(aTHX)
 #   define oopsAV(a)                            Perl_oopsAV(aTHX_ a)
 #   define oopsHV(a)                            Perl_oopsHV(aTHX_ a)
 #   define op_unscope(a)                        Perl_op_unscope(aTHX_ a)
@@ -1315,7 +1316,7 @@
 #   endif /* defined(PERL_IN_HV_C) */
 #   if defined(PERL_IN_LOCALE_C)
 #     define get_locale_string_utf8ness_i(a,b,c,d) S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
-#     define ints_to_tm(a,b,c,d,e,f,g,h,i,j,k)  S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
+#     define ints_to_tm(a,b,c,d,e,f,g,h,i)      S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define is_locale_utf8(a)                  S_is_locale_utf8(aTHX_ a)
 #     define my_localeconv(a)                   S_my_localeconv(aTHX_ a)
 #     define populate_hash_from_C_localeconv(a,b,c,d,e) S_populate_hash_from_C_localeconv(aTHX_ a,b,c,d,e)
@@ -1595,6 +1596,7 @@
 #   if defined(PERL_IN_PP_SYS_C)
 #     define doform(a,b,c)                      S_doform(aTHX_ a,b,c)
 #     define space_join_names_mortal(a)         S_space_join_names_mortal(aTHX_ a)
+#     define warn_not_dirhandle(a)              S_warn_not_dirhandle(aTHX_ a)
 #     if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #       define dooneliner(a,b)                  S_dooneliner(aTHX_ a,b)
 #     endif
@@ -1642,6 +1644,7 @@
 #     define tokenize_use(a,b)                  S_tokenize_use(aTHX_ a,b)
 #     define tokeq(a)                           S_tokeq(aTHX_ a)
 #     define update_debugger_info(a,b,c)        S_update_debugger_info(aTHX_ a,b,c)
+#     define yyerror_non_ascii_message(a)       S_yyerror_non_ascii_message(aTHX_ a)
 #     define yywarn(a,b)                        S_yywarn(aTHX_ a,b)
 #     if defined(DEBUGGING)
 #       define printbuf(a,b)                    S_printbuf(aTHX_ a,b)
@@ -1764,7 +1767,6 @@
 #   define skipspace_flags(a,b)                 Perl_skipspace_flags(aTHX_ a,b)
 #   define sv_magicext_mglob(a)                 Perl_sv_magicext_mglob(aTHX_ a)
 #   define sv_only_taint_gmagic                 Perl_sv_only_taint_gmagic
-#   define sv_strftime_ints(a,b,c,d,e,f,g,h,i,j) Perl_sv_strftime_ints(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #   define utf16_to_utf8_base(a,b,c,d,e,f)      Perl_utf16_to_utf8_base(aTHX_ a,b,c,d,e,f)
 #   define utf8_to_utf16_base(a,b,c,d,e,f)      Perl_utf8_to_utf16_base(aTHX_ a,b,c,d,e,f)
 #   define validate_proto(a,b,c,d)              Perl_validate_proto(aTHX_ a,b,c,d)
