@@ -13491,6 +13491,19 @@ Perl_ck_open(pTHX_ OP *o)
              (last == OpSIBLING(oa)))			/* The bareword. */
               last->op_private &= ~OPpCONST_STRICT;
     }
+    {
+        /* mark as special if filename is a literal undef */
+        const OP *arg = cLISTOPx(o)->op_first; /* pushmark */
+        if (
+            (arg = OpSIBLING(arg))    /* handle */
+            && (arg = OpSIBLING(arg)) /* mode */
+            && (arg = OpSIBLING(arg)) /* filename */
+        ) {
+            if (arg->op_type == OP_UNDEF && !(arg->op_flags & OPf_KIDS)) {
+                o->op_flags |= OPf_SPECIAL;
+            }
+        }
+    }
     return ck_fun(o);
 }
 
@@ -15679,7 +15692,19 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
             }
             return o;
         default:
-            o = op_convert_list(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
+            /* For open(), OPf_SPECIAL indicates we saw a literal undef as the
+             * filename argument and thus a &PL_sv_undef argument at runtime
+             * should trigger the creation of a temp file. This is to
+             * distinguish between open(..., ..., undef) and
+             * open(..., ..., delete $hash{key}), which also passes
+             * &PL_sv_undef if $hash{key} does not exist, but which should not
+             * create a temporary file.
+             * In case of a runtime call via &CORE::open(...) or
+             * my $f = \&CORE::open; $f->(...), we cannot distinguish between
+             * those cases. Therefore we always set the flag to interpret
+             * &PL_sv_undef as a temp file.
+             */
+            o = op_convert_list(opnum,OPf_SPECIAL*(opnum == OP_GLOB || opnum == OP_OPEN),argop);
             if (is_handle_constructor(o, 2))
                 argop->op_private |= OPpCOREARGS_DEREF2;
             if (opnum == OP_SUBSTR) {

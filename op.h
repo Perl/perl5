@@ -164,6 +164,8 @@ Deprecated.  Use C<GIMME_V> instead.
                                 /*  On OP_RETURN, module_true is in effect */
                                 /*  On OP_NEXT/OP_LAST/OP_REDO, there is no
                                  *  loop label */
+                                /*  On OP_OPEN, create a temporary file if the
+                                 *  filename argument is &PL_sv_undef */
 /* There is no room in op_flags for this one, so it has its own bit-
    field member (op_folded) instead.  The flag is only used to tell
    op_convert_list to set op_folded.  */
