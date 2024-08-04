@@ -389,6 +389,22 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+L<C<open>|perlfunc/open> automatically creates an anonymous temporary file when
+passed C<undef> as a filename:
+
+    open(my $fh, "+>", undef) or die ...
+
+Due the way this feature was implemented, it would also trigger for
+non-existent elements of arrays or hashes:
+
+    open(my $fh, "+>", $hash{no_such_key}) or die ...
+    # unexpectedly succeeds and creates a temp file
+
+Now a temporary file is only created if a literal C<undef> is passed.
+[GH #22385]
+
+=item *
+
 Compound assignment operators return lvalues that can be further modified:
 
     ($x &= $y) += $z;
