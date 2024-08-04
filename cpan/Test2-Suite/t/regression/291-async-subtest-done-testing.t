@@ -1,4 +1,11 @@
 use Test2::V0;
+
+BEGIN {
+    require Config;
+    skip_all('no fork')
+        unless ($Config::Config{d_fork} or $Config::Config{d_pseudofork});
+}
+
 use Test2::Tools::AsyncSubtest qw/fork_subtest/;
 
 my $st = fork_subtest foo => sub {
