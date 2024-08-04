@@ -16,6 +16,7 @@ Test2::Suite cpan/Test2-Suite/t/modules/Require/ExtendedTesting.t 47f28c9bccf130
 Test2::Suite cpan/Test2-Suite/t/modules/Require/NonInteractiveTesting.t 05e6835384ff054d5fa1b2d62b0401c7944a7a52
 Test2::Suite cpan/Test2-Suite/t/modules/Require/ReleaseTesting.t 1eb2d643a4ff304131769de79eac3a6525b4fbe0
 Test2::Suite cpan/Test2-Suite/t/regression/291-async-subtest-done-testing.t e1d1145da23a2d1bfd9bbe126e9c4d7e5198f259
+Test::Harness cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm 68d1c45ebf06f9ed734f3cd4f055fc8f05df67cb
 Time::Piece cpan/Time-Piece/Piece.pm 8cec8b66183ceddb9bf2b6af35dcdd345bc9adfa
 Time::Piece cpan/Time-Piece/Piece.xs 543152540ee17788a638b2c5746b86c3d04401d1
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
