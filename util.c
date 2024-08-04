@@ -2430,10 +2430,10 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     }
     if (pid == 0) {
         /* Child */
-#undef THIS
-#undef THAT
-#define THIS that
-#define THAT This
+#  undef THIS
+#  undef THAT
+#  define THIS that
+#  define THAT This
         /* Close parent's end of error status pipe (if any) */
         if (did_pipes)
             PerlLIO_close(pp[0]);
@@ -2448,11 +2448,11 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
             setfd_cloexec_or_inhexec_by_sysfdness(p[THIS]);
             PerlLIO_close(p[THAT]);	/* close parent's end of _the_ pipe */
         }
-#if !defined(HAS_FCNTL) || !defined(F_SETFD)
+#  if !defined(HAS_FCNTL) || !defined(F_SETFD)
         /* No automatic close - do it by hand */
-#  ifndef NOFILE
-#  define NOFILE 20
-#  endif
+#    ifndef NOFILE
+#      define NOFILE 20
+#    endif
         {
             int fd;
 
@@ -2461,11 +2461,11 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
                     PerlLIO_close(fd);
             }
         }
-#endif
+#  endif
         do_aexec5(NULL, args-1, args-1+n, pp[1], did_pipes);
         PerlProc__exit(1);
-#undef THIS
-#undef THAT
+#  undef THIS
+#  undef THAT
     }
     /* Parent */
     if (did_pipes)
