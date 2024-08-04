@@ -70,7 +70,8 @@ use Data::Dumper;
     is($warning, "", 'qquote(undef) did not warn');
 }
 
-{
+SKIP: {
+    skip "ASCII-centric test", 2, unless ord "A" == 65;
     my $warning = '';
     local $SIG{__WARN__} = sub { $warning = $_[0] };
 
