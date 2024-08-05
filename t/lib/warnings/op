@@ -1577,6 +1577,18 @@ Possible precedence problem on bitwise |. operator at - line 26.
 Possible precedence problem on bitwise &. operator at - line 27.
 ########
 # op.c
+use warnings 'precedence';
+use feature 'isa';
+$a = !$b isa Some::Class;  # should warn
+$a = (!$b) isa Some::Class;
+$a = !($b) isa Some::Class;  # should warn
+$a = !($b isa Some::Class);
+$a = not $b isa Some::Class;
+EXPECT
+Possible precedence problem on isa operator at - line 4.
+Possible precedence problem on isa operator at - line 6.
+########
+# op.c
 use integer;
 use warnings 'precedence';
 $a = $b & $c == $d;
