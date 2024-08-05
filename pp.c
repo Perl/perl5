@@ -6603,8 +6603,7 @@ PP_wrapped(pp_reverse, 0, 1)
             SP = oldsp;
         }
     }
-    else {
-        char *up;
+    else { /* GIMME_V != G_LIST. Doing string reversal. */
         dTARGET;
         STRLEN len;
 
@@ -6613,17 +6612,88 @@ PP_wrapped(pp_reverse, 0, 1)
             do_join(TARG, &PL_sv_no, MARK, SP);
             SP = MARK + 1;
             SETs(TARG);
-        } else if (SP > MARK) {
-            sv_setsv_flags(TARG, *SP, SV_GMAGIC);
-            SETs(TARG);
         } else {
-            sv_setsv_flags(TARG, DEFSV, SV_GMAGIC);
-            XPUSHs(TARG);
+            SV * src_sv = NULL;
+            /* Determine the source SV and get TARG on the stack */
+            if (SP > MARK) {
+                src_sv = *SP;
+                SETs(TARG);
+            } else {
+                src_sv = DEFSV;
+                XPUSHs(TARG);
+            }
+            assert(src_sv);
+            assert(src_sv != TARG);
+
+            if (/* Fallback to sv_setsv_flags() + in-place reversal if: */
+                /*     src_sv may need careful handling */
+                SvTYPE(src_sv) > SVt_PVMG || SvGMAGICAL(src_sv) ||
+                    SvVOK(src_sv) ||
+                /*     src_sv doesn't contain a valid string */
+                !(SvFLAGS(src_sv) & SVp_POK) ||
+                /*     TARG may need careful handling */
+                SvTYPE(TARG) > SVt_PVMG ||
+                /*     sv_setsv_flags() will swipe src_sv's buffer */
+                sv_can_swipe_pv_buf(src_sv)
+            ) {
+                sv_setsv_flags(TARG, src_sv, SV_GMAGIC);
+                /* FALLTHROUGH */
+            } else { /* Source & destination buffers are distinct. By not
+                      * calling sv_setsv_flags(), we can do a reverse copy
+                      * in a single pass, rather than 2-3 passes. */
+
+                const char * src = SvPV_const(src_sv, len);
+
+                /* Prepare the TARG. */
+                if (SvTYPE(TARG) < SVt_PV) {
+                    SvUPGRADE(TARG, SvTYPE(src_sv)); /* No buffer allocation here */
+                } else if(SvTHINKFIRST(TARG)) {
+                     SV_CHECK_THINKFIRST_COW_DROP(TARG); /* Drops any buffer */
+                }
+                SvSETMAGIC(TARG);
+                SvGROW(TARG, len + 1);
+                SvCUR_set(TARG, len);
+                SvPOK_only(TARG);
+                *SvEND(TARG) = '\0';
+                if (SvTAINTED(src_sv))
+                    SvTAINT(TARG);
+
+                /* Do the reverse copy */
+                if (DO_UTF8(src_sv)) {
+                    SvUTF8_on(TARG);
+
+                    const U8* s = (const U8*)src;
+                    U8* dd = (U8*)(SvPVX(TARG) + len);
+                    const U8* send = (const U8*)(s + len);
+                    int bytes = 0;
+                    while (s < send) {
+                        bytes = UTF8SKIP(s);
+                        if (bytes == 1) {
+                            *--dd = *s++;
+                        } else {
+                            dd -= bytes;
+                            U8* d2 = dd;
+                            while (bytes-- > 0)
+                                *d2++ = *s++;
+                        }
+                    }
+                } else {
+                    char * outp= SvPVX(TARG);
+                    const char *p = src + len;
+                    while (p != src)
+                        *outp++ = *--p;
+                }
+            RETURN;
+            }
         }
+
+        /* Traditional in-place reversal routines */
         SvSETMAGIC(TARG); /* remove any utf8 length magic */
 
-        up = SvPV_force(TARG, len);
+        char *up = SvPV_force(TARG, len);
+
         if (len > 1) {
+            /* The traditional way, operate on the current byte buffer */
             char *down;
             if (DO_UTF8(TARG)) {	/* first reverse each character */
                 U8* s = (U8*)SvPVX(TARG);
@@ -6655,8 +6725,8 @@ PP_wrapped(pp_reverse, 0, 1)
                 *up++ = *down;
                 *down-- = tmp;
             }
-            (void)SvPOK_only_UTF8(TARG);
         }
+        (void)SvPOK_only_UTF8(TARG);
     }
     RETURN;
 }
