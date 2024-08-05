@@ -1205,7 +1205,7 @@ for ("", nullrocow) {
 
 {   # GH #21748
     my $c;
-    my $x = "\xcb";
+    my $x = chr utf8::unicode_to_native(0xcb);
     $c = $x =~ tr[\N{U+00CB}\N{U+00EB}\N{U+2010}][\N{U+0401}\N{U+0451}\-];
     is $x, "\x{401}", 'Latin1 \N{} followed by above Latin1 work properly';
     is $c, 1, "Count for the above test";
