@@ -15229,14 +15229,22 @@ Perl_ck_length(pTHX_ OP *o)
 OP *
 Perl_ck_isa(pTHX_ OP *o)
 {
-    OP *classop = cBINOPo->op_last;
-
     PERL_ARGS_ASSERT_CK_ISA;
+
+    OP *const classop = cBINOPo->op_last;
 
     /* Convert barename into PV */
     if(classop->op_type == OP_CONST && classop->op_private & OPpCONST_BARE) {
         /* TODO: Optionally convert package to raw HV here */
         classop->op_private &= ~(OPpCONST_BARE|OPpCONST_STRICT);
+    }
+
+    OP *const objop = cBINOPo->op_first;
+    /* !$x isa Some::Class  # probably meant !($x isa Some::Class) */
+    if (objop->op_type == OP_NOT && !(objop->op_flags & OPf_PARENS)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+            "Possible precedence problem on isa operator"
+        );
     }
 
     return o;
