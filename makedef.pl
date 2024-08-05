@@ -1185,6 +1185,14 @@ if (PLATFORM eq 'os2') {
     delete $export{$_} foreach @missing;
 }
 
+
+if (ord "A" != 65) {
+    for my $symbol (qw( PL_a2e PL_e2a PL_e2utf PL_utf2e )) {
+        try_symbols($symbol);
+    }
+}
+
+
 ###############################################################################
 
 # Now all symbols should be defined because next we are going to output them.
