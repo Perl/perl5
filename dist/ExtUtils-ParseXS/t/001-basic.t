@@ -266,7 +266,7 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
     . " of 0 - the base function in XSAlias.xs, line 13\n"
     . "Warning: Aliases 'do' and 'xunx', 'do' have identical values"
     . " of 0 - the base function in XSAlias.xs, line 14\n"
-    . "Warning: Aliases 'xunx2' and 'do', 'xunx', 'do' have"
+    . "Warning: Aliases 'xunx2' and 'do', 'xunx' have"
     . " identical values of 0 - the base function in XSAlias.xs, line 15\n"
     ,
     "Saw expected warnings from XSAlias.xs in AUTHOR_WARNINGS mode";

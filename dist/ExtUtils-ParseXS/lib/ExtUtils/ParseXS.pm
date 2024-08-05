@@ -331,8 +331,6 @@ BEGIN {
   'XsubAliasValues',     # Hash of hash of bools: indicates which alias
                          # names have been used for each value.
   'XsubAliasValueClashHinted', # Bool: an ALIAS warning-hint has been emitted.
-  'XsubAlias',           # XXX this field is almost certainly a typo
-                         # for XsubAliases.
 
 
   # Per-XSUB INPUT section parsing state:
@@ -2573,10 +2571,10 @@ sub get_aliases {
     # it is NOT a mistake.
     unless ($is_symbolic) {
       my @keys= sort keys %{$self->{XsubAliasValues}->{$value}||{}};
-      # deal with an alias of 0, which might not be in the XsubAlias dataset
-      # yet as 0 is the default for the base function ($fname)
+      # deal with an alias of 0, which might not be in the XsubAliases
+      # dataset yet as 0 is the default for the base function ($fname)
       push @keys, $fname
-        if $value eq "0" and !defined $self->{XsubAlias}{$fname};
+        if $value eq "0" and !defined $self->{XsubAliases}{$fname};
       if (@keys and $self->{author_warnings}) {
         # We do not warn about value collisions unless author_warnings
         # are enabled. They aren't helpful to a module consumer, only
