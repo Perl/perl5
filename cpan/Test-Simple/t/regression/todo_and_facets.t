@@ -3,13 +3,14 @@ use warnings;
 
 use Test2::API qw/context/;
 
-use Test2::Tools::Tiny qw/done_testing todo/;
+use Test2::Tools::Basic qw/todo done_testing/;
 use Test::More();
 
 BEGIN {
-    *tm_ok = \&Test::More::ok;
+    *tm_ok   = \&Test::More::ok;
     *tm_pass = \&Test::More::pass;
     *tm_fail = \&Test::More::fail;
+    *bas_ok  = \&Test2::Tools::Basic::ok;
 }
 
 use vars qw/$TODO/;
@@ -39,6 +40,8 @@ sub new_ok($;$@) {
 
     leg_ok(0, "legacy ok fail");
     new_ok(0, "new ok fail");
+
+    bas_ok(0, "basic ok fail");
 }
 
 todo new_todo_test => sub {
@@ -47,6 +50,8 @@ todo new_todo_test => sub {
 
     leg_ok(0, "legacy ok fail");
     new_ok(0, "new ok fail");
+
+    bas_ok(0, "basic ok fail");
 };
 
 done_testing;
