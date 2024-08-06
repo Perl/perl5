@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 
 use v5.41;
-no feature 'signatures';    # For the time being, to avoid converting
 use Text::Tabs;
 
 # Unconditionally regenerate:
@@ -470,8 +469,7 @@ my %initial_file_section = (
                             'vutil.c' => $versioning_scn,
                            );
 
-sub where_from_string($;$) {
-    my ($file, $line_num) = @_;
+sub where_from_string ($file, $line_num = 0) {
 
     # Returns a string of hopefully idiomatic text about the location given by
     # the input parameters.  The line number is not always available, and this
@@ -632,8 +630,7 @@ sub check_and_add_proto_defn {
     return \$elements{$element};
 }
 
-sub classify_input_line ($$$$) {
-    my ($file, $line_num, $input, $is_file_C) = @_;
+sub classify_input_line ($file, $line_num, $input, $is_file_C) {
 
     # Looks at an input line and classifies it as to if it is of use to us or
     # not, and if so, what class of apidoc line it is.  It looks for common
@@ -761,8 +758,7 @@ sub classify_input_line ($$$$) {
         EOS
 }
 
-sub handle_apidoc_line ($$$$) {
-    my ($file, $line_num, $type, $arg) = @_;
+sub handle_apidoc_line ($file, $line_num, $type, $arg) {
 
     # This just does a couple of checks that would otherwise have to be
     # duplicated in the calling code, and calls check_and_add_proto_defn() to
@@ -806,16 +802,14 @@ sub handle_apidoc_line ($$$$) {
     return $updated;
 }
 
-sub destination_pod ($) {   # Into which pod should the element go whose flags
-                            # are $1
-    my $flags = shift;
+sub destination_pod ($flags) {  # Into which pod should the element go whose
+                                # flags are $1
     return "unknown" if $flags eq "";
     return $api if $flags =~ /A/;
     return $intern;
 }
 
-sub autodoc ($$) { # parse a file and extract documentation info
-    my($fh, $file) = @_;
+sub autodoc ($fh, $file) {  # parse a file and extract documentation info
 
     my $section = $initial_file_section{$file}
                                     if defined $initial_file_section{$file};
@@ -1584,8 +1578,7 @@ sub parse_config_h {
     }
 }
 
-sub format_pod_indexes($) {
-    my $entries_ref = shift;
+sub format_pod_indexes ($entries_ref) {
 
     # Output the X<> references to the names, packed since they don't get
     # displayed, but not too many per line so that when someone is editing the
@@ -1612,9 +1605,8 @@ sub format_pod_indexes($) {
     return $text;
 }
 
-sub docout ($$$) { # output the docs for one function group
-    my($fh, $element_name, $docref) = @_;
-
+sub docout ($fh, $element_name, $docref) {  # output the docs for one function
+                                            # group
     # Trim trailing space
     $element_name =~ s/\s*$//;
 
@@ -2160,8 +2152,7 @@ sub docout ($$$) { # output the docs for one function group
     print $fh "\n";
 }
 
-sub construct_missings_section {
-    my ($missings_hdr, $missings_ref) = @_;
+sub construct_missings_section ($missings_hdr, $missings_ref) {
     my $text = "";
 
     $text .= "$missings_hdr\n" . format_pod_indexes($missings_ref);
@@ -2239,8 +2230,7 @@ sub dictionary_order {
     return $a cmp $b;
 }
 
-sub output($) {     # Output a complete pod file
-    my $destpod = shift;
+sub output ($destpod) {  # Output a complete pod file
     my $podname = $destpod->{podname};
     my $dochash = $destpod->{docs};
 
