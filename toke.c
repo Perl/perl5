@@ -3533,15 +3533,15 @@ S_scan_const(pTHX_ char *start)
                      * of the range is above that value.  We don't count the
                      * end points here, as they will already have been counted
                      * as they were parsed. */
-                    if (range_min >= UTF_CONTINUATION_MARK) {
+                    if (! OFFUNI_IS_INVARIANT(range_min)) {
 
                         /* The whole range is made up of variants */
                         extras = (range_max - 1) - (range_min + 1) + 1;
                     }
-                    else if (range_max >= UTF_CONTINUATION_MARK) {
+                    else if (! OFFUNI_IS_INVARIANT(range_max)) {
 
                         /* Only the higher portion of the range is variants */
-                        extras = (range_max - 1) - UTF_CONTINUATION_MARK + 1;
+                        extras = (range_max - 1) - MIN_OFFUNI_VARIANT_CP + 1;
                     }
 
                     utf8_variant_count += extras;
