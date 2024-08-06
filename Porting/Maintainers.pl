@@ -1135,30 +1135,6 @@ our %Modules = (
         ],
     },
 
-    'Test2::Suite' => {
-        'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000163.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Wed Jun 12 09:17:44 2024',
-        'SYNCINFO'     => 'LeoNerd on Sat Apr 27 10:12:36 2024',
-        'SYNCINFO'     => 'jkeenan on Wed Nov  1 20:18:33 2023',
-        'FILES'        => q[cpan/Test2-Suite],
-        'EXCLUDED'     => [
-            qw( appveyor.yml
-                perltidyrc
-                t/00-report.t ),
-
-            # https://github.com/Test-More/Test2-Suite/issues/208
-            't/acceptance/Workflow-Acceptance.t',
-        ],
-        'CUSTOMIZED'   => [
-            # https://github.com/Test-More/Test2-Suite/pull/296
-            't/modules/Require/AutomatedTesting.t',
-            't/modules/Require/ExtendedTesting.t',
-            't/modules/Require/NonInteractiveTesting.t',
-            't/modules/Require/ReleaseTesting.t',
-            't/regression/291-async-subtest-done-testing.t',
-        ],
-    },
-
     'Text::Abbrev' => {
         'DISTRIBUTION' => 'FLORA/Text-Abbrev-1.02.tar.gz',
         'FILES'        => q[dist/Text-Abbrev],
