@@ -355,10 +355,19 @@ S_exit_warning(pTHX)
 {
     int veto_cleanup, warn;
     dMY_POOL;
+    IV running_threads;
+    IV joinable_threads;
+    IV detached_threads;
 
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-    veto_cleanup = (MY_POOL.total_threads > 0);
-    warn         = (MY_POOL.running_threads || MY_POOL.joinable_threads);
+
+    running_threads  = MY_POOL.running_threads;
+    joinable_threads = MY_POOL.joinable_threads;
+    detached_threads = MY_POOL.detached_threads;
+
+    veto_cleanup     = (MY_POOL.total_threads > 0);
+    warn             = (running_threads || joinable_threads);
+
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     if (warn) {
@@ -367,9 +376,9 @@ S_exit_warning(pTHX)
                             IVdf " running and unjoined\n\t%"
                             IVdf " finished and unjoined\n\t%"
                             IVdf " running and detached\n",
-                            MY_POOL.running_threads,
-                            MY_POOL.joinable_threads,
-                            MY_POOL.detached_threads);
+                            running_threads,
+                            joinable_threads,
+                            detached_threads);
         }
     }
 
