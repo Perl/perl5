@@ -4454,11 +4454,11 @@ dist/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
 dist/Storable/hints/linux.pl		Hint for Storable for named architecture
+dist/Storable/lib/Storable.pm		Storable perl module
 dist/Storable/Makefile.PL		Storable extension
-dist/Storable/MANIFEST			Storable MANIFEST file
+dist/Storable/MANIFEST.SKIP		Storable extension
 dist/Storable/README			Storable extension
 dist/Storable/stacksize			compute stack sizes
-dist/Storable/Storable.pm		Storable perl module
 dist/Storable/Storable.xs		Storable extension
 dist/Storable/t/attach.t		Check STORABLE_attach doesn't create objects unnecessarily
 dist/Storable/t/attach_errors.t		Trigger and test STORABLE_attach errors
@@ -4479,15 +4479,16 @@ dist/Storable/t/file_magic.t		See if file_magic function works
 dist/Storable/t/flags.t			See if Storable works
 dist/Storable/t/forgive.t		See if Storable works
 dist/Storable/t/freeze.t		See if Storable works
-dist/Storable/t/HAS_ATTACH.pm		For auto-requiring of modules for STORABLE_attach
-dist/Storable/t/HAS_HOOK.pm		For auto-requiring of modules for STORABLE_thaw
-dist/Storable/t/HAS_OVERLOAD.pm		For auto-requiring of mdoules for overload
 dist/Storable/t/huge.t			See how Storable handles huge data
 dist/Storable/t/hugeids.t		See how Storable handles huge object ids
 dist/Storable/t/integer.t		See if Storable works
 dist/Storable/t/interwork56.t		Test compatibility kludge for 64bit data under 5.6.x
 dist/Storable/t/just_plain_nasty.t	See if Storable works
 dist/Storable/t/leaks.t			See if Storable leaks (skips in core)
+dist/Storable/t/lib/HAS_HOOK.pm		For auto-requiring of modules for STORABLE_thaw
+dist/Storable/t/lib/HAS_OVERLOAD.pm	For auto-requiring of mdoules for overload
+dist/Storable/t/lib/STDump.pm		See if Storable works
+dist/Storable/t/lib/STTestLib.pm	more helper routines for tests
 dist/Storable/t/lock.t			See if Storable works
 dist/Storable/t/make_56_interwork.pl	Make test data for interwork56.t
 dist/Storable/t/make_downgrade.pl	Make test data for downgrade.t
@@ -4500,9 +4501,7 @@ dist/Storable/t/restrict.t		See if Storable works
 dist/Storable/t/retrieve.t		See if Storable works
 dist/Storable/t/robust.t		See if it survives mangled %INC
 dist/Storable/t/sig_die.t		See if Storable works
-dist/Storable/t/st-dump.pl		See if Storable works
 dist/Storable/t/store.t			See if Storable works
-dist/Storable/t/testlib.pl		more helper routines for tests
 dist/Storable/t/threads.t		Does Storable work with threads?
 dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/tied_hook.t		See if Storable works
