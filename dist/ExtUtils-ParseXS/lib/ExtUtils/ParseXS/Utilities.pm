@@ -528,7 +528,7 @@ sub assign_func_args {
   shift @func_args if defined($class);
 
   for my $arg (@func_args) {
-    $arg =~ s/^/&/ if $self->{in_out}->{$arg};
+    $arg =~ s/^/&/ if $self->{xsub_map_argname_to_in_out}->{$arg};
   }
   return join(", ", @func_args);
 }
@@ -541,7 +541,7 @@ sub assign_func_args {
 =item * Purpose
 
 Process a CPP conditional line (C<#if> etc), to keep track of conditional
-nesting.  In particular, it updates C<< @{$self->{XSStack}} >> which
+nesting.  In particular, it updates C<< @{$self->{XS_parse_stack}} >> which
 contains the current list of nested conditions. So an C<#if> pushes, an
 C<#endif> pops, an C<#else> modifies etc. Each element is a hash of the
 form:
@@ -586,40 +586,40 @@ sub analyze_preprocessor_statements {
 
   if ($statement eq 'if') {
     # #if or #ifdef
-    $XSS_work_idx = @{ $self->{XSStack} };
-    push(@{ $self->{XSStack} }, {type => 'if'});
+    $XSS_work_idx = @{ $self->{XS_parse_stack} };
+    push(@{ $self->{XS_parse_stack} }, {type => 'if'});
   }
   else {
     # An #else/#elsif/#endif.
 
     $self->death("Error: '$statement' with no matching 'if'")
-      if $self->{XSStack}->[-1]{type} ne 'if';
+      if $self->{XS_parse_stack}->[-1]{type} ne 'if';
 
-    if ($self->{XSStack}->[-1]{varname}) {
+    if ($self->{XS_parse_stack}->[-1]{varname}) {
       # close any '#ifdef XSubPPtmpAAAA' inserted earlier into boot code.
-      push(@{ $self->{InitFileCode} }, "#endif\n");
+      push(@{ $self->{bootcode_early} }, "#endif\n");
       push(@{ $BootCode_ref },         "#endif");
     }
 
-    my(@fns) = keys %{$self->{XSStack}->[-1]{functions}};
+    my(@fns) = keys %{$self->{XS_parse_stack}->[-1]{functions}};
 
     if ($statement ne 'endif') {
       # Add current functions to the hash of functions seen in previous
       # branch limbs, then reset for this next limb of the branch.
-      @{$self->{XSStack}->[-1]{other_functions}}{@fns} = (1) x @fns;
-      @{$self->{XSStack}->[-1]}{qw(varname functions)} = ('', {});
+      @{$self->{XS_parse_stack}->[-1]{other_functions}}{@fns} = (1) x @fns;
+      @{$self->{XS_parse_stack}->[-1]}{qw(varname functions)} = ('', {});
     }
     else {
       # #endif - pop stack and update new top entry
-      my($tmp) = pop(@{ $self->{XSStack} });
+      my($tmp) = pop(@{ $self->{XS_parse_stack} });
       0 while (--$XSS_work_idx
-           && $self->{XSStack}->[$XSS_work_idx]{type} ne 'if');
+           && $self->{XS_parse_stack}->[$XSS_work_idx]{type} ne 'if');
 
       # For all functions declared within any limb of the just-popped
       # if/endif, mark them as having appeared within this limb of the
       # outer nested branch.
       push(@fns, keys %{$tmp->{other_functions}});
-      @{$self->{XSStack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
+      @{$self->{XS_parse_stack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
     }
   }
 
@@ -771,7 +771,7 @@ sub _MsgHint {
   my ExtUtils::ParseXS $self = shift;
   my $hint = pop;
   my $warn_line_number = $self->current_line_number();
-  my $ret = join("",@_) . " in $self->{filename}, line $warn_line_number\n";
+  my $ret = join("",@_) . " in $self->{in_filename}, line $warn_line_number\n";
   if ($hint) {
     $ret .= "    ($_)\n" for split /\n/, $hint;
   }
@@ -784,7 +784,7 @@ sub _MsgHint {
 sub blurt {
   my ExtUtils::ParseXS $self = shift;
   $self->Warn(@_);
-  $self->{errors}++
+  $self->{error_count}++
 }
 
 
@@ -793,7 +793,7 @@ sub blurt {
 sub death {
   my ExtUtils::ParseXS $self = $_[0];
   my $message = _MsgHint(@_,"");
-  if ($self->{die_on_error}) {
+  if ($self->{config_die_on_error}) {
     die $message;
   } else {
     warn $message;
@@ -835,7 +835,7 @@ sub check_conditional_preprocessor_statements {
       elsif (!$cpplevel) {
         $self->Warn("Warning: #else/elif/endif without #if in this function");
         print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
-          if $self->{XSStack}->[-1]{type} eq 'if';
+          if $self->{XS_parse_stack}->[-1]{type} eq 'if';
         return;
       }
       elsif ($cpp =~ /^\#\s*endif/) {
