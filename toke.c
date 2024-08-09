@@ -6966,20 +6966,12 @@ yyl_dblquote(pTHX_ char *s)
 {
     char *d;
     STRLEN len;
-    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-    DEBUG_T( {
-        if (s)
-            printbuf("### Saw string before %s\n", s);
-        else
-            PerlIO_printf(Perl_debug_log,
-                         "### Saw unterminated string\n");
-    } );
+
+    s = S_scan_terminated(aTHX_ s, OP_CONST);
+    DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
     if (PL_expect == XOPERATOR) {
             no_op("String",s);
     }
-    if (!s)
-        missingterm(NULL, 0);
-    pl_yylval.ival = OP_CONST;
     /* FIXME. I think that this can be const if char *d is replaced by
        more localised variables.  */
     for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
@@ -6996,19 +6988,10 @@ yyl_dblquote(pTHX_ char *s)
 static int
 yyl_backtick(pTHX_ char *s)
 {
-    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
-    DEBUG_T( {
-        if (s)
-            printbuf("### Saw backtick string before %s\n", s);
-        else
-            PerlIO_printf(Perl_debug_log,
-                         "### Saw unterminated backtick string\n");
-    } );
+    s = S_scan_terminated(aTHX_ s, OP_BACKTICK);
+    DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
     if (PL_expect == XOPERATOR)
         no_op("Backticks",s);
-    if (!s)
-        missingterm(NULL, 0);
-    pl_yylval.ival = OP_BACKTICK;
     TERM(sublex_start());
 }
 
