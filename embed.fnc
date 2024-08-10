@@ -5881,8 +5881,6 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 				|NULLOK const char *type		\
 				|STRLEN typelen 			\
 				|NULLOK const char **error_msg
-S	|void	|no_op		|NN const char * const what		\
-				|NULLOK char *s
 S	|void	|parse_ident	|NN char **s				\
 				|NN char **d				\
 				|NN char * const e			\
@@ -5914,6 +5912,10 @@ S	|void	|update_debugger_info					\
 				|NULLOK SV *orig_sv			\
 				|NULLOK const char * const buf		\
 				|STRLEN len
+S	|void	|warn_expect_operator					\
+				|NN const char * const what		\
+				|NULLOK char *s 			\
+				|I32 pop_oldbufptr
 S	|void	|yyerror_non_ascii_message				\
 				|NN const U8 * const s
 S	|int	|yywarn 	|NN const char * const s		\
