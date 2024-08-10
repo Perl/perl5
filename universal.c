@@ -642,27 +642,27 @@ XS(XS_utf8_downgrade)
 XS(XS_utf8_native_to_unicode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_native_to_unicode)
 {
- dXSARGS;
- const UV uv = SvUV(ST(0));
+    dXSARGS;
+    const UV uv = SvUV(ST(0));
 
- if (items > 1)
-     croak_xs_usage(cv, "sv");
+    if (items > 1)
+        croak_xs_usage(cv, "sv");
 
- ST(0) = sv_2mortal(newSVuv(NATIVE_TO_UNI(uv)));
- XSRETURN(1);
+    ST(0) = sv_2mortal(newSVuv(NATIVE_TO_UNI(uv)));
+    XSRETURN(1);
 }
 
 XS(XS_utf8_unicode_to_native); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_unicode_to_native)
 {
- dXSARGS;
- const UV uv = SvUV(ST(0));
+    dXSARGS;
+    const UV uv = SvUV(ST(0));
 
- if (items > 1)
-     croak_xs_usage(cv, "sv");
+    if (items > 1)
+        croak_xs_usage(cv, "sv");
 
- ST(0) = sv_2mortal(newSVuv(UNI_TO_NATIVE(uv)));
- XSRETURN(1);
+    ST(0) = sv_2mortal(newSVuv(UNI_TO_NATIVE(uv)));
+    XSRETURN(1);
 }
 
 XS(XS_Internals_SvREADONLY); /* prototype to pass -Wmissing-prototypes */
