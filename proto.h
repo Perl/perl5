@@ -9299,11 +9299,6 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, 
         assert(key); assert(sv)
 
 STATIC void
-S_no_op(pTHX_ const char * const what, char *s);
-# define PERL_ARGS_ASSERT_NO_OP                 \
-        assert(what)
-
-STATIC void
 S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
         assert(s); assert(d); assert(e)
@@ -9394,6 +9389,11 @@ S_tokeq(pTHX_ SV *sv);
 STATIC void
 S_update_debugger_info(pTHX_ SV *orig_sv, const char * const buf, STRLEN len);
 # define PERL_ARGS_ASSERT_UPDATE_DEBUGGER_INFO
+
+STATIC void
+S_warn_expect_operator(pTHX_ const char * const what, char *s, I32 pop_oldbufptr);
+# define PERL_ARGS_ASSERT_WARN_EXPECT_OPERATOR  \
+        assert(what)
 
 STATIC void
 S_yyerror_non_ascii_message(pTHX_ const U8 * const s);
