@@ -1508,6 +1508,7 @@ sub is_scalar {
 sub maybe_parens {
     my $self = shift;
     my($text, $cx, $prec) = @_;
+    $cx //= 0;
     if ($prec < $cx              # unary ops nest just fine
 	or $prec == $cx and $cx != 4 and $cx != 16 and $cx != 21
 	or $self->{'parens'})
