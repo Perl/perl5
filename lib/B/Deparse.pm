@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.77;
+package B::Deparse 1.78;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -6155,6 +6155,8 @@ sub pp_transr { push @_, 'r'; goto &pp_trans }
 
 sub re_dq_disambiguate {
     my ($first, $last) = @_;
+    $first //= '';
+    $last //= '';
     ($last =~ /^[A-Z\\\^\[\]_?]/ &&
 	$first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
 	|| ($last =~ /^[{\[\w_]/ &&
