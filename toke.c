@@ -12563,16 +12563,13 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             UV uv;
             const int flags = grok_number (PL_tokenbuf, d - PL_tokenbuf, &uv);
 
+            /* scan_num only parses tokens beginning with a digit or '.'
+               which can't be a negative number. */
+            assert(!(flags & IS_NUMBER_NEG));
+
             if (flags == IS_NUMBER_IN_UV) {
-              if (uv <= IV_MAX)
-                sv = newSViv(uv); /* Prefer IVs over UVs. */
-              else
+                /* Note that newSVuv will create IV if uv <= IV_MAX */
                 sv = newSVuv(uv);
-            } else if (flags == (IS_NUMBER_IN_UV | IS_NUMBER_NEG)) {
-              if (uv <= (UV) IV_MIN)
-                sv = newSViv(-(IV)uv);
-              else
-                floatit = TRUE;
             } else
               floatit = TRUE;
         }
