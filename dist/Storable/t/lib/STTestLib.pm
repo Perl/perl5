@@ -22,7 +22,7 @@ sub slurp {
 sub write_and_retrieve {
     my $data = shift;
 
-    my ($fh, $filename) = tempfile('storable-testfile-XXXXX', TMPDIR => 1);
+    my ($fh, $filename) = tempfile('storable-testfile-XXXXX', TMPDIR => 1, UNLINK => 1);
     binmode $fh;
     print $fh $data or die "Can't print to '$filename': $!";
     close $fh or die "Can't close '$filename': $!";
@@ -32,7 +32,7 @@ sub write_and_retrieve {
 
 sub tempfilename {
     local $^W;
-    my (undef, $file) = tempfile('storable-testfile-XXXXX', TMPDIR => 1, UNLINK => 1, OPEN => 0);
+    my (undef, $file) = tempfile('storable-testfile-XXXXX', TMPDIR => 1, UNLINK => 1);
     return $file;
 }
 
