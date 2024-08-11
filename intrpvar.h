@@ -297,7 +297,14 @@ On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
 thread's copy.
 
-=for apidoc_section $io
+=for apidoc mn|IO*|PL_last_in_io
+
+The IO which was last used for a filehandle input operation.  (C<< <FH> >>)
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =for apidoc mn|GV*|PL_ofsgv
 
 The glob containing the output field separator - C<*,> in Perl space.
@@ -311,6 +318,7 @@ thread's copy.
 
 PERLVAR(I, rs,		SV *)		/* input record separator $/ */
 PERLVAR(I, last_in_gv,	GV *)		/* GV used in last <FH> */
+PERLVAR(I, last_in_io,  IO *)           /* IO used in last <FH> */
 PERLVAR(I, ofsgv,	GV *)		/* GV of output field separator *, */
 PERLVAR(I, defoutgv,	GV *)		/* default FH for output */
 PERLVARI(I, chopset,	const char *, " \n-")	/* $: */

@@ -3997,6 +3997,7 @@ EXpx	|SV *	|sv_setsv_cow	|NULLOK SV *dsv 			\
 				|NN SV *ssv
 #endif
 #if defined(PERL_CORE)
+dip	|GV *	|last_in_gv
 p	|void	|opslab_force_free					\
 				|NN OPSLAB *slab
 p	|void	|opslab_free	|NN OPSLAB *slab

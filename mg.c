@@ -887,6 +887,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     const char *s = NULL;
     REGEXP *rx;
     char nextchar;
+    GV *gv;
 
     PERL_ARGS_ASSERT_MAGIC_GET;
 
@@ -1055,9 +1056,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '\014':		/* ^LAST_FH */
         if (strEQ(remaining, "AST_FH")) {
-            if (PL_last_in_gv && (SV*)PL_last_in_gv != &PL_sv_undef) {
-                assert(isGV_with_GP(PL_last_in_gv));
-                sv_setrv_inc(sv, MUTABLE_SV(PL_last_in_gv));
+            GV *gv = last_in_gv();
+            if (gv
+                && (SV*)gv != &PL_sv_undef
+                && isGV_with_GP(gv)) {
+                sv_setrv_inc(sv, MUTABLE_SV(gv));
                 sv_rvweaken(sv);
             }
             else
@@ -1169,8 +1172,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         }
         goto set_undef;
     case '.':
-        if (GvIO(PL_last_in_gv)) {
-            sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
+        if ((gv = last_in_gv()) && GvIO(gv)) {
+            sv_setiv(sv, (IV)IoLINES(GvIOp(gv)));
         }
         break;
     case '?':
@@ -3008,6 +3011,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     I32 i;
     STRLEN len;
     MAGIC *tmg;
+    GV *gv;
 
     PERL_ARGS_ASSERT_MAGIC_SET;
 
@@ -3203,11 +3207,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '.':
         if (PL_localizing) {
-            if (PL_localizing == 1)
-                SAVESPTR(PL_last_in_gv);
+            if (PL_localizing == 1) {
+                SAVE_LAST_IN();
+            }
         }
-        else if (SvOK(sv) && GvIO(PL_last_in_gv))
-            IoLINES(GvIOp(PL_last_in_gv)) = SvIV(sv);
+        else if (SvOK(sv) && (gv = last_in_gv()) && GvIO(gv))
+            IoLINES(GvIOp(gv)) = SvIV(sv);
         break;
     case '^':
         {

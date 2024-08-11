@@ -153,6 +153,7 @@
 # define PL_known_layers                        (vTHX->Iknown_layers)
 # define PL_langinfo_sv                         (vTHX->Ilanginfo_sv)
 # define PL_last_in_gv                          (vTHX->Ilast_in_gv)
+# define PL_last_in_io                          (vTHX->Ilast_in_io)
 # define PL_lastfd                              (vTHX->Ilastfd)
 # define PL_lastgotoprobe                       (vTHX->Ilastgotoprobe)
 # define PL_laststatval                         (vTHX->Ilaststatval)

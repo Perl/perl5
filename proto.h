@@ -6109,13 +6109,17 @@ Perl_Slab_to_rw(pTHX_ OPSLAB * const slab);
 
 # endif /* defined(PERL_DEBUG_READONLY_OPS) */
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE GV *
+Perl_last_in_gv(pTHX);
+#   define PERL_ARGS_ASSERT_LAST_IN_GV
+
 PERL_STATIC_INLINE bool
 S_should_warn_nl(const char *pv)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_SHOULD_WARN_NL      \
         assert(pv)
 
-# endif
+# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
 PERL_CALLCONV bool

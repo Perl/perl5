@@ -506,8 +506,9 @@ PP(pp_glob)
     }
 #endif /* !VMS */
 
-    SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
+    SAVE_LAST_IN();
     PL_last_in_gv = gv;
+    PL_last_in_io = NULL;
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
     PL_rs = newSVpvs_flags("\000", SVs_TEMP);
@@ -529,7 +530,7 @@ PP(pp_glob)
 
 PP(pp_rcatline)
 {
-    PL_last_in_gv = cGVOP_gv;
+    PL_last_in_gv = cGVOP_gv; /* do_readline() will set PL_last_in_io */
     return do_readline();
 }
 
@@ -2366,15 +2367,16 @@ PP_wrapped(pp_eof, MAXARG, 0)
             which = 2;
         }
         else {
-            gv = PL_last_in_gv;			/* eof */
+            gv = last_in_gv();			/* eof */
             which = 0;
         }
     }
+    PL_last_in_io = io = GvIO(gv);
 
     if (!gv)
         RETPUSHYES;
 
-    if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
+    if (io && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
         return tied_method1(SV_CONST(EOF), SP, MUTABLE_SV(io), mg, newSVuv(which));
     }
 
@@ -2409,13 +2411,15 @@ PP_wrapped(pp_tell, MAXARG, 0)
     GV *gv;
     IO *io;
 
-    if (MAXARG != 0 && (TOPs || POPs))
-        PL_last_in_gv = MUTABLE_GV(POPs);
-    else
+    if (MAXARG != 0 && (TOPs || POPs)) {
+        gv = PL_last_in_gv = MUTABLE_GV(POPs);
+    }
+    else {
         EXTEND(SP, 1);
-    gv = PL_last_in_gv;
+        gv = last_in_gv();
+    }
+    PL_last_in_io = io = GvIO(gv);
 
-    io = GvIO(gv);
     if (io) {
         const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
@@ -2451,7 +2455,7 @@ PP_wrapped(pp_sysseek, 3, 0)
 #endif
 
     GV * const gv = PL_last_in_gv = MUTABLE_GV(POPs);
-    IO *const io = GvIO(gv);
+    IO *const io = PL_last_in_io = GvIO(gv);
 
     if (io) {
         const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
