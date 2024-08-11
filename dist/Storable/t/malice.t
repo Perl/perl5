@@ -280,9 +280,6 @@ test_things($contents, \&write_and_retrieve, 'file');
 my $stored = freeze \%hash;
 test_things($stored, sub { eval { thaw $_[0] } }, 'string');
 
-# Network order.
-unlink $file or die "Can't unlink '$file': $!";
-
 ok (defined nstore(\%hash, $file), "nstore() returned defined value");
 
 $expected = 20 + length ($file_magic_str) + $network_magic + $fancy;
