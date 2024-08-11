@@ -571,6 +571,7 @@ without their dangers, especially when multiple locks are involved.
 Consider the following code:
 
     use threads;
+    use threads::shared;
 
     my $x :shared = 4;
     my $y :shared = 'foo';
@@ -584,6 +585,8 @@ Consider the following code:
         sleep(20);
         lock($x);
     });
+    $thr1->join();
+    $thr2->join();
 
 This program will probably hang until you kill it.  The only way it
 won't hang is if one of the two threads acquires both locks
