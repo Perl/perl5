@@ -8218,6 +8218,9 @@ S_sv_strftime_common(pTHX_ SV * fmt,
 {   /* Documented above */
     PERL_ARGS_ASSERT_SV_STRFTIME_COMMON;
 
+    STRLEN fmt_cur;
+    const char *fmt_str = SvPV_const(fmt, fmt_cur);
+
     utf8ness_t fmt_utf8ness = (SvUTF8(fmt) && LIKELY(! IN_BYTES))
                               ? UTF8NESS_YES
                               : UTF8NESS_UNKNOWN;
@@ -8228,8 +8231,8 @@ S_sv_strftime_common(pTHX_ SV * fmt,
      * to get almost all the typical returns to fit without the called function
      * having to realloc; this is a somewhat educated guess, but feel free to
      * tweak it. */
-    SV* sv = newSV(MAX(SvCUR(fmt) * 2, 64));
-    if (! strftime8(SvPV_nolen(fmt),
+    SV* sv = newSV(MAX(fmt_cur * 2, 64));
+    if (! strftime8(fmt_str,
                     sv,
                     locale,
                     mytm,
