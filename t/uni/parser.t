@@ -187,8 +187,12 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
 # tests for "Bad name"
 eval q{ Ｆｏｏ::$bar };
 like( $@, qr/Bad name after Ｆｏｏ::/, 'Bad name after Ｆｏｏ::' );
-eval q{ Ｆｏｏ''bar };
-like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
+{
+    # since ' is no longer usable in symbols, the error is no longer "Bad name"
+    no warnings "syntax"; # suppress String found where operator expeected
+    eval q{ Ｆｏｏ''bar };
+    like( $@, qr/syntax error at \(eval \d+\) line 1, near \"Ｆｏｏ\'\'/, 'Syntax error for Ｆｏｏ\'' );
+}
 
 {
     no warnings 'utf8';

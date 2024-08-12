@@ -353,7 +353,8 @@ has cxxc => (
 EXPECT
 Bareword found where operator expected (Do you need to predeclare "isa"?) at - line 9, near "isa => 'Int"
   (Might be a runaway multi-line '' string starting on line 4)
-Bad name after Int' at - line 9.
+syntax error at - line 9, near "isa => 'Int"
+Execution of - aborted due to compilation errors.
 ########
 # NAME Bad name after :: (with other helpful messages)
 sub has{}
@@ -610,4 +611,19 @@ EXPECT
 syntax error at - line 2, near "[
 =="
   (Might be a runaway multi-line // string starting on line 1)
+Execution of - aborted due to compilation errors.
+########
+# NAME tick in names: initial character of sub name
+sub 'Hello'_he_said (_);
+EXPECT
+Illegal declaration of anonymous subroutine at - line 1.
+########
+# NAME tick in names: initial character of format name
+    format 'one =
+ok @<< - format 'foo still works
+$test
+.
+EXPECT
+syntax error at - line 2, near "ok @<< - format '"
+  (Might be a runaway multi-line '' string starting on line 1)
 Execution of - aborted due to compilation errors.

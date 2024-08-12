@@ -1853,7 +1853,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
              * access to a known hint bit in a known OP, we can't
              * tell whether HINT_STRICT_REFS is in force or not.
              */
-            if (!memchr(s, ':', len) && !memchr(s, '\'', len))
+            if (!memchr(s, ':', len))
                 Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("main::"),
                                      SV_GMAGIC);
             if (i)

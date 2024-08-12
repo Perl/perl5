@@ -487,7 +487,7 @@ results.
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
-=item Bad name after %s
+=item Bad name after %s::
 
 (F) You started to name a symbol by using a package prefix, and then
 didn't finish the symbol.  In particular, you can't interpolate outside
@@ -4796,22 +4796,6 @@ take place when going past the end of the string when either
 C<sysread()>ing a file, or when seeking past the end of a scalar opened
 for I/O (in anticipation of future reads and to imitate the behavior
 with real files).
-
-=item Old package separator "'" deprecated
-
-(D deprecated::apostrophe_as_package_separator, syntax) You used the old package
-separator "'" in a variable, subroutine or package name. Support for the
-old package separator will be removed in Perl 5.42.
-
-=item Old package separator used in string
-
-(D deprecated::apostrophe_as_package_separator, syntax) You used the old package
-separator, "'", in a variable named inside a double-quoted string; e.g.,
-C<"In $name's house">. This is equivalent to C<"In $name::s house">. If
-you meant the former, put a backslash before the apostrophe
-(C<"In $name\'s house">).
-
-Support for the old package separator will be removed in Perl 5.42.
 
 =item Only scalar fields can take a :param attribute
 
