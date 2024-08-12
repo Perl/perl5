@@ -45,6 +45,17 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Apostrophe is no longer recognized as a global name separator
+
+The apostrophe C<'> has been recognized as a separator between
+components of package names and package variables since Perl 3, acting
+exactly like C<::>, which was introduced in Perl 5.
+
+Use of C<'> as a package separator was deprecated in Perl 5.38 and has
+now been removed.
+
+[github #22303]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
