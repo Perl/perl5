@@ -6240,7 +6240,7 @@ sub code_list {
 	local(@$self{qw'curstash warnings hints hinthash curcop'})
 	    = @$self{qw'curstash warnings hints hinthash curcop'};
 
-    my $re;
+    my $re = "";
     for ($op = $op->first->sibling; !null($op); $op = $op->sibling) {
 	if ($op->name eq 'null' and $op->flags & OPf_SPECIAL) {
 	    my $scope = $op->first;
