@@ -32,12 +32,18 @@ my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list'
 
 require './regen/embed_lib.pl';
 
+# List of functions which doesn't have diag format as their argument
+my %explicit_opt_out = map +($_ => 1), qw (
+    warn_expect_operator
+);
+
 # Look for functions that look like they could be diagnostic ones.
 my @functions;
 foreach (@{(setup_embed())[0]}) {
   my $embed= $_->{embed}
     or next;
   next unless $embed->{name}  =~ /warn|(?<!ov)err|(\b|_)die|croak|deprecate/i;
+  next if exists $explicit_opt_out{$embed->{name}};
   # Skip some known exceptions
   next if $embed->{name} =~ /croak_kw_unless_class/;
   # The flag p means that this function may have a 'Perl_' prefix
