@@ -1582,9 +1582,82 @@ $a = (!$b) isa Some::Class;
 $a = !($b) isa Some::Class;  # should warn
 $a = !($b isa Some::Class);
 $a = not $b isa Some::Class;
+
+my $code = "#line 1 [cmp]\n";
+for my $op (qw( == != < > <= >= eq ne lt gt le ge )) {
+    $code .= "\$a = !\$a $op \$b;\n";  # should warn
+    $code .= "\$a = (!\$a) $op \$b;\n";
+    $code .= "\$a = !(\$a) $op \$b;\n";  # should warn
+    $code .= "\$a = !(\$a $op \$b);\n";
+    $code .= "\$a = not \$a $op \$b;\n";
+}
+$a = $b = 0;
+eval $code;
+die $@ if $@;
+
+$_ = '';
+$a = !/x/;
+
+$code = "#line 1 [bind]\n";
+for my $rhs (qw( /x/ $b tr/x/x/ tr!x!y!r s!x!y!r )) {
+    for my $bind ('=~', $rhs =~ /!r\z/ ? () : '!~') {
+        $code .= "\$a = !\$a $bind $rhs;\n";  # should warn
+        $code .= "\$a = (!\$a) $bind $rhs;\n";
+        $code .= "\$a = !(\$a) $bind $rhs;\n";  # should warn
+        $code .= "\$a = !(\$a $bind $rhs);\n";
+        $code .= "\$a = not \$a $bind $rhs;\n";
+    }
+}
+$a = $b = 0;
+eval $code;
+die $@ if $@;
+
+# doesn't compile, but should warn anyway
+eval "#line 1 [extra]\n" . '$a = !$a =~ s/x/y/';
 EXPECT
-Possible precedence problem on isa operator at - line 4.
-Possible precedence problem on isa operator at - line 6.
+Possible precedence problem between ! and derived class test at - line 4.
+Possible precedence problem between ! and derived class test at - line 6.
+Possible precedence problem between ! and numeric eq (==) at [cmp] line 1.
+Possible precedence problem between ! and numeric eq (==) at [cmp] line 3.
+Possible precedence problem between ! and numeric ne (!=) at [cmp] line 6.
+Possible precedence problem between ! and numeric ne (!=) at [cmp] line 8.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 11.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 13.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 16.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 18.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 21.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 23.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 26.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 28.
+Possible precedence problem between ! and string eq at [cmp] line 31.
+Possible precedence problem between ! and string eq at [cmp] line 33.
+Possible precedence problem between ! and string ne at [cmp] line 36.
+Possible precedence problem between ! and string ne at [cmp] line 38.
+Possible precedence problem between ! and string lt at [cmp] line 41.
+Possible precedence problem between ! and string lt at [cmp] line 43.
+Possible precedence problem between ! and string gt at [cmp] line 46.
+Possible precedence problem between ! and string gt at [cmp] line 48.
+Possible precedence problem between ! and string le at [cmp] line 51.
+Possible precedence problem between ! and string le at [cmp] line 53.
+Possible precedence problem between ! and string ge at [cmp] line 56.
+Possible precedence problem between ! and string ge at [cmp] line 58.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 1.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 3.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 6.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 8.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 11.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 13.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 16.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 18.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 21.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 23.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 26.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 28.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 31.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 33.
+Possible precedence problem between ! and substitution (s///) at [bind] line 36.
+Possible precedence problem between ! and substitution (s///) at [bind] line 38.
+Possible precedence problem between ! and substitution (s///) at [extra] line 1.
 ########
 # op.c
 use integer;
