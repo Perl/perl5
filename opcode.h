@@ -1494,12 +1494,12 @@ INIT({
 	Perl_ck_cmp,		/* i_ne */
 	Perl_ck_null,		/* ncmp */
 	Perl_ck_null,		/* i_ncmp */
-	Perl_ck_null,		/* slt */
-	Perl_ck_null,		/* sgt */
-	Perl_ck_null,		/* sle */
-	Perl_ck_null,		/* sge */
-	Perl_ck_null,		/* seq */
-	Perl_ck_null,		/* sne */
+	Perl_ck_scmp,		/* slt */
+	Perl_ck_scmp,		/* sgt */
+	Perl_ck_scmp,		/* sle */
+	Perl_ck_scmp,		/* sge */
+	Perl_ck_scmp,		/* seq */
+	Perl_ck_scmp,		/* sne */
 	Perl_ck_null,		/* scmp */
 	Perl_ck_bitop,		/* bit_and */
 	Perl_ck_bitop,		/* bit_xor */

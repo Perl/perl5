@@ -1242,6 +1242,7 @@
 #     define ck_rfun(a)                         Perl_ck_rfun(aTHX_ a)
 #     define ck_rvconst(a)                      Perl_ck_rvconst(aTHX_ a)
 #     define ck_sassign(a)                      Perl_ck_sassign(aTHX_ a)
+#     define ck_scmp(a)                         Perl_ck_scmp(aTHX_ a)
 #     define ck_select(a)                       Perl_ck_select(aTHX_ a)
 #     define ck_shift(a)                        Perl_ck_shift(aTHX_ a)
 #     define ck_sort(a)                         Perl_ck_sort(aTHX_ a)

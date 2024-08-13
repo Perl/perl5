@@ -4297,6 +4297,11 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
             o = right;
         }
         else {
+            if (left->op_type == OP_NOT && !(left->op_flags & OPf_PARENS)) {
+                Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+                    "Possible precedence problem between ! and %s", PL_op_desc[rtype]
+                );
+            }
             right->op_flags |= OPf_STACKED;
             if (rtype != OP_MATCH && rtype != OP_TRANSR &&
             ! (rtype == OP_TRANS &&
@@ -11971,6 +11976,18 @@ Perl_ck_bitop(pTHX_ OP *o)
     return o;
 }
 
+static void
+check_precedence_not_vs_cmp(pTHX_ const OP *const o)
+{
+    /* warn for !$x == 42, but not !$x == !$y */
+    const OP *const kid = cUNOPo->op_first;
+    if (kid->op_type == OP_NOT && !(kid->op_flags & OPf_PARENS) && OpSIBLING(kid)->op_type != OP_NOT) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+            "Possible precedence problem between ! and %s", OP_DESC(o)
+        );
+    }
+}
+
 PERL_STATIC_INLINE bool
 is_dollar_bracket(pTHX_ const OP * const o)
 {
@@ -12017,6 +12034,8 @@ Perl_ck_cmp(pTHX_ OP *o)
             Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                         "$[ used in %s (did you mean $] ?)", OP_DESC(o));
     }
+
+    check_precedence_not_vs_cmp(aTHX_ o);
 
     /* convert (index(...) == -1) and variations into
      *   (r)index/BOOL(,NEG)
@@ -12097,6 +12116,17 @@ Perl_ck_cmp(pTHX_ OP *o)
     return indexop;
 }
 
+/* for slt, sgt, sle, sge, seq, sne */
+
+OP *
+Perl_ck_scmp(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_SCMP;
+
+    check_precedence_not_vs_cmp(aTHX_ o);
+
+    return o;
+}
 
 OP *
 Perl_ck_concat(pTHX_ OP *o)
@@ -14992,7 +15022,7 @@ Perl_ck_isa(pTHX_ OP *o)
     /* !$x isa Some::Class  # probably meant !($x isa Some::Class) */
     if (objop->op_type == OP_NOT && !(objop->op_flags & OPf_PARENS)) {
         Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-            "Possible precedence problem on isa operator"
+            "Possible precedence problem between ! and %s", OP_DESC(o)
         );
     }
 
