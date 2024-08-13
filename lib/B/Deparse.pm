@@ -6720,7 +6720,7 @@ sub pp_pushdefer {
 sub builtin1 {
     my $self = shift;
     my ($op, $cx, $name) = @_;
-    my $arg = $self->deparse($op->first);
+    my $arg = $self->deparse($op->first, 6);
     # TODO: work out if lexical alias is present somehow...
     return "builtin::$name($arg)";
 }
