@@ -6159,90 +6159,86 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * The lhs of the tr/// is here referred to as the t side.
      * The rhs of the tr/// is here referred to as the r side.
      *
-         * An inversion map consists of two parallel arrays.  One is
-         * essentially an inversion list: an ordered list of code points such
-         * that each element gives the first code point of a range of
-         * consecutive code points that map to the element in the other array
-         * that has the same index as this one (in other words, the
-         * corresponding element).  Thus the range extends up to (but not
-         * including) the code point given by the next higher element.  In a
-         * true inversion map, the corresponding element in the other array
-         * gives the mapping of the first code point in the range, with the
-         * understanding that the next higher code point in the inversion
-         * list's range will map to the next higher code point in the map.
-         *
-         * So if at element [i], let's say we have:
-         *
-         *     t_invlist  r_map
-         * [i]    A         a
-         *
-         * This means that A => a, B => b, C => c....  Let's say that the
-         * situation is such that:
-         *
-         * [i+1]  L        -1
-         *
-         * This means the sequence that started at [i] stops at K => k.  This
-         * illustrates that you need to look at the next element to find where
-         * a sequence stops.  Except, the highest element in the inversion list
-         * begins a range that is understood to extend to the platform's
-         * infinity.
-         *
-         * This routine modifies traditional inversion maps to reserve two
-         * mappings:
-         *
-         *  TR_UNLISTED (or -1) indicates that no code point in the range
-         *      is listed in the tr/// searchlist.  At runtime, these are
-         *      always passed through unchanged.  In the inversion map, all
-         *      points in the range are mapped to -1, instead of increasing,
-         *      like the 'L' in the example above.
-         *
-         *      We start the parse with every code point mapped to this, and as
-         *      we parse and find ones that are listed in the search list, we
-         *      carve out ranges as we go along that override that.
-         *
-         *  TR_SPECIAL_HANDLING (or -2) indicates that every code point in the
-         *      range needs special handling.  Again, all code points in the
-         *      range are mapped to -2, instead of increasing.
-         *
-         *      Under /d this value means the code point should be deleted from
-         *      the transliteration when encountered.
-         *
-         *      Otherwise, it marks that every code point in the range is to
-         *      map to the final character in the replacement list.  This
-         *      happens only when the replacement list is shorter than the
-         *      search one, so there are things in the search list that have no
-         *      correspondence in the replacement list.  For example, in
-         *      tr/a-z/A/, 'A' is the final value, and the inversion map
-         *      generated for this would be like this:
-         *          \0  =>  -1
-         *          a   =>   A
-         *          b-z =>  -2
-         *          z+1 =>  -1
-         *      'A' appears once, then the remainder of the range maps to -2.
-         *      The use of -2 isn't strictly necessary, as an inversion map is
-         *      capable of representing this situation, but not nearly so
-         *      compactly, and this is actually quite commonly encountered.
-         *      Indeed, the original design of this code used a full inversion
-         *      map for this.  But things like
-         *          tr/\0-\x{FFFF}/A/
-         *      generated huge data structures, slowly, and the execution was
-         *      also slow.  So the current scheme was implemented.
-         *
-         *  So, if the next element in our example is:
-         *
-         * [i+2]  Q        q
-         *
-         * Then all of L, M, N, O, and P map to TR_UNLISTED.  If the next
-         * elements are
-         *
-         * [i+3]  R        z
-         * [i+4]  S       TR_UNLISTED
-         *
-         * Then Q => q; R => z; and S => TR_UNLISTED.  If [i+4] (the 'S') is
-         * the final element in the arrays, every code point from S to infinity
-         * maps to TR_UNLISTED.
-         *
-         */
+     * An inversion map consists of two parallel arrays.  One is essentially an
+     * inversion list: an ordered list of code points such that each element
+     * gives the first code point of a range of consecutive code points that
+     * map to the element in the other array that has the same index as this
+     * one (in other words, the corresponding element).  Thus the range extends
+     * up to (but not including) the code point given by the next higher
+     * element.  In a true inversion map, the corresponding element in the
+     * other array gives the mapping of the first code point in the range, with
+     * the understanding that the next higher code point in the inversion
+     * list's range will map to the next higher code point in the map.
+     *
+     * So if at element [i], let's say we have:
+     *
+     *     t_invlist  r_map
+     * [i]    A         a
+     *
+     * This means that A => a, B => b, C => c....  Let's say that the situation
+     * is such that:
+     *
+     * [i+1]  L        -1
+     *
+     * This means the sequence that started at [i] stops at K => k.  This
+     * illustrates that you need to look at the next element to find where a
+     * sequence stops.  Except, the highest element in the inversion list
+     * begins a range that is understood to extend to the platform's infinity.
+     *
+     * This routine modifies traditional inversion maps to reserve two
+     * mappings:
+     *
+     *  TR_UNLISTED (or -1) indicates that no code point in the range is listed
+     *      in the tr/// searchlist.  At runtime, these are always passed
+     *      through unchanged.  In the inversion map, all points in the range
+     *      are mapped to -1, instead of increasing, like the 'L' in the
+     *      example above.
+     *
+     *      We start the parse with every code point mapped to this, and as we
+     *      parse and find ones that are listed in the search list, we carve
+     *      out ranges as we go along that override that.
+     *
+     *  TR_SPECIAL_HANDLING (or -2) indicates that every code point in the
+     *      range needs special handling.  Again, all code points in the range
+     *      are mapped to -2, instead of increasing.
+     *
+     *      Under /d this value means the code point should be deleted from the
+     *      transliteration when encountered.
+     *
+     *      Otherwise, it marks that every code point in the range is to map to
+     *      the final character in the replacement list.  This happens only
+     *      when the replacement list is shorter than the search one, so there
+     *      are things in the search list that have no correspondence in the
+     *      replacement list.  For example, in tr/a-z/A/, 'A' is the final
+     *      value, and the inversion map generated for this would be like this:
+     *          \0  =>  -1
+     *          a   =>   A
+     *          b-z =>  -2
+     *          z+1 =>  -1
+     *      'A' appears once, then the remainder of the range maps to -2.  The
+     *      use of -2 isn't strictly necessary, as an inversion map is capable
+     *      of representing this situation, but not nearly so compactly, and
+     *      this is actually quite commonly encountered.  Indeed, the original
+     *      design of this code used a full inversion map for this.  But things
+     *      like
+     *          tr/\0-\x{FFFF}/A/
+     *      generated huge data structures, slowly, and the execution was also
+     *      slow.  So the current scheme was implemented.
+     *
+     *  So, if the next element in our example is:
+     *
+     * [i+2]  Q        q
+     *
+     * Then all of L, M, N, O, and P map to TR_UNLISTED.  If the next elements
+     * are
+     *
+     * [i+3]  R        z
+     * [i+4]  S       TR_UNLISTED
+     *
+     * Then Q => q; R => z; and S => TR_UNLISTED.  If [i+4] (the 'S') is the
+     * final element in the arrays, every code point from S to infinity maps to
+     * TR_UNLISTED.
+     */
 
     SV * const tstr = cSVOPx(expr)->op_sv;
     SV * const rstr = cSVOPx(repl)->op_sv;
