@@ -2336,17 +2336,18 @@ X<tr> X<y> X<transliterate> X</c> X</d> X</s>
 Transliterates all occurrences of the characters found (or not found
 if the C</c> modifier is specified) in the search list with the
 positionally corresponding character in the replacement list, possibly
-deleting some, depending on the modifiers specified.  It returns the
-number of characters replaced or deleted.  If no string is specified via
-the C<=~> or C<!~> operator, the C<$_> string is transliterated.
+deleting some, depending on the modifiers specified.  Unless the C</r>
+flag is specified, it returns the number of characters replaced or
+deleted.  If no string is specified via the C<=~> or C<!~> operator, the
+C<$_> string is transliterated.
 
 For B<sed> devotees, C<y> is provided as a synonym for C<tr>.
 
 If the C</r> (non-destructive) option is present, a new copy of the string
-is made and its characters transliterated, and this copy is returned no
-matter whether it was modified or not: the original string is always
-left unchanged.  The new copy is always a plain string, even if the input
-string is an object or a tied variable.
+is made and its characters transliterated, and this copy is returned,
+instead of a count, no matter whether it was modified or not: the
+original string is always left unchanged.  The new copy is always a
+plain string, even if the input string is an object or a tied variable.
 
 Unless the C</r> option is used, the string specified with C<=~> must be a
 scalar variable, an array element, a hash element, or an assignment to one
@@ -2439,8 +2440,8 @@ Options:
 
     c	Complement the SEARCHLIST.
     d	Delete found but unreplaced characters.
-    r	Return the modified string and leave the original string
-	untouched.
+    r	Return the modified string instead of a count, and leave the
+        original string untouched.
     s	Squash duplicate replaced characters.
 
 If the C</d> modifier is specified, any characters specified by
