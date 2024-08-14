@@ -401,7 +401,6 @@ our %Modules = (
     'Encode' => {
         'DISTRIBUTION' => 'DANKOGAI/Encode-3.21.tar.gz',
         'SYNCINFO'     => 'jkeenan on Sun Feb 25 19:56:46 2024',
-        'SYNCINFO'     => 'jkeenan on Fri Nov 10 15:12:07 2023',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -612,7 +611,6 @@ our %Modules = (
     'Getopt::Long' => {
         'DISTRIBUTION' => 'JV/Getopt-Long-2.58.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Jun 12 08:25:08 2024',
-        'SYNCINFO'     => 'jkeenan on Sat Nov 11 13:09:21 2023',
         'FILES'        => q[cpan/Getopt-Long],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -761,8 +759,6 @@ our %Modules = (
     'Math::BigInt' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003003.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Jun 12 08:50:03 2024',
-        'SYNCINFO'     => 'corion on Thu Jan 11 20:23:12 2024',
-        'SYNCINFO'     => 'book on Tue Dec 26 22:44:58 2023',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -776,8 +772,6 @@ our %Modules = (
     'Math::BigInt::FastCalc' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5018.tar.gz',
         'SYNCINFO'     => 'corion on Thu Jan 11 20:24:21 2024',
-        'SYNCINFO'     => 'jkeenan on Sat Dec 30 14:31:28 2023',
-        'SYNCINFO'     => 'jkeenan on Sun Sep 24 08:29:56 2023',
         'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
             qr{^inc/},
@@ -925,7 +919,6 @@ our %Modules = (
     'Pod::Checker' => {
         'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.77.tar.gz',
         'SYNCINFO'     => 'jkeenan on Mon Feb  5 16:37:53 2024',
-        'SYNCINFO'     => 'corion on Tue Jan  9 20:34:18 2024',
         'FILES'        => q[cpan/Pod-Checker],
     },
 
@@ -1086,7 +1079,6 @@ our %Modules = (
     'Term::Table' => {
         'DISTRIBUTION' => 'EXODIST/Term-Table-0.020.tar.gz',
         'SYNCINFO'     => 'jkeenan on Mon Aug  5 21:13:24 2024',
-        'SYNCINFO'     => 'jkeenan on Wed Nov  1 19:16:24 2023',
         'FILES'        => q[cpan/Term-Table],
         'EXCLUDED'     => [
             qw( appveyor.yml ),
@@ -1122,8 +1114,6 @@ our %Modules = (
     'Test::Simple' => {
         'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302200.tar.gz',
         'SYNCINFO'     => 'jkeenan on Tue Aug  6 07:52:25 2024',
-        'SYNCINFO'     => 'LeoNerd on Sat Apr 27 10:20:58 2024',
-        'SYNCINFO'     => 'jkeenan on Fri Dec  1 07:01:54 2023',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
