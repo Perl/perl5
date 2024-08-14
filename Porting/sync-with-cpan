@@ -824,10 +824,7 @@ while (<$Maintainers_pl>) {
             my $date = localtime;
             my $user = $ENV{USER} ? "$ENV{USER} on " : "";
             my $key = "SYNCINFO";
-            if ( /^'([A-Z_]+)'\s+=>/ and $1 eq $key) {
-                s/(=>\s+)'[^']+'/$1'$user$date'/;
-            }
-            else {
+            unless (s/^ \s* '\Q$key\E' \s* => \s* \K '[^']+' /'$user$date'/x) {
                 print $new_Maintainers_pl
                     "        '$key'     => '$user$date',\n";
             }
