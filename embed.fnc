@@ -652,6 +652,10 @@ Adp	|SV *	|amagic_call	|NN SV *left				\
 				|NN SV *right				\
 				|int method				\
 				|int dir
+Adp	|SV *	|amagic_call_unx|NN SV *sv				\
+				|int method				\
+				|NN SV **args				\
+				|I32 nargs
 Adp	|SV *	|amagic_deref_call					\
 				|NN SV *ref				\
 				|int method

@@ -89,6 +89,7 @@ our @names = qw#
     (~~
     (-X
     (qr
+    (substr
 #;
 
 our @enums = qw#
@@ -167,6 +168,7 @@ our @enums = qw#
     smart
     ftest
     regexp
+    substr
 #;
 
 { my $i = 0; our %names = map { $_ => $i++ } @names }

@@ -3621,6 +3621,14 @@ PP_wrapped(pp_substr,
         assert(!repl_sv);
         repl_sv = POPs;
     }
+    if(UNLIKELY(SvFLAGS(sv) & (SVf_ROK|SVs_GMG))) {
+        SV *ret;
+        SV *args[] = {pos_sv, len_sv, repl_sv};
+        if((ret = amagic_call_unx(sv, substr_amg, args, 2 + !!repl_sv))) {
+            PUSHs(ret);
+            RETURN;
+        }
+    }
     if (lvalue && !repl_sv) {
         SV * ret;
         ret = newSV_type_mortal(SVt_PVLV);  /* Not TARG RT#67838 */

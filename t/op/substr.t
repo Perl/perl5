@@ -22,7 +22,7 @@ $SIG{__WARN__} = sub {
      }
 };
 
-plan(400);
+plan(406);
 
 run_tests() unless caller;
 
@@ -916,6 +916,46 @@ fresh_perl_is('$0 = "/usr/bin/perl"; substr($0, 0, 0, $0)', '', {}, "(perl #1293
     \$h{foo} = \(my $bar = "baz");
     substr delete $h{foo}, 1, 1, o=>;
     is $bar, boz => 'first arg to 4-arg substr is loose lvalue context';
+}
+
+{
+    my @substr_args;
+    my $substr_return;
+
+    package OverloadedSubstr {
+        use overload
+            substr => "_substr",
+            '""'   => sub { "fail" };
+
+        sub _substr {
+            shift;
+            @substr_args = @_;
+            return $substr_return;
+        }
+    }
+
+    my $str = bless [], "OverloadedSubstr";
+
+    # substr RVALUE
+    $substr_return = "result";
+    my $s = substr( $str, 0, 5 );
+    is($s, "result", 'result of overloaded substr()');
+    ok(eq_array(\@substr_args, [0, 5]), 'args passed to overloaded substr()');
+
+    # substr with replacement
+    substr( $str, 2, 4, "replacement" );
+    ok(eq_array(\@substr_args, [2, 4, "replacement"]), 'args passed to overloaded substr() with replacement');
+
+    # substr LVALUE
+    substr( $str, 1, 6 ) = "lvalue";
+    ok(eq_array(\@substr_args, [1, 6, "lvalue"]), 'args passed to overloaded substr() lvalue');
+
+    # substr get magic
+    sub substr_3_1 :lvalue { substr( $str, 3, 1 ); }
+    $substr_return = "magic result";
+    $s = substr_3_1();
+    is($s, "magic result", 'result of overloaded substr() lvalue getmagic');
+    ok(eq_array(\@substr_args, [3, 1]), 'args passed to overloaded substr() lvalue getmagic');
 }
 
 1;

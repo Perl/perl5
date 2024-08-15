@@ -4275,6 +4275,102 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   }
 }
 
+SV *
+Perl_amagic_call_unx(pTHX_ SV *sv, int method, SV **args, I32 nargs)
+{
+    PERL_ARGS_ASSERT_AMAGIC_CALL_UNX;
+
+    if(!SvAMAGIC(sv))
+        return NULL;
+
+    HV *stash = SvSTASH(SvRV(sv));
+    if(!stash || !Gv_AMG(stash))
+        return NULL;
+
+    MAGIC *mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
+    if(!mg)
+        return NULL;
+
+    CV **cvp = NULL;
+    AMT *amtp = NULL;
+    if(AMT_AMAGIC((AMT *)mg->mg_ptr)) {
+        amtp = (AMT *)mg->mg_ptr;
+        cvp  = amtp->table;
+    }
+    if(!cvp)
+        return NULL;
+
+    CV *cv = cvp[method];
+    if(!cv) {
+        // TODO: Has overloading generally, just not this overload specifically. Complain?
+        return NULL;
+    }
+
+    dSP;
+    U8 gimme = GIMME_V;
+    LISTOP myop;
+    const bool oldcatch = CATCH_GET;
+    CATCH_SET(TRUE);
+    Zero(&myop, 1, LISTOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = NULL;
+    myop.op_flags = OPf_STACKED;
+
+    switch(gimme) {
+        case G_VOID:
+            myop.op_flags |= OPf_WANT_VOID;
+            break;
+        case G_LIST:
+        case G_SCALAR:
+            myop.op_flags |= OPf_WANT_SCALAR;
+            break;
+    }
+
+    PUSHSTACKi(PERLSI_OVERLOAD);
+    ENTER;
+    SAVEOP();
+    PL_op = (OP *) &myop;
+    if (PERLDB_SUB && PL_curstash != PL_debstash)
+        PL_op->op_private |= OPpENTERSUB_DB;
+    Perl_pp_pushmark(aTHX);
+
+    EXTEND(SP, 2 + nargs);
+    PUSHs(sv);
+    while(nargs) {
+        PUSHs(*args);
+        args++, nargs--;
+    }
+    PUSHs(MUTABLE_SV(cv));
+    PUTBACK;
+    I32 oldmark = TOPMARK;
+
+    if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))
+        CALLRUNOPS(aTHX);
+    LEAVE;
+    SPAGAIN;
+
+    I32 nret = SP - (PL_stack_base + oldmark);
+
+    SV *res;
+    switch(gimme) {
+        case G_VOID:
+            res = &PL_sv_undef;
+            SP = PL_stack_base + oldmark;
+            break;
+
+        case G_LIST:
+        case G_SCALAR:
+            res = POPs;
+            break;
+    }
+
+    PUTBACK;
+    POPSTACK;
+    CATCH_SET(oldcatch);
+
+    return res;
+}
+
 /*
 =for apidoc gv_name_set
 

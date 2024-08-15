@@ -194,6 +194,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int dir);
         assert(left); assert(right)
 
 PERL_CALLCONV SV *
+Perl_amagic_call_unx(pTHX_ SV *sv, int method, SV **args, I32 nargs);
+#define PERL_ARGS_ASSERT_AMAGIC_CALL_UNX        \
+        assert(sv); assert(args)
+
+PERL_CALLCONV SV *
 Perl_amagic_deref_call(pTHX_ SV *ref, int method);
 #define PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL      \
         assert(ref)

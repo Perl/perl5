@@ -2504,6 +2504,18 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_GETSUBSTR;
     PERL_UNUSED_ARG(mg);
 
+    if (UNLIKELY(SvFLAGS(lsv) && (SVf_ROK|SVs_GMG))) {
+        SV *ret;
+        SV *args[] = {newSV_type_mortal(SVt_IV), newSV_type_mortal(SVt_IV)};
+        if(negoff) sv_setiv(args[0], LvTARGOFF(sv)); else sv_setuv(args[0], LvTARGOFF(sv));
+        if(negrem) sv_setiv(args[1], LvTARGLEN(sv)); else sv_setuv(args[0], LvTARGLEN(sv));
+
+        if((ret = amagic_call_unx(lsv, substr_amg, args, 2))) {
+            sv_setsv_nomg(lsv, ret);
+            return 0;
+        }
+    }
+
     if (!translate_substr_offsets(
             SvUTF8(lsv) ? sv_or_pv_len_utf8(lsv, tmps, len) : len,
             negoff ? -(IV)offs : (IV)offs, !negoff,
@@ -2537,6 +2549,17 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     SvGETMAGIC(lsv);
+
+    if (UNLIKELY(SvFLAGS(lsv) & (SVf_ROK|SVs_GMG))) {
+        SV *ret;
+        SV *args[] = {newSV_type_mortal(SVt_IV), newSV_type_mortal(SVt_IV), sv};
+        if(negoff) sv_setiv(args[0], LvTARGOFF(sv)); else sv_setuv(args[0], LvTARGOFF(sv));
+        if(neglen) sv_setiv(args[1], LvTARGLEN(sv)); else sv_setuv(args[0], LvTARGLEN(sv));
+
+        if((ret = amagic_call_unx(lsv, substr_amg, args, 3)))
+            return 0;
+    }
+
     if (SvROK(lsv))
         Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
                             "Attempt to use reference as lvalue in substr"
