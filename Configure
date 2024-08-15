@@ -6742,7 +6742,7 @@ define)
     ;;
 *)  if $test -f /lib/syscalls.exp; then
 	echo " "
-	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
+	echo "Also extracting names from /lib/syscalls.exp for good old AIX..." >&4
 	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*[ 	]*$/\1/p' \
 		/lib/syscalls.exp >>libc.list
     fi
