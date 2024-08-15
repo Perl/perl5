@@ -32,7 +32,7 @@ my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list'
 
 require './regen/embed_lib.pl';
 
-# List of functions which doesn't have diag format as their argument
+# List of functions which don't have diag format as their argument
 my %explicit_opt_out = map +($_ => 1), qw (
     warn_expect_operator
 );
