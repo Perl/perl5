@@ -1734,10 +1734,13 @@ cpan/Params-Check/t/01_Params-Check.t	Params::Check tests
 cpan/parent/lib/parent.pm			Establish an ISA relationship with base classes at compile time
 cpan/parent/t/compile-time.t			tests for parent.pm
 cpan/parent/t/compile-time-file.t		tests for parent.pm
+cpan/parent/t/gh1.t				parent
 cpan/parent/t/lib/Dummy.pm			test files for parent.pm
 cpan/parent/t/lib/Dummy/Outside.pm		test files for parent.pm
 cpan/parent/t/lib/Dummy2.plugin			test files for parent.pm
 cpan/parent/t/lib/FileThatOnlyExistsAsPMC.pmc	test files for parent.pm
+cpan/parent/t/lib/localize_A.pm			parent
+cpan/parent/t/lib/localize_B.pm			parent
 cpan/parent/t/lib/ReturnsFalse.pm		test files for parent.pm
 cpan/parent/t/parent.t				tests for parent.pm
 cpan/parent/t/parent-classfromclassfile.t	tests for parent.pm
