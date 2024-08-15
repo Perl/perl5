@@ -150,6 +150,14 @@ version 1.63 to 1.65.
 
 L<Term::Table> has been upgraded from version 0.020 to 0.022.
 
+=item *
+
+L<parent> has been upgraded from version 0.241 to 0.242.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.48 to 3.50.
+
 =back
 
 =head2 Removed Modules and Pragmata
