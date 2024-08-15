@@ -1112,10 +1112,6 @@ our %Modules = (
                 t/lib/if.pm
                 ),
         ],
-        'CUSTOMIZED'   => [
-            # https://github.com/Perl-Toolchain-Gang/Test-Harness/pull/132
-            'cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm',
-        ],
     },
 
     'Test::Simple' => {
