@@ -56,6 +56,21 @@ now been removed.
 
 [github #22303]
 
+=head2 Switch and Smart Match operator removed
+
+The "switch" feature and the smartmatch operator, C<~~>, were introduced in
+v5.10.  Their behavior was significantly changed in v5.10.1.  When the
+"experiment" system was added in v5.18.0, switch and smartmatch were
+retroactively declared experimental.  Over the years, proposals to fix or
+supplement the features have come and gone.
+
+They were deprecated in Perl v5.38.0 and scheduled for removal in Perl
+5.42.0
+
+These features have now been entirely removed.
+
+[github #22370]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
