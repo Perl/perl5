@@ -132,13 +132,14 @@ the first line that is expected to execute in the sub. [github #799]
 
 =item *
 
-L<Test::Simple> has been upgraded from version 1.302199 to 1.302200.  Upstream
-on CPAN, the Test2-Suite distribution has been merged into the Test-Simple
-distribution.  Test2-Suite was formerly shipped with the Perl core
-distribution.  Test2-Suite's files are now found under F<cpan/Test-Simple> in
-the Perl 5 source tree (whether you access that source tree in a git checkout
-or in a released tarball).  However, this should have no impact whatsoever on any
-end-user of any modules formerly found under Test2-Suite.
+L<Test::Simple> has been upgraded from version 1.302199 to 1.302200 and
+subsequently to 1.302201.  Upstream on CPAN, the Test2-Suite distribution has
+been merged into the Test-Simple distribution.  Test2-Suite was formerly
+shipped with the Perl core distribution.  Test2-Suite's files are now found
+under F<cpan/Test-Simple> in the Perl 5 source tree (whether you access that
+source tree in a git checkout or in a released tarball).  However, this should
+have no impact whatsoever on any end-user of any modules formerly found under
+Test2-Suite.
 
 =back
 
