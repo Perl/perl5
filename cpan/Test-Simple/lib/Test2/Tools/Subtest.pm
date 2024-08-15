@@ -2,7 +2,7 @@ package Test2::Tools::Subtest;
 use strict;
 use warnings;
 
-our $VERSION = '1.302200';
+our $VERSION = '1.302201';
 
 use Test2::API qw/context run_subtest/;
 use Test2::Util qw/try/;

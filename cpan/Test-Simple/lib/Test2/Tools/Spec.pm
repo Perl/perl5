@@ -2,7 +2,7 @@ package Test2::Tools::Spec;
 use strict;
 use warnings;
 
-our $VERSION = '1.302200';
+our $VERSION = '1.302201';
 
 use Carp qw/croak/;
 use Test2::Workflow qw/parse_args build current_build root_build init_root build_stack/;

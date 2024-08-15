@@ -2,7 +2,7 @@ package Test::Builder::TodoDiag;
 use strict;
 use warnings;
 
-our $VERSION = '1.302200';
+our $VERSION = '1.302201';
 
 BEGIN { require Test2::Event::Diag; our @ISA = qw(Test2::Event::Diag) }
 

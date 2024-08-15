@@ -8,7 +8,7 @@ use Test2::Compare::Meta();
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '1.302200';
+our $VERSION = '1.302201';
 
 use Test2::Util::HashBase qw/calls meta refcheck ending/;
 
