@@ -25,7 +25,7 @@ if ($NoTaintSupport) {
     exit 0;
 }
 
-plan tests => 1065;
+plan tests => 1057;
 
 $| = 1;
 
@@ -2440,32 +2440,6 @@ EOF
     is_tainted $dest, "ucfirst(tainted) taints its return value";
 }
 
-{
-    # Taintedness of values returned from given()
-    use feature 'switch';
-    no warnings 'experimental::smartmatch';
-
-    my @descriptions = ('when', 'given end', 'default');
-
-    for (qw<x y z>) {
-	my $letter = "$_$TAINT";
-
-	my $desc = "tainted value returned from " . shift(@descriptions);
-
-	my $res = do {
-	    no warnings 'deprecated';
-	    given ($_) {
-		when ('x') { $letter }
-		when ('y') { goto leavegiven }
-		default    { $letter }
-		leavegiven:  $letter
-	    }
-	};
-	is         $res, $letter, "$desc is correct";
-	is_tainted $res,          "$desc stays tainted";
-    }
-}
-
 
 # tainted constants and index()
 #  RT 64804; http://bugs.debian.org/291450
@@ -2478,14 +2452,6 @@ EOF
     my $ix = index(undef, C);
     is( $ix, -1, q[index(undef, C)] );
     ok(!tainted "", "tainting still works after index() of the constant");
-}
-
-# Tainted values with smartmatch
-# [perl #93590] S_do_smartmatch stealing its own string buffers
-{
-no warnings 'deprecated';
-ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
-ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
 }
 
 # Tainted values and ref()

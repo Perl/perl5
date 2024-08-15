@@ -965,7 +965,7 @@ say 'foo';
 use feature ':5.10';
 say 'foo';
 >>>>
-use feature 'say', 'state', 'switch';
+use feature 'say', 'state';
 say 'foo';
 ####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
@@ -1010,7 +1010,7 @@ __SUB__;
 use feature ':5.15';
 __SUB__;
 >>>>
-use feature 'current_sub', 'evalbytes', 'fc', 'say', 'state', 'switch', 'unicode_strings', 'unicode_eval';
+use feature 'current_sub', 'evalbytes', 'fc', 'say', 'state', 'unicode_strings', 'unicode_eval';
 __SUB__;
 ####
 # SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
@@ -1067,15 +1067,6 @@ my $a = {};
 my $b = \{};
 my $c = [];
 my $d = \[];
-####
-# SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
-# CONTEXT use feature ':5.10'; no warnings 'deprecated';
-# implicit smartmatch in given/when
-given ('foo') {
-    when ('bar') { continue; }
-    when ($_ ~~ 'quux') { continue; }
-    default { 0; }
-}
 ####
 # conditions in elsifs (regression in change #33710 which fixed bug #37302)
 if ($a) { x(); }
@@ -1635,14 +1626,6 @@ $a[0] = 1;
 # CONTEXT no warnings 'deprecated';
 CORE::state $x;
 CORE::say $x;
-CORE::given ($x) {
-    CORE::when (3) {
-        continue;
-    }
-    CORE::default {
-        CORE::break;
-    }
-}
 CORE::evalbytes '';
 () = CORE::__SUB__;
 () = CORE::fc $x;
@@ -1653,27 +1636,11 @@ use feature (sprintf(":%vd", $^V));
 use 1;
 CORE::say $_;
 CORE::state $x;
-CORE::given ($x) {
-    CORE::when (3) {
-        continue;
-    }
-    CORE::default {
-        CORE::break;
-    }
-}
 CORE::evalbytes '';
 () = CORE::__SUB__;
 >>>>
 CORE::say $_;
 CORE::state $x;
-CORE::given ($x) {
-    CORE::when (3) {
-        continue;
-    }
-    CORE::default {
-        CORE::break;
-    }
-}
 CORE::evalbytes '';
 () = CORE::__SUB__;
 ####
@@ -1684,14 +1651,6 @@ use feature (sprintf(":%vd", $^V));
 use 1;
 CORE::say $_;
 CORE::state $x;
-CORE::given ($x) {
-    CORE::when (3) {
-        continue;
-    }
-    CORE::default {
-        CORE::break;
-    }
-}
 CORE::evalbytes '';
 () = CORE::__SUB__;
 >>>>
@@ -1699,26 +1658,16 @@ no feature ':all';
 use feature ':default';
 CORE::say $_;
 CORE::state $x;
-CORE::given ($x) {
-    CORE::when (3) {
-        continue;
-    }
-    CORE::default {
-        CORE::break;
-    }
-}
 CORE::evalbytes '';
 () = CORE::__SUB__;
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
 # lexical subroutines and keywords of the same name
-# CONTEXT use feature 'lexical_subs', 'switch'; no warnings 'experimental'; no warnings 'deprecated';
-my sub default;
+# CONTEXT use feature 'lexical_subs'; no warnings 'experimental'; no warnings 'deprecated';
 my sub else;
 my sub elsif;
 my sub for;
 my sub foreach;
-my sub given;
 my sub if;
 my sub m;
 my sub no;
@@ -1734,9 +1683,7 @@ my sub tr;
 my sub unless;
 my sub until;
 my sub use;
-my sub when;
 my sub while;
-CORE::default { die; }
 CORE::if ($1) { die; }
 CORE::if ($1) { die; }
 CORE::elsif ($1) { die; }
@@ -1744,7 +1691,6 @@ CORE::else { die; }
 CORE::for (die; $1; die) { die; }
 CORE::foreach $_ (1 .. 10) { die; }
 die CORE::foreach (1);
-CORE::given ($1) { die; }
 CORE::m[/];
 CORE::m?/?;
 CORE::package foo;
@@ -1758,7 +1704,6 @@ CORE::unless ($1) { die; }
 CORE::until ($1) { die; }
 die CORE::until $1;
 CORE::use strict;
-CORE::when ($1 ~~ $2) { die; }
 CORE::while ($1) { die; }
 die CORE::while $1;
 ####

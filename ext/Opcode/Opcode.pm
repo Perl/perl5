@@ -1,4 +1,4 @@
-package Opcode 1.65;
+package Opcode 1.66;
 
 use strict;
 
@@ -433,11 +433,6 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     entertry leavetry -- can be used to 'hide' fatal errors
     entertrycatch poptry catch leavetrycatch -- similar
-
-    entergiven leavegiven
-    enterwhen leavewhen
-    break continue
-    smartmatch
 
     pushdefer
 

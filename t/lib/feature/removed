@@ -8,3 +8,12 @@ OPTIONS regex
 ########
 no feature "array_base";
 EXPECT
+########
+# NAME switch feature removed
+use feature "switch";
+EXPECT
+OPTIONS regex
+^Feature "switch" is not supported by Perl [v0-9.]+ at - line 1.
+########
+no feature "switch";
+EXPECT

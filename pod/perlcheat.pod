@@ -28,14 +28,14 @@ already be overwhelming.
   ->                     while   (e) { }        until (e)   { }
   ++ --                  if      (e) { } elsif (e) { } else { }
   **                     unless  (e) { } elsif (e) { } else { }
-  ! ~ \ u+ u-            given   (e) { when (e) {} default {} }
+  ! ~ \ u+ u-
   =~ !~
   * / % x                 NUMBERS vs STRINGS  FALSE vs TRUE
   + - .                   =          =        undef, "", 0, "0"
   << >>                   +          .        anything else
   named uops              == !=      eq ne
   < > <= >= lt gt le ge   < > <= >=  lt gt le ge
-  == != <=> eq ne cmp ~~  <=>        cmp
+  == != <=> eq ne cmp     <=>        cmp
   &
   | ^             REGEX MODIFIERS       REGEX METACHARS
   &&              /i case insensitive   ^      string begin

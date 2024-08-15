@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 166;
+plan tests => 162;
 
 # Before loading feature.pm, test it with CORE::
 ok eval 'CORE::state $x = 1;', 'CORE::state outside of feature.pm scope';
@@ -340,18 +340,6 @@ foreach my $x (0 .. 4) {
     is $tb, $thunderbirds2 [$x], "substr";
 }
 
-
-#
-# Use with given.
-#
-my @spam = qw [spam ham bacon beans];
-foreach my $spam (@spam) {
-    no warnings 'deprecated';
-    given (state $spam = $spam) {
-        when ($spam [0]) {ok 1, "given"}
-        default          {ok 0, "given"}
-    }
-}
 
 #
 # Redefine.

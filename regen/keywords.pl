@@ -38,11 +38,7 @@ while (<DATA>) {
 my %feature_kw = (
     state     => 'state',
     say       => 'say',
-    given     => 'switch',
-    when      => 'switch',
-    default   => 'switch',
     # continue is already a keyword
-    break     => 'switch',
     evalbytes => 'evalbytes',
     __SUB__   => '__SUB__',
     fc        => 'fc',
@@ -141,7 +137,6 @@ __END__
 -bind
 -binmode
 -bless
--break
 -caller
 +catch
 -chdir
@@ -161,7 +156,6 @@ __END__
 -crypt
 -dbmclose
 -dbmopen
-+default
 +defer
 +defined
 +delete
@@ -223,7 +217,6 @@ __END__
 -getservent
 -getsockname
 -getsockopt
-+given
 +glob
 -gmtime
 +goto
@@ -376,7 +369,6 @@ __END__
 -waitpid
 -wantarray
 -warn
-+when
 +while
 -write
 -x
