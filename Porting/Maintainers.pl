@@ -1077,7 +1077,6 @@ our %Modules = (
     'Term::Table' => {
         'DISTRIBUTION' => 'EXODIST/Term-Table-0.022.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Aug 14 21:27:04 2024',
-        'SYNCINFO'     => 'jkeenan on Mon Aug  5 21:13:24 2024',
         'FILES'        => q[cpan/Term-Table],
         'EXCLUDED'     => [
             qw( appveyor.yml ),
@@ -1092,7 +1091,6 @@ our %Modules = (
     'Test::Harness' => {
         'DISTRIBUTION' => 'LEONT/Test-Harness-3.50.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Aug 14 21:59:59 2024',
-        'SYNCINFO'     => 'gknop on Sat Oct 21 15:01:02 2023',
         'FILES'        => q[cpan/Test-Harness],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -1110,7 +1108,6 @@ our %Modules = (
     'Test::Simple' => {
         'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302201.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Aug 14 20:45:51 2024',
-        'SYNCINFO'     => 'jkeenan on Tue Aug  6 07:52:25 2024',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
