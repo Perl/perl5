@@ -146,6 +146,10 @@ Test2-Suite.
 L<Scalar::Util> (the Scalar-List-Utils distribution) has been upgraded from
 version 1.63 to 1.65.
 
+=item *
+
+L<Term::Table> has been upgraded from version 0.020 to 0.022.
+
 =back
 
 =head2 Removed Modules and Pragmata
