@@ -2210,7 +2210,7 @@ cpan/podlators/t/text/utf8-io.t					Test file related to podlators
 cpan/Scalar-List-Utils/lib/List/Util.pm		List::Util
 cpan/Scalar-List-Utils/lib/List/Util/XS.pm	List::Util
 cpan/Scalar-List-Utils/lib/Scalar/Util.pm	Scalar::Util
-cpan/Scalar-List-Utils/lib/Sub/Util.pm
+cpan/Scalar-List-Utils/lib/Sub/Util.pm		Module related to Scalar::Util
 cpan/Scalar-List-Utils/ListUtil.xs		Util extension
 cpan/Scalar-List-Utils/Makefile.PL		Util extension
 cpan/Scalar-List-Utils/multicall.h		Util extension
@@ -2218,40 +2218,40 @@ cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
-cpan/Scalar-List-Utils/t/exotic_names.t
+cpan/Scalar-List-Utils/t/exotic_names.t		Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/first.t		List::Util
-cpan/Scalar-List-Utils/t/getmagic-once.t
-cpan/Scalar-List-Utils/t/head-tail.t
+cpan/Scalar-List-Utils/t/getmagic-once.t	Test file related to Scalar::Util
+cpan/Scalar-List-Utils/t/head-tail.t		Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/isvstring.t		Scalar::Util
 cpan/Scalar-List-Utils/t/lln.t			Scalar::Util
 cpan/Scalar-List-Utils/t/max.t			List::Util
 cpan/Scalar-List-Utils/t/maxstr.t		List::Util
-cpan/Scalar-List-Utils/t/mesh.t
+cpan/Scalar-List-Utils/t/mesh.t			Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/min.t			List::Util
 cpan/Scalar-List-Utils/t/minstr.t		List::Util
 cpan/Scalar-List-Utils/t/openhan.t		Scalar::Util
-cpan/Scalar-List-Utils/t/pair.t
+cpan/Scalar-List-Utils/t/pair.t			Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/product.t		List::Util
-cpan/Scalar-List-Utils/t/prototype.t
+cpan/Scalar-List-Utils/t/prototype.t		Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/readonly.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reduce.t		List::Util
-cpan/Scalar-List-Utils/t/reductions.t
+cpan/Scalar-List-Utils/t/reductions.t		Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/refaddr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reftype.t		Scalar::Util
 cpan/Scalar-List-Utils/t/rt-96343.t		Scalar::Util
-cpan/Scalar-List-Utils/t/sample.t
-cpan/Scalar-List-Utils/t/scalarutil-proto.t
+cpan/Scalar-List-Utils/t/sample.t		Test file related to Scalar::Util
+cpan/Scalar-List-Utils/t/scalarutil-proto.t	Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/shuffle.t		List::Util
 cpan/Scalar-List-Utils/t/stack-corruption.t	List::Util
-cpan/Scalar-List-Utils/t/subname.t
+cpan/Scalar-List-Utils/t/subname.t		Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/sum.t			List::Util
-cpan/Scalar-List-Utils/t/sum0.t
+cpan/Scalar-List-Utils/t/sum0.t			Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
-cpan/Scalar-List-Utils/t/undefined-block.t
+cpan/Scalar-List-Utils/t/undefined-block.t	Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
-cpan/Scalar-List-Utils/t/uniqnum.t
+cpan/Scalar-List-Utils/t/uniqnum.t		Test file related to Scalar::Util
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
-cpan/Scalar-List-Utils/t/zip.t
+cpan/Scalar-List-Utils/t/zip.t			Test file related to Scalar::Util
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
 cpan/Socket/Socket.xs			Socket extension external subroutines
