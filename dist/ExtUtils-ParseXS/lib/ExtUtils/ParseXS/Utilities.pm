@@ -304,7 +304,7 @@ sub map_type {
   my ($type, $varname) = @_;
 
   # C++ has :: in types too so skip this
-  $type =~ tr/:/_/ unless $self->{RetainCplusplusHierarchicalTypes};
+  $type =~ tr/:/_/ unless $self->{config_RetainCplusplusHierarchicalTypes};
 
   # map the special return type 'array(type, n)' to 'type *'
   $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
