@@ -6410,9 +6410,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     UV PL_partition_by_byte_length[] = {
         0,
 
-        /* 0 .. 127  all have 1 byte
+        /* 0 .. 127 (0.. 159 on EBCDIC platforms) all have 1 byte
          * representations */
-        0x80,
+        UTF_MIN_CONTINUATION_BYTE,
 
         /* The highest two UTF-8 byte representable code point is the one with
          * all 1's in the payload bearing bits of the start byte and its single
