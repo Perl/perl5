@@ -662,6 +662,7 @@ EOM
     # Process and emit any initial C-preprocessor lines and blank
     # lines.  Also, keep track of #if/#else/#endif nesting, updating:
     #    $self->{XS_parse_stack}
+    #    $self->{XS_parse_stack_top_if_idx}
     #    $self->{bootcode_early}
     #    $self->{bootcode_later}
 
@@ -670,8 +671,8 @@ EOM
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
-      ($self) =
-        analyze_preprocessor_statements($self, $statement);
+      # update global tracking of #if/#else etc
+      $self->analyze_preprocessor_statements($statement);
     }
 
     next PARAGRAPH unless @{ $self->{line} };
