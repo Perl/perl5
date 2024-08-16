@@ -248,6 +248,9 @@ BEGIN {
   'bootcode_early',     # Array of code lines to emit early in boot XSUB:
                         # typically newXS() calls
 
+  'bootcode_later',     # Array of code lines to emit later on in boot XSUB:
+                        # typically lines from a BOOT: XS file section
+
 
   # Per-XSUB parsing state:
 
@@ -465,6 +468,8 @@ sub process_file {
   @{ $self->{XS_parse_stack} } = ({type => 'none'});
 
   $self->{bootcode_early} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
+  $self->{bootcode_later} = [];
+
   # hash of package name => package C name
   $self->{map_overloaded_package_to_C_package} = {};
   # hashref of package name => fallback setting
@@ -615,8 +620,6 @@ EOM
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my $BootCode_ref = [];  # lines to emit for the boot sub
-
   my $XSS_top_if_idx = 0; # Index of the current top-most '#if' on the
                           # XS_parse_stack. Note that it's not necessarily
                           # the top element of the stack, since that also
@@ -637,16 +640,16 @@ EOM
     # lines.  Also, keep track of #if/#else/#endif nesting, updating:
     #    $self->{XS_parse_stack}
     #    $self->{bootcode_early}
-    #    @{$BootCode_ref}
+    #    $self->{bootcode_later}
 
     while (@{ $self->{line} } && $self->{line}->[0] !~ /^[^\#]/) {
       my $ln = shift(@{ $self->{line} });
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
-      ( $self, $XSS_top_if_idx, $BootCode_ref ) =
+      ( $self, $XSS_top_if_idx, $self->{bootcode_later} ) =
         analyze_preprocessor_statements(
-          $self, $statement, $XSS_top_if_idx, $BootCode_ref
+          $self, $statement, $XSS_top_if_idx, $self->{bootcode_later}
         );
     }
 
@@ -665,7 +668,7 @@ EOM
       # So that only the defined XSUBs get added to the symbol table.
       print "#define $cpp_next_tmp_define 1\n\n";
       push(@{ $self->{bootcode_early} }, "#if $cpp_next_tmp_define\n");
-      push(@{ $BootCode_ref },     "#if $cpp_next_tmp_define");
+      push(@{ $self->{bootcode_later} }, "#if $cpp_next_tmp_define");
       $self->{XS_parse_stack}->[$XSS_top_if_idx]{varname} = $cpp_next_tmp_define++;
     }
 
@@ -750,14 +753,14 @@ EOM
       check_conditional_preprocessor_statements($self);
 
       # prepend a '#line' directive if needed
-      push (@{ $BootCode_ref },
+      push (@{ $self->{bootcode_later} },
            "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \""
            . escape_file_for_line_directive($self->{in_pathname}) . "\"")
         if    $self->{config_WantLineNumbers}
            && $self->{line}->[0] !~ /^\s*#\s*line\b/;
 
       # Save all the BOOT lines plus trailing empty line to be emitted later.
-      push (@{ $BootCode_ref }, @{ $self->{line} }, "");
+      push (@{ $self->{bootcode_later} }, @{ $self->{line} }, "");
       next PARAGRAPH;
     }
 
@@ -2080,9 +2083,9 @@ EOF
   # a trailing '#line' may be emitted to effect the change back to the
   # current foo.c line from the foo.xs part where the BOOT: code was.
 
-  if (@{ $BootCode_ref }) {
+  if (@{ $self->{bootcode_later} }) {
     print "\n    /* Initialisation Section */\n\n";
-    @{ $self->{line} } = @{ $BootCode_ref };
+    @{ $self->{line} } = @{ $self->{bootcode_later} };
     $self->print_section();
     print "\n    /* End of Initialisation Section */\n\n";
   }
