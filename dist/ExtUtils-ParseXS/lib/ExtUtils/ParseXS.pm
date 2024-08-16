@@ -214,6 +214,11 @@ BEGIN {
 
   'XS_parse_stack',     # Array of hashes: nested INCLUDE and #if states.
 
+  'XS_parse_stack_top_if_idx', # Index of the current top-most '#if' on the
+                        # XS_parse_stack. Note that it's not necessarily
+                        # the top element of the stack, since that also
+                        # includes elements for each INCLUDE etc.
+
   'MODULE_cname',       # MODULE canonical name (i.e. after s/\W/_/g).
   'PACKAGE_name',       # PACKAGE name.
   'PACKAGE_C_name',     #             Ditto, but with tr/:/_/.
@@ -620,10 +625,7 @@ EOM
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
 
-  my $XSS_top_if_idx = 0; # Index of the current top-most '#if' on the
-                          # XS_parse_stack. Note that it's not necessarily
-                          # the top element of the stack, since that also
-                          # includes elements for each INCLUDE etc.
+  $self->{XS_parse_stack_top_if_idx} = 0;
 
   my $cpp_next_tmp_define = 'XSubPPtmpAAAA';
 
@@ -647,15 +649,18 @@ EOM
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
-      ( $self, $XSS_top_if_idx, $self->{bootcode_later} ) =
+      ( $self, $self->{XS_parse_stack_top_if_idx}, $self->{bootcode_later} ) =
         analyze_preprocessor_statements(
-          $self, $statement, $XSS_top_if_idx, $self->{bootcode_later}
+          $self, $statement, $self->{XS_parse_stack_top_if_idx},
+          $self->{bootcode_later}
         );
     }
 
     next PARAGRAPH unless @{ $self->{line} };
 
-    if ($XSS_top_if_idx && !$self->{XS_parse_stack}->[$XSS_top_if_idx]{varname}) {
+    if (   $self->{XS_parse_stack_top_if_idx}
+        && !$self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{varname})
+    {
       # We are inside an #if, but have not yet #defined its xsubpp variable.
       #
       # At the start of every '#if ...' which is external to an XSUB,
@@ -669,7 +674,8 @@ EOM
       print "#define $cpp_next_tmp_define 1\n\n";
       push(@{ $self->{bootcode_early} }, "#if $cpp_next_tmp_define\n");
       push(@{ $self->{bootcode_later} }, "#if $cpp_next_tmp_define");
-      $self->{XS_parse_stack}->[$XSS_top_if_idx]{varname} = $cpp_next_tmp_define++;
+      $self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{varname}
+          = $cpp_next_tmp_define++;
     }
 
     # This will die on something like
@@ -855,7 +861,7 @@ EOM
     }
 
     # mark C function name as used
-    $self->{XS_parse_stack}->[$XSS_top_if_idx]{functions}{ $self->{xsub_func_full_C_name} }++;
+    $self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{functions}{ $self->{xsub_func_full_C_name} }++;
 
     # initialise more per-XSUB state
     delete $self->{xsub_map_alias_name_to_value};           # ALIAS: ...
