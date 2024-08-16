@@ -6559,6 +6559,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     for (pass2 = 0; pass2 < 2; pass2++) {
         if (pass2) {
+
+            DEBUG_yv(PerlIO_printf(Perl_debug_log, "After pass1: \n"));
+            DEBUG_yv(invmap_dump(t_invlist, r_map));
+
             /* In the second pass, we start with a single range */
             t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
             len = 1;
