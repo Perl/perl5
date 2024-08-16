@@ -259,6 +259,20 @@ BEGIN {
 
   # Per-XSUB parsing state:
 
+  'xsub_seen_NO_RETURN',       # Bool: XSUB declared as NO_RETURN
+
+  'xsub_seen_extern_C',        # Bool: XSUB return type is 'extern "C" ...'
+
+  'xsub_seen_static',          # Bool: XSUB return type is 'static ...'
+
+  'xsub_seen_PPCODE',          # Bool: XSUB has PPCODE    (peek-ahead)
+
+  'xsub_seen_CODE',            # Bool: XSUB has CODE      (peek-ahead)
+
+  'xsub_seen_INTERFACE',       # Bool: XSUB has INTERFACE (peek-ahead)
+
+  'xsub_seen_ellipsis',        # Bool: XSUB signature has (   ,...)
+
   'xsub_seen_PROTOTYPE',       # Bool: PROTOTYPE keyword seen (for dup warning)
   
   'xsub_seen_SCOPE',           # Bool: SCOPE keyword seen (for dup warning).
@@ -283,6 +297,13 @@ BEGIN {
   'xsub_SCOPE_enabled',        # Bool: SCOPE ENABLEd
 
   'xsub_return_type',          # Return type of the XSUB (whitespace-tidied).
+
+  'xsub_class',                # Bool: the class part of the XSUB's
+                               # function name (if any). May include
+                               # 'const' prefix.
+
+  'xsub_signature',            # Bool: the XSUB's (...) signature
+
 
   'xsub_func_name',            # The name of this XSUB        eg 'f'
   'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
@@ -719,19 +740,19 @@ EOM
     $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
     $self->{xsub_SCOPE_enabled}        = 0;
     $self->{xsub_map_overload_name_to_seen} = {};
+    $self->{xsub_seen_NO_RETURN}            = 0;
+    $self->{xsub_seen_extern_C}             = 0;
+    $self->{xsub_seen_static}               = 0;
+    $self->{xsub_seen_PPCODE}               = 0;
+    $self->{xsub_seen_CODE}                 = 0;
+    $self->{xsub_seen_INTERFACE}            = 0;
+    $self->{xsub_seen_ellipsis}             = 0;
+    $self->{xsub_class}                     = undef;
+    $self->{xsub_signature}                 = undef;
 
     # used for emitting XSRETURN($XSRETURN_count) if > 0, or XSRETURN_EMPTY
     my $XSRETURN_count = 0;
 
-    my $seen_NO_RETURN = 0;
-    my $seen_extern_C  = 0;
-    my $seen_static    = 0;
-    my $seen_PPCODE    = 0;
-    my $seen_CODE      = 0;
-    my $seen_INTERFACE = 0;
-    my $seen_ellipsis  = 0;
-    my $class          = undef;
-    my $signature      = undef;
 
     # Process next line
 
@@ -790,7 +811,8 @@ EOM
     # function to be on the same line.)
     ($self->{xsub_return_type}) = ExtUtils::Typemaps::tidy_type($_);
 
-    $seen_NO_RETURN = 1 if $self->{xsub_return_type} =~ s/^NO_OUTPUT\s+//;
+    $self->{xsub_seen_NO_RETURN} = 1
+      if $self->{xsub_return_type} =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line declarations. This splits a single line like:
     #    int foo(....)
@@ -813,8 +835,10 @@ EOM
     $self->blurt("Error: Function definition too short '$self->{xsub_return_type}'"), next PARAGRAPH
       unless @{ $self->{line} };
 
-    $seen_extern_C = 1 if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
-    $seen_static   = 1 if $self->{xsub_return_type} =~ s/^static\s+//;
+    $self->{xsub_seen_extern_C} = 1
+                          if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
+    $self->{xsub_seen_static}   = 1
+                          if $self->{xsub_return_type} =~ s/^static\s+//;
 
     {
       my $func_header = shift(@{ $self->{line} });
@@ -830,9 +854,10 @@ EOM
       $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-      ($class, $self->{xsub_func_name}, $signature) =  ($1, $2, $3);
+      ($self->{xsub_class}, $self->{xsub_func_name}, $self->{xsub_signature})
+          = ($1, $2, $3);
 
-      $class = "$4 $class" if $4;
+      $self->{xsub_class} = "$4 $self->{xsub_class}" if $4;
 
       ($self->{xsub_func_full_perl_name} = $self->{xsub_func_name}) =~
           s/^($self->{PREFIX_pattern})?/$self->{PACKAGE_class}/;
@@ -852,8 +877,8 @@ EOM
       #
       # we should have:
       #
-      # $class                            'const Some::Class'
-      # $signature                         args
+      # $self->{xsub_class}               'const Some::Class'
+      # $self->{xsub_signature}            'arg1, arg2, arg3'
       # $self->{xsub_func_name}           'foo_bar'
       # $self->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
       # $self->{xsub_func_full_C_name}    'BAR__BAZ_bar';
@@ -881,7 +906,7 @@ EOM
 
 
     # ----------------------------------------------------------------
-    # Do initial processing of the XSUB's signature - $signature
+    # Do initial processing of the XSUB's signature - $self->{xsub_signature}
     #
     # Split the signature on commas into @args while allowing for things
     # like (a = ",", b), and extract any IN/OUT/etc prefix.
@@ -911,7 +936,7 @@ EOM
     #
     # ----------------------------------------------------------------
     #
-    # Given a signature (i.e. $signature) like:
+    # Given a signature (i.e. $self->{xsub_signature}) like:
     #
     #    OUT     char *s,             \
     #            int   length(s),     \
@@ -949,7 +974,9 @@ EOM
     #
     # ----------------------------------------------------------------
 
-    $signature =~ s/\\\s*/ /g;  # remove line continuation chars (\)
+    # remove line continuation chars (\)
+    $self->{xsub_signature} =~ s/\\\s*/ /g;
+
     my @args;
 
     my (@fake_INPUT_pre);       # For length(var) generated variables
@@ -960,11 +987,11 @@ EOM
 
 
 
-    if ($self->{config_allow_argtypes} and $signature =~ /\S/) {
+    if ($self->{config_allow_argtypes} and $self->{xsub_signature} =~ /\S/) {
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
 
-      my $args = "$signature ,";
+      my $args = "$self->{xsub_signature} ,";
       use re 'eval';
 
       if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
@@ -1046,8 +1073,8 @@ EOM
         # regex doesn't work. This code path should ideally never be
         # reached, and indicates a design weakness in $C_arg.
         # It assumes there's nothing fancy like types or IN/OUT.
-        @args = split(/\s*,\s*/, $signature);
-        Warn( $self, "Warning: cannot parse argument list '$signature', fallback to split");
+        @args = split(/\s*,\s*/, $self->{xsub_signature});
+        Warn( $self, "Warning: cannot parse argument list '$self->{xsub_signature}', fallback to split");
       }
     }
     else {
@@ -1055,7 +1082,7 @@ EOM
       # latter means that only K&R form is recognised, e.g. foo(OUT a, b)
       # Only IN/OUT prefixes are processed.
 
-      @args = split(/\s*,\s*/, $signature);
+      @args = split(/\s*,\s*/, $self->{xsub_signature});
 
       for (@args) {
         if (    $self->{config_allow_inout}
@@ -1078,8 +1105,9 @@ EOM
     # ----------------------------------------------------------------
 
     # For C++ type methods, add fake method arg to beginning
-    if (defined($class)) {
-      my $arg0 = (($seen_static or $self->{xsub_func_name} eq 'new')
+    if (defined($self->{xsub_class})) {
+      my $arg0 = (  ($self->{xsub_seen_static}
+                  or $self->{xsub_func_name} eq 'new')
           ? "CLASS" : "THIS");
       unshift(@args, $arg0);
     }
@@ -1098,7 +1126,7 @@ EOM
         # XXX this code deletes any embedded '...' from any of the other args
         # too, which is almost certainly wrong.
         if ($args[$i] =~ s/\.\.\.//) {
-          $seen_ellipsis = 1;
+          $self->{xsub_seen_ellipsis} = 1;
           if ($args[$i] eq '' && $i == $#args) {
             $report_args .= ", ...";
             pop(@args);
@@ -1138,7 +1166,7 @@ EOM
       # The args to pass to the wrapped library function. Basically
       # join(',' @args) but with '&' prepended for any *OUT* args.
       $self->{xsub_C_auto_function_signature} =
-          assign_func_args($self, \@args, $class);
+          assign_func_args($self, \@args, $self->{xsub_class});
 
       # map argument names to indexes
       @{ $self->{xsub_map_argname_to_idx} }{@args} = @map_param_idx_to_arg_idx;
@@ -1152,9 +1180,9 @@ EOM
 
     $self->{xsub_seen_ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
 
-    $seen_PPCODE    = !! grep(/^\s*PPCODE\s*:/,     @{ $self->{line} });
-    $seen_CODE      = !! grep(/^\s*CODE\s*:/,       @{ $self->{line} });
-    $seen_INTERFACE = !! grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
+    $self->{xsub_seen_PPCODE}   = !!grep(/^\s*PPCODE\s*:/,    @{$self->{line}});
+    $self->{xsub_seen_CODE}     = !!grep(/^\s*CODE\s*:/,      @{$self->{line}});
+    $self->{xsub_seen_INTERFACE}= !!grep(/^\s*INTERFACE\s*:/, @{$self->{line}});
 
     # Horrible 'void' return arg count hack.
     #
@@ -1181,7 +1209,7 @@ EOM
     #
     # XXX this searches the whole XSUB, not just the CODE: section
     {
-      my $EXPLICIT_RETURN = ($seen_CODE &&
+      my $EXPLICIT_RETURN = ($self->{xsub_seen_CODE} &&
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
       $XSRETURN_count = 1 if $EXPLICIT_RETURN;
     }
@@ -1192,7 +1220,7 @@ EOM
     # ----------------------------------------------------------------
 
     {
-      my $extern = $seen_extern_C ? qq[extern "C"] : "";
+      my $extern = $self->{xsub_seen_extern_C} ? qq[extern "C"] : "";
 
     # Emit function header
       print Q(<<"EOF");
@@ -1208,7 +1236,7 @@ EOF
 #    dXSI32;
 EOF
 
-    print Q(<<"EOF") if $seen_INTERFACE;
+    print Q(<<"EOF") if $self->{xsub_seen_INTERFACE};
 #    dXSFUNCTION($self->{xsub_return_type});
 EOF
 
@@ -1216,7 +1244,8 @@ EOF
     {
       # the code to emit to determine whether the correct number of argument
       # have been passed
-      my $condition_code = set_cond($seen_ellipsis, $min_arg_count, $args_count);
+      my $condition_code =
+        set_cond($self->{xsub_seen_ellipsis}, $min_arg_count, $args_count);
 
       print Q(<<"EOF") if $self->{config_allow_exceptions}; # "-except" cmd line switch
 #    char errbuf[1024];
@@ -1243,11 +1272,11 @@ EOF
     # dXSARGS) is unused.
     # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     # but such a move could break third-party extensions
-    print Q(<<"EOF") if $seen_PPCODE;
+    print Q(<<"EOF") if $self->{xsub_seen_PPCODE};
 #    PERL_UNUSED_VAR(ax); /* -Wall */
 EOF
 
-    print Q(<<"EOF") if $seen_PPCODE;
+    print Q(<<"EOF") if $self->{xsub_seen_PPCODE};
 #    SP -= items;
 EOF
 
@@ -1320,8 +1349,8 @@ EOF
 
       # Emit a 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-      if (!$self->{xsub_seen_THIS_in_INPUT} && defined($class)) {
-        if ($seen_static or $self->{xsub_func_name} eq 'new') {
+      if (!$self->{xsub_seen_THIS_in_INPUT} && defined($self->{xsub_class})) {
+        if ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new') {
           print "\tchar *";
           $self->{xsub_map_argname_to_type}->{"CLASS"} = "char *";
           $self->generate_init( {
@@ -1332,10 +1361,10 @@ EOF
           } );
         }
         else {
-          print "\t" . map_type($self, "$class *");
-          $self->{xsub_map_argname_to_type}->{"THIS"} = "$class *";
+          print "\t" . map_type($self, "self->{xsub_$}class *");
+          $self->{xsub_map_argname_to_type}->{"THIS"} = "self->{xsub_$}class *";
           $self->generate_init( {
-            type          => "$class *",
+            type          => "$self->{xsub_class} *",
             num           => 1,
             var           => "THIS",
             printed_name  => undef,
@@ -1448,7 +1477,9 @@ EOF
           }
 
         }
-        elsif (defined($class) and $self->{xsub_func_name} eq "DESTROY") {
+        elsif (    defined($self->{xsub_class})
+               and $self->{xsub_func_name} eq "DESTROY")
+        {
           # Emit a default body for a C++ DESTROY method: "delete THIS;"
           print "\n\t";
           print "delete THIS;\n";
@@ -1468,17 +1499,18 @@ EOF
             $implicit_OUTPUT_RETVAL = 1;
           }
 
-          if ($seen_static) { # it has a return type of 'static foo'
+          if ($self->{xsub_seen_static}) {
+            # it has a return type of 'static foo'
             if ($self->{xsub_func_name} eq 'new') {
-              $self->{xsub_func_name} = "$class";
+              $self->{xsub_func_name} = "$self->{xsub_class}";
             }
             else {
-              print "${class}::";
+              print "$self->{xsub_class}::";
             }
           }
-          elsif (defined($class)) {
+          elsif (defined($self->{xsub_class})) {
             if ($self->{xsub_func_name} eq 'new') {
-              $self->{xsub_func_name} .= " $class";
+              $self->{xsub_func_name} .= " $self->{xsub_class}";
             }
             else {
               print "THIS->";
@@ -1516,7 +1548,7 @@ EOF
       #   ($implicit_OUTPUT_RETVAL).
       # - Also from this point on, treat the (non-void) return type as void.
       ($implicit_OUTPUT_RETVAL, $self->{xsub_return_type}) =
-                                    (0, 'void') if $seen_NO_RETURN;
+                                  (0, 'void') if $self->{xsub_seen_NO_RETURN};
 
       # used by OUTPUT_handler() to detect duplicate OUTPUT var lines
       undef %{ $self->{xsub_map_varname_to_seen_in_OUTPUT} };
@@ -1684,7 +1716,7 @@ EOF
 #   ]]
 EOF
 
-      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled} and not $seen_PPCODE;
+      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled} and not $self->{xsub_seen_PPCODE};
 #   LEAVE;
 EOF
 
@@ -1736,12 +1768,12 @@ EOF
       if $^O eq "hpux";
 
     if ($XSRETURN_count) {
-      print Q(<<"EOF") unless $seen_PPCODE;
+      print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
 #    XSRETURN($XSRETURN_count);
 EOF
     }
     else {
-      print Q(<<"EOF") unless $seen_PPCODE;
+      print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
 #    XSRETURN_EMPTY;
 EOF
     }
@@ -1799,7 +1831,7 @@ EOF
             $self->{xsub_map_arg_idx_to_proto}->[$min_arg_count] .= ";";
           }
           push @{ $self->{xsub_map_arg_idx_to_proto} }, "$s\@"
-            if $seen_ellipsis; # '...' was seen in XSUB signature
+            if $self->{xsub_seen_ellipsis}; # '...' was seen in XSUB signature
 
           $proto_arg = join ("",
                   grep defined, @{ $self->{xsub_map_arg_idx_to_proto} } );
