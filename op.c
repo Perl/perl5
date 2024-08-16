@@ -6603,8 +6603,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     __FILE__, __LINE__, _byte_dump_string(t, tend - t, 0)));
         DEBUG_y(PerlIO_printf(Perl_debug_log, "rstr=%s\n",
                                         _byte_dump_string(r, rend - r, 0)));
-        DEBUG_y(PerlIO_printf(Perl_debug_log, "/c=%d; /s=%d; /d=%d\n",
-                                                  complement, squash, del));
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "/c=%d; /s=%d; /d=%d\n"
+                                              " At the beginning of pass %u\n",
+                                              complement, squash, del,
+                                              pass2 + 1));
         DEBUG_y(invmap_dump(t_invlist, r_map));
 
         /* Now go through the search list constructing an inversion map.  The
