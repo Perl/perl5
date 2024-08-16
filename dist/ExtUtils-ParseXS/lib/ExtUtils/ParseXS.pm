@@ -197,10 +197,8 @@ BEGIN {
   'config_allow_inout', # Bool: (default true): "-noinout" switch not present.
                         # Enables processing of IN/OUT/etc arg modifiers.
 
-  'config_allow_exceptions', # Initially a bool from the '-except' switch.
-                        # Then turned into 'TRY' / '' so acts still
-                        # kind of as a boolean, but can be output
-                        # directly.
+  'config_allow_exceptions', # Bool: (default false): the '-except' switch
+                        # present.
 
   'config_optimize',    # Bool: (default true): "-nooptimize" switch not
                         # present. Enables optimizations (currently just
@@ -452,8 +450,6 @@ sub process_file {
       %opts,
     );
   }
-
-  $Options{except} = $Options{except} ? ' TRY' : '';
 
   # Global Constants
 
@@ -1282,9 +1278,13 @@ EOF
 
       # Emit opening brace. With cmd-line switch "-except", prefix it
       # with 'TRY'
-      print Q(<<"EOF");
-#   $self->{config_allow_exceptions} [[
+      {
+        my $try = $self->{config_allow_exceptions} ? ' TRY' : '';
+        print Q(<<"EOF");
+#   $try [[
 EOF
+      }
+
       # First, initialize variables manipulated by INPUT_handler().
       $self->{xsub_seen_THIS_in_INPUT} = 0;    # seen a THIS var
       $self->{xsub_seen_RETVAL_in_INPUT} = 0;  # seen a RETVAL var
