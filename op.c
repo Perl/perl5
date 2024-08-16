@@ -6686,10 +6686,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     r_cp = TR_SPECIAL_HANDLING;
                     r_range_count = t_range_count;
 
-                    if (! del) {
-                        DEBUG_yv(PerlIO_printf(Perl_debug_log,
-                                        "final_map =%" UVXf "\n", final_map));
+#ifdef DEBUGGING
+                    if (DEBUG_y_TEST && ! del) {
+                        PerlIO_printf(Perl_debug_log,
+                                          "final_map =%" UVXf "\n", final_map);
                     }
+#endif
                 }
                 else {
                     if (! rstr_utf8) {
@@ -7313,22 +7315,26 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                               : (short) rlen
                                 ? (short) final_map
                                 : (short) TR_R_EMPTY;
-        DEBUG_y(PerlIO_printf(Perl_debug_log,"%s: %d\n", __FILE__, __LINE__));
-        for (i = 0; i < tbl->size; i++) {
-            if (tbl->map[i] < 0) {
-                DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%d",
-                                                (unsigned) i, tbl->map[i]));
+#ifdef DEBUGGING
+        if (DEBUG_y_TEST) {
+            PerlIO_printf(Perl_debug_log,"%s: %d\n", __FILE__, __LINE__);
+            for (i = 0; i < tbl->size; i++) {
+                if (tbl->map[i] < 0) {
+                    PerlIO_printf(Perl_debug_log," %02x=>%d",
+                                                    (unsigned) i, tbl->map[i]);
+                }
+                else {
+                    PerlIO_printf(Perl_debug_log," %02x=>%02x",
+                                                    (unsigned) i, tbl->map[i]);
+                }
+                if ((i+1) % 8 == 0 || i + 1 == (short) tbl->size) {
+                    PerlIO_printf(Perl_debug_log,"\n");
+                }
             }
-            else {
-                DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%02x",
-                                                (unsigned) i, tbl->map[i]));
-            }
-            if ((i+1) % 8 == 0 || i + 1 == (short) tbl->size) {
-                DEBUG_y(PerlIO_printf(Perl_debug_log,"\n"));
-            }
-        }
-        DEBUG_y(PerlIO_printf(Perl_debug_log,"Final map 0x%x=>%02x\n",
-                                (unsigned) tbl->size, tbl->map[tbl->size]));
+            PerlIO_printf(Perl_debug_log,"Final map 0x%x=>%02x\n",
+                                    (unsigned) tbl->size, tbl->map[tbl->size]);
+        };
+#endif
 
         SvREFCNT_dec(t_invlist);
 
