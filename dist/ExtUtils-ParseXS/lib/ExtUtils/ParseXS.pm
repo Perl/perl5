@@ -730,6 +730,8 @@ EOM
     my $seen_CODE      = 0;
     my $seen_INTERFACE = 0;
     my $seen_ellipsis  = 0;
+    my $class          = undef;
+    my $signature      = undef;
 
     # Process next line
 
@@ -814,8 +816,6 @@ EOM
     $seen_extern_C = 1 if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
     $seen_static   = 1 if $self->{xsub_return_type} =~ s/^static\s+//;
 
-    my ($class, $orig_args);
-
     {
       my $func_header = shift(@{ $self->{line} });
 
@@ -830,7 +830,7 @@ EOM
       $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-      ($class, $self->{xsub_func_name}, $orig_args) =  ($1, $2, $3);
+      ($class, $self->{xsub_func_name}, $signature) =  ($1, $2, $3);
 
       $class = "$4 $class" if $4;
 
@@ -853,7 +853,7 @@ EOM
       # we should have:
       #
       # $class                            'const Some::Class'
-      # $orig_args                         args
+      # $signature                         args
       # $self->{xsub_func_name}           'foo_bar'
       # $self->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
       # $self->{xsub_func_full_C_name}    'BAR__BAZ_bar';
@@ -881,7 +881,7 @@ EOM
 
 
     # ----------------------------------------------------------------
-    # Do initial processing of the XSUB's signature - $orig_args
+    # Do initial processing of the XSUB's signature - $signature
     #
     # Split the signature on commas into @args while allowing for things
     # like (a = ",", b), and extract any IN/OUT/etc prefix.
@@ -911,7 +911,7 @@ EOM
     #
     # ----------------------------------------------------------------
     #
-    # Given a signature (i.e. $orig_args) like:
+    # Given a signature (i.e. $signature) like:
     #
     #    OUT     char *s,             \
     #            int   length(s),     \
@@ -949,7 +949,7 @@ EOM
     #
     # ----------------------------------------------------------------
 
-    $orig_args =~ s/\\\s*/ /g;  # remove line continuation chars (\)
+    $signature =~ s/\\\s*/ /g;  # remove line continuation chars (\)
     my @args;
 
     my (@fake_INPUT_pre);       # For length(var) generated variables
@@ -960,11 +960,11 @@ EOM
 
 
 
-    if ($self->{config_allow_argtypes} and $orig_args =~ /\S/) {
+    if ($self->{config_allow_argtypes} and $signature =~ /\S/) {
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
 
-      my $args = "$orig_args ,";
+      my $args = "$signature ,";
       use re 'eval';
 
       if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
@@ -1046,8 +1046,8 @@ EOM
         # regex doesn't work. This code path should ideally never be
         # reached, and indicates a design weakness in $C_arg.
         # It assumes there's nothing fancy like types or IN/OUT.
-        @args = split(/\s*,\s*/, $orig_args);
-        Warn( $self, "Warning: cannot parse argument list '$orig_args', fallback to split");
+        @args = split(/\s*,\s*/, $signature);
+        Warn( $self, "Warning: cannot parse argument list '$signature', fallback to split");
       }
     }
     else {
@@ -1055,7 +1055,7 @@ EOM
       # latter means that only K&R form is recognised, e.g. foo(OUT a, b)
       # Only IN/OUT prefixes are processed.
 
-      @args = split(/\s*,\s*/, $orig_args);
+      @args = split(/\s*,\s*/, $signature);
 
       for (@args) {
         if (    $self->{config_allow_inout}
