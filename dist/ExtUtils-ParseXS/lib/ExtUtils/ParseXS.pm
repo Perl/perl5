@@ -75,7 +75,7 @@ use ExtUtils::ParseXS::Utilities qw(
   map_type
   standard_XS_defs
   assign_func_args
-  analyze_preprocessor_statements
+  analyze_preprocessor_statement
   set_cond
   Warn
   WarnHint
@@ -672,7 +672,7 @@ EOM
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
       # update global tracking of #if/#else etc
-      $self->analyze_preprocessor_statements($statement);
+      $self->analyze_preprocessor_statement($statement);
     }
 
     next PARAGRAPH unless @{ $self->{line} };
