@@ -670,9 +670,9 @@ EOM
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
-      ( $self, $self->{XS_parse_stack_top_if_idx}, $self->{bootcode_later} ) =
+      ( $self, $self->{bootcode_later} ) =
         analyze_preprocessor_statements(
-          $self, $statement, $self->{XS_parse_stack_top_if_idx},
+          $self, $statement,
           $self->{bootcode_later}
         );
     }
