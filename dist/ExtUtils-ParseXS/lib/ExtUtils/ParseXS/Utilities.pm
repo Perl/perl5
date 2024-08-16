@@ -541,10 +541,11 @@ sub assign_func_args {
 =item * Purpose
 
 Process a CPP conditional line (C<#if> etc), to keep track of conditional
-nesting.  In particular, it updates C<< @{$self->{XS_parse_stack}} >> which
-contains the current list of nested conditions. So an C<#if> pushes, an
-C<#endif> pops, an C<#else> modifies etc. Each element is a hash of the
-form:
+nesting. In particular, it updates C<< @{$self->{XS_parse_stack}} >> which
+contains the current list of nested conditions, and
+C<< $self->{XS_parse_stack_top_if_idx} >> which indicates the most recent
+C<if> in that stack. So an C<#if> pushes, an C<#endif> pops, an C<#else>
+modifies etc. Each element is a hash of the form:
 
   {
     type      => 'if',
@@ -561,20 +562,17 @@ form:
 
 =item * Arguments
 
-      ( $self, $XSS_work_idx, $BootCode_ref ) =
+      ( $self, $BootCode_ref ) =
         analyze_preprocessor_statements(
-          $self, $statement, $XSS_work_idx, $BootCode_ref
+          $self, $statement, $BootCode_ref
         );
-
-<$XSS_work_idx> is the current depth of #if nesting.
 
 <$BootCode_ref> is an array reference of lines to be output in the boot code.
 This function may add additional lines to it.
 
 =item * Return Value
 
-Returns a modified C<$XSS_work_idx>, Also (for no very good reason) it
-returns the original values of C<$self> and C<$BootCode_ref>.
+For no very good reason it returns the original values of C<$self> and C<$BootCode_ref>.
 
 =back
 
@@ -582,11 +580,13 @@ returns the original values of C<$self> and C<$BootCode_ref>.
 
 sub analyze_preprocessor_statements {
   my ExtUtils::ParseXS $self = shift;
-  my ($statement, $XSS_work_idx, $BootCode_ref) = @_;
+  my ($statement, $BootCode_ref) = @_;
+
+  my $ix = $self->{XS_parse_stack_top_if_idx};
 
   if ($statement eq 'if') {
     # #if or #ifdef
-    $XSS_work_idx = @{ $self->{XS_parse_stack} };
+    $ix = @{ $self->{XS_parse_stack} };
     push(@{ $self->{XS_parse_stack} }, {type => 'if'});
   }
   else {
@@ -612,18 +612,20 @@ sub analyze_preprocessor_statements {
     else {
       # #endif - pop stack and update new top entry
       my($tmp) = pop(@{ $self->{XS_parse_stack} });
-      0 while (--$XSS_work_idx
-           && $self->{XS_parse_stack}->[$XSS_work_idx]{type} ne 'if');
+      0 while (--$ix
+           && $self->{XS_parse_stack}->[$ix]{type} ne 'if');
 
       # For all functions declared within any limb of the just-popped
       # if/endif, mark them as having appeared within this limb of the
       # outer nested branch.
       push(@fns, keys %{$tmp->{other_functions}});
-      @{$self->{XS_parse_stack}->[$XSS_work_idx]{functions}}{@fns} = (1) x @fns;
+      @{$self->{XS_parse_stack}->[$ix]{functions}}{@fns}  =  (1) x @fns;
     }
   }
 
-  return ($self, $XSS_work_idx, $BootCode_ref);
+  $self->{XS_parse_stack_top_if_idx} = $ix;
+
+  return ($self, $BootCode_ref);
 }
 
 

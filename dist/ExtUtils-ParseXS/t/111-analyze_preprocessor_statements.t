@@ -7,9 +7,9 @@ use ExtUtils::ParseXS::Utilities qw(
     analyze_preprocessor_statements
 );
 
-#      ( $self, $XSS_work_idx, $BootCode_ref ) =
+#      ( $self, $BootCode_ref ) =
 #        analyze_preprocessor_statements(
-#          $self, $statement, $XSS_work_idx, $BootCode_ref
+#          $self, $statement, $BootCode_ref
 #        );
 
 pass("Passed all tests in $0");
