@@ -670,11 +670,8 @@ EOM
       print $ln, "\n";
       next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
-      ( $self, $self->{bootcode_later} ) =
-        analyze_preprocessor_statements(
-          $self, $statement,
-          $self->{bootcode_later}
-        );
+      ($self) =
+        analyze_preprocessor_statements($self, $statement);
     }
 
     next PARAGRAPH unless @{ $self->{line} };

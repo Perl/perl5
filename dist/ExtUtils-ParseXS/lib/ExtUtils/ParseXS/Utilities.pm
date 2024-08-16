@@ -560,19 +560,18 @@ modifies etc. Each element is a hash of the form:
                   # XS functions seen within any previous branch
     other_functions => {... }
 
+It also updates C<< $self->{bootcode_early} >> and
+C<< $self->{bootcode_late} >> with extra CPP directives.
+
 =item * Arguments
 
-      ( $self, $BootCode_ref ) =
+      ($self) =
         analyze_preprocessor_statements(
-          $self, $statement, $BootCode_ref
-        );
-
-<$BootCode_ref> is an array reference of lines to be output in the boot code.
-This function may add additional lines to it.
+          $self, $statement);
 
 =item * Return Value
 
-For no very good reason it returns the original values of C<$self> and C<$BootCode_ref>.
+For no very good reason it returns the original value of C<$self>.
 
 =back
 
@@ -580,7 +579,7 @@ For no very good reason it returns the original values of C<$self> and C<$BootCo
 
 sub analyze_preprocessor_statements {
   my ExtUtils::ParseXS $self = shift;
-  my ($statement, $BootCode_ref) = @_;
+  my ($statement) = @_;
 
   my $ix = $self->{XS_parse_stack_top_if_idx};
 
@@ -598,7 +597,7 @@ sub analyze_preprocessor_statements {
     if ($self->{XS_parse_stack}->[-1]{varname}) {
       # close any '#ifdef XSubPPtmpAAAA' inserted earlier into boot code.
       push(@{ $self->{bootcode_early} }, "#endif\n");
-      push(@{ $BootCode_ref },         "#endif");
+      push(@{ $self->{bootcode_later} }, "#endif");
     }
 
     my(@fns) = keys %{$self->{XS_parse_stack}->[-1]{functions}};
@@ -625,7 +624,7 @@ sub analyze_preprocessor_statements {
 
   $self->{XS_parse_stack_top_if_idx} = $ix;
 
-  return ($self, $BootCode_ref);
+  return ($self);
 }
 
 
