@@ -299,9 +299,8 @@ BEGIN {
                                # Includes generated argument names like
                                # 'XSauto_length_of_foo' for 'length(foo)'.
   
-  'xsub_map_argname_to_islength', # Hash: indicates (by existence, not value)
-                               # whether argument was declared as
-                               # 'length(foo)'.
+  'xsub_map_argname_to_islength', # Hash of bools: indicates whether
+                               # argument was declared as 'length(foo)'.
   
   'xsub_map_arg_idx_to_proto', # Array: maps argument index to prototype
                                # (such as '$'). Always populated, even if
@@ -2299,7 +2298,7 @@ sub INPUT_handler {
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x)
     {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
-      $self->{xsub_map_argname_to_islength}->{$2} = undef; # key's *existence* is the signifier
+      $self->{xsub_map_argname_to_islength}->{$2} = 1;
       # defer this line until after all the other declarations
       $self->{xsub_deferred_code_lines} .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
     }
@@ -3544,7 +3543,7 @@ sub generate_init {
   # would emit SvPV_nolen(...) - and instead, emit
   # SvPV(..., STRLEN_length_of_foo)
   if (    $xstype eq 'T_PV'
-      and exists $self->{xsub_map_argname_to_islength}->{$var})
+      and $self->{xsub_map_argname_to_islength}->{$var})
   {
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
