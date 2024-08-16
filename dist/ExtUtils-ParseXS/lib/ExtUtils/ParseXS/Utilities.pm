@@ -18,7 +18,7 @@ our (@ISA, @EXPORT_OK);
   map_type
   standard_XS_defs
   assign_func_args
-  analyze_preprocessor_statements
+  analyze_preprocessor_statement
   set_cond
   Warn
   WarnHint
@@ -45,7 +45,7 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     map_type
     standard_XS_defs
     assign_func_args
-    analyze_preprocessor_statements
+    analyze_preprocessor_statement
     set_cond
     Warn
     blurt
@@ -534,7 +534,7 @@ sub assign_func_args {
 }
 
 
-=head2 C<analyze_preprocessor_statements()>
+=head2 C<analyze_preprocessor_statement()>
 
 =over 4
 
@@ -565,13 +565,13 @@ C<< $self->{bootcode_late} >> with extra CPP directives.
 
 =item * Arguments
 
-      $self->analyze_preprocessor_statements($statement);
+      $self->analyze_preprocessor_statement($statement);
 
 =back
 
 =cut
 
-sub analyze_preprocessor_statements {
+sub analyze_preprocessor_statement {
   my ExtUtils::ParseXS $self = shift;
   my ($statement) = @_;
 
