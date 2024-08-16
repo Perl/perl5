@@ -453,14 +453,14 @@ sub process_file {
 
   # Global Constants
 
-  my ($Is_VMS, $SymSet);
+  my ($Is_VMS, $VMS_SymSet);
 
   if ($^O eq 'VMS') {
     $Is_VMS = 1;
     # Establish set of global symbols with max length 28, since xsubpp
     # will later add the 'XS_' prefix.
     require ExtUtils::XSSymSet;
-    $SymSet = ExtUtils::XSSymSet->new(28);
+    $VMS_SymSet = ExtUtils::XSSymSet->new(28);
   }
 
   # XS_parse_stack is an array of hashes. Each hash records the current
@@ -830,7 +830,7 @@ EOM
       ($clean_func_name = $self->{xsub_func_name}) =~ s/^$self->{PREFIX_pattern}//;
       $self->{xsub_func_full_C_name} = "$self->{PACKAGE_C_name}_$clean_func_name";
       if ($Is_VMS) {
-        $self->{xsub_func_full_C_name} = $SymSet->addsym( $self->{xsub_func_full_C_name} );
+        $self->{xsub_func_full_C_name} = $VMS_SymSet->addsym( $self->{xsub_func_full_C_name} );
       }
 
       # At this point, supposing that the input so far was:
