@@ -723,6 +723,14 @@ EOM
     # used for emitting XSRETURN($XSRETURN_count) if > 0, or XSRETURN_EMPTY
     my $XSRETURN_count = 0;
 
+    my $seen_NO_RETURN = 0;
+    my $seen_extern_C  = 0;
+    my $seen_static    = 0;
+    my $seen_PPCODE    = 0;
+    my $seen_CODE      = 0;
+    my $seen_INTERFACE = 0;
+    my $seen_ellipsis  = 0;
+
     # Process next line
 
     $_ = shift(@{ $self->{line} });
@@ -780,7 +788,7 @@ EOM
     # function to be on the same line.)
     ($self->{xsub_return_type}) = ExtUtils::Typemaps::tidy_type($_);
 
-    my $seen_NO_RETURN = 1 if $self->{xsub_return_type} =~ s/^NO_OUTPUT\s+//;
+    $seen_NO_RETURN = 1 if $self->{xsub_return_type} =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line declarations. This splits a single line like:
     #    int foo(....)
@@ -803,8 +811,8 @@ EOM
     $self->blurt("Error: Function definition too short '$self->{xsub_return_type}'"), next PARAGRAPH
       unless @{ $self->{line} };
 
-    my $seen_extern_C = 1 if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
-    my $seen_static   = 1 if $self->{xsub_return_type} =~ s/^static\s+//;
+    $seen_extern_C = 1 if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
+    $seen_static   = 1 if $self->{xsub_return_type} =~ s/^static\s+//;
 
     my ($class, $orig_args);
 
@@ -1071,14 +1079,13 @@ EOM
 
     # For C++ type methods, add fake method arg to beginning
     if (defined($class)) {
-      my $arg0 = ((defined($seen_static) or $self->{xsub_func_name} eq 'new')
+      my $arg0 = (($seen_static or $self->{xsub_func_name} eq 'new')
           ? "CLASS" : "THIS");
       unshift(@args, $arg0);
     }
 
     my $args_count = 0;
     my $report_args = ''; # the arg's description as used by croak()
-    my $seen_ellipsis;
     my $min_arg_count;
 
     {
@@ -1143,8 +1150,11 @@ EOM
     # that are needed to be known early.
     # ----------------------------------------------------------------
 
-    my $seen_PPCODE = grep(/^\s*PPCODE\s*:/, @{ $self->{line} });
-    my $seen_CODE   = grep(/^\s*CODE\s*:/,   @{ $self->{line} });
+    $self->{xsub_seen_ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
+
+    $seen_PPCODE    = !! grep(/^\s*PPCODE\s*:/,     @{ $self->{line} });
+    $seen_CODE      = !! grep(/^\s*CODE\s*:/,       @{ $self->{line} });
+    $seen_INTERFACE = !! grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
 
     # Horrible 'void' return arg count hack.
     #
@@ -1175,11 +1185,6 @@ EOM
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
       $XSRETURN_count = 1 if $EXPLICIT_RETURN;
     }
-
-    $self->{xsub_seen_ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
-
-    my $seen_INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
-
 
 
     # ----------------------------------------------------------------
@@ -1314,7 +1319,7 @@ EOF
       # Emit a 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
       if (!$self->{xsub_seen_THIS_in_INPUT} && defined($class)) {
-        if (defined($seen_static) or $self->{xsub_func_name} eq 'new') {
+        if ($seen_static or $self->{xsub_func_name} eq 'new') {
           print "\tchar *";
           $self->{xsub_map_argname_to_type}->{"CLASS"} = "char *";
           $self->generate_init( {
@@ -1461,7 +1466,7 @@ EOF
             $implicit_OUTPUT_RETVAL = 1;
           }
 
-          if (defined($seen_static)) { # it has a return type of 'static foo'
+          if ($seen_static) { # it has a return type of 'static foo'
             if ($self->{xsub_func_name} eq 'new') {
               $self->{xsub_func_name} = "$class";
             }
