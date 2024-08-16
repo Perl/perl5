@@ -565,13 +565,7 @@ C<< $self->{bootcode_late} >> with extra CPP directives.
 
 =item * Arguments
 
-      ($self) =
-        analyze_preprocessor_statements(
-          $self, $statement);
-
-=item * Return Value
-
-For no very good reason it returns the original value of C<$self>.
+      $self->analyze_preprocessor_statements($statement);
 
 =back
 
@@ -623,8 +617,6 @@ sub analyze_preprocessor_statements {
   }
 
   $self->{XS_parse_stack_top_if_idx} = $ix;
-
-  return ($self);
 }
 
 

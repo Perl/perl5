@@ -7,10 +7,8 @@ use ExtUtils::ParseXS::Utilities qw(
     analyze_preprocessor_statements
 );
 
-#      ($self) =
-#        analyze_preprocessor_statements(
-#          $self, $statement
-#        );
+# XXX not yet tested
+# $self->analyze_preprocessor_statements($statement);
 
 pass("Passed all tests in $0");
 
