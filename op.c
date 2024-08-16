@@ -6108,19 +6108,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     /* This function compiles a tr///, from data gathered from toke.c, into a
      * form suitable for use by do_trans() in doop.c at runtime.
      *
-     * It first normalizes the data, while discarding extraneous inputs; then
-     * writes out the compiled data.  The normalization allows for complete
-     * analysis, and avoids some false negatives and positives earlier versions
-     * of this code had.
+     * It has two passes.  The second is mainly to streamline the result of the
+     * first pass, resulting in less memory usage and faster runtime execution
+     * besides.
      *
-     * The normalization form is an inversion map (described below in detail).
+     * The first pass normalizes the data, while discarding extraneous inputs.
+     * The normalization allows for complete analysis, and avoids some false
+     * negatives and positives earlier versions of this code had.
+     *
+     * The normalizd form is an inversion map (described below in detail).
      * This is essentially the compiled form for tr///'s that require UTF-8,
-     * and its easy to use it to write the 257-byte table for tr///'s that
-     * don't need UTF-8.  That table is identical to what's been in use for
-     * many perl versions, except that it doesn't handle some edge cases that
-     * it used to, involving code points above 255.  The UTF-8 form now handles
-     * these.  (This could be changed with extra coding should it shown to be
-     * desirable.)
+     * There is a different form for those that don't need UTF-8, identical to
+     * what's been in use for many perl versions, except that it doesn't handle
+     * some edge cases that it used to, involving code points above 255.  The
+     * UTF-8 form now handles these.  (This could be changed with extra coding
+     * should it shown to be desirable.)
      *
      * If the complement (/c) option is specified, the lhs string (tstr) is
      * parsed into an inversion list.  Complementing these is trivial.  Then a
@@ -6166,9 +6168,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * one (in other words, the corresponding element).  Thus the range extends
      * up to (but not including) the code point given by the next higher
      * element.  In a true inversion map, the corresponding element in the
-     * other array gives the mapping of the first code point in the range, with
-     * the understanding that the next higher code point in the inversion
-     * list's range will map to the next higher code point in the map.
+     * other array (the inversion list) gives the mapping of the first code
+     * point in the range, with the understanding that the next higher code
+     * point in the inversion list's range will map to the next higher code
+     * point in the map.
      *
      * So if at element [i], let's say we have:
      *
@@ -6191,16 +6194,30 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      *  TR_UNLISTED (or -1) indicates that no code point in the range is listed
      *      in the tr/// searchlist.  At runtime, these are always passed
      *      through unchanged.  In the inversion map, all points in the range
-     *      are mapped to -1, instead of increasing, like the 'L' in the
-     *      example above.
+     *      are mapped to -1, instead of increasing.  The 'L' entry in the
+     *      example above illustrates this.
      *
      *      We start the parse with every code point mapped to this, and as we
      *      parse and find ones that are listed in the search list, we carve
      *      out ranges as we go along that override that.
      *
+     *  So, if the next element in our main example is such that it yields:
+     *
+     * [i]    A        a
+     * [i+1]  L       -1
+     * [i+2]  Q        q
+     *
+     * Then all of L, M, N, O, and P map to TR_UNLISTED.  We know that Q maps
+     * to q, but we need the next element (or know this is the final one) to
+     * figure out what comes next.
+     *
+     * The other special mapping is
+     *
      *  TR_SPECIAL_HANDLING (or -2) indicates that every code point in the
      *      range needs special handling.  Again, all code points in the range
      *      are mapped to -2, instead of increasing.
+     *
+     *      There are two cases where this mapping is used:
      *
      *      Under /d this value means the code point should be deleted from the
      *      transliteration when encountered.
@@ -6225,13 +6242,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      *      generated huge data structures, slowly, and the execution was also
      *      slow.  So the current scheme was implemented.
      *
-     *  So, if the next element in our example is:
+     * If the next few elements in the example yield
      *
+     * [i]    A        a
+     * [i+1]  L       -1
      * [i+2]  Q        q
-     *
-     * Then all of L, M, N, O, and P map to TR_UNLISTED.  If the next elements
-     * are
-     *
      * [i+3]  R        z
      * [i+4]  S       TR_UNLISTED
      *
@@ -6268,12 +6283,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * at runtime */
     bool has_utf8_variant = false;
 
-    /* What is the maximum expansion factor in UTF-8 transliterations.  If a
-     * 2-byte UTF-8 encoded character is to be replaced by a 3-byte one, its
-     * expansion factor is 1.5.  This number is used at runtime to calculate
-     * how much space to allocate for non-inplace transliterations.  Without
-     * this number, the worst case is 14, which is extremely unlikely to happen
-     * in real life, and could require significant memory overhead. */
+    /* What is the maximum expansion factor in UTF-8 transliterations,
+     * calculated in the first pass.  If a 2-byte UTF-8 encoded character is to
+     * be replaced by a 3-byte one, its expansion factor is 1.5.  This number
+     * is used at runtime to calculate how much space to allocate for
+     * non-inplace transliterations.  Without this number, the worst case is
+     * 14, which is extremely unlikely to happen in real life, and could
+     * require significant memory overhead. */
     NV max_expansion = 1.;
 
     UV t_range_count, r_range_count, min_range_count;
@@ -6301,19 +6317,15 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     unsigned int pass2;
 
     /* This routine implements detection of a transliteration having a longer
-     * UTF-8 representation than its source, by partitioning all the possible
-     * code points of the platform into equivalence classes of the same UTF-8
-     * byte length in the first pass.  As it constructs the mappings, it carves
-     * these up into smaller chunks, but doesn't merge any together.  This
-     * makes it easy to find the instances it's looking for.  A second pass is
-     * done after this has been determined which merges things together to
-     * shrink the table for runtime.  The table below is used for both ASCII
-     * and EBCDIC platforms.  On EBCDIC, the byte length is not monotonically
-     * increasing for code points below 256.  To correct for that, the macro
-     * CP_ADJUST defined below converts those code points to ASCII in the first
-     * pass, and we use the ASCII partition values.  That works because the
-     * growth factor will be unaffected, which is all that is calculated during
-     * the first pass. */
+     * UTF-8 representation than its source, by partitioning in the first pass
+     * all the possible code points of the platform into equivalence classes of
+     * the same UTF-8 byte length.  PL_partition_by_byte_length[] is the guts
+     * of an inversion list that does this.  It is used to avoid the expense of
+     * constructing the partition at runtime.  It covers the entire range of
+     * code points possible on this platform, and each entry is for the single
+     * range of code points whose UTF-8 representation has the same length.
+     * (The definition of UTF-8 guarantees that there is a single range for
+     * each length.) */
     UV PL_partition_by_byte_length[] = {
         0,
         0x80,   /* Below this is 1 byte representations */
@@ -6329,6 +6341,81 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #  endif
 
     };
+
+    /* At the beginning of the first pass, the inversion map will look like
+     * this on a 32-bit ASCII platform
+     *
+     *  [0]         0 .. 0x7F      TR_UNLISTED
+     *  [1]      0x80 .. 0x07FF    TR_UNLISTED
+     *  [2]    0x0800 .. 0xFFFF    TR_UNLISTED
+     *  [3]   0x10000 .. 0x1FFFFF  TR_UNLISTED
+     *  [4]  0x200000 .. 0x3FFFFFF TR_UNLISTED
+     *  [5] 0x4000000 .. INFTY     TR_UNLISTED
+     *
+     * Now suppose that we are compiling tr/A-Z/a-z/
+     * At the end of the first pass, the inversion map will be
+     *
+     *  [0]         0 .. 0x40      TR_UNLISTED
+     *  [1]      0x41 .. 0x5A      0x61
+     *  [2]      0x5B .. 0x7F      TR_UNLISTED
+     *  [3]      0x80 .. 0x07FF    TR_UNLISTED
+     *  [4]    0x0800 .. 0xFFFF    TR_UNLISTED
+     *  [5]   0x10000 .. 0x1FFFFF  TR_UNLISTED
+     *  [6]  0x200000 .. 0x3FFFFFF TR_UNLISTED
+     *  [7] 0x4000000 .. INFTY     TR_UNLISTED
+     *
+     * The second pass will merge adjacent ranges, squashing this down to
+     *
+     *  [0]    0 .. 0x40   TR_UNLISTED
+     *  [1] 0x41 .. 0x5A   0x61
+     *  [2] 0x5B .. INFTY  TR_UNLISTED
+     *
+     * The actual compiled code will be the traditional 257 byte lookup array
+     * with 26 bytes in the middle looking like
+     *
+     *      [ord "A"] => ord("a")
+     *      [ord "B"] => ord("b")
+     *      ...
+     *      [ord "Z"] => ord("z")
+     *
+     * The 257th byte will contain information about the flags this tr is
+     * compiled with.  The remaining bytes will all contain TR_UNLISTED to
+     * indicate they are not to be touched by this operation.
+     *
+     * The reason the code space is partitioned is illustrated by the example
+     * oF compiling tr/\x{7FF}-\x{FFFE}/\x{800}-\x{FFFF}/
+     * This example effectively adds 1 to each code point in the lhs range.  By
+     * the end of the first pass, the inversion map will look like
+     *
+     *  [0]         0 .. 0x7F      TR_UNLISTED
+     *  [1]      0x80 .. 0x07FE    TR_UNLISTED
+     *  [2]    0x07FF              0x0800
+     *  [2]    0x0800 .. 0xFFFE    0x0801
+     *  [2]    0xFFFF              TR_UNLISTED
+     *  [3]   0x10000 .. 0x1FFFFF  TR_UNLISTED
+     *  [4]  0x200000 .. 0x3FFFFFF TR_UNLISTED
+     *  [5] 0x4000000 .. INFTY     TR_UNLISTED
+     *
+     * In this large range, just one code point, \x{7FF} translates to a code
+     * point which has a longer representation than it does.  This means that a
+     * string containing that code point cannot be edited in place, a fact we
+     * need to know at compilation time.  The partitioning forces the algorithm
+     * to split off the code point into a separate element from the rest of the
+     * range.  This makes it easy to find such cases.  That information is
+     * noted, and the second pass squashes this down to
+     *
+     *  [0]      0 .. 0x07FE  TR_UNLISTED
+     *  [1] 0x07FF .. 0xFFFE  0x0800
+     *  [2] 0xFFFF .. INFTY   TR_UNLISTED
+     *
+     * This inversion map is what is used at runtime; the 257 element table
+     * would be useless here, and is not generated.
+     *
+     * Note that we determine here if there is any possible input that can't be
+     * done in place.  It might be that a particular input contains only code
+     * points that can be done in place.  One could examine at runtime to see,
+     * but this could be as expensive as just doing the copy.
+     */
 
     PERL_ARGS_ASSERT_PMTRANS;
 
@@ -6464,11 +6551,15 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             t_array = invlist_array(t_invlist);
         }
 
-/* As noted earlier, we convert EBCDIC code points to Unicode in the first pass
- * so as to get the well-behaved length 1 vs length 2 boundary.  Only code
- * points below 256 differ between the two character sets in this regard.  For
- * these, we also can't have any ranges, as they have to be individually
- * converted. */
+/* In EBCDIC, the byte length is not monotonically increasing for code points
+ * below 256, which the algorithm below requires.  To accommodate that, the
+ * macro CP_ADJUST defined below converts those code points to ASCII in the
+ * first pass and does nothing in the second.  This works because the first
+ * pass is looking only for the existence of anomalies; and not the specific
+ * code point values.  The growth factor is going to be 2 regardless, because
+ * one byte can become two.  Only code points below 256 differ between the two
+ * character sets in this regard.  For these, we also can't have any ranges, as
+ * they have to be individually converted. */
 #ifdef EBCDIC
 #  define CP_ADJUST(x)          ((pass2) ? (x) : NATIVE_TO_UNI(x))
 #  define FORCE_RANGE_LEN_1(x)  ((pass2) ? 0 : ((x) < 256))
@@ -6508,8 +6599,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
          * to deal with at run time.  This is the only place in core that
          * generates an inversion map; if others were introduced, it might be
          * better to create general purpose routines to handle them.
-         * (Inversion maps are created in perl in other places.)
-         *
+         * (Inversion lists are created in perl in other places.)
+         */
                            /* Finish up range started in what otherwise would
                             * have been the final iteration */
         while (t < tend || t_range_count > 0) {
@@ -6635,8 +6726,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * code point <cp>.  The inversion map was initialized to cover the
              * entire range of possible inputs, so this should not fail.  So
              * the return value is the index into the list's array of the range
-             * that contains <cp>, that is, 'i' such that array[i] <= cp <
-             * array[i+1] */
+             * that contains <cp>, that is, 'i' such that
+             *      array[i] <= cp < * array[i+1] */
             j = _invlist_search(t_invlist, t_cp);
             assert(j >= 0);
             i = j;
@@ -6741,8 +6832,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * case is an expansion ratio of 14:1. This is rare, and
                      * we'd rather allocate only the necessary amount of extra
                      * memory for that copy.  We can calculate the worst case
-                     * for this particular transliteration is by keeping track
-                     * of the expansion factor for each range.
+                     * for this particular transliteration by keeping track of
+                     * the expansion factor for each range.
                      *
                      * Consider tr/\xCB/\X{E000}/.  The maximum expansion
                      * factor is 1 byte going to 3 if the target string is not
@@ -7094,7 +7185,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     if (   can_force_utf8
         || (   len > 0
             && t_array[len-1] > 255
-                 /* If the final range is 0x100-INFINITY and is a special
+                 /* But if the final range is 0x100-INFINITY and is a special
                   * mapping, the table implementation can handle it */
             && ! (   t_array[len-1] == 256
                   && (   r_map[len-1] == TR_UNLISTED
