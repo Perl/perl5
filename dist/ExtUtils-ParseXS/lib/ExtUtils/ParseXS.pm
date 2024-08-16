@@ -349,12 +349,6 @@ BEGIN {
 
   'xsub_seen_RETVAL_in_INPUT', # Seen var called 'RETVAL' in an INPUT section.
 
-  'var_num',                   # Num: the index number of the parameter. The
-                               # counting starts at 1 and skips fake
-                               # parameters like 'length(s)' (zero is used
-                               # for RETVAL).  XXX This should really just
-                               # be a lex var
-
 
   # Per-XSUB OUTPUT section parsing state:
 
@@ -2374,16 +2368,16 @@ sub INPUT_handler {
 
     # The index number of the parameter. The counting starts at 1 and skips
     # fake parameters like 'length(s))' (zero is used for RETVAL).
-    $self->{var_num} = $self->{xsub_map_argname_to_idx}->{$var_name};
+    my $var_num = $self->{xsub_map_argname_to_idx}->{$var_name};
 
     # Get the prototype character, if any, associated with the typemap
     # entry for this var's type; defaults to '$'
-    if ($self->{var_num}) {
+    if ($var_num) {
       my $typemap = $self->{typemaps_object}->get_typemap(ctype => $var_type);
       $self->report_typemap_failure($self->{typemaps_object}, $var_type, "death")
         if not $typemap and not $is_overridden_typemap;
 
-      $self->{xsub_map_arg_idx_to_proto}->[$self->{var_num}]
+      $self->{xsub_map_arg_idx_to_proto}->[$var_num]
          = ($typemap && $typemap->proto) || "\$";
     }
 
@@ -2415,17 +2409,17 @@ sub INPUT_handler {
       # Emit var and init code based on overridden $var_init
       $self->output_init( {
         type          => $var_type,
-        num           => $self->{var_num},
+        num           => $var_num,
         var           => $var_name,
         init          => $var_init,
         printed_name  => $printed_name,
       } );
     }
-    elsif ($self->{var_num}) {
+    elsif ($var_num) {
       # Emit var and init code based on typemap entry
       $self->generate_init( {
         type          => $var_type,
-        num           => $self->{var_num},
+        num           => $var_num,
         var           => $var_name,
         printed_name  => $printed_name,
       } );
@@ -2486,20 +2480,20 @@ sub OUTPUT_handler {
     $self->blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
       unless defined $self->{xsub_map_argname_to_type}->{$outarg};
 
-    $self->{var_num} = $self->{xsub_map_argname_to_idx}->{$outarg};
+    my $var_num = $self->{xsub_map_argname_to_idx}->{$outarg};
 
     # Emit the custom var-setter code if present; else use the one from
     # the OUTPUT typemap.
 
     if ($outcode) {
       print "\t$outcode\n";
-      print "\tSvSETMAGIC(ST(" , $self->{var_num} - 1 , "));\n"
+      print "\tSvSETMAGIC(ST(" , $var_num - 1 , "));\n"
         if $self->{xsub_SETMAGIC_state};
     }
     else {
       $self->generate_output( {
         type        => $self->{xsub_map_argname_to_type}->{$outarg},
-        num         => $self->{var_num},
+        num         => $var_num,
         var         => $outarg,
         do_setmagic => $self->{xsub_SETMAGIC_state},
         do_push     => undef,
