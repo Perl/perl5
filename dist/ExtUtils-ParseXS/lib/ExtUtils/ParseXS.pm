@@ -394,7 +394,7 @@ BEGIN {
   # do 'use fields', except: fields needs Hash::Util which is XS, which
   # needs us. So only 'use fields' on systems where Hash::Util has already
   # been built.
-  if (eval 'require Hash::Util (); 1;') {
+  if (eval 'require Hash::Util; 1;') {
     require 'fields.pm';
     $USING_FIELDS = 1;
     fields->import(@fields);
