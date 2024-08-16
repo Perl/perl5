@@ -1191,16 +1191,18 @@ EOM
     # Emit initial C code for the XSUB
     # ----------------------------------------------------------------
 
-    $seen_extern_C = $seen_extern_C ? qq[extern "C"] : "";
+    {
+      my $extern = $seen_extern_C ? qq[extern "C"] : "";
 
     # Emit function header
-    print Q(<<"EOF");
-#$seen_extern_C
+      print Q(<<"EOF");
+#$extern
 #XS_EUPXS(XS_$self->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
 #XS_EUPXS(XS_$self->{xsub_func_full_C_name})
 #[[
 #    dVAR; dXSARGS;
 EOF
+    }
 
     print Q(<<"EOF") if $self->{xsub_seen_ALIAS};
 #    dXSI32;
