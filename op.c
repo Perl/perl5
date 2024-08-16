@@ -6051,34 +6051,95 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
 
+/* 4 bits per hex char, highest bit position = 0,1-3 => 1; 4-7 => 2; ... */
+#define NUM_HEX_CHARS(num) ((int) ((num == 0) ? 1 : 1 + (msbit_pos(num) / 4)))
+
+#define INFTY  "INFINITY"  /* How to spell "infinity" in the output */
+
+/* Total number of bytes a given code point would occupy in the output */
+#define TOTAL_LEN(num)                                                      \
+            ((int) ((num == 0)                                              \
+                    ? 1    /* Plain 0 has no ornamentation */               \
+                    : ((num >= IV_MAX)                                      \
+                       ? STRLENs(INFTY)                                   \
+                       : ((STRLENs("0x") + ((NUM_HEX_CHARS(num) <= 2)       \
+                          ? 2  /* Otherwise, minimum of 2 hex digits */     \
+                          : NUM_HEX_CHARS(num)))))))
+
+/* To make evident, Configure with `-DDEBUGGING`, build, run 
+ *  `./perl -Ilib -Dy t/op/tr.t`
+ */
 void
 Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
 {
-    const char indent[] = "    ";
+    PERL_ARGS_ASSERT_INVMAP_DUMP;
+
+    const unsigned int indent = 4;
 
     UV len = _invlist_len(invlist);
     UV * array = invlist_array(invlist);
-    UV i;
 
-    PERL_ARGS_ASSERT_INVMAP_DUMP;
+    if (len == 0) {
+        PerlIO_printf(Perl_debug_log, "(empty)\n");
+        return;
+    }
 
-    for (i = 0; i < len; i++) {
+    int upper = len - 1;
+    if (array[upper] >= IV_MAX) {   /* Avoid going off end in loop below */
+        upper--;
+    }
+
+    /* Each range is output with a start column, wide enough for the highest
+     * possible value; and an end column, similarly wide, but never narrower
+     * than the space required to output the phrase for infinity */
+    int max_start_len = TOTAL_LEN(array[upper]);
+    int max_end_len = MAX(STRLENs(INFTY), TOTAL_LEN(array[upper] - 1));
+
+    for (int i = 0; i <= upper; i++) {
         UV start = array[i];
-        UV end   = (i + 1 < len) ? array[i+1] - 1 : IV_MAX;
+        UV end = (i + 1 <= upper) ? array[i+1] - 1 : IV_MAX;
 
-        PerlIO_printf(Perl_debug_log, "%s[%" UVuf "] 0x%04" UVXf, indent, i, start);
-        if (end == IV_MAX) {
-            PerlIO_printf(Perl_debug_log, " .. INFTY");
-        }
-        else if (end != start) {
-            PerlIO_printf(Perl_debug_log, " .. 0x%04" UVXf, end);
+        /* The indentation */
+        PerlIO_printf(Perl_debug_log, "%*s[%d]", indent, " ", i);
+
+        /* Output a plain 0 without 0x ornamentation */
+        if (start == 0) {
+            PerlIO_printf(Perl_debug_log, "%*s%" UVXf,
+                                          max_start_len, " ", start);
         }
         else {
-            PerlIO_printf(Perl_debug_log, "            ");
+            PerlIO_printf(Perl_debug_log, "%*s0x%02" UVXf,
+                                          max_start_len - TOTAL_LEN(start) + 1,
+                                          " ",
+                                          start);
         }
 
-        PerlIO_printf(Perl_debug_log, "\t");
+#define RANGE_STRING  " .. "
+        if (end <= start) {
 
+            /* Skip the end column if the same as the start column, but instead
+             * space over the same number of columns it would occupy */
+            PerlIO_printf(Perl_debug_log, "%*s",
+                                            (int) STRLENs(RANGE_STRING)
+                                          + max_end_len
+                                          + 2,
+                                          " ");
+        }
+        else {
+            PerlIO_printf(Perl_debug_log, RANGE_STRING);
+
+            if (end >= IV_MAX) {
+                PerlIO_printf(Perl_debug_log, INFTY);
+            }
+            else {
+                PerlIO_printf(Perl_debug_log, "0x%02" UVXf, end);
+            }
+
+            PerlIO_printf(Perl_debug_log, "%*s",
+                                         max_end_len - TOTAL_LEN(end) + 2, " ");
+        }
+
+        /* Finally the column for the mapping */
         if (map[i] == TR_UNLISTED) {
             PerlIO_printf(Perl_debug_log, "TR_UNLISTED\n");
         }
@@ -6086,7 +6147,7 @@ Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
             PerlIO_printf(Perl_debug_log, "TR_SPECIAL_HANDLING\n");
         }
         else {
-            PerlIO_printf(Perl_debug_log, "0x%04" UVXf "\n", map[i]);
+            PerlIO_printf(Perl_debug_log, "0x%02" UVXf "\n", map[i]);
         }
     }
 }
