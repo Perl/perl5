@@ -540,12 +540,14 @@ for (qw(trans transr)) {
             bitcount_def  => 'OPpTRANS_BITS',
             label         => 'TRANS',
             enum          => [ qw(
-                                1   OPpTRANS_RESERVED_FOR_FUTURE_USE
-                                    RESERVED_FOR_FUTURE_USE
+                                1   OPpTRANS_ONLY_UTF8_INVARIANTS
+                                    ONLY_UTF8_INVARIANTS
                                 2   OPpTRANS_CAN_FORCE_UTF8  CAN_FORCE_UTF8
                                 3   OPpTRANS_GROWS           GROWS
                             )],
 
+                            # 1 => Only chars whose representation is the same
+                            #      in UTF-8 vs not are involved in the operation
                             # 2 => Some 0-255 range char maps to 256-INF char
                             # 3 => Some replacement chars occupy more space
                             #      than their src

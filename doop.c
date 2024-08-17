@@ -49,8 +49,10 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
                                           __FILE__, __LINE__));
     DEBUG_y(sv_dump(sv));
 
-    /* First, take care of non-UTF-8 input strings, because they're easy */
-    if (!SvUTF8(sv)) {
+    /* First, take care of input strings where UTF8ness doesn't matter */
+    if (   ! SvUTF8(sv)
+        || (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_ONLY_UTF8_INVARIANTS)
+    {
         while (s < send) {
             const short ch = tbl->map[*s];
             if (ch >= 0) {
@@ -187,7 +189,9 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
                                           __FILE__, __LINE__));
     DEBUG_y(sv_dump(sv));
 
-    if (!SvUTF8(sv)) {
+    if (   ! SvUTF8(sv)
+        || (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_ONLY_UTF8_INVARIANTS)
+    {
         U8 *d = s;
         U8 * const dstart = d;
 

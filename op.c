@@ -6184,6 +6184,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * UTF-8 by a tr/// operation. */
     bool can_force_utf8 = FALSE;
 
+    /* If only ASCII-range characters are involved, some shortcuts can be done
+     * at runtime */
+    bool has_utf8_variant = false;
+
     /* What is the maximum expansion factor in UTF-8 transliterations.  If a
      * 2-byte UTF-8 encoded character is to be replaced by a 3-byte one, its
      * expansion factor is 1.5.  This number is used at runtime to calculate
@@ -6389,10 +6393,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #  define CP_ADJUST(x)          ((pass2) ? (x) : NATIVE_TO_UNI(x))
 #  define FORCE_RANGE_LEN_1(x)  ((pass2) ? 0 : ((x) < 256))
 #  define CP_SKIP(x)            ((pass2) ? UVCHR_SKIP(x) : OFFUNISKIP(x))
+#  define CP_VARIANT(x)         ((pass2) ? ! UVCHR_IS_INVARIANT(x)          \
+                                         : ! OFFUNI_IS_INVARIANT(x))
 #else
 #  define CP_ADJUST(x)          (x)
 #  define FORCE_RANGE_LEN_1(x)  0
 #  define CP_SKIP(x)            UVCHR_SKIP(x)
+#  define CP_VARIANT(x)       ! UVCHR_IS_INVARIANT(x)
 #endif
 
         /* And the mapping of each of the ranges is initialized.  Initially,
@@ -6560,6 +6567,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     }
                 }
 
+                if (CP_VARIANT(t_cp)) {
+                    has_utf8_variant = true;
+                }
+
                 /* Count the total number of listed code points * */
                 t_count += t_range_count;
             }
@@ -6605,6 +6616,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
                     if (r_cp == TR_SPECIAL_HANDLING) {
                         r_range_count = t_range_count;
+                    }
+                    else if (CP_VARIANT(r_cp)) {
+                        has_utf8_variant = true;
                     }
 
                     /* This is the final character so far */
@@ -7155,6 +7169,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         /* Indicate this is an op_pv */
         o->op_private &= ~OPpTRANS_USE_SVOP;
+
+        /* Indicate if no variants, but complementing means the runtime has to
+         * consider variants anyway */
+        if (! complement && ! has_utf8_variant) {
+            o->op_private |= OPpTRANS_ONLY_UTF8_INVARIANTS;
+        }
 
         tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
         tbl->size = 256;
