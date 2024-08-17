@@ -2266,7 +2266,7 @@ END_EXTERN_C
 #define OPpITER_REVERSED        0x02
 #define OPpMETH_NO_BAREWORD_IO  0x02
 #define OPpSORT_INTEGER         0x02
-#define OPpTRANS_USE_SVOP       0x02
+#define OPpTRANS_GROWS          0x02
 #define OPpARG2_MASK            0x03
 #define OPpAVHVSWITCH_MASK      0x03
 #define OPpARGELEM_HV           0x04
@@ -2354,7 +2354,7 @@ END_EXTERN_C
 #define OPpREFCOUNTED           0x40
 #define OPpREPEAT_DOLIST        0x40
 #define OPpSLICE                0x40
-#define OPpTRANS_GROWS          0x40
+#define OPpTRANS_USE_SVOP       0x40
 #define OPpPADRANGE_COUNTMASK   0x7f
 #define OPpARG_IF_UNDEF         0x80
 #define OPpASSIGN_CV_TO_GV      0x80
@@ -2989,7 +2989,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x018f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, chdir, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
     0x463c, 0x4558, 0x2e74, 0x2db0, 0x0003, /* backtick */
     0x06d5, /* subst */
-    0x129c, 0x2558, 0x0ad4, 0x4eec, 0x28e8, 0x5724, 0x08e1, /* trans, transr */
+    0x129c, 0x5738, 0x0ad4, 0x4eec, 0x28e8, 0x2544, 0x08e1, /* trans, transr */
     0x10dc, 0x05f8, 0x0067, /* sassign */
     0x0d98, 0x0c94, 0x0b90, 0x3cec, 0x06c8, 0x0067, /* aassign */
     0x5430, 0x0003, /* chomp, schomp, negate, i_negate, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, refaddr, reftype, ceil, floor */
@@ -3093,8 +3093,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* QR         */ (0),
     /* SUBST      */ (OPpTRUEBOOL),
     /* SUBSTCONT  */ (OPpARG1_MASK),
-    /* TRANS      */ (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_USE_SVOP|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE),
-    /* TRANSR     */ (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_USE_SVOP|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE),
+    /* TRANS      */ (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_GROWS|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_USE_SVOP|OPpTRANS_DELETE),
+    /* TRANSR     */ (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_GROWS|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_USE_SVOP|OPpTRANS_DELETE),
     /* SASSIGN    */ (OPpARG2_MASK|OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV),
     /* AASSIGN    */ (OPpARG2_MASK|OPpASSIGN_TRUEBOOL|OPpMAYBE_LVSUB|OPpASSIGN_COMMON_AGG|OPpASSIGN_COMMON_RC1|OPpASSIGN_COMMON_SCALAR),
     /* CHOP       */ (OPpARG1_MASK),
