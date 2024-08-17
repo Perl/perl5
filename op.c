@@ -7245,8 +7245,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             del, squash, complement,
             cBOOL(o->op_private & OPpTRANS_IDENTICAL),
             cBOOL(o->op_private & OPpTRANS_USE_SVOP),
-            cBOOL(o->op_private & OPpTRANS_GROWS),
-            cBOOL(o->op_private & OPpTRANS_CAN_FORCE_UTF8),
+            (o->op_private & OPpTRANS_MASK) == OPpTRANS_GROWS,
+            (o->op_private & OPpTRANS_MASK) == OPpTRANS_CAN_FORCE_UTF8,
             max_expansion));
 
     Safefree(r_map);

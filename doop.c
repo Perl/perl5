@@ -62,7 +62,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         SvSETMAGIC(sv);
     }
     else {
-        const bool grows = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
+        const bool grows = (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_GROWS;
         U8 *d;
         U8 *dstart;
 
@@ -240,7 +240,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     }
     else { /* is utf8 */
         const bool squash = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
-        const bool grows  = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
+        const bool grows = (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_GROWS;
         U8 *d;
         U8 *dstart;
         Size_t size = tbl->size;
@@ -418,7 +418,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     UV previous_map = TR_OOB;
     const bool squash         = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
     const bool delete_unfound = cBOOL(PL_op->op_private & OPpTRANS_DELETE);
-    bool inplace = ! cBOOL(PL_op->op_private & OPpTRANS_GROWS);
+    bool inplace = (PL_op->op_private & OPpTRANS_MASK) != OPpTRANS_GROWS;
     const UV* from_array = invlist_array(from_invlist);
     UV final_map = TR_OOB;
     bool out_is_utf8 = cBOOL(SvUTF8(sv));
@@ -438,7 +438,9 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     /* If there is something in the transliteration that could force the input
      * to be changed to UTF-8, we don't know if we can do it in place, so
      * assume cannot */
-    if (! out_is_utf8 && (PL_op->op_private & OPpTRANS_CAN_FORCE_UTF8)) {
+    if (   ! out_is_utf8
+        && (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_CAN_FORCE_UTF8)
+    {
         inplace = FALSE;
     }
 
