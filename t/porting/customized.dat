@@ -10,15 +10,9 @@ MIME::Base64 cpan/MIME-Base64/Base64.xs ad617fe2d01932c35b92defa26d40aba601a95a8
 MIME::Base64 cpan/MIME-Base64/lib/MIME/Base64.pm 18e38d197c7c83f96b24f48bef514e93908e6a82
 MIME::Base64 cpan/MIME-Base64/lib/MIME/QuotedPrint.pm 36cbb455ab57b9bbca7e86f50987c8b1df1a8122
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
-Scalar::Util cpan/Scalar-List-Utils/t/uniqnum.t 553b0df79a084015b39e4ae9774f801c9eafeb4c
-Test2::Suite cpan/Test2-Suite/t/modules/Require/AutomatedTesting.t 87095a0ad2ef036d95861aad55b2d2118859abc9
-Test2::Suite cpan/Test2-Suite/t/modules/Require/ExtendedTesting.t 47f28c9bccf130983827637c42b7026d8f70aa69
-Test2::Suite cpan/Test2-Suite/t/modules/Require/NonInteractiveTesting.t 05e6835384ff054d5fa1b2d62b0401c7944a7a52
-Test2::Suite cpan/Test2-Suite/t/modules/Require/ReleaseTesting.t 1eb2d643a4ff304131769de79eac3a6525b4fbe0
-Test2::Suite cpan/Test2-Suite/t/regression/291-async-subtest-done-testing.t e1d1145da23a2d1bfd9bbe126e9c4d7e5198f259
-Test::Harness cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm 68d1c45ebf06f9ed734f3cd4f055fc8f05df67cb
 Time::Piece cpan/Time-Piece/Piece.pm 8cec8b66183ceddb9bf2b6af35dcdd345bc9adfa
 Time::Piece cpan/Time-Piece/Piece.xs 543152540ee17788a638b2c5746b86c3d04401d1
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
 Win32API::File cpan/Win32API-File/File.xs beb870fed4490d2faa547b4a8576b8d64d1d27c5
+autodie cpan/autodie/t/utime.t f94c3000b5b23db59df64895594050d7151f8333
 version cpan/version/lib/version.pm 8080cfe1fb21d5248c8ff5133b298d249d11e8e8

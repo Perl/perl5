@@ -171,6 +171,9 @@ our %Modules = (
                 t/no-all.t
                 )
         ],
+        'CUSTOMIZED'   => [
+            qw( t/utime.t )
+        ],
     },
 
     'AutoLoader' => {
