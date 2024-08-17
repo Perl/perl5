@@ -719,7 +719,7 @@ SKIP: {
 	) {
 		my($pattern, $flag) = @$_;
 		my $prog = "split $pattern";
-		my $expect = qr{^r->extflags:.*\b$flag\b}m;
+		my $expect = qr{^r->extflags:.*\b$flag\b}ms;
 		fresh_perl_like($prog, $expect, {
 			switches => [ '-Mre=Debug,COMPILE', '-c' ],
 		}, "special-case pattern for $prog");
@@ -741,7 +741,7 @@ SKIP: {
 
     for my $prog ( @skipwhite ) {
         fresh_perl_like("use re qw(/$modifiers); \$sp=qq( ); \$e=qq(); $prog;",
-            qr{^r->extflags:.*\bSKIPWHITE\b\s\bWHITE\b}m,
+            qr{^r->extflags:.*\bSKIPWHITE\b\s\n?\bWHITE\b}ms,
             {switches => [ '-Mre=Debug,COMPILE' ]},
             "$prog sets SKIPWHITE|WHITE under `use re qw(/$modifiers)`");
 
@@ -753,12 +753,12 @@ SKIP: {
     }
     for my $prog ( @noskipwhite) {
         fresh_perl_like("use re qw(/$modifiers); \$sp=qq( ); \$e=qq(); $prog;",
-            qr{^r->extflags:.*\bNULL\b}m,
+            qr{^r->extflags:.*\bNULL\b}ms,
             {switches => [ '-Mre=Debug,COMPILE' ]},
             "$prog does not set SKIPWHITE|WHITE under `use re qw(/$modifiers)`");
         fresh_perl_like("use re qw(/$modifiers); \$sp=qq( ); \$e=qq();"
                        ."\$_=qq( 1  1 ); \@c=$prog; print 0+\@c, qq(<\@c>)",
-            qr{^6<  1     1  >}m,
+            qr{^6<  1     1  >}ms,
             {},
             "$prog matches expected under `use re qw(/$modifiers)`");
     }
