@@ -2305,8 +2305,8 @@ sub output ($destpod) {  # Output a complete pod file
             }
 
             # Then, output everything.
-            for my $function_name (sort dictionary_order keys %$section_info) {
-                docout($fh, $function_name, $section_info->{$function_name});
+            for my $this_leader (sort dictionary_order keys %$section_info) {
+                docout($fh, $this_leader, $section_info->{$this_leader});
             }
         }
         else {
