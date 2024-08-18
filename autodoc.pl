@@ -1679,7 +1679,7 @@ sub docout ($fh, $element_name, $docref) {  # output the docs for one function
         }
 
         # If there is a single item in the group, no need to give the name,
-        # bu`t capitalize the first word.
+        # but capitalize the first word.
         if (@items == 1) {
             $entry = ucfirst($entry);
         }
@@ -1746,9 +1746,8 @@ sub docout ($fh, $element_name, $docref) {  # output the docs for one function
     my @usage;
     if (defined $docref->{usage}) {
 
-        # A complete override of the usage section.  Note that the check for
-        # the O flag isn't checked for, as that usage is never output in this
-        # case
+        # A complete override of the usage section.  Note that the O flag
+        # isn't checked for, as that usage is never output in this case
         push @usage, ($docref->{usage} =~ s/^/ /mrg), "\n";
     }
     else {
