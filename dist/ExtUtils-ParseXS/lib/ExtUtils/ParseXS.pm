@@ -1323,10 +1323,15 @@ EOF
       # Process any implicit INPUT section.
       $self->INPUT_handler($_);
 
+      # keywords which can appear anywhere in an XSUB
+      my $generic_xsub_keys =
+        $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt;
+
       # Process as many keyword lines/blocks as can be found which match
       # the pattern. At this stage it's looking for (possibly multiple)
       # INPUT and/or PREINIT blocks, plus any generic XSUB keywords.
-      $self->process_keywords("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|ATTRS|PROTOTYPE|SCOPE|OVERLOAD");
+      $self->process_keywords(
+        "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$generic_xsub_keys");
 
       print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
         |   ENTER;
@@ -1417,7 +1422,7 @@ EOF
         # the pattern. At this stage it's looking for (possibly multiple)
         # INIT blocks, plus any generic XSUB keywords.
         $self->process_keywords(
-        "INIT|ALIAS|ATTRS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS|OVERLOAD");
+        "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$generic_xsub_keys");
 
         # ----------------------------------------------------------------
         # Time to emit the main body of the XSUB. Either the real code
@@ -1543,7 +1548,7 @@ EOF
       # the pattern.
       # XXX POSTCALL is documented to precede OUTPUT, but here we allow
       # them in any order and multiplicity.
-      $self->process_keywords("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
+      $self->process_keywords("OUTPUT|POSTCALL|$generic_xsub_keys");
 
       # A CODE section using RETVAL must also have an OUTPUT entry
       if (        $self->{xsub_seen_RETVAL_in_CODE}
@@ -1692,7 +1697,7 @@ EOF
 
       # Process as many keyword lines/blocks as can be found which match
       # the pattern.
-      $self->process_keywords("CLEANUP|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
+      $self->process_keywords("CLEANUP|$generic_xsub_keys");
 
       # ----------------------------------------------------------------
       # Emit function trailers

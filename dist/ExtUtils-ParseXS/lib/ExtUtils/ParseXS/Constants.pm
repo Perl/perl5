@@ -47,4 +47,9 @@ our @XSKeywords      = qw(
 
 our $XSKeywordsAlternation = join('|', @XSKeywords);
 
+
+# keywords which can appear anywhere within an XSUB.
+
+our $generic_xsub_keywords_alt = 'ALIAS|ATTRS|OVERLOAD|PROTOTYPE';
+
 1;
