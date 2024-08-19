@@ -2956,7 +2956,7 @@ EOF
 # current file state, in preparation for INCLUDEing a new file. (Note that
 # it doesn't handle type => 'if' style entries, only file entries.)
 
-sub PushXSStack {
+sub push_parse_stack {
   my ExtUtils::ParseXS $self = shift;
   my %args = @_;
   # Save the current file context.
@@ -3004,7 +3004,7 @@ sub INCLUDE_handler {
           " 'perldoc perlxs' for details.");
   }
 
-  $self->PushXSStack();
+  $self->push_parse_stack();
 
   $self->{in_fh} = Symbol::gensym();
 
@@ -3088,7 +3088,7 @@ sub INCLUDE_COMMAND_handler {
   $self->death("INCLUDE_COMMAND: pipes are illegal")
     if /^\s*\|/ or /\|\s*$/;
 
-  $self->PushXSStack( IsPipe => 1 );
+  $self->push_parse_stack( IsPipe => 1 );
 
   $self->{in_fh} = Symbol::gensym();
 
