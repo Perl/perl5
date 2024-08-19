@@ -69,6 +69,32 @@ They were deprecated in Perl v5.38.0 and scheduled for removal in Perl
 
 These features have now been entirely removed.
 
+If you code currently uses C<given>/C<when> or smart match this can be
+replaced with an C<if>/C<else> chain, or there are several alternative
+"switch" or smart match implementations on CPAN.
+
+In no particular order:
+
+=over
+
+=item *
+
+L<Syntax::Infix::Smartmatch|https://metacpan.org/pod/Syntax::Infix::Smartmatch>
+
+=item *
+
+L<Switch::Back|https://metacpan.org/pod/Switch::Back>
+
+=item *
+
+L<Syntax::Operator::Matches|https://metacpan.org/pod/Syntax::Operator::Matches>
+
+=item *
+
+L<Syntax::Keyword::Match|https://metacpan.org/pod/Syntax::Keyword::Match>
+
+=back
+
 [github #22370]
 
 =head1 Deprecations
