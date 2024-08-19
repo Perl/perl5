@@ -1,5 +1,6 @@
 package ExtUtils::ParseXS;
 use strict;
+use warnings;
 
 # Note that the pod for this module is separate in ParseXS.pod.
 #
