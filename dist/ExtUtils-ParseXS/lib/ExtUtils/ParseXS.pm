@@ -1326,7 +1326,7 @@ EOF
       # Process as many keyword lines/blocks as can be found which match
       # the pattern. At this stage it's looking for (possibly multiple)
       # INPUT and/or PREINIT blocks, plus any generic XSUB keywords.
-      $self->process_keyword("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|ATTRS|PROTOTYPE|SCOPE|OVERLOAD");
+      $self->process_keywords("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|ATTRS|PROTOTYPE|SCOPE|OVERLOAD");
 
       print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
         |   ENTER;
@@ -1416,7 +1416,7 @@ EOF
         # Process as many keyword lines/blocks as can be found which match
         # the pattern. At this stage it's looking for (possibly multiple)
         # INIT blocks, plus any generic XSUB keywords.
-        $self->process_keyword(
+        $self->process_keywords(
         "INIT|ALIAS|ATTRS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS|OVERLOAD");
 
         # ----------------------------------------------------------------
@@ -1543,7 +1543,7 @@ EOF
       # the pattern.
       # XXX POSTCALL is documented to precede OUTPUT, but here we allow
       # them in any order and multiplicity.
-      $self->process_keyword("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
+      $self->process_keywords("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
       # A CODE section using RETVAL must also have an OUTPUT entry
       if (        $self->{xsub_seen_RETVAL_in_CODE}
@@ -1692,7 +1692,7 @@ EOF
 
       # Process as many keyword lines/blocks as can be found which match
       # the pattern.
-      $self->process_keyword("CLEANUP|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
+      $self->process_keywords("CLEANUP|ALIAS|ATTRS|PROTOTYPE|OVERLOAD");
 
       # ----------------------------------------------------------------
       # Emit function trailers
@@ -2242,7 +2242,7 @@ sub merge_section {
 # Process as many keyword lines/blocks as can be found which match the
 # pattern, by calling the FOO_handler() method for each keyword.
 
-sub process_keyword {
+sub process_keywords {
   my ExtUtils::ParseXS $self = shift;
   my ($pattern) = @_;
 
