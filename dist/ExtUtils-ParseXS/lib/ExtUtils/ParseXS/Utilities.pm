@@ -17,7 +17,7 @@ our (@ISA, @EXPORT_OK);
   process_typemaps
   map_type
   standard_XS_defs
-  assign_func_args
+  C_func_signature
   analyze_preprocessor_statement
   set_cond
   Warn
@@ -44,7 +44,7 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     process_typemaps
     map_type
     standard_XS_defs
-    assign_func_args
+    C_func_signature
     analyze_preprocessor_statement
     set_cond
     Warn
@@ -494,7 +494,7 @@ EOF
   return 1;
 }
 
-=head2 C<assign_func_args()>
+=head2 C<C_func_signature()>
 
 =over 4
 
@@ -507,7 +507,7 @@ args marked as C<*OUT*> are prefixed with '&'.
 
 =item * Arguments
 
-  $string = assign_func_args($self, $argsref, $class);
+  $sig_string = $self->C_func_signature($argsref, $class);
 
 C<$argref> is an array reference containing the xsub's parameters.
 
@@ -521,7 +521,7 @@ A string such as C<'foo, &bar, baz'>
 
 =cut
 
-sub assign_func_args {
+sub C_func_signature {
   my ExtUtils::ParseXS $self = shift;
   my ($argsref, $class) = @_;
   my @func_args = @{$argsref};
