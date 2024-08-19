@@ -141,7 +141,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+C<tr///> now runs at the same speed regardless of the internal
+representation of its operand, as long as the only characters being
+translated are ASCII-range, for example C<tr/A-Z/a-z/>.  Previously, if
+the internal encoding was UTF-8, a slower, more general implementation
+was used.
 
 =back
 
