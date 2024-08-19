@@ -2127,8 +2127,9 @@ EOF
 
   if (@{ $self->{bootcode_later} }) {
     print "\n    /* Initialisation Section */\n\n";
-    @{ $self->{line} } = @{ $self->{bootcode_later} };
-    $self->print_section();
+    print "$_\n" for @{$self->{bootcode_later}};
+    print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+      if $self->{config_WantLineNumbers};
     print "\n    /* End of Initialisation Section */\n\n";
   }
 
