@@ -2265,11 +2265,14 @@ sub BOOT_handler {
   $self->check_conditional_preprocessor_statements();
 
   # prepend a '#line' directive if needed
-  push (@{ $self->{bootcode_later} },
-       "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \""
-       . escape_file_for_line_directive($self->{in_pathname}) . "\"\n")
-    if    $self->{config_WantLineNumbers}
-       && $self->{line}->[0] !~ /^\s*#\s*line\b/;
+  if (   $self->{config_WantLineNumbers}
+      && $self->{line}->[0] !~ /^\s*#\s*line\b/)
+  {
+    push @{ $self->{bootcode_later} },
+       sprintf "#line %d \"%s\"\n",
+         $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }],
+         escape_file_for_line_directive($self->{in_pathname});
+  }
 
   # Save all the BOOT lines plus trailing empty line to be emitted later.
   push @{ $self->{bootcode_later} }, "$_\n" for @{ $self->{line} }, "";
