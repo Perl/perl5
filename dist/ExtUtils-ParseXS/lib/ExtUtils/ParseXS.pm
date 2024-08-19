@@ -1974,12 +1974,12 @@ EOF
       |
 EOF
 
-    unshift(@{ $self->{bootcode_early} }, Q(<<"MAKE_FETCHMETHOD_WORK"));
+    unshift(@{ $self->{bootcode_early} }, Q(<<"EOF"));
       |   /* Making a sub named "${package}::()" allows the package */
       |   /* to be findable via fetchmethod(), and causes */
       |   /* overload::Overloaded("$package") to return true. */
       |   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
-MAKE_FETCHMETHOD_WORK
+EOF
   }
 
 
