@@ -25,9 +25,6 @@ Nothing is exported.  Use fully qualified variable names.
 
 =cut
 
-# FIXME: THESE ARE NOT CONSTANTS!
-our @InitFileCode;
-
 # Note that to reduce maintenance, $PrototypeRegexp is used
 # by ExtUtils::Typemaps, too!
 our $PrototypeRegexp = "[" . quotemeta('\$%&*@;[]_') . "]";

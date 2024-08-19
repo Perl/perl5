@@ -493,7 +493,7 @@ sub process_file {
   # for within an #if / #endif.
   @{ $self->{XS_parse_stack} } = ({type => 'none'});
 
-  $self->{bootcode_early} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
+  $self->{bootcode_early} = [];
   $self->{bootcode_later} = [];
 
   # hash of package name => package C name
