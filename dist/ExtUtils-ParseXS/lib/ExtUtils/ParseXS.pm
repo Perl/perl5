@@ -692,7 +692,7 @@ EOM
       # So that only the defined XSUBs get added to the symbol table.
       print "#define $cpp_next_tmp_define 1\n\n";
       push(@{ $self->{bootcode_early} }, "#if $cpp_next_tmp_define\n");
-      push(@{ $self->{bootcode_later} }, "#if $cpp_next_tmp_define");
+      push(@{ $self->{bootcode_later} }, "#if $cpp_next_tmp_define\n");
       $self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{varname}
           = $cpp_next_tmp_define++;
     }
@@ -790,12 +790,12 @@ EOM
       # prepend a '#line' directive if needed
       push (@{ $self->{bootcode_later} },
            "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \""
-           . escape_file_for_line_directive($self->{in_pathname}) . "\"")
+           . escape_file_for_line_directive($self->{in_pathname}) . "\"\n")
         if    $self->{config_WantLineNumbers}
            && $self->{line}->[0] !~ /^\s*#\s*line\b/;
 
       # Save all the BOOT lines plus trailing empty line to be emitted later.
-      push (@{ $self->{bootcode_later} }, @{ $self->{line} }, "");
+      push @{ $self->{bootcode_later} }, "$_\n" for @{ $self->{line} }, "";
       next PARAGRAPH;
     }
 
@@ -2127,7 +2127,7 @@ EOF
 
   if (@{ $self->{bootcode_later} }) {
     print "\n    /* Initialisation Section */\n\n";
-    print "$_\n" for @{$self->{bootcode_later}};
+    print @{$self->{bootcode_later}};
     print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
       if $self->{config_WantLineNumbers};
     print "\n    /* End of Initialisation Section */\n\n";

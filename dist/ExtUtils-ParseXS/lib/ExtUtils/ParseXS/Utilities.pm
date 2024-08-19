@@ -591,7 +591,7 @@ sub analyze_preprocessor_statement {
     if ($self->{XS_parse_stack}->[-1]{varname}) {
       # close any '#ifdef XSubPPtmpAAAA' inserted earlier into boot code.
       push(@{ $self->{bootcode_early} }, "#endif\n");
-      push(@{ $self->{bootcode_later} }, "#endif");
+      push(@{ $self->{bootcode_later} }, "#endif\n");
     }
 
     my(@fns) = keys %{$self->{XS_parse_stack}->[-1]{functions}};
