@@ -74,7 +74,7 @@ use ExtUtils::ParseXS::Utilities qw(
   process_typemaps
   map_type
   standard_XS_defs
-  assign_func_args
+  C_func_signature
   analyze_preprocessor_statement
   set_cond
   Warn
@@ -1152,7 +1152,7 @@ EOM
       # The args to pass to the wrapped library function. Basically
       # join(',' @args) but with '&' prepended for any *OUT* args.
       $self->{xsub_C_auto_function_signature} =
-          $self->assign_func_args(\@args, $self->{xsub_class});
+          $self->C_func_signature(\@args, $self->{xsub_class});
 
       # map argument names to indexes
       @{ $self->{xsub_map_argname_to_idx} }{@args} = @map_param_idx_to_arg_idx;
