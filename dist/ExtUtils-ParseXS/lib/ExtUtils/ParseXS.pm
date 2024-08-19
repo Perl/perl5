@@ -19,9 +19,9 @@ use strict;
 #
 # Of particular note is the Q() function, which is typically used to
 # process escaped ("quoted") heredoc text of C code fragments to be
-# output. It strips any leading /^#/, and converts [[ and ]] to { and }.
-# This allows unmatched braces to be included in the C fragments without
-# confusing text editors.
+# output. It strips an initial '|' preceded by optional spaces, and
+# converts [[ and ]] to { and }.  This allows unmatched braces to be
+# included in the C fragments without confusing text editors.
 #
 # Some other tasks have been moved out to various .pm files under ParseXS:
 #
@@ -1222,20 +1222,20 @@ EOM
 
     # Emit function header
       print Q(<<"EOF");
-#$extern
-#XS_EUPXS(XS_$self->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
-#XS_EUPXS(XS_$self->{xsub_func_full_C_name})
-#[[
-#    dVAR; dXSARGS;
+        |$extern
+        |XS_EUPXS(XS_$self->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
+        |XS_EUPXS(XS_$self->{xsub_func_full_C_name})
+        |[[
+        |    dVAR; dXSARGS;
 EOF
     }
 
     print Q(<<"EOF") if $self->{xsub_seen_ALIAS};
-#    dXSI32;
+      |    dXSI32;
 EOF
 
     print Q(<<"EOF") if $self->{xsub_seen_INTERFACE};
-#    dXSFUNCTION($self->{xsub_return_type});
+      |    dXSFUNCTION($self->{xsub_return_type});
 EOF
 
 
@@ -1246,21 +1246,21 @@ EOF
         set_cond($self->{xsub_seen_ellipsis}, $min_arg_count, $args_count);
 
       print Q(<<"EOF") if $self->{config_allow_exceptions}; # "-except" cmd line switch
-#    char errbuf[1024];
-#    *errbuf = '\\0';
+        |    char errbuf[1024];
+        |    *errbuf = '\\0';
 EOF
 
       if ($condition_code) {
         print Q(<<"EOF");
-#    if ($condition_code)
-#       croak_xs_usage(cv,  "$report_args");
+          |    if ($condition_code)
+          |       croak_xs_usage(cv,  "$report_args");
 EOF
       }
       else {
         # cv and items likely to be unused
         print Q(<<"EOF");
-#    PERL_UNUSED_VAR(cv); /* -W */
-#    PERL_UNUSED_VAR(items); /* -W */
+          |    PERL_UNUSED_VAR(cv); /* -W */
+          |    PERL_UNUSED_VAR(items); /* -W */
 EOF
       }
     }
@@ -1271,11 +1271,11 @@ EOF
     # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     # but such a move could break third-party extensions
     print Q(<<"EOF") if $self->{xsub_seen_PPCODE};
-#    PERL_UNUSED_VAR(ax); /* -Wall */
+      |    PERL_UNUSED_VAR(ax); /* -Wall */
 EOF
 
     print Q(<<"EOF") if $self->{xsub_seen_PPCODE};
-#    SP -= items;
+      |    SP -= items;
 EOF
 
     # ----------------------------------------------------------------
@@ -1318,7 +1318,7 @@ EOF
       {
         my $try = $self->{config_allow_exceptions} ? ' TRY' : '';
         print Q(<<"EOF");
-#   $try [[
+          |   $try [[
 EOF
       }
 
@@ -1341,8 +1341,8 @@ EOF
       $self->process_keyword("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|ATTRS|PROTOTYPE|SCOPE|OVERLOAD");
 
       print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
-#   ENTER;
-#   [[
+        |   ENTER;
+        |   [[
 EOF
 
       # Emit a 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
@@ -1711,22 +1711,22 @@ EOF
       # ----------------------------------------------------------------
 
       print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
-#   ]]
+        |   ]]
 EOF
 
       print Q(<<"EOF") if $self->{xsub_SCOPE_enabled} and not $self->{xsub_seen_PPCODE};
-#   LEAVE;
+        |   LEAVE;
 EOF
 
       print Q(<<"EOF");
-#    ]]
+        |    ]]
 EOF
 
       print Q(<<"EOF") if $self->{config_allow_exceptions};
-#    BEGHANDLERS
-#    CATCHALL
-#    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
-#    ENDHANDLERS
+        |    BEGHANDLERS
+        |    CATCHALL
+        |    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
+        |    ENDHANDLERS
 EOF
 
       if ($self->check_keyword("CASE")) {
@@ -1750,8 +1750,8 @@ EOF
     # ----------------------------------------------------------------
 
     print Q(<<"EOF") if $self->{config_allow_exceptions};
-#    if (errbuf[0])
-#    Perl_croak(aTHX_ errbuf);
+        |    if (errbuf[0])
+        |    Perl_croak(aTHX_ errbuf);
 EOF
 
     # Emit XSRETURN(N) or XSRETURN_EMPTY. It's possible that the user's
@@ -1767,12 +1767,12 @@ EOF
 
     if ($XSRETURN_count) {
       print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
-#    XSRETURN($XSRETURN_count);
+        |    XSRETURN($XSRETURN_count);
 EOF
     }
     else {
       print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
-#    XSRETURN_EMPTY;
+        |    XSRETURN_EMPTY;
 EOF
     }
 
@@ -1784,8 +1784,8 @@ EOF
 
     # Emit final closing bracket for the XSUB.
     print Q(<<"EOF");
-#]]
-#
+        |]]
+        |
 EOF
 
     # ----------------------------------------------------------------
@@ -1859,8 +1859,8 @@ EOF
         foreach my $xname (sort keys %{ $self->{xsub_map_alias_name_to_value} }) {
           my $value = $self->{xsub_map_alias_name_to_value}{$xname};
           push(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-#        cv = $newXS(\"$xname\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
-#        XSANY.any_i32 = $value;
+            |        cv = $newXS(\"$xname\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
+            |        XSANY.any_i32 = $value;
 EOF
         }
       }
@@ -1868,8 +1868,8 @@ EOF
         # Generate a standard newXS() call, plus a single call to
         # apply_attrs_string() call with the string of attributes.
         push(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-#        cv = $newXS(\"$self->{xsub_func_full_perl_name}\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
-#        apply_attrs_string("$self->{PACKAGE_name}", cv, "@{ $self->{xsub_attributes} }", 0);
+          |        cv = $newXS(\"$self->{xsub_func_full_perl_name}\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
+          |        apply_attrs_string("$self->{PACKAGE_name}", cv, "@{ $self->{xsub_attributes} }", 0);
 EOF
       }
       elsif ($self->{xsub_seen_INTERFACE_or_MACRO}) {
@@ -1881,8 +1881,8 @@ EOF
           my $value = $self->{xsub_map_interface_name_short_to_original}{$yname};
           $yname = "$self->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
           push(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-#        cv = $newXS(\"$yname\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
-#        $self->{xsub_interface_macro_set}(cv,$value);
+            |        cv = $newXS(\"$yname\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
+            |        $self->{xsub_interface_macro_set}(cv,$value);
 EOF
         }
       }
@@ -1964,21 +1964,21 @@ EOF
     # make them findable with fetchmethod
     my $packid = $self->{map_overloaded_package_to_C_package}->{$package};
     print Q(<<"EOF");
-#XS_EUPXS(XS_${packid}_nil); /* prototype to pass -Wmissing-prototypes */
-#XS_EUPXS(XS_${packid}_nil)
-#{
-#   dXSARGS;
-#   PERL_UNUSED_VAR(items);
-#   XSRETURN_EMPTY;
-#}
-#
+      |XS_EUPXS(XS_${packid}_nil); /* prototype to pass -Wmissing-prototypes */
+      |XS_EUPXS(XS_${packid}_nil)
+      |{
+      |   dXSARGS;
+      |   PERL_UNUSED_VAR(items);
+      |   XSRETURN_EMPTY;
+      |}
+      |
 EOF
 
     unshift(@{ $self->{bootcode_early} }, Q(<<"MAKE_FETCHMETHOD_WORK"));
-#   /* Making a sub named "${package}::()" allows the package */
-#   /* to be findable via fetchmethod(), and causes */
-#   /* overload::Overloaded("$package") to return true. */
-#   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
+      |   /* Making a sub named "${package}::()" allows the package */
+      |   /* to be findable via fetchmethod(), and causes */
+      |   /* overload::Overloaded("$package") to return true. */
+      |   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
 MAKE_FETCHMETHOD_WORK
   }
 
@@ -1988,21 +1988,20 @@ MAKE_FETCHMETHOD_WORK
   # ----------------------------------------------------------------
 
   print Q(<<"EOF");
-##ifdef __cplusplus
-#extern "C" [[
-##endif
+    |#ifdef __cplusplus
+    |extern "C" [[
+    |#endif
 EOF
 
   print Q(<<"EOF");
-#XS_EXTERNAL(boot_$self->{MODULE_cname}); /* prototype to pass -Wmissing-prototypes */
-#XS_EXTERNAL(boot_$self->{MODULE_cname})
-#[[
-##if PERL_VERSION_LE(5, 21, 5)
-#    dVAR; dXSARGS;
-##else
-#    dVAR; ${\($self->{VERSIONCHECK_value} ?
-     'dXSBOOTARGSXSAPIVERCHK;' : 'dXSBOOTARGSAPIVERCHK;')}
-##endif
+    |XS_EXTERNAL(boot_$self->{MODULE_cname}); /* prototype to pass -Wmissing-prototypes */
+    |XS_EXTERNAL(boot_$self->{MODULE_cname})
+    |[[
+    |#if PERL_VERSION_LE(5, 21, 5)
+    |    dVAR; dXSARGS;
+    |#else
+    |    dVAR; ${\($self->{VERSIONCHECK_value} ? 'dXSBOOTARGSXSAPIVERCHK;' : 'dXSBOOTARGSAPIVERCHK;')}
+    |#endif
 EOF
 
   # Declare a 'file' var for passing to newXS() and variants.
@@ -2020,40 +2019,40 @@ EOF
   # warnings with recent gcc.
 
   print Q(<<"EOF") if $self->{xsub_func_full_C_name};
-##if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
-#    char* file = __FILE__;
-##else
-#    const char* file = __FILE__;
-##endif
-#
-#    PERL_UNUSED_VAR(file);
+    |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
+    |    char* file = __FILE__;
+    |#else
+    |    const char* file = __FILE__;
+    |#endif
+    |
+    |    PERL_UNUSED_VAR(file);
 EOF
 
   # Emit assorted declarations
 
   print Q(<<"EOF");
-#
-#    PERL_UNUSED_VAR(cv); /* -W */
-#    PERL_UNUSED_VAR(items); /* -W */
+    |
+    |    PERL_UNUSED_VAR(cv); /* -W */
+    |    PERL_UNUSED_VAR(items); /* -W */
 EOF
 
   if ($self->{VERSIONCHECK_value}) {
     print Q(<<"EOF") ;
-##if PERL_VERSION_LE(5, 21, 5)
-#    XS_VERSION_BOOTCHECK;
-##  ifdef XS_APIVERSION_BOOTCHECK
-#    XS_APIVERSION_BOOTCHECK;
-##  endif
-##endif
-
+    |#if PERL_VERSION_LE(5, 21, 5)
+    |    XS_VERSION_BOOTCHECK;
+    |#  ifdef XS_APIVERSION_BOOTCHECK
+    |    XS_APIVERSION_BOOTCHECK;
+    |#  endif
+    |#endif
+    |
 EOF
 
   } else {
     print Q(<<"EOF") ;
-##if PERL_VERSION_LE(5, 21, 5) && defined(XS_APIVERSION_BOOTCHECK)
-#  XS_APIVERSION_BOOTCHECK;
-##endif
-
+      |#if PERL_VERSION_LE(5, 21, 5) && defined(XS_APIVERSION_BOOTCHECK)
+      |  XS_APIVERSION_BOOTCHECK;
+      |#endif
+      |
 EOF
 
   }
@@ -2068,9 +2067,9 @@ EOF
       or defined $self->{seen_INTERFACE_or_MACRO})
   {
     print Q(<<"EOF");
-#    [[
-#        CV * cv;
-#
+      |    [[
+      |        CV * cv;
+      |
 EOF
   }
 
@@ -2081,10 +2080,10 @@ EOF
     # Before 5.10, PL_amagic_generation used to need setting to at least a
     # non-zero value to tell perl that any overloading was present.
     print Q(<<"EOF");
-#    /* register the overloading (type 'A') magic */
-##if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
-#    PL_amagic_generation++;
-##endif
+      |    /* register the overloading (type 'A') magic */
+      |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
+      |    PL_amagic_generation++;
+      |#endif
 EOF
 
     for my $package (sort keys %{ $self->{map_overloaded_package_to_C_package} }) {
@@ -2095,13 +2094,13 @@ EOF
       my $fallback =     $self->{map_package_to_fallback_string}->{$package}
                      || "&PL_sv_undef";
       print Q(<<"EOF");
-#    /* The magic for overload gets a GV* via gv_fetchmeth as */
-#    /* mentioned above, and looks in the SV* slot of it for */
-#    /* the "fallback" status. */
-#    sv_setsv(
-#        get_sv( "${package}::()", TRUE ),
-#        $fallback
-#    );
+        |    /* The magic for overload gets a GV* via gv_fetchmeth as */
+        |    /* mentioned above, and looks in the SV* slot of it for */
+        |    /* the "fallback" status. */
+        |    sv_setsv(
+        |        get_sv( "${package}::()", TRUE ),
+        |        $fallback
+        |    );
 EOF
 
     }
@@ -2117,7 +2116,7 @@ EOF
       or defined $self->{seen_INTERFACE_or_MACRO})
   {
     print Q(<<"EOF");
-#    ]]
+      |    ]]
 EOF
   }
 
@@ -2136,20 +2135,20 @@ EOF
   # Emit code to call any UNITCHECK blocks and return true. Since 5.22,
   # this is been put into a separate function.
   print Q(<<'EOF');
-##if PERL_VERSION_LE(5, 21, 5)
-##  if PERL_VERSION_GE(5, 9, 0)
-#    if (PL_unitcheckav)
-#        call_list(PL_scopestack_ix, PL_unitcheckav);
-##  endif
-#    XSRETURN_YES;
-##else
-#    Perl_xs_boot_epilog(aTHX_ ax);
-##endif
-#]]
-#
-##ifdef __cplusplus
-#]]
-##endif
+    |#if PERL_VERSION_LE(5, 21, 5)
+    |#  if PERL_VERSION_GE(5, 9, 0)
+    |    if (PL_unitcheckav)
+    |        call_list(PL_scopestack_ix, PL_unitcheckav);
+    |#  endif
+    |    XSRETURN_YES;
+    |#else
+    |    Perl_xs_boot_epilog(aTHX_ ax);
+    |#endif
+    |]]
+    |
+    |#ifdef __cplusplus
+    |]]
+    |#endif
 EOF
 
   warn("Please specify prototyping behavior for $self->{in_filename} (see perlxs manual)\n")
@@ -2603,7 +2602,7 @@ sub INTERFACE_handler {
     $self->{xsub_map_interface_name_short_to_original}->{$iface_name} = $_;
   }
   print Q(<<"EOF");
-#    XSFUNCTION = $self->{xsub_interface_macro}($self->{xsub_return_type},cv,XSANY.any_dptr);
+    |    XSFUNCTION = $self->{xsub_interface_macro}($self->{xsub_return_type},cv,XSANY.any_dptr);
 EOF
   $self->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
   $self->{seen_INTERFACE_or_MACRO} = 1;       # global
@@ -2941,14 +2940,14 @@ sub EXPORT_XSUB_SYMBOLS_handler {
   my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
   print Q(<<"EOF");
-##undef XS_EUPXS
-##if defined(PERL_EUPXS_ALWAYS_EXPORT)
-##  define XS_EUPXS(name) XS_EXTERNAL(name)
-##elif defined(PERL_EUPXS_NEVER_EXPORT)
-##  define XS_EUPXS(name) XS_INTERNAL(name)
-##else
-##  define XS_EUPXS(name) $xs_impl(name)
-##endif
+    |#undef XS_EUPXS
+    |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
+    |#  define XS_EUPXS(name) XS_EXTERNAL(name)
+    |#elif defined(PERL_EUPXS_NEVER_EXPORT)
+    |#  define XS_EUPXS(name) XS_INTERNAL(name)
+    |#else
+    |#  define XS_EUPXS(name) $xs_impl(name)
+    |#endif
 EOF
 }
 
@@ -3013,9 +3012,9 @@ sub INCLUDE_handler {
   open($self->{in_fh}, $_) or $self->death("Cannot open '$_': $!");
 
   print Q(<<"EOF");
-#
-#/* INCLUDE:  Including '$_' from '$self->{in_filename}' */
-#
+    |
+    |/* INCLUDE:  Including '$_' from '$self->{in_filename}' */
+    |
 EOF
 
   $self->{in_filename} = $_;
@@ -3103,9 +3102,9 @@ sub INCLUDE_COMMAND_handler {
     or $self->death( $self, "Cannot run command '$_' to include its output: $!");
 
   print Q(<<"EOF");
-#
-#/* INCLUDE_COMMAND:  Including output of '$_' from '$self->{in_filename}' */
-#
+    |
+    |/* INCLUDE_COMMAND:  Including output of '$_' from '$self->{in_filename}' */
+    |
 EOF
 
   $self->{in_filename} = $_;
@@ -3162,22 +3161,44 @@ sub PopFile {
   }
 
   print Q(<<"EOF");
-#
-#/* INCLUDE: Returning to '$self->{in_filename}' from '$ThisFile' */
-#
+    |
+    |/* INCLUDE: Returning to '$self->{in_filename}' from '$ThisFile' */
+    |
 EOF
 
   return 1;
 }
 
 
-# Unescape a string (typically a heredoc): strip leading #, and replace [[
-# and ]] with { and } (so that text editors don't see a bare { or } when
-# bouncing around doing brace level matching).
+# Unescape a string (typically a heredoc):
+#   - strip leading '    |' (any number of leading spaces)
+#   - and replace [[ and ]]
+#         with    {  and }
+# so that text editors don't see a bare { or } when bouncing around doing
+# brace level matching.
 
 sub Q {
-  my($text) = @_;
-  $text =~ s/^#//gm;
+  my ($text) = @_;
+  my @lines = split /^/, $text;
+  my $first;
+  for (@lines) {
+    unless (s/^(\s*)\|//) {
+      die "Internal error: no leading '|' in Q() string:\n$_\n";
+    }
+    my $pre = $1;
+    die "Internal error: leading tab char in Q() string:\n$_\n"
+      if $pre =~ /\t/;
+
+    if (defined $first) {
+      die "Internal error: leading indents in Q() string don't match:\n$_\n"
+        if $pre ne $first;
+    }
+    else {
+      $first = $pre;
+    }
+  }
+  $text = join "", @lines;
+
   $text =~ s/\[\[/{/g;
   $text =~ s/\]\]/}/g;
   $text;
