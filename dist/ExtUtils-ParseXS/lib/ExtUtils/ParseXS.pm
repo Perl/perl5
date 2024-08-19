@@ -785,7 +785,7 @@ EOM
 
       # Check all the @{ $self->{line}} lines for balance: all the
       # #if, #else, #endif etc within the BOOT should balance out.
-      check_conditional_preprocessor_statements($self);
+      $self->check_conditional_preprocessor_statements();
 
       # prepend a '#line' directive if needed
       push (@{ $self->{bootcode_later} },
@@ -1164,7 +1164,7 @@ EOM
       # The args to pass to the wrapped library function. Basically
       # join(',' @args) but with '&' prepended for any *OUT* args.
       $self->{xsub_C_auto_function_signature} =
-          assign_func_args($self, \@args, $self->{xsub_class});
+          $self->assign_func_args(\@args, $self->{xsub_class});
 
       # map argument names to indexes
       @{ $self->{xsub_map_argname_to_idx} }{@args} = @map_param_idx_to_arg_idx;
@@ -1359,7 +1359,7 @@ EOF
           } );
         }
         else {
-          print "\t" . map_type($self, "self->{xsub_$}class *");
+          print "\t" . $self->map_type("self->{xsub_$}class *");
           $self->{xsub_map_argname_to_type}->{"THIS"} = "self->{xsub_$}class *";
           $self->generate_init( {
             type          => "$self->{xsub_class} *",
@@ -1389,7 +1389,7 @@ EOF
         if ($self->{xsub_return_type} ne "void") {
 
           # Emit the RETVAL variable declaration.
-          print "\t" . map_type($self, $self->{xsub_return_type}, 'RETVAL') . ";\n"
+          print "\t" . $self->map_type($self->{xsub_return_type}, 'RETVAL') . ";\n"
             if !$self->{xsub_seen_RETVAL_in_INPUT};
           $self->{xsub_map_argname_to_idx}->{"RETVAL"} = 0;
           $self->{xsub_map_argname_to_type}->{"RETVAL"} = $self->{xsub_return_type};
@@ -2403,11 +2403,11 @@ sub INPUT_handler {
     my $printed_name;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
       # Function pointers are not yet supported with output_init()!
-      print "\t" . map_type($self, $var_type, $var_name);
+      print "\t" . $self->map_type($var_type, $var_name);
       $printed_name = 1;
     }
     else {
-      print "\t" . map_type($self, $var_type, undef);
+      print "\t" . $self->map_type($var_type, undef);
       $printed_name = 0;
     }
 
@@ -3478,7 +3478,7 @@ sub fetch_para {
 }
 
 
-# output_init($self, { key = value, ... })
+# $self->output_init({ key = value, ... })
 #   type: 'char *' etc
 #   num:  the parameter number, corresponds to in ST(num-1)
 #   var:  the parameter name
@@ -3547,7 +3547,7 @@ sub output_init {
 }
 
 
-# generate_init($self, { key = value, ... })
+# $self->generate_init({ key = value, ... })
 #   type         'char *' etc
 #   num          the parameter number, corresponds to ST(num-1)
 #   var          the parameter name
@@ -3745,7 +3745,7 @@ sub generate_init {
 }
 
 
-# generate_output($self, { key = value, ... })
+# $self->generate_output({ key = value, ... })
 #
 #   type        'char *' etc
 #   num         the parameter number, corresponds to ST(num-1)
