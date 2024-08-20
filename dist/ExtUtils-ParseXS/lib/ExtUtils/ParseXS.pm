@@ -4014,10 +4014,10 @@ sub generate_output {
       # So for the last two forms revert 'RETVALSV' back.
       if ($do_mortal || $do_setmagic) {
         # $do_mortal or $do_setmagic imply further use of the variable
-        $evalexpr =~ s/RETVALSV/RETVAL/g;
+        $evalexpr =~ s/\bRETVALSV\b/RETVAL/g;
       }
       else {
-        $evalexpr =~ s/RETVALSV/$orig_arg/g;
+        $evalexpr =~ s/\bRETVALSV\b/$orig_arg/g;
       }
     }
 
