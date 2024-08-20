@@ -3906,7 +3906,7 @@ sub generate_output {
     my $orig_arg = $arg;
     my @lines;           # lines of code to eventually emit
     my $use_RETVALSV = 1;
-    my $do_mortal = 0;
+    my $do_mortalize = 0;
     # the typemap already includes 'ST(0) =' rather than 'RETVALSV = ' etc
     my $ST0_already_assigned_to = 0;
     my $want_newmortal = 0;
@@ -4003,7 +4003,7 @@ sub generate_output {
 
         # See comment above about the SVPtr optimisation
         $use_RETVALSV = 0 if $ntype eq "SVPtr";
-        $do_mortal = 1;
+        $do_mortalize = 1;
       }
     }
     else {
@@ -4028,8 +4028,8 @@ sub generate_output {
       #   ST(0) = ...;       otherwise.
       #
       # So for the last two forms revert 'RETVALSV' back.
-      if ($do_mortal || $do_setmagic) {
-        # $do_mortal or $do_setmagic imply further use of the variable
+      if ($do_mortalize || $do_setmagic) {
+        # $do_mortalize or $do_setmagic imply further use of the variable
         $evalexpr =~ s/\bRETVALSV\b/RETVAL/g;
       }
       else {
@@ -4047,7 +4047,7 @@ sub generate_output {
     # Emit mortalisation and set magic code on the result SV if need be
 
     my $sv = $use_RETVALSV ? 'SV' : '';
-    push @lines, "\tRETVAL$sv = sv_2mortal(RETVAL$sv);\n" if $do_mortal;
+    push @lines, "\tRETVAL$sv = sv_2mortal(RETVAL$sv);\n" if $do_mortalize;
     push @lines, "\tSvSETMAGIC(RETVAL$sv);\n"             if $do_setmagic;
 
     # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
