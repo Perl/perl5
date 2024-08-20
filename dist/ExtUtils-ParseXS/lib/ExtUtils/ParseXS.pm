@@ -3908,7 +3908,7 @@ sub generate_output {
     # If the var is called RETVAL, then we return its value on the
     # stack
     my $orig_arg = $arg;
-    my $indent;
+    my @lines;           # lines of code to eventually emit
     my $use_RETVALSV = 1;
     my $do_mortal = 0;
     my $do_copy_tmp = 1;
@@ -4030,27 +4030,10 @@ sub generate_output {
       $do_setmagic = 0;
     }
 
-    # if using RETVALSV, start a new block then declare it.
-    if ($use_RETVALSV) {
-      print "\t{\n\t    SV * RETVALSV;\n";
-      $indent = "\t    ";
-    } else {
-      $indent = "\t";
-    }
-
     # (typically) initialise RETVALSV
-    print $indent.$pre_expr if $pre_expr;
+    push @lines, "\t" . $pre_expr if $pre_expr;
 
-    if ($use_RETVALSV) {
-      # Indent the typemap code 1 level deeper.
-      $evalexpr =~ s/^(\t|        )/$indent/gm;
-      #"\t    \t" doesn't draw right in some IDEs
-      #break down all \t into spaces
-      $evalexpr =~ s/\t/        /g;
-      #rebuild back into \t'es, \t==8 spaces, indent==4 spaces
-      $evalexpr =~ s/        /\t/g;
-    }
-    else {
+    if (!$use_RETVALSV) {
       # we want the typemap to look like one of these three cases:
       #
       #   RETVALSV = ...;    if $use_RETVALSV; else
@@ -4071,22 +4054,39 @@ sub generate_output {
 
     # Emit the typemap, unless it's of the trivial "RETVAL = RETVAL"
     # form, which is sometimes generated for the SVPtr optimisation.
-    print $evalexpr if $evalexpr !~ /^\s*RETVAL = RETVAL;$/;
+    if ($evalexpr !~ /^\s*RETVAL = RETVAL;$/) {
+      push @lines, split /^/, $evalexpr
+    }
 
     # Emit mortalisation and set magic code on the result SV if need be
 
-    print $indent.'RETVAL'.($use_RETVALSV ? 'SV':'')
+    push @lines, "\tRETVAL".($use_RETVALSV ? 'SV':'')
           .' = sv_2mortal(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_mortal;
-    print $indent.'SvSETMAGIC(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_setmagic;
+    push @lines, "\tSvSETMAGIC(RETVAL".($use_RETVALSV ? 'SV':'').");\n" if $do_setmagic;
 
     # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
     # was already assigned to earlier directly by the typemap.
     # The $do_copy_tmp condition (always true except for immortals)
     # means that this is usually done. But for immortals we only do
     # it if extra code has been emitted, i.e. mortalisation or set magic.
-    print $indent."$orig_arg = RETVAL".($use_RETVALSV ? 'SV':'').";\n"
+    push @lines, "\t$orig_arg = RETVAL".($use_RETVALSV ? 'SV':'').";\n"
       if $do_mortal || $do_setmagic || $do_copy_tmp;
-    print "\t}\n" if $use_RETVALSV;
+
+    if ($use_RETVALSV) {
+      # Add an extra 4-indent
+      for (@lines) {
+        s/\t/        /g;   # break down all tabs into spaces
+        s/^/    /;         # add 4-space extra indent
+        s/        /\t/g;   # convert 8 spaces back to tabs
+      }
+
+      # Wrap the output code in a new block with a RETVALSV declaration
+      unshift @lines,  "\t{\n",
+                       "\t    SV * RETVALSV;\n";
+      push    @lines,  "\t}\n";
+    }
+
+    print @lines;
   }
 
   elsif ($do_push) {
