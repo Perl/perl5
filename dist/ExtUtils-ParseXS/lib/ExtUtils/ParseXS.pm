@@ -3908,7 +3908,7 @@ sub generate_output {
     my $use_RETVALSV = 1;
     my $do_mortal = 0;
     my $do_copy_tmp = 1;
-    my $pre_expr;
+    my $want_newmortal = 0;
 
     # Evaluate the typemap, expanding any vars like $var and $arg.
     # So for example,
@@ -3994,13 +3994,13 @@ sub generate_output {
       # This is the opposite case to a '$arg = ' style typemap.
       # We assume it's something like  sv_setiv($arg, (IV)$arg); where
       # we need to create a new mortal for the typemap to update.
-      $pre_expr = "RETVALSV = sv_newmortal();\n";
+      $want_newmortal = 1;
       # new mortals don't have set magic
       $do_setmagic = 0;
     }
 
     # (typically) initialise RETVALSV
-    push @lines, "\t" . $pre_expr if $pre_expr;
+    push @lines, "\tRETVALSV = sv_newmortal();\n" if $want_newmortal;
 
     if (!$use_RETVALSV) {
       # we want the typemap to look like one of these three cases:
