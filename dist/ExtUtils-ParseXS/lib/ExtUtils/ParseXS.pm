@@ -3821,10 +3821,6 @@ sub generate_output {
   # whitespace-tidy the type
   $type = ExtUtils::Typemaps::tidy_type($type);
 
-  # XXX not sure why this is needed. We pass $type rather than local
-  # $argsref->{type} to the eval anyway.
-  local $argsref->{type} = $type;
-
   if ($type =~ /^array\(([^,]*),(.*)\)/) {
     # Handle the implicit array return type, "array(type, nlelem)"
     # specially. It returns a mortal string which is a copy of $var,
@@ -3962,7 +3958,7 @@ sub generate_output {
     # subsequently match /^\s*\Q$arg\E =/ (where $arg is "RETVAL"), but
     # couldn't have matched against the original typemap.
 
-    local $eval_vars->{arg} = $arg = 'RETVALSV';
+    $eval_vars->{arg} = $arg = 'RETVALSV';
     my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
 
     if ($expr =~ /^\t\Q$arg\E = new/) {
@@ -4093,7 +4089,7 @@ sub generate_output {
     # $do_push indicates that this is an OUTLIST value, so an SV with
     # the value should be pushed onto the stack
     print "\tPUSHs(sv_newmortal());\n";
-    local $eval_vars->{arg} = "ST($num)";
+    $eval_vars->{arg} = "ST($num)";
     $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
   }
