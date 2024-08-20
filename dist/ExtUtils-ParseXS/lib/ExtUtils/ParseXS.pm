@@ -3907,7 +3907,8 @@ sub generate_output {
     my @lines;           # lines of code to eventually emit
     my $use_RETVALSV = 1;
     my $do_mortal = 0;
-    my $do_copy_tmp = 1;
+    # the typemap already includes 'ST(0) =' rather than 'RETVALSV = ' etc
+    my $ST0_already_assigned_to = 0;
     my $want_newmortal = 0;
 
     # Evaluate the typemap, expanding any vars like $var and $arg.
@@ -3995,7 +3996,6 @@ sub generate_output {
         # This RE must be tried before next elsif, as is it effectively a
         # special-case of the more general /\$arg =/ pattern.
 
-        $do_copy_tmp = 0; #$arg will be a ST(X), no SV* RETVAL, no RETVALSV
         $use_RETVALSV = 0;
       }
       else {
@@ -4034,6 +4034,7 @@ sub generate_output {
       }
       else {
         $evalexpr =~ s/\bRETVALSV\b/$orig_arg/g;
+        $ST0_already_assigned_to = 1;
       }
     }
 
@@ -4051,11 +4052,8 @@ sub generate_output {
 
     # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
     # was already assigned to earlier directly by the typemap.
-    # The $do_copy_tmp condition (always true except for immortals)
-    # means that this is usually done. But for immortals we only do
-    # it if extra code has been emitted, i.e. mortalisation or set magic.
     push @lines, "\t$orig_arg = RETVAL$sv;\n"
-      if $do_mortal || $do_setmagic || $do_copy_tmp;
+      unless $ST0_already_assigned_to;
 
     if ($use_RETVALSV) {
       # Add an extra 4-indent
