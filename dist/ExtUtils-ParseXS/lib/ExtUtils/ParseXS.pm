@@ -3961,35 +3961,7 @@ sub generate_output {
     $eval_vars->{arg} = $arg = 'RETVALSV';
     my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
 
-    if ($evalexpr =~
-        /^\s*
-          \Q$arg\E
-          \s*=\s*
-          (  boolSV\(.*\)
-          |  &PL_sv_yes
-          |  &PL_sv_no
-          |  &PL_sv_undef
-          |  &PL_sv_zero
-          )
-          \s*;\s*$
-        /x)
-    {
-      # An optimisation: in cases where the return value is an SV and
-      # the style of the typemap indicates that the SV will be one of
-      # the immortals, skip mortalizing it. This code doesn't detect all
-      # possible immortal values; for example, it won't detect a
-      # function or expression that only returns immortals. But since
-      # its only an optimisation, it doesn't matter if some cases aren't
-      # spotted.
-      #
-      # This RE must be tried before next elsif, as is it effectively a
-      # special-case of the more general /\$arg =/ pattern.
-
-      $do_copy_tmp = 0; #$arg will be a ST(X), no SV* RETVAL, no RETVALSV
-      $use_RETVALSV = 0;
-    }
-    elsif ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
-      # This is the more general case of the previous branch.
+    if ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
       # Detect a typemap that assigns an SV to the arg, rather than than
       # updating an SV; e.g.:
       #     $arg = newRV($var);
@@ -3998,9 +3970,41 @@ sub generate_output {
       # and if so, we just mortalise the SV rather than creating a
       # new temp and copying.
 
-      # See comment above about the SVPtr optimisation
-      $use_RETVALSV = 0 if $ntype eq "SVPtr";
-      $do_mortal = 1;
+      # Is it a more special case of the '$arg = ' pattern?
+      if ($evalexpr =~
+          /^\s*
+            \Q$arg\E
+            \s*=\s*
+            (  boolSV\(.*\)
+            |  &PL_sv_yes
+            |  &PL_sv_no
+            |  &PL_sv_undef
+            |  &PL_sv_zero
+            )
+            \s*;\s*$
+          /x)
+      {
+        # An optimisation: in cases where the return value is an SV and
+        # the style of the typemap indicates that the SV will be one of
+        # the immortals, skip mortalizing it. This code doesn't detect all
+        # possible immortal values; for example, it won't detect a
+        # function or expression that only returns immortals. But since
+        # its only an optimisation, it doesn't matter if some cases aren't
+        # spotted.
+        #
+        # This RE must be tried before next elsif, as is it effectively a
+        # special-case of the more general /\$arg =/ pattern.
+
+        $do_copy_tmp = 0; #$arg will be a ST(X), no SV* RETVAL, no RETVALSV
+        $use_RETVALSV = 0;
+      }
+      else {
+        # general '$arg = ' typemap
+
+        # See comment above about the SVPtr optimisation
+        $use_RETVALSV = 0 if $ntype eq "SVPtr";
+        $do_mortal = 1;
+      }
     }
     else {
       # This is the opposite case to a '$arg = ' style typemap.
