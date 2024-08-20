@@ -3835,286 +3835,286 @@ sub generate_output {
     return;
   }
 
-    # Handle a normal return type via a typemap.
+  # Handle a normal return type via a typemap.
 
-    # Get the output map entry for this type; complain if not found.
-    my $typemap = $typemaps->get_typemap(ctype => $type);
-    if (not $typemap) {
-      $self->report_typemap_failure($typemaps, $type);
+  # Get the output map entry for this type; complain if not found.
+  my $typemap = $typemaps->get_typemap(ctype => $type);
+  if (not $typemap) {
+    $self->report_typemap_failure($typemaps, $type);
+    return;
+  }
+
+  my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
+  if (not $outputmap) {
+    $self->blurt("Error: No OUTPUT definition for type '$type', typekind '"
+                 . $typemap->xstype . "' found");
+    return;
+  }
+
+  # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
+  # valid vars which can appear within a typemap template.
+  (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+  $ntype =~ s/\(\)//g;
+
+  # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
+  # where it's the type of each array element. But it's also passed to
+  # the typemap template (although undocumented and virtually unused).
+  (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+
+  # The type looked up in the eval is Foo__Bar rather than Foo::Bar
+  $type =~ tr/:/_/ unless $self->{config_RetainCplusplusHierarchicalTypes};
+
+  # Specify the environment for when the typemap template is evalled.
+  my $eval_vars = {%$argsref, subtype => $subtype,
+                    ntype => $ntype, arg => $arg, type => $type };
+
+  # Get the text of the typemap template, with a few transformations to
+  # make it work better with fussy C compilers. In particular, strip
+  # trailing semicolons and remove any leading white space before a '#'.
+  my $expr = $outputmap->cleaned_code;
+
+  # In the four branches of this big if/else, handle the four types of
+  # var:
+  #   the T_ARRAY / DO_ARRAY_ELEM hack
+  #   RETVAL
+  #   OUTLIST argname
+  #   argname
+
+  if ($expr =~ /DO_ARRAY_ELEM/) {
+    # See the comments in generate_init() that explain the similar code
+    # for the DO_ARRAY_ELEM hack there.
+    my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
+    if (not $subtypemap) {
+      $self->report_typemap_failure($typemaps, $subtype);
       return;
     }
 
-    my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
-    if (not $outputmap) {
-      $self->blurt("Error: No OUTPUT definition for type '$type', typekind '"
-                   . $typemap->xstype . "' found");
+    my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
+    if (not $suboutputmap) {
+      $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
       return;
     }
 
-    # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
-    # valid vars which can appear within a typemap template.
-    (my $ntype = $type) =~ s/\s*\*/Ptr/g;
-    $ntype =~ s/\(\)//g;
+    my $subexpr = $suboutputmap->cleaned_code;
+    $subexpr =~ s/ntype/subtype/g;
+    $subexpr =~ s/\$arg/ST(ix_$var)/g;
+    $subexpr =~ s/\$var/${var}\[ix_$var]/g;
+    $subexpr =~ s/\n\t/\n\t\t/g;
+    $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
+    $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+    print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
+  }
+  elsif ($var eq 'RETVAL') {
+    # If the var is called RETVAL, then we return its value on the
+    # stack
+    my $orig_arg = $arg;
+    my $indent;
+    my $use_RETVALSV = 1;
+    my $do_mortal = 0;
+    my $do_copy_tmp = 1;
+    my $pre_expr;
 
-    # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
-    # where it's the type of each array element. But it's also passed to
-    # the typemap template (although undocumented and virtually unused).
-    (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+    # Evaluate the typemap, expanding any vars like $var and $arg.
+    # So for example,
+    #
+    #     $arg = Foo($var);
+    #
+    # normally gets expanded to:
+    #
+    #     ST(0) = Foo(RETVAL);
+    #
+    # However, this is often then followed by a few more emitted lines
+    # such as:
+    #
+    #     sv_2mortal(ST(0));
+    #     SvSETMAGIC(ST(0));
+    #
+    # which involve inefficient multiple accesses to get the ST(0)
+    # pointer.  So in this branch, as an optimisation, we declare a
+    # temporary variable RETVALSV; then we use it rather than 'ST(0)'
+    # for the value of $arg in the evalled typemap and in any other
+    # emitted code, only storing to ST(0) finally. So our example code
+    # above will be emitted as:
+    #
+    #     SV *RETVALSV;
+    #     RETVALSV = Foo(RETVAL);
+    #     RETVALSV = sv_2mortal(RETVALSV);
+    #     SvSETMAGIC(RETVALSV);
+    #     ST(0) = RETVALSV;
+    #
+    # Note that RETVALSV is set again from the return value of
+    # sv_2mortal(), which means that the compiler doesn't have to save
+    # the value of RETVALSV across the function call.
+    #
+    # There is a further special optimisation for the T_SV case,
+    # where RETVAL is already of type SV* (i.e. $ntype eq 'SVPtr').
+    # In the case where the typemap of of the form '$arg = Foo($var)',
+    # (as opposed to 'sv_setFOO($arg, $var)'), then we don't declare
+    # RETVALSV and just use RETVAL directly.
+    #
+    # Note that we evaluate the typemap early here, so that the various
+    # regexes below such as /^\s*\Q$arg\E\s*=/ can be matched against
+    # the *evalled* result of typemap entries such as
+    #
+    # ${ "$var" eq "RETVAL" ? \"$arg = $var;" : \"sv_setsv_mg($arg, $var);" }
+    #
+    # which may eval to something like "RETVALSV = RETVAL" and
+    # subsequently match /^\s*\Q$arg\E =/ (where $arg is "RETVAL"), but
+    # couldn't have matched against the original typemap.
 
-    # The type looked up in the eval is Foo__Bar rather than Foo::Bar
-    $type =~ tr/:/_/ unless $self->{config_RetainCplusplusHierarchicalTypes};
+    local $eval_vars->{arg} = $arg = 'RETVALSV';
+    my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
 
-    # Specify the environment for when the typemap template is evalled.
-    my $eval_vars = {%$argsref, subtype => $subtype,
-                      ntype => $ntype, arg => $arg, type => $type };
-
-    # Get the text of the typemap template, with a few transformations to
-    # make it work better with fussy C compilers. In particular, strip
-    # trailing semicolons and remove any leading white space before a '#'.
-    my $expr = $outputmap->cleaned_code;
-
-    # In the four branches of this big if/else, handle the four types of
-    # var:
-    #   the T_ARRAY / DO_ARRAY_ELEM hack
-    #   RETVAL
-    #   OUTLIST argname
-    #   argname
-
-    if ($expr =~ /DO_ARRAY_ELEM/) {
-      # See the comments in generate_init() that explain the similar code
-      # for the DO_ARRAY_ELEM hack there.
-      my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
-      if (not $subtypemap) {
-        $self->report_typemap_failure($typemaps, $subtype);
-        return;
-      }
-
-      my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
-      if (not $suboutputmap) {
-        $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
-        return;
-      }
-
-      my $subexpr = $suboutputmap->cleaned_code;
-      $subexpr =~ s/ntype/subtype/g;
-      $subexpr =~ s/\$arg/ST(ix_$var)/g;
-      $subexpr =~ s/\$var/${var}\[ix_$var]/g;
-      $subexpr =~ s/\n\t/\n\t\t/g;
-      $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
-      $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
-      print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
+    if ($expr =~ /^\t\Q$arg\E = new/) {
+      # XXX this branch is broken and is never taken.
+      # But it doesn't matter, because the \Q$arg\E\s*= branch further
+      # below will handle whatever is needed.
+      #
+      # Historically, the /\$arg = / branch was split into two by
+      # perl-5.003_05-110-ga2baab1cc6. The normal branch emitted some C
+      # code to say "if the SV is immortal, skip the mortalising".  But
+      # if the value being assigned is the return value from a newRV()
+      # call or similar, then we know it can't be immortal, so it
+      # skipped emitting the extra test in the second branch.
+      #
+      # Later with perl-5.004_03-1569-gd689ffdd6d, the "emit C test for
+      # immortal" code was removed, so the two branches became
+      # functionally equivalent (and could have been merged into a
+      # single branch at that point, but weren't).
+      #
+      # Then with v5.19.1-126-gfc5771079a, the regexes were changed to
+      # match against $evalexpr rather than $expr, to better match code
+      # patterns. But in this branch it still tries to match against
+      # $expr, so now always fails. But it doesn't matter, because that
+      # commit also added a different "don't mortalise if immortal"
+      # test, seen in the /boolSV/ branch below, which will handle this
+      # ok.
+      $do_mortal = 1;
     }
-    elsif ($var eq 'RETVAL') {
-      # If the var is called RETVAL, then we return its value on the
-      # stack
-      my $orig_arg = $arg;
-      my $indent;
-      my $use_RETVALSV = 1;
-      my $do_mortal = 0;
-      my $do_copy_tmp = 1;
-      my $pre_expr;
 
-      # Evaluate the typemap, expanding any vars like $var and $arg.
-      # So for example,
+    elsif ($evalexpr =~ /^\t\Q$arg\E\s*=\s*(boolSV\(|(&PL_sv_yes|&PL_sv_no|&PL_sv_undef)\s*;)/) {
+      # An optimisation: in cases where the return value is an SV and
+      # the style of the typemap indicates that the SV will be one of
+      # the immortals, skip mortalizing it. This code doesn't detect all
+      # possible immortal values; for example, it won't detect a
+      # function or expression that only returns immortals. But since
+      # its only an optimisation, it doesn't matter if some cases aren't
+      # spotted.
       #
-      #     $arg = Foo($var);
-      #
-      # normally gets expanded to:
-      #
-      #     ST(0) = Foo(RETVAL);
-      #
-      # However, this is often then followed by a few more emitted lines
-      # such as:
-      #
-      #     sv_2mortal(ST(0));
-      #     SvSETMAGIC(ST(0));
-      #
-      # which involve inefficient multiple accesses to get the ST(0)
-      # pointer.  So in this branch, as an optimisation, we declare a
-      # temporary variable RETVALSV; then we use it rather than 'ST(0)'
-      # for the value of $arg in the evalled typemap and in any other
-      # emitted code, only storing to ST(0) finally. So our example code
-      # above will be emitted as:
-      #
-      #     SV *RETVALSV;
-      #     RETVALSV = Foo(RETVAL);
-      #     RETVALSV = sv_2mortal(RETVALSV);
-      #     SvSETMAGIC(RETVALSV);
-      #     ST(0) = RETVALSV;
-      #
-      # Note that RETVALSV is set again from the return value of
-      # sv_2mortal(), which means that the compiler doesn't have to save
-      # the value of RETVALSV across the function call.
-      #
-      # There is a further special optimisation for the T_SV case,
-      # where RETVAL is already of type SV* (i.e. $ntype eq 'SVPtr').
-      # In the case where the typemap of of the form '$arg = Foo($var)',
-      # (as opposed to 'sv_setFOO($arg, $var)'), then we don't declare
-      # RETVALSV and just use RETVAL directly.
-      #
-      # Note that we evaluate the typemap early here, so that the various
-      # regexes below such as /^\s*\Q$arg\E\s*=/ can be matched against
-      # the *evalled* result of typemap entries such as
-      #
-      # ${ "$var" eq "RETVAL" ? \"$arg = $var;" : \"sv_setsv_mg($arg, $var);" }
-      #
-      # which may eval to something like "RETVALSV = RETVAL" and
-      # subsequently match /^\s*\Q$arg\E =/ (where $arg is "RETVAL"), but
-      # couldn't have matched against the original typemap.
+      # This RE must be tried before next elsif, as is it effectively a
+      # special-case of the more general /\$arg =/ pattern.
 
-      local $eval_vars->{arg} = $arg = 'RETVALSV';
-      my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
+      $do_copy_tmp = 0; #$arg will be a ST(X), no SV* RETVAL, no RETVALSV
+      $use_RETVALSV = 0;
+    }
+    elsif ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
+      # This is the more general case of the previous branch.
+      # Detect a typemap that assigns an SV to the arg, rather than than
+      # updating an SV; e.g.:
+      #     $arg = newRV($var);
+      # as opposed to
+      #     sv_setiv($arg, (IV)$arg);
+      # and if so, we just mortalise the SV rather than creating a
+      # new temp and copying.
 
-      if ($expr =~ /^\t\Q$arg\E = new/) {
-        # XXX this branch is broken and is never taken.
-        # But it doesn't matter, because the \Q$arg\E\s*= branch further
-        # below will handle whatever is needed.
-        #
-        # Historically, the /\$arg = / branch was split into two by
-        # perl-5.003_05-110-ga2baab1cc6. The normal branch emitted some C
-        # code to say "if the SV is immortal, skip the mortalising".  But
-        # if the value being assigned is the return value from a newRV()
-        # call or similar, then we know it can't be immortal, so it
-        # skipped emitting the extra test in the second branch.
-        #
-        # Later with perl-5.004_03-1569-gd689ffdd6d, the "emit C test for
-        # immortal" code was removed, so the two branches became
-        # functionally equivalent (and could have been merged into a
-        # single branch at that point, but weren't).
-        #
-        # Then with v5.19.1-126-gfc5771079a, the regexes were changed to
-        # match against $evalexpr rather than $expr, to better match code
-        # patterns. But in this branch it still tries to match against
-        # $expr, so now always fails. But it doesn't matter, because that
-        # commit also added a different "don't mortalise if immortal"
-        # test, seen in the /boolSV/ branch below, which will handle this
-        # ok.
-        $do_mortal = 1;
-      }
+      # See comment above about the SVPtr optimisation
+      $use_RETVALSV = 0 if $ntype eq "SVPtr";
+      $do_mortal = 1;
+    }
+    else {
+      # This is the opposite case to a '$arg = ' style typemap.
+      # We assume it's something like  sv_setiv($arg, (IV)$arg); where
+      # we need to create a new mortal for the typemap to update.
+      $pre_expr = "RETVALSV = sv_newmortal();\n";
+      # new mortals don't have set magic
+      $do_setmagic = 0;
+    }
 
-      elsif ($evalexpr =~ /^\t\Q$arg\E\s*=\s*(boolSV\(|(&PL_sv_yes|&PL_sv_no|&PL_sv_undef)\s*;)/) {
-        # An optimisation: in cases where the return value is an SV and
-        # the style of the typemap indicates that the SV will be one of
-        # the immortals, skip mortalizing it. This code doesn't detect all
-        # possible immortal values; for example, it won't detect a
-        # function or expression that only returns immortals. But since
-        # its only an optimisation, it doesn't matter if some cases aren't
-        # spotted.
-        #
-        # This RE must be tried before next elsif, as is it effectively a
-        # special-case of the more general /\$arg =/ pattern.
+    # if using RETVALSV, start a new block then declare it.
+    if ($use_RETVALSV) {
+      print "\t{\n\t    SV * RETVALSV;\n";
+      $indent = "\t    ";
+    } else {
+      $indent = "\t";
+    }
 
-        $do_copy_tmp = 0; #$arg will be a ST(X), no SV* RETVAL, no RETVALSV
-        $use_RETVALSV = 0;
-      }
-      elsif ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
-        # This is the more general case of the previous branch.
-        # Detect a typemap that assigns an SV to the arg, rather than than
-        # updating an SV; e.g.:
-        #     $arg = newRV($var);
-        # as opposed to
-        #     sv_setiv($arg, (IV)$arg);
-        # and if so, we just mortalise the SV rather than creating a
-        # new temp and copying.
+    # (typically) initialise RETVALSV
+    print $indent.$pre_expr if $pre_expr;
 
-        # See comment above about the SVPtr optimisation
-        $use_RETVALSV = 0 if $ntype eq "SVPtr";
-        $do_mortal = 1;
+    if ($use_RETVALSV) {
+      # Indent the typemap code 1 level deeper.
+      $evalexpr =~ s/^(\t|        )/$indent/gm;
+      #"\t    \t" doesn't draw right in some IDEs
+      #break down all \t into spaces
+      $evalexpr =~ s/\t/        /g;
+      #rebuild back into \t'es, \t==8 spaces, indent==4 spaces
+      $evalexpr =~ s/        /\t/g;
+    }
+    else {
+      # we want the typemap to look like one of these three cases:
+      #
+      #   RETVALSV = ...;    if $use_RETVALSV; else
+      #   RETVAL = ...;      if the SVPtr optimisation is in place to
+      #                         use RETVAL rather than RETVALSV, and
+      #                         further use of the var is expected;
+      #   ST(0) = ...;       otherwise.
+      #
+      # So for the last two forms revert 'RETVALSV' back.
+      if ($do_mortal || $do_setmagic) {
+        # $do_mortal or $do_setmagic imply further use of the variable
+        $evalexpr =~ s/RETVALSV/RETVAL/g;
       }
       else {
-        # This is the opposite case to a '$arg = ' style typemap.
-        # We assume it's something like  sv_setiv($arg, (IV)$arg); where
-        # we need to create a new mortal for the typemap to update.
-        $pre_expr = "RETVALSV = sv_newmortal();\n";
-        # new mortals don't have set magic
-        $do_setmagic = 0;
+        $evalexpr =~ s/RETVALSV/$orig_arg/g;
       }
-
-      # if using RETVALSV, start a new block then declare it.
-      if ($use_RETVALSV) {
-        print "\t{\n\t    SV * RETVALSV;\n";
-        $indent = "\t    ";
-      } else {
-        $indent = "\t";
-      }
-
-      # (typically) initialise RETVALSV
-      print $indent.$pre_expr if $pre_expr;
-
-      if ($use_RETVALSV) {
-        # Indent the typemap code 1 level deeper.
-        $evalexpr =~ s/^(\t|        )/$indent/gm;
-        #"\t    \t" doesn't draw right in some IDEs
-        #break down all \t into spaces
-        $evalexpr =~ s/\t/        /g;
-        #rebuild back into \t'es, \t==8 spaces, indent==4 spaces
-        $evalexpr =~ s/        /\t/g;
-      }
-      else {
-        # we want the typemap to look like one of these three cases:
-        #
-        #   RETVALSV = ...;    if $use_RETVALSV; else
-        #   RETVAL = ...;      if the SVPtr optimisation is in place to
-        #                         use RETVAL rather than RETVALSV, and
-        #                         further use of the var is expected;
-        #   ST(0) = ...;       otherwise.
-        #
-        # So for the last two forms revert 'RETVALSV' back.
-        if ($do_mortal || $do_setmagic) {
-          # $do_mortal or $do_setmagic imply further use of the variable
-          $evalexpr =~ s/RETVALSV/RETVAL/g;
-        }
-        else {
-          $evalexpr =~ s/RETVALSV/$orig_arg/g;
-        }
-      }
-
-      # Emit the typemap, unless it's of the trivial "RETVAL = RETVAL"
-      # form, which is sometimes generated for the SVPtr optimisation.
-      print $evalexpr if $evalexpr !~ /^\s*RETVAL = RETVAL;$/;
-
-      # Emit mortalisation and set magic code on the result SV if need be
-
-      print $indent.'RETVAL'.($use_RETVALSV ? 'SV':'')
-            .' = sv_2mortal(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_mortal;
-      print $indent.'SvSETMAGIC(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_setmagic;
-
-      # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
-      # was already assigned to earlier directly by the typemap.
-      # The $do_copy_tmp condition (always true except for immortals)
-      # means that this is usually done. But for immortals we only do
-      # it if extra code has been emitted, i.e. mortalisation or set magic.
-      print $indent."$orig_arg = RETVAL".($use_RETVALSV ? 'SV':'').";\n"
-        if $do_mortal || $do_setmagic || $do_copy_tmp;
-      print "\t}\n" if $use_RETVALSV;
     }
 
-    elsif ($do_push) {
-      # $do_push indicates that this is an OUTLIST value, so an SV with
-      # the value should be pushed onto the stack
-      print "\tPUSHs(sv_newmortal());\n";
-      local $eval_vars->{arg} = "ST($num)";
-      $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
-      print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
-    }
+    # Emit the typemap, unless it's of the trivial "RETVAL = RETVAL"
+    # form, which is sometimes generated for the SVPtr optimisation.
+    print $evalexpr if $evalexpr !~ /^\s*RETVAL = RETVAL;$/;
 
-    elsif ($arg =~ /^ST\(\d+\)$/) {
-      # This is a normal OUTPUT var - i.e. a named parameter whose
-      # corresponding arg on the stack should be updated with the
-      # parameter's current value by using the code contained in the
-      # output typemap.
-      #
-      # Note that for non-RETVAL args being *updated* (as opposed to
-      # replaced), this branch relies on the typemap to Do The Right
-      # Thing. For example, T_BOOL currently has this typemap entry:
-      #
-      # ${"$var" eq "RETVAL" ? \"$arg = boolSV($var);" : \"sv_setsv($arg, boolSV($var));"}
-      #
-      #  which means that if we hit this branch, $evalexpr will have been
-      #  expanded to something like sv_setsv(ST(2), boolSV(foo))
-      $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
-      print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
-    }
+    # Emit mortalisation and set magic code on the result SV if need be
+
+    print $indent.'RETVAL'.($use_RETVALSV ? 'SV':'')
+          .' = sv_2mortal(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_mortal;
+    print $indent.'SvSETMAGIC(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_setmagic;
+
+    # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
+    # was already assigned to earlier directly by the typemap.
+    # The $do_copy_tmp condition (always true except for immortals)
+    # means that this is usually done. But for immortals we only do
+    # it if extra code has been emitted, i.e. mortalisation or set magic.
+    print $indent."$orig_arg = RETVAL".($use_RETVALSV ? 'SV':'').";\n"
+      if $do_mortal || $do_setmagic || $do_copy_tmp;
+    print "\t}\n" if $use_RETVALSV;
+  }
+
+  elsif ($do_push) {
+    # $do_push indicates that this is an OUTLIST value, so an SV with
+    # the value should be pushed onto the stack
+    print "\tPUSHs(sv_newmortal());\n";
+    local $eval_vars->{arg} = "ST($num)";
+    $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+  }
+
+  elsif ($arg =~ /^ST\(\d+\)$/) {
+    # This is a normal OUTPUT var - i.e. a named parameter whose
+    # corresponding arg on the stack should be updated with the
+    # parameter's current value by using the code contained in the
+    # output typemap.
+    #
+    # Note that for non-RETVAL args being *updated* (as opposed to
+    # replaced), this branch relies on the typemap to Do The Right
+    # Thing. For example, T_BOOL currently has this typemap entry:
+    #
+    # ${"$var" eq "RETVAL" ? \"$arg = boolSV($var);" : \"sv_setsv($arg, boolSV($var));"}
+    #
+    #  which means that if we hit this branch, $evalexpr will have been
+    #  expanded to something like sv_setsv(ST(2), boolSV(foo))
+    $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+  }
 }
 
 
