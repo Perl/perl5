@@ -4023,7 +4023,7 @@ sub generate_output {
 
     # Emit the typemap, unless it's of the trivial "RETVAL = RETVAL"
     # form, which is sometimes generated for the SVPtr optimisation.
-    if ($evalexpr !~ /^\s*RETVAL\s*=\s*RETVAL\s*;\s*$/) {
+    unless ($evalexpr =~ /^\s*RETVAL\s*=\s*RETVAL\s*;\s*$/) {
       push @lines, split /^/, $evalexpr
     }
 
