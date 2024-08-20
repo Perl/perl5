@@ -3594,11 +3594,6 @@ sub generate_init {
   # whitespace-tidy the type
   $type = ExtUtils::Typemaps::tidy_type($type);
 
-  if (not $typemaps->get_typemap(ctype => $type)) {
-    $self->report_typemap_failure($typemaps, $type);
-    return;
-  }
-
   # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
   # which can appear within a typemap template.
   (my $ntype = $type) =~ s/\s*\*/Ptr/g;
@@ -3610,8 +3605,12 @@ sub generate_init {
 
   # look up the TYPEMAP entry for this C type and grab the corresponding
   # XS type name (e.g. $type of 'char *'  gives $xstype of 'T_PV'
-  my $typem = $typemaps->get_typemap(ctype => $type);
-  my $xstype = $typem->xstype;
+  my $typemap = $typemaps->get_typemap(ctype => $type);
+  if (not $typemap) {
+    $self->report_typemap_failure($typemaps, $type);
+    return;
+  }
+  my $xstype = $typemap->xstype;
 
   # An optimisation: for the typemaps which check that the dereferenced
   # item is blessed into the right class, skip the test for DESTROY()
