@@ -3961,7 +3961,19 @@ sub generate_output {
     $eval_vars->{arg} = $arg = 'RETVALSV';
     my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
 
-    if ($evalexpr =~ /^\t\Q$arg\E\s*=\s*(boolSV\(|(&PL_sv_yes|&PL_sv_no|&PL_sv_undef)\s*;)/) {
+    if ($evalexpr =~
+        /^\s*
+          \Q$arg\E
+          \s*=\s*
+          (  boolSV\(.*\)
+          |  &PL_sv_yes
+          |  &PL_sv_no
+          |  &PL_sv_undef
+          |  &PL_sv_zero
+          )
+          \s*;\s*$
+        /x)
+    {
       # An optimisation: in cases where the return value is an SV and
       # the style of the typemap indicates that the SV will be one of
       # the immortals, skip mortalizing it. This code doesn't detect all
