@@ -4060,16 +4060,16 @@ sub generate_output {
 
     # Emit mortalisation and set magic code on the result SV if need be
 
-    push @lines, "\tRETVAL".($use_RETVALSV ? 'SV':'')
-          .' = sv_2mortal(RETVAL'.($use_RETVALSV ? 'SV':'').");\n" if $do_mortal;
-    push @lines, "\tSvSETMAGIC(RETVAL".($use_RETVALSV ? 'SV':'').");\n" if $do_setmagic;
+    my $sv = $use_RETVALSV ? 'SV' : '';
+    push @lines, "\tRETVAL$sv = sv_2mortal(RETVAL$sv);\n" if $do_mortal;
+    push @lines, "\tSvSETMAGIC(RETVAL$sv);\n"             if $do_setmagic;
 
     # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
     # was already assigned to earlier directly by the typemap.
     # The $do_copy_tmp condition (always true except for immortals)
     # means that this is usually done. But for immortals we only do
     # it if extra code has been emitted, i.e. mortalisation or set magic.
-    push @lines, "\t$orig_arg = RETVAL".($use_RETVALSV ? 'SV':'').";\n"
+    push @lines, "\t$orig_arg = RETVAL$sv;\n"
       if $do_mortal || $do_setmagic || $do_copy_tmp;
 
     if ($use_RETVALSV) {
