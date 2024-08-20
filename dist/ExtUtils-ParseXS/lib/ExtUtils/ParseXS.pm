@@ -3832,8 +3832,9 @@ sub generate_output {
     print "\t$arg = sv_newmortal();\n";
     print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1));\n";
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+    return;
   }
-  else {
+
     # Handle a normal return type via a typemap.
 
     # Get the output map entry for this type; complain if not found.
@@ -4114,7 +4115,6 @@ sub generate_output {
       $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
       print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     }
-  }
 }
 
 
