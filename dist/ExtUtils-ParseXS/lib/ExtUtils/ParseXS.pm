@@ -3961,34 +3961,7 @@ sub generate_output {
     $eval_vars->{arg} = $arg = 'RETVALSV';
     my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
 
-    if ($expr =~ /^\t\Q$arg\E = new/) {
-      # XXX this branch is broken and is never taken.
-      # But it doesn't matter, because the \Q$arg\E\s*= branch further
-      # below will handle whatever is needed.
-      #
-      # Historically, the /\$arg = / branch was split into two by
-      # perl-5.003_05-110-ga2baab1cc6. The normal branch emitted some C
-      # code to say "if the SV is immortal, skip the mortalising".  But
-      # if the value being assigned is the return value from a newRV()
-      # call or similar, then we know it can't be immortal, so it
-      # skipped emitting the extra test in the second branch.
-      #
-      # Later with perl-5.004_03-1569-gd689ffdd6d, the "emit C test for
-      # immortal" code was removed, so the two branches became
-      # functionally equivalent (and could have been merged into a
-      # single branch at that point, but weren't).
-      #
-      # Then with v5.19.1-126-gfc5771079a, the regexes were changed to
-      # match against $evalexpr rather than $expr, to better match code
-      # patterns. But in this branch it still tries to match against
-      # $expr, so now always fails. But it doesn't matter, because that
-      # commit also added a different "don't mortalise if immortal"
-      # test, seen in the /boolSV/ branch below, which will handle this
-      # ok.
-      $do_mortal = 1;
-    }
-
-    elsif ($evalexpr =~ /^\t\Q$arg\E\s*=\s*(boolSV\(|(&PL_sv_yes|&PL_sv_no|&PL_sv_undef)\s*;)/) {
+    if ($evalexpr =~ /^\t\Q$arg\E\s*=\s*(boolSV\(|(&PL_sv_yes|&PL_sv_no|&PL_sv_undef)\s*;)/) {
       # An optimisation: in cases where the return value is an SV and
       # the style of the typemap indicates that the SV will be one of
       # the immortals, skip mortalizing it. This code doesn't detect all
