@@ -300,6 +300,21 @@ to open the handle with opendir().
 
 [github #22394]
 
+=item *
+
+L<Possible precedence problem on isa operator|perldiag/"Possible precedence problem on isa operator">
+
+(W precedence) You wrote something like
+
+    !$obj isa Some::Class
+
+but because C<!> has higher precedence than C<isa>, this is interpreted as
+C<(!$obj) isa Some::Class>, which checks whether a boolean is an instance of
+C<Some::Class>. If you want to negate the result of C<isa> instead, use one of:
+
+    !($obj isa Some::Class)   # explicit parentheses
+    not $obj isa Some::Class  # low-precedence 'not' operator
+
 =back
 
 =head2 Changes to Existing Diagnostics
