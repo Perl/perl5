@@ -11979,9 +11979,18 @@ Perl_ck_bitop(pTHX_ OP *o)
 static void
 check_precedence_not_vs_cmp(pTHX_ const OP *const o)
 {
-    /* warn for !$x == 42, but not !$x == !$y */
-    const OP *const kid = cUNOPo->op_first;
-    if (kid->op_type == OP_NOT && !(kid->op_flags & OPf_PARENS) && OpSIBLING(kid)->op_type != OP_NOT) {
+    const OP *const left = cUNOPo->op_first,
+             *const right = OpSIBLING(left);
+    if (
+        left->op_type == OP_NOT             /* warn for !$x == ...       */
+        && !(left->op_flags & OPf_PARENS)   /* but not  (!$x) == ...     */
+        && right->op_type != OP_NOT         /* ... nor  !$x == !...      */
+        && !(                               /* ... nor  !$x == !CONSTANT */
+            right->op_folded
+            && right->op_type == OP_CONST
+            && SvIsBOOL(cSVOPx_sv(right))
+        )
+    ) {
         Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
             "Possible precedence problem between ! and %s", OP_DESC(o)
         );
