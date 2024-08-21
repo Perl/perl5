@@ -524,6 +524,15 @@ This has been corrected. [GH #22412]
 
 =item *
 
+Starting in v5.39.8, L<POSIX/C<strftime>> would crash or produce odd errors
+(such as C<Out of memory in perl:util:safesysmalloc>) when given a format
+string that wasn't actually a string, but a number, C<undef>, or an object
+(even one with overloaded string conversion).
+
+Now C<strftime> stringifies its first argument, as before. [GH #22498]
+
+=item *
+
 XXX
 
 =back
