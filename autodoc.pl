@@ -1605,8 +1605,8 @@ sub format_pod_indexes ($entries_ref) {
     return $text;
 }
 
-sub docout ($fh, $element_name, $docref) {  # output the docs for one function
-                                            # group
+    # output the docs for one function group
+sub docout ($fh, $section_name, $element_name, $docref) {
     # Trim trailing space
     $element_name =~ s/\s*$//;
 
@@ -2312,7 +2312,8 @@ sub output ($destpod) {  # Output a complete pod file
 
             # Then, output everything.
             for my $this_leader (sort dictionary_order keys %$section_info) {
-                docout($fh, $this_leader, $section_info->{$this_leader});
+                docout($fh, $section_name,
+                       $this_leader, $section_info->{$this_leader});
             }
         }
 
