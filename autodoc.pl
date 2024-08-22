@@ -2283,7 +2283,13 @@ sub output ($destpod) {  # Output a complete pod file
             }
         }
 
-        if ($section_info && keys $section_info->%*) {
+        if (! $section_info || ! keys $section_info->%*) {
+            my $pod_type = ($podname eq $api) ? "public" : "internal";
+            print $fh "\nThere are currently no $pod_type API items in ",
+                      $section_name, "\n";
+        }
+        else {
+
             my $leader_name;
             my $leader_pod;
 
@@ -2308,11 +2314,6 @@ sub output ($destpod) {  # Output a complete pod file
             for my $this_leader (sort dictionary_order keys %$section_info) {
                 docout($fh, $this_leader, $section_info->{$this_leader});
             }
-        }
-        else {
-            my $pod_type = ($podname eq $api) ? "public" : "internal";
-            print $fh "\nThere are currently no $pod_type API items in ",
-                      $section_name, "\n";
         }
 
         print $fh "\n", $valid_sections{$section_name}{footer}, "\n"
