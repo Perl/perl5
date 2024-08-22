@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 33;
+use Test::More tests => 37;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -410,4 +410,60 @@ EOF
     like($out, qr/XS_Foo_f/,               "string ref: fn name");
     like($out, qr/#line \d+ "\(input\)"/,  "string ref input #line");
     like($out, qr/#line \d+ "\(output\)"/, "string ref output #line");
+}
+
+
+{
+    # Test [=+;] on INPUT lines (including embedded double quotes
+    # within expression which get evalled)
+
+    my $pxs = ExtUtils::ParseXS->new;
+    tie *FH, 'Capture';
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void f(mymarker1, a, b, c, d)
+        |        int mymarker1
+        |        int a = ($var"$var);
+        |        int b ; blah($var"$var);
+        |        int c + blurg($var"$var);
+        |        int d
+        |    CODE:
+        |        mymarker2;
+EOF
+
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    # Those INPUT lines should have produced something like:
+    #
+    #    int    mymarker1 = (int)SvIV(ST(0));
+    #    int    a = (a"a);
+    #    int    b;
+    #    int    c = (int)SvIV(ST(3))
+    #    int    d = (int)SvIV(ST(4))
+    #    blah(b"b);
+    #    blurg(c"c);
+    #    mymarker2;
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    like($out, qr/^ \s+ int \s+ a\ =\ \Q(a"a);\E $/xm,
+                        "INPUT '=' expands custom typemap");
+
+    like($out, qr/^ \s+ int \s+ b;$/xm,
+                        "INPUT ';' suppresses typemap");
+
+    like($out, qr/^ \s+ int \s+ c\ =\ \Q(int)SvIV(ST(3))\E $/xm,
+                        "INPUT '+' expands standard typemap");
+
+    like($out,
+        qr/^ \s+ int \s+ d\ = .*? blah\Q(b"b)\E .*? blurg\Q(c"c)\E .*? mymarker2/xms,
+                        "INPUT '+' and ';' append expanded code");
 }
