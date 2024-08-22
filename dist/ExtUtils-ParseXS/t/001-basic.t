@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 30;
+use Test::More tests => 33;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -11,6 +11,9 @@ use PrimitiveCapture;
 my ($source_file, $obj_file, $lib_file);
 
 require_ok( 'ExtUtils::ParseXS' );
+
+# Borrow the useful heredoc quoting/indenting function.
+*Q = \&ExtUtils::ParseXS::Q;
 
 chdir('t') if -d 't';
 push @INC, '.';
@@ -372,6 +375,34 @@ EOF_CONTENT
     like($exception, qr/Could not find a typemap for C type 'S \*'/,
          "check we throw rather than trying to deref '2'");
 }
+
+
+{
+    # Basic test of using a string ref as the input file
+
+    my $pxs = ExtUtils::ParseXS->new;
+    tie *FH, 'Foo';
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void f(int a)
+        |    CODE:
+        |        mycode;
+EOF
+
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # We should have got some content, and the generated '#line' lines
+    # should be sensible rather than '#line 1 SCALAR(0x...)'.
+    like($out, qr/XS_Foo_f/,               "string ref: fn name");
+    like($out, qr/#line \d+ "\(input\)"/,  "string ref input #line");
+    like($out, qr/#line \d+ "\(output\)"/, "string ref output #line");
+}
+
 
 #####################################################################
 

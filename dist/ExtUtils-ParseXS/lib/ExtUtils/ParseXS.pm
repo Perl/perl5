@@ -518,11 +518,23 @@ sub process_file {
 
   die "Missing required parameter 'filename'" unless $Options{filename};
 
-  $self->{in_pathname} = $Options{filename};
-  ($self->{dir}, $self->{in_filename}) =
-    (dirname($Options{filename}), basename($Options{filename}));
-  $self->{in_pathname} =~ s/\\/\\\\/g;
-  $self->{IncludedFiles}->{$Options{filename}}++;
+
+  # allow a string ref to be passed as an in-place filehandle
+  if (ref $Options{filename}) {
+    my $f = '(input)';
+    $self->{in_pathname} = $f;
+    $self->{in_filename} = $f;
+    $self->{dir}         = '.';
+    $self->{IncludedFiles}->{$f}++;
+    $Options{outfile}    = '(output)' unless $Options{outfile};
+  }
+  else {
+    ($self->{dir}, $self->{in_filename}) =
+        (dirname($Options{filename}), basename($Options{filename}));
+    $self->{in_pathname} = $Options{filename};
+    $self->{in_pathname} =~ s/\\/\\\\/g;
+    $self->{IncludedFiles}->{$Options{filename}}++;
+  }
 
   # Open the output file if given as a string.  If they provide some
   # other kind of reference, trust them that we can print to it.
@@ -583,8 +595,13 @@ EOM
 
   # Open the input file (using $self->{in_filename} which
   # is a basename'd $Options{filename} due to chdir above)
-  open($self->{in_fh}, '<', $self->{in_filename})
-      or die "cannot open $self->{in_filename}: $!\n";
+  {
+    my $fn   = $self->{in_filename};
+    my $opfn = $Options{filename};
+    $fn = $opfn if ref $opfn; # allow string ref as a source of file
+    open($self->{in_fh}, '<', $fn)
+        or die "cannot open $self->{in_filename}: $!\n";
+  }
 
   # ----------------------------------------------------------------
   # Process the first (C language) half of the XS file, up until the first
