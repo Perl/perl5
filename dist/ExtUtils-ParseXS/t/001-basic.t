@@ -15,6 +15,15 @@ require_ok( 'ExtUtils::ParseXS' );
 # Borrow the useful heredoc quoting/indenting function.
 *Q = \&ExtUtils::ParseXS::Q;
 
+
+{
+    # Minimal tie package to capture output to a filehandle
+    package Capture;
+    sub TIEHANDLE { bless {} }
+    sub PRINT { shift->{buf} .= join '', @_ }
+    sub content { shift->{buf} }
+}
+
 chdir('t') if -d 't';
 push @INC, '.';
 
@@ -37,7 +46,7 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 { # first block: try without linenumbers
 my $pxs = ExtUtils::ParseXS->new;
 # Try sending to filehandle
-tie *FH, 'Foo';
+tie *FH, 'Capture';
 $pxs->process_file( filename => 'XSTest.xs', output => \*FH, prototypes => 1 );
 like tied(*FH)->content, '/is_even/', "Test that output contains some text";
 
@@ -148,7 +157,7 @@ unless ($ENV{PERL_NO_CLEANUP}) {
 { # second block: try with linenumbers
 my $pxs = ExtUtils::ParseXS->new;
 # Try sending to filehandle
-tie *FH, 'Foo';
+tie *FH, 'Capture';
 $pxs->process_file(
     filename => 'XSTest.xs',
     output => \*FH,
@@ -189,7 +198,7 @@ unless ($ENV{PERL_NO_CLEANUP}) {
 
 { # third block: broken typemap
 my $pxs = ExtUtils::ParseXS->new;
-tie *FH, 'Foo';
+tie *FH, 'Capture';
 my $stderr = PrimitiveCapture::capture_stderr(sub {
   $pxs->process_file(filename => 'XSBroken.xs', output => \*FH);
 });
@@ -199,7 +208,7 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 
 { # fourth block: https://github.com/Perl/perl5/issues/19661
   my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Foo';
+  tie *FH, 'Capture';
   my ($stderr, $filename);
   {
     $filename = 'XSFalsePositive.xs';
@@ -231,7 +240,7 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 
 { # tight cpp directives
   my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Foo';
+  tie *FH, 'Capture';
   my $stderr = PrimitiveCapture::capture_stderr(sub { eval {
     $pxs->process_file(
       filename => 'XSTightDirectives.xs',
@@ -247,7 +256,7 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 
 { # Alias check
   my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Foo';
+  tie *FH, 'Capture';
   my $stderr = PrimitiveCapture::capture_stderr(sub {
     $pxs->process_file(
       filename => 'XSAlias.xs',
@@ -300,7 +309,7 @@ EOF_CONTENT
 }
 { # Alias check with no dev warnings.
   my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Foo';
+  tie *FH, 'Capture';
   my $stderr = PrimitiveCapture::capture_stderr(sub {
     $pxs->process_file(
       filename => 'XSAlias.xs',
@@ -360,7 +369,7 @@ EOF_CONTENT
 
 {
     my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Foo';
+    tie *FH, 'Capture';
     my $exception;
     my $stderr = PrimitiveCapture::capture_stderr(sub {
         eval {
@@ -381,7 +390,7 @@ EOF_CONTENT
     # Basic test of using a string ref as the input file
 
     my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Foo';
+    tie *FH, 'Capture';
     my $text = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
         |
@@ -402,10 +411,3 @@ EOF
     like($out, qr/#line \d+ "\(input\)"/,  "string ref input #line");
     like($out, qr/#line \d+ "\(output\)"/, "string ref output #line");
 }
-
-
-#####################################################################
-
-sub Foo::TIEHANDLE { bless {}, 'Foo' }
-sub Foo::PRINT { shift->{buf} .= join '', @_ }
-sub Foo::content { shift->{buf} }
