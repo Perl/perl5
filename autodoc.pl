@@ -2146,9 +2146,12 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     }
 
     print $fh "\n=back\n";
-    print $fh "\n=for hackers\n";
-    print $fh join "\n", @where_froms;
-    print $fh "\n";
+
+    if (@where_froms) {
+        print $fh "\n=for hackers\n";
+        print $fh join "\n", @where_froms;
+        print $fh "\n";
+    }
 }
 
 sub construct_missings_section ($missings_hdr, $missings_ref) {
