@@ -2690,7 +2690,10 @@ $api{hdr} = <<"_EOB_";
 |Suggestions and patches welcome
 |L<perl5-porters\@perl.org|mailto:perl5-porters\@perl.org>.
 |
-|The sections in this document currently are
+|The API elements are grouped by functionality into sections, as follows.
+|Within sections the elements are ordered alphabetically, ignoring case, with
+|non-leading underscores sorted first, and leading underscores and digits
+|sorted last.
 |
 |=over $standard_indent
 
