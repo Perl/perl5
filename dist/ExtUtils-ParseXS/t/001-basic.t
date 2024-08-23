@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 37;
+use Test::More tests => 38;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -466,4 +466,47 @@ EOF
     like($out,
         qr/^ \s+ int \s+ d\ = .*? blah\Q(b"b"int)\E .*? blurg\Q(c"c"int)\E .*? mymarker2/xms,
                         "INPUT '+' and ';' append expanded code");
+}
+
+
+{
+    # Check that function pointer types are supported
+
+    my $pxs = ExtUtils::ParseXS->new;
+    tie *FH, 'Capture';
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |int (*)(char *, long)   T_INT_FN_PTR
+        |
+        |INPUT
+        |
+        |T_INT_FN_PTR
+        |    $var = ($type)INT2PTR(SvIV($arg))
+        |EOF
+        |
+        |void foo(mymarker1, fn_ptr)
+        |    int                   mymarker1
+        |    int (*)(char *, long) fn_ptr
+EOF
+
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? XSRETURN ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    # remove all spaces for easier matching
+    my $sout = $out;
+    $sout =~ s/[ \t]+//g;
+
+    like($sout,
+        qr/\Qint(*fn_ptr)(char*,long)=(int(*)(char*,long))INT2PTR(SvIV(ST(1)))/,
+        "function pointer declared okay");
 }

@@ -1360,23 +1360,24 @@ EOF
 
       if (!$self->{xsub_seen_THIS_in_INPUT} && defined($self->{xsub_class})) {
         if ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new') {
-          print "\tchar *";
+          print "\tchar *\tCLASS";
           $self->{xsub_map_argname_to_type}->{"CLASS"} = "char *";
           $self->generate_init( {
             type          => "char *",
             num           => 1,
             var           => "CLASS",
-            printed_name  => undef,
+            printed_name  => 1,
           } );
         }
         else {
           print "\t" . $self->map_type("$self->{xsub_class} *");
+          print "\tTHIS";
           $self->{xsub_map_argname_to_type}->{"THIS"} = "$self->{xsub_class} *";
           $self->generate_init( {
             type          => "$self->{xsub_class} *",
             num           => 1,
             var           => "THIS",
-            printed_name  => undef,
+            printed_name  => 1,
           } );
         }
       }
@@ -2437,16 +2438,15 @@ sub INPUT_handler {
     # generate_init() can handle this directly ("temporary" being defined
     # as 25 years so far and counting).
 
-    my $printed_name;
+    my $printed_name = 1;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
-      # Function pointers are not yet supported with output_init()!
+      # for a fn ptr type, embed the var name in the type declaration
       print "\t" . $self->map_type($var_type, $var_name);
-      $printed_name = 1;
     }
     else {
-      print "\t" . $self->map_type($var_type, undef);
-      $printed_name = 0;
+      print "\t" . $self->map_type($var_type, undef), "\t$var_name";
     }
+
 
     # The index number of the parameter. The counting starts at 1 and skips
     # fake parameters like 'length(s))' (zero is used for RETVAL).
@@ -2469,8 +2469,8 @@ sub INPUT_handler {
       if $var_addr;
 
     # Process the initialisation part of the INPUT line (if any) and/or
-    # apply the standard typemap entry. Typically emits "var = ..."
-    # (the type having already been emitted above).
+    # apply the standard typemap entry. Typically emits "= ..."
+    # (the type and var name having already been emitted above).
 
     if (   $var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
         or
@@ -3590,7 +3590,7 @@ sub output_init {
 #   var          the parameter name
 #   printed_name if true, the parameter name has already been printed
 #
-# This function emits code like "var = initialisation code", based on the
+# This function emits text like "= initialisation code", based on the
 # typemap INPUT entry associated with $type, passing the typemap code
 # through a double-quoted context eval first, to expand variables such as
 # $type.
@@ -3715,9 +3715,8 @@ sub generate_init {
     argoff        => $argoff,
   };
 
-  # Now, finally, emit the actual variable declaration and
-  # initialisation line(s). (The variable type will already have been
-  # emitted).
+  # Now finally, emit the actual variable declaration and initialisation
+  # line(s). The variable type and name will already have been emitted.
 
   if (defined($self->{xsub_map_argname_to_default}->{$var})) {
     # Has a default value. Emit just the variable declaration, and
@@ -3766,15 +3765,11 @@ sub generate_init {
       .= $self->eval_input_typemap_code(qq/qq\a\\n$expr;\\n\a/, $eval_vars);
   }
   else {
-    # The template starts with '$var = ...', so no need to emit
-    # the variable name, just the expr.
+    # The template starts with '$var = ...'. The variable name has already
+    # been emitted, so remove it from the typemap before evalling it,
 
-    # For function pointers, the variable name has already been emitted.
-    # If we emit $expr, we end up with nonsense like
-    #   int (*var)(int) var = INT2PTR(SvIV(ST(0)))
-    #  where var gets emitted twice.  Abort for now.
-    die "panic: do not know how to handle this branch for function pointers"
-      if $printed_name;
+    $expr =~ s/^\s*\$var(\s*=\s*)/$1/
+      or $self->death("panic: typemap doesn't start with '\$var='\n");
 
     $self->eval_input_typemap_code(qq/print qq\a$expr;\\n\a/, $eval_vars);
   }
