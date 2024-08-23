@@ -358,6 +358,7 @@ Term::UI::History
 Test::Harness::TAP
 Test::Inline
 Test::MockObject
+Test::Smoke
 Test::Unit
 Test::Vars
 Text::Autoformat
