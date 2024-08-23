@@ -2384,7 +2384,6 @@ sub INPUT_handler {
     # normal typemap), such as 'int foo = ($type)SvIV($arg)'
     my $var_init = '';
     $var_init = $1 if s/\s*([=;+].*)$//s;
-    $var_init =~ s/"/\\"/g;
 
     # *sigh* It's valid to supply explicit input typemaps in the argument list.
     # XXX this doesn't allow '= NO_INIT', nor '= foo()'
@@ -3545,10 +3544,10 @@ sub output_init {
   if ( $init =~ /^=/ ) {
     # overridden typemap, such as '= ($type)SvUV($arg)'
     if ($printed_name) {
-      $self->eval_input_typemap_code(qq/print " $init\\n"/, $argsref);
+      $self->eval_input_typemap_code(qq/print qq\a $init\\n\a/, $argsref);
     }
     else {
-      $self->eval_input_typemap_code(qq/print "\\t$var $init\\n"/, $argsref);
+      $self->eval_input_typemap_code(qq/print qq\a\\t$var $init\\n\a/, $argsref);
     }
   }
   else {
@@ -3574,13 +3573,13 @@ sub output_init {
       $init =~ s/^;//;
     }
     else {
-      $self->eval_input_typemap_code(qq/print "\\t$var;\\n"/, $argsref);
+      $self->eval_input_typemap_code(qq/print qq\a\\t$var;\\n\a/, $argsref);
       $init =~ s/^;//;
     }
 
     # defer outputting the "extra code"
     $self->{xsub_deferred_code_lines}
-      .= $self->eval_input_typemap_code(qq/"\\n\\t$init\\n"/, $argsref);
+      .= $self->eval_input_typemap_code(qq/qq\a\\n\\t$init\\n\a/, $argsref);
   }
 }
 

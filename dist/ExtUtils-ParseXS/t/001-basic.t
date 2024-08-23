@@ -426,9 +426,9 @@ EOF
         |
         |void f(mymarker1, a, b, c, d)
         |        int mymarker1
-        |        int a = ($var"$var);
-        |        int b ; blah($var"$var);
-        |        int c + blurg($var"$var);
+        |        int a = ($var"$var\"$type);
+        |        int b ; blah($var"$var\"$type);
+        |        int c + blurg($var"$var\"$type);
         |        int d
         |    CODE:
         |        mymarker2;
@@ -439,12 +439,12 @@ EOF
     # Those INPUT lines should have produced something like:
     #
     #    int    mymarker1 = (int)SvIV(ST(0));
-    #    int    a = (a"a);
+    #    int    a = (a"a\"int);
     #    int    b;
     #    int    c = (int)SvIV(ST(3))
     #    int    d = (int)SvIV(ST(4))
-    #    blah(b"b);
-    #    blurg(c"c);
+    #    blah(b"b\"int);
+    #    blurg(c"c\"int);
     #    mymarker2;
 
     my $out = tied(*FH)->content;
@@ -454,7 +454,7 @@ EOF
     $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
         or die "couldn't trim output";
 
-    like($out, qr/^ \s+ int \s+ a\ =\ \Q(a"a);\E $/xm,
+    like($out, qr/^ \s+ int \s+ a\ =\ \Q(a"a"int);\E $/xm,
                         "INPUT '=' expands custom typemap");
 
     like($out, qr/^ \s+ int \s+ b;$/xm,
@@ -464,6 +464,6 @@ EOF
                         "INPUT '+' expands standard typemap");
 
     like($out,
-        qr/^ \s+ int \s+ d\ = .*? blah\Q(b"b)\E .*? blurg\Q(c"c)\E .*? mymarker2/xms,
+        qr/^ \s+ int \s+ d\ = .*? blah\Q(b"b"int)\E .*? blurg\Q(c"c"int)\E .*? mymarker2/xms,
                         "INPUT '+' and ';' append expanded code");
 }
