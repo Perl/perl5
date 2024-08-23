@@ -566,8 +566,21 @@ the F<perldelta> of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Abe Timmerman (ABELTJE) passed away on August 15, 2024. Since 2002, Abe
+built and maintained the L<Test::Smoke> project: "a set of scripts and
+modules that try to run the Perl core tests on as many configurations as
+possible and combine the results into an easy to read report". Smoking
+Perl on as many platforms and configurations as possible has been
+instrumental in finding bugs and developing patches for those bugs.
+
+Abe was a regular attendee of the Perl Toolchain Summit (née Perl QA
+Hackathon), the Dutch Perl Workshop and the Amsterdam.pm user group
+meetings. With his kindness, his smile and his laugh, he helped make
+Perl and its community better.
+
+Abeltje's memorial card said "Grab every opportunity to have a drink of
+bubbly. This is an opportunity". We'll miss you Abe, and we'll have a
+drink of bubbly in your honor.
 
 =head1 Acknowledgements
 
