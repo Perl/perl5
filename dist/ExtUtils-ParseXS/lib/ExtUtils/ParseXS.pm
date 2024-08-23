@@ -1366,7 +1366,6 @@ EOF
             type          => "char *",
             num           => 1,
             var           => "CLASS",
-            printed_name  => 1,
           } );
         }
         else {
@@ -1377,7 +1376,6 @@ EOF
             type          => "$self->{xsub_class} *",
             num           => 1,
             var           => "THIS",
-            printed_name  => 1,
           } );
         }
       }
@@ -2414,7 +2412,7 @@ sub INPUT_handler {
 
     $self->{xsub_map_argname_to_type}->{$var_name} = $var_type;
 
-    # Emit the variable's type.
+    # Emit the variable's type and name.
     #
     # Includes special handling for function pointer types. An INPUT line
     # always has the C type followed by the variable name. The C code
@@ -2430,15 +2428,9 @@ sub INPUT_handler {
     #    char *              s = [something from a typemap]
     #    int (* fn_ptr)(int)   = [something from a typemap]
     #
-    # So handle specially the specific case of a type containing '(*)'
-    # and make a note that the variable name doesn't have to be emitted
-    # out again.
-    #
-    # XXX $printed_name is just a temporary workaround until
-    # generate_init() can handle this directly ("temporary" being defined
-    # as 25 years so far and counting).
+    # So handle specially the specific case of a type containing '(*)' by
+    # embedding the variable name *within* rather than *after* the type.
 
-    my $printed_name = 1;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
       # for a fn ptr type, embed the var name in the type declaration
       print "\t" . $self->map_type($var_type, $var_name);
@@ -2446,7 +2438,6 @@ sub INPUT_handler {
     else {
       print "\t" . $self->map_type($var_type, undef), "\t$var_name";
     }
-
 
     # The index number of the parameter. The counting starts at 1 and skips
     # fake parameters like 'length(s))' (zero is used for RETVAL).
@@ -2480,12 +2471,7 @@ sub INPUT_handler {
        )
     {
       # NO_INIT or OUT* class; skip initialisation
-      if ($printed_name) {
-        print ";\n";
-      }
-      else {
-        print "\t$var_name;\n";
-      }
+      print ";\n";
     }
     elsif ($var_init =~ /\S/) {
       # Emit var and init code based on overridden $var_init
@@ -2494,7 +2480,6 @@ sub INPUT_handler {
         num           => $var_num,
         var           => $var_name,
         init          => $var_init,
-        printed_name  => $printed_name,
       } );
     }
     elsif ($var_num) {
@@ -2503,7 +2488,6 @@ sub INPUT_handler {
         type          => $var_type,
         num           => $var_num,
         var           => $var_name,
-        printed_name  => $printed_name,
       } );
     }
     else {
@@ -3520,7 +3504,6 @@ sub fetch_para {
 #   num:  the parameter number, corresponds to in ST(num-1)
 #   var:  the parameter name
 #   init: the initialiser, e.g. '= SvPV($arg)'
-#   printed_name: the parameter name has already been printed
 #
 # Emit "var = initialisation code" based on the value of $init (which
 # contains everything following the variable name on the INPUT line).
@@ -3533,8 +3516,8 @@ sub output_init {
   my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
 
-  my ($type, $num, $var, $init, $printed_name)
-    = @{$argsref}{qw(type num var init printed_name)};
+  my ($type, $num, $var, $init)
+    = @{$argsref}{qw(type num var init)};
 
   # local assign for efficiently passing in to eval_input_typemap_code
   local $argsref->{arg} = $num
@@ -3542,13 +3525,8 @@ sub output_init {
                           : "/* not a parameter */";
 
   if ( $init =~ /^=/ ) {
-    # overridden typemap, such as '= ($type)SvUV($arg)'
-    if ($printed_name) {
-      $self->eval_input_typemap_code(qq/print qq\a $init\\n\a/, $argsref);
-    }
-    else {
-      $self->eval_input_typemap_code(qq/print qq\a\\t$var $init\\n\a/, $argsref);
-    }
+    # Overridden typemap, such as '= ($type)SvUV($arg)'
+    $self->eval_input_typemap_code(qq/print qq\a $init\\n\a/, $argsref);
   }
   else {
     # "; extra code" or "+ extra code" :
@@ -3564,16 +3542,11 @@ sub output_init {
         type          => $type,
         num           => $num,
         var           => $var,
-        printed_name  => $printed_name,
       } );
     }
-    # "; extra code"
-    elsif ($printed_name) {
-      print ";\n";
-      $init =~ s/^;//;
-    }
     else {
-      print "\t$var;\n";
+      # "; extra code"
+      print ";\n";
       $init =~ s/^;//;
     }
 
@@ -3588,7 +3561,6 @@ sub output_init {
 #   type         'char *' etc
 #   num          the parameter number, corresponds to ST(num-1)
 #   var          the parameter name
-#   printed_name if true, the parameter name has already been printed
 #
 # This function emits text like "= initialisation code", based on the
 # typemap INPUT entry associated with $type, passing the typemap code
@@ -3599,8 +3571,8 @@ sub generate_init {
   my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
 
-  my ($type, $num, $var, $printed_name)
-    = @{$argsref}{qw(type num var printed_name)};
+  my ($type, $num, $var)
+    = @{$argsref}{qw(type num var)};
 
   my $argoff = $num - 1;
   my $arg = "ST($argoff)";
@@ -3642,7 +3614,6 @@ sub generate_init {
   if (    $xstype eq 'T_PV'
       and $self->{xsub_map_argname_to_islength}->{$var})
   {
-    print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
       if defined $self->{xsub_map_argname_to_default}->{$var};
@@ -3706,7 +3677,6 @@ sub generate_init {
   # Specify the environment for when the typemap template is evalled.
   my $eval_vars = {
     var           => $var,
-    printed_name  => $printed_name,
     type          => $type,
     ntype         => $ntype,
     subtype       => $subtype,
@@ -3719,19 +3689,13 @@ sub generate_init {
   # line(s). The variable type and name will already have been emitted.
 
   if (defined($self->{xsub_map_argname_to_default}->{$var})) {
-    # Has a default value. Emit just the variable declaration, and
+    # Has a default value. Just terminate the variable declaration, and
     # defer the initialisation.
+
+    print ";\n";
 
     $expr =~ s/(\t+)/$1    /g;
     $expr =~ s/        /\t/g;
-
-    # Emit the var name
-    if ($printed_name) {
-      print ";\n";
-    }
-    else {
-      print "\t$var;\n";
-    }
 
     if ($self->{xsub_map_argname_to_default}->{$var} eq 'NO_INIT') {
       # for foo(a, b = NO_INIT), add code to initialise later only if
@@ -3751,15 +3715,11 @@ sub generate_init {
     }
   }
   elsif ($self->{xsub_SCOPE_enabled} or $expr !~ /^\s*\$var =/) {
-    # The template is likely a full block rather than a
-    # '$var = ...' expression. Emit just the var now, and
-    # defer the initialisation
-    if ($printed_name) {
-      print ";\n";
-    }
-    else {
-      print "\t$var;\n";
-    }
+    # The template is likely a full block rather than a '$var = ...'
+    # expression. Just terminate the variable declaration, and defer the
+    # initialisation.
+
+    print ";\n";
 
     $self->{xsub_deferred_code_lines}
       .= $self->eval_input_typemap_code(qq/qq\a\\n$expr;\\n\a/, $eval_vars);
