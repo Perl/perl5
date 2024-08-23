@@ -4046,13 +4046,13 @@ sub generate_output {
 
     # Emit mortalisation and set magic code on the result SV if need be
 
-    my $sv = $use_RETVALSV ? 'SV' : '';
-    push @lines, "\tRETVAL$sv = sv_2mortal(RETVAL$sv);\n" if $do_mortalize;
-    push @lines, "\tSvSETMAGIC(RETVAL$sv);\n"             if $do_setmagic;
+    my $retvar = $use_RETVALSV ? 'RETVALSV' : 'RETVAL';
+    push @lines, "\t$retvar = sv_2mortal($retvar);\n" if $do_mortalize;
+    push @lines, "\tSvSETMAGIC($retvar);\n"           if $do_setmagic;
 
     # Emit the final 'ST(0) = RETVAL' or similar, unless ST(0)
     # was already assigned to earlier directly by the typemap.
-    push @lines, "\t$orig_arg = RETVAL$sv;\n"
+    push @lines, "\t$orig_arg = $retvar;\n"
       unless $ST0_already_assigned_to;
 
     if ($use_RETVALSV) {
