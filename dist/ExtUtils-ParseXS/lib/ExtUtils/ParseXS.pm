@@ -3573,7 +3573,7 @@ sub output_init {
       $init =~ s/^;//;
     }
     else {
-      $self->eval_input_typemap_code(qq/print qq\a\\t$var;\\n\a/, $argsref);
+      print "\t$var;\n";
       $init =~ s/^;//;
     }
 
@@ -3731,7 +3731,7 @@ sub generate_init {
       print ";\n";
     }
     else {
-      $self->eval_input_typemap_code(qq/print "\\t$var;\\n"/, $eval_vars);
+      print "\t$var;\n";
     }
 
     if ($self->{xsub_map_argname_to_default}->{$var} eq 'NO_INIT') {
@@ -3759,7 +3759,7 @@ sub generate_init {
       print ";\n";
     }
     else {
-      $self->eval_input_typemap_code(qq/print qq\a\\t$var;\\n\a/, $eval_vars);
+      print "\t$var;\n";
     }
 
     $self->{xsub_deferred_code_lines}
