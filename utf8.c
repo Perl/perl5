@@ -4188,14 +4188,15 @@ char *
 Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
                           UV flags)
 {
+    PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
+
     int truncated = 0;
     const U8 *s, *e;
-
-    PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
+    STRLEN next_len = 0;
 
     SvPVCLEAR(dsv);
     SvUTF8_off(dsv);
-    for (s = spv, e = s + len; s < e; s += UTF8SKIP(s)) {
+    for (s = spv, e = s + len; s < e; s += next_len) {
         UV u;
         bool ok = 0;
 
@@ -4204,7 +4205,9 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
              break;
         }
 
-        u = utf8_to_uvchr_buf(s, e, 0);
+        u = utf8_to_uvchr_buf(s, e, &next_len);
+        assert(next_len > 0);
+
         if (u < 256) {
             const U8 c = (U8) u;
             if (flags & UNI_DISPLAY_BACKSLASH) {
