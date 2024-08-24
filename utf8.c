@@ -4199,40 +4199,40 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
     SvPVCLEAR(dsv);
     SvUTF8_off(dsv);
     for (s = spv, e = s + len; s < e; s += UTF8SKIP(s)) {
-         UV u;
-         bool ok = 0;
+        UV u;
+        bool ok = 0;
 
-         if (pvlim && SvCUR(dsv) >= pvlim) {
-              truncated++;
-              break;
-         }
+        if (pvlim && SvCUR(dsv) >= pvlim) {
+             truncated++;
+             break;
+        }
 
-         u = utf8_to_uvchr_buf(s, e, 0);
-         if (u < 256) {
-             const U8 c = (U8) u;
-             if (flags & UNI_DISPLAY_BACKSLASH) {
-                 if (    isMNEMONIC_CNTRL(c)
-                     && (   c != '\b'
-                         || (flags & UNI_DISPLAY_BACKSPACE)))
-                 {
-                    const char * mnemonic = cntrl_to_mnemonic(c);
-                    sv_catpvn(dsv, mnemonic, strlen(mnemonic));
-                    ok = 1;
-                 }
-                 else if (c == '\\') {
-                    sv_catpvs(dsv, "\\\\");
-                    ok = 1;
-                 }
-             }
-             /* isPRINT() is the locale-blind version. */
-             if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-                 const char string = c;
-                 sv_catpvn(dsv, &string, 1);
-                 ok = 1;
-             }
-         }
-         if (!ok)
-             Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
+        u = utf8_to_uvchr_buf(s, e, 0);
+        if (u < 256) {
+            const U8 c = (U8) u;
+            if (flags & UNI_DISPLAY_BACKSLASH) {
+                if (    isMNEMONIC_CNTRL(c)
+                    && (   c != '\b'
+                        || (flags & UNI_DISPLAY_BACKSPACE)))
+                {
+                   const char * mnemonic = cntrl_to_mnemonic(c);
+                   sv_catpvn(dsv, mnemonic, strlen(mnemonic));
+                   ok = 1;
+                }
+                else if (c == '\\') {
+                   sv_catpvs(dsv, "\\\\");
+                   ok = 1;
+                }
+            }
+            /* isPRINT() is the locale-blind version. */
+            if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
+                const char string = c;
+                sv_catpvn(dsv, &string, 1);
+                ok = 1;
+            }
+        }
+        if (!ok)
+            Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
     }
     if (truncated)
          sv_catpvs(dsv, "...");
