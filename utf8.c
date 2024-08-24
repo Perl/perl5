@@ -4166,15 +4166,36 @@ Build to the scalar C<dsv> a displayable version of the UTF-8 encoded string
 C<spv>, length C<len>, the displayable version being at most C<pvlim> bytes
 long (if longer, the rest is truncated and C<"..."> will be appended).
 
-The C<flags> argument can have C<UNI_DISPLAY_ISPRINT> set to display
-C<isPRINT()>able characters as themselves, C<UNI_DISPLAY_BACKSLASH>
-to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
-(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
-C<UNI_DISPLAY_QQ> (and its alias C<UNI_DISPLAY_REGEX>) have both
-C<UNI_DISPLAY_BACKSLASH> and C<UNI_DISPLAY_ISPRINT> turned on.
+The C<flags> argument can have any combination of these flag bits
 
-Additionally, there is now C<UNI_DISPLAY_BACKSPACE> which allows C<\b> for a
-backspace, but only when C<UNI_DISPLAY_BACKSLASH> also is set.
+=over
+
+=item C<UNI_DISPLAY_ISPRINT>
+
+to display C<isPRINT()>able characters as themselves
+
+=item C<UNI_DISPLAY_BACKSLASH>
+
+to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
+
+(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
+
+=item C<UNI_DISPLAY_BACKSPACE>
+
+to display C<\b> for a backspace, but only when C<UNI_DISPLAY_BACKSLASH> also
+is set.
+
+=item C<UNI_DISPLAY_REGEX>
+
+This a shorthand for C<UNI_DISPLAY_ISPRINT> along with
+C<UNI_DISPLAY_BACKSLASH>.
+
+=item C<UNI_DISPLAY_QQ>
+
+This a shorthand for all three C<UNI_DISPLAY_ISPRINT>,
+C<UNI_DISPLAY_BACKSLASH>, and C<UNI_DISPLAY_BACKSLASH>.
+
+=back
 
 The pointer to the PV of the C<dsv> is returned.
 
