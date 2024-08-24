@@ -14,7 +14,7 @@ BEGIN {
 use utf8;
 require Config;
 
-plan tests => 317;
+plan tests => 318;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -1209,6 +1209,16 @@ for ("", nullrocow) {
     $c = $x =~ tr[\N{U+00CB}\N{U+00EB}\N{U+2010}][\N{U+0401}\N{U+0451}\-];
     is $x, "\x{401}", 'Latin1 \N{} followed by above Latin1 work properly';
     is $c, 1, "Count for the above test";
+}
+
+{   # As of August 2024, the code to handle this situation is not otherwise
+    # exercised by the test suite
+
+    my $A = "A";
+    utf8::upgrade($A);
+
+    $A =~ tr/A/\xB6/;   # B6 works in both ASCII and EBCDIC
+    is($A, "\xB6", "UTF-8 invariant in a UTF-8 string to UTF-8 variant");
 }
 
 1;
