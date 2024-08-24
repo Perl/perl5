@@ -537,7 +537,7 @@ h = \
     regexp.h scope.h sv.h thread.h unixish.h utf8.h util.h warnings.h \
     $(CONFIGH)
 
-c_base = \
+common_c = \
     av.c \
     builtin.c \
     caretx.c \
@@ -556,10 +556,8 @@ c_base = \
     mg.c \
     mro_core.c \
     numeric.c \
-    op.c \
     pad.c \
     peep.c \
-    perl.c \
     perlio.c \
     perly.c \
     pp.c \
@@ -581,10 +579,16 @@ c_base = \
     taint.c \
     time64.c \
     toke.c \
-    universal.c \
     utf8.c \
-    util.c \
+    util.c
+
+c_base = \
+    $(common_c) \
+    op.c \
+    perl.c \
+    universal.c \
     $(mallocsrc)
+
 
 !NO!SUBS!
 
