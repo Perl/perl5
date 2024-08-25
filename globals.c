@@ -39,6 +39,11 @@
 PERL_THREAD_LOCAL void *PL_current_context;
 #endif
 
+/* Initialization is moved to standalone opcode.c but it is expected to be
+   visible via globals.o
+*/
+#include "opcode.c"
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

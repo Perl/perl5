@@ -3,6 +3,7 @@
 # Regenerate (overwriting only if changed):
 #
 #    opcode.h
+#    opcode.c
 #    opnames.h
 #    pp_proto.h
 #    lib/B/Op_private.pm
@@ -18,6 +19,14 @@
 
 use v5.26;
 use warnings;
+
+sub generate_opcode_c;
+sub generate_opcode_c_epilogue;
+sub generate_opcode_c_prologue;
+sub generate_opcode_c_opnames;
+sub generate_opcode_c_pl_check;
+sub generate_opcode_c_pl_opargs;
+sub generate_opcode_c_pl_ppaddr;
 
 sub generate_opcode_h;
 sub generate_opcode_h_epilogue;
@@ -648,7 +657,7 @@ EOF
 
 # output the contents of the assorted PL_op_private_*[] tables
 
-sub print_PL_op_private_tables {
+sub print_c_PL_op_private_tables {
     my $fh = shift;
 
     my $PL_op_private_labels     = '';
@@ -821,27 +830,12 @@ sub print_PL_op_private_tables {
     }
 
     print $fh <<EOF;
-START_EXTERN_C
-
-#ifndef DOINIT
-
-/* data about the flags in op_private */
-
-EXTCONST I16  PL_op_private_bitdef_ix[];
-EXTCONST U16  PL_op_private_bitdefs[];
-EXTCONST char PL_op_private_labels[];
-EXTCONST I16  PL_op_private_bitfields[];
-EXTCONST U8   PL_op_private_valid[];
-
-#else
-
-
 /* PL_op_private_labels[]: the short descriptions of private flags.
  * All labels are concatenated into a single char array
  * (separated by \\0's) for compactness.
  */
 
-EXTCONST char PL_op_private_labels[] = {
+const char * PL_op_private_labels = (const char []) {
 $PL_op_private_labels
 };
 
@@ -857,7 +851,7 @@ $PL_op_private_labels
  *    -1
  */
 
-EXTCONST I16 PL_op_private_bitfields[] = {
+const I16 * PL_op_private_bitfields = (const I16 []) {
 $PL_op_private_bitfields
 };
 
@@ -865,7 +859,7 @@ $PL_op_private_bitfields
 /* PL_op_private_bitdef_ix[]: map an op number to a starting position
  * in PL_op_private_bitdefs.  If -1, the op has no bits defined */
 
-EXTCONST I16  PL_op_private_bitdef_ix[] = {
+const I16 * PL_op_private_bitdef_ix = (const I16 []) {
 $PL_op_private_bitdef_ix
 };
 
@@ -883,7 +877,7 @@ $PL_op_private_bitdef_ix
  *              into PL_op_private_bitfields[] (for a bit field)
  */
 
-EXTCONST U16  PL_op_private_bitdefs[] = {
+const U16 * PL_op_private_bitdefs = (const U16 []) {
 $PL_op_private_bitdefs
 };
 
@@ -891,19 +885,25 @@ $PL_op_private_bitdefs
 /* PL_op_private_valid: for each op, indexed by op_type, indicate which
  * flags bits in op_private are legal */
 
-EXTCONST U8 PL_op_private_valid[] = {
+const U8 * PL_op_private_valid = (const U8 []) {
 $PL_op_private_valid
 };
-
-#endif /* !DOINIT */
-
-END_EXTERN_C
-
-
 EOF
 
 }
 
+sub print_h_PL_op_private_tables {
+    print <<EOF;
+/* data about the flags in op_private */
+
+extern const I16  * PL_op_private_bitdef_ix;
+extern const U16  * PL_op_private_bitdefs;
+extern const char * PL_op_private_labels;
+extern const I16  * PL_op_private_bitfields;
+extern const U8   * PL_op_private_valid;
+EOF
+
+}
 
 # =================================================================
 
@@ -967,6 +967,7 @@ my %opflags = (
 );
 
 generate_opcode_h;
+generate_opcode_c;
 generate_opnames_h;
 generate_pp_proto_h;
 generate_b_op_private_pm;
@@ -1001,6 +1002,170 @@ sub gen_op_is_macro {
     }
 }
 
+sub generate_opcode_c {
+    my $oc = open_new( 'opcode.c', '>', {
+        by        => 'regen/opcode.pl',
+        copyright => [1993 .. 2007],
+        file      => 'opcode.c',
+        from      => 'its data',
+        style     => '*',
+    });
+
+    my $old = select $oc;
+
+    generate_opcode_c_prologue;
+    generate_opcode_c_opnames;
+    generate_opcode_c_pl_check;
+    generate_opcode_c_pl_opargs;
+    generate_opcode_c_pl_ppaddr;
+    generate_opcode_c_epilogue;
+
+    select $old;
+}
+
+sub generate_opcode_c_epilogue {
+    print qq (\n\n);
+    OP_PRIVATE::print_c_PL_op_private_tables(select);
+    read_only_bottom_close_and_rename(select);
+}
+
+sub generate_opcode_c_prologue {
+    print <<~'END';
+    /* at the moment opcode.c is "included" from globals.c which provides and overloads */
+    END
+
+    #print qq (#include "EXTERN.h"\n);
+    #print qq (#define PERL_IN_OPCODE_C\n);
+    #print qq (#include "perl.h"\n\n);
+    #print qq (#include "proto.h"\n\n);
+}
+
+sub generate_opcode_c_opnames {
+    print <<~'END';
+    /* at the moment opcode.c is "included" from globals.c which removes 'extern' */
+    EXTCONST char* const * PL_op_name = (const char * []) {
+    END
+
+    for (@ops) {
+        print qq(\t"$_",\n);
+    }
+
+    print <<~'END';
+            "freed",
+    };
+
+    /* at the moment opcode.c is "included" from globals.c which removes 'extern' */
+    EXTCONST char* const * PL_op_desc = (const char * []) {
+    END
+
+    for (@ops) {
+        my($safe_desc) = $desc{$_};
+
+        # Have to escape double quotes and escape characters.
+        $safe_desc =~ s/([\\"])/\\$1/g;
+
+        print qq(\t"$safe_desc",\n);
+    }
+
+    print <<~'END';
+        "freed op",
+    };
+    END
+}
+
+sub generate_opcode_c_pl_check {
+    print <<~'END';
+    /* at the moment opcode.c is "included" from globals.c which removes 'extern' */
+    EXT Perl_check_t * PL_check = (Perl_check_t []) {
+    END
+
+    for (@ops) {
+        print "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
+    }
+
+    print <<~'END';
+    };
+    END
+}
+
+sub generate_opcode_c_pl_opargs {
+    my $OCSHIFT = 8;
+    my $OASHIFT = 12;
+
+    print <<~'END';
+    /* at the moment opcode.c is "included" from globals.c which removes 'extern' */
+    EXTCONST U32 * PL_opargs = (const U32 []) {
+    END
+
+    for my $op (@ops) {
+        my $argsum = 0;
+        my $flags = $flags{$op};
+        for my $flag (keys %opflags) {
+            if ($flags =~ s/$flag//) {
+                die "Flag collision for '$op' ($flags{$op}, $flag)\n"
+                    if $argsum & $opflags{$flag};
+                $argsum |= $opflags{$flag};
+            }
+        }
+        die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)\n]
+            unless exists $opclass{$flags};
+        $argsum |= $opclass{$flags} << $OCSHIFT;
+        my $argshift = $OASHIFT;
+        for my $arg (split(' ',$args{$op})) {
+            if ($arg =~ s/^D//) {
+                # handle 1st, just to put D 1st.
+            }
+            if ($arg =~ /^F/) {
+                # record opnums of these opnames
+                $arg =~ s/s//;
+                $arg =~ s/-//;
+                $arg =~ s/\+//;
+            } elsif ($arg =~ /^S./) {
+                $arg =~ s/<//;
+                $arg =~ s/\|//;
+            }
+            my $argnum = ($arg =~ s/\?//) ? 8 : 0;
+            die "op = $op, arg = $arg\n"
+                unless exists $argnum{$arg};
+            $argnum += $argnum{$arg};
+            die "Argument overflow for '$op'\n"
+                if $argshift >= $ARGBITS ||
+                $argnum > ((1 << ($ARGBITS - $argshift)) - 1);
+            $argsum += $argnum << $argshift;
+            $argshift += 4;
+        }
+        $argsum = sprintf("0x%08x", $argsum);
+        print "\t", tab(3, "$argsum,"), "/* $op */\n";
+    }
+
+    print <<~'END';
+    };
+    END
+}
+
+sub generate_opcode_c_pl_ppaddr {
+    # Emit ppcode switch array.
+
+    print <<~'END';
+    /* at the moment code is "included" from globals.c which removes 'extern' */
+    EXT Perl_ppaddr_t * PL_ppaddr = (Perl_ppaddr_t []) {
+    END
+
+    for (@ops) {
+        my $op_func = "Perl_pp_$_";
+        my $name = $alias{$_};
+        if ($name && $name->[0] ne $op_func) {
+            print "\t$op_func,\t/* implemented by $name->[0] */\n";
+        } else {
+            print "\t$op_func,\n";
+        }
+    }
+
+    print <<~'END';
+    };
+    END
+}
+
 sub generate_opcode_h {
     my $oc = open_new( 'opcode.h', '>', {
         by        => 'regen/opcode.pl',
@@ -1014,10 +1179,12 @@ sub generate_opcode_h {
 
     generate_opcode_h_prologue;
     generate_opcode_h_defines;
+    print "START_EXTERN_C\n\n";
     generate_opcode_h_opnames;
     generate_opcode_h_pl_ppaddr;
     generate_opcode_h_pl_check;
     generate_opcode_h_pl_opargs;
+    print "END_EXTERN_C\n\n";
     generate_opcode_h_epilogue;
 
     select $old;
@@ -1063,9 +1230,8 @@ sub generate_opcode_h_defines {
 }
 
 sub generate_opcode_h_epilogue {
-    print "\n\n";
     OP_PRIVATE::print_defines(select);
-    OP_PRIVATE::print_PL_op_private_tables(select);
+    OP_PRIVATE::print_h_PL_op_private_tables(select);
     read_only_bottom_close_and_rename(select);
 }
 
@@ -1075,135 +1241,26 @@ sub generate_opcode_h_prologue {
 sub generate_opcode_h_opnames {
     # Emit op names and descriptions.
     print <<~'END';
-    START_EXTERN_C
-
-    EXTCONST char* const PL_op_name[] INIT({
-    END
-
-    for (@ops) {
-        print qq(\t"$_",\n);
-    }
-
-    print <<~'END';
-            "freed",
-    });
-
-    EXTCONST char* const PL_op_desc[] INIT({
-    END
-
-    for (@ops) {
-        my($safe_desc) = $desc{$_};
-
-        # Have to escape double quotes and escape characters.
-        $safe_desc =~ s/([\\"])/\\$1/g;
-
-        print qq(\t"$safe_desc",\n);
-    }
-
-    print <<~'END';
-        "freed op",
-    });
-
-    END_EXTERN_C
+    extern const char* const * PL_op_name;
+    extern const char* const * PL_op_desc;
     END
 }
 
 sub generate_opcode_h_pl_check {
     print <<~'END';
-
-    EXT Perl_check_t PL_check[] /* or perlvars.h */
-    INIT({
-    END
-
-    for (@ops) {
-        print "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
-    }
-
-    print <<~'END';
-    });
+    extern Perl_check_t * PL_check; /* or perlvars.h */
     END
 }
 
 sub generate_opcode_h_pl_opargs {
-    my $OCSHIFT = 8;
-    my $OASHIFT = 12;
-
     print <<~'END';
-
-    EXTCONST U32 PL_opargs[] INIT({
-    END
-
-    for my $op (@ops) {
-        my $argsum = 0;
-        my $flags = $flags{$op};
-        for my $flag (keys %opflags) {
-            if ($flags =~ s/$flag//) {
-                die "Flag collision for '$op' ($flags{$op}, $flag)\n"
-                    if $argsum & $opflags{$flag};
-                $argsum |= $opflags{$flag};
-            }
-        }
-        die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)\n]
-            unless exists $opclass{$flags};
-        $argsum |= $opclass{$flags} << $OCSHIFT;
-        my $argshift = $OASHIFT;
-        for my $arg (split(' ',$args{$op})) {
-            if ($arg =~ s/^D//) {
-                # handle 1st, just to put D 1st.
-            }
-            if ($arg =~ /^F/) {
-                # record opnums of these opnames
-                $arg =~ s/s//;
-                $arg =~ s/-//;
-                $arg =~ s/\+//;
-            } elsif ($arg =~ /^S./) {
-                $arg =~ s/<//;
-                $arg =~ s/\|//;
-            }
-            my $argnum = ($arg =~ s/\?//) ? 8 : 0;
-            die "op = $op, arg = $arg\n"
-                unless exists $argnum{$arg};
-            $argnum += $argnum{$arg};
-            die "Argument overflow for '$op'\n"
-                if $argshift >= $ARGBITS ||
-                $argnum > ((1 << ($ARGBITS - $argshift)) - 1);
-            $argsum += $argnum << $argshift;
-            $argshift += 4;
-        }
-        $argsum = sprintf("0x%08x", $argsum);
-        print "\t", tab(3, "$argsum,"), "/* $op */\n";
-    }
-
-    print <<~'END';
-    });
-
-    END_EXTERN_C
+    extern const U32 * PL_opargs;
     END
 }
 
 sub generate_opcode_h_pl_ppaddr {
-    # Emit ppcode switch array.
-
     print <<~'END';
-
-    START_EXTERN_C
-
-    EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
-    INIT({
-    END
-
-    for (@ops) {
-        my $op_func = "Perl_pp_$_";
-        my $name = $alias{$_};
-        if ($name && $name->[0] ne $op_func) {
-            print "\t$op_func,\t/* implemented by $name->[0] */\n";
-        } else {
-            print "\t$op_func,\n";
-        }
-    }
-
-    print <<~'END';
-    });
+    extern Perl_ppaddr_t * PL_ppaddr; /* or perlvars.h */
     END
 }
 

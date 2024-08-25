@@ -91,6 +91,7 @@ numeric.c				Miscellaneous numeric conversion routines
 op.c					Opcode syntax tree code
 op.h					Opcode syntax tree header
 op_reg_common.h				Common parts of op.h, regexp.h header
+opcode.c				Automatically generated opcode source
 opcode.h				Automatically generated opcode header
 opnames.h				Automatically generated opcode header
 overload.h				generated overload enum (public)
