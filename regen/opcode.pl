@@ -1025,6 +1025,8 @@ sub generate_opcode_h {
 
 my @unimplemented;
 sub generate_opcode_h_defines {
+    print "#$restrict_to_core\n\n";
+
     my $last_cond = '';
 
     sub unimplemented {
@@ -1068,7 +1070,6 @@ sub generate_opcode_h_epilogue {
 }
 
 sub generate_opcode_h_prologue {
-    print "#$restrict_to_core\n\n";
 }
 
 sub generate_opcode_h_opnames {
