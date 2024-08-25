@@ -607,49 +607,7 @@ c = $(c_base) miniperlmain.c $(mini_only_src)
 # actual perl(mini)main.o, nor any dtrace objects.
 
 common_objs = \
-    av$(OBJ_EXT) \
-    builtin$(OBJ_EXT) \
-    caretx$(OBJ_EXT) \
-    class$(OBJ_EXT) \
-    deb$(OBJ_EXT) \
-    doio$(OBJ_EXT) \
-    doop$(OBJ_EXT) \
-    dquote$(OBJ_EXT) \
-    dump$(OBJ_EXT) \
-    globals$(OBJ_EXT) \
-    gv$(OBJ_EXT) \
-    hv$(OBJ_EXT) \
-    keywords$(OBJ_EXT) \
-    locale$(OBJ_EXT) \
-    mathoms$(OBJ_EXT) \
-    mg$(OBJ_EXT) \
-    mro_core$(OBJ_EXT) \
-    numeric$(OBJ_EXT) \
-    pad$(OBJ_EXT) \
-    peep$(OBJ_EXT) \
-    perlio$(OBJ_EXT) \
-    perly$(OBJ_EXT) \
-    pp$(OBJ_EXT) \
-    pp_ctl$(OBJ_EXT) \
-    pp_hot$(OBJ_EXT) \
-    pp_pack$(OBJ_EXT) \
-    pp_sort$(OBJ_EXT) \
-    pp_sys$(OBJ_EXT) \
-    reentr$(OBJ_EXT) \
-    regcomp$(OBJ_EXT) \
-    regcomp_debug$(OBJ_EXT) \
-    regcomp_invlist$(OBJ_EXT) \
-    regcomp_study$(OBJ_EXT) \
-    regcomp_trie$(OBJ_EXT) \
-    regexec$(OBJ_EXT) \
-    run$(OBJ_EXT) \
-    scope$(OBJ_EXT) \
-    sv$(OBJ_EXT) \
-    taint$(OBJ_EXT) \
-    time64$(OBJ_EXT) \
-    toke$(OBJ_EXT) \
-    utf8$(OBJ_EXT) \
-    util$(OBJ_EXT) \
+    $(common_c:.c=$(OBJ_EXT)) \
     $(mallocobj) \
     $(ARCHOBJS)
 
