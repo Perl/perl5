@@ -1211,7 +1211,8 @@ our %Modules = (
     },
 
     'Tie::RefHash' => {
-        'DISTRIBUTION' => 'ETHER/Tie-RefHash-1.40.tar.gz',
+        'DISTRIBUTION' => 'ETHER/Tie-RefHash-1.41.tar.gz',
+        'SYNCINFO'     => 'mauke on Mon Aug 26 04:28:51 2024',
         'FILES'        => q[cpan/Tie-RefHash],
         'EXCLUDED'     => [
             qr{^t/00-},
