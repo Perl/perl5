@@ -991,7 +991,7 @@ L<Announced on 2019-03-21 by Zak Elep|https://www.nntp.perl.org/group/perl.perl5
 
 L<Announced on 2019-02-20 by Atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2019/02/msg253750.html>
 
-=head2 v5.29.7 - Edsger W. Dijkstra: "Programming Considered as a Human Activity", IFIP Congress, New York, 1965.
+=head2 v5.29.7 - Edsger W. Dijkstra: "Programming Considered as a Human Activity", IFIP Congress, New York, 1965
 
 L<Announced on 2019-01-20 by Abigail|https://www.nntp.perl.org/group/perl.perl5.porters/2019/01/msg253444.html>
 
@@ -2328,7 +2328,7 @@ L<Announced on 2015-12-21 by David Golden|http://www.nntp.perl.org/group/perl.pe
    that could splinter the Republic forever and usher in
   a new Empire of gradual typing....
 
-=head2 v5.23.5 - utastro!nather (Ed Nather), "The Story of Mel", in net.jokes, May 21, 1983.
+=head2 v5.23.5 - utastro!nather (Ed Nather), "The Story of Mel", in net.jokes, May 21, 1983
 
 L<Announced on 2015-11-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2015/11/msg232758.html>
 

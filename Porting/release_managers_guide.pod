@@ -685,7 +685,7 @@ F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>
 
 =back
 
-=head4 Update C<Module::CoreList> with module version data for the new release.
+=head4 Update C<Module::CoreList> with module version data for the new release
 
 Note that if this is a MAINT release, you should run the following actions
 from the maint branch, but commit the C<CoreList.pm> changes in
