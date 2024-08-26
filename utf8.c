@@ -1039,21 +1039,23 @@ which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding, and no longer than
 C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
 the length, in bytes, of that character.
 
-The value of C<flags> determines the behavior when C<s> does not point to a
-well-formed UTF-8 character.  If C<flags> is 0, encountering a malformation
-causes zero to be returned and C<*retlen> is set so that (S<C<s> + C<*retlen>>)
-is the next possible position in C<s> that could begin a non-malformed
-character.  Also, if UTF-8 warnings haven't been lexically disabled, a warning
-is raised.  Some UTF-8 input sequences may contain multiple malformations.
+The value of C<flags> determines the behavior when either C<s> does not point
+to a well-formed UTF-8 character, or the pointed-to code point is a member of
+certain potentially problematic classes (listed below).  If C<flags> is 0, all
+such classes are accepted, and encountering a malformation causes zero to be
+returned and C<*retlen> to be set so that (S<C<s> + C<*retlen>>) is the next
+possible position in C<s> that could begin a non-malformed character.  For
+malformations, if UTF-8 warnings haven't been lexically disabled, a warning is
+also raised.  Some UTF-8 input sequences may contain multiple malformations.
 This function tries to find every possible one in each call, so multiple
 warnings can be raised for the same sequence.
 
 Various ALLOW flags can be set in C<flags> to allow (and not warn on)
 individual types of malformations, such as the sequence being overlong (that
-is, when there is a shorter sequence that can express the same code point;
-overlong sequences are expressly forbidden in the UTF-8 standard due to
-potential security issues).  Another malformation example is the first byte of
-a character not being a legal first byte.  See F<utf8.h> for the list of such
+is, there is a shorter sequence that can express the same code point; overlong
+sequences are expressly forbidden in the UTF-8 standard due to potential
+security issues).  Another malformation example is the first byte of the input
+sequence not being a legal first byte.  See F<utf8.h> for the list of such
 flags.  Even if allowed, this function generally returns the Unicode
 REPLACEMENT CHARACTER when it encounters a malformation.  There are flags in
 F<utf8.h> to override this behavior for the overlong malformations, but don't
@@ -1071,12 +1073,12 @@ be set to 1.  To disambiguate, upon a zero return, see if the first byte of
 C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the input had an
 error.  Or you can use C<L</utf8n_to_uvchr_error>>.
 
-Certain code points are considered problematic.  These are Unicode surrogates,
-Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
-By default these are considered regular code points, but certain situations
-warrant special handling for them, which can be specified using the C<flags>
-parameter.  If C<flags> contains C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, all
-three classes are treated as malformations and handled as such.  The flags
+Certain classes of code points are considered problematic.  These are Unicode
+surrogates, Unicode non-characters, and code points above the Unicode maximum
+of 0x10FFFF.  By default these are considered regular code points, but certain
+situations warrant special handling for them, which can be specified using the
+C<flags> parameter.  If C<flags> contains C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>,
+all three classes are treated as malformations and handled as such.  The flags
 C<UTF8_DISALLOW_SURROGATE>, C<UTF8_DISALLOW_NONCHAR>, and
 C<UTF8_DISALLOW_SUPER> (meaning above the legal Unicode maximum) can be set to
 disallow these categories individually.  C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
@@ -1119,7 +1121,6 @@ can apply to code points that actually do fit in 31 bits.  This happens on
 EBCDIC platforms, and sometimes when the L<overlong
 malformation|/C<UTF8_GOT_LONG>> is also present.  The new names accurately
 describe the situation in all cases.
-
 
 All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
