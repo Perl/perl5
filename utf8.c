@@ -1288,7 +1288,7 @@ C<UTF8_DISALLOW_SUPER> or the C<UTF8_WARN_SUPER> flags.
 
 =item C<UTF8_GOT_SURROGATE>
 
-The input sequence was malformed in that it is for a -Unicode UTF-16 surrogate
+The input sequence was malformed in that it is for a Unicode UTF-16 surrogate
 code point.
 This bit is set only if the input C<flags> parameter contains either the
 C<UTF8_DISALLOW_SURROGATE> or the C<UTF8_WARN_SURROGATE> flags.
