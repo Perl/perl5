@@ -10589,7 +10589,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && BITMAP_TEST(( (struct regnode_bbm *) p)->bitmap,
                                 (U8) scan[1] & UTF_CONTINUATION_MASK))
         {
-            scan += 2;  /* This node only matces 2-byte UTF-8 */
+            scan += 2;  /* This node only matches 2-byte UTF-8 */
             hardcount++;
         }
         break;
