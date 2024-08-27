@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 38;
+use Test::More tests => 39;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -21,6 +21,8 @@ require_ok( 'ExtUtils::ParseXS' );
     package Capture;
     sub TIEHANDLE { bless {} }
     sub PRINT { shift->{buf} .= join '', @_ }
+    sub PRINTF    { my $obj = shift; my $fmt = shift;
+                    $obj->{buf} .= sprintf $fmt, @_ }
     sub content { shift->{buf} }
 }
 
@@ -509,4 +511,37 @@ EOF
     like($sout,
         qr/\Qint(*fn_ptr)(char*,long)=(int(*)(char*,long))INT2PTR(SvIV(ST(1)))/,
         "function pointer declared okay");
+}
+
+{
+    # Check that default expressions are template-expanded.
+    # Whether this is sensible or not, Dynaloader and other distributions
+    # rely on it
+
+    my $pxs = ExtUtils::ParseXS->new;
+    tie *FH, 'Capture';
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void foo(int mymarker1, char *pkg = "$Package")
+        |    CODE:
+        |        mymarker2;
+EOF
+
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    # remove all spaces for easier matching
+    my $sout = $out;
+    $sout =~ s/[ \t]+//g;
+
+    like($sout, qr/pkg.*=.*"Foo"/, "default expression expanded");
 }

@@ -3527,7 +3527,8 @@ sub output_init {
 
   if ( $init =~ /^=/ ) {
     # Overridden typemap, such as '= ($type)SvUV($arg)'
-    $self->eval_input_typemap_code(qq/print qq\a $init\\n\a/, $argsref);
+    printf " %s\n",
+      $self->eval_input_typemap_code("qq\a$init\a", $argsref);
   }
   else {
     # "; extra code" or "+ extra code" :
@@ -3553,7 +3554,8 @@ sub output_init {
 
     # defer outputting the "extra code"
     $self->{xsub_deferred_code_lines}
-      .= $self->eval_input_typemap_code(qq/qq\a\\n\\t$init\\n\a/, $argsref);
+      .= sprintf "\n\t%s\n",
+          $self->eval_input_typemap_code("qq\a$init\a", $argsref);
   }
 }
 
@@ -3701,18 +3703,20 @@ sub generate_init {
     if ($self->{xsub_map_argname_to_default}->{$var} eq 'NO_INIT') {
       # for foo(a, b = NO_INIT), add code to initialise later only if
       # an arg was supplied.
-      $self->{xsub_deferred_code_lines} .= $self->eval_input_typemap_code(
-        qq/qq\a\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n\a/,
-        $eval_vars
-      );
+      $self->{xsub_deferred_code_lines}
+        .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n",
+            $num,
+            $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
     }
     else {
       # for foo(a, b = default), add code to initialise later to either
       # the arg or default value
-      $self->{xsub_deferred_code_lines} .= $self->eval_input_typemap_code(
-        qq/qq\a\\n\\tif (items < $num)\\n\\t    $var = $self->{xsub_map_argname_to_default}->{$var};\\n\\telse {\\n$expr;\\n\\t}\\n\a/,
-        $eval_vars
-      );
+      $self->{xsub_deferred_code_lines}
+        .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n\telse {\n%s;\n\t}\n",
+            $num,
+            $var,
+            $self->eval_input_typemap_code("qq\a$self->{xsub_map_argname_to_default}->{$var}\a", $eval_vars),
+            $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
     }
   }
   elsif ($self->{xsub_SCOPE_enabled} or $expr !~ /^\s*\$var =/) {
@@ -3723,7 +3727,8 @@ sub generate_init {
     print ";\n";
 
     $self->{xsub_deferred_code_lines}
-      .= $self->eval_input_typemap_code(qq/qq\a\\n$expr;\\n\a/, $eval_vars);
+     .= sprintf "\n%s;\n",
+          $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
   }
   else {
     # The template starts with '$var = ...'. The variable name has already
@@ -3732,7 +3737,8 @@ sub generate_init {
     $expr =~ s/^\s*\$var(\s*=\s*)/$1/
       or $self->death("panic: typemap doesn't start with '\$var='\n");
 
-    $self->eval_input_typemap_code(qq/print qq\a$expr;\\n\a/, $eval_vars);
+    printf "%s;\n",
+      $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
   }
 }
 
@@ -3869,7 +3875,7 @@ sub generate_output {
     $subexpr =~ s/\$var/${var}\[ix_$var]/g;
     $subexpr =~ s/\n\t/\n\t\t/g;
     $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
-    $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+    print $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
     print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
   }
   elsif ($var eq 'RETVAL') {
@@ -4049,7 +4055,7 @@ sub generate_output {
     # the value should be pushed onto the stack
     print "\tPUSHs(sv_newmortal());\n";
     $eval_vars->{arg} = "ST($num)";
-    $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+    print $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
   }
 
@@ -4067,7 +4073,7 @@ sub generate_output {
     #
     #  which means that if we hit this branch, $evalexpr will have been
     #  expanded to something like sv_setsv(ST(2), boolSV(foo))
-    $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+    print $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
   }
 }
