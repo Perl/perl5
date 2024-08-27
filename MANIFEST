@@ -6620,6 +6620,7 @@ t/run/runenv.t				Test if perl honors its environment variables.
 t/run/runenv_hashseed.t			Test if perl honors PERL_HASH_SEED.
 t/run/runenv_randseed.t			Test if perl honors PERL_RAND_SEED.
 t/run/script.t				See if script invocation works
+t/run/switch-I-and-M.t			Test order of application of -I and -M
 t/run/switch0.t				Test the -0 switch
 t/run/switcha.t				Test the -a switch
 t/run/switchC.t				Test the -C switch
