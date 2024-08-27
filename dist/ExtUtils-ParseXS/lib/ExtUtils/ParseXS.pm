@@ -3577,6 +3577,8 @@ sub generate_init {
   my ($type, $num, $var)
     = @{$argsref}{qw(type num var)};
 
+  my $default = $self->{xsub_map_argname_to_default}->{$var};
+
   my $argoff = $num - 1;
   my $arg = "ST($argoff)";
 
@@ -3619,7 +3621,7 @@ sub generate_init {
   {
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
-      if defined $self->{xsub_map_argname_to_default}->{$var};
+      if defined $default;
     return;
   }
 
@@ -3691,7 +3693,7 @@ sub generate_init {
   # Now finally, emit the actual variable declaration and initialisation
   # line(s). The variable type and name will already have been emitted.
 
-  if (defined($self->{xsub_map_argname_to_default}->{$var})) {
+  if (defined $default) {
     # Has a default value. Just terminate the variable declaration, and
     # defer the initialisation.
 
@@ -3700,7 +3702,7 @@ sub generate_init {
     $expr =~ s/(\t+)/$1    /g;
     $expr =~ s/        /\t/g;
 
-    if ($self->{xsub_map_argname_to_default}->{$var} eq 'NO_INIT') {
+    if ($default eq 'NO_INIT') {
       # for foo(a, b = NO_INIT), add code to initialise later only if
       # an arg was supplied.
       $self->{xsub_deferred_code_lines}
@@ -3715,8 +3717,8 @@ sub generate_init {
         .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n\telse {\n%s;\n\t}\n",
             $num,
             $var,
-            $self->eval_input_typemap_code("qq\a$self->{xsub_map_argname_to_default}->{$var}\a", $eval_vars),
-            $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
+            $self->eval_input_typemap_code("qq\a$default\a", $eval_vars),
+            $self->eval_input_typemap_code("qq\a$expr\a",    $eval_vars);
     }
   }
   elsif ($self->{xsub_SCOPE_enabled} or $expr !~ /^\s*\$var =/) {
