@@ -327,8 +327,9 @@ BEGIN {
                                # Includes generated argument names like
                                # 'XSauto_length_of_foo' for 'length(foo)'.
   
-  'xsub_map_argname_to_islength', # Hash of bools: indicates whether
-                               # argument was declared as 'length(foo)'.
+  'xsub_map_argname_to_has_length', # Hash of bools: indicates whether
+                               # argument foo was also declared as
+                               # 'length(foo)'.
   
   'xsub_map_arg_idx_to_proto', # Array: maps argument index to prototype
                                # (such as '$'). Always populated, even if
@@ -741,7 +742,7 @@ EOM
                            xsub_map_varname_to_seen_in_INPUT
                            xsub_map_argname_to_seen_type
                            xsub_map_argname_to_in_out
-                           xsub_map_argname_to_islength
+                           xsub_map_argname_to_has_length
                           ))
     {
       $self->{$member} = {};
@@ -2374,7 +2375,7 @@ sub INPUT_handler {
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x)
     {
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
-      $self->{xsub_map_argname_to_islength}->{$2} = 1;
+      $self->{xsub_map_argname_to_has_length}->{$2} = 1;
       # defer this line until after all the other declarations
       $self->{xsub_deferred_code_lines} .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
     }
@@ -3608,11 +3609,11 @@ sub generate_init {
   $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
     if $self->{xsub_func_name} =~ /DESTROY$/;
 
-  # In the presence of length(foo), override the normal typedef - which
-  # would emit SvPV_nolen(...) - and instead, emit
-  # SvPV(..., STRLEN_length_of_foo)
+  # For a string-ish parameter foo, if length(foo) was also declared as a
+  # pseudo-parameter, then override the normal typedef - which would emit
+  # SvPV_nolen(...) - and instead, emit SvPV(..., STRLEN_length_of_foo)
   if (    $xstype eq 'T_PV'
-      and $self->{xsub_map_argname_to_islength}->{$var})
+      and $self->{xsub_map_argname_to_has_length}->{$var})
   {
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
