@@ -15,7 +15,7 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
+See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 </div>
 
@@ -25,23 +25,15 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="" id="06e09b1c400d84c9f6294f62a8310b332c3cc4fb" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="jkeenan" id="bf38d1cf744fcc49b715b9d633761aa67436c002" issue="21366" pull="" desc="locale.c: Initialize PL_curlocales at startup"/>
-
-<commit votes="richardleach" id="9e298ab597b2c6fc0741749d7e29119e2d6cd628" issue="21235" pull="21265" desc="Perl_av_extend_guts: Zero() trailing elements after unshift &amp; resize"/>
-
-<commit votes="" id="" issue="22176" pull="22185" desc="locale.c: Be sure to toggle into dot radix locale"/>
-
-<commit votes="" id="" issue="21564" pull="21566" desc="don't clear IOK on @{&quot;_&lt;$file&quot;} entries when a dbstate is freed"/>
-
 </div>
 
 <div><h3>New Feature Fixes</h3>
-
-<commit votes="tonyc" id="3c849777973e02cafe9c5064fafc43feb0c4e466" issue="21271" pull="21284" desc="make sure &quot;use VERSION;&quot; sets the flag needed for &quot;used only once&quot;"/>
 
 </div>
 
@@ -71,14 +63,14 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
   <xsl:template match="/">
     <html>
       <head>
-        <title>Cherry-pick votes for maint-5.38</title>
+        <title>Cherry-pick votes for maint-5.40</title>
         <style>
           .accepted .ref a { color: #090 }
           .unvoted  .ref a { color: #c00 }
         </style>
       </head>
       <body>
-        <h1>Cherry-pick votes for maint-5.38</h1>
+        <h1>Cherry-pick votes for maint-5.40</h1>
         <xsl:for-each select="/doc/data/div">
           <h2><xsl:value-of select="h2"/></h2>
           <h3><xsl:value-of select="h3"/></h3>
