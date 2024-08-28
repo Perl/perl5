@@ -1266,6 +1266,7 @@ cpan/IO-Compress/bin/streamzip				IO-Compress
 cpan/IO-Compress/bin/zipdetails				IO::Compress
 cpan/IO-Compress/lib/Compress/Zlib.pm			IO::Compress
 cpan/IO-Compress/lib/File/GlobMapper.pm			IO::Compress
+cpan/IO-Compress/lib/IO/Compress.pm			IO-Compress
 cpan/IO-Compress/lib/IO/Compress/Adapter/Bzip2.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Adapter/Deflate.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Adapter/Identity.pm	IO::Compress
