@@ -186,6 +186,9 @@ L<perl5db.pl> has been upgraded from version 1.80 to 1.81.
 C<b subname>, C<c subname>, C<b postpone subname> will now break on
 the first line that is expected to execute in the sub. [github #799]
 
+Distinguish between an empty list or undef for C<w>
+expressions. [github #22207]
+
 =item *
 
 L<Test::Simple> has been upgraded from version 1.302199 to 1.302200 and
