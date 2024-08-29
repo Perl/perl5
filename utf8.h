@@ -335,7 +335,17 @@ are in the character. */
 /* A continuation byte in a UTF-8 encoded sequence contributes this number of
  * low-order bits to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
- * real information */
+ * real information.  (If you're really curious, the only two numbers that work
+ * out for this on an 8-bit byte are 5 and 6.  Since the first two bits are
+ * already taken, a maximum of 6 are available for anything else.  If 6 is
+ * used, there are 64 possible continuations 80-BF.  With 5, there are 32,
+ * A0-BF.  And with 4 there would be 0 continuations possible; an
+ * impossibility.  So 5 is the minimum.  UTF-EBCDIC I8 (Intermediate 8) is just
+ * setting this to 5.  We could have a UTF-8 encoding that is based on ASCII,
+ * but uses just 5 bits of payload per continuation byte.  The reason someone
+ * might want to do this is to extend the set of characters that occupy a
+ * single byte when encoded in this hypothetical UTF-8 to additionally include
+ * the C1 controls.) */
 #  define UTF_CONTINUATION_BYTE_INFO_BITS 6
 
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
