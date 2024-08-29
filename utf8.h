@@ -376,12 +376,17 @@ are in the character. */
 #define UTF_IS_CONTINUATION_MASK \
     ((U8) ((0xFF << UTF_ACCUMULATION_SHIFT) & 0xFF))
 
-/* This defines the bits that are to be in the continuation bytes of a
- * multi-byte UTF-8 encoded character that mark it is a continuation byte.
- * This turns out to be 0x80 in UTF-8, 0xA0 in UTF-EBCDIC.  (khw doesn't know
- * the underlying reason that B0 works here, except it just happens to work.
- * One could solve for two linear equations and come up with it.) */
-#define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
+/* This defines the bits that mark a byte in a multi-byte UTF-8 encoded
+ * character as being a continuation byte.  A MASK clears the bits you don't
+ * want, using a binary '&'; and a MARK sets the ones you do want, using a
+ * binary '|'.  As stated earlier, the fundamental difference between UTF-8 and
+ * UTF-EBCDIC is that the former has the upper 2 bits of a continuation byte be
+ * '10', and the latter has the upper 3 bits be '101', leaving 6 and 5 bits
+ * respectively in which to store information.  This is equivalent to "All bits
+ * are 1 except those that store information (which vary) plus the bit that is
+ * required to be 0".  This yields 1000 0000 (0x80) for ASCII, and 1010 0000
+ * (0xA0) for UTF-EBCDIC. */
+#define UTF_CONTINUATION_MARK (~(0x40 | UTF_CONTINUATION_MASK) & 0xff)
 
 /* These values are clearer in some contexts; still apply to UTF, not UTF-8 */
 #define UTF_MIN_CONTINUATION_BYTE  UTF_CONTINUATION_MARK
