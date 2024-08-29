@@ -10,7 +10,7 @@ use Config;
 
 require './test.pl';
 
-plan(2);
+plan(3);
 
 # first test using -Margs ...
 $ENV{PERL5OPT} = "-Mlib=optm1 -Iopti1 -Mlib=optm2 -Iopti2";
@@ -22,8 +22,13 @@ like(runperl(switches => [qw(-Ii1 -Mlib=m1 -Ii2 -Mlib=m2)], prog => 'print join(
      qr{^\Qoptm2 optm1 m2 m1 opti2 opti1 ../lib . i1 i2 e1 e2\E\b},
      "Order of application of -I and -M matches documentation");
 
-# and now using -M args with a space. NB that '-M foo' isn't supported
-# in PERL5OPT, just like how '-I foo' isn't.
-like(runperl(switches => [qw(-Ii1 -M lib=m1 -Ii2 -M lib=m2)], prog => 'print join(q( ), @INC)', stderr => 1),
+# and now using -M and -I args with a space. NB that '-M foo' and '-I foo'
+# aren't supported in PERL5OPT.
+like(runperl(switches => [qw(-I i1 -M lib=m1 -I i2 -M lib=m2)], prog => 'print join(q( ), @INC)', stderr => 1),
      qr{^\Qoptm2 optm1 m2 m1 opti2 opti1 ../lib . i1 i2 e1 e2\E\b},
-     "Order of application of -I and -M matches documentation when -M has a space");
+     "... still matches when the switch is followed by a space then its parameter");
+
+# and now with a mixture of args with and without spaces
+like(runperl(switches => [qw(-Ii1 -Mlib=m1 -I i2 -M lib=m2)], prog => 'print join(q( ), @INC)', stderr => 1),
+     qr{^\Qoptm2 optm1 m2 m1 opti2 opti1 ../lib . i1 i2 e1 e2\E\b},
+     "... still matches when we've got a mixture of args with and without spaces");
