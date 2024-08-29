@@ -332,8 +332,8 @@ platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
 are in the character. */
 
-/* This is the number of low-order bits a continuation byte in a UTF-8 encoded
- * sequence contributes to the specification of the code point.  In the bit
+/* A continuation byte in a UTF-8 encoded sequence contributes this number of
+ * low-order bits to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
  * real information */
 #  define UTF_CONTINUATION_BYTE_INFO_BITS 6
