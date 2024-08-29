@@ -2325,6 +2325,44 @@ sub CASE_handler {
 }
 
 
+# ST(): helper function for the various INPUT / OUTPUT code emitting
+# parts.  Generate an "ST(n)" string. This is normally just:
+#
+#   "ST(". $num - 1 . ")"
+#
+# but with subtleties when $num is 0 or undef.
+# Gathering all such uses into one place helps in documenting the totality.
+#
+# Normally parameter names are mapped to index numbers 1,2,... (via
+# $self->{xsub_map_argname_to_idx}). In addition, in *OUTPUT* processing
+# only, 'RETVAL' is mapped to 0.
+#
+# Finally, in input processing it is legal to have a parameter with a
+# typemap override, but where the parameter isn't in the signature. People
+# misuse this to declare other variables which should really be in a
+# PREINIT section:
+#
+#    int
+#    foo(a)
+#       int a
+#       int b = 0
+#
+# The '= 0' will be interpreted as a local typemap entry, so $arg etc
+# will be populated and the "typemap" evalled, So $num is undef, but we
+# shouldn't emit a warning when generating "ST(N-1)".
+#
+sub ST {
+  my ($self, $num, $is_output) = @_;
+
+  if (defined $num) {
+    return "ST(0)"                if $is_output && $num == 0;
+    return "ST(" . ($num-1) . ")" if $num >= 1;
+    $self->Warn("Internal error: unexpected zero num in ST()");
+  }
+  return '/* not a parameter */';
+}
+
+
 # INPUT_handler(): handle an explicit INPUT: block, or any implicit INPUT
 # block which can follow an xsub signature or CASE keyword.
 #
@@ -2554,7 +2592,7 @@ sub OUTPUT_handler {
 
     if ($outcode) {
       print "\t$outcode\n";
-      print "\tSvSETMAGIC(ST(" , $var_num - 1 , "));\n"
+      print "\tSvSETMAGIC(" . $self->ST($var_num, 1) . ");\n"
         if $self->{xsub_SETMAGIC_state};
     }
     else {
@@ -3521,9 +3559,7 @@ sub output_init {
     = @{$argsref}{qw(type num var init)};
 
   # local assign for efficiently passing in to eval_input_typemap_code
-  local $argsref->{arg} = $num
-                          ? "ST(" . ($num-1) . ")"
-                          : "/* not a parameter */";
+  local $argsref->{arg} = $self->ST($num, 0);
 
   if ( $init =~ /^=/ ) {
     # Overridden typemap, such as '= ($type)SvUV($arg)'
@@ -3579,8 +3615,8 @@ sub generate_init {
 
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
+  my $arg = $self->ST($num, 0);
   my $argoff = $num - 1;
-  my $arg = "ST($argoff)";
 
   my $typemaps = $self->{typemaps_object};
 
@@ -3794,7 +3830,7 @@ sub generate_output {
   my ($type, $num, $var, $do_setmagic, $do_push)
     = @{$argsref}{qw(type num var do_setmagic do_push)};
 
-  my $arg = "ST(" . ($num - ($num != 0)) . ")";
+  my $arg = $self->ST($num, 1);
 
   my $typemaps = $self->{typemaps_object};
 
@@ -4056,7 +4092,7 @@ sub generate_output {
     # $do_push indicates that this is an OUTLIST value, so an SV with
     # the value should be pushed onto the stack
     print "\tPUSHs(sv_newmortal());\n";
-    $eval_vars->{arg} = "ST($num)";
+    $eval_vars->{arg} = $self->ST($num+1, 1);
     print $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
   }
