@@ -2512,15 +2512,53 @@ sub INPUT_handler {
       # NO_INIT or OUT* class; skip initialisation
       print ";\n";
     }
+
     elsif ($var_init =~ /\S/) {
-      # Emit var and init code based on overridden $var_init
-      $self->output_init( {
-        type          => $var_type,
-        num           => $var_num,
-        var           => $var_name,
-        init          => $var_init,
-      } );
+      # Emit the init code based on overridden $var_init, which should
+      # start with /[=;+]/.
+
+      my $argsref = {
+          type          => $var_type,
+          num           => $var_num,
+          var           => $var_name,
+          init          => $var_init,
+          arg           => $self->ST($var_num, 0),
+        };
+
+      if ($var_init =~ /^=/) {
+        # Overridden typemap, such as '= ($type)SvUV($arg)'
+        printf " %s\n",
+          $self->eval_input_typemap_code("qq\a$var_init\a", $argsref);
+      }
+      else {
+        # "; extra code" or "+ extra code" :
+        # append the extra code (after passing through eval) after all the
+        # INPUT and PREINIT blocks have been processed, using the
+        # $self->{xsub_deferred_code_lines} mechanism.
+        # In addition, for '+', also generate the normal initialisation code
+        # from the standard typemap.
+
+        if ($var_init =~ s/^\+//  &&  $var_num) {
+          # "+ extra code"
+          $self->generate_init( {
+            type          => $var_type,
+            num           => $var_num,
+            var           => $var_name,
+          } );
+        }
+        else {
+          # "; extra code"
+          print ";\n";
+          $var_init =~ s/^;//;
+        }
+
+        # defer outputting the "extra code"
+        $self->{xsub_deferred_code_lines}
+          .= sprintf "\n\t%s\n",
+              $self->eval_input_typemap_code("qq\a$var_init\a", $argsref);
+      }
     }
+
     elsif ($var_num) {
       # Emit var and init code based on typemap entry
       $self->generate_init( {
@@ -3535,64 +3573,6 @@ sub fetch_para {
     while @{ $self->{line} } && $self->{line}->[-1] eq "";
 
   return 1;
-}
-
-
-# $self->output_init({ key = value, ... })
-#   type: 'char *' etc
-#   num:  the parameter number, corresponds to in ST(num-1)
-#   var:  the parameter name
-#   init: the initialiser, e.g. '= SvPV($arg)'
-#
-# Emit "var = initialisation code" based on the value of $init (which
-# contains everything following the variable name on the INPUT line).
-# It assumes that $init starts with /[=;+]/.
-#
-# See also generate_init() below, which provides a similar role for when
-# $init is empty.
-
-sub output_init {
-  my ExtUtils::ParseXS $self = shift;
-  my $argsref = shift;
-
-  my ($type, $num, $var, $init)
-    = @{$argsref}{qw(type num var init)};
-
-  # local assign for efficiently passing in to eval_input_typemap_code
-  local $argsref->{arg} = $self->ST($num, 0);
-
-  if ( $init =~ /^=/ ) {
-    # Overridden typemap, such as '= ($type)SvUV($arg)'
-    printf " %s\n",
-      $self->eval_input_typemap_code("qq\a$init\a", $argsref);
-  }
-  else {
-    # "; extra code" or "+ extra code" :
-    # append the extra code (after passing through eval) after all the
-    # INPUT and PREINIT blocks have been processed, using the
-    # $self->{xsub_deferred_code_lines} mechanism.
-    # In addition, for '+', also generate the normal initialisation code
-    # from the standard typemap.
-
-    if (  $init =~ s/^\+//  &&  $num  ) {
-      # "+ extra code"
-      $self->generate_init( {
-        type          => $type,
-        num           => $num,
-        var           => $var,
-      } );
-    }
-    else {
-      # "; extra code"
-      print ";\n";
-      $init =~ s/^;//;
-    }
-
-    # defer outputting the "extra code"
-    $self->{xsub_deferred_code_lines}
-      .= sprintf "\n\t%s\n",
-          $self->eval_input_typemap_code("qq\a$init\a", $argsref);
-  }
 }
 
 
