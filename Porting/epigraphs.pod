@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.3 - Jasper Fforde, The Constant Rabbit
+
+L<Announced on 2024-08-29 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2024/08/msg268756.html>
+
+  Somebody once said that the library is actually the dominant life
+  form on the planet. Humans simply exist as the reproductive means to
+  achieve more libraries.
+
 =head2 v5.41.2 - John Dryden
 
 L<Announced on 2024-07-20 by Karen Etheridge (Ether)|https://www.nntp.perl.org/group/perl.perl5.porters/2024/07/msg268542.html>
