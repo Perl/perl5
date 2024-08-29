@@ -2767,11 +2767,11 @@ p	|void	|report_wrongway_fh					\
 				|NULLOK const GV *gv			\
 				|const char have
 AOdp	|void	|require_pv	|NN const char *pv
-AMp	|void	|resume_compcv	|NN struct suspended_compcv *buffer	\
+Cop	|void	|resume_compcv	|NN struct suspended_compcv *buffer	\
 				|bool save
-dm	|void	|resume_compcv_and_save 				\
+Adm	|void	|resume_compcv_and_save 				\
 				|NN struct suspended_compcv *buffer
-dm	|void	|resume_compcv_final					\
+Adm	|void	|resume_compcv_final					\
 				|NN struct suspended_compcv *buffer
 APTdp	|char * |rninstr	|NN const char *big			\
 				|NN const char *bigend			\
