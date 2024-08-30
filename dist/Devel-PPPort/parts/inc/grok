@@ -286,7 +286,7 @@ grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 #ifndef grok_bin
 #  if { NEED grok_bin }
 UV
-grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -369,13 +369,15 @@ grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
         *result = value_nv;
     return UV_MAX;
 }
+
+#    define  grok_bin(s,l,f,r)  Perl_grok_bin(aTHX_ s, l, f, r)
 #  endif
 #endif
 
 #ifndef grok_hex
 #  if { NEED grok_hex }
 UV
-grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -458,13 +460,14 @@ grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
         *result = value_nv;
     return UV_MAX;
 }
+#    define  grok_hex(s,l,f,r)  Perl_grok_hex(aTHX_ s, l, f, r)
 #  endif
 #endif
 
 #ifndef grok_oct
 #  if { NEED grok_oct }
 UV
-grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -538,6 +541,7 @@ grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
         *result = value_nv;
     return UV_MAX;
 }
+#    define  grok_oct(s,l,f,r)  Perl_grok_oct(aTHX_ s, l, f, r)
 #  endif
 #endif
 
