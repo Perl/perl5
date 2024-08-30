@@ -883,7 +883,7 @@ my @buf_tests = (
 );
 
 if (ord("A") != 65) {   # tests not valid for EBCDIC
-    skip("Perl version too early", 2 + 4 + (scalar @buf_tests * 5));
+    skip("Tests only valid on ASCII platforms", 2 + 4 + (scalar @buf_tests * 5));
 }
 else {
     $ret = &Devel::PPPort::utf8_to_uvchr_buf("\xc4\x80", 0);
