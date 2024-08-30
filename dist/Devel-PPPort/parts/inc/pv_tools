@@ -75,7 +75,7 @@ pv_escape(pTHX_ SV *dsv, char const * const str,
                      isuni ? utf8_to_uvchr_buf((U8*)pv, end, &readsize) :
 #endif
                              (U8)*pv;
-        const U8 c = (U8)u & 0xFF;
+        const U8 c = (U8) u;
 
         if (u > 255 || (flags & PERL_PV_ESCAPE_ALL)) {
             if (flags & PERL_PV_ESCAPE_FIRSTCHAR)
