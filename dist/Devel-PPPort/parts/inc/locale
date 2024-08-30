@@ -15,10 +15,6 @@ __UNDEFINED__ LC_NUMERIC_UNLOCK
 #    undef DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 #    ifdef USE_LOCALE
 __UNDEFINED__ DECLARATION_FOR_LC_NUMERIC_MANIPULATION char *LoC_
-__UNDEFINED__ STORE_NUMERIC_SET_STANDARD()            \
-	 LoC_ = savepv(setlocale(LC_NUMERIC, NULL));  \
-	 SAVEFREEPV(LoC_);                            \
-	 setlocale(LC_NUMERIC, "C");
 __UNDEFINED__ RESTORE_LC_NUMERIC()                    \
 	 setlocale(LC_NUMERIC, LoC_);
 #    else
