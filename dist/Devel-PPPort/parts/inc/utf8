@@ -31,8 +31,7 @@ __UNDEFINED__ UNICODE_REPLACEMENT  0xFFFD
 __UNDEFINED__  UTF8_MAXBYTES   UTF8_MAXLEN
 #endif
 
-__UNDEF_NOT_PROVIDED__ UTF_START_MARK(len)                                   \
-                    (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
+__UNDEF_NOT_PROVIDED__ UTF_START_MARK(len)  ((U8) ~(0xFF >> (len)))
 
 /* On non-EBCDIC was valid for some releases earlier than this, but easier to
  * just do one check */
