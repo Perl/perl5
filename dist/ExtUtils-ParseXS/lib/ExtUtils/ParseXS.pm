@@ -1353,8 +1353,8 @@ EOF
           } );
         }
         else {
-          print "\t" . $self->map_type("self->{xsub_$}class *");
-          $self->{xsub_map_argname_to_type}->{"THIS"} = "self->{xsub_$}class *";
+          print "\t" . $self->map_type("$self->{xsub_class} *");
+          $self->{xsub_map_argname_to_type}->{"THIS"} = "$self->{xsub_class} *";
           $self->generate_init( {
             type          => "$self->{xsub_class} *",
             num           => 1,
