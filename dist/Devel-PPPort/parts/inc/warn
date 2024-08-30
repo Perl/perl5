@@ -137,10 +137,10 @@ ck_warner(pTHX_ U32 err, const char *pat, ...)
 {
     va_list args;
 
-    if (   ! ckWARN((err      ) & 0xFF)
-        && ! ckWARN((err >>  8) & 0xFF)
-        && ! ckWARN((err >> 16) & 0xFF)
-        && ! ckWARN((err >> 24) & 0xFF))
+    if (   ! ckWARN((U8) (err))
+        && ! ckWARN((U8) (err >>  8))
+        && ! ckWARN((U8) (err >> 16))
+        && ! ckWARN((U8) (err >> 24)))
     {
         return;
     }
@@ -162,10 +162,10 @@ ck_warner_d(pTHX_ U32 err, const char *pat, ...)
 {
     va_list args;
 
-    if (   ! ckWARN_d((err      ) & 0xFF)
-        && ! ckWARN_d((err >>  8) & 0xFF)
-        && ! ckWARN_d((err >> 16) & 0xFF)
-        && ! ckWARN_d((err >> 24) & 0xFF))
+    if (   ! ckWARN_d((U8) (err))
+        && ! ckWARN_d((U8) (err >>  8))
+        && ! ckWARN_d((U8) (err >> 16))
+        && ! ckWARN_d((U8) (err >> 24)))
     {
         return;
     }
