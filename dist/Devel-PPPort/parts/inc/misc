@@ -128,8 +128,8 @@ __UNDEF_NOT_PROVIDED__ inRANGE(c, l, u)                                        \
     : (withinCOUNT(((WIDEST_UTYPE) (c)), (l), ((u) - (l)))))
 
 #undef FITS_IN_8_BITS   /* handy.h version uses a core-only constant */
-__UNDEF_NOT_PROVIDED__ FITS_IN_8_BITS(c) (   (sizeof(c) == 1)               \
-                                    || !(((WIDEST_UTYPE)(c)) & ~0xFF))
+__UNDEF_NOT_PROVIDED__ FITS_IN_8_BITS(c)                                    \
+                    ((sizeof(c) == 1) || ((WIDEST_UTYPE)(c) == ((U8)(c))))
 
 /* Create the macro for "is'macro'_utf8_safe(s, e)".  For code points below
  * 256, it calls the equivalent _L1 macro by converting the UTF-8 to code
