@@ -6,6 +6,7 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 use Config;
 
 require './test.pl';
