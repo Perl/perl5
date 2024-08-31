@@ -3714,22 +3714,23 @@ sub generate_init {
   # Now finally, emit the actual variable declaration and initialisation
   # line(s). The variable type and name will already have been emitted.
 
+  my $init_code = $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
+
   if (defined $default) {
     # Has a default value. Just terminate the variable declaration, and
     # defer the initialisation.
 
     print ";\n";
 
-    $expr =~ s/(\t+)/$1    /g;
-    $expr =~ s/        /\t/g;
+    # indent the code 1 step further
+    $init_code =~ s/(\t+)/$1    /g;
+    $init_code =~ s/        /\t/g;
 
     if ($default eq 'NO_INIT') {
       # for foo(a, b = NO_INIT), add code to initialise later only if
       # an arg was supplied.
       $self->{xsub_deferred_code_lines}
-        .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n",
-            $num,
-            $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
+        .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n", $num, $init_code;
     }
     else {
       # for foo(a, b = default), add code to initialise later to either
@@ -3739,29 +3740,28 @@ sub generate_init {
             $num,
             $var,
             $self->eval_input_typemap_code("qq\a$default\a", $eval_vars),
-            $self->eval_input_typemap_code("qq\a$expr\a",    $eval_vars);
+            $init_code;
     }
   }
-  elsif ($self->{xsub_SCOPE_enabled} or $expr !~ /^\s*\$var =/) {
+  elsif ($self->{xsub_SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
     # The template is likely a full block rather than a '$var = ...'
     # expression. Just terminate the variable declaration, and defer the
     # initialisation.
+    # Note that /\Q$var\E/ matches the string containing whatever $var
+    # was expanded to in the eval.
 
     print ";\n";
 
-    $self->{xsub_deferred_code_lines}
-     .= sprintf "\n%s;\n",
-          $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
+    $self->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code;
   }
   else {
     # The template starts with '$var = ...'. The variable name has already
     # been emitted, so remove it from the typemap before evalling it,
 
-    $expr =~ s/^\s*\$var(\s*=\s*)/$1/
+    $init_code =~ s/^\s*\Q$var\E(\s*=\s*)/$1/
       or $self->death("panic: typemap doesn't start with '\$var='\n");
 
-    printf "%s;\n",
-      $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
+    printf "%s;\n", $init_code;
   }
 }
 
