@@ -427,8 +427,8 @@
 :        code. (A typical guard will be that it is being included in a
 :        particular C file(s) or in the perl core.) Therefore, all non-guarded
 :        functions should also have the 'p' flag specified to avoid polluting
-:        the XS code name space. Otherwise an error is generated if the 'S'
-:        flag is not also specified.
+:        the XS code name space.  Otherwise, this flag also turns on the 'S'
+:	 flag.
 :
 :          proto.h: function is declared as PERL_STATIC_INLINE
 :
