@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 39;
+use Test::More tests => 40;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -544,4 +544,41 @@ EOF
     $sout =~ s/[ \t]+//g;
 
     like($sout, qr/pkg.*=.*"Foo"/, "default expression expanded");
+}
+
+{
+    # Test 'alien' INPUT parameters: ones which are declared in an INPUT
+    # section but don't appear in the XSUB's signature. This ought to be
+    # a compile error, but people rely on it to declare and initialise
+    # variables which ought to be in a PREINIT or CODE section.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    tie *FH, 'Capture';
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void foo(mymarker1)
+        |        int mymarker1
+        |        long alien1
+        |        int  alien2 = 123;
+        |    CODE:
+        |        mymarker2;
+EOF
+
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    # remove all spaces for easier matching
+    my $sout = $out;
+    $sout =~ s/[ \t]+//g;
+
+    like($sout, qr/longalien1;\nintalien2=123;/, "alien INPUT parameters");
 }
