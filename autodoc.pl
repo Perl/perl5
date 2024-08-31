@@ -1839,6 +1839,17 @@ sub docout ($fh, $element_name, $docref) {  # output the docs for one function
             if ($has_args) {
                 @args = $item->{args}->@*;
 
+                # A thread context parameter is the default for functions (not
+                # macros) unless the T flag is specified.  Those functions
+                # that don't have long names (indicated by not having any of
+                # the [IipS] flags have such an implicit parameter, that we
+                # need to make explicit for the documentation.
+                if ($item->{flags} !~ /[ IipS Mm T ]/xx)  {
+                    $this_has_pTHX = 1;     # This 3 line design pattern is
+                    unshift @args, "pTHX";  # repeated a few lines below
+                    $any_has_pTHX_ = 1 if @args > 1;
+                }
+
                 # If only the Perl_foo form is to be displayed, change the
                 # name of this item to be that.  This happens for either of
                 # two reasons:
