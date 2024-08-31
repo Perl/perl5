@@ -3242,7 +3242,11 @@ S_find_locale_from_environment(pTHX_ const locale_category_index index)
     const char * locale_names[LC_ALL_INDEX_] = { NULL };
 
     /* Use any "LC_ALL" environment variable, as it overrides everything else.
-     * */
+     * This may not work correctly if LC_ALL is heterogeneous.  It is a simple
+     * matter to handle such a case, and GH #21398 would do so.  But in
+     * developing a test for that, khw couldn't get libc to handle a disparate
+     * LC_ALL environment variable, so that pull request was closed without
+     * merging, but the patch is attached to it. */
     if (lc_all && strNE(lc_all, "")) {
         return lc_all;
     }
