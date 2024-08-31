@@ -569,7 +569,7 @@ whether it is valid to call C<HvAUX()>.
  * STR_WITH_LEN to do the work, we have to unroll it.
  *
  *
-=for apidoc_defn AR|bool|hv_existss|HV *hv|"key"
+=for apidoc_defn AmR|bool|hv_existss|HV *hv|"key"
 =cut
 */
 #define hv_existss(hv, key) \
