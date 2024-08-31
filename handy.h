@@ -474,7 +474,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 
 
 /*
-=for apidoc_defn x|void|lex_stuff_pvs|"pv"|U32 flags
+=for apidoc_defn mx|void|lex_stuff_pvs|"pv"|U32 flags
 
 =cut
 */
