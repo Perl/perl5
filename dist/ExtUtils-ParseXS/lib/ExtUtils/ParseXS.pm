@@ -2536,7 +2536,8 @@ sub INPUT_handler {
         # INPUT and PREINIT blocks have been processed, using the
         # $self->{xsub_deferred_code_lines} mechanism.
         # In addition, for '+', also generate the normal initialisation code
-        # from the standard typemap.
+        # from the standard typemap - assuming that it's a real parameter
+        # that appears in the signature as well as the INPUT line.
 
         if ($var_init =~ s/^\+//  &&  $var_num) {
           # "+ extra code"
@@ -2568,7 +2569,11 @@ sub INPUT_handler {
       } );
     }
     else {
-      # Fake var like 'length(s)'. Don't emit anything.
+      # A parameter which has been declared (with no initialiser) in the
+      # INPUT section, but which hasn't also been declared in the XSUB's
+      # signature.  Should be illegal, but people rely on it,
+      # For such a variable, don't use a typemap, because there's no value
+      # on the stack to be converted.
       print ";\n";
     }
 
