@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 41;
+use Test::More tests => 46;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -608,4 +608,55 @@ EOF
 
     like($stderr, qr/No INPUT definition for type 'Foo::Bar'/,
                     "No INPUT definition");
+}
+
+{
+    # Test for default arg mixed with initialisers
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void foo(mymarker1, aaa = 111, bbb = 222, ccc = 333)
+        |    int mymarker1
+        |    int aaa = 777;
+        |    int bbb + 888;
+        |    int ccc ; 999;
+        |  CODE:
+        |    mymarker2
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    # remove all spaces for easier matching
+    my $sout = $out;
+    $sout =~ s/[ \t]+//g;
+
+    {
+        local $TODO = "default is lost in presence of initialiser";
+
+        like($sout, qr/if\(items<2\)\naaa=111;\nelse\{\naaa=777;\n\}\n/,
+                    "default with =init");
+    }
+
+    like($sout, qr/if\(items<3\)\nbbb=222;\nelse\{\nbbb=.*ST\(2\)\)\n;\n\}\n/,
+                    "default with +init");
+    like($sout, qr/if\(items<4\)\nccc=333;\n999;\n/,
+                    "default with ;init");
+
+    like($sout, qr/^888;$/m,
+                    "default with +init deferred expression");
+    like($sout, qr/^999;$/m,
+                    "default with ;init deferred expression");
+
 }

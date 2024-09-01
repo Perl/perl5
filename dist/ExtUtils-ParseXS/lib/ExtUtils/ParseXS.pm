@@ -2528,7 +2528,8 @@ sub INPUT_handler {
       if ($var_init =~ /^=/) {
         # Overridden typemap, such as '= ($type)SvUV($arg)'
         $var_init =~ s/^=\s*//;
-        $var_init =~ s/\s*;\s*$//;
+        $var_init =~ s/;\s*$//;
+
         $self->generate_init( {
           type          => $var_type,
           num           => $var_num,
@@ -2545,24 +2546,19 @@ sub INPUT_handler {
         # from the standard typemap - assuming that it's a real parameter
         # that appears in the signature as well as the INPUT line.
 
-        if ($var_init =~ s/^\+//  &&  $var_num) {
-          # "+ extra code"
-          $self->generate_init( {
-            type          => $var_type,
-            num           => $var_num,
-            var           => $var_name,
-          } );
-        }
-        else {
-          # "; extra code"
-          print ";\n";
-          $var_init =~ s/^;//;
-        }
-
-        # defer outputting the "extra code"
-        $self->{xsub_deferred_code_lines}
-          .= sprintf "\n\t%s\n",
-              $self->eval_input_typemap_code("qq\a$var_init\a", $argsref);
+        # if '+' on a real var, generate init from typemap,
+        # else (';' or fake var), skip init.
+        my $no_init = !($var_init =~ s/^\+// && $var_num);
+        $var_init =~ s/^[+;]//;
+        # But in either case, add the deferred code
+        $self->generate_init( {
+          type          => $var_type,
+          num           => $var_num,
+          var           => $var_name,
+          defer         => $var_init,
+          init          => undef,
+          no_init       => $no_init,
+        } );
       }
     }
 
@@ -3591,7 +3587,9 @@ sub fetch_para {
 #   type         'char *' etc
 #   num          the parameter number, corresponds to ST(num-1)
 #   var          the parameter name
-#   init         optional initialiser template code to override typemap entry
+#   init         Optional initialiser template code to override typemap entry.
+#   no_init      If true, don't plant initialiser code.
+#   defer        Optional deferred template code to add after all declarations
 #
 # This function emits text like "= initialisation code", based on the
 # typemap INPUT entry associated with $type (or an explicit override),
@@ -3602,8 +3600,8 @@ sub generate_init {
   my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
 
-  my ($type, $num, $var, $init)
-    = @{$argsref}{qw(type num var init)};
+  my ($type, $num, $var, $init, $no_init, $defer)
+    = @{$argsref}{qw(type num var init no_init defer)};
 
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
@@ -3632,8 +3630,16 @@ sub generate_init {
     # Use the supplied code template rather than getting it from the
     # typemap
 
+    $self->death(
+          "Internal error: generate_init(): both init and no_init supplied")
+      if $no_init;
+
     $eval_vars->{init} = $init;
     $init_template = "\$var = $init";
+  }
+  elsif ($no_init) {
+    # don't add initialiser
+    $init_template = "";
   }
   else {
     # Get the initialiser template from the typemap
@@ -3741,9 +3747,16 @@ sub generate_init {
   # line(s). The variable type and name will already have been emitted.
 
   my $init_code =
-    $self->eval_input_typemap_code("qq\a$init_template\a", $eval_vars);
+    length $init_template
+      ? $self->eval_input_typemap_code("qq\a$init_template\a", $eval_vars)
+      : "";
 
-  if (defined $default) {
+
+  if (defined $default
+    # XXX for now, for backcompat, ignore default if the
+    # param has a typemap override
+    && !(defined $init)
+  ) {
     # Has a default value. Just terminate the variable declaration, and
     # defer the initialisation.
 
@@ -3762,12 +3775,13 @@ sub generate_init {
     else {
       # for foo(a, b = default), add code to initialise later to either
       # the arg or default value
+      my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
       $self->{xsub_deferred_code_lines}
-        .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n\telse {\n%s;\n\t}\n",
+        .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
             $num,
             $var,
             $self->eval_input_typemap_code("qq\a$default\a", $eval_vars),
-            $init_code;
+            $else;
     }
   }
   elsif ($self->{xsub_SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
@@ -3789,6 +3803,11 @@ sub generate_init {
       or $self->death("panic: typemap doesn't start with '\$var='\n");
 
     printf "%s;\n", $init_code;
+  }
+
+  if (defined $defer) {
+    $self->{xsub_deferred_code_lines}
+      .= $self->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
   }
 }
 
