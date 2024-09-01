@@ -2527,8 +2527,14 @@ sub INPUT_handler {
 
       if ($var_init =~ /^=/) {
         # Overridden typemap, such as '= ($type)SvUV($arg)'
-        printf " %s\n",
-          $self->eval_input_typemap_code("qq\a$var_init\a", $argsref);
+        $var_init =~ s/^=\s*//;
+        $var_init =~ s/\s*;\s*$//;
+        $self->generate_init( {
+          type          => $var_type,
+          num           => $var_num,
+          var           => $var_name,
+          init          => $var_init,
+        } );
       }
       else {
         # "; extra code" or "+ extra code" :
@@ -3585,18 +3591,19 @@ sub fetch_para {
 #   type         'char *' etc
 #   num          the parameter number, corresponds to ST(num-1)
 #   var          the parameter name
+#   init         optional initialiser template code to override typemap entry
 #
 # This function emits text like "= initialisation code", based on the
-# typemap INPUT entry associated with $type, passing the typemap code
-# through a double-quoted context eval first, to expand variables such as
-# $type.
+# typemap INPUT entry associated with $type (or an explicit override),
+# passing the typemap code through a double-quoted context eval first, to
+# expand variables such as # $type.
 
 sub generate_init {
   my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
 
-  my ($type, $num, $var)
-    = @{$argsref}{qw(type num var)};
+  my ($type, $num, $var, $init)
+    = @{$argsref}{qw(type num var init)};
 
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
@@ -3621,7 +3628,16 @@ sub generate_init {
 
   my $init_template;
 
-  {
+  if (defined $init) {
+    # Use the supplied code template rather than getting it from the
+    # typemap
+
+    $eval_vars->{init} = $init;
+    $init_template = "\$var = $init";
+  }
+  else {
+    # Get the initialiser template from the typemap
+
     my $typemaps = $self->{typemaps_object};
 
     # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
