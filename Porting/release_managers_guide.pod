@@ -801,7 +801,7 @@ an entry has been added by F<corelist-perldelta.pl>.
 
 You should add pod links for GitHub issue references thusly:
 
- $ perl -p -i -e'BEGIN{undef $/}; s{(?:GH|github)\s*#(\d+)}{L<GH #$1|https://github.com/Perl/perl5/issues/$2>}img' pod/perldelta.pod
+ $ perl -gpi -e 's{\b(?:GH|github)\s*#(\d+)}{L<GH #$1|https://github.com/Perl/perl5/issues/$1>}ig' pod/perldelta.pod
 
 Re-read the perldelta to try to find any embarrassing typos and thinkos;
 remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
