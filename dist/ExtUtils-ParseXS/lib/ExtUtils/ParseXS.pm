@@ -3601,12 +3601,28 @@ sub generate_init {
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
   my $arg = $self->ST($num, 0);
-  my $argoff = $num - 1;
-
-  my $typemaps = $self->{typemaps_object};
 
   # whitespace-tidy the type
   $type = ExtUtils::Typemaps::tidy_type($type);
+
+  # Specify the environment for when the initialiser template is evaled.
+  # Only the common ones are specified here. Other fields may be added
+  # later.
+  my $eval_vars = {
+    type          => $type,
+    var           => $var,
+    num           => $num,
+    arg           => $arg,
+  };
+
+  # The type looked up in the eval is Foo__Bar rather than Foo::Bar
+  $eval_vars->{type} =~ tr/:/_/
+      unless $self->{config_RetainCplusplusHierarchicalTypes};
+
+  my $init_template;
+
+  {
+  my $typemaps = $self->{typemaps_object};
 
   # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
   # which can appear within a typemap template.
@@ -3646,9 +3662,6 @@ sub generate_init {
     return;
   }
 
-  # The type looked up in the eval is Foo__Bar rather than Foo::Bar
-  $type =~ tr/:/_/ unless $self->{config_RetainCplusplusHierarchicalTypes};
-
   # Get the ExtUtils::Typemaps::InputMap object associated with the
   # xstype. This contains the template of the code to be embedded,
   # e.g. 'SvPV_nolen($arg)'
@@ -3662,6 +3675,8 @@ sub generate_init {
   # work better with fussy C compilers. In particular, strip trailing
   # semicolons and remove any leading white space before a '#'.
   my $expr = $inputmap->cleaned_code;
+
+  my $argoff = $num - 1;
 
   # Process DO_ARRAY_ELEM. This is an undocumented hack that makes the
   # horrible T_ARRAY typemap work. "DO_ARRAY_ELEM" appears as a token
@@ -3700,21 +3715,17 @@ sub generate_init {
     $self->{xsub_SCOPE_enabled} = 1;
   }
 
-  # Specify the environment for when the typemap template is evalled.
-  my $eval_vars = {
-    var           => $var,
-    type          => $type,
-    ntype         => $ntype,
-    subtype       => $subtype,
-    num           => $num,
-    arg           => $arg,
-    argoff        => $argoff,
-  };
+  # Specify additional environment for when a template derived from a
+  # *typemap* is evalled.
+  @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
+  $init_template = $expr;
+  }
 
   # Now finally, emit the actual variable declaration and initialisation
   # line(s). The variable type and name will already have been emitted.
 
-  my $init_code = $self->eval_input_typemap_code("qq\a$expr\a", $eval_vars);
+  my $init_code =
+    $self->eval_input_typemap_code("qq\a$init_template\a", $eval_vars);
 
   if (defined $default) {
     # Has a default value. Just terminate the variable declaration, and
