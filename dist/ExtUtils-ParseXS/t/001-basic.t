@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 40;
+use Test::More tests => 41;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -581,4 +581,31 @@ EOF
     $sout =~ s/[ \t]+//g;
 
     like($sout, qr/longalien1;\nintalien2=123;/, "alien INPUT parameters");
+}
+
+{
+    # Test for 'No INPUT definition' error, particularly that the
+    # type is output correctly in the error message.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |Foo::Bar   T_FOOBAR
+        |EOF
+        |
+        |void foo(fb)
+        |        Foo::Bar fb
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        $pxs->process_file( filename => \$text, output => \*FH);
+    });
+
+    like($stderr, qr/No INPUT definition for type 'Foo::Bar'/,
+                    "No INPUT definition");
 }
