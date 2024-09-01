@@ -3622,103 +3622,103 @@ sub generate_init {
   my $init_template;
 
   {
-  my $typemaps = $self->{typemaps_object};
+    my $typemaps = $self->{typemaps_object};
 
-  # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
-  # which can appear within a typemap template.
-  (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+    # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
+    # which can appear within a typemap template.
+    (my $ntype = $type) =~ s/\s*\*/Ptr/g;
 
-  # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
-  # where it's the type of each array element. But it's also passed to
-  # the typemap template (although undocumented and virtually unused).
-  (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+    # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
+    # where it's the type of each array element. But it's also passed to
+    # the typemap template (although undocumented and virtually unused).
+    (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
 
-  # look up the TYPEMAP entry for this C type and grab the corresponding
-  # XS type name (e.g. $type of 'char *'  gives $xstype of 'T_PV'
-  my $typemap = $typemaps->get_typemap(ctype => $type);
-  if (not $typemap) {
-    $self->report_typemap_failure($typemaps, $type);
-    return;
-  }
-  my $xstype = $typemap->xstype;
+    # look up the TYPEMAP entry for this C type and grab the corresponding
+    # XS type name (e.g. $type of 'char *'  gives $xstype of 'T_PV'
+    my $typemap = $typemaps->get_typemap(ctype => $type);
+    if (not $typemap) {
+      $self->report_typemap_failure($typemaps, $type);
+      return;
+    }
+    my $xstype = $typemap->xstype;
 
-  # An optimisation: for the typemaps which check that the dereferenced
-  # item is blessed into the right class, skip the test for DESTROY()
-  # methods, as more or less by definition, DESTROY() will be called on an
-  # object of the right class. Basically, for T_foo_OBJ, use T_foo_REF
-  # instead. T_REF_IV_PTR was added in v5.22.0.
-  $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
-    if $self->{xsub_func_name} =~ /DESTROY$/;
+    # An optimisation: for the typemaps which check that the dereferenced
+    # item is blessed into the right class, skip the test for DESTROY()
+    # methods, as more or less by definition, DESTROY() will be called on an
+    # object of the right class. Basically, for T_foo_OBJ, use T_foo_REF
+    # instead. T_REF_IV_PTR was added in v5.22.0.
+    $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
+      if $self->{xsub_func_name} =~ /DESTROY$/;
 
-  # For a string-ish parameter foo, if length(foo) was also declared as a
-  # pseudo-parameter, then override the normal typedef - which would emit
-  # SvPV_nolen(...) - and instead, emit SvPV(..., STRLEN_length_of_foo)
-  if (    $xstype eq 'T_PV'
-      and $self->{xsub_map_argname_to_has_length}->{$var})
-  {
-    print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
-    die "default value not supported with length(NAME) supplied"
-      if defined $default;
-    return;
-  }
-
-  # Get the ExtUtils::Typemaps::InputMap object associated with the
-  # xstype. This contains the template of the code to be embedded,
-  # e.g. 'SvPV_nolen($arg)'
-  my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
-  if (not defined $inputmap) {
-    $self->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
-    return;
-  }
-
-  # Get the text of the template, with a few transformations to make it
-  # work better with fussy C compilers. In particular, strip trailing
-  # semicolons and remove any leading white space before a '#'.
-  my $expr = $inputmap->cleaned_code;
-
-  my $argoff = $num - 1;
-
-  # Process DO_ARRAY_ELEM. This is an undocumented hack that makes the
-  # horrible T_ARRAY typemap work. "DO_ARRAY_ELEM" appears as a token
-  # in the INPUT and OUTPUT code for for T_ARRAY, within a "for each
-  # element" loop, and the purpose of this branch is to substitute the
-  # token for some real code which will process each element, based on the
-  # type of the array elements (the $subtype).
-  #
-  # Note: This gruesome bit either needs heavy rethinking or
-  # documentation. I vote for the former. --Steffen, 2011
-  # Seconded, DAPM 2024.
-  if ($expr =~ /DO_ARRAY_ELEM/) {
-    my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
-    if (not $subtypemap) {
-      $self->report_typemap_failure($typemaps, $subtype);
+    # For a string-ish parameter foo, if length(foo) was also declared as a
+    # pseudo-parameter, then override the normal typedef - which would emit
+    # SvPV_nolen(...) - and instead, emit SvPV(..., STRLEN_length_of_foo)
+    if (    $xstype eq 'T_PV'
+        and $self->{xsub_map_argname_to_has_length}->{$var})
+    {
+      print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
+      die "default value not supported with length(NAME) supplied"
+        if defined $default;
       return;
     }
 
-    my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
-    if (not $subinputmap) {
-      $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
+    # Get the ExtUtils::Typemaps::InputMap object associated with the
+    # xstype. This contains the template of the code to be embedded,
+    # e.g. 'SvPV_nolen($arg)'
+    my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
+    if (not defined $inputmap) {
+      $self->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
       return;
     }
 
-    my $subexpr = $subinputmap->cleaned_code;
-    $subexpr =~ s/\$type/\$subtype/g;
-    $subexpr =~ s/ntype/subtype/g;
-    $subexpr =~ s/\$arg/ST(ix_$var)/g;
-    $subexpr =~ s/\n\t/\n\t\t/g;
-    $subexpr =~ s/is not of (.*\")/[arg %d] is not of $1, ix_$var + 1/g;
-    $subexpr =~ s/\$var/${var}\[ix_$var - $argoff]/;
-    $expr =~ s/DO_ARRAY_ELEM/$subexpr/;
-  }
+    # Get the text of the template, with a few transformations to make it
+    # work better with fussy C compilers. In particular, strip trailing
+    # semicolons and remove any leading white space before a '#'.
+    my $expr = $inputmap->cleaned_code;
 
-  if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
-    $self->{xsub_SCOPE_enabled} = 1;
-  }
+    my $argoff = $num - 1;
 
-  # Specify additional environment for when a template derived from a
-  # *typemap* is evalled.
-  @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
-  $init_template = $expr;
+    # Process DO_ARRAY_ELEM. This is an undocumented hack that makes the
+    # horrible T_ARRAY typemap work. "DO_ARRAY_ELEM" appears as a token
+    # in the INPUT and OUTPUT code for for T_ARRAY, within a "for each
+    # element" loop, and the purpose of this branch is to substitute the
+    # token for some real code which will process each element, based on the
+    # type of the array elements (the $subtype).
+    #
+    # Note: This gruesome bit either needs heavy rethinking or
+    # documentation. I vote for the former. --Steffen, 2011
+    # Seconded, DAPM 2024.
+    if ($expr =~ /DO_ARRAY_ELEM/) {
+      my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
+      if (not $subtypemap) {
+        $self->report_typemap_failure($typemaps, $subtype);
+        return;
+      }
+
+      my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
+      if (not $subinputmap) {
+        $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
+        return;
+      }
+
+      my $subexpr = $subinputmap->cleaned_code;
+      $subexpr =~ s/\$type/\$subtype/g;
+      $subexpr =~ s/ntype/subtype/g;
+      $subexpr =~ s/\$arg/ST(ix_$var)/g;
+      $subexpr =~ s/\n\t/\n\t\t/g;
+      $subexpr =~ s/is not of (.*\")/[arg %d] is not of $1, ix_$var + 1/g;
+      $subexpr =~ s/\$var/${var}\[ix_$var - $argoff]/;
+      $expr =~ s/DO_ARRAY_ELEM/$subexpr/;
+    }
+
+    if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
+      $self->{xsub_SCOPE_enabled} = 1;
+    }
+
+    # Specify additional environment for when a template derived from a
+    # *typemap* is evalled.
+    @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
+    $init_template = $expr;
   }
 
   # Now finally, emit the actual variable declaration and initialisation
