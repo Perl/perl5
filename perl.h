@@ -961,7 +961,7 @@ If we aren't in taint checking mode, do nothing;
 otherwise indicate to L</C<TAINT_set>> and L</C<TAINT_PROPER>> that some
 unspecified element is tainted.
 
-=for apidoc Cm|void|TAINT_NOT
+=for apidoc Cmn|void|TAINT_NOT
 
 Remove any taintedness previously set by, I<e.g.>, C<TAINT>.
 
@@ -987,11 +987,11 @@ tainting violation.  If such violations are fatal, it croaks.
 If C<s> is true, L</C<TAINT_get>> returns true;
 If C<s> is false, L</C<TAINT_get>> returns false;
 
-=for apidoc Cm|bool|TAINT_get
+=for apidoc Cmn|bool|TAINT_get
 
 Returns a boolean as to whether some element is tainted or not.
 
-=for apidoc Cm|bool|TAINTING_get
+=for apidoc Cmn|bool|TAINTING_get
 
 Returns a boolean as to whether taint checking is enabled or not.
 
@@ -999,7 +999,7 @@ Returns a boolean as to whether taint checking is enabled or not.
 
 Turn taint checking mode off/on
 
-=for apidoc Cm|bool|TAINT_WARN_get
+=for apidoc Cmn|bool|TAINT_WARN_get
 
 Returns false if tainting violations are fatal;
 Returns true if they're just warnings
