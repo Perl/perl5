@@ -2511,7 +2511,8 @@ typedef UVTYPE UV;
 
 /*
 =for apidoc_section $casting
-=for apidoc Cyh|type|NUM2PTR|type|int value
+=for apidoc Cmh|type|NUM2PTR|type|int value
+
 You probably want to be using L<C</INT2PTR>> instead.
 
 =cut
