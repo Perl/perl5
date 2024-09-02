@@ -326,7 +326,7 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
        0,   160,   160,   159,   171,   170,   181,   180,   194,   193,
@@ -432,27 +432,6 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
-     305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
-     315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
-     325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
-     335,   336,   337,   338,   339,   340,   341,   342,   343,   344,
-     345,   346,   347,   348,   349,   350,   351,   352,   353,   354,
-     355,   356,   357,   358,   359,   360,   361,   362,   363,   364,
-     365,   366,   367,   368,   369,   370,   371,   372,   373,   374,
-     375,   376,   377,   378,   379,   380,   381,   382
-};
-#endif
-
 #define YYPACT_NINF (-540)
 
 #define yypact_value_is_default(Yyn) \
@@ -463,8 +442,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   ((Yyn) == YYTABLE_NINF)
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
      693,  -540,  -540,  -540,  -540,  -540,  -540,  -540,    40,  -540,
@@ -535,9 +514,9 @@ static const yytype_int16 yypact[] =
     -540,  -540,   208,  -540
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_int16 yydefact[] =
 {
        0,     2,     4,     6,     8,    10,    12,    14,     0,    21,
@@ -608,7 +587,7 @@ static const yytype_int16 yydefact[] =
       76,    87,     0,    54
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
     -540,  -540,  -540,  -540,  -540,  -540,  -540,  -540,  -540,  -540,
@@ -625,10 +604,10 @@ static const yytype_int16 yypgoto[] =
     -540,  -540,  -540,    25
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
-      -1,     8,     9,    10,    11,    12,    13,    14,    15,   107,
+       0,     8,     9,    10,    11,    12,    13,    14,    15,   107,
      108,   117,   462,   423,   250,   398,   545,   574,   622,   118,
      609,   269,   115,   116,   489,   494,   402,   400,   569,   634,
      538,   575,   559,   586,   628,   641,   405,   110,   590,   259,
@@ -642,9 +621,9 @@ static const yytype_int16 yydefgoto[] =
       82,    83,    84,   128
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
       60,   121,   127,    17,   425,   139,   140,    86,   476,    60,
@@ -1385,8 +1364,8 @@ static const yytype_int16 yycheck[] =
      123,   124,   125
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
        0,     3,     4,     5,     6,     7,     8,     9,   129,   130,
@@ -1457,7 +1436,7 @@ static const yytype_uint8 yystos[] =
       83,   166,   126,   142
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_uint8 yyr1[] =
 {
        0,   128,   130,   129,   131,   129,   132,   129,   133,   129,
@@ -1496,7 +1475,7 @@ static const yytype_uint8 yyr1[] =
      240,   241,   241,   241,   241
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     4,     0,     3,     0,     3,     0,     3,
@@ -1591,5 +1570,5 @@ static const toketypes yy_type_tab[] =
 
 /* Generated from:
  * 9fc11f4af92f701d8d7909a9cd9dc52e01098c42c2504fb84c15e1d1e72f4803 perly.y
- * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
+ * af9eea5667ae4cf5c222df4068af3533b3d6a530bac87a3ce09871d32646017b regen_perly.pl
  * ex: set ro ft=c: */
