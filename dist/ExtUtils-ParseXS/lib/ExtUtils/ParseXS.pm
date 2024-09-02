@@ -1360,25 +1360,17 @@ EOF
       # Emit a 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
       if (!$self->{xsub_seen_THIS_in_INPUT} && defined($self->{xsub_class})) {
-        if ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new') {
-          print "\tchar *\tCLASS";
-          $self->{xsub_map_argname_to_type}->{"CLASS"} = "char *";
-          $self->generate_init( {
-            type          => "char *",
-            num           => 1,
-            var           => "CLASS",
-          } );
-        }
-        else {
-          print "\t" . $self->map_type("$self->{xsub_class} *");
-          print "\tTHIS";
-          $self->{xsub_map_argname_to_type}->{"THIS"} = "$self->{xsub_class} *";
-          $self->generate_init( {
-            type          => "$self->{xsub_class} *",
-            num           => 1,
-            var           => "THIS",
-          } );
-        }
+        my ($var, $type) =
+          ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
+            ? ('CLASS', "char *")
+            : ('THIS',  "$self->{xsub_class} *");
+
+        $self->{xsub_map_argname_to_type}->{$var} = $type;
+        $self->generate_init( {
+          type          => $type,
+          num           => 1,
+          var           => $var,
+        } );
       }
 
       # These are set later if OUTPUT is found and/or CODE using RETVAL
@@ -2451,33 +2443,6 @@ sub INPUT_handler {
 
     $self->{xsub_map_argname_to_type}->{$var_name} = $var_type;
 
-    # Emit the variable's type and name.
-    #
-    # Includes special handling for function pointer types. An INPUT line
-    # always has the C type followed by the variable name. The C code
-    # which is emitted normally follows the same pattern. However for
-    # function pointers, the code is different: the variable name has to
-    # be embedded *within* the type. For example, these two INPUT lines:
-    #
-    #    char *        s
-    #    int (*)(int)  fn_ptr
-    #
-    # cause the following lines of C to be emitted;
-    #
-    #    char *              s = [something from a typemap]
-    #    int (* fn_ptr)(int)   = [something from a typemap]
-    #
-    # So handle specially the specific case of a type containing '(*)' by
-    # embedding the variable name *within* rather than *after* the type.
-
-    if ($var_type =~ / \( \s* \* \s* \) /x) {
-      # for a fn ptr type, embed the var name in the type declaration
-      print "\t" . $self->map_type($var_type, $var_name);
-    }
-    else {
-      print "\t" . $self->map_type($var_type, undef), "\t$var_name";
-    }
-
     # The index number of the parameter. The counting starts at 1 and skips
     # fake parameters like 'length(s))' (zero is used for RETVAL).
     my $var_num = $self->{xsub_map_argname_to_idx}->{$var_name};
@@ -2502,6 +2467,8 @@ sub INPUT_handler {
     # apply the standard typemap entry. Typically emits "= ..."
     # (the type and var name having already been emitted above).
 
+    my ($init, $no_init, $defer);
+
     if (   $var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
         or
                 $self->{xsub_map_argname_to_in_out}->{$var_name}
@@ -2510,32 +2477,19 @@ sub INPUT_handler {
        )
     {
       # NO_INIT or OUT* class; skip initialisation
-      print ";\n";
+      $no_init = 1;
     }
 
     elsif ($var_init =~ /\S/) {
       # Emit the init code based on overridden $var_init, which should
       # start with /[=;+]/.
 
-      my $argsref = {
-          type          => $var_type,
-          num           => $var_num,
-          var           => $var_name,
-          init          => $var_init,
-          arg           => $self->ST($var_num, 0),
-        };
-
       if ($var_init =~ /^=/) {
         # Overridden typemap, such as '= ($type)SvUV($arg)'
         $var_init =~ s/^=\s*//;
         $var_init =~ s/;\s*$//;
 
-        $self->generate_init( {
-          type          => $var_type,
-          num           => $var_num,
-          var           => $var_name,
-          init          => $var_init,
-        } );
+        $init = $var_init,
       }
       else {
         # "; extra code" or "+ extra code" :
@@ -2548,27 +2502,15 @@ sub INPUT_handler {
 
         # if '+' on a real var, generate init from typemap,
         # else (';' or fake var), skip init.
-        my $no_init = !($var_init =~ s/^\+// && $var_num);
+        $no_init = !($var_init =~ s/^\+// && $var_num);
         $var_init =~ s/^[+;]//;
         # But in either case, add the deferred code
-        $self->generate_init( {
-          type          => $var_type,
-          num           => $var_num,
-          var           => $var_name,
-          defer         => $var_init,
-          init          => undef,
-          no_init       => $no_init,
-        } );
+        $defer = $var_init,
       }
     }
 
     elsif ($var_num) {
       # Emit var and init code based on typemap entry
-      $self->generate_init( {
-        type          => $var_type,
-        num           => $var_num,
-        var           => $var_name,
-      } );
     }
     else {
       # A parameter which has been declared (with no initialiser) in the
@@ -2576,8 +2518,20 @@ sub INPUT_handler {
       # signature.  Should be illegal, but people rely on it,
       # For such a variable, don't use a typemap, because there's no value
       # on the stack to be converted.
-      print ";\n";
+      $no_init = 1;
     }
+
+    # Emit "type var" declaration and possibly various forms of
+    # initialiser code.
+
+    $self->generate_init( {
+      type          => $var_type,
+      num           => $var_num,
+      var           => $var_name,
+      defer         => $defer,
+      init          => $init,
+      no_init       => $no_init,
+    } );
 
   } # foreach line in INPUT block
 }
@@ -3591,8 +3545,8 @@ sub fetch_para {
 #   no_init      If true, don't plant initialiser code.
 #   defer        Optional deferred template code to add after all declarations
 #
-# This function emits text like "= initialisation code", based on the
-# typemap INPUT entry associated with $type (or an explicit override),
+# This function emits text like "type var = initialisation code", based on
+# the typemap INPUT entry associated with $type (or an explicit override),
 # passing the typemap code through a double-quoted context eval first, to
 # expand variables such as # $type.
 
@@ -3606,6 +3560,38 @@ sub generate_init {
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
   my $arg = $self->ST($num, 0);
+
+  # Emit the variable's type and name.
+  #
+  # Includes special handling for function pointer types. An INPUT line
+  # always has the C type followed by the variable name. The C code
+  # which is emitted normally follows the same pattern. However for
+  # function pointers, the code is different: the variable name has to
+  # be embedded *within* the type. For example, these two INPUT lines:
+  #
+  #    char *        s
+  #    int (*)(int)  fn_ptr
+  #
+  # cause the following lines of C to be emitted;
+  #
+  #    char *              s = [something from a typemap]
+  #    int (* fn_ptr)(int)   = [something from a typemap]
+  #
+  # So handle specially the specific case of a type containing '(*)' by
+  # embedding the variable name *within* rather than *after* the type.
+
+
+  if ($type =~ / \( \s* \* \s* \) /x) {
+    # for a fn ptr type, embed the var name in the type declaration
+    print "\t" . $self->map_type($type, $var);
+  }
+  else {
+    print "\t",
+              ((defined($self->{xsub_class}) && $var eq 'CLASS')
+                ? $type
+                : $self->map_type($type, undef)),
+           "\t$var";
+  }
 
   # whitespace-tidy the type
   $type = ExtUtils::Typemaps::tidy_type($type);
@@ -3756,6 +3742,9 @@ sub generate_init {
     # XXX for now, for backcompat, ignore default if the
     # param has a typemap override
     && !(defined $init)
+    # XXX for now, for backcompat, ignore default if the
+    # param wouldn't otherwise get initialised
+    && !$no_init
   ) {
     # Has a default value. Just terminate the variable declaration, and
     # defer the initialisation.
@@ -3776,6 +3765,7 @@ sub generate_init {
       # for foo(a, b = default), add code to initialise later to either
       # the arg or default value
       my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
+
       $self->{xsub_deferred_code_lines}
         .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
             $num,
@@ -3793,7 +3783,8 @@ sub generate_init {
 
     print ";\n";
 
-    $self->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code;
+    $self->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code
+      if $init_code =~ /\S/;
   }
   else {
     # The template starts with '$var = ...'. The variable name has already

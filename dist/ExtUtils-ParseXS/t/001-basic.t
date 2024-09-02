@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 48;
+use Test::More tests => 54;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -619,11 +619,14 @@ EOF
         |
         |PROTOTYPES: DISABLE
         |
-        |void foo(mymarker1, aaa = 111, bbb = 222, ccc = 333)
+        |void foo(mymarker1, aaa = 111, bbb = 222, ccc = 333, ddd = NO_INIT, eee = NO_INIT, fff = NO_INIT)
         |    int mymarker1
         |    int aaa = 777;
         |    int bbb + 888;
         |    int ccc ; 999;
+        |    int ddd = AAA;
+        |    int eee + BBB;
+        |    int fff ; CCC;
         |  CODE:
         |    mymarker2
 EOF
@@ -642,22 +645,39 @@ EOF
     my $sout = $out;
     $sout =~ s/[ \t]+//g;
 
+    like($sout, qr/if\(items<3\)\nbbb=222;\nelse\{\nbbb=.*ST\(2\)\)\n;\n\}\n/,
+                    "default with +init");
+
+    like($sout, qr/\Qif(items>=6){\E\n\Qeee=(int)SvIV(ST(5))\E\n;\n\}/,
+                "NO_INIT default with +init");
+
     {
         local $TODO = "default is lost in presence of initialiser";
 
         like($sout, qr/if\(items<2\)\naaa=111;\nelse\{\naaa=777;\n\}\n/,
                     "default with =init");
-    }
 
-    like($sout, qr/if\(items<3\)\nbbb=222;\nelse\{\nbbb=.*ST\(2\)\)\n;\n\}\n/,
-                    "default with +init");
-    like($sout, qr/if\(items<4\)\nccc=333;\n999;\n/,
+        like($sout, qr/if\(items<4\)\nccc=333;\n999;\n/,
                     "default with ;init");
 
+        like($sout, qr/if\(items>=5\)\{\nddd=AAA;\n\}/,
+                    "NO_INIT default with =init");
+      unlike($sout, qr/^intddd=AAA;\n/m,
+                    "NO_INIT default with =init no stray");
+
+    }
+
+
+    like($sout, qr/^$/m,
+                    "default with +init deferred expression");
     like($sout, qr/^888;$/m,
                     "default with +init deferred expression");
     like($sout, qr/^999;$/m,
                     "default with ;init deferred expression");
+    like($sout, qr/^BBB;$/m,
+                    "NO_INIT default with +init deferred expression");
+    like($sout, qr/^CCC;$/m,
+                    "NO_INIT default with ;init deferred expression");
 
 }
 
