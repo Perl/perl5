@@ -317,4 +317,24 @@ SKIP: {
     ok($saved_errno == EISDIR,  "\$! is EISDIR on do dir");
 }
 
+# do block with single child calls DESTROY properly
+{
+    my $d = 0;
+    {
+        package Foo;
+        sub new {return bless {}, shift};
+        sub DESTROY {
+            $d = 1;
+        }
+        1;
+    };
+    do { my $obj = Foo->new() };
+    ok($d, "does single object instantiation DESTROY work?");
+    $d = 0;
+    my $f = do { Foo->new() };
+    is($d, 0, "does single object instantiation to LVALUE not DESTROY?");
+    my $k = do { my $l = Foo->new() };
+    is($d, 0, "does single object instantiation to LVALUE from 'my' not DESTROY?");
+}
+
 done_testing();

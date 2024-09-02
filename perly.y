@@ -1342,7 +1342,11 @@ anonymous
 termdo	:       KW_DO term	%prec UNIOP                     /* do $filename */
 			{ $$ = dofile($term, $KW_DO);}
 	|	KW_DO block	%prec PERLY_PAREN_OPEN               /* do { code */
-			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, op_scope($block));}
+			{
+              OP* block_op = $block;
+              block_op->op_flags |= OPf_PARENS;
+              $$ = newUNOP(OP_NULL, OPf_SPECIAL, op_scope(block_op));
+            }
         ;
 
 term[product]	:	termbinop

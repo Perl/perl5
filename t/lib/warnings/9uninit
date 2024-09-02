@@ -865,7 +865,7 @@ Use of uninitialized value $m1 in regexp compilation at - line 30.
 Use of uninitialized value $g1 in substitution iterator at - line 31.
 Use of uninitialized value $m1 in regexp compilation at - line 32.
 Use of uninitialized value $g1 in substitution iterator at - line 32.
-Use of uninitialized value $m1 in substitution (s///) at - line 33.
+Use of uninitialized value in substitution iterator at - line 33.
 Use of uninitialized value in substitution iterator at - line 36.
 Use of uninitialized value $m1 in transliteration (tr///) at - line 38.
 Use of uninitialized value $m1 in transliteration (tr///) at - line 39.
