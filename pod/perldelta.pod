@@ -366,7 +366,15 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+C<pack("p", ...)> and C<pack("P", ...)> now SvPV_force() the supplied
+SV unless it is read only.  This will remove CoW from the SV and
+prevents code that writes through the generated pointer from modifying
+the value of other SVs that happen the share the same CoWed string
+buffer.
+
+Note: this does not make C<pack("p",... )> safe, if the SV is magical
+then any writes to the buffer will likely be discarded on the next
+read.  [GH #22380]
 
 =back
 
