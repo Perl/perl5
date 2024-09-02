@@ -133,8 +133,6 @@ open my $tmph_fh, '<', $tmph_file or die "Can't open $tmph_file: $!\n";
 }
 
 my $endcore_done = 0;
-my $gather_tokens = 0;
-my $tokens;
 while (<$tmph_fh>) {
     # bison 2.6 adds header guards, which break things because of where we
     # insert #ifdef PERL_CORE, so strip them because they aren't important
@@ -162,19 +160,6 @@ j
 	$endcore_done = 1;
     }
     next if /^#line \d+ ".*"/;
-    if (!$gather_tokens) {
-	$gather_tokens = 1 if /^\s* enum \s* yytokentype \s* \{/x;
-    }
-    else {
-	if (/^\# \s* endif/x) { # The #endif just after the end of the token enum
-	    $gather_tokens = 0;
-	    $_ .= "\n/* Tokens.  */\n$tokens";
-	}
-	else {
-	    my ($tok, $val) = /(\w+) \s* = \s* (\d+)/x;
-	    $tokens .= "#define $tok $val\n" if $tok;
-	}
-    }
     print $h_fh $_;
 }
 close $tmph_fh;
