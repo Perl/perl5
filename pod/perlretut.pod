@@ -2839,10 +2839,10 @@ alternative will be tried. As failing to match doesn't preserve capture
 groups or produce results, it may be necessary to use this in
 combination with embedded code.
 
-   %count = ();
-   "supercalifragilisticexpialidocious" =~
-       /([aeiou])(?{ $count{$1}++; })(*FAIL)/i;
-   printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
+    my %count;
+    "supercalifragilisticexpialidocious" =~
+        /([aeiou])(?{ $count{lc($1)}++; })(*FAIL)/i;
+    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
 
 The pattern begins with a class matching a subset of letters.  Whenever
 this matches, a statement like C<$count{'a'}++;> is executed, incrementing
@@ -2851,12 +2851,15 @@ the regexp engine proceeds according to the book: as long as the end of
 the string hasn't been reached, the position is advanced before looking
 for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the entire string has been inspected.
-(It's remarkable that an alternative solution using something like
 
-   $count{lc($_)}++ for split('', "supercalifragilisticexpialidocious");
-   printf "%3d '%s'\n", $count2{$_}, $_ for ( qw{ a e i o u } );
+(In a real program, you might instead solve this problem using
 
-is considerably slower.)
+    my $string = "supercalifragilisticexpialidocious";
+    my %count;
+    $count{lc($1)}++ while $string =~ /([aeiou])/ig;
+    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
+
+This is faster than embedded code blocks in the regex.)
 
 
 =head2 Pragmas and debugging
