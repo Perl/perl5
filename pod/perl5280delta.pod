@@ -1711,7 +1711,7 @@ applicable.
 =item *
 
 Perl now includes a default F<.travis.yml> file for Travis CI testing
-on github mirrors.
+on GitHub mirrors.
 L<[GH #14558]|https://github.com/Perl/perl5/issues/14558>
 
 =item *

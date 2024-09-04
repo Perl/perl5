@@ -231,7 +231,7 @@ stack for their return values in cases where no argument was passed in.
 
 =item *
 
-When matching unicode strings under some conditions inappropriate backtracking would
+When matching Unicode strings under some conditions inappropriate backtracking would
 result in a C<Malformed UTF-8 character (fatal)> error. This should no longer occur.
 See  L<[GH #10434]|https://github.com/Perl/perl5/issues/10434>
 

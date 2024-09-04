@@ -1367,11 +1367,11 @@ output double quoted strings with various characters escaped so as to
 make the exact value clear to a reader. The exact rules on which
 characters are escaped may change over time but currently are that
 printable ASCII codepoints, with the exception of C<"> and C<\>, and
-unicode word characters whose codepoint is over 255 are output raw, and
+Unicode word characters whose codepoint is over 255 are output raw, and
 any other symbols are escaped much as Data::Dumper might escape them,
 using C<\n> for newline and C<\"> for double quotes, etc. Codepoints in
 the range 128-255 are always escaped as they can cause trouble on
-unicode terminals when output raw.
+Unicode terminals when output raw.
 
 In older versions of perl the one liner
 

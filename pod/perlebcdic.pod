@@ -105,7 +105,7 @@ Portuguese, Spanish, and Swedish.  Dutch is covered albeit without
 the ij ligature.  French is covered too but without the oe ligature.
 German can use ISO 8859-1 but must do so without German-style
 quotation marks.  This set is based on Western European extensions
-to ASCII and is commonly encountered in world wide web work.
+to ASCII and is commonly encountered in World Wide Web work.
 In IBM character code set identification terminology, ISO 8859-1 is
 also known as CCSID 819 (or sometimes 0819 or even 00819).
 
