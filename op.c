@@ -13487,8 +13487,11 @@ Perl_ck_open(pTHX_ OP *o)
              (oa = OpSIBLING(first)) &&                 /* The fh. */
              (oa = OpSIBLING(oa)) &&                    /* The mode. */
              S_is_dup_mode(oa) &&                       /* A dup open. */
-             (last == OpSIBLING(oa)))                   /* The bareword. */
-              last->op_private &= ~OPpCONST_STRICT;
+             (last == OpSIBLING(oa))) {                 /* The bareword. */
+             if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED)
+                 no_bareword_filehandle(SvPVX(cSVOPx_sv(last)));
+             last->op_private &= ~OPpCONST_STRICT;
+         }
     }
     {
         /* mark as special if filename is a literal undef */
