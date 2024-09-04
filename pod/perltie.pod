@@ -1127,7 +1127,7 @@ This is the output when it is executed:
     The End
 
 So far so good.  Those of you who have been paying attention will have
-spotted that the tied object hasn't been used so far.  So lets add an
+spotted that the tied object hasn't been used so far.  So let's add an
 extra method to the Remember class to allow comments to be included in
 the file; say, something like this:
 

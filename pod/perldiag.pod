@@ -737,7 +737,7 @@ format can only be used with positive integers.  See L<perlfunc/pack>.
 
 (F) You manipulated Perl's symbol table directly, stored a reference
 in it, then tried to access that symbol via conventional Perl syntax.
-The access triggers Perl to autovivify that typeglob, but it there is
+The access triggers Perl to autovivify that typeglob, but there is
 no legal conversion from that type of reference to a typeglob.
 
 =item Cannot copy to %s
@@ -2902,7 +2902,7 @@ this support.  Talk to your Perl administrator.
 (F) A parameter in a subroutine signature contained an unexpected character
 following the C<$>, C<@> or C<%> sigil character.  Normally the sigil
 should be followed by the variable name or C<=> etc.  Perhaps you are
-trying use a prototype while in the scope of C<use feature 'signatures'>?
+trying to use a prototype while in the scope of C<use feature 'signatures'>?
 For example:
 
     sub foo ($$) {}            # legal - a prototype

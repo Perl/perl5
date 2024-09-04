@@ -439,7 +439,7 @@ canonical combining classes and weeds out singletons.
 
 Unless you’ve used C</a> or C</aa>, C<\d> matches more than
 ASCII digits only, but Perl’s implicit string-to-number
-conversion does not current recognize these.  Here’s how to
+conversion does not currently recognize these.  Here’s how to
 convert such strings manually.
 
  use v5.14;  # needed for num() function
