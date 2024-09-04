@@ -1449,7 +1449,7 @@ Two flag bits are currently supported.
 
 =item C<SVf_UTF8>
 
-This will call C<SvUTF8_on()> for you. (Note that this does not convert an
+This will call C<SvUTF8_on()> for you. (Note that this does not convert a
 sequence of ISO 8859-1 characters to UTF-8). A wrapper, C<newSVpvn_utf8()>
 is available for this.
 

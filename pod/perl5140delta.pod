@@ -1085,7 +1085,7 @@ the regex to utf8 is necessary but this isn't known when the compilation begins.
 =head2 String appending is 100 times faster
 
 When doing a lot of string appending, perls built to use the system's
-C<malloc> could end up allocating a lot more memory than needed in a
+C<malloc> could end up allocating a lot more memory than needed in an
 inefficient way.
 
 C<sv_grow>, the function used to allocate more memory if necessary
