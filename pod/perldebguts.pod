@@ -961,7 +961,7 @@ grasp of what happens.
 Assume that an integer cannot take less than 20 bytes of memory, a
 float cannot take less than 24 bytes, a string cannot take less
 than 32 bytes (all these examples assume 32-bit architectures, the
-result are quite a bit worse on 64-bit architectures).  If a variable
+results are quite a bit worse on 64-bit architectures).  If a variable
 is accessed in two of three different ways (which require an integer,
 a float, or a string), the memory footprint may increase yet another
 20 bytes.  A sloppy malloc(3) implementation can inflate these

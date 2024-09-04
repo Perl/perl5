@@ -2291,7 +2291,7 @@ C<PL_glob_index> is gone.
 
 =item *
 
-The private Perl_croak_no_modify has had its context parameter removed.  It is
+The private Perl_croak_no_modify has had its context parameter removed.  It
 now has a void prototype.  Users of the public API croak_no_modify remain
 unaffected.
 
@@ -2340,7 +2340,7 @@ C<mg_length> has been deprecated.
 
 C<sv_len> now always returns a byte count and C<sv_len_utf8> a character
 count.  Previously, C<sv_len> and C<sv_len_utf8> were both buggy and would
-sometimes returns bytes and sometimes characters.  C<sv_len_utf8> no longer
+sometimes return bytes and sometimes characters.  C<sv_len_utf8> no longer
 assumes that its argument is in UTF-8.  Neither of these creates UTF-8 caches
 for tied or overloaded values or for non-PVs any more.
 

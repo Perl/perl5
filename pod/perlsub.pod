@@ -439,7 +439,7 @@ is not important, it may be omitted just as the parameter's name was:
     }
 
 Optional positional parameters must come after all mandatory positional
-parameters.  (If there are no mandatory positional parameters then an
+parameters.  (If there are no mandatory positional parameters then the
 optional positional parameters can be the first thing in the signature.)
 If there are multiple optional positional parameters and not enough
 arguments are supplied to fill them all, they will be filled from left

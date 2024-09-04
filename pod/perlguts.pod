@@ -1274,7 +1274,7 @@ settable with L<< IO::Handle's untaint() method|IO::Handle/"$io->untaint" >>.
 =for apidoc Amnh||IOf_FLUSH
 =for apidoc Amnh||IOf_UNTAINT
 
-The IO object may also contains a directory handle:
+The IO object may also contain a directory handle:
 
   DIR *IoDIRP(io);
 

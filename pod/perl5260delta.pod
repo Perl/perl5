@@ -2622,7 +2622,7 @@ L<[GH #15657]|https://github.com/Perl/perl5/issues/15657>
 
 =item *
 
-Occasionally C<local()>s in a code block within a patterns weren't being
+Occasionally C<local()>s in a code block within a pattern weren't being
 undone when the pattern matching backtracked over the code block.
 L<[GH #15056]|https://github.com/Perl/perl5/issues/15056>
 

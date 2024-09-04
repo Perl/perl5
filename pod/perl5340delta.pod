@@ -1300,7 +1300,7 @@ operations.
 
 C<semctl()>, C<msgctl()>, and C<shmctl()> now attempt to downgrade the C<ARG>
 parameter if its value is being used as input to C<IPC_SET> or
-C<SETALL> calls.  A failed downgrade will thrown an exception.
+C<SETALL> calls.  A failed downgrade will throw an exception.
 
 =item *
 

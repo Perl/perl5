@@ -26,7 +26,7 @@ If you have neither, you don't have any thread support built in.
 If you have both, you are in trouble.
 
 The L<threads> and L<threads::shared> modules are included in the core Perl
-distribution.  Additionally, they are maintained as a separate modules on
+distribution.  Additionally, they are maintained as separate modules on
 CPAN, so you can check there for any updates.
 
 =head1 What Is A Thread Anyway?
