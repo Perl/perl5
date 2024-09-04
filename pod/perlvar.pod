@@ -787,7 +787,7 @@ which are hard or impossible to wrap are called. The keys of this hash
 are named after the keyword that is being hooked, followed by two
 underbars and then a phase term; either "before" or "after".
 
-Perl will throw an error if you attempt modify a key which is not
+Perl will throw an error if you attempt to modify a key which is not
 documented to exist, or if you attempt to store anything other than a
 code reference or undef in the hash.  If you wish to use an object to
 implement a hook you can use currying to embed the object into an
