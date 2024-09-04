@@ -1012,7 +1012,7 @@ Some of these reentrant functions that are available on all platforms
 should always be used anyway; they are in the lists directly under
 L<libc functions to avoid>.
 
-Others may not be available on some platforms, or have issues that makes
+Others may not be available on some platforms, or have issues that make
 them undesirable to use even when they are available.  Or it may just be
 more complicated and tedious to use the reentrant version.  For these,
 perl has a mechanism for automatically substituting that reentrant

@@ -63,7 +63,7 @@ platforms where they are available.  And Unicode supports a database of
 more types of information than the basic locale systems have.  This
 database is called C<CLDR>, the "Common Locale Data Repository",
 L<http://cldr.unicode.org/>.  There are various CPAN modules that
-provides access to this XML-encoded data, such as L<Locale::CLDR>,
+provide access to this XML-encoded data, such as L<Locale::CLDR>,
 L<CLDR::Number>, and L<DateTime::Format::CLDR>.
 
 =head1 WHAT IS A LOCALE
