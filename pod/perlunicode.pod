@@ -636,7 +636,7 @@ scripts, Katakana and Hiragana, but nowhere else.  The C<Script>
 property places all characters that are used in multiple scripts in the
 C<Common> script, while the C<Script_Extensions> property places those
 that are used in only a few scripts into each of those scripts; while
-still using C<Common> for those used in many scripts.  Thus both these
+still using C<Common> for those used in many scripts.  Thus both of these
 match:
 
  "0" =~ /\p{sc=Common}/     # Matches

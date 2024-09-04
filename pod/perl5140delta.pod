@@ -1022,7 +1022,7 @@ L<Unicode::Casing>, which provides improved functionality.
 The following module will be removed from the core distribution in a
 future release, and should be installed from CPAN instead.  Distributions
 on CPAN that require this should add it to their prerequisites.  The
-core version of these module now issues a deprecation warning.
+core version of this module now issues a deprecation warning.
 
 If you ship a packaged version of Perl, either alone or as part of a
 larger system, then you should carefully consider the repercussions of
