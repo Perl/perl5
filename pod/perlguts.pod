@@ -2101,7 +2101,7 @@ provide pointers to the modifiable data explicitly (either C pointers,
 or Perlish C<GV *>s).  Where the above macros take C<int>, a similar
 function takes C<int *>.
 
-Other macros above have functions implementing them, but its probably
+Other macros above have functions implementing them, but it's probably
 best to just use the macro, and not those or the ones below.
 
 =over 4
@@ -3531,7 +3531,7 @@ So don't do that!
 
 (Note that we don't have to test for invariant characters in the
 examples above.  The functions work on any well-formed UTF-8 input.
-It's just that its faster to avoid the function overhead when it's not
+It's just that it's faster to avoid the function overhead when it's not
 needed.)
 
 =head2 How does Perl store UTF-8 strings?
@@ -4452,7 +4452,7 @@ C<cx_popsub>. In part, this looks like:
     cx->blk_sub.cv = NULL;
     SvREFCNT_dec(cv);
 
-where its processing the just-executed CV. Note that before it decrements
+where it's processing the just-executed CV. Note that before it decrements
 the CV's reference count, it nulls the C<blk_sub.cv>. This means that if
 it re-enters, the CV won't be freed twice. It also means that you can't
 rely on such type-specific fields having useful values after the return

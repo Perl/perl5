@@ -243,7 +243,7 @@ ARRAY reference, we'll choose a HASH reference to represent our object.
 A HASH works out well as a generic record type: the C<{ELEMSIZE}> field will
 store the maximum element size allowed, and the C<{ARRAY}> field will hold the
 true ARRAY ref.  If someone outside the class tries to dereference the
-object returned (doubtless thinking it an ARRAY ref), they'll blow up.
+object returned (doubtless thinking it is an ARRAY ref), they'll blow up.
 This just goes to show you that you should respect an object's privacy.
 
     sub TIEARRAY {

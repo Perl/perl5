@@ -2021,7 +2021,7 @@ L</Embedded Code Execution Frequency>.
 This is a "postponed" regular subexpression.  It behaves in I<exactly> the
 same way as a C<(?{ I<code> })> code block as described above, except that
 its return value, rather than being assigned to C<$^R>, is treated as a
-pattern, compiled if it's a string (or used as-is if its a qr// object),
+pattern, compiled if it's a string (or used as-is if it's a qr// object),
 then matched as if it were inserted instead of this construct.
 
 During the matching of this sub-pattern, it has its own set of
