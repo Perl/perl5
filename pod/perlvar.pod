@@ -821,7 +821,7 @@ C<require__before> hooks are called in FIFO order, and if the hook
 returns a code reference those code references will be called in FILO
 order.  In other words if A requires B requires C, then
 C<require__before> will be called first for A, then B and then C, and
-the post-action code reference will executed first for C, then B and
+the post-action code reference will be executed first for C, then B and
 then finally A.
 
 Well behaved code should ensure that when setting up a

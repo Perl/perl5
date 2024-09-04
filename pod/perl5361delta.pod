@@ -68,7 +68,7 @@ interpreter panic; e.g.
 =item *
 
 An C<eval EXPR> referring to a lexical sub defined in grandparent scope no
-longer produces an assertion failures.
+longer produces an assertion failure.
 [L<GH #19857|https://github.com/Perl/perl5/issues/19857>]
 
 =item *

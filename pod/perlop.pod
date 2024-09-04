@@ -2188,7 +2188,7 @@ A string which is (possibly) interpolated and then executed as a
 system command, via F</bin/sh> or its equivalent if required.  Shell
 wildcards, pipes, and redirections will be honored.  Similarly to
 C<system>, if the string contains no shell metacharacters then it will
-executed directly.  The collected standard output of the command is
+be executed directly.  The collected standard output of the command is
 returned; standard error is unaffected.  In scalar context, it comes
 back as a single (potentially multi-line) string, or C<undef> if the
 shell (or command) could not be started.  In list context, returns a
@@ -3375,7 +3375,7 @@ Bitstrings of any size may be manipulated by the bitwise operators
 If the operands to a binary bitwise op are strings of different
 sizes, B<|> and B<^> ops act as though the shorter operand had
 additional zero bits on the right, while the B<&> op acts as though
-the longer operand were truncated to the length of the shorter.
+the longer operand was truncated to the length of the shorter.
 The granularity for such extension or truncation is one or more
 bytes.
 

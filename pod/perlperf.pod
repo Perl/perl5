@@ -588,7 +588,7 @@ systems which provide C<clock_gettime()>.  It can be started and stopped even
 by the program being profiled.  It's a one-line entry to profile C<mod_perl>
 applications.  It's written in C<c> and is probably the fastest profiler
 available for Perl.  The list of coolness just goes on.  Enough of that, let's
-see how to it works - just use the familiar C<-d> switch to plug it in and run
+see how it works - just use the familiar C<-d> switch to plug it in and run
 the code.
 
  $> perl -d:NYTProf wordmatch -f perl5db.pl
@@ -1104,7 +1104,7 @@ completely optimized away, and you can't get much more efficient than that.
 
 =head1 POSTSCRIPT
 
-This document has provided several way to go about identifying hot-spots, and
+This document has provided several ways to go about identifying hot-spots, and
 checking whether any modifications have improved the runtime of the code.
 
 As a final thought, remember that it's not (at the time of writing) possible to

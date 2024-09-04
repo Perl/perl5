@@ -8375,7 +8375,7 @@ string's internal encoding.
 
 As of Perl 5.39.9 the C</x> default modifier does NOT affect
 C<split STRING> but does affect C<split PATTERN>, this means that
-C<split " "> will produces the expected I<awk> emulation regardless as
+C<split " "> will produce the expected I<awk> emulation regardless as
 to whether it is used in the scope of a C<use re "/x"> statement. If you
 want to split by spaces under C<use re "/x"> you must do something like
 C<split /(?-x: )/> or C<split /\x{20}/> instead of C<split / />.
