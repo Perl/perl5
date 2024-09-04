@@ -1197,7 +1197,7 @@ it represents all types.  This used to be the preferred way to
 pass arrays and hashes by reference into a function, but now that
 we have real references, this is seldom needed.  
 
-The main use of typeglobs in modern Perl is create symbol table aliases.
+The main use of typeglobs in modern Perl is to create symbol table aliases.
 This assignment:
 
     *this = *that;

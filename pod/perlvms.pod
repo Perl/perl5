@@ -1135,7 +1135,7 @@ status value to be passed through.  The special value of 0xFFFF is
 almost a NOOP as it will cause the current native VMS status in the
 C library to become the current native Perl VMS status, and is handled
 this way as it is known to not be a valid native VMS status value.
-It is recommend that only values in the range of normal Unix parent or
+It is recommended that only values in the range of normal Unix parent or
 child status numbers, 0 to 255 are used.
 
 The pragma C<use vmsish 'status'> makes C<$?> reflect the actual 

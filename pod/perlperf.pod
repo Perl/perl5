@@ -173,9 +173,9 @@ actually worth the eyestrain, or the loss of maintainability.
 =head2  Search and replace or tr
 
 If we have a string which needs to be modified, while a regex will almost
-always be much more flexible, C<tr>, an oft underused tool, can still be a
-useful.  One scenario might be replace all vowels with another character.  The
-regex solution might look like this:
+always be much more flexible, C<tr>, an oft underused tool, can still be
+useful.  One scenario might be to replace all vowels with another character.
+The regex solution might look like this:
 
  $str =~ s/[aeiou]/x/g
 
