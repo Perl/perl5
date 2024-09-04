@@ -517,7 +517,7 @@ so SvIOK is false.  (In perl 5.18 onwards, tied scalars use
 the flags the same way as untied scalars.)  Another is when
 numeric conversion has occurred and precision has been lost: only the
 private flag is set on 'lossy' values.  So when an NV is converted to an
-IV with loss, SvIOKp, SvNOKp and SvNOK will be set, while SvIOK wont be.
+IV with loss, SvIOKp, SvNOKp and SvNOK will be set, while SvIOK won't be.
 
 In general, though, it's best to use the C<Sv*V> macros.
 
@@ -4088,7 +4088,7 @@ be invoked on scope exit. A full list of such macros can be found in
 F<scope.h>.
 
 There is no public API for popping individual values or items from the save
-stack. Instead, via the scope stack, the C<ENTER> and C<LEAVE> pair form a way
+stack. Instead, via the scope stack, the C<ENTER> and C<LEAVE> pair forms a way
 to start and stop nested scopes. Leaving a nested scope via C<LEAVE> will
 restore all of the saved values that had been pushed since the most recent
 C<ENTER>.

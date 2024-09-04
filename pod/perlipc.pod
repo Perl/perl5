@@ -973,7 +973,7 @@ Here's a sample TCP client using Internet-domain sockets:
 
 And here's a corresponding server to go along with it.  We'll
 leave the address as C<INADDR_ANY> so that the kernel can choose
-the appropriate interface on multihomed hosts.  If you want sit
+the appropriate interface on multihomed hosts.  If you want to sit
 on a particular interface (like the external side of a gateway
 or firewall machine), fill this in with your real address instead.
 

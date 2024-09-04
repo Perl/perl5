@@ -299,7 +299,7 @@ automatically.
 
     $thr->detach();   # Now we officially don't care any more
 
-    sleep(15);        # Let thread run for awhile
+    sleep(15);        # Let thread run for a while
 
     sub sub1 {
         my $count = 0;

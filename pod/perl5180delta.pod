@@ -855,7 +855,7 @@ down to a single op and are hence faster than before.
 A new C preprocessor define C<NO_TAINT_SUPPORT> was added that, if set,
 disables Perl's taint support altogether.  Using the -T or -t command
 line flags will cause a fatal error.  Beware that both core tests as
-well as many a CPAN distribution's tests will fail with this change.  On
+well as many CPAN distribution's tests will fail with this change.  On
 the upside, it provides a small performance benefit due to reduced
 branching.
 

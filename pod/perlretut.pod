@@ -633,7 +633,7 @@ that matches.
 
 Alternation allows a regexp to choose among alternatives, but by
 itself it is unsatisfying.  The reason is that each alternative is a whole
-regexp, but sometime we want alternatives for just part of a
+regexp, but sometimes we want alternatives for just part of a
 regexp.  For instance, suppose we want to search for housecats or
 housekeepers.  The regexp C<housecat|housekeeper> fits the bill, but is
 inefficient because we had to type C<house> twice.  It would be nice to

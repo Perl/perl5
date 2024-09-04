@@ -1301,7 +1301,7 @@ in C<@Fields>.
         @Fields = split /^\s*=+\s*$/;
     }
 
-It particular, it's important to C<local>ize $_ in any routine that assigns
+In particular, it's important to C<local>ize $_ in any routine that assigns
 to it.  Look out for implicit assignments in C<while> conditionals.
 
 =item 2.

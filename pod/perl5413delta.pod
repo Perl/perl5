@@ -285,7 +285,7 @@ passed C<undef> as a filename:
 
     open(my $fh, "+>", undef) or die ...
 
-Due the way this feature was implemented, it would also trigger for
+Due to the way this feature was implemented, it would also trigger for
 non-existent elements of arrays or hashes:
 
     open(my $fh, "+>", $hash{no_such_key}) or die ...
