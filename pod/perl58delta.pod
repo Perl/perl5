@@ -270,7 +270,7 @@ ugly, but the current implementation slows down normal array and hash
 use quite noticeably. The C<fields> pragma interface will remain
 available.  The I<restricted hashes> interface is expected to
 be the replacement interface (see L<Hash::Util>).  If your existing
-programs depends on the underlying implementation, consider using
+programs depend on the underlying implementation, consider using
 L<Class::PseudoHash> from CPAN.
 
 =item *
