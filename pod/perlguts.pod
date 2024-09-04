@@ -2632,7 +2632,7 @@ of free()ing (i.e. their type is changed to OP_NULL).
 
 After the compile tree for a subroutine (or for an C<eval> or a file)
 is created, an additional pass over the code is performed.  This pass
-is neither top-down or bottom-up, but in the execution order (with
+is neither top-down nor bottom-up, but in the execution order (with
 additional complications for conditionals).  Optimizations performed
 at this stage are subject to the same restrictions as in the pass 2.
 
