@@ -1568,7 +1568,7 @@ Unicode normalization tests have been added.
 
 =item *
 
-t/test.pl: Add ability to cancel an watchdog timer
+t/test.pl: Add ability to cancel a watchdog timer
 
 =back
 
