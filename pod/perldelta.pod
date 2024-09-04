@@ -376,6 +376,13 @@ Note: this does not make C<pack("p",... )> safe, if the SV is magical
 then any writes to the buffer will likely be discarded on the next
 read.  [GH #22380]
 
+=item *
+
+Enforce C<no feature "bareword_filehandles"> for bareword file handles
+that have strictness removed because they are used in open() with a
+"dup" mode, such as in C<< open my $fh, ">&", THISHANDLE >>. [GH
+#22568]
+
 =back
 
 =head1 Known Problems
