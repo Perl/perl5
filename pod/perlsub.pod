@@ -1363,7 +1363,7 @@ do that, you need to understand references as detailed in L<perlref>.
 This section may not make much sense to you otherwise.
 
 Here are a few simple examples.  First, let's pass in several arrays
-to a function and have it C<pop> all of then, returning a new list
+to a function and have it C<pop> all of them, returning a new list
 of all their former last elements:
 
     @tailings = popmany ( \@w, \@x, \@y, \@z );
