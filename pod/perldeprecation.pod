@@ -18,7 +18,7 @@ which they will be removed.
 
 =head3 Unicode Delimiter Will be Paired
 
-Some unicode delimiters used to be allowed as single characters, but
+Some Unicode delimiters used to be allowed as single characters, but
 in the future will be part of a balanced pair. This deprecation category
 is used to mark the ones that will change from being unpaired to paired.
 
@@ -37,7 +37,7 @@ Category: "deprecated::dot_in_inc"
 
 =head3 Unicode Property Name
 
-Various types of unicode property name will generate deprecated warnings
+Various types of Unicode property name will generate deprecated warnings
 when used in a regex pattern. For instance surrogate characters will result
 in deprecation warnings.
 

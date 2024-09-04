@@ -2667,7 +2667,7 @@ could be all Cyrillic (except for the dot), or they could be a mixture
 of the two.  In the case of an internet address the C<.com> would be in
 Latin, And any Cyrillic ones would cause it to be a mixture, not a
 script run.  Someone clicking on such a link would not be directed to
-the real Paypal website, but an attacker would craft a look-alike one to
+the real PayPal website, but an attacker would craft a look-alike one to
 attempt to gather sensitive information from the person.
 
 Starting in Perl 5.28, it is now easy to detect strings that aren't

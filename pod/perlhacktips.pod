@@ -1825,7 +1825,7 @@ will need to build perl with C<CFG=Debug> or C<CFG=DebugSymbols>.
 
 The Visual Studio profiler is a sampling profiler.
 
-See L<the visual studio
+See L<the Visual Studio
 documentation|https://github.com/MicrosoftDocs/visualstudio-docs/blob/main/docs/profiling/beginners-guide-to-performance-profiling.md>
 to get started.
 
