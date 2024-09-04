@@ -8972,6 +8972,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * categories into our internal indices. */
     if (map_LC_ALL_position_to_index[0] == LC_ALL_INDEX_) {
 
+#    ifdef PERL_LC_ALL_CATEGORY_POSITIONS_INIT
         /* Use this array, initialized by a config.h constant */
         int lc_all_category_positions[] = PERL_LC_ALL_CATEGORY_POSITIONS_INIT;
         STATIC_ASSERT_STMT(   C_ARRAY_LENGTH(lc_all_category_positions)
@@ -8984,6 +8985,21 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             map_LC_ALL_position_to_index[i] =
                               get_category_index(lc_all_category_positions[i]);
         }
+#    else
+        /* It is possible for both PERL_LC_ALL_USES_NAME_VALUE_PAIRS and
+         * PERL_LC_ALL_CATEGORY_POSITIONS_INIT not to be defined, e.g. on
+         * systems with only a C locale during ./Configure.  Assume that this
+         * can only happen as part of some sort of bootstrapping so allow
+         * compilation to succeed by ignoring correctness.
+         */
+        for (unsigned int i = 0;
+             i < C_ARRAY_LENGTH(map_LC_ALL_position_to_index);
+             i++)
+        {
+            map_LC_ALL_position_to_index[i] = 0;
+        }
+#    endif
+
     }
 
     LOCALE_UNLOCK;
