@@ -7908,54 +7908,6 @@ fallback:
     return NORMAL;
 }
 
-PP(pp_refaddr)
-{
-    dTARGET;
-    SV *arg = *PL_stack_sp;
-
-    SvGETMAGIC(arg);
-
-    if(SvROK(arg))
-        sv_setuv_mg(TARG, PTR2UV(SvRV(arg)));
-    else
-        sv_setsv(TARG, &PL_sv_undef);
-
-    rpp_replace_1_1_NN(TARG);
-    return NORMAL;
-}
-
-PP(pp_reftype)
-{
-    dTARGET;
-    SV *arg = *PL_stack_sp;
-
-    SvGETMAGIC(arg);
-
-    if(SvROK(arg))
-        sv_setpv_mg(TARG, sv_reftype(SvRV(arg), FALSE));
-    else
-        sv_setsv(TARG, &PL_sv_undef);
-
-    rpp_replace_1_1_NN(TARG);
-    return NORMAL;
-}
-
-PP(pp_ceil)
-{
-    dTARGET;
-    TARGn(Perl_ceil(SvNVx(*PL_stack_sp)), 1);
-    rpp_replace_1_1_NN(TARG);
-    return NORMAL;
-}
-
-PP(pp_floor)
-{
-    dTARGET;
-    TARGn(Perl_floor(SvNVx(*PL_stack_sp)), 1);
-    rpp_replace_1_1_NN(TARG);
-    return NORMAL;
-}
-
 PP(pp_is_tainted)
 {
     SV *arg = *PL_stack_sp;

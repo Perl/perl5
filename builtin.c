@@ -212,7 +212,7 @@ XS(XS_builtin_trim)
         croak_xs_usage(cv, "arg");
     }
 
-    dTARGET;
+    dXSTARG;
     SV *source = TOPs;
     STRLEN len;
     const U8 *start;
@@ -467,8 +467,18 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
         return newLISTOPn(opcode, wantflags,
             argop,
             NULL);
-    else
-        return newUNOP(opcode, wantflags, argop);
+    else {
+        OP * const op = newUNOP(opcode, wantflags, argop);
+
+        /* since these pp funcs can be called from XS, and XS may be called
+           without a normal ENTERSUB, we need to indicate to them that a targ
+           has been allocated.
+        */
+        if (op->op_targ)
+            op->op_private |= OPpENTERSUB_HASTARG;
+
+        return op;
+    }
 }
 
 XS(XS_builtin_indexed)
@@ -520,6 +530,56 @@ XS(XS_builtin_load_module)
     /* The loaded module's name is left intentionally on the stack for the
      * caller's benefit, and becomes load_module's return value. */
     XSRETURN(1);
+}
+
+/* These pp_ funcs all need to use dXSTARG */
+
+PP(pp_refaddr)
+{
+    dXSTARG;
+    SV *arg = *PL_stack_sp;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg))
+        sv_setuv_mg(TARG, PTR2UV(SvRV(arg)));
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    rpp_replace_1_1_NN(TARG);
+    return NORMAL;
+}
+
+PP(pp_reftype)
+{
+    dXSTARG;
+    SV *arg = *PL_stack_sp;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg))
+        sv_setpv_mg(TARG, sv_reftype(SvRV(arg), FALSE));
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    rpp_replace_1_1_NN(TARG);
+    return NORMAL;
+}
+
+PP(pp_ceil)
+{
+    dXSTARG;
+    TARGn(Perl_ceil(SvNVx(*PL_stack_sp)), 1);
+    rpp_replace_1_1_NN(TARG);
+    return NORMAL;
+}
+
+PP(pp_floor)
+{
+    dXSTARG;
+    TARGn(Perl_floor(SvNVx(*PL_stack_sp)), 1);
+    rpp_replace_1_1_NN(TARG);
+    return NORMAL;
 }
 
 static OP *ck_builtin_funcN(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
