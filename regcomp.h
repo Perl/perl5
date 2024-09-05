@@ -496,6 +496,11 @@ struct regnode_ssc {
 
 #define PARNO(p)        ARG1u(p)          /* APPLIES for OPEN and CLOSE only */
 
+/* Only for BRANCH and BRANCHJ. Currently, those nodes don't use the flags field
+ * so it is repurposed has a bool and the flags field is written to 1 byte at a time.
+ */
+#define BRANCH_HAS_CUTGROUP(p)  FLAGS(p)
+
 #define NODE_ALIGN_FILL(node) (FLAGS(node) = 0)
 
 /* Long strings.  Currently limited to length 18 bits, which handles a 262000
