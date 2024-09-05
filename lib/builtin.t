@@ -627,6 +627,24 @@ use v5.39;
 EOS
 }
 
+# github #22542
+{
+    # some of these functions don't error at this point, but they might be updated
+    # and see the same problem we fix here
+    for my $func (qw(is_bool is_weak blessed refaddr reftype ceil floor is_tainted
+                     trim stringify created_as_string created_as_number)) {
+        my $arg =
+          $func =~ /ceil|floor|created_as/ ? "1.1" :
+          $func =~ /(^ref|blessed|is_weak)/ ? "\\1" : '"abc"';
+        fresh_perl_is(<<"EOS", "ok", {}, "goto $func");
+no warnings "experimental";
+sub f { goto &builtin::$func }
+f($arg);
+print "ok";
+EOS
+    }
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();
