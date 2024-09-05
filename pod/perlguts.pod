@@ -3697,7 +3697,7 @@ in a single byte.
 =head2 How do I compare strings?
 
 L<perlapi/sv_cmp> and L<perlapi/sv_cmp_flags> do a lexigraphic
-comparison of two SV's, and handle UTF-8ness properly.  Note, however,
+comparison of two SVs, and handle UTF-8ness properly.  Note, however,
 that Unicode specifies a much fancier mechanism for collation, available
 via the L<Unicode::Collate> module.
 
