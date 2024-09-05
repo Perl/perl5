@@ -1140,7 +1140,7 @@ provides for fast access to the buffer (not common on modern architectures);
 otherwise, it uses the ":unix:perlio" implementation.
 
 On Win32 the default in this release (5.30) is ":unix:crlf". Win32's ":stdio"
-has a number of bugs/mis-features for Perl IO which are somewhat depending
+has a number of bugs/mis-features for Perl IO which are somewhat dependent
 on the version and vendor of the C compiler. Using our own C<:crlf> layer as
 the buffer avoids those issues and makes things more uniform.
 
