@@ -4195,7 +4195,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             reginsert(pRExC_state, BRANCHJ, br, depth+1);
             ARG2a_SET(REGNODE_p(br), npar_before_regbranch);
             ARG2b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
-            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
             BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else {
