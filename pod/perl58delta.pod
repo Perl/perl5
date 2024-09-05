@@ -2898,7 +2898,7 @@ The C<-M> and C<-m> options now warn if you didn't supply the module name.
 =item *
 
 If you in C<use> specify a required minimum version, modules matching
-the name and but not defining a $VERSION will cause a fatal failure.
+the name but not defining a $VERSION will cause a fatal failure.
 
 =item *
 
