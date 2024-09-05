@@ -1614,6 +1614,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_seen = 0;
     RExC_maxlen = 0;
     RExC_in_lookaround = 0;
+    RExC_has_cutgroup = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_recode_x_to_native = 0;
     RExC_in_multi_char_class = 0;
@@ -3984,7 +3985,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     {
                         REQUIRE_BRANCHJ(flagp, 0);
                     }
-                    RExC_has_cutgroup = 0;
                     br = regbranch(pRExC_state, &flags, 1, depth+1);
                     if (br == 0) {
                         RETURN_FAIL_ON_RESTART(flags,flagp);
@@ -4008,7 +4008,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         lastbr = reg1node(pRExC_state, IFTHEN, 0);
 
                         if (!regbranch(pRExC_state, &flags, 1, depth+1)) {
-                            RExC_has_cutgroup  = had_cutgroup;
                             RETURN_FAIL_ON_RESTART(flags, flagp);
                             FAIL2("panic: regbranch returned failure, flags=%#" UVxf,
                                   (UV) flags);
@@ -4054,7 +4053,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                     For large programs it seems to be required
                                     but I can't figure out why. -- dmq*/
 #endif
-                    RExC_has_cutgroup  = had_cutgroup;
                     return ret;
                 }
                 RExC_parse_inc_safe();
@@ -4184,7 +4182,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     /* Pick up the branches, linking them together. */
     segment_parse_start = RExC_parse;
     I32 npar_before_regbranch = RExC_npar - 1;
-    RExC_has_cutgroup = 0;
     br = regbranch(pRExC_state, &flags, 1, depth+1);
 
     /*     branch_len = (paren != 0); */
@@ -4199,12 +4196,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             ARG2a_SET(REGNODE_p(br), npar_before_regbranch);
             ARG2b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
             FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else {
             reginsert(pRExC_state, BRANCH, br, depth+1);
             ARG1a_SET(REGNODE_p(br), (U16)npar_before_regbranch);
             ARG1b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
-            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         have_branch = 1;
     }
@@ -4238,8 +4236,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 after_freeze = RExC_logical_npar;
             RExC_logical_npar = freeze_paren;
         }
-
-        RExC_has_cutgroup = 0;
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
         if (br == 0) {
@@ -4256,7 +4252,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 ARG1b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
             else
                 ARG2b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
-            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else
         if (OP(REGNODE_p(br)) == BRANCHJ) {
@@ -4264,7 +4260,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 ARG1b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
             else
                 ARG2b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
-            FLAGS(REGNODE_p(br)) = RExC_has_cutgroup;
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
 
         lastbr = br;
