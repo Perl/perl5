@@ -606,6 +606,29 @@ addbits('entersub',
     # 7    => OPpLVAL_INTRO, already defined above
 );
 
+# OpENTERSUB_HASTARG is checked by dXSTARG, used by many XSUBs, to see if
+# a TARG is available.
+#
+# A normal entersub, or these builtin:: ops allocate the  TARG and sets this
+# flag in their ck functions.  entersub allocates it since it will be the active
+# op during execution of the XSUB and this saves creating a new mortal.
+#
+# goto never allocates the targ and never sets the flag, but it can call
+# XSUBs that check the flag (see github #22542)
+#
+# call_sv() can create an entersub that has neither the TARG nor the
+# flag set (and it would be difficult to do so), so we do need the
+# flag or an equivalent.
+#
+# The listed builtin:: pp_ functions need this flag (rather than
+# assuming a TARG) because their XSUB implementations just call the
+# pp_ func, which may be called from goto or call_sv() and not have a
+# TARG allocated.
+
+addbits($_,
+        2      => qw(OPpENTERSUB_HASTARG  TARG  ),
+) for qw(refaddr reftype ceil floor goto);
+
 # note that some of these flags are just left-over from when an entersub
 # is converted into an rv2cv, and could probably be cleared/re-assigned
 
