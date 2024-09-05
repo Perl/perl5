@@ -192,7 +192,16 @@ XS(XS_builtin_func1_scalar)
             break;
 
         case OP_STRINGIFY:
-            Perl_pp_stringify(aTHX);
+            {
+                /* we could only call pp_stringify if we're sure there is a TARG
+                   and if the XSUB is called from call_sv() or goto it may not
+                   have one.
+                */
+                dXSTARG;
+                sv_copypv(TARG, *PL_stack_sp);
+                SvSETMAGIC(TARG);
+                rpp_replace_1_1_NN(TARG);
+            }
             break;
 
         default:
