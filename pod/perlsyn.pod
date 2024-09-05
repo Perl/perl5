@@ -60,7 +60,7 @@ the beginning or the end of the script.  However, if you're using
 lexically-scoped private variables created with C<my()>,
 C<state()>, or C<our()>, you'll have to make sure
 your format or subroutine definition is within the same block scope
-as the my if you expect to be able to access those private variables.
+as the my() if you expect to be able to access those private variables.
 
 Declaring a subroutine allows a subroutine name to be used as if it were a
 list operator from that point forward in the program.  You can declare a
