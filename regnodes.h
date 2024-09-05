@@ -290,7 +290,7 @@ typedef struct regnode                           tregnode_WHILEM;
 
 #define NBOUNDU                      14        /* 0x0e Match "" at any
                                                   non-boundary of a given type
-                                                  using using /u rules. */
+                                                  using /u rules. */
 #define NBOUNDU_tb                      28     /*      0x01c */
 #define NBOUNDU_t8                      29     /*      0x01d */
 #define NBOUNDU_tb_pb                      56  /*      0x038 */
