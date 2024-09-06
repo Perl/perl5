@@ -914,25 +914,12 @@ EOM
     # The final list of @args will have any surrounding white space and
     # any IN/OUT prefix stripped.
     #
-    # Any ANSI-style types and/or length()s, e.g. (char *s, int length(s)),
-    # won't be directly processed, but instead will be copied into the
-    # arrays @fake_INPUT_pre and @fake_INPUT, later to be injected into
-    # a fake "INPUT:" block following any real PREINIT: and/or INPUT:
-    # blocks. So, from the rest of the parser's perspective, it thinks
-    # that
+    # Any ANSI-style 'type var' and/or length() parameters, e.g.
     #
-    #    int foo(char *s, int length(s))
-    #       ....
+    #     (char *s, int length(s))
     #
-    # was actually written kind of like
-    #
-    #    int foo(s)
-    #       ....
-    #       INPUT:
-    #        int length(s)
-    #        char *s
-    #
-    # (Yes, this is an ugly hack.)
+    # will be saved into @ANSI_params to be processed and turned into into
+    # C code later, after all PREINIT: and/or INPUT: blocks.
     #
     # ----------------------------------------------------------------
     #
@@ -947,9 +934,29 @@ EOM
     #
     #  @args           = ('s',  'XSauto_length_of_s', 'size= 10');
     #
-    #  @fake_INPUT_pre = ('int   length(s)');
-    #  @fake_INPUT     = ('char *s',
-    #                     'int   size');
+    #
+    #  @ANSI_params  = (
+    #                    {
+    #                       type      => 'char *',
+    #                       var       => 's',
+    #                       ansi      => 1,
+    #                       num       => 1,
+    #                    },
+    #                    {
+    #                       type      => 'int',
+    #                       var       => 'length(s)',
+    #                       len_name  => 's',
+    #                       ansi      => 1,
+    #                       no_init   => 1;
+    #                       is_length => 1;
+    #                    },
+    #                    {
+    #                       type      => 'int',
+    #                       var       => 'size',
+    #                       ansi      => 1,
+    #                       num       => 3,
+    #                    },
+    #                   );
     #
     # Vars which aren't passed from perl call args:
     #
@@ -975,8 +982,7 @@ EOM
 
     my @args;
 
-    my (@fake_INPUT_pre);       # For length(var) generated variables
-    my (@fake_INPUT);           # For normal parameters
+    my (@ANSI_params);          # For parameters with type or length()
 
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
@@ -1037,8 +1043,10 @@ EOM
           }
 
           my $is_length;
+          my $var = $name_or_lenname;
 
           if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
+            $var = $1;
             $name_or_lenname = "XSauto_length_of_$1";
             $is_length = 1;
             die "Default value on length() argument: '$_'"
@@ -1046,12 +1054,23 @@ EOM
           }
 
           if (length $pre or $is_length) { # 'int foo' or 'length(foo)'
+            my $param = {
+              type   => $pre,
+              var    => $var,
+              ansi   => 1,
+            };
+
             if ($is_length) {
-              push @fake_INPUT_pre, $arg;
+              $param->{no_init}   = 1;
+              $param->{is_length} = 1;
+              $param->{len_name}  = $var;
+              $param->{var}       = "length($var)";
+              $self->{xsub_map_argname_to_has_length}->{$var} = 1;
             }
-            else {
-              push @fake_INPUT, $arg;
+            else  {
+              $param->{no_init}   = 1 if $out_type =~ /^OUT/;
             }
+            push @ANSI_params, $param;
 
             $_ = "$name_or_lenname$default"; # Assigns to @args
           }
@@ -1397,13 +1416,18 @@ EOF
             if $self->{config_optimize} and $outputmap and $outputmap->targetable;
         }
 
-        # Process the synthetic INPUT lines generated earlier when
-        # processing ANSI-ish parameters in the XSUB's signature (i.e.
-        # those which have a type and/or /IN/OUT/etc).
-        if (@fake_INPUT or @fake_INPUT_pre) {
-          unshift @{ $self->{line} }, @fake_INPUT_pre, @fake_INPUT, $_;
-          $_ = "";
-          $self->INPUT_handler($_, 1); # 1 implies synthetic
+        # Process any parameters which were declared with a type
+        # or length(foo). Do the length() ones first.
+
+        for my $param (
+            grep(  $_->{is_length}, @ANSI_params),
+            grep(! $_->{is_length}, @ANSI_params),
+        )
+        {
+          $param->{num} = $self->{xsub_map_argname_to_idx}->{$param->{var}};
+          $self->param_check($param)
+            or next;
+          $self->generate_init($param);
         }
 
         # ----------------------------------------------------------------
@@ -2347,17 +2371,10 @@ sub ST {
 
 # INPUT_handler(): handle an explicit INPUT: block, or any implicit INPUT
 # block which can follow an xsub signature or CASE keyword.
-#
-# For a function signature with types and/or IN_OUT prefixes, it will also
-# be called after all real PREINIT/INPUT blocks, to process a synthetic
-# block of input lines generated by the signature-parsing code, that
-# allows those types to be processed. In this case we are called with
-# with an extra true arg.
 
 sub INPUT_handler {
   my ExtUtils::ParseXS $self = shift;
   $_ = shift;
-  my $synthetic = shift; # have fake lines from signature types
 
   # In this loop: process each line until the next keyword or end of
   # paragraph.
@@ -2394,38 +2411,10 @@ sub INPUT_handler {
           /xs
       or $self->blurt("Error: invalid argument declaration '$ln'"), next;
 
-    # Process any length(foo) declarations.
-    # Basically for something like foo(char *s, int length(s)),
-    # create *two* local C vars: one with STRLEN type, and one with the
-    # type specified in the signature. Eventually, generate code looking
-    # something like:
-    #   STRLEN  STRLEN_length_of_s;
-    #   int     XSauto_length_of_s;
-    #   char *s = (char *)SvPV(ST(0), STRLEN_length_of_s);
-    #   XSauto_length_of_s = STRLEN_length_of_s;
-    #   RETVAL = foo(s, XSauto_length_of_s);
-    #
-    # Note that the SvPV() code is generated later by overriding the
-    # normal T_PV typemap (which uses PV_nolen()).
-    # Substituting 'XSauto_length_of_foo=NO_INIT' for 'length(foo)' causes
-    # the code further down to emit the 'int XSauto_length_of_foo'
-    # declaration.
-
+    # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
-      if (!$synthetic) {
-        $self->blurt("Error: length() not permitted in INPUT section");
-        next;
-      }
-
-      my $name = $1;
-      $var_name = "XSauto_length_of_$name";
-      $var_init = '=NO_INIT';
-
-      print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
-      $self->{xsub_map_argname_to_has_length}->{$name} = 1;
-      # defer this line until after all the other declarations
-      $self->{xsub_deferred_code_lines} .=
-          "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
+      $self->blurt("Error: length() not permitted in INPUT section");
+      next;
     }
 
     # Prepend a '&' to this arg's name for the args to pass to the
@@ -3576,6 +3565,34 @@ sub generate_init {
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
   my $arg = $self->ST($num, 0);
+
+  if ($argsref->{is_length}) {
+    # Process length(foo) parameter.
+    # Basically for something like foo(char *s, int length(s)),
+    # create *two* local C vars: one with STRLEN type, and one with the
+    # type specified in the signature. Eventually, generate code looking
+    # something like:
+    #   STRLEN  STRLEN_length_of_s;
+    #   int     XSauto_length_of_s;
+    #   char *s = (char *)SvPV(ST(0), STRLEN_length_of_s);
+    #   XSauto_length_of_s = STRLEN_length_of_s;
+    #   RETVAL = foo(s, XSauto_length_of_s);
+    #
+    # Note that the SvPV() code line is generated via a separate call to
+    # this sub with s as the var (as opposed to *this* call, which is
+    # handling length(s)), by overriding the normal T_PV typemap (which
+    # uses PV_nolen()).
+
+    my $name = $argsref->{len_name};
+
+    print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
+    # defer this line until after all the other declarations
+    $self->{xsub_deferred_code_lines} .=
+        "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
+
+    # this var will be declared using the normal typemap mechanism below
+    $var = "XSauto_length_of_$name";
+  }
 
   # Emit the variable's type and name.
   #
