@@ -1479,9 +1479,10 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
             break;
 
         S_opdump_indent(aTHX_ o, level, bar, file, "FIELDS: (%" UVuf ")\n", n_fields);
-        for(Size_t i = 0; i < n_fields; i++) {
+        UNOP_AUX_item *fieldaux = aux + 2;
+        for(Size_t i = 0; i < n_fields; i++, fieldaux += 2) {
             S_opdump_indent(aTHX_ o, level, bar, file, "  [%zd] PADIX = %" UVuf "  FIELDIX = % " UVuf "\n",
-                    i, aux[2 + i*2 + 0].uv, aux[2 + i*2 + 1].uv);
+                    i, fieldaux[0].uv, fieldaux[1].uv);
         }
         break;
     }
