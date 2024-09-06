@@ -923,6 +923,7 @@ struct custom_op {
     const char	   *xop_desc;
     U32		    xop_class;
     void	  (*xop_peep)(pTHX_ OP *o, OP *oldop);
+    void          (*xop_dump)(pTHX_ const OP *o, struct Perl_OpDumpContext *ctx);
 };
 
 /* return value of Perl_custom_op_get_field, similar to void * then casting but
@@ -933,6 +934,7 @@ typedef union {
     const char	   *xop_desc;
     U32		    xop_class;
     void	  (*xop_peep)(pTHX_ OP *o, OP *oldop);
+    void	  (*xop_dump)(pTHX_ const OP *o, struct Perl_OpDumpContext *ctx);
     XOP            *xop_ptr;
 } XOPRETANY;
 
@@ -942,6 +944,7 @@ typedef union {
 #define XOPf_xop_desc	0x02
 #define XOPf_xop_class	0x04
 #define XOPf_xop_peep	0x08
+#define XOPf_xop_dump	0x10
 
 /* used by Perl_custom_op_get_field for option checking */
 typedef enum {
@@ -949,13 +952,15 @@ typedef enum {
     XOPe_xop_name = XOPf_xop_name,
     XOPe_xop_desc = XOPf_xop_desc,
     XOPe_xop_class = XOPf_xop_class,
-    XOPe_xop_peep = XOPf_xop_peep
+    XOPe_xop_peep = XOPf_xop_peep,
+    XOPe_xop_dump = XOPf_xop_dump,
 } xop_flags_enum;
 
 #define XOPd_xop_name	PL_op_name[OP_CUSTOM]
 #define XOPd_xop_desc	PL_op_desc[OP_CUSTOM]
 #define XOPd_xop_class	OA_BASEOP
 #define XOPd_xop_peep	((Perl_cpeep_t)0)
+#define XOPd_xop_dump   NULL
 
 #define XopENTRY_set(xop, which, to) \
     STMT_START { \

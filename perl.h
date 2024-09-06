@@ -4505,6 +4505,8 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 #include "perly.h"
 
+/* opaque struct type used to communicate between xop_dump and opdump_printf */
+struct Perl_OpDumpContext;
 
 /* macros to define bit-fields in structs. */
 #ifndef PERL_BITFIELD8

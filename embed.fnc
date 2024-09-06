@@ -2376,6 +2376,9 @@ ARdp	|OP *	|op_convert_list|I32 optype				\
 				|I32 flags				\
 				|NULLOK OP *o
 Adp	|void	|op_dump	|NN const OP *o
+Adfp	|void	|opdump_printf	|NN struct Perl_OpDumpContext *ctx	\
+				|NN const char *pat			\
+				|...
 ; Used in op.c and class.c
 Adp	|OP *	|op_force_list	|NULLOK OP *o
 Adp	|void	|op_free	|NULLOK OP *arg
