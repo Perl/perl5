@@ -2422,7 +2422,15 @@ sub INPUT_handler {
 
     # Split 'char * &foo'  into  ('char *', '&', 'foo')
     # skip to next INPUT line if not valid.
-    my ($var_type, $var_addr, $var_name) = /^(.*?[^&\s])\s*(\&?)\s*\b(\w+)$/s
+    my ($var_type, $var_addr, $var_name) =
+          /^
+            ( .*? [^&\s] )   # type
+            \s*
+            (\&?)            # addr
+            \s* \b
+            (\w+)            # name
+            $
+          /xs
       or $self->blurt("Error: invalid argument declaration '$ln'"), next;
 
     # Check for duplicate definitions of a particular parameter name.
