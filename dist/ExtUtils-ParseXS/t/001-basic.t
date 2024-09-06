@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 54;
+use Test::More tests => 55;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -725,4 +725,27 @@ EOF
     like($out, qr/^\s*\QX__Y *\E\s+THIS = \Qmy_xy(ST(0))\E$/m,
                     "THIS auto-generated");
 
+}
+
+{
+    # Test for 'length(foo)' not legal in INPUT section
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void foo(s)
+        |        char *s
+        |        int  length(s)
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        $pxs->process_file( filename => \$text, output => \*FH);
+    });
+
+    like($stderr, qr/./,
+                    "No length() in INPUT section");
 }
