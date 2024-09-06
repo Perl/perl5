@@ -103,6 +103,7 @@ ones:
     SV*  newSVpvf_nocontext(const char * const pat, ...)
     SV*  newSVpvn(const char*, STRLEN);
     SV*  newSVpvs("literal string")
+    SV*  newSVpvz(STRLEN)
     SV*  newSVsv(SV*);
 
 C<STRLEN> is an integer type (C<Size_t>, usually defined as C<size_t> in
@@ -113,6 +114,12 @@ S<C<"literal string">> is a string enclosed in double quote characters,
 and the created SV is of string type (a PV), initialized to contain a
 copy of the literal string parameter.  C<newSVpvs("")> creates an SV
 containing an empty (zero-length) string and returns a pointer to it.
+
+C<newSVpvz> is like C<newSVpvs("")>, but it reserves the number of bytes
+specified by its parameter for future growth, without having to
+reallocate memory.  It is useful in situations where you don't know what
+the string eventually will be, but you have a pretty good idea of its
+eventual minimum size.
 
 =for apidoc_section $string
 =for apidoc Ayh||STRLEN
