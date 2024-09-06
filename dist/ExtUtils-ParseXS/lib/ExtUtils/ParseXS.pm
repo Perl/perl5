@@ -2418,10 +2418,6 @@ sub INPUT_handler {
     my $var_init = '';
     $var_init = $1 if s/\s*([=;+].*)$//s;
 
-    # *sigh* It's valid to supply explicit input typemaps in the argument list.
-    # XXX this doesn't allow '= NO_INIT', nor '= foo()'
-    my $is_overridden_typemap = $var_init =~ /ST\s*\(|\$arg\b/;
-
     s/\s+/ /g;
 
     # Split 'char * &foo'  into  ('char *', '&', 'foo')
@@ -2454,9 +2450,6 @@ sub INPUT_handler {
     # entry for this var's type; defaults to '$'
     if ($var_num) {
       my $typemap = $self->{typemaps_object}->get_typemap(ctype => $var_type);
-      $self->report_typemap_failure($self->{typemaps_object}, $var_type, "death")
-        if not $typemap and not $is_overridden_typemap;
-
       $self->{xsub_map_arg_idx_to_proto}->[$var_num]
          = ($typemap && $typemap->proto) || "\$";
     }

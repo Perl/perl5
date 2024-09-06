@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 55;
+use Test::More tests => 56;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -752,4 +752,28 @@ EOF
 
     like($stderr, qr/./,
                     "No length() in INPUT section");
+}
+
+{
+    # Test for initialisers with unknown variable type.
+    # This previously died.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void foo(a, b, c)
+        |    UnknownType a = NO_INIT
+        |    UnknownType b = bar();
+        |    UnknownType c = baz($arg);
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        $pxs->process_file( filename => \$text, output => \*FH);
+    });
+
+    is($stderr, undef, "Unknown type with initialiser: no errors");
 }
