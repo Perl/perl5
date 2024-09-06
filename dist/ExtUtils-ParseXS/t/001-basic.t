@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 56;
+use Test::More tests => 59;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -776,4 +776,33 @@ EOF
     });
 
     is($stderr, undef, "Unknown type with initialiser: no errors");
+}
+
+{
+    # Test for "duplicate definition of argument" errors
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void foo(a, b, int c)
+        |    int a;
+        |    int a;
+        |    int b;
+        |    int b;
+        |    int c;
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        $pxs->process_file( filename => \$text, output => \*FH);
+    });
+
+    for my $var (qw(a b c)) {
+        my $count = () =
+            $stderr =~ /duplicate definition of argument '$var'/g;
+        is($count, 1, "One dup error for \"$var\"");
+    }
 }
