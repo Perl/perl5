@@ -2384,6 +2384,26 @@ sub INPUT_handler {
     # remove any trailing semicolon, except for initialisations
     s/\s*;$//g unless /[=;+].*\S/;
 
+    # Extract optional initialisation code (which overrides the
+    # normal typemap), such as 'int foo = ($type)SvIV($arg)'
+    my $var_init = '';
+    $var_init = $1 if s/\s*([=;+].*)$//s;
+
+    s/\s+/ /g;
+
+    # Split 'char * &foo'  into  ('char *', '&', 'foo')
+    # skip to next INPUT line if not valid.
+    my ($var_type, $var_addr, $var_name) =
+          /^
+            ( .*? [^&\s] )        # type
+            \s*
+            (\&?)                 # addr
+            \s* \b
+            (\w+ | length\(\w+\)) # name or length(name)
+            $
+          /xs
+      or $self->blurt("Error: invalid argument declaration '$ln'"), next;
+
     # Process any length(foo) declarations.
     # Basically for something like foo(char *s, int length(s)),
     # create *two* local C vars: one with STRLEN type, and one with the
@@ -2401,37 +2421,22 @@ sub INPUT_handler {
     # the code further down to emit the 'int XSauto_length_of_foo'
     # declaration.
 
-    if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x)
-    {
+    if ($var_name =~ /^length\((\w+)\)$/) {
       if (!$synthetic) {
         $self->blurt("Error: length() not permitted in INPUT section");
         next;
       }
-      print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
-      $self->{xsub_map_argname_to_has_length}->{$2} = 1;
+
+      my $name = $1;
+      $var_name = "XSauto_length_of_$name";
+      $var_init = '=NO_INIT';
+
+      print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
+      $self->{xsub_map_argname_to_has_length}->{$name} = 1;
       # defer this line until after all the other declarations
-      $self->{xsub_deferred_code_lines} .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;\n";
+      $self->{xsub_deferred_code_lines} .=
+          "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
     }
-
-    # Extract optional initialisation code (which overrides the
-    # normal typemap), such as 'int foo = ($type)SvIV($arg)'
-    my $var_init = '';
-    $var_init = $1 if s/\s*([=;+].*)$//s;
-
-    s/\s+/ /g;
-
-    # Split 'char * &foo'  into  ('char *', '&', 'foo')
-    # skip to next INPUT line if not valid.
-    my ($var_type, $var_addr, $var_name) =
-          /^
-            ( .*? [^&\s] )   # type
-            \s*
-            (\&?)            # addr
-            \s* \b
-            (\w+)            # name
-            $
-          /xs
-      or $self->blurt("Error: invalid argument declaration '$ln'"), next;
 
     # Check for duplicate definitions of a particular parameter name.
     # Either the name has appeared in more than one INPUT line (including
