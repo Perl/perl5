@@ -2505,6 +2505,14 @@ sub INPUT_handler {
       $no_init = 1;
     }
 
+    my $param = { # stores info about a particular parameter
+      type    => $var_type,
+      num     => $var_num,
+      var     => $var_name,
+      defer   => $defer,
+      init    => $init,
+      no_init => $no_init,
+    };
 
     # Check for duplicate definitions of a particular parameter name.
     # Either the name has appeared in more than one INPUT line (including
@@ -2512,21 +2520,21 @@ sub INPUT_handler {
     # or has appeared as both a typed param and in a real INPUT entry.
     # XXX the second branch of the 'or' appears redundant
 
-    $self->blurt("Error: duplicate definition of argument '$var_name' ignored"), next
-      if   $self->{xsub_map_varname_to_seen_in_INPUT}->{$var_name}++
-        or defined $self->{xsub_map_argname_to_seen_type}->{$var_name}
+    $self->blurt("Error: duplicate definition of argument '$param->{var}' ignored"), next
+      if   $self->{xsub_map_varname_to_seen_in_INPUT}->{$param->{var}}++
+        or defined $self->{xsub_map_argname_to_seen_type}->{$param->{var}}
            and not $synthetic;
 
     # flag 'THIS' and 'RETVAL' as having been seen
-    $self->{xsub_seen_THIS_in_INPUT}   |= $var_name eq "THIS";
-    $self->{xsub_seen_RETVAL_in_INPUT} |= $var_name eq "RETVAL";
+    $self->{xsub_seen_THIS_in_INPUT}   |= $param->{var} eq "THIS";
+    $self->{xsub_seen_RETVAL_in_INPUT} |= $param->{var} eq "RETVAL";
 
-    $self->{xsub_map_argname_to_type}->{$var_name} = $var_type;
+    $self->{xsub_map_argname_to_type}->{$param->{var}} = $param->{type};
 
     # Get the prototype character, if any, associated with the typemap
     # entry for this var's type; defaults to '$'
     if ($var_num) {
-      my $typemap = $self->{typemaps_object}->get_typemap(ctype => $var_type);
+      my $typemap = $self->{typemaps_object}->get_typemap(ctype => $param->{type});
       $self->{xsub_map_arg_idx_to_proto}->[$var_num]
          = ($typemap && $typemap->proto) || "\$";
     }
@@ -2534,14 +2542,7 @@ sub INPUT_handler {
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
 
-    $self->generate_init( {
-      type          => $var_type,
-      num           => $var_num,
-      var           => $var_name,
-      defer         => $defer,
-      init          => $init,
-      no_init       => $no_init,
-    } );
+    $self->generate_init($param);
 
   } # foreach line in INPUT block
 }
