@@ -1459,7 +1459,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_ARGCHECK:
     {
         struct op_argcheck_aux *aux = (struct op_argcheck_aux *)cUNOP_AUXo->op_aux;
-        S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %d .. %d\n",
+        S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %" UVuf " .. %" UVuf "\n",
                 aux->params, aux->opt_params);
         if(aux->slurpy)
             S_opdump_indent(aTHX_ o, level, bar, file, "SLURPY = '%c'\n", aux->slurpy);
