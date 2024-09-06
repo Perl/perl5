@@ -3848,6 +3848,17 @@ will be called from C<Perl_rpeep> when ops of this type are encountered
 by the peephole optimizer.  I<o> is the OP that needs optimizing;
 I<oldop> is the previous OP optimized, whose C<op_next> points to I<o>.
 
+=item xop_dump
+
+This member is a pointer to a function of type
+C<void (pTHX_ OP *, struct OpDumpContext *)>. If set, this function is called
+by C<op_dump()> when dumping a custom operator of this type, after the op's
+basic fields have been printed. This function may make use of
+C<opdump_printf()> to emit additional output that may be useful for debugging.
+
+The opaque structure pointer passed in as its final argument should be passed
+directly into C<opdump_printf()>.
+
 =for apidoc_section $optree_manipulation
 =for apidoc Ayh||Perl_cpeep_t
 

@@ -470,6 +470,7 @@
 # define op_scope(a)                            Perl_op_scope(aTHX_ a)
 # define op_sibling_splice                      Perl_op_sibling_splice
 # define op_wrap_finally(a,b)                   Perl_op_wrap_finally(aTHX_ a,b)
+# define opdump_printf(a,...)                   Perl_opdump_printf(aTHX_ a,__VA_ARGS__)
 # define packlist(a,b,c,d,e)                    Perl_packlist(aTHX_ a,b,c,d,e)
 # define pad_add_anon(a,b)                      Perl_pad_add_anon(aTHX_ a,b)
 # define pad_add_name_pv(a,b,c,d)               Perl_pad_add_name_pv(aTHX_ a,b,c,d)

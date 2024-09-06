@@ -15402,7 +15402,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
     HE *he = NULL;
     XOP *xop;
 
-    static const XOP xop_null = { 0, 0, 0, 0, 0 };
+    static const XOP xop_null = { 0, 0, 0, 0, 0, 0 };
 
     PERL_ARGS_ASSERT_CUSTOM_OP_GET_FIELD;
     assert(o->op_type == OP_CUSTOM);
@@ -15476,6 +15476,9 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
                 case XOPe_xop_peep:
                     any.xop_peep = xop->xop_peep;
                     break;
+                case XOPe_xop_dump:
+                    any.xop_dump = xop->xop_dump;
+                    break;
                 default:
                   field_panic:
                     Perl_croak(aTHX_
@@ -15496,6 +15499,9 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
                     break;
                 case XOPe_xop_peep:
                     any.xop_peep = XOPd_xop_peep;
+                    break;
+                case XOPe_xop_dump:
+                    any.xop_dump = XOPd_xop_dump;
                     break;
                 default:
                     goto field_panic;

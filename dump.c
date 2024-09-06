@@ -703,6 +703,76 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
     va_end(args);
 }
 
+struct Perl_OpDumpContext {
+    I32 level;
+    UV bar;
+    PerlIO *file;
+    bool indent_needed;
+};
+
+static void
+S_opdump_print(pTHX_ struct Perl_OpDumpContext *ctx, SV *msg)
+{
+    STRLEN msglen;
+    const char *msgpv = SvPV(msg, msglen);
+
+    while(msglen) {
+        if(ctx->indent_needed) {
+            PerlIO_puts(ctx->file, "     ");
+
+            for (I32 i = ctx->level-1; i >= 0; i--)
+                    PerlIO_puts(ctx->file,
+                        (ctx->bar & (1 << i))  ? "|   " : "    ");
+        }
+
+        const char *eol_at = strchr(msgpv, '\n');
+        if(eol_at) {
+            STRLEN partlen = eol_at - msgpv + 1;
+            PerlIO_write(ctx->file, msgpv, partlen);
+
+            ctx->indent_needed = true;
+            msgpv  += partlen;
+            msglen -= partlen;
+        }
+        else {
+            PerlIO_write(ctx->file, msgpv, msglen);
+
+            ctx->indent_needed = false;
+            msglen = 0;
+        }
+    }
+}
+
+/*
+=for apidoc_section $debugging
+=for apidoc opdump_printf
+
+Prints formatted output to C<STDERR> according to the pattern and subsequent
+arguments, in the style of C<printf()> et.al. This should only be called by
+a function invoked by the C<xop_dump> field of a custom operator, where the
+C<ctx> opaque structure pointer should be passed in from the argument given
+to the C<xop_dump> callback.
+
+This function handles indentation after linefeeds, so message strings passed
+in should not account for it themselves. Multiple lines may be passed to this
+function at once, or a single line may be split across multiple calls.
+
+=cut
+ */
+
+void
+Perl_opdump_printf(pTHX_ struct Perl_OpDumpContext *ctx, const char *pat, ...)
+{
+    va_list args;
+
+    PERL_ARGS_ASSERT_OPDUMP_PRINTF;
+
+    va_start(args, pat);
+    SV *msg_sv = sv_2mortal(vnewSVpvf(pat, &args));
+    S_opdump_print(aTHX_ ctx, msg_sv);
+    va_end(args);
+}
+
 
 /* display a link field (e.g. op_next) in the format
  *     ====> sequence_number [opname 0x123456]
@@ -1493,6 +1563,22 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         break;
     }
 
+    case OP_CUSTOM:
+    {
+        void (*custom_dumper)(pTHX_ const OP *o, struct Perl_OpDumpContext *ctx) =
+            XopENTRYCUSTOM(o, xop_dump);
+
+        if(custom_dumper) {
+            struct Perl_OpDumpContext ctx = {
+                .level         = level,
+                .bar           = bar,
+                .file          = file,
+                .indent_needed = true,
+            };
+            (*custom_dumper)(aTHX_ o, &ctx);
+        }
+        break;
+    }
 
     default:
         break;
