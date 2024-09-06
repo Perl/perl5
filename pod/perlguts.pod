@@ -90,24 +90,34 @@ is documented only in this paragraph.)
 =for apidoc_section $floating
 =for apidoc Ayh||NV
 
-The seven routines are:
+There are more than a few routines that create and initialize SVs, with
+new ones occassionally added.  These are all documented in L<perlapi/SV
+Handling>; each one's name begins with C<newSV>.  Here are the basic
+ones:
 
+    SV*  newSVbool(boolean_value);
     SV*  newSViv(IV);
     SV*  newSVuv(UV);
     SV*  newSVnv(double);
     SV*  newSVpv(const char*, STRLEN);
+    SV*  newSVpvf_nocontext(const char * const pat, ...)
     SV*  newSVpvn(const char*, STRLEN);
-    SV*  newSVpvf(const char*, ...);
+    SV*  newSVpvs("literal string")
     SV*  newSVsv(SV*);
 
 C<STRLEN> is an integer type (C<Size_t>, usually defined as C<size_t> in
 F<config.h>) guaranteed to be large enough to represent the size of
 any string that perl can handle.
 
+S<C<"literal string">> is a string enclosed in double quote characters,
+and the created SV is of string type (a PV), initialized to contain a
+copy of the literal string parameter.  C<newSVpvs("")> creates an SV
+containing an empty (zero-length) string and returns a pointer to it.
+
 =for apidoc_section $string
 =for apidoc Ayh||STRLEN
 
-In the unlikely case of a SV requiring more complex initialization, you
+In the case of an SV requiring more complex initialization, you
 can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
 type NULL is returned, else an SV of type PV is returned with len + 1 (for
 the C<NUL>) bytes of storage allocated, accessible via SvPVX.  In both cases
@@ -117,8 +127,10 @@ the SV has the undef value.
     SV *sv = newSV(10);  /* 10 (+1) bytes of uninitialised storage
                           * allocated */
 
-To change the value of an I<already-existing> SV, there are eight routines:
+To change the value of an I<already-existing> SV, these are the basic
+routines (with more specified in L<perlapi/SV Handling>):
 
+    void  sv_setbool(SV*, bool);
     void  sv_setiv(SV*, IV);
     void  sv_setuv(SV*, UV);
     void  sv_setnv(SV*, double);
