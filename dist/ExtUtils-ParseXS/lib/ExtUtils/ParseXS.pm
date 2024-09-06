@@ -2401,9 +2401,12 @@ sub INPUT_handler {
     # the code further down to emit the 'int XSauto_length_of_foo'
     # declaration.
 
-    # XXX this block should only be done when $synthetic is true
     if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x)
     {
+      if (!$synthetic) {
+        $self->blurt("Error: length() not permitted in INPUT section");
+        next;
+      }
       print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
       $self->{xsub_map_argname_to_has_length}->{$2} = 1;
       # defer this line until after all the other declarations
