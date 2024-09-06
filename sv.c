@@ -5822,7 +5822,8 @@ Perl_newSV(pTHX_ const STRLEN len)
 
 Creates a new SV initialized with an empty string, like C<newSVpvs("")>, but
 with enough available space to hold a string of C<len> bytes (plus a trailing
-NUL) without needing to grow.
+NUL) without needing to grow.  It differs from C<L</newSV>> in that the string
+is defined and initialized.
 
 The reference count for the new SV is set to 1.
 
