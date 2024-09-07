@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 59;
+use Test::More tests => 61;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -805,4 +805,38 @@ EOF
             $stderr =~ /duplicate definition of argument '$var'/g;
         is($count, 1, "One dup error for \"$var\"");
     }
+}
+
+{
+    # Basic check of an OUT parameter where the type is specified either
+    # in the signature or in an INPUT line
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |int
+        |f(marker1, OUT a, OUT int b)
+        |    int mymarker1
+        |    int a
+        |  CODE:
+        |    mymarker2
+        |
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    like($out, qr/^\s+int\s+a;\s*$/m, "OUT a");
+    like($out, qr/^\s+int\s+b;\s*$/m, "OUT b");
+
 }
