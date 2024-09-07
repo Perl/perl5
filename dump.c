@@ -665,7 +665,6 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
                 const char* pat, ...)
 {
     va_list args;
-    I32 i;
     bool newop = (level < 0);
 
     va_start(args, pat);
@@ -678,7 +677,7 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
 
         /* output preceding blank line */
         PerlIO_puts(file, "     ");
-        for (i = level-1; i >= 0; i--)
+        for (I32 i = level-1; i >= 0; i--)
             PerlIO_puts(file,  (   i == 0
                                 || (i < UVSIZE*8 && (bar & ((UV)1 << i)))
                                )
@@ -695,7 +694,7 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
     else
         PerlIO_printf(file, "     ");
 
-    for (i = level-1; i >= 0; i--)
+    for (I32 i = level-1; i >= 0; i--)
             PerlIO_puts(file,
                   (i == 0 && newop) ? "+--"
                 : (bar & (1 << i))  ? "|   "
