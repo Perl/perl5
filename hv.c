@@ -4120,6 +4120,21 @@ Perl_cop_store_label(pTHX_ COP *const cop, const char *label, STRLEN len,
         = refcounted_he_new_pvs(cop->cop_hints_hash, ":", labelsv, 0);
 }
 
+/* share doesn't mean "shared" but "shared string table" */
+/* TODO: should this be atomic increment ??? */
+struct hek *
+Perl_share_hek_hek (pTHX_ const struct hek *hek)
+{
+    PERL_ARGS_ASSERT_SHARE_HEK_HEK;
+    ((struct shared_he *)(((char *)hek)
+                          - STRUCT_OFFSET(struct shared_he,
+                                          shared_he_hek)))
+        ->shared_he_he.he_valu.hent_refcount++
+    ;
+
+    return (struct hek *) hek;
+}
+
 /*
 =for apidoc_section $HV
 =for apidoc hv_assert

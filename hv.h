@@ -520,13 +520,6 @@ whether it is valid to call C<HvAUX()>.
 #define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))
 #define sharepvn(pv, len, hash)	     Perl_sharepvn(pv, len, hash)
 
-#define share_hek_hek(hek)						\
-    (++(((struct shared_he *)(((char *)hek)				\
-                              - STRUCT_OFFSET(struct shared_he,		\
-                                              shared_he_hek)))		\
-        ->shared_he_he.he_valu.hent_refcount),				\
-     hek)
-
 #define hv_store_ent(hv, keysv, val, hash)				\
     ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\
                       (val), (hash)))
