@@ -177,6 +177,11 @@ S_new_he(pTHX)
 
 #endif
 
+struct shared_he {
+    struct he shared_he_he;
+    struct hek shared_he_hek;
+};
+
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {

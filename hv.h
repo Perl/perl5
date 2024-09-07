@@ -63,10 +63,7 @@ struct hek {
        is UTF-8 or WAS-UTF-8, or an SV */
 };
 
-struct shared_he {
-    struct he shared_he_he;
-    struct hek shared_he_hek;
-};
+struct shared_he;
 
 /* Subject to change.
    Don't access this directly.
