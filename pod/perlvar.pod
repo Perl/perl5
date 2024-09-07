@@ -1524,28 +1524,25 @@ This variable was added in Perl v5.10.0.
 
 Variables that depend on the currently selected filehandle may be set
 by calling an appropriate object method on the C<IO::Handle> object,
-although this is less efficient than using the regular built-in
+although this is slightly less efficient than using the regular built-in
 variables.  (Summary lines below for this contain the word HANDLE.)
-First you must say
+
+In Perl versions before v5.14.0, you had to say
 
     use IO::Handle;
 
-after which you may use either
-
-    method HANDLE EXPR
-
-or more safely,
+before using
 
     HANDLE->method(EXPR)
+
+Since Perl v5.14.0, you can use all filehandles as objects without manually
+loading any modules first.
 
 Each method returns the old value of the C<IO::Handle> attribute.  The
 methods each take an optional EXPR, which, if supplied, specifies the
 new value for the C<IO::Handle> attribute in question.  If not
 supplied, most methods do nothing to the current value--except for
 C<autoflush()>, which will assume a 1 for you, just to be different.
-
-Because loading in the C<IO::Handle> class is an expensive operation,
-you should learn how to use the regular built-in variables.
 
 A few of these variables are considered "read-only".  This means that
 if you try to assign to this variable, either directly or indirectly
@@ -1570,12 +1567,12 @@ But the following code is quite bad:
     my $content = <$fh>;
     close $fh;
 
-since some other module, may want to read data from some file in the
+since some other module may want to read data from some file in the
 default "line mode", so if the code we have just presented has been
 executed, the global value of C<$/> is now changed for any other code
 running inside the same Perl interpreter.
 
-Usually when a variable is localized you want to make sure that this
+Usually when a variable is localized, you want to make sure that this
 change affects the shortest scope possible.  So unless you are already
 inside some short C<{}> block, you should create one yourself.  For
 example:
