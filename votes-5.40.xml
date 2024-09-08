@@ -25,7 +25,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="" id="06e09b1c400d84c9f6294f62a8310b332c3cc4fb" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
+<commit votes="" id="3e14b2fcf59b5b88b289caa973f0b8748c93a594" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
 
 </div>
 
