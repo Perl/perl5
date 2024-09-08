@@ -4,7 +4,7 @@ use strict;
 
 # Keep $VERSION consistent in all *.pm files in this distribution, including
 # Cwd.pm.
-our $VERSION = '3.92';
+our $VERSION = '3.93';
 $VERSION =~ tr/_//d;
 
 my %module = (
