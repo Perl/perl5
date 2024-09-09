@@ -350,6 +350,19 @@ well.
 
 XXX
 
+=item *
+
+The C<op_dump()> function has been expanded to include additional information
+about the recent C<OP_METHSTART> and C<OP_INITFIELD> ops, as well as for
+C<OP_ARGCHECK> and C<OP_ARGELEM> which had not been done previously.
+
+=item *
+
+C<op_dump()> now also has the facility to print extra debugging information
+about custom operators, if those operators register a helper function via the
+new C<xop_dump> element of the C<XOP> structure. For more information, see the
+relevant additions to L<perlguts|perlguts/"Custom Operators">.
+
 =back
 
 =head1 Selected Bug Fixes
