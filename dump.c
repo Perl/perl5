@@ -692,7 +692,7 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
 
     }
     else
-        PerlIO_printf(file, "     ");
+        PerlIO_puts(file, "     ");
 
     for (I32 i = level-1; i >= 0; i--)
             PerlIO_puts(file,
