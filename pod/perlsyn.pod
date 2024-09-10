@@ -550,7 +550,7 @@ If the size of the LIST is not an exact multiple of the number of iterator
 variables, then on the last iteration the "excess" iterator variables are
 aliases to C<undef>, as if the LIST had C<, undef> appended as many times as
 needed for its length to become an exact multiple.  This happens whether
-LIST is a literal LIST or an array - ie arrays are not extended if their
+LIST is a literal LIST or an array - i.e. arrays are not extended if their
 size is not a multiple of the iteration size, consistent with iterating an
 array one-at-a-time.  As these padding elements are not lvalues, attempting
 to modify them will fail, consistent with the behaviour when iterating a
