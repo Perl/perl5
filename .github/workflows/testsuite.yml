@@ -16,7 +16,7 @@
 #   - CI_FORCE_LINUX: if set to a true value: run the 'linux' job;
 #   - CI_FORCE_LINUX_I386: if set to a true value: run the 'linux-i386' job;
 #   - CI_FORCE_INSTALL: if set to a true value: run the 'install' job;
-#   - CI_FORCE_MACOS: if set to a true value: run the 'smoke-macos-catalina-xcode12' job;
+#   - CI_FORCE_MACOS: if set to a true value: run the 'smoke-macos-12' job;
 #   - CI_FORCE_MSVC142: if set to a true value: run the 'windows-msvc142' job;
 #   - CI_FORCE_MINGW64: if set to a true value: run the 'mingw64' job;
 #   - CI_FORCE_CYGWIN: if set to a true value: run the 'cygwin' job;
@@ -79,7 +79,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1000
       - name: git setup
@@ -187,7 +187,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
         if: steps.ci_config.outputs.ci_skip_sanity != 'true'
@@ -273,7 +273,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -325,7 +325,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y build-essential git-core libgdbm-dev libdb-dev
-      # actions/checkout@v2 and actions/checkout@v3 don't work in a i386 container:
+      # actions/checkout@v2 and higher don't work in a i386 container:
       # the GitHub runner uses `node` that is installed on the host inside the container.
       # The host is (likely) running x86_64 and using a binary build for x86_64 inside a
       # i386 container just doesn't work.
@@ -385,7 +385,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -422,9 +422,9 @@ jobs:
   # | '  \/ _` / _| (_) \__ \
   # |_|_|_\__,_\__|\___/|___/
 
-  smoke-macos-big-sur-xcode13:
-    name: "macOS (big sur) xcode 13"
-    runs-on: macos-11
+  smoke-macos-12:
+    name: "macOS (Monterey) 12"
+    runs-on: macos-12
     timeout-minutes: 120
     needs: sanity_check
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_macos == 'true'))
@@ -437,7 +437,7 @@ jobs:
           - "-Duseithreads -Duseshrplib"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure
         run: |
           sh ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }}
@@ -466,7 +466,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       #- name: Install clcache
       #  shell: cmd
       #  run: |
@@ -522,7 +522,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install mingw-64
         run: |
           mkdir C:\perl_ci && cd C:\perl_ci
@@ -668,7 +668,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -719,7 +719,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -767,7 +767,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -795,9 +795,9 @@ jobs:
   #  \__,_|_|___/\__|    |_| |_| |_|\___/ \__,_|\__,_|_|\___||___/
 
   dist-modules:
-    name: dist-modules
+    name: dist ${{ matrix.os.label }} ${{ matrix.perl-version }} ${{ matrix.threads.label }}
     needs: sanity_check
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os.id }}
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_dist_modules == 'true'))
 
     env:
@@ -812,17 +812,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # once some failures are resolved we may be able to add Windows to this
+        os:
+          - id: ubuntu-latest
+            label: Linux
         perl-version:
-          - 'latest'
+          - '5.38'
           - '5.24'
           - '5.10'
           - '5.8'
-
-    container:
-      image: perldocker/perl-tester:${{ matrix.perl-version }}
+        threads:
+          - enable: true
+            label: -Dusethreads
+          - enable: false
+            label: -Uusethreads
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1.30.0
+        with:
+          perl-version: ${{ matrix.perl-version }}
+          multi-thread: ${{ matrix.threads.id }}
+          install-modules:
+            ExtUtils::MakeMaker
+            Perl::OSType
+            Scalar::Util
+            Socket
+            version
       - name: perl -V
         run: perl -V
       - name: Build and test dist modules
@@ -832,7 +849,7 @@ jobs:
   dist-modules-sys-macos:
     name: "Test dist/ modules on MacOS system perl"
     needs: sanity_check
-    runs-on: macos-11
+    runs-on: macos-12
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_dist_modules == 'true'))
 
     env:
@@ -848,10 +865,10 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: perl -V
         run: /usr/bin/perl -V
       - name: Build and test dist modules
         run:
-          /usr/bin/perl Porting/test-dist-modules.pl -continue -separate
+          /usr/bin/perl Porting/test-dist-modules.pl -continue
 

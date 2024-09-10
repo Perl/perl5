@@ -368,6 +368,9 @@ ccflags="$ccflags -DNO_THREAD_SAFE_QUERYLOCALE"
 # #21556]
 ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
 
+# See comments in locale.c about this #define
+ccflags="$ccflags -DHAS_BROKEN_LANGINFO_CODESET"
+
 ldlibpthname='DYLD_LIBRARY_PATH';
 
 # useshrplib=true results in much slower startup times.

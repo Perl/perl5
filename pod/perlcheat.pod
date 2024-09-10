@@ -28,14 +28,14 @@ already be overwhelming.
   ->                     while   (e) { }        until (e)   { }
   ++ --                  if      (e) { } elsif (e) { } else { }
   **                     unless  (e) { } elsif (e) { } else { }
-  ! ~ \ u+ u-            given   (e) { when (e) {} default {} }
+  ! ~ \ u+ u-
   =~ !~
   * / % x                 NUMBERS vs STRINGS  FALSE vs TRUE
   + - .                   =          =        undef, "", 0, "0"
   << >>                   +          .        anything else
   named uops              == !=      eq ne
   < > <= >= lt gt le ge   < > <= >=  lt gt le ge
-  == != <=> eq ne cmp ~~  <=>        cmp
+  == != <=> eq ne cmp     <=>        cmp
   &
   | ^             REGEX MODIFIERS       REGEX METACHARS
   &&              /i case insensitive   ^      string begin
@@ -48,7 +48,7 @@ already be overwhelming.
   not             /u Unicode            []     character class
   and             /e evaluate /ee rpts  \b     boundary
   or xor          /g global             \z     string end
-                  /o compile pat once   ()     capture
+                  /o compile pat once   (p)    capture
   DEBUG                                 (?:p)  no capture
   -MO=Deparse     REGEX CHARCLASSES     (?#t)  comment
   -MO=Terse       .   [^\n]             (?=p)  ZW pos ahead

@@ -417,7 +417,8 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_regex_padav
 		    PL_dollarzero_mutex
 		    PL_env_mutex
-		    PL_hints_mutex
+                    PL_env_mutex_depth
+                    PL_hints_mutex
 		    PL_locale_mutex
 		    PL_locale_mutex_depth
 		    PL_my_ctx_mutex
@@ -1183,6 +1184,14 @@ if (PLATFORM eq 'os2') {
     @missing = grep { !exists $exportperlmalloc{$_} } @missing;
     delete $export{$_} foreach @missing;
 }
+
+
+if (ord "A" != 65) {
+    for my $symbol (qw( PL_a2e PL_e2a PL_e2utf PL_utf2e )) {
+        try_symbols($symbol);
+    }
+}
+
 
 ###############################################################################
 

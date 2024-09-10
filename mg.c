@@ -1853,7 +1853,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
              * access to a known hint bit in a known OP, we can't
              * tell whether HINT_STRICT_REFS is in force or not.
              */
-            if (!memchr(s, ':', len) && !memchr(s, '\'', len))
+            if (!memchr(s, ':', len))
                 Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("main::"),
                                      SV_GMAGIC);
             if (i)
@@ -3091,9 +3091,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             U32 save_hints = PL_hints;
             PL_hints = SvUV(sv);
 
-            /* If wasn't UTF-8, and now is, notify the parser */
-            if ((PL_hints & HINT_UTF8) && ! (save_hints & HINT_UTF8)) {
-                notify_parser_that_changed_to_utf8();
+            if (   (PL_hints   & (HINT_UTF8|HINT_ASCII_ENCODING))
+                != (save_hints & (HINT_UTF8|HINT_ASCII_ENCODING)))
+            {
+                notify_parser_that_encoding_changed();
             }
         }
         break;
@@ -3675,7 +3676,6 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     CV *cv = NULL;
     OP *myop = PL_op;
     U32 flags = 0;
-    XPV * const tXpv = PL_Xpv;
     I32 old_ss_ix = PL_savestack_ix;
     SV *errsv_save = NULL;
 
@@ -3696,7 +3696,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
         }
     }
     /* sv_2cv is too complicated, try a simpler variant first: */
-    if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
+    if (!SvROK(PL_psig_ptr[sig]) || !(cv = CV_FROM_REF(PL_psig_ptr[sig]))
         || SvTYPE(cv) != SVt_PVCV) {
         HV *st;
         cv = sv_2cv(PL_psig_ptr[sig], &st, &gv, GV_ADD);
@@ -3830,7 +3830,6 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     PL_op = myop;			/* Apparently not needed... */
 
     PL_Sv = tSv;			/* Restore global temporaries. */
-    PL_Xpv = tXpv;
     return;
 }
 

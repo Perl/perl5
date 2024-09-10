@@ -32,7 +32,7 @@
 #define PERL_IN_PP_PACK_C
 #include "perl.h"
 
-/* Types used by pack/unpack */ 
+/* Types used by pack/unpack */
 typedef enum {
   e_no_len,     /* no length  */
   e_number,     /* number, [] */
@@ -48,7 +48,7 @@ typedef struct tempsym {
   U32      flags;    /* /=4, comma=2, pack=1  */
                      /*   and group modifiers */
   SSize_t  length;   /* length/repeat count   */
-  howlen_t howlen;   /* how length is given   */ 
+  howlen_t howlen;   /* how length is given   */
   int      level;    /* () nesting level      */
   STRLEN   strbeg;   /* offset of group start */
   struct tempsym *previous; /* previous group */
@@ -3076,7 +3076,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
                                        "Attempt to pack pointer to temporary value");
                     }
-                    if (SvPOK(fromstr) || SvNIOK(fromstr))
+                    if (SvREADONLY(fromstr))
                         aptr = SvPV_nomg_const_nolen(fromstr);
                     else
                         aptr = SvPV_force_flags_nolen(fromstr, 0);
@@ -3167,7 +3167,7 @@ PP_wrapped(pp_pack, 0, 1)
             _force_out_malformed_utf8_message(error_pos,
                                               (U8 *) result + result_len,
                                               0, /* no flags */
-                                              1 /* Die */
+                                              MALFORMED_UTF8_DIE
                                             );
             NOT_REACHED; /* NOTREACHED */
         }

@@ -337,7 +337,8 @@ PP(pp_padsv_store)
         );
     SvSetMagicSV(targ, val);
 
-    rpp_replace_1_1_NN(targ);
+    assert(GIMME_V == G_VOID);
+    rpp_popfree_1_NN();
     return NORMAL;
 }
 
@@ -1657,7 +1658,7 @@ PP(pp_readline)
     /* is it *FOO, $fh, or 'FOO' ? */
     if (!isGV_with_GP(PL_last_in_gv)) {
         if (SvROK(PL_last_in_gv) && isGV_with_GP(SvRV(PL_last_in_gv)))
-            PL_last_in_gv = MUTABLE_GV(SvRV(PL_last_in_gv));
+            PL_last_in_gv = GV_FROM_REF((SV *)PL_last_in_gv);
         else {
             rpp_xpush_1(MUTABLE_SV(PL_last_in_gv));
             Perl_pp_rv2gv(aTHX);
@@ -1937,9 +1938,7 @@ PP(pp_add)
                         auv = aiv;
                         auvok = 1;	/* Now acting as a sign flag.  */
                     } else {
-                        /* Using 0- here and later to silence bogus warning
-                         * from MS VC */
-                        auv = (UV) (0 - (UV) aiv);
+                        auv = NEGATE_2UV(aiv);
                     }
                 }
                 a_valid = 1;
@@ -1959,7 +1958,7 @@ PP(pp_add)
                     buv = biv;
                     buvok = 1;
                 } else
-                    buv = (UV) (0 - (UV) biv);
+                    buv = NEGATE_2UV(biv);
             }
             /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
                else "IV" now, independent of how it came in.
@@ -1998,9 +1997,8 @@ PP(pp_add)
                     TARGu(result,1);
                 else {
                     /* Negate result */
-                    if (result <= (UV)IV_MIN)
-                        TARGi(result == (UV)IV_MIN
-                                ? IV_MIN : -(IV)result, 1);
+                    if (result <= ABS_IV_MIN)
+                        TARGi(NEGATE_2IV(result), 1);
                     else {
                         /* result valid, but out of range for IV.  */
                         TARGn(-(NV)result, 1);
@@ -5992,15 +5990,22 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                  *    ++PL_tmps_ix, moving the previous occupant there
                  *    instead.
                  */
-                SV *newsv = newSV_type(SVt_NULL);
+
+                /* A newsv of type SVt_NULL will always be upgraded to
+                 * SvTYPE(sv), where that is a SVt_PVNV or below. It is
+                 * more efficient to create such types directly than
+                 * upgrade to them via sv_upgrade() within sv_setsv_flags. */
+                SV *newsv = (SvTYPE(sv) <= SVt_PVNV)
+                            ? newSV_type(SvTYPE(sv))
+                            : newSV_type(SVt_NULL);
 
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
                 *tmps_basep++ = newsv;
 
-                if (SvTYPE(sv) <= SVt_IV) {
-                    /* arg must be one of undef, IV/UV, or RV: skip
-                     * sv_setsv_flags() and do the copy directly */
+                if (SvTYPE(sv) <= (NVSIZE <= IVSIZE ? SVt_NV : SVt_IV)) {
+                    /* arg must be one of undef/IV/UV/RV - maybe NV depending on
+                     * config, skip sv_setsv_flags() and do the copy directly */
                     U32 dstflags;
                     U32 srcflags = SvFLAGS(sv);
 
@@ -6028,6 +6033,21 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                                             |(srcflags & SVf_IVisUV));
                         }
                     }
+#if NVSIZE <= IVSIZE
+                    else if (srcflags & SVf_NOK) {
+                        SET_SVANY_FOR_BODYLESS_NV(newsv);
+                        dstflags = (SVt_NV|SVf_NOK|SVp_NOK|SVs_TEMP);
+
+                        /* both src and dst are <= SVt_MV, so sv_any points to the
+                         * head; so access the head directly
+                         */
+                        assert(    &(sv->sv_u.svu_nv)
+                                == &(((XPVNV*) SvANY(sv))->xnv_u.xnv_nv));
+                        assert(    &(newsv->sv_u.svu_nv)
+                                == &(((XPVNV*) SvANY(newsv))->xnv_u.xnv_nv));
+                        newsv->sv_u.svu_nv = sv->sv_u.svu_nv;
+                    }
+#endif
                     else {
                         assert(!(srcflags & SVf_OK));
                         dstflags = (SVt_NULL|SVs_TEMP); /* SV type plus flags */
@@ -6194,7 +6214,7 @@ PP(pp_entersub)
 
     /* a non-magic-RV -> CV ? */
     if (LIKELY( (SvFLAGS(sv) & (SVf_ROK|SVs_GMG)) == SVf_ROK)) {
-        cv = MUTABLE_CV(SvRV(sv));
+        cv = MUTABLE_CV(SvRV(sv));  /* might not actually be a CV */
         if (UNLIKELY(SvOBJECT(cv))) /* might be overloaded */
             goto do_ref;
     }
@@ -6242,7 +6262,7 @@ PP(pp_entersub)
                 cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
                 break;
             }
-            cv = MUTABLE_CV(SvRV(sv));
+            cv = MUTABLE_CV(SvRV(sv));  /* might not actually be a CV */
             if (LIKELY(SvTYPE(cv) == SVt_PVCV))
                 break;
             /* FALLTHROUGH */
@@ -6372,7 +6392,7 @@ PP(pp_entersub)
 
             defavp = &GvAV(PL_defgv);
             cx->blk_sub.savearray = *defavp;
-            *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
+            *defavp = AvREFCNT_inc_simple_NN(av);
 
             /* it's the responsibility of whoever leaves a sub to ensure
              * that a clean, empty AV is left in pad[0]. This is normally

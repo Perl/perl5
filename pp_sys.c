@@ -3902,12 +3902,14 @@ PP(pp_fttext)
 
 PP_wrapped(pp_chdir, MAXARG, 0)
 {
-    dSP; dTARGET;
+    dSP;
     const char *tmps = NULL;
     GV *gv = NULL;
+    /* pp_coreargs pushes a NULL to indicate no args passed to
+     * CORE::chdir() */
+    SV * const sv = MAXARG == 1 ? POPs : NULL;
 
-    if( MAXARG == 1 ) {
-        SV * const sv = POPs;
+    if (sv) {
         if (PL_op->op_flags & OPf_SPECIAL) {
             gv = gv_fetchsv(sv, 0, SVt_PVIO);
             if (!gv) {
@@ -3916,9 +3918,8 @@ PP_wrapped(pp_chdir, MAXARG, 0)
                                 "chdir() on unopened filehandle %" SVf, sv);
                 }
                 SETERRNO(EBADF,RMS_IFI);
-                PUSHs(&PL_sv_zero);
                 TAINT_PROPER("chdir");
-                RETURN;
+                RETPUSHNO;
             }
         }
         else if (!(gv = MAYBE_DEREF_GV(sv)))
@@ -3939,10 +3940,9 @@ PP_wrapped(pp_chdir, MAXARG, 0)
             tmps = SvPV_nolen_const(*svp);
         }
         else {
-            PUSHs(&PL_sv_zero);
             SETERRNO(EINVAL, LIB_INVARG);
             TAINT_PROPER("chdir");
-            RETURN;
+            RETPUSHNO;
         }
     }
 
@@ -3950,43 +3950,29 @@ PP_wrapped(pp_chdir, MAXARG, 0)
     if (gv) {
 #ifdef HAS_FCHDIR
         IO* const io = GvIO(gv);
-        if (io) {
-            if (IoDIRP(io)) {
-                PUSHi(fchdir(my_dirfd(IoDIRP(io))) >= 0);
-            } else if (IoIFP(io)) {
-                int fd = PerlIO_fileno(IoIFP(io));
-                if (fd < 0) {
-                    goto nuts;
-                }
-                PUSHi(fchdir(fd) >= 0);
-            }
-            else {
-                goto nuts;
-            }
-        } else {
-            goto nuts;
+        const int fd =
+            !io        ? -1 :
+            IoDIRP(io) ? my_dirfd(IoDIRP(io)) :
+            IoIFP(io)  ? PerlIO_fileno(IoIFP(io)) :
+                         -1;
+        if (fd < 0) {
+            report_evil_fh(gv);
+            SETERRNO(EBADF,RMS_IFI);
+            RETPUSHNO;
         }
-
+        PUSHs(boolSV(fchdir(fd) >= 0));
 #else
         DIE(aTHX_ PL_no_func, "fchdir");
 #endif
     }
     else 
-        PUSHi( PerlDir_chdir(tmps) >= 0 );
+        PUSHs(boolSV( PerlDir_chdir(tmps) >= 0 ));
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value
      * in the future. */
     hv_delete(GvHVn(PL_envgv),"DEFAULT",7,G_DISCARD);
 #endif
     RETURN;
-
-#ifdef HAS_FCHDIR
- nuts:
-    report_evil_fh(gv);
-    SETERRNO(EBADF,RMS_IFI);
-    PUSHs(&PL_sv_zero);
-    RETURN;
-#endif
 }
 
 
@@ -4299,6 +4285,23 @@ PP_wrapped(pp_open_dir, 2, 0)
 #endif
 }
 
+static void
+S_warn_not_dirhandle(pTHX_ GV *gv) {
+    IO *io = GvIOn(gv);
+
+    if (IoIFP(io)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+                       "%s() attempted on handle %" HEKf
+                       " opened with open()",
+                       OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
+    }
+    else {
+        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
+                       "%s() attempted on invalid dirhandle %" HEKf,
+                       OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
+    }
+}
+
 PP_wrapped(pp_readdir, 1, 0)
 {
 #if !defined(Direntry_t) || !defined(HAS_READDIR)
@@ -4316,9 +4319,7 @@ PP_wrapped(pp_readdir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "readdir() attempted on invalid dirhandle %" HEKf,
-                            HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
 
@@ -4366,9 +4367,7 @@ PP_wrapped(pp_telldir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "telldir() attempted on invalid dirhandle %" HEKf,
-                            HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
 
@@ -4392,9 +4391,7 @@ PP_wrapped(pp_seekdir, 2, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "seekdir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
     (void)PerlDir_seek(IoDIRP(io), along);
@@ -4417,9 +4414,7 @@ PP_wrapped(pp_rewinddir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "rewinddir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
     (void)PerlDir_rewind(IoDIRP(io));
@@ -4441,9 +4436,7 @@ PP_wrapped(pp_closedir, 1, 0)
     IO * const io = GvIOn(gv);
 
     if (!IoDIRP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "closedir() attempted on invalid dirhandle %" HEKf,
-                                HEKfARG(GvENAME_HEK(gv)));
+        warn_not_dirhandle(gv);
         goto nope;
     }
 #ifdef VOID_CLOSEDIR

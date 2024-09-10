@@ -646,13 +646,6 @@ my $refcount;
 PERL
 }
 
-{
-    # smartmatch is deprecated and will be removed in 5.042
-    no warnings 'deprecated';
-    my $one = 1;
-    leak 2, 0, sub { 1 ~~ sub { 1 + $one } }, 'Smartmatch doesn\'t leak';
-}
-
 # the initial implementation of the require hook had some leaks
 
 sub hook::before  { $_[0] = "NoSuchFile2" if $_[0] =~/ NoSuch/;
@@ -683,3 +676,30 @@ leak 2, 0,  sub {
                                 } } 1..2;
             },
             'sort block return';
+
+
+# Avoid leaks when overloading causes a compile-time pattern code block
+# to be recompiled at runtime.
+
+package myconcat {
+    use overload
+        '""' => sub { ${$_[0]} },
+        '.' =>  sub {
+                        my ($x, $y) = @_[ $_[2] ? (1,0) : (0,1) ];
+                        my ($xx, $yy) = ("$x", "$y");
+                        "$xx$yy";
+                    }
+        ;
+
+    ::leak(2, 0,
+        sub {
+           my $r1 = qr/(?{1})/;
+           my $r2 = qr/(?{2})/;
+           bless $r2, 'myconcat';
+           use re "eval";
+           qr/$r1$r2/;
+           1;
+        },
+        'overloaded pattern with code block'
+    );
+}

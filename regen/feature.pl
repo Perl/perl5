@@ -26,7 +26,6 @@ use warnings;
 my %feature = (
     say                     => 'say',
     state                   => 'state',
-    switch                  => 'switch',
     bitwise                 => 'bitwise',
     evalbytes               => 'evalbytes',
     current_sub             => '__SUB__',
@@ -55,19 +54,19 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles};
+use constant V5_9_5 => sort qw{say state indirect multidimensional bareword_filehandles};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
 use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
-use constant V5_35  => sort grep {; $_ ne 'switch'
-                                 && $_ ne 'indirect'
+use constant V5_35  => sort grep {; $_ ne 'indirect'
                                  && $_ ne 'multidimensional' } +V5_27, qw{isa signatures};
 
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
 
-use constant V5_39  => sort ( +V5_37, qw{try extra_paired_delimiters} );
+use constant V5_39  => sort ( +V5_37, qw{try} );
+use constant V5_41  => sort ( +V5_39 );
 
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
@@ -100,10 +99,12 @@ my %feature_bundle = (
     "5.37"  => [ +V5_37 ],
     # using 5.39 features bundle
     "5.39"  => [ +V5_39 ],
+    # using 5.41 features bundle
+    "5.41"  => [ +V5_41 ],
 );
 
 my @noops = qw( postderef lexical_subs );
-my @removed = qw( array_base );
+my @removed = qw( array_base switch );
 
 
 ###########################################################################
@@ -541,7 +542,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.88';
+our $VERSION = '1.91';
 
 FEATURES
 
@@ -633,21 +634,10 @@ This feature is available starting with Perl 5.10.
 
 =head2 The 'switch' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::smartmatch";
-
-C<use feature 'switch'> tells the compiler to enable the Raku
+C<use feature 'switch'> told the compiler to enable the Raku
 given/when construct.
 
-See L<perlsyn/"Switch Statements"> for details.
-
-This feature is available starting with Perl 5.10.
-It is deprecated starting with Perl 5.38, and using
-C<given>, C<when> or smartmatch will throw a warning.
-It will be removed in Perl 5.42.
+This feature was removed in Perl 5.42.
 
 =head2 The 'unicode_strings' feature
 
@@ -937,6 +927,12 @@ This feature is available starting in Perl 5.36.
 
 =head2 The 'extra_paired_delimiters' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::extra_paired_delimiters";
+
 This feature enables the use of more paired string delimiters than the
 traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.  When
 this feature is on, for example, you can say S<C<qrE<171>patE<187>>>.
@@ -945,16 +941,7 @@ As with any usage of non-ASCII delimiters in a UTF-8-encoded source file, you
 will want to ensure the parser will decode the source code from UTF-8 bytes
 with a declaration such as C<use utf8>.
 
-This feature is available starting in Perl 5.36.  From Perl 5.36 to 5.38,
-it was classed as experimental, and Perl emitted a warning for its usage,
-except when explicitly disabled:
-
-    no warnings "experimental::extra_paired_delimiters";
-
-As of Perl 5.40, use of this feature no longer triggers a warning (though the
-C<experimental::extra_paired_delimiters> warning category still exists for
-compatibility with code that disables it). This feature is now considered
-stable.
+This feature is available starting in Perl 5.36.
 
 For a full list of the available characters, see
 L<perlop/List of Extra Paired Delimiters>.

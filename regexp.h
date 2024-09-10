@@ -113,21 +113,23 @@ struct reg_code_block {
 
 struct reg_code_blocks {
     int refcnt; /* we may be pointed to from a regex and from the savestack */
-    int  count;    /* how many code blocks */
+    int  count; /* how many code block slots currently in use */
+    int  size;  /* how many slots allocated in code_block[]  */
     struct reg_code_block *cb; /* array of reg_code_block's */
 };
 
 
 /*
-= for apidoc AyT||regexp
-  The regexp/REGEXP struct, see L<perlreapi> for further documentation
-  on the individual fields. The struct is ordered so that the most
-  commonly used fields are placed at the start.
+=for apidoc AyT||regexp
+The regexp/REGEXP struct, see L<perlreapi> for further documentation
+on the individual fields. The struct is ordered so that the most
+commonly used fields are placed at the start.
 
-  Any patch that adds items to this struct will need to include
-  changes to F<sv.c> (C<Perl_re_dup()>) and F<regcomp.c>
-  (C<pregfree()>). This involves freeing or cloning items in the
-  regexp's data array based on the data item's type.
+Any patch that adds items to this struct will need to include
+changes to F<sv.c> (C<Perl_re_dup()>) and F<regcomp.c>
+(C<pregfree()>). This involves freeing or cloning items in the
+regexp's data array based on the data item's type.
+=cut
 */
 
 /* NOTE: There is a copy of this struct in the documentation in perlreapi.pod

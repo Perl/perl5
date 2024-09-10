@@ -1995,7 +1995,7 @@ to know 1) how to represent Unicode characters in a regexp and 2) that
 a matching operation will treat the string to be searched as a sequence
 of characters, not bytes.  The answer to 1) is that Unicode characters
 greater than C<chr(255)> are represented using the C<\x{hex}> notation, because
-C<\x>I<XY> (without curly braces and I<XY> are two hex digits) doesn't
+C<\x>I<XY> (specified as two hex digits without curly braces) doesn't
 go further than 255.  (Starting in Perl 5.14, if you're an octal fan,
 you can also use C<\o{oct}>.)
 
@@ -2118,9 +2118,9 @@ Unicode standard, or the Unicode Consortium's website L<https://www.unicode.org>
 As if all those classes weren't enough, Perl also defines POSIX-style
 character classes.  These have the form C<[:I<name>:]>, with I<name> the
 name of the POSIX class.  The POSIX classes are C<alpha>, C<alnum>,
-C<ascii>, C<cntrl>, C<digit>, C<graph>, C<lower>, C<print>, C<punct>,
-C<space>, C<upper>, and C<xdigit>, and two extensions, C<word> (a Perl
-extension to match C<\w>), and C<blank> (a GNU extension).  The C</a>
+C<ascii>, C<blank>, C<cntrl>, C<digit>, C<graph>, C<lower>, C<print>,
+C<punct>, C<space>, C<upper>, C<xdigit>, and C<word> (a Perl extension to
+match C<\w>).  The C</a>
 modifier restricts these to matching just in the ASCII range; otherwise
 they can match the same as their corresponding Perl Unicode classes:
 C<[:upper:]> is the same as C<\p{IsUpper}>, I<etc>.  (There are some
@@ -2839,10 +2839,10 @@ alternative will be tried. As failing to match doesn't preserve capture
 groups or produce results, it may be necessary to use this in
 combination with embedded code.
 
-   %count = ();
-   "supercalifragilisticexpialidocious" =~
-       /([aeiou])(?{ $count{$1}++; })(*FAIL)/i;
-   printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
+    my %count;
+    "supercalifragilisticexpialidocious" =~
+        /([aeiou])(?{ $count{lc($1)}++; })(*FAIL)/i;
+    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
 
 The pattern begins with a class matching a subset of letters.  Whenever
 this matches, a statement like C<$count{'a'}++;> is executed, incrementing
@@ -2851,12 +2851,15 @@ the regexp engine proceeds according to the book: as long as the end of
 the string hasn't been reached, the position is advanced before looking
 for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the entire string has been inspected.
-(It's remarkable that an alternative solution using something like
 
-   $count{lc($_)}++ for split('', "supercalifragilisticexpialidocious");
-   printf "%3d '%s'\n", $count2{$_}, $_ for ( qw{ a e i o u } );
+(In a real program, you might instead solve this problem using
 
-is considerably slower.)
+    my $string = "supercalifragilisticexpialidocious";
+    my %count;
+    $count{lc($1)}++ while $string =~ /([aeiou])/ig;
+    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
+
+This is faster than embedded code blocks in the regex.)
 
 
 =head2 Pragmas and debugging

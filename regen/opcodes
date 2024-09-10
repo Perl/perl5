@@ -153,12 +153,12 @@ i_ne		integer ne (!=)		ck_cmp		ifs2	S S<
 ncmp		numeric comparison (<=>)	ck_null		Iifst2	S S<
 i_ncmp		integer comparison (<=>)	ck_null		ifst2	S S<
 
-slt		string lt		ck_null		ifs2	S S
-sgt		string gt		ck_null		ifs2	S S
-sle		string le		ck_null		ifs2	S S
-sge		string ge		ck_null		ifs2	S S
-seq		string eq		ck_null		ifs2	S S
-sne		string ne		ck_null		ifs2	S S
+slt		string lt		ck_scmp		ifs2	S S
+sgt		string gt		ck_scmp		ifs2	S S
+sle		string le		ck_scmp		ifs2	S S
+sge		string ge		ck_scmp		ifs2	S S
+seq		string eq		ck_scmp		ifs2	S S
+sne		string ne		ck_scmp		ifs2	S S
 scmp		string comparison (cmp)	ck_null		ifst2	S S
 
 bit_and		bitwise and (&)		ck_bitop	fst2	S S|
@@ -177,8 +177,6 @@ not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fst1	S
 ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
 scomplement	string 1's complement (~)	ck_null	fsT1	S
-
-smartmatch	smart match		ck_smartmatch	s2
 
 # High falutin' math.
 
@@ -329,13 +327,6 @@ method_super	super with known name	ck_null		d.
 method_redir	redirect method with known name	ck_null	d.
 method_redir_super	redirect super method with known name	ck_null	d.
 
-entergiven	given()			ck_null		d|
-leavegiven	leave given block	ck_null		1
-enterwhen	when()			ck_null		d|
-leavewhen	leave when block	ck_null		1
-break		break			ck_null		0
-continue	continue		ck_null		0
-
 # I/O.
 
 open		open			ck_open		ismt@	F S? L
@@ -435,7 +426,7 @@ ftbinary	-B			ck_ftst		isu-	F-
 # File calls.
 
 # chdir really behaves as if it had both "S?" and "F?"
-chdir		chdir			ck_trunc	isT%	S?
+chdir		chdir			ck_trunc	is%	S?
 chown		chown			ck_fun		imsT@	L
 chroot		chroot			ck_fun		isTu%	S?
 unlink		unlink			ck_fun		imsTu@	L

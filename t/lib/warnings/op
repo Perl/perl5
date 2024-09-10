@@ -418,7 +418,6 @@ eval { getgrgid 1 };	# OP_GGRGID
 eval { getpwnam 1 };	# OP_GPWNAM
 eval { getpwuid 1 };	# OP_GPWUID
 prototype "foo";	# OP_PROTOTYPE
-$a ~~ $b;		# OP_SMARTMATCH
 $a <=> $b;		# OP_NCMP
 "dsatrewq";
 "diatrewq";
@@ -467,13 +466,12 @@ Useless use of getgrgid in void context at - line 51.
 Useless use of getpwnam in void context at - line 52.
 Useless use of getpwuid in void context at - line 53.
 Useless use of subroutine prototype in void context at - line 54.
-Useless use of smart match in void context at - line 55.
-Useless use of numeric comparison (<=>) in void context at - line 56.
-Useless use of a constant ("dsatrewq") in void context at - line 57.
-Useless use of a constant ("diatrewq") in void context at - line 58.
-Useless use of a constant ("igatrewq") in void context at - line 59.
-Useless use of __SUB__ in void context at - line 61.
-Useless use of anonymous array ([]) in void context at - line 62.
+Useless use of numeric comparison (<=>) in void context at - line 55.
+Useless use of a constant ("dsatrewq") in void context at - line 56.
+Useless use of a constant ("diatrewq") in void context at - line 57.
+Useless use of a constant ("igatrewq") in void context at - line 58.
+Useless use of __SUB__ in void context at - line 60.
+Useless use of anonymous array ([]) in void context at - line 61.
 ########
 # op.c
 use warnings 'scalar' ; close STDIN ;
@@ -1577,6 +1575,95 @@ Possible precedence problem on bitwise |. operator at - line 26.
 Possible precedence problem on bitwise &. operator at - line 27.
 ########
 # op.c
+use warnings 'precedence';
+use feature 'isa';
+use constant A_CONSTANT => 42;
+
+$a = !$b isa Some::Class;  # should warn
+$a = (!$b) isa Some::Class;
+$a = !($b) isa Some::Class;  # should warn
+$a = !($b isa Some::Class);
+$a = not $b isa Some::Class;
+
+my $code = "#line 1 [cmp]\n";
+for my $op (qw( == != < > <= >= eq ne lt gt le ge )) {
+    $code .= "\$a = !\$a $op \$b;\n";  # should warn
+    $code .= "\$a = (!\$a) $op \$b;\n";
+    $code .= "\$a = !(\$a) $op \$b;\n";  # should warn
+    $code .= "\$a = !(\$a $op \$b);\n";
+    $code .= "\$a = !\$a $op !0;\n";
+    $code .= "\$a = !\$a $op !A_CONSTANT;\n";
+    $code .= "\$a = not \$a $op \$b;\n";
+}
+$a = $b = 0;
+eval $code;
+die $@ if $@;
+
+$_ = '';
+$a = !/x/;
+
+$code = "#line 1 [bind]\n";
+for my $rhs (qw( /x/ $b tr/x/x/ tr!x!y!r s!x!y!r )) {
+    for my $bind ('=~', $rhs =~ /!r\z/ ? () : '!~') {
+        $code .= "\$a = !\$a $bind $rhs;\n";  # should warn
+        $code .= "\$a = (!\$a) $bind $rhs;\n";
+        $code .= "\$a = !(\$a) $bind $rhs;\n";  # should warn
+        $code .= "\$a = !(\$a $bind $rhs);\n";
+        $code .= "\$a = not \$a $bind $rhs;\n";
+    }
+}
+$a = $b = 0;
+eval $code;
+die $@ if $@;
+
+# doesn't compile, but should warn anyway
+eval "#line 1 [extra]\n" . '$a = !$a =~ s/x/y/';
+EXPECT
+Possible precedence problem between ! and derived class test at - line 6.
+Possible precedence problem between ! and derived class test at - line 8.
+Possible precedence problem between ! and numeric eq (==) at [cmp] line 1.
+Possible precedence problem between ! and numeric eq (==) at [cmp] line 3.
+Possible precedence problem between ! and numeric ne (!=) at [cmp] line 8.
+Possible precedence problem between ! and numeric ne (!=) at [cmp] line 10.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 15.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 17.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 22.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 24.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 29.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 31.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 36.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 38.
+Possible precedence problem between ! and string eq at [cmp] line 43.
+Possible precedence problem between ! and string eq at [cmp] line 45.
+Possible precedence problem between ! and string ne at [cmp] line 50.
+Possible precedence problem between ! and string ne at [cmp] line 52.
+Possible precedence problem between ! and string lt at [cmp] line 57.
+Possible precedence problem between ! and string lt at [cmp] line 59.
+Possible precedence problem between ! and string gt at [cmp] line 64.
+Possible precedence problem between ! and string gt at [cmp] line 66.
+Possible precedence problem between ! and string le at [cmp] line 71.
+Possible precedence problem between ! and string le at [cmp] line 73.
+Possible precedence problem between ! and string ge at [cmp] line 78.
+Possible precedence problem between ! and string ge at [cmp] line 80.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 1.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 3.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 6.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 8.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 11.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 13.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 16.
+Possible precedence problem between ! and pattern match (m//) at [bind] line 18.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 21.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 23.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 26.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 28.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 31.
+Possible precedence problem between ! and transliteration (tr///) at [bind] line 33.
+Possible precedence problem between ! and substitution (s///) at [bind] line 36.
+Possible precedence problem between ! and substitution (s///) at [bind] line 38.
+Possible precedence problem between ! and substitution (s///) at [extra] line 1.
+########
+# op.c
 use integer;
 use warnings 'precedence';
 $a = $b & $c == $d;
@@ -2162,7 +2249,7 @@ use warnings;
 use v5.12;
 use v5.20;
 EXPECT
-Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at - line 3.
+Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.44 at - line 3.
 ########
 use warnings;
 use v5.8;
@@ -2173,7 +2260,7 @@ use warnings;
 use v5.10;
 use v5.8;
 EXPECT
-Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at - line 3.
+Changing use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.44 at - line 3.
 ########
 use warnings;
 use v5.12;

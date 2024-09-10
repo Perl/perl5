@@ -1345,9 +1345,9 @@ Portability issues: L<perlport/chroot>.
 =for Pod::Functions declare a separate global namespace that is an object class
 
 Declares the BLOCK or the rest of the compilation unit as being in the given
-namespace, which implements an object class.  This behaves similarly to
-L<C<package>|/package NAMESPACE>, except that the newly-created package behaves
-as a class.
+namespace, which implements an object class (see L<perlclass>).  This
+behaves similarly to L<C<package>|/package NAMESPACE>, except that the
+newly-created package behaves as a class.
 
 =item close FILEHANDLE
 X<close>
@@ -2088,7 +2088,7 @@ L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and
 L<C<each>|/each HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
-provided here the exact details of Perl's hash algorithm and the hash
+provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
 
 After L<C<each>|/each HASH> has returned all entries from the hash or
@@ -2581,7 +2581,7 @@ expanding wildcards or splitting up words with whitespace in them.
     exec { $args[0] } @args;  # safe even with one-arg list
 
 The first version, the one without the indirect object, ran the I<echo>
-program, passing it C<"surprise"> an argument.  The second version didn't;
+program, passing it C<"surprise"> as an argument.  The second version didn't;
 it tried to run a program named I<"echo surprise">, didn't find it, and set
 L<C<$?>|perlvar/$?> to a non-zero value indicating failure.
 
@@ -3597,6 +3597,9 @@ X<goto> X<jump> X<jmp>
 
 =for Pod::Functions create spaghetti code
 
+C<goto> transfers execution to a specified point in the program. Unlike a
+function call, execution does not return to C<goto>.
+
 The C<goto LABEL> form finds the statement labeled with LABEL and
 resumes execution there.  It can't be used to get out of a block or
 subroutine given to L<C<sort>|/sort SUBNAME LIST>.  It can be used to go
@@ -3778,6 +3781,9 @@ the L<C<sprintf>|/sprintf FORMAT, LIST>,
 L<C<printf>|/printf FILEHANDLE FORMAT, LIST>, or the
 L<C<POSIX::floor>|POSIX/C<floor>> and L<C<POSIX::ceil>|POSIX/C<ceil>>
 functions will serve you better than will L<C<int>|/int EXPR>.
+Moreover, C<int 'Inf'> produces Inf (see
+L<perldata/Special floating point: infinity (Inf) and not-a-number (NaN)>
+for explanation), but so do all the alternative methods mentioned above.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 X<ioctl>
@@ -3862,7 +3868,7 @@ L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and L<C<each>|/each
 HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
-provided here the exact details of Perl's hash algorithm and the hash
+provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.  Tied hashes
 may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
@@ -4177,6 +4183,24 @@ A local modifies the listed variables to be local to the enclosing
 block, file, or eval.  If more than one value is listed, the list must
 be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
 for details, including issues with tied arrays and hashes.
+
+Like L<C<my>|/my VARLIST>, L<C<state>|/state VARLIST>, and
+L<C<our>|/our VARLIST>, L<C<local>|/local EXPR> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+Unlike the other declarations, the effect of L<C<local>|/local EXPR> happens
+at runtime, and so it will apply to additional uses of the same variable
+executed after the declaration, even within the same statement. Note that
+this does not include uses within an expression assigned to the variable
+when it is localized, because the assigned expression is evaluated before
+the localization.
+
+    package main;
+    our $x = 2;
+    {
+      foo($x, local $x = $x + 1, $x); # foo() receives (2, 3, 3)
+      # $main::x is 3 within the call to foo()
+    }
+    foo($x); # foo() receives (2) and $main::x is 2
 
 The C<delete local EXPR> construct can also be used to localize the deletion
 of array/hash elements to the current block.
@@ -4534,6 +4558,19 @@ as a dummy placeholder, for example to skip assignment of initial
 values:
 
     my ( undef, $min, $hour ) = localtime;
+
+Like L<C<state>|/state VARLIST>, L<C<local>|/local EXPR>, and
+L<C<our>|/our VARLIST>, L<C<my>|/my VARLIST> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+The declaration will not apply to additional uses of the same variable until
+the next statement. This means additional uses of that variable within the
+same statement will act as they would have before that declaration occurred,
+or result in a strict 'vars' error, as appropriate.
+
+    package main;
+    our $x = 2;
+    foo($x, my $x = $x + 1, $x); # foo() receives (2, 3, 2)
+    foo($x, $main::x);           # foo() receives (3, 2)
 
 Redeclaring a variable in the same scope or statement will "shadow" the
 previous declaration, creating a new instance and preventing access to
@@ -5261,7 +5298,7 @@ package variables spring into existence when first used.
     print $Foo::foo; # prints 23
 
 Because the variable becomes legal immediately under C<use strict 'vars'>, so
-long as there is no variable with that name is already in scope, you can then
+long as there is no variable with that name already in scope, you can then
 reference the package variable again even within the same statement.
 
     package Foo;
@@ -5274,6 +5311,21 @@ If more than one variable is listed, the list must be placed
 in parentheses.
 
     our($bar, $baz);
+
+Like L<C<my>|/my VARLIST>, L<C<state>|/state VARLIST>, and
+L<C<local>|/local EXPR>, L<C<our>|/our VARLIST> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+The declaration will not apply to additional uses of the same variable until
+the next statement. This means additional uses of that variable within the
+same statement will act as they would have before that declaration occurred,
+with the exception that it will still satisfy strict 'vars' and interpret that
+variable as the newly aliased package variable if it was not yet declared in
+that scope.
+
+    package main;
+    my $x = 2;
+    foo($x, our $x = $x + 1, $x); # foo() receives (2, 3, 2)
+    foo($x, our $z = 5, $z);      # foo() receives (3, 5, 5)
 
 An L<C<our>|/our VARLIST> declaration declares an alias for a package
 variable that will be visible
@@ -5653,14 +5705,14 @@ the I<length-item> is the string length, not the number of strings.  With
 an explicit repeat count for pack, the packed string is adjusted to that
 length.  For example:
 
- This code:                             gives this result:
+    This code:                              gives this result:
 
- unpack("W/a", "\004Gurusamy")          ("Guru")
- unpack("a3/A A*", "007 Bond  J ")      (" Bond", "J")
- unpack("a3 x2 /A A*", "007: Bond, J.") ("Bond, J", ".")
+    unpack("W/a", "\004Gurusamy")           ("Guru")
+    unpack("a3/A A*", "007 Bond  J ")       (" Bond", "J")
+    unpack("a3 x2 /A A*", "007: Bond, J.")  ("Bond, J", ".")
 
- pack("n/a* w/a","hello,","world")     "\000\006hello,\005world"
- pack("a/W2", ord("a") .. ord("z"))    "2ab"
+    pack("n/a* w/a", "hi,", "world")        "\000\003hi,\005world"
+    pack("a/W2", ord("a") .. ord("z"))      "2ab"
 
 The I<length-item> is not returned explicitly from
 L<C<unpack>|/unpack TEMPLATE,EXPR>.
@@ -5680,10 +5732,10 @@ may be larger.  This is mainly an issue on 64-bit platforms.  You can
 see whether using C<!> makes any difference this way:
 
     printf "format s is %d, s! is %d\n",
-	length pack("s"), length pack("s!");
+        length pack("s"), length pack("s!");
 
     printf "format l is %d, l! is %d\n",
-	length pack("l"), length pack("l!");
+        length pack("l"), length pack("l!");
 
 
 C<i!> and C<I!> are also allowed, but only for completeness' sake:
@@ -5701,11 +5753,11 @@ the command line:
 
 or programmatically via the L<C<Config>|Config> module:
 
-       use Config;
-       print $Config{shortsize},    "\n";
-       print $Config{intsize},      "\n";
-       print $Config{longsize},     "\n";
-       print $Config{longlongsize}, "\n";
+    use Config;
+    print $Config{shortsize},    "\n";
+    print $Config{intsize},      "\n";
+    print $Config{longsize},     "\n";
+    print $Config{longlongsize}, "\n";
 
 C<$Config{longlongsize}> is undefined on systems without
 long long support.
@@ -5734,14 +5786,14 @@ Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980.
 
 Some systems may have even weirder byte orders such as
 
-   0x56 0x78 0x12 0x34
-   0x34 0x12 0x78 0x56
+    0x56 0x78 0x12 0x34
+    0x34 0x12 0x78 0x56
 
 These are called mid-endian, middle-endian, mixed-endian, or just weird.
 
 You can determine your system endianness with this incantation:
 
-   printf("%#02x ", $_) for unpack("W*", pack L=>0x12345678);
+    printf("%#02x ", $_) for unpack("W*", pack("L", 0x12345678));
 
 The byteorder on the platform where Perl was built is also available
 via L<Config>:
@@ -5886,7 +5938,9 @@ L<C<unpack>|/unpack TEMPLATE,EXPR>, also via the C</>
 template character.  Within each repetition of a group, positioning with
 C<@> starts over at 0.  Therefore, the result of
 
-    pack("@1A((@2A)@3A)", qw[X Y Z])
+    # note: single quotes around the template string to prevent
+    # array interpolation of @1, @2, @3
+    pack('@1A((@2A)@3A)', qw[X Y Z])
 
 is the string C<"\0X\0\0YZ">.
 
@@ -5898,9 +5952,9 @@ characters.  For example, to L<C<pack>|/pack TEMPLATE,LIST> or
 L<C<unpack>|/unpack TEMPLATE,EXPR> a C structure like
 
     struct {
-	char   c;    /* one signed, 8-bit character */
-	double d;
-	char   cc[2];
+        char   c;    /* one signed, 8-bit character */
+        double d;
+        char   cc[2];
     }
 
 one may need to use the template C<c x![d] d c[2]>.  This assumes that
@@ -6765,6 +6819,11 @@ results against a class name doesn't perform a class membership test:
 a class's members also include objects blessed into subclasses, for
 which C<ref> will return the name of the subclass.  Also beware that
 class names can clash with the built-in type names (described below).
+Use L<the C<isa> method|UNIVERSAL/C<< $obj->isa( TYPE ) >>> to test
+class membership of a class name or blessed object, after ensuring it
+is one of these things.  Alternatively, the
+L<C<isa> operator|perlop/"Class Instance Operator"> can test class
+membership without checking blessedness first.
 
 If the operand is a reference to an unblessed object, then the return
 value indicates the type of object.  If the unblessed referent is not
@@ -6779,15 +6838,15 @@ these built-in type names can also be used as
 class names, so C<ref> returning one of these names doesn't unambiguously
 indicate that the referent is of the kind to which the name refers.
 
-The ambiguity between built-in type names and class names significantly
-limits the utility of C<ref>.  For unambiguous information, use
-L<C<Scalar::Util::blessed()>|Scalar::Util/blessed> for information about
-blessing, and L<C<Scalar::Util::reftype()>|Scalar::Util/reftype> for
-information about physical types.  Use L<the C<isa> method|UNIVERSAL/C<<
-$obj->isa( TYPE ) >>> for class membership tests, though one must be
-sure of blessedness before attempting a method call.  Alternatively, the
-L<C<isa> operator|perlop/"Class Instance Operator"> can test class
-membership without checking blessedness first.
+The ambiguity between built-in type names and class names may limit the
+utility of C<ref>, but in practice, such clashes rarely occur unless
+intentionally engineered.  For unambiguous information, use
+L<builtin/blessed> for information about blessing, and L<builtin/reftype>
+for information about physical types.  But beware that the physical type
+returned by C<reftype> does not indicate how a blessed object is meant to
+be used, and the appropriate dereference operations for an object
+(whether to access the blessed structure directly, or via an L<overload>)
+will be described by the documentation for the object class.
 
 See also L<perlref> and L<perlobj>.
 
@@ -7968,6 +8027,10 @@ If the subroutine is an XSUB, the elements to be compared are pushed on
 to the stack, the way arguments are usually passed to XSUBs.  C<$a> and
 C<$b> are not set.
 
+If two or more elements of LIST compare the same (i.e. the comparison
+operation returns 0 for them), they retain the relative order they had
+in LIST. In other words, sorting is stable (and has been since v5.8.0).
+
 The values to be compared are always passed by reference and should not
 be modified.
 
@@ -7986,10 +8049,6 @@ modifying an element of a list returned by L<C<sort>|/sort SUBNAME LIST>
 L<C<grep>|/grep BLOCK LIST>)
 actually modifies the element in the original list.  This is usually
 something to be avoided when writing clear code.
-
-Historically Perl has varied in whether sorting is stable by default.
-If stability matters, it can be controlled explicitly by using the
-L<sort> pragma.
 
 Examples:
 
@@ -8080,10 +8139,6 @@ Examples:
 
     my @new = sort function_with_signature @old;
 
-    # guarantee stability
-    use sort 'stable';
-    my @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-
 Warning: syntactical care is required when sorting the list returned from
 a function.  If you want to sort the list returned by the function call
 C<find_records(@key)>, you can use:
@@ -8172,8 +8227,8 @@ eliminate any C<NaN>s from the input list.
 
     my @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
-In this version of F<perl>, the C<sort> function is implemented via the
-mergesort algorithm.
+In the current version of Perl, the C<sort> function is implemented via
+the mergesort algorithm.
 
 =item splice ARRAY,OFFSET,LENGTH,LIST
 X<splice>
@@ -8475,10 +8530,6 @@ In addition, Perl permits the following widely-supported conversions:
          into the next argument in the parameter list
    %a    hexadecimal floating point
    %A    like %a, but using upper-case letters
-
-Finally, for backward (and we do mean "backward") compatibility, Perl
-permits these unnecessary but widely-supported conversions:
-
    %i    a synonym for %d
    %D    a synonym for %ld
    %U    a synonym for %lu
@@ -8956,8 +9007,8 @@ The L<File::stat> module provides a convenient, by-name access mechanism:
            $filename, $sb->size, $sb->mode & 07777,
            scalar localtime $sb->mtime;
 
-You can import symbolic mode constants (C<S_IF*>) and functions
-(C<S_IS*>) from the L<Fcntl> module:
+You can import symbolic mode constants and functions
+(C<S_I*>) from the L<Fcntl> module:
 
     use Fcntl ':mode';
 
@@ -8973,7 +9024,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     my $is_directory  =  S_ISDIR($mode);
 
 You could write the last two using the C<-u> and C<-d> operators.
-Commonly available C<S_IF*> constants are:
+Commonly available C<S_I*> constants are:
 
     # Permissions: read, write, execute, for user, group, others.
 
@@ -8981,44 +9032,43 @@ Commonly available C<S_IF*> constants are:
     S_IRWXG S_IRGRP S_IWGRP S_IXGRP
     S_IRWXO S_IROTH S_IWOTH S_IXOTH
 
-    # Setuid/Setgid/Stickiness/SaveText.
+    # Setuid/Setgid/Stickiness/SaveText/EnforcedLocks.
     # Note that the exact meaning of these is system-dependent.
 
-    S_ISUID S_ISGID S_ISVTX S_ISTXT
+    S_ISUID S_ISGID S_ISVTX S_ISTXT S_ENFMT
 
     # File types.  Not all are necessarily available on
     # your system.
 
     S_IFREG S_IFDIR S_IFLNK S_IFBLK S_IFCHR
-    S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
+    S_IFIFO S_IFSOCK S_IFWHT
 
     # The following are compatibility aliases for S_IRUSR,
     # S_IWUSR, and S_IXUSR.
 
     S_IREAD S_IWRITE S_IEXEC
 
-and the C<S_IF*> functions are
+and the C<S_I*> functions are
 
     S_IMODE($mode)    the part of $mode containing the permission
                       bits and the setuid/setgid/sticky bits
 
-    S_IFMT($mode)     the part of $mode containing the file type
-                      which can be bit-anded with (for example)
-                      S_IFREG or with the following functions
+    S_IFMT($mode)     the part of $mode containing the file type,
+                      which will match one of the S_IF* constants
+                      (e.g. S_IFMT($mode) == S_IFDIR for directories),
+                      but see the following helper functions
 
     # The operators -f, -d, -l, -b, -c, -p, and -S.
 
     S_ISREG($mode) S_ISDIR($mode) S_ISLNK($mode)
     S_ISBLK($mode) S_ISCHR($mode) S_ISFIFO($mode) S_ISSOCK($mode)
 
-    # No direct -X operator counterpart, but for the first one
-    # the -g operator is often equivalent.  The ENFMT stands for
-    # record flocking enforcement, a platform-dependent feature.
+    # No direct -X operator counterpart.
 
-    S_ISENFMT($mode) S_ISWHT($mode)
+    S_ISWHT($mode)
 
 See your native L<chmod(2)> and L<stat(2)> documentation for more details
-about the C<S_*> constants.  To get status info for a symbolic link
+about the C<S_I*> constants.  To get status info for a symbolic link
 instead of the target file behind the link, use the
 L<C<lstat>|/lstat FILEHANDLE> function.
 
@@ -9047,6 +9097,20 @@ parentheses.  With a parenthesised list, L<C<undef>|/undef EXPR> can be
 used as a
 dummy placeholder.  However, since initialization of state variables in
 such lists is currently not possible this would serve no purpose.
+
+Like L<C<my>|/my VARLIST>, L<C<local>|/local EXPR>, and
+L<C<our>|/our VARLIST>, L<C<state>|/state VARLIST> can operate on a variable
+anywhere it appears in an expression (aside from interpolation in strings).
+The declaration will not apply to additional uses of the same variable until
+the next statement. This means additional uses of that variable within the
+same statement will act as they would have before that declaration occurred,
+or result in a strict 'vars' error, as appropriate.
+
+    package main;
+    use feature 'state';
+    our $x = 2;
+    foo($x, state $x = $x + 1, $x); # foo() receives (2, 3, 2)
+    foo($x, $main::x);              # foo() receives (3, 2)
 
 Redeclaring a variable in the same scope or statement will "shadow" the
 previous declaration, creating a new instance and preventing access to
@@ -10116,11 +10180,11 @@ pragmas are:
     use constant;
     use diagnostics;
     use integer;
+    use feature  qw(say signatures bitwise);
     use sigtrap  qw(SEGV BUS);
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
     use warnings qw(all);
-    use sort     qw(stable);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like L<C<strict>|strict> or L<C<integer>|integer>, unlike
@@ -10178,24 +10242,25 @@ If the specified Perl version is 5.39.0 or higher, builtin functions are
 imported lexically as with L<C<use builtin>|builtin> with a corresponding
 version bundle.
 
-Later use of C<use VERSION> will override most behavior of a previous
-C<use VERSION>, possibly removing the C<strict>, C<warnings> and C<feature>
-effects added by it.  Because C<builtin> functions are created as lexical
-subroutines in the current scope, it is not possible to remove those again
-and therefore a C<use VERSION> will I<not> remove any that happen to be
-visible but would not have been imported by it.
+Use of C<use VERSION> while another is in effect is not allowed with a
+C<use v5.39;> or greater version.  For lower versions, C<use VERSION> will
+override most behavior of a previous C<use VERSION>, possibly removing
+C<warnings> and C<feature> effects added by it. This behavior is deprecated,
+and a future release of perl will disallow changing the version once one has
+been declared.  Additionally, a C<use VERSION> with a version less than 5.11
+is not allowed after a C<use VERSION> with a version greater than 5.11.
 
 C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, F<warnings.pm>
-or F<builtin.pm> files.
+or F<builtin.pm> files, but instead implements the equivalent functionality
+directly.
 
-In the current implementation, any explicit use of C<use strict> or
-C<no strict> overrides C<use VERSION>, even if it comes before it.
-However, this may be subject to change in a future release of Perl, so new
-code should not rely on this fact.  It is recommended that a
-C<use VERSION> declaration be the first significant statement within a
-file (possibly after a C<package> statement or any amount of whitespace or
-comment), so that its effects happen first, and other pragmata are applied
-after it.
+In the current implementation, any explicit use of C<no strict> overrides
+C<use VERSION>, even if it comes before it. However, this may be subject to
+change in a future release of Perl, so new code should not rely on this fact.
+It is recommended that a C<use VERSION> declaration be the first significant
+statement within a file (possibly after a C<package> statement or any amount
+of whitespace or comment), so that its effects happen first, and other pragmata
+are applied after it.
 
 Specifying VERSION as a numeric argument of the form 5.024001 should
 generally be avoided as older less readable syntax compared to
@@ -10225,7 +10290,7 @@ infrastructure, this feature is now little used in practice and should be
 avoided in newly-written code.
 
 Care should be taken when using the C<no VERSION> form, as it is I<only>
-meant to be used to assert that the running Perl is of a earlier version
+meant to be used to assert that the running Perl is of an earlier version
 than its argument and I<not> to undo the feature-enabling side effects
 of C<use VERSION>.
 
@@ -10300,7 +10365,7 @@ L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and
 L<C<each>|/each HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
-provided here the exact details of Perl's hash algorithm and the hash
+provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.  Tied hashes
 may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.

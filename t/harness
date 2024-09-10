@@ -186,7 +186,7 @@ sub _compute_tests_and_ordering($) {
 
             $all_dirs{$path} = 1;
             $map_file_to_dir{$file} = $path;
-            # is this is a file that requires we do special processing
+            # is this a file that requires we do special processing
             # on the directory as a whole?
             if ($must_be_executed_serially{$file}) {
                 $partial_serials{$path} = 1;

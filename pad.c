@@ -53,7 +53,7 @@ AV which is C<@_>.  Other entries are storage for variables and op targets.
 
 Iterating over the PADNAMELIST iterates over all possible pad
 items.  Pad slots for targets (C<SVs_PADTMP>)
-and GVs end up having &PL_padname_undef "names", while slots for constants 
+and GVs end up having &PL_padname_undef "names", while slots for constants
 have C<&PL_padname_const> "names" (see C<L</pad_alloc>>).  That
 C<&PL_padname_undef>
 and C<&PL_padname_const> are used is an implementation detail subject to
@@ -306,6 +306,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     CV cvbody;/*CV body will never be realloced inside this func,
                so don't read it more than once, use fake CV so existing macros
                will work, the indirection and CV head struct optimized away*/
+#ifdef DEBUGGING
+    SvFLAGS(&cvbody) = SVt_PVCV;
+#endif
     SvANY(&cvbody) = SvANY(cv);
 
     PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
@@ -558,8 +561,7 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 
     if (typestash) {
         PadnameFLAGS(name) |= PADNAMEf_TYPED;
-        PadnameTYPE(name) =
-            MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash)));
+        PadnameTYPE(name) = HvREFCNT_inc_simple_NN(typestash);
     }
     if (ourstash) {
         PadnameFLAGS(name) |= PADNAMEf_OUR;
@@ -581,15 +583,17 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 }
 
 /*
-=for apidoc pad_add_name_pvn
+=for apidoc      pad_add_name_pv
+=for apidoc_item pad_add_name_pvn
+=for apidoc_item pad_add_name_sv
 
-Allocates a place in the currently-compiling pad for a named lexical
-variable.  Stores the name and other metadata in the name part of the
-pad, and makes preparations to manage the variable's lexical scoping.
-Returns the offset of the allocated pad slot.
+These each allocate a place in the currently-compiling pad for a named lexical
+variable.  They store the name and other metadata in the name part of the
+pad, and make preparations to manage the variable's lexical scoping.
+They return the offset of the allocated pad slot.
 
-C<namepv>/C<namelen> specify the variable's name in UTF-8, including
-leading sigil.
+They differ only in how the input variable's name is specified.
+
 If C<typestash> is non-null, the name is for a typed lexical, and this
 identifies the type.  If C<ourstash> is non-null, it's a lexical reference
 to a package variable, and this identifies the package.  The following
@@ -599,6 +603,18 @@ flags can be OR'ed together:
  padadd_STATE        variable will retain value persistently
  padadd_NO_DUP_CHECK skip check for lexical shadowing
  padadd_FIELD        specifies that the lexical is a field for a class
+
+In all forms, the variable name must include the leading sigil.
+
+In C<pad_add_name_sv>, the input name is taken from the SV parameter using
+C<L</SvPVutf8>()>.
+
+In C<pad_add_name_pv>, the input name is a NUL-terminated string, which must be
+encoded in UTF-8.
+
+In C<pad_add_name_pvn>, C<namelen> gives the length of the input name in bytes,
+which means it may contain embedded NUL characters.  Again, it must be encoded
+in UTF-8.
 
 =cut
 */
@@ -654,15 +670,6 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     return offset;
 }
 
-/*
-=for apidoc pad_add_name_pv
-
-Exactly like L</pad_add_name_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
-
 PADOFFSET
 Perl_pad_add_name_pv(pTHX_ const char *name,
                      const U32 flags, HV *typestash, HV *ourstash)
@@ -670,15 +677,6 @@ Perl_pad_add_name_pv(pTHX_ const char *name,
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PV;
     return pad_add_name_pvn(name, strlen(name), flags, typestash, ourstash);
 }
-
-/*
-=for apidoc pad_add_name_sv
-
-Exactly like L</pad_add_name_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
-
-=cut
-*/
 
 PADOFFSET
 Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
@@ -943,16 +941,38 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
 
 /*
-=for apidoc pad_findmy_pvn
+=for apidoc      pad_findmy_pv
+=for apidoc_item pad_findmy_pvn
+=for apidoc_item pad_findmy_pvs
+=for apidoc_item pad_findmy_sv
 
-Given the name of a lexical variable, find its position in the
-currently-compiling pad.
-C<namepv>/C<namelen> specify the variable's name, including leading sigil.
-C<flags> is reserved and must be zero.
+Given the name of a lexical variable, including its leading sigil, find its
+position in the currently-compiling pad.
+
 If it is not in the current pad but appears in the pad of any lexically
 enclosing scope, then a pseudo-entry for it is added in the current pad.
-Returns the offset in the current pad,
-or C<NOT_IN_PAD> if no such lexical is in scope.
+
+These each return the offset in the current pad, or C<NOT_IN_PAD> if no such
+lexical is in scope.
+
+The forms differ only in how the variable's name is specified.
+
+In C<pad_findmy_pvs>, the variable name is a C language string literal,
+enclosed in double quotes.
+
+In plain C<pad_findmy_pv>, the variable name is a C language NUL-terminated
+string.
+
+In C<pad_findmy_pvn>, C<len> gives the length of the variable name in bytes,
+so it may contain embedded-NUL characters.  The caller must make sure C<namepv>
+contains at least C<len> bytes.
+
+In C<pad_findmy_sv>, the variable name is taken from the SV parameter using
+C<L</SvPVutf8>()>.
+
+C<flags> is reserved and must be zero.
+
+=for apidoc Amnh||NOT_IN_PAD
 
 =cut
 */
@@ -1005,30 +1025,12 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     return NOT_IN_PAD;
 }
 
-/*
-=for apidoc pad_findmy_pv
-
-Exactly like L</pad_findmy_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
-
 PADOFFSET
 Perl_pad_findmy_pv(pTHX_ const char *name, U32 flags)
 {
     PERL_ARGS_ASSERT_PAD_FINDMY_PV;
     return pad_findmy_pvn(name, strlen(name), flags);
 }
-
-/*
-=for apidoc pad_findmy_sv
-
-Exactly like L</pad_findmy_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
-
-=cut
-*/
 
 PADOFFSET
 Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
@@ -1079,8 +1081,9 @@ index into the parent pad.
 */
 
 /* the CV has finished being compiled. This is not a sufficient test for
- * all CVs (eg XSUBs), but suffices for the CVs found in a lexical chain */
-#define CvCOMPILED(cv)	CvROOT(cv)
+ * all CVs (eg XSUBs), but suffices for the CVs found in a lexical chain.
+ * Note that a fully-compiled eval doesn't get CvROOT() set. */
+#define CvCOMPILED(cv)	(CvROOT(cv) || CvEVAL_COMPILED(cv))
 
 /* the CV does late binding of its lexicals */
 #define CvLATE(cv) (CvANON(cv) || CvCLONE(cv) || SvTYPE(cv) == SVt_PVFM)
@@ -1972,7 +1975,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
     PL_compcv = cv;
     if (newcv) SAVEFREESV(cv); /* in case of fatal warnings */
 
-    CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
+    CvOUTSIDE(cv) = CvREFCNT_inc_simple(outside);
 
     SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;

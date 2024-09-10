@@ -49,8 +49,10 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
                                           __FILE__, __LINE__));
     DEBUG_y(sv_dump(sv));
 
-    /* First, take care of non-UTF-8 input strings, because they're easy */
-    if (!SvUTF8(sv)) {
+    /* First, take care of input strings where UTF8ness doesn't matter */
+    if (   ! SvUTF8(sv)
+        || (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_ONLY_UTF8_INVARIANTS)
+    {
         while (s < send) {
             const short ch = tbl->map[*s];
             if (ch >= 0) {
@@ -62,7 +64,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         SvSETMAGIC(sv);
     }
     else {
-        const bool grows = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
+        const bool grows = (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_GROWS;
         U8 *d;
         U8 *dstart;
 
@@ -187,7 +189,9 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
                                           __FILE__, __LINE__));
     DEBUG_y(sv_dump(sv));
 
-    if (!SvUTF8(sv)) {
+    if (   ! SvUTF8(sv)
+        || (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_ONLY_UTF8_INVARIANTS)
+    {
         U8 *d = s;
         U8 * const dstart = d;
 
@@ -240,7 +244,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     }
     else { /* is utf8 */
         const bool squash = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
-        const bool grows  = cBOOL(PL_op->op_private & OPpTRANS_GROWS);
+        const bool grows = (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_GROWS;
         U8 *d;
         U8 *dstart;
         Size_t size = tbl->size;
@@ -369,7 +373,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
         else {
             from = utf8_to_uvchr_buf(s, send, &s_len);
             if (from == 0 && *s != '\0') {
-                _force_out_malformed_utf8_message(s, send, 0, /*die*/TRUE);
+                _force_out_malformed_utf8_message(s, send, 0, MALFORMED_UTF8_DIE);
             }
         }
 
@@ -418,7 +422,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     UV previous_map = TR_OOB;
     const bool squash         = cBOOL(PL_op->op_private & OPpTRANS_SQUASH);
     const bool delete_unfound = cBOOL(PL_op->op_private & OPpTRANS_DELETE);
-    bool inplace = ! cBOOL(PL_op->op_private & OPpTRANS_GROWS);
+    bool inplace = (PL_op->op_private & OPpTRANS_MASK) != OPpTRANS_GROWS;
     const UV* from_array = invlist_array(from_invlist);
     UV final_map = TR_OOB;
     bool out_is_utf8 = cBOOL(SvUTF8(sv));
@@ -438,7 +442,9 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     /* If there is something in the transliteration that could force the input
      * to be changed to UTF-8, we don't know if we can do it in place, so
      * assume cannot */
-    if (! out_is_utf8 && (PL_op->op_private & OPpTRANS_CAN_FORCE_UTF8)) {
+    if (   ! out_is_utf8
+        && (PL_op->op_private & OPpTRANS_MASK) == OPpTRANS_CAN_FORCE_UTF8)
+    {
         inplace = FALSE;
     }
 
@@ -486,7 +492,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
         else {
             from = utf8_to_uvchr_buf(s, send, &s_len);
             if (from == 0 && *s != '\0') {
-                _force_out_malformed_utf8_message(s, send, 0, /*die*/TRUE);
+                _force_out_malformed_utf8_message(s, send, 0, MALFORMED_UTF8_DIE);
             }
         }
 

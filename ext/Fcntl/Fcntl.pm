@@ -688,11 +688,6 @@ equivalent to C<S_IFMT($mode) == S_IFCHR>.
 Convenience function to check for directories: C<S_ISDIR($mode)> is
 equivalent to C<S_IFMT($mode) == S_IFDIR>.
 
-=item C<S_ISENFMT>
-
-Broken function; do not use. (C<S_ISENFMT($mode)> should always return false,
-anyway.)
-
 =item C<S_ISFIFO>
 
 Convenience function to check for fifos: C<S_ISFIFO($mode)> is
@@ -857,7 +852,7 @@ use strict;
 
 use Exporter 'import';
 require XSLoader;
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 
 XSLoader::load();
 
@@ -876,7 +871,7 @@ our %EXPORT_TAGS = (
 		     S_IREAD S_IWRITE S_IEXEC
 		     S_ISREG S_ISDIR S_ISLNK S_ISSOCK
 		     S_ISBLK S_ISCHR S_ISFIFO
-		     S_ISWHT S_ISENFMT
+		     S_ISWHT
 		     S_IFMT S_IMODE
                   )],
 );

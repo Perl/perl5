@@ -207,11 +207,30 @@ Perl_op_prune_chain_head(OP** op_p)
 #endif
 
 /* rounds up to nearest pointer */
-#define SIZE_TO_PSIZE(x)	(((x) + sizeof(I32 *) - 1)/sizeof(I32 *))
+PERL_STATIC_INLINE U16
+S_size_to_psize(size_t sz) {
+    size_t psize = (sz + sizeof(I32 *) - 1) / sizeof(I32 *);
+    assert(psize <= U16_MAX);
 
-#define DIFF(o,p)	\
-    (assert(((char *)(p) - (char *)(o)) % sizeof(I32**) == 0), \
-      ((size_t)((I32 **)(p) - (I32**)(o))))
+    return (U16)psize;
+}
+
+/*
+
+  Find the U16 offset of an OPSLOT within an OPSLAB.
+
+*/
+
+PERL_STATIC_INLINE U16
+S_opslab_slot_offset(const OPSLAB *slab, const OPSLOT *slot) {
+    PERL_ARGS_ASSERT_OPSLAB_SLOT_OFFSET;
+
+    const char *base = (const char *)&slab->opslab_slots;
+    assert((size_t)((const char *)slot - base) % sizeof(I32**) == 0);
+    const ptrdiff_t offset = (const I32 **)slot - (const I32 **)base;
+    assert(offset >= 0 && offset <= U16_MAX);
+    return (U16)offset;
+}
 
 /* requires double parens and aTHX_ */
 #define DEBUG_S_warn(args)					       \
@@ -220,7 +239,7 @@ Perl_op_prune_chain_head(OP** op_p)
     )
 
 /* opslot_size includes the size of the slot header, and an op can't be smaller than BASEOP */
-#define OPSLOT_SIZE_BASE (SIZE_TO_PSIZE(sizeof(OPSLOT)))
+#define OPSLOT_SIZE_BASE (size_to_psize(sizeof(OPSLOT)))
 
 /* the number of bytes to allocate for a slab with sz * sizeof(I32 **) space for op */
 #define OpSLABSizeBytes(sz) \
@@ -236,7 +255,7 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
     size_t sz_bytes = OpSLABSizeBytes(sz);
 
     /* opslot_offset is only U16 */
-    assert(sz < U16_MAX);
+    assert(sz <= U16_MAX);
     /* room for at least one op */
     assert(sz >= OPSLOT_SIZE_BASE);
 
@@ -260,7 +279,7 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
     /* The context is unused in non-Windows */
     PERL_UNUSED_CONTEXT;
 #endif
-    slab->opslab_free_space = sz;
+    slab->opslab_free_space = (U16)sz;
     slab->opslab_head = head ? head : slab;
     DEBUG_S_warn((aTHX_ "allocated new op slab sz 0x%x, %p, head slab %p",
         (unsigned int)slab->opslab_size, (void*)slab,
@@ -291,7 +310,7 @@ S_link_freed_op(pTHX_ OPSLAB *slab, OP *o) {
            is small.
         */
         /* We already have a list that isn't large enough, expand it */
-        size_t newsize = index+1;
+        U16 newsize = index+1;
         OP **p = (OP **)PerlMemShared_realloc(slab->opslab_freed, newsize * sizeof(OP*));
 
         if (!p)
@@ -320,7 +339,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     OPSLAB *slab2;
     OPSLOT *slot;
     OP *o;
-    size_t sz_in_p; /* size in pointer units, including the OPSLOT header */
+    U16 sz_in_p; /* size in pointer units, including the OPSLOT header */
 
     /* We only allocate ops from the slab during subroutine compilation.
        We find the slab via PL_compcv, hence that must be non-NULL. It could
@@ -349,7 +368,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     }
     else ++(head_slab = (OPSLAB *)CvSTART(PL_compcv))->opslab_refcnt;
 
-    sz_in_p = SIZE_TO_PSIZE(sz + OPSLOT_HEADER);
+    sz_in_p = size_to_psize(sz + OPSLOT_HEADER);
 
     /* The head slab for each CV maintains a free list of OPs. In particular, constant folding
        will free up OPs, so it makes sense to re-use them where possible. A
@@ -378,7 +397,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     }
 
 #define INIT_OPSLOT(s) \
-            slot->opslot_offset = DIFF(&slab2->opslab_slots, slot) ;	\
+            slot->opslot_offset = opslab_slot_offset(slab2, slot) ;	\
             slot->opslot_size = s;                      \
             slab2->opslab_free_space -= s;		\
             o = &slot->opslot_op;			\
@@ -2039,8 +2058,6 @@ Perl_scalar(pTHX_ OP *o)
                     next_kid = kid;
                     goto do_next;
                 }
-                else if (kid->op_type == OP_LEAVEWHEN)
-                    scalar(kid);
                 else
                     scalarvoid(kid);
                 kid = sib;
@@ -2129,7 +2146,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         want = o->op_flags & OPf_WANT;
         if ((want && want != OPf_WANT_SCALAR)
             || (PL_parser && PL_parser->error_count)
-            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE || o->op_type == OP_LEAVEWHEN)
+            || o->op_type == OP_RETURN || o->op_type == OP_REQUIRE)
         {
             goto get_next_op;
         }
@@ -2158,7 +2175,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
             /* FALLTHROUGH */
         case OP_WANTARRAY:
         case OP_GV:
-        case OP_SMARTMATCH:
         case OP_AV2ARYLEN:
         case OP_REF:
         case OP_REFGEN:
@@ -2397,8 +2413,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
 
         case OP_DOR:
         case OP_COND_EXPR:
-        case OP_ENTERGIVEN:
-        case OP_ENTERWHEN:
             next_kid = OpSIBLING(cUNOPo->op_first);
         break;
 
@@ -2418,8 +2432,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_LEAVETRY:
         case OP_LEAVELOOP:
         case OP_LINESEQ:
-        case OP_LEAVEGIVEN:
-        case OP_LEAVEWHEN:
         case OP_ONCE:
         kids:
             next_kid = cLISTOPo->op_first;
@@ -2606,8 +2618,6 @@ Perl_list(pTHX_ OP *o)
                     next_kid = kid;
                     goto do_next;
                 }
-                else if (kid->op_type == OP_LEAVEWHEN)
-                    list(kid);
                 else
                     scalarvoid(kid);
                 kid = sib;
@@ -3145,7 +3155,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                 cv = isGV(gv)
                     ? GvCV(gv)
                     : SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV
-                        ? MUTABLE_CV(SvRV(gv))
+                        ? CV_FROM_REF((SV *)gv)
                         : NULL;
                 if (!cv)
                     break;
@@ -3190,6 +3200,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_BIT_AND:
     case OP_BIT_XOR:
     case OP_BIT_OR:
+    case OP_NBIT_AND:
+    case OP_NBIT_XOR:
+    case OP_NBIT_OR:
+    case OP_SBIT_AND:
+    case OP_SBIT_XOR:
+    case OP_SBIT_OR:
     case OP_I_MULTIPLY:
     case OP_I_DIVIDE:
     case OP_I_MODULO:
@@ -4281,6 +4297,11 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
             o = right;
         }
         else {
+            if (left->op_type == OP_NOT && !(left->op_flags & OPf_PARENS)) {
+                Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+                    "Possible precedence problem between ! and %s", PL_op_desc[rtype]
+                );
+            }
             right->op_flags |= OPf_STACKED;
             if (rtype != OP_MATCH && rtype != OP_TRANSR &&
             ! (rtype == OP_TRANS &&
@@ -4702,6 +4723,7 @@ Perl_newPROG(pTHX_ OP *o)
         SAVEFREEOP(o);
         ENTER;
         S_process_optree(aTHX_ NULL, PL_eval_root, start);
+        CvEVAL_COMPILED_on(PL_compcv); /* this eval is now fully compiled */
         LEAVE;
         PL_savestack_ix = i;
     }
@@ -5081,7 +5103,9 @@ S_fold_constants(pTHX_ OP *const o)
         SvPADTMP_off(sv);
     else if (!SvIMMORTAL(sv)) {
         SvPADTMP_on(sv);
-        SvREADONLY_on(sv);
+        /* Do not set SvREADONLY(sv) here. newSVOP will call
+         * Perl_ck_svconst, which will do it. Setting it early
+         * here prevents Perl_ck_svconst from setting SvIsCOW(sv).*/
     }
     newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
     if (!is_stringify) newop->op_folded = 1;
@@ -5530,6 +5554,16 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
     if (type == OP_RETURN) {
         if (FEATURE_MODULE_TRUE_IS_ENABLED)
             flags |= OPf_SPECIAL;
+    }
+    if (type == OP_STRINGIFY && OP_TYPE_IS(o, OP_CONST) &&
+        !(flags & OPf_FOLDED) ) {
+        assert(!OpSIBLING(o));
+        /* Don't wrap a single CONST in a list, process that list,
+         * then constant fold the list back to the starting OP.
+         * Note: Folded CONSTs do not seem to occur frequently
+         * enough for it to be worth the code bloat of also
+         * providing a fast path for them. */
+        return o;
     }
     if (!o || o->op_type != OP_LIST)
         o = force_list(o, FALSE);
@@ -6017,34 +6051,95 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
 
+/* 4 bits per hex char, highest bit position = 0,1-3 => 1; 4-7 => 2; ... */
+#define NUM_HEX_CHARS(num) ((int) ((num == 0) ? 1 : 1 + (msbit_pos(num) / 4)))
+
+#define INFTY  "INFINITY"  /* How to spell "infinity" in the output */
+
+/* Total number of bytes a given code point would occupy in the output */
+#define TOTAL_LEN(num)                                                      \
+            ((int) ((num == 0)                                              \
+                    ? 1    /* Plain 0 has no ornamentation */               \
+                    : ((num >= IV_MAX)                                      \
+                       ? STRLENs(INFTY)                                   \
+                       : ((STRLENs("0x") + ((NUM_HEX_CHARS(num) <= 2)       \
+                          ? 2  /* Otherwise, minimum of 2 hex digits */     \
+                          : NUM_HEX_CHARS(num)))))))
+
+/* To make evident, Configure with `-DDEBUGGING`, build, run 
+ *  `./perl -Ilib -Dy t/op/tr.t`
+ */
 void
 Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
 {
-    const char indent[] = "    ";
+    PERL_ARGS_ASSERT_INVMAP_DUMP;
+
+    const unsigned int indent = 4;
 
     UV len = _invlist_len(invlist);
     UV * array = invlist_array(invlist);
-    UV i;
 
-    PERL_ARGS_ASSERT_INVMAP_DUMP;
+    if (len == 0) {
+        PerlIO_printf(Perl_debug_log, "(empty)\n");
+        return;
+    }
 
-    for (i = 0; i < len; i++) {
+    int upper = len - 1;
+    if (array[upper] >= IV_MAX) {   /* Avoid going off end in loop below */
+        upper--;
+    }
+
+    /* Each range is output with a start column, wide enough for the highest
+     * possible value; and an end column, similarly wide, but never narrower
+     * than the space required to output the phrase for infinity */
+    int max_start_len = TOTAL_LEN(array[upper]);
+    int max_end_len = MAX(STRLENs(INFTY), TOTAL_LEN(array[upper] - 1));
+
+    for (int i = 0; i <= upper; i++) {
         UV start = array[i];
-        UV end   = (i + 1 < len) ? array[i+1] - 1 : IV_MAX;
+        UV end = (i + 1 <= upper) ? array[i+1] - 1 : IV_MAX;
 
-        PerlIO_printf(Perl_debug_log, "%s[%" UVuf "] 0x%04" UVXf, indent, i, start);
-        if (end == IV_MAX) {
-            PerlIO_printf(Perl_debug_log, " .. INFTY");
-        }
-        else if (end != start) {
-            PerlIO_printf(Perl_debug_log, " .. 0x%04" UVXf, end);
+        /* The indentation */
+        PerlIO_printf(Perl_debug_log, "%*s[%d]", indent, " ", i);
+
+        /* Output a plain 0 without 0x ornamentation */
+        if (start == 0) {
+            PerlIO_printf(Perl_debug_log, "%*s%" UVXf,
+                                          max_start_len, " ", start);
         }
         else {
-            PerlIO_printf(Perl_debug_log, "            ");
+            PerlIO_printf(Perl_debug_log, "%*s0x%02" UVXf,
+                                          max_start_len - TOTAL_LEN(start) + 1,
+                                          " ",
+                                          start);
         }
 
-        PerlIO_printf(Perl_debug_log, "\t");
+#define RANGE_STRING  " .. "
+        if (end <= start) {
 
+            /* Skip the end column if the same as the start column, but instead
+             * space over the same number of columns it would occupy */
+            PerlIO_printf(Perl_debug_log, "%*s",
+                                            (int) STRLENs(RANGE_STRING)
+                                          + max_end_len
+                                          + 2,
+                                          " ");
+        }
+        else {
+            PerlIO_printf(Perl_debug_log, RANGE_STRING);
+
+            if (end >= IV_MAX) {
+                PerlIO_printf(Perl_debug_log, INFTY);
+            }
+            else {
+                PerlIO_printf(Perl_debug_log, "0x%02" UVXf, end);
+            }
+
+            PerlIO_printf(Perl_debug_log, "%*s",
+                                         max_end_len - TOTAL_LEN(end) + 2, " ");
+        }
+
+        /* Finally the column for the mapping */
         if (map[i] == TR_UNLISTED) {
             PerlIO_printf(Perl_debug_log, "TR_UNLISTED\n");
         }
@@ -6052,7 +6147,7 @@ Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
             PerlIO_printf(Perl_debug_log, "TR_SPECIAL_HANDLING\n");
         }
         else {
-            PerlIO_printf(Perl_debug_log, "0x%04" UVXf "\n", map[i]);
+            PerlIO_printf(Perl_debug_log, "0x%02" UVXf "\n", map[i]);
         }
     }
 }
@@ -6079,19 +6174,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     /* This function compiles a tr///, from data gathered from toke.c, into a
      * form suitable for use by do_trans() in doop.c at runtime.
      *
-     * It first normalizes the data, while discarding extraneous inputs; then
-     * writes out the compiled data.  The normalization allows for complete
-     * analysis, and avoids some false negatives and positives earlier versions
-     * of this code had.
+     * It has two passes.  The second is mainly to streamline the result of the
+     * first pass, resulting in less memory usage and faster runtime execution
+     * besides.
      *
-     * The normalization form is an inversion map (described below in detail).
+     * The first pass normalizes the data, while discarding extraneous inputs.
+     * The normalization allows for complete analysis, and avoids some false
+     * negatives and positives earlier versions of this code had.
+     *
+     * The normalizd form is an inversion map (described below in detail).
      * This is essentially the compiled form for tr///'s that require UTF-8,
-     * and its easy to use it to write the 257-byte table for tr///'s that
-     * don't need UTF-8.  That table is identical to what's been in use for
-     * many perl versions, except that it doesn't handle some edge cases that
-     * it used to, involving code points above 255.  The UTF-8 form now handles
-     * these.  (This could be changed with extra coding should it shown to be
-     * desirable.)
+     * There is a different form for those that don't need UTF-8, identical to
+     * what's been in use for many perl versions, except that it doesn't handle
+     * some edge cases that it used to, involving code points above 255.  The
+     * UTF-8 form now handles these.  (This could be changed with extra coding
+     * should it shown to be desirable.)
      *
      * If the complement (/c) option is specified, the lhs string (tstr) is
      * parsed into an inversion list.  Complementing these is trivial.  Then a
@@ -6129,6 +6226,99 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      *
      * The lhs of the tr/// is here referred to as the t side.
      * The rhs of the tr/// is here referred to as the r side.
+     *
+     * An inversion map consists of two parallel arrays.  One is essentially an
+     * inversion list: an ordered list of code points such that each element
+     * gives the first code point of a range of consecutive code points that
+     * map to the element in the other array that has the same index as this
+     * one (in other words, the corresponding element).  Thus the range extends
+     * up to (but not including) the code point given by the next higher
+     * element.  In a true inversion map, the corresponding element in the
+     * other array (the inversion list) gives the mapping of the first code
+     * point in the range, with the understanding that the next higher code
+     * point in the inversion list's range will map to the next higher code
+     * point in the map.
+     *
+     * So if at element [i], let's say we have:
+     *
+     *     t_invlist  r_map
+     * [i]    A         a
+     *
+     * This means that A => a, B => b, C => c....  Let's say that the situation
+     * is such that:
+     *
+     * [i+1]  L        -1
+     *
+     * This means the sequence that started at [i] stops at K => k.  This
+     * illustrates that you need to look at the next element to find where a
+     * sequence stops.  Except, the highest element in the inversion list
+     * begins a range that is understood to extend to the platform's infinity.
+     *
+     * This routine modifies traditional inversion maps to reserve two
+     * mappings:
+     *
+     *  TR_UNLISTED (or -1) indicates that no code point in the range is listed
+     *      in the tr/// searchlist.  At runtime, these are always passed
+     *      through unchanged.  In the inversion map, all points in the range
+     *      are mapped to -1, instead of increasing.  The 'L' entry in the
+     *      example above illustrates this.
+     *
+     *      We start the parse with every code point mapped to this, and as we
+     *      parse and find ones that are listed in the search list, we carve
+     *      out ranges as we go along that override that.
+     *
+     *  So, if the next element in our main example is such that it yields:
+     *
+     * [i]    A        a
+     * [i+1]  L       -1
+     * [i+2]  Q        q
+     *
+     * Then all of L, M, N, O, and P map to TR_UNLISTED.  We know that Q maps
+     * to q, but we need the next element (or know this is the final one) to
+     * figure out what comes next.
+     *
+     * The other special mapping is
+     *
+     *  TR_SPECIAL_HANDLING (or -2) indicates that every code point in the
+     *      range needs special handling.  Again, all code points in the range
+     *      are mapped to -2, instead of increasing.
+     *
+     *      There are two cases where this mapping is used:
+     *
+     *      Under /d this value means the code point should be deleted from the
+     *      transliteration when encountered.
+     *
+     *      Otherwise, it marks that every code point in the range is to map to
+     *      the final character in the replacement list.  This happens only
+     *      when the replacement list is shorter than the search one, so there
+     *      are things in the search list that have no correspondence in the
+     *      replacement list.  For example, in tr/a-z/A/, 'A' is the final
+     *      value, and the inversion map generated for this would be like this:
+     *          \0  =>  -1
+     *          a   =>   A
+     *          b-z =>  -2
+     *          z+1 =>  -1
+     *      'A' appears once, then the remainder of the range maps to -2.  The
+     *      use of -2 isn't strictly necessary, as an inversion map is capable
+     *      of representing this situation, but not nearly so compactly, and
+     *      this is actually quite commonly encountered.  Indeed, the original
+     *      design of this code used a full inversion map for this.  But things
+     *      like
+     *          tr/\0-\x{FFFF}/A/
+     *      generated huge data structures, slowly, and the execution was also
+     *      slow.  So the current scheme was implemented.
+     *
+     * If the next few elements in the example yield
+     *
+     * [i]    A        a
+     * [i+1]  L       -1
+     * [i+2]  Q        q
+     * [i+3]  R        z
+     * [i+4]  S       TR_UNLISTED
+     *
+     * Then Q => q; R => z; and S => TR_UNLISTED.  If [i+4] (the 'S') is the
+     * final element in the arrays, every code point from S to infinity maps to
+     * TR_UNLISTED.
      */
 
     SV * const tstr = cSVOPx(expr)->op_sv;
@@ -6155,12 +6345,17 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * UTF-8 by a tr/// operation. */
     bool can_force_utf8 = FALSE;
 
-    /* What is the maximum expansion factor in UTF-8 transliterations.  If a
-     * 2-byte UTF-8 encoded character is to be replaced by a 3-byte one, its
-     * expansion factor is 1.5.  This number is used at runtime to calculate
-     * how much space to allocate for non-inplace transliterations.  Without
-     * this number, the worst case is 14, which is extremely unlikely to happen
-     * in real life, and could require significant memory overhead. */
+    /* If only ASCII-range characters are involved, some shortcuts can be done
+     * at runtime */
+    bool has_utf8_variant = false;
+
+    /* What is the maximum expansion factor in UTF-8 transliterations,
+     * calculated in the first pass.  If a 2-byte UTF-8 encoded character is to
+     * be replaced by a 3-byte one, its expansion factor is 1.5.  This number
+     * is used at runtime to calculate how much space to allocate for
+     * non-inplace transliterations.  Without this number, the worst case is
+     * 14, which is extremely unlikely to happen in real life, and could
+     * require significant memory overhead. */
     NV max_expansion = 1.;
 
     UV t_range_count, r_range_count, min_range_count;
@@ -6188,34 +6383,119 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     unsigned int pass2;
 
     /* This routine implements detection of a transliteration having a longer
-     * UTF-8 representation than its source, by partitioning all the possible
-     * code points of the platform into equivalence classes of the same UTF-8
-     * byte length in the first pass.  As it constructs the mappings, it carves
-     * these up into smaller chunks, but doesn't merge any together.  This
-     * makes it easy to find the instances it's looking for.  A second pass is
-     * done after this has been determined which merges things together to
-     * shrink the table for runtime.  The table below is used for both ASCII
-     * and EBCDIC platforms.  On EBCDIC, the byte length is not monotonically
-     * increasing for code points below 256.  To correct for that, the macro
-     * CP_ADJUST defined below converts those code points to ASCII in the first
-     * pass, and we use the ASCII partition values.  That works because the
-     * growth factor will be unaffected, which is all that is calculated during
-     * the first pass. */
+     * UTF-8 representation than its source, by partitioning in the first pass
+     * all the possible code points of the platform into equivalence classes of
+     * the same UTF-8 byte length.  PL_partition_by_byte_length[] is the guts
+     * of an inversion list that does this.  It is used to avoid the expense of
+     * constructing the partition at runtime.  It covers the entire range of
+     * code points possible on this platform, and each entry is for the single
+     * range of code points whose UTF-8 representation has the same length.
+     * (The definition of UTF-8 guarantees that there is a single range for
+     * each length.) */
     UV PL_partition_by_byte_length[] = {
         0,
-        0x80,   /* Below this is 1 byte representations */
-        (32 * (1UL << (    UTF_ACCUMULATION_SHIFT))),   /* 2 bytes below this */
-        (16 * (1UL << (2 * UTF_ACCUMULATION_SHIFT))),   /* 3 bytes below this */
-        ( 8 * (1UL << (3 * UTF_ACCUMULATION_SHIFT))),   /* 4 bytes below this */
-        ( 4 * (1UL << (4 * UTF_ACCUMULATION_SHIFT))),   /* 5 bytes below this */
-        ( 2 * (1UL << (5 * UTF_ACCUMULATION_SHIFT)))    /* 6 bytes below this */
+
+        /* 0 .. 127  all have 1 byte
+         * representations */
+        0x80,
+
+        /* The highest two UTF-8 byte representable code point is the one with
+         * all 1's in the payload bearing bits of the start byte and its single
+         * continuation byte.  Those start bytes have 5 bits in their payload,
+         * and the single start byte has UTF_ACCUMULATION_SHIFT payload bits.
+         * The range for three byte code points starts at 1 plus that. */
+        1 + nBIT_UMAX(5 + 1 * UTF_ACCUMULATION_SHIFT),  /* begins 3 bytes */
+
+       /* The same is true for each succeeding byte length.  Each has one less
+        * bit in the start byte than the previous one, but one more
+        * continuation byte. */
+        1 + nBIT_UMAX(4 + 2 * UTF_ACCUMULATION_SHIFT),  /* begins 4 bytes */
+        1 + nBIT_UMAX(3 + 3 * UTF_ACCUMULATION_SHIFT),  /* begins 5 bytes */
+        1 + nBIT_UMAX(2 + 4 * UTF_ACCUMULATION_SHIFT),  /* begins 6 bytes */
+        1 + nBIT_UMAX(1 + 5 * UTF_ACCUMULATION_SHIFT),  /* begins 7 bytes */
 
 #  ifdef UV_IS_QUAD
-                                                    ,
-        ( ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))    /* 7 bytes below this */
+
+        /* begins platform's longest number of bytes */
+        1 + nBIT_UMAX(0 + 6 * UTF_ACCUMULATION_SHIFT)
 #  endif
 
     };
+
+    /* At the beginning of the first pass, the inversion map will look like
+     * this on a 32-bit ASCII platform
+     *
+     *  [0]         0 .. 0x7F      TR_UNLISTED
+     *  [1]      0x80 .. 0x07FF    TR_UNLISTED
+     *  [2]    0x0800 .. 0xFFFF    TR_UNLISTED
+     *  [3]   0x10000 .. 0x1FFFFF  TR_UNLISTED
+     *  [4]  0x200000 .. 0x3FFFFFF TR_UNLISTED
+     *  [5] 0x4000000 .. INFTY     TR_UNLISTED
+     *
+     * Now suppose that we are compiling tr/A-Z/a-z/
+     * At the end of the first pass, the inversion map will be
+     *
+     *  [0]         0 .. 0x40      TR_UNLISTED
+     *  [1]      0x41 .. 0x5A      0x61
+     *  [2]      0x5B .. 0x7F      TR_UNLISTED
+     *  [3]      0x80 .. 0x07FF    TR_UNLISTED
+     *  [4]    0x0800 .. 0xFFFF    TR_UNLISTED
+     *  [5]   0x10000 .. 0x1FFFFF  TR_UNLISTED
+     *  [6]  0x200000 .. 0x3FFFFFF TR_UNLISTED
+     *  [7] 0x4000000 .. INFTY     TR_UNLISTED
+     *
+     * The second pass will merge adjacent ranges, squashing this down to
+     *
+     *  [0]    0 .. 0x40   TR_UNLISTED
+     *  [1] 0x41 .. 0x5A   0x61
+     *  [2] 0x5B .. INFTY  TR_UNLISTED
+     *
+     * The actual compiled code will be the traditional 257 byte lookup array
+     * with 26 bytes in the middle looking like
+     *
+     *      [ord "A"] => ord("a")
+     *      [ord "B"] => ord("b")
+     *      ...
+     *      [ord "Z"] => ord("z")
+     *
+     * The 257th byte will contain information about the flags this tr is
+     * compiled with.  The remaining bytes will all contain TR_UNLISTED to
+     * indicate they are not to be touched by this operation.
+     *
+     * The reason the code space is partitioned is illustrated by the example
+     * oF compiling tr/\x{7FF}-\x{FFFE}/\x{800}-\x{FFFF}/
+     * This example effectively adds 1 to each code point in the lhs range.  By
+     * the end of the first pass, the inversion map will look like
+     *
+     *  [0]         0 .. 0x7F      TR_UNLISTED
+     *  [1]      0x80 .. 0x07FE    TR_UNLISTED
+     *  [2]    0x07FF              0x0800
+     *  [2]    0x0800 .. 0xFFFE    0x0801
+     *  [2]    0xFFFF              TR_UNLISTED
+     *  [3]   0x10000 .. 0x1FFFFF  TR_UNLISTED
+     *  [4]  0x200000 .. 0x3FFFFFF TR_UNLISTED
+     *  [5] 0x4000000 .. INFTY     TR_UNLISTED
+     *
+     * In this large range, just one code point, \x{7FF} translates to a code
+     * point which has a longer representation than it does.  This means that a
+     * string containing that code point cannot be edited in place, a fact we
+     * need to know at compilation time.  The partitioning forces the algorithm
+     * to split off the code point into a separate element from the rest of the
+     * range.  This makes it easy to find such cases.  That information is
+     * noted, and the second pass squashes this down to
+     *
+     *  [0]      0 .. 0x07FE  TR_UNLISTED
+     *  [1] 0x07FF .. 0xFFFE  0x0800
+     *  [2] 0xFFFF .. INFTY   TR_UNLISTED
+     *
+     * This inversion map is what is used at runtime; the 257 element table
+     * would be useless here, and is not generated.
+     *
+     * Note that we determine here if there is any possible input that can't be
+     * done in place.  It might be that a particular input contains only code
+     * points that can be done in place.  One could examine at runtime to see,
+     * but this could be as expensive as just doing the copy.
+     */
 
     PERL_ARGS_ASSERT_PMTRANS;
 
@@ -6345,25 +6625,36 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     for (pass2 = 0; pass2 < 2; pass2++) {
         if (pass2) {
+
+            DEBUG_yv(PerlIO_printf(Perl_debug_log, "After pass1: \n"));
+            DEBUG_yv(invmap_dump(t_invlist, r_map));
+
             /* In the second pass, we start with a single range */
             t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
             len = 1;
             t_array = invlist_array(t_invlist);
         }
 
-/* As noted earlier, we convert EBCDIC code points to Unicode in the first pass
- * so as to get the well-behaved length 1 vs length 2 boundary.  Only code
- * points below 256 differ between the two character sets in this regard.  For
- * these, we also can't have any ranges, as they have to be individually
- * converted. */
+/* In EBCDIC, the byte length is not monotonically increasing for code points
+ * below 256, which the algorithm below requires.  To accommodate that, the
+ * macro CP_ADJUST defined below converts those code points to ASCII in the
+ * first pass and does nothing in the second.  This works because the first
+ * pass is looking only for the existence of anomalies; and not the specific
+ * code point values.  The growth factor is going to be 2 regardless, because
+ * one byte can become two.  Only code points below 256 differ between the two
+ * character sets in this regard.  For these, we also can't have any ranges, as
+ * they have to be individually converted. */
 #ifdef EBCDIC
 #  define CP_ADJUST(x)          ((pass2) ? (x) : NATIVE_TO_UNI(x))
 #  define FORCE_RANGE_LEN_1(x)  ((pass2) ? 0 : ((x) < 256))
 #  define CP_SKIP(x)            ((pass2) ? UVCHR_SKIP(x) : OFFUNISKIP(x))
+#  define CP_VARIANT(x)         ((pass2) ? ! UVCHR_IS_INVARIANT(x)          \
+                                         : ! OFFUNI_IS_INVARIANT(x))
 #else
 #  define CP_ADJUST(x)          (x)
 #  define FORCE_RANGE_LEN_1(x)  0
 #  define CP_SKIP(x)            UVCHR_SKIP(x)
+#  define CP_VARIANT(x)       ! UVCHR_IS_INVARIANT(x)
 #endif
 
         /* And the mapping of each of the ranges is initialized.  Initially,
@@ -6382,8 +6673,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     __FILE__, __LINE__, _byte_dump_string(t, tend - t, 0)));
         DEBUG_y(PerlIO_printf(Perl_debug_log, "rstr=%s\n",
                                         _byte_dump_string(r, rend - r, 0)));
-        DEBUG_y(PerlIO_printf(Perl_debug_log, "/c=%d; /s=%d; /d=%d\n",
-                                                  complement, squash, del));
+        DEBUG_y(PerlIO_printf(Perl_debug_log, "/c=%d; /s=%d; /d=%d\n"
+                                              " At the beginning of pass %u\n",
+                                              complement, squash, del,
+                                              pass2 + 1));
         DEBUG_y(invmap_dump(t_invlist, r_map));
 
         /* Now go through the search list constructing an inversion map.  The
@@ -6392,91 +6685,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
          * to deal with at run time.  This is the only place in core that
          * generates an inversion map; if others were introduced, it might be
          * better to create general purpose routines to handle them.
-         * (Inversion maps are created in perl in other places.)
-         *
-         * An inversion map consists of two parallel arrays.  One is
-         * essentially an inversion list: an ordered list of code points such
-         * that each element gives the first code point of a range of
-         * consecutive code points that map to the element in the other array
-         * that has the same index as this one (in other words, the
-         * corresponding element).  Thus the range extends up to (but not
-         * including) the code point given by the next higher element.  In a
-         * true inversion map, the corresponding element in the other array
-         * gives the mapping of the first code point in the range, with the
-         * understanding that the next higher code point in the inversion
-         * list's range will map to the next higher code point in the map.
-         *
-         * So if at element [i], let's say we have:
-         *
-         *     t_invlist  r_map
-         * [i]    A         a
-         *
-         * This means that A => a, B => b, C => c....  Let's say that the
-         * situation is such that:
-         *
-         * [i+1]  L        -1
-         *
-         * This means the sequence that started at [i] stops at K => k.  This
-         * illustrates that you need to look at the next element to find where
-         * a sequence stops.  Except, the highest element in the inversion list
-         * begins a range that is understood to extend to the platform's
-         * infinity.
-         *
-         * This routine modifies traditional inversion maps to reserve two
-         * mappings:
-         *
-         *  TR_UNLISTED (or -1) indicates that no code point in the range
-         *      is listed in the tr/// searchlist.  At runtime, these are
-         *      always passed through unchanged.  In the inversion map, all
-         *      points in the range are mapped to -1, instead of increasing,
-         *      like the 'L' in the example above.
-         *
-         *      We start the parse with every code point mapped to this, and as
-         *      we parse and find ones that are listed in the search list, we
-         *      carve out ranges as we go along that override that.
-         *
-         *  TR_SPECIAL_HANDLING (or -2) indicates that every code point in the
-         *      range needs special handling.  Again, all code points in the
-         *      range are mapped to -2, instead of increasing.
-         *
-         *      Under /d this value means the code point should be deleted from
-         *      the transliteration when encountered.
-         *
-         *      Otherwise, it marks that every code point in the range is to
-         *      map to the final character in the replacement list.  This
-         *      happens only when the replacement list is shorter than the
-         *      search one, so there are things in the search list that have no
-         *      correspondence in the replacement list.  For example, in
-         *      tr/a-z/A/, 'A' is the final value, and the inversion map
-         *      generated for this would be like this:
-         *          \0  =>  -1
-         *          a   =>   A
-         *          b-z =>  -2
-         *          z+1 =>  -1
-         *      'A' appears once, then the remainder of the range maps to -2.
-         *      The use of -2 isn't strictly necessary, as an inversion map is
-         *      capable of representing this situation, but not nearly so
-         *      compactly, and this is actually quite commonly encountered.
-         *      Indeed, the original design of this code used a full inversion
-         *      map for this.  But things like
-         *          tr/\0-\x{FFFF}/A/
-         *      generated huge data structures, slowly, and the execution was
-         *      also slow.  So the current scheme was implemented.
-         *
-         *  So, if the next element in our example is:
-         *
-         * [i+2]  Q        q
-         *
-         * Then all of L, M, N, O, and P map to TR_UNLISTED.  If the next
-         * elements are
-         *
-         * [i+3]  R        z
-         * [i+4]  S       TR_UNLISTED
-         *
-         * Then Q => q; R => z; and S => TR_UNLISTED.  If [i+4] (the 'S') is
-         * the final element in the arrays, every code point from S to infinity
-         * maps to TR_UNLISTED.
-         *
+         * (Inversion lists are created in perl in other places.)
          */
                            /* Finish up range started in what otherwise would
                             * have been the final iteration */
@@ -6531,6 +6740,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     }
                 }
 
+                if (CP_VARIANT(t_cp)) {
+                    has_utf8_variant = true;
+                }
+
                 /* Count the total number of listed code points * */
                 t_count += t_range_count;
             }
@@ -6545,10 +6758,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     r_cp = TR_SPECIAL_HANDLING;
                     r_range_count = t_range_count;
 
-                    if (! del) {
-                        DEBUG_yv(PerlIO_printf(Perl_debug_log,
-                                        "final_map =%" UVXf "\n", final_map));
+#ifdef DEBUGGING
+                    if (DEBUG_y_TEST && ! del) {
+                        PerlIO_printf(Perl_debug_log,
+                                          "final_map =%" UVXf "\n", final_map);
                     }
+#endif
                 }
                 else {
                     if (! rstr_utf8) {
@@ -6577,6 +6792,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     if (r_cp == TR_SPECIAL_HANDLING) {
                         r_range_count = t_range_count;
                     }
+                    else if (CP_VARIANT(r_cp)) {
+                        has_utf8_variant = true;
+                    }
 
                     /* This is the final character so far */
                     final_map = r_cp + r_range_count - 1;
@@ -6596,8 +6814,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * code point <cp>.  The inversion map was initialized to cover the
              * entire range of possible inputs, so this should not fail.  So
              * the return value is the index into the list's array of the range
-             * that contains <cp>, that is, 'i' such that array[i] <= cp <
-             * array[i+1] */
+             * that contains <cp>, that is, 'i' such that
+             *      array[i] <= cp < * array[i+1] */
             j = _invlist_search(t_invlist, t_cp);
             assert(j >= 0);
             i = j;
@@ -6702,8 +6920,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * case is an expansion ratio of 14:1. This is rare, and
                      * we'd rather allocate only the necessary amount of extra
                      * memory for that copy.  We can calculate the worst case
-                     * for this particular transliteration is by keeping track
-                     * of the expansion factor for each range.
+                     * for this particular transliteration by keeping track of
+                     * the expansion factor for each range.
                      *
                      * Consider tr/\xCB/\X{E000}/.  The maximum expansion
                      * factor is 1 byte going to 3 if the target string is not
@@ -7055,7 +7273,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     if (   can_force_utf8
         || (   len > 0
             && t_array[len-1] > 255
-                 /* If the final range is 0x100-INFINITY and is a special
+                 /* But if the final range is 0x100-INFINITY and is a special
                   * mapping, the table implementation can handle it */
             && ! (   t_array[len-1] == 256
                   && (   r_map[len-1] == TR_UNLISTED
@@ -7127,6 +7345,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         /* Indicate this is an op_pv */
         o->op_private &= ~OPpTRANS_USE_SVOP;
 
+        /* Indicate if no variants, but complementing means the runtime has to
+         * consider variants anyway */
+        if (! complement && ! has_utf8_variant) {
+            o->op_private |= OPpTRANS_ONLY_UTF8_INVARIANTS;
+        }
+
         tbl = (OPtrans_map*)PerlMemShared_calloc(struct_size, 1);
         tbl->size = 256;
         cPVOPo->op_pv = (char*)tbl;
@@ -7163,22 +7387,26 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                               : (short) rlen
                                 ? (short) final_map
                                 : (short) TR_R_EMPTY;
-        DEBUG_y(PerlIO_printf(Perl_debug_log,"%s: %d\n", __FILE__, __LINE__));
-        for (i = 0; i < tbl->size; i++) {
-            if (tbl->map[i] < 0) {
-                DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%d",
-                                                (unsigned) i, tbl->map[i]));
+#ifdef DEBUGGING
+        if (DEBUG_y_TEST) {
+            PerlIO_printf(Perl_debug_log,"%s: %d\n", __FILE__, __LINE__);
+            for (i = 0; i < tbl->size; i++) {
+                if (tbl->map[i] < 0) {
+                    PerlIO_printf(Perl_debug_log," %02x=>%d",
+                                                    (unsigned) i, tbl->map[i]);
+                }
+                else {
+                    PerlIO_printf(Perl_debug_log," %02x=>%02x",
+                                                    (unsigned) i, tbl->map[i]);
+                }
+                if ((i+1) % 8 == 0 || i + 1 == (short) tbl->size) {
+                    PerlIO_printf(Perl_debug_log,"\n");
+                }
             }
-            else {
-                DEBUG_y(PerlIO_printf(Perl_debug_log," %02x=>%02x",
-                                                (unsigned) i, tbl->map[i]));
-            }
-            if ((i+1) % 8 == 0 || i + 1 == (short) tbl->size) {
-                DEBUG_y(PerlIO_printf(Perl_debug_log,"\n"));
-            }
-        }
-        DEBUG_y(PerlIO_printf(Perl_debug_log,"Final map 0x%x=>%02x\n",
-                                (unsigned) tbl->size, tbl->map[tbl->size]));
+            PerlIO_printf(Perl_debug_log,"Final map 0x%x=>%02x\n",
+                                    (unsigned) tbl->size, tbl->map[tbl->size]);
+        };
+#endif
 
         SvREFCNT_dec(t_invlist);
 
@@ -7216,8 +7444,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             del, squash, complement,
             cBOOL(o->op_private & OPpTRANS_IDENTICAL),
             cBOOL(o->op_private & OPpTRANS_USE_SVOP),
-            cBOOL(o->op_private & OPpTRANS_GROWS),
-            cBOOL(o->op_private & OPpTRANS_CAN_FORCE_UTF8),
+            (o->op_private & OPpTRANS_MASK) == OPpTRANS_GROWS,
+            (o->op_private & OPpTRANS_MASK) == OPpTRANS_CAN_FORCE_UTF8,
             max_expansion));
 
     Safefree(r_map);
@@ -7921,7 +8149,7 @@ static U16 S_extract_shortver(pTHX_ SV *sv)
     if(!SvRV(sv) || !SvOBJECT(rv = SvRV(sv)) || !sv_derived_from(sv, "version"))
         return 0;
 
-    AV *av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(rv), "version", 0)));
+    AV *av = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(rv), "version", 0));
 
     U16 shortver = 0;
 
@@ -8051,7 +8279,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             }
             else {
                 /* OK let's at least warn */
-                deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.46",
+                deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.44",
                     "Changing use VERSION while another use VERSION is in scope");
             }
         }
@@ -8088,6 +8316,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             prepare_export_lexical();
             import_builtin_bundle(shortver);
             finish_export_lexical();
+        }
+
+        /* source::encoding 'ascii' is also off by default for earlier versions
+         * */
+        if (shortver >= SHORTVER(5, 41)) {
+            PL_hints |= HINT_ASCII_ENCODING;
+        }
+        else {
+            PL_hints &= ~HINT_ASCII_ENCODING;
         }
 
         PL_prevailing_version = shortver;
@@ -9582,7 +9819,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
      * keep it in-place if there's space */
     if (loop->op_slabbed
         &&    OpSLOT(loop)->opslot_size
-            < SIZE_TO_PSIZE(sizeof(LOOP) + OPSLOT_HEADER))
+            < size_to_psize(sizeof(LOOP) + OPSLOT_HEADER))
     {
         /* no space; allocate new op */
         LOOP *tmp;
@@ -9664,239 +9901,6 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
     return o;
 }
 
-/* if the condition is a literal array or hash
-   (or @{ ... } etc), make a reference to it.
- */
-STATIC OP *
-S_ref_array_or_hash(pTHX_ OP *cond)
-{
-    if (cond
-    && (cond->op_type == OP_RV2AV
-    ||  cond->op_type == OP_PADAV
-    ||  cond->op_type == OP_RV2HV
-    ||  cond->op_type == OP_PADHV))
-
-        return newUNOP(OP_REFGEN, 0, op_lvalue(cond, OP_REFGEN));
-
-    else if(cond
-    && (cond->op_type == OP_ASLICE
-    ||  cond->op_type == OP_KVASLICE
-    ||  cond->op_type == OP_HSLICE
-    ||  cond->op_type == OP_KVHSLICE)) {
-
-        /* anonlist now needs a list from this op, was previously used in
-         * scalar context */
-        cond->op_flags &= ~(OPf_WANT_SCALAR | OPf_REF);
-        cond->op_flags |= OPf_WANT_LIST;
-
-        return newANONLIST(op_lvalue(cond, OP_ANONLIST));
-    }
-
-    else
-        return cond;
-}
-
-/* These construct the optree fragments representing given()
-   and when() blocks.
-
-   entergiven and enterwhen are LOGOPs; the op_other pointer
-   points up to the associated leave op. We need this so we
-   can put it in the context and make break/continue work.
-   (Also, of course, pp_enterwhen will jump straight to
-   op_other if the match fails.)
- */
-
-STATIC OP *
-S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
-                   I32 enter_opcode, I32 leave_opcode,
-                   PADOFFSET entertarg)
-{
-    LOGOP *enterop;
-    OP *o;
-
-    PERL_ARGS_ASSERT_NEWGIVWHENOP;
-    PERL_UNUSED_ARG(entertarg); /* used to indicate targ of lexical $_ */
-
-    enterop = alloc_LOGOP(enter_opcode, block, NULL);
-    enterop->op_targ = 0;
-    enterop->op_private = 0;
-
-    o = newUNOP(leave_opcode, 0, (OP *) enterop);
-
-    if (cond) {
-        /* prepend cond if we have one */
-        op_sibling_splice((OP*)enterop, NULL, 0, scalar(cond));
-
-        o->op_next = LINKLIST(cond);
-        cond->op_next = (OP *) enterop;
-    }
-    else {
-        /* This is a default {} block */
-        enterop->op_flags |= OPf_SPECIAL;
-        o      ->op_flags |= OPf_SPECIAL;
-
-        o->op_next = (OP *) enterop;
-    }
-
-    CHECKOP(enter_opcode, enterop); /* Currently does nothing, since
-                                       entergiven and enterwhen both
-                                       use ck_null() */
-
-    enterop->op_next = LINKLIST(block);
-    block->op_next = enterop->op_other = o;
-
-    return o;
-}
-
-
-/* For the purposes of 'when(implied_smartmatch)'
- *              versus 'when(boolean_expression)',
- * does this look like a boolean operation? For these purposes
-   a boolean operation is:
-     - a subroutine call [*]
-     - a logical connective
-     - a comparison operator
-     - a filetest operator, with the exception of -s -M -A -C
-     - defined(), exists() or eof()
-     - /$re/ or $foo =~ /$re/
-
-   [*] possibly surprising
- */
-STATIC bool
-S_looks_like_bool(pTHX_ const OP *o)
-{
-    PERL_ARGS_ASSERT_LOOKS_LIKE_BOOL;
-
-    switch(o->op_type) {
-        case OP_OR:
-        case OP_DOR:
-            return looks_like_bool(cLOGOPo->op_first);
-
-        case OP_AND:
-        {
-            OP* sibl = OpSIBLING(cLOGOPo->op_first);
-            ASSUME(sibl);
-            return (
-                looks_like_bool(cLOGOPo->op_first)
-             && looks_like_bool(sibl));
-        }
-
-        case OP_NULL:
-        case OP_SCALAR:
-            return (
-                o->op_flags & OPf_KIDS
-            && looks_like_bool(cUNOPo->op_first));
-
-        case OP_ENTERSUB:
-
-        case OP_NOT:	case OP_XOR:
-
-        case OP_EQ:	case OP_NE:	case OP_LT:
-        case OP_GT:	case OP_LE:	case OP_GE:
-
-        case OP_I_EQ:	case OP_I_NE:	case OP_I_LT:
-        case OP_I_GT:	case OP_I_LE:	case OP_I_GE:
-
-        case OP_SEQ:	case OP_SNE:	case OP_SLT:
-        case OP_SGT:	case OP_SLE:	case OP_SGE:
-
-        case OP_SMARTMATCH:
-
-        case OP_FTRREAD:  case OP_FTRWRITE: case OP_FTREXEC:
-        case OP_FTEREAD:  case OP_FTEWRITE: case OP_FTEEXEC:
-        case OP_FTIS:     case OP_FTEOWNED: case OP_FTROWNED:
-        case OP_FTZERO:   case OP_FTSOCK:   case OP_FTCHR:
-        case OP_FTBLK:    case OP_FTFILE:   case OP_FTDIR:
-        case OP_FTPIPE:   case OP_FTLINK:   case OP_FTSUID:
-        case OP_FTSGID:   case OP_FTSVTX:   case OP_FTTTY:
-        case OP_FTTEXT:   case OP_FTBINARY:
-
-        case OP_DEFINED: case OP_EXISTS:
-        case OP_MATCH:	 case OP_EOF:
-
-        case OP_FLOP:
-
-            return TRUE;
-
-        case OP_INDEX:
-        case OP_RINDEX:
-            /* optimised-away (index() != -1) or similar comparison */
-            if (o->op_private & OPpTRUEBOOL)
-                return TRUE;
-            return FALSE;
-
-        case OP_CONST:
-            /* Detect comparisons that have been optimized away */
-            if (cSVOPo->op_sv == &PL_sv_yes
-            ||  cSVOPo->op_sv == &PL_sv_no)
-
-                return TRUE;
-            else
-                return FALSE;
-        /* FALLTHROUGH */
-        default:
-            return FALSE;
-    }
-}
-
-
-/*
-=for apidoc newGIVENOP
-
-Constructs, checks, and returns an op tree expressing a C<given> block.
-C<cond> supplies the expression to whose value C<$_> will be locally
-aliased, and C<block> supplies the body of the C<given> construct; they
-are consumed by this function and become part of the constructed op tree.
-C<defsv_off> must be zero (it used to identity the pad slot of lexical $_).
-
-=cut
-*/
-
-OP *
-Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
-{
-    PERL_ARGS_ASSERT_NEWGIVENOP;
-    PERL_UNUSED_ARG(defsv_off);
-
-    assert(!defsv_off);
-    return newGIVWHENOP(
-        ref_array_or_hash(cond),
-        block,
-        OP_ENTERGIVEN, OP_LEAVEGIVEN,
-        0);
-}
-
-/*
-=for apidoc newWHENOP
-
-Constructs, checks, and returns an op tree expressing a C<when> block.
-C<cond> supplies the test expression, and C<block> supplies the block
-that will be executed if the test evaluates to true; they are consumed
-by this function and become part of the constructed op tree.  C<cond>
-will be interpreted DWIMically, often as a comparison against C<$_>,
-and may be null to generate a C<default> block.
-
-=cut
-*/
-
-OP *
-Perl_newWHENOP(pTHX_ OP *cond, OP *block)
-{
-    const bool cond_llb = (!cond || looks_like_bool(cond));
-    OP *cond_op;
-
-    PERL_ARGS_ASSERT_NEWWHENOP;
-
-    if (cond_llb)
-        cond_op = cond;
-    else {
-        cond_op = newBINOP(OP_SMARTMATCH, OPf_SPECIAL,
-                newDEFSVOP(),
-                scalar(ref_array_or_hash(cond)));
-    }
-
-    return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
-}
 
 /*
 =for apidoc newDEFEROP
@@ -10711,7 +10715,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
            ec ? GV_NOADD_NOINIT
               :   (IN_PERL_RUNTIME && PL_curstash != CopSTASH(PL_curcop))
                || PL_curstash != PL_defstash
-               || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
+               || memchr(name, ':', namlen)
                     ? gv_fetch_flags
                     : GV_ADDMULTI | GV_NOINIT | GV_NOTQUAL;
         gv = gv_fetchsv(cSVOPo->op_sv, flags, SVt_PVCV);
@@ -12166,6 +12170,27 @@ Perl_ck_bitop(pTHX_ OP *o)
     return o;
 }
 
+static void
+check_precedence_not_vs_cmp(pTHX_ const OP *const o)
+{
+    const OP *const left = cUNOPo->op_first,
+             *const right = OpSIBLING(left);
+    if (
+        left->op_type == OP_NOT             /* warn for !$x == ...       */
+        && !(left->op_flags & OPf_PARENS)   /* but not  (!$x) == ...     */
+        && right->op_type != OP_NOT         /* ... nor  !$x == !...      */
+        && !(                               /* ... nor  !$x == !CONSTANT */
+            right->op_folded
+            && right->op_type == OP_CONST
+            && SvIsBOOL(cSVOPx_sv(right))
+        )
+    ) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+            "Possible precedence problem between ! and %s", OP_DESC(o)
+        );
+    }
+}
+
 PERL_STATIC_INLINE bool
 is_dollar_bracket(pTHX_ const OP * const o)
 {
@@ -12212,6 +12237,8 @@ Perl_ck_cmp(pTHX_ OP *o)
             Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                         "$[ used in %s (did you mean $] ?)", OP_DESC(o));
     }
+
+    check_precedence_not_vs_cmp(aTHX_ o);
 
     /* convert (index(...) == -1) and variations into
      *   (r)index/BOOL(,NEG)
@@ -12292,6 +12319,17 @@ Perl_ck_cmp(pTHX_ OP *o)
     return indexop;
 }
 
+/* for slt, sgt, sle, sge, seq, sne */
+
+OP *
+Perl_ck_scmp(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_SCMP;
+
+    check_precedence_not_vs_cmp(aTHX_ o);
+
+    return o;
+}
 
 OP *
 Perl_ck_concat(pTHX_ OP *o)
@@ -13258,38 +13296,6 @@ Perl_ck_listiob(pTHX_ OP *o)
     return listkids(o);
 }
 
-OP *
-Perl_ck_smartmatch(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_CK_SMARTMATCH;
-    if (0 == (o->op_flags & OPf_SPECIAL)) {
-        OP *first  = cBINOPo->op_first;
-        OP *second = OpSIBLING(first);
-
-        /* Implicitly take a reference to an array or hash */
-
-        /* remove the original two siblings, then add back the
-         * (possibly different) first and second sibs.
-         */
-        op_sibling_splice(o, NULL, 1, NULL);
-        op_sibling_splice(o, NULL, 1, NULL);
-        first  = ref_array_or_hash(first);
-        second = ref_array_or_hash(second);
-        op_sibling_splice(o, NULL, 0, second);
-        op_sibling_splice(o, NULL, 0, first);
-
-        /* Implicitly take a reference to a regular expression */
-        if (first->op_type == OP_MATCH && !(first->op_flags & OPf_STACKED)) {
-            OpTYPE_set(first, OP_QR);
-        }
-        if (second->op_type == OP_MATCH && !(second->op_flags & OPf_STACKED)) {
-            OpTYPE_set(second, OP_QR);
-        }
-    }
-
-    return o;
-}
-
 
 static OP *
 S_maybe_targlex(pTHX_ OP *o)
@@ -13372,7 +13378,6 @@ Perl_ck_method(pTHX_ OP *o)
 {
     SV *sv, *methsv, *rclass;
     const char* method;
-    char* compatptr;
     int utf8;
     STRLEN len, nsplit = 0, i;
     OP* new_op;
@@ -13382,14 +13387,6 @@ Perl_ck_method(pTHX_ OP *o)
     if (kid->op_type != OP_CONST) return o;
 
     sv = kSVOP->op_sv;
-
-    /* replace ' with :: */
-    while ((compatptr = (char *) memchr(SvPVX(sv), '\'',
-                                        SvEND(sv) - SvPVX(sv) )))
-    {
-        *compatptr = ':';
-        sv_insert(sv, compatptr - SvPVX_const(sv), 0, ":", 1);
-    }
 
     method = SvPVX_const(sv);
     len = SvCUR(sv);
@@ -13437,6 +13434,40 @@ Perl_ck_null(pTHX_ OP *o)
     return o;
 }
 
+__attribute__nonnull__(1)
+static bool
+S_is_dup_mode(const OP *o)
+{
+    assert(o != NULL);
+    if (o->op_type != OP_CONST) {
+        return false;
+    }
+
+    const SV *const sv = cSVOPx(o)->op_sv;
+    if (!SvPOK(sv)) {
+        return false;
+    }
+
+    const char *mode = SvPVX_const(sv);
+    if (*mode == '+') {
+        mode++;
+    }
+    if (*mode == '>') {
+        if (mode[1] == '>') {
+            mode++;
+        }
+    }
+    else if (*mode == '<') {
+        /* nop */
+    }
+    else {
+        return false;
+    }
+
+    /* <&, >&, >>&, +<&, +>&, +>>& */
+    return mode[1] == '&';
+}
+
 OP *
 Perl_ck_open(pTHX_ OP *o)
 {
@@ -13449,19 +13480,31 @@ Perl_ck_open(pTHX_ OP *o)
          OP * const first = cLISTOPx(o)->op_first; /* The pushmark. */
          OP * const last  = cLISTOPx(o)->op_last;  /* The bareword. */
          OP *oa;
-         const char *mode;
 
-         if ((last->op_type == OP_CONST) &&		/* The bareword. */
+         if ((last->op_type == OP_CONST) &&             /* The bareword. */
              (last->op_private & OPpCONST_BARE) &&
              (last->op_private & OPpCONST_STRICT) &&
-             (oa = OpSIBLING(first)) &&		/* The fh. */
-             (oa = OpSIBLING(oa)) &&			/* The mode. */
-             (oa->op_type == OP_CONST) &&
-             SvPOK(cSVOPx(oa)->op_sv) &&
-             (mode = SvPVX_const(cSVOPx(oa)->op_sv)) &&
-             mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
-             (last == OpSIBLING(oa)))			/* The bareword. */
-              last->op_private &= ~OPpCONST_STRICT;
+             (oa = OpSIBLING(first)) &&                 /* The fh. */
+             (oa = OpSIBLING(oa)) &&                    /* The mode. */
+             S_is_dup_mode(oa) &&                       /* A dup open. */
+             (last == OpSIBLING(oa))) {                 /* The bareword. */
+             if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED)
+                 no_bareword_filehandle(SvPVX(cSVOPx_sv(last)));
+             last->op_private &= ~OPpCONST_STRICT;
+         }
+    }
+    {
+        /* mark as special if filename is a literal undef */
+        const OP *arg = cLISTOPx(o)->op_first; /* pushmark */
+        if (
+            (arg = OpSIBLING(arg))    /* handle */
+            && (arg = OpSIBLING(arg)) /* mode */
+            && (arg = OpSIBLING(arg)) /* filename */
+        ) {
+            if (arg->op_type == OP_UNDEF && !(arg->op_flags & OPf_KIDS)) {
+                o->op_flags |= OPf_SPECIAL;
+            }
+        }
     }
     return ck_fun(o);
 }
@@ -14199,7 +14242,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
             gv = cGVOPx_gv(rvop);
             if (!isGV(gv)) {
                 if (SvROK(gv) && SvTYPE(SvRV(gv)) == SVt_PVCV) {
-                    cv = MUTABLE_CV(SvRV(gv));
+                    cv = CV_FROM_REF((SV *)gv);
                     gv = NULL;
                     break;
                 }
@@ -14632,7 +14675,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
             /* Usually, OPf_SPECIAL on an op with no args means that it had
              * parens, but these have their own meaning for that flag: */
             && opnum != OP_VALUES && opnum != OP_KEYS && opnum != OP_EACH
-            && opnum != OP_DELETE && opnum != OP_EXISTS)
+            && opnum != OP_DELETE && opnum != OP_EXISTS && opnum != OP_CHDIR)
                 flags |= OPf_SPECIAL;
         /* excise cvop from end of sibling chain */
         op_sibling_splice(parent, prev, 1, NULL);
@@ -15201,14 +15244,22 @@ Perl_ck_length(pTHX_ OP *o)
 OP *
 Perl_ck_isa(pTHX_ OP *o)
 {
-    OP *classop = cBINOPo->op_last;
-
     PERL_ARGS_ASSERT_CK_ISA;
+
+    OP *const classop = cBINOPo->op_last;
 
     /* Convert barename into PV */
     if(classop->op_type == OP_CONST && classop->op_private & OPpCONST_BARE) {
         /* TODO: Optionally convert package to raw HV here */
         classop->op_private &= ~(OPpCONST_BARE|OPpCONST_STRICT);
+    }
+
+    OP *const objop = cBINOPo->op_first;
+    /* !$x isa Some::Class  # probably meant !($x isa Some::Class) */
+    if (objop->op_type == OP_NOT && !(objop->op_flags & OPf_PARENS)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+            "Possible precedence problem between ! and %s", OP_DESC(o)
+        );
     }
 
     return o;
@@ -15351,7 +15402,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
     HE *he = NULL;
     XOP *xop;
 
-    static const XOP xop_null = { 0, 0, 0, 0, 0 };
+    static const XOP xop_null = { 0, 0, 0, 0, 0, 0 };
 
     PERL_ARGS_ASSERT_CUSTOM_OP_GET_FIELD;
     assert(o->op_type == OP_CUSTOM);
@@ -15425,6 +15476,9 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
                 case XOPe_xop_peep:
                     any.xop_peep = xop->xop_peep;
                     break;
+                case XOPe_xop_dump:
+                    any.xop_dump = xop->xop_dump;
+                    break;
                 default:
                   field_panic:
                     Perl_croak(aTHX_
@@ -15445,6 +15499,9 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
                     break;
                 case XOPe_xop_peep:
                     any.xop_peep = XOPd_xop_peep;
+                    break;
+                case XOPe_xop_dump:
+                    any.xop_dump = XOPd_xop_dump;
                     break;
                 default:
                     goto field_panic;
@@ -15511,8 +15568,8 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 #define retsetpvs(x,y) sv_setpvs(sv, x); if(opnum) *opnum=(y); return sv
 
     switch (code < 0 ? -code : code) {
-    case KEY_and   : case KEY_chop: case KEY_chomp:
-    case KEY_cmp   : case KEY_defined: case KEY_delete: case KEY_exec  :
+    case KEY_and   : case KEY_chop: case KEY_chomp    : case KEY_cmp   :
+    case KEY_continue: case KEY_defined: case KEY_delete: case KEY_exec  :
     case KEY_exists: case KEY_eq     : case KEY_ge    : case KEY_goto  :
     case KEY_grep  : case KEY_gt     : case KEY_last  : case KEY_le    :
     case KEY_lt    : case KEY_map    : case KEY_ne    : case KEY_next  :
@@ -15651,7 +15708,19 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
             }
             return o;
         default:
-            o = op_convert_list(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
+            /* For open(), OPf_SPECIAL indicates we saw a literal undef as the
+             * filename argument and thus a &PL_sv_undef argument at runtime
+             * should trigger the creation of a temp file. This is to
+             * distinguish between open(..., ..., undef) and
+             * open(..., ..., delete $hash{key}), which also passes
+             * &PL_sv_undef if $hash{key} does not exist, but which should not
+             * create a temporary file.
+             * In case of a runtime call via &CORE::open(...) or
+             * my $f = \&CORE::open; $f->(...), we cannot distinguish between
+             * those cases. Therefore we always set the flag to interpret
+             * &PL_sv_undef as a temp file.
+             */
+            o = op_convert_list(opnum,OPf_SPECIAL*(opnum == OP_GLOB || opnum == OP_OPEN),argop);
             if (is_handle_constructor(o, 2))
                 argop->op_private |= OPpCOREARGS_DEREF2;
             if (opnum == OP_SUBSTR) {

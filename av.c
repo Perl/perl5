@@ -767,12 +767,22 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 }
 
 /*
-=for apidoc av_push
+=for apidoc      av_push
+=for apidoc_item av_push_simple
 
-Pushes an SV (transferring control of one reference count) onto the end of the
-array.  The array will grow automatically to accommodate the addition.
+These each push an SV (transferring control of one reference count) onto the
+end of the array.  The array will grow automatically to accommodate the
+addition.
 
 Perl equivalent: C<push @myarray, $val;>.
+
+C<av_push> is the general purpose form, suitable for all situations.
+
+C<av_push_simple> is a cut-down version of C<av_push> that assumes that the
+array is very straightforward, with no magic, not readonly, and is AvREAL
+(see L<perlguts/Real AVs - and those that are not>), and that C<key> is not
+less than -1. This function MUST NOT be used in situations where any of those
+assumptions may not hold.
 
 =cut
 */
@@ -967,8 +977,10 @@ Perl_av_shift(pTHX_ AV *av)
 }
 
 /*
-=for apidoc av_tindex
-=for apidoc_item av_top_index
+=for apidoc      av_top_index
+=for apidoc_item av_tindex
+=for apidoc_item AvFILL
+=for apidoc_item av_len
 
 These behave identically.
 If the array C<av> is empty, these return -1; otherwise they return the maximum
@@ -979,15 +991,10 @@ They process 'get' magic.
 
 The Perl equivalent for these is C<$#av>.
 
-Use C<L</av_count>> to get the number of elements in an array.
-
-=for apidoc av_len
-
-Same as L</av_top_index>.  Note that, unlike what the name implies, it returns
+Note that, unlike what the name C<av_len> implies, it returns
 the maximum index in the array.  This is unlike L</sv_len>, which returns what
-you would expect.
-
-B<To get the true number of elements in the array, instead use C<L</av_count>>>.
+you would expect.  To get the actual number of elements in an array, use
+C<L</av_count>>.
 
 =cut
 */

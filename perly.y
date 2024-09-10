@@ -68,7 +68,6 @@
 %token <ival> KW_LOCAL KW_MY KW_FIELD
 %token <ival> KW_IF KW_ELSE KW_ELSIF KW_UNLESS
 %token <ival> KW_FOR KW_UNTIL KW_WHILE KW_CONTINUE
-%token <ival> KW_GIVEN KW_WHEN KW_DEFAULT
 %token <ival> KW_TRY KW_CATCH KW_FINALLY KW_DEFER
 %token <ival> KW_REQUIRE KW_DO
 
@@ -473,15 +472,6 @@ barestmt:	PLUGSTMT
                               newCONDOP(0, $mexpr, $else, op_scope($mblock)));
 			  parser->copline = (line_t)$KW_UNLESS;
 			}
-	|	KW_GIVEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
-			{
-			  $$ = block_end($remember, newGIVENOP($mexpr, op_scope($mblock), 0));
-			  parser->copline = (line_t)$KW_GIVEN;
-			}
-	|	KW_WHEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
-			{ $$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock))); }
-	|	KW_DEFAULT block
-			{ $$ = newWHENOP(0, op_scope($block)); }
 	|	KW_WHILE PERLY_PAREN_OPEN remember texpr PERLY_PAREN_CLOSE mintro mblock cont
 			{
 			  $$ = block_end($remember,
@@ -689,8 +679,6 @@ sideff	:	error
 	|	expr[body] KW_FOR condition
 			{ $$ = newFOROP(0, NULL, $condition, $body, NULL);
 			  parser->copline = (line_t)$KW_FOR; }
-	|	expr[body] KW_WHEN condition
-			{ $$ = newWHENOP($condition, op_scope($body)); }
 	;
 
 /* else and elsif blocks */

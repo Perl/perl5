@@ -49,18 +49,13 @@
  *
  * and add the 'b' flag in embed.fnc.
  *
- * The compilation of this file can be suppressed; see INSTALL
+ * The compilation of this file and the functions within it can be suppressed
+ * by adding this option to Configure:
  *
- * Some blurb for perlapi.pod:
-
- head1 Obsolete backwards compatibility functions
-
-Some of these are also deprecated.  You can exclude these from
-your compiled Perl by adding this option to Configure:
-C<-Accflags='-DNO_MATHOMS'>
-
-=cut
-
+ *      -Accflags='-DNO_MATHOMS'
+ *
+ * Some of the functions here are also deprecated.
+ *
  */
 
 
@@ -86,18 +81,6 @@ Perl_ref(pTHX_ OP *o, I32 type)
 {
     return doref(o, type, TRUE);
 }
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_unref
-
-Unsets the RV status of the SV, and decrements the reference count of
-whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<L</SvROK_off>>.
-
-=cut
-*/
 
 void
 Perl_sv_unref(pTHX_ SV *sv)
@@ -228,17 +211,6 @@ Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
     return sv_2pvutf8(sv, NULL);
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_force_normal
-
-Undo various types of fakery on an SV: if the PV is a shared string, make
-a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an C<xpvmg>.  See also C<L</sv_force_normal_flags>>.
-
-=cut
-*/
-
 void
 Perl_sv_force_normal(pTHX_ SV *sv)
 {
@@ -284,7 +256,7 @@ Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len)
  */
 
 void
-Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr)
+Perl_sv_catsv(pTHX_ SV *dsv, SV * const sstr)
 {
     PERL_ARGS_ASSERT_SV_CATSV;
 
@@ -292,7 +264,7 @@ Perl_sv_catsv(pTHX_ SV *dsv, SV *sstr)
 }
 
 void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *sstr)
+Perl_sv_catsv_mg(pTHX_ SV *dsv, SV * const sstr)
 {
     PERL_ARGS_ASSERT_SV_CATSV_MG;
 
@@ -420,15 +392,6 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 
     gv_efullname4(sv, gv, prefix, TRUE);
 }
-
-/*
-=for apidoc_section $GV
-=for apidoc gv_fetchmethod
-
-See L</gv_fetchmethod_autoload>.
-
-=cut
-*/
 
 GV *
 Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
@@ -803,14 +766,6 @@ Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 
     sv_copypv_flags(dsv, ssv, SV_GMAGIC);
 }
-
-/*
-=for apidoc_section $unicode
-=for apidoc is_utf8_char_buf
-
-This is identical to the macro L<perlapi/isUTF8_CHAR>.
-
-=cut */
 
 STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)

@@ -365,60 +365,32 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 }
 
 /*
-=for apidoc uvchr_to_utf8
+=for apidoc      uvchr_to_utf8
+=for apidoc_item uvchr_to_utf8_flags
 
-Adds the UTF-8 representation of the native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
+These each add the UTF-8 representation of the native code point C<uv> to the
+end of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
 C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
 the byte after the end of the new character.  In other words,
 
     d = uvchr_to_utf8(d, uv);
 
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-This function accepts any code point from 0..C<IV_MAX> as input.
-C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
-
-It is possible to forbid or warn on non-Unicode code points, or those that may
-be problematic by using L</uvchr_to_utf8_flags>.
-
-=cut
-*/
-
-/* This is also a macro */
-PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
-
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return uvchr_to_utf8(d, uv);
-}
-
-/*
-=for apidoc uvchr_to_utf8_flags
-
-Adds the UTF-8 representation of the native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
-C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
-the byte after the end of the new character.  In other words,
-
-    d = uvchr_to_utf8_flags(d, uv, flags);
-
-or, in most cases,
-
-    d = uvchr_to_utf8_flags(d, uv, 0);
-
 This is the Unicode-aware way of saying
 
     *(d++) = uv;
 
-If C<flags> is 0, this function accepts any code point from 0..C<IV_MAX> as
-input.  C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
+C<flags> is used to make some classes of code points problematic in some way.
+C<uvchr_to_utf8> is effectively the same as calling C<uvchr_to_utf8_flags>
+with C<flags> set to 0, meaning no class of code point is considered
+problematic.  That means any input code point from 0..C<IV_MAX> is considered
+to be fine.  C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
 
-Specifying C<flags> can further restrict what is allowed and not warned on, as
-follows:
+A code point can be problematic in one of two ways.  Its use could just raise a
+warning, and/or it could be forbidden with the function failing, and returning
+NULL.
+
+The potential classes of problematic code points and the flags that make them
+so are:
 
 If C<uv> is a Unicode surrogate code point and C<UNICODE_WARN_SURROGATE> is set,
 the function will raise a warning, provided UTF8 warnings are enabled.  If
@@ -481,6 +453,15 @@ The new names accurately describe the situation in all cases.
 
 =cut
 */
+
+/* This is also a macro */
+PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
+
+U8 *
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    return uvchr_to_utf8(d, uv);
+}
 
 /* This is also a macro */
 PERL_CALLCONV U8*       Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
@@ -1058,21 +1039,23 @@ which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding, and no longer than
 C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
 the length, in bytes, of that character.
 
-The value of C<flags> determines the behavior when C<s> does not point to a
-well-formed UTF-8 character.  If C<flags> is 0, encountering a malformation
-causes zero to be returned and C<*retlen> is set so that (S<C<s> + C<*retlen>>)
-is the next possible position in C<s> that could begin a non-malformed
-character.  Also, if UTF-8 warnings haven't been lexically disabled, a warning
-is raised.  Some UTF-8 input sequences may contain multiple malformations.
+The value of C<flags> determines the behavior when either C<s> does not point
+to a well-formed UTF-8 character, or the pointed-to code point is a member of
+certain potentially problematic classes (listed below).  If C<flags> is 0, all
+such classes are accepted, and encountering a malformation causes zero to be
+returned and C<*retlen> to be set so that (S<C<s> + C<*retlen>>) is the next
+possible position in C<s> that could begin a non-malformed character.  For
+malformations, if UTF-8 warnings haven't been lexically disabled, a warning is
+also raised.  Some UTF-8 input sequences may contain multiple malformations.
 This function tries to find every possible one in each call, so multiple
 warnings can be raised for the same sequence.
 
 Various ALLOW flags can be set in C<flags> to allow (and not warn on)
 individual types of malformations, such as the sequence being overlong (that
-is, when there is a shorter sequence that can express the same code point;
-overlong sequences are expressly forbidden in the UTF-8 standard due to
-potential security issues).  Another malformation example is the first byte of
-a character not being a legal first byte.  See F<utf8.h> for the list of such
+is, there is a shorter sequence that can express the same code point; overlong
+sequences are expressly forbidden in the UTF-8 standard due to potential
+security issues).  Another malformation example is the first byte of the input
+sequence not being a legal first byte.  See F<utf8.h> for the list of such
 flags.  Even if allowed, this function generally returns the Unicode
 REPLACEMENT CHARACTER when it encounters a malformation.  There are flags in
 F<utf8.h> to override this behavior for the overlong malformations, but don't
@@ -1090,12 +1073,12 @@ be set to 1.  To disambiguate, upon a zero return, see if the first byte of
 C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the input had an
 error.  Or you can use C<L</utf8n_to_uvchr_error>>.
 
-Certain code points are considered problematic.  These are Unicode surrogates,
-Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
-By default these are considered regular code points, but certain situations
-warrant special handling for them, which can be specified using the C<flags>
-parameter.  If C<flags> contains C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, all
-three classes are treated as malformations and handled as such.  The flags
+Certain classes of code points are considered problematic.  These are Unicode
+surrogates, Unicode non-characters, and code points above the Unicode maximum
+of 0x10FFFF.  By default these are considered regular code points, but certain
+situations warrant special handling for them, which can be specified using the
+C<flags> parameter.  If C<flags> contains C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>,
+all three classes are treated as malformations and handled as such.  The flags
 C<UTF8_DISALLOW_SURROGATE>, C<UTF8_DISALLOW_NONCHAR>, and
 C<UTF8_DISALLOW_SUPER> (meaning above the legal Unicode maximum) can be set to
 disallow these categories individually.  C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
@@ -1138,7 +1121,6 @@ can apply to code points that actually do fit in 31 bits.  This happens on
 EBCDIC platforms, and sometimes when the L<overlong
 malformation|/C<UTF8_GOT_LONG>> is also present.  The new names accurately
 describe the situation in all cases.
-
 
 All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
@@ -3308,7 +3290,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     if (cp == 0 && (p >= e || *p != '\0')) {
-        _force_out_malformed_utf8_message(p, e, 0, 1);
+        _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE);
         NOT_REACHED; /* NOTREACHED */
     }
 
@@ -3853,7 +3835,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
         STRLEN len_result;                                                   \
         result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
         if (len_result == (STRLEN) -1) {                                     \
-            _force_out_malformed_utf8_message(p, e, 0, 1 /* Die */ );        \
+            _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE ); \
         }
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \

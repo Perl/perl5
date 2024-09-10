@@ -18,22 +18,6 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
-=item Smart match (C<~~>)
-
-Introduced in Perl 5.10.0
-
-Modified in Perl 5.10.1, 5.12.0
-
-Deprecated in 5.38.0
-
-Will be removed in 5.42.0
-
-Using this feature triggers warnings in the category
-C<deprecated>.
-
-The ticket for this experiment is
-L<[perl #13173]|https://github.com/Perl/perl5/issues/13173>.
-
 =item Pluggable keywords
 
 Introduced in Perl 5.11.2
@@ -174,18 +158,20 @@ executed until the containing block is being exited.
 The ticket for this experiment is
 L<[perl #17949]|https://github.com/Perl/perl5/issues/17949>.
 
-=item The C<class> feature
+=item Extra paired delimiters for quote-like operators
 
-Introduced in Perl 5.38.0
-
-This feature provides new syntax and semantics for using object oriented
-programming based on classes.  For more information see L<perlclass>.
+Introduced in Perl 5.36.0
 
 Using this feature triggers warnings in the category
-C<experimental::class>.
+C<experimental::extra_paired_delimiters>.
+
+This feature allows for many non-ASCII pairs of mirroring delimiters, for
+example:
+
+    my @array = qw« tinker tailor soldier spy »;
 
 The ticket for this experiment is
-L<[perl #22139]|https://github.com/Perl/perl5/issues/22139>.
+L<[perl #19765]|https://github.com/Perl/perl5/issues/19765>.
 
 =back
 
@@ -364,17 +350,6 @@ Accepted in Perl 5.40.
 This feature enables a parenthesized list of iteration variables for C<for>
 rather than a single variable.
 
-=item Extra paired delimiters for quote-like operators
-
-Introduced in Perl 5.36.0
-
-Accepted in Perl 5.40
-
-This feature allows for many non-ASCII pairs of mirroring delimiters, for
-example:
-
-    my @array = qw« tinker tailor soldier spy »;
-
 =back
 
 =head2 Removed features
@@ -462,6 +437,16 @@ Removed in Perl 5.28.0
 Introduced in Perl 5.8.0 (or before)
 
 Removed in Perl 5.36.0
+
+=item Smart match (C<~~>)
+
+Introduced in Perl 5.10.0
+
+Modified in Perl 5.10.1, 5.12.0
+
+Deprecated in 5.38.0
+
+Has been removed for 5.42.0
 
 =back
 

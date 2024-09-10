@@ -646,7 +646,7 @@ To be fully compatible with the Exporter and MakeMaker modules you
 should store your module's version number in a non-my package
 variable called $VERSION.  This should be a positive floating point
 number with at least two digits after the decimal (i.e., hundredths,
-e.g, C<$VERSION = "0.01">).  Don't use a "1.3.2" style version.
+e.g., C<$VERSION = "0.01">).  Don't use a "1.3.2" style version.
 See L<Exporter> for details.
 
 It may be handy to add a function or method to retrieve the number.

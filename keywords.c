@@ -516,7 +516,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 4: /* 40 tokens of length 4 */
+    case 4: /* 39 tokens of length 4 */
       switch (name[0])
       {
         case 'I':
@@ -936,49 +936,38 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           }
 
         case 'w':
-          switch (name[1])
+          if (name[1] == 'a')
           {
-            case 'a':
-              switch (name[2])
-              {
-                case 'i':
-                  if (name[3] == 't')
-                  {                               /* wait             */
-                    return -KEY_wait;
-                  }
+            switch (name[2])
+            {
+              case 'i':
+                if (name[3] == 't')
+                {                                 /* wait             */
+                  return -KEY_wait;
+                }
 
-                  goto unknown;
+                goto unknown;
 
-                case 'r':
-                  if (name[3] == 'n')
-                  {                               /* warn             */
-                    return -KEY_warn;
-                  }
+              case 'r':
+                if (name[3] == 'n')
+                {                                 /* warn             */
+                  return -KEY_warn;
+                }
 
-                  goto unknown;
+                goto unknown;
 
-                default:
-                  goto unknown;
-              }
-
-            case 'h':
-              if (name[2] == 'e' &&
-                  name[3] == 'n')
-              {                                   /* when             */
-                return (all_keywords || FEATURE_SWITCH_IS_ENABLED ? KEY_when : 0);
-              }
-
-              goto unknown;
-
-            default:
-              goto unknown;
+              default:
+                goto unknown;
+            }
           }
+
+          goto unknown;
 
         default:
           goto unknown;
       }
 
-    case 5: /* 43 tokens of length 5 */
+    case 5: /* 41 tokens of length 5 */
       switch (name[0])
       {
         case 'B':
@@ -1031,31 +1020,15 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           }
 
         case 'b':
-          switch (name[1])
-          {
-            case 'l':
-              if (name[2] == 'e' &&
-                  name[3] == 's' &&
-                  name[4] == 's')
-              {                                   /* bless            */
-                return -KEY_bless;
-              }
-
-              goto unknown;
-
-            case 'r':
-              if (name[2] == 'e' &&
-                  name[3] == 'a' &&
-                  name[4] == 'k')
-              {                                   /* break            */
-                return (all_keywords || FEATURE_SWITCH_IS_ENABLED ? -KEY_break : 0);
-              }
-
-              goto unknown;
-
-            default:
-              goto unknown;
+          if (name[1] == 'l' &&
+              name[2] == 'e' &&
+              name[3] == 's' &&
+              name[4] == 's')
+          {                                       /* bless            */
+            return -KEY_bless;
           }
+
+          goto unknown;
 
         case 'c':
           switch (name[1])
@@ -1215,17 +1188,6 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
             default:
               goto unknown;
           }
-
-        case 'g':
-          if (name[1] == 'i' &&
-              name[2] == 'v' &&
-              name[3] == 'e' &&
-              name[4] == 'n')
-          {                                       /* given            */
-            return (all_keywords || FEATURE_SWITCH_IS_ENABLED ? KEY_given : 0);
-          }
-
-          goto unknown;
 
         case 'i':
           switch (name[1])
@@ -2006,7 +1968,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 7: /* 31 tokens of length 7 */
+    case 7: /* 30 tokens of length 7 */
       switch (name[0])
       {
         case 'D':
@@ -2098,33 +2060,13 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
               goto unknown;
 
             case 'e':
-              if (name[2] == 'f')
-              {
-                switch (name[3])
-                {
-                  case 'a':
-                    if (name[4] == 'u' &&
-                        name[5] == 'l' &&
-                        name[6] == 't')
-                    {                             /* default          */
-                      return (all_keywords || FEATURE_SWITCH_IS_ENABLED ? KEY_default : 0);
-                    }
-
-                    goto unknown;
-
-                  case 'i':
-                    if (name[4] == 'n' &&
-                        name[5] == 'e' &&
-                        name[6] == 'd')
-                    {                             /* defined          */
-                      return KEY_defined;
-                    }
-
-                    goto unknown;
-
-                  default:
-                    goto unknown;
-                }
+              if (name[2] == 'f' &&
+                  name[3] == 'i' &&
+                  name[4] == 'n' &&
+                  name[5] == 'e' &&
+                  name[6] == 'd')
+              {                                   /* defined          */
+                return KEY_defined;
               }
 
               goto unknown;
@@ -3573,5 +3515,5 @@ unknown:
 }
 
 /* Generated from:
- * c8b75109fa56ce3ea3f30503a3b398f02e49036dc60d5fb36ea5ba9ffd6c596e regen/keywords.pl
+ * 7960cd8dbcd65990506e4c222c8d32119ef37cacb444a2031cf2ea7cc723ccdc regen/keywords.pl
  * ex: set ro ft=c: */

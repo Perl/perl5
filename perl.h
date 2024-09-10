@@ -789,8 +789,8 @@ Now a placeholder that declares nothing
 
 /*
 =for apidoc_section $directives
-=for apidoc AmnUu|void|STMT_END
-=for apidoc_item |    |STMT_START
+=for apidoc AmnUu|void|STMT_START
+=for apidoc_item |    |STMT_END
 
 These allow a series of statements in a macro to be used as a single statement,
 as in
@@ -961,7 +961,7 @@ If we aren't in taint checking mode, do nothing;
 otherwise indicate to L</C<TAINT_set>> and L</C<TAINT_PROPER>> that some
 unspecified element is tainted.
 
-=for apidoc Cm|void|TAINT_NOT
+=for apidoc Cmn|void|TAINT_NOT
 
 Remove any taintedness previously set by, I<e.g.>, C<TAINT>.
 
@@ -987,11 +987,11 @@ tainting violation.  If such violations are fatal, it croaks.
 If C<s> is true, L</C<TAINT_get>> returns true;
 If C<s> is false, L</C<TAINT_get>> returns false;
 
-=for apidoc Cm|bool|TAINT_get
+=for apidoc Cmn|bool|TAINT_get
 
 Returns a boolean as to whether some element is tainted or not.
 
-=for apidoc Cm|bool|TAINTING_get
+=for apidoc Cmn|bool|TAINTING_get
 
 Returns a boolean as to whether taint checking is enabled or not.
 
@@ -999,7 +999,7 @@ Returns a boolean as to whether taint checking is enabled or not.
 
 Turn taint checking mode off/on
 
-=for apidoc Cm|bool|TAINT_WARN_get
+=for apidoc Cmn|bool|TAINT_WARN_get
 
 Returns false if tainting violations are fatal;
 Returns true if they're just warnings
@@ -2511,7 +2511,8 @@ typedef UVTYPE UV;
 
 /*
 =for apidoc_section $casting
-=for apidoc Cyh|type|NUM2PTR|type|int value
+=for apidoc Cmh|type|NUM2PTR|type|int value
+
 You probably want to be using L<C</INT2PTR>> instead.
 
 =cut
@@ -2676,11 +2677,8 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #       endif
 #   endif
 #   ifndef Perl_isnan
-#       if defined(HAS_ISNANL) && !(defined(isnan) && defined(HAS_C99))
-#           define Perl_isnan(x) isnanl(x)
-#       elif defined(__sgi) && defined(__c99)  /* XXX Configure test needed */
-#           define Perl_isnan(x) isnan(x)
-#       endif
+        /* C99 requites that isnan() also support long double */
+#       define Perl_isnan(x) isnan(x)
 #   endif
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINFL) && !(defined(isinf) && defined(HAS_C99))
@@ -3113,10 +3111,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #define my_atof2(a,b) my_atof3(a,b,0)
 
 /*
-=for apidoc AmTR|NV|Atof|NN const char * const s
-
-This is a synonym for L</C<my_atof>>.
-
+=for apidoc_defn AmTR|NV|Atof|NN const char * const s
 =cut
 
 */
@@ -4404,9 +4399,6 @@ intrinsic function, see its documents for more details.
 void init_os_extras(void);
 #endif
 
-#ifdef UNION_ANY_DEFINITION
-UNION_ANY_DEFINITION;
-#else
 union any {
     void*       any_ptr;
     SV*         any_sv;
@@ -4429,7 +4421,6 @@ union any {
     void        (*any_dptr) (void*);
     void        (*any_dxptr) (pTHX_ void*);
 };
-#endif
 
 typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 
@@ -4514,6 +4505,8 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 #include "perly.h"
 
+/* opaque struct type used to communicate between xop_dump and opdump_printf */
+struct Perl_OpDumpContext;
 
 /* macros to define bit-fields in structs. */
 #ifndef PERL_BITFIELD8
@@ -4842,12 +4835,12 @@ Gid_t getegid (void);
 #define DEBUG_C_FLAG		0x00200000 /*2097152 */
 #define DEBUG_A_FLAG		0x00400000 /*4194304 */
 #define DEBUG_q_FLAG		0x00800000 /*8388608 */
-#define DEBUG_M_FLAG		0x01000000 /*16777216*/
+/* was smartmatch, now free     0x01000000  16777216 */
 #define DEBUG_B_FLAG		0x02000000 /*33554432*/
 #define DEBUG_L_FLAG		0x04000000 /*67108864*/
 #define DEBUG_i_FLAG		0x08000000 /*134217728*/
 #define DEBUG_y_FLAG		0x10000000 /*268435456*/
-#define DEBUG_MASK		0x1FFFEFFF /* mask of all the standard flags */
+#define DEBUG_MASK		0x1EFFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* -D was given --> PL_debug |= FLAG */
@@ -4881,7 +4874,6 @@ Gid_t getegid (void);
 #  define DEBUG_C_TEST_ UNLIKELY(PL_debug & DEBUG_C_FLAG)
 #  define DEBUG_A_TEST_ UNLIKELY(PL_debug & DEBUG_A_FLAG)
 #  define DEBUG_q_TEST_ UNLIKELY(PL_debug & DEBUG_q_FLAG)
-#  define DEBUG_M_TEST_ UNLIKELY(PL_debug & DEBUG_M_FLAG)
 #  define DEBUG_B_TEST_ UNLIKELY(PL_debug & DEBUG_B_FLAG)
 
 /* Locale initialization comes earlier than PL_debug gets set,
@@ -4928,7 +4920,6 @@ Gid_t getegid (void);
 #  define DEBUG_C_TEST DEBUG_C_TEST_
 #  define DEBUG_A_TEST DEBUG_A_TEST_
 #  define DEBUG_q_TEST DEBUG_q_TEST_
-#  define DEBUG_M_TEST DEBUG_M_TEST_
 #  define DEBUG_B_TEST DEBUG_B_TEST_
 #  define DEBUG_L_TEST DEBUG_L_TEST_
 #  define DEBUG_i_TEST DEBUG_i_TEST_
@@ -5027,7 +5018,6 @@ Gid_t getegid (void);
 #  define DEBUG_C(a) DEBUG__(DEBUG_C_TEST, a)
 #  define DEBUG_A(a) DEBUG__(DEBUG_A_TEST, a)
 #  define DEBUG_q(a) DEBUG__(DEBUG_q_TEST, a)
-#  define DEBUG_M(a) DEBUG__(DEBUG_M_TEST, a)
 #  define DEBUG_B(a) DEBUG__(DEBUG_B_TEST, a)
 #  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 #  define DEBUG_i(a) DEBUG__(DEBUG_i_TEST, a)
@@ -5059,7 +5049,6 @@ Gid_t getegid (void);
 #  define DEBUG_C_TEST (0)
 #  define DEBUG_A_TEST (0)
 #  define DEBUG_q_TEST (0)
-#  define DEBUG_M_TEST (0)
 #  define DEBUG_B_TEST (0)
 #  define DEBUG_L_TEST (0)
 #  define DEBUG_i_TEST (0)
@@ -5095,7 +5084,6 @@ Gid_t getegid (void);
 #  define DEBUG_C(a)
 #  define DEBUG_A(a)
 #  define DEBUG_q(a)
-#  define DEBUG_M(a)
 #  define DEBUG_B(a)
 #  define DEBUG_L(a)
 #  define DEBUG_i(a)
@@ -5693,9 +5681,7 @@ EXTCONST unsigned char PL_latin1_lc[];
 #ifdef DOINIT
 EXTCONST char* const PL_block_type[] = {
         "NULL",
-        "WHEN",
         "BLOCK",
-        "GIVEN",
         "LOOP_ARY",
         "LOOP_LAZYSV",
         "LOOP_LAZYIV",
@@ -5940,7 +5926,7 @@ typedef enum {
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */
 #define HINT_BYTES		0x00000008 /* bytes pragma */
-#define HINT_LOCALE_PARTIAL	0x00000010 /* locale, but a subset of categories */
+#define HINT_ASCII_ENCODING     0x00000010 /* source::encoding */
 
 #define HINT_EXPLICIT_STRICT_REFS	0x00000020 /* strict.pm */
 #define HINT_EXPLICIT_STRICT_SUBS	0x00000040 /* strict.pm */
@@ -6386,13 +6372,17 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 #  define PERL_SET_THX(t)		NOOP
 #endif
 
+/* Create a reentrant lock mechanism.  Currently these are also
+ * many-readers/1-writer locks, simply because that's all that is so far needed
+ * */
 #ifdef WIN32
     /* Windows mutexes are all general semaphores; we don't currently bother
      * with reproducing the same panic behavior as on other systems */
 #  define PERL_REENTRANT_LOCK(name, mutex, counter,                         \
                               cond_to_panic_if_already_locked)              \
-        MUTEX_LOCK(mutex)
-#  define PERL_REENTRANT_UNLOCK(name, mutex, counter)  MUTEX_UNLOCK(mutex)
+        PERL_WRITE_LOCK(mutex)
+
+#  define PERL_REENTRANT_UNLOCK(name, mutex, counter)  PERL_WRITE_UNLOCK(mutex)
 #else
 
     /* Simulate a general (or recursive) semaphore on 'mutex' whose name will
@@ -6421,7 +6411,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                                 "%s: %d: locking " name "; lock depth=1\n", \
                                 __FILE__, __LINE__));                       \
             )                                                               \
-            MUTEX_LOCK(mutex);                                         \
+            PERL_WRITE_LOCK(mutex);                                         \
             counter = 1;                                                    \
             UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: " name " locked; lock depth=1\n",  \
@@ -6446,6 +6436,21 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
+#  define PERL_REENTRANT_READ_LOCK(name, mutex, counter)                    \
+    STMT_START {                                                            \
+        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (counter <= 0) {                                                 \
+            assert(counter == 0);                                           \
+            PERL_READ_LOCK(mutex);                                          \
+        }                                                                   \
+        else {                                                              \
+            /* This thread already has a write lock on this mutex.  Just    \
+             * increment the number of readers it has */                    \
+            (mutex)->readers_count++;                                       \
+        }                                                                   \
+        CLANG_DIAG_RESTORE                                                  \
+    } STMT_END
+
 #  define PERL_REENTRANT_UNLOCK(name, mutex, counter)                       \
     STMT_START {                                                            \
         if (LIKELY(counter == 1)) {                                         \
@@ -6454,7 +6459,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                           __FILE__, __LINE__));                             \
             )                                                               \
             counter = 0;                                                    \
-            MUTEX_UNLOCK(mutex);                                       \
+            PERL_WRITE_UNLOCK(mutex);                                       \
         }                                                                   \
         else if (counter <= 0) {                                            \
             Perl_croak_nocontext("panic: %s: %d: attempting to unlock"      \
@@ -6469,6 +6474,27 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                 __FILE__, __LINE__, counter));                              \
             )                                                               \
         }                                                                   \
+    } STMT_END
+
+#  define PERL_REENTRANT_READ_UNLOCK(name, mutex, counter)                  \
+    STMT_START {                                                            \
+        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (counter <= 0) {                                                 \
+            assert(count == 0);                                             \
+            PERL_READ_UNLOCK(mutex);                                        \
+        }                                                                   \
+        else if (LIKELY((mutex)->readers_count > 0)) {                      \
+            /* This thread already has a write lock on this mutex.  Just    \
+             * deccrement the number of readers it has */                   \
+            (mutex)->readers_count--;                                       \
+        }                                                                   \
+        else {                                                              \
+            Perl_croak_nocontext("panic: %s: %d: attempting to read unlock" \
+                                 " already unlocked " name "; counter was"  \
+                                 " %zd\n", __FILE__, __LINE__,              \
+                                 (mutex)->readers_count);                   \
+        }                                                                   \
+        CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
 #endif
@@ -7031,8 +7057,13 @@ typedef struct am_table_short AMTS;
 #endif
 
 #ifdef USE_THREADS
-#  define ENV_LOCK            PERL_WRITE_LOCK(&PL_env_mutex)
-#  define ENV_UNLOCK          PERL_WRITE_UNLOCK(&PL_env_mutex)
+#  define ENV_LOCK            PERL_REENTRANT_LOCK("env",                    \
+                                                  &PL_env_mutex,            \
+                                                  PL_env_mutex_depth,       \
+                                                  1)
+#  define ENV_UNLOCK          PERL_REENTRANT_UNLOCK("env",                  \
+                                                    &PL_env_mutex,          \
+                                                    PL_env_mutex_depth)
 #  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
 #  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
 #  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
@@ -7389,11 +7420,10 @@ typedef struct am_table_short AMTS;
                         }                                                   \
                     } STMT_END
 #  endif
-
-#  define LOCALE_INIT           MUTEX_INIT(&PL_locale_mutex)
-#  define LOCALE_TERM           STMT_START {                                \
-                                    LOCALE_TERM_POSIX_2008_;                \
-                                    MUTEX_DESTROY(&PL_locale_mutex);        \
+#  define LOCALE_INIT           PERL_RW_MUTEX_INIT(&PL_locale_mutex)
+#  define LOCALE_TERM           STMT_START {                                  \
+                                    LOCALE_TERM_POSIX_2008_;                  \
+                                    PERL_RW_MUTEX_DESTROY(&PL_locale_mutex);  \
                                 } STMT_END
 #endif
 
@@ -7401,16 +7431,23 @@ typedef struct am_table_short AMTS;
 
    /* Returns TRUE if the plain locale pragma without a parameter is in effect.
     * */
-#  define IN_LOCALE_RUNTIME	(PL_curcop                                  \
-                              && CopHINTS_get(PL_curcop) & HINT_LOCALE)
-
+#  define PERL_IN_UNRESTRICTED_LOCALE_  -2   /* Chosen so as to not conflict
+                                                with a real category number,
+                                                nor -1 already reserved */
    /* Returns TRUE if either form of the locale pragma is in effect */
 #  define IN_SOME_LOCALE_FORM_RUNTIME                                       \
-        cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+                     (PL_curcop && CopHINTS_get(PL_curcop) & (HINT_LOCALE))
 
-#  define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
-#  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
-                        cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+#  define IN_LOCALE_RUNTIME                                                 \
+      (   IN_SOME_LOCALE_FORM_RUNTIME                                       \
+       && is_in_locale_category_(false, /* runtime */                       \
+                                 PERL_IN_UNRESTRICTED_LOCALE_))
+#  define IN_LOCALE_COMPILETIME	                                            \
+      (   IN_SOME_LOCALE_FORM_COMPILETIME                                  \
+       && is_in_locale_category_(true, /* is compiling */                   \
+                                 PERL_IN_UNRESTRICTED_LOCALE_ ))
+
+#  define IN_SOME_LOCALE_FORM_COMPILETIME  cBOOL(PL_hints & (HINT_LOCALE))
 
 /*
 =for apidoc_section $locale
@@ -7442,17 +7479,18 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
 #  define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
 
-#  define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
-#  define IN_LC_PARTIAL_RUNTIME                                             \
-              (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+#  define IN_LC_PARTIAL_COMPILETIME   (     IN_SOME_LOCALE_FORM_COMPILETIME \
+                                       && ! IN_LOCALE_COMPILETIME)
+#  define IN_LC_PARTIAL_RUNTIME       (     IN_SOME_LOCALE_FORM_RUNTIME     \
+                                       && ! IN_LOCALE_RUNTIME)
 
 #  define IN_LC_COMPILETIME(category)                                       \
        (       IN_LC_ALL_COMPILETIME                                        \
         || (   IN_LC_PARTIAL_COMPILETIME                                    \
-            && Perl__is_in_locale_category(aTHX_ TRUE, (category))))
+            && Perl_is_in_locale_category_(aTHX_ TRUE, (category))))
 #  define IN_LC_RUNTIME(category)                                           \
       (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
-                 && Perl__is_in_locale_category(aTHX_ FALSE, (category))))
+                 && Perl_is_in_locale_category_(aTHX_ FALSE, (category))))
 #  define IN_LC(category)  \
                     (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
 
@@ -7877,9 +7915,7 @@ END_EXTERN_C
 
 =for apidoc_section $numeric
 
-=for apidoc AmTR|NV|Strtod|NN const char * const s|NULLOK char ** e
-
-This is a synonym for L</my_strtod>.
+=for apidoc_defn AmTR|NV|Strtod|NN const char * const s|NULLOK char **e
 
 =for apidoc AmTR|NV|Strtol|NN const char * const s|NULLOK char ** e|int base
 
@@ -8197,12 +8233,7 @@ EXTERN_C int flock(int fd, int op);
 #define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
 /*
-=for apidoc_section $numeric
-
-=for apidoc AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
-
-A synonym for L</grok_numeric_radix>
-
+=for apidoc_defn AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
 =cut
 */
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)

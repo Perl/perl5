@@ -488,11 +488,12 @@ doesn't already exist.
 =for apidoc Am|SV *|CopFILESV|const COP * c
 Returns the SV associated with the C<COP> C<c>
 
-=for apidoc Am|void|CopFILE_set|COP * c|const char * pv
-Makes C<pv> the name of the file associated with the C<COP> C<c>
-
-=for apidoc Am|void|CopFILE_setn|COP * c|const char * pv|STRLEN len
-Makes C<pv> the name of the file associated with the C<COP> C<c>
+=for apidoc   Am|void|CopFILE_set|COP * c|const char * pv
+=for apidoc_item|void|CopFILE_setn|COP * c|const char * pv|STRLEN len
+These each make C<pv> the name of the file associated with the C<COP> C<c>.
+In the plain C<CopFILE_set> form, C<pv> is a C language NUL-terminated string.
+In C<CopFILE_setn>, C<len> is the length of C<pv>, which hence may contain
+embedded NUL characters.
 
 =for apidoc Am|void|CopFILE_copy|COP * dst|COP * src
 Efficiently copies the cop file name from one COP to another. Wraps
@@ -1118,27 +1119,21 @@ struct context {
    and a static array of context names in pp_ctl.c  */
 #define CXTYPEMASK	0xf
 #define CXt_NULL	0 /* currently only used for sort BLOCK */
-#define CXt_WHEN	1
-#define CXt_BLOCK	2
-/* When micro-optimising :-) keep GIVEN next to the LOOPs, as these 5 share a
-   jump table in pp_ctl.c
-   The first 4 don't have a 'case' in at least one switch statement in pp_ctl.c
-*/
-#define CXt_GIVEN	3
+#define CXt_BLOCK	1
 
 /* be careful of the ordering of these five. Macros like CxTYPE_is_LOOP,
  * CxFOREACH compare ranges */
-#define CXt_LOOP_ARY	4 /* for (@ary)     { ...; } */
-#define CXt_LOOP_LAZYSV	5 /* for ('a'..'z') { ...; } */
-#define CXt_LOOP_LAZYIV	6 /* for (1..9)     { ...; } */
-#define CXt_LOOP_LIST	7 /* for (1,2,3)    { ...; } */
-#define CXt_LOOP_PLAIN	8 /* while (...)    { ...; }
+#define CXt_LOOP_ARY	2 /* for (@ary)     { ...; } */
+#define CXt_LOOP_LAZYSV	3 /* for ('a'..'z') { ...; } */
+#define CXt_LOOP_LAZYIV	4 /* for (1..9)     { ...; } */
+#define CXt_LOOP_LIST	5 /* for (1,2,3)    { ...; } */
+#define CXt_LOOP_PLAIN	6 /* while (...)    { ...; }
                              or plain block { ...; } */
-#define CXt_SUB		9
-#define CXt_FORMAT     10
-#define CXt_EVAL       11 /* eval'', eval{}, try{} */
-#define CXt_SUBST      12
-#define CXt_DEFER      13
+#define CXt_SUB		7
+#define CXt_FORMAT      8
+#define CXt_EVAL        9 /* eval'', eval{}, try{} */
+#define CXt_SUBST      10
+#define CXt_DEFER      11
 /* SUBST doesn't feature in all switch statements.  */
 
 /* private flags for CXt_SUB and CXt_FORMAT */

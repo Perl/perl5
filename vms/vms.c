@@ -8843,16 +8843,6 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
         *(cp1++) = *(cp2++);
     }
   }
-  if ((no_type_seen == 1) && DECC_READDIR_DROPDOTNOTYPE) {
-  char *lcp1;
-    lcp1 = cp1;
-    lcp1--;
-     /* Fix me for "^]", but that requires making sure that you do
-      * not back up past the start of the filename
-      */
-    if ((*lcp1 != ']') && (*lcp1 != '*') && (*lcp1 != '%'))
-      *cp1++ = '.';
-  }
   *cp1 = '\0';
 
   if (utf8_flag != NULL)

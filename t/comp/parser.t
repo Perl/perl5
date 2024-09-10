@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..191\n";
+print "1..189\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -222,8 +222,12 @@ EOF
 # tests for "Bad name"
 eval q{ foo::$bar };
 like( $@, qr/Bad name after foo::/, 'Bad name after foo::' );
-eval q{ foo''bar };
-like( $@, qr/Bad name after foo'/, 'Bad name after foo\'' );
+{
+    # since ' is no longer usable in symbols, the error is no longer "Bad name"
+    no warnings "syntax"; # suppress String found where operator expeected
+    eval q{ foo''bar };
+    like( $@, qr/syntax error at \(eval \d+\) line 1, near "foo''/, 'Syntax error for foo\'' );
+}
 
 # test for ?: context error
 eval q{($a ? $x : ($y)) = 5};
@@ -368,12 +372,11 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
 }
 
 {
-    no warnings;
     # [perl #113016] CORE::print::foo
-    sub CORE'print'foo { 43 } # apostrophes intentional; do not tempt fate
-    sub CORE'foo'bar { 43 }
+    sub CORE::print::foo { 43 }
+    sub CORE::foo::bar { 43 }
     is CORE::print::foo, 43, 'CORE::print::foo is not CORE::print ::foo';
-    is scalar eval "CORE::foo'bar", 43, "CORE::foo'bar is not an error";
+    is scalar eval "CORE::foo::bar", 43, "CORE::foo'bar is not an error";
 }
 
 # bug #71748
@@ -451,11 +454,6 @@ END
 eval 's/${<<END}//';
 eval 's//${<<END}/';
 print "ok ", ++$test, " - unterminated here-docs in s/// in string eval\n";
-{
-    no warnings qw(syntax deprecated);
-    sub 'Hello'_he_said (_);
-}
-is prototype "Hello::_he_said", '_', 'initial tick in sub declaration';
 
 {
     my @x = 'string';
@@ -473,21 +471,6 @@ is 1,1, ' no crash for "no ... syntax error"';
 for my $pkg(()){}
 $pkg = 3;
 is $pkg, 3, '[perl #114942] for my $foo()){} $foo';
-
-# Check that format 'Foo still works after removing the hack from
-# force_word
-{
-    no warnings qw(syntax deprecated);
-    $test++;
-    format 'one =
-ok @<< - format 'foo still works
-$test
-.
-}
-{
-    local $~ = "one";
-    write();
-}
 
 $test++;
 format ::two =
@@ -557,12 +540,6 @@ eval{$1=eval{a:}};
 # Used to fail assertions [perl #123753]
 eval "map+map";
 eval "grep+grep";
-
-# ALso failed an assertion [perl #123848]
-{
- local $SIG{__WARN__} = sub{};
- eval 'my $_; m// ~~ 0';
-}
 
 # Used to crash [perl #125679]
 eval 'BEGIN {$^H=-1} \eval=time';

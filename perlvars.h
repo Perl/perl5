@@ -99,7 +99,7 @@ PERLVARI(G, mmap_page_size, IV, 0)
 #if defined(USE_ITHREADS)
 PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 PERLVAR(G, env_mutex, perl_RnW1_mutex_t)      /* Mutex for accessing ENV */
-PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex related to locale handling */
+PERLVAR(G, locale_mutex, perl_RnW1_mutex_t)   /* Mutex related to locale handling */
 #endif
 
 #ifdef USE_POSIX_2008_LOCALE

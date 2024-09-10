@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.76;
+package B::Deparse 1.78;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -2325,10 +2325,6 @@ my %feature_keywords = (
   # keyword => 'feature',
     state   => 'state',
     say     => 'say',
-    given   => 'switch',
-    when    => 'switch',
-    default => 'switch',
-    break   => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
@@ -2637,34 +2633,6 @@ sub pp_ggrnam { unop(@_, "getgrnam") }
 sub pp_ggrgid { unop(@_, "getgrgid") }
 
 sub pp_lock { unop(@_, "lock") }
-
-sub pp_continue { unop(@_, "continue"); }
-sub pp_break { unop(@_, "break"); }
-
-sub givwhen {
-    my $self = shift;
-    my($op, $cx, $givwhen) = @_;
-
-    my $enterop = $op->first;
-    my ($head, $block);
-    if ($enterop->flags & OPf_SPECIAL) {
-	$head = $self->keyword("default");
-	$block = $self->deparse($enterop->first, 0);
-    }
-    else {
-	my $cond = $enterop->first;
-	my $cond_str = $self->deparse($cond, 1);
-	$head = "$givwhen ($cond_str)";
-	$block = $self->deparse($cond->sibling, 0);
-    }
-
-    return "$head {\n".
-	"\t$block\n".
-	"\b}\cK";
-}
-
-sub pp_leavegiven { givwhen(@_, $_[0]->keyword("given")); }
-sub pp_leavewhen  { givwhen(@_, $_[0]->keyword("when")); }
 
 sub pp_exists {
     my $self = shift;
@@ -3158,16 +3126,6 @@ sub pp_padsv_store {
     return $self->maybe_parens("$var = $val", $cx, 7);
 }
 
-sub pp_smartmatch {
-    my ($self, $op, $cx) = @_;
-    if (($op->flags & OPf_SPECIAL) && $self->{expand} < 2) {
-	return $self->deparse($op->last, $cx);
-    }
-    else {
-	binop(@_, "~~", 14);
-    }
-}
-
 # '.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
 # programmer had written '($a . $b) .= $c', except legal.
@@ -3277,7 +3235,7 @@ sub pp_dor { logop(@_, "//", 10) }
 
 # xor is syntactically a logop, but it's really a binop (contrary to
 # old versions of opcode.pl). Syntax is what matters here.
-sub pp_xor { logop(@_, "xor", 2, "",   0,  "") }
+sub pp_xor { logop(@_, "xor", 2, "^^", 10, "") }
 
 sub logassignop {
     my $self = shift;
@@ -5162,7 +5120,7 @@ sub retscalar {
                  |i_subtract|concat|multiconcat|stringify|left_shift|right_shift|lt
                  |i_lt|gt|i_gt|le|i_le|ge|i_ge|eq|i_eq|ne|i_ne|ncmp|i_ncmp
                  |slt|sgt|sle|sge|seq|sne|scmp|[sn]?bit_(?:and|x?or)|negate
-                 |i_negate|not|[sn]?complement|smartmatch|atan2|sin|cos
+                 |i_negate|not|[sn]?complement|atan2|sin|cos
                  |rand|srand|exp|log|sqrt|int|hex|oct|abs|length|substr
                  |vec|index|rindex|sprintf|formline|ord|chr|crypt|ucfirst
                  |lcfirst|uc|lc|quotemeta|aelemfast|aelem|exists|helem
@@ -6282,7 +6240,7 @@ sub code_list {
 	local(@$self{qw'curstash warnings hints hinthash curcop'})
 	    = @$self{qw'curstash warnings hints hinthash curcop'};
 
-    my $re;
+    my $re = "";
     for ($op = $op->first->sibling; !null($op); $op = $op->sibling) {
 	if ($op->name eq 'null' and $op->flags & OPf_SPECIAL) {
 	    my $scope = $op->first;
@@ -6762,7 +6720,7 @@ sub pp_pushdefer {
 sub builtin1 {
     my $self = shift;
     my ($op, $cx, $name) = @_;
-    my $arg = $self->deparse($op->first);
+    my $arg = $self->deparse($op->first, 6);
     # TODO: work out if lexical alias is present somehow...
     return "builtin::$name($arg)";
 }

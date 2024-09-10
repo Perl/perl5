@@ -1717,6 +1717,7 @@ CODE:
     ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
     XSRETURN(1);
 
+#if !PERL_VERSION_GE(5, 40, 0)
 SV *
 blessed(sv)
     SV *sv
@@ -1819,6 +1820,8 @@ PROTOTYPE: $
 CODE:
     ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
     XSRETURN(1);
+
+#endif /* !PERL_VERSION_GE(5, 40, 0) */
 
 int
 readonly(sv)

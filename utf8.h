@@ -127,19 +127,8 @@ typedef enum {
 #define FOLD_FLAGS_NOMIX_ASCII  0x4
 
 /*
-=for apidoc is_ascii_string
-
-This is a misleadingly-named synonym for L</is_utf8_invariant_string>.
-On ASCII-ish platforms, the name isn't misleading: the ASCII-range characters
-are exactly the UTF-8 invariants.  But EBCDIC machines have more invariants
-than just the ASCII characters, so C<is_utf8_invariant_string> is preferred.
-
-=for apidoc is_invariant_string
-
-This is a somewhat misleadingly-named synonym for L</is_utf8_invariant_string>.
-C<is_utf8_invariant_string> is preferred, as it indicates under what conditions
-the string is invariant.
-
+=for apidoc_defn APRTdm|bool|is_ascii_string|NN const U8 * const s|STRLEN len
+=for apidoc_defn APRTdm|bool|is_invariant_string|NN const U8 * const s|STRLEN len
 =cut
 */
 #define is_ascii_string(s, len)     is_utf8_invariant_string(s, len)
@@ -384,8 +373,13 @@ are in the character. */
  * One could solve for two linear equations and come up with it.) */
 #define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
 
-/* This value is clearer in some contexts */
+/* These values are clearer in some contexts; still apply to UTF, not UTF-8 */
 #define UTF_MIN_CONTINUATION_BYTE  UTF_CONTINUATION_MARK
+#define MIN_OFFUNI_VARIANT_CP  UTF_MIN_CONTINUATION_BYTE
+
+/* This is the name to use if you are working in UTF-8, as opposed to plain
+ * 'UTF', which is I8 on EBCDIC platforms */
+#define UTF8_MIN_CONTINUATION_BYTE  I8_TO_NATIVE_UTF8(UTF_MIN_CONTINUATION_BYTE)
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof? */
@@ -396,8 +390,7 @@ are in the character. */
 /* Is the representation of the Unicode code point 'cp' the same regardless of
  * being encoded in UTF-8 or not? This is a fundamental property of
  * UTF-8,EBCDIC */
-#define OFFUNI_IS_INVARIANT(c)                                              \
-                        (((WIDEST_UTYPE)(c)) < UTF_MIN_CONTINUATION_BYTE)
+#define OFFUNI_IS_INVARIANT(c) (((WIDEST_UTYPE)(c)) < MIN_OFFUNI_VARIANT_CP)
 
 /*
 =for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
@@ -801,8 +794,7 @@ C<L</UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 */
 
 #define UTF8_CHK_SKIP(s)                                                       \
-            (UNLIKELY(s[0] == '\0') ? 1 : MIN(UTF8SKIP(s),                     \
-                                    my_strnlen((char *) (s), UTF8SKIP(s))))
+           (UNLIKELY(s[0] == '\0') ? 1 : my_strnlen((const char *) (s), UTF8SKIP(s)))
 /*
 
 =for apidoc Am|STRLEN|UTF8_SAFE_SKIP|char* s|char* e
@@ -943,9 +935,9 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * complicated by the probability of having categories in different locales. */
 #define IN_UNI_8_BIT                                                    \
             ((    (      (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT))    \
-                   || (   CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL \
+                   || (   CopHINTS_get(PL_curcop) & HINT_LOCALE         \
                             /* -1 below is for :not_characters */       \
-                       && _is_in_locale_category(FALSE, -1)))           \
+                       && is_in_locale_category_(FALSE, -1)))           \
               && (! IN_BYTES))
 
 #define UNICODE_SURROGATE_FIRST		0xD800
@@ -1311,6 +1303,9 @@ point's representation.
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)
+
+#define MALFORMED_UTF8_DIE  TRUE
+#define MALFORMED_UTF8_WARN FALSE
 
 #endif /* PERL_UTF8_H_ */
 

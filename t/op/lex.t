@@ -11,6 +11,8 @@ BEGIN {
     @INC= "../lib";
 }
 
+plan(tests => 53);
+
 {
     print <<'';   # Yow!
 ok 1
@@ -311,6 +313,10 @@ local $SIG{__WARN__} = sub {
 evalbytes <<EOS;
 use feature 'extra_paired_delimiters';
 
+my \$warns = q$lhs this string uses paired latin1 delimiters $rhs;
+
+no warnings 'experimental::extra_paired_delimiters';
+
 my \$nowarn = q$lhs this string uses paired latin1 delimiters $rhs;
 no feature 'extra_paired_delimiters';
 my \$warn2= q$lhs this string uses lhs delimiter fore/aft $lhs;
@@ -318,17 +324,21 @@ my \$warn3= q$rhs this string uses rhs delimiter fore/aft $rhs;
 EOS
 
 is($@, "", "Various tests of string delims $lhs/$rhs returned without error");
-is(@warnings, 2, "And the expected number of warnings were generated");
+is(@warnings, 3, "And the expected number of warnings were generated");
 like($warnings[0],
+     qr/Use of '$lhs' is experimental as a string delimiter at/,
+     'And the first warning is as expected');
+like($warnings[1],
      qr/Use of '$lhs' is deprecated as a string delimiter at/,
      'And the second warning is as expected');
-like($warnings[1],
+like($warnings[2],
      qr/Use of '$rhs' is deprecated as a string delimiter at/,
      'And the third warning is as expected');
 
 undef @warnings;
 evalbytes <<EOS;
 use feature 'extra_paired_delimiters';
+no warnings 'experimental::extra_paired_delimiters';
 my \$warn2= q$lhs this string uses lhs delimiter fore/aft $lhs;
 EOS
 
@@ -349,6 +359,7 @@ is(@warnings, 0, "With no warnings generated");
 undef @warnings;
 evalbytes <<EOS;
 use feature 'extra_paired_delimiters';
+no warnings 'experimental::extra_paired_delimiters';
 my \$warn2= q$rhs this string reverses the delimiters $lhs;
 EOS
 
@@ -369,6 +380,7 @@ is(@warnings, 0, "With no warnings generated");
 
 undef @warnings;
 evalbytes <<EOS;
+no warnings 'experimental::extra_paired_delimiters';
 use feature 'extra_paired_delimiters';
 my \$good= q$lhs this $lhs string has $lhs $lhs nested $rhs paired $rhs $rhs delimiters $rhs;
 EOS
@@ -378,6 +390,7 @@ is(@warnings, 0, "With no warnings generated");
 
 undef @warnings;
 evalbytes <<EOS;
+no warnings 'experimental::extra_paired_delimiters';
 use feature 'extra_paired_delimiters';
 my \$good= q$lhs this $lhs string has $lhs too few closing $lhs nested $rhs paired rhs $rhs delimiters $rhs;
 EOS
@@ -385,5 +398,3 @@ EOS
 like($@, qr/Can't find string terminator "$rhs" anywhere before EOF/,
      "Using too few closing delims in nesting fails as expected");
 is(@warnings, 0, "With no warnings generated");
-
-done_testing();

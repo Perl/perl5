@@ -44,6 +44,12 @@ letter.
 
 =over 4
 
+=item __CLASS__ is experimental
+
+(S experimental::class) This warning is emitted if you use the C<__CLASS__>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item accept() on closed socket %s
 
 (W closed) You tried to do an accept on a closed socket.  Did you forget
@@ -481,7 +487,7 @@ results.
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
-=item Bad name after %s
+=item Bad name after %s::
 
 (F) You started to name a symbol by using a package prefix, and then
 didn't finish the symbol.  In particular, you can't interpolate outside
@@ -668,6 +674,20 @@ version.
 (F) A subroutine invoked from an external package via call_sv()
 exited by calling exit.
 
+=item %s() attempted on invalid dirhandle %s
+
+(W io) You called readdir(), telldir(), seekdir(), rewinddir() or
+closedir() on a handle that has not been opened, or is now closed.  A
+handle must be successfully opened with opendir() to be used with
+these functions.  Check your control flow.
+
+=item %s() attempted on handle %s opened with open()
+
+(W io) You called readdir(), telldir(), seekdir(), rewinddir() or
+closedir() on a handle that was opened with open().  If you want to
+use these functions to traverse the contents of a directory, you need
+to open the handle with opendir().
+
 =item %s() called too early to check prototype
 
 (W prototype) You've called a function that has a prototype before the
@@ -848,15 +868,6 @@ object instance.
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
 
-=item Can't "break" in a loop topicalizer
-
-(F) You called C<break>, but you're in a C<foreach> block rather than
-a C<given> block.  You probably meant to use C<next> or C<last>.
-
-=item Can't "break" outside a given block
-
-(F) You called C<break>, but you're not inside a C<given> block.
-
 =item Can't call destructor for 0x%p in global destruction
 
 (S) This should not happen. Internals code has set up a destructor
@@ -923,11 +934,6 @@ You CAN say
 
 but then $foo no longer contains a glob.
 
-=item Can't "continue" outside a when block
-
-(F) You called C<continue>, but you're not inside a C<when>
-or C<default> block.
-
 =item can't convert empty path
 
 (F) On Cygwin, you called a path conversion function with an empty path.
@@ -942,13 +948,6 @@ quotas or other plumbing problems.
 
 (F) Only scalar, array, and hash variables may be declared as "my", "our" or
 "state" variables.  They must have ordinary identifiers as names.
-
-=item Can't "default" outside a topicalizer
-
-(F) You have used a C<default> block that is neither inside a
-C<foreach> loop nor a C<given> block.  (Note that this error is
-issued on exit from the C<default> block, so you won't get the
-error if you use an explicit C<continue>.)
 
 =item Can't determine class of operator %s, assuming BASEOP
 
@@ -1148,11 +1147,6 @@ error occurs in cases such as these:
 (F) A C<goto> statement was executed to jump into the scope of a C<defer>
 block.  This is not permitted.
 
-=item Can't "goto" into a "given" block
-
-(F) A "goto" statement was executed to jump into the middle of a C<given>
-block.  You can't get there from here.  See L<perlfunc/goto>.
-
 =item Can't "goto" into the middle of a foreach loop
 
 (F) A "goto" statement was executed to jump into the middle of a foreach
@@ -1287,7 +1281,7 @@ via package "%s" (Perhaps you forgot to load the package?)
 (D deprecated::missing_import_called_with_args) You called the
 C<import()> or C<unimport()> method of a class that has no import method
 defined in its inheritance graph, and passed an argument to the method.
-This is very often the sign of a mispelled package name in a use or
+This is very often the sign of a misspelled package name in a use or
 require statement that has silently succeded due to a case insensitive
 file system.
 
@@ -1681,13 +1675,6 @@ instead.
 (F) You attempted to weaken something that was not a reference.  Only
 references can be weakened.
 
-=item Can't "when" outside a topicalizer
-
-(F) You have used a when() block that is neither inside a C<foreach>
-loop nor a C<given> block.  (Note that this error is issued on exit
-from the C<when> block, so you won't get the error if the match fails,
-or if you use an explicit C<continue>.)
-
 =item Can't x= to read-only value
 
 (F) You tried to repeat a constant value (often the undefined value)
@@ -1876,11 +1863,6 @@ keyword.
 =item Cloning substitution context is unimplemented
 
 (F) Creating a new thread inside the C<s///> operator is not supported.
-
-=item closedir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you tried to close is either closed or not really
-a dirhandle.  Check your control flow.
 
 =item close() on unopened filehandle %s
 
@@ -2740,12 +2722,6 @@ L<perlfunc/getsockopt>.
 (F) You called PerlIO::get_layers() with an unknown argument. Legal
 arguments are provided in key/value pairs, with the keys being one
 of C<input>, C<output> or C<detail>, followed by a boolean.
-
-=item given is deprecated
-
-(D deprecated::smartmatch) C<given> depends on smartmatch, which is
-deprecated. It will be removed in Perl 5.42. See the explanation under
-L<perlsyn/Experimental Details on given and when>.
 
 =item Global symbol "%s" requires explicit package name (did you forget to
 declare "my %s"?)
@@ -4782,22 +4758,6 @@ C<sysread()>ing a file, or when seeking past the end of a scalar opened
 for I/O (in anticipation of future reads and to imitate the behavior
 with real files).
 
-=item Old package separator "'" deprecated
-
-(D deprecated::apostrophe_as_package_separator, syntax) You used the old package
-separator "'" in a variable, subroutine or package name. Support for the
-old package separator will be removed in Perl 5.42.
-
-=item Old package separator used in string
-
-(D deprecated::apostrophe_as_package_separator, syntax) You used the old package
-separator, "'", in a variable named inside a double-quoted string; e.g.,
-C<"In $name's house">. This is equivalent to C<"In $name::s house">. If
-you meant the former, put a backslash before the apostrophe
-(C<"In $name\'s house">).
-
-Support for the old package separator will be removed in Perl 5.42.
-
 =item Only scalar fields can take a :param attribute
 
 (F) You tried to apply the C<:param> attribute to an array or hash field.
@@ -5467,6 +5427,42 @@ Note this may be also triggered for constructs like:
 
     sub { 1 if die; }
 
+=item Possible precedence problem between ! and %s
+
+(W precedence) You wrote something like
+
+    !$x < $y               # parsed as: (!$x) < $y
+    !$x eq $y              # parsed as: (!$x) eq $y
+    !$x =~ /regex/         # parsed as: (!$x) =~ /regex/
+    !$obj isa Some::Class  # parsed as: (!$obj) isa Some::Class
+
+but because C<!> has higher precedence than comparison operators, C<=~>, and
+C<isa>, this is interpreted as comparing/matching the logical negation of the
+first operand, instead of negating the result of the comparison/match.
+
+To disambiguate, either use a negated comparison/binding operator:
+
+    $x >= $y
+    $x ne $y
+    $x !~ /regex/
+
+... or parentheses:
+
+    !($x < $y)
+    !($x eq $y)
+    !($x =~ /regex/)
+    !($obj isa Some::Class)
+
+... or the low-precedence C<not> operator:
+
+    not $x < $y
+    not $x eq $y
+    not $x =~ /regex/
+    not $obj isa Some::Class
+
+(If you did mean to compare the boolean result of negating the first operand,
+parenthesize as C<< (!$x) < $y >>, C<< (!$x) eq $y >>, etc.)
+
 =item Possible precedence problem on bitwise %s operator
 
 (W precedence) Your program uses a bitwise logical operator in conjunction
@@ -5639,11 +5635,6 @@ Stricter rules help to find typos and other errors.  You included a
 range, and at least one of the end points is a decimal digit.  Under the
 stricter rules, when this happens, both end points should be digits in
 the same group of 10 consecutive digits.
-
-=item readdir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you're reading from is either closed or not really
-a dirhandle.  Check your control flow.
 
 =item readline() on closed filehandle %s
 
@@ -5845,11 +5836,6 @@ for the character.
 (W syntax) You wrote your assignment operator backwards.  The = must
 always come last, to avoid ambiguity with subsequent unary operators.
 
-=item rewinddir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you tried to do a rewinddir() on is either closed
-or not really a dirhandle.  Check your control flow.
-
 =item Scalars leaked: %d
 
 (S internal) Something went wrong in Perl's internal bookkeeping
@@ -5898,11 +5884,6 @@ Note that since Perl 5.10.0 a // can also be the I<defined-or>
 construct, not just the empty search pattern.  Therefore code written
 in Perl 5.10.0 or later that uses the // as the I<defined-or> can be
 misparsed by pre-5.10.0 Perls as a non-terminated search pattern.
-
-=item seekdir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you are doing a seekdir() on is either closed or not
-really a dirhandle.  Check your control flow.
 
 =item %sseek() on unopened filehandle
 
@@ -6173,20 +6154,6 @@ requested.
 (F) In a subroutine signature, you put something after a slurpy (array or
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
-
-=item Smart matching a non-overloaded object breaks encapsulation
-
-(F) You should not use the C<~~> operator on an object that does not
-overload it: Perl refuses to use the object's underlying structure
-for the smart match.
-
-=item Smartmatch is deprecated
-
-(D deprecated::smartmatch) This warning is emitted if you
-use the smartmatch (C<~~>) operator.  This is a deprecated
-feature.  Particularly, its behavior is noticed for being
-unnecessarily complex and unintuitive, and it will be removed
-in Perl 5.42.
 
 =item Sorry, hash keys must be smaller than 2**31 bytes
 
@@ -6487,11 +6454,6 @@ know about your kind of stdio.  You'll have to use a filename instead.
 
 (F) You tried to use C<goto> to reach a label that was too deeply nested
 for Perl to reach.  Perl is doing you a favor by refusing.
-
-=item telldir() attempted on invalid dirhandle %s
-
-(W io) The dirhandle you tried to telldir() is either closed or not really
-a dirhandle.  Check your control flow.
 
 =item tell() on unopened filehandle
 
@@ -6796,7 +6758,7 @@ use it to restrict permissions for yourself (EXPR & 0700).
 =item UNIVERSAL does not export anything
 
 (F) You asked UNIVERSAL to export something, but UNIVERSAL is the
-base class for all classes and contains not exportable symbols.
+base class for all classes and contains no exportable symbols.
 
 =item Unbalanced context: %d more PUSHes than POPs
 
@@ -7756,6 +7718,15 @@ will no longer compile in a future version of Perl.  Or you can turn on
 S<C<use feature 'extra_paired_delimiters'>> and use the character that
 is the mirror image of this one for the closing string delimiter.
 
+=item Use of '%s' is experimental as a string delimiter
+
+(S experimental::extra_paired_delimiters)   This warning is emitted if
+you use as a string delimiter one of the non-ASCII mirror image ones
+enabled by S<C<use feature 'extra_paired_delimiters'>>.  Simply suppress
+the warning if you want to use the feature, but know that in doing so
+you are taking the risk of using an experimental feature which may
+change or be removed in a future Perl version:
+
 =item Use of %s is not allowed in Unicode property wildcard
 subpatterns in regex; marked by S<<-- HERE> in m/%s/
 
@@ -7770,6 +7741,10 @@ See L<perlunicode/Wildcards in Property Values>.
 (W io) A filehandle represents an opened file, and when you opened the file
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
+
+=item Use of non-ASCII character 0x%X illegal when 'use source::encoding "ascii"' is in effect
+
+(F) This pragma forbids non-ASCII characters within its scope.
 
 =item Use of reference "%s" as array index
 
@@ -8179,14 +8154,6 @@ but in actual fact, you got
     rand(+5);
 
 So put in parentheses to say what you really mean.
-
-=item when is deprecated
-
-(D deprecated::smartmatch) C<when> depends on smartmatch, which is
-deprecated.  Additionally, it has several special cases that may
-not be immediately obvious, and it will be removed in Perl 5.42.
-See the explanation
-under L<perlsyn/Experimental Details on given and when>.
 
 =item Wide character in %s
 

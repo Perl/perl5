@@ -86,7 +86,6 @@ sub testit {
             use feature 'lexical_subs';
             $code = "no warnings 'syntax'; no strict 'vars'; sub { state sub $keyword; ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";
-            $code = "use feature 'switch';\n$code" if $keyword eq "break";
             $code_ref = eval $code or die "$@ in $expr";
         }
         else {
@@ -95,7 +94,6 @@ sub testit {
             import subs $keyword;
             $code = "no warnings 'syntax'; no strict 'vars'; sub { ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";
-            $code = "use feature 'switch';\n$code" if $keyword eq "break";
             $code_ref = eval $code or die "$@ in $expr";
         }
 
@@ -123,7 +121,7 @@ sub testit {
 
 
 # Deparse can't distinguish 'and' from '&&' etc
-my %infix_map = qw(and && or ||);
+my %infix_map = (and => '&&', or => '||', xor => '^^');
 
 # Test a keyword that is a binary infix operator, like 'cmp'.
 # $parens - "$a op $b" is deparsed as "($a op $b)"
@@ -364,7 +362,7 @@ my %not_tested = map { $_ => 1} qw(
     UNITCHECK
     catch
     class
-    default
+    continue
     defer
     else
     elsif
@@ -373,7 +371,6 @@ my %not_tested = map { $_ => 1} qw(
     for
     foreach
     format
-    given
     if
     m
     method
@@ -391,7 +388,6 @@ my %not_tested = map { $_ => 1} qw(
     unless
     until
     use
-    when
     while
     y
 );
@@ -472,7 +468,6 @@ atan2            2     p
 bind             2     p
 binmode          12    p
 bless            1     p
-break            0     -
 caller           0     -
 chdir            01    -
 chmod            @     p1
@@ -485,7 +480,6 @@ close            01    -
 closedir         1     -
 cmp              B     -
 connect          2     p
-continue         0     -
 cos              01    $
 crypt            2     p
 # dbmopen  handled specially
@@ -543,7 +537,6 @@ getservbyport    2     p
 getservent       0     -
 getsockname      1     -
 getsockopt       3     p
-# given handled specially
 grep             123   p+ # also tested specially
 # glob handled specially
 # goto handled specially
@@ -686,4 +679,4 @@ wantarray        0     -
 warn             @     p1
 write            01    -
 x                B     -
-xor              B     p
+xor              B     -

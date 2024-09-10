@@ -136,21 +136,16 @@ generic characters, and identifiers should match
 That is, any word character in the ASCII range, as long as the first
 character is not a digit.
 
-There are two package separators in Perl: A double colon (C<::>) and a single
-quote (C<'>).  Use of C<'> as the package separator is deprecated and will be
-removed in Perl 5.40.  Normal identifiers can start or end with a double
-colon, and can contain several parts delimited by double colons.  Single
-quotes have similar rules, but with the exception that they are not legal at
-the end of an identifier: That is, C<$'foo> and C<$foo'bar> are legal, but
-C<$foo'bar'> is not.
+There is one package separator in Perl: A double colon (C<::>).
+Normal identifiers can start or end with a double colon, and can
+contain several parts delimited by double colons.
+
+Previously you could use C<'> as a package separator, this was removed
+in Perl 5.42.
 
 Additionally, if the identifier is preceded by a sigil --
 that is, if the identifier is part of a variable name -- it
 may optionally be enclosed in braces.
-
-While you can mix double colons with singles quotes, the quotes must come
-after the colons: C<$::::'foo> and C<$foo::'bar> are legal, but C<$::'::foo>
-and C<$foo'::bar> are not.
 
 Put together, a grammar to match a basic identifier becomes
 
@@ -164,9 +159,9 @@ Put together, a grammar to match a basic identifier becomes
           )
       )
       (?<normal_identifier>
-          (?: :: )* '?
+          (?: :: )*
            (?&basic_identifier)
-           (?: (?= (?: :: )+ '? | (?: :: )* ' ) (?&normal_identifier) )?
+           (?: (?= :: ) (?&normal_identifier) )?
           (?: :: )*
       )
       (?<basic_identifier>
@@ -176,7 +171,7 @@ Put together, a grammar to match a basic identifier becomes
             | (?aa) (?!\d) \w+
           )
       )
-      (?<sigil> [&*\$\@\%])
+      (?<sigil> \$\# | [&*\$\@%])
       (?<Perl_XIDS> (?[ ( \p{Word} & \p{XID_Start} ) + [_] ]) )
       (?<Perl_XIDC> (?[ \p{Word} & \p{XID_Continue} ]) )
   )

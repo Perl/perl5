@@ -849,6 +849,9 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                 }
                 else {
                     if (num_svs) {
+                        if (*svp == &PL_sv_undef && PL_op && !(PL_op->op_flags & OPf_SPECIAL)) {
+                            *svp = sv_newmortal();
+                        }
                         fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
                     }
                     else {
@@ -884,6 +887,9 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             }
             else {
                 if (num_svs) {
+                    if (*svp == &PL_sv_undef && PL_op && !(PL_op->op_flags & OPf_SPECIAL)) {
+                        *svp = sv_newmortal();
+                    }
                     fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
                 }
                 else {
@@ -965,14 +971,9 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                 IoTYPE(io) = IoTYPE_STD;
             }
             else {
-                if (num_svs) {
-                    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
-                }
-                else {
-                    SV *namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
-                    type = NULL;
-                    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,1,&namesv);
-                }
+                SV *namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
+                type = NULL;
+                fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,1,&namesv);
             }
         }
     }

@@ -243,9 +243,9 @@ uni/variables.t
 #    #line 10 ....
 #    }
 #
-../cpan/Test2-Suite/t/behavior/filtering.t
-../cpan/Test2-Suite/t/modules/Tools/Compare.t
-../cpan/Test2-Suite/t/modules/Tools/Subtest.t
+../cpan/Test-Simple/t/behavior/filtering.t
+../cpan/Test-Simple/t/modules/Tools/Compare.t
+../cpan/Test-Simple/t/modules/Tools/Subtest.t
 
 ../dist/Attribute-Handlers/t/constants.t
 ../dist/Attribute-Handlers/t/data_convert.t

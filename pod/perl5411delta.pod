@@ -1,0 +1,264 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5411delta - what is new for perl v5.41.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.41.0 release and the 5.41.1
+release.
+
+If you are upgrading from an earlier release such as 5.40.0, first read
+L<perl5410delta>, which describes differences between 5.40.0 and 5.41.0.
+
+=head1 Core Enhancements
+
+=head2 More CORE:: subs
+
+C<chdir> has been added as a subroutine to the CORE:: namespace.
+
+Previously, code like C<&CORE::chdir($dir)> or C<< my $ref = \&CORE::chdir;
+$ref->($dir) >> would throw an error saying C<&CORE::chdir cannot be called
+directly>. These cases are now fully supported.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Various optimizations related to handling of C<CONST>s.
+
+=item *
+
+C<Perl_leave_adjust_stacks>: additional efficiency for mortal copies.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<builtin> has been upgraded from version 0.014 to 0.015.
+
+Documented when each L<builtin> function was first available and stabilized.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.189 to 2.190.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.51 to 3.52.
+
+=item *
+
+L<Fcntl> has been upgraded from version 1.18 to 1.19.
+
+Removed pointless C<S_ISENFMT> function.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.57 to 2.58.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 2.003002 to 2.003003.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20240610 to 5.20240620.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.20 to 2.21.
+
+=item *
+
+L<sort> has been upgraded from version 2.05 to 2.06.
+
+=item *
+
+L<Test2::Suite> has been upgraded from version 0.000162 to 0.000163.
+
+=item *
+
+L<VMS::Filespec> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<warnings> has been upgraded from version 1.69 to 1.70.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+Combined the documentation for several groups of related functions
+into single entries.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Clarified the description of C<ref> and C<reftype> in relation
+to built-in types and class names.
+
+=item *
+
+Clarified that perl C<sort> is stable (and has been since v5.8.0).
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Added some description of "real" C<AV>s compared to "fake" C<AV>s.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+A new F<t/run/todo.t> test script was added as a place for TODO tests
+for known unfixed bugs.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The L<perlapi/C<sv_strftime_ints>> function is introduced.  This is an
+enhanced version of L<perlapi/C<my_strftime>>, which is retained for
+backwards compatibility.  Both are to call L<strftime(3)> when you have
+the year, month, hour, etc.  The new function handles UTF8ness for you,
+and allows you to specify if you want the possibility of daylight
+savings time to be considered.  C<my_strftime> never considers DST.
+
+=item *
+
+The C<bytes_to_utf8>, C<bytes_from_utf8>, and C<bytes_from_utf8_loc>
+functions are no longer experimental.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Fix null pointer dereference in S_SvREFCNT_dec [L<GH #16627|https://github.com/Perl/perl5/issues/16627>].
+
+=item *
+
+Fix feature 'class' Segmentation fault in DESTROY [L<GH #22278|https://github.com/Perl/perl5/issues/22278>].
+
+=item *
+
+Fix C<POSIX::strftime()> [L<GH #22369|https://github.com/Perl/perl5/issues/22369>].
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.41.1 represents approximately 3 weeks of development since Perl
+5.41.0 and contains approximately 6,000 lines of changes across 270 files
+from 20 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 3,900 lines of changes to 210 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.41.1:
+
+Chad Granum, Craig A. Berry, Dabrien 'Dabe' Murphy, Dan Book, David
+Mitchell, Elvin Aslanov, Graham Knop, James E Keenan, James Raspass, Johan
+Vromans, Karl Williamson, Leon Timmermans, Lukas Mai, Max Maischein, Paul
+Evans, Peter John Acklam, Philippe Bruhat (BooK), Richard Leach, TAKAI
+Kousuke, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

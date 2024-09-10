@@ -242,6 +242,9 @@ use feature 'try';
     is($scalar, "result", 'do { try/catch } with multiple statements');
 }
 
+my $program = $0;
+$program =~ s/\.dp$//; # running under 'cd t; ./TEST -deparse'
+
 # try{} blocks should be invisible to caller()
 {
     my $caller;
@@ -255,7 +258,7 @@ use feature 'try';
     my $LINE = __LINE__+1;
     B();
 
-    is($caller, "main::B ($0 line $LINE)", 'try {} block is invisible to caller()');
+    is($caller, "main::B ($program line $LINE)", 'try {} block is invisible to caller()');
 }
 
 # try/catch/finally
@@ -265,15 +268,18 @@ use feature 'try';
     my $warnings;
     BEGIN { $SIG{__WARN__} = sub { $warnings .= shift; }; }
 
-    my ($lfinally) = (__LINE__+5);
+    my $lfinally = __LINE__; $lfinally += 7;
     try {
+        1;  # empty line to make line numbers match when being deparsed
     }
     catch ($e) {
+        1;  # empty line to make line numbers match when being deparsed
     }
     finally {
+        1;  # empty line to make line numbers match when being deparsed
     }
 
-    is($warnings, "try/catch/finally is experimental at $0 line $lfinally.\n",
+    is($warnings, "try/catch/finally is experimental at $program line $lfinally.\n",
         'compiletime warnings');
     BEGIN { undef $SIG{__WARN__}; }
 }

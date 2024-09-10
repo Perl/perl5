@@ -8056,7 +8056,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         break;
                     }
                 } while(n);
-                
+
                 if (!n) /* this means there is nothing that matched */
                     sayNO;
             }
@@ -10605,7 +10605,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && BITMAP_TEST(( (struct regnode_bbm *) p)->bitmap,
                                 (U8) scan[1] & UTF_CONTINUATION_MASK))
         {
-            scan += 2;  /* This node only matces 2-byte UTF-8 */
+            scan += 2;  /* This node only matches 2-byte UTF-8 */
             hardcount++;
         }
         break;
@@ -10937,7 +10937,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         if (c_len == (STRLEN)-1) {
             _force_out_malformed_utf8_message(p, p_end,
                                               utf8n_flags,
-                                              1 /* 1 means die */ );
+                                              MALFORMED_UTF8_DIE);
             NOT_REACHED; /* NOTREACHED */
         }
         if (     c > 255
@@ -11905,7 +11905,22 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
                              */
             }
 
-            zero_of_char = decimals_array[index_of_zero_of_char];
+            /* Here, is a digit.  Unicode guarantees that the range that
+             * contains it will include all 10 consecutive digits.  It also
+             * guarantees that the numeric value of the first digit in the
+             * range will be 0.  But, be careful, that first digit need not be
+             * the zero of this run!  This happens if Unicode has allocated
+             * several adjacent 10-digit runs.  'decimals_invlist' groups them
+             * all into a single range, and the first character is indeed a
+             * DIGIT 0, but is the zero of only the first run.  U+1D7CE, for
+             * example, starts a single range of 50 \d characters.  These
+             * actually form 5 adjacent runs of 10 digits each, all in the
+             * Common script.
+             *      (cp - U+1D7CE) % 10
+             * yields a value 0..9 which is the offset from cp's zero digit
+             * code point. */
+            zero_of_char =   cp
+                         -  ((cp - decimals_array[index_of_zero_of_char]) % 10);
         }
 
         /* Here, the character is a decimal digit, and the zero of its sequence
@@ -12109,7 +12124,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
             return newSViv(HvTOTALKEYS(RXp_PAREN_NAMES(rx)));
         } else if (flags & RXapif_ONE) {
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
-            av = MUTABLE_AV(SvRV(ret));
+            av = AV_FROM_REF(ret);
             length = av_count(av);
             SvREFCNT_dec_NN(ret);
             return newSViv(length);

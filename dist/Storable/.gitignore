@@ -1,1 +1,3 @@
 !/Makefile.PL
+/Storable-*/
+/Storable-*.tar.gz

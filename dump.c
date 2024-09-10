@@ -665,7 +665,6 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
                 const char* pat, ...)
 {
     va_list args;
-    I32 i;
     bool newop = (level < 0);
 
     va_start(args, pat);
@@ -678,7 +677,7 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
 
         /* output preceding blank line */
         PerlIO_puts(file, "     ");
-        for (i = level-1; i >= 0; i--)
+        for (I32 i = level-1; i >= 0; i--)
             PerlIO_puts(file,  (   i == 0
                                 || (i < UVSIZE*8 && (bar & ((UV)1 << i)))
                                )
@@ -693,14 +692,84 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
 
     }
     else
-        PerlIO_printf(file, "     ");
+        PerlIO_puts(file, "     ");
 
-    for (i = level-1; i >= 0; i--)
+    for (I32 i = level-1; i >= 0; i--)
             PerlIO_puts(file,
                   (i == 0 && newop) ? "+--"
                 : (bar & (1 << i))  ? "|   "
                 :                     "    ");
     PerlIO_vprintf(file, pat, args);
+    va_end(args);
+}
+
+struct Perl_OpDumpContext {
+    I32 level;
+    UV bar;
+    PerlIO *file;
+    bool indent_needed;
+};
+
+static void
+S_opdump_print(pTHX_ struct Perl_OpDumpContext *ctx, SV *msg)
+{
+    STRLEN msglen;
+    const char *msgpv = SvPV(msg, msglen);
+
+    while(msglen) {
+        if(ctx->indent_needed) {
+            PerlIO_puts(ctx->file, "     ");
+
+            for (I32 i = ctx->level-1; i >= 0; i--)
+                    PerlIO_puts(ctx->file,
+                        (ctx->bar & (1 << i))  ? "|   " : "    ");
+        }
+
+        const char *eol_at = strchr(msgpv, '\n');
+        if(eol_at) {
+            STRLEN partlen = eol_at - msgpv + 1;
+            PerlIO_write(ctx->file, msgpv, partlen);
+
+            ctx->indent_needed = true;
+            msgpv  += partlen;
+            msglen -= partlen;
+        }
+        else {
+            PerlIO_write(ctx->file, msgpv, msglen);
+
+            ctx->indent_needed = false;
+            msglen = 0;
+        }
+    }
+}
+
+/*
+=for apidoc_section $debugging
+=for apidoc opdump_printf
+
+Prints formatted output to C<STDERR> according to the pattern and subsequent
+arguments, in the style of C<printf()> et.al. This should only be called by
+a function invoked by the C<xop_dump> field of a custom operator, where the
+C<ctx> opaque structure pointer should be passed in from the argument given
+to the C<xop_dump> callback.
+
+This function handles indentation after linefeeds, so message strings passed
+in should not account for it themselves. Multiple lines may be passed to this
+function at once, or a single line may be split across multiple calls.
+
+=cut
+ */
+
+void
+Perl_opdump_printf(pTHX_ struct Perl_OpDumpContext *ctx, const char *pat, ...)
+{
+    va_list args;
+
+    PERL_ARGS_ASSERT_OPDUMP_PRINTF;
+
+    va_start(args, pat);
+    SV *msg_sv = sv_2mortal(vnewSVpvf(pat, &args));
+    S_opdump_print(aTHX_ ctx, msg_sv);
     va_end(args);
 }
 
@@ -1375,8 +1444,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_DORASSIGN:
     case OP_ANDASSIGN:
     case OP_ARGDEFELEM:
-    case OP_ENTERGIVEN:
-    case OP_ENTERWHEN:
     case OP_ENTERTRY:
     case OP_ONCE:
         S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");
@@ -1454,6 +1521,64 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         }
         break;
 
+    case OP_ARGELEM:
+        S_opdump_indent(aTHX_ o, level, bar, file, "ARGIX = %" IVdf "\n", PTR2IV(cUNOP_AUXo->op_aux));
+        break;
+
+    case OP_ARGCHECK:
+    {
+        struct op_argcheck_aux *aux = (struct op_argcheck_aux *)cUNOP_AUXo->op_aux;
+        S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %" UVuf " .. %" UVuf "\n",
+                aux->params, aux->opt_params);
+        if(aux->slurpy)
+            S_opdump_indent(aTHX_ o, level, bar, file, "SLURPY = '%c'\n", aux->slurpy);
+
+        break;
+    }
+
+    case OP_METHSTART:
+    {
+        UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+        if(!aux)
+            break;
+
+        UV n_fields = aux[0].uv;
+        S_opdump_indent(aTHX_ o, level, bar, file, "MAX_FIELDIX = %" UVuf "\n", aux[1].uv);
+        if(!n_fields)
+            break;
+
+        S_opdump_indent(aTHX_ o, level, bar, file, "FIELDS: (%" UVuf ")\n", n_fields);
+        UNOP_AUX_item *fieldaux = aux + 2;
+        for(Size_t i = 0; i < n_fields; i++, fieldaux += 2) {
+            S_opdump_indent(aTHX_ o, level, bar, file, "  [%zd] PADIX = %" UVuf "  FIELDIX = % " UVuf "\n",
+                    i, fieldaux[0].uv, fieldaux[1].uv);
+        }
+        break;
+    }
+
+    case OP_INITFIELD:
+    {
+        UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+        S_opdump_indent(aTHX_ o, level, bar, file, "FIELDIX = %" UVuf "\n", aux[0].uv);
+        break;
+    }
+
+    case OP_CUSTOM:
+    {
+        void (*custom_dumper)(pTHX_ const OP *o, struct Perl_OpDumpContext *ctx) =
+            XopENTRYCUSTOM(o, xop_dump);
+
+        if(custom_dumper) {
+            struct Perl_OpDumpContext ctx = {
+                .level         = level,
+                .bar           = bar,
+                .file          = file,
+                .indent_needed = true,
+            };
+            (*custom_dumper)(aTHX_ o, &ctx);
+        }
+        break;
+    }
 
     default:
         break;
@@ -1782,7 +1907,8 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_SIGNATURE,        "SIGNATURE,"},
     {CVf_REFCOUNTED_ANYSV, "REFCOUNTED_ANYSV,"},
     {CVf_IsMETHOD,         "IsMETHOD,"},
-    {CVf_XS_RCSTACK,       "XS_RCSTACK,"}
+    {CVf_XS_RCSTACK,       "XS_RCSTACK,"},
+    {CVf_EVAL_COMPILED,    "EVAL_COMPILED,"},
 };
 
 const struct flag_to_name hv_flags_names[] = {
@@ -2738,22 +2864,23 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 }
 
 /*
-=for apidoc sv_dump
+=for apidoc      sv_dump
+=for apidoc_item sv_dump_depth
 
-Dumps the contents of an SV to the C<STDERR> filehandle.
+These each dump the contents of an SV to the C<STDERR> filehandle.
 
-For an example of its output, see L<Devel::Peek>. If
-the item is an SvROK it will dump items to a depth of 4,
-otherwise it will dump only the top level item, which
-means that it will not dump the contents of an AV * or
-HV *. For that use C<av_dump()> or C<hv_dump()>.
+C<sv_dump_depth> is a more flexible variant of C<sv_dump>, taking an extra
+parameter giving the maximum depth to dump.
 
-=for apidoc sv_dump_depth
+C<sv_dump> is limited to dumping items to a depth of 4 if the item is an SvROK,
+and dumping only the top level item otherwise.  This means that it will not
+dump the contents of an S<C<AV *>> or S<C<HV *>>. For that use C<L</av_dump>>
+or C<L</hv_dump>>.
 
-Dumps the contents of an SV to the C<STDERR> filehandle
-to the depth requested. This function can be used on any
-SV derived type (GV, HV, AV) with an appropriate cast.
-This is a more flexible variant of sv_dump(). For example
+For an example of its output, see L<Devel::Peek>.
+
+In contrast, C<sv_dump_depth> can be used on any SV derived type (GV, HV, AV)
+with an appropriate cast:
 
     HV *hv = ...;
     sv_dump_depth((SV*)hv, 2);

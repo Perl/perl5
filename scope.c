@@ -1684,11 +1684,6 @@ Perl_leave_scope(pTHX_ I32 base)
             (void)sv_clear(a0.any_sv);
             break;
 
-        case SAVEt_LONG:			/* long reference */
-            a0 = ap[0]; a1 = ap[1];
-            *(long*)a1.any_ptr = a0.any_long;
-            break;
-
         case SAVEt_IV:				/* IV reference */
             a0 = ap[0]; a1 = ap[1];
             *(IV*)a1.any_ptr = a0.any_iv;

@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 169);
+plan(tests => 170);
 
 eval 'pass();';
 
@@ -767,4 +767,21 @@ pass("eval in freed package does not crash");
             "test that nested eval '$fragment' calls sig die as expected"
         );
     }
+}
+
+# The first inner eval finds the $v and adds a fake entry to the
+# outer eval's pad. The second inner eval finds the fake $c entry,
+# but was incorrectly concluding that the outer eval was in fact a
+# non-live anon prototype and issuing the warning
+# 'Variable "$v" is not available'/
+
+{
+    use warnings;
+    my $w = 0;
+    local $SIG{__WARN__} = sub { $w++ };
+    sub {
+        my $v;
+        eval q( eval '$v'; eval '$v';);
+    }->();
+    is($w, 0, "nested eval and closure");
 }

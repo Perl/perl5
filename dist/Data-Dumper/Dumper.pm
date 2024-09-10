@@ -30,7 +30,7 @@ our ( $Indent, $Trailingcomma, $Purity, $Pad, $Varname, $Useqq, $Terse, $Freezer
 our ( @ISA, @EXPORT, @EXPORT_OK, $VERSION );
 
 BEGIN {
-    $VERSION = '2.189'; # Don't forget to set version and release
+    $VERSION = '2.190'; # Don't forget to set version and release
                         # date in POD below!
 
     @ISA = qw(Exporter);
@@ -760,6 +760,7 @@ my $low_controls_re = qr/[$low_controls]/;
 # put a string value in double quotes
 sub qquote {
   local($_) = shift;
+  return qq("") unless defined && length;  # fast exit if undef/empty
   s/([\\\"\@\$])/\\$1/g;
 
   # This efficiently changes the high ordinal characters to \x{} if the utf8
@@ -1455,7 +1456,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.189
+Version 2.190
 
 =head1 SEE ALSO
 
