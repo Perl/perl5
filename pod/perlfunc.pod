@@ -7097,7 +7097,7 @@ If the hook is an array reference, its first element must be a
 subroutine reference or an object as described above. When the first
 element is an object that supports an C<INC> or C<INCDIR> method then
 the method will be called with the object as the first argument, the
-filename requested as the second, and the hook array reference as the
+filename requested as the second, and the hook array reference as
 the third. When the first element is a subroutine then it will be
 called with the array as the first argument, and the filename as the
 second, no third parameter will be passed in. In both forms you can

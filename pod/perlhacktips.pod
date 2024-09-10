@@ -262,7 +262,7 @@ C<snprintf> in the VMS libc only added support for C<PRIdN> etc very
 recently, meaning that there are live supported installations without
 this, or formats such as C<%zu>.
 
-(perl's C<sv_catpvf> etc use parser code code in F<sv.c>, which
+(perl's C<sv_catpvf> etc use parser code in F<sv.c>, which
 supports the C<z> modifier, along with perl-specific formats such as
 C<SVf>.)
 
@@ -401,7 +401,7 @@ the issues.
 
 =head3 Choosing good symbol names
 
-Ideally, a symbol name name should correctly and precisely describe its
+Ideally, a symbol name should correctly and precisely describe its
 intended purpose.  But there is a tension between that and getting
 names that are overly long and hence awkward to type and read.
 Metaphors could be helpful (a poetic name), but those tend to be
@@ -516,7 +516,7 @@ restrictions on what names you can use.)
 
 This kind of name collision doesn't happen with the macro's formal
 parameters, so they don't need to have complicated names.  But there
-are pitfalls when a a parameter is an expression, or has some Perl
+are pitfalls when a parameter is an expression, or has some Perl
 magic attached.  When calling a function, C will evaluate the parameter
 once, and pass the result to the function.  But when calling a macro,
 the parameter is copied as-is by the C preprocessor to each instance

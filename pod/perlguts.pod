@@ -2067,7 +2067,7 @@ from the related C<SAVEDESTRUCTOR_X()> in that it MUST be either NULL or
 an C<SV*>.
 
 Note the I<end of the current statement> may occur much before the
-the I<end of the current pseudo-block>.  You may wish to look at the
+I<end of the current pseudo-block>.  You may wish to look at the
 C<SAVEDESTRUCTOR_X()> macro instead.
 
 =for apidoc Amh||MORTALSVFUNC_X|SVFUNC_t f|SV *sv
@@ -2080,7 +2080,7 @@ See the documentation for C<mortal_destructor_sv()> for details on
 the C<args> parameter is handled.
 
 Note the I<end of the current statement> may occur much before the
-the I<end of the current pseudo-block>.  If you wish to call a perl
+I<end of the current pseudo-block>.  If you wish to call a perl
 function at the end of the current pseudo block you should use the
 C<SAVEDESTRUCTOR_X()> API instead, which will require you create a
 C wrapper to call the Perl function.
@@ -4473,7 +4473,7 @@ C<for (list) {}>), and what args (if any) it returns; and that will
 already have been sorted out earlier by C<leave_adjust_stacks()>.
 
 Finally, the context stack pointer is actually decremented by C<CX_POP(cx)>.
-After this point, it's possible that that the current context frame could
+After this point, it's possible that the current context frame could
 be overwritten by other contexts being pushed. Although things like ties
 and C<DESTROY> are supposed to work within a new context stack, it's best
 not to assume this. Indeed on debugging builds, C<CX_POP(cx)> deliberately
@@ -4523,7 +4523,7 @@ short), are called via special wrapper functions which adjust the stack
 before and after. At the moment there is no API to write an RC XS
 function, so all XS code will continue to be called via a wrapper (which
 makes them slightly slower), but means that in general, CPAN distributions
-containing XS code code continue to work without modification.
+containing XS code continue to work without modification.
 
 However, PP functions, either in perl core, or those in XS functions used
 to implement custom ops or to override the PP functions for built-in ops,

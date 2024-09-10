@@ -1095,7 +1095,7 @@ currency values.)
 
 Perl essentially takes no notice of this category.  On POSIX systems, you
 can call C<strfmon()> from XS code to create formatted strings, and/or you
-you can query the C<LC_MONETARY> locale-specific values with
+can query the C<LC_MONETARY> locale-specific values with
 L</The localeconv function> and use the information that it returns in your
 application's own formatting of currency amounts.  However, you may well
 find that the information, voluminous and complex though it may be, still

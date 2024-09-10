@@ -604,7 +604,7 @@ your language very well.
 
 Earlier we mentioned that explicit action is required to have your code
 get called with the numeric portions of the locale not meeting the
-the typical expectations of having a dot for the radix character and no
+typical expectations of having a dot for the radix character and no
 punctuation separating groups of digits.  That action is to call the
 function L<perlapi/C<switch_to_global_locale>>.
 
@@ -1046,7 +1046,7 @@ L<libc functions to avoid>.
 
 Even so, some of the preferred alternatives are considered obsolete or
 otherwise unwise to use on some platforms.  These are marked with a '?'.
-Also, some alternatives aren't Perl-defined functions and aren't in in
+Also, some alternatives aren't Perl-defined functions and aren't in
 the POSIX Standard, so won't be widely available.  These are marked with
 '~'.  (Remember that the automatic substitution only happens when they
 are available and desirable, so you can just use the unpreferred
