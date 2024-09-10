@@ -5463,7 +5463,7 @@ of values, as follows:
        as possible.  Bit eight (the high bit) is set on each byte
        except the last.
 
-    x  A null byte (a.k.a ASCII NUL, "\000", chr(0))
+    x  A null byte (a.k.a. ASCII NUL, "\000", chr(0))
     X  Back up a byte.
     @  Null-fill or truncate to absolute position, counted from the
        start of the innermost ()-group.
