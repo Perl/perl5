@@ -8680,7 +8680,7 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
 #endif /* USE_LOCALE_COLLATE */
 
 static char *
-S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
+S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
 {
     SV * const tsv = newSV_type(SVt_NULL);
     ENTER;
@@ -8694,7 +8694,7 @@ S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 }
 
 static char *
-S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
+S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
 {
     SSize_t bytesread;
     const STRLEN recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
@@ -8822,7 +8822,7 @@ in the SV (typically, C<SvCUR(sv)> is a suitable choice).
 */
 
 char *
-Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
+Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
 {
     const char *rsptr;
     STRLEN rslen;
@@ -8848,7 +8848,8 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
         if (PerlIO_isutf8(fp)) {
             if (!SvUTF8(sv)) {
                 sv_utf8_upgrade_nomg(sv);
-                sv_pos_u2b(sv,&append,0);
+                append = (SSize_t)sv_pos_u2b_flags(sv, (STRLEN)append, NULL,
+                                                   SV_GMAGIC|SV_CONST_RETURN);
             }
         } else if (SvUTF8(sv)) {
             return S_sv_gets_append_to_utf8(aTHX_ sv, fp, append);
@@ -8962,11 +8963,11 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     STDCHAR *ptr;       /* pointer into fp's read-ahead buffer */
     STRLEN bpx;         /* length of the data in the target sv
                            used to fix pointers after a SvGROW */
-    I32 shortbuffered;  /* If the pv buffer is shorter than the amount
-                           of data left in the read-ahead buffer.
-                           If 0 then the pv buffer can hold the full
-                           amount left, otherwise this is the amount it
-                           can hold. */
+    SSize_t shortbuffered;/* If the pv buffer is shorter than the amount
+                             of data left in the read-ahead buffer.
+                             If 0 then the pv buffer can hold the full
+                             amount left, otherwise this is the amount it
+                             can hold. */
 
     /* Here is some breathtakingly efficient cheating */
 
@@ -9029,11 +9030,11 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     cnt = PerlIO_get_cnt(fp);
 
     /* make sure we have the room */
-    if ((I32)(SvLEN(sv) - append) <= cnt + 1) {
+    if ((SSize_t)(SvLEN(sv) - append) <= cnt + 1) {
         /* Not room for all of it
            if we are looking for a separator and room for some
          */
-        if (rslen && cnt > 80 && (I32)SvLEN(sv) > append) {
+        if (rslen && cnt > 80 && SvLEN(sv) > (STRLEN)append) {
             /* just process what we have room for */
             shortbuffered = cnt - SvLEN(sv) + append + 1;
             cnt -= shortbuffered;

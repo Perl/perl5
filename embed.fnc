@@ -3175,7 +3175,7 @@ ATdpx	|SV *	|sv_get_backrefs|NN SV * const sv
 Adip	|void	|SvGETMAGIC	|NN SV *sv
 Adp	|char * |sv_gets	|NN SV * const sv			\
 				|NN PerlIO * const fp			\
-				|I32 append
+				|SSize_t append
 Cdp	|char * |sv_grow	|NN SV * const sv			\
 				|STRLEN newlen
 Cdp	|char * |sv_grow_fresh	|NN SV * const sv			\

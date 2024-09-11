@@ -4557,7 +4557,7 @@ Perl_sv_get_backrefs(SV * const sv);
         assert(sv)
 
 PERL_CALLCONV char *
-Perl_sv_gets(pTHX_ SV * const sv, PerlIO * const fp, I32 append);
+Perl_sv_gets(pTHX_ SV * const sv, PerlIO * const fp, SSize_t append);
 #define PERL_ARGS_ASSERT_SV_GETS                \
         assert(sv); assert(fp)
 
