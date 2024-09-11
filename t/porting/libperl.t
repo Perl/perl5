@@ -81,7 +81,10 @@ print "# \$^O = $^O\n";
 print "# \$Config{archname} = $Config{archname}\n";
 print "# \$Config{cc} = $Config{cc}\n";
 print "# libperl = $libperl_a\n";
+
+my $common = $Config{ccflags} =~ /-fcommon/ ? 1 : 0;
 my $nocommon = $Config{ccflags} =~ /-fno-common/ ? 1 : 0;
+print "# common = $common\n";
 print "# nocommon = $nocommon\n";
 
 
@@ -255,6 +258,10 @@ sub nm_parse_gnu {
                 print "# Unknown type: $line ($symbols->{o})\n";
             }
             return;
+        } elsif (/^ {8}(?: {8})? [wW] _?(\w+)$/) {
+            # weak symbol "not tagged as a weak object symbol"
+            # don't bother saving - perl symbols shouldn't be here
+            return;
         } elsif (/^ {8}(?: {8})? U _?(\w+)$/) {
             my ($symbol) = $1;
             return if is_perlish_symbol($symbol);
@@ -364,6 +371,13 @@ while (<$nm_fh>) {
 #                              'PL_current_context' => { 'globals.o' => 1 },
 #                              ...
 #                          },
+#                 'common' => {
+#                                # some bss symbols may be here instead
+#                                # on older gcc/clang where -fno-common
+#                                # isn't the default. Even if it is the
+#                                # default, clang with ASAN may still
+#                                # put some private values in it.
+#                             },
 #                 'data' => {
 #                              'my_cxt_index' => { 'DynaLoader.o' => 1 },
 #                              ...
@@ -421,8 +435,6 @@ unless (exists $symbols{text}) {
 
 # do an ok(), but on failure, print some diagnostic info about that symbol
 
-my $common_was_aliased;
-
 sub has_symbol {
     my ($sym, $ok, $desc) = @_;
     ok($ok, $desc);
@@ -437,10 +449,7 @@ sub has_symbol {
         diag "Didn't find the symbol '$sym' where expected,",
             "nor was it seen elsewhere in the nm output";
     }
-    diag sprintf("\$symbols{data}{common} %s aliased to \$symbols{data}{bss}",
-            defined $common_was_aliased
-                ? $common_was_aliased ? "was" : "wasn't"
-                : "not yet");
+    diag "-fcommon "    . ($common   ? "present" : "not present");
     diag "-fno-common " . ($nocommon ? "present" : "not present");
 }
 
@@ -465,18 +474,9 @@ for my $dtype (sort keys %{$symbols{data}}) {
     }
 }
 
-if ( !$symbols{data}{common} ) {
-    # This is likely because Perl was compiled with
-    # -Accflags="-fno-common"
-    $symbols{data}{common} = $symbols{data}{bss};
-    $common_was_aliased = 1;
-}
-else {
-    $common_was_aliased = 0;
-}
-
 has_symbol('PL_hash_seed_w',
-        $symbols{data}{common}{PL_hash_seed_w}{'globals.o'},
+           $symbols{data}{bss}{PL_hash_seed_w}{'globals.o'}
+        || $symbols{data}{common}{PL_hash_seed_w}{'globals.o'},
         "has PL_hash_seed_w");
 
 has_symbol('PL_ppaddr', $symbols{data}{data}{PL_ppaddr}{'globals.o'},
