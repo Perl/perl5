@@ -5972,6 +5972,7 @@ t/bigmem/stack_over.t			Check handling of stack overflows with 32-bit MARK on 64
 t/bigmem/str.t				Test string primitives with large strings
 t/bigmem/subst.t			Test s/// with large strings
 t/bigmem/subst2.t			Test s//EXPR/e with large strings
+t/bigmem/sv_gets.t			Test reading a lot with sv_gets()
 t/bigmem/vec.t				Check vec() handles large offsets
 t/charset_tools.pl			To aid in portable testing across platforms with different character sets
 t/class/accessor.t			See if accessor methods work
