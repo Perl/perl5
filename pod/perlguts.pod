@@ -91,7 +91,7 @@ is documented only in this paragraph.)
 =for apidoc Ayh||NV
 
 There are more than a few routines that create and initialize SVs, with
-new ones occassionally added.  These are all documented in L<perlapi/SV
+new ones occasionally added.  These are all documented in L<perlapi/SV
 Handling>; each one's name begins with C<newSV>.  Here are the basic
 ones:
 
