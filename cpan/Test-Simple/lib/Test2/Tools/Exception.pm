@@ -2,7 +2,7 @@ package Test2::Tools::Exception;
 use strict;
 use warnings;
 
-our $VERSION = '1.302201';
+our $VERSION = '1.302203';
 
 use Carp qw/carp/;
 use Test2::API qw/context/;

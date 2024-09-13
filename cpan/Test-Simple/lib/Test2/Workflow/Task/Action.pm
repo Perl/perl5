@@ -2,7 +2,7 @@ package Test2::Workflow::Task::Action;
 use strict;
 use warnings;
 
-our $VERSION = '1.302201';
+our $VERSION = '1.302203';
 
 use base 'Test2::Workflow::Task';
 use Test2::Util::HashBase qw/around/;
