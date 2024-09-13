@@ -3557,16 +3557,16 @@ sub param_check {
 
 sub generate_init {
   my ExtUtils::ParseXS $self = shift;
-  my $argsref = shift;
+  my $param = shift;
 
   my ($type, $num, $var, $init, $no_init, $defer)
-    = @{$argsref}{qw(type num var init no_init defer)};
+    = @{$param}{qw(type num var init no_init defer)};
 
   my $default = $self->{xsub_map_argname_to_default}->{$var};
 
   my $arg = $self->ST($num, 0);
 
-  if ($argsref->{is_length}) {
+  if ($param->{is_length}) {
     # Process length(foo) parameter.
     # Basically for something like foo(char *s, int length(s)),
     # create *two* local C vars: one with STRLEN type, and one with the
@@ -3583,7 +3583,7 @@ sub generate_init {
     # handling length(s)), by overriding the normal T_PV typemap (which
     # uses PV_nolen()).
 
-    my $name = $argsref->{len_name};
+    my $name = $param->{len_name};
 
     print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
     # defer this line until after all the other declarations
