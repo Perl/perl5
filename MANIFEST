@@ -516,27 +516,27 @@ cpan/CPAN/lib/CPAN/LWP/UserAgent.pm			helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Mirrors.pm				helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Module.pm				helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Nox.pm				Runs CPAN while avoiding compiled extensions
-cpan/CPAN/lib/CPAN/Plugin.pm
-cpan/CPAN/lib/CPAN/Plugin/Specfile.pm
-cpan/CPAN/lib/CPAN/Prompt.pm
+cpan/CPAN/lib/CPAN/Plugin.pm				Module related to CPAN
+cpan/CPAN/lib/CPAN/Plugin/Specfile.pm			Module related to CPAN
+cpan/CPAN/lib/CPAN/Prompt.pm				Module related to CPAN
 cpan/CPAN/lib/CPAN/Queue.pm				queueing system for CPAN.pm
-cpan/CPAN/lib/CPAN/Shell.pm
+cpan/CPAN/lib/CPAN/Shell.pm				Module related to CPAN
 cpan/CPAN/lib/CPAN/Tarzip.pm				helper package for CPAN.pm
-cpan/CPAN/lib/CPAN/URL.pm
+cpan/CPAN/lib/CPAN/URL.pm				Module related to CPAN
 cpan/CPAN/lib/CPAN/Version.pm				Simple math with different flavors of version strings
 cpan/CPAN/PAUSE2003.pub					CPAN public key
 cpan/CPAN/PAUSE2005.pub					CPAN public key
 cpan/CPAN/PAUSE2007.pub					CPAN public key
 cpan/CPAN/PAUSE2009.pub					CPAN public key
-cpan/CPAN/PAUSE2011.pub
-cpan/CPAN/PAUSE2022.pub
+cpan/CPAN/PAUSE2011.pub					CPAN
+cpan/CPAN/PAUSE2022.pub					CPAN
 cpan/CPAN/scripts/cpan					easily interact with CPAN from the command line
 cpan/CPAN/t/01loadme.t					See if CPAN the module works
 cpan/CPAN/t/02nox.t					See if CPAN::Nox works
 cpan/CPAN/t/03pkgs.t					See if CPAN::Version works
 cpan/CPAN/t/10version.t					See if CPAN the module works
 cpan/CPAN/t/11mirroredby.t				See if CPAN::Mirrored::By works
-cpan/CPAN/t/32pushyhttps.t
+cpan/CPAN/t/32pushyhttps.t				Test file related to CPAN
 cpan/CPAN-Meta/corpus/BadMETA.yml
 cpan/CPAN-Meta/corpus/bareyaml.meta
 cpan/CPAN-Meta/corpus/CL018_yaml.meta
