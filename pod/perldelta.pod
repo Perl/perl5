@@ -403,6 +403,13 @@ call, any of trim(), refaddr(), reftype(), ceil(), floor() or
 stringify() in the C<builtin::> package would crash or assert due to a
 C<TARG> handling bug. [GH #22542]
 
+=item *
+
+Fix sv_gets() to accept a C<SSize_t> append offset instead of C<I32>.
+This prevents integer overflows when appending to a large C<SV> for
+C<readpipe> aka C<qx//> and C<readline>.
+L<https://www.perlmonks.org/?node_id=11161665>
+
 =back
 
 =head1 Known Problems
