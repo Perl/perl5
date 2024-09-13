@@ -3,7 +3,7 @@ package overload;
 use strict;
 no strict 'refs';
 
-our $VERSION = '1.38';
+our $VERSION = '1.39';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -19,6 +19,7 @@ our %ops = (
     iterators           => '<>',
     filetest            => "-X",
     dereferencing       => '${} @{} %{} &{} *{}',
+    matching            => '~~',
     special             => 'nomethod fallback =',
 );
 
