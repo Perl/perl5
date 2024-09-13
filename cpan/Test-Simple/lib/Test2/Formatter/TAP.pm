@@ -2,7 +2,7 @@ package Test2::Formatter::TAP;
 use strict;
 use warnings;
 
-our $VERSION = '1.302201';
+our $VERSION = '1.302203';
 
 use Test2::Util qw/clone_io/;
 
@@ -384,6 +384,8 @@ sub info_tap {
 
         my $msg;
         if ($table && $self->supports_tables) {
+            my $size = $self->calc_table_size($f);
+
             $msg = join "\n" => map { "# $_" } Term::Table->new(
                 header      => $table->{header},
                 rows        => $table->{rows},
@@ -391,8 +393,12 @@ sub info_tap {
                 no_collapse => $table->{no_collapse},
                 sanitize    => 1,
                 mark_tail   => 1,
-                max_width   => $self->calc_table_size($f),
+                max_width   => $size,
             )->render();
+
+            $msg .= "\n(If this table is too small, you can use the TABLE_TERM_SIZE=### env var to set a larger size, detected size is '$size')\n"
+                if $size <= 80
+                && !$ENV{TABLE_TERM_SIZE};
         }
         elsif (ref($details)) {
             require Data::Dumper;
