@@ -254,7 +254,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Fix compilation on platforms (e.g. "Gentoo Prefix") with only a C locale [GH #22569]
+Bug first reported downstream L<bugs.gentoo.org/939014|https://bugs.gentoo.org/939014> 
 
 =back
 
