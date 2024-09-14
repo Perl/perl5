@@ -530,7 +530,7 @@ Perl_new_version(pTHX_ SV *ver)
             if(svp)
                 (void)hv_stores(MUTABLE_HV(hv), "original", newSVsv(*svp));
         }
-        sav = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(ver), "version", FALSE));
+        sav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(ver), "version", FALSE)));
         /* This will get reblessed later if a derived class*/
         for ( key = 0; key <= av_len(sav); key++ )
         {
@@ -994,7 +994,7 @@ Perl_vnumify(pTHX_ SV *vs)
     }
 
     /* attempt to retrieve the version array */
-    if ( !(av = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)) ) ) {
+    if ( !(av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE))) ) ) {
         return newSVpvs("0");
     }
 
@@ -1056,7 +1056,7 @@ Perl_vnormal(pTHX_ SV *vs)
     if ( ! vs )
         Perl_croak(aTHX_ "Invalid version object");
 
-    av = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE));
+    av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)));
 
     len = av_len(av);
     if ( len == -1 )
@@ -1161,10 +1161,10 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
         Perl_croak(aTHX_ "Invalid version object");
 
     /* get the left hand term */
-    lav = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(lhv), "version", FALSE));
+    lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(lhv), "version", FALSE)));
 
     /* and the right hand term */
-    rav = AV_FROM_REF(*hv_fetchs(MUTABLE_HV(rhv), "version", FALSE));
+    rav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(rhv), "version", FALSE)));
 
     l = av_len(lav);
     r = av_len(rav);
