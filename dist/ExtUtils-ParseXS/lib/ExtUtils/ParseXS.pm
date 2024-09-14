@@ -2400,6 +2400,21 @@ sub INPUT_handler {
 
     # Split 'char * &foo'  into  ('char *', '&', 'foo')
     # skip to next INPUT line if not valid.
+    #
+    # Note that this pattern has a very liberal sense of what is "valid",
+    # since we don't fully parse C types.  For example:
+    #
+    #    int foo(a)
+    #        int a XYZ
+    #
+    # would be interpreted as an "alien" (i.e. not in the signature)
+    # variable called "XYZ", with a type of "int a". And because it's
+    # alien the initialiser is skipped, so 'int a' is never looked up in
+    # a typemap, so we don't detect anything wrong. Later on, the C
+    # compiler is likely to trip over on the emitted declaration
+    # however:
+    #     int a XYZ;
+
     my ($var_type, $var_addr, $var_name) =
           /^
             ( .*? [^&\s] )        # type
@@ -2426,9 +2441,8 @@ sub INPUT_handler {
     # fake parameters like 'length(s))' (zero is used for RETVAL).
     my $var_num = $self->{xsub_map_argname_to_idx}->{$var_name};
 
-    # Process the initialisation part of the INPUT line (if any) and/or
-    # apply the standard typemap entry. Typically emits "= ..."
-    # (the type and var name having already been emitted above).
+
+    # Parse the initialisation part of the INPUT line (if any)
 
     my ($init, $no_init, $defer);
 
