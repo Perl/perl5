@@ -955,7 +955,7 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 
 /*
 =for apidoc_section $tainting
-=for apidoc Cm|void|TAINT
+=for apidoc Cmn|void|TAINT
 
 If we aren't in taint checking mode, do nothing;
 otherwise indicate to L</C<TAINT_set>> and L</C<TAINT_PROPER>> that some
@@ -970,7 +970,7 @@ Remove any taintedness previously set by, I<e.g.>, C<TAINT>.
 If C<c> evaluates to true, call L</C<TAINT>> to indicate that something is
 tainted; otherwise do nothing.
 
-=for apidoc Cmn|void|TAINT_ENV
+=for apidoc Cm|void|TAINT_ENV
 
 Looks at several components of L<C<%ENV>|perlvar/%ENV> for taintedness, and
 calls L</C<taint_proper>> if any are tainted.  The components it searches are
