@@ -175,6 +175,16 @@ This prevents integer overflows when appending to a large C<SV> for
 C<readpipe> aka C<qx//> and C<readline>.
 L<https://www.perlmonks.org/?node_id=11161665>
 
+=item *
+
+Fixed an issue where `utf8n_to_uvchr` failed to correctly identify
+certain invalid UTF-8 sequences as invalid. Specifically, sequences
+that start with continuation bytes or unassigned bytes could cause
+unexpected behavior or a panic. This fix ensures that such invalid
+sequences are now properly detected and handled. This correction
+also resolves related issues in modules that handle UTF-8 processing,
+such as `Encode.pm`.
+
 =back
 
 =head1 Acknowledgements
