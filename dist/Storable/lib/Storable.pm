@@ -30,7 +30,7 @@ our @EXPORT_OK = qw(
 our ($canonical, $forgive_me);
 
 BEGIN {
-    our $VERSION = '3.34';
+    our $VERSION = '3.35';
 }
 
 our $recursion_limit;
@@ -251,33 +251,33 @@ sub _store {
     my ($file, $use_locking) = @_;
     logcroak "not a reference" unless ref($self);
     logcroak "wrong argument number" unless @_ == 2;    # No @foo in arglist
-    local *FILE;
+    my $FILE;
     if ($use_locking) {
-        open(FILE, ">>", $file) || logcroak "can't write into $file: $!";
+        open($FILE, ">>", $file) || logcroak "can't write into $file: $!";
         unless (CAN_FLOCK) {
             logcarp
                 "Storable::lock_store: fcntl/flock emulation broken on $^O";
             return undef;
         }
-        flock(FILE, LOCK_EX) ||
+        flock($FILE, LOCK_EX) ||
             logcroak "can't get exclusive lock on $file: $!";
-        truncate FILE, 0;
+        truncate $FILE, 0;
         # Unlocking will happen when FILE is closed
     } else {
-        open(FILE, ">", $file) || logcroak "can't create $file: $!";
+        open($FILE, ">", $file) || logcroak "can't create $file: $!";
     }
-    binmode FILE;   # Archaic systems...
+    binmode $FILE;   # Archaic systems...
     my $da = $@;    # Don't mess if called from exception handler
     my $ret;
     # Call C routine nstore or pstore, depending on network order
-    eval { $ret = &$xsptr(*FILE, $self) };
+    eval { $ret = &$xsptr($FILE, $self) };
     # close will return true on success, so the or short-circuits, the ()
     # expression is true, and for that case the block will only be entered
     # if $@ is true (ie eval failed)
     # if close fails, it returns false, $ret is altered, *that* is (also)
     # false, so the () expression is false, !() is true, and the block is
     # entered.
-    if (!(close(FILE) or undef $ret) || $@) {
+    if (!(close($FILE) or undef $ret) || $@) {
         unlink($file) or warn "Can't unlink $file: $!\n";
     }
     if ($@) {
