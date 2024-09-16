@@ -10,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302203';
+our $VERSION = '1.302204';
 
 
 my $INST;
@@ -175,8 +175,18 @@ our @EXPORT_OK = qw{
     test2_enable_trace_stamps
     test2_disable_trace_stamps
     test2_trace_stamps_enabled
+
+    test2_add_pending_diag
+    test2_get_pending_diags
+    test2_clear_pending_diags
 };
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
+
+my @PENDING_DIAGS;
+
+sub test2_add_pending_diag { push @PENDING_DIAGS => @_ }
+sub test2_get_pending_diags { @PENDING_DIAGS }
+sub test2_clear_pending_diags { my @out = @PENDING_DIAGS; @PENDING_DIAGS = (); return @out }
 
 my $STACK       = $INST->stack;
 my $CONTEXTS    = $INST->contexts;
@@ -445,6 +455,7 @@ sub context {
             eval_error  => $eval_error,
             child_error => $child_error,
             _is_spawn   => [$pkg, $file, $line, $sub],
+            _start_fail_count => $hub->{failed} || 0,
         },
         'Test2::API::Context'
     ) if $current && $depth_ok;
@@ -493,15 +504,16 @@ sub context {
     my $aborted = 0;
     $current = bless(
         {
-            _aborted     => \$aborted,
-            stack        => $stack,
-            hub          => $hub,
-            trace        => $trace,
-            _is_canon    => 1,
-            _depth       => $depth,
-            errno        => $errno,
-            eval_error   => $eval_error,
-            child_error  => $child_error,
+            _aborted          => \$aborted,
+            stack             => $stack,
+            hub               => $hub,
+            trace             => $trace,
+            _is_canon         => 1,
+            _depth            => $depth,
+            errno             => $errno,
+            eval_error        => $eval_error,
+            child_error       => $child_error,
+            _start_fail_count => $hub->{failed} || 0,
             $params{on_release} ? (_on_release => [$params{on_release}]) : (),
         },
         'Test2::API::Context'
@@ -1530,6 +1542,24 @@ The sub will receive exactly 1 argument, the type of thing being tagged
 'context', 'hub', or 'event'. In the future additional things may be tagged, in
 which case new strings will be passed in. These are purely informative, you can
 (and usually should) ignore them.
+
+=item test2_add_pending_diag($diag)
+
+=item test2_add_pending_diag($diag1, $diag2)
+
+Add a diagnostics message that will be issued the next time a context in which
+a failure occured is released.
+
+This can also be thought of like this: "If the next bit causes a failed
+assertion, add this diagnostics message".
+
+=item @diags = test2_get_pending_diags()
+
+Get all the current pending diagnostics messages.
+
+=item @diags = test2_clear_pending_diags()
+
+Clear any pending diagnostics, returning them.
 
 =back
 

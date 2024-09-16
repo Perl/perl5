@@ -11,7 +11,22 @@ is(warns { warn 'a' }, 1, "1 warning");
 is(warns { warn 'a' for 1 .. 4 }, 4, "4 warnings");
 
 ok(no_warnings { 0 }, "no warnings");
-ok(!no_warnings { warn 'a' }, "warnings");
+
+ok(!no_warnings { warn 'blah 1' }, "warnings");
+
+my $es = intercept {
+    ok(!no_warnings { warn "blah 2\n" }, "warnings 1");
+    ok(no_warnings { warn "blah 3\n" }, "warnings 2")
+};
+
+like(
+    [grep { $_->isa('Test2::Event::Diag') } @$es],
+    [
+        {message => qr/Failed test 'warnings 2'/},
+        {message => "blah 3\n"},
+    ],
+    "When the test failed we got a diag about the warning, but we got no diag when it passed"
+);
 
 is(
     warnings { 0 },

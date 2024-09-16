@@ -2,10 +2,10 @@ package Test2::Tools::Exception;
 use strict;
 use warnings;
 
-our $VERSION = '1.302203';
+our $VERSION = '1.302204';
 
 use Carp qw/carp/;
-use Test2::API qw/context/;
+use Test2::API qw/context test2_add_pending_diag test2_clear_pending_diags/;
 
 our @EXPORT = qw/dies lives try_ok/;
 use base 'Exporter';
@@ -42,6 +42,8 @@ sub lives(&) {
         $err = $@;
     }
 
+    test2_add_pending_diag("Exception: $err");
+
     # If the eval failed we want to set $@ to the error.
     $@ = $err;
     return 0;
@@ -53,12 +55,13 @@ sub try_ok(&;$) {
     my $ok = &lives($code);
     my $err = $@;
 
+    my @diag = test2_clear_pending_diags();
+
     # Context should be obtained AFTER code is run so that events inside the
     # codeblock report inside the codeblock itself. This will also preserve $@
     # as thrown inside the codeblock.
     my $ctx = context();
-    chomp(my $diag = "Exception: $err");
-    $ctx->ok($ok, $name, [$diag]);
+    $ctx->ok($ok, $name, \@diag);
     $ctx->release;
 
     $@ = $err unless $ok;
