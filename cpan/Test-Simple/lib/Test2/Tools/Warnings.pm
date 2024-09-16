@@ -2,9 +2,9 @@ package Test2::Tools::Warnings;
 use strict;
 use warnings;
 
-our $VERSION = '1.302203';
+our $VERSION = '1.302204';
 
-use Test2::API qw/context/;
+use Test2::API qw/context test2_add_pending_diag/;
 
 our @EXPORT = qw/warns warning warnings no_warnings/;
 use base 'Exporter';
@@ -17,7 +17,14 @@ sub warns(&) {
     return $warnings;
 }
 
-sub no_warnings(&) { return !&warns(@_) }
+sub no_warnings(&) {
+    my $warnings = &warnings(@_);
+    return 1 if !@$warnings;
+
+    test2_add_pending_diag(@$warnings);
+
+    return 0;
+}
 
 sub warning(&) {
     my $code = shift;

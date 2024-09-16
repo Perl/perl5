@@ -2,7 +2,7 @@ package Test2::Tools::Ref;
 use strict;
 use warnings;
 
-our $VERSION = '1.302203';
+our $VERSION = '1.302204';
 
 use Scalar::Util qw/reftype refaddr/;
 use Test2::API qw/context/;

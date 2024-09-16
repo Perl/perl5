@@ -2,7 +2,7 @@ package Test2::Tools::Compare;
 use strict;
 use warnings;
 
-our $VERSION = '1.302203';
+our $VERSION = '1.302204';
 
 use Carp qw/croak/;
 use Scalar::Util qw/reftype/;
