@@ -123,11 +123,8 @@ EOM
 }
 
 sub file_magic {
-    require IO::File;
-
     my $file = shift;
-    my $fh = IO::File->new;
-    open($fh, "<", $file) || die "Can't open '$file': $!";
+    open(my $fh, "<", $file) || die "Can't open '$file': $!";
     binmode($fh);
     defined(sysread($fh, my $buf, 32)) || die "Can't read from '$file': $!";
     close($fh);
