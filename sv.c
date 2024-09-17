@@ -11735,7 +11735,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
     assert(HEXTRACTSIZE <= VHEX_SIZE);
 
     PERL_UNUSED_VAR(ix); /* might happen */
-    (void)Perl_frexp(PERL_ABS(nv), exponent);
+    (void)Perl_frexp(nv, exponent);
     *subnormal = FALSE;
     if (vend && (vend <= vhex || vend > vmaxend)) {
         /* diag_listed_as: Hexadecimal float: internal error (%s) */
