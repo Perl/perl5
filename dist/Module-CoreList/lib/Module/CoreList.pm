@@ -22182,6 +22182,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'File::Spec::Win32'     => '3.93',
             'Module::CoreList'      => '5.20240920',
             'Module::CoreList::Utils'=> '5.20240920',
+            'Storable'              => '3.35',
             'Test2'                 => '1.302204',
             'Test2::API'            => '1.302204',
             'Test2::API::Breakage'  => '1.302204',
