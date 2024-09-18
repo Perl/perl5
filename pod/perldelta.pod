@@ -208,6 +208,47 @@ XXX L<message|perldiag/"message">
 
 XXX L<message|perldiag/"message">
 
+=item *
+
+L<Possible precedence problem between ! and %s|perldiag/"Possible precedence problem between ! and %s">
+
+(W precedence) You wrote something like
+
+    !$x < $y               # parsed as: (!$x) < $y
+    !$x eq $y              # parsed as: (!$x) eq $y
+    !$x =~ /regex/         # parsed as: (!$x) =~ /regex/
+    !$obj isa Some::Class  # parsed as: (!$obj) isa Some::Class
+
+but because C<!> has higher precedence than comparison operators, C<=~>, and
+C<isa>, this is interpreted as comparing/matching the logical negation of the
+first operand, instead of negating the result of the comparison/match.
+
+To disambiguate, either use a negated comparison/binding operator:
+
+    $x >= $y
+    $x ne $y
+    $x !~ /regex/
+
+... or parentheses:
+
+    !($x < $y)
+    !($x eq $y)
+    !($x =~ /regex/)
+    !($obj isa Some::Class)
+
+... or the low-precedence C<not> operator:
+
+    not $x < $y
+    not $x eq $y
+    not $x =~ /regex/
+    not $obj isa Some::Class
+
+(If you did mean to compare the boolean result of negating the first operand,
+parenthesize as C<< (!$x) < $y >>, C<< (!$x) eq $y >>, etc.)
+
+(This warning subsumes the C<Possible precedence problem on isa operator>
+warning from the previous perl release.)
+
 =back
 
 =head2 Changes to Existing Diagnostics
