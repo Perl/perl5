@@ -2439,9 +2439,11 @@ sub INPUT_handler {
       if $var_addr;
 
     # The index number of the parameter. The counting starts at 1 and skips
-    # fake parameters like 'length(s))' (zero is used for RETVAL).
+    # fake parameters like 'length(s))'. If not found, flag it as 'alien':
+    # a var which appears in an INPUT section but not in the XSUB's
+    # signature. Legal but nasty.
     my $var_num = $self->{xsub_map_argname_to_idx}->{$var_name};
-
+    my $is_alien = !defined($var_num);
 
     # Parse the initialisation part of the INPUT line (if any)
 
@@ -2481,13 +2483,13 @@ sub INPUT_handler {
 
         # if '+' on a real var, generate init from typemap,
         # else (';' or fake var), skip init.
-        $no_init = !($init_op eq '+' && $var_num);
+        $no_init = !($init_op eq '+' && !$is_alien);
         # But in either case, add the deferred code
         $defer = $var_init,
       }
     }
 
-    elsif ($var_num) {
+    elsif (!$is_alien) {
       # Emit var and init code based on typemap entry
     }
     else {
@@ -2507,6 +2509,7 @@ sub INPUT_handler {
       init    => $init,
       init_op => $init_op,
       no_init => $no_init,
+      is_alien=> $is_alien,
     };
 
     $self->param_check($param)
