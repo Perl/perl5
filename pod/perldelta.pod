@@ -524,9 +524,33 @@ died, add a short obituary here.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.41.4 represents approximately 3 weeks of development since Perl
+5.41.3 and contains approximately 6,000 lines of changes across 390 files
+from 18 authors.
 
-  perl Porting/acknowledgements.pl v5.41.3..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 3,700 lines of changes to 280 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.41.4:
+
+Andrei Horodniceanu, Antanas Vaitkus, Aristotle Pagaltzis, Craig A. Berry,
+David Cantrell, David Mitchell, E. Choroba, Ed J, Eric Herman, Graham Knop,
+James E Keenan, Karl Williamson, Lukas Mai, Paul Evans, Philippe Bruhat
+(BooK), Sisyphus, Thibault Duponchelle, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
