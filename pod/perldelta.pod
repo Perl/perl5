@@ -125,6 +125,42 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
+L<CPAN> has been upgraded from version 2.36 to 2.37.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.34 to 1.36.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.53 to 3.54.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.53 to 3.54.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20240829 to 5.20240920.
+
+=item *
+
+L<Storable> has been upgraded from version 3.34 to 3.35.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302201 to 1.302204.
+
+=item *
+
+L<version> has been upgraded from version 0.9930 to 0.9933.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
