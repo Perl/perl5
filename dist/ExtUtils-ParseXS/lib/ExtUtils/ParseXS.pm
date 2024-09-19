@@ -2394,7 +2394,8 @@ sub INPUT_handler {
     # Extract optional initialisation code (which overrides the
     # normal typemap), such as 'int foo = ($type)SvIV($arg)'
     my $var_init = '';
-    $var_init = $1 if s/\s*([=;+].*)$//s;
+    my $init_op;
+    ($init_op, $var_init) = ($1, $2) if s/\s* ([=;+]) \s* (.*) $//xs;
 
     s/\s+/ /g;
 
@@ -2446,24 +2447,25 @@ sub INPUT_handler {
 
     my ($init, $no_init, $defer);
 
-    if (   $var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
+    if (        defined $init_op
+            and $init_op =~ /^[=;]$/
+            and $var_init =~ /^NO_INIT\s*;?\s*$/
         or
                 $self->{xsub_map_argname_to_in_out}->{$var_name}
             and $self->{xsub_map_argname_to_in_out}->{$var_name} =~ /^OUT/
-            and $var_init !~ /\S/
+            and !defined($init_op)
        )
     {
       # NO_INIT or OUT* class; skip initialisation
       $no_init = 1;
     }
 
-    elsif ($var_init =~ /\S/) {
-      # Emit the init code based on overridden $var_init, which should
-      # start with /[=;+]/.
+    elsif (defined $init_op) {
+      # Emit the init code based on overridden $var_init, which was
+      # preceded by /[=;+]/ which has been extracted into $init_op
 
-      if ($var_init =~ /^=/) {
+      if ($init_op  eq '=') {
         # Overridden typemap, such as '= ($type)SvUV($arg)'
-        $var_init =~ s/^=\s*//;
         $var_init =~ s/;\s*$//;
 
         $init = $var_init,
@@ -2479,8 +2481,7 @@ sub INPUT_handler {
 
         # if '+' on a real var, generate init from typemap,
         # else (';' or fake var), skip init.
-        $no_init = !($var_init =~ s/^\+// && $var_num);
-        $var_init =~ s/^[+;]//;
+        $no_init = !($init_op eq '+' && $var_num);
         # But in either case, add the deferred code
         $defer = $var_init,
       }
@@ -2504,6 +2505,7 @@ sub INPUT_handler {
       var     => $var_name,
       defer   => $defer,
       init    => $init,
+      init_op => $init_op,
       no_init => $no_init,
     };
 
