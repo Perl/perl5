@@ -45,7 +45,7 @@ sub caller3_ok {
         ),
     );
 
-    $expected =~ s/'/::/g;
+    $expected =~ s/'/::/g if $] < 5.041_003;
 
     # this is apparently how things worked before 5.16
     utf8::encode($expected) if $] < 5.016 and $ord > 255;

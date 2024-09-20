@@ -215,7 +215,7 @@ SKIP: {
         }
         if (eval {
             my $nanish = "$NaN" + 0;
-            $nanish != 0 && !$nanish != $NaN;
+            $nanish != 0 && $nanish != $NaN && $nanish != $nanish;
         }) {
             push @nums, $NaN;
         }
