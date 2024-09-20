@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20240920';
+our $VERSION = '5.20241020';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -428,7 +428,7 @@ sub changes_between {
     5.041002 => '2024-07-20',
     5.041003 => '2024-08-29',
     5.041004 => '2024-09-20',
-    5.041005 => '????-??-??',
+    5.041005 => '2024-10-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -22393,7 +22393,10 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.041005 => {
         delta_from => 5.041004,
         changed => {
+            'B::Op_private'         => '5.041005',
             'Config'                => '5.041005',
+            'Module::CoreList'      => '5.20241020',
+            'Module::CoreList::Utils'=> '5.20241020',
         },
         removed => {
         }
