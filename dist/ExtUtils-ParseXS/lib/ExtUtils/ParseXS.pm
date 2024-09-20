@@ -1382,11 +1382,13 @@ EOF
             : ('THIS',  "$self->{xsub_class} *");
 
         $self->{xsub_map_argname_to_type}->{$var} = $type;
-        $self->generate_init( {
+
+        my $param = ExtUtils::ParseXS::Node::Param->new({
           type          => $type,
           num           => 1,
           var           => $var,
-        } );
+        });
+        $param->as_code($self);
       }
 
       # These are set later if OUTPUT is found and/or CODE using RETVAL
@@ -1432,9 +1434,9 @@ EOF
         )
         {
           $param->{num} = $self->{xsub_map_argname_to_idx}->{$param->{var}};
-          $self->param_check($param)
+          $param->check($self)
             or next;
-          $self->generate_init($param);
+          $param->as_code($self);
         }
 
         # ----------------------------------------------------------------
@@ -2520,13 +2522,13 @@ sub INPUT_handler {
       is_alien=> $is_alien,
     });
 
-    $self->param_check($param)
+    $param->check($self)
       or next;
 
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
 
-    $self->generate_init($param);
+    $param->as_code($self);
 
   } # foreach line in INPUT block
 }
@@ -3532,68 +3534,58 @@ sub fetch_para {
 }
 
 
-# param_check(): for a parsed INPUT line and/or typed parameter in a
-# signature, update some global state and do some checks (e.g. "duplicate
-# argument" error).
+# check(): for a parsed INPUT line and/or typed parameter in a signature,
+# update some global state and do some checks (e.g. "duplicate argument"
+# error).
 #
 # Return true if checks pass.
 
-sub param_check {
-  my ExtUtils::ParseXS $self = shift;
-  my ($param) = @_;
+sub ExtUtils::ParseXS::Node::Param::check {
+  my ExtUtils::ParseXS::Node::Param $self = shift;
+  my ExtUtils::ParseXS              $pxs  = shift;
 
   # Check for duplicate definitions of a particular parameter name.
   # Either the name has appeared in more than one INPUT line or
   # has appeared also in the signature with a type specified.
 
-  if ($self->{xsub_map_varname_to_seen_in_INPUT}->{$param->{var}}++) {
-    $self->blurt(
-        "Error: duplicate definition of argument '$param->{var}' ignored");
+  if ($pxs->{xsub_map_varname_to_seen_in_INPUT}->{$self->{var}}++) {
+    $pxs->blurt(
+        "Error: duplicate definition of argument '$self->{var}' ignored");
     return;
   }
 
   # flag 'THIS' and 'RETVAL' as having been seen
-  $self->{xsub_seen_THIS_in_INPUT}   |= $param->{var} eq "THIS";
-  $self->{xsub_seen_RETVAL_in_INPUT} |= $param->{var} eq "RETVAL";
+  $pxs->{xsub_seen_THIS_in_INPUT}   |= $self->{var} eq "THIS";
+  $pxs->{xsub_seen_RETVAL_in_INPUT} |= $self->{var} eq "RETVAL";
 
-  $self->{xsub_map_argname_to_type}->{$param->{var}} = $param->{type};
+  $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $self->{type};
 
   # Get the prototype character, if any, associated with the typemap
   # entry for this var's type; defaults to '$'
-  if ($param->{num}) {
-    my $typemap = $self->{typemaps_object}->get_typemap(ctype => $param->{type});
-    $self->{xsub_map_arg_idx_to_proto}->[$param->{num}]
+  if ($self->{num}) {
+    my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $self->{type});
+    $pxs->{xsub_map_arg_idx_to_proto}->[$self->{num}]
        = ($typemap && $typemap->proto) || "\$";
   }
   return 1;
 }
 
 
-# $self->generate_init({ key = value, ... })
-#   type         'char *' etc
-#   num          the parameter number, corresponds to ST(num-1)
-#   var          the parameter name
-#   init         Optional initialiser template code to override typemap entry.
-#   no_init      If true, don't plant initialiser code.
-#   defer        Optional deferred template code to add after all declarations
-#
-# This function emits text like "type var = initialisation code", based on
-# the typemap INPUT entry associated with $type (or an explicit override),
-# passing the typemap code through a double-quoted context eval first, to
-# expand variables such as # $type.
+# $self->as_code()
+# Emit the param object as C code
 
-sub generate_init {
-  my ExtUtils::ParseXS $self = shift;
-  my $param = shift;
+sub ExtUtils::ParseXS::Node::Param::as_code {
+  my ExtUtils::ParseXS::Node::Param $self = shift;
+  my ExtUtils::ParseXS              $pxs  = shift;
 
   my ($type, $num, $var, $init, $no_init, $defer)
-    = @{$param}{qw(type num var init no_init defer)};
+    = @{$self}{qw(type num var init no_init defer)};
 
-  my $default = $self->{xsub_map_argname_to_default}->{$var};
+  my $default = $pxs->{xsub_map_argname_to_default}->{$var};
 
-  my $arg = $self->ST($num, 0);
+  my $arg = $pxs->ST($num, 0);
 
-  if ($param->{is_length}) {
+  if ($self->{is_length}) {
     # Process length(foo) parameter.
     # Basically for something like foo(char *s, int length(s)),
     # create *two* local C vars: one with STRLEN type, and one with the
@@ -3610,11 +3602,11 @@ sub generate_init {
     # handling length(s)), by overriding the normal T_PV typemap (which
     # uses PV_nolen()).
 
-    my $name = $param->{len_name};
+    my $name = $self->{len_name};
 
     print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
     # defer this line until after all the other declarations
-    $self->{xsub_deferred_code_lines} .=
+    $pxs->{xsub_deferred_code_lines} .=
         "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
 
     # this var will be declared using the normal typemap mechanism below
@@ -3643,13 +3635,13 @@ sub generate_init {
 
   if ($type =~ / \( \s* \* \s* \) /x) {
     # for a fn ptr type, embed the var name in the type declaration
-    print "\t" . $self->map_type($type, $var);
+    print "\t" . $pxs->map_type($type, $var);
   }
   else {
     print "\t",
-              ((defined($self->{xsub_class}) && $var eq 'CLASS')
+              ((defined($pxs->{xsub_class}) && $var eq 'CLASS')
                 ? $type
-                : $self->map_type($type, undef)),
+                : $pxs->map_type($type, undef)),
            "\t$var";
   }
 
@@ -3668,7 +3660,7 @@ sub generate_init {
 
   # The type looked up in the eval is Foo__Bar rather than Foo::Bar
   $eval_vars->{type} =~ tr/:/_/
-      unless $self->{config_RetainCplusplusHierarchicalTypes};
+      unless $pxs->{config_RetainCplusplusHierarchicalTypes};
 
   my $init_template;
 
@@ -3676,8 +3668,9 @@ sub generate_init {
     # Use the supplied code template rather than getting it from the
     # typemap
 
-    $self->death(
-          "Internal error: generate_init(): both init and no_init supplied")
+    $pxs->death(
+            "Internal error: ExtUtils::ParseXS::Node::Param::as_code(): "
+          . "both init and no_init supplied")
       if $no_init;
 
     $eval_vars->{init} = $init;
@@ -3690,7 +3683,7 @@ sub generate_init {
   else {
     # Get the initialiser template from the typemap
 
-    my $typemaps = $self->{typemaps_object};
+    my $typemaps = $pxs->{typemaps_object};
 
     # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
     # which can appear within a typemap template.
@@ -3705,7 +3698,7 @@ sub generate_init {
     # XS type name (e.g. $type of 'char *'  gives $xstype of 'T_PV'
     my $typemap = $typemaps->get_typemap(ctype => $type);
     if (not $typemap) {
-      $self->report_typemap_failure($typemaps, $type);
+      $pxs->report_typemap_failure($typemaps, $type);
       return;
     }
     my $xstype = $typemap->xstype;
@@ -3716,13 +3709,13 @@ sub generate_init {
     # object of the right class. Basically, for T_foo_OBJ, use T_foo_REF
     # instead. T_REF_IV_PTR was added in v5.22.0.
     $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
-      if $self->{xsub_func_name} =~ /DESTROY$/;
+      if $pxs->{xsub_func_name} =~ /DESTROY$/;
 
     # For a string-ish parameter foo, if length(foo) was also declared as a
     # pseudo-parameter, then override the normal typedef - which would emit
     # SvPV_nolen(...) - and instead, emit SvPV(..., STRLEN_length_of_foo)
     if (    $xstype eq 'T_PV'
-        and $self->{xsub_map_argname_to_has_length}->{$var})
+        and $pxs->{xsub_map_argname_to_has_length}->{$var})
     {
       print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
       die "default value not supported with length(NAME) supplied"
@@ -3735,7 +3728,7 @@ sub generate_init {
     # e.g. 'SvPV_nolen($arg)'
     my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
     if (not defined $inputmap) {
-      $self->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
+      $pxs->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
       return;
     }
 
@@ -3759,13 +3752,13 @@ sub generate_init {
     if ($expr =~ /DO_ARRAY_ELEM/) {
       my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
       if (not $subtypemap) {
-        $self->report_typemap_failure($typemaps, $subtype);
+        $pxs->report_typemap_failure($typemaps, $subtype);
         return;
       }
 
       my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
       if (not $subinputmap) {
-        $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
+        $pxs->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
         return;
       }
 
@@ -3780,7 +3773,7 @@ sub generate_init {
     }
 
     if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
-      $self->{xsub_SCOPE_enabled} = 1;
+      $pxs->{xsub_SCOPE_enabled} = 1;
     }
 
     # Specify additional environment for when a template derived from a
@@ -3794,7 +3787,7 @@ sub generate_init {
 
   my $init_code =
     length $init_template
-      ? $self->eval_input_typemap_code("qq\a$init_template\a", $eval_vars)
+      ? $pxs->eval_input_typemap_code("qq\a$init_template\a", $eval_vars)
       : "";
 
 
@@ -3818,7 +3811,7 @@ sub generate_init {
     if ($default eq 'NO_INIT') {
       # for foo(a, b = NO_INIT), add code to initialise later only if
       # an arg was supplied.
-      $self->{xsub_deferred_code_lines}
+      $pxs->{xsub_deferred_code_lines}
         .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n", $num, $init_code;
     }
     else {
@@ -3826,15 +3819,15 @@ sub generate_init {
       # the arg or default value
       my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
 
-      $self->{xsub_deferred_code_lines}
+      $pxs->{xsub_deferred_code_lines}
         .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
             $num,
             $var,
-            $self->eval_input_typemap_code("qq\a$default\a", $eval_vars),
+            $pxs->eval_input_typemap_code("qq\a$default\a", $eval_vars),
             $else;
     }
   }
-  elsif ($self->{xsub_SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
+  elsif ($pxs->{xsub_SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
     # The template is likely a full block rather than a '$var = ...'
     # expression. Just terminate the variable declaration, and defer the
     # initialisation.
@@ -3843,7 +3836,7 @@ sub generate_init {
 
     print ";\n";
 
-    $self->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code
+    $pxs->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code
       if $init_code =~ /\S/;
   }
   else {
@@ -3851,14 +3844,14 @@ sub generate_init {
     # been emitted, so remove it from the typemap before evalling it,
 
     $init_code =~ s/^\s*\Q$var\E(\s*=\s*)/$1/
-      or $self->death("panic: typemap doesn't start with '\$var='\n");
+      or $pxs->death("panic: typemap doesn't start with '\$var='\n");
 
     printf "%s;\n", $init_code;
   }
 
   if (defined $defer) {
-    $self->{xsub_deferred_code_lines}
-      .= $self->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
+    $pxs->{xsub_deferred_code_lines}
+      .= $pxs->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
   }
 }
 
@@ -3975,8 +3968,8 @@ sub generate_output {
   #   argname
 
   if ($expr =~ /DO_ARRAY_ELEM/) {
-    # See the comments in generate_init() that explain the similar code
-    # for the DO_ARRAY_ELEM hack there.
+    # See the comments in ExtUtils::ParseXS::Node::Param::as_code() that
+    # explain the similar code for the DO_ARRAY_ELEM hack there.
     my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
     if (not $subtypemap) {
       $self->report_typemap_failure($typemaps, $subtype);
