@@ -1,0 +1,264 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5414delta - what is new for perl v5.41.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.41.3 release and the 5.41.4
+release.
+
+If you are upgrading from an earlier release such as 5.41.2, first read
+L<perl5413delta>, which describes differences between 5.41.2 and 5.41.3.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<CPAN> has been upgraded from version 2.36 to 2.37.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.34 to 1.36.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.53 to 3.54.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.53 to 3.54.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20240829 to 5.20240920.
+
+=item *
+
+L<overload> has been upgraded from version 1.38 to 1.39.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.65 to 1.66.
+
+=item *
+
+L<Storable> has been upgraded from version 3.34 to 3.35.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302201 to 1.302204.
+
+=item *
+
+L<version> has been upgraded from version 0.9930 to 0.9933.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.37 to 1.38.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages. For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<Possible precedence problem between ! and %s|perldiag/"Possible precedence problem between ! and %s">
+
+(W precedence) You wrote something like
+
+    !$x < $y               # parsed as: (!$x) < $y
+    !$x eq $y              # parsed as: (!$x) eq $y
+    !$x =~ /regex/         # parsed as: (!$x) =~ /regex/
+    !$obj isa Some::Class  # parsed as: (!$obj) isa Some::Class
+
+but because C<!> has higher precedence than comparison operators, C<=~>, and
+C<isa>, this is interpreted as comparing/matching the logical negation of the
+first operand, instead of negating the result of the comparison/match.
+
+To disambiguate, either use a negated comparison/binding operator:
+
+    $x >= $y
+    $x ne $y
+    $x !~ /regex/
+
+... or parentheses:
+
+    !($x < $y)
+    !($x eq $y)
+    !($x =~ /regex/)
+    !($obj isa Some::Class)
+
+... or the low-precedence C<not> operator:
+
+    not $x < $y
+    not $x eq $y
+    not $x =~ /regex/
+    not $obj isa Some::Class
+
+(If you did mean to compare the boolean result of negating the first operand,
+parenthesize as C<< (!$x) < $y >>, C<< (!$x) eq $y >>, etc.)
+
+(This warning subsumes the C<Possible precedence problem on isa operator>
+warning from the previous perl release.)
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Fix compilation on platforms (e.g. "Gentoo Prefix") with only a C locale [L<GH #22569|https://github.com/Perl/perl5/issues/22569>]
+Bug first reported downstream L<bugs.gentoo.org/939014|https://bugs.gentoo.org/939014> 
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The C<op_dump()> function has been expanded to include additional information
+about the recent C<OP_METHSTART> and C<OP_INITFIELD> ops, as well as for
+C<OP_ARGCHECK> and C<OP_ARGELEM> which had not been done previously.
+
+=item *
+
+C<op_dump()> now also has the facility to print extra debugging information
+about custom operators, if those operators register a helper function via the
+new C<xop_dump> element of the C<XOP> structure. For more information, see the
+relevant additions to L<perlguts|perlguts/"Custom Operators">.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<pack("p", ...)> and C<pack("P", ...)> now SvPV_force() the supplied
+SV unless it is read only.  This will remove CoW from the SV and
+prevents code that writes through the generated pointer from modifying
+the value of other SVs that happen the share the same CoWed string
+buffer.
+
+Note: this does not make C<pack("p",... )> safe, if the SV is magical
+then any writes to the buffer will likely be discarded on the next
+read.  [L<GH #22380|https://github.com/Perl/perl5/issues/22380>]
+
+=item *
+
+Enforce C<no feature "bareword_filehandles"> for bareword file handles
+that have strictness removed because they are used in open() with a
+"dup" mode, such as in C<< open my $fh, ">&", THISHANDLE >>. [L<GH #22568|https://github.com/Perl/perl5/issues/22568>]
+
+=item *
+
+Using C<goto> to tail call, or using the call_sv() and related APIs to
+call, any of trim(), refaddr(), reftype(), ceil(), floor() or
+stringify() in the C<builtin::> package would crash or assert due to a
+C<TARG> handling bug. [L<GH #22542|https://github.com/Perl/perl5/issues/22542>]
+
+=item *
+
+Fix sv_gets() to accept a C<SSize_t> append offset instead of C<I32>.
+This prevents integer overflows when appending to a large C<SV> for
+C<readpipe> aka C<qx//> and C<readline>.
+L<https://www.perlmonks.org/?node_id=11161665>
+
+=item *
+
+Fixed an issue where `utf8n_to_uvchr` failed to correctly identify
+certain invalid UTF-8 sequences as invalid. Specifically, sequences
+that start with continuation bytes or unassigned bytes could cause
+unexpected behavior or a panic. This fix ensures that such invalid
+sequences are now properly detected and handled. This correction
+also resolves related issues in modules that handle UTF-8 processing,
+such as `Encode.pm`.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.41.4 represents approximately 3 weeks of development since Perl
+5.41.3 and contains approximately 5,800 lines of changes across 400 files
+from 20 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 3,700 lines of changes to 290 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.41.4:
+
+Andrei Horodniceanu, Antanas Vaitkus, Aristotle Pagaltzis, Craig A. Berry,
+David Cantrell, David Mitchell, E. Choroba, Ed J, Eric Herman, Graham Knop,
+James E Keenan, Karl Williamson, Leon Timmermans, Lukas Mai, Masahiro Honma,
+Paul Evans, Philippe Bruhat (BooK), Sisyphus, Thibault Duponchelle, Tony
+Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
