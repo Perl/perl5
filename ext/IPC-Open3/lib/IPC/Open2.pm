@@ -5,8 +5,8 @@ use strict;
 require 5.006;
 use Exporter 'import';
 
-our $VERSION	= 1.06;
-our @EXPORT		= qw(open2);
+our $VERSION = 1.07;
+our @EXPORT  = qw(open2);
 
 =head1 NAME
 
@@ -22,12 +22,12 @@ IPC::Open2 - open a process for both reading and writing using open2()
     my $pid = open2(my $chld_out, my $chld_in, 'some cmd and args');
 
     # read from parent STDIN and write to already open handle
-    open my $outfile, '>', 'outfile.txt' or die "open failed: $!";
-    my $pid = open2($outfile, '<&STDIN', 'some', 'cmd', 'and', 'args');
+    open OUTFILE, '>', 'outfile.txt' or die "open failed: $!";
+    my $pid = open2('>&OUTFILE', '<&STDIN', 'some', 'cmd', 'and', 'args');
 
     # read from already open handle and write to parent STDOUT
-    open my $infile, '<', 'infile.txt' or die "open failed: $!";
-    my $pid = open2('>&STDOUT', $infile, 'some', 'cmd', 'and', 'args');
+    open INFILE, '<', 'infile.txt' or die "open failed: $!";
+    my $pid = open2('>&STDOUT', '<&INFILE', 'some', 'cmd', 'and', 'args');
 
     # reap zombie and retrieve exit status
     waitpid( $pid, 0 );
