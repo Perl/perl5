@@ -40,6 +40,14 @@ L<Module::CoreList> has been upgraded from version 5.20240829 to 5.20240920.
 
 =item *
 
+L<overload> has been upgraded from version 1.38 to 1.39.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.65 to 1.66.
+
+=item *
+
 L<Storable> has been upgraded from version 3.34 to 3.35.
 
 =item *
