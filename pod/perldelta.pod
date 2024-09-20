@@ -198,11 +198,11 @@ such as `Encode.pm`.
 =head1 Acknowledgements
 
 Perl 5.41.4 represents approximately 3 weeks of development since Perl
-5.41.3 and contains approximately 6,000 lines of changes across 390 files
-from 18 authors.
+5.41.3 and contains approximately 5,800 lines of changes across 400 files
+from 20 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 3,700 lines of changes to 280 .pm, .t, .c and .h files.
+approximately 3,700 lines of changes to 290 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant
 community of users and developers. The following people are known to have
@@ -210,8 +210,9 @@ contributed the improvements that became Perl 5.41.4:
 
 Andrei Horodniceanu, Antanas Vaitkus, Aristotle Pagaltzis, Craig A. Berry,
 David Cantrell, David Mitchell, E. Choroba, Ed J, Eric Herman, Graham Knop,
-James E Keenan, Karl Williamson, Lukas Mai, Paul Evans, Philippe Bruhat
-(BooK), Sisyphus, Thibault Duponchelle, Tony Cook.
+James E Keenan, Karl Williamson, Leon Timmermans, Lukas Mai, Masahiro Honma,
+Paul Evans, Philippe Bruhat (BooK), Sisyphus, Thibault Duponchelle, Tony
+Cook.
 
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
