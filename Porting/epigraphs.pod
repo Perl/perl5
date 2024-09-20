@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.4 - Theodor Seuss Geisel
+
+L<Announced on 2024-09-20 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2024/09/msg268800.html>
+
+  Sometimes you will never know the value of a moment
+  until it becomes a memory.
+
 =head2 v5.41.3 - Jasper Fforde, The Constant Rabbit
 
 L<Announced on 2024-08-29 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2024/08/msg268756.html>
