@@ -348,10 +348,14 @@ SKIP:
     # based on https://github.com/Perl/perl5/issues/22380
     eval { require XS::APItest; 1 }
       or skip "Cannot load XS::APItest", 2;
+    my $intptr_format
+        = $Config{ptrsize} == 4 ? 'l'
+        : $Config{ptrsize} == 8 ? 'q'
+        : skip "Don't know how to unpack $Config{ptrsize}-byte pointers as integers", 2;
     # writable "P"
     my $orig = "x" x 36;
     my $data = $orig;
-    my $ptr = unpack 'j', pack 'P', $data;
+    my $ptr = unpack $intptr_format, pack 'P', $data;
     XS::APItest::modify_pv($ptr, length $data);
     is($data, "y" x 36, "check \$data was modified");
     is($orig, "x" x 36, "check \$orig wasn't modified");
