@@ -27,7 +27,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <commit votes="steveh" id="3e14b2fcf59b5b88b289caa973f0b8748c93a594" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
 
-<commit votes="steveh" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
+<commit votes="steveh jkeenan" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
 <commit votes="steveh" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
 
 </div>
@@ -44,7 +44,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh" id="f18202d16387736426e105007d434480cfdd540d" issue="" pull="22569" desc="locale.c: Fix compilation on platforms with only a C locale"/>
+<commit votes="steveh jkeenan" id="f18202d16387736426e105007d434480cfdd540d" issue="" pull="22569" desc="locale.c: Fix compilation on platforms with only a C locale"/>
 
 <!-- Possibly also: https://github.com/Perl/perl5/pull/22609 if/when it is merged to blead -->
 
