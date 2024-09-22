@@ -58,6 +58,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <commit votes="steveh" id="d3f42b8d3823ce40f4f62758562ad4c02ffa3e27" issue="21751" pull="21818" desc="DynaLoader: dl_dyld.xs: don't undef bool"/>
 
+<!-- Possibly also: https://github.com/Perl/perl5/pull/22609 if/when it is merged to blead -->
+
 </div>
 
 <div><h3>Portability Fixes</h3>

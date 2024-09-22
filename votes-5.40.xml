@@ -44,6 +44,10 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="steveh" id="f18202d16387736426e105007d434480cfdd540d" issue="" pull="22569" desc="locale.c: Fix compilation on platforms with only a C locale"/>
+
+<!-- Possibly also: https://github.com/Perl/perl5/pull/22609 if/when it is merged to blead -->
+
 </div>
 
 <div><h3>Portability Fixes</h3>
