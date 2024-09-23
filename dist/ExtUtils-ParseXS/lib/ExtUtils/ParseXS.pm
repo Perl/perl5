@@ -995,20 +995,37 @@ EOM
 
 
 
-    if ($self->{config_allow_argtypes} and $self->{xsub_signature} =~ /\S/) {
+    if ($self->{config_allow_argtypes}) {
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
 
-      my $args = "$self->{xsub_signature} ,";
-      use re 'eval';
+      my $sig = $self->{xsub_signature};
 
-      if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
-        # If the arguments are capable of being split by using the fancy
-        # regex, do so. This splits the args on commas, but can handle
-        # things like foo(a = ",", b)
-        @args = ($args =~ /\G ( (??{ $C_arg }) ) , /xg);
-
+      if ($sig =~ /\S/) {
+        my $sig_c = "$sig ,";
+        use re 'eval'; # needed for 5.16.0 and earlier
+        my $can_use_regex = ($sig_c =~ /^( (??{ $C_arg }) , )* $ /x);
         no re 'eval';
+
+        if ($can_use_regex) {
+          # If the parameters are capable of being split by using the fancy
+          # regex, do so. This splits the params on commas, but can handle
+          # things like foo(a = ",", b)
+          use re 'eval';
+          @args = ($sig_c =~ /\G ( (??{ $C_arg }) ) , /xg);
+        }
+        else {
+          # This is the fallback parameter-splitting path for when the $C_arg
+          # regex doesn't work. This code path should ideally never be
+          # reached, and indicates a design weakness in $C_arg.
+          @args = split(/\s*,\s*/, $sig);
+          Warn( $self, "Warning: cannot parse argument list '$sig', fallback to split");
+        }
+      }
+      else {
+        @args = ();
+      }
+
 
         for ( @args ) {
           #  For each arg in @args, alias to $_ (and sometimes modify),
@@ -1087,21 +1104,10 @@ EOM
           $self->{xsub_map_argname_to_in_out}->{$name_or_lenname}
               = $out_type if $out_type;
         }
-      }
-      else {
-        no re 'eval';
-        # This is the fallback argument-splitting path for when the $C_arg
-        # regex doesn't work. This code path should ideally never be
-        # reached, and indicates a design weakness in $C_arg.
-        # It assumes there's nothing fancy like types or IN/OUT.
-        @args = split(/\s*,\s*/, $self->{xsub_signature});
-        Warn( $self, "Warning: cannot parse argument list '$self->{xsub_signature}', fallback to split");
-      }
     }
     else {
-      # Process empty args, or args in presence of -noargtypes.  The
-      # latter means that only K&R form is recognised, e.g. foo(OUT a, b)
-      # Only IN/OUT prefixes are processed.
+      # Process args in presence of -noargtypes: only K&R form is
+      # recognised, e.g. foo(OUT a, b) Only IN/OUT prefixes are processed.
 
       @args = split(/\s*,\s*/, $self->{xsub_signature});
 
