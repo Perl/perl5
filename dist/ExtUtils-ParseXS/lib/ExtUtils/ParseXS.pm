@@ -993,13 +993,13 @@ EOM
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
 
-
-
-    if ($self->{config_allow_argtypes}) {
+    {
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
 
       my $sig = $self->{xsub_signature};
+
+      # First, split into separate parameters
 
       if ($sig =~ /\S/) {
         my $sig_c = "$sig ,";
@@ -1026,104 +1026,142 @@ EOM
         @args = ();
       }
 
-
         for ( @args ) {
-          #  For each arg in @args, alias to $_ (and sometimes modify),
-          #  then extract the components of the arg. An arg is of the
-          #  general form:
+          # Process each parameter. A parameter is of the general form:
           #
-          #   pre var = default
+          #    OUT char* foo = expression
           #
-          # where:
-          #   =default is optional,
-          #   pre      is optional and is something like a C type and/or
-          #            IN_OUT etc
-          #   var      is required and is in one of two forms:
-          #              foo
-          #              length(foo)
-          #            where the second is a fake arg, not passed from
-          #            perl, but passed to the wrapped C function as the
-          #            length of the named arg
+          #  where:
+          #    IN/OUT/OUTLIST etc are only allowed under
+          #                      $self->{config_allow_inout}
+          #
+          #    a C type       is only allowed under
+          #                      $self->{config_allow_argtypes}
+          #
+          #    foo            can be a plain C variable name, or can be
+          #    length(foo)    only under $self->{config_allow_argtypes}
+          #
+          #    = default      default value - only allowed under
+          #                      $self->{config_allow_argtypes}
 
           s/^\s+//;
           s/\s+$//;
-          my ($arg, $default) = ($_ =~ m/ ( [^=]* ) ( (?: = .* )? ) /x);
-          my ($pre, $name_or_lenname) = ($arg =~ /(.*?) \s*
-                             \b ( \w+ | length\( \s*\w+\s* \) )
-                             \s* $ /x);
-          next unless defined($pre) && length($pre);
 
-          # Process $pre: either a C type or IN_OUT etc (or both)
+          # ellipsis is processed properly further below. Skip for now
+          next if $_ eq '...';
 
-          my $out_type = '';
-          if (    $self->{config_allow_inout}
-              and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//)
-          {
-            my $type = $1;
-            $out_type = $type if $type ne 'IN';
-            $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
-            $pre =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\b\s*//;
+          my ($out_type, $type, $name_or_lenname, $default) =
+              /^
+                 (?:
+                   (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
+                   \b\s*
+                 )?
+                 (.*?)                             # optional type
+                 \s*
+                 \b
+                 (   \w+                           # var
+                   | length\( \s*\w+\s* \)         # length(var)
+                 )
+                 (?: ( \s* = \s* .*?) )?
+                 \s*
+               $
+              /x;
+
+          unless (defined $name_or_lenname) {
+            $self->blurt("Unparseable XSUB parameter: '$_'");
+            next;
           }
+
+          # Process optional IN/OUT etc modifier
+
+          if (defined $out_type) {
+            if ($self->{config_allow_inout}) {
+              $out_type =  $1 eq 'IN' ? '' : $1;
+            }
+            else {
+              $self->blurt("parameter IN/OUT modifier not allowed under -noinout");
+            }
+          }
+          else {
+            $out_type = '';
+          }
+
+          # Process optional type
+
+          undef $type unless length($type) && $type =~ /\S/;
+
+          if (defined($type) && !$self->{config_allow_argtypes}) {
+            $self->blurt("parameter type not allowed under -noargtypes");
+            undef $type;
+          }
+
+          # Process 'length(foo)' pseudo-parameter
 
           my $is_length;
-          my $var = $name_or_lenname;
+          my $name = $name_or_lenname;
 
           if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
-            $var = $1;
-            $name_or_lenname = "XSauto_length_of_$1";
-            $is_length = 1;
-            die "Default value on length() argument: '$_'"
-              if length $default;
+            if ($self->{config_allow_argtypes}) {
+              $name = $1;
+              $name_or_lenname = "XSauto_length_of_$name";
+              $is_length = 1;
+              if (defined $default) {
+                $self->blurt("Default value not allowed on length() parameter '$name'");
+                undef $default;
+              }
+            }
+            else {
+              $self->blurt("length() pseudo-parameter not allowed under -noargtypes");
+            }
           }
 
-          if (length $pre or $is_length) { # 'int foo' or 'length(foo)'
+          # Push a Node::Param object onto @ANSI_params to process params
+          # which won't have a corresponding INPUT line
+
+          if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
+
             my ExtUtils::ParseXS::Node::Param $param =
                   ExtUtils::ParseXS::Node::Param->new({
-                    type    => $pre,
-                    var     => $var,
+                    type    => $type,
+                    var     => $name,
                     is_ansi => 1,
                   });
 
             if ($is_length) {
               $param->{no_init}   = 1;
               $param->{is_length} = 1;
-              $param->{len_name}  = $var;
-              $param->{var}       = "length($var)";
-              $self->{xsub_map_argname_to_has_length}->{$var} = 1;
+              $param->{len_name}  = $name;
+              $param->{var}       = $name_or_lenname;
+
+              $self->{xsub_map_argname_to_has_length}->{$name} = 1;
             }
-            else  {
+            else {
               $param->{no_init}   = 1 if $out_type =~ /^OUT/;
             }
-            push @ANSI_params, $param;
 
-            $_ = "$name_or_lenname$default"; # Assigns to @args
+            push @ANSI_params, $param;
           }
 
-          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $is_length;
           push @OUTLIST_vars, $name_or_lenname if $out_type =~ /OUTLIST$/;
           $self->{xsub_map_argname_to_in_out}->{$name_or_lenname}
-              = $out_type if $out_type;
-        }
-    }
-    else {
-      # Process args in presence of -noargtypes: only K&R form is
-      # recognised, e.g. foo(OUT a, b) Only IN/OUT prefixes are processed.
+              = $out_type if length $out_type;
 
-      @args = split(/\s*,\s*/, $self->{xsub_signature});
-
-      for (@args) {
-        if (    $self->{config_allow_inout}
-            and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\b\s*//)
-        {
-          my $out_type = $1;
-          next if $out_type eq 'IN';
-          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
-          if ($out_type =~ /OUTLIST$/) {
-              push @OUTLIST_vars, undef;
+          # XXX for now, reconstruct the original param with
+          # all the optional bits stripped, for processing further below.
+          # Also, for backcompat, preserve (non)spaces either side of the
+          # default '=' like xsubpp used to do
+          # Assigns to @args
+          my $d = $default;
+          if (defined $d) {
+            $d =~ s/^\s+// if (defined $type or $is_length);
           }
-          $self->{xsub_map_argname_to_in_out}->{$_} = $out_type;
-        }
-      }
+          else {
+            $d = '';
+          }
+          $_ = $name_or_lenname . $d;
+
+          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $is_length;
+        } # for (@args)
     }
 
     # ----------------------------------------------------------------

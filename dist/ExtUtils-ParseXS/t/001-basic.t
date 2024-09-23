@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 61;
+use Test::More tests => 67;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -839,4 +839,68 @@ EOF
     like($out, qr/^\s+int\s+a;\s*$/m, "OUT a");
     like($out, qr/^\s+int\s+b;\s*$/m, "OUT b");
 
+}
+
+{
+    # Basic check of a "usage: ..." string.
+    # In particular, it should strip away type and IN/OUT class etc.
+    # Also, some distros include a test of their usage strings which
+    # are sensitive to variations in white space, so this test
+    # confirms that the exact white space is preserved, especially
+    # with regards to space (or not) around the '=' of a default value.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |int
+        |foo(  a   ,  char   * b  , OUT  int  c  ,  OUTLIST int  d   ,    \
+        |      IN_OUT char * * e    =   1  + 2 ,   long length(e)   ,    \
+        |      char* f="abc"  ,     g  =   0  ,   ...     )
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    my $ok = $out =~ /croak_xs_usage\(cv,\s*(".*")\);\s*$/m;
+    my $str = $ok ? $1 : '';
+    ok $ok, "extract usage string";
+    is $str, q("a, b, c, e=   1  + 2, f=\"abc\", g  =   0, ..."),
+         "matched usage string";
+}
+
+{
+    # Test for parameter parsing errors, including the effects of the
+    # -noargtype and -noinout switches
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void
+        |foo(char* a, length(a) = 0, IN c, +++)
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        eval {
+            $pxs->process_file( filename => \$text, output => \*FH,
+                                argtypes => 0, inout => 0);
+        }
+    });
+
+    like $stderr, qr{\Qparameter type not allowed under -noargtypes},
+                 "no type under -noargtypes";
+    like $stderr, qr{\Qlength() pseudo-parameter not allowed under -noargtypes},
+                 "no length under -noargtypes";
+    like $stderr, qr{\Qparameter IN/OUT modifier not allowed under -noinout},
+                 "no IN/OUT under -noinout";
+    like $stderr, qr{\QUnparseable XSUB parameter: '+++'},
+                 "unparseable parameter";
 }
