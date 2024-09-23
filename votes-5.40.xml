@@ -25,10 +25,10 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh tonyc" id="3e14b2fcf59b5b88b289caa973f0b8748c93a594" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
+<commit votes="steveh tonyc mauke" id="3e14b2fcf59b5b88b289caa973f0b8748c93a594" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
 
-<commit votes="steveh jkeenan tonyc" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
-<commit votes="steveh tonyc" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
+<commit votes="steveh jkeenan tonyc mauke" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
+<commit votes="steveh tonyc mauke" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
 
 </div>
 
