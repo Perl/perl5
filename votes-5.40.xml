@@ -60,6 +60,11 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="jkeenan" id="be9c403702f3b48693e5a02d1c5c9ecb7ae16dea" issue="" pull="22299" desc="perldiag: 'misspelled' was misspelled"/>
+
+<commit votes="jkeenan" id="78facf50a113cc1ce43c518fed81278168721ba4" issue="" pull="22404" desc="PathTools: Keep $VERSION consistent in all *.pm files
+"/>
+
 </div>
 
 <div><h3>Others</h3>
