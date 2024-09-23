@@ -945,22 +945,22 @@ EOM
     #                    {
     #                       type      => 'char *',
     #                       var       => 's',
-    #                       ansi      => 1,
-    #                       num       => 1,
+    #                       is_ansi   => 1,
+    #                       arg_num   => 1,
     #                    },
     #                    {
     #                       type      => 'int',
     #                       var       => 'length(s)',
     #                       len_name  => 's',
-    #                       ansi      => 1,
+    #                       is_ansi   => 1,
     #                       no_init   => 1;
     #                       is_length => 1;
     #                    },
     #                    {
     #                       type      => 'int',
     #                       var       => 'size',
-    #                       ansi      => 1,
-    #                       num       => 3,
+    #                       is_ansi   => 1,
+    #                       arg_num   => 3,
     #                    },
     #                   );
     #
@@ -1062,9 +1062,9 @@ EOM
           if (length $pre or $is_length) { # 'int foo' or 'length(foo)'
             my ExtUtils::ParseXS::Node::Param $param =
                   ExtUtils::ParseXS::Node::Param->new({
-                    type   => $pre,
-                    var    => $var,
-                    ansi   => 1,
+                    type    => $pre,
+                    var     => $var,
+                    is_ansi => 1,
                   });
 
             if ($is_length) {
@@ -1385,7 +1385,7 @@ EOF
 
         my $param = ExtUtils::ParseXS::Node::Param->new({
           type          => $type,
-          num           => 1,
+          arg_num       => 1,
           var           => $var,
         });
         $param->as_code($self);
@@ -1433,7 +1433,7 @@ EOF
             grep(! $_->{is_length}, @ANSI_params),
         )
         {
-          $param->{num} = $self->{xsub_map_argname_to_idx}->{$param->{var}};
+          $param->{arg_num} = $self->{xsub_map_argname_to_idx}->{$param->{var}};
           $param->check($self)
             or next;
           $param->as_code($self);
@@ -2513,7 +2513,7 @@ sub INPUT_handler {
   my ExtUtils::ParseXS::Node::Param $param =
      ExtUtils::ParseXS::Node::Param->new({
       type    => $var_type,
-      num     => $var_num,
+      arg_num => $var_num,
       var     => $var_name,
       defer   => $defer,
       init    => $init,

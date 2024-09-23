@@ -89,13 +89,13 @@ BEGIN {
     our @FIELDS = (
         @ExtUtils::ParseXS::Node::FIELDS,
         'type',      # The C type of the parameter
-        'num',       # The arg number (starting at 1) mapped to this param
+        'arg_num',   # The arg number (starting at 1) mapped to this param
         'var',       # the name of the parameter
         'defer',     # deferred initialisation template code
         'init',      # initialisation template code
         'init_op',   # initialisation type: one of =/+/;
         'no_init',   # don't initialise the parameter
-        'ansi',      # param's type was specified in signature
+        'is_ansi',   # param's type was specified in signature
         'is_length', # param is declared as 'length(foo)' in signature
         'len_name' , # the 'foo' in 'length(foo)' in signature
         'is_alien',  # var declared in INPUT line, but not in signature
@@ -135,10 +135,10 @@ sub check {
   
     # Get the prototype character, if any, associated with the typemap
     # entry for this var's type; defaults to '$'
-    if ($self->{num}) {
+    if ($self->{arg_num}) {
         my $typemap =
                 $pxs->{typemaps_object}->get_typemap(ctype => $self->{type});
-        $pxs->{xsub_map_arg_idx_to_proto}->[$self->{num}]
+        $pxs->{xsub_map_arg_idx_to_proto}->[$self->{arg_num}]
               = ($typemap && $typemap->proto) || "\$";
     }
     return 1;
@@ -152,12 +152,12 @@ sub as_code {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
-    my ($type, $num, $var, $init, $no_init, $defer)
-        = @{$self}{qw(type num var init no_init defer)};
+    my ($type, $arg_num, $var, $init, $no_init, $defer)
+        = @{$self}{qw(type arg_num var init no_init defer)};
   
     my $default = $pxs->{xsub_map_argname_to_default}->{$var};
   
-    my $arg = $pxs->ST($num, 0);
+    my $arg = $pxs->ST($arg_num, 0);
   
     if ($self->{is_length}) {
         # Process length(foo) parameter.
@@ -228,7 +228,7 @@ sub as_code {
     my $eval_vars = {
         type          => $type,
         var           => $var,
-        num           => $num,
+        num           => $arg_num,
         arg           => $arg,
     };
   
@@ -312,7 +312,7 @@ sub as_code {
         # semicolons and remove any leading white space before a '#'.
         my $expr = $inputmap->cleaned_code;
   
-        my $argoff = $num - 1;
+        my $argoff = $arg_num - 1;
   
         # Process DO_ARRAY_ELEM. This is an undocumented hack that makes the
         # horrible T_ARRAY typemap work. "DO_ARRAY_ELEM" appears as a token
@@ -390,7 +390,7 @@ sub as_code {
             # an arg was supplied.
             $pxs->{xsub_deferred_code_lines}
                 .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n",
-                           $num, $init_code;
+                           $arg_num, $init_code;
         }
         else {
             # for foo(a, b = default), add code to initialise later to either
@@ -399,7 +399,7 @@ sub as_code {
   
             $pxs->{xsub_deferred_code_lines}
                 .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
-                        $num,
+                        $arg_num,
                         $var,
                         $pxs->eval_input_typemap_code("qq\a$default\a",
                                                        $eval_vars),
