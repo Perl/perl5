@@ -992,6 +992,7 @@ EOM
 
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
+    my @report_params;          # the param descriptions as used by croak()
 
     {
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
@@ -1178,7 +1179,6 @@ EOM
     }
 
     my $args_count = 0;
-    my $report_args = ''; # the arg's description as used by croak()
     my $min_arg_count;
 
     {
@@ -1193,7 +1193,7 @@ EOM
         if ($args[$i] =~ s/\.\.\.//) {
           $self->{xsub_seen_ellipsis} = 1;
           if ($args[$i] eq '' && $i == $#args) {
-            $report_args .= ", ...";
+            push @report_params, '...';
             pop(@args);
             last;
           }
@@ -1207,7 +1207,7 @@ EOM
         }
         else {
           push @map_param_idx_to_arg_idx, ++$args_count;
-            $report_args .= ", $args[$i]";
+          push @report_params, $args[$i];
         }
 
         # process default values, e.g. (int foo = 1)
@@ -1225,8 +1225,6 @@ EOM
 
 
       $min_arg_count = $args_count - $optional_args_count;
-      $report_args =~ s/"/\\"/g;
-      $report_args =~ s/^,\s+//;
 
       # The args to pass to the wrapped library function. Basically
       # join(',' @args) but with '&' prepended for any *OUT* args.
@@ -1318,9 +1316,11 @@ EOF
 EOF
 
       if ($condition_code) {
+        my $p = join ', ', @report_params;
+        $p =~ s/"/\\"/g;
         print Q(<<"EOF");
           |    if ($condition_code)
-          |       croak_xs_usage(cv,  "$report_args");
+          |       croak_xs_usage(cv,  "$p");
 EOF
       }
       else {
