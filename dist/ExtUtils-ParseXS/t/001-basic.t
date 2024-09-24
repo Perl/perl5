@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 67;
+use Test::More tests => 73;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -903,4 +903,60 @@ EOF
                  "no IN/OUT under -noinout";
     like $stderr, qr{\QUnparseable XSUB parameter: '+++'},
                  "unparseable parameter";
+}
+
+{
+    # Test for ellipis in the signature.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void
+        |foo(int mymarker1, char *b = "...", int c = 0, ...)
+        |    POSTCALL:
+        |      mymarker2;
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    like $out, qr/\Qb = "..."/, "ellipsis: b has correct default value";
+    like $out, qr/b = .*SvPV/,  "ellipsis: b has correct non-default value";
+    like $out, qr/\Qc = 0/,     "ellipsis: c has correct default value";
+    like $out, qr/c = .*SvIV/,  "ellipsis: c has correct non-default value";
+    like $out, qr/\Qfoo(mymarker1, b, c)/, "ellipsis: wrapped function args";
+}
+
+{
+    # Test for bad ellipsis
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void
+        |foo(a, ..., b)
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        eval {
+            $pxs->process_file( filename => \$text, output => \*FH);
+        }
+    });
+
+    like $stderr, qr{\Qfurther XSUB parameter seen after ellipsis},
+                 "further XSUB parameter seen after ellipsis";
 }

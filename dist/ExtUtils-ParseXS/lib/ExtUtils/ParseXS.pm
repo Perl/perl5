@@ -1048,8 +1048,18 @@ EOM
           s/^\s+//;
           s/\s+$//;
 
-          # ellipsis is processed properly further below. Skip for now
-          next if $_ eq '...';
+          # Process ellipsis (...)
+
+          $self->blurt("further XSUB parameter seen after ellipsis (...)")
+            if $self->{xsub_seen_ellipsis};
+
+          if ($_ eq '...') {
+            $self->{xsub_seen_ellipsis} = 1;
+            push @report_params, $_;
+            next;
+          }
+
+          # Decompose parameter into its components
 
           my ($out_type, $type, $name_or_lenname, $default) =
               /^
@@ -1161,7 +1171,12 @@ EOM
           }
           $_ = $name_or_lenname . $d;
 
-          $only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $is_length;
+          if ($out_type eq "OUTLIST" or $is_length) {
+            $only_C_inlist{$_} = 1;
+          }
+          else {
+            push @report_params, $_;
+          }
         } # for (@args)
     }
 
@@ -1186,18 +1201,7 @@ EOM
       my @map_param_idx_to_arg_idx = ();
 
       foreach my $i (0 .. $#args) {
-
-        # Handle trailing ellipsis, e.g. (foo, bar, ...)
-        # XXX this code deletes any embedded '...' from any of the other args
-        # too, which is almost certainly wrong.
-        if ($args[$i] =~ s/\.\.\.//) {
-          $self->{xsub_seen_ellipsis} = 1;
-          if ($args[$i] eq '' && $i == $#args) {
-            push @report_params, '...';
-            pop(@args);
-            last;
-          }
-        }
+        next if $args[$i] eq '...'; # XXX tmp during refactoring
 
         # @map_param_idx_to_arg_idx maps param index to expected arg index,
         # with undef indicating a fake parameter that isn't assigned
@@ -1207,7 +1211,6 @@ EOM
         }
         else {
           push @map_param_idx_to_arg_idx, ++$args_count;
-          push @report_params, $args[$i];
         }
 
         # process default values, e.g. (int foo = 1)
@@ -1223,6 +1226,8 @@ EOM
 
       } # end foreach $i
 
+      # XXX tmp hack during code refactoring
+      @args = grep $_ ne "...", @args;
 
       $min_arg_count = $args_count - $optional_args_count;
 
