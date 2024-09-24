@@ -10243,7 +10243,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
            my sub foo; sub { sub foo { } }
      */
   redo:
+    assert(pax > 0);
     name = PadlistNAMESARRAY(CvPADLIST(outcv))[pax];
+    assert(name);
     if (PadnameOUTER(name) && PARENT_PAD_INDEX(name)) {
         pax = PARENT_PAD_INDEX(name);
         outcv = CvOUTSIDE(outcv);
@@ -10285,7 +10287,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else if (PadnameIsSTATE(name) || CvDEPTH(outcv))
         cv = *spot;
     else {
-        assert (SvTYPE(*spot) == SVt_PVCV);
+        assert (*spot && SvTYPE(*spot) == SVt_PVCV);
         if (CvNAMED(*spot))
             hek = CvNAME_HEK(*spot);
         else {
