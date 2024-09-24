@@ -994,6 +994,10 @@ EOM
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
     my @report_params;          # the param descriptions as used by croak()
 
+    my $optional_args_count = 0;# how many default params seen
+    my $args_count = 0;         # how many args are expected
+    my $min_arg_count;          # min number of args allowed
+
     {
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
@@ -1061,7 +1065,7 @@ EOM
 
           # Decompose parameter into its components
 
-          my ($out_type, $type, $name_or_lenname, $default) =
+          my ($out_type, $type, $name_or_lenname, $sp1, $sp2, $default) =
               /^
                  (?:
                    (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
@@ -1073,7 +1077,9 @@ EOM
                  (   \w+                           # var
                    | length\( \s*\w+\s* \)         # length(var)
                  )
-                 (?: ( \s* = \s* .*?) )?
+                 (?:
+                    (\s*) = (\s*) ( .*?)           # default expr
+                 )?
                  \s*
                $
               /x;
@@ -1157,26 +1163,26 @@ EOM
           $self->{xsub_map_argname_to_in_out}->{$name_or_lenname}
               = $out_type if length $out_type;
 
-          # XXX for now, reconstruct the original param with
-          # all the optional bits stripped, for processing further below.
-          # Also, for backcompat, preserve (non)spaces either side of the
-          # default '=' like xsubpp used to do
-          # Assigns to @args
-          my $d = $default;
-          if (defined $d) {
-            $d =~ s/^\s+// if (defined $type or $is_length);
+          # Process the default expression, including making the text
+          # to be used in "usage: ..." error messages.
+          my $report_def = '';
+          if (defined $default) {
+            $optional_args_count++;
+            # The default expression for reporting usage. For backcompat,
+            # sometimes preserve the spaces either side of the '='
+            $report_def =    ((defined $type or $is_length) ? '' : $sp1)
+                           . "=$sp2$default";
+            $self->{xsub_map_argname_to_default}->{$name_or_lenname} = $default;
           }
-          else {
-            $d = '';
-          }
-          $_ = $name_or_lenname . $d;
 
           if ($out_type eq "OUTLIST" or $is_length) {
-            $only_C_inlist{$_} = 1;
+            $only_C_inlist{$name_or_lenname} = 1;
           }
           else {
-            push @report_params, $_;
+            push @report_params, $name_or_lenname . $report_def;
           }
+          # XXX tmp workaround during refactoring
+          $_ = $name_or_lenname;
         } # for (@args)
     }
 
@@ -1193,11 +1199,7 @@ EOM
       unshift(@args, $arg0);
     }
 
-    my $args_count = 0;
-    my $min_arg_count;
-
     {
-      my $optional_args_count = 0;
       my @map_param_idx_to_arg_idx = ();
 
       foreach my $i (0 .. $#args) {
@@ -1211,14 +1213,6 @@ EOM
         }
         else {
           push @map_param_idx_to_arg_idx, ++$args_count;
-        }
-
-        # process default values, e.g. (int foo = 1)
-        if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
-          $optional_args_count++;
-          $args[$i] = $1; # delete the '= ...' from $arg[$i]
-          $self->{xsub_map_argname_to_default}->{$args[$i]} = $2;
-          $self->{xsub_map_argname_to_default}->{$args[$i]} =~ s/"/\\"/g; # escape double quotes
         }
 
         $self->{xsub_map_arg_idx_to_proto}->[$i+1] = '$'

@@ -397,6 +397,7 @@ sub as_code {
             # the arg or default value
             my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
   
+            $default =~ s/"/\\"/g; # escape double quotes
             $pxs->{xsub_deferred_code_lines}
                 .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
                         $arg_num,
