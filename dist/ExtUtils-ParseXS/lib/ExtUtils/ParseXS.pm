@@ -1191,8 +1191,11 @@ EOM
           }
           else {
             push @report_params, $name_or_lenname . $report_def;
+            $self->{xsub_map_argname_to_idx}{$name_or_lenname} = ++$args_count;
           }
           push @autocall_args, $name_or_lenname;
+
+          # map argument names to indexes
           # XXX tmp workaround during refactoring
           $_ = $name_or_lenname;
         } # for (@args)
@@ -1204,28 +1207,13 @@ EOM
     # ----------------------------------------------------------------
 
     {
-      my @map_param_idx_to_arg_idx = ();
-
       foreach my $i (0 .. $#args) {
         next if $args[$i] eq '...'; # XXX tmp during refactoring
-
-        # @map_param_idx_to_arg_idx maps param index to expected arg index,
-        # with undef indicating a fake parameter that isn't assigned
-        # to an arg
-        if ($only_C_inlist{$args[$i]}) {
-          push @map_param_idx_to_arg_idx, undef;
-        }
-        else {
-          push @map_param_idx_to_arg_idx, ++$args_count;
-        }
 
         $self->{xsub_map_arg_idx_to_proto}->[$i+1] = '$'
             unless $only_C_inlist{$args[$i]};
 
       } # end foreach $i
-
-      # XXX tmp hack during code refactoring
-      @args = grep $_ ne "...", @args;
 
       $min_arg_count = $args_count - $optional_args_count;
 
@@ -1233,9 +1221,6 @@ EOM
       # join(',' @args) but with '&' prepended for any *OUT* args.
       $self->{xsub_C_auto_function_signature} =
           $self->C_func_signature(\@autocall_args, $self->{xsub_class});
-
-      # map argument names to indexes
-      @{ $self->{xsub_map_argname_to_idx} }{@args} = @map_param_idx_to_arg_idx;
     }
 
 
