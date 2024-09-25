@@ -993,6 +993,7 @@ EOM
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
     my @report_params;          # the param descriptions as used by croak()
+    my @autocall_args;          # args to pass to an autocall C func
 
     my $optional_args_count = 0;# how many default params seen
     my $args_count = 0;         # how many args are expected
@@ -1029,6 +1030,16 @@ EOM
       }
       else {
         @args = ();
+      }
+
+      # C++ methods get a fake object/class arg at the start.
+      # This affects arg numbering and the "usage: ..." error message.
+      if (defined($self->{xsub_class})) {
+        my $a = ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
+             ? "CLASS" : "THIS";
+        push @report_params, $a;
+        push @autocall_args, $a;
+        ++$args_count;
       }
 
         for ( @args ) {
@@ -1181,6 +1192,7 @@ EOM
           else {
             push @report_params, $name_or_lenname . $report_def;
           }
+          push @autocall_args, $name_or_lenname;
           # XXX tmp workaround during refactoring
           $_ = $name_or_lenname;
         } # for (@args)
@@ -1190,14 +1202,6 @@ EOM
     # Do post-processing of the sxub's signature parameters:
     # handle methods, '...', default values, mapping from param# to arg#.
     # ----------------------------------------------------------------
-
-    # For C++ type methods, add fake method arg to beginning
-    if (defined($self->{xsub_class})) {
-      my $arg0 = (  ($self->{xsub_seen_static}
-                  or $self->{xsub_func_name} eq 'new')
-          ? "CLASS" : "THIS");
-      unshift(@args, $arg0);
-    }
 
     {
       my @map_param_idx_to_arg_idx = ();
@@ -1228,7 +1232,7 @@ EOM
       # The args to pass to the wrapped library function. Basically
       # join(',' @args) but with '&' prepended for any *OUT* args.
       $self->{xsub_C_auto_function_signature} =
-          $self->C_func_signature(\@args, $self->{xsub_class});
+          $self->C_func_signature(\@autocall_args, $self->{xsub_class});
 
       # map argument names to indexes
       @{ $self->{xsub_map_argname_to_idx} }{@args} = @map_param_idx_to_arg_idx;

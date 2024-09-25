@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 73;
+use Test::More tests => 77;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -959,4 +959,47 @@ EOF
 
     like $stderr, qr{\Qfurther XSUB parameter seen after ellipsis},
                  "further XSUB parameter seen after ellipsis";
+}
+
+{
+    # Test for CLASS/THIS in C++ XSUBs
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |color *  O_OBJECT
+        |INPUT
+        |O_OBJECT
+        |    something($arg)
+        |EOF
+        |
+        |
+        |void
+        |color::new(int aaa)
+        |
+        |void
+        |color::f(int bbb)
+        |
+        |void
+        |mymarker()
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A.*? (XS_Foo_new .*? XS_Foo_mymarker).*\z/$1/xms
+        or die "couldn't trim output";
+
+    like $out, qr/\Qnew color(aaa)/,                "C++ XSUB: wrapped new";
+    like $out, qr/\QTHIS->f(bbb)/,                  "C++ XSUB: wrapped THIS";
+    like $out, qr/\Qusage(cv,\E\s+\Q"CLASS, aaa")/, "C++ XSUB: usage new";
+    like $out, qr/\Qusage(cv,\E\s+\Q"THIS, bbb")/,  "C++ XSUB: usage THIS";
 }
