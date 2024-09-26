@@ -71,12 +71,14 @@ inline void MEMODSlx(char *str, long x)
 class VMem;
 
 /*
- * Address an alignment issue with x64 mingw-w64 ports of gcc-12 and
- * (presumably) later. We do the same thing again 16 lines further down.
- * See https://github.com/Perl/perl5/issues/19824
+ * Address an alignment issue with x64 mingw-w64 ports of gcc.
+ * (We do the same thing again a little further down.)
+ * See https://github.com/Perl/perl5/issues/19824.
+ * Later modified as a result of discussions in
+ * https://github.com/Perl/perl5/issues/22577 
  */
 
-#if defined(__MINGW64__) && __GNUC__ > 11
+#if defined(__MINGW64__)
 typedef struct _MemoryBlockHeader* PMEMORY_BLOCK_HEADER __attribute__ ((aligned(16)));
 #else
 typedef struct _MemoryBlockHeader* PMEMORY_BLOCK_HEADER;
@@ -87,7 +89,7 @@ typedef struct _MemoryBlockHeader {
     PMEMORY_BLOCK_HEADER    pPrev;
     VMem *owner;
 
-#if defined(__MINGW64__) && __GNUC__ > 11
+#if defined(__MINGW64__)
 } MEMORY_BLOCK_HEADER __attribute__ ((aligned(16))), *PMEMORY_BLOCK_HEADER;
 #else
 } MEMORY_BLOCK_HEADER, *PMEMORY_BLOCK_HEADER;
