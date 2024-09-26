@@ -3123,8 +3123,9 @@ L<perlsec> for more information.
 
 (F) You can't use system(), exec(), or a piped open in a setuid or
 setgid script if C<$ENV{PATH}> contains a directory that is writable by
-the world.  Also, the PATH must not contain any relative directory.
-See L<perlsec>.
+the world.  Also, the PATH must not contain any relative directory or
+empty component (so C<''>, C<':'>, and C<'/usr/bin::/usr/local/bin'>
+would all trigger this error). See L<perlsec>.
 
 =item Insecure $ENV{%s} while running %s
 
