@@ -1023,11 +1023,22 @@ EOM
       # C++ methods get a fake object/class arg at the start.
       # This affects arg numbering and the "usage: ..." error message.
       if (defined($self->{xsub_class})) {
-        my $a = ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
-             ? "CLASS" : "THIS";
-        push @report_params, $a;
-        push @autocall_args, $a;
-        ++$args_count;
+        my ($var, $type) =
+          ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
+            ? ('CLASS', "char *")
+            : ('THIS',  "$self->{xsub_class} *");
+
+        push @report_params, $var;
+        push @autocall_args, $var;
+        my ExtUtils::ParseXS::Node::Param $param
+            = ExtUtils::ParseXS::Node::Param->new( {
+                var          => $var,
+                type         => $type,
+                is_synthetic => 1,
+                arg_num      => ++$args_count,
+              });
+        push @{$sig->{params}}, $param;
+        $sig->{names}{$var} = $param;
       }
 
         for ( @args ) {
@@ -1400,21 +1411,10 @@ EOF
         |   [[
 EOF
 
-      # Emit a 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
+      # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-      if (!$self->{xsub_seen_THIS_in_INPUT} && defined($self->{xsub_class})) {
-        my ($var, $type) =
-          ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
-            ? ('CLASS', "char *")
-            : ('THIS',  "$self->{xsub_class} *");
-
-        $self->{xsub_map_argname_to_type}->{$var} = $type;
-
-        my $param = ExtUtils::ParseXS::Node::Param->new({
-          type          => $type,
-          arg_num       => 1,
-          var           => $var,
-        });
+      for my $param (grep $_->{is_synthetic}, @{$self->{xsub_sig}{params}}) {
+        next if $param->{var} eq 'THIS' && $self->{xsub_seen_THIS_in_INPUT};
         $param->as_code($self);
       }
 

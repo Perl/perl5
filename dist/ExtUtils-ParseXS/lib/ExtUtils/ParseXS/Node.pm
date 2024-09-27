@@ -101,6 +101,7 @@ BEGIN {
         'is_length', # param is declared as 'length(foo)' in signature
         'len_name' , # the 'foo' in 'length(foo)' in signature
         'is_alien',  # var declared in INPUT line, but not in signature
+        'is_synthetic',# var like 'THIS' - we pretend it was in the sig
 
     );
 
