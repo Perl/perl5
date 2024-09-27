@@ -2472,6 +2472,10 @@ sub INPUT_handler {
       next;
     }
 
+    # flag 'THIS' and 'RETVAL' as having been seen
+    $self->{xsub_seen_THIS_in_INPUT}   |= $var_name eq "THIS";
+    $self->{xsub_seen_RETVAL_in_INPUT} |= $var_name eq "RETVAL";
+
     # Prepend a '&' to this arg's name for the args to pass to the
     # wrapped function (if any) called in the absence of a CODE: section.
     $self->{xsub_C_auto_function_signature} =~ s/\b($var_name)\b/&$1/

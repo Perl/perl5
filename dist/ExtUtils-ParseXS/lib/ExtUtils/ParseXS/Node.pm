@@ -149,10 +149,6 @@ sub check {
         return;
     }
   
-    # flag 'THIS' and 'RETVAL' as having been seen
-    $pxs->{xsub_seen_THIS_in_INPUT}   |= $self->{var} eq "THIS";
-    $pxs->{xsub_seen_RETVAL_in_INPUT} |= $self->{var} eq "RETVAL";
-  
     $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $self->{type};
   
     # Get the prototype character, if any, associated with the typemap
