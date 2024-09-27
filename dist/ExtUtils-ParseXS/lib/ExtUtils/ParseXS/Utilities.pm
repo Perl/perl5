@@ -528,7 +528,9 @@ sub C_func_signature {
   shift @func_args if defined($class);
 
   for my $arg (@func_args) {
-    $arg =~ s/^/&/ if $self->{xsub_map_argname_to_in_out}->{$arg};
+    $arg =~ s/^/&/
+      if defined $self->{xsub_sig}{names}{$arg}{in_out}
+         &&      $self->{xsub_sig}{names}{$arg}{in_out} =~ /OUT/;
   }
   return join(", ", @func_args);
 }

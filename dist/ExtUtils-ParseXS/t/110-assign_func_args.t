@@ -17,15 +17,24 @@ use ExtUtils::ParseXS::Utilities qw(
 my ($self, @args, $class);
 my ($func_args, $expected);
 
+# fake up a Node::Sig object
+# XXX really we should actually bless an object
+sub set_sig {
+    my ($self, $var, $inout) = @_;
+    $self->{xsub_sig}{names}{$var}{in_out} = $inout;
+}
+
+$self ={};
+
 @args = qw( alpha beta gamma );
-$self->{xsub_map_argname_to_in_out}->{alpha} = 'OUT';
+set_sig($self, 'alpha', 'OUT');
 $expected = q|&alpha, beta, gamma|;
 $func_args = C_func_signature($self, \@args, $class);
 is( $func_args, $expected,
     "Got expected func_args: in_out true; class undefined" );
 
 @args = ( 'My::Class', qw( beta gamma ) );
-$self->{xsub_map_argname_to_in_out}->{beta} = 'OUT';
+set_sig($self, 'beta', 'OUT');
 $class = 'My::Class';
 $expected = q|&beta, gamma|;
 $func_args = C_func_signature($self, \@args, $class);
@@ -33,7 +42,7 @@ is( $func_args, $expected,
     "Got expected func_args: in_out true; class defined" );
 
 @args = ( 'My::Class', qw( beta gamma ) );
-$self->{xsub_map_argname_to_in_out}->{beta} = '';
+set_sig($self, 'beta', '');
 $class = 'My::Class';
 $expected = q|beta, gamma|;
 $func_args = C_func_signature($self, \@args, $class);
@@ -41,7 +50,7 @@ is( $func_args, $expected,
     "Got expected func_args: in_out false; class defined" );
 
 @args = qw( alpha beta gamma );
-$self->{xsub_map_argname_to_in_out}->{alpha} = '';
+set_sig($self, 'alpha', '');
 $class = undef;
 $expected = q|alpha, beta, gamma|;
 $func_args = C_func_signature($self, \@args, $class);

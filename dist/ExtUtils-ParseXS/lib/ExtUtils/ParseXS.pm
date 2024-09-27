@@ -278,8 +278,6 @@ BEGIN {
 
   'xsub_seen_INTERFACE',       # Bool: XSUB has INTERFACE (peek-ahead)
 
-  'xsub_seen_ellipsis',        # Bool: XSUB signature has (   ,...)
-
   'xsub_seen_PROTOTYPE',       # Bool: PROTOTYPE keyword seen (for dup warning)
   
   'xsub_seen_SCOPE',           # Bool: SCOPE keyword seen (for dup warning).
@@ -309,30 +307,18 @@ BEGIN {
                                # function name (if any). May include
                                # 'const' prefix.
 
-  'xsub_signature',            # Bool: the XSUB's (...) signature
-
+  'xsub_sig',                  # Node::Sig object holding all the info
+                               # about the XSUB's signature and INPUT
+                               # lines
 
   'xsub_func_name',            # The name of this XSUB        eg 'f'
   'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
   'xsub_func_full_C_name',     # its full C function name     eg 'Foo__Bar__f'
 
-  'xsub_map_argname_to_idx',   # Hash: Map argument names to indexes.
-
   'xsub_map_argname_to_type',  # Hash: map argument names to types, such as
                                # 'int *'. Names include special ones like
                                # 'RETVAL'.
 
-  'xsub_map_argname_to_default', # Hash: map argument names to default
-                               # expressions (if any).
-  
-  'xsub_map_argname_to_in_out',# Hash: map argument names to 'OUTLIST' etc.
-                               # Includes generated argument names like
-                               # 'XSauto_length_of_foo' for 'length(foo)'.
-  
-  'xsub_map_argname_to_has_length', # Hash of bools: indicates whether
-                               # argument foo was also declared as
-                               # 'length(foo)'.
-  
   'xsub_map_arg_idx_to_proto', # Array: maps argument index to prototype
                                # (such as '$'). Always populated, even if
                                # prototypes aren't being used for this
@@ -738,12 +724,8 @@ EOM
 
     # Initialize some per-XSUB instance variables:
 
-    foreach my $member (qw(xsub_map_argname_to_idx
-                           xsub_map_argname_to_type
-                           xsub_map_argname_to_default
+    foreach my $member (qw(xsub_map_argname_to_type
                            xsub_map_varname_to_seen_in_INPUT
-                           xsub_map_argname_to_in_out
-                           xsub_map_argname_to_has_length
                           ))
     {
       $self->{$member} = {};
@@ -764,9 +746,8 @@ EOM
     $self->{xsub_seen_PPCODE}               = 0;
     $self->{xsub_seen_CODE}                 = 0;
     $self->{xsub_seen_INTERFACE}            = 0;
-    $self->{xsub_seen_ellipsis}             = 0;
     $self->{xsub_class}                     = undef;
-    $self->{xsub_signature}                 = undef;
+    $self->{xsub_sig}                       = undef;
 
     # used for emitting XSRETURN($XSRETURN_count) if > 0, or XSRETURN_EMPTY
     my $XSRETURN_count = 0;
@@ -846,6 +827,10 @@ EOM
     $self->{xsub_seen_static}   = 1
                           if $self->{xsub_return_type} =~ s/^static\s+//;
 
+    my ExtUtils::ParseXS::Node::Sig $sig
+        = $self->{xsub_sig}
+        = ExtUtils::ParseXS::Node::Sig->new();
+
     {
       my $func_header = shift(@{ $self->{line} });
 
@@ -860,7 +845,7 @@ EOM
       $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-      ($self->{xsub_class}, $self->{xsub_func_name}, $self->{xsub_signature})
+      ($self->{xsub_class}, $self->{xsub_func_name}, $sig->{sig_text})
           = ($1, $2, $3);
 
       $self->{xsub_class} = "$4 $self->{xsub_class}" if $4;
@@ -884,10 +869,11 @@ EOM
       # we should have:
       #
       # $self->{xsub_class}               'const Some::Class'
-      # $self->{xsub_signature}            'arg1, arg2, arg3'
       # $self->{xsub_func_name}           'foo_bar'
       # $self->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
       # $self->{xsub_func_full_C_name}    'BAR__BAZ_bar';
+      #
+      # $sig->{sig_text}                  'param1, param2, param3'
 
 
       # Check for a duplicate function definition, but ignoring multiple
@@ -912,7 +898,7 @@ EOM
 
 
     # ----------------------------------------------------------------
-    # Do initial processing of the XSUB's signature - $self->{xsub_signature}
+    # Do initial processing of the XSUB's signature - $sig->{sig_text}
     #
     # Split the signature on commas into @args while allowing for things
     # like (a = ",", b), and extract any IN/OUT/etc prefix.
@@ -929,14 +915,16 @@ EOM
     #
     # ----------------------------------------------------------------
     #
-    # Given a signature (i.e. $self->{xsub_signature}) like:
+    # Given a signature (i.e. $sig->{sig_text}) like:
     #
     #    OUT     char *s,             \
     #            int   length(s),     \
     #    OUTLIST int   size     = 10)
     #
-    # then this section will set various vars and object fields like the
-    # following:
+    # then this section will populate the $sig object with various
+    # bits of overall signature state, plus an array of Node::Param objects
+    #
+    #XXX update this:
     #
     #  @args           = ('s',  'XSauto_length_of_s', 'size= 10');
     #
@@ -984,7 +972,7 @@ EOM
     # ----------------------------------------------------------------
 
     # remove line continuation chars (\)
-    $self->{xsub_signature} =~ s/\\\s*/ /g;
+    $sig->{sig_text} =~ s/\\\s*/ /g;
 
     my @args;
 
@@ -1003,12 +991,12 @@ EOM
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
 
-      my $sig = $self->{xsub_signature};
+      my $sig_text = $sig->{sig_text};
 
       # First, split into separate parameters
 
-      if ($sig =~ /\S/) {
-        my $sig_c = "$sig ,";
+      if ($sig_text =~ /\S/) {
+        my $sig_c = "$sig_text ,";
         use re 'eval'; # needed for 5.16.0 and earlier
         my $can_use_regex = ($sig_c =~ /^( (??{ $C_arg }) , )* $ /x);
         no re 'eval';
@@ -1024,8 +1012,8 @@ EOM
           # This is the fallback parameter-splitting path for when the $C_arg
           # regex doesn't work. This code path should ideally never be
           # reached, and indicates a design weakness in $C_arg.
-          @args = split(/\s*,\s*/, $sig);
-          Warn( $self, "Warning: cannot parse argument list '$sig', fallback to split");
+          @args = split(/\s*,\s*/, $sig_text);
+          Warn( $self, "Warning: cannot parse argument list '$sig_text', fallback to split");
         }
       }
       else {
@@ -1066,10 +1054,10 @@ EOM
           # Process ellipsis (...)
 
           $self->blurt("further XSUB parameter seen after ellipsis (...)")
-            if $self->{xsub_seen_ellipsis};
+            if $sig->{seen_ellipsis};
 
           if ($_ eq '...') {
-            $self->{xsub_seen_ellipsis} = 1;
+            $sig->{seen_ellipsis} = 1;
             push @report_params, $_;
             next;
           }
@@ -1099,6 +1087,20 @@ EOM
             $self->blurt("Unparseable XSUB parameter: '$_'");
             next;
           }
+
+          my ExtUtils::ParseXS::Node::Param $param
+              = ExtUtils::ParseXS::Node::Param->new( {
+                  var => $name_or_lenname,
+                });
+
+          if (exists $sig->{names}{$name_or_lenname}) {
+            $self->blurt(
+                "Error: duplicate definition of argument '$name_or_lenname' ignored");
+            next;
+          }
+
+          push @{$sig->{params}}, $param;
+          $sig->{names}{$name_or_lenname} = $param;
 
           # Process optional IN/OUT etc modifier
 
@@ -1148,20 +1150,13 @@ EOM
 
           if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
 
-            my ExtUtils::ParseXS::Node::Param $param =
-                  ExtUtils::ParseXS::Node::Param->new({
-                    type    => $type,
-                    var     => $name,
-                    is_ansi => 1,
-                  });
+            @$param{qw(type var is_ansi)} = ($type, $name, 1);
 
             if ($is_length) {
               $param->{no_init}   = 1;
               $param->{is_length} = 1;
               $param->{len_name}  = $name;
               $param->{var}       = $name_or_lenname;
-
-              $self->{xsub_map_argname_to_has_length}->{$name} = 1;
             }
             else {
               $param->{no_init}   = 1 if $out_type =~ /^OUT/;
@@ -1171,8 +1166,7 @@ EOM
           }
 
           push @OUTLIST_vars, $name_or_lenname if $out_type =~ /OUTLIST$/;
-          $self->{xsub_map_argname_to_in_out}->{$name_or_lenname}
-              = $out_type if length $out_type;
+          $param->{in_out} = $out_type if length $out_type;
 
           # Process the default expression, including making the text
           # to be used in "usage: ..." error messages.
@@ -1183,15 +1177,16 @@ EOM
             # sometimes preserve the spaces either side of the '='
             $report_def =    ((defined $type or $is_length) ? '' : $sp1)
                            . "=$sp2$default";
-            $self->{xsub_map_argname_to_default}->{$name_or_lenname} = $default;
+            $param->{default} = $default;
           }
 
           if ($out_type eq "OUTLIST" or $is_length) {
             $only_C_inlist{$name_or_lenname} = 1;
+            $param->{arg_num} = undef;
           }
           else {
             push @report_params, $name_or_lenname . $report_def;
-            $self->{xsub_map_argname_to_idx}{$name_or_lenname} = ++$args_count;
+            $param->{arg_num} = ++$args_count;
           }
           push @autocall_args, $name_or_lenname;
 
@@ -1296,7 +1291,7 @@ EOF
       # the code to emit to determine whether the correct number of argument
       # have been passed
       my $condition_code =
-        set_cond($self->{xsub_seen_ellipsis}, $min_arg_count, $args_count);
+        set_cond($sig->{seen_ellipsis}, $min_arg_count, $args_count);
 
       print Q(<<"EOF") if $self->{config_allow_exceptions}; # "-except" cmd line switch
         |    char errbuf[1024];
@@ -1444,7 +1439,6 @@ EOF
           # Emit the RETVAL variable declaration.
           print "\t" . $self->map_type($self->{xsub_return_type}, 'RETVAL') . ";\n"
             if !$self->{xsub_seen_RETVAL_in_INPUT};
-          $self->{xsub_map_argname_to_idx}->{"RETVAL"} = 0;
           $self->{xsub_map_argname_to_type}->{"RETVAL"} = $self->{xsub_return_type};
 
           # If it looks like the output typemap code can be hacked to
@@ -1465,7 +1459,6 @@ EOF
             grep(! $_->{is_length}, @ANSI_params),
         )
         {
-          $param->{arg_num} = $self->{xsub_map_argname_to_idx}->{$param->{var}};
           $param->check($self)
             or next;
           $param->as_code($self);
@@ -1626,12 +1619,18 @@ EOF
       # Process any OUT vars: i.e. vars that are declared OUT in
       # the XSUB's signature rather than in an OUTPUT section.
 
-      for my $var (grep $self->{xsub_map_argname_to_in_out}->{$_} =~ /OUT$/,
-                            sort keys %{ $self->{xsub_map_argname_to_in_out} })
+      for my $param (
+              grep {
+                     exists $_->{in_out}
+                  && $_->{in_out} =~ /OUT$/
+                  && !$self->{xsub_map_varname_to_seen_in_OUTPUT}{$_->{var}}
+              }
+              @{ $self->{xsub_sig}{params}})
       {
+        my $var = $param->{var};
         $self->generate_output( {
             type        => $self->{xsub_map_argname_to_type}->{$var},
-            num         => $self->{xsub_map_argname_to_idx}->{$var},
+            num         => $param->{arg_num},
             var         => $var,
             do_setmagic => $self->{xsub_SETMAGIC_state},
             do_push     => undef,
@@ -1887,7 +1886,7 @@ EOF
             $self->{xsub_map_arg_idx_to_proto}->[$min_arg_count] .= ";";
           }
           push @{ $self->{xsub_map_arg_idx_to_proto} }, "$s\@"
-            if $self->{xsub_seen_ellipsis}; # '...' was seen in XSUB signature
+            if $sig->{seen_ellipsis}; # '...' was seen in XSUB signature
 
           $proto_arg = join ("",
                   grep defined, @{ $self->{xsub_map_arg_idx_to_proto} } );
@@ -2380,9 +2379,8 @@ sub CASE_handler {
 # but with subtleties when $num is 0 or undef.
 # Gathering all such uses into one place helps in documenting the totality.
 #
-# Normally parameter names are mapped to index numbers 1,2,... (via
-# $self->{xsub_map_argname_to_idx}). In addition, in *OUTPUT* processing
-# only, 'RETVAL' is mapped to 0.
+# Normally parameter names are mapped to index numbers 1,2,... . In
+# addition, in *OUTPUT* processing only, 'RETVAL' is mapped to 0.
 #
 # Finally, in input processing it is legal to have a parameter with a
 # typemap override, but where the parameter isn't in the signature. People
@@ -2483,7 +2481,7 @@ sub INPUT_handler {
     # fake parameters like 'length(s))'. If not found, flag it as 'alien':
     # a var which appears in an INPUT section but not in the XSUB's
     # signature. Legal but nasty.
-    my $var_num = $self->{xsub_map_argname_to_idx}->{$var_name};
+    my $var_num = $self->{xsub_sig}{names}{$var_name}{arg_num};
     my $is_alien = !defined($var_num);
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -2493,13 +2491,8 @@ sub INPUT_handler {
     if (        defined $init_op
             and $init_op =~ /^[=;]$/
             and $var_init =~ /^NO_INIT\s*;?\s*$/
-        or
-                $self->{xsub_map_argname_to_in_out}->{$var_name}
-            and $self->{xsub_map_argname_to_in_out}->{$var_name} =~ /^OUT/
-            and !defined($init_op)
-       )
-    {
-      # NO_INIT or OUT* class; skip initialisation
+    ) {
+      # NO_INIT: skip initialisation
       $no_init = 1;
     }
 
@@ -2607,13 +2600,18 @@ sub OUTPUT_handler {
       next;
     }
 
-    $self->blurt("Error: OUTPUT $outarg not an argument"), next
-      unless defined($self->{xsub_map_argname_to_idx}->{$outarg});
+    my $var_num = ($outarg eq "RETVAL" && $self->{xsub_return_type} ne "void")
+                    ? 0
+                    : $self->{xsub_sig}{names}{$outarg}{arg_num};
+
+    unless (defined $var_num) {
+      $self->blurt("Error: OUTPUT $outarg not an argument");
+      next;
+    }
 
     $self->blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
       unless defined $self->{xsub_map_argname_to_type}->{$outarg};
 
-    my $var_num = $self->{xsub_map_argname_to_idx}->{$outarg};
 
     # Emit the custom var-setter code if present; else use the one from
     # the OUTPUT typemap.
@@ -2632,12 +2630,6 @@ sub OUTPUT_handler {
         do_push     => undef,
       } );
     }
-
-    # No need to auto-OUTPUT
-    delete $self->{xsub_map_argname_to_in_out}->{$outarg}
-      if     exists $self->{xsub_map_argname_to_in_out}->{$outarg}
-         and $self->{xsub_map_argname_to_in_out}->{$outarg} =~ /OUT$/;
-
   } # foreach line in OUTPUT block
 }
 

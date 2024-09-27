@@ -80,7 +80,7 @@ sub new {
 
 package ExtUtils::ParseXS::Node::Param;
 
-# Node class which holds the state of one XSUB parameter, based on the
+# Node subclass which holds the state of one XSUB parameter, based on the
 # XSUB's signature and/or an INPUT line.
 
 BEGIN {
@@ -91,6 +91,8 @@ BEGIN {
         'type',      # The C type of the parameter
         'arg_num',   # The arg number (starting at 1) mapped to this param
         'var',       # the name of the parameter
+        'default',   # default value (if any)
+        'in_out',    # The In/OUT/OUTLIST etc value (if any)
         'defer',     # deferred initialisation template code
         'init',      # initialisation template code
         'init_op',   # initialisation type: one of =/+/;
@@ -117,6 +119,26 @@ sub check {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
+    # XXX tmp workaround during code refactoring
+    # Copy any relevant fields from the param object (if any) for the
+    # param of the same name declared in the signature, to the INPUT param
+    # object.
+    my ExtUtils::ParseXS::Node::Param $sigp =
+        $pxs->{xsub_sig}{names}{$self->{var}};
+
+    if ($sigp) {
+        for (qw(default)) {
+            $self->{$_} = $sigp->{$_} if exists $sigp->{$_};
+        }
+        if (    defined $sigp->{in_out}
+            and  $sigp->{in_out} =~ /^OUT/
+            and !defined($self->{init_op})
+        ) {
+            # OUT* class: skip initialisation
+            $self->{no_init} = 1;
+        }
+    }
+    #
     # Check for duplicate definitions of a particular parameter name.
     # Either the name has appeared in more than one INPUT line or
     # has appeared also in the signature with a type specified.
@@ -152,10 +174,8 @@ sub as_code {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
-    my ($type, $arg_num, $var, $init, $no_init, $defer)
-        = @{$self}{qw(type arg_num var init no_init defer)};
-  
-    my $default = $pxs->{xsub_map_argname_to_default}->{$var};
+    my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
+        = @{$self}{qw(type arg_num var init no_init defer default)};
   
     my $arg = $pxs->ST($arg_num, 0);
   
@@ -290,7 +310,7 @@ sub as_code {
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
         if (    $xstype eq 'T_PV'
-                and $pxs->{xsub_map_argname_to_has_length}->{$var})
+                and exists $pxs->{xsub_sig}{names}{"length($var)"})
         {
             print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
             die "default value not supported with length(NAME) supplied"
@@ -434,6 +454,39 @@ sub as_code {
             .= $pxs->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
     }
 }
+
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::Sig;
+
+# Node subclass which holds the state of an XSUB's signature, based on the
+# XSUB's actual signature plus any INPUT lines. It is a mainly a list of
+# Node::Param children.
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::FIELDS,
+        'params',        # Array ref of Node::Param objects representing
+                         # the parameters of this XSUB
+
+        'names',         # Hash ref mapping variable names to Node::Param
+                         # objects
+
+        'sig_text',      # The original text of the sig, e.g.
+                         #   'param1, int param2 = 0'
+
+        'seen_ellipsis', # Bool: XSUB signature has (   ,...)
+
+        'nargs',         # The number of args expected from caller
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
 
 
 1;
