@@ -2126,15 +2126,33 @@ accidentally clobber the iterator state during execution of the loop body.
 It's easy enough to explicitly reset the iterator before starting a loop,
 but there is no way to insulate the iterator state used by a loop from
 the iterator state used by anything else that might execute during the
-loop body.  To avoid these problems, use a C<foreach> loop rather than
-C<while>-C<each>.
+loop body.
 
 This extends to using C<each> on the result of an anonymous hash or
 array constructor.  A new underlying array or hash is created each
 time so each will always start iterating from scratch, eg:
 
   # loops forever
-  while (my ($key, $value) = each @{ +{ a => 1 } }) {
+  while (my ($key, $value) = each %{ +{ a => 1 } }) {
+      print "$key=$value\n";
+  }
+
+To avoid these problems resulting from the hash-embedded iterator, use a
+L<C<foreach>|perlsyn/"Foreach Loops"> loop rather than C<while>-C<each>.
+As of Perl 5.36, you can iterate over both keys and values directly with
+a multiple-value C<foreach> loop.
+
+  # retrieves the keys one time for iteration
+  # iteration is unaffected by any operations on %hash within
+  foreach my $key (keys %hash) {
+      my $value = $hash{$key};
+      $hash{$key} = {keys => scalar keys %hash, outer => [%hash]};
+      some_function_that_may_mess_with(\%hash, $key, $value);
+      $hash{"new$key"} = delete $hash{$key};
+  }
+
+  # Perl 5.36+
+  foreach my ($key, $value) (%{ +{ a => 1 } }) {
       print "$key=$value\n";
   }
 
