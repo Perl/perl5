@@ -2987,14 +2987,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
      * simple cases, and, if necessary calls a helper function to deal with the
      * more complex ones.  Almost all well-formed non-problematic code points
      * are considered simple, so that it's unlikely that the helper function
-     * will need to be called.
-     *
-     * This is an adaptation of the tables and algorithm given in
-     * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
-     * comprehensive documentation of the original version.  A copyright notice
-     * for the original version is given at the beginning of this file.  The
-     * Perl adaptation is documented at the definition of PL_strict_utf8_dfa_tab[].
-     */
+     * will need to be called. */
 
     const U8 * const s0 = s;
     const U8 * send = s0 + curlen;
@@ -3010,10 +3003,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         *msgs = NULL;
     }
 
-    /* This dfa is fast.  If it accepts the input, it was for a well-formed,
-     * non-problematic code point, which can be returned immediately.
-     * Otherwise we call a helper function to figure out the more complicated
-     * cases. */
 
     /* No calls from core pass in an empty string; non-core need a check */
 #ifdef PERL_CORE
@@ -3034,7 +3023,19 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
             return *s;
         }
 
-        /* The terminology of the dfa refers to a 'class'.  The variable 'type'
+        /* This dfa is fast.  If it accepts the input, it was for a
+         * well-formed, non-problematic code point, which can be returned
+         * immediately.  Otherwise we call a helper function to figure out the
+         * more complicated cases.
+         *
+         * It is an adaptation of the tables and algorithm given in
+         * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
+         * comprehensive documentation of the original version.  A copyright
+         * notice for the original version is given at the beginning of this
+         * file.  The Perl adaptation is documented at the definition of
+         * PL_strict_utf8_dfa_tab[].
+         *
+         * The terminology of the dfa refers to a 'class'.  The variable 'type'
          * would have been named 'class' except that is a reserved word in C++
          * */
         PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
