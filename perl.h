@@ -6567,7 +6567,7 @@ static U8 utf8d_C9[] = {
  * new nodes.  The array would have to be made U16 instead of U8, not worth it
  * for this rarely encountered case
  *
- * The classes are
+ *      byte          class
  *      00-7F           0   Always legal, single byte sequence
  *      80-81           7   Not legal immediately after start bytes E0 F0 F8 FC
  *                          FE
@@ -6704,7 +6704,7 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  * classes" in the linked-to document for further explanation of the original
  * dfa.)
  *
- * The classes are
+ *      byte          class
  *      00-7F           0
  *      80-8E           9
  *      8F             10
@@ -6823,11 +6823,11 @@ EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
 };
 
 /* And below is yet another version of the above tables that accepts only UTF-8
- * as defined by Corregidum #9.  Hence no surrogates nor non-Unicode, but
+ * as defined by Corrigendum #9.  Hence no surrogates nor non-Unicode, but
  * it allows non-characters.  This is isomorphic to the original table
  * in https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
  *
- * The classes are
+ *      byte          class
  *      00-7F           0
  *      80-8F           9
  *      90-9F          10
