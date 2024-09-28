@@ -3042,7 +3042,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
             uv = UTF8_ACCUMULATE(uv, *s);
         }
 
-        if (state == 0) {
+        if (LIKELY(state == 0)) {
 #ifdef EBCDIC
             uv = UNI_TO_NATIVE(uv);
 #endif
