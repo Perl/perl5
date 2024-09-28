@@ -3024,13 +3024,13 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
                                                         flags, errors, msgs);
 #endif
 
-    type = PL_strict_utf8_dfa_tab[*s];
+        type = PL_strict_utf8_dfa_tab[*s];
 
     /* The table is structured so that 'type' is 0 iff the input byte is
      * represented identically regardless of the UTF-8ness of the string */
-    if (type == 0) {   /* UTF-8 invariants are returned unchanged */
-        uv = *s;
-    }
+        if (type == 0) {   /* UTF-8 invariants are returned unchanged */
+            uv = *s;
+        }
     else {
         UV state = PL_strict_utf8_dfa_tab[256 + type];
         uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
@@ -3041,25 +3041,25 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
 
             uv = UTF8_ACCUMULATE(uv, *s);
 
-            if (state == 0) {
+        if (state == 0) {
 #ifdef EBCDIC
-                uv = UNI_TO_NATIVE(uv);
+            uv = UNI_TO_NATIVE(uv);
 #endif
                 goto success;
-            }
         }
+    }
 
-        /* Here is potentially problematic.  Use the full mechanism */
-        return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
-                                           errors, msgs);
+    /* Here is potentially problematic.  Use the full mechanism */
+    return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
+                                       errors, msgs);
     }
 
   success:
-    if (retlen) {
-        *retlen = s - s0 + 1;
-    }
+            if (retlen) {
+                *retlen = s - s0 + 1;
+            }
 
-    return uv;
+            return uv;
 }
 
 PERL_STATIC_INLINE UV
