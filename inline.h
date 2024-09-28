@@ -3024,14 +3024,19 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
                                                         flags, errors, msgs);
 #endif
 
+        /* UTF-8 invariants are returned unchanged.  The code below is quite
+         * capable of handling this, but this shortcuts this very common case
+         * */
+        if (UTF8_IS_INVARIANT(*s)) {
+            if (retlen) {
+                *retlen = 1;
+            }
+
+            return *s;
+        }
+
         type = PL_strict_utf8_dfa_tab[*s];
 
-    /* The table is structured so that 'type' is 0 iff the input byte is
-     * represented identically regardless of the UTF-8ness of the string */
-        if (type == 0) {   /* UTF-8 invariants are returned unchanged */
-            uv = *s;
-        }
-    else {
         UV state = PL_strict_utf8_dfa_tab[256 + type];
         uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
 
@@ -3049,8 +3054,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
     /* Here is potentially problematic.  Use the full mechanism */
     return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
                                        errors, msgs);
-    }
-
   success:
             if (retlen) {
                 *retlen = s - s0 + 1;
