@@ -1178,8 +1178,9 @@ point's representation.
 
 /* C9 refers to Unicode Corrigendum #9: allows but discourages non-chars */
 #define UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE                                    \
-                                 (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_SURROGATE)
-#define UTF8_WARN_ILLEGAL_C9_INTERCHANGE (UTF8_WARN_SUPER|UTF8_WARN_SURROGATE)
+    (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_PERL_EXTENDED|UTF8_DISALLOW_SURROGATE)
+#define UTF8_WARN_ILLEGAL_C9_INTERCHANGE                                        \
+                (UTF8_WARN_SUPER|UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SURROGATE)
 
 #define UTF8_DISALLOW_ILLEGAL_INTERCHANGE                                       \
                   (UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE|UTF8_DISALLOW_NONCHAR)
