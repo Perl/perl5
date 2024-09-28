@@ -3005,7 +3005,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
 #ifdef PERL_CORE
     assert(curlen > 0);
 #else
-    if (curlen == 0) return _utf8n_to_uvchr_msgs_helper(s0, 0, retlen,
+    if (UNLIKELY(curlen == 0)) return _utf8n_to_uvchr_msgs_helper(s0, 0, retlen,
                                                         flags, errors, msgs);
 #endif
 
