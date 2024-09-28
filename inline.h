@@ -3004,10 +3004,10 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
 #ifdef PERL_CORE
     assert(curlen > 0);
 #else
-    if (UNLIKELY(curlen == 0)) return _utf8n_to_uvchr_msgs_helper(s0, 0, retlen,
-                                                        flags, errors, msgs);
+    if (LIKELY(curlen > 0))
 #endif
 
+    {
         /* UTF-8 invariants are returned unchanged.  The code below is quite
          * capable of handling this, but this shortcuts this very common case
          * */
@@ -3055,6 +3055,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
 
             return UNI_TO_NATIVE(uv);
         }
+    }
 
     /* Here is potentially problematic.  Use the full mechanism */
     return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
