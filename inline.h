@@ -3043,9 +3043,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         }
 
         if (LIKELY(state == 0)) {
-#ifdef EBCDIC
-            uv = UNI_TO_NATIVE(uv);
-#endif
                 goto success;
         }
 
@@ -3059,7 +3056,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
                 *retlen = s - s0 + 1;
             }
 
-            return uv;
+            return UNI_TO_NATIVE(uv);
 }
 
 PERL_STATIC_INLINE UV
