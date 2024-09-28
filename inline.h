@@ -3035,11 +3035,12 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         UV state = PL_strict_utf8_dfa_tab[256 + type];
         uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
 
-        while (LIKELY(state != 1) && ++s < send) {
+        while (state > 1 && ++s < send) {
             type  = PL_strict_utf8_dfa_tab[*s];
             state = PL_strict_utf8_dfa_tab[256 + state + type];
 
             uv = UTF8_ACCUMULATE(uv, *s);
+        }
 
         if (state == 0) {
 #ifdef EBCDIC
@@ -3047,7 +3048,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
 #endif
                 goto success;
         }
-    }
 
     /* Here is potentially problematic.  Use the full mechanism */
     return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
