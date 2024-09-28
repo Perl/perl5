@@ -3003,6 +3003,14 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
 
+    /* Assume that isn't malformed; the vast majority of calls won't be */
+    if (errors) {
+        *errors = 0;
+    }
+    if (msgs) {
+        *msgs = NULL;
+    }
+
     /* This dfa is fast.  If it accepts the input, it was for a well-formed,
      * non-problematic code point, which can be returned immediately.
      * Otherwise we call a helper function to figure out the more complicated
@@ -3049,12 +3057,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
   success:
     if (retlen) {
         *retlen = s - s0 + 1;
-    }
-    if (errors) {
-        *errors = 0;
-    }
-    if (msgs) {
-        *msgs = NULL;
     }
 
     return uv;
