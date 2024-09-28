@@ -3048,18 +3048,16 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         }
 
         if (LIKELY(state == 0)) {
-                goto success;
-        }
-
-    /* Here is potentially problematic.  Use the full mechanism */
-    return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
-                                       errors, msgs);
-  success:
             if (retlen) {
                 *retlen = s - s0 + 1;
             }
 
             return UNI_TO_NATIVE(uv);
+        }
+
+    /* Here is potentially problematic.  Use the full mechanism */
+    return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
+                                       errors, msgs);
 }
 
 PERL_STATIC_INLINE UV
