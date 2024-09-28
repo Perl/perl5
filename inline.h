@@ -3034,6 +3034,9 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
             return *s;
         }
 
+        /* The terminology of the dfa refers to a 'class'.  The variable 'type'
+         * would have been named 'class' except that is a reserved word in C++
+         * */
         PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
 
         UV state = PL_strict_utf8_dfa_tab[256 + type];
