@@ -3038,8 +3038,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
          * would have been named 'class' except that is a reserved word in C++
          * */
         PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
-
-        UV state = PL_strict_utf8_dfa_tab[256 + type];
+        PERL_UINT_FAST8_T state = PL_strict_utf8_dfa_tab[256 + type];
         uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
 
         while (state > 1 && ++s < send) {
