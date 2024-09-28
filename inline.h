@@ -2983,17 +2983,13 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
                          U32 * errors,
                          AV ** msgs)
 {
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
+
     /* This is the inlined portion of utf8n_to_uvchr_msgs.  It handles the
      * simple cases, and, if necessary calls a helper function to deal with the
      * more complex ones.  Almost all well-formed non-problematic code points
      * are considered simple, so that it's unlikely that the helper function
      * will need to be called. */
-
-    const U8 * const s0 = s;
-    const U8 * send = s0 + curlen;
-    UV uv;
-
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
 
     /* Assume that isn't malformed; the vast majority of calls won't be */
     if (errors) {
@@ -3003,6 +2999,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         *msgs = NULL;
     }
 
+    const U8 * s0;
 
     /* No calls from core pass in an empty string; non-core need a check */
 #ifdef PERL_CORE
@@ -3023,6 +3020,9 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
             return *s;
         }
 
+        const U8 * send = s + curlen;
+        s0 = s;
+
         /* This dfa is fast.  If it accepts the input, it was for a
          * well-formed, non-problematic code point, which can be returned
          * immediately.  Otherwise we call a helper function to figure out the
@@ -3040,7 +3040,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
          * */
         PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
         PERL_UINT_FAST8_T state = PL_strict_utf8_dfa_tab[256 + type];
-        uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
+        UV uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
 
         while (state > 1 && ++s < send) {
             type  = PL_strict_utf8_dfa_tab[*s];
