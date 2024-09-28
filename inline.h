@@ -2998,7 +2998,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
 
     const U8 * const s0 = s;
     const U8 * send = s0 + curlen;
-    UV type;
     UV uv;
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
@@ -3035,7 +3034,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
             return *s;
         }
 
-        type = PL_strict_utf8_dfa_tab[*s];
+        PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
 
         UV state = PL_strict_utf8_dfa_tab[256 + type];
         uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
