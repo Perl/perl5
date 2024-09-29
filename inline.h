@@ -2976,7 +2976,7 @@ Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
 }
 
 PERL_STATIC_INLINE UV
-Perl_utf8n_to_uvchr_msgs(const U8 *s,
+Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
                          STRLEN curlen,
                          STRLEN *retlen,
                          const U32 flags,
@@ -2999,7 +2999,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         *msgs = NULL;
     }
 
-    const U8 * s0;
 
     /* No calls from core pass in an empty string; non-core need a check */
 #ifdef PERL_CORE
@@ -3012,16 +3011,16 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         /* UTF-8 invariants are returned unchanged.  The code below is quite
          * capable of handling this, but this shortcuts this very common case
          * */
-        if (UTF8_IS_INVARIANT(*s)) {
+        if (UTF8_IS_INVARIANT(*s0)) {
             if (retlen) {
                 *retlen = 1;
             }
 
-            return *s;
+            return *s0;
         }
 
+        const U8 * s = s0;
         const U8 * send = s + curlen;
-        s0 = s;
 
         /* This dfa is fast.  If it accepts the input, it was for a
          * well-formed, non-problematic code point, which can be returned
