@@ -3639,7 +3639,7 @@ AMTdp	|UV	|utf8n_to_uvchr_error					\
 				|const U32 flags			\
 				|NULLOK U32 *errors
 ATdip	|UV	|utf8n_to_uvchr_msgs					\
-				|NN const U8 *s 			\
+				|NN const U8 * const s0 		\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
 				|const U32 flags			\
