@@ -29,6 +29,9 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <commit votes="steveh jkeenan tonyc mauke" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
 <commit votes="steveh tonyc mauke" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
+<commit votes="khw" id="f2bf404f5305a32462ff5667054c9094d8a65f0" issue="" pull="22597" desc="Catch malformed UTF-8"/>
+<commit votes="khw" id="afc13b2fc932a5863a65e71ef353d5f021c260eb" issue="" pull="22597" desc="Catch malformed UTF-8"/>
+<commit votes="khw" id="4a9fdaae88804817e66b38f429ac0306d428c87a" issue="" pull="22597" desc="Catch malformed UTF-8"/>
 
 </div>
 
