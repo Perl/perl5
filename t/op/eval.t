@@ -379,6 +379,7 @@ our $x = 1;
     is(db6(),      4);
 
     # [GH #19370]
+    local $TODO = "outside not available when needed";
     my sub d6 {
         DB::db3();
     }

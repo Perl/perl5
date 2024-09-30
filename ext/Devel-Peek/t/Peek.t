@@ -364,8 +364,8 @@ do_test('reference to named subroutine without prototype',
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (3|4)
-    FLAGS = \\((?:HASEVAL,)?(?:NAMED)?\\)	# $] < 5.015 || !thr
-    FLAGS = \\(DYNFILE(?:,HASEVAL)?(?:,NAMED)?\\) # $] >= 5.015 && thr
+    FLAGS = \\((?:HASEVAL(?:,NAMED)?)?\\)	# $] < 5.015 || !thr
+    FLAGS = \\(DYNFILE(?:,HASEVAL(?:,NAMED)?)?\\) # $] >= 5.015 && thr
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
@@ -375,8 +375,8 @@ do_test('reference to named subroutine without prototype',
     DEPTH = 1(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
-    FLAGS = 0x(?:[c84]00)?0			# $] < 5.015 || !thr
-    FLAGS = 0x[cd1459]000			# $] >= 5.015 && thr
+    FLAGS = 0x(?:[c4]00)?0			# $] < 5.015 || !thr
+    FLAGS = 0x[cd145]000			# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
