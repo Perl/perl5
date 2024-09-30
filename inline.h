@@ -2672,11 +2672,6 @@ PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
 {
     PERL_ARGS_ASSERT_UTF8_HOP_FORWARD;
-
-    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
-     * the bitops (especially ~) can create illegal UTF-8.
-     * In other words: in Perl UTF-8 is not just for Unicode. */
-
     assert(off >= 0);
 
     if (UNLIKELY(s >= end)) {
@@ -2736,11 +2731,6 @@ PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
 {
     PERL_ARGS_ASSERT_UTF8_HOP_BACK;
-
-    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
-     * the bitops (especially ~) can create illegal UTF-8.
-     * In other words: in Perl UTF-8 is not just for Unicode. */
-
     assert(start <= s);
     assert(off <= 0);
 
