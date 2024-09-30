@@ -7491,23 +7491,16 @@ S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
 
     PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS;
 
-    while (s < send && uoffset) {
-        --uoffset;
-        s += UTF8SKIP(s);
-    }
-    if (s == send) {
+    SSize_t overshoot;
+    s = utf8_hop_forward_overshoot(s, uoffset, send, &overshoot);
+    if (s >= send) {
         *at_end = TRUE;
     }
-    else if (s > send) {
-        *at_end = TRUE;
-        /* This is the existing behaviour. Possibly it should be a croak, as
-           it's actually a bounds error  */
-        s = send;
-    }
+
     /* If the unicode position is beyond the end, we return the end but
        shouldn't cache that position */
-    *canonical_position = (uoffset == 0);
-    *uoffset_p -= uoffset;
+    *canonical_position = ! overshoot;
+    *uoffset_p -= overshoot;
     return s - start;
 }
 
