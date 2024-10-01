@@ -6058,13 +6058,13 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
 /* Total number of bytes a given code point would occupy in the output */
 #define TOTAL_LEN(num)                                                      \
-            ((int) ((num == 0)                                              \
-                    ? 1    /* Plain 0 has no ornamentation */               \
-                    : ((num >= IV_MAX)                                      \
-                       ? STRLENs(INFTY)                                   \
-                       : ((STRLENs("0x") + ((NUM_HEX_CHARS(num) <= 2)       \
-                          ? 2  /* Otherwise, minimum of 2 hex digits */     \
-                          : NUM_HEX_CHARS(num)))))))
+            ((unsigned) ((num == 0)                                         \
+                         ? 1    /* Plain 0 has no ornamentation */          \
+                         : ((num >= IV_MAX)                                 \
+                            ? STRLENs(INFTY)                                \
+                            : ((STRLENs("0x") + ((NUM_HEX_CHARS(num) <= 2)  \
+                               ? 2  /* Otherwise, minimum of 2 hex digits */\
+                               : NUM_HEX_CHARS(num)))))))
 
 /* To make evident, Configure with `-DDEBUGGING`, build, run 
  *  `./perl -Ilib -Dy t/op/tr.t`
