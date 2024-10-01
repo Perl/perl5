@@ -811,4 +811,47 @@ sub {
 };
 test_ref_to_unavailable();
 
+{
+    # 22547
+    fresh_perl_is(<<'EOC', "OK", {}, "RT #22547");
+use builtin qw(weaken);
+
+my $wref;
+{
+    my $x;
+    my $subject = sub {
+        $x = $_[0];
+
+        my $y;
+        return sub { $y };
+    };
+    my $subscriber = {};
+    weaken($wref = $subscriber);
+    $subscriber->{foo} = $subject->($subscriber);
+}
+!defined $wref and print "OK";
+EOC
+
+    local $TODO = "still leaks with eval ''";
+    fresh_perl_is(<<'EOC', "OK", {}, "RT #22547 with eval");
+use builtin qw(weaken);
+
+my $wref;
+{
+    my $x;
+    my $subject = sub {
+        $x = $_[0];
+
+        my $y;
+        return sub { eval "1"; $y };
+    };
+    my $subscriber = {};
+    weaken($wref = $subscriber);
+    $subscriber->{foo} = $subject->($subscriber);
+}
+!defined $wref and print "OK";
+EOC
+}
+
+
 done_testing();
