@@ -2679,12 +2679,22 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
     }
 
     const U8 * const s0 = s;
-    const U8 * send = s + *lenp;
+    const U8 * const send = s + *lenp;
+    const U8 * first_variant;
+
+    /* The initial portion of 's' that consists of invariants can be Copied
+     * as-is.  If it is entirely invariant, the whole thing can be Copied. */
+    if (is_utf8_invariant_string_loc(s, *lenp, &first_variant)) {
+        first_variant = send;
+    }
 
     U8 *d;
     Newx(d, (*lenp) + 1, U8);
+    Copy(s, d, first_variant - s, U8);
 
     U8 *converted_start = d;
+    d += first_variant - s;
+    s = first_variant;
 
     while (s < send) {
         U8 c = *s++;
