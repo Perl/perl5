@@ -2397,14 +2397,14 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 
     U8 * const save = s;
     U8 * const send = s + *lenp;
-    U8 * d;
+    s = first_variant;
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
 
     /* There is some start-up/tear-down overhead with this, so no real gain
-     * unless the string is long enough.  The current value is just a
-     * guess. */
-    if (*lenp > 5 * PERL_WORDSIZE) {
+     * unless the remaining portion of the string is long enough.  The current
+     * value is just a guess. */
+    if ((send - s) > 5 * PERL_WORDSIZE) {
 
         /* First, go through the string a word at-a-time to verify that it is
          * downgradable.  If it contains any start byte besides C2 and C3, then
@@ -2517,7 +2517,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
      * and should a malformed one come along, it undoes what it already has
      * done */
 
-    d = s = first_variant;
+    U8 * d = s = first_variant;
 
     while (s < send) {
         U8 * s1;
