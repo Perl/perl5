@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 77;
+use Test::More tests => 93;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -962,44 +962,116 @@ EOF
 }
 
 {
-    # Test for CLASS/THIS in C++ XSUBs
+    # Test for C++ XSUB support: in particular,
+    # - an XSUB function including a class in its name implies C++
+    # - implicit CLASS/THIS first arg
+    # - new and DESTROY methods handled specially
+    # - 'static' return type implies class method
+    # - 'const' can follow signature
+    #
 
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
+    my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
         |
         |PROTOTYPES: DISABLE
         |
         |TYPEMAP: <<EOF
-        |color *  O_OBJECT
+        |X::Y *        T_OBJECT
+        |const X::Y *  T_OBJECT
+        |
         |INPUT
-        |O_OBJECT
-        |    something($arg)
+        |T_OBJECT
+        |    $var = my_in($arg);
+        |
+        |OUTPUT
+        |T_OBJECT
+        |    my_out($arg, $var)
         |EOF
         |
-        |
-        |void
-        |color::new(int aaa)
-        |
-        |void
-        |color::f(int bbb)
-        |
-        |void
-        |mymarker()
 EOF
 
-    tie *FH, 'Capture';
-    $pxs->process_file( filename => \$text, output => \*FH);
+    my @test_fns = (
+        # [
+        #     XSUB return-type line,
+        #     SXUB declaration line,
+        #     [ check_stderr, qr/expected/, "test description"],
+        #     ....
+        # ]
 
-    my $out = tied(*FH)->content;
+        [
+            # test something that isn't actually C++
+            'X::Y*',
+            'new(int aaa)',
+            [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain new: usage"    ],
+            [ 0, qr/\Qnew(aaa)/,                  "C++: plain new: autocall" ],
+        ],
+        [
+            'X::Y*',
+            'X::Y::new(int aaa)',
+            [ 0, qr/usage\(cv,\s+"CLASS, aaa"\)/, "C++: new: usage"     ],
+            [ 0, qr/char\s*\*\s*CLASS\b/,         "C++: new: var decl"  ],
+            [ 0, qr/\Qnew X::Y(aaa)/,             "C++: new: autocall"  ],
+        ],
+        [
+            'static X::Y*',
+            'X::Y::new(int aaa)',
+            [ 0, qr/usage\(cv,\s+"CLASS, aaa"\)/, "C++: static new: usage"    ],
+            [ 0, qr/char\s*\*\s*CLASS\b/,         "C++: static new: var decl" ],
+            [ 0, qr/\QX::Y(aaa)/,                 "C++: static new: autocall" ],
+        ],
+        [
+            'void',
+            'X::Y::fff(int bbb)',
+            [ 0, qr/usage\(cv,\s+"THIS, bbb"\)/,  "C++: fff: usage"    ],
+            [ 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: fff: var decl" ],
+            [ 0, qr/\QTHIS->fff(bbb)/,            "C++: fff: autocall" ],
+        ],
+        [
+            'static int',
+            'X::Y::ggg(int ccc)',
+            [ 0, qr/usage\(cv,\s+"CLASS, ccc"\)/, "C++: ggg: usage"    ],
+            [ 0, qr/char\s*\*\s*CLASS\b/,         "C++: ggg: var decl" ],
+            [ 0, qr/\QX::Y::ggg(ccc)/,            "C++: ggg: autocall" ],
+        ],
+        [
+            'int',
+            'X::Y::hhh(int ddd) const',
+            [ 0, qr/usage\(cv,\s+"THIS, ddd"\)/,        "C++: hhh: usage"    ],
+            [ 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: hhh: var decl" ],
+            [ 0, qr/\QTHIS->hhh(ddd)/,                  "C++: hhh: autocall" ],
+        ],
+        [
+            'void',
+            'X::Y::DESTROY()',
+            [ 0, qr/usage\(cv,\s+"THIS"\)/,       "C++: DESTROY: usage"    ],
+            [ 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: DESTROY: var decl" ],
+            [ 0, qr/delete\s+THIS;/,              "C++: DESTROY: autocall" ],
+        ]
+    );
 
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A.*? (XS_Foo_new .*? XS_Foo_mymarker).*\z/$1/xms
-        or die "couldn't trim output";
+    for my $test_fn (@test_fns) {
+        my ($ret, $decl, @tests) = @$test_fn;
 
-    like $out, qr/\Qnew color(aaa)/,                "C++ XSUB: wrapped new";
-    like $out, qr/\QTHIS->f(bbb)/,                  "C++ XSUB: wrapped THIS";
-    like $out, qr/\Qusage(cv,\E\s+\Q"CLASS, aaa")/, "C++ XSUB: usage new";
-    like $out, qr/\Qusage(cv,\E\s+\Q"THIS, bbb")/,  "C++ XSUB: usage THIS";
+        my $text = "$preamble$ret\n$decl\n";
+
+        tie *FH, 'Capture';
+        my $pxs = ExtUtils::ParseXS->new;
+        my $stderr = PrimitiveCapture::capture_stderr(sub {
+            eval {
+                $pxs->process_file( filename => \$text, output => \*FH);
+            }
+        });
+
+        my $out = tied(*FH)->content;
+
+        # trim the output to just the function in question to make
+        # test diagnostics smaller.
+        $out =~ s/\A.*? (^\w+\(XS_Foo_ .*? ^}).*\z/$1/xms
+            or die "couldn't trim output";
+
+        for my $test (@tests) {
+            my ($is_err, $qr, $desc) = @$test;
+            like $is_err ? $stderr : $out, $qr, $desc;
+        }
+    }
 }
