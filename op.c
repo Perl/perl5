@@ -171,6 +171,9 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 
 static const char array_passed_to_stat[] = "Array passed to stat will be coerced to a scalar";
 
+/* UGH!! */
+EXTERN_C void XS_builtin_indexed(pTHX_ CV *);
+
 /* remove any leading "empty" ops from the op_next chain whose first
  * node's address is stored in op_p. Store the updated address of the
  * first node in op_p.
@@ -9631,6 +9634,39 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
     return o;
 }
 
+#define op_is_cv_xsub(o, xsub)  S_op_is_cv_xsub(aTHX_ o, xsub)
+static bool
+S_op_is_cv_xsub(pTHX_ OP *o, XSUBADDR_t xsub)
+{
+    if(o->op_type == OP_NULL)
+        o = cUNOPo->op_first;
+
+    CV *cv;
+    switch(o->op_type) {
+        case OP_GV:
+        {
+            GV *gv;
+            if(!(gv = cGVOPo_gv))
+                return false;
+            cv = GvCV(gv);
+            break;
+        }
+
+        case OP_PADCV:
+            cv = (CV *)PAD_SVl(o->op_targ);
+            assert(cv && SvTYPE(cv) == SVt_PVCV);
+            break;
+
+        default:
+            return false;
+    }
+
+    if(!cv || !CvISXSUB(cv))
+        return false;
+
+    return CvXSUB(cv) == xsub;
+}
+
 /*
 =for apidoc newFOROP
 
@@ -9663,6 +9699,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     PADOFFSET how_many_more = 0;
     I32 enteriterflags = 0;
     I32 enteriterpflags = 0;
+    U8 iterpflags = 0;
     bool parens = 0;
 
     PERL_ARGS_ASSERT_NEWFOROP;
@@ -9774,6 +9811,42 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         expr = op_lvalue(op_force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
         enteriterflags |= OPf_STACKED;
     }
+    else if (padoff != 0 && how_many_more == 1 &&  /* two lexical vars */
+             expr->op_type == OP_ENTERSUB) {
+        OP *args = cUNOPx(expr)->op_first;
+        assert(OP_TYPE_IS_OR_WAS(args, OP_LIST));
+
+        OP *pre_firstarg = NULL;
+        OP *firstarg = cLISTOPx(args)->op_first;
+        OP *lastarg  = cLISTOPx(args)->op_last;
+
+        if(firstarg->op_type == OP_PUSHMARK)
+            pre_firstarg = firstarg, firstarg = OpSIBLING(firstarg);
+        if(firstarg == lastarg)
+            firstarg = NULL;
+
+        if (op_is_cv_xsub(lastarg, &XS_builtin_indexed) &&                   /* a call to builtin::indexed */
+            firstarg && OpSIBLING(firstarg) == lastarg &&                    /* with one arg */
+            (firstarg->op_type == OP_RV2AV || firstarg->op_type == OP_PADAV) /* ... which is an array */
+        ) {
+            /* Turn for my ($idx, $val) (indexed @arr) into a similar OPf_STACKED
+             * loop on the array itself as the case above, plus a flag to tell
+             * pp_iter to set the index directly
+             */
+
+            /* Cut the array arg out of the args list and discard the rest of
+             * the original expr
+             */
+            op_sibling_splice(args, pre_firstarg, 1, NULL);
+            op_free(expr);
+
+            expr = op_lvalue(op_force_list(scalar(ref(firstarg, OP_ITER))), OP_GREPSTART);
+            enteriterflags |= OPf_STACKED;
+            iterpflags |= OPpITER_INDEXED;
+        }
+        else
+            goto expr_not_special;
+    }
     else if (expr->op_type == OP_NULL &&
              (expr->op_flags & OPf_KIDS) &&
              cBINOPx(expr)->op_first->op_type == OP_FLOP)
@@ -9804,6 +9877,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         enteriterflags |= OPf_STACKED;
     }
     else {
+expr_not_special:
         expr = op_lvalue(op_force_list(expr), OP_GREPSTART);
     }
 
@@ -9840,7 +9914,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     if (parens)
         /* hint to deparser that this:  for my (...) ... */
         loop->op_flags |= OPf_PARENS;
-    iter = newOP(OP_ITER, 0);
+    iter = newOP(OP_ITER, (U32)iterpflags << 8);
     iter->op_targ = how_many_more;
     return newWHILEOP(flags, 1, loop, iter, block, cont, 0);
 }
