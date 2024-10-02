@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 93;
+use Test::More tests => 99;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1004,6 +1004,24 @@ EOF
             'new(int aaa)',
             [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain new: usage"    ],
             [ 0, qr/\Qnew(aaa)/,                  "C++: plain new: autocall" ],
+        ],
+
+        [
+            # test something static that isn't actually C++
+            'static X::Y*',
+            'new(int aaa)',
+            [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain static new: usage"    ],
+            [ 0, qr/\Qnew(aaa)/,                  "C++: plain static new: autocall" ],
+            [ 1, qr/Ignoring 'static' type modifier/, "C++: plain static new: warning" ],
+        ],
+
+        [
+            # test something static that isn't actually C++ nor new
+            'static X::Y*',
+            'foo(int aaa)',
+            [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain static foo usage"    ],
+            [ 0, qr/\Qfoo(aaa)/,                  "C++: plain static foo autocall" ],
+            [ 1, qr/Ignoring 'static' type modifier/, "C++: plain static foo warning" ],
         ],
         [
             'X::Y*',

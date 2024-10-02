@@ -850,6 +850,14 @@ EOM
 
       $self->{xsub_class} = "$4 $self->{xsub_class}" if $4;
 
+      if ($self->{xsub_seen_static}
+          and !defined $self->{xsub_class})
+      {
+        $self->Warn(  "Ignoring 'static' type modifier:"
+                    . " only valid with an XSUB name which includes a class");
+        $self->{xsub_seen_static} = 0;
+      }
+
       ($self->{xsub_func_full_perl_name} = $self->{xsub_func_name}) =~
           s/^($self->{PREFIX_pattern})?/$self->{PACKAGE_class}/;
 
@@ -1548,21 +1556,23 @@ EOF
             $implicit_OUTPUT_RETVAL = 1;
           }
 
-          if ($self->{xsub_seen_static}) {
-            # it has a return type of 'static foo'
-            if ($self->{xsub_func_name} eq 'new') {
-              $self->{xsub_func_name} = "$self->{xsub_class}";
+          if (defined($self->{xsub_class})) {
+            if ($self->{xsub_seen_static}) {
+              # it has a return type of 'static foo'
+              if ($self->{xsub_func_name} eq 'new') {
+                $self->{xsub_func_name} = "$self->{xsub_class}";
+              }
+              else {
+                print "$self->{xsub_class}::";
+              }
             }
             else {
-              print "$self->{xsub_class}::";
-            }
-          }
-          elsif (defined($self->{xsub_class})) {
-            if ($self->{xsub_func_name} eq 'new') {
-              $self->{xsub_func_name} .= " $self->{xsub_class}";
-            }
-            else {
-              print "THIS->";
+              if ($self->{xsub_func_name} eq 'new') {
+                $self->{xsub_func_name} .= " $self->{xsub_class}";
+              }
+              else {
+                print "THIS->";
+              }
             }
           }
 
