@@ -303,7 +303,7 @@ BEGIN {
 
   'xsub_return_type',          # Return type of the XSUB (whitespace-tidied).
 
-  'xsub_class',                # Bool: the class part of the XSUB's
+  'xsub_class',                # Str: the class part of the XSUB's
                                # function name (if any). May include
                                # 'const' prefix.
 
