@@ -2610,6 +2610,11 @@ foreach my ($key, $value) (%hash) {
     study $_;
 }
 ####
+my @arr;
+foreach my ($idx, $elem) (builtin::indexed @arr) {
+    die;
+}
+####
 my @ducks;
 foreach my ($tick, $trick, $track) (@ducks) {
     study $_;

@@ -91,6 +91,23 @@ There may well be none in a stable release.
 
 XXX
 
+=item *
+
+Code that uses the C<indexed> function from the L<builtin> module to generate
+a list of index/value pairs out of array which is then passed into a
+two-variable C<foreach> list to unpack those again is now optimised to be more
+efficient.
+
+    my @array = (...);
+
+    foreach my ($idx, $val) (builtin::indexed @array) {
+        ...
+    }
+
+In particular, a temporary list twice the size of the original
+array is no longer generated.  Instead, the list iterates down the array
+in-place directly, in the same way that C<foreach (@array)> would do.
+
 =back
 
 =head1 Modules and Pragmata

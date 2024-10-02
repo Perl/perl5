@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.79;
+package B::Deparse 1.80;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -66,7 +66,8 @@ BEGIN {
     # List version-specific constants here.
     # Easiest way to keep this code portable between version looks to
     # be to fake up a dummy constant that will never actually be true.
-    foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
+    foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_INDEXED
+		OPpITER_REVERSED OPpCONST_NOVER
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
 		PMf_CHARSET PMf_KEEPCOPY PMf_NOCAPTURE CVf_ANONCONST
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
@@ -4018,6 +4019,7 @@ sub loop_common {
     } elsif ($enter->name eq "enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;
+	my $iter = $kid->first->first;
 	if ($ary->name eq 'null' and $enter->private & OPpITER_REVERSED) {
 	    # "reverse" was optimised away
 	    $ary = listop($self, $ary->first->sibling, 1, 'reverse');
@@ -4028,6 +4030,10 @@ sub loop_common {
 	      $self->deparse($ary->first->sibling->sibling, 9);
 	} else {
 	    $ary = $self->deparse($ary, 1);
+	}
+
+	if ($iter->private & OPpITER_INDEXED) {
+	    $ary = "builtin::indexed $ary";
 	}
 
         if ($enter->flags & OPf_PARENS) {
@@ -4057,7 +4063,7 @@ sub loop_common {
 	} else {
 	    $var = $self->deparse($var, 1);
 	}
-	$body = $kid->first->first->sibling; # skip OP_AND and OP_ITER
+	$body = $iter->sibling;
 	if (!is_state $body->first and $body->first->name !~ /^(?:stub|leave|scope)$/) {
 	    confess unless $var eq '$_';
 	    $body = $body->first;
