@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 99;
+use Test::More tests => 102;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1057,6 +1057,24 @@ EOF
             [ 0, qr/usage\(cv,\s+"THIS, ddd"\)/,        "C++: hhh: usage"    ],
             [ 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: hhh: var decl" ],
             [ 0, qr/\QTHIS->hhh(ddd)/,                  "C++: hhh: autocall" ],
+        ],
+        [
+            'int',
+            'X::Y::f1(THIS, int i)',
+            [ 1, qr/\QError: duplicate definition of argument 'THIS' /,
+                 "C++: f1 dup THIS" ],
+        ],
+        [
+            'int',
+            'X::Y::f2(int THIS, int i)',
+            [ 1, qr/\QError: duplicate definition of argument 'THIS' /,
+                 "C++: f2 dup THIS" ],
+        ],
+        [
+            'int',
+            'X::Y::new(int CLASS, int i)',
+            [ 1, qr/\QError: duplicate definition of argument 'CLASS' /,
+                 "C++: new dup CLASS" ],
         ],
         [
             'void',

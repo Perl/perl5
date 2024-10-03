@@ -364,8 +364,6 @@ BEGIN {
                                # 'seen in INPUT' boolean (for duplicate
                                # spotting).
   
-  'xsub_seen_THIS_in_INPUT',   # Seen var called 'THIS' in an INPUT section.
-
   'xsub_seen_RETVAL_in_INPUT', # Seen var called 'RETVAL' in an INPUT section.
 
 
@@ -1392,7 +1390,6 @@ EOF
       }
 
       # First, initialize variables manipulated by INPUT_handler().
-      $self->{xsub_seen_THIS_in_INPUT} = 0;    # seen a THIS var
       $self->{xsub_seen_RETVAL_in_INPUT} = 0;  # seen a RETVAL var
       $self->{xsub_deferred_code_lines} = "";  # lines to be emitted after
                                                # PREINIT/INPUT
@@ -1422,7 +1419,6 @@ EOF
       # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
       for my $param (grep $_->{is_synthetic}, @{$self->{xsub_sig}{params}}) {
-        next if $param->{var} eq 'THIS' && $self->{xsub_seen_THIS_in_INPUT};
         $param->as_code($self);
       }
 
@@ -2482,8 +2478,7 @@ sub INPUT_handler {
       next;
     }
 
-    # flag 'THIS' and 'RETVAL' as having been seen
-    $self->{xsub_seen_THIS_in_INPUT}   |= $var_name eq "THIS";
+    # flag 'RETVAL' as having been seen
     $self->{xsub_seen_RETVAL_in_INPUT} |= $var_name eq "RETVAL";
 
     # Prepend a '&' to this arg's name for the args to pass to the
