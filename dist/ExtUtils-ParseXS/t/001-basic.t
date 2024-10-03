@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 102;
+use Test::More tests => 106;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1075,6 +1075,14 @@ EOF
             'X::Y::new(int CLASS, int i)',
             [ 1, qr/\QError: duplicate definition of argument 'CLASS' /,
                  "C++: new dup CLASS" ],
+        ],
+        [
+            'int',
+            "X::Y::f3(int i)\n    OUTPUT:\n        THIS",
+            [ 0, qr/usage\(cv,\s+"THIS, i"\)/,     "C++: f3: usage"    ],
+            [ 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/, "C++: f3: var decl" ],
+            [ 0, qr/\QTHIS->f3(i)/,                "C++: f3: autocall" ],
+            [ 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,   "C++: f3: set st0"  ],
         ],
         [
             'void',

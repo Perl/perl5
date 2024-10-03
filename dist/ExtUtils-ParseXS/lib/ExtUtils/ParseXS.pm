@@ -1045,6 +1045,7 @@ EOM
               });
         push @{$sig->{params}}, $param;
         $sig->{names}{$var} = $param;
+        $param->check($self)
       }
 
         for ( @args ) {
