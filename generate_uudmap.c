@@ -71,9 +71,9 @@ format_mg_data(FILE *out, const void *thing, size_t count) {
 
   while (1) {
       if (p->value) {
-          fprintf(out, "    %s\n    %s", p->comment, p->value);
+          fprintf(out, "  %s\n  %s", p->comment, p->value);
       } else {
-          fputs("    0", out);
+          fputs("  0", out);
       }
       ++p;
       if (!--count)
@@ -87,15 +87,15 @@ static void
 format_char_block(FILE *out, const void *thing, size_t count) {
   const char *block = (const char *)thing;
 
-  fputs("    ", out);
+  fputs("  ", out);
   while (count--) {
     fprintf(out, "%d", *block);
     block++;
     if (count) {
-      fputs(", ", out);
-      if (!(count & 15)) {
-        fputs("\n    ", out);
-      }
+      if (!(count & 15))
+        fputs(",\n  ", out);
+      else
+        fputs(", ", out);
     }
   }
   fputc('\n', out);
