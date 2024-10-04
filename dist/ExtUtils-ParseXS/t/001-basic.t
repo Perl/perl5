@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 126;
+use Test::More tests => 128;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1280,6 +1280,31 @@ EOF
             [ 0, 0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
             [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [ 0, 0, qr/delete\s+THIS;/,                      "autocall" ],
+        ]
+    );
+
+    test_many($preamble, 'Foo', \@test_fns);
+}
+
+{
+    # check that suitable "usage: " error strings are generated
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "general usage",
+            [
+                'void',
+                'foo(a, char *b,  int length(b), int d =  999, ...)',
+                '    long a',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"a, b, d=  999, ..."\)/,     ""    ],
         ]
     );
 

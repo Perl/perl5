@@ -93,6 +93,7 @@ BEGIN {
         'arg_num',   # The arg number (starting at 1) mapped to this param
         'var',       # the name of the parameter
         'default',   # default value (if any)
+        'default_usage', # how to report default value in "usage:..." error
         'in_out',    # The In/OUT/OUTLIST etc value (if any)
         'defer',     # deferred initialisation template code
         'init',      # initialisation template code
@@ -460,7 +461,6 @@ sub as_code {
 }
 
 
-
 # ======================================================================
 
 package ExtUtils::ParseXS::Node::Sig;
@@ -491,6 +491,27 @@ BEGIN {
     fields->import(@FIELDS) if $USING_FIELDS;
 }
 
+
+# Return a string to be used in "usage: .." error messages.
+
+sub usage_string {
+    my ExtUtils::ParseXS::Node::Sig $self = shift;
+
+    my @args = map  {
+                          $_->{var}
+                        . (defined $_->{default_usage}
+                            ?$_->{default_usage}
+                            : ''
+                          )
+                    }
+               grep {
+                        defined $_->{arg_num},
+                    }
+               @{$self->{params}};
+
+    push @args, '...' if $self->{seen_ellipsis};
+    return join ', ', @args;
+}
 
 
 1;

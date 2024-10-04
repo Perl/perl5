@@ -986,7 +986,6 @@ EOM
 
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
-    my @report_params;          # the param descriptions as used by croak()
     my @autocall_args;          # args to pass to an autocall C func
 
     my $optional_args_count = 0;# how many default params seen
@@ -1034,7 +1033,6 @@ EOM
             ? ('CLASS', "char *")
             : ('THIS',  "$self->{xsub_class} *");
 
-        push @report_params, $var;
         push @autocall_args, $var;
         my ExtUtils::ParseXS::Node::Param $param
             = ExtUtils::ParseXS::Node::Param->new( {
@@ -1076,7 +1074,6 @@ EOM
 
           if ($_ eq '...') {
             $sig->{seen_ellipsis} = 1;
-            push @report_params, $_;
             next;
           }
 
@@ -1195,6 +1192,7 @@ EOM
             # sometimes preserve the spaces either side of the '='
             $report_def =    ((defined $type or $is_length) ? '' : $sp1)
                            . "=$sp2$default";
+            $param->{default_usage} = $report_def;
             $param->{default} = $default;
           }
 
@@ -1203,7 +1201,6 @@ EOM
             $param->{arg_num} = undef;
           }
           else {
-            push @report_params, $name_or_lenname . $report_def;
             $param->{arg_num} = ++$args_count;
           }
           push @autocall_args, $name_or_lenname;
@@ -1317,7 +1314,7 @@ EOF
 EOF
 
       if ($condition_code) {
-        my $p = join ', ', @report_params;
+        my $p = $self->{xsub_sig}->usage_string();
         $p =~ s/"/\\"/g;
         print Q(<<"EOF");
           |    if ($condition_code)
