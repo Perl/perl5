@@ -1058,7 +1058,7 @@ $(UUDMAP_H) $(MG_DATA_H) : $(BITCOUNT_H)
 $(BITCOUNT_H) : $(GENUUDMAP)
 	$(GENUUDMAP) $(GENERATED_HEADERS)
 
-$(GENUUDMAP_OBJ) : ..\mg_raw.h
+$(GENUUDMAP_OBJ) : ..\generate_uudmap.c ..\mg_raw.h
 
 $(GENUUDMAP) : $(GENUUDMAP_OBJ)
 	$(LINK32) -out:$@ @<<

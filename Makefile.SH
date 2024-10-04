@@ -771,7 +771,7 @@ globals$(OBJ_EXT): $(generated_headers)
 
 uudmap.h mg_data.h: bitcount.h
 
-generate_uudmap$(OBJ_EXT): mg_raw.h
+generate_uudmap$(OBJ_EXT): generate_uudmap.c mg_raw.h
 
 !NO!SUBS!
 
