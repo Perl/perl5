@@ -993,17 +993,22 @@ EOF
     my @test_fns = (
         # [
         #     "common prefix for test descriptions",
-        #     XSUB return-type line,
-        #     SXUB declaration line,
+        #     [ ... lines to be ...
+        #       ... used as ...
+        #       ... XSUB body...
+        #     ],
         #     [ check_stderr, expect_nomatch, qr/expected/, "test description"],
+        #     [ ... and more tests ..]
         #     ....
         # ]
 
         [
             # test something that isn't actually C++
             "C++: plain new",
-            'X::Y*',
-            'new(int aaa)',
+            [
+                'X::Y*',
+                'new(int aaa)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
         ],
@@ -1011,8 +1016,10 @@ EOF
         [
             # test something static that isn't actually C++
             "C++: plain static new",
-            'static X::Y*',
-            'new(int aaa)',
+            [
+                'static X::Y*',
+                'new(int aaa)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
             [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
@@ -1021,122 +1028,174 @@ EOF
         [
             # test something static that isn't actually C++ nor new
             "C++: plain static foo",
-            'static X::Y*',
-            'foo(int aaa)',
+            [
+                'static X::Y*',
+                'foo(int aaa)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [ 0, 0, qr/\Qfoo(aaa)/,                          "autocall" ],
             [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
         ],
+
         [
             "C++: new",
-            'X::Y*',
-            'X::Y::new(int aaa)',
+            [
+                'X::Y*',
+                'X::Y::new(int aaa)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
             [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
             [ 0, 0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
         ],
+
         [
             "C++: static new",
-            'static X::Y*',
-            'X::Y::new(int aaa)',
+            [
+                'static X::Y*',
+                'X::Y::new(int aaa)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
             [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
             [ 0, 0, qr/\QX::Y(aaa)/,                         "autocall" ],
         ],
+
         [
             "C++: fff",
-            'void',
-            'X::Y::fff(int bbb)',
+            [
+                'void',
+                'X::Y::fff(int bbb)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"THIS, bbb"\)/,          "usage"    ],
             [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [ 0, 0, qr/\QTHIS->fff(bbb)/,                    "autocall" ],
         ],
+
         [
             "C++: ggg",
-            'static int',
-            'X::Y::ggg(int ccc)',
+            [
+                'static int',
+                'X::Y::ggg(int ccc)',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"CLASS, ccc"\)/,         "usage"    ],
             [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
             [ 0, 0, qr/\QX::Y::ggg(ccc)/,                    "autocall" ],
         ],
+
         [
             "C++: hhh",
-            'int',
-            'X::Y::hhh(int ddd) const',
+            [
+                'int',
+                'X::Y::hhh(int ddd) const',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"THIS, ddd"\)/,          "usage"    ],
             [ 0, 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,  "var decl" ],
             [ 0, 0, qr/\QTHIS->hhh(ddd)/,                    "autocall" ],
         ],
+
         [
             "",
-            'int',
-            'X::Y::f1(THIS, int i)',
+            [
+                'int',
+                'X::Y::f1(THIS, int i)',
+            ],
             [ 1, 0, qr/\QError: duplicate definition of argument 'THIS' /,
                  "C++: f1 dup THIS" ],
         ],
+
         [
             "",
-            'int',
-            'X::Y::f2(int THIS, int i)',
+            [
+                'int',
+                'X::Y::f2(int THIS, int i)',
+            ],
             [ 1, 0, qr/\QError: duplicate definition of argument 'THIS' /,
                  "C++: f2 dup THIS" ],
         ],
+
         [
             "",
-            'int',
-            'X::Y::new(int CLASS, int i)',
+            [
+                'int',
+                'X::Y::new(int CLASS, int i)',
+            ],
             [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS' /,
                  "C++: new dup CLASS" ],
         ],
+
         [
             "C++: f3",
-            'int',
-            "X::Y::f3(int i)\n    OUTPUT:\n        THIS",
+            [
+                'int',
+                'X::Y::f3(int i)',
+                '    OUTPUT:',
+                '        THIS',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,            "usage"    ],
             [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [ 0, 0, qr/\QTHIS->f3(i)/,                       "autocall" ],
             [ 0, 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,          "set st0"  ],
         ],
-        # allow THIS's type to be overridden ...
+
         [
+            # allow THIS's type to be overridden ...
             "C++: f4: override THIS type",
-            'int',
-            "X::Y::f4(int i)\n    int THIS",
+            [
+                'int',
+                'X::Y::f4(int i)',
+                '    int THIS',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,       "usage"    ],
             [ 0, 0, qr/int\s*THIS\s*=\s*\(int\)/,       "var decl" ],
             [ 0, 1, qr/X__Y\s*\*\s*THIS/,               "no class var decl" ],
             [ 0, 0, qr/\QTHIS->f4(i)/,                  "autocall" ],
         ],
-        #  ... but not multiple times
+
         [
+            #  ... but not multiple times
             "C++: f5: dup override THIS type",
-            'int',
-            "X::Y::f5(int i)\n    int THIS\n    long THIS",
+            [
+                'int',
+                'X::Y::f5(int i)',
+                '    int THIS',
+                '    long THIS',
+            ],
             [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
                     "dup err" ],
         ],
-        # allow CLASS's type to be overridden ...
+
         [
+            # allow CLASS's type to be overridden ...
             "C++: new: override CLASS type",
-            'int',
-            "X::Y::new(int i)\n    int CLASS",
+            [
+                'int',
+                'X::Y::new(int i)',
+                '    int CLASS',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"CLASS, i"\)/,      "usage"    ],
             [ 0, 0, qr/int\s*CLASS\s*=\s*\(int\)/,      "var decl" ],
             [ 0, 1, qr/char\s*\*\s*CLASS/,              "no char* var decl" ],
             [ 0, 0, qr/\Qnew X::Y(i)/,                  "autocall" ],
         ],
-        #  ... but not multiple times
+
         [
+            #  ... but not multiple times
             "C++: new dup override CLASS type",
-            'int',
-            "X::Y::new(int i)\n    int CLASS\n    long CLASS",
+            [
+                'int',
+                'X::Y::new(int i)',
+                '    int CLASS',
+                '    long CLASS',
+            ],
             [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
                     "dup err" ],
         ],
+
         [
             "C++: DESTROY",
-            'void',
-            'X::Y::DESTROY()',
+            [
+                'void',
+                'X::Y::DESTROY()',
+            ],
             [ 0, 0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
             [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [ 0, 0, qr/delete\s+THIS;/,                      "autocall" ],
@@ -1144,9 +1203,10 @@ EOF
     );
 
     for my $test_fn (@test_fns) {
-        my ($prefix, $ret, $decl, @tests) = @$test_fn;
+        my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
 
-        my $text = "$preamble$ret\n$decl\n";
+        my $text = $preamble;
+        $text .= "$_\n" for @$xsub_lines;
 
         tie *FH, 'Capture';
         my $pxs = ExtUtils::ParseXS->new;
@@ -1166,7 +1226,7 @@ EOF
         my $err_tested;
         for my $test (@tests) {
             my ($is_err, $exp_nomatch, $qr, $desc) = @$test;
-            $desc = "$prefix: $desc" if length $prefix;
+            $desc = "$desc_prefix: $desc" if length $desc_prefix;
             my $str;
             if ($is_err) {
                 $err_tested = 1;
@@ -1185,7 +1245,7 @@ EOF
         # if there were no tests that expect an error, test that there
         # were no errors
         if (!$err_tested) {
-            is $stderr, undef, "$prefix: no errors expected";
+            is $stderr, undef, "$desc_prefix: no errors expected";
         }
     }
 }
