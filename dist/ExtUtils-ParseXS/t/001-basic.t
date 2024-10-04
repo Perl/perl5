@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 106;
+use Test::More tests => 114;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -992,109 +992,123 @@ EOF
 
     my @test_fns = (
         # [
+        #     "common prefix for test descriptions",
         #     XSUB return-type line,
         #     SXUB declaration line,
-        #     [ check_stderr, qr/expected/, "test description"],
+        #     [ check_stderr, expect_nomatch, qr/expected/, "test description"],
         #     ....
         # ]
 
         [
             # test something that isn't actually C++
+            "C++: plain new",
             'X::Y*',
             'new(int aaa)',
-            [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain new: usage"    ],
-            [ 0, qr/\Qnew(aaa)/,                  "C++: plain new: autocall" ],
+            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
         ],
 
         [
             # test something static that isn't actually C++
+            "C++: plain static new",
             'static X::Y*',
             'new(int aaa)',
-            [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain static new: usage"    ],
-            [ 0, qr/\Qnew(aaa)/,                  "C++: plain static new: autocall" ],
-            [ 1, qr/Ignoring 'static' type modifier/, "C++: plain static new: warning" ],
+            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
+            [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
         ],
 
         [
             # test something static that isn't actually C++ nor new
+            "C++: plain static foo",
             'static X::Y*',
             'foo(int aaa)',
-            [ 0, qr/usage\(cv,\s+"aaa"\)/,        "C++: plain static foo usage"    ],
-            [ 0, qr/\Qfoo(aaa)/,                  "C++: plain static foo autocall" ],
-            [ 1, qr/Ignoring 'static' type modifier/, "C++: plain static foo warning" ],
+            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [ 0, 0, qr/\Qfoo(aaa)/,                          "autocall" ],
+            [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
         ],
         [
+            "C++: new",
             'X::Y*',
             'X::Y::new(int aaa)',
-            [ 0, qr/usage\(cv,\s+"CLASS, aaa"\)/, "C++: new: usage"     ],
-            [ 0, qr/char\s*\*\s*CLASS\b/,         "C++: new: var decl"  ],
-            [ 0, qr/\Qnew X::Y(aaa)/,             "C++: new: autocall"  ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
+            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [ 0, 0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
         ],
         [
+            "C++: static new",
             'static X::Y*',
             'X::Y::new(int aaa)',
-            [ 0, qr/usage\(cv,\s+"CLASS, aaa"\)/, "C++: static new: usage"    ],
-            [ 0, qr/char\s*\*\s*CLASS\b/,         "C++: static new: var decl" ],
-            [ 0, qr/\QX::Y(aaa)/,                 "C++: static new: autocall" ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
+            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [ 0, 0, qr/\QX::Y(aaa)/,                         "autocall" ],
         ],
         [
+            "C++: fff",
             'void',
             'X::Y::fff(int bbb)',
-            [ 0, qr/usage\(cv,\s+"THIS, bbb"\)/,  "C++: fff: usage"    ],
-            [ 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: fff: var decl" ],
-            [ 0, qr/\QTHIS->fff(bbb)/,            "C++: fff: autocall" ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, bbb"\)/,          "usage"    ],
+            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [ 0, 0, qr/\QTHIS->fff(bbb)/,                    "autocall" ],
         ],
         [
+            "C++: ggg",
             'static int',
             'X::Y::ggg(int ccc)',
-            [ 0, qr/usage\(cv,\s+"CLASS, ccc"\)/, "C++: ggg: usage"    ],
-            [ 0, qr/char\s*\*\s*CLASS\b/,         "C++: ggg: var decl" ],
-            [ 0, qr/\QX::Y::ggg(ccc)/,            "C++: ggg: autocall" ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, ccc"\)/,         "usage"    ],
+            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [ 0, 0, qr/\QX::Y::ggg(ccc)/,                    "autocall" ],
         ],
         [
+            "C++: hhh",
             'int',
             'X::Y::hhh(int ddd) const',
-            [ 0, qr/usage\(cv,\s+"THIS, ddd"\)/,        "C++: hhh: usage"    ],
-            [ 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: hhh: var decl" ],
-            [ 0, qr/\QTHIS->hhh(ddd)/,                  "C++: hhh: autocall" ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, ddd"\)/,          "usage"    ],
+            [ 0, 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,  "var decl" ],
+            [ 0, 0, qr/\QTHIS->hhh(ddd)/,                    "autocall" ],
         ],
         [
+            "",
             'int',
             'X::Y::f1(THIS, int i)',
-            [ 1, qr/\QError: duplicate definition of argument 'THIS' /,
+            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS' /,
                  "C++: f1 dup THIS" ],
         ],
         [
+            "",
             'int',
             'X::Y::f2(int THIS, int i)',
-            [ 1, qr/\QError: duplicate definition of argument 'THIS' /,
+            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS' /,
                  "C++: f2 dup THIS" ],
         ],
         [
+            "",
             'int',
             'X::Y::new(int CLASS, int i)',
-            [ 1, qr/\QError: duplicate definition of argument 'CLASS' /,
+            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS' /,
                  "C++: new dup CLASS" ],
         ],
         [
+            "C++: f3",
             'int',
             "X::Y::f3(int i)\n    OUTPUT:\n        THIS",
-            [ 0, qr/usage\(cv,\s+"THIS, i"\)/,     "C++: f3: usage"    ],
-            [ 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/, "C++: f3: var decl" ],
-            [ 0, qr/\QTHIS->f3(i)/,                "C++: f3: autocall" ],
-            [ 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,   "C++: f3: set st0"  ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,            "usage"    ],
+            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [ 0, 0, qr/\QTHIS->f3(i)/,                       "autocall" ],
+            [ 0, 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,          "set st0"  ],
         ],
         [
+            "C++: DESTROY",
             'void',
             'X::Y::DESTROY()',
-            [ 0, qr/usage\(cv,\s+"THIS"\)/,       "C++: DESTROY: usage"    ],
-            [ 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,"C++: DESTROY: var decl" ],
-            [ 0, qr/delete\s+THIS;/,              "C++: DESTROY: autocall" ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
+            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [ 0, 0, qr/delete\s+THIS;/,                      "autocall" ],
         ]
     );
 
     for my $test_fn (@test_fns) {
-        my ($ret, $decl, @tests) = @$test_fn;
+        my ($prefix, $ret, $decl, @tests) = @$test_fn;
 
         my $text = "$preamble$ret\n$decl\n";
 
@@ -1113,9 +1127,29 @@ EOF
         $out =~ s/\A.*? (^\w+\(XS_Foo_ .*? ^}).*\z/$1/xms
             or die "couldn't trim output";
 
+        my $err_tested;
         for my $test (@tests) {
-            my ($is_err, $qr, $desc) = @$test;
-            like $is_err ? $stderr : $out, $qr, $desc;
+            my ($is_err, $exp_nomatch, $qr, $desc) = @$test;
+            $desc = "$prefix: $desc" if length $prefix;
+            my $str;
+            if ($is_err) {
+                $err_tested = 1;
+                $str = $stderr;
+            }
+            else {
+                $str = $out;
+            }
+            if ($exp_nomatch) {
+                unlike $str, $qr, $desc;
+            }
+            else {
+                like $str, $qr, $desc;
+            }
+        }
+        # if there were no tests that expect an error, test that there
+        # were no errors
+        if (!$err_tested) {
+            is $stderr, undef, "$prefix: no errors expected";
         }
     }
 }
