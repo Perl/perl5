@@ -43,7 +43,88 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 # paths to absolute for simplicity.
 @INC = map { File::Spec->rel2abs($_) } @INC;
 
+
+
 #########################
+
+# test_many(): test a list of XSUB bodies with a common XS preamble.
+# $package is the name of the package the XSUB is compiled in, in order
+# to be able to extract out the C function definition. So where the
+# C func is called XS_Foo_Bar_foo, set $package to 'Foo_Bar'
+#
+# For each body, a series of regexes is matched against the STDOUT or
+# STDERR produced.
+#
+# $test_fns is an array ref, where each element is an array ref consisting
+# of:
+#  
+# [
+#     "common prefix for test descriptions",
+#     [ ... lines to be ...
+#       ... used as ...
+#       ... XSUB body...
+#     ],
+#     [ check_stderr, expect_nomatch, qr/expected/, "test description"],
+#     [ ... and more tests ..]
+#     ....
+# ]
+#
+#  where:
+#  check_stderr:   boolean: test STDERR against regex rather than STDOUT
+#  expect_nomatch: boolean: pass if the regex *doesn't* match
+
+sub test_many {
+    my ($preamble, $package, $test_fns) = @_;
+    for my $test_fn (@$test_fns) {
+        my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
+
+        my $text = $preamble;
+        $text .= "$_\n" for @$xsub_lines;
+
+        tie *FH, 'Capture';
+        my $pxs = ExtUtils::ParseXS->new;
+        my $stderr = PrimitiveCapture::capture_stderr(sub {
+            eval {
+                $pxs->process_file( filename => \$text, output => \*FH);
+            }
+        });
+
+        my $out = tied(*FH)->content;
+
+        # trim the output to just the function in question to make
+        # test diagnostics smaller.
+        $out =~ s/\A.*? (^\w+\(XS_${package}_ .*? ^}).*\z/$1/xms
+            or die "couldn't trim output";
+
+        my $err_tested;
+        for my $test (@tests) {
+            my ($is_err, $exp_nomatch, $qr, $desc) = @$test;
+            $desc = "$desc_prefix: $desc" if length $desc_prefix;
+            my $str;
+            if ($is_err) {
+                $err_tested = 1;
+                $str = $stderr;
+            }
+            else {
+                $str = $out;
+            }
+            if ($exp_nomatch) {
+                unlike $str, $qr, $desc;
+            }
+            else {
+                like $str, $qr, $desc;
+            }
+        }
+        # if there were no tests that expect an error, test that there
+        # were no errors
+        if (!$err_tested) {
+            is $stderr, undef, "$desc_prefix: no errors expected";
+        }
+    }
+}
+
+#########################
+
 
 { # first block: try without linenumbers
 my $pxs = ExtUtils::ParseXS->new;
@@ -1202,50 +1283,5 @@ EOF
         ]
     );
 
-    for my $test_fn (@test_fns) {
-        my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
-
-        my $text = $preamble;
-        $text .= "$_\n" for @$xsub_lines;
-
-        tie *FH, 'Capture';
-        my $pxs = ExtUtils::ParseXS->new;
-        my $stderr = PrimitiveCapture::capture_stderr(sub {
-            eval {
-                $pxs->process_file( filename => \$text, output => \*FH);
-            }
-        });
-
-        my $out = tied(*FH)->content;
-
-        # trim the output to just the function in question to make
-        # test diagnostics smaller.
-        $out =~ s/\A.*? (^\w+\(XS_Foo_ .*? ^}).*\z/$1/xms
-            or die "couldn't trim output";
-
-        my $err_tested;
-        for my $test (@tests) {
-            my ($is_err, $exp_nomatch, $qr, $desc) = @$test;
-            $desc = "$desc_prefix: $desc" if length $desc_prefix;
-            my $str;
-            if ($is_err) {
-                $err_tested = 1;
-                $str = $stderr;
-            }
-            else {
-                $str = $out;
-            }
-            if ($exp_nomatch) {
-                unlike $str, $qr, $desc;
-            }
-            else {
-                like $str, $qr, $desc;
-            }
-        }
-        # if there were no tests that expect an error, test that there
-        # were no errors
-        if (!$err_tested) {
-            is $stderr, undef, "$desc_prefix: no errors expected";
-        }
-    }
+    test_many($preamble, 'Foo', \@test_fns);
 }
