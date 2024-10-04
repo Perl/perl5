@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 114;
+use Test::More tests => 126;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1096,6 +1096,42 @@ EOF
             [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [ 0, 0, qr/\QTHIS->f3(i)/,                       "autocall" ],
             [ 0, 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,          "set st0"  ],
+        ],
+        # allow THIS's type to be overridden ...
+        [
+            "C++: f4: override THIS type",
+            'int',
+            "X::Y::f4(int i)\n    int THIS",
+            [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,       "usage"    ],
+            [ 0, 0, qr/int\s*THIS\s*=\s*\(int\)/,       "var decl" ],
+            [ 0, 1, qr/X__Y\s*\*\s*THIS/,               "no class var decl" ],
+            [ 0, 0, qr/\QTHIS->f4(i)/,                  "autocall" ],
+        ],
+        #  ... but not multiple times
+        [
+            "C++: f5: dup override THIS type",
+            'int',
+            "X::Y::f5(int i)\n    int THIS\n    long THIS",
+            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
+                    "dup err" ],
+        ],
+        # allow CLASS's type to be overridden ...
+        [
+            "C++: new: override CLASS type",
+            'int',
+            "X::Y::new(int i)\n    int CLASS",
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, i"\)/,      "usage"    ],
+            [ 0, 0, qr/int\s*CLASS\s*=\s*\(int\)/,      "var decl" ],
+            [ 0, 1, qr/char\s*\*\s*CLASS/,              "no char* var decl" ],
+            [ 0, 0, qr/\Qnew X::Y(i)/,                  "autocall" ],
+        ],
+        #  ... but not multiple times
+        [
+            "C++: new dup override CLASS type",
+            'int',
+            "X::Y::new(int i)\n    int CLASS\n    long CLASS",
+            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
+                    "dup err" ],
         ],
         [
             "C++: DESTROY",

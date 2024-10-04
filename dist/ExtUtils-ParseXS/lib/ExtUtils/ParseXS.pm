@@ -1039,7 +1039,7 @@ EOM
         my ExtUtils::ParseXS::Node::Param $param
             = ExtUtils::ParseXS::Node::Param->new( {
                 var          => $var,
-                type         => $type,
+                soft_type    => $type,
                 is_synthetic => 1,
                 arg_num      => ++$args_count,
               });
@@ -2487,11 +2487,13 @@ sub INPUT_handler {
     $self->{xsub_C_auto_function_signature} =~ s/\b($var_name)\b/&$1/
       if $var_addr;
 
+    my $sig_param = $self->{xsub_sig}{names}{$var_name};
+
     # The index number of the parameter. The counting starts at 1 and skips
     # fake parameters like 'length(s))'. If not found, flag it as 'alien':
     # a var which appears in an INPUT section but not in the XSUB's
     # signature. Legal but nasty.
-    my $var_num = $self->{xsub_sig}{names}{$var_name}{arg_num};
+    my $var_num = $sig_param->{arg_num};
     my $is_alien = !defined($var_num);
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -2562,6 +2564,11 @@ sub INPUT_handler {
 
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
+
+    # Synthetic params like THIS will be emitted later - they
+    # are treated like ANSI params, except the type can overridden
+    # within an INPUT statement
+    next if $sig_param->{is_synthetic};
 
     $param->as_code($self);
 

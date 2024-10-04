@@ -89,6 +89,7 @@ BEGIN {
     our @FIELDS = (
         @ExtUtils::ParseXS::Node::FIELDS,
         'type',      # The C type of the parameter
+        'soft_type', # The C type be used if not explicitly defined
         'arg_num',   # The arg number (starting at 1) mapped to this param
         'var',       # the name of the parameter
         'default',   # default value (if any)
@@ -128,7 +129,7 @@ sub check {
         $pxs->{xsub_sig}{names}{$self->{var}};
 
     if ($sigp) {
-        for (qw(default)) {
+        for (qw(default soft_type)) {
             $self->{$_} = $sigp->{$_} if exists $sigp->{$_};
         }
         if (    defined $sigp->{in_out}
@@ -138,6 +139,9 @@ sub check {
             # OUT* class: skip initialisation
             $self->{no_init} = 1;
         }
+        # XXX also tmp copy some stuff back to the sig param
+        $sigp->{type} = $self->{type}
+            if defined $sigp->{soft_type} && !defined $sigp->{type};
     }
     #
     # Check for duplicate definitions of a particular parameter name.
@@ -150,13 +154,14 @@ sub check {
         return;
     }
   
-    $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $self->{type};
+    my $type = defined $self->{type} ? $self->{type} : $self->{soft_type};
+    $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $type;
   
     # Get the prototype character, if any, associated with the typemap
     # entry for this var's type; defaults to '$'
     if ($self->{arg_num}) {
         my $typemap =
-                $pxs->{typemaps_object}->get_typemap(ctype => $self->{type});
+                $pxs->{typemaps_object}->get_typemap(ctype => $type);
         $pxs->{xsub_map_arg_idx_to_proto}->[$self->{arg_num}]
               = ($typemap && $typemap->proto) || "\$";
     }
@@ -171,10 +176,12 @@ sub as_code {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
-    my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
-        = @{$self}{qw(type arg_num var init no_init defer default)};
+    my ($type, $soft_type, $arg_num, $var, $init, $no_init, $defer, $default)
+        = @{$self}{qw(type soft_type arg_num var init no_init defer default)};
   
     my $arg = $pxs->ST($arg_num, 0);
+
+    $type = $soft_type unless defined $type;
   
     if ($self->{is_length}) {
         # Process length(foo) parameter.
