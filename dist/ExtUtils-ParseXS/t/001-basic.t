@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 136;
+use Test::More tests => 149;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1371,6 +1371,46 @@ EOF
             ],
             [ 0, 0, qr/\(a,\n        b   , bar,\n\Q        c? c : "boo!")/,
               ""  ],
+        ],
+    );
+
+    test_many($preamble, 'Foo', \@test_fns);
+}
+
+{
+    # Test OUTLIST etc
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "IN OUT",
+            [
+                'void',
+                'foo(IN int A, IN_OUT int B, OUT int C, OUTLIST int D, IN_OUTLIST int E)',
+            ],
+            [ 0, 0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
+
+            [ 0, 0, qr/int\s+A\s*=\s*\(int\)SvIV\s*/,  "A decl"   ],
+            [ 0, 0, qr/int\s+B\s*=\s*\(int\)SvIV\s*/,  "B decl"   ],
+            [ 0, 0, qr/int\s+C\s*;/,                   "C decl"   ],
+            [ 0, 0, qr/int\s+D\s*;/,                   "D decl"   ],
+            [ 0, 0, qr/int\s+E\s*=\s*\(int\)SvIV\s*/,  "E decl"   ],
+
+            [ 0, 0, qr/\Qfoo(A, &B, &C, &D, &E)/,      "autocall" ],
+
+            [ 0, 0, qr/sv_setiv.*ST\(1\).*\bB\b/,      "set B"    ],
+            [ 0, 0, qr/sv_setiv.*ST\(2\).*\bC\b/,      "set C"    ],
+
+            [ 0, 0, qr/\QEXTEND(SP,2)/,                "extend"   ],
+
+            [ 0, 0, qr/sv_setiv.*ST\(0\).*\bD\b/,      "set D"    ],
+            [ 0, 0, qr/sv_setiv.*ST\(1\).*\bE\b/,      "set E"    ],
         ],
     );
 
