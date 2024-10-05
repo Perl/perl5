@@ -43,7 +43,41 @@
    "hello world" won't port easily to it.  */
 #include <errno.h>
 
+#define xstrputc(_ch) *p++ = _ch
+#define xstrputs(_str) do {p2 = p; p += sizeof(_str)-1; \
+    memcpy((void *)p2, (void *)_str, sizeof(_str)-1);} while(0)
+
 static const char * progname;
+
+static void
+output_zeros(FILE *out, unsigned int count) {
+  char buf [sizeof("  0,   \n")+80]; /* tiny oversize */
+  char * start = buf;
+  char * p = start;
+  char * p2;
+
+  if(count) {
+    const unsigned int max0 = sizeof("0, ")-1;
+    const unsigned int maxln = 80-sizeof("  \n")-1;
+
+    xstrputs("  ");
+    while(count) {
+      xstrputc('0');
+      count--;
+      if(count) {
+        if(p < start+maxln) {
+          xstrputs(", ");
+          continue;
+        }
+        else
+          xstrputs(",\n  ");
+      }
+      p2 = p;
+      p = start;
+      fwrite(start, sizeof(char), p2-start, out);
+    }
+  }
+}
 
 struct mg_data_raw_t {
     unsigned char type;
@@ -66,45 +100,55 @@ struct mg_data_t {
 };
 
 static void
-format_mg_data(FILE *out, const void *thing, size_t count) {
+format_mg_data(FILE *out, const void *thing, unsigned int count) {
   const struct mg_data_t *p = (const struct mg_data_t *)thing;
+  unsigned int zero = 0;
 
   while (1) {
       if (p->value) {
-          fprintf(out, "  %s\n  %s", p->comment, p->value);
+          unsigned int zero2 = zero;
+          if (zero2) {
+            zero = 0;
+            output_zeros(out, zero2);
+            fputs(",\n", out);
+          }
+          fprintf(out, "  %s\n  %s,\n", p->comment, p->value);
       } else {
-          fputs("  0", out);
+          zero++;
       }
       ++p;
       if (!--count)
           break;
-      fputs(",\n", out);
   }
-  fputc('\n', out);
 }
 
 static void
-format_char_block(FILE *out, const void *thing, size_t count) {
+format_char_block(FILE *out, const void *thing, unsigned int count) {
   const char *block = (const char *)thing;
 
   fputs("  ", out);
   while (count--) {
-    fprintf(out, "%d", *block);
+    const char * fmt;
+    char c = *block;
     block++;
     if (count) {
       if (!(count & 15))
-        fputs(",\n  ", out);
+        fmt = "%d,\n  ";
       else
-        fputs(", ", out);
+        fmt = "%d, ";
     }
+    else
+      fmt = "%d";
+    fprintf(out, fmt, c);
   }
   fputc('\n', out);
 }
 
 static void
 output_to_file(const char *filename,
-               void (format_function)(FILE *out, const void *thing, size_t count),
-               const void *thing, size_t count,
+               void (format_function)(FILE *out, const void *thing,
+                                      unsigned int count),
+               const void *thing, unsigned int count,
                const char *header
 ) {
   FILE *const out = fopen(filename, "w");
@@ -115,10 +159,11 @@ output_to_file(const char *filename,
     exit(1);
   }
 
-  fprintf(out, "/* %s:\n", filename);
-  fprintf(out, " * THIS FILE IS AUTO-GENERATED DURING THE BUILD by: %s\n",
-                progname);
-  fprintf(out, " *\n%s\n*/\n{\n", header);
+  fprintf(out,
+    "/* %s:\n"
+    " * THIS FILE IS AUTO-GENERATED DURING THE BUILD by: %s\n"
+    " *\n%s\n*/\n{\n",
+    filename, progname, header);
   format_function(out, thing, count);
   fputs("}\n", out);
 
@@ -135,7 +180,7 @@ static const char PL_uuemap[]
 typedef unsigned char U8;
 
 int main(int argc, char **argv) {
-  size_t i;
+  unsigned int i;
 
   progname = argv[0];
   if (argc < 4 || argv[1][0] == '\0' || argv[2][0] == '\0'
