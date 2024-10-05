@@ -910,8 +910,8 @@ EOM
     #
     #     (char *s, int length(s))
     #
-    # will be saved into @ANSI_params to be processed and turned into into
-    # C code later, after all PREINIT: and/or INPUT: blocks.
+    # will be processed and turned into into C code later, after all
+    # PREINIT: and/or INPUT: blocks.
     #
     # ----------------------------------------------------------------
     #
@@ -928,29 +928,6 @@ EOM
     #
     #  @args           = ('s',  'XSauto_length_of_s', 'size= 10');
     #
-    #
-    #  @ANSI_params  = (
-    #                    {
-    #                       type      => 'char *',
-    #                       var       => 's',
-    #                       is_ansi   => 1,
-    #                       arg_num   => 1,
-    #                    },
-    #                    {
-    #                       type      => 'int',
-    #                       var       => 'length(s)',
-    #                       len_name  => 's',
-    #                       is_ansi   => 1,
-    #                       no_init   => 1;
-    #                       is_length => 1;
-    #                    },
-    #                    {
-    #                       type      => 'int',
-    #                       var       => 'size',
-    #                       is_ansi   => 1,
-    #                       arg_num   => 3,
-    #                    },
-    #                   );
     #
     # Vars which aren't passed from perl call args:
     #
@@ -975,8 +952,6 @@ EOM
     $sig->{sig_text} =~ s/\\\s*/ /g;
 
     my @args;
-
-    my (@ANSI_params);          # For parameters with type or length()
 
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
@@ -1152,8 +1127,8 @@ EOM
             }
           }
 
-          # Push a Node::Param object onto @ANSI_params to process params
-          # which won't have a corresponding INPUT line
+          # handle ANSI params: those which have a type or 'length(s)',
+          # and which thus don't need a matching INPUT line
 
           if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
 
@@ -1168,8 +1143,6 @@ EOM
             else {
               $param->{no_init}   = 1 if $out_type =~ /^OUT/;
             }
-
-            push @ANSI_params, $param;
           }
 
           push @OUTLIST_vars, $name_or_lenname if $out_type =~ /OUTLIST$/;
@@ -1443,10 +1416,16 @@ EOF
         # or length(foo). Do the length() ones first.
 
         for my $param (
-            grep(  $_->{is_length}, @ANSI_params),
-            grep(! $_->{is_length}, @ANSI_params),
+            grep $_->{is_ansi},
+              (
+                grep(  $_->{is_length}, @{$self->{xsub_sig}{params}} ),
+                grep(! $_->{is_length}, @{$self->{xsub_sig}{params}} ),
+              )
         )
         {
+          # These check() calls really ought to come earlier, but this
+          # matches older behaviour for now (when ANSI params were
+          # injected into the src as fake INPUT lines at the *end*).
           $param->check($self)
             or next;
           $param->as_code($self);
