@@ -48,9 +48,15 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 #########################
 
 # test_many(): test a list of XSUB bodies with a common XS preamble.
-# $package is the name of the package the XSUB is compiled in, in order
-# to be able to extract out the C function definition. So where the
-# C func is called XS_Foo_Bar_foo, set $package to 'Foo_Bar'
+# $prefix is the prefix of the XSUB's name, in order to be able to extract
+# out the C function definition. Typically the generated C subs look like:
+#
+#    XS_EXTERNAL(XS_Foo_foo)
+#    {
+#    ...
+#    }
+# So setting prefix to 'XS_Foo' will match any fn declared in the Foo
+# package, while 'boot_Foo' will extract the boot fn.
 #
 # For each body, a series of regexes is matched against the STDOUT or
 # STDERR produced.
@@ -74,7 +80,7 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 #  expect_nomatch: boolean: pass if the regex *doesn't* match
 
 sub test_many {
-    my ($preamble, $package, $test_fns) = @_;
+    my ($preamble, $prefix, $test_fns) = @_;
     for my $test_fn (@$test_fns) {
         my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
 
@@ -94,8 +100,10 @@ sub test_many {
 
         # trim the output to just the function in question to make
         # test diagnostics smaller.
-        $out =~ s/\A.*? (^\w+\(XS_${package}_ .*? ^}).*\z/$1/xms
-            or die "couldn't trim output";
+        if ($out =~ /\S/) {
+            $out =~ s/\A.*? (^\w+\(${prefix} .*? ^}).*\z/$1/xms
+                or die "couldn't trim output for fn '$prefix'";
+        }
 
         my $err_tested;
         for my $test (@tests) {
@@ -1284,7 +1292,7 @@ EOF
         ]
     );
 
-    test_many($preamble, 'Foo', \@test_fns);
+    test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
 {
@@ -1309,7 +1317,7 @@ EOF
         ]
     );
 
-    test_many($preamble, 'Foo', \@test_fns);
+    test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
 {
@@ -1374,7 +1382,7 @@ EOF
         ],
     );
 
-    test_many($preamble, 'Foo', \@test_fns);
+    test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
 {
@@ -1414,5 +1422,5 @@ EOF
         ],
     );
 
-    test_many($preamble, 'Foo', \@test_fns);
+    test_many($preamble, 'XS_Foo_', \@test_fns);
 }
