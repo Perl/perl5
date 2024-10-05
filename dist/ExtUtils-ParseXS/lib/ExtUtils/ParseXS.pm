@@ -934,8 +934,6 @@ EOM
     #  $only_C_inlist{XSauto_length_of_s} = 1; # because of length()
     #  $only_C_inlist{'size= 10'}         = 1; # because of OUTLIST
     #
-    #  @OUTLIST_vars = ('size');              # OUTLIST vars
-    #
     # Parameters which included a C type:
     #
     #  # IN_OUT, OUT etc vars except IN
@@ -954,7 +952,6 @@ EOM
     my @args;
 
     my %only_C_inlist;          # Not in the signature of Perl function
-    my @OUTLIST_vars;           # list of vars declared as OUTLIST
 
     my $optional_args_count = 0;# how many default params seen
     my $args_count = 0;         # how many args are expected
@@ -1145,7 +1142,6 @@ EOM
             }
           }
 
-          push @OUTLIST_vars, $name_or_lenname if $out_type =~ /OUTLIST$/;
           $param->{in_out} = $out_type if length $out_type;
 
           # Process the default expression, including making the text
@@ -1614,7 +1610,10 @@ EOF
 
       # If there are any OUTLIST vars to be pushed, first extend the
       # stack, to fit all OUTLIST vars + RETVAL
-      my $outlist_count = @OUTLIST_vars;
+      my $outlist_count = grep {    defined $_->{in_out}
+                                 && $_->{in_out} =~ /OUTLIST$/
+                               }
+                               @{$self->{xsub_sig}{params}};
       if ($outlist_count) {
         my $ext = $outlist_count;
         ++$ext if $self->{xsub_seen_RETVAL_in_OUTPUT} || $implicit_OUTPUT_RETVAL;
@@ -1715,7 +1714,12 @@ EOF
       $XSRETURN_count += $outlist_count;
 
       # Now that RETVAL is on the stack, also push any OUTLIST vars too
-      for my $var (@OUTLIST_vars) {
+      for my $param (grep  {    defined $_->{in_out}
+                             && $_->{in_out} =~ /OUTLIST$/
+                           }
+                           @{$self->{xsub_sig}{params}}
+      ) {
+        my $var = $param->{var};
         $self->generate_output(
           {
             type        => $self->{xsub_map_argname_to_type}->{$var},
