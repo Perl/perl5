@@ -94,6 +94,7 @@ BEGIN {
         'var',       # the name of the parameter
         'default',   # default value (if any)
         'default_usage', # how to report default value in "usage:..." error
+        'proto',     # overridden prototype char(s) (if any) from typemap
         'in_out',    # The IN/OUT/OUTLIST etc value (if any)
         'defer',     # deferred initialisation template code
         'init',      # initialisation template code
@@ -123,6 +124,17 @@ sub check {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
+    my $type = defined $self->{type} ? $self->{type} : $self->{soft_type};
+    $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $type;
+
+    # Get the overridden prototype character, if any, associated with the
+    # typemap entry for this var's type.
+    if ($self->{arg_num}) {
+        my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $type);
+        my $p = $typemap && $typemap->proto;
+        $self->{proto} = $p if defined $p && length $p;
+    }
+
     # XXX tmp workaround during code refactoring
     # Copy any relevant fields from the param object (if any) for the
     # param of the same name declared in the signature, to the INPUT param
@@ -144,7 +156,7 @@ sub check {
         # XXX also tmp copy some stuff back to the sig param
         $sigp->{type} = $self->{type}
             if defined $sigp->{soft_type} && !defined $sigp->{type};
-        for(qw(is_addr in_out)) {
+        for(qw(is_addr in_out proto)) {
             $sigp->{$_} = $self->{$_} if exists $self->{$_};
         }
     }
@@ -159,17 +171,6 @@ sub check {
         return;
     }
   
-    my $type = defined $self->{type} ? $self->{type} : $self->{soft_type};
-    $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $type;
-  
-    # Get the prototype character, if any, associated with the typemap
-    # entry for this var's type; defaults to '$'
-    if ($self->{arg_num}) {
-        my $typemap =
-                $pxs->{typemaps_object}->get_typemap(ctype => $type);
-        $pxs->{xsub_map_arg_idx_to_proto}->[$self->{arg_num}]
-              = ($typemap && $typemap->proto) || "\$";
-    }
     return 1;
 }
 
@@ -490,6 +491,7 @@ BEGIN {
         'seen_ellipsis', # Bool: XSUB signature has (   ,...)
 
         'nargs',         # The number of args expected from caller
+        'min_args',      # The minimum number of args allowed from caller
 
         'auto_function_sig_override', # the C_ARGS value, if any
 
@@ -554,6 +556,32 @@ sub C_func_signature {
     return join(", ", @args);
 }
 
+
+# $self->proto_string():
+#
+# return a string containing the perl prototype string for this XSUB,
+# e.g. '$$;$$@'.
+
+sub proto_string {
+    my ExtUtils::ParseXS::Node::Sig $self = shift;
+
+    # Generate a prototype entry for each param that's bound to a real
+    # arg. Use '$' unless the typemap for that param has specified an
+    # overridden entry.
+    my @p = map  defined $_->{proto} ? $_->{proto} : '$',
+            grep defined $_->{arg_num} && $_->{arg_num} > 0,
+            @{$self->{params}};
+
+    my @sep = (';'); # separator between required and optional args
+    my $min = $self->{min_args};
+    if ($min < $self->{nargs}) {
+        # has some default vals
+        splice (@p, $min, 0, ';');
+        @sep = (); # separator already added
+    }
+    push @p, @sep, '@' if $self->{seen_ellipsis};  # '...'
+    return join '', @p;
+}
 
 1;
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 149;
+use Test::More tests => 171;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1423,4 +1423,139 @@ EOF
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # Test prototypes
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: ENABLE
+        |
+        |TYPEMAP: <<EOF
+        |X::Y *        T_OBJECT
+        |const X::Y *  T_OBJECT
+        |
+        |INPUT
+        |T_OBJECT
+        |    $var = my_in($arg);
+        |
+        |OUTPUT
+        |T_OBJECT
+        |    my_out($arg, $var)
+        |EOF
+EOF
+
+    my @test_fns = (
+        [
+            "auto-generated proto basic",
+            [
+                'void',
+                'foo(int a, int b, int c)',
+            ],
+            [ 0, 0, qr/"\$\$\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto basic with default",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+            ],
+            [ 0, 0, qr/"\$\$;\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto complex",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, OUTLIST int C, int D)',
+            ],
+            [ 0, 0, qr/"\$\$\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto  complex with default",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, IN_OUTLIST int C, int D = 0)',
+            ],
+            [ 0, 0, qr/"\$\$\$;\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with ellipsis",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, OUT int C, int D, ...)',
+            ],
+            [ 0, 0, qr/"\$\$\$\$;\@"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with default and ellipsis",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
+            ],
+            [ 0, 0, qr/"\$\$\$;\$\@"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with default and ellipsis and THIS",
+            [
+                'void',
+                'X::Y::foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
+            ],
+            [ 0, 0, qr/"\$\$\$\$;\$\@"/, "" ],
+        ],
+
+        [
+            "explicit prototype",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+                '    PROTOTYPE: $@%;$'
+            ],
+            [ 0, 0, qr/"\$\@%;\$"/, "" ],
+        ],
+
+        [
+            "explicit prototype with backslash etc",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+                '    PROTOTYPE: \$\[@%]'
+            ],
+            # Note that the emitted C code will have escaped backslashes,
+            # so the actual C code looks something like:
+            #    newXS_some_variant(..., "\\$\\[@%]");
+            # and so the regex below has to escape each backslash and
+            # meta char its trying to match:
+            [ 0, 0, qr/" \\  \\  \$  \\  \\ \[  \@  \%  \] "/x, "" ],
+        ],
+
+        [
+            "explicit empty prototype",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+                '    PROTOTYPE:'
+            ],
+            [ 0, 0, qr/newXS.*, ""/, "" ],
+        ],
+
+        [
+            # shady but legal
+            "auto-generated proto with no type",
+            [
+                'void',
+                'foo(a, b, c = 0)',
+            ],
+            [ 0, 0, qr/"\$\$;\$"/, ""  ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
 }
