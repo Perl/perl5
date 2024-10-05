@@ -124,9 +124,13 @@ format_mg_data(FILE *out, const void *thing, unsigned int count) {
 
 static void
 format_char_block(FILE *out, const void *thing, unsigned int count) {
+  char buf [(sizeof("-255,\n  ")-1) * 256]; /* 2048, oversized vs ~900 */
+  char * start = buf;
+  char * p = start;
+  char * p2;
   const char *block = (const char *)thing;
 
-  fputs("  ", out);
+  xstrputs("  ");
   while (count--) {
     const char * fmt;
     char c = *block;
@@ -139,9 +143,10 @@ format_char_block(FILE *out, const void *thing, unsigned int count) {
     }
     else
       fmt = "%d";
-    fprintf(out, fmt, c);
+    p += sprintf(p, fmt, c);
   }
-  fputc('\n', out);
+  xstrputc('\n');
+  fwrite(start, sizeof(char), p-start, out);
 }
 
 static void
