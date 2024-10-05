@@ -1501,7 +1501,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
  * the differences between platforms.
  *
  * base_posix_setlocale_() presents a consistent POSIX-compliant interface to
- * setlocale().   Windows requres a customized base-level setlocale().  This
+ * setlocale().   Windows requires a customized base-level setlocale().  This
  * layer should only be used by the next level up: the plain posix_setlocale
  * layer.  Any necessary mutex locking needs to be done at a higher level.  The
  * return may be overwritten by the next call to this function */
