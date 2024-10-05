@@ -94,11 +94,12 @@ BEGIN {
         'var',       # the name of the parameter
         'default',   # default value (if any)
         'default_usage', # how to report default value in "usage:..." error
-        'in_out',    # The In/OUT/OUTLIST etc value (if any)
+        'in_out',    # The IN/OUT/OUTLIST etc value (if any)
         'defer',     # deferred initialisation template code
         'init',      # initialisation template code
         'init_op',   # initialisation type: one of =/+/;
         'no_init',   # don't initialise the parameter
+        'is_addr',   # INPUT var declared as '&foo'
         'is_ansi',   # param's type was specified in signature
         'is_length', # param is declared as 'length(foo)' in signature
         'len_name' , # the 'foo' in 'length(foo)' in signature
@@ -143,6 +144,9 @@ sub check {
         # XXX also tmp copy some stuff back to the sig param
         $sigp->{type} = $self->{type}
             if defined $sigp->{soft_type} && !defined $sigp->{type};
+        for(qw(is_addr in_out)) {
+            $sigp->{$_} = $self->{$_} if exists $self->{$_};
+        }
     }
     #
     # Check for duplicate definitions of a particular parameter name.
@@ -486,6 +490,9 @@ BEGIN {
         'seen_ellipsis', # Bool: XSUB signature has (   ,...)
 
         'nargs',         # The number of args expected from caller
+
+        'auto_function_sig_override', # the C_ARGS value, if any
+
     );
 
     fields->import(@FIELDS) if $USING_FIELDS;
@@ -511,6 +518,40 @@ sub usage_string {
 
     push @args, '...' if $self->{seen_ellipsis};
     return join ', ', @args;
+}
+
+
+# $self->C_func_signature():
+#
+# return a string containing the arguments to pass to an autocall C
+# function, e.g. 'a, &b, c'.
+
+sub C_func_signature {
+    my ExtUtils::ParseXS::Node::Sig $self = shift;
+
+    my @args;
+    for my $param (@{$self->{params}}) {
+        next if $param->{is_synthetic}; # THIS etc
+
+        if ($param->{is_length}) {
+            push @args, "XSauto_length_of_$param->{len_name}";
+            next;
+        }
+
+        my $io = $param->{in_out};
+        $io = '' unless defined $io;
+
+        # Ignore fake/alien stuff, except an OUTLIST arg, which
+        # isn't passed from perl (so no arg_num), but *is* passed to
+        # the C function and then back to perl.
+        next unless defined $param->{arg_num} or $io eq 'OUTLIST';
+        
+        my $a = $param->{var};
+        $a = "&$a" if $param->{is_addr} or $io =~ /OUT/;
+        push @args, $a;
+    }
+
+    return join(", ", @args);
 }
 
 

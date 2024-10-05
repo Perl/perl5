@@ -81,7 +81,6 @@ use ExtUtils::ParseXS::Utilities qw(
   process_typemaps
   map_type
   standard_XS_defs
-  C_func_signature
   analyze_preprocessor_statement
   set_cond
   Warn
@@ -328,11 +327,6 @@ BEGIN {
 
   'xsub_CASE_condition_count', # number of CASE keywords encountered.
                                # Zero indicates none encountered yet.
-
-  'xsub_C_auto_function_signature', # The args to pass to any wrapped
-                               # library function.  Basically join(','
-                               # @args) but with '&' prepended for any OUT
-                               # args.
 
   'xsub_map_overload_name_to_seen', # Hash: maps each overload method name
                                # (such as '<=>') to a boolean indicating
@@ -986,7 +980,6 @@ EOM
 
     my %only_C_inlist;          # Not in the signature of Perl function
     my @OUTLIST_vars;           # list of vars declared as OUTLIST
-    my @autocall_args;          # args to pass to an autocall C func
 
     my $optional_args_count = 0;# how many default params seen
     my $args_count = 0;         # how many args are expected
@@ -1033,7 +1026,6 @@ EOM
             ? ('CLASS', "char *")
             : ('THIS',  "$self->{xsub_class} *");
 
-        push @autocall_args, $var;
         my ExtUtils::ParseXS::Node::Param $param
             = ExtUtils::ParseXS::Node::Param->new( {
                 var          => $var,
@@ -1203,7 +1195,6 @@ EOM
           else {
             $param->{arg_num} = ++$args_count;
           }
-          push @autocall_args, $name_or_lenname;
 
           # map argument names to indexes
           # XXX tmp workaround during refactoring
@@ -1226,11 +1217,6 @@ EOM
       } # end foreach $i
 
       $min_arg_count = $args_count - $optional_args_count;
-
-      # The args to pass to the wrapped library function. Basically
-      # join(',' @args) but with '&' prepended for any *OUT* args.
-      $self->{xsub_C_auto_function_signature} =
-          $self->C_func_signature(\@autocall_args, $self->{xsub_class});
     }
 
 
@@ -1577,7 +1563,12 @@ EOF
 
           $self->{xsub_func_name} = 'XSFUNCTION'
                     if $self->{xsub_seen_INTERFACE_or_MACRO};
-          print "$self->{xsub_func_name}($self->{xsub_C_auto_function_signature});\n";
+
+          my $sig  = $self->{xsub_sig};
+          my $args = $sig->{auto_function_sig_override}; # C_ARGS
+          $args = $sig->C_func_signature()
+            unless defined $args;
+          print "$self->{xsub_func_name}($args);\n";
 
         } # End: PPCODE: or CODE: or a default body
 
@@ -2479,11 +2470,6 @@ sub INPUT_handler {
     # flag 'RETVAL' as having been seen
     $self->{xsub_seen_RETVAL_in_INPUT} |= $var_name eq "RETVAL";
 
-    # Prepend a '&' to this arg's name for the args to pass to the
-    # wrapped function (if any) called in the absence of a CODE: section.
-    $self->{xsub_C_auto_function_signature} =~ s/\b($var_name)\b/&$1/
-      if $var_addr;
-
     my $sig_param = $self->{xsub_sig}{names}{$var_name};
 
     # The index number of the parameter. The counting starts at 1 and skips
@@ -2553,6 +2539,7 @@ sub INPUT_handler {
       init    => $init,
       init_op => $init_op,
       no_init => $no_init,
+      is_addr => !!$var_addr,
       is_alien=> $is_alien,
     });
 
@@ -2648,7 +2635,7 @@ sub OUTPUT_handler {
 }
 
 
-# Set $self->{xsub_C_auto_function_signature} to the concatenation of all
+# Set $sig->{auto_function_sig_override} to the concatenation of all
 # the following lines (including $_).
 
 sub C_ARGS_handler {
@@ -2657,7 +2644,7 @@ sub C_ARGS_handler {
   my $in = $self->merge_section();
 
   trim_whitespace($in);
-  $self->{xsub_C_auto_function_signature} = $in;
+  $self->{xsub_sig}{auto_function_sig_override} = $in;
 }
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 128;
+use Test::More tests => 136;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -90,6 +90,7 @@ sub test_many {
         });
 
         my $out = tied(*FH)->content;
+        untie *FH;
 
         # trim the output to just the function in question to make
         # test diagnostics smaller.
@@ -1306,6 +1307,71 @@ EOF
             ],
             [ 0, 0, qr/usage\(cv,\s+"a, b, d=  999, ..."\)/,     ""    ],
         ]
+    );
+
+    test_many($preamble, 'Foo', \@test_fns);
+}
+
+{
+    # check that args to an auto-called C function are correct
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "autocall args normal",
+            [
+                'void',
+                'foo( OUT int  a,   b   , char   *  c , int length(c), OUTLIST int d, IN_OUTLIST int e)',
+                '    long &b',
+                '    int alien',
+            ],
+            [ 0, 0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c, &d, &e)/,  ""  ],
+        ],
+        [
+            "autocall args normal",
+            [
+                'void',
+                'foo( OUT int  a,   b   , char   *  c , size_t length(c) )',
+                '    long &b',
+                '    int alien',
+            ],
+            [ 0, 0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c)/,     ""    ],
+        ],
+
+        [
+            "autocall args C_ARGS",
+            [
+                'void',
+                'foo( int  a,   b   , char   *  c  )',
+                '    C_ARGS:     a,   b   , bar,  c? c : "boo!"    ',
+                '    INPUT:',
+                '        long &b',
+            ],
+            [ 0, 0, qr/\Qfoo(a,   b   , bar,  c? c : "boo!")/,     ""    ],
+        ],
+
+        [
+            # Whether this is sensible or not is another matter.
+            # For now, just check that it works as-is.
+            "autocall args C_ARGS multi-line",
+            [
+                'void',
+                'foo( int  a,   b   , char   *  c  )',
+                '    C_ARGS: a,',
+                '        b   , bar,',
+                '        c? c : "boo!"',
+                '    INPUT:',
+                '        long &b',
+            ],
+            [ 0, 0, qr/\(a,\n        b   , bar,\n\Q        c? c : "boo!")/,
+              ""  ],
+        ],
     );
 
     test_many($preamble, 'Foo', \@test_fns);
