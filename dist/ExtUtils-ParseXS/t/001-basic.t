@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 171;
+use Test::More tests => 175;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1435,7 +1435,7 @@ EOF
         |
         |TYPEMAP: <<EOF
         |X::Y *        T_OBJECT
-        |const X::Y *  T_OBJECT
+        |const X::Y *  T_OBJECT \&
         |
         |INPUT
         |T_OBJECT
@@ -1544,6 +1544,24 @@ EOF
                 '    PROTOTYPE:'
             ],
             [ 0, 0, qr/newXS.*, ""/, "" ],
+        ],
+
+        [
+            "not overridden by typemap",
+            [
+                'void',
+                'foo(X::Y * a, int b, int c = 0)',
+            ],
+            [ 0, 0, qr/"\$\$;\$"/, "" ],
+        ],
+
+        [
+            "overridden by typemap",
+            [
+                'void',
+                'foo(const X::Y * a, int b, int c = 0)',
+            ],
+            [ 0, 0, qr/" \\ \\ \& \$ ; \$ "/x, "" ],
         ],
 
         [
