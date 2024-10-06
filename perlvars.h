@@ -384,7 +384,7 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
  * This is needed for tearing down threads::shared and probably
  * not be used for anything else.
  */
-PERLVARI(G, shutdownhook, shutdown_proc_t, &Perl_noshutdownhook);
+PERLVARI(G, shutdownhook, shutdown_proc_t, &Perl_noshutdownhook)
 
 /* these record the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
