@@ -892,41 +892,20 @@ EOM
 
 
     # ----------------------------------------------------------------
-    # Do initial processing of the XSUB's signature - $sig->{sig_text}
+    # Process the XSUB's signature: $sig->{sig_text}
     #
-    # Split the signature on commas into @args while allowing for things
-    # like (a = ",", b), and extract any IN/OUT/etc prefix.
+    # Split the signature on commas into parameters, while allowing for
+    # things like '(a = ",", b)'. Then for each parameter, parse its
+    # various fields and store in a ExtUtils::ParseXS::Node::Param object.
+    # Also, create a Node::Sig object which contains a list of those
+    # Node::Param objects, plus any other state deduced from the
+    # signature, such as min/max permitted number of args.
     #
-    # The final list of @args will have any surrounding white space and
-    # any IN/OUT prefix stripped.
-    #
-    # Any ANSI-style 'type var' and/or length() parameters, e.g.
-    #
-    #     (char *s, int length(s))
-    #
-    # will be processed and turned into into C code later, after all
-    # PREINIT: and/or INPUT: blocks.
-    #
-    # ----------------------------------------------------------------
-    #
-    # Given a signature (i.e. $sig->{sig_text}) like:
+    # A typical signature might look like:
     #
     #    OUT     char *s,             \
     #            int   length(s),     \
     #    OUTLIST int   size     = 10)
-    #
-    # then this section will populate the $sig object with various
-    # bits of overall signature state, plus an array of Node::Param objects
-    #
-    #XXX update this:
-    #
-    #  @args           = ('s',  'XSauto_length_of_s', 'size= 10');
-    #
-    # Parameters which included a C type:
-    #
-    #  # IN_OUT, OUT etc vars except IN
-    #  $self->{xsub_map_argname_to_in_out}{s}    = 'OUT';
-    #  $self->{xsub_map_argname_to_in_out}{size} = 'OUTLIST';
     #
     # XXX Note that 'length(s)' should only be used with a type prefix.
     # Otherwise it will probably be mishandled. We should really detect
@@ -937,18 +916,13 @@ EOM
     {
       # remove line continuation chars (\)
       $sig->{sig_text} =~ s/\\\s*/ /g;
+      my $sig_text = $sig->{sig_text};
 
       my @args;
-
       my $optional_args_count = 0;# how many default params seen
       my $args_count = 0;         # how many args are expected
 
-      # Process signatures of both ANSI and K&R forms, i.e. of the forms
-      # foo(OUT a, b) and foo(OUT int a, int b)
-
-      my $sig_text = $sig->{sig_text};
-
-      # First, split into separate parameters
+      # First, split signature into separate parameters
 
       if ($sig_text =~ /\S/) {
         my $sig_c = "$sig_text ,";
@@ -976,7 +950,7 @@ EOM
       }
 
       # C++ methods get a fake object/class arg at the start.
-      # This affects arg numbering and the "usage: ..." error message.
+      # This affects arg numbering.
       if (defined($self->{xsub_class})) {
         my ($var, $type) =
           ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
@@ -1008,7 +982,7 @@ EOM
         #                      $self->{config_allow_argtypes}
         #
         #    foo            can be a plain C variable name, or can be
-        #    length(foo)    only under $self->{config_allow_argtypes}
+        #    length(foo)    but only under $self->{config_allow_argtypes}
         #
         #    = default      default value - only allowed under
         #                      $self->{config_allow_argtypes}
@@ -1109,11 +1083,10 @@ EOM
           }
         }
 
-        # handle ANSI params: those which have a type or 'length(s)',
-        # and which thus don't need a matching INPUT line
+        # Handle ANSI params: those which have a type or 'length(s)',
+        # and which thus don't need a matching INPUT line.
 
         if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-
           @$param{qw(type var is_ansi)} = ($type, $name, 1);
 
           if ($is_length) {
