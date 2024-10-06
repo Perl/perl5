@@ -9,7 +9,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 26;
+use Test::More tests => 30;
 
 # For the first go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -204,4 +204,15 @@ SKIP: {
     my $time = time();
     is(mktime(CORE::localtime($time)), $time, "mktime()");
     is(mktime(POSIX::localtime($time)), $time, "mktime()");
+}
+
+{
+    # GH #22498
+    is(strftime(42, CORE::localtime), '42', "strftime() works if format is a number");
+    my $obj = bless {}, 'Some::Random::Class';
+    is(strftime($obj, CORE::localtime), "$obj", "strftime() works if format is an object");
+    my $warnings = '';
+    local $SIG{__WARN__} = sub { $warnings .= $_[0] };
+    is(strftime(undef, CORE::localtime), '', "strftime() works if format is undef");
+    like($warnings, qr/^Use of uninitialized value in subroutine entry /, "strftime(undef, ...) produces expected warning");
 }
