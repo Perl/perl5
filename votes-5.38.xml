@@ -34,9 +34,9 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 <commit votes="steveh tonyc" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
 
 <!-- Catch malformed UTF-8 changes: -->
-<commit votes="khw" id="079900bbc162f26bba6696fb13c82dcdf4bb5b61" issue="" pull="22597" desc="utf8n_to_uvchr: check the state of DFA after the first transition"/>
-<commit votes="khw" id="0069b5031c15e97c8848e04504aa35ead5dd2cf7" issue="" pull="22597" desc="utf8n_to_uvchr: consolidate condition checks within while loop to share code"/>
-<commit votes="khw" id="29501f0a538173b08a71931d81608462a65b81aa" issue="" pull="22597" desc="chore: run `Porting/updateAUTHORS.pl`"/>
+<commit votes="khw steveh" id="079900bbc162f26bba6696fb13c82dcdf4bb5b61" issue="" pull="22597" desc="utf8n_to_uvchr: check the state of DFA after the first transition"/>
+<commit votes="khw steveh" id="0069b5031c15e97c8848e04504aa35ead5dd2cf7" issue="" pull="22597" desc="utf8n_to_uvchr: consolidate condition checks within while loop to share code"/>
+<commit votes="khw steveh" id="29501f0a538173b08a71931d81608462a65b81aa" issue="" pull="22597" desc="chore: run `Porting/updateAUTHORS.pl`"/>
 
 </div>
 
