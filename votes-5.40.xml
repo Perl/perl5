@@ -25,11 +25,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh tonyc mauke" id="3e14b2fcf59b5b88b289caa973f0b8748c93a594" issue="22498" pull="22500" desc="locale: stringify strftime fmt before querying length/utf8ness"/>
-
-<commit votes="steveh jkeenan tonyc mauke" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
-<commit votes="steveh tonyc mauke" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
-
 <!-- Catch malformed UTF-8 changes: -->
 <commit votes="khw steveh" id="079900bbc162f26bba6696fb13c82dcdf4bb5b61" issue="" pull="22597" desc="utf8n_to_uvchr: check the state of DFA after the first transition"/>
 <commit votes="khw steveh" id="0069b5031c15e97c8848e04504aa35ead5dd2cf7" issue="" pull="22597" desc="utf8n_to_uvchr: consolidate condition checks within while loop to share code"/>
@@ -54,8 +49,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh jkeenan tonyc" id="f18202d16387736426e105007d434480cfdd540d" issue="" pull="22569" desc="locale.c: Fix compilation on platforms with only a C locale"/>
-
 <!-- Possibly also: https://github.com/Perl/perl5/pull/22609 if/when it is merged to blead -->
 
 </div>
@@ -69,8 +62,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="jkeenan tonyc steveh" id="be9c403702f3b48693e5a02d1c5c9ecb7ae16dea" issue="" pull="22299" desc="perldiag: 'misspelled' was misspelled"/>
 
 <commit votes="jkeenan steveh" id="78facf50a113cc1ce43c518fed81278168721ba4" issue="" pull="22404" desc="PathTools: Keep $VERSION consistent in all *.pm files
 "/>
