@@ -35,6 +35,11 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 <commit votes="khw" id="0069b5031c15e97c8848e04504aa35ead5dd2cf7" issue="" pull="22597" desc="utf8n_to_uvchr: consolidate condition checks within while loop to share code"/>
 <commit votes="khw" id="29501f0a538173b08a71931d81608462a65b81aa" issue="" pull="22597" desc="chore: run `Porting/updateAUTHORS.pl`"/>
 
+<!-- goto &#amp;builtin::X changes: (The middle one needs regen/opcode.pl rather than the opcode.h change from blead) -->
+<commit votes="steveh" id="39cf04a2758735e0c0ed9ee89acc5a2b4d52d627" issue="22542" pull="22582" desc="builtin: test the unary functions see if tail call crashes them"/>
+<commit votes="steveh" id="db19dfaafcb8344ef45012ae7f90fad964857888" issue="22542" pull="22582" desc="builtin: fix TARG handling for refaddr, reftype, ceil, floor, trim"/>
+<commit votes="steveh" id="8df7878c8a51a3781b8f8106e4d2d5d419c2d1a1" issue="22542" pull="22582" desc="builtin::stringify: duplicate the implementation for XS"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
