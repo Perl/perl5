@@ -461,7 +461,7 @@ static MD5_CTX* get_md5_ctx(pTHX_ SV* sv)
 
     for (mg = SvMAGIC(SvRV(sv)); mg; mg = mg->mg_moremagic) {
 	if (mg->mg_type == PERL_MAGIC_ext
-	    && mg->mg_virtual == (const MGVTBL * const)&vtbl_md5) {
+	    && mg->mg_virtual == (const MGVTBL *)&vtbl_md5) {
 	    return (MD5_CTX *)mg->mg_ptr;
 	}
     }
@@ -483,7 +483,7 @@ static SV * new_md5_ctx(pTHX_ MD5_CTX *context, const char *klass)
 #ifdef USE_ITHREADS
     mg =
 #endif
-	sv_magicext(sv, NULL, PERL_MAGIC_ext, (const MGVTBL * const)&vtbl_md5, (const char *)context, 0);
+	sv_magicext(sv, NULL, PERL_MAGIC_ext, (const MGVTBL *)&vtbl_md5, (const char *)context, 0);
 
 #if defined(USE_ITHREADS) && defined(MGf_DUP)
     mg->mg_flags |= MGf_DUP;
