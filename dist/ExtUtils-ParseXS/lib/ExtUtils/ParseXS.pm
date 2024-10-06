@@ -934,15 +934,15 @@ EOM
     #
     # ----------------------------------------------------------------
 
-    # remove line continuation chars (\)
-    $sig->{sig_text} =~ s/\\\s*/ /g;
-
-    my @args;
-
-    my $optional_args_count = 0;# how many default params seen
-    my $args_count = 0;         # how many args are expected
-
     {
+      # remove line continuation chars (\)
+      $sig->{sig_text} =~ s/\\\s*/ /g;
+
+      my @args;
+
+      my $optional_args_count = 0;# how many default params seen
+      my $args_count = 0;         # how many args are expected
+
       # Process signatures of both ANSI and K&R forms, i.e. of the forms
       # foo(OUT a, b) and foo(OUT int a, int b)
 
@@ -995,164 +995,164 @@ EOM
         $param->check($self)
       }
 
-        for ( @args ) {
-          # Process each parameter. A parameter is of the general form:
-          #
-          #    OUT char* foo = expression
-          #
-          #  where:
-          #    IN/OUT/OUTLIST etc are only allowed under
-          #                      $self->{config_allow_inout}
-          #
-          #    a C type       is only allowed under
-          #                      $self->{config_allow_argtypes}
-          #
-          #    foo            can be a plain C variable name, or can be
-          #    length(foo)    only under $self->{config_allow_argtypes}
-          #
-          #    = default      default value - only allowed under
-          #                      $self->{config_allow_argtypes}
+      for (@args) {
+        # Process each parameter. A parameter is of the general form:
+        #
+        #    OUT char* foo = expression
+        #
+        #  where:
+        #    IN/OUT/OUTLIST etc are only allowed under
+        #                      $self->{config_allow_inout}
+        #
+        #    a C type       is only allowed under
+        #                      $self->{config_allow_argtypes}
+        #
+        #    foo            can be a plain C variable name, or can be
+        #    length(foo)    only under $self->{config_allow_argtypes}
+        #
+        #    = default      default value - only allowed under
+        #                      $self->{config_allow_argtypes}
 
-          s/^\s+//;
-          s/\s+$//;
+        s/^\s+//;
+        s/\s+$//;
 
-          # Process ellipsis (...)
+        # Process ellipsis (...)
 
-          $self->blurt("further XSUB parameter seen after ellipsis (...)")
-            if $sig->{seen_ellipsis};
+        $self->blurt("further XSUB parameter seen after ellipsis (...)")
+          if $sig->{seen_ellipsis};
 
-          if ($_ eq '...') {
-            $sig->{seen_ellipsis} = 1;
-            next;
+        if ($_ eq '...') {
+          $sig->{seen_ellipsis} = 1;
+          next;
+        }
+
+        # Decompose parameter into its components
+
+        my ($out_type, $type, $name_or_lenname, $sp1, $sp2, $default) =
+            /^
+               (?:
+                 (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
+                 \b\s*
+               )?
+               (.*?)                             # optional type
+               \s*
+               \b
+               (   \w+                           # var
+                 | length\( \s*\w+\s* \)         # length(var)
+               )
+               (?:
+                  (\s*) = (\s*) ( .*?)           # default expr
+               )?
+               \s*
+             $
+            /x;
+
+        unless (defined $name_or_lenname) {
+          $self->blurt("Unparseable XSUB parameter: '$_'");
+          next;
+        }
+
+        my ExtUtils::ParseXS::Node::Param $param
+            = ExtUtils::ParseXS::Node::Param->new( {
+                var => $name_or_lenname,
+              });
+
+        if (exists $sig->{names}{$name_or_lenname}) {
+          $self->blurt(
+              "Error: duplicate definition of argument '$name_or_lenname' ignored");
+          next;
+        }
+
+        push @{$sig->{params}}, $param;
+        $sig->{names}{$name_or_lenname} = $param;
+
+        # Process optional IN/OUT etc modifier
+
+        if (defined $out_type) {
+          if ($self->{config_allow_inout}) {
+            $out_type =  $1 eq 'IN' ? '' : $1;
           }
-
-          # Decompose parameter into its components
-
-          my ($out_type, $type, $name_or_lenname, $sp1, $sp2, $default) =
-              /^
-                 (?:
-                   (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
-                   \b\s*
-                 )?
-                 (.*?)                             # optional type
-                 \s*
-                 \b
-                 (   \w+                           # var
-                   | length\( \s*\w+\s* \)         # length(var)
-                 )
-                 (?:
-                    (\s*) = (\s*) ( .*?)           # default expr
-                 )?
-                 \s*
-               $
-              /x;
-
-          unless (defined $name_or_lenname) {
-            $self->blurt("Unparseable XSUB parameter: '$_'");
-            next;
+          else {
+            $self->blurt("parameter IN/OUT modifier not allowed under -noinout");
           }
+        }
+        else {
+          $out_type = '';
+        }
 
-          my ExtUtils::ParseXS::Node::Param $param
-              = ExtUtils::ParseXS::Node::Param->new( {
-                  var => $name_or_lenname,
-                });
+        # Process optional type
 
-          if (exists $sig->{names}{$name_or_lenname}) {
-            $self->blurt(
-                "Error: duplicate definition of argument '$name_or_lenname' ignored");
-            next;
-          }
+        undef $type unless length($type) && $type =~ /\S/;
 
-          push @{$sig->{params}}, $param;
-          $sig->{names}{$name_or_lenname} = $param;
+        if (defined($type) && !$self->{config_allow_argtypes}) {
+          $self->blurt("parameter type not allowed under -noargtypes");
+          undef $type;
+        }
 
-          # Process optional IN/OUT etc modifier
+        # Process 'length(foo)' pseudo-parameter
 
-          if (defined $out_type) {
-            if ($self->{config_allow_inout}) {
-              $out_type =  $1 eq 'IN' ? '' : $1;
-            }
-            else {
-              $self->blurt("parameter IN/OUT modifier not allowed under -noinout");
+        my $is_length;
+        my $name = $name_or_lenname;
+
+        if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
+          if ($self->{config_allow_argtypes}) {
+            $name = $1;
+            $name_or_lenname = "XSauto_length_of_$name";
+            $is_length = 1;
+            if (defined $default) {
+              $self->blurt("Default value not allowed on length() parameter '$name'");
+              undef $default;
             }
           }
           else {
-            $out_type = '';
+            $self->blurt("length() pseudo-parameter not allowed under -noargtypes");
           }
+        }
 
-          # Process optional type
+        # handle ANSI params: those which have a type or 'length(s)',
+        # and which thus don't need a matching INPUT line
 
-          undef $type unless length($type) && $type =~ /\S/;
+        if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
 
-          if (defined($type) && !$self->{config_allow_argtypes}) {
-            $self->blurt("parameter type not allowed under -noargtypes");
-            undef $type;
-          }
+          @$param{qw(type var is_ansi)} = ($type, $name, 1);
 
-          # Process 'length(foo)' pseudo-parameter
-
-          my $is_length;
-          my $name = $name_or_lenname;
-
-          if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
-            if ($self->{config_allow_argtypes}) {
-              $name = $1;
-              $name_or_lenname = "XSauto_length_of_$name";
-              $is_length = 1;
-              if (defined $default) {
-                $self->blurt("Default value not allowed on length() parameter '$name'");
-                undef $default;
-              }
-            }
-            else {
-              $self->blurt("length() pseudo-parameter not allowed under -noargtypes");
-            }
-          }
-
-          # handle ANSI params: those which have a type or 'length(s)',
-          # and which thus don't need a matching INPUT line
-
-          if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-
-            @$param{qw(type var is_ansi)} = ($type, $name, 1);
-
-            if ($is_length) {
-              $param->{no_init}   = 1;
-              $param->{is_length} = 1;
-              $param->{len_name}  = $name;
-              $param->{var}       = $name_or_lenname;
-            }
-            else {
-              $param->{no_init}   = 1 if $out_type =~ /^OUT/;
-            }
-          }
-
-          $param->{in_out} = $out_type if length $out_type;
-
-          # Process the default expression, including making the text
-          # to be used in "usage: ..." error messages.
-          my $report_def = '';
-          if (defined $default) {
-            $optional_args_count++;
-            # The default expression for reporting usage. For backcompat,
-            # sometimes preserve the spaces either side of the '='
-            $report_def =    ((defined $type or $is_length) ? '' : $sp1)
-                           . "=$sp2$default";
-            $param->{default_usage} = $report_def;
-            $param->{default} = $default;
-          }
-
-          if ($out_type eq "OUTLIST" or $is_length) {
-            $param->{arg_num} = undef;
+          if ($is_length) {
+            $param->{no_init}   = 1;
+            $param->{is_length} = 1;
+            $param->{len_name}  = $name;
+            $param->{var}       = $name_or_lenname;
           }
           else {
-            $param->{arg_num} = ++$args_count;
+            $param->{no_init}   = 1 if $out_type =~ /^OUT/;
           }
-        } # for (@args)
+        }
+
+        $param->{in_out} = $out_type if length $out_type;
+
+        # Process the default expression, including making the text
+        # to be used in "usage: ..." error messages.
+        my $report_def = '';
+        if (defined $default) {
+          $optional_args_count++;
+          # The default expression for reporting usage. For backcompat,
+          # sometimes preserve the spaces either side of the '='
+          $report_def =    ((defined $type or $is_length) ? '' : $sp1)
+                         . "=$sp2$default";
+          $param->{default_usage} = $report_def;
+          $param->{default} = $default;
+        }
+
+        if ($out_type eq "OUTLIST" or $is_length) {
+          $param->{arg_num} = undef;
+        }
+        else {
+          $param->{arg_num} = ++$args_count;
+        }
+      } # for (@args)
+
+      $sig->{nargs}    = $args_count;
+      $sig->{min_args} = $args_count - $optional_args_count;
     }
-
-    $sig->{nargs}    = $args_count;
-    $sig->{min_args} = $args_count - $optional_args_count;
 
 
     # ----------------------------------------------------------------
