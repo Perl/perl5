@@ -8791,12 +8791,6 @@ S_reghop3(U8 *s, SSize_t off, const U8 *lim)
         assert(s); assert(lim)
 
 STATIC U8 *
-S_reghop4(U8 *s, SSize_t off, const U8 *llim, const U8 *rlim)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_REGHOP4               \
-        assert(s); assert(llim); assert(rlim)
-
-STATIC U8 *
 S_reghopmaybe3(U8 *s, SSize_t off, const U8 * const lim)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_REGHOPMAYBE3          \
