@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 175;
+use Test::More tests => 179;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -1254,6 +1254,28 @@ EOF
         ],
 
         [
+            #  don't allow THIS in sig, with type
+            "C++: f6: sig THIS type",
+            [
+                'int',
+                'X::Y::f6(int THIS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow THIS in sig, without type
+            "C++: f7: sig THIS no type",
+            [
+                'int',
+                'X::Y::f7(THIS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
+                    "dup err" ],
+        ],
+
+        [
             # allow CLASS's type to be overridden ...
             "C++: new: override CLASS type",
             [
@@ -1275,6 +1297,28 @@ EOF
                 'X::Y::new(int i)',
                 '    int CLASS',
                 '    long CLASS',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow CLASS in sig, with type
+            "C++: new sig CLASS type",
+            [
+                'int',
+                'X::Y::new(int CLASS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow CLASS in sig, without type
+            "C++: new sig CLASS no type",
+            [
+                'int',
+                'X::Y::new(CLASS)',
             ],
             [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
                     "dup err" ],

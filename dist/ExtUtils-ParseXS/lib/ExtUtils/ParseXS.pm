@@ -956,7 +956,7 @@ EOM
         my ExtUtils::ParseXS::Node::Param $param
             = ExtUtils::ParseXS::Node::Param->new( {
                 var          => $var,
-                soft_type    => $type,
+                type         => $type,
                 is_synthetic => 1,
                 arg_num      => ++$args_count,
               });
@@ -3517,7 +3517,6 @@ sub generate_output {
     my $param = $sig->{names}{$var};
     if ($param) {
       $type = $param->{type};
-      $type = $param->{soft_type} unless defined $type;
     }
   }
 

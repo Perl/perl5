@@ -89,7 +89,6 @@ BEGIN {
     our @FIELDS = (
         @ExtUtils::ParseXS::Node::FIELDS,
         'type',      # The C type of the parameter
-        'soft_type', # The C type be used if not explicitly defined
         'arg_num',   # The arg number (starting at 1) mapped to this param
         'var',       # the name of the parameter
         'default',   # default value (if any)
@@ -124,7 +123,7 @@ sub check {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
-    my $type = defined $self->{type} ? $self->{type} : $self->{soft_type};
+    my $type = $self->{type};
 
     # Get the overridden prototype character, if any, associated with the
     # typemap entry for this var's type.
@@ -142,7 +141,7 @@ sub check {
         $pxs->{xsub_sig}{names}{$self->{var}};
 
     if ($sigp) {
-        for (qw(default soft_type)) {
+        for (qw(default)) {
             $self->{$_} = $sigp->{$_} if exists $sigp->{$_};
         }
         if (    defined $sigp->{in_out}
@@ -179,12 +178,10 @@ sub as_code {
     my ExtUtils::ParseXS::Node::Param $self = shift;
     my ExtUtils::ParseXS              $pxs  = shift;
   
-    my ($type, $soft_type, $arg_num, $var, $init, $no_init, $defer, $default)
-        = @{$self}{qw(type soft_type arg_num var init no_init defer default)};
+    my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
+        = @{$self}{qw(type arg_num var init no_init defer default)};
   
     my $arg = $pxs->ST($arg_num, 0);
-
-    $type = $soft_type unless defined $type;
   
     if ($self->{is_length}) {
         # Process length(foo) parameter.
