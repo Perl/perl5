@@ -1987,7 +1987,6 @@
 #     define regcppop(a,b)                      S_regcppop(aTHX_ a,b comma_aDEPTH)
 #     define regcppush(a,b,c)                   S_regcppush(aTHX_ a,b,c comma_aDEPTH)
 #     define reghop3                            S_reghop3
-#     define reghop4                            S_reghop4
 #     define reghopmaybe3                       S_reghopmaybe3
 #     define reginclass(a,b,c,d,e)              S_reginclass(aTHX_ a,b,c,d,e)
 #     define regmatch(a,b,c)                    S_regmatch(aTHX_ a,b,c)

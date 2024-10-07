@@ -5575,10 +5575,6 @@ ESW	|void	|regcp_restore	|NN regexp *rex 			\
 ERST	|U8 *	|reghop3	|NN U8 *s				\
 				|SSize_t off				\
 				|NN const U8 *lim
-ERST	|U8 *	|reghop4	|NN U8 *s				\
-				|SSize_t off				\
-				|NN const U8 *llim			\
-				|NN const U8 *rlim
 ERST	|U8 *	|reghopmaybe3	|NN U8 *s				\
 				|SSize_t off				\
 				|NN const U8 * const lim
