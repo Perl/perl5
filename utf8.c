@@ -498,21 +498,14 @@ S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 #endif
 
       case 0xF0:
-        return (len < 2)
-               ? -1
-               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x10;
       case 0xF8:
-        return (len < 2)
-               ? -1
-               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x08;
       case 0xFC:
-        return (len < 2)
-               ? -1
-               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x04;
       case 0xFE:
         return (len < 2)
-               ? -1
-               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x02;
+               ? -1     /* This pattern encapsulates
+                         * F0 => 0x10; F8 => 0x08; FC => 0x04; FF => 0x02 */
+               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE
+                                         + 0x100 - NATIVE_UTF8_TO_I8(s[0]);
       case 0xFF:
         return isFF_overlong(s, len);
     }
