@@ -105,6 +105,7 @@ BEGIN {
         'len_name' , # the 'foo' in 'length(foo)' in signature
         'is_alien',  # var declared in INPUT line, but not in signature
         'is_synthetic',# var like 'THIS' - we pretend it was in the sig
+        'in_input',  # the parameter has appeared in an INPUT statement
 
     );
 
@@ -155,16 +156,6 @@ sub check {
         for(qw(is_addr in_out proto type)) {
             $sigp->{$_} = $self->{$_} if exists $self->{$_};
         }
-    }
-    #
-    # Check for duplicate definitions of a particular parameter name.
-    # Either the name has appeared in more than one INPUT line or
-    # has appeared also in the signature with a type specified.
-  
-    if ($pxs->{xsub_map_varname_to_seen_in_INPUT}->{$self->{var}}++) {
-        $pxs->blurt(
-            "Error: duplicate definition of argument '$self->{var}' ignored");
-        return;
     }
   
     return 1;

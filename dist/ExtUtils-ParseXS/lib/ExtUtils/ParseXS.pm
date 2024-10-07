@@ -345,10 +345,6 @@ BEGIN {
 
   # Per-XSUB INPUT section parsing state:
 
-  'xsub_map_varname_to_seen_in_INPUT', # Hash: map argument names to a
-                               # 'seen in INPUT' boolean (for duplicate
-                               # spotting).
-  
   'xsub_seen_RETVAL_in_INPUT', # Seen var called 'RETVAL' in an INPUT section.
 
 
@@ -706,13 +702,6 @@ EOM
       if $self->{line}->[0] =~ /^\s/;
 
     # Initialize some per-XSUB instance variables:
-
-    foreach my $member (qw(
-                           xsub_map_varname_to_seen_in_INPUT
-                          ))
-    {
-      $self->{$member} = {};
-    }
 
     $self->{xsub_seen_PROTOTYPE}       = 0;
     $self->{xsub_seen_SCOPE}           = 0;
@@ -1284,7 +1273,6 @@ EOF
                                                # PREINIT/INPUT
                         #
                         # keep track of which vars have been seen
-      %{ $self->{xsub_map_varname_to_seen_in_INPUT} } = ();
       $self->{xsub_seen_RETVAL_in_OUTPUT} = 0; # RETVAL seen in OUTPUT section
 
       # Process any implicit INPUT section.
@@ -2374,14 +2362,34 @@ sub INPUT_handler {
     # flag 'RETVAL' as having been seen
     $self->{xsub_seen_RETVAL_in_INPUT} |= $var_name eq "RETVAL";
 
+    my ($var_num, $is_alien);
     my $sig_param = $self->{xsub_sig}{names}{$var_name};
 
-    # The index number of the parameter. The counting starts at 1 and skips
-    # fake parameters like 'length(s))'. If not found, flag it as 'alien':
-    # a var which appears in an INPUT section but not in the XSUB's
-    # signature. Legal but nasty.
-    my $var_num = $sig_param->{arg_num};
-    my $is_alien = !defined($var_num);
+    if (defined $sig_param) {
+      # The var appeared in the signature too.
+
+      # Check for duplicate definitions of a particular parameter name.
+      # This can be either because it has appeared in multiple INPUT
+      # lines, or because the type was already defined in the signature,
+      # and thus shouldn't be defined again. The exception to this are
+      # synthetic params like THIS, which are assigned a provisional type
+      # which can be overridden.
+      if (   $sig_param->{in_input}
+          or (!$sig_param->{is_synthetic} and exists $sig_param->{type})
+      ) {
+          $self->blurt(
+            "Error: duplicate definition of argument '$var_name' ignored");
+          next;
+      }
+      $sig_param->{in_input} = 1;
+      $var_num = $sig_param->{arg_num};
+    }
+    else {
+      # The var is in an INPUT line, but not in signature. Treat it as a
+      # general var declaration (which really should have been in a
+      # PREINIT section). Legal but nasty: flag is as 'alien'
+      $is_alien = 1;
+    }
 
     # Parse the initialisation part of the INPUT line (if any)
 
