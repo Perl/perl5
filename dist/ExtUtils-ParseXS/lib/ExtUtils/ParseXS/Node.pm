@@ -125,7 +125,6 @@ sub check {
     my ExtUtils::ParseXS              $pxs  = shift;
   
     my $type = defined $self->{type} ? $self->{type} : $self->{soft_type};
-    $pxs->{xsub_map_argname_to_type}->{$self->{var}} = $type;
 
     # Get the overridden prototype character, if any, associated with the
     # typemap entry for this var's type.
@@ -154,9 +153,7 @@ sub check {
             $self->{no_init} = 1;
         }
         # XXX also tmp copy some stuff back to the sig param
-        $sigp->{type} = $self->{type}
-            if defined $sigp->{soft_type} && !defined $sigp->{type};
-        for(qw(is_addr in_out proto)) {
+        for(qw(is_addr in_out proto type)) {
             $sigp->{$_} = $self->{$_} if exists $self->{$_};
         }
     }

@@ -314,10 +314,6 @@ BEGIN {
   'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
   'xsub_func_full_C_name',     # its full C function name     eg 'Foo__Bar__f'
 
-  'xsub_map_argname_to_type',  # Hash: map argument names to types, such as
-                               # 'int *'. Names include special ones like
-                               # 'RETVAL'.
-
   'xsub_CASE_condition',       # Most recent CASE string.
 
   'xsub_CASE_condition_count', # number of CASE keywords encountered.
@@ -711,7 +707,7 @@ EOM
 
     # Initialize some per-XSUB instance variables:
 
-    foreach my $member (qw(xsub_map_argname_to_type
+    foreach my $member (qw(
                            xsub_map_varname_to_seen_in_INPUT
                           ))
     {
@@ -1336,7 +1332,6 @@ EOF
           # Emit the RETVAL variable declaration.
           print "\t" . $self->map_type($self->{xsub_return_type}, 'RETVAL') . ";\n"
             if !$self->{xsub_seen_RETVAL_in_INPUT};
-          $self->{xsub_map_argname_to_type}->{"RETVAL"} = $self->{xsub_return_type};
 
           # If it looks like the output typemap code can be hacked to
           # use a TARG to optimise returning the value (rather than
@@ -1539,7 +1534,6 @@ EOF
       {
         my $var = $param->{var};
         $self->generate_output( {
-            type        => $self->{xsub_map_argname_to_type}->{$var},
             num         => $param->{arg_num},
             var         => $var,
             do_setmagic => $self->{xsub_SETMAGIC_state},
@@ -1639,7 +1633,6 @@ EOF
         else {
           # Emit a normal RETVAL
           $self->generate_output( {
-            type        => $self->{xsub_return_type},
             num         => 0,
             var         => 'RETVAL',
             do_setmagic => 0,   # RETVAL almost never needs SvSETMAGIC()
@@ -1662,7 +1655,6 @@ EOF
         my $var = $param->{var};
         $self->generate_output(
           {
-            type        => $self->{xsub_map_argname_to_type}->{$var},
             num         => $num++,
             var         => $var,
             do_setmagic => 0,
@@ -2522,10 +2514,6 @@ sub OUTPUT_handler {
       next;
     }
 
-    $self->blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
-      unless defined $self->{xsub_map_argname_to_type}->{$outarg};
-
-
     # Emit the custom var-setter code if present; else use the one from
     # the OUTPUT typemap.
 
@@ -2536,7 +2524,6 @@ sub OUTPUT_handler {
     }
     else {
       $self->generate_output( {
-        type        => $self->{xsub_map_argname_to_type}->{$outarg},
         num         => $var_num,
         var         => $outarg,
         do_setmagic => $self->{xsub_SETMAGIC_state},
@@ -3473,7 +3460,6 @@ sub fetch_para {
 
 # $self->generate_output({ key = value, ... })
 #
-#   type        'char *' etc
 #   num         the parameter number, corresponds to ST(num-1)
 #   var         the parameter name, such as 'RETVAL'
 #   do_setmagic whether to call set magic after assignment
@@ -3517,8 +3503,28 @@ sub fetch_para {
 sub generate_output {
   my ExtUtils::ParseXS $self = shift;
   my $argsref = shift;
-  my ($type, $num, $var, $do_setmagic, $do_push)
-    = @{$argsref}{qw(type num var do_setmagic do_push)};
+  my ($num, $var, $do_setmagic, $do_push)
+    = @{$argsref}{qw(num var do_setmagic do_push)};
+
+  # Determine type - this is usually from the 'type' field of the
+  # associated param object in the Sig object, but with special cases.
+  my $type;
+  if ($var eq 'RETVAL') {
+    $type = $self->{xsub_return_type};
+  }
+  else {
+    my $sig = $self->{xsub_sig};
+    my $param = $sig->{names}{$var};
+    if ($param) {
+      $type = $param->{type};
+      $type = $param->{soft_type} unless defined $type;
+    }
+  }
+
+  unless (defined $type) {
+    $self->blurt("Can't determine output type for '$var'");
+    next;
+  }
 
   my $arg = $self->ST($num, 1);
 
