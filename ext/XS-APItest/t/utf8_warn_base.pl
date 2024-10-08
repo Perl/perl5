@@ -1551,9 +1551,9 @@ foreach my $test (@tests) {
                   # Test partial character handling, for each byte not a
                   # full character
                   my $did_test_partial = 0;
-                  for (my $j = 1; $j < $this_length - 1; $j++) {
+                  for (my $byte_count = 1; $byte_count < $this_expected_len - 1; $byte_count++) {
                       $did_test_partial = 1;
-                      my $partial = substr($this_bytes, 0, $j);
+                      my $partial = substr($this_bytes, 0, $byte_count);
                       my $ret_should_be;
                       my $comment;
                       if ($disallow_type || $malformations_name) {
@@ -1582,7 +1582,7 @@ foreach my $test (@tests) {
                               $needed_to_tell = $dl if $dl < $needed_to_tell;
                           }
 
-                          if ($j < $needed_to_tell) {
+                          if ($byte_count < $needed_to_tell) {
                               $ret_should_be = 1;
                               $comment .= ", but need $needed_to_tell"
                                         . " bytes to discern:";
@@ -1596,7 +1596,7 @@ foreach my $test (@tests) {
                       undef @warnings_gotten;
 
                       $ret = test_is_utf8_valid_partial_char_flags($partial,
-                                                      $j, $disallow_flags);
+                                                      $byte_count, $disallow_flags);
                       is($ret, $ret_should_be,
                           "    And is_utf8_valid_partial_char_flags("
                           . display_bytes($partial)
