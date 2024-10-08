@@ -1051,15 +1051,14 @@ EOM
         # Process 'length(foo)' pseudo-parameter
 
         my $is_length;
-        my $name = $name_or_lenname;
+        my $len_name;
 
         if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
           if ($self->{config_allow_argtypes}) {
-            $name = $1;
-            $name_or_lenname = "XSauto_length_of_$name";
+            $len_name = $1;
             $is_length = 1;
             if (defined $default) {
-              $self->blurt("Default value not allowed on length() parameter '$name'");
+              $self->blurt("Default value not allowed on length() parameter '$len_name'");
               undef $default;
             }
           }
@@ -1072,13 +1071,12 @@ EOM
         # and which thus don't need a matching INPUT line.
 
         if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-          @$param{qw(type var is_ansi)} = ($type, $name, 1);
+          @$param{qw(type is_ansi)} = ($type, 1);
 
           if ($is_length) {
             $param->{no_init}   = 1;
             $param->{is_length} = 1;
-            $param->{len_name}  = $name;
-            $param->{var}       = $name_or_lenname;
+            $param->{len_name}  = $len_name;
           }
           else {
             $param->{no_init}   = 1 if $out_type =~ /^OUT/;
