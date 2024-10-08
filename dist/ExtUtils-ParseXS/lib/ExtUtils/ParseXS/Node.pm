@@ -557,7 +557,7 @@ sub parse {
       # regex doesn't work. This code path should ideally never be
       # reached, and indicates a design weakness in $C_arg.
       @param_texts = split(/\s*,\s*/, $sig_text);
-      Warn($pxs, "Warning: cannot parse argument list '$sig_text', fallback to split");
+      Warn($pxs, "Warning: cannot parse parameter list '$sig_text', fallback to split");
     }
   }
   else {
@@ -649,7 +649,7 @@ sub parse {
 
     if (exists $self->{names}{$name}) {
       $pxs->blurt(
-          "Error: duplicate definition of argument '$name' ignored");
+          "Error: duplicate definition of parameter '$name' ignored");
       next;
     }
 

@@ -2087,7 +2087,7 @@ sub INPUT_handler {
             (\w+ | length\(\w+\)) # name or length(name)
             $
           /xs
-      or $self->blurt("Error: invalid argument declaration '$ln'"), next;
+      or $self->blurt("Error: invalid parameter declaration '$ln'"), next;
 
     # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
@@ -2116,7 +2116,7 @@ sub INPUT_handler {
           or (!$param->{is_synthetic} and exists $param->{type})
       ) {
           $self->blurt(
-            "Error: duplicate definition of argument '$var_name' ignored");
+            "Error: duplicate definition of parameter '$var_name' ignored");
           next;
       }
       $param->{in_input} = 1;
@@ -2230,7 +2230,7 @@ sub OUTPUT_handler {
     #
     my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
 
-    $self->blurt("Error: duplicate OUTPUT argument '$outarg' ignored"), next
+    $self->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored"), next
       if $self->{xsub_map_varname_to_seen_in_OUTPUT}->{$outarg}++;
 
     if (!$self->{xsub_seen_RETVAL_in_OUTPUT} and $outarg eq 'RETVAL') {
@@ -2251,7 +2251,7 @@ sub OUTPUT_handler {
                     : $self->{xsub_sig}{names}{$outarg}{arg_num};
 
     unless (defined $var_num) {
-      $self->blurt("Error: OUTPUT $outarg not an argument");
+      $self->blurt("Error: OUTPUT $outarg not an parameter");
       next;
     }
 

@@ -894,7 +894,7 @@ EOF
 
     for my $var (qw(a b c alien)) {
         my $count = () =
-            $stderr =~ /duplicate definition of argument '$var'/g;
+            $stderr =~ /duplicate definition of parameter '$var'/g;
         is($count, 1, "One dup error for \"$var\"");
     }
 }
@@ -1190,7 +1190,7 @@ EOF
                 'int',
                 'X::Y::f1(THIS, int i)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS' /,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS' /,
                  "C++: f1 dup THIS" ],
         ],
 
@@ -1200,7 +1200,7 @@ EOF
                 'int',
                 'X::Y::f2(int THIS, int i)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS' /,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS' /,
                  "C++: f2 dup THIS" ],
         ],
 
@@ -1210,7 +1210,7 @@ EOF
                 'int',
                 'X::Y::new(int CLASS, int i)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS' /,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS' /,
                  "C++: new dup CLASS" ],
         ],
 
@@ -1251,7 +1251,7 @@ EOF
                 '    int THIS',
                 '    long THIS',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
 
@@ -1262,7 +1262,7 @@ EOF
                 'int',
                 'X::Y::f6(int THIS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
 
@@ -1273,7 +1273,7 @@ EOF
                 'int',
                 'X::Y::f7(THIS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'THIS'/,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
 
@@ -1300,7 +1300,7 @@ EOF
                 '    int CLASS',
                 '    long CLASS',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
@@ -1311,7 +1311,7 @@ EOF
                 'int',
                 'X::Y::new(int CLASS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
@@ -1322,7 +1322,7 @@ EOF
                 'int',
                 'X::Y::new(CLASS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of argument 'CLASS'/,
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
