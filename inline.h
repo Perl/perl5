@@ -2227,7 +2227,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
  *                  immediately after it.
  */
 
-#define DFA_RETURN_SUCCESS_      return s - s0
+#define DFA_RETURN_SUCCESS_      return (s8dfa_ - s0)
 #define DFA_RETURN_FAILURE_      return 0
 #ifdef HAS_EXTRA_LONG_UTF8
 #  define DFA_TEASE_APART_FF_  goto tease_apart_FF
@@ -2240,15 +2240,15 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
                               reject_action,                                \
                               incomplete_char_action)                       \
     STMT_START {                                                            \
-        const U8 * s = s0;                                                  \
-        const U8 * const e_ = e;                                            \
+        const U8 * s8dfa_ = s0;                                             \
+        const U8 * const e8dfa_ = e;                                        \
         UV state = 0;                                                       \
                                                                             \
-        PERL_NON_CORE_CHECK_EMPTY(s, e_);                                   \
+        PERL_NON_CORE_CHECK_EMPTY(s8dfa_, e8dfa_);                          \
                                                                             \
         do {                                                                \
-            state = dfa_tab[256 + state + dfa_tab[*s]];                     \
-            s++;                                                            \
+            state = dfa_tab[256 + state + dfa_tab[*s8dfa_]];                \
+            s8dfa_++;                                                       \
                                                                             \
             if (state == 0) {   /* Accepting state */                       \
                 accept_action;                                              \
@@ -2257,7 +2257,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
             if (UNLIKELY(state == 1)) { /* Rejecting state */               \
                 reject_action;                                              \
             }                                                               \
-        } while (s < e_);                                                   \
+        } while (s8dfa_ < e8dfa_);                                          \
                                                                             \
         /* Here, dropped out of loop before end-of-char */                  \
         incomplete_char_action;                                             \
