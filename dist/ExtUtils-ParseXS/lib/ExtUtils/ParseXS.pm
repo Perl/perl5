@@ -1079,12 +1079,10 @@ EOM
             $param->{is_length} = 1;
             $param->{len_name}  = $len_name;
           }
-          else {
-            $param->{no_init}   = 1 if $out_type =~ /^OUT/;
-          }
         }
 
         $param->{in_out} = $out_type if length $out_type;
+        $param->{no_init} = 1        if $out_type =~ /^OUT/;
 
         # Process the default expression, including making the text
         # to be used in "usage: ..." error messages.
@@ -2401,9 +2399,10 @@ sub INPUT_handler {
 
     # Parse the initialisation part of the INPUT line (if any)
 
-    my ($init, $no_init, $defer);
+    my ($init, $defer);
+    my $no_init = $param->{no_init}; # may have had OUT in signature
 
-    if (defined $init_op) {
+    if (!$no_init && defined $init_op) {
       # Emit the init code based on overridden $var_init, which was
       # preceded by /[=;+]/ which has been extracted into $init_op
 
@@ -2434,12 +2433,8 @@ sub INPUT_handler {
     }
     else {
       # no initialiser: emit var and init code based on typemap entry,
-      # unless:
-      #  - its alien (so no stack arg to bind to it), or
-      #  - its an OUT-only var, so not initialised from the arg
-      $no_init = 1
-          if (   $is_alien
-              or defined $param->{in_out} and $param->{in_out} =~ /^OUT/) 
+      # unless: it's alien (so no stack arg to bind to it)
+      $no_init = 1 if $is_alien;
     }
 
     %$param = (
