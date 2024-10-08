@@ -533,9 +533,9 @@ sub parse {
   $self->{sig_text} =~ s/\\\s*/ /g;
   my $sig_text = $self->{sig_text};
 
-  my @args;
-  my $optional_args_count = 0;# how many default params seen
-  my $args_count = 0;         # how many args are expected
+  my @param_texts;
+  my $opt_args = 0; # how many params with default values seen
+  my $nargs    = 0; # how many args are expected
 
   # First, split signature into separate parameters
 
@@ -550,21 +550,21 @@ sub parse {
       # regex, do so. This splits the params on commas, but can handle
       # things like foo(a = ",", b)
       use re 'eval';
-      @args = ($sig_c =~ /\G ( (??{ $C_arg }) ) , /xg);
+      @param_texts = ($sig_c =~ /\G ( (??{ $C_arg }) ) , /xg);
     }
     else {
       # This is the fallback parameter-splitting path for when the $C_arg
       # regex doesn't work. This code path should ideally never be
       # reached, and indicates a design weakness in $C_arg.
-      @args = split(/\s*,\s*/, $sig_text);
+      @param_texts = split(/\s*,\s*/, $sig_text);
       Warn($pxs, "Warning: cannot parse argument list '$sig_text', fallback to split");
     }
   }
   else {
-    @args = ();
+    @param_texts = ();
   }
 
-  # C++ methods get a fake object/class arg at the start.
+  # C++ methods get a fake object/class param at the start.
   # This affects arg numbering.
   if (defined($pxs->{xsub_class})) {
     my ($var, $type) =
@@ -577,14 +577,14 @@ sub parse {
             var          => $var,
             type         => $type,
             is_synthetic => 1,
-            arg_num      => ++$args_count,
+            arg_num      => ++$nargs,
           });
     push @{$self->{params}}, $param;
     $self->{names}{$var} = $param;
     $param->check($pxs)
   }
 
-  for (@args) {
+  for (@param_texts) {
     # Process each parameter. A parameter is of the general form:
     #
     #    OUT char* foo = expression
@@ -718,7 +718,7 @@ sub parse {
     # to be used in "usage: ..." error messages.
     my $report_def = '';
     if (defined $default) {
-      $optional_args_count++;
+      $opt_args++;
       # The default expression for reporting usage. For backcompat,
       # sometimes preserve the spaces either side of the '='
       $report_def =    ((defined $type or $is_length) ? '' : $sp1)
@@ -731,13 +731,14 @@ sub parse {
       $param->{arg_num} = undef;
     }
     else {
-      $param->{arg_num} = ++$args_count;
+      $param->{arg_num} = ++$nargs;
     }
-  } # for (@args)
+  } # for (@param_texts)
 
-  $self->{nargs}    = $args_count;
-  $self->{min_args} = $args_count - $optional_args_count;
+  $self->{nargs}    = $nargs;
+  $self->{min_args} = $nargs - $opt_args;
 }
+
 
 # Return a string to be used in "usage: .." error messages.
 
