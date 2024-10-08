@@ -1250,7 +1250,7 @@ EOF
 
       for my $param (
               grep {
-                     exists $_->{in_out}
+                     defined $_->{in_out}
                   && $_->{in_out} =~ /OUT$/
                   && !$self->{xsub_map_varname_to_seen_in_OUTPUT}{$_->{var}}
               }

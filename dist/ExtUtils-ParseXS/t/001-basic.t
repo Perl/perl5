@@ -29,8 +29,10 @@ require_ok( 'ExtUtils::ParseXS' );
 chdir('t') if -d 't';
 push @INC, '.';
 
-$ExtUtils::ParseXS::DIE_ON_ERROR = 1;
-$ExtUtils::ParseXS::AUTHOR_WARNINGS = 1;
+package ExtUtils::ParseXS;
+our $DIE_ON_ERROR = 1;
+our $AUTHOR_WARNINGS = 1;
+package main;
 
 use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 
