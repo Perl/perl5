@@ -2248,16 +2248,15 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
                                                                             \
         do {                                                                \
             state = dfa_tab[256 + state + dfa_tab[*s8dfa_]];                \
-            s8dfa_++;                                                       \
+        } while (++s8dfa_ < e8dfa_ && state > 1);                           \
                                                                             \
-            if (state == 0) {   /* Accepting state */                       \
-                accept_action;                                              \
-            }                                                               \
+        if (LIKELY(state == 0)) {   /* Accepting state */                   \
+            accept_action;                                                  \
+        }                                                                   \
                                                                             \
-            if (UNLIKELY(state == 1)) { /* Rejecting state */               \
-                reject_action;                                              \
-            }                                                               \
-        } while (s8dfa_ < e8dfa_);                                          \
+        if (state == 1) { /* Rejecting state */                             \
+            reject_action;                                                  \
+        }                                                                   \
                                                                             \
         /* Here, dropped out of loop before end-of-char */                  \
         incomplete_char_action;                                             \
