@@ -985,9 +985,10 @@ EOM
           next;
         }
 
-        # Decompose parameter into its components
+        # Decompose parameter into its components.
+        # Note that $name can be either 'foo' or 'length(foo)'
 
-        my ($out_type, $type, $name_or_lenname, $sp1, $sp2, $default) =
+        my ($out_type, $type, $name, $sp1, $sp2, $default) =
             /^
                (?:
                  (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
@@ -1006,24 +1007,24 @@ EOM
              $
             /x;
 
-        unless (defined $name_or_lenname) {
+        unless (defined $name) {
           $self->blurt("Unparseable XSUB parameter: '$_'");
           next;
         }
 
         my ExtUtils::ParseXS::Node::Param $param
             = ExtUtils::ParseXS::Node::Param->new( {
-                var => $name_or_lenname,
+                var => $name,
               });
 
-        if (exists $sig->{names}{$name_or_lenname}) {
+        if (exists $sig->{names}{$name}) {
           $self->blurt(
-              "Error: duplicate definition of argument '$name_or_lenname' ignored");
+              "Error: duplicate definition of argument '$name' ignored");
           next;
         }
 
         push @{$sig->{params}}, $param;
-        $sig->{names}{$name_or_lenname} = $param;
+        $sig->{names}{$name} = $param;
 
         # Process optional IN/OUT etc modifier
 
@@ -1053,7 +1054,7 @@ EOM
         my $is_length;
         my $len_name;
 
-        if ($name_or_lenname =~ /^length\( \s* (\w+) \s* \)\z/x) {
+        if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
           if ($self->{config_allow_argtypes}) {
             $len_name = $1;
             $is_length = 1;
