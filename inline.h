@@ -2241,7 +2241,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
                               incomplete_char_action)                       \
     STMT_START {                                                            \
         const U8 * s = s0;                                                  \
-        const U8 * e_ = e;                                                  \
+        const U8 * const e_ = e;                                            \
         UV state = 0;                                                       \
                                                                             \
         PERL_NON_CORE_CHECK_EMPTY(s, e_);                                   \
