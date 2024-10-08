@@ -88,25 +88,32 @@ BEGIN {
 
     our @FIELDS = (
         @ExtUtils::ParseXS::Node::FIELDS,
-        'type',      # The C type of the parameter
-        'arg_num',   # The arg number (starting at 1) mapped to this param
+
+        # values derived from the XSUB's signature
+        'in_out',    # The IN/OUT/OUTLIST etc value (if any)
         'var',       # the name of the parameter
+        'arg_num',   # The arg number (starting at 1) mapped to this param
         'default',   # default value (if any)
         'default_usage', # how to report default value in "usage:..." error
-        'proto',     # overridden prototype char(s) (if any) from typemap
-        'in_out',    # The IN/OUT/OUTLIST etc value (if any)
-        'defer',     # deferred initialisation template code
-        'init',      # initialisation template code
-        'init_op',   # initialisation type: one of =/+/;
-        'no_init',   # don't initialise the parameter
-        'is_addr',   # INPUT var declared as '&foo'
         'is_ansi',   # param's type was specified in signature
         'is_length', # param is declared as 'length(foo)' in signature
         'len_name' , # the 'foo' in 'length(foo)' in signature
-        'is_alien',  # var declared in INPUT line, but not in signature
         'is_synthetic',# var like 'THIS' - we pretend it was in the sig
+
+        # values derived from both the XSUB's signature and/or INPUT line
+        'type',      # The C type of the parameter
+        'no_init',   # don't initialise the parameter
+
+        # values derived from the XSUB's INPUT line
+        'init_op',   # initialisation type: one of =/+/;
+        'init',      # initialisation template code
+        'is_addr',   # INPUT var declared as '&foo'
+        'is_alien',  # var declared in INPUT line, but not in signature
         'in_input',  # the parameter has appeared in an INPUT statement
 
+        # derived values calculated later
+        'defer',     # deferred initialisation template code
+        'proto',     # overridden prototype char(s) (if any) from typemap
     );
 
     fields->import(@FIELDS) if $USING_FIELDS;
