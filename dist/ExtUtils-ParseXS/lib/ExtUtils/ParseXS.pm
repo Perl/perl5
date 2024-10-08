@@ -881,7 +881,7 @@ EOM
     # Split $self->{xsub_sub}{sig_text} into parameters, parse them,
     # and store them as Node::Param objects within the Node::Sig object.
 
-    $self->parse_sig();
+    $sig->parse($self);
 
     # ----------------------------------------------------------------
     # Peek ahead into the body of the XSUB looking for various conditions
@@ -1894,13 +1894,13 @@ EOF
 #
 # ----------------------------------------------------------------
 
-sub parse_sig {
-  my ExtUtils::ParseXS            $self = shift;
-  my ExtUtils::ParseXS::Node::Sig $sig  = $self->{xsub_sig};
+sub ExtUtils::ParseXS::Node::Sig::parse {
+  my ExtUtils::ParseXS::Node::Sig $self = shift;
+  my ExtUtils::ParseXS            $pxs  = shift;
 
   # remove line continuation chars (\)
-  $sig->{sig_text} =~ s/\\\s*/ /g;
-  my $sig_text = $sig->{sig_text};
+  $self->{sig_text} =~ s/\\\s*/ /g;
+  my $sig_text = $self->{sig_text};
 
   my @args;
   my $optional_args_count = 0;# how many default params seen
@@ -1926,7 +1926,7 @@ sub parse_sig {
       # regex doesn't work. This code path should ideally never be
       # reached, and indicates a design weakness in $C_arg.
       @args = split(/\s*,\s*/, $sig_text);
-      Warn( $self, "Warning: cannot parse argument list '$sig_text', fallback to split");
+      Warn($pxs, "Warning: cannot parse argument list '$sig_text', fallback to split");
     }
   }
   else {
@@ -1935,11 +1935,11 @@ sub parse_sig {
 
   # C++ methods get a fake object/class arg at the start.
   # This affects arg numbering.
-  if (defined($self->{xsub_class})) {
+  if (defined($pxs->{xsub_class})) {
     my ($var, $type) =
-      ($self->{xsub_seen_static} or $self->{xsub_func_name} eq 'new')
+      ($pxs->{xsub_seen_static} or $pxs->{xsub_func_name} eq 'new')
         ? ('CLASS', "char *")
-        : ('THIS',  "$self->{xsub_class} *");
+        : ('THIS',  "$pxs->{xsub_class} *");
 
     my ExtUtils::ParseXS::Node::Param $param
         = ExtUtils::ParseXS::Node::Param->new( {
@@ -1948,9 +1948,9 @@ sub parse_sig {
             is_synthetic => 1,
             arg_num      => ++$args_count,
           });
-    push @{$sig->{params}}, $param;
-    $sig->{names}{$var} = $param;
-    $param->check($self)
+    push @{$self->{params}}, $param;
+    $self->{names}{$var} = $param;
+    $param->check($pxs)
   }
 
   for (@args) {
@@ -1960,27 +1960,27 @@ sub parse_sig {
     #
     #  where:
     #    IN/OUT/OUTLIST etc are only allowed under
-    #                      $self->{config_allow_inout}
+    #                      $pxs->{config_allow_inout}
     #
     #    a C type       is only allowed under
-    #                      $self->{config_allow_argtypes}
+    #                      $pxs->{config_allow_argtypes}
     #
     #    foo            can be a plain C variable name, or can be
-    #    length(foo)    but only under $self->{config_allow_argtypes}
+    #    length(foo)    but only under $pxs->{config_allow_argtypes}
     #
     #    = default      default value - only allowed under
-    #                      $self->{config_allow_argtypes}
+    #                      $pxs->{config_allow_argtypes}
 
     s/^\s+//;
     s/\s+$//;
 
     # Process ellipsis (...)
 
-    $self->blurt("further XSUB parameter seen after ellipsis (...)")
-      if $sig->{seen_ellipsis};
+    $pxs->blurt("further XSUB parameter seen after ellipsis (...)")
+      if $self->{seen_ellipsis};
 
     if ($_ eq '...') {
-      $sig->{seen_ellipsis} = 1;
+      $self->{seen_ellipsis} = 1;
       next;
     }
 
@@ -2007,7 +2007,7 @@ sub parse_sig {
         /x;
 
     unless (defined $name) {
-      $self->blurt("Unparseable XSUB parameter: '$_'");
+      $pxs->blurt("Unparseable XSUB parameter: '$_'");
       next;
     }
 
@@ -2016,23 +2016,23 @@ sub parse_sig {
             var => $name,
           });
 
-    if (exists $sig->{names}{$name}) {
-      $self->blurt(
+    if (exists $self->{names}{$name}) {
+      $pxs->blurt(
           "Error: duplicate definition of argument '$name' ignored");
       next;
     }
 
-    push @{$sig->{params}}, $param;
-    $sig->{names}{$name} = $param;
+    push @{$self->{params}}, $param;
+    $self->{names}{$name} = $param;
 
     # Process optional IN/OUT etc modifier
 
     if (defined $out_type) {
-      if ($self->{config_allow_inout}) {
+      if ($pxs->{config_allow_inout}) {
         $out_type =  $1 eq 'IN' ? '' : $1;
       }
       else {
-        $self->blurt("parameter IN/OUT modifier not allowed under -noinout");
+        $pxs->blurt("parameter IN/OUT modifier not allowed under -noinout");
       }
     }
     else {
@@ -2043,8 +2043,8 @@ sub parse_sig {
 
     undef $type unless length($type) && $type =~ /\S/;
 
-    if (defined($type) && !$self->{config_allow_argtypes}) {
-      $self->blurt("parameter type not allowed under -noargtypes");
+    if (defined($type) && !$pxs->{config_allow_argtypes}) {
+      $pxs->blurt("parameter type not allowed under -noargtypes");
       undef $type;
     }
 
@@ -2054,16 +2054,16 @@ sub parse_sig {
     my $len_name;
 
     if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-      if ($self->{config_allow_argtypes}) {
+      if ($pxs->{config_allow_argtypes}) {
         $len_name = $1;
         $is_length = 1;
         if (defined $default) {
-          $self->blurt("Default value not allowed on length() parameter '$len_name'");
+          $pxs->blurt("Default value not allowed on length() parameter '$len_name'");
           undef $default;
         }
       }
       else {
-        $self->blurt("length() pseudo-parameter not allowed under -noargtypes");
+        $pxs->blurt("length() pseudo-parameter not allowed under -noargtypes");
       }
     }
 
@@ -2104,8 +2104,8 @@ sub parse_sig {
     }
   } # for (@args)
 
-  $sig->{nargs}    = $args_count;
-  $sig->{min_args} = $args_count - $optional_args_count;
+  $self->{nargs}    = $args_count;
+  $self->{min_args} = $args_count - $optional_args_count;
 }
 
 
