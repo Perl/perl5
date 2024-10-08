@@ -240,7 +240,7 @@ eval <<'CODE';
     no warnings qw(deprecated syntax);
     my @result = sort main'Backwards 'one', 'two';
 CODE
-cmp_ok($@,'ne','',q(old skool package));
+cmp_ok($@,'eq','',q(old skool package));
 
 eval <<'CODE';
     # "sort 'one', 'two'" should not try to parse "'one" as a sort sub

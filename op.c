@@ -10717,7 +10717,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
            ec ? GV_NOADD_NOINIT
               :   (IN_PERL_RUNTIME && PL_curstash != CopSTASH(PL_curcop))
                || PL_curstash != PL_defstash
-               || memchr(name, ':', namlen)
+               || memchr(name, ':', namlen) || memchr(name, '\'', namlen)
                     ? gv_fetch_flags
                     : GV_ADDMULTI | GV_NOINIT | GV_NOTQUAL;
         gv = gv_fetchsv(cSVOPo->op_sv, flags, SVt_PVCV);
@@ -13380,6 +13380,7 @@ Perl_ck_method(pTHX_ OP *o)
 {
     SV *sv, *methsv, *rclass;
     const char* method;
+    char* compatptr;
     int utf8;
     STRLEN len, nsplit = 0, i;
     OP* new_op;
@@ -13389,6 +13390,14 @@ Perl_ck_method(pTHX_ OP *o)
     if (kid->op_type != OP_CONST) return o;
 
     sv = kSVOP->op_sv;
+
+    /* replace ' with :: */
+    while ((compatptr = (char *) memchr(SvPVX(sv), '\'',
+                                        SvEND(sv) - SvPVX(sv) )))
+    {
+        *compatptr = ':';
+        sv_insert(sv, compatptr - SvPVX_const(sv), 0, ":", 1);
+    }
 
     method = SvPVX_const(sv);
     len = SvCUR(sv);
