@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 179;
+use Test::More tests => 182;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -883,6 +883,8 @@ EOF
         |    int b;
         |    int b;
         |    int c;
+        |    int alien;
+        |    int alien;
 EOF
 
     tie *FH, 'Capture';
@@ -890,7 +892,7 @@ EOF
         $pxs->process_file( filename => \$text, output => \*FH);
     });
 
-    for my $var (qw(a b c)) {
+    for my $var (qw(a b c alien)) {
         my $count = () =
             $stderr =~ /duplicate definition of argument '$var'/g;
         is($count, 1, "One dup error for \"$var\"");
@@ -1481,6 +1483,9 @@ EOF
         |X::Y *        T_OBJECT
         |const X::Y *  T_OBJECT \&
         |
+        |P::Q *        T_OBJECT @
+        |const P::Q *  T_OBJECT %
+        |
         |INPUT
         |T_OBJECT
         |    $var = my_in($arg);
@@ -1553,6 +1558,16 @@ EOF
                 'X::Y::foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
             ],
             [ 0, 0, qr/"\$\$\$\$;\$\@"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with overridden THIS type",
+            [
+                'void',
+                'P::Q::foo()',
+                '    const P::Q * THIS'
+            ],
+            [ 0, 0, qr/"%"/, "" ],
         ],
 
         [

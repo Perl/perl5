@@ -2363,9 +2363,11 @@ sub INPUT_handler {
     $self->{xsub_seen_RETVAL_in_INPUT} |= $var_name eq "RETVAL";
 
     my ($var_num, $is_alien);
-    my $sig_param = $self->{xsub_sig}{names}{$var_name};
 
-    if (defined $sig_param) {
+    my ExtUtils::ParseXS::Node::Param $param
+          = $self->{xsub_sig}{names}{$var_name};
+
+    if (defined $param) {
       # The var appeared in the signature too.
 
       # Check for duplicate definitions of a particular parameter name.
@@ -2374,21 +2376,28 @@ sub INPUT_handler {
       # and thus shouldn't be defined again. The exception to this are
       # synthetic params like THIS, which are assigned a provisional type
       # which can be overridden.
-      if (   $sig_param->{in_input}
-          or (!$sig_param->{is_synthetic} and exists $sig_param->{type})
+      if (   $param->{in_input}
+          or (!$param->{is_synthetic} and exists $param->{type})
       ) {
           $self->blurt(
             "Error: duplicate definition of argument '$var_name' ignored");
           next;
       }
-      $sig_param->{in_input} = 1;
-      $var_num = $sig_param->{arg_num};
+      $param->{in_input} = 1;
+      $var_num = $param->{arg_num};
     }
     else {
       # The var is in an INPUT line, but not in signature. Treat it as a
       # general var declaration (which really should have been in a
       # PREINIT section). Legal but nasty: flag is as 'alien'
       $is_alien = 1;
+      $param = ExtUtils::ParseXS::Node::Param->new({
+                  var      => $var_name,
+                  is_alien => 1,
+               });
+
+      push @{$self->{xsub_sig}{params}}, $param;
+      $self->{xsub_sig}{names}{$var_name} = $param;
     }
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -2442,8 +2451,16 @@ sub INPUT_handler {
       $no_init = 1;
     }
 
-  my ExtUtils::ParseXS::Node::Param $param =
-     ExtUtils::ParseXS::Node::Param->new({
+    if (    defined $param->{in_out}
+        and  $param->{in_out} =~ /^OUT/
+        and !defined $init_op
+    ) {
+        # OUT* class: skip initialisation
+        $no_init = 1;
+    }
+
+    %$param = (
+      %$param,
       type    => $var_type,
       arg_num => $var_num,
       var     => $var_name,
@@ -2452,8 +2469,7 @@ sub INPUT_handler {
       init_op => $init_op,
       no_init => $no_init,
       is_addr => !!$var_addr,
-      is_alien=> $is_alien,
-    });
+    );
 
     $param->check($self)
       or next;
@@ -2464,7 +2480,7 @@ sub INPUT_handler {
     # Synthetic params like THIS will be emitted later - they
     # are treated like ANSI params, except the type can overridden
     # within an INPUT statement
-    next if $sig_param->{is_synthetic};
+    next if $param->{is_synthetic};
 
     $param->as_code($self);
 

@@ -115,8 +115,7 @@ BEGIN {
 
 
 # check(): for a parsed INPUT line and/or typed parameter in a signature,
-# update some global state and do some checks (e.g. "duplicate argument"
-# error).
+# update some global state and do some checks
 #
 # Return true if checks pass.
 
@@ -128,34 +127,15 @@ sub check {
 
     # Get the overridden prototype character, if any, associated with the
     # typemap entry for this var's type.
+    # Note that something with a provisional type such as THIS can get
+    # the type changed later. It is important to update each time.
+    # It also can't be looked up only at BOOT code emitting time, because
+    # potentiall, the typmap may been bee updated last in the XS file
+    # after the XSUB was parsed.
     if ($self->{arg_num}) {
         my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $type);
         my $p = $typemap && $typemap->proto;
         $self->{proto} = $p if defined $p && length $p;
-    }
-
-    # XXX tmp workaround during code refactoring
-    # Copy any relevant fields from the param object (if any) for the
-    # param of the same name declared in the signature, to the INPUT param
-    # object.
-    my ExtUtils::ParseXS::Node::Param $sigp =
-        $pxs->{xsub_sig}{names}{$self->{var}};
-
-    if ($sigp) {
-        for (qw(default)) {
-            $self->{$_} = $sigp->{$_} if exists $sigp->{$_};
-        }
-        if (    defined $sigp->{in_out}
-            and  $sigp->{in_out} =~ /^OUT/
-            and !defined($self->{init_op})
-        ) {
-            # OUT* class: skip initialisation
-            $self->{no_init} = 1;
-        }
-        # XXX also tmp copy some stuff back to the sig param
-        for(qw(is_addr in_out proto type)) {
-            $sigp->{$_} = $self->{$_} if exists $self->{$_};
-        }
     }
   
     return 1;
