@@ -2404,59 +2404,43 @@ sub INPUT_handler {
 
     my ($init, $no_init, $defer);
 
-    if (        defined $init_op
-            and $init_op =~ /^[=;]$/
-            and $var_init =~ /^NO_INIT\s*;?\s*$/
-    ) {
-      # NO_INIT: skip initialisation
-      $no_init = 1;
-    }
-
-    elsif (defined $init_op) {
+    if (defined $init_op) {
       # Emit the init code based on overridden $var_init, which was
       # preceded by /[=;+]/ which has been extracted into $init_op
 
-      if ($init_op  eq '=') {
+      if (    $init_op =~ /^[=;]$/
+          and $var_init =~ /^NO_INIT\s*;?\s*$/
+      ) {
+        # NO_INIT: skip initialisation
+        $no_init = 1;
+      }
+      elsif ($init_op  eq '=') {
         # Overridden typemap, such as '= ($type)SvUV($arg)'
         $var_init =~ s/;\s*$//;
-
         $init = $var_init,
       }
       else {
         # "; extra code" or "+ extra code" :
         # append the extra code (after passing through eval) after all the
-        # INPUT and PREINIT blocks have been processed, using the
-        # $self->{xsub_deferred_code_lines} mechanism.
-        # In addition, for '+', also generate the normal initialisation code
-        # from the standard typemap - assuming that it's a real parameter
-        # that appears in the signature as well as the INPUT line.
-
-        # if '+' on a real var, generate init from typemap,
-        # else (';' or fake var), skip init.
+        # INPUT and PREINIT blocks have been processed, indirectly using
+        # the $self->{xsub_deferred_code_lines} mechanism.
+        # In addition, for '+', also generate the normal initialisation
+        # code from the standard typemap - assuming that it's a real
+        # parameter that appears in the signature as well as the INPUT
+        # line.
         $no_init = !($init_op eq '+' && !$is_alien);
         # But in either case, add the deferred code
-        $defer = $var_init,
+        $defer = $var_init;
       }
     }
-
-    elsif (!$is_alien) {
-      # Emit var and init code based on typemap entry
-    }
     else {
-      # A parameter which has been declared (with no initialiser) in the
-      # INPUT section, but which hasn't also been declared in the XSUB's
-      # signature.  Should be illegal, but people rely on it,
-      # For such a variable, don't use a typemap, because there's no value
-      # on the stack to be converted.
-      $no_init = 1;
-    }
-
-    if (    defined $param->{in_out}
-        and  $param->{in_out} =~ /^OUT/
-        and !defined $init_op
-    ) {
-        # OUT* class: skip initialisation
-        $no_init = 1;
+      # no initialiser: emit var and init code based on typemap entry,
+      # unless:
+      #  - its alien (so no stack arg to bind to it), or
+      #  - its an OUT-only var, so not initialised from the arg
+      $no_init = 1
+          if (   $is_alien
+              or defined $param->{in_out} and $param->{in_out} =~ /^OUT/) 
     }
 
     %$param = (
