@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66879);
+plan (tests => 66880);
 
 # ${single:colon} should not be treated as a simple variable, but as a
 # block with a label inside.
@@ -35,11 +35,16 @@ plan (tests => 66879);
         );
 }
 
-# and ${yadda::etc} should both work under strict
+# ${yadda'etc} and ${yadda::etc} should both work under strict
 {
     local $@;
     eval q<use strict; ${flark::fleem}>;
     is($@, '', q<${package::var} works>);
+
+    no warnings qw(syntax deprecated);
+    local $@;
+    eval q<use strict; ${fleem'flark}>;
+    is($@, '', q<...as does ${package'var}>);
 }
 
 # The first character in ${...} should respect the rules

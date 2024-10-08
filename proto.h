@@ -4185,6 +4185,11 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
 #define PERL_ARGS_ASSERT_SCAN_WORD              \
         assert(s); assert(dest); assert(slp)
 
+PERL_CALLCONV char *
+Perl_scan_word6(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp, bool warn_tick);
+#define PERL_ARGS_ASSERT_SCAN_WORD6             \
+        assert(s); assert(dest); assert(slp)
+
 PERL_CALLCONV U32
 Perl_seed(pTHX);
 #define PERL_ARGS_ASSERT_SEED
@@ -9256,7 +9261,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, 
         assert(key); assert(sv)
 
 STATIC void
-S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
+S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar, bool tick_warn);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
         assert(s); assert(d); assert(e)
 
