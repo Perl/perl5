@@ -4,43 +4,45 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.91';
+our $VERSION = '1.92';
 
 our %feature = (
-    fc                      => 'feature_fc',
-    isa                     => 'feature_isa',
-    say                     => 'feature_say',
-    try                     => 'feature_try',
-    class                   => 'feature_class',
-    defer                   => 'feature_defer',
-    state                   => 'feature_state',
-    bitwise                 => 'feature_bitwise',
-    indirect                => 'feature_indirect',
-    evalbytes               => 'feature_evalbytes',
-    signatures              => 'feature_signatures',
-    current_sub             => 'feature___SUB__',
-    module_true             => 'feature_module_true',
-    refaliasing             => 'feature_refaliasing',
-    postderef_qq            => 'feature_postderef_qq',
-    unicode_eval            => 'feature_unieval',
-    declared_refs           => 'feature_myref',
-    unicode_strings         => 'feature_unicode',
-    multidimensional        => 'feature_multidimensional',
-    bareword_filehandles    => 'feature_bareword_filehandles',
-    extra_paired_delimiters => 'feature_more_delims',
+    fc                              => 'feature_fc',
+    isa                             => 'feature_isa',
+    say                             => 'feature_say',
+    try                             => 'feature_try',
+    class                           => 'feature_class',
+    defer                           => 'feature_defer',
+    state                           => 'feature_state',
+    bitwise                         => 'feature_bitwise',
+    indirect                        => 'feature_indirect',
+    evalbytes                       => 'feature_evalbytes',
+    signatures                      => 'feature_signatures',
+    current_sub                     => 'feature___SUB__',
+    module_true                     => 'feature_module_true',
+    refaliasing                     => 'feature_refaliasing',
+    postderef_qq                    => 'feature_postderef_qq',
+    unicode_eval                    => 'feature_unieval',
+    declared_refs                   => 'feature_myref',
+    unicode_strings                 => 'feature_unicode',
+    multidimensional                => 'feature_multidimensional',
+    bareword_filehandles            => 'feature_bareword_filehandles',
+    extra_paired_delimiters         => 'feature_more_delims',
+    apostrophe_as_package_separator => 'feature_apos_as_name_sep',
 );
 
 our %feature_bundle = (
-    "5.10"    => [qw(bareword_filehandles indirect multidimensional say state)],
-    "5.11"    => [qw(bareword_filehandles indirect multidimensional say state unicode_strings)],
-    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state unicode_eval unicode_strings)],
-    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state unicode_eval unicode_strings)],
-    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state unicode_eval unicode_strings)],
-    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
-    "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
-    "5.39"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state try unicode_eval unicode_strings)],
-    "default" => [qw(bareword_filehandles indirect multidimensional)],
+    "5.10"    => [qw(apostrophe_as_package_separator bareword_filehandles indirect multidimensional say state)],
+    "5.11"    => [qw(apostrophe_as_package_separator bareword_filehandles indirect multidimensional say state unicode_strings)],
+    "5.15"    => [qw(apostrophe_as_package_separator bareword_filehandles current_sub evalbytes fc indirect multidimensional say state unicode_eval unicode_strings)],
+    "5.23"    => [qw(apostrophe_as_package_separator bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state unicode_eval unicode_strings)],
+    "5.27"    => [qw(apostrophe_as_package_separator bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state unicode_eval unicode_strings)],
+    "5.35"    => [qw(apostrophe_as_package_separator bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
+    "5.37"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
+    "5.39"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
+    "5.41"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
+    "all"     => [qw(apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state try unicode_eval unicode_strings)],
+    "default" => [qw(apostrophe_as_package_separator bareword_filehandles indirect multidimensional)],
 );
 
 $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
@@ -66,8 +68,7 @@ $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.36"} = $feature_bundle{"5.35"};
 $feature_bundle{"5.38"} = $feature_bundle{"5.37"};
 $feature_bundle{"5.40"} = $feature_bundle{"5.39"};
-$feature_bundle{"5.41"} = $feature_bundle{"5.39"};
-$feature_bundle{"5.42"} = $feature_bundle{"5.39"};
+$feature_bundle{"5.42"} = $feature_bundle{"5.41"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -80,7 +81,7 @@ my %removed = (
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x3c000000;
-our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 5.35 5.37 5.39 );
+our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 5.35 5.37 5.39 5.41 );
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
@@ -506,6 +507,18 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 This feature enables the C<class> block syntax and other associated keywords
 which implement the "new" object system, previously codenamed "Corinna".
 
+=head2 The 'apostrophe_as_package_separator' feature
+
+This feature enables use C<'> (apostrophe) as an alternative to using
+C<::> as a separate in package and other global names.
+
+This is enabled by default, but disabled from the 5.41 feature bundle
+onwards.  In previous versions it was enabled all the time.
+
+This only disables C<'> in symbols in your source code, the internal
+conversion from C<'> to C<::>, including for symbolic references, is
+always enabled.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -520,71 +533,88 @@ The following feature bundles are available:
   --------- -----------------
   :default  indirect multidimensional
             bareword_filehandles
+            apostrophe_as_package_separator
 
-  :5.10     bareword_filehandles indirect
+  :5.10     apostrophe_as_package_separator
+            bareword_filehandles indirect
             multidimensional say state
 
-  :5.12     bareword_filehandles indirect
+  :5.12     apostrophe_as_package_separator
+            bareword_filehandles indirect
             multidimensional say state unicode_strings
 
-  :5.14     bareword_filehandles indirect
+  :5.14     apostrophe_as_package_separator
+            bareword_filehandles indirect
             multidimensional say state unicode_strings
 
-  :5.16     bareword_filehandles current_sub evalbytes
+  :5.16     apostrophe_as_package_separator
+            bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
             unicode_eval unicode_strings
 
-  :5.18     bareword_filehandles current_sub evalbytes
+  :5.18     apostrophe_as_package_separator
+            bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
             unicode_eval unicode_strings
 
-  :5.20     bareword_filehandles current_sub evalbytes
+  :5.20     apostrophe_as_package_separator
+            bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
             unicode_eval unicode_strings
 
-  :5.22     bareword_filehandles current_sub evalbytes
+  :5.22     apostrophe_as_package_separator
+            bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
             unicode_eval unicode_strings
 
-  :5.24     bareword_filehandles current_sub evalbytes
+  :5.24     apostrophe_as_package_separator
+            bareword_filehandles current_sub evalbytes
             fc indirect multidimensional postderef_qq
             say state unicode_eval unicode_strings
 
-  :5.26     bareword_filehandles current_sub evalbytes
+  :5.26     apostrophe_as_package_separator
+            bareword_filehandles current_sub evalbytes
             fc indirect multidimensional postderef_qq
             say state unicode_eval unicode_strings
 
-  :5.28     bareword_filehandles bitwise current_sub
+  :5.28     apostrophe_as_package_separator
+            bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
             postderef_qq say state unicode_eval
             unicode_strings
 
-  :5.30     bareword_filehandles bitwise current_sub
+  :5.30     apostrophe_as_package_separator
+            bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
             postderef_qq say state unicode_eval
             unicode_strings
 
-  :5.32     bareword_filehandles bitwise current_sub
+  :5.32     apostrophe_as_package_separator
+            bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
             postderef_qq say state unicode_eval
             unicode_strings
 
-  :5.34     bareword_filehandles bitwise current_sub
+  :5.34     apostrophe_as_package_separator
+            bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
             postderef_qq say state unicode_eval
             unicode_strings
 
-  :5.36     bareword_filehandles bitwise current_sub
+  :5.36     apostrophe_as_package_separator
+            bareword_filehandles bitwise current_sub
             evalbytes fc isa postderef_qq say signatures
             state unicode_eval unicode_strings
 
-  :5.38     bitwise current_sub evalbytes fc isa
-            module_true postderef_qq say signatures
-            state unicode_eval unicode_strings
+  :5.38     apostrophe_as_package_separator bitwise
+            current_sub evalbytes fc isa module_true
+            postderef_qq say signatures state
+            unicode_eval unicode_strings
 
-  :5.40     bitwise current_sub evalbytes fc isa
-            module_true postderef_qq say signatures
-            state try unicode_eval unicode_strings
+  :5.40     apostrophe_as_package_separator bitwise
+            current_sub evalbytes fc isa module_true
+            postderef_qq say signatures state try
+            unicode_eval unicode_strings
 
   :5.42     bitwise current_sub evalbytes fc isa
             module_true postderef_qq say signatures
