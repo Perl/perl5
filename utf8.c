@@ -769,8 +769,7 @@ Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
     PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER_;
 
     assert(e > s);
-    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_PERL_EXTENDED)));
+    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     full_len = UTF8SKIP(s);
 
