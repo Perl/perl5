@@ -241,7 +241,7 @@ get_gdbm_errno(pTHX_ IV idx, SV *sv)
     if (gdbm_check_syserr(gdbm_errno)) {
         SV *val = get_sv("!", 0);
         if (val) {
-            sv_catpv(sv, ": ");
+            sv_catpvs(sv, ": ");
             sv_catsv(sv, val);
         }
     }
