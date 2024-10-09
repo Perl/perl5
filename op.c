@@ -171,9 +171,6 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 
 static const char array_passed_to_stat[] = "Array passed to stat will be coerced to a scalar";
 
-/* UGH!! */
-EXTERN_C void XS_builtin_indexed(pTHX_ CV *);
-
 /* remove any leading "empty" ops from the op_next chain whose first
  * node's address is stored in op_p. Store the updated address of the
  * first node in op_p.
@@ -9825,7 +9822,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         if(firstarg == lastarg)
             firstarg = NULL;
 
-        if (op_is_cv_xsub(lastarg, &XS_builtin_indexed) &&                   /* a call to builtin::indexed */
+        if (op_is_cv_xsub(lastarg, &Perl_XS_builtin_indexed) &&              /* a call to builtin::indexed */
             firstarg && OpSIBLING(firstarg) == lastarg &&                    /* with one arg */
             (firstarg->op_type == OP_RV2AV || firstarg->op_type == OP_PADAV) /* ... which is an array */
         ) {
