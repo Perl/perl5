@@ -2075,8 +2075,7 @@ Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
     const U8 * first_variant;
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_FLAGS;
-    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_PERL_EXTENDED)));
+    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     if (len == 0) {
         len = strlen((const char *)s);
@@ -2086,13 +2085,13 @@ Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
         return is_utf8_string(s, len);
     }
 
-    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
+    if ((flags & UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
                                         == UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
     {
         return is_strict_utf8_string(s, len);
     }
 
-    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
+    if ((flags & UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
                                        == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
     {
         return is_c9strict_utf8_string(s, len);
@@ -2516,20 +2515,19 @@ Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN 
     const U8 * first_variant;
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS;
-    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_PERL_EXTENDED)));
+    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     if (flags == 0) {
         return is_utf8_string_loclen(s, len, ep, el);
     }
 
-    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
+    if ((flags & UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
                                         == UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
     {
         return is_strict_utf8_string_loclen(s, len, ep, el);
     }
 
-    if ((flags & ~UTF8_DISALLOW_PERL_EXTENDED)
+    if ((flags & UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
                                     == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
     {
         return is_c9strict_utf8_string_loclen(s, len, ep, el);
@@ -2793,8 +2791,7 @@ PERL_STATIC_INLINE STRLEN
 Perl_isUTF8_CHAR_flags(const U8 * const s0, const U8 * const e, const U32 flags)
 {
     PERL_ARGS_ASSERT_ISUTF8_CHAR_FLAGS;
-    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_PERL_EXTENDED)));
+    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     PERL_IS_UTF8_CHAR_DFA(s0, e, PL_extended_utf8_dfa_tab,
                           goto check_success,
@@ -2874,8 +2871,7 @@ PERL_STATIC_INLINE bool
 Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, const U32 flags)
 {
     PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS;
-    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                          |UTF8_DISALLOW_PERL_EXTENDED)));
+    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     PERL_IS_UTF8_CHAR_DFA(s0, e, PL_extended_utf8_dfa_tab,
                           DFA_RETURN_FAILURE_,
