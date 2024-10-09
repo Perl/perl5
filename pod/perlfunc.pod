@@ -5377,9 +5377,10 @@ values:
 
     our ( undef, $min, $hour ) = localtime;
 
-L<C<our>|/our VARLIST> differs from L<C<use vars>|vars>, which allows
-use of an unqualified name I<only> within the affected package, but
-across scopes.
+L<C<our>|/our VARLIST> creates a lexically scoped alias to the package
+variable of the same name, and as such differs from L<C<use vars>|vars>,
+which allows use of an unqualified name I<only> within the affected
+package, without consideration for scopes.
 
 =item pack TEMPLATE,LIST
 X<pack>
