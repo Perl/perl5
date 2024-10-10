@@ -2242,7 +2242,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
     STMT_START {                                                            \
         const U8 * s8dfa_ = s0;                                             \
         const U8 * const e8dfa_ = e;                                        \
-        UV state = 0;                                                       \
+        PERL_UINT_FAST16_T state = 0;                                        \
                                                                             \
         PERL_NON_CORE_CHECK_EMPTY(s8dfa_, e8dfa_);                          \
                                                                             \
