@@ -6080,6 +6080,7 @@ t/lib/common.pl				Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t			See if configuration meets basic needs
 t/lib/Count.pm				Helper for t/op/method.t
 t/lib/croak.t				Test calls to Perl_croak() in the C source.
+t/lib/croak/builtin			Test croak calls from builtin.c
 t/lib/croak/class			Test croak calls from class.c
 t/lib/croak/gv				Test croak calls from gv.c
 t/lib/croak/mg				Test croak calls from mg.c

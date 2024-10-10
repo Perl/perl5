@@ -1,4 +1,4 @@
-package builtin 0.015;
+package builtin 0.016;
 
 use v5.40;
 
@@ -105,6 +105,16 @@ The following bundles currently exist:
 
     :5.40      true false weaken unweaken is_weak blessed refaddr reftype
                ceil floor is_tainted trim indexed
+
+=head2 Read-only Functions
+
+Various optimisations that apply to many functions in the L<builtin> package
+would be broken if the functions are ever replaced or changed, such as by
+assignment into glob references.  Because of this, the globs that contain
+them are set read-only since Perl version 5.41.5, preventing such replacement.
+
+    $ perl -e '*builtin::reftype = sub { "BOO" }'
+    Modification of a read-only value attempted at -e line 1.
 
 =head1 FUNCTIONS
 
