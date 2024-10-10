@@ -9977,6 +9977,8 @@ void
 Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
                     const STRLEN len, const U32 flags)
 {
+    STRIP_WS_BUF_T pbuf;
+    STRIP_WS_BUF_T cbuf;
     SV *name = NULL, *msg;
     const char * cvp = SvROK(cv)
                         ? SvTYPE(SvRV_const(cv)) == SVt_PVCV
@@ -9994,8 +9996,8 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
         return;
 
     if (p && cvp) {
-        p = S_strip_spaces(aTHX_ p, &plen);
-        cvp = S_strip_spaces(aTHX_ cvp, &clen);
+        p = strip_spaces(STRIP_WS_PICK_BUF_TYPE(&pbuf, plen), p, &plen);
+        cvp = strip_spaces(STRIP_WS_PICK_BUF_TYPE(&cbuf, clen), cvp, &clen);
         if ((flags & SVf_UTF8) == SvUTF8(cv)) {
             if (plen == clen && memEQ(cvp, p, plen))
                 return;
@@ -14362,6 +14364,7 @@ OP *
 Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
     STRLEN proto_len;
+    STRIP_WS_BUF_T protocleanbuf;
     const char *proto, *proto_end;
     OP *aop, *prev, *cvop, *parent;
     int optional = 0;
@@ -14375,7 +14378,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     if (SvTYPE(protosv) == SVt_PVCV)
          proto = CvPROTO(protosv), proto_len = CvPROTOLEN(protosv);
     else proto = SvPV(protosv, proto_len);
-    proto = S_strip_spaces(aTHX_ proto, &proto_len);
+    proto = strip_spaces( STRIP_WS_PICK_BUF_TYPE(&protocleanbuf, proto_len),
+                          proto, &proto_len);
     proto_end = proto + proto_len;
     parent = entersubop;
     aop = cUNOPx(entersubop)->op_first;
