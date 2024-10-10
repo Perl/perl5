@@ -2404,7 +2404,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     /* There is some start-up/tear-down overhead with this, so no real gain
      * unless the remaining portion of the string is long enough.  The current
      * value is just a guess. */
-    if ((send - s) > 5 * PERL_WORDSIZE) {
+    if ((send - s) > (ptrdiff_t) (5 * PERL_WORDSIZE)) {
 
         /* First, go through the string a word at-a-time to verify that it is
          * downgradable.  If it contains any start byte besides C2 and C3, then
