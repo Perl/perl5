@@ -723,15 +723,15 @@ S_does_utf8_overflow(const U8 * const s,
     /* The sequence \xff\x80\x80\x80\x80\x80\x80\x82 is an overlong that
      * evaluates to 2**31, so overflows an IV.  For a UV it's
      *              \xff\x80\x80\x80\x80\x80\x80\x83 = 2**32 */
-#  define OVERFLOWS  "\xff\x80\x80\x80\x80\x80\x80\x82"
+#  define OVERFLOWS_MIN_STRING  "\xff\x80\x80\x80\x80\x80\x80\x82"
 
-    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS)) {   /* Not enough info */
-         return -1;
+    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS_MIN_STRING)) {
+        return -1;  /* Not enough info to be sure */
     }
 
 #  define strnGE(s1,s2,l) (strncmp(s1,s2,l) >= 0)
 
-    return strnGE((const char *) s, OVERFLOWS, STRLENs(OVERFLOWS));
+    return (strnGE((const char *) s, OVERFLOWS_MIN_STRING, STRLENs(OVERFLOWS_MIN_STRING)));
 
 #endif
 
