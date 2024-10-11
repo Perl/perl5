@@ -9994,12 +9994,14 @@ SV *
 Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 {
     SV *sv;
+    STRLEN pat_len = strlen(pat);
 
     PERL_ARGS_ASSERT_VNEWSVPVF;
 
-    sv = newSV(1);
+    /* Unlikely output len < input pat len. ("%c",'A')("%s","") is rare. */
+    sv = newSV(pat_len+STRLENs("\0"));
     SvPVCLEAR_FRESH(sv);
-    sv_vcatpvfn_flags(sv, pat, strlen(pat), args, NULL, 0, NULL, 0);
+    sv_vcatpvfn_flags(sv, pat, pat_len, args, NULL, 0, NULL, 0);
     return sv;
 }
 
@@ -10015,10 +10017,20 @@ The reference count for the SV is set to 1.
 SV *
 Perl_newSVnv(pTHX_ const NV n)
 {
-    SV *sv = newSV_type(SVt_NV);
+    SV *sv;
+#if NVSIZE <= IVSIZE
+    /* This bodyless code has been agressively strip for speed.
+       Do not revise it unless you use disassembler and look at machine code.*/
+    new_SV(sv);
+    SvFLAGS(sv) = SVt_NV | SVf_NOK | SVp_NOK;
+    SET_SVANY_FOR_BODYLESS_NV(sv);
+    sv->sv_u.svu_nv = n;
+#else
+    sv = newSV_type(SVt_NV);
     (void)SvNOK_on(sv);
-
     SvNV_set(sv, n);
+#endif
+
     SvTAINT(sv);
 
     return sv;
@@ -10036,10 +10048,20 @@ SV is set to 1.
 SV *
 Perl_newSViv(pTHX_ const IV i)
 {
-    SV *sv = newSV_type(SVt_IV);
-    (void)SvIOK_on(sv);
+    SV *sv;
+    new_SV(sv);
 
-    SvIV_set(sv, i);
+    /* We're starting from SVt_FIRST, so provided that's
+     * actual 0, we don't have to unset any SV type flags
+     * to promote to SVt_IV. */
+    STATIC_ASSERT_STMT(SVt_FIRST == 0);
+
+    /* This bodyless code has been agressively striped for speed.
+       Do not revise it unless you use disassembler and look at machine code.*/
+    SvFLAGS(sv) = SVt_IV | SVf_IOK | SVp_IOK;
+    SET_SVANY_FOR_BODYLESS_IV(sv);
+    sv->sv_u.svu_iv = i;
+
     SvTAINT(sv);
 
     return sv;
@@ -10058,15 +10080,6 @@ SV *
 Perl_newSVuv(pTHX_ const UV u)
 {
     SV *sv;
-
-    /* Inlining ONLY the small relevant subset of sv_setuv here
-     * for performance. Makes a significant difference. */
-
-    /* Using ivs is more efficient than using uvs - see sv_setuv */
-    if (u <= (UV)IV_MAX) {
-        return newSViv((IV)u);
-    }
-
     new_SV(sv);
 
     /* We're starting from SVt_FIRST, so provided that's
@@ -10074,12 +10087,44 @@ Perl_newSVuv(pTHX_ const UV u)
      * to promote to SVt_IV. */
     STATIC_ASSERT_STMT(SVt_FIRST == 0);
 
-    SET_SVANY_FOR_BODYLESS_IV(sv);
-    SvFLAGS(sv) |= SVt_IV;
-    (void)SvIOK_on(sv);
-    (void)SvIsUV_on(sv);
+    /* This bodyless code has been agressively striped for speed.
+       Do not revise it unless you use disassembler and look at machine code.*/
 
-    SvUV_set(sv, u);
+    /* Verify the &~ and |, or &~ >> | or >> |, trick works. Portability. */
+    STATIC_ASSERT_STMT(
+        cBOOL(((UV)SVf_IVisUV) == (((UV)IV_MAX)+1))
+        || cBOOL((((UV)SVf_IVisUV)<<32) == (((UV)IV_MAX)+1)));
+    STATIC_ASSERT_STMT(
+        STRUCT_OFFSET(SV, sv_u.svu_uv) == STRUCT_OFFSET(SV, sv_u.svu_iv)
+        && sizeof(sv->sv_u.svu_uv) == sizeof(sv->sv_u.svu_iv));
+
+    /* branchless SvIsUV_on() replaces former code with former comments:
+
+    * Inlining ONLY the small relevant subset of sv_setuv here
+    * for performance. Makes a significant difference.
+
+    * Using ivs is more efficient than using uvs - see sv_setuv
+    if (u <= (UV)IV_MAX) {
+        return newSViv((IV)u);
+    }
+    */
+    /* Flags unrolled, since MSVC -O1 optimizer refused to combine
+       3 SvFLAGS(s); statements if "SvFLAGS() |= dynamic_var;".
+       Unroll to guarentee any CC flags, any CCs, do exactly 1 write to
+       SvFLAGS(). */
+    if(((UV)SVf_IVisUV) == (((UV)IV_MAX)+1))  /* UV is 32 */
+        SvFLAGS(sv) =
+            ((U32)(u&(((UV)IV_MAX)+1)))
+            | (SVt_IV|SVf_IOK|SVp_IOK);
+    else                                      /* UV is 64 */
+        SvFLAGS(sv) =
+            ((U32)((UV)((u&(((UV)IV_MAX)+1))>>32)))
+            | (SVt_IV|SVf_IOK|SVp_IOK);
+    /* Explictly optimize out reading SvANY ptr. Some CCs might optimize
+       next 2 statements, MSVC did, but some may not. */
+    SET_SVANY_FOR_BODYLESS_IV(sv);
+    sv->sv_u.svu_uv = u;
+
     SvTAINT(sv);
 
     return sv;
