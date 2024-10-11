@@ -252,8 +252,11 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
  * langinfo.h.  There is a slight possibility that one of these numbers could
  * conflict with some other value, in which case after much gnashing of teeth
  * you will find this comment, and end up having to adjust the numbers.   But
- * glibc values are not (so far) negative */
-#if ! defined(HAS_NL_LANGINFO) || ! defined(LC_ADDRESS)
+ * glibc values are not (so far) negative.
+ *
+ * Android is special in that it doesn't define any of these, but has the
+ * corresponding category */
+#if defined(__ANDROID__) || ! defined(HAS_NL_LANGINFO) || ! defined(LC_ADDRESS)
 #  define _NL_ADDRESS_POSTAL_FMT   -58
 #  define _NL_ADDRESS_COUNTRY_NAME -59
 #  define _NL_ADDRESS_COUNTRY_POST -60
@@ -269,7 +272,7 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
 
 #  define HAS_MISSING_LANGINFO_ITEM_
 #endif
-#if ! defined(HAS_NL_LANGINFO) || ! defined(LC_IDENTIFICATION)
+#if defined(__ANDROID__) || ! defined(HAS_NL_LANGINFO) || ! defined(LC_IDENTIFICATION)
 #  define _NL_IDENTIFICATION_TITLE        -70
 #  define _NL_IDENTIFICATION_SOURCE       -71
 #  define _NL_IDENTIFICATION_ADDRESS      -72
@@ -288,11 +291,11 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
 
 #  define HAS_MISSING_LANGINFO_ITEM_
 #endif
-#if ! defined(HAS_NL_LANGINFO) || ! defined(LC_MEASUREMENT)
+#if defined(__ANDROID__) || ! defined(HAS_NL_LANGINFO) || ! defined(LC_MEASUREMENT)
 #  define _NL_MEASUREMENT_MEASUREMENT -85
 #  define HAS_MISSING_LANGINFO_ITEM_
 #endif
-#if ! defined(HAS_NL_LANGINFO) || ! defined(LC_NAME)
+#if defined(__ANDROID__) || ! defined(HAS_NL_LANGINFO) || ! defined(LC_NAME)
 #  define _NL_NAME_NAME_FMT     -86
 #  define _NL_NAME_NAME_GEN     -87
 #  define _NL_NAME_NAME_MR      -88
@@ -302,13 +305,13 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
 
 #  define HAS_MISSING_LANGINFO_ITEM_
 #endif
-#if ! defined(HAS_NL_LANGINFO) || ! defined(LC_PAPER)
+#if defined(__ANDROID__) || ! defined(HAS_NL_LANGINFO) || ! defined(LC_PAPER)
 #  define _NL_PAPER_HEIGHT  -92
 #  define _NL_PAPER_WIDTH   -93
 
 #  define HAS_MISSING_LANGINFO_ITEM_
 #endif
-#if ! defined(HAS_NL_LANGINFO) || ! defined(LC_TELEPHONE)
+#if defined(__ANDROID__) || ! defined(HAS_NL_LANGINFO) || ! defined(LC_TELEPHONE)
 #  define _NL_TELEPHONE_TEL_INT_FMT  -94
 #  define _NL_TELEPHONE_TEL_DOM_FMT  -95
 #  define _NL_TELEPHONE_INT_SELECT   -96
