@@ -601,6 +601,8 @@ S_does_utf8_overflow(const U8 * const s,
                      const U8 * e,
                      const bool consider_overlongs)
 {
+    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
+
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
      * 'e' - 1 would overflow an IV on this platform; that is if it represents
      * a code point larger than the highest representable code point.  It
@@ -623,9 +625,6 @@ S_does_utf8_overflow(const U8 * const s,
     const STRLEN len = e - s;
     const U8 *x;
     const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF;
-    int is_overlong = 0;
-
-    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
 
     for (x = s; x < e; x++, y++) {
 
@@ -654,7 +653,7 @@ S_does_utf8_overflow(const U8 * const s,
      * there's not enough information to tell */
     return (len >= STRLENs(HIGHEST_REPRESENTABLE_UTF)) ? 0 : -1;
 
-  overflows_if_not_overlong:
+  overflows_if_not_overlong: ;
 
     /* Here, a well-formed sequence overflows.  If we are assuming
      * well-formedness, return that it overflows. */
@@ -666,7 +665,7 @@ S_does_utf8_overflow(const U8 * const s,
      * overflow if you were to calculate it out.
      *
      * See if it actually is overlong */
-    is_overlong = is_utf8_overlong(s, len);
+    int is_overlong = is_utf8_overlong(s, len);
 
     /* If it isn't overlong, is well-formed, so overflows */
     if (is_overlong == 0) {
@@ -678,7 +677,9 @@ S_does_utf8_overflow(const U8 * const s,
         return -1;
     }
 
-    /* Here, it appears to overflow, but it is also overlong */
+    /* Here, it appears to overflow, but it is also overlong.  That overlong
+     * may evaluate to something that doesn't overflow; or it may evaluate to
+     * something that does.  Figure it out */
 
 #if 6 * UTF_CONTINUATION_BYTE_INFO_BITS <= IVSIZE * CHARBITS
 
@@ -699,9 +700,10 @@ S_does_utf8_overflow(const U8 * const s,
      *
      * FE consists of 7 bytes total; the FE start byte contributes 0 bits of
      * information (the high 7 bits, all ones, say that the sequence is 7 bytes
-     * long, and the bottom, zero, bit is s placeholder. That leaves the 6
-     * continuation bytes to contribute UTF_CONTINUATION_BYTE_INFO_BITS each.
-      If that number of bits doesn't exceed the word size, it can't overflow. */
+     * long, and the bottom, zero, bit is 0, so doesn't add anything. That
+     * leaves the 6 continuation bytes to contribute
+     * UTF_CONTINUATION_BYTE_INFO_BITS each.  If that number of bits doesn't
+     * exceed the word size, it can't overflow. */
 
     return 0;
 
