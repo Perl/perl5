@@ -5945,8 +5945,7 @@ RS	|UV	|check_locale_boundary_crossing 			\
 				|NN STRLEN *lenp
 RTi	|int	|does_utf8_overflow					\
 				|NN const U8 * const s			\
-				|NN const U8 *e 			\
-				|const bool consider_overlongs
+				|NN const U8 *e
 RTi	|int	|isFF_overlong	|NN const U8 * const s			\
 				|const STRLEN len
 Ri	|bool	|is_utf8_common |NN const U8 * const p			\

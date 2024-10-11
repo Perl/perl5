@@ -9466,7 +9466,7 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category, const char * const name, cons
 # endif
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE int
-S_does_utf8_overflow(const U8 * const s, const U8 *e, const bool consider_overlongs)
+S_does_utf8_overflow(const U8 * const s, const U8 *e)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW  \
         assert(s); assert(e)
