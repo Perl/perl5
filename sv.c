@@ -10022,7 +10022,13 @@ Perl_newSVnv(pTHX_ const NV n)
     /* This bodyless code has been agressively strip for speed.
        Do not revise it unless you use disassembler and look at machine code.*/
     new_SV(sv);
+#if PTRSIZE == 8 && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+    *(Size_t *)(&SvREFCNT(sv)) =
+        ((Size_t)1)
+        | ((Size_t)(((Size_t)(SVt_NV | SVf_NOK | SVp_NOK)) << 32));
+#else
     SvFLAGS(sv) = SVt_NV | SVf_NOK | SVp_NOK;
+#endif
     SET_SVANY_FOR_BODYLESS_NV(sv);
     sv->sv_u.svu_nv = n;
 #else
@@ -10058,7 +10064,12 @@ Perl_newSViv(pTHX_ const IV i)
 
     /* This bodyless code has been agressively striped for speed.
        Do not revise it unless you use disassembler and look at machine code.*/
+#if PTRSIZE == 8 && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+      *(Size_t *)(&SvREFCNT(sv)) = ((Size_t)1) |
+            ((Size_t)((((Size_t)(SVt_IV|SVf_IOK|SVp_IOK)) << 32)));
+#else
     SvFLAGS(sv) = SVt_IV | SVf_IOK | SVp_IOK;
+#endif
     SET_SVANY_FOR_BODYLESS_IV(sv);
     sv->sv_u.svu_iv = i;
 
@@ -10108,6 +10119,44 @@ Perl_newSVuv(pTHX_ const UV u)
         return newSViv((IV)u);
     }
     */
+
+    /* If 64b CPU, and little endian (x86, x64, modern ARM),
+       set sv->sv_refcnt and sv->sv_flags, with exactly 1 CPU op.
+       'sv->sv_refcnt = 0;' assignment in new_SV() will optimize away.
+       Assert sv->sv_any is 64b, and sv->sv_refcnt is directly afterwards
+       in memory layout, and that sv->sv_refcnt and sv->sv_flags are adjacent,
+       therefore proving this U32* ptr, casted to U64*, is aligned.
+       Note majority of modern Perl users use LE CPUs, with hardware unaligned
+       support. But there is no Configure/perlapi macro defines currently,
+       that config YES/NO for hardware unaligned. Still, because the SV head
+       struct currently is aligned on all 64b builds, make sure SV head struct
+       stays aligned unless intentional future refactoring of SV head struct.
+
+       This optimization can't be done on i386, since 64b ints are always
+       emulated with 32b CPU ops by all CCs AFAIK. And the X32 Linux OS/Kernel
+       has already been grandfathered. Other than X32 I can't think of any
+       OS or CPU with native 64b CPU ops, but 32b pointers.
+
+       Doing this trick on 64b big endian OS, is possible, but a BE core dev
+       must port the code, fix all bit operators, and test it. */
+      STATIC_ASSERT_STMT(
+          (STRUCT_OFFSET(SV,sv_refcnt) == sizeof(sv->sv_any))
+          && STRUCT_OFFSET(SV,sv_flags) == STRUCT_OFFSET(SV,sv_refcnt)+U32SIZE);
+
+#if PTRSIZE == 8 && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+        STATIC_ASSERT_STMT(
+            sizeof(sv->sv_refcnt) + sizeof(sv->sv_flags) == PTRSIZE
+            && STRUCT_OFFSET(SV,sv_refcnt) == PTRSIZE);
+
+      *(Size_t *)(&SvREFCNT(sv)) =
+          ((Size_t)1)
+          | ((Size_t) (
+              ((Size_t) (
+                  ((U32)((UV)((u&(((UV)IV_MAX)+1))>>32)))
+                  | (SVt_IV|SVf_IOK|SVp_IOK)
+              )) << 32
+          ));
+#else
     /* Flags unrolled, since MSVC -O1 optimizer refused to combine
        3 SvFLAGS(s); statements if "SvFLAGS() |= dynamic_var;".
        Unroll to guarentee any CC flags, any CCs, do exactly 1 write to
@@ -10120,6 +10169,7 @@ Perl_newSVuv(pTHX_ const UV u)
         SvFLAGS(sv) =
             ((U32)((UV)((u&(((UV)IV_MAX)+1))>>32)))
             | (SVt_IV|SVf_IOK|SVp_IOK);
+#endif
     /* Explictly optimize out reading SvANY ptr. Some CCs might optimize
        next 2 statements, MSVC did, but some may not. */
     SET_SVANY_FOR_BODYLESS_IV(sv);
