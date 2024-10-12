@@ -3824,21 +3824,29 @@ PP(pp_index)
         if (little_utf8) {
             /* Well, maybe instead we might be able to downgrade the small
                string?  */
-            char * const pv = (char*)bytes_from_utf8((U8 *)little_p, &llen,
-                                                     &little_utf8);
-            if (little_utf8) {
-                /* If the large string is ISO-8859-1, and it's not possible to
+            U8 * free_little_p = NULL;
+            if (utf8_to_bytes_new_pv(&little_p, &llen, &free_little_p)) {
+                little_utf8 = false;
+
+                /* Here 'little_p' is in byte form, and 'free_little_p' is
+                 * non-NULL if the original wasn't, and 'little_p' is pointing
+                 * to new memory.  We create a new SV for use by the rest of
+                 * the routine that contains the new byte string, and donate it
+                 * to temp to ensure it will get free()d */
+                if (free_little_p) {
+                    little = temp = newSV_type(SVt_NULL);
+                    sv_usepvn(temp, (char *) little_p, llen);
+                    little_p = SvPVX_const(little);
+                }
+            }
+            else {
+                /* When the large string is ISO-8859-1, and it's not possible to
                    convert the small string to ISO-8859-1, then there is no
                    way that it could be found anywhere by index.  */
                 retval = -1;
                 goto push_result;
             }
 
-            /* At this point, pv is a malloc()ed string. So donate it to temp
-               to ensure it will get free()d  */
-            little = temp = newSV_type(SVt_NULL);
-            sv_usepvn(temp, pv, llen);
-            little_p = SvPVX(little);
         } else {
             temp = newSVpvn(little_p, llen);
 
