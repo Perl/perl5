@@ -16,7 +16,7 @@
  *     [p.278 of _The Lord of the Rings_, II/iii: "The Ring Goes South"]
  */
 
-/* 
+/*
 =head1 HV Handling
 A HV structure represents a Perl hash.  It consists mainly of an array
 of pointers, each of which points to a linked list of HE structures.  The
@@ -513,7 +513,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                                            ((flags & HVhek_UTF8)
                                             ? SVf_UTF8 : 0));
                 }
-                
+
                 mg->mg_obj = keysv;         /* pass key */
                 uf->uf_index = action;      /* pass action */
                 magic_getuvar(MUTABLE_SV(hv), mg);
@@ -763,23 +763,24 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (is_utf8 && !(flags & HVhek_KEYCANONICAL)) {
-        char * const keysave = (char *)key;
-        key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
-        if (is_utf8)
-            flags |= HVhek_UTF8;
-        else
-            flags &= ~HVhek_UTF8;
-        if (key != keysave) {
-            if (flags & HVhek_FREEKEY)
-                Safefree(keysave);
-            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
-            /* If the caller calculated a hash, it was on the sequence of
-               octets that are the UTF-8 form. We've now changed the sequence
-               of octets stored to that of the equivalent byte representation,
-               so the hash we need is different.  */
-            hash = 0;
-        }
+            char * const keysave = (char *)key;
+            key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+            if (is_utf8)
+                flags |= HVhek_UTF8;
+            else
+                flags &= ~HVhek_UTF8;
+            if (key != keysave) {
+                if (flags & HVhek_FREEKEY)
+                    Safefree(keysave);
+                flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+                /* If the caller calculated a hash, it was on the sequence of
+                 * octets that are the UTF-8 form. We've now changed the
+                 * sequence of octets stored to that of the equivalent byte
+                 * representation, so the hash we need is different.  */
+                hash = 0;
+            }
     }
+
 
     if (keysv && (SvIsCOW_shared_hash(keysv))) {
         if (HvSHAREKEYS(hv))
@@ -912,7 +913,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
   not_found:
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
-    if (!(action & HV_FETCH_ISSTORE) 
+    if (!(action & HV_FETCH_ISSTORE)
         && SvRMAGICAL((const SV *)hv)
         && mg_find((const SV *)hv, PERL_MAGIC_env)) {
         unsigned long len;
@@ -1245,7 +1246,7 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
     }
     else
         sv = &PL_sv_zero;
-    
+
     return sv;
 }
 
@@ -1458,7 +1459,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 HvHASKFLAGS_off(hv);
         }
 
-        /* If this is a stash and the key ends with ::, then someone is 
+        /* If this is a stash and the key ends with ::, then someone is
          * deleting a package.
          */
         if (sv && SvTYPE(sv) == SVt_PVGV && HvHasENAME(hv)) {
@@ -2761,7 +2762,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         {
             assert(*hekp);
             if (
-                 (HEK_UTF8(*hekp) || (flags & SVf_UTF8)) 
+                 (HEK_UTF8(*hekp) || (flags & SVf_UTF8))
                     ? hek_eq_pvn_flags(aTHX_ *hekp, name, (I32)len, flags)
                     : (HEK_LEN(*hekp) == (I32)len && memEQ(HEK_KEY(*hekp), name, len))
                ) {
@@ -2824,7 +2825,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         HEK **victim = namep + (count < 0 ? -count : count);
         while (victim-- > namep + 1)
             if (
-             (HEK_UTF8(*victim) || (flags & SVf_UTF8)) 
+             (HEK_UTF8(*victim) || (flags & SVf_UTF8))
                 ? hek_eq_pvn_flags(aTHX_ *victim, name, (I32)len, flags)
                 : (HEK_LEN(*victim) == (I32)len && memEQ(HEK_KEY(*victim), name, len))
             ) {
@@ -2847,7 +2848,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
                 return;
             }
         if (
-            count > 0 && ((HEK_UTF8(*namep) || (flags & SVf_UTF8)) 
+            count > 0 && ((HEK_UTF8(*namep) || (flags & SVf_UTF8))
                 ? hek_eq_pvn_flags(aTHX_ *namep, name, (I32)len, flags)
                 : (HEK_LEN(*namep) == (I32)len && memEQ(HEK_KEY(*namep), name, len))
             )
@@ -2856,7 +2857,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         }
     }
     else if(
-        (HEK_UTF8(aux->xhv_name_u.xhvnameu_name) || (flags & SVf_UTF8)) 
+        (HEK_UTF8(aux->xhv_name_u.xhvnameu_name) || (flags & SVf_UTF8))
                 ? hek_eq_pvn_flags(aTHX_ aux->xhv_name_u.xhvnameu_name, name, (I32)len, flags)
                 : (HEK_LEN(aux->xhv_name_u.xhvnameu_name) == (I32)len &&
                             memEQ(HEK_KEY(aux->xhv_name_u.xhvnameu_name), name, len))
@@ -3343,22 +3344,22 @@ Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash)
     PERL_ARGS_ASSERT_SHARE_HEK;
 
     if (len < 0) {
-      STRLEN tmplen = -len;
-      is_utf8 = TRUE;
-      /* See the note in hv_fetch(). --jhi */
-      str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
-      len = tmplen;
-      /* If we were able to downgrade here, then than means that we were passed
-         in a key which only had chars 0-255, but was utf8 encoded.  */
-      if (is_utf8)
-          flags = HVhek_UTF8;
-      /* If we found we were able to downgrade the string to bytes, then
-         we should flag that it needs upgrading on keys or each.  Also flag
-         that we need share_hek_flags to free the string.  */
-      if (str != save) {
-          PERL_HASH(hash, str, len);
-          flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
-      }
+        STRLEN tmplen = -len;
+        is_utf8 = TRUE;
+        /* See the note in hv_fetch(). --jhi */
+        str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
+        len = tmplen;
+        /* If we were able to downgrade here, then than means that we were passed
+           in a key which only had chars 0-255, but was utf8 encoded.  */
+        if (is_utf8)
+            flags = HVhek_UTF8;
+        /* If we found we were able to downgrade the string to bytes, then
+           we should flag that it needs upgrading on keys or each.  Also flag
+           that we need share_hek_flags to free the string.  */
+        if (str != save) {
+            PERL_HASH(hash, str, len);
+            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+        }
     }
 
     return share_hek_flags (str, len, hash, flags);
@@ -4008,7 +4009,7 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
         HINTS_REFCNT_LOCK;
         new_count = --he->refcounted_he_refcnt;
         HINTS_REFCNT_UNLOCK;
-        
+
         if (new_count) {
             return;
         }
