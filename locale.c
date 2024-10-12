@@ -8619,15 +8619,11 @@ S_strftime8(pTHX_ const char * fmt,
         if (! is_locale_utf8(locale)) {
             locale_utf8ness = LOCALE_NOT_UTF8;
 
-            bool is_utf8 = true;
             Size_t fmt_len = strlen(fmt);
-            fmt = (char *) bytes_from_utf8((U8 *) fmt, &fmt_len, &is_utf8);
-            if (is_utf8) {
+            if (! utf8_to_bytes_temp_pv((U8 **) &fmt, &fmt_len)) {
                 SET_EINVAL;
                 return false;
             }
-
-            SAVEFREEPV(fmt);
         }
         else {
             locale_utf8ness = LOCALE_IS_UTF8;
@@ -9839,14 +9835,12 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         }
         else {   /* locale is not UTF-8; but input is; downgrade the input */
 
-            s = (char *) bytes_from_utf8((const U8 *) s, &len, &utf8);
-
-            /* If the downgrade was successful we are done, but if the input
-             * contains things that require UTF-8 to represent, have to do
-             * damage control ... */
-            if (UNLIKELY(utf8)) {
-
-                /* What we do is construct a non-UTF-8 string with
+            if (UNLIKELY(! utf8_to_bytes_temp_pv((const U8 **) &s, &len))) {
+                /* If the downgrade was successful we are done, but if the
+                 * input contains things that require UTF-8 to represent, have
+                 * to do damage control:
+                 *
+                 * What we do is construct a non-UTF-8 string with
                  *  1) the characters representable by a single byte converted
                  *     to be so (if necessary);
                  *  2) and the rest converted to collate the same as the
@@ -9865,8 +9859,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                  *     on a locale where only 0-255 are valid.  If two strings
                  *     sort entirely equal, then the sort order for the
                  *     above-255 code points will be in code point order. */
-
-                utf8 = FALSE;
 
                 /* If we haven't calculated the code point with the maximum
                  * collating order for this locale, do so now */
@@ -9957,6 +9949,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                     Renew(s, d, char);   /* Free up unused space */
                 }
             }
+
+            utf8 = false;
         }
 
         /* Here, we have constructed a modified version of the input.  It could
