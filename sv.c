@@ -9886,14 +9886,18 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
     SV *sv;
     bool is_utf8 = FALSE;
-    const char *const orig_src = src;
 
     if (len < 0) {
-        STRLEN tmplen = -len;
-        is_utf8 = TRUE;
+        len = -len;
+        Size_t size_t_len = len;
         /* See the note in hv.c:hv_fetch() --jhi */
-        src = (char*)bytes_from_utf8((const U8*)src, &tmplen, &is_utf8);
-        len = tmplen;
+        if (! utf8_to_bytes_temp_pv((const U8**)&src, &size_t_len)) {
+            is_utf8 = true;
+        }
+        else {
+            hash = 0;
+            len = size_t_len;
+        }
     }
     if (!hash)
         PERL_HASH(hash, src, len);
@@ -9907,8 +9911,6 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     SvPOK_on(sv);
     if (is_utf8)
         SvUTF8_on(sv);
-    if (src != orig_src)
-        Safefree(src);
     return sv;
 }
 
