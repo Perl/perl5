@@ -3337,28 +3337,31 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 HEK *
 Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash)
 {
-    bool is_utf8 = FALSE;
     int flags = 0;
-    const char * const save = str;
 
     PERL_ARGS_ASSERT_SHARE_HEK;
 
     if (len < 0) {
-        STRLEN tmplen = -len;
-        is_utf8 = TRUE;
+        len = -len;
         /* See the note in hv_fetch(). --jhi */
-        str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
-        len = tmplen;
-        /* If we were able to downgrade here, then than means that we were passed
-           in a key which only had chars 0-255, but was utf8 encoded.  */
-        if (is_utf8)
+        void * free_me = NULL;
+        if (! utf8_to_bytes_new_pv((const U8 **) &str,
+                                   (Size_t *) &len, &free_me))
+        {
             flags = HVhek_UTF8;
-        /* If we found we were able to downgrade the string to bytes, then
-           we should flag that it needs upgrading on keys or each.  Also flag
-           that we need share_hek_flags to free the string.  */
-        if (str != save) {
-            PERL_HASH(hash, str, len);
-            flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+        }
+        else {
+            /* If we were able to downgrade here, then than means that we were
+             * passed in a key which only had chars 0-255, but was utf8 encoded.
+             * It could also be that all the chars were UTF-8 invariant (0-127
+             * on ASCII machines), so the operation did nothing.  But
+             * otherwise, we should flag that it needs upgrading on keys or
+             * each.  Also in that case, flag that we need 'share_hek_flags' to
+             * free the string.  */
+            if (free_me) {
+                PERL_HASH(hash, str, len);
+                flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+            }
         }
     }
 
