@@ -793,7 +793,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     s = SvPV(sv, len);
     if (chomping) {
         if (s && len) {
-            char *temp_buffer = NULL;
+            U8 *temp_buffer = NULL;
             s += --len;
             if (RsPARA(PL_rs)) {
                 if (*s != '\n')
@@ -817,23 +817,18 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
                     /* Assumption is that rs is shorter than the scalar.  */
                     if (SvUTF8(PL_rs)) {
                         /* RS is utf8, scalar is 8 bit.  */
-                        bool is_utf8 = TRUE;
-                        temp_buffer = (char*)bytes_from_utf8((U8*)rsptr,
-                                                             &rslen, &is_utf8);
-                        if (is_utf8) {
-                            /* Cannot downgrade, therefore cannot possibly match.
-                               At this point, temp_buffer is not alloced, and
-                               is the buffer inside PL_rs, so don't free it.
-                             */
-                            assert (temp_buffer == rsptr);
+                        if (! utf8_to_bytes_new_pv(&rsptr, &rslen,
+                                                   &temp_buffer))
+                        {
+                            /* Cannot downgrade, therefore cannot possibly
+                             * match. */
                             goto nope_free_nothing;
                         }
-                        rsptr = temp_buffer;
                     }
                     else {
                         /* RS is 8 bit, scalar is utf8.  */
-                        temp_buffer = (char*)bytes_to_utf8((U8*)rsptr, &rslen);
-                        rsptr = temp_buffer;
+                        temp_buffer = bytes_to_utf8((U8*)rsptr, &rslen);
+                        rsptr = (char *) temp_buffer;
                     }
                 }
                 if (rslen == 1) {
