@@ -11151,17 +11151,19 @@ Perl_sv_unref_flags(pTHX_ SV *const ref, const U32 flags)
 =for apidoc_section $tainting
 =for apidoc sv_taint
 
-Taint an SV.  Use C<SvTAINTED_on> instead.
+Taint an SV.  Use C<SvTAINTED_on> instead. Return value is input SV *.
+Useful for chaining calls and more efficient C code (tail calling).
 
 =cut
 */
 
-void
+SV *
 Perl_sv_taint(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SV_TAINT;
 
-    sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
+    sv_magic(sv, NULL, PERL_MAGIC_taint, NULL, 0);
+    return sv;
 }
 
 /*

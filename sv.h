@@ -1724,8 +1724,6 @@ attention to precisely which outputs are influenced by which inputs.
 =cut
 */
 
-#define sv_taint(sv)	  sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0)
-
 #ifdef NO_TAINT_SUPPORT
 #   define SvTAINTED(sv) 0
 #else

@@ -4916,7 +4916,7 @@ PERL_CALLCONV SV *
 Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv);
 #define PERL_ARGS_ASSERT_SV_STRING_FROM_ERRNUM
 
-PERL_CALLCONV void
+PERL_CALLCONV SV *
 Perl_sv_taint(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_TAINT               \
         assert(sv)
