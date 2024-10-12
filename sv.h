@@ -1735,8 +1735,8 @@ attention to precisely which outputs are influenced by which inputs.
 #define SvTAINT(sv)			\
     STMT_START {			\
         assert(TAINTING_get || !TAINT_get); \
-        if (UNLIKELY(TAINT_get))	\
-            SvTAINTED_on(sv);	        \
+        if (TAINT_AND_TAINTING_get) \
+            sv_taint(sv); \
     } STMT_END
 
 /*

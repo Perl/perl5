@@ -249,6 +249,17 @@ perl_construct(pTHXx)
     SvREADONLY_on(&PL_sv_placeholder);
     SvREFCNT(&PL_sv_placeholder) = SvREFCNT_IMMORTAL;
 
+    STATIC_ASSERT_STMT(
+        sizeof(((TAINT_U *)0)->both)
+        == (sizeof(((TAINT_U *)0)->u.tainting) + sizeof(((TAINT_U *)0)->u.tainted))
+    );
+    STATIC_ASSERT_STMT(
+        sizeof(((TAINT_U *)0)->both)
+        == (STRUCT_OFFSET(TAINT_U, u.tainted) + sizeof(((TAINT_U *)0)->u.tainted))
+    );
+    STATIC_ASSERT_STMT(STRUCT_OFFSET(TAINT_U, both) == STRUCT_OFFSET(TAINT_U, u.tainting));
+    /* PL_taint.u.both = 0; */
+
     PL_sighandlerp  = Perl_sighandler;
     PL_sighandler1p = Perl_sighandler1;
     PL_sighandler3p = Perl_sighandler3;
