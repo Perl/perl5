@@ -3684,47 +3684,21 @@ SV *
 Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
                          const char *keypv, STRLEN keylen, U32 hash, U32 flags)
 {
-    U8 utf8_flag;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN;
+
+    U8 utf8_flag;
+    U8 * free_me = NULL;
 
     if (flags & ~(REFCOUNTED_HE_KEY_UTF8|REFCOUNTED_HE_EXISTS))
         Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %" UVxf,
             (UV)flags);
     if (!chain)
         goto ret;
-    if (flags & REFCOUNTED_HE_KEY_UTF8) {
-        /* For searching purposes, canonicalise to Latin-1 where possible. */
-        const char *keyend = keypv + keylen, *p;
-        STRLEN nonascii_count = 0;
-        for (p = keypv; p != keyend; p++) {
-            if (! UTF8_IS_INVARIANT(*p)) {
-                if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, keyend)) {
-                    goto canonicalised_key;
-                }
-                nonascii_count++;
-                p++;
-            }
-        }
-        if (nonascii_count) {
-            char *q;
-            const char *p = keypv, *keyend = keypv + keylen;
-            keylen -= nonascii_count;
-            Newx(q, keylen, char);
-            SAVEFREEPV(q);
-            keypv = q;
-            for (; p != keyend; p++, q++) {
-                U8 c = (U8)*p;
-                if (UTF8_IS_INVARIANT(c)) {
-                    *q = (char) c;
-                }
-                else {
-                    p++;
-                    *q = (char) EIGHT_BIT_UTF8_TO_NATIVE(c, *p);
-                }
-            }
-        }
+    /* For searching purposes, canonicalise to Latin-1 where possible. */
+    if (   flags & REFCOUNTED_HE_KEY_UTF8
+        && utf8_to_bytes_new_pv(&keypv, &keylen, &free_me))
+    {
         flags &= ~REFCOUNTED_HE_KEY_UTF8;
-        canonicalised_key: ;
     }
     utf8_flag = (flags & REFCOUNTED_HE_KEY_UTF8) ? HVhek_UTF8 : 0;
     if (!hash)
@@ -3744,6 +3718,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
             utf8_flag == (HEK_FLAGS(chain->refcounted_he_hek) & HVhek_UTF8)
 #endif
         ) {
+            Safefree(free_me);
             if (flags & REFCOUNTED_HE_EXISTS)
                 return (chain->refcounted_he_data[0] & HVrhek_typemask)
                     == HVrhek_delete
@@ -3752,6 +3727,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
         }
     }
   ret:
+    Safefree(free_me);
     return flags & REFCOUNTED_HE_EXISTS ? NULL : &PL_sv_placeholder;
 }
 
@@ -3836,6 +3812,8 @@ struct refcounted_he *
 Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
         const char *keypv, STRLEN keylen, U32 hash, SV *value, U32 flags)
 {
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PVN;
+
     STRLEN value_len = 0;
     const char *value_p = NULL;
     bool is_pv;
@@ -3843,7 +3821,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     char hekflags;
     STRLEN key_offset = 1;
     struct refcounted_he *he;
-    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PVN;
+    U8 * free_me = NULL;
 
     if (!value || value == &PL_sv_placeholder) {
         value_type = HVrhek_delete;
@@ -3867,39 +3845,11 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     }
     hekflags = value_type;
 
-    if (flags & REFCOUNTED_HE_KEY_UTF8) {
-        /* Canonicalise to Latin-1 where possible. */
-        const char *keyend = keypv + keylen, *p;
-        STRLEN nonascii_count = 0;
-        for (p = keypv; p != keyend; p++) {
-            if (! UTF8_IS_INVARIANT(*p)) {
-                if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, keyend)) {
-                    goto canonicalised_key;
-                }
-                nonascii_count++;
-                p++;
-            }
-        }
-        if (nonascii_count) {
-            char *q;
-            const char *p = keypv, *keyend = keypv + keylen;
-            keylen -= nonascii_count;
-            Newx(q, keylen, char);
-            SAVEFREEPV(q);
-            keypv = q;
-            for (; p != keyend; p++, q++) {
-                U8 c = (U8)*p;
-                if (UTF8_IS_INVARIANT(c)) {
-                    *q = (char) c;
-                }
-                else {
-                    p++;
-                    *q = (char) EIGHT_BIT_UTF8_TO_NATIVE(c, *p);
-                }
-            }
-        }
+    /* Canonicalise to Latin-1 where possible. */
+    if (   (flags & REFCOUNTED_HE_KEY_UTF8)
+        && utf8_to_bytes_new_pv(&keypv, &keylen, &free_me))
+    {
         flags &= ~REFCOUNTED_HE_KEY_UTF8;
-        canonicalised_key: ;
     }
     if (flags & REFCOUNTED_HE_KEY_UTF8)
         hekflags |= HVhek_UTF8;
@@ -3939,6 +3889,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     he->refcounted_he_data[0] = hekflags;
     he->refcounted_he_refcnt = 1;
 
+    Safefree(free_me);
     return he;
 }
 
