@@ -11148,6 +11148,23 @@ Perl_sv_unref_flags(pTHX_ SV *const ref, const U32 flags)
 }
 
 /*
+=for apidoc_section $tainting
+=for apidoc sv_taint
+
+Taint an SV.  Use C<SvTAINTED_on> instead.
+
+=cut
+*/
+
+void
+Perl_sv_taint(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_TAINT;
+
+    sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
+}
+
+/*
 =for apidoc sv_untaint
 
 Untaint an SV.  Use C<SvTAINTED_off> instead.

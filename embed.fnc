@@ -3433,7 +3433,7 @@ Adp	|SV *	|sv_strftime_tm |NN SV *fmt				\
 Adp	|SV *	|sv_string_from_errnum					\
 				|int errnum				\
 				|NULLOK SV *tgtsv
-CMbdp	|void	|sv_taint	|NN SV *sv
+ACdp	|void	|sv_taint	|NN SV *sv
 CRdp	|bool	|sv_tainted	|NN SV * const sv
 Adip	|bool	|SvTRUE 	|NULLOK SV *sv
 Cdp	|I32	|sv_true	|NULLOK SV * const sv
