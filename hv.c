@@ -3242,9 +3242,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
     HE *entry;
     HE **oentry;
-    bool is_utf8 = FALSE;
     int k_flags = 0;
-    const char * const save = str;
     struct shared_he *he = NULL;
 
     if (hek) {
@@ -3266,14 +3264,18 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         hash = HEK_HASH(hek);
     } else if (len < 0) {
         STRLEN tmplen = -len;
-        is_utf8 = TRUE;
         /* See the note in hv_fetch(). --jhi */
-        str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
-        len = tmplen;
-        if (is_utf8)
+        U8 * free_str = NULL;
+        if (! utf8_to_bytes_new_pv(&str, &tmplen, &free_str)) {
             k_flags = HVhek_UTF8;
-        if (str != save)
-            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+        }
+        else {
+            k_flags |= HVhek_WASUTF8;
+            len = tmplen;
+            if (free_str) {
+                k_flags |= HVhek_FREEKEY;
+            }
+        }
     }
 
     /* what follows was the moral equivalent of:
