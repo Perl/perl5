@@ -1337,19 +1337,23 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (is_utf8 && !(k_flags & HVhek_KEYCANONICAL)) {
         const char * const keysave = key;
-        key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+        U8 * free_me = NULL;
 
-        if (is_utf8)
+        if (! utf8_to_bytes_new_pv(&key, &klen, &free_me)) {
             k_flags |= HVhek_UTF8;
-        else
+        }
+        else {
             k_flags &= ~HVhek_UTF8;
-        if (key != keysave) {
-            if (k_flags & HVhek_FREEKEY) {
-                /* This shouldn't happen if our caller does what we expect,
-                   but strictly the API allows it.  */
-                Safefree(keysave);
+            is_utf8 = false;
+
+            if (free_me) {
+                if (k_flags & HVhek_FREEKEY) {
+                    /* This shouldn't happen if our caller does what we expect,
+                       but strictly the API allows it.  */
+                    Safefree(keysave);
+                }
+                k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
             }
-            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
         }
     }
 
