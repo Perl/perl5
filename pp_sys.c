@@ -2191,7 +2191,6 @@ PP_wrapped(pp_syswrite, 0, 1)
     STRLEN blen;
     const int op_type = PL_op->op_type;
     bool doing_utf8;
-    U8 *tmpbuf = NULL;
     GV *const gv = MUTABLE_GV(*++MARK);
     IO *const io = GvIO(gv);
     int fd;
@@ -2242,15 +2241,10 @@ PP_wrapped(pp_syswrite, 0, 1)
                    OP_DESC(PL_op));
     }
     else if (doing_utf8) {
-        STRLEN tmplen = blen;
-        U8 * const result = bytes_from_utf8((const U8*) buffer, &tmplen, &doing_utf8);
-        if (!doing_utf8) {
-            tmpbuf = result;
-            buffer = (char *) tmpbuf;
-            blen = tmplen;
+        if (utf8_to_bytes_temp_pv((const U8**)&buffer, &blen)) {
+            doing_utf8 = false;
         }
         else {
-            assert((char *)result == buffer);
             Perl_croak(aTHX_ "Wide character in %s", OP_DESC(PL_op));
         }
     }
@@ -2283,7 +2277,6 @@ PP_wrapped(pp_syswrite, 0, 1)
             length = (Size_t)SvIVx(*++MARK);
 #endif
             if ((SSize_t)length < 0) {
-                Safefree(tmpbuf);
                 DIE(aTHX_ "Negative length");
             }
         }
@@ -2292,12 +2285,10 @@ PP_wrapped(pp_syswrite, 0, 1)
             offset = SvIVx(*++MARK);
             if (offset < 0) {
                 if (-offset > (IV)blen) {
-                    Safefree(tmpbuf);
                     DIE(aTHX_ "Offset outside string");
                 }
                 offset += blen;
             } else if (offset > (IV)blen) {
-                Safefree(tmpbuf);
                 DIE(aTHX_ "Offset outside string");
             }
         } else
@@ -2322,7 +2313,6 @@ PP_wrapped(pp_syswrite, 0, 1)
         goto say_undef;
     SP = ORIGMARK;
 
-    Safefree(tmpbuf);
 #if Size_t_size > IVSIZE
     PUSHn(retval);
 #else
@@ -2331,7 +2321,6 @@ PP_wrapped(pp_syswrite, 0, 1)
     RETURN;
 
   say_undef:
-    Safefree(tmpbuf);
     SP = ORIGMARK;
     RETPUSHUNDEF;
 }
