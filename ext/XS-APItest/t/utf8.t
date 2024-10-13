@@ -33,8 +33,8 @@ my $offset = 1;  # Start 1 byte past word boundary.
 # We choose an invariant and a variant that are at the boundaries between
 # those two types on ASCII platforms.  And, just in case the EBCDIC ever
 # changes to do per-word, we choose arbitrarily an invariant that has most of
-# its bits set natively, and a variant that has most unset.   First create
-# versions for display in the test names.
+# its bits set natively, and a variant that has most unset.  The variant is a
+# continuation byte.  First create versions for display in the test names.
 my $display_invariant = isASCII ? "7F" : sprintf "%02X", utf8::unicode_to_native(0x9F);
 my $display_variant =   isASCII ? "80" : sprintf "%02X", utf8::unicode_to_native(0xA0);
 my $invariant = chr hex $display_invariant;
