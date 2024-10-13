@@ -1620,7 +1620,7 @@
 #     define intuit_more(a,b)                   S_intuit_more(aTHX_ a,b)
 #     define lop(a,b,c)                         S_lop(aTHX_ a,b,c)
 #     define missingterm(a,b)                   S_missingterm(aTHX_ a,b)
-#     define parse_ident(a,b,c,d,e,f,g)         S_parse_ident(aTHX_ a,b,c,d,e,f,g)
+#     define parse_ident(a,b,c,d,e,f)           S_parse_ident(aTHX_ a,b,c,d,e,f)
 #     define pending_ident()                    S_pending_ident(aTHX)
 #     define scan_const(a)                      S_scan_const(aTHX_ a)
 #     define scan_formline(a)                   S_scan_formline(aTHX_ a)
@@ -1757,7 +1757,6 @@
 #   define report_uninit(a)                     Perl_report_uninit(aTHX_ a)
 #   define scan_str(a,b,c,d,e)                  Perl_scan_str(aTHX_ a,b,c,d,e)
 #   define scan_word(a,b,c,d,e)                 Perl_scan_word(aTHX_ a,b,c,d,e)
-#   define scan_word6(a,b,c,d,e,f)              Perl_scan_word6(aTHX_ a,b,c,d,e,f)
 #   define skipspace_flags(a,b)                 Perl_skipspace_flags(aTHX_ a,b)
 #   define sv_magicext_mglob(a)                 Perl_sv_magicext_mglob(aTHX_ a)
 #   define sv_only_taint_gmagic                 Perl_sv_only_taint_gmagic

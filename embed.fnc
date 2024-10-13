@@ -2995,12 +2995,6 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|STRLEN destlen 			\
 				|int allow_package			\
 				|NN STRLEN *slp
-EXpx	|char * |scan_word6	|NN char *s				\
-				|NN char *dest				\
-				|STRLEN destlen 			\
-				|int allow_package			\
-				|NN STRLEN *slp 			\
-				|bool warn_tick
 Cp	|U32	|seed
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 ep	|void	|set_caret_X
@@ -5874,8 +5868,7 @@ S	|void	|parse_ident	|NN char **s				\
 				|NN char * const e			\
 				|int allow_package			\
 				|bool is_utf8				\
-				|bool check_dollar			\
-				|bool tick_warn
+				|bool check_dollar
 S	|int	|pending_ident
 RS	|char * |scan_const	|NN char *start
 RS	|char * |scan_formline	|NN char *s

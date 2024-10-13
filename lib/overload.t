@@ -2395,7 +2395,7 @@ is eval {"$a"}, overload::StrVal($a),
 {
  package mane;
  use overload q\""\ => "bear::strength";
- use overload bool  => "bear'bouillon";
+ use overload bool  => "bear::bouillon";
 }
 @bear::ISA = 'food';
 sub food::strength { 'twine' }
