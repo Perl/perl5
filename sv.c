@@ -10037,7 +10037,7 @@ Perl_newSVnv(pTHX_ const NV n)
     SvNV_set(sv, n);
 #endif
 
-    SvTAINT(sv);
+    sv = SvTAINTTC(sv);
 
     return sv;
 }
@@ -10073,7 +10073,7 @@ Perl_newSViv(pTHX_ const IV i)
     SET_SVANY_FOR_BODYLESS_IV(sv);
     sv->sv_u.svu_iv = i;
 
-    SvTAINT(sv);
+    sv = SvTAINTTC(sv);
 
     return sv;
 }
@@ -10175,7 +10175,7 @@ Perl_newSVuv(pTHX_ const UV u)
     SET_SVANY_FOR_BODYLESS_IV(sv);
     sv->sv_u.svu_uv = u;
 
-    SvTAINT(sv);
+    sv = SvTAINTTC(sv);
 
     return sv;
 }
