@@ -455,8 +455,7 @@ DEFINES		= $(DEFINES) -D_DEBUG -DDEBUGGING
 EXTRACFLAGS	= $(EXTRACFLAGS) -MDd
 !ELSE
 # Enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG).
-# -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
-OPTIMIZE	= -O1 -Zi -GL
+OPTIMIZE	= -O2 -Zi -GL -Gw
 # we enable debug symbols in release builds also
 LINK_DBG	= -debug -opt:ref,icf -ltcg
 # you may want to enable this if you want COFF symbols in the executables
