@@ -121,7 +121,7 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
         // }
         else {
           if(!saw[type]) {
-            __debugbreak();
+            //__debugbreak();
             saw[type] = 1;
           }
           *where = Perl_newSV_typeX(aTHX_ type);

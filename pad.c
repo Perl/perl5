@@ -2220,8 +2220,8 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
     assert(!CvUNIQUE(proto));
 
     if (!cv) {
-      if(SvTYPE(proto) != SVt_PVCV && SvTYPE(proto)  != SVt_PVFM )
-          __debugbreak();
+      // if(SvTYPE(proto) != SVt_PVCV && SvTYPE(proto)  != SVt_PVFM )
+          // __debugbreak();
       if (SvTYPE(proto) == SVt_PVCV) {
           cv = MUTABLE_CV(newSV_type(SVt_PVCV));
       }
@@ -2229,7 +2229,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
           cv = MUTABLE_CV(newSV_type(SVt_PVFM));
       }
       else {
-          __debugbreak();
+          croak("panic: S_cv_clone strange SV %u", SvTYPE(proto));
       }
     }
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC

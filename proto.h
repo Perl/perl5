@@ -9839,11 +9839,6 @@ Perl_newRV_noinc(pTHX_ SV * const tmpRef)
         assert(tmpRef)
 
 PERL_STATIC_INLINE SV *
-Perl_newSV_type(pTHX_ const svtype type)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_NEWSV_TYPE
-
-PERL_STATIC_INLINE SV *
 Perl_newSV_typeSVt_INVLIST(pTHX)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPESVT_INVLIST
@@ -9927,6 +9922,11 @@ PERL_STATIC_INLINE SV *
 Perl_newSV_typeSVt_REGEXP(pTHX)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPESVT_REGEXP
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeX(pTHX_ const svtype type)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPEX
 
 PERL_STATIC_FORCE_INLINE SV *
 Perl_newSV_type_mortal(pTHX_ const svtype type)

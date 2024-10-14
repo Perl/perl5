@@ -404,7 +404,7 @@ static const struct body_details fake_hv_with_aux =
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX))) };
 
 /*
-=for apidoc newSV_type
+=for apidoc newSV_typeX
 
 Creates a new SV, of the type specified.  The reference count for the new SV
 is set to 1.
@@ -579,111 +579,16 @@ PERL_STATIC_INLINE SV *
 Perl_newSV_typeX(pTHX_ const svtype type)
 {
 
-static const struct body_details bodies_by_type_STAT[] = {
-    /* HEs use this offset for their arena.  */
-    { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
-
-    /* IVs are in the head, so the allocation size is 0.  */
-    { 0,
-      sizeof(IV), /* This is used to copy out the IV body.  */
-      STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
-      NOARENA /* IVS don't need an arena  */, 0
-    },
-
-#if NVSIZE <= IVSIZE
-    { 0, sizeof(NV),
-      STRUCT_OFFSET(XPVNV, xnv_u),
-      SVt_NV, FALSE, HADNV, NOARENA, 0 },
-#else
-    { sizeof(NV), sizeof(NV),
-      STRUCT_OFFSET(XPVNV, xnv_u),
-      SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
-#endif
-
-    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_PV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_INVLIST, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_PVIV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_PVNV, FALSE, HADNV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
-
-    { sizeof(ALIGNED_TYPE_NAME(regexp)),
-      sizeof(regexp),
-      0,
-      SVt_REGEXP, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
-    },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
-      copy_length(XPVAV, xav_alloc),
-      0,
-      SVt_PVAV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
-      copy_length(XPVHV, xhv_max),
-      0,
-      SVt_PVHV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
-      sizeof(XPVCV),
-      0,
-      SVt_PVCV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
-      sizeof(XPVFM),
-      0,
-      SVt_PVFM, TRUE, NONV, NOARENA,
-      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
-      sizeof(XPVIO),
-      0,
-      SVt_PVIO, TRUE, NONV, HASARENA,
-      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVOBJ)),
-      copy_length(XPVOBJ, xobject_fields),
-      0,
-      SVt_PVOBJ, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
-};
-
     SV *sv;
     void*      new_body;
+#ifdef WANT_SV_BODY_DETAILS
     const struct body_details *type_details;
+#endif
 
     new_SV(sv);
-
-    bodies_by_type_STAT[type];
+#ifdef WANT_SV_BODY_DETAILS
+    type_details = bodies_by_type + type;
+#endif
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= type;
@@ -706,20 +611,29 @@ static const struct body_details bodies_by_type_STAT[] = {
     case SVt_PVHV:
     case SVt_PVAV:
     case SVt_PVOBJ:
-        assert(bodies_by_type_STAT[type].body_size);
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->body_size);
+#endif
 
 #ifndef PURIFY
-        assert(bodies_by_type_STAT[type].arena);
-        assert(bodies_by_type_STAT[type].arena_size);
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->arena);
+        assert(type_details->arena_size);
+#endif
         /* This points to the start of the allocated area.  */
         new_body = S_new_body(aTHX_ type);
         /* xpvav and xpvhv have no offset, so no need to adjust new_body */
-        assert(!(bodies_by_type_STAT[type].offset));
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->offset);
+#endif
 #else
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
-           
-        new_body = new_NOARENAZ(&(bodies_by_type_STAT[type]));
+#ifdef WANT_SV_BODY_DETAILS
+        new_body = new_NOARENAZ(type_details);
+#else
+        new_body = new_NOARENAZ(type);
+#endif
 #endif
         SvANY(sv) = new_body;
 
@@ -779,20 +693,32 @@ static const struct body_details bodies_by_type_STAT[] = {
          * Obviously this all only holds as long as it's a true reflection of
          * the bodies_by_type lookup table. */
 #ifndef PURIFY
-         ASSUME(bodies_by_type_STAT[type].arena);
+#ifdef WANT_SV_BODY_DETAILS
+         ASSUME(type_details->arena);
+#endif
 #endif
          /* FALLTHROUGH */
     case SVt_PVFM:
-
-        assert(bodies_by_type_STAT[type].body_size);
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->body_size);
+#endif
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
 #ifndef PURIFY
-        if(bodies_by_type_STAT[type].arena) {
+#ifdef WANT_SV_BODY_DETAILS
+        if(type_details->arena) {
+#else
+        if(SVDB_arena(type)) {
+#endif
             /* This points to the start of the allocated area.  */
             new_body = S_new_body(aTHX_ type);
-            Zero(new_body, bodies_by_type_STAT[type].body_size, char);
-            new_body = ((char *)new_body) - bodies_by_type_STAT[type].offset;
+#ifdef WANT_SV_BODY_DETAILS
+            Zero(new_body, type_details->body_size, char);
+            new_body = ((char *)new_body) - type_details->offset;
+#else
+            Zero(new_body, SVDB_body_size(type), char);
+            new_body = ((char *)new_body) - SVDB_offset(type);
+#endif
         } else
 #endif
         {
