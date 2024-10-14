@@ -4922,7 +4922,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
         SvUPGRADE(dsv, SVt_COW);
     }
     else
-        dsv = newSV_type(SVt_COW);
+        dsv = newSV_type(SVt_PV);
 
     assert (SvPOK(ssv));
     assert (SvPOKp(ssv));
@@ -5438,9 +5438,19 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         /* Need to downgrade the REGEXP to a simple(r) scalar. This is analogous
            to sv_unglob. We only need it here, so inline it.  */
         const bool islv = SvTYPE(sv) == SVt_PVLV;
-        const svtype new_type =
-          islv ? SVt_NULL : SvMAGIC(sv) || SvSTASH(sv) ? SVt_PVMG : SVt_PV;
-        SV *const temp = newSV_type(new_type);
+        svtype new_type;
+        SV * temp;
+        if(islv) {
+          temp = Perl_newSV_type(SVt_NULL);
+          new_type = SVt_NULL;
+        } else if (SvMAGIC(sv) || SvSTASH(sv)) {
+          temp = Perl_newSV_type(SVt_PVMG);
+          new_type = SVt_PVMG;
+        }
+        else  {
+          temp = Perl_newSV_type(SVt_PV);
+          new_type = SVt_PV;
+        }
         regexp *old_rx_body;
 
         if (new_type == SVt_PVMG) {
@@ -16539,9 +16549,9 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
     param->flags = 0;
     param->proto_perl = from;
     param->new_perl = to;
-    param->stashes = (AV *)Perl_newSV_type(to, SVt_PVAV);
+    param->stashes = (AV *)Perl_newSV_typeSVt_PVAV(to);
     AvREAL_off(param->stashes);
-    param->unreferenced = (AV *)Perl_newSV_type(to, SVt_PVAV);
+    param->unreferenced = (AV *)Perl_newSV_typeSVt_PVAV(to);
 
     if (was != to) {
         PERL_SET_THX(was);

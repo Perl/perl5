@@ -2299,6 +2299,40 @@ ARdp	|SV *	|newSV_true
 ARdip	|SV *	|newSV_type	|const svtype type
 AIRdp	|SV *	|newSV_type_mortal					\
 				|const svtype type
+ARdip	|SV *	|newSV_type_mortalSVt_INVLIST
+ARdip	|SV *	|newSV_type_mortalSVt_IV
+ARdip	|SV *	|newSV_type_mortalSVt_NULL
+ARdip	|SV *	|newSV_type_mortalSVt_NV
+ARdip	|SV *	|newSV_type_mortalSVt_PV
+ARdip	|SV *	|newSV_type_mortalSVt_PVAV
+ARdip	|SV *	|newSV_type_mortalSVt_PVCV
+ARdip	|SV *	|newSV_type_mortalSVt_PVFM
+ARdip	|SV *	|newSV_type_mortalSVt_PVGV
+ARdip	|SV *	|newSV_type_mortalSVt_PVHV
+ARdip	|SV *	|newSV_type_mortalSVt_PVIO
+ARdip	|SV *	|newSV_type_mortalSVt_PVIV
+ARdip	|SV *	|newSV_type_mortalSVt_PVLV
+ARdip	|SV *	|newSV_type_mortalSVt_PVMG
+ARdip	|SV *	|newSV_type_mortalSVt_PVNV
+ARdip	|SV *	|newSV_type_mortalSVt_PVOBJ
+ARdip	|SV *	|newSV_type_mortalSVt_REGEXP
+ARdip	|SV *	|newSV_typeSVt_INVLIST
+ARdip	|SV *	|newSV_typeSVt_IV
+ARdip	|SV *	|newSV_typeSVt_NULL
+ARdip	|SV *	|newSV_typeSVt_NV
+ARdip	|SV *	|newSV_typeSVt_PV
+ARdip	|SV *	|newSV_typeSVt_PVAV
+ARdip	|SV *	|newSV_typeSVt_PVCV
+ARdip	|SV *	|newSV_typeSVt_PVFM
+ARdip	|SV *	|newSV_typeSVt_PVGV
+ARdip	|SV *	|newSV_typeSVt_PVHV
+ARdip	|SV *	|newSV_typeSVt_PVIO
+ARdip	|SV *	|newSV_typeSVt_PVIV
+ARdip	|SV *	|newSV_typeSVt_PVLV
+ARdip	|SV *	|newSV_typeSVt_PVMG
+ARdip	|SV *	|newSV_typeSVt_PVNV
+ARdip	|SV *	|newSV_typeSVt_PVOBJ
+ARdip	|SV *	|newSV_typeSVt_REGEXP
 ARdp	|SV *	|newSVuv	|const UV u
 ARdpx	|OP *	|newTRYCATCHOP	|I32 flags				\
 				|NN OP *tryblock			\

@@ -2219,7 +2219,10 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
 
     assert(!CvUNIQUE(proto));
 
-    if (!cv) cv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
+    if (!cv) {
+      __debugbreak();
+      cv = MUTABLE_CV(Perl_newSV_typeX(pTHX_ SvTYPE(proto)));
+    }
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
                                     |CVf_SLABBED);
     CvCLONED_on(cv);
