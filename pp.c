@@ -5983,8 +5983,8 @@ PP(pp_emptyavhv)
     OP * const op = PL_op;
     SV * rv;
     SV * const sv = MUTABLE_SV( (op->op_private & OPpEMPTYAVHV_IS_HV)
-                                ? Perl_newSV_type(SVt_PVHV)
-                                : Perl_newSV_type(SVt_PVAV) );
+                                ? newSV_type(SVt_PVHV)
+                                : newSV_type(SVt_PVAV) );
 
     /* Is it an assignment, just a stack push, or both?*/
     if (op->op_private & OPpTARGET_MY) {

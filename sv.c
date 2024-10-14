@@ -29,6 +29,9 @@
 
 #include "EXTERN.h"
 #define PERL_IN_SV_C
+//#if defined(DEBUGGING)
+#  define WANT_SV_BODY_DETAILS
+//#endif
 #include "perl.h"
 #include "regcomp.h"
 #ifdef __VMS
@@ -5441,14 +5444,14 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         svtype new_type;
         SV * temp;
         if(islv) {
-          temp = Perl_newSV_type(SVt_NULL);
+          temp = newSV_type(SVt_NULL);
           new_type = SVt_NULL;
         } else if (SvMAGIC(sv) || SvSTASH(sv)) {
-          temp = Perl_newSV_type(SVt_PVMG);
+          temp = newSV_type(SVt_PVMG);
           new_type = SVt_PVMG;
         }
         else  {
-          temp = Perl_newSV_type(SVt_PV);
+          temp = newSV_type(SVt_PV);
           new_type = SVt_PV;
         }
         regexp *old_rx_body;

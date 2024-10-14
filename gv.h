@@ -101,6 +101,17 @@ L<perl5100delta>.
 =for apidoc Am|SV*|GvSVn|GV* gv
 Like C<L</GvSV>>, but creates an empty scalar if none already exists.
 
+=for apidoc Am|SV*|GvSVnt|GV* gv|svtype sv_type
+Like C<L</GvSVn>>, but creates an empty scalar whose type is already upgraded
+to the requested type if none already exists. Note, if there is an existing
+scalar already stored in the GV, its type is NOT upgraded, so you still must
+do an C<SvUPGRADE> unless you are absolutly the scalar slot in the GV was
+empty before, or if you allocated or created the GV immediatly before.
+Note, all the I<sv_set**v()> functions do all necessary C<SvUPGRADE> type
+logic checks for you. This macro exists to skip a 2nd pass through the
+I<SV *> allocator subsystem. That 2nd pass skipped is the slow path of
+C<SvUPGRADE> and swapping SV body types in the type upgrade.
+
 =for apidoc Am|AV*|GvAV|GV* gv
 
 Return the AV from the GV.
@@ -121,8 +132,12 @@ Return the CV from the GV.
 #define GvSVn(gv)	(*(GvGP(gv)->gp_sv ? \
                          &(GvGP(gv)->gp_sv) : \
                          &(GvGP(gv_SVadd(gv))->gp_sv)))
+#define GvSVnt(_gv,_sv_type)	(*(GvGP(_gv)->gp_sv ? \
+                         &(GvGP(_gv)->gp_sv) : \
+                         &(GvGP(gv_SVadd_type(_gv,_sv_type))->gp_sv)))
 #else
 #define GvSVn(gv)	GvSV(gv)
+#define GvSVnt(_gv,_sv_type) (((void)SvUPGRADE(GvSV(_gv),_sv_type)),GvSV(_gv))
 #endif
 
 #define GvREFCNT(gv)	(GvGP(gv)->gp_refcnt)
@@ -347,6 +362,7 @@ Make sure there is a slot of the given type (AV, HV, IO, SV) in the GV C<gv>.
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
 #define gv_IOadd(gv) gv_add_by_type((gv), SVt_PVIO)
 #define gv_SVadd(gv) gv_add_by_type((gv), SVt_NULL)
+#define gv_SVadd_type(_gv,_sv_type) gv_add_by_type((_gv), (_sv_type))
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

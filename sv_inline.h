@@ -179,6 +179,8 @@ ALIGNED_TYPE(XPVOBJ);
         STRUCT_OFFSET(type, last_member) \
         + sizeof (((type*)SvANY((const SV *)0))->last_member)
 
+#ifdef WANT_SV_BODY_DETAILS
+
 static const struct body_details bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
     { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
@@ -277,9 +279,35 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
 };
 
+#endif
+
+
+#define SVDB_body_size(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(0):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(0):(sizeof(NV)))):(_a)==SVt_PV?(sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(sizeof(XPVMG)):(_a)==SVt_REGEXP?(sizeof(ALIGNED_TYPE_NAME(regexp))):(_a)==SVt_PVGV?(sizeof(ALIGNED_TYPE_NAME(XPVGV))):(_a)==SVt_PVLV?(sizeof(ALIGNED_TYPE_NAME(XPVLV))):(_a)==SVt_PVAV?(sizeof(ALIGNED_TYPE_NAME(XPVAV))):(_a)==SVt_PVHV?(sizeof(ALIGNED_TYPE_NAME(XPVHV))):(_a)==SVt_PVCV?(sizeof(ALIGNED_TYPE_NAME(XPVCV))):(_a)==SVt_PVFM?(sizeof(ALIGNED_TYPE_NAME(XPVFM))):(_a)==SVt_PVIO?(sizeof(ALIGNED_TYPE_NAME(XPVIO))):(sizeof(ALIGNED_TYPE_NAME(XPVOBJ))))
+
+#define SVDB_copy(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(sizeof(IV)):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(sizeof(NV)):(sizeof(NV)))):(_a)==SVt_PV?(copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(copy_length(XPVMG, xnv_u)):(_a)==SVt_REGEXP?(sizeof(regexp)):(_a)==SVt_PVGV?(sizeof(XPVGV)):(_a)==SVt_PVLV?(sizeof(XPVLV)):(_a)==SVt_PVAV?(copy_length(XPVAV, xav_alloc)):(_a)==SVt_PVHV?(copy_length(XPVHV, xhv_max)):(_a)==SVt_PVCV?(sizeof(XPVCV)):(_a)==SVt_PVFM?(sizeof(XPVFM)):(_a)==SVt_PVIO?(sizeof(XPVIO)):(copy_length(XPVOBJ, xobject_fields)))
+
+#define SVDB_offset(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(STRUCT_OFFSET(XPVIV, xiv_iv)):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(STRUCT_OFFSET(XPVNV, xnv_u)):(STRUCT_OFFSET(XPVNV, xnv_u)))):(_a)==SVt_PV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(0):(_a)==SVt_REGEXP?(0):(_a)==SVt_PVGV?(0):(_a)==SVt_PVLV?(0):(_a)==SVt_PVAV?(0):(_a)==SVt_PVHV?(0):(_a)==SVt_PVCV?(0):(_a)==SVt_PVFM?(0):(_a)==SVt_PVIO?(0):(0))
+
+#define SVDB_type(_a) ((_a)==SVt_NULL?(SVt_NULL):(_a)==SVt_IV?(SVt_IV):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(SVt_NV):(SVt_NV))):(_a)==SVt_PV?(SVt_PV):(_a)==SVt_INVLIST?(SVt_INVLIST):(_a)==SVt_PVIV?(SVt_PVIV):(_a)==SVt_PVNV?(SVt_PVNV):(_a)==SVt_PVMG?(SVt_PVMG):(_a)==SVt_REGEXP?(SVt_REGEXP):(_a)==SVt_PVGV?(SVt_PVGV):(_a)==SVt_PVLV?(SVt_PVLV):(_a)==SVt_PVAV?(SVt_PVAV):(_a)==SVt_PVHV?(SVt_PVHV):(_a)==SVt_PVCV?(SVt_PVCV):(_a)==SVt_PVFM?(SVt_PVFM):(_a)==SVt_PVIO?(SVt_PVIO):(SVt_PVOBJ))
+
+#define SVDB_cant_upgrade(_a) ((_a)==SVt_NULL?(FALSE):(_a)==SVt_IV?(FALSE):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(FALSE):(FALSE))):(_a)==SVt_PV?(FALSE):(_a)==SVt_INVLIST?(TRUE):(_a)==SVt_PVIV?(FALSE):(_a)==SVt_PVNV?(FALSE):(_a)==SVt_PVMG?(FALSE):(_a)==SVt_REGEXP?(TRUE):(_a)==SVt_PVGV?(TRUE):(_a)==SVt_PVLV?(TRUE):(_a)==SVt_PVAV?(TRUE):(_a)==SVt_PVHV?(TRUE):(_a)==SVt_PVCV?(TRUE):(_a)==SVt_PVFM?(TRUE):(_a)==SVt_PVIO?(TRUE):(TRUE))
+
+#define SVDB_zero_nv(_a) ((_a)==SVt_NULL?(NONV):(_a)==SVt_IV?(NONV):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(HADNV):(HADNV))):(_a)==SVt_PV?(NONV):(_a)==SVt_INVLIST?(NONV):(_a)==SVt_PVIV?(NONV):(_a)==SVt_PVNV?(HADNV):(_a)==SVt_PVMG?(HADNV):(_a)==SVt_REGEXP?(NONV):(_a)==SVt_PVGV?(HADNV):(_a)==SVt_PVLV?(HADNV):(_a)==SVt_PVAV?(NONV):(_a)==SVt_PVHV?(NONV):(_a)==SVt_PVCV?(NONV):(_a)==SVt_PVFM?(NONV):(_a)==SVt_PVIO?(NONV):(NONV))
+
+#define SVDB_arena(_a) ((_a)==SVt_NULL?(NOARENA):(_a)==SVt_IV?(NOARENA):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(NOARENA):(HASARENA))):(_a)==SVt_PV?(HASARENA):(_a)==SVt_INVLIST?(HASARENA):(_a)==SVt_PVIV?(HASARENA):(_a)==SVt_PVNV?(HASARENA):(_a)==SVt_PVMG?(HASARENA):(_a)==SVt_REGEXP?(HASARENA):(_a)==SVt_PVGV?(HASARENA):(_a)==SVt_PVLV?(HASARENA):(_a)==SVt_PVAV?(HASARENA):(_a)==SVt_PVHV?(HASARENA):(_a)==SVt_PVCV?(HASARENA):(_a)==SVt_PVFM?(NOARENA):(_a)==SVt_PVIO?(HASARENA):(HASARENA))
+
+#define SVDB_arena_size(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(0):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(0):(FIT_ARENA(0, sizeof(NV))))):(_a)==SVt_PV?(FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_INVLIST?(FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVIV?(FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVNV?(FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVMG?(FIT_ARENA(0, sizeof(XPVMG))):(_a)==SVt_REGEXP?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))):(_a)==SVt_PVGV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV)))):(_a)==SVt_PVLV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV)))):(_a)==SVt_PVAV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV)))):(_a)==SVt_PVHV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV)))):(_a)==SVt_PVCV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV)))):(_a)==SVt_PVFM?(FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM)))):(_a)==SVt_PVIO?(FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO)))):(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ)))))
+
+
+#ifdef WANT_SV_BODY_DETAILS
 #define new_body_allocated(sv_type)            \
     (void *)((char *)S_new_body(aTHX_ sv_type) \
              - bodies_by_type[sv_type].offset)
+#else
+#define new_body_allocated(sv_type)            \
+    (void *)((char *)S_new_body(aTHX_ sv_type) \
+             - SVDB_offset(sv_type)
+#endif
 
 #ifdef PURIFY
 #if !(NVSIZE <= IVSIZE)
@@ -298,22 +326,37 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()    new_body_allocated(SVt_PVNV)
 #define new_XPVMG()    new_body_allocated(SVt_PVMG)
 
+#ifdef WANT_SV_BODY_DETAILS
 #define del_body_by_type(p, type)                               \
     del_body(p + bodies_by_type[(type)].offset,                 \
              &PL_body_roots[(type)])
+#else
+#define del_body_by_type(p, type)                               \
+    del_body(p + SVDB_offset(type),                 \
+             &PL_body_roots[(type)])
+#endif
 
 #endif /* PURIFY */
 
 /* no arena for you! */
 
+
+#ifdef WANT_SV_BODY_DETAILS
 #define new_NOARENA(details) \
         safemalloc((details)->body_size + (details)->offset)
 #define new_NOARENAZ(details) \
         safecalloc((details)->body_size + (details)->offset, 1)
+#else
+#define new_NOARENA(_sv_type) \
+        safemalloc(SVDB_body_size(_sv_type) + SVDB_offset(_sv_type))
+#define new_NOARENAZ(_sv_type) \
+        safecalloc(SVDB_body_size(_sv_type) + SVDB_offset(_sv_type), 1)
+#endif
 
 #ifndef PURIFY
 
 /* grab a new thing from the arena's free list, allocating more if necessary. */
+#ifdef WANT_SV_BODY_DETAILS
 #define new_body_from_arena(xpv, root_index, type_meta) \
     STMT_START { \
         void ** const r3wt = &PL_body_roots[root_index]; \
@@ -323,12 +366,27 @@ static const struct body_details bodies_by_type[] = {
                                              type_meta.arena_size)); \
         *(r3wt) = *(void**)(xpv); \
     } STMT_END
+#endif
+
+#define new_body_from_arena_exp(xpv, root_index, _body_size, _arena_size) \
+    STMT_START { \
+        void ** const r3wt = &PL_body_roots[root_index]; \
+        xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
+          ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ root_index, \
+                                             _body_size,\
+                                             _arena_size)); \
+        *(r3wt) = *(void**)(xpv); \
+    } STMT_END
 
 PERL_STATIC_INLINE void *
 S_new_body(pTHX_ const svtype sv_type)
 {
     void *xpv;
+#ifdef WANT_SV_BODY_DETAILS
     new_body_from_arena(xpv, sv_type, bodies_by_type[sv_type]);
+#else
+    new_body_from_arena_exp(xpv, sv_type, SVDB_body_size(sv_type), SVDB_arena_size(sv_type));
+#endif
     return xpv;
 }
 
@@ -402,7 +460,11 @@ Perl_newSV_type(pTHX_ const svtype type)
 #else
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
+#ifdef WANT_SV_BODY_DETAILS
         new_body = new_NOARENAZ(type_details);
+#else
+        new_body = new_NOARENAZ(type);
+#endif
 #endif
         SvANY(sv) = new_body;
 
@@ -479,7 +541,11 @@ Perl_newSV_type(pTHX_ const svtype type)
         } else
 #endif
         {
+#ifdef WANT_SV_BODY_DETAILS
             new_body = new_NOARENAZ(type_details);
+#else
+            new_body = new_NOARENAZ(type);
+#endif
         }
         SvANY(sv) = new_body;
 
@@ -512,13 +578,112 @@ Perl_newSV_type(pTHX_ const svtype type)
 PERL_STATIC_INLINE SV *
 Perl_newSV_typeX(pTHX_ const svtype type)
 {
+
+static const struct body_details bodies_by_type_STAT[] = {
+    /* HEs use this offset for their arena.  */
+    { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
+
+    /* IVs are in the head, so the allocation size is 0.  */
+    { 0,
+      sizeof(IV), /* This is used to copy out the IV body.  */
+      STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
+      NOARENA /* IVS don't need an arena  */, 0
+    },
+
+#if NVSIZE <= IVSIZE
+    { 0, sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, NOARENA, 0 },
+#else
+    { sizeof(NV), sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
+#endif
+
+    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_INVLIST, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PVIV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PVNV, FALSE, HADNV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
+
+    { sizeof(ALIGNED_TYPE_NAME(regexp)),
+      sizeof(regexp),
+      0,
+      SVt_REGEXP, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
+    },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
+      copy_length(XPVAV, xav_alloc),
+      0,
+      SVt_PVAV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
+      copy_length(XPVHV, xhv_max),
+      0,
+      SVt_PVHV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
+      sizeof(XPVCV),
+      0,
+      SVt_PVCV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
+      sizeof(XPVFM),
+      0,
+      SVt_PVFM, TRUE, NONV, NOARENA,
+      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
+      sizeof(XPVIO),
+      0,
+      SVt_PVIO, TRUE, NONV, HASARENA,
+      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVOBJ)),
+      copy_length(XPVOBJ, xobject_fields),
+      0,
+      SVt_PVOBJ, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
+};
+
     SV *sv;
     void*      new_body;
     const struct body_details *type_details;
 
     new_SV(sv);
 
-    type_details = bodies_by_type + type;
+    bodies_by_type_STAT[type];
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= type;
@@ -541,19 +706,20 @@ Perl_newSV_typeX(pTHX_ const svtype type)
     case SVt_PVHV:
     case SVt_PVAV:
     case SVt_PVOBJ:
-        assert(type_details->body_size);
+        assert(bodies_by_type_STAT[type].body_size);
 
 #ifndef PURIFY
-        assert(type_details->arena);
-        assert(type_details->arena_size);
+        assert(bodies_by_type_STAT[type].arena);
+        assert(bodies_by_type_STAT[type].arena_size);
         /* This points to the start of the allocated area.  */
         new_body = S_new_body(aTHX_ type);
         /* xpvav and xpvhv have no offset, so no need to adjust new_body */
-        assert(!(type_details->offset));
+        assert(!(bodies_by_type_STAT[type].offset));
 #else
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
-        new_body = new_NOARENAZ(type_details);
+           
+        new_body = new_NOARENAZ(&(bodies_by_type_STAT[type]));
 #endif
         SvANY(sv) = new_body;
 
@@ -613,24 +779,28 @@ Perl_newSV_typeX(pTHX_ const svtype type)
          * Obviously this all only holds as long as it's a true reflection of
          * the bodies_by_type lookup table. */
 #ifndef PURIFY
-         ASSUME(type_details->arena);
+         ASSUME(bodies_by_type_STAT[type].arena);
 #endif
          /* FALLTHROUGH */
     case SVt_PVFM:
 
-        assert(type_details->body_size);
+        assert(bodies_by_type_STAT[type].body_size);
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
 #ifndef PURIFY
-        if(type_details->arena) {
+        if(bodies_by_type_STAT[type].arena) {
             /* This points to the start of the allocated area.  */
             new_body = S_new_body(aTHX_ type);
-            Zero(new_body, type_details->body_size, char);
-            new_body = ((char *)new_body) - type_details->offset;
+            Zero(new_body, bodies_by_type_STAT[type].body_size, char);
+            new_body = ((char *)new_body) - bodies_by_type_STAT[type].offset;
         } else
 #endif
         {
-            new_body = new_NOARENAZ(type_details);
+#ifdef WANT_SV_BODY_DETAILS
+        new_body = new_NOARENAZ(type_details);
+#else
+        new_body = new_NOARENAZ(type);
+#endif
         }
         SvANY(sv) = new_body;
 
@@ -1148,21 +1318,12 @@ Perl_sv_setpv_freshbuf(pTHX_ SV *const sv)
 }
 
 
-#define SVDB_body_size(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(0):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(0):(sizeof(NV)))):(_a)==SVt_PV?(sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(sizeof(XPVMG)):(_a)==SVt_REGEXP?(sizeof(ALIGNED_TYPE_NAME(regexp))):(_a)==SVt_PVGV?(sizeof(ALIGNED_TYPE_NAME(XPVGV))):(_a)==SVt_PVLV?(sizeof(ALIGNED_TYPE_NAME(XPVLV))):(_a)==SVt_PVAV?(sizeof(ALIGNED_TYPE_NAME(XPVAV))):(_a)==SVt_PVHV?(sizeof(ALIGNED_TYPE_NAME(XPVHV))):(_a)==SVt_PVCV?(sizeof(ALIGNED_TYPE_NAME(XPVCV))):(_a)==SVt_PVFM?(sizeof(ALIGNED_TYPE_NAME(XPVFM))):(_a)==SVt_PVIO?(sizeof(ALIGNED_TYPE_NAME(XPVIO))):(sizeof(ALIGNED_TYPE_NAME(XPVOBJ))))
 
-#define SVDB_copy(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(sizeof(IV)):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(sizeof(NV)):(sizeof(NV)))):(_a)==SVt_PV?(copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(copy_length(XPVMG, xnv_u)):(_a)==SVt_REGEXP?(sizeof(regexp)):(_a)==SVt_PVGV?(sizeof(XPVGV)):(_a)==SVt_PVLV?(sizeof(XPVLV)):(_a)==SVt_PVAV?(copy_length(XPVAV, xav_alloc)):(_a)==SVt_PVHV?(copy_length(XPVHV, xhv_max)):(_a)==SVt_PVCV?(sizeof(XPVCV)):(_a)==SVt_PVFM?(sizeof(XPVFM)):(_a)==SVt_PVIO?(sizeof(XPVIO)):(copy_length(XPVOBJ, xobject_fields)))
 
-#define SVDB_offset(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(STRUCT_OFFSET(XPVIV, xiv_iv)):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(STRUCT_OFFSET(XPVNV, xnv_u)):(STRUCT_OFFSET(XPVNV, xnv_u)))):(_a)==SVt_PV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(0):(_a)==SVt_REGEXP?(0):(_a)==SVt_PVGV?(0):(_a)==SVt_PVLV?(0):(_a)==SVt_PVAV?(0):(_a)==SVt_PVHV?(0):(_a)==SVt_PVCV?(0):(_a)==SVt_PVFM?(0):(_a)==SVt_PVIO?(0):(0))
 
-#define SVDB_type(_a) ((_a)==SVt_NULL?(SVt_NULL):(_a)==SVt_IV?(SVt_IV):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(SVt_NV):(SVt_NV))):(_a)==SVt_PV?(SVt_PV):(_a)==SVt_INVLIST?(SVt_INVLIST):(_a)==SVt_PVIV?(SVt_PVIV):(_a)==SVt_PVNV?(SVt_PVNV):(_a)==SVt_PVMG?(SVt_PVMG):(_a)==SVt_REGEXP?(SVt_REGEXP):(_a)==SVt_PVGV?(SVt_PVGV):(_a)==SVt_PVLV?(SVt_PVLV):(_a)==SVt_PVAV?(SVt_PVAV):(_a)==SVt_PVHV?(SVt_PVHV):(_a)==SVt_PVCV?(SVt_PVCV):(_a)==SVt_PVFM?(SVt_PVFM):(_a)==SVt_PVIO?(SVt_PVIO):(SVt_PVOBJ))
 
-#define SVDB_cant_upgrade(_a) ((_a)==SVt_NULL?(FALSE):(_a)==SVt_IV?(FALSE):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(FALSE):(FALSE))):(_a)==SVt_PV?(FALSE):(_a)==SVt_INVLIST?(TRUE):(_a)==SVt_PVIV?(FALSE):(_a)==SVt_PVNV?(FALSE):(_a)==SVt_PVMG?(FALSE):(_a)==SVt_REGEXP?(TRUE):(_a)==SVt_PVGV?(TRUE):(_a)==SVt_PVLV?(TRUE):(_a)==SVt_PVAV?(TRUE):(_a)==SVt_PVHV?(TRUE):(_a)==SVt_PVCV?(TRUE):(_a)==SVt_PVFM?(TRUE):(_a)==SVt_PVIO?(TRUE):(TRUE))
 
-#define SVDB_zero_nv(_a) ((_a)==SVt_NULL?(NONV):(_a)==SVt_IV?(NONV):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(HADNV):(HADNV))):(_a)==SVt_PV?(NONV):(_a)==SVt_INVLIST?(NONV):(_a)==SVt_PVIV?(NONV):(_a)==SVt_PVNV?(HADNV):(_a)==SVt_PVMG?(HADNV):(_a)==SVt_REGEXP?(NONV):(_a)==SVt_PVGV?(HADNV):(_a)==SVt_PVLV?(HADNV):(_a)==SVt_PVAV?(NONV):(_a)==SVt_PVHV?(NONV):(_a)==SVt_PVCV?(NONV):(_a)==SVt_PVFM?(NONV):(_a)==SVt_PVIO?(NONV):(NONV))
 
-#define SVDB_arena(_a) ((_a)==SVt_NULL?(NOARENA):(_a)==SVt_IV?(NOARENA):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(NOARENA):(HASARENA))):(_a)==SVt_PV?(HASARENA):(_a)==SVt_INVLIST?(HASARENA):(_a)==SVt_PVIV?(HASARENA):(_a)==SVt_PVNV?(HASARENA):(_a)==SVt_PVMG?(HASARENA):(_a)==SVt_REGEXP?(HASARENA):(_a)==SVt_PVGV?(HASARENA):(_a)==SVt_PVLV?(HASARENA):(_a)==SVt_PVAV?(HASARENA):(_a)==SVt_PVHV?(HASARENA):(_a)==SVt_PVCV?(HASARENA):(_a)==SVt_PVFM?(NOARENA):(_a)==SVt_PVIO?(HASARENA):(HASARENA))
-
-#define SVDB_arena_size(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(0):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(0):(FIT_ARENA(0, sizeof(NV))))):(_a)==SVt_PV?(FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_INVLIST?(FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVIV?(FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVNV?(FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVMG?(FIT_ARENA(0, sizeof(XPVMG))):(_a)==SVt_REGEXP?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))):(_a)==SVt_PVGV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV)))):(_a)==SVt_PVLV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV)))):(_a)==SVt_PVAV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV)))):(_a)==SVt_PVHV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV)))):(_a)==SVt_PVCV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV)))):(_a)==SVt_PVFM?(FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM)))):(_a)==SVt_PVIO?(FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO)))):(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ)))))
 
 PERL_STATIC_INLINE SV *
 Perl_newSV_typeSVt_NULL(pTHX)

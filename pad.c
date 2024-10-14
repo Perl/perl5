@@ -2220,8 +2220,17 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
     assert(!CvUNIQUE(proto));
 
     if (!cv) {
-      __debugbreak();
-      cv = MUTABLE_CV(Perl_newSV_typeX(pTHX_ SvTYPE(proto)));
+      if(SvTYPE(proto) != SVt_PVCV && SvTYPE(proto)  != SVt_PVFM )
+          __debugbreak();
+      if (SvTYPE(proto) == SVt_PVCV) {
+          cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+      }
+      else if(SvTYPE(proto) == SVt_PVFM) {
+          cv = MUTABLE_CV(newSV_type(SVt_PVFM));
+      }
+      else {
+          __debugbreak();
+      }
     }
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
                                     |CVf_SLABBED);
