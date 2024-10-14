@@ -1008,12 +1008,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     bool result_needs_to_be_utf8 = FALSE;
     bool left_utf8 = FALSE;
     bool right_utf8 = FALSE;
-    U8 * left_non_downgraded = NULL;
-    U8 * right_non_downgraded = NULL;
-    Size_t left_non_downgraded_len = 0;
-    Size_t right_non_downgraded_len = 0;
-    char * non_downgraded = NULL;
-    Size_t non_downgraded_len = 0;
 
     PERL_ARGS_ASSERT_DO_VOP;
 
@@ -1031,34 +1025,25 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     /* This needs to come after SvPV to ensure that string overloading has
        fired off.  */
 
-    /* Create downgraded temporaries of any UTF-8 encoded operands */
+    /* Create downgraded temporaries of any UTF-8 encoded operands.  As of
+     * perl-5.32, we no longer accept above-FF code points at all */
     if (DO_UTF8(left)) {
-        const U8 * save_lc = (U8 *) lc;
-
         left_utf8 = TRUE;
         result_needs_to_be_utf8 = TRUE;
 
-        left_non_downgraded_len = leftlen;
-        lc = (char *) bytes_from_utf8_loc((const U8 *) lc, &leftlen,
-                                          &left_utf8,
-                                          (const U8 **) &left_non_downgraded);
-        /* Calculate the number of trailing unconvertible bytes.  This quantity
-         * is the original length minus the length of the converted portion. */
-        left_non_downgraded_len -= left_non_downgraded - save_lc;
-        SAVEFREEPV(lc);
+        lc = (char *) bytes_from_utf8((const U8 *) lc, &leftlen, &left_utf8);
+        if (! left_utf8) {
+            SAVEFREEPV(lc);
+        }
     }
     if (DO_UTF8(right)) {
-        const U8 * save_rc = (U8 *) rc;
-
         right_utf8 = TRUE;
         result_needs_to_be_utf8 = TRUE;
 
-        right_non_downgraded_len = rightlen;
-        rc = (char *) bytes_from_utf8_loc((const U8 *) rc, &rightlen,
-                                          &right_utf8,
-                                          (const U8 **) &right_non_downgraded);
-        right_non_downgraded_len -= right_non_downgraded - save_rc;
-        SAVEFREEPV(rc);
+        rc = (char *) bytes_from_utf8((const U8 *) rc, &rightlen, &right_utf8);
+        if (! right_utf8) {
+            SAVEFREEPV(rc);
+        }
     }
 
     /* We set 'len' to the length that the operation actually operates on.  The
@@ -1069,9 +1054,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
      * on zeros without having to do it.  In the case of '&', the result is
      * zero, and the dangling portion is simply discarded.  For '|' and '^', the
      * result is the same as the other operand, so the dangling part is just
-     * appended to the final result, unchanged.  As of perl-5.32, we no longer
-     * accept above-FF code points in the dangling portion.
-     */
+     * appended to the final result, unchanged. */
     if (left_utf8 || right_utf8) {
         Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
     }
@@ -1173,29 +1156,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
                 sv_catpvn_nomg(sv, lsave + len, leftlen - len);
         }
         *SvEND(sv) = '\0';
-
-        /* If there is trailing stuff that couldn't be converted from UTF-8, it
-         * is appended as-is for the ^ and | operators.  This preserves
-         * backwards compatibility */
-        if (right_non_downgraded) {
-            non_downgraded = (char *) right_non_downgraded;
-            non_downgraded_len = right_non_downgraded_len;
-        }
-        else if (left_non_downgraded) {
-            non_downgraded = (char *) left_non_downgraded;
-            non_downgraded_len = left_non_downgraded_len;
-        }
-
         break;
     }
 
     if (result_needs_to_be_utf8) {
         sv_utf8_upgrade_nomg(sv);
-
-        /* Append any trailing UTF-8 as-is. */
-        if (non_downgraded) {
-            sv_catpvn_nomg(sv, non_downgraded, non_downgraded_len);
-        }
     }
 
     SvTAINT(sv);
