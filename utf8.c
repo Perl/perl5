@@ -597,35 +597,34 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
 #endif
 
 PERL_STATIC_INLINE int
-S_does_utf8_overflow(const U8 * const s,
-                     const U8 * e,
-                     const bool consider_overlongs)
+S_does_utf8_overflow(const U8 * const s, const U8 * e)
 {
+    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
+
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
      * 'e' - 1 would overflow an IV on this platform; that is if it represents
-     * a code point larger than the highest representable code point.  It
-     * returns 1 if it does overflow; 0 if it doesn't, and -1 if there isn't
-     * enough information to tell.  This last return value can happen if the
-     * sequence is incomplete, missing some trailing bytes that would form a
-     * complete character.  If there are enough bytes to make a definitive
-     * decision, this function does so.
-     *
-     * If 'consider_overlongs' is TRUE, the function checks for the possibility
-     * that the sequence is an overlong that doesn't overflow.  Otherwise, it
-     * assumes the sequence is not an overlong.  This can give different
-     * results only on ASCII 32-bit platforms.
-     *
-     * (For ASCII platforms, we could use memcmp() because we don't have to
-     * convert each byte to I8, but it's very rare input indeed that would
-     * approach overflow, so the loop below will likely only get executed once.)
-     *
-     */
+     * a code point larger than the highest representable code point.  The
+     * possible returns are: */
+#define NO_OVERFLOW                 0   /* Definitely doesn't overflow */
+
+/* There aren't enough examinable bytes available to be sure.  This can happen
+ * if the sequence is incomplete, missing some trailing bytes that would form a
+ * complete character. */
+#define COULD_OVERFLOW              1
+
+/* This overflows if not also overlong, and like COULD_OVERFLOW, there aren't
+ * enough available bytes to be sure, but since overlongs are very rarely
+ * encountered, for most purposes consider it to overflow */
+#define ALMOST_CERTAINLY_OVERFLOWS  2
+
+#define OVERFLOWS                   3   /* Definitely overflows */
+
+    /* Note that the values are ordered so that you can use '>=' in checking
+     * the return value. */
+
     const STRLEN len = e - s;
     const U8 *x;
     const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF;
-    int is_overlong = 0;
-
-    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
 
     for (x = s; x < e; x++, y++) {
 
@@ -635,13 +634,13 @@ S_does_utf8_overflow(const U8 * const s,
          * bytes larger than those omitted bytes, and therefore 'x' can't
          * overflow */
         if (*y == '\0') {
-            return 0;
+            return NO_OVERFLOW;
         }
 
         /* If this byte is less than the corresponding highest non-overflowing
          * UTF-8, the sequence doesn't overflow */
         if (NATIVE_UTF8_TO_I8(*x) < *y) {
-            return 0;
+            return NO_OVERFLOW;
         }
 
         if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
@@ -652,33 +651,25 @@ S_does_utf8_overflow(const U8 * const s,
     /* Got to the end, and all bytes are the same.  If the input is a whole
      * character, it doesn't overflow.  And if it is a partial character,
      * there's not enough information to tell */
-    return (len >= STRLENs(HIGHEST_REPRESENTABLE_UTF)) ? 0 : -1;
+    return (len >= STRLENs(HIGHEST_REPRESENTABLE_UTF)) ? NO_OVERFLOW
+                                                       : COULD_OVERFLOW;
 
-  overflows_if_not_overlong:
+  overflows_if_not_overlong: ;
 
-    /* Here, a well-formed sequence overflows.  If we are assuming
-     * well-formedness, return that it overflows. */
-    if (! consider_overlongs) {
-        return 1;
-    }
-
-    /* Here, it could be the overlong malformation, and might not actually
-     * overflow if you were to calculate it out.
-     *
-     * See if it actually is overlong */
-    is_overlong = is_utf8_overlong(s, len);
-
-    /* If it isn't overlong, is well-formed, so overflows */
-    if (is_overlong == 0) {
-        return 1;
+    /* Here, the sequence overflows if not overlong.  Check for that */
+    int is_overlong = is_utf8_overlong(s, len);
+    if (LIKELY(is_overlong == 0)) {
+        return OVERFLOWS;
     }
 
     /* Not long enough to determine */
     if (is_overlong < 0) {
-        return -1;
+        return ALMOST_CERTAINLY_OVERFLOWS;
     }
 
-    /* Here, it appears to overflow, but it is also overlong */
+    /* Here, it appears to overflow, but it is also overlong.  That overlong
+     * may evaluate to something that doesn't overflow; or it may evaluate to
+     * something that does.  Figure it out */
 
 #if 6 * UTF_CONTINUATION_BYTE_INFO_BITS <= IVSIZE * CHARBITS
 
@@ -699,11 +690,12 @@ S_does_utf8_overflow(const U8 * const s,
      *
      * FE consists of 7 bytes total; the FE start byte contributes 0 bits of
      * information (the high 7 bits, all ones, say that the sequence is 7 bytes
-     * long, and the bottom, zero, bit is s placeholder. That leaves the 6
-     * continuation bytes to contribute UTF_CONTINUATION_BYTE_INFO_BITS each.
-      If that number of bits doesn't exceed the word size, it can't overflow. */
+     * long, and the bottom, zero, bit is 0, so doesn't add anything. That
+     * leaves the 6 continuation bytes to contribute
+     * UTF_CONTINUATION_BYTE_INFO_BITS each.  If that number of bits doesn't
+     * exceed the word size, it can't overflow. */
 
-    return 0;
+    return NO_OVERFLOW;
 
 #else
 
@@ -715,21 +707,23 @@ S_does_utf8_overflow(const U8 * const s,
      *
      * That means only the FF start byte can have an overflowing overlong. */
     if (*s < 0xFF) {
-        return 0;
+        return NO_OVERFLOW;
     }
 
     /* The sequence \xff\x80\x80\x80\x80\x80\x80\x82 is an overlong that
      * evaluates to 2**31, so overflows an IV.  For a UV it's
      *              \xff\x80\x80\x80\x80\x80\x80\x83 = 2**32 */
-#  define OVERFLOWS  "\xff\x80\x80\x80\x80\x80\x80\x82"
+#  define OVERFLOWS_MIN_STRING  "\xff\x80\x80\x80\x80\x80\x80\x82"
 
-    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS)) {   /* Not enough info */
-         return -1;
+    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS_MIN_STRING)) {
+        return ALMOST_CERTAINLY_OVERFLOWS;  /* Not enough info to be sure */
     }
 
 #  define strnGE(s1,s2,l) (strncmp(s1,s2,l) >= 0)
 
-    return strnGE((const char *) s, OVERFLOWS, STRLENs(OVERFLOWS));
+    return (strnGE((const char *) s, OVERFLOWS_MIN_STRING, STRLENs(OVERFLOWS_MIN_STRING)))
+    ? OVERFLOWS
+    : NO_OVERFLOW;
 
 #endif
 
@@ -895,9 +889,7 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
         s++;
     }
 
-    if (0 < does_utf8_overflow(s0, e,
-                               FALSE /* Don't consider_overlongs */
-    )) {
+    if (does_utf8_overflow(s0, e) == OVERFLOWS) {
         return 0;
     }
 
@@ -1567,10 +1559,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
     /* Check for overflow.  The algorithm requires us to not look past the end
      * of the current character, even if partial, so the upper limit is 's' */
-    if (UNLIKELY(0 < does_utf8_overflow(s0, s,
-                                         1 /* Do consider overlongs */
-                                        )))
-    {
+    if (UNLIKELY(does_utf8_overflow(s0, s) >= ALMOST_CERTAINLY_OVERFLOWS)) {
         possible_problems |= UTF8_GOT_OVERFLOW;
         uv = UNICODE_REPLACEMENT;
     }
@@ -4124,9 +4113,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
         if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
             if (UNLIKELY(UTF8_IS_SUPER(s, e))) {
                 if (   ckWARN_d(WARN_NON_UNICODE)
-                    || UNLIKELY(0 < does_utf8_overflow(s, s + len,
-                                               0 /* Don't consider overlongs */
-                                               )))
+                    || UNLIKELY(does_utf8_overflow(s, s + len) >= ALMOST_CERTAINLY_OVERFLOWS))
                 {
                     /* A side effect of this function will be to warn */
                     (void) utf8n_to_uvchr(s, e - s, NULL, UTF8_WARN_SUPER);
