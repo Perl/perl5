@@ -3083,6 +3083,49 @@ Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     }
 }
 
+/*
+=for apidoc utf8_to_uv
+
+Convert the first character in the UTF-8-encoded string starting at C<s> to the
+native code point it represents, storing its value into C<*cp>, and the number
+of bytes of C<s> it occupies into C<*advance>.
+
+Only the bytes from C<s> to S<C<send -1>> are examined.  B<It is an error to call
+this function without> S<C<send E<gt> s>>.
+
+If the bytes starting at C<s> do not represent at least one well-formed UTF-8
+character, this function returns C<false> and sets C<*cp> to the Unicode
+C<REPLACEMENT CHARACTER>.
+
+Otherwise it returns C<true>.
+
+With both success and failure, the value of C<*advance> is the number of bytes
+to add to C<s> to look for the next code point in it.  You might be tempted to
+use C<UTF8_SKIP> instead for this purpose, but B<don't>; it requires extra
+work, and is likely wrong when this function returns C<false>.
+
+Starting in Perl v5.42, this is the preferred function to call to convert from
+UTF-8 for code that doesn't want to get into the weeds of possible
+malformations.
+
+=cut
+*/
+
+PERL_STATIC_INLINE  bool
+Perl_utf8_to_uv(pTHX_ const U8 *s, const U8 *send, UV *cp, STRLEN *advance)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UV;
+    assert(s < send);
+
+    U32 errors;
+
+    /* Same logic as in utf8_to_uvchr_buf_helper for why we allow EMPTY here */
+    *cp = utf8n_to_uvchr_error(s, send - s, advance,
+                               (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY),
+                               &errors);
+    return errors == 0;
+}
+
 /* ------------------------------- perl.h ----------------------------- */
 
 /*

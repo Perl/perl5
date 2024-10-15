@@ -10093,6 +10093,11 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
 # define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
         assert(s); assert(start); assert(end)
 
+PERL_STATIC_INLINE bool
+Perl_utf8_to_uv(pTHX_ const U8 *s, const U8 *send, UV *cp, STRLEN *advance);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV            \
+        assert(s); assert(send); assert(cp); assert(advance)
+
 PERL_STATIC_INLINE UV
 Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
 # define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF_HELPER \

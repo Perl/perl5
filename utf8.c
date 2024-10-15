@@ -1029,8 +1029,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 =for apidoc utf8n_to_uvchr
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this
-directly.
+Most code should use L</utf8_to_uv>() rather than call this directly.
 
 Bottom level UTF-8 decode routine.
 Returns the native code point value of the first character in the string C<s>,
@@ -1160,8 +1159,7 @@ Perl_utf8n_to_uvchr(const U8 *s,
 =for apidoc utf8n_to_uvchr_error
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this
-directly.
+Most code should use L</utf8_to_uv>() rather than call this directly.
 
 This function is for code that needs to know what the precise malformation(s)
 are when an error is found.  If you also need to know the generated warning
@@ -1331,8 +1329,7 @@ Perl_utf8n_to_uvchr_error(const U8 *s,
 =for apidoc utf8n_to_uvchr_msgs
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this
-directly.
+Most code should use L</utf8_to_uv>() rather than call this directly.
 
 This function is for code that needs to know what the precise malformation(s)
 are when an error is found, and wants the corresponding warning and/or error
@@ -2107,6 +2104,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 /*
 =for apidoc utf8_to_uvchr_buf
 
+It is better to use C<L</utf8_to_uv>> instead of this function.
+
 Returns the native code point of the first character in the string C<s> which
 is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
 C<*retlen> will be set to the length, in bytes, of that character.
@@ -2120,12 +2119,44 @@ the next possible position in C<s> that could begin a non-malformed character.
 See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is
 returned.
 
+This function is problematic.  The behavior varies depending on if C<utf8>
+warnings are enabled or not.
+
+=over
+
+=item If enabled:
+
+=over
+
+=item A zero return can mean both success or failure
+
+Hence a zero return must be disambiguated.  Success would come from the next
+character being a NUL.
+
+=item If failure, C<retlen> will be -1, so can't be used to find where to start
+parsing again.
+
+=back
+
+=item If disabled:
+
+Both the return and C<retlen> will be usable values, but the return of the
+S<C<REPLACEMENT CHARACTER>> is ambiguous.  It could mean failure, or it could
+mean that that was the next character in the input and was successfully
+decoded.
+
+=back
+
+In both cases, there are problems, and in practice no one has bothered to
+notice if warnings are enbabled or not.
+
+C<L</utf8_to_uv>> was invented to solve these problems.
+
 =cut
 
 Also implemented as a macro in utf8.h
 
 */
-
 
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
@@ -3718,13 +3749,14 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
             /* For the dot above to modify the 'I', it must be part of a
              * combining sequence immediately following the 'I', and no other
              * modifier with a ccc of 230 may intervene */
-            cp = utf8_to_uvchr_buf(p, e, NULL);
+            STRLEN advance;
+            utf8_to_uv(p, e, &cp, &advance);
             if (! _invlist_contains_cp(PL_CCC_non0_non230, cp)) {
                 break;
             }
 
             /* Here the combining sequence continues */
-            p += UTF8SKIP(p);
+            p += advance;
         }
     }
 
@@ -4116,7 +4148,9 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
     PERL_ARGS_ASSERT_CHECK_UTF8_PRINT;
 
     while (s < e) {
-        if (UTF8SKIP(s) > len) {
+        STRLEN advance = UTF8SKIP(s);
+
+        if (advance > len) {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
                            "%s in %s", unees, PL_op ? OP_DESC(PL_op) : "print");
             return FALSE;
@@ -4138,10 +4172,11 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                     /* This has a different warning than the one the called
                      * function would output, so can't just call it, unlike we
                      * do for the non-chars and above-unicodes */
-                    UV uv = utf8_to_uvchr_buf(s, e, NULL);
+                    UV uv;
+                    utf8_to_uv(s, e, &uv, &advance);
                     Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
                         "Unicode surrogate U+%04" UVXf " is illegal in UTF-8",
-                                             uv);
+                        uv);
                     ok = FALSE;
                 }
             }
@@ -4153,7 +4188,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                 ok = FALSE;
             }
         }
-        s += UTF8SKIP(s);
+        s += advance;
     }
 
     return ok;
