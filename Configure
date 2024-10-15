@@ -2135,10 +2135,14 @@ if test -f "$rsrc/MANIFEST"; then
 	rm -f missing
 	tmppwd=`pwd`
 	for filelist in x??; do
-		(cd "$rsrc"; ls `cat "$tmppwd/$filelist"` \
-			>/dev/null 2>>"$tmppwd/missing")
+		for file in `cat "$tmppwd/$filelist"`; do
+			if [ ! -e "$rsrc/$file" ]; then
+				echo "$file" >> "$tmppwd/missing"
+			fi
+		done
 	done
 	if test -s missing; then
+		echo "The following files do not exist:" >&4
 		cat missing >&4
 		cat >&4 <<'EOM'
 
