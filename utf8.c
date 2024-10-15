@@ -2679,11 +2679,6 @@ and subtracting the after-call value of C<*lenp> from it.
 U8 *
 Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** first_unconverted)
 {
-    U8 *d;
-    const U8 *original = s;
-    U8 *converted_start;
-    const U8 *send = s + *lenp;
-
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8_LOC;
 
     if (! *is_utf8p) {
@@ -2691,12 +2686,27 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
             *first_unconverted = NULL;
         }
 
-        return (U8 *) original;
+        return (U8 *) s;
     }
 
-    Newx(d, (*lenp) + 1, U8);
+    const U8 * const s0 = s;
+    const U8 * const send = s + *lenp;
+    const U8 * first_variant;
 
-    converted_start = d;
+    /* The initial portion of 's' that consists of invariants can be Copied
+     * as-is.  If it is entirely invariant, the whole thing can be Copied. */
+    if (is_utf8_invariant_string_loc(s, *lenp, &first_variant)) {
+        first_variant = send;
+    }
+
+    U8 *d;
+    Newx(d, (*lenp) + 1, U8);
+    Copy(s, d, first_variant - s, U8);
+
+    U8 *converted_start = d;
+    d += first_variant - s;
+    s = first_variant;
+
     while (s < send) {
         U8 c = *s++;
         if (! UTF8_IS_INVARIANT(c)) {
@@ -2710,7 +2720,7 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
                 }
                 else {
                     Safefree(converted_start);
-                    return (U8 *) original;
+                    return (U8 *) s0;
                 }
             }
 
