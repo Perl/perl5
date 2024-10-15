@@ -4166,15 +4166,36 @@ Build to the scalar C<dsv> a displayable version of the UTF-8 encoded string
 C<spv>, length C<len>, the displayable version being at most C<pvlim> bytes
 long (if longer, the rest is truncated and C<"..."> will be appended).
 
-The C<flags> argument can have C<UNI_DISPLAY_ISPRINT> set to display
-C<isPRINT()>able characters as themselves, C<UNI_DISPLAY_BACKSLASH>
-to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
-(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
-C<UNI_DISPLAY_QQ> (and its alias C<UNI_DISPLAY_REGEX>) have both
-C<UNI_DISPLAY_BACKSLASH> and C<UNI_DISPLAY_ISPRINT> turned on.
+The C<flags> argument can have any combination of these flag bits
 
-Additionally, there is now C<UNI_DISPLAY_BACKSPACE> which allows C<\b> for a
-backspace, but only when C<UNI_DISPLAY_BACKSLASH> also is set.
+=over
+
+=item C<UNI_DISPLAY_ISPRINT>
+
+to display C<isPRINT()>able characters as themselves
+
+=item C<UNI_DISPLAY_BACKSLASH>
+
+to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
+
+(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
+
+=item C<UNI_DISPLAY_BACKSPACE>
+
+to display C<\b> for a backspace, but only when C<UNI_DISPLAY_BACKSLASH> also
+is set.
+
+=item C<UNI_DISPLAY_REGEX>
+
+This a shorthand for C<UNI_DISPLAY_ISPRINT> along with
+C<UNI_DISPLAY_BACKSLASH>.
+
+=item C<UNI_DISPLAY_QQ>
+
+This a shorthand for all three C<UNI_DISPLAY_ISPRINT>,
+C<UNI_DISPLAY_BACKSLASH>, and C<UNI_DISPLAY_BACKSLASH>.
+
+=back
 
 The pointer to the PV of the C<dsv> is returned.
 
@@ -4191,47 +4212,51 @@ char *
 Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
                           UV flags)
 {
-    int truncated = 0;
-    const char *s, *e;
-
     PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
+
+    int truncated = 0;
+    const U8 *s, *e;
+    STRLEN next_len = 0;
 
     SvPVCLEAR(dsv);
     SvUTF8_off(dsv);
-    for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
-         UV u;
-         bool ok = 0;
+    for (s = spv, e = s + len; s < e; s += next_len) {
+        UV u;
+        bool ok = 0;
 
-         if (pvlim && SvCUR(dsv) >= pvlim) {
-              truncated++;
-              break;
-         }
-         u = utf8_to_uvchr_buf((U8*)s, (U8*)e, 0);
-         if (u < 256) {
-             const U8 c = (U8) u;
-             if (flags & UNI_DISPLAY_BACKSLASH) {
-                 if (    isMNEMONIC_CNTRL(c)
-                     && (   c != '\b'
-                         || (flags & UNI_DISPLAY_BACKSPACE)))
-                 {
-                    const char * mnemonic = cntrl_to_mnemonic(c);
-                    sv_catpvn(dsv, mnemonic, strlen(mnemonic));
-                    ok = 1;
-                 }
-                 else if (c == '\\') {
-                    sv_catpvs(dsv, "\\\\");
-                    ok = 1;
-                 }
-             }
-             /* isPRINT() is the locale-blind version. */
-             if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-                 const char string = c;
-                 sv_catpvn(dsv, &string, 1);
-                 ok = 1;
-             }
-         }
-         if (!ok)
-             Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
+        if (pvlim && SvCUR(dsv) >= pvlim) {
+             truncated++;
+             break;
+        }
+
+        u = utf8_to_uvchr_buf(s, e, &next_len);
+        assert(next_len > 0);
+
+        if (u < 256) {
+            const U8 c = (U8) u;
+            if (flags & UNI_DISPLAY_BACKSLASH) {
+                if (    isMNEMONIC_CNTRL(c)
+                    && (   c != '\b'
+                        || (flags & UNI_DISPLAY_BACKSPACE)))
+                {
+                   const char * mnemonic = cntrl_to_mnemonic(c);
+                   sv_catpvn(dsv, mnemonic, strlen(mnemonic));
+                   ok = 1;
+                }
+                else if (c == '\\') {
+                   sv_catpvs(dsv, "\\\\");
+                   ok = 1;
+                }
+            }
+            /* isPRINT() is the locale-blind version. */
+            if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
+                const char string = c;
+                sv_catpvn(dsv, &string, 1);
+                ok = 1;
+            }
+        }
+        if (!ok)
+            Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
     }
     if (truncated)
          sv_catpvs(dsv, "...");
