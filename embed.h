@@ -917,6 +917,7 @@
 #   define boot_core_builtin()                  Perl_boot_core_builtin(aTHX)
 #   define boot_core_mro()                      Perl_boot_core_mro(aTHX)
 #   define build_infix_plugin(a,b,c)            Perl_build_infix_plugin(aTHX_ a,b,c)
+#   define c_bp                                 Perl_c_bp
 #   define cando(a,b,c)                         Perl_cando(aTHX_ a,b,c)
 #   define check_utf8_print(a,b)                Perl_check_utf8_print(aTHX_ a,b)
 #   define closest_cop(a,b,c,d)                 Perl_closest_cop(aTHX_ a,b,c,d)

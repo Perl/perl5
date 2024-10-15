@@ -5,10 +5,18 @@
 
 /* Do *not* define PERL_NO_GET_CONTEXT.  This is the one place where we get
    to test implicit Perl_get_context().  */
+/* for GetErrorMode */
+#ifdef WIN32
+#   define _WIN32_WINNT 0x0601
+#endif
 
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+#ifdef WIN32
+#  include <windows.h>
+#endif
 
 /* PERL_VERSION_xx sanity checks */
 #if !PERL_VERSION_EQ(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
@@ -3151,6 +3159,20 @@ my_cxt_setsv(sv)
         SvREFCNT_dec(MY_CXT.sv);
         my_cxt_setsv_p(sv _aMY_CXT);
         SvREFCNT_inc(sv);
+
+void
+test_C_BP_breakpoint()
+    CODE:
+    {
+#ifdef WIN32
+      UINT em = GetErrorMode();
+      SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX );
+#endif
+      C_BP;
+#ifdef WIN32
+      SetErrorMode(em);
+#endif
+    }
 
 bool
 sv_setsv_cow_hashkey_core()

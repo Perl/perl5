@@ -802,6 +802,8 @@ CRTp	|I32	|cast_i32	|NV f
 CRTp	|IV	|cast_iv	|NV f
 CRTp	|U32	|cast_ulong	|NV f
 CRTp	|UV	|cast_uv	|NV f
+FTXdp	|void	|c_bp		|NN const char *file_metadata		\
+				|...
 p	|bool	|check_utf8_print					\
 				|NN const U8 *s 			\
 				|const STRLEN len

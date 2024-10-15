@@ -346,6 +346,18 @@ well.
 
 =over 4
 
+=item * C_BP XS macro added for C debugger breakpoints
+
+A cross platform macro C<C_BP> was added, that triggers a C breakpoint in the
+appropriate OS/platform specific C debugger, if the C debugger is already
+started. If a C debugger is not available, the C<C_BP> will immedialty kill
+the perl process similar to a SEGV. This new macro makes Perl core hacking
+and XS development easier. The macro is never intended to be shipped in stable
+or production code or even alpha beta code, and is strictly development
+helper tool for local use. It is similar to C<assert()> but launches or triggers
+a breakpoint in the C debugger, and you can resume execution use the step
+controls in the C debugger.
+
 =item *
 
 XXX
