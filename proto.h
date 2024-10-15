@@ -5140,6 +5140,9 @@ Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, cons
 /* PERL_CALLCONV bool
 Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors); */
 
+/* PERL_CALLCONV bool
+Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flag); */
+
 PERL_CALLCONV bool
 Perl_utf8_to_uv_msgs_helper_(const U8 * const s0, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
 #define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_ \
