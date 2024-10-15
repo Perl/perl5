@@ -2004,6 +2004,206 @@ Perl_croak_popstack(void)
 }
 
 /*
+=for apidoc c_bp
+
+Internal helper for C<C_BP>.  Not to be called directly.
+
+Prints file name, C function name, line number, and CPU the instruction
+pointer.  Instruction pointer intended to be copied to a C debugger tool or
+disassembler or used with core dumps.  It is a faux-function pointer to
+somewhere in the middle of the caller's C function, this address can never
+be casted from I<void *> to a function pointer, then called, a SEGV will
+occur.
+
+=cut
+*/
+
+void
+Perl_c_bp(const char * file_metadata)
+{
+    /* file_metadata is a string in the format of "XS_my_func*XSModule.c*6789"
+       The 3 arguments are catted together by CPP, so in the caller,
+       when using a C debugger, you press "Step One" key 2 times less, when
+       using step by disassembly view. C_BP macro should never appear in
+       public Stable/Gold releases of Perl core or any CPAN module. Using
+       C_BP even in a alpha release, is questionable. Smokers/CI greatly
+       dislike SEGVs which someone require human intervention to unfreeze
+       the console or unattended CI tool.
+    */
+
+#ifdef WIN32
+    void * ip = _ReturnAddress();
+#elif defined(__has_builtin) && __has_builtin(__builtin_return_address)
+    void * ip = __builtin_return_address(0);
+#else
+#  if PTRSIZE == 4
+    void * ip = (void *)0x12345678;
+#  else
+    void * ip = (void *)0x123456789ABCDEF0;
+#  endif
+#endif
+    //char buf [sizeof("panic: C breakpoint hit file \"%s\", function \"%s\" line %s CPU IP 0x%p\n")
+    //         + (U8_MAX*3) + (PTRSIZE*2) + 1];
+    char buf [sizeof("panic: C breakpoint hit file \"%.*s\", function \"%.*s\" line %.*s CPU IP 0x%p\n")
+               + (U8_MAX*3) + (PTRSIZE*2) + 1];
+    int out_len;
+    U32 f_len;
+    const char * file_metadata_end;
+    const char * p;
+    char * pbuf;
+    char * pbuf2;
+    U8 l;
+
+    const char * fnc_st;
+    const char * fnc_end;
+    U8 fnc_len;
+
+    const char * fn_st;
+    const char * fn_end;
+    U8 fn_len;
+
+    const char * ln_st;
+    const char * ln_end;
+    U8 ln_len;
+
+    PERL_ARGS_ASSERT_C_BP;
+
+
+    f_len = (U32)strlen(file_metadata);
+    file_metadata_end = file_metadata + f_len;
+    p = file_metadata;
+
+    fnc_st = p;
+    fnc_end = memchr(fnc_st, '*', fnc_st-file_metadata_end);
+    if(!fnc_end) {
+      fnc_st = "unknown";
+      fnc_end = fnc_st + STRLENs("unknown");
+      p = file_metadata_end;
+    }
+    else {
+      p = fnc_end + 1;
+    }
+    fnc_len = (U8)(fnc_end - fnc_st);
+
+    fn_st = p;
+    fn_end = memchr(fn_st, '*', file_metadata_end - fn_st);
+    if(!fn_end) {
+      fn_st = "unknown";
+      fn_end = fn_st + STRLENs("unknown");
+      p = file_metadata_end;
+    }
+    else {
+      p = fn_end + 1;
+    }
+    fn_len = (U8)(fn_end-fn_st);
+
+    ln_st = p;
+    ln_end = file_metadata_end;
+    ln_len = (U8)(ln_end - p);
+    if(!ln_len) {
+       ln_st = "unknown";
+       ln_len = STRLENs("unknown");
+    }
+    out_len = my_snprintf((char*)buf, sizeof(buf)-2,
+    "panic: C breakpoint hit file \"%.*s\", function \"%.*s\" line %.*s CPU IP 0x%p",
+    (Size_t)fn_len, fn_st, (Size_t)fnc_len, fnc_st, (Size_t)ln_len, ln_st, ip);
+    buf[out_len] = '\0';
+
+    STMT_START {
+        dTHX;
+        Perl_warn(aTHX_ "%s", (char *)buf); /* stderr+stdout, force user to see it */
+        PerlIO_flush(PerlIO_stderr());
+        PerlIO * out = PerlIO_stdout();
+        buf[out_len] = '\n';
+        out_len++;
+        buf[out_len] = '\0';
+        PerlIO_write(out, (char *)buf, out_len);
+        PerlIO_flush(out);
+    } STMT_END;
+
+    return;
+    f_len = (U32)strlen(file_metadata);
+    file_metadata_end = file_metadata + f_len;
+    p = file_metadata;
+
+    fnc_st = p;
+    fnc_end = memchr(fnc_st, '*', fnc_st-file_metadata_end);
+    if(!fnc_end) {
+      fnc_st = "unknown";
+      fnc_end = fnc_st + STRLENs("unknown");
+      p = file_metadata_end;
+    }
+    else {
+      fnc_end = fnc_end - 1;
+      p = fnc_end + 1;
+    }
+    fnc_len = (U8)(fnc_end - fnc_st);
+
+    fn_st = p;
+    fn_end = memchr(fn_st, '*', file_metadata_end - fn_st);
+    if(!fn_end) {
+      fn_st = "unknown";
+      fn_end = fn_st + STRLENs("unknown");
+      p = file_metadata_end;
+    }
+    else {
+      fn_end = fn_end - 1;
+      p = fn_end + 1;
+    }
+    fn_len = (U8)(fn_end-fn_st);
+
+    ln_st = p;
+    ln_end = file_metadata_end;
+    ln_len = (U8)(ln_end - p);
+    if(!ln_len) {
+       ln_st = "unknown";
+       ln_len = STRLENs("unknown");
+    }
+
+    pbuf = (char*)buf;
+    l = STRLENs("panic: C breakpoint hit file \"");
+    pbuf2 = pbuf;
+    pbuf += l;
+    Move("panic: C breakpoint hit file \"", pbuf2, l, char);
+
+    pbuf2 = pbuf;
+    pbuf += fn_len;
+    Move(fn_st, pbuf2, fn_len, char);
+
+    l = STRLENs("\", function \"");
+    pbuf2 = pbuf;
+    pbuf += l;
+    Move("\", function \"", pbuf2, l, char);
+
+    pbuf2 = pbuf;
+    pbuf += fnc_len;
+    Move(fnc_st, pbuf2, fnc_len, char);
+
+    l = STRLENs("\" line ");
+    pbuf2 = pbuf;
+    pbuf += l;
+    Move("\" line ", pbuf2, l, char);
+
+    pbuf2 = pbuf;
+    pbuf += ln_len;
+    Move(ln_st, pbuf2, ln_len, char);
+
+    pbuf += sprintf(pbuf," CPU IP 0x%p", ip);
+    Perl_warn_nocontext((char *)buf); /* stderr+stdout, force user to see it */
+    STMT_START {
+      dTHX;
+        PerlIO_flush(PerlIO_stderr());
+        PerlIO * out = PerlIO_stdout();
+        *pbuf = '\n';
+        pbuf++;
+        *pbuf = '\0';
+        pbuf++;
+        PerlIO_write(out, (char *)buf, pbuf-((char *)buf)-1);
+        PerlIO_flush(out);
+    } STMT_END;
+}
+
+/*
 =for apidoc warn_sv
 
 This is an XS interface to Perl's C<warn> function.
