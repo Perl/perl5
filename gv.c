@@ -961,12 +961,11 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
                     Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
                         "While trying to resolve method call %.*s->%.*s()"
                         " can not locate package %" SVf_QUOTEDPREFIX " yet it is mentioned in @%.*s::ISA"
-                        " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
+                        " (perhaps you forgot to load it?)",
                          (int) hvnamelen, hvname,
                          (int) len, name,
                         SVfARG(linear_sv),
-                         (int) hvnamelen, hvname,
-                         SVfARG(linear_sv));
+                         (int) hvnamelen, hvname);
                 }
             }
             continue;
@@ -1261,9 +1260,9 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
                 Perl_croak(aTHX_
                            "Can't locate object method %" UTF8f_QUOTEDPREFIX ""
                            " via package %" SVf_QUOTEDPREFIX ""
-                           " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
+                           " (perhaps you forgot to load it?)",
                            UTF8fARG(is_utf8, name_end - name, name),
-                           SVfARG(packnamesv), SVfARG(packnamesv));
+                           SVfARG(packnamesv));
             }
         }
     }

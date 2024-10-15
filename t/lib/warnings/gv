@@ -28,7 +28,7 @@ Undefined subroutine &main::joe called at - line 3.
 use warnings 'syntax' ;
 @ISA = qw(Fred); __PACKAGE__->joe()
 EXPECT
-While trying to resolve method call main->joe() can not locate package "Fred" yet it is mentioned in @main::ISA (perhaps you forgot to load "Fred"?) at - line 3.
+While trying to resolve method call main->joe() can not locate package "Fred" yet it is mentioned in @main::ISA (perhaps you forgot to load it?) at - line 3.
 Can't locate object method "joe" via package "main" at - line 3.
 ########
 # gv.c
@@ -57,7 +57,7 @@ $a = bless [], 'C';
 $a->foo();
 __END__
 EXPECT
-While trying to resolve method call C->foo() can not locate package "A" yet it is mentioned in @C::ISA (perhaps you forgot to load "A"?) at - line 18.
+While trying to resolve method call C->foo() can not locate package "A" yet it is mentioned in @C::ISA (perhaps you forgot to load it?) at - line 18.
 I'm in B's foo
 ########
 # gv.c

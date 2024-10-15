@@ -1260,8 +1260,7 @@ unable to locate this library.  See L<DynaLoader>.
 functioning as a class, but that package doesn't define that particular
 method, nor does any of its base classes.  See L<perlobj>.
 
-=item Can't locate object method "%s" via package "%s" (perhaps you forgot
-to load "%s"?)
+=item Can't locate object method "%s" via package "%s" (perhaps you forgot to load it?)
 
 (F) You called a method on a class that did not exist, and the method
 could not be found in UNIVERSAL.  This often means that a method
@@ -8195,7 +8194,7 @@ can be determined from the template alone.  This is not possible if
 it contains any of the codes @, /, U, u, w or a *-length.  Redesign
 the template.
 
-=item While trying to resolve method call %s->%s() can not locate package "%s" yet it is mentioned in @%s::ISA (perhaps you forgot to load "%s"?)
+=item While trying to resolve method call %s->%s() can not locate package "%s" yet it is mentioned in @%s::ISA (perhaps you forgot to load it?)
 
 (W syntax) It is possible that the C<@ISA> contains a misspelled or never loaded
 package name, which can result in perl choosing an unexpected parent
