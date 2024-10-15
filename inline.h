@@ -3091,22 +3091,31 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
     assert(s < send);
 
-    if (! ckWARN_d(WARN_UTF8)) {
+    UV cp;
 
-        /* EMPTY is not really allowed, and asserts on debugging builds.  But
-         * on non-debugging we have to deal with it, and this causes it to
-         * return the REPLACEMENT CHARACTER, as the documentation indicates */
-        return utf8n_to_uvchr(s, send - s, retlen,
-                              (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY));
-    }
-    else {
-        UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
-        if (retlen && ret == 0 && (send <= s || *s != '\0')) {
-            *retlen = (STRLEN) -1;
-        }
+    /* When everything is legal, just return that; but when not:
+     *  1) if warnings are enabled return 0 and retlen to -1
+     *  2) if warnings are disabled, set 'flags' to accept any malformation,
+     *     but that will just cause the REPLACEMENT CHARACTER to be returned,
+     *     as the documentation indicates.  EMPTY is not really allowed, and
+     *     asserts on debugging builds.  But on non-debugging we have to deal
+     *     with it.
+     * This API means 0 can mean a legal NUL, or the input is malformed; and
+     * the caller has to know if warnings are disabled to know if it can rely on
+     * 'retlen'.  Best to use utf8_to_uv() instead */
+    U32 flags = (ckWARN_d(WARN_UTF8)) ? 0 : (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY);
 
-        return ret;
+    if (   LIKELY(utf8_to_uv_flags(s, send, &cp, retlen, flags))
+        || flags)
+    {
+        return cp;
     }
+
+    if (retlen) {
+        *retlen = (STRLEN) -1;
+    }
+
+    return 0;
 }
 
 /* ------------------------------- perl.h ----------------------------- */
