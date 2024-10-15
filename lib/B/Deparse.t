@@ -3344,3 +3344,15 @@ my $z = __PACKAGE__;
 # CONTEXT use feature "state";
 state sub FOO () { 42 }
 print 42, "\n";
+####
+# CONTEXT use feature 'isa';
+# GH #22661 ! vs comparisons
+my $p;
+$_ = (!$p) == 1;
+$_ = (!$p) != 1;
+$_ = (!$p) eq '';
+$_ = (!$p) ne '';
+$_ = (!$p) isa 'Some::Class';
+$_ = (!$p) =~ tr/1//;
+$_ = (!$p) =~ /1/;
+$_ = (!$p) =~ s/1//r;
