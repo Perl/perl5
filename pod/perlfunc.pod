@@ -7151,6 +7151,20 @@ or:
         ...
     }
 
+Note, that a given hook will be executed only once, no matter how many
+times it is pushed into C<@INC>. This is a precaution to make it harder
+to create infinite loops in the require machinery. For anyone deliberately
+wanting to do this, you can use the ARRAY hook representation to pass in
+the same object or sub more than once, or you use currying with a sub:
+
+    my $callback = sub { warn "In \@INC position $INC" };
+    @INC = map { sub{ $callback->() }, $_ } @INC; # curry callback
+    #or
+    @INC = map { [ $callback ], $_ } @INC;    # wrap in ARRAY
+
+would set up inc so the same callback was called before every existing
+lookup the C<@INC> array.
+
 These hooks are also permitted to set the L<C<%INC>|perlvar/%INC> entry
 corresponding to the files they have loaded.  See L<perlvar/%INC>.
 Should an C<INC> hook not do this then perl will set the C<%INC> entry
@@ -7200,6 +7214,15 @@ will be unrolled after the hook exits, and its value only has meaning
 immediately after execution of the hook, thus setting C<$INC> to some
 value prior to executing a C<require> will have no effect on how the
 require executes at all.
+
+As of 5.37.7 any given hook in the C<@INC> array no matter how it got
+there will be executed at most once, the deduping is done using the
+refaddr of the hook and cannot be bypassed with overloads (although the
+array interface makes it easy to create multiple distinct copies if you
+really really want to do this). Likewise any given textually distinct
+directory will be inspected only once. Eg, "foo/../bar/" and "bar/"
+would be treated as distinct, but inserting "foo/" twice would not result
+in us checking the filesystem twice.
 
 As of 5.37.7 C<@INC> values of undef will be silently ignored.
 
