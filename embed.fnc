@@ -3678,6 +3678,13 @@ AMdip	|UV	|utf8_to_uvchr_buf					\
 				|NN const U8 *s 			\
 				|NN const U8 *send			\
 				|NULLOK STRLEN *retlen
+ATmp	|bool	|utf8_to_uv_errors					\
+				|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flags			\
+				|NULLOK U32 *errors
 ATip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
 				|NN const U8 *e 			\
 				|NN UV *cp_p				\
