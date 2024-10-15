@@ -863,6 +863,7 @@
 # define utf8_to_bytes_overwrite(a,b)           Perl_utf8_to_bytes_overwrite(aTHX,a,b)
 # define utf8_to_bytes_temp_pv(a,b)             Perl_utf8_to_bytes_temp_pv(aTHX,a,b)
 # define utf8_to_uv_errors                      Perl_utf8_to_uv_errors
+# define utf8_to_uv_flags                       Perl_utf8_to_uv_flags
 # define utf8_to_uv_msgs                        Perl_utf8_to_uv_msgs
 # define utf8_to_uv_msgs_helper_                Perl_utf8_to_uv_msgs_helper_
 # define utf8n_to_uvchr                         Perl_utf8n_to_uvchr
