@@ -11012,7 +11012,7 @@ whatever was being referenced by the RV.  This can almost be thought of
 as a reversal of C<L</newSVrv>>.
 
 C<sv_unref_flags> has an extra parameter, C<flags>, which can contain
-the C<SV_IMMEDIATE_UNREF> bit to force the reference count to be decremented 
+the C<SV_IMMEDIATE_UNREF> bit to force the reference count to be decremented
 no matter what.
 
 When that bit isn't set, or with plain C<sv_unref> always, the reference count
