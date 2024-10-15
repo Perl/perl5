@@ -43,6 +43,11 @@ SOFTWARE.
 
 /* ------------------------------- av.h ------------------------------- */
 
+#undef newSV_type
+#define newSV_type(ty) Perl_newSV_type##ty(aTHX)
+#undef newSV_type_mortal
+#define newSV_type_mortal(ty) Perl_newSV_type_mortal##ty(aTHX)
+
 /*
 =for apidoc_section $AV
 =for apidoc av_count
