@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 61;
+use Test::More tests => 182;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -29,8 +29,10 @@ require_ok( 'ExtUtils::ParseXS' );
 chdir('t') if -d 't';
 push @INC, '.';
 
-$ExtUtils::ParseXS::DIE_ON_ERROR = 1;
-$ExtUtils::ParseXS::AUTHOR_WARNINGS = 1;
+package ExtUtils::ParseXS;
+our $DIE_ON_ERROR = 1;
+our $AUTHOR_WARNINGS = 1;
+package main;
 
 use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 
@@ -43,7 +45,97 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 # paths to absolute for simplicity.
 @INC = map { File::Spec->rel2abs($_) } @INC;
 
+
+
 #########################
+
+# test_many(): test a list of XSUB bodies with a common XS preamble.
+# $prefix is the prefix of the XSUB's name, in order to be able to extract
+# out the C function definition. Typically the generated C subs look like:
+#
+#    XS_EXTERNAL(XS_Foo_foo)
+#    {
+#    ...
+#    }
+# So setting prefix to 'XS_Foo' will match any fn declared in the Foo
+# package, while 'boot_Foo' will extract the boot fn.
+#
+# For each body, a series of regexes is matched against the STDOUT or
+# STDERR produced.
+#
+# $test_fns is an array ref, where each element is an array ref consisting
+# of:
+#  
+# [
+#     "common prefix for test descriptions",
+#     [ ... lines to be ...
+#       ... used as ...
+#       ... XSUB body...
+#     ],
+#     [ check_stderr, expect_nomatch, qr/expected/, "test description"],
+#     [ ... and more tests ..]
+#     ....
+# ]
+#
+#  where:
+#  check_stderr:   boolean: test STDERR against regex rather than STDOUT
+#  expect_nomatch: boolean: pass if the regex *doesn't* match
+
+sub test_many {
+    my ($preamble, $prefix, $test_fns) = @_;
+    for my $test_fn (@$test_fns) {
+        my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
+
+        my $text = $preamble;
+        $text .= "$_\n" for @$xsub_lines;
+
+        tie *FH, 'Capture';
+        my $pxs = ExtUtils::ParseXS->new;
+        my $stderr = PrimitiveCapture::capture_stderr(sub {
+            eval {
+                $pxs->process_file( filename => \$text, output => \*FH);
+            }
+        });
+
+        my $out = tied(*FH)->content;
+        untie *FH;
+
+        # trim the output to just the function in question to make
+        # test diagnostics smaller.
+        if ($out =~ /\S/) {
+            $out =~ s/\A.*? (^\w+\(${prefix} .*? ^}).*\z/$1/xms
+                or die "couldn't trim output for fn '$prefix'";
+        }
+
+        my $err_tested;
+        for my $test (@tests) {
+            my ($is_err, $exp_nomatch, $qr, $desc) = @$test;
+            $desc = "$desc_prefix: $desc" if length $desc_prefix;
+            my $str;
+            if ($is_err) {
+                $err_tested = 1;
+                $str = $stderr;
+            }
+            else {
+                $str = $out;
+            }
+            if ($exp_nomatch) {
+                unlike $str, $qr, $desc;
+            }
+            else {
+                like $str, $qr, $desc;
+            }
+        }
+        # if there were no tests that expect an error, test that there
+        # were no errors
+        if (!$err_tested) {
+            is $stderr, undef, "$desc_prefix: no errors expected";
+        }
+    }
+}
+
+#########################
+
 
 { # first block: try without linenumbers
 my $pxs = ExtUtils::ParseXS->new;
@@ -793,6 +885,8 @@ EOF
         |    int b;
         |    int b;
         |    int c;
+        |    int alien;
+        |    int alien;
 EOF
 
     tie *FH, 'Capture';
@@ -800,9 +894,9 @@ EOF
         $pxs->process_file( filename => \$text, output => \*FH);
     });
 
-    for my $var (qw(a b c)) {
+    for my $var (qw(a b c alien)) {
         my $count = () =
-            $stderr =~ /duplicate definition of argument '$var'/g;
+            $stderr =~ /duplicate definition of parameter '$var'/g;
         is($count, 1, "One dup error for \"$var\"");
     }
 }
@@ -839,4 +933,708 @@ EOF
     like($out, qr/^\s+int\s+a;\s*$/m, "OUT a");
     like($out, qr/^\s+int\s+b;\s*$/m, "OUT b");
 
+}
+
+{
+    # Basic check of a "usage: ..." string.
+    # In particular, it should strip away type and IN/OUT class etc.
+    # Also, some distros include a test of their usage strings which
+    # are sensitive to variations in white space, so this test
+    # confirms that the exact white space is preserved, especially
+    # with regards to space (or not) around the '=' of a default value.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |int
+        |foo(  a   ,  char   * b  , OUT  int  c  ,  OUTLIST int  d   ,    \
+        |      IN_OUT char * * e    =   1  + 2 ,   long length(e)   ,    \
+        |      char* f="abc"  ,     g  =   0  ,   ...     )
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    my $ok = $out =~ /croak_xs_usage\(cv,\s*(".*")\);\s*$/m;
+    my $str = $ok ? $1 : '';
+    ok $ok, "extract usage string";
+    is $str, q("a, b, c, e=   1  + 2, f=\"abc\", g  =   0, ..."),
+         "matched usage string";
+}
+
+{
+    # Test for parameter parsing errors, including the effects of the
+    # -noargtype and -noinout switches
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void
+        |foo(char* a, length(a) = 0, IN c, +++)
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        eval {
+            $pxs->process_file( filename => \$text, output => \*FH,
+                                argtypes => 0, inout => 0);
+        }
+    });
+
+    like $stderr, qr{\Qparameter type not allowed under -noargtypes},
+                 "no type under -noargtypes";
+    like $stderr, qr{\Qlength() pseudo-parameter not allowed under -noargtypes},
+                 "no length under -noargtypes";
+    like $stderr, qr{\Qparameter IN/OUT modifier not allowed under -noinout},
+                 "no IN/OUT under -noinout";
+    like $stderr, qr{\QUnparseable XSUB parameter: '+++'},
+                 "unparseable parameter";
+}
+
+{
+    # Test for ellipis in the signature.
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void
+        |foo(int mymarker1, char *b = "...", int c = 0, ...)
+        |    POSTCALL:
+        |      mymarker2;
+EOF
+
+    tie *FH, 'Capture';
+    $pxs->process_file( filename => \$text, output => \*FH);
+
+    my $out = tied(*FH)->content;
+
+    # trim the output to just the function in question to make
+    # test diagnostics smaller.
+    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
+        or die "couldn't trim output";
+
+    like $out, qr/\Qb = "..."/, "ellipsis: b has correct default value";
+    like $out, qr/b = .*SvPV/,  "ellipsis: b has correct non-default value";
+    like $out, qr/\Qc = 0/,     "ellipsis: c has correct default value";
+    like $out, qr/c = .*SvIV/,  "ellipsis: c has correct non-default value";
+    like $out, qr/\Qfoo(mymarker1, b, c)/, "ellipsis: wrapped function args";
+}
+
+{
+    # Test for bad ellipsis
+
+    my $pxs = ExtUtils::ParseXS->new;
+    my $text = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |void
+        |foo(a, ..., b)
+EOF
+
+    tie *FH, 'Capture';
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        eval {
+            $pxs->process_file( filename => \$text, output => \*FH);
+        }
+    });
+
+    like $stderr, qr{\Qfurther XSUB parameter seen after ellipsis},
+                 "further XSUB parameter seen after ellipsis";
+}
+
+{
+    # Test for C++ XSUB support: in particular,
+    # - an XSUB function including a class in its name implies C++
+    # - implicit CLASS/THIS first arg
+    # - new and DESTROY methods handled specially
+    # - 'static' return type implies class method
+    # - 'const' can follow signature
+    #
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |X::Y *        T_OBJECT
+        |const X::Y *  T_OBJECT
+        |
+        |INPUT
+        |T_OBJECT
+        |    $var = my_in($arg);
+        |
+        |OUTPUT
+        |T_OBJECT
+        |    my_out($arg, $var)
+        |EOF
+        |
+EOF
+
+    my @test_fns = (
+        # [
+        #     "common prefix for test descriptions",
+        #     [ ... lines to be ...
+        #       ... used as ...
+        #       ... XSUB body...
+        #     ],
+        #     [ check_stderr, expect_nomatch, qr/expected/, "test description"],
+        #     [ ... and more tests ..]
+        #     ....
+        # ]
+
+        [
+            # test something that isn't actually C++
+            "C++: plain new",
+            [
+                'X::Y*',
+                'new(int aaa)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
+        ],
+
+        [
+            # test something static that isn't actually C++
+            "C++: plain static new",
+            [
+                'static X::Y*',
+                'new(int aaa)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
+            [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
+        ],
+
+        [
+            # test something static that isn't actually C++ nor new
+            "C++: plain static foo",
+            [
+                'static X::Y*',
+                'foo(int aaa)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [ 0, 0, qr/\Qfoo(aaa)/,                          "autocall" ],
+            [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
+        ],
+
+        [
+            "C++: new",
+            [
+                'X::Y*',
+                'X::Y::new(int aaa)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
+            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [ 0, 0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
+        ],
+
+        [
+            "C++: static new",
+            [
+                'static X::Y*',
+                'X::Y::new(int aaa)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
+            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [ 0, 0, qr/\QX::Y(aaa)/,                         "autocall" ],
+        ],
+
+        [
+            "C++: fff",
+            [
+                'void',
+                'X::Y::fff(int bbb)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, bbb"\)/,          "usage"    ],
+            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [ 0, 0, qr/\QTHIS->fff(bbb)/,                    "autocall" ],
+        ],
+
+        [
+            "C++: ggg",
+            [
+                'static int',
+                'X::Y::ggg(int ccc)',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, ccc"\)/,         "usage"    ],
+            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [ 0, 0, qr/\QX::Y::ggg(ccc)/,                    "autocall" ],
+        ],
+
+        [
+            "C++: hhh",
+            [
+                'int',
+                'X::Y::hhh(int ddd) const',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, ddd"\)/,          "usage"    ],
+            [ 0, 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,  "var decl" ],
+            [ 0, 0, qr/\QTHIS->hhh(ddd)/,                    "autocall" ],
+        ],
+
+        [
+            "",
+            [
+                'int',
+                'X::Y::f1(THIS, int i)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS' /,
+                 "C++: f1 dup THIS" ],
+        ],
+
+        [
+            "",
+            [
+                'int',
+                'X::Y::f2(int THIS, int i)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS' /,
+                 "C++: f2 dup THIS" ],
+        ],
+
+        [
+            "",
+            [
+                'int',
+                'X::Y::new(int CLASS, int i)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS' /,
+                 "C++: new dup CLASS" ],
+        ],
+
+        [
+            "C++: f3",
+            [
+                'int',
+                'X::Y::f3(int i)',
+                '    OUTPUT:',
+                '        THIS',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,            "usage"    ],
+            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [ 0, 0, qr/\QTHIS->f3(i)/,                       "autocall" ],
+            [ 0, 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,          "set st0"  ],
+        ],
+
+        [
+            # allow THIS's type to be overridden ...
+            "C++: f4: override THIS type",
+            [
+                'int',
+                'X::Y::f4(int i)',
+                '    int THIS',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,       "usage"    ],
+            [ 0, 0, qr/int\s*THIS\s*=\s*\(int\)/,       "var decl" ],
+            [ 0, 1, qr/X__Y\s*\*\s*THIS/,               "no class var decl" ],
+            [ 0, 0, qr/\QTHIS->f4(i)/,                  "autocall" ],
+        ],
+
+        [
+            #  ... but not multiple times
+            "C++: f5: dup override THIS type",
+            [
+                'int',
+                'X::Y::f5(int i)',
+                '    int THIS',
+                '    long THIS',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow THIS in sig, with type
+            "C++: f6: sig THIS type",
+            [
+                'int',
+                'X::Y::f6(int THIS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow THIS in sig, without type
+            "C++: f7: sig THIS no type",
+            [
+                'int',
+                'X::Y::f7(THIS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
+                    "dup err" ],
+        ],
+
+        [
+            # allow CLASS's type to be overridden ...
+            "C++: new: override CLASS type",
+            [
+                'int',
+                'X::Y::new(int i)',
+                '    int CLASS',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"CLASS, i"\)/,      "usage"    ],
+            [ 0, 0, qr/int\s*CLASS\s*=\s*\(int\)/,      "var decl" ],
+            [ 0, 1, qr/char\s*\*\s*CLASS/,              "no char* var decl" ],
+            [ 0, 0, qr/\Qnew X::Y(i)/,                  "autocall" ],
+        ],
+
+        [
+            #  ... but not multiple times
+            "C++: new dup override CLASS type",
+            [
+                'int',
+                'X::Y::new(int i)',
+                '    int CLASS',
+                '    long CLASS',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow CLASS in sig, with type
+            "C++: new sig CLASS type",
+            [
+                'int',
+                'X::Y::new(int CLASS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
+                    "dup err" ],
+        ],
+
+        [
+            #  don't allow CLASS in sig, without type
+            "C++: new sig CLASS no type",
+            [
+                'int',
+                'X::Y::new(CLASS)',
+            ],
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
+                    "dup err" ],
+        ],
+
+        [
+            "C++: DESTROY",
+            [
+                'void',
+                'X::Y::DESTROY()',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
+            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [ 0, 0, qr/delete\s+THIS;/,                      "autocall" ],
+        ]
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # check that suitable "usage: " error strings are generated
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "general usage",
+            [
+                'void',
+                'foo(a, char *b,  int length(b), int d =  999, ...)',
+                '    long a',
+            ],
+            [ 0, 0, qr/usage\(cv,\s+"a, b, d=  999, ..."\)/,     ""    ],
+        ]
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # check that args to an auto-called C function are correct
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "autocall args normal",
+            [
+                'void',
+                'foo( OUT int  a,   b   , char   *  c , int length(c), OUTLIST int d, IN_OUTLIST int e)',
+                '    long &b',
+                '    int alien',
+            ],
+            [ 0, 0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c, &d, &e)/,  ""  ],
+        ],
+        [
+            "autocall args normal",
+            [
+                'void',
+                'foo( OUT int  a,   b   , char   *  c , size_t length(c) )',
+                '    long &b',
+                '    int alien',
+            ],
+            [ 0, 0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c)/,     ""    ],
+        ],
+
+        [
+            "autocall args C_ARGS",
+            [
+                'void',
+                'foo( int  a,   b   , char   *  c  )',
+                '    C_ARGS:     a,   b   , bar,  c? c : "boo!"    ',
+                '    INPUT:',
+                '        long &b',
+            ],
+            [ 0, 0, qr/\Qfoo(a,   b   , bar,  c? c : "boo!")/,     ""    ],
+        ],
+
+        [
+            # Whether this is sensible or not is another matter.
+            # For now, just check that it works as-is.
+            "autocall args C_ARGS multi-line",
+            [
+                'void',
+                'foo( int  a,   b   , char   *  c  )',
+                '    C_ARGS: a,',
+                '        b   , bar,',
+                '        c? c : "boo!"',
+                '    INPUT:',
+                '        long &b',
+            ],
+            [ 0, 0, qr/\(a,\n        b   , bar,\n\Q        c? c : "boo!")/,
+              ""  ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # Test OUTLIST etc
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "IN OUT",
+            [
+                'void',
+                'foo(IN int A, IN_OUT int B, OUT int C, OUTLIST int D, IN_OUTLIST int E)',
+            ],
+            [ 0, 0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
+
+            [ 0, 0, qr/int\s+A\s*=\s*\(int\)SvIV\s*/,  "A decl"   ],
+            [ 0, 0, qr/int\s+B\s*=\s*\(int\)SvIV\s*/,  "B decl"   ],
+            [ 0, 0, qr/int\s+C\s*;/,                   "C decl"   ],
+            [ 0, 0, qr/int\s+D\s*;/,                   "D decl"   ],
+            [ 0, 0, qr/int\s+E\s*=\s*\(int\)SvIV\s*/,  "E decl"   ],
+
+            [ 0, 0, qr/\Qfoo(A, &B, &C, &D, &E)/,      "autocall" ],
+
+            [ 0, 0, qr/sv_setiv.*ST\(1\).*\bB\b/,      "set B"    ],
+            [ 0, 0, qr/sv_setiv.*ST\(2\).*\bC\b/,      "set C"    ],
+
+            [ 0, 0, qr/\QEXTEND(SP,2)/,                "extend"   ],
+
+            [ 0, 0, qr/sv_setiv.*ST\(0\).*\bD\b/,      "set D"    ],
+            [ 0, 0, qr/sv_setiv.*ST\(1\).*\bE\b/,      "set E"    ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # Test prototypes
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: ENABLE
+        |
+        |TYPEMAP: <<EOF
+        |X::Y *        T_OBJECT
+        |const X::Y *  T_OBJECT \&
+        |
+        |P::Q *        T_OBJECT @
+        |const P::Q *  T_OBJECT %
+        |
+        |INPUT
+        |T_OBJECT
+        |    $var = my_in($arg);
+        |
+        |OUTPUT
+        |T_OBJECT
+        |    my_out($arg, $var)
+        |EOF
+EOF
+
+    my @test_fns = (
+        [
+            "auto-generated proto basic",
+            [
+                'void',
+                'foo(int a, int b, int c)',
+            ],
+            [ 0, 0, qr/"\$\$\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto basic with default",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+            ],
+            [ 0, 0, qr/"\$\$;\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto complex",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, OUTLIST int C, int D)',
+            ],
+            [ 0, 0, qr/"\$\$\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto  complex with default",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, IN_OUTLIST int C, int D = 0)',
+            ],
+            [ 0, 0, qr/"\$\$\$;\$"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with ellipsis",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, OUT int C, int D, ...)',
+            ],
+            [ 0, 0, qr/"\$\$\$\$;\@"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with default and ellipsis",
+            [
+                'void',
+                'foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
+            ],
+            [ 0, 0, qr/"\$\$\$;\$\@"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with default and ellipsis and THIS",
+            [
+                'void',
+                'X::Y::foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
+            ],
+            [ 0, 0, qr/"\$\$\$\$;\$\@"/, "" ],
+        ],
+
+        [
+            "auto-generated proto with overridden THIS type",
+            [
+                'void',
+                'P::Q::foo()',
+                '    const P::Q * THIS'
+            ],
+            [ 0, 0, qr/"%"/, "" ],
+        ],
+
+        [
+            "explicit prototype",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+                '    PROTOTYPE: $@%;$'
+            ],
+            [ 0, 0, qr/"\$\@%;\$"/, "" ],
+        ],
+
+        [
+            "explicit prototype with backslash etc",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+                '    PROTOTYPE: \$\[@%]'
+            ],
+            # Note that the emitted C code will have escaped backslashes,
+            # so the actual C code looks something like:
+            #    newXS_some_variant(..., "\\$\\[@%]");
+            # and so the regex below has to escape each backslash and
+            # meta char its trying to match:
+            [ 0, 0, qr/" \\  \\  \$  \\  \\ \[  \@  \%  \] "/x, "" ],
+        ],
+
+        [
+            "explicit empty prototype",
+            [
+                'void',
+                'foo(int a, int b, int c = 0)',
+                '    PROTOTYPE:'
+            ],
+            [ 0, 0, qr/newXS.*, ""/, "" ],
+        ],
+
+        [
+            "not overridden by typemap",
+            [
+                'void',
+                'foo(X::Y * a, int b, int c = 0)',
+            ],
+            [ 0, 0, qr/"\$\$;\$"/, "" ],
+        ],
+
+        [
+            "overridden by typemap",
+            [
+                'void',
+                'foo(const X::Y * a, int b, int c = 0)',
+            ],
+            [ 0, 0, qr/" \\ \\ \& \$ ; \$ "/x, "" ],
+        ],
+
+        [
+            # shady but legal
+            "auto-generated proto with no type",
+            [
+                'void',
+                'foo(a, b, c = 0)',
+            ],
+            [ 0, 0, qr/"\$\$;\$"/, ""  ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
 }
