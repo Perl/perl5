@@ -4088,6 +4088,8 @@ p	|void	|finish_export_lexical
 p	|void	|import_builtin_bundle					\
 				|U16 ver
 p	|void	|prepare_export_lexical
+p	|void	|XS_builtin_indexed					\
+				|NN CV *cv
 #endif
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
     defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \

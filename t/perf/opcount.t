@@ -1011,4 +1011,13 @@ test_opcount(0, "Empty anonhash ref and direct lexical assignment",
                     srefgen     => 1,
                 });
 
+test_opcount(0, "foreach 2 lexicals on builtin::indexed",
+                sub { my @input = (); foreach my ($i, $x) (builtin::indexed @input) { } },
+                {
+                    entersub => 0, # no call to builtin::indexed
+                    enteriter => 1,
+                    iter => 1,
+                    padav => 2,
+                });
+
 done_testing();
