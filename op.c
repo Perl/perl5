@@ -9977,6 +9977,11 @@ void
 Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
                     const STRLEN len, const U32 flags)
 {
+    /* protos > ~8ch are likely junk. See git for why 0x68. */
+    struct { /* struct recovers 15-19 alignment bytes from C compiler */
+        char p [(0xff-(0x68/(PTRSIZE>=8?1:2))-(PTRSIZE*5))/2];
+        char cv [(0xff-(0x68/(PTRSIZE>=8?1:2))-(PTRSIZE*5))/2];
+    } cleanbuf;
     SV *name = NULL, *msg;
     const char * cvp = SvROK(cv)
                         ? SvTYPE(SvRV_const(cv)) == SVt_PVCV
@@ -9994,8 +9999,12 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
         return;
 
     if (p && cvp) {
-        p = S_strip_spaces(aTHX_ p, &plen);
-        cvp = S_strip_spaces(aTHX_ cvp, &clen);
+        p = S_strip_spaces(aTHX_
+                          (plen <= sizeof(cleanbuf.p)-1 ? cleanbuf.p : NULL),
+                          p, &plen);
+        cvp = S_strip_spaces(aTHX_
+                            (clen <= sizeof(cleanbuf.cv)-1 ? cleanbuf.cv : NULL),
+                            cvp, &clen);
         if ((flags & SVf_UTF8) == SvUTF8(cv)) {
             if (plen == clen && memEQ(cvp, p, plen))
                 return;
@@ -14362,6 +14371,8 @@ OP *
 Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
     STRLEN proto_len;
+    /* protos > ~8ch are likely junk. See git for why 0x88. */
+    char protocleanbuf [0xff-(0x88/(PTRSIZE>=8?1:2))-(PTRSIZE*5)];
     const char *proto, *proto_end;
     OP *aop, *prev, *cvop, *parent;
     int optional = 0;
@@ -14375,7 +14386,10 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     if (SvTYPE(protosv) == SVt_PVCV)
          proto = CvPROTO(protosv), proto_len = CvPROTOLEN(protosv);
     else proto = SvPV(protosv, proto_len);
-    proto = S_strip_spaces(aTHX_ proto, &proto_len);
+    proto = S_strip_spaces(aTHX_
+                          (proto_len <= sizeof(protocleanbuf)-1
+                          ? protocleanbuf : NULL),
+                          proto, &proto_len);
     proto_end = proto + proto_len;
     parent = entersubop;
     aop = cUNOPx(entersubop)->op_first;

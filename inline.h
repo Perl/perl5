@@ -261,25 +261,47 @@ Perl_CvDEPTH(const CV * const sv)
  Since we can't enforce the spacelessness at assignment time, this routine
  provides a temporary copy at parse time with spaces removed.
  I<orig> is the start of the original buffer, I<len> is the length of the
- prototype and will be updated when this returns.
+ prototype and will be updated when this returns. I<buf_out> is an optional
+ small C stack buffer, large enough for len+1 bytes. If I<buf_out> is NULL,
+ a temporary self-freeing new buffer (mortal but subject to change), will be
+ malloc-ed and returned. I<buf_out> by design should be NULL for large, and
+ probably invalid, junk, fuzzing, or syntax error, prototype strings. Caller
+ should bounds check and compare C stack buffer I<buf_out> size vs prototype
+ len and pass NULL for I<buf_out> to signal that I<malloc> type memory must
+ be alloced if needed. Note, this function will return the I<orig> ptr, as an
+ optimization if the string is already clean of spaces.
  */
 
 #ifdef PERL_CORE
 PERL_STATIC_INLINE char *
-S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
+S_strip_spaces(pTHX_ char * buf_out, const char * orig, STRLEN * const ptolen)
 {
-    SV * tmpsv;
-    char * tmps;
-    tmpsv = newSVpvn_flags(orig, *len, SVs_TEMP);
-    tmps = SvPVX(tmpsv);
-    while ((*len)--) {
-        if (!isSPACE(*orig))
-            *tmps++ = *orig;
-        orig++;
-    }
-    *tmps = '\0';
-    *len = tmps - SvPVX(tmpsv);
-                return SvPVX(tmpsv);
+    STRLEN len = *ptolen;
+    const char * orig_p = orig;
+    const char * orig_end = orig + len;
+
+    while (orig_p < orig_end) {
+        if(isSPACE(*orig_p)) { /* no memchr()! think memspn() */
+            char * tmps;
+            char * tmps_p;
+            if(buf_out)
+                tmps = buf_out;
+            else
+                tmps = SvPVX(sv_2mortal(newSV(len+1)));
+            tmps_p = tmps+(orig_p-orig);
+            Move(orig, tmps, (Size_t)(orig_p-orig), char);
+            while (orig_p < orig_end) {
+                if(!isSPACE(*orig_p))
+                    *tmps_p++ = *orig_p;
+                orig_p++;
+            }
+            *tmps_p = '\0';
+            *ptolen = tmps_p - tmps;
+            return tmps;
+        }
+        orig_p++;
+    } /* ptolen untouched */
+    return (char *)orig;
 }
 #endif
 

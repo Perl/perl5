@@ -6281,11 +6281,16 @@ yyl_colon(pTHX_ char *s)
 static int
 yyl_subproto(pTHX_ char *s, CV *cv)
 {
+    /* protos > ~8ch are likely junk. See git for why 0x28. */
+    char protocleanbuf [0xff-(0x28/(PTRSIZE>=8?1:2))-(PTRSIZE*5)];
     STRLEN protolen = CvPROTOLEN(cv);
     const char *proto = CvPROTO(cv);
     bool optional;
 
-    proto = S_strip_spaces(aTHX_ proto, &protolen);
+    proto = S_strip_spaces(aTHX_
+                          (protolen <= sizeof(protocleanbuf)-1
+                          ? protocleanbuf : NULL),
+                          proto, &protolen);
     if (!protolen)
         TERM(FUNC0SUB);
     if ((optional = *proto == ';')) {
