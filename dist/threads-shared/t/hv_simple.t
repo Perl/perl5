@@ -27,7 +27,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..16\n");   ### Number of tests that will be run ###
+    print("1..18\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -55,23 +55,28 @@ $hash{"3"} = 3;
 ok(7, keys %hash == 4, "Check keys");
 ok(8, exists($hash{"1"}), "Exist on existing key");
 ok(9, !exists($hash{"4"}), "Exists on non existing key");
+
+{ local $hash{"4"} = 1 }
+ok(10, keys %hash == 4, "Localization left 3 keys");
+ok(11, !exists($hash{"4"}), "Localization didn't leave extra key");
+
 my %seen;
 foreach my $key ( keys %hash) {
     $seen{$key}++;
 }
-ok(10, $seen{1} == 1, "Keys..");
-ok(11, $seen{2} == 1, "Keys..");
-ok(12, $seen{3} == 1, "Keys..");
-ok(13, $seen{"foo"} == 1, "Keys..");
+ok(12, $seen{1} == 1, "Keys..");
+ok(13, $seen{2} == 1, "Keys..");
+ok(14, $seen{3} == 1, "Keys..");
+ok(15, $seen{"foo"} == 1, "Keys..");
 
 # bugid #24407: the stringification of the numeric 1 got allocated to the
 # wrong thread memory pool, which crashes on Windows.
-ok(14, exists $hash{1}, "Check numeric key");
+ok(16, exists $hash{1}, "Check numeric key");
 
 threads->create(sub { %hash = () })->join();
-ok(15, keys %hash == 0, "Check clear");
+ok(17, keys %hash == 0, "Check clear");
 
-ok(16, is_shared(%hash), "Check for sharing");
+ok(18, is_shared(%hash), "Check for sharing");
 
 exit(0);
 
