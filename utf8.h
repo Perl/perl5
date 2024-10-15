@@ -152,6 +152,8 @@ typedef enum {
 #define Perl_utf8n_to_uvchr_error(s, len, lenp, flags, errors)                 \
                     Perl_utf8n_to_uvchr_msgs(s, len, lenp, flags, errors, 0)
 
+#define Perl_utf8_to_uv_flags(   s, e, cp_p, advance_p, flags)              \
+        Perl_utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, 0)
 #define Perl_utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, errors)      \
           Perl_utf8_to_uv_msgs(  s, e, cp_p, advance_p, flags, errors, 0)
 
