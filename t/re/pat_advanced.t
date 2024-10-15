@@ -2115,6 +2115,20 @@ EOP
                 qr/(A (.*)  (?{ $count_b++ }) (CE*){0,6} (*THEN)  | A D) z/x,
                 1,
             ],
+            [
+                0,
+                "abcde",
+                qr/ \A a (b (?{ $count_a++ }) | . (?{ $count_a++ })) (*THEN) (*FAIL) /x,
+                qr/ \A a (b (?{ $count_b++ }) | . (?{ $count_b++ })) (*THEN) z /x,
+                1,
+            ],
+            [
+                1,
+                "abcde",
+                qr/ \A a (b (?{ $count_a++ }) | . (?{ $count_a++ })) (*THEN) (*FAIL) | \A (?{ $count_a++ }) a /x,
+                qr/ \A a (b (?{ $count_b++ }) | . (?{ $count_b++ })) (*THEN) z | \A (?{ $count_b++ }) a /x,
+                2,
+            ],
         ) {
             $c++;
             $count_a = 0;

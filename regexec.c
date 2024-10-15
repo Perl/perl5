@@ -6483,7 +6483,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     SV *sv_yes_mark = NULL; /* last mark name we have seen
                                during a successful match */
     U32 lastopen = 0;       /* last open we saw */
-    bool has_cutgroup = RXp_HAS_CUTGROUP(rex) ? 1 : 0;
+    bool has_cutgroup;
     SV* const oreplsv = GvSVn(PL_replgv);
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
@@ -6868,6 +6868,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 goto trie_first_try; /* jump into the fail handler */
             }}
             NOT_REACHED; /* NOTREACHED */
+            
+        case TRIE_next:
+            sayYES;
+            NOT_REACHED; /* NOTREACHED */
 
         case TRIE_next_fail: /* we failed - try next alternative */
         {
@@ -6997,13 +7001,24 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     );
             });
 
-            if ( ST.accepted > 1 || has_cutgroup || ST.jump ) {
+            if ( ST.accepted > 1 || ST.jump ) {
                 if (RE_PESSIMISTIC_PARENS) {
                     (void)regcppush(rex, 0, maxopenparen);
                     REGCP_SET(ST.lastcp);
                 }
-                PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc, loceol,
-                                script_run_begin);
+
+                reg_trie_data * const trie = (reg_trie_data*)rexi->data->data[ARG1u(ST.me)];
+                has_cutgroup = trie->wordinfo[ST.nextword].has_cutgroup;
+
+                if (has_cutgroup) {
+                    PUSH_YES_STATE_GOTO(TRIE_next, scan, (char*)uc, loceol,
+                                    script_run_begin);
+                }
+                else {
+                    PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc, loceol,
+                                    script_run_begin);
+                }
+
                 NOT_REACHED; /* NOTREACHED */
             }
             /* only one choice left - just continue */
@@ -9084,6 +9099,7 @@ NULL
             ST.before_paren = ARG1a(scan);
             ST.after_paren = ARG1b(scan);
           branch_logic:
+            has_cutgroup = BRANCH_HAS_CUTGROUP(scan);
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);
             ST.lastparen = RXp_LASTPAREN(rex);
