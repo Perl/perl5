@@ -433,6 +433,7 @@ EOM
 *** Don't recognize processor, can't specify 64 bit compilation.
 
 EOM
+     exit 1
     ;;
     esac
     for var in ccflags cppflags ld ldflags
