@@ -427,6 +427,7 @@ EOM
     case `uname -p` in 
     powerpc) arch=ppc64 ;;
     i386) arch=x86_64 ;;
+    arm) arch=arm64 ;;
     *) cat <<EOM >&4
 
 *** Don't recognize processor, can't specify 64 bit compilation.
