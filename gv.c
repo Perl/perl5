@@ -1179,7 +1179,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
          * method name.
          *
          * leaves last_separator pointing to the beginning of the
-         * last package separator (::) or 0
+         * last package separator (either ' or ::) or 0
          * if none was found.
          *
          * leaves name pointing at the beginning of the
@@ -1188,7 +1188,11 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
         const char *name_cursor = name;
         const char * const name_em1 = name_end - 1; /* name_end minus 1 */
         for (name_cursor = name; name_cursor < name_end ; name_cursor++) {
-            if (name_cursor < name_em1 && *name_cursor == ':' && name_cursor[1] == ':') {
+            if (*name_cursor == '\'') {
+                last_separator = name_cursor;
+                name = name_cursor + 1;
+            }
+            else if (name_cursor < name_em1 && *name_cursor == ':' && name_cursor[1] == ':') {
                 last_separator = name_cursor++;
                 name = name_cursor + 1;
             }
@@ -1798,6 +1802,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
     const char *name_cursor;
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
+    char smallbuf[64]; /* small buffer to avoid a malloc when possible */
 
     PERL_ARGS_ASSERT_PARSE_GV_STASH_NAME;
 
@@ -1811,7 +1816,8 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
 
     for (name_cursor = *name; name_cursor < name_end; name_cursor++) {
         if (name_cursor < name_em1 &&
-            (*name_cursor == ':' && name_cursor[1] == ':'))
+            ((*name_cursor == ':' && name_cursor[1] == ':')
+           || *name_cursor == '\''))
         {
             if (!*stash)
                 *stash = PL_defstash;
@@ -1825,6 +1831,22 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                 if (*name_cursor == ':') {
                     key = *name;
                     *len += 2;
+                }
+                else { /* using ' for package separator */
+                    /* use our pre-allocated buffer when possible to save a malloc */
+                    char *tmpbuf;
+                    if ( *len+2 <= sizeof smallbuf)
+                        tmpbuf = smallbuf;
+                    else {
+                        /* only malloc once if needed */
+                        if (tmpfullbuf == NULL) /* only malloc&free once, a little more than needed */
+                            Newx(tmpfullbuf, full_len+2, char);
+                        tmpbuf = tmpfullbuf;
+                    }
+                    Copy(*name, tmpbuf, *len, char);
+                    tmpbuf[(*len)++] = ':';
+                    tmpbuf[(*len)++] = ':';
+                    key = tmpbuf;
                 }
                 gvp = (GV**)hv_fetch(*stash, key, is_utf8 ? -((I32)*len) : (I32)*len, add);
                 *gv = gvp ? *gvp : NULL;

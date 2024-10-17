@@ -24,7 +24,7 @@ use lib 't/lib';
 
 {
     package Child3;
-    use if $] < 5.041_003, parent => "Dummy'Outside";
+    use if $] != 5.041_003, parent => "Dummy'Outside";
 }
 
 my $obj = {};
@@ -41,11 +41,10 @@ is $obj->exclaim, "I CAN FROM Dummy::InlineChild", 'Inheritance is set up correc
 
 SKIP:
 {
-  skip "No ' in names from 5.041_003", 3 if $] >= 5.041_003;
-$obj = {};
-bless $obj, 'Child3';
-isa_ok $obj, 'Dummy::Outside';
-can_ok $obj, 'exclaim';
-is $obj->exclaim, "I CAN FROM Dummy::Outside", "Inheritance is set up correctly for classes inherited from via '";
-
+    skip "No ' in names in 5.041_003", 3 if $] == 5.041_003;
+    $obj = {};
+    bless $obj, 'Child3';
+    isa_ok $obj, 'Dummy::Outside';
+    can_ok $obj, 'exclaim';
+    is $obj->exclaim, "I CAN FROM Dummy::Outside", "Inheritance is set up correctly for classes inherited from via '";
 }
