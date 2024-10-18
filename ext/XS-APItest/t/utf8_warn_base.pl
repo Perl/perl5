@@ -1190,7 +1190,12 @@ foreach my $test (@tests) {
   # We try various combinations of malformations that can occur
   foreach my $short (0, 1) {
     next if $skip_most_tests && $short;
-    foreach my $unexpected_noncont (0, 1) {
+    # Insert an unexpected non-continuation in every possible position
+    my $unexpected_noncont;
+    for ($unexpected_noncont = $length - $short - 1;
+         $unexpected_noncont > 0;
+         $unexpected_noncont--)
+    {
       next if $skip_most_tests && $unexpected_noncont;
       foreach my $overlong (0, 1) {
         next if $overlong && $skip_most_tests;
@@ -1318,11 +1323,14 @@ foreach my $test (@tests) {
 
           if ($unexpected_noncont) {
 
-              # To force this malformation, change the final continuation
-              # byte into a start byte.
-              my $pos = ($short) ? -2 : -1;
-              substr($this_bytes, $pos, 1) = $known_start_byte;
-              $this_expected_len--;
+              # The overlong tweaking above changes the first bytes to
+              # specified values; we better not override those.
+              next if $overlong;
+
+              # To force this malformation, change a continuation byte into a
+              # start byte.
+              substr($this_bytes, $unexpected_noncont, 1) = $known_start_byte;
+              $this_expected_len = $unexpected_noncont;
           }
 
           # The whole point of a test that is malformed from the beginning
@@ -1551,9 +1559,9 @@ foreach my $test (@tests) {
                   # Test partial character handling, for each byte not a
                   # full character
                   my $did_test_partial = 0;
-                  for (my $j = 1; $j < $this_length - 1; $j++) {
+                  for (my $byte_count = 1; $byte_count < $this_expected_len - 1; $byte_count++) {
                       $did_test_partial = 1;
-                      my $partial = substr($this_bytes, 0, $j);
+                      my $partial = substr($this_bytes, 0, $byte_count);
                       my $ret_should_be;
                       my $comment;
                       if ($disallow_type || $malformations_name) {
@@ -1582,7 +1590,7 @@ foreach my $test (@tests) {
                               $needed_to_tell = $dl if $dl < $needed_to_tell;
                           }
 
-                          if ($j < $needed_to_tell) {
+                          if ($byte_count < $needed_to_tell) {
                               $ret_should_be = 1;
                               $comment .= ", but need $needed_to_tell"
                                         . " bytes to discern:";
@@ -1596,7 +1604,7 @@ foreach my $test (@tests) {
                       undef @warnings_gotten;
 
                       $ret = test_is_utf8_valid_partial_char_flags($partial,
-                                                      $j, $disallow_flags);
+                                                      $byte_count, $disallow_flags);
                       is($ret, $ret_should_be,
                           "    And is_utf8_valid_partial_char_flags("
                           . display_bytes($partial)
