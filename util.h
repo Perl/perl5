@@ -165,6 +165,108 @@ typedef struct {
 
 #endif /* USE_C_BACKTRACE */
 
+/*
+
+=for apidoc_section $debugging
+=for apidoc Amn;||C_BP
+
+Prints file, C function name, and line, to I<STDOUT> and I<STDERR>.
+Then triggers a breakpoint in the OS specific C debugger.  If the OS specific
+C debugger is not running, not configured correctly, not installed, or Perl
+is running on an unattended machine, C<C_BP> is immediatly fatal to the
+Perl process.  "immediatly fatal" is similar to a SEGV happening.
+If you use a C debugger, and I<C_BP> executes, using your C debugger, you can
+resume execution of the Perl process, with no side effects, as if nothing
+happened.
+
+C breakpoints implementations are very OS specific, but on most OSes, this
+is I<raise(SIGTRAP)> or CPU I<interrupt 3>.
+
+C_BP macro should never appear in public Stable/Gold releases of Perl core
+or any CPAN module. Using C_BP even in a alpha release, is questionable.
+Smokers/CI greatly dislike SEGVs and SEGV-like abnormal process terminations
+which sometimes require human intervention to unfreeze the console or
+unattended CI tool of that unattended system.  C_BP is intended for personal
+hacking and development, or 1 off patches sent by a lead dev to a user
+for troubleshooting or bug fixing some very specific problem.
+
+C<C_BP> has no arguments, no return value.  Use it as I<C_BP;>.
+
+=cut
+
+*/
+
+/* __builtin_debugtrap() and __builtin_trap() for GCC and Clang have
+   bike shedding drama, supposedly GCC and gdb made an executive decision
+   that a software (compiled C) triggered C breakpoint, is a NO_RETURN
+   optimized, unrecoverable hard error, and they will never impliment
+   a software triggered breakpoint that can resume execution.
+   AFAIK internally GCC impliments __builtin_debugtrap() and __builtin_trap()
+   as an illegal CPU opcode, followed by NO_RETURN optimization.
+   Supposedly GDB itself, when you set a BP in GDB, GDB will scribble
+   "illegal opcode" in the process memory space and save whatever prior CPU
+   op was there before. Then once the OS kernel delivers SIGILL, gdb looks at
+   its table of breakpoints, scribbles the old good opcode over "illegal op"
+   and resumes execution or pauses and shows you the frozen process.
+
+   gdb will not and has no way, to repair a foreign "illegal opcode" "problem"
+   that came with the binary from the disk copy of the binary.
+   The foreign "illegal opcode" was inserted at compile time by GCC.
+
+   Therefore, __builtin_debugtrap() and __builtin_trap() are not being used here
+   since they don't allow resuming execution after the breakpoint/pause
+   in the C debugger.
+
+   x86/x64 interrupt 3 allows resuming execution, since while GCC/gdb disagree
+   with the decisions of Linux Kernel devs, they are reluctantly forced to
+   to allow resuming execution for ABI/API compatiblity with the Linux Kernel.
+
+   For ARM, the assembly opcode for a software breakpoint seems to change with
+   each new iPhone release.  If you have a working perl on ARM development
+   enviroment, you are welcome to add ARM specific code with correct #ifdefs.
+
+   If anyone wants to test __builtin_debugtrap() and __builtin_trap(), and
+   see if execution can be resumed in a C debugger on
+   Clang/Apple/Android/latest GCC/forks of GCC, your welcome to set #ifdefs
+   and use __builtin_debugtrap()/__builtin_trap().
+*/
+
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
+#  define CBPFUNCTION__ __func__
+#elif (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tru64, -c99 not known, only -std1). */
+#  define CBPFUNCTION__ "UNKNOWN"
+#else
+#  define CBPFUNCTION__ __FUNCTION__ /* Common extension. */
+#endif
+
+#ifdef _MSC_VER
+#  define C_BP (void)(IsDebuggerPresent() ? __debugbreak() \
+                : (Perl_c_bp(__FUNCTION__ "*"__FILE__ "*" STRINGIFY(__LINE__)) \
+                ,__debugbreak()))
+#elif defined(__has_builtin) && __has_builtin(__debugbreak)
+#  ifdef WIN32
+#    define C_BP (void)(IsDebuggerPresent() ? __debugbreak() \
+                 : (Perl_c_bp(CBPFUNCTION__, __FILE__ "*" STRINGIFY(__LINE__)) \
+                 ,__debugbreak()))
+#  else
+#    define C_BP (void)(Perl_c_bp(CBPFUNCTION__, __FILE__ "*" STRINGIFY(__LINE__)) \
+                 ,__debugbreak())
+#  endif
+#elif defined(__i386__) || defined(__x86_64__)
+#    define C_BP (void)(Perl_c_bp(CBPFUNCTION__, __FILE__ "*" STRINGIFY(__LINE__)) \
+                 ,__debugbreak_int3())
+
+PERL_STATIC_INLINE void __debugbreak_int3(void) {
+    __asm__ __volatile__("int {$}3":);
+}
+
+#else
+/* last resort, has to do something useful on all platforms, and SIGTRAP
+   in a post mortem log file is very distinct from SIGSEGV */
+#    define C_BP (void)(Perl_c_bp(CBPFUNCTION__, __FILE__ "*" STRINGIFY(__LINE__)) \
+                 ,raise(SIGTRAP))
+#endif
+
 /* Use a packed 32 bit constant "key" to start the handshake. The key defines
    ABI compatibility, and how to process the vararg list.
 

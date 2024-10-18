@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '1.38';
+our $VERSION = '1.39';
 
 require XSLoader;
 

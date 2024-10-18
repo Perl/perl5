@@ -418,6 +418,11 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8          \
         assert(s); assert(lenp)
 
+PERL_CALLCONV void
+Perl_c_bp(const char *file_metadata, ...);
+#define PERL_ARGS_ASSERT_C_BP                   \
+        assert(file_metadata)
+
 PERL_CALLCONV SSize_t
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv);
 #define PERL_ARGS_ASSERT_CALL_ARGV              \
