@@ -3687,37 +3687,14 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
         goto ret;
     if (flags & REFCOUNTED_HE_KEY_UTF8) {
         /* For searching purposes, canonicalise to Latin-1 where possible. */
-        const char *keyend = keypv + keylen, *p;
-        STRLEN nonascii_count = 0;
-        for (p = keypv; p != keyend; p++) {
-            if (! UTF8_IS_INVARIANT(*p)) {
-                if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, keyend)) {
-                    goto canonicalised_key;
-                }
-                nonascii_count++;
-                p++;
-            }
+        bool is_utf8 = true;
+        char * non_utf8_keypv = (char *) bytes_from_utf8((U8 *) keypv, &keylen,
+                                                          &is_utf8);
+        if (! is_utf8) {   /* Have Latin1 */
+            SAVEFREEPV(non_utf8_keypv);
+            keypv = non_utf8_keypv;
+            flags &= ~REFCOUNTED_HE_KEY_UTF8;
         }
-        if (nonascii_count) {
-            char *q;
-            const char *p = keypv, *keyend = keypv + keylen;
-            keylen -= nonascii_count;
-            Newx(q, keylen, char);
-            SAVEFREEPV(q);
-            keypv = q;
-            for (; p != keyend; p++, q++) {
-                U8 c = (U8)*p;
-                if (UTF8_IS_INVARIANT(c)) {
-                    *q = (char) c;
-                }
-                else {
-                    p++;
-                    *q = (char) EIGHT_BIT_UTF8_TO_NATIVE(c, *p);
-                }
-            }
-        }
-        flags &= ~REFCOUNTED_HE_KEY_UTF8;
-        canonicalised_key: ;
     }
     utf8_flag = (flags & REFCOUNTED_HE_KEY_UTF8) ? HVhek_UTF8 : 0;
     if (!hash)
@@ -3862,37 +3839,14 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
 
     if (flags & REFCOUNTED_HE_KEY_UTF8) {
         /* Canonicalise to Latin-1 where possible. */
-        const char *keyend = keypv + keylen, *p;
-        STRLEN nonascii_count = 0;
-        for (p = keypv; p != keyend; p++) {
-            if (! UTF8_IS_INVARIANT(*p)) {
-                if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, keyend)) {
-                    goto canonicalised_key;
-                }
-                nonascii_count++;
-                p++;
-            }
+        bool is_utf8 = true;
+        char * non_utf8_keypv = (char *) bytes_from_utf8((U8 *) keypv, &keylen,
+                                                          &is_utf8);
+        if (! is_utf8) {   /* Have Latin1 */
+            SAVEFREEPV(non_utf8_keypv);
+            keypv = non_utf8_keypv;
+            flags &= ~REFCOUNTED_HE_KEY_UTF8;
         }
-        if (nonascii_count) {
-            char *q;
-            const char *p = keypv, *keyend = keypv + keylen;
-            keylen -= nonascii_count;
-            Newx(q, keylen, char);
-            SAVEFREEPV(q);
-            keypv = q;
-            for (; p != keyend; p++, q++) {
-                U8 c = (U8)*p;
-                if (UTF8_IS_INVARIANT(c)) {
-                    *q = (char) c;
-                }
-                else {
-                    p++;
-                    *q = (char) EIGHT_BIT_UTF8_TO_NATIVE(c, *p);
-                }
-            }
-        }
-        flags &= ~REFCOUNTED_HE_KEY_UTF8;
-        canonicalised_key: ;
     }
     if (flags & REFCOUNTED_HE_KEY_UTF8)
         hekflags |= HVhek_UTF8;
