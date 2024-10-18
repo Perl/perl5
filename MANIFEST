@@ -4166,6 +4166,7 @@ dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod			ExtUtils::ParseXS documentation
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Constants.pm		ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/CountLines.pm	ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Eval.pm		ExtUtils::ParseXS guts
+dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Node.pm		ExtUtils::ParseXS guts - AST nodes
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Utilities.pm		ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps.pm			ExtUtils::Typemaps, a PXS helper
 dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps/Cmd.pm		ExtUtils::Typemaps helper module
@@ -4187,7 +4188,6 @@ dist/ExtUtils-ParseXS/t/105-valid_proto_string.t		ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/106-process_typemaps.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/108-map_type.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/109-standard_XS_defs.t			ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/110-assign_func_args.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/111-analyze_preprocessor_statements.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/112-set_cond.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/113-check_cond_preproc_statements.t	ExtUtils::ParseXS tests
