@@ -3643,13 +3643,6 @@ ATdip	|UV	|utf8n_to_uvchr_msgs					\
 				|const U32 flags			\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
-CTp	|UV	|_utf8n_to_uvchr_msgs_helper				\
-				|NN const U8 *s 			\
-				|STRLEN curlen				\
-				|NULLOK STRLEN *retlen			\
-				|const U32 flags			\
-				|NULLOK U32 *errors			\
-				|NULLOK AV **msgs
 CDbdp	|UV	|utf8n_to_uvuni |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
@@ -3685,6 +3678,21 @@ AMdip	|UV	|utf8_to_uvchr_buf					\
 				|NN const U8 *s 			\
 				|NN const U8 *send			\
 				|NULLOK STRLEN *retlen
+ATip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
+				|NN const U8 *e 			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flags			\
+				|NULLOK U32 *errors			\
+				|NULLOK AV **msgs
+CTp	|bool	|utf8_to_uv_msgs_helper_				\
+				|NN const U8 * const s0 		\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flags			\
+				|NULLOK U32 *errors			\
+				|NULLOK AV **msgs
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 : Used in perly.y

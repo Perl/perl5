@@ -160,11 +160,6 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *len
 #define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS   \
         assert(p); assert(ustrp)
 
-PERL_CALLCONV UV
-Perl__utf8n_to_uvchr_msgs_helper(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors, AV **msgs);
-#define PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER \
-        assert(s)
-
 PERL_CALLCONV_NO_RET void
 Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
         __attribute__noreturn__
@@ -5142,6 +5137,11 @@ Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, cons
 #define PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE     \
         assert(s); assert(d); assert(newlen)
 
+PERL_CALLCONV bool
+Perl_utf8_to_uv_msgs_helper_(const U8 * const s0, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
+#define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_ \
+        assert(s0); assert(e); assert(cp_p)
+
 /* PERL_CALLCONV UV
 Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags); */
 
@@ -10083,6 +10083,11 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
         assert(s); assert(start); assert(end)
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_uv_msgs(const U8 * const s0, const U8 *e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS       \
+        assert(s0); assert(e); assert(cp_p)
 
 PERL_STATIC_INLINE UV
 Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);

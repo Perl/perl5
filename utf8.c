@@ -1334,21 +1334,25 @@ The caller, of course, is responsible for freeing any returned AV.
 =cut
 */
 
-UV
-Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
-                               STRLEN curlen,
-                               STRLEN *retlen,
-                               const U32 flags,
-                               U32 * errors,
-                               AV ** msgs)
+bool
+Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
+                             const U8 * const e,
+                             UV *cp_p,
+                             Size_t *advance_p,
+                             const U32 flags,
+                             U32 * errors,
+                             AV ** msgs)
 {
-    const U8 * const s0 = s;
-    const U8 * send = s0 + curlen;
+    PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_;
+
+    const U8 * s = s0;
+    const U8 * send = e;
+    SSize_t curlen = send - s0;
     U32 possible_problems;  /* A bit is set here for each potential problem
                                found as we go along */
     UV uv;
-    STRLEN expectlen;     /* How long should this sequence be? */
-    STRLEN avail_len;     /* When input is too short, gives what that is */
+    SSize_t expectlen;    /* How long should this sequence be? */
+    SSize_t avail_len;    /* When input is too short, gives what that is */
     U32 discard_errors;   /* Used to save branches when 'errors' is NULL; this
                              gets set and discarded */
 
@@ -1361,8 +1365,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     UV uv_so_far;
     dTHX;
 
-    PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER;
-
     /* Here, is one of: a) malformed; b) a problematic code point (surrogate,
      * non-unicode, or nonchar); or c) on ASCII platforms, one of the Hangul
      * syllables that the dfa doesn't properly handle.  Quickly dispose of the
@@ -1371,8 +1373,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     /* Each of the affected Hanguls starts with \xED */
 
     if (is_HANGUL_ED_utf8_safe(s0, send)) { /* Always false on EBCDIC */
-        if (retlen) {
-            *retlen = 3;
+        if (advance_p) {
+            *advance_p = 3;
         }
         if (errors) {
             *errors = 0;
@@ -1381,9 +1383,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
             *msgs = NULL;
         }
 
-        return ((0xED & UTF_START_MASK(3)) << (2 * UTF_ACCUMULATION_SHIFT))
-             | ((s0[1] & UTF_CONTINUATION_MASK) << UTF_ACCUMULATION_SHIFT)
-             |  (s0[2] & UTF_CONTINUATION_MASK);
+        *cp_p = ((0xED & UTF_START_MASK(3)) << (2 * UTF_ACCUMULATION_SHIFT))
+            | ((s0[1] & UTF_CONTINUATION_MASK) << UTF_ACCUMULATION_SHIFT)
+            |  (s0[2] & UTF_CONTINUATION_MASK);
+        return true;
     }
 
     /* In conjunction with the exhaustive tests that can be enabled in
@@ -1426,7 +1429,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * We also should not consume too few bytes, otherwise someone could inject
      * things.  For example, an input could be deliberately designed to
      * overflow, and if this code bailed out immediately upon discovering that,
-     * returning to the caller C<*retlen> pointing to the very next byte (one
+     * returning to the caller C<*advance_p> pointing to the very next byte (one
      * which is actually part of the overflowing sequence), that could look
      * legitimate to the caller, which could discard the initial partial
      * sequence and process the rest, inappropriately.
@@ -1438,7 +1441,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * allowed one, we could allow in something that shouldn't have been.
      */
 
-    if (UNLIKELY(curlen == 0)) {
+    if (UNLIKELY(curlen <= 0)) {
         possible_problems |= UTF8_GOT_EMPTY;
         curlen = 0;
         uv = UNICODE_REPLACEMENT;
@@ -1453,8 +1456,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * function will be for, has this expected length.  For efficiency, set
      * things up here to return it.  It will be overridden only in those rare
      * cases where a malformation is found */
-    if (retlen) {
-        *retlen = expectlen;
+    if (advance_p) {
+        *advance_p = expectlen;
     }
 
     /* A continuation character can't start a valid sequence */
@@ -1532,7 +1535,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * we must look at the UTF-8 byte sequence itself to see if it is for an
      * overlong */
     if (     (   LIKELY(! possible_problems)
-              && UNLIKELY(expectlen > (STRLEN) OFFUNISKIP(uv)))
+              && UNLIKELY(expectlen > (SSize_t) OFFUNISKIP(uv)))
         || (       UNLIKELY(possible_problems)
             && (   UNLIKELY(! UTF8_IS_START(*s0))
                 || (UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))))
@@ -1548,7 +1551,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
             &&   LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
         {
             UV min_uv = uv_so_far;
-            STRLEN i;
+            SSize_t i;
 
             /* Here, the input is both overlong and is missing some trailing
              * bytes.  There is no single code point it could be for, but there
@@ -2041,19 +2044,17 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
         /* Since there was a possible problem, the returned length may need to
          * be changed from the one stored at the beginning of this function.
          * Instead of trying to figure out if it has changed, just do it. */
-        if (retlen) {
-            *retlen = curlen;
+        if (advance_p) {
+            *advance_p = curlen;
         }
 
         if (disallowed) {
-            if (flags & UTF8_CHECK_ONLY && retlen) {
-                *retlen = ((STRLEN) -1);
-            }
-            return 0;
+            return false;
         }
     }
 
-    return UNI_TO_NATIVE(uv);
+    *cp_p = UNI_TO_NATIVE(uv);
+    return true;
 }
 
 /*
