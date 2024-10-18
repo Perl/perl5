@@ -94,6 +94,7 @@ sub mkpath {
         $paths = [$paths] unless UNIVERSAL::isa( $paths, 'ARRAY' );
         $data->{verbose} = $verbose;
         $data->{mode} = defined $mode ? $mode : oct '777';
+        $data->{owner} = $<;
     }
     else {
         my %args_permitted = map { $_ => 1 } ( qw|
