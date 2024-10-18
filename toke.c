@@ -6281,11 +6281,13 @@ yyl_colon(pTHX_ char *s)
 static int
 yyl_subproto(pTHX_ char *s, CV *cv)
 {
+    STRIP_WS_BUF_T protocleanbuf;
     STRLEN protolen = CvPROTOLEN(cv);
     const char *proto = CvPROTO(cv);
     bool optional;
 
-    proto = S_strip_spaces(aTHX_ proto, &protolen);
+    proto = strip_spaces( STRIP_WS_PICK_BUF_TYPE(&protocleanbuf, protolen),
+                          proto, &protolen);
     if (!protolen)
         TERM(FUNC0SUB);
     if ((optional = *proto == ';')) {
