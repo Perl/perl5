@@ -370,7 +370,7 @@ Implements C<SAVERCPV>.
 
 Saves and restores a refcounted string, similar to what
 save_generic_svref would do for a SV*. Can be used to restore
-a refcounted string to its previous state. Performs the 
+a refcounted string to its previous state. Performs the
 appropriate refcount counting so that nothing should leak
 or be prematurely freed.
 
@@ -1345,7 +1345,7 @@ Perl_leave_scope(pTHX_ I32 base)
             bool had_method;
 
             a0 = ap[0]; a1 = ap[1];
-            /* possibly taking a method out of circulation */	
+            /* possibly taking a method out of circulation */
             had_method = cBOOL(GvCVu(a0.any_gv));
             gp_free(a0.any_gv);
             GvGP_set(a0.any_gv, (GP*)a1.any_ptr);
@@ -1353,7 +1353,7 @@ Perl_leave_scope(pTHX_ I32 base)
                 if (memEQs(GvNAME(a0.any_gv), GvNAMELEN(a0.any_gv), "ISA"))
                     mro_isa_changed_in(hv);
                 else if (had_method || GvCVu(a0.any_gv))
-                    /* putting a method back into circulation ("local")*/	
+                    /* putting a method back into circulation ("local")*/
                     gv_method_changed(a0.any_gv);
             }
             SvREFCNT_dec_NN(a0.any_gv);
