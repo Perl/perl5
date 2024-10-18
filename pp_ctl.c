@@ -4960,7 +4960,7 @@ S_require_file(pTHX_ SV *sv)
                          == NULL)
                         continue;
                     sv_setpv(namesv, unixdir);
-                    sv_catpv(namesv, unixname);
+                    sv_catpvn(namesv, unixname, unixlen);
 #else
                     /* The equivalent of		    
                        Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
