@@ -33,6 +33,8 @@
 #define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
 #define TO_SOCKET(x)	_get_osfhandle(x)
 
+#ifndef WIN32_NO_SOCKETS
+
 #define StartSockets() \
     STMT_START {					\
         if (!wsock_started)				\
@@ -50,13 +52,26 @@
             }						\
     } STMT_END
 
+#else
+
+#  define StartSockets()
+
+#  define SOCKET_TEST(x, y) \
+    STMT_START {					\
+        SetLastError(ERROR_CALL_NOT_IMPLEMENTED); \
+        errno = ENOSYS; \
+    } STMT_END
+
+#endif
+
 #define SOCKET_TEST_ERROR(x) SOCKET_TEST(x, SOCKET_ERROR)
 
 static struct servent* win32_savecopyservent(struct servent*d,
                                              struct servent*s,
                                              const char *proto);
-
+#ifndef WIN32_NO_SOCKETS
 static int wsock_started = 0;
+#endif
 
 #ifdef WIN32_DYN_IOINFO_SIZE
 EXTERN_C Size_t w32_ioinfo_size;
@@ -65,8 +80,10 @@ EXTERN_C Size_t w32_ioinfo_size;
 EXTERN_C void
 EndSockets(void)
 {
+#ifndef WIN32_NO_SOCKETS
     if (wsock_started)
         WSACleanup();
+#endif
 }
 
 /* Translate WSAExxx values to corresponding Exxx values where possible. Not all
@@ -329,6 +346,7 @@ convert_errno_to_wsa_error(int err)
 void
 start_sockets(void) 
 {
+#ifndef WIN32_NO_SOCKETS
     unsigned short version;
     WSADATA retdata;
     int ret;
@@ -345,6 +363,7 @@ start_sockets(void)
 
     /* atexit((void (*)(void)) EndSockets); */
     wsock_started = 1;
+#endif
 }
 
 /* in no sockets Win32 builds, these use the inline functions defined in
@@ -391,88 +410,143 @@ win32_ntohs(u_short netshort)
 SOCKET
 win32_accept(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
+#ifndef WIN32_NO_SOCKETS
     SOCKET r;
 
     SOCKET_TEST((r = accept(TO_SOCKET(s), addr, addrlen)), INVALID_SOCKET);
     return OPEN_SOCKET(r);
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return INVALID_SOCKET;
+#endif
 }
 
 int
 win32_bind(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = bind(TO_SOCKET(s), addr, addrlen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_connect(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = connect(TO_SOCKET(s), addr, addrlen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 
 int
 win32_getpeername(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = getpeername(TO_SOCKET(s), addr, addrlen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = getsockname(TO_SOCKET(s), addr, addrlen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = getsockopt(TO_SOCKET(s), level, optname, optval, optlen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return INVALID_SOCKET;
+#endif
 }
 
 int
 win32_ioctlsocket(SOCKET s, long cmd, u_long *argp)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = ioctlsocket(TO_SOCKET(s), cmd, argp));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return INVALID_SOCKET;
+#endif
 }
 
 int
 win32_listen(SOCKET s, int backlog)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = listen(TO_SOCKET(s), backlog));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_recv(SOCKET s, char *buf, int len, int flags)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = recv(TO_SOCKET(s), buf, len, flags));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
     int frombufsize = *fromlen;
 
@@ -484,12 +558,18 @@ win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, i
     if (r != SOCKET_ERROR && frombufsize == *fromlen)
         (void)win32_getpeername(s, from, fromlen);
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 /* select contributed by Vincent R. Slyngstad (vrs@ibeam.intel.com) */
 int
 win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const struct timeval* timeout)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
     int i, fd, save_errno = errno;
     FD_SET nrd, nwr, nex;
@@ -553,52 +633,87 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     }
     errno = save_errno;
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_send(SOCKET s, const char *buf, int len, int flags)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = send(TO_SOCKET(s), buf, len, flags));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_sendto(SOCKET s, const char *buf, int len, int flags,
              const struct sockaddr *to, int tolen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = sendto(TO_SOCKET(s), buf, len, flags, to, tolen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_setsockopt(SOCKET s, int level, int optname, const char *optval, int optlen)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = setsockopt(TO_SOCKET(s), level, optname, optval, optlen));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
     
 int
 win32_shutdown(SOCKET s, int how)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = shutdown(TO_SOCKET(s), how));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 int
 win32_closesocket(SOCKET s)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = closesocket(TO_SOCKET(s)));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 void
@@ -611,6 +726,7 @@ convert_proto_info_w2a(WSAPROTOCOL_INFOW *in, WSAPROTOCOL_INFOA *out)
 SOCKET
 open_ifs_socket(int af, int type, int protocol)
 {
+#ifndef WIN32_NO_SOCKETS
     dTHX;
     char *s;
     unsigned long proto_buffers_len = 0;
@@ -661,11 +777,17 @@ open_ifs_socket(int af, int type, int protocol)
     }
 
     return out;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return INVALID_SOCKET;
+#endif
 }
 
 SOCKET
 win32_socket(int af, int type, int protocol)
 {
+#ifndef WIN32_NO_SOCKETS
     SOCKET s;
 
     StartSockets();
@@ -680,56 +802,92 @@ win32_socket(int af, int type, int protocol)
         s = OPEN_SOCKET(s);
 
     return s;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return INVALID_SOCKET;
+#endif
 }
 
 struct hostent *
 win32_gethostbyaddr(const char *addr, int len, int type)
 {
+#ifndef WIN32_NO_SOCKETS
     struct hostent *r;
 
     SOCKET_TEST(r = gethostbyaddr(addr, len, type), NULL);
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 struct hostent *
 win32_gethostbyname(const char *name)
 {
+#ifndef WIN32_NO_SOCKETS
     struct hostent *r;
 
     SOCKET_TEST(r = gethostbyname(name), NULL);
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 int
 win32_gethostname(char *name, int len)
 {
+#ifndef WIN32_NO_SOCKETS
     int r;
 
     SOCKET_TEST_ERROR(r = gethostname(name, len));
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#endif
 }
 
 struct protoent *
 win32_getprotobyname(const char *name)
 {
+#ifndef WIN32_NO_SOCKETS
     struct protoent *r;
 
     SOCKET_TEST(r = getprotobyname(name), NULL);
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 struct protoent *
 win32_getprotobynumber(int num)
 {
+#ifndef WIN32_NO_SOCKETS
     struct protoent *r;
 
     SOCKET_TEST(r = getprotobynumber(num), NULL);
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 struct servent *
 win32_getservbyname(const char *name, const char *proto)
 {
+#ifndef WIN32_NO_SOCKETS
     dTHXa(NULL);    
     struct servent *r;
 
@@ -739,11 +897,17 @@ win32_getservbyname(const char *name, const char *proto)
         r = win32_savecopyservent(&w32_servent, r, proto);
     }
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 struct servent *
 win32_getservbyport(int port, const char *proto)
 {
+#ifndef WIN32_NO_SOCKETS
     dTHXa(NULL); 
     struct servent *r;
 
@@ -753,11 +917,22 @@ win32_getservbyport(int port, const char *proto)
         r = win32_savecopyservent(&w32_servent, r, proto);
     }
     return r;
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 int
 win32_ioctl(int i, unsigned int u, char *data)
 {
+#ifdef WIN32_NO_SOCKETS
+
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return SOCKET_ERROR;
+#else
     u_long u_long_arg; 
     int retval;
     
@@ -782,20 +957,33 @@ win32_ioctl(int i, unsigned int u, char *data)
         SetLastError(wsaerr);
     }
     return retval;
+#endif
 }
 
 char FAR *
 win32_inet_ntoa(struct in_addr in)
 {
+#ifndef WIN32_NO_SOCKETS
     StartSockets();
     return inet_ntoa(in);
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return NULL;
+#endif
 }
 
 unsigned long
 win32_inet_addr(const char FAR *cp)
 {
+#ifndef WIN32_NO_SOCKETS
     StartSockets();
     return inet_addr(cp);
+#else
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    errno = ENOSYS;
+    return -1;
+#endif
 }
 
 /*

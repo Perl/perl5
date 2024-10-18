@@ -5464,7 +5464,9 @@ Perl_win32_init(int *argcp, char ***argvp)
     g_osver.dwOSVersionInfoSize = sizeof(g_osver);
     GetVersionEx(&g_osver);
 
+#ifndef WIN32_NO_SOCKETS
     win32_hook_closehandle_in_crt();
+#endif
 
     ansify_path();
 
@@ -5513,7 +5515,9 @@ Perl_win32_term(void)
     RegCloseKey(HKCU_Perl_hnd);
     /* the handles are in an undefined state until the next PERL_SYS_INIT3 */
 #endif
+#ifndef WIN32_NO_SOCKETS
     win32_unhook_closehandle_in_crt();
+#endif
 }
 
 void
