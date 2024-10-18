@@ -413,6 +413,9 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8          \
         assert(s); assert(lenp)
 
+/* PERL_CALLCONV bool
+Perl_c9strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+
 PERL_CALLCONV SSize_t
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv);
 #define PERL_ARGS_ASSERT_CALL_ARGV              \
@@ -3498,6 +3501,9 @@ perl_run(PerlInterpreter *my_perl);
 #define PERL_ARGS_ASSERT_PERL_RUN               \
         assert(my_perl)
 
+/* PERL_CALLCONV bool
+Perl_perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+
 PERL_CALLCONV Signal_t
 Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
 #define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
@@ -4284,6 +4290,9 @@ Perl_str_to_version(pTHX_ SV *sv)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_STR_TO_VERSION         \
         assert(sv)
+
+/* PERL_CALLCONV bool
+Perl_strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
 
 PERL_CALLCONV void
 Perl_sub_crush_depth(pTHX_ CV *cv)
