@@ -3687,10 +3687,6 @@ AMdip	|UV	|utf8_to_uvchr_buf					\
 				|NN const U8 *s 			\
 				|NN const U8 *send			\
 				|NULLOK STRLEN *retlen
-Cip	|UV	|utf8_to_uvchr_buf_helper				\
-				|NN const U8 *s 			\
-				|NN const U8 *send			\
-				|NULLOK STRLEN *retlen
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 : Used in perly.y
