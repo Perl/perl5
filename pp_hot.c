@@ -4868,6 +4868,7 @@ PP(pp_iter)
     PERL_CONTEXT *cx = CX_CUR();
     SV **itersvp = CxITERVAR(cx);
     const U8 type = CxTYPE(cx);
+    U8 pflags = PL_op->op_private;
 
     /* Classic "for" syntax iterates one-at-a-time.
        Many-at-a-time for loops are only for lexicals declared as part of the
@@ -5014,7 +5015,7 @@ PP(pp_iter)
         case CXt_LOOP_LIST: /* for (1,2,3) */
 
             assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
-            inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
+            inc = (IV)1 - (IV)(pflags & OPpITER_REVERSED);
             ix = (cx->blk_loop.state_u.stack.ix += inc);
             if (UNLIKELY(inc > 0
                          ? ix > cx->blk_oldsp
@@ -5036,7 +5037,7 @@ PP(pp_iter)
         case CXt_LOOP_ARY: /* for (@ary) */
 
             av = cx->blk_loop.state_u.ary.ary;
-            inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
+            inc = (IV)1 - (IV)(pflags & OPpITER_REVERSED);
             ix = (cx->blk_loop.state_u.ary.ix += inc);
             if (UNLIKELY(inc > 0
                          ? ix > AvFILL(av)
@@ -5053,6 +5054,14 @@ PP(pp_iter)
             }
             else {
                 sv = AvARRAY(av)[ix];
+            }
+
+            if (UNLIKELY(pflags & OPpITER_INDEXED) && (i == 0)) {
+                SvREFCNT_dec(*itersvp);
+                *itersvp = newSViv(ix);
+
+                ++i;
+                ++itersvp;
             }
 
         loop_ary_common:

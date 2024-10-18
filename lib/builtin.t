@@ -347,6 +347,30 @@ package FetchStoreCounter {
     is(prototype(\&builtin::indexed), '@', 'indexed prototype');
 }
 
+# indexed + foreach loop optimisation appears transparent
+{
+    my @output;
+    my @input = qw( zero one two three four five );
+
+    foreach my ( $idx, $val ) ( builtin::indexed @input ) {
+        push @output, "[$idx]=$val";
+    }
+
+    ok(eq_array(\@output, [qw( [0]=zero [1]=one [2]=two [3]=three [4]=four [5]=five )] ),
+        'foreach + builtin::indexed' );
+
+    undef @output;
+
+    use builtin qw( indexed );
+
+    foreach my ( $idx, $val ) ( indexed @input ) {
+        push @output, "[$idx]=$val";
+    }
+
+    ok(eq_array(\@output, [qw( [0]=zero [1]=one [2]=two [3]=three [4]=four [5]=five )] ),
+        'foreach + imported indexed' );
+}
+
 # Vanilla trim tests
 {
     use builtin qw( trim );

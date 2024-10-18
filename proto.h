@@ -6203,6 +6203,12 @@ S_get_aux_mg(pTHX_ AV *av);
 #endif
 #if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 PERL_CALLCONV void
+Perl_XS_builtin_indexed(pTHX_ CV *cv)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_XS_BUILTIN_INDEXED    \
+        assert(cv); assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
+
+PERL_CALLCONV void
 Perl_finish_export_lexical(pTHX)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL
