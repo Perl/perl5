@@ -253,8 +253,10 @@ DllMain(HINSTANCE hModule,	/* DLL module handle */
             A. Not called at all.
             B. Called after memory allocation for Heap has been forcibly removed by OS.
             PerlIO_cleanup() was done here but fails (B).
-         */     
+         */
+#ifndef WIN32_NO_SOCKETS
         EndSockets();
+#endif
 #if defined(USE_ITHREADS)
         if (PL_curinterp)
             FREE_THREAD_KEY;
