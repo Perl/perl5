@@ -891,6 +891,11 @@ CTp	|Signal_t|csighandler1	|int sig
 CTp	|Signal_t|csighandler3	|int sig				\
 				|NULLOK Siginfo_t *info 		\
 				|NULLOK void *uap
+ATmp	|bool	|c9strict_utf8_to_uv					\
+				|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p
 EXp	|regexp_engine const *|current_re_engine
 RXp	|XOPRETANY|custom_op_get_field					\
 				|NN const OP *o 			\
@@ -2532,6 +2537,10 @@ ATdo	|int	|perl_run	|NN PerlInterpreter *my_perl
 ATdo	|const char *|Perl_setlocale					\
 				|const int category			\
 				|NULLOK const char *locale
+ATmp	|bool	|perl_utf8_to_uv|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p
 CTp	|Signal_t|perly_sighandler					\
 				|int sig				\
 				|NULLOK Siginfo_t *info 		\
@@ -3042,6 +3051,11 @@ dopx	|PerlIO *|start_glob	|NN SV *tmpglob 			\
 				|NN IO *io
 Adp	|I32	|start_subparse |I32 is_format				\
 				|U32 flags
+ATmp	|bool	|strict_utf8_to_uv					\
+				|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p
 CRp	|NV	|str_to_version |NN SV *sv
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV *cv
@@ -3627,12 +3641,11 @@ ARTdip	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
 				|NN const U8 *end
 ARdp	|STRLEN |utf8_length	|NN const U8 *s0			\
 				|NN const U8 *e
-
-AMTdp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
+ATdmp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
 				|const U32 flags
-AMTdp	|UV	|utf8n_to_uvchr_error					\
+ATdmp	|UV	|utf8n_to_uvchr_error					\
 				|NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
@@ -3640,13 +3653,6 @@ AMTdp	|UV	|utf8n_to_uvchr_error					\
 				|NULLOK U32 *errors
 ATdip	|UV	|utf8n_to_uvchr_msgs					\
 				|NN const U8 * const s0 		\
-				|STRLEN curlen				\
-				|NULLOK STRLEN *retlen			\
-				|const U32 flags			\
-				|NULLOK U32 *errors			\
-				|NULLOK AV **msgs
-CTp	|UV	|_utf8n_to_uvchr_msgs_helper				\
-				|NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
 				|const U32 flags			\
@@ -3681,16 +3687,44 @@ EMXp	|U8 *	|utf16_to_utf8_reversed 				\
 				|NN U8 *d				\
 				|Size_t bytelen 			\
 				|NN Size_t *newlen
+ATdmp	|bool	|utf8_to_uv	|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p
 ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
-AMdp	|UV	|utf8_to_uvchr_buf					\
+AMdip	|UV	|utf8_to_uvchr_buf					\
 				|NN const U8 *s 			\
 				|NN const U8 *send			\
 				|NULLOK STRLEN *retlen
-Cip	|UV	|utf8_to_uvchr_buf_helper				\
-				|NN const U8 *s 			\
-				|NN const U8 *send			\
-				|NULLOK STRLEN *retlen
+ATdmp	|bool	|utf8_to_uv_errors					\
+				|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flags			\
+				|NULLOK U32 *errors
+ATdmp	|bool	|utf8_to_uv_flags					\
+				|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flag
+ATdip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
+				|NN const U8 *e 			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flags			\
+				|NULLOK U32 *errors			\
+				|NULLOK AV **msgs
+CTp	|bool	|utf8_to_uv_msgs_helper_				\
+				|NN const U8 * const s0 		\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p		\
+				|const U32 flags			\
+				|NULLOK U32 *errors			\
+				|NULLOK AV **msgs
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 : Used in perly.y
