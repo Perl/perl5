@@ -5981,6 +5981,7 @@ t/class/class.t				See if class declarations work
 t/class/construct.t			See if class constructors work
 t/class/destruct.t			See if class destruction works
 t/class/field.t				See if class field declarations work
+t/class/gh22169.t			Test defining a class that previously failed to define
 t/class/inherit.t			See if class inheritance works
 t/class/method.t			See if class method declarations work
 t/class/phasers.t			See if class phaser blocks work

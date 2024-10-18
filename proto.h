@@ -6218,6 +6218,13 @@ Perl_prepare_export_lexical(pTHX)
 # define PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL
 
 #endif /* defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C) */
+#if defined(PERL_IN_CLASS_C)
+STATIC void
+S_class_cleanup_definition(pTHX_ HV *stash);
+# define PERL_ARGS_ASSERT_CLASS_CLEANUP_DEFINITION \
+        assert(stash)
+
+#endif
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) || \
     defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C)
 PERL_CALLCONV OP *
