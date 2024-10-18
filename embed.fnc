@@ -3672,6 +3672,10 @@ EMXp	|U8 *	|utf16_to_utf8_reversed 				\
 				|NN U8 *d				\
 				|Size_t bytelen 			\
 				|NN Size_t *newlen
+ATmp	|bool	|utf8_to_uv	|NN const U8 * const s			\
+				|NN const U8 * const e			\
+				|NN UV *cp_p				\
+				|NULLOK Size_t *advance_p
 ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 AMdip	|UV	|utf8_to_uvchr_buf					\
