@@ -3662,6 +3662,35 @@ EOS
     $wrapper->contents_like(qr/print "2\\n"/, "break immediately after defining problem");
 }
 
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                "s",
+                "s",
+                "s",
+                "s",
+                "s",
+                "s",
+                "s",
+                "q",
+            ],
+            prog => \<<'EOS',
+use v5.40.0;
+sub four ($x1, $x2, $x3, $x4) { # start sub four
+    print $x1, $x2, $x3, $x4;
+}
+four(1,2,3,4);
+EOS
+        }
+       );
+    my $content = $wrapper->_contents;
+    my $count = () = $content =~ /start sub four/g;
+    is($count, 1, "expect to step on sub four entry once")
+      or diag $content;
+}
+
 done_testing();
 
 END {
