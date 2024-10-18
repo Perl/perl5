@@ -1131,24 +1131,6 @@ warn.
 =for apidoc Amnh||UTF8_WARN_PERL_EXTENDED
 =for apidoc Amnh||UTF8_DISALLOW_PERL_EXTENDED
 
-=cut
-
-Also implemented as a macro in utf8.h
-*/
-
-UV
-Perl_utf8n_to_uvchr(const U8 *s,
-                    STRLEN curlen,
-                    STRLEN *retlen,
-                    const U32 flags)
-{
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
-
-    return utf8n_to_uvchr_error(s, curlen, retlen, flags, NULL);
-}
-
-/*
-
 =for apidoc utf8n_to_uvchr_error
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.

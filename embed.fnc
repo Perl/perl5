@@ -3626,8 +3626,7 @@ ARTdip	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
 				|NN const U8 *end
 ARdp	|STRLEN |utf8_length	|NN const U8 *s0			\
 				|NN const U8 *e
-
-AMTdp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
+ATdmp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
 				|const U32 flags
