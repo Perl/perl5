@@ -1169,8 +1169,8 @@ PP_wrapped(pp_tie, 0, 1)
                              :                 newSVpvs_flags("main", SVs_TEMP);
                DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
                          " via package %" SVf_QUOTEDPREFIX
-                   " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
-                   methname, SVfARG(stashname), SVfARG(stashname));
+                   " (perhaps you forgot to load it?)",
+                   methname, SVfARG(stashname));
            }
        }
        else if (!(gv = gv_fetchmethod(stash, methname))) {
