@@ -1301,25 +1301,6 @@ flag to suppress any warnings, and then examine the C<*errors> return.
 =for apidoc Amnh||UTF8_GOT_SUPER
 =for apidoc Amnh||UTF8_GOT_SURROGATE
 
-=cut
-
-Also implemented as a macro in utf8.h
-*/
-
-UV
-Perl_utf8n_to_uvchr_error(const U8 *s,
-                          STRLEN curlen,
-                          STRLEN *retlen,
-                          const U32 flags,
-                          U32 * errors)
-{
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR;
-
-    return utf8n_to_uvchr_msgs(s, curlen, retlen, flags, errors, NULL);
-}
-
-/*
-
 =for apidoc utf8n_to_uvchr_msgs
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.

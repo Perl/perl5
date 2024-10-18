@@ -148,8 +148,9 @@ typedef enum {
     Perl_utf8_to_uvchr_buf(aTHX_ (const U8 *) (s), (const U8 *) e, lenp)
 #define utf8n_to_uvchr(s, len, lenp, flags)                                    \
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
-#define utf8n_to_uvchr_error(s, len, lenp, flags, errors)                      \
-                        utf8n_to_uvchr_msgs(s, len, lenp, flags, errors, 0)
+
+#define Perl_utf8n_to_uvchr_error(s, len, lenp, flags, errors)                 \
+                    Perl_utf8n_to_uvchr_msgs(s, len, lenp, flags, errors, 0)
 
 #define utf16_to_utf8(p, d, bytelen, newlen)                                \
                             utf16_to_utf8_base(p, d, bytelen, newlen, 0, 1)

@@ -3631,7 +3631,7 @@ AMTdp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
 				|const U32 flags
-AMTdp	|UV	|utf8n_to_uvchr_error					\
+ATdmp	|UV	|utf8n_to_uvchr_error					\
 				|NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
