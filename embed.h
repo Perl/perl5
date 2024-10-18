@@ -157,6 +157,7 @@
 # define bytes_cmp_utf8(a,b,c,d)                Perl_bytes_cmp_utf8(aTHX_ a,b,c,d)
 # define bytes_from_utf8_loc                    Perl_bytes_from_utf8_loc
 # define bytes_to_utf8(a,b)                     Perl_bytes_to_utf8(aTHX_ a,b)
+# define c9strict_utf8_to_uv                    Perl_c9strict_utf8_to_uv
 # define call_argv(a,b,c)                       Perl_call_argv(aTHX_ a,b,c)
 # define call_atexit(a,b)                       Perl_call_atexit(aTHX_ a,b)
 # define call_list(a,b)                         Perl_call_list(aTHX_ a,b)
@@ -221,6 +222,7 @@
 # define dump_vindent(a,b,c,d)                  Perl_dump_vindent(aTHX_ a,b,c,d)
 # define eval_pv(a,b)                           Perl_eval_pv(aTHX_ a,b)
 # define eval_sv(a,b)                           Perl_eval_sv(aTHX_ a,b)
+# define extended_utf8_to_uv                    Perl_extended_utf8_to_uv
 # define fbm_compile(a,b)                       Perl_fbm_compile(aTHX_ a,b)
 # define fbm_instr(a,b,c,d)                     Perl_fbm_instr(aTHX_ a,b,c,d)
 # define filter_add(a,b)                        Perl_filter_add(aTHX_ a,b)
@@ -641,6 +643,7 @@
 # define stack_grow(a,b,c)                      Perl_stack_grow(aTHX_ a,b,c)
 # define start_subparse(a,b)                    Perl_start_subparse(aTHX_ a,b)
 # define str_to_version(a)                      Perl_str_to_version(aTHX_ a)
+# define strict_utf8_to_uv                      Perl_strict_utf8_to_uv
 # define suspend_compcv(a)                      Perl_suspend_compcv(aTHX_ a)
 # define sv_2bool_flags(a,b)                    Perl_sv_2bool_flags(aTHX_ a,b)
 # define sv_2cv(a,b,c,d)                        Perl_sv_2cv(aTHX_ a,b,c,d)
