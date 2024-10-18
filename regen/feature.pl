@@ -45,6 +45,7 @@ my %feature = (
     extra_paired_delimiters => 'more_delims',
     module_true             => 'module_true',
     class                   => 'class',
+    apostrophe_as_package_separator => 'apos_as_name_sep',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -54,7 +55,7 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state indirect multidimensional bareword_filehandles};
+use constant V5_9_5 => sort qw{say state indirect multidimensional bareword_filehandles apostrophe_as_package_separator};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
@@ -66,14 +67,17 @@ use constant V5_35  => sort grep {; $_ ne 'indirect'
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
 
 use constant V5_39  => sort ( +V5_37, qw{try} );
-use constant V5_41  => sort ( +V5_39 );
+use constant V5_41  => sort
+  grep {; $_ ne 'apostrophe_as_package_separator' }
+  ( +V5_39 );
 
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
 #
 my %feature_bundle = (
     all     => [ sort keys %feature ],
-    default => [ qw{indirect multidimensional bareword_filehandles} ],
+    default => [ qw{indirect multidimensional bareword_filehandles
+                    apostrophe_as_package_separator} ],
     # using 5.9.5 features bundle
     "5.9.5" => [ +V5_9_5 ],
     "5.10"  => [ +V5_9_5 ],
@@ -542,7 +546,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.91';
+our $VERSION = '1.92';
 
 FEATURES
 
@@ -964,6 +968,18 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 
 This feature enables the C<class> block syntax and other associated keywords
 which implement the "new" object system, previously codenamed "Corinna".
+
+=head2 The 'apostrophe_as_package_separator' feature
+
+This feature enables use C<'> (apostrophe) as an alternative to using
+C<::> as a separate in package and other global names.
+
+This is enabled by default, but disabled from the 5.41 feature bundle
+onwards.  In previous versions it was enabled all the time.
+
+This only disables C<'> in symbols in your source code, the internal
+conversion from C<'> to C<::>, including for symbolic references, is
+always enabled.
 
 =head1 FEATURE BUNDLES
 

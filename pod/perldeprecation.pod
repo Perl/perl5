@@ -97,16 +97,6 @@ your restraint.
 
 Category: "deprecated::goto_construct"
 
-=head3 Use of C<'> as a global name separator
-
-Perl allows use of C<'> instead of C<::> to replace the parts of a
-package or global variable name, for example C<A::B> and C<A'B> are
-equivalent.
-
-C<'> will no longer be recognized as a name separator in Perl 5.42.
-
-Category: "deprecated::apostrophe_as_package_separator"
-
 =head2 Perl 5.40
 
 =head3 Downgrading a C<use VERSION> to below v5.11

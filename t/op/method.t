@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 161);
+plan(tests => 163);
 
 {
     # RT #126042 &{1==1} * &{1==1} would crash
@@ -253,6 +253,12 @@ sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
    my @ret = $o->SUPER::method('whatever');
    ::is $ret[0], $o, 'object passed to SUPER::method';
    ::is $ret[1], 'whatever', 'argument passed to SUPER::method';
+   {
+       no warnings qw(syntax deprecated);
+       @ret = $o->SUPER'method('whatever');
+   }
+   ::is $ret[0], $o, "object passed to SUPER'method";
+   ::is $ret[1], 'whatever', "argument passed to SUPER'method";
    @ret = Saab->SUPER::method;
    ::is $ret[0], 'Saab', "package name passed to SUPER::method";
    @ret = OtherSaab->SUPER::method;

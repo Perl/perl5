@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.70';
+$VERSION = '1.71';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -80,8 +80,6 @@ our $WARNING_TREE = {
                                 'deprecated::dot_in_inc'               => [ 5.025011, DEFAULT_ON],
                                 'deprecated::version_downgrade'        => [ 5.035009, DEFAULT_ON],
                                 'deprecated::delimiter_will_be_paired' => [ 5.035010, DEFAULT_ON],
-                                'deprecated::apostrophe_as_package_separator'
-                                                                       => [ 5.037009, DEFAULT_ON],
                                 'deprecated::smartmatch'               => [ 5.037010, DEFAULT_ON],
                                 'deprecated::missing_import_called_with_args'   
                                                                        => [ 5.039002, DEFAULT_ON],

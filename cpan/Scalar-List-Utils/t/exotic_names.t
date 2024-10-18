@@ -45,7 +45,7 @@ sub caller3_ok {
         ),
     );
 
-    $expected =~ s/'/::/g if $] < 5.041_003;
+    $expected =~ s/'/::/g if $] < 5.037009 || $] >= 5.041_004;
 
     # this is apparently how things worked before 5.16
     utf8::encode($expected) if $] < 5.016 and $ord > 255;
@@ -72,7 +72,7 @@ my @ordinal = (
     ($] >= 5.014 ? ( 0 ) : ()),
     1 .. 38,
     # single quote ' separators are deprecated in 5.37.9
-    ($] < 5.037009 ? ( 39 ) : ()),
+    ($] < 5.037009 || $] >= 5.041_004 ? ( 39 ) : ()),
     40 .. 255,
     # Unicode in 5.6 is not sane (crashes etc)
     ($] >= 5.008 ? (
@@ -85,7 +85,7 @@ my @ordinal = (
 
 my $legal_ident_char = join('',
     "A-Z_a-z0-9",
-    ($] < 5.037009 ? q['] : ()),
+    ($] < 5.037009 || $] >= 5.041_004 ? q['] : ()),
     ($] > 5.008 ? (
         map chr, 0x100, 0x498
     ) : ()),

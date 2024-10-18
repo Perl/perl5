@@ -13,7 +13,7 @@ BEGIN {
 use utf8;
 use open qw( :utf8 :std );
 
-plan( tests => 48 );
+plan( tests => 49 );
 
 #These come from op/my_stash.t
 {
@@ -283,4 +283,8 @@ plan( tests => 48 );
         ok eval { Bèàr::::bàz() },
         'packages ending with :: are self-consistent';
     }
+    
+    # [perl #88138] ' not equivalent to :: before a null
+    ${"à'\0b"} = "c";
+    is ${"à::\0b"}, "c", "' is equivalent to :: before a null";
 }
