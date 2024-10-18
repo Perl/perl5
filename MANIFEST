@@ -6341,6 +6341,7 @@ t/op/isa.t				See if isa works
 t/op/join.t				See if join works
 t/op/kill0.t				See if kill works
 t/op/kill0_child			Process tree script that is kill()ed
+t/op/kill9_shell_exit.t			Check for correct exit code on shell execution kill signal
 t/op/kvaslice.t				See if index/value array slices work
 t/op/kvhslice.t				See if key/value hash slices work
 t/op/lc.t				See if lc, uc, lcfirst, ucfirst, quotemeta work
