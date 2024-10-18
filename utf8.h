@@ -148,8 +148,12 @@ typedef enum {
         Perl_uvchr_to_utf8_flags_msgs(aTHX, d, u, f, 0)
 #define Perl_uvchr_to_utf8_flags_msgs(mTHX, d, u, f , m)                        \
         Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ d, NATIVE_TO_UNI(u), f, m)
-#define utf8_to_uvchr_buf(s, e, lenp)                                           \
-            utf8_to_uvchr_buf_helper((const U8 *) (s), (const U8 *) e, lenp)
+
+/* This is needed to cast the parameters for all those calls that had them
+ * improperly as chars */
+#define utf8_to_uvchr_buf(s, e, lenp)                                          \
+    Perl_utf8_to_uvchr_buf(aTHX_ (const U8 *) (s), (const U8 *) e, lenp)
+
 #define utf8n_to_uvchr(s, len, lenp, flags)                                    \
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
 #define utf8n_to_uvchr_error(s, len, lenp, flags, errors)                      \
