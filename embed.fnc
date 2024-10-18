@@ -732,6 +732,8 @@ Cdip	|SV **	|av_store_simple|NN AV *av				\
 Adp	|void	|av_undef	|NN AV *av
 Adp	|void	|av_unshift	|NN AV *av				\
 				|SSize_t num
+Adp	|void	|av_unshift_sv	|NN AV *av				\
+				|NN SV *sv
 : Used in perly.y
 Rp	|OP *	|bind_match	|I32 type				\
 				|NN OP *left				\
