@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.78;
+package B::Deparse 1.79;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -3034,6 +3034,25 @@ sub deparse_binop_right {
     }
 }
 
+my %can_warn_about_lhs_not;
+BEGIN {
+    %can_warn_about_lhs_not = map +($_ => 1), qw(
+        ==
+        !=
+        <
+        <=
+        >
+        >=
+        eq
+        ne
+        lt
+        le
+        gt
+        ge
+        isa
+    );
+}
+
 sub binop {
     my $self = shift;
     my ($op, $cx, $opname, $prec, $flags) = (@_, 0);
@@ -3049,15 +3068,21 @@ sub binop {
     }
     my $leftop = $left;
     $left = $self->deparse_binop_left($op, $left, $prec);
-    $left = "($left)" if $flags & LIST_CONTEXT
-		     and    $left !~ /^(my|our|local|state|)\s*[\@%\(]/
-			 || do {
-				# Parenthesize if the left argument is a
-				# lone repeat op.
-				my $left = $leftop->first->sibling;
-				$left->name eq 'repeat'
-				    && null($left->sibling);
-			    };
+    $left = "($left)"
+        if $flags & LIST_CONTEXT
+            and $left !~ /^(my|our|local|state|)\s*[\@%\(]/
+                || do {
+                    # Parenthesize if the left argument is a
+                    # lone repeat op.
+                    my $left = $leftop->first->sibling;
+                    $left->name eq 'repeat'
+                    && null($left->sibling);
+                }
+        or
+            $can_warn_about_lhs_not{$opname}
+            and $leftop->name eq 'not'
+            and $leftop->flags & OPf_PARENS
+            and $left !~ /\(/;
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }
@@ -4214,7 +4239,12 @@ sub pp_null {
     } elsif (!null($op->first->sibling) and
 	     $op->first->sibling->name =~ /^transr?\z/ and
 	     $op->first->sibling->flags & OPf_STACKED) {
-	return $self->maybe_parens($self->deparse($op->first, 20) . " =~ "
+        my $lhs = $self->deparse($op->first, 20);
+        $lhs = "($lhs)"
+            if $op->first->name eq 'not'
+                and $op->first->flags & OPf_PARENS
+                and $lhs !~ /\(/;
+        return $self->maybe_parens( "$lhs =~ "
 				   . $self->deparse($op->first->sibling, 20),
 				   $cx, 20);
     } elsif ($op->flags & OPf_SPECIAL && $cx < 1 && !$op->targ) {
@@ -6362,6 +6392,10 @@ sub matchop {
     if ($op->name ne 'split' && $op->flags & OPf_STACKED) {
 	$binop = 1;
 	$var = $self->deparse($kid, 20);
+        $var = "($var)"
+            if $kid->name eq 'not'
+                and $kid->flags & OPf_PARENS
+                and $var !~ /\(/;
 	$kid = $kid->sibling;
     }
            # not $name; $name will be 'm' for both match and split
@@ -6523,6 +6557,10 @@ sub pp_subst {
     if ($op->flags & OPf_STACKED) {
 	$binop = 1;
 	$var = $self->deparse($kid, 20);
+        $var = "($var)"
+            if $kid->name eq 'not'
+                and $kid->flags & OPf_PARENS
+                and $var !~ /\(/;
 	$kid = $kid->sibling;
     }
     elsif (my $targ = $op->targ) {
