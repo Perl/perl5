@@ -33,8 +33,15 @@
 #define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
 #define TO_SOCKET(x)	_get_osfhandle(x)
 
+#define StartSockets() \
+    STMT_START {					\
+        if (!wsock_started)				\
+            start_sockets();				\
+    } STMT_END
+
 #define SOCKET_TEST(x, y) \
     STMT_START {					\
+        StartSockets();					\
         if((x) == (y))					\
             {						\
             int wsaerr = WSAGetLastError();		\
@@ -49,6 +56,8 @@ static struct servent* win32_savecopyservent(struct servent*d,
                                              struct servent*s,
                                              const char *proto);
 
+static int wsock_started = 0;
+
 #ifdef WIN32_DYN_IOINFO_SIZE
 EXTERN_C Size_t w32_ioinfo_size;
 #endif
@@ -56,7 +65,8 @@ EXTERN_C Size_t w32_ioinfo_size;
 EXTERN_C void
 EndSockets(void)
 {
-    WSACleanup();
+    if (wsock_started)
+        WSACleanup();
 }
 
 /* Translate WSAExxx values to corresponding Exxx values where possible. Not all
@@ -316,27 +326,63 @@ convert_errno_to_wsa_error(int err)
 }
 #endif /* ERRNO_HAS_POSIX_SUPPLEMENT */
 
+void
+start_sockets(void) 
+{
+    unsigned short version;
+    WSADATA retdata;
+    int ret;
+
+    /*
+     * initalize the winsock interface and insure that it is
+     * cleaned up at exit.
+     */
+    version = 0x2;
+    if(ret = WSAStartup(version, &retdata))
+        Perl_croak_nocontext("Unable to locate winsock library!\n");
+    if(retdata.wVersion != version)
+        Perl_croak_nocontext("Could not find version 2.0 of winsock dll\n");
+
+    /* atexit((void (*)(void)) EndSockets); */
+    wsock_started = 1;
+}
+
+/* in no sockets Win32 builds, these use the inline functions defined in
+ * perl.h
+ */
 u_long
 win32_htonl(u_long hostlong)
 {
+#ifndef WIN32_NO_SOCKETS
+    StartSockets();
+#endif
     return htonl(hostlong);
 }
 
 u_short
 win32_htons(u_short hostshort)
 {
+#ifndef WIN32_NO_SOCKETS
+    StartSockets();
+#endif
     return htons(hostshort);
 }
 
 u_long
 win32_ntohl(u_long netlong)
 {
+#ifndef WIN32_NO_SOCKETS
+    StartSockets();
+#endif
     return ntohl(netlong);
 }
 
 u_short
 win32_ntohs(u_short netshort)
 {
+#ifndef WIN32_NO_SOCKETS
+    StartSockets();
+#endif
     return ntohs(netshort);
 }
 
@@ -448,6 +494,8 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     int i, fd, save_errno = errno;
     FD_SET nrd, nwr, nex;
     bool just_sleep = TRUE;
+
+    StartSockets();
 
     FD_ZERO(&nrd);
     FD_ZERO(&nwr);
@@ -620,6 +668,8 @@ win32_socket(int af, int type, int protocol)
 {
     SOCKET s;
 
+    StartSockets();
+
     if((s = open_ifs_socket(af, type, protocol)) == INVALID_SOCKET)
         {
         int wsaerr = WSAGetLastError();
@@ -711,6 +761,11 @@ win32_ioctl(int i, unsigned int u, char *data)
     u_long u_long_arg; 
     int retval;
     
+    if (!wsock_started) {
+        Perl_croak_nocontext("ioctl implemented only on sockets");
+        /* NOTREACHED */
+    }
+
     /* mauke says using memcpy avoids alignment issues */
     memcpy(&u_long_arg, data, sizeof u_long_arg); 
     retval = ioctlsocket(TO_SOCKET(i), (long)u, &u_long_arg);
@@ -732,12 +787,14 @@ win32_ioctl(int i, unsigned int u, char *data)
 char FAR *
 win32_inet_ntoa(struct in_addr in)
 {
+    StartSockets();
     return inet_ntoa(in);
 }
 
 unsigned long
 win32_inet_addr(const char FAR *cp)
 {
+    StartSockets();
     return inet_addr(cp);
 }
 

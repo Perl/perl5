@@ -5461,9 +5461,6 @@ Perl_win32_init(int *argcp, char ***argvp)
      */
     InitCommonControls();
 
-    WSADATA wsadata;
-    WSAStartup(MAKEWORD(2, 2), &wsadata);
-
     g_osver.dwOSVersionInfoSize = sizeof(g_osver);
     GetVersionEx(&g_osver);
 
