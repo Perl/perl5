@@ -2111,18 +2111,7 @@ returned.
 
 =cut
 
-Also implemented as a macro in utf8.h
-
 */
-
-
-UV
-Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
-{
-    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
-
-    return utf8_to_uvchr_buf_helper(s, send, retlen);
-}
 
 /*
 =for apidoc utf8_length

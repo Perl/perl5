@@ -3060,6 +3060,14 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
 }
 
 PERL_STATIC_INLINE UV
+Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
+
+    return utf8_to_uvchr_buf_helper(s, send, retlen);
+}
+
+PERL_STATIC_INLINE UV
 Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF_HELPER;

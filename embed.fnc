@@ -3682,7 +3682,7 @@ EMXp	|U8 *	|utf16_to_utf8_reversed 				\
 				|NN Size_t *newlen
 ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
-AMdp	|UV	|utf8_to_uvchr_buf					\
+AMdip	|UV	|utf8_to_uvchr_buf					\
 				|NN const U8 *s 			\
 				|NN const U8 *send			\
 				|NULLOK STRLEN *retlen

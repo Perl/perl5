@@ -5143,11 +5143,6 @@ Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, cons
         assert(s); assert(d); assert(newlen)
 
 PERL_CALLCONV UV
-Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
-#define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF      \
-        assert(s); assert(send)
-
-PERL_CALLCONV UV
 Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags);
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR         \
         assert(s)
@@ -10092,6 +10087,11 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
         assert(s); assert(start); assert(end)
+
+PERL_STATIC_INLINE UV
+Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
+# define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF     \
+        assert(s); assert(send)
 
 PERL_STATIC_INLINE UV
 Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
