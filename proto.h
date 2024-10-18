@@ -5147,10 +5147,8 @@ Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags)
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR         \
         assert(s)
 
-PERL_CALLCONV UV
-Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors);
-#define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR   \
-        assert(s)
+/* PERL_CALLCONV UV
+Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors); */
 
 PERL_CALLCONV void
 Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
