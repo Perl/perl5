@@ -1411,7 +1411,8 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
 #endif      /* End of ! EBCDIC */
 
-    /* Process per-byte */
+    /* Process per-byte.  (Can't use libc functions like strpbrk() because
+     * input isn't necessarily a C string) */
     while (x < send) {
         if (! UTF8_IS_INVARIANT(*x)) {
             if (ep) {
