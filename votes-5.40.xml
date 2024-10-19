@@ -63,7 +63,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="jkeenan steveh" id="78facf50a113cc1ce43c518fed81278168721ba4" issue="" pull="22404" desc="PathTools: Keep $VERSION consistent in all *.pm files
+<commit votes="jkeenan steveh khw" id="78facf50a113cc1ce43c518fed81278168721ba4" issue="" pull="22404" desc="PathTools: Keep $VERSION consistent in all *.pm files
 "/>
 
 </div>
