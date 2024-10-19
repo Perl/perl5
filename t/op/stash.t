@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc( qw(../lib) );
 }
 
-plan( tests => 54 );
+plan( tests => 55 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -300,6 +300,10 @@ fresh_perl_is(
     ok eval { Bear::::baz() },
      'packages ending with :: are self-consistent';
 }
+
+# [perl #88138] ' not equivalent to :: before a null
+${"a'\0b"} = "c";
+is ${"a::\0b"}, "c", "' is equivalent to :: before a null";
 
 # [perl #101486] Clobbering the current package
 ok eval '

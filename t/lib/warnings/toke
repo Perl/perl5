@@ -408,10 +408,46 @@ sort ("")
 EXPECT
 
 ########
-# NAME ' no longer is part of the symbol character set
+@foo::bar = 1..3;
+() = "$foo'bar";
+() = "@foo'bar";
+() = "$#foo'bar";
+use warnings 'syntax';
+() = "$foo'bar";
+() = "@foo'bar";
+() = "$#foo'bar";
+no warnings 'syntax', 'deprecated' ;
+() = "$foo'bar";
+() = "@foo'bar";
+() = "$#foo'bar";
+# ' in names no longer deprecated, ensure we don't warn
+EXPECT
+########
+use warnings 'syntax'; use utf8;
+@fooл::barл = 1..3;
+() = "$fooл'barл";
+() = "@fooл'barл";
+() = "$#fooл'barл";
+no warnings 'syntax', 'deprecated' ;
+() = "$fooл'barл";
+() = "@fooл'barл";
+() = "$#fooл'barл";
+# ' in names no longer deprecated, ensure we don't warn
+EXPECT
+########
+# NAME deprecation of ' in names reverted
+sub foo'bar { 1 }
+$a'b = 1;
+@a'c = ();
+%a'd = ();
+package a'e;
+# ' in names no longer deprecated, ensure we don't warn
+EXPECT
+########
+# NAME ' no longer is part of the symbol character set (reverted)
 # previously these would parse like:
-# "${foo'bar}", but now they parse like "${foo}'bar"
-# and any ' parsing for symbols is now gone, so no warning
+# "${foo'bar}", but they did parse like "${foo}'bar"
+# but now they parse in names again
 @foo::bar = 1..3;
 () = "$foo'bar";
 () = "@foo'bar";
@@ -437,17 +473,14 @@ no warnings 'syntax', 'deprecated' ;
 () = "@fooл'barл";
 () = "$#fooл'barл";
 EXPECT
-Possible unintended interpolation of @fooл in string at - line 5.
 ########
-# NAME deprecation of ' in names
+# NAME deprecation of ' in names (reverted)
 sub foo'bar { 1 }
 $a'b = 1;
 @a'c = ();
 %a'd = ();
 package a'e;
 EXPECT
-OPTION fatal
-Illegal declaration of subroutine main::foo at - line 1.
 ########
 # toke.c
 use warnings 'ambiguous' ;
