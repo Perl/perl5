@@ -1,8 +1,11 @@
 #!./perl
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';    # for fresh_perl_is() etc
+    set_up_inc('../lib', '.', '../ext/re');
+    require './charset_tools.pl';
+    require './loc_tools.pl';
+    require Config; import Config;
 }
 
 use strict;
@@ -24,6 +27,11 @@ use warnings;
 
 my $switches = "";
 
+{   # Fixed by acababb42be12ff2986b73c1bfa963b70bb5d54e
+    "abab" =~ /(?:[^b]*(?=(b)|(a))ab)*/;
+    is($1, undef, "GH #16894");
+}
+
 our $TODO;
 TODO: {
     local $TODO = "GH 16250";
@@ -34,6 +42,36 @@ TODO: {
         print $1 // "undef", ":", $2 // "undef", "\n";
         EOF
     "undef:de567\nundef:de567", { eval $switches }, "");
+}
+
+TODO: {
+    local $::TODO = 'GH 16876';
+    fresh_perl('$_ = "a"; s{ x | (?{ s{}{x} }) }{}gx;',
+               { stderr => 'devnull' });
+    is($?, 0, "No assertion failure");
+}
+
+TODO: {
+    local $::TODO = 'GH 16952';
+    fresh_perl('s/d|(?{})!//.$&>0for$0,l..a0,0..0',
+               { stderr => 'devnull' });
+    is($?, 0, "No assertion failure");
+}
+
+TODO: {
+    local $::TODO = 'GH 16971';
+    fresh_perl('split(/00|0\G/, "000")',
+               { stderr => 'devnull' });
+    is($?, 0, "No assertion failure");
+}
+
+TODO: {
+    local $::TODO = 'GH 16627';
+    fresh_perl('use re "eval";
+                my @r;
+                for$0(qw(0 0)){push@r,qr/@r(?{})/};',
+               { stderr => 'devnull' });
+    is($?, 0, "No assertion failure");
 }
 
 done_testing();
