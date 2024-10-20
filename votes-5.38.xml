@@ -58,9 +58,6 @@ khw: See https://github.com/Perl/perl5/issues/21366#issuecomment-2384217051 and 
 
 <div><h3>Build and Installation Fixes</h3>
 
-<!-- jkeenan: d3f42b8d38 needs $VERSION bump in ext/DynaLoader/DynaLoader_pm.PL -->
-<commit votes="steveh tonyc khw" id="d3f42b8d3823ce40f4f62758562ad4c02ffa3e27" issue="21751" pull="21818" desc="DynaLoader: dl_dyld.xs: don't undef bool"/>
-
 <!-- Possibly also: https://github.com/Perl/perl5/pull/22609 if/when it is merged to blead -->
 
 </div>
