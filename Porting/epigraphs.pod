@@ -17,6 +17,17 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.5 - Great P.I. of the Universe, Under A Killing Moon
+
+L<Announced on 2024-10-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2024/10/msg268977.html>
+
+  PI: So, they've found it again, have they? I thought we'd taken care of it.
+  A:  The forces of evil are persistent, Sir.
+  PI: I'm getting too old for this....
+  PI: Who have we got lined up to deal with this problem?
+  A:  Murphy, sir.
+  PI: Oh no! Not Murphy!
+
 =head2 v5.41.4 - Theodor Seuss Geisel
 
 L<Announced on 2024-09-20 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2024/09/msg268800.html>
