@@ -1903,10 +1903,26 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
                            "Called new_numeric with %s, PL_numeric_name=%s\n",
                            newnum, PL_numeric_name));
 
-    /* If not forcing this procedure, and there isn't actually a change from
-     * our records, do nothing.  (Our records can be wrong when sync'ing to the
-     * locale set up by an external library, hence the 'force' parameter) */
+    /* We keep records comparing the characteristics of the LC_NUMERIC catetory
+     * of the current locale vs the standard C locale.  If the new locale that
+     * has just been changed to is the same as the one our records are for,
+     * they are still valid, and we don't have to recalculate them.  'force' is
+     * true if the caller suspects that the records are out-of-date, so do go
+     * ahead and recalculate them.  (This can happen when an external library
+     * has had control and now perl is reestablishing control; we have to
+     * assume that that library changed the locale in unknown ways.)
+     *
+     * Even if our records are valid, the new locale will likely have been
+     * switched to before this function gets called, and we must toggle into
+     * one indistinguishable from the C locale with regards to LC_NUMERIC
+     * handling, so that all the libc functions that are affected by LC_NUMERIC
+     * will work as expected.  This can be skipped if we already know that the
+     * locale is indistinguishable from the C locale. */
     if (! force && strEQ(PL_numeric_name, newnum)) {
+        if (! PL_numeric_underlying_is_standard) {
+            set_numeric_standard();
+        }
+
         return;
     }
 
