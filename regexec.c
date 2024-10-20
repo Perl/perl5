@@ -4094,7 +4094,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         /* XXXX check_substr already used to find "s", can optimize if
            check_substr==must. */
         dontbother = 0;
-        strend = HOPc(strend, -dontbother);
         while ( (s <= last) &&
                 (s = fbm_instr((unsigned char*)HOP4c(s, back_min, strbeg,  strend),
                                   (unsigned char*)strend, must,
