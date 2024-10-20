@@ -427,6 +427,16 @@ my $non_pods = qr/
                            | lst      # assorted listing files
                            | bat      # Windows,OS2 batch files
                            | cmd      # Windows,OS2 command files
+                           | pdb      # Windows, C debugger symbols
+                           | dmp      # Windows, C debugger temps
+                           | nam      # Windows, C debugger temps
+                           | id0      # Windows, C debugger temps
+                           | id1      # Windows, C debugger temps
+                           | obj      # Windows .o equivalent
+                           | lib      # Windows .a equivalent
+                           | def      # Windows compiler DLL related (ASCII)
+                           | exp      # Windows compiler DLL related (binary)
+                           | pch      # Windows pre-compiled headers
                            | lis      # VMS compiler listings
                            | map      # VMS linker maps
                            | opt      # VMS linker options files
