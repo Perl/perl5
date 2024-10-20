@@ -231,10 +231,22 @@ Additionally, the following selected changes have been made:
 
 =head3 L<perl5416delta>
 
+=head4 F<pod/perlguts.pod> and F<pod/perlclib.pod>
+
 =over 4
 
-=item *
+=item Memory Allocation in C/XS
 
+Documentation was updated to reflect that mixing C<Newx>, C<Renew>, and
+C<Safefree> vs C<malloc>, C<realloc>, and C<free> are not allowed, and mixing
+pointers between the 2 classes of APIs is not allowed. Updates made in
+F<pod/perlguts.pod> and F<pod/perlclib.pod>.
+
+=back
+
+=over 4
+
+=item
 Added the change note for apostrophes in names being reinstated, which
 was delayed by the review cycle.
 

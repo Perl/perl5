@@ -166,7 +166,10 @@ should use C<sv_gets> instead:
   p = realloc(p, n)              Renew(p, n, t)
 
 It is not portable to try to allocate 0 bytes; allocating 1 or more is
-portable.
+portable.  Never pass pointers between C<Newx>, C<Renew>, C<Safefree> and
+I<libc> equivalents C<malloc>, C<realloc>, C<free>.  They are not from the
+same memory pool or allocator.  Either an instant or delayed I<SEGV> will
+occur, or subtle memory leaks or subtle heap corruption.
 
   memcpy(dst, src, n)            Copy(src, dst, n, t)
   memmove(dst, src, n)           Move(src, dst, n, t)
