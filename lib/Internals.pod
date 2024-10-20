@@ -57,6 +57,22 @@ to implement higher-level behavior which should be used instead.
 See the core implementation for the exact meaning of the readonly flag for
 each internal variable type.
 
+=item Internals::getcwd()
+
+Internally core maintained version of L<Cwd::getcwd()|Cwd/getcwd> or
+L<Win32::GetCwd()|Win32/Win32::GetCwd()>. Only for use if loading L<Cwd::|Cwd> or
+calling C<Win32::GetCwd()> and its C<AUTOLOAD> to L<Win32.pm|Win32> will
+somehow break a TAP test in a C<.t>.
+
+Not defined on all platforms and all perl build flag configs.  May not set
+C<PWD> env var.  May disappear at any time.  Probe for the sub's existance
+before calling it and write C<if>/C<else> if C<Internals::getcwd> is
+unavailable.  Although this would be a bug, there is no guarentee it will
+return the same identical string as L<Cwd::getcwd()|Cwd/getcwd> or
+L<Win32::GetCwd()|Win32/Win32::GetCwd()>.  The public implementations can get patched
+in the future for some future discovered bug while this sub keeps the buggy
+return value.
+
 =item hv_clear_placeholders(%hash)
 
 Clear any placeholders from a locked hash. Should not be used directly.
