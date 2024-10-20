@@ -164,15 +164,20 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+
+
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 F<pod/perlguts.pod> and F<pod/perlclib.pod>
 
 =over 4
 
-=item *
+=item Memory Allocation in C/XS
 
-XXX Description of the change here
+Documentation was updated to reflect that mixing C<Newx>, C<Renew>, and
+C<Safefree> vs C<malloc>, C<realloc>, and C<free> not allowed, and mixing
+pointers between the 2 classes of APIs is not allowed. Updates made in
+F<pod/perlguts.pod> and F<pod/perlclib.pod>.
 
 =back
 
