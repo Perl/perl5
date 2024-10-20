@@ -2213,6 +2213,7 @@ cpan/podlators/t/text/termcap.t					podlators test
 cpan/podlators/t/text/utf8-io.t					Test file related to podlators
 cpan/Scalar-List-Utils/lib/List/Util.pm		List::Util
 cpan/Scalar-List-Utils/lib/List/Util/XS.pm	List::Util
+cpan/Scalar-List-Utils/lib/Scalar/List/Utils.pm	Scalar-List-Utils
 cpan/Scalar-List-Utils/lib/Scalar/Util.pm	Scalar::Util
 cpan/Scalar-List-Utils/lib/Sub/Util.pm		Module related to Scalar::Util
 cpan/Scalar-List-Utils/ListUtil.xs		Util extension
