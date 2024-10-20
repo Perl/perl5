@@ -123,11 +123,13 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =over 4
 
-=item *
+=item blib.pm
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-XXX If there was something important to note about this change, include that here.
+C<blib.pm> was updated from 1.07 to 1.08. Previously when L<Win32.pm|Win32>,
+and only that module, the C<cwd()> was obtained through inefficiently
+shelling out to a new C<cmd.exe>, this was fixed and the C<cwd> when using
+C<blib.pm> and L<Win32.pm|Win32> is obtained with a fast same-process API
+function call the way C<Win32::GetCwd()> and C<Cwd::> do it.
 
 =back
 
@@ -346,9 +348,12 @@ well.
 
 =over 4
 
-=item *
+=item Internals::getcwd() is documented as very limited platform availability
 
-XXX
+C<Internals::getcwd()> is documented as experimental, unsupported, not-bug-free
+and removeable in the future, and very limited availability on random
+platforms and perl core build flags. Basically C<Win32> only, and only for
+esoteric C<.t> TAP situations and esoteric internal core reasons.
 
 =back
 
