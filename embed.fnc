@@ -3622,10 +3622,15 @@ ARTdip	|U8 *	|utf8_hop_back_overshoot				\
 				|SSize_t off				\
 				|NN const U8 * const start		\
 				|NULLOK SSize_t *remaining
-ARTdip	|U8 *	|utf8_hop_forward					\
+ARTdmp	|U8 *	|utf8_hop_forward					\
 				|NN const U8 *s 			\
 				|SSize_t off				\
-				|NN const U8 *end
+				|NN const U8 * const end
+ARTdip	|U8 *	|utf8_hop_forward_overshoot				\
+				|NN const U8 *s 			\
+				|SSize_t off				\
+				|NN const U8 * const end		\
+				|NULLOK SSize_t *remaining
 ARTdip	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
 				|SSize_t off				\
 				|NN const U8 *start			\
