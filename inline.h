@@ -2691,10 +2691,12 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
 
         while (off-- && s < end) {
             STRLEN skip = UTF8SKIP(s);
-            if ((STRLEN)(end - s) <= skip) {
-                GCC_DIAG_IGNORE(-Wcast-qual)
-                return (U8 *)end;
-                GCC_DIAG_RESTORE
+
+            /* Quit without counting this character if it overshoots the edge.
+             * */
+            if ((STRLEN)(end - s) < skip) {
+                s = end;
+                break;
             }
             s += skip;
         }
