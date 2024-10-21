@@ -5995,8 +5995,10 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                  * SvTYPE(sv), where that is a SVt_PVNV or below. It is
                  * more efficient to create such types directly than
                  * upgrade to them via sv_upgrade() within sv_setsv_flags. */
-                SV *newsv = (SvTYPE(sv) <= SVt_PVNV)
-                            ? newSV_type(SvTYPE(sv))
+                SV *newsv = SvTYPE(sv) == SVt_IV ? newSV_type(SVt_IV)
+#if NVSIZE <= IVSIZE
+                            : SvTYPE(sv) == SVt_NV ? newSV_type(SVt_NV)
+#endif
                             : newSV_type(SVt_NULL);
 
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;

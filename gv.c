@@ -58,6 +58,7 @@ GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 {
     SV **where;
+    static char saw [20] = {0};
 
     if (
         !gv
@@ -94,7 +95,39 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 
     if (!*where)
     {
-        *where = newSV_type(type);
+        if(type == SVt_PVHV) {
+            *where = newSV_type(SVt_PVHV);
+        }
+        else if(type == SVt_PVAV) {
+            *where = newSV_type(SVt_PVAV);
+        }
+        else if(type == SVt_PVMG) {
+            *where = newSV_type(SVt_PVMG);
+        }
+        else if(type == SVt_PVIO) {
+            *where = newSV_type(SVt_PVIO);
+        }
+        else if(type == SVt_PV) {
+            *where = newSV_type(SVt_PV);
+        }
+        else if (type == SVt_PVGV) {
+            *where = newSV_type(SVt_PVGV);
+        }
+        else if(type == SVt_NULL) {
+            *where = newSV_type(SVt_NULL);
+        }
+        // else if(type == ) {
+            // *where = newSV_type();
+        // }
+        else {
+          if(!saw[type]) {
+            //__debugbreak();
+            saw[type] = 1;
+          }
+          *where = Perl_newSV_typeX(aTHX_ type);
+        }
+        
+
         if (   type == SVt_PVAV
             && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
         {
@@ -577,7 +610,7 @@ S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
     case SVt_PVGV:
         break;
     default:
-        if(GvSVn(gv)) {
+        if(GvSVnt(gv,sv_type)) {
             /* Work round what appears to be a bug in Sun C++ 5.8 2005/10/13
                If we just cast GvSVn(gv) to void, it ignores evaluating it for
                its side effect */
@@ -2330,16 +2363,16 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         storeparen:
             /* Flag the capture variables with a NULL mg_ptr
                Use mg_len for the array index to lookup.  */
-            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, NULL, paren);
+            sv_magic(GvSVnt(gv, SVt_PVMG), MUTABLE_SV(gv), PERL_MAGIC_sv, NULL, paren);
             break;
 
         case ':':		/* $: */
-            sv_setpv(GvSVn(gv),PL_chopset);
+            sv_setpv(GvSVnt(gv, SVt_PVMG),PL_chopset);
             goto magicalize;
 
         case '?':		/* $? */
 #ifdef COMPLEX_STATUS
-            SvUPGRADE(GvSVn(gv), SVt_PVLV);
+            SvUPGRADE(GvSVnt(gv, SVt_PVLV), SVt_PVLV);
 #endif
             goto magicalize;
 
@@ -2347,7 +2380,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             GvMULTI_on(gv);
             /* If %! has been used, automatically load Errno.pm. */
 
-            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
+            sv_magic(GvSVnt(gv,SVt_PVMG), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
 
             /* magicalization must be done before require_tie_mod_s is called */
             if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
@@ -2358,8 +2391,9 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         case '+':		/* $+, %+, @+ */
             GvMULTI_on(gv); /* no used once warnings here */
             {   /* $- $+ */
-                sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
-                if (*name == '+')
+                SV* svplusminus = GvSVnt(gv, SVt_PVMG);
+                sv_magic(svplusminus, MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
+                    if (*name == '+')
                     SvREADONLY_on(GvSVn(gv));
             }
             {   /* %- %+ */
@@ -2388,7 +2422,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             goto magicalize;
         case '\023':	/* $^S */
         ro_magicalize:
-            SvREADONLY_on(GvSVn(gv));
+            SvREADONLY_on(GvSVnt(gv,SVt_PVMG));
             /* FALLTHROUGH */
         case '0':		/* $0 */
         case '^':		/* $^ */
@@ -2417,14 +2451,14 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         case '\024':	/* $^T */
         case '\027':	/* $^W */
         magicalize:
-            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
+            sv_magic(GvSVnt(gv,SVt_PVMG), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
             break;
 
         case '\014':	/* $^L */
-            sv_setpvs(GvSVn(gv),"\f");
+            sv_setpvs(GvSVnt(gv, SVt_PV),"\f");
             break;
         case ';':		/* $; */
-            sv_setpvs(GvSVn(gv),"\034");
+            sv_setpvs(GvSVnt(gv, SVt_PV),"\034");
             break;
         case ']':		/* $] */
         {
