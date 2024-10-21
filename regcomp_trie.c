@@ -449,7 +449,7 @@ is the recommended Unicode-aware way of saying
      TRIE_LIST_LEN( state ) = 4;                                \
 } STMT_END
 
-#define TRIE_HANDLE_WORD(state) STMT_START {                    \
+#define TRIE_HANDLE_WORD(state, has_cutgroup_arg) STMT_START {  \
     U16 dupe= trie->states[ state ].wordnum;                    \
     regnode * const noper_next = regnext( noper );              \
                                                                 \
@@ -467,6 +467,7 @@ is the recommended Unicode-aware way of saying
     trie->wordinfo[curword].prev   = 0;                         \
     trie->wordinfo[curword].len    = wordlen;                   \
     trie->wordinfo[curword].accept = state;                     \
+    trie->wordinfo[curword].has_cutgroup = (has_cutgroup_arg);  \
                                                                 \
     if ( noper_next < tail ) {                                  \
         if (!trie->jump) {                                      \
@@ -985,8 +986,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 */
                 noper= REGNODE_AFTER(cur);
             }
-            TRIE_HANDLE_WORD(state);
-
+            TRIE_HANDLE_WORD(state, BRANCH_HAS_CUTGROUP(cur));
+            
         } /* end second pass */
 
         /* next alloc is the NEXT state to be allocated */
@@ -1199,7 +1200,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 noper= REGNODE_AFTER(cur);
             }
             accept_state = TRIE_NODENUM( state );
-            TRIE_HANDLE_WORD(accept_state);
+            TRIE_HANDLE_WORD(accept_state, BRANCH_HAS_CUTGROUP(cur));
 
         } /* end second pass */
 
