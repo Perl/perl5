@@ -2384,7 +2384,10 @@ marked with correct flags.
 All memory meant to be used with the Perl API functions should be manipulated
 using the macros described in this section.  The macros provide the necessary
 transparency between differences in the actual malloc implementation that is
-used within perl.
+used within perl. Never pass pointers between C<Newx>, C<Renew>, C<Safefree>
+and I<libc> equivalents C<malloc>, C<realloc>, C<free>.  They are not from the
+same memory pool or allocator.  Either an instant or delayed I<SEGV> will
+occur, or subtle memory leaks or subtle heap corruption.
 
 The following three macros are used to initially allocate memory :
 
