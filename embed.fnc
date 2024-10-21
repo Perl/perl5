@@ -3725,13 +3725,13 @@ p	|void	|utilize	|int aver				\
 				|NN OP *idop				\
 				|NULLOK OP *arg
 
-Adm	|U8 *	|uvchr_to_utf8	|NN U8 *d				\
+Admp	|U8 *	|uvchr_to_utf8	|NN U8 *d				\
 				|UV uv
-Adm	|U8 *	|uvchr_to_utf8_flags					\
+Admp	|U8 *	|uvchr_to_utf8_flags					\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags
-Adm	|U8 *	|uvchr_to_utf8_flags_msgs				\
+Admp	|U8 *	|uvchr_to_utf8_flags_msgs				\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags				\

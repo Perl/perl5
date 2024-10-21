@@ -5164,13 +5164,13 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         assert(idop)
 
 /* PERL_CALLCONV U8 *
-uvchr_to_utf8(pTHX_ U8 *d, UV uv); */
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv); */
 
 /* PERL_CALLCONV U8 *
-uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags); */
+Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags); */
 
 /* PERL_CALLCONV U8 *
-uvchr_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs); */
+Perl_uvchr_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs); */
 
 PERL_CALLCONV U8 *
 Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
