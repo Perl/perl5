@@ -5134,6 +5134,10 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 * const start)
 Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 * const end)
         __attribute__warn_unused_result__; */
 
+/* PERL_CALLCONV U8 *
+Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV STRLEN
 Perl_utf8_length(pTHX_ const U8 *s0, const U8 *e)
         __attribute__warn_unused_result__;
@@ -10096,9 +10100,9 @@ Perl_utf8_hop_forward_overshoot(const U8 *s, SSize_t off, const U8 * const end, 
         assert(s); assert(end)
 
 PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
+Perl_utf8_hop_overshoot(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end, SSize_t *remaining)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
+# define PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT    \
         assert(s); assert(start); assert(end)
 
 PERL_STATIC_INLINE UV
