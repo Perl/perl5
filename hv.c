@@ -1130,12 +1130,12 @@ Perl_hv_scalar(pTHX_ HV *hv)
     if (u <= (UV)IV_MAX) {
         SvIV_set(sv, (IV)u);
         (void)SvIOK_only(sv);
-        SvTAINT(sv);
+        sv = SvTAINTTC(sv);
     } else {
         SvIV_set(sv, 0);
         SvUV_set(sv, u);
         (void)SvIOK_only_UV(sv);
-        SvTAINT(sv);
+        sv = SvTAINTTC(sv);
     }
 
     return sv;
