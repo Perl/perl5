@@ -218,12 +218,25 @@ static const struct body_details bodies_by_type[] = {
       SVt_PVIV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
+#if NVSIZE > 8 && PTRSIZE < 8 && MEM_ALIGNBYTES > 8
+    /* NV may need strict 16 byte alignment.
+
+       On 64-bit systems the NV ends up aligned despite the hack
+       avoiding allocation of xmg_stash and xmg_u, so only do this
+       for 32-bit systems.
+    */
+    { sizeof(XPVNV),
+      sizeof(XPVNV),
+      0,
+      SVt_PVNV, FALSE, HADNV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVNV)) },
+#else
     { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVNV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
+#endif
     { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
