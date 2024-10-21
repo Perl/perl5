@@ -837,7 +837,7 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
                                 yyerror("A slurpy parameter may not have "
                                         "a default value");
 
-                            $$ = var ? newSTATEOP(0, NULL, var) : NULL;
+                            $$ = var ? newSTATEOP(OPf_FORCE_NEXTSTATE, NULL, var) : NULL;
                         }
 	;
 
@@ -913,7 +913,7 @@ sigscalarelem:
                                             "follows optional parameter");
                             }
 
-                            $$ = var ? newSTATEOP(0, NULL, var) : NULL;
+                            $$ = var ? newSTATEOP(OPf_FORCE_NEXTSTATE, NULL, var) : NULL;
                         }
 	;
 
@@ -985,7 +985,7 @@ subsigguts:
                                             (UNOP_AUX_item *)aux);
                             sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
                             sigops = op_prepend_elem(OP_LINESEQ,
-                                                newSTATEOP(0, NULL, NULL),
+                                                newSTATEOP(OPf_FORCE_NEXTSTATE, NULL, NULL),
                                                 sigops);
                             /* a nextstate at the end handles context
                              * correctly for an empty sub body */

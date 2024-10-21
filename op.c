@@ -8896,7 +8896,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     flags &= ~SVf_UTF8;
 
     NewOp(1101, cop, 1, COP);
-    if (PERLDB_LINE && CopLINE(PL_curcop) && PL_curstash != PL_debstash) {
+    if (PERLDB_LINE && CopLINE(PL_curcop) && PL_curstash != PL_debstash &&
+        !(flags & OPf_FORCE_NEXTSTATE)) {
         OpTYPE_set(cop, OP_DBSTATE);
     }
     else {
