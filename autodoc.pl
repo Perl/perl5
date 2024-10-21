@@ -1899,7 +1899,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                     # Here, has a long name and we didn't create one just
                     # above.  Check that there really is a long name entry.
                     my $real_proto = delete $protos{"Perl_$name"};
-                    if ($real_proto) {
+                    if ($real_proto || $flags =~ /m/) {
 
                         # Set up to redo the loop at the end.  This iteration
                         # adds the short form; the redo causes its long form

@@ -137,11 +137,14 @@ sub generate_proto_h {
 
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                             if $flags =~ /S/ && $flags =~ /p/;
-        die_at_end "$plain_func: m and $1 flags are mutually exclusive"
-                                        if $has_mflag && $flags =~ /([pS])/;
-
-        die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/
-                                                            && ! $has_mflag;
+	if ($has_mflag) {
+	    if ($flags =~ /S/) {
+		die_at_end "$plain_func: m and S flags are mutually exclusive";
+	    }
+	}
+	else {
+	    die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
+	}
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
@@ -500,9 +503,9 @@ sub embed_h {
         my $ind= $level ? " " : "";
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
-        unless ($flags =~ /[omM]/) {
+        if ($flags !~ /[omM]/ or ($flags =~ /m/ && $flags =~ /p/)) {
             my $argc = scalar @$args;
-            if ($flags =~ /T/) {
+            if ($flags =~ /[T]/) {
                 my $full_name = full_name($func, $flags);
                 next if $full_name eq $func;    # Don't output a no-op.
                 $ret = indent_define($func, $full_name, $ind);
@@ -525,8 +528,11 @@ sub embed_h {
                     $use_va_list ? ("__VA_ARGS__") : ());
                 $ret = "#${ind}define $func($paramlist) ";
                 add_indent($ret,full_name($func, $flags) . "(aTHX");
-                $ret .= "_ " if $replacelist;
-                $ret .= $replacelist;
+		if ($replacelist) {
+                    $ret .= ($flags =~ /m/) ? "," : "_ ";
+                    $ret .= $replacelist;
+                }
+
                 if ($flags =~ /W/) {
                     if ($replacelist) {
                         $ret .= " comma_aDEPTH";
