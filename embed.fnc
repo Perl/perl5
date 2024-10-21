@@ -315,9 +315,9 @@
 :        circumstances dictate otherwise, they can be anywhere, provided the
 :        whole function is wrapped with
 :
-:	    #ifndef NO_MATHOMS
-:	    ...
-:	    #endif
+:           #ifndef NO_MATHOMS
+:           ...
+:           #endif
 :
 :        Note that this flag no longer automatically adds a 'Perl_' prefix to
 :        the name. Additionally specify 'p' to do that.
@@ -371,10 +371,10 @@
 :        then it is assumed to take a strftime-style format string as the 1st
 :        arg; otherwise it's assumed to take a printf style format string, not
 :        necessarily the 1st arg.  All the arguments following the second form
-:	 (including possibly '...') are assumed to be for the format.
+:        (including possibly '...') are assumed to be for the format.
 :
 :         embed.h: any entry in here for the second form is suppressed because
-:	           of varargs
+:                  of varargs
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
 :   'F'  Function has a '...' parameter, but don't assume it is a format. This
@@ -397,7 +397,7 @@
 :        one NN argument.
 :
 :          proto.h: PERL_ARGS_ASSERT macro is not defined unless the function
-:		   has NN arguments
+:                   has NN arguments
 :
 :   'h'  Hide any documentation that would normally go into perlapi or
 :        perlintern. This is typically used when the documentation is actually
@@ -428,7 +428,7 @@
 :        particular C file(s) or in the perl core.) Therefore, all non-guarded
 :        functions should also have the 'p' flag specified to avoid polluting
 :        the XS code name space.  Otherwise, this flag also turns on the 'S'
-:	 flag.
+:        flag.
 :
 :          proto.h: function is declared as PERL_STATIC_INLINE
 :
@@ -445,7 +445,8 @@
 :        parameter unless the 'T' flag is specified.
 :
 :         suppress proto.h entry (actually, not suppressed, but commented out)
-:         suppress entry in the list of exported symbols available on all platforms
+:         suppress entry in the list of exported symbols available on all
+:             platforms
 :         suppress embed.h entry, as the implementation should furnish the macro
 :
 :   'M'  The implementation is furnishing its own macro instead of relying on
@@ -490,10 +491,10 @@
 :
 :   'o'  Has no Perl_foo or S_foo compatibility macro:
 :
-:	 This is used for whatever reason to force the function to be called
-:	 with the long name.  Perhaps there is a varargs issue.  Use the 'M'
-:	 flag instead for wrapper macros, and legacy-only functions should
-:	 also use 'b'.
+:        This is used for whatever reason to force the function to be called
+:        with the long name.  Perhaps there is a varargs issue.  Use the 'M'
+:        flag instead for wrapper macros, and legacy-only functions should
+:        also use 'b'.
 :
 :          embed.h: suppress "#define foo Perl_foo"
 :
@@ -544,8 +545,8 @@
 :
 :   's'  Static function, but function in source code has a Perl_ prefix:
 :
-:	 This is used for functions that have always had a Perl_ prefix, but
-:	 have been moved to a header file and declared static.
+:        This is used for functions that have always had a Perl_ prefix, but
+:        have been moved to a header file and declared static.
 :
 :          proto.h: function is declared as Perl_foo rather than foo
 :                STATIC is added to declaration;
@@ -580,11 +581,11 @@
 :        compatibility issues.
 :
 :   'W'  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH
-:	 argument to the function calls. This means that under DEBUGGING a
-:	 depth argument is added to the functions, which is used for example by
-:	 the regex engine for debugging and trace output. A non DEBUGGING build
-:	 will not pass the unused argument. Currently restricted to functions
-:	 with at least one argument.
+:        argument to the function calls. This means that under DEBUGGING a
+:        depth argument is added to the functions, which is used for example by
+:        the regex engine for debugging and trace output. A non DEBUGGING build
+:        will not pass the unused argument. Currently restricted to functions
+:        with at least one argument.
 :
 :   'X'  Explicitly exported:
 :
