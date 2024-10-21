@@ -14,7 +14,8 @@
 : real (full) name, with any appropriate thread context paramaters, thus hiding
 : that detail from the typical code.
 :
-: Most macros (as opposed to functions) listed here are the complete full name.
+: Many macros (as opposed to functions) listed here are the complete full name,
+: though we may want to start converting those to have full names.
 :
 : All non-static functions defined by perl need to be listed in this file.
 : embed.pl uses the entries here to construct:
@@ -158,8 +159,9 @@
 : and you know at a glance that the macro actually has documentation.  It
 : doesn't by itself create any documentation; instead the other apidoc lines
 : pull in information specified by these lines.  Many of the lines in this
-: file for macros could be pulled out of here and replaced by these lines
-: throughout the source.  It is a goal to do that as convenience dictates.
+: file for macros that don't also have the 'p' flag (described below) could be
+: pulled out of here and replaced by these lines throughout the source.  It is
+: a goal to do that as convenience dictates.
 :
 : The other apidoc lines either have the usage data as part of the line, or
 : pull in the data from this file or apidoc_defn lines.
@@ -211,10 +213,10 @@
 : line that begins with an '='.  In particular, an '=cut' line ends that
 : documentation without introducing something new.
 :
-: Various macros and other elements aren't listed here in embed.fnc.  They are
-: documented in the same manner, but since they don't have this file to get
-: information from, the defining lines have the syntax and meaning they do in
-: this file, so it can be specified:
+: Various macros and other elements aren't listed here in embed.fnc (though
+: they could be).  They are documented in the same manner, but since they don't
+: have this file to get information from, the defining lines have the syntax
+: and meaning they do in this file, so it can be specified:
 :
 :   =for apidoc flags|return_type|name|arg1|arg2|...|argN
 :   =for apidoc_item flags|return_type|name|arg1|arg2|...|argN
@@ -302,14 +304,13 @@
 :        functions flagged with this, the installation can run Configure with
 :        the -Accflags='-DNO_MATHOMS' parameter to not even compile them.
 :
-:        Sometimes the function has been subsumed by a more general one (say,
-:        by adding a flags parameter), and a macro exists with the original
-:        short name API, and it calls the new function, bypassing this one, and
-:        the original 'Perl_' form is being deprecated. In this case also
-:        specify the 'M' flag.
+:        If the function can be implemented as a macro (that evaluates its
+:        arguments exactly once), use the 'm' and 'p' flags together to implement
+:        this.  (See the discussion under 'm'.)  Another option for this is to
+:        use the 'M' flag.
 :
-:        Without the M flag, these functions should be deprecated, and it is an
-:        error to not also specify the 'D' flag.
+:        Without the m or M flags, these functions should be deprecated, and it
+:        is an error to not also specify the 'D' flag.
 :
 :        The 'b' functions are normally moved to mathoms.c, but if
 :        circumstances dictate otherwise, they can be anywhere, provided the
@@ -440,24 +441,46 @@
 :                  __attribute__always_inline__ is added
 :
 :   'm'  Implemented as a macro; there is no function associated with this
-:        name, and hence no long Perl_ or S_ name. However, if the macro name
-:        itself begins with 'Perl_', autodoc.pl will show a thread context
-:        parameter unless the 'T' flag is specified.
+:        name.  There is no long S_ name.
+:
+:        However, you may #define the macro with a long name like 'Perl_foo',
+:        and specify the 'p' flag.  This will cause an embed.h entry to be
+:        created that #defines 'foo' as 'Perl_foo'.  This can be used to make
+:        any macro have a long name, perhaps to avoid name collisions.  It is
+:        particularly useful tp preserve backward compatibility when a function
+:        is converted to be a macro.  Most of mathoms.c could be converted to
+:        use this facility.  When there is no thread context involved, you just
+:        do something like
+:
+:           #define Perl_foo(a, b, c)  Perl_bar(a, b, 0, c)
+:
+:        Otherwise consider this general case where there is a series of macros
+:        that build on the previous ones by calling something with a different
+:        name or with an extra parameter beyond what the previous one did:
+:
+:           #define Perl_foo(mTHX, a)         Perl_bar1(aTHX, a)
+:           #define Perl_bar1(mTHX, a)        Perl_bar2(aTHX, a, 0)
+:           #define Perl_bar2(mTHX, a, b)     Perl_bar3(aTHX, a, b, 0)
+:           #define Perl_bar3(mTHX, a, b, c)  Perl_func(aTHX_ a, b, c, 0)
+:
+:        Use the formal parameter name 'mTHX,' (which stands for "macro thread
+:        context") as the first in each macro definition, and call the next
+:        macro in the sequence with 'aTHX,' (Note the commas).  Eventually, the
+:        sequence will end with a function call (or else there would be no need
+:        for thread context).  For that instead call it with 'aTHX_' (with an
+:        underscore instead of a comma).
 :
 :         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols available on all
 :             platforms
-:         suppress embed.h entry, as the implementation should furnish the macro
+:         suppress embed.h entry (when no 'p' flag), as the implementation
+:             should furnish the macro
 :
 :   'M'  The implementation is furnishing its own macro instead of relying on
 :        the automatically generated short name macro (which simply expands to
 :        call the real name function). One reason to do this is if the
-:        parameters need to be cast from what the caller has, or if there is a
-:        macro that bypasses this function (whose long name is being retained
-:        for backward compatibility for those who call it with that name). An
-:        example is when a new function is created with an extra parameter and
-:        a wrapper macro is added that has the old API, but calls the new one
-:        with the exta parameter set to a default.
+:        parameters need to be cast from what the caller has.  There is less
+:        need to do this now that 'm' and 'p' together is supported.
 :
 :        This flag requires the 'p' flag to be specified, as there would be no
 :        need to do this if the function weren't publicly accessible before.
@@ -493,8 +516,8 @@
 :
 :        This is used for whatever reason to force the function to be called
 :        with the long name.  Perhaps there is a varargs issue.  Use the 'M'
-:        flag instead for wrapper macros, and legacy-only functions should
-:        also use 'b'.
+:        or 'm' flags instead for wrapper macros, and legacy-only functions
+:        should also use 'b'.
 :
 :          embed.h: suppress "#define foo Perl_foo"
 :
@@ -519,9 +542,10 @@
 :
 :          proto.h: add __attribute__pure__
 :
-:   'p'  Function in source code has a Perl_ prefix:
+:   'p'  Function or macro in source code has a Perl_ prefix:
 :
-:          proto.h: function is declared as Perl_foo rather than foo
+:          proto.h: function or macro is declared as Perl_foo rather than foo
+:                   (though the entries for macros will be commented out)
 :          embed.h: "#define foo Perl_foo" entries added
 :
 :   'R'  Return value must not be ignored (also implied by 'a' and 'P' flags):
