@@ -802,17 +802,6 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
 }
 
-/* return ptr to little string in big string, NULL if not found */
-/* The original version of this routine was donated by Corey Satten. */
-
-char *
-Perl_instr(const char *big, const char *little)
-{
-    PERL_ARGS_ASSERT_INSTR;
-
-    return instr(big, little);
-}
-
 SV *
 Perl_newSVsv(pTHX_ SV *const old)
 {
