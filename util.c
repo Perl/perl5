@@ -4124,6 +4124,7 @@ Perl_getcwd_sv(pTHX_ SV *sv)
         /* Some getcwd()s automatically allocate a buffer of the given
          * size from the heap if they are given a NULL buffer pointer.
          * The problem is that this behaviour is not portable. */
+        /* XXX bug use PerlEnv_get_childdir/PerlEnv_free_childenv all OSes? */
         if (getcwd(buf, sizeof(buf) - 1)) {
             sv_setpv(sv, buf);
             return TRUE;

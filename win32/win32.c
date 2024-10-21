@@ -5016,12 +5016,17 @@ XS(w32_SetChildShowWindow)
 }
 
 
-#ifdef PERL_IS_MINIPERL
-/* shelling out is much slower, full perl uses Win32.pm */
-XS(w32_GetCwd)
+
+/* Shelling out is much slower, full perl uses Win32.pm.
+   So for miniperl install "Win32::GetCwd", and for mini and full perl
+   install this as "Internals::getcwd". On Win32 platform, because of
+   Win32CORE.c AUTOLOAD vs DynaLoader.pm vs Win32.pm, race and recursion
+   and dependency problems can happen in rare cases. For example, see blib.pm
+   Offer Internals::getcwd as a backup at all times. */
+XS_EXTERNAL(w32_GetCwd)
 {
-    dXSARGS;
-    PERL_UNUSED_VAR(items);
+
+    SV *sv;
     /* Make the host for current directory */
     char* ptr = PerlEnv_get_childdir();
     /*
@@ -5030,20 +5035,28 @@ XS(w32_GetCwd)
      *   else return 'undef'
      */
     if (ptr) {
-        SV *sv = sv_newmortal();
+        dXSTARG;
+        sv = TARG;
         sv_setpv(sv, ptr);
         PerlEnv_free_childdir(ptr);
 
 #ifndef INCOMPLETE_TAINTS
         SvTAINTED_on(sv);
 #endif
-
-        ST(0) = sv;
-        XSRETURN(1);
+        SvSETMAGIC(sv);
     }
-    XSRETURN_UNDEF;
+    else {
+      sv = &PL_sv_undef;
+    }
+    {
+      dXSARGS;
+      PERL_UNUSED_VAR(items);
+      XSprePUSH;
+      XPUSHs(sv);
+      PUTBACK;
+    }
+    return;
 }
-#endif
 
 void
 Perl_init_os_extras(void)
