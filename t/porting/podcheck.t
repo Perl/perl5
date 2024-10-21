@@ -427,6 +427,13 @@ my $non_pods = qr/
                            | lst      # assorted listing files
                            | bat      # Windows,OS2 batch files
                            | cmd      # Windows,OS2 command files
+                           | pdb      # Windows, C debugger
+                           | dmp      # Windows, C debugger
+                           | nam      # Windows, C debugger
+                           | id0      # Windows, C debugger
+                           | id1      # Windows, C debugger
+                           | obj      # Windows, ignore MSVC even for GCC
+                           | pch      # Windows, ignore MSVC even for GCC
                            | lis      # VMS compiler listings
                            | map      # VMS linker maps
                            | opt      # VMS linker options files
