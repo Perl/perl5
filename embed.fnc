@@ -1623,7 +1623,7 @@ Cp	|void	|init_stacks
 Cp	|void	|init_tm	|NN struct tm *ptm
 p	|void	|init_uniprops
 : Used in perly.y
-AMPRTbdp|char * |instr		|NN const char *big			\
+APRTdmp |char * |instr		|NN const char *big			\
 				|NN const char *little
 Adp	|U32	|intro_my
 ERXp	|Size_t |_inverse_folds |const UV cp				\

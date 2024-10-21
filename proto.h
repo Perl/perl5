@@ -1797,6 +1797,11 @@ Perl_init_uniprops(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_INIT_UNIPROPS
 
+/* PERL_CALLCONV char *
+Perl_instr(const char *big, const char *little)
+        __attribute__warn_unused_result__
+        __attribute__pure__; */
+
 PERL_CALLCONV U32
 Perl_intro_my(pTHX);
 #define PERL_ARGS_ASSERT_INTRO_MY
@@ -5796,13 +5801,6 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash);
 PERL_CALLCONV SV **
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags);
 # define PERL_ARGS_ASSERT_HV_STORE_FLAGS
-
-PERL_CALLCONV char *
-Perl_instr(const char *big, const char *little)
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-# define PERL_ARGS_ASSERT_INSTR                 \
-        assert(big); assert(little)
 
 PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
