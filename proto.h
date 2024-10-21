@@ -6047,12 +6047,6 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 # define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
         assert(d)
 
-# if defined(PERL_DONT_CREATE_GVSV)
-PERL_CALLCONV GV *
-Perl_gv_SVadd(pTHX_ GV *gv);
-#   define PERL_ARGS_ASSERT_GV_SVADD
-
-# endif
 # if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
 PERL_CALLCONV OP *
@@ -6173,6 +6167,11 @@ Perl_do_exec(pTHX_ const char *cmd)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_EXEC               \
         assert(cmd)
+
+#endif
+#if defined(PERL_DONT_CREATE_GVSV)
+/* PERL_CALLCONV GV *
+Perl_gv_SVadd(pTHX_ GV *gv); */
 
 #endif
 #if defined(PERL_IMPLICIT_SYS)

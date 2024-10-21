@@ -2018,6 +2018,9 @@
 #   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
 #   define optimize_optree(a)                   Perl_optimize_optree(aTHX_ a)
 # endif
+# if defined(PERL_DONT_CREATE_GVSV)
+#   define gv_SVadd(a)                          Perl_gv_SVadd(aTHX,a)
+# endif
 # if !defined(PERL_IMPLICIT_SYS)
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)

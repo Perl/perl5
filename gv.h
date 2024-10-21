@@ -346,7 +346,7 @@ Make sure there is a slot of the given type (AV, HV, IO, SV) in the GV C<gv>.
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
 #define gv_IOadd(gv) gv_add_by_type((gv), SVt_PVIO)
-#define gv_SVadd(gv) gv_add_by_type((gv), SVt_NULL)
+#define Perl_gv_SVadd(mTHX, gv)  Perl_gv_add_by_type(aTHX_ (gv), SVt_NULL)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

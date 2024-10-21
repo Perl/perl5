@@ -4089,7 +4089,7 @@ Mp	|bool	|do_exec	|NN const char *cmd
 p	|bool	|do_exec	|NN const char *cmd
 #endif
 #if defined(PERL_DONT_CREATE_GVSV)
-AMbdp	|GV *	|gv_SVadd	|NULLOK GV *gv
+Admp	|GV *	|gv_SVadd	|NULLOK GV *gv
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 CTo	|PerlInterpreter *|perl_alloc_using				\
