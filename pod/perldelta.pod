@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Functions in the C<builtin::> package no longer permit replacement
+
+Various optimisations that apply to many functions in the L<builtin> package
+would be broken if the functions are ever replaced or changed, such as by
+assignment into glob references.  Because of this, the globs that contain
+them are now set read-only, preventing such replacement.
+
+    $ perl -e '*builtin::reftype = sub { "BOO" }'
+    Modification of a read-only value attempted at -e line 1.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
