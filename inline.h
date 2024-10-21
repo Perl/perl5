@@ -3033,9 +3033,11 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
          *
          * The terminology of the dfa refers to a 'class'.  The variable 'type'
          * would have been named 'class' except that is a reserved word in C++
-         * */
+         * 
+         * The table can be a U16 on EBCDIC platforms, so 'state' is declared
+         * as U16; 'type' is likely to never occupy more than 5 bits.  */
         PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
-        PERL_UINT_FAST8_T state = PL_strict_utf8_dfa_tab[256 + type];
+        PERL_UINT_FAST16_T state = PL_strict_utf8_dfa_tab[256 + type];
         UV uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
 
         while (state > 1 && ++s < send) {
