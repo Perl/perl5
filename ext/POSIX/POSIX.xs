@@ -2403,13 +2403,8 @@ fpclassify(x)
 	NV		x
     ALIAS:
 	ilogb = 1
-	isfinite = 2
-	isinf = 3
-	isnan = 4
-	isnormal = 5
-	lrint = 6
-	lround = 7
-        signbit = 8
+	lrint = 2
+	lround = 3
     CODE:
         PERL_UNUSED_VAR(x);
 	RETVAL = -1;
@@ -2429,38 +2424,19 @@ fpclassify(x)
 #endif
 	    break;
 	case 2:
-	    RETVAL = Perl_isfinite(x);
-	    break;
-	case 3:
-	    RETVAL = Perl_isinf(x);
-	    break;
-	case 4:
-	    RETVAL = Perl_isnan(x);
-	    break;
-	case 5:
-#ifdef c99_isnormal
-	    RETVAL = c99_isnormal(x);
-#else
-	    not_here("isnormal");
-#endif
-	    break;
-	case 6:
 #ifdef c99_lrint
 	    RETVAL = c99_lrint(x);
 #else
 	    not_here("lrint");
 #endif
 	    break;
-	case 7:
+        case 3:
+        default:
 #ifdef c99_lround
 	    RETVAL = c99_lround(x);
 #else
 	    not_here("lround");
 #endif
-	    break;
-	case 8:
-	default:
-	    RETVAL = Perl_signbit(x);
 	    break;
 	}
     OUTPUT:
@@ -2511,19 +2487,57 @@ setpayloadsig(nv, payload)
     OUTPUT:
 	nv
 
-int
-issignaling(nv)
-	NV nv
-    CODE:
-#ifdef DOUBLE_HAS_NAN
-	RETVAL = Perl_isnan(nv) && NV_NAN_IS_SIGNALING(&nv);
+bool
+isfinite(x)
+        NV x
+    PROTOTYPE: $
+    ALIAS:
+        isinf = 1
+        isnan = 2
+        isnormal = 3
+        issignaling = 4
+        signbit = 5
+    PPCODE:
+        /* isxxx() floating-point number classfication functions have return
+         * type 'int' in C, but they are semantically boolean functions. */
+        RETVAL = FALSE;
+        switch (ix) {
+        case 0:
+            RETVAL = cBOOL(Perl_isfinite(x));
+            break;
+        case 1:
+            /* On some system isinf() is defined to return 1 on +Inf and
+             * -1 on -Inf.  But C99/POSIX only mandates to return
+             * nonzero value on Inf regardless of its sign. */
+            RETVAL = cBOOL(Perl_isinf(x));
+            break;
+        case 2:
+            RETVAL = cBOOL(Perl_isnan(x));
+            break;
+        case 3:
+#ifdef c99_isnormal
+            RETVAL = cBOOL(c99_isnormal(x));
 #else
-        PERL_UNUSED_VAR(nv);
-        RETVAL = 0.0;
-	not_here("issignaling");
+            not_here("isnormal");
 #endif
-    OUTPUT:
-	RETVAL
+            break;
+        case 4:
+#ifdef DOUBLE_HAS_NAN
+            RETVAL = Perl_isnan(x) && NV_NAN_IS_SIGNALING(&x);
+#else
+            not_here("issignaling");
+#endif
+            break;
+        case 5:
+        default:
+            RETVAL = cBOOL(Perl_signbit(x));
+            break;
+        }
+        /* Map boolean false to PL_sv_zero for backward compatibility.
+           The default falsy value, PL_sv_no, is the null string,
+           but existing programs might expect isxxx() and/or signbit()
+           to return "0" for falsy results. */
+        PUSHs(RETVAL ? &PL_sv_yes : &PL_sv_zero);
 
 NV
 copysign(x,y)
@@ -2535,15 +2549,9 @@ copysign(x,y)
 	fmin = 3
 	fmod = 4
 	hypot = 5
-	isgreater = 6
-	isgreaterequal = 7
-	isless = 8
-	islessequal = 9
-	islessgreater = 10
-	isunordered = 11
-	nextafter = 12
-	nexttoward = 13
-	remainder = 14
+        nextafter = 6
+        nexttoward = 7
+        remainder = 8
     CODE:
         PERL_UNUSED_VAR(x);
         PERL_UNUSED_VAR(y);
@@ -2592,62 +2600,20 @@ copysign(x,y)
 #endif
 	    break;
 	case 6:
-#ifdef c99_isgreater
-	    RETVAL = c99_isgreater(x, y);
+#ifdef c99_nextafter
+            RETVAL = c99_nextafter(x, y);
 #else
-	    not_here("isgreater");
+            not_here("nextafter");
 #endif
 	    break;
 	case 7:
-#ifdef c99_isgreaterequal
-	    RETVAL = c99_isgreaterequal(x, y);
+#ifdef c99_nexttoward
+            RETVAL = c99_nexttoward(x, y);
 #else
-	    not_here("isgreaterequal");
+            not_here("nexttoward");
 #endif
 	    break;
 	case 8:
-#ifdef c99_isless
-	    RETVAL = c99_isless(x, y);
-#else
-	    not_here("isless");
-#endif
-	    break;
-	case 9:
-#ifdef c99_islessequal
-	    RETVAL = c99_islessequal(x, y);
-#else
-	    not_here("islessequal");
-#endif
-	    break;
-	case 10:
-#ifdef c99_islessgreater
-	    RETVAL = c99_islessgreater(x, y);
-#else
-	    not_here("islessgreater");
-#endif
-	    break;
-	case 11:
-#ifdef c99_isunordered
-	    RETVAL = c99_isunordered(x, y);
-#else
-	    not_here("isunordered");
-#endif
-	    break;
-	case 12:
-#ifdef c99_nextafter
-	    RETVAL = c99_nextafter(x, y);
-#else
-	    not_here("nextafter");
-#endif
-	    break;
-	case 13:
-#ifdef c99_nexttoward
-	    RETVAL = c99_nexttoward(x, y);
-#else
-	    not_here("nexttoward");
-#endif
-	    break;
-	case 14:
 	default:
 #ifdef c99_remainder
           RETVAL = c99_remainder(x, y);
@@ -2658,6 +2624,68 @@ copysign(x,y)
 	}
 	OUTPUT:
 	    RETVAL
+
+bool
+isgreater(x, y)
+        NV      x
+        NV      y
+    PROTOTYPE: $$
+    ALIAS:
+        isgreaterequal = 1
+        isless = 2
+        islessequal = 3
+        islessgreater = 4
+        isunordered = 5
+    PPCODE:
+        /* These comparison macros returns 'int' in C, but they are
+         * sematically boolean.  */
+        switch (ix) {
+        case 0:
+#ifdef c99_isgreater
+            RETVAL = cBOOL(c99_isgreater(x, y));
+#else
+            not_here("isgreater");
+#endif
+            break;
+        case 1:
+#ifdef c99_isgreaterequal
+            RETVAL = cBOOL(c99_isgreaterequal(x, y));
+#else
+            not_here("isgreaterequal");
+#endif
+            break;
+        case 2:
+#ifdef c99_isless
+            RETVAL = cBOOL(c99_isless(x, y));
+#else
+            not_here("isless");
+#endif
+            break;
+        case 3:
+#ifdef c99_islessequal
+            RETVAL = cBOOL(c99_islessequal(x, y));
+#else
+            not_here("islessequal");
+#endif
+            break;
+        case 4:
+#ifdef c99_islessgreater
+            RETVAL = cBOOL(c99_islessgreater(x, y));
+#else
+            not_here("islessgreater");
+#endif
+            break;
+        case 5:
+        default:
+#ifdef c99_isunordered
+            RETVAL = cBOOL(c99_isunordered(x, y));
+#else
+            not_here("isunordered");
+#endif
+            break;
+        }
+        /* See the comment on final PUSHs of isfinite(). */
+        PUSHs(RETVAL ? &PL_sv_yes : &PL_sv_zero);
 
 void
 frexp(x)
