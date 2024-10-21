@@ -1,4 +1,4 @@
-package builtin 0.015;
+package builtin 0.016;
 
 use v5.40;
 
@@ -105,6 +105,14 @@ The following bundles currently exist:
 
     :5.40      true false weaken unweaken is_weak blessed refaddr reftype
                ceil floor is_tainted trim indexed
+
+=head2 Function Optimisations
+
+Various optimisations that apply to many functions in the L<builtin> package
+would be no longer be performed if the functions are ever replaced or changed,
+such as by assignment into glob references.  It is suggested not to do this,
+so that the optimiser can correctly work out that intention of code which
+calls these functions.
 
 =head1 FUNCTIONS
 
