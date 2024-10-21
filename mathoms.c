@@ -437,14 +437,6 @@ Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp)
 }
 #endif
 
-bool
-Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
-
-    return is_utf8_string_loclen(s, len, ep, 0);
-}
-
 /*
 =for apidoc_section $SV
 =for apidoc sv_nolocking
