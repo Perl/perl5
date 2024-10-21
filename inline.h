@@ -260,27 +260,65 @@ Perl_CvDEPTH(const CV * const sv)
  was added by toke.c, but is generally not the case if it was added elsewhere.
  Since we can't enforce the spacelessness at assignment time, this routine
  provides a temporary copy at parse time with spaces removed.
+
  I<orig> is the start of the original buffer, I<len> is the length of the
- prototype and will be updated when this returns.
+ prototype and will be updated or stay the same when this returns.
+ I<small_buf> is an optional small C stack char array buffer
+ of type I<STRIP_WS_BUF_T>, Caller must use I<STRIP_WS_PICK_BUF_TYPE(&buf,len)>
+ to pick if I<small_buf> will be used or not.
+
+ If I<small_buf> is not used a temporary self-freeing new buffer
+ (mortal but subject to change), will be malloc-ed and returned. The return
+ pointer can be the original I<orig> ptr, or I<small_buf> ptr, or a temporary
+ already mortalized I<malloc> memory. It is supposed to be opaque how the retval
+ I<char *> was allocated. It will not leak, and you can't take ownership of it.
+ It will free itself somehow, in the near future when you leave the current C
+ function scope.
  */
 
 #ifdef PERL_CORE
+#  if defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
+
+typedef struct {
+    char small_buf [64];
+} STRIP_WS_BUF_T;
+
+#define STRIP_WS_PICK_BUF_TYPE(_buf, _len) \
+    (((_len) < (sizeof(STRIP_WS_BUF_T)-2)) ? (_buf) : NULL)
+#define strip_spaces(_smlb, _op, _plen) \
+    S_strip_spaces(aTHX_ (_smlb), (_op), (_plen))
+
 PERL_STATIC_INLINE char *
-S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
+S_strip_spaces(pTHX_ STRIP_WS_BUF_T * small_buf, const char * orig, STRLEN * const ptolen)
 {
-    SV * tmpsv;
-    char * tmps;
-    tmpsv = newSVpvn_flags(orig, *len, SVs_TEMP);
-    tmps = SvPVX(tmpsv);
-    while ((*len)--) {
-        if (!isSPACE(*orig))
-            *tmps++ = *orig;
-        orig++;
-    }
-    *tmps = '\0';
-    *len = tmps - SvPVX(tmpsv);
-                return SvPVX(tmpsv);
+    STRLEN len = *ptolen;
+    const char * orig_p = orig;
+    const char * orig_end = orig + len;
+
+    while (orig_p < orig_end) {
+        if(isSPACE(*orig_p)) { /* no memchr()! think memspn() */
+            char * tmps;
+            char * tmps_p;
+            if(small_buf)
+                tmps = (char *)&small_buf->small_buf[0];
+            else
+                tmps = SvPVX(sv_2mortal(newSV(len+1)));
+            tmps_p = tmps+(orig_p-orig);
+            Move(orig, tmps, (Size_t)(orig_p-orig), char);
+            while (orig_p < orig_end) {
+                if(!isSPACE(*orig_p))
+                    *tmps_p++ = *orig_p;
+                orig_p++;
+            }
+            *tmps_p = '\0';
+            *ptolen = tmps_p - tmps;
+            return tmps; /* return cleaned string */
+        }
+        orig_p++;
+    } /* ptolen was untouched */
+    return (char *)orig; /* original string unmodified */
 }
+#  endif
 #endif
 
 /* ------------------------------- iperlsys.h ------------------------------- */
