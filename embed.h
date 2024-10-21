@@ -1206,6 +1206,9 @@
 #     define import_builtin_bundle(a)           Perl_import_builtin_bundle(aTHX_ a)
 #     define prepare_export_lexical()           Perl_prepare_export_lexical(aTHX)
 #   endif
+#   if defined(PERL_IN_CLASS_C)
+#     define class_cleanup_definition(a)        S_class_cleanup_definition(aTHX_ a)
+#   endif
 #   if defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) || \
        defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C)
 #     define ck_anoncode(a)                     Perl_ck_anoncode(aTHX_ a)
