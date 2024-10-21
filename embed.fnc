@@ -1737,7 +1737,7 @@ ARTdip	|bool	|is_utf8_string_flags					\
 				|NN const U8 *s 			\
 				|STRLEN len				\
 				|const U32 flags
-AMTbdp	|bool	|is_utf8_string_loc					\
+ATdmp	|bool	|is_utf8_string_loc					\
 				|NN const U8 *s 			\
 				|const STRLEN len			\
 				|NN const U8 **ep

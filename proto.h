@@ -1867,6 +1867,9 @@ is_utf8_string(const U8 *s, STRLEN len)
         __attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV bool
+Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
+
+/* PERL_CALLCONV bool
 is_utf8_string_loc_flags(const U8 *s, STRLEN len, const U8 **ep, const U32 flags); */
 
 /* PERL_CALLCONV bool
@@ -5805,11 +5808,6 @@ PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 # define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \
         assert(buf); assert(buf_end)
-
-PERL_CALLCONV bool
-Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep);
-# define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC    \
-        assert(s); assert(ep)
 
 PERL_CALLCONV AV *
 Perl_newAV(pTHX)

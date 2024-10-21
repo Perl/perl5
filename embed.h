@@ -322,6 +322,7 @@
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
+# define is_utf8_string_loc                     Perl_is_utf8_string_loc
 # define is_utf8_string_loclen                  Perl_is_utf8_string_loclen
 # define is_utf8_string_loclen_flags            Perl_is_utf8_string_loclen_flags
 # define is_utf8_valid_partial_char_flags       Perl_is_utf8_valid_partial_char_flags
