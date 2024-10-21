@@ -6,10 +6,12 @@
  *     [Frodo on p.73 of _The Lord of the Rings_, I/iii: "Three Is Company"]
  */
 #define PERLIO_NOT_STDIO 0
+#define PERL_IN_WIN32_PERLLIB_C
 #include "EXTERN.h"
 #include "perl.h"
 
 #include "XSUB.h"
+#include <winuser.h>
 
 #ifdef PERL_IMPLICIT_SYS
 #include "win32iop.h"
