@@ -1231,17 +1231,6 @@ Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
     }
 }
 
-/*
-=for apidoc valid_utf8_to_uvchr
-Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
-known that the next character in the input UTF-8 string C<s> is well-formed
-(I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
-points, and non-Unicode code points are allowed.
-
-=cut
-
- */
-
 PERL_STATIC_INLINE UV
 Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 {
@@ -2053,7 +2042,7 @@ C<L</is_strict_utf8_string>> (and kin); and if C<flags> is
 C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, they give the same results as
 C<L</is_c9strict_utf8_string>> (and kin).  Otherwise C<flags> may be any
 combination of the C<UTF8_DISALLOW_I<foo>> flags understood by
-C<L</utf8n_to_uvchr>>, with the same meanings.
+C<L</utf8_to_uv>>, with the same meanings.
 
 It's better to use one of the non-C<_flags> functions if they give you the
 desired strictness, as those have a better chance of being inlined by the C
@@ -2306,7 +2295,7 @@ as C<L</isSTRICT_UTF8_CHAR>>;
 and if C<flags> is C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, this gives
 the same results as C<L</isC9_STRICT_UTF8_CHAR>>.
 Otherwise C<flags> may be any combination of the C<UTF8_DISALLOW_I<foo>> flags
-understood by C<L</utf8n_to_uvchr>>, with the same meanings.
+understood by C<L</utf8_to_uv>>, with the same meanings.
 
 The three alternative macros are for the most commonly needed validations; they
 are likely to run somewhat faster than this more general one, as they can be
@@ -2855,7 +2844,7 @@ C<is_utf8_valid_partial_char_flags> when the latter is called with a zero
 C<flags> parameter.  This parameter is used to restrict the classes of code
 points that are considered to be valid.  When zero, Perl's extended UTF-8 is
 used.  Otherwise C<flags> can be any combination of the C<UTF8_DISALLOW_I<foo>>
-flags accepted by C<L</utf8n_to_uvchr>>.  If there is any sequence of bytes
+flags accepted by C<L</utf8_to_uv>>.  If there is any sequence of bytes
 that can complete the input partial character in such a way that a
 non-prohibited character is formed, the function returns TRUE; otherwise FALSE.
 Non-character code points cannot be determined based on partial character
@@ -2927,7 +2916,7 @@ complete code point, this will return TRUE anyway, provided that
 C<L</is_utf8_valid_partial_char_flags>> returns TRUE for them.
 
 C<flags> can be zero or any combination of the C<UTF8_DISALLOW_I<foo>> flags
-accepted by C<L</utf8n_to_uvchr>>, and with the same meanings.
+accepted by C<L</utf8_to_uv>>, and with the same meanings.
 
 The functions differ from C<L</is_utf8_string_flags>> only in that the latter
 returns FALSE if the final few bytes of the string don't form a complete code
@@ -2972,21 +2961,22 @@ Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
            || is_utf8_valid_partial_char_flags(*ep, s + len, flags);
 }
 
-PERL_STATIC_INLINE UV
-Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
-                         STRLEN curlen,
-                         STRLEN *retlen,
-                         const U32 flags,
-                         U32 * errors,
-                         AV ** msgs)
+PERL_STATIC_INLINE bool
+Perl_utf8_to_uv_msgs(const U8 * const s0,
+                     const U8 * const e,
+                     UV * cp_p,
+                     Size_t *advance_p,
+                     const U32 flags,
+                     U32 * errors,
+                     AV ** msgs)
 {
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
+    PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS;
 
-    /* This is the inlined portion of utf8n_to_uvchr_msgs.  It handles the
-     * simple cases, and, if necessary calls a helper function to deal with the
-     * more complex ones.  Almost all well-formed non-problematic code points
-     * are considered simple, so that it's unlikely that the helper function
-     * will need to be called. */
+    /* This is the inlined portion of utf8_to_uv_msgs.  It handles the simple
+     * cases, and, if necessary calls a helper function to deal with the more
+     * complex ones.  Almost all well-formed non-problematic code points are
+     * considered simple, so that it's unlikely that the helper function will
+     * need to be called. */
 
     /* Assume that isn't malformed; the vast majority of calls won't be */
     if (errors) {
@@ -2999,9 +2989,9 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
 
     /* No calls from core pass in an empty string; non-core need a check */
 #ifdef PERL_CORE
-    assert(curlen > 0);
+    assert(e > s0);
 #else
-    if (LIKELY(curlen > 0))
+    if (LIKELY(e > s0))
 #endif
 
     {
@@ -3009,15 +2999,15 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
          * capable of handling this, but this shortcuts this very common case
          * */
         if (UTF8_IS_INVARIANT(*s0)) {
-            if (retlen) {
-                *retlen = 1;
+            if (advance_p) {
+                *advance_p = 1;
             }
 
-            return *s0;
+            *cp_p = *s0;
+            return true;
         }
 
         const U8 * s = s0;
-        const U8 * send = s + curlen;
 
         /* This dfa is fast.  If it accepts the input, it was for a
          * well-formed, non-problematic code point, which can be returned
@@ -3038,7 +3028,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
         PERL_UINT_FAST8_T state = PL_strict_utf8_dfa_tab[256 + type];
         UV uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
 
-        while (state > 1 && ++s < send) {
+        while (state > 1 && ++s < e) {
             type  = PL_strict_utf8_dfa_tab[*s];
             state = PL_strict_utf8_dfa_tab[256 + state + type];
 
@@ -3046,42 +3036,75 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
         }
 
         if (LIKELY(state == 0)) {
-            if (retlen) {
-                *retlen = s - s0 + 1;
+            if (advance_p) {
+                *advance_p = s - s0 + 1;
             }
 
-            return UNI_TO_NATIVE(uv);
+            *cp_p = UNI_TO_NATIVE(uv);
+            return true;
         }
     }
 
     /* Here is potentially problematic.  Use the full mechanism */
-    return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
-                                       errors, msgs);
+    return utf8_to_uv_msgs_helper_(s0, e, cp_p, advance_p, flags, errors, msgs);
 }
 
 PERL_STATIC_INLINE UV
-Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
+                         STRLEN curlen,
+                         STRLEN *retlen,
+                         const U32 flags,
+                         U32 * errors,
+                         AV ** msgs)
 {
-    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF_HELPER;
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
 
+    UV cp;
+    if (LIKELY(utf8_to_uv_msgs(s0, s0 + curlen, &cp, retlen, flags, errors,
+                                                                        msgs)))
+    {
+        return cp;
+    }
+
+    if (flags & UTF8_CHECK_ONLY && retlen) {
+        *retlen = ((STRLEN) -1);
+    }
+
+    return 0;
+}
+
+
+PERL_STATIC_INLINE UV
+Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
     assert(s < send);
 
-    if (! ckWARN_d(WARN_UTF8)) {
+    UV cp;
 
-        /* EMPTY is not really allowed, and asserts on debugging builds.  But
-         * on non-debugging we have to deal with it, and this causes it to
-         * return the REPLACEMENT CHARACTER, as the documentation indicates */
-        return utf8n_to_uvchr(s, send - s, retlen,
-                              (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY));
-    }
-    else {
-        UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
-        if (retlen && ret == 0 && (send <= s || *s != '\0')) {
-            *retlen = (STRLEN) -1;
-        }
+    /* When everything is legal, just return that; but when not:
+     *  1) if warnings are enabled return 0 and retlen to -1
+     *  2) if warnings are disabled, set 'flags' to accept any malformation,
+     *     but that will just cause the REPLACEMENT CHARACTER to be returned,
+     *     as the documentation indicates.  EMPTY is not really allowed, and
+     *     asserts on debugging builds.  But on non-debugging we have to deal
+     *     with it.
+     * This API means 0 can mean a legal NUL, or the input is malformed; and
+     * the caller has to know if warnings are disabled to know if it can rely on
+     * 'retlen'.  Best to use utf8_to_uv() instead */
+    U32 flags = (ckWARN_d(WARN_UTF8)) ? 0 : (UTF8_ALLOW_ANY | UTF8_ALLOW_EMPTY);
 
-        return ret;
+    if (   LIKELY(utf8_to_uv_flags(s, send, &cp, retlen, flags))
+        || flags)
+    {
+        return cp;
     }
+
+    if (retlen) {
+        *retlen = (STRLEN) -1;
+    }
+
+    return 0;
 }
 
 /* ------------------------------- perl.h ----------------------------- */
