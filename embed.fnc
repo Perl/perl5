@@ -3017,6 +3017,8 @@ Xp	|void	|set_numeric_underlying 				\
 Cp	|HEK *	|share_hek	|NN const char *str			\
 				|SSize_t len				\
 				|U32 hash
+Cp	|struct hek *|share_hek_hek					\
+				|NN const struct hek *hek
 Tp	|Signal_t|sighandler1	|int sig
 Tp	|Signal_t|sighandler3	|int sig				\
 				|NULLOK Siginfo_t *info 		\
