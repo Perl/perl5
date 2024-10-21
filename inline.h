@@ -2673,33 +2673,31 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
     PERL_ARGS_ASSERT_UTF8_HOP_FORWARD;
     assert(off >= 0);
 
-    if (UNLIKELY(s >= end)) {
-        if (s == end) {
-            return (U8 *) end;
+    if (off != 0) {
+        if (UNLIKELY(s >= end)) {
+            Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %zd"
+                                 " bytes beyond legal end position (0x%p)",
+                                 s, 1 + s - end, end);
         }
 
-        Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %zd bytes"
-                             " beyond legal end position (0x%p)",
-                             s, 1 + s - end, end);
-    }
-
-    if (off && UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
-        /* Get to next non-continuation byte */
-        do {
-            s++;
+        if (UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
+            /* Get to next non-continuation byte */
+            do {
+                s++;
+            }
+            while (s < end && UTF8_IS_CONTINUATION(*s));
+            off--;
         }
-        while (s < end && UTF8_IS_CONTINUATION(*s));
-        off--;
-    }
 
-    while (off-- && s < end) {
-        STRLEN skip = UTF8SKIP(s);
-        if ((STRLEN)(end - s) <= skip) {
-            GCC_DIAG_IGNORE(-Wcast-qual)
-            return (U8 *)end;
-            GCC_DIAG_RESTORE
+        while (off-- && s < end) {
+            STRLEN skip = UTF8SKIP(s);
+            if ((STRLEN)(end - s) <= skip) {
+                GCC_DIAG_IGNORE(-Wcast-qual)
+                return (U8 *)end;
+                GCC_DIAG_RESTORE
+            }
+            s += skip;
         }
-        s += skip;
     }
 
     GCC_DIAG_IGNORE(-Wcast-qual)
