@@ -1878,7 +1878,11 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                     || $needs_Perl_entry
                     || $cant_use_short_name)
                 {
-                    $name = "Perl_$name";
+                    # An all uppercase macro name gets an uppercase prefix.
+                    my $perl = ($flags =~ /m/ && $name !~ /[[:lower:]]/)
+                               ? "PERL_"
+                               : "Perl_";
+                    $name = "$perl$name";
 
                     # We can't hide the existence of any thread context
                     # parameter when using the "Perl_" long form.  So it must

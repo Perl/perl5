@@ -49,7 +49,14 @@ sub full_name ($$) { # Returns the function name with potentially the
                      # prefixes 'S_' or 'Perl_'
     my ($func, $flags) = @_;
 
-    return "Perl_$func" if $flags =~ /[ps]/;
+    if ($flags =~ /[ps]/) {
+
+	# An all uppercase macro name gets an uppercase prefix.
+	return ($flags =~ /m/ && $flags =~ /p/ && $func !~ /[[:lower:]]/)
+	       ? "PERL_$func"
+	       : "Perl_$func";
+    }
+
     return "S_$func" if $flags =~ /[SIi]/;
     return $func;
 }
@@ -140,10 +147,6 @@ sub generate_proto_h {
 	if ($has_mflag) {
 	    if ($flags =~ /S/) {
 		die_at_end "$plain_func: m and S flags are mutually exclusive";
-	    }
-	    elsif ($flags =~ /p/ && $has_context) {
-		die_at_end "$plain_func: m flag with p flag currently requires"
-		         . " T flag";
 	    }
 	}
 	else {
@@ -509,7 +512,7 @@ sub embed_h {
         my $inner_ind= $ind ? "  " : " ";
         if ($flags !~ /[omM]/ or ($flags =~ /m/ && $flags =~ /p/)) {
             my $argc = scalar @$args;
-            if ($flags =~ /[Tm]/) {
+            if ($flags =~ /[T]/) {
                 my $full_name = full_name($func, $flags);
                 next if $full_name eq $func;    # Don't output a no-op.
                 $ret = indent_define($func, $full_name, $ind);
@@ -532,8 +535,11 @@ sub embed_h {
                     $use_va_list ? ("__VA_ARGS__") : ());
                 $ret = "#${ind}define $func($paramlist) ";
                 add_indent($ret,full_name($func, $flags) . "(aTHX");
-                $ret .= "_ " if $replacelist;
-                $ret .= $replacelist;
+		if ($replacelist) {
+                    $ret .= ($flags =~ /m/) ? "," : "_ ";
+                    $ret .= $replacelist;
+                }
+
                 if ($flags =~ /W/) {
                     if ($replacelist) {
                         $ret .= " comma_aDEPTH";
