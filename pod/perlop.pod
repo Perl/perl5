@@ -126,31 +126,31 @@ C's precedence is slightly screwy.  (This makes learning Perl easier
 for C folks.)  With very few exceptions, these all operate on scalar
 values only, not array values.
 
-    left	terms and list operators (leftward)
-    left	->
-    nonassoc	++ --
-    right	**
-    right	! ~ ~. \ and unary + and -
-    left	=~ !~
-    left	* / % x
-    left	+ - .
-    left	<< >>
-    nonassoc	named unary operators
+    left        terms and list operators (leftward)
+    left        ->
+    nonassoc    ++ --
+    right       **
+    right       ! ~ ~. \ and unary + and -
+    left        =~ !~
+    left        * / % x
+    left        + - .
+    left        << >>
+    nonassoc    named unary operators
     nonassoc    isa
-    chained 	< > <= >= lt gt le ge
-    chain/na	== != eq ne <=> cmp
-    left	& &.
-    left	| |. ^ ^.
-    left	&&
-    left	|| ^^ //
-    nonassoc	..  ...
-    right	?:
-    right	= += -= *= etc. goto last next redo dump
-    left	, =>
-    nonassoc	list operators (rightward)
-    right	not
-    left	and
-    left	or xor
+    chained     < > <= >= lt gt le ge
+    chain/na    == != eq ne <=> cmp
+    left        & &.
+    left        | |. ^ ^.
+    left        &&
+    left        || ^^ //
+    nonassoc    ..  ...
+    right       ?:
+    right       = += -= *= etc. goto last next redo dump
+    left        , =>
+    nonassoc    list operators (rightward)
+    right       not
+    left        and
+    left        or xor
 
 In the following sections, these operators are covered in detail, in the
 same order in which they appear in the table above.
@@ -178,7 +178,7 @@ whether you are looking at the left side or the right side of the operator.
 For example, in
 
     @ary = (1, 3, sort 4, 2);
-    print @ary;		# prints 1324
+    print @ary;         # prints 1324
 
 the commas on the right of the C<sort> are evaluated before the C<sort>,
 but the commas on the left are evaluated after.  In other words,
@@ -187,13 +187,13 @@ then act like a simple TERM with regard to the preceding expression.
 Be careful with parentheses:
 
     # These evaluate exit before doing the print:
-    print($foo, exit);	# Obviously not what you want.
-    print $foo, exit;	# Nor is this.
+    print($foo, exit);  # Obviously not what you want.
+    print $foo, exit;   # Nor is this.
 
     # These do the print before evaluating exit:
-    (print $foo), exit;	# This is what you want.
-    print($foo), exit;	# Or this.
-    print ($foo), exit;	# Or even this.
+    (print $foo), exit; # This is what you want.
+    print($foo), exit;  # Or this.
+    print ($foo), exit; # Or even this.
 
 Also note that
 
@@ -271,10 +271,10 @@ has a value that is not the empty string and matches the pattern
 C</^[a-zA-Z]*[0-9]*\z/>, the increment is done as a string, preserving each
 character within its range, with carry:
 
-    print ++($foo = "99");	# prints "100"
-    print ++($foo = "a0");	# prints "a1"
-    print ++($foo = "Az");	# prints "Ba"
-    print ++($foo = "zz");	# prints "aaa"
+    print ++($foo = "99");      # prints "100"
+    print ++($foo = "a0");      # prints "a1"
+    print ++($foo = "Az");      # prints "Ba"
+    print ++($foo = "zz");      # prints "aaa"
 
 C<undef> is always treated as numeric, and in particular is changed
 to C<0> before incrementing (so that a post-increment of an undef value
@@ -433,12 +433,12 @@ negative), it returns an empty string
 or an empty list, depending on the context.
 X<x>
 
-    print '-' x 80;		# print row of dashes
+    print '-' x 80;             # print row of dashes
 
-    print "\t" x ($tab/8), ' ' x ($tab%8);	# tab over
+    print "\t" x ($tab/8), ' ' x ($tab%8);      # tab over
 
-    @ones = (1) x 80;		# a list of 80 1's
-    @ones = (5) x @ones;	# set all elements to 5
+    @ones = (1) x 80;           # a list of 80 1's
+    @ones = (5) x @ones;        # set all elements to 5
 
 
 =head2 Additive Operators
@@ -511,22 +511,22 @@ arguments within parentheses are taken to be of highest precedence,
 just like a normal function call.  For example,
 because named unary operators are higher precedence than C<||>:
 
-    chdir $foo    || die;	# (chdir $foo) || die
-    chdir($foo)   || die;	# (chdir $foo) || die
-    chdir ($foo)  || die;	# (chdir $foo) || die
-    chdir +($foo) || die;	# (chdir $foo) || die
+    chdir $foo    || die;       # (chdir $foo) || die
+    chdir($foo)   || die;       # (chdir $foo) || die
+    chdir ($foo)  || die;       # (chdir $foo) || die
+    chdir +($foo) || die;       # (chdir $foo) || die
 
 but, because C<"*"> is higher precedence than named operators:
 
-    chdir $foo * 20;	# chdir ($foo * 20)
-    chdir($foo) * 20;	# (chdir $foo) * 20
-    chdir ($foo) * 20;	# (chdir $foo) * 20
-    chdir +($foo) * 20;	# chdir ($foo * 20)
+    chdir $foo * 20;    # chdir ($foo * 20)
+    chdir($foo) * 20;   # (chdir $foo) * 20
+    chdir ($foo) * 20;  # (chdir $foo) * 20
+    chdir +($foo) * 20; # chdir ($foo * 20)
 
-    rand 10 * 20;	# rand (10 * 20)
-    rand(10) * 20;	# (rand 10) * 20
-    rand (10) * 20;	# (rand 10) * 20
-    rand +(10) * 20;	# rand (10 * 20)
+    rand 10 * 20;       # rand (10 * 20)
+    rand(10) * 20;      # (rand 10) * 20
+    rand (10) * 20;     # (rand 10) * 20
+    rand +(10) * 20;    # rand (10 * 20)
 
 Regarding precedence, the filetest operators, like C<-f>, C<-M>, etc. are
 treated like named unary operators, but they don't follow this functional
@@ -764,9 +764,9 @@ The C<||>, C<//> and C<&&> operators return the last value evaluated
 portable way to find out the home directory might be:
 
     $home =  $ENV{HOME}
-	  // $ENV{LOGDIR}
-	  // (getpwuid($<))[7]
-	  // die "You're homeless!\n";
+          // $ENV{LOGDIR}
+          // (getpwuid($<))[7]
+          // die "You're homeless!\n";
 
 In particular, this means that you shouldn't use this
 for selecting between two aggregates for assignment:
@@ -782,12 +782,12 @@ and C<"or"> is much lower, however, so that you can safely use them after a
 list operator without the need for parentheses:
 
     unlink "alpha", "beta", "gamma"
-	    or gripe(), next LINE;
+            or gripe(), next LINE;
 
 With the C-style operators that would have been written like this:
 
     unlink("alpha", "beta", "gamma")
-	    || (gripe(), next LINE);
+            || (gripe(), next LINE);
 
 It would be even more readable to write that this way:
 
@@ -813,7 +813,7 @@ versions of Perl might burn a lot of memory when you write something
 like this:
 
     for (1 .. 1_000_000) {
-	# code
+        # code
     }
 
 The range operator also works on strings, using the magical
@@ -1027,7 +1027,7 @@ argument before the C<:> is returned, otherwise the argument after the
 C<:> is returned.  For example:
 
     printf "I have %d dog%s.\n", $n,
-	    ($n == 1) ? "" : "s";
+            ($n == 1) ? "" : "s";
 
 Scalar or list context propagates downward into the 2nd
 or 3rd argument, whichever is selected.
@@ -1217,7 +1217,7 @@ Binary C<"or"> returns the logical disjunction of the two surrounding
 expressions.  It's equivalent to C<||> except for the very low precedence.
 This makes it useful for control flow:
 
-    print FH $data		or die "Can't write to FH: $!";
+    print FH $data              or die "Can't write to FH: $!";
 
 This means that it short-circuits: the right expression is evaluated
 only if the left expression is false.  Due to its precedence, you must
@@ -1277,19 +1277,19 @@ for these behaviors, but also provides a way for you to choose your
 quote character for any of them.  In the following table, a C<{}> represents
 any pair of delimiters you choose.
 
-    Customary  Generic        Meaning	     Interpolates
-	''	 q{}	      Literal		  no
-	""	qq{}	      Literal		  yes
-	``	qx{}	      Command		  yes*
-		qw{}	     Word list		  no
-	//	 m{}	   Pattern match	  yes*
-		qr{}	      Pattern		  yes*
-		 s{}{}	    Substitution	  yes*
-		tr{}{}	  Transliteration	  no (but see below)
-		 y{}{}	  Transliteration	  no (but see below)
+    Customary  Generic        Meaning        Interpolates
+        ''       q{}          Literal             no
+        ""      qq{}          Literal             yes
+        ``      qx{}          Command             yes*
+                qw{}         Word list            no
+        //       m{}       Pattern match          yes*
+                qr{}          Pattern             yes*
+                 s{}{}      Substitution          yes*
+                tr{}{}    Transliteration         no (but see below)
+                 y{}{}    Transliteration         no (but see below)
         <<EOF                 here-doc            yes*
 
-	* unless the delimiter is ''.
+        * unless the delimiter is ''.
 
 Non-bracketing delimiters use the same character fore and aft, but the four
 sorts of ASCII brackets (round, angle, square, curly) all nest, which means
@@ -1392,11 +1392,11 @@ says the illegal character is ignored, it is only ignored as part of the
 escape and will still be used as the subsequent character in the string.
 For example:
 
-  Original    Result    Warns?
-  "\x7"       "\x07"    no
-  "\x"        "\x00"    no
-  "\x7q"      "\x07q"   yes
-  "\xq"       "\x00q"   yes
+    Original    Result    Warns?
+    "\x7"       "\x07"    no
+    "\x"        "\x00"    no
+    "\x7q"      "\x07q"   yes
+    "\xq"       "\x00q"   yes
 
 =item [3]
 
@@ -1413,22 +1413,22 @@ point is I<hexadecimal number>.
 The character following C<\c> is mapped to some other character as shown in the
 table:
 
- Sequence   Value
-   \c@      chr(0)
-   \cA      chr(1)
-   \ca      chr(1)
-   \cB      chr(2)
-   \cb      chr(2)
-   ...
-   \cZ      chr(26)
-   \cz      chr(26)
-   \c[      chr(27)
-                     # See below for chr(28)
-   \c]      chr(29)
-   \c^      chr(30)
-   \c_      chr(31)
-   \c?      chr(127) # (on ASCII platforms; see below for link to
-                     #  EBCDIC discussion)
+    Sequence   Value
+      \c@      chr(0)
+      \cA      chr(1)
+      \ca      chr(1)
+      \cB      chr(2)
+      \cb      chr(2)
+      ...
+      \cZ      chr(26)
+      \cz      chr(26)
+      \c[      chr(27)
+                        # See below for chr(28)
+      \c]      chr(29)
+      \c^      chr(30)
+      \c_      chr(31)
+      \c?      chr(127) # (on ASCII platforms; see below for link to
+                        #  EBCDIC discussion)
 
 In other words, it's the character whose code point has had 64 xor'd with
 its uppercase.  C<\c?> is DELETE on ASCII platforms because
@@ -1517,15 +1517,15 @@ The following escape sequences are available in constructs that interpolate,
 but not in transliterations.
 X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q> X<\F>
 
-    \l		lowercase next character only
-    \u		titlecase (not uppercase!) next character only
-    \L		lowercase all characters till \E or end of string
-    \U		uppercase all characters till \E or end of string
-    \F		foldcase all characters till \E or end of string
+    \l          lowercase next character only
+    \u          titlecase (not uppercase!) next character only
+    \L          lowercase all characters till \E or end of string
+    \U          uppercase all characters till \E or end of string
+    \F          foldcase all characters till \E or end of string
     \Q          quote (disable) pattern metacharacters till \E or
                 end of string
-    \E		end either case modification or quoted section
-		(whichever was last seen)
+    \E          end either case modification or quoted section
+                (whichever was last seen)
 
 See L<perlfunc/quotemeta> for the exact definition of characters that
 are quoted by C<\Q>.
@@ -1533,8 +1533,8 @@ are quoted by C<\Q>.
 C<\L>, C<\U>, C<\F>, and C<\Q> can stack, in which case you need one
 C<\E> for each.  For example:
 
- say "This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
- This quoting\ Business\ HERE\ ISN\'T\ QUITE\ done\ yet\, is it?
+    say "This \Qquoting \ubusiness \Uhere isn't\E done yet,\E is it?";
+    This quoting Business HERE ISN'T done yet, is it?
 
 If a S<C<use locale>> form that includes C<LC_CTYPE> is in effect (see
 L<perllocale>), the case map used by C<\l>, C<\L>, C<\u>, and C<\U> is
@@ -1641,25 +1641,25 @@ is equivalent to
 The result may be used as a subpattern in a match:
 
     $re = qr/$pattern/;
-    $string =~ /foo${re}bar/;	# can be interpolated in other
+    $string =~ /foo${re}bar/;   # can be interpolated in other
                                 # patterns
-    $string =~ $re;		# or used standalone
-    $string =~ /$re/;		# or this way
+    $string =~ $re;             # or used standalone
+    $string =~ /$re/;           # or this way
 
 Since Perl may compile the pattern at the moment of execution of the C<qr()>
 operator, using C<qr()> may have speed advantages in some situations,
 notably if the result of C<qr()> is used standalone:
 
     sub match {
-	my $patterns = shift;
-	my @compiled = map qr/$_/i, @$patterns;
-	grep {
-	    my $success = 0;
-	    foreach my $pat (@compiled) {
-		$success = 1, last if /$pat/;
-	    }
-	    $success;
-	} @_;
+        my $patterns = shift;
+        my @compiled = map qr/$_/i, @$patterns;
+        grep {
+            my $success = 0;
+            foreach my $pat (@compiled) {
+                $success = 1, last if /$pat/;
+            }
+            $success;
+        } @_;
     }
 
 Precompilation of the pattern into an internal representation at
@@ -1670,17 +1670,17 @@ we did not use C<qr()> operator.)
 
 Options (specified by the following modifiers) are:
 
-    m	Treat string as multiple lines.
-    s	Treat string as single line. (Make . match a newline)
-    i	Do case-insensitive pattern matching.
+    m   Treat string as multiple lines.
+    s   Treat string as single line. (Make . match a newline)
+    i   Do case-insensitive pattern matching.
     x   Use extended regular expressions; specifying two
         x's means \t and the SPACE character are ignored within
         square-bracketed character classes
-    p	When matching preserve a copy of the matched string so
+    p   When matching preserve a copy of the matched string so
         that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be
         defined (ignored starting in v5.20 as these are always
         defined starting in that release)
-    o	Compile pattern only once.
+    o   Compile pattern only once.
     a   ASCII-restrict: Use ASCII for \d, \s, \w and [[:posix:]]
         character classes; specifying two a's adds the further
         restriction that no ASCII character will match a
@@ -1722,9 +1722,9 @@ rather tightly.)  See also L<perlre>.
 Options are as described in C<qr//> above; in addition, the following match
 process modifiers are available:
 
- g  Match globally, i.e., find all occurrences.
- c  Do not reset search position on a failed match when /g is
-    in effect.
+    g  Match globally, i.e., find all occurrences.
+    c  Do not reset search position on a failed match when /g is
+       in effect.
 
 If C<"/"> is the delimiter then the initial C<m> is optional.  With the C<m>
 you can use any pair of non-whitespace (ASCII) characters
@@ -1824,21 +1824,21 @@ With or without parentheses, an empty list is returned upon failure.
 
 Examples:
 
- open(TTY, "+</dev/tty")
-    || die "can't access /dev/tty: $!";
+    open(TTY, "+</dev/tty")
+       || die "can't access /dev/tty: $!";
 
- <TTY> =~ /^y/i && foo();	# do foo if desired
+    <TTY> =~ /^y/i && foo();       # do foo if desired
 
- if (/Version: *([0-9.]*)/) { $version = $1; }
+    if (/Version: *([0-9.]*)/) { $version = $1; }
 
- next if m#^/usr/spool/uucp#;
+    next if m#^/usr/spool/uucp#;
 
- # poor man's grep
- $arg = shift;
- while (<>) {
-    print if /$arg/;
- }
- if (($F1, $F2, $Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/))
+    # poor man's grep
+    $arg = shift;
+    while (<>) {
+       print if /$arg/;
+    }
+    if (($F1, $F2, $Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/))
 
 This last example splits C<$foo> into the first two words and the
 remainder of the line, and assigns those three fields to C<$F1>, C<$F2>, and
@@ -1882,38 +1882,38 @@ Examples:
     # scalar context
     local $/ = "";
     while ($paragraph = <>) {
-	while ($paragraph =~ /\p{Ll}['")]*[.!?]+['")]*\s/g) {
-	    $sentences++;
-	}
+        while ($paragraph =~ /\p{Ll}['")]*[.!?]+['")]*\s/g) {
+            $sentences++;
+        }
     }
     say $sentences;
 
 Here's another way to check for sentences in a paragraph:
 
- my $sentence_rx = qr{
-    (?: (?<= ^ ) | (?<= \s ) )  # after start-of-string or
-                                # whitespace
-    \p{Lu}                      # capital letter
-    .*?                         # a bunch of anything
-    (?<= \S )                   # that ends in non-
-                                # whitespace
-    (?<! \b [DMS]r  )           # but isn't a common abbr.
-    (?<! \b Mrs )
-    (?<! \b Sra )
-    (?<! \b St  )
-    [.?!]                       # followed by a sentence
-                                # ender
-    (?= $ | \s )                # in front of end-of-string
-                                # or whitespace
- }sx;
- local $/ = "";
- while (my $paragraph = <>) {
-    say "NEW PARAGRAPH";
-    my $count = 0;
-    while ($paragraph =~ /($sentence_rx)/g) {
-        printf "\tgot sentence %d: <%s>\n", ++$count, $1;
+    my $sentence_rx = qr{
+        (?: (?<= ^ ) | (?<= \s ) )  # after start-of-string or
+                                    # whitespace
+        \p{Lu}                      # capital letter
+        .*?                         # a bunch of anything
+        (?<= \S )                   # that ends in non-
+                                    # whitespace
+        (?<! \b [DMS]r  )           # but isn't a common abbr.
+        (?<! \b Mrs )
+        (?<! \b Sra )
+        (?<! \b St  )
+        [.?!]                       # followed by a sentence
+                                    # ender
+        (?= $ | \s )                # in front of end-of-string
+                                    # or whitespace
+    }sx;
+    local $/ = "";
+    while (my $paragraph = <>) {
+        say "NEW PARAGRAPH";
+        my $count = 0;
+        while ($paragraph =~ /($sentence_rx)/g) {
+            printf "\tgot sentence %d: <%s>\n", ++$count, $1;
+        }
     }
- }
 
 Here's how to use C<m//gc> with C<\G>:
 
@@ -1949,32 +1949,33 @@ combine several regexps like this to process a string part-by-part,
 doing different actions depending on which regexp matched.  Each
 regexp tries to match where the previous one leaves off.
 
- $_ = <<'EOL';
-    $url = URI::URL->new( "http://example.com/" );
-    die if $url eq "xXx";
- EOL
+    $_ = <<'EOL';
+        $url = URI::URL->new( "http://example.com/" );
+        die if $url eq "xXx";
+    EOL
 
- LOOP: {
-     print(" digits"),       redo LOOP if /\G\d+\b[,.;]?\s*/gc;
-     print(" lowercase"),    redo LOOP
-                                    if /\G\p{Ll}+\b[,.;]?\s*/gc;
-     print(" UPPERCASE"),    redo LOOP
-                                    if /\G\p{Lu}+\b[,.;]?\s*/gc;
-     print(" Capitalized"),  redo LOOP
-                              if /\G\p{Lu}\p{Ll}+\b[,.;]?\s*/gc;
-     print(" MiXeD"),        redo LOOP if /\G\pL+\b[,.;]?\s*/gc;
-     print(" alphanumeric"), redo LOOP
-                            if /\G[\p{Alpha}\pN]+\b[,.;]?\s*/gc;
-     print(" line-noise"),   redo LOOP if /\G\W+/gc;
-     print ". That's all!\n";
- }
+    LOOP: {
+        print(" digits"),       redo LOOP if /\G\d+\b[,.;]?\s*/gc;
+        print(" lowercase"),    redo LOOP
+                                      if /\G\p{Ll}+\b[,.;]?\s*/gc;
+        print(" UPPERCASE"),    redo LOOP
+                                      if /\G\p{Lu}+\b[,.;]?\s*/gc;
+        print(" Capitalized"),  redo LOOP
+                                if /\G\p{Lu}\p{Ll}+\b[,.;]?\s*/gc;
+        print(" MiXeD"),        redo LOOP
+                                         if /\G\pL+\b[,.;]?\s*/gc;
+        print(" alphanumeric"), redo LOOP
+                              if /\G[\p{Alpha}\pN]+\b[,.;]?\s*/gc;
+        print(" line-noise"),   redo LOOP if /\G\W+/gc;
+        print ". That's all!\n";
+    }
 
 Here is the output (split into several lines):
 
- line-noise lowercase line-noise UPPERCASE line-noise UPPERCASE
- line-noise lowercase line-noise lowercase line-noise lowercase
- lowercase line-noise lowercase lowercase line-noise lowercase
- lowercase line-noise MiXeD line-noise. That's all!
+    line-noise lowercase line-noise UPPERCASE line-noise UPPERCASE
+    line-noise lowercase line-noise lowercase line-noise lowercase
+    lowercase line-noise lowercase lowercase line-noise lowercase
+    lowercase line-noise MiXeD line-noise. That's all!
 
 =item C<m?I<PATTERN>?msixpodualngc>
 X<?> X<operator, match-once>
@@ -1986,11 +1987,11 @@ something in each file of a set of files, for instance.  Only C<m??>
 patterns local to the current package are reset.
 
     while (<>) {
-	if (m?^$?) {
-			    # blank line between header and body
-	}
+        if (m?^$?) {
+                            # blank line between header and body
+        }
     } continue {
-	reset if eof;	    # clear m?? status for next file
+        reset if eof;       # clear m?? status for next file
     }
 
 Another example switched the first "latin1" encoding it finds
@@ -2040,7 +2041,7 @@ expression is used instead.  See L<perlre> for further explanation on these.
 Options are as with C<m//> with the addition of the following replacement
 specific options:
 
-    e	Evaluate the right side as an expression.
+    e   Evaluate the right side as an expression.
     ee  Evaluate the right side as a string then eval the
         result.
     r   Return substitution and leave the original string
@@ -2061,33 +2062,33 @@ to be C<eval>ed before being run as a Perl expression.
 
 Examples:
 
-    s/\bgreen\b/mauve/g;	      # don't change wintergreen
+    s/\bgreen\b/mauve/g;              # don't change wintergreen
 
     $path =~ s|/usr/bin|/usr/local/bin|;
 
     s/Login: $foo/Login: $bar/; # run-time pattern
 
-    ($foo = $bar) =~ s/this/that/;	# copy first, then
+    ($foo = $bar) =~ s/this/that/;      # copy first, then
                                         # change
-    ($foo = "$bar") =~ s/this/that/;	# convert to string,
+    ($foo = "$bar") =~ s/this/that/;    # convert to string,
                                         # copy, then change
-    $foo = $bar =~ s/this/that/r;	# Same as above using /r
+    $foo = $bar =~ s/this/that/r;       # Same as above using /r
     $foo = $bar =~ s/this/that/r
-                =~ s/that/the other/r;	# Chained substitutes
+                =~ s/that/the other/r;  # Chained substitutes
                                         # using /r
-    @foo = map { s/this/that/r } @bar	# /r is very useful in
+    @foo = map { s/this/that/r } @bar   # /r is very useful in
                                         # maps
 
     $count = ($paragraph =~ s/Mister\b/Mr./g);  # get change-cnt
 
     $_ = 'abc123xyz';
-    s/\d+/$&*2/e;		# yields 'abc246xyz'
-    s/\d+/sprintf("%5d",$&)/e;	# yields 'abc  246xyz'
-    s/\w/$& x 2/eg;		# yields 'aabbcc  224466xxyyzz'
+    s/\d+/$&*2/e;               # yields 'abc246xyz'
+    s/\d+/sprintf("%5d",$&)/e;  # yields 'abc  246xyz'
+    s/\w/$& x 2/eg;             # yields 'aabbcc  224466xxyyzz'
 
-    s/%(.)/$percent{$1}/g;	# change percent escapes; no /e
-    s/%(.)/$percent{$1} || $&/ge;	# expr now, so /e
-    s/^=(\w+)/pod($1)/ge;	# use function call
+    s/%(.)/$percent{$1}/g;      # change percent escapes; no /e
+    s/%(.)/$percent{$1} || $&/ge;       # expr now, so /e
+    s/^=(\w+)/pod($1)/ge;       # use function call
 
     $_ = 'abc123xyz';
     $x = s/abc/def/r;           # $x is 'def123xyz' and
@@ -2111,21 +2112,21 @@ Examples:
 
     # Delete (most) C comments.
     $program =~ s {
-	/\*	# Match the opening delimiter.
-	.*?	# Match a minimal number of characters.
-	\*/	# Match the closing delimiter.
+        /\*     # Match the opening delimiter.
+        .*?     # Match a minimal number of characters.
+        \*/     # Match the closing delimiter.
     } []gsx;
 
-    s/^\s*(.*?)\s*$/$1/;	# trim whitespace in $_,
+    s/^\s*(.*?)\s*$/$1/;        # trim whitespace in $_,
                                 # expensively
 
-    for ($variable) {		# trim whitespace in $variable,
+    for ($variable) {           # trim whitespace in $variable,
                                 # cheap
-	s/^\s+//;
-	s/\s+$//;
+        s/^\s+//;
+        s/\s+$//;
     }
 
-    s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
+    s/([^ ]*) *([^ ]*)/$2 $1/;  # reverse 1st two fields
 
     $foo !~ s/A/a/g;    # Lowercase all A's in $foo; return
                         # 0 if any were found and changed;
@@ -2165,7 +2166,7 @@ the delimiter or backslash is interpolated.
 
     $foo = q!I said, "You said, 'She said it.'"!;
     $bar = q('This is it.');
-    $baz = '\n';		# a two-character string
+    $baz = '\n';                # a two-character string
 
 =item C<qq/I<STRING>/>
 X<qq> X<quote, double> X<"> X<"">
@@ -2176,8 +2177,8 @@ A double-quoted, interpolated string.
 
     $_ .= qq
      (*** The previous line contains the naughty word "$1".\n)
-		if /\b(tcl|java|python)\b/i;      # :-)
-    $baz = "\n";		# a one-character string
+                if /\b(tcl|java|python)\b/i;      # :-)
+    $baz = "\n";                # a one-character string
 
 =item C<qx/I<STRING>/>
 X<qx> X<`> X<``> X<backtick>
@@ -2291,8 +2292,8 @@ failure modes by inspecting C<$?> like this:
 Use the L<open> pragma to control the I/O layers used when reading the
 output of the command, for example:
 
-  use open IN => ":encoding(UTF-8)";
-  my $x = `cmd-producing-utf-8`;
+    use open IN => ":encoding(UTF-8)";
+    my $x = `cmd-producing-utf-8`;
 
 C<qx//> can also be called like a function with L<perlfunc/readpipe>.
 
@@ -2404,15 +2405,15 @@ signal Perl to do special handling to make them portable.  There are two
 classes of portable ranges.  The first are any subsets of the ranges
 C<A-Z>, C<a-z>, and C<0-9>, when expressed as literal characters.
 
-  tr/h-k/H-K/
+    tr/h-k/H-K/
 
 capitalizes the letters C<"h">, C<"i">, C<"j">, and C<"k"> and nothing
 else, no matter what the platform's character set is.  In contrast, all
 of
 
-  tr/\x68-\x6B/\x48-\x4B/
-  tr/h-\x6B/H-\x4B/
-  tr/\x68-k/\x48-K/
+    tr/\x68-\x6B/\x48-\x4B/
+    tr/h-\x6B/H-\x4B/
+    tr/\x68-k/\x48-K/
 
 do the same capitalizations as the previous example when run on ASCII
 platforms, but something completely different on EBCDIC ones.
@@ -2420,7 +2421,7 @@ platforms, but something completely different on EBCDIC ones.
 The second class of portable ranges is invoked when one or both of the
 range's end points are expressed as C<\N{...}>
 
- $string =~ tr/\N{U+20}-\N{U+7E}//d;
+    $string =~ tr/\N{U+20}-\N{U+7E}//d;
 
 removes from C<$string> all the platform's characters which are
 equivalent to any of Unicode U+0020, U+0021, ... U+007D, U+007E.  This
@@ -2438,11 +2439,11 @@ in doubt, spell out the character sets in full.
 
 Options:
 
-    c	Complement the SEARCHLIST.
-    d	Delete found but unreplaced characters.
-    r	Return the modified string instead of a count, and leave the
+    c   Complement the SEARCHLIST.
+    d   Delete found but unreplaced characters.
+    r   Return the modified string instead of a count, and leave the
         original string untouched.
-    s	Squash duplicate replaced characters.
+    s   Squash duplicate replaced characters.
 
 If the C</d> modifier is specified, any characters specified by
 I<SEARCHLIST>  not found in I<REPLACEMENTLIST> are deleted.  (Note that
@@ -2453,8 +2454,8 @@ If the C</s> modifier is specified, sequences of characters, all in a
 row, that were transliterated to the same character are squashed down to
 a single instance of that character.
 
- my $x = "aaabbbca";
- $x =~ tr/ab/dd/s;     # $x now is "dcd"
+    my $x = "aaabbbca";
+    $x =~ tr/ab/dd/s;     # $x now is "dcd"
 
 If the C</d> modifier is used, the I<REPLACEMENTLIST> is always interpreted
 exactly as specified.  Otherwise, if the I<REPLACEMENTLIST> is shorter
@@ -2503,50 +2504,50 @@ C</d> isn't specified.
 
 Some examples:
 
- $ARGV[1] =~ tr/A-Z/a-z/;   # canonicalize to lower case ASCII
+    $ARGV[1] =~ tr/A-Z/a-z/;  # canonicalize to lower case ASCII
 
- $cnt = tr/*/*/;            # count the stars in $_
- $cnt = tr/*//;             # same thing
+    $cnt = tr/*/*/;           # count the stars in $_
+    $cnt = tr/*//;            # same thing
 
- $cnt = $sky =~ tr/*/*/;    # count the stars in $sky
- $cnt = $sky =~ tr/*//;     # same thing
+    $cnt = $sky =~ tr/*/*/;   # count the stars in $sky
+    $cnt = $sky =~ tr/*//;    # same thing
 
- $cnt = $sky =~ tr/*//c;    # count all the non-stars in $sky
- $cnt = $sky =~ tr/*/*/c;   # same, but transliterate each non-star
-                            # into a star, leaving the already-stars
-                            # alone.  Afterwards, everything in $sky
-                            # is a star.
+    $cnt = $sky =~ tr/*//c;   # count all the non-stars in $sky
+    $cnt = $sky =~ tr/*/*/c;  # same, but transliterate each non-star
+                              # into a star, leaving the already-stars
+                              # alone.  Afterwards, everything in
+                              # $sky is a star.
 
- $cnt = tr/0-9//;           # count the ASCII digits in $_
+    $cnt = tr/0-9//;          # count the ASCII digits in $_
 
- tr/a-zA-Z//s;              # bookkeeper -> bokeper
- tr/o/o/s;                  # bookkeeper -> bokkeeper
- tr/oe/oe/s;                # bookkeeper -> bokkeper
- tr/oe//s;                  # bookkeeper -> bokkeper
- tr/oe/o/s;                 # bookkeeper -> bokkopor
+    tr/a-zA-Z//s;             # bookkeeper -> bokeper
+    tr/o/o/s;                 # bookkeeper -> bokkeeper
+    tr/oe/oe/s;               # bookkeeper -> bokkeper
+    tr/oe//s;                 # bookkeeper -> bokkeper
+    tr/oe/o/s;                # bookkeeper -> bokkopor
 
- ($HOST = $host) =~ tr/a-z/A-Z/;
-  $HOST = $host  =~ tr/a-z/A-Z/r; # same thing
+    ($HOST = $host) =~ tr/a-z/A-Z/;
+     $HOST = $host  =~ tr/a-z/A-Z/r; # same thing
 
- $HOST = $host =~ tr/a-z/A-Z/r   # chained with s///r
-               =~ s/:/ -p/r;
+    $HOST = $host =~ tr/a-z/A-Z/r # chained with s///r
+                  =~ s/:/ -p/r;
 
- tr/a-zA-Z/ /cs;                 # change non-alphas to single space
+    tr/a-zA-Z/ /cs;               # change non-alphas to single space
 
- @stripped = map tr/a-zA-Z/ /csr, @original;
-                                 # /r with map
+    @stripped = map tr/a-zA-Z/ /csr, @original;
+                                  # /r with map
 
- tr [\200-\377]
-    [\000-\177];                 # wickedly delete 8th bit
+    tr [\200-\377]
+       [\000-\177];               # wickedly delete 8th bit
 
- $foo !~ tr/A/a/    # transliterate all the A's in $foo to 'a',
-                    # return 0 if any were found and changed.
-                    # Otherwise return 1
+    $foo !~ tr/A/a/    # transliterate all the A's in $foo to 'a',
+                       # return 0 if any were found and changed.
+                       # Otherwise return 1
 
 If multiple transliterations are given for a character, only the
 first one is used:
 
- tr/AAA/XYZ/
+    tr/AAA/XYZ/
 
 will transliterate any A to X.
 
@@ -2555,10 +2556,10 @@ the I<SEARCHLIST> nor the I<REPLACEMENTLIST> are subjected to double quote
 interpolation.  That means that if you want to use variables, you
 must use an C<eval()>:
 
- eval "tr/$oldlist/$newlist/";
- die $@ if $@;
+    eval "tr/$oldlist/$newlist/";
+    die $@ if $@;
 
- eval "tr/$oldlist/$newlist/, 1" or die $@;
+    eval "tr/$oldlist/$newlist/, 1" or die $@;
 
 =item C<< <<I<EOF> >>
 X<here-doc> X<heredoc> X<here-document> X<<< << >>>
@@ -2588,11 +2589,11 @@ the treatment of the text.
 Double quotes indicate that the text will be interpolated using exactly
 the same rules as normal double quoted strings.
 
-       print <<EOF;
+    print <<EOF;
     The price is $Price.
     EOF
 
-       print << "EOF"; # same as above
+    print << "EOF"; # same as above
     The price is $Price.
     EOF
 
@@ -2608,11 +2609,11 @@ other quoting construct.
 Just as in the shell, a backslashed bareword following the C<<< << >>>
 means the same thing as a single-quoted string does:
 
-	$cost = <<'VISTA';  # hasta la ...
+    $cost = <<'VISTA';  # hasta la ...
     That'll be $10 please, ma'am.
     VISTA
 
-	$cost = <<\VISTA;   # Same thing!
+    $cost = <<\VISTA;   # Same thing!
     That'll be $10 please, ma'am.
     VISTA
 
@@ -2627,7 +2628,7 @@ string were embedded in backticks.  Thus the content is interpolated
 as though it were double quoted and then executed via the shell, with
 the results of the execution returned.
 
-       print << `EOC`; # execute command and get results
+    print << `EOC`; # execute command and get results
     echo hi there
     EOC
 
@@ -2641,9 +2642,9 @@ The here-doc modifier C<~> allows you to indent your here-docs to make
 the code more readable:
 
     if ($some_var) {
-      print <<~EOF;
-        This is a here-doc
-        EOF
+        print <<~EOF;
+          This is a here-doc
+          EOF
     }
 
 This will print...
@@ -2671,7 +2672,7 @@ delimiter) will be preserved:
     print <<~EOF;
       This text is not indented
         This text is indented with two spaces
-      		This text is indented with two tabs
+                This text is indented with two tabs
       EOF
 
 Finally, the modifier may be used with all of the forms
@@ -2690,13 +2691,13 @@ And whitespace may be used between the C<~> and quoted delimiters:
 
 It is possible to stack multiple here-docs in a row:
 
-       print <<"foo", <<"bar"; # you can stack them
+    print <<"foo", <<"bar"; # you can stack them
     I said foo.
     foo
     I said bar.
     bar
 
-       myfunc(<< "THIS", 23, <<'THAT');
+    myfunc(<< "THIS", 23, <<'THAT');
     Here's a line
     or two.
     THIS
@@ -2707,7 +2708,7 @@ Just don't forget that you have to put a semicolon on the end
 to finish the statement, as Perl doesn't know you're not going to
 try to do this:
 
-       print <<ABC
+    print <<ABC
     179231
     ABC
        + 20;
@@ -2848,7 +2849,7 @@ Thus:
 or:
 
     m/
-      bar	# NOT a comment, this slash / terminated m//!
+      bar       # NOT a comment, this slash / terminated m//!
      /x
 
 do not form legal quoted expressions.   The quoted part ends on the
@@ -2915,15 +2916,15 @@ between C<\Q> and C<\E> may lead to counterintuitive results.  So,
 C<"\Q\t\E"> is converted to C<quotemeta("\t")>, which is the same
 as C<"\\\t"> (since TAB is not alphanumeric).  Note also that:
 
-  $str = '\t';
-  return "\Q$str";
+    $str = '\t';
+    return "\Q$str";
 
 may be closer to the conjectural I<intention> of the writer of C<"\Q\t\E">.
 
 Interpolated scalars and arrays are converted internally to the C<join> and
 C<"."> catenation operations.  Thus, S<C<"$foo XXX '@arr'">> becomes:
 
-  $foo . " XXX '" . (join $", @arr) . "'";
+    $foo . " XXX '" . (join $", @arr) . "'";
 
 All operations above are performed simultaneously, left to right.
 
@@ -2937,11 +2938,11 @@ Note also that the interpolation code needs to make a decision on
 where the interpolated scalar ends.  For instance, whether
 S<C<< "a $x -> {c}" >>> really means:
 
-  "a " . $x . " -> {c}";
+    "a " . $x . " -> {c}";
 
 or:
 
-  "a " . $x -> {c};
+    "a " . $x -> {c};
 
 Most of the time, the longest possible text that does not include
 spaces between components and which contains matching braces or
@@ -3006,7 +3007,7 @@ matter unless the delimiter happens to be character special to the
 RE engine, such as in C<s*foo*bar*>, C<m[foo]>, or C<m?foo?>; or an
 alphanumeric char, as in:
 
-  m m ^ a \s* b mmx;
+    m m ^ a \s* b mmx;
 
 In the RE above, which is intentionally obfuscated for illustration, the
 delimiter is C<m>, the modifier is C<mx>, and after delimiter-removal the
@@ -3176,17 +3177,17 @@ gives you standard input.  The C<@ARGV> array is then processed as a list
 of filenames.  The loop
 
     while (<>) {
-	...			# code for each line
+        ...                     # code for each line
     }
 
 is equivalent to the following Perl-like pseudo code:
 
     unshift(@ARGV, '-') unless @ARGV;
     while ($ARGV = shift) {
-	open(ARGV, $ARGV);
-	while (<ARGV>) {
-	    ...		# code for each line
-	}
+        open(ARGV, $ARGV);
+        while (<ARGV>) {
+            ...         # code for each line
+        }
     }
 
 except that it isn't so cumbersome to say, and will actually work.
@@ -3238,15 +3239,15 @@ If you want to pass switches into your script, you can use one of the
 C<Getopts> modules or put a loop on the front like this:
 
     while ($_ = $ARGV[0], /^-/) {
-	shift;
+        shift;
         last if /^--$/;
-	if (/^-D(.*)/) { $debug = $1 }
-	if (/^-v/)     { $verbose++  }
-	# ...		# other switches
+        if (/^-D(.*)/) { $debug = $1 }
+        if (/^-v/)     { $verbose++  }
+        # ...           # other switches
     }
 
     while (<>) {
-	# ...		# code for each line
+        # ...           # code for each line
     }
 
 The C<< <> >> symbol will return C<undef> for end-of-file only once.
@@ -3281,15 +3282,15 @@ internal function directly as C<glob($foo)>, which is probably the right
 way to have done it in the first place.)  For example:
 
     while (<*.c>) {
-	chmod 0644, $_;
+        chmod 0644, $_;
     }
 
 is roughly equivalent to:
 
     open(FOO, "echo *.c | tr -s ' \t\r\f' '\\012\\012\\012\\012'|");
     while (<FOO>) {
-	chomp;
-	chmod 0644, $_;
+        chomp;
+        chmod 0644, $_;
     }
 
 except that the globbing is actually done internally using the standard
@@ -3351,7 +3352,7 @@ and this all reduces to one string internally.  Likewise, if
 you say
 
     foreach $file (@filenames) {
-	if (-s $file > 5 + 100 * 2**16) {  }
+        if (-s $file > 5 + 100 * 2**16) {  }
     }
 
 the compiler precomputes the number which that expression
@@ -3380,23 +3381,23 @@ The granularity for such extension or truncation is one or more
 bytes.
 
     # ASCII-based examples
-    print "j p \n" ^ " a h";        	# prints "JAPH\n"
-    print "JA" | "  ph\n";          	# prints "japh\n"
-    print "japh\nJunk" & '_____';   	# prints "JAPH\n";
-    print 'p N$' ^ " E<H\n";		# prints "Perl\n";
+    print "j p \n" ^ " a h";            # prints "JAPH\n"
+    print "JA" | "  ph\n";              # prints "japh\n"
+    print "japh\nJunk" & '_____';       # prints "JAPH\n";
+    print 'p N$' ^ " E<H\n";            # prints "Perl\n";
 
 If you are intending to manipulate bitstrings, be certain that
 you're supplying bitstrings: If an operand is a number, that will imply
 a B<numeric> bitwise operation.  You may explicitly show which type of
 operation you intend by using C<""> or C<0+>, as in the examples below.
 
-    $foo =  150  |  105;	# yields 255  (0x96 | 0x69 is 0xFF)
-    $foo = '150' |  105;	# yields 255
-    $foo =  150  | '105';	# yields 255
-    $foo = '150' | '105';	# yields string '155' (under ASCII)
+    $foo =  150  |  105;        # yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105;        # yields 255
+    $foo =  150  | '105';       # yields 255
+    $foo = '150' | '105';       # yields string '155' (under ASCII)
 
-    $baz = 0+$foo & 0+$bar;	# both ops explicitly numeric
-    $biz = "$foo" ^ "$bar";	# both ops explicitly stringy
+    $baz = 0+$foo & 0+$bar;     # both ops explicitly numeric
+    $biz = "$foo" ^ "$bar";     # both ops explicitly stringy
 
 This somewhat unpredictable behavior can be avoided with the "bitwise"
 feature, new in Perl 5.22.  You can enable it via S<C<use feature
@@ -3407,17 +3408,17 @@ after each operator (C<~. |. &. ^.>) forces it to treat its operands as
 strings:
 
     use feature "bitwise";
-    $foo =  150  |  105;	# yields 255  (0x96 | 0x69 is 0xFF)
-    $foo = '150' |  105;	# yields 255
-    $foo =  150  | '105';	# yields 255
-    $foo = '150' | '105';	# yields 255
-    $foo =  150  |. 105;	# yields string '155'
-    $foo = '150' |. 105;	# yields string '155'
-    $foo =  150  |.'105';	# yields string '155'
-    $foo = '150' |.'105';	# yields string '155'
+    $foo =  150  |  105;        # yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105;        # yields 255
+    $foo =  150  | '105';       # yields 255
+    $foo = '150' | '105';       # yields 255
+    $foo =  150  |. 105;        # yields string '155'
+    $foo = '150' |. 105;        # yields string '155'
+    $foo =  150  |.'105';       # yields string '155'
+    $foo = '150' |.'105';       # yields string '155'
 
-    $baz = $foo &  $bar;	# both operands numeric
-    $biz = $foo ^. $bar;	# both operands stringy
+    $baz = $foo &  $bar;        # both operands numeric
+    $biz = $foo ^. $bar;        # both operands stringy
 
 The assignment variants of these operators (C<&= |= ^= &.= |.= ^.=>)
 behave likewise under the feature.
@@ -3483,11 +3484,11 @@ decimal places.  See Knuth, volume II, for a more robust treatment of
 this topic.
 
     sub fp_equal {
-	my ($X, $Y, $POINTS) = @_;
-	my ($tX, $tY);
-	$tX = sprintf("%.${POINTS}g", $X);
-	$tY = sprintf("%.${POINTS}g", $Y);
-	return $tX eq $tY;
+        my ($X, $Y, $POINTS) = @_;
+        my ($tX, $tY);
+        $tX = sprintf("%.${POINTS}g", $X);
+        $tY = sprintf("%.${POINTS}g", $Y);
+        return $tX eq $tY;
     }
 
 The POSIX module (part of the standard perl distribution) implements
@@ -3514,22 +3515,22 @@ they're currently pretty slow.  At the cost of some space and
 considerable speed, they avoid the normal pitfalls associated with
 limited-precision representations.
 
-	use 5.010;
-	use bigint;  # easy interface to Math::BigInt
-	$x = 123456789123456789;
-	say $x * $x;
+    use 5.010;
+    use bigint;  # easy interface to Math::BigInt
+    $x = 123456789123456789;
+    say $x * $x;
     +15241578780673678515622620750190521
 
 Or with rationals:
 
-        use 5.010;
-        use bigrat;
-        $x = 3/22;
-        $y = 4/6;
-        say "x/y is ", $x/$y;
-        say "x*y is ", $x*$y;
-        x/y is 9/44
-        x*y is 1/11
+    use 5.010;
+    use bigrat;
+    $x = 3/22;
+    $y = 4/6;
+    say "x/y is ", $x/$y;
+    say "x*y is ", $x*$y;
+    x/y is 9/44
+    x*y is 1/11
 
 Several modules let you calculate with unlimited or fixed precision
 (bound only by memory and CPU time).  There
@@ -3538,19 +3539,19 @@ provide faster implementations via external C libraries.
 
 Here is a short, but incomplete summary:
 
-  Math::String           treat string sequences like numbers
-  Math::FixedPrecision   calculate with a fixed precision
-  Math::Currency         for currency calculations
-  Bit::Vector            manipulate bit vectors fast (uses C)
-  Math::BigIntFast       Bit::Vector wrapper for big numbers
-  Math::Pari             provides access to the Pari C library
-  Math::Cephes           uses the external Cephes C library (no
-                         big numbers)
-  Math::Cephes::Fraction fractions via the Cephes library
-  Math::GMP              another one using an external C library
-  Math::GMPz             an alternative interface to libgmp's big ints
-  Math::GMPq             an interface to libgmp's fraction numbers
-  Math::GMPf             an interface to libgmp's floating point numbers
+    Math::String           treat string sequences like numbers
+    Math::FixedPrecision   calculate with a fixed precision
+    Math::Currency         for currency calculations
+    Bit::Vector            manipulate bit vectors fast (uses C)
+    Math::BigIntFast       Bit::Vector wrapper for big numbers
+    Math::Pari             provides access to the Pari C library
+    Math::Cephes           uses the external Cephes C library (no
+                           big numbers)
+    Math::Cephes::Fraction fractions via the Cephes library
+    Math::GMP              another one using an external C library
+    Math::GMPz             an alternative interface to libgmp's big ints
+    Math::GMPq             an interface to libgmp's fraction numbers
+    Math::GMPf             an interface to libgmp's floating point numbers
 
 Choose wisely.
 
@@ -3560,390 +3561,416 @@ Choose wisely.
 
 The complete list of accepted paired delimiters as of Unicode 14.0 is:
 
- (  )    U+0028, U+0029   LEFT/RIGHT PARENTHESIS
- <  >    U+003C, U+003E   LESS-THAN/GREATER-THAN SIGN
- [  ]    U+005B, U+005D   LEFT/RIGHT SQUARE BRACKET
- {  }    U+007B, U+007D   LEFT/RIGHT CURLY BRACKET
- «  »    U+00AB, U+00BB   LEFT/RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
- »  «    U+00BB, U+00AB   RIGHT/LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
- ༺  ༻    U+0F3A, U+0F3B   TIBETAN MARK GUG RTAGS GYON,  TIBETAN MARK GUG
-                          RTAGS GYAS
- ༼  ༽    U+0F3C, U+0F3D   TIBETAN MARK ANG KHANG GYON,  TIBETAN MARK ANG
-                          KHANG GYAS
- ᚛  ᚜    U+169B, U+169C   OGHAM FEATHER MARK,  OGHAM REVERSED FEATHER MARK
- ‘  ’    U+2018, U+2019   LEFT/RIGHT SINGLE QUOTATION MARK
- ’  ‘    U+2019, U+2018   RIGHT/LEFT SINGLE QUOTATION MARK
- “  ”    U+201C, U+201D   LEFT/RIGHT DOUBLE QUOTATION MARK
- ”  “    U+201D, U+201C   RIGHT/LEFT DOUBLE QUOTATION MARK
- ‵  ′    U+2035, U+2032   REVERSED PRIME,  PRIME
- ‶  ″    U+2036, U+2033   REVERSED DOUBLE PRIME,  DOUBLE PRIME
- ‷  ‴    U+2037, U+2034   REVERSED TRIPLE PRIME,  TRIPLE PRIME
- ‹  ›    U+2039, U+203A   SINGLE LEFT/RIGHT-POINTING ANGLE QUOTATION MARK
- ›  ‹    U+203A, U+2039   SINGLE RIGHT/LEFT-POINTING ANGLE QUOTATION MARK
- ⁅  ⁆    U+2045, U+2046   LEFT/RIGHT SQUARE BRACKET WITH QUILL
- ⁍  ⁌    U+204D, U+204C   BLACK RIGHT/LEFTWARDS BULLET
- ⁽  ⁾    U+207D, U+207E   SUPERSCRIPT LEFT/RIGHT PARENTHESIS
- ₍  ₎    U+208D, U+208E   SUBSCRIPT LEFT/RIGHT PARENTHESIS
- →  ←    U+2192, U+2190   RIGHT/LEFTWARDS ARROW
- ↛  ↚    U+219B, U+219A   RIGHT/LEFTWARDS ARROW WITH STROKE
- ↝  ↜    U+219D, U+219C   RIGHT/LEFTWARDS WAVE ARROW
- ↠  ↞    U+21A0, U+219E   RIGHT/LEFTWARDS TWO HEADED ARROW
- ↣  ↢    U+21A3, U+21A2   RIGHT/LEFTWARDS ARROW WITH TAIL
- ↦  ↤    U+21A6, U+21A4   RIGHT/LEFTWARDS ARROW FROM BAR
- ↪  ↩    U+21AA, U+21A9   RIGHT/LEFTWARDS ARROW WITH HOOK
- ↬  ↫    U+21AC, U+21AB   RIGHT/LEFTWARDS ARROW WITH LOOP
- ↱  ↰    U+21B1, U+21B0   UPWARDS ARROW WITH TIP RIGHT/LEFTWARDS
- ↳  ↲    U+21B3, U+21B2   DOWNWARDS ARROW WITH TIP RIGHT/LEFTWARDS
- ⇀  ↼    U+21C0, U+21BC   RIGHT/LEFTWARDS HARPOON WITH BARB UPWARDS
- ⇁  ↽    U+21C1, U+21BD   RIGHT/LEFTWARDS HARPOON WITH BARB DOWNWARDS
- ⇉  ⇇    U+21C9, U+21C7   RIGHT/LEFTWARDS PAIRED ARROWS
- ⇏  ⇍    U+21CF, U+21CD   RIGHT/LEFTWARDS DOUBLE ARROW WITH STROKE
- ⇒  ⇐    U+21D2, U+21D0   RIGHT/LEFTWARDS DOUBLE ARROW
- ⇛  ⇚    U+21DB, U+21DA   RIGHT/LEFTWARDS TRIPLE ARROW
- ⇝  ⇜    U+21DD, U+21DC   RIGHT/LEFTWARDS SQUIGGLE ARROW
- ⇢  ⇠    U+21E2, U+21E0   RIGHT/LEFTWARDS DASHED ARROW
- ⇥  ⇤    U+21E5, U+21E4   RIGHT/LEFTWARDS ARROW TO BAR
- ⇨  ⇦    U+21E8, U+21E6   RIGHT/LEFTWARDS WHITE ARROW
- ⇴  ⬰    U+21F4, U+2B30   RIGHT/LEFT ARROW WITH SMALL CIRCLE
- ⇶  ⬱    U+21F6, U+2B31   THREE RIGHT/LEFTWARDS ARROWS
- ⇸  ⇷    U+21F8, U+21F7   RIGHT/LEFTWARDS ARROW WITH VERTICAL STROKE
- ⇻  ⇺    U+21FB, U+21FA   RIGHT/LEFTWARDS ARROW WITH DOUBLE VERTICAL
-                          STROKE
- ⇾  ⇽    U+21FE, U+21FD   RIGHT/LEFTWARDS OPEN-HEADED ARROW
- ∈  ∋    U+2208, U+220B   ELEMENT OF,  CONTAINS AS MEMBER
- ∉  ∌    U+2209, U+220C   NOT AN ELEMENT OF,  DOES NOT CONTAIN AS MEMBER
- ∊  ∍    U+220A, U+220D   SMALL ELEMENT OF,  SMALL CONTAINS AS MEMBER
- ≤  ≥    U+2264, U+2265   LESS-THAN/GREATER-THAN OR EQUAL TO
- ≦  ≧    U+2266, U+2267   LESS-THAN/GREATER-THAN OVER EQUAL TO
- ≨  ≩    U+2268, U+2269   LESS-THAN/GREATER-THAN BUT NOT EQUAL TO
- ≪  ≫    U+226A, U+226B   MUCH LESS-THAN/GREATER-THAN
- ≮  ≯    U+226E, U+226F   NOT LESS-THAN/GREATER-THAN
- ≰  ≱    U+2270, U+2271   NEITHER LESS-THAN/GREATER-THAN NOR EQUAL TO
- ≲  ≳    U+2272, U+2273   LESS-THAN/GREATER-THAN OR EQUIVALENT TO
- ≴  ≵    U+2274, U+2275   NEITHER LESS-THAN/GREATER-THAN NOR EQUIVALENT TO
- ≺  ≻    U+227A, U+227B   PRECEDES/SUCCEEDS
- ≼  ≽    U+227C, U+227D   PRECEDES/SUCCEEDS OR EQUAL TO
- ≾  ≿    U+227E, U+227F   PRECEDES/SUCCEEDS OR EQUIVALENT TO
- ⊀  ⊁    U+2280, U+2281   DOES NOT PRECEDE/SUCCEED
- ⊂  ⊃    U+2282, U+2283   SUBSET/SUPERSET OF
- ⊄  ⊅    U+2284, U+2285   NOT A SUBSET/SUPERSET OF
- ⊆  ⊇    U+2286, U+2287   SUBSET/SUPERSET OF OR EQUAL TO
- ⊈  ⊉    U+2288, U+2289   NEITHER A SUBSET/SUPERSET OF NOR EQUAL TO
- ⊊  ⊋    U+228A, U+228B   SUBSET/SUPERSET OF WITH NOT EQUAL TO
- ⊣  ⊢    U+22A3, U+22A2   LEFT/RIGHT TACK
- ⊦  ⫞    U+22A6, U+2ADE   ASSERTION,  SHORT LEFT TACK
- ⊨  ⫤    U+22A8, U+2AE4   TRUE,  VERTICAL BAR DOUBLE LEFT TURNSTILE
- ⊩  ⫣    U+22A9, U+2AE3   FORCES,  DOUBLE VERTICAL BAR LEFT TURNSTILE
- ⊰  ⊱    U+22B0, U+22B1   PRECEDES/SUCCEEDS UNDER RELATION
- ⋐  ⋑    U+22D0, U+22D1   DOUBLE SUBSET/SUPERSET
- ⋖  ⋗    U+22D6, U+22D7   LESS-THAN/GREATER-THAN WITH DOT
- ⋘  ⋙    U+22D8, U+22D9   VERY MUCH LESS-THAN/GREATER-THAN
- ⋜  ⋝    U+22DC, U+22DD   EQUAL TO OR LESS-THAN/GREATER-THAN
- ⋞  ⋟    U+22DE, U+22DF   EQUAL TO OR PRECEDES/SUCCEEDS
- ⋠  ⋡    U+22E0, U+22E1   DOES NOT PRECEDE/SUCCEED OR EQUAL
- ⋦  ⋧    U+22E6, U+22E7   LESS-THAN/GREATER-THAN BUT NOT EQUIVALENT TO
- ⋨  ⋩    U+22E8, U+22E9   PRECEDES/SUCCEEDS BUT NOT EQUIVALENT TO
- ⋲  ⋺    U+22F2, U+22FA   ELEMENT OF/CONTAINS WITH LONG HORIZONTAL STROKE
- ⋳  ⋻    U+22F3, U+22FB   ELEMENT OF/CONTAINS WITH VERTICAL BAR AT END OF
-                          HORIZONTAL STROKE
- ⋴  ⋼    U+22F4, U+22FC   SMALL ELEMENT OF/CONTAINS WITH VERTICAL BAR AT
-                          END OF HORIZONTAL STROKE
- ⋶  ⋽    U+22F6, U+22FD   ELEMENT OF/CONTAINS WITH OVERBAR
- ⋷  ⋾    U+22F7, U+22FE   SMALL ELEMENT OF/CONTAINS WITH OVERBAR
- ⌈  ⌉    U+2308, U+2309   LEFT/RIGHT CEILING
- ⌊  ⌋    U+230A, U+230B   LEFT/RIGHT FLOOR
- ⌦  ⌫    U+2326, U+232B   ERASE TO THE RIGHT/LEFT
- 〈 〉   U+2329, U+232A   LEFT/RIGHT-POINTING ANGLE BRACKET
- ⍈  ⍇    U+2348, U+2347   APL FUNCTIONAL SYMBOL QUAD RIGHT/LEFTWARDS ARROW
- ⏩ ⏪   U+23E9, U+23EA   BLACK RIGHT/LEFT-POINTING DOUBLE TRIANGLE
- ⏭  ⏮    U+23ED, U+23EE   BLACK RIGHT/LEFT-POINTING DOUBLE TRIANGLE WITH
-                          VERTICAL BAR
- ☛  ☚    U+261B, U+261A   BLACK RIGHT/LEFT POINTING INDEX
- ☞  ☜    U+261E, U+261C   WHITE RIGHT/LEFT POINTING INDEX
- ⚞  ⚟    U+269E, U+269F   THREE LINES CONVERGING RIGHT/LEFT
- ❨  ❩    U+2768, U+2769   MEDIUM LEFT/RIGHT PARENTHESIS ORNAMENT
- ❪  ❫    U+276A, U+276B   MEDIUM FLATTENED LEFT/RIGHT PARENTHESIS ORNAMENT
- ❬  ❭    U+276C, U+276D   MEDIUM LEFT/RIGHT-POINTING ANGLE BRACKET
-                          ORNAMENT
- ❮  ❯    U+276E, U+276F   HEAVY LEFT/RIGHT-POINTING ANGLE QUOTATION MARK
-                          ORNAMENT
- ❰  ❱    U+2770, U+2771   HEAVY LEFT/RIGHT-POINTING ANGLE BRACKET ORNAMENT
- ❲  ❳    U+2772, U+2773   LIGHT LEFT/RIGHT TORTOISE SHELL BRACKET ORNAMENT
- ❴  ❵    U+2774, U+2775   MEDIUM LEFT/RIGHT CURLY BRACKET ORNAMENT
- ⟃  ⟄    U+27C3, U+27C4   OPEN SUBSET/SUPERSET
- ⟅  ⟆    U+27C5, U+27C6   LEFT/RIGHT S-SHAPED BAG DELIMITER
- ⟈  ⟉    U+27C8, U+27C9   REVERSE SOLIDUS PRECEDING SUBSET,  SUPERSET
-                          PRECEDING SOLIDUS
- ⟞  ⟝    U+27DE, U+27DD   LONG LEFT/RIGHT TACK
- ⟦  ⟧    U+27E6, U+27E7   MATHEMATICAL LEFT/RIGHT WHITE SQUARE BRACKET
- ⟨  ⟩    U+27E8, U+27E9   MATHEMATICAL LEFT/RIGHT ANGLE BRACKET
- ⟪  ⟫    U+27EA, U+27EB   MATHEMATICAL LEFT/RIGHT DOUBLE ANGLE BRACKET
- ⟬  ⟭    U+27EC, U+27ED   MATHEMATICAL LEFT/RIGHT WHITE TORTOISE SHELL
-                          BRACKET
- ⟮  ⟯    U+27EE, U+27EF   MATHEMATICAL LEFT/RIGHT FLATTENED PARENTHESIS
- ⟴  ⬲    U+27F4, U+2B32   RIGHT/LEFT ARROW WITH CIRCLED PLUS
- ⟶  ⟵    U+27F6, U+27F5   LONG RIGHT/LEFTWARDS ARROW
- ⟹  ⟸    U+27F9, U+27F8   LONG RIGHT/LEFTWARDS DOUBLE ARROW
- ⟼  ⟻    U+27FC, U+27FB   LONG RIGHT/LEFTWARDS ARROW FROM BAR
- ⟾  ⟽    U+27FE, U+27FD   LONG RIGHT/LEFTWARDS DOUBLE ARROW FROM BAR
- ⟿  ⬳    U+27FF, U+2B33   LONG RIGHT/LEFTWARDS SQUIGGLE ARROW
- ⤀  ⬴    U+2900, U+2B34   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH VERTICAL
-                          STROKE
- ⤁  ⬵    U+2901, U+2B35   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH DOUBLE
-                          VERTICAL STROKE
- ⤃  ⤂    U+2903, U+2902   RIGHT/LEFTWARDS DOUBLE ARROW WITH VERTICAL
-                          STROKE
- ⤅  ⬶    U+2905, U+2B36   RIGHT/LEFTWARDS TWO-HEADED ARROW FROM BAR
- ⤇  ⤆    U+2907, U+2906   RIGHT/LEFTWARDS DOUBLE ARROW FROM BAR
- ⤍  ⤌    U+290D, U+290C   RIGHT/LEFTWARDS DOUBLE DASH ARROW
- ⤏  ⤎    U+290F, U+290E   RIGHT/LEFTWARDS TRIPLE DASH ARROW
- ⤐  ⬷    U+2910, U+2B37   RIGHT/LEFTWARDS TWO-HEADED TRIPLE DASH ARROW
- ⤑  ⬸    U+2911, U+2B38   RIGHT/LEFTWARDS ARROW WITH DOTTED STEM
- ⤔  ⬹    U+2914, U+2B39   RIGHT/LEFTWARDS ARROW WITH TAIL WITH VERTICAL
-                          STROKE
- ⤕  ⬺    U+2915, U+2B3A   RIGHT/LEFTWARDS ARROW WITH TAIL WITH DOUBLE
-                          VERTICAL STROKE
- ⤖  ⬻    U+2916, U+2B3B   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TAIL
- ⤗  ⬼    U+2917, U+2B3C   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TAIL WITH
-                          VERTICAL STROKE
- ⤘  ⬽    U+2918, U+2B3D   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TAIL WITH
-                          DOUBLE VERTICAL STROKE
- ⤚  ⤙    U+291A, U+2919   RIGHT/LEFTWARDS ARROW-TAIL
- ⤜  ⤛    U+291C, U+291B   RIGHT/LEFTWARDS DOUBLE ARROW-TAIL
- ⤞  ⤝    U+291E, U+291D   RIGHT/LEFTWARDS ARROW TO BLACK DIAMOND
- ⤠  ⤟    U+2920, U+291F   RIGHT/LEFTWARDS ARROW FROM BAR TO BLACK DIAMOND
- ⤳  ⬿    U+2933, U+2B3F   WAVE ARROW POINTING DIRECTLY RIGHT/LEFT
- ⤷  ⤶    U+2937, U+2936   ARROW POINTING DOWNWARDS THEN CURVING RIGHT/
-                          LEFTWARDS
- ⥅  ⥆    U+2945, U+2946   RIGHT/LEFTWARDS ARROW WITH PLUS BELOW
- ⥇  ⬾    U+2947, U+2B3E   RIGHT/LEFTWARDS ARROW THROUGH X
- ⥓  ⥒    U+2953, U+2952   RIGHT/LEFTWARDS HARPOON WITH BARB UP TO BAR
- ⥗  ⥖    U+2957, U+2956   RIGHT/LEFTWARDS HARPOON WITH BARB DOWN TO BAR
- ⥛  ⥚    U+295B, U+295A   RIGHT/LEFTWARDS HARPOON WITH BARB UP FROM BAR
- ⥟  ⥞    U+295F, U+295E   RIGHT/LEFTWARDS HARPOON WITH BARB DOWN FROM BAR
- ⥤  ⥢    U+2964, U+2962   RIGHT/LEFTWARDS HARPOON WITH BARB UP ABOVE
-                          RIGHT/LEFTWARDS HARPOON WITH BARB DOWN
- ⥬  ⥪    U+296C, U+296A   RIGHT/LEFTWARDS HARPOON WITH BARB UP ABOVE LONG
-                          DASH
- ⥭  ⥫    U+296D, U+296B   RIGHT/LEFTWARDS HARPOON WITH BARB DOWN BELOW
-                          LONG DASH
- ⥱  ⭀    U+2971, U+2B40   EQUALS SIGN ABOVE RIGHT/LEFTWARDS ARROW
- ⥲  ⭁    U+2972, U+2B41   TILDE OPERATOR ABOVE RIGHTWARDS ARROW,  REVERSE
-                          TILDE OPERATOR ABOVE LEFTWARDS ARROW
- ⥴  ⭋    U+2974, U+2B4B   RIGHTWARDS ARROW ABOVE TILDE OPERATOR,
-                          LEFTWARDS ARROW ABOVE REVERSE TILDE OPERATOR
- ⥵  ⭂    U+2975, U+2B42   RIGHTWARDS ARROW ABOVE ALMOST EQUAL TO,
-                          LEFTWARDS ARROW ABOVE REVERSE ALMOST EQUAL TO
- ⥹  ⥻    U+2979, U+297B   SUBSET/SUPERSET ABOVE RIGHT/LEFTWARDS ARROW
- ⦃  ⦄    U+2983, U+2984   LEFT/RIGHT WHITE CURLY BRACKET
- ⦅  ⦆    U+2985, U+2986   LEFT/RIGHT WHITE PARENTHESIS
- ⦇  ⦈    U+2987, U+2988   Z NOTATION LEFT/RIGHT IMAGE BRACKET
- ⦉  ⦊    U+2989, U+298A   Z NOTATION LEFT/RIGHT BINDING BRACKET
- ⦋  ⦌    U+298B, U+298C   LEFT/RIGHT SQUARE BRACKET WITH UNDERBAR
- ⦍  ⦐    U+298D, U+2990   LEFT/RIGHT SQUARE BRACKET WITH TICK IN TOP
-                          CORNER
- ⦏  ⦎    U+298F, U+298E   LEFT/RIGHT SQUARE BRACKET WITH TICK IN BOTTOM
-                          CORNER
- ⦑  ⦒    U+2991, U+2992   LEFT/RIGHT ANGLE BRACKET WITH DOT
- ⦓  ⦔    U+2993, U+2994   LEFT/RIGHT ARC LESS-THAN/GREATER-THAN BRACKET
- ⦕  ⦖    U+2995, U+2996   DOUBLE LEFT/RIGHT ARC GREATER-THAN/LESS-THAN
-                          BRACKET
- ⦗  ⦘    U+2997, U+2998   LEFT/RIGHT BLACK TORTOISE SHELL BRACKET
- ⦨  ⦩    U+29A8, U+29A9   MEASURED ANGLE WITH OPEN ARM ENDING IN ARROW
-                          POINTING UP AND RIGHT/LEFT
- ⦪  ⦫    U+29AA, U+29AB   MEASURED ANGLE WITH OPEN ARM ENDING IN ARROW
-                          POINTING DOWN AND RIGHT/LEFT
- ⦳  ⦴    U+29B3, U+29B4   EMPTY SET WITH RIGHT/LEFT ARROW ABOVE
- ⧀  ⧁    U+29C0, U+29C1   CIRCLED LESS-THAN/GREATER-THAN
- ⧘  ⧙    U+29D8, U+29D9   LEFT/RIGHT WIGGLY FENCE
- ⧚  ⧛    U+29DA, U+29DB   LEFT/RIGHT DOUBLE WIGGLY FENCE
- ⧼  ⧽    U+29FC, U+29FD   LEFT/RIGHT-POINTING CURVED ANGLE BRACKET
- ⩹  ⩺    U+2A79, U+2A7A   LESS-THAN/GREATER-THAN WITH CIRCLE INSIDE
- ⩻  ⩼    U+2A7B, U+2A7C   LESS-THAN/GREATER-THAN WITH QUESTION MARK ABOVE
- ⩽  ⩾    U+2A7D, U+2A7E   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO
- ⩿  ⪀    U+2A7F, U+2A80   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO WITH
-                          DOT INSIDE
- ⪁  ⪂    U+2A81, U+2A82   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO WITH
-                          DOT ABOVE
- ⪃  ⪄    U+2A83, U+2A84   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO WITH
-                          DOT ABOVE RIGHT/LEFT
- ⪅  ⪆    U+2A85, U+2A86   LESS-THAN/GREATER-THAN OR APPROXIMATE
- ⪇  ⪈    U+2A87, U+2A88   LESS-THAN/GREATER-THAN AND SINGLE-LINE NOT
-                          EQUAL TO
- ⪉  ⪊    U+2A89, U+2A8A   LESS-THAN/GREATER-THAN AND NOT APPROXIMATE
- ⪍  ⪎    U+2A8D, U+2A8E   LESS-THAN/GREATER-THAN ABOVE SIMILAR OR EQUAL
- ⪕  ⪖    U+2A95, U+2A96   SLANTED EQUAL TO OR LESS-THAN/GREATER-THAN
- ⪗  ⪘    U+2A97, U+2A98   SLANTED EQUAL TO OR LESS-THAN/GREATER-THAN WITH
-                          DOT INSIDE
- ⪙  ⪚    U+2A99, U+2A9A   DOUBLE-LINE EQUAL TO OR LESS-THAN/GREATER-THAN
- ⪛  ⪜    U+2A9B, U+2A9C   DOUBLE-LINE SLANTED EQUAL TO OR LESS-THAN/
-                          GREATER-THAN
- ⪝  ⪞    U+2A9D, U+2A9E   SIMILAR OR LESS-THAN/GREATER-THAN
- ⪟  ⪠    U+2A9F, U+2AA0   SIMILAR ABOVE LESS-THAN/GREATER-THAN ABOVE
-                          EQUALS SIGN
- ⪡  ⪢    U+2AA1, U+2AA2   DOUBLE NESTED LESS-THAN/GREATER-THAN
- ⪦  ⪧    U+2AA6, U+2AA7   LESS-THAN/GREATER-THAN CLOSED BY CURVE
- ⪨  ⪩    U+2AA8, U+2AA9   LESS-THAN/GREATER-THAN CLOSED BY CURVE ABOVE
-                          SLANTED EQUAL
- ⪪  ⪫    U+2AAA, U+2AAB   SMALLER THAN/LARGER THAN
- ⪬  ⪭    U+2AAC, U+2AAD   SMALLER THAN/LARGER THAN OR EQUAL TO
- ⪯  ⪰    U+2AAF, U+2AB0   PRECEDES/SUCCEEDS ABOVE SINGLE-LINE EQUALS SIGN
- ⪱  ⪲    U+2AB1, U+2AB2   PRECEDES/SUCCEEDS ABOVE SINGLE-LINE NOT EQUAL TO
- ⪳  ⪴    U+2AB3, U+2AB4   PRECEDES/SUCCEEDS ABOVE EQUALS SIGN
- ⪵  ⪶    U+2AB5, U+2AB6   PRECEDES/SUCCEEDS ABOVE NOT EQUAL TO
- ⪷  ⪸    U+2AB7, U+2AB8   PRECEDES/SUCCEEDS ABOVE ALMOST EQUAL TO
- ⪹  ⪺    U+2AB9, U+2ABA   PRECEDES/SUCCEEDS ABOVE NOT ALMOST EQUAL TO
- ⪻  ⪼    U+2ABB, U+2ABC   DOUBLE PRECEDES/SUCCEEDS
- ⪽  ⪾    U+2ABD, U+2ABE   SUBSET/SUPERSET WITH DOT
- ⪿  ⫀    U+2ABF, U+2AC0   SUBSET/SUPERSET WITH PLUS SIGN BELOW
- ⫁  ⫂    U+2AC1, U+2AC2   SUBSET/SUPERSET WITH MULTIPLICATION SIGN BELOW
- ⫃  ⫄    U+2AC3, U+2AC4   SUBSET/SUPERSET OF OR EQUAL TO WITH DOT ABOVE
- ⫅  ⫆    U+2AC5, U+2AC6   SUBSET/SUPERSET OF ABOVE EQUALS SIGN
- ⫇  ⫈    U+2AC7, U+2AC8   SUBSET/SUPERSET OF ABOVE TILDE OPERATOR
- ⫉  ⫊    U+2AC9, U+2ACA   SUBSET/SUPERSET OF ABOVE ALMOST EQUAL TO
- ⫋  ⫌    U+2ACB, U+2ACC   SUBSET/SUPERSET OF ABOVE NOT EQUAL TO
- ⫏  ⫐    U+2ACF, U+2AD0   CLOSED SUBSET/SUPERSET
- ⫑  ⫒    U+2AD1, U+2AD2   CLOSED SUBSET/SUPERSET OR EQUAL TO
- ⫕  ⫖    U+2AD5, U+2AD6   SUBSET/SUPERSET ABOVE SUBSET/SUPERSET
- ⫥  ⊫    U+2AE5, U+22AB   DOUBLE VERTICAL BAR DOUBLE LEFT/RIGHT TURNSTILE
- ⫷  ⫸    U+2AF7, U+2AF8   TRIPLE NESTED LESS-THAN/GREATER-THAN
- ⫹  ⫺    U+2AF9, U+2AFA   DOUBLE-LINE SLANTED LESS-THAN/GREATER-THAN OR
-                          EQUAL TO
- ⭆  ⭅    U+2B46, U+2B45   RIGHT/LEFTWARDS QUADRUPLE ARROW
- ⭇  ⭉    U+2B47, U+2B49   REVERSE TILDE OPERATOR ABOVE RIGHTWARDS ARROW,
-                          TILDE OPERATOR ABOVE LEFTWARDS ARROW
- ⭈  ⭊    U+2B48, U+2B4A   RIGHTWARDS ARROW ABOVE REVERSE ALMOST EQUAL
-                          TO,  LEFTWARDS ARROW ABOVE ALMOST EQUAL TO
- ⭌  ⥳    U+2B4C, U+2973   RIGHTWARDS ARROW ABOVE REVERSE TILDE OPERATOR,
-                          LEFTWARDS ARROW ABOVE TILDE OPERATOR
- ⭢  ⭠    U+2B62, U+2B60   RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW
- ⭬  ⭪    U+2B6C, U+2B6A   RIGHT/LEFTWARDS TRIANGLE-HEADED DASHED ARROW
- ⭲  ⭰    U+2B72, U+2B70   RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW TO BAR
- ⭼  ⭺    U+2B7C, U+2B7A   RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
-                          DOUBLE VERTICAL STROKE
- ⮆  ⮄    U+2B86, U+2B84   RIGHT/LEFTWARDS TRIANGLE-HEADED PAIRED ARROWS
- ⮊  ⮈    U+2B8A, U+2B88   RIGHT/LEFTWARDS BLACK CIRCLED WHITE ARROW
- ⮕  ⬅    U+2B95, U+2B05   RIGHT/LEFTWARDS BLACK ARROW
- ⮚  ⮘    U+2B9A, U+2B98   THREE-D TOP-LIGHTED RIGHT/LEFTWARDS EQUILATERAL
-                          ARROWHEAD
- ⮞  ⮜    U+2B9E, U+2B9C   BLACK RIGHT/LEFTWARDS EQUILATERAL ARROWHEAD
- ⮡  ⮠    U+2BA1, U+2BA0   DOWNWARDS TRIANGLE-HEADED ARROW WITH LONG TIP
-                          RIGHT/LEFTWARDS
- ⮣  ⮢    U+2BA3, U+2BA2   UPWARDS TRIANGLE-HEADED ARROW WITH LONG TIP
-                          RIGHT/LEFTWARDS
- ⮩  ⮨    U+2BA9, U+2BA8   BLACK CURVED DOWNWARDS AND RIGHT/LEFTWARDS ARROW
- ⮫  ⮪    U+2BAB, U+2BAA   BLACK CURVED UPWARDS AND RIGHT/LEFTWARDS ARROW
- ⮱  ⮰    U+2BB1, U+2BB0   RIBBON ARROW DOWN RIGHT/LEFT
- ⮳  ⮲    U+2BB3, U+2BB2   RIBBON ARROW UP RIGHT/LEFT
- ⯮  ⯬    U+2BEE, U+2BEC   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TRIANGLE
-                          ARROWHEADS
- ⸂  ⸃    U+2E02, U+2E03   LEFT/RIGHT SUBSTITUTION BRACKET
- ⸃  ⸂    U+2E03, U+2E02   RIGHT/LEFT SUBSTITUTION BRACKET
- ⸄  ⸅    U+2E04, U+2E05   LEFT/RIGHT DOTTED SUBSTITUTION BRACKET
- ⸅  ⸄    U+2E05, U+2E04   RIGHT/LEFT DOTTED SUBSTITUTION BRACKET
- ⸉  ⸊    U+2E09, U+2E0A   LEFT/RIGHT TRANSPOSITION BRACKET
- ⸊  ⸉    U+2E0A, U+2E09   RIGHT/LEFT TRANSPOSITION BRACKET
- ⸌  ⸍    U+2E0C, U+2E0D   LEFT/RIGHT RAISED OMISSION BRACKET
- ⸍  ⸌    U+2E0D, U+2E0C   RIGHT/LEFT RAISED OMISSION BRACKET
- ⸑  ⸐    U+2E11, U+2E10   REVERSED FORKED PARAGRAPHOS,  FORKED PARAGRAPHOS
- ⸜  ⸝    U+2E1C, U+2E1D   LEFT/RIGHT LOW PARAPHRASE BRACKET
- ⸝  ⸜    U+2E1D, U+2E1C   RIGHT/LEFT LOW PARAPHRASE BRACKET
- ⸠  ⸡    U+2E20, U+2E21   LEFT/RIGHT VERTICAL BAR WITH QUILL
- ⸡  ⸠    U+2E21, U+2E20   RIGHT/LEFT VERTICAL BAR WITH QUILL
- ⸢  ⸣    U+2E22, U+2E23   TOP LEFT/RIGHT HALF BRACKET
- ⸤  ⸥    U+2E24, U+2E25   BOTTOM LEFT/RIGHT HALF BRACKET
- ⸦  ⸧    U+2E26, U+2E27   LEFT/RIGHT SIDEWAYS U BRACKET
- ⸨  ⸩    U+2E28, U+2E29   LEFT/RIGHT DOUBLE PARENTHESIS
- ⸶  ⸷    U+2E36, U+2E37   DAGGER WITH LEFT/RIGHT GUARD
- ⹂  „    U+2E42, U+201E   DOUBLE LOW-REVERSED-9 QUOTATION MARK,  DOUBLE
-                          LOW-9 QUOTATION MARK
- ⹕  ⹖    U+2E55, U+2E56   LEFT/RIGHT SQUARE BRACKET WITH STROKE
- ⹗  ⹘    U+2E57, U+2E58   LEFT/RIGHT SQUARE BRACKET WITH DOUBLE STROKE
- ⹙  ⹚    U+2E59, U+2E5A   TOP HALF LEFT/RIGHT PARENTHESIS
- ⹛  ⹜    U+2E5B, U+2E5C   BOTTOM HALF LEFT/RIGHT PARENTHESIS
- 〈 〉   U+3008, U+3009   LEFT/RIGHT ANGLE BRACKET
- 《 》   U+300A, U+300B   LEFT/RIGHT DOUBLE ANGLE BRACKET
- 「 」   U+300C, U+300D   LEFT/RIGHT CORNER BRACKET
- 『 』   U+300E, U+300F   LEFT/RIGHT WHITE CORNER BRACKET
- 【 】   U+3010, U+3011   LEFT/RIGHT BLACK LENTICULAR BRACKET
- 〔 〕   U+3014, U+3015   LEFT/RIGHT TORTOISE SHELL BRACKET
- 〖 〗   U+3016, U+3017   LEFT/RIGHT WHITE LENTICULAR BRACKET
- 〘 〙   U+3018, U+3019   LEFT/RIGHT WHITE TORTOISE SHELL BRACKET
- 〚 〛   U+301A, U+301B   LEFT/RIGHT WHITE SQUARE BRACKET
- 〝 〞   U+301D, U+301E   REVERSED DOUBLE PRIME QUOTATION MARK,  DOUBLE
-                          PRIME QUOTATION MARK
- ꧁  ꧂    U+A9C1, U+A9C2   JAVANESE LEFT/RIGHT RERENGGAN
- ﴾  ﴿    U+FD3E, U+FD3F   ORNATE LEFT/RIGHT PARENTHESIS
- ﹙ ﹚   U+FE59, U+FE5A   SMALL LEFT/RIGHT PARENTHESIS
- ﹛ ﹜   U+FE5B, U+FE5C   SMALL LEFT/RIGHT CURLY BRACKET
- ﹝ ﹞   U+FE5D, U+FE5E   SMALL LEFT/RIGHT TORTOISE SHELL BRACKET
- ﹤ ﹥   U+FE64, U+FE65   SMALL LESS-THAN/GREATER-THAN SIGN
- （ ）   U+FF08, U+FF09   FULLWIDTH LEFT/RIGHT PARENTHESIS
- ＜ ＞   U+FF1C, U+FF1E   FULLWIDTH LESS-THAN/GREATER-THAN SIGN
- ［ ］   U+FF3B, U+FF3D   FULLWIDTH LEFT/RIGHT SQUARE BRACKET
- ｛ ｝   U+FF5B, U+FF5D   FULLWIDTH LEFT/RIGHT CURLY BRACKET
- ｟ ｠   U+FF5F, U+FF60   FULLWIDTH LEFT/RIGHT WHITE PARENTHESIS
- ｢  ｣    U+FF62, U+FF63   HALFWIDTH LEFT/RIGHT CORNER BRACKET
- ￫  ￩    U+FFEB, U+FFE9   HALFWIDTH RIGHT/LEFTWARDS ARROW
- 𝄃  𝄂    U+1D103, U+1D102 MUSICAL SYMBOL REVERSE FINAL BARLINE,  MUSICAL
-                          SYMBOL FINAL BARLINE
- 𝄆  𝄇    U+1D106, U+1D107 MUSICAL SYMBOL LEFT/RIGHT REPEAT SIGN
- 👉 👈   U+1F449, U+1F448 WHITE RIGHT/LEFT POINTING BACKHAND INDEX
- 🔈 🕨    U+1F508, U+1F568 SPEAKER,  RIGHT SPEAKER
- 🔉 🕩    U+1F509, U+1F569 SPEAKER WITH ONE SOUND WAVE,  RIGHT SPEAKER WITH
-                          ONE SOUND WAVE
- 🔊 🕪    U+1F50A, U+1F56A SPEAKER WITH THREE SOUND WAVES,  RIGHT SPEAKER
-                          WITH THREE SOUND WAVES
- 🕻  🕽    U+1F57B, U+1F57D LEFT/RIGHT HAND TELEPHONE RECEIVER
- 🖙  🖘    U+1F599, U+1F598 SIDEWAYS WHITE RIGHT/LEFT POINTING INDEX
- 🖛  🖚    U+1F59B, U+1F59A SIDEWAYS BLACK RIGHT/LEFT POINTING INDEX
- 🖝  🖜    U+1F59D, U+1F59C BLACK RIGHT/LEFT POINTING BACKHAND INDEX
- 🗦  🗧    U+1F5E6, U+1F5E7 THREE RAYS LEFT/RIGHT
- 🠂  🠀    U+1F802, U+1F800 RIGHT/LEFTWARDS ARROW WITH SMALL TRIANGLE
-                          ARROWHEAD
- 🠆  🠄    U+1F806, U+1F804 RIGHT/LEFTWARDS ARROW WITH MEDIUM TRIANGLE
-                          ARROWHEAD
- 🠊  🠈    U+1F80A, U+1F808 RIGHT/LEFTWARDS ARROW WITH LARGE TRIANGLE
-                          ARROWHEAD
- 🠒  🠐    U+1F812, U+1F810 RIGHT/LEFTWARDS ARROW WITH SMALL EQUILATERAL
-                          ARROWHEAD
- 🠖  🠔    U+1F816, U+1F814 RIGHT/LEFTWARDS ARROW WITH EQUILATERAL ARROWHEAD
- 🠚  🠘    U+1F81A, U+1F818 HEAVY RIGHT/LEFTWARDS ARROW WITH EQUILATERAL
-                          ARROWHEAD
- 🠞  🠜    U+1F81E, U+1F81C HEAVY RIGHT/LEFTWARDS ARROW WITH LARGE
-                          EQUILATERAL ARROWHEAD
- 🠢  🠠    U+1F822, U+1F820 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
-                          NARROW SHAFT
- 🠦  🠤    U+1F826, U+1F824 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
-                          MEDIUM SHAFT
- 🠪  🠨    U+1F82A, U+1F828 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH BOLD
-                          SHAFT
- 🠮  🠬    U+1F82E, U+1F82C RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
-                          HEAVY SHAFT
- 🠲  🠰    U+1F832, U+1F830 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH VERY
-                          HEAVY SHAFT
- 🠶  🠴    U+1F836, U+1F834 RIGHT/LEFTWARDS FINGER-POST ARROW
- 🠺  🠸    U+1F83A, U+1F838 RIGHT/LEFTWARDS SQUARED ARROW
- 🠾  🠼    U+1F83E, U+1F83C RIGHT/LEFTWARDS COMPRESSED ARROW
- 🡂  🡀    U+1F842, U+1F840 RIGHT/LEFTWARDS HEAVY COMPRESSED ARROW
- 🡆  🡄    U+1F846, U+1F844 RIGHT/LEFTWARDS HEAVY ARROW
- 🡒  🡐    U+1F852, U+1F850 RIGHT/LEFTWARDS SANS-SERIF ARROW
- 🡢  🡠    U+1F862, U+1F860 WIDE-HEADED RIGHT/LEFTWARDS LIGHT BARB ARROW
- 🡪  🡨    U+1F86A, U+1F868 WIDE-HEADED RIGHT/LEFTWARDS BARB ARROW
- 🡲  🡰    U+1F872, U+1F870 WIDE-HEADED RIGHT/LEFTWARDS MEDIUM BARB ARROW
- 🡺  🡸    U+1F87A, U+1F878 WIDE-HEADED RIGHT/LEFTWARDS HEAVY BARB ARROW
- 🢂  🢀    U+1F882, U+1F880 WIDE-HEADED RIGHT/LEFTWARDS VERY HEAVY BARB
-                          ARROW
- 🢒  🢐    U+1F892, U+1F890 RIGHT/LEFTWARDS TRIANGLE ARROWHEAD
- 🢖  🢔    U+1F896, U+1F894 RIGHT/LEFTWARDS WHITE ARROW WITHIN TRIANGLE
-                          ARROWHEAD
- 🢚  🢘    U+1F89A, U+1F898 RIGHT/LEFTWARDS ARROW WITH NOTCHED TAIL
- 🢡  🢠    U+1F8A1, U+1F8A0 RIGHTWARDS BOTTOM SHADED WHITE ARROW,
-                          LEFTWARDS BOTTOM-SHADED WHITE ARROW
- 🢣  🢢    U+1F8A3, U+1F8A2 RIGHT/LEFTWARDS TOP SHADED WHITE ARROW
- 🢥  🢦    U+1F8A5, U+1F8A6 RIGHT/LEFTWARDS RIGHT-SHADED WHITE ARROW
- 🢧  🢤    U+1F8A7, U+1F8A4 RIGHT/LEFTWARDS LEFT-SHADED WHITE ARROW
- 🢩  🢨    U+1F8A9, U+1F8A8 RIGHT/LEFTWARDS BACK-TILTED SHADOWED WHITE ARROW
- 🢫  🢪    U+1F8AB, U+1F8AA RIGHT/LEFTWARDS FRONT-TILTED SHADOWED WHITE
-                          ARROW
+    (  )    U+0028, U+0029   LEFT/RIGHT PARENTHESIS
+    <  >    U+003C, U+003E   LESS-THAN/GREATER-THAN SIGN
+    [  ]    U+005B, U+005D   LEFT/RIGHT SQUARE BRACKET
+    {  }    U+007B, U+007D   LEFT/RIGHT CURLY BRACKET
+    «  »    U+00AB, U+00BB   LEFT/RIGHT-POINTING DOUBLE ANGLE QUOTATION
+                             MARK
+    »  «    U+00BB, U+00AB   RIGHT/LEFT-POINTING DOUBLE ANGLE QUOTATION
+                             MARK
+    ༺  ༻    U+0F3A, U+0F3B   TIBETAN MARK GUG RTAGS GYON,  TIBETAN MARK
+                             GUG RTAGS GYAS
+    ༼  ༽    U+0F3C, U+0F3D   TIBETAN MARK ANG KHANG GYON,  TIBETAN MARK
+                             ANG KHANG GYAS
+    ᚛  ᚜    U+169B, U+169C   OGHAM FEATHER MARK,  OGHAM REVERSED FEATHER
+                             MARK
+    ‘  ’    U+2018, U+2019   LEFT/RIGHT SINGLE QUOTATION MARK
+    ’  ‘    U+2019, U+2018   RIGHT/LEFT SINGLE QUOTATION MARK
+    “  ”    U+201C, U+201D   LEFT/RIGHT DOUBLE QUOTATION MARK
+    ”  “    U+201D, U+201C   RIGHT/LEFT DOUBLE QUOTATION MARK
+    ‵  ′    U+2035, U+2032   REVERSED PRIME,  PRIME
+    ‶  ″    U+2036, U+2033   REVERSED DOUBLE PRIME,  DOUBLE PRIME
+    ‷  ‴    U+2037, U+2034   REVERSED TRIPLE PRIME,  TRIPLE PRIME
+    ‹  ›    U+2039, U+203A   SINGLE LEFT/RIGHT-POINTING ANGLE QUOTATION
+                             MARK
+    ›  ‹    U+203A, U+2039   SINGLE RIGHT/LEFT-POINTING ANGLE QUOTATION
+                             MARK
+    ⁅  ⁆    U+2045, U+2046   LEFT/RIGHT SQUARE BRACKET WITH QUILL
+    ⁍  ⁌    U+204D, U+204C   BLACK RIGHT/LEFTWARDS BULLET
+    ⁽  ⁾    U+207D, U+207E   SUPERSCRIPT LEFT/RIGHT PARENTHESIS
+    ₍  ₎    U+208D, U+208E   SUBSCRIPT LEFT/RIGHT PARENTHESIS
+    →  ←    U+2192, U+2190   RIGHT/LEFTWARDS ARROW
+    ↛  ↚    U+219B, U+219A   RIGHT/LEFTWARDS ARROW WITH STROKE
+    ↝  ↜    U+219D, U+219C   RIGHT/LEFTWARDS WAVE ARROW
+    ↠  ↞    U+21A0, U+219E   RIGHT/LEFTWARDS TWO HEADED ARROW
+    ↣  ↢    U+21A3, U+21A2   RIGHT/LEFTWARDS ARROW WITH TAIL
+    ↦  ↤    U+21A6, U+21A4   RIGHT/LEFTWARDS ARROW FROM BAR
+    ↪  ↩    U+21AA, U+21A9   RIGHT/LEFTWARDS ARROW WITH HOOK
+    ↬  ↫    U+21AC, U+21AB   RIGHT/LEFTWARDS ARROW WITH LOOP
+    ↱  ↰    U+21B1, U+21B0   UPWARDS ARROW WITH TIP RIGHT/LEFTWARDS
+    ↳  ↲    U+21B3, U+21B2   DOWNWARDS ARROW WITH TIP RIGHT/LEFTWARDS
+    ⇀  ↼    U+21C0, U+21BC   RIGHT/LEFTWARDS HARPOON WITH BARB UPWARDS
+    ⇁  ↽    U+21C1, U+21BD   RIGHT/LEFTWARDS HARPOON WITH BARB DOWNWARDS
+    ⇉  ⇇    U+21C9, U+21C7   RIGHT/LEFTWARDS PAIRED ARROWS
+    ⇏  ⇍    U+21CF, U+21CD   RIGHT/LEFTWARDS DOUBLE ARROW WITH STROKE
+    ⇒  ⇐    U+21D2, U+21D0   RIGHT/LEFTWARDS DOUBLE ARROW
+    ⇛  ⇚    U+21DB, U+21DA   RIGHT/LEFTWARDS TRIPLE ARROW
+    ⇝  ⇜    U+21DD, U+21DC   RIGHT/LEFTWARDS SQUIGGLE ARROW
+    ⇢  ⇠    U+21E2, U+21E0   RIGHT/LEFTWARDS DASHED ARROW
+    ⇥  ⇤    U+21E5, U+21E4   RIGHT/LEFTWARDS ARROW TO BAR
+    ⇨  ⇦    U+21E8, U+21E6   RIGHT/LEFTWARDS WHITE ARROW
+    ⇴  ⬰    U+21F4, U+2B30   RIGHT/LEFT ARROW WITH SMALL CIRCLE
+    ⇶  ⬱    U+21F6, U+2B31   THREE RIGHT/LEFTWARDS ARROWS
+    ⇸  ⇷    U+21F8, U+21F7   RIGHT/LEFTWARDS ARROW WITH VERTICAL STROKE
+    ⇻  ⇺    U+21FB, U+21FA   RIGHT/LEFTWARDS ARROW WITH DOUBLE VERTICAL
+                             STROKE
+    ⇾  ⇽    U+21FE, U+21FD   RIGHT/LEFTWARDS OPEN-HEADED ARROW
+    ∈  ∋    U+2208, U+220B   ELEMENT OF,  CONTAINS AS MEMBER
+    ∉  ∌    U+2209, U+220C   NOT AN ELEMENT OF,  DOES NOT CONTAIN AS
+                             MEMBER
+    ∊  ∍    U+220A, U+220D   SMALL ELEMENT OF,  SMALL CONTAINS AS MEMBER
+    ≤  ≥    U+2264, U+2265   LESS-THAN/GREATER-THAN OR EQUAL TO
+    ≦  ≧    U+2266, U+2267   LESS-THAN/GREATER-THAN OVER EQUAL TO
+    ≨  ≩    U+2268, U+2269   LESS-THAN/GREATER-THAN BUT NOT EQUAL TO
+    ≪  ≫    U+226A, U+226B   MUCH LESS-THAN/GREATER-THAN
+    ≮  ≯    U+226E, U+226F   NOT LESS-THAN/GREATER-THAN
+    ≰  ≱    U+2270, U+2271   NEITHER LESS-THAN/GREATER-THAN NOR EQUAL TO
+    ≲  ≳    U+2272, U+2273   LESS-THAN/GREATER-THAN OR EQUIVALENT TO
+    ≴  ≵    U+2274, U+2275   NEITHER LESS-THAN/GREATER-THAN NOR
+                             EQUIVALENT TO
+    ≺  ≻    U+227A, U+227B   PRECEDES/SUCCEEDS
+    ≼  ≽    U+227C, U+227D   PRECEDES/SUCCEEDS OR EQUAL TO
+    ≾  ≿    U+227E, U+227F   PRECEDES/SUCCEEDS OR EQUIVALENT TO
+    ⊀  ⊁    U+2280, U+2281   DOES NOT PRECEDE/SUCCEED
+    ⊂  ⊃    U+2282, U+2283   SUBSET/SUPERSET OF
+    ⊄  ⊅    U+2284, U+2285   NOT A SUBSET/SUPERSET OF
+    ⊆  ⊇    U+2286, U+2287   SUBSET/SUPERSET OF OR EQUAL TO
+    ⊈  ⊉    U+2288, U+2289   NEITHER A SUBSET/SUPERSET OF NOR EQUAL TO
+    ⊊  ⊋    U+228A, U+228B   SUBSET/SUPERSET OF WITH NOT EQUAL TO
+    ⊣  ⊢    U+22A3, U+22A2   LEFT/RIGHT TACK
+    ⊦  ⫞    U+22A6, U+2ADE   ASSERTION,  SHORT LEFT TACK
+    ⊨  ⫤    U+22A8, U+2AE4   TRUE,  VERTICAL BAR DOUBLE LEFT TURNSTILE
+    ⊩  ⫣    U+22A9, U+2AE3   FORCES,  DOUBLE VERTICAL BAR LEFT TURNSTILE
+    ⊰  ⊱    U+22B0, U+22B1   PRECEDES/SUCCEEDS UNDER RELATION
+    ⋐  ⋑    U+22D0, U+22D1   DOUBLE SUBSET/SUPERSET
+    ⋖  ⋗    U+22D6, U+22D7   LESS-THAN/GREATER-THAN WITH DOT
+    ⋘  ⋙    U+22D8, U+22D9   VERY MUCH LESS-THAN/GREATER-THAN
+    ⋜  ⋝    U+22DC, U+22DD   EQUAL TO OR LESS-THAN/GREATER-THAN
+    ⋞  ⋟    U+22DE, U+22DF   EQUAL TO OR PRECEDES/SUCCEEDS
+    ⋠  ⋡    U+22E0, U+22E1   DOES NOT PRECEDE/SUCCEED OR EQUAL
+    ⋦  ⋧    U+22E6, U+22E7   LESS-THAN/GREATER-THAN BUT NOT EQUIVALENT TO
+    ⋨  ⋩    U+22E8, U+22E9   PRECEDES/SUCCEEDS BUT NOT EQUIVALENT TO
+    ⋲  ⋺    U+22F2, U+22FA   ELEMENT OF/CONTAINS WITH LONG HORIZONTAL
+                             STROKE
+    ⋳  ⋻    U+22F3, U+22FB   ELEMENT OF/CONTAINS WITH VERTICAL BAR AT END
+                             OF HORIZONTAL STROKE
+    ⋴  ⋼    U+22F4, U+22FC   SMALL ELEMENT OF/CONTAINS WITH VERTICAL BAR
+                             AT END OF HORIZONTAL STROKE
+    ⋶  ⋽    U+22F6, U+22FD   ELEMENT OF/CONTAINS WITH OVERBAR
+    ⋷  ⋾    U+22F7, U+22FE   SMALL ELEMENT OF/CONTAINS WITH OVERBAR
+    ⌈  ⌉    U+2308, U+2309   LEFT/RIGHT CEILING
+    ⌊  ⌋    U+230A, U+230B   LEFT/RIGHT FLOOR
+    ⌦  ⌫    U+2326, U+232B   ERASE TO THE RIGHT/LEFT
+    〈 〉   U+2329, U+232A   LEFT/RIGHT-POINTING ANGLE BRACKET
+    ⍈  ⍇    U+2348, U+2347   APL FUNCTIONAL SYMBOL QUAD RIGHT/LEFTWARDS
+                             ARROW
+    ⏩ ⏪   U+23E9, U+23EA   BLACK RIGHT/LEFT-POINTING DOUBLE TRIANGLE
+    ⏭ ⏮   U+23ED, U+23EE   BLACK RIGHT/LEFT-POINTING DOUBLE TRIANGLE
+                             WITH VERTICAL BAR
+    ☛  ☚    U+261B, U+261A   BLACK RIGHT/LEFT POINTING INDEX
+    ☞  ☜    U+261E, U+261C   WHITE RIGHT/LEFT POINTING INDEX
+    ⚞  ⚟    U+269E, U+269F   THREE LINES CONVERGING RIGHT/LEFT
+    ❨  ❩    U+2768, U+2769   MEDIUM LEFT/RIGHT PARENTHESIS ORNAMENT
+    ❪  ❫    U+276A, U+276B   MEDIUM FLATTENED LEFT/RIGHT PARENTHESIS
+                             ORNAMENT
+    ❬  ❭    U+276C, U+276D   MEDIUM LEFT/RIGHT-POINTING ANGLE BRACKET
+                             ORNAMENT
+    ❮  ❯    U+276E, U+276F   HEAVY LEFT/RIGHT-POINTING ANGLE QUOTATION
+                             MARK ORNAMENT
+    ❰  ❱    U+2770, U+2771   HEAVY LEFT/RIGHT-POINTING ANGLE BRACKET
+                             ORNAMENT
+    ❲  ❳    U+2772, U+2773   LIGHT LEFT/RIGHT TORTOISE SHELL BRACKET
+                             ORNAMENT
+    ❴  ❵    U+2774, U+2775   MEDIUM LEFT/RIGHT CURLY BRACKET ORNAMENT
+    ⟃  ⟄    U+27C3, U+27C4   OPEN SUBSET/SUPERSET
+    ⟅  ⟆    U+27C5, U+27C6   LEFT/RIGHT S-SHAPED BAG DELIMITER
+    ⟈  ⟉    U+27C8, U+27C9   REVERSE SOLIDUS PRECEDING SUBSET,  SUPERSET
+                             PRECEDING SOLIDUS
+    ⟞  ⟝    U+27DE, U+27DD   LONG LEFT/RIGHT TACK
+    ⟦  ⟧    U+27E6, U+27E7   MATHEMATICAL LEFT/RIGHT WHITE SQUARE BRACKET
+    ⟨  ⟩    U+27E8, U+27E9   MATHEMATICAL LEFT/RIGHT ANGLE BRACKET
+    ⟪  ⟫    U+27EA, U+27EB   MATHEMATICAL LEFT/RIGHT DOUBLE ANGLE BRACKET
+    ⟬  ⟭    U+27EC, U+27ED   MATHEMATICAL LEFT/RIGHT WHITE TORTOISE SHELL
+                             BRACKET
+    ⟮  ⟯    U+27EE, U+27EF   MATHEMATICAL LEFT/RIGHT FLATTENED PARENTHESIS
+    ⟴  ⬲    U+27F4, U+2B32   RIGHT/LEFT ARROW WITH CIRCLED PLUS
+    ⟶  ⟵    U+27F6, U+27F5   LONG RIGHT/LEFTWARDS ARROW
+    ⟹  ⟸    U+27F9, U+27F8   LONG RIGHT/LEFTWARDS DOUBLE ARROW
+    ⟼  ⟻    U+27FC, U+27FB   LONG RIGHT/LEFTWARDS ARROW FROM BAR
+    ⟾  ⟽    U+27FE, U+27FD   LONG RIGHT/LEFTWARDS DOUBLE ARROW FROM BAR
+    ⟿  ⬳    U+27FF, U+2B33   LONG RIGHT/LEFTWARDS SQUIGGLE ARROW
+    ⤀  ⬴    U+2900, U+2B34   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH
+                             VERTICAL STROKE
+    ⤁  ⬵    U+2901, U+2B35   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH DOUBLE
+                             VERTICAL STROKE
+    ⤃  ⤂    U+2903, U+2902   RIGHT/LEFTWARDS DOUBLE ARROW WITH VERTICAL
+                             STROKE
+    ⤅  ⬶    U+2905, U+2B36   RIGHT/LEFTWARDS TWO-HEADED ARROW FROM BAR
+    ⤇  ⤆    U+2907, U+2906   RIGHT/LEFTWARDS DOUBLE ARROW FROM BAR
+    ⤍  ⤌    U+290D, U+290C   RIGHT/LEFTWARDS DOUBLE DASH ARROW
+    ⤏  ⤎    U+290F, U+290E   RIGHT/LEFTWARDS TRIPLE DASH ARROW
+    ⤐  ⬷    U+2910, U+2B37   RIGHT/LEFTWARDS TWO-HEADED TRIPLE DASH ARROW
+    ⤑  ⬸    U+2911, U+2B38   RIGHT/LEFTWARDS ARROW WITH DOTTED STEM
+    ⤔  ⬹    U+2914, U+2B39   RIGHT/LEFTWARDS ARROW WITH TAIL WITH VERTICAL
+                             STROKE
+    ⤕  ⬺    U+2915, U+2B3A   RIGHT/LEFTWARDS ARROW WITH TAIL WITH DOUBLE
+                             VERTICAL STROKE
+    ⤖  ⬻    U+2916, U+2B3B   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TAIL
+    ⤗  ⬼    U+2917, U+2B3C   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TAIL
+                             WITH VERTICAL STROKE
+    ⤘  ⬽    U+2918, U+2B3D   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH TAIL
+                             WITH DOUBLE VERTICAL STROKE
+    ⤚  ⤙    U+291A, U+2919   RIGHT/LEFTWARDS ARROW-TAIL
+    ⤜  ⤛    U+291C, U+291B   RIGHT/LEFTWARDS DOUBLE ARROW-TAIL
+    ⤞  ⤝    U+291E, U+291D   RIGHT/LEFTWARDS ARROW TO BLACK DIAMOND
+    ⤠  ⤟    U+2920, U+291F   RIGHT/LEFTWARDS ARROW FROM BAR TO BLACK
+                             DIAMOND
+    ⤳  ⬿    U+2933, U+2B3F   WAVE ARROW POINTING DIRECTLY RIGHT/LEFT
+    ⤷  ⤶    U+2937, U+2936   ARROW POINTING DOWNWARDS THEN CURVING RIGHT/
+                             LEFTWARDS
+    ⥅  ⥆    U+2945, U+2946   RIGHT/LEFTWARDS ARROW WITH PLUS BELOW
+    ⥇  ⬾    U+2947, U+2B3E   RIGHT/LEFTWARDS ARROW THROUGH X
+    ⥓  ⥒    U+2953, U+2952   RIGHT/LEFTWARDS HARPOON WITH BARB UP TO BAR
+    ⥗  ⥖    U+2957, U+2956   RIGHT/LEFTWARDS HARPOON WITH BARB DOWN TO BAR
+    ⥛  ⥚    U+295B, U+295A   RIGHT/LEFTWARDS HARPOON WITH BARB UP FROM BAR
+    ⥟  ⥞    U+295F, U+295E   RIGHT/LEFTWARDS HARPOON WITH BARB DOWN FROM
+                             BAR
+    ⥤  ⥢    U+2964, U+2962   RIGHT/LEFTWARDS HARPOON WITH BARB UP ABOVE
+                             RIGHT/LEFTWARDS HARPOON WITH BARB DOWN
+    ⥬  ⥪    U+296C, U+296A   RIGHT/LEFTWARDS HARPOON WITH BARB UP ABOVE
+                             LONG DASH
+    ⥭  ⥫    U+296D, U+296B   RIGHT/LEFTWARDS HARPOON WITH BARB DOWN BELOW
+                             LONG DASH
+    ⥱  ⭀    U+2971, U+2B40   EQUALS SIGN ABOVE RIGHT/LEFTWARDS ARROW
+    ⥲  ⭁    U+2972, U+2B41   TILDE OPERATOR ABOVE RIGHTWARDS ARROW,
+                             REVERSE TILDE OPERATOR ABOVE LEFTWARDS ARROW
+    ⥴  ⭋    U+2974, U+2B4B   RIGHTWARDS ARROW ABOVE TILDE OPERATOR,
+                             LEFTWARDS ARROW ABOVE REVERSE TILDE OPERATOR
+    ⥵  ⭂    U+2975, U+2B42   RIGHTWARDS ARROW ABOVE ALMOST EQUAL TO,
+                             LEFTWARDS ARROW ABOVE REVERSE ALMOST EQUAL TO
+    ⥹  ⥻    U+2979, U+297B   SUBSET/SUPERSET ABOVE RIGHT/LEFTWARDS ARROW
+    ⦃  ⦄    U+2983, U+2984   LEFT/RIGHT WHITE CURLY BRACKET
+    ⦅  ⦆    U+2985, U+2986   LEFT/RIGHT WHITE PARENTHESIS
+    ⦇  ⦈    U+2987, U+2988   Z NOTATION LEFT/RIGHT IMAGE BRACKET
+    ⦉  ⦊    U+2989, U+298A   Z NOTATION LEFT/RIGHT BINDING BRACKET
+    ⦋  ⦌    U+298B, U+298C   LEFT/RIGHT SQUARE BRACKET WITH UNDERBAR
+    ⦍  ⦐    U+298D, U+2990   LEFT/RIGHT SQUARE BRACKET WITH TICK IN TOP
+                             CORNER
+    ⦏  ⦎    U+298F, U+298E   LEFT/RIGHT SQUARE BRACKET WITH TICK IN BOTTOM
+                             CORNER
+    ⦑  ⦒    U+2991, U+2992   LEFT/RIGHT ANGLE BRACKET WITH DOT
+    ⦓  ⦔    U+2993, U+2994   LEFT/RIGHT ARC LESS-THAN/GREATER-THAN BRACKET
+    ⦕  ⦖    U+2995, U+2996   DOUBLE LEFT/RIGHT ARC GREATER-THAN/LESS-THAN
+                             BRACKET
+    ⦗  ⦘    U+2997, U+2998   LEFT/RIGHT BLACK TORTOISE SHELL BRACKET
+    ⦨  ⦩    U+29A8, U+29A9   MEASURED ANGLE WITH OPEN ARM ENDING IN ARROW
+                             POINTING UP AND RIGHT/LEFT
+    ⦪  ⦫    U+29AA, U+29AB   MEASURED ANGLE WITH OPEN ARM ENDING IN ARROW
+                             POINTING DOWN AND RIGHT/LEFT
+    ⦳  ⦴    U+29B3, U+29B4   EMPTY SET WITH RIGHT/LEFT ARROW ABOVE
+    ⧀  ⧁    U+29C0, U+29C1   CIRCLED LESS-THAN/GREATER-THAN
+    ⧘  ⧙    U+29D8, U+29D9   LEFT/RIGHT WIGGLY FENCE
+    ⧚  ⧛    U+29DA, U+29DB   LEFT/RIGHT DOUBLE WIGGLY FENCE
+    ⧼  ⧽    U+29FC, U+29FD   LEFT/RIGHT-POINTING CURVED ANGLE BRACKET
+    ⩹  ⩺    U+2A79, U+2A7A   LESS-THAN/GREATER-THAN WITH CIRCLE INSIDE
+    ⩻  ⩼    U+2A7B, U+2A7C   LESS-THAN/GREATER-THAN WITH QUESTION MARK
+                             ABOVE
+    ⩽  ⩾    U+2A7D, U+2A7E   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO
+    ⩿  ⪀    U+2A7F, U+2A80   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO
+                             WITH DOT INSIDE
+    ⪁  ⪂    U+2A81, U+2A82   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO
+                             WITH DOT ABOVE
+    ⪃  ⪄    U+2A83, U+2A84   LESS-THAN/GREATER-THAN OR SLANTED EQUAL TO
+                             WITH DOT ABOVE RIGHT/LEFT
+    ⪅  ⪆    U+2A85, U+2A86   LESS-THAN/GREATER-THAN OR APPROXIMATE
+    ⪇  ⪈    U+2A87, U+2A88   LESS-THAN/GREATER-THAN AND SINGLE-LINE NOT
+                             EQUAL TO
+    ⪉  ⪊    U+2A89, U+2A8A   LESS-THAN/GREATER-THAN AND NOT APPROXIMATE
+    ⪍  ⪎    U+2A8D, U+2A8E   LESS-THAN/GREATER-THAN ABOVE SIMILAR OR EQUAL
+    ⪕  ⪖    U+2A95, U+2A96   SLANTED EQUAL TO OR LESS-THAN/GREATER-THAN
+    ⪗  ⪘    U+2A97, U+2A98   SLANTED EQUAL TO OR LESS-THAN/GREATER-THAN
+                             WITH DOT INSIDE
+    ⪙  ⪚    U+2A99, U+2A9A   DOUBLE-LINE EQUAL TO OR LESS-THAN/
+                             GREATER-THAN
+    ⪛  ⪜    U+2A9B, U+2A9C   DOUBLE-LINE SLANTED EQUAL TO OR LESS-THAN/
+                             GREATER-THAN
+    ⪝  ⪞    U+2A9D, U+2A9E   SIMILAR OR LESS-THAN/GREATER-THAN
+    ⪟  ⪠    U+2A9F, U+2AA0   SIMILAR ABOVE LESS-THAN/GREATER-THAN ABOVE
+                             EQUALS SIGN
+    ⪡  ⪢    U+2AA1, U+2AA2   DOUBLE NESTED LESS-THAN/GREATER-THAN
+    ⪦  ⪧    U+2AA6, U+2AA7   LESS-THAN/GREATER-THAN CLOSED BY CURVE
+    ⪨  ⪩    U+2AA8, U+2AA9   LESS-THAN/GREATER-THAN CLOSED BY CURVE ABOVE
+                             SLANTED EQUAL
+    ⪪  ⪫    U+2AAA, U+2AAB   SMALLER THAN/LARGER THAN
+    ⪬  ⪭    U+2AAC, U+2AAD   SMALLER THAN/LARGER THAN OR EQUAL TO
+    ⪯  ⪰    U+2AAF, U+2AB0   PRECEDES/SUCCEEDS ABOVE SINGLE-LINE EQUALS
+                             SIGN
+    ⪱  ⪲    U+2AB1, U+2AB2   PRECEDES/SUCCEEDS ABOVE SINGLE-LINE NOT EQUAL
+                             TO
+    ⪳  ⪴    U+2AB3, U+2AB4   PRECEDES/SUCCEEDS ABOVE EQUALS SIGN
+    ⪵  ⪶    U+2AB5, U+2AB6   PRECEDES/SUCCEEDS ABOVE NOT EQUAL TO
+    ⪷  ⪸    U+2AB7, U+2AB8   PRECEDES/SUCCEEDS ABOVE ALMOST EQUAL TO
+    ⪹  ⪺    U+2AB9, U+2ABA   PRECEDES/SUCCEEDS ABOVE NOT ALMOST EQUAL TO
+    ⪻  ⪼    U+2ABB, U+2ABC   DOUBLE PRECEDES/SUCCEEDS
+    ⪽  ⪾    U+2ABD, U+2ABE   SUBSET/SUPERSET WITH DOT
+    ⪿  ⫀    U+2ABF, U+2AC0   SUBSET/SUPERSET WITH PLUS SIGN BELOW
+    ⫁  ⫂    U+2AC1, U+2AC2   SUBSET/SUPERSET WITH MULTIPLICATION SIGN
+                             BELOW
+    ⫃  ⫄    U+2AC3, U+2AC4   SUBSET/SUPERSET OF OR EQUAL TO WITH DOT ABOVE
+    ⫅  ⫆    U+2AC5, U+2AC6   SUBSET/SUPERSET OF ABOVE EQUALS SIGN
+    ⫇  ⫈    U+2AC7, U+2AC8   SUBSET/SUPERSET OF ABOVE TILDE OPERATOR
+    ⫉  ⫊    U+2AC9, U+2ACA   SUBSET/SUPERSET OF ABOVE ALMOST EQUAL TO
+    ⫋  ⫌    U+2ACB, U+2ACC   SUBSET/SUPERSET OF ABOVE NOT EQUAL TO
+    ⫏  ⫐    U+2ACF, U+2AD0   CLOSED SUBSET/SUPERSET
+    ⫑  ⫒    U+2AD1, U+2AD2   CLOSED SUBSET/SUPERSET OR EQUAL TO
+    ⫕  ⫖    U+2AD5, U+2AD6   SUBSET/SUPERSET ABOVE SUBSET/SUPERSET
+    ⫥  ⊫    U+2AE5, U+22AB   DOUBLE VERTICAL BAR DOUBLE LEFT/RIGHT
+                             TURNSTILE
+    ⫷  ⫸    U+2AF7, U+2AF8   TRIPLE NESTED LESS-THAN/GREATER-THAN
+    ⫹  ⫺    U+2AF9, U+2AFA   DOUBLE-LINE SLANTED LESS-THAN/GREATER-THAN OR
+                             EQUAL TO
+    ⭆  ⭅    U+2B46, U+2B45   RIGHT/LEFTWARDS QUADRUPLE ARROW
+    ⭇  ⭉    U+2B47, U+2B49   REVERSE TILDE OPERATOR ABOVE RIGHTWARDS
+                             ARROW, TILDE OPERATOR ABOVE LEFTWARDS ARROW
+    ⭈  ⭊    U+2B48, U+2B4A   RIGHTWARDS ARROW ABOVE REVERSE ALMOST EQUAL
+                             TO,  LEFTWARDS ARROW ABOVE ALMOST EQUAL TO
+    ⭌  ⥳    U+2B4C, U+2973   RIGHTWARDS ARROW ABOVE REVERSE TILDE
+                             OPERATOR, LEFTWARDS ARROW ABOVE TILDE
+                             OPERATOR
+    ⭢  ⭠    U+2B62, U+2B60   RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW
+    ⭬  ⭪    U+2B6C, U+2B6A   RIGHT/LEFTWARDS TRIANGLE-HEADED DASHED ARROW
+    ⭲  ⭰    U+2B72, U+2B70   RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW TO BAR
+    ⭼  ⭺    U+2B7C, U+2B7A   RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
+                             DOUBLE VERTICAL STROKE
+    ⮆  ⮄    U+2B86, U+2B84   RIGHT/LEFTWARDS TRIANGLE-HEADED PAIRED ARROWS
+    ⮊  ⮈    U+2B8A, U+2B88   RIGHT/LEFTWARDS BLACK CIRCLED WHITE ARROW
+    ⮕  ⬅    U+2B95, U+2B05   RIGHT/LEFTWARDS BLACK ARROW
+    ⮚  ⮘    U+2B9A, U+2B98   THREE-D TOP-LIGHTED RIGHT/LEFTWARDS
+                             EQUILATERAL ARROWHEAD
+    ⮞  ⮜    U+2B9E, U+2B9C   BLACK RIGHT/LEFTWARDS EQUILATERAL ARROWHEAD
+    ⮡  ⮠    U+2BA1, U+2BA0   DOWNWARDS TRIANGLE-HEADED ARROW WITH LONG TIP
+                             RIGHT/LEFTWARDS
+    ⮣  ⮢    U+2BA3, U+2BA2   UPWARDS TRIANGLE-HEADED ARROW WITH LONG TIP
+                             RIGHT/LEFTWARDS
+    ⮩  ⮨    U+2BA9, U+2BA8   BLACK CURVED DOWNWARDS AND RIGHT/LEFTWARDS
+                             ARROW
+    ⮫  ⮪    U+2BAB, U+2BAA   BLACK CURVED UPWARDS AND RIGHT/LEFTWARDS
+                             ARROW
+    ⮱  ⮰    U+2BB1, U+2BB0   RIBBON ARROW DOWN RIGHT/LEFT
+    ⮳  ⮲    U+2BB3, U+2BB2   RIBBON ARROW UP RIGHT/LEFT
+    ⯮  ⯬    U+2BEE, U+2BEC   RIGHT/LEFTWARDS TWO-HEADED ARROW WITH
+                             TRIANGLE ARROWHEADS
+    ⸂  ⸃    U+2E02, U+2E03   LEFT/RIGHT SUBSTITUTION BRACKET
+    ⸃  ⸂    U+2E03, U+2E02   RIGHT/LEFT SUBSTITUTION BRACKET
+    ⸄  ⸅    U+2E04, U+2E05   LEFT/RIGHT DOTTED SUBSTITUTION BRACKET
+    ⸅  ⸄    U+2E05, U+2E04   RIGHT/LEFT DOTTED SUBSTITUTION BRACKET
+    ⸉  ⸊    U+2E09, U+2E0A   LEFT/RIGHT TRANSPOSITION BRACKET
+    ⸊  ⸉    U+2E0A, U+2E09   RIGHT/LEFT TRANSPOSITION BRACKET
+    ⸌  ⸍    U+2E0C, U+2E0D   LEFT/RIGHT RAISED OMISSION BRACKET
+    ⸍  ⸌    U+2E0D, U+2E0C   RIGHT/LEFT RAISED OMISSION BRACKET
+    ⸑  ⸐    U+2E11, U+2E10   REVERSED FORKED PARAGRAPHOS,  FORKED
+                             PARAGRAPHOS
+    ⸜  ⸝    U+2E1C, U+2E1D   LEFT/RIGHT LOW PARAPHRASE BRACKET
+    ⸝  ⸜    U+2E1D, U+2E1C   RIGHT/LEFT LOW PARAPHRASE BRACKET
+    ⸠  ⸡    U+2E20, U+2E21   LEFT/RIGHT VERTICAL BAR WITH QUILL
+    ⸡  ⸠    U+2E21, U+2E20   RIGHT/LEFT VERTICAL BAR WITH QUILL
+    ⸢  ⸣    U+2E22, U+2E23   TOP LEFT/RIGHT HALF BRACKET
+    ⸤  ⸥    U+2E24, U+2E25   BOTTOM LEFT/RIGHT HALF BRACKET
+    ⸦  ⸧    U+2E26, U+2E27   LEFT/RIGHT SIDEWAYS U BRACKET
+    ⸨  ⸩    U+2E28, U+2E29   LEFT/RIGHT DOUBLE PARENTHESIS
+    ⸶  ⸷    U+2E36, U+2E37   DAGGER WITH LEFT/RIGHT GUARD
+    ⹂  „    U+2E42, U+201E   DOUBLE LOW-REVERSED-9 QUOTATION MARK,  DOUBLE
+                             LOW-9 QUOTATION MARK
+    ⹕  ⹖    U+2E55, U+2E56   LEFT/RIGHT SQUARE BRACKET WITH STROKE
+    ⹗  ⹘    U+2E57, U+2E58   LEFT/RIGHT SQUARE BRACKET WITH DOUBLE STROKE
+    ⹙  ⹚    U+2E59, U+2E5A   TOP HALF LEFT/RIGHT PARENTHESIS
+    ⹛  ⹜    U+2E5B, U+2E5C   BOTTOM HALF LEFT/RIGHT PARENTHESIS
+    〈 〉   U+3008, U+3009   LEFT/RIGHT ANGLE BRACKET
+    《 》   U+300A, U+300B   LEFT/RIGHT DOUBLE ANGLE BRACKET
+    「 」   U+300C, U+300D   LEFT/RIGHT CORNER BRACKET
+    『 』   U+300E, U+300F   LEFT/RIGHT WHITE CORNER BRACKET
+    【 】   U+3010, U+3011   LEFT/RIGHT BLACK LENTICULAR BRACKET
+    〔 〕   U+3014, U+3015   LEFT/RIGHT TORTOISE SHELL BRACKET
+    〖 〗   U+3016, U+3017   LEFT/RIGHT WHITE LENTICULAR BRACKET
+    〘 〙   U+3018, U+3019   LEFT/RIGHT WHITE TORTOISE SHELL BRACKET
+    〚 〛   U+301A, U+301B   LEFT/RIGHT WHITE SQUARE BRACKET
+    〝 〞   U+301D, U+301E   REVERSED DOUBLE PRIME QUOTATION MARK,  DOUBLE
+                             PRIME QUOTATION MARK
+    ꧁  ꧂    U+A9C1, U+A9C2   JAVANESE LEFT/RIGHT RERENGGAN
+    ﴾  ﴿    U+FD3E, U+FD3F   ORNATE LEFT/RIGHT PARENTHESIS
+    ﹙ ﹚   U+FE59, U+FE5A   SMALL LEFT/RIGHT PARENTHESIS
+    ﹛ ﹜   U+FE5B, U+FE5C   SMALL LEFT/RIGHT CURLY BRACKET
+    ﹝ ﹞   U+FE5D, U+FE5E   SMALL LEFT/RIGHT TORTOISE SHELL BRACKET
+    ﹤ ﹥   U+FE64, U+FE65   SMALL LESS-THAN/GREATER-THAN SIGN
+    （ ）   U+FF08, U+FF09   FULLWIDTH LEFT/RIGHT PARENTHESIS
+    ＜ ＞   U+FF1C, U+FF1E   FULLWIDTH LESS-THAN/GREATER-THAN SIGN
+    ［ ］   U+FF3B, U+FF3D   FULLWIDTH LEFT/RIGHT SQUARE BRACKET
+    ｛ ｝   U+FF5B, U+FF5D   FULLWIDTH LEFT/RIGHT CURLY BRACKET
+    ｟ ｠   U+FF5F, U+FF60   FULLWIDTH LEFT/RIGHT WHITE PARENTHESIS
+    ｢  ｣    U+FF62, U+FF63   HALFWIDTH LEFT/RIGHT CORNER BRACKET
+    ￫  ￩    U+FFEB, U+FFE9   HALFWIDTH RIGHT/LEFTWARDS ARROW
+    𝄃  𝄂    U+1D103, U+1D102 MUSICAL SYMBOL REVERSE FINAL BARLINE,
+                             MUSICAL SYMBOL FINAL BARLINE
+    𝄆  𝄇    U+1D106, U+1D107 MUSICAL SYMBOL LEFT/RIGHT REPEAT SIGN
+    👉 👈   U+1F449, U+1F448 WHITE RIGHT/LEFT POINTING BACKHAND INDEX
+    🔈 🕨    U+1F508, U+1F568 SPEAKER,  RIGHT SPEAKER
+    🔉 🕩    U+1F509, U+1F569 SPEAKER WITH ONE SOUND WAVE,  RIGHT SPEAKER
+                             WITH ONE SOUND WAVE
+    🔊 🕪    U+1F50A, U+1F56A SPEAKER WITH THREE SOUND WAVES,  RIGHT
+                             SPEAKER WITH THREE SOUND WAVES
+    🕻  🕽    U+1F57B, U+1F57D LEFT/RIGHT HAND TELEPHONE RECEIVER
+    🖙  🖘    U+1F599, U+1F598 SIDEWAYS WHITE RIGHT/LEFT POINTING INDEX
+    🖛  🖚    U+1F59B, U+1F59A SIDEWAYS BLACK RIGHT/LEFT POINTING INDEX
+    🖝  🖜    U+1F59D, U+1F59C BLACK RIGHT/LEFT POINTING BACKHAND INDEX
+    🗦  🗧    U+1F5E6, U+1F5E7 THREE RAYS LEFT/RIGHT
+    🠂  🠀    U+1F802, U+1F800 RIGHT/LEFTWARDS ARROW WITH SMALL TRIANGLE
+                             ARROWHEAD
+    🠆  🠄    U+1F806, U+1F804 RIGHT/LEFTWARDS ARROW WITH MEDIUM TRIANGLE
+                             ARROWHEAD
+    🠊  🠈    U+1F80A, U+1F808 RIGHT/LEFTWARDS ARROW WITH LARGE TRIANGLE
+                             ARROWHEAD
+    🠒  🠐    U+1F812, U+1F810 RIGHT/LEFTWARDS ARROW WITH SMALL EQUILATERAL
+                             ARROWHEAD
+    🠖  🠔    U+1F816, U+1F814 RIGHT/LEFTWARDS ARROW WITH EQUILATERAL
+                             ARROWHEAD
+    🠚  🠘    U+1F81A, U+1F818 HEAVY RIGHT/LEFTWARDS ARROW WITH EQUILATERAL
+                             ARROWHEAD
+    🠞  🠜    U+1F81E, U+1F81C HEAVY RIGHT/LEFTWARDS ARROW WITH LARGE
+                             EQUILATERAL ARROWHEAD
+    🠢  🠠    U+1F822, U+1F820 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
+                             NARROW SHAFT
+    🠦  🠤    U+1F826, U+1F824 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
+                             MEDIUM SHAFT
+    🠪  🠨    U+1F82A, U+1F828 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
+                             BOLD SHAFT
+    🠮  🠬    U+1F82E, U+1F82C RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
+                             HEAVY SHAFT
+    🠲  🠰    U+1F832, U+1F830 RIGHT/LEFTWARDS TRIANGLE-HEADED ARROW WITH
+                             VERY HEAVY SHAFT
+    🠶  🠴    U+1F836, U+1F834 RIGHT/LEFTWARDS FINGER-POST ARROW
+    🠺  🠸    U+1F83A, U+1F838 RIGHT/LEFTWARDS SQUARED ARROW
+    🠾  🠼    U+1F83E, U+1F83C RIGHT/LEFTWARDS COMPRESSED ARROW
+    🡂  🡀    U+1F842, U+1F840 RIGHT/LEFTWARDS HEAVY COMPRESSED ARROW
+    🡆  🡄    U+1F846, U+1F844 RIGHT/LEFTWARDS HEAVY ARROW
+    🡒  🡐    U+1F852, U+1F850 RIGHT/LEFTWARDS SANS-SERIF ARROW
+    🡢  🡠    U+1F862, U+1F860 WIDE-HEADED RIGHT/LEFTWARDS LIGHT BARB ARROW
+    🡪  🡨    U+1F86A, U+1F868 WIDE-HEADED RIGHT/LEFTWARDS BARB ARROW
+    🡲  🡰    U+1F872, U+1F870 WIDE-HEADED RIGHT/LEFTWARDS MEDIUM BARB ARROW
+    🡺  🡸    U+1F87A, U+1F878 WIDE-HEADED RIGHT/LEFTWARDS HEAVY BARB ARROW
+    🢂  🢀    U+1F882, U+1F880 WIDE-HEADED RIGHT/LEFTWARDS VERY HEAVY BARB
+                             ARROW
+    🢒  🢐    U+1F892, U+1F890 RIGHT/LEFTWARDS TRIANGLE ARROWHEAD
+    🢖  🢔    U+1F896, U+1F894 RIGHT/LEFTWARDS WHITE ARROW WITHIN TRIANGLE
+                             ARROWHEAD
+    🢚  🢘    U+1F89A, U+1F898 RIGHT/LEFTWARDS ARROW WITH NOTCHED TAIL
+    🢡  🢠    U+1F8A1, U+1F8A0 RIGHTWARDS BOTTOM SHADED WHITE ARROW,
+                             LEFTWARDS BOTTOM-SHADED WHITE ARROW
+    🢣  🢢    U+1F8A3, U+1F8A2 RIGHT/LEFTWARDS TOP SHADED WHITE ARROW
+    🢥  🢦    U+1F8A5, U+1F8A6 RIGHT/LEFTWARDS RIGHT-SHADED WHITE ARROW
+    🢧  🢤    U+1F8A7, U+1F8A4 RIGHT/LEFTWARDS LEFT-SHADED WHITE ARROW
+    🢩  🢨    U+1F8A9, U+1F8A8 RIGHT/LEFTWARDS BACK-TILTED SHADOWED WHITE
+                             ARROW
+    🢫  🢪    U+1F8AB, U+1F8AA RIGHT/LEFTWARDS FRONT-TILTED SHADOWED WHITE
+                             ARROW
 =cut
