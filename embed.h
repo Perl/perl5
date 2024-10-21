@@ -787,7 +787,10 @@
 # define utf8_distance(a,b)                     Perl_utf8_distance(aTHX_ a,b)
 # define utf8_hop                               Perl_utf8_hop
 # define utf8_hop_back                          Perl_utf8_hop_back
+# define utf8_hop_back_overshoot                Perl_utf8_hop_back_overshoot
 # define utf8_hop_forward                       Perl_utf8_hop_forward
+# define utf8_hop_forward_overshoot             Perl_utf8_hop_forward_overshoot
+# define utf8_hop_overshoot                     Perl_utf8_hop_overshoot
 # define utf8_hop_safe                          Perl_utf8_hop_safe
 # define utf8_length(a,b)                       Perl_utf8_length(aTHX_ a,b)
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)

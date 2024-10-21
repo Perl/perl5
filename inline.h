@@ -2650,56 +2650,92 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
 
 /*
 =for apidoc utf8_hop_forward
+=for apidoc utf8_hop_forward_overshoot
 
-Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
-forward.  C<s> does not need to be pointing to the starting byte of a
-character.  If it isn't, one count of C<off> will be used up to get to the
-start of the next character.
+These each take as input a position, C<s0>, into a string encoded as UTF-8
+which ends at the byte before C<end>, and return the position within it that is
+C<s0> displaced by up to C<off> characters forwards.
 
-C<off> must be non-negative.
+If there are fewer than C<off> characters between C<s0> and C<end>, the
+functions return C<end>.
 
-C<s> must be before or equal to C<end>.  If after, the function panics.
+The functions differ in two ways
 
-When moving forward it will not move beyond C<end>.
+=over 4
 
-Will not exceed this limit even if the string is not valid "UTF-8".
+=item *
+
+C<utf8_hop_forward_overshoot> can return how many characters beyond the edge
+the request was for.  When its parameter, C<&remaining>, is not NULL, the
+function stores into it the count of the excess; zero if the request was
+completely fulfilled.  The actual number of characters that were displaced can
+then be calculated as S<C<off - remaining>>.
+
+=item *
+
+C<utf8_hop_forward> will panic if called with C<s0> already positioned at or
+beyond the edge of the string ending at C<end> and the request is to go even
+further over the edge.  C<utf8_hop_forward_overshoot> presumes the caller will
+handle any errors, and just stores C<off> into C<remaining> without doing
+anything else.
+
+=back
+
+(The above contains a slight lie.  When C<remaining> is NULL, the two functions
+act identically.)
+
+C<s0> does not need to be pointing to the starting byte of a character.  If it
+isn't, one count of C<off> will be used up to get to that start.
+
+C<off> must be non-negative, and if zero, no action is taken; C<s0> is returned
+unchanged.
 
 =cut
 */
+# define Perl_utf8_hop_forward(          s, off, end)           \
+         Perl_utf8_hop_forward_overshoot(s, off, end, NULL)
 
 PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
+Perl_utf8_hop_forward_overshoot(const U8 * s, SSize_t off,
+                                const U8 * const end, SSize_t *remaining)
 {
-    PERL_ARGS_ASSERT_UTF8_HOP_FORWARD;
+    PERL_ARGS_ASSERT_UTF8_HOP_FORWARD_OVERSHOOT;
     assert(off >= 0);
 
-    if (UNLIKELY(s >= end)) {
-        if (s == end) {
-            return (U8 *) end;
+    if (off != 0) {
+        if (UNLIKELY(s >= end && ! remaining)) {
+            Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %zd"
+                                 " bytes beyond legal end position (0x%p)",
+                                 s, 1 + s - end, end);
         }
 
-        Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %zd bytes"
-                             " beyond legal end position (0x%p)",
-                             s, 1 + s - end, end);
+        if (UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
+            do {    /* Get to next non-continuation byte */
+                if (! UTF8_IS_CONTINUATION(*s)) {
+                    off--;
+                    break;
+                }
+                s++;
+            } while (s < end);
+        }
+
+        while (off > 0 && s < end) {
+            STRLEN skip = UTF8SKIP(s);
+
+            /* Quit without counting this character if it overshoots the edge.
+             * */
+            if ((STRLEN)(end - s) < skip) {
+                s = end;
+                break;
+            }
+
+            s += skip;
+            off--;
+        }
     }
 
-    if (off && UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
-        /* Get to next non-continuation byte */
-        do {
-            s++;
-        }
-        while (s < end && UTF8_IS_CONTINUATION(*s));
-        off--;
-    }
-
-    while (off-- && s < end) {
-        STRLEN skip = UTF8SKIP(s);
-        if ((STRLEN)(end - s) <= skip) {
-            GCC_DIAG_IGNORE(-Wcast-qual)
-            return (U8 *)end;
-            GCC_DIAG_RESTORE
-        }
-        s += skip;
+    if (remaining) {
+        *remaining = off;
     }
 
     GCC_DIAG_IGNORE(-Wcast-qual)
@@ -2708,28 +2744,48 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
 }
 
 /*
-=for apidoc utf8_hop_back
+=for apidoc      utf8_hop_back
+=for apidoc_item utf8_hop_back_overshoot
 
-Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
-backward.  C<s> does not need to be pointing to the starting byte of a
-character.  If it isn't, one count of C<off> will be used up to get to that
-start.
+These each take as input a string encoded as UTF-8 which starts at C<start>,
+and a position into it given by C<s>, and return the position within it that is
+C<s> displaced by up to C<off> characters backwards.
 
-C<off> must be non-positive.
+If there are fewer than C<off> characters between C<start> and C<s>, the
+functions return C<start>.
 
-C<s> must be after or equal to C<start>.
+The functions differ in that C<utf8_hop_back_overshoot> can return how many
+characters C<off> beyond the edge the request was for.  When its parameter,
+C<&remaining>, is not NULL, the function stores into it the count of the
+excess; zero if the request was completely fulfilled.  The actual number of
+characters that were displaced can then be calculated as S<C<off - remaining>>.
+This function acts identically to plain C<utf8_hop_back> when this parameter is
+NULL.
 
-When moving backward it will not move before C<start>.
+C<s> does not need to be pointing to the starting byte of a character.  If it
+isn't, one count of C<off> will be used up to get to that start.
 
-Will not exceed this limit even if the string is not valid "UTF-8".
+C<off> must be non-positive, and if zero, no action is taken; C<s> is returned
+unchanged.  That it otherwise must be negative means that the earlier
+description is a lie, to avoid burdening you with this detail too soon.  An
+C<off> of C<-2> means to displace two characters backwards, so the displacement
+is actually the absolute value of C<off>.  C<remaining> will also be
+non-positive.  If there was only one character between C<start> and C<s>, and a
+displacement of C<-2> was requested, C<remaining> would be set to C<-1>.  The
+subtraction formula works, yielding the result that only C<-1> character was
+displaced.
 
 =cut
 */
 
+# define Perl_utf8_hop_back(          s, off, start)            \
+         Perl_utf8_hop_back_overshoot(s, off, start, NULL)
+
 PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
+Perl_utf8_hop_back_overshoot(const U8 *s, SSize_t off,
+                             const U8 * const start, SSize_t *remaining)
 {
-    PERL_ARGS_ASSERT_UTF8_HOP_BACK;
+    PERL_ARGS_ASSERT_UTF8_HOP_BACK_OVERSHOOT;
     assert(start <= s);
     assert(off <= 0);
 
@@ -2740,10 +2796,18 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
      * moved is large, and core perl doesn't currently move more than a few
      * characters at a time.  You can reinstate it if it does become
      * advantageous. */
-    while (off++ && s > start) {
-        do {
+    while (off < 0 && s > start) {
+        do {    /* Find the beginning of this character */
             s--;
-        } while (s > start && UTF8_IS_CONTINUATION(*s));
+            if (! UTF8_IS_CONTINUATION(*s)) {
+                off++;
+                break;
+            }
+        } while (s > start);
+    }
+
+    if (remaining) {
+        *remaining = off;
     }
 
     GCC_DIAG_IGNORE(-Wcast-qual)
@@ -2752,39 +2816,51 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
 }
 
 /*
-=for apidoc utf8_hop_safe
+=for apidoc      utf8_hop_safe
+=for apidoc_item utf8_hop_safe_overshoot
 
-Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
-either forward or backward.  C<s> does not need to be pointing to the starting
-byte of a character.  If it isn't, one count of C<off> will be used up to get
-to the start of the next character for forward hops, and to the start of the
-current character for negative ones.
+These each take as input a string encoded as UTF-8 which starts at C<start>,
+ending at C<end>, and a position into it given by C<s>, and return the
+position within it that is C<s> displaced by up to C<off> characters, either
+forwards if C<off> is positive, or backwards if C<off> is negative.  (Nothing
+is done if C<off> is 0.)
 
-When moving backward it will not move before C<start>.
+If there are fewer than C<off> characters between C<s> and the respective edge,
+the functions return that edge.
 
-When moving forward it will not move beyond C<end>.
+The functions differ in that C<utf8_hop_overshoot> can return how many
+characters beyond the edge the request was for.  When its parameter,
+C<&remaining>, is not NULL, the function stores into it the count of the
+excess; zero if the request was completely fulfilled.  The actual number of
+characters that were displaced can then be calculated as S<C<off - remaining>>.
+This function acts identically to plain C<utf8_hop_safe> when this parameter is
+NULL.
 
-Will not exceed those limits even if the string is not valid "UTF-8".
+C<s> does not need to be pointing to the starting byte of a character.  If it
+isn't, one count of C<off> will be used up to get to that start.
+
+To be more precise, the displacement is by the absolute value of C<off>, and
+the excess count is the absolute value of C<remaining>.
 
 =cut
 */
 
-PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
-{
-    PERL_ARGS_ASSERT_UTF8_HOP_SAFE;
+#define Perl_utf8_hop_safe(s, o, b, e)  Perl_utf8_hop_overshoot(s, o, b, e, 0)
 
-    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
-     * the bitops (especially ~) can create illegal UTF-8.
-     * In other words: in Perl UTF-8 is not just for Unicode. */
+PERL_STATIC_INLINE U8 *
+Perl_utf8_hop_overshoot(const U8 *s, SSize_t off,
+                   const U8 * const start, const U8 * const end,
+                   SSize_t * remaining)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT;
 
     assert(start <= s && s <= end);
 
     if (off >= 0) {
-        return utf8_hop_forward(s, off, end);
+        return utf8_hop_forward_overshoot(s, off, end, remaining);
     }
     else {
-        return utf8_hop_back(s, off, start);
+        return utf8_hop_back_overshoot(s, off, start, remaining);
     }
 }
 
