@@ -595,6 +595,7 @@
 # define save_delete(a,b,c)                     Perl_save_delete(aTHX_ a,b,c)
 # define save_destructor(a,b)                   Perl_save_destructor(aTHX_ a,b)
 # define save_destructor_x(a,b)                 Perl_save_destructor_x(aTHX_ a,b)
+# define save_freepv(a)                         Perl_save_freepv(aTHX,a)
 # define save_freercpv(a)                       Perl_save_freercpv(aTHX_ a)
 # define save_generic_pvref(a)                  Perl_save_generic_pvref(aTHX_ a)
 # define save_generic_svref(a)                  Perl_save_generic_svref(aTHX_ a)

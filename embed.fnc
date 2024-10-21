@@ -2913,7 +2913,7 @@ Cp	|void	|save_destructor_x					\
 				|NULLOK void *p
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
 CMbp	|void	|save_freeop	|NULLOK OP *o
-CMbp	|void	|save_freepv	|NULLOK char *pv
+Cmp	|void	|save_freepv	|NULLOK char *pv
 Cdp	|void	|save_freercpv	|NN char *rcpv
 CMbp	|void	|save_freesv	|NULLOK SV *sv
 Cdp	|void	|save_generic_pvref					\

@@ -661,12 +661,6 @@ Perl_save_freeop(pTHX_ OP *o)
 }
 
 void
-Perl_save_freepv(pTHX_ char *pv)
-{
-    save_freepv(pv);
-}
-
-void
 Perl_save_op(pTHX)
 {
     save_op();

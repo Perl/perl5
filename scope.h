@@ -304,7 +304,8 @@ STMT_START {                                 \
       _o->op_savefree = 1;                     \
       save_pushptr((void *)(_o), SAVEt_FREEOP); \
     } STMT_END
-#define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
+#define Perl_save_freepv(mTHX, pv)                          \
+        Perl_save_pushptr(aTHX_ (void *)(pv), SAVEt_FREEPV)
 
 /*
 =for apidoc_section $callback
