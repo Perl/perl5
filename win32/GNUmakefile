@@ -1506,7 +1506,7 @@ $(UUDMAP_H) $(MG_DATA_H) : $(BITCOUNT_H)
 $(BITCOUNT_H) : $(GENUUDMAP)
 	$(GENUUDMAP) $(GENERATED_HEADERS)
 
-$(GENUUDMAP) : ..\mg_raw.h
+$(GENUUDMAP) : ..\generate_uudmap.c ..\mg_raw.h
 ifeq ($(CCTYPE),GCC)
 	$(LINK32) $(CFLAGS_O) -o..\generate_uudmap.exe ..\generate_uudmap.c \
 	$(BLINK_FLAGS) $(LIBFILES)
