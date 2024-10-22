@@ -763,14 +763,9 @@ Adp	|int	|bytes_cmp_utf8 |NN const U8 *b 			\
 				|STRLEN blen				\
 				|NN const U8 *u 			\
 				|STRLEN ulen
-AMdp	|U8 *	|bytes_from_utf8|NN const U8 *s 			\
+Adp	|U8 *	|bytes_from_utf8|NN const U8 *s 			\
 				|NN STRLEN *lenp			\
 				|NN bool *is_utf8p
-CTdp	|U8 *	|bytes_from_utf8_loc					\
-				|NN const U8 *s 			\
-				|NN STRLEN *lenp			\
-				|NN bool *is_utf8p			\
-				|NULLOK const U8 **first_unconverted
 Adp	|U8 *	|bytes_to_utf8	|NN const U8 *s 			\
 				|NN STRLEN *lenp
 AOdp	|SSize_t|call_argv	|NN const char *sub_name		\
