@@ -890,7 +890,7 @@ CTp	|Signal_t|csighandler1	|int sig
 CTp	|Signal_t|csighandler3	|int sig				\
 				|NULLOK Siginfo_t *info 		\
 				|NULLOK void *uap
-ATmp	|bool	|c9strict_utf8_to_uv					\
+ATdmp	|bool	|c9strict_utf8_to_uv					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
@@ -1150,7 +1150,7 @@ AOdp	|SV *	|eval_pv	|NN const char *p			\
 				|I32 croak_on_error
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
-ATmp	|bool	|extended_utf8_to_uv					\
+ATdmp	|bool	|extended_utf8_to_uv					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
@@ -3051,7 +3051,7 @@ dopx	|PerlIO *|start_glob	|NN SV *tmpglob 			\
 				|NN IO *io
 Adp	|I32	|start_subparse |I32 is_format				\
 				|U32 flags
-ATmp	|bool	|strict_utf8_to_uv					\
+ATdmp	|bool	|strict_utf8_to_uv					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
@@ -3687,7 +3687,7 @@ EMXp	|U8 *	|utf16_to_utf8_reversed 				\
 				|NN U8 *d				\
 				|Size_t bytelen 			\
 				|NN Size_t *newlen
-ATmp	|bool	|utf8_to_uv	|NN const U8 * const s			\
+ATdmp	|bool	|utf8_to_uv	|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
@@ -3697,20 +3697,20 @@ AMdip	|UV	|utf8_to_uvchr_buf					\
 				|NN const U8 *s 			\
 				|NN const U8 *send			\
 				|NULLOK STRLEN *retlen
-ATmp	|bool	|utf8_to_uv_errors					\
+ATdmp	|bool	|utf8_to_uv_errors					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|const U32 flags			\
 				|NULLOK U32 *errors
-ATmp	|bool	|utf8_to_uv_flags					\
+ATdmp	|bool	|utf8_to_uv_flags					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|const U32 flag
-ATip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
+ATdip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
 				|NN const U8 *e 			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\

@@ -50,7 +50,7 @@ Perl__force_out_malformed_utf8_message(pTHX_
             const U8 *const p,      /* First byte in UTF-8 sequence */
             const U8 * const e,     /* Final byte in sequence (may include
                                        multiple chars */
-            const U32 flags,        /* Flags to pass to utf8n_to_uvchr(),
+            const U32 flags,        /* Flags to pass to utf8_to_uv(),
                                        usually 0, or some DISALLOW flags */
             const bool die_here)    /* If TRUE, this function does not return */
 {
@@ -743,7 +743,7 @@ Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
      *      nowhere else.  The function has to cope as best it can if that
      *      sequence does not form a full character.
      * 'flags' can be 0, or any combination of the UTF8_DISALLOW_foo flags
-     *      accepted by L</utf8n_to_uvchr>.  If non-zero, this function returns
+     *      accepted by L</utf8_to_uv>.  If non-zero, this function returns
      *      0 if it determines the input will match something disallowed.
      * On output:
      *  The return is the number of bytes required to represent the code point
@@ -1018,155 +1018,312 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 
 /*
 
-=for apidoc utf8n_to_uvchr
+=for apidoc      utf8_to_uv
+=for apidoc_item extended_utf8_to_uv
+=for apidoc_item strict_utf8_to_uv
+=for apidoc_item c9strict_utf8_to_uv
+=for apidoc_item valid_utf8_to_uvchr
+=for apidoc_item utf8_to_uvchr_buf
+=for apidoc_item utf8_to_uvchr
 
-THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this
-directly.
+These functions each translate from UTF-8 to UTF-32 (or UTF-64 on 64 bit
+platforms).  In other words, to a code point ordinal value.  (On EBCDIC
+platforms, the initial encoding is UTF-EBCDIC, and the output is a native code
+point).
 
-Bottom level UTF-8 decode routine.
-Returns the native code point value of the first character in the string C<s>,
-which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding, and no longer than
-C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
-the length, in bytes, of that character.
+For example, the string "A" would be converted to the number 65 on an ASCII
+platform, and to 193 on an EBCDIC one.  Converting the string "ABC" would yield
+the same results, as the functions stop after the first character converted.
+Converting the string "\N{LATIN CAPITAL LETTER A WITH MACRON} plus anything
+more in the string" would yield the number 0x100 on both types of platforms,
+since the first character is U+0100.
 
-The value of C<flags> determines the behavior when either C<s> does not point
-to a well-formed UTF-8 character, or the pointed-to code point is a member of
-certain potentially problematic classes (listed below).  If C<flags> is 0, all
-such classes are accepted, and encountering a malformation causes zero to be
-returned and C<*retlen> to be set so that (S<C<s> + C<*retlen>>) is the next
-possible position in C<s> that could begin a non-malformed character.  For
-malformations, if UTF-8 warnings haven't been lexically disabled, a warning is
-also raised.  Some UTF-8 input sequences may contain multiple malformations.
-This function tries to find every possible one in each call, so multiple
-warnings can be raised for the same sequence.
+The functions whose names contain C<to_uvchr> are older than the functions
+whose names don't have C<chr> in them.  The API in the older functions is
+harder to use correctly, and so they are kept only for backwards compatibility,
+and may eventually become deprecated.  If you are writing a module and use
+L<Devel::PPPort>, your code can use the new functions back to at least Perl
+v5.7.1.  (C<valid_utf8_to_uvchr> is the exception to this name rule; its API is
+not problematic, and it is in no danger of becoming deprecated.  But it is
+highly specialized so should rarely occur in actual code.)
 
-Various ALLOW flags can be set in C<flags> to allow (and not warn on)
-individual types of malformations, such as the sequence being overlong (that
-is, there is a shorter sequence that can express the same code point; overlong
-sequences are expressly forbidden in the UTF-8 standard due to potential
-security issues).  Another malformation example is the first byte of the input
-sequence not being a legal first byte.  See F<utf8.h> for the list of such
-flags.  Even if allowed, this function generally returns the Unicode
-REPLACEMENT CHARACTER when it encounters a malformation.  There are flags in
-F<utf8.h> to override this behavior for the overlong malformations, but don't
-do that except for very specialized purposes.
-
-The C<UTF8_CHECK_ONLY> flag overrides the behavior when a non-allowed (by other
-flags) malformation is found.  If this flag is set, the routine assumes that
-the caller will raise a warning, and this function will silently just set
-C<retlen> to C<-1> (cast to C<STRLEN>) and return zero.
-
-Note that this API requires disambiguation between successful decoding a C<NUL>
-character, and an error return (unless the C<UTF8_CHECK_ONLY> flag is set), as
-in both cases, 0 is returned, and, depending on the malformation, C<retlen> may
-be set to -1.  To disambiguate, upon a zero return, see if the first byte of
-C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the input had an
-error.  Or you can use C<L</utf8n_to_uvchr_error>>.
-
-Certain classes of code points are considered problematic.  These are Unicode
-surrogates, Unicode non-characters, and code points above the Unicode maximum
-of 0x10FFFF.  By default these are considered regular code points, but certain
-situations warrant special handling for them, which can be specified using the
-C<flags> parameter.  If C<flags> contains C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>,
-all three classes are treated as malformations and handled as such.  The flags
-C<UTF8_DISALLOW_SURROGATE>, C<UTF8_DISALLOW_NONCHAR>, and
-C<UTF8_DISALLOW_SUPER> (meaning above the legal Unicode maximum) can be set to
-disallow these categories individually.  C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
-restricts the allowed inputs to the strict UTF-8 traditionally defined by
-Unicode.  Use C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE> to use the strictness
-definition given by
-L<Unicode Corrigendum #9|https://www.unicode.org/versions/corrigendum9.html>.
-The difference between traditional strictness and C9 strictness is that the
-latter does not forbid non-character code points.  (They are still discouraged,
-however.)  For more discussion see L<perlunicode/Noncharacter code points>.
-
-The flags C<UTF8_WARN_ILLEGAL_INTERCHANGE>,
-C<UTF8_WARN_ILLEGAL_C9_INTERCHANGE>, C<UTF8_WARN_SURROGATE>,
-C<UTF8_WARN_NONCHAR>, and C<UTF8_WARN_SUPER> will cause warning messages to be
-raised for their respective categories, but otherwise the code points are
-considered valid (not malformations).  To get a category to both be treated as
-a malformation and raise a warning, specify both the WARN and DISALLOW flags.
-(But note that warnings are not raised if lexically disabled nor if
-C<UTF8_CHECK_ONLY> is also specified.)
-
-Extremely high code points were never specified in any standard, and require an
-extension to UTF-8 to express, which Perl does.  It is likely that programs
-written in something other than Perl would not be able to read files that
-contain these; nor would Perl understand files written by something that uses a
-different extension.  For these reasons, there is a separate set of flags that
-can warn and/or disallow these extremely high code points, even if other
-above-Unicode ones are accepted.  They are the C<UTF8_WARN_PERL_EXTENDED> and
-C<UTF8_DISALLOW_PERL_EXTENDED> flags.  For more information see
-C<L</UTF8_GOT_PERL_EXTENDED>>.  Of course C<UTF8_DISALLOW_SUPER> will treat all
-above-Unicode code points, including these, as malformations.
-(Note that the Unicode standard considers anything above 0x10FFFF to be
-illegal, but there are standards predating it that allow up to 0x7FFF_FFFF
-(2**31 -1))
-
-A somewhat misleadingly named synonym for C<UTF8_WARN_PERL_EXTENDED> is
-retained for backward compatibility: C<UTF8_WARN_ABOVE_31_BIT>.  Similarly,
-C<UTF8_DISALLOW_ABOVE_31_BIT> is usable instead of the more accurately named
-C<UTF8_DISALLOW_PERL_EXTENDED>.  The names are misleading because these flags
-can apply to code points that actually do fit in 31 bits.  This happens on
-EBCDIC platforms, and sometimes when the L<overlong
-malformation|/C<UTF8_GOT_LONG>> is also present.  The new names accurately
-describe the situation in all cases.
-
-All other code points corresponding to Unicode characters, including private
-use and those yet to be assigned, are never considered malformed and never
-warn.
-
-=for apidoc Amnh||UTF8_CHECK_ONLY
-=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
-=for apidoc Amnh||UTF8_DISALLOW_SURROGATE
-=for apidoc Amnh||UTF8_DISALLOW_NONCHAR
-=for apidoc Amnh||UTF8_DISALLOW_SUPER
-=for apidoc Amnh||UTF8_WARN_ILLEGAL_INTERCHANGE
-=for apidoc Amnh||UTF8_WARN_ILLEGAL_C9_INTERCHANGE
-=for apidoc Amnh||UTF8_WARN_SURROGATE
-=for apidoc Amnh||UTF8_WARN_NONCHAR
-=for apidoc Amnh||UTF8_WARN_SUPER
-=for apidoc Amnh||UTF8_WARN_PERL_EXTENDED
-=for apidoc Amnh||UTF8_DISALLOW_PERL_EXTENDED
-
-=for apidoc utf8n_to_uvchr_error
-
-THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this
-directly.
-
-This function is for code that needs to know what the precise malformation(s)
-are when an error is found.  If you also need to know the generated warning
-messages, use L</utf8n_to_uvchr_msgs>() instead.
-
-It is like C<L</utf8n_to_uvchr>> but it takes an extra parameter placed after
-all the others, C<errors>.  If this parameter is 0, this function behaves
-identically to C<L</utf8n_to_uvchr>>.  Otherwise, C<errors> should be a pointer
-to a C<U32> variable, which this function sets to indicate any errors found.
-Upon return, if C<*errors> is 0, there were no errors found.  Otherwise,
-C<*errors> is the bit-wise C<OR> of the bits described in the list below.  Some
-of these bits will be set if a malformation is found, even if the input
-C<flags> parameter indicates that the given malformation is allowed; those
-exceptions are noted:
+All the functions accept, without complaint, well-formed UTF-8 for any
+non-problematic Unicode code point 0 .. 0x10FFFF.  There are two types of
+Unicode problematic code points:  surrogate characters and non-character code
+points.  (See L<perlunicode>.)  Some of the functions reject one or both of
+these.  Private use characters and those code points yet to be assigned to a
+particular character are never considered problematic.  Additionally, most of
+the functions accept non-Unicode code points, those starting at 0x110000.
 
 =over 4
 
-=item C<UTF8_GOT_PERL_EXTENDED>
+=item C<utf8_to_uv> forms
 
-The input sequence is not standard UTF-8, but a Perl extension.  This bit is
-set only if the input C<flags> parameter contains either the
-C<UTF8_DISALLOW_PERL_EXTENDED> or the C<UTF8_WARN_PERL_EXTENDED> flags.
+Almost all code should use only C<utf8_to_uv>, C<extended_utf8_to_uv>,
+C<strict_utf8_to_uv>, or C<c9strict_utf8_to_uv>.  The other functions are
+either the problematic old form, or are for highly specialized uses.
 
-Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
-and so some extension must be used to express them.  Perl uses a natural
-extension to UTF-8 to represent the ones up to 2**36-1, and invented a further
-extension to represent even higher ones, so that any code point that fits in a
-64-bit word can be represented.  Text using these extensions is not likely to
-be portable to non-Perl code.  We lump both of these extensions together and
-refer to them as Perl extended UTF-8.  There exist other extensions that people
-have invented, incompatible with Perl's.
+These four functions each return C<true> if the sequence of bytes starting at
+C<s> form a complete, legal UTF-8 (or UTF-EBCDIC) sequence for a code point.
+If so, C<*cp> will be set to the native code point value it represents, and
+C<*advance> will be set to its length, in bytes.
+
+Otherwise, each function returns C<false> and sets C<*cp> to the Unicode
+REPLACEMENT CHARACTER, and C<*advance> to the next position along C<s>, where
+the next possible UTF-8 character could begin.
+
+The functions only examine as many bytes along C<s> as are needed to form a
+complete UTF-8 representation of a single code point.  Under no circumstances
+do they examine any byte beyond S<C<e - 1>>, failing if the code point
+requires more than S<C<e - s>> bytes to represent.
+
+The functions differ only in what flavor of UTF-8 they accept.  All reject
+syntactically invalid UTF-8.  C<strict_utf8_to_uv> additionally rejects any
+UTF-8 that translates into a code point that isn't specified by Unicode to be
+freely exchangeable, namely the surrogate characters and non-character code
+points.  C<c9strict_utf8_to_uv> instead uses the exchangeable definition given
+by Unicode's Corregendum #9, which rejects only surrogates.
+C<extended_utf8_to_uv> accepts all syntactically valid UTF-8, as extended by
+Perl to allow 64-bit code points to be encoded.
+
+C<utf8_to_uv> is merely a synonym of C<extended_utf8_to_uv> whose name
+explicitly indicates that it accepts Perl-extended UTF-8.  Perl programs
+traditionally handle this by default.
+
+Whenever input is rejected, an explanatory warning message is raised, unless
+C<utf8> warnings (or the appropriate subcategory) are turned off.  A given
+input sequence may contain multiple malformations, giving rise to multiple
+warnings, as the functions attempt to find and report on all malformations in a
+sequence.  All the possible malformations are listed in C<L</utf8_to_uv_msgs>>,
+with some examples of multiple ones for the same sequence.
+
+Often, C<s> is an arbitrarily long string containing the UTF-8 representations
+of many code points in a row, and these functions are called in the course of
+parsing C<s> to find all those code points.
+
+If your code doesn't know how to deal with illegal input, as would be typical
+of a low level routine, the loop could look like:
+
+ while (s < e) {
+     UV cp;
+     Size_t advance;
+     (void) utf8_to_uv(s, e, &cp, &advance);
+     <handle 'cp'>
+     s += advance;
+ }
+
+A REPLACEMENT CHARACTER will be inserted everywhere that malformed input
+occurs.  Obviously, we aren't expecting such outcomes, but your code will be
+protected from going off the rails.
+
+If you do have a plan for handling malformed input, you could instead write:
+
+ while (s < e) {
+     UV cp;
+     Size_t advance;
+
+     if (UNLIKELY(! utf8_to_uv(s, e, &cp, &advance)) {
+         <bail out or convert to handleable>
+     }
+
+     <handle 'cp'>
+
+     s += advance;
+ }
+
+You may pass NULL to these functions instead of a pointer to your C<advance>
+variable.  But the only legitimate case to do this is if you are only examining
+the first character in C<s>, and have no plans to ever look further.  You could
+also advance by using C<UTF8SKIP>, but this gives the correct result if and
+only if the input is well-formed; and is extra work always, as the functions
+have already done the equivalent work and return the correct value in
+C<advance>, regardless of whether the input is well-formed or not.
+
+You must always pass a non-NULL pointer into which to store the (first) code
+point C<s> represents.  If you don't care about this value, you should be using
+one of the C<L</isUTF8_CHAR>> functions instead.
+
+=item Function where the UTF-8 is B<known> to be valid
+
+C<valid_utf8_to_uvchr> is designed
+to be used where you generated the UTF-8 yourself, so you know it is valid.
+It skips any error checking, assuming the sequence of bytes starting at C<s> is
+encoded as Perl extended UTF-8 (or Perl extended UTF-EBCDIC), reading as many
+bytes along C<s> as necessary, and returning that count in C<*retlen> (if
+C<retlen> is not NULL).
+
+=item C<utf8_to_uvchr> forms
+
+These are the old form equivalents of C<utf8_to_uv> (and its synonym,
+C<extended_utf8_to_uv>).  They are C<utf8_to_uvchr> and C<utf8_to_uvchr_buf>.
+There is no old form equivalent of either C<strict_utf8_to_uv> nor
+C<c9strict_utf8_to_uv>.
+
+C<utf8_to_uvchr> is DEPRECATED.  Do NOT use it; it is a security hole ready to
+bring destruction onto you and yours.  C<utf8_to_uvchr_buf> is discouraged and
+may eventually become deprecated
+
+C<utf8_to_uvchr_buf> checks if the sequence of bytes starting at C<s> form a
+complete, legal UTF-8 (or UTF-EBCDIC) sequence for a code point.  If so, it
+returns the code point value the sequence represents, and C<*retlen> will be
+set to its length, in bytes.  Thus, the next possible character in C<s> begins
+at S<C<s + *retlen>>.
+
+The function only examines as many bytes along C<s> as are needed to form a
+complete UTF-8 representation of a single code point.  Under no circumstances
+does it examine any byte beyond S<C<e - 1>>.
+
+If the sequence examined starting at C<s> is not legal Perl extended UTF-8, the
+translation fails, and the resultant behavior unfortunately depends on if the
+warnings category "utf8" is enabled or not.
+
+=over 4
+
+=item If C<'utf8'> warnings are disabled
+
+The Unicode REPLACEMENT CHARACTER is silently returned, and C<*retlen> is set
+(if C<retlen> isn't C<NULL>) so that (S<C<s> + C<*retlen>>) is the next
+possible position in C<s> that could begin a non-malformed character.
+
+But note that it is ambiguous whether a REPLACEMENT CHARACTER was actually in
+the input, or if this function synthetically generated one.  In the unlikely
+event that you care, you'd have to examine the input to disambiguate.
+
+=item If C<'utf8'> warnings are enabled
+
+A warning will be displayed, and 0 is returned and C<*retlen> is set (if
+C<retlen> isn't C<NULL>) to -1.
+
+But note that 0 may also be returned if S<*s> is a legal NUL character.  This
+means that you have to disambiguate a 0 return.  You can do this by checking
+that the first byte of C<s> is indeed a NUL; or by making sure to always pass a
+non-NULL C<retlen> pointer, and by examining it.
+
+Also note that should you wish to proceed with parsing C<s>, you have no easy
+way of knowing where to start looking in it for the next possible character.
+It would be better to have instead called an equivalent function that provides
+this information; any of the C<utf8_to_uv> series, or C<L</utf8n_to_uvchr>>.
+
+=back
+
+Because of these quirks, C<utf8_to_uvchr_buf> is very difficult to use
+correctly and handle all cases.  Generally, you need to bail out at the first
+failure it finds.
+
+The deprecated C<utf8_uvchr> behaves the same way as C<utf8_to_uvchr_buf> for
+well-formed input, and for the malformations it is capable of finding, but
+doesn't find all of them, and it can read beyond the end of the input buffer,
+which is why it is deprecated.
+
+=back
+
+The bottom line is use the C<utf8_to_uv()> family of functions.
+
+=for apidoc      utf8_to_uv_flags
+=for apidoc_item utf8n_to_uvchr
+
+These functions are generalized versions of C<L</utf8_to_uv>>, where you need
+more control over what UTF-8 sequences are acceptable.  These functions are
+unlikely to be needed except for specialized purposes.
+
+C<utf8n_to_uvchr> is more like a generalization of C<utf8_to_uvchr_buf>, but
+with fewer quirks, and a different method of specifying the bytes it is allowed
+to examine in C<s>.  It has a C<curlen> parameter instead of a C<e> parameter,
+so the furthest byte in C<s> it can look at is S<C<s + curlen>>.  Its return
+value is, like C<utf8_to_uvchr_buf>, ambiguous with respect to the NUL and
+REPLACEMENT characters, but the value of C<*retlen> can be relied on (except
+with the C<UTF8_CHECK_ONLY> flag described below) to know where the next
+possible character along C<s> starts, removing that quirk.  Hence, you always
+should use C<*retlen> to determine where the next character in C<s> starts.
+
+These functions have an additional parameter, C<flags>, besides the ones in
+C<utf8_to_uv> and C<utf8_to_uvchr_buf>, which can be used to broaden or
+restrict what is acceptable UTF-8.  C<flags> has the same meaning and behavior
+in both functions.  When C<flags> is 0, these functions accept any
+syntactically valid Perl-extended-UTF-8 sequence.
+
+There are flags that apply to accepting particular sequences, and flags that
+apply to raising warnings about encountering sequences.  Each type is
+independent of the other.  You can reject and not warn; warn and still accept;
+or both reject and warn.  Rejecting means that the sequence gets translated
+into the Unicode REPLACEMENT CHARACTER instead of what it was meant to
+represent.
+
+Even if a flag is passed that indicates warnings are desired; no warning will be
+raised if C<'utf8'> warnings (or the appropriate subcategory) are disabled at
+the point of the call.
+
+=over 4
+
+=item C<UTF8_CHECK_ONLY>
+
+This also suppresses any warnings.  And it changes what is stored into
+C<*retlen> with the C<uvchr> family of functions (for the worse).  It is not
+likely to be of use to you.  You can use C<UTF8_ALLOW_ANY> (described below) to
+also turn off warnings, and that flag doesn't adversely affect C<*retlen>.
+
+=item C<UTF8_DISALLOW_SURROGATE>
+
+=item C<UTF8_WARN_SURROGATE>
+
+These disallow and/or warn about UTF-8 sequences that represent surrogate
+characters.
+
+=item C<UTF8_DISALLOW_NONCHAR>
+
+=item C<UTF8_WARN_NONCHAR>
+
+These disallow and/or warn about UTF-8 sequences that represent non-character
+code points.
+
+=item C<UTF8_DISALLOW_SUPER>
+
+=item C<UTF8_WARN_SUPER>
+
+These disallow and/or warn about UTF-8 sequences that represent code points
+above 0x10FFFF.
+
+=item C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
+
+=item C<UTF8_WARN_ILLEGAL_INTERCHANGE>
+
+These are the same as having selected all three of the corresponding SURROGATE,
+NONCHAR and SUPER flags listed above.
+
+All such code points are not considered to be safely freely exchangeable
+between processes.
+
+=item C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>
+
+=item C<UTF8_WARN_ILLEGAL_C9_INTERCHANGE>
+
+These are the same as having selected both the corresponding SURROGATE and
+SUPER flags listed above.
+
+Unicode issued L<Unicode Corrigendum
+#9|https://www.unicode.org/versions/corrigendum9.html> to allow non-character
+code points to be exchanged by processes aware of the possibility.  (They are
+still discouraged, however.)  For more discussion see
+L<perlunicode/Noncharacter code points>.
+
+=item C<UTF8_DISALLOW_PERL_EXTENDED>
+
+=item C<UTF8_WARN_PERL_EXTENDED>
+
+These disallow and/or warn on encountering sequences that require Perl's
+extension to UTF-8 to represent them.   These are all for code points above
+0x10FFFF, so these sequences are a subset of the ones controlled by SUPER or
+either of the illegal interchange sets of flags.
+
+Perl predates Unicode, and earlier standards allowed for code points up through
+0x7FFF_FFFF (2**31 - 1).  Perl, of course, would like you to be able to
+represent in UTF-8 any code point available on the platform.  To do so, some
+extension must be used to express them.  Perl uses a natural extension to UTF-8
+to represent the ones up to 2**36-1, and invented a further extension to
+represent even higher ones, so that any code point that fits in a 64-bit word
+can be represented.  We lump both of these extensions together and refer to
+them as Perl extended UTF-8.  There exist other extensions that people have
+invented, incompatible with Perl's.
 
 On EBCDIC platforms starting in Perl v5.24, the Perl extension for representing
 extremely high code points kicks in at 0x3FFF_FFFF (2**30 -1), which is lower
@@ -1174,29 +1331,79 @@ than on ASCII.  Prior to that, code points 2**31 and higher were simply
 unrepresentable, and a different, incompatible method was used to represent
 code points between 2**30 and 2**31 - 1.
 
-On both platforms, ASCII and EBCDIC, C<UTF8_GOT_PERL_EXTENDED> is set if
-Perl extended UTF-8 is used.
+It is likely that programs written in something other than Perl would not be
+able to read files that contain these; nor would Perl understand files written
+by something that uses a different extension.  Hence, you can specify that
+above-Unicode code points are generally accepted and/or warned about, but still
+exclude the ones that require this extension to represent.
 
-In earlier Perls, this bit was named C<UTF8_GOT_ABOVE_31_BIT>, which you still
-may use for backward compatibility.  That name is misleading, as this flag may
-be set when the code point actually does fit in 31 bits.  This happens on
-EBCDIC platforms, and sometimes when the L<overlong
-malformation|/C<UTF8_GOT_LONG>> is also present.  The new name accurately
-describes the situation in all cases.
+=item C<UTF8_ALLOW_ANY> and kin
+
+Other flags can be passed to suppress warnings for syntactic malformations
+and/or overflowing the number of bits available in a UV on the platform.  All
+such malformations translate to the REPLACEMENT CHARACTER, regardless of
+any of the flags.  They, contrary to their names, only control the warnings.
+
+The only one that you would ever have any reason to use is C<UTF8_ALLOW_ANY>
+which suppresses the warnings for any of the syntactic malformations and
+overflow, except for empty input.
+
+The other such flags are shown in the C<_GOT_> bits list in
+C<L</utf8_to_uv_msgs>>.
+
+All such flags have C<_ALLOW_> in their names, which is misleading.  The name
+stems from a time when earlier perl versions kind-of, sort-of tried, mostly
+unsuccessfully, to accept these malformations in input strings.  That ended by
+Perl v5.14.
+
+=back
+
+=for apidoc      utf8_to_uv_msgs
+=for apidoc_item utf8n_to_uvchr_msgs
+=for apidoc_item utf8_to_uv_errors
+=for apidoc_item utf8n_to_uvchr_error
+
+These functions are generalizations of C<L</utf8_to_uv_flags>> and
+C<L</utf8n_to_uvchr>>.  They are used for the highly specialized purpose of
+when the caller needs to know the exact malformations that were encountered
+and/or the diagnostics that would be raised.
+
+They each take one or two extra parameters, pointers to where to store this
+information.  The functions with C<_msgs> in their names return both types, so
+take two extra parameters; those with C<_error> return just the malformations,
+so take just one extra parameter.  When the extra parameters are 0, the
+functions behave identically to the function they generalize.
+
+When the C<errors> parameter is not NULL, it should be the address of a U32
+variable, into which the functions store a bitmap, described just below, with a
+bit set for each malformation the function found; 0 if none.  What is
+considered a malformation is affected by C<flags>, the same as in
+C<utf8_to_uv_flags>.
+
+The bits returned in C<errors> and their meanings are:
+
+=over 4
 
 =item C<UTF8_GOT_CONTINUATION>
 
 The input sequence was malformed in that the first byte was a UTF-8
-continuation byte.
+continuation byte.  This bit is not set if the C<UTF8_ALLOW_CONTINUATION> flag
+is set.
 
 =item C<UTF8_GOT_EMPTY>
 
-The input C<curlen> parameter was 0.
+The input parameters indicated the length of C<s> is 0.  Technically, this a
+coding error, not a malformation; you should check before calling these
+functions if there is actually anything to convert.  But perl needs to be able
+to recover from bad input, and this is how it does it.
+
+This bit is not set if the C<UTF8_ALLOW_EMPTY> flag is set.
 
 =item C<UTF8_GOT_LONG>
 
 The input sequence was malformed in that there is some other sequence that
 evaluates to the same code point, but that sequence is shorter than this one.
+This bit is not set if the C<UTF8_ALLOW_LONG> flag is set.
 
 Until Unicode 3.1, it was legal for programs to accept this malformation, but
 it was discovered that this created security issues.
@@ -1212,19 +1419,26 @@ C<UTF8_DISALLOW_NONCHAR> or the C<UTF8_WARN_NONCHAR> flags.
 
 The input sequence was malformed in that a non-continuation type byte was found
 in a position where only a continuation type one should be.  See also
-C<L</UTF8_GOT_SHORT>>.
+C<L</UTF8_GOT_SHORT>>.  This bit is not set if the
+C<UTF8_ALLOW_NON_CONTINUATION> flag is set.
 
 =item C<UTF8_GOT_OVERFLOW>
 
 The input sequence was malformed in that it is for a code point that is not
 representable in the number of bits available in an IV on the current platform.
+This bit is not set if the C<UTF8_ALLOW_OVERFLOW> flag is set.
+
+=item C<UTF8_GOT_PERL_EXTENDED>
+
+The input sequence is not standard UTF-8, but a Perl extension.  This bit is
+set only if the input C<flags> parameter contains either the
+C<UTF8_DISALLOW_PERL_EXTENDED> or the C<UTF8_WARN_PERL_EXTENDED> flags.
 
 =item C<UTF8_GOT_SHORT>
 
 The input sequence was malformed in that C<curlen> is smaller than required for
 a complete sequence.  In other words, the input is for a partial character
-sequence.
-
+sequence.  This bit is not set if the C<UTF8_ALLOW_SHORT> flag is set.
 
 C<UTF8_GOT_SHORT> and C<UTF8_GOT_NON_CONTINUATION> both indicate a too short
 sequence.  The difference is that C<UTF8_GOT_NON_CONTINUATION> indicates always
@@ -1233,12 +1447,12 @@ sequence was looked at.   If no other flags are present, it means that the
 sequence was valid as far as it went.  Depending on the application, this could
 mean one of three things:
 
-=over
+=over 4
 
 =item *
 
-The C<curlen> length parameter passed in was too small, and the function was
-prevented from examining all the necessary bytes.
+The C<e> or C<curlen> parameters passed in were too small, and the function
+was prevented from examining all the necessary bytes.
 
 =item *
 
@@ -1269,67 +1483,86 @@ C<UTF8_DISALLOW_SURROGATE> or the C<UTF8_WARN_SURROGATE> flags.
 
 =back
 
-To do your own error handling, call this function with the C<UTF8_CHECK_ONLY>
-flag to suppress any warnings, and then examine the C<*errors> return.
+Note that more than one bit may have been set by these functions.  This is
+because it is possible for multiple malformations to be present in the same
+sequence.  An example would be an overlong sequence evaluating to a surrogate
+when surrogates are forbidden.
 
-=for apidoc Amnh||UTF8_GOT_PERL_EXTENDED
+If you don't care about the system's messages text nor warning categories, you
+can customize error handling by calling one of the C<_error> functions, using
+either of the flags C<UTF8_ALLOW_ANY> or C<UTF8_CHECK_ONLY> to suppress any
+warnings, and then examine the C<*errors> return.
+
+But if you do care, use one of the functions with C<_msgs> in their names.
+These allow you to completely customize error handling.  They take a second
+extra parameter, C<msgs>.  If the flag C<UTF8_CHECK_ONLY> is passed, this
+parameter is ignored.  Otherwise, if not NULL, it should be a pointer to a
+variable which has been declared to be an C<AV*>, and into which the function
+creates a new AV to store information, described below, about all malformations
+the function found; NULL is stored if none.  What is considered a malformation
+is affected by C<flags>, the same as described in C<L</utf8_to_uv_flags>>.
+
+Each element of the C<msgs> AV array is an anonymous hash with the following
+three key-value pairs:
+
+=over 4
+
+=item C<text>
+
+A C<SVpv> containing the text of any warning message that would have ordinarily
+been generated.  The function suppresses raising this warning itself.
+
+=item C<warn_categories>
+
+The warning category (or categories) for the message, packed into a C<SVuv>.
+
+=item C<flag>
+
+A C<SVuv> containing a single flag bit associated with this message.  The bit
+corresponds to some bit in the C<*errors> return value, such as
+C<UTF8_GOT_LONG>.
+
+=back
+
+The array is sorted so that element C<[0]> contains the first message that
+would have otherwise been raised; C<[1]>, the second; and so on.
+
+You thus can completely override the normal error handling; you can check the
+lexical warnings state (or not) when choosing what to do with the returned
+messages.
+
+The caller, of course, is responsible for freeing any returned AV.
+
+=for apidoc Amnh||UTF8_ALLOW_CONTINUATION
+=for apidoc Amnh||UTF8_ALLOW_EMPTY
+=for apidoc Amnh||UTF8_ALLOW_LONG
+=for apidoc Amnh||UTF8_ALLOW_NON_CONTINUATION
+=for apidoc Amnh||UTF8_ALLOW_OVERFLOW
+=for apidoc Amnh||UTF8_ALLOW_PERL_EXTENDED
+=for apidoc Amnh||UTF8_ALLOW_SHORT
+=for apidoc Amnh||UTF8_CHECK_ONLY
+=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
+=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+=for apidoc Amnh||UTF8_DISALLOW_NONCHAR
+=for apidoc Amnh||UTF8_DISALLOW_PERL_EXTENDED
+=for apidoc Amnh||UTF8_DISALLOW_SUPER
+=for apidoc Amnh||UTF8_DISALLOW_SURROGATE
 =for apidoc Amnh||UTF8_GOT_CONTINUATION
 =for apidoc Amnh||UTF8_GOT_EMPTY
 =for apidoc Amnh||UTF8_GOT_LONG
 =for apidoc Amnh||UTF8_GOT_NONCHAR
 =for apidoc Amnh||UTF8_GOT_NON_CONTINUATION
 =for apidoc Amnh||UTF8_GOT_OVERFLOW
+=for apidoc Amnh||UTF8_GOT_PERL_EXTENDED
 =for apidoc Amnh||UTF8_GOT_SHORT
 =for apidoc Amnh||UTF8_GOT_SUPER
 =for apidoc Amnh||UTF8_GOT_SURROGATE
-
-=for apidoc utf8n_to_uvchr_msgs
-
-THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Most code should use L</utf8_to_uvchr_buf>() rather than call this
-directly.
-
-This function is for code that needs to know what the precise malformation(s)
-are when an error is found, and wants the corresponding warning and/or error
-messages to be returned to the caller rather than be displayed.  All messages
-that would have been displayed if all lexical warnings are enabled will be
-returned.
-
-It is just like C<L</utf8n_to_uvchr_error>> but it takes an extra parameter
-placed after all the others, C<msgs>.  If this parameter is 0, this function
-behaves identically to C<L</utf8n_to_uvchr_error>>.  Otherwise, C<msgs> should
-be a pointer to an C<AV *> variable, in which this function creates a new AV to
-contain any appropriate messages.  The elements of the array are ordered so
-that the first message that would have been displayed is in the 0th element,
-and so on.  Each element is a hash with three key-value pairs, as follows:
-
-=over 4
-
-=item C<text>
-
-The text of the message as a C<SVpv>.
-
-=item C<warn_categories>
-
-The warning category (or categories) packed into a C<SVuv>.
-
-=item C<flag>
-
-A single flag bit associated with this message, in a C<SVuv>.
-The bit corresponds to some bit in the C<*errors> return value,
-such as C<UTF8_GOT_LONG>.
-
-=back
-
-It's important to note that specifying this parameter as non-null will cause
-any warnings this function would otherwise generate to be suppressed, and
-instead be placed in C<*msgs>.  The caller can check the lexical warnings state
-(or not) when choosing what to do with the returned messages.
-
-If the flag C<UTF8_CHECK_ONLY> is passed, no warnings are generated, and hence
-no AV is created.
-
-The caller, of course, is responsible for freeing any returned AV.
+=for apidoc Amnh||UTF8_WARN_ILLEGAL_C9_INTERCHANGE
+=for apidoc Amnh||UTF8_WARN_ILLEGAL_INTERCHANGE
+=for apidoc Amnh||UTF8_WARN_NONCHAR
+=for apidoc Amnh||UTF8_WARN_PERL_EXTENDED
+=for apidoc Amnh||UTF8_WARN_SUPER
+=for apidoc Amnh||UTF8_WARN_SURROGATE
 
 =cut
 */
@@ -2056,26 +2289,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     *cp_p = UNI_TO_NATIVE(uv);
     return true;
 }
-
-/*
-=for apidoc utf8_to_uvchr_buf
-
-Returns the native code point of the first character in the string C<s> which
-is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
-C<*retlen> will be set to the length, in bytes, of that character.
-
-If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
-enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
-C<NULL>) to -1.  If those warnings are off, the computed value, if well-defined
-(or the Unicode REPLACEMENT CHARACTER if not), is silently returned, and
-C<*retlen> is set (if C<retlen> isn't C<NULL>) so that (S<C<s> + C<*retlen>>) is
-the next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is
-returned.
-
-=cut
-
-*/
 
 /*
 =for apidoc utf8_length
