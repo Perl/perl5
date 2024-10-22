@@ -1296,8 +1296,6 @@ point's representation.
 #define SHARP_S_SKIP 2
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
-#define bytes_from_utf8(s, lenp, is_utf8p)                                  \
-                            bytes_from_utf8_loc(s, lenp, is_utf8p, 0)
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
