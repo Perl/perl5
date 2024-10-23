@@ -2399,14 +2399,16 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
 
-    /* There is some start-up/tear-down overhead with this, so no real gain
+    /* Do a first pass through the string to see if it actually is translatable
+     * into bytes.  On long strings this is
+     * done a word at a time, so is relatively quick. (There is some
+     * start-up/tear-down overhead with the per-word algorithm, so no real gain
      * unless the remaining portion of the string is long enough.  The current
-     * value is just a guess. */
+     * value is just a guess.)  On EBCDIC, it's always per-byte. */
     if ((send - s) > (ptrdiff_t) (5 * PERL_WORDSIZE)) {
 
-        /* First, go through the string a word at-a-time to verify that it is
-         * downgradable.  If it contains any start byte besides C2 and C3, then
-         * it isn't. */
+        /* If the string contains any start byte besides C2 and C3, then it
+         * isn't translatable into bytes */
 
         const PERL_UINTMAX_T C0_mask = PERL_COUNT_MULTIPLIER * 0xC0;
         const PERL_UINTMAX_T C2_mask = PERL_COUNT_MULTIPLIER * 0xC2;
@@ -2490,9 +2492,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     }
 
 #endif
-
-    /* Do the straggler bytes beyond the final word boundary (or all bytes
-     * in the case of EBCDIC) */
+    /* Do the straggler bytes beyond what the loop above did */
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
@@ -2504,19 +2504,18 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
         s++;
     }
 
-    /* Here, we passed the tests above.  For the EBCDIC case, everything
-     * was well-formed and can be downgraded to non-UTF8.  For non-EBCDIC,
-     * it means only that all start bytes were C2 or C3, hence any
-     * well-formed sequences are downgradable.  But we didn't test, for
-     * example, that there weren't two C2's in a row.  That means that in
-     * the loop below, we have to be sure things are well-formed.  Because
-     * this is very very likely, and we don't care about having speedy
-     * handling of malformed input, the loop proceeds as if well formed,
-     * and should a malformed one come along, it undoes what it already has
-     * done */
-
     U8 * d = s = first_variant;
 
+    /* For the cases where the per-word algorithm wasn't used, everything is
+     * well-formed and can definitely be translated.  When the per word
+     * algorithm was used, it found that all start bytes in the string were C2
+     * or C3, hence any well-formed sequences are convertible to bytes.  But we
+     * didn't test, for example, that there weren't two C2's in a row.  That
+     * means that in the loop below, we have to be sure things are well-formed.
+     * Because it is very very unlikely that we got this far for something
+     * malformed, and because we prioritize speed in the normal case over the
+     * malformed one, we go ahead and do the translation, and undo it if found
+     * to be necessary. */
     while (s < send) {
         U8 c = *s++;
         if (! UVCHR_IS_INVARIANT(c)) {
@@ -2548,12 +2547,11 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 
   cant_convert: ;
 
-    /* Here, it is malformed.  This shouldn't happen on EBCDIC, and on ASCII
-     * platforms, we know that the only start bytes in the text are C2 and C3,
-     * and the code above has made sure that it doesn't end with a start byte.
-     * That means the only malformations that are possible are a start byte
-     * without a continuation (either followed by another start byte or an
-     * invariant) or an unexpected continuation.
+    /* Here, we found a malformation in the input.  This won't happen except
+     * when the per-word algorithm was used in the first pass, because that may
+     * miss some malformations.  It determined that the only start bytes in the
+     * text are C2 and C3, but didn't examine it to make sure each of those was
+     * followed by precisely one continuation, for example.
      *
      * We have to undo all we've done before, back down to the first UTF-8
      * variant.  Note that each 2-byte variant we've done so far (converted to
