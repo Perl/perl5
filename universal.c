@@ -1131,9 +1131,9 @@ XS(XS_re_regexp_pattern)
     NOT_REACHED; /* NOTREACHED */
 }
 
-#if defined(HAS_GETCWD) && defined(PERL_IS_MINIPERL)
+#if defined(HAS_GETCWD)
 
-XS(XS_Internals_getcwd)
+XS_EXTERNAL(XS_Internals_getcwd)
 {
     dXSARGS;
     if (items != 0)
@@ -1353,7 +1353,7 @@ static const struct xsub_details these_details[] = {
     /* Always offer backup, Win32CORE.c vs AUTOLOAD vs Win32.pm
        vs Win32.dll vs loading a .pm or .dll at all, has rare dep/recursion
        problems in certain modules or .t files. See w32_GetCwd() . */
-    {"Internals::getcwd", w32_GetCwd, "", 0 },
+    /*{"Internals::getcwd", w32_GetCwd, "", 0 },*/
 #endif
     {"Tie::Hash::NamedCapture::_tie_it", XS_NamedCapture_tie_it, NULL, 0 },
     {"Tie::Hash::NamedCapture::TIEHASH", XS_NamedCapture_TIEHASH, NULL, 0 },

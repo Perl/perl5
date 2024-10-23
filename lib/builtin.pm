@@ -1,4 +1,4 @@
-package builtin 0.015;
+package builtin 0.016;
 
 use v5.40;
 
@@ -173,6 +173,29 @@ This function is currently B<experimental>.
 Returns the floating-point "Not-a-Number" value.
 
 Available starting with Perl 5.40.
+
+=head2 getcwd
+
+    $cwd = builtin::getcwd();
+
+Core maintained version of L<Cwd::getcwd()|Cwd/getcwd> or
+L<Win32::GetCwd()|Win32/Win32::GetCwd()>.  It is suggested that you only use
+this sub if loading L<Cwd::|Cwd> or calling C<Win32::GetCwd()> and its
+C<AUTOLOAD> to L<Win32.pm|Win32> will somehow break a TAP test in a C<.t> or
+for some esoteric reason L<@INC|perlvar/@INC> L<%INC|perlvar/%INC> or
+L<$INC|perlvar/$INC> are unusable or temporarily broken or undef, or you are
+running perl.bin without perl's L<PERL5LIB|perlrun/PERL5LIB> or
+L<PERLLIB|perlrun/PERLLIB>.
+
+C<builtin::getcwd> may not always return the same string as
+L<Cwd::getcwd()|Cwd/getcwd> or L<Win32::GetCwd()|Win32/Win32::GetCwd()>.
+This sub may have less Perl specific OS portability fixes vs the 2
+subs above, and could return C<undef> in situations where those 2 would return
+a successful string value.  C<builtin::getcwd> is not guarenteed to set
+C<PWD> env var.  Although this would be a bug, there is no guarentee it will
+return the same identical string. Note the public implementations of the other
+2 subs can get patched in the future for some future discovered bug while this
+sub keeps the buggy return value string.
 
 =head2 weaken
 

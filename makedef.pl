@@ -347,6 +347,7 @@ if ($define{'PERL_IMPLICIT_SYS'}) {
     ++$skip{$_} foreach qw(
 		    Perl_my_popen
 		    Perl_my_pclose
+		    win32_get_childdir_tbuf
 			 );
     ++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
     ++$export{perl_clone_host} if $define{USE_ITHREADS};
@@ -844,6 +845,7 @@ if (PLATFORM eq 'win32') {
 		    win32_free_childenv
 		    win32_get_childdir
 		    win32_get_childenv
+		    win32_get_childdir_tbuf
 		    win32_spawnvp
 		    Perl_init_os_extras
 		    Perl_win32_init

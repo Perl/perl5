@@ -52,8 +52,8 @@ sub import
      # That means that it would not be possible to run `make test`
      # for the Win32 module because blib.pm would always load the
      # installed version before @INC gets updated with the blib path.
-     if(defined &Internals::getcwd) {
-       $dir = Internals::getcwd();
+     if(defined &builtin::getcwd) {
+       $dir = builtin::getcwd();
      } else {
        chomp($dir = `cd`);
      }

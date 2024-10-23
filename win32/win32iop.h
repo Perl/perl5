@@ -159,6 +159,9 @@ DllExport void		win32_free_childenv(void* d);
 DllExport void		win32_clearenv(void);
 DllExport char *	win32_get_childdir(void);
 DllExport void		win32_free_childdir(char* d);
+#ifndef PERL_IMPLICIT_SYS
+DllExport unsigned int	win32_get_childdir_tbuf(char* ptr, PH_GCDB_T info);
+#endif
 DllExport Sighandler_t	win32_signal(int sig, Sighandler_t subcode);
 
 
@@ -343,6 +346,7 @@ END_EXTERN_C
 #define free_childenv(d)	win32_free_childenv(d)
 #define clearenv()		win32_clearenv()
 #define get_childdir()		win32_get_childdir()
+#define get_childdir_tbuf(_p,_i)		win32_get_childdir_tbuf((_p),(_i))
 #define free_childdir(d)	win32_free_childdir(d)
 
 #undef getenv

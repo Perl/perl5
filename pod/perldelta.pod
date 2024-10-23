@@ -131,6 +131,12 @@ shelling out to a new C<cmd.exe>, this was fixed and the C<cwd> when using
 C<blib.pm> and L<Win32.pm|Win32> is obtained with a fast same-process API
 function call the way C<Win32::GetCwd()> and C<Cwd::> do it.
 
+=item builtin.pm
+
+C<builtin.pm> was updated from 0.015 to 0.016.
+
+C<builtin::getcwd()> was added as experimental.
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -348,12 +354,9 @@ well.
 
 =over 4
 
-=item Internals::getcwd() is documented as very limited platform availability
+=item *
 
-C<Internals::getcwd()> is documented as experimental, unsupported, not-bug-free
-and removeable in the future, and very limited availability on random
-platforms and perl core build flags. Basically C<Win32> only, and only for
-esoteric C<.t> TAP situations and esoteric internal core reasons.
+XXX
 
 =back
 

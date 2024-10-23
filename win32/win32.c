@@ -4488,11 +4488,22 @@ DllExport char*
 win32_get_childdir(void)
 {
     char* ptr;
-    char szfilename[MAX_PATH+1];
+    char filenamebuf[MAX_PATH+1];
+    char *pfilename = (char *)filenamebuf;
+    DWORD curlen = sizeof(filenamebuf);
+    DWORD retlen;
 
-    GetCurrentDirectoryA(MAX_PATH+1, szfilename);
-    Newx(ptr, strlen(szfilename)+1, char);
-    strcpy(ptr, szfilename);
+    retry:
+    retlen = GetCurrentDirectoryA(curlen, pfilename);
+    if(retlen >= curlen) {
+        curlen = retlen + 1;
+        pfilename = alloca(curlen);
+        goto retry;
+    }
+    Newx(ptr, retlen+1, char);
+    /* if failed sys call (retlen == 0), unknown if buffer ever was written to */
+    ptr[retlen] = '\0';
+    ptr = MoveD(pfilename, ptr, retlen, char);
     return ptr;
 }
 
@@ -4502,6 +4513,88 @@ win32_free_childdir(char* d)
     Safefree(d);
 }
 
+#ifndef PERL_IMPLICIT_SYS
+
+unsigned int
+win32_get_childdir_tbuf(char* ptr, PH_GCDB_T info)
+{
+    BOOL use_default;
+    int retlen;
+    DWORD length;
+    DWORD wlength;
+    WCHAR * wptr;
+    DWORD len_tchar = info.len_tchar;
+    if(len_tchar < 2)
+        croak_no_mem_ext(STR_WITH_LEN("win32_get_childdir_tbuf"));
+    if(info.want_wide || info.want_utf8_maybe) {
+        if(info.want_utf8_maybe) {
+            wlength = len_tchar <= 0xFFFF ? len_tchar : 0xFFFF;
+            wptr = (WCHAR *)alloca(wlength * sizeof(WCHAR));
+        }
+        else {
+            wlength = len_tchar;
+            wptr = (WCHAR *)ptr;
+        }
+        length = GetCurrentDirectoryW(wlength, wptr);
+        if(!length)
+            goto syscall_fail;
+        else if(length >= wlength) {
+/* anti 2 buffers here, utf8 or WIDE doesn't matter because min 2 bytes check */
+            wptr = (WCHAR *)ptr;
+            wptr[wlength-1] = '\0';
+            return length;
+        }
+        if (length > 3) {
+            if ((wptr[length-1] == '\\') || (wptr[length-1] == '/')) {
+                wptr[length-1] = 0;
+                length--;
+            }
+        }
+        if(info.want_utf8_maybe) {
+            use_default = FALSE;
+            retlen = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                             wptr, length+1, ptr, len_tchar,
+                                             NULL, &use_default);
+            if (use_default && retlen) {
+                  retlen = WideCharToMultiByte(CP_UTF8, 0,
+                                                wptr, length+1, ptr, len_tchar,
+                                                NULL, NULL);
+                  if(!retlen)
+                      goto syscall_fail;
+                  length = (unsigned int)retlen;
+                  length |= 0x80000000;
+            }
+            else {
+                length = (unsigned int)retlen;
+            }
+            if(!retlen) { /*syscall failed unknown why */
+                syscall_fail:
+                wptr = (WCHAR *)ptr;
+                /* utf8 or WIDE doesn't matter because min 2 bytes check */
+                wptr[0] = '\0';
+                return 0;
+            }
+        }
+    }
+    else {
+        length = GetCurrentDirectoryA(len_tchar, ptr);
+        if(!length)
+            goto syscall_fail;
+        else if(length >= len_tchar) {
+            ptr[len_tchar-1] = '\0';
+            return length;
+        }
+        if (length > 3) {
+            if ((ptr[length-1] == '\\') || (ptr[length-1] == '/')) {
+                ptr[length-1] = 0;
+                length--;
+            }
+        }
+    }
+    return length;
+}
+
+#endif
 
 /* XXX this needs to be made more compatible with the spawnvp()
  * provided by the various RTLs.  In particular, searching for
@@ -4530,7 +4623,10 @@ do_spawnvp_handles(int mode, const char *cmdname, const char *const *argv,
     dTHXa(NULL);
     int ret;
     void* env;
-    char* dir;
+    char dirbuf [MAX_PATH+1];
+    char* dir = dirbuf;
+    DWORD dirlen = sizeof(dirbuf);
+    DWORD dirretlen;
     child_IO_table tbl;
     STARTUPINFO StartupInfo;
     PROCESS_INFORMATION ProcessInformation;
@@ -4562,7 +4658,24 @@ do_spawnvp_handles(int mode, const char *cmdname, const char *const *argv,
 
     aTHXa(PERL_GET_THX);
     env = PerlEnv_get_childenv();
-    dir = PerlEnv_get_childdir();
+
+    PH_GCDB_T dirinfo;
+    dirinfo.want_wide = 0;
+    dirinfo.want_utf8_maybe = 0;
+
+    retry_dir:
+    dirinfo.len_tchar = dirlen;
+    dirretlen = PerlEnv_get_childdir_tbuf(dir, dirinfo);
+    if(dirretlen >=  dirlen) {
+        dirlen = dirretlen + 1;
+        dir = alloca(dirlen);
+        goto retry_dir;
+    }
+    else if(!dirretlen){
+        translate_to_errno();
+        ret = -1;
+        goto RETVAL;
+     }
 
     switch(mode) {
     case P_NOWAIT:	/* asynch + remember result */
@@ -4678,7 +4791,6 @@ RETRY:
 
 RETVAL:
     PerlEnv_free_childenv(env);
-    PerlEnv_free_childdir(dir);
     Safefree(cmd);
     if (cname != cmdname)
         Safefree(cname);
@@ -5023,39 +5135,75 @@ XS(w32_SetChildShowWindow)
    Win32CORE.c AUTOLOAD vs DynaLoader.pm vs Win32.pm, race and recursion
    and dependency problems can happen in rare cases. For example, see blib.pm
    Offer Internals::getcwd as a backup at all times. */
-XS_EXTERNAL(w32_GetCwd)
+XS(w32_GetCwd)
 {
-
-    SV *sv;
+    dXSARGS;
     /* Make the host for current directory */
-    char* ptr = PerlEnv_get_childdir();
-    /*
-     * If ptr != Nullch
-     *   then it worked, set PV valid,
-     *   else return 'undef'
-     */
-    if (ptr) {
-        dXSTARG;
-        sv = TARG;
-        sv_setpv(sv, ptr);
-        PerlEnv_free_childdir(ptr);
+    char buf [MAX_PATH+1];
+    char* dir;
+    DWORD dirlen;
+    DWORD dirretlen;
+    PH_GCDB_T dirinfo;
+    SV * sv;
+    unsigned int gotutf8;
+    if (items)
+        croak_xs_usage(cv, "");
+    EXTEND(SP,1);
 
-#ifndef INCOMPLETE_TAINTS
-        SvTAINTED_on(sv);
-#endif
+    dXSTARG;
+    sv = TARG;
+
+    if(SvTYPE(sv) >= SVt_PV) {
+        SV_CHECK_THINKFIRST_COW_DROP(sv);
+        if(SvLEN(sv) >= 32) {
+            dirlen = (DWORD)SvLEN(sv);
+            dir = SvPVX(sv);
+        }
+        else
+          goto stk_buf;
+    }
+    else {
+        stk_buf:
+        dirlen = sizeof(buf);
+        dir = buf;
+    }
+
+    dirinfo.want_wide = 0;
+    dirinfo.want_utf8_maybe = XSANY.any_i32 == 'W' ? 1 : 0;
+
+    retry_dir:
+    dirinfo.len_tchar = dirlen;
+    dirretlen = PerlEnv_get_childdir_tbuf(dir, dirinfo);
+    gotutf8 = dirretlen & 0x80000000;
+    dirretlen &= ~0x80000000;
+    if(dirretlen >=  dirlen) {
+        dirlen = dirretlen + 1;
+        dir = alloca(dirlen);
+        goto retry_dir;
+    }
+    else if(!dirretlen){
+        translate_to_errno();
+        sv = &PL_sv_undef;
+    }
+    else if(SvTYPE(sv) >= SVt_PV && dir == SvPVX(sv)) {
+        SvCUR_set(sv, dirretlen);
+        SvNIOK_off(sv);
+        SvPOK_on(sv);
+        if(gotutf8)
+          SvUTF8_on(sv);
         SvSETMAGIC(sv);
     }
     else {
-      sv = &PL_sv_undef;
+        if(gotutf8)
+            SvUTF8_on(sv);
+        sv_setpvn_mg(sv, dir, dirretlen);
     }
-    {
-      dXSARGS;
-      PERL_UNUSED_VAR(items);
-      XSprePUSH;
-      XPUSHs(sv);
-      PUTBACK;
-    }
-    return;
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(sv);
+#endif
+
+    PUSHs(sv);
+    PUTBACK;
 }
 
 void

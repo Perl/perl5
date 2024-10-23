@@ -141,6 +141,7 @@ public:
     void FreeChildEnv(void* pStr) { FreeLocalEnvironmentStrings((char*)pStr); };
     char* GetChildDir(void);
     void FreeChildDir(char* pStr);
+    unsigned int GetChildDirTBuf(char* buf, PH_GCDB_T info);
     void Reset(void);
     void Clearenv(void);
 
@@ -505,6 +506,12 @@ PerlEnvFreeChilddir(struct IPerlEnv* piPerl, char* childDir)
     IPERL2HOST(piPerl)->FreeChildDir(childDir);
 }
 
+unsigned int
+PerlEnvGetChilddirTBuf(struct IPerlEnv* piPerl, char* buf, PH_GCDB_T info)
+{
+    return IPERL2HOST(piPerl)->GetChildDirTBuf(buf,info);
+}
+
 unsigned long
 PerlEnvOsId(struct IPerlEnv* piPerl)
 {
@@ -552,6 +559,7 @@ const struct IPerlEnv perlEnv =
     PerlEnvFreeChildenv,
     PerlEnvGetChilddir,
     PerlEnvFreeChilddir,
+    PerlEnvGetChilddirTBuf,
     PerlEnvOsId,
     PerlEnvLibPath,
     PerlEnvSiteLibPath,
@@ -2406,6 +2414,85 @@ CPerlHost::GetChildDir(void)
             ptr[length-1] = 0;
     }
     return ptr;
+}
+
+unsigned int
+CPerlHost::GetChildDirTBuf(char* ptr, PH_GCDB_T info)
+{
+    BOOL use_default;
+    int retlen;
+    DWORD length;
+    DWORD wlength;
+    WCHAR * wptr;
+    DWORD len_tchar = info.len_tchar;
+    if(len_tchar < 2)
+        croak_no_mem_ext(STR_WITH_LEN("CPerlHost::GetChildDirTBuf"));
+    if(info.want_wide || info.want_utf8_maybe) {
+        if(info.want_utf8_maybe) {
+            wlength = len_tchar <= 0xFFFF ? len_tchar : 0xFFFF;
+            wptr = (WCHAR *)alloca(wlength * sizeof(WCHAR));
+        }
+        else {
+            wlength = len_tchar;
+            wptr = (WCHAR *)ptr;
+        }
+        length = m_pvDir->GetCurrentDirectoryW(wlength, wptr);
+        if(!length)
+            goto syscall_fail;
+        else if(length >= wlength) {
+/* anti 2 buffers here, utf8 or WIDE doesn't matter because min 2 bytes check */
+            wptr = (WCHAR *)ptr;
+            wptr[wlength-1] = '\0';
+            return length;
+        }
+        if (length > 3) {
+            if ((wptr[length-1] == '\\') || (wptr[length-1] == '/')) {
+                wptr[length-1] = 0;
+                length--;
+            }
+        }
+        if(info.want_utf8_maybe) {
+            use_default = FALSE;
+            retlen = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                             wptr, length+1, ptr, len_tchar,
+                                             NULL, &use_default);
+            if (use_default && retlen) {
+                  retlen = WideCharToMultiByte(CP_UTF8, 0,
+                                                wptr, length+1, ptr, len_tchar,
+                                                NULL, NULL);
+                  if(!retlen)
+                      goto syscall_fail;
+                  length = (unsigned int)retlen-1;
+                  length |= 0x80000000;
+            }
+            else {
+                length = (unsigned int)retlen-1;
+            }
+            if(!retlen) { /*syscall failed unknown why */
+                syscall_fail:
+                wptr = (WCHAR *)ptr;
+                /* utf8 or WIDE doesn't matter because min 2 bytes check */
+                wptr[0] = '\0';
+                return 0;
+            }
+        }
+    }
+    else {
+        length = m_pvDir->GetCurrentDirectoryA(len_tchar, ptr);
+        if(!length)
+            goto syscall_fail;
+        else if(length >= len_tchar) {
+            ptr[len_tchar-1] = '\0';
+            return length;
+        }
+        if (length > 3) {
+            if ((ptr[length-1] == '\\') || (ptr[length-1] == '/')) {
+                ptr[length-1] = 0;
+                length--;
+            }
+        }
+    }
+    return length;
 }
 
 void
