@@ -2157,7 +2157,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
     PERL_ARGS_ASSERT_UTF8_LENGTH;
 
-    /* For EBCDCIC and short strings, we count the characters.  The boundary
+    /* For EBCDIC and short strings, we count the characters.  The boundary
      * was determined by eyeballing the output of Porting/bench.pl and
      * choosing a number where the continuations method gave better results (on
      * a 64 bit system, khw not having access to a 32 bit system with
