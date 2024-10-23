@@ -4310,17 +4310,15 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         break;
     case SVt_IV:
         if (SvIOK(ssv)) {
+            /* Bodiless-SV code above should have handled these cases */
+            assert(dtype != SVt_NULL);
+#if NVSIZE <= IVSIZE
+            assert(dtype != SVt_NV);
+#endif
             switch (dtype) {
-            case SVt_NULL:
-                /* For performance, we inline promoting to type SVt_IV. */
-                /* We're starting from SVt_NULL, so provided that define is
-                 * actual 0, we don't have to unset any SV type flags
-                 * to promote to SVt_IV. */
-                STATIC_ASSERT_STMT(SVt_NULL == 0);
-                SET_SVANY_FOR_BODYLESS_IV(dsv);
-                SvFLAGS(dsv) |= SVt_IV;
-                break;
+#if NVSIZE > IVSIZE
             case SVt_NV:
+#endif
             case SVt_PV:
                 sv_upgrade(dsv, SVt_PVIV);
                 break;
@@ -4341,17 +4339,21 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         }
         if (!SvROK(ssv))
             goto undef_sstr;
+#if NVSIZE > IVSIZE
         if (dtype < SVt_PV && dtype != SVt_IV)
             sv_upgrade(dsv, SVt_IV);
+#endif
         break;
 
     case SVt_NV:
         if (LIKELY( SvNOK(ssv) )) {
             switch (dtype) {
+#if NVSIZE > IVSIZE
             case SVt_NULL:
             case SVt_IV:
                 sv_upgrade(dsv, SVt_NV);
                 break;
+#endif
             case SVt_PV:
             case SVt_PVIV:
                 sv_upgrade(dsv, SVt_PVNV);
