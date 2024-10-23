@@ -4201,7 +4201,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     STATIC_ASSERT_STMT(SVt_IV   == 1);
     STATIC_ASSERT_STMT(SVt_NV   == 2);
 #if NVSIZE <= IVSIZE
-    if (both_type <= 2) {
+    if ((stype <= SVt_NV) & (dtype <= SVt_NV)) {
 #else
     if (both_type <= 1) {
 #endif
@@ -4275,6 +4275,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         SvREFCNT_dec(old_rv);
         return;
     }
+
+#if NVSIZE <= IVSIZE
+    both_type = (stype | dtype);
+#endif
 
     if (UNLIKELY(both_type == SVTYPEMASK)) {
         if (SvIS_FREED(dsv)) {
