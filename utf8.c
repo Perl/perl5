@@ -2518,7 +2518,6 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     U8 * d = s = first_variant;
 
     while (s < send) {
-        U8 * s1;
 
         if (UVCHR_IS_INVARIANT(*s)) {
             *d++ = *s++;
@@ -2561,7 +2560,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
          * byte that will be the source for the first byte (or bytes) at
          * 's' that need to be changed back.  Note that s1 can expand to
          * two bytes */
-        s1 = d;
+        U8 * s1 = d;
         while (s >= d) {
             s--;
             if (! UVCHR_IS_INVARIANT(*s1)) {
