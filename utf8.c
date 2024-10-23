@@ -2393,8 +2393,8 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     /* Nothing before 'first_variant' needs to be changed, so start the real
      * work there */
 
-    U8 * const save = s;
-    U8 * const send = s + *lenp;
+    U8 * const s0 = s;
+    U8 * const send = s0 + *lenp;
     s = first_variant;
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
@@ -2541,9 +2541,9 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 
     /* Success! */
     *d = '\0';
-    *lenp = d - save;
+    *lenp = d - s0;
 
-    return save;
+    return s0;
 
   cant_convert: ;
 
