@@ -2525,6 +2525,17 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
             continue;
         }
 
+                goto cant_convert;
+    }
+
+    /* Success! */
+    *d = '\0';
+    *lenp = d - save;
+
+    return save;
+
+  cant_convert: ;
+
     /* Here, it is malformed.  This shouldn't happen on EBCDIC, and on ASCII
      * platforms, we know that the only start bytes in the text are C2 and C3,
      * and the code above has made sure that it doesn't end with a start byte.
@@ -2571,13 +2582,6 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 
     *lenp = ((STRLEN) -1);
     return NULL;
-    }
-
-    /* Success! */
-    *d = '\0';
-    *lenp = d - save;
-
-    return save;
 }
 
 /*
