@@ -2534,55 +2534,52 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
             continue;
         }
 
-        /* Here, it is malformed.  This shouldn't happen on EBCDIC, and on
-         * ASCII platforms, we know that the only start bytes in the text
-         * are C2 and C3, and the code above has made sure that it doesn't
-         * end with a start byte.  That means the only malformations that
-         * are possible are a start byte without a continuation (either
-         * followed by another start byte or an invariant) or an unexpected
-         * continuation.
-         *
-         * We have to undo all we've done before, back down to the first
-         * UTF-8 variant.  Note that each 2-byte variant we've done so far
-         * (converted to single byte) slides things to the left one byte,
-         * and so we have bytes that haven't been written over.
-         *
-         * Here, 'd' points to the next position to overwrite, and 's'
-         * points to the first invalid byte.  That means 'd's contents
-         * haven't been changed yet, nor has anything else beyond it in the
-         * string.  In restoring to the original contents, we don't need to
-         * do anything past (d-1).
-         *
-         * In particular, the bytes from 'd' to 's' have not been changed.
-         * This loop uses a new variable 's1' (to avoid confusing 'source'
-         * and 'destination') set to 'd',  and moves 's' and 's1' in lock
-         * step back so that afterwards, 's1' points to the first changed
-         * byte that will be the source for the first byte (or bytes) at
-         * 's' that need to be changed back.  Note that s1 can expand to
-         * two bytes */
-        U8 * s1 = d;
-        while (s >= d) {
+    /* Here, it is malformed.  This shouldn't happen on EBCDIC, and on ASCII
+     * platforms, we know that the only start bytes in the text are C2 and C3,
+     * and the code above has made sure that it doesn't end with a start byte.
+     * That means the only malformations that are possible are a start byte
+     * without a continuation (either followed by another start byte or an
+     * invariant) or an unexpected continuation.
+     *
+     * We have to undo all we've done before, back down to the first UTF-8
+     * variant.  Note that each 2-byte variant we've done so far (converted to
+     * single byte) slides things to the left one byte, and so we have bytes
+     * that haven't been written over.
+     *
+     * Here, 'd' points to the next position to overwrite, and 's' points to
+     * the first invalid byte.  That means 'd's contents haven't been changed
+     * yet, nor has anything else beyond it in the string.  In restoring to the
+     * original contents, we don't need to do anything past (d-1).
+     *
+     * In particular, the bytes from 'd' to 's' have not been changed.  This
+     * loop uses a new variable 's1' (to avoid confusing 'source' and
+     * 'destination') set to 'd',  and moves 's' and 's1' in lock step back so
+     * that afterwards, 's1' points to the first changed byte that will be the
+     * source for the first byte (or bytes) at 's' that need to be changed
+     * back.  Note that s1 can expand to two bytes */
+    U8 * s1 = d;
+    while (s >= d) {
+        s--;
+        if (! UVCHR_IS_INVARIANT(*s1)) {
             s--;
-            if (! UVCHR_IS_INVARIANT(*s1)) {
-                s--;
-            }
+        }
+        s1--;
+    }
+
+    /* Do the changing back */
+    while (s1 >= first_variant) {
+        if (UVCHR_IS_INVARIANT(*s1)) {
+            *s-- = *s1--;
+        }
+        else {
+            *s-- = UTF8_EIGHT_BIT_LO(*s1);
+            *s-- = UTF8_EIGHT_BIT_HI(*s1);
             s1--;
         }
+    }
 
-        /* Do the changing back */
-        while (s1 >= first_variant) {
-            if (UVCHR_IS_INVARIANT(*s1)) {
-                *s-- = *s1--;
-            }
-            else {
-                *s-- = UTF8_EIGHT_BIT_LO(*s1);
-                *s-- = UTF8_EIGHT_BIT_HI(*s1);
-                s1--;
-            }
-        }
-
-        *lenp = ((STRLEN) -1);
-        return NULL;
+    *lenp = ((STRLEN) -1);
+    return NULL;
     }
 
     /* Success! */
