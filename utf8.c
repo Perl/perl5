@@ -2518,23 +2518,26 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     U8 * d = s = first_variant;
 
     while (s < send) {
+        U8 c = *s++;
+        if (! UVCHR_IS_INVARIANT(c)) {
 
-        if (UVCHR_IS_INVARIANT(*s)) {
-            *d++ = *s++;
-            continue;
-        }
-
-        /* Here it is two-byte encoded. */
-        if (   LIKELY(UTF8_IS_DOWNGRADEABLE_START(*s))
-            && LIKELY(UTF8_IS_CONTINUATION((s[1]))))
-        {
-            U8 first_byte = *s++;
-            *d++ = EIGHT_BIT_UTF8_TO_NATIVE(first_byte, *s);
-            s++;
-            continue;
-        }
-
+            /* Then it is a multi-byte character.  The first pass above
+             * determined that the string contains only invariants, the C2 and
+             * C3 start bytes, and continuation bytes.  The condition above
+             * excluded this from being an invariant.  To be well formed, it
+             * needs to be a start byte followed by a continuation byte. */
+            if (   UNLIKELY(  UTF8_IS_CONTINUATION(c))
+                || UNLIKELY(  s >= send)
+                || UNLIKELY(! UTF8_IS_CONTINUATION(*s)))
+            {
                 goto cant_convert;
+            }
+
+            c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
+            s++;
+        }
+
+        *d++ = c;
     }
 
     /* Success! */
