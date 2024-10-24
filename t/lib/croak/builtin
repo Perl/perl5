@@ -1,0 +1,6 @@
+__END__
+########
+# Attempted replacement of builtin:: functions is not allowed as of Perl 5.41.5
+*builtin::reftype = sub { "BOO" };
+EXPECT
+Modification of a read-only value attempted at - line 2.

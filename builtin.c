@@ -804,6 +804,13 @@ Perl_boot_core_builtin(pTHX)
         if(builtin->checker) {
             cv_set_call_checker_flags(cv, builtin->checker, newSVuv(PTR2UV(builtin)), 0);
         }
+
+        /* Because of all these callcheckers and other optimisations, it would
+         * all break if we permitted runtime replacement of the functions,
+         * e.g. by glob tricks like `*builtin::reftype = sub { ... }`.
+         * Prevent modification of the GV so as to avoid this problem.
+         */
+        SvREADONLY_on((SV *)CvGV(cv));
     }
 
     newXS_flags("builtin::import", &XS_builtin_import, __FILE__, NULL, 0);
