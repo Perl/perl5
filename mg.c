@@ -1564,6 +1564,33 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
     dTHX;
 #endif
 
+    bool can_deliver = true;
+#ifdef MULTIPLICITY
+    /* If a C library creates a thread, signals may be delivered to
+     * the library thread which doesn't have the perl context set in
+     * TLS.
+     *
+     * So fallback to the interpreter stored during interpreter
+     * initialization.
+     *
+     * This isn't great, but it's better than a segfault or dropping
+     * the signal on the floor.
+     */
+    if (!aTHX) {
+        aTHX = PERL_GET_INTERP;
+        /* Trying to deliver from here is not just unsafe, it's
+         * foolish, since we'd have two threads working with the
+         * same interpreter structure.
+         *
+         * The signals like SIGSEGV listed below should only be
+         * delivered to the current thread (I think) so we shouldn't
+         * get here.
+         */
+        can_deliver = false;
+        assert(aTHX);
+    }
+#endif
+
 #ifdef PERL_USE_3ARG_SIGHANDLER
 #if defined(__cplusplus) && defined(__GNUC__)
     /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
@@ -1598,7 +1625,7 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
 #ifdef SIGFPE
            sig == SIGFPE ||
 #endif
-           (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
+           ((PL_signals & PERL_SIGNALS_UNSAFE_FLAG) && can_deliver))
         /* Call the perl level handler now--
          * with risk we may be in malloc() or being destructed etc. */
     {
