@@ -4615,6 +4615,7 @@ S_require_file(pTHX_ SV *sv)
             namesv = newSV_type(SVt_PV);
             AV *inc_ar = GvAVn(PL_incgv);
             SSize_t incdir_continue_inc_idx = -1;
+            HV *inc_seen_hv = (HV*)sv_2mortal((SV*)newHV());
 
             for (
                 inc_idx = 0;
@@ -4647,14 +4648,31 @@ S_require_file(pTHX_ SV *sv)
                 }
                 if (!SvOK(dirsv))
                     continue;
+                
+                /* use the refaddr of the RV for the key for refs */
+                UV diruv = 0;
+                SV **seen_svp = NULL;
+                if (SvROK(dirsv)) {
+                    diruv = PTR2UV(SvRV(dirsv));
+                    seen_svp = hv_fetch(inc_seen_hv, (char*)&diruv, sizeof(UV), 1);
+                    if (!seen_svp)
+                        croak_no_mem();
+                }
+
+                /* is this a new path or callback? */
+                if (seen_svp) {
+                    if (SvOK(*seen_svp))
+                        continue; /* we have executed this hook already */
+                    else
+                        sv_setiv(*seen_svp,1); /* mark this hook as seen */
+                }
 
                 av_push(inc_checked, dirsv);
 
-                if (SvROK(dirsv)) {
+                if (diruv) {
                     int count;
                     SV **svp;
                     SV *loader = dirsv;
-                    UV diruv = PTR2UV(SvRV(dirsv));
 
                     if (SvTYPE(SvRV(loader)) == SVt_PVAV
                         && !SvOBJECT(SvRV(loader)))

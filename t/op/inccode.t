@@ -21,7 +21,7 @@ unless (is_miniperl()) {
 
 use strict;
 
-plan(tests => 71 + !is_miniperl() * (4 + 14 * $can_fork));
+plan(tests => 71 + !is_miniperl() * (5 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -417,11 +417,16 @@ if ($can_fork) {
     is ("@::bbblplast", "0 1 2 3 4 5", "All ran with a filter");
 }
 SKIP:{
-    skip "need fork",1 unless $can_fork;
+    skip "need fork",2 unless $can_fork;
     fresh_perl_like('@INC=("A",bless({},"Hook"),"D"); '
-                 .'sub Hook::INCDIR { return "B","C"} '
-                 .'eval "require Frobnitz" or print $@;',
-                  qr/\(\@INC[\w ]+: A Hook=HASH\(0x[A-Fa-f0-9]+\) B C D\)/,
-                  {},
-                  "Check if INCDIR hook works as expected");
+                   .'sub Hook::INCDIR { return "B","C"} '
+                   .'eval "require Frobnitz" or print $@;',
+                    qr/\(\@INC[\w ]+: A Hook=HASH\(0x[A-Fa-f0-9]+\) B C D\)/,
+                    {},
+                    "Check if INCDIR hook works as expected");
+    fresh_perl_is('unshift @INC, my $sub= sub { @INC = reverse @INC; }; '
+                   .'eval "require Frobnitz"; print $INC[-1] eq $sub ? "ok" : "not ok"',
+                    "ok",
+                    {},
+                    "Make sure \@INC hooks are called at most once");
 }
