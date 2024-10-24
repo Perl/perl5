@@ -9994,12 +9994,14 @@ SV *
 Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 {
     SV *sv;
+    STRLEN pat_len = strlen(pat);
 
     PERL_ARGS_ASSERT_VNEWSVPVF;
 
-    sv = newSV(1);
+    /* Unlikely output len < input pat len. ("%c",'A')("%s","") is rare. */
+    sv = newSV(pat_len+STRLENs("\0"));
     SvPVCLEAR_FRESH(sv);
-    sv_vcatpvfn_flags(sv, pat, strlen(pat), args, NULL, 0, NULL, 0);
+    sv_vcatpvfn_flags(sv, pat, pat_len, args, NULL, 0, NULL, 0);
     return sv;
 }
 
@@ -10015,11 +10017,27 @@ The reference count for the SV is set to 1.
 SV *
 Perl_newSVnv(pTHX_ const NV n)
 {
-    SV *sv = newSV_type(SVt_NV);
+    SV *sv;
+#if NVSIZE <= IVSIZE
+    /* This bodyless code has been agressively strip for speed.
+       Do not revise it unless you use disassembler and look at machine code.*/
+    new_SV(sv);
+#if PTRSIZE == 8 && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+    *(Size_t *)(&SvREFCNT(sv)) =
+        ((Size_t)1)
+        | ((Size_t)(((Size_t)(SVt_NV | SVf_NOK | SVp_NOK)) << 32));
+#else
+    SvFLAGS(sv) = SVt_NV | SVf_NOK | SVp_NOK;
+#endif
+    SET_SVANY_FOR_BODYLESS_NV(sv);
+    sv->sv_u.svu_nv = n;
+#else
+    sv = newSV_type(SVt_NV);
     (void)SvNOK_on(sv);
-
     SvNV_set(sv, n);
-    SvTAINT(sv);
+#endif
+
+    sv = SvTAINTTC(sv);
 
     return sv;
 }
@@ -10036,11 +10054,26 @@ SV is set to 1.
 SV *
 Perl_newSViv(pTHX_ const IV i)
 {
-    SV *sv = newSV_type(SVt_IV);
-    (void)SvIOK_on(sv);
+    SV *sv;
+    new_SV(sv);
 
-    SvIV_set(sv, i);
-    SvTAINT(sv);
+    /* We're starting from SVt_FIRST, so provided that's
+     * actual 0, we don't have to unset any SV type flags
+     * to promote to SVt_IV. */
+    STATIC_ASSERT_STMT(SVt_FIRST == 0);
+
+    /* This bodyless code has been agressively striped for speed.
+       Do not revise it unless you use disassembler and look at machine code.*/
+#if PTRSIZE == 8 && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+      *(Size_t *)(&SvREFCNT(sv)) = ((Size_t)1) |
+            ((Size_t)((((Size_t)(SVt_IV|SVf_IOK|SVp_IOK)) << 32)));
+#else
+    SvFLAGS(sv) = SVt_IV | SVf_IOK | SVp_IOK;
+#endif
+    SET_SVANY_FOR_BODYLESS_IV(sv);
+    sv->sv_u.svu_iv = i;
+
+    sv = SvTAINTTC(sv);
 
     return sv;
 }
@@ -10058,15 +10091,6 @@ SV *
 Perl_newSVuv(pTHX_ const UV u)
 {
     SV *sv;
-
-    /* Inlining ONLY the small relevant subset of sv_setuv here
-     * for performance. Makes a significant difference. */
-
-    /* Using ivs is more efficient than using uvs - see sv_setuv */
-    if (u <= (UV)IV_MAX) {
-        return newSViv((IV)u);
-    }
-
     new_SV(sv);
 
     /* We're starting from SVt_FIRST, so provided that's
@@ -10074,13 +10098,84 @@ Perl_newSVuv(pTHX_ const UV u)
      * to promote to SVt_IV. */
     STATIC_ASSERT_STMT(SVt_FIRST == 0);
 
-    SET_SVANY_FOR_BODYLESS_IV(sv);
-    SvFLAGS(sv) |= SVt_IV;
-    (void)SvIOK_on(sv);
-    (void)SvIsUV_on(sv);
+    /* This bodyless code has been agressively striped for speed.
+       Do not revise it unless you use disassembler and look at machine code.*/
 
-    SvUV_set(sv, u);
-    SvTAINT(sv);
+    /* Verify the &~ and |, or &~ >> | or >> |, trick works. Portability. */
+    STATIC_ASSERT_STMT(
+        cBOOL(((UV)SVf_IVisUV) == (((UV)IV_MAX)+1))
+        || cBOOL((((UV)SVf_IVisUV)<<32) == (((UV)IV_MAX)+1)));
+    STATIC_ASSERT_STMT(
+        STRUCT_OFFSET(SV, sv_u.svu_uv) == STRUCT_OFFSET(SV, sv_u.svu_iv)
+        && sizeof(sv->sv_u.svu_uv) == sizeof(sv->sv_u.svu_iv));
+
+    /* branchless SvIsUV_on() replaces former code with former comments:
+
+    * Inlining ONLY the small relevant subset of sv_setuv here
+    * for performance. Makes a significant difference.
+
+    * Using ivs is more efficient than using uvs - see sv_setuv
+    if (u <= (UV)IV_MAX) {
+        return newSViv((IV)u);
+    }
+    */
+
+    /* If 64b CPU, and little endian (x86, x64, modern ARM),
+       set sv->sv_refcnt and sv->sv_flags, with exactly 1 CPU op.
+       'sv->sv_refcnt = 0;' assignment in new_SV() will optimize away.
+       Assert sv->sv_any is 64b, and sv->sv_refcnt is directly afterwards
+       in memory layout, and that sv->sv_refcnt and sv->sv_flags are adjacent,
+       therefore proving this U32* ptr, casted to U64*, is aligned.
+       Note majority of modern Perl users use LE CPUs, with hardware unaligned
+       support. But there is no Configure/perlapi macro defines currently,
+       that config YES/NO for hardware unaligned. Still, because the SV head
+       struct currently is aligned on all 64b builds, make sure SV head struct
+       stays aligned unless intentional future refactoring of SV head struct.
+
+       This optimization can't be done on i386, since 64b ints are always
+       emulated with 32b CPU ops by all CCs AFAIK. And the X32 Linux OS/Kernel
+       has already been grandfathered. Other than X32 I can't think of any
+       OS or CPU with native 64b CPU ops, but 32b pointers.
+
+       Doing this trick on 64b big endian OS, is possible, but a BE core dev
+       must port the code, fix all bit operators, and test it. */
+      STATIC_ASSERT_STMT(
+          (STRUCT_OFFSET(SV,sv_refcnt) == sizeof(sv->sv_any))
+          && STRUCT_OFFSET(SV,sv_flags) == STRUCT_OFFSET(SV,sv_refcnt)+U32SIZE);
+
+#if PTRSIZE == 8 && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+        STATIC_ASSERT_STMT(
+            sizeof(sv->sv_refcnt) + sizeof(sv->sv_flags) == PTRSIZE
+            && STRUCT_OFFSET(SV,sv_refcnt) == PTRSIZE);
+
+      *(Size_t *)(&SvREFCNT(sv)) =
+          ((Size_t)1)
+          | ((Size_t) (
+              ((Size_t) (
+                  ((U32)((UV)((u&(((UV)IV_MAX)+1))>>32)))
+                  | (SVt_IV|SVf_IOK|SVp_IOK)
+              )) << 32
+          ));
+#else
+    /* Flags unrolled, since MSVC -O1 optimizer refused to combine
+       3 SvFLAGS(s); statements if "SvFLAGS() |= dynamic_var;".
+       Unroll to guarentee any CC flags, any CCs, do exactly 1 write to
+       SvFLAGS(). */
+    if(((UV)SVf_IVisUV) == (((UV)IV_MAX)+1))  /* UV is 32 */
+        SvFLAGS(sv) =
+            ((U32)(u&(((UV)IV_MAX)+1)))
+            | (SVt_IV|SVf_IOK|SVp_IOK);
+    else                                      /* UV is 64 */
+        SvFLAGS(sv) =
+            ((U32)((UV)((u&(((UV)IV_MAX)+1))>>32)))
+            | (SVt_IV|SVf_IOK|SVp_IOK);
+#endif
+    /* Explictly optimize out reading SvANY ptr. Some CCs might optimize
+       next 2 statements, MSVC did, but some may not. */
+    SET_SVANY_FOR_BODYLESS_IV(sv);
+    sv->sv_u.svu_uv = u;
+
+    sv = SvTAINTTC(sv);
 
     return sv;
 }
@@ -11050,6 +11145,25 @@ Perl_sv_unref_flags(pTHX_ SV *const ref, const U32 flags)
         SvREFCNT_dec_NN(target);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
         sv_2mortal(target);	/* Schedule for freeing later */
+}
+
+/*
+=for apidoc_section $tainting
+=for apidoc sv_taint
+
+Taint an SV.  Use C<SvTAINTED_on> instead. Return value is input SV *.
+Useful for chaining calls and more efficient C code (tail calling).
+
+=cut
+*/
+
+SV *
+Perl_sv_taint(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_TAINT;
+
+    sv_magic(sv, NULL, PERL_MAGIC_taint, NULL, 0);
+    return sv;
 }
 
 /*
@@ -15798,7 +15912,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #ifndef NO_TAINT_SUPPORT
     /* Set tainting stuff before PerlIO_debug can possibly get called */
-    PL_tainting		= proto_perl->Itainting;
+    PL_tainting		= proto_perl->Itaint.u.tainting;
     PL_taint_warn	= proto_perl->Itaint_warn;
 #else
     PL_tainting         = FALSE;
@@ -15943,7 +16057,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_statcache	= proto_perl->Istatcache;
 
 #ifndef NO_TAINT_SUPPORT
-    PL_tainted		= proto_perl->Itainted;
+    PL_tainted		= proto_perl->Itaint.u.tainted;
 #else
     PL_tainted          = FALSE;
 #endif
