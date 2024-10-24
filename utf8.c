@@ -2610,8 +2610,7 @@ after-call value of C<*lenp> from it.
 
 =cut
 
-There is a macro that avoids this function call, but this is retained for
-anyone who calls it with the Perl_ prefix */
+*/
 
 U8 *
 Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
@@ -2619,62 +2618,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
     PERL_UNUSED_CONTEXT;
 
-    return bytes_from_utf8_loc(s, lenp, is_utf8p, NULL);
-}
-
-/*
-=for apidoc bytes_from_utf8_loc
-
-Like C<L<perlapi/bytes_from_utf8>()>, but takes an extra parameter, a pointer
-to where to store the location of the first character in C<"s"> that cannot be
-converted to non-UTF8.
-
-If that parameter is C<NULL>, this function behaves identically to
-C<bytes_from_utf8>.
-
-Otherwise if C<*is_utf8p> is 0 on input, the function behaves identically to
-C<bytes_from_utf8>, except it also sets C<*first_non_downgradable> to C<NULL>.
-
-Otherwise, the function returns a newly created C<NUL>-terminated string
-containing the non-UTF8 equivalent of the convertible first portion of
-C<"s">.  C<*lenp> is set to its length, not including the terminating C<NUL>.
-If the entire input string was converted, C<*is_utf8p> is set to a FALSE value,
-and C<*first_non_downgradable> is set to C<NULL>.
-
-Otherwise, C<*first_non_downgradable> is set to point to the first byte of the
-first character in the original string that wasn't converted.  C<*is_utf8p> is
-unchanged.  Note that the new string may have length 0.
-
-Another way to look at it is, if C<*first_non_downgradable> is non-C<NULL> and
-C<*is_utf8p> is TRUE, this function starts at the beginning of C<"s"> and
-converts as many characters in it as possible stopping at the first one it
-finds that can't be converted to non-UTF-8.  C<*first_non_downgradable> is
-set to point to that.  The function returns the portion that could be converted
-in a newly created C<NUL>-terminated string, and C<*lenp> is set to its length,
-not including the terminating C<NUL>.  If the very first character in the
-original could not be converted, C<*lenp> will be 0, and the new string will
-contain just a single C<NUL>.  If the entire input string was converted,
-C<*is_utf8p> is set to FALSE and C<*first_non_downgradable> is set to C<NULL>.
-
-Upon successful return, the number of variants in the converted portion of the
-string can be computed by having saved the value of C<*lenp> before the call,
-and subtracting the after-call value of C<*lenp> from it.
-
-=cut
-
-
-*/
-
-U8 *
-Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** first_unconverted)
-{
-    PERL_ARGS_ASSERT_BYTES_FROM_UTF8_LOC;
-
     if (! *is_utf8p) {
-        if (first_unconverted) {
-            *first_unconverted = NULL;
-        }
-
         return (U8 *) s;
     }
 
@@ -2703,14 +2647,8 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
             /* Then it is multi-byte encoded.  If the code point is above 0xFF,
              * have to stop now */
             if (UNLIKELY (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s - 1, send))) {
-                if (first_unconverted) {
-                    *first_unconverted = s - 1;
-                    goto finish_and_return;
-                }
-                else {
                     Safefree(converted_start);
                     return (U8 *) s0;
-                }
             }
 
             c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
@@ -2721,11 +2659,7 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
 
     /* Here, converted the whole of the input */
     *is_utf8p = FALSE;
-    if (first_unconverted) {
-        *first_unconverted = NULL;
-    }
 
-  finish_and_return:
     *d = '\0';
     *lenp = d - converted_start;
 
