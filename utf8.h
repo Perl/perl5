@@ -1306,6 +1306,15 @@ point's representation.
 
 #define Perl_is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 
+typedef enum {
+    PL_utf8_to_bytes_overwrite = 0,
+    PL_utf8_to_bytes_new_memory,
+    PL_utf8_to_bytes_use_temporary,
+} Perl_utf8_to_bytes_arg;
+
+#define Perl_utf8_to_bytes_overwrite(mTHX, s, l)                            \
+        Perl_utf8_to_bytes_(aTHX_ s, l, PL_utf8_to_bytes_overwrite)
+
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)
