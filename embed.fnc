@@ -3613,17 +3613,33 @@ ARdip	|IV	|utf8_distance	|NN const U8 *a 			\
 				|NN const U8 *b
 ARTdip	|U8 *	|utf8_hop	|NN const U8 *s 			\
 				|SSize_t off
-ARTdip	|U8 *	|utf8_hop_back	|NN const U8 *s 			\
+ARTdmp	|U8 *	|utf8_hop_back	|NN const U8 *s 			\
 				|SSize_t off				\
-				|NN const U8 *start
-ARTdip	|U8 *	|utf8_hop_forward					\
+				|NN const U8 * const start
+ARTdip	|U8 *	|utf8_hop_back_overshoot				\
 				|NN const U8 *s 			\
 				|SSize_t off				\
-				|NN const U8 *end
-ARTdip	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
+				|NN const U8 * const start		\
+				|NULLOK SSize_t *remaining
+ARTdmp	|U8 *	|utf8_hop_forward					\
+				|NN const U8 *s 			\
 				|SSize_t off				\
-				|NN const U8 *start			\
-				|NN const U8 *end
+				|NN const U8 * const end
+ARTdip	|U8 *	|utf8_hop_forward_overshoot				\
+				|NN const U8 *s 			\
+				|SSize_t off				\
+				|NN const U8 * const end		\
+				|NULLOK SSize_t *remaining
+ARTdip	|U8 *	|utf8_hop_overshoot					\
+				|NN const U8 *s 			\
+				|SSize_t off				\
+				|NN const U8 * const start		\
+				|NN const U8 * const end		\
+				|NULLOK SSize_t *remaining
+ARTdmp	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
+				|SSize_t off				\
+				|NN const U8 * const start		\
+				|NN const U8 * const end
 ARdp	|STRLEN |utf8_length	|NN const U8 *s0			\
 				|NN const U8 *e
 
