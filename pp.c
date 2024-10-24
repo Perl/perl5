@@ -3318,7 +3318,7 @@ PP(pp_int)
       }
       else if (SvIOK(sv)) {
         if (SvIsUV(sv))
-            TARGu(SvUV_nomg(sv), 1);
+            TARGu(SvUVX(sv), 1);
         else
             TARGi(iv, 1);
       }
