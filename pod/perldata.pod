@@ -187,7 +187,7 @@ fully-qualified.  They come in six forms (but don't use forms 5 and 6):
 =item 1.
 
 A sigil, followed solely by digits matching C<\p{POSIX_Digit}>, like
-C<$0>, C<$1>, or C<$10000>.
+C<$0>, C<@1>, or C<%10000>.
 
 =item 2.
 
