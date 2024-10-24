@@ -859,6 +859,7 @@
 # define utf8_hop_safe                          Perl_utf8_hop_safe
 # define utf8_length(a,b)                       Perl_utf8_length(aTHX_ a,b)
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)
+# define utf8_to_bytes_(a,b)                    Perl_utf8_to_bytes_(aTHX_ a,b)
 # define utf8_to_uvchr_buf_helper(a,b,c)        Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
 # define uvchr_to_utf8(a,b)                     Perl_uvchr_to_utf8(aTHX,a,b)
