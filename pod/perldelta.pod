@@ -143,8 +143,16 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here. Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+=head2 perlop
+
+=over 4
+
+=item *
+
+Normalized alignment of verbatim sections, fixing how they are displayed by
+some Pod viewers that strip indentation.
+
+=back
 
 =head2 New Documentation
 
