@@ -727,6 +727,11 @@ is that B<-MI<MODULE>=number> never does a version check,
 unless C<I<MODULE>::import()> itself is set up to do a version check, which
 could happen for example if I<MODULE> inherits from L<Exporter>.
 
+However, it should be noted that since the syntax C<'-MI<MODULE foo,bar>'>
+shown above will generate C<use MODULE ('foo', 'bar')>, it's possible
+to do a version check using C<'-MI<MODULE VERSION foo,bar>'>, which will
+generate C<use MODULE VERSION ('foo', 'bar')>.
+
 =item B<-n>
 X<-n>
 
