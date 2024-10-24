@@ -155,7 +155,9 @@ required, but is kept for backwards compatibility.
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
  * XXX Should really be a Configure probe, with HAS__FUNCTION__
  *     and FUNCTION__ as results.
- * XXX Similarly, a Configure probe for __FILE__ and __LINE__ is needed. */
+ * XXX Similarly, a Configure probe for __FILE__ and __LINE__ is needed.
+ * Remember to also update CBPFUNCTION__ in util.h
+ */
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
 #  define FUNCTION__ __func__
 #  define SAFE_FUNCTION__ __func__
