@@ -1681,6 +1681,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_seen = 0;
     RExC_maxlen = 0;
     RExC_in_lookaround = 0;
+    RExC_has_cutgroup = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_recode_x_to_native = 0;
     RExC_in_multi_char_class = 0;
@@ -3093,6 +3094,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
     I32 was_in_lookaround = RExC_in_lookaround;
+    I32 had_cutgroup      = RExC_has_cutgroup;
     I32 fake_eval = 0; /* matches paren */
 
     /* The difference between the following variables can be seen with  *
@@ -3259,6 +3261,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if ( memEQs(start_verb, verb_len,"THEN") ) {
                     op = CUTGROUP;
                     RExC_seen |= REG_CUTGROUP_SEEN;
+                    RExC_has_cutgroup = 1;
                 }
                 break;
             case 'a':
@@ -4247,11 +4250,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             reginsert(pRExC_state, BRANCHJ, br, depth+1);
             ARG2a_SET(REGNODE_p(br), npar_before_regbranch);
             ARG2b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else {
             reginsert(pRExC_state, BRANCH, br, depth+1);
             ARG1a_SET(REGNODE_p(br), (U16)npar_before_regbranch);
             ARG1b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         have_branch = 1;
     }
@@ -4301,6 +4306,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 ARG1b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
             else
                 ARG2b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
         else
         if (OP(REGNODE_p(br)) == BRANCHJ) {
@@ -4308,6 +4314,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 ARG1b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
             else
                 ARG2b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
+            BRANCH_HAS_CUTGROUP(REGNODE_p(br)) = RExC_has_cutgroup;
         }
 
         lastbr = br;
@@ -4512,6 +4519,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         RExC_logical_npar = after_freeze;
 
     RExC_in_lookaround = was_in_lookaround;
+    RExC_has_cutgroup  = had_cutgroup;
 
     return(ret);
 }
