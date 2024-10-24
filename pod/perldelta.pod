@@ -376,7 +376,22 @@ well.
 
 =item *
 
-XXX
+Three new API functions are introduced to convert strings encoded in
+UTF-8 to native bytes format (if possible).  These are easier to use
+than the existing ones, and they avoid unnecessary memory allocations.
+The functions are L<perlapi/C<utf8_to_bytes_overwrite>> which is used
+when it is ok for the input string to be overwritten with the converted
+result; and L<perlapi/C<utf8_to_bytes_new_pv>> and
+L<perlapi/C<utf8_to_bytes_temp_pv>> when the original string must be
+preserved intact.  C<utf8_to_bytes_temp_pv> returns the result in a
+temporary using L<perlapi>/C<SAVEFREEPV> that will automatically be
+destroyed.  With C<utf8_to_bytes_new_pv>, you are responsible for
+freeing the newly allocated memory that is returned if the conversion is
+successful.
+
+The latter two functions are designed to replace
+L<perlapi/C<bytes_from_utf8>> which creates memory unnecessarily, or
+unnecessarily large.
 
 =item *
 
