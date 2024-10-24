@@ -636,6 +636,7 @@
 # define set_context                            Perl_set_context
 # define setdefout(a)                           Perl_setdefout(aTHX_ a)
 # define share_hek(a,b,c)                       Perl_share_hek(aTHX_ a,b,c)
+# define share_hek_hek(a)                       Perl_share_hek_hek(aTHX_ a)
 # define single_1bit_pos32                      Perl_single_1bit_pos32
 # define sortsv(a,b,c)                          Perl_sortsv(aTHX_ a,b,c)
 # define sortsv_flags(a,b,c,d)                  Perl_sortsv_flags(aTHX_ a,b,c,d)

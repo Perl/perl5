@@ -4243,6 +4243,11 @@ Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash);
 #define PERL_ARGS_ASSERT_SHARE_HEK              \
         assert(str)
 
+PERL_CALLCONV struct hek *
+Perl_share_hek_hek(pTHX_ const struct hek *hek);
+#define PERL_ARGS_ASSERT_SHARE_HEK_HEK          \
+        assert(hek)
+
 PERL_CALLCONV Signal_t
 Perl_sighandler1(int sig)
         __attribute__visibility__("hidden");

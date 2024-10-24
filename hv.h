@@ -63,10 +63,7 @@ struct hek {
        is UTF-8 or WAS-UTF-8, or an SV */
 };
 
-struct shared_he {
-    struct he shared_he_he;
-    struct hek shared_he_hek;
-};
+struct shared_he;
 
 /* Subject to change.
    Don't access this directly.
@@ -121,7 +118,7 @@ struct xpvhv_aux {
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
 
-/* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer 
+/* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer
  * to an array of HEK pointers, this being the length. The first element is
  * the name of the stash, which may be NULL. If xhv_name_count is positive,
  * then *xhv_name is one of the effective names. If xhv_name_count is nega-
@@ -500,7 +497,7 @@ whether it is valid to call C<HvAUX()>.
 #ifndef PERL_USE_LARGE_HV_ALLOC
 /* Default to allocating the correct size - default to assuming that malloc()
    is not broken and is efficient at allocating blocks sized at powers-of-two.
-*/   
+*/
 #  define PERL_HV_ARRAY_ALLOC_BYTES(size) ((size) * sizeof(HE*))
 #else
 #  define MALLOC_OVERHEAD 16
@@ -519,13 +516,6 @@ whether it is valid to call C<HvAUX()>.
 
 #define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))
 #define sharepvn(pv, len, hash)	     Perl_sharepvn(pv, len, hash)
-
-#define share_hek_hek(hek)						\
-    (++(((struct shared_he *)(((char *)hek)				\
-                              - STRUCT_OFFSET(struct shared_he,		\
-                                              shared_he_hek)))		\
-        ->shared_he_he.he_valu.hent_refcount),				\
-     hek)
 
 #define hv_store_ent(hv, keysv, val, hash)				\
     ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\

@@ -16,7 +16,7 @@
  *     [p.278 of _The Lord of the Rings_, II/iii: "The Ring Goes South"]
  */
 
-/* 
+/*
 =head1 HV Handling
 A HV structure represents a Perl hash.  It consists mainly of an array
 of pointers, each of which points to a linked list of HE structures.  The
@@ -176,6 +176,11 @@ S_new_he(pTHX)
 
 
 #endif
+
+struct shared_he {
+    struct he shared_he_he;
+    struct hek shared_he_hek;
+};
 
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
@@ -513,7 +518,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                                            ((flags & HVhek_UTF8)
                                             ? SVf_UTF8 : 0));
                 }
-                
+
                 mg->mg_obj = keysv;         /* pass key */
                 uf->uf_index = action;      /* pass action */
                 magic_getuvar(MUTABLE_SV(hv), mg);
@@ -912,7 +917,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
   not_found:
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
-    if (!(action & HV_FETCH_ISSTORE) 
+    if (!(action & HV_FETCH_ISSTORE)
         && SvRMAGICAL((const SV *)hv)
         && mg_find((const SV *)hv, PERL_MAGIC_env)) {
         unsigned long len;
@@ -1245,7 +1250,7 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
     }
     else
         sv = &PL_sv_zero;
-    
+
     return sv;
 }
 
@@ -1312,7 +1317,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                         /* No longer an element */
                         sv_unmagic(sv, PERL_MAGIC_tiedelem);
                         return sv;
-                    }		
+                    }
                     return NULL;		/* element cannot be deleted */
                 }
 #ifdef ENV_IS_CASELESS
@@ -1454,7 +1459,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 HvHASKFLAGS_off(hv);
         }
 
-        /* If this is a stash and the key ends with ::, then someone is 
+        /* If this is a stash and the key ends with ::, then someone is
          * deleting a package.
          */
         if (sv && SvTYPE(sv) == SVt_PVGV && HvHasENAME(hv)) {
@@ -2757,7 +2762,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         {
             assert(*hekp);
             if (
-                 (HEK_UTF8(*hekp) || (flags & SVf_UTF8)) 
+                 (HEK_UTF8(*hekp) || (flags & SVf_UTF8))
                     ? hek_eq_pvn_flags(aTHX_ *hekp, name, (I32)len, flags)
                     : (HEK_LEN(*hekp) == (I32)len && memEQ(HEK_KEY(*hekp), name, len))
                ) {
@@ -2820,7 +2825,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         HEK **victim = namep + (count < 0 ? -count : count);
         while (victim-- > namep + 1)
             if (
-             (HEK_UTF8(*victim) || (flags & SVf_UTF8)) 
+             (HEK_UTF8(*victim) || (flags & SVf_UTF8))
                 ? hek_eq_pvn_flags(aTHX_ *victim, name, (I32)len, flags)
                 : (HEK_LEN(*victim) == (I32)len && memEQ(HEK_KEY(*victim), name, len))
             ) {
@@ -2843,7 +2848,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
                 return;
             }
         if (
-            count > 0 && ((HEK_UTF8(*namep) || (flags & SVf_UTF8)) 
+            count > 0 && ((HEK_UTF8(*namep) || (flags & SVf_UTF8))
                 ? hek_eq_pvn_flags(aTHX_ *namep, name, (I32)len, flags)
                 : (HEK_LEN(*namep) == (I32)len && memEQ(HEK_KEY(*namep), name, len))
             )
@@ -2852,7 +2857,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         }
     }
     else if(
-        (HEK_UTF8(aux->xhv_name_u.xhvnameu_name) || (flags & SVf_UTF8)) 
+        (HEK_UTF8(aux->xhv_name_u.xhvnameu_name) || (flags & SVf_UTF8))
                 ? hek_eq_pvn_flags(aTHX_ aux->xhv_name_u.xhvnameu_name, name, (I32)len, flags)
                 : (HEK_LEN(aux->xhv_name_u.xhvnameu_name) == (I32)len &&
                             memEQ(HEK_KEY(aux->xhv_name_u.xhvnameu_name), name, len))
@@ -4002,7 +4007,7 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
         HINTS_REFCNT_LOCK;
         new_count = --he->refcounted_he_refcnt;
         HINTS_REFCNT_UNLOCK;
-        
+
         if (new_count) {
             return;
         }
@@ -4116,6 +4121,21 @@ Perl_cop_store_label(pTHX_ COP *const cop, const char *label, STRLEN len,
         SvUTF8_on(labelsv);
     cop->cop_hints_hash
         = refcounted_he_new_pvs(cop->cop_hints_hash, ":", labelsv, 0);
+}
+
+/* share doesn't mean "shared" but "shared string table" */
+/* TODO: should this be atomic increment ??? */
+struct hek *
+Perl_share_hek_hek (pTHX_ const struct hek *hek)
+{
+    PERL_ARGS_ASSERT_SHARE_HEK_HEK;
+    ((struct shared_he *)(((char *)hek)
+                          - STRUCT_OFFSET(struct shared_he,
+                                          shared_he_hek)))
+        ->shared_he_he.he_valu.hent_refcount++
+    ;
+
+    return (struct hek *) hek;
 }
 
 /*
