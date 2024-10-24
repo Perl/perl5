@@ -2399,6 +2399,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
     U8 * const s0 = *s_ptr;
     const U8 * const send = s0 + *lenp;
     U8 * s = first_variant;
+    Size_t invariant_length = first_variant - s0;
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
 
@@ -2504,7 +2505,8 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
         s++;
     }
 
-    U8 * d = s = first_variant;
+    U8 *d0 = s0;
+    U8 * d = d0 + invariant_length;
 
     /* For the cases where the per-word algorithm wasn't used, everything is
      * well-formed and can definitely be translated.  When the per word
@@ -2516,6 +2518,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
      * malformed, and because we prioritize speed in the normal case over the
      * malformed one, we go ahead and do the translation, and undo it if found
      * to be necessary. */
+    s = first_variant;
     while (s < send) {
         U8 c = *s++;
         if (! UVCHR_IS_INVARIANT(c)) {
@@ -2541,7 +2544,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
 
     /* Success! */
     *d = '\0';
-    *lenp = d - s0;
+    *lenp = d - d0;
 
     return true;
 
