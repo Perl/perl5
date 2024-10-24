@@ -1,10 +1,16 @@
-package builtin 0.015;
+package builtin 0.016;
 
 use v5.40;
 
 # All code, including &import, is implemented by always-present
-# functions in the perl interpreter itself.
-# See also `builtin.c` in perl source
+# functions in the perl interpreter itself in `builtin.c`.
+#
+# $builtin::VERSION and %INC are also set by the interpreter in `builtin.c`
+# since this file is a NOOP.  Therefore this file is unlikely to ever execute
+# and primarily serves as POD.
+#
+# Remember to keep $VERSION in this file and $VERSION in builtin.c synced!
+
 
 __END__
 

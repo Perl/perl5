@@ -774,6 +774,9 @@ XS(XS_builtin_import)
 void
 Perl_boot_core_builtin(pTHX)
 {
+    HV * inc_hv;
+    GV * ver_gv;
+    SV * ver_sv;
     I32 i;
     for(i = 0; builtins[i].name; i++) {
         const struct BuiltinFuncDescriptor *builtin = &builtins[i];
@@ -807,6 +810,13 @@ Perl_boot_core_builtin(pTHX)
     }
 
     newXS_flags("builtin::import", &XS_builtin_import, __FILE__, NULL, 0);
+
+    inc_hv = GvHVn(PL_incgv);
+    hv_store(inc_hv, "builtin.pm", STRLENs("builtin.pm"), newSVpvs(__FILE__), 0);
+    ver_gv = gv_fetchpvs("builtin::VERSION", GV_ADDMULTI, SVt_PV);
+    ver_sv = GvSV(ver_gv);
+    /* Remember to keep $VERSION in this file and $VERSION in builtin.pm synced. */
+    sv_setpvs(ver_sv, "0.016");
 }
 
 /*
