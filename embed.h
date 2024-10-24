@@ -307,6 +307,7 @@
 # define init_i18nl10n(a)                       Perl_init_i18nl10n(aTHX_ a)
 # define init_stacks()                          Perl_init_stacks(aTHX)
 # define init_tm(a)                             Perl_init_tm(aTHX_ a)
+# define instr                                  Perl_instr
 # define intro_my()                             Perl_intro_my(aTHX)
 # define isC9_STRICT_UTF8_CHAR                  Perl_isC9_STRICT_UTF8_CHAR
 # define isSTRICT_UTF8_CHAR                     Perl_isSTRICT_UTF8_CHAR
@@ -322,6 +323,7 @@
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
+# define is_utf8_string_loc                     Perl_is_utf8_string_loc
 # define is_utf8_string_loclen                  Perl_is_utf8_string_loclen
 # define is_utf8_string_loclen_flags            Perl_is_utf8_string_loclen_flags
 # define is_utf8_valid_partial_char_flags       Perl_is_utf8_valid_partial_char_flags
@@ -593,6 +595,7 @@
 # define save_delete(a,b,c)                     Perl_save_delete(aTHX_ a,b,c)
 # define save_destructor(a,b)                   Perl_save_destructor(aTHX_ a,b)
 # define save_destructor_x(a,b)                 Perl_save_destructor_x(aTHX_ a,b)
+# define save_freepv(a)                         Perl_save_freepv(aTHX,a)
 # define save_freercpv(a)                       Perl_save_freercpv(aTHX_ a)
 # define save_generic_pvref(a)                  Perl_save_generic_pvref(aTHX_ a)
 # define save_generic_svref(a)                  Perl_save_generic_svref(aTHX_ a)
@@ -793,6 +796,9 @@
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)
 # define utf8_to_uvchr_buf_helper(a,b,c)        Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
+# define uvchr_to_utf8(a,b)                     Perl_uvchr_to_utf8(aTHX,a,b)
+# define uvchr_to_utf8_flags(a,b,c)             Perl_uvchr_to_utf8_flags(aTHX,a,b,c)
+# define uvchr_to_utf8_flags_msgs(a,b,c,d)      Perl_uvchr_to_utf8_flags_msgs(aTHX,a,b,c,d)
 # define uvoffuni_to_utf8_flags_msgs(a,b,c,d)   Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 # define valid_utf8_to_uvchr                    Perl_valid_utf8_to_uvchr
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)

@@ -454,24 +454,6 @@ The new names accurately describe the situation in all cases.
 =cut
 */
 
-/* This is also a macro */
-PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
-
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return uvchr_to_utf8(d, uv);
-}
-
-/* This is also a macro */
-PERL_CALLCONV U8*       Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
-
-U8 *
-Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
-{
-    return uvchr_to_utf8_flags(d, uv, flags);
-}
-
 PERL_STATIC_INLINE int
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {

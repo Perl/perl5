@@ -22,15 +22,15 @@
 /*
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl which we cannot completely remove from the core
- * code. There are two reasons functions should be here:
+ * code. There is only one reason these days for functions should be here:
  *
  * 1) A function has been replaced by a macro within a minor release,
  *    so XS modules compiled against an older release will expect to
  *    still be able to link against the function
- * 2) A function Perl_foo(...) with #define foo Perl_foo(aTHX_ ...)
- *    has been replaced by a macro, e.g. #define foo(...) foo_flags(...,0)
- *    but XS code may still explicitly use the long form, i.e.
- *    Perl_foo(aTHX_ ...)
+ *
+ * It used to be that this was the way to handle the case were a function
+ * Perl_foo(...) had been replaced by a macro.  But see the 'm' flag discussion
+ * in embed.fnc for a better way to handle this.
  *
  * This file can't just be cleaned out periodically, because that would break
  * builds with -DPERL_NO_SHORT_NAMES
@@ -437,14 +437,6 @@ Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp)
 }
 #endif
 
-bool
-Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
-
-    return is_utf8_string_loclen(s, len, ep, 0);
-}
-
 /*
 =for apidoc_section $SV
 =for apidoc sv_nolocking
@@ -669,12 +661,6 @@ Perl_save_freeop(pTHX_ OP *o)
 }
 
 void
-Perl_save_freepv(pTHX_ char *pv)
-{
-    save_freepv(pv);
-}
-
-void
 Perl_save_op(pTHX)
 {
     save_op();
@@ -808,17 +794,6 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
-}
-
-/* return ptr to little string in big string, NULL if not found */
-/* The original version of this routine was donated by Corey Satten. */
-
-char *
-Perl_instr(const char *big, const char *little)
-{
-    PERL_ARGS_ASSERT_INSTR;
-
-    return instr(big, little);
 }
 
 SV *

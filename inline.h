@@ -2114,7 +2114,8 @@ Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
     return TRUE;
 }
 
-#define is_utf8_string_loc(s, len, ep)  is_utf8_string_loclen(s, len, ep, 0)
+#define Perl_is_utf8_string_loc(s, len, ep)          \
+        Perl_is_utf8_string_loclen(s, len, ep, 0)
 
 PERL_STATIC_INLINE bool
 Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)

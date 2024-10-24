@@ -136,12 +136,14 @@ typedef enum {
 
 #define uvoffuni_to_utf8_flags(d,uv,flags)                                     \
                                uvoffuni_to_utf8_flags_msgs(d, uv, flags, 0)
-#define uvchr_to_utf8(a,b)          uvchr_to_utf8_flags(a,b,0)
-#define uvchr_to_utf8_flags(d,uv,flags)                                        \
-                                    uvchr_to_utf8_flags_msgs(d,uv,flags, 0)
-#define uvchr_to_utf8_flags_msgs(d,uv,flags,msgs)                              \
-                uvoffuni_to_utf8_flags_msgs(d,NATIVE_TO_UNI(uv),flags, msgs)
-#define utf8_to_uvchr_buf(s, e, lenp)                                          \
+
+#define Perl_uvchr_to_utf8(mTHX, d, u)                                          \
+        Perl_uvchr_to_utf8_flags(aTHX, d, u, 0)
+#define Perl_uvchr_to_utf8_flags(mTHX, d, u, f)                                 \
+        Perl_uvchr_to_utf8_flags_msgs(aTHX, d, u, f, 0)
+#define Perl_uvchr_to_utf8_flags_msgs(mTHX, d, u, f , m)                        \
+        Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ d, NATIVE_TO_UNI(u), f, m)
+#define utf8_to_uvchr_buf(s, e, lenp)                                           \
             utf8_to_uvchr_buf_helper((const U8 *) (s), (const U8 *) e, lenp)
 #define utf8n_to_uvchr(s, len, lenp, flags)                                    \
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
