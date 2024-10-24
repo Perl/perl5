@@ -933,6 +933,24 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num)
 }
 
 /*
+=for apidoc av_unshift_sv
+
+Unshift a single SV onto the beginning of the array.  The array will grow
+automatically to accommodate the addition.
+
+=cut
+*/
+
+void
+Perl_av_unshift_sv(pTHX_ AV *av, SV *sv)
+{
+    PERL_ARGS_ASSERT_AV_UNSHIFT_SV;
+
+    av_unshift(av, 1);
+    av_store(av, 0, sv);
+}
+
+/*
 =for apidoc av_shift
 
 Removes one SV from the start of the array, reducing its size by one and

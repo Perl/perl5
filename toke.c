@@ -4922,8 +4922,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
                           FPTR2DPTR(void *, IoANY(datasv)),
                           SvPV_nolen(datasv)));
-    av_unshift(PL_rsfp_filters, 1);
-    av_store(PL_rsfp_filters, 0, datasv) ;
+    av_unshift_sv(PL_rsfp_filters, datasv);
     if (
         !PL_parser->filtered
      && PL_parser->lex_flags & LEX_EVALBYTES
