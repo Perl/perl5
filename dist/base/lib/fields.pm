@@ -252,7 +252,7 @@ to subclasses.
 
 Also, B<in Perl 5.8.x and earlier>, this pragma uses pseudo-hashes, the
 effect being that you can have objects with named fields which are as
-compact and as fast arrays to access, as long as the objects are
+compact and fast as arrays to access, as long as the objects are
 accessed through properly typed variables.
 
 The following functions are supported:
@@ -293,7 +293,7 @@ pseudo-hashes directly.
 If the first argument is a reference to an array, the pseudo-hash will
 be created with keys from that array.  If a second argument is supplied,
 it must also be a reference to an array whose elements will be used as
-the values.  If the second array contains less elements than the first,
+the values.  If the second array contains fewer elements than the first,
 the trailing elements of the pseudo-hash will not be initialized.
 This makes it particularly useful for creating a pseudo-hash from
 subroutine arguments:
