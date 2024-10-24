@@ -447,7 +447,7 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 
     entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
 
-    OPCODE opcode = builtin->ckval;
+    OPCODE opcode = (OPCODE)builtin->ckval;
     if(!opcode)
         return entersubop;
 
@@ -752,7 +752,7 @@ XS(XS_builtin_import)
             if(!S_parse_version(sympv + 1, sympv + symlen, &vmajor, &vminor))
                 Perl_croak(aTHX_ "Invalid version bundle %" SVf_QUOTEDPREFIX, sym);
 
-            U16 want_ver = SHORTVER(vmajor, vminor);
+            U16 want_ver = (U16)SHORTVER(vmajor, vminor);
 
             if(want_ver < SHORTVER(5,39) ||
                     /* round up devel version to next major release; e.g. 5.39 => 5.40 */
@@ -774,9 +774,6 @@ XS(XS_builtin_import)
 void
 Perl_boot_core_builtin(pTHX)
 {
-    HV * inc_hv;
-    GV * ver_gv;
-    SV * ver_sv;
     I32 i;
     for(i = 0; builtins[i].name; i++) {
         const struct BuiltinFuncDescriptor *builtin = &builtins[i];
@@ -792,7 +789,7 @@ Perl_boot_core_builtin(pTHX)
         SV *name = newSVpvs_flags("builtin::", SVs_TEMP);
         sv_catpv(name, builtin->name);
         CV *cv = newXS_flags(SvPV_nolen(name), builtin->xsub, __FILE__, proto, 0);
-        XSANY.any_i32 = builtin->ckval;
+        XSANY.any_i32 = (I32)builtin->ckval;
 
         if (   builtin->xsub == &XS_builtin_func1_void
             || builtin->xsub == &XS_builtin_func1_scalar)
@@ -811,10 +808,11 @@ Perl_boot_core_builtin(pTHX)
 
     newXS_flags("builtin::import", &XS_builtin_import, __FILE__, NULL, 0);
 
-    inc_hv = GvHVn(PL_incgv);
-    hv_store(inc_hv, "builtin.pm", STRLENs("builtin.pm"), newSVpvs(__FILE__), 0);
-    ver_gv = gv_fetchpvs("builtin::VERSION", GV_ADDMULTI, SVt_PV);
-    ver_sv = GvSV(ver_gv);
+    HV * inc_hv = GvHVn(PL_incgv);
+    hv_stores(inc_hv, "builtin.pm", newSVpvs(__FILE__));
+
+    GV * ver_gv = gv_fetchpvs("builtin::VERSION", GV_ADDMULTI, SVt_PV);
+    SV * ver_sv = GvSV(ver_gv);
     /* Remember to keep $VERSION in this file and $VERSION in builtin.pm synced. */
     sv_setpvs(ver_sv, "0.016");
 }
