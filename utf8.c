@@ -2396,7 +2396,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
      * work there */
 
     U8 * const s0 = *s_ptr;
-    U8 * const send = s0 + *lenp;
+    const U8 * const send = s0 + *lenp;
     U8 * s = first_variant;
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
