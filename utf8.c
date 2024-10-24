@@ -2368,25 +2368,27 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 =cut
 */
 
-U8 *
-Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
+bool
+Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
 {
-    U8 * first_variant;
-
-    PERL_ARGS_ASSERT_UTF8_TO_BYTES;
+    PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
     PERL_UNUSED_CONTEXT;
 
+    U8 * first_variant;
+
     /* This is a no-op if no variants at all in the input */
-    if (is_utf8_invariant_string_loc(s, *lenp, (const U8 **) &first_variant)) {
-        return s;
+    if (is_utf8_invariant_string_loc(*s_ptr, *lenp,
+                                    (const U8 **) &first_variant))
+    {
+        return true;
     }
 
     /* Nothing before 'first_variant' needs to be changed, so start the real
      * work there */
 
-    U8 * const s0 = s;
+    U8 * const s0 = *s_ptr;
     U8 * const send = s0 + *lenp;
-    s = first_variant;
+    U8 * s = first_variant;
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
 
@@ -2416,8 +2418,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
         while (s < partial_word_end) {
             if (! UTF8_IS_INVARIANT(*s)) {
                 if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                    *lenp = ((STRLEN) -1);
-                    return NULL;
+                    return false;
                 }
                 s++;
             }
@@ -2467,8 +2468,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
              * If they're not equal, there are start bytes that aren't C2
              * nor C3, hence this is not downgradable */
             if (start_bytes != C2_C3_start_bytes) {
-                *lenp = ((STRLEN) -1);
-                return NULL;
+                return false;
             }
 
             s += PERL_WORDSIZE;
@@ -2487,8 +2487,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                *lenp = ((STRLEN) -1);
-                return NULL;
+                return false;
             }
             s++;
         }
@@ -2534,7 +2533,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     *d = '\0';
     *lenp = d - s0;
 
-    return s0;
+    return true;
 
   cant_convert: ;
 
@@ -2581,7 +2580,19 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
         }
     }
 
-    *lenp = ((STRLEN) -1);
+    return false;
+}
+
+U8 *
+Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_BYTES;
+
+    if (utf8_to_bytes_(&s, lenp)) {
+        return s;
+    }
+
+    *lenp = (STRLEN) -1;
     return NULL;
 }
 
