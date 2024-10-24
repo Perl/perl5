@@ -2368,7 +2368,7 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 =cut
 */
 
-bool
+PL_utf8_to_bytes_ret
 Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
@@ -2380,7 +2380,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
     if (is_utf8_invariant_string_loc(*s_ptr, *lenp,
                                     (const U8 **) &first_variant))
     {
-        return true;
+        return PL_was_noop;
     }
 
     /* Nothing before 'first_variant' needs to be changed, so start the real
@@ -2418,7 +2418,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
         while (s < partial_word_end) {
             if (! UTF8_IS_INVARIANT(*s)) {
                 if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                    return false;
+                    return PL_cant_convert;
                 }
                 s++;
             }
@@ -2468,7 +2468,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
              * If they're not equal, there are start bytes that aren't C2
              * nor C3, hence this is not downgradable */
             if (start_bytes != C2_C3_start_bytes) {
-                return false;
+                return PL_cant_convert;
             }
 
             s += PERL_WORDSIZE;
@@ -2487,7 +2487,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                return false;
+                return PL_cant_convert;
             }
             s++;
         }
@@ -2533,7 +2533,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
     *d = '\0';
     *lenp = d - s0;
 
-    return true;
+    return PL_converted;
 
   cant_convert: ;
 
@@ -2580,7 +2580,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
         }
     }
 
-    return false;
+    return PL_cant_convert;
 }
 
 U8 *

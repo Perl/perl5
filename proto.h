@@ -5132,7 +5132,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_UTF8_TO_BYTES          \
         assert(s); assert(lenp)
 
-PERL_CALLCONV bool
+PERL_CALLCONV PL_utf8_to_bytes_ret
 Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_UTF8_TO_BYTES_         \
         assert(s_ptr); assert(lenp)
