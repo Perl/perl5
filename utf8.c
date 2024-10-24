@@ -2369,7 +2369,8 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 */
 
 PL_utf8_to_bytes_ret
-Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp)
+Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
+                          Perl_utf8_to_bytes_arg result_as)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
     PERL_UNUSED_CONTEXT;
@@ -2588,7 +2589,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES;
 
-    if (utf8_to_bytes_(&s, lenp)) {
+    if (utf8_to_bytes_overwrite(&s, lenp)) {
         return s;
     }
 

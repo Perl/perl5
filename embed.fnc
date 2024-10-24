@@ -3679,6 +3679,10 @@ Adpx	|U8 *	|utf8_to_bytes	|NN U8 *s				\
 				|NN STRLEN *lenp
 Cp	|PL_utf8_to_bytes_ret|utf8_to_bytes_				\
 				|NN U8 **s_ptr				\
+				|NN STRLEN *lenp			\
+				|Perl_utf8_to_bytes_arg result_as
+Admp	|PL_utf8_to_bytes_ret|utf8_to_bytes_overwrite			\
+				|NN U8 **s_ptr				\
 				|NN STRLEN *lenp
 EMXp	|U8 *	|utf16_to_utf8	|NN U8 *p				\
 				|NN U8 *d				\
