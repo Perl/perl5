@@ -158,6 +158,10 @@ my %described_elsewhere;
 # unlooked at
 my %protos;
 
+# For outputting an index of the API elements.  Each key is an element; its
+# value is the section the element is in.
+my %index;
+
 my $described_in = "Described in";
 
 my $description_indent = 4;
@@ -231,6 +235,7 @@ my $XS_scn = 'XS';
 
 # Kept separate at end
 my $undocumented_scn = 'Undocumented elements';
+my $index_scn = 'INDEX';
 
 my %valid_sections = (
     $AV_scn => {},
@@ -479,10 +484,11 @@ sub where_from_string ($file, $line_num = 0) {
     return "at $file, line $line_num";
 }
 
-sub check_and_add_proto_defn {
-    my ($element, $file, $line_num, $raw_flags, $ret_type, $args_ref,
-        $definition_type
-       ) = @_;
+sub check_and_add_proto_defn($element, $file, $line_num, $destpod, $section,
+                             $raw_flags, $ret_type, $args_ref,
+                             $definition_type)
+{
+
 
     # This function constructs a hash describing what we know so far about the
     # API element '$element', as determined by 'apidoc'-type lines scattered
@@ -620,6 +626,16 @@ sub check_and_add_proto_defn {
         else {
             $elements{$element}{docs_found}{file} = $file;
             $elements{$element}{docs_found}{line_num} = $line_num // 0;
+            $elements{$element}{docs_found}{section} = $section;
+
+            if (! $destpod) {
+                my $this_flags = $elements{$element}{flags}
+                              || $flags_sans_d;
+                $destpod = destination_pod($this_flags);
+            }
+
+            $elements{$element}{destpod} = $destpod;
+            $index{$destpod}{$element} = $section;
         }
 
         if ($definition_type == PLAIN_APIDOC) {
@@ -758,7 +774,7 @@ sub classify_input_line ($file, $line_num, $input, $is_file_C) {
         EOS
 }
 
-sub handle_apidoc_line ($file, $line_num, $type, $arg) {
+sub handle_apidoc_line ($file, $line_num, $destpod, $section, $type, $arg) {
 
     # This just does a couple of checks that would otherwise have to be
     # duplicated in the calling code, and calls check_and_add_proto_defn() to
@@ -792,10 +808,12 @@ sub handle_apidoc_line ($file, $line_num, $type, $arg) {
     # this definition (which has the side effect of cleaning up any NN or
     # NULLOK in @args)
     my $updated = check_and_add_proto_defn($name, $file, $line_num,
+                    $destpod, $section,
 
                     # The fact that we have this line somewhere in the source
                     # code means we implicitly have the 'd' flag
                     $flags . "d",
+
                     $ret_type, \@args,
                     $type);
 
@@ -899,7 +917,8 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
               . " '$arg' " . where_from_string($file, $line_num);
         }
         elsif ($outer_line_type == APIDOC_DEFN) {
-            handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
+            handle_apidoc_line($file, $line_num, $destpod, $section,
+                               $outer_line_type, $arg);
             next;   # 'handle_apidoc_line' handled everything for this type
         }
         elsif ($outer_line_type == APIDOC_SECTION) {
@@ -920,9 +939,10 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
             # Drop down to accumulate the heading text for this section.
         }
         elsif ($outer_line_type == PLAIN_APIDOC) {
-            my $leader_ref =
-                  handle_apidoc_line($file, $line_num, $outer_line_type, $arg);
-            $destpod = destination_pod($$leader_ref->{flags});
+            my $leader_ref = handle_apidoc_line($file, $line_num,
+                                                undef, $section,
+                                                $outer_line_type, $arg);
+            $destpod = $$leader_ref->{destpod};
 
             push @items, $leader_ref;
 
@@ -944,8 +964,9 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
                 # separating 'apidoc_item' lines
                 $text = "";
 
-                my $item_ref =
-                  handle_apidoc_line($file, $line_num, $item_line_type, $arg);
+                my $item_ref = handle_apidoc_line($file, $line_num,
+                                                  $destpod, $section,
+                                                  $item_line_type, $arg);
 
                 push @items, $item_ref;
             }
@@ -1563,6 +1584,7 @@ sub parse_config_h {
             $flags .= 'U' unless defined $configs{$name}{usage};
             my $data = check_and_add_proto_defn($name, $config_h,
                                      $configs{$name}{defn_line_num},
+                                     $api, $section,
                                      $flags,
                                      "void",    # No return type
                                      [],
@@ -2499,6 +2521,24 @@ sub output ($destpod) {  # Output a complete pod file
         print $fh construct_missings_section($hdr, $ref);
     }
 
+    print $fh <<~EOT;
+
+        =head1 $index_scn
+
+        Below is an alphabetical list of all API elements in this file,
+        cross referenced to the section in which they are documented.
+
+        EOT
+
+    my %this_index = $index{$podname}->%*;
+    my $space = "E<nbsp>" x 4;
+
+    print $fh "=over 1\n\n";
+    foreach my $element (sort dictionary_order keys %this_index) {
+        print $fh "=item L</$element>${space}L</$this_index{$element}>\n\n";
+    }
+    print $fh "=back\n\n";
+
     print $fh "\n$destpod->{footer}\n=cut\n";
 
     read_only_bottom_close_and_rename($fh);
@@ -2513,7 +2553,10 @@ foreach (@{(setup_embed())[0]}) {
                                  @{$embed}{qw(flags return_type name args)};
     check_and_add_proto_defn($func, $file,
                              # embed.fnc data doesn't currently furnish the
-                             # line number
+                             # line number; and we have no section in the
+                             # documente yet
+                             undef,
+                             undef,
                              undef,
 
                              $flags, $ret_type, $args,
@@ -2756,7 +2799,8 @@ $valid_sections{$genconfig_scn}{footer}
 
 my $section_list = join "\n\n", map { "=item L</$_>" }
                                 sort(dictionary_order keys %valid_sections),
-                                $undocumented_scn;  # Keep last
+                                $undocumented_scn,  # Keep next-to-last
+                                $index_scn;         # Keep last
 
 # Leading '|' is to hide these lines from pod checkers.  khw is unsure if this
 # is still needed.
@@ -2776,9 +2820,9 @@ $api{hdr} = <<"_EOB_";
 |L<perlintern> and F<$config_h>, some items are listed here as being actually
 |documented in another pod.
 |
-|L<At the end|/$undocumented_scn> is a list of functions which have yet
-|to be documented.  Patches welcome!  The interfaces of these are subject to
-|change without notice.
+|L<Just before the index|/$undocumented_scn> is a list of functions which have
+|yet to be documented.  Patches welcome!  The interfaces of these are subject
+|to change without notice.
 |
 |Some of the functions documented here are consolidated so that a single entry
 |serves for multiple functions which all do basically the same thing, but have
