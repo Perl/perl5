@@ -15048,6 +15048,20 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
     return dsv;
  }
 
+/*
+=for apidoc      sv_dup
+=for apidoc_item sv_dup_inc
+
+In spite of their generic names, these are very specialized functions mainly
+for use when cloning an interpreter instance.
+
+They duplicate an SV of any type (not just a plain SV, but including AV, HV
+I<etc>.), returning a pointer to the cloned object.  The difference is that the
+new SV under C<sv_dup> has a reference count of 0, but 1 under C<sv_dup_inc>.
+
+=cut
+ */
+
 SV *
 Perl_sv_dup_inc(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 {
