@@ -930,7 +930,7 @@ sub IO::File::TIEARRAY {
 }
 fileno FOO; tie @a, "FOO"
 EXPECT
-Can't locate object method "TIEARRAY" via package "FOO" (perhaps you forgot to load "FOO"?) at - line 5.
+Can't locate object method "TIEARRAY" via package "FOO" (perhaps you forgot to load it?) at - line 5.
 ########
 # tie into empty package name
 tie $foo, "";
