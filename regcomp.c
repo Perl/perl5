@@ -5320,7 +5320,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
         substitute_parse = newSVpvs("?:");
         sv_catsv(substitute_parse, value_sv);
-        sv_catpv(substitute_parse, ")");
+        sv_catpvs(substitute_parse, ")");
 
         /* The value should already be native, so no need to convert on EBCDIC
          * platforms.*/
@@ -10752,7 +10752,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                     first_time = FALSE;
 
-                    sv_catpv(substitute_parse, SvPVX(this_sequence));
+                    sv_catpvn(substitute_parse,
+                              SvPVX(this_sequence), SvCUR(this_sequence));
                 }
             }
         }
@@ -14222,7 +14223,6 @@ S_handle_user_defined_property(pTHX_
 
     const char * s0 = string;   /* Points to first byte in the current line
                                    being parsed in 'string' */
-    const char overflow_msg[] = "Code point too large in \"";
     SV* running_definition = NULL;
 
     PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY;
@@ -14279,7 +14279,7 @@ S_handle_user_defined_property(pTHX_
                     s = e;
                 }
                 if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
-                sv_catpv(msg, overflow_msg);
+                sv_catpvs(msg, "Code point too large in \"");
                 Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
                                      UTF8fARG(is_contents_utf8, s - s0, s0));
                 sv_catpvs(msg, "\"");
@@ -14314,7 +14314,7 @@ S_handle_user_defined_property(pTHX_
                         s = e;
                     }
                     if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
-                    sv_catpv(msg, overflow_msg);
+                    sv_catpvs(msg, "Code point too large in \"");
                     Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
                                       UTF8fARG(is_contents_utf8, s - s0, s0));
                     sv_catpvs(msg, "\"");
@@ -15929,12 +15929,17 @@ S_parse_uniprop_string(pTHX_
 
   append_name_to_msg:
     {
-        const char * prefix = (runtime && level == 0) ?  " \\p{" : " \"";
-        const char * suffix = (runtime && level == 0) ?  "}" : "\"";
+        bool is_root = runtime && level == 0;
+        const char * prefix = is_root ? " \\p{" : " \"";
+        Size_t prefixl = is_root ? STRLENs(" \\p{") : STRLENs(" \"");
+        const char * suffix;
+        Size_t suffixl;
 
-        sv_catpv(msg, prefix);
+        sv_catpvn(msg, prefix, prefixl);
         Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
-        sv_catpv(msg, suffix);
+        suffix = is_root ? "}" : "\"";
+        suffixl = is_root ? STRLENs("}") : STRLENs("\"");
+        sv_catpvn(msg, suffix, suffixl);
     }
 
     return NULL;
