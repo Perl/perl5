@@ -2352,18 +2352,148 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 }
 
 /*
-=for apidoc utf8_to_bytes
+=for apidoc      utf8_to_bytes_overwrite
+=for apidoc_item utf8_to_bytes_new_pv
+=for apidoc_item utf8_to_bytes_temp_pv
+=for apidoc_item utf8_to_bytes
+=for apidoc_item bytes_from_utf8
 
-Converts a string C<"s"> of length C<*lenp> from UTF-8 into native byte encoding.
-Unlike L</bytes_to_utf8>, this over-writes the original string, and
-updates C<*lenp> to contain the new length.
-Returns zero on failure (leaving C<"s"> unchanged) setting C<*lenp> to -1.
+These each convert a string encoded as UTF-8 into the equivalent native byte
+representation, if possible.  The first three forms are preferred; their API is
+more convenient to use, and each return non-zero if the result is in bytes;
+zero if the conversion failed.
 
-Upon successful return, the number of variants in the string can be computed by
-having saved the value of C<*lenp> before the call, and subtracting the
-after-call value of C<*lenp> from it.
+=over 4
 
-If you need a copy of the string, see L</bytes_from_utf8>.
+=item C<utf8_to_bytes_overwrite>
+
+=item C<utf8_to_bytes_new_pv>
+
+=item C<utf8_to_bytes_temp_pv>
+
+These differ only in the form of the returned string and the allowed constness
+of the input string.  In each, if the input string was already in native bytes
+or was not convertible, the input isn't changed.
+
+C<utf8_to_bytes_overwrite> overwrites the input string with the bytes
+conversion.  Hence, the input string should not be C<const>.  (Converting the
+multi-byte UTF-8 encoding to single bytes never expands the result, so
+overwriting is always feasible.)
+
+Both C<utf8_to_bytes_new_pv> and C<utf8_to_bytes_temp_pv> allocate new memory
+to hold the converted string, never changing the input.  Hence the input string
+may be C<const>.  They differ in that C<utf8_to_bytes_temp_pv> arranges for the
+new memory to automatically be freed.  With C<utf8_to_bytes_new_pv>, the caller
+is responsible for freeing the memory.
+
+In each of these three functions, the input C<s_ptr> is a pointer to the string
+to be converted (so that the first byte will be at C<*sptr[0]>), and C<*lenp>
+is its length.
+
+The return of each can be one of three values:
+
+=over 4
+
+=item C<PL_cant_convert> (or its equivalent, 0 or C<false>)
+
+This happens when the input is not well-formed UTF-8 or contains at least one
+UTF-8 sequence that represents a code point that can't be expressed as a byte.
+The contents of C<*s_ptr> and C<*lenp> are not changed.
+
+=item C<PL_was_noop>
+
+The input turned out to already be in bytes form.  The contents of C<*s_ptr>
+and C<*lenp> are not changed.
+
+=item C<PL_converted>
+
+The input was successfully translated to native bytes.  The result will be
+NUL-terminated even if the original wasn't.
+
+=over 4
+
+=item For C<utf8_to_bytes_overwrite>,
+
+The input string C<*s_ptr> was overwritten with the native bytes, including a
+NUL terminator.  C<*lenp> has been updated with the new length.
+
+=item For C<utf8_to_bytes_new_pv> and C<utf8_to_bytes_temp_pv>
+
+The input string was not changed.  Instead, new memory has been allocated
+containing the translation of the input into native bytes with a NUL terminator
+byte.  C<*s_ptr> now points to that new memory, and  C<*lenp> contains its
+length.
+
+For C<utf8_to_bytes_temp_pv>, the new memory has been arranged to be
+automatically freed, via a call to C<L</SAVEFREEPV>>.
+
+For C<utf8_to_bytes_new_pv>, it is the caller's responsibility to free the new
+memory when done using it.
+
+=back
+
+=back
+
+Except when calling C<utf8_to_bytes_new_pv>, most likely you can treat the
+return as a boolean.  With that function you will need to know whether or not
+there is memory that has to be freed.
+
+Note that in all cases, C<*s_ptr> and C<*lenp> will have correct and consistent
+values, updated as was necessary.
+
+Also note that when the return isn't C<PL_cant_convert>, the number of variants
+in the string can be computed by having saved the value of C<*lenp> before the
+call, and subtracting the after-call value of C<*lenp> from it.  This is also
+true for the other two functions described below.
+
+=item C<utf8_to_bytes>
+
+Plain C<utf8_to_bytes> also converts a UTF-8 encoded string to bytes, but there
+are more glitches that the caller has to be prepared to handle.
+
+The input string is passed with one less indirection level, C<s>.
+
+=over
+
+=item If the conversion was successful or a noop
+
+The function returns C<s> (unchanged), but its contents were changed if this
+was not a noop; C<*lenp> will be updated as necessary to be the correct length.
+
+=item If the conversion failed
+
+The function returns NULL and sets C<*lenp> to -1, cast to C<STRLEN>.
+This means that you will have to use a temporary containing the string length
+to pass to the function if you will need the value afterwards.
+
+The contents of C<s> were not changed.
+
+=back
+
+=item C<bytes_from_utf8>
+
+C<bytes_from_utf8> also converts a potentially UTF-8 encoded string C<s> to
+bytes.  It preserves C<s>, allocating new memory for the converted string.
+
+In contrast to the other functions, the input string to this one need not
+be UTF-8.  If not, the caller has set C<*is_utf8p> to be C<false>, and the
+function does nothing, returning the original C<s>.
+
+Also do nothing if there are code points in the string not expressible in
+native byte encoding, returning the original C<s>.
+
+Otherwise, C<*is_utf8p> is set to 0, and the return value is a pointer to a
+newly created string containing the native byte equivalent of C<s>, and whose
+length is returned in C<*lenp>, updated.  The new string is C<NUL>-terminated.
+The caller is responsible for arranging for the memory used by this string to
+get freed.
+
+The major problem with this function is that memory is allocated and filled
+even when the input string was already in bytes form.
+
+=back
+
+New code should use the first three functions listed above.
 
 =cut
 */
@@ -2634,34 +2764,6 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
     *lenp = (STRLEN) -1;
     return NULL;
 }
-
-/*
-=for apidoc bytes_from_utf8
-
-Converts a potentially UTF-8 encoded string C<s> of length C<*lenp> into native
-byte encoding.  On input, the boolean C<*is_utf8p> gives whether or not C<s> is
-actually encoded in UTF-8.
-
-Unlike L</utf8_to_bytes> but like L</bytes_to_utf8>, this is non-destructive of
-the input string.
-
-Do nothing if C<*is_utf8p> is 0, or if there are code points in the string
-not expressible in native byte encoding.  In these cases, C<*is_utf8p> and
-C<*lenp> are unchanged, and the return value is the original C<s>.
-
-Otherwise, C<*is_utf8p> is set to 0, and the return value is a pointer to a
-newly created string containing a downgraded copy of C<s>, and whose length is
-returned in C<*lenp>, updated.  The new string is C<NUL>-terminated.  The
-caller is responsible for arranging for the memory used by this string to get
-freed.
-
-Upon successful return, the number of variants in the string can be computed by
-having saved the value of C<*lenp> before the call, and subtracting the
-after-call value of C<*lenp> from it.
-
-=cut
-
-*/
 
 U8 *
 Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
