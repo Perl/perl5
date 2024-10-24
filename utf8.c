@@ -2391,11 +2391,12 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
     const U8 * const send = s0 + *lenp;
     U8 * s = first_variant;
     Size_t invariant_length = first_variant - s0;
+    Size_t variant_count = 0;
 
 #ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
 
     /* Do a first pass through the string to see if it actually is translatable
-     * into bytes.  On long strings this is
+     * into bytes, and if so, how big the result is.  On long strings this is
      * done a word at a time, so is relatively quick. (There is some
      * start-up/tear-down overhead with the per-word algorithm, so no real gain
      * unless the remaining portion of the string is long enough.  The current
@@ -2422,8 +2423,11 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
                 if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
                     return PL_cant_convert;
                 }
+
                 s++;
+                variant_count++;
             }
+
             s++;
         }
 
@@ -2473,6 +2477,12 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
                 return PL_cant_convert;
             }
 
+            /* Commit 03c1e4ab1d6ee9062fb3f94b0ba31db6698724b1 contains an
+               explanation of how this works */
+            variant_count +=
+                (Size_t) (((((start_bytes)) >> 7) * PERL_COUNT_MULTIPLIER)
+                                      >> ((PERL_WORDSIZE - 1) * CHARBITS));
+
             s += PERL_WORDSIZE;
         } while (s + PERL_WORDSIZE <= send);
 
@@ -2481,6 +2491,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
          * first byte of the character  */
         if (s > first_variant && UTF8_IS_START(*(s-1))) {
             s--;
+            variant_count--;
         }
     }
 
@@ -2492,16 +2503,20 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
                 return PL_cant_convert;
             }
             s++;
+            variant_count++;
         }
         s++;
     }
 
+    /* Here, we passed the tests above and know how many UTF-8 variant
+     * characters there are, which allows us to calculate the size to malloc
+     * for the non-destructive case */
     U8 *d0;
     if (result_as != PL_utf8_to_bytes_new_memory) {
         d0 = s0;
     }
     else {
-        Newx(d0, *lenp + 1, U8);
+        Newx(d0, (*lenp) + 1 - variant_count, U8);
         Copy(s0, d0, invariant_length, U8);
     }
 
