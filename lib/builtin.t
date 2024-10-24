@@ -645,6 +645,13 @@ EOS
     }
 }
 
+like($INC{'builtin.pm'}, qr/builtin\.c/, 'check that \'builtin.pm\' is in %INC');
+{
+    my $xsv = $builtin::VERSION;
+    delete $INC{'builtin.pm'};
+    eval "use builtin;";
+    is($xsv, $builtin::VERSION, 'XS $VERSION matches PP $VERSION');
+}
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();

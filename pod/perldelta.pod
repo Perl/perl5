@@ -123,11 +123,22 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =over 4
 
-=item *
+=item builtin.pm
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<builtin.pm|/builtin.pm> has been upgraded from version 0.015 to 0.016.
+As an optimization the C<builtin::> package and module is now fully
+implemented in C to save on file system I/O and startup time.
 
-XXX If there was something important to note about this change, include that here.
+Specifically the C<use builtin;> statement  and any permutations of
+C<use builtin;> will not internally perform a per process first time
+C<require;> anymore and C<$INC{'builtin.pm'}> is already filled in at
+process startup.  All C<.pm> functionality is embedded in the interpreter at
+startup now.  This optimization removes all I/O calls and time overhead of
+parsing the C<builtin.pm> file.  The C<builtin.pm> file will remain as
+documentation.
+
+C<builtin::>'s C<import()>, C<$VERSION>, and all available subroutines/APIs
+have not changed.  No changes are required to previously written code.
 
 =back
 
