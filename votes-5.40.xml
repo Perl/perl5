@@ -25,11 +25,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<!-- Catch malformed UTF-8 changes: -->
-<commit votes="khw steveh tonyc" id="079900bbc162f26bba6696fb13c82dcdf4bb5b61" issue="" pull="22597" desc="utf8n_to_uvchr: check the state of DFA after the first transition"/>
-<commit votes="khw steveh tonyc" id="0069b5031c15e97c8848e04504aa35ead5dd2cf7" issue="" pull="22597" desc="utf8n_to_uvchr: consolidate condition checks within while loop to share code"/>
-<commit votes="khw steveh tonyc" id="29501f0a538173b08a71931d81608462a65b81aa" issue="" pull="22597" desc="chore: run `Porting/updateAUTHORS.pl`"/>
-
 <!-- goto &#amp;builtin::X changes: (The middle one needs regen/opcode.pl rather than the opcode.h change from blead) -->
 <commit votes="steveh tonyc" id="39cf04a2758735e0c0ed9ee89acc5a2b4d52d627" issue="22542" pull="22582" desc="builtin: test the unary functions see if tail call crashes them"/>
 <commit votes="steveh tonyc" id="db19dfaafcb8344ef45012ae7f90fad964857888" issue="22542" pull="22582" desc="builtin: fix TARG handling for refaddr, reftype, ceil, floor, trim"/>
