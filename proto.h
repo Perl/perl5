@@ -160,11 +160,6 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *len
 #define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS   \
         assert(p); assert(ustrp)
 
-PERL_CALLCONV UV
-Perl__utf8n_to_uvchr_msgs_helper(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors, AV **msgs);
-#define PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER \
-        assert(s)
-
 PERL_CALLCONV_NO_RET void
 Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
         __attribute__noreturn__
@@ -417,6 +412,9 @@ PERL_CALLCONV U8 *
 Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8          \
         assert(s); assert(lenp)
+
+/* PERL_CALLCONV bool
+Perl_c9strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
 
 PERL_CALLCONV SSize_t
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv);
@@ -1112,6 +1110,9 @@ PERL_CALLCONV SSize_t
 Perl_eval_sv(pTHX_ SV *sv, I32 flags);
 #define PERL_ARGS_ASSERT_EVAL_SV                \
         assert(sv)
+
+/* PERL_CALLCONV bool
+Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
 
 PERL_CALLCONV void
 Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
@@ -4290,6 +4291,9 @@ Perl_str_to_version(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_STR_TO_VERSION         \
         assert(sv)
 
+/* PERL_CALLCONV bool
+Perl_strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+
 PERL_CALLCONV void
 Perl_sub_crush_depth(pTHX_ CV *cv)
         __attribute__visibility__("hidden");
@@ -5142,20 +5146,25 @@ Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, cons
 #define PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE     \
         assert(s); assert(d); assert(newlen)
 
-PERL_CALLCONV UV
-Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
-#define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF      \
-        assert(s); assert(send)
+/* PERL_CALLCONV bool
+Perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
 
-PERL_CALLCONV UV
-Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags);
-#define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR         \
-        assert(s)
+/* PERL_CALLCONV bool
+Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors); */
 
-PERL_CALLCONV UV
-Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors);
-#define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR   \
-        assert(s)
+/* PERL_CALLCONV bool
+Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flag); */
+
+PERL_CALLCONV bool
+Perl_utf8_to_uv_msgs_helper_(const U8 * const s0, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
+#define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_ \
+        assert(s0); assert(e); assert(cp_p)
+
+/* PERL_CALLCONV UV
+Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags); */
+
+/* PERL_CALLCONV UV
+Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors); */
 
 PERL_CALLCONV void
 Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
@@ -10093,9 +10102,14 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
 # define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
         assert(s); assert(start); assert(end)
 
+PERL_STATIC_INLINE bool
+Perl_utf8_to_uv_msgs(const U8 * const s0, const U8 *e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS       \
+        assert(s0); assert(e); assert(cp_p)
+
 PERL_STATIC_INLINE UV
-Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
-# define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF_HELPER \
+Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
+# define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF     \
         assert(s); assert(send)
 
 PERL_STATIC_INLINE UV
