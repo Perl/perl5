@@ -690,7 +690,8 @@ addbits('enteriter',
                     1 => qw(OPpITER_REVERSED REVERSED),# for (reverse ...)
                     3 => qw(OPpITER_DEF      DEF),     # 'for $_'
 );
-addbits('iter',     1 => qw(OPpITER_REVERSED REVERSED));
+addbits('iter',     1 => qw(OPpITER_REVERSED REVERSED),
+                    2 => qw(OPpITER_INDEXED  INDEXED));
 
 
 

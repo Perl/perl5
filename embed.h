@@ -1202,6 +1202,7 @@
 #     define get_aux_mg(a)                      S_get_aux_mg(aTHX_ a)
 #   endif
 #   if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
+#     define XS_builtin_indexed(a)              Perl_XS_builtin_indexed(aTHX_ a)
 #     define finish_export_lexical()            Perl_finish_export_lexical(aTHX)
 #     define import_builtin_bundle(a)           Perl_import_builtin_bundle(aTHX_ a)
 #     define prepare_export_lexical()           Perl_prepare_export_lexical(aTHX)

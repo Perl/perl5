@@ -9631,6 +9631,39 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
     return o;
 }
 
+#define op_is_cv_xsub(o, xsub)  S_op_is_cv_xsub(aTHX_ o, xsub)
+static bool
+S_op_is_cv_xsub(pTHX_ OP *o, XSUBADDR_t xsub)
+{
+    if(o->op_type == OP_NULL)
+        o = cUNOPo->op_first;
+
+    CV *cv;
+    switch(o->op_type) {
+        case OP_GV:
+        {
+            GV *gv;
+            if(!(gv = cGVOPo_gv))
+                return false;
+            cv = GvCV(gv);
+            break;
+        }
+
+        case OP_PADCV:
+            cv = (CV *)PAD_SVl(o->op_targ);
+            assert(cv && SvTYPE(cv) == SVt_PVCV);
+            break;
+
+        default:
+            return false;
+    }
+
+    if(!cv || !CvISXSUB(cv))
+        return false;
+
+    return CvXSUB(cv) == xsub;
+}
+
 /*
 =for apidoc newFOROP
 
@@ -9661,15 +9694,16 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     OP *iter;
     PADOFFSET padoff = 0;
     PADOFFSET how_many_more = 0;
-    I32 iterflags = 0;
-    I32 iterpflags = 0;
+    I32 enteriterflags = 0;
+    I32 enteriterpflags = 0;
+    U8 iterpflags = 0;
     bool parens = 0;
 
     PERL_ARGS_ASSERT_NEWFOROP;
 
     if (sv) {
         if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
-            iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
+            enteriterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
             OpTYPE_set(sv, OP_RV2GV);
 
             /* The op_type check is needed to prevent a possible segfault
@@ -9680,7 +9714,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
              */
             if (cUNOPx(sv)->op_first->op_type == OP_GV
              && cGVOPx_gv(cUNOPx(sv)->op_first) == PL_defgv)
-                iterpflags |= OPpITER_DEF;
+                enteriterpflags |= OPpITER_DEF;
         }
         else if (sv->op_type == OP_PADSV) { /* private variable */
             if (sv->op_flags & OPf_PARENS) {
@@ -9688,7 +9722,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
                 sv->op_private |= OPpLVAL_INTRO;
                 parens = 1;
             }
-            iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
+            enteriterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
             padoff = sv->op_targ;
             sv->op_targ = 0;
             op_free(sv);
@@ -9704,7 +9738,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             UNOP *padsv;
             PADOFFSET i;
 
-            iterpflags = OPpLVAL_INTRO; /* for my ($k, $v) () */
+            enteriterpflags = OPpLVAL_INTRO; /* for my ($k, $v) () */
             parens = 1;
 
             if (!pushmark || pushmark->op_type != OP_PUSHMARK) {
@@ -9762,17 +9796,53 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             const char * const name = PadnamePV(pn);
 
             if (PadnameLEN(pn) == 2 && name[0] == '$' && name[1] == '_')
-                iterpflags |= OPpITER_DEF;
+                enteriterpflags |= OPpITER_DEF;
         }
     }
     else {
         sv = newGVOP(OP_GV, 0, PL_defgv);
-        iterpflags |= OPpITER_DEF;
+        enteriterpflags |= OPpITER_DEF;
     }
 
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
         expr = op_lvalue(op_force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
-        iterflags |= OPf_STACKED;
+        enteriterflags |= OPf_STACKED;
+    }
+    else if (padoff != 0 && how_many_more == 1 &&  /* two lexical vars */
+             expr->op_type == OP_ENTERSUB) {
+        OP *args = cUNOPx(expr)->op_first;
+        assert(OP_TYPE_IS_OR_WAS(args, OP_LIST));
+
+        OP *pre_firstarg = NULL;
+        OP *firstarg = cLISTOPx(args)->op_first;
+        OP *lastarg  = cLISTOPx(args)->op_last;
+
+        if(firstarg->op_type == OP_PUSHMARK)
+            pre_firstarg = firstarg, firstarg = OpSIBLING(firstarg);
+        if(firstarg == lastarg)
+            firstarg = NULL;
+
+        if (op_is_cv_xsub(lastarg, &Perl_XS_builtin_indexed) &&              /* a call to builtin::indexed */
+            firstarg && OpSIBLING(firstarg) == lastarg &&                    /* with one arg */
+            (firstarg->op_type == OP_RV2AV || firstarg->op_type == OP_PADAV) /* ... which is an array */
+        ) {
+            /* Turn for my ($idx, $val) (indexed @arr) into a similar OPf_STACKED
+             * loop on the array itself as the case above, plus a flag to tell
+             * pp_iter to set the index directly
+             */
+
+            /* Cut the array arg out of the args list and discard the rest of
+             * the original expr
+             */
+            op_sibling_splice(args, pre_firstarg, 1, NULL);
+            op_free(expr);
+
+            expr = op_lvalue(op_force_list(scalar(ref(firstarg, OP_ITER))), OP_GREPSTART);
+            enteriterflags |= OPf_STACKED;
+            iterpflags |= OPpITER_INDEXED;
+        }
+        else
+            goto expr_not_special;
     }
     else if (expr->op_type == OP_NULL &&
              (expr->op_flags & OPf_KIDS) &&
@@ -9801,19 +9871,20 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         op_free(expr);
         expr = (OP*)(listop);
         op_null(expr);
-        iterflags |= OPf_STACKED;
+        enteriterflags |= OPf_STACKED;
     }
     else {
+expr_not_special:
         expr = op_lvalue(op_force_list(expr), OP_GREPSTART);
     }
 
-    loop = (LOOP*)op_convert_list(OP_ENTERITER, iterflags,
+    loop = (LOOP*)op_convert_list(OP_ENTERITER, enteriterflags,
                                   op_append_elem(OP_LIST, list(expr),
                                                  scalar(sv)));
     assert(!loop->op_next);
     /* for my  $x () sets OPpLVAL_INTRO;
      * for our $x () sets OPpOUR_INTRO */
-    loop->op_private = (U8)iterpflags;
+    loop->op_private = (U8)enteriterpflags;
 
     /* upgrade loop from a LISTOP to a LOOPOP;
      * keep it in-place if there's space */
@@ -9840,7 +9911,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     if (parens)
         /* hint to deparser that this:  for my (...) ... */
         loop->op_flags |= OPf_PARENS;
-    iter = newOP(OP_ITER, 0);
+    iter = newOP(OP_ITER, (U32)iterpflags << 8);
     iter->op_targ = how_many_more;
     return newWHILEOP(flags, 1, loop, iter, block, cont, 0);
 }
