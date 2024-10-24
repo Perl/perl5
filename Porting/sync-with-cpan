@@ -606,10 +606,24 @@ foreach my $file (@old_files) {
     push @gone => $file;
 }
 
-my @changes_info;
+# See if we can automatically extract the Changes file entry for
+# this release. We use heurstics to deal with this, as the formats
+# of these files are not well defined. This currently works
+# for the distributions we bundle, but if the Changes file format
+# is modified for any of the distributions, or if we add a new
+# distribution we may want to edit this code to handle the change.
+
+my @changes_info;   # the changes file entry for the version we are
+                    # updating to.
 if (!$changes_file) {
-    print "Could not find a changes file!\n",
-          "If this is not correct and there is one, please consider updating this script!\n";
+
+    print
+      "########################################################\n",
+      "Could not find a changes file for this distribution!\n",
+      "If this is not correct and there is one, please consider\n",
+      "updating this script to detect it!\n";
+    pause_for_input();
+    print "\n";
 } else {
     open my $ifh, "<", $changes_file
         or die "Failed to open '$changes_file':$!";
@@ -619,6 +633,7 @@ if (!$changes_file) {
     my $is_update = $new_version ne $old_version;
 
     for(my $idx = 0; $idx < @lines; $idx++) {
+        # try to detect the beginning of the entry for this version.
         if ($lines[$idx] =~ /$new_version/ ||
             ($pkg_dir eq "CPAN" and $lines[$idx] =~/^\d{4}-\d{2}-\d{2}/
              && $lines[$idx+2]
@@ -627,6 +642,8 @@ if (!$changes_file) {
             $seen_new_version = 1;
             push @changes_info, $lines[$idx];
         } elsif ($seen_new_version) {
+            # try to detect the end of the changes file entry. Depending
+            # on the distribution involved this requires different heuristics.
             if ($is_update && $pkg_dir eq "ExtUtils-MakeMaker") {
                 if ($lines[$idx] =~/$old_version/) {
                     last;
@@ -647,7 +664,15 @@ if (!$changes_file) {
         }
     }
     if (!@changes_info) {
-        die "No changes?";
+        print
+          "###################################################################\n",
+          "We were NOT able to detect an entry for this version ($new_version)\n",
+          "in $changes_file. This may mean you need to update the heuristics for\n",
+          "detecting the entry for this distribution in $0.\n",
+          "This can be ignored for now, but it would be nice to fix the code to\n",
+          "do the right thing.\n";
+        pause_for_input();
+        print "\n";
     } else {
         print "Changes from $changes_file\n";
         print $_,"\n" for @changes_info;
