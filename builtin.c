@@ -29,6 +29,12 @@ struct BuiltinFuncDescriptor {
     bool is_experimental;
 };
 
+#ifdef WIN32
+    XS_EXTERNAL(w32_GetCwd);
+#elif defined(HAS_GETCWD)
+    XS_EXTERNAL(XS_Internals_getcwd);
+#endif
+
 #define warn_experimental_builtin(name) S_warn_experimental_builtin(aTHX_ name)
 static void S_warn_experimental_builtin(pTHX_ const char *name)
 {
@@ -640,6 +646,11 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     /* list functions */
     { "indexed",          SHORTVER(5,39), &XS_builtin_indexed,          &ck_builtin_funcN, 0, false },
     { "export_lexically",      NO_BUNDLE, &XS_builtin_export_lexically, NULL,              0, true },
+#ifdef WIN32
+    { "getcwd",        NO_BUNDLE, &w32_GetCwd,           NULL, 0, true },
+#elif defined(HAS_GETCWD)
+    { "getcwd",        NO_BUNDLE, &XS_Internals_getcwd,  NULL, 0, true },
+#endif
 
     { NULL, 0, NULL, NULL, 0, false }
 };

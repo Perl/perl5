@@ -123,11 +123,19 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =over 4
 
-=item *
+=item blib.pm
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+C<blib.pm> was updated from 1.07 to 1.08. Previously when L<Win32.pm|Win32>,
+and only that module, the C<cwd()> was obtained through inefficiently
+shelling out to a new C<cmd.exe>, this was fixed and the C<cwd> when using
+C<blib.pm> and L<Win32.pm|Win32> is obtained with a fast same-process API
+function call the way C<Win32::GetCwd()> and C<Cwd::> do it.
 
-XXX If there was something important to note about this change, include that here.
+=item builtin.pm
+
+C<builtin.pm> was updated from 0.015 to 0.016.
+
+C<builtin::getcwd()> was added as experimental.
 
 =back
 

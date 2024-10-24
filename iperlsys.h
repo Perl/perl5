@@ -470,6 +470,7 @@ typedef void*           (*LPEnvGetChildenv)(struct IPerlEnv*);
 typedef void            (*LPEnvFreeChildenv)(struct IPerlEnv*, void* env);
 typedef char*           (*LPEnvGetChilddir)(struct IPerlEnv*);
 typedef void            (*LPEnvFreeChilddir)(struct IPerlEnv*, char* dir);
+typedef unsigned int    (*LPEnvGetChilddir_tbuf)(struct IPerlEnv*, char* ptr, PH_GCDB_T info);
 #  ifdef HAS_ENVGETENV
 typedef char*           (*LPENVGetenv)(struct IPerlEnv*, const char *varname);
 typedef char*           (*LPENVGetenv_len)(struct IPerlEnv*,
@@ -497,6 +498,7 @@ struct IPerlEnv
     LPEnvFreeChildenv   pFreeChildenv;
     LPEnvGetChilddir    pGetChilddir;
     LPEnvFreeChilddir   pFreeChilddir;
+    LPEnvGetChilddir_tbuf    pGetChilddir_tbuf;
 #  ifdef HAS_ENVGETENV
     LPENVGetenv         pENVGetenv;
     LPENVGetenv_len     pENVGetenv_len;
@@ -532,6 +534,8 @@ struct IPerlEnvInfo
         (*PL_Env->pGetChilddir)(PL_Env)
 #  define PerlEnv_free_childdir(d)                              \
         (*PL_Env->pFreeChilddir)(PL_Env, (d))
+#  define PerlEnv_get_childdir_tbuf(_p,_i)                         \
+        (*PL_Env->pGetChilddir_tbuf)(PL_Env,(_p),(_i))
 #  ifdef HAS_ENVGETENV
 #    define PerlEnv_ENVgetenv(str)                              \
         (*PL_Env->pENVGetenv)(PL_Env,(str))
@@ -583,6 +587,7 @@ struct IPerlEnvInfo
 #  define PerlEnv_get_childenv()                win32_get_childenv()
 #  define PerlEnv_free_childenv(e)      win32_free_childenv((e))
 #  define PerlEnv_get_childdir()                win32_get_childdir()
+#  define PerlEnv_get_childdir_tbuf(_p,_i)      win32_get_childdir_tbuf((_p),(_i))
 #  define PerlEnv_free_childdir(d)      win32_free_childdir((d))
 #  else
 #    define PerlEnv_clearenv(str)               (ENV_LOCK, (clearenv(str)   \

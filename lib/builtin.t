@@ -440,6 +440,19 @@ TODO: {
     is($HASH{key}, "val", 'Lexically exported hash is accessible');
 }
 
+# Test getcwd
+{
+    require Cwd;
+
+    eval "getcwd()";
+    ok($@, "no main::getcwd");
+
+    TODO: {
+        local $::TODO = "backslash vs forward slash problems on Win32";
+        is(builtin::getcwd(), Cwd::getcwd(), "builtin::getcwd() eq Cwd::getcwd()");
+    }
+}
+
 # load_module
 {
     use builtin qw( load_module );

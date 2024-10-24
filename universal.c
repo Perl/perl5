@@ -1131,21 +1131,22 @@ XS(XS_re_regexp_pattern)
     NOT_REACHED; /* NOTREACHED */
 }
 
-#if defined(HAS_GETCWD) && defined(PERL_IS_MINIPERL)
+#if defined(HAS_GETCWD)
 
-XS(XS_Internals_getcwd)
+XS_EXTERNAL(XS_Internals_getcwd)
 {
     dXSARGS;
-    SV *sv = sv_newmortal();
-
     if (items != 0)
         croak_xs_usage(cv, "");
+    EXTEND(SP,1);
+    dXSTARG;
+    PUSHs(TARG);
+    PUTBACK;
 
-    (void)getcwd_sv(sv);
+    (void)getcwd_sv(TARG);
 
-    SvTAINTED_on(sv);
-    PUSHs(sv);
-    XSRETURN(1);
+    SvTAINTED_on(TARG);
+    SvSETMAGIC(TARG);
 }
 
 #endif
@@ -1314,6 +1315,10 @@ struct xsub_details {
     int ix;
 };
 
+#ifdef WIN32
+    XS_EXTERNAL(w32_GetCwd);
+#endif
+
 static const struct xsub_details these_details[] = {
     {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL, 0 },
     {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL, 0 },
@@ -1344,6 +1349,11 @@ static const struct xsub_details these_details[] = {
     {"re::regexp_pattern", XS_re_regexp_pattern, "$", 0 },
 #if defined(HAS_GETCWD) && defined(PERL_IS_MINIPERL)
     {"Internals::getcwd", XS_Internals_getcwd, "", 0 },
+#elif defined(WIN32)
+    /* Always offer backup, Win32CORE.c vs AUTOLOAD vs Win32.pm
+       vs Win32.dll vs loading a .pm or .dll at all, has rare dep/recursion
+       problems in certain modules or .t files. See w32_GetCwd() . */
+    /*{"Internals::getcwd", w32_GetCwd, "", 0 },*/
 #endif
     {"Tie::Hash::NamedCapture::_tie_it", XS_NamedCapture_tie_it, NULL, 0 },
     {"Tie::Hash::NamedCapture::TIEHASH", XS_NamedCapture_TIEHASH, NULL, 0 },

@@ -39,7 +39,7 @@ Nick Ing-Simmons nik@tiuk.ti.com
 use Cwd;
 use File::Spec;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 our $Verbose = 0;
 
 sub import
@@ -52,7 +52,11 @@ sub import
      # That means that it would not be possible to run `make test`
      # for the Win32 module because blib.pm would always load the
      # installed version before @INC gets updated with the blib path.
-     chomp($dir = `cd`);
+     if(defined &builtin::getcwd) {
+       $dir = builtin::getcwd();
+     } else {
+       chomp($dir = `cd`);
+     }
  }
  else {
      $dir = getcwd;
