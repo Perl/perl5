@@ -636,184 +636,264 @@ Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
     op_free(attrlist);
 }
 
+/*
+
+Called when a compilation failure occurs when defining a class.
+
+Returns the given stash to a clean state, as if none of the class has
+been defined so a new attempt can be made.
+
+*/
+
+static void
+S_class_cleanup_definition(pTHX_ HV *stash) {
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    SvREFCNT_dec(aux->xhv_class_superclass);
+    aux->xhv_class_superclass = NULL;
+
+    /* clean up adjust blocks */
+    SvREFCNT_dec(aux->xhv_class_adjust_blocks);
+    aux->xhv_class_adjust_blocks = NULL;
+
+    /* name to slot index */
+    SvREFCNT_dec(aux->xhv_class_param_map);
+    aux->xhv_class_param_map = NULL;
+
+    /* clean up the ops for defaults for fields, if any, since
+       padname_free() doesn't.
+    */
+    PADNAMELIST *fieldnames = aux->xhv_class_fields;
+    if (fieldnames) {
+        for(SSize_t i = PadnamelistMAX(fieldnames); i >= 0 ; i--) {
+            PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+            op_free(PadnameFIELDINFO(pn)->defop);
+            PadnameFIELDINFO(pn)->defop = NULL;
+        }
+        PadnamelistREFCNT_dec(fieldnames);
+        aux->xhv_class_fields = NULL;
+    }
+
+    /* clean up methods */
+    /* should we keep a separate list of these instead? */
+    if (hv_iterinit(stash)) {
+        HE *he;
+        while ((he = hv_iternext(stash)) != NULL) {
+            STRLEN klen;
+            const char * const kpv = HePV(he, klen);
+            SV *entry = HeVAL(he);
+            CV *cv = NULL;
+            if (SvTYPE(entry) == SVt_PVGV
+                && (cv = GvCV((GV*)entry))
+                && (CvIsMETHOD(cv) || memEQs(kpv, klen, "new"))) {
+                SvREFCNT_dec(cv);
+                GvCV_set((GV*)entry, NULL);
+            }
+            else if (SvTYPE(entry) == SVt_PVCV
+                     && (CvIsMETHOD((CV*)entry) || memEQs(kpv, klen, "new"))) {
+                (void)hv_delete(stash, kpv, HeUTF8(he) ? -(I32)klen : (I32)klen,
+                                G_DISCARD);
+            }
+        }
+        ++PL_sub_generation;
+    }
+
+    /* field clean up */
+    resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
+    SvREFCNT_dec(PL_compcv);
+    Safefree(aux->xhv_class_suspended_initfields_compcv);
+    aux->xhv_class_suspended_initfields_compcv = NULL;
+
+    /* remove any ISA entries */
+    SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
+    sv_2mortal(isaname);
+    AV *isa = get_av(SvPV_nolen(isaname), (SvFLAGS(isaname) & SVf_UTF8));
+    if (isa) {
+        /* we make this read-only above since class-keyword
+           classes manage ISA themselves, the class has failed to
+           load, so we no longer manage it.
+        */
+        SvREADONLY_off((SV *)isa);
+        av_clear(isa);
+    }
+
+    /* no longer a class */
+    aux->xhv_aux_flags &= ~HvAUXf_IS_CLASS;
+}
+
 void
 Perl_class_seal_stash(pTHX_ HV *stash)
 {
     PERL_ARGS_ASSERT_CLASS_SEAL_STASH;
 
     assert(HvSTASH_IS_CLASS(stash));
+
+    if (PL_parser->error_count) {
+        /* we had errors, clean up */
+        class_cleanup_definition(stash);
+        return;
+    }
+
     struct xpvhv_aux *aux = HvAUX(stash);
 
-    if (PL_parser->error_count == 0) {
-        /* generate initfields CV */
-        I32 floor_ix = PL_savestack_ix;
-        SAVEI32(PL_subline);
-        save_item(PL_subname);
+    /* generate initfields CV */
+    I32 floor_ix = PL_savestack_ix;
+    SAVEI32(PL_subline);
+    save_item(PL_subname);
 
-        resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
+    resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
 
-        /* Some OP_INITFIELD ops will need to populate the pad with their
-         * result because later ops will rely on it. There's no need to do
-         * this for every op though. Store a mapping to work out which ones
-         * we'll need.
-         */
-        PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
-        HV *fieldix_to_padix = newHV();
-        SAVEFREESV((SV *)fieldix_to_padix);
+    /* Some OP_INITFIELD ops will need to populate the pad with their
+     * result because later ops will rely on it. There's no need to do
+     * this for every op though. Store a mapping to work out which ones
+     * we'll need.
+     */
+    PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
+    HV *fieldix_to_padix = newHV();
+    SAVEFREESV((SV *)fieldix_to_padix);
 
-        /* padix 0 == @_; padix 1 == $self. Start at 2 */
-        for(PADOFFSET padix = 2; padix <= PadnamelistMAX(pnl); padix++) {
-            PADNAME *pn = PadnamelistARRAY(pnl)[padix];
-            if(!pn || !PadnameIsFIELD(pn))
-                continue;
+    /* padix 0 == @_; padix 1 == $self. Start at 2 */
+    for(PADOFFSET padix = 2; padix <= PadnamelistMAX(pnl); padix++) {
+        PADNAME *pn = PadnamelistARRAY(pnl)[padix];
+        if(!pn || !PadnameIsFIELD(pn))
+            continue;
 
-            U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
-            (void)hv_store_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), newSVuv(padix), 0);
-        }
+        U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
+        (void)hv_store_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), newSVuv(padix), 0);
+    }
 
-        OP *ops = NULL;
+    OP *ops = NULL;
 
-        ops = op_append_list(OP_LINESEQ, ops,
-                newUNOP_AUX(OP_METHSTART, OPpINITFIELDS << 8, NULL, NULL));
+    ops = op_append_list(OP_LINESEQ, ops,
+         newUNOP_AUX(OP_METHSTART, OPpINITFIELDS << 8, NULL, NULL));
 
-        if(aux->xhv_class_superclass) {
-            HV *superstash = aux->xhv_class_superclass;
-            assert(HvSTASH_IS_CLASS(superstash));
-            struct xpvhv_aux *superaux = HvAUX(superstash);
+    if(aux->xhv_class_superclass) {
+        HV *superstash = aux->xhv_class_superclass;
+        assert(HvSTASH_IS_CLASS(superstash));
+        struct xpvhv_aux *superaux = HvAUX(superstash);
 
-            /* Build an OP_ENTERSUB */
-            OP *o = newLISTOPn(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED,
-                newPADxVOP(OP_PADSV, 0, PADIX_SELF),
-                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
-                /* TODO: This won't work at all well under `use threads` because
-                 * it embeds the CV * to the superclass initfields CV right into
-                 * the optree. Maybe we'll have to pop it in the pad or something
-                 */
-                newSVOP(OP_CONST, 0, (SV *)superaux->xhv_class_initfields_cv),
-                NULL);
-
-            ops = op_append_list(OP_LINESEQ, ops, o);
-        }
-
-        PADNAMELIST *fieldnames = aux->xhv_class_fields;
-
-        for(SSize_t i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
-            PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
-            char sigil = PadnamePV(pn)[0];
-            PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
-
-            /* Extract the OP_{NEXT,DB}STATE op from the defop so we can
-             * splice it in
+        /* Build an OP_ENTERSUB */
+        OP *o = newLISTOPn(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED,
+            newPADxVOP(OP_PADSV, 0, PADIX_SELF),
+            newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+            /* TODO: This won't work at all well under `use threads` because
+             * it embeds the CV * to the superclass initfields CV right into
+             * the optree. Maybe we'll have to pop it in the pad or something
              */
-            OP *valop = PadnameFIELDINFO(pn)->defop;
-            if(valop && valop->op_type == OP_LINESEQ) {
-                OP *o = cLISTOPx(valop)->op_first;
-                cLISTOPx(valop)->op_first = NULL;
-                cLISTOPx(valop)->op_last = NULL;
-                /* have to clear the OPf_KIDS flag or op_free() will get upset */
-                valop->op_flags &= ~OPf_KIDS;
-                op_free(valop);
+            newSVOP(OP_CONST, 0, (SV *)superaux->xhv_class_initfields_cv),
+            NULL);
 
-                OP *fieldcop = o;
-                assert(fieldcop->op_type == OP_NEXTSTATE || fieldcop->op_type == OP_DBSTATE);
-                o = OpSIBLING(o);
-                OpLASTSIB_set(fieldcop, NULL);
+        ops = op_append_list(OP_LINESEQ, ops, o);
+    }
 
-                valop = o;
-                OpLASTSIB_set(valop, NULL);
+    PADNAMELIST *fieldnames = aux->xhv_class_fields;
 
-                ops = op_append_list(OP_LINESEQ, ops, fieldcop);
-            }
+    for(SSize_t i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
+        PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+        char sigil = PadnamePV(pn)[0];
+        PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
 
-            SV *paramname = PadnameFIELDINFO(pn)->paramname;
+        /* Extract the OP_{NEXT,DB}STATE op from the defop so we can
+         * splice it in
+         */
+        OP *valop = PadnameFIELDINFO(pn)->defop;
+        if(valop && valop->op_type == OP_LINESEQ) {
+            OP *o = cLISTOPx(valop)->op_first;
+            cLISTOPx(valop)->op_first = NULL;
+            cLISTOPx(valop)->op_last = NULL;
+            /* have to clear the OPf_KIDS flag or op_free() will get upset */
+            valop->op_flags &= ~OPf_KIDS;
+            op_free(valop);
 
-            U8 op_priv = 0;
-            switch(sigil) {
-                case '$':
-                    if(paramname) {
-                        if(!valop) {
-                            SV *message =
-                                newSVpvf("Required parameter '%" SVf "' is missing for %" HvNAMEf_QUOTEDPREFIX " constructor",
-                                    SVfARG(paramname), HvNAMEfARG(stash));
-                            valop = newLISTOPn(OP_DIE, 0,
-                                    newSVOP(OP_CONST, 0, message),
-                                    NULL);
-                        }
+            OP *fieldcop = o;
+            assert(fieldcop->op_type == OP_NEXTSTATE || fieldcop->op_type == OP_DBSTATE);
+            o = OpSIBLING(o);
+            OpLASTSIB_set(fieldcop, NULL);
 
-                        OP *helemop =
-                            newBINOP(OP_HELEM, 0,
-                                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
-                                newSVOP(OP_CONST, 0, SvREFCNT_inc(paramname)));
+            valop = o;
+            OpLASTSIB_set(valop, NULL);
 
-                        if(PadnameFIELDINFO(pn)->def_if_undef) {
-                            /* delete $params{$paramname} // DEFOP */
-                            valop = newLOGOP(OP_DOR, 0,
-                                    newUNOP(OP_DELETE, 0, helemop), valop);
-                        }
-                        else if(PadnameFIELDINFO(pn)->def_if_false) {
-                            /* delete $params{$paramname} || DEFOP */
-                            valop = newLOGOP(OP_OR, 0,
-                                newUNOP(OP_DELETE, 0, helemop), valop);
-                        }
-                        else {
-                            /* exists $params{$paramname} ? delete $params{$paramname} : DEFOP */
-                            /* more efficient with the new OP_HELEMEXISTSOR */
-                            valop = newLOGOP(OP_HELEMEXISTSOR, OPpHELEMEXISTSOR_DELETE << 8,
-                                helemop, valop);
-                        }
-
-                        valop = op_contextualize(valop, G_SCALAR);
-                    }
-                    break;
-
-                case '@':
-                    op_priv = OPpINITFIELD_AV;
-                    break;
-
-                case '%':
-                    op_priv = OPpINITFIELD_HV;
-                    break;
-
-                default:
-                    NOT_REACHED;
-            }
-
-            UNOP_AUX_item *aux;
-            aux = (UNOP_AUX_item *)PerlMemShared_malloc(
-                                    sizeof(UNOP_AUX_item) * 2);
-
-            aux[0].uv = fieldix;
-
-            OP *fieldop = newUNOP_AUX(OP_INITFIELD, valop ? OPf_STACKED : 0, valop, aux);
-            fieldop->op_private = op_priv;
-
-            HE *he;
-            if((he = hv_fetch_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), 0, 0)) &&
-                SvOK(HeVAL(he))) {
-                fieldop->op_targ = SvUV(HeVAL(he));
-            }
-
-            ops = op_append_list(OP_LINESEQ, ops, fieldop);
+            ops = op_append_list(OP_LINESEQ, ops, fieldcop);
         }
 
-        /* initfields CV should not get class_wrap_method_body() called on its
-         * body. pretend it isn't a method for now */
-        CvIsMETHOD_off(PL_compcv);
-        CV *initfields = newATTRSUB(floor_ix, NULL, NULL, NULL, ops);
-        CvIsMETHOD_on(initfields);
+        SV *paramname = PadnameFIELDINFO(pn)->paramname;
 
-        aux->xhv_class_initfields_cv = initfields;
-    }
-    else {
-        /* we had errors, clean up and don't populate initfields */
-        PADNAMELIST *fieldnames = aux->xhv_class_fields;
-        if (fieldnames) {
-            for(SSize_t i = PadnamelistMAX(fieldnames); i >= 0 ; i--) {
-                PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
-                op_free(PadnameFIELDINFO(pn)->defop);
+        U8 op_priv = 0;
+        switch(sigil) {
+        case '$':
+            if(paramname) {
+                if(!valop) {
+                    SV *message =
+                        newSVpvf("Required parameter '%" SVf "' is missing for "
+                                 "%" HvNAMEf_QUOTEDPREFIX " constructor",
+                                 SVfARG(paramname), HvNAMEfARG(stash));
+                    valop = newLISTOPn(OP_DIE, 0,
+                                       newSVOP(OP_CONST, 0, message),
+                                       NULL);
+                }
+
+                OP *helemop =
+                    newBINOP(OP_HELEM, 0,
+                             newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+                             newSVOP(OP_CONST, 0, SvREFCNT_inc(paramname)));
+
+                if(PadnameFIELDINFO(pn)->def_if_undef) {
+                    /* delete $params{$paramname} // DEFOP */
+                    valop = newLOGOP(OP_DOR, 0,
+                                     newUNOP(OP_DELETE, 0, helemop), valop);
+                }
+                else if(PadnameFIELDINFO(pn)->def_if_false) {
+                    /* delete $params{$paramname} || DEFOP */
+                    valop = newLOGOP(OP_OR, 0,
+                                     newUNOP(OP_DELETE, 0, helemop), valop);
+                }
+                else {
+                    /* exists $params{$paramname} ? delete $params{$paramname} : DEFOP */
+                    /* more efficient with the new OP_HELEMEXISTSOR */
+                    valop = newLOGOP(OP_HELEMEXISTSOR, OPpHELEMEXISTSOR_DELETE << 8,
+                                     helemop, valop);
+                }
+
+                valop = op_contextualize(valop, G_SCALAR);
             }
+            break;
+
+        case '@':
+            op_priv = OPpINITFIELD_AV;
+            break;
+
+        case '%':
+            op_priv = OPpINITFIELD_HV;
+            break;
+
+        default:
+            NOT_REACHED;
         }
+
+        UNOP_AUX_item *aux;
+        aux = (UNOP_AUX_item *)PerlMemShared_malloc(sizeof(UNOP_AUX_item) * 2);
+
+        aux[0].uv = fieldix;
+
+        OP *fieldop = newUNOP_AUX(OP_INITFIELD, valop ? OPf_STACKED : 0, valop, aux);
+        fieldop->op_private = op_priv;
+
+        HE *he;
+        if((he = hv_fetch_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), 0, 0)) &&
+           SvOK(HeVAL(he))) {
+            fieldop->op_targ = SvUV(HeVAL(he));
+        }
+
+        ops = op_append_list(OP_LINESEQ, ops, fieldop);
     }
+
+    /* initfields CV should not get class_wrap_method_body() called on its
+     * body. pretend it isn't a method for now */
+    CvIsMETHOD_off(PL_compcv);
+    CV *initfields = newATTRSUB(floor_ix, NULL, NULL, NULL, ops);
+    CvIsMETHOD_on(initfields);
+
+    aux->xhv_class_initfields_cv = initfields;
 }
 
 void

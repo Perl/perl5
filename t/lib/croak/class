@@ -145,7 +145,7 @@ no warnings 'experimental::class';
 eval "class C {";
 C->new;
 EXPECT
-Cannot create an object of incomplete class "C" at - line 5.
+Can't locate object method "new" via package "C" at - line 5.
 ########
 # NAME try to create an object of incomplete class (compile-time)
 use v5.36;
