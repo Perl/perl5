@@ -188,6 +188,7 @@ SECURITY.md				Add Security Policy for GitHub
 sv.c					Scalar value code
 sv.h					Scalar value header
 sv_inline.h				Perl_newSV_type and required defs
+svfix.pl					throw away script for fixing Perl_newSV_type bloat
 taint.c					Tainting code
 TestInit.pm				Preamble library for tests
 thread.h				Threading header

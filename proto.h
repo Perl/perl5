@@ -9833,15 +9833,185 @@ Perl_newRV_noinc(pTHX_ SV * const tmpRef)
         assert(tmpRef)
 
 PERL_STATIC_INLINE SV *
-Perl_newSV_type(pTHX_ const svtype type)
+Perl_newSV_typeSVt_INVLIST(pTHX)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_NEWSV_TYPE
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_INVLIST
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_IV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_IV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_NULL(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_NULL
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_NV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_NV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVAV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVAV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVCV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVCV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVFM(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVFM
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVGV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVGV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVHV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVHV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVIO(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVIO
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVIV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVIV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVLV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVLV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVMG(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVMG
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVNV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVNV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVOBJ(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_PVOBJ
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_REGEXP(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPESVT_REGEXP
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeX(pTHX_ const svtype type)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPEX
 
 PERL_STATIC_FORCE_INLINE SV *
 Perl_newSV_type_mortal(pTHX_ const svtype type)
         __attribute__warn_unused_result__
         __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_INVLIST(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_INVLIST
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_IV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_IV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_NULL(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_NULL
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_NV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_NV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVAV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVAV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVCV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVCV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVFM(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVFM
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVGV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVGV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVHV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVHV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVIO(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVIO
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVIV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVIV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVLV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVLV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVMG(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVMG
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVNV(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVNV
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVOBJ(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_PVOBJ
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_REGEXP(pTHX)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTALSVT_REGEXP
 
 PERL_STATIC_INLINE SV *
 Perl_new_sv(pTHX_ const char *file, int line, const char *func);

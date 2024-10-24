@@ -179,6 +179,8 @@ ALIGNED_TYPE(XPVOBJ);
         STRUCT_OFFSET(type, last_member) \
         + sizeof (((type*)SvANY((const SV *)0))->last_member)
 
+#ifdef WANT_SV_BODY_DETAILS
+
 static const struct body_details bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
     { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
@@ -277,9 +279,35 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
 };
 
+#endif
+
+
+#define SVDB_body_size(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(0):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(0):(sizeof(NV)))):(_a)==SVt_PV?(sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(sizeof(XPVMG)):(_a)==SVt_REGEXP?(sizeof(ALIGNED_TYPE_NAME(regexp))):(_a)==SVt_PVGV?(sizeof(ALIGNED_TYPE_NAME(XPVGV))):(_a)==SVt_PVLV?(sizeof(ALIGNED_TYPE_NAME(XPVLV))):(_a)==SVt_PVAV?(sizeof(ALIGNED_TYPE_NAME(XPVAV))):(_a)==SVt_PVHV?(sizeof(ALIGNED_TYPE_NAME(XPVHV))):(_a)==SVt_PVCV?(sizeof(ALIGNED_TYPE_NAME(XPVCV))):(_a)==SVt_PVFM?(sizeof(ALIGNED_TYPE_NAME(XPVFM))):(_a)==SVt_PVIO?(sizeof(ALIGNED_TYPE_NAME(XPVIO))):(sizeof(ALIGNED_TYPE_NAME(XPVOBJ))))
+
+#define SVDB_copy(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(sizeof(IV)):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(sizeof(NV)):(sizeof(NV)))):(_a)==SVt_PV?(copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(copy_length(XPVMG, xnv_u)):(_a)==SVt_REGEXP?(sizeof(regexp)):(_a)==SVt_PVGV?(sizeof(XPVGV)):(_a)==SVt_PVLV?(sizeof(XPVLV)):(_a)==SVt_PVAV?(copy_length(XPVAV, xav_alloc)):(_a)==SVt_PVHV?(copy_length(XPVHV, xhv_max)):(_a)==SVt_PVCV?(sizeof(XPVCV)):(_a)==SVt_PVFM?(sizeof(XPVFM)):(_a)==SVt_PVIO?(sizeof(XPVIO)):(copy_length(XPVOBJ, xobject_fields)))
+
+#define SVDB_offset(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(STRUCT_OFFSET(XPVIV, xiv_iv)):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(STRUCT_OFFSET(XPVNV, xnv_u)):(STRUCT_OFFSET(XPVNV, xnv_u)))):(_a)==SVt_PV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_INVLIST?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVIV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVNV?(+ STRUCT_OFFSET(XPV, xpv_cur)):(_a)==SVt_PVMG?(0):(_a)==SVt_REGEXP?(0):(_a)==SVt_PVGV?(0):(_a)==SVt_PVLV?(0):(_a)==SVt_PVAV?(0):(_a)==SVt_PVHV?(0):(_a)==SVt_PVCV?(0):(_a)==SVt_PVFM?(0):(_a)==SVt_PVIO?(0):(0))
+
+#define SVDB_type(_a) ((_a)==SVt_NULL?(SVt_NULL):(_a)==SVt_IV?(SVt_IV):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(SVt_NV):(SVt_NV))):(_a)==SVt_PV?(SVt_PV):(_a)==SVt_INVLIST?(SVt_INVLIST):(_a)==SVt_PVIV?(SVt_PVIV):(_a)==SVt_PVNV?(SVt_PVNV):(_a)==SVt_PVMG?(SVt_PVMG):(_a)==SVt_REGEXP?(SVt_REGEXP):(_a)==SVt_PVGV?(SVt_PVGV):(_a)==SVt_PVLV?(SVt_PVLV):(_a)==SVt_PVAV?(SVt_PVAV):(_a)==SVt_PVHV?(SVt_PVHV):(_a)==SVt_PVCV?(SVt_PVCV):(_a)==SVt_PVFM?(SVt_PVFM):(_a)==SVt_PVIO?(SVt_PVIO):(SVt_PVOBJ))
+
+#define SVDB_cant_upgrade(_a) ((_a)==SVt_NULL?(FALSE):(_a)==SVt_IV?(FALSE):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(FALSE):(FALSE))):(_a)==SVt_PV?(FALSE):(_a)==SVt_INVLIST?(TRUE):(_a)==SVt_PVIV?(FALSE):(_a)==SVt_PVNV?(FALSE):(_a)==SVt_PVMG?(FALSE):(_a)==SVt_REGEXP?(TRUE):(_a)==SVt_PVGV?(TRUE):(_a)==SVt_PVLV?(TRUE):(_a)==SVt_PVAV?(TRUE):(_a)==SVt_PVHV?(TRUE):(_a)==SVt_PVCV?(TRUE):(_a)==SVt_PVFM?(TRUE):(_a)==SVt_PVIO?(TRUE):(TRUE))
+
+#define SVDB_zero_nv(_a) ((_a)==SVt_NULL?(NONV):(_a)==SVt_IV?(NONV):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(HADNV):(HADNV))):(_a)==SVt_PV?(NONV):(_a)==SVt_INVLIST?(NONV):(_a)==SVt_PVIV?(NONV):(_a)==SVt_PVNV?(HADNV):(_a)==SVt_PVMG?(HADNV):(_a)==SVt_REGEXP?(NONV):(_a)==SVt_PVGV?(HADNV):(_a)==SVt_PVLV?(HADNV):(_a)==SVt_PVAV?(NONV):(_a)==SVt_PVHV?(NONV):(_a)==SVt_PVCV?(NONV):(_a)==SVt_PVFM?(NONV):(_a)==SVt_PVIO?(NONV):(NONV))
+
+#define SVDB_arena(_a) ((_a)==SVt_NULL?(NOARENA):(_a)==SVt_IV?(NOARENA):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(NOARENA):(HASARENA))):(_a)==SVt_PV?(HASARENA):(_a)==SVt_INVLIST?(HASARENA):(_a)==SVt_PVIV?(HASARENA):(_a)==SVt_PVNV?(HASARENA):(_a)==SVt_PVMG?(HASARENA):(_a)==SVt_REGEXP?(HASARENA):(_a)==SVt_PVGV?(HASARENA):(_a)==SVt_PVLV?(HASARENA):(_a)==SVt_PVAV?(HASARENA):(_a)==SVt_PVHV?(HASARENA):(_a)==SVt_PVCV?(HASARENA):(_a)==SVt_PVFM?(NOARENA):(_a)==SVt_PVIO?(HASARENA):(HASARENA))
+
+#define SVDB_arena_size(_a) ((_a)==SVt_NULL?(0):(_a)==SVt_IV?(0):(_a)==SVt_NV?((NVSIZE <= IVSIZE?(0):(FIT_ARENA(0, sizeof(NV))))):(_a)==SVt_PV?(FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_INVLIST?(FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVIV?(FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVNV?(FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur))):(_a)==SVt_PVMG?(FIT_ARENA(0, sizeof(XPVMG))):(_a)==SVt_REGEXP?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))):(_a)==SVt_PVGV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV)))):(_a)==SVt_PVLV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV)))):(_a)==SVt_PVAV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV)))):(_a)==SVt_PVHV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV)))):(_a)==SVt_PVCV?(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV)))):(_a)==SVt_PVFM?(FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM)))):(_a)==SVt_PVIO?(FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO)))):(FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ)))))
+
+
+#ifdef WANT_SV_BODY_DETAILS
 #define new_body_allocated(sv_type)            \
     (void *)((char *)S_new_body(aTHX_ sv_type) \
              - bodies_by_type[sv_type].offset)
+#else
+#define new_body_allocated(sv_type)            \
+    (void *)((char *)S_new_body(aTHX_ sv_type) \
+             - SVDB_offset(sv_type)
+#endif
 
 #ifdef PURIFY
 #if !(NVSIZE <= IVSIZE)
@@ -298,22 +326,37 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()    new_body_allocated(SVt_PVNV)
 #define new_XPVMG()    new_body_allocated(SVt_PVMG)
 
+#ifdef WANT_SV_BODY_DETAILS
 #define del_body_by_type(p, type)                               \
     del_body(p + bodies_by_type[(type)].offset,                 \
              &PL_body_roots[(type)])
+#else
+#define del_body_by_type(p, type)                               \
+    del_body(p + SVDB_offset(type),                 \
+             &PL_body_roots[(type)])
+#endif
 
 #endif /* PURIFY */
 
 /* no arena for you! */
 
+
+#ifdef WANT_SV_BODY_DETAILS
 #define new_NOARENA(details) \
         safemalloc((details)->body_size + (details)->offset)
 #define new_NOARENAZ(details) \
         safecalloc((details)->body_size + (details)->offset, 1)
+#else
+#define new_NOARENA(_sv_type) \
+        safemalloc(SVDB_body_size(_sv_type) + SVDB_offset(_sv_type))
+#define new_NOARENAZ(_sv_type) \
+        safecalloc(SVDB_body_size(_sv_type) + SVDB_offset(_sv_type), 1)
+#endif
 
 #ifndef PURIFY
 
 /* grab a new thing from the arena's free list, allocating more if necessary. */
+#ifdef WANT_SV_BODY_DETAILS
 #define new_body_from_arena(xpv, root_index, type_meta) \
     STMT_START { \
         void ** const r3wt = &PL_body_roots[root_index]; \
@@ -323,12 +366,27 @@ static const struct body_details bodies_by_type[] = {
                                              type_meta.arena_size)); \
         *(r3wt) = *(void**)(xpv); \
     } STMT_END
+#endif
+
+#define new_body_from_arena_exp(xpv, root_index, _body_size, _arena_size) \
+    STMT_START { \
+        void ** const r3wt = &PL_body_roots[root_index]; \
+        xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
+          ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ root_index, \
+                                             _body_size,\
+                                             _arena_size)); \
+        *(r3wt) = *(void**)(xpv); \
+    } STMT_END
 
 PERL_STATIC_INLINE void *
 S_new_body(pTHX_ const svtype sv_type)
 {
     void *xpv;
+#ifdef WANT_SV_BODY_DETAILS
     new_body_from_arena(xpv, sv_type, bodies_by_type[sv_type]);
+#else
+    new_body_from_arena_exp(xpv, sv_type, SVDB_body_size(sv_type), SVDB_arena_size(sv_type));
+#endif
     return xpv;
 }
 
@@ -346,13 +404,17 @@ static const struct body_details fake_hv_with_aux =
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX))) };
 
 /*
-=for apidoc newSV_type
+=for apidoc newSV_typeX
 
 Creates a new SV, of the type specified.  The reference count for the new SV
 is set to 1.
 
 =cut
 */
+#undef newSV_type
+#define newSV_type(ty) Perl_newSV_type##ty(aTHX)
+
+#if 0
 
 PERL_STATIC_INLINE SV *
 Perl_newSV_type(pTHX_ const svtype type)
@@ -398,7 +460,11 @@ Perl_newSV_type(pTHX_ const svtype type)
 #else
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
+#ifdef WANT_SV_BODY_DETAILS
         new_body = new_NOARENAZ(type_details);
+#else
+        new_body = new_NOARENAZ(type);
+#endif
 #endif
         SvANY(sv) = new_body;
 
@@ -475,7 +541,192 @@ Perl_newSV_type(pTHX_ const svtype type)
         } else
 #endif
         {
+#ifdef WANT_SV_BODY_DETAILS
             new_body = new_NOARENAZ(type_details);
+#else
+            new_body = new_NOARENAZ(type);
+#endif
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+    return sv;
+}
+
+#endif
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeX(pTHX_ const svtype type)
+{
+
+    SV *sv;
+    void*      new_body;
+#ifdef WANT_SV_BODY_DETAILS
+    const struct body_details *type_details;
+#endif
+
+    new_SV(sv);
+#ifdef WANT_SV_BODY_DETAILS
+    type_details = bodies_by_type + type;
+#endif
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->body_size);
+#endif
+
+#ifndef PURIFY
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->arena);
+        assert(type_details->arena_size);
+#endif
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->offset);
+#endif
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifdef WANT_SV_BODY_DETAILS
+        new_body = new_NOARENAZ(type_details);
+#else
+        new_body = new_NOARENAZ(type);
+#endif
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (type_details->arena), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+#ifdef WANT_SV_BODY_DETAILS
+         ASSUME(type_details->arena);
+#endif
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+#ifdef WANT_SV_BODY_DETAILS
+        assert(type_details->body_size);
+#endif
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+#ifdef WANT_SV_BODY_DETAILS
+        if(type_details->arena) {
+#else
+        if(SVDB_arena(type)) {
+#endif
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+#ifdef WANT_SV_BODY_DETAILS
+            Zero(new_body, type_details->body_size, char);
+            new_body = ((char *)new_body) - type_details->offset;
+#else
+            Zero(new_body, SVDB_body_size(type), char);
+            new_body = ((char *)new_body) - SVDB_offset(type);
+#endif
+        } else
+#endif
+        {
+#ifdef WANT_SV_BODY_DETAILS
+        new_body = new_NOARENAZ(type_details);
+#else
+        new_body = new_NOARENAZ(type);
+#endif
         }
         SvANY(sv) = new_body;
 
@@ -520,10 +771,12 @@ at some point in the future.)
 =cut
 */
 
+#if 0
+
 PERL_STATIC_INLINE SV *
 Perl_newSV_type_mortal(pTHX_ const svtype type)
 {
-    SV *sv = newSV_type(type);
+    SV *sv = Perl_newSV_type(pTHX_ type);
     SSize_t ix = ++PL_tmps_ix;
     if (UNLIKELY(ix >= PL_tmps_max))
         ix = Perl_tmps_grow_p(aTHX_ ix);
@@ -532,6 +785,7 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
     return sv;
 }
 
+#endif
 /* The following functions started out in sv.h and then moved to inline.h. They
  * moved again into this file during the 5.37.x development cycle. */
 
@@ -858,7 +1112,7 @@ Perl_SvNV_nomg(pTHX_ SV *sv) {
 PERL_STATIC_INLINE STRLEN
 S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 {
-    PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B;
+
     if (SvGAMAGIC(sv)) {
         U8 *hopped = utf8_hop((U8 *)pv, pos);
         if (lenp) *lenp = (STRLEN)(utf8_hop(hopped, *lenp) - hopped);
@@ -988,6 +1242,2787 @@ Perl_sv_setpv_freshbuf(pTHX_ SV *const sv)
     SvTAINT(sv);
     return SvPVX(sv);
 }
+
+
+
+
+
+
+
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_NULL(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_NULL
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_NULL));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_NULL));
+        assert(SVDB_arena_size(SVt_NULL));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_NULL)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_NULL) + SVDB_offset(SVt_NULL), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_NULL)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_NULL));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_NULL));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_NULL)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_NULL), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_NULL);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_NULL) + SVDB_offset(SVt_NULL), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_IV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_IV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_IV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_IV));
+        assert(SVDB_arena_size(SVt_IV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_IV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_IV) + SVDB_offset(SVt_IV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_IV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_IV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_IV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_IV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_IV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_IV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_IV) + SVDB_offset(SVt_IV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_NV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_NV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_NV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_NV));
+        assert(SVDB_arena_size(SVt_NV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_NV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_NV) + SVDB_offset(SVt_NV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_NV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_NV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_NV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_NV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_NV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_NV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_NV) + SVDB_offset(SVt_NV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PV));
+        assert(SVDB_arena_size(SVt_PV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PV) + SVDB_offset(SVt_PV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PV) + SVDB_offset(SVt_PV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_INVLIST(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_INVLIST
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_INVLIST));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_INVLIST));
+        assert(SVDB_arena_size(SVt_INVLIST));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_INVLIST)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_INVLIST) + SVDB_offset(SVt_INVLIST), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_INVLIST)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_INVLIST));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_INVLIST));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_INVLIST)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_INVLIST), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_INVLIST);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_INVLIST) + SVDB_offset(SVt_INVLIST), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVIV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVIV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVIV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVIV));
+        assert(SVDB_arena_size(SVt_PVIV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVIV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVIV) + SVDB_offset(SVt_PVIV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVIV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVIV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVIV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVIV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVIV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVIV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVIV) + SVDB_offset(SVt_PVIV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVNV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVNV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVNV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVNV));
+        assert(SVDB_arena_size(SVt_PVNV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVNV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVNV) + SVDB_offset(SVt_PVNV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVNV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVNV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVNV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVNV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVNV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVNV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVNV) + SVDB_offset(SVt_PVNV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVMG(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVMG
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVMG));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVMG));
+        assert(SVDB_arena_size(SVt_PVMG));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVMG)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVMG) + SVDB_offset(SVt_PVMG), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVMG)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVMG));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVMG));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVMG)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVMG), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVMG);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVMG) + SVDB_offset(SVt_PVMG), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_REGEXP(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_REGEXP
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_REGEXP));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_REGEXP));
+        assert(SVDB_arena_size(SVt_REGEXP));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_REGEXP)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_REGEXP) + SVDB_offset(SVt_REGEXP), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_REGEXP)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_REGEXP));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_REGEXP));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_REGEXP)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_REGEXP), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_REGEXP);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_REGEXP) + SVDB_offset(SVt_REGEXP), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVGV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVGV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVGV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVGV));
+        assert(SVDB_arena_size(SVt_PVGV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVGV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVGV) + SVDB_offset(SVt_PVGV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVGV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVGV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVGV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVGV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVGV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVGV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVGV) + SVDB_offset(SVt_PVGV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVLV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVLV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVLV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVLV));
+        assert(SVDB_arena_size(SVt_PVLV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVLV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVLV) + SVDB_offset(SVt_PVLV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVLV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVLV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVLV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVLV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVLV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVLV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVLV) + SVDB_offset(SVt_PVLV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVAV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVAV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVAV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVAV));
+        assert(SVDB_arena_size(SVt_PVAV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVAV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVAV) + SVDB_offset(SVt_PVAV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVAV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVAV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVAV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVAV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVAV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVAV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVAV) + SVDB_offset(SVt_PVAV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVHV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVHV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVHV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVHV));
+        assert(SVDB_arena_size(SVt_PVHV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVHV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVHV) + SVDB_offset(SVt_PVHV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVHV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVHV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVHV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVHV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVHV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVHV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVHV) + SVDB_offset(SVt_PVHV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVCV(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVCV
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVCV));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVCV));
+        assert(SVDB_arena_size(SVt_PVCV));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVCV)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVCV) + SVDB_offset(SVt_PVCV), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVCV)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVCV));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVCV));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVCV)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVCV), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVCV);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVCV) + SVDB_offset(SVt_PVCV), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVFM(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVFM
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVFM));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVFM));
+        assert(SVDB_arena_size(SVt_PVFM));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVFM)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVFM) + SVDB_offset(SVt_PVFM), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVFM)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVFM));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVFM));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVFM)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVFM), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVFM);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVFM) + SVDB_offset(SVt_PVFM), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVIO(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVIO
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVIO));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVIO));
+        assert(SVDB_arena_size(SVt_PVIO));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVIO)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVIO) + SVDB_offset(SVt_PVIO), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVIO)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVIO));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVIO));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVIO)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVIO), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVIO);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVIO) + SVDB_offset(SVt_PVIO), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_typeSVt_PVOBJ(pTHX)
+{
+    SV *sv;
+    void*      new_body;
+
+    new_SV(sv);
+
+#define type SVt_PVOBJ
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(SVDB_body_size(SVt_PVOBJ));
+
+#ifndef PURIFY
+        assert(SVDB_arena(SVt_PVOBJ));
+        assert(SVDB_arena_size(SVt_PVOBJ));
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(SVDB_offset(SVt_PVOBJ)));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = safecalloc(SVDB_body_size(SVt_PVOBJ) + SVDB_offset(SVt_PVOBJ), 1);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        switch(type) {
+        case SVt_PVAV:
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+            break;
+        case SVt_PVHV:
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            break;
+        case SVt_PVOBJ:
+            ObjectMAXFIELD(sv) = -1;
+            ObjectFIELDS(sv) = NULL;
+            break;
+        default:
+            NOT_REACHED;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (SVDB_arena(SVt_PVOBJ)), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(SVDB_arena(SVt_PVOBJ));
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(SVDB_body_size(SVt_PVOBJ));
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(SVDB_arena(SVt_PVOBJ)) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, SVDB_body_size(SVt_PVOBJ), char);
+            new_body = ((char *)new_body) - SVDB_offset(SVt_PVOBJ);
+        } else
+#endif
+        {
+            new_body = safecalloc(SVDB_body_size(SVt_PVOBJ) + SVDB_offset(SVt_PVOBJ), 1);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)type);
+    }
+
+#undef type
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_NULL(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_NULL(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_IV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_IV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_NV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_NV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_INVLIST(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_INVLIST(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVIV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVIV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVNV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVNV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVMG(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVMG(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_REGEXP(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_REGEXP(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVGV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVGV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVLV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVLV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVAV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVAV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVHV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVHV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVCV(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVCV(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVFM(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVFM(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVIO(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVIO(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortalSVt_PVOBJ(pTHX)
+{
+    SV *sv = Perl_newSV_typeSVt_PVOBJ(aTHX);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
