@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.91';
+our $VERSION = '1.92';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -86,6 +86,158 @@ our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 5.35 5.37 5.39 );
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
 # See HINT_UNI_8_BIT in perl.h.
 our $hint_uni8bit = 0x00000800;
+
+sub import {
+    shift;
+
+    if (!@_) {
+        croak("No features specified");
+    }
+
+    __common(1, @_);
+}
+
+sub unimport {
+    shift;
+
+    # A bare C<no feature> should reset to the default bundle
+    if (!@_) {
+	$^H &= ~($hint_uni8bit|$hint_mask);
+	return;
+    }
+
+    __common(0, @_);
+}
+
+
+sub __common {
+    my $import = shift;
+    my $bundle_number = $^H & $hint_mask;
+    my $features = $bundle_number != $hint_mask
+      && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
+    if ($features) {
+	# Features are enabled implicitly via bundle hints.
+	# Delete any keys that may be left over from last time.
+	delete @^H{ values(%feature) };
+	$^H |= $hint_mask;
+	for (@$features) {
+	    $^H{$feature{$_}} = 1;
+	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+	}
+    }
+    while (@_) {
+        my $name = shift;
+        if (substr($name, 0, 1) eq ":") {
+            my $v = substr($name, 1);
+            if (!exists $feature_bundle{$v}) {
+                $v =~ s/^([0-9]+)\.([0-9]+).[0-9]+$/$1.$2/;
+                if (!exists $feature_bundle{$v}) {
+                    unknown_feature_bundle(substr($name, 1));
+                }
+            }
+            unshift @_, @{$feature_bundle{$v}};
+            next;
+        }
+        if (!exists $feature{$name}) {
+            if (exists $noops{$name}) {
+                next;
+            }
+            if (!$import && exists $removed{$name}) {
+                next;
+            }
+            unknown_feature($name);
+        }
+	if ($import) {
+	    $^H{$feature{$name}} = 1;
+	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	} else {
+            delete $^H{$feature{$name}};
+            $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
+        }
+    }
+}
+
+sub unknown_feature {
+    my $feature = shift;
+    croak(sprintf('Feature "%s" is not supported by Perl %vd',
+            $feature, $^V));
+}
+
+sub unknown_feature_bundle {
+    my $feature = shift;
+    croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
+            $feature, $^V));
+}
+
+sub croak {
+    require Carp;
+    Carp::croak(@_);
+}
+
+sub features_enabled {
+    my ($depth) = @_;
+
+    $depth //= 1;
+    my @frame = caller($depth+1)
+      or return;
+    my ($hints, $hinthash) = @frame[8, 10];
+
+    my $bundle_number = $hints & $hint_mask;
+    if ($bundle_number != $hint_mask) {
+        return $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]}->@*;
+    }
+    else {
+        my @features;
+        for my $feature (sort keys %feature) {
+            if ($hinthash->{$feature{$feature}}) {
+                push @features, $feature;
+            }
+        }
+        return @features;
+    }
+}
+
+sub feature_enabled {
+    my ($feature, $depth) = @_;
+
+    $depth //= 1;
+    my @frame = caller($depth+1)
+      or return;
+    my ($hints, $hinthash) = @frame[8, 10];
+
+    my $hint_feature = $feature{$feature}
+      or croak "Unknown feature $feature";
+    my $bundle_number = $hints & $hint_mask;
+    if ($bundle_number != $hint_mask) {
+        my $bundle = $hint_bundles[$bundle_number >> $hint_shift];
+        for my $bundle_feature ($feature_bundle{$bundle}->@*) {
+            return 1 if $bundle_feature eq $feature;
+        }
+        return 0;
+    }
+    else {
+        return $hinthash->{$hint_feature} // 0;
+    }
+}
+
+sub feature_bundle {
+    my $depth = shift;
+
+    $depth //= 1;
+    my @frame = caller($depth+1)
+      or return;
+    my $bundle_number = $frame[8] & $hint_mask;
+    if ($bundle_number != $hint_mask) {
+        return $hint_bundles[$bundle_number >> $hint_shift];
+    }
+    else {
+        return undef;
+    }
+}
+
+1;
+
+__END__
 
 # TODO:
 # - think about versioned features (use feature switch => 2)
@@ -728,155 +880,5 @@ bundle.  This may change in a future release of perl.
 =back
 
 =cut
-
-sub import {
-    shift;
-
-    if (!@_) {
-        croak("No features specified");
-    }
-
-    __common(1, @_);
-}
-
-sub unimport {
-    shift;
-
-    # A bare C<no feature> should reset to the default bundle
-    if (!@_) {
-	$^H &= ~($hint_uni8bit|$hint_mask);
-	return;
-    }
-
-    __common(0, @_);
-}
-
-
-sub __common {
-    my $import = shift;
-    my $bundle_number = $^H & $hint_mask;
-    my $features = $bundle_number != $hint_mask
-      && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
-    if ($features) {
-	# Features are enabled implicitly via bundle hints.
-	# Delete any keys that may be left over from last time.
-	delete @^H{ values(%feature) };
-	$^H |= $hint_mask;
-	for (@$features) {
-	    $^H{$feature{$_}} = 1;
-	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
-	}
-    }
-    while (@_) {
-        my $name = shift;
-        if (substr($name, 0, 1) eq ":") {
-            my $v = substr($name, 1);
-            if (!exists $feature_bundle{$v}) {
-                $v =~ s/^([0-9]+)\.([0-9]+).[0-9]+$/$1.$2/;
-                if (!exists $feature_bundle{$v}) {
-                    unknown_feature_bundle(substr($name, 1));
-                }
-            }
-            unshift @_, @{$feature_bundle{$v}};
-            next;
-        }
-        if (!exists $feature{$name}) {
-            if (exists $noops{$name}) {
-                next;
-            }
-            if (!$import && exists $removed{$name}) {
-                next;
-            }
-            unknown_feature($name);
-        }
-	if ($import) {
-	    $^H{$feature{$name}} = 1;
-	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-	} else {
-            delete $^H{$feature{$name}};
-            $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
-        }
-    }
-}
-
-sub unknown_feature {
-    my $feature = shift;
-    croak(sprintf('Feature "%s" is not supported by Perl %vd',
-            $feature, $^V));
-}
-
-sub unknown_feature_bundle {
-    my $feature = shift;
-    croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
-            $feature, $^V));
-}
-
-sub croak {
-    require Carp;
-    Carp::croak(@_);
-}
-
-sub features_enabled {
-    my ($depth) = @_;
-
-    $depth //= 1;
-    my @frame = caller($depth+1)
-      or return;
-    my ($hints, $hinthash) = @frame[8, 10];
-
-    my $bundle_number = $hints & $hint_mask;
-    if ($bundle_number != $hint_mask) {
-        return $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]}->@*;
-    }
-    else {
-        my @features;
-        for my $feature (sort keys %feature) {
-            if ($hinthash->{$feature{$feature}}) {
-                push @features, $feature;
-            }
-        }
-        return @features;
-    }
-}
-
-sub feature_enabled {
-    my ($feature, $depth) = @_;
-
-    $depth //= 1;
-    my @frame = caller($depth+1)
-      or return;
-    my ($hints, $hinthash) = @frame[8, 10];
-
-    my $hint_feature = $feature{$feature}
-      or croak "Unknown feature $feature";
-    my $bundle_number = $hints & $hint_mask;
-    if ($bundle_number != $hint_mask) {
-        my $bundle = $hint_bundles[$bundle_number >> $hint_shift];
-        for my $bundle_feature ($feature_bundle{$bundle}->@*) {
-            return 1 if $bundle_feature eq $feature;
-        }
-        return 0;
-    }
-    else {
-        return $hinthash->{$hint_feature} // 0;
-    }
-}
-
-sub feature_bundle {
-    my $depth = shift;
-
-    $depth //= 1;
-    my @frame = caller($depth+1)
-      or return;
-    my $bundle_number = $frame[8] & $hint_mask;
-    if ($bundle_number != $hint_mask) {
-        return $hint_bundles[$bundle_number >> $hint_shift];
-    }
-    else {
-        return undef;
-    }
-}
-
-1;
 
 # ex: set ro ft=perl:
