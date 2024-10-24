@@ -310,7 +310,8 @@ written twice.
 Some networking library functions like gethostbyname() are known to have
 their own implementations of timeouts which may conflict with your
 timeouts.  If you have problems with such functions, try using the POSIX
-sigaction() function, which bypasses Perl safe signals.  Be warned that
+sigaction() function with SigAction objects, which bypass Perl safe signals
+unless you set their C<safe> flag explicitly.  Be warned that
 this does subject you to possible memory corruption, as described above.
 
 Instead of setting C<$SIG{ALRM}>:
