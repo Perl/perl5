@@ -1339,7 +1339,10 @@ point's representation.
 #define UNI_DISPLAY_BACKSLASH   0x0002
 #define UNI_DISPLAY_BACKSPACE   0x0004  /* Allow \b when also
                                            UNI_DISPLAY_BACKSLASH */
-#define UNI_DISPLAY_QQ          (UNI_DISPLAY_ISPRINT                \
+#define UNI_DISPLAY_TR_       ( 0x0008                              \
+                               |UNI_DISPLAY_ISPRINT                 \
+                               |UNI_DISPLAY_BACKSLASH)
+#define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT                \
                                 |UNI_DISPLAY_BACKSLASH              \
                                 |UNI_DISPLAY_BACKSPACE)
 

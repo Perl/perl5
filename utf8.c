@@ -4759,8 +4759,18 @@ See also L</sv_uni_display>.
 =for apidoc Amnh||UNI_DISPLAY_ISPRINT
 =for apidoc Amnh||UNI_DISPLAY_QQ
 =for apidoc Amnh||UNI_DISPLAY_REGEX
+
+=for apidoc Cmn||UNI_DISPLAY_TR
+
+This is an extra flag for L<perlapi/sv_uni_display> which is for internal use
+only.  It displays an operand of the tr/// operation.  These operands have a
+peculiar, deliberate UTF-8 malformation which this flag enables the proper
+handling of.  It turns on ISPRINT and BACKSLASH as well.
+
 =cut
+
 */
+
 char *
 Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
                           UV flags)
@@ -4780,6 +4790,14 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
         if (pvlim && SvCUR(dsv) >= pvlim) {
              truncated++;
              break;
+        }
+
+        /* The minus is unambiguously the range indicator within a UTF-8 tr///
+         * operand */
+        if (UNLIKELY(flags & UNI_DISPLAY_TR_ && *s == ILLEGAL_UTF8_BYTE)) {
+            sv_catpvs(dsv, "-");
+            next_len = 1;
+            continue;
         }
 
         (void) utf8_to_uv(s, e, &u, &next_len);
