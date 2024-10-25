@@ -4206,28 +4206,28 @@ Admp	|GV *	|gv_SVadd	|NULLOK GV *gv
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 CTo	|PerlInterpreter *|perl_alloc_using				\
-				|NN struct IPerlMem *ipM		\
-				|NN struct IPerlMem *ipMS		\
-				|NN struct IPerlMem *ipMP		\
-				|NN struct IPerlEnv *ipE		\
-				|NN struct IPerlStdIO *ipStd		\
-				|NN struct IPerlLIO *ipLIO		\
-				|NN struct IPerlDir *ipD		\
-				|NN struct IPerlSock *ipS		\
-				|NN struct IPerlProc *ipP
+				|NN const struct IPerlMem **ipM 	\
+				|NN const struct IPerlMem **ipMS	\
+				|NN const struct IPerlMem **ipMP	\
+				|NN const struct IPerlEnv **ipE 	\
+				|NN const struct IPerlStdIO **ipStd	\
+				|NN const struct IPerlLIO **ipLIO	\
+				|NN const struct IPerlDir **ipD 	\
+				|NN const struct IPerlSock **ipS	\
+				|NN const struct IPerlProc **ipP
 # if defined(USE_ITHREADS)
 CTo	|PerlInterpreter *|perl_clone_using				\
 				|NN PerlInterpreter *proto_perl 	\
 				|UV flags				\
-				|NN struct IPerlMem *ipM		\
-				|NN struct IPerlMem *ipMS		\
-				|NN struct IPerlMem *ipMP		\
-				|NN struct IPerlEnv *ipE		\
-				|NN struct IPerlStdIO *ipStd		\
-				|NN struct IPerlLIO *ipLIO		\
-				|NN struct IPerlDir *ipD		\
-				|NN struct IPerlSock *ipS		\
-				|NN struct IPerlProc *ipP
+				|NN const struct IPerlMem **ipM 	\
+				|NN const struct IPerlMem **ipMS	\
+				|NN const struct IPerlMem **ipMP	\
+				|NN const struct IPerlEnv **ipE 	\
+				|NN const struct IPerlStdIO **ipStd	\
+				|NN const struct IPerlLIO **ipLIO	\
+				|NN const struct IPerlDir **ipD 	\
+				|NN const struct IPerlSock **ipS	\
+				|NN const struct IPerlProc **ipP
 # endif
 #else
 Adp	|I32	|my_pclose	|NULLOK PerlIO *ptr

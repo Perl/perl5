@@ -15708,11 +15708,11 @@ perl_clone(PerlInterpreter *proto_perl, UV flags)
 
 PerlInterpreter *
 perl_clone_using(PerlInterpreter *proto_perl, UV flags,
-                 struct IPerlMem* ipM, struct IPerlMem* ipMS,
-                 struct IPerlMem* ipMP, struct IPerlEnv* ipE,
-                 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
-                 struct IPerlDir* ipD, struct IPerlSock* ipS,
-                 struct IPerlProc* ipP)
+                 const struct IPerlMem** ipM, const struct IPerlMem** ipMS,
+                 const struct IPerlMem** ipMP, const struct IPerlEnv** ipE,
+                 const struct IPerlStdIO** ipStd, const struct IPerlLIO** ipLIO,
+                 const struct IPerlDir** ipD, const struct IPerlSock** ipS,
+                 const struct IPerlProc** ipP)
 {
     /* XXX many of the string copies here can be optimized if they're
      * constants; they need to be allocated as common memory and just
@@ -15722,7 +15722,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     CLONE_PARAMS clone_params;
     CLONE_PARAMS* const param = &clone_params;
 
-    PerlInterpreter * const my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
+    PerlInterpreter * const my_perl = (PerlInterpreter*)((*ipM)->pMalloc)(ipM, sizeof(PerlInterpreter));
 
     PERL_ARGS_ASSERT_PERL_CLONE_USING;
 #else		/* !PERL_IMPLICIT_SYS */

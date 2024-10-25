@@ -168,18 +168,18 @@ Perl_sys_term(void)
 
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
-perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
-                 struct IPerlMem* ipMP, struct IPerlEnv* ipE,
-                 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
-                 struct IPerlDir* ipD, struct IPerlSock* ipS,
-                 struct IPerlProc* ipP)
+perl_alloc_using(const struct IPerlMem** ipM, const struct IPerlMem** ipMS,
+                 const struct IPerlMem** ipMP, const struct IPerlEnv** ipE,
+                 const struct IPerlStdIO** ipStd, const struct IPerlLIO** ipLIO,
+                 const struct IPerlDir** ipD, const struct IPerlSock** ipS,
+                 const struct IPerlProc** ipP)
 {
     PerlInterpreter *my_perl;
 
     PERL_ARGS_ASSERT_PERL_ALLOC_USING;
 
     /* Newx() needs interpreter, so call malloc() instead */
-    my_perl = (PerlInterpreter*)(*ipM->pCalloc)(ipM, 1, sizeof(PerlInterpreter));
+    my_perl = (PerlInterpreter*)((*ipM)->pCalloc)(ipM, 1, sizeof(PerlInterpreter));
     S_init_tls_and_interp(my_perl);
     PL_Mem = ipM;
     PL_MemShared = ipMS;

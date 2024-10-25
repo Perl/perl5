@@ -6160,14 +6160,14 @@ Perl_gv_SVadd(pTHX_ GV *gv); */
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 PERL_CALLCONV PerlInterpreter *
-perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP);
+perl_alloc_using(const struct IPerlMem **ipM, const struct IPerlMem **ipMS, const struct IPerlMem **ipMP, const struct IPerlEnv **ipE, const struct IPerlStdIO **ipStd, const struct IPerlLIO **ipLIO, const struct IPerlDir **ipD, const struct IPerlSock **ipS, const struct IPerlProc **ipP);
 # define PERL_ARGS_ASSERT_PERL_ALLOC_USING      \
         assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); \
         assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
 
 # if defined(USE_ITHREADS)
 PERL_CALLCONV PerlInterpreter *
-perl_clone_using(PerlInterpreter *proto_perl, UV flags, struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP);
+perl_clone_using(PerlInterpreter *proto_perl, UV flags, const struct IPerlMem **ipM, const struct IPerlMem **ipMS, const struct IPerlMem **ipMP, const struct IPerlEnv **ipE, const struct IPerlStdIO **ipStd, const struct IPerlLIO **ipLIO, const struct IPerlDir **ipD, const struct IPerlSock **ipS, const struct IPerlProc **ipP);
 #   define PERL_ARGS_ASSERT_PERL_CLONE_USING    \
         assert(proto_perl); assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); \
         assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
