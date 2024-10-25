@@ -106,26 +106,26 @@ perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
 }
 
 EXTERN_C PerlInterpreter*
-perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-                 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
-                 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
-                 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
-                 struct IPerlProc** ppProc)
+perl_alloc_override(const struct  IPerlMem** ppMem, const struct  IPerlMem** ppMemShared,
+                 const struct  IPerlMem** ppMemParse, const struct  IPerlEnv** ppEnv,
+                 const struct  IPerlStdIO** ppStdIO, const struct  IPerlLIO** ppLIO,
+                 const struct  IPerlDir** ppDir, const struct  IPerlSock** ppSock,
+                 const struct  IPerlProc** ppProc)
 {
     PerlInterpreter *my_perl = NULL;
     CPerlHost* pHost = new CPerlHost(ppMem, ppMemShared, ppMemParse, ppEnv,
                                      ppStdIO, ppLIO, ppDir, ppSock, ppProc);
 
     if (pHost) {
-        my_perl = perl_alloc_using(pHost->m_pHostperlMem,
-                                   pHost->m_pHostperlMemShared,
-                                   pHost->m_pHostperlMemParse,
-                                   pHost->m_pHostperlEnv,
-                                   pHost->m_pHostperlStdIO,
-                                   pHost->m_pHostperlLIO,
-                                   pHost->m_pHostperlDir,
-                                   pHost->m_pHostperlSock,
-                                   pHost->m_pHostperlProc);
+        my_perl = perl_alloc_using(&pHost->m_pHostperlMem,
+                                   &pHost->m_pHostperlMemShared,
+                                   &pHost->m_pHostperlMemParse,
+                                   &pHost->m_pHostperlEnv,
+                                   &pHost->m_pHostperlStdIO,
+                                   &pHost->m_pHostperlLIO,
+                                   &pHost->m_pHostperlDir,
+                                   &pHost->m_pHostperlSock,
+                                   &pHost->m_pHostperlProc);
         if (my_perl) {
             w32_internal_host = pHost;
             pHost->host_perl  = my_perl;
@@ -140,15 +140,15 @@ perl_alloc(void)
     PerlInterpreter* my_perl = NULL;
     CPerlHost* pHost = new CPerlHost();
     if (pHost) {
-        my_perl = perl_alloc_using(pHost->m_pHostperlMem,
-                                   pHost->m_pHostperlMemShared,
-                                   pHost->m_pHostperlMemParse,
-                                   pHost->m_pHostperlEnv,
-                                   pHost->m_pHostperlStdIO,
-                                   pHost->m_pHostperlLIO,
-                                   pHost->m_pHostperlDir,
-                                   pHost->m_pHostperlSock,
-                                   pHost->m_pHostperlProc);
+        my_perl = perl_alloc_using(&pHost->m_pHostperlMem,
+                                   &pHost->m_pHostperlMemShared,
+                                   &pHost->m_pHostperlMemParse,
+                                   &pHost->m_pHostperlEnv,
+                                   &pHost->m_pHostperlStdIO,
+                                   &pHost->m_pHostperlLIO,
+                                   &pHost->m_pHostperlDir,
+                                   &pHost->m_pHostperlSock,
+                                   &pHost->m_pHostperlProc);
         if (my_perl) {
             w32_internal_host = pHost;
             pHost->host_perl  = my_perl;
@@ -283,15 +283,15 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags) {
     CPerlHost *h;
     h = new CPerlHost(*(CPerlHost*)PL_sys_intern.internal_host);
     proto_perl = perl_clone_using(proto_perl, flags,
-                        h->m_pHostperlMem,
-                        h->m_pHostperlMemShared,
-                        h->m_pHostperlMemParse,
-                        h->m_pHostperlEnv,
-                        h->m_pHostperlStdIO,
-                        h->m_pHostperlLIO,
-                        h->m_pHostperlDir,
-                        h->m_pHostperlSock,
-                        h->m_pHostperlProc
+                        &h->m_pHostperlMem,
+                        &h->m_pHostperlMemShared,
+                        &h->m_pHostperlMemParse,
+                        &h->m_pHostperlEnv,
+                        &h->m_pHostperlStdIO,
+                        &h->m_pHostperlLIO,
+                        &h->m_pHostperlDir,
+                        &h->m_pHostperlSock,
+                        &h->m_pHostperlProc
     );
     proto_perl->Isys_intern.internal_host = h;
     h->host_perl  = proto_perl;
