@@ -2382,7 +2382,6 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, U8 ** free_me,
                           Perl_utf8_to_bytes_arg result_as)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
-    PERL_UNUSED_CONTEXT;
 
     if (result_as == PL_utf8_to_bytes_new_memory) {
         *free_me = NULL;
@@ -2574,7 +2573,13 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, U8 ** free_me,
     *lenp = d - d0;
 
     if (result_as != PL_utf8_to_bytes_overwrite) {
-        *s_ptr = *free_me = d0;
+        *s_ptr = d0;
+        if (result_as == PL_utf8_to_bytes_use_temporary) {
+            SAVEFREEPV(*s_ptr);
+        }
+        else {
+            *free_me = *s_ptr;
+        }
     }
 
     return true;

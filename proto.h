@@ -5356,6 +5356,9 @@ Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, U8 *free_me); */
 /* PERL_CALLCONV bool
 Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp); */
 
+/* PERL_CALLCONV bool
+Perl_utf8_to_bytes_temp_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp); */
+
 PERL_CALLCONV U8 *
 Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, const bool high, const bool low);
 #define PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE     \

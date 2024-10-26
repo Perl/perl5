@@ -862,6 +862,7 @@
 # define utf8_to_bytes_(a,b,c,d)                Perl_utf8_to_bytes_(aTHX_ a,b,c,d)
 # define utf8_to_bytes_new_pv(a,b,c)            Perl_utf8_to_bytes_new_pv(aTHX,a,b,c)
 # define utf8_to_bytes_overwrite(a,b)           Perl_utf8_to_bytes_overwrite(aTHX,a,b)
+# define utf8_to_bytes_temp_pv(a,b)             Perl_utf8_to_bytes_temp_pv(aTHX,a,b)
 # define utf8_to_uvchr_buf_helper(a,b,c)        Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
 # define uvchr_to_utf8(a,b)                     Perl_uvchr_to_utf8(aTHX,a,b)
