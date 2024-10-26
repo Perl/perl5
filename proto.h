@@ -5138,6 +5138,9 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, Perl_utf8_to_bytes_arg resul
         assert(s_ptr); assert(lenp)
 
 /* PERL_CALLCONV PL_utf8_to_bytes_ret
+Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp); */
+
+/* PERL_CALLCONV PL_utf8_to_bytes_ret
 Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp); */
 
 PERL_CALLCONV U8 *

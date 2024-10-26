@@ -3681,6 +3681,9 @@ Cp	|PL_utf8_to_bytes_ret|utf8_to_bytes_				\
 				|NN U8 **s_ptr				\
 				|NN STRLEN *lenp			\
 				|Perl_utf8_to_bytes_arg result_as
+Admp	|PL_utf8_to_bytes_ret|utf8_to_bytes_new_pv			\
+				|NN U8 const **s_ptr			\
+				|NN STRLEN *lenp
 Admp	|PL_utf8_to_bytes_ret|utf8_to_bytes_overwrite			\
 				|NN U8 **s_ptr				\
 				|NN STRLEN *lenp
