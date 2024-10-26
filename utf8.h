@@ -1312,8 +1312,15 @@ typedef enum {
     PL_utf8_to_bytes_use_temporary,
 } Perl_utf8_to_bytes_arg;
 
+/* INT2PTR() is because this parameter should not be used in this case, but
+ * there is a NN assertion for it.  It causes that to pass but to still
+ * segfault if wrongly gets used */
 #define Perl_utf8_to_bytes_overwrite(mTHX, s, l)                            \
-        Perl_utf8_to_bytes_(aTHX_ s, l, PL_utf8_to_bytes_overwrite)
+        Perl_utf8_to_bytes_(aTHX_ s, l, INT2PTR(U8 **, 1),                  \
+                                  PL_utf8_to_bytes_overwrite)
+#define Perl_utf8_to_bytes_new_pv(mTHX, s, l, f)                            \
+        Perl_utf8_to_bytes_(aTHX_ (U8 **) s, l, f,                          \
+                                  PL_utf8_to_bytes_new_memory)
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */

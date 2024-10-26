@@ -2378,11 +2378,15 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 */
 
 bool
-Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
+Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, U8 ** free_me,
                           Perl_utf8_to_bytes_arg result_as)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
     PERL_UNUSED_CONTEXT;
+
+    if (result_as == PL_utf8_to_bytes_new_memory) {
+        *free_me = NULL;
+    }
 
     U8 * first_variant;
 
@@ -2505,7 +2509,15 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
         s++;
     }
 
-    U8 *d0 = s0;
+    U8 *d0;
+    if (result_as == PL_utf8_to_bytes_overwrite) {
+        d0 = s0;
+    }
+    else {
+        Newx(d0, *lenp + 1, U8);
+        Copy(s0, d0, invariant_length, U8);
+    }
+
     U8 * d = d0 + invariant_length;
 
     /* For the cases where the per-word algorithm wasn't used, everything is
@@ -2546,6 +2558,10 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
     *d = '\0';
     *lenp = d - d0;
 
+    if (result_as != PL_utf8_to_bytes_overwrite) {
+        *s_ptr = *free_me = d0;
+    }
+
     return true;
 
   cant_convert: ;
@@ -2556,10 +2572,16 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
      * text are C2 and C3, but didn't examine it to make sure each of those was
      * followed by precisely one continuation, for example.
      *
-     * We have to undo all we've done before, back down to the first UTF-8
-     * variant.  Note that each 2-byte variant we've done so far (converted to
-     * single byte) slides things to the left one byte, and so we have bytes
-     * that haven't been written over.
+     * If the result is in newly allocated memory, just free it */
+    if (result_as != PL_utf8_to_bytes_overwrite) {
+        Safefree(d0);
+        return false;
+    }
+
+    /* Otherwise, we have to undo all we've done before, back down to the first
+     * UTF-8 variant.  Note that each 2-byte variant we've done so far
+     * (converted to single byte) slides things to the left one byte, and so we
+     * have bytes that haven't been written over.
      *
      * Here, 'd' points to the next position to overwrite, and 's' points to
      * the first invalid byte.  That means 'd's contents haven't been changed
@@ -2641,57 +2663,25 @@ U8 *
 Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 {
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
-    PERL_UNUSED_CONTEXT;
 
-    if (! *is_utf8p) {
-        return (U8 *) s;
-    }
+    if (*is_utf8p) {
+        U8 * new_memory = NULL;
+        if (utf8_to_bytes_new_pv(&s, lenp, &new_memory)) {
+            *is_utf8p = false;
 
-    const U8 * const s0 = s;
-    const U8 * const send = s + *lenp;
-    const U8 * first_variant;
-
-    /* The initial portion of 's' that consists of invariants can be Copied
-     * as-is.  If it is entirely invariant, the whole thing can be Copied. */
-    if (is_utf8_invariant_string_loc(s, *lenp, &first_variant)) {
-        first_variant = send;
-    }
-
-    U8 *d;
-    Newx(d, (*lenp) + 1, U8);
-    Copy(s, d, first_variant - s, U8);
-
-    U8 *converted_start = d;
-    d += first_variant - s;
-    s = first_variant;
-
-    while (s < send) {
-        U8 c = *s++;
-        if (! UTF8_IS_INVARIANT(c)) {
-
-            /* Then it is multi-byte encoded.  If the code point is above 0xFF,
-             * have to stop now */
-            if (UNLIKELY (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s - 1, send))) {
-                    Safefree(converted_start);
-                    return (U8 *) s0;
+            /* Our callers are always expecting new memory upon success.  Give
+             * it to them, adding a trailing NUL if not already there */
+            if (new_memory == NULL) {
+                U8 * new_s;
+                Newx(new_s, *lenp + 1, U8);
+                Copy(s, new_s, *lenp, U8);
+                new_s[*lenp] = '\0';
+                s = new_s;
             }
-
-            c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
-            s++;
         }
-        *d++ = c;
     }
 
-    /* Here, converted the whole of the input */
-    *is_utf8p = FALSE;
-
-    *d = '\0';
-    *lenp = d - converted_start;
-
-    /* Trim unused space */
-    Renew(converted_start, *lenp + 1, U8);
-
-    return converted_start;
+    return (U8 *) s;
 }
 
 /*
