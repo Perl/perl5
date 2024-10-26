@@ -2373,7 +2373,6 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
                           Perl_utf8_to_bytes_arg result_as)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
-    PERL_UNUSED_CONTEXT;
 
     U8 * first_variant;
 
@@ -2562,6 +2561,9 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp,
 
     if (result_as != PL_utf8_to_bytes_overwrite) {
         *s_ptr = d0;
+        if (result_as == PL_utf8_to_bytes_use_temporary) {
+            SAVEFREEPV(*s_ptr);
+        }
     }
 
     return PL_converted;

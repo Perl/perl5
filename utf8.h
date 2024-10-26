@@ -1313,6 +1313,8 @@ typedef enum {
         Perl_utf8_to_bytes_(aTHX_ s, l, PL_utf8_to_bytes_overwrite)
 #define Perl_utf8_to_bytes_new_pv(mTHX, s, l)                               \
         Perl_utf8_to_bytes_(aTHX_ (U8 **) s, l, PL_utf8_to_bytes_new_memory)
+#define Perl_utf8_to_bytes_temp_pv(mTHX, s, l)                              \
+        Perl_utf8_to_bytes_(aTHX_ (U8 **) s, l, PL_utf8_to_bytes_use_temporary)
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */

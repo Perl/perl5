@@ -3687,6 +3687,9 @@ Admp	|PL_utf8_to_bytes_ret|utf8_to_bytes_new_pv			\
 Admp	|PL_utf8_to_bytes_ret|utf8_to_bytes_overwrite			\
 				|NN U8 **s_ptr				\
 				|NN STRLEN *lenp
+Admp	|PL_utf8_to_bytes_ret|utf8_to_bytes_temp_pv			\
+				|NN U8 const **s_ptr			\
+				|NN STRLEN *lenp
 EMXp	|U8 *	|utf16_to_utf8	|NN U8 *p				\
 				|NN U8 *d				\
 				|Size_t bytelen 			\
