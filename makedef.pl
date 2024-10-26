@@ -177,6 +177,7 @@ if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
 if (    $define{USE_POSIX_2008_LOCALE}
     && (   $define{HAS_QUERYLOCALE}
         || (     $Config{cppsymbols} =~ /__GLIBC__/
+            && ! $define{NO_USE_NL_LOCALE_NAME}
             &&   $define{HAS_NL_LANGINFO_L}
             && ! $define{SETLOCALE_ACCEPTS_ANY_LOCALE_NAME})))
 {
