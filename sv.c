@@ -4275,22 +4275,15 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         SvREFCNT_dec(old_rv);
         return;
     }
-
+/*
 #if NVSIZE <= IVSIZE
     both_type = (stype | dtype);
 #endif
-
+*/
     if (UNLIKELY(both_type == SVTYPEMASK)) {
-        if (SvIS_FREED(dsv)) {
-            Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
-                       " to a freed scalar %p", SVfARG(ssv), (void *)dsv);
-        }
-        if (SvIS_FREED(ssv)) {
-            Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
-                       (void*)ssv, (void*)dsv);
-        }
+        croak_sv_setsv_flags(dsv, ssv);
+        NOT_REACHED;
     }
-
 
 
     SV_CHECK_THINKFIRST_COW_DROP(dsv);
@@ -4390,14 +4383,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         invlist_clone(ssv, dsv);
         return;
     default:
-        {
-        const char * const type = sv_reftype(ssv,0);
-        if (PL_op)
-            /* diag_listed_as: Bizarre copy of %s */
-            Perl_croak(aTHX_ "Bizarre copy of %s in %s", type, OP_DESC(PL_op));
-        else
-            Perl_croak(aTHX_ "Bizarre copy of %s", type);
-        }
+        croak_sv_setsv_flags(dsv, ssv);
         NOT_REACHED; /* NOTREACHED */
 
     case SVt_REGEXP:
@@ -4451,12 +4437,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     else if (UNLIKELY(dtype == SVt_PVAV || dtype == SVt_PVHV
              || dtype == SVt_PVFM))
     {
-        const char * const type = sv_reftype(dsv,0);
-        if (PL_op)
-            /* diag_listed_as: Cannot copy to %s */
-            Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_DESC(PL_op));
-        else
-            Perl_croak(aTHX_ "Cannot copy to %s", type);
+        croak_sv_setsv_flags(dsv, ssv);
+        NOT_REACHED;
     } else if (sflags & SVf_ROK) {
         if (isGV_with_GP(dsv)
             && SvTYPE(SvRV(ssv)) == SVt_PVGV && isGV_with_GP(SvRV(ssv))) {
@@ -17734,6 +17716,44 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
         Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
                 "", "", "");
     GCC_DIAG_RESTORE_STMT;
+}
+
+/* This helper function for Perl_sv_setsv_flags is as cold as they come.
+ * We should almost never call it and it will definitely croak when we do.
+ * Therefore it should not matter that it is not close to the main function
+ * or that we make it redo work that the caller already did.
+ * The main aim is to keep Perl_sv_setsv_flags as slim as possible and this
+ * includes keeping the call sites for this function small.
+ */
+void S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv)
+{
+    OP *op = PL_op;
+    if (SvIS_FREED(dsv)) {
+        Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
+                   " to a freed scalar %p", SVfARG(ssv), (void *)dsv);
+    }
+    if (SvIS_FREED(ssv)) {
+        Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
+                   (void*)ssv, (void*)dsv);
+    }
+
+    if (SvTYPE(ssv) > SVt_PVLV)
+    {
+        const char * const type = sv_reftype(ssv,0);
+        if (op)
+            /* diag_listed_as: Bizarre copy of %s */
+            Perl_croak(aTHX_ "Bizarre copy of %s in %s", type, OP_DESC(op));
+        else
+            Perl_croak(aTHX_ "Bizarre copy of %s", type);
+    }
+
+    const char * const type = sv_reftype(dsv,0);
+    if (op)
+        /* diag_listed_as: Cannot copy to %s */
+        Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_DESC(op));
+    else
+        Perl_croak(aTHX_ "Cannot copy to %s", type);
+
 }
 
 /*

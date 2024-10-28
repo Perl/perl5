@@ -2157,6 +2157,7 @@
 #     define F0convert                          S_F0convert
 #     define anonymise_cv_maybe(a,b)            S_anonymise_cv_maybe(aTHX_ a,b)
 #     define assert_uft8_cache_coherent(a,b,c,d) S_assert_uft8_cache_coherent(aTHX_ a,b,c,d)
+#     define croak_sv_setsv_flags(a,b)          S_croak_sv_setsv_flags(aTHX_ a,b)
 #     define curse(a,b)                         S_curse(aTHX_ a,b)
 #     define expect_number(a)                   S_expect_number(aTHX_ a)
 #     define find_array_subscript(a,b)          S_find_array_subscript(aTHX_ a,b)

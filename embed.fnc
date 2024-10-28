@@ -5811,6 +5811,9 @@ S	|void	|assert_uft8_cache_coherent				\
 				|STRLEN from_cache			\
 				|STRLEN real				\
 				|NN SV * const sv
+S	|void	|croak_sv_setsv_flags					\
+				|NN SV * const dsv			\
+				|NN SV * const ssv
 S	|bool	|curse		|NN SV * const sv			\
 				|const bool check_refcnt
 RS	|STRLEN |expect_number	|NN const char ** const pattern

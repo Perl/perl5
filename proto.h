@@ -8923,6 +8923,11 @@ S_assert_uft8_cache_coherent(pTHX_ const char * const func, STRLEN from_cache, S
 # define PERL_ARGS_ASSERT_ASSERT_UFT8_CACHE_COHERENT \
         assert(func); assert(sv)
 
+STATIC void
+S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv);
+# define PERL_ARGS_ASSERT_CROAK_SV_SETSV_FLAGS  \
+        assert(dsv); assert(ssv)
+
 STATIC bool
 S_curse(pTHX_ SV * const sv, const bool check_refcnt);
 # define PERL_ARGS_ASSERT_CURSE                 \
