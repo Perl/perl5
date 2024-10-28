@@ -763,22 +763,53 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (is_utf8 && !(flags & HVhek_KEYCANONICAL)) {
-            char * const keysave = (char *)key;
-            key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
-            if (is_utf8)
-                flags |= HVhek_UTF8;
-            else
-                flags &= ~HVhek_UTF8;
-            if (key != keysave) {
-                if (flags & HVhek_FREEKEY)
-                    Safefree(keysave);
-                flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
-                /* If the caller calculated a hash, it was on the sequence of
-                 * octets that are the UTF-8 form. We've now changed the
-                 * sequence of octets stored to that of the equivalent byte
-                 * representation, so the hash we need is different.  */
-                hash = 0;
+
+        /* If the caller wants us to free the key when done, instead use it as
+         * scratch to store the converted value, and let later code free it. */
+        if (flags & HVhek_FREEKEY) {
+            if (! utf8_to_bytes_overwrite((U8 **) &key, &klen)) {
+                flags |= HVhek_UTF8; /* Couldn't convert */
             }
+            else {
+
+                /* Here, key is now in native bytes, and klen is its length */
+#       define  NOW_NATIVE                  \
+                is_utf8 = false;            \
+                flags &= ~HVhek_UTF8;       \
+                flags |= HVhek_WASUTF8;
+
+                NOW_NATIVE;
+            }
+        }
+        else {
+
+            /* Here, the caller wants to retain the key.  Use newly allocated
+             * memory to store any converted value */
+            void * free_me = NULL;
+            if (! utf8_to_bytes_new_pv((const U8 **) &key, &klen, &free_me)) {
+                flags |= HVhek_UTF8; /* Couldn't convert */
+            }
+            else {
+
+                /* Here, key is now in native bytes, and klen is its length */
+                NOW_NATIVE;
+
+                /* 'free_me' is NULL if the key was already in native bytes, so
+                 * nothing changed, hence no need for anything more.  Otherwise
+                 * we have to compensate. */
+                if (free_me) {
+
+                    /* Make sure the newly allocated memory gets freed */
+                    flags |= HVhek_FREEKEY;
+
+                    /* If the caller calculated a hash, it was on the sequence
+                     * of octets that are the UTF-8 form. We've now changed the
+                     * sequence of octets stored to that of the equivalent byte
+                     * representation, so the hash we need is different.  */
+                    hash = 0;
+                }
+            }
+        }
     }
 
 
