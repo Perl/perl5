@@ -15,7 +15,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 
-our $VERSION = 1.62;
+our $VERSION = 1.63;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
