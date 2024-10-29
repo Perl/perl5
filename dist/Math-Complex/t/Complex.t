@@ -349,6 +349,22 @@ EOS
 
     $test++;
     push @script, <<EOS;
+    print "# make 23i\n";
+    \$z = Math::Complex->make('23i');
+    print "not " unless \$z == cplx(0,23);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# make i\n";
+    \$z = Math::Complex->make('i');
+    print "not " unless \$z == cplx(0,1);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
     print "# remake 2+i\n";
     \$z = cplx('2+i');
     print "not " unless \$z == Math::Complex->make(2,1);
@@ -362,6 +378,48 @@ EOS
     print "not " unless \$z == cplx(3,-1);
     print "ok $test\n";
 EOS
+
+    if ($has_inf) {
+        $test++;
+        push @script, <<EOS;
+        print "# make inf\n";
+        \$z = Math::Complex->make('inf');
+        print "not " unless \$z == cplx(\$inf, 0);
+        print "ok $test\n";
+EOS
+
+        $test++;
+        push @script, <<EOS;
+        print "# make -inf\n";
+        \$z = Math::Complex->make('-inf');
+        print "not " unless \$z == cplx(-\$inf, 0);
+        print "ok $test\n";
+EOS
+
+        $test++;
+        push @script, <<EOS;
+        print "# make infi\n";
+        \$z = Math::Complex->make('infi');
+        print "not " unless \$z == cplx(0, \$inf);
+        print "ok $test\n";
+EOS
+
+        $test++;
+        push @script, <<EOS;
+        print "# make -infi\n";
+        \$z = Math::Complex->make('-infi');
+        print "not " unless \$z == cplx(0, -\$inf);
+        print "ok $test\n";
+EOS
+
+        $test++;
+        push @script, <<EOS;
+        print "# make -infi\n";
+        \$z = Math::Complex->make('inf+infi');
+        print "not " unless \$z == cplx(\$inf, \$inf);
+        print "ok $test\n";
+EOS
+    }
 
     $test++;
     push @script, <<EOS;

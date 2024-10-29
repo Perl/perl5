@@ -112,7 +112,7 @@ my %LOGN;
 
 # Regular expression for floating point numbers.
 # These days we could use Scalar::Util::lln(), I guess.
-my $gre = qr'\s*([\+\-]?(?:(?:(?:\d+(?:_\d+)*(?:\.\d*(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[eE][\+\-]?\d+(?:_\d+)*)?))|inf)'i;
+my $gre = qr'\s*([\+\-]?(?:(?:(?:\d+(?:_\d+)*(?:\.\d*(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[eE][\+\-]?\d+(?:_\d+)*)?)|inf))'i;
 
 require Exporter;
 
@@ -196,25 +196,31 @@ sub _cannot_make {
     die "@{[(caller(1))[3]]}: Cannot take $_[0] of '$_[1]'.\n";
 }
 
+sub _normalize_num {
+    my $x = shift;
+    $x =~ s/^\+//;
+    $x =~ s/_//g;
+    $x =~ s/^(-?)inf$/$1 ? -Inf() : Inf()/ie if $has_inf;
+    return $x;
+}
+
 sub _make {
     my $arg = shift;
     my ($p, $q);
 
     if ($arg =~ /^$gre$/) {
 	($p, $q) = ($1, 0);
-    } elsif ($arg =~ /^(?:$gre)?$gre\s*i\s*$/) {
+    } elsif ($arg =~ /^(?:$gre(?=\s*[+\-]))?$gre\s*i\s*$/) {
 	($p, $q) = ($1 || 0, $2);
-    } elsif ($arg =~ /^(?:$gre)?\s*([+\-]?)i\s*$/) {
+    } elsif ($arg =~ /^(?:$gre(?=\s*[+\-]))?\s*([+\-]?)i\s*$/) {
         ($p, $q) = ($1 || 0, $2 . '1');
     } elsif ($arg =~ /^\s*\($gre\s*(?:,$gre\s*)?\)\s*$/) {
 	($p, $q) = ($1, $2 || 0);
     }
 
     if (defined $p) {
-	$p =~ s/^\+//;
-	$p =~ s/^(-?)inf$/"${1}9**9**9"/e if $has_inf;
-	$q =~ s/^\+//;
-	$q =~ s/^(-?)inf$/"${1}9**9**9"/e if $has_inf;
+	$p = _normalize_num $p;
+	$q = _normalize_num $q;
     }
 
     return ($p, $q);
@@ -235,10 +241,8 @@ sub _emake {
     }
 
     if (defined $p) {
-	$p =~ s/^\+//;
-	$q =~ s/^\+//;
-	$p =~ s/^(-?)inf$/"${1}9**9**9"/e if $has_inf;
-	$q =~ s/^(-?)inf$/"${1}9**9**9"/e if $has_inf;
+        $p = _normalize_num $p;
+        $q = _normalize_num $q;
     }
 
     return ($p, $q);
