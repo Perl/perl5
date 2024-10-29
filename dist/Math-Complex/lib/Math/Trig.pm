@@ -425,7 +425,7 @@ and the imaginary part of approximately C<-1.317>.
 =back
 
 The full circle is 2 I<pi> radians or I<360> degrees or I<400> gradians.
-The result is by default wrapped to be inside the [0, {2pi,360,400}] circle.
+The result is by default wrapped to be inside the [0, {2pi,360,400}) circle.
 If you don't want this, supply a true second argument:
 
     $zillions_of_radians  = deg2rad($zillions_of_degrees, 1);
