@@ -204,7 +204,7 @@ sub _make {
 	($p, $q) = ($1, 0);
     } elsif ($arg =~ /^(?:$gre)?$gre\s*i\s*$/) {
 	($p, $q) = ($1 || 0, $2);
-    } elsif ($arg =~ /^\s*\(\s*$gre\s*(?:,\s*$gre\s*)?\)\s*$/) {
+    } elsif ($arg =~ /^\s*\($gre\s*(?:,$gre\s*)?\)\s*$/) {
 	($p, $q) = ($1, $2 || 0);
     }
 
@@ -222,13 +222,13 @@ sub _emake {
     my $arg = shift;
     my ($p, $q);
 
-    if ($arg =~ /^\s*\[\s*$gre\s*(?:,\s*$gre\s*)?\]\s*$/) {
+    if ($arg =~ /^\s*\[$gre\s*(?:,$gre\s*)?\]\s*$/) {
 	($p, $q) = ($1, $2 || 0);
-    } elsif ($arg =~ m!^\s*\[\s*$gre\s*(?:,\s*([-+]?\d*\s*)?pi(?:/\s*(\d+))?\s*)?\]\s*$!) {
+    } elsif ($arg =~ m!^\s*\[$gre\s*(?:,\s*([-+]?\d*\s*)?pi(?:/\s*(\d+))?\s*)?\]\s*$!) {
 	($p, $q) = ($1, ($2 eq '-' ? -1 : ($2 || 1)) * pi() / ($3 || 1));
-    } elsif ($arg =~ /^\s*\[\s*$gre\s*\]\s*$/) {
+    } elsif ($arg =~ /^\s*\[$gre\s*\]\s*$/) {
 	($p, $q) = ($1, 0);
-    } elsif ($arg =~ /^\s*$gre\s*$/) {
+    } elsif ($arg =~ /^$gre\s*$/) {
 	($p, $q) = ($1, 0);
     }
 
