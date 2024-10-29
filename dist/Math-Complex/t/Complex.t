@@ -349,6 +349,22 @@ EOS
 
     $test++;
     push @script, <<EOS;
+    print "# remake 2+i\n";
+    \$z = cplx('2+i');
+    print "not " unless \$z == Math::Complex->make(2,1);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# make 3-i\n";
+    \$z = Math::Complex->make('3-i');
+    print "not " unless \$z == cplx(3,-1);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
     print "# emake [2,3]\n";
     \$z = Math::Complex->emake('[2,3]');
     print "not " unless \$z == cplxe(2,3);
