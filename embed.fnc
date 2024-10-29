@@ -1490,11 +1490,11 @@ ARdp	|HV *	|hv_copy_hints_hv					\
 Cp	|void	|hv_delayfree_ent					\
 				|NULLOK HV *notused			\
 				|NULLOK HE *entry
-AMbdp	|SV *	|hv_delete	|NULLOK HV *hv				\
+Admp	|SV *	|hv_delete	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen				\
 				|I32 flags
-AMbdp	|SV *	|hv_delete_ent	|NULLOK HV *hv				\
+Admp	|SV *	|hv_delete_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|I32 flags				\
 				|U32 hash
@@ -1510,17 +1510,17 @@ dp	|void	|hv_ename_delete|NN HV *hv				\
 				|NN const char *name			\
 				|U32 len				\
 				|U32 flags
-AMRbdp	|bool	|hv_exists	|NULLOK HV *hv				\
+ARdmp	|bool	|hv_exists	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen
-AMRbdp	|bool	|hv_exists_ent	|NULLOK HV *hv				\
+ARdmp	|bool	|hv_exists_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|U32 hash
-AMbdp	|SV **	|hv_fetch	|NULLOK HV *hv				\
+Admp	|SV **	|hv_fetch	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen				\
 				|I32 lval
-AMbdp	|HE *	|hv_fetch_ent	|NULLOK HV *hv				\
+Admp	|HE *	|hv_fetch_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|I32 lval				\
 				|U32 hash
@@ -1531,7 +1531,7 @@ Adp	|I32	|hv_iterinit	|NN HV *hv
 ARdp	|char * |hv_iterkey	|NN HE *entry				\
 				|NN I32 *retlen
 ARdp	|SV *	|hv_iterkeysv	|NN HE *entry
-AMRbdp	|HE *	|hv_iternext	|NN HV *hv
+Admp	|HE *	|hv_iternext	|NN HV *hv
 ARdpx	|HE *	|hv_iternext_flags					\
 				|NN HV *hv				\
 				|I32 flags
@@ -1542,7 +1542,7 @@ ARdp	|SV *	|hv_iterval	|NN HV *hv				\
 				|NN HE *entry
 Adp	|void	|hv_ksplit	|NN HV *hv				\
 				|IV newmax
-AMbdp	|void	|hv_magic	|NN HV *hv				\
+Admp	|void	|hv_magic	|NN HV *hv				\
 				|NULLOK GV *gv				\
 				|int how
 Adp	|void	|hv_name_set	|NN HV *hv				\
@@ -1565,25 +1565,25 @@ Cdop	|void	|hv_riter_set	|NN HV *hv				\
 				|I32 riter
 
 ARdp	|SV *	|hv_scalar	|NN HV *hv
-AMbdp	|SV **	|hv_store	|NULLOK HV *hv				\
+Admp	|SV **	|hv_store	|NULLOK HV *hv				\
 				|NULLOK const char *key 		\
 				|I32 klen				\
 				|NULLOK SV *val 			\
 				|U32 hash
-AMbdp	|HE *	|hv_store_ent	|NULLOK HV *hv				\
+Admp	|HE *	|hv_store_ent	|NULLOK HV *hv				\
 				|NULLOK SV *key 			\
 				|NULLOK SV *val 			\
 				|U32 hash
-AMbpx	|SV **	|hv_store_flags |NULLOK HV *hv				\
+Ampx	|SV **	|hv_store_flags |NULLOK HV *hv				\
 				|NULLOK const char *key 		\
 				|I32 klen				\
 				|NULLOK SV *val 			\
 				|U32 hash				\
 				|int flags
-Adm	|SV **	|hv_stores	|NULLOK HV *hv				\
+Admp	|SV **	|hv_stores	|NULLOK HV *hv				\
 				|"key"					\
 				|NULLOK SV *val
-Adm	|void	|hv_undef	|NULLOK HV *hv
+Admp	|void	|hv_undef	|NULLOK HV *hv
 Xop	|void	|hv_undef_flags |NULLOK HV *hv				\
 				|U32 flags
 APdm	|I32	|ibcmp		|NN const char *a			\
@@ -2206,7 +2206,7 @@ ARdp	|OP *	|newGVOP	|I32 type				\
 				|NN GV *gv
 ARdp	|OP *	|newGVREF	|I32 type				\
 				|NULLOK OP *o
-AMRbdp	|HV *	|newHV
+ARdmp	|HV *	|newHV
 ARdp	|HV *	|newHVhv	|NULLOK HV *hv
 ARdp	|OP *	|newHVREF	|NN OP *o
 AMRbdp	|IO *	|newIO

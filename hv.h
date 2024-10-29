@@ -513,9 +513,9 @@ whether it is valid to call C<HvAUX()>.
 /* Flags for hv_iternext_flags.  */
 #define HV_ITERNEXT_WANTPLACEHOLDERS	0x01	/* Don't skip placeholders.  */
 
-#define hv_iternext(hv)	hv_iternext_flags(hv, 0)
-#define hv_magic(hv, gv, how) sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
-#define hv_undef(hv) Perl_hv_undef_flags(aTHX_ hv, 0)
+#define Perl_hv_iternext(mTHX, hv)	Perl_hv_iternext_flags(aTHX_ hv, 0)
+#define Perl_hv_magic(mTHX, hv, gv, how) Perl_sv_magic(aTHX_ MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
+#define Perl_hv_undef(mTHX, hv) Perl_hv_undef_flags(aTHX_ hv, 0)
 
 #define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))
 #define sharepvn(pv, len, hash)	     Perl_sharepvn(pv, len, hash)
@@ -527,41 +527,41 @@ whether it is valid to call C<HvAUX()>.
         ->shared_he_he.he_valu.hent_refcount),				\
      hek)
 
-#define hv_store_ent(hv, keysv, val, hash)				\
-    ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\
+#define Perl_hv_store_ent(mTHX, hv, keysv, val, hash)				\
+    ((HE *) Perl_hv_common(aTHX_ (hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\
                       (val), (hash)))
 
-#define hv_exists_ent(hv, keysv, hash)					\
-    cBOOL(hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (hash)))
-#define hv_fetch_ent(hv, keysv, lval, hash)				\
-    ((HE *) hv_common((hv), (keysv), NULL, 0, 0,			\
+#define Perl_hv_exists_ent(mTHX, hv, keysv, hash)					\
+    cBOOL(Perl_hv_common(aTHX_ (hv), (keysv), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (hash)))
+#define Perl_hv_fetch_ent(mTHX, hv, keysv, lval, hash)				\
+    ((HE *) Perl_hv_common(aTHX_ (hv), (keysv), NULL, 0, 0,			\
                       ((lval) ? HV_FETCH_LVALUE : 0), NULL, (hash)))
-#define hv_delete_ent(hv, key, flags, hash)				\
-    (MUTABLE_SV(hv_common((hv), (key), NULL, 0, 0, (flags) | HV_DELETE,	\
+#define Perl_hv_delete_ent(mTHX, hv, key, flags, hash)				\
+    (MUTABLE_SV(Perl_hv_common(aTHX_ (hv), (key), NULL, 0, 0, (flags) | HV_DELETE,	\
                           NULL, (hash))))
 
-#define hv_store_flags(hv, key, klen, val, hash, flags)			\
-    ((SV**) hv_common((hv), NULL, (key), (klen), (flags),		\
+#define Perl_hv_store_flags(mTHX, hv, key, klen, val, hash, flags)			\
+    ((SV**) Perl_hv_common(aTHX_ (hv), NULL, (key), (klen), (flags),		\
                       (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val),	\
                       (hash)))
 
-#define hv_store(hv, key, klen, val, hash)				\
-    ((SV**) hv_common_key_len((hv), (key), (klen),			\
+#define Perl_hv_store(mTHX, hv, key, klen, val, hash)				\
+    ((SV**) Perl_hv_common_key_len(aTHX_ (hv), (key), (klen),			\
                               (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV),	\
                               (val), (hash)))
 
 
 
-#define hv_exists(hv, key, klen)					\
-    cBOOL(hv_common_key_len((hv), (key), (klen), HV_FETCH_ISEXISTS, NULL, 0))
+#define Perl_hv_exists(mTHX, hv, key, klen)					\
+    cBOOL(Perl_hv_common_key_len(aTHX_ (hv), (key), (klen), HV_FETCH_ISEXISTS, NULL, 0))
 
-#define hv_fetch(hv, key, klen, lval)					\
-    ((SV**) hv_common_key_len((hv), (key), (klen), (lval)		\
+#define Perl_hv_fetch(mTHX, hv, key, klen, lval)				\
+    ((SV**) Perl_hv_common_key_len(aTHX_ (hv), (key), (klen), (lval)		\
                               ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)	\
                               : HV_FETCH_JUST_SV, NULL, 0))
 
-#define hv_delete(hv, key, klen, flags)					\
-    (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),			\
+#define Perl_hv_delete(mTHX, hv, key, klen, flags)					\
+    (MUTABLE_SV(Perl_hv_common_key_len(aTHX_ (hv), (key), (klen),			\
                                   (flags) | HV_DELETE, NULL, 0)))
 
 /* Provide 's' suffix subs for constant strings (and avoid needing to count
@@ -590,8 +590,8 @@ whether it is valid to call C<HvAUX()>.
 #define hv_name_sets(hv, name, flags) \
     hv_name_set((hv),ASSERT_IS_LITERAL(name),(sizeof(name)-1), flags)
 
-#define hv_stores(hv, key, val) \
-    hv_store((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (val), 0)
+#define Perl_hv_stores(mTHX, hv, key, val) \
+    Perl_hv_store(aTHX, (hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (val), 0)
 
 #ifdef PERL_CORE
 # define hv_storehek(hv, hek, val) \
@@ -731,7 +731,7 @@ Creates a new HV.  The reference count is set to 1.
 =cut
 */
 
-#define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))
+#define Perl_newHV(mTHX)	MUTABLE_HV(Perl_newSV_type(aTHX_ SVt_PVHV))
 
 #include "hv_func.h"
 
