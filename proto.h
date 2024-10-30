@@ -851,6 +851,9 @@ Perl_die_unwind(pTHX_ SV *msv)
 #define PERL_ARGS_ASSERT_DIE_UNWIND             \
         assert(msv)
 
+/* PERL_CALLCONV bool
+Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp); */
+
 PERL_CALLCONV bool
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp, int fd, int do_report)
         __attribute__visibility__("hidden");
@@ -5881,11 +5884,6 @@ Perl_malloced_size(void *p)
 
 #endif /* defined(MYMALLOC) */
 #if !defined(NO_MATHOMS)
-PERL_CALLCONV bool
-Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp);
-# define PERL_ARGS_ASSERT_DO_AEXEC              \
-        assert(mark); assert(sp)
-
 PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 # define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \

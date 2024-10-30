@@ -90,16 +90,6 @@ Perl_huge(void)
 }
 #endif
 
-#ifndef OS2
-bool
-Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp)
-{
-    PERL_ARGS_ASSERT_DO_AEXEC;
-
-    return do_aexec5(really, mark, sp, 0, 0);
-}
-#endif
-
 /*
 =for apidoc_section $SV
 =for apidoc sv_nolocking
