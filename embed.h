@@ -424,6 +424,7 @@
 # define newHV()                                Perl_newHV(aTHX)
 # define newHVREF(a)                            Perl_newHVREF(aTHX_ a)
 # define newHVhv(a)                             Perl_newHVhv(aTHX_ a)
+# define newIO()                                Perl_newIO(aTHX)
 # define newLISTOP(a,b,c,d)                     Perl_newLISTOP(aTHX_ a,b,c,d)
 # define newLISTOPn(a,...)                      Perl_newLISTOPn(aTHX_ a,__VA_ARGS__)
 # define newLOGOP(a,b,c,d)                      Perl_newLOGOP(aTHX_ a,b,c,d)

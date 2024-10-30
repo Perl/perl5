@@ -2731,7 +2731,7 @@ Create a new IO, setting the reference count to 1.
 
 =cut
 */
-#define newIO()	MUTABLE_IO(newSV_type(SVt_PVIO))
+#define Perl_newIO(mTHX)  MUTABLE_IO(Perl_newSV_type(aTHX_ SVt_PVIO))
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 

@@ -135,12 +135,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-IO *
-Perl_newIO(pTHX)
-{
-    return MUTABLE_IO(newSV_type(SVt_PVIO));
-}
-
 I32
 Perl_my_stat(pTHX)
 {

@@ -2209,7 +2209,7 @@ ARdp	|OP *	|newGVREF	|I32 type				\
 ARdmp	|HV *	|newHV
 ARdp	|HV *	|newHVhv	|NULLOK HV *hv
 ARdp	|OP *	|newHVREF	|NN OP *o
-AMRbdp	|IO *	|newIO
+ARdmp	|IO *	|newIO
 ARdp	|OP *	|newLISTOP	|I32 type				\
 				|I32 flags				\
 				|NULLOK OP *first			\
