@@ -806,6 +806,7 @@
 # define sv_uni_display(a,b,c,d)                Perl_sv_uni_display(aTHX_ a,b,c,d)
 # define sv_unmagic(a,b)                        Perl_sv_unmagic(aTHX_ a,b)
 # define sv_unmagicext(a,b,c)                   Perl_sv_unmagicext(aTHX_ a,b,c)
+# define sv_unref(a)                            Perl_sv_unref(aTHX,a)
 # define sv_unref_flags(a,b)                    Perl_sv_unref_flags(aTHX_ a,b)
 # define sv_untaint(a)                          Perl_sv_untaint(aTHX_ a)
 # define sv_upgrade(a,b)                        Perl_sv_upgrade(aTHX_ a,b)
@@ -1461,6 +1462,10 @@
 #   endif /* defined(PERL_IN_LOCALE_C) */
 #   if defined(PERL_IN_MALLOC_C)
 #     define adjust_size_and_find_bucket        S_adjust_size_and_find_bucket
+#   endif
+#   if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
+       defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
+#     define ref(a,b)                           Perl_ref(aTHX,a,b)
 #   endif
 #   if defined(PERL_IN_MG_C)
 #     define fixup_errno_string(a)              S_fixup_errno_string(aTHX_ a)

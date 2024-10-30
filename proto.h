@@ -5091,6 +5091,9 @@ Perl_sv_unmagicext(pTHX_ SV * const sv, const int type, const MGVTBL *vtbl);
 #define PERL_ARGS_ASSERT_SV_UNMAGICEXT          \
         assert(sv)
 
+/* PERL_CALLCONV void
+Perl_sv_unref(pTHX_ SV *sv); */
+
 PERL_CALLCONV void
 Perl_sv_unref_flags(pTHX_ SV * const ref, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_UNREF_FLAGS         \
@@ -5931,11 +5934,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
         __attribute__deprecated__;
 # define PERL_ARGS_ASSERT_SV_NOUNLOCKING
 
-PERL_CALLCONV void
-Perl_sv_unref(pTHX_ SV *sv);
-# define PERL_ARGS_ASSERT_SV_UNREF              \
-        assert(sv)
-
 PERL_CALLCONV UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
         __attribute__deprecated__;
@@ -5960,13 +5958,6 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 # define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
         assert(d)
 
-# if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
-     defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
-PERL_CALLCONV OP *
-Perl_ref(pTHX_ OP *o, I32 type);
-#   define PERL_ARGS_ASSERT_REF
-
-# endif
 #endif /* !defined(NO_MATHOMS) */
 #if defined(PERL_ANY_COW)
 PERL_CALLCONV SV *
@@ -7181,6 +7172,12 @@ STATIC int
 S_adjust_size_and_find_bucket(size_t *nbytes_p);
 # define PERL_ARGS_ASSERT_ADJUST_SIZE_AND_FIND_BUCKET \
         assert(nbytes_p)
+
+#endif
+#if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
+    defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
+/* PERL_CALLCONV OP *
+Perl_ref(pTHX_ OP *o, I32 type); */
 
 #endif
 #if defined(PERL_IN_MG_C)

@@ -73,23 +73,6 @@
  * without a compiler warning */
 GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 
-/* ref() is now a macro using Perl_doref;
- * this version provided for binary compatibility only.
- */
-OP *
-Perl_ref(pTHX_ OP *o, I32 type)
-{
-    return doref(o, type, TRUE);
-}
-
-void
-Perl_sv_unref(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_UNREF;
-
-    sv_unref_flags(sv, 0);
-}
-
 #if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
 /*
  * This hack is to force load of "huge" support from libm.a

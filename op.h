@@ -661,7 +661,7 @@ typedef enum {
                                                    list of SVs */
 
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
-#define ref(o, type) doref(o, type, TRUE)
+#define Perl_ref(mTHX, o, type)  Perl_doref(aTHX_ o, type, TRUE)
 #endif
 
 

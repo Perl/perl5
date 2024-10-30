@@ -2169,7 +2169,7 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #endif
 
 
-#define sv_unref(sv)    	sv_unref_flags(sv, 0)
+#define Perl_sv_unref(mTHX, sv)  Perl_sv_unref_flags(aTHX_ sv, 0)
 #define Perl_sv_force_normal(mTHX, sv)  Perl_sv_force_normal_flags(aTHX_ sv, 0)
 #define Perl_sv_usepvn(mTHX, sv, p, l)                                  \
         Perl_sv_usepvn_flags(aTHX_ sv, p, l, 0)
