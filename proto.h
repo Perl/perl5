@@ -2789,6 +2789,10 @@ PERL_CALLCONV CV *
 Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block, bool o_is_gv);
 #define PERL_ARGS_ASSERT_NEWATTRSUB_X
 
+/* PERL_CALLCONV AV *
+Perl_newAV(pTHX)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV OP *
 Perl_newAVREF(pTHX_ OP *o)
         __attribute__warn_unused_result__;
@@ -5888,11 +5892,6 @@ PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 # define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \
         assert(buf); assert(buf_end)
-
-PERL_CALLCONV AV *
-Perl_newAV(pTHX)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_NEWAV
 
 PERL_CALLCONV IO *
 Perl_newIO(pTHX)

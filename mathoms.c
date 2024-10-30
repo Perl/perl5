@@ -135,16 +135,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-AV *
-Perl_newAV(pTHX)
-{
-    return MUTABLE_AV(newSV_type(SVt_PVAV));
-    /* sv_upgrade does AvREAL_only():
-    AvALLOC(av) = 0;
-    AvARRAY(av) = NULL;
-    AvMAX(av) = AvFILLp(av) = -1; */
-}
-
 void
 Perl_save_freesv(pTHX_ SV *sv)
 {

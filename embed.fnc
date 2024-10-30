@@ -2159,7 +2159,7 @@ Xdp	|CV *	|newATTRSUB_x	|I32 floor				\
 				|NULLOK OP *attrs			\
 				|NULLOK OP *block			\
 				|bool o_is_gv
-AMRbdp	|AV *	|newAV
+ARdmp	|AV *	|newAV
 ARdm	|AV *	|newAV_alloc_x	|SSize_t size
 ARdm	|AV *	|newAV_alloc_xz |SSize_t size
 ARdp	|AV *	|newAVav	|NULLOK AV *oav
