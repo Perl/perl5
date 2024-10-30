@@ -4536,8 +4536,8 @@ struct Perl_OpDumpContext;
 #include "utf8.h"
 
 /* these would be in doio.h if there was such a file */
-#define my_stat()  my_stat_flags(SV_GMAGIC)
-#define my_lstat() my_lstat_flags(SV_GMAGIC)
+#define Perl_my_stat(mTHX_)  Perl_my_stat_flags(aTHX_  SV_GMAGIC)
+#define Perl_my_lstat(mTHX)  Perl_my_lstat_flags(aTHX_ SV_GMAGIC)
 
 /* defined in sv.c, but also used in [ach]v.c */
 #undef _XPV_HEAD

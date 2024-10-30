@@ -135,18 +135,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-I32
-Perl_my_stat(pTHX)
-{
-    return my_stat_flags(SV_GMAGIC);
-}
-
-I32
-Perl_my_lstat(pTHX)
-{
-    return my_lstat_flags(SV_GMAGIC);
-}
-
 STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 {

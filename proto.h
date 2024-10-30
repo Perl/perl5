@@ -2679,7 +2679,7 @@ Perl_my_fork(void);
 #define PERL_ARGS_ASSERT_MY_FORK
 
 /* PERL_CALLCONV I32
-my_lstat(pTHX); */
+Perl_my_lstat(pTHX); */
 
 PERL_CALLCONV I32
 Perl_my_lstat_flags(pTHX_ const U32 flags);
@@ -2719,7 +2719,7 @@ Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 #define PERL_ARGS_ASSERT_MY_SOCKETPAIR
 
 /* PERL_CALLCONV I32
-my_stat(pTHX); */
+Perl_my_stat(pTHX); */
 
 PERL_CALLCONV I32
 Perl_my_stat_flags(pTHX_ const U32 flags);
