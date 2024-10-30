@@ -5,7 +5,7 @@ use Exporter;
 use File::Spec;
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.54';
+our $VERSION = '3.55';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -17,7 +17,6 @@ our (@ISA, @EXPORT_OK);
   process_typemaps
   map_type
   standard_XS_defs
-  C_func_signature
   analyze_preprocessor_statement
   set_cond
   Warn
@@ -44,7 +43,6 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     process_typemaps
     map_type
     standard_XS_defs
-    C_func_signature
     analyze_preprocessor_statement
     set_cond
     Warn
@@ -493,46 +491,6 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 EOF
   return 1;
 }
-
-=head2 C<C_func_signature()>
-
-=over 4
-
-=item * Purpose
-
-Generate the argument list to be applied to the call to the "real" C
-library function which is wrapped by the xsub. It is is the same as the
-xsub's arguments, except that any initial method pointer is deleted, and
-args marked as C<*OUT*> are prefixed with '&'.
-
-=item * Arguments
-
-  $sig_string = $self->C_func_signature($argsref, $class);
-
-C<$argref> is an array reference containing the xsub's parameters.
-
-C<$class> if defined, indicates that this is a method.
-
-=item * Return Value
-
-A string such as C<'foo, &bar, baz'>
-
-=back
-
-=cut
-
-sub C_func_signature {
-  my ExtUtils::ParseXS $self = shift;
-  my ($argsref, $class) = @_;
-  my @func_args = @{$argsref};
-  shift @func_args if defined($class);
-
-  for my $arg (@func_args) {
-    $arg =~ s/^/&/ if $self->{xsub_map_argname_to_in_out}->{$arg};
-  }
-  return join(", ", @func_args);
-}
-
 
 =head2 C<analyze_preprocessor_statement()>
 

@@ -164,7 +164,7 @@ static const char non_utf8_target_but_utf8_required[]
 #define HOP3clim(pos,off,lim) ((char*)HOP3lim(pos,off,lim))
 
 #define HOP4(pos,off,llim, rlim) (reginfo->is_utf8_target \
-    ? reghop4((U8*)(pos), off, (U8*)(llim), (U8*)(rlim)) \
+    ? utf8_hop_safe((U8*)(pos), off, (U8*)(llim), (U8*)(rlim)) \
     : (U8*)(pos + off))
 #define HOP4c(pos,off,llim, rlim) ((char*)HOP4(pos,off,llim, rlim))
 
@@ -4094,7 +4094,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         /* XXXX check_substr already used to find "s", can optimize if
            check_substr==must. */
         dontbother = 0;
-        strend = HOPc(strend, -dontbother);
         while ( (s <= last) &&
                 (s = fbm_instr((unsigned char*)HOP4c(s, back_min, strbeg,  strend),
                                   (unsigned char*)strend, must,
@@ -11156,14 +11155,6 @@ S_reghop3(U8 *s, SSize_t off, const U8* lim)
         }
     }
     return s;
-}
-
-STATIC U8 *
-S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
-{
-    PERL_ARGS_ASSERT_REGHOP4;
-
-    return utf8_hop_safe(s, off, llim, rlim);
 }
 
 /* like reghop3, but returns NULL on overrun, rather than returning last

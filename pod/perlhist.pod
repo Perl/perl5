@@ -784,6 +784,7 @@ the strings?).
  Ether     5.41.2       2024-Jul-20
  Philippe  5.41.3       2024-Aug-29
  Thibault  5.41.4       2024-Sep-20
+ Richard L 5.41.5       2024-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 

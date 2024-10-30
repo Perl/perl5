@@ -605,7 +605,7 @@ jobs:
         run: |
           cd ~/work
           set +e
-          ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING || exit 1
+          ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING -Astatic_ext=I18N/Langinfo || exit 1
       - name: Build
         shell: sh
         env:

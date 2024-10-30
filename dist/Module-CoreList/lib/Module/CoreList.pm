@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20241020';
+our $VERSION = '5.20241120';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -429,6 +429,7 @@ sub changes_between {
     5.041003 => '2024-08-29',
     5.041004 => '2024-09-20',
     5.041005 => '2024-10-20',
+    5.041006 => '2024-11-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -22395,8 +22396,39 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.041005',
             'Config'                => '5.041005',
+            'Digest::MD5'           => '2.59',
+            'ExtUtils::ParseXS'     => '3.55',
+            'ExtUtils::ParseXS::Constants'=> '3.55',
+            'ExtUtils::ParseXS::CountLines'=> '3.55',
+            'ExtUtils::ParseXS::Eval'=> '3.55',
+            'ExtUtils::ParseXS::Node'=> '3.55',
+            'ExtUtils::ParseXS::Utilities'=> '3.55',
+            'ExtUtils::Typemaps'    => '3.55',
+            'ExtUtils::Typemaps::Cmd'=> '3.55',
+            'ExtUtils::Typemaps::InputMap'=> '3.55',
+            'ExtUtils::Typemaps::OutputMap'=> '3.55',
+            'ExtUtils::Typemaps::Type'=> '3.55',
+            'IPC::Open2'            => '1.07',
+            'IPC::Open3'            => '1.23',
+            'List::Util'            => '1.68',
+            'List::Util::XS'        => '1.68',
             'Module::CoreList'      => '5.20241020',
             'Module::CoreList::Utils'=> '5.20241020',
+            'Scalar::List::Utils'   => '1.68',
+            'Scalar::Util'          => '1.68',
+            'Sub::Util'             => '1.68',
+            'threads::shared'       => '1.70',
+        },
+        removed => {
+        }
+    },
+    5.041006 => {
+        delta_from => 5.041005,
+        changed => {
+            'B::Op_private'         => '5.041006',
+            'Config'                => '5.041006',
+            'Module::CoreList'      => '5.20241120',
+            'Module::CoreList::Utils'=> '5.20241120',
         },
         removed => {
         }
@@ -23956,6 +23988,13 @@ sub is_core
         removed => {
         }
     },
+    5.041006 => {
+        delta_from => 5.041005,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -24230,6 +24269,7 @@ sub is_core
     'Pod::Text::Overstrike' => 'cpan',
     'Pod::Text::Termcap'    => 'cpan',
     'Pod::Usage'            => 'cpan',
+    'Scalar::List::Utils'   => 'cpan',
     'Scalar::Util'          => 'cpan',
     'Socket'                => 'cpan',
     'Sub::Util'             => 'cpan',
@@ -24791,6 +24831,7 @@ sub is_core
     'Pod::Text::Overstrike' => 'https://github.com/rra/podlators/issues',
     'Pod::Text::Termcap'    => 'https://github.com/rra/podlators/issues',
     'Pod::Usage'            => 'https://github.com/Dual-Life/Pod-Usage/issues',
+    'Scalar::List::Utils'   => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Scalar::Util'          => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Socket'                => undef,
     'Sub::Util'             => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',

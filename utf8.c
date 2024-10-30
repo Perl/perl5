@@ -454,24 +454,6 @@ The new names accurately describe the situation in all cases.
 =cut
 */
 
-/* This is also a macro */
-PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
-
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return uvchr_to_utf8(d, uv);
-}
-
-/* This is also a macro */
-PERL_CALLCONV U8*       Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
-
-U8 *
-Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
-{
-    return uvchr_to_utf8_flags(d, uv, flags);
-}
-
 PERL_STATIC_INLINE int
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {
@@ -597,35 +579,34 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
 #endif
 
 PERL_STATIC_INLINE int
-S_does_utf8_overflow(const U8 * const s,
-                     const U8 * e,
-                     const bool consider_overlongs)
+S_does_utf8_overflow(const U8 * const s, const U8 * e)
 {
+    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
+
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
      * 'e' - 1 would overflow an IV on this platform; that is if it represents
-     * a code point larger than the highest representable code point.  It
-     * returns 1 if it does overflow; 0 if it doesn't, and -1 if there isn't
-     * enough information to tell.  This last return value can happen if the
-     * sequence is incomplete, missing some trailing bytes that would form a
-     * complete character.  If there are enough bytes to make a definitive
-     * decision, this function does so.
-     *
-     * If 'consider_overlongs' is TRUE, the function checks for the possibility
-     * that the sequence is an overlong that doesn't overflow.  Otherwise, it
-     * assumes the sequence is not an overlong.  This can give different
-     * results only on ASCII 32-bit platforms.
-     *
-     * (For ASCII platforms, we could use memcmp() because we don't have to
-     * convert each byte to I8, but it's very rare input indeed that would
-     * approach overflow, so the loop below will likely only get executed once.)
-     *
-     */
+     * a code point larger than the highest representable code point.  The
+     * possible returns are: */
+#define NO_OVERFLOW                 0   /* Definitely doesn't overflow */
+
+/* There aren't enough examinable bytes available to be sure.  This can happen
+ * if the sequence is incomplete, missing some trailing bytes that would form a
+ * complete character. */
+#define COULD_OVERFLOW              1
+
+/* This overflows if not also overlong, and like COULD_OVERFLOW, there aren't
+ * enough available bytes to be sure, but since overlongs are very rarely
+ * encountered, for most purposes consider it to overflow */
+#define ALMOST_CERTAINLY_OVERFLOWS  2
+
+#define OVERFLOWS                   3   /* Definitely overflows */
+
+    /* Note that the values are ordered so that you can use '>=' in checking
+     * the return value. */
+
     const STRLEN len = e - s;
     const U8 *x;
     const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF;
-    int is_overlong = 0;
-
-    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
 
     for (x = s; x < e; x++, y++) {
 
@@ -635,13 +616,13 @@ S_does_utf8_overflow(const U8 * const s,
          * bytes larger than those omitted bytes, and therefore 'x' can't
          * overflow */
         if (*y == '\0') {
-            return 0;
+            return NO_OVERFLOW;
         }
 
         /* If this byte is less than the corresponding highest non-overflowing
          * UTF-8, the sequence doesn't overflow */
         if (NATIVE_UTF8_TO_I8(*x) < *y) {
-            return 0;
+            return NO_OVERFLOW;
         }
 
         if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
@@ -652,33 +633,25 @@ S_does_utf8_overflow(const U8 * const s,
     /* Got to the end, and all bytes are the same.  If the input is a whole
      * character, it doesn't overflow.  And if it is a partial character,
      * there's not enough information to tell */
-    return (len >= STRLENs(HIGHEST_REPRESENTABLE_UTF)) ? 0 : -1;
+    return (len >= STRLENs(HIGHEST_REPRESENTABLE_UTF)) ? NO_OVERFLOW
+                                                       : COULD_OVERFLOW;
 
-  overflows_if_not_overlong:
+  overflows_if_not_overlong: ;
 
-    /* Here, a well-formed sequence overflows.  If we are assuming
-     * well-formedness, return that it overflows. */
-    if (! consider_overlongs) {
-        return 1;
-    }
-
-    /* Here, it could be the overlong malformation, and might not actually
-     * overflow if you were to calculate it out.
-     *
-     * See if it actually is overlong */
-    is_overlong = is_utf8_overlong(s, len);
-
-    /* If it isn't overlong, is well-formed, so overflows */
-    if (is_overlong == 0) {
-        return 1;
+    /* Here, the sequence overflows if not overlong.  Check for that */
+    int is_overlong = is_utf8_overlong(s, len);
+    if (LIKELY(is_overlong == 0)) {
+        return OVERFLOWS;
     }
 
     /* Not long enough to determine */
     if (is_overlong < 0) {
-        return -1;
+        return ALMOST_CERTAINLY_OVERFLOWS;
     }
 
-    /* Here, it appears to overflow, but it is also overlong */
+    /* Here, it appears to overflow, but it is also overlong.  That overlong
+     * may evaluate to something that doesn't overflow; or it may evaluate to
+     * something that does.  Figure it out */
 
 #if 6 * UTF_CONTINUATION_BYTE_INFO_BITS <= IVSIZE * CHARBITS
 
@@ -699,11 +672,12 @@ S_does_utf8_overflow(const U8 * const s,
      *
      * FE consists of 7 bytes total; the FE start byte contributes 0 bits of
      * information (the high 7 bits, all ones, say that the sequence is 7 bytes
-     * long, and the bottom, zero, bit is s placeholder. That leaves the 6
-     * continuation bytes to contribute UTF_CONTINUATION_BYTE_INFO_BITS each.
-      If that number of bits doesn't exceed the word size, it can't overflow. */
+     * long, and the bottom, zero, bit is 0, so doesn't add anything. That
+     * leaves the 6 continuation bytes to contribute
+     * UTF_CONTINUATION_BYTE_INFO_BITS each.  If that number of bits doesn't
+     * exceed the word size, it can't overflow. */
 
-    return 0;
+    return NO_OVERFLOW;
 
 #else
 
@@ -715,21 +689,23 @@ S_does_utf8_overflow(const U8 * const s,
      *
      * That means only the FF start byte can have an overflowing overlong. */
     if (*s < 0xFF) {
-        return 0;
+        return NO_OVERFLOW;
     }
 
     /* The sequence \xff\x80\x80\x80\x80\x80\x80\x82 is an overlong that
      * evaluates to 2**31, so overflows an IV.  For a UV it's
      *              \xff\x80\x80\x80\x80\x80\x80\x83 = 2**32 */
-#  define OVERFLOWS  "\xff\x80\x80\x80\x80\x80\x80\x82"
+#  define OVERFLOWS_MIN_STRING  "\xff\x80\x80\x80\x80\x80\x80\x82"
 
-    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS)) {   /* Not enough info */
-         return -1;
+    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS_MIN_STRING)) {
+        return ALMOST_CERTAINLY_OVERFLOWS;  /* Not enough info to be sure */
     }
 
 #  define strnGE(s1,s2,l) (strncmp(s1,s2,l) >= 0)
 
-    return strnGE((const char *) s, OVERFLOWS, STRLENs(OVERFLOWS));
+    return (strnGE((const char *) s, OVERFLOWS_MIN_STRING, STRLENs(OVERFLOWS_MIN_STRING)))
+    ? OVERFLOWS
+    : NO_OVERFLOW;
 
 #endif
 
@@ -895,9 +871,7 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
         s++;
     }
 
-    if (0 < does_utf8_overflow(s0, e,
-                               FALSE /* Don't consider_overlongs */
-    )) {
+    if (does_utf8_overflow(s0, e) == OVERFLOWS) {
         return 0;
     }
 
@@ -1288,7 +1262,7 @@ C<UTF8_DISALLOW_SUPER> or the C<UTF8_WARN_SUPER> flags.
 
 =item C<UTF8_GOT_SURROGATE>
 
-The input sequence was malformed in that it is for a -Unicode UTF-16 surrogate
+The input sequence was malformed in that it is for a Unicode UTF-16 surrogate
 code point.
 This bit is set only if the input C<flags> parameter contains either the
 C<UTF8_DISALLOW_SURROGATE> or the C<UTF8_WARN_SURROGATE> flags.
@@ -1567,10 +1541,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
     /* Check for overflow.  The algorithm requires us to not look past the end
      * of the current character, even if partial, so the upper limit is 's' */
-    if (UNLIKELY(0 < does_utf8_overflow(s0, s,
-                                         1 /* Do consider overlongs */
-                                        )))
-    {
+    if (UNLIKELY(does_utf8_overflow(s0, s) >= ALMOST_CERTAINLY_OVERFLOWS)) {
         possible_problems |= UTF8_GOT_OVERFLOW;
         uv = UNICODE_REPLACEMENT;
     }
@@ -2168,7 +2139,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
     PERL_ARGS_ASSERT_UTF8_LENGTH;
 
-    /* For EBCDCIC and short strings, we count the characters.  The boundary
+    /* For EBCDIC and short strings, we count the characters.  The boundary
      * was determined by eyeballing the output of Porting/bench.pl and
      * choosing a number where the continuations method gave better results (on
      * a 64 bit system, khw not having access to a 32 bit system with
@@ -2621,8 +2592,7 @@ after-call value of C<*lenp> from it.
 
 =cut
 
-There is a macro that avoids this function call, but this is retained for
-anyone who calls it with the Perl_ prefix */
+*/
 
 U8 *
 Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
@@ -2630,73 +2600,28 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
     PERL_UNUSED_CONTEXT;
 
-    return bytes_from_utf8_loc(s, lenp, is_utf8p, NULL);
-}
-
-/*
-=for apidoc bytes_from_utf8_loc
-
-Like C<L<perlapi/bytes_from_utf8>()>, but takes an extra parameter, a pointer
-to where to store the location of the first character in C<"s"> that cannot be
-converted to non-UTF8.
-
-If that parameter is C<NULL>, this function behaves identically to
-C<bytes_from_utf8>.
-
-Otherwise if C<*is_utf8p> is 0 on input, the function behaves identically to
-C<bytes_from_utf8>, except it also sets C<*first_non_downgradable> to C<NULL>.
-
-Otherwise, the function returns a newly created C<NUL>-terminated string
-containing the non-UTF8 equivalent of the convertible first portion of
-C<"s">.  C<*lenp> is set to its length, not including the terminating C<NUL>.
-If the entire input string was converted, C<*is_utf8p> is set to a FALSE value,
-and C<*first_non_downgradable> is set to C<NULL>.
-
-Otherwise, C<*first_non_downgradable> is set to point to the first byte of the
-first character in the original string that wasn't converted.  C<*is_utf8p> is
-unchanged.  Note that the new string may have length 0.
-
-Another way to look at it is, if C<*first_non_downgradable> is non-C<NULL> and
-C<*is_utf8p> is TRUE, this function starts at the beginning of C<"s"> and
-converts as many characters in it as possible stopping at the first one it
-finds that can't be converted to non-UTF-8.  C<*first_non_downgradable> is
-set to point to that.  The function returns the portion that could be converted
-in a newly created C<NUL>-terminated string, and C<*lenp> is set to its length,
-not including the terminating C<NUL>.  If the very first character in the
-original could not be converted, C<*lenp> will be 0, and the new string will
-contain just a single C<NUL>.  If the entire input string was converted,
-C<*is_utf8p> is set to FALSE and C<*first_non_downgradable> is set to C<NULL>.
-
-Upon successful return, the number of variants in the converted portion of the
-string can be computed by having saved the value of C<*lenp> before the call,
-and subtracting the after-call value of C<*lenp> from it.
-
-=cut
-
-
-*/
-
-U8 *
-Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** first_unconverted)
-{
-    U8 *d;
-    const U8 *original = s;
-    U8 *converted_start;
-    const U8 *send = s + *lenp;
-
-    PERL_ARGS_ASSERT_BYTES_FROM_UTF8_LOC;
-
     if (! *is_utf8p) {
-        if (first_unconverted) {
-            *first_unconverted = NULL;
-        }
-
-        return (U8 *) original;
+        return (U8 *) s;
     }
 
-    Newx(d, (*lenp) + 1, U8);
+    const U8 * const s0 = s;
+    const U8 * const send = s + *lenp;
+    const U8 * first_variant;
 
-    converted_start = d;
+    /* The initial portion of 's' that consists of invariants can be Copied
+     * as-is.  If it is entirely invariant, the whole thing can be Copied. */
+    if (is_utf8_invariant_string_loc(s, *lenp, &first_variant)) {
+        first_variant = send;
+    }
+
+    U8 *d;
+    Newx(d, (*lenp) + 1, U8);
+    Copy(s, d, first_variant - s, U8);
+
+    U8 *converted_start = d;
+    d += first_variant - s;
+    s = first_variant;
+
     while (s < send) {
         U8 c = *s++;
         if (! UTF8_IS_INVARIANT(c)) {
@@ -2704,14 +2629,8 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
             /* Then it is multi-byte encoded.  If the code point is above 0xFF,
              * have to stop now */
             if (UNLIKELY (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s - 1, send))) {
-                if (first_unconverted) {
-                    *first_unconverted = s - 1;
-                    goto finish_and_return;
-                }
-                else {
                     Safefree(converted_start);
-                    return (U8 *) original;
-                }
+                    return (U8 *) s0;
             }
 
             c = EIGHT_BIT_UTF8_TO_NATIVE(c, *s);
@@ -2722,11 +2641,7 @@ Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8** f
 
     /* Here, converted the whole of the input */
     *is_utf8p = FALSE;
-    if (first_unconverted) {
-        *first_unconverted = NULL;
-    }
 
-  finish_and_return:
     *d = '\0';
     *lenp = d - converted_start;
 
@@ -2745,7 +2660,7 @@ Returns a pointer to the newly-created string, and sets C<*lenp> to
 reflect the new length in bytes.  The caller is responsible for arranging for
 the memory used by this string to get freed.
 
-Upon successful return, the number of variants in the string can be computed by
+Upon return, the number of variants in the string can be computed by
 having saved the value of C<*lenp> before the call, and subtracting it from the
 after-call value of C<*lenp>.
 
@@ -4124,9 +4039,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
         if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
             if (UNLIKELY(UTF8_IS_SUPER(s, e))) {
                 if (   ckWARN_d(WARN_NON_UNICODE)
-                    || UNLIKELY(0 < does_utf8_overflow(s, s + len,
-                                               0 /* Don't consider overlongs */
-                                               )))
+                    || UNLIKELY(does_utf8_overflow(s, s + len) >= ALMOST_CERTAINLY_OVERFLOWS))
                 {
                     /* A side effect of this function will be to warn */
                     (void) utf8n_to_uvchr(s, e - s, NULL, UTF8_WARN_SUPER);
@@ -4166,15 +4079,36 @@ Build to the scalar C<dsv> a displayable version of the UTF-8 encoded string
 C<spv>, length C<len>, the displayable version being at most C<pvlim> bytes
 long (if longer, the rest is truncated and C<"..."> will be appended).
 
-The C<flags> argument can have C<UNI_DISPLAY_ISPRINT> set to display
-C<isPRINT()>able characters as themselves, C<UNI_DISPLAY_BACKSLASH>
-to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
-(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
-C<UNI_DISPLAY_QQ> (and its alias C<UNI_DISPLAY_REGEX>) have both
-C<UNI_DISPLAY_BACKSLASH> and C<UNI_DISPLAY_ISPRINT> turned on.
+The C<flags> argument can have any combination of these flag bits
 
-Additionally, there is now C<UNI_DISPLAY_BACKSPACE> which allows C<\b> for a
-backspace, but only when C<UNI_DISPLAY_BACKSLASH> also is set.
+=over
+
+=item C<UNI_DISPLAY_ISPRINT>
+
+to display C<isPRINT()>able characters as themselves
+
+=item C<UNI_DISPLAY_BACKSLASH>
+
+to display the C<\\[nrfta\\]> as the backslashed versions (like C<"\n">)
+
+(C<UNI_DISPLAY_BACKSLASH> is preferred over C<UNI_DISPLAY_ISPRINT> for C<"\\">).
+
+=item C<UNI_DISPLAY_BACKSPACE>
+
+to display C<\b> for a backspace, but only when C<UNI_DISPLAY_BACKSLASH> also
+is set.
+
+=item C<UNI_DISPLAY_REGEX>
+
+This a shorthand for C<UNI_DISPLAY_ISPRINT> along with
+C<UNI_DISPLAY_BACKSLASH>.
+
+=item C<UNI_DISPLAY_QQ>
+
+This a shorthand for all three C<UNI_DISPLAY_ISPRINT>,
+C<UNI_DISPLAY_BACKSLASH>, and C<UNI_DISPLAY_BACKSLASH>.
+
+=back
 
 The pointer to the PV of the C<dsv> is returned.
 
@@ -4191,47 +4125,51 @@ char *
 Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
                           UV flags)
 {
-    int truncated = 0;
-    const char *s, *e;
-
     PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
+
+    int truncated = 0;
+    const U8 *s, *e;
+    STRLEN next_len = 0;
 
     SvPVCLEAR(dsv);
     SvUTF8_off(dsv);
-    for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
-         UV u;
-         bool ok = 0;
+    for (s = spv, e = s + len; s < e; s += next_len) {
+        UV u;
+        bool ok = 0;
 
-         if (pvlim && SvCUR(dsv) >= pvlim) {
-              truncated++;
-              break;
-         }
-         u = utf8_to_uvchr_buf((U8*)s, (U8*)e, 0);
-         if (u < 256) {
-             const U8 c = (U8) u;
-             if (flags & UNI_DISPLAY_BACKSLASH) {
-                 if (    isMNEMONIC_CNTRL(c)
-                     && (   c != '\b'
-                         || (flags & UNI_DISPLAY_BACKSPACE)))
-                 {
-                    const char * mnemonic = cntrl_to_mnemonic(c);
-                    sv_catpvn(dsv, mnemonic, strlen(mnemonic));
-                    ok = 1;
-                 }
-                 else if (c == '\\') {
-                    sv_catpvs(dsv, "\\\\");
-                    ok = 1;
-                 }
-             }
-             /* isPRINT() is the locale-blind version. */
-             if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-                 const char string = c;
-                 sv_catpvn(dsv, &string, 1);
-                 ok = 1;
-             }
-         }
-         if (!ok)
-             Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
+        if (pvlim && SvCUR(dsv) >= pvlim) {
+             truncated++;
+             break;
+        }
+
+        u = utf8_to_uvchr_buf(s, e, &next_len);
+        assert(next_len > 0);
+
+        if (u < 256) {
+            const U8 c = (U8) u;
+            if (flags & UNI_DISPLAY_BACKSLASH) {
+                if (    isMNEMONIC_CNTRL(c)
+                    && (   c != '\b'
+                        || (flags & UNI_DISPLAY_BACKSPACE)))
+                {
+                   const char * mnemonic = cntrl_to_mnemonic(c);
+                   sv_catpvn(dsv, mnemonic, strlen(mnemonic));
+                   ok = 1;
+                }
+                else if (c == '\\') {
+                   sv_catpvs(dsv, "\\\\");
+                   ok = 1;
+                }
+            }
+            /* isPRINT() is the locale-blind version. */
+            if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
+                const char string = c;
+                sv_catpvn(dsv, &string, 1);
+                ok = 1;
+            }
+        }
+        if (!ok)
+            Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
     }
     if (truncated)
          sv_catpvs(dsv, "...");

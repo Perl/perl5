@@ -1878,7 +1878,11 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                     || $needs_Perl_entry
                     || $cant_use_short_name)
                 {
-                    $name = "Perl_$name";
+                    # An all uppercase macro name gets an uppercase prefix.
+                    my $perl = ($flags =~ /m/ && $name !~ /[[:lower:]]/)
+                               ? "PERL_"
+                               : "Perl_";
+                    $name = "$perl$name";
 
                     # We can't hide the existence of any thread context
                     # parameter when using the "Perl_" long form.  So it must
@@ -1899,7 +1903,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                     # Here, has a long name and we didn't create one just
                     # above.  Check that there really is a long name entry.
                     my $real_proto = delete $protos{"Perl_$name"};
-                    if ($real_proto) {
+                    if ($real_proto || $flags =~ /m/) {
 
                         # Set up to redo the loop at the end.  This iteration
                         # adds the short form; the redo causes its long form

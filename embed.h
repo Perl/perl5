@@ -156,7 +156,7 @@
 # define block_gimme()                          Perl_block_gimme(aTHX)
 # define block_start(a)                         Perl_block_start(aTHX_ a)
 # define bytes_cmp_utf8(a,b,c,d)                Perl_bytes_cmp_utf8(aTHX_ a,b,c,d)
-# define bytes_from_utf8_loc                    Perl_bytes_from_utf8_loc
+# define bytes_from_utf8(a,b,c)                 Perl_bytes_from_utf8(aTHX_ a,b,c)
 # define bytes_to_utf8(a,b)                     Perl_bytes_to_utf8(aTHX_ a,b)
 # define call_argv(a,b,c)                       Perl_call_argv(aTHX_ a,b,c)
 # define call_atexit(a,b)                       Perl_call_atexit(aTHX_ a,b)
@@ -307,6 +307,7 @@
 # define init_i18nl10n(a)                       Perl_init_i18nl10n(aTHX_ a)
 # define init_stacks()                          Perl_init_stacks(aTHX)
 # define init_tm(a)                             Perl_init_tm(aTHX_ a)
+# define instr                                  Perl_instr
 # define intro_my()                             Perl_intro_my(aTHX)
 # define isC9_STRICT_UTF8_CHAR                  Perl_isC9_STRICT_UTF8_CHAR
 # define isSTRICT_UTF8_CHAR                     Perl_isSTRICT_UTF8_CHAR
@@ -322,6 +323,7 @@
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
+# define is_utf8_string_loc                     Perl_is_utf8_string_loc
 # define is_utf8_string_loclen                  Perl_is_utf8_string_loclen
 # define is_utf8_string_loclen_flags            Perl_is_utf8_string_loclen_flags
 # define is_utf8_valid_partial_char_flags       Perl_is_utf8_valid_partial_char_flags
@@ -593,6 +595,7 @@
 # define save_delete(a,b,c)                     Perl_save_delete(aTHX_ a,b,c)
 # define save_destructor(a,b)                   Perl_save_destructor(aTHX_ a,b)
 # define save_destructor_x(a,b)                 Perl_save_destructor_x(aTHX_ a,b)
+# define save_freepv(a)                         Perl_save_freepv(aTHX,a)
 # define save_freercpv(a)                       Perl_save_freercpv(aTHX_ a)
 # define save_generic_pvref(a)                  Perl_save_generic_pvref(aTHX_ a)
 # define save_generic_svref(a)                  Perl_save_generic_svref(aTHX_ a)
@@ -787,12 +790,18 @@
 # define utf8_distance(a,b)                     Perl_utf8_distance(aTHX_ a,b)
 # define utf8_hop                               Perl_utf8_hop
 # define utf8_hop_back                          Perl_utf8_hop_back
+# define utf8_hop_back_overshoot                Perl_utf8_hop_back_overshoot
 # define utf8_hop_forward                       Perl_utf8_hop_forward
+# define utf8_hop_forward_overshoot             Perl_utf8_hop_forward_overshoot
+# define utf8_hop_overshoot                     Perl_utf8_hop_overshoot
 # define utf8_hop_safe                          Perl_utf8_hop_safe
 # define utf8_length(a,b)                       Perl_utf8_length(aTHX_ a,b)
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)
 # define utf8_to_uvchr_buf_helper(a,b,c)        Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
+# define uvchr_to_utf8(a,b)                     Perl_uvchr_to_utf8(aTHX,a,b)
+# define uvchr_to_utf8_flags(a,b,c)             Perl_uvchr_to_utf8_flags(aTHX,a,b,c)
+# define uvchr_to_utf8_flags_msgs(a,b,c,d)      Perl_uvchr_to_utf8_flags_msgs(aTHX,a,b,c,d)
 # define uvoffuni_to_utf8_flags_msgs(a,b,c,d)   Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 # define valid_utf8_to_uvchr                    Perl_valid_utf8_to_uvchr
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
@@ -1987,7 +1996,6 @@
 #     define regcppop(a,b)                      S_regcppop(aTHX_ a,b comma_aDEPTH)
 #     define regcppush(a,b,c)                   S_regcppush(aTHX_ a,b,c comma_aDEPTH)
 #     define reghop3                            S_reghop3
-#     define reghop4                            S_reghop4
 #     define reghopmaybe3                       S_reghopmaybe3
 #     define reginclass(a,b,c,d,e)              S_reginclass(aTHX_ a,b,c,d,e)
 #     define regmatch(a,b,c)                    S_regmatch(aTHX_ a,b,c)
@@ -2009,6 +2017,9 @@
 # if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
 #   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
 #   define optimize_optree(a)                   Perl_optimize_optree(aTHX_ a)
+# endif
+# if defined(PERL_DONT_CREATE_GVSV)
+#   define gv_SVadd(a)                          Perl_gv_SVadd(aTHX,a)
 # endif
 # if !defined(PERL_IMPLICIT_SYS)
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)

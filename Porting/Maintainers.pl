@@ -826,7 +826,7 @@ our %Modules = (
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20240920.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20241020.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -999,8 +999,8 @@ our %Modules = (
     },
 
     'Scalar::Util' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.66.tar.gz',
-        'SYNCINFO'     => 'tib on Fri Sep 20 08:05:21 2024',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.68.tar.gz',
+        'SYNCINFO'     => 'rich on Sun Oct 20 15:42:58 2024',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 

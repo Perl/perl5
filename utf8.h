@@ -136,12 +136,14 @@ typedef enum {
 
 #define uvoffuni_to_utf8_flags(d,uv,flags)                                     \
                                uvoffuni_to_utf8_flags_msgs(d, uv, flags, 0)
-#define uvchr_to_utf8(a,b)          uvchr_to_utf8_flags(a,b,0)
-#define uvchr_to_utf8_flags(d,uv,flags)                                        \
-                                    uvchr_to_utf8_flags_msgs(d,uv,flags, 0)
-#define uvchr_to_utf8_flags_msgs(d,uv,flags,msgs)                              \
-                uvoffuni_to_utf8_flags_msgs(d,NATIVE_TO_UNI(uv),flags, msgs)
-#define utf8_to_uvchr_buf(s, e, lenp)                                          \
+
+#define Perl_uvchr_to_utf8(mTHX, d, u)                                          \
+        Perl_uvchr_to_utf8_flags(aTHX, d, u, 0)
+#define Perl_uvchr_to_utf8_flags(mTHX, d, u, f)                                 \
+        Perl_uvchr_to_utf8_flags_msgs(aTHX, d, u, f, 0)
+#define Perl_uvchr_to_utf8_flags_msgs(mTHX, d, u, f , m)                        \
+        Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ d, NATIVE_TO_UNI(u), f, m)
+#define utf8_to_uvchr_buf(s, e, lenp)                                           \
             utf8_to_uvchr_buf_helper((const U8 *) (s), (const U8 *) e, lenp)
 #define utf8n_to_uvchr(s, len, lenp, flags)                                    \
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
@@ -332,10 +334,20 @@ platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
 the paradigm that the number of leading bits gives how many total bytes there
 are in the character. */
 
-/* This is the number of low-order bits a continuation byte in a UTF-8 encoded
- * sequence contributes to the specification of the code point.  In the bit
+/* A continuation byte in a UTF-8 encoded sequence contributes this number of
+ * low-order bits to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
- * real information */
+ * real information.  (If you're really curious, the only two numbers that work
+ * out for this on an 8-bit byte are 5 and 6.  Since the first two bits are
+ * already taken, a maximum of 6 are available for anything else.  If 6 is
+ * used, there are 64 possible continuations 80-BF.  With 5, there are 32,
+ * A0-BF.  And with 4 there would be 0 continuations possible; an
+ * impossibility.  So 5 is the minimum.  UTF-EBCDIC I8 (Intermediate 8) is just
+ * setting this to 5.  We could have a UTF-8 encoding that is based on ASCII,
+ * but uses just 5 bits of payload per continuation byte.  The reason someone
+ * might want to do this is to extend the set of characters that occupy a
+ * single byte when encoded in this hypothetical UTF-8 to additionally include
+ * the C1 controls.) */
 #  define UTF_CONTINUATION_BYTE_INFO_BITS 6
 
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
@@ -366,12 +378,17 @@ are in the character. */
 #define UTF_IS_CONTINUATION_MASK \
     ((U8) ((0xFF << UTF_ACCUMULATION_SHIFT) & 0xFF))
 
-/* This defines the bits that are to be in the continuation bytes of a
- * multi-byte UTF-8 encoded character that mark it is a continuation byte.
- * This turns out to be 0x80 in UTF-8, 0xA0 in UTF-EBCDIC.  (khw doesn't know
- * the underlying reason that B0 works here, except it just happens to work.
- * One could solve for two linear equations and come up with it.) */
-#define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
+/* This defines the bits that mark a byte in a multi-byte UTF-8 encoded
+ * character as being a continuation byte.  A MASK clears the bits you don't
+ * want, using a binary '&'; and a MARK sets the ones you do want, using a
+ * binary '|'.  As stated earlier, the fundamental difference between UTF-8 and
+ * UTF-EBCDIC is that the former has the upper 2 bits of a continuation byte be
+ * '10', and the latter has the upper 3 bits be '101', leaving 6 and 5 bits
+ * respectively in which to store information.  This is equivalent to "All bits
+ * are 1 except those that store information (which vary) plus the bit that is
+ * required to be 0".  This yields 1000 0000 (0x80) for ASCII, and 1010 0000
+ * (0xA0) for UTF-EBCDIC. */
+#define UTF_CONTINUATION_MARK (~(0x40 | UTF_CONTINUATION_MASK) & 0xff)
 
 /* These values are clearer in some contexts; still apply to UTF, not UTF-8 */
 #define UTF_MIN_CONTINUATION_BYTE  UTF_CONTINUATION_MARK
@@ -1281,8 +1298,6 @@ point's representation.
 #define SHARP_S_SKIP 2
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
-#define bytes_from_utf8(s, lenp, is_utf8p)                                  \
-                            bytes_from_utf8_loc(s, lenp, is_utf8p, 0)
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */

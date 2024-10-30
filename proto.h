@@ -409,11 +409,6 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p);
         assert(s); assert(lenp); assert(is_utf8p)
 
 PERL_CALLCONV U8 *
-Perl_bytes_from_utf8_loc(const U8 *s, STRLEN *lenp, bool *is_utf8p, const U8 **first_unconverted);
-#define PERL_ARGS_ASSERT_BYTES_FROM_UTF8_LOC    \
-        assert(s); assert(lenp); assert(is_utf8p)
-
-PERL_CALLCONV U8 *
 Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8          \
         assert(s); assert(lenp)
@@ -1797,6 +1792,11 @@ Perl_init_uniprops(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_INIT_UNIPROPS
 
+/* PERL_CALLCONV char *
+Perl_instr(const char *big, const char *little)
+        __attribute__warn_unused_result__
+        __attribute__pure__; */
+
 PERL_CALLCONV U32
 Perl_intro_my(pTHX);
 #define PERL_ARGS_ASSERT_INTRO_MY
@@ -1865,6 +1865,9 @@ is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep,
 /* PERL_CALLCONV bool
 is_utf8_string(const U8 *s, STRLEN len)
         __attribute__warn_unused_result__; */
+
+/* PERL_CALLCONV bool
+Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
 
 /* PERL_CALLCONV bool
 is_utf8_string_loc_flags(const U8 *s, STRLEN len, const U8 **ep, const U32 flags); */
@@ -3977,6 +3980,9 @@ PERL_CALLCONV void
 Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void *p);
 #define PERL_ARGS_ASSERT_SAVE_DESTRUCTOR_X
 
+/* PERL_CALLCONV void
+Perl_save_freepv(pTHX_ char *pv); */
+
 PERL_CALLCONV void
 Perl_save_freercpv(pTHX_ char *rcpv);
 #define PERL_ARGS_ASSERT_SAVE_FREERCPV          \
@@ -5126,6 +5132,18 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen);
 #define PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED \
         assert(p); assert(d); assert(newlen)
 
+/* PERL_CALLCONV U8 *
+Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 * const start)
+        __attribute__warn_unused_result__; */
+
+/* PERL_CALLCONV U8 *
+Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 * const end)
+        __attribute__warn_unused_result__; */
+
+/* PERL_CALLCONV U8 *
+Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV STRLEN
 Perl_utf8_length(pTHX_ const U8 *s0, const U8 *e)
         __attribute__warn_unused_result__;
@@ -5164,13 +5182,13 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         assert(idop)
 
 /* PERL_CALLCONV U8 *
-uvchr_to_utf8(pTHX_ U8 *d, UV uv); */
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv); */
 
 /* PERL_CALLCONV U8 *
-uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags); */
+Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags); */
 
 /* PERL_CALLCONV U8 *
-uvchr_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs); */
+Perl_uvchr_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs); */
 
 PERL_CALLCONV U8 *
 Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
@@ -5794,22 +5812,10 @@ PERL_CALLCONV SV **
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags);
 # define PERL_ARGS_ASSERT_HV_STORE_FLAGS
 
-PERL_CALLCONV char *
-Perl_instr(const char *big, const char *little)
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-# define PERL_ARGS_ASSERT_INSTR                 \
-        assert(big); assert(little)
-
 PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 # define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \
         assert(buf); assert(buf_end)
-
-PERL_CALLCONV bool
-Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep);
-# define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC    \
-        assert(s); assert(ep)
 
 PERL_CALLCONV AV *
 Perl_newAV(pTHX)
@@ -5838,10 +5844,6 @@ Perl_newSVsv(pTHX_ SV * const old)
 PERL_CALLCONV void
 Perl_save_freeop(pTHX_ OP *o);
 # define PERL_ARGS_ASSERT_SAVE_FREEOP
-
-PERL_CALLCONV void
-Perl_save_freepv(pTHX_ char *pv);
-# define PERL_ARGS_ASSERT_SAVE_FREEPV
 
 PERL_CALLCONV void
 Perl_save_freesv(pTHX_ SV *sv);
@@ -6040,12 +6042,6 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 # define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
         assert(d)
 
-# if defined(PERL_DONT_CREATE_GVSV)
-PERL_CALLCONV GV *
-Perl_gv_SVadd(pTHX_ GV *gv);
-#   define PERL_ARGS_ASSERT_GV_SVADD
-
-# endif
 # if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
 PERL_CALLCONV OP *
@@ -6166,6 +6162,11 @@ Perl_do_exec(pTHX_ const char *cmd)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_EXEC               \
         assert(cmd)
+
+#endif
+#if defined(PERL_DONT_CREATE_GVSV)
+/* PERL_CALLCONV GV *
+Perl_gv_SVadd(pTHX_ GV *gv); */
 
 #endif
 #if defined(PERL_IMPLICIT_SYS)
@@ -8791,12 +8792,6 @@ S_reghop3(U8 *s, SSize_t off, const U8 *lim)
         assert(s); assert(lim)
 
 STATIC U8 *
-S_reghop4(U8 *s, SSize_t off, const U8 *llim, const U8 *rlim)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_REGHOP4               \
-        assert(s); assert(llim); assert(rlim)
-
-STATIC U8 *
 S_reghopmaybe3(U8 *s, SSize_t off, const U8 * const lim)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_REGHOPMAYBE3          \
@@ -9466,7 +9461,7 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category, const char * const name, cons
 # endif
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE int
-S_does_utf8_overflow(const U8 * const s, const U8 *e, const bool consider_overlongs)
+S_does_utf8_overflow(const U8 * const s, const U8 *e)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW  \
         assert(s); assert(e)
@@ -10082,21 +10077,21 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
         assert(s)
 
 PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
+Perl_utf8_hop_back_overshoot(const U8 *s, SSize_t off, const U8 * const start, SSize_t *remaining)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_UTF8_HOP_BACK         \
+# define PERL_ARGS_ASSERT_UTF8_HOP_BACK_OVERSHOOT \
         assert(s); assert(start)
 
 PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
+Perl_utf8_hop_forward_overshoot(const U8 *s, SSize_t off, const U8 * const end, SSize_t *remaining)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_UTF8_HOP_FORWARD      \
+# define PERL_ARGS_ASSERT_UTF8_HOP_FORWARD_OVERSHOOT \
         assert(s); assert(end)
 
 PERL_STATIC_INLINE U8 *
-Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
+Perl_utf8_hop_overshoot(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end, SSize_t *remaining)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
+# define PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT    \
         assert(s); assert(start); assert(end)
 
 PERL_STATIC_INLINE UV
