@@ -377,30 +377,6 @@ Perl_huge(void)
 }
 #endif
 
-void
-Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
-{
-    PERL_ARGS_ASSERT_GV_FULLNAME3;
-
-    gv_fullname4(sv, gv, prefix, TRUE);
-}
-
-void
-Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
-{
-    PERL_ARGS_ASSERT_GV_EFULLNAME3;
-
-    gv_efullname4(sv, gv, prefix, TRUE);
-}
-
-GV *
-Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
-{
-    PERL_ARGS_ASSERT_GV_FETCHMETHOD;
-
-    return gv_fetchmethod_autoload(stash, name, TRUE);
-}
-
 bool
 Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw,
              int rawmode, int rawperm, PerlIO *supplied_fp)
@@ -525,24 +501,6 @@ void
 Perl_save_op(pTHX)
 {
     save_op();
-}
-
-GV *
-Perl_gv_AVadd(pTHX_ GV *gv)
-{
-    return gv_AVadd(gv);
-}
-
-GV *
-Perl_gv_HVadd(pTHX_ GV *gv)
-{
-    return gv_HVadd(gv);
-}
-
-GV *
-Perl_gv_IOadd(pTHX_ GV *gv)
-{
-    return gv_IOadd(gv);
 }
 
 IO *

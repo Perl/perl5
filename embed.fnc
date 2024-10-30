@@ -1327,12 +1327,12 @@ ARdp	|GV *	|gv_autoload_pvn|NULLOK NOCHECK HV *stash		\
 ARdp	|GV *	|gv_autoload_sv |NULLOK NOCHECK HV *stash		\
 				|NN SV *namesv				\
 				|U32 flags
-AMbdp	|GV *	|gv_AVadd	|NULLOK GV *gv
+Admp	|GV *	|gv_AVadd	|NULLOK GV *gv
 Cp	|void	|gv_check	|NN HV *stash
 : Used in pp.c and pp_sys.c
 ARdp	|SV *	|gv_const_sv	|NN GV *gv
 Adp	|void	|gv_dump	|NULLOK GV *gv
-AMbdp	|void	|gv_efullname3	|NN SV *sv				\
+Admp	|void	|gv_efullname3	|NN SV *sv				\
 				|NN const GV *gv			\
 				|NULLOK const char *prefix
 Adp	|void	|gv_efullname4	|NN SV *sv				\
@@ -1353,7 +1353,7 @@ Adm	|GV *	|gv_fetchmeth_autoload					\
 				|NN const char *name			\
 				|STRLEN len				\
 				|I32 level
-AMbdp	|GV *	|gv_fetchmethod |NN NOCHECK HV *stash			\
+Admp	|GV *	|gv_fetchmethod |NN NOCHECK HV *stash			\
 				|NN const char *name
 Adp	|GV *	|gv_fetchmethod_autoload				\
 				|NN NOCHECK HV *stash			\
@@ -1414,7 +1414,7 @@ Adp	|GV *	|gv_fetchpvn_flags					\
 Adp	|GV *	|gv_fetchsv	|NN SV *name				\
 				|I32 flags				\
 				|const svtype sv_type
-AMbdp	|void	|gv_fullname3	|NN SV *sv				\
+Admp	|void	|gv_fullname3	|NN SV *sv				\
 				|NN const GV *gv			\
 				|NULLOK const char *prefix
 Adp	|void	|gv_fullname4	|NN SV *sv				\
@@ -1423,7 +1423,7 @@ Adp	|void	|gv_fullname4	|NN SV *sv				\
 				|bool keepmain
 CRdp	|CV *	|gv_handler	|NULLOK HV *stash			\
 				|I32 id
-AMbdp	|GV *	|gv_HVadd	|NULLOK GV *gv
+Admp	|GV *	|gv_HVadd	|NULLOK GV *gv
 Adm	|void	|gv_init	|NN GV *gv				\
 				|NULLOK HV *stash			\
 				|NN const char *name			\
@@ -1442,7 +1442,7 @@ Adp	|void	|gv_init_sv	|NN GV *gv				\
 				|NULLOK HV *stash			\
 				|NN SV *namesv				\
 				|U32 flags
-AMbdp	|GV *	|gv_IOadd	|NULLOK GV *gv
+Admp	|GV *	|gv_IOadd	|NULLOK GV *gv
 Adp	|void	|gv_name_set	|NN GV *gv				\
 				|NN const char *name			\
 				|U32 len				\

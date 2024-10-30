@@ -297,9 +297,12 @@ Return the CV from the GV.
 /* gv_fetchfile_flags() */
 #define GVF_NOADD       0x01    /* don't add the glob if it doesn't exist */
 
-#define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE)
-#define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
-#define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)
+#define Perl_gv_fullname3(mTHX, sv,gv,prefix)                           \
+        Perl_gv_fullname4(aTHX_ sv,gv,prefix,TRUE)
+#define Perl_gv_efullname3(mTHX, sv, gv, prefix)                        \
+        Perl_gv_efullname4(aTHX_ sv,gv,prefix,TRUE)
+#define Perl_gv_fetchmethod(mTHX, stash, name)                          \
+        Perl_gv_fetchmethod_autoload(aTHX_ stash, name, TRUE)
 
 /*
 =for apidoc_defn Am|GV *|gv_fetchsv_nomg|SV *name|I32 flags|const svtype sv_type
@@ -343,10 +346,10 @@ Make sure there is a slot of the given type (AV, HV, IO, SV) in the GV C<gv>.
 =cut
 */
 
-#define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
-#define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
-#define gv_IOadd(gv) gv_add_by_type((gv), SVt_PVIO)
-#define Perl_gv_SVadd(mTHX, gv)  Perl_gv_add_by_type(aTHX_ (gv), SVt_NULL)
+#define Perl_gv_AVadd(mTHX, gv) Perl_gv_add_by_type(aTHX_ (gv), SVt_PVAV)
+#define Perl_gv_HVadd(mTHX, gv) Perl_gv_add_by_type(aTHX_ (gv), SVt_PVHV)
+#define Perl_gv_IOadd(mTHX, gv) Perl_gv_add_by_type(aTHX_ (gv), SVt_PVIO)
+#define Perl_gv_SVadd(mTHX, gv) Perl_gv_add_by_type(aTHX_ (gv), SVt_NULL)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
