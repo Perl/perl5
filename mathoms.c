@@ -90,16 +90,6 @@ Perl_huge(void)
 }
 #endif
 
-bool
-Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw,
-             int rawmode, int rawperm, PerlIO *supplied_fp)
-{
-    PERL_ARGS_ASSERT_DO_OPEN;
-
-    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
-                    supplied_fp, (SV **) NULL, 0);
-}
-
 #ifndef OS2
 bool
 Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp)

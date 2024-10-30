@@ -8398,8 +8398,8 @@ so no C<x++>.
 #pragma message disable (mainparm) /* Perl uses the envp in main(). */
 #endif
 
-#define do_open(g, n, l, a, rm, rp, sf) \
-        do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
+#define Perl_do_open(mTHX, g, n, l, a, rm, rp, sf)                      \
+        Perl_do_openn(aTHX_ g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #  define do_exec(cmd)			do_exec3(cmd,0,0)
 #endif

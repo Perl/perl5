@@ -206,6 +206,7 @@
 # define do_join(a,b,c,d)                       Perl_do_join(aTHX_ a,b,c,d)
 # define do_magic_dump(a,b,c,d,e,f,g)           Perl_do_magic_dump(aTHX_ a,b,c,d,e,f,g)
 # define do_op_dump(a,b,c)                      Perl_do_op_dump(aTHX_ a,b,c)
+# define do_open(a,b,c,d,e,f,g)                 Perl_do_open(aTHX,a,b,c,d,e,f,g)
 # define do_openn(a,b,c,d,e,f,g,h,i)            Perl_do_openn(aTHX_ a,b,c,d,e,f,g,h,i)
 # define do_pmop_dump(a,b,c)                    Perl_do_pmop_dump(aTHX_ a,b,c)
 # define do_sprintf(a,b,c)                      Perl_do_sprintf(aTHX_ a,b,c)

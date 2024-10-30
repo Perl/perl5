@@ -910,6 +910,9 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o);
 #define PERL_ARGS_ASSERT_DO_OP_DUMP             \
         assert(file)
 
+/* PERL_CALLCONV bool
+Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp); */
+
 PERL_CALLCONV bool
 Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len, PerlIO *supplied_fp, SV **svp, U32 num)
         __attribute__visibility__("hidden");
@@ -5882,11 +5885,6 @@ PERL_CALLCONV bool
 Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp);
 # define PERL_ARGS_ASSERT_DO_AEXEC              \
         assert(mark); assert(sp)
-
-PERL_CALLCONV bool
-Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp);
-# define PERL_ARGS_ASSERT_DO_OPEN               \
-        assert(gv); assert(name)
 
 PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
