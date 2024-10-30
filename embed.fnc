@@ -2148,7 +2148,7 @@ ARdp	|OP *	|newASSIGNOP	|I32 flags				\
 				|NULLOK OP *left			\
 				|I32 optype				\
 				|NULLOK OP *right
-Adm	|CV *	|newATTRSUB	|I32 floor				\
+Admp	|CV *	|newATTRSUB	|I32 floor				\
 				|NULLOK OP *o				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *attrs			\
@@ -2275,7 +2275,7 @@ ARdp	|OP *	|newSTATEOP	|I32 flags				\
 				|NULLOK OP *o
 p	|CV *	|newSTUB	|NN GV *gv				\
 				|bool fake
-AMbdp	|CV *	|newSUB 	|I32 floor				\
+Admp	|CV *	|newSUB 	|I32 floor				\
 				|NULLOK OP *o				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *block

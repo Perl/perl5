@@ -147,13 +147,6 @@ Perl_my_lstat(pTHX)
     return my_lstat_flags(SV_GMAGIC);
 }
 
-CV *
-Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
-{
-    return newATTRSUB(floor, o, proto, NULL, block);
-}
-
-
 STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 {

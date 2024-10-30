@@ -2783,7 +2783,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 #define PERL_ARGS_ASSERT_NEWASSIGNOP
 
 /* PERL_CALLCONV CV *
-newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block); */
+Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block); */
 
 PERL_CALLCONV CV *
 Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block, bool o_is_gv);
@@ -3024,6 +3024,9 @@ Perl_newSTUB(pTHX_ GV *gv, bool fake)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_NEWSTUB                \
         assert(gv)
+
+/* PERL_CALLCONV CV *
+Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block); */
 
 PERL_CALLCONV SV *
 Perl_newSV(pTHX_ const STRLEN len)
@@ -5908,10 +5911,6 @@ PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 # define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \
         assert(buf); assert(buf_end)
-
-PERL_CALLCONV CV *
-Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block);
-# define PERL_ARGS_ASSERT_NEWSUB
 
 PERL_CALLCONV void
 Perl_sv_nolocking(pTHX_ SV *sv)
