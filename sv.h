@@ -1721,10 +1721,14 @@ inputs such as locale settings.  C<SvTAINT> propagates that taintedness to
 the outputs of an expression in a pessimistic fashion; i.e., without paying
 attention to precisely which outputs are influenced by which inputs.
 
+=for apidoc sv_taint
+Taint an SV.  Use C<SvTAINTED_on> instead.
+
 =cut
 */
 
-#define sv_taint(sv)	  sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0)
+#define Perl_sv_taint(mTHX, sv)                                     \
+        Perl_sv_magic(aTHX_ (sv), NULL, PERL_MAGIC_taint, NULL, 0)
 
 #ifdef NO_TAINT_SUPPORT
 #   define SvTAINTED(sv) 0
@@ -2166,9 +2170,11 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 
 
 #define sv_unref(sv)    	sv_unref_flags(sv, 0)
-#define sv_force_normal(sv)	sv_force_normal_flags(sv, 0)
-#define sv_usepvn(sv, p, l)	sv_usepvn_flags(sv, p, l, 0)
-#define sv_usepvn_mg(sv, p, l)	sv_usepvn_flags(sv, p, l, SV_SMAGIC)
+#define Perl_sv_force_normal(mTHX, sv)  Perl_sv_force_normal_flags(aTHX_ sv, 0)
+#define Perl_sv_usepvn(mTHX, sv, p, l)                                  \
+        Perl_sv_usepvn_flags(aTHX_ sv, p, l, 0)
+#define Perl_sv_usepvn_mg(mTHX, sv, p, l)                               \
+        Perl_sv_usepvn_flags(aTHX_ sv, p, l, SV_SMAGIC)
 
 /*
 =for apidoc Am|void|SV_CHECK_THINKFIRST_COW_DROP|SV * sv
@@ -2219,14 +2225,40 @@ immediately written again.
 
 /* all these 'functions' are now just macros */
 
-#define sv_pv(sv) SvPV_nolen(sv)
-#define sv_pvutf8(sv) SvPVutf8_nolen(sv)
-#define sv_pvbyte(sv) SvPVbyte_nolen(sv)
+/*
+=for apidoc sv_pv
+
+Use the C<SvPV_nolen> macro instead
+
+=cut
+*/
+#define Perl_sv_pv(mTHX, sv) Perl_SvPV_nolen(aTHX_ sv)
+
+/*
+=for apidoc sv_pvutf8
+
+Use the C<SvPVutf8_nolen> macro instead
+
+=cut
+*/
+
+#define Perl_sv_pvutf8(mTHX, sv)  Perl_SvPVutf8_nolen(aTHX_ sv)
+
+/*
+=for apidoc sv_pvbyte
+
+Use C<SvPVbyte_nolen> instead.
+
+=cut
+*/
+#define Perl sv_pvbyte(mTHX, sv)  Perl SvPVbyte_nolen(aTHX_ sv)
 
 #define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
-#define sv_utf8_upgrade_flags(sv, flags) sv_utf8_upgrade_flags_grow(sv, flags, 0)
+#define Perl_sv_utf8_upgrade_flags(mTHX, sv, flags)                     \
+        Perl_sv_utf8_upgrade_flags_grow(aTHX_ sv, flags, 0)
 #define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
-#define sv_utf8_downgrade(sv, fail_ok) sv_utf8_downgrade_flags(sv, fail_ok, SV_GMAGIC)
+#define Perl_sv_utf8_downgrade(mTHX, sv, fail_ok)                       \
+        Perl_sv_utf8_downgrade_flags(aTHX_ sv, fail_ok, SV_GMAGIC)
 #define sv_utf8_downgrade_nomg(sv, fail_ok) sv_utf8_downgrade_flags(sv, fail_ok, 0)
 /*
 =for apidoc_defn Am|void|sv_catpvn_nomg|NN SV * const dsv               \
@@ -2238,45 +2270,89 @@ immediately written again.
 */
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
 #define sv_catpv_nomg(dsv, sstr) sv_catpv_flags(dsv, sstr, 0)
-#define sv_setsv(dsv, ssv) \
-        sv_setsv_flags(dsv, ssv, SV_GMAGIC|SV_DO_COW_SVSETSV)
+#define Perl_sv_setsv(mTHX, dsv, ssv)                                   \
+        Perl_sv_setsv_flags(aTHX_ dsv, ssv, SV_GMAGIC|SV_DO_COW_SVSETSV)
 /*
 =for apidoc_defn Am|void|sv_setsv_nomg|SV *dsv|SV *ssv
 =for apidoc_defn Am|void|sv_catsv_nomg|SV * const dsv|SV * const sstr
 =cut
 */
 #define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_DO_COW_SVSETSV)
-#define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
+#define Perl_sv_catsv(mTHX, dsv, ssv)                                   \
+        Perl_sv_catsv_flags(aTHX_ dsv, ssv, SV_GMAGIC)
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
-#define sv_catsv_mg(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC|SV_SMAGIC)
-#define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
-#define sv_catpvn_mg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
-#define sv_copypv(dsv, ssv) sv_copypv_flags(dsv, ssv, SV_GMAGIC)
+#define Perl_sv_catsv_mg(mTHX, dsv, ssv)                                \
+        Perl_sv_catsv_flags(aTHX_ dsv, ssv, SV_GMAGIC|SV_SMAGIC)
+#define Perl_sv_catpvn(mTHX, dsv, sstr, slen)                           \
+        Perl_sv_catpvn_flags(aTHX_ dsv, sstr, slen, SV_GMAGIC)
+#define Perl_sv_catpvn_mg(mTHX, dsv, sstr, slen)                        \
+        Perl_sv_catpvn_flags(aTHX_ dsv, sstr, slen, SV_GMAGIC|SV_SMAGIC)
+#define Perl_sv_copypv(mTHX, dsv, ssv)                                  \
+        Perl_sv_copypv_flags(aTHX_ dsv, ssv, SV_GMAGIC)
 #define sv_copypv_nomg(dsv, ssv) sv_copypv_flags(dsv, ssv, 0)
-#define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
-#define sv_2pv_nolen(sv) sv_2pv(sv, 0)
-#define sv_2pvbyte(sv, lp) sv_2pvbyte_flags(sv, lp, SV_GMAGIC)
-#define sv_2pvbyte_nolen(sv) sv_2pvbyte(sv, 0)
-#define sv_2pvutf8(sv, lp) sv_2pvutf8_flags(sv, lp, SV_GMAGIC)
-#define sv_2pvutf8_nolen(sv) sv_2pvutf8(sv, 0)
+#define Perl_sv_2pv(mTHX, sv, lp)  Perl_sv_2pv_flags(aTHX_ sv, lp, SV_GMAGIC)
+
+/*
+=for apidoc sv_2pv_nolen
+
+Like C<sv_2pv()>, but doesn't return the length too.  You should usually
+use the macro wrapper C<SvPV_nolen(sv)> instead.
+
+=cut
+*/
+#define Perl_sv_2pv_nolen(mTHX, sv)  Perl_sv_2pv(mTHX, sv, 0)
+#define Perl_sv_2pvbyte(mTHX, sv, lp)                                   \
+        Perl_sv_2pvbyte_flags(aTHX_ sv, lp, SV_GMAGIC)
+
+/*
+=for apidoc sv_2pvbyte_nolen
+
+Return a pointer to the byte-encoded representation of the SV.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVbyte_nolen> macro.
+
+=cut
+*/
+#define Perl_sv_2pvbyte_nolen(mTHX, sv)                                 \
+        Perl_sv_2pvbyte(aTHX_ sv, 0)
+
+#define Perl_sv_2pvutf8(mTHX, sv, lp)                                   \
+        Perl_sv_2pvutf8_flags(aTHX_ sv, lp, SV_GMAGIC)
+
+/*
+=for apidoc sv_2pvutf8_nolen
+
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8_nolen> macro.
+
+=cut
+*/
+#define Perl_sv_2pvutf8_nolen(mTHX, sv)  Perl_sv_2pvutf8(aTHX, sv, 0)
+
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
-#define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
-#define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
-#define sv_2iv(sv) sv_2iv_flags(sv, SV_GMAGIC)
-#define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
-#define sv_2nv(sv) sv_2nv_flags(sv, SV_GMAGIC)
-#define sv_eq(sv1, sv2) sv_eq_flags(sv1, sv2, SV_GMAGIC)
+#define Perl_sv_pvn_force(mTHX, sv, lp)                                 \
+        Perl_sv_pvn_force_flags(aTHX_ sv, lp, SV_GMAGIC)
+#define Perl_sv_utf8_upgrade(mTHX, sv)                                  \
+        Perl_sv_utf8_upgrade_flags(aTHX, sv, SV_GMAGIC)
+#define Perl_sv_2iv(mTHX, sv) Perl_sv_2iv_flags(aTHX_ sv, SV_GMAGIC)
+#define Perl_sv_2uv(mTHX, sv) Perl_sv_2uv_flags(aTHX_ sv, SV_GMAGIC)
+#define Perl_sv_2nv(mTHX, sv) Perl_sv_2nv_flags(aTHX_ sv, SV_GMAGIC)
+#define Perl_sv_eq(mTHX, sv1, sv2) Perl_sv_eq_flags(aTHX_ sv1, sv2, SV_GMAGIC)
 #define sv_cmp(sv1, sv2) sv_cmp_flags(sv1, sv2, SV_GMAGIC)
 #define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
 #define sv_numeq(sv1, sv2) sv_numeq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_streq(sv1, sv2) sv_streq_flags(sv1, sv2, SV_GMAGIC)
-#define sv_collxfrm(sv, nxp) sv_collxfrm_flags(sv, nxp, SV_GMAGIC)
-#define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
+#define Perl_sv_collxfrm(mTHX, sv, nxp)                                     \
+        Perl_sv_collxfrm_flags(aTHX_ sv, nxp, SV_GMAGIC)
+#define Perl_sv_2bool(mTHX, sv) Perl_sv_2bool_flags(aTHX_ sv, SV_GMAGIC)
 #define sv_2bool_nomg(sv) sv_2bool_flags(sv, 0)
-#define sv_insert(bigstr, offset, len, little, littlelen)		\
+#define Perl_sv_insert(mTHX, bigstr, offset, len, little, littlelen)        \
         Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
                              (littlelen), SV_GMAGIC)
-#define sv_mortalcopy(sv) \
+#define Perl_sv_mortalcopy(mTHX, sv)                                        \
         Perl_sv_mortalcopy_flags(aTHX_ sv, SV_GMAGIC|SV_DO_COW_SVSETSV)
 #define sv_cathek(sv,hek)					    \
         STMT_START {						     \
@@ -2566,7 +2642,8 @@ struct clone_params {
 
 /* SV_NOSTEAL prevents TEMP buffers being, well, stolen, and saves games
    with SvTEMP_off and SvTEMP_on round a call to sv_setsv.  */
-#define newSVsv(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL)
+#define Perl_newSVsv(mTHX, sv)                                  \
+        Perl_newSVsv_flags(aTHX_ (sv), SV_GMAGIC|SV_NOSTEAL)
 #define newSVsv_nomg(sv) newSVsv_flags((sv), SV_NOSTEAL)
 
 /*

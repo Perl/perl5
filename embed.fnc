@@ -2314,7 +2314,7 @@ ARdp	|SV *	|newSVpvz	|const STRLEN len
 ARdp	|OP *	|newSVREF	|NN OP *o
 Adp	|SV *	|newSVrv	|NN SV * const rv			\
 				|NULLOK const char * const classname
-AMRbdp	|SV *	|newSVsv	|NULLOK SV * const old
+ARdmp	|SV *	|newSVsv	|NULLOK SV * const old
 ARdp	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
 				|I32 flags
 ARdm	|SV *	|newSVsv_nomg	|NULLOK SV * const old
@@ -3074,7 +3074,7 @@ ATdip	|void	|SvAMAGIC_on	|NN SV *sv
 ATdp	|void	|sv_backoff	|NN SV * const sv
 Adp	|SV *	|sv_bless	|NN SV * const sv			\
 				|NN NOCHECK HV * const stash
-CMbdp	|bool	|sv_2bool	|NN SV * const sv
+Cdmp	|bool	|sv_2bool	|NN SV * const sv
 Cdp	|bool	|sv_2bool_flags |NN SV *sv				\
 				|I32 flags
 Adp	|bool	|sv_cat_decode	|NN SV *dsv				\
@@ -3096,22 +3096,22 @@ Adfpv	|void	|sv_catpvf_mg	|NN SV * const sv			\
 				|...
 Adp	|void	|sv_catpv_mg	|NN SV * const dsv			\
 				|NULLOK const char * const sstr
-AMbdp	|void	|sv_catpvn	|NN SV * const dsv			\
+Admp	|void	|sv_catpvn	|NN SV * const dsv			\
 				|NN const char *sstr			\
 				|STRLEN len
 Adp	|void	|sv_catpvn_flags|NN SV * const dsv			\
 				|NN const char *sstr			\
 				|const STRLEN len			\
 				|const I32 flags
-AMbdp	|void	|sv_catpvn_mg	|NN SV * const dsv			\
+Admp	|void	|sv_catpvn_mg	|NN SV * const dsv			\
 				|NN const char *sstr			\
 				|STRLEN len
-AMbdp	|void	|sv_catsv	|NN SV * const dsv			\
+Admp	|void	|sv_catsv	|NN SV * const dsv			\
 				|NULLOK SV * const sstr
 Adp	|void	|sv_catsv_flags |NN SV * const dsv			\
 				|NULLOK SV * const sstr 		\
 				|const I32 flags
-AMbdp	|void	|sv_catsv_mg	|NN SV * const dsv			\
+Admp	|void	|sv_catsv_mg	|NN SV * const dsv			\
 				|NULLOK SV * const sstr
 Adp	|void	|sv_chop	|NN SV * const sv			\
 				|NULLOK const char * const ptr
@@ -3131,7 +3131,7 @@ Adp	|I32	|sv_cmp_locale_flags					\
 				|NULLOK SV * const sv1			\
 				|NULLOK SV * const sv2			\
 				|const U32 flags
-AMbdp	|void	|sv_copypv	|NN SV * const dsv			\
+Admp	|void	|sv_copypv	|NN SV * const dsv			\
 				|NN SV * const ssv
 Adp	|void	|sv_copypv_flags|NN SV * const dsv			\
 				|NN SV * const ssv			\
@@ -3181,12 +3181,12 @@ ARdp	|bool	|sv_does_sv	|NN SV *sv				\
 Adp	|void	|sv_dump	|NULLOK SV *sv
 Adp	|void	|sv_dump_depth	|NULLOK SV *sv				\
 				|I32 depth
-AMbdp	|I32	|sv_eq		|NULLOK SV *sv1 			\
+Admp	|I32	|sv_eq		|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|I32	|sv_eq_flags	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
-AMbdp	|void	|sv_force_normal|NN SV *sv
+Admp	|void	|sv_force_normal|NN SV *sv
 Adp	|void	|sv_force_normal_flags					\
 				|NN SV * const sv			\
 				|const U32 flags
@@ -3206,7 +3206,7 @@ Cdp	|char * |sv_grow_fresh	|NN SV * const sv			\
 				|STRLEN newlen
 Adp	|void	|sv_inc 	|NULLOK SV * const sv
 Adp	|void	|sv_inc_nomg	|NULLOK SV * const sv
-AMbdp	|void	|sv_insert	|NN SV * const bigstr			\
+Admp	|void	|sv_insert	|NN SV * const bigstr			\
 				|const STRLEN offset			\
 				|const STRLEN len			\
 				|NN const char * const little		\
@@ -3224,7 +3224,7 @@ ARdp	|bool	|sv_isa_sv	|NN SV *sv				\
 				|NN SV *namesv
 Adp	|int	|sv_isobject	|NULLOK SV *sv
 Adip	|IV	|SvIV		|NN SV *sv
-CMbp	|IV	|sv_2iv 	|NN SV *sv
+Cmp	|IV	|sv_2iv 	|NN SV * const sv
 Adp	|IV	|sv_2iv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|IV	|SvIV_nomg	|NN SV *sv
@@ -3248,7 +3248,7 @@ Adp	|MAGIC *|sv_magicext	|NN SV * const sv			\
 EXp	|MAGIC *|sv_magicext_mglob					\
 				|NN SV *sv
 Adp	|SV *	|sv_2mortal	|NULLOK SV * const sv
-AMRbdp	|SV *	|sv_mortalcopy	|NULLOK SV * const oldsv
+ARdmp	|SV *	|sv_mortalcopy	|NULLOK SV * const oldsv
 ARdp	|SV *	|sv_mortalcopy_flags					\
 				|NULLOK SV * const oldsv		\
 				|U32 flags
@@ -3266,6 +3266,7 @@ Adp	|bool	|sv_numeq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
 Adip	|NV	|SvNV		|NN SV *sv
+Cmp	|NV	|sv_2nv 	|NN SV * const sv
 Adp	|NV	|sv_2nv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|NV	|SvNV_nomg	|NN SV *sv
@@ -3286,12 +3287,12 @@ Adp	|STRLEN |sv_pos_u2b_flags					\
 				|STRLEN uoffset 			\
 				|NULLOK STRLEN * const lenp		\
 				|U32 flags
-AMbdp	|char * |sv_2pv 	|NN SV *sv				\
+Admp	|char * |sv_2pv 	|NN SV *sv				\
 				|NULLOK STRLEN *lp
-CMRbdp	|char * |sv_pv		|NN SV *sv
-AMbdp	|char * |sv_2pvbyte	|NN SV *sv				\
+CRdmp	|char * |sv_pv		|NN SV *sv
+Admp	|char * |sv_2pvbyte	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
-CMRbdp	|char * |sv_pvbyte	|NN SV *sv
+CRdmp	|char * |sv_pvbyte	|NN SV *sv
 Adp	|char * |sv_2pvbyte_flags					\
 				|NN SV *sv				\
 				|NULLOK STRLEN * const lp		\
@@ -3303,21 +3304,21 @@ ip	|char * |sv_pvbyten_force_wrapper				\
 				|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 dummy
-CMRbdp	|char * |sv_2pvbyte_nolen					\
+CRdmp	|char * |sv_2pvbyte_nolen					\
 				|NN SV *sv
 Adp	|char * |sv_2pv_flags	|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
-CMbdp	|char * |sv_pvn_force	|NN SV *sv				\
+Cdmp	|char * |sv_pvn_force	|NN SV *sv				\
 				|NULLOK STRLEN *lp
 Adp	|char * |sv_pvn_force_flags					\
 				|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
-CMRbdp	|char * |sv_2pv_nolen	|NN SV *sv
-AMbdp	|char * |sv_2pvutf8	|NN SV *sv				\
+CRdmp	|char * |sv_2pv_nolen	|NN SV *sv
+Admp	|char * |sv_2pvutf8	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
-CMRbdp	|char * |sv_pvutf8	|NN SV *sv
+CRdmp	|char * |sv_pvutf8	|NN SV *sv
 Adp	|char * |sv_2pvutf8_flags					\
 				|NN SV *sv				\
 				|NULLOK STRLEN * const lp		\
@@ -3329,7 +3330,7 @@ ip	|char * |sv_pvutf8n_force_wrapper				\
 				|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 dummy
-CMRbdp	|char * |sv_2pvutf8_nolen					\
+CRdmp	|char * |sv_2pvutf8_nolen					\
 				|NN SV *sv
 AIdp	|bool	|SvPVXtrue	|NN SV *sv
 Adp	|char * |sv_recode_to_utf8					\
@@ -3423,7 +3424,7 @@ Adp	|void	|sv_setrv_noinc |NN SV * const sv			\
 Adp	|void	|sv_setrv_noinc_mg					\
 				|NN SV * const sv			\
 				|NN SV * const ref
-AMbdp	|void	|sv_setsv	|NN SV *dsv				\
+Admp	|void	|sv_setsv	|NN SV *dsv				\
 				|NULLOK SV *ssv
 Adp	|void	|sv_setsv_flags |NN SV *dsv				\
 				|NULLOK SV *ssv 			\
@@ -3456,7 +3457,7 @@ Adp	|SV *	|sv_strftime_tm |NN SV *fmt				\
 Adp	|SV *	|sv_string_from_errnum					\
 				|int errnum				\
 				|NULLOK SV *tgtsv
-CMbdp	|void	|sv_taint	|NN SV *sv
+Cdmp	|void	|sv_taint	|NN SV *sv
 CRdp	|bool	|sv_tainted	|NN SV * const sv
 Adip	|bool	|SvTRUE 	|NULLOK SV *sv
 Cdp	|I32	|sv_true	|NULLOK SV * const sv
@@ -3479,18 +3480,18 @@ Adp	|void	|sv_unref_flags |NN SV * const ref			\
 Cdp	|void	|sv_untaint	|NN SV * const sv
 Adp	|void	|sv_upgrade	|NN SV * const sv			\
 				|svtype new_type
-AMbdp	|void	|sv_usepvn	|NN SV *sv				\
+Admp	|void	|sv_usepvn	|NN SV *sv				\
 				|NULLOK char *ptr			\
 				|STRLEN len
 Adp	|void	|sv_usepvn_flags|NN SV * const sv			\
 				|NULLOK char *ptr			\
 				|const STRLEN len			\
 				|const U32 flags
-AMbdp	|void	|sv_usepvn_mg	|NN SV *sv				\
+Admp	|void	|sv_usepvn_mg	|NN SV *sv				\
 				|NULLOK char *ptr			\
 				|STRLEN len
 Adp	|bool	|sv_utf8_decode |NN SV * const sv
-AMbdp	|bool	|sv_utf8_downgrade					\
+Admp	|bool	|sv_utf8_downgrade					\
 				|NN SV * const sv			\
 				|const bool fail_ok
 Adp	|bool	|sv_utf8_downgrade_flags				\
@@ -3501,8 +3502,8 @@ Adm	|bool	|sv_utf8_downgrade_nomg 				\
 				|NN SV * const sv			\
 				|const bool fail_ok
 Adp	|void	|sv_utf8_encode |NN SV * const sv
-AMbdp	|STRLEN |sv_utf8_upgrade|NN SV *sv
-Adm	|STRLEN |sv_utf8_upgrade_flags					\
+Admp	|STRLEN |sv_utf8_upgrade|NN SV *sv
+Admp	|STRLEN |sv_utf8_upgrade_flags					\
 				|NN SV * const sv			\
 				|const I32 flags
 Adp	|STRLEN |sv_utf8_upgrade_flags_grow				\
@@ -3512,7 +3513,7 @@ Adp	|STRLEN |sv_utf8_upgrade_flags_grow				\
 Adm	|STRLEN |sv_utf8_upgrade_nomg					\
 				|NN SV *sv
 Adip	|UV	|SvUV		|NN SV *sv
-CMbp	|UV	|sv_2uv 	|NN SV *sv
+Cmp	|UV	|sv_2uv 	|NN SV * const sv
 Adp	|UV	|sv_2uv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|UV	|SvUV_nomg	|NN SV *sv
@@ -6270,7 +6271,7 @@ p	|int	|magic_setcollxfrm					\
 				|NN MAGIC *mg
 EXop	|SV *	|strxfrm	|NN SV *src
 : Defined in locale.c, used only in sv.c
-AMbdp	|char * |sv_collxfrm	|NN SV * const sv			\
+Admp	|char * |sv_collxfrm	|NN SV * const sv			\
 				|NN STRLEN * const nxp
 Adp	|char * |sv_collxfrm_flags					\
 				|NN SV * const sv			\

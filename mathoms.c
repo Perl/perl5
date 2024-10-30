@@ -90,276 +90,6 @@ Perl_sv_unref(pTHX_ SV *sv)
     sv_unref_flags(sv, 0);
 }
 
-/*
-=for apidoc_section $tainting
-=for apidoc sv_taint
-
-Taint an SV.  Use C<SvTAINTED_on> instead.
-
-=cut
-*/
-
-void
-Perl_sv_taint(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_TAINT;
-
-    sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
-}
-
-/* sv_2iv() is now a macro using Perl_sv_2iv_flags();
- * this function provided for binary compatibility only
- */
-
-IV
-Perl_sv_2iv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2IV;
-
-    return sv_2iv_flags(sv, SV_GMAGIC);
-}
-
-/* sv_2uv() is now a macro using Perl_sv_2uv_flags();
- * this function provided for binary compatibility only
- */
-
-UV
-Perl_sv_2uv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2UV;
-
-    return sv_2uv_flags(sv, SV_GMAGIC);
-}
-
-/* sv_2nv() is now a macro using Perl_sv_2nv_flags();
- * this function provided for binary compatibility only
- */
-
-NV
-Perl_sv_2nv(pTHX_ SV *sv)
-{
-    return sv_2nv_flags(sv, SV_GMAGIC);
-}
-
-
-/* sv_2pv() is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp)
-{
-    PERL_ARGS_ASSERT_SV_2PV;
-
-    return sv_2pv_flags(sv, lp, SV_GMAGIC);
-}
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_2pv_nolen
-
-Like C<sv_2pv()>, but doesn't return the length too.  You should usually
-use the macro wrapper C<SvPV_nolen(sv)> instead.
-
-=cut
-*/
-
-char *
-Perl_sv_2pv_nolen(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2PV_NOLEN;
-    return sv_2pv(sv, NULL);
-}
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_2pvbyte_nolen
-
-Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVbyte_nolen> macro.
-
-=cut
-*/
-
-char *
-Perl_sv_2pvbyte_nolen(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2PVBYTE_NOLEN;
-
-    return sv_2pvbyte(sv, NULL);
-}
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_2pvutf8_nolen
-
-Return a pointer to the UTF-8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8_nolen> macro.
-
-=cut
-*/
-
-char *
-Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2PVUTF8_NOLEN;
-
-    return sv_2pvutf8(sv, NULL);
-}
-
-void
-Perl_sv_force_normal(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_FORCE_NORMAL;
-
-    sv_force_normal_flags(sv, 0);
-}
-
-/* sv_setsv() is now a macro using Perl_sv_setsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv)
-{
-    PERL_ARGS_ASSERT_SV_SETSV;
-
-    sv_setsv_flags(dsv, ssv, SV_GMAGIC);
-}
-
-/* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
-{
-    PERL_ARGS_ASSERT_SV_CATPVN;
-
-    sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
-}
-
-void
-Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len)
-{
-    PERL_ARGS_ASSERT_SV_CATPVN_MG;
-
-    sv_catpvn_flags(dsv,sstr,len,SV_GMAGIC|SV_SMAGIC);
-}
-
-/* sv_catsv() is now a macro using Perl_sv_catsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catsv(pTHX_ SV *dsv, SV * const sstr)
-{
-    PERL_ARGS_ASSERT_SV_CATSV;
-
-    sv_catsv_flags(dsv, sstr, SV_GMAGIC);
-}
-
-void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, SV * const sstr)
-{
-    PERL_ARGS_ASSERT_SV_CATSV_MG;
-
-    sv_catsv_flags(dsv,sstr,SV_GMAGIC|SV_SMAGIC);
-}
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_pv
-
-Use the C<SvPV_nolen> macro instead
-
-=cut
-*/
-
-/* sv_pv() is now a macro using SvPV_nolen();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_PV;
-
-    if (SvPOK(sv))
-        return SvPVX(sv);
-
-    return sv_2pv(sv, NULL);
-}
-
-/* sv_pvn_force() is now a macro using Perl_sv_pvn_force_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
-{
-    PERL_ARGS_ASSERT_SV_PVN_FORCE;
-
-    return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
-}
-
-/* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvbyte(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_PVBYTE;
-
-    (void)sv_utf8_downgrade(sv, FALSE);
-    return sv_pv(sv);
-}
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_pvbyte
-
-Use C<SvPVbyte_nolen> instead.
-
-=cut
-*/
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_pvutf8
-
-Use the C<SvPVutf8_nolen> macro instead
-
-=cut
-*/
-
-
-char *
-Perl_sv_pvutf8(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_PVUTF8;
-
-    sv_utf8_upgrade(sv);
-    return sv_pv(sv);
-}
-
-/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
- * this function provided for binary compatibility only
- */
-
-STRLEN
-Perl_sv_utf8_upgrade(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_UTF8_UPGRADE;
-
-    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
-}
-
 #if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
 /*
  * This hack is to force load of "huge" support from libm.a
@@ -442,23 +172,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-void
-Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
-{
-    PERL_ARGS_ASSERT_SV_USEPVN_MG;
-
-    sv_usepvn_flags(sv,ptr,len, SV_SMAGIC);
-}
-
-
-void
-Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
-{
-    PERL_ARGS_ASSERT_SV_USEPVN;
-
-    sv_usepvn_flags(sv,ptr,len, 0);
-}
-
 AV *
 Perl_newAV(pTHX)
 {
@@ -467,14 +180,6 @@ Perl_newAV(pTHX)
     AvALLOC(av) = 0;
     AvARRAY(av) = NULL;
     AvMAX(av) = AvFILLp(av) = -1; */
-}
-
-void
-Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, 
-              const char *const little, const STRLEN littlelen)
-{
-    PERL_ARGS_ASSERT_SV_INSERT;
-    sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
 }
 
 void
@@ -521,48 +226,12 @@ Perl_my_lstat(pTHX)
     return my_lstat_flags(SV_GMAGIC);
 }
 
-I32
-Perl_sv_eq(pTHX_ SV *sv1, SV *sv2)
-{
-    return sv_eq_flags(sv1, sv2, SV_GMAGIC);
-}
-
-#ifdef USE_LOCALE_COLLATE
-char *
-Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
-{
-    PERL_ARGS_ASSERT_SV_COLLXFRM;
-    return sv_collxfrm_flags(sv, nxp, SV_GMAGIC);
-}
-
-#endif
-
-bool
-Perl_sv_2bool(pTHX_ SV *const sv)
-{
-    PERL_ARGS_ASSERT_SV_2BOOL;
-    return sv_2bool_flags(sv, SV_GMAGIC);
-}
-
 CV *
 Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
 {
     return newATTRSUB(floor, o, proto, NULL, block);
 }
 
-SV *
-Perl_sv_mortalcopy(pTHX_ SV *const oldsv)
-{
-    return Perl_sv_mortalcopy_flags(aTHX_ oldsv, SV_GMAGIC);
-}
-
-void
-Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
-{
-    PERL_ARGS_ASSERT_SV_COPYPV;
-
-    sv_copypv_flags(dsv, ssv, SV_GMAGIC);
-}
 
 STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
@@ -572,7 +241,6 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 
     return isUTF8_CHAR(buf, buf_end);
 }
-
 /*
 =for apidoc_section $unicode
 =for apidoc utf8_to_uvuni
@@ -605,36 +273,6 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
-}
-
-SV *
-Perl_newSVsv(pTHX_ SV *const old)
-{
-    return newSVsv(old);
-}
-
-bool
-Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
-{
-    PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE;
-
-    return sv_utf8_downgrade(sv, fail_ok);
-}
-
-char *
-Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp)
-{
-    PERL_ARGS_ASSERT_SV_2PVUTF8;
-
-    return sv_2pvutf8(sv, lp);
-}
-
-char *
-Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
-{
-    PERL_ARGS_ASSERT_SV_2PVBYTE;
-
-    return sv_2pvbyte(sv, lp);
 }
 
 U8 *
