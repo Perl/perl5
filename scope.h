@@ -294,15 +294,17 @@ casts it to a pointer of that C<type>.
 #define SSPTR(off,type)         (assert(sizeof(off) >= sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
 #define SSPTRt(off,type)        (assert(sizeof(off) >= sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
 
-#define save_freesv(op)		save_pushptr((void *)(op), SAVEt_FREESV)
-#define save_mortalizesv(op)	save_pushptr((void *)(op), SAVEt_MORTALIZESV)
+#define Perl_save_freesv(mTHX, op)                                          \
+        Perl_save_pushptr(aTHX_ (void *)(op), SAVEt_FREESV)
+#define Perl_save_mortalizesv(mTHX, op)                                     \
+        Perl_save_pushptr(aTHX_ (void *)(op), SAVEt_MORTALIZESV)
 
-# define save_freeop(op)                    \
-STMT_START {                                 \
-      OP * const _o = (OP *)(op);             \
-      assert(!_o->op_savefree);               \
-      _o->op_savefree = 1;                     \
-      save_pushptr((void *)(_o), SAVEt_FREEOP); \
+# define Perl_save_freeop(mTHX, op)                                         \
+STMT_START {                                                                \
+      OP * const _o = (OP *)(op);                                           \
+      assert(!_o->op_savefree);                                             \
+      _o->op_savefree = 1;                                                  \
+      Perl_save_pushptr(aTHX_ (void *)(_o), SAVEt_FREEOP);                  \
     } STMT_END
 #define Perl_save_freepv(mTHX, pv)                          \
         Perl_save_pushptr(aTHX_ (void *)(pv), SAVEt_FREEPV)
@@ -316,7 +318,7 @@ Implements C<SAVEOP>.
 =cut
  */
 
-#define save_op()		save_pushptr((void *)(PL_op), SAVEt_OP)
+#define Perl_save_op(mTHX)  Perl_save_pushptr(aTHX_ (void *)(PL_op), SAVEt_OP)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

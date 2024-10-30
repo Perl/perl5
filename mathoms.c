@@ -135,32 +135,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-void
-Perl_save_freesv(pTHX_ SV *sv)
-{
-    save_freesv(sv);
-}
-
-void
-Perl_save_mortalizesv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SAVE_MORTALIZESV;
-
-    save_mortalizesv(sv);
-}
-
-void
-Perl_save_freeop(pTHX_ OP *o)
-{
-    save_freeop(o);
-}
-
-void
-Perl_save_op(pTHX)
-{
-    save_op();
-}
-
 IO *
 Perl_newIO(pTHX)
 {

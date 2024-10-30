@@ -2910,10 +2910,10 @@ Cp	|void	|save_destructor_x					\
 				|DESTRUCTORFUNC_t f			\
 				|NULLOK void *p
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
-CMbp	|void	|save_freeop	|NULLOK OP *o
+Cmp	|void	|save_freeop	|NULLOK OP *o
 Cmp	|void	|save_freepv	|NULLOK char *pv
 Cdp	|void	|save_freercpv	|NN char *rcpv
-CMbp	|void	|save_freesv	|NULLOK SV *sv
+Cmp	|void	|save_freesv	|NULLOK SV *sv
 Cdp	|void	|save_generic_pvref					\
 				|NN char **str
 Cdp	|void	|save_generic_svref					\
@@ -2939,10 +2939,10 @@ Cp	|void	|save_I8	|NN I8 *bytep
 Cp	|void	|save_int	|NN int *intp
 Adhp	|void	|save_item	|NN SV *item
 Cp	|void	|save_iv	|NN IV *ivp
-CMbp	|void	|save_mortalizesv					\
+Cmp	|void	|save_mortalizesv					\
 				|NN SV *sv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
-CMbdp	|void	|save_op
+Cdmp	|void	|save_op
 Cdp	|void	|save_padsv_and_mortalize				\
 				|PADOFFSET off
 Cp	|void	|save_pptr	|NN char **pptr

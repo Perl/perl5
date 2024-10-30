@@ -4052,12 +4052,18 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void *p);
 #define PERL_ARGS_ASSERT_SAVE_DESTRUCTOR_X
 
 /* PERL_CALLCONV void
+Perl_save_freeop(pTHX_ OP *o); */
+
+/* PERL_CALLCONV void
 Perl_save_freepv(pTHX_ char *pv); */
 
 PERL_CALLCONV void
 Perl_save_freercpv(pTHX_ char *rcpv);
 #define PERL_ARGS_ASSERT_SAVE_FREERCPV          \
         assert(rcpv)
+
+/* PERL_CALLCONV void
+Perl_save_freesv(pTHX_ SV *sv); */
 
 PERL_CALLCONV void
 Perl_save_generic_pvref(pTHX_ char **str);
@@ -4115,6 +4121,12 @@ PERL_CALLCONV void
 Perl_save_iv(pTHX_ IV *ivp);
 #define PERL_ARGS_ASSERT_SAVE_IV                \
         assert(ivp)
+
+/* PERL_CALLCONV void
+Perl_save_mortalizesv(pTHX_ SV *sv); */
+
+/* PERL_CALLCONV void
+Perl_save_op(pTHX); */
 
 PERL_CALLCONV void
 Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off);
@@ -5901,23 +5913,6 @@ Perl_newIO(pTHX)
 PERL_CALLCONV CV *
 Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block);
 # define PERL_ARGS_ASSERT_NEWSUB
-
-PERL_CALLCONV void
-Perl_save_freeop(pTHX_ OP *o);
-# define PERL_ARGS_ASSERT_SAVE_FREEOP
-
-PERL_CALLCONV void
-Perl_save_freesv(pTHX_ SV *sv);
-# define PERL_ARGS_ASSERT_SAVE_FREESV
-
-PERL_CALLCONV void
-Perl_save_mortalizesv(pTHX_ SV *sv);
-# define PERL_ARGS_ASSERT_SAVE_MORTALIZESV      \
-        assert(sv)
-
-PERL_CALLCONV void
-Perl_save_op(pTHX);
-# define PERL_ARGS_ASSERT_SAVE_OP
 
 PERL_CALLCONV void
 Perl_sv_nolocking(pTHX_ SV *sv)
