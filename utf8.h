@@ -1302,7 +1302,7 @@ point's representation.
 /* Should be removed; maybe deprecated, but not used in CPAN */
 #define SHARP_S_SKIP 2
 
-#define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
+#define Perl_is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */

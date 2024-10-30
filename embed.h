@@ -339,6 +339,7 @@
 # define is_safe_syscall(a,b,c,d)               Perl_is_safe_syscall(aTHX_ a,b,c,d)
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen
 # define is_utf8_FF_helper_                     Perl_is_utf8_FF_helper_
+# define is_utf8_char_buf                       Perl_is_utf8_char_buf
 # define is_utf8_char_helper_                   Perl_is_utf8_char_helper_
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc

@@ -1908,6 +1908,9 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e, const bool requ
 #define PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_     \
         assert(s0); assert(e)
 
+/* PERL_CALLCONV STRLEN
+Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end); */
+
 PERL_CALLCONV STRLEN
 Perl_is_utf8_char_helper_(const U8 * const s, const U8 *e, const U32 flags)
         __attribute__warn_unused_result__
@@ -5907,11 +5910,6 @@ Perl_malloced_size(void *p)
 
 #endif /* defined(MYMALLOC) */
 #if !defined(NO_MATHOMS)
-PERL_CALLCONV STRLEN
-Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
-# define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \
-        assert(buf); assert(buf_end)
-
 PERL_CALLCONV void
 Perl_sv_nolocking(pTHX_ SV *sv)
         __attribute__deprecated__;

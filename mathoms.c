@@ -135,14 +135,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-STRLEN
-Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
-{
-
-    PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
-
-    return isUTF8_CHAR(buf, buf_end);
-}
 /*
 =for apidoc_section $unicode
 =for apidoc utf8_to_uvuni
