@@ -6559,14 +6559,6 @@ static U8 utf8d_C9[] = {
  *          arbitrary class number chosen to not conflict with the above
  *          classes, and to index into the remaining table
  *
- * It would make the code simpler if start byte FF could also be handled, but
- * doing so would mean adding two more classes (one from splitting 80 from 81,
- * and one for FF), and nodes for each of 6 new continuation bytes.  The
- * current table has 436 entries; the new one would require 140 more = 576 (2
- * additional classes for each of the 10 existing nodes, and 20 for each of 6
- * new nodes.  The array would have to be made U16 instead of U8, not worth it
- * for this rarely encountered case
- *
  *      byte          class
  *      00-7F           0   Always legal, single byte sequence
  *      80-81           7   Not legal immediately after start bytes E0 F0 F8 FC
@@ -6588,7 +6580,7 @@ static U8 utf8d_C9[] = {
  *      FD              6   Legal start byte for six byte sequences
  *      FE             17   Some sequences are overlong; others legal
  *                          (is 1 on 32-bit machines, since it overflows)
- *      FF              1   Need to handle specially
+ *      FF              1   Need to handle specially  (explained below)
  */
 
 EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
@@ -6670,7 +6662,54 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
 /*N10*/  1, 1, 1, 1, 1, 1, 1, 1,N5,N5,N5,N5,N5, 1, 1, 1, 1, 1,
 };
 
-/* And below is a version of the above table that accepts only strict UTF-8.
+/* The first portion of the table is 256 bytes.  To keep the table declarable
+ * as U8, 256 is added to the index when accessing this portion at runtime.
+ * That addition could be eliminated if we were willing to declare the table
+ * U16 and adjust the numbers accordingly.
+ *
+ * FF is handled specially because otherwise the table would need to contain
+ * elements that occupy more than 8 bits and so the table would have to be
+ * declared as U16, so not worth it for this rarely encountered case.  If you
+ * are tempted anyway, here is a sketch of what the nodes would look like:
+ * N0     The initial state, and final accepting one.
+ * N1     Any one continuation byte (80-BF) left.  This is transitioned to
+ *        immediately when the start byte indicates a two-byte sequence
+ * N2     Any two continuation bytes left.
+ * N3     Any three continuation bytes left.
+ * N4     Any four continuation bytes left.
+ * N5     Any five continuation bytes left.
+ * N6     Any six continuation bytes left.
+ * N7     Any seven continuation bytes left.
+ * N8     Any eight continuation bytes left.
+ * N9     Any nine continuation bytes left.
+ * N10    Any ten continuation bytes left.
+ * N11    Start byte is E0.  Continuation bytes 80-9F are illegal (overlong);
+ *        the other continuations transition to N1
+ * N12    Start byte is F0.  Continuation bytes 80-8F are illegal (overlong);
+ *        the other continuations transition to N2
+ * N13    Start byte is F8.  Continuation bytes 80-87 are illegal (overlong);
+ *        the other continuations transition to N3
+ * N14    Start byte is FC.  Continuation bytes 80-83 are illegal (overlong);
+ *        the other continuations transition to N4
+ * N15    Start byte is FE.  Continuation bytes 80-81 are illegal (overlong);
+ * N16    Start byte is FF.  Continuation byte 80 transitions to N17;
+ *        the other continuations are illegal (overflow)
+ * N17    sequence so far is FF 80; continuation byte 80 transitions to N18;
+ *        81-9F to N10; the other continuations are illegal (overflow)
+ * N18    sequence so far is FF 80 80; continuation byte 80 transitions to N19;
+ *        the other continuations transition to N9
+ * N19    sequence so far is FF 80 80 80; continuation byte 80 transitions to
+ *        N20; the other continuations transition to N8
+ * N20    sequence so far is FF 80 80 80 80; continuation byte 80 transitions to
+ *        N21; the other continuations transition to N7
+ * N21    sequence so far is FF 80 80 80 80 80; continuation bytes 81-BF
+ *        transition to N6; 80 is illegal (overlong)
+ *
+ * A new class, the 19th, would have to be created for FF.  Then the nodes
+ * portion of the table would have 21 * 19 = 399 slots.  The current table has
+ * 18 classes and 10 nodes = 180 slots for the nodes portion. */
+
+/* Below is a version of the above table that accepts only strict UTF-8.
  * Hence no surrogates nor non-characters, nor non-Unicode.  Thus, if the input
  * passes this dfa, it will be for a well-formed, non-problematic code point
  * that can be returned immediately.
