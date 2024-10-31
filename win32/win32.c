@@ -5696,7 +5696,8 @@ Perl_sys_intern_init(pTHX)
     w32_pseudo_id		= 0;
     Newx(w32_pseudo_children, 1, pseudo_child_tab);
     w32_num_pseudo_children	= 0;
-#  endif
+    PL_sys_intern.cur_tid = GetCurrentThreadId();
+#endif
     w32_timerid                 = 0;
     w32_message_hwnd            = CAST_HWND__(INVALID_HANDLE_VALUE);
     w32_poll_count              = 0;
@@ -5739,6 +5740,15 @@ Perl_sys_intern_clear(pTHX)
     }
     if (w32_message_hwnd != NULL && w32_message_hwnd != INVALID_HANDLE_VALUE)
         DestroyWindow(w32_message_hwnd);
+
+/*  "win32_checkTLS()" executes very late in perl_destruct() and/or perl_free().
+    Field cur_tid must be working to the very end of the
+    interp struct/mem alloc/process.
+#ifdef USE_ITHREADS
+    PL_sys_intern.cur_tid = 0;
+#endif
+*/
+
 #  ifdef MULTIPLICITY
     if (my_perl == PL_curinterp) {
 #  else
@@ -5764,6 +5774,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->fdpid			= newAV();
     Newxz(dst->children, 1, child_tab);
     dst->pseudo_id		= 0;
+    dst->cur_tid = 0;
     Newxz(dst->pseudo_children, 1, pseudo_child_tab);
     dst->timerid                = 0;
     dst->message_hwnd		= CAST_HWND__(INVALID_HANDLE_VALUE);

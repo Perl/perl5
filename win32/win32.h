@@ -523,6 +523,9 @@ struct interp_intern {
     HWND        message_hwnd;
     UINT	timerid;
     unsigned 	poll_count;
+#ifdef USE_ITHREADS
+    DWORD       cur_tid;
+#endif
     Sighandler_t sigtable[SIG_SIZE];
 };
 
