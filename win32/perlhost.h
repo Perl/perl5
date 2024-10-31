@@ -15,7 +15,13 @@
 #include <signal.h>
 #include <wchar.h>
 #include "iperlsys.h"
+
 #include "vmem.h"
+
+#define CRT_ALLOC_BASE
+#include "vmem.h"
+#undef CRT_ALLOC_BASE
+
 #include "vdir.h"
 
 #ifndef WC_NO_BEST_FIT_CHARS
@@ -38,6 +44,7 @@ public:
                  const struct IPerlProc** ppProc);
     CPerlHost(CPerlHost& host);
     ~CPerlHost(void);
+    VMEM_H_NEW_OP;
 
     static CPerlHost* IPerlMem2Host(const struct IPerlMem** piPerl);
     static CPerlHost* IPerlMemShared2Host(const struct IPerlMem** piPerl);
@@ -56,20 +63,20 @@ public:
 
 /* IPerlMem */
     /* Locks provided but should be unnecessary as this is private pool */
-    inline void* Malloc(size_t size) { return m_pVMem->Malloc(size); };
-    inline void* Realloc(void* ptr, size_t size) { return m_pVMem->Realloc(ptr, size); };
-    inline void Free(void* ptr) { m_pVMem->Free(ptr); };
+    inline void* Malloc(size_t size) { return m_VMem.Malloc(size); };
+    inline void* Realloc(void* ptr, size_t size) { return m_VMem.Realloc(ptr, size); };
+    inline void Free(void* ptr) { m_VMem.Free(ptr); };
     inline void* Calloc(size_t num, size_t size)
     {
         size_t count = num*size;
         void* lpVoid = Malloc(count);
         if (lpVoid)
-            ZeroMemory(lpVoid, count);
+            lpVoid = memset(lpVoid, 0, count);
         return lpVoid;
     };
-    inline void GetLock(void) { m_pVMem->GetLock(); };
-    inline void FreeLock(void) { m_pVMem->FreeLock(); };
-    inline int IsLocked(void) { return m_pVMem->IsLocked(); };
+    inline void GetLock(void) { m_VMem.GetLock(); };
+    inline void FreeLock(void) { m_VMem.FreeLock(); };
+    inline int IsLocked(void) { return m_VMem.IsLocked(); };
 
 /* IPerlMemShared */
     /* Locks used to serialize access to the pool */
@@ -103,7 +110,7 @@ public:
         size_t count = num*size;
         void* lpVoid = MallocShared(count);
         if (lpVoid)
-            ZeroMemory(lpVoid, count);
+            lpVoid = memset(lpVoid, 0, count);
         return lpVoid;
     };
 
@@ -122,7 +129,7 @@ public:
         size_t count = num*size;
         void* lpVoid = MallocParse(count);
         if (lpVoid)
-            ZeroMemory(lpVoid, count);
+            lpVoid = memset(lpVoid, 0, count);
         return lpVoid;
     };
 
@@ -137,7 +144,7 @@ public:
             *len = strlen(e);
         return e;
     }
-    void* CreateChildEnv(void) { return CreateLocalEnvironmentStrings(*m_pvDir); };
+    void* CreateChildEnv(void) { return CreateLocalEnvironmentStrings(m_vDir); };
     void FreeChildEnv(void* pStr) { FreeLocalEnvironmentStrings((char*)pStr); };
     char* GetChildDir(void);
     void FreeChildDir(char* pStr);
@@ -166,7 +173,7 @@ protected:
 public:
 
 /* IPerlDIR */
-    virtual int Chdir(const char *dirname);
+    int Chdir(const char *dirname);
 
 /* IPerllProc */
     void Abort(void);
@@ -176,9 +183,10 @@ public:
     int Execv(const char *cmdname, const char *const *argv);
     int Execvp(const char *cmdname, const char *const *argv);
 
+    inline VMem* GetMem(void) { return (VMem* )&m_VMem; };
     inline VMem* GetMemShared(void) { m_pVMemShared->AddRef(); return m_pVMemShared; };
     inline VMem* GetMemParse(void) { m_pVMemParse->AddRef(); return m_pVMemParse; };
-    inline VDir* GetDir(void) { return m_pvDir; };
+    inline VDir* GetDir(void) { return &m_vDir; };
 
 public:
 
@@ -192,22 +200,23 @@ public:
     const struct IPerlSock*	    m_pHostperlSock;
     const struct IPerlProc*	    m_pHostperlProc;
 
-    inline char* MapPathA(const char *pInName) { return m_pvDir->MapPathA(pInName); };
-    inline WCHAR* MapPathW(const WCHAR *pInName) { return m_pvDir->MapPathW(pInName); };
+    inline char* MapPathA(const char *pInName) { return m_vDir.MapPathA(pInName); };
+    inline WCHAR* MapPathW(const WCHAR *pInName) { return m_vDir.MapPathW(pInName); };
+    inline operator VDir* () { return GetDir(); };
 protected:
-
-    VDir*   m_pvDir;
-    VMem*   m_pVMem;
+    VMemNL  m_VMem;
     VMem*   m_pVMemShared;
     VMem*   m_pVMemParse;
 
-    DWORD   m_dwEnvCount;
     LPSTR*  m_lppEnvList;
+    DWORD   m_dwEnvCount;
     BOOL    m_bTopLevel;	// is this a toplevel host?
     static long num_hosts;
 public:
     inline  int LastHost(void) { return num_hosts == 1L; };
     struct interpreter *host_perl;
+protected:
+    VDir   m_vDir;
 };
 
 long CPerlHost::num_hosts = 0L;
@@ -2110,12 +2119,11 @@ CPerlHost::CPerlHost(void)
 {
     /* Construct a host from scratch */
     InterlockedIncrement(&num_hosts);
-    m_pvDir = new VDir();
-    m_pVMem = new VMem();
+
     m_pVMemShared = new VMem();
     m_pVMemParse =  new VMem();
 
-    m_pvDir->Init(NULL, m_pVMem);
+    m_vDir.Init(NULL);
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
@@ -2150,12 +2158,11 @@ CPerlHost::CPerlHost(const struct IPerlMem** ppMem, const struct IPerlMem** ppMe
                  const struct IPerlProc** ppProc)
 {
     InterlockedIncrement(&num_hosts);
-    m_pvDir = new VDir(0);
-    m_pVMem = new VMem();
+
     m_pVMemShared = new VMem();
     m_pVMemParse =  new VMem();
 
-    m_pvDir->Init(NULL, m_pVMem);
+    m_vDir.Init(NULL, 0);
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
@@ -2177,13 +2184,12 @@ CPerlHost::CPerlHost(CPerlHost& host)
 {
     /* Construct a host from another host */
     InterlockedIncrement(&num_hosts);
-    m_pVMem = new VMem();
+
     m_pVMemShared = host.GetMemShared();
     m_pVMemParse =  host.GetMemParse();
 
     /* duplicate directory info */
-    m_pvDir = new VDir(0);
-    m_pvDir->Init(host.GetDir(), m_pVMem);
+    m_vDir.Init(host.GetDir(), 0);
 
     m_pHostperlMem	    = &perlMem;
     m_pHostperlMemShared    = &perlMemShared;
@@ -2210,10 +2216,10 @@ CPerlHost::~CPerlHost(void)
 {
     Reset();
     InterlockedDecrement(&num_hosts);
-    delete m_pvDir;
+    //delete m_vDir;
     m_pVMemParse->Release();
     m_pVMemShared->Release();
-    m_pVMem->Release();
+    //m_VMem.Release();
 }
 
 LPSTR
@@ -2360,7 +2366,7 @@ CPerlHost::GetChildDir(void)
     size_t length;
 
     Newx(ptr, MAX_PATH+1, char);
-    m_pvDir->GetCurrentDirectoryA(MAX_PATH+1, ptr);
+    m_vDir.GetCurrentDirectoryA(MAX_PATH+1, ptr);
     length = strlen(ptr);
     if (length > 3) {
         if ((ptr[length-1] == '\\') || (ptr[length-1] == '/'))
@@ -2546,11 +2552,19 @@ CPerlHost::Chdir(const char *dirname)
         errno = ENOENT;
         return -1;
     }
-    ret = m_pvDir->SetCurrentDirectoryA((char*)dirname);
+    ret = m_vDir.SetCurrentDirectoryA((char*)dirname);
     if(ret < 0) {
         errno = ENOENT;
     }
     return ret;
+}
+
+static inline VMemNL * VDToVM(VDir * pvd) {
+    VDir * vd = (VDir *)pvd;
+    size_t p_szt = ((size_t)vd)-((size_t)((CPerlHost*)NULL)->GetDir());
+    CPerlHost * cph = (CPerlHost*)p_szt;
+    VMemNL * vm = cph->GetMem();
+    return vm;
 }
 
 #endif /* ___PerlHost_H___ */

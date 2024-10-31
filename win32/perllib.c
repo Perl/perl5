@@ -49,10 +49,21 @@ xs_init(pTHX)
 void
 win32_checkTLS(PerlInterpreter *host_perl)
 {
-    dTHX;
-    if (host_perl != my_perl) {
-        int *nowhere = NULL;
-        abort();
+/* GCurThdId() is lightweight, but b/c of the ctrl-c/signals sometimes firing
+  in other random WinOS threads, that make the TIDs go out of sync.
+  This isn't always an error, although high chance of a SEGV in the next
+  couple milliseconds b/c of "Day 1 of Win32 port" Ctrl-C vs Perl bugs.
+  Google it for details.  So this code, if TIDs don't match, do the full heavy
+  TlsGetValue() + misc fn calls.  Then resync TIDs to keep this fast for
+  future calls to this fn. */
+    DWORD tid = GetCurrentThreadId();
+    if(tid != host_perl->Isys_intern.cur_tid) {
+        dTHX; /* heavyweight */
+        if (host_perl != my_perl) {
+            int *nowhere = NULL;
+            abort();
+        }
+        host_perl->Isys_intern.cur_tid = tid;
     }
 }
 
