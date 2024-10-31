@@ -332,7 +332,7 @@ is runperl(stderr => 1, prog => '#!perl -M'),
 
 # Tests for switches which do not exist
 
-foreach my $switch (split //, "ABbGHJjKkLNOoPQqRrYyZz123456789_")
+foreach my $switch (split //, "ABbGHJKkLNOoPQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 

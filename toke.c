@@ -1527,8 +1527,13 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
         PL_parser->rsfp = NULL;
         PL_parser->in_pod = PL_parser->filtered = 0;
         if (!PL_in_eval && PL_minus_p) {
-            sv_catpvs(linestr,
-                /*{*/";}continue{print or die qq(-p destination: $!\\n);}");
+            if (PL_minus_j) {
+                sv_catpvs(linestr,
+                    /*{*/";}continue{print JSON::PP::encode_json($_) or die qq(-p destination: $!\\n);}");
+            } else {
+                sv_catpvs(linestr,
+                    /*{*/";}continue{print or die qq(-p destination: $!\\n);}");
+            };
             PL_minus_n = PL_minus_p = 0;
         } else if (!PL_in_eval && PL_minus_n) {
             sv_catpvs(linestr, /*{*/";}");
@@ -9208,6 +9213,10 @@ yyl_try(pTHX_ char *s)
                 sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
                 if (PL_minus_l)
                     sv_catpvs(PL_linestr,"chomp;");
+                if (PL_minus_j) {
+                    sv_catpvs(PL_linestr,"use JSON::PP ();");
+                    sv_catpvs(PL_linestr,"$_ = JSON::PP::decode_json($_);");
+                }
                 if (PL_minus_a) {
                     if (PL_minus_F) {
                         if (   (   *PL_splitstr == '/'

@@ -190,6 +190,7 @@
 # define PL_minus_c                             (vTHX->Iminus_c)
 # define PL_minus_E                             (vTHX->Iminus_E)
 # define PL_minus_F                             (vTHX->Iminus_F)
+# define PL_minus_j                             (vTHX->Iminus_j)
 # define PL_minus_l                             (vTHX->Iminus_l)
 # define PL_minus_n                             (vTHX->Iminus_n)
 # define PL_minus_p                             (vTHX->Iminus_p)
