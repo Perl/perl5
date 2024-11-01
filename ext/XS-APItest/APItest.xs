@@ -1941,6 +1941,65 @@ xsreturn_empty()
     PPCODE:
         XSRETURN_EMPTY;
 
+void
+test_mismatch_xs_handshake_api_ver(...)
+    ALIAS:
+        test_mismatch_xs_handshake_bad_struct = 1
+        test_mismatch_xs_handshake_bad_struct_and_ver = 2
+    PPCODE:
+    if(ix == 0) {
+#ifdef MULTIPLICITY
+        Perl_xs_handshake(HS_KEYp(sizeof(PerlInterpreter),
+                                  TRUE, NULL, FALSE,
+                                  sizeof("v1.1337.0")-1,
+                                  sizeof("")-1),
+                                  HS_CXT, __FILE__, items, ax,
+                                  "v1.1337.0");
+#else
+        Perl_xs_handshake(HS_KEYp(sizeof(struct PerlHandShakeInterpreter),
+                                  FALSE, NULL, FALSE,
+                                  sizeof("v1.1337.0")-1,
+                                  sizeof("")-1),
+                                  HS_CXT, __FILE__, items, ax,
+                                  "v1.1337.0");
+#endif
+    }
+    else if(ix == 1) {
+#ifdef MULTIPLICITY
+        Perl_xs_handshake(HS_KEYp(sizeof(PerlInterpreter)+1,
+                                  TRUE, NULL, FALSE,
+                                  sizeof("v" PERL_API_VERSION_STRING)-1,
+                                  sizeof("")-1),
+                                  HS_CXT, __FILE__, items, ax,
+                                  "v" PERL_API_VERSION_STRING);
+#else
+        Perl_xs_handshake(HS_KEYp(sizeof(struct PerlHandShakeInterpreter)+1,
+                                  FALSE, NULL, FALSE,
+                                  sizeof("v" PERL_API_VERSION_STRING)-1,
+                                  sizeof("")-1),
+                                  HS_CXT, __FILE__, items, ax,
+                                  "v" PERL_API_VERSION_STRING);
+#endif
+    }
+    else {
+#ifdef MULTIPLICITY
+        Perl_xs_handshake(HS_KEYp(sizeof(PerlInterpreter)+1,
+                                  TRUE, NULL, FALSE,
+                                  sizeof("v1.1337.0")-1,
+                                  sizeof("")-1),
+                                  HS_CXT, __FILE__, items, ax,
+                                  "v1.1337.0");
+#else
+        Perl_xs_handshake(HS_KEYp(sizeof(struct PerlHandShakeInterpreter)+1,
+                                    FALSE, NULL, FALSE,
+                                    sizeof("v1.1337.0")-1,
+                                    sizeof("")-1),
+                                    HS_CXT, __FILE__, items, ax,
+                                    "v1.1337.0");
+#endif
+    }
+
+
 MODULE = XS::APItest:Hash               PACKAGE = XS::APItest::Hash
 
 void

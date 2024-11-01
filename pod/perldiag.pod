@@ -3689,7 +3689,9 @@ does when displayed.
 (P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
 process that was built against a different build of perl than the
 said library was compiled against.  Reinstalling the XS module will
-likely fix this error.
+likely fix this error.  This error is a less commonly seen subset of
+L<"Perl API version %s of %s does not match %s"|perldiag/"Perl API version %s of %s does not match %s">
+error.
 
 =item Locale '%s' contains (at least) the following characters which
 have unexpected meanings: %s  The Perl program will use the expected
@@ -5281,7 +5283,31 @@ redirected it with select().)
 =item Perl API version %s of %s does not match %s
 
 (F) The XS module in question was compiled against a different incompatible
-version of Perl than the one that has loaded the XS module.
+version of Perl than the one that has loaded the XS module.  If the internal
+differences between the 2 incompatible Perl versions are large enough to
+prevent obtaining the full module name causing this error message, a
+C<.c> file name will be shown in this error message instead of the full module
+name.  The C<.c> file name serves as a hint to help identify the module
+causing this error.
+
+The term XS module does not mean a C<.pm> file.  This error is not directly
+caused by Perl code inside a particular C<.pm> file or C<.pl> file.
+Instead this error is only caused by OS and CPU specific "shared library"
+files created by a C or C++ compiler.  This file format is called a
+C<.so>, C<.dll>, C<.dylib>, C<.bundle> or C<.sl> on Perl's most popular
+operating systems.  These shared library files are a part of the XS API
+documented in L<perlxs|perlxs>.
+
+Each OS has a different file extension or no extension for shared libraries.
+But shared library files on all OSes are non-text, unprintable, binary files
+with raw machine code inside of them created by a C or C++ compiler.
+
+The C<.so> or C<.dll> or equivalent is usually loaded by a C<.pm> or C<.pl>
+file making a call to L<DynaLoader|DynaLoader> or L<XSLoader|XSLoader>, which
+then calls OS specific mechanisms to load the shared library file into the Perl
+process. The OS specific mechanism then calls a function or subroutine inside
+the particular C<.so> or C<.dll> file. That particular C<.so> or C<.dll> file
+then throws this error.
 
 =item Perl folding rules are not up-to-date for 0x%X; please use the perlbug
 utility to report; in regex; marked by S<<-- HERE> in m/%s/
