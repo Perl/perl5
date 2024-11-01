@@ -5513,7 +5513,7 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
    The meaning of the varargs is determined the U32 key arg (which is not
    a format string). The fields of key are assembled by using HS_KEY().
 
-   Under PERL_IMPLICIT_CONTEX, the v_my_perl arg is of type
+   Under PERL_IMPLICIT_CONTEXT, the v_my_perl arg is of type
    "PerlInterpreter *" and represents the callers context; otherwise it is
    of type "CV *", and is the boot xsub's CV.
 
@@ -5535,7 +5535,17 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
    (remember that it assumes that the 1st arg is the interp cxt).
 
    'file' is the source filename of the caller.
-*/
+
+   Expansion provisions: Argument char * api_version is private to
+   #include "perl.h". EU::MM and XS authors can't modify it. perl.h could
+   place an aligned const pointer to a const static C struct before or after
+   the C string, or just the later. Or add argument #8 and 1 new bit in U32 key.
+   Arg U32 key can't be changed to arg U64 key, on OSes/CPUs with 32bit void*s.
+   Some/all 32b CCs will invisibly splice in "U32 key64_upper" as arg 2,
+   shifting all other args down the C stack, and breaking ABI compat of this C
+   function between any and all old/new permutations of a .xs vs a libperl.
+
+   See GH PR #22719 for other expansion provisions. */
 
 Stack_off_t
 Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
@@ -5546,6 +5556,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     void * got;
     void * need;
     const char *stage = "first";
+    bool in_abi_mismatch = FALSE;
 #ifdef MULTIPLICITY
     dTHX;
     tTHX xs_interp;
@@ -5561,7 +5572,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     if (UNLIKELY(got != need))
         goto bad_handshake;
 /* try to catch where a 2nd threaded perl interp DLL is loaded into a process
-   by a XS DLL compiled against the wrong interl DLL b/c of bad @INC, and the
+   by a XS DLL compiled against the wrong interp DLL b/c of bad @INC, and the
    2nd threaded perl interp DLL never initialized its TLS/PERL_SYS_INIT3 so
    dTHX call from 2nd interp DLL can't return the my_perl that pp_entersub
    passed to the XS DLL */
@@ -5585,10 +5596,10 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     stage = "second";
     if(UNLIKELY(got != need)) {
         bad_handshake:/* recycle branch and string from above */
-        if(got != (void *)HSf_NOCHK)
-            noperl_die("%s: loadable library and perl binaries are mismatched"
-                       " (got %s handshake key %p, needed %p)\n",
-                       file, stage, got, need);
+        if(got != (void *)HSf_NOCHK) {
+          in_abi_mismatch = TRUE;
+          goto die_mismatched_rmv_c_args;
+        }
     }
 
     if(key & HSf_SETXSUBFN) {     /* this might be called from a module bootstrap */
@@ -5600,19 +5611,34 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
             (void)gv_fetchfile(file); */
     }
 
+    die_mismatched_rmv_c_args:
     if(key & HSf_POPMARK) {
-        ax = POPMARK;
-        {   SV **mark = PL_stack_base + ax++;
-            {   dSP;
-                items = (Stack_off_t)(SP - MARK);
-            }
+    /* Don't touch the local unthreaded or threaded Perl stack if mismatched
+       ABI. The pointers inside the mark stack vars and @_ vars are
+       uninitialized data if we are executing in an unexpected second
+       libperl.{so,dll} with a different major version.  The second libperl
+       possibly was auto-loaded by the OS, as a dependency of the out of
+       date XS shared library file. */
+        if(in_abi_mismatch) {
+            ax = Stack_off_t_MAX; /* silence CC & poison */
+            items = Stack_off_t_MAX;
+        }
+        else {
+            ax = POPMARK;
+            SV **mark = PL_stack_base + ax++;
+            dSP;
+            items = (Stack_off_t)(SP - MARK);
         }
     } else {
         items = va_arg(args, Stack_off_t);
         ax = va_arg(args, Stack_off_t);
     }
-    assert(ax >= 0);
-    assert(items >= 0);
+
+    if(!in_abi_mismatch) {
+        assert(ax >= 0);
+        assert(items >= 0);
+    }
+
     {
         U32 apiverlen;
         assert(HS_GETAPIVERLEN(key) <= UCHAR_MAX);
@@ -5620,11 +5646,36 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
             char * api_p = va_arg(args, char*);
             if(apiverlen != sizeof("v" PERL_API_VERSION_STRING)-1
                 || memNE(api_p, "v" PERL_API_VERSION_STRING,
-                         sizeof("v" PERL_API_VERSION_STRING)-1))
-                croak("Perl API version %s of %" SVf " does not match %s",
-                                    api_p, SVfARG(PL_stack_base[ax + 0]),
-                                    "v" PERL_API_VERSION_STRING);
-        }
+                         sizeof("v" PERL_API_VERSION_STRING)-1)) {
+                if(in_abi_mismatch)
+                    noperl_die("Perl API version %s of %s does not match %s",
+                               api_p, file, "v" PERL_API_VERSION_STRING);
+                else {/* use %s for SV * for string literal reuse with above */
+                    SV * package_sv = PL_stack_base[ax + 0];
+                    Perl_croak_nocontext("Perl API version %s of %s does not match %s",
+                                          api_p, SvPV_nolen_const(package_sv),
+                                          "v" PERL_API_VERSION_STRING);
+                }
+            } /* memcmp() */
+        } /* if user wants API Ver Check (xsubpp default is on ) */
+
+/* The gentler error above couldn't be shown. Maybe the 2 API ver strings DID
+str eq match. So its an interpreter build time/Configure problem, or 3rd party
+patches by OS vendors. Or system perl vs /home "local perl" battles.
+No choice but to show the full hex debugging info and die.
+
+On Unix, the 1st correct original libperl/perl.bin, on ELF, is irreversibly
+corrupted now because new Perl API C func function have already been
+linked/injected into the 1st perl.bin from the 2nd incompatible "surprise"
+new libperl.so/.dll in the same process.
+
+A quick process exit using only libc APIs, no perl APIs, is the only fool proof,
+cross platform way to prevent a SEGV.
+*/
+        if(in_abi_mismatch)
+            noperl_die("%s: loadable library and perl binaries are mismatched"
+                       " (got %s handshake key %p, needed %p)\n",
+                       file, stage, got, need);
     }
     {
         U32 xsverlen = HS_GETXSVERLEN(key);

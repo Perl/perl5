@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(544);
+    plan(547);
     use_ok('XS::APItest')
 };
 use Config;
@@ -385,3 +385,13 @@ eval { my @a = sort f 2, 1;  $x++};
 print "x=$x\n";
 EOF
 }
+
+fresh_perl_like('use XS::APItest;'
+              .'XS::APItest::XSUB::test_mismatch_xs_handshake_api_ver("Dog");'
+              , qr/\QPerl API version v1.1337.0 of Dog does not match\E/);
+fresh_perl_like('use XS::APItest;'
+              .'XS::APItest::XSUB::test_mismatch_xs_handshake_bad_struct("Dog");'
+              , qr/\Q loadable library and perl binaries are mismatched (got first handshake\E/);
+fresh_perl_like('use XS::APItest;'
+              .'XS::APItest::XSUB::test_mismatch_xs_handshake_bad_struct_and_ver("Dog");'
+              , qr/\QPerl API version v1.1337.0 of APItest.xs does not match\E/);
