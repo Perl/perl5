@@ -131,6 +131,15 @@ XXX If there was something important to note about this change, include that her
 
 =item *
 
+L<IPC::Open3> has been upgraded from version 1.23 to 1.24.
+L<IPC::Open2> has been upgraded from version 1.07 to 1.08.
+
+There is now a way to pass lexical filehandles to child processes directly
+(instead of having the module create a pipe internally). Previously, only
+bareword filehandles could be used in "dup mode".
+
+=item *
+
 L<Math::Complex> has been upgraded from version 1.62 to 1.63.
 
 The complex number parser for string inputs has been improved. In particular,
