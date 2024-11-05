@@ -28,7 +28,21 @@ directly>. These cases are now fully supported.
 
 =item *
 
-Various optimizations related to handling of C<CONST>s.
+Constant-folded strings are now sharable via the Copy-on-Write mechanism.
+[L<GH #22163|https://github.com/Perl/perl5/pull/22163>]
+
+The following code would previously have allocated eleven string buffers,
+each containing one million "A"s:
+
+C<my @scalars; push @scalars, ("A" x 1_000_000) for 0..9;>
+
+Now a single buffer is allocated and shared between a CONST OP and
+the ten scalar elements of L<@scalars>.
+
+Note that any code using this sort of constant to simulate memory leaks
+(perhaps in test files) must now permute the string in order to trigger
+a string copy and the allocation of separate buffers. For example,
+C<("A" x 1_000_000).time> might be a suitable small change.
 
 =item *
 
