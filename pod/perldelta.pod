@@ -503,6 +503,19 @@ L<C<valid_identifier_pvn()>|perlapi/valid_identifier_pvn> and
 L<C<valid_identifier_sv()>|perlapi/valid_identifier_sv> have been added, which
 test if a string would be considered by Perl to be a valid identifier name.
 
+=item *
+
+When assigning from an SVt_IV into a SVt_NV (or vice versa), providing that
+both are "bodyless" types, Perl_sv_setsv_flags will now just change the
+destination type to match the source type. Previously, an SVt_IV would have
+been upgraded to a SVt_PVNV to store an NV, and an SVt_NV would have been
+upgraded to a SVt_PVIV to store an IV. This change prevents the need to
+allocate - and later free - the relevant body struct.
+
+=item *
+
+XXX
+
 =back
 
 =head1 Selected Bug Fixes
