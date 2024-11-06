@@ -43,6 +43,20 @@ PERLVARI(G, curinterp,	PerlInterpreter *, NULL)
                                          * useithreads) */
 #if defined(USE_ITHREADS)
 PERLVAR(G, thr_key,	perl_key)	/* key to retrieve per-thread struct */
+
+#  ifndef WIN32
+/* Used to re-send signals we receive on a non-perl thread to the main
+ * thread.  Windows uses window messages to do this so we don't need
+ * it there.
+ *
+ * If we do end up adding this for Windows it will need more complex
+ * management since we'd want to store a thread handle (a HANDLE)
+ * which needs clean up on exit.
+ */
+
+PERLVAR(G, main_thread, pthread_t)
+#  endif
+
 #endif
 
 /* XXX does anyone even use this? */

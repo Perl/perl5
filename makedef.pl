@@ -461,6 +461,10 @@ unless ($define{'USE_THREADS'}) {
     ++$skip{Perl_thread_locale_term};
 }
 
+if (!$define{USE_ITHREADS} || $define{WIN32}) {
+    ++$skip{PL_main_thread};
+}
+
 unless ($define{USE_POSIX_2008_LOCALE})
 {
     ++$skip{$_} foreach qw(

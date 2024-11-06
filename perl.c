@@ -90,6 +90,7 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
         ENV_INIT;
         MUTEX_INIT(&PL_dollarzero_mutex);
         MUTEX_INIT(&PL_my_ctx_mutex);
+        PTHREAD_INIT_SELF(PL_main_thread);
 #  endif
     }
 #if defined(USE_ITHREADS)

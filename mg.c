@@ -1564,6 +1564,17 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
     dTHX;
 #endif
 
+#if defined(USE_ITHREADS) && !defined(WIN32)
+    if (!aTHX) {
+        /* presumably ths signal is being delivered to a non-perl
+         * thread, presumably created by a library, redirect it to the
+         * main thread.
+         */
+        pthread_kill(PL_main_thread, sig);
+        return;
+    }
+#endif
+
 #ifdef PERL_USE_3ARG_SIGHANDLER
 #if defined(__cplusplus) && defined(__GNUC__)
     /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
