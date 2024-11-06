@@ -11911,12 +11911,17 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #  define HEXFP_NV
     NV hexfp_nv = 0.0;
 #endif
-    NV hexfp_mult = 1.0;
+    int hexfp_exp = 0;
     UV high_non_zero = 0; /* highest digit */
     int non_zero_integer_digits = 0;
     bool new_octal = FALSE;     /* octal with "0o" prefix */
 
     PERL_ARGS_ASSERT_SCAN_NUM;
+
+    /* Make sure "int" is wide enough to hold exponent of NV.
+       We use "int" (rather than I32 etc.) to be compatible with ldexp() */
+    STATIC_ASSERT_STMT((INT_MIN / 10) < NV_MIN_EXP);
+    STATIC_ASSERT_STMT(NV_MAX_EXP < (INT_MAX / 10));
 
     /* We use the first character to decide what type of number this is */
 
@@ -12204,7 +12209,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         h++;
                     }
                     if (isDIGIT(*h)) {
-                        I32 hexfp_exp = 0;
                         while (isDIGIT(*h) || *h == '_') {
                             if (isDIGIT(*h)) {
                                 hexfp_exp *= 10;
@@ -12241,7 +12245,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #ifdef HEXFP_UQUAD
                         hexfp_exp -= hexfp_frac_bits;
 #endif
-                        hexfp_mult = Perl_pow(2.0, hexfp_exp);
                         hexfp = TRUE;
                         goto decimal;
                     }
@@ -12491,9 +12494,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                    "Hexadecimal float: mantissa overflow");
 #  endif
 #ifdef HEXFP_UQUAD
-                nv = hexfp_uquad * hexfp_mult;
+                nv = (NV)hexfp_uquad;
 #else /* HEXFP_NV */
-                nv = hexfp_nv * hexfp_mult;
+                nv = hexfp_nv;
+#endif
+#ifdef Perl_ldexp
+                nv = Perl_ldexp(nv, hexfp_exp);
+#else
+                nv *= Perl_pow(2.0, hexfp_exp);
 #endif
             } else {
                 nv = Atof(PL_tokenbuf);
