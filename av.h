@@ -236,10 +236,6 @@ to fit one element without extending:
 
 */
 
-/* sv_upgrade does AvREAL_only():
-    AvALLOC(av) = 0;
-    AvARRAY(av) = NULL;
-    AvMAX(av) = AvFILLp(av) = -1; */
 #define Perl_newAV(mTHX)  MUTABLE_AV(Perl_newSV_type(aTHX_ SVt_PVAV))
 
 #define newAV_mortal()	MUTABLE_AV(newSV_type_mortal(SVt_PVAV))
