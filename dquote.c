@@ -117,7 +117,7 @@ Perl_form_alien_digit_msg(pTHX_
 
         /* It also isn't a UTF-8 invariant character, so no display shortcuts
          * are available.  Use \\x{...} */
-        Perl_sv_setpvf(aTHX_ display_char, "\\x{%02x}", *first_bad);
+        sv_setpvf(display_char, "\\x{%02x}", *first_bad);
     }
 
     /* Ready to start building the message */
@@ -216,7 +216,7 @@ Perl_form_cp_too_large_msg(pTHX_
         prefix = "0x";
     }
 
-    Perl_sv_setpvf(aTHX_ message_sv, "Use of code point %s", prefix);
+    sv_setpvf(message_sv, "Use of code point %s", prefix);
     if (string) {
         sv_catpvf(message_sv, "%.*s", (int) len, string);
     }

@@ -4859,7 +4859,7 @@ S_require_file(pTHX_ SV *sv)
                         }
                     }
 
-                    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%" UVxf "/%s",
+                    sv_setpvf(namesv, "/loader/0x%" UVxf "/%s",
                                    diruv, name);
                     tryname = SvPVX_const(namesv);
                     tryrsfp = NULL;
@@ -5099,7 +5099,7 @@ S_require_file(pTHX_ SV *sv)
                     sv_catpv(namesv, unixname);
 #else
                     /* The equivalent of		    
-                       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
+                       sv_setpvf(namesv, "%s/%s", dir, name);
                        but without the need to parse the format string, or
                        call strlen on either pointer, and with the correct
                        allocation up front.  */
@@ -5440,7 +5440,7 @@ PP(pp_entereval)
 
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
         SV * const temp_sv = sv_newmortal();
-        Perl_sv_setpvf(aTHX_ temp_sv, "_<(eval %lu)[%s:%" LINE_Tf "]",
+        sv_setpvf(temp_sv, "_<(eval %lu)[%s:%" LINE_Tf "]",
                        (unsigned long)++PL_evalseq,
                        CopFILE(PL_curcop), CopLINE(PL_curcop));
         tmpbuf = SvPVX(temp_sv);
