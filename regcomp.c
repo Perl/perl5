@@ -1024,7 +1024,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
             SV * const errsv = ERRSV;
             if (SvTRUE_NN(errsv))
                 /* use croak_sv ? */
-                Perl_croak_nocontext("%" SVf, SVfARG(errsv));
+                croak("%" SVf, SVfARG(errsv));
         }
         assert(SvROK(qr_ref));
         qr = SvRV(qr_ref);

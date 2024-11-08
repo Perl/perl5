@@ -924,13 +924,13 @@ PP_wrapped(pp_formline, 0, 1)
                 {
                     int len;
                     if (!quadmath_format_valid(fmt))
-                        Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", fmt);
+                        croak("panic: quadmath invalid format \"%s\"", fmt);
                     WITH_LC_NUMERIC_SET_TO_NEEDED(
                         len = quadmath_snprintf(t, max, fmt, (int) fieldsize,
                                                (int) arg, value);
                     );
                     if (len == -1)
-                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", fmt);
+                        croak("panic: quadmath_snprintf failed, format \"%s\"", fmt);
                 }
 #else
                 /* we generate fmt ourselves so it is safe */

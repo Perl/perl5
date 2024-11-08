@@ -3357,7 +3357,7 @@ Perl_op_scope(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_OP_SCOPE
 
 PERL_CALLCONV OP *
-Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP *insert);
+Perl_op_sibling_splice(pTHX_ OP *parent, OP *start, int del_count, OP *insert);
 #define PERL_ARGS_ASSERT_OP_SIBLING_SPLICE
 
 PERL_CALLCONV OP *

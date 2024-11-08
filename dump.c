@@ -2972,7 +2972,7 @@ Perl_runops_debug(pTHX)
 #endif
 #ifdef PERL_USE_HWM
         if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
-            Perl_croak_nocontext(
+            croak(
                 "panic: previous op failed to extend arg stack: "
                 "base=%p, sp=%p, hwm=%p\n",
                     PL_stack_base, PL_stack_sp,

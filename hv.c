@@ -2072,7 +2072,7 @@ Perl_hv_clear(pTHX_ HV *hv)
                     if (HeVAL(entry)) {
                         if (SvREADONLY(HeVAL(entry))) {
                             SV* const keysv = hv_iterkeysv(entry);
-                            Perl_croak_nocontext(
+                            croak(
                                 "Attempt to delete readonly key '%" SVf "' from a restricted hash",
                                 (void*)keysv);
                         }
@@ -3410,7 +3410,7 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
     assert(!(flags & HVhek_NOTSHARED));
 
     if (UNLIKELY(len > (STRLEN) I32_MAX)) {
-        Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes");
+        croak("Sorry, hash keys must be smaller than 2**31 bytes");
     }
 
     /* what follows is the moral equivalent of:

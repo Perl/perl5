@@ -2276,7 +2276,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
 #elif defined(NO_TAINT_SUPPORT)
-            Perl_croak_nocontext("This perl was compiled without taint support. "
+            croak("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
             CHECK_MALLOC_TOO_LATE_FOR('t');
@@ -2291,7 +2291,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
 #elif defined(NO_TAINT_SUPPORT)
-            Perl_croak_nocontext("This perl was compiled without taint support. "
+            croak("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
             CHECK_MALLOC_TOO_LATE_FOR('T');
@@ -2409,7 +2409,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
 #elif defined(NO_TAINT_SUPPORT)
-            Perl_croak_nocontext("This perl was compiled without taint support. "
+            croak("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
             CHECK_MALLOC_TOO_LATE_FOR('T');
@@ -2448,7 +2448,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
 #elif defined(NO_TAINT_SUPPORT)
-                    Perl_croak_nocontext("This perl was compiled without taint support. "
+                    croak("This perl was compiled without taint support. "
                                "Cowardly refusing to run with -t or -T flags");
 #else
                     if( !TAINTING_get) {
@@ -3910,7 +3910,7 @@ Perl_moreswitches(pTHX_ const char *s)
 #if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
 #elif defined(NO_TAINT_SUPPORT)
-        Perl_croak_nocontext("This perl was compiled without taint support. "
+        croak("This perl was compiled without taint support. "
                    "Cowardly refusing to run with -t or -T flags");
 #else
         if (!TAINTING_get)
@@ -4088,7 +4088,7 @@ Perl_my_unexec(pTHX)
 #  ifdef VMS
      lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
 #  elif defined(WIN32) || defined(__CYGWIN__)
-    Perl_croak_nocontext("dump is not supported");
+    croak("dump is not supported");
 #  else
     ABORT();		/* for use with undump */
 #  endif
@@ -4329,7 +4329,7 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
         int fd = PerlIO_fileno(rsfp);
         Stat_t statbuf;
         if (fd < 0 || PerlLIO_fstat(fd, &statbuf) < 0) { /* may be either wrapped or real suid */
-            Perl_croak_nocontext( "Illegal suidscript");
+            croak( "Illegal suidscript");
         }
         if ((my_euid != my_uid && my_euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
             ||

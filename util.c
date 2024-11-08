@@ -269,7 +269,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
 # ifdef PERL_TRACK_MEMPOOL
             if (header->interpreter != aTHX) {
-                Perl_croak_nocontext("panic: realloc %p from wrong pool, %p!=%p",
+                croak("panic: realloc %p from wrong pool, %p!=%p",
                                      where, header->interpreter, aTHX);
             }
             assert(header->next->prev == header);
@@ -289,7 +289,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
 #ifdef DEBUGGING
         if ((SSize_t)size < 0)
-            Perl_croak_nocontext("panic: realloc %p , size=%" UVuf,
+            croak("panic: realloc %p , size=%" UVuf,
                                  where, (UV)size);
 #endif
 #ifdef PERL_DEBUG_READONLY_COW
@@ -390,17 +390,17 @@ Perl_safesysfree(Malloc_t where)
 # endif
 # ifdef PERL_TRACK_MEMPOOL
             if (header->interpreter != aTHX) {
-                Perl_croak_nocontext("panic: free %p from wrong pool, %p!=%p",
+                croak("panic: free %p from wrong pool, %p!=%p",
                                      where, header->interpreter, aTHX);
             }
             if (!header->prev) {
-                Perl_croak_nocontext("panic: duplicate free");
+                croak("panic: duplicate free");
             }
             if (!(header->next))
-                Perl_croak_nocontext("panic: bad free of %p, header->next==NULL",
+                croak("panic: bad free of %p, header->next==NULL",
                                      where);
             if (header->next->prev != header || header->prev->next != header) {
-                Perl_croak_nocontext("panic: bad free of %p, ->next->prev=%p, "
+                croak("panic: bad free of %p, ->next->prev=%p, "
                                      "header=%p, ->prev->next=%p",
                                      where, header->next->prev, header,
                                      header->prev->next);
@@ -469,7 +469,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
 #ifdef DEBUGGING
     if ((SSize_t)size < 0 || (SSize_t)count < 0)
-        Perl_croak_nocontext("panic: calloc, size=%" UVuf ", count=%" UVuf,
+        croak("panic: calloc, size=%" UVuf ", count=%" UVuf,
                              (UV)size, (UV)count);
 #endif
 #ifdef PERL_DEBUG_READONLY_COW
@@ -3646,7 +3646,7 @@ Perl_set_context(void *t)
     {
         const int error = pthread_setspecific(PL_thr_key, t);
         if (error)
-            Perl_croak_nocontext("panic: pthread_setspecific, error=%d", error);
+            croak_nocontext("panic: pthread_setspecific, error=%d", error);
     }
 #  endif
 
@@ -5266,7 +5266,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
                 retval = quadmath_snprintf(buffer, len, format, va_arg(ap, NV));
             );
             if (retval == -1) {
-                Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", format);
+                croak("panic: quadmath_snprintf failed, format \"%s\"", format);
             }
             quadmath_valid = TRUE;
         }
@@ -5292,7 +5292,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
          * If quadmath_format_needed() returns false, we are reasonably
          * certain that we can call vnsprintf() or vsprintf() safely. */
         if (!quadmath_valid && quadmath_format_needed(format))
-          Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", format);
+          croak("panic: quadmath_snprintf failed, format \"%s\"", format);
 
     }
 #endif
@@ -5319,7 +5319,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
         (len > 0 && (Size_t)retval >= len)
 #endif
     )
-        Perl_croak_nocontext("panic: my_snprintf buffer overflow");
+        croak("panic: my_snprintf buffer overflow");
     return retval;
 }
 
@@ -5621,7 +5621,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
             if(apiverlen != sizeof("v" PERL_API_VERSION_STRING)-1
                 || memNE(api_p, "v" PERL_API_VERSION_STRING,
                          sizeof("v" PERL_API_VERSION_STRING)-1))
-                Perl_croak_nocontext("Perl API version %s of %" SVf " does not match %s",
+                croak("Perl API version %s of %" SVf " does not match %s",
                                     api_p, SVfARG(PL_stack_base[ax + 0]),
                                     "v" PERL_API_VERSION_STRING);
         }

@@ -12459,7 +12459,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             width = expect_number(&q);
             if (*q == '$') {
                 if (args)
-                    Perl_croak_nocontext(
+                    croak(
                         "Cannot yet reorder sv_vcatpvfn() arguments from va_list");
                 ++q;
                 efix = (Size_t)width;
@@ -12527,7 +12527,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 ix = expect_number(&q);
                 if (*q++ == '$') {
                     if (args)
-                        Perl_croak_nocontext(
+                        croak(
                             "Cannot yet reorder sv_vcatpvfn() arguments from va_list");
                     no_redundant_warning = TRUE;
                 } else
@@ -12612,7 +12612,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     ix = expect_number(&q);
                     if (*q++ == '$') {
                         if (args)
-                            Perl_croak_nocontext(
+                            croak(
                                 "Cannot yet reorder sv_vcatpvfn() arguments from va_list");
                         no_redundant_warning = TRUE;
                     } else
@@ -13676,13 +13676,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifdef USE_QUADMATH
                 {
                     if (!quadmath_format_valid(ptr))
-                        Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
+                        croak("panic: quadmath invalid format \"%s\"", ptr);
                     WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric,
                         elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
                                                  ptr, nv);
                     );
                     if ((IV)elen == -1) {
-                        Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", ptr);
+                        croak("panic: quadmath_snprintf failed, format \"%s\"", ptr);
                     }
                 }
 #elif defined(HAS_LONG_DOUBLE)
@@ -13751,7 +13751,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
                 else {
                     if (arg_missing)
-                        Perl_croak_nocontext(
+                        croak(
                             "Missing argument for %%n in %s",
                                 PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
                     sv_setuv_mg(argsv, has_utf8
