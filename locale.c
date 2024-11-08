@@ -7316,7 +7316,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
              * invalid. */;
 #  if defined(I_LANGINFO)
 
-            Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %jd",
+            croak("panic: Unexpected nl_langinfo() item %jd",
                                  item);
 
 #  else

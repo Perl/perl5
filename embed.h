@@ -505,7 +505,7 @@
 # define op_refcnt_lock()                       Perl_op_refcnt_lock(aTHX)
 # define op_refcnt_unlock()                     Perl_op_refcnt_unlock(aTHX)
 # define op_scope(a)                            Perl_op_scope(aTHX_ a)
-# define op_sibling_splice                      Perl_op_sibling_splice
+# define op_sibling_splice(a,b,c,d)             Perl_op_sibling_splice(aTHX_ a,b,c,d)
 # define op_wrap_finally(a,b)                   Perl_op_wrap_finally(aTHX_ a,b)
 # define opdump_printf(a,...)                   Perl_opdump_printf(aTHX_ a,__VA_ARGS__)
 # define packlist(a,b,c,d,e)                    Perl_packlist(aTHX_ a,b,c,d,e)

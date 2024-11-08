@@ -2443,7 +2443,7 @@ Adp	|OP *	|op_prepend_elem|I32 optype				\
 Cdp	|void	|op_refcnt_lock
 Cdp	|void	|op_refcnt_unlock
 Adpx	|OP *	|op_scope	|NULLOK OP *o
-ATdp	|OP *	|op_sibling_splice					\
+Adp	|OP *	|op_sibling_splice					\
 				|NULLOK OP *parent			\
 				|NULLOK OP *start			\
 				|int del_count				\

@@ -6551,7 +6551,7 @@ PP(pp_entersub)
          * in scalar context.
         */
         if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
-            Perl_croak_nocontext(
+            croak(
                 "panic: XSUB %s::%s (%s) failed to extend arg stack: "
                 "base=%p, sp=%p, hwm=%p\n",
                     HvNAME(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)), CvFILE(cv),

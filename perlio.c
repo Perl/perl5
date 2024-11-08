@@ -2747,20 +2747,19 @@ PerlIOUnix_refcnt_inc(int fd)
 int
 PerlIOUnix_refcnt_dec(int fd)
 {
+    dTHX;
     int cnt = 0;
     if (fd >= 0) {
-#ifdef DEBUGGING
-        dTHX;
-#endif
+
         MUTEX_LOCK(&PL_perlio_mutex);
         if (fd >= PL_perlio_fd_refcnt_size) {
             /* diag_listed_as: refcnt_dec: fd %d%s */
-            Perl_croak_nocontext("refcnt_dec: fd %d >= refcnt_size %d\n",
+            croak("refcnt_dec: fd %d >= refcnt_size %d\n",
                        fd, PL_perlio_fd_refcnt_size);
         }
         if (PL_perlio_fd_refcnt[fd] <= 0) {
             /* diag_listed_as: refcnt_dec: fd %d%s */
-            Perl_croak_nocontext("refcnt_dec: fd %d: %d <= 0\n",
+            croak("refcnt_dec: fd %d: %d <= 0\n",
                        fd, PL_perlio_fd_refcnt[fd]);
         }
         cnt = --PL_perlio_fd_refcnt[fd];
@@ -2768,7 +2767,7 @@ PerlIOUnix_refcnt_dec(int fd)
         MUTEX_UNLOCK(&PL_perlio_mutex);
     } else {
         /* diag_listed_as: refcnt_dec: fd %d%s */
-        Perl_croak_nocontext("refcnt_dec: fd %d < 0\n", fd);
+        croak("refcnt_dec: fd %d < 0\n", fd);
     }
     return cnt;
 }
@@ -5289,8 +5288,8 @@ Perl_PerlIO_stderr(pTHX)
 char *
 PerlIO_getname(PerlIO *f, char *buf)
 {
-#ifdef VMS
     dTHX;
+#ifdef VMS
     char *name = NULL;
     bool exported = FALSE;
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
@@ -5306,7 +5305,7 @@ PerlIO_getname(PerlIO *f, char *buf)
 #else
     PERL_UNUSED_ARG(f);
     PERL_UNUSED_ARG(buf);
-    Perl_croak_nocontext("Don't know how to get file name");
+    croak("Don't know how to get file name");
     return NULL;
 #endif
 }

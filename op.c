@@ -1590,7 +1590,7 @@ see C<L</OpMORESIB_set>>, C<L</OpLASTSIB_set>>, C<L</OpMAYBESIB_set>>.
 */
 
 OP *
-Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
+Perl_op_sibling_splice(pTHX_ OP *parent, OP *start, int del_count, OP* insert)
 {
     OP *first;
     OP *rest;
@@ -1673,7 +1673,7 @@ Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
     return last_del ? first : NULL;
 
   no_parent:
-    Perl_croak_nocontext("panic: op_sibling_splice(): NULL parent");
+    croak("panic: op_sibling_splice(): NULL parent");
 }
 
 /*
@@ -2788,7 +2788,7 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
             SSize_t keylen;
             const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
             if (keylen > I32_MAX) {
-                Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes");
+                croak("Sorry, hash keys must be smaller than 2**31 bytes");
             }
 
             SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -(I32)keylen : (I32)keylen, 0);
@@ -11147,12 +11147,12 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         PL_compcv = 0;
         if (isBEGIN) {
             if (PL_in_eval & EVAL_KEEPERR)
-                Perl_croak_nocontext("BEGIN not safe after errors--compilation aborted");
+                croak("BEGIN not safe after errors--compilation aborted");
             else {
                 SV * const errsv = ERRSV;
                 /* force display of errors found but not reported */
                 sv_catpvs(errsv, "BEGIN not safe after errors--compilation aborted");
-                Perl_croak_nocontext("%" SVf, SVfARG(errsv));
+                croak("%" SVf, SVfARG(errsv));
             }
         }
         goto done;
