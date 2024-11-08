@@ -347,11 +347,11 @@ static int debug_initialization = 0;
         const char * errno_string;                                          \
         if (GET_ERRNO == 0) { /* Skip output if both errno types are 0 */   \
             if (LIKELY(extended == 0)) errno_string = "";                   \
-            else errno_string = Perl_form(aTHX_ "; $^E=%d", extended);      \
+            else errno_string = form("; $^E=%d", extended);                 \
         }                                                                   \
         else if (LIKELY(extended == GET_ERRNO))                             \
-            errno_string = Perl_form(aTHX_ "; $!=%d", GET_ERRNO);           \
-        else errno_string = Perl_form(aTHX_ "; $!=%d, $^E=%d",              \
+            errno_string = form("; $!=%d", GET_ERRNO);                      \
+        else errno_string = form("; $!=%d, $^E=%d",                         \
                                                     GET_ERRNO, extended);
 #  else
      /* Output the errno, if non-zero */
@@ -360,7 +360,7 @@ static int debug_initialization = 0;
         const char * errno_string = "";                                     \
         if (GET_ERRNO != 0) {                                               \
             dTHX;                                                           \
-            errno_string = Perl_form(aTHX_ "; $!=%d", GET_ERRNO);           \
+            errno_string = form("; $!=%d", GET_ERRNO);                      \
         }
 #  endif
 
@@ -956,14 +956,14 @@ S_get_displayable_string(pTHX_
             if (cp == ' ' || cp == '\\') {
                 my_strlcat(ret, "\\", size);
             }
-            my_strlcat(ret, Perl_form(aTHX_ "%c", (U8) cp), size);
+            my_strlcat(ret, form("%c", (U8) cp), size);
             prev_was_printable = TRUE;
         }
         else {
             if (! first_time) {
                 my_strlcat(ret, " ", size);
             }
-            my_strlcat(ret, Perl_form(aTHX_ "%02" UVXf, cp), size);
+            my_strlcat(ret, form("%02" UVXf, cp), size);
             prev_was_printable = FALSE;
         }
         t += (is_utf8) ? UTF8SKIP(t) : 1;
@@ -1021,7 +1021,7 @@ S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
         return LC_ALL_INDEX_;   /* Arbitrary */
     }
 
-    locale_panic_via_(Perl_form(aTHX_ "Unknown locale category %d", category),
+    locale_panic_via_(form("Unknown locale category %d", category),
                       __FILE__, caller_line);
     NOT_REACHED; /* NOTREACHED */
 }
@@ -1096,7 +1096,7 @@ Perl_locale_panic(const char * msg,
     if (   strNE(__FILE__, higher_caller_file)
         || immediate_caller_line != higher_caller_line)
     {
-        called_by = Perl_form(aTHX_ "\nCalled by %s: %" LINE_Tf "\n",
+        called_by = form("\nCalled by %s: %" LINE_Tf "\n",
                                     higher_caller_file, higher_caller_line);
     }
 
@@ -1108,7 +1108,7 @@ Perl_locale_panic(const char * msg,
 
     const int extended_errnum = get_extended_os_errno();
     if (errno != extended_errnum) {
-        errno_text = Perl_form(aTHX_ "; errno=%d, $^E=%d",
+        errno_text = form("; errno=%d, $^E=%d",
                                      errno, extended_errnum);
     }
     else
@@ -1116,7 +1116,7 @@ Perl_locale_panic(const char * msg,
 #endif
 
     {
-        errno_text = Perl_form(aTHX_ "; errno=%d", errno);
+        errno_text = form("; errno=%d", errno);
     }
 
     /* diag_listed_as: panic: %s */
@@ -1158,7 +1158,7 @@ Perl_locale_panic(const char * msg,
                 const char * temp = savepvn(s, len);                        \
                 result = savepv(override_ignored_category(i, temp));        \
                 if (action == check_that_overridden && strNE(result, temp)) { \
-                    locale_panic_(Perl_form(aTHX_                           \
+                    locale_panic_(form(                                     \
                                 "%s expected to be '%s', instead is '%s'",  \
                                 category_names[i], result, temp));          \
                 }                                                           \
@@ -1480,7 +1480,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
             break;
     }
 
-    msg = Perl_form(aTHX_ "'%.*s' %s\n",
+    msg = form("'%.*s' %s\n",
                           (int) (display_end - display_start),
                           display_start, msg);
 
@@ -2587,7 +2587,7 @@ S_bool_setlocale_2008_i(pTHX_
      * now switch into it */
     if (! uselocale(new_obj)) {
         freelocale(new_obj);
-        locale_panic_(Perl_form(aTHX_ "(called from %" LINE_Tf "):"
+        locale_panic_(form("(called from %" LINE_Tf "):"
                                       " bool_setlocale_2008_i: switching"
                                       " into new locale failed",
                                       caller_line));
@@ -3142,7 +3142,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
             }
 
             /* If would have overflowed, panic */
-            locale_panic_via_(Perl_form(aTHX_
+            locale_panic_via_(form(
                                         "Internal length calculation wrong.\n"
                                         "\"%s\" was not entirely added to"
                                         " \"%.*s\"; needed=%zu, had=%zu",
@@ -3399,14 +3399,14 @@ S_setlocale_failure_panic_via_i(pTHX_
     const char * proxy_text = "";
     if (proxy_caller_line != 0 && proxy_caller_line != immediate_caller_line)
     {
-        proxy_text = Perl_form(aTHX_ "\nCalled via %s: %" LINE_Tf,
+        proxy_text = form("\nCalled via %s: %" LINE_Tf,
                                       __FILE__, proxy_caller_line);
     }
     if (   strNE(__FILE__, higher_caller_file)
         || (   immediate_caller_line != 0
             && immediate_caller_line != higher_caller_line))
     {
-        proxy_text = Perl_form(aTHX_ "%s\nCalled via %s: %" LINE_Tf,
+        proxy_text = form("%s\nCalled via %s: %" LINE_Tf,
                                       proxy_text, __FILE__,
                                       immediate_caller_line);
     }
@@ -3414,7 +3414,7 @@ S_setlocale_failure_panic_via_i(pTHX_
     /* 'false' in the get_displayable_string() calls makes it not think the
      * locale is UTF-8, so just dumps bytes.  Actually figuring it out can be
      * too complicated for a panic situation. */
-    const char * msg = Perl_form(aTHX_
+    const char * msg = form(
                             "Can't change locale for %s (%d) from '%s' to '%s'"
                             " %s",
                             name, cat,
@@ -3854,7 +3854,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
                               "Unsupported, MB_CUR_MAX=%d\n", mb_cur_max));
 
         if (! IN_LC(LC_CTYPE) || ckWARN_d(WARN_LOCALE)) {
-            char * msg = Perl_form(aTHX_
+            char * msg = form(
                                    "Locale '%s' is unsupported, and may hang"
                                    " or crash the interpreter",
                                      newctype);
@@ -4619,7 +4619,7 @@ S_my_setlocale_debug_string_i(pTHX_
 #    define THREAD_ARGUMENT
 #  endif
 
-    return Perl_form(aTHX_
+    return form(
                      "%s:%" LINE_Tf ": " THREAD_FORMAT
                      " setlocale(%s[%d], %s%s%s) returned %s%s%s\n",
 
@@ -4664,7 +4664,7 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                            caller_line));
 
     if (! locale_to_restore_to) {
-        locale_panic_via_(Perl_form(aTHX_
+        locale_panic_via_(form(
                                     "Could not find current %s locale",
                                     category_names[cat_index]),
                          __FILE__, caller_line);
@@ -5084,7 +5084,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
     /* Catch glitches.  Usually this is because LC_CTYPE needs to be the same
      * locale as whatever is being worked on */
     if (UNLIKELY(instr(string, REPLACEMENT_CHARACTER_UTF8))) {
-        locale_panic_(Perl_form(aTHX_
+        locale_panic_(form(
                                 "Unexpected REPLACEMENT_CHARACTER in '%s'\n%s",
                                 string, get_LC_ALL_display()));
     }
@@ -5443,7 +5443,7 @@ S_my_localeconv(pTHX_ const int item)
 
         switch (item) {
           default:
-            locale_panic_(Perl_form(aTHX_
+            locale_panic_(form(
                           "Unexpected item passed to my_localeconv: %d", item));
             break;
 
@@ -6603,7 +6603,7 @@ S_langinfo_sv_i(pTHX_
              * of this bug */
             case CODESET:
 #  endif
-                locale_panic_(Perl_form(aTHX_
+                locale_panic_(form(
                                         "nl_langinfo returned empty for %ld"
                                         " in supposed locale \n'%s';"
                                         " which really is\n'%s'\n"
@@ -6679,7 +6679,7 @@ S_langinfo_sv_i(pTHX_
                  * represents even only the first 10 alternative digits, it
                  * will be much longer than that.  So to reach here, the
                  * separator must be some other byte. */
-                locale_panic_(Perl_form(aTHX_
+                locale_panic_(form(
                                         "Can't find separator in ALT_DIGITS"
                                         " representation '%s' for locale '%s'",
                                         _byte_dump_string((U8 *) retval,
@@ -9030,7 +9030,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * malloc'd in the interim.  We arbitrarily switch to the C locale,
      * overridden below  */
     if (! uselocale(PL_C_locale_obj)) {
-        locale_panic_(Perl_form(aTHX_
+        locale_panic_(form(
                                 "Can't uselocale(0x%p), LC_ALL supposed to"
                                 " be 'C'",
                                 PL_C_locale_obj));
@@ -10950,7 +10950,7 @@ Perl_switch_locale_context(pTHX)
 #  ifdef USE_POSIX_2008_LOCALE
 
     if (! uselocale(PL_cur_locale_obj)) {
-        locale_panic_(Perl_form(aTHX_
+        locale_panic_(form(
                                 "Can't uselocale(0x%p), LC_ALL supposed to"
                                 " be '%s'",
                                 PL_cur_locale_obj, get_LC_ALL_display()));
@@ -10959,7 +10959,7 @@ Perl_switch_locale_context(pTHX)
 #  elif defined(WIN32)
 
     if (! bool_setlocale_c(LC_ALL, PL_cur_LC_ALL)) {
-        locale_panic_(Perl_form(aTHX_ "Can't setlocale(%s)", PL_cur_LC_ALL));
+        locale_panic_(form("Can't setlocale(%s)", PL_cur_LC_ALL));
     }
 
 #  endif
@@ -10991,7 +10991,7 @@ Perl_thread_locale_init(pTHX)
 
         /* Not being able to change to the C locale is severe; don't keep
          * going.  */
-        locale_panic_(Perl_form(aTHX_
+        locale_panic_(form(
                                 "Can't uselocale(0x%p), 'C'", PL_C_locale_obj));
         NOT_REACHED; /* NOTREACHED */
     }

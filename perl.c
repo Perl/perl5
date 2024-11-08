@@ -4163,7 +4163,7 @@ S_init_main_stash(pTHX)
     PL_replgv = gv_fetchpvs("\022", GV_ADD|GV_NOTQUAL, SVt_PV); /* ^R */
     SvREFCNT_inc_simple_void(PL_replgv);
     GvMULTI_on(PL_replgv);
-    (void)Perl_form(aTHX_ "%240s","");	/* Preallocate temp - for immediate signals. */
+    (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
 #ifdef PERL_DONT_CREATE_GVSV
     (void)gv_SVadd(PL_errgv);
 #endif

@@ -809,7 +809,7 @@ S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
 {
     PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE;
 
-    yyerror_pv(Perl_form(aTHX_ "Use of non-ASCII character 0x%02X"
+    yyerror_pv(form("Use of non-ASCII character 0x%02X"
                                " illegal when 'use source::encoding"
                                " \"ascii\"' is in effect", *s), 0);
 }
@@ -2888,7 +2888,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     if (!SvCUR(char_name)) {
         SvREFCNT_dec_NN(char_name);
         /* diag_listed_as: Unknown charname '%s' */
-        *error_msg = Perl_form(aTHX_ "Unknown charname ''");
+        *error_msg = form("Unknown charname ''");
         return NULL;
     }
 
@@ -2903,7 +2903,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     res = new_constant( NULL, 0, "charnames", char_name, NULL,
                         context, context_len, error_msg);
     if (*error_msg) {
-        *error_msg = Perl_form(aTHX_ "Unknown charname '%s'", SvPVX(char_name));
+        *error_msg = form("Unknown charname '%s'", SvPVX(char_name));
 
         SvREFCNT_dec(res);
         return NULL;
@@ -3005,7 +3005,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         /* diag_listed_as: charnames alias definitions may not contain
                            trailing white-space; marked by <-- HERE in %s
          */
-        *error_msg = Perl_form(aTHX_
+        *error_msg = form(
             "charnames alias definitions may not contain trailing "
             "white-space; marked by <-- HERE in %.*s<-- HERE %.*s",
             (int)(s - context + 1), context,
@@ -3026,7 +3026,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
                                               MALFORMED_UTF8_WARN);
             /* diag_listed_as: Malformed UTF-8 returned by \N{%s}
                                immediately after '%s' */
-            *error_msg = Perl_form(aTHX_
+            *error_msg = form(
                 "Malformed UTF-8 returned by %.*s immediately after '%.*s'",
                  (int) context_len, context,
                  (int) ((char *) first_bad_char_loc - str), str);
@@ -3042,7 +3042,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
          * that this print won't run off the end of the string */
         /* diag_listed_as: Invalid character in \N{...}; marked by <-- HERE
                            in \N{%s} */
-        *error_msg = Perl_form(aTHX_
+        *error_msg = form(
             "Invalid character in \\N{...}; marked by <-- HERE in %.*s<-- HERE %.*s",
             (int)(s - context + 1), context,
             (int)(e - s + 1), s + 1);
@@ -3053,7 +3053,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         /* diag_listed_as: charnames alias definitions may not contain a
                            sequence of multiple spaces; marked by <-- HERE
                            in %s */
-        *error_msg = Perl_form(aTHX_
+        *error_msg = form(
             "charnames alias definitions may not contain a sequence of "
             "multiple spaces; marked by <-- HERE in %.*s<-- HERE %.*s",
             (int)(s - context + 1), context,
@@ -4210,7 +4210,7 @@ S_scan_const(pTHX_ char *start)
                                        ? UTF8SKIP(str)
                                        : 1U))
                             {
-                                yyerror(Perl_form(aTHX_
+                                yyerror(form(
                                     "%.*s must not be a named sequence"
                                     " in transliteration operator",
                                         /*  +1 to include the "}" */
@@ -5140,7 +5140,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 
     if (PL_expect != XSTATE)
         /* diag_listed_as: "use" not allowed in expression */
-        yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
+        yyerror(form("\"%s\" not allowed in expression",
                     is_use ? "use" : "no"));
     PL_expect = XTERM;
     s = skipspace(s);
@@ -6210,7 +6210,7 @@ yyl_colon(pTHX_ char *s)
             PL_bufptr = s;
             yyerror( (const char *)
                      (*s
-                      ? Perl_form(aTHX_ "Invalid separator character "
+                      ? form("Invalid separator character "
                                   "%c%c%c in attribute list", q, *s, q)
                       : "Unterminated attribute list" ) );
             op_free(attrs);
@@ -7019,7 +7019,7 @@ yyl_croak_unrecognised(pTHX_ char *s)
                            10, UNI_DISPLAY_ISPRINT);
     }
     else {
-        c = Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
+        c = form("\\x%02X", (unsigned char)*s);
     }
 
     if (s >= PL_linestart) {
@@ -7190,7 +7190,7 @@ yyl_my(pTHX_ char *s, I32 my)
 {
     if (PL_in_my) {
         PL_bufptr = s;
-        yyerror(Perl_form(aTHX_
+        yyerror(form(
                           "Can't redeclare \"%s\" in \"%s\"",
                            my       == KEY_my    ? "my" :
                            my       == KEY_state ? "state" : "our",
@@ -9966,7 +9966,7 @@ S_pending_ident(pTHX)
             if (has_colon)
                 /* diag_listed_as: No package name allowed for variable %s
                                    in "our" */
-                yyerror_pv(Perl_form(aTHX_ "No package name allowed for "
+                yyerror_pv(form("No package name allowed for "
                                   "%s %s in \"our\"",
                                   *PL_tokenbuf=='&' ? "subroutine" : "variable",
                                   PL_tokenbuf), UTF ? SVf_UTF8 : 0);
@@ -9978,7 +9978,7 @@ S_pending_ident(pTHX)
                 /* "my" variable %s can't be in a package */
                 /* PL_no_myglob is constant */
                 GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-                yyerror_pv(Perl_form(aTHX_ PL_no_myglob,
+                yyerror_pv(form(PL_no_myglob,
                             PL_in_my == KEY_my ? "my" :
                             PL_in_my == KEY_field ? "field" : "state",
                             *PL_tokenbuf == '&' ? "subroutine" : "variable",
@@ -10255,7 +10255,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 
   report:
 
-    msg = Perl_form(aTHX_ "Constant(%.*s)%s %s%s%s",
+    msg = form("Constant(%.*s)%s %s%s%s",
                         (int)(type ? typelen : len),
                         (type ? type: s),
                         optional_colon,
@@ -10613,7 +10613,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 
     if ( charlen != 1 || ! strchr(valid_flags, c) ) {
         if (isWORDCHAR_lazy_if_safe( *s, PL_bufend, UTF)) {
-            yyerror_pv(Perl_form(aTHX_ "Unknown regexp modifier \"/%.*s\"", (int)charlen, *s),
+            yyerror_pv(form("Unknown regexp modifier \"/%.*s\"", (int)charlen, *s),
                        UTF ? SVf_UTF8 : 0);
             (*s) += charlen;
             /* Pretend that it worked, so will continue processing before
@@ -10677,14 +10677,14 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 
     multiple_charsets:
         if (*charset != c) {
-            yyerror(Perl_form(aTHX_ "Regexp modifiers \"/%c\" and \"/%c\" are mutually exclusive", *charset, c));
+            yyerror(form("Regexp modifiers \"/%c\" and \"/%c\" are mutually exclusive", *charset, c));
         }
         else if (c == 'a') {
   /* diag_listed_as: Regexp modifier "/%c" may appear a maximum of twice */
             yyerror("Regexp modifier \"/a\" may appear a maximum of twice");
         }
         else {
-            yyerror(Perl_form(aTHX_ "Regexp modifier \"/%c\" may not appear twice", c));
+            yyerror(form("Regexp modifier \"/%c\" may not appear twice", c));
         }
 
         /* Pretend that it worked, so will continue processing before dieing */
@@ -12065,14 +12065,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 /* 8 and 9 are not octal */
                 case '8': case '9':
                     if (shift == 3)
-                        yyerror(Perl_form(aTHX_ "Illegal octal digit '%c'", *s));
+                        yyerror(form("Illegal octal digit '%c'", *s));
                     /* FALLTHROUGH */
 
                 /* octal digits */
                 case '2': case '3': case '4':
                 case '5': case '6': case '7':
                     if (shift == 1)
-                        yyerror(Perl_form(aTHX_ "Illegal binary digit '%c'", *s));
+                        yyerror(form("Illegal binary digit '%c'", *s));
                     /* FALLTHROUGH */
 
                 case '0': case '1':
@@ -12317,7 +12317,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 char *oldbp = PL_bufptr;
                 if (*d) ++d; /* so the user sees the bad non-digit */
                 PL_bufptr = (char *)d; /* so yyerror reports the context */
-                yyerror(Perl_form(aTHX_ "No digits found for %s literal",
+                yyerror(form("No digits found for %s literal",
                                   bases[shift]));
                 PL_bufptr = oldbp;
             }

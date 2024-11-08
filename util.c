@@ -1420,7 +1420,7 @@ Perl_form_nocontext(const char* pat, ...)
 These each take a sprintf-style format pattern and conventional
 (non-SV) arguments and return the formatted string.
 
-    (char *) Perl_form(aTHX_ const char* pat, ...)
+    (char *) form(const char* pat, ...)
 
 They can be used any place a string (char *) is required:
 
@@ -5653,10 +5653,10 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
     else {
         /* XXX GV_ADDWARN */
         vn = "XS_VERSION";
-        sv = get_sv(Perl_form(aTHX_ "%" SVf "::%s", SVfARG(module), vn), 0);
+        sv = get_sv(form("%" SVf "::%s", SVfARG(module), vn), 0);
         if (!sv || !SvOK(sv)) {
             vn = "VERSION";
-            sv = get_sv(Perl_form(aTHX_ "%" SVf "::%s", SVfARG(module), vn), 0);
+            sv = get_sv(form("%" SVf "::%s", SVfARG(module), vn), 0);
         }
     }
     if (sv) {

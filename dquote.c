@@ -46,7 +46,7 @@ Perl_grok_bslash_c(pTHX_ const char   source,
         const char control = toCTRL('{');
         if (isPRINT_A(control)) {
             /* diag_listed_as: Use "%s" instead of "%s" */
-            *message = Perl_form(aTHX_ PERL_DIAG_DIE_SYNTAX("Use \"%c\" instead of \"\\c{\""), control);
+            *message = form(PERL_DIAG_DIE_SYNTAX("Use \"%c\" instead of \"\\c{\""), control);
         }
         else {
             *message = "Sequence \"\\c{\" invalid";
@@ -67,7 +67,7 @@ Perl_grok_bslash_c(pTHX_ const char   source,
         clearer[i++] = '\0';
 
         if (packed_warn) {
-            *message = Perl_form(aTHX_ format, source, clearer);
+            *message = form(format, source, clearer);
             *packed_warn = packWARN(WARN_SYNTAX);
         }
         else {

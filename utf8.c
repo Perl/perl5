@@ -240,7 +240,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
             U32 category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
             const char * format = PL_extended_cp_format;
             if (msgs) {
-                *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                *msgs = new_msg_hv(form(format, input_uv),
                                    category,
                                    (flags & UNICODE_WARN_PERL_EXTENDED)
                                    ? UNICODE_GOT_PERL_EXTENDED
@@ -285,7 +285,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                 const char * format = super_cp_format;
 
                 if (msgs) {
-                    *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                    *msgs = new_msg_hv(form(format, input_uv),
                                        category,
                                        UNICODE_GOT_SUPER);
                 }
@@ -317,7 +317,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                     U32 category = packWARN(WARN_NONCHAR);
                     const char * format = nonchar_cp_format;
                     if (msgs) {
-                        *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                        *msgs = new_msg_hv(form(format, input_uv),
                                            category,
                                            UNICODE_GOT_NONCHAR);
                     }
@@ -334,7 +334,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                     U32 category = packWARN(WARN_SURROGATE);
                     const char * format = surrogate_cp_format;
                     if (msgs) {
-                        *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                        *msgs = new_msg_hv(form(format, input_uv),
                                            category,
                                            UNICODE_GOT_SURROGATE);
                     }
@@ -985,7 +985,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 
     const char * const where = (non_cont_byte_pos == 1)
                                ? "immediately"
-                               : Perl_form(aTHX_ "%d bytes",
+                               : form("%d bytes",
                                                  (int) non_cont_byte_pos);
     const U8 * x = s + non_cont_byte_pos;
     const U8 * e = s + print_len;
@@ -1006,7 +1006,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
         }
     }
 
-    return Perl_form(aTHX_ "%s: %s (unexpected non-continuation byte 0x%02x,"
+    return form("%s: %s (unexpected non-continuation byte 0x%02x,"
                            " %s after start byte 0x%02x; need %d bytes, got %d)",
                            malformed_text,
                            _byte_dump_string(s, x - s, 0),
@@ -2269,7 +2269,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_CONTINUATION:
                 COMMON_DEFAULT_REJECTS(,);
-                message = Perl_form(aTHX_
+                message = form(
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
                                 malformed_text,
@@ -2279,7 +2279,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_SHORT:
                 COMMON_DEFAULT_REJECTS(,);
-                message = Perl_form(aTHX_
+                message = form(
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
                              _byte_dump_string(s0, avail_len, 0),
@@ -2298,7 +2298,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
                                 ? (int) (s - s0)
                                 : (int) (avail_len);
-                message = Perl_form(aTHX_ "%s",
+                message = form("%s",
                                     unexpected_non_continuation_text(s0,
                                                             printlen,
                                                             s - s0,
@@ -2407,8 +2407,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                              |UTF8_GOT_LONG_WITH_VALUE
                                              |UTF8_GOT_PERL_EXTENDED
                                              |UTF8_GOT_NONCHAR)));
-                message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
-
+                message = form(nonchar_cp_format, input_uv);
                 break;
 
                 /* The final three cases are all closely related.  They are
@@ -3897,7 +3896,7 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
 
     if (ckWARN_d(category)) {
 
-        key = Perl_form(aTHX_ "%s;%d;%s;%d", name, use_locale, file, line);
+        key = form("%s;%d;%s;%d", name, use_locale, file, line);
         if (! hv_fetch(PL_seen_deprecated_macro, key, strlen(key), 0)) {
             if (! PL_seen_deprecated_macro) {
                 PL_seen_deprecated_macro = newHV();
