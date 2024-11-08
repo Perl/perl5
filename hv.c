@@ -1272,7 +1272,7 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
 
     if (HvUSEDKEYS((HV *)hv)) {
         sv = sv_newmortal();
-        Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
+        sv_setpvf(sv, "%ld/%ld",
                 (long)HvFILL(hv), (long)HvMAX(hv) + 1);
     }
     else

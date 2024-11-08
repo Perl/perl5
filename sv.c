@@ -13770,7 +13770,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && ckWARN(WARN_PRINTF))
             {
                 SV * const msg = sv_newmortal();
-                Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %sprintf: ",
+                sv_setpvf(msg, "Invalid conversion in %sprintf: ",
                           (PL_op->op_type == OP_PRTF) ? "" : "s");
                 if (fmtstart < patend) {
                     const char * const fmtend = q < patend ? q : patend;

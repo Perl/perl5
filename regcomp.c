@@ -16343,7 +16343,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
             for (j = low; j <= high; j++) { /* For each code point in the series */
 
                 /* Get its name, and see if it matches the subpattern */
-                Perl_sv_setpvf(aTHX_ algo_name, "%s-%X", SvPVX(prefix),
+                sv_setpvf(algo_name, "%s-%X", SvPVX(prefix),
                                      (unsigned) j);
 
                 if (execute_wildcard(subpattern_re,

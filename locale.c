@@ -7075,7 +7075,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
 
         const char * orig_CTYPE_locale;
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-        Perl_sv_setpvf(aTHX_ sv, CODE_PAGE_FORMAT, CODE_PAGE_FUNCTION);
+        sv_setpvf(sv, CODE_PAGE_FORMAT, CODE_PAGE_FUNCTION);
         retval_type = RETVAL_IN_sv;
 
         /* We just assume the codeset is ASCII; no need to check for it being

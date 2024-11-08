@@ -11076,7 +11076,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         has_name = TRUE;
     } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
         SV * const sv = sv_newmortal();
-        Perl_sv_setpvf(aTHX_ sv, "%s[%s:%" LINE_Tf "]",
+        sv_setpvf(sv, "%s[%s:%" LINE_Tf "]",
                        PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
                        CopFILE(PL_curcop), CopLINE(PL_curcop));
         gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
