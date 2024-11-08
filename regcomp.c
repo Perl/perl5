@@ -9114,10 +9114,10 @@ redo_curchar:
         result_string = newSVpvs("");
         while (invlist_iternext(final, &start, &end)) {
             if (start == end) {
-                Perl_sv_catpvf(aTHX_ result_string, "\\x{%" UVXf "}", start);
+                sv_catpvf(result_string, "\\x{%" UVXf "}", start);
             }
             else {
-                Perl_sv_catpvf(aTHX_ result_string, "\\x{%" UVXf "}-\\x{%"
+                sv_catpvf(result_string, "\\x{%" UVXf "}-\\x{%"
                                                         UVXf "}", start, end);
             }
         }
@@ -10013,7 +10013,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                     if (cp > 255) {
                                         REQUIRE_UTF8(flagp);
                                     }
-                                    Perl_sv_catpvf(aTHX_ final, "\\x{%" UVXf "}",
+                                    sv_catpvf(final, "\\x{%" UVXf "}",
                                                                         cp);
                                     SvREFCNT_dec_NN(character);
                                 }
@@ -10522,7 +10522,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                       foldbuf + foldlen);
                         SV* multi_fold = newSVpvs_flags("", SVs_TEMP);
 
-                        Perl_sv_catpvf(aTHX_ multi_fold, "\\x{%" UVXf "}", value);
+                        sv_catpvf(multi_fold, "\\x{%" UVXf "}", value);
 
                         multi_char_matches
                                         = add_multi_match(multi_char_matches,
@@ -14295,7 +14295,7 @@ S_handle_user_defined_property(pTHX_
                 }
                 if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
                 sv_catpv(msg, overflow_msg);
-                Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                sv_catpvf(msg, "%" UTF8f,
                                      UTF8fARG(is_contents_utf8, s - s0, s0));
                 sv_catpvs(msg, "\"");
                 goto return_failure;
@@ -14330,7 +14330,7 @@ S_handle_user_defined_property(pTHX_
                     }
                     if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
                     sv_catpv(msg, overflow_msg);
-                    Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+                    sv_catpvf(msg, "%" UTF8f,
                                       UTF8fARG(is_contents_utf8, s - s0, s0));
                     sv_catpvs(msg, "\"");
                     goto return_failure;
@@ -14358,7 +14358,7 @@ S_handle_user_defined_property(pTHX_
         else if (max < min) {
             if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
             sv_catpvs(msg, "Illegal range in \"");
-            Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+            sv_catpvf(msg, "%" UTF8f,
                                 UTF8fARG(is_contents_utf8, s - s0, s0));
             sv_catpvs(msg, "\"");
             goto return_failure;
@@ -14377,7 +14377,7 @@ S_handle_user_defined_property(pTHX_
                                             (UNICODE_IS_PERL_EXTENDED(min))
                                             ? min : max));
             sv_catpvs(msg, " in \"");
-            Perl_sv_catpvf(aTHX_ msg, "%" UTF8f,
+            sv_catpvf(msg, "%" UTF8f,
                                  UTF8fARG(is_contents_utf8, s - s0, s0));
             sv_catpvs(msg, "\"");
         }
@@ -14484,7 +14484,7 @@ S_handle_user_defined_property(pTHX_
 
     if (name_len > 0) {
         sv_catpvs(msg, " in expansion of ");
-        Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
+        sv_catpvf(msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
     }
 
     return running_definition;
@@ -14558,12 +14558,12 @@ S_get_fq_name(pTHX_
                          : CopSTASH(PL_curcop);
         const char* pkgname = HvNAME(pkg);
 
-        Perl_sv_catpvf(aTHX_ fq_name, "%" UTF8f,
+        sv_catpvf(fq_name, "%" UTF8f,
                       UTF8fARG(is_utf8, strlen(pkgname), pkgname));
         sv_catpvs(fq_name, "::");
     }
 
-    Perl_sv_catpvf(aTHX_ fq_name, "%" UTF8f,
+    sv_catpvf(fq_name, "%" UTF8f,
                          UTF8fARG(is_utf8, name_len, name));
     return fq_name;
 }
@@ -15535,7 +15535,7 @@ S_parse_uniprop_string(pTHX_
 
                 if (name_len > 0) {
                     sv_catpvs(msg, " in expansion of ");
-                    Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8,
+                    sv_catpvf(msg, "%" UTF8f, UTF8fARG(is_utf8,
                                                                   name_len,
                                                                   name));
                 }
@@ -15948,7 +15948,7 @@ S_parse_uniprop_string(pTHX_
         const char * suffix = (runtime && level == 0) ?  "}" : "\"";
 
         sv_catpv(msg, prefix);
-        Perl_sv_catpvf(aTHX_ msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
+        sv_catpvf(msg, "%" UTF8f, UTF8fARG(is_utf8, name_len, name));
         sv_catpv(msg, suffix);
     }
 

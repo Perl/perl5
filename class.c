@@ -230,7 +230,7 @@ XS(injected_constructor)
         SAVEFREESV(paramnames);
 
         while((he = hv_iternext(params)))
-            Perl_sv_catpvf(aTHX_ paramnames, ", %" SVf, SVfARG(HeSVKEY_force(he)));
+            sv_catpvf(paramnames, ", %" SVf, SVfARG(HeSVKEY_force(he)));
 
         croak("Unrecognised parameters for %" HvNAMEf_QUOTEDPREFIX " constructor: %" SVf,
                 HvNAMEfARG(stash), SVfARG(paramnames));

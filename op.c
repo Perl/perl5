@@ -6588,7 +6588,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             sv_catpvn(inverted_tstr, (char *) temp, temp_end_pos - temp);
 
             if (start != end) {
-                Perl_sv_catpvf(aTHX_ inverted_tstr, "%c", RANGE_INDICATOR);
+                sv_catpvf(inverted_tstr, "%c", RANGE_INDICATOR);
                 temp_end_pos = uv_to_utf8(temp, end);
                 sv_catpvn(inverted_tstr, (char *) temp, temp_end_pos - temp);
             }
@@ -10383,16 +10383,16 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
     }
     sv_setpvs(msg, "Prototype mismatch:");
     if (name)
-        Perl_sv_catpvf(aTHX_ msg, " sub %" SVf, SVfARG(name));
+        sv_catpvf(msg, " sub %" SVf, SVfARG(name));
     if (cvp)
-        Perl_sv_catpvf(aTHX_ msg, " (%" UTF8f ")",
+        sv_catpvf(msg, " (%" UTF8f ")",
             UTF8fARG(SvUTF8(cv),clen,cvp)
         );
     else
         sv_catpvs(msg, ": none");
     sv_catpvs(msg, " vs ");
     if (p)
-        Perl_sv_catpvf(aTHX_ msg, "(%" UTF8f ")", UTF8fARG(flags & SVf_UTF8,len,p));
+        sv_catpvf(msg, "(%" UTF8f ")", UTF8fARG(flags & SVf_UTF8,len,p));
     else
         sv_catpvs(msg, "none");
     Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%" SVf, SVfARG(msg));

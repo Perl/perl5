@@ -4035,14 +4035,14 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
             }
 
             if (PL_in_utf8_CTYPE_locale) {
-                Perl_sv_catpvf(aTHX_ PL_warn_locale,
+                sv_catpvf(PL_warn_locale,
                      "Locale '%s' contains (at least) the following characters"
                      " which have\nunexpected meanings: %s\nThe Perl program"
                      " will use the expected meanings",
                       newctype, bad_chars_list);
             }
             else {
-                Perl_sv_catpvf(aTHX_ PL_warn_locale,
+                sv_catpvf(PL_warn_locale,
                                   "\nThe following characters (and maybe"
                                   " others) may not have the same meaning as"
                                   " the Perl program expects: %s\n",
@@ -4052,12 +4052,12 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
 
 #    if defined(HAS_SOME_LANGINFO) || defined(WIN32)
 
-            Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
+            sv_catpvf(PL_warn_locale, "; codeset=%s",
                                  langinfo_c(CODESET, LC_CTYPE, newctype, NULL));
 
 #    endif
 
-            Perl_sv_catpvf(aTHX_ PL_warn_locale, "\n");
+            sv_catpvf(PL_warn_locale, "\n");
 
             /* If we are actually in the scope of the locale or are debugging,
              * output the message now.  If not in that scope, we save the

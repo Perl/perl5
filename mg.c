@@ -1261,7 +1261,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 Newx(gary, num_groups, Groups_t);
                 num_groups = getgroups(num_groups, gary);
                 for (i = 0; i < num_groups; i++)
-                    Perl_sv_catpvf(aTHX_ sv, " %" IVdf, (IV)gary[i]);
+                    sv_catpvf(sv, " %" IVdf, (IV)gary[i]);
                 Safefree(gary);
             }
         }

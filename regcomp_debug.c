@@ -555,10 +555,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     k = REGNODE_TYPE(op);
     if (op == BRANCH) {
-        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG1a(o),(IV)ARG1b(o));
+        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG1a(o),(IV)ARG1b(o));
     }
     else if (op == BRANCHJ) {
-        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2a(o),(IV)ARG2b(o));
+        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2a(o),(IV)ARG2b(o));
     }
     else if (k == EXACT) {
         sv_catpvs(sv, " ");
@@ -584,11 +584,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         const reg_trie_data * const trie
             = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
 
-        Perl_sv_catpvf(aTHX_ sv, "-%s", REGNODE_NAME(FLAGS(o)));
+        sv_catpvf(sv, "-%s", REGNODE_NAME(FLAGS(o)));
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
-          Perl_sv_catpvf(aTHX_ sv,
+          sv_catpvf(sv,
             "<S:%" UVuf "/%" IVdf " W:%" UVuf " L:%" UVuf "/%" UVuf " C:%" UVuf "/%" UVuf ">",
             (UV)trie->startstate,
             (IV)trie->statecount-1, /* -1 because of the unused 0 element */
@@ -614,23 +614,23 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             sv_catpvs(sv, "]");
         }
         if (trie->before_paren || trie->after_paren)
-            Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")",
+            sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")",
                     (IV)trie->before_paren,(IV)trie->after_paren);
     } else if (k == CURLY) {
         U32 lo = ARG1i(o), hi = ARG2i(o);
         if (ARG3u(o)) /* check both ARG3a and ARG3b at the same time */
-            Perl_sv_catpvf(aTHX_ sv, "<%d:%d>", ARG3a(o),ARG3b(o)); /* paren before, paren after */
+            sv_catpvf(sv, "<%d:%d>", ARG3a(o),ARG3b(o)); /* paren before, paren after */
         if (op == CURLYM || op == CURLYN || op == CURLYX)
-            Perl_sv_catpvf(aTHX_ sv, "[%d]", FLAGS(o)); /* Parenth number */
-        Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
+            sv_catpvf(sv, "[%d]", FLAGS(o)); /* Parenth number */
+        sv_catpvf(sv, "{%u,", (unsigned) lo);
         if (hi == REG_INFTY)
             sv_catpvs(sv, "INFTY");
         else
-            Perl_sv_catpvf(aTHX_ sv, "%u", (unsigned) hi);
+            sv_catpvf(sv, "%u", (unsigned) hi);
         sv_catpvs(sv, "}");
     }
     else if (k == WHILEM && FLAGS(o))                   /* Ordinal/of */
-        Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", FLAGS(o) & 0xf, FLAGS(o)>>4);
+        sv_catpvf(sv, "[%d/%d]", FLAGS(o) & 0xf, FLAGS(o)>>4);
     else if (k == REF || k == OPEN || k == CLOSE
              || k == GROUPP || op == ACCEPT)
     {
@@ -649,13 +649,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 if (prog->parno_to_logical)
                     logical_parno = prog->parno_to_logical[parno];
 
-                Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)logical_parno);     /* Parenth number */
+                sv_catpvf(sv, "%" UVuf, (UV)logical_parno);     /* Parenth number */
                 if (parno != logical_parno)
-                    Perl_sv_catpvf(aTHX_ sv, "/%" UVuf, (UV)parno);        /* Parenth number */
+                    sv_catpvf(sv, "/%" UVuf, (UV)parno);        /* Parenth number */
 
                 SV **name= av_fetch_simple(name_list, parno, 0 );
                 if (name)
-                    Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
+                    sv_catpvf(sv, " '%" SVf "'", SVfARG(*name));
             }
             else
             if (parno > 0) {
@@ -672,10 +672,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 I32 n;
                 if (name) {
                     for ( n = 0; n < SvIVX(sv_dat); n++ ) {
-                        Perl_sv_catpvf(aTHX_ sv, "%s%" IVdf,
+                        sv_catpvf(sv, "%s%" IVdf,
                                     (n ? "," : ""), (IV)nums[n]);
                     }
-                    Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
+                    sv_catpvf(sv, " '%" SVf "'", SVfARG(*name));
                 }
             }
         } else if (parno > 0) {
@@ -683,24 +683,24 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             if (prog->parno_to_logical)
                 logical_parno = prog->parno_to_logical[parno];
 
-            Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)logical_parno);     /* Parenth number */
+            sv_catpvf(sv, "%" UVuf, (UV)logical_parno);     /* Parenth number */
             if (logical_parno != parno)
-                Perl_sv_catpvf(aTHX_ sv, "/%" UVuf, (UV)parno);     /* Parenth number */
+                sv_catpvf(sv, "/%" UVuf, (UV)parno);     /* Parenth number */
 
         }
         if ( k == REF ) {
-            Perl_sv_catpvf(aTHX_ sv, " <%" IVdf ">", (IV)ARG2i(o));
+            sv_catpvf(sv, " <%" IVdf ">", (IV)ARG2i(o));
         }
         if ( k == REF && reginfo) {
             U32 n = ARG1u(o);  /* which paren pair */
             I32 ln = RXp_OFFS_START(prog,n);
             if (RXp_LASTPAREN(prog) < n || ln == -1 || RXp_OFFS_END(prog,n) == -1)
-                Perl_sv_catpvf(aTHX_ sv, ": FAIL");
+                sv_catpvf(sv, ": FAIL");
             else if (ln == RXp_OFFS_END(prog,n))
-                Perl_sv_catpvf(aTHX_ sv, ": ACCEPT - EMPTY STRING");
+                sv_catpvf(sv, ": ACCEPT - EMPTY STRING");
             else {
                 const char *s = reginfo->strbeg + ln;
-                Perl_sv_catpvf(aTHX_ sv, ": ");
+                sv_catpvf(sv, ": ");
                 Perl_pv_pretty( aTHX_ sv, s, RXp_OFFS_END(prog,n) - RXp_OFFS_START(prog,n), 32, 0, 0,
                     PERL_PV_ESCAPE_UNI_DETECT|PERL_PV_PRETTY_NOCLEAR|PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE );
             }
@@ -718,21 +718,21 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         /* Paren and offset */
-        Perl_sv_catpvf(aTHX_ sv, "%" IVdf, logical_parno);
+        sv_catpvf(sv, "%" IVdf, logical_parno);
         if (logical_parno != parno)
-            Perl_sv_catpvf(aTHX_ sv, "/%" IVdf, parno);
+            sv_catpvf(sv, "/%" IVdf, parno);
 
-        Perl_sv_catpvf(aTHX_ sv, "[%+d:%d]", (int)ARG2i(o),
+        sv_catpvf(sv, "[%+d:%d]", (int)ARG2i(o),
                 (int)((o + (int)ARG2i(o)) - progi->program) );
         if (name_list) {
             SV **name= av_fetch_simple(name_list, ARG1u(o), 0 );
             if (name)
-                Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
+                sv_catpvf(sv, " '%" SVf "'", SVfARG(*name));
         }
     }
     else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
-        Perl_sv_catpvf(aTHX_ sv, "[%d]", FLAGS(o));
+        sv_catpvf(sv, "[%d]", FLAGS(o));
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         char * bitmap;
@@ -826,7 +826,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         /* Ready to start outputting.  First, the initial left bracket */
-        Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+        sv_catpvf(sv, "[%s", PL_colors[0]);
 
         if (   bitmap
             || bitmap_range_not_in_bitmap
@@ -865,7 +865,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     sv_catpvs(sv, "{");
                 }
                 else if (do_sep) {
-                    Perl_sv_catpvf(aTHX_ sv,"%s][%s", PL_colors[1],
+                    sv_catpvf(sv,"%s][%s", PL_colors[1],
                                                       PL_colors[0]);
                 }
                 sv_catsv(sv, unresolved);
@@ -899,7 +899,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
             /* This is output in a separate [] */
             if (do_sep) {
-                Perl_sv_catpvf(aTHX_ sv,"%s][%s", PL_colors[1], PL_colors[0]);
+                sv_catpvf(sv,"%s][%s", PL_colors[1], PL_colors[0]);
             }
 
             /* And, for easy of understanding, it is shown in the
@@ -942,10 +942,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         /* And finally the matching, closing ']' */
-        Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+        sv_catpvf(sv, "%s]", PL_colors[1]);
 
         if (op == ANYOFHs) {
-            Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes = %s", 
+            sv_catpvf(sv, " (Leading UTF-8 bytes = %s", 
                 _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, 
                 FLAGS(o), 1));
         }
@@ -962,11 +962,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             if (op != ANYOFR || ! isASCII(ANYOFRbase(o) + ANYOFRdelta(o)))
 #endif
             {
-                Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte = %02X", lowest);
+                sv_catpvf(sv, " (First UTF-8 byte = %02X", lowest);
                 if (lowest != highest) {
-                    Perl_sv_catpvf(aTHX_ sv, "-%02X", highest);
+                    sv_catpvf(sv, "-%02X", highest);
                 }
-                Perl_sv_catpvf(aTHX_ sv, ")");
+                sv_catpvf(sv, ")");
             }
         }
 
@@ -975,24 +975,24 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == ANYOFM) {
         SV * cp_list = get_ANYOFM_contents(o);
 
-        Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+        sv_catpvf(sv, "[%s", PL_colors[0]);
         if (op == NANYOFM) {
             _invlist_invert(cp_list);
         }
 
         put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, 0, true);
-        Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+        sv_catpvf(sv, "%s]", PL_colors[1]);
 
         SvREFCNT_dec(cp_list);
     }
     else if (k == ANYOFHbbm) {
         SV * cp_list = get_ANYOFHbbm_contents(o);
-        Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+        sv_catpvf(sv, "[%s", PL_colors[0]);
 
         sv_catsv(sv, invlist_contents(cp_list,
                                       false /* output suitable for catsv */
                                      ));
-        Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+        sv_catpvf(sv, "%s]", PL_colors[1]);
 
         SvREFCNT_dec(cp_list);
     }
@@ -1008,7 +1008,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
         }
         else {
-            Perl_sv_catpvf(aTHX_ sv, "[illegal type = %d])", index);
+            sv_catpvf(sv, "[illegal type = %d])", index);
         }
     }
     else if (k == BOUND || k == NBOUND) {
@@ -1024,23 +1024,23 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         sv_catpv(sv, bounds[FLAGS(o)]);
     }
     else if (k == BRANCHJ && (op == UNLESSM || op == IFMATCH)) {
-        Perl_sv_catpvf(aTHX_ sv, "[%d", -(FLAGS(o)));
+        sv_catpvf(sv, "[%d", -(FLAGS(o)));
         if (NEXT_OFF(o)) {
-            Perl_sv_catpvf(aTHX_ sv, "..-%d", FLAGS(o) - NEXT_OFF(o));
+            sv_catpvf(sv, "..-%d", FLAGS(o) - NEXT_OFF(o));
         }
-        Perl_sv_catpvf(aTHX_ sv, "]");
+        sv_catpvf(sv, "]");
     }
     else if (op == SBOL)
-        Perl_sv_catpvf(aTHX_ sv, " /%s/", FLAGS(o) ? "\\A" : "^");
+        sv_catpvf(sv, " /%s/", FLAGS(o) ? "\\A" : "^");
     else if (op == EVAL) {
         if (FLAGS(o) & EVAL_OPTIMISTIC_FLAG)
-            Perl_sv_catpvf(aTHX_ sv, " optimistic");
+            sv_catpvf(sv, " optimistic");
     }
 
     /* add on the verb argument if there is one */
     if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && FLAGS(o)) {
         if ( ARG1u(o) )
-            Perl_sv_catpvf(aTHX_ sv, ":%" SVf,
+            sv_catpvf(sv, ":%" SVf,
                        SVfARG((MUTABLE_SV(progi->data->data[ ARG1u( o ) ]))));
         else
             sv_catpvs(sv, ":NULL");
@@ -1063,7 +1063,7 @@ S_put_code_point(pTHX_ SV *sv, UV c)
     PERL_ARGS_ASSERT_PUT_CODE_POINT;
 
     if (c > 255) {
-        Perl_sv_catpvf(aTHX_ sv, "\\x{%04" UVXf "}", c);
+        sv_catpvf(sv, "\\x{%04" UVXf "}", c);
     }
     else if (isPRINT(c)) {
         const char string = (char) c;
@@ -1075,10 +1075,10 @@ S_put_code_point(pTHX_ SV *sv, UV c)
         sv_catpvn(sv, &string, 1);
     }
     else if (isMNEMONIC_CNTRL(c)) {
-        Perl_sv_catpvf(aTHX_ sv, "%s", cntrl_to_mnemonic((U8) c));
+        sv_catpvf(sv, "%s", cntrl_to_mnemonic((U8) c));
     }
     else {
-        Perl_sv_catpvf(aTHX_ sv, "\\x%02X", (U8) c);
+        sv_catpvf(sv, "\\x%02X", (U8) c);
     }
 }
 
@@ -1258,7 +1258,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         format = "\\x%02" UVXf "-\\x%02" UVXf;
 #endif
         GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-        Perl_sv_catpvf(aTHX_ sv, format, start, this_end);
+        sv_catpvf(sv, format, start, this_end);
         GCC_DIAG_RESTORE_STMT;
         break;
     }
@@ -1354,17 +1354,17 @@ S_put_charclass_bitmap_innards_common(pTHX_
     }
 
     if (only_utf8 && _invlist_len(only_utf8)) {
-        Perl_sv_catpvf(aTHX_ output, "%s{utf8}%s", PL_colors[1], PL_colors[0]);
+        sv_catpvf(output, "%s{utf8}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, only_utf8);
     }
 
     if (not_utf8 && _invlist_len(not_utf8)) {
-        Perl_sv_catpvf(aTHX_ output, "%s{not utf8}%s", PL_colors[1], PL_colors[0]);
+        sv_catpvf(output, "%s{not utf8}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, not_utf8);
     }
 
     if (only_utf8_locale && _invlist_len(only_utf8_locale)) {
-        Perl_sv_catpvf(aTHX_ output, "%s{utf8 locale}%s", PL_colors[1], PL_colors[0]);
+        sv_catpvf(output, "%s{utf8 locale}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, only_utf8_locale);
 
         /* This is the only list in this routine that can legally contain code

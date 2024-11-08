@@ -3786,7 +3786,7 @@ Perl_moreswitches(pTHX_ const char *s)
                 sv_catpvn(sv, start, s-start);
                 /* Don't use NUL as q// delimiter here, this string goes in the
                  * environment. */
-                Perl_sv_catpvf(aTHX_ sv, " split(/,/,q{%s});", ++s);
+                sv_catpvf(sv, " split(/,/,q{%s});", ++s);
             }
             s = end;
             my_setenv("PERL5DB", SvPV_nolen_const(sv));
@@ -5190,7 +5190,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
             if (addoldvers) {
                 for (incver = incverlist; *incver; incver++) {
                     /* .../xxx if -d .../xxx */
-                    Perl_sv_catpvf(aTHX_ subdir, "/%s", *incver);
+                    sv_catpvf(subdir, "/%s", *incver);
                     subdir = S_incpush_if_exists(aTHX_ av, subdir, libdir);
                 }
             }
@@ -5328,7 +5328,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
                 if (paramList == PL_beginav)
                     sv_catpvs(atsv, "BEGIN failed--compilation aborted");
                 else
-                    Perl_sv_catpvf(aTHX_ atsv,
+                    sv_catpvf(atsv,
                                    "%s failed--call queue aborted",
                                    paramList == PL_checkav ? "CHECK"
                                    : paramList == PL_initav ? "INIT"

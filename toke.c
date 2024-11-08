@@ -566,33 +566,33 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
             Perl_sv_catpv(aTHX_ report, name);
         else if (isGRAPH(rv))
         {
-            Perl_sv_catpvf(aTHX_ report, "'%c'", (char)rv);
+            sv_catpvf(report, "'%c'", (char)rv);
             if ((char)rv == 'p')
                 sv_catpvs(report, " (pending identifier)");
         }
         else if (!rv)
             sv_catpvs(report, "EOF");
         else
-            Perl_sv_catpvf(aTHX_ report, "?? %" IVdf, (IV)rv);
+            sv_catpvf(report, "?? %" IVdf, (IV)rv);
         switch (type) {
         case TOKENTYPE_NONE:
             break;
         case TOKENTYPE_IVAL:
-            Perl_sv_catpvf(aTHX_ report, "(ival=%" IVdf ")", (IV)lvalp->ival);
+            sv_catpvf(report, "(ival=%" IVdf ")", (IV)lvalp->ival);
             break;
         case TOKENTYPE_OPNUM:
-            Perl_sv_catpvf(aTHX_ report, "(ival=op_%s)",
+            sv_catpvf(report, "(ival=op_%s)",
                                     PL_op_name[lvalp->ival]);
             break;
         case TOKENTYPE_PVAL:
-            Perl_sv_catpvf(aTHX_ report, "(pval=%p)", lvalp->pval);
+            sv_catpvf(report, "(pval=%p)", lvalp->pval);
             break;
         case TOKENTYPE_OPVAL:
             if (lvalp->opval) {
-                Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
+                sv_catpvf(report, "(opval=op_%s)",
                                     PL_op_name[lvalp->opval->op_type]);
                 if (lvalp->opval->op_type == OP_CONST) {
-                    Perl_sv_catpvf(aTHX_ report, " %s",
+                    sv_catpvf(report, " %s",
                         SvPEEK(cSVOPx_sv(lvalp->opval)));
                 }
 
@@ -9217,7 +9217,7 @@ yyl_try(pTHX_ char *s)
                         {
                             /* strchr is ok, because -F pattern can't contain
                              * embedded NULs */
-                            Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s);", PL_splitstr);
+                            sv_catpvf(PL_linestr, "our @F=split(%s);", PL_splitstr);
                         }
                         else {
                             /* "q\0${splitstr}\0" is legal perl. Yes, even NUL
@@ -12963,29 +12963,29 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
         else {
             sv_catpvs(where_sv, "next char ");
             if (yychar < 32)
-                Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
+                sv_catpvf(where_sv, "^%c", toCTRL(yychar));
             else if (isPRINT_LC(yychar)) {
                 const char string = yychar;
                 sv_catpvn(where_sv, &string, 1);
             }
             else
-                Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
+                sv_catpvf(where_sv, "\\%03o", yychar & 255);
         }
         msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
-        Perl_sv_catpvf(aTHX_ msg, " at %s line %" LINE_Tf ", ",
+        sv_catpvf(msg, " at %s line %" LINE_Tf ", ",
             OutCopFILE(PL_curcop),
             (PL_parser->preambling == NOLINE
                    ? CopLINE(PL_curcop)
                    : PL_parser->preambling));
         if (context)
-            Perl_sv_catpvf(aTHX_ msg, "near \"%" UTF8f "\"\n",
+            sv_catpvf(msg, "near \"%" UTF8f "\"\n",
                                  UTF8fARG(UTF, contlen, context));
         else
-            Perl_sv_catpvf(aTHX_ msg, "%" SVf "\n", SVfARG(where_sv));
+            sv_catpvf(msg, "%" SVf "\n", SVfARG(where_sv));
         if (   PL_multi_start < PL_multi_end
             && (U32)(CopLINE(PL_curcop) - PL_multi_end) <= 1)
         {
-            Perl_sv_catpvf(aTHX_ msg,
+            sv_catpvf(msg,
             "  (Might be a runaway multi-line %c%c string starting on"
             " line %" LINE_Tf ")\n",
                     (int)PL_multi_open,(int)PL_multi_close,(line_t)PL_multi_start);

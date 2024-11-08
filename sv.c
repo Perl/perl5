@@ -13780,7 +13780,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         if (isPRINT(*f)) {
                             sv_catpvn_nomg(msg, f, 1);
                         } else {
-                            Perl_sv_catpvf(aTHX_ msg, "\\%03o", (U8) *f);
+                            sv_catpvf(msg, "\\%03o", (U8) *f);
                         }
                     }
                     sv_catpvs(msg, "\"");
@@ -16884,14 +16884,14 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
         const char * const pv = SvPV_nomg_const((SV*)keyname, len);
 
         *SvPVX(name) = '$';
-        Perl_sv_catpvf(aTHX_ name, "{%s}",
+        sv_catpvf(name, "{%s}",
             pv_pretty(sv, pv, len, 32, NULL, NULL,
                     PERL_PV_PRETTY_DUMP | PERL_PV_ESCAPE_UNI_DETECT ));
         SvREFCNT_dec_NN(sv);
     }
     else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
         *SvPVX(name) = '$';
-        Perl_sv_catpvf(aTHX_ name, "[%" IVdf "]", (IV)aindex);
+        sv_catpvf(name, "[%" IVdf "]", (IV)aindex);
     }
     else if (subscript_type == FUV_SUBSCRIPT_WITHIN) {
         /* We know that name has no magic, so can use 0 instead of SV_GMAGIC */
