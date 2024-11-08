@@ -15696,13 +15696,13 @@ S_parse_uniprop_string(pTHX_
                 /* If the value is an integer, the canonical value is integral
                  * */
                 if (Perl_ceil(value) == value) {
-                    canonical = Perl_form(aTHX_ "%.*s%.0" NVff,
+                    canonical = form("%.*s%.0" NVff,
                                             equals_pos, lookup_name, value);
                 }
                 else {  /* Otherwise, it is %e with a known precision */
                     char * exp_ptr;
 
-                    canonical = Perl_form(aTHX_ "%.*s%.*" NVef,
+                    canonical = form("%.*s%.*" NVef,
                                                 equals_pos, lookup_name,
                                                 PL_E_FORMAT_PRECISION, value);
 
@@ -15806,7 +15806,7 @@ S_parse_uniprop_string(pTHX_
                 numerator /= gcd;
                 denominator /= gcd;
 
-                canonical = Perl_form(aTHX_ "%.*s%s%" UVuf "/%" UVuf,
+                canonical = form("%.*s%s%" UVuf "/%" UVuf,
                         equals_pos, lookup_name, sign, numerator, denominator);
             }
 

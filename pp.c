@@ -3171,7 +3171,7 @@ PP(pp_sin)
               char * mesg;
               LC_NUMERIC_LOCK(0);
               SET_NUMERIC_STANDARD();
-              mesg = Perl_form(aTHX_ "Can't take %s of %" NVgf, neg_report, value);
+              mesg = form("Can't take %s of %" NVgf, neg_report, value);
               LC_NUMERIC_UNLOCK;
 
               /* diag_listed_as: Can't take log of %g */

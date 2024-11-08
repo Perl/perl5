@@ -679,7 +679,7 @@ S_no_fh_allowed(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_NO_FH_ALLOWED;
 
-    yyerror(Perl_form(aTHX_ "Missing comma after first argument to %s function",
+    yyerror(form("Missing comma after first argument to %s function",
                  OP_DESC(o)));
     return o;
 }
@@ -688,7 +688,7 @@ STATIC OP *
 S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 {
     PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_PV;
-    yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %s", name), flags);
+    yyerror_pv(form("Not enough arguments for %s", name), flags);
     return o;
 }
 
@@ -697,7 +697,7 @@ S_too_many_arguments_pv(pTHX_ OP *o, const char *name, U32 flags)
 {
     PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_PV;
 
-    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %s", name), flags);
+    yyerror_pv(form("Too many arguments for %s", name), flags);
     return o;
 }
 
@@ -706,7 +706,7 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const OP *o, const OP *kid)
 {
     PERL_ARGS_ASSERT_BAD_TYPE_PV;
 
-    yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
+    yyerror_pv(form("Type of arg %d to %s must be %s (not %s)",
                  (int)n, PL_op_desc[(o)->op_type], t, OP_DESC(kid)), 0);
 }
 
@@ -716,7 +716,7 @@ S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
     SV * const namesv = cv_name((CV *)gv, NULL, 0);
     PERL_ARGS_ASSERT_BAD_TYPE_GV;
 
-    yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %" SVf " must be %s (not %s)",
+    yyerror_pv(form("Type of arg %d to %" SVf " must be %s (not %s)",
                  (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv));
 }
 
@@ -788,12 +788,12 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
          && isASCII(name[1])
          && (!isPRINT(name[1]) || memCHRs("\t\n\r\f", name[1]))) {
             /* diag_listed_as: Can't use global %s in %s */
-            yyerror(Perl_form(aTHX_ "Can't use global %c^%c%.*s in %s",
+            yyerror(form("Can't use global %c^%c%.*s in %s",
                               name[0], toCTRL(name[1]),
                               (int)(len - 2), name + 2,
                               type));
         } else {
-            yyerror_pv(Perl_form(aTHX_ "Can't use global %.*s in %s",
+            yyerror_pv(form("Can't use global %.*s in %s",
                               (int) len, name,
                               type), flags & SVf_UTF8);
         }
@@ -2927,7 +2927,7 @@ S_lvref(pTHX_ OP *o, I32 type)
             o->op_flags |= OPf_STACKED;
             if (o->op_flags & OPf_PARENS) {
                 if (o->op_private & OPpLVAL_INTRO) {
-                     yyerror(Perl_form(aTHX_ "Can't modify reference to "
+                     yyerror(form("Can't modify reference to "
                           "localized parenthesized array in list assignment"));
                     goto do_next;
                 }
@@ -2961,7 +2961,7 @@ S_lvref(pTHX_ OP *o, I32 type)
         case OP_RV2HV:
             if (o->op_flags & OPf_PARENS) {
               parenhash:
-                yyerror(Perl_form(aTHX_ "Can't modify reference to "
+                yyerror(form("Can't modify reference to "
                                      "parenthesized hash in list assignment"));
                     goto do_next;
             }
@@ -3023,7 +3023,7 @@ S_lvref(pTHX_ OP *o, I32 type)
         default:
           badref:
             /* diag_listed_as: Can't modify reference to %s in %s assignment */
-            yyerror(Perl_form(aTHX_ "Can't modify reference to %s in %s",
+            yyerror(form("Can't modify reference to %s in %s",
                          o->op_type == OP_NULL && o->op_flags & OPf_SPECIAL
                           ? "do block"
                           : OP_DESC(o),
@@ -3184,7 +3184,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                     return NULL;
 
                 namesv = cv_name(cv, NULL, 0);
-                yyerror_pv(Perl_form(aTHX_ "Can't modify non-lvalue "
+                yyerror_pv(form("Can't modify non-lvalue "
                                      "subroutine call of &%" SVf " in %s",
                                      SVfARG(namesv), PL_op_desc[type]),
                            SvUTF8(namesv));
@@ -3198,7 +3198,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         /* grep, foreach, subcalls, refgen */
         if (S_potential_mod_type(type))
             break;
-        yyerror(Perl_form(aTHX_ "Can't modify %s in %s",
+        yyerror(form("Can't modify %s in %s",
                      (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)
                       ? "do block"
                       : OP_DESC(o)),
@@ -4105,7 +4105,7 @@ S_cant_declare(pTHX_ OP *o)
     if (o->op_type == OP_NULL
      && (o->op_flags & (OPf_SPECIAL|OPf_KIDS)) == OPf_KIDS)
         o = cUNOPo->op_first;
-    yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
+    yyerror(form("Can't declare %s in \"%s\"",
                              o->op_type == OP_NULL
                                && o->op_flags & OPf_SPECIAL
                                  ? "do block"
@@ -13253,7 +13253,7 @@ Perl_ck_fun(pTHX_ OP *o)
                     bad_type_pv(1, "array", o, kid);
                 }
                 else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV) {
-                    yyerror_pv(Perl_form(aTHX_ "Experimental %s on scalar is now forbidden",
+                    yyerror_pv(form("Experimental %s on scalar is now forbidden",
                                          PL_op_desc[type]), 0);
                 }
                 else {
@@ -14015,7 +14015,7 @@ Perl_ck_refassign(pTHX_ OP *o)
     default:
       bad:
         /* diag_listed_as: Can't modify reference to %s in %s assignment */
-        yyerror(Perl_form(aTHX_ "Can't modify reference to %s in scalar "
+        yyerror(form("Can't modify reference to %s in scalar "
                                 "assignment",
                                  OP_DESC(varop)));
         return o;
@@ -14800,7 +14800,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         if (proto >= proto_end)
         {
             SV * const namesv = cv_name((CV *)namegv, NULL, 0);
-            yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
+            yyerror_pv(form("Too many arguments for %" SVf,
                                         SVfARG(namesv)), SvUTF8(namesv));
             return entersubop;
         }
@@ -14892,7 +14892,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                                      OP_LVALUE_NO_CROAK
                                     )) goto wrapref;
                             bad_type_gv(arg, namegv, o3,
-                                    Perl_form(aTHX_ "one of %.*s",(int)(end - p), p));
+                                    form("one of %.*s",(int)(end - p), p));
                         } else
                             goto oops;
                         break;
@@ -14981,7 +14981,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         (*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
     {
         SV * const namesv = cv_name((CV *)namegv, NULL, 0);
-        yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %" SVf,
+        yyerror_pv(form("Not enough arguments for %" SVf,
                                     SVfARG(namesv)), SvUTF8(namesv));
     }
     return entersubop;
@@ -15042,7 +15042,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         for (cvop = aop; OpSIBLING(cvop); cvop = OpSIBLING(cvop)) ;
         if (aop != cvop) {
             SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
-            yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
+            yyerror_pv(form("Too many arguments for %" SVf,
                 SVfARG(namesv)), SvUTF8(namesv));
         }
 
@@ -15118,7 +15118,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                 OP *nextop;
 
                 namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
-                yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
+                yyerror_pv(form("Too many arguments for %" SVf,
                     SVfARG(namesv)), SvUTF8(namesv));
                 while (aop) {
                     nextop = OpSIBLING(aop);

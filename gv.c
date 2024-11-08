@@ -2883,7 +2883,7 @@ Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
     PERL_ARGS_ASSERT_NEWGVGEN_FLAGS;
     assert(!(flags & ~SVf_UTF8));
 
-    return gv_fetchpv(Perl_form(aTHX_ "%" UTF8f "::_GEN_%ld",
+    return gv_fetchpv(form("%" UTF8f "::_GEN_%ld",
                                 UTF8fARG(flags, strlen(pack), pack),
                                 (long)PL_gensym++),
                       GV_ADD, SVt_PVGV);
