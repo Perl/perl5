@@ -115,7 +115,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
             sv = MUTABLE_SV(gv);
         }
         else if (!isGV_with_GP(sv)) {
-            Perl_die(aTHX_ "Not a GLOB reference");
+            die("Not a GLOB reference");
         }
     }
     else {
@@ -143,7 +143,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
                     goto wasref;
                 }
                 if (PL_op->op_flags & OPf_REF || strict) {
-                    Perl_die(aTHX_ PL_no_usym, "a symbol");
+                    die(PL_no_usym, "a symbol");
                 }
                 if (ckWARN(WARN_UNINITIALIZED))
                     report_uninit(sv);
@@ -158,7 +158,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
             }
             else {
                 if (strict) {
-                    Perl_die(aTHX_
+                    die(
                              PL_no_symref_sv,
                              sv,
                              (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""),
@@ -223,16 +223,16 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 
     if (PL_op->op_private & HINT_STRICT_REFS) {
         if (SvOK(sv))
-            Perl_die(aTHX_ PL_no_symref_sv, sv,
+            die(PL_no_symref_sv, sv,
                      (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""), what);
         else
-            Perl_die(aTHX_ PL_no_usym, what);
+            die(PL_no_usym, what);
     }
     if (!SvOK(sv)) {
         if (
           PL_op->op_flags & OPf_REF
         )
-            Perl_die(aTHX_ PL_no_usym, what);
+            die(PL_no_usym, what);
         if (ckWARN(WARN_UNINITIALIZED))
             report_uninit(sv);
         if (type != SVt_PV && GIMME_V == G_LIST) {

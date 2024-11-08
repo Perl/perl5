@@ -13508,7 +13508,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 int i = PERL_INT_MIN;
                 (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp: %" VCATPVFN_FV_GF, fv);
+                    die("panic: frexp: %" VCATPVFN_FV_GF, fv);
 
                 if (i > 0) {
                     digits = BIT_DIGITS(i);

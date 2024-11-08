@@ -6767,7 +6767,7 @@ S_doparseform(pTHX_ SV *sv)
     mg->mg_flags |= MGf_REFCOUNTED;
 
     if (unchopnum && repeat)
-        Perl_die(aTHX_ "Repeated format line will never terminate (~~ and @#)");
+        die("Repeated format line will never terminate (~~ and @#)");
 
     return mg;
 }

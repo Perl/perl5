@@ -2748,7 +2748,7 @@ S_aassign_uid(pTHX)
 #  endif /* HAS_SETEUID */
         if (PL_delaymagic & DM_UID) {
             if (PL_delaymagic_uid != PL_delaymagic_euid)
-                Perl_die(aTHX_ "No setreuid available");
+                die("No setreuid available");
             PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
         }
 #endif /* HAS_SETRESUID */
@@ -2783,7 +2783,7 @@ S_aassign_uid(pTHX)
 #  endif /* HAS_SETEGID */
         if (PL_delaymagic & DM_GID) {
             if (PL_delaymagic_gid != PL_delaymagic_egid)
-                Perl_die(aTHX_ "No setregid available");
+                die("No setregid available");
             PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
         }
 #endif /* HAS_SETRESGID */
@@ -4427,13 +4427,13 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
 {
     if (PL_op->op_private & HINT_STRICT_REFS) {
         if (SvOK(sv))
-            Perl_die(aTHX_ PL_no_symref_sv, sv,
+            die(PL_no_symref_sv, sv,
                      (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""), what);
         else
-            Perl_die(aTHX_ PL_no_usym, what);
+            die(PL_no_usym, what);
     }
     if (!SvOK(sv))
-        Perl_die(aTHX_ PL_no_usym, what);
+        die(PL_no_usym, what);
     return gv_fetchsv_nomg(sv, GV_ADD, type);
 }
 

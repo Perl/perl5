@@ -3107,7 +3107,7 @@ Perl_gp_free(pTHX_ GV *gv)
        && !gp->gp_form) break;
 
       if (--attempts == 0) {
-        Perl_die(aTHX_
+        die(
           "panic: gp_free failed to free glob pointer - "
           "something is repeatedly re-creating entries"
         );

@@ -1440,7 +1440,7 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SET_ALL_ENV;
     PERL_UNUSED_ARG(mg);
 #if defined(VMS)
-    Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
+    die("Can't make list assignment to %%ENV on this system");
 #else
     if (PL_localizing) {
         HE* entry;
@@ -1463,7 +1463,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
 #if defined(VMS)
-    Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
+    die("Can't make list assignment to %%ENV on this system");
 #else
     my_clearenv();
 #endif

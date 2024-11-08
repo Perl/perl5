@@ -4961,7 +4961,7 @@ Perl_filter_del(pTHX_ filter_t funcp)
         return;
     }
     /* we need to search for the correct entry and clear it	*/
-    Perl_die(aTHX_ "filter_del can only delete in reverse order (currently)");
+    die("filter_del can only delete in reverse order (currently)");
 }
 
 

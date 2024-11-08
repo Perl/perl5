@@ -3499,7 +3499,7 @@ Perl_hv_placeholders_p(pTHX_ HV *hv)
         mg = sv_magicext(MUTABLE_SV(hv), 0, PERL_MAGIC_rhash, 0, 0, 0);
 
         if (!mg) {
-            Perl_die(aTHX_ "panic: hv_placeholders_p");
+            die("panic: hv_placeholders_p");
         }
     }
     return &(mg->mg_len);
@@ -3543,7 +3543,7 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
         mg->mg_len = ph;
     } else if (ph) {
         if (!sv_magicext(MUTABLE_SV(hv), 0, PERL_MAGIC_rhash, 0, 0, ph))
-            Perl_die(aTHX_ "panic: hv_placeholders_set");
+            die("panic: hv_placeholders_set");
     }
     /* else we don't need to add magic to record 0 placeholders.  */
 }
