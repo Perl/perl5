@@ -308,11 +308,11 @@ XS(XS_builtin_export_lexically)
     warn_experimental_builtin("export_lexically");
 
     if(!PL_compcv)
-        Perl_croak(aTHX_
+        croak(
                 "export_lexically can only be called at compile time");
 
     if(items % 2)
-        Perl_croak(aTHX_ "Odd number of elements in export_lexically");
+        croak("Odd number of elements in export_lexically");
 
     for(int i = 0; i < items; i += 2) {
         SV *name = ST(i);
@@ -320,7 +320,7 @@ XS(XS_builtin_export_lexically)
 
         if(!SvROK(ref))
             /* diag_listed_as: Expected %s reference in export_lexically */
-            Perl_croak(aTHX_ "Expected a reference in export_lexically");
+            croak("Expected a reference in export_lexically");
 
         char sigil = SvPVX(name)[0];
         SV *rv = SvRV(ref);
@@ -358,7 +358,7 @@ XS(XS_builtin_export_lexically)
         }
 
         if(bad)
-            Perl_croak(aTHX_ "Expected %s reference in export_lexically", bad);
+            croak("Expected %s reference in export_lexically", bad);
     }
 
     prepare_export_lexical();
@@ -695,7 +695,7 @@ static void S_import_sym(pTHX_ SV *sym)
 
     CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
     if(!cv)
-        Perl_croak(aTHX_ builtin_not_recognised, sym);
+        croak(builtin_not_recognised, sym);
 
     export_lexical(ampname, (SV *)cv);
 }
@@ -737,7 +737,7 @@ XS(XS_builtin_import)
     dXSARGS;
 
     if(!PL_compcv)
-        Perl_croak(aTHX_
+        croak(
                 "builtin::import can only be called at compile time");
 
     prepare_export_lexical();
@@ -747,19 +747,19 @@ XS(XS_builtin_import)
         STRLEN symlen;
         const char *sympv = SvPV(sym, symlen);
         if(strEQ(sympv, "import"))
-            Perl_croak(aTHX_ builtin_not_recognised, sym);
+            croak(builtin_not_recognised, sym);
 
         if(sympv[0] == ':') {
             UV vmajor, vminor;
             if(!S_parse_version(sympv + 1, sympv + symlen, &vmajor, &vminor))
-                Perl_croak(aTHX_ "Invalid version bundle %" SVf_QUOTEDPREFIX, sym);
+                croak("Invalid version bundle %" SVf_QUOTEDPREFIX, sym);
 
             U16 want_ver = SHORTVER(vmajor, vminor);
 
             if(want_ver < SHORTVER(5,39) ||
                     /* round up devel version to next major release; e.g. 5.39 => 5.40 */
                     want_ver > SHORTVER(PERL_REVISION, PERL_VERSION + (PERL_VERSION % 2)))
-                Perl_croak(aTHX_ "Builtin version bundle \"%s\" is not supported by Perl " PERL_VERSION_STRING,
+                croak("Builtin version bundle \"%s\" is not supported by Perl " PERL_VERSION_STRING,
                         sympv);
 
             import_builtin_bundle(want_ver);

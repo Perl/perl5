@@ -79,7 +79,7 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
         } else {
             what = type == SVt_PVAV ? "array" : "scalar";
         }
-        Perl_croak(aTHX_ "Bad symbol for %s", what);
+        croak("Bad symbol for %s", what);
     }
 
     if (type == SVt_PVHV) {
@@ -468,7 +468,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
         case SVt_PVHV:
         case SVt_PVFM:
         case SVt_PVIO:
-            Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
+            croak("Cannot convert a reference to %s to typeglob",
                        sv_reftype(has_constant, 0));
             NOT_REACHED; /* NOTREACHED */
             break;
@@ -877,7 +877,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
     hvname = HvNAME_get(stash);
     hvnamelen = HvNAMELEN_get(stash);
     if (!hvname)
-      Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
+      croak("Can't use anonymous symbol table for method lookup");
 
     assert(hvname);
     assert(name || meth);
@@ -1246,7 +1246,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
                     if (gv)
                         return gv;
                 }
-                Perl_croak(aTHX_
+                croak(
                            "Can't locate object method %" UTF8f_QUOTEDPREFIX ""
                            " via package %" HEKf_QUOTEDPREFIX,
                                     UTF8fARG(is_utf8, name_end - name, name),
@@ -1262,7 +1262,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
                     packnamesv = error_report;
                 }
 
-                Perl_croak(aTHX_
+                croak(
                            "Can't locate object method %" UTF8f_QUOTEDPREFIX ""
                            " via package %" SVf_QUOTEDPREFIX ""
                            " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
@@ -1404,7 +1404,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
         !(flags & GV_AUTOLOAD_ISMETHOD)
      && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
-        Perl_croak(aTHX_ "Use of inherited AUTOLOAD for non-method %" SVf
+        croak("Use of inherited AUTOLOAD for non-method %" SVf
                          "::%" UTF8f "() is no longer allowed",
                          SVfARG(packname),
                          UTF8fARG(is_utf8, len, name));
@@ -1547,10 +1547,10 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
         assert(sp == PL_stack_sp);
         stash = gv_stashpvn(name, len, 0);
         if (!stash)
-            Perl_croak(aTHX_ "panic: Can't use %c%c because %s is not available",
+            croak("panic: Can't use %c%c because %s is not available",
                     type, varname, name);
         else if (! GET_HV_FETCH_TIE_FUNC)
-            Perl_croak(aTHX_ "panic: Can't use %c%c because %s does not define _tie_it",
+            croak("panic: Can't use %c%c because %s does not define _tie_it",
                     type, varname, name);
       }
       /* Now call the tie function.  It should be in *gvp.  */
@@ -2400,7 +2400,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         case '#':		/* $# */
         if (sv_type == SVt_PV)
             /* diag_listed_as: $* is no longer supported as of Perl 5.30 */
-            Perl_croak(aTHX_ "$%c is no longer supported as of Perl 5.30", *name);
+            croak("$%c is no longer supported as of Perl 5.30", *name);
         break;
         case '\010':	/* $^H */
             {
@@ -2505,7 +2505,7 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
     } else if (sv_type == SVt_PV) {
         if (*name == '*' || *name == '#') {
             /* diag_listed_as: $* is no longer supported as of Perl 5.30 */
-            Perl_croak(aTHX_ "$%c is no longer supported as of Perl 5.30", *name);
+            croak("$%c is no longer supported as of Perl 5.30", *name);
         }
     }
     if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
@@ -3272,7 +3272,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
                                                     ? gvsv
                                                     : newSVpvs_flags("???", SVs_TEMP);
                         /* diag_listed_as: Can't resolve method "%s" overloading "%s" in package "%s" */
-                        Perl_croak(aTHX_ "%s method \"%" SVf256
+                        croak("%s method \"%" SVf256
                                     "\" overloading \"%s\" "\
                                     "in package \"%" HEKf256 "\"",
                                    (GvCVGEN(gv) ? "Stub found while resolving"
@@ -3713,7 +3713,7 @@ Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
     while ((tmpsv = amagic_call(ref, &PL_sv_undef, method,
                                 AMGf_noright | AMGf_unary))) {
         if (!SvROK(tmpsv))
-            Perl_croak(aTHX_ "Overloaded dereference did not return a reference");
+            croak("Overloaded dereference did not return a reference");
         if (tmpsv == ref || SvRV(tmpsv) == SvRV(ref)) {
             /* Bail out if it returns us the same reference.  */
             return tmpsv;
@@ -4029,7 +4029,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
         if (use_default_op) {
           DEBUG_o( Perl_deb(aTHX_ "%" SVf, SVfARG(msg)) );
         } else {
-          Perl_croak(aTHX_ "%" SVf, SVfARG(msg));
+          croak("%" SVf, SVfARG(msg));
         }
         return NULL;
       }
@@ -4288,7 +4288,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       return boolSV(ans);
     } else if (method==copy_amg) {
       if (!SvROK(res)) {
-        Perl_croak(aTHX_ "Copy method did not return a reference");
+        croak("Copy method did not return a reference");
       }
       return SvREFCNT_inc(SvRV(res));
     } else {
@@ -4317,7 +4317,7 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_GV_NAME_SET;
 
     if (len > I32_MAX)
-        Perl_croak(aTHX_ "panic: gv name too long (%" UVuf ")", (UV) len);
+        croak("panic: gv name too long (%" UVuf ")", (UV) len);
 
     if (!(flags & GV_ADD) && GvNAME_HEK(gv)) {
         unshare_hek(GvNAME_HEK(gv));
@@ -4427,7 +4427,7 @@ Perl_gv_override(pTHX_ const char * const name, const STRLEN len)
 static void
 core_xsub(pTHX_ CV* cv)
 {
-    Perl_croak(aTHX_
+    croak(
        "&CORE::%s cannot be called directly", GvNAME(CvGV(cv))
     );
 }

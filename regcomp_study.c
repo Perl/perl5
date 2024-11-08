@@ -2858,7 +2858,7 @@ Perl_study_chunk(pTHX_
                 continue;
 
             default:
-                Perl_croak(aTHX_ "panic: unexpected varying REx opcode %d",
+                croak("panic: unexpected varying REx opcode %d",
                                                                     OP(scan));
             case REF:
             case CLUMP:
@@ -2938,7 +2938,7 @@ Perl_study_chunk(pTHX_
 
                 default:
 #ifdef DEBUGGING
-                   Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d",
+                   croak("panic: unexpected simple REx opcode %d",
                                                                      OP(scan));
 #endif
                 case SANY:
@@ -3587,7 +3587,7 @@ Perl_study_chunk(pTHX_
 #endif /* TRIE_STUDY_OPT */
 
         else if (OP(scan) == REGEX_SET) {
-            Perl_croak(aTHX_ "panic: %s regnode should be resolved"
+            croak("panic: %s regnode should be resolved"
                              " before optimization", REGNODE_NAME(REGEX_SET));
         }
 

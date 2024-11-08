@@ -629,7 +629,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
 
     if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK|padadd_FIELD))
-        Perl_croak(aTHX_ "panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
+        croak("panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
                    (UV)flags);
 
     name = newPADNAMEpvn(namepv, namelen);
@@ -724,7 +724,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     ASSERT_CURPAD_ACTIVE("pad_alloc");
 
     if (AvARRAY(PL_comppad) != PL_curpad)
-        Perl_croak(aTHX_ "panic: pad_alloc, %p!=%p",
+        croak("panic: pad_alloc, %p!=%p",
                    AvARRAY(PL_comppad), PL_curpad);
     if (PL_pad_reset_pending)
         pad_reset();
@@ -989,7 +989,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
 
     if (flags)
-        Perl_croak(aTHX_ "panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
+        croak("panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
                    (UV)flags);
 
     /* compilation errors can zero PL_compcv */
@@ -1115,7 +1115,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 
     flags &= ~(padadd_STALEOK|padfind_FIELD_OK); /* one-shot flags */
     if (flags)
-        Perl_croak(aTHX_ "panic: pad_findlex illegal flag bits 0x%" UVxf,
+        croak("panic: pad_findlex illegal flag bits 0x%" UVxf,
                    (UV)flags);
 
     *out_flags = 0;
@@ -1374,7 +1374,7 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
     ASSERT_CURPAD_ACTIVE("pad_sv");
 
     if (!po)
-        Perl_croak(aTHX_ "panic: pad_sv po");
+        croak("panic: pad_sv po");
     DEBUG_X(PerlIO_printf(Perl_debug_log,
         "Pad 0x%" UVxf "[0x%" UVxf "] sv:      %ld sv=0x%" UVxf "\n",
         PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po, PTR2UV(PL_curpad[po]))
@@ -1565,10 +1565,10 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     if (!PL_curpad)
         return;
     if (AvARRAY(PL_comppad) != PL_curpad)
-        Perl_croak(aTHX_ "panic: pad_swipe curpad, %p!=%p",
+        croak("panic: pad_swipe curpad, %p!=%p",
                    AvARRAY(PL_comppad), PL_curpad);
     if (!po || ((SSize_t)po) > AvFILLp(PL_comppad))
-        Perl_croak(aTHX_ "panic: pad_swipe po=%ld, fill=%ld",
+        croak("panic: pad_swipe po=%ld, fill=%ld",
                    (long)po, (long)AvFILLp(PL_comppad));
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
@@ -1619,7 +1619,7 @@ S_pad_reset(pTHX)
 {
 #ifdef USE_PAD_RESET
     if (AvARRAY(PL_comppad) != PL_curpad)
-        Perl_croak(aTHX_ "panic: pad_reset curpad, %p!=%p",
+        croak("panic: pad_reset curpad, %p!=%p",
                    AvARRAY(PL_comppad), PL_curpad);
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
@@ -1773,10 +1773,10 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     if (!PL_curpad)
         return;
     if (AvARRAY(PL_comppad) != PL_curpad)
-        Perl_croak(aTHX_ "panic: pad_free curpad, %p!=%p",
+        croak("panic: pad_free curpad, %p!=%p",
                    AvARRAY(PL_comppad), PL_curpad);
     if (!po)
-        Perl_croak(aTHX_ "panic: pad_free po");
+        croak("panic: pad_free po");
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
             "Pad 0x%" UVxf "[0x%" UVxf "] free:    %ld\n",
@@ -2186,7 +2186,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                         ) == o
                      && !OpSIBLING(o))
                     {
-                        Perl_croak(aTHX_
+                        croak(
                             "Constants from lexical variables potentially modified "
                             "elsewhere are no longer permitted");
                     }
@@ -2277,7 +2277,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 {
     PERL_ARGS_ASSERT_CV_CLONE;
 
-    if (!CvPADLIST(proto)) Perl_croak(aTHX_ "panic: no pad in cv_clone");
+    if (!CvPADLIST(proto)) croak("panic: no pad in cv_clone");
     return S_cv_clone(aTHX_ proto, NULL, NULL, NULL);
 }
 

@@ -99,7 +99,7 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
     PERL_ARGS_ASSERT_AV_EXTEND_GUTS;
 
     if (key < -1) /* -1 is legal */
-        Perl_croak(aTHX_
+        croak(
             "panic: av_extend_guts() negative count (%" IVdf ")", (IV)key);
 
     if (key > *maxp) {

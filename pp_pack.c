@@ -257,7 +257,7 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
                          ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
     if (retlen == (STRLEN) -1)
       croak:
-        Perl_croak(aTHX_ "Malformed UTF-8 string in '%c' format in unpack",
+        croak("Malformed UTF-8 string in '%c' format in unpack",
                    (int) TYPE_NO_MODIFIERS(datumtype));
     if (val >= 0x100) {
         Perl_ck_warner(aTHX_ packWARN(WARN_UNPACK),
@@ -361,14 +361,14 @@ STMT_START {							\
 #define SAFE_UTF8_EXPAND(var)	\
 STMT_START {				\
     if ((var) > SSize_t_MAX / UTF8_EXPAND) \
-        Perl_croak(aTHX_ "Out of memory during pack()"); \
+        croak("Out of memory during pack()"); \
     (var) = (var) * UTF8_EXPAND; \
 } STMT_END
 
 #define GROWING2(utf8, cat, start, cur, item_size, item_count)	\
 STMT_START {							\
     if (SSize_t_MAX / (item_size) < (item_count))		\
-        Perl_croak(aTHX_ "Out of memory during pack()");	\
+        croak("Out of memory during pack()");	                \
     GROWING((utf8), (cat), (start), (cur), (item_size) * (item_count)); \
 } STMT_END
 
@@ -378,8 +378,8 @@ STMT_START {					\
     STRLEN catcur = (STRLEN)((cur) - (start));	\
     if (utf8) SAFE_UTF8_EXPAND(glen);		\
     if (SSize_t_MAX - glen < catcur)		\
-        Perl_croak(aTHX_ "Out of memory during pack()"); \
-    if (catcur + glen >= SvLEN(cat)) {	\
+        croak("Out of memory during pack()");   \
+    if (catcur + glen >= SvLEN(cat)) {	        \
         (start) = sv_exp_grow(cat, glen);	\
         (cur) = (start) + SvCUR(cat);		\
     }						\
@@ -415,7 +415,7 @@ STMT_START {							\
     val = utf8n_to_uvchr((U8 *) str, end-str, &retlen, utf8_flags);	\
     if (retlen == (STRLEN) -1) {			        \
         *cur = '\0';						\
-        Perl_croak(aTHX_ "Malformed UTF-8 string in pack");	\
+        croak("Malformed UTF-8 string in pack");	        \
     }								\
     str += retlen;						\
 } STMT_END
@@ -438,7 +438,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 
         switch (symptr->howlen) {
           case e_star:
-            Perl_croak(aTHX_ "Within []-length '*' not allowed in %s",
+            croak("Within []-length '*' not allowed in %s",
                         _action( symptr ) );
 
           default:
@@ -454,7 +454,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
             switch(TYPE_NO_ENDIANNESS(symptr->code)) {
             default:
                 /* diag_listed_as: Invalid type '%s' in %s */
-                Perl_croak(aTHX_ "Invalid type '%c' in %s",
+                croak("Invalid type '%c' in %s",
                            (int)TYPE_NO_MODIFIERS(symptr->code),
                            _action( symptr ) );
             case '.' | TYPE_IS_SHRIEKING:
@@ -465,7 +465,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
             case 'U':			/* XXXX Is it correct? */
             case 'w':
             case 'u':
-                Perl_croak(aTHX_ "Within []-length '%c' not allowed in %s",
+                croak("Within []-length '%c' not allowed in %s",
                            (int) TYPE_NO_MODIFIERS(symptr->code),
                            _action( symptr ) );
             case '%':
@@ -494,7 +494,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
             case 'X':
                 size = -1;
                 if (total < len)
-                    Perl_croak(aTHX_ "'X' outside of string in %s", _action( symptr ) );
+                    croak("'X' outside of string in %s", _action( symptr ) );
                 break;
             case 'x' | TYPE_IS_SHRIEKING:
                 if (!len)		/* Avoid division by 0 */
@@ -556,11 +556,11 @@ S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
             ++opened;
         else if (c == ')' || c == ']') {
             if (opened == 0)
-                Perl_croak(aTHX_ "Mismatched brackets in template");
+                croak("Mismatched brackets in template");
             --opened;
         }
     }
-    Perl_croak(aTHX_ "No group ending character '%c' found in template",
+    croak("No group ending character '%c' found in template",
                ender);
     NOT_REACHED; /* NOTREACHED */
 }
@@ -580,7 +580,7 @@ S_get_num(pTHX_ const char *patptr, SSize_t *lenptr )
   while (isDIGIT(*patptr)) {
     SSize_t nlen = (len * 10) + (*patptr++ - '0');
     if (nlen < 0 || nlen/10 != len)
-      Perl_croak(aTHX_ "pack/unpack repeat count overflow");
+      croak("pack/unpack repeat count overflow");
     len = nlen;
   }
   *lenptr = len;
@@ -629,12 +629,12 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
       /* for '(', skip to ')' */
       if (code == '(') {
         if( isDIGIT(*patptr) || *patptr == '*' || *patptr == '[' )
-          Perl_croak(aTHX_ "()-group starts with a count in %s",
+          croak("()-group starts with a count in %s",
                         _action( symptr ) );
         symptr->grpbeg = patptr;
         patptr = 1 + ( symptr->grpend = group_end(patptr, patend, ')') );
         if( symptr->level >= MAX_SUB_TEMPLATE_LEVEL )
-          Perl_croak(aTHX_ "Too deeply nested ()-groups in %s",
+          croak("Too deeply nested ()-groups in %s",
                         _action( symptr ) );
       }
 
@@ -671,15 +671,15 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
           break;
 
         if (!strchr(allowed, TYPE_NO_MODIFIERS(code)))
-          Perl_croak(aTHX_ "'%c' allowed only after types %s in %s", *patptr,
+          croak("'%c' allowed only after types %s in %s", *patptr,
                         allowed, _action( symptr ) );
 
         if (TYPE_ENDIANNESS(code | modifier) == TYPE_ENDIANNESS_MASK)
-          Perl_croak(aTHX_ "Can't use both '<' and '>' after type '%c' in %s",
+          croak("Can't use both '<' and '>' after type '%c' in %s",
                      (int) TYPE_NO_MODIFIERS(code), _action( symptr ) );
         else if (TYPE_ENDIANNESS(code | modifier | inherited_modifiers) ==
                  TYPE_ENDIANNESS_MASK)
-          Perl_croak(aTHX_ "Can't use '%c' in a group with different byte-order in %s",
+          croak("Can't use '%c' in a group with different byte-order in %s",
                      *patptr, _action( symptr ) );
 
         if ((code & modifier)) {
@@ -714,7 +714,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
           if (isDIGIT(*lenptr)) {
             lenptr = get_num( lenptr, &symptr->length );
             if( *lenptr != ']' )
-              Perl_croak(aTHX_ "Malformed integer in [] in %s",
+              croak("Malformed integer in [] in %s",
                             _action( symptr ) );
           } else {
             tempsym_t savsym = *symptr;
@@ -744,7 +744,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
               patptr++;
               if (patptr < patend &&
                   (isDIGIT(*patptr) || *patptr == '*' || *patptr == '['))
-                Perl_croak(aTHX_ "'/' does not take a repeat count in %s",
+                croak("'/' does not take a repeat count in %s",
                             _action( symptr ) );
             }
             break;
@@ -922,7 +922,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
         switch(TYPE_NO_ENDIANNESS(datumtype)) {
         default:
             /* diag_listed_as: Invalid type '%s' in %s */
-            Perl_croak(aTHX_ "Invalid type '%c' in unpack", (int)TYPE_NO_MODIFIERS(datumtype) );
+            croak("Invalid type '%c' in unpack", (int)TYPE_NO_MODIFIERS(datumtype) );
 
         case '%':
             if (howlen == e_no_len)
@@ -981,10 +981,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             if (utf8  && !(datumtype & TYPE_IS_SHRIEKING)) {
                 s = (char *) utf8_hop_forward((U8 *) s, len, (U8 *) strend);
                 if (s >= strend)
-                    Perl_croak(aTHX_ "'@' outside of string in unpack");
+                    croak("'@' outside of string in unpack");
             } else {
                 if (strend-s < len)
-                    Perl_croak(aTHX_ "'@' outside of string in unpack");
+                    croak("'@' outside of string in unpack");
                 s += len;
             }
             break;
@@ -1003,7 +1003,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     }
                 }
                 if (last > s)
-                    Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                    croak("Malformed UTF-8 string in unpack");
                 s = last;
                 break;
             }
@@ -1013,10 +1013,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             if (utf8) {
                 s = (char *) utf8_hop_back((U8 *) s, -len, (U8 *) strbeg);
                 if (s <= strbeg)
-                    Perl_croak(aTHX_ "'X' outside of string in unpack");
+                    croak("'X' outside of string in unpack");
             } else {
                 if (len > s - strbeg)
-                    Perl_croak(aTHX_ "'X' outside of string in unpack" );
+                    croak("'X' outside of string in unpack" );
                 s -= len;
             }
             break;
@@ -1034,18 +1034,18 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             if (utf8) {
                 while (len>0) {
                     if (s >= strend)
-                        Perl_croak(aTHX_ "'x' outside of string in unpack");
+                        croak("'x' outside of string in unpack");
                     s += UTF8SKIP(s);
                     len--;
                 }
             } else {
                 if (len > strend - s)
-                    Perl_croak(aTHX_ "'x' outside of string in unpack");
+                    croak("'x' outside of string in unpack");
                 s += len;
             }
             break;
         case '/':
-            Perl_croak(aTHX_ "'/' must follow a numeric type in unpack");
+            croak("'/' must follow a numeric type in unpack");
 
         case 'A':
         case 'Z':
@@ -1061,12 +1061,12 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                 for (l=len, hop=s; l>0; l--, hop += UTF8SKIP(hop)) {
                     if (hop >= strend) {
                         if (hop > strend)
-                            Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                            croak("Malformed UTF-8 string in unpack");
                         break;
                     }
                 }
                 if (hop > strend)
-                    Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                    croak("Malformed UTF-8 string in unpack");
                 len = hop - s;
             } else if (len > strend - s)
                 len = strend - s;
@@ -1094,7 +1094,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     if (ptr >= s) ptr += UTF8SKIP(ptr);
                     else ptr++;
                     if (ptr > s+len)
-                        Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                        croak("Malformed UTF-8 string in unpack");
                 } else {
                     for (ptr = s+len-1; ptr >= s; ptr--)
                         if (*ptr != 0 && !isSPACE(*ptr)) break;
@@ -1236,7 +1236,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     aint = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
                                  ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
                     if (retlen == (STRLEN) -1)
-                        Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                        croak("Malformed UTF-8 string in unpack");
                     s += retlen;
                   }
                 else
@@ -1259,7 +1259,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     UV val;
                     if (! utf8_to_uv((const U8 *) s, (const U8 *) strend,
                                      &val, &retlen)) {
-                        Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                        croak("Malformed UTF-8 string in unpack");
                     }
                     s += retlen;
                     if (!checksum)
@@ -1286,7 +1286,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     if (symptr->flags & FLAG_DO_UTF8) utf8 = 0;
                     else
                         /* Should be impossible due to the need_utf8() test */
-                        Perl_croak(aTHX_ "U0 mode on a byte string");
+                        croak("U0 mode on a byte string");
                 }
                 break;
             }
@@ -1318,7 +1318,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     auv = utf8n_to_uvchr((U8*)s, strend - s, &retlen,
                                          UTF8_ALLOW_DEFAULT);
                     if (retlen == (STRLEN) -1)
-                        Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                        croak("Malformed UTF-8 string in unpack");
                     s += retlen;
                 }
                 if (!checksum)
@@ -1616,12 +1616,12 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     }
                 }
                 if ((s >= strend) && bytes)
-                    Perl_croak(aTHX_ "Unterminated compressed integer in unpack");
+                    croak("Unterminated compressed integer in unpack");
             }
             break;
         case 'P':
             if (symptr->howlen == e_star)
-                Perl_croak(aTHX_ "'P' must have an explicit size in unpack");
+                croak("'P' must have an explicit size in unpack");
             EXTEND(SP, 1);
             if (s + sizeof(char*) <= strend) {
                 char *aptr;
@@ -1812,18 +1812,18 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                 break;
             if( next_symbol(symptr) ){
               if( symptr->howlen == e_number )
-                Perl_croak(aTHX_ "Count after length/code in unpack" );
+                croak("Count after length/code in unpack" );
               if( beyond ){
                 /* ...end of char buffer then no decent length available */
-                Perl_croak(aTHX_ "length/code after end of string in unpack" );
+                croak("length/code after end of string in unpack" );
               } else {
                 /* take top of stack (hope it's numeric) */
                 len = POPi;
                 if( len < 0 )
-                    Perl_croak(aTHX_ "Negative '/' count in unpack" );
+                    croak("Negative '/' count in unpack" );
               }
             } else {
-                Perl_croak(aTHX_ "Code missing after '/' in unpack" );
+                croak("Code missing after '/' in unpack" );
             }
             datumtype = symptr->code;
             explicit_length = FALSE;
@@ -2028,7 +2028,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
     if (m != marks + sym_ptr->level+1) {
         Safefree(marks);
         Safefree(to_start);
-        Perl_croak(aTHX_ "panic: marks beyond string end, m=%p, marks=%p, "
+        croak("panic: marks beyond string end, m=%p, marks=%p, "
                    "level=%d", m, marks, sym_ptr->level);
     }
     for (group=sym_ptr; group; group = group->previous)
@@ -2078,9 +2078,9 @@ S_sv_check_infnan(pTHX_ SV *sv, I32 datumtype)
         const I32 c = TYPE_NO_MODIFIERS(datumtype);
         const NV nv = SvNV_nomg(sv);
         if (c == 'w')
-            Perl_croak(aTHX_ "Cannot compress %" NVgf " in pack", nv);
+            croak("Cannot compress %" NVgf " in pack", nv);
         else
-            Perl_croak(aTHX_ "Cannot pack %" NVgf " with '%c'", nv, (int) c);
+            croak("Cannot pack %" NVgf " with '%c'", nv, (int) c);
     }
     return sv;
 }
@@ -2150,7 +2150,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         found = next_symbol(&lookahead);
         if (symptr->flags & FLAG_SLASH) {
             IV count;
-            if (!found) Perl_croak(aTHX_ "Code missing after '/' in pack");
+            if (!found) croak("Code missing after '/' in pack");
             if (memCHRs("aAZ", lookahead.code)) {
                 if (lookahead.howlen == e_number) count = lookahead.length;
                 else {
@@ -2178,10 +2178,10 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         switch (TYPE_NO_ENDIANNESS(datumtype)) {
         default:
             /* diag_listed_as: Invalid type '%s' in %s */
-            Perl_croak(aTHX_ "Invalid type '%c' in pack",
+            croak("Invalid type '%c' in pack",
                        (int) TYPE_NO_MODIFIERS(datumtype));
         case '%':
-            Perl_croak(aTHX_ "'%%' may not be used in pack");
+            croak("'%%' may not be used in pack");
 
         case '.' | TYPE_IS_SHRIEKING:
         case '.':
@@ -2207,7 +2207,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         len--;
                     }
                     if (from > cur)
-                        Perl_croak(aTHX_ "Malformed UTF-8 string in pack");
+                        croak("Malformed UTF-8 string in pack");
                     if (len) {
                         /* Here we know from == cur */
                       grow:
@@ -2273,7 +2273,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                     }
                 }
                 if (last > cur)
-                    Perl_croak(aTHX_ "Malformed UTF-8 string in pack");
+                    croak("Malformed UTF-8 string in pack");
                 cur = last;
                 break;
             }
@@ -2285,11 +2285,11 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
               utf8_shrink:
                 while (len > 0) {
                     if (cur <= start)
-                        Perl_croak(aTHX_ "'%c' outside of string in pack",
+                        croak("'%c' outside of string in pack",
                                    (int) TYPE_NO_MODIFIERS(datumtype));
                     while (--cur, UTF8_IS_CONTINUATION(*cur)) {
                         if (cur <= start)
-                            Perl_croak(aTHX_ "'%c' outside of string in pack",
+                            croak("'%c' outside of string in pack",
                                        (int) TYPE_NO_MODIFIERS(datumtype));
                     }
                     len--;
@@ -2297,7 +2297,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             } else {
               shrink:
                 if (cur - start < len)
-                    Perl_croak(aTHX_ "'%c' outside of string in pack",
+                    croak("'%c' outside of string in pack",
                                (int) TYPE_NO_MODIFIERS(datumtype));
                 cur -= len;
             }
@@ -2353,7 +2353,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                     fromlen--;
                 }
                 if (s > end)
-                    Perl_croak(aTHX_ "Malformed UTF-8 string in pack");
+                    croak("Malformed UTF-8 string in pack");
                 if (utf8) {
                     len = fromlen;
                     if (datumtype == 'Z') len++;
@@ -2371,7 +2371,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 GROWING(0, cat, start, cur, len);
                 if (!S_utf8_to_bytes(aTHX_ &aptr, end, cur, fromlen,
                                   datumtype | TYPE_IS_PACK))
-                    Perl_croak(aTHX_ "panic: predicted utf8 length not available, "
+                    croak("panic: predicted utf8 length not available, "
                                "for '%c', aptr=%p end=%p cur=%p, fromlen=%zu",
                                (int)datumtype, aptr, end, cur, fromlen);
                 cur += fromlen;
@@ -2870,7 +2870,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 if (anv < 0) {
                     *cur = '\0';
                     SvCUR_set(cat, cur - start);
-                    Perl_croak(aTHX_ "Cannot compress negative numbers in pack");
+                    croak("Cannot compress negative numbers in pack");
                 }
 
                 /* 0xFFFFFFFFFFFFFFFF may cast to 18446744073709551616.0,
@@ -2916,7 +2916,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                     do {
                         const NV next = Perl_floor(anv / 128);
                         if (in <= buf)  /* this cannot happen ;-) */
-                            Perl_croak(aTHX_ "Cannot compress integer in pack");
+                            croak("Cannot compress integer in pack");
                         *--in = (unsigned char)(anv - (next * 128)) | 0x80;
                         anv = next;
                     } while (anv > 0);
@@ -2934,7 +2934,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                     /* Copy string and check for compliance */
                     from = SvPV_nomg_const(fromstr, len);
                     if ((norm = is_an_int(from, len)) == NULL)
-                        Perl_croak(aTHX_ "Can only compress unsigned integers in pack");
+                        croak("Can only compress unsigned integers in pack");
 
                     Newx(result, len, char);
                     in = result + len;
@@ -3106,7 +3106,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                                       'u' | TYPE_IS_PACK)) {
                         *cur = '\0';
                         SvCUR_set(cat, cur - start);
-                        Perl_croak(aTHX_ "panic: string is shorter than advertised, "
+                        croak("panic: string is shorter than advertised, "
                                    "aptr=%p, aend=%p, buffer=%p, todo=%zd",
                                    aptr, aend, buffer, todo);
                     }

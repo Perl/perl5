@@ -217,7 +217,7 @@ XS(Cygwin_cwd)
        There is Cwd->cwd() usage in the wild, and previous versions didn't die.
      */
     if(items > 1)
-        Perl_croak(aTHX_ "Usage: Cwd::cwd()");
+        croak("Usage: Cwd::cwd()");
     if((cwd = getcwd(NULL, -1))) {
         ST(0) = sv_2mortal(newSVpv(cwd, 0));
         free(cwd);
@@ -234,7 +234,7 @@ XS(XS_Cygwin_pid_to_winpid)
     pid_t pid, RETVAL;
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Cygwin::pid_to_winpid(pid)");
+        croak("Usage: Cygwin::pid_to_winpid(pid)");
 
     pid = (pid_t)SvIV(ST(0));
 
@@ -252,7 +252,7 @@ XS(XS_Cygwin_winpid_to_pid)
     pid_t pid, RETVAL;
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Cygwin::winpid_to_pid(pid)");
+        croak("Usage: Cygwin::winpid_to_pid(pid)");
 
     pid = (pid_t)SvIV(ST(0));
 
@@ -293,7 +293,7 @@ S_convert_path_common(pTHX_ const direction_t direction)
         const char *name = (direction == to_posix)
                      ? "win::win_to_posix_path"
                      : "posix_to_win_path";
-        Perl_croak(aTHX_ "Usage: Cygwin::%s(pathname, [absolute])", name);
+        croak("Usage: Cygwin::%s(pathname, [absolute])", name);
     }
 
     src_path = SvPVx(ST(0), len);
@@ -301,7 +301,7 @@ S_convert_path_common(pTHX_ const direction_t direction)
         absolute_flag = SvTRUE(ST(1));
 
     if (!len)
-        Perl_croak(aTHX_ "can't convert empty path");
+        croak("can't convert empty path");
     isutf8 = SvUTF8(ST(0));
 
 #if HAVE_CYGWIN_VERSION(0, 181)
@@ -411,7 +411,7 @@ XS(XS_Cygwin_mount_table)
     struct mntent *mnt;
 
     if (items != 0)
-        Perl_croak(aTHX_ "Usage: Cygwin::mount_table");
+        croak("Usage: Cygwin::mount_table");
     /* => array of [mnt_dir mnt_fsname mnt_type mnt_opts] */
 
     setmntent (0, 0);
@@ -435,7 +435,7 @@ XS(XS_Cygwin_mount_flags)
     flags[0] = '\0';
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Cygwin::mount_flags( mnt_dir | '/cygdrive' )");
+        croak("Usage: Cygwin::mount_flags( mnt_dir | '/cygdrive' )");
 
     pathname = SvPV_nolen(ST(0));
 
@@ -513,7 +513,7 @@ XS(XS_Cygwin_is_binmount)
     char *pathname;
 
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Cygwin::is_binmount(pathname)");
+        croak("Usage: Cygwin::is_binmount(pathname)");
 
     pathname = SvPV_nolen(ST(0));
 

@@ -732,7 +732,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 if (SvROK(sv))
                     sv = SvRV(sv);
                 if (SvTYPE(sv) != SVt_REGEXP)
-                    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
+                    croak("Overloaded qr did not return a REGEXP");
                 msv = sv;
             }
         }
@@ -1665,7 +1665,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (runtime_code) {
         assert(TAINTING_get || !TAINT_get);
         if (TAINT_get)
-            Perl_croak(aTHX_ "Eval-group in insecure regular expression");
+            croak("Eval-group in insecure regular expression");
 
         if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
             /* whoops, we have a non-utf8 pattern, whilst run-time code
@@ -1792,7 +1792,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     else if (! MUST_RESTART(flags)) {
         ReREFCNT_dec(Rx);
-        Perl_croak(aTHX_ "panic: reg returned failure to re_op_compile, flags: %#" UVxf, (UV) flags);
+        croak("panic: reg returned failure to re_op_compile, flags: %#" UVxf, (UV) flags);
     }
 
     /* Here, we either have success, or we have to redo the parse for some reason */
@@ -2534,7 +2534,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
         HE *he_str = NULL;
         SV *sv_dat = NULL;
         if ( ! sv_name )      /* should not happen*/
-            Perl_croak(aTHX_ "panic: no svname in reg_scan_name");
+            croak("panic: no svname in reg_scan_name");
         if (RExC_paren_names)
             he_str = hv_fetch_ent( RExC_paren_names, sv_name, 0, 0 );
         if ( he_str )
@@ -2554,7 +2554,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
         return sv_dat;
     }
 
-    Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
+    croak("panic: bad flag %lx in reg_scan_name",
                      (unsigned long) flags);
 }
 
@@ -3559,7 +3559,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         HE *he_str;
                         SV *sv_dat = NULL;
                         if (!svname) /* shouldn't happen */
-                            Perl_croak(aTHX_
+                            croak(
                                 "panic: reg_scan_name returned NULL");
                         if (!RExC_paren_names) {
                             RExC_paren_names = newHV();
@@ -3574,7 +3574,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             sv_dat = HeVAL(he_str);
                         if ( ! sv_dat ) {
                             /* croak baby croak */
-                            Perl_croak(aTHX_
+                            croak(
                                 "panic: paren_name hash element allocation failed");
                         } else if ( SvPOK(sv_dat) ) {
                             /* (?|...) can mean we have dupes so scan to check
@@ -5261,7 +5261,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             if (! hv_store(RExC_unlexed_names, RExC_parse, name_len,
                            value_sv, 0))
             {
-                Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+                croak("panic: hv_store() unexpectedly failed");
             }
         }
 
@@ -12518,7 +12518,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
                     if (SvCUR(msg)) {
                         assert(prop_definition == NULL);
 
-                        Perl_croak(aTHX_ "%" UTF8f,
+                        croak("%" UTF8f,
                                 UTF8fARG(SvUTF8(msg), SvCUR(msg), SvPVX(msg)));
                     }
 
@@ -13574,7 +13574,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                 assert(n == 0);
                 break;
             default:
-                Perl_croak(aTHX_ "panic: regfree data code '%c'",
+                croak("panic: regfree data code '%c'",
                                                     ri->data->what[n]);
             }
         }
@@ -13822,7 +13822,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
                 d->data[i]= ri->data->data[i];
                 break;
             default:
-                Perl_croak(aTHX_ "panic: re_dup_guts unknown data code '%c'",
+                croak("panic: re_dup_guts unknown data code '%c'",
                                                            ri->data->what[i]);
             }
         }
@@ -13874,7 +13874,7 @@ S_re_croak(pTHX_ bool utf8, const char* pat,...)
         len = 512;
     Copy(message, buf, len , char);
     /* len-1 to avoid \n */
-    Perl_croak(aTHX_ "%" UTF8f, UTF8fARG(utf8, len-1, buf));
+    croak("%" UTF8f, UTF8fARG(utf8, len-1, buf));
 }
 
 /* XXX Here's a total kludge.  But we need to re-enter for swash routines. */
@@ -14452,7 +14452,7 @@ S_handle_user_defined_property(pTHX_
                                         this_definition, &running_definition);
                 break;
             default:
-                Perl_croak(aTHX_ "panic: %s: %d: Unexpected operation %d",
+                croak("panic: %s: %d: Unexpected operation %d",
                                  __FILE__, __LINE__, op);
                 break;
         }
@@ -15002,7 +15002,7 @@ S_parse_uniprop_string(pTHX_
 
             lookup_loose = get_cvs("_charnames::_loose_regcomp_lookup", 0);
             if (! lookup_loose) {
-                Perl_croak(aTHX_
+                croak(
                        "panic: Can't find '_charnames::_loose_regcomp_lookup");
             }
 
@@ -16030,7 +16030,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * for any errors generated */
     get_names_info = get_cv("_charnames::_get_names_info", 0);
     if (! get_names_info) {
-        Perl_croak(aTHX_ "panic: Can't find '_charnames::_get_names_info");
+        croak("panic: Can't find '_charnames::_get_names_info");
     }
 
     /* Get the charnames data */

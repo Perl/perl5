@@ -243,12 +243,12 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
     PERL_ARGS_ASSERT_REGCPPUSH;
 
     if (paren_elems_to_push < 0)
-        Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i",
+        croak("panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i",
                    (int)paren_elems_to_push, (int)maxopenparen,
                    (int)parenfloor);
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
-        Perl_croak(aTHX_ "panic: paren_elems_to_push offset %" UVuf
+        croak("panic: paren_elems_to_push offset %" UVuf
                    " out of range (%lu-%ld)",
                    total_elems,
                    (unsigned long)maxopenparen,
@@ -549,7 +549,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
             break;
     }
 
-    Perl_croak(aTHX_
+    croak(
                "panic: isFOO_lc() has an unexpected character class '%d'",
                classnum);
 
@@ -1134,7 +1134,7 @@ Perl_re_intuit_start(pTHX_
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
-        Perl_croak(aTHX_ "panic: end_shift: %" IVdf " pattern:\n%s\n ",
+        croak("panic: end_shift: %" IVdf " pattern:\n%s\n ",
                    (IV)end_shift, RX_PRECOMP(rx));
 #endif
 
@@ -3505,7 +3505,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         assert(0);
 
       default:
-        Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
+        croak("panic: unknown regstclass %d", (int)OP(c));
     } /* End of switch on node type */
 
     return 0;
@@ -3716,7 +3716,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     /* Be paranoid... */
     if (prog == NULL) {
-        Perl_croak(aTHX_ "NULL regexp parameter");
+        croak("NULL regexp parameter");
     }
 
     DEBUG_EXECUTE_r(
@@ -3850,7 +3850,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     /* Check validity of program. */
     if (UCHARAT(progi->program) != REG_MAGIC) {
-        Perl_croak(aTHX_ "corrupted regexp program");
+        croak("corrupted regexp program");
     }
 
     RXp_MATCH_TAINTED_off(prog);
@@ -8175,7 +8175,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             arg = ARG1u(scan);
             if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
-                    Perl_croak(aTHX_
+                    croak(
                         "Pattern subroutine nesting without pos change"
                         " exceeded limit in regex");
             } else {
@@ -8197,7 +8197,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if ( rex->recurse_locinput[arg] == locinput ) {
                 /* FIXME: we should show the regop that is failing as part
                  * of the error message. */
-                Perl_croak(aTHX_ "Infinite recursion in regex");
+                croak("Infinite recursion in regex");
             } else {
                 ST.prev_recurse_locinput= rex->recurse_locinput[arg];
                 rex->recurse_locinput[arg]= locinput;
@@ -8224,7 +8224,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EVAL:  /*   /(?{...})B/   /(??{A})B/  and  /(?(?{...})X|Y)B/   */
             if (logical == 2 && cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
-                    Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regex");
+                    croak("EVAL without pos change exceeded limit in regex");
             } else {
                 nochange_depth = 0;
             }
@@ -10020,7 +10020,7 @@ NULL
         default:
             PerlIO_printf(Perl_error_log, "%" UVxf " %d\n",
                           PTR2UV(scan), OP(scan));
-            Perl_croak(aTHX_ "regexp memory corruption");
+            croak("regexp memory corruption");
 
         /* this is a point to jump to in order to increment
          * locinput by one character */
@@ -10103,7 +10103,7 @@ NULL
     * We get here only if there's trouble -- normally "case END" is
     * the terminating point.
     */
-    Perl_croak(aTHX_ "corrupted regexp pointers");
+    croak("corrupted regexp pointers");
     NOT_REACHED; /* NOTREACHED */
 
   yes:
@@ -10895,7 +10895,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         break;
 
     default:
-        Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized"
+        croak("panic: regrepeat() called with unrecognized"
                          " node type %d='%s'", OP(p), REGNODE_NAME(OP(p)));
         NOT_REACHED; /* NOTREACHED */
 
@@ -12014,7 +12014,7 @@ Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value,
     } else if (flags & (RXapif_SCALAR | RXapif_REGNAMES_COUNT)) {
         return reg_named_buff_scalar(rx, flags);
     } else {
-        Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff", (int)flags);
+        croak("panic: Unknown flags %d in named_buff", (int)flags);
         return NULL;
     }
 }
@@ -12031,7 +12031,7 @@ Perl_reg_named_buff_iter(pTHX_ REGEXP * const rx, const SV * const lastkey,
     else if (flags & RXapif_NEXTKEY)
         return reg_named_buff_nextkey(rx, flags);
     else {
-        Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff_iter",
+        croak("panic: Unknown flags %d in named_buff_iter",
                                             (int)flags);
         return NULL;
     }
@@ -12168,7 +12168,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
             SvREFCNT_dec_NN(ret);
             return newSViv(length);
         } else {
-            Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff_scalar",
+            croak("panic: Unknown flags %d in named_buff_scalar",
                                                 (int)flags);
             return NULL;
         }

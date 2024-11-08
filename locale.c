@@ -1120,7 +1120,7 @@ Perl_locale_panic(const char * msg,
     }
 
     /* diag_listed_as: panic: %s */
-    Perl_croak(aTHX_ "%s: %" LINE_Tf ": panic: %s%s%s\n",
+    croak("%s: %" LINE_Tf ": panic: %s%s%s\n",
                      __FILE__, immediate_caller_line,
                      msg, errno_text, called_by);
 }
@@ -8450,7 +8450,7 @@ S_strftime_tm(pTHX_ const char *fmt,
     bool succeeded = false;
 
 #ifndef HAS_STRFTIME
-    Perl_croak(aTHX_ "panic: no strftime");
+    croak("panic: no strftime");
 #endif
 
     start_DEALING_WITH_MISMATCHED_CTYPE(locale);

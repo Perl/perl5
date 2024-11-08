@@ -911,7 +911,7 @@ subsigguts:
                 optsiglist
 			{
 			    if (!FEATURE_SIGNATURES_IS_ENABLED && !CvIsMETHOD(PL_compcv))
-			        Perl_croak(aTHX_ "Experimental "
+			        croak("Experimental "
                                     "subroutine signatures not enabled");
 
                             /* We shouldn't get here otherwise */

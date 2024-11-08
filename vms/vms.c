@@ -1406,7 +1406,7 @@ prime_env_iter(void)
       buf[retlen] = '\0';
       if (iosb[1] != subpid) {
         if (iosb[1]) {
-          Perl_croak(aTHX_ "Unknown process %x sent message to prime_env_iter: %s",buf);
+          croak("Unknown process %x sent message to prime_env_iter: %s",buf);
         }
         continue;
       }
@@ -12622,7 +12622,7 @@ rmsexpand_fromperl(pTHX_ CV *cv)
   fs_utf8 = 0;
   dfs_utf8 = 0;
   if (!items || items > 2)
-    Perl_croak(aTHX_ "Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
+    croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
   fspec = SvPV(ST(0),n_a);
   fs_utf8 = SvUTF8(ST(0));
   if (!fspec || !*fspec) XSRETURN_UNDEF;
@@ -12649,7 +12649,7 @@ vmsify_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
   int utf8_fl;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::vmsify(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::vmsify(spec)");
   utf8_fl = SvUTF8(ST(0));
   vmsified = do_tovmsspec(SvPV(ST(0),n_a),NULL,1,&utf8_fl);
   ST(0) = sv_newmortal();
@@ -12670,7 +12670,7 @@ unixify_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
   int utf8_fl;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::unixify(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::unixify(spec)");
   utf8_fl = SvUTF8(ST(0));
   unixified = do_tounixspec(SvPV(ST(0),n_a),NULL,1,&utf8_fl);
   ST(0) = sv_newmortal();
@@ -12691,7 +12691,7 @@ fileify_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
   int utf8_fl;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::fileify(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::fileify(spec)");
   utf8_fl = SvUTF8(ST(0));
   fileified = do_fileify_dirspec(SvPV(ST(0),n_a),NULL,1,&utf8_fl);
   ST(0) = sv_newmortal();
@@ -12712,7 +12712,7 @@ pathify_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
   int utf8_fl;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::pathify(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::pathify(spec)");
   utf8_fl = SvUTF8(ST(0));
   pathified = do_pathify_dirspec(SvPV(ST(0),n_a),NULL,1,&utf8_fl);
   ST(0) = sv_newmortal();
@@ -12733,7 +12733,7 @@ vmspath_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
   int utf8_fl;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::vmspath(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::vmspath(spec)");
   utf8_fl = SvUTF8(ST(0));
   vmspath = do_tovmspath(SvPV(ST(0),n_a),NULL,1,&utf8_fl);
   ST(0) = sv_newmortal();
@@ -12754,7 +12754,7 @@ unixpath_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
   int utf8_fl;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::unixpath(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::unixpath(spec)");
   utf8_fl = SvUTF8(ST(0));
   unixpath = do_tounixpath(SvPV(ST(0),n_a),NULL,1,&utf8_fl);
   ST(0) = sv_newmortal();
@@ -12776,7 +12776,7 @@ candelete_fromperl(pTHX_ CV *cv)
   IO *io;
   STRLEN n_a;
 
-  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::candelete(spec)");
+  if (items != 1) croak("Usage: VMS::Filespec::candelete(spec)");
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   Newx(fspec, VMS_MAXRSS, char);
@@ -12815,7 +12815,7 @@ rmscopy_fromperl(pTHX_ CV *cv)
   STRLEN n_a;
 
   if (items < 2 || items > 3)
-    Perl_croak(aTHX_ "Usage: File::Copy::rmscopy(from,to[,date_flag])");
+    croak("Usage: File::Copy::rmscopy(from,to[,date_flag])");
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   Newx(inspec, VMS_MAXRSS, char);
@@ -13249,7 +13249,7 @@ unixrealpath_fromperl(pTHX_ CV *cv)
     STRLEN n_a;
 
     if (!items || items != 1)
-        Perl_croak(aTHX_ "Usage: VMS::Filespec::unixrealpath(spec)");
+        croak("Usage: VMS::Filespec::unixrealpath(spec)");
 
     fspec = SvPV(ST(0),n_a);
     if (!fspec || !*fspec) XSRETURN_UNDEF;
@@ -13277,7 +13277,7 @@ vmsrealpath_fromperl(pTHX_ CV *cv)
     STRLEN n_a;
 
     if (!items || items != 1)
-        Perl_croak(aTHX_ "Usage: VMS::Filespec::vmsrealpath(spec)");
+        croak("Usage: VMS::Filespec::vmsrealpath(spec)");
 
     fspec = SvPV(ST(0),n_a);
     if (!fspec || !*fspec) XSRETURN_UNDEF;

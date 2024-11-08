@@ -1436,7 +1436,7 @@ get_hwnd_delay(pTHX, long child, DWORD tries)
         }
     }
 
-    Perl_croak(aTHX_ "panic: child pseudo-process was never scheduled");
+    croak("panic: child pseudo-process was never scheduled");
 }
 #endif
 

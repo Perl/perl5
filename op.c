@@ -668,7 +668,7 @@ Perl_op_refcnt_dec(pTHX_ OP *o)
 #define CHECKOP(type,o) \
     ((PL_op_mask && PL_op_mask[type])				\
      ? ( op_free((OP*)o),					\
-         Perl_croak(aTHX_ "'%s' trapped by operation mask", PL_op_desc[type]),	\
+         croak("'%s' trapped by operation mask", PL_op_desc[type]),	\
          (OP*)0 )						\
      : PL_check[type](aTHX_ (OP*)o))
 
@@ -768,7 +768,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     PERL_ARGS_ASSERT_ALLOCMY;
 
     if (flags & ~SVf_UTF8)
-        Perl_croak(aTHX_ "panic: allocmy illegal flag bits 0x%" UVxf,
+        croak("panic: allocmy illegal flag bits 0x%" UVxf,
                    (UV)flags);
 
     is_idfirst = flags & SVf_UTF8
@@ -1771,7 +1771,7 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
         case G_LIST:   return list(o);
         case G_VOID:   return scalarvoid(o);
         default:
-            Perl_croak(aTHX_ "panic: op_contextualize bad context %ld",
+            croak("panic: op_contextualize bad context %ld",
                        (long) context);
     }
 }
@@ -2799,7 +2799,7 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
         if (   check_fields
             && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0))
         {
-            Perl_croak(aTHX_ "No such class field \"%" SVf "\" "
+            croak("No such class field \"%" SVf "\" "
                         "in variable %" PNf " of type %" HEKf,
                         SVfARG(*svp), PNfARG(lexname),
                         HEKfARG(HvNAME_HEK(PadnameTYPE(lexname))));
@@ -3146,7 +3146,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
                 if (kid->op_type != OP_PUSHMARK) {
                     if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
-                        Perl_croak(aTHX_
+                        croak(
                                 "panic: unexpected lvalue entersub "
                                 "args: type/targ %ld:%" UVuf,
                                 (long)kid->op_type, (UV)kid->op_targ);
@@ -3162,7 +3162,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                 if (kid->op_type == OP_NULL && kid->op_targ == OP_RV2SV)
                     kid = kUNOP->op_first;
                 if (kid->op_type == OP_NULL)
-                    Perl_croak(aTHX_
+                    croak(
                                "panic: unexpected constant lvalue entersub "
                                "entry via type/targ %ld:%" UVuf,
                                (long)kid->op_type, (UV)kid->op_targ);
@@ -3361,7 +3361,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_PADSV:
         PL_modcount++;
         if (!type) /* local() */
-            Perl_croak(aTHX_ "Can't localize lexical variable %" PNf,
+            croak("Can't localize lexical variable %" PNf,
                               PNfARG(PAD_COMPNAME(o->op_targ)));
         if (!(o->op_private & OPpLVAL_INTRO)
          || (  type != OP_SASSIGN && type != OP_AASSIGN
@@ -3488,7 +3488,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         if (type == OP_NULL) { /* local */
           local_refgen:
             if (!FEATURE_MYREF_IS_ENABLED)
-                Perl_croak(aTHX_ "The experimental declared_refs "
+                croak("The experimental declared_refs "
                                  "feature is not enabled");
             Perl_ck_warner_d(aTHX_
                      packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
@@ -3514,7 +3514,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
             S_lvref(aTHX_ kid, type);
             if (!PL_parser || PL_parser->error_count == ec) {
                 if (!FEATURE_REFALIASING_IS_ENABLED)
-                    Perl_croak(aTHX_
+                    croak(
                        "Experimental aliasing via reference not enabled");
                 Perl_ck_warner_d(aTHX_
                                  packWARN(WARN_EXPERIMENTAL__REFALIASING),
@@ -4156,7 +4156,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     }
     else if (type == OP_REFGEN || type == OP_SREFGEN) {
         if (!FEATURE_MYREF_IS_ENABLED)
-            Perl_croak(aTHX_ "The experimental declared_refs "
+            croak("The experimental declared_refs "
                              "feature is not enabled");
         Perl_ck_warner_d(aTHX_
              packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
@@ -5093,7 +5093,7 @@ S_fold_constants(pTHX_ OP *const o)
         PL_diehook  = olddiehook;
         /* XXX note that this croak may fail as we've already blown away
          * the stack - eg any nested evals */
-        Perl_croak(aTHX_ "panic: fold_constants JMPENV_PUSH returned %d", ret);
+        croak("panic: fold_constants JMPENV_PUSH returned %d", ret);
     }
     PL_dowarn   = oldwarn;
     PL_warnhook = oldwarnhook;
@@ -5206,7 +5206,7 @@ S_gen_constant_list(pTHX_ OP *o)
         JMPENV_POP;
         PL_warnhook = oldwarnhook;
         PL_diehook = olddiehook;
-        Perl_croak(aTHX_ "panic: gen_constant_list JMPENV_PUSH returned %d",
+        croak("panic: gen_constant_list JMPENV_PUSH returned %d",
             ret);
     }
 
@@ -8198,7 +8198,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     PERL_ARGS_ASSERT_UTILIZE;
 
     if (idop->op_type != OP_CONST)
-        Perl_croak(aTHX_ "Module name must be constant");
+        croak("Module name must be constant");
 
     veop = NULL;
 
@@ -8213,7 +8213,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             SV *meth;
 
             if (version->op_type != OP_CONST || !SvNIOKp(vesv))
-                Perl_croak(aTHX_ "Version number must be a constant number");
+                croak("Version number must be a constant number");
 
             /* Make copy of idop so we don't free it twice */
             pack = newSVOP(OP_CONST, 0, newSVsv(cSVOPx(idop)->op_sv));
@@ -9124,7 +9124,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
                 && o2->op_private & OPpLVAL_INTRO
                 && !(o2->op_private & OPpPAD_STATE))
             {
-        Perl_croak(aTHX_ "This use of my() in false conditional is "
+        croak("This use of my() in false conditional is "
                           "no longer allowed");
             }
 
@@ -9770,12 +9770,12 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             parens = 1;
 
             if (!pushmark || pushmark->op_type != OP_PUSHMARK) {
-                Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting pushmark",
+                croak("panic: newFORLOOP, found %s, expecting pushmark",
                            pushmark ? PL_op_desc[pushmark->op_type] : "NULL");
             }
             first_padsv = OpSIBLING(pushmark);
             if (!first_padsv || first_padsv->op_type != OP_PADSV) {
-                Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting padsv",
+                croak("panic: newFORLOOP, found %s, expecting padsv",
                            first_padsv ? PL_op_desc[first_padsv->op_type] : "NULL");
             }
             padoff = first_padsv->op_targ;
@@ -9785,13 +9785,13 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             padsv = cUNOPx(OpSIBLING(first_padsv));
             do {
                 if (!padsv || padsv->op_type != OP_PADSV) {
-                    Perl_croak(aTHX_ "panic: newFORLOOP, found %s at %zd, expecting padsv",
+                    croak("panic: newFORLOOP, found %s at %zd, expecting padsv",
                                padsv ? PL_op_desc[padsv->op_type] : "NULL",
                                how_many_more);
                 }
                 ++how_many_more;
                 if (padsv->op_targ != padoff + how_many_more) {
-                    Perl_croak(aTHX_ "panic: newFORLOOP, padsv at %zd targ is %zd, not %zd",
+                    croak("panic: newFORLOOP, padsv at %zd targ is %zd, not %zd",
                                how_many_more, padsv->op_targ, padoff + how_many_more);
                 }
 
@@ -9818,7 +9818,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             sv = NULL;
         }
         else
-            Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
+            croak("Can't use %s for loop variable", PL_op_desc[sv->op_type]);
         if (padoff) {
             PADNAME * const pn = PAD_COMPNAME(padoff);
             const char * const name = PadnamePV(pn);
@@ -11629,7 +11629,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
              * effectively a no-op, as max_nest_iv will never be negative here.
              */
             if (PL_eval_begin_nest_depth >= (UV)max_nest_iv) {
-                Perl_croak(aTHX_ "Too many nested BEGIN blocks, maximum of %" IVdf " allowed",
+                croak("Too many nested BEGIN blocks, maximum of %" IVdf " allowed",
                              max_nest_iv);
             }
             SAVEINT(PL_eval_begin_nest_depth);
@@ -12317,7 +12317,7 @@ Perl_newAVREF(pTHX_ OP *o)
         return o;
     }
     else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)) {
-        Perl_croak(aTHX_ "Can't use an array as a reference");
+        croak("Can't use an array as a reference");
     }
     return newUNOP(OP_RV2AV, 0, scalar(o));
 }
@@ -12372,7 +12372,7 @@ Perl_newHVREF(pTHX_ OP *o)
         return o;
     }
     else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)) {
-        Perl_croak(aTHX_ "Can't use a hash as a reference");
+        croak("Can't use a hash as a reference");
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
 }
@@ -12781,7 +12781,7 @@ Perl_ck_delete(pTHX_ OP *o)
             o->op_private |= OPpKVSLICE;
             break;
         default:
-            Perl_croak(aTHX_ "delete argument is not a HASH or ARRAY "
+            croak("delete argument is not a HASH or ARRAY "
                              "element or slice");
         }
         if (kid->op_private & OPpLVAL_INTRO)
@@ -12968,14 +12968,14 @@ Perl_ck_exists(pTHX_ OP *o)
             (void) ref(kid, o->op_type);
             if (kid->op_type != OP_RV2CV
                         && !(PL_parser && PL_parser->error_count))
-                Perl_croak(aTHX_
+                croak(
                           "exists argument is not a subroutine name");
             o->op_private |= OPpEXISTS_SUB;
         }
         else if (kid->op_type == OP_AELEM)
             o->op_flags |= OPf_SPECIAL;
         else if (kid->op_type != OP_HELEM)
-            Perl_croak(aTHX_ "exists argument is not a HASH or ARRAY "
+            croak("exists argument is not a HASH or ARRAY "
                              "element or a subroutine");
         op_null(kid);
     }
@@ -13052,7 +13052,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
                 break;
             }
             if (badthing)
-                Perl_croak(aTHX_
+                croak(
                            "Can't use bareword (\"%" SVf "\") as %s ref while \"strict refs\" in use",
                            SVfARG(kidsv), badthing);
         }
@@ -13512,7 +13512,7 @@ Perl_ck_grep(pTHX_ OP *o)
         return o;
     kid = OpSIBLING(cLISTOPo->op_first);
     if (kid->op_type != OP_NULL)
-        Perl_croak(aTHX_ "panic: ck_grep, type=%u", (unsigned) kid->op_type);
+        croak("panic: ck_grep, type=%u", (unsigned) kid->op_type);
     kid = kUNOP->op_first;
 
     gwop = alloc_LOGOP(type, o, LINKLIST(kid));
@@ -13576,13 +13576,13 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
         switch (cUNOPo->op_first->op_type) {
         case OP_RV2AV:
         case OP_PADAV:
-            Perl_croak(aTHX_ "Can't use 'defined(@array)'"
+            croak("Can't use 'defined(@array)'"
                              " (Maybe you should just omit the defined()?)");
             NOT_REACHED; /* NOTREACHED */
             break;
         case OP_RV2HV:
         case OP_PADHV:
-            Perl_croak(aTHX_ "Can't use 'defined(%%hash)'"
+            croak("Can't use 'defined(%%hash)'"
                              " (Maybe you should just omit the defined()?)");
             NOT_REACHED; /* NOTREACHED */
             break;
@@ -14021,7 +14021,7 @@ Perl_ck_refassign(pTHX_ OP *o)
         return o;
     }
     if (!FEATURE_REFALIASING_IS_ENABLED)
-        Perl_croak(aTHX_
+        croak(
                   "Experimental aliasing via reference not enabled");
     Perl_ck_warner_d(aTHX_
                      packWARN(WARN_EXPERIMENTAL__REFALIASING),
@@ -14639,7 +14639,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
     GV *gv;
     PERL_ARGS_ASSERT_RV2CV_OP_CV;
     if (flags & ~RV2CVOPCV_FLAG_MASK)
-        Perl_croak(aTHX_ "panic: rv2cv_op_cv bad flags %x", (unsigned)flags);
+        croak("panic: rv2cv_op_cv bad flags %x", (unsigned)flags);
     if (cvop->op_type != OP_RV2CV)
         return NULL;
     if (cvop->op_private & OPpENTERSUB_AMPER)
@@ -14778,7 +14778,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     const char *e = NULL;
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO;
     if (SvTYPE(protosv) == SVt_PVCV ? !SvPOK(protosv) : !SvOK(protosv))
-        Perl_croak(aTHX_ "panic: ck_entersub_args_proto CV with no proto, "
+        croak("panic: ck_entersub_args_proto CV with no proto, "
                    "flags=%lx", (unsigned long) SvFLAGS(protosv));
     if (SvTYPE(protosv) == SVt_PVCV)
          proto = CvPROTO(protosv), proto_len = CvPROTOLEN(protosv);
@@ -14963,7 +14963,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                 continue;
             default:
             oops: {
-                Perl_croak(aTHX_ "Malformed prototype for %" SVf ": %" SVf,
+                croak("Malformed prototype for %" SVf ": %" SVf,
                                   SVfARG(cv_name((CV *)namegv, NULL, 0)),
                                   SVfARG(protosv));
             }
@@ -15891,7 +15891,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
                     break;
                 default:
                   field_panic:
-                    Perl_croak(aTHX_
+                    croak(
                         "panic: custom_op_get_field(): invalid field %d\n",
                         (int)field);
                     break;
@@ -15944,7 +15944,7 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
         PL_custom_ops = newHV();
 
     if (!hv_store_ent(PL_custom_ops, keysv, newSViv(PTR2IV(xop)), 0))
-        Perl_croak(aTHX_ "panic: can't register custom OP %s", xop->xop_name);
+        croak("panic: can't register custom OP %s", xop->xop_name);
 }
 
 /*
@@ -16297,7 +16297,7 @@ const_av_xsub(pTHX_ CV* cv)
     }
 #endif
     if (SvRMAGICAL(av))
-        Perl_croak(aTHX_ "Magical list constants are not supported");
+        croak("Magical list constants are not supported");
     if (GIMME_V != G_LIST) {
         EXTEND(SP, 1);
         ST(0) = sv_2mortal(newSViv((IV)AvFILLp(av)+1));

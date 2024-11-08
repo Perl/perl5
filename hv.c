@@ -320,7 +320,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
         SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ msg, SVfARG(sv));
+    croak(msg, SVfARG(sv));
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -890,7 +890,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                        so putting this test here is cheap  */
                     if (flags & HVhek_FREEKEY)
                         Safefree(key);
-                    Perl_croak(aTHX_ S_strtab_error,
+                    croak(S_strtab_error,
                                action & HV_FETCH_LVALUE ? "fetch" : "store");
                 }
                 else {
@@ -1018,7 +1018,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
            this test here is cheap  */
         if (flags & HVhek_FREEKEY)
             Safefree(key);
-        Perl_croak(aTHX_ S_strtab_error,
+        croak(S_strtab_error,
                    action & HV_FETCH_LVALUE ? "fetch" : "store");
     }
     else {
@@ -1444,7 +1444,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         if (hv == PL_strtab) {
             if (k_flags & HVhek_FREEKEY)
                 Safefree(key);
-            Perl_croak(aTHX_ S_strtab_error, "delete");
+            croak(S_strtab_error, "delete");
         }
 
         sv = HeVAL(entry);
@@ -2611,7 +2611,7 @@ Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand) {
     }
     iter->xhv_rand = new_xhv_rand;
 #else
-    Perl_croak(aTHX_ "This Perl has not been built with support for randomized hash key traversal but something called Perl_hv_rand_set().");
+    croak("This Perl has not been built with support for randomized hash key traversal but something called Perl_hv_rand_set().");
 #endif
 }
 
@@ -2677,7 +2677,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_HV_NAME_SET;
 
     if (len > I32_MAX)
-        Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
+        croak("panic: hv name too long (%" UVuf ")", (UV) len);
 
     if (HvHasAUX(hv)) {
         iter = HvAUX(hv);
@@ -2781,7 +2781,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_HV_ENAME_ADD;
 
     if (len > I32_MAX)
-        Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
+        croak("panic: hv name too long (%" UVuf ")", (UV) len);
 
     PERL_HASH(hash, name, len);
 
@@ -2843,7 +2843,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_HV_ENAME_DELETE;
 
     if (len > I32_MAX)
-        Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
+        croak("panic: hv name too long (%" UVuf ")", (UV) len);
 
     if (!HvHasAUX(hv)) return;
 
@@ -3583,7 +3583,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
             SvUTF8_on(value);
         break;
     default:
-        Perl_croak(aTHX_ "panic: refcounted_he_value bad flags %" UVxf,
+        croak("panic: refcounted_he_value bad flags %" UVxf,
                    (UV)he->refcounted_he_data[0]);
     }
     return value;
@@ -3605,7 +3605,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
     U32 placeholders, max;
 
     if (flags)
-        Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %" UVxf,
+        croak("panic: refcounted_he_chain_2hv bad flags %" UVxf,
             (UV)flags);
 
     /* We could chase the chain once to get an idea of the number of keys,
@@ -3724,7 +3724,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
     void * free_me = NULL;
 
     if (flags & ~(REFCOUNTED_HE_KEY_UTF8|REFCOUNTED_HE_EXISTS))
-        Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %" UVxf,
+        croak("panic: refcounted_he_fetch_pvn bad flags %" UVxf,
             (UV)flags);
     if (!chain)
         goto ret;
@@ -3799,7 +3799,7 @@ Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
     STRLEN keylen;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_SV;
     if (flags & REFCOUNTED_HE_KEY_UTF8)
-        Perl_croak(aTHX_ "panic: refcounted_he_fetch_sv bad flags %" UVxf,
+        croak("panic: refcounted_he_fetch_sv bad flags %" UVxf,
             (UV)flags);
     keypv = SvPV_const(key, keylen);
     if (SvUTF8(key))
@@ -3961,7 +3961,7 @@ Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent,
     STRLEN keylen;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_SV;
     if (flags & REFCOUNTED_HE_KEY_UTF8)
-        Perl_croak(aTHX_ "panic: refcounted_he_new_sv bad flags %" UVxf,
+        croak("panic: refcounted_he_new_sv bad flags %" UVxf,
             (UV)flags);
     keypv = SvPV_const(key, keylen);
     if (SvUTF8(key))
@@ -4101,7 +4101,7 @@ Perl_cop_store_label(pTHX_ COP *const cop, const char *label, STRLEN len,
     PERL_ARGS_ASSERT_COP_STORE_LABEL;
 
     if (flags & ~(SVf_UTF8))
-        Perl_croak(aTHX_ "panic: cop_store_label illegal flag bits 0x%" UVxf,
+        croak("panic: cop_store_label illegal flag bits 0x%" UVxf,
                    (UV)flags);
     labelsv = newSVpvn_flags(label, len, SVs_TEMP);
     if (flags & SVf_UTF8)

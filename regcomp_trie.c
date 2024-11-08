@@ -595,7 +595,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         case EXACTFU:
         case EXACTFLU8: folder = PL_fold_latin1; break;
         case EXACTF:  folder = PL_fold; break;
-        default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u %s", (unsigned) flags, REGNODE_NAME(flags) );
+        default: croak("panic! In trie construction, unknown node type %u %s", (unsigned) flags, REGNODE_NAME(flags) );
     }
 
     /* create the trie struct, all zeroed */
@@ -816,7 +816,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 svpp = hv_fetch( widecharmap, (char*)&uvc, sizeof( UV ), 1 );
 
                 if ( !svpp )
-                    Perl_croak( aTHX_ "error creating/fetching widecharmap entry for 0x%" UVXf, uvc );
+                    croak("error creating/fetching widecharmap entry for 0x%" UVXf, uvc );
 
                 if ( !SvTRUE( *svpp ) ) {
                     sv_setiv( *svpp, ++trie->uniquecharcount );
@@ -975,7 +975,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         }
                         state = newstate;
                     } else {
-                        Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %" IVdf, uvc );
+                        croak("panic! In trie construction, no char mapping for %" IVdf, uvc );
                     }
                 }
             } else {
@@ -1186,7 +1186,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         }
                         state = trie->trans[ state + charid ].next;
                     } else {
-                        Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %" IVdf, uvc );
+                        croak("panic! In trie construction, no char mapping for %" IVdf, uvc );
                     }
                     /* charid is now 0 if we dont know the char read, or
                      * nonzero if we do */

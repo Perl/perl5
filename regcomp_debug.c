@@ -547,7 +547,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                   (int)op, (int)REGNODE_MAX);
         }
         else {
-            Perl_croak(aTHX_ "panic: corrupted regexp opcode %d > %d",
+            croak("panic: corrupted regexp opcode %d > %d",
                              (int)op, (int)REGNODE_MAX);
         }
     }
