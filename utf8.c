@@ -77,8 +77,8 @@ Perl_force_out_malformed_utf8_message_(pTHX_
     (void) utf8_to_uv_errors(p, e, &dummy, NULL, flags, &errors);
 
     if (! errors) {
-        Perl_croak(aTHX_ "panic: force_out_malformed_utf8_message_ should"
-                         " be called only when there are errors found");
+        croak("panic: force_out_malformed_utf8_message_ should"
+                  " be called only when there are errors found");
     }
 }
 
@@ -232,7 +232,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
         if (   UNLIKELY(input_uv > MAX_LEGAL_CP
             && UNLIKELY(! (flags & UNICODE_ALLOW_ABOVE_IV_MAX))))
         {
-            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, /* Hex output */
+            croak("%s", form_cp_too_large_msg(16, /* Hex output */
                                                          NULL, 0, input_uv));
         }
 
@@ -2240,7 +2240,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
             switch (this_problem) {
               default:
-                Perl_croak(aTHX_ "panic: Unexpected case value in "
+                croak("panic: Unexpected case value in "
                                  " utf8n_to_uvchr_msgs() %" U32uf,
                            this_problem);
                 /* NOTREACHED */
@@ -2585,7 +2585,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
         if (disallowed) {
             if ((flags & ~UTF8_CHECK_ONLY) & UTF8_DIE_IF_MALFORMED) {
-                Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
+                croak("Malformed UTF-8 character (fatal)");
             }
 
             success = false;
@@ -3431,7 +3431,7 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
     PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE;
 
     if (bytelen & 1)
-        Perl_croak(aTHX_ "panic: utf16_to_utf8%s: odd bytelen %" UVuf,
+        croak("panic: utf16_to_utf8%s: odd bytelen %" UVuf,
                 ((high_byte == 0) ? "" : "_reversed"), (UV)bytelen);
     pend = p + bytelen;
 
@@ -3454,14 +3454,14 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
 #define FIRST_IN_PLANE1      0x10000
 
             if (UNLIKELY(p >= pend) || UNLIKELY(uv > LAST_HIGH_SURROGATE)) {
-                Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
+                croak("Malformed UTF-16 surrogate");
             }
             else {
                 U32 low_surrogate = (p[(U8) high_byte] << 8) + p[(U8) low_byte];
                 if (UNLIKELY(! inRANGE(low_surrogate, FIRST_LOW_SURROGATE,
                                                        LAST_LOW_SURROGATE)))
                 {
-                    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
+                    croak("Malformed UTF-16 surrogate");
                 }
 
                 p += 2;
@@ -3626,7 +3626,7 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
                 return 'S';
 #endif
             default:
-                Perl_croak(aTHX_ "panic: to_upper_title_latin1 did not expect"
+                croak("panic: to_upper_title_latin1 did not expect"
                                  " '%c' to map to '%c'",
                                  c, LATIN_SMALL_LETTER_Y_WITH_DIAERESIS);
                 NOT_REACHED; /* NOTREACHED */
@@ -3905,7 +3905,7 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
             if (! hv_store(PL_seen_deprecated_macro, key,
                            strlen(key), &PL_sv_undef, 0))
             {
-                Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+                croak("panic: hv_store() unexpectedly failed");
             }
 
             if (instr(file, "mathoms.c")) {
@@ -4016,7 +4016,7 @@ S_to_case_cp_list(pTHX_
             }
             else if (UNLIKELY(UNICODE_IS_SUPER(original))) {
                 if (UNLIKELY(original > MAX_LEGAL_CP)) {
-                    Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, original));
+                    croak("%s", form_cp_too_large_msg(16, NULL, 0, original));
                 }
                 if (ckWARN_d(WARN_NON_UNICODE)) {
                     const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;

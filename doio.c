@@ -506,7 +506,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
         /* sysopen style args, i.e. integer mode and permissions */
 
         if (num_svs != 0) {
-            Perl_croak(aTHX_ "panic: sysopen with multiple args, num_svs=%ld",
+            croak("panic: sysopen with multiple args, num_svs=%ld",
                        (long) num_svs);
         }
         return do_open_raw(gv, oname, len, rawmode, rawperm, NULL);
@@ -671,7 +671,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             if (num_svs) {
                 if (type[1] != IoTYPE_STD) {
                   unknown_open_mode:
-                    Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
+                    croak("Unknown open() mode '%.*s'", (int)olen, oname);
                 }
                 type++;
             }
@@ -754,7 +754,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                     UV uv;
                     if (num_svs > 1) {
                         /* diag_listed_as: More than one argument to '%s' open */
-                        Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
+                        croak("More than one argument to '%c&' open",IoTYPE(io));
                     }
                     while (isSPACE(*type))
                         type++;
@@ -844,7 +844,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                     IoTYPE(io) = IoTYPE_STD;
                     if (num_svs > 1) {
                         /* diag_listed_as: More than one argument to '%s' open */
-                        Perl_croak(aTHX_ "More than one argument to '>%c' open",IoTYPE_STD);
+                        croak("More than one argument to '>%c' open",IoTYPE_STD);
                     }
                 }
                 else {
@@ -882,7 +882,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                 IoTYPE(io) = IoTYPE_STD;
                 if (num_svs > 1) {
                     /* diag_listed_as: More than one argument to '%s' open */
-                    Perl_croak(aTHX_ "More than one argument to '<%c' open",IoTYPE_STD);
+                    croak("More than one argument to '<%c' open",IoTYPE_STD);
                 }
             }
             else {
@@ -1652,7 +1652,7 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
         && PerlLIO_stat(".", &statbuf) >= 0
         && ( statbuf.st_dev != orig_cwd_stat->st_dev
                      || statbuf.st_ino != orig_cwd_stat->st_ino)) {
-        Perl_croak(aTHX_ "Cannot complete in-place edit of %s: %s",
+        croak("Cannot complete in-place edit of %s: %s",
                    orig_pv, "Current directory has changed");
     }
 #else
@@ -1663,7 +1663,7 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
     */
     if (!PERL_FILE_IS_ABSOLUTE(orig_pv)
         && PerlLIO_stat(SvPVX(*temp_psv), &statbuf) < 0) {
-        Perl_croak(aTHX_ "Cannot complete in-place edit of %s: %s",
+        croak("Cannot complete in-place edit of %s: %s",
                    orig_pv,
                    "Work file is missing - did you change directory?");
     }
@@ -1777,7 +1777,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
 #  else
                             UNLINK(SvPVX(*temp_psv));
 #  endif
-                            Perl_croak(aTHX_ "Can't rename %s to %s: %s, skipping file",
+                            croak("Can't rename %s to %s: %s, skipping file",
                                        SvPVX(*orig_psv), SvPVX(*back_psv), Strerror(errno));
                         }
                         /* should we warn here? */
@@ -1787,7 +1787,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
                     (void)UNLINK(SvPVX(*back_psv));
                     if (link(orig_pv, SvPVX(*back_psv))) {
                         if (!is_explict) {
-                            Perl_croak(aTHX_ "Can't rename %s to %s: %s, skipping file",
+                            croak("Can't rename %s to %s: %s, skipping file",
                                        SvPVX(*orig_psv), SvPVX(*back_psv), Strerror(errno));
                         }
                         goto abort_inplace;
@@ -1824,7 +1824,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
                     UNLINK(SvPVX(*temp_psv));
 #endif
                     /* diag_listed_as: Cannot complete in-place edit of %s: %s */
-                    Perl_croak(aTHX_ "Cannot complete in-place edit of %s: failed to rename work file '%s' to '%s': %s",
+                    croak("Cannot complete in-place edit of %s: failed to rename work file '%s' to '%s': %s",
                                orig_pv, SvPVX(*temp_psv), orig_pv, Strerror(errno));
                 }
             abort_inplace:
@@ -1845,7 +1845,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
             UNLINK(SvPVX_const(*temp_psv));
 #endif
             if (!is_explict) {
-                Perl_croak(aTHX_ "Failed to close in-place work file %s: %s",
+                croak("Failed to close in-place work file %s: %s",
                            SvPVX(*temp_psv), Strerror(errno));
             }
         }
@@ -2123,7 +2123,7 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
                 if (!end)
                     end = s+len;
 #ifndef PERLIO_LAYERS
-                Perl_croak(aTHX_ "IO layers (like '%.*s') unavailable", end-s, s);
+                croak("IO layers (like '%.*s') unavailable", end-s, s);
 #else
                 len -= end-s;
                 s = end;
@@ -2356,7 +2356,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     if (PL_op->op_flags & OPf_REF) {
         if (cGVOP_gv == PL_defgv) {
             if (PL_laststype != OP_LSTAT)
-                Perl_croak(aTHX_ "%s", no_prev_lstat);
+                croak("%s", no_prev_lstat);
             if (PL_laststatval < 0)
                 SETERRNO(EBADF,RMS_IFI);
             return PL_laststatval;
@@ -2374,7 +2374,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
              == OPpFT_STACKED) {
       if (PL_laststype != OP_LSTAT)
-        Perl_croak(aTHX_ "%s", no_prev_lstat);
+        croak("%s", no_prev_lstat);
       return PL_laststatval;
     }
 
@@ -2435,7 +2435,7 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 {
     PERL_ARGS_ASSERT_DO_AEXEC5;
 #if defined(__LIBCATAMOUNT__)
-    Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
+    croak("exec? I'm not *that* kind of operating system");
 #else
     assert(sp >= mark);
     ENTER;
@@ -2760,7 +2760,7 @@ nothing in the core.
                 len -= 3;
             }
            if ((val = whichsig_pvn(s, len)) < 0)
-               Perl_croak(aTHX_ "Unrecognized signal name \"%" SVf "\"",
+               croak("Unrecognized signal name \"%" SVf "\"",
                                 SVfARG(*mark));
         }
         else
@@ -2779,7 +2779,7 @@ nothing in the core.
             Pid_t proc;
             SvGETMAGIC(*mark);
             if (!(SvNIOK(*mark) || looks_like_number(*mark)))
-                Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
+                croak("Can't kill a non-numeric process ID");
             proc = SvIV_nomg(*mark);
             APPLY_TAINT_PROPER();
 #ifdef HAS_KILLPG
@@ -3074,7 +3074,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
         /* diag_listed_as: msg%s not implemented */
-        Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
+        croak("%s not implemented", PL_op_desc[optype]);
 #endif
     }
     return -1;			/* should never happen */
@@ -3134,14 +3134,14 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
         }
 #else
         /* diag_listed_as: sem%s not implemented */
-        Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
+        croak("%s not implemented", PL_op_desc[optype]);
 #endif
         break;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
         /* diag_listed_as: shm%s not implemented */
-        Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
+        croak("%s not implemented", PL_op_desc[optype]);
 #endif
     }
 
@@ -3161,7 +3161,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
             STRLEN len;
             a = SvPVbyte(astr, len);
             if (len != infosize)
-                Perl_croak(aTHX_ "Bad arg length for %s, is %lu, should be %ld",
+                croak("Bad arg length for %s, is %lu, should be %ld",
                       PL_op_desc[optype],
                       (unsigned long)len,
                       (long)infosize);
@@ -3208,7 +3208,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
             ret = Semctl(id, n, cmd, unsemds);
 #else
             /* diag_listed_as: sem%s not implemented */
-            Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
+            croak("%s not implemented", PL_op_desc[optype]);
 #endif
         }
         break;
@@ -3242,7 +3242,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     const char * const mbuf = SvPVbyte(mstr, len);
 
     if (len < sizeof(long))
-        Perl_croak(aTHX_ "Arg too short for msgsnd");
+        croak("Arg too short for msgsnd");
 
     const STRLEN msize = len - sizeof(long);
 
@@ -3257,7 +3257,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
     /* diag_listed_as: msg%s not implemented */
-    Perl_croak(aTHX_ "msgsnd not implemented");
+    croak("msgsnd not implemented");
     return -1;
 #endif
 }
@@ -3306,7 +3306,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
     /* diag_listed_as: msg%s not implemented */
-    Perl_croak(aTHX_ "msgrcv not implemented");
+    croak("msgrcv not implemented");
     return -1;
 #endif
 }
@@ -3352,7 +3352,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     }
 #else
     /* diag_listed_as: sem%s not implemented */
-    Perl_croak(aTHX_ "semop not implemented");
+    croak("semop not implemented");
 #endif
 }
 
@@ -3444,7 +3444,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     return shmdt(shm);
 #else
     /* diag_listed_as: shm%s not implemented */
-    Perl_croak_nocontext("shm I/O not implemented");
+    croak("shm I/O not implemented");
     return -1;
 #endif
 }

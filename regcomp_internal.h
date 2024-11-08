@@ -856,7 +856,7 @@ static const scan_data_t zero_scan_data = {
               ? eI - sI   /* Length before the <--HERE */                   \
               : ((xI_offset(xC) >= 0)                                       \
                  ? xI_offset(xC)                                            \
-                 : (Perl_croak(aTHX_ "panic: %s: %d: negative offset: %"    \
+                 : (croak("panic: %s: %d: negative offset: %"               \
                                     IVdf " trying to output message for "   \
                                     " pattern %.*s",                        \
                                     __FILE__, __LINE__, (IV) xI_offset(xC), \
@@ -888,22 +888,22 @@ static const scan_data_t zero_scan_data = {
 } STMT_END
 
 #define FAIL(msg) _FAIL(                            \
-    Perl_croak(aTHX_ "%s in regex m/%" UTF8f "%s/",         \
+    croak("%s in regex m/%" UTF8f "%s/",         \
             msg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
 #define FAIL2(msg,arg) _FAIL(                       \
-    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",       \
+    croak(msg " in regex m/%" UTF8f "%s/",       \
             arg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
 #define FAIL3(msg,arg1,arg2) _FAIL(                         \
-    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",       \
+    croak(msg " in regex m/%" UTF8f "%s/",                  \
      arg1, arg2, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
 #define Simple_vFAIL(m) STMT_START {                                    \
-    Perl_croak(aTHX_ "%s" REPORT_LOCATION,                              \
+    croak("%s" REPORT_LOCATION,                                         \
             m, REPORT_LOCATION_ARGS(RExC_parse));                       \
 } STMT_END
 
@@ -965,7 +965,7 @@ static const scan_data_t zero_scan_data = {
 #define _WARN_HELPER(loc, warns, code)                                  \
     STMT_START {                                                        \
         if (! RExC_copy_start_in_constructed) {                         \
-            Perl_croak( aTHX_ "panic! %s: %d: Tried to warn when none"  \
+            croak("panic! %s: %d: Tried to warn when none"              \
                               " expected at '%s'",                      \
                               __FILE__, __LINE__, loc);                 \
         }                                                               \

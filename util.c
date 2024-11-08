@@ -1948,7 +1948,7 @@ Perl_croak(pTHX_ const char *pat, ...)
 
 This encapsulates a common reason for dying, generating terser object code than
 using the generic C<Perl_croak>.  It is exactly equivalent to
-C<Perl_croak(aTHX_ "%s", PL_no_modify)> (which expands to something like
+C<croak("%s", PL_no_modify)> (which expands to something like
 "Modification of a read-only value attempted").
 
 Less code used on exception code paths reduces CPU cache pressure.
@@ -2606,7 +2606,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
             int pid2, status;
             PerlLIO_close(p[This]);
             if (read_total != sizeof(int))
-                Perl_croak(aTHX_ "panic: kid popen errno read, n=%u", read_total);
+                croak("panic: kid popen errno read, n=%u", read_total);
             do {
                 pid2 = wait4pid(pid, &status, 0);
             } while (pid2 == -1 && errno == EINTR);
@@ -2636,7 +2636,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 #  elif defined(WIN32)
     return win32_popenlist(mode, n, args);
 #  else
-    Perl_croak(aTHX_ "List form of piped open not implemented");
+    croak("List form of piped open not implemented");
     return (PerlIO *) NULL;
 #  endif
 #endif
@@ -2693,7 +2693,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
                 PerlLIO_close(pp[1]);
             }
             if (!doexec)
-                Perl_croak(aTHX_ "Can't fork: %s", Strerror(errno));
+                croak("Can't fork: %s", Strerror(errno));
             return NULL;
         }
         Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
@@ -2789,7 +2789,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
             int pid2, status;
             PerlLIO_close(p[This]);
             if (n != sizeof(int))
-                Perl_croak(aTHX_ "panic: kid popen errno read, n=%u", n);
+                croak("panic: kid popen errno read, n=%u", n);
             do {
                 pid2 = wait4pid(pid, &status, 0);
             } while (pid2 == -1 && errno == EINTR);
@@ -3251,7 +3251,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 #endif
     {
         if (flags)
-            Perl_croak(aTHX_ "Can't do waitpid with flags");
+            croak("Can't do waitpid with flags");
         else {
             while ((result = PerlProc_wait(statusp)) != pid && pid > 0 && result >= 0)
                 pidgone(result,*statusp);
@@ -3603,7 +3603,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
         if (!xfound) {
             if (flags & 1) {			/* do or die? */
                 /* diag_listed_as: Can't execute %s */
-                Perl_croak(aTHX_ "Can't %s %s%s%s",
+                croak("Can't %s %s%s%s",
                       (xfailed ? "execute" : "find"),
                       (xfailed ? xfailed : scriptname),
                       (xfailed ? "" : " on PATH"),
@@ -4243,7 +4243,7 @@ Perl_getcwd_sv(pTHX_ SV *sv)
     cino = statbuf.st_ino;
 
     if (cdev != orig_cdev || cino != orig_cino) {
-        Perl_croak(aTHX_ "Unstable directory path, "
+        croak("Unstable directory path, "
                    "current directory changed unexpectedly");
     }
 
@@ -4588,11 +4588,11 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
                     if (isSPACE(*p))
                         goto the_end_of_the_opts_parser;
                     else
-                        Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+                        croak("Unknown Unicode option letter '%c'", *p);
                 }
             }
             else {
-                Perl_croak(aTHX_ "Invalid number '%s' for -C option.\n", p);
+                croak("Invalid number '%s' for -C option.\n", p);
             }
         }
         else {
@@ -4622,7 +4622,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
                       if (*p != '\n' && *p != '\r') {
                         if(isSPACE(*p)) goto the_end_of_the_opts_parser;
                         else
-                          Perl_croak(aTHX_
+                          croak(
                                      "Unknown Unicode option letter '%c'", *p);
                       }
                  }
@@ -4635,7 +4635,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
   the_end_of_the_opts_parser:
 
   if (opt & ~PERL_UNICODE_ALL_FLAGS)
-       Perl_croak(aTHX_ "Unknown Unicode option value %" UVuf,
+       croak("Unknown Unicode option value %" UVuf,
                   (UV) (opt & ~PERL_UNICODE_ALL_FLAGS));
 
   *popt = p;

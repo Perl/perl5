@@ -2330,7 +2330,7 @@ PP(pp_padav)
         if (flags && !(flags & OPpENTERSUB_INARGS)) {
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
-                Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
+                croak("Can't return array to lvalue scalar context");
             goto ret;
        }
     }
@@ -2384,7 +2384,7 @@ PP(pp_padhv)
         if (flags && !(flags & OPpENTERSUB_INARGS)) {
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
-                Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+                croak("Can't return hash to lvalue scalar context");
             rpp_push_1(TARG);
             return NORMAL;
         }
@@ -2422,7 +2422,7 @@ PP(pp_rv2av)
             DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
         else if (UNLIKELY(PL_op->op_flags & OPf_MOD
                 && PL_op->op_private & OPpLVAL_INTRO))
-            Perl_croak(aTHX_ "%s", PL_no_localize_ref);
+            croak("%s", PL_no_localize_ref);
     }
     else if (UNLIKELY(SvTYPE(sv) != type)) {
             GV *gv;
@@ -2497,7 +2497,7 @@ PP(pp_rv2av)
     return NORMAL;
 
  croak_cant_return:
-    Perl_croak(aTHX_ "Can't return %s to lvalue scalar context",
+    croak("Can't return %s to lvalue scalar context",
                is_pp_rv2av ? "array" : "hash");
 }
 
@@ -2641,7 +2641,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 #ifdef DEBUGGING
             if (fake) {
                 /* op_dump(PL_op); */
-                Perl_croak(aTHX_
+                croak(
                     "panic: aassign skipped needed copy of common RH elem %"
                         UVuf, (UV)(relem - firstrelem));
             }
@@ -2658,7 +2658,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                (It's relying on a panic, not a "semi-panic" from newSVsv()
                and then an assertion failure below.)  */
             if (UNLIKELY(SvIS_FREED(svr))) {
-                Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
+                croak("panic: attempt to copy freed scalar %p",
                            (void*)svr);
             }
 #endif
@@ -3763,7 +3763,7 @@ PP(pp_match)
         if (PL_curpm == PL_reg_curpm) {
             if (PL_curpm_under) {
                 if (PL_curpm_under == PL_reg_curpm) {
-                    Perl_croak(aTHX_ "Infinite recursion via empty pattern");
+                    croak("Infinite recursion via empty pattern");
                 } else {
                     pm = PL_curpm_under;
                 }
@@ -5072,7 +5072,7 @@ PP(pp_iter)
             if (LIKELY(sv)) {
                 if (UNLIKELY(SvIS_FREED(sv))) {
                     *itersvp = NULL;
-                    Perl_croak(aTHX_ "Use of freed value in iteration");
+                    croak("Use of freed value in iteration");
                 }
                 if (SvPADTMP(sv)) {
                     sv = newSVsv(sv);
@@ -5319,7 +5319,7 @@ PP(pp_subst)
         if (PL_curpm == PL_reg_curpm) {
             if (PL_curpm_under) {
                 if (PL_curpm_under == PL_reg_curpm) {
-                    Perl_croak(aTHX_ "Infinite recursion via empty pattern");
+                    croak("Infinite recursion via empty pattern");
                 } else {
                     pm = PL_curpm_under;
                 }
@@ -6743,7 +6743,7 @@ S_opmethod_stash(pTHX_ SV* meth)
     HV* stash;
 
     SV* const sv = PL_stack_base + TOPMARK == PL_stack_sp
-        ? (Perl_croak(aTHX_ "Can't call method \"%" SVf "\" without a "
+        ? (croak("Can't call method \"%" SVf "\" without a "
                             "package or object reference", SVfARG(meth)),
            (SV *)NULL)
         : *(PL_stack_base + TOPMARK + 1);
@@ -6752,7 +6752,7 @@ S_opmethod_stash(pTHX_ SV* meth)
 
     if (UNLIKELY(!sv))
        undefined:
-        Perl_croak(aTHX_ "Can't call method \"%" SVf "\" on an undefined value",
+        croak("Can't call method \"%" SVf "\" on an undefined value",
                    SVfARG(meth));
 
     if (UNLIKELY(SvGMAGICAL(sv))) mg_get(sv);
@@ -6766,7 +6766,7 @@ S_opmethod_stash(pTHX_ SV* meth)
     else if (!SvOK(sv)) goto undefined;
     else if (isGV_with_GP(sv)) {
         if (!GvIO(sv))
-            Perl_croak(aTHX_ "Can't call method \"%" SVf "\" "
+            croak("Can't call method \"%" SVf "\" "
                              "without a package or object reference",
                               SVfARG(meth));
         ob = sv;
@@ -6807,7 +6807,7 @@ S_opmethod_stash(pTHX_ SV* meth)
             /* this isn't the name of a filehandle either */
             if (!packlen)
             {
-                Perl_croak(aTHX_ "Can't call method \"%" SVf "\" "
+                croak("Can't call method \"%" SVf "\" "
                                  "without a package or object reference",
                                   SVfARG(meth));
             }
@@ -6838,7 +6838,7 @@ S_opmethod_stash(pTHX_ SV* meth)
                      && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
                      && SvOBJECT(ob))))
     {
-        Perl_croak(aTHX_ "Can't call method \"%" SVf "\" on unblessed reference",
+        croak("Can't call method \"%" SVf "\" on unblessed reference",
                    SVfARG((SvPOK(meth) && SvPVX(meth) == PL_isa_DOES)
                                         ? newSVpvs_flags("DOES", SVs_TEMP)
                                         : meth));

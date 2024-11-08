@@ -385,7 +385,7 @@ works out the package name and subroutine name from C<cv>, and then calls
 C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
  diag_listed_as: SKIPME
- Perl_croak(aTHX_ "Usage: %" SVf "::%" SVf "(%s)", "ouch" "awk",
+ croak("Usage: %" SVf "::%" SVf "(%s)", "ouch" "awk",
                                                      "eee_yow");
 
 =cut
@@ -418,7 +418,7 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
 
         /* Pants. I don't think that it should be possible to get here. */
         /* diag_listed_as: SKIPME */
-        Perl_croak(aTHX_ "Usage: CODE(0x%" UVxf ")(%s)", PTR2UV(cv), params);
+        croak("Usage: CODE(0x%" UVxf ")(%s)", PTR2UV(cv), params);
     }
 }
 
@@ -451,7 +451,7 @@ XS(XS_UNIVERSAL_import_unimport)
     if (items > 1) {
         char *class_pv= SvPV_nolen(ST(0));
         if (strEQ(class_pv,"UNIVERSAL"))
-            Perl_croak(aTHX_ "UNIVERSAL does not export anything");
+            croak("UNIVERSAL does not export anything");
         /* _charnames is special - ignore it for now as the code that
          * depends on it has its own "no import" logic that produces better
          * warnings than this does. */
@@ -528,7 +528,7 @@ XS(XS_UNIVERSAL_DOES)
     PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-        Perl_croak(aTHX_ "Usage: invocant->DOES(kind)");
+        croak("Usage: invocant->DOES(kind)");
     else {
         SV * const sv = ST(0);
         if (sv_does_sv( sv, ST(1), 0 ))
@@ -826,7 +826,7 @@ XS(XS_PerlIO_get_layers)
                        goto fail;
                   default:
                   fail:
-                       Perl_croak(aTHX_
+                       croak(
                                   "get_layers: unknown argument '%s'",
                                   key);
                   }
@@ -1024,7 +1024,7 @@ XS(XS_re_regnames)
         
         if (!entry)
             /* diag_listed_as: SKIPME */
-            Perl_croak(aTHX_ "NULL array element in re::regnames()");
+            croak("NULL array element in re::regnames()");
 
         mPUSHs(SvREFCNT_inc_simple_NN(*entry));
     }

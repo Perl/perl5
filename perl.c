@@ -440,7 +440,7 @@ perl_construct(pTHXx)
         PL_mmap_page_size = sysconf(_SC_MMAP_PAGE_SIZE);
 #   endif
         if ((long) PL_mmap_page_size < 0) {
-            Perl_croak(aTHX_ "panic: sysconf: %s",
+            croak("panic: sysconf: %s",
                 errno ? Strerror(errno) : "pagesize unknown");
         }
       }
@@ -450,7 +450,7 @@ perl_construct(pTHXx)
       PL_mmap_page_size = PAGESIZE;       /* compiletime, bad */
 #endif
       if (PL_mmap_page_size <= 0)
-        Perl_croak(aTHX_ "panic: bad pagesize %" IVdf,
+        croak("panic: bad pagesize %" IVdf,
                    (IV) PL_mmap_page_size);
     }
 #endif /* HAS_MMAP */
@@ -2164,10 +2164,10 @@ S_moreswitch_m(pTHX_ char option, const char *s)
         }
     }
     if (s == start)
-        Perl_croak(aTHX_ "Module name required with -%c option",
+        croak("Module name required with -%c option",
                             option);
     if (colon)
-        Perl_croak(aTHX_ "Invalid module name %.*s with -%c option: "
+        croak("Invalid module name %.*s with -%c option: "
                             "contains single ':'",
                             (int)(s - start), start, option);
     end = s + strlen(s);
@@ -2175,7 +2175,7 @@ S_moreswitch_m(pTHX_ char option, const char *s)
         sv_catpvn(sv, start, end - start);
         if (option == 'm') {
             if (*s != '\0')
-                Perl_croak(aTHX_ "Can't use '%c' after -mname", *s);
+                croak("Can't use '%c' after -mname", *s);
             sv_catpvs( sv, " ()");
         }
     } else {
@@ -2318,7 +2318,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 argc--,argv++;
             }
             else
-                Perl_croak(aTHX_ "No code specified for -%c", c);
+                croak("No code specified for -%c", c);
             sv_catpvs(PL_e_script, "\n");
             break;
 
@@ -2339,7 +2339,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 incpush(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
             }
             else
-                Perl_croak(aTHX_ "No directory specified for -I");
+                croak("No directory specified for -I");
             break;
         case 'S':
             forbid_setid('S', FALSE);
@@ -2387,7 +2387,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
             s--;
             /* FALLTHROUGH */
         default:
-            Perl_croak(aTHX_ "Unrecognized switch: -%s  (-h will show valid options)",s);
+            croak("Unrecognized switch: -%s  (-h will show valid options)",s);
         }
     }
     }
@@ -2432,7 +2432,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 if (!*s)
                     break;
                 if (!memCHRs("CDIMUdmtwW", *s))
-                    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
+                    croak("Illegal switch in PERL5OPT: -%c", *s);
                 while (++s && *s) {
                     if (isSPACE(*s)) {
                         if (!popt_copy) {
@@ -2577,7 +2577,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
             lex_start_flags |= LEX_START_COPIED;
             find_beginning(linestr_sv, rsfp);
             if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
-                Perl_croak(aTHX_ "Can't chdir to %s",cddir);
+                croak("Can't chdir to %s",cddir);
         }
     }
 
@@ -2669,7 +2669,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
          else if (strEQ(s, "safe"))
               PL_signals &= ~PERL_SIGNALS_UNSAFE_FLAG;
          else
-              Perl_croak(aTHX_ "PERL_SIGNALS illegal: \"%s\"", s);
+              croak("PERL_SIGNALS illegal: \"%s\"", s);
     }
     }
 
@@ -3856,7 +3856,7 @@ Perl_moreswitches(pTHX_ const char *s)
                 s++;
         }
         else
-            Perl_croak(aTHX_ "No directory specified for -I");
+            croak("No directory specified for -I");
         return s;
     case 'l':
         PL_minus_l = TRUE;
@@ -3890,7 +3890,7 @@ Perl_moreswitches(pTHX_ const char *s)
         if (*++s)
             s = S_moreswitch_m(aTHX_ option, s);
         else
-            Perl_croak(aTHX_ "Missing argument to -%c", option);
+            croak("Missing argument to -%c", option);
         return s;
     case 'n':
         PL_minus_n = TRUE;
@@ -3966,9 +3966,9 @@ Perl_moreswitches(pTHX_ const char *s)
     case 'S':
 #endif
     case 'V':
-        Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
+        croak("Can't emulate -%.1s on #! line",s);
     default:
-        Perl_croak(aTHX_
+        croak(
             "Unrecognized switch: -%.1s  (-h will show valid options)",s
         );
     }
@@ -4219,10 +4219,10 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
                  * Still, can we be sure we got the right thing?
                  */
                 if (*s != '/') {
-                    Perl_croak(aTHX_ "Wrong syntax (suid) fd script name \"%s\"\n", s);
+                    croak("Wrong syntax (suid) fd script name \"%s\"\n", s);
                 }
                 if (! *(s+1)) {
-                    Perl_croak(aTHX_ "Missing (suid) fd script name\n");
+                    croak("Missing (suid) fd script name\n");
                 }
                 scriptname = savepv(s + 1);
                 Safefree(PL_origfilename);
@@ -4263,7 +4263,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
                 scriptname = tmpname;
                 close(tmpfd);
             } else
-                Perl_croak(aTHX_ "Failed to create a fake bit bucket");
+                croak("Failed to create a fake bit bucket");
         }
 #endif
         rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
@@ -4279,9 +4279,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     if (!rsfp) {
         /* PSz 16 Sep 03  Keep neat error message */
         if (PL_e_script)
-            Perl_croak(aTHX_ "Can't open " BIT_BUCKET ": %s\n", Strerror(errno));
+            croak("Can't open " BIT_BUCKET ": %s\n", Strerror(errno));
         else
-            Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+            croak("Can't open perl script \"%s\": %s\n",
                     CopFILE(PL_curcop), Strerror(errno));
     }
     fd = PerlIO_fileno(rsfp);
@@ -4289,7 +4289,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     if (fd < 0 ||
         (PerlLIO_fstat(fd, &tmpstatbuf) >= 0
          && S_ISDIR(tmpstatbuf.st_mode)))
-        Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+        croak("Can't open perl script \"%s\": %s\n",
             CopFILE(PL_curcop),
             Strerror(EISDIR));
 
@@ -4336,7 +4336,7 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
             (my_egid != my_gid && my_egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
             )
             if (!PL_do_undump)
-                Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
+                croak("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
         /* not set-id, must be wrapped */
     }
@@ -4355,7 +4355,7 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 
     do {
         if ((s = sv_gets(linestr_sv, rsfp, 0)) == NULL)
-            Perl_croak(aTHX_ "No Perl script found in input\n");
+            croak("No Perl script found in input\n");
         s2 = s;
     } while (!(*s == '#' && s[1] == '!' && ((s = instr(s,"perl")) || (s = instr(s2,"PERL")))));
     PerlIO_ungetc(rsfp, '\n');		/* to keep line count right */
@@ -4455,12 +4455,12 @@ S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
     if (PerlProc_getuid() != PerlProc_geteuid())
-        Perl_croak(aTHX_ "No %s allowed while running setuid", message);
+        croak("No %s allowed while running setuid", message);
     if (PerlProc_getgid() != PerlProc_getegid())
-        Perl_croak(aTHX_ "No %s allowed while running setgid", message);
+        croak("No %s allowed while running setgid", message);
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
     if (suidscript)
-        Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", message);
+        croak("No %s allowed with (suid) fdscript", message);
 }
 
 void
@@ -4476,7 +4476,7 @@ Perl_init_dbargs(pTHX)
            "leak" until global destruction.  */
         av_clear(args);
         if (SvTIED_mg((const SV *)args, PERL_MAGIC_tied))
-            Perl_croak(aTHX_ "Cannot set tied @DB::args");
+            croak("Cannot set tied @DB::args");
     }
     AvREIFY_only(PL_dbargs);
 }
@@ -5337,7 +5337,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
                 while (PL_scopestack_ix > oldscope)
                     LEAVE;
                 JMPENV_POP;
-                Perl_croak(aTHX_ "%" SVf, SVfARG(atsv));
+                croak("%" SVf, SVfARG(atsv));
             }
             break;
         case 1:

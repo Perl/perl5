@@ -350,7 +350,7 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
     PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
 
     if (version_id != INVLIST_VERSION_ID) {
-        Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
+        croak("panic: Incorrect version for previously generated inversion list");
     }
 
     /* The generated array passed in includes header elements that aren't part
@@ -409,7 +409,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
         if (   array[final_element] > start
             || ELEMENT_RANGE_MATCHES_INVLIST(final_element))
         {
-            Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but "
+            croak("panic: attempting to append to an inversion list, but "
                              "wasn't at the end of the list, final = %" UVuf 
                              ", start = %" UVuf ", match = %c",
                      array[final_element], start,

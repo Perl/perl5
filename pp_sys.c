@@ -232,7 +232,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     int res;
 
 #if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
-    Perl_croak(aTHX_ "switching effective uid is not implemented");
+    croak("switching effective uid is not implemented");
 #else
 #  ifdef HAS_SETREUID
     if (setreuid(euid, ruid))
@@ -240,11 +240,11 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     if (setresuid(euid, ruid, (Uid_t)-1))
 #  endif
         /* diag_listed_as: entering effective %s failed */
-        Perl_croak(aTHX_ "entering effective uid failed");
+        croak("entering effective uid failed");
 #endif
 
 #if !defined(HAS_SETREGID) && !defined(HAS_SETRESGID)
-    Perl_croak(aTHX_ "switching effective gid is not implemented");
+    croak("switching effective gid is not implemented");
 #else
 #  ifdef HAS_SETREGID
     if (setregid(egid, rgid))
@@ -252,7 +252,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     if (setresgid(egid, rgid, (Gid_t)-1))
 #  endif
         /* diag_listed_as: entering effective %s failed */
-        Perl_croak(aTHX_ "entering effective gid failed");
+        croak("entering effective gid failed");
 #endif
 
     res = access(path, mode);
@@ -263,7 +263,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     if (setresuid(ruid, euid, (Uid_t)-1))
 #endif
         /* diag_listed_as: leaving effective %s failed */
-        Perl_croak(aTHX_ "leaving effective uid failed");
+        croak("leaving effective uid failed");
 
 #ifdef HAS_SETREGID
     if (setregid(rgid, egid))
@@ -271,7 +271,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     if (setresgid(rgid, egid, (Gid_t)-1))
 #endif
         /* diag_listed_as: leaving effective %s failed */
-        Perl_croak(aTHX_ "leaving effective gid failed");
+        croak("leaving effective gid failed");
 
     return res;
 }
@@ -827,7 +827,7 @@ PP_wrapped(pp_open, 0, 1)
         IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
         if (IoDIRP(io))
-            Perl_croak(aTHX_ "Cannot open %" HEKf " as a filehandle: it is already open as a dirhandle",
+            croak("Cannot open %" HEKf " as a filehandle: it is already open as a dirhandle",
                              HEKfARG(GvENAME_HEK(gv)));
 
         mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -1100,7 +1100,7 @@ PP_wrapped(pp_tie, 0, 1)
             methname = "TIEARRAY";
             if (!AvREAL(varsv)) {
                 if (!AvREIFY(varsv))
-                    Perl_croak(aTHX_ "Cannot tie unreifiable array");
+                    croak("Cannot tie unreifiable array");
                 av_clear((AV *)varsv);
                 AvREIFY_off(varsv);
                 AvREAL_on(varsv);
@@ -1199,7 +1199,7 @@ PP_wrapped(pp_tie, 0, 1)
         if (varsv == SvRV(sv) &&
             (SvTYPE(varsv) == SVt_PVAV ||
              SvTYPE(varsv) == SVt_PVHV))
-            Perl_croak(aTHX_
+            croak(
                        "Self-ties of arrays and hashes are not supported");
         sv_magic(varsv, (SvRV(sv) == varsv ? NULL : sv), how, NULL, 0);
     }
@@ -1975,7 +1975,7 @@ PP_wrapped(pp_sysread, 0, 1)
 
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
         if (PL_op->op_type == OP_SYSREAD || PL_op->op_type == OP_RECV) {
-            Perl_croak(aTHX_
+            croak(
                        "%s() isn't allowed on :utf8 handles",
                        OP_DESC(PL_op));
         }
@@ -2234,7 +2234,7 @@ PP_wrapped(pp_syswrite, 0, 1)
     doing_utf8 = DO_UTF8(bufsv);
 
     if (PerlIO_isutf8(IoIFP(io))) {
-        Perl_croak(aTHX_
+        croak(
                    "%s() isn't allowed on :utf8 handles",
                    OP_DESC(PL_op));
     }
@@ -2243,7 +2243,7 @@ PP_wrapped(pp_syswrite, 0, 1)
             doing_utf8 = false;
         }
         else {
-            Perl_croak(aTHX_ "Wide character in %s", OP_DESC(PL_op));
+            croak("Wide character in %s", OP_DESC(PL_op));
         }
     }
 
@@ -3073,7 +3073,7 @@ PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
                                         : &PL_sv_no));
             } else if (PL_laststype != OP_LSTAT)
                 /* diag_listed_as: The stat preceding %s wasn't an lstat */
-                Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
+                croak("The stat preceding lstat() wasn't an lstat");
         }
 
         if (gv == PL_defgv) {
@@ -4255,7 +4255,7 @@ PP_wrapped(pp_open_dir, 2, 0)
     IO * const io = GvIOn(gv);
 
     if ((IoIFP(io) || IoOFP(io)))
-        Perl_croak(aTHX_ "Cannot open %" HEKf " as a dirhandle: it is already open as a filehandle",
+        croak("Cannot open %" HEKf " as a dirhandle: it is already open as a filehandle",
                          HEKfARG(GvENAME_HEK(gv)));
     if (IoDIRP(io))
         PerlDir_close(IoDIRP(io));

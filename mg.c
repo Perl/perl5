@@ -323,7 +323,7 @@ Perl_mg_size(pTHX_ SV *sv)
         case SVt_PVHV:
             /* FIXME */
         default:
-            Perl_croak(aTHX_ "Size magic not implemented");
+            croak("Size magic not implemented");
 
     }
     NOT_REACHED; /* NOTREACHED */
@@ -1637,7 +1637,7 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
 #endif
         /* Add one to say _a_ signal is pending */
         if (++PL_sig_pending >= SIG_PENDING_DIE_COUNT)
-            Perl_croak(aTHX_ "Maximal count of pending signals (%lu) exceeded",
+            croak("Maximal count of pending signals (%lu) exceeded",
                        (unsigned long)SIG_PENDING_DIE_COUNT);
     }
 }
@@ -1759,7 +1759,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
         }
         else if (sv) {
             SV *tmp = sv_newmortal();
-            Perl_croak(aTHX_ "No such hook: %s",
+            croak("No such hook: %s",
                                 pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
         }
         i = 0;
@@ -1927,7 +1927,7 @@ Perl_magic_sethook(pTHX_ SV *sv, MAGIC *mg)
     }
     else {
         SV *tmp = sv_newmortal();
-        Perl_croak(aTHX_ "Attempt to set unknown hook '%s' in %%{^HOOK}",
+        croak("Attempt to set unknown hook '%s' in %%{^HOOK}",
                             pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
     }
     if (sv && SvOK(sv) && (!SvROK(sv) || SvTYPE(SvRV(sv))!= SVt_PVCV))
@@ -2262,7 +2262,7 @@ Perl_magic_sizepack(pTHX_ SV *sv, MAGIC *mg)
     if (retsv) {
         retval = SvIV(retsv)-1;
         if (retval < -1)
-            Perl_croak(aTHX_ "FETCHSIZE returned a negative value");
+            croak("FETCHSIZE returned a negative value");
     }
     return (U32) retval;
 }
@@ -2335,7 +2335,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 
     /* The magic ptr/len for the debugger's hash should always be an SV.  */
     if (UNLIKELY(mg->mg_len != HEf_SVKEY)) {
-        Perl_croak(aTHX_ "panic: magic_setdbline len=%" IVdf ", ptr='%s'",
+        croak("panic: magic_setdbline len=%" IVdf ", ptr='%s'",
                    (IV)mg->mg_len, mg->mg_ptr);
     }
 
@@ -2526,7 +2526,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
             negoff ? -(IV)lvoff : (IV)lvoff, !negoff,
             neglen ? -(IV)lvlen : (IV)lvlen, !neglen, &lvoff, &lvlen
     ))
-        Perl_croak(aTHX_ "substr outside of string");
+        croak("substr outside of string");
     oldtarglen = lvlen;
     if (DO_UTF8(sv)) {
         sv_utf8_upgrade_nomg(lsv);
@@ -2695,10 +2695,10 @@ Perl_vivify_defelem(pTHX_ SV *sv)
         if (he)
             value = HeVAL(he);
         if (!value || value == &PL_sv_undef)
-            Perl_croak(aTHX_ PL_no_helem_sv, SVfARG(mg->mg_obj));
+            croak(PL_no_helem_sv, SVfARG(mg->mg_obj));
     }
     else if (LvSTARGOFF(sv) < 0)
-        Perl_croak(aTHX_ PL_no_aelem, LvSTARGOFF(sv));
+        croak(PL_no_aelem, LvSTARGOFF(sv));
     else {
         AV *const av = MUTABLE_AV(LvTARG(sv));
         if ((I32)LvTARGLEN(sv) < 0 && LvSTARGOFF(sv) > AvFILL(av))
@@ -2706,7 +2706,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
         else {
             SV* const * const svp = av_fetch(av, LvSTARGOFF(sv), TRUE);
             if (!svp || !(value = *svp))
-                Perl_croak(aTHX_ PL_no_aelem, LvSTARGOFF(sv));
+                croak(PL_no_aelem, LvSTARGOFF(sv));
         }
     }
     SvREFCNT_inc_simple_void(value);
@@ -2859,7 +2859,7 @@ Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
 {
     const char *bad = NULL;
     PERL_ARGS_ASSERT_MAGIC_SETLVREF;
-    if (!SvROK(sv)) Perl_croak(aTHX_ "Assigned value is not a reference");
+    if (!SvROK(sv)) croak("Assigned value is not a reference");
     switch (mg->mg_private & OPpLVREF_TYPE) {
     case OPpLVREF_SV:
         if (SvTYPE(SvRV(sv)) > SVt_PVLV)
@@ -2879,7 +2879,7 @@ Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
     }
     if (bad)
         /* diag_listed_as: Assigned value is not %s reference */
-        Perl_croak(aTHX_ "Assigned value is not a%s reference", bad);
+        croak("Assigned value is not a%s reference", bad);
     switch (mg->mg_obj ? SvTYPE(mg->mg_obj) : 0) {
     case 0:
     {
@@ -2981,7 +2981,7 @@ S_set_dollarzero(pTHX_ SV *sv)
         /* Set the legacy process name in addition to the POSIX name on Linux */
         if (prctl(PR_SET_NAME, (unsigned long)s, 0, 0, 0) != 0) {
             /* diag_listed_as: SKIPME */
-            Perl_croak(aTHX_ "Can't set $0 with prctl(): %s", Strerror(errno));
+            croak("Can't set $0 with prctl(): %s", Strerror(errno));
         }
 #endif
     }
@@ -3067,7 +3067,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
         }
         else if (strEQ(mg->mg_ptr + 1, "NCODING") && SvOK(sv))
-            Perl_croak(aTHX_ "${^ENCODING} is no longer supported");
+            croak("${^ENCODING} is no longer supported");
         break;
     case '\006':	/* ^F */
         if (mg->mg_ptr[1] == '\0') {
@@ -3281,13 +3281,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                     IV val = SvIV(referent);
                     if (val <= 0) {
                         sv_setsv(sv, PL_rs);
-                        Perl_croak(aTHX_ "Setting $/ to a reference to %s is forbidden",
+                        croak("Setting $/ to a reference to %s is forbidden",
                                          val < 0 ? "a negative integer" : "zero");
                     }
                 } else {
                     sv_setsv(sv, PL_rs);
                     /* diag_listed_as: Setting $/ to %s reference is forbidden */
-                    Perl_croak(aTHX_ "Setting $/ to a%s %s reference is forbidden",
+                    croak("Setting $/ to a%s %s reference is forbidden",
                                       *reftype == 'A' ? "n" : "", reftype);
                 }
             }
@@ -3306,7 +3306,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '[':
         if (SvIV(sv) != 0)
-            Perl_croak(aTHX_ "Assigning non-zero to $[ is no longer possible");
+            croak("Assigning non-zero to $[ is no longer possible");
         break;
     case '?':
 #ifdef COMPLEX_STATUS
@@ -3364,7 +3364,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #  endif
             PERL_UNUSED_RESULT(PerlProc_setuid(new_uid));
         } else {
-            Perl_croak(aTHX_ "setruid() not implemented");
+            croak("setruid() not implemented");
         }
 #endif
         break;
@@ -3388,7 +3388,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         if (new_euid == PerlProc_getuid())		/* special case $> = $< */
             PERL_UNUSED_RESULT(PerlProc_setuid(new_euid));
         else {
-            Perl_croak(aTHX_ "seteuid() not implemented");
+            croak("seteuid() not implemented");
         }
 #endif
         break;
@@ -3412,7 +3412,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         if (new_gid == PerlProc_getegid())			/* special case $( = $) */
             PERL_UNUSED_RESULT(PerlProc_setgid(new_gid));
         else {
-            Perl_croak(aTHX_ "setrgid() not implemented");
+            croak("setrgid() not implemented");
         }
 #endif
         break;
@@ -3493,7 +3493,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         if (new_egid == PerlProc_getgid())			/* special case $) = $( */
             PERL_UNUSED_RESULT(PerlProc_setgid(new_egid));
         else {
-            Perl_croak(aTHX_ "setegid() not implemented");
+            croak("setegid() not implemented");
         }
 #endif
         break;

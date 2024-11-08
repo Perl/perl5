@@ -1063,12 +1063,12 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         break;
     default:
         if (UNLIKELY(old_type_details->cant_upgrade))
-            Perl_croak(aTHX_ "Can't upgrade %s (%" UVuf ") to %" UVuf,
+            croak("Can't upgrade %s (%" UVuf ") to %" UVuf,
                        sv_reftype(sv, 0), (UV) old_type, (UV) new_type);
     }
 
     if (UNLIKELY(old_type > new_type))
-        Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
+        croak("sv_upgrade from type %d down to type %d",
                 (int)old_type, (int)new_type);
 
     new_type_details = bodies_by_type + new_type;
@@ -1258,7 +1258,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         }
         break;
     default:
-        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+        croak("panic: sv_upgrade to unknown type %lu",
                    (unsigned long)new_type);
     }
 
@@ -1544,7 +1544,7 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
     case SVt_PVFM:
     case SVt_PVIO:
         /* diag_listed_as: Can't coerce %s to %s in %s */
-        Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
+        croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
                    OP_DESC(PL_op));
         NOT_REACHED; /* NOTREACHED */
         break;
@@ -1656,7 +1656,7 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
     case SVt_PVFM:
     case SVt_PVIO:
         /* diag_listed_as: Can't coerce %s to %s in %s */
-        Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
+        croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
                    OP_DESC(PL_op));
         NOT_REACHED; /* NOTREACHED */
         break;
@@ -3661,10 +3661,10 @@ Perl_sv_utf8_downgrade_flags(pTHX_ SV *const sv, const bool fail_ok, const U32 f
                     return FALSE;
                 else {
                     if (PL_op)
-                        Perl_croak(aTHX_ "Wide character in %s",
+                        croak("Wide character in %s",
                                    OP_DESC(PL_op));
                     else
-                        Perl_croak(aTHX_ "Wide character");
+                        croak("Wide character");
                 }
             }
             SvCUR_set(sv, len);
@@ -4820,7 +4820,7 @@ Perl_sv_set_undef(pTHX_ SV *sv)
     }
 
     if (SvIS_FREED(sv))
-        Perl_croak(aTHX_ "panic: attempt to undefine a freed scalar %p",
+        croak("panic: attempt to undefine a freed scalar %p",
             (void *)sv);
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
@@ -5074,7 +5074,7 @@ Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
         /* len is STRLEN which is unsigned, need to copy to signed */
         const IV iv = len;
         if (iv < 0)
-            Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen %"
+            croak("panic: sv_setpvn called with negative strlen %"
                        IVdf, iv);
     }
     SvUPGRADE(sv, SVt_PV);
@@ -5111,7 +5111,7 @@ Perl_sv_setpvn_fresh(pTHX_ SV *const sv, const char *const ptr, const STRLEN len
         const IV iv = len;
         /* len is STRLEN which is unsigned, need to copy to signed */
         if (iv < 0)
-            Perl_croak(aTHX_ "panic: sv_setpvn_fresh called with negative strlen %"
+            croak("panic: sv_setpvn_fresh called with negative strlen %"
                        IVdf, iv);
 
         dptr = sv_grow_fresh(sv, len + 1);
@@ -5552,7 +5552,7 @@ Perl_sv_chop(pTHX_ SV *const sv, const char *const ptr)
     }
     max_delta = SvLEN(sv) ? SvLEN(sv) : SvCUR(sv);
     if (delta > max_delta)
-        Perl_croak(aTHX_ "panic: sv_chop ptr=%p, start=%p, end=%p",
+        croak("panic: sv_chop ptr=%p, start=%p, end=%p",
                    ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
     /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), so don't use ptr any more */
     SV_CHECK_THINKFIRST(sv);
@@ -5987,7 +5987,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
         || ((flags = PL_magic_data[how]),
             (vtable_index = flags & PERL_MAGIC_VTABLE_MASK)
             > magic_vtable_max))
-        Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
+        croak("Don't know how to handle magic of type \\%o", how);
 
     /* PERL_MAGIC_ext is reserved for use by extensions not perl internals.
        Useful for attaching extension internal data to perl vars.
@@ -6125,7 +6125,7 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
     if (!SvOK(sv))  /* let undefs pass */
         return sv;
     if (!SvROK(sv))
-        Perl_croak(aTHX_ "Can't weaken a nonreference");
+        croak("Can't weaken a nonreference");
     else if (SvWEAKREF(sv)) {
         Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is already weak");
         return sv;
@@ -6159,7 +6159,7 @@ Perl_sv_rvunweaken(pTHX_ SV *const sv)
     if (!SvOK(sv)) /* let undefs pass */
         return sv;
     if (!SvROK(sv))
-        Perl_croak(aTHX_ "Can't unweaken a nonreference");
+        croak("Can't unweaken a nonreference");
     else if (!SvWEAKREF(sv)) {
         Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is not weak");
         return sv;
@@ -6342,7 +6342,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     }
 
     if (!svp)
-        Perl_croak(aTHX_ "panic: del_backref, svp=0");
+        croak("panic: del_backref, svp=0");
     if (!*svp) {
         /* It's possible that sv is being freed recursively part way through the
            freeing of tsv. If this happens, the backreferences array of tsv has
@@ -6350,7 +6350,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
            we should not panic. Instead, nothing needs doing, so return.  */
         if (PL_phase == PERL_PHASE_DESTRUCT && SvREFCNT(tsv) == 0)
             return;
-        Perl_croak(aTHX_ "panic: del_backref, *svp=%p phase=%s refcnt=%" UVuf,
+        croak("panic: del_backref, *svp=%p phase=%s refcnt=%" UVuf,
                    (void*)*svp, PL_phase_names[PL_phase], (UV)SvREFCNT(tsv));
     }
 
@@ -6410,7 +6410,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     else {
         /* optimisation: only a single backref, stored directly */
         if (*svp != sv)
-            Perl_croak(aTHX_ "panic: del_backref, *svp=%p, sv=%p",
+            croak("panic: del_backref, *svp=%p, sv=%p",
                        (void*)*svp, (void*)sv);
         *svp = NULL;
     }
@@ -6435,7 +6435,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
     if (SvIS_FREED(av)) {
         if (PL_in_clean_all) /* All is fair */
             return;
-        Perl_croak(aTHX_
+        croak(
                    "panic: magic_killbackrefs (freed backref AV/SV)");
     }
 
@@ -6489,7 +6489,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
                     }
 
                 } else {
-                    Perl_croak(aTHX_
+                    croak(
                                "panic: magic_killbackrefs (flags=%" UVxf ")",
                                (UV)SvFLAGS(referrer));
                 }
@@ -6580,7 +6580,7 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
     bigend = big + SvCUR(bigstr);
 
     if (midend > bigend)
-        Perl_croak(aTHX_ "panic: sv_insert, midend=%p, bigend=%p",
+        croak("panic: sv_insert, midend=%p, bigend=%p",
                    midend, bigend);
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
@@ -6637,7 +6637,7 @@ Perl_sv_replace(pTHX_ SV *const sv, SV *const nsv)
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (SvREFCNT(nsv) != 1) {
-        Perl_croak(aTHX_ "panic: reference miscount on nsv in sv_replace()"
+        croak("panic: reference miscount on nsv in sv_replace()"
                    " (%" UVuf " != 1)", (UV) SvREFCNT(nsv));
     }
     if (SvMAGICAL(sv)) {
@@ -7275,7 +7275,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 
         if (check_refcnt && SvREFCNT(sv)) {
             if (PL_in_clean_objs)
-                Perl_croak(aTHX_
+                croak(
                   "DESTROY created new reference to dead object '%" HEKf "'",
                    HEKfARG(HvNAME_HEK(stash)));
             /* DESTROY gave object new lease on life */
@@ -8015,7 +8015,7 @@ Perl_sv_pos_b2u_flags(pTHX_ SV *const sv, STRLEN const offset, U32 flags)
     s = (const U8*)SvPV_flags(sv, blen, flags);
 
     if (blen < offset)
-        Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset, blen=%" UVuf
+        croak("panic: sv_pos_b2u: bad byte offset, blen=%" UVuf
                    ", byte=%" UVuf, (UV)blen, (UV)offset);
 
     send = s + offset;
@@ -8120,7 +8120,7 @@ S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache,
        while printing error messages.  */
     SAVEI8(PL_utf8cache);
     PL_utf8cache = 0;
-    Perl_croak(aTHX_ "panic: %s cache %" UVuf " real %" UVuf " for %" SVf,
+    croak("panic: %s cache %" UVuf " real %" UVuf " for %" SVf,
                func, (UV) from_cache, (UV) real, SVfARG(sv));
 }
 
@@ -8919,7 +8919,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
         else {
             if (SvUTF8(PL_rs)) {
                 if (!sv_utf8_downgrade(PL_rs, TRUE)) {
-                    Perl_croak(aTHX_ "Wide character in $/");
+                    croak("Wide character in $/");
                 }
             }
             /* extract the raw pointer to the record separator */
@@ -10321,14 +10321,14 @@ Perl_sv_2io(pTHX_ SV *const sv)
             gv = MUTABLE_GV(sv);
             io = GvIO(gv);
             if (!io)
-                Perl_croak(aTHX_ "Bad filehandle: %" HEKf,
+                croak("Bad filehandle: %" HEKf,
                                     HEKfARG(GvNAME_HEK(gv)));
             break;
         }
         /* FALLTHROUGH */
     default:
         if (!SvOK(sv))
-            Perl_croak(aTHX_ PL_no_usym, "filehandle");
+            croak(PL_no_usym, "filehandle");
         if (SvROK(sv)) {
             SvGETMAGIC(SvRV(sv));
             return sv_2io(SvRV(sv));
@@ -10343,7 +10343,7 @@ Perl_sv_2io(pTHX_ SV *const sv)
             if (SvGMAGICAL(sv)) {
                 newsv = sv_mortalcopy_flags(sv, SV_DO_COW_SVSETSV);
             }
-            Perl_croak(aTHX_ "Bad filehandle: %" SVf, SVfARG(newsv));
+            croak("Bad filehandle: %" SVf, SVfARG(newsv));
         }
         break;
     }
@@ -10399,7 +10399,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
             else if(SvGETMAGIC(sv), isGV_with_GP(sv))
                 gv = MUTABLE_GV(sv);
             else
-                Perl_croak(aTHX_ "Not a subroutine reference");
+                croak("Not a subroutine reference");
         }
         else if (isGV_with_GP(sv)) {
             gv = MUTABLE_GV(sv);
@@ -10503,7 +10503,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
         if (SvTYPE(sv) > SVt_PVLV
             || isGV_with_GP(sv))
             /* diag_listed_as: Can't coerce %s to %s in %s */
-            Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
+            croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
                 OP_DESC(PL_op));
         s = sv_2pv_flags(sv, &len, flags &~ SV_GMAGIC);
         if (!s) {
@@ -10931,16 +10931,16 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 
     SvGETMAGIC(sv);
     if (!SvROK(sv))
-        Perl_croak(aTHX_ "Can't bless non-reference value");
+        croak("Can't bless non-reference value");
     if (HvSTASH_IS_CLASS(stash))
-        Perl_croak(aTHX_ "Attempt to bless into a class");
+        croak("Attempt to bless into a class");
 
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY|SVf_PROTECT)) {
         if (SvREADONLY(tmpRef))
             Perl_croak_no_modify();
         if (SvTYPE(tmpRef) == SVt_PVOBJ)
-            Perl_croak(aTHX_ "Can't bless an object reference");
+            croak("Can't bless an object reference");
         if (SvOBJECT(tmpRef)) {
             oldstash = SvSTASH(tmpRef);
         }
@@ -11455,7 +11455,7 @@ static void
 S_croak_overflow()
 {
     dTHX;
-    Perl_croak(aTHX_ "Integer overflow in format string for %s",
+    croak("Integer overflow in format string for %s",
                     (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
 }
 
@@ -11752,7 +11752,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
     *subnormal = FALSE;
     if (vend && (vend <= vhex || vend > vmaxend)) {
         /* diag_listed_as: Hexadecimal float: internal error (%s) */
-        Perl_croak(aTHX_ "Hexadecimal float: internal error (entry)");
+        croak("Hexadecimal float: internal error (entry)");
     }
     {
         /* First check if using long doubles. */
@@ -11972,7 +11972,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         ixmin < 0 || ixmax >= NVSIZE ||
         (vend && v != vend)) {
         /* diag_listed_as: Hexadecimal float: internal error (%s) */
-        Perl_croak(aTHX_ "Hexadecimal float: internal error (overflow)");
+        croak("Hexadecimal float: internal error (overflow)");
     }
     return v;
 }
@@ -12240,7 +12240,7 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     /* sanity checks */
     if (elen >= bufsize || width >= bufsize)
         /* diag_listed_as: Hexadecimal float: internal error (%s) */
-        Perl_croak(aTHX_ "Hexadecimal float: internal error (overflow)");
+        croak("Hexadecimal float: internal error (overflow)");
 
     elen += my_snprintf(p, bufsize - elen,
                         "%c%+d", lower ? 'p' : 'P',
@@ -13394,7 +13394,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             if (Perl_isinfnan(nv)) {
                 if (c == 'c')
-                    Perl_croak(aTHX_ "Cannot printf %" NVgf " with '%c'",
+                    croak("Cannot printf %" NVgf " with '%c'",
                                nv, (int)c);
 
                 elen = S_infnan_2pv(nv, ebuf, sizeof(ebuf), plus);
@@ -13599,7 +13599,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 /* snprintf() returns an int, and we use that return value,
                    so die horribly if the expected size is too large for int
                 */
-                Perl_croak(aTHX_ "Numeric format result too large");
+                croak("Numeric format result too large");
             }
 
             if (PL_efloatsize <= float_need) {
@@ -15117,7 +15117,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
     while (ix >= 0) {
         PERL_CONTEXT * const ncx = &ncxs[ix];
         if (CxTYPE(ncx) == CXt_SUBST) {
-            Perl_croak(aTHX_ "Cloning substitution context is unimplemented");
+            croak("Cloning substitution context is unimplemented");
         }
         else {
             ncx->blk_oldcop = (COP*)any_dup(ncx->blk_oldcop, param->proto_perl);
@@ -15596,7 +15596,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
             TOPPTR(nss,ix) = parser_dup((const yy_parser*)ptr, param);
             break;
         default:
-            Perl_croak(aTHX_
+            croak(
                        "panic: ss_dup inconsistency (%" IVdf ")", (IV) type);
         }
     }
@@ -16762,7 +16762,7 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
         LEAVE;
     }
     else
-        Perl_croak(aTHX_ "Invalid argument to sv_cat_decode");
+        croak("Invalid argument to sv_cat_decode");
     return ret;
 
 }
@@ -17758,11 +17758,11 @@ void S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv)
 {
     OP *op = PL_op;
     if (SvIS_FREED(dsv)) {
-        Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
+        croak("panic: attempt to copy value %" SVf
                    " to a freed scalar %p", SVfARG(ssv), (void *)dsv);
     }
     if (SvIS_FREED(ssv)) {
-        Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
+        croak("panic: attempt to copy freed scalar %p to %p",
                    (void*)ssv, (void*)dsv);
     }
 
@@ -17771,17 +17771,17 @@ void S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv)
         const char * const type = sv_reftype(ssv,0);
         if (op)
             /* diag_listed_as: Bizarre copy of %s */
-            Perl_croak(aTHX_ "Bizarre copy of %s in %s", type, OP_DESC(op));
+            croak("Bizarre copy of %s in %s", type, OP_DESC(op));
         else
-            Perl_croak(aTHX_ "Bizarre copy of %s", type);
+            croak("Bizarre copy of %s", type);
     }
 
     const char * const type = sv_reftype(dsv,0);
     if (op)
         /* diag_listed_as: Cannot copy to %s */
-        Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_DESC(op));
+        croak("Cannot copy to %s in %s", type, OP_DESC(op));
     else
-        Perl_croak(aTHX_ "Cannot copy to %s", type);
+        croak("Cannot copy to %s", type);
 
 }
 

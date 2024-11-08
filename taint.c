@@ -80,7 +80,7 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
             Perl_ck_warner_d(aTHX_ packWARN(WARN_TAINT), f, s, ug);
         }
         else {
-            Perl_croak(aTHX_ f, s, ug);
+            croak(f, s, ug);
         }
         GCC_DIAG_RESTORE_STMT;
 

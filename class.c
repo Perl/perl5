@@ -145,7 +145,7 @@ XS(injected_constructor)
                 HvNAMEfARG(stash));
 
     if (!aux->xhv_class_initfields_cv) {
-        Perl_croak(aTHX_ "Cannot create an object of incomplete class %" HvNAMEf_QUOTEDPREFIX,
+        croak("Cannot create an object of incomplete class %" HvNAMEf_QUOTEDPREFIX,
                    HvNAMEfARG(stash));
     }
 

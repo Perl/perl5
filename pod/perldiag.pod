@@ -2283,11 +2283,6 @@ L<builtin> by using the C<unimport> method (likely via C<no builtin ...>
 syntax), but the requested function has not been imported into the current
 scope.
 
-=item %s (%d) does not match %s (%d)
-
-(P) The size of a PerlIO function table passed by an extension is smaller than
-expected.
-
 =item Don't know how to get file name
 
 (P) C<PerlIO_getname>, a perl internal I/O function specific to VMS, was
@@ -5378,6 +5373,14 @@ are as follows.
 Both numeric and string values are accepted, but note that string values are
 case sensitive.  The default for this setting is "RANDOM" or 1.
 
+=item PerlIO layer function table size (%d) does not match size expected by this perl (%d)
+
+(P) The size of a PerlIO function table passed by an extension is smaller than expected.
+
+=item PerlIO layer instance size (%d) smaller than size expected by this perl (%d)
+
+(P) The size of a PerlIO instance passed by an extension is smaller than expected.
+
 =item pid %x not a child
 
 (W exec) A warning peculiar to VMS.  Waitpid() was asked to wait for a
@@ -6243,11 +6246,6 @@ requested.
 (F) In a subroutine signature, you put something after a slurpy (array or
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
-
-=item %s (%d) smaller than %s (%d)
-
-(P) The size of a PerlIO instance passed by an extension is smaller than
-expected.
 
 =item Smart matching a non-overloaded object breaks encapsulation
 

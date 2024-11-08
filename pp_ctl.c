@@ -175,7 +175,7 @@ PP(pp_regcomp)
     if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm) {
         if (PL_curpm == PL_reg_curpm) {
             if (PL_curpm_under && PL_curpm_under == PL_reg_curpm) {
-                Perl_croak(aTHX_ "Infinite recursion via empty pattern");
+                croak("Infinite recursion via empty pattern");
             }
         }
     }
@@ -1492,7 +1492,7 @@ PP_wrapped(pp_flop, (GIMME_V == G_LIST) ? 2 : 1, 0)
                         overflow = TRUE;
                 }
                 if (overflow)
-                    Perl_croak(aTHX_ "Out of memory during list extend");
+                    croak("Out of memory during list extend");
                 EXTEND_MORTAL(n);
                 EXTEND(SP, n);
             }
@@ -1655,7 +1655,7 @@ Perl_block_gimme(pTHX)
 
     gimme = (cxstack[cxix].blk_gimme & G_WANT);
     if (!gimme)
-        Perl_croak(aTHX_ "panic: bad gimme: %d\n", gimme);
+        croak("panic: bad gimme: %d\n", gimme);
     return gimme;
 }
 
@@ -1970,10 +1970,10 @@ Perl_qerror(pTHX_ SV *err)
         else
         if (raw_error_count >= PERL_STOP_PARSING_AFTER_N_ERRORS) {
             if (errsv) {
-                Perl_croak(aTHX_ "%" SVf "%s has too many errors.\n",
+                croak("%" SVf "%s has too many errors.\n",
                     SVfARG(errsv), name);
             } else {
-                Perl_croak(aTHX_ "%s has too many errors.\n", name);
+                croak("%s has too many errors.\n", name);
             }
         }
     }
@@ -2021,7 +2021,7 @@ S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
                 errsv = newSVpvs_flags("Unknown error\n", SVs_TEMP);
         }
 
-        Perl_croak(aTHX_ fmt, SVfARG(errsv));
+        croak(fmt, SVfARG(errsv));
     }
 }
 
@@ -2804,7 +2804,7 @@ PP(pp_leavesublv)
                     what = "undef";
                 }
               croak:
-                Perl_croak(aTHX_
+                croak(
                           "Can't return %s from lvalue subroutine", what);
             }
 
@@ -2878,7 +2878,7 @@ PP(pp_return)
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
                 /* diag_listed_as: Can't "%s" out of a "defer" block */
                 /* diag_listed_as: Can't "%s" out of a "finally" block */
-                Perl_croak(aTHX_ "Can't \"%s\" out of a \"%s\" block",
+                croak("Can't \"%s\" out of a \"%s\" block",
                         "return", S_defer_blockname(&cxstack[i]));
         }
         if (cxix < 0) {
@@ -3005,7 +3005,7 @@ S_unwind_loop(pTHX)
         cxix = dopoptoloop(cxstack_ix);
         if (cxix < 0)
             /* diag_listed_as: Can't "last" outside a loop block */
-            Perl_croak(aTHX_ "Can't \"%s\" outside a loop block",
+            croak("Can't \"%s\" outside a loop block",
                 OP_NAME(PL_op));
     }
     else {
@@ -3029,7 +3029,7 @@ S_unwind_loop(pTHX)
         cxix = dopoptolabel(label, label_len, label_flags);
         if (cxix < 0)
             /* diag_listed_as: Label not found for "last %s" */
-            Perl_croak(aTHX_ "Label not found for \"%s %" SVf "\"",
+            croak("Label not found for \"%s %" SVf "\"",
                                        OP_NAME(PL_op),
                                        SVfARG(PL_op->op_flags & OPf_STACKED
                                               && !SvGMAGICAL(sv)
@@ -3048,7 +3048,7 @@ S_unwind_loop(pTHX)
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
                 /* diag_listed_as: Can't "%s" out of a "defer" block */
                 /* diag_listed_as: Can't "%s" out of a "finally" block */
-                Perl_croak(aTHX_ "Can't \"%s\" out of a \"%s\" block",
+                croak("Can't \"%s\" out of a \"%s\" block",
                         OP_NAME(PL_op), S_defer_blockname(&cxstack[i]));
         }
         dounwind(cxix);
@@ -3131,7 +3131,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     PERL_ARGS_ASSERT_DOFINDLABEL;
 
     if (ops >= oplimit)
-        Perl_croak(aTHX_ "%s", too_deep);
+        croak("%s", too_deep);
     if (o->op_type == OP_LEAVE ||
         o->op_type == OP_SCOPE ||
         o->op_type == OP_LEAVELOOP ||
@@ -3159,7 +3159,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
       }
     }
     if (ops >= oplimit)
-        Perl_croak(aTHX_ "%s", too_deep);
+        croak("%s", too_deep);
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
         OP *kid;
@@ -3205,7 +3205,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
             }
             if ((o = dofindlabel(kid, label, len, flags, ops, oplimit))) {
                 if (kid->op_type == OP_PUSHDEFER)
-                    Perl_croak(aTHX_ "Can't \"goto\" into a \"defer\" block");
+                    croak("Can't \"goto\" into a \"defer\" block");
                 return o;
             }
             if (first_kid_of_binary)
@@ -3224,13 +3224,13 @@ S_check_op_type(pTHX_ OP * const o)
      * for each op.  For now, we punt on the hard ones. */
     /* XXX This comment seems to me like wishful thinking.  --sprout */
     if (o == UNENTERABLE)
-        Perl_croak(aTHX_
+        croak(
                   "Can't \"goto\" into a binary or list expression");
     if (o->op_type == OP_ENTERITER)
-        Perl_croak(aTHX_
+        croak(
                   "Can't \"goto\" into the middle of a foreach loop");
     if (o->op_type == OP_ENTERGIVEN)
-        Perl_croak(aTHX_
+        croak(
                   "Can't \"goto\" into a \"given\" block");
 }
 
@@ -3303,7 +3303,7 @@ PP(pp_goto)
             for(ix = cxstack_ix; ix > cxix; ix--) {
                 if(CxTYPE(&cxstack[ix]) == CXt_DEFER)
                     /* diag_listed_as: Can't "%s" out of a "defer" block */
-                    Perl_croak(aTHX_ "Can't \"%s\" out of a \"%s\" block",
+                    croak("Can't \"%s\" out of a \"%s\" block",
                             "goto", S_defer_blockname(&cxstack[ix]));
             }
 
@@ -5919,7 +5919,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
     if (SvROK(e) && SvOBJECT(SvRV(e)) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) {
         DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
-        Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
+        croak("Smart matching a non-overloaded object breaks encapsulation");
     }
     if (SvROK(d) && SvOBJECT(SvRV(d)) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
         object_on_left = TRUE;
@@ -6544,7 +6544,7 @@ S_doparseform(pTHX_ SV *sv)
     PERL_ARGS_ASSERT_DOPARSEFORM;
 
     if (len == 0)
-        Perl_croak(aTHX_ "Null picture in formline");
+        croak("Null picture in formline");
 
     if (SvTYPE(sv) >= SVt_PVMG) {
         /* This might, of course, still return NULL.  */

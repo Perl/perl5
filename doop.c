@@ -804,7 +804,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
     PERL_ARGS_ASSERT_DO_VECGET;
 
     if (size < 1 || ! isPOWER_OF_2(size))
-        Perl_croak(aTHX_ "Illegal number of bits in vec");
+        croak("Illegal number of bits in vec");
 
     if (SvUTF8(sv)) {
         if (Perl_sv_utf8_downgrade_flags(aTHX_ sv, TRUE, 0)) {
@@ -812,7 +812,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
             s = (unsigned char *) SvPV_flags(sv, srclen, svpv_flags);
         }
         else {
-            Perl_croak(aTHX_ "Use of strings with code points over 0xFF"
+            croak("Use of strings with code points over 0xFF"
                              " as arguments to vec is forbidden");
         }
     }
@@ -928,7 +928,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     size = LvTARGLEN(sv);
 
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
-        Perl_croak(aTHX_ "Illegal number of bits in vec");
+        croak("Illegal number of bits in vec");
 
     if (size < 8) {
         bitoffs = ((offset%8)*size)%8;
@@ -1039,7 +1039,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
      * result is the same as the other operand, so the dangling part is just
      * appended to the final result, unchanged. */
     if (left_utf8 || right_utf8) {
-        Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
+        croak(FATAL_ABOVE_FF_MSG, PL_op_desc[optype]);
     }
     else {  /* Neither is UTF-8 */
         len = MIN(leftlen, rightlen);
@@ -1224,7 +1224,7 @@ PP(do_kv)
         const I32 flags = is_lvalue_sub();
         if (flags && !(flags & OPpENTERSUB_INARGS))
             /* diag_listed_as: Can't modify %s in %s */
-            Perl_croak(aTHX_ "Can't modify keys in list assignment");
+            croak("Can't modify keys in list assignment");
     }
 
     /* push all keys and/or values onto stack */

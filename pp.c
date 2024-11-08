@@ -289,7 +289,7 @@ PP(pp_rv2sv)
             else if (gv)
                 sv = save_scalar(gv);
             else
-                Perl_croak(aTHX_ "%s", PL_no_localize_ref);
+                croak("%s", PL_no_localize_ref);
         }
         else if (PL_op->op_private & OPpDEREF)
             sv = vivify_ref(sv, PL_op->op_private & OPpDEREF);
@@ -593,7 +593,7 @@ PP(pp_bless)
       curstash:
         stash = CopSTASH(PL_curcop);
         if (SvTYPE(stash) != SVt_PVHV)
-            Perl_croak(aTHX_ "Attempt to bless into a freed package");
+            croak("Attempt to bless into a freed package");
     }
     else {
         SV * const ssv = *sp--;
@@ -607,7 +607,7 @@ PP(pp_bless)
         if (SvROK(ssv)) {
           if (!SvAMAGIC(ssv)) {
            frog:
-            Perl_croak(aTHX_ "Attempt to bless into a reference");
+            croak("Attempt to bless into a reference");
           }
           /* SvAMAGIC is on here, but it only means potentially overloaded,
              so after stringification: */
@@ -1848,7 +1848,7 @@ PP_wrapped(pp_repeat,
 
             if ( items > SSize_t_MAX / (SSize_t)sizeof(SV *) / count )
                 /* diag_listed_as: Out of memory during %s extend */
-                Perl_croak(aTHX_ "Out of memory during list extend");
+                croak("Out of memory during list extend");
             max = items * count;
             MEXTEND(MARK, max);
 
@@ -1887,7 +1887,7 @@ PP_wrapped(pp_repeat,
                 if (   len > (MEM_SIZE_MAX-1) / (UV)count /* max would overflow */
                 )
                     /* diag_listed_as: Out of memory during %s extend */
-                    Perl_croak(aTHX_ "Out of memory during string extend");
+                    croak("Out of memory during string extend");
                 max = (UV)count * len + 1;
                 SvGROW(TARG, max);
 
@@ -2791,7 +2791,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
 
         if (SvUTF8(TARG)) {
             if (len && ! utf8_to_bytes_overwrite(&tmps, &len)) {
-                Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[PL_op->op_type]);
+                croak(FATAL_ABOVE_FF_MSG, PL_op_desc[PL_op->op_type]);
             }
             SvCUR_set(TARG, len);
             SvUTF8_off(TARG);
@@ -3716,7 +3716,7 @@ PP_wrapped(pp_substr,
 
   bound_fail:
     if (repl)
-        Perl_croak(aTHX_ "substr outside of string");
+        croak("substr outside of string");
     Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
     RETPUSHUNDEF;
 }
@@ -4065,7 +4065,7 @@ PP(pp_chr)
     if (UNLIKELY(SvAMAGIC(top)))
         top = sv_2num(top);
     if (UNLIKELY(isinfnansv(top)))
-        Perl_croak(aTHX_ "Cannot chr %" NVgf, SvNV(top));
+        croak("Cannot chr %" NVgf, SvNV(top));
     else {
         if (!IN_BYTES /* under bytes, chr(-1) eq chr(0xff), etc. */
             && ((SvIOKp(top) && !SvIsUV(top) && SvIV_nomg(top) < 0)
@@ -5424,7 +5424,7 @@ PP(pp_kvaslice)
        if (flags) {
            if (!(flags & OPpENTERSUB_INARGS))
                /* diag_listed_as: Can't modify %s in %s */
-               Perl_croak(aTHX_ "Can't modify index/value array slice in list assignment");
+               croak("Can't modify index/value array slice in list assignment");
            lval = flags;
        }
     }
@@ -5519,7 +5519,7 @@ PP_wrapped(pp_akeys, 1, 0)
         const I32 flags = is_lvalue_sub();
         if (flags && !(flags & OPpENTERSUB_INARGS))
             /* diag_listed_as: Can't modify %s in %s */
-            Perl_croak(aTHX_
+            croak(
                       "Can't modify keys on array in list assignment");
       }
       {
@@ -5939,7 +5939,7 @@ PP(pp_kvhslice)
        if (flags) {
            if (!(flags & OPpENTERSUB_INARGS))
                /* diag_listed_as: Can't modify %s in %s */
-               Perl_croak(aTHX_ "Can't modify key/value hash slice in %s assignment",
+               croak("Can't modify key/value hash slice in %s assignment",
                                  GIMME_V == G_LIST ? "list" : "scalar");
            lval = flags;
        }
@@ -7274,7 +7274,7 @@ PP_wrapped(pp_coreargs, 0, 0)
     else if(numargs > maxargs) err = "Too many";
     if (err)
         /* diag_listed_as: Too many arguments for %s */
-        Perl_croak(aTHX_
+        croak(
           "%s arguments for %s", err,
            opnum ? PL_op_desc[opnum] : SvPV_nolen_const(cSVOP_sv)
         );
@@ -7454,7 +7454,7 @@ S_localise_aelem_lval(pTHX_ AV * const av, SV * const keysv,
     if (can_preserve ? av_exists(av, ix) : TRUE) {
         SV ** const svp = av_fetch(av, ix, 1);
         if (!svp || !*svp)
-            Perl_croak(aTHX_ PL_no_aelem, ix);
+            croak(PL_no_aelem, ix);
         save_aelem(av, ix, svp);
     }
     else
@@ -7469,7 +7469,7 @@ S_localise_helem_lval(pTHX_ HV * const hv, SV * const keysv,
         HE * const he = hv_fetch_ent(hv, keysv, 1, 0);
         SV ** const svp = he ? &HeVAL(he) : NULL;
         if (!svp || !*svp)
-            Perl_croak(aTHX_ PL_no_helem_sv, SVfARG(keysv));
+            croak(PL_no_helem_sv, SVfARG(keysv));
         save_helem_flags(hv, keysv, svp, 0);
     }
     else
