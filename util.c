@@ -1637,7 +1637,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
                 cop = PL_curcop;
 
             if (CopLINE(cop))
-                Perl_sv_catpvf(aTHX_ sv, " at %s line %" LINE_Tf,
+                sv_catpvf(sv, " at %s line %" LINE_Tf,
                                 OutCopFILE(cop), CopLINE(cop));
         }
 
@@ -1648,7 +1648,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
             STRLEN l;
             const bool line_mode = (RsSIMPLE(PL_rs) &&
                                    *SvPV_const(PL_rs,l) == '\n' && l == 1);
-            Perl_sv_catpvf(aTHX_ sv, ", <%" SVf "> %s %" IVdf,
+            sv_catpvf(sv, ", <%" SVf "> %s %" IVdf,
                            SVfARG(PL_last_in_gv == PL_argvgv
                                  ? &PL_sv_no
                                  : newSVhek_mortal(GvNAME_HEK(PL_last_in_gv))),
@@ -5673,10 +5673,10 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
             string = vstringify(pmsv);
 
             if (vn) {
-                Perl_sv_catpvf(aTHX_ xpt, "$%" SVf "::%s %" SVf, SVfARG(module), vn,
+                sv_catpvf(xpt, "$%" SVf "::%s %" SVf, SVfARG(module), vn,
                                SVfARG(string));
             } else {
-                Perl_sv_catpvf(aTHX_ xpt, "bootstrap parameter %" SVf, SVfARG(string));
+                sv_catpvf(xpt, "bootstrap parameter %" SVf, SVfARG(string));
             }
             SvREFCNT_dec(string);
 
@@ -6587,31 +6587,31 @@ Perl_get_c_backtrace_dump(pTHX_ int depth, int skip)
         UV i;
         for (i = 0, frame = bt->frame_info;
              i < bt->header.frame_count; i++, frame++) {
-            Perl_sv_catpvf(aTHX_ dsv, "%d", (int)i);
-            Perl_sv_catpvf(aTHX_ dsv, "\t%p", frame->addr ? frame->addr : "-");
+            sv_catpvf(dsv, "%d", (int)i);
+            sv_catpvf(dsv, "\t%p", frame->addr ? frame->addr : "-");
             /* Symbol (function) names might disappear without debug info.
              *
              * The source code location might disappear in case of the
              * optimizer inlining or otherwise rearranging the code. */
             if (frame->symbol_addr) {
-                Perl_sv_catpvf(aTHX_ dsv, ":%04x",
+                sv_catpvf(dsv, ":%04x",
                                (int)
                                ((char*)frame->addr - (char*)frame->symbol_addr));
             }
-            Perl_sv_catpvf(aTHX_ dsv, "\t%s",
+            sv_catpvf(dsv, "\t%s",
                            frame->symbol_name_size &&
                            frame->symbol_name_offset ?
                            (char*)bt + frame->symbol_name_offset : "-");
             if (frame->source_name_size &&
                 frame->source_name_offset &&
                 frame->source_line_number) {
-                Perl_sv_catpvf(aTHX_ dsv, "\t%s:%" UVuf,
+                sv_catpvf(dsv, "\t%s:%" UVuf,
                                (char*)bt + frame->source_name_offset,
                                (UV)frame->source_line_number);
             } else {
-                Perl_sv_catpvf(aTHX_ dsv, "\t-");
+                sv_catpvf(dsv, "\t-");
             }
-            Perl_sv_catpvf(aTHX_ dsv, "\t%s",
+            sv_catpvf(dsv, "\t%s",
                            frame->object_name_size &&
                            frame->object_name_offset ?
                            (char*)bt + frame->object_name_offset : "-");

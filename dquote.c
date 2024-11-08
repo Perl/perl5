@@ -144,7 +144,7 @@ Perl_form_alien_digit_msg(pTHX_
     if (isPRINT(*first_bad)) {
         sv_catpvs(message_sv, "'");
     }
-    Perl_sv_catpvf(aTHX_ message_sv, " terminates \\%c early.  Resolved as "
+    sv_catpvf(message_sv, " terminates \\%c early.  Resolved as "
                                      "\"\\%c", symbol, symbol);
     if (braced) {
         sv_catpvs(message_sv, "{");
@@ -218,13 +218,13 @@ Perl_form_cp_too_large_msg(pTHX_
 
     Perl_sv_setpvf(aTHX_ message_sv, "Use of code point %s", prefix);
     if (string) {
-        Perl_sv_catpvf(aTHX_ message_sv, "%.*s", (int) len, string);
+        sv_catpvf(message_sv, "%.*s", (int) len, string);
     }
     else {
-        Perl_sv_catpvf(aTHX_ message_sv, format, cp);
+        sv_catpvf(message_sv, format, cp);
     }
-    Perl_sv_catpvf(aTHX_ message_sv, " is not allowed; the permissible max is %s", prefix);
-    Perl_sv_catpvf(aTHX_ message_sv, format, MAX_LEGAL_CP);
+    sv_catpvf(message_sv, " is not allowed; the permissible max is %s", prefix);
+    sv_catpvf(message_sv, format, MAX_LEGAL_CP);
 
     return SvPVX_const(message_sv);
 }

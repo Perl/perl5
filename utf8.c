@@ -4847,7 +4847,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
             }
         }
         if (!ok)
-            Perl_sv_catpvf(aTHX_ dsv, "\\x{%" UVxf "}", u);
+            sv_catpvf(dsv, "\\x{%" UVxf "}", u);
     }
     if (truncated)
          sv_catpvs(dsv, "...");
