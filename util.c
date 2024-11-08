@@ -93,7 +93,7 @@ S_maybe_protect_rw(pTHX_ struct perl_memory_debug_header *header)
 {
     if (header->readonly
      && mprotect(header, header->size, PROT_READ|PROT_WRITE))
-        Perl_warn(aTHX_ "mprotect for COW string %p %lu failed with %d",
+        warn("mprotect for COW string %p %lu failed with %d",
                          header, header->size, errno);
 }
 
@@ -102,7 +102,7 @@ S_maybe_protect_ro(pTHX_ struct perl_memory_debug_header *header)
 {
     if (header->readonly
      && mprotect(header, header->size, PROT_READ))
-        Perl_warn(aTHX_ "mprotect RW for COW string %p %lu failed with %d",
+        warn("mprotect RW for COW string %p %lu failed with %d",
                          header, header->size, errno);
 }
 # define maybe_protect_rw(foo) S_maybe_protect_rw(aTHX_ foo)
@@ -4799,7 +4799,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
             env_pv++;
 
         if (*env_pv && !isXDIGIT(*env_pv)) {
-            Perl_warn(aTHX_ "perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set\n");
+            warn("perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set\n");
         }
         /* should we check for unparsed crap? */
         /* should we warn about unused hex? */
@@ -4826,7 +4826,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         } else if (strEQ(env_pv,"2") || strEQ(env_pv,"DETERMINISTIC")) {
             PL_hash_rand_bits_enabled= 2;
         } else {
-            Perl_warn(aTHX_ "perl: warning: strange setting in '$ENV{PERL_PERTURB_KEYS}': '%s'\n", env_pv);
+            warn("perl: warning: strange setting in '$ENV{PERL_PERTURB_KEYS}': '%s'\n", env_pv);
         }
     }
 #  endif

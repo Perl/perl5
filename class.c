@@ -141,7 +141,7 @@ XS(injected_constructor)
     struct xpvhv_aux *aux = HvAUX(stash);
 
     if((items - 1) % 2)
-        Perl_warn(aTHX_ "Odd number of arguments passed to %" HvNAMEf_QUOTEDPREFIX " constructor",
+        warn("Odd number of arguments passed to %" HvNAMEf_QUOTEDPREFIX " constructor",
                 HvNAMEfARG(stash));
 
     if (!aux->xhv_class_initfields_cv) {

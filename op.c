@@ -457,7 +457,7 @@ Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
         /*DEBUG_U(PerlIO_printf(Perl_debug_log,"mprotect ->ro %lu at %p\n",
                               (unsigned long) slab->opslab_size, (void *)slab));*/
         if (mprotect(slab, OpSLABSizeBytes(slab->opslab_size), PROT_READ))
-            Perl_warn(aTHX_ "mprotect for %p %lu failed with %d", (void *)slab,
+            warn("mprotect for %p %lu failed with %d", (void *)slab,
                              (unsigned long)slab->opslab_size, errno);
     }
 }
@@ -476,7 +476,7 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
                               (unsigned long) size, (void *)slab2));*/
         if (mprotect((void *)slab2, OpSLABSizeBytes(slab2->opslab_size),
                      PROT_READ|PROT_WRITE)) {
-            Perl_warn(aTHX_ "mprotect RW for %p %lu failed with %d", (void *)slab,
+            warn("mprotect RW for %p %lu failed with %d", (void *)slab,
                              (unsigned long)slab2->opslab_size, errno);
         }
     }
@@ -11712,7 +11712,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                          * be BEGIN blocks. Which works out, since the INIT
                          * blocks it creates are eval'ed and so are late.
                          */
-                        Perl_warn(aTHX_ "Treating %s::INIT block as BEGIN block as workaround",
+                        warn("Treating %s::INIT block as BEGIN block as workaround",
                                 MI_INIT_WORKAROUND_PACK);
                         goto module_install_hack;
                     }

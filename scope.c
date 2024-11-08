@@ -1960,7 +1960,7 @@ Perl_magic_freedestruct(pTHX_ SV* sv, MAGIC* mg) {
 
     IV nargs = 0;
     if (PL_phase == PERL_PHASE_DESTRUCT) {
-        Perl_warn(aTHX_ "Can't call destructor for 0x%p in global destruction\n", sv);
+        warn("Can't call destructor for 0x%p in global destruction\n", sv);
         return 1;
     }
 
