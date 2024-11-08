@@ -2632,11 +2632,11 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
        platforms where kill was not defined.  */
 #ifndef HAS_KILL
     if (type == OP_KILL)
-        Perl_die(aTHX_ PL_no_func, what);
+        die(PL_no_func, what);
 #endif
 #ifndef HAS_CHOWN
     if (type == OP_CHOWN)
-        Perl_die(aTHX_ PL_no_func, what);
+        die(PL_no_func, what);
 #endif
 
 
@@ -2675,7 +2675,7 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
                         } else if (fchmod(fd, val))
                             tot--;
 #else
-                        Perl_die(aTHX_ PL_no_func, "fchmod");
+                        die(PL_no_func, "fchmod");
 #endif
                     }
                     else {
@@ -2716,7 +2716,7 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
                         } else if (fchown(fd, val, val2))
                             tot--;
 #else
-                        Perl_die(aTHX_ PL_no_func, "fchown");
+                        die(PL_no_func, "fchown");
 #endif
                     }
                     else {
@@ -2908,7 +2908,7 @@ nothing in the core.
                         } else if (futimes(fd, (struct timeval *) utbufp))
                             tot--;
 #else
-                        Perl_die(aTHX_ PL_no_func, "futimes");
+                        die(PL_no_func, "futimes");
 #endif
                     }
                     else {
