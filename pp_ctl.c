@@ -1946,7 +1946,7 @@ Perl_qerror(pTHX_ SV *err)
         else if (PL_errors)
             sv_catsv(PL_errors, err);
         else
-            Perl_warn(aTHX_ "%" SVf, SVfARG(err));
+            warn("%" SVf, SVfARG(err));
 
         if (PL_parser) {
             ++PL_parser->error_count;

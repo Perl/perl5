@@ -587,7 +587,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     }
 
     if (returned_errno || *buffer) {
-        Perl_warn(aTHX_ "Debug leaking scalars child failed%s%.*s with errno"
+        warn("Debug leaking scalars child failed%s%.*s with errno"
                   " %d: %s", (*buffer ? " at " : ""), (int) *buffer, buffer + 1,
                   returned_errno, Strerror(returned_errno));
     }
@@ -5385,7 +5385,7 @@ Perl_my_exit(pTHX_ U32 status)
     }
     if (PL_exit_flags & PERL_EXIT_WARN) {
         PL_exit_flags |= PERL_EXIT_ABORT; /* Protect against reentrant calls */
-        Perl_warn(aTHX_ "Unexpected exit %lu", (unsigned long)status);
+        warn("Unexpected exit %lu", (unsigned long)status);
         PL_exit_flags &= ~PERL_EXIT_ABORT;
     }
     switch (status) {
@@ -5503,7 +5503,7 @@ Perl_my_failure_exit(pTHX)
     }
     if (PL_exit_flags & PERL_EXIT_WARN) {
         PL_exit_flags |= PERL_EXIT_ABORT; /* Protect against reentrant calls */
-        Perl_warn(aTHX_ "Unexpected exit failure %ld", (long)PL_statusvalue);
+        warn("Unexpected exit failure %ld", (long)PL_statusvalue);
         PL_exit_flags &= ~PERL_EXIT_ABORT;
     }
     my_exit_jump();

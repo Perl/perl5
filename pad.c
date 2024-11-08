@@ -358,7 +358,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
                 LEAVE;
             }
 #ifdef DEBUGGING
-            else Perl_warn(aTHX_ "Slab leaked from cv %p", (void*)cv);
+            else warn("Slab leaked from cv %p", (void*)cv);
 #endif
         }
     }
@@ -520,7 +520,7 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
     if      (CvROOT(cv))  slab = OpSLAB(CvROOT(cv));
     else if (CvSTART(cv)) slab = (OPSLAB *)CvSTART(cv);
 #ifdef DEBUGGING
-    else if (slabbed)     Perl_warn(aTHX_ "Slab leaked from cv %p", (void*)cv);
+    else if (slabbed)     warn("Slab leaked from cv %p", (void*)cv);
 #endif
 
     if (slab) {

@@ -2745,7 +2745,7 @@ do_raise(pTHX_ int sig)
 void
 sig_terminate(pTHX_ int sig)
 {
-    Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
+    warn("Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
     /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
        thread 
      */
@@ -5669,7 +5669,7 @@ win32_csighandler(int sig)
 {
 #if 0
     dTHXa(PERL_GET_SIG_CONTEXT);
-    Perl_warn(aTHX_ "Got signal %d",sig);
+    warn("Got signal %d",sig);
 #endif
     PERL_UNUSED_ARG(sig);
     /* Does nothing */

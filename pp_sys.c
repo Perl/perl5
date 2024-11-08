@@ -576,7 +576,7 @@ PP_wrapped(pp_warn, 0, 1)
       }
     }
     if (SvROK(exsv) && !PL_warnhook)
-         Perl_warn(aTHX_ "%" SVf, SVfARG(exsv));
+         warn("%" SVf, SVfARG(exsv));
     else warn_sv(exsv);
     RETSETYES;
 }

@@ -3494,7 +3494,7 @@ Perl_op_class(pTHX_ const OP *o)
     case OA_UNOP_AUX:
         return OPclass_UNOP_AUX;
     }
-    Perl_warn(aTHX_ "Can't determine class of operator %s, assuming BASEOP\n",
+    warn("Can't determine class of operator %s, assuming BASEOP\n",
          OP_NAME(o));
     return OPclass_BASEOP;
 }

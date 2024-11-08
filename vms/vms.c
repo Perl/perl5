@@ -931,7 +931,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
                     "Can't read CRTL environ\n");
             } else
 #endif
-                Perl_warn(aTHX_ "Can't read CRTL environ\n");
+                warn("Can't read CRTL environ\n");
             continue;
           }
           retsts = SS$_NOLOGNAM;
@@ -10921,7 +10921,7 @@ Perl_vms_do_aexec(pTHX_ SV *really,SV **mark,SV **sp)
   if (vfork_called) {           /* this follows a vfork - act Unixish */
     vfork_called--;
     if (vfork_called < 0) {
-      Perl_warn(aTHX_ "Internal inconsistency in tracking vforks");
+      warn("Internal inconsistency in tracking vforks");
       vfork_called = 0;
     }
     else return do_aexec(really,mark,sp);
@@ -10949,7 +10949,7 @@ Perl_vms_do_exec(pTHX_ const char *cmd)
   if (vfork_called) {             /* this follows a vfork - act Unixish */
     vfork_called--;
     if (vfork_called < 0) {
-      Perl_warn(aTHX_ "Internal inconsistency in tracking vforks");
+      warn("Internal inconsistency in tracking vforks");
       vfork_called = 0;
     }
     else return do_exec(cmd);
@@ -11382,7 +11382,7 @@ fillpasswd (pTHX_ const char *name, struct passwd *pwd)
         pwd->pw_gid= uic.uic$v_group;
     }
     else
-      Perl_warn(aTHX_ "getpwnam returned invalid UIC %#o for user \"%s\"");
+      warn("getpwnam returned invalid UIC %#o for user \"%s\"");
     pwd->pw_passwd=  pw_passwd;
     pwd->pw_gecos=   owner.pw_gecos;
     pwd->pw_dir=     defdev.pw_dir;
@@ -11595,7 +11595,7 @@ Perl_my_time(pTHX_ time_t *timep)
       if (!vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
         gmtime_emulation_type++;
         utc_offset_secs = 0;
-        Perl_warn(aTHX_ "no UTC offset information; assuming local time is UTC");
+        warn("no UTC offset information; assuming local time is UTC");
       }
       else { utc_offset_secs = atol(off); }
     }
