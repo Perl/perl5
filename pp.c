@@ -6517,10 +6517,10 @@ PP_wrapped(pp_reverse, 0, 1)
             SP = MARK + 1;
             SETs(TARG);
         } else if (SP > MARK) {
-            sv_setsv(TARG, *SP);
+            sv_setsv_flags(TARG, *SP, SV_GMAGIC);
             SETs(TARG);
         } else {
-            sv_setsv(TARG, DEFSV);
+            sv_setsv_flags(TARG, DEFSV, SV_GMAGIC);
             XPUSHs(TARG);
         }
         SvSETMAGIC(TARG); /* remove any utf8 length magic */
