@@ -35,6 +35,36 @@ in-place directly, in the same way that C<foreach (@array)> would do.
 
 =back
 
+=head1 Incompatible Changes
+
+=head2 Apostrophe is again recognized as a global name separator
+
+This was deprecated in Perl 5.38 and removed as scheduled in perl
+5.41.3, but after some discussion has been reinstated by default.
+
+This can be controlled with the C<apostrophe_as_package_separator>
+feature which is enabled by default, but is disabled from the 5.41
+feature bundle onwards.
+
+If you want to disable use within your own code you can explicitly
+disable the feature:
+
+  no feature "apostrophe_as_package_separator";
+
+Note that disabling this feature only prevents use of apostrophe as a
+package separator within code; symbolic references still treat C<'> as
+C<::> with the feature disabled:
+
+  my $symref = "My'Module'Var";
+  # default features
+  my $x = $My'Module'Var; # fine
+  no feature "apostrophe_as_package_separator";
+  no strict "refs";
+  my $y = $$symref;       # like $My::Module::Var
+  my $z = $My'Module'Var; # syntax error
+
+[L<GH #22644|https://github.com/Perl/perl5/issues/22644>]
+
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata

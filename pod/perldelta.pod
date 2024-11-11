@@ -180,13 +180,14 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perl5416delta>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Added the change note for apostrophes in names being reinstated, which
+was delayed by the review cycle.
 
 =back
 
