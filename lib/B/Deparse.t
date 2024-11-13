@@ -3361,3 +3361,7 @@ $_ = (!$p) isa 'Some::Class';
 $_ = (!$p) =~ tr/1//;
 $_ = (!$p) =~ /1/;
 $_ = (!$p) =~ s/1//r;
+####
+# Else block of a ternary is optimised away
+my $x;
+my(@y) = $x ? [1, 2] : ();
