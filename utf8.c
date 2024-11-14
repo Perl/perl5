@@ -1700,13 +1700,14 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
              * it changes 'uv' looked at by the others */
 
             U32 this_problem = 1U << lsbit_pos32(possible_problems);
+            possible_problems &= ~this_problem;
+
             switch (this_problem) {
               case UTF8_GOT_OVERFLOW:
 
                 /* Overflow means also got a super and are using Perl's
                  * extended UTF-8, but we handle all three cases here */
-                possible_problems
-                  &= ~(UTF8_GOT_OVERFLOW|UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
+                possible_problems &= ~(UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
                 *errors |= UTF8_GOT_OVERFLOW;
 
                 /* But the API says we flag all errors found */
@@ -1757,7 +1758,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_EMPTY:
-                possible_problems &= ~UTF8_GOT_EMPTY;
                 *errors |= UTF8_GOT_EMPTY;
 
                 if (! (flags & UTF8_ALLOW_EMPTY)) {
@@ -1781,7 +1781,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_CONTINUATION:
-                possible_problems &= ~UTF8_GOT_CONTINUATION;
                 *errors |= UTF8_GOT_CONTINUATION;
 
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
@@ -1802,7 +1801,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_SHORT:
-                possible_problems &= ~UTF8_GOT_SHORT;
                 *errors |= UTF8_GOT_SHORT;
 
                 if (! (flags & UTF8_ALLOW_SHORT)) {
@@ -1825,7 +1823,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_NON_CONTINUATION:
-                possible_problems &= ~UTF8_GOT_NON_CONTINUATION;
                 *errors |= UTF8_GOT_NON_CONTINUATION;
 
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
@@ -1853,7 +1850,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_SURROGATE:
-                possible_problems &= ~UTF8_GOT_SURROGATE;
 
                 if (flags & UTF8_WARN_SURROGATE) {
                     *errors |= UTF8_GOT_SURROGATE;
@@ -1886,7 +1882,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_SUPER:
-                possible_problems &= ~UTF8_GOT_SUPER;
 
                 if (flags & UTF8_WARN_SUPER) {
                     *errors |= UTF8_GOT_SUPER;
@@ -1963,7 +1958,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_NONCHAR:
-                possible_problems &= ~UTF8_GOT_NONCHAR;
 
                 if (flags & UTF8_WARN_NONCHAR) {
                     *errors |= UTF8_GOT_NONCHAR;
@@ -1990,7 +1984,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 break;
 
               case UTF8_GOT_LONG:
-                possible_problems &= ~UTF8_GOT_LONG;
                 *errors |= UTF8_GOT_LONG;
 
                 if (flags & UTF8_ALLOW_LONG) {
