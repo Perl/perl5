@@ -1128,6 +1128,8 @@ point's representation.
 /* Largest code point we accept from external sources */
 #define MAX_LEGAL_CP  ((UV)IV_MAX)
 
+/* The ordering of these bits is important to a switch() statement in utf8.c
+ * for handling problems in converting UTF-8 to a UV */
 #define UTF8_ALLOW_OVERFLOW             0x0001
 #define UTF8_GOT_OVERFLOW               UTF8_ALLOW_OVERFLOW
 

@@ -1690,12 +1690,18 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
             char * message = NULL;
             U32 this_flag_bit = 0;
 
-            /* Each 'if' clause handles one problem.  They are ordered so that
-             * the first ones' messages will be displayed before the later
-             * ones; this is kinda in decreasing severity order.  But the
-             * overlong must come last, as it changes 'uv' looked at by the
-             * others */
-            if (possible_problems & UTF8_GOT_OVERFLOW) {
+            /* Each 'case' handles one problem given by a bit in
+             * 'possible_problems'.  The lowest bit positions, as #defined in
+             * utf8.h, are are handled first.  Some of the ordering is
+             * important so that higher priority items are done before lower
+             * ones; some of which may depend on earlier actions.  Also the
+             * ordering tries to cause any messages to be displayed in kind of
+             * decreasing severity order.  But the overlong must come last, as
+             * it changes 'uv' looked at by the others */
+
+            U32 this_problem = 1U << lsbit_pos32(possible_problems);
+            switch (this_problem) {
+              case UTF8_GOT_OVERFLOW:
 
                 /* Overflow means also got a super and are using Perl's
                  * extended UTF-8, but we handle all three cases here */
@@ -1747,8 +1753,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                         }
                     }
                 }
-            }
-            else if (possible_problems & UTF8_GOT_EMPTY) {
+
+                break;
+
+              case UTF8_GOT_EMPTY:
                 possible_problems &= ~UTF8_GOT_EMPTY;
                 *errors |= UTF8_GOT_EMPTY;
 
@@ -1769,8 +1777,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                         this_flag_bit = UTF8_GOT_EMPTY;
                     }
                 }
-            }
-            else if (possible_problems & UTF8_GOT_CONTINUATION) {
+
+                break;
+
+              case UTF8_GOT_CONTINUATION:
                 possible_problems &= ~UTF8_GOT_CONTINUATION;
                 *errors |= UTF8_GOT_CONTINUATION;
 
@@ -1788,8 +1798,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                         this_flag_bit = UTF8_GOT_CONTINUATION;
                     }
                 }
-            }
-            else if (possible_problems & UTF8_GOT_SHORT) {
+
+                break;
+
+              case UTF8_GOT_SHORT:
                 possible_problems &= ~UTF8_GOT_SHORT;
                 *errors |= UTF8_GOT_SHORT;
 
@@ -1810,8 +1822,9 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                     }
                 }
 
-            }
-            else if (possible_problems & UTF8_GOT_NON_CONTINUATION) {
+                break;
+
+              case UTF8_GOT_NON_CONTINUATION:
                 possible_problems &= ~UTF8_GOT_NON_CONTINUATION;
                 *errors |= UTF8_GOT_NON_CONTINUATION;
 
@@ -1836,8 +1849,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                         this_flag_bit = UTF8_GOT_NON_CONTINUATION;
                     }
                 }
-            }
-            else if (possible_problems & UTF8_GOT_SURROGATE) {
+
+                break;
+
+              case UTF8_GOT_SURROGATE:
                 possible_problems &= ~UTF8_GOT_SURROGATE;
 
                 if (flags & UTF8_WARN_SURROGATE) {
@@ -1867,8 +1882,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                     disallowed = TRUE;
                     *errors |= UTF8_GOT_SURROGATE;
                 }
-            }
-            else if (possible_problems & UTF8_GOT_SUPER) {
+
+                break;
+
+              case UTF8_GOT_SUPER:
                 possible_problems &= ~UTF8_GOT_SUPER;
 
                 if (flags & UTF8_WARN_SUPER) {
@@ -1942,8 +1959,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                     *errors |= UTF8_GOT_SUPER;
                     disallowed = TRUE;
                 }
-            }
-            else if (possible_problems & UTF8_GOT_NONCHAR) {
+
+                break;
+
+              case UTF8_GOT_NONCHAR:
                 possible_problems &= ~UTF8_GOT_NONCHAR;
 
                 if (flags & UTF8_WARN_NONCHAR) {
@@ -1967,8 +1986,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                     disallowed = TRUE;
                     *errors |= UTF8_GOT_NONCHAR;
                 }
-            }
-            else if (possible_problems & UTF8_GOT_LONG) {
+
+                break;
+
+              case UTF8_GOT_LONG:
                 possible_problems &= ~UTF8_GOT_LONG;
                 *errors |= UTF8_GOT_LONG;
 
@@ -2033,7 +2054,15 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                         this_flag_bit = UTF8_GOT_LONG;
                     }
                 }
-            } /* End of looking through the possible flags */
+
+                break;
+
+              default:
+                Perl_croak(aTHX_ "panic: Unexpected case value in "
+                                 " utf8n_to_uvchr_msgs() %d", this_problem);
+                /* NOTREACHED */
+
+            } /* End of switch() on the possible problems */
 
             /* Display the message (if any) for the problem being handled in
              * this iteration of the loop */
