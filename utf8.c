@@ -1593,19 +1593,18 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     /* Here, we have found all the possible problems, except for when the input
      * is for a problematic code point not allowed by the input parameters.
      * Check now for those parameters */
-    if (flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                 |UTF8_WARN_ILLEGAL_INTERCHANGE))
+    if (   flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                    |UTF8_WARN_ILLEGAL_INTERCHANGE)
+
+                    /* if overflow, we know without looking further that this
+                     * is a non-Unicode code point, which we deal with below in
+                     * the overflow handling code */
+        && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
     {
                                 /* uv is valid for overlongs */
         if (   (      LIKELY(! (possible_problems & ~UTF8_GOT_LONG))
                    && isUNICODE_POSSIBLY_PROBLEMATIC(uv))
             || (   UNLIKELY(possible_problems)
-
-                          /* if overflow, we know without looking further
-                           * precisely which of the problematic types it is,
-                           * and we deal with those in the overflow handling
-                           * code */
-                && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW))
                 && (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
                     || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0)))))
         {
