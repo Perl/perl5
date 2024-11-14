@@ -1593,10 +1593,11 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     /* Here, we have found all the possible problems, except for when the input
      * is for a problematic code point not allowed by the input parameters.
      * Check now for those parameters */
-    if (   (flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                     |UTF8_WARN_ILLEGAL_INTERCHANGE))
+    if (flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                 |UTF8_WARN_ILLEGAL_INTERCHANGE))
+    {
                                 /* uv is valid for overlongs */
-        && (   (      LIKELY(! (possible_problems & ~UTF8_GOT_LONG))
+        if (   (      LIKELY(! (possible_problems & ~UTF8_GOT_LONG))
                    && isUNICODE_POSSIBLY_PROBLEMATIC(uv))
             || (   UNLIKELY(possible_problems)
 
@@ -1606,8 +1607,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                            * code */
                 && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW))
                 && (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
-                    || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))))))
-    {
+                    || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0)))))
+        {
         /* If there were no malformations, or the only malformation is an
          * overlong, 'uv' is valid */
         if (LIKELY(! (possible_problems & ~UTF8_GOT_LONG))) {
@@ -1644,6 +1645,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
             /* We need a complete well-formed UTF-8 character to discern
              * non-characters, so can't look for them here */
+        }
         }
     }
 
