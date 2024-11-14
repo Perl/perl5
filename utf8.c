@@ -1605,14 +1605,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW))
                 && (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
                     || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0)))))
-        && ((flags & ( UTF8_DISALLOW_NONCHAR
-                      |UTF8_DISALLOW_SURROGATE
-                      |UTF8_DISALLOW_SUPER
-                      |UTF8_DISALLOW_PERL_EXTENDED
-                      |UTF8_WARN_NONCHAR
-                      |UTF8_WARN_SURROGATE
-                      |UTF8_WARN_SUPER
-                      |UTF8_WARN_PERL_EXTENDED))))
+        && ((flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                      |UTF8_WARN_ILLEGAL_INTERCHANGE))))
     {
         /* If there were no malformations, or the only malformation is an
          * overlong, 'uv' is valid */
