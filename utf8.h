@@ -1128,6 +1128,9 @@ point's representation.
 /* Largest code point we accept from external sources */
 #define MAX_LEGAL_CP  ((UV)IV_MAX)
 
+#define UTF8_ALLOW_OVERFLOW             0x0001
+#define UTF8_GOT_OVERFLOW               UTF8_ALLOW_OVERFLOW
+
 #define UTF8_ALLOW_EMPTY		0x0002	/* Allow a zero length string */
 #define UTF8_GOT_EMPTY                  UTF8_ALLOW_EMPTY
 
@@ -1135,37 +1138,17 @@ point's representation.
 #define UTF8_ALLOW_CONTINUATION		0x0004
 #define UTF8_GOT_CONTINUATION		UTF8_ALLOW_CONTINUATION
 
-/* Unexpected non-continuation byte */
-#define UTF8_ALLOW_NON_CONTINUATION	0x0010
-#define UTF8_GOT_NON_CONTINUATION	UTF8_ALLOW_NON_CONTINUATION
-
 /* expecting more bytes than were available in the string */
 #define UTF8_ALLOW_SHORT		0x0008
 #define UTF8_GOT_SHORT		        UTF8_ALLOW_SHORT
 
-/* Overlong sequence; i.e., the code point can be specified in fewer bytes.
- * First one will convert the overlong to the REPLACEMENT CHARACTER; second
- * will return what the overlong evaluates to */
-#define UTF8_ALLOW_LONG                 0x2000
-#define UTF8_ALLOW_LONG_AND_ITS_VALUE   (UTF8_ALLOW_LONG|0x4000)
-#define UTF8_GOT_LONG                   UTF8_ALLOW_LONG
-
-#define UTF8_ALLOW_OVERFLOW             0x0001
-#define UTF8_GOT_OVERFLOW               UTF8_ALLOW_OVERFLOW
+/* Unexpected non-continuation byte */
+#define UTF8_ALLOW_NON_CONTINUATION	0x0010
+#define UTF8_GOT_NON_CONTINUATION	UTF8_ALLOW_NON_CONTINUATION
 
 #define UTF8_DISALLOW_SURROGATE		0x0020	/* Unicode surrogates */
 #define UTF8_GOT_SURROGATE		UTF8_DISALLOW_SURROGATE
 #define UTF8_WARN_SURROGATE		0x0040
-
-/* Unicode non-character  code points */
-#define UTF8_DISALLOW_NONCHAR           0x0800
-#define UTF8_GOT_NONCHAR                UTF8_DISALLOW_NONCHAR
-#define UTF8_WARN_NONCHAR               0x1000
-
-/* Super-set of Unicode: code points above the legal max */
-#define UTF8_DISALLOW_SUPER		0x0200
-#define UTF8_GOT_SUPER		        UTF8_DISALLOW_SUPER
-#define UTF8_WARN_SUPER		        0x0400
 
 /* The original UTF-8 standard did not define UTF-8 with start bytes of 0xFE or
  * 0xFF, though UTF-EBCDIC did.  This allowed both versions to represent code
@@ -1179,6 +1162,23 @@ point's representation.
 #define UTF8_DISALLOW_PERL_EXTENDED     0x0080
 #define UTF8_GOT_PERL_EXTENDED          UTF8_DISALLOW_PERL_EXTENDED
 #define UTF8_WARN_PERL_EXTENDED         0x0100
+
+/* Super-set of Unicode: code points above the legal max */
+#define UTF8_DISALLOW_SUPER		0x0200
+#define UTF8_GOT_SUPER		        UTF8_DISALLOW_SUPER
+#define UTF8_WARN_SUPER		        0x0400
+
+/* Unicode non-character  code points */
+#define UTF8_DISALLOW_NONCHAR           0x0800
+#define UTF8_GOT_NONCHAR                UTF8_DISALLOW_NONCHAR
+#define UTF8_WARN_NONCHAR               0x1000
+
+/* Overlong sequence; i.e., the code point can be specified in fewer bytes.
+ * First one will convert the overlong to the REPLACEMENT CHARACTER; second
+ * will return what the overlong evaluates to */
+#define UTF8_ALLOW_LONG                 0x2000
+#define UTF8_ALLOW_LONG_AND_ITS_VALUE   (UTF8_ALLOW_LONG|0x4000)
+#define UTF8_GOT_LONG                   UTF8_ALLOW_LONG
 
 /* For back compat, these old names are misleading for overlongs and
  * UTF_EBCDIC. */
