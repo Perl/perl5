@@ -1601,27 +1601,13 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                      * the overflow handling code */
         && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
     {
-        /* If there were no malformations, or the only malformation is an
-         * overlong, 'uv' is valid */
-        if (   LIKELY(! (possible_problems & ~UTF8_GOT_LONG))
-            && isUNICODE_POSSIBLY_PROBLEMATIC(uv))
-        {
-            if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                possible_problems |= UTF8_GOT_SURROGATE;
-            }
-            else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-                possible_problems |= UTF8_GOT_SUPER;
-            }
-            else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-                possible_problems |= UTF8_GOT_NONCHAR;
-            }
-        }
-        else if (   UNLIKELY(possible_problems)
-                        /* Otherwise, need to look at the source UTF-8,
-                         * possibly adjusted to be non-overlong */
-                 && (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
-                     || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))))
-        {
+            if (UNLIKELY(possible_problems & ~UTF8_GOT_LONG)) {
+
+            /* Here, there is a malformation other than overlong, we need to
+               look at the source UTF-8, possibly adjusted to be non-overlong */
+            if (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
+                || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0)))
+            {
             if (UNLIKELY(NATIVE_UTF8_TO_I8(*adjusted_s0)
                                                     > UTF_START_BYTE_110000_))
             {
@@ -1642,7 +1628,24 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
             /* We need a complete well-formed UTF-8 character to discern
              * non-characters, so can't look for them here */
+            }
         }
+        else
+
+            /* Here there were no malformations, or the only malformation is an
+             * overlong, 'uv' is valid, and the 'if' above made sure that it
+             * could be problematic */
+            if (isUNICODE_POSSIBLY_PROBLEMATIC(uv)) {
+                if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+                    possible_problems |= UTF8_GOT_SURROGATE;
+                }
+                else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
+                    possible_problems |= UTF8_GOT_SUPER;
+                }
+                else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+                    possible_problems |= UTF8_GOT_NONCHAR;
+                }
+            }
     }
 
   ready_to_handle_errors:
