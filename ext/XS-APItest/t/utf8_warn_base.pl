@@ -585,23 +585,24 @@ sub flags_to_text($$)
 # Possible flag returns from utf8n_to_uvchr_error().  These should have G_,
 # instead of A_, D_, but the prefixes will be used in a later commit, so
 # minimize churn by having them here.
+# The ordering is important, sorted by lowest bit position first taken from
+# utf8.h
 my @utf8n_flags_to_text =  ( qw(
+        A_OVERFLOW
         A_EMPTY
         A_CONTINUATION
-        A_NON_CONTINUATION
         A_SHORT
-        A_LONG
-        A_LONG_AND_ITS_VALUE
-        PLACEHOLDER
-        A_OVERFLOW
+        A_NON_CONTINUATION
         D_SURROGATE
         W_SURROGATE
-        D_NONCHAR
-        W_NONCHAR
-        D_SUPER
-        W_SUPER
         D_PERL_EXTENDED
         W_PERL_EXTENDED
+        D_SUPER
+        W_SUPER
+        D_NONCHAR
+        W_NONCHAR
+        A_LONG
+        A_LONG_AND_ITS_VALUE
         CHECK_ONLY
         NO_CONFIDENCE_IN_CURLEN_
     ) );
