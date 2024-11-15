@@ -1601,6 +1601,15 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                      * the overflow handling code */
         && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
     {
+        /* By examining just the first byte, we can see if this is using
+         * non-standard UTF-8.  Even if it is an overlong that reduces to a
+         * small code point, it is still using this Perl invention, so mark it
+         * as such */
+        if (UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))) {
+            possible_problems |= UTF8_GOT_SUPER;
+        }
+        else {
+            /* See if the input has malformations besides possibly overlong */
             if (UNLIKELY(possible_problems & ~UTF8_GOT_LONG)) {
 
             /* Here, there is a malformation other than overlong, we need to
@@ -1646,6 +1655,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                     possible_problems |= UTF8_GOT_NONCHAR;
                 }
             }
+        }
     }
 
   ready_to_handle_errors:
