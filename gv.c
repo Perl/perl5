@@ -3458,7 +3458,7 @@ and could be used to tell if a given object would stringify to something
 other than the normal default ref stringification.
 
 Note that the fact that this function returns TRUE does not mean you
-can succesfully perform the operation with amagic_call(), for instance
+can successfully perform the operation with amagic_call(), for instance
 any overloaded method might throw a fatal exception,  however if this
 function returns FALSE you can be confident that it will NOT perform
 the given overload operation.

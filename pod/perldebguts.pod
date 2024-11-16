@@ -596,8 +596,8 @@ will be lost.
                              defined by current locale
  NBOUNDU          no         Match "" at any non-boundary of a given
                              type using /u rules.
- NBOUNDA          no         Match "" betweeen any \w\w or \W\W, where
-                             \w is [_a-zA-Z0-9]
+ NBOUNDA          no         Match "" between any \w\w or \W\W, where \w
+                             is [_a-zA-Z0-9]
 
  # [Special] alternatives:
  REG_ANY          no         Match any one character (except newline).

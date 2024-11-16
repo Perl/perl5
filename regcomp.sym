@@ -78,7 +78,7 @@ BOUNDA      BOUND,      no        ; Match "" at any boundary between \w\W or \W\
 NBOUND      NBOUND,     no        ; Like NBOUNDA for non-utf8, otherwise like BOUNDU
 NBOUNDL     NBOUND,     no        ; Like NBOUND/NBOUNDU, but \w and \W are defined by current locale
 NBOUNDU     NBOUND,     no        ; Match "" at any non-boundary of a given type using /u rules.
-NBOUNDA     NBOUND,     no        ; Match "" betweeen any \w\w or \W\W, where \w is [_a-zA-Z0-9]
+NBOUNDA     NBOUND,     no        ; Match "" between any \w\w or \W\W, where \w is [_a-zA-Z0-9]
 
 #* [Special] alternatives:
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
@@ -108,7 +108,7 @@ ANYOFRb     ANYOFR,     packed 1  S ; Like ANYOFR, but all matches share the sam
 # operations.  (We don't have to compare the final byte as it has to be
 # different or else this wouldn't be a range.)  So we might as well dispense
 # with the comparisons that ANYOFRs would do, and go directly to do the
-# conversion .
+# conversion.
 
 ANYOFHbbm   ANYOFHbbm   none bbm S ; Like ANYOFHb, but only for 2-byte UTF-8 characters; uses a bitmap to match the continuation byte
 

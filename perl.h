@@ -1231,12 +1231,12 @@ typedef enum {
  * platform that instead uses positional notation.  By doing this, you can find
  * many bugs without trying it out on a real such platform.  It would be
  * possible to create the reverse definitions for people who have ready access
- * to a posiional notation box, but harder to get a name=value box */
+ * to a positional notation box, but harder to get a name=value box */
 #  if defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION)            \
    && defined(PERL_LC_ALL_USES_NAME_VALUE_PAIRS)
 #    undef  PERL_LC_ALL_USES_NAME_VALUE_PAIRS
 
-#    define  PERL_LC_ALL_CATEGORY_POSITIONS_INIT /* Assumes glibc cateories */\
+#    define  PERL_LC_ALL_CATEGORY_POSITIONS_INIT /* Assumes glibc categories */\
                                   { 12, 11, 10, 9, 8, 7, 5, 4, 3, 2, 1, 0 }
 #    define  PERL_LC_ALL_SEPARATOR "/ = /"
 #  endif
@@ -5424,7 +5424,7 @@ string.  All you are interested in is the first character of that string.  To
 get uppercase letters (for the values 10..15), add 16 to the index.  Hence,
 C<PL_hexdigit[11]> is C<'b'>, and C<PL_hexdigit[11+16]> is C<'B'>.  Adding 16
 to an index whose representation is '0'..'9' yields the same as not adding 16.
-Indices outside the range 0..31 result in (bad) undedefined behavior.
+Indices outside the range 0..31 result in (bad) undefined behavior.
 
 =cut
 */
@@ -5531,7 +5531,7 @@ EXTCONST  unsigned char PL_fold[] = {
 
 EXTCONST  unsigned char PL_fold_latin1[] = {
     /* Full latin1 complement folding, except for three problematic code points:
-     *	Micro sign (181 = 0xB5) and y with diearesis (255 = 0xFF) have their
+     *	Micro sign (181 = 0xB5) and y with diaeresis (255 = 0xFF) have their
      *	fold complements outside the Latin1 range, so can't match something
      *	that isn't in utf8.
      *	German lower case sharp s (223 = 0xDF) folds to two characters, 'ss',
@@ -7188,7 +7188,7 @@ typedef struct am_table_short AMTS;
  * They require some sort of exclusive lock against similar functions, and a
  * read lock on both the locale and environment.  However, on systems which
  * have per-thread locales, the locale is constant during the execution of
- * these functions, and so no locale lock is necssary.  For such systems, an
+ * these functions, and so no locale lock is necessary.  For such systems, an
  * exclusive ENV lock is necessary and sufficient.  On systems where the locale
  * could change out from under us, we use an exclusive LOCALE lock to prevent
  * that, and a read ENV lock to prevent other threads that have nothing to do
@@ -7276,7 +7276,7 @@ typedef struct am_table_short AMTS;
 #define STRFTIME_LOCK                   ENVr_LOCALEr_LOCK
 #define STRFTIME_UNLOCK                 ENVr_LOCALEr_UNLOCK
 
-/* These time-related functions all requre that the environment and locale
+/* These time-related functions all require that the environment and locale
  * don't change while they are executing (at least in glibc; this appears to be
  * contrary to the POSIX standard).  tzset() writes global variables, so
  * always needs to have write locking.  ctime, localtime, mktime, and strftime
@@ -7312,7 +7312,7 @@ typedef struct am_table_short AMTS;
 #define TZSET_LOCK         gwENVr_LOCALEr_LOCK
 #define TZSET_UNLOCK       gwENVr_LOCALEr_UNLOCK
 
-/* Similiarly, these functions need a constant environment and/or locale.  And
+/* Similarly, these functions need a constant environment and/or locale.  And
  * some have a buffer that is shared with another thread executing the same or
  * a related call.  A mutex could be created for each class, but for now, share
  * the ENV mutex with everything, as none probably gets called so much that
@@ -9174,7 +9174,7 @@ END_EXTERN_C
 
 #endif /* DOUBLE_HAS_NAN */
 
-/* these are used to faciliate the env var PERL_RAND_SEED,
+/* these are used to facilitate the env var PERL_RAND_SEED,
  * which allows consistent behavior from code that calls
  * srand() with no arguments, either explicitly or implicitly.
  */

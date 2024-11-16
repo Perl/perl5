@@ -148,7 +148,7 @@ struct RExC_state_t {
     int         code_index;             /* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
                                             within pattern */
-    SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
+    SSize_t     maxlen;                        /* minimum possible number of chars in string to match */
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
@@ -430,7 +430,7 @@ struct RExC_state_t {
 #define TRYAGAIN        0x10    /* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
 #define NEED_UTF8       0x40    /* In conjunction with RESTART_PARSE, need to
-                                   calcuate sizes as UTF-8 */
+                                   calculate sizes as UTF-8 */
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
 
@@ -563,7 +563,7 @@ struct RExC_state_t {
                  _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 
 /* We add a marker if we are deferring expansion of a property that is both
- * 1) potentiallly user-defined; and
+ * 1) potentially user-defined; and
  * 2) could also be an official Unicode property.
  *
  * Without this marker, any deferred expansion can only be for a user-defined

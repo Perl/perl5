@@ -1894,10 +1894,10 @@ the code reference.
 
 When operating in a C callback mode the C<args> parameter will be passed
 directly to the C function as a C<void *> pointer. No additional
-processing of the argument will be peformed, and it is the callers
+processing of the argument will be performed, and it is the callers
 responsibility to free the C<args> parameter if necessary.
 
-Be aware that there is a signficant difference in timing between the
+Be aware that there is a significant difference in timing between the
 I<end of the current statement> and the I<end of the current pseudo
 block>. If you are looking for a mechanism to trigger a function at the
 end of the B<current pseudo block> you should look at
@@ -1910,7 +1910,7 @@ B<end of the current statement> with the arguments provided. It is a
 wrapper around C<mortal_destructor_sv()> which ensures that the latter
 function is called appropriately.
 
-Be aware that there is a signficant difference in timing between the
+Be aware that there is a significant difference in timing between the
 I<end of the current statement> and the I<end of the current pseudo
 block>. If you are looking for a mechanism to trigger a function at the
 end of the B<current pseudo block> you should look at
@@ -1920,7 +1920,7 @@ L<perlapi/C<SAVEDESTRUCTOR_X>> instead of this function.
 
 This function is called via magic to implement the
 C<mortal_destructor_sv()> and C<mortal_destructor_x()> functions. It
-should not be called directly and has no user servicable parts.
+should not be called directly and has no user serviceable parts.
 
 =cut
 */

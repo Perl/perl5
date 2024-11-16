@@ -298,7 +298,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define NBOUNDU_t8_pb                      58  /*      0x03a */
 #define NBOUNDU_t8_p8                      59  /*      0x03b */
 
-#define NBOUNDA                      15        /* 0x0f Match "" betweeen any
+#define NBOUNDA                      15        /* 0x0f Match "" between any
                                                   \w\w or \W\W, where \w is
                                                   [_a-zA-Z0-9] */
 #define NBOUNDA_tb                      30     /*      0x01e */
