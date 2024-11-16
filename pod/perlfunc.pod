@@ -4232,33 +4232,30 @@ X<localtime> X<ctime>
 =for Pod::Functions convert UNIX time into record or string using local time
 
 Converts a time as returned by the time function to a 9-element list
-with the time analyzed for the local time zone.  Typically used as
-follows:
+with the time analyzed for the local time zone.  If EXPR is omitted,
+L<C<localtime>|/localtime EXPR> uses the current time (as returned by
+L<C<time>|/time>).
+
+Typically used as follows:
 
     #     0    1    2     3     4    5     6     7     8
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                                                 localtime(time);
 
-All list elements are numeric and come straight out of the C 'struct
-tm'.  C<$sec>, C<$min>, and C<$hour> are the seconds, minutes, and hours
+All list elements are numeric and come straight out of the C C<struct
+tm>.  C<$sec>, C<$min>, and C<$hour> are the seconds, minutes, and hours
 of the specified time.
 
-C<$mday> is the day of the month and C<$mon> the month in
-the range C<0..11>, with 0 indicating January and 11 indicating December.
-This makes it easy to get a month name from a list:
+C<$mday> is the day of the month in the range C<1..31> (i.e. 1-based).  C<$mon>
+is the month in the range C<0..11> (i.e. 0-based), with 0 indicating January
+and 11 indicating December.  This makes it easy to get a month name from a
+list:
 
     my @abbr = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
     print "$abbr[$mon] $mday";
     # $mon=9, $mday=18 gives "Oct 18"
 
-C<$year> contains the number of years since 1900.  To get the full
-year write:
-
-    $year += 1900;
-
-To get the last two digits of the year (e.g., "01" in 2001) do:
-
-    $year = sprintf("%02d", $year % 100);
+C<$year> contains the number of years since 1900 (e.g. C<129> for 2029).
 
 C<$wday> is the day of the week, with 0 indicating Sunday and 3 indicating
 Wednesday.  C<$yday> is the day of the year, in the range C<0..364>
@@ -4267,21 +4264,42 @@ Wednesday.  C<$yday> is the day of the year, in the range C<0..364>
 C<$isdst> is true if the specified time occurs when Daylight Saving
 Time is in effect, false otherwise.
 
-If EXPR is omitted, L<C<localtime>|/localtime EXPR> uses the current
-time (as returned by L<C<time>|/time>).
+To get a human-readable date/time string, use L<POSIX/C<strftime>>:
+
+    use POSIX qw(strftime);
+    my @now = localtime;
+    my $now_string = strftime "%Y-%m-%d %H:%M:%S", @now;
+    # e.g. "2025-11-29 15:19:02"
+
+To get just the year, you can use either L<POSIX/C<strftime>>:
+
+    use POSIX qw(strftime);
+    # full year:
+    my $year = strftime "%Y", localtime;
+    # just the last two digits of the year:
+    my $ar = strftime "%y", localtime;
+
+... or manual arithmetic:
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+                                                            localtime;
+    # full year:
+    $year += 1900;
+    # just the last two digits of the year:
+    my $ar = sprintf("%02d", $year % 100);
 
 In scalar context, L<C<localtime>|/localtime EXPR> returns the
 L<ctime(3)> value:
 
- my $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
+    my $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
 This scalar value is always in English, and is B<not> locale-dependent.
 To get similar but locale-dependent date strings, try for example:
 
- use POSIX qw(strftime);
- my $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
- # or for GMT formatted appropriately for your locale:
- my $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
+    use POSIX qw(strftime);
+    my $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
+    # or for GMT formatted appropriately for your locale:
+    my $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
 
 C<$now_string> will be formatted according to the current LC_TIME locale
 the program or thread is running in.  See L<perllocale> for how to set
