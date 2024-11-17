@@ -1046,7 +1046,7 @@ succeeds a positive value but is infixed, by replacing the radix
 character.
 
 Prior to Perl v5.37.7, empty string fields and numeric fields with value
--1 were omittted from the returned hash.
+-1 were omitted from the returned hash.
 
 =item C<localtime>
 
