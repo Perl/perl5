@@ -1564,7 +1564,9 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
         }
         else {
             /* See if the input has malformations besides possibly overlong */
-            if (UNLIKELY(possible_problems & ~UTF8_GOT_LONG)) {
+            if (   UNLIKELY(possible_problems & ~UTF8_GOT_LONG)
+                && LIKELY(flags & ~(UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)))
+            {
 
                 /* Here, the input is malformed in some way besides possibly
                  * overlong, except it doesn't overflow.  If you look at the
@@ -1576,6 +1578,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                  * be enough information present to determine if what we have
                  * so far would, if filled out completely, be for one of these
                  * problematic code points we are being asked to check for.
+                 * But to determine if a code point is a non-character, we need
+                 * all bytes, so this effort would be wasted, hence the
+                 * conditional above excludes this step if those are the only
+                 * thing being checked for.
                  *
                  * The range of surrogates is
                  *      ASCII platforms                  EBCDIC I8
@@ -1601,12 +1607,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                  * This is done by pretending the input was filled out to its
                  * full length with occurrences of the smallest continuation
                  * byte.  For surrogates we could just look at the bytes, but
-                 * this single algorithm works for both those and supers.
-                 *
-                 * To determine if a code point is a non-character, we need all
-                 * bytes, so this effort is wasted if the caller is looking for
-                 * just those, but that is unlikely; the two official Unicode
-                 * restrictions include the other two. */
+                 * this single algorithm works for both those and supers. */
                 for (unsigned i = curlen; i < expectlen; i++) {
                     uv = UTF8_ACCUMULATE(uv,
                                 I8_TO_NATIVE_UTF8(UTF_MIN_CONTINUATION_BYTE));
