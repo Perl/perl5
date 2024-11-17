@@ -1534,15 +1534,19 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
         possible_problems |= UTF8_GOT_OVERFLOW;
     }
 
+/* Is the first byte of 's' a start byte in the UTF-8 encoding system, not
+ * excluding starting an overlong sequence? */
+#define UTF8_IS_SYNTACTIC_START_BYTE(s)  (NATIVE_TO_I8(*s) >= 0xC0)
+
     /* Check for overlong.  If no problems so far, 'uv' is the correct code
-     * point value.  Simply see if it is expressible in fewer bytes.  Otherwise
-     * we must look at the UTF-8 byte sequence itself to see if it is for an
-     * overlong */
+     * point value.  Simply see if it is expressible in fewer bytes.  But if
+     * there are other malformations, we may be still be able to tell if this
+     * is an overlong by looking at the UTF-8 byte sequence itself */
     if (   (   LIKELY(! possible_problems)
-            && UNLIKELY(expectlen > (STRLEN) OFFUNISKIP(uv)))
-        || (       UNLIKELY(possible_problems)
-            && (   UNLIKELY(! UTF8_IS_START(*s0))
-                || (UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))))
+            && UNLIKELY(expectlen > OFFUNISKIP(uv)))
+        || (   UNLIKELY(possible_problems)
+            && UTF8_IS_SYNTACTIC_START_BYTE(s0)
+            && UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))
     {
         possible_problems |= UTF8_GOT_LONG;
     }
