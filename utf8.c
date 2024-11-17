@@ -1456,8 +1456,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     }
 
     /* We now know we can examine the first byte of the input */
-    expectlen = UTF8SKIP(s);
-    uv = *s;
+    expectlen = UTF8SKIP(s0);
 
     /* This is a helper function; invariants should have been handled before
      * calling it */
@@ -1472,7 +1471,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     }
 
     /* A continuation character can't start a valid sequence */
-    if (UNLIKELY(UTF8_IS_CONTINUATION(uv))) {
+    if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
         curlen = 1;
         uv = UNICODE_REPLACEMENT;
@@ -1487,7 +1486,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     /* Convert to I8 on EBCDIC (no-op on ASCII), then remove the leading bits
      * that indicate the number of bytes in the character's whole UTF-8
      * sequence, leaving just the bits that are part of the value.  */
-    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
+    uv = NATIVE_UTF8_TO_I8(*s0) & UTF_START_MASK(expectlen);
 
     /* Setup the loop end point, making sure to not look past the end of the
      * input string, and flag it as too short if the size isn't big enough. */
