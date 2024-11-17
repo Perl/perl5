@@ -2038,6 +2038,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
         bool disallowed = FALSE;
         const U32 orig_problems = possible_problems;
+        const UV input_uv = uv;
         U32 error_flags_return = 0;
         AV * msgs_return = NULL;
 
@@ -2083,9 +2084,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * priority items are done before lower ones; some of which may
              * depend on earlier actions.  Also the ordering tries to cause any
              * messages to be displayed in kind of decreasing severity order.
-             * But the overlong must come last, as it changes 'uv' looked at by
-             * the others */
-
+             * */
             U32 this_problem = 1U << lsbit_pos32(possible_problems);
 
             U32 this_flag_bit = this_problem;
@@ -2202,7 +2201,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         pack_warn = packWARN(WARN_SURROGATE);
 
                         /* These are the only errors that can occur with a
-                        * surrogate when the 'uv' isn't valid */
+                        * surrogate when the 'input_uv' isn't valid */
                         if (orig_problems & UTF8_GOT_TOO_SHORT) {
                             message = Perl_form(aTHX_
                                     "UTF-16 surrogate (any UTF-8 sequence that"
@@ -2210,7 +2209,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                     _byte_dump_string(s0, curlen, 0));
                         }
                         else {
-                            message = Perl_form(aTHX_ surrogate_cp_format, uv);
+                            message = Perl_form(aTHX_ surrogate_cp_format,
+                                                      input_uv);
                         }
                     }
                 }
@@ -2235,7 +2235,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                    & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
 
                         pack_warn = packWARN(WARN_NONCHAR);
-                        message = Perl_form(aTHX_ nonchar_cp_format, uv);
+                        message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
                     }
                 }
 
@@ -2258,10 +2258,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
 
-                        /* These error types cause 'uv' to be something that
-                         * isn't what was intended, so can't use it in the
+                        /* These error types cause 'input_uv' to be something
+                         * that isn't what was intended, so can't use it in the
                          * message.  The other error types either can't
-                         * generate an overlong, or else the 'uv' is valid */
+                         * generate an overlong, or else the 'input_uv' is
+                         * valid */
                         if (orig_problems &
                                         (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
                         {
@@ -2277,12 +2278,12 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         else {
                             U8 tmpbuf[UTF8_MAXBYTES+1];
                             const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
-                                                                        uv, 0);
+                                                                input_uv, 0);
                             /* Don't use U+ for non-Unicode code points, which
                              * includes those in the Latin1 range */
-                            const char * preface = (   UNICODE_IS_SUPER(uv)
+                            const char * preface = (  UNICODE_IS_SUPER(input_uv)
 #ifdef EBCDIC
-                                                    || uv <= 0xFF
+                                                    || input_uv <= 0xFF
 #endif
                                                    )
                                                    ? "0x"
@@ -2294,9 +2295,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 _byte_dump_string(s0, send - s0, 0),
                                 _byte_dump_string(tmpbuf, e - tmpbuf, 0),
                                 preface,
-                                ((uv < 256) ? 2 : 4), /* Field width of 2 for
-                                                         small code points */
-                                UNI_TO_NATIVE(uv));
+                                ((input_uv < 256) ? 2 : 4), /* Field width of 2
+                                                               for small code
+                                                               points */
+                                UNI_TO_NATIVE(input_uv));
                         }
                     }
                 }
@@ -2426,7 +2428,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * lie; 0x41 is Unicode.  It was expressed in a non-standard
                  * form of UTF-8 that Unicode doesn't approve of.) */
                 cp_format = (   (orig_problems & (UTF8_GOT_TOO_SHORT))
-                             || ! UNICODE_IS_PERL_EXTENDED(uv))
+                             || ! UNICODE_IS_PERL_EXTENDED(input_uv))
                             ? NULL
                             : PL_extended_cp_format;
                 non_cp_format = "Any UTF-8 sequence that starts with \"%s\""
@@ -2457,7 +2459,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     if (NEED_MESSAGE(WARN_NON_UNICODE, ckWARN, WARN_PORTABLE)) {
                         pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
                         if (cp_format) {
-                            message = Perl_form(aTHX_ cp_format, uv);
+                            message = Perl_form(aTHX_ cp_format, input_uv);
                         }
                         else {
                             message = Perl_form(aTHX_
@@ -2504,7 +2506,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
                         pack_warn = packWARN(WARN_NON_UNICODE);
                         if (cp_format) {
-                            message = Perl_form(aTHX_ cp_format, uv);
+                            message = Perl_form(aTHX_ cp_format, input_uv);
                         }
                         else {
                             message = Perl_form(aTHX_
