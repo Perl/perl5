@@ -79,7 +79,7 @@ BEGIN {
         @cmpop,    # include the numerical comparison operators.
         '<< >>',
         '+ -',
-        '* / %',    # highest prcedence operators.
+        '* / %',    # highest precedence operators.
     );
 
     my @unop= qw( ! ~ + - );
@@ -220,7 +220,7 @@ sub _count_ops {
 # in a sensible order. Anything starting with PERL_IN_
 # should be on the left in alphabetical order. Digits
 # should be on the right (eg 0), and ties are resolved
-# by stripping non-alpha-numerc, thus removing underbar
+# by stripping non-alpha-numeric, thus removing underbar
 # parens, spaces, logical operators, etc, and then by
 # lc comparison of the result.
 sub _sort_terms {
@@ -343,7 +343,7 @@ sub _pt_as_str {
 }
 
 # Returns the precedence of an operator, returns 0 if there is no token
-# or the next token is not an op, or confesss if it encounters an op it does not
+# or the next token is not an op, or confess if it encounters an op it does not
 # know.
 sub _precedence {
     my $self= shift;
@@ -1657,7 +1657,7 @@ conditional blocks which include the line. Each line has its own copy of the
 conditions it was operated on currently, but that may change so dont alter
 this data. The inner arrays may contain more than one element. If so then the
 line is part of an "#else" or "#elsif" and the clauses should be considered to
-be a conjuction when considering "when is this line included", however when
+be a conjunction when considering "when is this line included", however when
 considered as part of an if/elsif/else, each added clause represents the most
 recent condition. In the following you can see how:
 
