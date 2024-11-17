@@ -2828,7 +2828,7 @@ L<[GH #15606]|https://github.com/Perl/perl5/issues/15606>
 
 =item *
 
-Avoid a heap-after-use error in the parser when creating an error messge
+Avoid a heap-after-use error in the parser when creating an error message
 for a syntactically invalid heredoc.
 L<[GH #15527]|https://github.com/Perl/perl5/issues/15527>
 

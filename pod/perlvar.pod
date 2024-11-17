@@ -812,7 +812,7 @@ In order to make it easy to perform an action with shared state both
 before and after the require keyword was executed the C<require__before>
 hook may return a "post-action" coderef which will in turn be executed when
 the C<require> completes.  This coderef will be executed regardless as to
-whether the require completed succesfully or threw an exception.  It will
+whether the require completed successfully or threw an exception.  It will
 be called with the filename that was required.  You can check %INC to
 determine if the require was successful.  Any other return from the
 C<require__before> hook will be silently ignored.

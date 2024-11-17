@@ -167,7 +167,7 @@ it managed to execute an average of 628,930 times a second during our test, the
 direct approach managed to run an additional 204,403 times, unfortunately.
 Unfortunately, because there are many examples of code written using the
 multiple layer direct variable access, and it's usually horrible.  It is,
-however, minusculy faster.  The question remains whether the minute gain is
+however, minusculely faster.  The question remains whether the minute gain is
 actually worth the eyestrain, or the loss of maintainability.
 
 =head2  Search and replace or tr
@@ -198,7 +198,7 @@ noticing it's assigned only the once.
 
  my $STR = "$$-this and that";
 
- timethese( 1000000, {
+ timethese(1000000, {
  'sr'  => sub { my $str = $STR; $str =~ s/[aeiou]/x/g; return $str; },
  'tr'  => sub { my $str = $STR; $str =~ tr/aeiou/xxxxx/; return $str; },
  });

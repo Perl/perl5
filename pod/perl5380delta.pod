@@ -216,7 +216,7 @@ have a constant target label, and that label is found within the block.
 
 =head2 New regexp variable ${^LAST_SUCCESSFUL_PATTERN}
 
-This allows access to the last succesful pattern that matched in the current
+This allows access to the last successful pattern that matched in the current
 scope.  Many aspects of the regex engine refer to the "last successful
 pattern". The empty pattern reuses it, and all of the magic regex vars relate
 to it. This allows access to its pattern. The following code
@@ -1428,7 +1428,7 @@ account.
 
 Removed C<< Complex regular subexpression recursion limit (%d) exceeded >>
 
-The regular expresion engine has not used recursion in some time. This
+The regular expression engine has not used recursion in some time. This
 warning no longer makes sense.
 
 See [L<GH #19636|https://github.com/Perl/perl5/pull/19636>].

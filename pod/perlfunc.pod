@@ -1001,7 +1001,7 @@ confusion.
 Also avoid C<bless>ing things into the class name C<0>; this
 will cause code which (erroneously) checks the result of
 L<C<ref>|/ref EXPR> to see if a reference is C<bless>ed to fail,
-as "0", a falsy value, is returned.
+as "0", a false value, is returned.
 
 See L<perlmod/"Perl Modules"> for more details.
 
@@ -3582,7 +3582,7 @@ is used as a C<while>/C<for> condition, then the condition actually
 tests for definedness of the expression's value, not for its regular
 truth value.
 
-Internal implemenation details:
+Internal implementation details:
 
 This is the internal function implementing the C<< <*.c> >> operator,
 but you can use it directly. The C<< <*.c> >> operator is discussed in

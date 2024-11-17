@@ -6984,7 +6984,7 @@ enough to figure out what you really meant.
 =item Unexpected characters while parsing class :isa attribute: %s
 
 (F) You tried to specify something other than a single class name with an
-optional trailing verison number as the value for a C<class> C<:isa>
+optional trailing version number as the value for a C<class> C<:isa>
 attribute.  This confused the parser.
 
 =item Unexpected exit %u
@@ -7044,7 +7044,7 @@ the only way to do that in Perl is to mark it as serious.
 
 (F) A Unicode property wildcard looks like a delimited regular
 expression pattern (all within the braces of the enclosing C<\p{...}>.
-The closing delimtter to match the opening one was not found.  If the
+The closing delimiter to match the opening one was not found.  If the
 opening one is escaped by preceding it with a backslash, the closing one
 must also be so escaped.
 
@@ -7710,7 +7710,7 @@ only C.  This usually means there's a better way to do it in Perl.
 a starting delimiter of a string outside the scope of
 S<C<use feature 'extra_paired_delimiters'>>. This character is the
 mirror image of another Unicode character; within the scope of that
-feature, the two are considered a pair for delimitting strings. It is
+feature, the two are considered a pair for delimiting strings. It is
 planned to make that feature the default, at which point this usage
 would become illegal; hence this warning.
 
@@ -7734,7 +7734,7 @@ subpatterns in regex; marked by S<<-- HERE> in m/%s/
 (F) You were using a wildcard subpattern a Unicode property value, and
 the subpattern contained something that is illegal.  Not all regular
 expression capabilities are legal in such subpatterns, and this is one.
-Rewrite your subppattern to not use the offending construct.
+Rewrite your subpattern to not use the offending construct.
 See L<perlunicode/Wildcards in Property Values>.
 
 =item Use of -l on filehandle%s
