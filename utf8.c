@@ -1377,7 +1377,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     U8 * adjusted_s0;
     U8 temp_char_buf[UTF8_MAXBYTES + 1]; /* Used to avoid a Newx in this
                                             routine; see [perl #130921] */
-    UV uv_so_far;
     dTHX;
 
     PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER;
@@ -1421,7 +1420,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     avail_len = 0;
     discard_errors = 0;
     adjusted_s0 = (U8 *) s0;
-    uv_so_far = 0;
 
     if (errors) {
         *errors = 0;
@@ -1534,16 +1532,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * A convenience macro that matches either of the too-short conditions.  */
 #   define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
 
-    if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
-        uv_so_far = uv;
-        uv = UNICODE_REPLACEMENT;
-    }
-
     /* Check for overflow.  The algorithm requires us to not look past the end
      * of the current character, even if partial, so the upper limit is 's' */
     if (UNLIKELY(does_utf8_overflow(s0, s) >= ALMOST_CERTAINLY_OVERFLOWS)) {
         possible_problems |= UTF8_GOT_OVERFLOW;
-        uv = UNICODE_REPLACEMENT;
     }
 
     /* Check for overlong.  If no problems so far, 'uv' is the correct code
@@ -1566,7 +1558,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                            * cases */
             &&   LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
         {
-            UV min_uv = uv_so_far;
+            UV min_uv = uv;
             STRLEN i;
 
             /* Here, the input is both overlong and is missing some trailing
@@ -1714,6 +1706,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                  * extended UTF-8, but we handle all three cases here */
                 possible_problems &= ~(UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
                 *errors |= UTF8_GOT_OVERFLOW;
+                uv = UNICODE_REPLACEMENT;
 
                 /* But the API says we flag all errors found */
                 if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
@@ -1807,6 +1800,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
               case UTF8_GOT_SHORT:
                 *errors |= UTF8_GOT_SHORT;
+                uv = UNICODE_REPLACEMENT;
 
                 if (! (flags & UTF8_ALLOW_SHORT)) {
                     disallowed = TRUE;
@@ -1829,6 +1823,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
               case UTF8_GOT_NON_CONTINUATION:
                 *errors |= UTF8_GOT_NON_CONTINUATION;
+                uv = UNICODE_REPLACEMENT;
 
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
                     disallowed = TRUE;
