@@ -1526,7 +1526,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * separate.
      *
      * A convenience macro that matches either of the too-short conditions.  */
-#   define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
+#define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
 
     /* Check for overflow.  The algorithm requires us to not look past the end
      * of the current character, even if partial, so the upper limit is 's' */
@@ -1538,8 +1538,8 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * point value.  Simply see if it is expressible in fewer bytes.  Otherwise
      * we must look at the UTF-8 byte sequence itself to see if it is for an
      * overlong */
-    if (     (   LIKELY(! possible_problems)
-              && UNLIKELY(expectlen > (STRLEN) OFFUNISKIP(uv)))
+    if (   (   LIKELY(! possible_problems)
+            && UNLIKELY(expectlen > (STRLEN) OFFUNISKIP(uv)))
         || (       UNLIKELY(possible_problems)
             && (   UNLIKELY(! UTF8_IS_START(*s0))
                 || (UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))))
