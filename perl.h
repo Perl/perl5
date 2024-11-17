@@ -940,6 +940,8 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
  * know what you're doing: tests and CPAN modules' tests are bound to fail.
  */
 #ifdef NO_TAINT_SUPPORT
+#   define PL_tainting		PL_taint.u.tainting
+#   define PL_tainted		PL_taint.u.tainted
 #   define TAINT		NOOP
 #   define TAINT_NOT		NOOP
 #   define TAINT_IF(c)		NOOP
@@ -948,6 +950,7 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 #   define TAINT_set(s)		NOOP
 #   define TAINT_get		0
 #   define TAINTING_get		0
+#   define TAINT_AND_TAINTING_get	0
 #   define TAINTING_set(s)	NOOP
 #   define TAINT_WARN_get       0
 #   define TAINT_WARN_set(s)    NOOP
@@ -1014,6 +1017,10 @@ violations are fatal.
 
 =cut
 */
+
+#define PL_tainting PL_taint.u.tainting
+#define PL_tainted PL_taint.u.tainted
+
     /* Set to tainted if we are running under tainting mode */
 #   define TAINT		(PL_tainted = PL_tainting)
 
@@ -1027,6 +1034,8 @@ violations are fatal.
 #   define TAINT_set(s)		(PL_tainted = cBOOL(s))
 #   define TAINT_get		(cBOOL(UNLIKELY(PL_tainted)))    /* Is something tainted? */
 #   define TAINTING_get		(cBOOL(UNLIKELY(PL_tainting)))
+/*  Efficient version of (PL_tainted && PL_tainting) */
+#   define TAINT_AND_TAINTING_get	(UNLIKELY(PL_taint.both == (TRUE | (TRUE << 8))))
 #   define TAINTING_set(s)	(PL_tainting = cBOOL(s))
 #   define TAINT_WARN_get       (PL_taint_warn)
 #   define TAINT_WARN_set(s)    (PL_taint_warn = cBOOL(s))
@@ -3308,6 +3317,14 @@ typedef struct padname PADNAME;
 
 #include "handy.h"
 #include "charclass_invlists.h"
+
+typedef union {
+    U16 both;
+    struct {
+        bool tainting;
+        bool tainted;
+    } u;
+} TAINT_U;
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
 #   if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)

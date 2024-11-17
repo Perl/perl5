@@ -74,8 +74,9 @@ PERLVAR(I, multideref_pc, UNOP_AUX_item *)
 PERLVAR(I, curpm,	PMOP *)		/* what to do \ interps in REs from */
 PERLVAR(I, curpm_under,        PMOP *)                /* what to do \ interps in REs from */
 
-PERLVAR(I, tainting,	bool)		/* ? doing taint checks */
-PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
+/* bool PL_tainting --- ? doing taint checks */
+/* bool PL_tainted  --- using variables controlled by $< */
+PERLVAR(I, taint,	TAINT_U)
 
 /* PL_delaymagic is currently used for two purposes: to assure simultaneous
  * updates in ($<,$>) = ..., and to assure atomic update in push/unshift

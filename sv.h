@@ -1722,9 +1722,22 @@ the outputs of an expression in a pessimistic fashion; i.e., without paying
 attention to precisely which outputs are influenced by which inputs.
 
 =cut
-*/
 
-#define sv_taint(sv)	  sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0)
+=for apidoc Cm|SV* sv|SvTAINTTC|SV* sv
+Identical to C<SvTAINT>, except optimized for for C compilers to do tail calls.
+Incoming arg I<sv> will be returned as the retval of I<SvTAINTTC>.
+The return value I<SV *> pointer will be identical to the incoming
+argument I<SV *> pointer. Ex. I<sv = sv;>).  This way if I<TAINT> is on, and
+the slow path branch executes, which has an internal helper function, that
+helper function returns the argument passed in, and C compilers can optimize
+the slowpath branch to a tail call, or use less registers.  This macro is mostly
+intended to be used if C<SvTAINTTC> is the last or almost last statement
+in the caller function, and the caller has a I<SV *> return type, and will
+return C<SvTAINTTC>'s arg I<sv>, to its caller as a return value.  Similar idea
+to C<sv_2mortal>.
+
+=cut
+*/
 
 #ifdef NO_TAINT_SUPPORT
 #   define SvTAINTED(sv) 0
@@ -1737,9 +1750,12 @@ attention to precisely which outputs are influenced by which inputs.
 #define SvTAINT(sv)			\
     STMT_START {			\
         assert(TAINTING_get || !TAINT_get); \
-        if (UNLIKELY(TAINT_get))	\
-            SvTAINTED_on(sv);	        \
+        if (TAINT_AND_TAINTING_get) \
+            sv_taint(sv); \
     } STMT_END
+
+#define SvTAINTTC(sv) ((assert(TAINTING_get || !TAINT_get), \
+    TAINT_AND_TAINTING_get) ? sv_taint((sv)) : (sv))
 
 /*
 =for apidoc_section $SV

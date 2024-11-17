@@ -90,23 +90,6 @@ Perl_sv_unref(pTHX_ SV *sv)
     sv_unref_flags(sv, 0);
 }
 
-/*
-=for apidoc_section $tainting
-=for apidoc sv_taint
-
-Taint an SV.  Use C<SvTAINTED_on> instead.
-
-=cut
-*/
-
-void
-Perl_sv_taint(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_TAINT;
-
-    sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
-}
-
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();
  * this function provided for binary compatibility only
  */
