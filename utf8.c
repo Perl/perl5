@@ -1459,6 +1459,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     expectlen = UTF8SKIP(s);
     uv = *s;
 
+    /* This is a helper function; invariants should have been handled before
+     * calling it */
+    assert(! NATIVE_BYTE_IS_INVARIANT(*s0));
+
     /* A well-formed UTF-8 character, as the vast majority of calls to this
      * function will be for, has this expected length.  For efficiency, set
      * things up here to return it.  It will be overridden only in those rare
