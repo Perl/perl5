@@ -234,7 +234,9 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
             if (msgs) {
                 *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
                                    category,
-                                   UNICODE_GOT_PERL_EXTENDED);
+                                   (flags & UNICODE_WARN_PERL_EXTENDED)
+                                   ? UNICODE_GOT_PERL_EXTENDED
+                                   : UNICODE_GOT_SUPER);
             }
             else {
                 Perl_ck_warner_d(aTHX_ category, format, input_uv);
