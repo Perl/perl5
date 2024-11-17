@@ -1933,7 +1933,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
         while (possible_problems) { /* Handle each possible problem */
             char * message = NULL;
-            U32 this_flag_bit = 0;
 
             /* Each 'case' handles one problem given by a bit in
              * 'possible_problems'.  The lowest bit positions, as #defined in
@@ -1945,6 +1944,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * it changes 'uv' looked at by the others */
 
             U32 this_problem = 1U << lsbit_pos32(possible_problems);
+
+            U32 this_flag_bit = this_problem;
+
             possible_problems &= ~this_problem;
 
             /* Most case:s use this; overridden in a few */
@@ -1971,7 +1973,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_ "%s (empty string)",
                                                    malformed_text);
-                        this_flag_bit = UTF8_GOT_EMPTY;
                     }
                 }
 
@@ -1988,7 +1989,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 " with no preceding start byte)",
                                 malformed_text,
                                 _byte_dump_string(s0, 1, 0), *s0);
-                        this_flag_bit = UTF8_GOT_CONTINUATION;
                     }
                 }
 
@@ -2008,7 +2008,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                              (int)avail_len,
                              avail_len == 1 ? "" : "s",
                              (int)expectlen);
-                        this_flag_bit = UTF8_GOT_SHORT;
                     }
                 }
 
@@ -2033,7 +2032,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                             printlen,
                                                             s - s0,
                                                             (int) expectlen));
-                        this_flag_bit = UTF8_GOT_NON_CONTINUATION;
                     }
                 }
 
@@ -2058,7 +2056,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         else {
                             message = Perl_form(aTHX_ surrogate_cp_format, uv);
                         }
-                        this_flag_bit = UTF8_GOT_SURROGATE;
                     }
                 }
 
@@ -2082,7 +2079,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                         pack_warn = packWARN(WARN_NONCHAR);
                         message = Perl_form(aTHX_ nonchar_cp_format, uv);
-                        this_flag_bit = UTF8_GOT_NONCHAR;
                     }
                 }
 
@@ -2151,7 +2147,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                          small code points */
                                 UNI_TO_NATIVE(uv));
                         }
-                        this_flag_bit = UTF8_GOT_LONG;
                     }
                 }
 
@@ -2204,7 +2199,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         message = Perl_form(aTHX_ "%s: %s (overflows)",
                                             malformed_text,
                                             _byte_dump_string(s0, curlen, 0));
-                        this_flag_bit = UTF8_GOT_OVERFLOW;
                     }
                 }
 
@@ -2228,7 +2222,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         else {
                             message = Perl_form(aTHX_ super_cp_format, uv);
                         }
-                        this_flag_bit = UTF8_GOT_SUPER;
                     }
                 }
 
@@ -2288,8 +2281,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * this iteration of the loop */
             if (message) {
                 if (msgs) {
-                    assert(this_flag_bit);
-
                     if (*msgs == NULL) {
                         *msgs = newAV();
                     }
