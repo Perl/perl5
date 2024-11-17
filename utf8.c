@@ -1371,12 +1371,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     U32 discard_errors;   /* Used to save branches when 'errors' is NULL; this
                              gets set and discarded */
 
-    /* The below are used only if there is both an overlong malformation and a
-     * too short one.  Otherwise the first two are set to 's0' and 'send', and
-     * the third not used at all */
-    U8 * adjusted_s0;
-    U8 temp_char_buf[UTF8_MAXBYTES + 1]; /* Used to avoid a Newx in this
-                                            routine; see [perl #130921] */
     dTHX;
 
     PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER;
@@ -1419,7 +1413,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     expectlen = 0;
     avail_len = 0;
     discard_errors = 0;
-    adjusted_s0 = (U8 *) s0;
 
     if (errors) {
         *errors = 0;
@@ -1549,37 +1542,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 || (UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))))
     {
         possible_problems |= UTF8_GOT_LONG;
-
-        if (   UNLIKELY(   possible_problems & UTF8_GOT_TOO_SHORT)
-
-                          /* The calculation in the 'true' branch of this 'if'
-                           * below won't work if overflows, and isn't needed
-                           * anyway.  Further below we handle all overflow
-                           * cases */
-            &&   LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
-        {
-            UV min_uv = uv;
-            STRLEN i;
-
-            /* Here, the input is both overlong and is missing some trailing
-             * bytes.  There is no single code point it could be for, but there
-             * may be enough information present to determine if what we have
-             * so far is for an unallowed code point, such as for a surrogate.
-             * The code further below has the intelligence to determine this,
-             * but just for non-overlong UTF-8 sequences.  What we do here is
-             * calculate the smallest code point the input could represent if
-             * there were no too short malformation.  Then we compute and save
-             * the UTF-8 for that, which is what the code below looks at
-             * instead of the raw input.  It turns out that the smallest such
-             * code point is all we need. */
-            for (i = curlen; i < expectlen; i++) {
-                min_uv = UTF8_ACCUMULATE(min_uv,
-                                I8_TO_NATIVE_UTF8(UTF_MIN_CONTINUATION_BYTE));
-            }
-
-            adjusted_s0 = temp_char_buf;
-            (void) uvoffuni_to_utf8_flags(adjusted_s0, min_uv, 0);
-        }
     }
 
     /* Here, we have found all the possible problems, except for when the input
@@ -1604,38 +1566,58 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
             /* See if the input has malformations besides possibly overlong */
             if (UNLIKELY(possible_problems & ~UTF8_GOT_LONG)) {
 
-            /* Here, there is a malformation other than overlong, we need to
-               look at the source UTF-8, possibly adjusted to be non-overlong */
-            if (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
-                || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0)))
-            {
-            if (UNLIKELY(NATIVE_UTF8_TO_I8(*adjusted_s0)
-                                                    > UTF_START_BYTE_110000_))
-            {
-                possible_problems |= UTF8_GOT_SUPER;
-            }
-            else if (curlen > 1) {
-                if (UNLIKELY(   NATIVE_UTF8_TO_I8(*adjusted_s0)
-                                                == UTF_START_BYTE_110000_
-                             && NATIVE_UTF8_TO_I8(*(adjusted_s0 + 1))
-                                                >= UTF_FIRST_CONT_BYTE_110000_))
-                {
-                    possible_problems |= UTF8_GOT_SUPER;
-                }
-                else if (UNLIKELY(is_SURROGATE_utf8(adjusted_s0))) {
-                    possible_problems |= UTF8_GOT_SURROGATE;
+                /* Here, the input is malformed in some way besides possibly
+                 * overlong, except it doesn't overflow.  If you look at the
+                 * code above, to get here, it must be a too short string,
+                 * possibly overlong besides. */
+                assert(possible_problems & UTF8_GOT_TOO_SHORT);
+
+                /* There is no single code point it could be for, but there may
+                 * be enough information present to determine if what we have
+                 * so far would, if filled out completely, be for one of these
+                 * problematic code points we are being asked to check for.
+                 *
+                 * The range of surrogates is
+                 *      ASCII platforms                  EBCDIC I8
+                 *      "\xed\xa0\x80"               "\xf1\xb6\xa0\xa0"
+                 * to   "\xed\xbf\xbf".              "\xf1\xb7\xbf\xbf"
+                 *
+                 * (Continuation byte range):
+                 *       \x80 to \xbf                     \xa0 to \xbf
+                 *
+                 * In both cases, if we have the first two bytes, we can tell
+                 * if it is a surrogate or not.  If we have only one byte, we
+                 * can't tell, so we have to assume it isn't a surrogate.
+                 *
+                 * It is more complicated for supers due to the possibility of
+                 * overlongs. For example, in ASCII, the first non-Unicode code
+                 * point is represented by the sequence \xf4\x90\x80\x80, so
+                 * \xf8\x80\x80\x80\x41 looks like it is for a much bigger code
+                 * point.  But it in fact is an overlong representation of the
+                 * letter "A".
+                 *
+                 * So what we do is calculate the smallest code point the input
+                 * could represent if there were no too short malformation.
+                 * This is done by pretending the input was filled out to its
+                 * full length with occurrences of the smallest continuation
+                 * byte.  For surrogates we could just look at the bytes, but
+                 * this single algorithm works for both those and supers.
+                 *
+                 * To determine if a code point is a non-character, we need all
+                 * bytes, so this effort is wasted if the caller is looking for
+                 * just those, but that is unlikely; the two official Unicode
+                 * restrictions include the other two. */
+                for (unsigned i = curlen; i < expectlen; i++) {
+                    uv = UTF8_ACCUMULATE(uv,
+                                I8_TO_NATIVE_UTF8(UTF_MIN_CONTINUATION_BYTE));
                 }
             }
 
-            /* We need a complete well-formed UTF-8 character to discern
-             * non-characters, so can't look for them here */
-            }
-        }
-        else
-
-            /* Here there were no malformations, or the only malformation is an
-             * overlong, 'uv' is valid, and the 'if' above made sure that it
-             * could be problematic */
+            /* Here 'uv' is as valid as it can get.  Perhaps it was valid all
+             * along because there were no malformations, or the only
+             * malformation is an overlong (which allows it to be fully
+             * computed).  Or it may have been "cured" as best it can by the
+             * loop just above. */
             if (isUNICODE_POSSIBLY_PROBLEMATIC(uv)) {
                 if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
                     possible_problems |= UTF8_GOT_SURROGATE;
