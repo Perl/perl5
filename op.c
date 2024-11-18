@@ -2257,9 +2257,19 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_ASLICE:
         case OP_HELEM:
         case OP_HSLICE:
-            if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
-                /* Otherwise it's "Useless use of grep iterator" */
-                useless = OP_DESC(o);
+            if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO))) {
+                if ((op_parent(o)->op_type == OP_ONCE) &&
+                    (op_parent(o)->op_next == o)
+                ){
+                    /* An already set "state" OP has been encounted
+                     * and there's no point pushing anything to the
+                     * stack in void context. */
+                    op_parent(o)->op_next = o->op_next;
+                } else {
+                    /* Otherwise it's "Useless use of grep iterator" */
+                    useless = OP_DESC(o);
+                }
+            }
             break;
 
         case OP_SPLIT:
@@ -8597,8 +8607,8 @@ S_newONCEOP(pTHX_ OP *initop, OP *padop)
 {
     const PADOFFSET target = padop->op_targ;
     OP *const nexop = newOP(padop->op_type,
-                            (padop->op_flags & ~(OPf_REF|OPf_MOD|OPf_SPECIAL))
-                            | ((padop->op_private & ~OPpLVAL_INTRO) << 8));
+            (padop->op_flags & ~(OPf_REF|OPf_MOD|OPf_SPECIAL|OPf_WANT))
+            | ((padop->op_private & ~(OPpLVAL_INTRO|OPpPAD_STATE)) << 8));
     OP *const first = newOP(OP_NULL, 0);
     OP *const nullop = newCONDOP(0, first, initop, nexop);
     /* XXX targlex disabled for now; see ticket #124160
