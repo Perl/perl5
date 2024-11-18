@@ -406,7 +406,7 @@ checkOptree ( name	=> 'void context state',
 # 4      <$> const[IV 1] s
 # 5      <1> padsv_store[$x:2,3] vKS/LVINTRO,STATE
 #            goto 6
-# 8  <0> padsv[$x:2,3] vRM*/STATE
+# 8  <0> padsv[$x:2,3] v/STATE
 # 6  <;> nextstate(main 3 -e:1) v:%,{,fea=15
 # 7  <@> leave[1 ref] vKP/REFC
 EOT_EOT
@@ -416,7 +416,7 @@ EOT_EOT
 # 4      <$> const(IV 1) s
 # 5      <1> padsv_store[$x:2,3] vKS/LVINTRO,STATE
 #            goto 6
-# 8  <0> padsv[$x:2,3] vRM*/STATE
+# 8  <0> padsv[$x:2,3] v/STATE
 # 6  <;> nextstate(main 3 -e:1) v:%,{,fea=15
 # 7  <@> leave[1 ref] vKP/REFC
 EONT_EONT
@@ -433,7 +433,7 @@ checkOptree ( name	=> 'scalar context state',
 # 5      <0> padsv[$x:2,3] sRM*/LVINTRO,STATE
 # 6      <2> sassign sKS/2
 #            goto 7
-# a  <0> padsv[$x:2,3] sRM*/STATE
+# a  <0> padsv[$x:2,3] s/STATE
 # 7  <1> padsv_store[$y:2,3] vKS/LVINTRO
 # 8  <;> nextstate(main 3 -e:1) v:%,{,fea=15
 # 9  <@> leave[1 ref] vKP/REFC
@@ -445,7 +445,7 @@ EOT_EOT
 # 5      <0> padsv[$x:2,3] sRM*/LVINTRO,STATE
 # 6      <2> sassign sKS/2
 #            goto 7
-# a  <0> padsv[$x:2,3] sRM*/STATE
+# a  <0> padsv[$x:2,3] s/STATE
 # 7  <1> padsv_store[$y:2,3] vKS/LVINTRO
 # 8  <;> nextstate(main 3 -e:1) v:%,{,fea=15
 # 9  <@> leave[1 ref] vKP/REFC

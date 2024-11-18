@@ -8596,18 +8596,18 @@ static OP *
 S_newONCEOP(pTHX_ OP *initop, OP *padop)
 {
     const PADOFFSET target = padop->op_targ;
-    OP *const other = newOP(OP_PADSV,
-                            padop->op_flags
+    OP *const nexop = newOP(padop->op_type,
+                            (padop->op_flags & ~(OPf_REF|OPf_MOD|OPf_SPECIAL))
                             | ((padop->op_private & ~OPpLVAL_INTRO) << 8));
     OP *const first = newOP(OP_NULL, 0);
-    OP *const nullop = newCONDOP(0, first, initop, other);
+    OP *const nullop = newCONDOP(0, first, initop, nexop);
     /* XXX targlex disabled for now; see ticket #124160
-        newCONDOP(0, first, S_maybe_targlex(aTHX_ initop), other);
+        newCONDOP(0, first, S_maybe_targlex(aTHX_ initop), nexop);
      */
     OP *const condop = first->op_next;
 
     OpTYPE_set(condop, OP_ONCE);
-    other->op_targ = target;
+    nexop->op_targ = target;
 
     /* Store the initializedness of state vars in a separate
        pad entry.  */

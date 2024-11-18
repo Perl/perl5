@@ -366,7 +366,9 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Declaring a lexically scoped array or hash using C<state> within a subroutine
+and then immediately returning no longer triggers a "Bizarre copy of HASH/ARRAY
+in subroutine exit" error. [GH #18630]
 
 =back
 
