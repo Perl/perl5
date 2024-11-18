@@ -408,6 +408,15 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+The perl parser would erroneously parse like C<=cut> some other POD directives
+whose names start with I<cut>, prematurely terminating an embedded POD section.
+The following cases were affected: I<cut> followed by a digit (e.g.
+C<=cut2studio>), I<cut> followed by an underscore (e.g. C<=cut_grass>), and in
+string C<eval>, any identifier starting with I<cut> (e.g. C<=cute>).
+[GH #22759]
+
+=item *
+
 Builds with C<-msse> and quadmath on 32-bit x86 systems would crash
 with a misaligned access early in the build. [GH #22577]
 

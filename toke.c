@@ -7349,7 +7349,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
         if (PL_parser->in_pod) {
             /* Incest with pod. */
             if (    memBEGINPs(s, (STRLEN) (PL_bufend - s), "=cut")
-                && !isALPHA(s[4]))
+                && !isIDCONT_A(s[4]))
             {
                 SvPVCLEAR(PL_linestr);
                 PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
@@ -9372,7 +9372,8 @@ yyl_try(pTHX_ char *s)
                     while (s < d) {
                         if (*s++ == '\n') {
                             incline(s, PL_bufend);
-                            if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=cut"))
+                            if (memBEGINPs(s, (STRLEN) (PL_bufend - s), "=cut")
+                                && !isIDCONT_A(s[4]))
                             {
                                 s = (char *) memchr(s,'\n', d - s);
                                 if (s)
