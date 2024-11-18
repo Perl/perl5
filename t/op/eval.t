@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 170);
+plan(tests => 172);
 
 eval 'pass();';
 
@@ -390,6 +390,57 @@ our $x = 1;
         DB::db3();
     };
     is($d7->(), 3);
+}
+
+{
+    # github 22547
+    # these produce the expected results with 5.40.0
+    local $TODO = "eval from DB outside chain is broken";
+    fresh_perl_is(<<'CODE', "1.1\n1.2\n2\n", {}, "lexical lookup from DB::");
+use builtin qw(ceil);
+use strict;
+
+package DB {
+  sub do_eval { eval shift or $@; }
+}
+
+{
+  my $xx = 1.2;
+  my sub f {
+    print DB::do_eval(shift), "\n";
+  }
+  f('1.1');
+  f('$xx');
+  f('ceil(1.1)');
+}
+CODE
+
+    # subtley different, one of the suggested solutions was to make
+    # CvOUTSIDE a weak reference, but in the case below $f exits before
+    # the eval is called, so the outside link from the closure it returns
+    # would break for a weak reference.
+    fresh_perl_is(<<'CODE', "1.1\n1.2\n2\n", {}, "lexical lookup from DB::");
+use strict;
+
+package DB {
+  sub do_eval { eval shift or $@; }
+}
+
+sub g {
+  my $yy;
+  my $f = sub {
+    $yy; # closure
+    use builtin qw(ceil);
+    our $xx = 1.2;
+    my $yy = shift;
+    return sub { print DB::do_eval($yy) || $@, "\n" };
+  };
+  return $f->(shift);
+}
+g('1.1')->();
+g('$xx')->();
+g('ceil(1.1)')->();
+CODE
 }
 
 # [perl #19022] used to end up with shared hash warnings
