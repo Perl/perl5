@@ -8317,8 +8317,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
 
                     if (o->op_type != OP_STUB) {
-                        assert(    o->op_type == OP_NEXTSTATE
-                                || o->op_type == OP_DBSTATE
+                        assert(OP_TYPE_IS_COP_NN(o)
                                 || (o->op_type == OP_NULL
                                     &&  (  o->op_targ == OP_NEXTSTATE
                                         || o->op_targ == OP_DBSTATE

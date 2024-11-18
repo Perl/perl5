@@ -2136,8 +2136,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         const char* useless = NULL;
         OP * next_kid = NULL;
 
-        if (o->op_type == OP_NEXTSTATE
-            || o->op_type == OP_DBSTATE
+        if (OP_TYPE_IS_COP_NN(o)
             || (o->op_type == OP_NULL && (o->op_targ == OP_NEXTSTATE
                                           || o->op_targ == OP_DBSTATE)))
             PL_curcop = (COP*)o;                /* for warning below */
@@ -4516,13 +4515,12 @@ Perl_op_scope(pTHX_ OP *o)
             OP *kid;
             OpTYPE_set(o, OP_SCOPE);
             kid = cLISTOPo->op_first;
-            if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+            if (OP_TYPE_IS_COP_NN(kid)) {
                 op_null(kid);
 
                 /* The following deals with things like 'do {1 for 1}' */
                 kid = OpSIBLING(kid);
-                if (kid &&
-                    (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE))
+                if (kid && OP_TYPE_IS_COP_NN(kid))
                     op_null(kid);
             }
         }
@@ -4538,7 +4536,7 @@ Perl_op_unscope(pTHX_ OP *o)
     if (o && o->op_type == OP_LINESEQ) {
         OP *kid = cLISTOPo->op_first;
         for(; kid; kid = OpSIBLING(kid))
-            if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+            if (OP_TYPE_IS_COP_NN(kid))
                 op_null(kid);
     }
     return o;

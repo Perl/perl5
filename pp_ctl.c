@@ -3034,7 +3034,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
         OP * const kid1 = cUNOPo->op_first;
         /* First try all the kids at this level, since that's likeliest. */
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
-            if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+            if (OP_TYPE_IS_COP_NN(kid)) {
                 STRLEN kid_label_len;
                 U32 kid_label_flags;
                 const char *kid_label = CopLABEL_len_flags(kCOP,
@@ -3057,7 +3057,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
             bool first_kid_of_binary = FALSE;
             if (kid == PL_lastgotoprobe)
                 continue;
-            if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+            if (OP_TYPE_IS_COP_NN(kid)) {
                 if (ops == opstack)
                     *ops++ = kid;
                 else if (ops[-1] != UNENTERABLE

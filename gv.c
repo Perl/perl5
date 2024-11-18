@@ -504,8 +504,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     isGV_with_GP_on(gv);
 
     if (really_sub && !CvISXSUB(has_constant) && CvSTART(has_constant)
-     && (  CvSTART(has_constant)->op_type == OP_NEXTSTATE
-        || CvSTART(has_constant)->op_type == OP_DBSTATE))
+     && (OP_TYPE_IS_COP_NN(CvSTART(has_constant))))
         PL_curcop = (COP *)CvSTART(has_constant);
     GvGP_set(gv, Perl_newGP(aTHX_ gv));
     PL_curcop = old;

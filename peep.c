@@ -1253,9 +1253,7 @@ S_finalize_op(pTHX_ OP* o)
         case OP_EXEC:
             if (OpHAS_SIBLING(o)) {
                 OP *sib = OpSIBLING(o);
-                if ((  sib->op_type == OP_NEXTSTATE || sib->op_type == OP_DBSTATE)
-                    && ckWARN(WARN_EXEC)
-                    && OpHAS_SIBLING(sib))
+                if (OP_TYPE_IS_COP_NN(sib) && ckWARN(WARN_EXEC) && OpHAS_SIBLING(sib))
                 {
                     const OPCODE type = OpSIBLING(sib)->op_type;
                     if (type != OP_EXIT && type != OP_WARN && type != OP_DIE) {
@@ -3343,8 +3341,7 @@ Perl_rpeep(pTHX_ OP *o)
                     ) {
                         U8 old_count;
                         assert(oldoldop->op_next == oldop);
-                        assert(   oldop->op_type == OP_NEXTSTATE
-                               || oldop->op_type == OP_DBSTATE);
+                        assert(OP_TYPE_IS_COP_NN(oldop));
                         assert(oldop->op_next == o);
 
                         old_count
@@ -3379,8 +3376,7 @@ Perl_rpeep(pTHX_ OP *o)
                             && (p->op_private & OPpLVAL_INTRO) == intro
                             && !(p->op_private & ~OPpLVAL_INTRO)
                             && p->op_next
-                            && (   p->op_next->op_type == OP_NEXTSTATE
-                                || p->op_next->op_type == OP_DBSTATE)
+                            && OP_TYPE_IS_COP_NN(p->op_next)
                             && count < OPpPADRANGE_COUNTMASK
                             && base + count == p->op_targ
                     ) {
