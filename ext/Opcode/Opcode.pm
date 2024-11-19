@@ -1,4 +1,4 @@
-package Opcode 1.67;
+package Opcode 1.68;
 
 use strict;
 
@@ -322,7 +322,8 @@ invert_opset function.
     slt sgt sle sge seq sne scmp
     isa
 
-    substr vec stringify study pos length index rindex ord chr
+    substr substr_left vec stringify study pos length index
+    rindex ord chr
 
     ucfirst lcfirst uc lc fc quotemeta trans transr chop schop
     chomp schomp

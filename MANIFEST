@@ -6439,6 +6439,7 @@ t/op/studytied.t			See if study works with tied scalars
 t/op/sub.t				See if subroutines work
 t/op/sub_lval.t				See if lvalue subroutines work
 t/op/substr.t				See if substr works
+t/op/substr_left.t			See if substr($x, 0, $l, '') optimisation works
 t/op/substr_thr.t			See if substr works in another thread
 t/op/svflags.t				See if POK is set as expected.
 t/op/svleak.pl				Test file for svleak.t

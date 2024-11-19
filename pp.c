@@ -3717,6 +3717,98 @@ PP_wrapped(pp_substr,
     RETPUSHUNDEF;
 }
 
+/* OP_SUBSTR_LEFT is a specialized version of OP_SUBSTR, where:
+ *     the EXPR is a PADSV
+ *     the OFFSET is a CONST zero
+ *     the replacement pattern is a CONST ""
+ *     it's definitely not in lvalue context (see the check in pp_substr)
+ *     it definitely doesn't have OPpSUBSTR_REPL_FIRST set
+ *     it may be an rvalue or in void context (may support TARGMY later)
+ */
+PP(pp_substr_left)
+{
+    dTARGET;
+    STRLEN curlen;
+    STRLEN utf8_curlen = 0;
+    STRLEN byte_len = 0;
+    SV *sv = PL_stack_sp[-1];
+    const bool rvalue = (GIMME_V != G_VOID) || (PL_op->op_private & OPpTARGET_MY);
+    const bool do_chop = (MAXARG3 == 4);
+    const char *tmps;
+
+    if (do_chop) {
+        SvGETMAGIC(sv);
+        if (SvROK(sv))
+            Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
+                        "Attempt to use reference as lvalue in substr"
+            );
+        tmps = SvPV_force_nomg(sv, curlen);
+    } else
+        tmps = SvPV_const(sv, curlen);
+
+    if (DO_UTF8(sv)) {
+        utf8_curlen = sv_or_pv_len_utf8(sv, tmps, curlen);
+        if (utf8_curlen == curlen)
+            utf8_curlen = 0;
+        else
+            curlen = utf8_curlen;
+    }
+
+    /* Inlined, simplified Perl_translate_substr_offsets */
+    if (curlen) {
+        const IV len_iv = SvIV(PL_stack_sp[0]);
+        const int len_is_uv = len_iv == 0 || SvIOK_UV(PL_stack_sp[0]);
+
+        if (!len_is_uv && len_iv < 0) { /* Negative length supplied */
+            const IV pos2_iv = curlen + len_iv;
+            if (!(curlen-1 > ~(UV)len_iv) && pos2_iv < 0) {
+                byte_len = 0;
+            } else if ((UV)pos2_iv > curlen) {
+                byte_len = (STRLEN)( (UV)curlen);
+            } else {
+                byte_len = (STRLEN)( (UV)pos2_iv );
+            }
+        } else if ((UV)len_iv <= curlen) { /* Non-negative length supplied */
+                byte_len = (STRLEN)( (UV)len_iv);
+        } else {
+            byte_len = curlen;
+        }
+    }
+    /* End of inlined, simplified Perl_translate_substr_offsets */
+
+    if (utf8_curlen) {
+        /* This could update byte_len, but the return value
+           will always be zero, which subsequent code has
+           assumed to be the case. */
+        sv_or_pv_pos_u2b(sv, tmps, 0, &byte_len);
+    }
+
+    if (rvalue) {
+        SvTAINTED_off(TARG);                /* decontaminate */
+        SvUTF8_off(TARG);                   /* decontaminate */
+        sv_setpvn(TARG, tmps, byte_len);
+#ifdef USE_LOCALE_COLLATE
+        sv_unmagic(TARG, PERL_MAGIC_collxfrm);
+#endif
+        if (utf8_curlen)
+            SvUTF8_on(TARG);
+    }
+
+    if (do_chop) {
+        SvTAINT(sv);
+        sv_chop(sv, SvPVX(sv) + byte_len);
+        SvSETMAGIC(sv);
+    }
+
+    if (rvalue) {
+        SvSETMAGIC(TARG);
+        rpp_replace_2_1(TARG);
+    } else {
+        rpp_popfree_2();
+    }
+    return NORMAL;
+}
+
 PP_wrapped(pp_vec, 3, 0)
 {
     dSP;

@@ -234,7 +234,7 @@ use strict;
                             # substr starts off with 4 bits set in
                             # ck_fun(), but since it never has more than 7
                             # args, bit 3 is later stolen
-                            qw(substr);
+                            qw(substr substr_left);
 
     $args4{$_} = 1 for  keys %maxarg,
                         grep !$args0{$_} && !$args1{$_}

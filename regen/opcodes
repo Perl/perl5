@@ -200,6 +200,7 @@ abs		abs			ck_fun		fsTu%	S?
 
 length		length			ck_length	ifsTu%	S?
 substr		substr			ck_substr	st@	S S S? S?
+substr_left	substr left		ck_substr	sT@	S S S? S?
 vec		vec			ck_fun		ist@	S S S
 
 index		index			ck_index	isT@	S S S?

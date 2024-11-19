@@ -3868,6 +3868,98 @@ Perl_rpeep(pTHX_ OP *o)
             }
             break;
 
+        case OP_SUBSTR: {
+            OP *expr, *offs, *len;
+            /* Specialize substr($x, 0, $y) and substr($x,0,$y,"") */
+            /* Does this substr have 3-4 args and amiable flags? */
+            if (
+                ((cMAXARG3x(o) == 4) || (cMAXARG3x(o) == 3))
+                /* No lvalue cases, no OPpSUBSTR_REPL_FIRST*/
+                && !(o->op_private & (OPpSUBSTR_REPL_FIRST|OPpMAYBE_LVSUB))
+                && !(o->op_flags & OPf_MOD)
+            ){
+                /* Should be a leading ex-pushmark */
+                OP *pushmark = cBINOPx(o)->op_first;
+                assert(pushmark->op_type == OP_NULL);
+                expr = OpSIBLING(pushmark);
+                offs = OpSIBLING(expr);
+
+                /* Gets complicated fast if the expr isn't simple*/
+                if (expr->op_type != OP_PADSV)
+                    break;
+                /* Is the offset CONST zero? */
+                if (offs->op_type != OP_CONST)
+                    break;
+                SV *offs_sv = cSVOPx_sv(offs);
+                if (!(SvIOK(offs_sv) && SvIVX(offs_sv) == 0))
+                    break;
+                len  = OpSIBLING(offs);
+
+                if (cMAXARG3x(o) == 4) {/* replacement */
+                    /* Is the replacement string CONST ""? */
+                    OP *repl = OpSIBLING(len);
+                    if (repl->op_type != OP_CONST)
+                        break;
+                    SV *repl_sv = cSVOPx_sv(repl);
+                    if(!(SvPOK(repl_sv) && SvCUR(repl_sv) == 0))
+                        break;
+                }
+            } else {
+                break;
+            }
+            /* It's on! */
+            /* Take out the static LENGTH & REPLACMENT OPs */
+            /* (The finalizer does not seem to change op_next here) */
+            expr->op_next = offs->op_next;
+            o->op_private = cMAXARG3x(o);
+            if (cMAXARG3x(o) == 4)
+                len->op_next = o;
+
+            /* We have a problem if padrange pushes the expr OP for us,
+             * then jumps straight to the offs CONST OP. For example:
+             *     push @{$pref{ substr($key, 0, 1) }}, $key;
+             * We don't want to hit that OP, but cannot easily figure
+             * out if that is going to happen and adjust for it.
+             * So we have to null out the OP, and then do a fixup in
+              * B::Deparse. :/  */
+            op_null(offs);
+
+            /* repl status unchanged because it makes Deparsing easier. */
+
+            /* Upgrade the SUBSTR to a SUBSTR_LEFT */
+            OpTYPE_set(o, OP_SUBSTR_LEFT);
+
+            /* oldop will be the OP_CONST associated with "" */
+            /* oldoldop is more unpredictable */
+            oldoldop = oldop = NULL;
+
+            /* pp_substr may be unsuitable for TARGMY optimization
+             * because of its potential RETPUSHUNDEF, and use of
+             * bit 4 for OPpSUBSTR_REPL_FIRST, but no such
+             * problems with pp_substr_left. Must just avoid
+             * sv == TARG.*/
+            if (OP_TYPE_IS(o->op_next, OP_PADSV) &&
+                !(o->op_next->op_private) &&
+                OP_TYPE_IS(o->op_next->op_next, OP_SASSIGN) &&
+                (o->op_next->op_targ != expr->op_targ)
+            ) {
+                OP * padsv = o->op_next;
+                OP * sassign = padsv->op_next;
+                /* Carry over some flags */
+                o->op_flags = OPf_KIDS | (o->op_flags & OPf_PARENS) |
+                              (sassign->op_flags & (OPf_WANT|OPf_PARENS));
+                o->op_private |= OPpTARGET_MY;
+                /* Steal the TARG, set op_next pointers*/
+                o->op_targ = padsv->op_targ;
+                padsv->op_targ = 0;
+                o->op_next = sassign->op_next;
+                /* Null the replaced OPs*/
+                op_null(padsv);
+                op_null(sassign);
+            }
+        }
+        break;
+
         case OP_SASSIGN: {
             if (OP_GIMME(o,0) == G_VOID
              || (  o->op_next->op_type == OP_LINESEQ

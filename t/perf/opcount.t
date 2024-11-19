@@ -1028,4 +1028,82 @@ test_opcount(0, "foreach 2 lexicals on builtin::indexed LIST",
                     iter => 1,
                 });
 
+# substr with const zero offset and "" replacements
+test_opcount(0, "substr with const zero offset and '' repl (void)",
+                sub { my $z; substr($z, 0, 2, "") },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 2,
+                });
+
+test_opcount(0, "substr with const zero offset and '' repl (lexical)",
+                sub { my $z; my $x = substr($z, 0, 2, "") },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 2,
+                    padsv        => 3,
+                    sassign      => 1
+                });
+
+test_opcount(0, "substr with const zero offset and '' repl (lexical TARGMY)",
+                sub { my ($z, $x); $x = substr($z, 0, 2, "") },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 2,
+                    padsv        => 3,
+                    padsv_store  => 0,
+                    sassign      => 0
+                });
+
+test_opcount(0, "substr with const zero offset and '' repl (gv)",
+                sub { my $z; our $x = substr($z, 0, 2, "") },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 2,
+                    gvsv         => 1,
+                    sassign      => 1
+                });
+
+test_opcount(0, "substr with const zero offset (void)",
+                sub { my $z; substr($z, 0, 2) },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 1,
+                });
+
+test_opcount(0, "substr with const zero offset (lexical)",
+                sub { my $z; my $x = substr($z, 0, 2) },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 1,
+                    padsv        => 3,
+                    sassign      => 1
+                });
+
+test_opcount(0, "substr with const zero offset (lexical TARGMY)",
+                sub { my ($z, $x); $x = substr($z, 0, 2) },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 1,
+                    padsv        => 3,
+                    sassign      => 0
+                });
+
+test_opcount(0, "substr with const zero offset  (gv)",
+                sub { my $z; our $x = substr($z, 0, 2) },
+                {
+                    substr       => 0,
+                    substr_left  => 1,
+                    const        => 1,
+                    gvsv         => 1,
+                    sassign      => 1
+                });
+
 done_testing();

@@ -1779,6 +1779,22 @@
         code    => 'index $x, "b"',
     },
 
+    # SUBSTR
+    'func::substr::nibble_void' => {
+        desc    => 'substr with a zero offset, empty replacement pattern (void)',
+        setup   => 'my $z = "JAPH"x1000',
+        code    => 'substr($z, 0, 2, "")',
+    },
+    'func::substr::nibble_lex' => {
+        desc    => 'substr with a zero offset, empty replacement pattern (lex assign)',
+        setup   => 'my $x; my $z = "JAPH"x1000',
+        code    => '$x = substr($z, 0, 2, "")',
+    },
+    'func::substr::nibble_gvsv' => {
+        desc    => 'substr with a zero offset, empty replacement pattern (global assign)',
+        setup   => 'our $x; my $z = "JAPH"x1000',
+        code    => '$x = substr($z, 0, 2, "")',
+    },
 
     # JOIN
 
