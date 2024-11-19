@@ -27,6 +27,20 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New C<:writer> attribute on field variables
+
+Classes defined using C<use feature 'class'> are now able to automatically
+create writer accessors for scalar fields, by using the C<:writer> attribute,
+similar to the way that C<:reader> already creates reader accessors.
+
+    class Point {
+        field $x :reader :writer :param;
+        field $y :reader :writer :param;
+    }
+
+    my $p = Point->new( x => 20, y => 40 );
+    $p->set_x(60);
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
