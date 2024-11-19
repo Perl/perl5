@@ -1932,7 +1932,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             ((msgs)                            ? warning           : 0))))
 
         while (possible_problems) { /* Handle each possible problem */
-            U32 pack_warn = 0;
             char * message = NULL;
             U32 this_flag_bit = 0;
 
@@ -1947,6 +1946,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
             U32 this_problem = 1U << lsbit_pos32(possible_problems);
             possible_problems &= ~this_problem;
+
+            /* Most case:s use this; overridden in a few */
+            U32 pack_warn = packWARN(WARN_UTF8);
 
             switch (this_problem) {
               case UTF8_GOT_OVERFLOW:
@@ -2015,7 +2017,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_ "%s (empty string)",
                                                    malformed_text);
                         this_flag_bit = UTF8_GOT_EMPTY;
@@ -2030,7 +2031,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
@@ -2049,7 +2049,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 if (! (flags & UTF8_ALLOW_SHORT)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
@@ -2077,7 +2076,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
                                        ? (int) (s - s0)
                                        : (int) (send - s0);
-                        pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_ "%s",
                             unexpected_non_continuation_text(s0,
                                                             printlen,
@@ -2232,7 +2230,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     disallowed = TRUE;
 
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        pack_warn = packWARN(WARN_UTF8);
 
                         /* These error types cause 'uv' to be something that
                          * isn't what was intended, so can't use it in the
