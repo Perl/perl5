@@ -260,6 +260,33 @@ context.
 
     scalar $instance->users;
 
+=head3 :writer
+
+A field with a C<:writer> attribute will generate a writer accessor method
+automatically.  The generated method will have a signature that consumes
+exactly one argument, and its body will assign that scalar argument to the
+field, and return the invocant object itself.
+
+    field $s :writer;
+
+    # Equivalent to
+    field $s;
+    method set_s($new) { $s = $new; return $self; }
+
+By default the accessor method will have the name of the field minus the
+leading sigil with the string C<set_> prefixed to it, but a different name
+can be specified in the attribute's value.
+
+    field $x :writer(write_x);
+
+    # Generates a method
+    method write_x ($new) { ... }
+
+Curerently, writer accessors can only be applied to scalar fields.  Attempts
+to apply this attribute to a non-scalar field will result in a fatal exception
+at compile-time.  This may be relaxed in a future version to allow writers on
+array or hash fields.  For now, these will have to be created manually.
+
 =head2 Method attributes
 
 None yet.

@@ -699,6 +699,13 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
+=item Cannot apply a :writer attribute to a non-scalar field
+
+(F) An attempt was made to use the C<:writer> attribute on a field that is
+not a scalar (i.e. an array or hash).  At the present version, these are only
+permitted on scalar fields.  You will have to manually create a writer
+accessor method yourself.
+
 =item Cannot assign :param(%s) to field %s because that name is already in use
 
 (F) An attempt was made to apply a parameter name to a field, when the name

@@ -165,3 +165,23 @@ class XXX {
 }
 EXPECT
 "abc-def" is not a valid name for a generated method at - line 6.
+########
+# Invalid method name for :writer attribute
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class XXX {
+  field $x :writer(set-abc-def);
+}
+EXPECT
+"set-abc-def" is not a valid name for a generated method at - line 6.
+########
+# Writer on non-scalar field
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class XXX {
+  field @things :writer;
+}
+EXPECT
+Cannot apply a :writer attribute to a non-scalar field at - line 6.

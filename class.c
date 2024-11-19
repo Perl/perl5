@@ -1055,6 +1055,104 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     CvIsMETHOD_on(cv);
 }
 
+/* If '@_' is called "snail", then elements of it can be called "slugs"; i.e.
+ * snails out of their container. */
+#define newSLUGOP(idx)  S_newSLUGOP(aTHX_ idx)
+static OP *
+S_newSLUGOP(pTHX_ IV idx)
+{
+    assert(idx >= 0 && idx <= 255);
+    OP *op = newGVOP(OP_AELEMFAST, 0, PL_defgv);
+    op->op_private = idx;
+    return op;
+}
+
+static void
+apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
+{
+    char sigil = PadnamePV(pn)[0];
+    if(sigil != '$')
+        croak("Cannot apply a :writer attribute to a non-scalar field");
+
+    if(value)
+        SvREFCNT_inc(value);
+    else {
+        /* Default to "set_" . name minus the sigil */
+        value = newSVpvs("set_");
+        sv_catpvn_flags(value, PadnamePV(pn) + 1, PadnameLEN(pn) - 1,
+                PadnameUTF8(pn) ? SV_CATUTF8 : 0);
+    }
+
+    if(!valid_identifier_sv(value))
+        croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
+
+    PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+    I32 floor_ix = start_subparse(FALSE, 0);
+    SAVEFREESV(PL_compcv);
+
+    I32 save_ix = block_start(TRUE);
+
+    PADOFFSET padix;
+
+    padix = pad_add_name_pvs("$self", 0, NULL, NULL);
+    assert(padix == PADIX_SELF);
+
+    padix = pad_add_name_pvn(PadnamePV(pn), PadnameLEN(pn), 0, NULL, NULL);
+    intro_my();
+
+    OP *methstartop;
+    {
+        UNOP_AUX_item *aux;
+        aux = (UNOP_AUX_item *)PerlMemShared_malloc(
+                                sizeof(UNOP_AUX_item) * (2 + 2));
+
+        UNOP_AUX_item *ap = aux;
+        (ap++)->uv = 1;       /* fieldcount */
+        (ap++)->uv = fieldix; /* max_fieldix */
+
+        (ap++)->uv = padix;
+        (ap++)->uv = fieldix;
+
+        methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
+    }
+
+    OP *argcheckop;
+    {
+        struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
+            PerlMemShared_malloc(sizeof(*aux));
+
+        aux->params     = 1;
+        aux->opt_params = 0;
+        aux->slurpy     = 0;
+
+        argcheckop = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
+    }
+
+    OP *assignop = newBINOP(OP_SASSIGN, 0,
+            newSLUGOP(0),
+            newPADxVOP(OP_PADSV, OPf_MOD|OPf_REF, padix));
+
+    OP *retop = newLISTOP(OP_RETURN, 0,
+            newOP(OP_PUSHMARK, 0),
+            newPADxVOP(OP_PADSV, 0, PADIX_SELF));
+
+    OP *ops = newLISTOPn(OP_LINESEQ, 0,
+            methstartop,
+            argcheckop,
+            assignop,
+            retop,
+            NULL);
+
+    SvREFCNT_inc(PL_compcv);
+    ops = block_end(save_ix, ops);
+
+    OP *nameop = newSVOP(OP_CONST, 0, value);
+
+    CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
+    CvIsMETHOD_on(cv);
+}
+
 static struct {
     const char *name;
     bool requires_value;
@@ -1067,6 +1165,10 @@ static struct {
     { .name           = "reader",
       .requires_value = false,
       .apply          = &apply_field_attribute_reader,
+    },
+    { .name           = "writer",
+      .requires_value = false,
+      .apply          = &apply_field_attribute_writer,
     },
     { NULL, false, NULL }
 };
