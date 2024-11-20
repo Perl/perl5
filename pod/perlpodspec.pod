@@ -1425,9 +1425,9 @@ Each "=over" ... "=back" region should be one of the following:
 
 =item *
 
-An "=over" ... "=back" region containing only "=item *" commands,
-each followed by some number of ordinary/verbatim paragraphs, other
-nested "=over" ... "=back" regions, "=for..." paragraphs, and
+An "=over" ... "=back" region containing only C<m/\A=item\s+\*\s*\z/>
+commands, each followed by some number of ordinary/verbatim paragraphs,
+other nested "=over" ... "=back" regions, "=for..." paragraphs, and
 "=begin"..."=end" regions.
 
 (Pod processors must tolerate a bare "=item" as if it were "=item
