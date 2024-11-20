@@ -3766,6 +3766,16 @@ EXdpx	|bool	|validate_proto |NN SV *name				\
 				|NULLOK SV *proto			\
 				|bool warn				\
 				|bool curstash
+Adp	|bool	|valid_identifier_pve					\
+				|NN const char *s			\
+				|NN const char *end			\
+				|U32 flags
+Adp	|bool	|valid_identifier_pvn					\
+				|NN const char *s			\
+				|STRLEN len				\
+				|U32 flags
+Adp	|bool	|valid_identifier_sv					\
+				|NULLOK SV *sv
 CRTdip	|UV	|valid_utf8_to_uvchr					\
 				|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen

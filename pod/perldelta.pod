@@ -350,6 +350,13 @@ well.
 
 XXX
 
+=item *
+
+New API functions L<C<valid_identifier_pve()>|perlapi/valid_identifier_pve>,
+L<C<valid_identifier_pvn()>|perlapi/valid_identifier_pvn> and
+L<C<valid_identifier_sv()>|perlapi/valid_identifier_sv> have been added, which
+test if a string would be considered by Perl to be a valid identifier name.
+
 =back
 
 =head1 Selected Bug Fixes

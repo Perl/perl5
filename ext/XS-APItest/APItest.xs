@@ -7408,6 +7408,12 @@ gimme()
     OUTPUT:
         RETVAL
 
+bool
+valid_identifier(SV *s)
+    CODE:
+        RETVAL = valid_identifier_sv(s);
+    OUTPUT:
+        RETVAL
 
 MODULE = XS::APItest            PACKAGE = XS::APItest::Backrefs
 

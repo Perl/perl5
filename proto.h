@@ -5391,6 +5391,20 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV **
         assert(d)
 
 PERL_CALLCONV bool
+Perl_valid_identifier_pve(pTHX_ const char *s, const char *end, U32 flags);
+#define PERL_ARGS_ASSERT_VALID_IDENTIFIER_PVE   \
+        assert(s); assert(end)
+
+PERL_CALLCONV bool
+Perl_valid_identifier_pvn(pTHX_ const char *s, STRLEN len, U32 flags);
+#define PERL_ARGS_ASSERT_VALID_IDENTIFIER_PVN   \
+        assert(s)
+
+PERL_CALLCONV bool
+Perl_valid_identifier_sv(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_VALID_IDENTIFIER_SV
+
+PERL_CALLCONV bool
 Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash);
 #define PERL_ARGS_ASSERT_VALIDATE_PROTO         \
         assert(name)

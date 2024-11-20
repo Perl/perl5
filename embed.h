@@ -865,6 +865,9 @@
 # define uvchr_to_utf8_flags(a,b,c)             Perl_uvchr_to_utf8_flags(aTHX,a,b,c)
 # define uvchr_to_utf8_flags_msgs(a,b,c,d)      Perl_uvchr_to_utf8_flags_msgs(aTHX,a,b,c,d)
 # define uvoffuni_to_utf8_flags_msgs(a,b,c,d)   Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
+# define valid_identifier_pve(a,b,c)            Perl_valid_identifier_pve(aTHX_ a,b,c)
+# define valid_identifier_pvn(a,b,c)            Perl_valid_identifier_pvn(aTHX_ a,b,c)
+# define valid_identifier_sv(a)                 Perl_valid_identifier_sv(aTHX_ a)
 # define valid_utf8_to_uvchr                    Perl_valid_utf8_to_uvchr
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
 # define vcroak(a,b)                            Perl_vcroak(aTHX_ a,b)

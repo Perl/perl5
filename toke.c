@@ -13933,5 +13933,104 @@ Perl_parse_subsignature(pTHX_ U32 flags)
 }
 
 /*
+=for apidoc valid_identifier_pve
+
+Returns true if the string given by C<s> until C<end> would be considered
+valid as a Perl identifier.  That is, it must begin with a character matching
+C<isIDFIRST>, followed by characters all matching C<isIDCONT>.  An empty
+string (i.e. when C<end> is C<s>) will return false.
+
+If C<flags> contains the C<SVf_UTF8> bit, then the string is presumed to be
+encoded in UTF-8, and suitable Unicode character test functions will be used.
+
+=cut
+*/
+
+bool
+Perl_valid_identifier_pve(pTHX_ const char *s, const char *end, U32 flags)
+{
+    PERL_ARGS_ASSERT_VALID_IDENTIFIER_PVE;
+
+    if(end <= s)
+        return false;
+
+    if(flags & SVf_UTF8) {
+        if(!isIDFIRST_utf8_safe((U8 *)s, (U8 *)end))
+            return false;
+
+        while(s < end) {
+            s += UTF8SKIP((U8 *)s);
+            if(s == end)
+                break;
+            if(!isIDCONT_utf8_safe((U8 *)s, (U8 *)end))
+                return false;
+        }
+        return true;
+    }
+    else {
+        if(!isIDFIRST(s[0]))
+            return false;
+
+        while(s < end) {
+            s += 1;
+            if(s == end)
+                break;
+            if(!isIDCONT(s[0]))
+                return false;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+/*
+=for apidoc valid_identifier_pvn
+
+Returns true if the string given by C<s> whose length is C<len> would be
+considered valid as a Perl identifier.  That is, it must begin with a
+character matching C<isIDFIRST>, followed by characters all matching
+C<isIDCONT>.  An empty string (i.e. when C<len> is zero) will return false.
+
+If C<flags> contains the C<SVf_UTF8> bit, then the string is presumed to be
+encoded in UTF-8, and suitable Unicode character test functions will be used.
+
+=cut
+*/
+
+bool
+Perl_valid_identifier_pvn(pTHX_ const char *s, STRLEN len, U32 flags)
+{
+    PERL_ARGS_ASSERT_VALID_IDENTIFIER_PVN;
+
+    return valid_identifier_pve(s, s + len, flags);
+}
+
+/*
+=for apidoc valid_identifier_sv
+
+Returns true if the given SV contains a non-empty string whose characters
+match accoding to C<valid_identifier_pvn>.  Returns false if given NULL, an
+undefined SV, or a SV that does not contain a non-empty string.
+
+Does not invoke C<get> magic on the SV beforehand.
+
+=cut
+*/
+
+bool
+Perl_valid_identifier_sv(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_VALID_IDENTIFIER_SV;
+
+    if(!sv || !SvOK(sv))
+        return false;
+
+    STRLEN len;
+    const char *pv = SvPV_const(sv, len);
+    return valid_identifier_pve(pv, pv + len, SvUTF8(sv));
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

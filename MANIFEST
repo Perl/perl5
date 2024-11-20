@@ -5207,6 +5207,7 @@ ext/XS-APItest/t/utf8_warn07.t			Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn08.t			Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn09.t			Tests for code in utf8.c
 ext/XS-APItest/t/utf8_warn_base.pl		Tests for code in utf8.c
+ext/XS-APItest/t/valid_identifier.t		XS::APItest: tests for valid_identifier_sv()
 ext/XS-APItest/t/weaken.t			XS::APItest: tests for sv_rvweaken() and sv_get_backrefs()
 ext/XS-APItest/t/whichsig.t			XS::APItest: tests for whichsig() and variants
 ext/XS-APItest/t/win32.t			Test Win32 specific APIs
