@@ -1733,12 +1733,16 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                      * necessarily do so in the future.  We output (only) the
                      * most dire warning */
                     if (! (flags & UTF8_CHECK_ONLY)) {
-                        if (msgs || ckWARN_d(WARN_UTF8)) {
+                        if (ckWARN_d(WARN_UTF8)) {
                             pack_warn = packWARN(WARN_UTF8);
                         }
-                        else if (msgs || ckWARN_d(WARN_NON_UNICODE)) {
+                        else if (ckWARN_d(WARN_NON_UNICODE)) {
                             pack_warn = packWARN(WARN_NON_UNICODE);
                         }
+                        else if (msgs) {
+                            pack_warn = packWARN(WARN_UTF8);
+                        }
+
                         if (pack_warn) {
                             message = Perl_form(aTHX_ "%s: %s (overflows)",
                                             malformed_text,
