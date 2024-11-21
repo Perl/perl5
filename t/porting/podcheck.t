@@ -1105,7 +1105,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $addr = refaddr $self;
 
         $in_NAME{$addr} = 1 if $running_simple_text{$addr} eq 'NAME';
-        return $self->SUPER::end_head(@_);
+        return $self->SUPER::end_head1(@_);
     }
 
     sub start_Verbatim {
