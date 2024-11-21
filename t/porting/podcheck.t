@@ -1765,6 +1765,7 @@ sub is_pod_file {
                     $checker->name($name);
                     $id_to_checker{$name} = $checker
                         if $filename =~ m{^cpan/};
+                    $valid_modules{$name} = 1;
                 }
             }
             elsif ($filename =~ m{^cpan/}) {
