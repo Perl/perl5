@@ -1086,14 +1086,21 @@ package My::Pod::Checker {      # Extend Pod::Checker
         $self->SUPER::end_Para(@_);
     }
 
+    sub start_head {
+        my $self = shift;
+        my $addr = refaddr $self;
+        $running_CFL_text{$addr} = "";
+        $running_simple_text{$addr} = "";
+
+        return $self->SUPER::start_head(@_);
+    }
+
     sub start_head1 {
         my $self = shift;
         check_see_but_not_link($self);
 
         my $addr = refaddr $self;
         $start_line{$addr} = $_[0]->{start_line};
-        $running_CFL_text{$addr} = "";
-        $running_simple_text{$addr} = "";
 
         return $self->SUPER::start_head1(@_);
     }
