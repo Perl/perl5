@@ -924,7 +924,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         return $self->SUPER::start_Para(@_);
     }
 
-    sub start_item {
+    sub start_item {    # Pod::Checker has no corresponding method
         my $self = shift;
         check_see_but_not_link($self);
 
@@ -2061,7 +2061,7 @@ foreach my $filename (@files) {
 
 # Here, all files have been parsed, and all links and link targets are stored.
 # Now go through the files again and see which don't have matches.
-if (! $has_input_files) {
+if (! $has_input_files) {   # No xref unless processing all files
     foreach my $filename (@files) {
         next if $filename_to_checker{$filename}->get_skip;
 
