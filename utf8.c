@@ -1686,7 +1686,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     if (UNLIKELY(curlen <= 0)) {
         possible_problems |= UTF8_GOT_EMPTY;
         curlen = 0;
-        uv = UNICODE_REPLACEMENT;
         goto ready_to_handle_errors;
     }
 
@@ -1709,7 +1708,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
         curlen = 1;
-        uv = UNICODE_REPLACEMENT;
         goto ready_to_handle_errors;
     }
 
@@ -1897,11 +1895,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      input by for the next call to this function.
      * possible_problems    is 0 if there weren't any problems; otherwise a bit
      *                      is set in it for each potential problem found.
-     * uv                   contains the code point the input sequence
-     *                      represents; or if there is a problem that prevents
-     *                      a well-defined value from being computed, it is
-     *                      some substitute value, typically the REPLACEMENT
-     *                      CHARACTER.
+     * uv                   contains the value of the code point the input
+     *                      sequence represents, as far as we were able to
+     *                      determine.  This is the correct translation of the
+     *                      input bytes if and only if no malformations were
+     *                      encountered.
      * s                    points to just after where we left off processing
      *                      the character
      * send                 points to just after where that character should
@@ -2056,6 +2054,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_EMPTY:
+                uv = UNICODE_REPLACEMENT;
                 if (! (flags & UTF8_ALLOW_EMPTY)) {
 
                     /* This so-called malformation is now treated as a bug in
@@ -2073,6 +2072,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_CONTINUATION:
+                uv = UNICODE_REPLACEMENT;
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
