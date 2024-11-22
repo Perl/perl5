@@ -1858,13 +1858,19 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * loop just above. */
             if (isUNICODE_POSSIBLY_PROBLEMATIC(uv)) {
                 if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                    possible_problems |= UTF8_GOT_SURROGATE;
+                    if (flags & (UTF8_DISALLOW_SURROGATE|UTF8_WARN_SURROGATE)) {
+                        possible_problems |= UTF8_GOT_SURROGATE;
+                    }
                 }
                 else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-                    possible_problems |= UTF8_GOT_SUPER;
+                    if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
+                        possible_problems |= UTF8_GOT_SUPER;
+                    }
                 }
                 else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-                    possible_problems |= UTF8_GOT_NONCHAR;
+                    if (flags & (UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)) {
+                        possible_problems |= UTF8_GOT_NONCHAR;
+                    }
                 }
             }
         }
@@ -2039,6 +2045,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_SURROGATE:
 
+                /* Code earlier in this function has set things up so we don't
+                 * get here unless at least one of the two top-level 'if's in
+                 * this case are true */
+
                 if (flags & UTF8_WARN_SURROGATE) {
                     *errors |= UTF8_GOT_SURROGATE;
 
@@ -2067,6 +2077,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_NONCHAR:
+
+                /* Code earlier in this function has set things up so we don't
+                 * get here unless at least one of the two top-level 'if's in
+                 * this case are true */
 
                 if (flags & UTF8_WARN_NONCHAR) {
                     *errors |= UTF8_GOT_NONCHAR;
@@ -2201,6 +2215,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_SUPER:
+
+                /* We get here when the input is for an above Unicode code
+                 * point, but it does not use Perl extended UTF-8, and the
+                 * caller has indicated that these are to be disallowed and/or
+                 * warned about */
 
                 if (flags & UTF8_WARN_SUPER) {
                     *errors |= UTF8_GOT_SUPER;
