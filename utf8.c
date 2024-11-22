@@ -34,7 +34,8 @@
 #include "perl.h"
 #include "invlist_inline.h"
 
-static const char malformed_text[] = "Malformed UTF-8 character";
+#define MALFORMED_TEXT  "Malformed UTF-8 character"
+static const char malformed_text[] = MALFORMED_TEXT;
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
@@ -2282,8 +2283,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     pack_warn = NEED_MESSAGE(WARN_UTF8,
                                              ckWARN_d, WARN_NON_UNICODE);
                     if (pack_warn) {
-                        message = Perl_form(aTHX_ "%s: %s (overflows)",
-                                            malformed_text,
+                        message = Perl_form(aTHX_ MALFORMED_TEXT
+                                            ": %s (overflows)",
                                             _byte_dump_string(s0, curlen, 0));
                     }
                 }
