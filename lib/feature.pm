@@ -4,10 +4,12 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.92';
+our $VERSION = '1.93';
 
 our %feature = (
     fc                              => 'feature_fc',
+    all                             => 'feature_all',
+    any                             => 'feature_any',
     isa                             => 'feature_isa',
     say                             => 'feature_say',
     try                             => 'feature_try',
@@ -41,7 +43,7 @@ our %feature_bundle = (
     "5.37"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
     "5.39"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
     "5.41"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
-    "all"     => [qw(apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state try unicode_eval unicode_strings)],
+    "all"     => [qw(all any apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state try unicode_eval unicode_strings)],
     "default" => [qw(apostrophe_as_package_separator bareword_filehandles indirect multidimensional)],
 );
 
@@ -518,6 +520,35 @@ onwards.  In previous versions it was enabled all the time.
 This only disables C<'> in symbols in your source code, the internal
 conversion from C<'> to C<::>, including for symbolic references, is
 always enabled.
+
+=head2 The 'any' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::any";
+
+This feature enables the L<C<any>|perlfunc/any BLOCK LIST> operator keyword.
+This allow testing whether any of the values in a list satisfy a given
+condition, with short-circuiting behaviour as soon as it finds one.
+
+=head2 The 'all' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::all";
+
+This feature enables the L<C<all>|perlfunc/all BLOCK LIST> operator keyword.
+This allow testing whether all of the values in a list satisfy a given
+condition, with short-circuiting behaviour as soon as it finds one that does
+not.
+
+B<Note:> remember that this enables one specific feature whose name is C<all>;
+it does not enable all of the features.  This is not C<use feature ':all'>.
+For that, see the section below.
 
 =head1 FEATURE BUNDLES
 

@@ -1715,7 +1715,7 @@
 #     define incline(a,b)                       S_incline(aTHX_ a,b)
 #     define intuit_method(a,b,c)               S_intuit_method(aTHX_ a,b,c)
 #     define intuit_more(a,b)                   S_intuit_more(aTHX_ a,b)
-#     define lop(a,b,c)                         S_lop(aTHX_ a,b,c)
+#     define lop(a,b,c,d)                       S_lop(aTHX_ a,b,c,d)
 #     define missingterm(a,b)                   S_missingterm(aTHX_ a,b)
 #     define parse_ident(a,b,c,d,e,f)           S_parse_ident(aTHX_ a,b,c,d,e,f)
 #     define pending_ident()                    S_pending_ident(aTHX)

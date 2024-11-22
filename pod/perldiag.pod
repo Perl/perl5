@@ -75,6 +75,12 @@ removed in a future Perl version:
     use feature "refaliasing";
     \$x = \$y;
 
+=item all is experimental
+
+(S experimental::all) This warning is emitted if you use the C<all>
+keyword of C<use feature 'all'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item '%c' allowed only after types %s in %s
 
 (F) The modifiers '!', '<' and '>' are allowed in pack() or unpack() only
@@ -181,6 +187,12 @@ which 'splits' output into two streams, such as
         print OUT;
     }
     close OUT;
+
+=item any is experimental
+
+(S experimental::any) This warning is emitted if you use the C<any>
+keyword of C<use feature 'any'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
 
 =item Applying %s to %s will act on scalar(%s)
 

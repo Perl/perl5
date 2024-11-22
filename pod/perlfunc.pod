@@ -173,6 +173,7 @@ X<list>
 
 =for Pod::Functions =LIST
 
+L<C<all>|/all BLOCK LIST>, L<C<any>|/any BLOCK LIST>,
 L<C<grep>|/grep BLOCK LIST>, L<C<join>|/join EXPR,LIST>,
 L<C<map>|/map BLOCK LIST>, L<C<qwE<sol>E<sol>>|/qwE<sol>STRINGE<sol>>,
 L<C<reverse>|/reverse LIST>, L<C<sort>|/sort SUBNAME LIST>,
@@ -804,6 +805,67 @@ caveats given in L<perlipc/"Signals">.
 For more information see L<perlipc>.
 
 Portability issues: L<perlport/alarm>.
+
+=item all BLOCK LIST
+
+=for Pod::Functions test if every value in a list satisfies the given condition
+
+Evaluates the BLOCK for each element of the LIST (locally setting
+L<C<$_>|perlvar/$_> to each element) and checks the truth of the result of
+that block.  Returns true if every element makes the block yield true, or
+returns false if at least one element makes the block false.
+
+As soon as any element makes the block yield false, then the result of this
+operator is determined.  It will short-circuit in that case and not consider
+any further elements.
+
+When used as a condition, this is similar to using L<C<grep>|/grep BLOCK LIST>
+to count that every value satisfies the condition, except for this
+short-circuit behaviour.
+
+    if( all { length $_ } @strings ) {
+        say "Every string is non-empty";
+    }
+
+is roughly equivalent to
+
+    if( @strings == grep { length $_ } @strings ) ...
+
+This operator is only available if the
+L<C<all> feature|feature/"The 'all' feature"> is enabled.
+
+It is currently considered B<experimental>, and will issue a compile-time
+warning in the category C<experimental::all> unless that category is silenced.
+
+=item any BLOCK LIST
+
+=for Pod::Functions test if at least one value in a list satisfies the given condition
+
+Evaluates the BLOCK for each element of the LIST (locally setting
+L<C<$_>|perlvar/$_> to each element) and checks the truth of the result of
+that block.  Returns true if at least one element makes the block yield
+true, or returns false if no element is found to make it true.
+
+As soon as any element makes the block yield true, then the result of this
+operator is determined.  It will short-circuit in that case and not consider
+any further elements.
+
+When used as a condition, this is similar to L<C<grep>|/grep BLOCK LIST>,
+except for this short-circuit behaviour.
+
+    if( any { length $_ } @strings ) {
+        say "At least one string is non-empty";
+    }
+
+is roughly equivalent to
+
+    if( grep { length $_ } @strings ) ...
+
+This operator is only available if the
+L<C<any> feature|feature/"The 'any' feature"> is enabled.
+
+It is currently considered B<experimental>, and will issue a compile-time
+warning in the category C<experimental::any> unless that category is silenced.
 
 =item atan2 Y,X
 X<atan2> X<arctangent> X<tan> X<tangent>

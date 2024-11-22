@@ -9182,7 +9182,7 @@ S_intuit_more(pTHX_ char *s, char *e);
         assert(s); assert(e)
 
 STATIC I32
-S_lop(pTHX_ I32 f, U8 x, char *s);
+S_lop(pTHX_ enum yytokentype t, I32 f, U8 x, char *s);
 # define PERL_ARGS_ASSERT_LOP                   \
         assert(s)
 

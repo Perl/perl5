@@ -428,6 +428,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (OPNUM, ASSIGNOP),
     DEBUG_TOKEN (OPNUM, BITANDOP),
     DEBUG_TOKEN (OPNUM, BITOROP),
+    DEBUG_TOKEN (OPNUM, BLKLSTOP),
     DEBUG_TOKEN (OPNUM, CHEQOP),
     DEBUG_TOKEN (OPNUM, CHRELOP),
     DEBUG_TOKEN (NONE,  COLONATTR),
@@ -2103,7 +2104,15 @@ S_check_uni(pTHX)
  * with a subroutine, S_lop() for which LOP is just another name.
  */
 
-#define LOP(f,x) return lop(f,x,s)
+#define LOP(f,x) return lop(LSTOP,f,x,s)
+
+/*
+ * BLKLOP : a macro to build a list operator. Similar to LOP but its first
+ * argument must be a block, so it does not need the PL_expect value to be
+ * specified.
+ */
+
+#define BLKLOP(f) return lop(BLKLSTOP,f,XBLOCK,s)
 
 /*
  * S_lop
@@ -2117,7 +2126,7 @@ S_check_uni(pTHX)
  */
 
 STATIC I32
-S_lop(pTHX_ I32 f, U8 x, char *s)
+S_lop(pTHX_ enum yytokentype t, I32 f, U8 x, char *s)
 {
     PERL_ARGS_ASSERT_LOP;
 
@@ -2138,7 +2147,7 @@ S_lop(pTHX_ I32 f, U8 x, char *s)
         lstop:
         if (!PL_lex_allbrackets && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
             PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-        return REPORT(LSTOP);
+        return REPORT(t);
     }
 }
 
@@ -7952,10 +7961,20 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_accept:
         LOP(OP_ACCEPT,XTERM);
 
+    case KEY_all:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__ALL), "all is experimental");
+        BLKLOP(OP_ALLSTART);
+
     case KEY_and:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
             return REPORT(0);
         OPERATOR(ANDOP);
+
+    case KEY_any:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__ANY), "any is experimental");
+        BLKLOP(OP_ANYSTART);
 
     case KEY_atan2:
         LOP(OP_ATAN2,XTERM);

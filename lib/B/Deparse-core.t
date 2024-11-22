@@ -91,6 +91,7 @@ sub testit {
         else {
             package test;
             use subs ();
+            no warnings qw( experimental::any experimental::all );
             import subs $keyword;
             $code = "no warnings 'syntax'; no strict 'vars'; sub { ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";
@@ -231,6 +232,9 @@ while (<DATA>) {
 
 
 # Special cases
+
+testit any      => 'CORE::any { $a } $b, $c',    'CORE::any({$a;} $b, $c);';
+testit all      => 'CORE::all { $a } $b, $c',    'CORE::all({$a;} $b, $c);';
 
 testit dbmopen  => 'CORE::dbmopen(%foo, $bar, $baz);';
 testit dbmclose => 'CORE::dbmclose %foo;';

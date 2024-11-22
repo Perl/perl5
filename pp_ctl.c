@@ -1010,7 +1010,7 @@ PP_wrapped(pp_formline, 0, 1)
     }
 }
 
-/* also used for: pp_mapstart() */
+/* also used for: pp_mapstart(), pp_anystart(), pp_allstart() */
 PP(pp_grepstart)
 {
     /* See the code comments at the start of pp_grepwhile() and
@@ -1022,10 +1022,31 @@ PP(pp_grepstart)
 
     if (PL_stack_base + TOPMARK == PL_stack_sp) {
         (void)POPMARK;
-        if (GIMME_V == G_SCALAR) {
-            rpp_extend(1);
-            *++PL_stack_sp = &PL_sv_zero;
+
+        switch(PL_op->op_type) {
+            case OP_GREPSTART:
+            case OP_MAPSTART:
+                if (GIMME_V == G_SCALAR) {
+                    rpp_extend(1);
+                    *++PL_stack_sp = &PL_sv_zero;
+                }
+                break;
+
+            case OP_ANYSTART:
+                if (GIMME_V > G_VOID) {
+                    rpp_extend(1);
+                    rpp_push_IMM(&PL_sv_no);
+                }
+                break;
+
+            case OP_ALLSTART:
+                if (GIMME_V > G_VOID) {
+                    rpp_extend(1);
+                    rpp_push_IMM(&PL_sv_yes);
+                }
+                break;
         }
+
         return PL_op->op_next->op_next;
     }
     svp = PL_stack_base + TOPMARK + 1;
@@ -1304,6 +1325,62 @@ PP(pp_mapwhile)
 
         return cLOGOP->op_other;
     }
+}
+
+PP(pp_anywhile)
+{
+    OPCODE op_type = cUNOP->op_first->op_type;
+
+    bool match = SvTRUE_NN(*PL_stack_sp);
+    rpp_popfree_1_NN();
+
+    ++*PL_markstack_ptr;
+    FREETMPS;
+    LEAVE_with_name("grep_item");
+
+    bool result;
+
+    if((op_type == OP_ANYSTART && match) || (op_type == OP_ALLSTART && !match)) {
+        /* shortcircuit; result is known. Stop here */
+        result = match;
+        goto leave_with_result;
+    }
+
+    if(UNLIKELY(PL_stack_base + *PL_markstack_ptr > PL_stack_sp)) {
+        /* Ran out of items */
+        result = (op_type == OP_ANYSTART) ? false : true;
+
+leave_with_result:
+        LEAVE_with_name("grep");
+        (void)POPMARK;				/* pop src */
+        --*PL_markstack_ptr;
+        (void)POPMARK;				/* pop dst */
+        SV **base = PL_stack_base + POPMARK;	/* pop original mark */
+
+        rpp_popfree_to_NN(base);
+        rpp_push_IMM(result ? &PL_sv_yes : &PL_sv_no);
+
+        return NORMAL;
+    }
+
+    ENTER_with_name("grep_item");
+    SAVEVPTR(PL_curpm);
+
+    SV *src = PL_stack_base[TOPMARK];
+    if (SvPADTMP(src)) {
+        SV *newsrc = sv_mortalcopy(src);
+        PL_stack_base[TOPMARK] = newsrc;
+#ifdef PERL_RC_STACK
+        SvREFCNT_inc_simple_void_NN(newsrc);
+        SvREFCNT_dec(src);
+#endif
+        src = newsrc;
+        PL_tmps_floor++;
+    }
+    SvTEMP_off(src);
+    DEFSV_set(src);
+
+    return cLOGOP->op_other;
 }
 
 /* Range stuff. */

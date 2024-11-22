@@ -44,6 +44,8 @@
 #define Perl_pp_keys Perl_do_kv
 #define Perl_pp_rv2hv Perl_pp_rv2av
 #define Perl_pp_pop Perl_pp_shift
+#define Perl_pp_anystart Perl_pp_grepstart
+#define Perl_pp_allstart Perl_pp_grepstart
 #define Perl_pp_mapstart Perl_pp_grepstart
 #define Perl_pp_dor Perl_pp_defined
 #define Perl_pp_andassign Perl_pp_and
@@ -319,6 +321,9 @@ EXTCONST char* const PL_op_name[] INIT({
 	"reverse",
 	"grepstart",
 	"grepwhile",
+	"anystart",
+	"allstart",
+	"anywhile",
 	"mapstart",
 	"mapwhile",
 	"range",
@@ -738,6 +743,9 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"reverse",
 	"grep",
 	"grep iterator",
+	"any",
+	"all",
+	"any/all iterator",
 	"map",
 	"map iterator",
 	"flipflop",
@@ -1162,6 +1170,9 @@ INIT({
 	Perl_pp_reverse,
 	Perl_pp_grepstart,
 	Perl_pp_grepwhile,
+	Perl_pp_anystart,	/* implemented by Perl_pp_grepstart */
+	Perl_pp_allstart,	/* implemented by Perl_pp_grepstart */
+	Perl_pp_anywhile,
 	Perl_pp_mapstart,	/* implemented by Perl_pp_grepstart */
 	Perl_pp_mapwhile,
 	Perl_pp_range,
@@ -1581,6 +1592,9 @@ INIT({
 	Perl_ck_fun,		/* reverse */
 	Perl_ck_grep,		/* grepstart */
 	Perl_ck_null,		/* grepwhile */
+	Perl_ck_grep,		/* anystart */
+	Perl_ck_grep,		/* allstart */
+	Perl_ck_null,		/* anywhile */
 	Perl_ck_grep,		/* mapstart */
 	Perl_ck_null,		/* mapwhile */
 	Perl_ck_null,		/* range */
@@ -1999,6 +2013,9 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00002409,	/* reverse */
 	0x00025401,	/* grepstart */
 	0x00000308,	/* grepwhile */
+	0x00025401,	/* anystart */
+	0x00025401,	/* allstart */
+	0x00000308,	/* anywhile */
 	0x00025401,	/* mapstart */
 	0x00000308,	/* mapwhile */
 	0x00011300,	/* range */
@@ -2719,6 +2736,9 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      173, /* reverse */
        0, /* grepstart */
      175, /* grepwhile */
+      -1, /* anystart */
+      -1, /* allstart */
+       0, /* anywhile */
        0, /* mapstart */
        0, /* mapwhile */
        0, /* range */
@@ -2979,7 +2999,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, anywhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
     0x3cfc, 0x5379, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x077e, 0x0554, 0x1b70, 0x542c, 0x4fc8, 0x4225, /* const */
@@ -3242,6 +3262,9 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* REVERSE    */ (OPpARG1_MASK|OPpREVERSE_INPLACE),
     /* GREPSTART  */ (OPpARG1_MASK),
     /* GREPWHILE  */ (OPpARG1_MASK|OPpTRUEBOOL),
+    /* ANYSTART   */ (0),
+    /* ALLSTART   */ (0),
+    /* ANYWHILE   */ (OPpARG1_MASK),
     /* MAPSTART   */ (OPpARG1_MASK),
     /* MAPWHILE   */ (OPpARG1_MASK),
     /* RANGE      */ (OPpARG1_MASK),

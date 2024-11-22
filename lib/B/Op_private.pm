@@ -289,6 +289,7 @@ $bits{andassign}{0} = $bf[0];
 $bits{anonconst}{0} = $bf[0];
 @{$bits{anonhash}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 @{$bits{anonlist}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
+$bits{anywhile}{0} = $bf[0];
 $bits{argcheck}{0} = $bf[0];
 @{$bits{argdefelem}}{7,6,0} = ('OPpARG_IF_UNDEF', 'OPpARG_IF_FALSE', $bf[0]);
 @{$bits{argelem}}{2,1,0} = ($bf[8], $bf[8], $bf[0]);

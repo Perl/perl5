@@ -173,6 +173,19 @@ example:
 The ticket for this experiment is
 L<[perl #19765]|https://github.com/Perl/perl5/issues/19765>.
 
+=item C<any> and C<all> list processing operators
+
+Introduced in Perl 5.41.7.
+
+Using these features triggers warnings in the categories C<experimental::any>
+or C<experiment::all>.
+
+This adds new list processing operators named C<any> and C<all>, each as their
+own named feature.
+
+The ticket for this experiment is
+L<[perl #22794]|https://github.com/Perl/perl5/issues/22794>.
+
 =back
 
 =head2 Accepted features

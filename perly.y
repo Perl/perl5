@@ -85,7 +85,7 @@
 %token <opval> PLUGEXPR PLUGSTMT
 %token <opval> LABEL
 %token <ival> LOOPEX DOTDOT YADAYADA
-%token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
+%token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP BLKLSTOP
 %token <ival> POWOP MULOP ADDOP
 %token <ival> DOLSHARP HASHBRACK NOAMP
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
@@ -126,7 +126,7 @@
 %left <ival> OROP <pval> PLUGIN_LOGICAL_OR_LOW_OP
 %left <ival> ANDOP <pval> PLUGIN_LOGICAL_AND_LOW_OP
 %right <ival> NOTOP
-%nonassoc LSTOP LSTOPSUB
+%nonassoc LSTOP LSTOPSUB BLKLSTOP
 %left PERLY_COMMA
 %right <ival> ASSIGNOP <pval> PLUGIN_ASSIGN_OP
 %right <ival> PERLY_QUESTION_MARK PERLY_COLON
@@ -1084,6 +1084,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($LSTOP, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($LSTOP,$indirob), $listexpr) );
 			}
+        |       BLKLSTOP block listexpr /* all/any { ... } @args */
+                        { $$ = op_convert_list($BLKLSTOP, OPf_STACKED,
+                                op_prepend_elem(OP_LIST, newUNOP(OP_NULL, 0, op_scope($block)), $listexpr) );
+                        }
 	|	FUNC PERLY_PAREN_OPEN indirob expr PERLY_PAREN_CLOSE      /* print ($fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );

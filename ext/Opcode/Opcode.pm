@@ -1,4 +1,4 @@
-package Opcode 1.66;
+package Opcode 1.67;
 
 use strict;
 
@@ -377,6 +377,7 @@ used to implement a resource attack (e.g., consume all available CPU time).
 
     grepstart grepwhile
     mapstart mapwhile
+    anystart allstart anywhile
     enteriter iter
     enterloop leaveloop unstack
     last next redo

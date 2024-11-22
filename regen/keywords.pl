@@ -52,6 +52,8 @@ my %feature_kw = (
     method    => 'class',
     ADJUST    => 'class',
     __CLASS__ => 'class',
+    any       => 'any',
+    all       => 'all',
 );
 
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
@@ -132,7 +134,9 @@ __END__
 -abs
 -accept
 -alarm
+-all
 -and
+-any
 -atan2
 -bind
 -binmode

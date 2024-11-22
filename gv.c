@@ -610,7 +610,8 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY___DATA__: case KEY___END__ :
     case KEY_ADJUST  : case KEY_AUTOLOAD: case KEY_BEGIN : case KEY_CHECK :
     case KEY_DESTROY : case KEY_END     : case KEY_INIT  : case KEY_UNITCHECK:
-    case KEY_and     : case KEY_catch   : case KEY_class :
+    case KEY_all     : case KEY_and     : case KEY_any   :
+    case KEY_catch   : case KEY_class   :
     case KEY_continue: case KEY_cmp     : case KEY_defer :
     case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
     case KEY_eq     : case KEY_eval  : case KEY_field  :

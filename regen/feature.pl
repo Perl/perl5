@@ -46,6 +46,8 @@ my %feature = (
     module_true             => 'module_true',
     class                   => 'class',
     apostrophe_as_package_separator => 'apos_as_name_sep',
+    any                     => 'any',
+    all                     => 'all',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -546,7 +548,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.92';
+our $VERSION = '1.93';
 
 FEATURES
 
@@ -980,6 +982,35 @@ onwards.  In previous versions it was enabled all the time.
 This only disables C<'> in symbols in your source code, the internal
 conversion from C<'> to C<::>, including for symbolic references, is
 always enabled.
+
+=head2 The 'any' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::any";
+
+This feature enables the L<C<any>|perlfunc/any BLOCK LIST> operator keyword.
+This allow testing whether any of the values in a list satisfy a given
+condition, with short-circuiting behaviour as soon as it finds one.
+
+=head2 The 'all' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::all";
+
+This feature enables the L<C<all>|perlfunc/all BLOCK LIST> operator keyword.
+This allow testing whether all of the values in a list satisfy a given
+condition, with short-circuiting behaviour as soon as it finds one that does
+not.
+
+B<Note:> remember that this enables one specific feature whose name is C<all>;
+it does not enable all of the features.  This is not C<use feature ':all'>.
+For that, see the section below.
 
 =head1 FEATURE BUNDLES
 

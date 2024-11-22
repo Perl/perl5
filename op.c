@@ -12089,8 +12089,16 @@ Constructs, checks, and returns a glob reference op.
 OP *
 Perl_newGVREF(pTHX_ I32 type, OP *o)
 {
-    if (type == OP_MAPSTART || type == OP_GREPSTART || type == OP_SORT)
-        return newUNOP(OP_NULL, 0, o);
+    switch(type) {
+        /* The thing that looks like a GVREF at the start of these operators
+         * isn't really */
+        case OP_MAPSTART:
+        case OP_GREPSTART:
+        case OP_SORT:
+        case OP_ANYSTART:
+        case OP_ALLSTART:
+            return newUNOP(OP_NULL, 0, o);
+    }
 
     if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED &&
         ((PL_opargs[type] >> OASHIFT) & 7) == OA_FILEREF &&
@@ -13231,7 +13239,10 @@ Perl_ck_grep(pTHX_ OP *o)
 {
     LOGOP *gwop;
     OP *kid;
-    const OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
+    const OPCODE type =
+        o->op_type == OP_GREPSTART ? OP_GREPWHILE :
+        o->op_type == OP_MAPSTART  ? OP_MAPWHILE  :
+                                     OP_ANYWHILE;  /* any and all both share this */
 
     PERL_ARGS_ASSERT_CK_GREP;
 

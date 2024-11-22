@@ -2348,6 +2348,8 @@ my %feature_keywords = (
    finally  => 'try',
    defer    => 'defer',
    signatures => 'signatures',
+   any      => 'any',
+   all      => 'all',
 );
 
 # keywords that are strong and also have a prototype
@@ -3652,9 +3654,10 @@ sub pp_sort { indirop(@_, "sort") }
 
 sub mapop {
     my $self = shift;
-    my($op, $cx, $name) = @_;
+    my($op, $cx) = @_;
     my($expr, @exprs);
-    my $kid = $op->first; # this is the (map|grep)start
+    my $kid = $op->first; # this is the (map|grep|any|all)start
+    my ( $name ) = $kid->name =~ m/(.*)start/; # anystart and allstart share anywhile
     $kid = $kid->first->sibling; # skip a pushmark
     my $code = $kid->first; # skip a null
     if (is_scope $code) {
@@ -3672,8 +3675,9 @@ sub mapop {
 				    $code . join(", ", @exprs), $cx, 5);
 }
 
-sub pp_mapwhile { mapop(@_, "map") }
-sub pp_grepwhile { mapop(@_, "grep") }
+sub pp_mapwhile { mapop(@_) }
+sub pp_grepwhile { mapop(@_) }
+sub pp_anywhile { mapop(@_) }
 sub pp_mapstart { baseop(@_, "map") }
 sub pp_grepstart { baseop(@_, "grep") }
 

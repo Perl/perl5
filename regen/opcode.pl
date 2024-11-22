@@ -142,7 +142,7 @@ my @raw_alias = (
                                          spwent epwent sgrent egrent)],
                  Perl_pp_shostent => [qw(snetent sprotoent sservent)],
                  Perl_pp_aelemfast => ['aelemfast_lex'],
-                 Perl_pp_grepstart => ['mapstart'],
+                 Perl_pp_grepstart => ['mapstart', 'anystart', 'allstart'],
                 );
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

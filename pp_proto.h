@@ -20,6 +20,7 @@ PERL_CALLCONV PP(pp_anoncode) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_anonconst) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_anonhash) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_anonlist) __attribute__visibility__("hidden");
+PERL_CALLCONV PP(pp_anywhile) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_argcheck) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_argdefelem) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_argelem) __attribute__visibility__("hidden");

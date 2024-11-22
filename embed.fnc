@@ -5957,7 +5957,8 @@ S	|int	|intuit_method	|NN char *s				\
 				|NULLOK NOCHECK CV *cv
 S	|int	|intuit_more	|NN char *s				\
 				|NN char *e
-S	|I32	|lop		|I32 f					\
+S	|I32	|lop		|enum yytokentype t			\
+				|I32 f					\
 				|U8 x					\
 				|NN char *s
 Sr	|void	|missingterm	|NULLOK char *s 			\
