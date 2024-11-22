@@ -1951,58 +1951,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             U32 pack_warn = packWARN(WARN_UTF8);
 
             switch (this_problem) {
-              case UTF8_GOT_OVERFLOW:
-
-                /* Overflow means also got a super and are using Perl's
-                 * extended UTF-8, but we handle all three cases here */
-                possible_problems &= ~(UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
-                *errors |= UTF8_GOT_OVERFLOW;
-                uv = UNICODE_REPLACEMENT;
-
-                /* But the API says we flag all errors found */
-                if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
-                    *errors |= UTF8_GOT_SUPER;
-                }
-                if (flags
-                        & (UTF8_WARN_PERL_EXTENDED|UTF8_DISALLOW_PERL_EXTENDED))
-                {
-                    *errors |= UTF8_GOT_PERL_EXTENDED;
-                }
-
-                /* Disallow if any of the three categories say to */
-                if ( ! (flags &   UTF8_ALLOW_OVERFLOW)
-                    || (flags & ( UTF8_DISALLOW_SUPER
-                                 |UTF8_DISALLOW_PERL_EXTENDED)))
-                {
-                    disallowed = TRUE;
-                }
-
-                /* Likewise, warn if any say to */
-                if (  ! (flags & UTF8_ALLOW_OVERFLOW)
-                    ||  (flags & (UTF8_WARN_SUPER|UTF8_WARN_PERL_EXTENDED)))
-                {
-
-                    /* Overflow is a hybrid. If the word size on this platform
-                     * were wide enough for this to not overflow, a non-Unicode
-                     * code point would have been generated.  If the caller
-                     * wanted warnings for such code points, the warning
-                     * category would be WARN_NON_UNICODE, On the other hand,
-                     * overflow is considered a malformation, which is serious,
-                     * and the category would be just WARN_UTF8.  We clearly
-                     * should warn if either category is enabled, but which
-                     * category to use?  Historically, we've used 'utf8' if it
-                     * is enabled; and that seems like the more severe
-                     * category, more befitting a malformation. */
-                    pack_warn = NEED_MESSAGE(WARN_UTF8,
-                                             ckWARN_d, WARN_NON_UNICODE);
-                    if (pack_warn) {
-                        message = Perl_form(aTHX_ "%s: %s (overflows)",
-                                            malformed_text,
-                                            _byte_dump_string(s0, curlen, 0));
-                        this_flag_bit = UTF8_GOT_OVERFLOW;
-                    }
-                }
-
+              default:
+                Perl_croak(aTHX_ "panic: Unexpected case value in "
+                                 " utf8n_to_uvchr_msgs() %d", this_problem);
+                /* NOTREACHED */
                 break;
 
               case UTF8_GOT_EMPTY:
@@ -2117,78 +2069,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 break;
 
-              case UTF8_GOT_SUPER:
-
-                if (flags & UTF8_WARN_SUPER) {
-                    *errors |= UTF8_GOT_SUPER;
-
-                    if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
-                        pack_warn = packWARN(WARN_NON_UNICODE);
-
-                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
-                            message = Perl_form(aTHX_
-                                    "Any UTF-8 sequence that starts with"
-                                    " \"%s\" is for a non-Unicode code point,"
-                                    " may not be portable",
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            message = Perl_form(aTHX_ super_cp_format, uv);
-                        }
-                        this_flag_bit = UTF8_GOT_SUPER;
-                    }
-                }
-
-                /* Test for Perl's extended UTF-8 after the regular SUPER ones,
-                 * and before possibly bailing out, so that the more dire
-                 * warning will override the regular one. */
-                if (UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))) {
-                    if (   (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
-                        && NEED_MESSAGE(WARN_NON_UNICODE, ckWARN, WARN_PORTABLE))
-                    {
-                        pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
-
-                        /* If it is an overlong that evaluates to a code point
-                         * that doesn't have to use the Perl extended UTF-8, it
-                         * still used it, and so we output a message that
-                         * doesn't refer to the code point.  The same is true
-                         * if there was a SHORT malformation where the code
-                         * point is not valid.  In that case, 'uv' will have
-                         * been set to the REPLACEMENT CHAR, and the message
-                         * below without the code point in it will be selected
-                         * */
-                        if (UNICODE_IS_PERL_EXTENDED(uv)) {
-                            message = Perl_form(aTHX_
-                                            PL_extended_cp_format, uv);
-                        }
-                        else {
-                            message = Perl_form(aTHX_
-                                        "Any UTF-8 sequence that starts with"
-                                        " \"%s\" is a Perl extension, and"
-                                        " so is not portable",
-                                        _byte_dump_string(s0, curlen, 0));
-                        }
-                        this_flag_bit = UTF8_GOT_PERL_EXTENDED;
-                    }
-
-                    if (flags & ( UTF8_WARN_PERL_EXTENDED
-                                 |UTF8_DISALLOW_PERL_EXTENDED))
-                    {
-                        *errors |= UTF8_GOT_PERL_EXTENDED;
-
-                        if (flags & UTF8_DISALLOW_PERL_EXTENDED) {
-                            disallowed = TRUE;
-                        }
-                    }
-                }
-
-                if (flags & UTF8_DISALLOW_SUPER) {
-                    *errors |= UTF8_GOT_SUPER;
-                    disallowed = TRUE;
-                }
-
-                break;
-
               case UTF8_GOT_NONCHAR:
 
                 if (flags & UTF8_WARN_NONCHAR) {
@@ -2276,11 +2156,131 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 }
 
                 break;
+              case UTF8_GOT_OVERFLOW:
 
-              default:
-                Perl_croak(aTHX_ "panic: Unexpected case value in "
-                                 " utf8n_to_uvchr_msgs() %d", this_problem);
-                /* NOTREACHED */
+                /* Overflow means also got a super and are using Perl's
+                 * extended UTF-8, but we handle all three cases here */
+                possible_problems &= ~(UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
+                *errors |= UTF8_GOT_OVERFLOW;
+                uv = UNICODE_REPLACEMENT;
+
+                /* But the API says we flag all errors found */
+                if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
+                    *errors |= UTF8_GOT_SUPER;
+                }
+                if (flags
+                        & (UTF8_WARN_PERL_EXTENDED|UTF8_DISALLOW_PERL_EXTENDED))
+                {
+                    *errors |= UTF8_GOT_PERL_EXTENDED;
+                }
+
+                /* Disallow if any of the three categories say to */
+                if ( ! (flags &   UTF8_ALLOW_OVERFLOW)
+                    || (flags & ( UTF8_DISALLOW_SUPER
+                                 |UTF8_DISALLOW_PERL_EXTENDED)))
+                {
+                    disallowed = TRUE;
+                }
+
+                /* Likewise, warn if any say to */
+                if (  ! (flags & UTF8_ALLOW_OVERFLOW)
+                    ||  (flags & (UTF8_WARN_SUPER|UTF8_WARN_PERL_EXTENDED)))
+                {
+
+                    /* Overflow is a hybrid. If the word size on this platform
+                     * were wide enough for this to not overflow, a non-Unicode
+                     * code point would have been generated.  If the caller
+                     * wanted warnings for such code points, the warning
+                     * category would be WARN_NON_UNICODE, On the other hand,
+                     * overflow is considered a malformation, which is serious,
+                     * and the category would be just WARN_UTF8.  We clearly
+                     * should warn if either category is enabled, but which
+                     * category to use?  Historically, we've used 'utf8' if it
+                     * is enabled; and that seems like the more severe
+                     * category, more befitting a malformation. */
+                    pack_warn = NEED_MESSAGE(WARN_UTF8,
+                                             ckWARN_d, WARN_NON_UNICODE);
+                    if (pack_warn) {
+                        message = Perl_form(aTHX_ "%s: %s (overflows)",
+                                            malformed_text,
+                                            _byte_dump_string(s0, curlen, 0));
+                        this_flag_bit = UTF8_GOT_OVERFLOW;
+                    }
+                }
+
+                break;
+
+              case UTF8_GOT_SUPER:
+
+                if (flags & UTF8_WARN_SUPER) {
+                    *errors |= UTF8_GOT_SUPER;
+
+                    if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
+                        pack_warn = packWARN(WARN_NON_UNICODE);
+
+                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                            message = Perl_form(aTHX_
+                                    "Any UTF-8 sequence that starts with"
+                                    " \"%s\" is for a non-Unicode code point,"
+                                    " may not be portable",
+                                    _byte_dump_string(s0, curlen, 0));
+                        }
+                        else {
+                            message = Perl_form(aTHX_ super_cp_format, uv);
+                        }
+                        this_flag_bit = UTF8_GOT_SUPER;
+                    }
+                }
+
+                /* Test for Perl's extended UTF-8 after the regular SUPER ones,
+                 * and before possibly bailing out, so that the more dire
+                 * warning will override the regular one. */
+                if (UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))) {
+                    if (   (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
+                        && NEED_MESSAGE(WARN_NON_UNICODE, ckWARN, WARN_PORTABLE))
+                    {
+                        pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
+
+                        /* If it is an overlong that evaluates to a code point
+                         * that doesn't have to use the Perl extended UTF-8, it
+                         * still used it, and so we output a message that
+                         * doesn't refer to the code point.  The same is true
+                         * if there was a SHORT malformation where the code
+                         * point is not valid.  In that case, 'uv' will have
+                         * been set to the REPLACEMENT CHAR, and the message
+                         * below without the code point in it will be selected
+                         * */
+                        if (UNICODE_IS_PERL_EXTENDED(uv)) {
+                            message = Perl_form(aTHX_
+                                            PL_extended_cp_format, uv);
+                        }
+                        else {
+                            message = Perl_form(aTHX_
+                                        "Any UTF-8 sequence that starts with"
+                                        " \"%s\" is a Perl extension, and"
+                                        " so is not portable",
+                                        _byte_dump_string(s0, curlen, 0));
+                        }
+                        this_flag_bit = UTF8_GOT_PERL_EXTENDED;
+                    }
+
+                    if (flags & ( UTF8_WARN_PERL_EXTENDED
+                                 |UTF8_DISALLOW_PERL_EXTENDED))
+                    {
+                        *errors |= UTF8_GOT_PERL_EXTENDED;
+
+                        if (flags & UTF8_DISALLOW_PERL_EXTENDED) {
+                            disallowed = TRUE;
+                        }
+                    }
+                }
+
+                if (flags & UTF8_DISALLOW_SUPER) {
+                    *errors |= UTF8_GOT_SUPER;
+                    disallowed = TRUE;
+                }
+
+                break;
 
             } /* End of switch() on the possible problems */
 
