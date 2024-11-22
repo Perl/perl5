@@ -1201,7 +1201,7 @@ point's representation.
  * First one will convert the overlong to the REPLACEMENT CHARACTER; second
  * will return what the overlong evaluates to */
 #define UTF8_ALLOW_LONG                 0x2000
-#define UTF8_ALLOW_LONG_AND_ITS_VALUE   (UTF8_ALLOW_LONG|0x4000)
+#define UTF8_ALLOW_LONG_AND_ITS_VALUE   0x4000
 #define UTF8_GOT_LONG                   UTF8_ALLOW_LONG
 
 /* For back compat, these old names are misleading for overlongs and

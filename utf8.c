@@ -2092,17 +2092,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
               case UTF8_GOT_LONG:
                 *errors |= UTF8_GOT_LONG;
 
-                if (flags & UTF8_ALLOW_LONG) {
-
-                    /* We don't allow the actual overlong value, unless the
-                     * special extra bit is also set */
-                    if (! (flags & (   UTF8_ALLOW_LONG_AND_ITS_VALUE
-                                    & ~UTF8_ALLOW_LONG)))
-                    {
-                        uv = UNICODE_REPLACEMENT;
-                    }
+                if (! (flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
+                    uv = UNICODE_REPLACEMENT;
                 }
-                else {
+
+                if (! (flags & ( UTF8_ALLOW_LONG
+                                |UTF8_ALLOW_LONG_AND_ITS_VALUE)))
+                {
                     disallowed = TRUE;
 
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
