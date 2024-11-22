@@ -1591,7 +1591,12 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_;
 
     const U8 * s = s0;
+
+    /* The ending position, plus 1, of the first character in the sequence
+     * beginning at s0.  In other words, 'e', adjusted down to to be no more
+     * than a single character */
     const U8 * send = e;
+
     SSize_t curlen = send - s0;
     U32 possible_problems;  /* A bit is set here for each potential problem
                                found as we go along */
@@ -1603,10 +1608,12 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
     dTHX;
 
-    /* Here, is one of: a) malformed; b) a problematic code point (surrogate,
-     * non-unicode, or nonchar); or c) on ASCII platforms, one of the Hangul
-     * syllables that the dfa doesn't properly handle.  Quickly dispose of the
-     * final case. */
+    /* Here, is one of:
+     *  a)  malformed;
+     *  b)  a problematic code point (surrogate, non-unicode, or nonchar); or
+     *  c)  on ASCII platforms, one of the Hangul syllables that the dfa
+     *      doesn't properly handle.  Quickly dispose of the final case.
+     */
 
     /* Assume will be successful; override later if necessary */
     if (UNLIKELY(errors)) {
@@ -1652,7 +1659,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         errors = &discard_errors;
     }
 
-    /* The order of malformation tests here is important.  We should consume as
+    /* Accumulate the code point translation of the input byte sequence
+     * s0 .. e-1, looking for malformations.
+     *
+     * The order of malformation tests here is important.  We should consume as
      * few bytes as possible in order to not skip any valid character.  This is
      * required by the Unicode Standard (section 3.9 of Unicode 6.0); see also
      * https://unicode.org/reports/tr36 for more discussion as to why.  For
@@ -1711,8 +1721,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
     /* Here is not a continuation byte, nor an invariant.  The only thing left
      * is a start byte (possibly for an overlong).  (We can't use UTF8_IS_START
-     * because it excludes start bytes like \xC0 that always lead to
-     * overlongs.) */
+     * to check for sure because it excludes start bytes like \xC0 that always
+     * lead to overlongs.) */
 
     /* Convert to I8 on EBCDIC (no-op on ASCII), then remove the leading bits
      * that indicate the number of bytes in the character's whole UTF-8
@@ -1874,16 +1884,23 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 }
             }
         }
-    }
+    }   /* End of checking if is a special code point */
 
   ready_to_handle_errors: ;
 
     /* At this point:
-     * curlen               contains the number of bytes in the sequence that
-     *                      this call should advance the input by.
-     * avail_len            gives the available number of bytes passed in, but
-     *                      only if this is less than the expected number of
-     *                      bytes, based on the code point's start byte.
+     * s0                   points to the first byte of the character
+     * expectlen            gives the number of bytes that the character is
+     *                      expected to occupy, based on the value of the
+     *                      presumed start byte in s0.  This will be 0 if the
+     *                      sequence is empty, or 1 if s0 isn't actually a
+     *                      start byte.
+     * avail_len            gives the number of bytes in the sequence this
+     *                      call can look at, one character's worth at most.
+     * curlen               gives the number of bytes in the sequence that
+     *                      this call actually looked at.  This is returned to
+     *                      the caller as the value they should advance the
+     *                      input by for the next call to this function.
      * possible_problems    is 0 if there weren't any problems; otherwise a bit
      *                      is set in it for each potential problem found.
      * uv                   contains the code point the input sequence
@@ -1891,7 +1908,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      a well-defined value from being computed, it is
      *                      some substitute value, typically the REPLACEMENT
      *                      CHARACTER.
-     * s0                   points to the first byte of the character
      * s                    points to just after where we left off processing
      *                      the character
      * send                 points to just after where that character should
@@ -1902,20 +1918,86 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     bool success = true;
 
     if (UNLIKELY(possible_problems)) {
+
+        /* Here, the input sequence is potentially problematic.  The code here
+         * determines if that is indeed the case and how to handle it.  The
+         * possible outcomes are:
+         *  1)  substituting the Unicode REPLACEMENT CHARACTER as the
+         *      translation for this input sequence; and/or
+         *  2)  returning information about the problem to the caller in
+         *      *errors and/or *msgs; and/or
+         *  3)  raising appropriate warnings.
+         *
+         * There are two main categories of potential problems.
+         *
+         *  a)  One type is by default not considered to be a problem.  These
+         *      are for when the input was syntactically valid
+         *      Perl-extended-UTF-8 for a code point that is representable on
+         *      this platform, but that code point isn't considered by Unicode
+         *      to be freely exchangeable between applications.  To get here,
+         *      code earlier in this function has determined both that this
+         *      sequence is for such a code point, and that the 'flags'
+         *      parameter indicates that these are to be considered
+         *      problematic, meaning this sequence should be rejected, merely
+         *      warned about, or both.  *errors will be set for each of these.
+         *
+         *      If the caller to this function has set the corresponding
+         *      DISALLOW bit in 'flags', the translation of this sequence will
+         *      be the Unicode REPLACEMENT CHARACTER.
+         *
+         *      If the caller to this function has set the corresponding WARN
+         *      bit in 'flags' potentially a warning message will be generated,
+         *      using the rules common to both types of problems, and detailed
+         *      below.
+         *
+         *  b)  The other type is considered by default to be problematic.
+         *      There are three subclasses:
+         *      1)  Some syntactic malformation meant that no code point could
+         *          be calculated for the input.  An example is that the
+         *          sequence was incomplete, more bytes were called for than
+         *          the input contained.  The function returns the Unicode
+         *          REPLACEMENT CHARACTER as the translation of these.
+         *      2)  The sequence is legal Perl extended UTF-8, but is for a
+         *          code point too large to be represented on this platform.
+         *          The function returns the Unicode REPLACEMENT CHARACTER as
+         *          the translation of these.
+         *      3)  The sequence represents a code point which can also be
+         *          represented by a shorter sequence.  These have been
+         *          declared illegal by Unicode fiat because they were being
+         *          used as Trojan horses to successfully attack applications.
+         *          One undocumented flag causes these to be accepted, but
+         *          otherwise the function returns the Unicode REPLACEMENT
+         *          CHARACTER as the translation of these.
+         *
+         *      In all cases the corresponding bit in *errors is set.  This is
+         *      in contrast to the other type of problem where the input
+         *      'flags' affect if the bit is set or not.
+         *
+         *      The default is to generate a warning for each of these.  If the
+         *      input 'flags' has a corresponding ALLOW flag, warnings are
+         *      suppressed.  The only other thing the ALLOW flags do is
+         *      determine if the function returns sucess or failure
+         *
+         *  For both types of problems, if warnings are called for by the input
+         *  flags, also setting the UTF8_CHECK_ONLY flag overrides
+         *  generating them.  If 'msgs' is not NULL, they all will be returned
+         *  there; otherwise they will be raised if warnings are enabled.
+         */
+
         bool disallowed = FALSE;
         const U32 orig_problems = possible_problems;
 
-        /* Returns 0 if no message needs to be generated for this problem even
-         * if everything else says to.  Otherwise returns the warning category
-         * to use for the message.
+        /* The following macro returns 0 if no message needs to be generated
+         * for this problem even if everything else says to.  Otherwise returns
+         * the warning category to use for the message..
          *
          * No message need be generated if the UTF8_CHECK_ONLY flag has been
          * set by the caller.  Otherwise, a message should be generated if
          * either:
          *  1)  the caller has furnished a structure into which messages should
          *      be returned to it (so it itself can decide what to do); or
-         *  2)  warnings are enabled for either of the category parameters to the
-         *      macro.
+         *  2)  warnings are enabled for either of the category parameters to
+         *      the macro.
          *
          * The 'warning' parameter is the higher priority warning category to
          * check.  The macro calls ckWARN_d(warning), so warnings for it are
@@ -1940,20 +2022,28 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         while (possible_problems) { /* Handle each possible problem */
             char * message = NULL;
 
-            /* Each 'case' handles one problem given by a bit in
-             * 'possible_problems'.  The lowest bit positions, as #defined in
-             * utf8.h, are are handled first.  Some of the ordering is
-             * important so that higher priority items are done before lower
-             * ones; some of which may depend on earlier actions.  Also the
-             * ordering tries to cause any messages to be displayed in kind of
-             * decreasing severity order.  But the overlong must come last, as
-             * it changes 'uv' looked at by the others */
+            /* The lowest bit positions, as #defined in utf8.h, are handled
+             * first.  Some of the ordering is important so that higher
+             * priority items are done before lower ones; some of which may
+             * depend on earlier actions.  Also the ordering tries to cause any
+             * messages to be displayed in kind of decreasing severity order.
+             * But the overlong must come last, as it changes 'uv' looked at by
+             * the others */
 
             U32 this_problem = 1U << lsbit_pos32(possible_problems);
 
             U32 this_flag_bit = this_problem;
 
+            /* Turn off so next iteration doesn't retry this */
             possible_problems &= ~this_problem;
+
+            /* The code is structured so that there is a case: in a switch()
+             * for each problem type, so as to handle the different details of
+             * each.  The only common part after setting things up is the
+             * handling of any generated warning message.  That means that if a
+             * case: finds there is no message, it can 'continue' to the next
+             * loop iteration instead of doing a 'break', whose only purpose
+             * would be to handle the message. */
 
             /* Most case:s use this; overridden in a few */
             U32 pack_warn = packWARN(WARN_UTF8);
@@ -2088,8 +2178,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     if (NEED_MESSAGE(WARN_NONCHAR,,)) {
                         /* The code above should have guaranteed that we don't
                          * get here with errors other than overlong */
-                        assert (! (orig_problems
-                                        & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
+                        assert (! (  orig_problems
+                                   & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
 
                         pack_warn = packWARN(WARN_NONCHAR);
                         message = Perl_form(aTHX_ nonchar_cp_format, uv);
@@ -2301,8 +2391,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     }
 
                     av_push(*msgs, newRV_noinc((SV*) new_msg_hv(message,
-                                                                pack_warn,
-                                                                this_flag_bit)));
+                                                              pack_warn,
+                                                              this_flag_bit)));
                 }
                 else if (PL_op)
                     Perl_warner(aTHX_ pack_warn, "%s in %s", message,
@@ -2323,7 +2413,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             success = false;
             uv = UNICODE_REPLACEMENT;
         }
-    }
+    } /* End of there was a possible problem */
 
     *cp_p = UNI_TO_NATIVE(uv);
     return success;
