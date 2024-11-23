@@ -3499,6 +3499,13 @@ should use the printf/sprintf functions instead.
 overload::constant needs to be a code reference.  Either
 an anonymous subroutine, or a reference to a subroutine.
 
+=item "%s" is not a valid name for a generated method
+
+(F) A custom method name was passed to an attribute on a field, such as
+C<:reader>, which creates a new method.  These generated methods must have
+valid names, but the value given to the attribute would result in an
+invalid name.
+
 =item '%s' is not an overloadable type
 
 (W overload) You tried to overload a constant type the overload package is

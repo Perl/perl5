@@ -979,6 +979,9 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
         /* Default to name minus the sigil */
         value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
 
+    if(!valid_identifier_sv(value))
+        croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
+
     PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
 
     I32 floor_ix = start_subparse(FALSE, 0);
