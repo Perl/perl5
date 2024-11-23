@@ -2889,14 +2889,6 @@ declaration.  The '_' in a prototype must be followed by a ';',
 indicating the rest of the parameters are optional, or one of '@'
 or '%', since those two will accept 0 or more final parameters.
 
-=item Illegal character \%o (carriage return)
-
-(F) Perl normally treats carriage returns in the program text as
-it would any other whitespace, which means you should never see
-this error when Perl was built using standard options.  For some
-reason, your version of Perl appears to have been built without
-this support.  Talk to your Perl administrator.
-
 =item Illegal character following sigil in a subroutine signature
 
 (F) A parameter in a subroutine signature contained an unexpected character

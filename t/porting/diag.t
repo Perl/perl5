@@ -740,9 +740,6 @@ Wrong syntax (suid) fd script name "%s"
 
 __CATEGORIES__
 
-# This is a warning, but is currently followed immediately by a croak (toke.c)
-Illegal character \%o (carriage return)
-
 # Because uses WARN_MISSING as a synonym for WARN_UNINITIALIZED (sv.c)
 Missing argument in %s
 

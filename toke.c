@@ -9244,13 +9244,7 @@ yyl_try(pTHX_ char *s)
             return tok;
         goto retry_bufptr;
 
-    case '\r':
-#ifdef PERL_STRICT_CR
-        Perl_warn(aTHX_ "Illegal character \\%03o (carriage return)", '\r');
-        Perl_croak(aTHX_
-      "\t(Maybe you didn't strip carriage returns after a network transfer?)\n");
-#endif
-    case ' ': case '\t': case '\f': case '\v':
+    case ' ': case '\t': case '\f': case '\r': case '\v':
         s++;
         goto retry;
 
@@ -9394,11 +9388,7 @@ yyl_try(pTHX_ char *s)
         }
         if (PL_expect == XBLOCK) {
             const char *t = s;
-            while (SPACE_OR_TAB(*t)
-#ifndef PERL_STRICT_CR
-                    || *t == '\r'
-#endif
-            )
+            while (SPACE_OR_TAB(*t) || *t == '\r')
                 t++;
             if (*t == '\n' || *t == '#') {
                 ENTER_with_name("lex_format");
@@ -9460,11 +9450,7 @@ yyl_try(pTHX_ char *s)
 
     case '.':
         if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack
-#ifdef PERL_STRICT_CR
-            && s[1] == '\n'
-#else
             && (s[1] == '\n' || (s[1] == '\r' && s[2] == '\n'))
-#endif
             && (s == PL_linestart || s[-1] == '\n') )
         {
             PL_expect = XSTATE;
@@ -11016,7 +11002,6 @@ S_scan_heredoc(pTHX_ char *s)
     *d = '\0';
     len = d - PL_tokenbuf;
 
-#ifndef PERL_STRICT_CR
     d = (char *) memchr(s, '\r', PL_bufend - s);
     if (d) {
         char * const olds = s;
@@ -11039,7 +11024,6 @@ S_scan_heredoc(pTHX_ char *s)
         SvCUR_set(PL_linestr, PL_bufend - SvPVX_const(PL_linestr));
         s = olds;
     }
-#endif
 
     tmpstr = newSV_type(SVt_PVIV);
     if (term == '\'') {
@@ -11245,7 +11229,6 @@ S_scan_heredoc(pTHX_ char *s)
             PL_parser->herelines++;
             PL_last_lop = PL_last_uni = NULL;
 
-#ifndef PERL_STRICT_CR
             if (PL_bufend - PL_linestart >= 2) {
                 if (   (PL_bufend[-2] == '\r' && PL_bufend[-1] == '\n')
                     || (PL_bufend[-2] == '\n' && PL_bufend[-1] == '\r'))
@@ -11259,7 +11242,6 @@ S_scan_heredoc(pTHX_ char *s)
             }
             else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
                 PL_bufend[-1] = '\n';
-#endif
 
             if (indented && (PL_bufend-s) >= len) {
                 char * found = ninstr(s, PL_bufend, (PL_tokenbuf + 1), (PL_tokenbuf +1 + len));
@@ -11852,7 +11834,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         if (s < PL_bufend)
             break;		/* handle case where we are done yet :-) */
 
-#ifndef PERL_STRICT_CR
         if (to - SvPVX_const(sv) >= 2) {
             if (   (to[-2] == '\r' && to[-1] == '\n')
                 || (to[-2] == '\n' && to[-1] == '\r'))
@@ -11866,7 +11847,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         }
         else if (to - SvPVX_const(sv) == 1 && to[-1] == '\r')
             to[-1] = '\n';
-#endif
 
         /* if we're out of file, or a read fails, bail and reset the current
            line marker so we can report where the unterminated string began
@@ -12611,13 +12591,8 @@ S_scan_formline(pTHX_ char *s)
         char *eol;
         if (*s == '.') {
             char *t = s+1;
-#ifdef PERL_STRICT_CR
-            while (SPACE_OR_TAB(*t))
-                t++;
-#else
             while (SPACE_OR_TAB(*t) || *t == '\r')
                 t++;
-#endif
             if (*t == '\n' || t == PL_bufend) {
                 eofmt = TRUE;
                 break;
@@ -12642,14 +12617,12 @@ S_scan_formline(pTHX_ char *s)
             }
             if (eol > s) {
                 sv_catpvn(stuff, s, eol-s);
-#ifndef PERL_STRICT_CR
                 if (eol-s > 1 && eol[-2] == '\r' && eol[-1] == '\n') {
                     char *end = SvPVX(stuff) + SvCUR(stuff);
                     end[-2] = '\n';
                     end[-1] = '\0';
                     SvCUR_set(stuff, SvCUR(stuff) - 1);
                 }
-#endif
             }
             else
               break;

@@ -256,6 +256,20 @@ L</Platform Support> section, instead.
 
 XXX
 
+=item *
+
+The (mostly undocumented) configuration macro C<PERL_STRICT_CR> has been
+removed. When enabled (e.g. with C<./Configure -A ccflags=-DPERL_STRICT_CR>),
+it would make the perl parser throw a fatal error when it encountered a CR
+(carriage return) character in source files. The default (and now only)
+behavior of the perl parser is to strip CRs paired with newline characters and
+otherwise treat them as whitespace.
+
+(C<PERL_STRICT_CR> was originally introduced in perl 5.005 to optionally
+restore backward compatibility with perl 5.004, which had made CR in source
+files an error. Before that, CR was accepted, but retained literally in quoted
+multi-line constructs such as here-documents, even at the end of a line.)
+
 =back
 
 =head1 Testing

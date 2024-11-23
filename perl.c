@@ -2231,9 +2231,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
       reswitch:
         switch ((c = *s)) {
         case 'C':
-#ifndef PERL_STRICT_CR
         case '\r':
-#endif
         case ' ':
         case '0':
         case 'F':
@@ -3955,9 +3953,7 @@ Perl_moreswitches(pTHX_ const char *s)
         break;
     case '-':
     case 0:
-#if defined(WIN32) || !defined(PERL_STRICT_CR)
     case '\r':
-#endif
     case '\n':
     case '\t':
         break;
