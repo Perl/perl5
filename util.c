@@ -2004,6 +2004,168 @@ Perl_croak_popstack(void)
 }
 
 /*
+=for apidoc c_bp
+
+Internal helper for C<C_BP>.  Not to be called directly.
+
+Prints file name, C function name, line number, and CPU the instruction
+pointer.  Instruction pointer intended to be copied to a C debugger tool or
+disassembler or used with core dumps.  It is a faux-function pointer to
+somewhere in the middle of the caller's C function, this address can never
+be casted from I<void *> to a function pointer, then called, a SEGV will
+occur.
+
+=cut
+*/
+
+void
+Perl_c_bp(const char * file_metadata, ...)
+{
+    /* file_metadata is a string in the format of "XS_my_func*XSModule.c*6789"
+       The 3 arguments are catted together by CPP, so in the caller,
+       when using a C debugger, you press "Step One" key 2 times less, when
+       using step by disassembly view. On compilers like GCC where __FUNCTION__
+       is not a string litteral but a const char * global
+       variable/linker symbol, file_metadata is only the
+       function name, and does not have a "*" in it, so then read the 2nd
+       optional argument which const char * string litteral that has
+       the file name and line number catted together with "*";
+
+       C_BP macro should never appear in
+       public Stable/Gold releases of Perl core or any CPAN module. Using
+       C_BP even in a alpha release, is questionable. Smokers/CI greatly
+       dislike SEGVs which someone require human intervention to unfreeze
+       the console or unattended CI tool.
+    */
+
+    /* XXX improvements, identify which .so/.dll on disk this address is from.
+       Ajust value to a 0-indexed value to remove ASLR randomizing between
+       process runs. Better integration with USE_C_BACKTRACE if
+       USE_C_BACKTRACE enabled on a particular platform. */
+#if defined(__has_builtin) && __has_builtin(__builtin_return_address)
+    void * ip = __builtin_return_address(0); /* GCC family */
+#elif _MSC_VER
+    void * ip = _ReturnAddress();
+#else
+    /* last resort, seems to work on all CPU archs, guaranteed to work
+       on all x86/x64 OSes, all CCs, exceptions to last resort, rumor says
+       Solaris SPARC, call/ret instructions pop and push function pointers
+       to an array of function pointers, far far away from the C stack as
+       a security measure so on SPARC this would be the contents of a random
+       C auto var in the caller.
+
+       IA64, with hardware assistence by the IA64, supposedly appropriate
+       portions of the C stack are automatically shifted into kernel space on
+       each function call so no callee can read or write any C auto var in its
+       caller. Only exception is "other_func(&some_var_this_func);" The shift
+       factor now excludes some_var_this_func. So the line below would SEGV.
+
+       If any bug reports come in from these old CPUs, implement the correct
+       platform specific way to get debugging info, or uncomment the fallback */
+    void * ip = *(((void **)&file_metadata)-1);
+    /* fallback
+#  if PTRSIZE == 4
+    void * ip = (void *)0x12345678;
+#  else
+    void * ip = (void *)0x123456789ABCDEF0;
+#  endif
+    */
+#endif
+    char buf [sizeof("panic: C breakpoint hit file \"%.*s\", function \"%.*s\" line %.*s CPU IP 0x%p\n")
+               + (U8_MAX*3) + (PTRSIZE*2) + 1];
+    va_list args;
+    int out_len;
+    U32 f_len;
+    const char * file_metadata_end;
+    const char * p;
+
+    const char * fnc_st;
+    const char * fnc_end;
+    U8 fnc_len;
+
+    const char * fn_st;
+    const char * fn_end;
+    U8 fn_len;
+
+    const char * ln_st;
+    const char * ln_end;
+    U8 ln_len;
+
+    PERL_ARGS_ASSERT_C_BP;
+
+    va_start(args, file_metadata);
+    f_len = (U32)strlen(file_metadata);
+    file_metadata_end = file_metadata + f_len;
+    p = file_metadata;
+
+    fnc_st = p;
+    fnc_end = (const char*)memchr(  (const void *)fnc_st,
+                                    '*', file_metadata_end - fnc_st);
+    if(!fnc_end) {
+        if(f_len) {
+            fnc_end = fnc_st + f_len;
+            file_metadata = va_arg(args, const char *);
+            f_len = strlen(file_metadata);
+            file_metadata_end = file_metadata + f_len;
+            p = file_metadata;
+        }
+        else {
+            fnc_st = "unknown";
+            fnc_end = fnc_st + STRLENs("unknown");
+            p = file_metadata_end;
+        }
+    }
+    else {
+        p = fnc_end + 1;
+    }
+    fnc_len = (U8)(fnc_end - fnc_st);
+
+    fn_st = p;
+    fn_end = (const char*)memchr( (const void *)fn_st,
+                                  '*', file_metadata_end - fn_st);
+    if(!fn_end) {
+        fn_st = "unknown";
+        fn_end = fn_st + STRLENs("unknown");
+        p = file_metadata_end;
+    }
+    else {
+        p = fn_end + 1;
+    }
+    fn_len = (U8)(fn_end-fn_st);
+
+    ln_st = p;
+    ln_end = file_metadata_end;
+    ln_len = (U8)(ln_end - p);
+    if(!ln_len) {
+        ln_st = "unknown";
+        ln_len = STRLENs("unknown");
+    }
+    out_len = my_snprintf((char*)buf, sizeof(buf)-2,
+                          "panic: C breakpoint hit file \"%.*s\", "
+                          "function \"%.*s\" line %.*s CPU IP 0x%p",
+                          (int)fn_len, fn_st, (int)fnc_len, fnc_st,
+                          (int)ln_len, ln_st, ip);
+    if(out_len > 0 && out_len >= (int)(sizeof(buf)-2)) {
+        out_len = (int)(sizeof(buf)-2);
+    }
+    buf[out_len] = '\0'; /* MSVCRT bug don't ask, paranoia */
+
+    STMT_START {
+        dTHX; /* stderr+stdout, force user to see it */
+        Perl_warn(aTHX_ "%s", (char *)buf); /* no "\n" for max diag info */
+        PerlIO_flush(PerlIO_stderr());
+        PerlIO * out = PerlIO_stdout();
+        buf[out_len] = '\n'; /* force shell/terminal to print it, paranoia */
+        out_len++;
+        buf[out_len] = '\0';
+        PerlIO_write(out, (char *)buf, (Size_t)out_len);
+        PerlIO_flush(out); /* force shell/terminal to print it */
+    } STMT_END;
+    va_end(args);
+    return;
+}
+
+/*
 =for apidoc warn_sv
 
 This is an XS interface to Perl's C<warn> function.

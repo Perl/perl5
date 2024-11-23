@@ -7,10 +7,11 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+use Config;
 use utf8;
 use open qw( :utf8 :std );
 
-plan( tests => 18 );
+plan( tests => 19 );
 
 package ｍａｉｎ;
 
@@ -74,3 +75,32 @@ $^P = 16;
 $^P = $saved_perldb;
 
 ::is( eval 'ｐｂ()', 'ｍａｉｎ::ｐｂ', 'actually return the right function name even if $^P had been on at some point' );
+
+# Skip the OS signal/exception from this faux-SEGV
+# code is from cpan/Test-Harness/t/harness.t
+SKIP: {
+    ::skip "No SIGSEGV on $^O", 1
+        if $^O ne 'MSWin32' && $Config::Config{'sig_name'} !~ m/SEGV/;
+    #line below not in cpan/Test-Harness/t/harness.t
+    ::skip "No SIGTRAP on $^O", 1
+        if $^O ne 'MSWin32' && $Config::Config{'sig_name'} !~ m/TRAP/;
+
+    # some people -Dcc="somecc -fsanitize=..." or -Doptimize="-fsanitize=..."
+    ::skip "ASAN doesn't passthrough SEGV", 1
+      if "$Config{cc} $Config{ccflags} $Config{optimize}" =~ /-fsanitize\b/;
+
+    my $out_str = ::fresh_perl('BEGIN { chdir \'t\' if -d \'t\';'
+    .'require \'./test.pl\';set_up_inc(\'../lib\',\'../../lib\');}'
+    .'use XS::APItest;XS::APItest::test_C_BP_breakpoint();');
+
+    # On machines where 'ulimit -c' does not return '0', a perl.core
+    # file is created here.  We don't need to examine it, and it's
+    # annoying to have it subsequently show up as an untracked file in
+    # `git status`, so simply get rid of it per suggestion by Karen
+    # Etheridge.
+    END { unlink 'perl.core' }
+
+
+    ::like($out_str, qr/panic: C breakpoint hit file/,
+           'C_BP macro and C breakpoint works');
+}
