@@ -9394,11 +9394,11 @@ yyl_try(pTHX_ char *s)
         }
         if (PL_expect == XBLOCK) {
             const char *t = s;
-#ifdef PERL_STRICT_CR
-            while (SPACE_OR_TAB(*t))
-#else
-            while (SPACE_OR_TAB(*t) || *t == '\r')
+            while (SPACE_OR_TAB(*t)
+#ifndef PERL_STRICT_CR
+                    || *t == '\r'
 #endif
+            )
                 t++;
             if (*t == '\n' || *t == '#') {
                 ENTER_with_name("lex_format");
