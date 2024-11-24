@@ -2499,8 +2499,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * case set up a more dire warning and jumped to the label just
                  * above (after determining that warning/rejecting here was
                  * enabled).  */
+                error_flags_return |= this_flag_bit;
                 if (flags & UTF8_WARN_SUPER) {
-                    error_flags_return |= this_flag_bit;
                     if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
                         pack_warn = packWARN(WARN_NON_UNICODE);
                         if (cp_format) {
@@ -2515,7 +2515,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 }
 
                 if (flags & UTF8_DISALLOW_SUPER) {
-                    error_flags_return |= this_flag_bit;
                     disallowed = true;
                 }
 
