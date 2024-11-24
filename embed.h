@@ -861,6 +861,9 @@
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)
 # define utf8_to_uvchr_buf_helper(a,b,c)        Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
+# define uv_to_utf8(a,b)                        Perl_uv_to_utf8(aTHX,a,b)
+# define uv_to_utf8_flags(a,b,c)                Perl_uv_to_utf8_flags(aTHX,a,b,c)
+# define uv_to_utf8_msgs(a,b,c,d)               Perl_uv_to_utf8_msgs(aTHX,a,b,c,d)
 # define uvchr_to_utf8(a,b)                     Perl_uvchr_to_utf8(aTHX,a,b)
 # define uvchr_to_utf8_flags(a,b,c)             Perl_uvchr_to_utf8_flags(aTHX,a,b,c)
 # define uvchr_to_utf8_flags_msgs(a,b,c,d)      Perl_uvchr_to_utf8_flags_msgs(aTHX,a,b,c,d)
