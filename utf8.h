@@ -1230,12 +1230,12 @@ point's representation.
 #define UTF8_ALLOW_SURROGATE 0
 
 /* C9 refers to Unicode Corrigendum #9: allows but discourages non-chars */
-#define UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE                                    \
+#define UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE                                \
     (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_PERL_EXTENDED|UTF8_DISALLOW_SURROGATE)
-#define UTF8_WARN_ILLEGAL_C9_INTERCHANGE                                        \
+#define UTF8_WARN_ILLEGAL_C9_INTERCHANGE                                    \
                 (UTF8_WARN_SUPER|UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SURROGATE)
 
-#define UTF8_DISALLOW_ILLEGAL_INTERCHANGE                                       \
+#define UTF8_DISALLOW_ILLEGAL_INTERCHANGE                                   \
                   (UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE|UTF8_DISALLOW_NONCHAR)
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
                           (UTF8_WARN_ILLEGAL_C9_INTERCHANGE|UTF8_WARN_NONCHAR)
@@ -1244,10 +1244,10 @@ point's representation.
  * to have to deal with any malformations that might be present.  All such will
  * be safely replaced by the REPLACEMENT CHARACTER, unless other flags
  * overriding this are also present. */
-#define UTF8_ALLOW_ANY ( UTF8_ALLOW_CONTINUATION                                \
-                        |UTF8_ALLOW_NON_CONTINUATION                            \
-                        |UTF8_ALLOW_SHORT                                       \
-                        |UTF8_ALLOW_LONG                                        \
+#define UTF8_ALLOW_ANY ( UTF8_ALLOW_CONTINUATION                            \
+                        |UTF8_ALLOW_NON_CONTINUATION                        \
+                        |UTF8_ALLOW_SHORT                                   \
+                        |UTF8_ALLOW_LONG                                    \
                         |UTF8_ALLOW_OVERFLOW)
 
 /* Accept any Perl-extended UTF-8 that evaluates to any UV on the platform, but
