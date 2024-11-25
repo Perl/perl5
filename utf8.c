@@ -1383,10 +1383,10 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * final case. */
 
     /* Assume will be successful; override later if necessary */
-    if (errors) {
+    if (UNLIKELY(errors)) {
         *errors = 0;
     }
-    if (msgs) {
+    if (UNLIKELY(msgs)) {
         *msgs = NULL;
     }
 
