@@ -1382,17 +1382,19 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * syllables that the dfa doesn't properly handle.  Quickly dispose of the
      * final case. */
 
+    /* Assume will be successful; override later if necessary */
+    if (errors) {
+        *errors = 0;
+    }
+    if (msgs) {
+        *msgs = NULL;
+    }
+
     /* Each of the affected Hanguls starts with \xED */
 
     if (is_HANGUL_ED_utf8_safe(s0, send)) { /* Always false on EBCDIC */
         if (retlen) {
             *retlen = 3;
-        }
-        if (errors) {
-            *errors = 0;
-        }
-        if (msgs) {
-            *msgs = NULL;
         }
 
         return ((0xED & UTF_START_MASK(3)) << (2 * UTF_ACCUMULATION_SHIFT))
@@ -1668,11 +1670,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     if (UNLIKELY(possible_problems)) {
         bool disallowed = FALSE;
         const U32 orig_problems = possible_problems;
-
-        if (msgs) {
-            *msgs = NULL;
-        }
-
 
         /* Returns 0 if no message needs to be generated for this problem even
          * if everything else says to.  Otherwise returns the warning category
