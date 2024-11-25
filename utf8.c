@@ -1629,11 +1629,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
     const U8 * s = s0;
 
-    /* The ending position, plus 1, of the first character in the sequence
-     * beginning at s0.  In other words, 'e', adjusted down to to be no more
-     * than a single character */
-    const U8 * send = e;
-
     U32 possible_problems;  /* A bit is set here for each potential problem
                                found as we go along */
     UV uv = 0;
@@ -1659,8 +1654,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     }
 
     /* Each of the affected Hanguls starts with \xED */
-
-    if (is_HANGUL_ED_utf8_safe(s0, send)) { /* Always false on EBCDIC */
+    if (is_HANGUL_ED_utf8_safe(s0, e)) { /* Always false on EBCDIC */
         if (advance_p) {
             *advance_p = 3;
         }
@@ -1675,10 +1669,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * APItest/t/utf8_warn_base.pl, this can make sure the dfa does precisely
      * what it is intended to do, and that no flaws in it are masked by
      * dropping down and executing the code below
-    assert(! isUTF8_CHAR(s0, send)
-          || UTF8_IS_SURROGATE(s0, send)
-          || UTF8_IS_SUPER(s0, send)
-          || UTF8_IS_NONCHAR(s0,send));
+    assert(! isUTF8_CHAR(s0, e)
+          || UTF8_IS_SURROGATE(s0, e)
+          || UTF8_IS_SUPER(s0, e)
+          || UTF8_IS_NONCHAR(s0, e));
     */
 
     s = s0;
@@ -1719,6 +1713,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * another, and if we abandon searching for others after finding the
      * allowed one, we could allow in something that shouldn't have been.
      */
+
+    /* The ending position, plus 1, of the first character in the sequence
+     * beginning at s0.  In other words, 'e', adjusted down to to be no more
+     * than a single character */
+    const U8 * send = e;
 
     Size_t curlen;
     if (UNLIKELY(s0 >= send)) {
