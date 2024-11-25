@@ -1603,8 +1603,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     UV uv;
     SSize_t expectlen;    /* How long should this sequence be? */
     SSize_t avail_len;    /* When input is too short, gives what that is */
-    U32 discard_errors;   /* Used to save branches when 'errors' is NULL; this
-                             gets set and discarded */
 
     dTHX;
 
@@ -1650,13 +1648,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     possible_problems = 0;
     expectlen = 0;
     avail_len = 0;
-    discard_errors = 0;
 
     if (errors) {
         *errors = 0;
-    }
-    else {
-        errors = &discard_errors;
     }
 
     /* Accumulate the code point translation of the input byte sequence
@@ -1986,6 +1980,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
         bool disallowed = FALSE;
         const U32 orig_problems = possible_problems;
+        U32 error_flags_return = 0;
 
         /* The following macro returns 0 if no message needs to be generated
          * for this problem even if everything else says to.  Otherwise returns
@@ -2034,6 +2029,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
             U32 this_flag_bit = this_problem;
 
+            /* All cases but these two set this; it makes the cases simpler
+             * to do it here */
+            error_flags_return |= this_problem & ~( UTF8_GOT_PERL_EXTENDED
+                                                   |UTF8_GOT_SUPER);
+
             /* Turn off so next iteration doesn't retry this */
             possible_problems &= ~this_problem;
 
@@ -2056,8 +2056,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_EMPTY:
-                *errors |= UTF8_GOT_EMPTY;
-
                 if (! (flags & UTF8_ALLOW_EMPTY)) {
 
                     /* This so-called malformation is now treated as a bug in
@@ -2075,8 +2073,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_CONTINUATION:
-                *errors |= UTF8_GOT_CONTINUATION;
-
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
@@ -2091,7 +2087,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_SHORT:
-                *errors |= UTF8_GOT_SHORT;
                 uv = UNICODE_REPLACEMENT;
 
                 if (! (flags & UTF8_ALLOW_SHORT)) {
@@ -2110,7 +2105,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_NON_CONTINUATION:
-                *errors |= UTF8_GOT_NON_CONTINUATION;
                 uv = UNICODE_REPLACEMENT;
 
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
@@ -2140,8 +2134,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * this case are true */
 
                 if (flags & UTF8_WARN_SURROGATE) {
-                    *errors |= UTF8_GOT_SURROGATE;
-
                     if (NEED_MESSAGE(WARN_SURROGATE,,)) {
                         pack_warn = packWARN(WARN_SURROGATE);
 
@@ -2161,7 +2153,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 if (flags & UTF8_DISALLOW_SURROGATE) {
                     disallowed = TRUE;
-                    *errors |= UTF8_GOT_SURROGATE;
                 }
 
                 break;
@@ -2173,8 +2164,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * this case are true */
 
                 if (flags & UTF8_WARN_NONCHAR) {
-                    *errors |= UTF8_GOT_NONCHAR;
-
                     if (NEED_MESSAGE(WARN_NONCHAR,,)) {
                         /* The code above should have guaranteed that we don't
                          * get here with errors other than overlong */
@@ -2188,13 +2177,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 if (flags & UTF8_DISALLOW_NONCHAR) {
                     disallowed = TRUE;
-                    *errors |= UTF8_GOT_NONCHAR;
                 }
 
                 break;
 
               case UTF8_GOT_LONG:
-                *errors |= UTF8_GOT_LONG;
 
                 if (! (flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
                     uv = UNICODE_REPLACEMENT;
@@ -2256,17 +2243,16 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 /* Overflow means also got a super and are using Perl's
                  * extended UTF-8, but we handle all three cases here */
                 possible_problems &= ~(UTF8_GOT_SUPER|UTF8_GOT_PERL_EXTENDED);
-                *errors |= UTF8_GOT_OVERFLOW;
                 uv = UNICODE_REPLACEMENT;
 
                 /* But the API says we flag all errors found */
                 if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
-                    *errors |= UTF8_GOT_SUPER;
+                    error_flags_return |= UTF8_GOT_SUPER;
                 }
                 if (flags
                         & (UTF8_WARN_PERL_EXTENDED|UTF8_DISALLOW_PERL_EXTENDED))
                 {
-                    *errors |= UTF8_GOT_PERL_EXTENDED;
+                    error_flags_return |= UTF8_GOT_PERL_EXTENDED;
                 }
 
                 /* Disallow if any of the three categories say to */
@@ -2312,7 +2298,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * warned about */
 
                 if (flags & UTF8_WARN_SUPER) {
-                    *errors |= UTF8_GOT_SUPER;
+                    error_flags_return |= UTF8_GOT_SUPER;
 
                     if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
                         pack_warn = packWARN(WARN_NON_UNICODE);
@@ -2365,7 +2351,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     if (flags & ( UTF8_WARN_PERL_EXTENDED
                                  |UTF8_DISALLOW_PERL_EXTENDED))
                     {
-                        *errors |= UTF8_GOT_PERL_EXTENDED;
+                        error_flags_return |= UTF8_GOT_PERL_EXTENDED;
 
                         if (flags & UTF8_DISALLOW_PERL_EXTENDED) {
                             disallowed = TRUE;
@@ -2374,7 +2360,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 }
 
                 if (flags & UTF8_DISALLOW_SUPER) {
-                    *errors |= UTF8_GOT_SUPER;
+                    error_flags_return |= UTF8_GOT_SUPER;
                     disallowed = TRUE;
                 }
 
@@ -2407,6 +2393,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          * Instead of trying to figure out if it has changed, just do it. */
         if (advance_p) {
             *advance_p = curlen;
+        }
+
+        if (errors) {
+            *errors = error_flags_return;
         }
 
         if (disallowed) {
