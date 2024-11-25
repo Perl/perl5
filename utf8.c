@@ -1640,8 +1640,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     Size_t expectlen;    /* How long should this sequence be? */
     Size_t avail_len;    /* When input is too short, gives what that is */
 
-    dTHX;
-
     /* Here, is one of:
      *  a)  malformed;
      *  b)  a problematic code point (surrogate, non-unicode, or nonchar); or
@@ -1955,6 +1953,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     bool success = true;
 
     if (UNLIKELY(possible_problems)) {
+        dTHX;
 
         /* Here, the input sequence is potentially problematic.  The code here
          * determines if that is indeed the case and how to handle it.  The
