@@ -41,6 +41,31 @@ similar to the way that C<:reader> already creates reader accessors.
     my $p = Point->new( x => 20, y => 40 );
     $p->set_x(60);
 
+=head2 New C<any> and C<all> operators
+
+A new experimental feature has been added, which adds two new list-processing
+operators, C<any> and C<all>.
+
+    use v5.40;
+    use feature 'all';
+
+    my @numbers = ...
+
+    if(all { $_ % 2 == 0 } @numbers) {
+        say "All the numbers are even";
+    }
+
+These operate similarly to C<grep> except that they only ever return true or
+false, testing if any (or all) of the elements in the list make the testing
+block yield true.  Because of this they can short-circuit, avoiding the need
+to test any further elements if a given element determines the eventual
+result.
+
+These are inspired by the same-named functions in the L<List::Util> module,
+except that they are implemented as direct core operators, and thus perform
+faster, and do not produce an additional subroutine call stack frame for
+invoking the code block.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
