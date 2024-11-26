@@ -5288,6 +5288,16 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * malloc'd in the interim */
     uselocale(PL_C_locale_obj);
 
+#    ifdef USE_PL_CURLOCALES
+
+    /* Tell our querylocale emulation that we are in the C locale */
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        (void) emulate_setlocale_i(i, "C",
+                                   RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
+                                   __LINE__);
+    }
+
+#    endif
 #    ifdef USE_LOCALE_NUMERIC
 
     PL_underlying_numeric_obj = duplocale(PL_C_locale_obj);
