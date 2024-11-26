@@ -800,47 +800,6 @@ S_scan_terminated(pTHX_ char *s, I32 ival) {
 
 #include "feature.h"
 
-/*
- * experimental text filters for win32 carriage-returns, utf16-to-utf8 and
- * utf16-to-utf8-reversed.
- */
-
-#ifdef PERL_CR_FILTER
-static void
-strip_return(SV *sv)
-{
-    const char *s = SvPVX_const(sv);
-    const char * const e = s + SvCUR(sv);
-
-    PERL_ARGS_ASSERT_STRIP_RETURN;
-
-    /* outer loop optimized to do nothing if there are no CR-LFs */
-    while (s < e) {
-        if (*s++ == '\r' && *s == '\n') {
-            /* hit a CR-LF, need to copy the rest */
-            char *d = s - 1;
-            *d++ = *s++;
-            while (s < e) {
-                if (*s == '\r' && s[1] == '\n')
-                    s++;
-                *d++ = *s++;
-            }
-            SvCUR(sv) -= s - d;
-            return;
-        }
-    }
-}
-
-STATIC I32
-S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
-{
-    const I32 count = FILTER_READ(idx+1, sv, maxlen);
-    if (count > 0 && !maxlen)
-        strip_return(sv);
-    return count;
-}
-#endif
-
 STATIC void
 S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
 {
@@ -5126,11 +5085,6 @@ S_filter_gets(pTHX_ SV *sv, STRLEN append)
 {
     PERL_ARGS_ASSERT_FILTER_GETS;
 
-#ifdef PERL_CR_FILTER
-    if (!PL_rsfp_filters) {
-        filter_add(S_cr_textfilter,NULL);
-    }
-#endif
     if (PL_rsfp_filters) {
         if (!append)
             SvCUR_set(sv, 0);	/* start with empty line	*/
@@ -13091,6 +13045,11 @@ S_swallow_bom(pTHX_ U8 *s)
 
 
 #ifndef PERL_NO_UTF16_FILTER
+/*
+ * experimental text filter for utf16-to-utf8 and
+ * utf16-to-utf8-reversed.
+ */
+
 static I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {

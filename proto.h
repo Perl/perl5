@@ -9284,17 +9284,6 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE *lvalp);
         assert(lvalp)
 
 # endif /* defined(DEBUGGING) */
-# if defined(PERL_CR_FILTER)
-STATIC I32
-S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
-#   define PERL_ARGS_ASSERT_CR_TEXTFILTER
-
-STATIC void
-S_strip_return(pTHX_ SV *sv);
-#   define PERL_ARGS_ASSERT_STRIP_RETURN        \
-        assert(sv)
-
-# endif /* defined(PERL_CR_FILTER) */
 # if !defined(PERL_NO_UTF16_FILTER)
 STATIC U8 *
 S_add_utf16_textfilter(pTHX_ U8 * const s, bool reversed);

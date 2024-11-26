@@ -1726,10 +1726,6 @@
 #       define printbuf(a,b)                    S_printbuf(aTHX_ a,b)
 #       define tokereport(a,b)                  S_tokereport(aTHX_ a,b)
 #     endif
-#     if defined(PERL_CR_FILTER)
-#       define cr_textfilter(a,b,c)             S_cr_textfilter(aTHX_ a,b,c)
-#       define strip_return(a)                  S_strip_return(aTHX_ a)
-#     endif
 #     if !defined(PERL_NO_UTF16_FILTER)
 #       define add_utf16_textfilter(a,b)        S_add_utf16_textfilter(aTHX_ a,b)
 #       define utf16_textfilter(a,b,c)          S_utf16_textfilter(aTHX_ a,b,c)

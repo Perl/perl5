@@ -5956,12 +5956,6 @@ Sf	|void	|printbuf	|NN const char * const fmt		\
 S	|int	|tokereport	|I32 rv 				\
 				|NN const YYSTYPE *lvalp
 # endif
-# if defined(PERL_CR_FILTER)
-S	|I32	|cr_textfilter	|int idx				\
-				|NULLOK SV *sv				\
-				|int maxlen
-S	|void	|strip_return	|NN SV *sv
-# endif
 # if !defined(PERL_NO_UTF16_FILTER)
 S	|U8 *	|add_utf16_textfilter					\
 				|NN U8 * const s			\
