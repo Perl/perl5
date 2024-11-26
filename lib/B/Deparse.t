@@ -2615,6 +2615,10 @@ foreach my ($idx, $elem) (builtin::indexed @arr) {
     die;
 }
 ####
+foreach my ($idx, $elem) (builtin::indexed 'x', 'y', 'z') {
+    die;
+}
+####
 my @ducks;
 foreach my ($tick, $trick, $track) (@ducks) {
     study $_;

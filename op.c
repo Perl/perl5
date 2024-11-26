@@ -9672,6 +9672,17 @@ S_op_is_cv_xsub(pTHX_ OP *o, XSUBADDR_t xsub)
     return CvXSUB(cv) == xsub;
 }
 
+#define op_is_call_to_cv_xsub(o, xsub)  S_op_is_call_to_cv_xsub(aTHX_ o, xsub)
+static bool
+S_op_is_call_to_cv_xsub(pTHX_ OP *o, XSUBADDR_t xsub)
+{
+    if(o->op_type != OP_ENTERSUB)
+        return false;
+
+    OP *cvop = cLISTOPx(cUNOPo->op_first)->op_last;
+    return op_is_cv_xsub(cvop, xsub);
+}
+
 /*
 =for apidoc newFOROP
 
@@ -9812,45 +9823,64 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         enteriterpflags |= OPpITER_DEF;
     }
 
-    if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
-        expr = op_lvalue(op_force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
-        enteriterflags |= OPf_STACKED;
-    }
-    else if (padoff != 0 && how_many_more == 1 &&  /* two lexical vars */
-             expr->op_type == OP_ENTERSUB) {
+    if (padoff != 0 && how_many_more == 1 &&  /* two lexical vars */
+             op_is_call_to_cv_xsub(expr, &Perl_XS_builtin_indexed)) { /* expr is a call to builtin::indexed */
+        /* Turn the OP_ENTERSUB into a regular OP_LIST without the final CV,
+         * and set the OPpITER_INDEXED flag instead */
         OP *args = cUNOPx(expr)->op_first;
         assert(OP_TYPE_IS_OR_WAS(args, OP_LIST));
 
-        OP *pre_firstarg = NULL;
-        OP *firstarg = cLISTOPx(args)->op_first;
-        OP *lastarg  = cLISTOPx(args)->op_last;
+        OP *first = cLISTOPx(args)->op_first;
+        /* OP_PUSHMARK must remain */
+        assert(first->op_type == OP_PUSHMARK);
+        first = OpSIBLING(first);
 
-        if(firstarg->op_type == OP_PUSHMARK)
-            pre_firstarg = firstarg, firstarg = OpSIBLING(firstarg);
-        if(firstarg == lastarg)
-            firstarg = NULL;
+        OP *pre_last = NULL, *last = first;
+        while(OpHAS_SIBLING(last))
+            pre_last = last, last = OpSIBLING(last);
+        if(pre_last) {
+            /* splice out the final CV op */
+            cLISTOPx(args)->op_last = pre_last;
+            OpLASTSIB_set(pre_last, args);
 
-        if (op_is_cv_xsub(lastarg, &Perl_XS_builtin_indexed) &&              /* a call to builtin::indexed */
-            firstarg && OpSIBLING(firstarg) == lastarg &&                    /* with one arg */
-            (firstarg->op_type == OP_RV2AV || firstarg->op_type == OP_PADAV) /* ... which is an array */
-        ) {
-            /* Turn for my ($idx, $val) (indexed @arr) into a similar OPf_STACKED
-             * loop on the array itself as the case above, plus a flag to tell
-             * pp_iter to set the index directly
-             */
+            op_free(last);
 
-            /* Cut the array arg out of the args list and discard the rest of
-             * the original expr
-             */
-            op_sibling_splice(args, pre_firstarg, 1, NULL);
+            last = pre_last;
+        }
+
+        if(first == last && (first->op_type == OP_PADAV || first->op_type == OP_RV2AV)) {
+            /* Preserve the ARRAY shortcut */
+            OpLASTSIB_set(cLISTOPx(args)->op_first, args);
             op_free(expr);
 
-            expr = op_lvalue(op_force_list(scalar(ref(firstarg, OP_ITER))), OP_GREPSTART);
-            enteriterflags |= OPf_STACKED;
-            iterpflags |= OPpITER_INDEXED;
+            OpLASTSIB_set(first, NULL);
+            expr = first;
         }
-        else
-            goto expr_not_special;
+        else {
+            /* the op_targ slot contained the "was" op_type for an
+             * OP_NULL; clear it or op_free() will get very confused */
+            args->op_targ = 0;
+            OpTYPE_set(args, OP_LIST);
+            OpLASTSIB_set(args, NULL);
+
+            expr->op_flags &= ~OPf_KIDS;
+            cUNOPx(expr)->op_first = NULL;
+            op_free(expr);
+
+            expr = args;
+        }
+
+        /* expr's parent has currently been set to NULL, but that's OK. When
+         * it gets consumed by the LOOP* structure later to make the loop op
+         * itself this will get set correctly.
+         */
+
+        iterpflags |= OPpITER_INDEXED;
+    }
+
+    if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
+        expr = op_lvalue(op_force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
+        enteriterflags |= OPf_STACKED;
     }
     else if (expr->op_type == OP_NULL &&
              (expr->op_flags & OPf_KIDS) &&
@@ -9882,7 +9912,6 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         enteriterflags |= OPf_STACKED;
     }
     else {
-expr_not_special:
         expr = op_lvalue(op_force_list(expr), OP_GREPSTART);
     }
 

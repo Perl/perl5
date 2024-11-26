@@ -5031,6 +5031,16 @@ PP(pp_iter)
                 sv = PL_stack_base[ix];
             }
 
+            if (UNLIKELY(pflags & OPpITER_INDEXED) && (i == 0)) {
+                SvREFCNT_dec(*itersvp);
+                /* here ix is really a stack pointer offset; we have to
+                 * calculate the real index */
+                *itersvp = newSViv(ix - cx->blk_loop.state_u.stack.basesp - 1);
+
+                ++i;
+                ++itersvp;
+            }
+
             av = NULL;
             goto loop_ary_common;
 

@@ -357,7 +357,7 @@ package FetchStoreCounter {
     }
 
     ok(eq_array(\@output, [qw( [0]=zero [1]=one [2]=two [3]=three [4]=four [5]=five )] ),
-        'foreach + builtin::indexed' );
+        'foreach + builtin::indexed ARRAY' );
 
     undef @output;
 
@@ -368,7 +368,16 @@ package FetchStoreCounter {
     }
 
     ok(eq_array(\@output, [qw( [0]=zero [1]=one [2]=two [3]=three [4]=four [5]=five )] ),
-        'foreach + imported indexed' );
+        'foreach + imported indexed ARRAY' );
+
+    undef @output;
+
+    foreach my ( $idx, $val ) ( builtin::indexed qw( six seven eight nine ) ) {
+        push @output, "[$idx]=$val";
+    }
+
+    ok(eq_array(\@output, [qw( [0]=six [1]=seven [2]=eight [3]=nine )] ),
+        'foreach + builtin::indexed LIST' );
 }
 
 # Vanilla trim tests
