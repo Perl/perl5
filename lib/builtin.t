@@ -678,6 +678,14 @@ EOS
     }
 }
 
+# github #22784
+{
+    use builtin qw( trim );
+    sub f { 0+trim($_[0]) }
+    is(f(4), 4, "populate TARG.iv");
+    is(f(123), 123, "check TARG.IOK is reset properly");
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();
