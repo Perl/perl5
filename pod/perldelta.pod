@@ -284,6 +284,12 @@ restore backward compatibility with perl 5.004, which had made CR in source
 files an error. Before that, CR was accepted, but retained literally in quoted
 multi-line constructs such as here-documents, even at the end of a line.)
 
+=item *
+
+Similarly, the (even less documented) configuration macro C<PERL_CR_FILTER> has
+been removed. When enabled, it would install a default source filter to strip
+carriage returns from source code before the parser proper got to see it.
+
 =back
 
 =head1 Testing
