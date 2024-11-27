@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 52; # not counting those in the __DATA__ section
+my $tests = 53; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -570,6 +570,19 @@ is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
     prog => 'package Foo; sub f { 1; } BEGIN { *Bar::f = \&f; }'),
     "package Foo;\nsub f {\n    1;\n}\nsub BEGIN {\n    *Bar::f = \\&f;\n}\n",
     "sub glob alias in separate package shouldn't impede emitting original sub";
+
+# method declarations (GH#22777)
+like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
+    prog => <<'EOF',
+        use feature qw( class signatures );
+        class C {
+            field $x;
+            method m () { $x++ }
+        }
+EOF
+    ),
+    qr/ +method m \(\) \{\n +\$x\+\+;\n +\}/,
+    "feature class method deparses as method";
 
 
 done_testing($tests);

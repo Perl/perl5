@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.80;
+package B::Deparse 1.81;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -28,7 +28,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpARG_IF_UNDEF OPpARG_IF_FALSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP
-         CVf_NOWARN_AMBIGUOUS CVf_LVALUE
+         CVf_NOWARN_AMBIGUOUS CVf_LVALUE CVf_IsMETHOD
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE
 	 PADNAMEf_OUTER PADNAMEf_OUR PADNAMEf_TYPED
@@ -480,7 +480,8 @@ sub next_todo {
 	# XXX We would do $self->keyword("sub"), but ‘my CORE::sub’
 	#     doesn’t work and ‘my sub’ ignores a &sub in scope.  I.e.,
 	#     we have a core bug here.
-	push @text, "sub " . substr $name->PVX, 1;
+	my $kw = $cv ? $self->kw_sub_or_method($cv) : "sub";
+	push @text, "$kw " . substr $name->PVX, 1;
 	if ($cv) {
 	    # my sub foo { }
 	    push @text,  " " . $self->deparse_sub($cv);
@@ -554,7 +555,7 @@ sub next_todo {
         } elsif (defined $stash) {
             $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
         }
-	my $ret = "$pragmata${p}${l}" . $self->keyword("sub") . " $name "
+	my $ret = "$pragmata${p}${l}" . $self->keyword($self->kw_sub_or_method($cv)) . " $name "
 	      . $self->deparse_sub($cv);
 	$self->{'subs_declared'}{$name} = 1;
 	return $ret;
@@ -1304,6 +1305,12 @@ sub deparse_argops {
 }
 
 
+sub kw_sub_or_method {
+    my $self = shift;
+    my $cv = shift;
+    return ($cv->CvFLAGS & CVf_IsMETHOD) ? "method" : "sub";
+}
+
 # Deparse a sub. Returns everything except the 'sub foo',
 # e.g.  ($$) : method { ...; }
 # or    : prototype($$) lvalue ($a, $b) { ...; };
@@ -1329,10 +1336,13 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
             $proto = $myproto;
         }
     }
-    if ($cv->CvFLAGS & (CVf_NOWARN_AMBIGUOUS|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
-        push @attrs, "lvalue" if $cv->CvFLAGS & CVf_LVALUE;
-        push @attrs, "method" if $cv->CvFLAGS & CVf_NOWARN_AMBIGUOUS;
-        push @attrs, "const"  if $cv->CvFLAGS & CVf_ANONCONST;
+    my $cv_flags = $cv->CvFLAGS;
+    my $is_method = $cv_flags & CVf_IsMETHOD;
+
+    if ($cv_flags & (CVf_NOWARN_AMBIGUOUS|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
+        push @attrs, "lvalue" if $cv_flags & CVf_LVALUE;
+        push @attrs, "method" if $cv_flags & CVf_NOWARN_AMBIGUOUS and !$is_method;
+        push @attrs, "const"  if $cv_flags & CVf_ANONCONST;
     }
 
     local($self->{'curcv'}) = $cv;
@@ -1350,6 +1360,10 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
         # stub sub may have single op rather than list of ops
         my $is_list = ($lineseq->name eq "lineseq");
         my $firstop = $is_list ? $lineseq->first : $lineseq;
+
+        if ($is_method and $firstop->name eq "methstart") {
+            $firstop = $firstop->sibling;
+        }
 
         # Try to deparse first subtree as a signature if possible.
         # Top of signature subtree has an ex-argcheck as a placeholder
@@ -2812,8 +2826,9 @@ sub pp_refgen {
 
 sub e_anoncode {
     my ($self, $info) = @_;
-    my $text = $self->deparse_sub($info->{code});
-    return $self->keyword("sub") . " $text";
+    my $cv = $info->{code};
+    my $text = $self->deparse_sub($cv);
+    return $self->keyword($self->kw_sub_or_method($cv)) . " $text";
 }
 
 sub pp_anoncode {
@@ -5645,7 +5660,7 @@ sub const {
 		 $self->{curcv}->object_2svref == $ref->object_2svref) {
 		return $self->keyword("__SUB__");
 	    }
-	    return "sub " . $self->deparse_sub($ref);
+	    return $self->kw_sub_or_method($ref) . " " . $self->deparse_sub($ref);
 	}
 	if ($class ne 'SPECIAL' and $ref->FLAGS & SVs_SMG) {
 	    for (my $mg = $ref->MAGIC; $mg; $mg = $mg->MOREMAGIC) {
