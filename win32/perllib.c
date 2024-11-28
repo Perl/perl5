@@ -52,6 +52,8 @@ win32_checkTLS(PerlInterpreter *host_perl)
     dTHX;
     if (host_perl != my_perl) {
         int *nowhere = NULL;
+        *nowhere = 0; /* this segfault is deliberate,
+                         so you can see the stack trace */
         abort();
     }
 }
@@ -232,7 +234,8 @@ BOOL APIENTRY
 DllMain(HINSTANCE hModule,	/* DLL module handle */
         DWORD fdwReason,	/* reason called */
         LPVOID lpvReserved)	/* reserved */
-{ 
+{
+    PERL_UNUSED_ARG(lpvReserved);
     switch (fdwReason) {
         /* The DLL is attaching to a process due to process
          * initialization or a call to LoadLibrary.

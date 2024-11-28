@@ -360,6 +360,12 @@ typedef unsigned int	uintptr_t;
 #  define _UINTPTR_T_DEFINED
 #endif
 
+typedef struct {
+  unsigned int want_wide: 1;
+  unsigned int want_utf8_maybe: 1;
+  unsigned int len_tchar: 29;
+} PH_GCDB_T;
+
 START_EXTERN_C
 
 /* For UNIX compatibility. */

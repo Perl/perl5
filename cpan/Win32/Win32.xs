@@ -936,31 +936,72 @@ XS(w32_SetChildShowWindow)
 XS(w32_GetCwd)
 {
     dXSARGS;
-    char* ptr;
-    if (items)
-	Perl_croak(aTHX_ "usage: Win32::GetCwd()");
-
     /* Make the host for current directory */
-    ptr = PerlEnv_get_childdir();
-    /*
-     * If ptr != Nullch
-     *   then it worked, set PV valid,
-     *   else return 'undef'
-     */
-    if (ptr) {
-	SV *sv = sv_newmortal();
-	sv_setpv(sv, ptr);
-	PerlEnv_free_childdir(ptr);
+    char buf [MAX_PATH+1];
+    char* dir;
+    DWORD dirlen;
+    DWORD dirretlen;
+    PH_GCDB_T dirinfo;
+    unsigned int gotutf8;
+    SV * sv;
+    if (items)
+        croak_xs_usage(cv, "");
+    EXTEND(SP,1);
 
+    dXSTARG;
+    sv = TARG;
+
+    if(SvTYPE(sv) >= SVt_PV) {
+        SV_CHECK_THINKFIRST_COW_DROP(sv);
+        if(SvLEN(sv) >= 32) {
+            dirlen = (DWORD)SvLEN(sv);
+            dir = SvPVX(sv);
+        }
+        else
+          goto stk_buf;
+    }
+    else {
+        stk_buf:
+        dirlen = sizeof(buf);
+        dir = buf;
+    }
+
+    dirinfo.want_wide = 0;
+    dirinfo.want_utf8_maybe = XSANY.any_i32 == 'W' ? 1 : 0;
+
+    retry_dir:
+    dirinfo.len_tchar = dirlen;
+    dirretlen = PerlEnv_get_childdir_tbuf(dir, dirinfo);
+    gotutf8 = dirretlen & 0x80000000;
+    dirretlen &= ~0x80000000;
+    if(dirretlen >=  dirlen) {
+        dirlen = dirretlen + 1;
+        dir = alloca(dirlen);
+        goto retry_dir;
+    }
+    else if(!dirretlen){
+        //translate_to_errno(); //TODO XXXX
+        sv = &PL_sv_undef;
+    }
+    else if(SvTYPE(sv) >= SVt_PV && dir == SvPVX(sv)) {
+        SvCUR_set(sv, dirretlen);
+        SvNIOK_off(sv);
+        SvPOK_on(sv);
+        if(gotutf8)
+          SvUTF8_on(sv);
+        SvSETMAGIC(sv);
+    }
+    else {
+        if(gotutf8)
+            SvUTF8_on(sv);
+        sv_setpvn_mg(sv, dir, dirretlen);
+    }
 #ifndef INCOMPLETE_TAINTS
 	SvTAINTED_on(sv);
 #endif
 
-	EXTEND(SP,1);
-	ST(0) = sv;
-	XSRETURN(1);
-    }
-    XSRETURN_UNDEF;
+    PUSHs(sv);
+    PUTBACK;
 }
 
 XS(w32_SetCwd)
@@ -2023,6 +2064,8 @@ PROTOTYPES: DISABLE
 BOOT:
 {
     const char *file = __FILE__;
+    GV * gv;
+    CV * cv;
 
     if (g_osver.dwOSVersionInfoSize == 0) {
         g_osver.dwOSVersionInfoSize = sizeof(g_osver);
@@ -2051,8 +2094,19 @@ BOOT:
     newXS("Win32::GetFolderPath", w32_GetFolderPath, file);
     newXS("Win32::IsAdminUser", w32_IsAdminUser, file);
     newXS("Win32::GetFileVersion", w32_GetFileVersion, file);
+    gv = gv_fetchpvn("Win32::GetCwd", sizeof("Win32::GetCwd")-1, 0, SVt_PVGV);
+    cv = GvCV(gv);
+    if(cv) {
+        GvCV_set(gv, NULL);
+        SvREFCNT_dec_NN(cv);
+    }
+    cv = newXS("Win32::GetCwdA", w32_GetCwd, file);
+    XSANY.any_i32 = 'A';
+    SvREFCNT_inc(cv);
+    GvCV_set(gv,cv);
 
-    newXS("Win32::GetCwd", w32_GetCwd, file);
+    cv = newXS("Win32::GetCwdW", w32_GetCwd, file);
+    XSANY.any_i32 = 'W';
     newXS("Win32::SetCwd", w32_SetCwd, file);
     newXS("Win32::GetNextAvailDrive", w32_GetNextAvailDrive, file);
     newXS("Win32::GetLastError", w32_GetLastError, file);

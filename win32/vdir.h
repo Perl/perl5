@@ -32,27 +32,25 @@ public:
     int SetCurrentDirectoryW(WCHAR *lpBuffer);
     inline int GetDefault(void) { return nDefault; };
 
-    inline char* GetCurrentDirectoryA(int dwBufSize, char *lpBuffer)
+    inline unsigned int GetCurrentDirectoryA(int dwBufSize, char *lpBuffer)
     {
         char* ptr = dirTableA[nDefault];
-        while (--dwBufSize)
-        {
-            if ((*lpBuffer++ = *ptr++) == '\0')
-                break;
-        }
-        *lpBuffer = '\0';
-        return /* unused */ NULL;
+        unsigned int len = (unsigned int)strlen(ptr);
+        unsigned int cpylen = len <= ((unsigned int)dwBufSize)-1
+                                  ? len : ((unsigned int)dwBufSize)-1;
+        lpBuffer = (char*)memcpy((void*)lpBuffer, (void*)ptr, cpylen);
+        lpBuffer[cpylen] = '\0';
+        return len;
     };
-    inline WCHAR* GetCurrentDirectoryW(int dwBufSize, WCHAR *lpBuffer)
+    inline unsigned int GetCurrentDirectoryW(int dwBufSize, WCHAR *lpBuffer)
     {
         WCHAR* ptr = dirTableW[nDefault];
-        while (--dwBufSize)
-        {
-            if ((*lpBuffer++ = *ptr++) == '\0')
-                break;
-        }
-        *lpBuffer = '\0';
-        return /* unused */ NULL;
+        unsigned int len = (unsigned int)wcslen(ptr);
+        unsigned int cpylen = len <= ((unsigned int)dwBufSize)-1
+                                  ? len : ((unsigned int)dwBufSize)-1;
+        lpBuffer = (WCHAR*)memcpy((void*)lpBuffer, (void*)ptr, cpylen*sizeof(WCHAR));
+        lpBuffer[cpylen] = '\0';
+        return len;
     };
 
     DWORD CalculateEnvironmentSpace(void);
