@@ -1733,15 +1733,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     /* This is a helper function; invariants should have been handled before
      * calling it */
     assert(! NATIVE_BYTE_IS_INVARIANT(*s0));
-
-    /* A well-formed UTF-8 character, as the vast majority of calls to this
-     * function will be for, has this expected length.  For efficiency, set
-     * things up here to return it.  It will be overridden only in those rare
-     * cases where a malformation is found */
-    if (advance_p) {
-        *advance_p = expectlen;
-    }
-
     /* A continuation character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
@@ -2550,13 +2541,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             }
         }   /* End of 'while (possible_problems)' */
 
-        /* Since there was a possible problem, the returned length may need to
-         * be changed from the one stored at the beginning of this function.
-         * Instead of trying to figure out if it has changed, just do it. */
-        if (advance_p) {
-            *advance_p = curlen;
-        }
-
         if (msgs_return) {
             *msgs = msgs_return;
         }
@@ -2574,6 +2558,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             uv = UNICODE_REPLACEMENT;
         }
     } /* End of there was a possible problem */
+
+    if (advance_p) {
+        *advance_p = curlen;
+    }
 
     *cp_p = UNI_TO_NATIVE(uv);
     return success;
