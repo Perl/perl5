@@ -22979,7 +22979,7 @@ else
 #include <signal.h>
 #include <stdio.h>
 int main() {
-printf("$xx %d\n", SIG${xx});
+printf("$xx %ld\n", (long) SIG${xx});
 return 0;
 }
 EOCP
