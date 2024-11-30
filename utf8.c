@@ -1065,20 +1065,20 @@ syntactically invalid UTF-8.
 
 =over 4
 
-=item C<strict_utf8_to_uv>
+=item * C<strict_utf8_to_uv>
 
 additionally rejects any UTF-8 that translates into a code point that isn't
 specified by Unicode to be freely exchangeable, namely the surrogate characters
 and non-character code points (besides non-Unicode code points, any above
 0x10FFFF).  It does not raise a warning when rejecting.
 
-=item C<c9strict_utf8_to_uv>
+=item * C<c9strict_utf8_to_uv>
 
 instead uses the exchangeable definition given by Unicode's Corregendum #9,
 which accepts non-character code points while still rejecting surrogates.  It
 does not raise a warning when rejecting.
 
-=item C<extended_utf8_to_uv>
+=item * C<extended_utf8_to_uv>
 
 accepts all syntactically valid UTF-8, as extended by Perl to allow 64-bit code
 points to be encoded.

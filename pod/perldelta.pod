@@ -406,6 +406,42 @@ well.
 
 =item *
 
+New API functions are introduced to convert strings encoded in UTF-8 to
+their ordinal code point equivalent.  These are safe to use by default,
+and generally more convenient to use than the existing ones.
+
+L<perlapi/C<utf8_to_uv>> replaces L<perlapi/C<utf8_to_uvchr>> (which is
+retained for backwards compatibility), but you should convert to use the
+new form, as likely you aren't using the old one safely.
+
+There are also two new functions, L<perlapi/C<strict_utf8_to_uv>> and
+L<perlapi/C<c9strict_utf8_to_uv>> which do the same thing except when
+the input string represents a code point that Unicode doesn't accept as
+legal for interchange, using either the strict original definition
+(C<strict_utf8_to_uv>), or the looser one given by
+L<Unicode Corrigendum #9|https://www.unicode.org/versions/corrigendum9.html>
+(C<c9strict_utf8_to_uv>).  When the input string represents one of the
+restricted code points, these functions return the Unicode
+C<REPLACEMENT CHARACTER> instead.
+
+Also L<perlapi/C<extended_utf8_to_uv>> is a synonym for C<utf8_to_uv>, for use
+when you want to emphasize that the entire range of Perl extended UTF-8
+is acceptable.
+
+There are also replacement functions for the three more specialized
+conversion functions that you are unlikely to need to use.  Again, the
+old forms are kept for backwards compatibility, but you should convert
+to use the new forms.
+
+L<perlapi/C<utf8_to_uv_flags>> replaces L<perlapi/C<utf8n_to_uvchr>>.
+
+L<perlapi/C<utf8_to_uv_errors>> replaces L<perlapi/C<utf8n_to_uvchr_error>>.
+
+L<perlapi/C<utf8_to_uv_msgs>> replaces
+L<perlapi/C<utf8n_to_uvchr_msgs>>.
+
+=item *
+
 Three new API functions are introduced to convert strings encoded in
 UTF-8 to native bytes format (if possible).  These are easier to use
 than the existing ones, and they avoid unnecessary memory allocations.
