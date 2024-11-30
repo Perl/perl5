@@ -17724,7 +17724,7 @@ main (const int argc, const char ** argv)
         /* Here isn't name=value pairs.  Find the position of the alternate */
         const char * alt_pos = strstr(lc_all, alternate);
         if (! alt_pos) {
-            fprintf(stderr, "Couldn't find '%s' in '%'s\n", alternate, lc_all);
+            fprintf(stderr, "Couldn't find '%s' in '%s'\n", alternate, lc_all);
             return 1;
         }
 
