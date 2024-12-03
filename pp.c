@@ -4511,7 +4511,6 @@ PP_wrapped(pp_uc, 1, 0)
         U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
-#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
         /* All occurrences of these are to be moved to follow any other marks.
          * This is context-dependent.  We may not be passed enough context to
          * move the iota subscript beyond all of them, but we do the best we can
@@ -4552,9 +4551,8 @@ PP_wrapped(pp_uc, 1, 0)
 #else
             uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len, 0);
 #endif
-            if (   uv == GREEK_CAPITAL_LETTER_IOTA
-                && utf8_to_uv_or_die(s, send, 0) ==
-                                                COMBINING_GREEK_YPOGEGRAMMENI)
+            if (   UNLIKELY(uv == GREEK_CAPITAL_LETTER_IOTA)
+                && memBEGINs(s, this_len, COMBINING_GREEK_YPOGEGRAMMENI_UTF8))
             {
                 in_iota_subscript = TRUE;
             }

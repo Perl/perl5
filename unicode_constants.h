@@ -57,6 +57,7 @@ bytes.
 
 #   define COMBINING_GRAVE_ACCENT_UTF8  "\xCC\x80"    /* U+0300 */
 #   define COMBINING_DOT_ABOVE_UTF8  "\xCC\x87"    /* U+0307 */
+#   define COMBINING_GREEK_YPOGEGRAMMENI_UTF8  "\xCD\x85"    /* U+0345 */
 
 #   define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xE1\xBA\x9E"    /* U+1E9E */
 
@@ -122,6 +123,7 @@ bytes.
 
 #   define COMBINING_GRAVE_ACCENT_UTF8  "\xAF\x41"    /* U+0300 */
 #   define COMBINING_DOT_ABOVE_UTF8  "\xAF\x48"    /* U+0307 */
+#   define COMBINING_GREEK_YPOGEGRAMMENI_UTF8  "\xB1\x46"    /* U+0345 */
 
 #   define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xBF\x63\x72"    /* U+1E9E */
 
@@ -187,6 +189,7 @@ bytes.
 
 #   define COMBINING_GRAVE_ACCENT_UTF8  "\xAD\x41"    /* U+0300 */
 #   define COMBINING_DOT_ABOVE_UTF8  "\xAD\x48"    /* U+0307 */
+#   define COMBINING_GREEK_YPOGEGRAMMENI_UTF8  "\xAF\x46"    /* U+0345 */
 
 #   define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xBF\x62\x71"    /* U+1E9E */
 
