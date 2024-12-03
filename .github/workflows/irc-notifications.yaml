@@ -162,9 +162,7 @@ jobs:
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
-            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} opened PR #${{ github.event.pull_request.number }}
-            ${{ env.TITLE }}
-            ${{ github.event.pull_request.html_url }}
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} opened PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc merged pull request
         uses: rectalogic/notify-irc@v2
@@ -175,9 +173,7 @@ jobs:
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
-            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} merged PR #${{ github.event.pull_request.number }}
-            ${{ env.TITLE }}
-            ${{ github.event.pull_request.html_url }}
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} merged PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc closed pull request
         uses: rectalogic/notify-irc@v2
@@ -188,9 +184,7 @@ jobs:
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
-            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} closed PR #${{ github.event.pull_request.number }}
-            ${{ env.TITLE }}
-            ${{ github.event.pull_request.html_url }}
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} closed PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc synchronize pull request
         uses: rectalogic/notify-irc@v2
