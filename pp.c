@@ -4525,11 +4525,11 @@ PP_wrapped(pp_uc, 1, 0)
         bool in_iota_subscript = FALSE;
 
         while (s < send) {
-            STRLEN u;
-            STRLEN ulen;
+            STRLEN this_len;
+            STRLEN upper_len;
             UV uv;
             if (UNLIKELY(in_iota_subscript)) {
-                UV cp = utf8_to_uv_or_die(s, send, &u);
+                UV cp = utf8_to_uv_or_die(s, send, &this_len);
 
                 if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
 
@@ -4540,16 +4540,17 @@ PP_wrapped(pp_uc, 1, 0)
                 }
             }
             else {
-                u = UTF8SKIP(s);
+                this_len = UTF8SKIP(s);
             }
 
             /* Then handle the current character.  Get the changed case value
              * and copy it to the output buffer */
 
 #ifdef USE_LOCALE_CTYPE
-            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len,
+                                     IN_LC_RUNTIME(LC_CTYPE));
 #else
-            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &ulen, 0);
+            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len, 0);
 #endif
             if (   uv == GREEK_CAPITAL_LETTER_IOTA
                 && utf8_to_uv_or_die(s, send, 0) ==
@@ -4558,7 +4559,9 @@ PP_wrapped(pp_uc, 1, 0)
                 in_iota_subscript = TRUE;
             }
             else {
-                if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+                if (   upper_len > this_len
+                    && (SvLEN(dest) < (min += upper_len - this_len)))
+                {
                     /* If the eventually required minimum size outgrows the
                      * available space, we need to grow. */
                     const UV o = d - (U8*)SvPVX_const(dest);
@@ -4571,10 +4574,10 @@ PP_wrapped(pp_uc, 1, 0)
                      * another option */
                     d = o + (U8*) SvGROW(dest, min);
                 }
-                Copy(tmpbuf, d, ulen, U8);
-                d += ulen;
+                Copy(tmpbuf, d, upper_len, U8);
+                d += upper_len;
             }
-            s += u;
+            s += this_len;
         }
         if (in_iota_subscript) {
             *d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);
@@ -4868,12 +4871,13 @@ PP_wrapped(pp_lc, 1, 0)
         bool remove_dot_above = FALSE;
 
         while (s < send) {
-            const STRLEN u = UTF8SKIP(s);
-            STRLEN ulen;
+            const STRLEN this_len = UTF8SKIP(s);
+            STRLEN lower_len;
 
 #ifdef USE_LOCALE_CTYPE
 
-            _toLOWER_utf8_flags(s, send, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+            _toLOWER_utf8_flags(s, send, tmpbuf, &lower_len,
+                                IN_LC_RUNTIME(LC_CTYPE));
 
             /* If we are in a Turkic locale, we have to do more work.  As noted
              * in the comments for lcfirst, there is a special case if a 'I'
@@ -4888,9 +4892,10 @@ PP_wrapped(pp_lc, 1, 0)
                 && IN_LC_RUNTIME(LC_CTYPE))
             {
                 if (   UNLIKELY(remove_dot_above)
-                    && memBEGINs(tmpbuf, sizeof(tmpbuf), COMBINING_DOT_ABOVE_UTF8))
+                    && memBEGINs(tmpbuf, sizeof(tmpbuf),
+                                 COMBINING_DOT_ABOVE_UTF8))
                 {
-                    s += u;
+                    s += this_len;
                     remove_dot_above = FALSE;
                     continue;
                 }
@@ -4901,15 +4906,16 @@ PP_wrapped(pp_lc, 1, 0)
 #else
             PERL_UNUSED_VAR(remove_dot_above);
 
-            _toLOWER_utf8_flags(s, send, tmpbuf, &ulen, 0);
+            _toLOWER_utf8_flags(s, send, tmpbuf, &lower_len, 0);
 #endif
 
             /* Here is where we would do context-sensitive actions for the
              * Greek final sigma.  See the commit message for 86510fb15 for why
              * there isn't any */
 
-            if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
-
+            if (   lower_len > this_len
+                && (SvLEN(dest) < (min += lower_len - this_len)))
+            {
                 /* If the eventually required minimum size outgrows the
                  * available space, we need to grow. */
                 const UV o = d - (U8*)SvPVX_const(dest);
@@ -4925,9 +4931,9 @@ PP_wrapped(pp_lc, 1, 0)
 
             /* Copy the newly lowercased letter to the output buffer we're
              * building */
-            Copy(tmpbuf, d, ulen, U8);
-            d += ulen;
-            s += u;
+            Copy(tmpbuf, d, lower_len, U8);
+            d += lower_len;
+            s += this_len;
         }   /* End of looping through the source string */
         SvUTF8_on(dest);
         *d = '\0';
@@ -5131,19 +5137,19 @@ PP_wrapped(pp_fc, 1, 0)
 
     if (DO_UTF8(source)) { /* UTF-8 flagged string. */
         while (s < send) {
-            const STRLEN u = UTF8SKIP(s);
+            const STRLEN this_len = UTF8SKIP(s);
             STRLEN ulen;
 
             _toFOLD_utf8_flags(s, send, tmpbuf, &ulen, flags);
 
-            if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+            if (ulen > this_len && (SvLEN(dest) < (min += ulen - this_len))) {
                 const UV o = d - (U8*)SvPVX_const(dest);
                 d = o + (U8*) SvGROW(dest, min);
             }
 
             Copy(tmpbuf, d, ulen, U8);
             d += ulen;
-            s += u;
+            s += this_len;
         }
         SvUTF8_on(dest);
     } /* Unflagged string */
