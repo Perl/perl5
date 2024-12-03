@@ -72,7 +72,8 @@ PERL_STATIC_INLINE SV*
 Perl_new_sv(pTHX_ const char *file, int line, const char *func)
 {
     SV* sv;
-#ifndef DEBUG_LEAKING_SCALARS
+#if !defined(DEBUG_LEAKING_SCALARS) || \
+     (!defined(DEBUGGING) && !defined(PERL_MEM_LOG))
     PERL_UNUSED_ARG(file);
     PERL_UNUSED_ARG(line);
     PERL_UNUSED_ARG(func);
