@@ -155,7 +155,7 @@ jobs:
 
       - name: irc opened pull request
         uses: rectalogic/notify-irc@v2
-        if: vars.NOTIFY_IRC_P5P == 'true' && github.event_name == 'pull_request' && github.event.action == 'opened'
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -166,7 +166,7 @@ jobs:
 
       - name: irc merged pull request
         uses: rectalogic/notify-irc@v2
-        if: vars.NOTIFY_IRC_P5P == 'true' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -177,7 +177,7 @@ jobs:
 
       - name: irc closed pull request
         uses: rectalogic/notify-irc@v2
-        if: vars.NOTIFY_IRC_P5P == 'true' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
