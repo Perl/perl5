@@ -414,6 +414,11 @@ L<perlapi/C<utf8_to_uv>> replaces L<perlapi/C<utf8_to_uvchr>> (which is
 retained for backwards compatibility), but you should convert to use the
 new form, as likely you aren't using the old one safely.
 
+To convert in the opposite direction, you can now use
+L<perlapi/C<uv_to_utf8>>.  This is not a new function, but a new synonym
+for L<perlapi/C<uvchr_to_utf8>>.  It is added so you don't have to learn
+two sets of names.
+
 There are also two new functions, L<perlapi/C<strict_utf8_to_uv>> and
 L<perlapi/C<c9strict_utf8_to_uv>> which do the same thing except when
 the input string represents a code point that Unicode doesn't accept as
@@ -439,6 +444,12 @@ L<perlapi/C<utf8_to_uv_errors>> replaces L<perlapi/C<utf8n_to_uvchr_error>>.
 
 L<perlapi/C<utf8_to_uv_msgs>> replaces
 L<perlapi/C<utf8n_to_uvchr_msgs>>.
+
+Also added are the inverse functions L<perlapi/C<uv_to_utf8_flags>>
+and L<perlapi/C<uv_to_utf8_msgs>>, which are synonyms for the existing
+functions, L<perlapi/C<uvchr_to_utf8_flags>> and
+L<perlapi/C<uvchr_to_utf8_flags_msgs>> respectively.  These are provided only
+so you don't have to learn two sets of names.
 
 =item *
 

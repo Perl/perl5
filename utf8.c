@@ -121,14 +121,14 @@ S_new_msg_hv(pTHX_ const char * const message, /* The message text */
 =for apidoc uvoffuni_to_utf8_flags
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Instead, B<Almost all code should use L<perlapi/uvchr_to_utf8> or
-L<perlapi/uvchr_to_utf8_flags>>.
+Instead, B<Almost all code should use L<perlapi/uv_to_utf8> or
+L<perlapi/uv_to_utf8_flags>>.
 
 This function is like them, but the input is a strict Unicode
 (as opposed to native) code point.  Only in very rare circumstances should code
 not be using the native code point.
 
-For details, see the description for L<perlapi/uvchr_to_utf8_flags>.
+For details, see the description for L<perlapi/uv_to_utf8_flags>.
 
 =cut
 */
@@ -155,9 +155,11 @@ const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
 #define MASK    UTF_CONTINUATION_MASK
 
 /*
-=for apidoc uvchr_to_utf8_flags_msgs
+=for apidoc      uv_to_utf8_msgs
+=for apidoc_item uvchr_to_utf8_flags_msgs
 
-THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+These functions are identical.  THEY SHOULD BE USED IN ONLY VERY SPECIALIZED
+CIRCUMSTANCES.
 
 Most code should use C<L</uvchr_to_utf8_flags>()> rather than call this directly.
 
@@ -367,7 +369,9 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 }
 
 /*
-=for apidoc      uvchr_to_utf8
+=for apidoc      uv_to_utf8
+=for apidoc_item uv_to_utf8_flags
+=for apidoc_item uvchr_to_utf8
 =for apidoc_item uvchr_to_utf8_flags
 
 These each add the UTF-8 representation of the native code point C<uv> to the
@@ -375,17 +379,21 @@ end of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
 C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
 the byte after the end of the new character.  In other words,
 
-    d = uvchr_to_utf8(d, uv);
+    d = uv_to_utf8(d, uv);
 
 This is the Unicode-aware way of saying
 
     *(d++) = uv;
 
-C<flags> is used to make some classes of code points problematic in some way.
-C<uvchr_to_utf8> is effectively the same as calling C<uvchr_to_utf8_flags>
+(C<uvchr_to_utf8> is a synonym for C<uv_to_utf8>.)
+
+C<uv_to_utf8_flags> is used to make some classes of code points problematic in
+some way.  C<uv_to_utf8> is effectively the same as calling C<uv_to_utf8_flags>
 with C<flags> set to 0, meaning no class of code point is considered
 problematic.  That means any input code point from 0..C<IV_MAX> is considered
 to be fine.  C<IV_MAX> is typically 0x7FFF_FFFF in a 32-bit word.
+
+(C<uvchr_to_utf8_flags> is a synonym for C<uv_to_utf8_flags>).
 
 A code point can be problematic in one of two ways.  Its use could just raise a
 warning, and/or it could be forbidden with the function failing, and returning
