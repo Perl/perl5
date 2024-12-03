@@ -2020,7 +2020,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
 
     for (;from_ptr < from_end; from_ptr++) {
         while (*m == from_ptr) *m++ = to_ptr;
-        to_ptr = (char *) uvchr_to_utf8((U8 *) to_ptr, *(U8 *) from_ptr);
+        to_ptr = (char *) uv_to_utf8((U8 *) to_ptr, *(U8 *) from_ptr);
     }
     *to_ptr = 0;
 
@@ -2391,7 +2391,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 GROWING(0, cat, start, cur, fromlen*(UTF8_EXPAND-1)+len);
                 len -= fromlen;
                 while (fromlen > 0) {
-                    cur = (char *) uvchr_to_utf8((U8 *) cur, * (U8 *) aptr);
+                    cur = (char *) uv_to_utf8((U8 *) cur, * (U8 *) aptr);
                     aptr++;
                     fromlen--;
                 }
@@ -2605,7 +2605,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
                         end = start+SvLEN(cat)-UTF8_MAXLEN;
                     }
-                    cur = (char *) uvchr_to_utf8_flags((U8 *) cur, auv, 0);
+                    cur = (char *) uv_to_utf8((U8 *) cur, auv);
                 } else {
                     if (auv >= 0x100) {
                         if (!SvUTF8(cat)) {
@@ -2656,7 +2656,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 auv = SvUV_no_inf(fromstr, datumtype);
                 if (utf8) {
                     U8 buffer[UTF8_MAXLEN+1], *endb;
-                    endb = uvchr_to_utf8_flags(buffer, auv, 0);
+                    endb = uv_to_utf8(buffer, auv);
                     if (cur+(endb-buffer)*UTF8_EXPAND >= end) {
                         *cur = '\0';
                         SvCUR_set(cat, cur - start);
@@ -2672,7 +2672,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
                         end = start+SvLEN(cat)-UTF8_MAXLEN;
                     }
-                    cur = (char *) uvchr_to_utf8_flags((U8 *) cur, auv, 0);
+                    cur = (char *) uv_to_utf8((U8 *) cur, auv);
                 }
             }
             break;

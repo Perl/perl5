@@ -3982,7 +3982,7 @@ PP(pp_chr)
 
     if (value > 255 && !IN_BYTES) {
         SvGROW(TARG, (STRLEN)UVCHR_SKIP(value)+1);
-        tmps = (char*)uvchr_to_utf8_flags((U8*)SvPVX(TARG), value, 0);
+        tmps = (char*)uv_to_utf8((U8*)SvPVX(TARG), value);
         SvCUR_set(TARG, tmps - SvPVX_const(TARG));
         *tmps = '\0';
         (void)SvPOK_only(TARG);

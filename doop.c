@@ -85,7 +85,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
             if (c < 0x100 && (ch = tbl->map[c]) >= 0) {
                 matches++;
-                d = uvchr_to_utf8(d, (UV)ch);
+                d = uv_to_utf8(d, (UV)ch);
                 s += ulen;
             }
             else { /* No match -> copy */
@@ -282,7 +282,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
               replace:
                 matches++;
                 if (LIKELY(!squash || ch != pch)) {
-                    d = uvchr_to_utf8(d, ch);
+                    d = uv_to_utf8(d, ch);
                     pch = ch;
                 }
                 s += len;
@@ -541,7 +541,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
          * to the output */
         if (! squash || to != previous_map) {
             if (out_is_utf8) {
-                d = uvchr_to_utf8(d, to);
+                d = uv_to_utf8(d, to);
             }
             else {
                 if (to >= 256) {    /* If need to convert to UTF-8, restart */

@@ -6574,12 +6574,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
             start = MIN(IV_MAX, start);
             end   = MIN(IV_MAX, end);
 
-            temp_end_pos = uvchr_to_utf8(temp, start);
+            temp_end_pos = uv_to_utf8(temp, start);
             sv_catpvn(inverted_tstr, (char *) temp, temp_end_pos - temp);
 
             if (start != end) {
                 Perl_sv_catpvf(aTHX_ inverted_tstr, "%c", RANGE_INDICATOR);
-                temp_end_pos = uvchr_to_utf8(temp, end);
+                temp_end_pos = uv_to_utf8(temp, end);
                 sv_catpvn(inverted_tstr, (char *) temp, temp_end_pos - temp);
             }
         }

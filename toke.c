@@ -774,7 +774,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
             len = 1;
         }
         else {
-            char *end = (char *)uvchr_to_utf8((U8 *)tmpbuf, PL_multi_close);
+            char *end = (char *) uv_to_utf8((U8 *)tmpbuf, PL_multi_close);
             *end = '\0';
             len = end - tmpbuf;
             uni = TRUE;
@@ -3611,7 +3611,7 @@ S_scan_const(pTHX_ char *start)
                         if (real_range_max > 0x101) {
                             *d++ = (char) RANGE_INDICATOR;
                         }
-                        d = (char*)uvchr_to_utf8((U8*)d, real_range_max);
+                        d = (char*) uv_to_utf8((U8*)d, real_range_max);
                     }
                 }
 #endif
@@ -3898,7 +3898,7 @@ S_scan_const(pTHX_ char *start)
                             d = SvCUR(sv) + SvGROW(sv, needed);
                         }
 
-                        d = (char*) uvchr_to_utf8_flags((U8*)d, uv,
+                        d = (char*) uv_to_utf8_flags((U8*)d, uv,
                                                    (ckWARN(WARN_PORTABLE))
                                                    ? UNICODE_WARN_PERL_EXTENDED
                                                    : 0);
@@ -13275,7 +13275,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
             }
 
             /* Append native character for the rev point */
-            tmpend = uvchr_to_utf8(tmpbuf, rev);
+            tmpend = uv_to_utf8(tmpbuf, rev);
             sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
             if (!UVCHR_IS_INVARIANT(rev))
                  SvUTF8_on(sv);

@@ -13251,7 +13251,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     {
                         STATIC_ASSERT_STMT(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
                         eptr = ebuf;
-                        elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
+                        elen = uv_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
                         is_utf8 = TRUE;
                     }
                     else {

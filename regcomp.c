@@ -6725,7 +6725,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         *(s++) = (char) ender;
                     }
                     else {
-                        U8 * new_s = uvchr_to_utf8((U8*)s, ender);
+                        U8 * new_s = uv_to_utf8((U8*)s, ender);
                         added_len = (char *) new_s - s;
                         s = (char *) new_s;
 
@@ -11805,7 +11805,7 @@ S_optimize_regclass(pTHX_
                 *STRINGs(REGNODE_p(*ret)) = (U8) value;
             }
             else {
-                uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(*ret)), value);
+                uv_to_utf8((U8 *) STRINGs(REGNODE_p(*ret)), value);
             }
 
             return op;
@@ -12088,8 +12088,8 @@ S_optimize_regclass(pTHX_
 
         /* Place the lowest UTF-8 start byte in the flags field, so as to allow
          * efficient ruling out at run time of many possible inputs.  */
-        (void) uvchr_to_utf8(low_utf8, start[0]);
-        (void) uvchr_to_utf8(high_utf8, end[0]);
+        (void) uv_to_utf8(low_utf8, start[0]);
+        (void) uv_to_utf8(high_utf8, end[0]);
 
         /* If all code points share the same first byte, this can be an
          * ANYOFRb.  Otherwise store the lowest UTF-8 start byte which can
@@ -12123,7 +12123,7 @@ S_optimize_regclass(pTHX_
          * regnode can be used for higher ones, but we can't calculate the code
          * point of those.  IV_MAX suffices though, as it will be a large first
          * byte */
-        Size_t low_len = uvchr_to_utf8(low_utf8, MIN(lowest_cp, IV_MAX))
+        Size_t low_len = uv_to_utf8(low_utf8, MIN(lowest_cp, IV_MAX))
                        - low_utf8;
 
         /* We store the lowest possible first byte of the UTF-8 representation,
@@ -12140,7 +12140,7 @@ S_optimize_regclass(pTHX_
          * well */
         if (highest_cp <= IV_MAX) {
             U8 high_utf8[UTF8_MAXBYTES+1];
-            Size_t high_len = uvchr_to_utf8(high_utf8, highest_cp) - high_utf8;
+            Size_t high_len = uv_to_utf8(high_utf8, highest_cp) - high_utf8;
 
             /* If the lowest and highest are the same, we can get an exact
              * first byte instead of a just minimum or even a sequence of exact
@@ -14064,8 +14064,7 @@ S_get_extended_utf8_msg(pTHX_ const UV cp)
     HV *msgs;
     SV **msg;
 
-    uvchr_to_utf8_flags_msgs(dummy, cp, UNICODE_WARN_PERL_EXTENDED,
-                             &msgs);
+    uv_to_utf8_msgs(dummy, cp, UNICODE_WARN_PERL_EXTENDED, &msgs);
 
     msg = hv_fetchs(msgs, "text", 0);
     assert(msg);

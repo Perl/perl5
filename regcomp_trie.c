@@ -381,7 +381,7 @@ and would end up looking like:
    8: EXACT <baz>(10)
   10: END(0)
 
-    d = uvchr_to_utf8_flags(d, uv, 0);
+    d = uv_to_utf8(d, uv);
 
 is the recommended Unicode-aware way of saying
 
@@ -393,7 +393,7 @@ is the recommended Unicode-aware way of saying
         if (UTF) {                                                         \
             SV *zlopp = newSV(UTF8_MAXBYTES);                              \
             unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);      \
-            unsigned char *const kapow = uvchr_to_utf8(flrbbbbb, val);     \
+            unsigned char *const kapow = uv_to_utf8(flrbbbbb, val);     \
             *kapow = '\0';                                                 \
             SvCUR_set(zlopp, kapow - flrbbbbb);                            \
             SvPOK_on(zlopp);                                               \

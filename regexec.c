@@ -5015,7 +5015,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
 
             /* Add this character to the list of possible matches */
             if (utf8_target) {
-                uvchr_to_utf8(matches[(U8) m->count], fold_from);
+                uv_to_utf8(matches[(U8) m->count], fold_from);
                 lengths[m->count] = UVCHR_SKIP(fold_from);
                 m->count++;
             }
