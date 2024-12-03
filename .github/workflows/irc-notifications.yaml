@@ -127,7 +127,7 @@ jobs:
           # -------------------------------------
           echo "# script parse.pl"
           cat <<'EOS' > parse.pl
-          use v5.14; use strict; use warnings;
+          use v5.14; use warnings;
           my ( $key, $len ) = @ARGV;
           $key //= ''; $len //= 50;
           my $txt = substr( $ENV{$key} || "Unknown $key", 0, $len );
@@ -143,7 +143,7 @@ jobs:
           # -------------------------------------
           echo 'BODY<<EOS'        >> $GITHUB_ENV
           perl parse.pl BODY 500  >> $GITHUB_ENV
-          echo 'EOS'               >> $GITHUB_ENV
+          echo 'EOS'              >> $GITHUB_ENV
           # -------------------------------------
           echo "# done"
 
