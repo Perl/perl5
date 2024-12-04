@@ -1667,10 +1667,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
           || UTF8_IS_NONCHAR(s0, e));
     */
 
-    if (errors) {
-        *errors = 0;
-    }
-
     /* Accumulate the code point translation of the input byte sequence
      * s0 .. e-1, looking for malformations.
      *
