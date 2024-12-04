@@ -1732,15 +1732,16 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     /* We now know we can examine the first byte of the input */
     expectlen = UTF8SKIP(s0);
 
-    /* This is a helper function; invariants should have been handled before
-     * calling it */
-    assert(! NATIVE_BYTE_IS_INVARIANT(*s0));
     /* A continuation character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
         curlen = 1;
         goto ready_to_handle_errors;
     }
+
+    /* This is a helper function; invariants should have been handled before
+     * calling it */
+    assert(! NATIVE_BYTE_IS_INVARIANT(*s0));
 
     /* Here is not a continuation byte, nor an invariant.  The only thing left
      * is a start byte (possibly for an overlong).  (We can't use UTF8_IS_START
