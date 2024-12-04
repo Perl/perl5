@@ -945,7 +945,7 @@ case 2: /* @1: %empty  */
                                 yyerror("A slurpy parameter may not have "
                                         "a default value");
 
-                            (yyval.opval) = var ? newSTATEOP(0, NULL, var) : NULL;
+                            (yyval.opval) = var ? newSTATEOP(OPf_FORCE_NEXTSTATE, NULL, var) : NULL;
                         }
 
     break;
@@ -1024,7 +1024,7 @@ case 2: /* @1: %empty  */
                                             "follows optional parameter");
                             }
 
-                            (yyval.opval) = var ? newSTATEOP(0, NULL, var) : NULL;
+                            (yyval.opval) = var ? newSTATEOP(OPf_FORCE_NEXTSTATE, NULL, var) : NULL;
                         }
 
     break;
@@ -1104,7 +1104,7 @@ case 2: /* @1: %empty  */
                                             (UNOP_AUX_item *)aux);
                             sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
                             sigops = op_prepend_elem(OP_LINESEQ,
-                                                newSTATEOP(0, NULL, NULL),
+                                                newSTATEOP(OPf_FORCE_NEXTSTATE, NULL, NULL),
                                                 sigops);
                             /* a nextstate at the end handles context
                              * correctly for an empty sub body */
@@ -2331,6 +2331,6 @@ case 2: /* @1: %empty  */
     
 
 /* Generated from:
- * 9fc11f4af92f701d8d7909a9cd9dc52e01098c42c2504fb84c15e1d1e72f4803 perly.y
+ * 43bca65a61cd508da43f23047549ee0583ef762d0fa0cff9857d0038ac6eb083 perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */

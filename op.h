@@ -171,6 +171,15 @@ Deprecated.  Use C<GIMME_V> instead.
    op_convert_list to set op_folded.  */
 #define OPf_FOLDED      (1<<16)
 
+/* In debugging mode newSTATEOP() normally makes an OP_DBSTATE, set
+   this to force creation of an OP_NEXTSTATE (which isn't
+   steppable/breakable) instead.
+
+   This is useful if you need to intro_my() but not make a breakable
+   op.
+ */
+#define OPf_FORCE_NEXTSTATE (1 << 17)
+
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
