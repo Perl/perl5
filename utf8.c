@@ -1633,7 +1633,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                found as we go along */
     UV uv = 0;
     Size_t expectlen;    /* How long should this sequence be? */
-    Size_t avail_len;    /* When input is too short, gives what that is */
 
     /* Here, is one of:
      *  a)  malformed;
@@ -1678,8 +1677,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     s = s0;
     possible_problems = 0;
     expectlen = 0;
-    avail_len = 0;
-
     if (errors) {
         *errors = 0;
     }
@@ -1714,18 +1711,23 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * allowed one, we could allow in something that shouldn't have been.
      */
 
+    Size_t curlen = 0;      /* How many bytes have we processed so far */
+
+    /* Gives how many bytes are available, which may turn out to be less than
+     * the expected length */
+    Size_t avail_len;
+
     /* The ending position, plus 1, of the first character in the sequence
      * beginning at s0.  In other words, 'e', adjusted down to to be no more
      * than a single character */
     const U8 * send = e;
 
-    Size_t curlen;
     if (UNLIKELY(s0 >= send)) {
         possible_problems |= UTF8_GOT_EMPTY;
-        curlen = 0;
+        avail_len = 0;
         goto ready_to_handle_errors;
     }
-    curlen = send - s0;
+    avail_len = send - s0;
 
     /* We now know we can examine the first byte of the input */
     expectlen = UTF8SKIP(s0);
@@ -1752,12 +1754,12 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
     /* Setup the loop end point, making sure to not look past the end of the
      * input string, and flag it as too short if the size isn't big enough. */
-    if (UNLIKELY(curlen < expectlen)) {
+    if (UNLIKELY(avail_len < expectlen)) {
         possible_problems |= UTF8_GOT_SHORT;
-        avail_len = curlen;
     }
     else {
         send = (U8*) s0 + expectlen;
+        avail_len = expectlen;
     }
 
     /* Now, loop through the remaining bytes in the character's sequence,
