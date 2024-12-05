@@ -81,7 +81,8 @@ Perl__force_out_malformed_utf8_message(pTHX_
         PL_curcop->cop_warnings = pWARN_ALL;
     }
 
-    (void) utf8n_to_uvchr_error(p, e - p, NULL, flags & ~UTF8_CHECK_ONLY, &errors);
+    UV cp;
+    (void) utf8_to_uv_errors(p, e, &cp, NULL, flags & ~UTF8_CHECK_ONLY, &errors);
 
     LEAVE;
 
