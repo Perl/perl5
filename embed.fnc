@@ -794,8 +794,12 @@ Adp	|int	|bytes_cmp_utf8 |NN const U8 *b 			\
 Adp	|U8 *	|bytes_from_utf8|NN const U8 *s 			\
 				|NN STRLEN *lenp			\
 				|NN bool *is_utf8p
-Adp	|U8 *	|bytes_to_utf8	|NN const U8 *s 			\
+Admp	|U8 *	|bytes_to_utf8	|NN const U8 *s 			\
 				|NN STRLEN *lenp
+Adp	|U8 *	|bytes_to_utf8_free_me					\
+				|NN const U8 *s 			\
+				|NN STRLEN *lenp			\
+				|NULLOK const U8 **free_me
 AOdp	|SSize_t|call_argv	|NN const char *sub_name		\
 				|I32 flags				\
 				|NN char **argv

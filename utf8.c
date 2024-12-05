@@ -3257,39 +3257,80 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 }
 
 /*
-=for apidoc bytes_to_utf8
+=for apidoc      bytes_to_utf8
+=for apidoc_item bytes_to_utf8_free_me
 
-Converts a string C<s> of length C<*lenp> bytes from the native encoding into
-UTF-8.
-Returns a pointer to the newly-created string, and sets C<*lenp> to
-reflect the new length in bytes.  The caller is responsible for arranging for
-the memory used by this string to get freed.
+These each convert a string C<s> of length C<*lenp> bytes from the native
+encoding into UTF-8 (UTF-EBCDIC on EBCDIC platforms), returning a pointer to
+the UTF-8 string, and setting C<*lenp> to its length in bytes.
+
+C<bytes_to_utf8> always allocates new memory for the result, making sure it is
+NUL-terminated.
+
+C<bytes_to_utf8_free_me> simply returns a pointer to the input string if the
+string's UTF-8 representation is the same as its native representation.
+Otherwise, it behaves like C<bytes_to_utf8>, returning a pointer to new memory
+containing the conversion of the input.  In other words, it returns the input
+string if converting the string would be a no-op.  Note that when no new string
+is allocated, the function can't add a NUL to the original string if one wasn't
+already there.
+
+In both cases, the caller is responsible for arranging for any new memory to
+get freed.
+
+C<bytes_to_utf8_free_me> takes an extra parameter, C<free_me> to communicate.
+to the caller that memory was allocated or not.  If that parameter is NULL,
+C<bytes_to_utf8_free_me> acts identically to C<bytes_to_utf8>, always
+allocating new memory.
+
+But when it is a non-NULL pointer, C<bytes_to_utf8_free_me> stores into it
+either NULL if no memory was allocated; or a pointer to that new memory.  This
+allows the following convenient paradigm:
+
+ U8 * free_me;
+ U8 converted = bytes_to_utf8_free_me(string, &len, &free_me);
+
+ ...
+
+ Safefree(free_me);
+
+You don't have to know if memory was allocated or not.  Just call C<Safefree>
+unconditionally.  C<free_me> will contain a suitable value to pass to
+C<Safefree> for it to do the right thing, regardless.
 
 Upon return, the number of variants in the string can be computed by
 having saved the value of C<*lenp> before the call, and subtracting it from the
 after-call value of C<*lenp>.
 
-A C<NUL> character will be written after the end of the string.
-
-If you want to convert to UTF-8 from encodings other than
-the native (Latin1 or EBCDIC),
-see L</sv_recode_to_utf8>().
+If you want to convert to UTF-8 from encodings other than the native (Latin1 or
+EBCDIC), see L</sv_recode_to_utf8>().
 
 =cut
 */
 
 U8*
-Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
+Perl_bytes_to_utf8_free_me(pTHX_ const U8 *s, Size_t *lenp,
+                                 const U8 ** free_me_ptr)
 {
+    PERL_ARGS_ASSERT_BYTES_TO_UTF8_FREE_ME;
+    PERL_UNUSED_CONTEXT;
+
     const U8 * const send = s + (*lenp);
+    const Size_t variant_count = variant_under_utf8_count(s, send);
+
+    /* Return the input unchanged if the flag indicates to do so, and there
+     * are no characters that differ when represented in UTF-8, and the
+     * original is NUL-terminated */
+    if (free_me_ptr != NULL && variant_count == 0) {
+        *free_me_ptr = NULL;
+        return (U8 *) s;
+    }
+
     U8 *d;
     U8 *dst;
 
-    PERL_ARGS_ASSERT_BYTES_TO_UTF8;
-    PERL_UNUSED_CONTEXT;
-
     /* 1 for each byte + 1 for each byte that expands to two, + trailing NUL */
-    Newx(d, (*lenp) + variant_under_utf8_count(s, send) + 1, U8);
+    Newx(d, (*lenp) + variant_count + 1, U8);
     dst = d;
 
     while (s < send) {
@@ -3298,7 +3339,11 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
     }
 
     *d = '\0';
-    *lenp = d-dst;
+    *lenp = d - dst;
+
+    if (free_me_ptr != NULL) {
+        *free_me_ptr = dst;
+    }
 
     return dst;
 }

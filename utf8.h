@@ -1330,6 +1330,7 @@ point's representation.
 
 #define Perl_is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 
+#define Perl_bytes_to_utf8(mTHX, s, lenp)  Perl_bytes_to_utf8_free_me(aTHX_ s, lenp, NULL)
 typedef enum {
     PL_utf8_to_bytes_overwrite = 0,
     PL_utf8_to_bytes_new_memory,
