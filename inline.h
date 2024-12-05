@@ -1299,7 +1299,7 @@ Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp)
 
 /*
 =for apidoc valid_utf8_to_uvchr
-Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
+Like C<L<perlapi/utf8_to_uv>>, but should only be called when it is
 known that the next character in the input UTF-8 string C<s> is well-formed
 (I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
 points, and non-Unicode code points are allowed.
