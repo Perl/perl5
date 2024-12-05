@@ -3575,7 +3575,7 @@ Perl_translate_substr_offsets( STRLEN curlen, IV pos1_iv,
 }
 
 PP_wrapped(pp_substr,
-                (PL_op->op_private & 7)
+                MAXARG3
               + ((PL_op->op_private & OPpSUBSTR_REPL_FIRST) ? 1 : 0),
             0)
 {
@@ -3595,7 +3595,7 @@ PP_wrapped(pp_substr,
     SV *repl_sv = NULL;
     const char *repl = NULL;
     STRLEN repl_len;
-    int num_args = PL_op->op_private & 7;
+    int num_args = MAXARG3;
     bool repl_need_utf8_upgrade = FALSE;
 
     if (num_args > 2) {

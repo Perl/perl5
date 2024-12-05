@@ -3988,7 +3988,7 @@ Perl_rpeep(pTHX_ OP *o)
                     */
                     OP *left = OpSIBLING(right);
                     if (left->op_type == OP_SUBSTR
-                         && (left->op_private & 7) < 4) {
+                         && (cMAXARG3x(left) < 4)) {
                         op_null(o);
                         /* cut out right */
                         op_sibling_splice(o, NULL, 1, NULL);
