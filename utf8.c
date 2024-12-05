@@ -4204,7 +4204,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
         }
 
         /* Here, no characters crossed, result is ok as-is, but we warn. */
-        _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(p, p + UTF8SKIP(p));
+        CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(p, p + UTF8SKIP(p));
         return result;
     }
 

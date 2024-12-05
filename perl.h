@@ -7545,7 +7545,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
       * and will do so if enabled.  The first takes a single code point
       * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
       * string, and an end position which it won't try to read past */
-#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                        \
+#    define CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG_(cp)                        \
         STMT_START {                                                        \
             if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
@@ -7554,7 +7554,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
             }                                                               \
         }  STMT_END
 
-#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
+#    define CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(s, send)                 \
         STMT_START { /* Check if to warn before doing the conversion work */\
             if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
                 UV cp = utf8_to_uvchr_buf((U8 *) (s), (U8 *) (send), NULL); \
@@ -7583,8 +7583,8 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define IN_LC_RUNTIME(category)          0
 #  define IN_LC(category)                  0
 #  define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
-#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)
-#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c)
+#  define CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(s, send)
+#  define CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG_(c)
 #endif
 
 #define locale_panic_via_(m, f, l)  Perl_locale_panic((m), __LINE__, f, l)

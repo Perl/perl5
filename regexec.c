@@ -609,7 +609,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
                         EIGHT_BIT_UTF8_TO_NATIVE(*character, *(character + 1)));
     }
 
-    _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, e);
+    CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(character, e);
 
     switch ((char_class_number_) classnum) {
         case CC_ENUM_SPACE_:     return is_XPERLSPACE_high(character);
@@ -1812,7 +1812,7 @@ STMT_START {                                                                \
     case trie_flu8:                                                         \
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                 \
         if (UTF8_IS_ABOVE_LATIN1(*uc)) {                                    \
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);             \
+            CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(uc, uc_end);             \
         }                                                                   \
         goto do_trie_utf8_fold;                                             \
     case trie_utf8_exactfa_fold:                                            \
@@ -1862,7 +1862,7 @@ STMT_START {                                                                \
     case trie_utf8l:                                                        \
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                 \
         if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                     \
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);             \
+            CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(uc, uc_end);                     \
         }                                                                   \
         /* FALLTHROUGH */                                                   \
     case trie_utf8:                                                         \
@@ -6748,7 +6748,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         /* We only output for EXACTL, as we let the folder
                          * output this message for EXACTFLU8 to avoid
                          * duplication */
-                        _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput,
+                        CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(locinput,
                                                                reginfo->strend);
                     }
                 }
@@ -7075,7 +7075,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * just to check for this warning is worth it.  So this just checks
              * the first character */
             if (utf8_target && UTF8_IS_ABOVE_LATIN1(*locinput)) {
-                _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
+                CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(locinput, reginfo->strend);
             }
             goto do_exact;
         case EXACT_REQ8:
@@ -7761,7 +7761,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(locinput, reginfo->strend)) {
                 /* An above Latin-1 code point, or malformed */
-                _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput,
+                CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(locinput,
                                                        reginfo->strend);
                 goto utf8_posix_above_latin1;
             }
@@ -10327,7 +10327,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case EXACTL_t8:
         if (UTF8_IS_ABOVE_LATIN1(*scan)) {
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(scan, loceol);
+            CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(scan, loceol);
         }
         /* FALLTHROUGH */
 
@@ -10948,7 +10948,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
             &&  (OP(n) == ANYOFL || OP(n) == ANYOFPOSIXL)
             && ! (flags & ANYOFL_UTF8_LOCALE_REQD))
         {
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c);
+            CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG_(c);
         }
     }
 
