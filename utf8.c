@@ -1991,6 +1991,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         bool disallowed = FALSE;
         const U32 orig_problems = possible_problems;
         U32 error_flags_return = 0;
+        AV * msgs_return = NULL;
 
         /* The following macro returns 0 if no message needs to be generated
          * for this problem even if everything else says to.  Otherwise returns
@@ -2471,17 +2472,17 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
             } /* End of switch() on the possible problems */
 
-            /* Display the message (if any) for the problem being handled in
-             * this iteration of the loop */
+            /* Display or save the message (if any) for the problem being
+             * handled in this iteration of the loop */
             if (message) {
                 if (msgs) {
-                    if (*msgs == NULL) {
-                        *msgs = newAV();
+                    if (msgs_return == NULL) {
+                        msgs_return = newAV();
                     }
 
-                    av_push(*msgs, newRV_noinc((SV*) new_msg_hv(message,
-                                                              pack_warn,
-                                                              this_flag_bit)));
+                    av_push(msgs_return,
+                            newRV_noinc((SV*) new_msg_hv(message, pack_warn,
+                                                         this_flag_bit)));
                 }
                 else if (PL_op)
                     Perl_warner(aTHX_ pack_warn, "%s in %s", message,
@@ -2496,6 +2497,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          * Instead of trying to figure out if it has changed, just do it. */
         if (advance_p) {
             *advance_p = curlen;
+        }
+
+        if (msgs_return) {
+            *msgs = msgs_return;
         }
 
         if (errors) {
