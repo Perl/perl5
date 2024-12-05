@@ -143,7 +143,8 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
         const U8* e = s + bytelen;
         IV fc;
 
-        fc = uc = utf8_to_uvchr_buf(s, s + bytelen, NULL);
+        utf8_to_uv(s, e, &uc, NULL);
+        fc = uc;
 
         /* The only code points that aren't folded in a UTF EXACTFish
          * node are the problematic ones in EXACTFL nodes */
@@ -2248,7 +2249,7 @@ Perl_study_chunk(pTHX_
             assert(bytelen);
             if (UTF) {
                 const U8 * const s = (U8*)STRING(scan);
-                uc = utf8_to_uvchr_buf(s, s + bytelen, NULL);
+                utf8_to_uv(s, s + bytelen, &uc, NULL);
                 charlen = utf8_length(s, s + bytelen);
             } else {
                 uc = *((U8*)STRING(scan));
