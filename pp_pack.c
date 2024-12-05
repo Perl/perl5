@@ -3152,7 +3152,7 @@ PP_wrapped(pp_pack, 0, 1)
         const U8 * error_pos;
 
         if (! is_utf8_string_loc((U8 *) result, result_len, &error_pos)) {
-            _force_out_malformed_utf8_message(error_pos,
+            force_out_malformed_utf8_message_(error_pos,
                                               (U8 *) result + result_len,
                                               0, /* no flags */
                                               MALFORMED_UTF8_DIE

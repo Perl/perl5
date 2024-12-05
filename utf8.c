@@ -47,7 +47,7 @@ within non-zero characters.
 */
 
 void
-Perl__force_out_malformed_utf8_message(pTHX_
+Perl_force_out_malformed_utf8_message_(pTHX_
             const U8 *const p,      /* First byte in UTF-8 sequence */
             const U8 * const e,     /* Final byte in sequence (may include
                                        multiple chars */
@@ -55,6 +55,8 @@ Perl__force_out_malformed_utf8_message(pTHX_
                                        usually 0, or some DISALLOW flags */
             const bool die_here)    /* If TRUE, this function does not return */
 {
+    PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_MESSAGE_;
+
     /* This core-only function is to be called when a malformed UTF-8 character
      * is found, in order to output the detailed information about the
      * malformation before dieing.  The reason it exists is for the occasions
@@ -68,8 +70,6 @@ Perl__force_out_malformed_utf8_message(pTHX_
      * flexibility is here to return to the caller so they can finish up and
      * die themselves */
     U32 errors;
-
-    PERL_ARGS_ASSERT__FORCE_OUT_MALFORMED_UTF8_MESSAGE;
 
     ENTER;
     SAVEI8(PL_dowarn);
@@ -86,7 +86,7 @@ Perl__force_out_malformed_utf8_message(pTHX_
     LEAVE;
 
     if (! errors) {
-        Perl_croak(aTHX_ "panic: _force_out_malformed_utf8_message should"
+        Perl_croak(aTHX_ "panic: force_out_malformed_utf8_message_ should"
                          " be called only when there are errors found");
     }
 
@@ -3734,7 +3734,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     if (cp == 0 && (p >= e || *p != '\0')) {
-        _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE);
+        force_out_malformed_utf8_message_(p, e, 0, MALFORMED_UTF8_DIE);
         NOT_REACHED; /* NOTREACHED */
     }
 
@@ -4279,7 +4279,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
         STRLEN len_result;                                                   \
         result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
         if (len_result == (STRLEN) -1) {                                     \
-            _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE ); \
+            force_out_malformed_utf8_message_(p, e, 0, MALFORMED_UTF8_DIE ); \
         }
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \

@@ -1238,7 +1238,7 @@ Adpx	|void	|forbid_outofblock_ops					\
 				|NN OP *o				\
 				|NN const char *blockname
 p	|void	|force_locale_unlock
-Cp	|void	|_force_out_malformed_utf8_message			\
+Cp	|void	|force_out_malformed_utf8_message_			\
 				|NN const U8 * const p			\
 				|NN const U8 * const e			\
 				|const U32 flags			\

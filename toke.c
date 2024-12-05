@@ -929,7 +929,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
                                              SvCUR(line),
                                              &first_bad_char_loc)))
         {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
+            force_out_malformed_utf8_message_(first_bad_char_loc,
                                               (U8 *) s + SvCUR(line),
                                               0,
                                               MALFORMED_UTF8_DIE);
@@ -1546,7 +1546,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
                             PL_parser->bufend - PL_parser->bufptr,
                             &first_bad_char_loc)))
         {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
+            force_out_malformed_utf8_message_(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
                                               0,
                                               MALFORMED_UTF8_DIE);
@@ -1636,7 +1636,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
         }
         unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
         if (retlen == (STRLEN)-1) {
-            _force_out_malformed_utf8_message((U8 *) s,
+            force_out_malformed_utf8_message_((U8 *) s,
                                               (U8 *) bufend,
                                               0,
                                               MALFORMED_UTF8_DIE);
@@ -3023,7 +3023,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         if (UNLIKELY(! is_utf8_string_loc((U8 *) str, len,
                                           &first_bad_char_loc)))
         {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
+            force_out_malformed_utf8_message_(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
                                               0,
                                               MALFORMED_UTF8_WARN);
@@ -9618,7 +9618,7 @@ Perl_yylex(pTHX)
                                                         PL_bufend - PL_bufptr,
                                                         &first_bad_char_loc)))
         {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
+            force_out_malformed_utf8_message_(first_bad_char_loc,
                                               (U8 *) PL_bufend,
                                               0,
                                               MALFORMED_UTF8_DIE);
