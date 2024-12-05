@@ -7120,12 +7120,18 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 }
             }
 
-            /* unrolled SvREFCNT_dec and sv_free2 follows: */
+            /* Do the equivalent of SvREFCNT_dec(sv), except:
+             - for the case of RC==1, inline the actions normally taken
+               by sv_free2() prior it calling sv_clear(), and handle the
+               sv_clear() actions ourselves (without needing to
+               recurse).
+             - For the exceptional case of RC==0, do a traditional
+               recursive free. */
 
             if (!sv)
                 continue;
             if (!SvREFCNT(sv)) {
-                sv_free(sv);
+                Perl_sv_free2(aTHX_ sv, 0);
                 continue;
             }
             if (--(SvREFCNT(sv)))
