@@ -115,7 +115,8 @@ static const char non_utf8_target_but_utf8_required[]
 #endif
 
 #define NON_UTF8_TARGET_BUT_UTF8_REQUIRED(target) STMT_START {           \
-    DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%s", non_utf8_target_but_utf8_required));\
+    DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%s",                         \
+                                    non_utf8_target_but_utf8_required)); \
     goto target;                                                         \
 } STMT_END
 
@@ -129,18 +130,18 @@ static const char non_utf8_target_but_utf8_required[]
 
 #define CHR_SVLEN(sv) (utf8_target ? sv_len_utf8(sv) : SvCUR(sv))
 
-#define HOPc(pos,off) \
-        (char *)(reginfo->is_utf8_target \
-            ? reghop3((U8*)pos, off, \
-                    (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg)) \
+#define HOPc(pos,off)                                                       \
+        (char *)(reginfo->is_utf8_target                                    \
+            ? reghop3((U8*)pos, off,                                        \
+                    (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg))    \
             : (U8*)(pos + off))
 
 /* like HOPMAYBE3 but backwards. lim must be +ve. Returns NULL on overshoot */
-#define HOPBACK3(pos, off, lim) \
-        (reginfo->is_utf8_target                          \
-            ? reghopmaybe3((U8*)pos, (SSize_t)0-off, (U8*)(lim)) \
-            : (pos - off >= lim)	                         \
-                ? (U8*)pos - off		                 \
+#define HOPBACK3(pos, off, lim)                                     \
+        (reginfo->is_utf8_target                                    \
+            ? reghopmaybe3((U8*)pos, (SSize_t)0-off, (U8*)(lim))    \
+            : (pos - off >= lim)	                            \
+                ? (U8*)pos - off		                    \
                 : NULL)
 
 #define HOPBACKc(pos, off) ((char*)HOPBACK3(pos, off, reginfo->strbeg))
@@ -158,13 +159,13 @@ static const char non_utf8_target_but_utf8_required[]
 
 /* like HOP3, but limits the result to <= lim even for the non-utf8 case.
  * off must be >=0; args should be vars rather than expressions */
-#define HOP3lim(pos,off,lim) (reginfo->is_utf8_target \
-    ? reghop3((U8*)(pos), off, (U8*)(lim)) \
+#define HOP3lim(pos,off,lim) (reginfo->is_utf8_target           \
+    ? reghop3((U8*)(pos), off, (U8*)(lim))                      \
     : (U8*)((pos + off) > lim ? lim : (pos + off)))
 #define HOP3clim(pos,off,lim) ((char*)HOP3lim(pos,off,lim))
 
-#define HOP4(pos,off,llim, rlim) (reginfo->is_utf8_target \
-    ? utf8_hop_safe((U8*)(pos), off, (U8*)(llim), (U8*)(rlim)) \
+#define HOP4(pos,off,llim, rlim) (reginfo->is_utf8_target       \
+    ? utf8_hop_safe((U8*)(pos), off, (U8*)(llim), (U8*)(rlim))  \
     : (U8*)(pos + off))
 #define HOP4c(pos,off,llim, rlim) ((char*)HOP4(pos,off,llim, rlim))
 
@@ -176,20 +177,20 @@ static const char non_utf8_target_but_utf8_required[]
  *
  * NOTE that *nothing* that affects backtracking should be in here, specifically
  * VERBS must NOT be included. JUMPABLE is used to determine  if we can ignore a
- * node that is in between two EXACT like nodes when ascertaining what the required
- * "follow" character is. This should probably be moved to regex compile time
- * although it may be done at run time because of the REF possibility - more
- * investigation required. -- demerphq
+ * node that is in between two EXACT like nodes when ascertaining what the
+ * required "follow" character is. This should probably be moved to regex
+ * compile time although it may be done at run time because of the REF
+ * possibility - more investigation required. -- demerphq
 */
-#define JUMPABLE(rn) (                                                             \
-    OP(rn) == OPEN ||                                                              \
-    (OP(rn) == CLOSE &&                                                            \
-     !EVAL_CLOSE_PAREN_IS(cur_eval,PARNO(rn)) ) ||                                 \
-    OP(rn) == EVAL ||                                                              \
-    OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                                      \
-    OP(rn) == PLUS || OP(rn) == MINMOD ||                                          \
-    OP(rn) == KEEPS ||                                                             \
-    (REGNODE_TYPE(OP(rn)) == CURLY && ARG1i(rn) > 0)                                  \
+#define JUMPABLE(rn) (                                                      \
+    OP(rn) == OPEN ||                                                       \
+    (OP(rn) == CLOSE &&                                                     \
+     !EVAL_CLOSE_PAREN_IS(cur_eval,PARNO(rn)) ) ||                          \
+    OP(rn) == EVAL ||                                                       \
+    OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                               \
+    OP(rn) == PLUS || OP(rn) == MINMOD ||                                   \
+    OP(rn) == KEEPS ||                                                      \
+    (REGNODE_TYPE(OP(rn)) == CURLY && ARG1i(rn) > 0)                        \
 )
 #define IS_EXACT(rn) (REGNODE_TYPE(OP(rn)) == EXACT)
 
@@ -199,17 +200,18 @@ static const char non_utf8_target_but_utf8_required[]
   Search for mandatory following text node; for lookahead, the text must
   follow but for lookbehind (FLAGS(rn) != 0) we skip to the next step.
 */
-#define FIND_NEXT_IMPT(rn) STMT_START {                                   \
-    while (JUMPABLE(rn)) { \
-        const OPCODE type = OP(rn); \
-        if (type == SUSPEND || REGNODE_TYPE(type) == CURLY) \
-            rn = REGNODE_AFTER_opcode(rn,type); \
-        else if (type == PLUS) \
-            rn = REGNODE_AFTER_type(rn,tregnode_PLUS); \
-        else if (type == IFMATCH) \
-            rn = (FLAGS(rn) == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) : rn + ARG1u(rn); \
-        else rn += NEXT_OFF(rn); \
-    } \
+#define FIND_NEXT_IMPT(rn) STMT_START {                                     \
+    while (JUMPABLE(rn)) {                                                  \
+        const OPCODE type = OP(rn);                                         \
+        if (type == SUSPEND || REGNODE_TYPE(type) == CURLY)                 \
+            rn = REGNODE_AFTER_opcode(rn,type);                             \
+        else if (type == PLUS)                                              \
+            rn = REGNODE_AFTER_type(rn,tregnode_PLUS);                      \
+        else if (type == IFMATCH)                                           \
+            rn = (FLAGS(rn) == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) \
+                                  : rn + ARG1u(rn);                         \
+        else rn += NEXT_OFF(rn);                                            \
+    }                                                                       \
 } STMT_END
 
 #define SLAB_FIRST(s) (&(s)->states[0])
@@ -303,7 +305,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 #define REGCP_SET(cp)                                           \
     DEBUG_STATE_r(                                              \
         Perl_re_exec_indentf( aTHX_                             \
-            "Setting an EVAL scope, savestack = %" IVdf ",\n",    \
+            "Setting an EVAL scope, savestack = %" IVdf ",\n",  \
             depth, (IV)PL_savestack_ix                          \
         )                                                       \
     );                                                          \
@@ -313,7 +315,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
     DEBUG_STATE_r(                                              \
         if (cp != PL_savestack_ix)                              \
             Perl_re_exec_indentf( aTHX_                         \
-                "Clearing an EVAL scope, savestack = %"           \
+                "Clearing an EVAL scope, savestack = %"         \
                 IVdf "..%" IVdf "\n",                           \
                 depth, (IV)(cp), (IV)PL_savestack_ix            \
             )                                                   \
@@ -393,7 +395,7 @@ S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma
     }
 }
 
-#define CAPTURE_CLEAR(from_ix, to_ix, str) \
+#define CAPTURE_CLEAR(from_ix, to_ix, str)              \
     if (from_ix) capture_clear(rex,from_ix, to_ix, str)
 
 STATIC void
@@ -1206,7 +1208,7 @@ Perl_re_intuit_start(pTHX_
 
             if (check_len > targ_len) {
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
-                              "Target string too short to match required substring...\n"));
+                  "Target string too short to match required substring...\n"));
                 goto fail_finish;
             }
 
@@ -1778,103 +1780,106 @@ Perl_re_intuit_start(pTHX_
 
 
 #define DECL_TRIE_TYPE(scan) \
-    const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold,       \
-                 trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold,              \
-                 trie_utf8l, trie_flu8, trie_flu8_latin }                           \
-                    trie_type = ((FLAGS(scan) == EXACT)                             \
-                                 ? (utf8_target ? trie_utf8 : trie_plain)           \
-                                 : (FLAGS(scan) == EXACTL)                          \
-                                    ? (utf8_target ? trie_utf8l : trie_plain)       \
-                                    : (FLAGS(scan) == EXACTFAA)                     \
-                                      ? (utf8_target                                \
-                                         ? trie_utf8_exactfa_fold                   \
-                                         : trie_latin_utf8_exactfa_fold)            \
-                                      : (FLAGS(scan) == EXACTFLU8                   \
-                                         ? (utf8_target                             \
-                                           ? trie_flu8                              \
-                                           : trie_flu8_latin)                       \
-                                         : (utf8_target                             \
-                                           ? trie_utf8_fold                         \
+    const enum { trie_plain, trie_utf8, trie_utf8_fold,                     \
+                 trie_latin_utf8_fold, trie_utf8_exactfa_fold,              \
+                 trie_latin_utf8_exactfa_fold,                              \
+                 trie_utf8l, trie_flu8, trie_flu8_latin }                   \
+                    trie_type = ((FLAGS(scan) == EXACT)                     \
+                                 ? (utf8_target ? trie_utf8 : trie_plain)   \
+                                 : (FLAGS(scan) == EXACTL)                  \
+                                    ? (utf8_target ? trie_utf8l : trie_plain)\
+                                    : (FLAGS(scan) == EXACTFAA)             \
+                                      ? (utf8_target                        \
+                                         ? trie_utf8_exactfa_fold           \
+                                         : trie_latin_utf8_exactfa_fold)    \
+                                      : (FLAGS(scan) == EXACTFLU8           \
+                                         ? (utf8_target                     \
+                                           ? trie_flu8                      \
+                                           : trie_flu8_latin)               \
+                                         : (utf8_target                     \
+                                           ? trie_utf8_fold                 \
                                            : trie_latin_utf8_fold)))
 
 /* 'uscan' is set to foldbuf, and incremented, so below the end of uscan is
  * 'foldbuf+sizeof(foldbuf)' */
-#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uc_end, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
-STMT_START {                                                                        \
-    STRLEN skiplen;                                                                 \
-    U8 flags = FOLD_FLAGS_FULL;                                                     \
-    switch (trie_type) {                                                            \
-    case trie_flu8:                                                                 \
-        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                         \
-        if (UTF8_IS_ABOVE_LATIN1(*uc)) {                                            \
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);                     \
-        }                                                                           \
-        goto do_trie_utf8_fold;                                                     \
-    case trie_utf8_exactfa_fold:                                                    \
-        flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
-        /* FALLTHROUGH */                                                           \
-    case trie_utf8_fold:                                                            \
-      do_trie_utf8_fold:                                                            \
-        if ( foldlen > 0 ) {                                                          \
-            uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );     \
-            foldlen -= len;                                                         \
-            uscan += len;                                                           \
-            len = 0;                                                                  \
-        } else {                                                                    \
-            uvc = _toFOLD_utf8_flags( (const U8*) uc, uc_end, foldbuf, &foldlen,    \
-                                                                            flags); \
-            len = UTF8_SAFE_SKIP(uc, uc_end);                                       \
-            skiplen = UVCHR_SKIP( uvc );                                            \
-            foldlen -= skiplen;                                                     \
-            uscan = foldbuf + skiplen;                                              \
-        }                                                                           \
-        break;                                                                      \
-    case trie_flu8_latin:                                                           \
-        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                         \
-        goto do_trie_latin_utf8_fold;                                               \
-    case trie_latin_utf8_exactfa_fold:                                              \
-        flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
-        /* FALLTHROUGH */                                                           \
-    case trie_latin_utf8_fold:                                                      \
-      do_trie_latin_utf8_fold:                                                      \
-        if ( foldlen > 0 ) {                                                          \
-            uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );     \
-            foldlen -= len;                                                         \
-            uscan += len;                                                           \
-            len = 0;                                                                  \
-        } else {                                                                    \
-            len = 1;                                                                \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);             \
-            skiplen = UVCHR_SKIP( uvc );                                            \
-            foldlen -= skiplen;                                                     \
-            uscan = foldbuf + skiplen;                                              \
-        }                                                                           \
-        break;                                                                      \
-    case trie_utf8l:                                                                \
-        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                         \
-        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                             \
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);                     \
-        }                                                                           \
-        /* FALLTHROUGH */                                                           \
-    case trie_utf8:                                                                 \
-        uvc = utf8n_to_uvchr( (const U8*) uc, uc_end - uc, &len, uniflags );        \
-        break;                                                                      \
-    case trie_plain:                                                                \
-        uvc = (UV)*uc;                                                              \
-        len = 1;                                                                    \
-    }                                                                               \
-    if (uvc < 256) {                                                                \
-        charid = trie->charmap[ uvc ];                                              \
-    }                                                                               \
-    else {                                                                          \
-        charid = 0;                                                                 \
-        if (widecharmap) {                                                          \
-            SV** const svpp = hv_fetch(widecharmap,                                 \
-                        (char*)&uvc, sizeof(UV), 0);                                \
-            if (svpp)                                                               \
-                charid = (U16)SvIV(*svpp);                                          \
-        }                                                                           \
-    }                                                                               \
+#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uc_end,      \
+                             uscan, len, uvc, charid, foldlen, foldbuf,     \
+                             uniflags)                                      \
+STMT_START {                                                                \
+    STRLEN skiplen;                                                         \
+    U8 flags = FOLD_FLAGS_FULL;                                             \
+    switch (trie_type) {                                                    \
+    case trie_flu8:                                                         \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                 \
+        if (UTF8_IS_ABOVE_LATIN1(*uc)) {                                    \
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);             \
+        }                                                                   \
+        goto do_trie_utf8_fold;                                             \
+    case trie_utf8_exactfa_fold:                                            \
+        flags |= FOLD_FLAGS_NOMIX_ASCII;                                    \
+        /* FALLTHROUGH */                                                   \
+    case trie_utf8_fold:                                                    \
+      do_trie_utf8_fold:                                                    \
+        if ( foldlen > 0 ) {                                                \
+            uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );\
+            foldlen -= len;                                                 \
+            uscan += len;                                                   \
+            len = 0;                                                        \
+        } else {                                                            \
+            uvc = _toFOLD_utf8_flags( (const U8*) uc, uc_end, foldbuf,      \
+                                                          &foldlen, flags); \
+            len = UTF8_SAFE_SKIP(uc, uc_end);                               \
+            skiplen = UVCHR_SKIP( uvc );                                    \
+            foldlen -= skiplen;                                             \
+            uscan = foldbuf + skiplen;                                      \
+        }                                                                   \
+        break;                                                              \
+    case trie_flu8_latin:                                                   \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                 \
+        goto do_trie_latin_utf8_fold;                                       \
+    case trie_latin_utf8_exactfa_fold:                                      \
+        flags |= FOLD_FLAGS_NOMIX_ASCII;                                    \
+        /* FALLTHROUGH */                                                   \
+    case trie_latin_utf8_fold:                                              \
+      do_trie_latin_utf8_fold:                                              \
+        if ( foldlen > 0 ) {                                                \
+            uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );\
+            foldlen -= len;                                                 \
+            uscan += len;                                                   \
+            len = 0;                                                        \
+        } else {                                                            \
+            len = 1;                                                        \
+            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);     \
+            skiplen = UVCHR_SKIP( uvc );                                    \
+            foldlen -= skiplen;                                             \
+            uscan = foldbuf + skiplen;                                      \
+        }                                                                   \
+        break;                                                              \
+    case trie_utf8l:                                                        \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                 \
+        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                     \
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);             \
+        }                                                                   \
+        /* FALLTHROUGH */                                                   \
+    case trie_utf8:                                                         \
+        uvc = utf8n_to_uvchr( (const U8*) uc, uc_end - uc, &len, uniflags );\
+        break;                                                              \
+    case trie_plain:                                                        \
+        uvc = (UV)*uc;                                                      \
+        len = 1;                                                            \
+    }                                                                       \
+    if (uvc < 256) {                                                        \
+        charid = trie->charmap[ uvc ];                                      \
+    }                                                                       \
+    else {                                                                  \
+        charid = 0;                                                         \
+        if (widecharmap) {                                                  \
+            SV** const svpp = hv_fetch(widecharmap,                         \
+                        (char*)&uvc, sizeof(UV), 0);                        \
+            if (svpp)                                                       \
+                charid = (U16)SvIV(*svpp);                                  \
+        }                                                                   \
+    }                                                                       \
 } STMT_END
 
 #define DUMP_EXEC_POS(li,s,doutf8,depth)                    \
@@ -1984,7 +1989,7 @@ STMT_START {                                                                    
  * the function */
 #define REXEC_FBC_FIND_NEXT_UTF8_SCAN_COND(f, COND)         \
     while (s < strend) {                                    \
-        s = (char *) (f);                                     \
+        s = (char *) (f);                                   \
         if (s == NULL) {                                    \
             s = (char *) strend;                            \
             break;                                          \
@@ -2051,56 +2056,56 @@ STMT_START {                                                                    
  * bottom of the loop tmp is always going to be equal to TEST_NON_UTF8(s),
  * which means at the top of the loop in the next iteration, it is
  * TEST_NON_UTF8(s-1) */
-#define FBC_UTF8_A(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)                         \
-    tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                      \
-    tmp = TEST_NON_UTF8(tmp);                                                  \
-    REXEC_FBC_UTF8_SCAN( /* advances s while s < strend */                     \
-        if (tmp == ! TEST_NON_UTF8((U8) *s)) {                                 \
-            tmp = !tmp;                                                        \
-            IF_SUCCESS; /* Is a boundary if values for s-1 and s differ */     \
-        }                                                                      \
-        else {                                                                 \
-            IF_FAIL;                                                           \
-        }                                                                      \
-    );                                                                         \
+#define FBC_UTF8_A(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)                      \
+    tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                   \
+    tmp = TEST_NON_UTF8(tmp);                                               \
+    REXEC_FBC_UTF8_SCAN( /* advances s while s < strend */                  \
+        if (tmp == ! TEST_NON_UTF8((U8) *s)) {                              \
+            tmp = !tmp;                                                     \
+            IF_SUCCESS; /* Is a boundary if values for s-1 and s differ */  \
+        }                                                                   \
+        else {                                                              \
+            IF_FAIL;                                                        \
+        }                                                                   \
+    );                                                                      \
 
 /* Like FBC_UTF8_A, but TEST_UV is a macro which takes a UV as its input, and
  * TEST_UTF8 is a macro that for the same input code points returns identically
  * to TEST_UV, but takes a pointer to a UTF-8 encoded string instead (and an
  * end pointer as well) */
-#define FBC_UTF8(TEST_UV, TEST_UTF8, IF_SUCCESS, IF_FAIL)                      \
-    if (s == reginfo->strbeg) {                                                \
-        tmp = '\n';                                                            \
-    }                                                                          \
-    else { /* Back-up to the start of the previous character */                \
-        U8 * const r = reghop3((U8*)s, -1, (U8*)reginfo->strbeg);              \
-        tmp = utf8n_to_uvchr(r, (U8*) reginfo->strend - r,                     \
-                                                       0, UTF8_ALLOW_DEFAULT); \
-    }                                                                          \
-    tmp = TEST_UV(tmp);                                                        \
-    REXEC_FBC_UTF8_SCAN(/* advances s while s < strend */                      \
-        if (tmp == ! (TEST_UTF8((U8 *) s, (U8 *) reginfo->strend))) {          \
-            tmp = !tmp;                                                        \
-            IF_SUCCESS;                                                        \
-        }                                                                      \
-        else {                                                                 \
-            IF_FAIL;                                                           \
-        }                                                                      \
+#define FBC_UTF8(TEST_UV, TEST_UTF8, IF_SUCCESS, IF_FAIL)                   \
+    if (s == reginfo->strbeg) {                                             \
+        tmp = '\n';                                                         \
+    }                                                                       \
+    else { /* Back-up to the start of the previous character */             \
+        U8 * const r = reghop3((U8*)s, -1, (U8*)reginfo->strbeg);           \
+        tmp = utf8n_to_uvchr(r, (U8*) reginfo->strend - r,                  \
+                         0, UTF8_ALLOW_DEFAULT);                            \
+    }                                                                       \
+    tmp = TEST_UV(tmp);                                                     \
+    REXEC_FBC_UTF8_SCAN(/* advances s while s < strend */                   \
+        if (tmp == ! (TEST_UTF8((U8 *) s, (U8 *) reginfo->strend))) {       \
+            tmp = !tmp;                                                     \
+            IF_SUCCESS;                                                     \
+        }                                                                   \
+        else {                                                              \
+            IF_FAIL;                                                        \
+        }                                                                   \
     );
 
 /* Like the above two macros, for a UTF-8 target string.  UTF8_CODE is the
  * complete code for handling UTF-8.  Common to the BOUND and NBOUND cases,
  * set-up by the FBC_BOUND, etc macros below */
-#define FBC_BOUND_COMMON_UTF8(UTF8_CODE, TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)   \
-    UTF8_CODE;                                                                 \
-    /* Here, things have been set up by the previous code so that tmp is the   \
-     * return of TEST_NON_UTF8(s-1).  We also have to check if this matches    \
-     * against the EOS, which we treat as a \n */                              \
-    if (tmp == ! TEST_NON_UTF8('\n')) {                                        \
-        IF_SUCCESS;                                                            \
-    }                                                                          \
-    else {                                                                     \
-        IF_FAIL;                                                               \
+#define FBC_BOUND_COMMON_UTF8(UTF8_CODE, TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)\
+    UTF8_CODE;                                                              \
+    /* Here, things have been set up by the previous code so that tmp is the\
+     * return of TEST_NON_UTF8(s-1).  We also have to check if this matches \
+     * against the EOS, which we treat as a \n */                           \
+    if (tmp == ! TEST_NON_UTF8('\n')) {                                     \
+        IF_SUCCESS;                                                         \
+    }                                                                       \
+    else {                                                                  \
+        IF_FAIL;                                                            \
     }
 
 /* Same as the macro above, but the target isn't UTF-8 */
@@ -2235,7 +2240,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 #define getSB_VAL_CP(cp)                                                       \
           _generic_GET_BREAK_VAL_CP(                                           \
                                     PL_SB_invlist,                             \
-                                    _Perl_SB_invmap,                     \
+                                    _Perl_SB_invmap,                           \
                                     (cp))
 
 /* Returns the SB value for the first code point in the UTF-8 encoded string
@@ -2247,7 +2252,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 #define getWB_VAL_CP(cp)                                                       \
           _generic_GET_BREAK_VAL_CP(                                           \
                                     PL_WB_invlist,                             \
-                                    _Perl_WB_invmap,                         \
+                                    _Perl_WB_invmap,                           \
                                     (cp))
 
 /* Returns the WB value for the first code point in the UTF-8 encoded string
@@ -6225,11 +6230,11 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 #define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
 #define NEXTCHR_IS_EOS (nextbyte < 0)
 
-#define SET_nextchr \
+#define SET_nextchr                                                         \
     nextbyte = ((locinput < reginfo->strend) ? UCHARAT(locinput) : NEXTCHR_EOS)
 
 #define SET_locinput(p) \
-    locinput = (p);  \
+    locinput = (p);     \
     SET_nextchr
 
 #define sayYES goto yes
@@ -6268,21 +6273,21 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 /* push a new state then goto it */
 
 #define PUSH_STATE_GOTO(state, node, input, eol, sr0)       \
-    pushinput = input; \
-    pusheol = eol; \
-    pushsr0 = sr0; \
-    scan = node; \
-    st->resume_state = state; \
+    pushinput = input;                                      \
+    pusheol = eol;                                          \
+    pushsr0 = sr0;                                          \
+    scan = node;                                            \
+    st->resume_state = state;                               \
     goto push_state;
 
 /* push a new state with success backtracking, then goto it */
 
 #define PUSH_YES_STATE_GOTO(state, node, input, eol, sr0)   \
-    pushinput = input; \
-    pusheol = eol;     \
-    pushsr0 = sr0; \
-    scan = node; \
-    st->resume_state = state; \
+    pushinput = input;                                      \
+    pusheol = eol;                                          \
+    pushsr0 = sr0;                                          \
+    scan = node;                                            \
+    st->resume_state = state;                               \
     goto push_yes_state;
 
 #define DEBUG_STATE_pp(pp)                                      \
@@ -8538,16 +8543,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     depth, cur_eval, ST.prev_eval);
             });
 
-#define SET_RECURSE_LOCINPUT(STR,VAL)\
-            if ( cur_eval && CUR_EVAL.close_paren ) {\
-                DEBUG_STACK_r({ \
-                    Perl_re_exec_indentf( aTHX_  STR " GOSUB%d ce = %p recurse_locinput = %p\n",\
-                        depth,    \
-                        CUR_EVAL.close_paren - 1,\
-                        cur_eval, \
-                        VAL);     \
-                });               \
-                rex->recurse_locinput[CUR_EVAL.close_paren - 1] = VAL;\
+#define SET_RECURSE_LOCINPUT(STR,VAL)                                   \
+            if ( cur_eval && CUR_EVAL.close_paren ) {                   \
+                DEBUG_STACK_r({                                         \
+                    Perl_re_exec_indentf( aTHX_  STR "                  \
+                        GOSUB%d ce = %p recurse_locinput = %p\n",       \
+                        depth,                                          \
+                        CUR_EVAL.close_paren - 1,                       \
+                        cur_eval,                                       \
+                        VAL);                                           \
+                });                                                     \
+                rex->recurse_locinput[CUR_EVAL.close_paren - 1] = VAL;  \
             }
 
             SET_RECURSE_LOCINPUT("EVAL_AB[before]", CUR_EVAL.prev_recurse_locinput);
