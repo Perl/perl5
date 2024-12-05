@@ -199,7 +199,9 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
     PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
 
-    return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
+    UV cp;
+    (void) utf8_to_uv_flags(s, s + curlen, &cp, retlen, flags);
+    return NATIVE_TO_UNI(cp);
 }
 
 UV
