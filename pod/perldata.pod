@@ -145,7 +145,8 @@ in Perl 5.42.
 
 Additionally, if the identifier is preceded by a sigil --
 that is, if the identifier is part of a variable name -- it
-may optionally be enclosed in braces.
+may optionally be enclosed in braces. For example, C<${name}>,
+C<@{bigcats}>, C<%{pizza_toppings}>.
 
 Put together, a grammar to match a basic identifier becomes
 
