@@ -608,6 +608,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
     }
 
     _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, e);
+    UV cp;
 
     switch ((char_class_number_) classnum) {
         case CC_ENUM_SPACE_:     return is_XPERLSPACE_high(character);
@@ -615,8 +616,8 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
         case CC_ENUM_XDIGIT_:    return is_XDIGIT_high(character);
         case CC_ENUM_VERTSPACE_: return is_VERTWS_high(character);
         default:
-            return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
-                                        utf8_to_uvchr_buf(character, e, NULL));
+            return    utf8_to_uv(character, e, &cp, NULL)
+                   && _invlist_contains_cp(PL_XPosix_ptrs[classnum], cp);
     }
     NOT_REACHED; /* NOTREACHED */
 }
