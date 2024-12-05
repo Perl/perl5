@@ -633,6 +633,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define ARGTARG		PL_op->op_targ
 
 #define MAXARG		(PL_op->op_private & OPpARG4_MASK)
+#define MAXARG3         (PL_op->op_private & OPpARG3_MASK)
+
 
 /* for backcompat - use switch_argstack() instead */
 

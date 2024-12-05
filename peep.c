@@ -27,7 +27,7 @@
 
 
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
-
+#define cMAXARG3x(o)  (o->op_private & OPpARG3_MASK)
 
 static void
 S_scalar_slice_warning(pTHX_ const OP *o)
