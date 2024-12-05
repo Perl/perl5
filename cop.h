@@ -434,6 +434,15 @@ the octets.
 
 #include "mydtrace.h"
 
+/* keep in sync with feature.h (which will complain if this is out of sync)
+ */
+#define COP_FEATURE_SIZE 1
+
+/* make this a struct so we can copy the feature bits with assignment */
+struct cop_feature_t {
+  U32 bits[COP_FEATURE_SIZE];
+};
+
 struct cop {
     BASEOP
     /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
@@ -460,12 +469,11 @@ struct cop {
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
     COPHH *	cop_hints_hash;
-    /* for now just a bitmask stored here.
-       If we get sufficient features this may become a pointer.
+    /*
        How these flags are stored is subject to change without
        notice.  Use the macros to test for features.
     */
-    U32		cop_features;
+    struct cop_feature_t	cop_features;
 };
 
 /*

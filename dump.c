@@ -28,6 +28,7 @@
 #define PERL_IN_DUMP_C
 #include "perl.h"
 #include "regcomp.h"
+#include "feature.h"
 
 static const char* const svtypenames[SVt_LAST] = {
     "NULL",
@@ -1414,8 +1415,11 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         /* add hints and features if set */
         if (cCOPo->cop_hints)
             S_opdump_indent(aTHX_ o, level, bar, file, "HINTS = %08x\n",cCOPo->cop_hints);
-        if (cCOPo->cop_features)
-            S_opdump_indent(aTHX_ o, level, bar, file, "FEATS = %08x\n",cCOPo->cop_features);
+        if (ANY_FEATURE_BITS_SET(cCOPo)) {
+            S_opdump_indent(aTHX_ o, level, bar, file, "FEATS = ");
+            DUMP_FEATURE_BITS(file, cCOPo);
+            PerlIO_puts(file, "\n");
+        }
 
         S_opdump_indent(aTHX_ o, level, bar, file, "SEQ = %u\n",
                          (unsigned int)cCOPo->cop_seq);

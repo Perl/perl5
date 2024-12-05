@@ -116,16 +116,22 @@ my @removed = qw( array_base switch );
 ###########################################################################
 # More data generated from the above
 
-if (keys %feature > 32) {
-    die "cop_features only has room for 32 features";
-}
-
 my %feature_bits;
+my %feature_indices;
 my $mask = 1;
+my $index = 0;
 for my $feature (sort keys %feature) {
     $feature_bits{$feature} = $mask;
-    $mask <<= 1;
+    $feature_indices{$feature} = $index;
+    if ($mask == 0x8000_0000) {
+        $mask = 1;
+        ++$index;
+    }
+    else {
+        $mask <<= 1;
+    }
 }
+my $cop_feature_size = $mask == 1 ? $index : $index + 1;
 
 for (keys %feature_bundle) {
     next unless /^5\.(\d*[13579])\z/;
@@ -302,14 +308,33 @@ print $h <<EOH;
 #if defined(PERL_CORE) || defined (PERL_EXT)
 
 #define HINT_FEATURE_SHIFT	$HintShift
-
 EOH
 
 for (sort keys %feature_bits) {
-    printf $h "#define FEATURE_%s_BIT%*s %#06x\n", uc($feature{$_}),
+    if ($feature_bits{$_} == 1) {
+        print $h "\n/* Index $feature_indices{$_} */\n";
+    }
+    printf $h "#define FEATURE_%s_BIT%*s %#010x\n", uc($feature{$_}),
       $width-length($feature{$_}), "", $feature_bits{$_};
 }
 print $h "\n";
+
+for (sort keys %feature_indices) {
+    printf $h "#define FEATURE_%s_INDEX%*s %d\n", uc($feature{$_}),
+      $width-length($feature{$_}), "", $feature_indices{$_};
+}
+print $h "\n";
+
+# we don't require that every source #includes <feature.h>
+print $h <<EOH;
+#define REAL_COP_FEATURE_SIZE $cop_feature_size
+
+/* If the following errors, update COP_FEATURE_SIZE in cop.h */
+#if defined(COP_FEATURE_SIZE) && COP_FEATURE_SIZE != REAL_COP_FEATURE_SIZE
+#  error "COP_FEATURE_SIZE and REAL_COP_FEATURE_SIZE don't match"
+#endif
+
+EOH
 
 my $count;
 for (@HintedBundles) {
@@ -330,9 +355,9 @@ print $h <<'EOH';
 #define CURRENT_FEATURE_BUNDLE \
     ((CURRENT_HINTS & HINT_FEATURE_MASK) >> HINT_FEATURE_SHIFT)
 
-#define FEATURE_IS_ENABLED_MASK(mask)                   \
+#define FEATURE_IS_ENABLED_MASK(index, mask)                   \
   ((CURRENT_HINTS & HINT_LOCALIZE_HH)                \
-    ? (PL_curcop->cop_features & (mask)) : FALSE)
+    ? (PL_curcop->cop_features.bits[index] & (mask)) : FALSE)
 
 /* The longest string we pass in.  */
 EOH
@@ -356,7 +381,7 @@ for (
     ( \\
 	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_INDEX, FEATURE_${NAME}_BIT)) \\
     )
 
 EOI
@@ -368,7 +393,7 @@ EOI
 	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_INDEX, FEATURE_${NAME}_BIT)) \\
     )
 
 EOH3
@@ -379,7 +404,7 @@ EOH3
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_INDEX, FEATURE_${NAME}_BIT)) \\
     )
 
 EOH4
@@ -389,18 +414,27 @@ EOH4
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT) \\
+	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_INDEX, FEATURE_${NAME}_BIT) \\
     )
 
 EOH5
     }
 }
 
+my $save_bits = "STMT_START {  \\\n        "
+  . join("\\\n        ", map { "SAVEI32(PL_compiling.cop_features.bits[$_]); " } 0 .. $cop_feature_size-1)
+  . " \\\n    } STMT_END";
+
+my $clear_bits = "("
+  . join("   \\\n     ", map "PL_compiling.cop_features.bits[$_] = ", 0 .. $cop_feature_size-1) . "0)";
+
 print $h <<EOH;
 
-#define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
+#define SAVEFEATUREBITS() \\
+    $save_bits
 
-#define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)
+#define CLEARFEATUREBITS() \\
+    $clear_bits
 
 #define FETCHFEATUREBITSHH(hh) S_fetch_feature_bits_hh(aTHX_ (hh))
 
@@ -450,6 +484,7 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
     if (memBEGINs(keypv, keylen, "feature_")) {
         const char *subf = keypv + (sizeof("feature_")-1);
         U32 mask = 0;
+        int index = 0;
         switch (*subf) {
 EOJ
 
@@ -470,6 +505,7 @@ EOS
             $if (keylen == sizeof("feature_$subkey")-1
                  && memcmp(subf+1, "$rest", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_\U${subkey}\E_BIT;
+                index = FEATURE_\U${subkey}\E_INDEX;
                 break;
             }
 EOJ
@@ -487,9 +523,9 @@ print $h <<EOJ;
             return;
         }
         if (valsv ? SvTRUE(valsv) : valbool)
-            PL_compiling.cop_features |= mask;
+            PL_compiling.cop_features.bits[index] |= mask;
         else
-            PL_compiling.cop_features &= ~mask;
+            PL_compiling.cop_features.bits[index] &= ~mask;
     }
 }
 #endif /* PERL_IN_MG_C */
@@ -499,6 +535,7 @@ struct perl_feature_bit {
   const char *name;
   STRLEN namelen;
   U32 mask;
+  int index;
 };
 
 #ifdef PERL_IN_PP_CTL_C
@@ -513,29 +550,53 @@ for my $key (sort keys %feature) {
         /* feature $key */
         "feature_$val",
         STRLENs("feature_$val"),
-        FEATURE_\U$val\E_BIT
+        FEATURE_\U$val\E_BIT,
+        FEATURE_\U$val\E_INDEX
     },
 EOJ
 }
 
 print $h <<EOJ;
-    { NULL, 0, 0U }
+    { NULL, 0, 0U, 0 }
 };
 
 PERL_STATIC_INLINE void
 S_fetch_feature_bits_hh(pTHX_ HV *hh) {
-    PL_compiling.cop_features = 0;
+    CLEARFEATUREBITS();
 
     const struct perl_feature_bit *fb = PL_feature_bits;
     while (fb->name) {
         SV **svp = hv_fetch(hh, fb->name, (I32)fb->namelen, 0);
         if (svp && SvTRUE(*svp))
-               PL_compiling.cop_features |= fb->mask;
+               PL_compiling.cop_features.bits[fb->index] |= fb->mask;
         ++fb;
     }
 }
 
-#endif
+#endif /* PERL_IN_PP_CTL_C */
+
+#ifdef PERL_IN_DUMP_C
+
+EOJ
+
+my $any_bits_set = "(                              \\\n      " .
+  join(" || \\\n      ", map "cop->cop_features.bits[$_]", 0 .. $cop_feature_size-1) .
+  "    \\\n    )";
+
+my $dump_bits = "STMT_START { \\\n        " .
+  join(qq( \\\n        PerlIO_putc(file, ','); \\\n        ),
+       map { qq(PerlIO_printf(file, "0x%08x", cop->cop_features.bits[$_]);) }
+       0 .. $cop_feature_size-1) .
+  " \\\n    } STMT_END";
+
+print $h <<EOJ;
+#define ANY_FEATURE_BITS_SET(cop)  \\
+    $any_bits_set
+
+#define DUMP_FEATURE_BITS(file, cop) \\
+    $dump_bits
+
+#endif /* PERL_IN_DUMP_C */
 
 #endif /* PERL_FEATURE_H_ */
 EOJ
