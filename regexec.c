@@ -7135,10 +7135,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     while (chars) {
                         if (utf8_target) {
-                            /* XXX This assumes the length is well-formed, as
-                             * does the UTF8SKIP below */
-                            uvc = utf8n_to_uvchr((U8*)uc, UTF8_MAXLEN, &len,
-                                                    uniflags);
+                            (void) utf8_to_uv_flags((U8*)uc, uc + UTF8_MAXLEN,
+                                            &uvc, &len,
+                                            ( uniflags|UTF8_DIE_IF_MALFORMED
+                                             |UTF8_NO_CONFIDENCE_IN_CURLEN_));
                             uc += len;
                         }
                         else {
@@ -7150,8 +7150,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         while (foldlen) {
                             if (!--chars)
                                 break;
-                            uvc = utf8n_to_uvchr(uscan, foldlen, &len,
-                                                 uniflags);
+                            (void) utf8_to_uv_flags((U8*)uscan,
+                                              uscan + foldlen, &uvc, &len,
+                                              uniflags|UTF8_DIE_IF_MALFORMED);
                             uscan += len;
                             foldlen -= len;
                         }
