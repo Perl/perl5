@@ -3053,7 +3053,7 @@ Perl_utf8_to_uv_msgs(const U8 * const s0,
                      const U8 * const e,
                      UV * cp_p,
                      Size_t *advance_p,
-                     const U32 flags,
+                     U32 flags,
                      U32 * errors,
                      AV ** msgs)
 {
@@ -3142,7 +3142,7 @@ PERL_STATIC_INLINE UV
 Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
                          STRLEN curlen,
                          STRLEN *retlen,
-                         const U32 flags,
+                         U32 flags,
                          U32 * errors,
                          AV ** msgs)
 {

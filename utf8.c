@@ -51,7 +51,7 @@ Perl_force_out_malformed_utf8_message_(pTHX_
             const U8 *const p,      /* First byte in UTF-8 sequence */
             const U8 * const e,     /* Final byte in sequence (may include
                                        multiple chars */
-            const U32 flags,        /* Flags to pass to utf8_to_uv(),
+                  U32 flags,        /* Flags to pass to utf8_to_uv(),
                                        usually 0, or some DISALLOW flags */
             const bool die_here)    /* If TRUE, this function does not return */
 {
@@ -70,28 +70,16 @@ Perl_force_out_malformed_utf8_message_(pTHX_
      * flexibility is here to return to the caller so they can finish up and
      * die themselves */
     U32 errors;
+    UV dummy;
 
-    ENTER;
-    SAVEI8(PL_dowarn);
-    SAVESPTR(PL_curcop);
-
-    PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
-    if (PL_curcop) {
-        SAVECURCOPWARNINGS();
-        PL_curcop->cop_warnings = pWARN_ALL;
-    }
-
-    (void) utf8n_to_uvchr_error(p, e - p, NULL, flags & ~UTF8_CHECK_ONLY, &errors);
-
-    LEAVE;
+    flags &= ~UTF8_CHECK_ONLY;
+    flags |= (die_here) ? UTF8_DIE_IF_MALFORMED
+                        : UTF8_FORCE_WARN_IF_MALFORMED;
+    (void) utf8_to_uv_errors(p, e, &dummy, NULL, flags, &errors);
 
     if (! errors) {
         Perl_croak(aTHX_ "panic: force_out_malformed_utf8_message_ should"
                          " be called only when there are errors found");
-    }
-
-    if (die_here) {
-        Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
 }
 
@@ -1271,6 +1259,16 @@ C<*retlen> with the C<uvchr> family of functions (for the worse).  It is not
 likely to be of use to you.  You can use C<UTF8_ALLOW_ANY> (described below) to
 also turn off warnings, and that flag doesn't adversely affect C<*retlen>.
 
+=item C<UTF8_FORCE_WARN_IF_MALFORMED>
+
+Normally, no warnings are generated if warnings are turned off lexically or
+globally, regardless of any flags to the contrary.  But this flag effectively
+turns on warnings temporarily for the duration of this function's execution.
+
+Do not use it lightly.
+
+This flag is ignored if C<UTF8_CHECK_ONLY> is also set.
+
 =item C<UTF8_DISALLOW_SURROGATE>
 
 =item C<UTF8_WARN_SURROGATE>
@@ -1364,6 +1362,14 @@ The only such flag that you would ever have any reason to use is
 C<UTF8_ALLOW_ANY> which applies to any of the syntactic malformations and
 overflow, except for empty input.  The other flags are analogous to ones in
 the C<_GOT_> bits list in C<L</utf8_to_uv_msgs>>.
+
+=item C<UTF8_DIE_IF_MALFORMED>
+
+If the function would otherwise return C<false>, it instead croaks.  The
+C<UTF8_FORCE_WARN_IF_MALFORMED> flag is effectively turned on so that the cause
+of the croak is displayed.
+
+This flag is ignored if C<UTF8_CHECK_ONLY> is also set.
 
 =back
 
@@ -1516,6 +1522,8 @@ function creates a new AV to store information, described below, about all
 the malformations that were encountered.
 
 If the flag C<UTF8_CHECK_ONLY> is passed, this parameter is ignored.
+Otherwise, when this parameter is set, the flags C<UTF8_DIE_IF_MALFORMED> and
+C<UTF8_FORCE_WARN_IF_MALFORMED> are ignored.
 
 What is considered a malformation is affected by C<flags>, the same as
 described in C<L</utf8_to_uv_flags>>.  No array element is generated for
@@ -1592,7 +1600,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                              const U8 * const e,
                              UV *cp_p,
                              Size_t *advance_p,
-                             const U32 flags,
+                             U32 flags,
                              U32 * errors,
                              AV ** msgs)
 {
@@ -1627,6 +1635,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     }
     if (UNLIKELY(msgs)) {
         *msgs = NULL;
+
+        /* The msgs parameter has higher priority than these flags */
+        flags &= ~(UTF8_DIE_IF_MALFORMED|UTF8_FORCE_WARN_IF_MALFORMED);
     }
 
     /* Each of the affected Hanguls starts with \xED */
@@ -1998,12 +2009,12 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          * the warning category to use for the message..
          *
          * No message need be generated if the UTF8_CHECK_ONLY flag has been
-         * set by the caller.  Otherwise, a message should be generated if
-         * either:
+         * set by the caller.  Otherwise, a message should be generated if:
          *  1)  the caller has furnished a structure into which messages should
          *      be returned to it (so it itself can decide what to do); or
          *  2)  warnings are enabled for either of the category parameters to
-         *      the macro.
+         *      the macro; or
+         *  3)  the special MALFORMED flags have been passed
          *
          * The 'warning' parameter is the higher priority warning category to
          * check.  The macro calls ckWARN_d(warning), so warnings for it are
@@ -2019,11 +2030,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *
          * When called without a second category, the macro outputs a bunch of
          * zeroes that the compiler should fold to nothing */
-#define NEED_MESSAGE(warning, extra_ckWARN, extra_category)             \
-            ((flags & UTF8_CHECK_ONLY)         ? 0                 :    \
-            ((ckWARN_d(warning))               ? warning           :    \
-            ((extra_ckWARN(extra_category +0)) ? extra_category +0 :    \
-            ((msgs)                            ? warning           : 0))))
+#define NEED_MESSAGE(warning, extra_ckWARN, extra_category)                 \
+          ((flags & UTF8_CHECK_ONLY)                 ? 0                 :  \
+          ((ckWARN_d(warning))                       ? warning           :  \
+          ((extra_ckWARN(extra_category +0))         ? extra_category +0 :  \
+          ((flags & ( UTF8_DIE_IF_MALFORMED                                 \
+                     |UTF8_FORCE_WARN_IF_MALFORMED)) ? warning           :  \
+          ((msgs)                                    ? warning : 0)))))
 
         while (possible_problems) { /* Handle each possible problem */
             char * message = NULL;
@@ -2484,11 +2497,35 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                             newRV_noinc((SV*) new_msg_hv(message, pack_warn,
                                                          this_flag_bit)));
                 }
-                else if (PL_op)
-                    Perl_warner(aTHX_ pack_warn, "%s in %s", message,
-                                                 OP_DESC(PL_op));
-                else
-                    Perl_warner(aTHX_ pack_warn, "%s", message);
+                else if (! (flags & UTF8_CHECK_ONLY)) {
+                    if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
+                                          |UTF8_FORCE_WARN_IF_MALFORMED)))
+                    {
+                        ENTER;
+                        SAVEI8(PL_dowarn);
+                        SAVESPTR(PL_curcop);
+
+                        PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
+                        if (PL_curcop) {
+                            SAVECURCOPWARNINGS();
+                            PL_curcop->cop_warnings = pWARN_ALL;
+                        }
+                    }
+
+                    if (PL_op) {
+                        Perl_warner(aTHX_ pack_warn, "%s in %s", message,
+                                                     OP_DESC(PL_op));
+                    }
+                    else {
+                        Perl_warner(aTHX_ pack_warn, "%s", message);
+                    }
+
+                    if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
+                                          |UTF8_FORCE_WARN_IF_MALFORMED)))
+                    {
+                        LEAVE;
+                    }
+                }
             }
         }   /* End of 'while (possible_problems)' */
 
@@ -2508,6 +2545,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         }
 
         if (disallowed) {
+            if ((flags & ~UTF8_CHECK_ONLY) & UTF8_DIE_IF_MALFORMED) {
+                Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
+            }
+
             success = false;
             uv = UNICODE_REPLACEMENT;
         }

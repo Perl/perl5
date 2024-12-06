@@ -1187,7 +1187,7 @@ Perl_force_locale_unlock(pTHX)
 #define PERL_ARGS_ASSERT_FORCE_LOCALE_UNLOCK
 
 PERL_CALLCONV void
-Perl_force_out_malformed_utf8_message_(pTHX_ const U8 * const p, const U8 * const e, const U32 flags, const bool die_here);
+Perl_force_out_malformed_utf8_message_(pTHX_ const U8 * const p, const U8 * const e, U32 flags, const bool die_here);
 #define PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_MESSAGE_ \
         assert(p); assert(e)
 
@@ -5372,13 +5372,13 @@ Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, cons
 Perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
 
 /* PERL_CALLCONV bool
-Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors); */
+Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors); */
 
 /* PERL_CALLCONV bool
-Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flag); */
+Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags); */
 
 PERL_CALLCONV bool
-Perl_utf8_to_uv_msgs_helper_(const U8 * const s0, const U8 * const e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
+Perl_utf8_to_uv_msgs_helper_(const U8 * const s0, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors, AV **msgs);
 #define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_ \
         assert(s0); assert(e); assert(cp_p)
 
@@ -10030,7 +10030,7 @@ Perl_utf8_hop_overshoot(const U8 *s, SSize_t off, const U8 * const start, const 
         assert(s); assert(start); assert(end)
 
 PERL_STATIC_INLINE bool
-Perl_utf8_to_uv_msgs(const U8 * const s0, const U8 *e, UV *cp_p, Size_t *advance_p, const U32 flags, U32 *errors, AV **msgs);
+Perl_utf8_to_uv_msgs(const U8 * const s0, const U8 *e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors, AV **msgs);
 # define PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS       \
         assert(s0); assert(e); assert(cp_p)
 

@@ -1214,6 +1214,8 @@ point's representation.
 
 #define UTF8_CHECK_ONLY			0x8000
 #define UTF8_NO_CONFIDENCE_IN_CURLEN_   0x10000  /* Internal core use only */
+#define UTF8_DIE_IF_MALFORMED           0x20000
+#define UTF8_FORCE_WARN_IF_MALFORMED    0x40000
 
 /* For backwards source compatibility.  They do nothing, as the default now
  * includes what they used to mean.  The first one's meaning was to allow the

@@ -1241,7 +1241,7 @@ p	|void	|force_locale_unlock
 Cp	|void	|force_out_malformed_utf8_message_			\
 				|NN const U8 * const p			\
 				|NN const U8 * const e			\
-				|const U32 flags			\
+				|U32 flags				\
 				|const bool die_here
 Adfpv	|char * |form		|NN const char *pat			\
 				|...
@@ -3757,19 +3757,19 @@ ATdmp	|bool	|utf8_to_uv_errors					\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
-				|const U32 flags			\
+				|U32 flags				\
 				|NULLOK U32 *errors
 ATdmp	|bool	|utf8_to_uv_flags					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
-				|const U32 flag
+				|U32 flags
 ATdip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
 				|NN const U8 *e 			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
-				|const U32 flags			\
+				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
 CTp	|bool	|utf8_to_uv_msgs_helper_				\
@@ -3777,7 +3777,7 @@ CTp	|bool	|utf8_to_uv_msgs_helper_				\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
-				|const U32 flags			\
+				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
