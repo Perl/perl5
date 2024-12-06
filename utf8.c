@@ -1045,13 +1045,15 @@ these.  Private use characters and those code points yet to be assigned to a
 particular character are never considered problematic.  Additionally, most of
 the functions accept non-Unicode code points, those starting at 0x110000.
 
+There are two sets of these functions:
+
 =over 4
 
 =item C<utf8_to_uv> forms
 
 Almost all code should use only C<utf8_to_uv>, C<extended_utf8_to_uv>,
 C<strict_utf8_to_uv>, or C<c9strict_utf8_to_uv>.  The other functions are
-either the problematic old form, or are for highly specialized uses.
+either the problematic old form, or are for specialized uses.
 
 These four functions each return C<true> if the sequence of bytes starting at
 C<s> form a complete, legal UTF-8 (or UTF-EBCDIC) sequence for a code point.
@@ -1087,16 +1089,17 @@ instead uses the exchangeable definition given by Unicode's Corregendum #9,
 which accepts non-character code points while still rejecting surrogates.  It
 does not raise a warning when rejecting.
 
-=item * C<extended_utf8_to_uv>
+=item * C<utf8_to_uv>
 
 accepts all syntactically valid UTF-8, as extended by Perl to allow 64-bit code
 points to be encoded.
 
-=back
+C<extended_utf8_to_uv> is merely a synonym for C<utf8_to_uv>.  Use this form
+to draw attention to the fact that it accepts any code point.  But since
+Perl programs traditionally do this by default, plain C<utf8_to_uv> is the form
+most often used.
 
-C<utf8_to_uv> is merely a synonym for C<extended_utf8_to_uv>, whose name
-explicitly indicates that it accepts Perl-extended UTF-8.  Perl programs
-traditionally handle this by default.
+=back
 
 Whenever syntactically invalid input is rejected, an explanatory warning
 message is raised, unless C<utf8> warnings (or the appropriate subcategory) are
@@ -1234,18 +1237,20 @@ unlikely to be needed except for specialized purposes.
 C<utf8n_to_uvchr> is more like an extension of C<utf8_to_uvchr_buf>, but
 with fewer quirks, and a different method of specifying the bytes in C<s> it is
 allowed to examine.  It has a C<curlen> parameter instead of an C<e> parameter,
-so the furthest byte in C<s> it can look at is S<C<s + curlen>>.  Its return
-value is, like C<utf8_to_uvchr_buf>, ambiguous with respect to the NUL and
-REPLACEMENT characters, but the value of C<*retlen> can be relied on (except
-with the C<UTF8_CHECK_ONLY> flag described below) to know where the next
-possible character along C<s> starts, removing that quirk.  Hence, you always
-should use C<*retlen> to determine where the next character in C<s> starts.
+so the furthest byte in C<s> it can look at is S<C<s + curlen - 1>>.  Its
+return value is, like C<utf8_to_uvchr_buf>, ambiguous with respect to the NUL
+and REPLACEMENT characters, but the value of C<*retlen> can be relied on
+(except with the C<UTF8_CHECK_ONLY> flag described below) to know where the
+next possible character along C<s> starts, removing that quirk.  Hence, you
+always should use C<*retlen> to determine where the next character in C<s>
+starts.
 
 These functions have an additional parameter, C<flags>, besides the ones in
 C<utf8_to_uv> and C<utf8_to_uvchr_buf>, which can be used to broaden or
 restrict what is acceptable UTF-8.  C<flags> has the same meaning and behavior
 in both functions.  When C<flags> is 0, these functions accept any
-syntactically valid Perl-extended-UTF-8 sequence.
+syntactically valid Perl-extended-UTF-8 sequence that doesn't overflow the
+platform's word size.
 
 There are flags that apply to accepting particular sequences, and flags that
 apply to raising warnings about encountering sequences.  Each type is
@@ -1254,15 +1259,14 @@ or both reject and warn.  Rejecting means that the sequence gets translated
 into the Unicode REPLACEMENT CHARACTER instead of what it was meant to
 represent.
 
-Even if a flag is passed that indicates warnings are desired; no warning will be
-raised if C<'utf8'> warnings (or the appropriate subcategory) are disabled at
-the point of the call.
+Unless otherwise stated below, warnings are subject to the C<utf8> warnings
+category being on.
 
 =over 4
 
 =item C<UTF8_CHECK_ONLY>
 
-This also suppresses any warnings.  And it changes what is stored into
+This suppresses any warnings.  And it changes what is stored into
 C<*retlen> with the C<uvchr> family of functions (for the worse).  It is not
 likely to be of use to you.  You can use C<UTF8_ALLOW_ANY> (described below) to
 also turn off warnings, and that flag doesn't adversely affect C<*retlen>.
@@ -1271,22 +1275,25 @@ also turn off warnings, and that flag doesn't adversely affect C<*retlen>.
 
 =item C<UTF8_WARN_SURROGATE>
 
-These disallow and/or warn about UTF-8 sequences that represent surrogate
-characters.
+These reject and/or warn about UTF-8 sequences that represent surrogate
+characters.  The warning categories C<utf8> and C<super> control if warnings
+are actually raised.
 
 =item C<UTF8_DISALLOW_NONCHAR>
 
 =item C<UTF8_WARN_NONCHAR>
 
-These disallow and/or warn about UTF-8 sequences that represent non-character
-code points.
+These reject and/or warn about UTF-8 sequences that represent non-character
+code points.  The warning categories C<utf8> and C<nonchar> control if warnings
+are actually raised.
 
 =item C<UTF8_DISALLOW_SUPER>
 
 =item C<UTF8_WARN_SUPER>
 
-These disallow and/or warn about UTF-8 sequences that represent code points
-above 0x10FFFF.
+These reject and/or warn about UTF-8 sequences that represent code points
+above 0x10FFFF.  The warning categories C<utf8> and C<super> control if
+warnings are actually raised.
 
 =item C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
 
@@ -1315,10 +1322,11 @@ L<perlunicode/Noncharacter code points>.
 
 =item C<UTF8_WARN_PERL_EXTENDED>
 
-These disallow and/or warn on encountering sequences that require Perl's
+These reject and/or warn on encountering sequences that require Perl's
 extension to UTF-8 to represent them.   These are all for code points above
 0x10FFFF, so these sequences are a subset of the ones controlled by SUPER or
-either of the illegal interchange sets of flags.
+either of the illegal interchange sets of flags.  The warning categories
+C<utf8>, C<super>, and C<portable> control if warnings are actually raised.
 
 Perl predates Unicode, and earlier standards allowed for code points up through
 0x7FFF_FFFF (2**31 - 1).  Perl, of course, would like you to be able to
@@ -1354,8 +1362,8 @@ regardless of any of the flags.
 
 The only such flag that you would ever have any reason to use is
 C<UTF8_ALLOW_ANY> which applies to any of the syntactic malformations and
-overflow, except for empty input.  The other flags are shown in the C<_GOT_>
-bits list in C<L</utf8_to_uv_msgs>>.
+overflow, except for empty input.  The other flags are analogous to ones in
+the C<_GOT_> bits list in C<L</utf8_to_uv_msgs>>.
 
 =back
 
