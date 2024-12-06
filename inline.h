@@ -3139,6 +3139,16 @@ Perl_utf8_to_uv_msgs(const U8 * const s0,
 }
 
 PERL_STATIC_INLINE UV
+Perl_utf8_to_uv_or_die(const U8 *s, const U8 *e, STRLEN *advance_p)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UV_OR_DIE;
+
+    UV cp;
+    (void) utf8_to_uv_flags(s, e, &cp, advance_p, UTF8_DIE_IF_MALFORMED);
+    return cp;
+}
+
+PERL_STATIC_INLINE UV
 Perl_utf8n_to_uvchr_msgs(const U8 * const s0,
                          STRLEN curlen,
                          STRLEN *retlen,

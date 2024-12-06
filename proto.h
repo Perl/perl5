@@ -10035,6 +10035,11 @@ Perl_utf8_to_uv_msgs(const U8 * const s0, const U8 *e, UV *cp_p, Size_t *advance
         assert(s0); assert(e); assert(cp_p)
 
 PERL_STATIC_INLINE UV
+Perl_utf8_to_uv_or_die(const U8 * const s, const U8 *e, Size_t *advance_p);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV_OR_DIE     \
+        assert(s); assert(e)
+
+PERL_STATIC_INLINE UV
 Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen);
 # define PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF     \
         assert(s); assert(send)

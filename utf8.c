@@ -1003,6 +1003,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 =for apidoc_item extended_utf8_to_uv
 =for apidoc_item strict_utf8_to_uv
 =for apidoc_item c9strict_utf8_to_uv
+=for apidoc_item utf8_to_uv_or_die
 =for apidoc_item utf8_to_uvchr_buf
 =for apidoc_item utf8_to_uvchr
 
@@ -1099,6 +1100,11 @@ sequence.  You can use that function or C<L</utf8_to_uv_flags>> to exert more
 control over the input that is considered acceptable, and the warnings that are
 raised.
 
+C<utf8_to_uv_or_die> has a simpler interface, for use when any errors are
+fatal.  It returns the code point instead of using an output parameter, and
+throws an exception with any errors found where the other functions here would
+have returned false.
+
 Often, C<s> is an arbitrarily long string containing the UTF-8 representations
 of many code points in a row, and these functions are called in the course of
 parsing C<s> to find all those code points.
@@ -1107,8 +1113,8 @@ If your code doesn't know how to deal with illegal input, as would be typical
 of a low level routine, the loop could look like:
 
  while (s < e) {
-     UV cp;
      Size_t advance;
+     UV cp;
      (void) utf8_to_uv(s, e, &cp, &advance);
      <handle 'cp'>
      s += advance;
@@ -1118,11 +1124,24 @@ A REPLACEMENT CHARACTER will be inserted everywhere that malformed input
 occurs.  Obviously, we aren't expecting such outcomes, but your code will be
 protected from attacks and many harmful effects that could otherwise occur.
 
+If the situation is such that it would be a bug for the input to be invalid, a
+somewhat simpler loop suffices:
+
+ while (s < e) {
+     Size_t advance;
+     UV cp = utf8_to_uv_or_die(s, e, &advance);
+     <handle 'cp'>
+     s += advance;
+ }
+
+This will throw an exception on invalid input, so your code doesn't have to
+concern itself with that possibility.
+
 If you do have a plan for handling malformed input, you could instead write:
 
  while (s < e) {
-     UV cp;
      Size_t advance;
+     UV cp;
 
      if (UNLIKELY(! utf8_to_uv(s, e, &cp, &advance)) {
          <bail out or convert to handleable>
@@ -1142,9 +1161,10 @@ attacks against such code; and it is extra work always, as the functions have
 already done the equivalent work and return the correct value in C<advance>,
 regardless of whether the input is well-formed or not.
 
-You must always pass a non-NULL pointer into which to store the (first) code
-point C<s> represents.  If you don't care about this value, you should be using
-one of the C<L</isUTF8_CHAR>> functions instead.
+Except with C<utf8_to_uv_or_die>, you must always pass a non-NULL pointer into
+which to store the (first) code point C<s> represents.  If you don't care about
+this value, you should be using one of the C<L</isUTF8_CHAR>> functions
+instead.
 
 =item C<utf8_to_uvchr> forms
 
@@ -1274,8 +1294,8 @@ This flag is ignored if C<UTF8_CHECK_ONLY> is also set.
 =item C<UTF8_WARN_SURROGATE>
 
 These reject and/or warn about UTF-8 sequences that represent surrogate
-characters.  The warning categories C<utf8> and C<super> control if warnings
-are actually raised.
+characters.  The warning categories C<utf8> and C<non_unicode> control if
+warnings are actually raised.
 
 =item C<UTF8_DISALLOW_NONCHAR>
 
@@ -1290,7 +1310,7 @@ are actually raised.
 =item C<UTF8_WARN_SUPER>
 
 These reject and/or warn about UTF-8 sequences that represent code points
-above 0x10FFFF.  The warning categories C<utf8> and C<super> control if
+above 0x10FFFF.  The warning categories C<utf8> and C<non_unicode> control if
 warnings are actually raised.
 
 =item C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
@@ -1324,7 +1344,8 @@ These reject and/or warn on encountering sequences that require Perl's
 extension to UTF-8 to represent them.   These are all for code points above
 0x10FFFF, so these sequences are a subset of the ones controlled by SUPER or
 either of the illegal interchange sets of flags.  The warning categories
-C<utf8>, C<super>, and C<portable> control if warnings are actually raised.
+C<utf8>, C<non_unicode>, and C<portable> control if warnings are actually
+raised.
 
 Perl predates Unicode, and earlier standards allowed for code points up through
 0x7FFF_FFFF (2**31 - 1).  Perl, of course, would like you to be able to

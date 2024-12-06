@@ -3780,6 +3780,10 @@ CTp	|bool	|utf8_to_uv_msgs_helper_				\
 				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
+ATdip	|UV	|utf8_to_uv_or_die					\
+				|NN const U8 * const s			\
+				|NN const U8 *e 			\
+				|NULLOK Size_t *advance_p
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 : Used in perly.y

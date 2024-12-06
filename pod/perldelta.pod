@@ -436,9 +436,10 @@ New API functions are introduced to convert strings encoded in UTF-8 to
 their ordinal code point equivalent.  These are safe to use by default,
 and generally more convenient to use than the existing ones.
 
-L<perlapi/C<utf8_to_uv>> replaces L<perlapi/C<utf8_to_uvchr>> (which is
-retained for backwards compatibility), but you should convert to use the
-new form, as likely you aren't using the old one safely.
+L<perlapi/C<utf8_to_uv>> and L<perlapi/C<utf8_to_uv_or_die>> replace
+L<perlapi/C<utf8_to_uvchr>> (which is retained for backwards
+compatibility), but you should convert to use the new forms, as likely
+you aren't using the old one safely.
 
 To convert in the opposite direction, you can now use
 L<perlapi/C<uv_to_utf8>>.  This is not a new function, but a new synonym

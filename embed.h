@@ -870,6 +870,7 @@
 # define utf8_to_uv_flags                       Perl_utf8_to_uv_flags
 # define utf8_to_uv_msgs                        Perl_utf8_to_uv_msgs
 # define utf8_to_uv_msgs_helper_                Perl_utf8_to_uv_msgs_helper_
+# define utf8_to_uv_or_die                      Perl_utf8_to_uv_or_die
 # define utf8n_to_uvchr                         Perl_utf8n_to_uvchr
 # define utf8n_to_uvchr_error                   Perl_utf8n_to_uvchr_error
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
