@@ -7,6 +7,11 @@ assignees: ''
 
 ---
 
+<!--
+Note: Bugs in the perldoc program itself should be reported to the CPAN module
+maintainer via the bug tracker listed on https://metacpan.org/pod/Pod::Perldoc
+-->
+
 **Where**
 <!-- What module, script or perldoc URL needs to be fixed? -->
 
