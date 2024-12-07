@@ -8992,6 +8992,54 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
     if (!anydelim && PL_expect == XSTATE
           && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
         s = d + 1;
+
+        /* It could also be a typo of :: */
+        if (isALPHA_A(*s)) { /* I'm not sure how to extend to cover UTF-8 */
+            switch(*s) {
+                case 'f': /* 'LABEL:for' or 'LABEL:foreach' ? */
+                    if (s + 3 < PL_bufend) {
+                        if (!( *(s+1) == 'o' && *(s+2) == 'r' ))
+                          goto package_typo;
+                        if ( isSPACE(*(s+3)) || *(s+3) == '(' )
+                            /* Could arguably be 'LABEL:for' */
+                            break;
+                        if (s + 7 < PL_bufend) {
+                            if (!( *(s+3) == 'e' && *(s+4) == 'a' &&
+                                   *(s+5) == 'c' && *(s+6) == 'h' &&
+                                  (! (isSPACE(*(s+6)) || *(s+6) == '('))
+                            ))
+                                goto package_typo;
+                        }
+                    } /* What does it mean if (s + 3 >= PL_bufend) ?? */
+                    break;
+                case 'u': /* 'LABEL:until' ? */
+                    if (s + 5 < PL_bufend) {
+                         if (!(
+                             *(s+1) == 'n' && *(s+2) == 't' &&
+                             *(s+3) == 'i' && *(s+4) == 'l' &&
+                             (isSPACE(*(s+5)) || *(s+5) == '(')
+                         ))
+                             goto package_typo;
+                    }
+                    break;
+                case 'w':
+                    if (s + 5 < PL_bufend) {
+                         if (!(
+                             *(s+1) == 'h' && *(s+2) == 'i' &&
+                             *(s+3) == 'l' && *(s+4) == 'e' &&
+                             (isSPACE(*(s+5)) || *(s+5) == '(')
+                         ))
+                             goto package_typo;
+                    }
+                    break;
+                default:
+                  package_typo:
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                            "Possible typo of package separator '::' as ':' following %s", PL_tokenbuf);
+                    break;
+            }
+        }
+
         pl_yylval.opval =
             newSVOP(OP_CONST, 0,
                 newSVpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0));
