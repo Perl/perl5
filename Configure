@@ -7135,16 +7135,16 @@ $echo "(You have $package $version_patchlevel_string.)"
 case "$osname" in
 dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
+	version=`echo $patchlevel $subversion | \
+		 $awk '{ printf "%d_%d", $1, $2 }'`
+	api_versionstring=`echo $api_version $api_subversion | \
+		 $awk '{ printf "%d_%d", $1, $2 }'`
 	;;
 *)
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
+	version=`echo $patchlevel $subversion | \
+		 $awk '{ printf "%d.%d", $1, $2 }'`
 	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
+		 $awk '{ printf "%d.%d", $1, $2 }'`
 	;;
 esac
 : Special case the 5.005_xx maintenance series, which used 5.005

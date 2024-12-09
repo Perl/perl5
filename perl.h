@@ -5447,12 +5447,10 @@ EXTERN_C char **environ;  /* environment variables supplied via exec */
 #include "patchlevel.h"
 #undef PERL_PATCHLEVEL_H_IMPLICIT
 
-#define PERL_VERSION_STRING	STRINGIFY(PERL_REVISION) "." \
-                                STRINGIFY(PERL_VERSION) "." \
-                                STRINGIFY(PERL_SUBVERSION)
+#define PERL_VERSION_STRING	STRINGIFY(PERL_VERSION) "." \
+                                STRINGIFY(PERL_SUBVERSION) ".0"
 
-#define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_REVISION) "." \
-                                STRINGIFY(PERL_API_VERSION) "." \
+#define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_VERSION) "." \
                                 STRINGIFY(PERL_API_SUBVERSION)
 
 START_EXTERN_C
