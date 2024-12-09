@@ -8034,7 +8034,7 @@ ASCII matches, is to add the C</aa> modifier to the regex.  This will
 exclude all these non-obvious matches, thus getting rid of this message.
 You can also say
 
- use if $] ge 5.016, re => '/aa';
+ use if "$]" >= 5.016, re => '/aa';
 
 to apply C</aa> to all regular expressions compiled within its scope.
 See L<re>.
