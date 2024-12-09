@@ -74,6 +74,14 @@ true)
 		;;
 	cygwin*)
 		shrpldflags="$shrpldflags -Wl,--out-implib=libperl.dll.a"
+		# The cygperl dll can be large and has conflicted with
+		# other DLLs as its name has changed from release to release.
+		# Give it its own space (and a lot of it) to work in.
+		# 32-bit (untested) gets less space since it is 32-bit.
+		case "$myarchname" in
+			"x86_64-cygwin") shrpldflags="$shrpldflags -Wl,--image-base=0x00380000000" ;;
+			*)  shrpldflags="$shrpldflags -Wl,--image-base=0x60500000" ;;
+		esac
 		linklibperl="-L. -lperl"
 		;;
 	sunos*)
