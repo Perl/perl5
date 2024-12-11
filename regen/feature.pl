@@ -120,7 +120,17 @@ my %feature_bundle = (
     "5.41"  => [ +V5_41 ],
     # using 5.43 features bundle
     "5.43"  => [ +V5_43 ],
+    # using 43 features bundle
+    "43"    => [ +V5_43 ],
 );
+
+# actually, 5.9.5 ends up between 5.43 and 43
+sub as_bundles {
+     $a eq 'default' ? -1 : $b eq 'default'   ?  1 # default first
+   : $a eq 'all'     ?  1 : $b eq 'all'       ? -1 # all last
+   : $a =~ /\./      ? $b =~ /\./ ? $a cmp $b : -1 # 5.x in order, before
+   :                   $b =~ /\./ ? 1 : $a <=> $b; # integers in order
+}
 
 my @noops = qw( postderef lexical_subs );
 my @removed = qw( array_base );
@@ -147,13 +157,18 @@ for my $feature (sort keys %feature) {
 my $cop_feature_size = $mask == 1 ? $index : $index + 1;
 
 for (keys %feature_bundle) {
-    next unless /^5\.(\d*[13579])\z/;
-    $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
+    if (/^5\.(\d*[13579])\z/) { # 5.x dev series
+        $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
+    }
+    elsif (/^(4[3579]|[5-9][13579]|[1-9][0-9]+[13579])\z/) { # 43 and above
+        $feature_bundle{($1+1)} ||= $feature_bundle{$_};
+    }
 }
+delete $feature_bundle{"5.44"}; # this one does not exist
 
 my %UniqueBundles; # "say state switch" => 5.10
 my %Aliases;       #  5.12 => 5.11
-for( sort keys %feature_bundle ) {
+for( sort as_bundles keys %feature_bundle ) {
     my $value = join(' ', sort @{$feature_bundle{$_}});
     if (exists $UniqueBundles{$value}) {
 	$Aliases{$_} = $UniqueBundles{$value};
@@ -165,8 +180,7 @@ for( sort keys %feature_bundle ) {
 			   # start   end
 my %BundleRanges; # say => ['5.10', '5.15'] # unique bundles for values
 for my $bund (
-    sort { $a eq 'default' ? -1 : $b eq 'default' ? 1 : $a cmp $b }
-         values %UniqueBundles
+    sort as_bundles values %UniqueBundles
 ) {
     next if $bund =~ /[^\d.]/ and $bund ne 'default';
     for (@{$feature_bundle{$bund}}) {
@@ -212,7 +226,7 @@ die "No HINT_FEATURE_MASK defined in perl.h" unless $HintMask;
 die "No HINT_UNI_8_BIT defined in perl.h"    unless $Uni8Bit;
 
 my @HintedBundles =
-    ('default', grep !/[^\d.]/, sort values %UniqueBundles);
+    ('default', grep !/[^\d.]/, sort as_bundles values %UniqueBundles);
 
 
 ###########################################################################
@@ -259,7 +273,7 @@ for( sort { $UniqueBundles{$a} cmp $UniqueBundles{$b} }
 }
 print $pm ");\n\n";
 
-for (sort keys %Aliases) {
+for (sort as_bundles keys %Aliases) {
     print $pm
 	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
 };
@@ -296,7 +310,7 @@ format PODTURES =
 $::bundle, $::feature
 .
 
-for ('default', sort grep /\.\d[02468]/, keys %feature_bundle) {
+for ('default', sort as_bundles grep /[02468]\z/, keys %feature_bundle) {
     $::bundle = ":$_";
     $::feature = join ' ', @{$feature_bundle{$_}};
     write $pm;
