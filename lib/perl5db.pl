@@ -523,7 +523,7 @@ BEGIN {eval 'use IO::Handle'}; # Needed for flush only? breaks under miniperl
 
 BEGIN {
     require feature;
-    $^V =~ /^v(\d+\.\d+)/;
+    $^V =~ /^v(5\.\d+|\d+)/;
     feature->import(":$1");
     $_initial_cwd = Cwd::getcwd();
 }
