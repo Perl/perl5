@@ -196,6 +196,8 @@ int main(int argc, char **argv, char **env) {
     perl_construct(my_perl);
     PL_exit_flags |= PERL_EXIT_WARN;
 
+    PERL_API_VERSION_CHECK;
+
     my_puts("ok 3");
 
     perl_parse(my_perl, NULL, (sizeof(cmds)/sizeof(char *))-1, (char **)cmds, env);
