@@ -61,6 +61,7 @@
 # define SvUV_nomg(a)                           Perl_SvUV_nomg(aTHX_ a)
 # define amagic_call(a,b,c,d)                   Perl_amagic_call(aTHX_ a,b,c,d)
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
+# define api_version_assert                     Perl_api_version_assert
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
 # define apply_builtin_cv_attributes(a,b)       Perl_apply_builtin_cv_attributes(aTHX_ a,b)
 # define atfork_child                           Perl_atfork_child
