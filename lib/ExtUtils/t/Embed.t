@@ -103,13 +103,26 @@ if ($^O eq 'VMS') {
    elsif ($^O eq 'os390' && $Config{usedl}) {
     push(@cmd,"-L$lib", ldopts());
    } else { # Not MSWin32 or OS/390 (z/OS) dynamic.
-    push(@cmd,"-L$lib",'-lperl');
+    my $ldopts = ldopts();
+    if ($^O eq 'openbsd' && $Config{useshrplib} eq "false") {
+        # see github #22125
+        # with OpenBSD, the packaged gcc (tries to) link
+        # against the system libperl, this will be fine once
+        # this perl gets installed, but that's not so good when
+        # testing against the uninstalled perl.
+        # This also matches how Makefile.SH links the perl executable
+        push @cmd, "$lib/libperl.a";
+        $ldopts =~ s/ -lperl\b//;
+    }
+    else {
+        push(@cmd,"-L$lib",'-lperl');
+    }
     local $SIG{__WARN__} = sub {
 	warn $_[0] unless $_[0] =~ /No library found for .*perl/
     };
     push(@cmd, '-Zlinker', '/PM:VIO')	# Otherwise puts a warning to STDOUT!
 	if $^O eq 'os2' and $Config{ldflags} =~ /(?<!\S)-Zomf\b/;
-    push(@cmd,ldopts());
+    push(@cmd, $ldopts);
    }
 
    if ($^O eq 'aix') { # AIX needs an explicit symbol export list.
@@ -158,7 +171,7 @@ $embed_test = "run/nodebug $exe" if $^O eq 'VMS';
 print "# embed_test = $embed_test\n";
 $status = system($embed_test);
 print (($status? 'not ':'')."ok 10 # system returned $status\n");
-#unlink($exe,"embed_test.c",$obj);
+unlink($exe,"embed_test.c",$obj);
 unlink("$exe.manifest") if $cl and $Config{'ccversion'} =~ /^(\d+)/ and $1 >= 14;
 unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
@@ -196,7 +209,7 @@ int main(int argc, char **argv, char **env) {
     perl_construct(my_perl);
     PL_exit_flags |= PERL_EXIT_WARN;
 
-    PERL_API_VERSION_CHECK;
+    PERL_API_VERSION_ASSERT;
 
     my_puts("ok 3");
 
