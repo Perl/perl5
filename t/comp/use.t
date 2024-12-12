@@ -6,7 +6,7 @@ BEGIN {
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
-print "1..87\n";
+print "1..88\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -87,7 +87,7 @@ eval q{ use v5.5.630; };
 is ($@, '');
 
 eval q{ use 10.0.2; };
-like ($@, qr/^\QPerl v10.0.2 required\E/);
+is ($@, '');
 
 eval "use 5.000";	# implicit semicolon
 is ($@, '');
@@ -96,41 +96,46 @@ eval "use 5.000;";
 is ($@, '');
 
 eval "use 6.000;";
-like ($@, qr/\QPerl v6.0.0 required--this is only $^V, stopped\E/);
+is ($@, '');
 
 eval "no 6.000;";
-is ($@, '');
+like ($@, qr/\QPerls since v6.0.0 too modern--this is $^V, stopped\E/);
 
 eval "no 5.000;";
 like ($@, qr/\QPerls since v5.0.0 too modern--this is $^V, stopped\E/);
 
 eval "use 5.6;";
-like ($@, qr/\QPerl v5.600.0 required (did you mean v5.6.0?)--this is only $^V, stopped\E/);
+is ($@, '');
 
 eval "use 5.8;";
-like ($@, qr/\QPerl v5.800.0 required (did you mean v5.8.0?)--this is only $^V, stopped\E/);
+is ($@, '');
 
 eval "use 5.9;";
-like ($@, qr/\QPerl v5.900.0 required (did you mean v5.9.0?)--this is only $^V, stopped\E/);
+is ($@, '');
 
 eval "use 5.10;";
-like ($@, qr/\QPerl v5.100.0 required (did you mean v5.10.0?)--this is only $^V, stopped\E/);
+is ($@, '');
 
 eval "use 5.11;";
-like ($@, qr/\QPerl v5.110.0 required (did you mean v5.11.0?)--this is only $^V, stopped\E/);
+is ($@, '');
 
 eval sprintf "use %.6f;", $];
 is ($@, '');
 
 
-eval sprintf "use %.6f;", $] - 0.000001;
+eval sprintf "use %.6f;", $] - 0.001;
 is ($@, '');
 
+my $Vthis = int $];
+my $Vnext = $Vthis + 1;
 eval sprintf("use %.6f;", $] + 1);
-like ($@, qr/Perl v6\.\d+\.\d+ required--this is only \Q$^V\E, stopped/a);
+like ($@, qr/Perl v$Vnext\.\d+\.\d+ required--this is only \Q$^V\E, stopped/a);
 
-eval sprintf "use %.6f;", $] + 0.00001;
-like ($@, qr/Perl v5\.\d+\.\d+ required--this is only \Q$^V\E, stopped/a);
+eval sprintf "use %.6f;", $] + 0.001;
+like ($@, qr/Perl v$Vthis\.\d+\.\d+ required--this is only \Q$^V\E, stopped/a);
+
+eval sprintf "use %.3f;", $Vthis + .999;
+like ($@, qr/Perl v$Vthis\.\d+\.\d+ required--this is only \Q$^V\E, stopped/a);
 
 # check that "use 5.11.0" (and higher) loads strictures
 eval 'use 5.11.0; ${"foo"} = "bar";';
