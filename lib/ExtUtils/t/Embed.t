@@ -103,13 +103,26 @@ if ($^O eq 'VMS') {
    elsif ($^O eq 'os390' && $Config{usedl}) {
     push(@cmd,"-L$lib", ldopts());
    } else { # Not MSWin32 or OS/390 (z/OS) dynamic.
-    push(@cmd,"-L$lib",'-lperl');
+    my $ldopts = ldopts();
+    if ($^O eq 'openbsd' && $Config{useshrplib} eq "false") {
+        # see github #22125
+        # with OpenBSD, the packaged gcc (tries to) link
+        # against the system libperl, this will be fine once
+        # this perl gets installed, but that's not so good when
+        # testing against the uninstalled perl.
+        # This also matches how Makefile.SH links the perl executable
+        push @cmd, "$lib/libperl.a";
+        $ldopts =~ s/ -lperl\b//;
+    }
+    else {
+        push(@cmd,"-L$lib",'-lperl');
+    }
     local $SIG{__WARN__} = sub {
 	warn $_[0] unless $_[0] =~ /No library found for .*perl/
     };
     push(@cmd, '-Zlinker', '/PM:VIO')	# Otherwise puts a warning to STDOUT!
 	if $^O eq 'os2' and $Config{ldflags} =~ /(?<!\S)-Zomf\b/;
-    push(@cmd,ldopts());
+    push(@cmd, $ldopts);
    }
 
    if ($^O eq 'aix') { # AIX needs an explicit symbol export list.
@@ -196,7 +209,7 @@ int main(int argc, char **argv, char **env) {
     perl_construct(my_perl);
     PL_exit_flags |= PERL_EXIT_WARN;
 
-    PERL_API_VERSION_CHECK;
+    PERL_API_VERSION_ASSERT;
 
     my_puts("ok 3");
 
