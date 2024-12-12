@@ -5739,6 +5739,52 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
     }
 }
 
+/*
+=for apidoc api_version_assert
+
+Used by the PERL_API_VERSION_CHECK macro to compare the perl the
+object was built with and the perl that C<libperl> was built with.
+
+This can be used to ensure that these match and produces a more
+diagnosable than random crashes and mis-behaviour.
+
+=cut
+*/
+
+void
+Perl_api_version_assert(size_t interp_size, void *v_my_perl,
+                        const char *api_version) {
+    dTHX;
+
+    PERL_ARGS_ASSERT_API_VERSION_ASSERT;
+
+    if (interp_size != sizeof(PerlInterpreter)) {
+        /* detects various types of configuration mismatches */
+        /* diag_listed_as: Mismatch between expected and libperl %s */
+        Perl_croak(aTHX_
+                   "Mismatch between expected and libperl interpreter structure size %zd vs %zd",
+                   interp_size, sizeof(PerlInterpreter));
+    }
+    if (
+#ifdef MULTIPLICITY
+      v_my_perl != my_perl
+#else
+      v_my_perl != NULL
+#endif
+        ) {
+        /* detect threads vs non-threads mismatch */
+        /* diag_listed_as: Mismatch between expected and libperl %s */
+        Perl_croak(aTHX_
+                   "Mismatch between expected and libperl interpreter pointer");
+    }
+    if (strNE(api_version, PERL_API_VERSION_STRING)) {
+        /* diag_listed_as: Mismatch between expected and libperl %s */
+        Perl_croak(aTHX_
+                   "Mismatch between expected and libperl API versions %s vs %s",
+                   api_version, PERL_API_VERSION_STRING);
+    }
+}
+
 PERL_STATIC_INLINE bool
 S_gv_has_usable_name(pTHX_ GV *gv)
 {

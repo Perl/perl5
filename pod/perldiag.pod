@@ -4020,6 +4020,11 @@ See L</500 Server error>.
 by a missing delimiter on a string or pattern, because it eventually
 ended earlier on the current line.
 
+=item Mismatch between expected and libperl %s
+
+(F) For an embedded perl, the perl headers and configuration you built
+your binary against don't match the library you've linked with.
+
 =item Mismatched brackets in template
 
 (F) A pack template could not be parsed because pairs of C<[...]> or

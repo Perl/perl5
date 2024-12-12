@@ -663,6 +663,10 @@ Adp	|SV *	|amagic_deref_call					\
 p	|bool	|amagic_is_enabled					\
 				|int method
 
+CTdp	|void	|api_version_assert					\
+				|size_t interp_size			\
+				|NULLOK void *v_my_perl 		\
+				|NN const char *api_version
 ETXip	|void	|append_utf8_from_native_byte				\
 				|const U8 byte				\
 				|NN U8 **dest

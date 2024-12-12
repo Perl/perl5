@@ -9264,6 +9264,14 @@ END_EXTERN_C
 #  define PERL_STACK_REALIGN
 #endif
 
+#ifdef MULTIPLICITY
+#  define PERL_API_VERSION_ASSERT \
+  Perl_api_version_assert(sizeof(PerlInterpreter), aTHX, PERL_API_VERSION_STRING)
+#else
+#  define PERL_API_VERSION_ASSERT \
+  Perl_api_version_assert(sizeof(PerlInterpreter), NULL, PERL_API_VERSION_STRING)
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)

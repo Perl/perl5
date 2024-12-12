@@ -158,7 +158,7 @@ $embed_test = "run/nodebug $exe" if $^O eq 'VMS';
 print "# embed_test = $embed_test\n";
 $status = system($embed_test);
 print (($status? 'not ':'')."ok 10 # system returned $status\n");
-unlink($exe,"embed_test.c",$obj);
+#unlink($exe,"embed_test.c",$obj);
 unlink("$exe.manifest") if $cl and $Config{'ccversion'} =~ /^(\d+)/ and $1 >= 14;
 unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
@@ -195,6 +195,8 @@ int main(int argc, char **argv, char **env) {
 
     perl_construct(my_perl);
     PL_exit_flags |= PERL_EXIT_WARN;
+
+    PERL_API_VERSION_CHECK;
 
     my_puts("ok 3");
 
