@@ -3604,7 +3604,7 @@ PP_wrapped(pp_substr,
         }
         if ((len_sv = POPs)) {
             len_iv    = SvIV(len_sv);
-            len_is_uv = len_iv ? SvIOK_UV(len_sv) : 1;
+            len_is_uv = len_iv == 0 || SvIOK_UV(len_sv);
         }
         else num_args--;
     }
