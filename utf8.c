@@ -1637,7 +1637,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     SSize_t curlen = send - s0;
     U32 possible_problems;  /* A bit is set here for each potential problem
                                found as we go along */
-    UV uv;
+    UV uv = 0;
     SSize_t expectlen;    /* How long should this sequence be? */
     SSize_t avail_len;    /* When input is too short, gives what that is */
 
