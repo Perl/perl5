@@ -1919,7 +1919,7 @@ PP(pp_subtract)
 
     SV *svr = PL_stack_sp[0];
     SV *svl = PL_stack_sp[-1];
-
+    NV nv;
 
 #ifdef PERL_PRESERVE_IVUV
 
@@ -2050,7 +2050,8 @@ PP(pp_subtract)
                         TARGi(NEGATE_2IV(result), 1);
                     else {
                         /* result valid, but out of range for IV.  */
-                        TARGn(-(NV)result, 1);
+                        nv = -(NV)result;
+                        goto ret_nv;
                     }
                 }
                 goto ret;
@@ -2060,13 +2061,14 @@ PP(pp_subtract)
 #else
     useleft = USE_LEFT(svl);
 #endif
-    {
-        /* If left operand is undef, treat as zero - value */
-        NV value = useleft ? SvNV_nomg(svl) : 0.0;
-        value -= SvNV_nomg(svr);
-        TARGn(value, 1);
-        goto ret;
-    }
+
+    /* If left operand is undef, treat as zero - value */
+    nv = useleft ? SvNV_nomg(svl) : 0.0;
+    /* Separate statements here to ensure SvNV_nomg(svl) is evaluated
+       before SvNV_nomg(svr) */
+    nv -= SvNV_nomg(svr);
+  ret_nv:
+    TARGn(nv, 1);
 
   ret:
     rpp_replace_2_1_NN(targ);
