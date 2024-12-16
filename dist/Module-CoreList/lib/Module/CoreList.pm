@@ -12,7 +12,7 @@ sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
 sub _undelta {
     my ($delta) = @_;
     my (%expanded, $delta_from, $base, $changed, $removed);
-    for my $v (sort keys %$delta) {
+    for my $v (sort { $a <=> $b } keys %$delta) {
         ($delta_from, $changed, $removed) = @{$delta->{$v}}{qw( delta_from changed removed )};
         $base = $delta_from ? $expanded{$delta_from} : {};
         my %full = ( %$base, %{$changed || {}} );
@@ -54,7 +54,7 @@ sub first_release_raw {
 
     my @perls = $version
         ? grep { defined $version{$_}{ $module } &&
-                        $version{$_}{ $module } ge $version } keys %version
+                        $version{$_}{ $module } >= $version } keys %version
         : grep { exists $version{$_}{ $module }             } keys %version;
 
     return @perls;
@@ -69,7 +69,7 @@ sub first_release_by_date {
 sub first_release {
     my @perls = &first_release_raw;
     return unless @perls;
-    return (sort { $a cmp $b } @perls)[0];
+    return (sort { $a <=> $b } @perls)[0];
 }
 
 sub find_modules {
@@ -123,9 +123,9 @@ sub removed_from_by_date {
 sub removed_raw {
   shift if defined $_[1] and $_[1] =~ PKG_PATTERN and _looks_like_invocant $_[0];
   my $mod = shift;
-  return unless my @perls = sort { $a cmp $b } first_release_raw($mod);
+  return unless my @perls = sort { $a <=> $b } first_release_raw($mod);
   my $last = pop @perls;
-  my @removed = grep { $_ > $last } sort { $a cmp $b } keys %version;
+  my @removed = grep { $_ > $last } sort { $a <=> $b } keys %version;
   return @removed;
 }
 
@@ -461,7 +461,7 @@ sub changes_between {
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
-    my $family = int ($version * 1000) / 1000;
+    my $family = $version > 43 ? int($version) : int( $version * 1000 ) / 1000;
     push @{ $families{ $family }} , $version;
 }
 
