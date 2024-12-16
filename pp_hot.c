@@ -6212,6 +6212,26 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
     }
 }
 
+/* S_croak_undefined_subroutine is a helper function for pp_entersub.
+ * It takes assorted DIE() logic out of that hot function.
+ */
+static void
+S_croak_undefined_subroutine(pTHX_ CV const *cv, GV const *gv)
+{
+    if (cv) {
+        if (CvLEXICAL(cv) && CvHASGV(cv))
+            croak("Undefined subroutine &%" SVf " called",
+                       SVfARG(cv_name((CV*)cv, NULL, 0)));
+        else /* pp_entersub triggers when (CvANON(cv) || !CvHASGV(cv)) */
+            croak("Undefined subroutine called");
+    } else { /* pp_entersub triggers when (!cv) after `try_autoload` */
+        SV *sub_name = newSV_type_mortal(SVt_PV);
+        gv_efullname3(sub_name, gv, NULL);
+
+        croak("Undefined subroutine &%" SVf " called", SVfARG(sub_name));
+    }
+    NOT_REACHED; /* NOTREACHED */
+}
 
 PP(pp_entersub)
 {
@@ -6306,15 +6326,12 @@ PP(pp_entersub)
     assert((void*)&CvROOT(cv) == (void*)&CvXSUB(cv));
     while (UNLIKELY(!CvROOT(cv))) {
         GV* autogv;
-        SV* sub_name;
 
         /* anonymous or undef'd function leaves us no recourse */
         if (CvLEXICAL(cv) && CvHASGV(cv))
-            DIE(aTHX_ "Undefined subroutine &%" SVf " called",
-                       SVfARG(cv_name(cv, NULL, 0)));
-        if (CvANON(cv) || !CvHASGV(cv)) {
-            DIE(aTHX_ "Undefined subroutine called");
-        }
+            S_croak_undefined_subroutine(aTHX_ cv, NULL);
+        if (CvANON(cv) || !CvHASGV(cv))
+            S_croak_undefined_subroutine(aTHX_ cv, NULL);
 
         /* autoloaded stub? */
         if (cv != GvCV(gv = CvGV(cv))) {
@@ -6330,11 +6347,8 @@ PP(pp_entersub)
                                        : 0));
             cv = autogv ? GvCV(autogv) : NULL;
         }
-        if (!cv) {
-            sub_name = sv_newmortal();
-            gv_efullname3(sub_name, gv, NULL);
-            DIE(aTHX_ "Undefined subroutine &%" SVf " called", SVfARG(sub_name));
-        }
+        if (!cv)
+            S_croak_undefined_subroutine(aTHX_ NULL, gv);
     }
 
     /* unrolled "CvCLONE(cv) && ! CvCLONED(cv)" */
