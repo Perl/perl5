@@ -6820,6 +6820,16 @@ Perhaps it's in a different package?  See L<perlfunc/sort>.
 (F) The subroutine indicated hasn't been defined, or if it was, it has
 since been undefined.
 
+=item Undefined subroutine &%s called, close to label '%s'
+
+(F) The subroutine indicated hasn't been defined, or if it was, it has
+since been undefined.
+
+This error could also indicate a mistyped package separator, when a
+single colon was typed instead of two colons. For example, C<Foo:bar()>
+would be parsed as the label C<Foo> followed by an unqualified function
+name: C<foo: bar()>.
+
 =item Undefined subroutine called
 
 (F) The anonymous subroutine you're trying to call hasn't been defined,

@@ -6228,6 +6228,14 @@ S_croak_undefined_subroutine(pTHX_ CV const *cv, GV const *gv)
         SV *sub_name = newSV_type_mortal(SVt_PV);
         gv_efullname3(sub_name, gv, NULL);
 
+        /* Heuristic to spot BOOP:boop() typo, when the intention was
+         * to call BOOP::boop(). */
+        const char * label = CopLABEL(PL_curcop);
+        if (label && OpSIBLING(PL_curcop) == PL_op) {
+            croak("Undefined subroutine &%" SVf " called, close to label '%s'",
+                SVfARG(sub_name), label);
+        }
+
         croak("Undefined subroutine &%" SVf " called", SVfARG(sub_name));
     }
     NOT_REACHED; /* NOTREACHED */
