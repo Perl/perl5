@@ -4351,11 +4351,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
         }                                                                    \
     }                                                                        \
     else {  /* malformed UTF-8 or ord above 255 */                           \
-        STRLEN len_result;                                                   \
-        result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
-        if (len_result == (STRLEN) -1) {                                     \
-            force_out_malformed_utf8_message_(p, e, 0, MALFORMED_UTF8_DIE ); \
-        }
+        result = utf8_to_uv_or_die(p, e, NULL);                              \
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \
         result = change_macro(result, p, ustrp, lenp);                       \
