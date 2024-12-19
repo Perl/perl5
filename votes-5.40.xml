@@ -21,7 +21,10 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Security Fixes</h3>
 
-<!-- Wanted: Fix for heap-buffer-overflow security issue reported on 12 Aug (no GH issue or CVE assigned yet) -->
+<!-- That is https://github.com/Perl/perl-security/issues/144
+     khw screwed up and the commit is in blead of the security repository -->
+<commit votes="khw" id="f93109c" issue="144" pull="" desc="heap-buffer-overflow"/>
+
 
 </div>
 
@@ -31,7 +34,10 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Regression Fixes</h3>
 
-<!-- Wanted: Fix for #22547 -->
+<!-- Wanted: Fix for #22547
+
+     See https://github.com/Perl/perl5/pull/22635 for a fix
+-->
 
 </div>
 
@@ -41,7 +47,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Build and Installation Fixes</h3>
 
-<!-- Possibly also: https://github.com/Perl/perl5/pull/22609 if/when it is merged to blead -->
+<commit votes="khw" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
+<commit votes="khw" id="5746862" issue="22793" pull="22799" desc="Configure: Fix compilation error on some systems"/>
 
 </div>
 
