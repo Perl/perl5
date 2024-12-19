@@ -1634,14 +1634,8 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
                 bufend = PL_parser->bufend;
             }
         }
-        unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
-        if (retlen == (STRLEN)-1) {
-            force_out_malformed_utf8_message_((U8 *) s,
-                                              (U8 *) bufend,
-                                              0,
-                                              MALFORMED_UTF8_DIE);
-            NOT_REACHED; /* NOTREACHED */
-        }
+
+        unichar = utf8_to_uv_or_die((U8*)s, (U8*) bufend, NULL);
         return unichar;
     } else {
         if (s == bufend) {
