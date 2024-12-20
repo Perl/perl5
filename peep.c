@@ -3588,6 +3588,21 @@ Perl_rpeep(pTHX_ OP *o)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
             /* FALLTHROUGH */
         case OP_COND_EXPR:
+            if (o->op_type == OP_COND_EXPR) {
+                /* Is there an empty "else" block or ternary false branch?
+                   If so, optimise away the OP_STUB if safe to do so. */
+                if (o->op_next->op_type == OP_STUB &&
+                    ((o->op_next->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+                ) {
+                    OP *stub = o->op_next;
+                    assert(stub == OpSIBLING(OpSIBLING( cLOGOP->op_first )));
+                    assert(!(stub->op_flags & OPf_KIDS));
+                    o->op_next = stub->op_next;
+                    op_sibling_splice(o, OpSIBLING(cLOGOP->op_first), 1, NULL);
+                    op_free(stub);
+                }
+            }
+            /* FALLTHROUGH */
         case OP_MAPWHILE:
         case OP_ANDASSIGN:
         case OP_ORASSIGN:

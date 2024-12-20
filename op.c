@@ -4524,6 +4524,11 @@ Perl_op_scope(pTHX_ OP *o)
 {
     if (o) {
         if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
+
+            /* This also makes eliding empty if/else blocks simpler. */
+            if (OP_TYPE_IS(o, OP_STUB) && (o->op_flags & OPf_PARENS))
+                return o;
+
             o = op_prepend_elem(OP_LINESEQ,
                     newOP(OP_ENTER, (o->op_flags & OPf_WANT)), o);
             OpTYPE_set(o, OP_LEAVE);

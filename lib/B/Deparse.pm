@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.85;
+package B::Deparse 1.86;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -4034,13 +4034,22 @@ sub pp_cond_expr {
     my $true = $cond->sibling;
     my $false = $true->sibling;
     my $cuddle = $self->{'cuddle'};
-    unless ($cx < 1 and (is_scope($true) and $true->name ne "null") and
-	    (is_scope($false) || is_ifelse_cont($false))
-	    and $self->{'expand'} < 7) {
-	$cond = $self->deparse($cond, 8);
-	$true = $self->deparse($true, 6);
-	$false = $self->deparse($false, 8);
-	return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
+
+    if (class($false) eq "NULL") { # Empty else {} block was optimised away
+        unless ($cx < 1 and (is_scope($true) and $true->name ne "null")) {
+            $cond = $self->deparse($cond, 8);
+            $true = $self->deparse($true, 6);
+            return $self->maybe_parens("$cond ? $true : ()", $cx, 8);
+        }
+    } else { # Both true and false branches are present
+        unless ($cx < 1 and (is_scope($true) and $true->name ne "null")
+               and (is_scope($false) || is_ifelse_cont($false))
+               and $self->{'expand'} < 7) {
+            $cond = $self->deparse($cond, 8);
+            $true = $self->deparse($true, 6);
+            $false = $self->deparse($false, 8);
+            return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
+        }
     }
 
     $cond = $self->deparse($cond, 1);

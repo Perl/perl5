@@ -3455,3 +3455,7 @@ $_ = (!$p) =~ s/1//r;
 my($x, $y, $z);
 $z = 1 + ($x ^^ $y);
 $z = ($x ^^= $y);
+####
+# Else block of a ternary is optimised away
+my $x;
+my(@y) = $x ? [1, 2] : ();
