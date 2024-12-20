@@ -4517,12 +4517,6 @@ Perl_op_scope(pTHX_ OP *o)
 {
     if (o) {
         if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
-
-            /* There's no need to wrap an empty stub in an enter/leave.
-             * This also makes eliding empty if/else blocks simpler. */
-            if (OP_TYPE_IS(o, OP_STUB) && (o->op_flags & OPf_PARENS))
-                return o;
-
             o = op_prepend_elem(OP_LINESEQ,
                     newOP(OP_ENTER, (o->op_flags & OPf_WANT)), o);
             OpTYPE_set(o, OP_LEAVE);
@@ -9274,6 +9268,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     logop = alloc_LOGOP(OP_COND_EXPR, first, LINKLIST(trueop));
     logop->op_flags |= (U8)flags;
     logop->op_private = (U8)(1 | (flags >> 8));
+    logop->op_next = LINKLIST(falseop);
 
     CHECKOP(OP_COND_EXPR, /* that's logop->op_type */
             logop);
@@ -9282,23 +9277,13 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     start = LINKLIST(first);
     first->op_next = (OP*)logop;
 
-    /* make first & trueop siblings */
-    /* falseop may also be a sibling, if not optimised away */
+    /* make first, trueop, falseop siblings */
     op_sibling_splice((OP*)logop, first,  0, trueop);
+    op_sibling_splice((OP*)logop, trueop, 0, falseop);
 
     o = newUNOP(OP_NULL, 0, (OP*)logop);
 
-    if (OP_TYPE_IS(falseop, OP_STUB) && (falseop->op_flags & OPf_PARENS)) {
-        /* The `else` block is empty. Optimise it away. */
-        logop->op_next = o;
-        op_free(falseop);
-    } else {
-        op_sibling_splice((OP*)logop, trueop, 0, falseop);
-        logop->op_next = LINKLIST(falseop);
-        falseop->op_next = o;
-    }
-
-    trueop->op_next = o;
+    trueop->op_next = falseop->op_next = o;
 
     o->op_next = start;
     return o;
