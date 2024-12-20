@@ -4034,12 +4034,23 @@ sub pp_cond_expr {
     my $true = $cond->sibling;
     my $false = $true->sibling;
     my $cuddle = $self->{'cuddle'};
+    my $no_true = 0;
 
-    if (class($false) eq "NULL") { # Empty else {} block was optimised away
-        unless ($cx < 1 and (is_scope($true) and $true->name ne "null")) {
-            $cond = $self->deparse($cond, 8);
-            $true = $self->deparse($true, 6);
-            return $self->maybe_parens("$cond ? $true : ()", $cx, 8);
+    if (class($false) eq "NULL") { # Empty true or false block was optimised away
+        if (!($op->flags & OPf_SPECIAL)) { # It was an empty true block
+            my $temp = $false; $false = $true; $true = $temp;
+            $no_true = 1;
+            unless ($cx < 1 and (is_scope($false) and $false->name ne "null")) {
+                $cond = $self->deparse($cond, 8);
+                $false = $self->deparse($false, 6);
+                return $self->maybe_parens("$cond ? () : $false", $cx, 8);
+            }
+        } else { # Must have been an empty false block
+            unless ($cx < 1 and (is_scope($true) and $true->name ne "null")) {
+                $cond = $self->deparse($cond, 8);
+                $true = $self->deparse($true, 6);
+                return $self->maybe_parens("$cond ? $true : ()", $cx, 8);
+            }
         }
     } else { # Both true and false branches are present
         unless ($cx < 1 and (is_scope($true) and $true->name ne "null")
@@ -4053,8 +4064,10 @@ sub pp_cond_expr {
     }
 
     $cond = $self->deparse($cond, 1);
-    $true = $self->deparse($true, 0);
-    my $head = $self->keyword("if") . " ($cond) {\n\t$true\n\b}";
+    $true = ($no_true) ? "\b" : $self->deparse($true, 0);
+    my $head = ($no_true)
+                ? $self->keyword("if") . " ($cond) {\n\t();\n\b}"
+                : $self->keyword("if") . " ($cond) {\n\t$true\n\b}";
     my @elsifs;
     my $elsif;
     while (!null($false) and is_ifelse_cont($false)) {
@@ -4069,13 +4082,24 @@ sub pp_cond_expr {
 	    $newcond = $newcond->first->sibling;
 	}
 	$newcond = $self->deparse($newcond, 1);
-	$newtrue = $self->deparse($newtrue, 0);
+
+        if (null($false) && ! ($newop->flags & OPf_SPECIAL)) {
+            # An empty elsif "true" block has been optimised away
+            my $temp = $false; $false = $newtrue; $newtrue = $temp;
+            $newtrue = "();";
+        } else {
+            $newtrue = $self->deparse($newtrue, 0);
+        }
+
 	$elsif ||= $self->keyword("elsif");
 	push @elsifs, "$elsif ($newcond) {\n\t$newtrue\n\b}";
     }
     if (!null($false)) {
 	$false = $cuddle . $self->keyword("else") . " {\n\t" .
 	  $self->deparse($false, 0) . "\n\b}\cK";
+    } elsif ($op->flags & OPf_SPECIAL) {
+        $false = $cuddle . $self->keyword("else") . " {\n\t" .
+          "();\n\b}\cK";
     } else {
 	$false = "\cK";
     }

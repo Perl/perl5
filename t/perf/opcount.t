@@ -1233,6 +1233,12 @@ test_opcount(0, "defined(ABC) gets constant folded",
                     defined      => 0,
                 });
 
+test_opcount(0, "Empty if{} blocks are optimised away",
+                sub { my $x; ($x) ? () : 1 },
+                {
+                    stub => 0
+                });
+
 test_opcount(0, "Empty else{} blocks are optimised away",
                 sub { my $x; ($x) ? 1 : () },
                 {

@@ -3456,6 +3456,85 @@ my($x, $y, $z);
 $z = 1 + ($x ^^ $y);
 $z = ($x ^^= $y);
 ####
-# Else block of a ternary is optimised away
+# Empty ? branch of a ternary is optimised away
+my $x;
+my(@y) = $x ? () : [1, 2];
+####
+# Empty : branch of a ternary is optimised away
 my $x;
 my(@y) = $x ? [1, 2] : ();
+####
+# Empty if {} block is optimised away
+my($x, $y);
+if ($x) {
+    ();
+}
+else {
+    $y = 1;
+}
+####
+# Empty else {} block is optimised away
+my($x, $y);
+if ($x) {
+    $y = 1;
+}
+else {
+    ();
+}
+####
+# Empty else {} preceded by an valid elsif
+my($x, $y);
+if ($x) {
+    $y = 1;
+}
+elsif ($y) {
+    $y = 2;
+}
+else {
+    ();
+}
+####
+# Empty elsif {} with valid else
+my($x, $y);
+if ($x) {
+    $y = 1;
+}
+elsif ($y) {
+    ();
+} else {
+    $y = 2;
+}
+####
+# Deparse of empty elsif sandwich (filling)
+my($x, $y);
+if ($x) {
+    $y = 1;
+}
+elsif ($y) {
+    $y = 3;
+}
+elsif ($y) {
+    ();
+}
+elsif ($y) {
+    $y = 4;
+} else {
+    $y = 2;
+}
+####
+# Deparse of empty elsif sandwich (bread)
+my($x, $y);
+if ($x) {
+    $y = 1;
+}
+elsif ($y) {
+    ();
+}
+elsif ($y) {
+    $y = 3;
+}
+elsif ($y) {
+    ();
+} else {
+    $y = 2;
+}

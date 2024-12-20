@@ -3589,14 +3589,38 @@ Perl_rpeep(pTHX_ OP *o)
             /* FALLTHROUGH */
         case OP_COND_EXPR:
             if (o->op_type == OP_COND_EXPR) {
+                OP *stub = cLOGOP->op_other;
+                /* Is there an empty "if" block or ternary true branch?
+                   If so, optimise away the OP_STUB if safe to do so. */
+                if (stub->op_type == OP_STUB &&
+                    ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+                ) {
+                    OP *trueop = OpSIBLING( cLOGOP->op_first );
+
+                    assert((stub == trueop ) || (OP_TYPE_IS(trueop, OP_SCOPE) &&
+                     ((stub == cUNOPx(trueop)->op_first)) && !OpSIBLING(stub))
+                    );
+                    assert(!(stub->op_flags & OPf_KIDS));
+
+                    cLOGOP->op_other = (stub->op_next == trueop) ?
+                                  stub->op_next->op_next  :
+                                  stub->op_next;
+
+                    op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
+
+                    if (stub != trueop) op_free(stub);
+                    op_free(trueop);
+                } else
+
                 /* Is there an empty "else" block or ternary false branch?
                    If so, optimise away the OP_STUB if safe to do so. */
-                if (o->op_next->op_type == OP_STUB &&
-                    ((o->op_next->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+                stub = o->op_next;
+                if (stub->op_type == OP_STUB &&
+                    ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
                 ) {
-                    OP *stub = o->op_next;
                     assert(stub == OpSIBLING(OpSIBLING( cLOGOP->op_first )));
                     assert(!(stub->op_flags & OPf_KIDS));
+                    o->op_flags |= OPf_SPECIAL; /* For B::Deparse */
                     o->op_next = stub->op_next;
                     op_sibling_splice(o, OpSIBLING(cLOGOP->op_first), 1, NULL);
                     op_free(stub);
