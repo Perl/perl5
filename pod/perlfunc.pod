@@ -6691,13 +6691,9 @@ including:
 
 =over
 
-=item * L<Data::Entropy>
+=item * L<Crypt::URandom>
 
-=item * L<Crypt::Random>
-
-=item * L<Math::Random::Secure>
-
-=item * L<Math::TrulyRandom>
+=item * L<Crypt::PRNG>
 
 =back
 
