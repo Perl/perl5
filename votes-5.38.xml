@@ -23,6 +23,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <!-- That is https://github.com/Perl/perl-security/issues/144
      khw screwed up and the commit is in blead of the security repository -->
+<!-- CVE-2024-56406 -->
 <commit votes="khw" id="f93109c" issue="144" pull="" desc="heap-buffer-overflow"/>
 
 </div>
