@@ -76,7 +76,8 @@ Cpanel::JSON::XS
 cpanp(1)
 CPANPLUS
 crypt(3)
-Crypt::Random
+Crypt::PRNG
+Crypt::URandom
 ctime(3)
 curl(1)
 Dancer
@@ -216,7 +217,6 @@ Math::BigInt::Constant
 Math::BigInt::GMP
 Math::BigInt::Pari
 Math::Random::MT::Perl
-Math::Random::Secure
 Math::TrulyRandom
 mbrlen(3)
 mbrtowc(3)
