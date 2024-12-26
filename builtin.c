@@ -431,19 +431,21 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     if(!opcode)
         return entersubop;
 
-    OP *parent = entersubop, *pushop, *argop;
-
-    pushop = cUNOPx(entersubop)->op_first;
+    OP *pushop = cUNOPx(entersubop)->op_first;
     if (!OpHAS_SIBLING(pushop)) {
         pushop = cUNOPx(pushop)->op_first;
     }
 
-    argop = OpSIBLING(pushop);
+    OP *argop = OpSIBLING(pushop);
 
     if (!argop || !OpHAS_SIBLING(argop) || OpHAS_SIBLING(OpSIBLING(argop)))
         return entersubop;
 
-    (void)op_sibling_splice(parent, pushop, 1, NULL);
+    {
+        OP *const excised = op_sibling_splice(NULL, pushop, 1, NULL);
+        PERL_UNUSED_VAR(excised);
+        assert(excised == argop);
+    }
 
     U8 wantflags = entersubop->op_flags & OPf_WANT;
 
