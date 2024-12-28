@@ -198,7 +198,8 @@ C<&PL_sv_undef>.
 
 =for apidoc Amn|SV|PL_sv_no
 This is the C<false> SV.  It is readonly.  See C<L</PL_sv_yes>>.  Always refer
-to this as C<&PL_sv_no>.
+to this as C<&PL_sv_no>.  Also see C<L</PL_sv_zero>>.  That is similar except
+for its string value. C<&PL_sv_no>'s string value is empty string C<"">.
 
 =for apidoc Amn|SV|PL_sv_yes
 This is the C<true> SV.  It is readonly.  See C<L</PL_sv_no>>.  Always refer to
