@@ -47,8 +47,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="khw steveh" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
-<commit votes="khw steveh" id="c9a9e95" issue="22793" pull="22799" desc="Configure: Fix compilation error on some systems"/>
+<commit votes="khw steveh mauke" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
+<commit votes="khw steveh mauke" id="c9a9e95" issue="22793" pull="22799" desc="Configure: Fix compilation error on some systems"/>
 
 </div>
 
@@ -58,8 +58,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh" id="fddbca2" issue="" pull="" desc="the macos-11 runner is deprecated and retires 28 June 2024"/>
-<commit votes="steveh" id="486e2a3" issue="" pull="" desc="github CI: the macos-12 runner is deprecated and retires 2024-12-03"/>
+<commit votes="steveh mauke" id="fddbca2" issue="" pull="" desc="the macos-11 runner is deprecated and retires 28 June 2024"/>
+<commit votes="steveh mauke" id="486e2a3" issue="" pull="" desc="github CI: the macos-12 runner is deprecated and retires 2024-12-03"/>
 
 </div>
 
