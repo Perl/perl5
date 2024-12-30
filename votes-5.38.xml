@@ -67,7 +67,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="khw" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
+<commit votes="khw steveh" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
 
 </div>
 
