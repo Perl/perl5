@@ -47,8 +47,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="khw" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
-<commit votes="khw" id="5746862" issue="22793" pull="22799" desc="Configure: Fix compilation error on some systems"/>
+<commit votes="khw steveh" id="914b007" issue="22577" pull="22609" desc="handle __float128 NV alignment on 32-bit"/>
+<commit votes="khw steveh" id="c9a9e95" issue="22793" pull="22799" desc="Configure: Fix compilation error on some systems"/>
 
 </div>
 
