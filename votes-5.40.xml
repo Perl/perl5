@@ -58,6 +58,9 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
+<commit votes="steveh" id="fddbca2" issue="" pull="" desc="the macos-11 runner is deprecated and retires 28 June 2024"/>
+<commit votes="steveh" id="486e2a3" issue="" pull="" desc="github CI: the macos-12 runner is deprecated and retires 2024-12-03"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
