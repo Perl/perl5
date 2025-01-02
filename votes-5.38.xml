@@ -39,13 +39,13 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <div><h3>Regression Fixes</h3>
 
-<!--         Both issues are still Open.
-     khw: PR 22701 is a better alternative to 83c4f4.  See the updated discussion
-          for GH21366. Downstream distributors reverted 7af2d20, causing 22195.
-          If we issue a new 5.38, it will reenable 7af2d20 automatically
-          fixing 22195, and GH22701 on top of that fixes 21366 
--->
+<!-- steveh: Both khw and I have looked at this commit and we both think it is too difficult to pull this into maint-5.38 due to
+             too many other changes touching the same area of code -->
 <commit votes="jkeenan" id="bf38d1cf744fcc49b715b9d633761aa67436c002" issue="21366" pull="" desc="locale.c: Initialize PL_curlocales at startup"/>
+
+<!-- steveh: khw devised first PR#22701 and then PR#22792 as alternatives to bf38d1c for fixing GH#21366 in maint-5.38
+             khw's own opinion is that PR#22792 is the best of those two alternatives -->
+<commit votes="khw steveh" id="ecd3fa85b9609c4f3f1461d38604dc03854b1899" issue="21366" pull="22792" desc="Fix maint 5.38 locale initialization bug"/>
 
 </div>
 
