@@ -30,7 +30,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 <!-- steveh: This is needed for 388bf71121e682302397a8b7d9f56fef5ba2559e below -->
-<commit votes="steveh mauke" id="ecbf63ae7dd6638fee8184d452ebacf312c3b535" issue="" pull="" desc="regcomp.c - zero the pRExC_state structure early in compilation"/>
+<commit votes="steveh mauke craigb" id="ecbf63ae7dd6638fee8184d452ebacf312c3b535" issue="" pull="" desc="regcomp.c - zero the pRExC_state structure early in compilation"/>
 
 <commit votes="steveh tonyc khw mauke" id="388bf71121e682302397a8b7d9f56fef5ba2559e" issue="21661" pull="21683" desc="safer cleanup when failing to compile regexps"/>
 <commit votes="steveh tonyc mauke" id="c9e5693c3bd5a506e29ece21256a1c07a6668a8e" issue="" pull="" desc="add tests for #21661"/>
@@ -45,7 +45,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <!-- steveh: khw devised first PR#22701 and then PR#22792 as alternatives to bf38d1c for fixing GH#21366 in maint-5.38
              khw's own opinion is that PR#22792 is the best of those two alternatives -->
-<commit votes="khw steveh" id="ecd3fa85b9609c4f3f1461d38604dc03854b1899" issue="21366" pull="22792" desc="Fix maint 5.38 locale initialization bug"/>
+<commit votes="khw steveh craigb" id="ecd3fa85b9609c4f3f1461d38604dc03854b1899" issue="21366" pull="22792" desc="Fix maint 5.38 locale initialization bug"/>
 
 </div>
 
