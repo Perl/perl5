@@ -1,4 +1,4 @@
-package builtin 0.017;
+package builtin 0.018;
 
 use v5.40;
 
@@ -167,7 +167,8 @@ Available starting with Perl 5.36.
 
 This function is currently B<experimental>.
 
-Returns the floating-point infinity value.
+Returns the floating-point infinity value. If the underlying numeric C type
+does not support such a value, it throws a runtime error instead.
 
 Available starting with Perl 5.40.
 
@@ -177,7 +178,8 @@ Available starting with Perl 5.40.
 
 This function is currently B<experimental>.
 
-Returns the floating-point "Not-a-Number" value.
+Returns the floating-point "Not-a-Number" value. If the underlying numeric C
+type does not support such a value, it throws a runtime error instead.
 
 Available starting with Perl 5.40.
 
