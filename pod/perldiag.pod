@@ -675,6 +675,16 @@ is currently being compiled. Since this method is used to introduce new
 lexical subroutines into the scope currently being compiled, this is not
 going to have any effect.
 
+=item builtin::inf not implemented
+
+(F) Your machine doesn't support infinity as a numeric value (probably because
+it's a VAX).
+
+=item builtin::nan not implemented
+
+(F) Your machine doesn't support NaN ("not a number") as a numeric value
+(probably because it's a VAX).
+
 =item Builtin version bundle "%s" is not supported by Perl
 
 (F) You attempted to C<use builtin :ver> for a version number that is either

@@ -8,6 +8,7 @@ BEGIN {
 
 use v5.36;
 no warnings 'experimental::builtin';
+use Config;
 
 package FetchStoreCounter {
     sub TIESCALAR($class, @args) { bless \@args, $class }
@@ -55,19 +56,31 @@ package FetchStoreCounter {
 {
     use builtin qw( inf nan );
 
-    ok(inf, 'inf is true');
-    ok(inf > 1E10, 'inf is bigger than 1E10');
-    ok(inf == inf, 'inf is equal to inf');
-    ok(inf == inf + 1, 'inf is equal to inf + 1');
+    if ($Config{d_double_has_inf}) {
+        ok(inf, 'inf is true');
+        ok(inf > 1E10, 'inf is bigger than 1E10');
+        ok(inf == inf, 'inf is equal to inf');
+        ok(inf == inf + 1, 'inf is equal to inf + 1');
 
-    # Invoke the real XSUB
-    my $inf = ( \&builtin::inf )->();
-    ok($inf == $inf + 1, 'inf returned by real xsub');
+        # Invoke the real XSUB
+        my $inf = ( \&builtin::inf )->();
+        ok($inf == $inf + 1, 'inf returned by real xsub');
+    } else {
+        is(eval { inf }, undef, 'inf throws');
+        my $e = $@;
+        like($e, qr/^builtin::inf not implemented at/, 'inf fails with correct error');
+    }
 
-    ok(nan != nan, 'NaN is not equal to NaN');
+    if ($Config{d_double_has_nan}) {
+        ok(nan != nan, 'NaN is not equal to NaN');
 
-    my $nan = ( \&builtin::nan )->();
-    ok($nan != $nan, 'NaN returned by real xsub');
+        my $nan = ( \&builtin::nan )->();
+        ok($nan != $nan, 'NaN returned by real xsub');
+    } else {
+        is(eval { nan }, undef, 'nan throws');
+        my $e = $@;
+        like($e, qr/^builtin::nan not implemented at/, 'nan fails with correct error');
+    }
 }
 
 # weakrefs

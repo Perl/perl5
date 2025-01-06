@@ -96,8 +96,12 @@ XS(XS_builtin_inf)
     dXSARGS;
     if(items)
         croak_xs_usage(cv, "");
+#ifdef DOUBLE_HAS_INF
     EXTEND(SP, 1);
     XSRETURN_NV(NV_INF);
+#else
+    Perl_croak_nocontext("builtin::inf not implemented");
+#endif
 }
 
 XS(XS_builtin_nan);
@@ -106,8 +110,12 @@ XS(XS_builtin_nan)
     dXSARGS;
     if(items)
         croak_xs_usage(cv, "");
+#ifdef DOUBLE_HAS_NAN
     EXTEND(SP, 1);
     XSRETURN_NV(NV_NAN);
+#else
+    Perl_croak_nocontext("builtin::nan not implemented");
+#endif
 }
 
 enum {
@@ -135,8 +143,16 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     switch(builtin->ckval) {
         case BUILTIN_CONST_FALSE: constval = &PL_sv_no; break;
         case BUILTIN_CONST_TRUE:  constval = &PL_sv_yes; break;
+#ifdef DOUBLE_HAS_INF
         case BUILTIN_CONST_INF:   constval = newSVnv(NV_INF); break;
+#else
+        case BUILTIN_CONST_INF:   return entersubop;
+#endif
+#ifdef DOUBLE_HAS_NAN
         case BUILTIN_CONST_NAN:   constval = newSVnv(NV_NAN); break;
+#else
+        case BUILTIN_CONST_NAN:   return entersubop;
+#endif
         default:
             DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf,
                       builtin->ckval);
