@@ -3985,6 +3985,21 @@ PP(pp_match)
     return NORMAL;
 }
 
+/* errno can be either EAGAIN or EWOULDBLOCK for a socket() read that
+   is non-blocking but would have blocked if blocking
+*/
+PERL_STATIC_INLINE bool
+error_is_would_block(int err) {
+#ifdef EAGAIN
+    if (err == EAGAIN)
+        return true;
+#endif
+#ifdef EWOULDBLOCK
+    if (err == EWOULDBLOCK)
+        return true;
+#endif
+    return false;
+}
 
 /* Perl_do_readline(): implement <$fh>, readline($fh) and glob('*.h')
  *
@@ -4227,6 +4242,9 @@ Perl_do_readline(pTHX)
                               (int)(STATUS_CURRENT >> 8),
                               (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
                 }
+            }
+            else if (error_is_would_block(errno)) {
+                PerlIO_clearerr(fp);
             }
 
             if (gimme == G_SCALAR) {
