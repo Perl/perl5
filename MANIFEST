@@ -6424,6 +6424,7 @@ t/op/range.t				See if .. works
 t/op/read.t				See if read() works
 t/op/readdir.t				See if readdir() works
 t/op/readline.t				See if <> / readline / rcatline work
+t/op/readline_nb.t			Test <> error handling on non-blocking handles
 t/op/recurse.t				See if deep recursion works
 t/op/ref.t				See if refs and objects work
 t/op/refstack.t				See if a ref counted stack fixes things
