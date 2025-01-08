@@ -373,6 +373,14 @@ XXX
 L<perlfunc/shmread> and L<perlfunc/shmwrite> are no longer limited to 31-bit
 values for their POS and SIZE arguments. [GH #22895]
 
+=item *
+
+L<perlfunc/shmread> is now better behaved if VAR is not a plain string. If VAR
+is a tied variable, it calls C<STORE> once; previously, it would also call
+C<FETCH>, but without using the result. If VAR is a reference, the referenced
+entity has its refcount properly decremented when VAR is turned into a string;
+previously, it would leak memory. [GH #22898]
+
 =back
 
 =head1 Known Problems

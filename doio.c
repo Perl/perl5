@@ -3421,17 +3421,8 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
         return -1;
 
     if (optype == OP_SHMREAD) {
-        SvGETMAGIC(mstr);
-        SvUPGRADE(mstr, SVt_PV);
-        /* suppress warning when reading into undef var (tchrist 3/Mar/00) */
-        if (! SvOK(mstr))
-            SvPVCLEAR(mstr);
-        SvPOK_only(mstr);
-        char *const mbuf = SvGROW(mstr, (STRLEN)msize+1);
-
-        Copy(shm + mpos, mbuf, msize, char);
-        SvCUR_set(mstr, msize);
-        *SvEND(mstr) = '\0';
+        sv_setpvn(mstr, shm + mpos, msize);
+        SvUTF8_off(mstr);
         SvSETMAGIC(mstr);
         /* who knows who has been playing with this shared memory? */
         SvTAINTED_on(mstr);

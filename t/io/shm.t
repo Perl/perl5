@@ -54,7 +54,7 @@ if (not defined $key) {
   }
 }
 else {
-	plan(tests => 28);
+	plan(tests => 33);
 	pass('acquired shared mem');
 }
 
@@ -87,7 +87,7 @@ my ($fetch, $store) = (0, 0);
   sub STORE     { ++$store; $_[0][0] = $_[1] } }
 tie my $ct, 'Counted';
 shmread $key, $ct, 0, 1;
-is($fetch, 1, "shmread FETCH once");
+is($fetch, 0, "shmread FETCH none");
 is($store, 1, "shmread STORE once");
 ($fetch, $store) = (0, 0);
 shmwrite $key, $ct, 0, 1;
@@ -108,6 +108,19 @@ is($store, 0, "shmwrite STORE none");
     $rdbuf = "";
     ok(shmread($key, $rdbuf, 0, 4), "read it back (upgraded source)");
     is($rdbuf, $text, "check we got back the expected (upgraded source)");
+}
+
+# GH #22898 - reading into reference is sane
+{
+    my $rdbuf = [];
+    builtin::weaken(my $wref = $rdbuf);
+
+    my $text = 'A';
+    ok(shmwrite($key, $text, 0, 1), "wrote 'A' to shared segment");
+    ok(shmread($key, $rdbuf, 0, 1), "read 1 byte into buffer that previously stored a ref");
+    is(ref($rdbuf), '', "buffer is not a reference anymore");
+    is($rdbuf, $text, "buffer contains expected string");
+    is($wref, undef, "no leak: referenced object had refcount decremented");
 }
 
 # GH #22895 - 2^31 boundary
