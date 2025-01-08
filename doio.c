@@ -3359,38 +3359,75 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     PERL_ARGS_ASSERT_DO_SHMIO;
     PERL_UNUSED_ARG(sp);
 
-    char *shm;
-    struct shmid_ds shmds;
-    const I32 id = SvIVx(*++mark);
-    SV * const mstr = *++mark;
-    const I32 mpos = SvIVx(*++mark);
-    const I32 msize = SvIVx(*++mark);
+    const IV iv_id = SvIVx(*++mark);
+    SV *const mstr = *++mark;
+    const IV iv_mpos = SvIVx(*++mark);
+    const IV iv_msize = SvIVx(*++mark);
 
-    SETERRNO(0,0);
-    if (shmctl(id, IPC_STAT, &shmds) == -1)
-        return -1;
-    if (mpos < 0 || msize < 0
-        || (size_t)mpos + msize > (size_t)shmds.shm_segsz) {
-        SETERRNO(EFAULT,SS_ACCVIO);		/* can't do as caller requested */
-        return -1;
-    }
-    if (id >= 0) {
-        shm = (char *)shmat(id, NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
-    } else {
+    /* must fit in int */
+    if (
+        iv_id < 0
+        || (sizeof (IV) > sizeof (int) && iv_id > PERL_INT_MAX)
+    ) {
         SETERRNO(EINVAL,LIB_INVARG);
         return -1;
     }
-    if (shm == (char *)-1)	/* I hate System V IPC, I really do */
+    const int id = iv_id;
+
+    /* must fit in both size_t and STRLEN (a.k.a Size_t) */
+    if (
+        iv_mpos < 0
+        || (sizeof (IV) > sizeof (size_t) && iv_mpos > (IV)SIZE_MAX)
+        || (sizeof (IV) > sizeof (STRLEN) && iv_mpos > (IV)(STRLEN)-1)
+    ) {
+        SETERRNO(EFAULT,SS_ACCVIO);
         return -1;
+    }
+    const size_t mpos = iv_mpos;
+
+    /* must fit in both size_t and STRLEN (a.k.a Size_t) */
+    if (
+        iv_msize < 0
+        || (sizeof (IV) > sizeof (size_t) && iv_msize > (IV)SIZE_MAX)
+        || (sizeof (IV) > sizeof (STRLEN) && iv_msize > (IV)(STRLEN)-1)
+        /* for shmread(), we need one extra byte for the NUL terminator */
+        || (optype == OP_SHMREAD && (STRLEN)iv_msize > (STRLEN)-1 - 1)
+    ) {
+        SETERRNO(EFAULT,SS_ACCVIO);
+        return -1;
+    }
+    const size_t msize = iv_msize;
+
+    if (SIZE_MAX - mpos < msize) {
+        /* overflow */
+        SETERRNO(EFAULT,SS_ACCVIO);
+        return -1;
+    }
+    const size_t mpos_end = mpos + msize;
+
+    SETERRNO(0,0);
+
+    struct shmid_ds shmds;
+    if (shmctl(id, IPC_STAT, &shmds) == -1)
+        return -1;
+
+    if (mpos_end > (size_t)shmds.shm_segsz) {
+        SETERRNO(EFAULT,SS_ACCVIO);
+        return -1;
+    }
+
+    char *const shm = (char *)shmat(id, NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
+    if (shm == (char *)-1)      /* I hate System V IPC, I really do */
+        return -1;
+
     if (optype == OP_SHMREAD) {
-        char *mbuf;
-        /* suppress warning when reading into undef var (tchrist 3/Mar/00) */
         SvGETMAGIC(mstr);
         SvUPGRADE(mstr, SVt_PV);
+        /* suppress warning when reading into undef var (tchrist 3/Mar/00) */
         if (! SvOK(mstr))
             SvPVCLEAR(mstr);
         SvPOK_only(mstr);
-        mbuf = SvGROW(mstr, (STRLEN)msize+1);
+        char *const mbuf = SvGROW(mstr, (STRLEN)msize+1);
 
         Copy(shm + mpos, mbuf, msize, char);
         SvCUR_set(mstr, msize);
@@ -3400,10 +3437,11 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
         SvTAINTED_on(mstr);
     }
     else {
-        STRLEN len;
+        assert(optype == OP_SHMWRITE);
 
-        const char *mbuf = SvPVbyte(mstr, len);
-        const I32 n = ((I32)len > msize) ? msize : (I32)len;
+        STRLEN len;
+        const char *const mbuf = SvPVbyte(mstr, len);
+        const STRLEN n = (len > msize) ? msize : len;
         Copy(mbuf, shm + mpos, n, char);
         if (n < msize)
             memzero(shm + mpos + n, msize - n);
@@ -3411,7 +3449,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     return shmdt(shm);
 #else
     /* diag_listed_as: shm%s not implemented */
-    Perl_croak(aTHX_ "shm I/O not implemented");
+    Perl_croak_nocontext("shm I/O not implemented");
     return -1;
 #endif
 }
