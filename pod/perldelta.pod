@@ -45,6 +45,26 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Removed containing function references for functions without eval
+
+5.40 reintroduced unconditional references from functions to their
+containing functions to fix a bug introduced in 5.18 that broke the
+special behaviour of C<eval EXPR> in package C<DB> which is used by
+the debugger.
+
+In some cases this change led to circular reference chains between
+closures and other existing references, resulting in memory leaks.
+
+This change has been reverted, fixing [GH #22547] but re-breaking [GH
+#19370].
+
+This means the reference loops won't occur, and that lexical variables
+and functions from enclosing functions may not be visible in the
+debugger.
+
+Note that calling C<eval EXPR> in a function unconditionally causes a
+function to reference its enclosing functions as it always has.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
