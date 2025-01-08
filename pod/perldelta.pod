@@ -368,6 +368,11 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+L<perlfunc/shmread> and L<perlfunc/shmwrite> are no longer limited to 31-bit
+values for their POS and SIZE arguments. [GH #22895]
+
 =back
 
 =head1 Known Problems
