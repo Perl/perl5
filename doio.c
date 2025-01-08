@@ -3356,15 +3356,15 @@ I32
 Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
+    PERL_ARGS_ASSERT_DO_SHMIO;
+    PERL_UNUSED_ARG(sp);
+
     char *shm;
     struct shmid_ds shmds;
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
     const I32 mpos = SvIVx(*++mark);
     const I32 msize = SvIVx(*++mark);
-
-    PERL_ARGS_ASSERT_DO_SHMIO;
-    PERL_UNUSED_ARG(sp);
 
     SETERRNO(0,0);
     if (shmctl(id, IPC_STAT, &shmds) == -1)
