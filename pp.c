@@ -3696,8 +3696,11 @@ PP_wrapped(pp_substr,
                 repl = (char*)bytes_to_utf8_free_me(
                                         (U8*)repl, &repl_len, &free_me);
             }
-            if (!SvOK(sv))
-                SvPVCLEAR(sv);
+
+            /* The earlier SvPV_force_nomg(sv, curlen) should have ensured
+             * that sv is SvOK, even if it wasn't beforehand. */
+            assert(SvOK(sv));
+
             sv_insert_flags(sv, byte_pos, byte_len, repl, repl_len, 0);
             Safefree(free_me);
         }
