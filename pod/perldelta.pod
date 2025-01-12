@@ -388,6 +388,13 @@ This has now been fixed, and runs as expected. ([GH #23064]).
         say "This line would never run";
     }
 
+=item *
+
+L<perlfunc/readline> now clears the error flag if an error occurs when
+reading and that error is C<EAGAIN> or C<EWOULDBLOCK>.  This allows
+old code that depended on C<readline> to clear all errors to ignore
+these relatively harmless errors.  [GH #22883]
+
 =back
 
 =head1 Known Problems
