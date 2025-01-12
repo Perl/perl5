@@ -563,13 +563,14 @@ jobs:
   # | (__| |_| | (_| |\ V  V /| | | | |
   #  \___|\__, |\__, | \_/\_/ |_|_| |_|
   #       |___/ |___/
+  # disabled until cygwin get a signal handling fix out
 
   cygwin:
     name: "cygwin"
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_cygwin == 'true'))
+    if: (! cancelled() && (needs.sanity_check.outputs.ci_force_cygwin == 'true'))
 
     steps:
       # we use Cygwin git, so no need to configure git here.
