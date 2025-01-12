@@ -793,7 +793,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     s = SvPV(sv, len);
     if (chomping) {
         if (s && len) {
-            void *temp_buffer = NULL;
+            void *free_me = NULL;
             s += --len;
             if (RsPARA(PL_rs)) {
                 if (*s != '\n')
@@ -818,7 +818,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
                     if (SvUTF8(PL_rs)) {
                         /* RS is utf8, scalar is 8 bit.  */
                         if (! utf8_to_bytes_new_pv((const U8 **) &rsptr, &rslen,
-                                                   &temp_buffer))
+                                                   &free_me))
                         {
                             /* Cannot downgrade, therefore cannot possibly
                              * match. */
@@ -827,8 +827,9 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
                     }
                     else {
                         /* RS is 8 bit, scalar is utf8.  */
-                        temp_buffer = bytes_to_utf8((U8*)rsptr, &rslen);
-                        rsptr = (char *) temp_buffer;
+                        rsptr = (char *) bytes_to_utf8_free_me((U8*) rsptr,
+                                                               &rslen,
+                                                               &free_me);
                     }
                 }
                 if (rslen == 1) {
@@ -853,7 +854,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
             SvSETMAGIC(sv);
 
             nope_free_all:
-            Safefree(temp_buffer);
+            Safefree(free_me);
             nope_free_nothing: ;
         }
     } else {
