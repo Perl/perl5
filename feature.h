@@ -748,7 +748,7 @@ S_fetch_feature_bits_hh(pTHX_ HV *hh) {
 
 #define DUMP_FEATURE_BITS(file, cop) \
     STMT_START { \
-        PerlIO_printf(file, "0x%08x", cop->cop_features.bits[0]); \
+        PerlIO_printf(file, "0x%" U32xf, cop->cop_features.bits[0]); \
     } STMT_END
 
 #endif /* PERL_IN_DUMP_C */

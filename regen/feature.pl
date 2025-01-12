@@ -585,7 +585,7 @@ my $any_bits_set = "(                              \\\n      " .
 
 my $dump_bits = "STMT_START { \\\n        " .
   join(qq( \\\n        PerlIO_putc(file, ','); \\\n        ),
-       map { qq(PerlIO_printf(file, "0x%08x", cop->cop_features.bits[$_]);) }
+       map { qq(PerlIO_printf(file, "0x%" U32xf, cop->cop_features.bits[$_]);) }
        0 .. $cop_feature_size-1) .
   " \\\n    } STMT_END";
 
