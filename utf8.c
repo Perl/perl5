@@ -2865,9 +2865,24 @@ automatically freed, via a call to C<L</SAVEFREEPV>>.
 
 For C<utf8_to_bytes_new_pv>, C<*free_me> has been set to C<*s_ptr>, and it is
 the caller's responsibility to free the new memory when done using it.
-The results of this parameter can simply be passed to C<L</Safefree>> when
-done, as that handles a C<NULL> parameter, and/or it can be used as a boolean
-(non-NULL meaning C<true>) to indicate that the input was indeed changed.
+The following paradigm is convenient to use for this:
+
+ void * free_me;
+ if (utf8_to_bytes_new_pv(&s, &len, &free_me) {
+    ...
+ }
+ else {
+    ...
+ }
+
+ ...
+
+ Safefree(free_me);
+
+C<free_me> can be used as a boolean (non-NULL meaning C<true>) to indicate that
+the input was indeed changed if you need to revisit that later in the code.
+Your design is likely flawed if you find yourself using C<free_me> for any
+other purpose.
 
 =back
 
