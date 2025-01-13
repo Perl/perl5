@@ -109,6 +109,15 @@ There may well be none in a stable release.
 
 =item *
 
+The peephole optimizer recognises the following zero-offset C<substr>
+patterns and swaps in a new dedicated operator (C<OP_SUBSTR_LEFT>).
+[GH #22785]
+
+    substr($x, 0, ...)
+    substr($x, 0, ..., '')
+
+=item *
+
 XXX
 
 =back
