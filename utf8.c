@@ -1627,13 +1627,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 {
     PERL_ARGS_ASSERT_UTF8_TO_UV_MSGS_HELPER_;
 
-    const U8 * s = s0;
-
-    U32 possible_problems;  /* A bit is set here for each potential problem
-                               found as we go along */
-    UV uv = 0;
-    Size_t expectlen;    /* How long should this sequence be? */
-
     /* Here, is one of:
      *  a)  malformed;
      *  b)  a problematic code point (surrogate, non-unicode, or nonchar); or
@@ -1674,9 +1667,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
           || UTF8_IS_NONCHAR(s0, e));
     */
 
-    s = s0;
-    possible_problems = 0;
-    expectlen = 0;
     if (errors) {
         *errors = 0;
     }
@@ -1711,7 +1701,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * allowed one, we could allow in something that shouldn't have been.
      */
 
+    Size_t expectlen = 0;   /* How long should this sequence be? */
     Size_t curlen = 0;      /* How many bytes have we processed so far */
+    UV uv = 0;              /* The accumulated code point, so far */
+    const U8 * s = s0;      /* Our current position examining the sequence */
 
     /* Gives how many bytes are available, which may turn out to be less than
      * the expected length */
@@ -1722,6 +1715,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * than a single character */
     const U8 * send = e;
 
+    /* A bit is set here for each potential problem found as we go along */
+    U32 possible_problems = 0;
+
+    /* The above variables have to be initialized before the 'goto' */
+
     if (UNLIKELY(s0 >= send)) {
         possible_problems |= UTF8_GOT_EMPTY;
         avail_len = 0;
@@ -1729,10 +1727,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     }
     avail_len = send - s0;
 
-    /* We now know we can examine the first byte of the input */
-    expectlen = UTF8SKIP(s0);
-
-    /* A continuation character can't start a valid sequence */
+    /* We now know we can examine the first byte of the input.  A continuation
+     * character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
         curlen = 1;
@@ -1744,9 +1740,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     assert(! NATIVE_BYTE_IS_INVARIANT(*s0));
 
     /* Here is not a continuation byte, nor an invariant.  The only thing left
-     * is a start byte (possibly for an overlong).  (We can't use UTF8_IS_START
-     * to check for sure because it excludes start bytes like \xC0 that always
-     * lead to overlongs.) */
+     * is a start byte (possibly for an overlong). */
+    expectlen = UTF8SKIP(s0); /* How long should this sequence be? */
 
     /* Convert to I8 on EBCDIC (no-op on ASCII), then remove the leading bits
      * that indicate the number of bytes in the character's whole UTF-8
