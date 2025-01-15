@@ -651,7 +651,7 @@ sub generate_embed_h {
        provides a set of compatibility functions that don't take an
        extra argument but grab the context pointer using the macro dTHX.
      */
-    #if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES)
+    #if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && !defined(PERL_WANT_VARARGS)
     END
 
     foreach (@nocontext) {

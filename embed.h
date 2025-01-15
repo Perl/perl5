@@ -76,7 +76,8 @@
    extra argument but grab the context pointer using the macro dTHX.
  */
 
-#   if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES)
+#   if  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && \
+       !defined(PERL_WANT_VARARGS)
 #     define croak                              Perl_croak_nocontext
 #     define deb                                Perl_deb_nocontext
 #     define die                                Perl_die_nocontext
@@ -90,7 +91,8 @@
 #     define sv_setpvf_mg                       Perl_sv_setpvf_mg_nocontext
 #     define warn                               Perl_warn_nocontext
 #     define warner                             Perl_warner_nocontext
-#   endif /* defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) */
+#   endif /*  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) &&
+             !defined(PERL_WANT_VARARGS) */
 # endif /* !defined(PERL_NOCOMPAT) */
 #endif /* !defined(PERL_CORE) */
 #if !defined(PERL_NO_SHORT_NAMES)
