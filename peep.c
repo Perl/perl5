@@ -3869,7 +3869,7 @@ Perl_rpeep(pTHX_ OP *o)
             break;
 
         case OP_SUBSTR: {
-            OP *expr, *offs, *len;
+            OP *expr, *offs, *len, *repl = NULL;
             /* Specialize substr($x, 0, $y) and substr($x,0,$y,"") */
             /* Does this substr have 3-4 args and amiable flags? */
             if (
@@ -3897,7 +3897,7 @@ Perl_rpeep(pTHX_ OP *o)
 
                 if (cMAXARG3x(o) == 4) {/* replacement */
                     /* Is the replacement string CONST ""? */
-                    OP *repl = OpSIBLING(len);
+                    repl = OpSIBLING(len);
                     if (repl->op_type != OP_CONST)
                         break;
                     SV *repl_sv = cSVOPx_sv(repl);
@@ -3908,12 +3908,10 @@ Perl_rpeep(pTHX_ OP *o)
                 break;
             }
             /* It's on! */
-            /* Take out the static LENGTH & REPLACMENT OPs */
+            /* Take out the static LENGTH OP.  */
             /* (The finalizer does not seem to change op_next here) */
             expr->op_next = offs->op_next;
             o->op_private = cMAXARG3x(o);
-            if (cMAXARG3x(o) == 4)
-                len->op_next = o;
 
             /* We have a problem if padrange pushes the expr OP for us,
              * then jumps straight to the offs CONST OP. For example:
@@ -3924,7 +3922,14 @@ Perl_rpeep(pTHX_ OP *o)
               * B::Deparse. :/  */
             op_null(offs);
 
-            /* repl status unchanged because it makes Deparsing easier. */
+            /* There can be multiple pointers to repl, see GH #22914.
+             *    substr $x, 0, $y ? 2 : 3, "";
+             * So instead of rewriting all of len, null out repl. */
+            if (repl) {
+                op_null(repl);
+                /* We can still rewrite the simple len case though.*/
+                len->op_next = o;
+            }
 
             /* Upgrade the SUBSTR to a SUBSTR_LEFT */
             OpTYPE_set(o, OP_SUBSTR_LEFT);

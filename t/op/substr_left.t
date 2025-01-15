@@ -104,5 +104,12 @@ $str = "\x00\x01\x02\x03\x04\x05";
 $result = substr($str, 0, 3, "");
 is($result, "\x00\x01\x02", 'hex EXPR: returns correct characters');
 is($str, "\x03\x04\x05", 'hex EXPR: retains correct characters');
+# GH #22914. LEN has more than one pointer to REPL.
+$str = "perl";
+# Hopefully $INC[0] ne '/dev/random' is a reasonable test assumption...
+# (We need a condition that no future clever optimiser will strip)
+$result = substr($str, 0, $INC[0] eq '/dev/random' ? 2: 3, '');
+is($result, 'per', 'GH#22914: non-trivial LEN returns correct characters');
+is($str, 'l', 'GH#22914: non-trivial LEN retains correct characters');
 
 done_testing();

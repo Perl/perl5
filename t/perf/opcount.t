@@ -1034,7 +1034,7 @@ test_opcount(0, "substr with const zero offset and '' repl (void)",
                 {
                     substr       => 0,
                     substr_left  => 1,
-                    const        => 2,
+                    const        => 1,
                 });
 
 test_opcount(0, "substr with const zero offset and '' repl (lexical)",
@@ -1042,7 +1042,7 @@ test_opcount(0, "substr with const zero offset and '' repl (lexical)",
                 {
                     substr       => 0,
                     substr_left  => 1,
-                    const        => 2,
+                    const        => 1,
                     padsv        => 3,
                     sassign      => 1
                 });
@@ -1052,7 +1052,7 @@ test_opcount(0, "substr with const zero offset and '' repl (lexical TARGMY)",
                 {
                     substr       => 0,
                     substr_left  => 1,
-                    const        => 2,
+                    const        => 1,
                     padsv        => 3,
                     padsv_store  => 0,
                     sassign      => 0
@@ -1063,7 +1063,7 @@ test_opcount(0, "substr with const zero offset and '' repl (gv)",
                 {
                     substr       => 0,
                     substr_left  => 1,
-                    const        => 2,
+                    const        => 1,
                     gvsv         => 1,
                     sassign      => 1
                 });
