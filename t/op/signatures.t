@@ -1399,20 +1399,8 @@ is scalar(t145()), undef;
     }
     is ref(t149()), "ARRAY", "t149: closure can make new lexical a ref";
 
-    # Quiet the 'use of @_ is experimental' warnings
-    no warnings 'experimental::args_array_with_signatures';
-
-    sub t150 ($a = do {@_ = qw(a b c); 1}, $b = 2) {
-        is $a, 1,   "t150: a: growing \@_";
-        is $b, "b", "t150: b: growing \@_";
-    }
-    t150();
-
-    sub t151 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, $b = 2) {
-        is $a, 1,   "t151: a: tied \@_";
-        is $b, "b", "t151: b: tied \@_";
-    }
-    t151();
+    # Tests t150, t151, t156 to t159 were related to modifying @_ during
+    # signature handling. This is no longer supported
 
     sub t152 ($a = t152x(), @b) {
         sub t152x { @b = qw(a b c); 1 }
@@ -1437,30 +1425,6 @@ is scalar(t145()), undef;
         $a . '-' . join(':', sort %b);
     }
     is t155(), "1-", "t155: closure can make new lexical hash tied";
-
-    sub t156 ($a = do {@_ = qw(a b c); 1}, @b) {
-        is $a, 1,       "t156: a: growing \@_";
-        is "@b", "b c", "t156: b: growing \@_";
-    }
-    t156();
-
-    sub t157 ($a = do {@_ = qw(a b c); 1}, %b) {
-        is $a, 1,                     "t157: a: growing \@_";
-        is join(':', sort %b), "b:c", "t157: b: growing \@_";
-    }
-    t157();
-
-    sub t158 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, @b) {
-        is $a, 1,          "t158: a: tied \@_";
-        is "@b", "b c",    "t158: b: tied \@_";
-    }
-    t158();
-
-    sub t159 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, %b) {
-        is  $a, 1,                     "t159: a: tied \@_";
-        is  join(':', sort %b), "b:c", "t159: b: tied \@_";
-    }
-    t159();
 
     # see if we can handle the equivalent of @a = ($a[1], $a[0])
 
