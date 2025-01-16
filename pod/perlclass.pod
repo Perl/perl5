@@ -70,8 +70,8 @@ used within the scope of this declaration.
 
 Classes can be declared in either block or statement syntax. If a block is
 used, the body of the block contains the implementation of the class. If the
-statement form is used, the remainder of the file is used up until the next
-C<class> or C<package> statement.
+statement form is used, the remainder of the current scope or file is used up
+until the next C<class> or C<package> statement.
 
 A C<class> declaration can optionally have a version number, similar to the
 C<package> keyword. It can also optionally have attributes. If both are
