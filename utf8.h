@@ -1173,27 +1173,56 @@ point's representation.
 
 /* The ordering of these bits is important to a switch() statement in utf8.c
  * for handling problems in converting UTF-8 to a UV */
-#define UTF8_GOT_OVERFLOW               0x0001
-#define UTF8_ALLOW_OVERFLOW             UTF8_GOT_OVERFLOW
+#define UTF8_GOT_OVERFLOW_BIT_POS_              0
+#define UTF8_GOT_EMPTY_BIT_POS_                 1
+#define UTF8_GOT_CONTINUATION_BIT_POS_          2
+#define UTF8_GOT_SHORT_BIT_POS_                 3
+#define UTF8_GOT_NON_CONTINUATION_BIT_POS_      4
 
-#define UTF8_GOT_EMPTY                  0x0002 /* Allow a zero length string */
-#define UTF8_ALLOW_EMPTY                UTF8_GOT_EMPTY
+#define UTF8_GOT_SURROGATE_BIT_POS_             5
+#define UTF8_WARN_SURROGATE_BIT_POS_            6
+
+#define UTF8_GOT_PERL_EXTENDED_BIT_POS_         7
+#define UTF8_WARN_PERL_EXTENDED_BIT_POS_        8
+
+#define UTF8_GOT_SUPER_BIT_POS_                 9
+#define UTF8_WARN_SUPER_BIT_POS_               10
+
+#define UTF8_GOT_NONCHAR_BIT_POS_              11
+#define UTF8_WARN_NONCHAR_BIT_POS_             12
+
+#define UTF8_GOT_LONG_BIT_POS_                 13
+#define UTF8_GOT_LONG_WITH_VALUE_BIT_POS_      14
+
+#define UTF8_CHECK_ONLY_BIT_POS_               15
+#define UTF8_DIE_IF_MALFORMED_BIT_POS_         16
+#define UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_  17
+
+#define UTF8_NO_CONFIDENCE_IN_CURLEN_BIT_POS_  18
+
+#define UTF8_GOT_OVERFLOW               (1U << UTF8_GOT_OVERFLOW_BIT_POS_)
+#define UTF8_ALLOW_OVERFLOW                    UTF8_GOT_OVERFLOW
+
+/* Allow a zero length string */
+#define UTF8_GOT_EMPTY                  (1U << UTF8_GOT_EMPTY_BIT_POS_)
+#define UTF8_ALLOW_EMPTY                       UTF8_GOT_EMPTY
 
 /* Allow first byte to be a continuation byte */
-#define UTF8_GOT_CONTINUATION           0x0004
-#define UTF8_ALLOW_CONTINUATION         UTF8_GOT_CONTINUATION
+#define UTF8_GOT_CONTINUATION           (1U << UTF8_GOT_CONTINUATION_BIT_POS_)
+#define UTF8_ALLOW_CONTINUATION                UTF8_GOT_CONTINUATION
 
 /* expecting more bytes than were available in the string */
-#define UTF8_GOT_SHORT                  0x0008
-#define UTF8_ALLOW_SHORT                UTF8_GOT_SHORT
+#define UTF8_GOT_SHORT                  (1U << UTF8_GOT_SHORT_BIT_POS_)
+#define UTF8_ALLOW_SHORT                       UTF8_GOT_SHORT
 
 /* Unexpected non-continuation byte */
-#define UTF8_GOT_NON_CONTINUATION       0x0010
-#define UTF8_ALLOW_NON_CONTINUATION     UTF8_GOT_NON_CONTINUATION
+#define UTF8_GOT_NON_CONTINUATION     (1U << UTF8_GOT_NON_CONTINUATION_BIT_POS_)
+#define UTF8_ALLOW_NON_CONTINUATION          UTF8_GOT_NON_CONTINUATION
 
-#define UTF8_GOT_SURROGATE              0x0020  /* Unicode surrogates */
-#define UTF8_DISALLOW_SURROGATE         UTF8_GOT_SURROGATE
-#define UTF8_WARN_SURROGATE             0x0040
+/* Unicode surrogates */
+#define UTF8_GOT_SURROGATE              (1U << UTF8_GOT_SURROGATE_BIT_POS_)
+#define UTF8_DISALLOW_SURROGATE                UTF8_GOT_SURROGATE
+#define UTF8_WARN_SURROGATE             (1U << UTF8_WARN_SURROGATE_BIT_POS_)
 
 /* The original UTF-8 standard did not define UTF-8 with start bytes of 0xFE or
  * 0xFF, though UTF-EBCDIC did.  This allowed both versions to represent code
@@ -1204,27 +1233,27 @@ point's representation.
  * extensions, and not likely to be interchangeable with other languages.  Note
  * that on ASCII platforms, FE overflows a signed 32-bit word, and FF an
  * unsigned one. */
-#define UTF8_GOT_PERL_EXTENDED          0x0080
-#define UTF8_DISALLOW_PERL_EXTENDED     UTF8_GOT_PERL_EXTENDED
-#define UTF8_WARN_PERL_EXTENDED         0x0100
+#define UTF8_GOT_PERL_EXTENDED          (1U << UTF8_GOT_PERL_EXTENDED_BIT_POS_)
+#define UTF8_DISALLOW_PERL_EXTENDED            UTF8_GOT_PERL_EXTENDED
+#define UTF8_WARN_PERL_EXTENDED         (1U << UTF8_WARN_PERL_EXTENDED_BIT_POS_)
 
 /* Super-set of Unicode: code points above the legal max */
-#define UTF8_GOT_SUPER                  0x0200
-#define UTF8_DISALLOW_SUPER             UTF8_GOT_SUPER
-#define UTF8_WARN_SUPER                 0x0400
+#define UTF8_GOT_SUPER                  (1U << UTF8_GOT_SUPER_BIT_POS_)
+#define UTF8_DISALLOW_SUPER                    UTF8_GOT_SUPER
+#define UTF8_WARN_SUPER                 (1U << UTF8_WARN_SUPER_BIT_POS_)
 
 /* Unicode non-character  code points */
-#define UTF8_GOT_NONCHAR                0x0800
-#define UTF8_DISALLOW_NONCHAR           UTF8_GOT_NONCHAR
-#define UTF8_WARN_NONCHAR               0x1000
+#define UTF8_GOT_NONCHAR                (1U << UTF8_GOT_NONCHAR_BIT_POS_)
+#define UTF8_DISALLOW_NONCHAR                  UTF8_GOT_NONCHAR
+#define UTF8_WARN_NONCHAR               (1U << UTF8_WARN_NONCHAR_BIT_POS_)
 
 /* Overlong sequence; i.e., the code point can be specified in fewer bytes.
  * First one will convert the overlong to the REPLACEMENT CHARACTER; second
  * will return what the overlong evaluates to */
-#define UTF8_GOT_LONG                   0x2000
-#define UTF8_ALLOW_LONG                 UTF8_GOT_LONG
-#define UTF8_GOT_LONG_WITH_VALUE        0x4000
-#define UTF8_ALLOW_LONG_AND_ITS_VALUE   UTF8_GOT_LONG_WITH_VALUE
+#define UTF8_GOT_LONG                   (1U << UTF8_GOT_LONG_BIT_POS_)
+#define UTF8_ALLOW_LONG                        UTF8_GOT_LONG
+#define UTF8_GOT_LONG_WITH_VALUE     (1U << UTF8_GOT_LONG_WITH_VALUE_BIT_POS_)
+#define UTF8_ALLOW_LONG_AND_ITS_VALUE       UTF8_GOT_LONG_WITH_VALUE
 
 /* For back compat, these old names are misleading for overlongs and
  * UTF_EBCDIC. */
@@ -1234,10 +1263,12 @@ point's representation.
 #define UTF8_DISALLOW_FE_FF             UTF8_DISALLOW_PERL_EXTENDED
 #define UTF8_WARN_FE_FF                 UTF8_WARN_PERL_EXTENDED
 
-#define UTF8_CHECK_ONLY                 0x8000
-#define UTF8_NO_CONFIDENCE_IN_CURLEN_   0x10000  /* Internal core use only */
-#define UTF8_DIE_IF_MALFORMED           0x20000
-#define UTF8_FORCE_WARN_IF_MALFORMED    0x40000
+#define UTF8_CHECK_ONLY                 (1U << UTF8_CHECK_ONLY_BIT_POS_)
+#define UTF8_NO_CONFIDENCE_IN_CURLEN_   /* Internal core use only */        \
+                            (1U << UTF8_NO_CONFIDENCE_IN_CURLEN_BIT_POS_)
+#define UTF8_DIE_IF_MALFORMED   (1U << UTF8_DIE_IF_MALFORMED_BIT_POS_)
+#define UTF8_FORCE_WARN_IF_MALFORMED                                        \
+                                (1U <<UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_)
 
 /* For backwards source compatibility.  They do nothing, as the default now
  * includes what they used to mean.  The first one's meaning was to allow the
