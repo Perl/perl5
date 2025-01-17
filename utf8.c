@@ -2185,63 +2185,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 break;
 
-              case UTF8_GOT_SURROGATE:
-
-                /* Code earlier in this function has set things up so we don't
-                 * get here unless at least one of the two top-level 'if's in
-                 * this case are true */
-
-                if (flags & UTF8_WARN_SURROGATE) {
-                    if (NEED_MESSAGE(WARN_SURROGATE,,)) {
-                        pack_warn = packWARN(WARN_SURROGATE);
-
-                        /* These are the only errors that can occur with a
-                        * surrogate when the 'input_uv' isn't valid */
-                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
-                            message = Perl_form(aTHX_
-                                    "UTF-16 surrogate (any UTF-8 sequence that"
-                                    " starts with \"%s\" is for a surrogate)",
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            message = Perl_form(aTHX_ surrogate_cp_format,
-                                                      input_uv);
-                        }
-                    }
-                }
-
-                if (flags & UTF8_DISALLOW_SURROGATE) {
-                    disallowed = TRUE;
-                }
-
-                break;
-
-              case UTF8_GOT_NONCHAR:
-
-                /* Code earlier in this function has set things up so we don't
-                 * get here unless at least one of the two top-level 'if's in
-                 * this case are true */
-
-                if (flags & UTF8_WARN_NONCHAR) {
-                    if (NEED_MESSAGE(WARN_NONCHAR,,)) {
-                        /* The code above should have guaranteed that we don't
-                         * get here with conditions other than these */
-                        assert (! (orig_problems & ~( UTF8_GOT_LONG
-                                                     |UTF8_GOT_LONG_WITH_VALUE
-                                                     |UTF8_GOT_PERL_EXTENDED
-                                                     |UTF8_GOT_NONCHAR)));
-
-                        pack_warn = packWARN(WARN_NONCHAR);
-                        message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
-                    }
-                }
-
-                if (flags & UTF8_DISALLOW_NONCHAR) {
-                    disallowed = TRUE;
-                }
-
-                break;
-
               case UTF8_GOT_LONG:
 
                 if (! (flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
@@ -2298,6 +2241,63 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 UNI_TO_NATIVE(input_uv));
                         }
                     }
+                }
+
+                break;
+
+              case UTF8_GOT_SURROGATE:
+
+                /* Code earlier in this function has set things up so we don't
+                 * get here unless at least one of the two top-level 'if's in
+                 * this case are true */
+
+                if (flags & UTF8_WARN_SURROGATE) {
+                    if (NEED_MESSAGE(WARN_SURROGATE,,)) {
+                        pack_warn = packWARN(WARN_SURROGATE);
+
+                        /* These are the only errors that can occur with a
+                        * surrogate when the 'input_uv' isn't valid */
+                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                            message = Perl_form(aTHX_
+                                    "UTF-16 surrogate (any UTF-8 sequence that"
+                                    " starts with \"%s\" is for a surrogate)",
+                                    _byte_dump_string(s0, curlen, 0));
+                        }
+                        else {
+                            message = Perl_form(aTHX_ surrogate_cp_format,
+                                                      input_uv);
+                        }
+                    }
+                }
+
+                if (flags & UTF8_DISALLOW_SURROGATE) {
+                    disallowed = TRUE;
+                }
+
+                break;
+
+              case UTF8_GOT_NONCHAR:
+
+                /* Code earlier in this function has set things up so we don't
+                 * get here unless at least one of the two top-level 'if's in
+                 * this case are true */
+
+                if (flags & UTF8_WARN_NONCHAR) {
+                    if (NEED_MESSAGE(WARN_NONCHAR,,)) {
+                        /* The code above should have guaranteed that we don't
+                         * get here with conditions other than these */
+                        assert (! (orig_problems & ~( UTF8_GOT_LONG
+                                                     |UTF8_GOT_LONG_WITH_VALUE
+                                                     |UTF8_GOT_PERL_EXTENDED
+                                                     |UTF8_GOT_NONCHAR)));
+
+                        pack_warn = packWARN(WARN_NONCHAR);
+                        message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
+                    }
+                }
+
+                if (flags & UTF8_DISALLOW_NONCHAR) {
+                    disallowed = TRUE;
                 }
 
                 break;
