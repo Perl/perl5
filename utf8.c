@@ -1567,9 +1567,10 @@ to a variable which has been declared to be an C<AV*>, and into which the
 function creates a new AV to store information, described below, about all the
 malformations that were encountered.
 
-If the flag C<UTF8_CHECK_ONLY> is passed, this parameter is ignored.
-Otherwise, when this parameter is set, the flags C<UTF8_DIE_IF_MALFORMED> and
-C<UTF8_FORCE_WARN_IF_MALFORMED> are ignored.
+When this parameter is non-NULL, the C<UTF8_DIE_IF_MALFORMED> and
+C<UTF8_FORCE_WARN_IF_MALFORMED> flags are asserted against in DEBUGGING builds,
+and are ignored in non-DEBUGGING ones.  The C<UTF8_CHECK_ONLY> flag is always
+ignored.
 
 What is considered a malformation is affected by C<flags>, the same as
 described in C<L</utf8_to_uv_flags>>.  No array element is generated for
@@ -1672,8 +1673,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     if (UNLIKELY(msgs)) {
         *msgs = NULL;
 
-        /* The msgs parameter has higher priority than these flags */
-        flags &= ~(UTF8_DIE_IF_MALFORMED|UTF8_FORCE_WARN_IF_MALFORMED);
+        /* This form of the function has higher priority than this flag */
+        flags &= ~UTF8_CHECK_ONLY;
     }
 
     /* Each of the affected Hanguls starts with \xED */
@@ -2521,6 +2522,14 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * returned; each case statement in the switch above does a
              * continue if no message for it need be generated. */
             if (msgs) {
+
+                /* It's illegal to call this with these flags, but we only fail
+                 * in the unlikely event that it matters.  Outside of DEBUGGING
+                 * builds, those flags contradictory to this operation get
+                 * ignored */
+                assert(! (flags & ( UTF8_DIE_IF_MALFORMED
+                                   |UTF8_FORCE_WARN_IF_MALFORMED)));
+
                 if (msgs_return == NULL) {
                     msgs_return = newAV();
                 }
