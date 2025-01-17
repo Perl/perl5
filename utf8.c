@@ -1835,10 +1835,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     }
 
     /* Here, we have found all the possible problems, except for when the input
-     * is for a problematic code point not allowed by the input parameters.
-     * Check now for those parameters */
-    if (   flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                    |UTF8_WARN_ILLEGAL_INTERCHANGE)
+     * is for a problematic code point either rejected or warned about by the
+     * input parameters.  Do a quick check, and if the input could be one of
+     * those code points and any of those pararameter flags are set, we have to
+     * investigate further. */
+    if (   UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s0))
+        && (flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                     |UTF8_WARN_ILLEGAL_INTERCHANGE))
 
                     /* if overflow, we know without looking further that this
                      * is a non-Unicode code point, which we deal with below in
@@ -1912,7 +1915,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * malformation is an overlong (which allows it to be fully
              * computed).  Or it may have been "cured" as best it can by the
              * loop just above. */
-            if (isUNICODE_POSSIBLY_PROBLEMATIC(uv)) {
                 if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
                     if (flags & (UTF8_DISALLOW_SURROGATE|UTF8_WARN_SURROGATE)) {
                         possible_problems |= UTF8_GOT_SURROGATE;
@@ -1928,7 +1930,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         possible_problems |= UTF8_GOT_NONCHAR;
                     }
                 }
-            }
         }
     }   /* End of checking if is a special code point */
 
