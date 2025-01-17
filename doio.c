@@ -2205,11 +2205,25 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
         return TRUE;
     if (SvTYPE(sv) == SVt_IV && SvIOK(sv)) {
         assert(!SvGMAGICAL(sv));
-        if (SvIsUV(sv))
-            PerlIO_printf(fp, "%" UVuf, (UV)SvUVX(sv));
-        else
-            PerlIO_printf(fp, "%" IVdf, (IV)SvIVX(sv));
-        return !PerlIO_error(fp);
+        bool happy = TRUE;
+
+        /* Adapted from Perl_sv_2pv_flags */
+        const U32 isUIOK = SvIsUV(sv);
+        /* The purpose of this union is to ensure that arr is aligned on
+           a 2 byte boundary, because that is what uiv_2buf() requires */
+        union {
+            char arr[TYPE_CHARS(UV)];
+            U16 dummy;
+        } buf;
+        char *ebuf, *ptr;
+        STRLEN len;
+        UV tempuv = SvUVX(sv);
+        ptr = uiv_2buf(buf.arr, SvIVX(sv), tempuv, isUIOK, &ebuf);
+        len = ebuf - ptr;
+
+        if (len && (PerlIO_write(fp,ptr,len) == 0))
+            happy = FALSE;
+        return happy ? !PerlIO_error(fp) : FALSE;
     }
     else {
         STRLEN len;

@@ -89,6 +89,12 @@ There may well be none in a stable release.
 
 =item *
 
+The stringification of integers by L<perlfunc/print> and L<perlfunc/say>,
+when coming from an SVt_IV, is now more efficient.
+[GH #22927]
+
+=item *
+
 XXX
 
 =back
