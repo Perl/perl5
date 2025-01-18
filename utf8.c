@@ -2007,8 +2007,27 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *
          * There are two main categories of potential problems.
          *
-         *  a)  One type is by default not considered to be a problem.  These
-         *      are for when the input was syntactically valid
+         *  a)  One type is considered by default to be problematic.  There are
+         *      three subclasses:
+         *      1)  Some syntactic malformation meant that no code point could
+         *          be calculated for the input.  An example is that the
+         *          sequence was incomplete, more bytes were called for than
+         *          the input contained.  The function returns the Unicode
+         *          REPLACEMENT CHARACTER as the translation of these.
+         *      2)  The sequence is legal Perl extended UTF-8, but is for a
+         *          code point too large to be represented on this platform.
+         *          The function returns the Unicode REPLACEMENT CHARACTER as
+         *          the translation of these.
+         *      3)  The sequence represents a code point which can also be
+         *          represented by a shorter sequence.  These have been
+         *          declared illegal by Unicode fiat because they were being
+         *          used as Trojan horses to successfully attack applications.
+         *          One undocumented flag causes these to be accepted, but
+         *          otherwise the function returns the Unicode REPLACEMENT
+         *          CHARACTER as the translation of these.
+         *
+         *  b)  The other type is by default not considered to be a problem.
+         *      These are for when the input was syntactically valid
          *      Perl-extended-UTF-8 for a code point that is representable on
          *      this platform, but that code point isn't considered by Unicode
          *      to be freely exchangeable between applications.  To get here,
@@ -2026,25 +2045,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *      bit in 'flags' potentially a warning message will be generated,
          *      using the rules common to both types of problems, and detailed
          *      below.
-         *
-         *  b)  The other type is considered by default to be problematic.
-         *      There are three subclasses:
-         *      1)  Some syntactic malformation meant that no code point could
-         *          be calculated for the input.  An example is that the
-         *          sequence was incomplete, more bytes were called for than
-         *          the input contained.  The function returns the Unicode
-         *          REPLACEMENT CHARACTER as the translation of these.
-         *      2)  The sequence is legal Perl extended UTF-8, but is for a
-         *          code point too large to be represented on this platform.
-         *          The function returns the Unicode REPLACEMENT CHARACTER as
-         *          the translation of these.
-         *      3)  The sequence represents a code point which can also be
-         *          represented by a shorter sequence.  These have been
-         *          declared illegal by Unicode fiat because they were being
-         *          used as Trojan horses to successfully attack applications.
-         *          One undocumented flag causes these to be accepted, but
-         *          otherwise the function returns the Unicode REPLACEMENT
-         *          CHARACTER as the translation of these.
          *
          *      In all cases the corresponding bit in *errors is set.  This is
          *      in contrast to the other type of problem where the input
