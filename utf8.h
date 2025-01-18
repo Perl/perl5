@@ -1112,11 +1112,13 @@ non-character code points
  * the Unicode legal max */
 #define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                    \
                                   UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
+#define UNICODE_IS_NONCHAR_GIVEN_NOT_SUPER(uv)                              \
+    (   UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                     \
+     || UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
 
 #define UNICODE_IS_NONCHAR(uv)                                              \
-    (       UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                 \
-     || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))      \
-         && LIKELY(! UNICODE_IS_SUPER(uv))))
+                       (   LIKELY(! UNICODE_IS_SUPER(uv))                   \
+                        && UNLIKELY(UNICODE_IS_NONCHAR_GIVEN_NOT_SUPER(uv)))
 
 /*
 =for apidoc Am|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
