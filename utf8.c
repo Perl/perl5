@@ -2461,9 +2461,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                }
             } /* End of switch() on the possible problems */
 
-            /* Display or save the message (if any) for the problem being
-             * handled in this iteration of the loop */
-            if (message) {
+            /* We only get here if there is a message to be displayed or
+             * returned; each case statement in the switch above does a
+             * continue if no message for it need be generated. */
                 if (msgs) {
                     if (msgs_return == NULL) {
                         msgs_return = newAV();
@@ -2479,7 +2479,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                           : pack_warn),
                                                          this_flag_bit)));
                 }
-                else if (! (flags & UTF8_CHECK_ONLY)) {
+                else {
                     if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
                                           |UTF8_FORCE_WARN_IF_MALFORMED)))
                     {
@@ -2508,7 +2508,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         LEAVE;
                     }
                 }
-            }
         }   /* End of 'while (possible_problems)' */
 
         if (msgs_return) {
