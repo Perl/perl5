@@ -74,6 +74,20 @@ L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/gr
   is essential to progress; for, if you know too much, you won't try
   the thing.
 
+=head2 v5.40.1 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
+
+L<Announced on 2025-01-18 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/01/msg269454.html>
+
+At the time of Alexander the Great, the Roman empire was no more than a
+little patch of land in the heart of Italy, and Rome a tiny city of
+twisting streets within strong walls.  But Rome's inhabitants were a
+proud people.  They loved recounting stories of the greatness of their
+past and were convinced of a great future.  Their history, as they told
+it, went back to ancient Troy.  A Trojan named Aeneas fled to Italy.
+His descendants were the twin brothers Romulus and Remus, sons of Mars,
+the god of war, who were suckled and raised in the forest by a wild
+she-wolf.  Romulus, so the myth goes, founded Rome.
+
 =head2 v5.40.1-RC1 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
 
 L<Announced on 2025-01-05 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/01/msg269400.html>
@@ -212,6 +226,20 @@ counterparts across the Atlantic were busy blowing each other to pieces
 in a Civil War, they embarked on the construction of the Metropolitan
 Line knowing only one thing for certain - there was no way they were
 going to be able to run steam trains through it.
+
+=head2 v5.38.3 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
+
+L<Announced on 2025-01-18 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/01/msg269453.html>
+
+When the Greeks came to Greece, they were not yet Greeks. Does that
+sound strange? Yet it is true. For the fact is that when the tribes
+from the north first invaded the lands they were to occupy, they
+weren't yet a unified people.  They spoke different dialects and were
+obedient to different chieftains.  They were tribes rather like the
+Sioux or the Mohicans you read about in stories of the Wild West, and
+had names such as the Dorians, Ionians and Aeolians.  Like the American
+Indians they were warlike and brave, but in other ways they were quite
+different.
 
 =head2 v5.38.3-RC1 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
 
