@@ -763,6 +763,7 @@ the strings?).
  Paul E    5.38.1       2023-Nov-25
  Paul E    5.38.2       2023-Nov-29
  Steve     5.38.3-RC1   2025-Jan-05
+ Steve     5.38.3       2025-Jan-18
 
  Ricardo   5.39.0       2023-Jun-30     The 5.39 development track
  Steve     5.39.1       2023-Jul-20
