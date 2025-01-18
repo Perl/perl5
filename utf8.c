@@ -1820,6 +1820,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * of the current character, even if partial, so the upper limit is 's' */
     if (UNLIKELY(does_utf8_overflow(s0, s) >= ALMOST_CERTAINLY_OVERFLOWS)) {
         possible_problems |= UTF8_GOT_OVERFLOW;
+        uv = UV_MAX;
     }
 
 /* Is the first byte of 's' a start byte in the UTF-8 encoding system, not
