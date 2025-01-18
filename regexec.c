@@ -11658,7 +11658,7 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
     PERL_ARGS_ASSERT_IS_GRAPHEME;
 
     if (   UNLIKELY(UNICODE_IS_SUPER(cp))
-        || UNLIKELY(UNICODE_IS_NONCHAR(cp)))
+        || UNLIKELY(UNICODE_IS_NONCHAR_GIVEN_NOT_SUPER(cp)))
     {
         /* These are considered graphemes */
         return true;

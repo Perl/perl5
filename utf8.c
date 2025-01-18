@@ -1952,7 +1952,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     possible_problems |= UTF8_GOT_SUPER;
                 }
             }
-            else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+            else if (UNLIKELY(UNICODE_IS_NONCHAR_GIVEN_NOT_SUPER(uv))) {
                 if (flags & (UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)) {
                     possible_problems |= UTF8_GOT_NONCHAR;
                 }
