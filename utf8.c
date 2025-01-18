@@ -33,8 +33,7 @@
 #include "perl.h"
 #include "invlist_inline.h"
 
-#define MALFORMED_TEXT  "Malformed UTF-8 character"
-static const char malformed_text[] = MALFORMED_TEXT;
+static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
