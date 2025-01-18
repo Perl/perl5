@@ -1041,24 +1041,31 @@ There are two sets of these functions:
 =item C<utf8_to_uv> forms
 
 Almost all code should use only C<utf8_to_uv>, C<extended_utf8_to_uv>,
-C<strict_utf8_to_uv>, or C<c9strict_utf8_to_uv>.  The other functions are
-either the problematic old form, or are for specialized uses.
+C<strict_utf8_to_uv>, C<c9strict_utf8_to_uv>, or C<utf8_to_uv_or_die>.  The
+other functions are either the problematic old form, or are for specialized
+uses.
 
-These four functions each return C<true> if the sequence of bytes starting at
-C<s> form a complete, legal UTF-8 (or UTF-EBCDIC) sequence for a code point.
-If so, C<*cp> will be set to the native code point value it represents, and
-C<*advance> will be set to its length, in bytes.
+C<utf8_to_uv_or_die> has a simpler interface than the other four, for use when
+any errors encountered should be fatal.  It throws an exception with any errors
+found, otherwise it returns the code point the input sequence represents.
 
-Otherwise, each function returns C<false> and sets C<*cp> to the Unicode
-REPLACEMENT CHARACTER, and C<*advance> to the next position along C<s>, where
-the next possible UTF-8 character could begin.  Failing to use this position as
-the next starting point during parsing of strings has led to successful
-attacks by crafted inputs.
+The other four functions each return C<true> if the sequence of bytes starting
+at C<s> form a complete, legal UTF-8 (or UTF-EBCDIC) sequence for a code point;
+or false otherwise.  They take an extra parameter, the address of an IV,
+C<&cp>.  C<*cp> will be set to the native code point value the sequence
+represents, and C<*advance> will be set to its length, in bytes.
+
+If the functions returns C<false>, C<*cp> is set to the Unicode REPLACEMENT
+CHARACTER, and C<*advance> to the next position along C<s>, where the next
+possible UTF-8 character could begin.  Failing to use this position as the next
+starting point during parsing of strings has led to successful attacks by
+crafted inputs.
 
 The functions only examine as many bytes along C<s> as are needed to form a
-complete UTF-8 representation of a single code point, but they never examine
-the byte at C<e>, or beyond.  They return false if the code point requires more
-than S<C<e - s>> bytes to represent.
+complete UTF-8 representation of a single code point; they never examine the
+byte at C<e>, or beyond.  They return false (or die in the case of
+C<utf8_to_uv_or_die>) if the code point requires more than S<C<e - s>> bytes to
+represent.
 
 The functions differ only in what flavor of UTF-8 they accept.  All reject
 syntactically invalid UTF-8.
@@ -1070,17 +1077,19 @@ syntactically invalid UTF-8.
 additionally rejects any UTF-8 that translates into a code point that isn't
 specified by Unicode to be freely exchangeable, namely the surrogate characters
 and non-character code points (besides non-Unicode code points, any above
-0x10FFFF).  It does not raise a warning when rejecting.
+0x10FFFF).  It does not raise a warning when rejecting these.
 
 =item * C<c9strict_utf8_to_uv>
 
 instead uses the exchangeable definition given by Unicode's Corregendum #9,
 which accepts non-character code points while still rejecting surrogates.  It
-does not raise a warning when rejecting.
+does not raise a warning when rejecting these.
 
 =item * C<utf8_to_uv>
 
-accepts all syntactically valid UTF-8, as extended by Perl to allow 64-bit code
+=item * C<utf8_to_uv_or die>
+
+accept all syntactically valid UTF-8, as extended by Perl to allow 64-bit code
 points to be encoded.
 
 C<extended_utf8_to_uv> is merely a synonym for C<utf8_to_uv>.  Use this form
@@ -1099,11 +1108,6 @@ C<L</utf8_to_uv_msgs>>, with some examples of multiple ones for the same
 sequence.  You can use that function or C<L</utf8_to_uv_flags>> to exert more
 control over the input that is considered acceptable, and the warnings that are
 raised.
-
-C<utf8_to_uv_or_die> has a simpler interface, for use when any errors are
-fatal.  It returns the code point instead of using an output parameter, and
-throws an exception with any errors found where the other functions here would
-have returned false.
 
 Often, C<s> is an arbitrarily long string containing the UTF-8 representations
 of many code points in a row, and these functions are called in the course of
@@ -1416,10 +1420,10 @@ bit set for each malformation the function found; 0 if none.  The C<ALLOW>-type
 flags are ignored when determining the content of this variable.  That is, even
 if you "allow" a particular malformation, if it is encountered, the
 corresponding bit will be set to notify you that one was encountered.
-The bits for malformations that are accepted by default aren't set unless the
-flags passed to the function indicate that they should be rejected or warned
-about when encountering them.  These malformations are explicitly noted in the
-list below along with the controlling flags.
+However, the bits for conditions that are accepted by default aren't set
+unless the flags passed to the function indicate that they should be
+rejected or warned about when encountering them.  These are explicitly
+noted in the list below along with the controlling flags.
 
 The bits returned in C<errors> and their meanings are:
 
@@ -1532,15 +1536,16 @@ be rejected or warned about.
 If you don't care about the system's messages text nor warning categories, you
 can customize error handling by calling one of the C<_error> functions, using
 either of the flags C<UTF8_ALLOW_ANY> or C<UTF8_CHECK_ONLY> to suppress any
-warnings, and then examine the C<*errors> return.
+warnings, and then examine the C<*errors> return.  If you don't use those
+flags, warnings will be raised as usual.
 
-But if you do care, use one of the functions with C<_msgs> in their names.
-These allow you to completely customize error handling by suppressing any
-warnings that would otherwise be raised; instead returning all needed
+But if you do care, instead use one of the functions with C<_msgs> in their
+names.  These allow you to completely customize error handling by suppressing
+any warnings that would otherwise be raised; instead returning all relevant
 information in a structure specified by an extra parameter, C<msgs>, a pointer
 to a variable which has been declared to be an C<AV*>, and into which the
-function creates a new AV to store information, described below, about all
-the malformations that were encountered.
+function creates a new AV to store information, described below, about all the
+malformations that were encountered.
 
 If the flag C<UTF8_CHECK_ONLY> is passed, this parameter is ignored.
 Otherwise, when this parameter is set, the flags C<UTF8_DIE_IF_MALFORMED> and
@@ -1549,7 +1554,7 @@ C<UTF8_FORCE_WARN_IF_MALFORMED> are ignored.
 What is considered a malformation is affected by C<flags>, the same as
 described in C<L</utf8_to_uv_flags>>.  No array element is generated for
 malformations that are "allowed" by the input flags, in contrast to the
-C<_error> functions.
+bitmap returned in a non-NULL C<*errors>.
 
 Each element of the C<msgs> AV array is an anonymous hash with the following
 three key-value pairs:
@@ -1558,12 +1563,18 @@ three key-value pairs:
 
 =item C<text>
 
-A C<SVpv> containing the text of any warning message that would have ordinarily
-been generated.  The function suppresses raising this warning itself.
+A C<SVpv> containing the text of the message about the problematic input.
+This text is identical to any warning that otherwise would have been raised if
+the appropriate warning categories were enabled.
 
 =item C<warn_categories>
 
-The warning category (or categories) for the message, packed into a C<SVuv>.
+This is 0 if the C<flags> parameter to the function would ordinarily not have
+caused the message to be output as a warning; otherwise it is the warning
+category (or categories) that would have been used to generate a warning for
+C<text>, packed into a C<SVuv>.  For example, if C<flags> contains
+C<UTF8_DISALLOW_SURROGATE>, but not C<UTF8_WARN_SURROGATE>, this would be 0 if
+the input was a surrogate.
 
 =item C<flag>
 
