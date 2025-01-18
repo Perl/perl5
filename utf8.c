@@ -1978,6 +1978,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      end, based on how many bytes the start byte tells
      *                      us should be in it, but no further than s0 +
      *                      avail_len
+     * overlong_detect_length  if no overlong malformation is present, this is
+     *                      0; otherwise it is the number of bytes required to
+     *                      make that determination.  It is used below to limit
+     *                      the number of bytes displayed in a warning so as to
+     *                      make the warning accurate and not misleading.
      */
     bool success = true;
 
@@ -2296,8 +2301,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                             " \"%s\" is overlong which can and should be"
                             " represented with a different, shorter sequence)",
                             malformed_text,
-                            byte_dump_string_(s0, send - s0, 0),
-                            byte_dump_string_(s0, curlen, 0));
+                            byte_dump_string_(s0, curlen, 0),
+                            byte_dump_string_(s0,
+                                              MIN(avail_len,
+                                                  overlong_detect_length),
+                                              0));
                 }
                 else {
                     U8 tmpbuf[UTF8_MAXBYTES+1];
