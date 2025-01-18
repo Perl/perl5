@@ -1735,7 +1735,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     int overlong_detect_length = 0;
 
     /* Gives how many bytes are available, which may turn out to be less than
-     * the expected length */
+     * (but never more than) the expected length,  */
     Size_t avail_len;
 
     /* The ending position, plus 1, of the first character in the sequence
@@ -1756,7 +1756,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     avail_len = send - s0;
 
     /* We now know we can examine the first byte of the input.  A continuation
-     * character can't start a valid sequence */
+     * byte can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
         curlen = 1;
@@ -1975,7 +1975,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      expected to occupy, based on the value of the
      *                      presumed start byte in s0.  This will be 0 if the
      *                      sequence is empty, or 1 if s0 isn't actually a
-     *                      start byte.
+     *                      start byte.  CAUTION: this could be beyond the end
+     *                      of the buffer.
      * avail_len            gives the number of bytes in the sequence this
      *                      call can look at, one character's worth at most.
      * curlen               gives the number of bytes in the sequence that
@@ -2013,6 +2014,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *  2)  returning information about the problem to the caller in
          *      *errors and/or *msgs; and/or
          *  3)  raising appropriate warnings.
+         *  4)  potentially croaking if the input is a forbidden sequence, and
+         *      the flag has been set that indicates to croak on those.
          *
          * There are two main categories of potential problems.
          *
@@ -2035,39 +2038,96 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *          otherwise the function returns the Unicode REPLACEMENT
          *          CHARACTER as the translation of these.
          *
+         *      These all have the same results unless flags are passed to
+         *      change the behavior.  Without flags the behavior is:
+         *
+         *      1)  The function returns failure.
+         *      2)  *cp_p is set to the REPLACEMENT_CHARACTER
+         *      3)  For each problem, a bit is set in *errors denoting the
+         *          error, if errors is not NULL.
+         *      4)  For each problem, an entry is generated in *msgs, if msgs
+         *          is not NULL.
+         *      5)  a warning is raised if msgs is NULL and the appropriate
+         *          warning category(ies) are enabled.
+         *
+         *      Various flags change the behavior:
+         *
+         *          UTF8_FORCE_WARN_IF_MALFORMED is forbidden if msgs is not
+         *              NULL, and is ignored if UTF8_CHECK_ONLY is also
+         *              specified; otherwise it turns on all warnings
+         *              categories for the duration of the function.
+         *
+         *          UTF8_DIE_IF_MALFORMED is forbidden if msgs is not NULL;
+         *              otherwise it acts as if UTF8_FORCE_WARN_IF_MALFORMED
+         *              has also been specified, and also croaks rather than
+         *              returning.
+         *
+         *          UTF8_CHECK_ONLY is ignored if msgs is not NULL or if
+         *              UTF8_DIE_IF_MALFORMED is also set; otherwise it
+         *              suppresses any warnings; behaviors 1) through 4) above
+         *              are unchanged
+         *
+         *      Also there is a flag associated with each possible condition,
+         *      for example, UTF8_ALLOW_LONG.  If set, the behavior is modified
+         *      so that the corresponding condition:
+         *          1)  doesn't cause the function to return failure
+         *          2)  the REPLACEMENT_CHARACTER is still stored in *cp_p,
+         *              except for the flag UTF8_ALLOW_LONG_AND_ITS_VALUE,
+         *              which returns the calculated code point, even if plain
+         *              UTF8_ALLOW_LONG is also set.
+         *          3)  *errors still has a bit set.
+         *          4)  no entry is generated in *msgs.
+         *          5)  no warning is raised
+         *
+         *      Note that this means the UTF8_CHECK_ONLY flag has the same
+         *      effect as passing an ALLOW flag for every condition.
+         *
+         *      Note also that an entry is placed in *errors for each condition
+         *      found, regardless of the other flags.  The caller can rely on
+         *      this being an accurate accounting of all conditions found, even
+         *      if they aren't otherwise reported.
+         *
          *  b)  The other type is by default not considered to be a problem.
-         *      These are for when the input was syntactically valid
-         *      Perl-extended-UTF-8 for a code point that is representable on
+         *      These are for when the input was syntactically valid UTF-8 (as
+         *      extended by Perl) for a code point that is representable on
          *      this platform, but that code point isn't considered by Unicode
-         *      to be freely exchangeable between applications.  To get here,
-         *      code earlier in this function has determined both that this
-         *      sequence is for such a code point, and that the 'flags'
-         *      parameter indicates that these are to be considered
-         *      problematic, meaning this sequence should be rejected, merely
-         *      warned about, or both.  *errors will be set for each of these.
+         *      to be freely exchangeable between applications.
          *
-         *      If the caller to this function has set the corresponding
-         *      DISALLOW bit in 'flags', the translation of this sequence will
-         *      be the Unicode REPLACEMENT CHARACTER.
+         *      The 'flags' parameter to this function must contain an
+         *      appropriate set bit in order for this function to consider them
+         *      to be problems.  And to get here, code earlier in this function
+         *      has determined one of those flags applies to this sequence.
+         *      This means that we know already that this input is problematic,
+         *      unlike the type a) items.
          *
-         *      If the caller to this function has set the corresponding WARN
-         *      bit in 'flags' potentially a warning message will be generated,
-         *      using the rules common to both types of problems, and detailed
-         *      below.
+         *      Each of these problematic sequences has two independent flags
+         *      associated with it.  The DISALLOW flag causes this code point
+         *      to be rejected; the WARN flag causes it to attempt to raise a
+         *      warning about it.  To do both, specify both flags.  This is
+         *      different from the type a) items, where the ALLOW flag affects
+         *      both the rejection and warning.  The same 5 actions as type a)
+         *      have to be done, but the conditions differ.  The actions when
+         *      the UTF8_CHECK_ONLY flag is not included are:
          *
-         *      In all cases the corresponding bit in *errors is set.  This is
-         *      in contrast to the other type of problem where the input
-         *      'flags' affect if the bit is set or not.
+         *      1)  If the DISALLOW flag is set, the function returns failure,
+         *          or croaks if the UTF8_DIE_IF_MALFORMED flag is included.
+         *      2)  If the DISALLOW flag is set, the REPLACEMENT_CHARACTER is
+         *          substituted for the returned code point
+         *      3)  A bit is set in *errors if errors is not NULL
+         *      4)  An entry in *msgs is generated if msgs is not NULL.  Since
+         *          to get here, we know the input is problematic, an entry is
+         *          unconditionally made.  The warnings category for it will be
+         *          zero if neither the corresponding WARN flag nor the
+         *          UTF8_FORCE_WARN_IF_MALFORMED flag are included.
+         *      5)  A warning is raised if msgs is NULL and either:
+         *            i)  the flag UTF8_FORCE_WARN_IF_MALFORMED is included; or
+         *           ii)  the corresponding WARN flag is included, and the
+         *                appropriate warning category(ies) are enabled.
          *
-         *      The default is to generate a warning for each of these.  If the
-         *      input 'flags' has a corresponding ALLOW flag, warnings are
-         *      suppressed.  The only other thing the ALLOW flags do is
-         *      determine if the function returns sucess or failure
-         *
-         *  For both types of problems, if warnings are called for by the input
-         *  flags, also setting the UTF8_CHECK_ONLY flag overrides
-         *  generating them.  If 'msgs' is not NULL, they all will be returned
-         *  there; otherwise they will be raised if warnings are enabled.
+         *      Including the UTF8_CHECK_ONLY flag has no effect if the
+         *      UTF8_DIE_IF_MALFORMED is also included; otherwise it changes
+         *      the above actions only to not do 5); so no warnings get
+         *      generated.
          */
 
         bool disallowed = FALSE;
@@ -2169,7 +2229,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             }
 
             /* The code is structured so that there is a case: in a switch()
-             * for each problem type, so as to handle the different details of
+             * for each condition type, so as to handle the different details of
              * each.  The only common part after setting things up is the
              * handling of any generated warning message.  That means that if a
              * case: finds there is no message, it can 'continue' to the next
@@ -2222,7 +2282,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                              malformed_text,
                              _byte_dump_string(s0, send - s0, 0),
                              (int)avail_len,
-                             avail_len == 1 ? "" : "s",
+                             avail_len == 1 ? "" : "s", /* Pluralize */
                              (int)expectlen);
                 break;
 
@@ -2324,8 +2384,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SURROGATE,
                                          WARN_SURROGATE,,);
 
-                        /* These are the only errors that can occur with a
-                        * surrogate when the 'input_uv' isn't valid */
+                        /* This is the only error that can occur with a
+                         * surrogate when the 'input_uv' isn't valid */
                         if (orig_problems & UTF8_GOT_TOO_SHORT) {
                             message = Perl_form(aTHX_
                                     "UTF-16 surrogate (any UTF-8 sequence that"
