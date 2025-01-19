@@ -1,4 +1,4 @@
-/*    inline.h
+/*>    inline.h
  *
  *    Copyright (C) 2012 by Larry Wall and others
  *
@@ -1234,6 +1234,40 @@ PERL_STATIC_INLINE U8 *
 Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
 {
     return bytes_to_utf8_free_me(s, lenp, NULL);
+}
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, void ** free_me)
+{
+    /* utf8_to_bytes_() is declared to take a non-const s_ptr because it may
+     * change it, but NOT when called with PL_utf8_to_bytes_new_memory, so it
+     * is ok to cast away const */
+    return utf8_to_bytes_((U8 **) s_ptr, lenp, free_me,
+                          PL_utf8_to_bytes_new_memory);
+}
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_bytes_temp_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp)
+{
+    /* utf8_to_bytes_() requires a non-NULL pointer, but doesn't use it when
+     * called with PL_utf8_to_bytes_use_temporary */
+    void* dummy = NULL;
+
+    /* utf8_to_bytes_() is declared to take a non-const s_ptr because it may
+     * change it, but NOT when called with PL_utf8_to_bytes_use_temporary, so
+     * it is ok to cast away const */
+    return utf8_to_bytes_((U8 **) s_ptr, lenp, &dummy,
+                          PL_utf8_to_bytes_use_temporary);
+}
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp)
+{
+    /* utf8_to_bytes_() requires a non-NULL pointer, but doesn't use it when
+     * called with PL_utf8_to_bytes_overwrite */
+    void* dummy = NULL;
+
+    return utf8_to_bytes_(s_ptr, lenp, &dummy, PL_utf8_to_bytes_overwrite);
 }
 
 /*

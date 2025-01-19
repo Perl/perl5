@@ -1338,9 +1338,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (is_utf8 && !(k_flags & HVhek_KEYCANONICAL)) {
         const char * const keysave = key;
-        U8 * free_me = NULL;
+        void * free_me = NULL;
 
-        if (! utf8_to_bytes_new_pv(&key, &klen, &free_me)) {
+        if (! utf8_to_bytes_new_pv((const U8 **) &key, &klen, &free_me)) {
             k_flags |= HVhek_UTF8;
         }
         else {
@@ -3270,8 +3270,8 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     } else if (len < 0) {
         STRLEN tmplen = -len;
         /* See the note in hv_fetch(). --jhi */
-        U8 * free_str = NULL;
-        if (! utf8_to_bytes_new_pv(&str, &tmplen, &free_str)) {
+        void * free_str = NULL;
+        if (! utf8_to_bytes_new_pv((const U8 **) &str, &tmplen, &free_str)) {
             k_flags = HVhek_UTF8;
         }
         else {
@@ -3687,7 +3687,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN;
 
     U8 utf8_flag;
-    U8 * free_me = NULL;
+    void * free_me = NULL;
 
     if (flags & ~(REFCOUNTED_HE_KEY_UTF8|REFCOUNTED_HE_EXISTS))
         Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %" UVxf,
@@ -3696,7 +3696,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
         goto ret;
     /* For searching purposes, canonicalise to Latin-1 where possible. */
     if (   flags & REFCOUNTED_HE_KEY_UTF8
-        && utf8_to_bytes_new_pv(&keypv, &keylen, &free_me))
+        && utf8_to_bytes_new_pv((const U8 **) &keypv, &keylen, &free_me))
     {
         flags &= ~REFCOUNTED_HE_KEY_UTF8;
     }
@@ -3821,7 +3821,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     char hekflags;
     STRLEN key_offset = 1;
     struct refcounted_he *he;
-    U8 * free_me = NULL;
+    void * free_me = NULL;
 
     if (!value || value == &PL_sv_placeholder) {
         value_type = HVrhek_delete;
@@ -3847,7 +3847,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
 
     /* Canonicalise to Latin-1 where possible. */
     if (   (flags & REFCOUNTED_HE_KEY_UTF8)
-        && utf8_to_bytes_new_pv(&keypv, &keylen, &free_me))
+        && utf8_to_bytes_new_pv((const U8 **) &keypv, &keylen, &free_me))
     {
         flags &= ~REFCOUNTED_HE_KEY_UTF8;
     }

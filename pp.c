@@ -793,7 +793,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     s = SvPV(sv, len);
     if (chomping) {
         if (s && len) {
-            U8 *temp_buffer = NULL;
+            void *temp_buffer = NULL;
             s += --len;
             if (RsPARA(PL_rs)) {
                 if (*s != '\n')
@@ -817,7 +817,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
                     /* Assumption is that rs is shorter than the scalar.  */
                     if (SvUTF8(PL_rs)) {
                         /* RS is utf8, scalar is 8 bit.  */
-                        if (! utf8_to_bytes_new_pv(&rsptr, &rslen,
+                        if (! utf8_to_bytes_new_pv((const U8 **) &rsptr, &rslen,
                                                    &temp_buffer))
                         {
                             /* Cannot downgrade, therefore cannot possibly
@@ -3911,8 +3911,10 @@ PP(pp_index)
         if (little_utf8) {
             /* Well, maybe instead we might be able to downgrade the small
                string?  */
-            U8 * free_little_p = NULL;
-            if (utf8_to_bytes_new_pv(&little_p, &llen, &free_little_p)) {
+            void * free_little_p = NULL;
+            if (utf8_to_bytes_new_pv((const U8 **) &little_p, &llen,
+                                     &free_little_p))
+            {
                 little_utf8 = false;
 
                 /* Here 'little_p' is in byte form, and 'free_little_p' is

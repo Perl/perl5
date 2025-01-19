@@ -5350,18 +5350,9 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp);
         assert(s); assert(lenp)
 
 PERL_CALLCONV bool
-Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, U8 **free_me, Perl_utf8_to_bytes_arg result_as);
+Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void **free_me, Perl_utf8_to_bytes_arg result_as);
 #define PERL_ARGS_ASSERT_UTF8_TO_BYTES_         \
         assert(s_ptr); assert(lenp); assert(free_me)
-
-/* PERL_CALLCONV bool
-Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, U8 *free_me); */
-
-/* PERL_CALLCONV bool
-Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp); */
-
-/* PERL_CALLCONV bool
-Perl_utf8_to_bytes_temp_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp); */
 
 PERL_CALLCONV U8 *
 Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, const bool high, const bool low);
@@ -10038,6 +10029,21 @@ Perl_utf8_hop_overshoot(const U8 *s, SSize_t off, const U8 * const start, const 
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT    \
         assert(s); assert(start); assert(end)
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, void **free_me);
+# define PERL_ARGS_ASSERT_UTF8_TO_BYTES_NEW_PV  \
+        assert(s_ptr); assert(lenp); assert(free_me)
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp);
+# define PERL_ARGS_ASSERT_UTF8_TO_BYTES_OVERWRITE \
+        assert(s_ptr); assert(lenp)
+
+PERL_STATIC_INLINE bool
+Perl_utf8_to_bytes_temp_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp);
+# define PERL_ARGS_ASSERT_UTF8_TO_BYTES_TEMP_PV \
+        assert(s_ptr); assert(lenp)
 
 PERL_STATIC_INLINE bool
 Perl_utf8_to_uv_msgs(const U8 * const s0, const U8 *e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors, AV **msgs);

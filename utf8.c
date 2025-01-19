@@ -2940,7 +2940,7 @@ New code should use the first three functions listed above.
 */
 
 bool
-Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, U8 ** free_me,
+Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void ** free_me,
                           Perl_utf8_to_bytes_arg result_as)
 {
     PERL_ARGS_ASSERT_UTF8_TO_BYTES_;
@@ -3219,7 +3219,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
 
     if (*is_utf8p) {
-        U8 * new_memory = NULL;
+        void * new_memory = NULL;
         if (utf8_to_bytes_new_pv(&s, lenp, &new_memory)) {
             *is_utf8p = false;
 
