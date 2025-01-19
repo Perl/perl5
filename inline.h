@@ -1132,7 +1132,6 @@ in lvalue context.
 =cut
 */
 
-
 PERL_STATIC_INLINE bool
 Perl_rpp_is_lone(pTHX_ SV *sv)
 {
@@ -1229,6 +1228,12 @@ Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
         *((*dest)++) = UTF8_EIGHT_BIT_HI(byte);
         *((*dest)++) = UTF8_EIGHT_BIT_LO(byte);
     }
+}
+
+PERL_STATIC_INLINE U8 *
+Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
+{
+    return bytes_to_utf8_free_me(s, lenp, NULL);
 }
 
 /*

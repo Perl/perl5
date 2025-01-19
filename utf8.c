@@ -3269,7 +3269,7 @@ But when it is a non-NULL pointer, C<bytes_to_utf8_free_me> stores into it
 either NULL if no memory was allocated; or a pointer to that new memory.  This
 allows the following convenient paradigm:
 
- U8 * free_me;
+ void * free_me;
  U8 converted = bytes_to_utf8_free_me(string, &len, &free_me);
 
  ...
@@ -3292,7 +3292,7 @@ EBCDIC), see L</sv_recode_to_utf8>().
 
 U8*
 Perl_bytes_to_utf8_free_me(pTHX_ const U8 *s, Size_t *lenp,
-                                 const U8 ** free_me_ptr)
+                                 void ** free_me_ptr)
 {
     PERL_ARGS_ASSERT_BYTES_TO_UTF8_FREE_ME;
     PERL_UNUSED_CONTEXT;

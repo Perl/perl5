@@ -398,11 +398,8 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p);
 #define PERL_ARGS_ASSERT_BYTES_FROM_UTF8        \
         assert(s); assert(lenp); assert(is_utf8p)
 
-/* PERL_CALLCONV U8 *
-Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp); */
-
 PERL_CALLCONV U8 *
-Perl_bytes_to_utf8_free_me(pTHX_ const U8 *s, STRLEN *lenp, const U8 **free_me);
+Perl_bytes_to_utf8_free_me(pTHX_ const U8 *s, STRLEN *lenp, void **free_me);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8_FREE_ME  \
         assert(s); assert(lenp)
 
@@ -9650,6 +9647,11 @@ PERL_STATIC_INLINE SV **
 Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val);
 # define PERL_ARGS_ASSERT_AV_STORE_SIMPLE       \
         assert(av); assert(SvTYPE(av) == SVt_PVAV)
+
+PERL_STATIC_INLINE U8 *
+Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
+# define PERL_ARGS_ASSERT_BYTES_TO_UTF8         \
+        assert(s); assert(lenp)
 
 PERL_STATIC_INLINE void
 Perl_clear_defarray_simple(pTHX_ AV *av);
