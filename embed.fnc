@@ -3818,13 +3818,13 @@ Cp	|U8 *	|uvoffuni_to_utf8_flags_msgs				\
 				|const UV flags 			\
 				|NULLOK HV **msgs
 
-Admp	|U8 *	|uv_to_utf8	|NN U8 *d				\
+Adip	|U8 *	|uv_to_utf8	|NN U8 *d				\
 				|UV uv
-Admp	|U8 *	|uv_to_utf8_flags					\
+Adip	|U8 *	|uv_to_utf8_flags					\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags
-Admp	|U8 *	|uv_to_utf8_msgs|NN U8 *d				\
+Adip	|U8 *	|uv_to_utf8_msgs|NN U8 *d				\
 				|UV uv					\
 				|UV flags				\
 				|NULLOK HV **msgs

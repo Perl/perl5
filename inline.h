@@ -1231,6 +1231,24 @@ Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
     }
 }
 
+PERL_STATIC_INLINE U8 *
+Perl_uv_to_utf8(pTHX_ U8 *d, UV input_uv)
+{
+    return uv_to_utf8_flags(d, input_uv, 0);
+}
+
+PERL_STATIC_INLINE U8 *
+Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV input_uv, UV flags)
+{
+    return uv_to_utf8_msgs(d, input_uv, flags, NULL);
+}
+
+PERL_STATIC_INLINE U8 *
+Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
+{
+    return uvoffuni_to_utf8_flags_msgs(d, NATIVE_TO_UNI(input_uv), flags, msgs);
+}
+
 /*
 =for apidoc valid_utf8_to_uvchr
 Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
