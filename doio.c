@@ -2205,7 +2205,6 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
         return TRUE;
     if (SvTYPE(sv) == SVt_IV && SvIOK(sv)) {
         assert(!SvGMAGICAL(sv));
-        bool happy = TRUE;
 
         /* Adapted from Perl_sv_2pv_flags */
         const U32 isUIOK = SvIsUV(sv);
@@ -2221,9 +2220,8 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
         ptr = uiv_2buf(buf.arr, SvIVX(sv), tempuv, isUIOK, &ebuf);
         len = ebuf - ptr;
 
-        if (len && (PerlIO_write(fp,ptr,len) == 0))
-            happy = FALSE;
-        return happy ? !PerlIO_error(fp) : FALSE;
+        bool happy = !(len && (PerlIO_write(fp,ptr,len) == 0));
+        return happy && !PerlIO_error(fp);
     }
     else {
         STRLEN len;
@@ -2236,7 +2234,6 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
          * Safefree(free_me) will free it.  This saves having to have extra
          * logic. */
         void *free_me = NULL;
-        bool happy = TRUE;
 
         if (PerlIO_isutf8(fp)) { /* If the stream is utf8 ... */
             if (!SvUTF8(sv)) {	/* Convert to utf8 if necessary */
@@ -2267,10 +2264,9 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
          * but only until the system hard limit/the filesystem limit,
          * at which we would get EPERM.  Note that when using buffered
          * io the write failure can be delayed until the flush/close. --jhi */
-        if (len && (PerlIO_write(fp,tmps,len) == 0))
-            happy = FALSE;
+        bool happy = !(len && (PerlIO_write(fp,tmps,len) == 0));
         Safefree(free_me);
-        return happy ? !PerlIO_error(fp) : FALSE;
+        return happy && !PerlIO_error(fp);
     }
 }
 
