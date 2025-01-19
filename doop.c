@@ -82,7 +82,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             short ch;
 
             /* Need to check this, otherwise 128..255 won't match */
-            const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
+            const UV c = utf8_to_uv_or_die(s, send, &ulen);
             if (c < 0x100 && (ch = tbl->map[c]) >= 0) {
                 matches++;
                 d = uv_to_utf8(d, (UV)ch);
@@ -149,7 +149,7 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         const bool complement = cBOOL(PL_op->op_private & OPpTRANS_COMPLEMENT);
         while (s < send) {
             STRLEN ulen;
-            const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
+            const UV c = utf8_to_uv_or_die(s, send, &ulen);
             if (c < 0x100) {
                 if (tbl->map[c] >= 0)
                     matches++;
@@ -266,8 +266,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 
         while (s < send) {
             STRLEN len;
-            const UV comp = utf8n_to_uvchr(s, send - s, &len,
-                                           UTF8_ALLOW_DEFAULT);
+            const UV comp = utf8_to_uv_or_die(s, send, &len);
             UV     ch;
             short sch;
 
@@ -371,10 +370,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
             s_len = 1;
         }
         else {
-            from = utf8_to_uvchr_buf(s, send, &s_len);
-            if (from == 0 && *s != '\0') {
-                force_out_malformed_utf8_message_(s, send, 0, MALFORMED_UTF8_DIE);
-            }
+            from = utf8_to_uv_or_die(s, send, &s_len);
         }
 
         /* Look the code point up in the data structure for this tr/// to get
@@ -490,10 +486,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
             s_len = 1;
         }
         else {
-            from = utf8_to_uvchr_buf(s, send, &s_len);
-            if (from == 0 && *s != '\0') {
-                force_out_malformed_utf8_message_(s, send, 0, MALFORMED_UTF8_DIE);
-            }
+            from = utf8_to_uv_or_die(s, send, &s_len);
         }
 
         /* Look the code point up in the data structure for this tr/// to get
