@@ -3106,28 +3106,57 @@ STMT_START {                    \
 #ifdef PERL_CORE
 /* Convenience macros for dealing with IV_MIN:
    In two's complement system, the absolute value of IV_MIN (i.e. -IV_MIN)
-   cannot be represented in IV.  Thus we cannot use simple negation
+   cannot be represented in an IV.  Thus we cannot use simple negation
    (like "-iv") if "iv" might be IV_MIN or -IV_MIN.
-   Note that expressions like "iv = -(UV)iv;" is also not portable
-   as "-(UV)iv" may not fit in IV range and attempt to convert such value
-   to IV might get implementation-defined result or raise a signal.  */
+   Note that expressions like "iv = -(UV)iv;" are also not portable
+   as "-(UV)iv" may not fit in the IV range and attempting to convert such
+   a value to an IV is undefined behavior which will get an
+   implementation-defined result or raise a signal.
+   */
 
-/* Negate IV in the range [IV_MIN, 0) to positive (absolute) UV value.
-   Written this way to avoid every subexpression never cause signed integer
-   overflow (even for two's complement), and make it possible to be compiled
-   into single negation by optimizing compilers. */
-#  define NEGATE_2UV(iv) (ASSUME((iv) < 0), (UV)-((iv) + 1) + 1U)
+/*
+=for apidoc_section $integer
+=for apidoc m|UV|NEGATE_2UV|IV iv
 
-/* Absolute value of IV_MIN as UV.  */
+Returns the absolute value of C<iv>, which must be negative, while avoiding
+undefined behavior even if C<iv> is L<perlapi/C<IV_MIN>>.
+
+=cut
+
+   Negate IV in the range [IV_MIN, 0) to positive (absolute) UV value.
+   Written this way to avoid any subexpression causing signed integer
+   overflow (even for two's complement), and to make it possible to be compiled
+   into a single negation by optimizing compilers. */
+#  define NEGATE_2UV(iv) (ASSUME((iv) < 0), (UV) -((iv) + 1) + 1U)
+
+/*
+=for apidoc_section $integer
+=for apidoc mn|UV|ABS_IV_MIN
+
+Returns the absolute value of L<perlapi/C<IV_MIN>>, suitable for use in a UV
+
+=cut
+*/
 #  define ABS_IV_MIN    NEGATE_2UV(IV_MIN)
 
-/* Negate UV in the range [0, abs(IV_MIN)] to zero or negative IV value
+/*
+=for apidoc_section $integer
+=for apidoc m|IV|NEGATE_2IV|UV uv
+
+Returns the negative value of C<uv>, which must be non-negative, for use in an
+IV.  The results are undefined if that value would be less than
+L<perlapi/C<IV_MIN>>.  This macro is needed because naively saying C<-uv> gives
+undefined behavior when C<uv> is equal to C<L</ABS_IV_MIN>>.
+
+=cut
+
+   Negate UV in the range [0, abs(IV_MIN)] to zero or negative IV value
    in the range [IV_MIN, 0].  Written this way to avoid casting non-IV value
    into IV (which is either the result is implementation-defined or an
    implementation-defined signal is raised).  Note that "8" below is an
-   arbitrary value to force both branches of conditional operator to be
+   arbitrary value to force both branches of the conditional operator to be
    non-constant and eventually make it possible to be compiled into
-   single negation by optimizing compilers. */
+   a single negation by optimizing compilers. */
 #  define NEGATE_2IV(uv) (ASSUME((uv) <= ABS_IV_MIN), \
                           (uv) < 8U ? -(IV)(uv) : -(IV)((uv) - 8U) - 8)
 

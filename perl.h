@@ -4745,6 +4745,11 @@ The largest signed integer that fits in an IV on this platform.
 The negative signed integer furthest away from 0 that fits in an IV on this
 platform.
 
+It is easy to get undefined C behavior with this value.  The macros (currently
+only available for internal use) L<perlintern/C<NEGATE_2UV>>,
+L<perlintern/C<ABS_IV_MIN>>, and L<perlintern/C<NEGATE_2IV>> avoid
+undefined behavior when finding the opposite signed equivalent value.
+
 =for apidoc Amn|UV|UV_MAX
 The largest unsigned integer that fits in a UV on this platform.
 
