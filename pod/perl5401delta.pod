@@ -9,8 +9,8 @@ perl5401delta - what is new for perl v5.40.1
 This document describes differences between the 5.40.0 release and the 5.40.1
 release.
 
-If you are upgrading from an earlier release such as 5.39.0, first read
-L<perl5400delta>, which describes differences between 5.39.0 and 5.40.0.
+If you are upgrading from an earlier release such as 5.38.0, first read
+L<perl5400delta>, which describes differences between 5.38.0 and 5.40.0.
 
 =head1 Incompatible Changes
 
