@@ -17,6 +17,24 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.8 - Syou Ishida, trans. E. Madison Shimoda, "We'll Prescribe You a Cat"
+
+L<Announced on 2025-01-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/01/msg269458.html>
+
+  'So Mr Kagawa, let's try this for a week.'
+  '...'
+  'I'm writing you a prescription.'
+  'You're writing me a prescription?'
+  'Correct.'
+Shuta looked at the cat in the carrier.
+  'Is that--a cat?'
+  'It is.'
+Shuta was starting to question his own sanity.
+  'A real cat?'
+  'Of course.  They're very effective.  You know the old saying, "A cat
+a day keeps the doctor away."  Cats are more effective than any other
+medicine out there.'
+
 =head2 v5.41.7 - Martha Wells
 
 L<Announced on 2024-12-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2024/12/msg269316.html>
