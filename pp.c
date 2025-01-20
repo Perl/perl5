@@ -7513,7 +7513,7 @@ PP(pp_refassign)
            in leavesub?  */
     }
     else
-        rpp_popfree_to_NN(PL_stack_sp - (extra + 1));
+        rpp_popfree_to_NN(PL_stack_sp - (extra + cBOOL(GIMME_V == G_VOID)));
 
     return NORMAL;
 }
