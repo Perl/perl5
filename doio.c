@@ -2215,15 +2215,19 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
         STRLEN len;
         /* Do this first to trigger any overloading.  */
         const U8 *tmps = (const U8 *) SvPV_const(sv, len);
-        U8 *tmpbuf = NULL;
 
+        /* If 'tmps' doesn't need converting, this will remain NULL and
+         * Safefree(free_me) will do nothing;  Otherwise it points to the newly
+         * allocated memory that tmps will also be changed to point to, so
+         * Safefree(free_me) will free it.  This saves having to have extra
+         * logic. */
+        void *free_me = NULL;
         bool happy = TRUE;
 
         if (PerlIO_isutf8(fp)) { /* If the stream is utf8 ... */
             if (!SvUTF8(sv)) {	/* Convert to utf8 if necessary */
-                /* We don't modify the original scalar.  */
-                tmpbuf = bytes_to_utf8(tmps, &len);
-                tmps = tmpbuf;
+                /* This doesn't modify the original scalar.  */
+                tmps = bytes_to_utf8_free_me(tmps, &len, &free_me);
             }
             else if (ckWARN4_d(WARN_UTF8, WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR)) {
                 (void) check_utf8_print(tmps, len);
@@ -2231,20 +2235,9 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
         } /* else stream isn't utf8 */
         else if (DO_UTF8(sv)) { /* But if is utf8 internally, attempt to
                                    convert to bytes */
-            STRLEN tmplen = len;
-            bool utf8 = TRUE;
-            U8 * const result = bytes_from_utf8(tmps, &tmplen, &utf8);
-            if (!utf8) {
-
-                /* Here, succeeded in downgrading from utf8.  Set up to below
-                 * output the converted value */
-                tmpbuf = result;
-                tmps = tmpbuf;
-                len = tmplen;
-            }
-            else {  /* Non-utf8 output stream, but string only representable in
-                       utf8 */
-                assert(result == tmps);
+            if (! utf8_to_bytes_new_pv(&tmps, &len, &free_me)) {
+                /* Non-utf8 output stream, but string only representable in
+                   utf8 */
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
                                  "Wide character in %s",
                                    PL_op ? OP_DESC(PL_op) : "print"
@@ -2262,7 +2255,7 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
          * io the write failure can be delayed until the flush/close. --jhi */
         if (len && (PerlIO_write(fp,tmps,len) == 0))
             happy = FALSE;
-        Safefree(tmpbuf);
+        Safefree(free_me);
         return happy ? !PerlIO_error(fp) : FALSE;
     }
 }
