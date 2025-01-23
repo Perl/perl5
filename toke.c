@@ -7191,6 +7191,7 @@ yyl_my(pTHX_ char *s, I32 my)
         STRLEN len;
         s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
         if (memEQs(PL_tokenbuf, len, "sub"))
+            /* my sub ... */
             return yyl_sub(aTHX_ s, my);
         PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
         if (!PL_in_my_stash) {
