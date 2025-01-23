@@ -7193,6 +7193,9 @@ yyl_my(pTHX_ char *s, I32 my)
         if (memEQs(PL_tokenbuf, len, "sub"))
             /* my sub ... */
             return yyl_sub(aTHX_ s, my);
+        if (memEQs(PL_tokenbuf, len, "method"))
+            /* my method ... */
+            return yyl_sub(aTHX_ s, KEY_method);
         PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
         if (!PL_in_my_stash) {
             char tmpbuf[1024];

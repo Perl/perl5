@@ -89,4 +89,18 @@ no warnings 'experimental::class';
     is(Testcase6->new->forwarded, "OK", 'forward-declared method works');
 }
 
+# methods can be declared lexically
+{
+    class Testcase7 {
+        my method priv {
+            return "private-result";
+        }
+
+        method m { return priv($self); }
+    }
+
+    is(Testcase7->new->m, "private-result", 'lexical method can be declared and called');
+    ok(!Testcase7->can("priv"), 'lexical method does not appear in the symbol table');
+}
+
 done_testing;

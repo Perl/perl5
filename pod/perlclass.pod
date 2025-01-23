@@ -185,6 +185,26 @@ Just like regular subroutines, methods I<can> be anonymous:
         }
     }
 
+Methods can also be declared as lexical subroutines, using the C<my> prefix.
+This creates a subroutine that is lexically visible within the current scope,
+but does not appear in the symbol table.  The effect is that of a I<private>
+method; one that can be called from within the class's own code, but not from
+outside.
+
+At present, there is no special syntax for invoking a lexical method, so for
+now they must be called as if they are regular (lexical) subroutines,
+remembering to pass the C<$self> invocant as the first positional argument.
+
+    class LexicalMethod {
+        my method abc ($x, $y) {
+            say "Internal method abc invoked with x=$x y=$y";
+        }
+
+        method xyz {
+            abc($self, "x", "y");
+        }
+    }
+
 =head1 ATTRIBUTES
 
 Specific aspects of the keywords mentioned above are managed using
