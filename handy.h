@@ -3103,7 +3103,6 @@ STMT_START {                    \
     (x) ^= ((x) << 26);         \
 } STMT_END
 
-#ifdef PERL_CORE
 /* Convenience macros for dealing with IV_MIN:
    In two's complement system, the absolute value of IV_MIN (i.e. -IV_MIN)
    cannot be represented in an IV.  Thus we cannot use simple negation
@@ -3159,8 +3158,6 @@ undefined behavior when C<uv> is equal to C<L</ABS_IV_MIN>>.
    a single negation by optimizing compilers. */
 #  define NEGATE_2IV(uv) (ASSUME((uv) <= ABS_IV_MIN), \
                           (uv) < 8U ? -(IV)(uv) : -(IV)((uv) - 8U) - 8)
-
-#endif  /* PERL_CORE */
 
 #endif  /* PERL_HANDY_H_ */
 
