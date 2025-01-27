@@ -29,21 +29,20 @@
 # it may work elsewhere but no specific attempt has been made to make it
 # portable.
 
-use 5.006;
-sub usage { die "usage: $0 [ -b bison_executable ] [ file.y ]\n" }
-
+use v5.10;
 use warnings;
-use strict;
+sub usage { die "usage: $0 [ -b bison_executable ] [ file.y ]\n" }
 
 our $Verbose;
 BEGIN { require './regen/regen_lib.pl'; }
 
-my $bison = 'bison';
+use Getopt::Long;
+Getopt::Long::Configure(qw( bundling bundling_values no_ignore_case ));
 
-if (@ARGV >= 2 and $ARGV[0] eq '-b') {
-    shift;
-    $bison = shift;
-}
+GetOptions(
+    'b|bison=s' => \(my $bison = 'bison'),
+    'W=s'       => \my @bison_warnings,
+) or usage;
 
 my $y_file = shift || 'perly.y';
 
@@ -90,7 +89,8 @@ EOF
 $version = $1;
 
 # creates $tmpc_file and $tmph_file
-my_system("$bison -d -o $tmpc_file $y_file");
+my_system("$bison -d -o $tmpc_file $y_file " .
+    join(" ", map { "-W$_" } @bison_warnings));
 
 open my $ctmp_fh, '<', $tmpc_file or die "Can't open $tmpc_file: $!\n";
 my $clines;
