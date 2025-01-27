@@ -199,8 +199,7 @@ extern int yydebug;
 /* Value type.  */
 #ifdef PERL_IN_TOKE_C
 static bool
-S_is_opval_token(int type)
-{
+S_is_opval_token(int type) {
     switch (type) {
     case ATTRLIST:
     case BAREWORD:
@@ -250,5 +249,5 @@ int yyparse (void);
 
 /* Generated from:
  * 783af8ff7ff42fd7313d85df8bbde58d7480e4964bb41ce7b92a5039a7286074 perly.y
- * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
+ * 1a4cfc5b32006b09aba17cc80cd31ade3503ab1e829681adfe337d9c26e19fe0 regen_perly.pl
  * ex: set ro ft=c: */
