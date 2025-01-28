@@ -1021,22 +1021,12 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     /* Create downgraded temporaries of any UTF-8 encoded operands.  As of
      * perl-5.32, we no longer accept above-FF code points at all */
     if (DO_UTF8(left)) {
-        left_utf8 = TRUE;
         result_needs_to_be_utf8 = TRUE;
-
-        lc = (char *) bytes_from_utf8((const U8 *) lc, &leftlen, &left_utf8);
-        if (! left_utf8) {
-            SAVEFREEPV(lc);
-        }
+        left_utf8 = ! utf8_to_bytes_temp_pv((const U8 **) &lc, &leftlen);
     }
     if (DO_UTF8(right)) {
-        right_utf8 = TRUE;
         result_needs_to_be_utf8 = TRUE;
-
-        rc = (char *) bytes_from_utf8((const U8 *) rc, &rightlen, &right_utf8);
-        if (! right_utf8) {
-            SAVEFREEPV(rc);
-        }
+        right_utf8 = ! utf8_to_bytes_temp_pv((const U8 **) &rc, &rightlen);
     }
 
     /* We set 'len' to the length that the operation actually operates on.  The
