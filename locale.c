@@ -8601,6 +8601,8 @@ S_strftime8(pTHX_ const char * fmt,
 
 #endif
 
+    void * free_me = NULL;
+
     switch (fmt_utf8ness) {
       case UTF8NESS_IMMATERIAL:
         break;
@@ -8619,15 +8621,12 @@ S_strftime8(pTHX_ const char * fmt,
         if (! is_locale_utf8(locale)) {
             locale_utf8ness = LOCALE_NOT_UTF8;
 
-            bool is_utf8 = true;
             Size_t fmt_len = strlen(fmt);
-            fmt = (char *) bytes_from_utf8((U8 *) fmt, &fmt_len, &is_utf8);
-            if (is_utf8) {
+            if (! utf8_to_bytes_new_pv((const U8 **) &fmt, &fmt_len, &free_me))
+            {
                 SET_EINVAL;
                 return false;
             }
-
-            SAVEFREEPV(fmt);
         }
         else {
             locale_utf8ness = LOCALE_IS_UTF8;
@@ -8649,8 +8648,8 @@ S_strftime8(pTHX_ const char * fmt,
                  * locale would find any UTF-8 variant characters to be
                  * malformed */
                 Size_t fmt_len = strlen(fmt);
-                fmt = (char *) bytes_to_utf8((U8 *) fmt, &fmt_len);
-                SAVEFREEPV(fmt);
+                fmt = (char *) bytes_to_utf8_free_me((U8 *) fmt,
+                                                     &fmt_len, &free_me);
             }
         }
 
@@ -8658,6 +8657,7 @@ S_strftime8(pTHX_ const char * fmt,
     }
 
     if (! strftime_tm(fmt, sv, locale, mytm)) {
+        Safefree(free_me);
         return false;
     }
 
@@ -8672,6 +8672,7 @@ S_strftime8(pTHX_ const char * fmt,
                            ? SvPVX(sv)
                            :_byte_dump_string((U8 *) SvPVX(sv), SvCUR(sv) ,0)),
                           *result_utf8ness));
+    Safefree(free_me);
     return true;
 
 #undef INDEX_TO_USE
