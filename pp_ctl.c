@@ -824,14 +824,14 @@ PP_wrapped(pp_formline, 0, 1)
              * item_is_utf8 implies source is utf8.
              * if trans, translate certain characters during the copy */
             {
-                U8 *tmp = NULL;
+                void *free_me = NULL;
                 STRLEN grow = 0;
 
                 SvCUR_set(PL_formtarget,
                           t - SvPVX_const(PL_formtarget));
 
                 if (targ_is_utf8 && !item_is_utf8) {
-                    source = tmp = bytes_to_utf8(source, &to_copy);
+                    source = bytes_to_utf8_free_me(source, &to_copy, &free_me);
                     grow = to_copy;
                 } else {
                     if (item_is_utf8 && !targ_is_utf8) {
@@ -883,8 +883,7 @@ PP_wrapped(pp_formline, 0, 1)
 
                 t += to_copy;
                 SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) + to_copy);
-                if (tmp)
-                    Safefree(tmp);
+                Safefree(free_me);
                 break;
             }
 
