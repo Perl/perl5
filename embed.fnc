@@ -6109,9 +6109,6 @@ RTi	|int	|does_utf8_overflow					\
 				|NN const U8 *e
 RTi	|int	|isFF_overlong	|NN const U8 * const s			\
 				|const STRLEN len
-Ri	|bool	|is_utf8_common |NN const U8 * const p			\
-				|NN const U8 * const e			\
-				|NN SV * const invlist
 RTi	|int	|is_utf8_overlong					\
 				|NN const U8 * const s			\
 				|const STRLEN len

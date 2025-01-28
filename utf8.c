@@ -3848,20 +3848,6 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     }
 }
 
-PERL_STATIC_INLINE bool
-S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
-                       SV* const invlist)
-{
-    PERL_ARGS_ASSERT_IS_UTF8_COMMON;
-
-    /* returns a boolean giving whether or not the UTF8-encoded character that
-     * starts at <p>, and extending no further than <e - 1> is in the inversion
-     * list <invlist>. */
-
-    UV cp = utf8_to_uv_or_die(p, e, NULL);
-    return _invlist_contains_cp(invlist, cp);
-}
-
 #if 0	/* Not currently used, but may be needed in the future */
 PERLVAR(I, seen_deprecated_macro, HV *)
 
@@ -3909,12 +3895,18 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
 }
 #endif
 
+/* returns a boolean giving whether or not the UTF8-encoded character that
+ * starts at <p>, and extending no further than <e - 1> is in the inversion
+ * list <invlist>. */
+#define IS_UTF8_IN_INVLIST(p, e, invlist)                                   \
+            _invlist_contains_cp(invlist, utf8_to_uv_or_die(p, e, NULL))
+
 bool
 Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
-    return is_utf8_common(p, e, PL_XPosix_ptrs[classnum]);
+    return IS_UTF8_IN_INVLIST(p, e, PL_XPosix_ptrs[classnum]);
 }
 
 bool
@@ -3922,7 +3914,7 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
 
-    return is_utf8_common(p, e, PL_utf8_perl_idstart);
+    return IS_UTF8_IN_INVLIST(p, e, PL_utf8_perl_idstart);
 }
 
 bool
@@ -3930,7 +3922,7 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
 
-    return is_utf8_common(p, e, PL_utf8_perl_idcont);
+    return IS_UTF8_IN_INVLIST(p, e, PL_utf8_perl_idcont);
 }
 
 STATIC UV
