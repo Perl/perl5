@@ -444,12 +444,12 @@ convert such strings manually.
 
  use v5.14;  # needed for num() function
  use Unicode::UCD qw(num);
- my $str = "got Ⅻ and ४५६७ and ⅞ and here";
+ my $str = "got Ⅻ and ४५६७ and ⅞ and 兆 here";
  my @nums = ();
  while ($str =~ /(\d+|\N)/g) {  # not just ASCII!
     push @nums, num($1);
  }
- say "@nums";   #     12      4567      0.875
+ say "@nums";   # 12 4567 0.875 1000000000000
 
  use charnames qw(:full);
  my $nv = num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}");
