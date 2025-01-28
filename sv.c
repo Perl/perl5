@@ -3644,7 +3644,7 @@ Perl_sv_utf8_downgrade_flags(pTHX_ SV *const sv, const bool fail_ok, const U32 f
             }
             s = (U8 *) SvPV_flags(sv, len, mg_flags);
 
-            if (!utf8_to_bytes(s, &len)) {
+            if (!utf8_to_bytes_overwrite(&s, &len)) {
                 if (fail_ok)
                     return FALSE;
                 else {

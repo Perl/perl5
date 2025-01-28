@@ -2789,7 +2789,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
         tmps = (U8*)SvPV_nomg(TARG, len);
 
         if (SvUTF8(TARG)) {
-            if (len && ! utf8_to_bytes(tmps, &len)) {
+            if (len && ! utf8_to_bytes_overwrite(&tmps, &len)) {
                 Perl_croak(aTHX_ FATAL_ABOVE_FF_MSG, PL_op_desc[PL_op->op_type]);
             }
             SvCUR_set(TARG, len);
