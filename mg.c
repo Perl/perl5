@@ -2572,9 +2572,10 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
         const char *utf8;
         lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
         newtarglen = len;
-        utf8 = (char*)bytes_to_utf8((U8*)tmps, &len);
+        void * free_me = NULL;
+        utf8 = (char*)bytes_to_utf8_free_me((U8*)tmps, &len, &free_me);
         sv_insert_flags(lsv, lvoff, lvlen, utf8, len, 0);
-        Safefree(utf8);
+        Safefree(free_me);
     }
     else {
         sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
