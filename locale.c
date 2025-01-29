@@ -9954,7 +9954,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 }
             }
             s[d++] = '\0';
-            Renew(s, d, char);   /* Free up unused space */
             }
         }
 
