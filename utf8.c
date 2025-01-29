@@ -3256,6 +3256,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 /*
 =for apidoc      bytes_to_utf8
 =for apidoc_item bytes_to_utf8_free_me
+=for apidoc_item bytes_to_utf8_temp_pv
 
 These each convert a string C<s> of length C<*lenp> bytes from the native
 encoding into UTF-8 (UTF-EBCDIC on EBCDIC platforms), returning a pointer to
@@ -3274,6 +3275,13 @@ already there.
 
 In both cases, the caller is responsible for arranging for any new memory to
 get freed.
+
+C<bytes_to_utf8_temp_pv> simply returns a pointer to the input string if the
+string's UTF-8 representation is the same as its native representation, thus
+behaving like C<bytes_to_utf8_free_me> in this situation.  Otherwise, it
+behaves like C<bytes_to_utf8>, returning a pointer to new memory containing the
+conversion of the input.  The difference is that it also arranges for the new
+memory to automatically be freed by calling C<L</SAVEFREEPV>> on it.
 
 C<bytes_to_utf8_free_me> takes an extra parameter, C<free_me> to communicate.
 to the caller that memory was allocated or not.  If that parameter is NULL,

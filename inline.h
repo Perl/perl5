@@ -1236,6 +1236,19 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
     return bytes_to_utf8_free_me(s, lenp, NULL);
 }
 
+PERL_STATIC_INLINE U8 *
+Perl_bytes_to_utf8_temp_pv(pTHX_ const U8 *s, STRLEN *lenp)
+{
+    void * free_me = NULL;
+    U8 * converted = bytes_to_utf8_free_me(s, lenp, &free_me);
+
+    if (free_me) {
+        SAVEFREEPV(free_me);
+    }
+
+    return converted;
+}
+
 PERL_STATIC_INLINE bool
 Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, void ** free_me)
 {

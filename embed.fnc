@@ -800,6 +800,9 @@ Adp	|U8 *	|bytes_to_utf8_free_me					\
 				|NN const U8 *s 			\
 				|NN STRLEN *lenp			\
 				|NULLOK void **free_me
+Adip	|U8 *	|bytes_to_utf8_temp_pv					\
+				|NN const U8 *s 			\
+				|NN STRLEN *lenp
 AOdp	|SSize_t|call_argv	|NN const char *sub_name		\
 				|I32 flags				\
 				|NN char **argv

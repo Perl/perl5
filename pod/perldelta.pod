@@ -360,7 +360,16 @@ well.
 
 =item *
 
-XXX
+Two new API functions are introduced to convert strings encoded in
+native bytes format to UTF-8.  These return the string unchanged if its
+UTF-8 representation is the same as the original.  Otherwise, new memory
+is allocated to contain the converted string.  This is in contrast to
+the existing L<perlapi/C<bytes_to_utf8>> which always allocates new
+memory.  The new functions are L<perlapi/C<bytes_to_utf8_free_me>> and
+L<perlapi/C<bytes_to_utf8_temp_pv>>.
+L<perlapi/C<bytes_to_utf8_temp_pv>> arranges for the new memory to
+automatically be freed.  With C<bytes_to_utf8_free_me>, you are
+responsible for freeing any newly allocated memory.
 
 =back
 

@@ -9644,6 +9644,11 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 # define PERL_ARGS_ASSERT_BYTES_TO_UTF8         \
         assert(s); assert(lenp)
 
+PERL_STATIC_INLINE U8 *
+Perl_bytes_to_utf8_temp_pv(pTHX_ const U8 *s, STRLEN *lenp);
+# define PERL_ARGS_ASSERT_BYTES_TO_UTF8_TEMP_PV \
+        assert(s); assert(lenp)
+
 PERL_STATIC_INLINE void
 Perl_clear_defarray_simple(pTHX_ AV *av);
 # define PERL_ARGS_ASSERT_CLEAR_DEFARRAY_SIMPLE \
