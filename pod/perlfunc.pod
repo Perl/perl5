@@ -6701,6 +6701,17 @@ the string.  A positive OFFSET greater than the length of SCALAR
 results in the string being padded to the required size with C<"\0">
 bytes before the result of the read is appended.
 
+    open(my $FH, "<", "input.txt") or die("Cannot open file: $!");
+
+    my $buf = "";
+    my $num = 0;
+
+    # Read 32 bytes
+    $num = read($FH, $buf, 32);
+
+    # Read 16 bytes into position 1024 of $buf
+    $num = read($FH, $buf, 16, 1024);
+
 The call is implemented in terms of either Perl's or your system's native
 L<fread(3)> library function, via the L<PerlIO> layers applied to the
 handle.  To get a true L<read(2)> system call, see
