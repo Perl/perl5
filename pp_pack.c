@@ -842,8 +842,7 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
         /* We probably should try to avoid this in case a scalar context call
            wouldn't get to the "U0" */
         STRLEN len = strend - s;
-        s = (char *) bytes_to_utf8((U8 *) s, &len);
-        SAVEFREEPV(s);
+        s = (char *) bytes_to_utf8_temp_pv((U8 *) s, &len);
         strend = s + len;
         flags |= FLAG_DO_UTF8;
     }
