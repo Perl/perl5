@@ -9609,6 +9609,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                          bool utf8      /* Is the input in UTF-8? */
                    )
 {
+    PERL_ARGS_ASSERT_MEM_COLLXFRM_;
+
     /* mem_collxfrm_() is like strxfrm() but with two important differences.
      * First, it handles embedded NULs. Second, it allocates a bit more memory
      * than needed for the transformed data itself.  The real transformed data
@@ -9636,8 +9638,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
     locale_t constructed_locale = (locale_t) 0;
 #  endif
-
-    PERL_ARGS_ASSERT_MEM_COLLXFRM_;
 
     /* Must be NUL-terminated */
     assert(*(input_string + len) == '\0');
@@ -9847,116 +9847,114 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
              * damage control ... */
             if (UNLIKELY(utf8)) {
 
-                /* What we do is construct a non-UTF-8 string with
-                 *  1) the characters representable by a single byte converted
-                 *     to be so (if necessary);
-                 *  2) and the rest converted to collate the same as the
-                 *     highest collating representable character.  That makes
-                 *     them collate at the end.  This is similar to how we
-                 *     handle embedded NULs, but we use the highest collating
-                 *     code point instead of the smallest.  Like the NUL case,
-                 *     this isn't perfect, but is the best we can reasonably
-                 *     do.  Every above-255 code point will sort the same as
-                 *     the highest-sorting 0-255 code point.  If that code
-                 *     point can combine in a sequence with some other code
-                 *     points for weight calculations, us changing something to
-                 *     be it can adversely affect the results.  But in most
-                 *     cases, it should work reasonably.  And note that this is
-                 *     really an illegal situation: using code points above 255
-                 *     on a locale where only 0-255 are valid.  If two strings
-                 *     sort entirely equal, then the sort order for the
-                 *     above-255 code points will be in code point order. */
+            /* What we do is construct a non-UTF-8 string with
+             *  1) the characters representable by a single byte converted to
+             *     be so (if not already);
+             *  2) and the rest converted to collate the same as the highest
+             *     collating representable character.  That makes them collate
+             *     at the end.  This is similar to how we handle embedded NULs,
+             *     but we use the highest collating code point instead of the
+             *     smallest.  Like the NUL case, this isn't perfect, but is the
+             *     best we can reasonably do.  Every above-255 code point will
+             *     sort the same as the highest-sorting 0-255 code point.  If
+             *     that code point can combine in a sequence with some other
+             *     code points for weight calculations, us changing something
+             *     to be it can adversely affect the results.  But in most
+             *     cases, it should work reasonably.  And note that this is
+             *     really an illegal situation: using code points above 255 on
+             *     a locale where only 0-255 are valid.  If two strings sort
+             *     entirely equal, then the sort order for the above-255 code
+             *     points will be in code point order. */
 
-                utf8 = FALSE;
+            utf8 = FALSE;
 
-                /* If we haven't calculated the code point with the maximum
-                 * collating order for this locale, do so now */
-                if (! PL_strxfrm_max_cp) {
-                    int j;
+            /* If we haven't calculated the code point with the maximum
+             * collating order for this locale, do so now */
+            if (! PL_strxfrm_max_cp) {
+                int j;
 
-                    /* The current transformed string that collates the
-                     * highest (except it also includes the prefixed collation
-                     * index. */
-                    char * cur_max_x = NULL;
+                /* The current transformed string that collates the
+                 * highest (except it also includes the prefixed collation
+                 * index. */
+                char * cur_max_x = NULL;
 
-                    /* Look through all legal code points (NUL isn't) */
-                    for (j = 1; j < 256; j++) {
-                        char * x;
-                        STRLEN x_len;
-                        char cur_source[] = { '\0', '\0' };
+                /* Look through all legal code points (NUL isn't) */
+                for (j = 1; j < 256; j++) {
+                    char * x;
+                    STRLEN x_len;
+                    char cur_source[] = { '\0', '\0' };
 
-                        /* Create a 1-char string of the current code point */
-                        cur_source[0] = (char) j;
+                    /* Create a 1-char string of the current code point */
+                    cur_source[0] = (char) j;
 
-                        /* Then transform it */
-                        x = mem_collxfrm_(cur_source, 1, &x_len, FALSE);
+                    /* Then transform it */
+                    x = mem_collxfrm_(cur_source, 1, &x_len, FALSE);
 
-                        /* If something went wrong (which it shouldn't), just
-                         * ignore this code point */
-                        if (! x) {
-                            continue;
-                        }
-
-                        /* If this character's transformation is higher than
-                         * the current highest, this one becomes the highest */
-                        if (   cur_max_x == NULL
-                            || strGT(x         + COLLXFRM_HDR_LEN,
-                                     cur_max_x + COLLXFRM_HDR_LEN))
-                        {
-                            PL_strxfrm_max_cp = j;
-                            Safefree(cur_max_x);
-                            cur_max_x = x;
-                        }
-                        else {
-                            Safefree(x);
-                        }
+                    /* If something went wrong (which it shouldn't), just
+                     * ignore this code point */
+                    if (! x) {
+                        continue;
                     }
 
-                    if (! cur_max_x) {
-                        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "mem_collxfrm_: Couldn't find any character to"
-                            " replace above-Latin1 chars in locale %s with",
-                            PL_collation_name));
-                        goto bad;
+                    /* If this character's transformation is higher than
+                     * the current highest, this one becomes the highest */
+                    if (   cur_max_x == NULL
+                        || strGT(x         + COLLXFRM_HDR_LEN,
+                                 cur_max_x + COLLXFRM_HDR_LEN))
+                    {
+                        PL_strxfrm_max_cp = j;
+                        Safefree(cur_max_x);
+                        cur_max_x = x;
                     }
+                    else {
+                        Safefree(x);
+                    }
+                }
 
+                if (! cur_max_x) {
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "mem_collxfrm_: highest 1-byte collating character"
-                            " in locale %s is 0x%02X\n",
-                            PL_collation_name,
-                            PL_strxfrm_max_cp));
-
-                    Safefree(cur_max_x);
+                        "mem_collxfrm_: Couldn't find any character to"
+                        " replace above-Latin1 chars in locale %s with",
+                        PL_collation_name));
+                    goto bad;
                 }
 
-                /* Here we know which legal code point collates the highest.
-                 * We are ready to construct the non-UTF-8 string.  The length
-                 * will be at least 1 byte smaller than the input string
-                 * (because we changed at least one 2-byte character into a
-                 * single byte), but that is eaten up by the trailing NUL */
-                Newx(s, len, char);
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "mem_collxfrm_: highest 1-byte collating character"
+                        " in locale %s is 0x%02X\n",
+                        PL_collation_name,
+                        PL_strxfrm_max_cp));
 
-                {
-                    STRLEN i;
-                    STRLEN d= 0;
-                    char * e = (char *) t + len;
+                Safefree(cur_max_x);
+            }
 
-                    for (i = 0; i < len; i+= UTF8SKIP(t + i)) {
-                        U8 cur_char = t[i];
-                        if (UTF8_IS_INVARIANT(cur_char)) {
-                            s[d++] = cur_char;
-                        }
-                        else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(t + i, e)) {
-                            s[d++] = EIGHT_BIT_UTF8_TO_NATIVE(cur_char, t[i+1]);
-                        }
-                        else {  /* Replace illegal cp with highest collating
-                                   one */
-                            s[d++] = PL_strxfrm_max_cp;
-                        }
-                    }
-                    s[d++] = '\0';
-                    Renew(s, d, char);   /* Free up unused space */
+            /* Here we know which legal code point collates the highest.  We
+             * are ready to construct the non-UTF-8 string.  The length will be
+             * at least 1 byte smaller than the input string (because we
+             * changed at least one 2-byte character into a single byte), but
+             * that is eaten up by the trailing NUL
+             *
+             * May shrink; will never grow */
+            Newx(s, len, char);
+
+            STRLEN i;
+            STRLEN d= 0;
+            char * e = (char *) t + len;
+
+            for (i = 0; i < len; i+= UTF8SKIP(t + i)) {
+                U8 cur_char = t[i];
+                if (UTF8_IS_INVARIANT(cur_char)) {
+                    s[d++] = cur_char;
                 }
+                else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(t + i, e)) {
+                    s[d++] = EIGHT_BIT_UTF8_TO_NATIVE(cur_char, t[i+1]);
+                }
+                else {  /* Replace illegal cp's with highest collating one */
+                    s[d++] = PL_strxfrm_max_cp;
+                }
+            }
+            s[d++] = '\0';
+            Renew(s, d, char);   /* Free up unused space */
             }
         }
 
