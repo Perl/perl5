@@ -9827,27 +9827,27 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         len = strlen(s);
     } /* End of replacing NULs */
 
-    /* Make sure the UTF8ness of the string and locale match */
-    if (utf8 != PL_in_utf8_COLLATE_locale) {
-        /* XXX convert above Unicode to 10FFFF? */
-        const char * const t = s;   /* Temporary so we can later find where the
-                                       input was */
+    if (! utf8) {
 
-        /* Here they don't match.  Change the string's to be what the locale is
-         * expecting */
-
-        if (! utf8) { /* locale is UTF-8, but input isn't; upgrade the input */
+        /* When the locale is UTF-8, strxfrm() is expecting a UTF-8 string.
+         * Here, the string isn't.  Convert it to be so. */
+        if (PL_in_utf8_COLLATE_locale) {
             s = (char *) bytes_to_utf8((const U8 *) s, &len);
             utf8 = TRUE;
         }
-        else {   /* locale is not UTF-8; but input is; downgrade the input */
 
-            s = (char *) bytes_from_utf8((const U8 *) s, &len, &utf8);
+        /* We are ready to call strxfrm() */
+    }
+    else if (! PL_in_utf8_COLLATE_locale) {
 
-            /* If the downgrade was successful we are done, but if the input
-             * contains things that require UTF-8 to represent, have to do
-             * damage control ... */
-            if (UNLIKELY(utf8)) {
+        /* Here, the string is UTF-8, but the locale isn't.  strxfrm() is
+         * expecting a non-UTF-8 string.  Convert the string to bytes.  If
+         * that succeeds, we are ready to call strxfrm() */
+        s = (char *) bytes_from_utf8((const U8 *) s, &len, &utf8);
+        const char * const t = s;   /* Temporary so we can later find where the
+                                       input was */
+        if (UNLIKELY(utf8)) {
+            /* But here, it didn't succeed; have to do damage control ... */
 
             /* What we do is construct a non-UTF-8 string with
              *  1) the characters representable by a single byte converted to
@@ -9956,7 +9956,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 }
             }
             s[d++] = '\0';
-            }
         }
 
         /* Here, we have constructed a modified version of the input.  It could
@@ -9966,6 +9965,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
             Safefree(t);
         }
     }
+    /* else   // Here both the locale and string are UTF-8 */
+    /* XXX convert above Unicode to 10FFFF? */
 
     length_in_chars = (utf8)
                       ? utf8_length((U8 *) s, (U8 *) s + len)
@@ -9989,8 +9990,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
 #  define CLEANUP_STRXFRM_COMMON                                        \
         STMT_START {                                                    \
-            if (s == sans_nuls) Safefree(sans_nuls);                    \
-            else if (s != input_string) Safefree(s);                    \
+            if (s != input_string && s != sans_nuls) Safefree(s);       \
+            Safefree(sans_nuls);                                        \
         } STMT_END
 
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
