@@ -55,7 +55,12 @@ typedef struct {
 
 #define NEEDS_LINES	1
 
-static const MGVTBL PerlIOEncode_tag = { 0, 0, 0, 0, 0, 0, 0, 0 };
+/* An empty hook structure just for the purpose of marking an SV */
+static const struct MagicFunctions magicfuncs_perlencoding = {
+    .ver   = 2,
+    .shape = MGv2s_BASE,
+    .debug_name = "PerlIO::encoding/tag",
+};
 
 static SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
@@ -67,9 +72,9 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
      * that it should not call methods and wait for _dup() to actually dup the
      * encoding object. */
     if (param) {
-	sv = newSV(0);
-	sv_magicext(sv, NULL, PERL_MAGIC_ext, &PerlIOEncode_tag, 0, 0);
-	return sv;
+        sv = newSV(0);
+        sv_magicv2_add(sv, &magicfuncs_perlencoding, 0, NULL);
+        return sv;
     }
     sv = &PL_sv_undef;
     if (e->enc) {
@@ -102,7 +107,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     SV *result = Nullsv;
 
     if (SvTYPE(arg) >= SVt_PVMG
-		&& mg_findext(arg, PERL_MAGIC_ext, &PerlIOEncode_tag)) {
+		&& (bool)sv_magicv2_find_by_funcs(arg, &magicfuncs_perlencoding)) {
 	e->enc = NULL;
 	e->chk = NULL;
 	e->inEncodeCall = 0;
