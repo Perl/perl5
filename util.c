@@ -4693,15 +4693,10 @@ Perl_seed(pTHX)
      * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
      * probably be bigger too.
      */
-#if RANDBITS > 16
-#  define SEED_C1	1000003
-#define   SEED_C4	73819
-#else
-#  define SEED_C1	25747
-#define   SEED_C4	20639
-#endif
+#define   SEED_C1	1000003
 #define   SEED_C2	3
 #define   SEED_C3	269
+#define   SEED_C4	73819
 #define   SEED_C5	26107
 
 #ifndef PERL_NO_DEV_RANDOM
