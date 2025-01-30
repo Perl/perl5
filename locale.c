@@ -9642,7 +9642,12 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Must be NUL-terminated */
     assert(*(input_string + len) == '\0');
 
+    /* We may have to allocate memory to hold modified versions of the input.
+     * Initialize to NULL here, and before any return, free them all.  Those
+     * that do get allocated will be non-NULL then, and get freed */
     char * sans_nuls = NULL;       /* NULs changed to lowest collating ctrl */
+    char * sans_highs = NULL;   /* >0xFF changed to highest collating byte
+                                      for non-UTF8 locales */
     void * free_me = NULL;  /* some called functions may allocate memory that
                                this function then is required to free */
 
@@ -9845,8 +9850,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         /* Here, the string is UTF-8, but the locale isn't.  strxfrm() is
          * expecting a non-UTF-8 string.  Convert the string to bytes.  If
          * that succeeds, we are ready to call strxfrm() */
-        const char * const t = s;   /* Temporary so we can later find where the
-                                       input was */
         utf8 = FALSE;
         if (UNLIKELY(! utf8_to_bytes_new_pv((const U8 **) &s, &len, &free_me)))
         {
@@ -9938,11 +9941,14 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
              * that is eaten up by the trailing NUL
              *
              * May shrink; will never grow */
-            Newx(s, len, char);
+            Newx(sans_highs, len, char);
 
             STRLEN i;
             STRLEN d= 0;
+            const char * const t = s;   /* Temporary so we can later find where
+                                           the input was */
             char * e = (char *) t + len;
+            s = sans_highs;
 
             for (i = 0; i < len; i+= UTF8SKIP(t + i)) {
                 U8 cur_char = t[i];
@@ -9957,13 +9963,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 }
             }
             s[d++] = '\0';
-        }
-
-        /* Here, we have constructed a modified version of the input.  It could
-         * be that we already had a modified copy before we did this version.
-         * If so, that copy is no longer needed */
-        if (t != input_string) {
-            Safefree(t);
         }
     }
     /* else   // Here both the locale and string are UTF-8 */
@@ -9991,9 +9990,9 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
 #  define CLEANUP_STRXFRM_COMMON                                        \
         STMT_START {                                                    \
-            if (s != input_string && s != sans_nuls && s != free_me) Safefree(s);\
             Safefree(free_me);                                          \
             Safefree(sans_nuls);                                        \
+            Safefree(sans_highs);                                       \
         } STMT_END
 
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
