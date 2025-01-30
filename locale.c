@@ -9643,6 +9643,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     assert(*(input_string + len) == '\0');
 
     char * sans_nuls = NULL;       /* NULs changed to lowest collating ctrl */
+    void * free_me = NULL;  /* some called functions may allocate memory that
+                               this function then is required to free */
 
     if (PL_collxfrm_mult == 0) {     /* unknown or bad */
         if (PL_collxfrm_base != 0) { /* bad collation => skip */
@@ -9832,7 +9834,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         /* When the locale is UTF-8, strxfrm() is expecting a UTF-8 string.
          * Here, the string isn't.  Convert it to be so. */
         if (PL_in_utf8_COLLATE_locale) {
-            s = (char *) bytes_to_utf8((const U8 *) s, &len);
+            s = (char *) bytes_to_utf8_free_me((const U8 *) s, &len, &free_me);
             utf8 = TRUE;
         }
 
@@ -9843,13 +9845,14 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         /* Here, the string is UTF-8, but the locale isn't.  strxfrm() is
          * expecting a non-UTF-8 string.  Convert the string to bytes.  If
          * that succeeds, we are ready to call strxfrm() */
-        s = (char *) bytes_from_utf8((const U8 *) s, &len, &utf8);
         const char * const t = s;   /* Temporary so we can later find where the
                                        input was */
-        if (UNLIKELY(utf8)) {
-            /* But here, it didn't succeed; have to do damage control ... */
-
-            /* What we do is construct a non-UTF-8 string with
+        utf8 = FALSE;
+        if (UNLIKELY(! utf8_to_bytes_new_pv((const U8 **) &s, &len, &free_me)))
+        {
+            /* But here, it didn't succeed; have to do damage control ...
+             *
+             * What we do is construct a non-UTF-8 string with
              *  1) the characters representable by a single byte converted to
              *     be so (if not already);
              *  2) and the rest converted to collate the same as the highest
@@ -9866,11 +9869,9 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
              *     really an illegal situation: using code points above 255 on
              *     a locale where only 0-255 are valid.  If two strings sort
              *     entirely equal, then the sort order for the above-255 code
-             *     points will be in code point order. */
-
-            utf8 = FALSE;
-
-            /* If we haven't calculated the code point with the maximum
+             *     points will be in code point order.
+             *
+             * If we haven't calculated the code point with the maximum
              * collating order for this locale, do so now */
             if (! PL_strxfrm_max_cp) {
                 int j;
@@ -9990,7 +9991,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
 #  define CLEANUP_STRXFRM_COMMON                                        \
         STMT_START {                                                    \
-            if (s != input_string && s != sans_nuls) Safefree(s);       \
+            if (s != input_string && s != sans_nuls && s != free_me) Safefree(s);\
+            Safefree(free_me);                                          \
             Safefree(sans_nuls);                                        \
         } STMT_END
 
