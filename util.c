@@ -4742,10 +4742,10 @@ Perl_seed(pTHX)
 #endif
     u += SEED_C3 * (U32)PerlProc_getpid();
     u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
-#ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
+
     UV ptruv = PTR2UV(&when);
     u += SEED_C5 * ptr_hash(ptruv);
-#endif
+
     return u;
 }
 
