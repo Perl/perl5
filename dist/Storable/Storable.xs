@@ -2960,6 +2960,19 @@ static int store_hash(pTHX_ stcxt_t *cxt, SV *xsv)
             keyval = SvPV(key, keylen_tmp);
             keylen = keylen_tmp;
             if (SvUTF8(key)) {
+
+#ifdef utf8_to_bytes_overwrite
+
+                /* If we are able to downgrade here; that means that we have a
+                 * key which only had chars 0-255, but was utf8 encoded.  */
+                if (utf8_to_bytes_overwrite( (U8**) &keyval, &keylen_tmp)) {
+                    keylen = keylen_tmp;
+                    flags |= SHV_K_WASUTF8;
+                }
+                else {
+                    flags |= SHV_K_UTF8;
+                }
+#else
                 const char *keysave = keyval;
                 bool is_utf8 = TRUE;
 
@@ -2982,6 +2995,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, SV *xsv)
                        to assign back to keylen.  */
                     flags |= SHV_K_UTF8;
                 }
+#endif
             }
 
             if (flagged_hash) {
@@ -3000,8 +3014,12 @@ static int store_hash(pTHX_ stcxt_t *cxt, SV *xsv)
             WLEN(keylen);
             if (keylen)
                 WRITE(keyval, keylen);
+
+#ifndef utf8_to_bytes_overwrite
+
             if (flags & SHV_K_WASUTF8)
                 Safefree (keyval);
+#endif
         }
 
         /*
