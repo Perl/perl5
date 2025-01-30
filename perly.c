@@ -166,6 +166,9 @@ yy_stack_print (pTHX_ const yy_parser *parser)
         case toketype_ival:
             PerlIO_printf(Perl_debug_log, " %8" IVdf, (IV)ps->val.ival);
             break;
+        case toketype_svval:
+            PerlIO_printf(Perl_debug_log, " 0x%" UVxf, PTR2UV(ps->val.svval));
+            break;
         default:
             PerlIO_printf(Perl_debug_log, " %8" UVxf, (UV)ps->val.ival);
         }
@@ -242,8 +245,8 @@ S_clear_yystack(pTHX_ void *arg)
 
     while (ps > parser->stack) {
         LEAVE_SCOPE(ps->savestack_ix);
-        if (yy_type_tab[yystos[ps->state]] == toketype_opval
-            && ps->val.opval)
+        toketypes toketype = yy_type_tab[yystos[ps->state]];
+        if (toketype == toketype_opval && ps->val.opval)
         {
             if (ps->compcv && (ps->compcv != PL_compcv)) {
                 PL_compcv = ps->compcv;
@@ -252,6 +255,10 @@ S_clear_yystack(pTHX_ void *arg)
             }
             YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
             op_free(ps->val.opval);
+        }
+        else if (toketype == toketype_svval && ps->val.svval) {
+            YYDPRINTF ((Perl_debug_log, "(freeing SV)\n"));
+            SvREFCNT_dec(ps->val.svval);
         }
         SvREFCNT_dec(ps->compcv);
         ps--;
