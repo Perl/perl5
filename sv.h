@@ -2074,29 +2074,18 @@ END_EXTERN_C
 #define SvUVx(sv) SvUV(sv)
 #define SvNVx(sv) SvNV(sv)
 
-#if defined(PERL_USE_GCC_BRACE_GROUPS)
-
-#  define SvPVx(sv, len) ({SV *_sv = (sv); SvPV(_sv, len); })
-#  define SvPVx_const(sv, len) ({SV *_sv = (sv); SvPV_const(_sv, len); })
-#  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })
-#  define SvPVx_nolen_const(sv) ({SV *_sv = (sv); SvPV_nolen_const(_sv); })
-#  define SvPVutf8x(sv, len) ({SV *_sv = (sv); SvPVutf8(_sv, len); })
-#  define SvPVbytex(sv, len) ({SV *_sv = (sv); SvPVbyte(_sv, len); })
-#  define SvPVbytex_nolen(sv) ({SV *_sv = (sv); SvPVbyte_nolen(_sv); })
-
-#else /* __GNUC__ */
-
-/* These inlined macros use globals, which will require a thread
- * declaration in user code, so we avoid them under threads */
-
-#  define SvPVx(sv, len) ((PL_Sv = (sv)), SvPV(PL_Sv, len))
-#  define SvPVx_const(sv, len) ((PL_Sv = (sv)), SvPV_const(PL_Sv, len))
-#  define SvPVx_nolen(sv) ((PL_Sv = (sv)), SvPV_nolen(PL_Sv))
-#  define SvPVx_nolen_const(sv) ((PL_Sv = (sv)), SvPV_nolen_const(PL_Sv))
-#  define SvPVutf8x(sv, len) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, len))
-#  define SvPVbytex(sv, len) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, len))
-#  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
-#endif /* __GNU__ */
+/* The following macro expansions evaluate their arguments just once. In
+ * earlier perl releases, the global variable PL_Sv was used as an intermediate
+ * in order to prevent multiple evaluations. The implementation changed in
+ * commit 1ef9039bccbfe64f47f201b6cfb7d6d23e0b08a7 to use inline functions
+ * instead. */
+#define SvPVx(sv, len)          SvPV(sv, len)
+#define SvPVx_const(sv, len)    SvPV_const(sv, len)
+#define SvPVx_nolen(sv)         SvPV_nolen(sv)
+#define SvPVx_nolen_const(sv)   SvPV_nolen_const(sv)
+#define SvPVutf8x(sv, len)      SvPVutf8(sv, len)
+#define SvPVbytex(sv, len)      SvPVbyte(sv, len)
+#define SvPVbytex_nolen(sv)     SvPVbyte_nolen(sv)
 
 #define SvIsCOW(sv)              (SvFLAGS(sv) & SVf_IsCOW)
 #define SvIsCOW_on(sv)           (SvFLAGS(sv) |= SVf_IsCOW)
