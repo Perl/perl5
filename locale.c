@@ -9942,27 +9942,28 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
              *
              * May shrink; will never grow */
             Newx(sans_highs, len, char);
+            char * d = sans_highs;
 
-            STRLEN i;
-            STRLEN d= 0;
-            const char * const t = s;   /* Temporary so we can later find where
-                                           the input was */
-            char * e = (char *) t + len;
-            s = sans_highs;
-
-            for (i = 0; i < len; i+= UTF8SKIP(t + i)) {
-                U8 cur_char = t[i];
-                if (UTF8_IS_INVARIANT(cur_char)) {
-                    s[d++] = cur_char;
+            const char * const e = s + len;
+            while (s < e) {
+                if (UTF8_IS_INVARIANT(*s)) {
+                    *d++ = *s++;
+                    continue;
                 }
-                else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(t + i, e)) {
-                    s[d++] = EIGHT_BIT_UTF8_TO_NATIVE(cur_char, t[i+1]);
+
+                if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e)) {
+                    *d++ = EIGHT_BIT_UTF8_TO_NATIVE(*s, *(s + 1));
                 }
                 else {  /* Replace illegal cp's with highest collating one */
-                    s[d++] = PL_strxfrm_max_cp;
+                    *d++ = PL_strxfrm_max_cp;
                 }
+
+                s+= UTF8SKIP(s);
             }
-            s[d++] = '\0';
+
+            *d++ = '\0';
+
+            s = sans_highs;
         }
     }
     /* else   // Here both the locale and string are UTF-8 */
