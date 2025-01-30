@@ -4703,11 +4703,6 @@ Perl_seed(pTHX)
     int fd;
 #endif
     U32 u;
-#ifdef HAS_GETTIMEOFDAY
-    struct timeval when;
-#else
-    Time_t when;
-#endif
 
 /* This test is an escape hatch, this symbol isn't set by Configure. */
 #ifndef PERL_NO_DEV_RANDOM
@@ -4729,12 +4724,17 @@ Perl_seed(pTHX)
 #endif
 
 #ifdef HAS_GETTIMEOFDAY
+    struct timeval when;
+
     PerlProc_gettimeofday(&when,NULL);
     u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
 #else
+    Time_t when;
+
     (void)time(&when);
     u = (U32)SEED_C1 * when;
 #endif
+
     u += SEED_C3 * (U32)PerlProc_getpid();
     u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
 
