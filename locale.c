@@ -9642,6 +9642,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Must be NUL-terminated */
     assert(*(input_string + len) == '\0');
 
+    char * sans_nuls = NULL;       /* NULs changed to lowest collating ctrl */
+
     if (PL_collxfrm_mult == 0) {     /* unknown or bad */
         if (PL_collxfrm_base != 0) { /* bad collation => skip */
             DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -9659,10 +9661,10 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
      * otherwise contain that character, but otherwise there may be
      * less-than-perfect results with that character and NUL.  This is
      * unavoidable unless we replace strxfrm with our own implementation. */
+
     if (UNLIKELY(s_strlen < len)) {   /* Only execute if there is an embedded
                                          NUL */
         char * e = s + len;
-        char * sans_nuls;
         STRLEN sans_nuls_len;
         int try_non_controls;
         char this_replacement_char[] = "?\0";   /* Room for a two-byte string,
@@ -9985,6 +9987,12 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Store the collation id */
     *(PERL_UINTMAX_T *)xbuf = PL_collation_ix;
 
+#  define CLEANUP_STRXFRM_COMMON                                        \
+        STMT_START {                                                    \
+            if (s == sans_nuls) Safefree(sans_nuls);                    \
+            else if (s != input_string) Safefree(s);                    \
+        } STMT_END
+
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
 #    ifdef USE_LOCALE_CTYPE
 
@@ -10001,6 +10009,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         STMT_START {                                                    \
             if (constructed_locale != (locale_t) 0)                     \
                 freelocale(constructed_locale);                         \
+            CLEANUP_STRXFRM_COMMON;                                     \
         } STMT_END
 #  else
 #    define my_strxfrm(dest, src, n)  strxfrm(dest, src, n)
@@ -10009,9 +10018,12 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
 
 #      define CLEANUP_STRXFRM                                           \
-                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale)
+        STMT_START {                                                    \
+                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);  \
+                CLEANUP_STRXFRM_COMMON;                                 \
+        } STMT_END
 #    else
-#      define CLEANUP_STRXFRM  NOOP
+#      define CLEANUP_STRXFRM  CLEANUP_STRXFRM_COMMON
 #    endif
 #  endif
 
@@ -10154,10 +10166,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     DEBUG_L(print_collxfrm_input_and_return(s, s + len, xbuf, *xlen, utf8));
     CLEANUP_STRXFRM;
 
-    if (s != input_string) {
-        Safefree(s);
-    }
-
     /* Free up unneeded space; retain enough for trailing NUL */
     Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
 
@@ -10167,10 +10175,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
     DEBUG_L(print_collxfrm_input_and_return(s, s + len, NULL, 0, utf8));
     CLEANUP_STRXFRM;
-
-    if (s != input_string) {
-        Safefree(s);
-    }
 
     Safefree(xbuf);
     *xlen = 0;
