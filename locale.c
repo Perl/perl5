@@ -10151,28 +10151,28 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         first_time = FALSE;
     }
 
-    CLEANUP_STRXFRM;
-
     DEBUG_L(print_collxfrm_input_and_return(s, s + len, xbuf, *xlen, utf8));
-
-    /* Free up unneeded space; retain enough for trailing NUL */
-    Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
+    CLEANUP_STRXFRM;
 
     if (s != input_string) {
         Safefree(s);
     }
+
+    /* Free up unneeded space; retain enough for trailing NUL */
+    Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
 
     return xbuf;
 
   bad:
 
-    CLEANUP_STRXFRM;
     DEBUG_L(print_collxfrm_input_and_return(s, s + len, NULL, 0, utf8));
+    CLEANUP_STRXFRM;
 
-    Safefree(xbuf);
     if (s != input_string) {
         Safefree(s);
     }
+
+    Safefree(xbuf);
     *xlen = 0;
 
     return NULL;
