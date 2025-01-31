@@ -1590,6 +1590,8 @@ for my $op (qw( == != < > <= >= eq ne lt gt le ge )) {
     $code .= "\$a = !\$a $op \$b;\n";  # should warn
     $code .= "\$a = (!\$a) $op \$b;\n";
     $code .= "\$a = !(\$a) $op \$b;\n";  # should warn
+    $code .= "\$a = !!\$a $op \$b;\n";
+    $code .= "\$a = !(!\$a) $op \$b;\n";  # should warn
     $code .= "\$a = !(\$a $op \$b);\n";
     $code .= "\$a = !\$a $op !0;\n";
     $code .= "\$a = !\$a $op !A_CONSTANT;\n";
@@ -1623,28 +1625,40 @@ Possible precedence problem between ! and derived class test at - line 6.
 Possible precedence problem between ! and derived class test at - line 8.
 Possible precedence problem between ! and numeric eq (==) at [cmp] line 1.
 Possible precedence problem between ! and numeric eq (==) at [cmp] line 3.
-Possible precedence problem between ! and numeric ne (!=) at [cmp] line 8.
+Possible precedence problem between ! and numeric eq (==) at [cmp] line 5.
 Possible precedence problem between ! and numeric ne (!=) at [cmp] line 10.
-Possible precedence problem between ! and numeric lt (<) at [cmp] line 15.
-Possible precedence problem between ! and numeric lt (<) at [cmp] line 17.
-Possible precedence problem between ! and numeric gt (>) at [cmp] line 22.
-Possible precedence problem between ! and numeric gt (>) at [cmp] line 24.
-Possible precedence problem between ! and numeric le (<=) at [cmp] line 29.
-Possible precedence problem between ! and numeric le (<=) at [cmp] line 31.
-Possible precedence problem between ! and numeric ge (>=) at [cmp] line 36.
-Possible precedence problem between ! and numeric ge (>=) at [cmp] line 38.
-Possible precedence problem between ! and string eq at [cmp] line 43.
-Possible precedence problem between ! and string eq at [cmp] line 45.
-Possible precedence problem between ! and string ne at [cmp] line 50.
-Possible precedence problem between ! and string ne at [cmp] line 52.
-Possible precedence problem between ! and string lt at [cmp] line 57.
-Possible precedence problem between ! and string lt at [cmp] line 59.
-Possible precedence problem between ! and string gt at [cmp] line 64.
-Possible precedence problem between ! and string gt at [cmp] line 66.
-Possible precedence problem between ! and string le at [cmp] line 71.
-Possible precedence problem between ! and string le at [cmp] line 73.
-Possible precedence problem between ! and string ge at [cmp] line 78.
-Possible precedence problem between ! and string ge at [cmp] line 80.
+Possible precedence problem between ! and numeric ne (!=) at [cmp] line 12.
+Possible precedence problem between ! and numeric ne (!=) at [cmp] line 14.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 19.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 21.
+Possible precedence problem between ! and numeric lt (<) at [cmp] line 23.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 28.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 30.
+Possible precedence problem between ! and numeric gt (>) at [cmp] line 32.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 37.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 39.
+Possible precedence problem between ! and numeric le (<=) at [cmp] line 41.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 46.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 48.
+Possible precedence problem between ! and numeric ge (>=) at [cmp] line 50.
+Possible precedence problem between ! and string eq at [cmp] line 55.
+Possible precedence problem between ! and string eq at [cmp] line 57.
+Possible precedence problem between ! and string eq at [cmp] line 59.
+Possible precedence problem between ! and string ne at [cmp] line 64.
+Possible precedence problem between ! and string ne at [cmp] line 66.
+Possible precedence problem between ! and string ne at [cmp] line 68.
+Possible precedence problem between ! and string lt at [cmp] line 73.
+Possible precedence problem between ! and string lt at [cmp] line 75.
+Possible precedence problem between ! and string lt at [cmp] line 77.
+Possible precedence problem between ! and string gt at [cmp] line 82.
+Possible precedence problem between ! and string gt at [cmp] line 84.
+Possible precedence problem between ! and string gt at [cmp] line 86.
+Possible precedence problem between ! and string le at [cmp] line 91.
+Possible precedence problem between ! and string le at [cmp] line 93.
+Possible precedence problem between ! and string le at [cmp] line 95.
+Possible precedence problem between ! and string ge at [cmp] line 100.
+Possible precedence problem between ! and string ge at [cmp] line 102.
+Possible precedence problem between ! and string ge at [cmp] line 104.
 Possible precedence problem between ! and pattern match (m//) at [bind] line 1.
 Possible precedence problem between ! and pattern match (m//) at [bind] line 3.
 Possible precedence problem between ! and pattern match (m//) at [bind] line 6.

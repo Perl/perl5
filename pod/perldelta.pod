@@ -230,6 +230,14 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+L<Possible precedence problem between ! and %s|perldiag/"Possible precedence problem between ! and %s">
+
+This warning no longer triggers for code like C<!!$x == $y>, i.e. where double
+negation (C<!!>) is used as a convert-to-boolean operator.
+[GH #22954]
+
+=item *
+
 XXX Describe change here
 
 =back

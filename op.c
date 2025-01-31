@@ -12302,6 +12302,10 @@ check_precedence_not_vs_cmp(pTHX_ const OP *const o)
             && right->op_type == OP_CONST
             && SvIsBOOL(cSVOPx_sv(right))
         )
+        && (                                /* ... nor  !!$x == ...      */
+            (cUNOPx(left)->op_first->op_flags & OPf_PARENS)
+            || cUNOPx(left)->op_first->op_type != OP_NOT
+        )
     ) {
         Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
             "Possible precedence problem between ! and %s", OP_DESC(o)
