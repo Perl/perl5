@@ -3090,6 +3090,16 @@ ATdmp	|bool	|strict_utf8_to_uv					\
 CRp	|NV	|str_to_version |NN SV *sv
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV *cv
+: Used in perly.y
+p	|void	|subsignature_append_positional 			\
+				|NULLOK OP *varop			\
+				|OPCODE defmode 			\
+				|NULLOK OP *defexpr
+p	|void	|subsignature_append_slurpy				\
+				|I32 sigil				\
+				|NULLOK OP *varop
+p	|OP *	|subsignature_finish
+p	|void	|subsignature_start
 Adp	|void	|suspend_compcv |NN struct suspended_compcv *buffer
 ATdip	|void	|SvAMAGIC_off	|NN SV *sv
 ATdip	|void	|SvAMAGIC_on	|NN SV *sv

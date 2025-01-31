@@ -1213,6 +1213,10 @@
 #   define sighandler1                          Perl_sighandler1
 #   define sighandler3                          Perl_sighandler3
 #   define sub_crush_depth(a)                   Perl_sub_crush_depth(aTHX_ a)
+#   define subsignature_append_positional(a,b,c) Perl_subsignature_append_positional(aTHX_ a,b,c)
+#   define subsignature_append_slurpy(a,b)      Perl_subsignature_append_slurpy(aTHX_ a,b)
+#   define subsignature_finish()                Perl_subsignature_finish(aTHX)
+#   define subsignature_start()                 Perl_subsignature_start(aTHX)
 #   define sv_2num(a)                           Perl_sv_2num(aTHX_ a)
 #   define sv_clean_all()                       Perl_sv_clean_all(aTHX)
 #   define sv_clean_objs()                      Perl_sv_clean_objs(aTHX)

@@ -9954,9 +9954,11 @@ S_pending_ident(pTHX)
                  * index. If we ever need more fields, use a real malloced
                  * aux strut instead.
                  */
-                o = newUNOP_AUX(OP_ARGELEM, 0, NULL,
-                                    INT2PTR(UNOP_AUX_item *,
-                                        (PL_parser->sig_elems)));
+                assert(PL_parser->signature);
+                /* We don't yet know the argindex but subsignature_append_*()
+                 * will fill it in
+                 */
+                o = newUNOP_AUX(OP_ARGELEM, 0, NULL, NULL);
                 o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
                                   : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
                                   :                         OPpARGELEM_HV);

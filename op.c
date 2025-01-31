@@ -16190,6 +16190,225 @@ Perl_rcpv_copy(pTHX_ char *pv) {
     return pv;
 }
 
+/* Subroutine signature parsing */
+
+struct yy_parser_signature {
+    UV          elems;      /* number of signature elements seen so far */
+    UV          optelems;   /* number of optional signature elems seen */
+    char        slurpy;     /* the sigil of the slurpy var (or null) */
+    OP         *elemops;    /* NULL, or an OP_LINESEQ of individual element ops */
+};
+
+static void
+destroy_subsignature_context(pTHX_ void *p)
+{
+    yy_parser_signature *signature = (yy_parser_signature *)p;
+
+    if(signature->elemops)
+        op_free(signature->elemops);
+
+    Safefree(signature);
+}
+
+/* Called from perly.y on encountering the '(' of a subroutine signature.
+ * Does not return anything useful, but sets up the memory structure in
+ * `PL_parser->signature` that the following functions make use of.
+ */
+
+void
+Perl_subsignature_start(pTHX)
+{
+    PERL_ARGS_ASSERT_SUBSIGNATURE_START;
+    assert(PL_parser);
+
+    yy_parser_signature *signature;
+    Newx(signature, 1, yy_parser_signature);
+    SAVEDESTRUCTOR_X(&destroy_subsignature_context, signature);
+
+    signature->elems    = 0;
+    signature->optelems = 0;
+    signature->slurpy   = 0;
+
+    signature->elemops = NULL;
+
+    SAVEVPTR(PL_parser->signature);
+    PL_parser->signature = signature;
+}
+
+/* Appends another positional scalar parameter to the accumulated set of
+ * subroutine params. `varop` may be NULL, but if not it must be an OP_ARGELEM
+ * whose op_targ refers to an already-declared pad lexical. That lexical must
+ * be a scalar. It is not necessary to set the argument index in the op_aux
+ * field; that will be filled in by this function.
+ * If `defexpr` is not NULL, it gives a defaulting expression to be evaluated
+ * if required, according to `defmode` - one of zero, `OP_DORASSIGN` or
+ * `OP_ORASSIGN`.
+ */
+
+void
+Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr)
+{
+    PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_POSITIONAL;
+    assert(PL_parser);
+    yy_parser_signature *signature = PL_parser->signature;
+    assert(signature);
+
+    if(signature->slurpy)
+        yyerror("Slurpy parameter not last");
+
+    UV argix = signature->elems;
+
+    if(varop) {
+        assert(varop->op_type == OP_ARGELEM);
+        assert((varop->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV);
+        assert(varop->op_targ);
+        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[varop->op_targ])[0] == '$');
+
+        /* Now fill in the argix */
+        cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
+    }
+
+    signature->elems++;
+
+    if(defexpr) {
+        signature->optelems++;
+
+        I32 flags = 0;
+        if(defmode == OP_DORASSIGN)
+            flags |= OPpARG_IF_UNDEF << 8;
+        if(defmode == OP_ORASSIGN)
+            flags |= OPpARG_IF_FALSE << 8;
+
+        if(defexpr->op_type == OP_NULL && !(defexpr->op_flags & OPf_KIDS))
+        {
+            /* handle '$=' special case */
+            if(varop)
+                yyerror("Optional parameter lacks default expression");
+        }
+        else {
+            /* a normal '=default' expression */
+            OP *defop = newARGDEFELEMOP(flags, defexpr, argix);
+
+            if(varop) {
+                varop->op_flags |= OPf_STACKED;
+                (void)op_sibling_splice(varop, NULL, 0, defop);
+                scalar(defop);
+            }
+            else
+                varop = newUNOP(OP_NULL, 0, defop);
+
+            LINKLIST(varop);
+            /* NB: normally the first child of a logop is executed before the
+             * logop, and it pushes a boolean result ready for the logop. For
+             * ARGDEFELEM, the op itself does the boolean calculation, so set
+             * the first op to it instead.
+             */
+            varop->op_next   = defop;
+            defexpr->op_next = varop;
+        }
+    }
+    else
+        if(signature->optelems)
+            yyerror("Mandatory parameter follows optional parameter");
+
+    if(varop) {
+        signature->elemops = op_append_list(OP_LINESEQ, signature->elemops,
+                newSTATEOP(0, NULL, varop));
+    }
+}
+
+/* Appends a final slurpy parameter to the accumulated set of subroutine
+ * params. `varop` may be NULL, but if not it must be an OP_ARGELEM whose
+ * op_targ refers to an already-declared pad lexical. That lexical must match
+ * the `sigil` parameter. It is not necessary to set the argument index in the
+ * op_aux field; that will be filled in by this function.
+ */
+
+void
+Perl_subsignature_append_slurpy(pTHX_ I32 sigil, OP *varop)
+{
+    PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_SLURPY;
+    assert(PL_parser);
+    yy_parser_signature *signature = PL_parser->signature;
+    assert(signature);
+    assert(sigil == '@' || sigil == '%');
+
+    if(signature->slurpy)
+        yyerror("Multiple slurpy parameters not allowed");
+
+    UV argix = signature->elems;
+
+    if(varop) {
+        assert(varop->op_type == OP_ARGELEM);
+        assert((varop->op_private & OPpARGELEM_MASK) ==
+                ((sigil == '@') ? OPpARGELEM_AV : OPpARGELEM_HV));
+        assert(varop->op_targ);
+        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[varop->op_targ])[0] == sigil);
+
+        /* Now fill in the argix */
+        cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
+    }
+
+    signature->slurpy = (char)sigil;
+
+    if(varop) {
+        /* TODO: assert() the sigil of the pad variable matches */
+        signature->elemops = op_append_list(OP_LINESEQ, signature->elemops,
+                newSTATEOP(0, NULL, varop));
+    }
+}
+
+/* Called from perly.y on encountering the closing `)` of a subroutine
+ * signature. This creates the optree fragment responsible for processing all
+ * the accumulated subroutine params, to be inserted at the start of the
+ * subroutine's optree.
+ */
+
+OP *
+Perl_subsignature_finish(pTHX)
+{
+    PERL_ARGS_ASSERT_SUBSIGNATURE_FINISH;
+    assert(PL_parser);
+    yy_parser_signature *signature = PL_parser->signature;
+    assert(signature);
+
+    OP *sigops = signature->elemops;
+    signature->elemops = NULL;
+
+    struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
+        PerlMemShared_malloc( sizeof(struct op_argcheck_aux));
+
+    aux->params     = signature->elems;
+    aux->opt_params = signature->optelems;
+    aux->slurpy     = signature->slurpy;
+
+    OP *check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
+
+    sigops = op_prepend_elem(OP_LINESEQ,
+            check,
+            sigops);
+
+    /* a nextstate right at the beginning */
+    sigops = op_prepend_elem(OP_LINESEQ,
+            newSTATEOP(0, NULL, NULL),
+            sigops);
+
+    /* a nextstate at the end handles context correctly for an empty sub body */
+    sigops = op_append_elem(OP_LINESEQ, sigops,
+            newSTATEOP(0, NULL, NULL));
+
+    /* wrap the list of arg ops in a NULL aux op.
+       This serves two purposes. First, it makes the arg list a separate
+       subtree from the body of the sub, and secondly the null op may in future
+       be upgraded to an OP_SIGNATURE when implemented. For now leave it as
+       ex-argcheck */
+
+    OP *ret = newUNOP_AUX(OP_ARGCHECK, 0, sigops, NULL);
+    op_null(ret);
+
+    return ret;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

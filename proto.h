@@ -4400,6 +4400,26 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
         assert(cv); assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
+Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_POSITIONAL
+
+PERL_CALLCONV void
+Perl_subsignature_append_slurpy(pTHX_ I32 sigil, OP *varop)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_SLURPY
+
+PERL_CALLCONV OP *
+Perl_subsignature_finish(pTHX)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_SUBSIGNATURE_FINISH
+
+PERL_CALLCONV void
+Perl_subsignature_start(pTHX)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_SUBSIGNATURE_START
+
+PERL_CALLCONV void
 Perl_suspend_compcv(pTHX_ struct suspended_compcv *buffer);
 #define PERL_ARGS_ASSERT_SUSPEND_COMPCV         \
         assert(buffer)

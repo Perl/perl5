@@ -31,6 +31,10 @@ typedef struct yy_lexshared {
     SV			*re_eval_str;	/* "(?{...})" text */
 } LEXSHARED;
 
+/* Opaque struct of data relevant during parsing and construction of a
+ * subroutine signature. Defined and used exclusively by op.c */
+typedef struct yy_parser_signature yy_parser_signature;
+
 typedef struct yy_parser {
 
     /* parser state */
@@ -112,10 +116,7 @@ typedef struct yy_parser {
     line_t	herelines;	/* number of lines in here-doc */
     line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
 
-    /* these are valid while parsing a subroutine signature */
-    UV          sig_elems;      /* number of signature elements seen so far */
-    UV          sig_optelems;   /* number of optional signature elems seen */
-    char        sig_slurpy;     /* the sigil of the slurpy var (or null) */
+    yy_parser_signature *signature; /* parser state of a subroutine signature */
     bool        sig_seen;       /* the currently parsing sub has a signature */
 
     bool        recheck_charset_validity;
