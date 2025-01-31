@@ -238,6 +238,12 @@ negation (C<!!>) is used as a convert-to-boolean operator.
 
 =item *
 
+L<Useless use of %s in void context|perldiag/"Useless use of %s in void context">
+
+This warning now triggers for use of a chained comparison like C<< 0 < $x < 1 >>.
+
+=item *
+
 XXX Describe change here
 
 =back

@@ -2234,6 +2234,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_GETLOGIN:
         case OP_PROTOTYPE:
         case OP_RUNCV:
+        case OP_CMPCHAIN_AND:
         func_ops:
             if (   (PL_opargs[o->op_type] & OA_TARGLEX)
                 && (o->op_private & OPpTARGET_MY)
