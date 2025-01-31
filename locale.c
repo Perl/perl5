@@ -9961,6 +9961,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 s+= UTF8SKIP(s);
             }
 
+            len = d - sans_highs;
             *d++ = '\0';
 
             s = sans_highs;
