@@ -10066,9 +10066,9 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
                 ++w;
             /* the list of chars below is for end of statements or
              * block / parens, boolean operators (&&, ||, //) and branch
-             * constructs (or, and, if, until, unless, while, err, for).
+             * constructs (or, and, if, until, unless, while, for).
              * Not a very solid hack... */
-            if (!*w || !memCHRs(";&/|})]oaiuwef!=", *w))
+            if (!*w || !memCHRs(";&/|})]oaiuwf!=", *w))
                 Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                             "%s (...) interpreted as function",name);
         }
