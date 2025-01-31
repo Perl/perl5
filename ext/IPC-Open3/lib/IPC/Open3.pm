@@ -8,7 +8,7 @@ use Exporter 'import';
 use Carp;
 use Symbol qw(gensym qualify);
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 our @EXPORT  = qw(open3);
 
 =head1 NAME
@@ -291,7 +291,8 @@ sub _open3 {
                 croak "$Me: Invalid dup mode: $_->{parent}[0]";
             }
         } else {
-            $_->{dup} = ($_->{parent} =~ s/^[<>]&//);
+#            $_->{dup} = ($_->{parent} =~ s/^[<>]&//);
+            $_->{dup} = ($_->{parent} =~ s/^[<>]&//) || defined fileno $_->{parent};
 
             if ($_->{parent} !~ /\A=?(\d+)\z/) {
                 # force unqualified filehandles into caller's package
