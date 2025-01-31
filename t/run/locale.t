@@ -584,6 +584,32 @@ else {
 EOF
 }
 
+SKIP:
+{
+    my @locales = find_locales( [ qw(LC_CTYPE LC_COLLATE) ] );
+    my (undef, $non_utf8_ref) = classify_locales_wrt_utf8ness(\@locales);
+    my @non_utf8_locales = grep { $_ !~ / \b C \b | POSIX /x }
+                                                            $non_utf8_ref->@*;
+    skip "didn't find a suitable non-UTF-8 locale", 1 unless
+                                                            @non_utf8_locales;
+    my $locale = $non_utf8_locales[0];
+
+    fresh_perl_is(<<"EOF", "ok\n", {}, "Handles above Latin1 and NUL in non-UTF8 locale");
+use locale;
+use POSIX qw(setlocale LC_COLLATE);
+if (setlocale(LC_COLLATE, '$locale')) {
+     my \$x = "A\\xB5\\x00B";
+     utf8::upgrade(\$x);
+     my \$y = "\\x{100}";
+     my \$cmp = \$x cmp \$y;
+     print \$cmp <= 0 ? "ok\n" : "not ok\n";
+}
+else {
+     print "ok\n";
+}
+EOF
+}
+
 SKIP: {   # GH #20085
     my @utf8_locales = find_utf8_ctype_locales();
     skip "didn't find a UTF-8 locale", 1 unless @utf8_locales;
