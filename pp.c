@@ -3398,7 +3398,7 @@ PP(pp_oct)
     if (DO_UTF8(sv)) {
          /* If Unicode, try to downgrade
           * If not possible, croak. */
-         SV* const tsv = sv_2mortal(newSVsv(sv));
+         SV* const tsv = sv_mortalcopy_flags(sv, SV_GMAGIC|SV_NOSTEAL);
 
          SvUTF8_on(tsv);
          (void)sv_utf8_downgrade(tsv, FALSE);

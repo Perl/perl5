@@ -1842,7 +1842,7 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
             : pv_pretty(tmpsv, p, origlen, 60, NULL, NULL, PERL_PV_ESCAPE_NONASCII);
 
         if (curstash && !memchr(SvPVX(name), ':', SvCUR(name))) {
-            SV *name2 = sv_2mortal(newSVsv(PL_curstname));
+            SV *name2 = sv_mortalcopy_flags(PL_curstname, SV_GMAGIC|SV_NOSTEAL);
             sv_catpvs(name2, "::");
             sv_catsv(name2, (SV *)name);
             name = name2;

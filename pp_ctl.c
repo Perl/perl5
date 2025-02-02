@@ -1517,7 +1517,7 @@ PP_wrapped(pp_flop, (GIMME_V == G_LIST) ? 2 : 1, 0)
                 XPUSHs(sv);
                 if (strEQ(SvPVX_const(sv),tmps))
                     break;
-                sv = sv_2mortal(newSVsv(sv));
+                sv = sv_mortalcopy_flags(sv, SV_GMAGIC|SV_NOSTEAL);
                 sv_inc(sv);
             }
         }
@@ -2315,7 +2315,7 @@ PP_wrapped(pp_caller, MAXARG, 0)
             }
             else {
                 /* I think this is will always be "", but be sure */
-                PUSHs(sv_2mortal(newSVsv(cur_text)));
+                PUSHs(sv_mortalcopy_flags(cur_text, SV_GMAGIC|SV_NOSTEAL));
             }
 
             PUSHs(&PL_sv_no);

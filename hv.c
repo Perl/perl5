@@ -698,7 +698,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     }
                     if (TAINTING_get)
                         TAINT_set(SvTAINTED(keysv));
-                    keysv = sv_2mortal(newSVsv(keysv));
+                    keysv = sv_mortalcopy_flags(keysv, SV_GMAGIC|SV_NOSTEAL);
                     mg_copy(MUTABLE_SV(hv), val, (char*)keysv, HEf_SVKEY);
                 } else {
                     mg_copy(MUTABLE_SV(hv), val, key, klen);

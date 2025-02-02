@@ -806,7 +806,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 } else {
                     /* a string with no trailing null, we need to copy it
                      * so it has a trailing null */
-                    pat = sv_2mortal(newSVsv(msv));
+                    pat = sv_mortalcopy_flags(msv, SV_GMAGIC|SV_NOSTEAL);
                 }
             }
 
@@ -16065,7 +16065,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     must_sv = re_intuit_string(subpattern_re);
     if (must_sv) {
         /* regexec.c can free the re_intuit_string() return. GH #17734 */
-        must_sv = sv_2mortal(newSVsv(must_sv));
+        must_sv = sv_mortalcopy_flags(must_sv, SV_GMAGIC|SV_NOSTEAL);
         must = SvPV(must_sv, must_len);
     }
     else {
