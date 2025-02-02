@@ -4741,6 +4741,8 @@ Perl_seed(pTHX)
     UV ptruv = PTR2UV(&when);
     u += SEED_C5 * ptr_hash(ptruv);
 
+    u = ptr_hash(u);
+
     return u;
 }
 
