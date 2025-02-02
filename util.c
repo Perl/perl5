@@ -4741,6 +4741,7 @@ Perl_seed(pTHX)
     UV ptruv = PTR2UV(&when);
     u += SEED_C5 * ptr_hash(ptruv);
 
+    /* Make sure we mix the bits of up real good for better randomness */
     u = ptr_hash(u);
 
     return u;
