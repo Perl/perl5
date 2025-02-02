@@ -4738,8 +4738,7 @@ S_require_file(pTHX_ SV *sv)
                         loader = *av_fetch(AV_FROM_REF(loader), 0, TRUE);
                         if (SvGMAGICAL(loader)) {
                             SvGETMAGIC(loader);
-                            SV *l = sv_newmortal();
-                            sv_setsv_nomg(l, loader);
+                            SV *l = sv_mortalcopy_flags(loader, SV_DO_COW_SVSETSV);
                             loader = l;
                         }
                     }

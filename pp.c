@@ -4063,8 +4063,7 @@ PP(pp_chr)
         {
             if (ckWARN(WARN_UTF8)) {
                 if (SvGMAGICAL(top)) {
-                    SV *top2 = sv_newmortal();
-                    sv_setsv_nomg(top2, top);
+                    SV *top2 = sv_mortalcopy_flags(top, SV_DO_COW_SVSETSV);
                     top = top2;
                 }
                 Perl_warner(aTHX_ packWARN(WARN_UTF8),

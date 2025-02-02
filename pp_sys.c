@@ -563,14 +563,12 @@ PP_wrapped(pp_warn, 0, 1)
       SvGETMAGIC(errsv);
       if (SvROK(errsv)) {
         if (SvGMAGICAL(errsv)) {
-            exsv = sv_newmortal();
-            sv_setsv_nomg(exsv, errsv);
+            exsv = sv_mortalcopy_flags(errsv, SV_DO_COW_SVSETSV);
         }
         else exsv = errsv;
       }
       else if (SvPOKp(errsv) ? SvCUR(errsv) : SvNIOKp(errsv)) {
-        exsv = sv_newmortal();
-        sv_setsv_nomg(exsv, errsv);
+        exsv = sv_mortalcopy_flags(errsv, SV_DO_COW_SVSETSV);
         sv_catpvs(exsv, "\t...caught");
       }
       else {

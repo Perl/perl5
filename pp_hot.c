@@ -6745,8 +6745,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     if (SvGMAGICAL(sv)) {
         /* copy the sv without magic to prevent magic from being
            executed twice */
-        SV* msv = sv_newmortal();
-        sv_setsv_nomg(msv, sv);
+        SV* msv = sv_mortalcopy_flags(sv, SV_DO_COW_SVSETSV);
         return msv;
     }
     return sv;

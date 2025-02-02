@@ -10316,8 +10316,7 @@ Perl_sv_2io(pTHX_ SV *const sv)
         if (!io) {
             SV *newsv = sv;
             if (SvGMAGICAL(sv)) {
-                newsv = sv_newmortal();
-                sv_setsv_nomg(newsv, sv);
+                newsv = sv_mortalcopy_flags(sv, SV_DO_COW_SVSETSV);
             }
             Perl_croak(aTHX_ "Bad filehandle: %" SVf, SVfARG(newsv));
         }
