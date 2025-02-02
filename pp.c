@@ -6151,8 +6151,7 @@ PP(pp_anonhash)
         if (++MARK < PL_stack_sp)
         {
             SvGETMAGIC(*MARK);
-            val = newSV_type(SVt_NULL);
-            sv_setsv_nomg(val, *MARK);
+            val = newSVsv_flags(*MARK, SV_DO_COW_SVSETSV);
         }
         else
         {
@@ -7738,11 +7737,9 @@ PP_wrapped(pp_argelem,
 
         i = 0;
         while (argc--) {
-            SV *tmpsv;
             SV **svp = av_fetch(defav, ix + i, FALSE);
             SV *val = svp ? *svp : &PL_sv_undef;
-            tmpsv = newSV_type(SVt_NULL);
-            sv_setsv(tmpsv, val);
+            SV *tmpsv = newSVsv_flags(val, SV_GMAGIC|SV_DO_COW_SVSETSV);
             av_store((AV*)targ, i++, tmpsv);
             TAINT_NOT;
         }
@@ -7757,10 +7754,8 @@ PP_wrapped(pp_argelem,
             /* see "target should usually be empty" comment above */
             for (i = 0; i < argc; i++) {
                 SV **svp = av_fetch(defav, ix + i, FALSE);
-                SV *newsv = newSV_type(SVt_NULL);
-                sv_setsv_flags(newsv,
-                                svp ? *svp : &PL_sv_undef,
-                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                SV *newsv = newSVsv_flags(svp ? *svp : &PL_sv_undef,
+                                    (SV_DO_COW_SVSETSV|SV_NOSTEAL));
                 if (!av_store(defav, ix + i, newsv))
                     SvREFCNT_dec_NN(newsv);
             }
@@ -7773,21 +7768,15 @@ PP_wrapped(pp_argelem,
 
         i = 0;
         while (argc) {
-            SV *tmpsv;
-            SV **svp;
-            SV *key;
-            SV *val;
-
+            SV **svp = av_fetch(defav, ix + i++, FALSE);
+            SV *key = svp ? *svp : &PL_sv_undef;
             svp = av_fetch(defav, ix + i++, FALSE);
-            key = svp ? *svp : &PL_sv_undef;
-            svp = av_fetch(defav, ix + i++, FALSE);
-            val = svp ? *svp : &PL_sv_undef;
+            SV *val = svp ? *svp : &PL_sv_undef;
 
             argc -= 2;
             if (UNLIKELY(SvGMAGICAL(key)))
                 key = sv_mortalcopy(key);
-            tmpsv = newSV_type(SVt_NULL);
-            sv_setsv(tmpsv, val);
+            SV *tmpsv = newSVsv_flags(val, SV_GMAGIC|SV_DO_COW_SVSETSV);
             hv_store_ent((HV*)targ, key, tmpsv, 0);
             TAINT_NOT;
         }
