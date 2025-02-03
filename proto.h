@@ -4926,6 +4926,22 @@ Perl_sv_reftype(pTHX_ const SV * const sv, const int ob)
         assert(sv)
 
 PERL_CALLCONV void
+Perl_sv_regex_global_pos_clear(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SV_REGEX_GLOBAL_POS_CLEAR \
+        assert(sv)
+
+PERL_CALLCONV bool
+Perl_sv_regex_global_pos_get(pTHX_ SV *sv, STRLEN *posp, U32 flags)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_REGEX_GLOBAL_POS_GET \
+        assert(sv); assert(posp)
+
+PERL_CALLCONV void
+Perl_sv_regex_global_pos_set(pTHX_ SV *sv, STRLEN pos, U32 flags);
+#define PERL_ARGS_ASSERT_SV_REGEX_GLOBAL_POS_SET \
+        assert(sv)
+
+PERL_CALLCONV void
 Perl_sv_replace(pTHX_ SV * const sv, SV * const nsv);
 #define PERL_ARGS_ASSERT_SV_REPLACE             \
         assert(sv); assert(nsv)

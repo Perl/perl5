@@ -3388,6 +3388,17 @@ AMTdip	|void	|SvREFCNT_inc_void					\
 				|NULLOK SV *sv
 ARdp	|const char *|sv_reftype|NN const SV * const sv 		\
 				|const int ob
+
+Adp	|void	|sv_regex_global_pos_clear				\
+				|NN SV *sv
+ARdp	|bool	|sv_regex_global_pos_get				\
+				|NN SV *sv				\
+				|NN STRLEN *posp			\
+				|U32 flags
+Adp	|void	|sv_regex_global_pos_set				\
+				|NN SV *sv				\
+				|STRLEN pos				\
+				|U32 flags
 Adp	|void	|sv_replace	|NN SV * const sv			\
 				|NN SV * const nsv
 Adp	|void	|sv_report_used

@@ -2439,17 +2439,14 @@ int
 Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 {
     SV* const lsv = LvTARG(sv);
-    MAGIC * const found = mg_find_mglob(lsv);
 
     PERL_ARGS_ASSERT_MAGIC_GETPOS;
     PERL_UNUSED_ARG(mg);
 
-    if (found && found->mg_len != -1) {
-            STRLEN i = found->mg_len;
-            if (found->mg_flags & MGf_BYTES && DO_UTF8(lsv))
-                i = sv_pos_b2u_flags(lsv, i, SV_GMAGIC|SV_CONST_RETURN);
-            sv_setuv(sv, i);
-            return 0;
+    STRLEN pos;
+    if (sv_regex_global_pos_get(lsv, &pos, 0)) {
+        sv_setuv(sv, pos);
+        return 0;
     }
     sv_set_undef(sv);
     return 0;
@@ -2459,44 +2456,14 @@ int
 Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 {
     SV* const lsv = LvTARG(sv);
-    SSize_t pos;
-    STRLEN len;
-    MAGIC* found;
-    const char *s;
 
     PERL_ARGS_ASSERT_MAGIC_SETPOS;
     PERL_UNUSED_ARG(mg);
 
-    found = mg_find_mglob(lsv);
-    if (!found) {
-        if (!SvOK(sv))
-            return 0;
-        found = sv_magicext_mglob(lsv);
-    }
-    else if (!SvOK(sv)) {
-        found->mg_len = -1;
-        return 0;
-    }
-    s = SvPV_const(lsv, len);
-
-    pos = SvIV(sv);
-
-    if (DO_UTF8(lsv)) {
-        const STRLEN ulen = sv_or_pv_len_utf8(lsv, s, len);
-        if (ulen)
-            len = ulen;
-    }
-
-    if (pos < 0) {
-        pos += len;
-        if (pos < 0)
-            pos = 0;
-    }
-    else if (pos > (SSize_t)len)
-        pos = len;
-
-    found->mg_len = pos;
-    found->mg_flags &= ~(MGf_MINMATCH|MGf_BYTES);
+    if(SvOK(sv))
+        sv_regex_global_pos_set(lsv, SvIV(sv), 0);
+    else
+        sv_regex_global_pos_clear(lsv);
 
     return 0;
 }

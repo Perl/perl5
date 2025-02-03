@@ -17779,5 +17779,111 @@ void S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv)
 }
 
 /*
+=for apidoc sv_regex_global_pos_get
+
+If the given SV has regexp global match position magic, sets the STRLEN
+pointed to by C<posp> to the current value of the position and returns true.
+If not, returns false.
+
+If flags is zero, the return value will count in units of characters.  If
+the C<SV_POSBYTES> flag is present, this will count instead in units of bytes,
+which may be different if the SV has the C<SvUTF8> flag set.
+
+=cut
+*/
+
+bool
+Perl_sv_regex_global_pos_get(pTHX_ SV *sv, STRLEN *posp, U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_REGEX_GLOBAL_POS_GET;
+
+    MAGIC *mg = mg_find_mglob(sv);
+    if(!mg || mg->mg_len == -1)
+        return false;
+
+    STRLEN pos = mg->mg_len;
+    if(!(flags & SV_POSBYTES) && (mg->mg_flags & MGf_BYTES) && DO_UTF8(sv))
+        pos = sv_pos_b2u_flags(sv, pos, SV_GMAGIC|SV_CONST_RETURN);
+
+    *posp = pos;
+    return true;
+}
+
+/*
+=for apidoc sv_regex_global_pos_set
+
+Sets the value in the regexp global match position magic, first adding it if
+necessary.  If C<pos> is given as a negative value, this will count backwards
+from the end of the string.
+
+If flags is zero, C<pos> will count in units of characters.  If the
+C<SV_POSBYTES> flag is present, this will count instead in units of bytes,
+which may be different if the SV has the C<SvUTF8> flag set.  In that case, it
+will be the caller's responsibility to ensure that C<pos> only lands on the
+boundary between characters, and not in the middle of a multi-byte character.
+
+=cut
+*/
+
+void
+Perl_sv_regex_global_pos_set(pTHX_ SV *sv, STRLEN pos, U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_REGEX_GLOBAL_POS_SET;
+    bool countbytes = (flags & SV_POSBYTES);
+
+    MAGIC *mg = mg_find_mglob(sv);
+    if(!mg)
+        mg = sv_magicext_mglob(sv);
+
+    STRLEN len;
+    const char *pv = SvPV_const(sv, len);
+
+    /* Convert length to chars, not bytes */
+    if(!countbytes && DO_UTF8(sv)) {
+        const STRLEN ulen = sv_or_pv_len_utf8(sv, pv, len);
+        if(ulen)
+            len = ulen;
+    }
+
+    /* We need signed maths now */
+    SSize_t spos = pos;
+
+    /* Clip pos to length, adjust negatives to count from end */
+    if(spos < 0) {
+        spos += len;
+        if(spos < 0)
+            spos = 0;
+    }
+    else if(spos > (SSize_t)len)
+        spos = len;
+
+    /* Pos is now definitely between 0 and length */
+    mg->mg_len = spos;
+    if(countbytes)
+        mg->mg_flags &= ~MGf_MINMATCH, mg->mg_flags |= MGf_BYTES;
+    else
+        mg->mg_flags &= ~(MGf_MINMATCH|MGf_BYTES);
+}
+
+/*
+=for apidoc sv_regex_global_pos_clear
+
+Resets the value in the regexp global match position magic, if it exists, so
+that it does not take effect.
+
+=cut
+*/
+
+void
+Perl_sv_regex_global_pos_clear(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_REGEX_GLOBAL_POS_CLEAR;
+
+    MAGIC *mg = mg_find_mglob(sv);
+    if(mg)
+        mg->mg_len = -1;
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

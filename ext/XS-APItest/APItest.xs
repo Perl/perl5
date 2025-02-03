@@ -4959,6 +4959,20 @@ modify_pv(IV pi, IV sz)
         /* used by op/pack.t when testing pack "p" */
         memset(INT2PTR(char *, pi), 'y', sz);
 
+STRLEN
+sv_regex_global_pos_get(SV *sv, U32 flags = 0)
+    CODE:
+        if(!sv_regex_global_pos_get(sv, &RETVAL, flags))
+            XSRETURN_UNDEF;
+    OUTPUT:
+        RETVAL
+
+void
+sv_regex_global_pos_set(SV *sv, STRLEN pos, U32 flags = 0)
+
+void
+sv_regex_global_pos_clear(SV *sv)
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
