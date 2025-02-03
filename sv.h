@@ -2155,6 +2155,9 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define SV_CATBYTES             (1 << 14) /* 0x4000 - 16384 */
 #define SV_CATUTF8              (1 << 15) /* 0x8000 - 32768 */
 
+/* sv_regex_global_pos_*() should count in bytes, not chars */
+#define SV_POSBYTES             SV_CATBYTES
+
 /* The core is safe for this COW optimisation. XS code on CPAN may not be.
    So only default to doing the COW setup if we're in the core.
  */

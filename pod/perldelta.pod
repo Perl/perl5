@@ -348,7 +348,12 @@ well.
 
 =item *
 
-XXX
+Three new API functions have been added to interact with the regexp global
+match position stored in an SV.  These are C<sv_regex_global_pos_get()>,
+C<sv_regex_global_pos_set()> and C<sv_regex_global_pos_clear()>.  Using these
+API functions avoids XS modules needing to know about or interact directly
+with the way this position is currently stored, which involves the
+C<PERL_MAGIC_regex_global> magic type.
 
 =back
 
