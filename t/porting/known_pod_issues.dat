@@ -421,6 +421,6 @@ pod/perlsolaris.pod	Verbatim line length including indents exceeds 78 by	-1
 pod/perltie.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perltru64.pod	Verbatim line length including indents exceeds 78 by	1
 porting/epigraphs.pod	Verbatim line length including indents exceeds 78 by	-1
-porting/release_managers_guide.pod	Verbatim line length including indents exceeds 78 by	1
+porting/release_managers_guide.pod	Verbatim line length including indents exceeds 78 by	8
 lib/benchmark.pm	Verbatim line length including indents exceeds 78 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
