@@ -1675,4 +1675,45 @@ EODUMP
             $head . 'NV = 0\.99999999\d+' . $tail);
 }
 
+{
+    use experimental "class";
+    # this could crash [github #22959]
+    class Foo {
+    };
+    do_test('class object with no fields', Foo->new, <<~'EOS');
+    SV = IV\($ADDR\) at $ADDR
+      REFCNT = \d+
+      FLAGS = \(ROK\)
+      RV = $ADDR
+      SV = PVOBJ\($ADDR\) at $ADDR
+        REFCNT = 1
+        FLAGS = \(OBJECT\)
+        STASH = $ADDR\s+"Foo"
+        MAXFIELD = -1
+        FIELDS = 0x0
+    EOS
+
+    # test object with fields too
+    class Foo2 {
+        field $x = 0;
+    };
+    do_test('class object with a field', Foo2->new, <<~'EOS');
+    SV = IV\($ADDR\) at $ADDR
+      REFCNT = \d+
+      FLAGS = \(ROK\)
+      RV = $ADDR
+      SV = PVOBJ\($ADDR\) at $ADDR
+        REFCNT = 1
+        FLAGS = \(OBJECT\)
+        STASH = $ADDR\s+"Foo2"
+        MAXFIELD = 0
+        FIELDS = $ADDR
+        Field No\. 0 \(\$x\)
+        SV = IV\($ADDR\) at $ADDR
+          REFCNT = 1
+          FLAGS = \(IOK,pIOK\)
+          IV = 0
+    EOS
+}
+
 done_testing();
