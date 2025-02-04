@@ -2794,15 +2794,26 @@ static const union {
     '9', '8', '9', '9'
 }};
 
-/* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
- * UV as a string towards the end of buf, and return pointers to start and
- * end of it.
+/* uiv_2buf(): originally a private routine for use by sv_2pv_flags(),
+ * now in use by do_print() and part of the public API. It prints an
+ * IV or UV as a string towards the end of buf, and return pointers
+ * to the start and end of it.
  *
  * We assume that buf is at least TYPE_CHARS(UV) long.
  */
 
-PERL_STATIC_INLINE char *
-S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const peob)
+/*
+=for apidoc uiv_2buf
+
+This function converts an IV or UV to its string representation.
+
+It is used internally by sv_2pv_flags() and do_print().
+
+=cut
+*/
+
+char *
+Perl_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const peob)
 {
     char *ptr = buf + TYPE_CHARS(UV);
     char * const ebuf = ptr;

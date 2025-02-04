@@ -851,6 +851,7 @@
 # define to_uni_lower(a,b,c)                    Perl_to_uni_lower(aTHX_ a,b,c)
 # define to_uni_title(a,b,c)                    Perl_to_uni_title(aTHX_ a,b,c)
 # define to_uni_upper(a,b,c)                    Perl_to_uni_upper(aTHX_ a,b,c)
+# define uiv_2buf                               Perl_uiv_2buf
 # define unpackstring(a,b,c,d,e)                Perl_unpackstring(aTHX_ a,b,c,d,e)
 # define unshare_hek(a)                         Perl_unshare_hek(aTHX_ a)
 # define unsharepvn(a,b,c)                      Perl_unsharepvn(aTHX_ a,b,c)
@@ -2181,7 +2182,6 @@
 #     define sv_pos_u2b_forwards                S_sv_pos_u2b_forwards
 #     define sv_pos_u2b_midway                  S_sv_pos_u2b_midway
 #     define sv_unglob(a,b)                     S_sv_unglob(aTHX_ a,b)
-#     define uiv_2buf                           S_uiv_2buf
 #     define utf8_mg_len_cache_update(a,b,c)    S_utf8_mg_len_cache_update(aTHX_ a,b,c)
 #     define utf8_mg_pos_cache_update(a,b,c,d,e) S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
 #     define visit(a,b,c)                       S_visit(aTHX_ a,b,c)

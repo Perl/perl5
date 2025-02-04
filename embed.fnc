@@ -3644,6 +3644,11 @@ EXop	|bool	|try_amagic_bin |int method				\
 				|int flags
 EXop	|bool	|try_amagic_un	|int method				\
 				|int flags
+ARTp	|char * |uiv_2buf	|NN char * const buf			\
+				|const IV iv				\
+				|UV uv					\
+				|const int is_uv			\
+				|NN char ** const peob
 Adp	|SSize_t|unpackstring	|NN const char *pat			\
 				|NN const char *patend			\
 				|NN const char *s			\
@@ -5886,11 +5891,6 @@ ST	|STRLEN |sv_pos_u2b_midway					\
 				|const STRLEN uend
 i	|void	|sv_unglob	|NN SV * const sv			\
 				|U32 flags
-RTi	|char * |uiv_2buf	|NN char * const buf			\
-				|const IV iv				\
-				|UV uv					\
-				|const int is_uv			\
-				|NN char ** const peob
 S	|void	|utf8_mg_len_cache_update				\
 				|NN SV * const sv			\
 				|NN MAGIC ** const mgp			\

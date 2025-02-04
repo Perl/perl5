@@ -5293,6 +5293,12 @@ PERL_CALLCONV bool
 Perl_try_amagic_un(pTHX_ int method, int flags);
 #define PERL_ARGS_ASSERT_TRY_AMAGIC_UN
 
+PERL_CALLCONV char *
+Perl_uiv_2buf(char * const buf, const IV iv, UV uv, const int is_uv, char ** const peob)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_UIV_2BUF               \
+        assert(buf); assert(peob)
+
 PERL_CALLCONV SSize_t
 Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, const char *strend, U32 flags);
 #define PERL_ARGS_ASSERT_UNPACKSTRING           \
@@ -9071,13 +9077,7 @@ S_sv_unglob(pTHX_ SV * const sv, U32 flags);
 #   define PERL_ARGS_ASSERT_SV_UNGLOB           \
         assert(sv)
 
-PERL_STATIC_INLINE char *
-S_uiv_2buf(char * const buf, const IV iv, UV uv, const int is_uv, char ** const peob)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_UIV_2BUF            \
-        assert(buf); assert(peob)
-
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
+# endif
 # if defined(USE_ITHREADS)
 STATIC SV *
 S_sv_dup_common(pTHX_ const SV * const ssv, CLONE_PARAMS * const param)
