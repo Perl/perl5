@@ -15,13 +15,13 @@ document that starts with a checklist for your release.
 
 This script is run as:
 
- perl Porting/make-rmg-checklist \
+ $ perl Porting/make-rmg-checklist \
      --version [5.X.Y-RC#] > /tmp/rmg.pod
 
 You can also pass the C<--html> flag to generate an HTML document instead of
 POD.
 
- perl Porting/make-rmg-checklist --html \
+ $ perl Porting/make-rmg-checklist --html \
      --version [5.X.Y-RC#] > /tmp/rmg.html
 
 =head1 SYNOPSIS
@@ -251,7 +251,7 @@ Additionally, all files listed as "modified" but not "customized for blead"
 should have entries added under the C<CUSTOMIZED> key in
 F<Porting/Maintainers.pl>, as well as checksums updated via:
 
- cd t; ../perl -I../lib porting/customized.t --regen
+ $ cd t; ../perl -I../lib porting/customized.t --regen
 
 =head4 Sync CPAN modules with the corresponding cpanE<sol> distro
 
@@ -259,7 +259,7 @@ In most cases, once a new version of a distribution shipped with core has been
 uploaded to CPAN, the core version thereof can be synchronized automatically
 with the program F<Porting/sync-with-cpan>. For example:
 
- perl Porting/sync-with-cpan Archive::Tar
+ $ perl Porting/sync-with-cpan Archive::Tar
 
 (But see the comments at the beginning of that program.  In particular, it has
 not yet been exercised on Windows as much as it has on Unix-like platforms.)
@@ -405,7 +405,7 @@ problems in pods.  However, it can be taught to ignore problems, and
 sometimes people do so for problems that really should be fixed before
 release.  To see what it is ignoring, run
 
- ./perl -Ilib t/porting/podcheck.t --counts
+ $ ./perl -Ilib t/porting/podcheck.t --counts
 
 Any problems listed as pedantic aren't worth your time investigating.
 These have a C<?> at the beginning of the text, or are for the too-long
@@ -416,13 +416,13 @@ mean that someone clicking on the pod in a web page will get a 404.
 
 To find out more about any real problems, capture the output from
 
- ./perl -Ilib t/porting/podcheck.t --show-all
+ $ ./perl -Ilib t/porting/podcheck.t --show-all
 
 and grep for those real problems.  (It can take a minute or so to run.)
 
 If you decide any should be fixed, after that gets done, run
 
- ./perl -Ilib t/porting/podcheck.t
+ $ ./perl -Ilib t/porting/podcheck.t
 
 to make sure those fixes were successful, and follow the directions in
 the output about regenerating the data base.
@@ -628,7 +628,7 @@ need to freeze blead during the release. This is less important for
 BLEAD-FINAL, MAINT, and RC releases, since blead will already be frozen in
 those cases. Create the branch by running
 
- git checkout -b release-5.X.Y
+ $ git checkout -b release-5.X.Y
 
 =head3 Build a clean perl
 
@@ -1116,11 +1116,11 @@ for files in the wrong place, or files no longer included which should be.
 For example, suppose the about-to-be-released version is 5.10.1 and the
 previous is 5.10.0:
 
- cd installdir-5.10.0/
- find . -type f | perl -pe's/5\.10\.0/5.10.1/g' | sort > /tmp/f1
- cd installdir-5.10.1/
- find . -type f | sort > /tmp/f2
- diff -u /tmp/f[12]
+ $ cd installdir-5.10.0/
+ $ find . -type f | perl -pe's/5\.10\.0/5.10.1/g' | sort > /tmp/f1
+ $ cd installdir-5.10.1/
+ $ find . -type f | sort > /tmp/f2
+ $ diff -u /tmp/f[12]
 
 =head4 Disable C<local::lib> if it's turned on
 
@@ -1217,8 +1217,8 @@ Upload the .gz and .xz versions of the tarball.
 Note: You can also use the command-line utility to upload your tarballs, if
 you have it configured:
 
- cpan-upload perl-5.X.Y.tar.gz
- cpan-upload perl-5.X.Y.tar.xz
+ $ cpan-upload perl-5.X.Y.tar.gz
+ $ cpan-upload perl-5.X.Y.tar.xz
 
 Do not proceed any further until you are sure that your tarballs are on CPAN.
 Check your authors directory metacpan.org to confirm that your uploads have
@@ -1278,11 +1278,11 @@ either, check that the email you are sending from is subscribed to the list.
 
 Merge the (local) release branch back into master now, and delete it.
 
- git checkout blead
- git pull
- git merge release-5.X.Y
- git push
- git branch -d release-5.X.Y
+ $ git checkout blead
+ $ git pull
+ $ git merge release-5.X.Y
+ $ git push
+ $ git branch -d release-5.X.Y
 
 Note: The merge will create a merge commit if other changes have been pushed
 to blead while you've been working on your release branch. Do NOT rebase your
@@ -1366,7 +1366,7 @@ Skip to the end of its test output to see the options it offers you.
 
 When C<make test_porting> passes, commit the new perldelta.
 
- git commit -m'New perldelta for 5.X.Y'
+ $ git commit -m'New perldelta for 5.X.Y'
 
 =back
 
