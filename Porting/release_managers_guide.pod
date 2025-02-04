@@ -709,7 +709,7 @@ modules on CPAN. It can use a full, local CPAN mirror and/or fall back
 on HTTP::Tiny to fetch package metadata remotely.
 
 (If you'd prefer to have a full CPAN mirror, see
-L<How to mirror CPAN|https://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN>)
+L<How to mirror CPAN|https://www.cpan.org/misc/how-to-mirror.html>)
 
 Change to your perl checkout, and if necessary,
 
