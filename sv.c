@@ -2817,8 +2817,8 @@ Perl_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const
 {
     char *ptr = buf + TYPE_CHARS(UV);
     char * const ebuf = ptr;
-    int sign;
-    U16 *word_ptr, *word_table;
+    U16 *word_ptr;
+    U16 const *word_table;
 
     PERL_ARGS_ASSERT_UIV_2BUF;
 
@@ -2827,16 +2827,17 @@ Perl_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const
     /* we are going to read/write two bytes at a time */
     word_ptr = (U16*)ptr;
     word_table = (U16*)int2str_table.arr;
-
-    if (UNLIKELY(is_uv))
-        sign = 0;
-    else if (iv >= 0) {
-        uv = iv;
-        sign = 0;
-    } else {
-        /* Using 0- here to silence bogus warning from MS VC */
-        uv = (UV) (0 - (UV) iv);
-        sign = 1;
+    bool sign = false;
+    if (LIKELY(!is_uv)) {
+        if (iv >= 0) {
+            uv = iv;
+        } else {
+            /* This is NEGATE_2UV(iv), which can be found in handy.h. */
+            /* sv_inline.h does not include handy.h because the latter
+             * would then get included twice into .c files. */
+            uv = (ASSUME((iv) < 0), (UV)-((iv) + 1) + 1U);
+            sign = 1;
+        }
     }
 
     while (uv > 99) {
