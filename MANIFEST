@@ -2709,6 +2709,7 @@ cpan/Test-Simple/lib/Test2/Util/Guard.pm					Test-Simple
 cpan/Test-Simple/lib/Test2/Util/HashBase.pm					Module related to Test::Simple
 cpan/Test-Simple/lib/Test2/Util/Importer.pm					Test-Simple
 cpan/Test-Simple/lib/Test2/Util/Ref.pm						Test-Simple
+cpan/Test-Simple/lib/Test2/Util/Sig.pm						Test-Simple
 cpan/Test-Simple/lib/Test2/Util/Stash.pm					Test-Simple
 cpan/Test-Simple/lib/Test2/Util/Sub.pm						Test-Simple
 cpan/Test-Simple/lib/Test2/Util/Table.pm					Test-Simple

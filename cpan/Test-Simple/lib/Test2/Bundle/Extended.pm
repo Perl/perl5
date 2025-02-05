@@ -4,7 +4,7 @@ use warnings;
 
 use Test2::V0;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 BEGIN {
     push @Test2::Bundle::Extended::ISA => 'Test2::V0';

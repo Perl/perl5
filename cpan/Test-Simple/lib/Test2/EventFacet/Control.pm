@@ -2,7 +2,7 @@ package Test2::EventFacet::Control;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 BEGIN { require Test2::EventFacet; our @ISA = qw(Test2::EventFacet) }
 use Test2::Util::HashBase qw{ -global -terminate -halt -has_callback -encoding -phase };

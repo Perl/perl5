@@ -2,12 +2,12 @@ package Test2::Util::Facets2Legacy;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 use Carp qw/croak confess/;
 use Scalar::Util qw/blessed/;
 
-use base 'Exporter';
+BEGIN { require Exporter; our @ISA = qw(Exporter) }
 our @EXPORT_OK = qw{
     causes_fail
     diagnostics

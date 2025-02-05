@@ -1,6 +1,6 @@
 package Test2::Manual::Tooling::Plugin::TestExit;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 1;
 

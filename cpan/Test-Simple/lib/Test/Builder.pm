@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 use Scalar::Util qw/blessed reftype weaken/;
 
@@ -963,13 +963,23 @@ sub cmp_ok {
         # over it, which can lead to issues with Devel::Cover
         my $bits_code = defined $warning_bits ? qq["\Q$warning_bits\E"] : 'undef';
 
-        # This is so that warnings come out at the caller's level
+        # Make sure warnings and location matches the caller. Can't do the
+        # comparison directly in the eval, as closing over variables can
+        # capture them forever when running with Devel::Cover.
+        my $check;
         $succ = eval qq[
 BEGIN {\${^WARNING_BITS} = $bits_code};
 #line $line "(eval in cmp_ok) $file"
-\$test = (\$got $type \$expect);
+\$check = sub { \$_[0] $type \$_[1] };
 1;
 ];
+
+        if ($succ) {
+            $succ = eval {
+                $test = $check->($got, $expect);
+                1;
+            };
+        }
         $error = $@;
     }
     local $Level = $Level + 1;

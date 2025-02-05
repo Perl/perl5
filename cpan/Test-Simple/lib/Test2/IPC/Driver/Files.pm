@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
@@ -14,7 +14,8 @@ use Storable();
 use File::Spec();
 use POSIX();
 
-use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator do_rename do_unlink try_sig_mask/;
+use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator do_rename do_unlink/;
+use Test2::Util::Sig qw/try_sig_mask/;
 use Test2::API qw/test2_ipc_set_pending/;
 
 sub is_viable { 1 }

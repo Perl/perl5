@@ -2,15 +2,13 @@ package Test2::Util;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
-use POSIX();
 use Config qw/%Config/;
 use Carp qw/croak/;
 
 BEGIN {
-    local ($@, $!, $SIG{__DIE__});
-    *HAVE_PERLIO = eval { require PerlIO; PerlIO->VERSION(1.02); } ? sub() { 1 } : sub() { 0 };
+    *HAVE_PERLIO = defined &PerlIO::get_layers ? sub() { 1 } : sub() { 0 };
 }
 
 our @EXPORT_OK = qw{
@@ -248,30 +246,10 @@ BEGIN {
     }
 }
 
+#for backwards compatibility
 sub try_sig_mask(&) {
-    my $code = shift;
-
-    my ($old, $blocked);
-    unless(IS_WIN32) {
-        my $to_block = POSIX::SigSet->new(
-            POSIX::SIGINT(),
-            POSIX::SIGALRM(),
-            POSIX::SIGHUP(),
-            POSIX::SIGTERM(),
-            POSIX::SIGUSR1(),
-            POSIX::SIGUSR2(),
-        );
-        $old = POSIX::SigSet->new;
-        $blocked = POSIX::sigprocmask(POSIX::SIG_BLOCK(), $to_block, $old);
-        # Silently go on if we failed to log signals, not much we can do.
-    }
-
-    my ($ok, $err) = &try($code);
-
-    # If our block was successful we want to restore the old mask.
-    POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
-
-    return ($ok, $err);
+    require Test2::Util::Sig;
+    goto &Test2::Util::Sig::try_sig_mask;
 }
 
 1;
@@ -368,32 +346,6 @@ cross-platform when trying to rename files you recently altered.
 
 Unlink a file, this wraps C<unlink()> in a way that makes it more reliable
 cross-platform when trying to unlink files you recently altered.
-
-=item ($ok, $err) = try_sig_mask { ... }
-
-Complete an action with several signals masked, they will be unmasked at the
-end allowing any signals that were intercepted to get handled.
-
-This is primarily used when you need to make several actions atomic (against
-some signals anyway).
-
-Signals that are intercepted:
-
-=over 4
-
-=item SIGINT
-
-=item SIGALRM
-
-=item SIGHUP
-
-=item SIGTERM
-
-=item SIGUSR1
-
-=item SIGUSR2
-
-=back
 
 =back
 

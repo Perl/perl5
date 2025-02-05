@@ -2,7 +2,7 @@ package Test::Builder::Formatter;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 BEGIN { require Test2::Formatter::TAP; our @ISA = qw(Test2::Formatter::TAP) }
 

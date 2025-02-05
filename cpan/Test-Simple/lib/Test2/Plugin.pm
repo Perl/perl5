@@ -2,7 +2,7 @@ package Test2::Plugin;
 use strict;
 use warnings;
 
-our $VERSION = '1.302207';
+our $VERSION = '1.302209';
 
 1;
 
