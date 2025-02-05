@@ -2616,7 +2616,8 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
     if (LvTARGLEN(sv)) {
         if (mg->mg_obj) {
             SV * const ahv = LvTARG(sv);
-            HE * const he = hv_fetch_ent(MUTABLE_HV(ahv), mg->mg_obj, FALSE, 0);
+            SV * const index_sv = SvOK(mg->mg_obj) ? mg->mg_obj : &PL_sv_no;
+            HE * const he = hv_fetch_ent(MUTABLE_HV(ahv), index_sv, FALSE, 0);
             if (he)
                 targ = HeVAL(he);
         }
