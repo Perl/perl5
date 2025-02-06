@@ -379,6 +379,26 @@ L<perlapi/C<bytes_to_utf8_temp_pv>> arranges for the new memory to
 automatically be freed.  With C<bytes_to_utf8_free_me>, you are
 responsible for freeing any newly allocated memory.
 
+=item *
+
+The way that subroutine signatures are parsed by the parser grammar has been
+changed.
+
+Previously, when parsing individual signature parameters, the parser would
+accumulate an C<OP_ARGELEM> optree fragment for each parameter on the parser
+stack, collecting them in an C<OP_LIST> sequence, before finally building the
+complete argument handling optree itself, in a large action block defined
+directly in F<perly.y>.
+
+In the new approach, all the optree generation is handled by newly-defined
+functions in F<op.c> which are called by the action blocks in the parser.
+These do not keep state on the parser stack, but instead in a dedicated memory
+structure referenced by the main C<PL_parser> structure.  This is intended to
+be largely opaque to other code, and accessed only via the new functions.
+
+This new arrangement is intended to allow more flexible code generation and
+additional features to be developed in future.
+
 =back
 
 =head1 Selected Bug Fixes
