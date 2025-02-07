@@ -496,6 +496,11 @@ struct regnode_ssc {
 
 #define PARNO(p)        ARG1u(p)          /* APPLIES for OPEN and CLOSE only */
 
+/* Only for BRANCH and BRANCHJ. Currently, those nodes don't use the flags field
+ * so it is repurposed has a bool and the flags field is written to 1 byte at a time.
+ */
+#define BRANCH_HAS_CUTGROUP(p)  FLAGS(p)
+
 #define NODE_ALIGN_FILL(node) (FLAGS(node) = 0)
 
 /* Long strings.  Currently limited to length 18 bits, which handles a 262000
@@ -1220,6 +1225,7 @@ typedef struct {
                  * zzz|abc|ab/ after matching the chars abc, the
                  * accepted word is #2, and the previous accepted
                  * word is #3 */
+    U8  has_cutgroup;
     U32 len;	/* how many chars long is this word? */
     U32 accept;	/* accept state for this word */
 } reg_trie_wordinfo;

@@ -2164,6 +2164,36 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 [^\W\S]*	a	y	$&	
 [^\W\S]?	a	y	$&	
 
+# (*THEN) tests
+/\A(?:.|..)(*THEN)c/	abc	n	-	-
+
+/ \A a (?: (?:          b | bc (*ACCEPT) ) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	abcd
+/ \A a (?: (?: (??{""}) b | bc (*ACCEPT) ) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	abcd
+
+/ \A (?:          abd | ab (?: c | (*ACCEPT)) (*THEN) z | abcd ) /x	abcde	y	$&	abcd
+/ \A (?: (??{""}) abd | ab (?: c | (*ACCEPT)) (*THEN) z | abcd ) /x	abcde	y	$&	abcd
+
+/ \A (?: abd |          ab (?: c | (*ACCEPT)) (*THEN) z | a ) /x	abcde	y	$&	a
+/ \A (?: abd | (??{""}) ab (?: c | (*ACCEPT)) (*THEN) z | a ) /x	abcde	y	$&	a
+
+# testing that backtracking can happen in between the start of a branch and the cutgroup as long as the control flow doesn't yet go past the cutgroup
+/ \A a (?: (?:          b | bc (*ACCEPT) ) (?: z | (*ACCEPT)) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	ab
+/ \A a (?: (?: (??{""}) b | bc (*ACCEPT) ) (?: z | (*ACCEPT)) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	ab
+
+/ \A a (?: (?:          b | bc (*ACCEPT) ) (?: . |   (*FAIL)) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	abcd
+/ \A a (?: (?: (??{""}) b | bc (*ACCEPT) ) (?: . |   (*FAIL)) (*THEN) (*FAIL) | bcd ) /x	abcde	y	$&	abcd
+
+# testing that the cut leads to a backtracking to the right branch
+/ \A a (?: (?:          b | bc (*ACCEPT) ) (?: . | cd (*ACCEPT) ) (*THEN) (*FAIL) | bcde ) /x	abcde	y	$&	abcde
+/ \A a (?: (?: (??{""}) b | bc (*ACCEPT) ) (?: . | cd (*ACCEPT) ) (*THEN) (*FAIL) | bcde ) /x	abcde	y	$&	abcde
+
+# testing the cut doesn't remove the choice point of its innermost outter branch, when there is no additional choice point between the start of a branch and the choice point
+/ \A (?:          a         z | abc )  /x	abcde	y	$&	abc
+/ \A (?:          a (*THEN) z | abc )  /x	abcde	y	$&	abc
+/ \A (?: (??{""}) a         z | abc )  /x	abcde	y	$&	abc
+/ \A (?: (??{""}) a (*THEN) z | abc )  /x	abcde	y	$&	abc
+
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
