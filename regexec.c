@@ -3372,8 +3372,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             dump_exec_pos( (char *)uc, c, strend,
                                         real_start, s, utf8_target, 0);
                             Perl_re_printf( aTHX_
-                                " Charid:%3u CP:%4" UVxf " ",
-                                 charid, uvc);
+                                "%sAHOC: Chid:%-3u CP:%#-6" UVxf " ",
+                                 PL_colors[4], charid, uvc);
+                            if (isPRINT_A(uvc))
+                                Perl_re_printf( aTHX_ "'%c' ", (int)uvc );
+                            else
+                                Perl_re_printf( aTHX_ "    " ); /* four spaces to match "'x' " */
                         });
                     }
                     else {
@@ -3393,8 +3397,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 dump_exec_pos((char *)uc, c, strend, real_start,
                                     s,   utf8_target, 0 );
                             Perl_re_printf( aTHX_
-                                "%sState: %4" UVxf ", word=%" UVxf,
-                                failed ? " Fail transition to " : "",
+                                "%s%sSt:%#-6" UVxf " W:%#-4" UVxf,
+                                PL_colors[4],
+                                failed ? "AHOC: Fail transition to     " : "",
                                 (UV)state, (UV)word);
                         });
                         if ( base ) {
@@ -3407,17 +3412,19 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                  && trie->trans[offset].check == state
                                  && (tmp=trie->trans[offset].next))
                             {
-                                DEBUG_TRIE_EXECUTE_r(
-                                    Perl_re_printf( aTHX_ " - legal\n"));
                                 failed = false;
                                 state = tmp;
+                                DEBUG_TRIE_EXECUTE_r(
+                                    Perl_re_printf( aTHX_ " - accept -> St:%#-6" UVxf "%s\n",
+                                        (UV)state, PL_colors[5]));
                                 break;
                             }
                             else {
-                                DEBUG_TRIE_EXECUTE_r(
-                                    Perl_re_printf( aTHX_ " - fail\n"));
                                 failed = true;
                                 state = aho->fail[state];
+                                DEBUG_TRIE_EXECUTE_r(
+                                    Perl_re_printf( aTHX_ " - reject -> St:%#-6" UVxf "%s\n",
+                                        (UV)state,PL_colors[5]));
                             }
                         }
                         else {
