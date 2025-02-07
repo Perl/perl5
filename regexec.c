@@ -3409,6 +3409,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             {
                                 DEBUG_TRIE_EXECUTE_r(
                                     Perl_re_printf( aTHX_ " - legal\n"));
+                                failed = 0;
                                 state = tmp;
                                 break;
                             }
