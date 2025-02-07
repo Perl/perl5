@@ -3318,7 +3318,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 U32 pointpos = 0;
 
                 while ( state && uc <= (U8*)strend ) {
-                    int failed=0;
+                    bool failed = false;
                     U32 word = aho->states[ state ].wordnum;
 
                     if( state==1 ) {
@@ -3409,14 +3409,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             {
                                 DEBUG_TRIE_EXECUTE_r(
                                     Perl_re_printf( aTHX_ " - legal\n"));
-                                failed = 0;
+                                failed = false;
                                 state = tmp;
                                 break;
                             }
                             else {
                                 DEBUG_TRIE_EXECUTE_r(
                                     Perl_re_printf( aTHX_ " - fail\n"));
-                                failed = 1;
+                                failed = true;
                                 state = aho->fail[state];
                             }
                         }
@@ -3424,7 +3424,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             /* we must be accepting here */
                             DEBUG_TRIE_EXECUTE_r(
                                     Perl_re_printf( aTHX_ " - accepting\n"));
-                            failed = 1;
+                            failed = true;
                             break;
                         }
                     } while(state);
