@@ -5959,6 +5959,8 @@ yyl_hyphen(pTHX_ char *s)
             }
             else if (*s == '$')
                 OPERATOR(ARROW);
+            else if (*s == '&')
+                OPERATOR(ARROW);
             else
                 TERM(ARROW);
         }

@@ -27,11 +27,20 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
-=head2 Lexical method syntax using C<my method>
+=head2 Lexical method declaration using C<my method>
 
 Like C<sub> since Perl version 5.18, C<method> can now be prefixed with the
 C<my> keyword.  This declares a subroutine that has lexical, rather than
 package visibility.  See L<perlclass> for more detail.
+
+=head2 Lexical method invocation operator C<< ->& >>
+
+Along with the ability to declare methods lexically, this release also permits
+invoking a lexical subroutine as if it were a method, bypassing the usual
+name-based method resolution by name.
+
+Combined with lexical method declaration, these two new abilities create the
+effect of having private methods.
 
 =head1 Security
 

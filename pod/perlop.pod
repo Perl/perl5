@@ -236,6 +236,12 @@ and (if it is a method name) the left side must be either an object (a
 blessed reference) or a class name (that is, a package name).  See
 L<perlobj>.
 
+The right side may also be the name of a subroutine, prefixed with the C<&>
+sigil.  This creates what looks like a lexical method invocation, where the
+method subroutine is resolved lexically instead of by name by a search within
+the packages of the object's class.  This resolution happens entirely at
+compile-time, and performs the same as a regular subroutine call at runtime.
+
 The dereferencing cases (as opposed to method-calling cases) are
 somewhat extended by the C<postderef> feature.  For the
 details of that feature, consult L<perlref/Postfix Dereference Syntax>.

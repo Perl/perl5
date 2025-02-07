@@ -191,9 +191,9 @@ but does not appear in the symbol table.  The effect is that of a I<private>
 method; one that can be called from within the class's own code, but not from
 outside.
 
-At present, there is no special syntax for invoking a lexical method, so for
-now they must be called as if they are regular (lexical) subroutines,
-remembering to pass the C<$self> invocant as the first positional argument.
+To invoke these lexical subroutines as methods, it is best to use the
+C<< ->& >> operator.  This bypasses method lookup by name, and directly
+invokes a lexical subroutine as if it was a method.
 
     class LexicalMethod {
         my method abc ($x, $y) {
@@ -201,9 +201,11 @@ remembering to pass the C<$self> invocant as the first positional argument.
         }
 
         method xyz {
-            abc($self, "x", "y");
+            $self->&abc("x", "y");
         }
     }
+
+    # The `abc` method is not visible from here
 
 =head1 ATTRIBUTES
 

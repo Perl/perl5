@@ -103,4 +103,35 @@ no warnings 'experimental::class';
     ok(!Testcase7->can("priv"), 'lexical method does not appear in the symbol table');
 }
 
+# ->& operator can invoke methods with lexical scope
+{
+    class Testcase8 {
+        my method priv {
+            return "private-result";
+        }
+
+        method notpriv {
+            return "pkg-result";
+        }
+
+        method lexm_paren { return $self->&priv(); }
+        method lexm_plain { return $self->&priv; }
+
+        method pkgm       { return $self->&notpriv; }
+    }
+
+    is(Testcase8->new->lexm_paren, "private-result", 'lexical method can be invoked with ->&m()');
+    is(Testcase8->new->lexm_plain, "private-result", 'lexical method can be invoked with ->&m');
+    is(Testcase8->new->pkgm,       "pkg-result",     'package method can be invoked with ->&m');
+
+    class Testcase8Derived :isa(Testcase8) {
+        method notpriv {
+            return "different result";
+        }
+    }
+
+    is(Testcase8Derived->new->pkgm, "pkg-result",
+        '->&m operator does not follow inheritance');
+}
+
 done_testing;
