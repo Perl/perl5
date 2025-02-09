@@ -32,7 +32,7 @@ S_unwind_scan_frames(pTHX_ const void *p)
     do {
         scan_frame *n= f->next_frame;
         Safefree(f);
-        f= n;
+        f = n;
     } while (f);
 }
 
@@ -1527,13 +1527,13 @@ Perl_study_chunk(pTHX_
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_STUDY_CHUNK;
-    RExC_study_started= 1;
+    RExC_study_started = 1;
 
     Zero(&data_fake, 1, scan_data_t);
 
     if ( depth == 0 ) {
         while (first_non_open && OP(first_non_open) == OPEN)
-            first_non_open=regnext(first_non_open);
+            first_non_open = regnext(first_non_open);
     }
 
   fake_study_recurse:
@@ -1542,7 +1542,8 @@ Perl_study_chunk(pTHX_
     );
     DEBUG_OPTIMISE_MORE_r(
     {
-        Perl_re_indentf( aTHX_  "study_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
+        Perl_re_indentf( aTHX_  "study_chunk stopparen = %ld recursed_count = %lu "
+                                "depth = %lu recursed_depth = %lu scan = %p last = %p",
             depth, (long)stopparen,
             (unsigned long)RExC_study_chunk_recursed_count,
             (unsigned long)depth, (unsigned long)recursed_depth,
@@ -1621,7 +1622,7 @@ Perl_study_chunk(pTHX_
             DEBUG_PEEP("scan", scan, depth, flags);
             DEBUG_PEEP("next", next, depth, flags);
 
-            /* we suppose the run is continuous, last=next...
+            /* we suppose the run is continuous, last = next...
              * NOTE we dont use the return here! */
             /* DEFINEP study_chunk() recursion */
             (void)study_chunk(pRExC_state, &scan, &minlen,
@@ -1649,7 +1650,7 @@ Perl_study_chunk(pTHX_
                  * check there too. */
                 SSize_t max1 = 0, min1 = OPTIMIZE_INFTY, num = 0;
                 regnode_ssc accum;
-                regnode * const startbranch=scan;
+                regnode * const startbranch = scan;
 
                 if (flags & SCF_DO_SUBSTR) {
                     /* Cannot merge strings after this. */
@@ -1692,7 +1693,7 @@ Perl_study_chunk(pTHX_
                     if (flags & SCF_WHILEM_VISITED_POS)
                         f |= SCF_WHILEM_VISITED_POS;
 
-                    /* we suppose the run is continuous, last=next...*/
+                    /* we suppose the run is continuous, last = next...*/
                     /* recurse study_chunk() for each BRANCH in an alternation */
                     minnext = study_chunk(pRExC_state, &scan, minlenp,
                                       &deltanext, next, &data_fake, stopparen,
@@ -1777,8 +1778,8 @@ Perl_study_chunk(pTHX_
                    whatever it is. We now start at the beginning of the
                    sequence and look for subsequences of
 
-                   BRANCH->EXACT=>x1
-                   BRANCH->EXACT=>x2
+                   BRANCH->EXACT => x1
+                   BRANCH->EXACT => x2
                    tail
 
                    which would be constructed from a pattern like
@@ -1813,7 +1814,7 @@ Perl_study_chunk(pTHX_
 
                 */
 
-                    int made=0;
+                    int made = 0;
                     if (!re_trie_maxbuff) {
                         re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
                         if (!SvIOK(re_trie_maxbuff))
@@ -1825,7 +1826,7 @@ Perl_study_chunk(pTHX_
                         regnode *prev = (regnode *)NULL;
                         regnode *tail = scan;
                         U8 trietype = 0;
-                        U32 count=0;
+                        U32 count = 0;
 
                         /* var tail is used because there may be a TAIL
                            regop in the way. Ie, the exacts will point to the
@@ -1952,7 +1953,7 @@ Perl_study_chunk(pTHX_
                                   Perl_re_printf( aTHX_ "\t=> %d:%s\t",
                                     REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
                                 }
-                                Perl_re_printf( aTHX_  "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
+                                Perl_re_printf( aTHX_  "(First == %d,Last == %d,Cur == %d,tt == %s,ntt == %s,nntt == %s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
                                    REGNODE_NAME(trietype), REGNODE_NAME(noper_trietype), REGNODE_NAME(noper_next_trietype)
                                 );
@@ -2050,7 +2051,7 @@ Perl_study_chunk(pTHX_
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
                             Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
                               depth+1, SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur));
-                            Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
+                            Perl_re_printf( aTHX_  "(First == %d, Last == %d, Cur == %d, tt == %s)\n",
                                REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
                                REGNODE_NAME(trietype)
                             );
@@ -2061,14 +2062,14 @@ Perl_study_chunk(pTHX_
                                 /* the last branch of the sequence was part of
                                  * a trie, so we have to construct it here
                                  * outside of the loop */
-                                made= make_trie( pRExC_state, startbranch,
+                                made = make_trie( pRExC_state, startbranch,
                                                  first, scan, tail, count,
                                                  trietype, depth+1 );
 #ifdef TRIE_STUDY_OPT
                                 if ( ((made == MADE_EXACT_TRIE &&
                                      startbranch == first)
                                      || ( first_non_open == first )) &&
-                                     depth==0 ) {
+                                     depth == 0 ) {
                                     flags |= SCF_TRIE_RESTUDY;
                                     if ( startbranch == first
                                          && scan >= tail )
@@ -2097,7 +2098,7 @@ Perl_study_chunk(pTHX_
                                     });
                                     OP(startbranch)= NOTHING;
                                     NEXT_OFF(startbranch)= tail - startbranch;
-                                    for ( opt= startbranch + 1; opt < tail ; opt++ )
+                                    for ( opt = startbranch + 1; opt < tail ; opt++ )
                                         OP(opt)= OPTIMIZED;
                                 }
                             }
@@ -2113,7 +2114,7 @@ Perl_study_chunk(pTHX_
             I32 paren = 0;
             regnode *start = NULL;
             regnode *end = NULL;
-            U32 my_recursed_depth= recursed_depth;
+            U32 my_recursed_depth = recursed_depth;
 
             if (OP(scan) != SUSPEND) { /* GOSUB */
                 /* Do setup, note this code has side effects beyond
@@ -2153,7 +2154,7 @@ Perl_study_chunk(pTHX_
                      * enclosing scope - see GH 18096, for example.
                      */
                     is_inf = is_inf_internal = 1;
-                    scan= regnext(scan);
+                    scan = regnext(scan);
                     continue;
                 }
 
@@ -2181,7 +2182,7 @@ Perl_study_chunk(pTHX_
                     /* we havent recursed into this paren yet, so recurse into it */
                     DEBUG_STUDYDATA("gosub-set", data, depth, is_inf, min, stopmin, delta);
                     PAREN_SET(recursed_depth, paren);
-                    my_recursed_depth= recursed_depth + 1;
+                    my_recursed_depth = recursed_depth + 1;
                 } else {
                     DEBUG_STUDYDATA("gosub-inf", data, depth, is_inf, min, stopmin, delta);
                     /* some form of infinite recursion, assume infinite length
@@ -2195,7 +2196,7 @@ Perl_study_chunk(pTHX_
                         ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 
-                    start= NULL; /* reset start so we dont recurse later on. */
+                    start = NULL; /* reset start so we dont recurse later on. */
                 }
             } else {
                 paren = stopparen;
@@ -2208,7 +2209,7 @@ Perl_study_chunk(pTHX_
                 if (!RExC_frame_last) {
                     Newxz(newframe, 1, scan_frame);
                     SAVEDESTRUCTOR_X(S_unwind_scan_frames, newframe);
-                    RExC_frame_head= newframe;
+                    RExC_frame_head = newframe;
                     RExC_frame_count++;
                 } else if (!RExC_frame_last->next_frame) {
                     Newxz(newframe, 1, scan_frame);
@@ -2216,9 +2217,9 @@ Perl_study_chunk(pTHX_
                     newframe->prev_frame= RExC_frame_last;
                     RExC_frame_count++;
                 } else {
-                    newframe= RExC_frame_last->next_frame;
+                    newframe = RExC_frame_last->next_frame;
                 }
-                RExC_frame_last= newframe;
+                RExC_frame_last = newframe;
 
                 newframe->next_regnode = regnext(scan);
                 newframe->last_regnode = last;
@@ -2237,7 +2238,7 @@ Perl_study_chunk(pTHX_
                 stopparen = paren;
                 last = end;
                 depth = depth + 1;
-                recursed_depth= my_recursed_depth;
+                recursed_depth = my_recursed_depth;
 
                 continue;
             }
@@ -2463,7 +2464,7 @@ Perl_study_chunk(pTHX_
                 scan = regnext(scan);
                 goto optimize_curly_tail;
             case CURLY:
-                if (stopparen>0 && (OP(scan)==CURLYN || OP(scan)==CURLYM)
+                if (stopparen > 0 && (OP(scan) == CURLYN || OP(scan) == CURLYM)
                     && (FLAGS(scan) == stopparen))
                 {
                     mincount = 1;
@@ -2810,14 +2811,14 @@ Perl_study_chunk(pTHX_
                     /* It is counted once already... */
                     data->pos_min += minnext * (mincount - counted);
 #if 0
-    Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
-                              " OPTIMIZE_INFTY=%" UVuf " minnext=%" UVuf
-                              " maxcount=%" UVuf " mincount=%" UVuf
-                              " data->pos_delta=%" UVuf "\n",
+    Perl_re_printf( aTHX_  "counted = %" UVuf " deltanext = %" UVuf
+                              " OPTIMIZE_INFTY = %" UVuf " minnext = %" UVuf
+                              " maxcount = %" UVuf " mincount = %" UVuf
+                              " data->pos_delta = %" UVuf "\n",
         (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext,
         (UV)maxcount, (UV)mincount, (UV)data->pos_delta);
     if (deltanext != OPTIMIZE_INFTY)
-        Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
+        Perl_re_printf( aTHX_  "LHS = %" UVuf " RHS = %" UVuf "\n",
             (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
             - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
 #endif
@@ -3164,7 +3165,7 @@ Perl_study_chunk(pTHX_
                  * we are dealing with variable length lookbehind that
                  * contains capturing buffers, which are considered
                  * experimental */
-                cur_last_close_op= *(data_fake.last_close_opp);
+                cur_last_close_op = *(data_fake.last_close_opp);
 
                 data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
@@ -3274,7 +3275,7 @@ Perl_study_chunk(pTHX_
                         f |= SCF_DO_SUBSTR;
                         if (FLAGS(scan))
                             scan_commit(pRExC_state, &data_fake, minlenp, is_inf);
-                        data_fake.last_found=newSVsv(data->last_found);
+                        data_fake.last_found = newSVsv(data->last_found);
                     }
                 }
                 else {
@@ -3447,13 +3448,13 @@ Perl_study_chunk(pTHX_
                 ssc_init_zero(pRExC_state, &accum);
 
             if (!trie->jump) {
-                min1= trie->minlen;
-                max1= trie->maxlen;
+                min1 = trie->minlen;
+                max1 = trie->maxlen;
             } else {
                 const regnode *nextbranch= NULL;
                 U32 word;
 
-                for ( word=1 ; word <= trie->wordcount ; word++)
+                for ( word = 1 ; word <= trie->wordcount ; word++)
                 {
                     SSize_t deltanext = 0, minnext = 0;
                     U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
@@ -3483,7 +3484,7 @@ Perl_study_chunk(pTHX_
                     if (trie->jump[word]) {
                         if (!nextbranch)
                             nextbranch = trie_node + trie->jump[0];
-                        scan= trie_node + trie->jump[word];
+                        scan = trie_node + trie->jump[word];
                         /* We go from the jump point to the branch that follows
                            it. Note this means we need the vestigal unused
                            branches even though they arent otherwise used. */
@@ -3494,7 +3495,7 @@ Perl_study_chunk(pTHX_
                             mutate_ok);
                     }
                     if (nextbranch && REGNODE_TYPE(OP(nextbranch))==BRANCH)
-                        nextbranch= regnext((regnode*)nextbranch);
+                        nextbranch = regnext((regnode*)nextbranch);
 
                     if (min1 > (SSize_t)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
@@ -3558,14 +3559,14 @@ Perl_study_chunk(pTHX_
                     flags |= SCF_DO_STCLASS_OR;
                 }
             }
-            scan= tail;
+            scan = tail;
             DEBUG_STUDYDATA("after TRIE study", data, depth, is_inf, min, stopmin, delta);
             continue;
         }
 #else
         else if (REGNODE_TYPE(OP(scan)) == TRIE) {
             reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG1u(scan) ];
-            U8*bang=NULL;
+            U8 *bang = NULL;
 
             min += trie->minlen;
             delta += (trie->maxlen - trie->minlen);
@@ -3703,7 +3704,7 @@ Perl_study_chunk(pTHX_
         data->pos_delta = OPTIMIZE_INFTY - data->pos_min;
     if (is_par > (I32)U8_MAX)
         is_par = 0;
-    if (is_par && pars==1 && data) {
+    if (is_par && pars == 1 && data) {
         data->flags |= SF_IN_PAR;
         data->flags &= ~SF_HAS_PAR;
     }

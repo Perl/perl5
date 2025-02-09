@@ -409,7 +409,9 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
         if (   array[final_element] > start
             || ELEMENT_RANGE_MATCHES_INVLIST(final_element))
         {
-            Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but wasn't at the end of the list, final=%" UVuf ", start=%" UVuf ", match=%c",
+            Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but "
+                             "wasn't at the end of the list, final = %" UVuf 
+                             ", start = %" UVuf ", match = %c",
                      array[final_element], start,
                      ELEMENT_RANGE_MATCHES_INVLIST(final_element) ? 't' : 'f');
         }
@@ -942,7 +944,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     /* Size the intersection for the worst case: that the intersection ends up
      * fragmenting everything to be completely disjoint */
-    r= _new_invlist(len_a + len_b);
+    r = _new_invlist(len_a + len_b);
 
     /* Will contain U+0000 iff both components do */
     array_r = _invlist_array_init(r,    len_a > 0 && array_a[0] == 0
@@ -975,7 +977,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
         }
         else {
             cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
-            cp= array_b[i_b++];
+            cp = array_b[i_b++];
         }
 
         /* Here, have chosen which of the two inputs to look at.  Only output

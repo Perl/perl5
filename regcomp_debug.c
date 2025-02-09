@@ -177,7 +177,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 #endif
 
     if (plast && plast < last)
-        last= plast;
+        last = plast;
 
     while (node && (!last || node < last)) {
         const U8 op = OP(node);
@@ -228,11 +228,11 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         else if ( REGNODE_TYPE(op)  == TRIE ) {
             const regnode *this_trie = node;
             const U32 n = ARG1u(node);
-            const reg_ac_data * const ac = op>=AHOCORASICK ?
+            const reg_ac_data * const ac = op >= AHOCORASICK ?
                (reg_ac_data *)ri->data->data[n] :
                NULL;
             const reg_trie_data * const trie =
-                (reg_trie_data*)ri->data->data[op<AHOCORASICK ? n : ac->trie];
+                (reg_trie_data*)ri->data->data[op < AHOCORASICK ? n : ac->trie];
 #ifdef DEBUGGING
             AV *const trie_words
                            = MUTABLE_AV(ri->data->data[n + TRIE_WORDS_OFFSET]);
@@ -258,24 +258,24 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                     : "???"
                 );
                 if (trie->jump) {
-                    U16 dist= trie->jump[word_idx+1];
+                    U16 dist = trie->jump[word_idx+1];
                     Perl_re_printf( aTHX_  "(%" UVuf ")\n",
                                (UV)((dist ? this_trie + dist : next) - start));
                     if (dist) {
                         if (!nextbranch)
-                            nextbranch= this_trie + trie->jump[0];
+                            nextbranch = this_trie + trie->jump[0];
                         DUMPUNTIL(this_trie + dist, nextbranch);
                     }
                     if (nextbranch && REGNODE_TYPE(OP(nextbranch))==BRANCH)
-                        nextbranch= regnext((regnode *)nextbranch);
+                        nextbranch = regnext((regnode *)nextbranch);
                 } else {
                     Perl_re_printf( aTHX_  "\n");
                 }
             }
             if (last && next > last)
-                node= last;
+                node = last;
             else
-                node= next;
+                node = next;
         }
         else if ( op == CURLY ) {   /* "next" might be very big: optimizer */
             DUMPUNTIL(after, after + 1); /* +1 is NOT a REGNODE_AFTER */
@@ -316,12 +316,12 @@ static void
 S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
 {
     int bit;
-    int set=0;
+    int set = 0;
 
     STATIC_ASSERT_STMT(REG_INTFLAGS_NAME_SIZE <= sizeof(flags) * CHARBITS);
 
-    for (bit=0; bit < REG_INTFLAGS_NAME_SIZE; bit++) {
-        if (flags & (1<<bit)) {
+    for (bit = 0; bit < REG_INTFLAGS_NAME_SIZE; bit++) {
+        if (flags & (1 << bit)) {
             if (!set++ && lead)
                 Perl_re_printf( aTHX_  "%s", lead);
             Perl_re_printf( aTHX_  "%s ", PL_reg_intflags_name[bit]);
@@ -339,14 +339,14 @@ static void
 S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 {
     int bit;
-    int set=0;
+    int set = 0;
     regex_charset cs;
 
     STATIC_ASSERT_STMT(REG_EXTFLAGS_NAME_SIZE <= sizeof(flags) * CHARBITS);
 
-    for (bit=0; bit<REG_EXTFLAGS_NAME_SIZE; bit++) {
-        if (flags & (1U<<bit)) {
-            if ((1U<<bit) & RXf_PMf_CHARSET) {  /* Output separately, below */
+    for (bit = 0; bit < REG_EXTFLAGS_NAME_SIZE; bit++) {
+        if (flags & (1U << bit)) {
+            if ((1U << bit) & RXf_PMf_CHARSET) {  /* Output separately, below */
                 continue;
             }
             if (!set++ && lead)
@@ -635,13 +635,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno= (op == ACCEPT)              ? ARG2u(o) :
+        U32 parno = (op == ACCEPT)              ? ARG2u(o) :
                    (op == OPEN || op == CLOSE) ? PARNO(o) :
                                                  ARG1u(o);
         if ( RXp_PAREN_NAMES(prog) ) {
-            name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
+            name_list = MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
-            name_list= RExC_paren_name_list;
+            name_list = RExC_paren_name_list;
         }
         if ( name_list ) {
             if ( k != REF || (op < REFN)) {
@@ -667,18 +667,18 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                  * S_reg_add_data()
                  */
                 SV *sv_dat= MUTABLE_SV(progi->data->data[ parno ]);
-                I32 *nums=(I32*)SvPVX(sv_dat);
+                I32 *nums = (I32*)SvPVX(sv_dat);
                 SV **name= av_fetch_simple(name_list, nums[0], 0 );
                 I32 n;
                 if (name) {
-                    for ( n=0; n<SvIVX(sv_dat); n++ ) {
+                    for ( n = 0; n < SvIVX(sv_dat); n++ ) {
                         Perl_sv_catpvf(aTHX_ sv, "%s%" IVdf,
                                     (n ? "," : ""), (IV)nums[n]);
                     }
                     Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
                 }
             }
-        } else if (parno>0) {
+        } else if (parno > 0) {
             UV logical_parno = parno;
             if (prog->parno_to_logical)
                 logical_parno = prog->parno_to_logical[parno];
@@ -712,9 +712,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                          ? prog->parno_to_logical[parno]
                          : parno;
         if ( RXp_PAREN_NAMES(prog) ) {
-            name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
+            name_list = MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
-            name_list= RExC_paren_name_list;
+            name_list = RExC_paren_name_list;
         }
 
         /* Paren and offset */
@@ -945,7 +945,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
         if (op == ANYOFHs) {
-            Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes=%s", _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, FLAGS(o), 1));
+            Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes = %s", 
+                _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, 
+                FLAGS(o), 1));
         }
         else if (REGNODE_TYPE(op) != ANYOF) {
             U8 lowest = (op != ANYOFHr)
@@ -960,7 +962,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             if (op != ANYOFR || ! isASCII(ANYOFRbase(o) + ANYOFRdelta(o)))
 #endif
             {
-                Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=%02X", lowest);
+                Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte = %02X", lowest);
                 if (lowest != highest) {
                     Perl_sv_catpvf(aTHX_ sv, "-%02X", highest);
                 }
@@ -1006,7 +1008,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
         }
         else {
-            Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);
+            Perl_sv_catpvf(aTHX_ sv, "[illegal type = %d])", index);
         }
     }
     else if (k == BOUND || k == NBOUND) {
