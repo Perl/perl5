@@ -3372,8 +3372,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             dump_exec_pos( (char *)uc, c, strend,
                                         real_start, s, utf8_target, 0);
                             Perl_re_printf( aTHX_
-                                "%sAHOC: Chid:%-3u CP:%#-6" UVxf " ",
-                                 PL_colors[4], charid, uvc);
+                                "%sAHOC: Chid:0x%-2" UVXf " CP:0x%-4" UVXf " ",
+                                 PL_colors[4], (UV)charid, uvc);
                             if (isPRINT_A(uvc))
                                 Perl_re_printf( aTHX_ "'%c' ", (int)uvc );
                             else
@@ -3397,9 +3397,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 dump_exec_pos((char *)uc, c, strend, real_start,
                                     s,   utf8_target, 0 );
                             Perl_re_printf( aTHX_
-                                "%s%sSt:%#-6" UVxf " W:%#-4" UVxf,
+                                "%s%sSt:0x%-4" UVXf " W:0x%-2" UVXf,
                                 PL_colors[4],
-                                failed ? "AHOC: Fail transition to     " : "",
+                                failed ? "AHOC: Fail transition to      " : "",
                                 (UV)state, (UV)word);
                         });
                         if ( base ) {
@@ -3415,7 +3415,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 failed = false;
                                 state = tmp;
                                 DEBUG_TRIE_EXECUTE_r(
-                                    Perl_re_printf( aTHX_ " - accept -> St:%#-6" UVxf "%s\n",
+                                    Perl_re_printf( aTHX_ " - good -> St:%#-6" UVxf "%s\n",
                                         (UV)state, PL_colors[5]));
                                 break;
                             }
@@ -3423,7 +3423,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 failed = true;
                                 state = aho->fail[state];
                                 DEBUG_TRIE_EXECUTE_r(
-                                    Perl_re_printf( aTHX_ " - reject -> St:%#-6" UVxf "%s\n",
+                                    Perl_re_printf( aTHX_ " - fail -> St:%#-6" UVxf "%s\n",
                                         (UV)state,PL_colors[5]));
                             }
                         }
@@ -6771,7 +6771,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 U8 *uscan = (U8*)NULL;
                 U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
                 U32 charcount = 0; /* how many input chars we have matched */
-                U32 accepted = 0; /* have we seen any accepting states? */
+                U32 accepted = 0; /* how many accepting states have we seen? */
 
                 ST.jump = trie->jump;
                 ST.j_before_paren = trie->j_before_paren;
@@ -6786,11 +6786,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                    accept state */
 
                 while ( state && uc <= (U8*)(loceol) ) {
-                    U32 base = trie->states[ state ].trans.base;
                     UV uvc = 0;
                     U16 charid = 0;
-                    U16 wordnum;
-                    wordnum = trie->states[ state ].wordnum;
+                    U32 base = trie->states[ state ].trans.base;
+                    U16 wordnum = trie->states[ state ].wordnum;
+                    PERL_DEB(U32 old_state = state);
 
                     if (wordnum) { /* it's an accept state */
                         if (!accepted) {
@@ -6809,15 +6809,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             ST.nextword = wordnum;
                         ST.topword = wordnum;
                     }
-
-                    DEBUG_TRIE_EXECUTE_r({
-                                DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
-                                /* HERE */
-                                PerlIO_printf( Perl_debug_log,
-                                    "%*s%sTRIE: State: %4" UVxf " Accepted: %c ",
-                                    INDENT_CHARS(depth), "", PL_colors[4],
-                                    (UV)state, (accepted ? 'Y' : 'N'));
-                    });
 
                     /* read a char and goto next state */
                     if ( base && (foldlen || uc < (U8*)(loceol))) {
@@ -6848,9 +6839,21 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         state = 0;
                     }
                     DEBUG_TRIE_EXECUTE_r(
+                        DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
                         Perl_re_printf( aTHX_
-                            "TRIE: Charid:%3x CP:%4" UVxf " After State: %4" UVxf "%s\n",
-                            charid, uvc, (UV)state, PL_colors[5] );
+                            "%sTRIE: Chid:0x%-2" UVXf " CP:0x%-4" UVXf " ",
+                            PL_colors[4], (UV)charid, uvc);
+                        if (isPRINT_A(uvc))
+                            Perl_re_printf( aTHX_ "'%c' ", (int)uvc );
+                        else
+                            Perl_re_printf( aTHX_ "    " ); /* four spaces to match "'x' " */
+                        Perl_re_printf( aTHX_
+                                "St:0x%-4" UVXf " W:0x%-2" UVXf " - %s -> St: 0x%-4" UVXf "%s\n",
+                                (UV)old_state, (UV)wordnum,
+                                state ? "good" : charid ? "fail" : "last",
+                                (UV)state, PL_colors[5]
+
+                        );
                     );
                 }
                 if (!accepted)
@@ -6996,7 +6999,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 
             DEBUG_EXECUTE_r({
-                Perl_re_exec_indentf( aTHX_  "%sTRIE matched word #%d, continuing%s\n",
+                Perl_re_exec_indentf( aTHX_  "%sTRIE: matched word #%d, continuing%s\n",
                     depth,
                     PL_colors[4],
                     ST.nextword,
