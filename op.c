@@ -1467,7 +1467,7 @@ S_find_and_forget_pmops(pTHX_ OP *o)
                 o = o->op_sibparent; /* process next sibling */
                 break;
             }
-            o = o->op_sibparent; /*try parent's next sibling */
+            o = o->op_sibparent; /* try parent's next sibling */
         }
     }
 }
@@ -2101,7 +2101,7 @@ Perl_scalar(pTHX_ OP *o)
             if (OpHAS_SIBLING(o))
                 next_kid = o->op_sibparent;
             else {
-                o = o->op_sibparent; /*try parent's next sibling */
+                o = o->op_sibparent; /* try parent's next sibling */
                 switch (o->op_type) {
                 case OP_SCOPE:
                 case OP_LINESEQ:
@@ -2109,7 +2109,7 @@ Perl_scalar(pTHX_ OP *o)
                 case OP_LEAVE:
                 case OP_LEAVETRY:
                     /* should really restore PL_curcop to its old value, but
-                     * setting it to PL_compiling is better than do nothing */
+                     * setting it to PL_compiling is better than doing nothing */
                     PL_curcop = &PL_compiling;
                 }
             }
@@ -2262,7 +2262,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
                 if ((op_parent(o)->op_type == OP_ONCE) &&
                     (op_parent(o)->op_next == o)
                 ){
-                    /* An already set "state" OP has been encounted
+                    /* An already set "state" OP has been encountered
                      * and there's no point pushing anything to the
                      * stack in void context. */
                     op_parent(o)->op_next = o->op_next;
@@ -2312,8 +2312,8 @@ Perl_scalarvoid(pTHX_ OP *arg)
             else {
                 if (ckWARN(WARN_VOID)) {
                     NV nv;
-                    /* don't warn on optimised away booleans, eg
-                     * use constant Foo, 5; Foo || print; */
+                    /* don't warn on optimised-away booleans, e.g.
+                     * use constant Foo => 5; Foo || print; */
                     if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
                         useless = NULL;
                     /* the constants 0 and 1 are permitted as they are
@@ -2503,7 +2503,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
             if (OpHAS_SIBLING(o))
                 next_kid = o->op_sibparent;
             else
-                o = o->op_sibparent; /*try parent's next sibling */
+                o = o->op_sibparent; /* try parent's next sibling */
         }
         o = next_kid;
     }
@@ -2544,7 +2544,7 @@ Perl_list(pTHX_ OP *o)
         }
 
         if ((o->op_private & OPpTARGET_MY)
-            && (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
+            && (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
         {
             goto do_next;				/* As if inside SASSIGN */
         }
@@ -2563,7 +2563,7 @@ Perl_list(pTHX_ OP *o)
                  && SvIVX(kSVOP_sv) == 1)
                 {
                     op_null(o); /* repeat */
-                    op_null(cUNOPx(cBINOPo->op_first)->op_first);/* pushmark */
+                    op_null(cUNOPx(cBINOPo->op_first)->op_first); /* pushmark */
                     /* const (rhs): */
                     op_free(op_sibling_splice(o, cBINOPo->op_first, 1, NULL));
                 }
@@ -2647,7 +2647,7 @@ Perl_list(pTHX_ OP *o)
             if (OpHAS_SIBLING(o))
                 next_kid = o->op_sibparent;
             else {
-                o = o->op_sibparent; /*try parent's next sibling */
+                o = o->op_sibparent; /* try parent's next sibling */
                 switch (o->op_type) {
                 case OP_SCOPE:
                 case OP_LINESEQ:
@@ -2655,7 +2655,7 @@ Perl_list(pTHX_ OP *o)
                 case OP_LEAVE:
                 case OP_LEAVETRY:
                     /* should really restore PL_curcop to its old value, but
-                     * setting it to PL_compiling is better than do nothing */
+                     * setting it to PL_compiling is better than doing nothing */
                     PL_curcop = &PL_compiling;
                 }
             }
@@ -2715,9 +2715,9 @@ S_modkids(pTHX_ OP *o, I32 type)
 }
 
 
-/* for a helem/hslice/kvslice, if its a fixed hash, croak on invalid
+/* For a helem/hslice/kvslice, if it's a fixed hash, croak on invalid
  * const fields. Also, convert CONST keys to HEK-in-SVs.
- * rop    is the op that retrieves the hash;
+ * rop    is the op that retrieves the hash
  * key_op is the first key
  * real   if false, only check (and possibly croak); don't update op
  */
@@ -2895,7 +2895,7 @@ S_vivifies(const OPCODE type)
  *     \($x,$y) = (...)
  * o would be the list ($x,$y) and type would be OP_AASSIGN.
  * It may descend and apply this to children too, for example in
- * \( $cond ? $x, $y) = (...)
+ * \( $cond ? $x : $y, $z) = (...)
  */
 
 static void
@@ -2998,7 +2998,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 
             /* the code formerly only recursed into the first child of
              * a non ex-list OP_NULL. if we ever encounter such a null op with
-             * more than one child, need to decide whether its ok to process
+             * more than one child, need to decide whether it's ok to process
              * *all* its kids or not */
             assert(o->op_targ == OP_LIST
                     || !(OpHAS_SIBLING(cBINOPo->op_first)));
@@ -3036,7 +3036,7 @@ S_lvref(pTHX_ OP *o, I32 type)
                 o = o->op_sibparent;
                 break;
             }
-            o = o->op_sibparent; /*try parent's next sibling */
+            o = o->op_sibparent; /* try parent's next sibling */
         }
     } /* while */
 }
@@ -3593,14 +3593,14 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                             && S_vivifies(next_kid->op_type))
                        )
                 )  {
-                    /*try parent's next sibling */
+                    /* try parent's next sibling */
                     o = parent;
                     next_kid =  NULL;
                 }
             }
         }
         else
-            o = o->op_sibparent; /*try parent's next sibling */
+            o = o->op_sibparent; /* try parent's next sibling */
 
     }
     o = next_kid;
@@ -3834,7 +3834,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
                     break;
                 continue;
             }
-            o = o->op_sibparent; /*try parent's next sibling */
+            o = o->op_sibparent; /* try parent's next sibling */
         }
     } /* while */
 }
@@ -5630,7 +5630,7 @@ Perl_newNULLLIST(pTHX)
     return newOP(OP_STUB, 0);
 }
 
-/* promote o and any siblings to be a list if its not already; i.e.
+/* Promote o and any siblings to be a list if it's not already; i.e.
  *
  *  o - A - B
  *
@@ -5640,7 +5640,7 @@ Perl_newNULLLIST(pTHX)
  *    |
  *  pushmark - o - A - B
  *
- * If nullit it true, the list op is nulled.
+ * If nullit is true, the list op is nulled.
  */
 
 static OP *
@@ -7743,7 +7743,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
                  * outer CV (the one whose slab holds the pm op). The
                  * inner CV (which holds expr) will be freed later, once
                  * all the entries on the parse stack have been popped on
-                 * return from this function. Which is why its safe to
+                 * return from this function. Which is why it's safe to
                  * call op_free(expr) below.
                  */
                 LEAVE_SCOPE(floor);
@@ -8258,8 +8258,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             newSTATEOP(0, NULL, imop) ));
 
     if (use_version) {
-        /* Enable the
-         * feature bundle that corresponds to the required version. */
+        /* Enable the feature bundle that corresponds to the required version. */
         use_version = sv_2mortal(new_version(use_version));
         S_enable_feature_bundle(aTHX_ use_version);
 
@@ -8537,7 +8536,7 @@ Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 #define ASSIGN_LIST   1
 #define ASSIGN_REF    2
 
-/* given the optree o on the LHS of an assignment, determine whether its:
+/* given the optree o on the LHS of an assignment, determine whether it's:
  *  ASSIGN_SCALAR   $x  = ...
  *  ASSIGN_LIST    ($x) = ...
  *  ASSIGN_REF     \$x  = ...
@@ -9935,7 +9934,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         NewOp(1234,tmp,1,LOOP);
         Copy(loop,tmp,1,LISTOP);
         assert(loop->op_last->op_sibparent == (OP*)loop);
-        OpLASTSIB_set(loop->op_last, (OP*)tmp); /*point back to new parent */
+        OpLASTSIB_set(loop->op_last, (OP*)tmp); /* point back to new parent */
         S_op_destroy(aTHX_ (OP*)loop);
         loop = tmp;
     }
@@ -9947,7 +9946,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     }
     loop->op_targ = padoff;
     if (parens)
-        /* hint to deparser that this:  for my (...) ... */
+        /* hint to deparser that this is:  for my (...) ... */
         loop->op_flags |= OPf_PARENS;
     iter = newOP(OP_ITER, (U32)iterpflags << 8);
     iter->op_targ = how_many_more;
@@ -12673,7 +12672,7 @@ Perl_ck_trycatch(pTHX_ OP *o)
      * terms of its ->op_next pointers.
      *
      * This way, if the tryblock dies, its retop points at the OP_CATCH, but
-     * if it does not then its leavetry skips over that and continues
+     * if it does not, then its leavetry skips over that and continues
      * execution past it.
      */
 
