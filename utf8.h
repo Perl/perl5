@@ -1065,13 +1065,18 @@ this macro matches
 #define UTF_START_BYTE_110000_  UTF_START_BYTE(PERL_UNICODE_MAX + 1, 21)
 #define UTF_FIRST_CONT_BYTE_110000_                                         \
                           UTF_FIRST_CONT_BYTE(PERL_UNICODE_MAX + 1, 21)
+
+/* Internal macro when we don't care about it being well-formed, and know we
+ * have two bytes available to read */
+#define UTF8_IS_SUPER_NO_CHECK_(s)                                          \
+     (       NATIVE_UTF8_TO_I8(s[0]) >= UTF_START_BYTE_110000_              \
+      && (   NATIVE_UTF8_TO_I8(s[0]) >  UTF_START_BYTE_110000_              \
+          || NATIVE_UTF8_TO_I8(s[1]) >= UTF_FIRST_CONT_BYTE_110000_))
+
 #define UTF8_IS_SUPER(s, e)                                                 \
-    (   ((e) - (s)) >= UNISKIP_BY_MSB_(20)                                  \
-     && (       NATIVE_UTF8_TO_I8(s[0]) >= UTF_START_BYTE_110000_           \
-         && (   NATIVE_UTF8_TO_I8(s[0]) >  UTF_START_BYTE_110000_           \
-             || NATIVE_UTF8_TO_I8(s[1]) >= UTF_FIRST_CONT_BYTE_110000_)))   \
+    ((((e) - (s)) >= UNISKIP_BY_MSB_(20) && UTF8_IS_SUPER_NO_CHECK_(s))     \
      ? isUTF8_CHAR(s, e)                                                    \
-     : 0
+     : 0)
 
 /*
 =for apidoc Am|bool|UNICODE_IS_NONCHAR|const UV uv
