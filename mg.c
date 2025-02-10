@@ -2616,7 +2616,15 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
     if (LvTARGLEN(sv)) {
         if (mg->mg_obj) {
             SV * const ahv = LvTARG(sv);
-            SV * const index_sv = SvOK(mg->mg_obj) ? mg->mg_obj : &PL_sv_no;
+            /* A call like $h{$s} with $s not defined would warn
+               here, which could be confusing.  A tied hash could treat
+               an undef index specially, so we need to preserve undef
+               for a tied hash.
+            */
+            SV * const index_sv =
+                SvOK(mg->mg_obj) ||
+                (SvRMAGICAL(ahv) && mg_find((const SV *)ahv, PERL_MAGIC_tied))
+                ? mg->mg_obj : &PL_sv_no;
             HE * const he = hv_fetch_ent(MUTABLE_HV(ahv), index_sv, FALSE, 0);
             if (he)
                 targ = HeVAL(he);
