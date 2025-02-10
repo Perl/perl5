@@ -584,12 +584,12 @@ else {
 EOF
 }
 
+@locales = find_locales( [ qw(LC_CTYPE LC_COLLATE) ] );
+my ($utf8_ref, $non_utf8_ref) = classify_locales_wrt_utf8ness(\@locales);
+my @non_utf8_locales = grep { $_ !~ / \b C \b | POSIX /x } $non_utf8_ref->@*;
+
 SKIP:
 {
-    my @locales = find_locales( [ qw(LC_CTYPE LC_COLLATE) ] );
-    my (undef, $non_utf8_ref) = classify_locales_wrt_utf8ness(\@locales);
-    my @non_utf8_locales = grep { $_ !~ / \b C \b | POSIX /x }
-                                                            $non_utf8_ref->@*;
     skip "didn't find a suitable non-UTF-8 locale", 1 unless
                                                             @non_utf8_locales;
     my $locale = $non_utf8_locales[0];
