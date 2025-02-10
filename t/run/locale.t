@@ -610,6 +610,50 @@ else {
 EOF
 }
 
+SKIP:
+{
+    skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
+    my $locale = $utf8_ref->[0];
+
+    fresh_perl_is(<<"EOF", "ok\n", {}, "Handles above Unicode in a UTF8 locale");
+use locale;
+use POSIX qw(setlocale LC_COLLATE);
+if (setlocale(LC_COLLATE, '$locale')) {
+     my \$x = "a\\x{10FFFF}\\x{110000}a\\x{10FFFF}a\\x{110000}";
+     my \$y = "a\\x{10FFFF}\\x{10FFFF}a\\x{10FFFF}a\\x{10FFFF}";
+     my \$cmp = \$x cmp \$y;
+     print \$cmp >= 0 ? "ok\n" : "not ok\n";
+}
+else {
+     print "ok\n";
+}
+EOF
+}
+
+SKIP:
+{
+    skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
+    my $is64bit = length sprintf("%x", ~0) > 8;
+    skip "32-bit ASCII platforms can't physically have extended UTF-8", 1
+                                                   if $::IS_ASCII  && ! $is64bit;
+    my $locale = $utf8_ref->[0];
+
+    fresh_perl_is(<<"EOF", "ok\n", {}, "cmp() handles Perl extended UTF-8");
+use locale;
+use POSIX qw(setlocale LC_COLLATE);
+if (setlocale(LC_COLLATE, '$locale')) {
+     no warnings qw(non_unicode portable);
+     my \$x = "\\x{10FFFF}";
+     my \$y = "\\x{100000000}";
+     my \$cmp = \$x cmp \$y;
+     print \$cmp <= 0 ? "ok\n" : "not ok\n";
+}
+else {
+     print "ok\n";
+}
+EOF
+}
+
 SKIP: {   # GH #20085
     my @utf8_locales = find_utf8_ctype_locales();
     skip "didn't find a UTF-8 locale", 1 unless @utf8_locales;

@@ -471,6 +471,13 @@ object's stash weren't always NULL or not-NULL, confusing sv_dump()
 (and hence Devel::Peek's Dump()) into crashing on an object with no
 defined fields in some cases.  [github #22959]
 
+=item *
+
+When comparing strings when using a UTF-8 locale, the behavior was
+previously undefined if either or both contained an above-Unicode code
+point, such as 0x110000.  Now all such code points will collate the same
+as the highest Unicode code point, U+10FFFF.
+
 =back
 
 =head1 Known Problems

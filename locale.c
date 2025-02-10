@@ -9967,8 +9967,106 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
             s = sans_highs;
         }
     }
-    /* else   // Here both the locale and string are UTF-8 */
-    /* XXX convert above Unicode to 10FFFF? */
+    else {  /* Here both the locale and string are UTF-8 */
+
+        /* In a UTF-8 locale, we can reasonably expect strxfrm() to properly
+         * handle any legal Unicode code point, including the non-character
+         * code points that are affirmed legal in Corrigendum #9.  Less certain
+         * is its handling of the surrogate characters, and those code points
+         * above the Unicode maximum of U+10FFFF.  It definitely won't know
+         * about Perl's invented UTF-8 extension for very large code points.
+         * Since surrogates and above-Unicode code points were formerly legal
+         * UTF-8, it very well may be that strxfrm() handles them, rather than
+         * going to the likely extra trouble of detecting and excluding them.
+         * This is especially true of surrogates where the code points the
+         * UTF-8 represents are listed in the Unicode Standard as being in a
+         * subset of the General Category "Other".  Indeed, glibc looks like it
+         * returns the identical collation sequence for all "Other" code points
+         * that have the same number of bytes in their representation.  That
+         * is, all such code points collate to the same spot.  glibc does the
+         * same for the above-Unicode code points, but it gets a little weird,
+         * as might be expected, when presented with Perl's invented UTF-8
+         * extension, but still serviceable.  But it is really undefined
+         * behavior, and we therefore should not present strxfrm with such
+         * input.  The code below does that.  And it is just about as easy to
+         * exclude all above-Unicode code points, as that is really undefined
+         * behavior as well, so the code below does that too.  These all are
+         * effectively permanently unassigned by Unicode, so the code below
+         * maps them all to the highest legal permanently unassigned code
+         * point, U+10FFFF.  XXX Could use find_next_masked() instead of
+         * strpbrk() on ASCII platforms to do per-word scanning */
+
+#  ifdef EBCDIC               /* Native; known valid only for IBM-1047, 037 */
+#    define SUPER_START_BYTES "\xEE\xEF\xFA\xFB\xFC\xFD\xFE"
+#  else
+#    define SUPER_START_BYTES                                               \
+                          "\xF4\xF5\xF6\xF7\xF8\xF9\xFA\xFB\xFC\xFD\xFE\xFF"
+#  endif
+
+        const char * const e = s + len;
+
+        /* Scan the input to find something that could be the start byte for an
+         * above-Unicode code point.  If none found, we are done. */
+        char * candidate = s;
+        while ((candidate = strpbrk(candidate, SUPER_START_BYTES))) {
+            char * next_char_start = candidate + UTF8SKIP(candidate);
+            assert(next_char_start <= e);
+
+            /* It may require more than the single start byte to determine if a
+             * sequence is for an above-Unicode code point.  Look to determine
+             * for sure.  If the sequence isn't for an above-Unicode code
+             * point, continue scanning for the next possible one. */
+            if (! UTF8_IS_SUPER_NO_CHECK_(candidate)) {
+                candidate = next_char_start;
+                continue;
+            }
+
+            /* Here, is above-Unicode.  Need to make a copy to translate this
+             * code code point (and any others that follow) to be within the
+             * Unicode range */
+            Newx(sans_highs, len + 1, char); /* May shrink; will never grow */
+            Size_t initial_length = candidate - s;
+
+            /* Copy as-is any initial portion that is Unicode */
+            Copy(s, sans_highs, initial_length, U8);
+
+            /* Replace this first above-Unicode character */
+            char * d = sans_highs + initial_length;
+            Copy(MAX_UNICODE_UTF8, d, STRLENs(MAX_UNICODE_UTF8), U8);
+            d += STRLENs(MAX_UNICODE_UTF8);
+
+            /* Then go through the rest of the string */
+            s = next_char_start;
+            while (s < e) {
+                if (UTF8_IS_INVARIANT(*s)) {
+                    *d++ = *s++;
+                    continue;
+                }
+
+                const Size_t this_len = UTF8SKIP(s);
+                next_char_start = s + this_len;
+                assert(next_char_start <= e);
+
+                if (UTF8_IS_SUPER_NO_CHECK_(s)) {
+                    Copy(MAX_UNICODE_UTF8, d, STRLENs(MAX_UNICODE_UTF8), U8);
+                    d += STRLENs(MAX_UNICODE_UTF8);
+                }
+                else {
+                    Copy(s, d, this_len, U8);
+                    d += this_len;
+                }
+
+                s = next_char_start;
+            }
+
+            len = d - sans_highs;
+            *d = '\0';
+
+            /* The rest of the routine will look at this modified copy */
+            s = sans_highs;
+            break;
+        }
+    }
 
     length_in_chars = (utf8)
                       ? utf8_length((U8 *) s, (U8 *) s + len)
