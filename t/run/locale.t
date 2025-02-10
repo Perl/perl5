@@ -594,7 +594,7 @@ SKIP:
                                                             @non_utf8_locales;
     my $locale = $non_utf8_locales[0];
 
-    fresh_perl_is(<<"EOF", "ok\n", {}, "Handles above Latin1 and NUL in non-UTF8 locale");
+    fresh_perl_is(<<"EOF", "ok\n", {}, "cmp() handles above Latin1 and NUL in non-UTF8 locale");
 use locale;
 use POSIX qw(setlocale LC_COLLATE);
 if (setlocale(LC_COLLATE, '$locale')) {
