@@ -7,7 +7,7 @@ require Tie::Hash;
 require XSLoader;
 
 our @ISA = qw(Tie::Hash);
-our $VERSION = "1.19";
+our $VERSION = "1.20";
 
 XSLoader::load();
 
@@ -24,12 +24,15 @@ ODBM_File - Tied access to odbm files
  use Fcntl;   # For O_RDWR, O_CREAT, etc.
  use ODBM_File;
 
-  # Now read and change the hash
-  $h{newkey} = newvalue;
-  print $h{oldkey}; 
-  ...
+ tie(%h, 'ODBM_File', 'filename.dbmx', O_RDWR|O_CREAT, 0640)
+   or die "Couldn't tie ODBM file 'filename.dbmx': $!; aborting";
 
-  untie %h;
+ # Now read and change the hash
+ $h{newkey} = newvalue;
+ print $h{oldkey};
+ ...
+
+ untie %h;
 
 =head1 DESCRIPTION
 
