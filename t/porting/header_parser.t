@@ -40,6 +40,7 @@ $hp->parse_text(<<~'EOF');
       line */
     #define C /* this is
                  a hidden line continuation */ D
+    # /* null directive */
     EOF
 my $normal= $hp->lines_as_str();
 my $lines= $hp->lines();
@@ -211,6 +212,18 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "start_line_num" => 11,
             "sub_type" => "#define",
             "type" => "content"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [],
+            "flat" => "#",
+            "level" => 0,
+            "line" => "# /* null directive */\n",
+            "n_lines" => 1,
+            "raw" => "# /* null directive */\n",
+            "source" => "(buffer)",
+            "start_line_num" => 13,
+            "sub_type" => "text",
+            "type" => "content"
           }, 'HeaderLine' )
         ];
         DUMP_EOF
@@ -228,6 +241,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
       line */
     #define C /* this is
                  a hidden line continuation */ D
+    # /* null directive */
     EOF
 
 {

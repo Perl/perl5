@@ -659,6 +659,13 @@ sub parse_fh {
                 $type= "content";
                 $sub_type= "#error";
             }
+            elsif ($flat =~ /#\s*\z/) {
+                # deal with the null directive
+                # see: https://en.cppreference.com/w/c/preprocessor
+                # and: https://stackoverflow.com/questions/35207515
+                $type= "content";
+                $sub_type= "text";
+            }
             else {
                 confess "Do not know what to do with $line";
             }
