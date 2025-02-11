@@ -4699,9 +4699,6 @@ Perl_seed(pTHX)
 #define   SEED_C4	73819
 #define   SEED_C5	26107
 
-#ifndef PERL_NO_DEV_RANDOM
-    int fd;
-#endif
     U32 u;
 
 /* This test is an escape hatch, this symbol isn't set by Configure. */
@@ -4713,7 +4710,7 @@ Perl_seed(pTHX)
     * is enough real entropy to fill the seed. */
 #define PERL_RANDOM_DEVICE "/dev/urandom"
 #endif
-    fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
+    int fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {
         if (PerlLIO_read(fd, (void*)&u, sizeof u) != sizeof u)
             u = 0;
