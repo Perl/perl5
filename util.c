@@ -1718,19 +1718,19 @@ Perl_invoke_exception_hook(pTHX_ SV *ex, bool warn)
     HV *stash;
     GV *gv;
     CV *cv;
-    SV **const hook = warn ? &PL_warnhook : &PL_diehook;
-    SV * const oldhook = *hook;
+    SV *const oldhook = warn ? PL_warnhook : PL_diehook;
+    bool *const in_hook = warn ? &PL_in_diehook : &PL_in_warnhook;
 
-    if (!oldhook || oldhook == PERL_WARNHOOK_FATAL)
+    if (!oldhook || oldhook == PERL_WARNHOOK_FATAL || *in_hook)
         return FALSE;
 
     ENTER;
     /* sv_2cv might call Perl_croak() or Perl_warner() */
-    SAVESPTR(*hook);
-    *hook = NULL;
+    SAVEBOOL(*in_hook);
+    *in_hook = TRUE;
     cv = sv_2cv(oldhook, &stash, &gv, 0);
     LEAVE;
-    if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
+    if (cv && (CvROOT(cv) || CvXSUB(cv))) {
         dSP;
         SV *exarg;
 
@@ -1738,8 +1738,8 @@ Perl_invoke_exception_hook(pTHX_ SV *ex, bool warn)
         save_re_context();
 
         /* call_sv(cv) might call Perl_croak() or Perl_warner() */
-        SAVESPTR(*hook);
-        *hook = NULL;
+        SAVEBOOL(*in_hook);
+        *in_hook = TRUE;
 
         exarg = newSVsv(ex);
         SvREADONLY_on(exarg);

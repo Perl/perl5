@@ -1096,6 +1096,9 @@ PERLVARA(I, mem_log, PERL_MEM_LOG_ARYLEN,  char)
  * have to worry about SV refcounts during scope enter/exit. */
 PERLVAR(I, prevailing_version, U16)
 
+PERLVARI(I, in_diehook, bool, FALSE)
+PERLVARI(I, in_warnhook, bool, FALSE)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

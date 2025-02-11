@@ -442,6 +442,16 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+The C<$SIG{__DIE__}> and C<$SIG{__WARN__}> handlers can no longer be invoked
+recursively, either deliberately or by accident, as described in
+L<perlvar/%SIG>. That is, when an exception (or warning) triggers a call to a
+C<$SIG{__DIE__}> (or C<$SIG{__WARN__}>) handler, further exceptions (or
+warnings) are processed directly, ignoring C<%SIG> until the original
+C<$SIG{__DIE__}> (or C<$SIG{__WARN__}>) handler call returns.
+[GH #14527], [GH #22984], [GH #22987]
+
+=item *
+
 The C<ObjectFIELDS()> for an object and C<xhv_class_fields> for the
 object's stash weren't always NULL or not-NULL, confusing sv_dump()
 (and hence Devel::Peek's Dump()) into crashing on an object with no
