@@ -40,6 +40,16 @@ $hp->parse_text(<<~'EOF');
       line */
     #define C /* this is
                  a hidden line continuation */ D
+    #de\
+    fine E\
+    F 42 /\
+    * a different kind of
+    hidden line continuation *\
+    /
+    #\
+    if defined E\
+    F
+    #endif
     # /* null directive */
     EOF
 my $normal= $hp->lines_as_str();
@@ -215,13 +225,58 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
           }, 'HeaderLine' ),
           bless( {
             "cond" => [],
+            "flat" => "#define EF 42",
+            "level" => 0,
+            "line" => "#de\\\nfine E\\\nF 42 /\\\n* a different kind of\nhidden line continuation *\\\n/\n",
+            "n_lines" => 6,
+            "raw" => "#de\\\nfine E\\\nF 42 /\\\n* a different kind of\nhidden line continuation *\\\n/\n",
+            "source" => "(buffer)",
+            "start_line_num" => 13,
+            "sub_type" => "#define",
+            "type" => "content"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [
+              [
+                "defined(EF)"
+              ]
+            ],
+            "flat" => "#if defined(EF)",
+            "level" => 0,
+            "line" => "#if defined(EF)\n",
+            "n_lines" => 3,
+            "raw" => "#\\\nif defined E\\\nF\n",
+            "source" => "(buffer)",
+            "start_line_num" => 19,
+            "sub_type" => "#if",
+            "type" => "cond"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [
+              [
+                "defined(EF)"
+              ]
+            ],
+            "flat" => "#endif",
+            "inner_lines" => 3,
+            "level" => 0,
+            "line" => "#endif\n",
+            "n_lines" => 1,
+            "raw" => "#endif\n",
+            "source" => "(buffer)",
+            "start_line_num" => 22,
+            "sub_type" => "#endif",
+            "type" => "cond"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [],
             "flat" => "#",
             "level" => 0,
             "line" => "# /* null directive */\n",
             "n_lines" => 1,
             "raw" => "# /* null directive */\n",
             "source" => "(buffer)",
-            "start_line_num" => 13,
+            "start_line_num" => 23,
             "sub_type" => "text",
             "type" => "content"
           }, 'HeaderLine' )
@@ -241,6 +296,14 @@ is($normal,<<~'EOF',"Normalized text as expected");
       line */
     #define C /* this is
                  a hidden line continuation */ D
+    #de\
+    fine E\
+    F 42 /\
+    * a different kind of
+    hidden line continuation *\
+    /
+    #if defined(EF)
+    #endif
     # /* null directive */
     EOF
 

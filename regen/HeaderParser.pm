@@ -361,8 +361,8 @@ sub _precedence {
 sub parse_expr {
     my ($self, $expr)= @_;
     if (defined $expr) {
-        $expr =~ s/\s*\\\n\s*/ /g;
-        $expr =~ s/defined\s+(\w+)/defined($1)/g;
+        $expr =~ s/\\\n//g;
+        $expr =~ s/\bdefined\s+(\w+)/defined($1)/g;
         $self->_tokenize_expr($expr);
     }
     my $ret= $self->_parse_expr();
@@ -558,20 +558,20 @@ sub parse_fh {
     while (defined(my $line= readline($fh))) {
         my $start_line_num= $line_num++;
         $self->{orig_content} .= $line;
-        while ($line =~ /\\\n\z/ or $line =~ m</\*(?:(?!\*/).)*\s*\z>s) {
+        while ($line =~ /\\\n\z/ or $line =~ m</(?:\\\n)*\*(?:(?!\*(?:\\\n)*/).)*\s*\z>s) {
             defined(my $read_line= readline($fh))
                 or last;
             $self->{orig_content} .= $read_line;
             $line_num++;
             $line .= $read_line;
         }
-        while ($line =~ m!/\*(.*?)(\*/|\z)!gs) {
+        while ($line =~ m!/(?:\\\n)*\*(.*?)(\*(?:\\\n)*/|\z)!gs) {
             my ($inner, $tail)= ($1, $2);
-            if ($tail ne "*/") {
+            if ($tail eq "") {
                 confess
                     "Unterminated comment starting at line $start_line_num\n";
             }
-            elsif ($inner =~ m!/\*!) {
+            elsif ($inner =~ m!/(?:\\\n)*\*!) {
                 confess
                     "Nested/broken comment starting at line $start_line_num\n";
             }
@@ -583,7 +583,7 @@ sub parse_fh {
         my $level= @cond;
         my $do_pop= 0;
         my $flat= $line;
-        $flat =~ s/\s*\\\n\s*/ /g;
+        $flat =~ s/\\\n//g;
         $flat =~ s!/\*.*?\*/! !gs;
         $flat =~ s/\s+/ /g;
         $flat =~ s/\s+\z//;
@@ -1592,8 +1592,9 @@ C preprocessor files are a bit tricky to parse properly, especially with a
 =item Line Continuations
 
 Any line ending in "\\\n" (that is backslash newline) is considered to be part
-of a longer string which continues on the next line. Processors should replace
-the "\\\n" typically with a space when converting to a "real" line.
+of a longer string which continues on the next line. Processors should delete
+the "\\\n" early on when converting to a "real" line, before doing any further
+parsing.
 
 =item Comments Acting As A Line Continuation
 
