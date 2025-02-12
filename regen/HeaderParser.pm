@@ -1611,11 +1611,11 @@ is the same as
 This type of comment usage is often overlooked by people writing header file
 parsers for the first time.
 
-=item Indented pre processor directives.
+=item Indented preprocessor directives
 
 It is easy to forget that there may be multiple spaces between the "#"
 character and the directive. It also easy to forget that there may be spaces
-in *front* of the "#" character. Both of these cases are often overlooked.
+in I<front> of the "#" character. Both of these cases are often overlooked.
 
 =back
 
@@ -1839,7 +1839,7 @@ style and form. For example:
     # endif /* !defined(BAR) */
     #endif /* defined(FOO) */
 
-HeaderParser uses two space tab stops for indenting C pre-processor
+HeaderParser uses two space tab stops for indenting C preprocessor
 directives. It puts the spaces between the "#" and the directive. The "#" is
 considered "part" of the indent, even though the space comes after it. This
 means the first indent level "looks" like one space, and following indents
