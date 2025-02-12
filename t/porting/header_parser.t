@@ -41,6 +41,10 @@ $hp->parse_text(<<~'EOF');
     #define C /* this is
                  a hidden line continuation */ D
     # /* null directive */
+    #error #undef
+    #error #pragma
+    #error #include
+    #error #define
     EOF
 my $normal= $hp->lines_as_str();
 my $lines= $hp->lines();
@@ -224,6 +228,54 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "start_line_num" => 13,
             "sub_type" => "text",
             "type" => "content"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [],
+            "flat" => "#error #undef",
+            "level" => 0,
+            "line" => "#error #undef\n",
+            "n_lines" => 1,
+            "raw" => "#error #undef\n",
+            "source" => "(buffer)",
+            "start_line_num" => 14,
+            "sub_type" => "#error",
+            "type" => "content"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [],
+            "flat" => "#error #pragma",
+            "level" => 0,
+            "line" => "#error #pragma\n",
+            "n_lines" => 1,
+            "raw" => "#error #pragma\n",
+            "source" => "(buffer)",
+            "start_line_num" => 15,
+            "sub_type" => "#error",
+            "type" => "content"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [],
+            "flat" => "#error #include",
+            "level" => 0,
+            "line" => "#error #include\n",
+            "n_lines" => 1,
+            "raw" => "#error #include\n",
+            "source" => "(buffer)",
+            "start_line_num" => 16,
+            "sub_type" => "#error",
+            "type" => "content"
+          }, 'HeaderLine' ),
+          bless( {
+            "cond" => [],
+            "flat" => "#error #define",
+            "level" => 0,
+            "line" => "#error #define\n",
+            "n_lines" => 1,
+            "raw" => "#error #define\n",
+            "source" => "(buffer)",
+            "start_line_num" => 17,
+            "sub_type" => "#error",
+            "type" => "content"
           }, 'HeaderLine' )
         ];
         DUMP_EOF
@@ -242,6 +294,10 @@ is($normal,<<~'EOF',"Normalized text as expected");
     #define C /* this is
                  a hidden line continuation */ D
     # /* null directive */
+    #error #undef
+    #error #pragma
+    #error #include
+    #error #define
     EOF
 
 {

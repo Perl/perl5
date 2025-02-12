@@ -601,7 +601,7 @@ sub parse_fh {
                     s/^(#(?:el)?if)(n?)def\s+(\w+)/$if ${not}defined($sym)/;
             }
             my $cond;    # used in various expressions below
-            if ($flat =~ /^#endif/) {
+            if ($flat =~ /^#endif\b/) {
                 if (!@cond) {
                     confess "Not expecting $flat";
                 }
@@ -639,27 +639,27 @@ sub parse_fh {
                 $type= "cond";
                 $sub_type= "#else";
             }
-            elsif ($flat =~ /#undef/) {
+            elsif ($flat =~ /^#undef\b/) {
                 $type= "content";
                 $sub_type= "#undef";
             }
-            elsif ($flat =~ /#pragma\b/) {
+            elsif ($flat =~ /^#pragma\b/) {
                 $type= "content";
                 $sub_type= "#pragma";
             }
-            elsif ($flat =~ /#include\b/) {
+            elsif ($flat =~ /^#include\b/) {
                 $type= "content";
                 $sub_type= "#include";
             }
-            elsif ($flat =~ /#define\b/) {
+            elsif ($flat =~ /^#define\b/) {
                 $type= "content";
                 $sub_type= "#define";
             }
-            elsif ($flat =~ /#error\b/) {
+            elsif ($flat =~ /^#error\b/) {
                 $type= "content";
                 $sub_type= "#error";
             }
-            elsif ($flat =~ /#\s*\z/) {
+            elsif ($flat =~ /^#\s*\z/) {
                 # deal with the null directive
                 # see: https://en.cppreference.com/w/c/preprocessor
                 # and: https://stackoverflow.com/questions/35207515
