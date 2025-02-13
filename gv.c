@@ -1621,7 +1621,8 @@ HV*
 Perl_gv_stashpv(pTHX_ const char *name, I32 create)
 {
     PERL_ARGS_ASSERT_GV_STASHPV;
-    return gv_stashpvn(name, strlen(name), create);
+    return Perl_gv_stashsvpvn_cached_p(aTHX_  create | GVCf_ISPV | GVCf_HASVA_LEN,
+                                              (void*)name, strlen(name));
 }
 
 /*
@@ -1697,14 +1698,72 @@ reasons.
 HV*
 Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
 {
+    PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED;
+    if(namesv)
+        return Perl_gv_stashsvpvn_cached_p(aTHX_ flags | GVCf_ISSV, (void*)namesv);
+    else
+        return Perl_gv_stashsvpvn_cached_p(aTHX_ flags | GVCf_ISPV | GVCf_HASVA_LEN,
+            (void*)name, namelen);
+}
+
+/* Not public API, "..." takes exactly 1 optional arg, "U32 namelen" for the
+   public facing _pvn() variant. All other varieties, pv() pvs() sv() hek()
+   do not use the optional 3rd arg.*/
+HV*
+Perl_gv_stashsvpvn_cached_p(pTHX_ I32 flags, void * namevp, ...)
+{
     HV* stash;
     HE* he;
+    SV* namesv;
+    const char* name;
+    va_list args;
+    U32 namelen;
+    U32 hash;
 
-    PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED;
+    PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED_P;
+    va_start(args, namevp);
+    if(GV_CACHE_ISRC(flags)) {
+        if(GV_CACHE_ISHEK(flags)) {
+            HEK* hek = (HEK*)namevp;
+            I32 hek_len =  HEK_LEN(hek);
+            if(hek_len == HEf_SVKEY) {
+                namesv = *(SV**)HEK_KEY(hek);
+                namevp = (void*)namesv;
+                goto have_sv;
+            }
+            namesv = NULL;
+            name = HEK_KEY(hek);
+            namelen = hek_len;
+            flags = (flags & ~SVf_UTF8) | (HEK_UTF8(hek) ? SVf_UTF8 : 0);
+/* hv_fetchhek() isn't used here. Its a macro and doesn't currently
+   do the optimisation you think it is supposed to do. Using macro
+   hv_fetchhek() in this fn, would add needless indirection through
+   wrapper hv_common_key_len() instead of centralized single call sites
+   to hv_common(). */
+            hash = HEK_HASH(hek);
+        }
+        else {
+            have_sv:
+            assert(GV_CACHE_ISSV(flags));
+            namesv = (SV*)namevp;
+            name = NULL;
+            namelen = 0;
+            flags = (flags & ~SVf_UTF8) | SvUTF8(namesv);
+            hash = 0;
+        }
+    }
+    else {
+        assert(GV_CACHE_ISPV(flags));
+        namesv = NULL;
+        name = (const char *)namevp;
+        namelen = GV_CACHE_HASVA_LEN(flags)
+                  ? va_arg(args, U32) : GV_CACHE_GET_INL_LEN(flags);
+        hash = 0;
+    }
 
     he = (HE *)hv_common(
         PL_stashcache, namesv, name, namelen,
-        (flags & SVf_UTF8) ? HVhek_UTF8 : 0, 0, NULL, 0
+        (flags & SVf_UTF8) ? HVhek_UTF8 : 0, 0, NULL, hash
     );
 
     if (he) {
@@ -1713,28 +1772,39 @@ Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 f
         assert(SvIOK(sv));
         hv = INT2PTR(HV*, SvIVX(sv));
         assert(SvTYPE(hv) == SVt_PVHV);
-        return hv;
+        stash = hv;
+        goto end;
     }
-    else if (flags & GV_CACHE_ONLY) return NULL;
+    else if (flags & GV_CACHE_ONLY) {
+      stash = NULL;
+      goto end;
+    }
 
     if (namesv) {
         if (SvOK(namesv)) { /* prevent double uninit warning */
             STRLEN len;
             name = SvPV_const(namesv, len);
             namelen = len;
-            flags |= SvUTF8(namesv);
+            flags = (flags & ~SVf_UTF8) | SvUTF8(namesv);
         } else {
             name = ""; namelen = 0;
+            namesv = NULL;    flags = flags & ~SVf_UTF8;
         }
-    }
+    } /* Turn off bits specific to our call conv so GV_NOADD_MASK works.
+         Some of our call conv bits are shared with other features from
+         other front end gv_*() funcs. */
+    flags &= ~GV_CACHE_VA_ARGS_MASK;
     stash = gv_stashpvn_internal(name, namelen, flags);
 
     if (stash && namelen) {
         SV* const ref = newSViv(PTR2IV(stash));
-        (void)hv_store(PL_stashcache, name,
-            (flags & SVf_UTF8) ? -(I32)namelen : (I32)namelen, ref, 0);
+        hv_common( PL_stashcache, namesv, name, namelen,
+            (flags & SVf_UTF8) ? HVhek_UTF8 : 0, HV_FETCH_ISSTORE, ref, hash
+        );
     }
 
+    end:
+    va_end(args);
     return stash;
 }
 
@@ -1742,15 +1812,34 @@ HV*
 Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 {
     PERL_ARGS_ASSERT_GV_STASHPVN;
-    return gv_stashsvpvn_cached(NULL, name, namelen, flags);
+    return Perl_gv_stashsvpvn_cached_p(aTHX_  flags | GVCf_ISPV | GVCf_HASVA_LEN,
+                                              (void*)name, namelen);
 }
+
+HV*
+Perl_gv_stashpvs_p(pTHX_ I32 flags, const char *name)
+{
+    PERL_ARGS_ASSERT_GV_STASHPVS_P;
+    return Perl_gv_stashsvpvn_cached_p(aTHX_ flags | GVCf_ISPV, (void*)name);
+}
+
 
 HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
 {
     PERL_ARGS_ASSERT_GV_STASHSV;
-    return gv_stashsvpvn_cached(sv, NULL, 0, flags);
+    return Perl_gv_stashsvpvn_cached_p(aTHX_ flags | GVCf_ISSV, (void*)sv);
 }
+
+HV*
+Perl_gv_stashhek(pTHX_ HEK *hek, I32 flags)
+{
+    PERL_ARGS_ASSERT_GV_STASHHEK;
+    return Perl_gv_stashsvpvn_cached_p(aTHX_
+                flags | GVCf_ISHEK,
+                (void*)hek);
+}
+
 GV *
 Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 flags, const svtype sv_type) {
     PERL_ARGS_ASSERT_GV_FETCHPV;

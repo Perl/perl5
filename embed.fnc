@@ -1468,11 +1468,15 @@ ep	|GV *	|gv_override	|NN const char * const name		\
 				|const STRLEN len
 p	|void	|gv_setref	|NN SV * const dsv			\
 				|NN SV * const ssv
+Ap	|HV *	|gv_stashhek	|NN HEK *hek				\
+				|I32 flags
 Adp	|HV *	|gv_stashpv	|NN const char *name			\
 				|I32 flags
 Adp	|HV *	|gv_stashpvn	|NN const char *name			\
 				|U32 namelen				\
 				|I32 flags
+Xp	|HV *	|gv_stashpvs_p	|I32 flags				\
+				|NN const char *name
 Adp	|HV *	|gv_stashsv	|NN SV *sv				\
 				|I32 flags
 Xdpx	|void	|gv_try_downgrade					\
@@ -4510,6 +4514,10 @@ EGdp	|HV *	|gv_stashsvpvn_cached					\
 				|const char *name			\
 				|U32 namelen				\
 				|I32 flags
+EFXp	|HV *	|gv_stashsvpvn_cached_p 				\
+				|I32 flags				\
+				|NN void *namevp			\
+				|...
 #endif
 #if defined(PERL_IN_HV_C)
 Sx	|void	|clear_placeholders					\
