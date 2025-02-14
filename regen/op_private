@@ -804,7 +804,7 @@ addbits('coreargs',
    #2 reserved for OPpDONT_INIT_GV in rv2gv
    #4 reserved for OPpALLOW_FAKE   in rv2gv
     6 => qw(OPpCOREARGS_SCALARMOD $MOD  ), # \$ rather than \[$@%*]
-    7 => qw(OPpCOREARGS_PUSHMARK  MARK  ), # Call pp_pushmark
+    7 => qw(OPpCOREARGS_PUSHMARK  MARK  ), # Call PUSHMARK
 );
 
 

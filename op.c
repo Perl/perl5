@@ -5182,7 +5182,7 @@ S_gen_constant_list(pTHX_ OP *o)
 #ifdef PERL_USE_HWM
         PL_curstackinfo->si_stack_hwm = 0; /* stop valgrind complaining */
 #endif
-        Perl_pp_pushmark(aTHX);
+        PUSHMARK(PL_stack_sp);
         CALLRUNOPS(aTHX);
         PL_op = curop;
         assert (!(curop->op_flags & OPf_SPECIAL));
