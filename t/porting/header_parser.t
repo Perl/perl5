@@ -41,7 +41,7 @@ EOF_BLURB
 {
     my @warn;
     local $SIG{__WARN__}= sub { push @warn, $_[0]; warn $_[0] };
-    my $hp= HeaderParser->new();
+    my $hp= HeaderParser->new(indent_defines=>1);
     $hp->parse_text(<<~'EOF');
         #ifdef A
         #ifdef B
@@ -566,7 +566,7 @@ EOF_BLURB
             ],
             "flat" => "#define MATCH 1",
             "level" => 1,
-            "line" => "            #define MATCH 1\n",
+            "line" => "# define MATCH 1\n",
             "n_lines" => 1,
             "raw" => "            #define MATCH 1\n",
             "source" => "(buffer)",
@@ -598,7 +598,7 @@ EOF_BLURB
             ],
             "flat" => "#define MATCH 0",
             "level" => 1,
-            "line" => "    #define MATCH 0\n",
+            "line" => "# define MATCH 0\n",
             "n_lines" => 1,
             "raw" => "    #define MATCH 0\n",
             "source" => "(buffer)",
@@ -663,9 +663,9 @@ EOF_BLURB
         #if CH == '\"' || CH == '\''   || CH == '\\' || CH == '\102' || CH == '\a' || \
             CH == '\b' || CH == '\f'   || CH == '\n' || CH == '\r'   || CH == '\t' || \
             CH == '\v' || CH == '\x43' || CH == '\?'
-                    #define MATCH 1
+        # define MATCH 1
         #else
-            #define MATCH 0
+        # define MATCH 0
         #endif
         EOF_NORMAL
     {

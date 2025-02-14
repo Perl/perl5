@@ -195,6 +195,8 @@ sub new {
     $args{add_commented_expr_after} //= 10;
     $args{max_width} //= 78;
     $args{min_break_width} //= 70;
+    $args{indent_define} //= 1;
+    $args{hug_define} //= 0;
     return bless \%args,;
 }
 
@@ -1070,11 +1072,21 @@ sub lines_as_str {
     #warn $self->dd($lines);
     foreach my $line_data (@$lines) {
         my $line= $line_data->{line};
-        if ($line_data->{type} ne "content" or $line_data->{sub_type} ne "text")
+        my $is_define = $line_data->is_define();
+        if (
+               $line_data->{type} ne "content"
+            or $line_data->{sub_type} ne "text"
+            or $is_define
+        )
         {
             my $level= $line_data->{level};
             my $ind= $self->indent_chars($level);
-            $line =~ s/^#(\s*)/#$ind/;
+
+            if ($self->{indent_define} and $self->{hug_define} and $is_define) {
+                $line =~ s/^\s*#(\s*)/$ind#/;
+            } elsif (!$is_define or $self->{indent_define}) {
+                $line =~ s/^\s*#(\s*)/#$ind/;
+            }
         }
         if ($line_data->{type} eq "cond") {
             my $add_commented_expr_after= $self->{add_commented_expr_after};
@@ -1637,6 +1649,51 @@ parsing the content of our header files in a consistent manner. A secondary
 purpose it to make various tasks we want to do easier, such as normalizing
 content or preprocessor expressions, or just extracting the real "content" of
 the file properly.
+
+=head2 new
+
+Construct a new HeaderParser. Options are as follows
+
+=over 4
+
+=item add_commented_expr_after
+
+Specifies the number of lines between conditional clause lines that will trigger
+a comment being generated on the close of the clause that shows what expession
+that close is for.
+
+=item max_width
+
+Maximum number of columns expected per line.
+
+=item min_break_width
+
+If a conditional clause is longer than this width HeaderParser will try to
+rearrange its terms so that each line is not longer than this.
+
+=item indent_define
+
+Should #define clauses be indented when contained a clause expression that is
+indented.
+
+=item hug_define
+
+Should the # hug the define or not? When not set (the default) an indented #define
+looks like this:
+
+    #if whatever
+    # define X
+    #endif
+
+When set it looks like this:
+
+    #if whatever
+     #define X
+    #endif
+
+That is the # is indented, and the define comes immediately afterwards.
+
+=back
 
 =head2 parse_fh
 
