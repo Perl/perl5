@@ -4647,16 +4647,14 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 #  include <starlet.h>
 #endif
 
-/* hash a pointer and return a U32
- *
- * this code was derived from Sereal, which was derived from autobox.
- */
+/* hash a pointer and return a U32 */
 
 PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
+/* 64 bit input */
 #if PTRSIZE == 8
     /*
      * This is one of Thomas Wang's hash functions for 64-bit integers from:
-     * http://www.concentric.net/~Ttwang/tech/inthash.htm
+     * https://gist.github.com/scottchiefbaker/9e21877a0c6041fbf54bd583cd1c52b4
      */
     u = (~u) + (u << 18);
     u = u ^ (u >> 31);
@@ -4664,6 +4662,7 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
     u = u ^ (u >> 11);
     u = u + (u << 6);
     u = u ^ (u >> 22);
+/* 32 bit input */
 #else
     /*
      * This is one of Bob Jenkins' hash functions for 32-bit integers
