@@ -107,6 +107,12 @@ BEGIN {
     $commutative{$_}++ for qw( || && + *);
 
     $binop_pat= $make_pat->(keys %precedence);
+
+    # Note below that we don't use the 'multichar' capture currently
+    # but, in a future patch we will add support for warning about
+    # non-portable constructs like multichar constants, so I have added
+    # the tokenizer support for it here so it is ready later.
+    my $sq_const_pat = qr/[^\\']|\\(?:['"\\?abfnrtv]|[0-7]{1,3}|x[0-9A-Fa-f]+)/;
     $tokenize_pat= qr/
      ^(?:
         (?<comment> \/\*.*?\*\/ )
@@ -115,7 +121,12 @@ BEGIN {
             (?<literal>
                 (?<define> defined\(\w+\) )
             |   (?<func>   \w+\s*\(\s*\w+(?:\s*,\s*\w+)*\s*\) )
-            |   (?<const>  (?:0x[a-fA-F0-9]+|\d+[LU]*|'.') )
+            |   (?<const>  (?:0x[a-fA-F0-9]+
+                           |-?\d+[LUlu]*
+                           |'$sq_const_pat
+                             (?<multichar>$sq_const_pat+)?'
+                           )
+                )
             |   (?<sym>    \w+ )
             )
         |   (?<op> $binop_pat | $unop_pat )
@@ -362,6 +373,7 @@ sub parse_expr {
     my ($self, $expr)= @_;
     if (defined $expr) {
         $expr =~ s/\\\n//g;
+        $expr =~ s/\bdefined\s+\(/defined(/g;
         $expr =~ s/\bdefined\s+(\w+)/defined($1)/g;
         $self->_tokenize_expr($expr);
     }
@@ -1072,7 +1084,7 @@ sub lines_as_str {
                 my $cond_txt= $self->tidy_cond($joined);
                 $cond_txt= "if $cond_txt" if $line_data->{sub_type} eq "#else";
                 $line =~ s!\s*\z! /* $cond_txt */\n!
-                    if $line_data->{inner_lines} >= $add_commented_expr_after;
+                    if ($line_data->{inner_lines}||0) >= $add_commented_expr_after;
             }
             elsif ($line_data->{sub_type} eq "#elif") {
                 my $last_frame= $line_data->{cond}[-1];
@@ -1080,7 +1092,7 @@ sub lines_as_str {
                     map { "($_)" } @$last_frame[ 0 .. ($#$last_frame - 1) ];
                 my $cond_txt= $self->tidy_cond($joined);
                 $line =~ s!\s*\z! /* && $cond_txt */\n!
-                    if $line_data->{inner_lines} >= $add_commented_expr_after;
+                    if ($line_data->{inner_lines}||0) >= $add_commented_expr_after;
             }
         }
         $line =~ s/\s*\z/\n/;
