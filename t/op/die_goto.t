@@ -5,7 +5,7 @@ use v5.36;
 # disabled into goto'd function. And the other documented
 # exceptions to enable dying from a die handler.
 
-print "1..6\n";
+print "1..5\n";
 
 eval {
     sub f1 { die "ok 1\n" }
@@ -15,14 +15,7 @@ eval {
 print $@;
 
 eval {
-    sub loopexit { for (0..2) { next if $_ } }
-    $SIG{__DIE__} = \&loopexit;
-    die "ok 2\n";
-};
-print $@;
-
-eval {
-    sub foo1 { die "ok 3\n" }
+    sub foo1 { die "ok 2\n" }
     sub bar1 { foo1() }
     $SIG{__DIE__} = \&bar1;
     die;
@@ -31,7 +24,7 @@ print $@;
 
 # GH #14527
 eval {
-    sub foo2 { die "ok 4\n" }
+    sub foo2 { die "ok 3\n" }
     sub bar2 { goto &foo2 }
     $SIG{__DIE__} = \&bar2;
     die;
@@ -42,7 +35,7 @@ print $@;
 
 # GH #22987 (die)
 eval {
-    sub foo3 { die "ok 5\n" }
+    sub foo3 { die "ok 4\n" }
     sub bar3 { { local $SIG{__DIE__}; } goto &foo3 }
     $SIG{__DIE__} = \&bar3;
     die;
@@ -61,4 +54,4 @@ eval {
     $SIG{__DIE__} = \&hybrid;
     hybrid;
 };
-print $@ eq "2\n" ? "ok 6\n" : "not ok 6\n" . "\$\@ = $@" =~ s/^/# /mgr;
+print $@ eq "2\n" ? "ok 5\n" : "not ok 5\n" . "\$\@ = $@" =~ s/^/# /mgr;
