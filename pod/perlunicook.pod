@@ -419,7 +419,7 @@ properties for use in regexes.
  &utf8::IsTitle
  END_OF_SET
 
- if (/\p{Is_GraecoRoman_Title}/ { ... }
+ if (/\p{Is_GraecoRoman_Title}/) { ... }
 
 =head2 ℞ 27: Unicode normalization
 
@@ -519,7 +519,7 @@ we print out both forms:
      my $gcs = Unicode::GCString->new($str);
      my $cols = $gcs->columns;
      my $pad = " " x (10 - $cols);
-     say str, $pad, " |";
+     say $str, $pad, " |";
  }
 
 generates this to show that it pads correctly no matter
