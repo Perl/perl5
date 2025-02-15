@@ -110,6 +110,20 @@ when coming from an SVt_IV, is now more efficient.
 
 =item *
 
+Subroutines in packages no longer need to be stored in typeglobs:
+declaring a subroutine will now put a simple sub reference directly in the
+stash if possible, saving memory.  The typeglob still notionally exists,
+so accessing it will cause the stash entry to be upgraded to a typeglob
+(i.e. this is just an internal implementation detail).
+This optimization does not currently apply to XSUBs or exported
+subroutines, and method calls will undo it, since they cache things in
+typeglobs.
+
+(This optimization was originally announced in L<perl5220delta>, but due to a
+bug it only worked for subroutines in package C<main>, not in modules.)
+
+=item *
+
 XXX
 
 =back
