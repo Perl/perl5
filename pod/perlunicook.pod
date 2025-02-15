@@ -16,7 +16,7 @@ value in them.
 
 =head2 ℞ 0: Standard preamble
 
-Unless otherwise notes, all examples below require this standard preamble
+Unless otherwise noted, all examples below require this standard preamble
 to work correctly, with the C<#!> adjusted to work on your system:
 
  #!/usr/bin/env perl
@@ -383,9 +383,9 @@ scope, or in just one regex.
  my($num) = $str =~ /(\d+)/a;
 
 Or use specific un-Unicode properties, like C<\p{ahex}>
-and C<\p{POSIX_Digit>}.  Properties still work normally
+and C<\p{POSIX_Digit}>.  Properties still work normally
 no matter what charset modifiers (C</d /u /l /a /aa>)
-should be effect.
+are in effect.
 
 =head2 ℞ 25: Match Unicode properties in regex with \p, \P
 
@@ -459,7 +459,7 @@ convert such strings manually.
 Programmer-visible “characters” are codepoints matched by C</./s>,
 but user-visible “characters” are graphemes matched by C</\X/>.
 
- # Find vowel *plus* any combining diacritics,underlining,etc.
+ # Find vowel *plus* any combining diacritics, underlining, etc.
  my $nfd = NFD($orig);
  $nfd =~ / (?=[aeiou]) \X /xi
 
@@ -735,7 +735,7 @@ Here's that program.
      "crème brûlée"      => 2.00, # crema catalana
      "fideuà"            => 4.20, # more noodles, Valencian
                                   # (Catalan=fideuada)
-     "pâté"              => 4.15, # gooseliver paste, French
+     "pâté"              => 4.15, # goose liver paste, French
      "お好み焼き"        => 8.00, # okonomiyaki, Japanese
  );
 
