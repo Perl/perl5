@@ -6464,7 +6464,6 @@ PP(pp_unshift)
     return NORMAL;
 }
 
-
 PP_wrapped(pp_reverse, 0, 1)
 {
     dSP; dMARK;
@@ -6490,15 +6489,17 @@ PP_wrapped(pp_reverse, 0, 1)
                     SV *begin, *end;
 
                     if (can_preserve) {
-                        if (!av_exists(av, i)) {
-                            if (av_exists(av, j)) {
+                        bool exists_i = av_exists(av, i);
+                        bool exists_j = av_exists(av, j);
+                        if (!exists_i) {
+                            if (exists_j) {
                                 SV *sv = av_delete(av, j, 0);
                                 begin = *av_fetch(av, i, TRUE);
                                 sv_setsv_mg(begin, sv);
                             }
                             continue;
                         }
-                        else if (!av_exists(av, j)) {
+                        else if (!exists_j) {
                             SV *sv = av_delete(av, i, 0);
                             end = *av_fetch(av, j, TRUE);
                             sv_setsv_mg(end, sv);
@@ -6579,18 +6580,20 @@ PP_wrapped(pp_reverse, 0, 1)
                       * in a single pass, rather than 2-3 passes. */
 
                 const char * src = SvPV_const(src_sv, len);
+                char* tb;
 
                 /* Prepare the TARG. */
+                SV_CHECK_THINKFIRST_COW_DROP(TARG); /* Drops any buffer */
                 if (SvTYPE(TARG) < SVt_PV) {
                     SvUPGRADE(TARG, SvTYPE(src_sv)); /* No buffer allocation here */
-                } else if(SvTHINKFIRST(TARG)) {
-                     SV_CHECK_THINKFIRST_COW_DROP(TARG); /* Drops any buffer */
+                } else {
+                    SvSETMAGIC(TARG);
                 }
-                SvSETMAGIC(TARG);
-                SvGROW(TARG, len + 1);
+
+                tb = SvGROW(TARG, len + 1);
                 SvCUR_set(TARG, len);
                 SvPOK_only(TARG);
-                *SvEND(TARG) = '\0';
+                tb[len] = '\0';
                 if (SvTAINTED(src_sv))
                     SvTAINT(TARG);
 
@@ -6614,10 +6617,69 @@ PP_wrapped(pp_reverse, 0, 1)
                         }
                     }
                 } else {
+                    STRLEN i = 0;
+                    STRLEN j = len;
+                    uint32_t u32_1, u32_2;
+                    uint16_t u16_1, u16_2;
                     char * outp= SvPVX(TARG);
-                    const char *p = src + len;
-                    while (p != src)
-                        *outp++ = *--p;
+                    /* Take a chunk of bytes from the front and from the
+                     * back, reverse the bytes in each and and swap the
+                     * chunks over. This should have generally good
+                     * performance but also is likely to be optimised
+                     * into bswap instructions by the compiler.
+                     */
+#ifdef HAS_QUAD
+                    uint64_t u64_1, u64_2;
+                    while (j - i >= 16) {
+                        memcpy(&u64_1, src + j - 8, 8);
+                        memcpy(&u64_2, src + i, 8);
+                        u64_1 = _swab_64_(u64_1);
+                        u64_2 = _swab_64_(u64_2);
+                        memcpy(outp + j - 8, &u64_2, 8);
+                        memcpy(outp + i, &u64_1, 8);
+                        i += 8;
+                        j -= 8;
+                    }
+
+                    if (j - i >= 8) {
+                        memcpy(&u32_1, src + j - 4, 4);
+                        memcpy(&u32_2, src + i, 4);
+                        u32_1 = _swab_32_(u32_1);
+                        u32_2 = _swab_32_(u32_2);
+                        memcpy(outp + j - 4, &u32_2, 4);
+                        memcpy(outp + i, &u32_1, 4);
+                        i += 4;
+                        j -= 4;
+                    }
+#else
+                    while (j - i >= 8) {
+                        memcpy(&u32_1, src + j - 4, 4);
+                        memcpy(&u32_2, src + i, 4);
+                        u32_1 = _swab_32_(u32_1);
+                        u32_2 = _swab_32_(u32_2);
+                        memcpy(outp + j - 4, &u32_2, 4);
+                        memcpy(outp + i, &u32_1, 4);
+                        i += 4;
+                        j -= 4;
+                    }
+#endif
+                    if (j - i >= 4) {
+                        memcpy(&u16_1, src + j - 2, 2);
+                        memcpy(&u16_2, src + i, 2);
+                        u16_1 = _swab_16_(u16_1);
+                        u16_2 = _swab_16_(u16_2);
+                        memcpy(outp + j - 2, &u16_2, 2);
+                        memcpy(outp + i, &u16_1, 2);
+                        i += 2;
+                        j -= 2;
+                    }
+
+                    /* Swap any remaining bytes one by one. */
+                    while (i < j) {
+                        outp[i] =  src[j - 1];
+                        outp[j - 1] = src[i];
+                        i++; j--;
+                    }
                 }
             RETURN;
             }
@@ -6630,8 +6692,8 @@ PP_wrapped(pp_reverse, 0, 1)
 
         if (len > 1) {
             /* The traditional way, operate on the current byte buffer */
-            char *down;
             if (DO_UTF8(TARG)) {	/* first reverse each character */
+                char *down;
                 U8* s = (U8*)SvPVX(TARG);
                 const U8* send = (U8*)(s + len);
                 while (s < send) {
@@ -6656,11 +6718,64 @@ PP_wrapped(pp_reverse, 0, 1)
                 }
                 up = SvPVX(TARG);
             }
-            down = SvPVX(TARG) + len - 1;
-            while (down > up) {
-                const char tmp = *up;
-                *up++ = *down;
-                *down-- = tmp;
+            STRLEN i = 0;
+            STRLEN j = len;
+            uint32_t u32_1, u32_2;
+            uint16_t u16_1, u16_2;
+            /* Reverse the buffer in place, in chunks where possible */
+#ifdef HAS_QUAD
+            uint64_t u64_1, u64_2;
+            while (j - i >= 16) {
+                memcpy(&u64_1, up + j - 8, 8);
+                memcpy(&u64_2, up + i, 8);
+                u64_1 = _swab_64_(u64_1);
+                u64_2 = _swab_64_(u64_2);
+                memcpy(up + j - 8, &u64_2, 8);
+                memcpy(up + i, &u64_1, 8);
+                i += 8;
+                j -= 8;
+            }
+
+            if (j - i >= 8) {
+                memcpy(&u32_1, up + j - 4, 4);
+                memcpy(&u32_2, up + i, 4);
+                u32_1 = _swab_32_(u32_1);
+                u32_2 = _swab_32_(u32_2);
+                memcpy(up + j - 4, &u32_2, 4);
+                memcpy(up + i, &u32_1, 4);
+                i += 4;
+                j -= 4;
+            }
+#else
+            while (j - i >= 8) {
+                memcpy(&u32_1, up + j - 4, 4);
+                memcpy(&u32_2, up + i, 4);
+                u32_1 = _swab_32_(u32_1);
+                u32_2 = _swab_32_(u32_2);
+                memcpy(up + j - 4, &u32_2, 4);
+                memcpy(up + i, &u32_1, 4);
+                i += 4;
+                j -= 4;
+            }
+#endif
+            if (j - i >= 4) {
+                memcpy(&u16_1, up + j - 2, 2);
+                memcpy(&u16_2, up + i, 2);
+                u16_1 = _swab_16_(u16_1);
+                u16_2 = _swab_16_(u16_2);
+                memcpy(up + j - 2, &u16_2, 2);
+                memcpy(up + i, &u16_1, 2);
+                i += 2;
+                j -= 2;
+            }
+
+            /* Finally, swap any remaining bytes one-by-one. */
+            while (i < j) {
+                unsigned char tmp = up[i];
+                up[i] = up[j - 1];
+                up[j - 1] = tmp;
+                i++;
+                j--;
             }
         }
         (void)SvPOK_only_UTF8(TARG);
