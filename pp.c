@@ -6529,7 +6529,6 @@ PP(pp_unshift)
     return NORMAL;
 }
 
-
 PP_wrapped(pp_reverse, 0, 1)
 {
     dSP; dMARK;
@@ -6679,10 +6678,50 @@ PP_wrapped(pp_reverse, 0, 1)
                         }
                     }
                 } else {
+                    STRLEN i = 0;
+                    STRLEN j = len;
                     char * outp= SvPVX(TARG);
-                    const char *p = src + len;
-                    while (p != src)
-                        *outp++ = *--p;
+                    /* Take a chunk of bytes from the front and from the
+                     * back, reverse the bytes in each and and swap the
+                     * chunks over. This should have generally good
+                     * performance but also is likely to be optimised
+                     * into bswap instructions by the compiler.
+                     */
+#ifdef HAS_QUAD
+                    while (j - i >= 16) {
+                        *(U64 *)(outp + i) = _swab_64_( *(U64 *)(src + j - 8) );
+                        *(U64 *)(outp + j - 8) = _swab_64_( *(U64 *)(src + i) );
+                        i += 8;
+                        j -= 8;
+                    }
+
+                    if (j - i >= 8) {
+                        *(U32 *)(outp + i) = _swab_32_( *(U32 *)(src + j - 4) );
+                        *(U32 *)(outp + j - 4) = _swab_32_( *(U32 *)(src + i) );
+                        i += 4;
+                        j -= 4;
+                    }
+#else
+                    while (j - i >= 8) {
+                        *(U32 *)(outp + i) = _swab_32_( *(U32 *)(src + j - 4) );
+                        *(U32 *)(outp + j - 4) = _swab_32_( *(U32 *)(src + i) );
+                        i += 4;
+                        j -= 4;
+                    }
+#endif
+                    if (j - i >= 4) {
+                        *(U16 *)(outp + i) = _swab_16_( *(U16 *)(src + j - 2) );
+                        *(U16 *)(outp + j - 2) = _swab_16_( *(U16 *)(src + i) );
+                        i += 2;
+                        j -= 2;
+                    }
+
+                    /* Swap any remaining bytes one by one. */
+                    while (i < j) {
+                        outp[i] =  src[j - 1];
+                        outp[j - 1] = src[i];
+                        i++; j--;
+                    }
                 }
             RETURN;
             }
@@ -6695,8 +6734,8 @@ PP_wrapped(pp_reverse, 0, 1)
 
         if (len > 1) {
             /* The traditional way, operate on the current byte buffer */
-            char *down;
             if (DO_UTF8(TARG)) {	/* first reverse each character */
+                char *down;
                 U8* s = (U8*)SvPVX(TARG);
                 const U8* send = (U8*)(s + len);
                 while (s < send) {
@@ -6720,11 +6759,53 @@ PP_wrapped(pp_reverse, 0, 1)
                 }
                 up = SvPVX(TARG);
             }
-            down = SvPVX(TARG) + len - 1;
-            while (down > up) {
-                const char tmp = *up;
-                *up++ = *down;
-                *down-- = tmp;
+            STRLEN i = 0;
+            STRLEN j = len;
+            /* Reverse the buffer in place, in chunks where possible */
+#ifdef HAS_QUAD
+            while (j - i >= 16) {
+                U64 lchunk = _swab_64_( *(U64 *)(up + j - 8) );
+                U64 rchunk = _swab_64_( *(U64 *)(up + i) );
+                *(U64 *)(up + i) = lchunk;
+                *(U64 *)(up + j - 8) = rchunk;
+                i += 8;
+                j -= 8;
+            }
+
+            if (j - i >= 8) {
+                U32 lchunk = _swab_32_( *(U32 *)(up + j - 4) );
+                U32 rchunk = _swab_32_( *(U32 *)(up + i) );
+                *(U32 *)(up + i) = lchunk;
+                *(U32 *)(up + j - 4) = rchunk;
+                i += 4;
+                j -= 4;
+            }
+#else
+            while (j - i >= 8) {
+                U32 lchunk = _swab_32_( *(U32 *)(up + j - 4) );
+                U32 rchunk = _swab_32_( *(U32 *)(up + i) );
+                *(U32 *)(up + i) = lchunk;
+                *(U32 *)(up + j - 4) = rchunk;
+                i += 4;
+                j -= 4;
+            }
+#endif
+            if (j - i >= 4) {
+                U16 lchunk = _swab_16_( *(U16 *)(up + j - 2) );
+                U16 rchunk = _swab_16_( *(U16 *)(up + i) );
+                *(U16 *)(up + i) = lchunk;
+                *(U16 *)(up + j - 2) = rchunk;
+                i += 2;
+                j -= 2;
+            }
+
+            /* Finally, swap any remaining bytes one-by-one. */
+            while (i < j) {
+                unsigned char tmp = up[i];
+                up[i] = up[j - 1];
+                up[j - 1] = tmp;
+                i++;
+                j--;
             }
         }
         (void)SvPOK_only_UTF8(TARG);
