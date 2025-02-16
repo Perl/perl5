@@ -456662,7 +456662,7 @@ static const U8 WB_dfa_table[] = {
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 /* Generated from:
- * 7229a97216f54f7d47d5cff56fc8dbc185dcfe40db20533f8034a1215af787fe lib/Unicode/UCD.pm
+ * b7f46fc1010fd83f5a678b268a23fef0142a18d0ab2a142edd0bb03328e667c3 lib/Unicode/UCD.pm
  * 764f420cedfc8b43d9fec251c957a5d55fc45d40f6573f162990ed1dce7e36e0 lib/unicore/ArabicShaping.txt
  * b8f32554c6f658821fb0ee742d21c5b1f2086b9bf13071fed04894b022f93d67 lib/unicore/BidiBrackets.txt
  * d7afdadd1bbd66f5a663ac0e8f7958f18fd9491fc0bc59ec5877cb82db71db7d lib/unicore/BidiMirroring.txt
