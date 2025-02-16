@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.80';
+our $VERSION = '0.81';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -2495,6 +2495,30 @@ doesn't view them as decimal digits, but merely digits, and so C<\d> will not
 match them.  A single-character string containing one of these digits will
 have its decimal value returned by C<num>, but any longer string containing
 only these digits will return C<undef>.
+
+To illustrate further, the Rumi numeric symbols were used in centuries past in
+and around North Africa and the Iberian peninsula.  In order to be able to
+digitize the many historical documents that use them, Unicode has encoded the
+set.  There is no character representing zero.  There are characters for one
+through nine, ten, twenty, and so forth. C<num> correctly returns the values
+of these in isolation.
+
+ my $rumi_one = num("\N{RUMI DIGIT ONE}");
+ my $rumi_two = num("\N{RUMI DIGIT TWO}");
+ my $rumi_twenty = num("\N{RUMI NUMBER TWENTY}");
+ say "$rumi_one $rumi_two $rumi_twenty";     # 1 2 20
+
+Because these do not follow modern decimal positional notation, stringing more
+than one of these together doesn't mean what you likely would think it means.
+So, C<num> correctly returns C<undef> if you try.   If you request the length
+of the valid initial substring in this case, that length would be one.
+
+ my $len;
+ my $value = num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}", \$len);
+ say $len, " ", (defined $value) ? $value : "undef";  # 1 undef
+
+How to represent numbers like twelve gets complicated, and Unicode doesn't
+give any guidance, so C<num> can't either.
 
 Strings of multiple sub- and superscripts are not recognized as numbers.  You
 can use either of the compatibility decompositions in Unicode::Normalize to
