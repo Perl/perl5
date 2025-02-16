@@ -452,7 +452,8 @@ convert such strings manually.
  say "@nums";   # 12 4567 0.875 1000000000000
 
  use charnames qw(:full);
- my $nv = num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}");
+ my $nv = num("\N{VAI DIGIT ONE}\N{VAI DIGIT TWO}");
+ say $nv;  # 12
 
 =head2 ℞ 29: Match Unicode grapheme cluster in regex
 

@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.78';
+our $VERSION = '0.79';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -113,7 +113,7 @@ Unicode::UCD - Unicode character database
     my $unicode_version = Unicode::UCD::UnicodeVersion();
 
     my $convert_to_numeric =
-              Unicode::UCD::num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}");
+              Unicode::UCD::num("\N{VAI DIGIT ONE}\N{VAI DIGIT TWO}");
 
 =head1 DESCRIPTION
 

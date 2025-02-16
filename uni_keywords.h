@@ -10,7 +10,7 @@
 #define MPH_VALt I16
 
 /*
-generator script: regen/mk_invlists.pl
+generator script: ./regen/mk_invlists.pl
 split strategy: squeeze
 srand: 1785235451
 rows: 7498
@@ -7707,7 +7707,7 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
 #endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
 
 /* Generated from:
- * 688d673ec947f7ccf898b4eae9848139d4d33676b688dee54f449f8bf9d3bbd2 lib/Unicode/UCD.pm
+ * 0e8307ab7c654d9c133ea885f5413a4eb5c0123ed2178f7e1cbabed36b67792c lib/Unicode/UCD.pm
  * eb840f36e0a7446293578c684a54c6d83d249abde7bdd4dfa89794af1d7fe9e9 lib/unicore/ArabicShaping.txt
  * 333ae1e99db0504ca8a046a07dc45b5e7aa91869c685e6bf955ebe674804827a lib/unicore/BidiBrackets.txt
  * b4b9e1d87d8ea273613880de9d2b2f0b0b696244b42152bfa0a3106e7d983a20 lib/unicore/BidiMirroring.txt
