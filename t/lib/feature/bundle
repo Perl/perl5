@@ -100,6 +100,7 @@ Assigning non-zero to $[ is no longer possible at - line 5.
 no feature ':all'; # turns array_base (and everything else) off
 $[ = 1;
 EXPECT
+Feature bundle ":all" is deprecated and should not be used at - line 2.
 Assigning non-zero to $[ is no longer possible at - line 3.
 ########
 # NAME $^H accidentally enabling all features

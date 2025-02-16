@@ -368,7 +368,6 @@ BEGIN {
     my @params = (
             'use v5.37',
             'use feature ":5.38"',
-            'use feature ":all"',
             'use feature "module_true"',
             'no feature "module_true"',
             '',

@@ -832,6 +832,8 @@ sub __common {
         my $name = shift;
         if (substr($name, 0, 1) eq ":") {
             my $v = substr($name, 1);
+            carp('Feature bundle ":all" is deprecated and should not be used')
+              if $v eq 'all';
             if (!exists $feature_bundle{$v}) {
                 $v =~ s/^([0-9]+)\.([0-9]+).[0-9]+$/$1.$2/;
                 if (!exists $feature_bundle{$v}) {
@@ -870,6 +872,11 @@ sub unknown_feature_bundle {
     my $feature = shift;
     croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
             $feature, $^V));
+}
+
+sub carp {
+    require Carp;
+    Carp::carp(@_);
 }
 
 sub croak {

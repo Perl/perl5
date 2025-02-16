@@ -442,7 +442,7 @@ like runperl(
 # This used to fail an assertion, but only as a standalone script
 is runperl(switches => ['-lXMfeature=:all'],
            prog     => 'state sub x {}; undef &x; print defined &x',
-           stderr   => 1), "\n", 'undefining state sub';
+           stderr   => 1), "Feature bundle \":all\" is deprecated and should not be used at -e line 0.\n\n", 'undefining state sub';
 {
   state sub x { is +(caller 0)[3], 'x', 'state sub name in caller' }
   x
@@ -475,7 +475,7 @@ is runperl(switches => ['-lXMfeature=:all'],
                           x()
                         }
                         x()',
-           stderr   => 1), "42\n",
+           stderr   => 1), "Feature bundle \":all\" is deprecated and should not be used at -e line 0.\n42\n",
   'closure behaviour of state sub in predeclared package sub';
 
 # -------------------- my -------------------- #
@@ -830,7 +830,7 @@ pass "pad taking ownership once more of packagified my-sub";
 # This used to fail an assertion, but only as a standalone script
 is runperl(switches => ['-lXMfeature=:all'],
            prog     => 'my sub x {}; undef &x; print defined &x',
-           stderr   => 1), "\n", 'undefining my sub';
+           stderr   => 1), "Feature bundle \":all\" is deprecated and should not be used at -e line 0.\n\n", 'undefining my sub';
 {
   my sub x { is +(caller 0)[3], 'x', 'my sub name in caller' }
   x

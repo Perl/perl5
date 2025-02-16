@@ -164,6 +164,12 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+=item *
+
+L<feature> has been upgraded from version 1.89 to 1.93.
+
+The C<:all> feature bundle now warns, suggesting you should not use it.
+
 =back
 
 =head2 Removed Modules and Pragmata
