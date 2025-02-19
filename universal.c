@@ -1230,7 +1230,7 @@ XS(XS_NamedCapture_FETCH)
 
         if (!rx || !SvROK(ST(0))) {
             if (ix & UNDEF_FATAL)
-                Perl_croak_no_modify();
+                croak_no_modify();
             else
                 XSRETURN_UNDEF;
         }

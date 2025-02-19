@@ -1382,7 +1382,7 @@ PP_wrapped(pp_sselect, 4, 0)
             continue;
         if (SvREADONLY(sv)) {
             if (!(SvPOK(sv) && SvCUR(sv) == 0))
-                Perl_croak_no_modify();
+                croak_no_modify();
         }
         else if (SvIsCOW(sv)) sv_force_normal_flags(sv, 0);
         if (SvPOK(sv)) {

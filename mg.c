@@ -735,7 +735,7 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
-    Perl_croak_no_modify();
+    croak_no_modify();
     NORETURN_FUNCTION_END;
 }
 
@@ -3010,7 +3010,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
              */
           croakparen:
             if (!PL_localizing) {
-                Perl_croak_no_modify();
+                croak_no_modify();
             }
         }
         return 0;
