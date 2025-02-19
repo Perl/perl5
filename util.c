@@ -4683,36 +4683,10 @@ U32
 Perl_seed(pTHX)
 {
     /*
-     * This is really just a quick hack which grabs various garbage
-     * values.  It really should be a real hash algorithm which
-     * spreads the effect of every input bit onto every output bit,
-     * if someone who knows about such things would bother to write it.
-     * Might be a good idea to add that function to CORE as well.
-     * No numbers below come from careful analysis or anything here,
-     * except they are primes and SEED_C1 > 1E6 to get a full-width
-     * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
-     * probably be bigger too.
+     * Attempt to read from /dev/urandom to generate a pseudo-random number.
+     * If that does not work, or it is unavailable, we fall back to gathering
+     * several state variables and hashing them into a seed value.
      */
-#if RANDBITS > 16
-#  define SEED_C1	1000003
-#define   SEED_C4	73819
-#else
-#  define SEED_C1	25747
-#define   SEED_C4	20639
-#endif
-#define   SEED_C2	3
-#define   SEED_C3	269
-#define   SEED_C5	26107
-
-#ifndef PERL_NO_DEV_RANDOM
-    int fd;
-#endif
-    U32 u;
-#ifdef HAS_GETTIMEOFDAY
-    struct timeval when;
-#else
-    Time_t when;
-#endif
 
 /* This test is an escape hatch, this symbol isn't set by Configure. */
 #ifndef PERL_NO_DEV_RANDOM
@@ -4727,7 +4701,9 @@ Perl_seed(pTHX)
 #    define PERL_RANDOM_DEVICE "/dev/urandom"
 #  endif
 #endif
-    fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
+    U32 u;
+
+    int fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {
         if (PerlLIO_read(fd, (void*)&u, sizeof u) != sizeof u)
             u = 0;
@@ -4737,20 +4713,35 @@ Perl_seed(pTHX)
     }
 #endif
 
+/* We only get this far if /dev/urandom is not available or the read fails.
+ * Grab several state variables and hash those for randomness instead.
+ */
+
 #ifdef HAS_GETTIMEOFDAY
+    struct timeval when;
+
     PerlProc_gettimeofday(&when,NULL);
-    u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
+    /* Milliseconds */
+    UV uptime = (when.tv_sec * 1000000) + when.tv_usec;
 #else
+    Time_t when;
+
     (void)time(&when);
-    u = (U32)SEED_C1 * when;
+    /* Seconds */
+    UV uptime = when;
 #endif
-    u += SEED_C3 * (U32)PerlProc_getpid();
-    u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
-#ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
-    UV ptruv = PTR2UV(&when);
-    u += SEED_C5 * ptr_hash(ptruv);
-#endif
-    return u;
+
+    UV pid       = PerlProc_getpid();
+    UV stack_ptr = PTR2UV(PL_stack_sp);
+    UV time_ptr  = PTR2UV(&when);
+
+    /* Mix all the states together with XOR and then hash them */
+    U32 ret = ptr_hash(uptime ^ pid ^ stack_ptr ^ time_ptr);
+
+    /* PerlIO_printf(Perl_debug_log, "XXXX: TIME:%lu PID:%lu Stack:%lu PTR:%lu\n", uptime, pid, stack_ptr, time_ptr); */
+    /* PerlIO_printf(Perl_debug_log, "SEED: %u\n", ret); */
+
+    return ret;
 }
 
 void
