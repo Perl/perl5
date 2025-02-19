@@ -60,6 +60,47 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Switch and Smart Match operator reinstated
+
+The "switch" feature and the smartmatch operator, C<~~>, were introduced in
+v5.10.  Their behavior was significantly changed in v5.10.1.  When the
+"experiment" system was added in v5.18.0, switch and smartmatch were
+retroactively declared experimental.  Over the years, proposals to fix or
+supplement the features have come and gone.
+
+They were deprecated in Perl v5.38.0 and scheduled for removal in Perl
+5.42.0, and entirely removed in Perl 5.41.3.
+
+After some discussion these have been re-instated.
+
+Using them no longer produces a deprecation warning.
+
+Switch itself still requires the C<switch> feature, which is enabled
+by default for feature bundles from v5.9.5 through to v5.34.  Switch
+remains disabled in feature bundles 5.35 and later, but can be
+separately enabled:
+
+  # no switch here
+  use v5.10;
+  # switch here
+  use v5.36;
+  # no switch here
+  use feature "switch";
+  # switch here
+
+Smart match now requires the C<smartmatch> feature, which is enabled
+by default and included in all feature bundles up to 5.40.  It is
+disabled for the 5.41 feature bundle and later, but can be separately
+enabled:
+
+  # smartmatch here
+  use v5.41;
+  # no smartmatch here
+  use feature "smartmatch";
+  # smartmatch here
+
+[L<GH #22752|https://github.com/Perl/perl5/issues/22752>]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
