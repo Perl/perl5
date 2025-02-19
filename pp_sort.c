@@ -816,7 +816,7 @@ PP(pp_sort)
         (void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
         av = MUTABLE_AV((*PL_stack_sp));
         if (SvREADONLY(av))
-            Perl_croak_no_modify();
+            croak_no_modify();
         max = AvFILL(av) + 1;
 
         I32 oldmark = MARK - PL_stack_base;

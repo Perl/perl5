@@ -4252,7 +4252,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 
         /* minimal subset of SV_CHECK_THINKFIRST_COW_DROP(dsv) */
         if (SvREADONLY(dsv))
-            Perl_croak_no_modify();
+            croak_no_modify();
         if (SvROK(dsv)) {
             if (SvWEAKREF(dsv))
                 sv_unref_flags(dsv, 0);
@@ -4802,7 +4802,7 @@ Perl_sv_set_undef(pTHX_ SV *sv)
              * variable? Some XS code does this */
             if (sv == &PL_sv_undef)
                 return;
-            Perl_croak_no_modify();
+            croak_no_modify();
         }
 
         if (SvROK(sv)) {
@@ -5065,7 +5065,7 @@ Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (isGV_with_GP(sv))
-        Perl_croak_no_modify();
+        croak_no_modify();
     if (!ptr) {
         (void)SvOK_off(sv);
         return;
@@ -5438,7 +5438,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
     PERL_ARGS_ASSERT_SV_FORCE_NORMAL_FLAGS;
 
     if (SvREADONLY(sv))
-        Perl_croak_no_modify();
+        croak_no_modify();
     else if (SvIsCOW(sv) && LIKELY(SvTYPE(sv) != SVt_PVHV))
         S_sv_uncow(aTHX_ sv, flags);
     if (SvROK(sv))
@@ -6002,7 +6002,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
             !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
            )
         {
-            Perl_croak_no_modify();
+            croak_no_modify();
         }
     }
     if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
@@ -9306,7 +9306,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
         return;
     if (SvTHINKFIRST(sv)) {
         if (SvREADONLY(sv)) {
-                Perl_croak_no_modify();
+                croak_no_modify();
         }
         if (SvROK(sv)) {
             IV i;
@@ -9371,7 +9371,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 
     /* treat AV/HV/CV/FM/IO and non-fake GVs as immutable */
     if (SvTYPE(sv) >= SVt_PVAV || (isGV_with_GP(sv) && !SvFAKE(sv)))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     if (!(flags & SVp_POK) || !*SvPVX_const(sv)) {
         if ((flags & SVTYPEMASK) < SVt_PVIV)
@@ -9490,7 +9490,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
         return;
     if (SvTHINKFIRST(sv)) {
         if (SvREADONLY(sv)) {
-                Perl_croak_no_modify();
+                croak_no_modify();
         }
         if (SvROK(sv)) {
             IV i;
@@ -9558,7 +9558,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 
     /* treat AV/HV/CV/FM/IO and non-fake GVs as immutable */
     if (SvTYPE(sv) >= SVt_PVAV || (isGV_with_GP(sv) && !SvFAKE(sv)))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     if (!(flags & SVp_POK)) {
         if ((flags & SVTYPEMASK) < SVt_PVIV)
@@ -10938,7 +10938,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY|SVf_PROTECT)) {
         if (SvREADONLY(tmpRef))
-            Perl_croak_no_modify();
+            croak_no_modify();
         if (SvTYPE(tmpRef) == SVt_PVOBJ)
             croak("Can't bless an object reference");
         if (SvOBJECT(tmpRef)) {

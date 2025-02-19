@@ -128,7 +128,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
                     GV *gv;
                     HV *stash;
                     if (SvREADONLY(sv))
-                        Perl_croak_no_modify();
+                        croak_no_modify();
                     gv = MUTABLE_GV(newSV_type(SVt_NULL));
                     stash = CopSTASH(PL_curcop);
                     if (SvTYPE(stash) != SVt_PVHV) stash = NULL;
@@ -787,7 +787,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
         return count;
     }
     else if (SvREADONLY(sv)) {
-            Perl_croak_no_modify();
+            croak_no_modify();
     }
 
     s = SvPV(sv, len);
@@ -6198,7 +6198,7 @@ PP_wrapped(pp_splice, 0, 1)
     }
 
     if (SvREADONLY(ary))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     SP++;
 
@@ -6419,7 +6419,7 @@ PP(pp_push)
         U16 old_delaymagic = PL_delaymagic;
 
         if (SvREADONLY(ary) && MARK < PL_stack_sp)
-            Perl_croak_no_modify();
+            croak_no_modify();
         PL_delaymagic = DM_DELAY;
         for (++MARK; MARK <= PL_stack_sp; MARK++) {
             SV *sv;

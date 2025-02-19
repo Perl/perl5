@@ -370,7 +370,7 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
     }
 
     if (SvREADONLY(av) && key >= AvFILL(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     if (!AvREAL(av) && AvREIFY(av))
         av_reify(av);
@@ -646,7 +646,7 @@ Perl_av_clear(pTHX_ AV *av)
 #endif
 
     if (SvREADONLY(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     /* Give any tie a chance to cleanup first */
     if (SvRMAGICAL(av)) {
@@ -796,7 +796,7 @@ Perl_av_push(pTHX_ AV *av, SV *val)
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (SvREADONLY(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
         Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(PUSH), G_DISCARD, 1,
@@ -828,7 +828,7 @@ Perl_av_pop(pTHX_ AV *av)
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (SvREADONLY(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
         retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(POP), 0, 0);
         if (retval)
@@ -887,7 +887,7 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num)
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (SvREADONLY(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
         Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(UNSHIFT),
@@ -954,7 +954,7 @@ Perl_av_shift(pTHX_ AV *av)
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (SvREADONLY(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
         retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(SHIFT), 0, 0);
         if (retval)
@@ -1083,7 +1083,7 @@ Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (SvREADONLY(av))
-        Perl_croak_no_modify();
+        croak_no_modify();
 
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic
