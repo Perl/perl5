@@ -14096,7 +14096,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 {
     DIR *ret;
 
-#if defined(HAS_FCHDIR) && defined(HAS_TELLDIR) && defined(HAS_SEEKDIR)
+#if !defined(HAS_FDOPENDIR) && defined(HAS_FCHDIR) && defined(HAS_TELLDIR) && defined(HAS_SEEKDIR)
     DIR *pwd;
     const Direntry_t *dirent;
     char smallbuf[256]; /* XXX MAXPATHLEN, surely? */
@@ -14116,7 +14116,13 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     if (ret)
         return ret;
 
-#if defined(HAS_FCHDIR) && defined(HAS_TELLDIR) && defined(HAS_SEEKDIR)
+#ifdef HAS_FDOPENDIR
+
+    PERL_UNUSED_ARG(param);
+
+    ret = fdopendir(dup(my_dirfd(dp)));
+
+#elif defined(HAS_FCHDIR) && defined(HAS_TELLDIR) && defined(HAS_SEEKDIR)
 
     PERL_UNUSED_ARG(param);
 
