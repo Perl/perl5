@@ -4364,14 +4364,23 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 }
 
 
-/* Set which rex is pointed to by PL_reg_curpm, handling ref counting.
- * Do inc before dec, in case old and new rex are the same */
-#define SET_reg_curpm(Re2)                          \
-    if (reginfo->info_aux_eval) {                   \
-        (void)ReREFCNT_inc(Re2);		    \
-        ReREFCNT_dec(PM_GETRE(PL_reg_curpm));	    \
-        PM_SETRE((PL_reg_curpm), (Re2));	    \
-    }
+/* Set which rex is pointed to by PL_reg_curpm (which is the fake global
+ * PMOP used to make $1 etc available while executing (?{...}) code).
+ * Handles ref counting.
+ */
+
+static void
+S_set_reg_curpm(pTHX_ REGEXP *rx, regmatch_info *reginfo)
+{
+    if (!reginfo->info_aux_eval)
+        return;
+
+    REGEXP *old_rx = PM_GETRE(PL_reg_curpm);
+    /* Do inc before dec, in case old and new rex are the same. */
+    SvREFCNT_inc(rx);
+    PM_SETRE(PL_reg_curpm, rx);
+    SvREFCNT_dec(old_rx);
+}
 
 
 /*
@@ -8528,7 +8537,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.prev_rex = rex_sv;
                 ST.prev_curlyx = cur_curlyx;
                 rex_sv = re_sv;
-                SET_reg_curpm(rex_sv);
+                S_set_reg_curpm(aTHX_ rex_sv, reginfo);
                 rex = re;
                 rexi = rei;
                 cur_curlyx = NULL;
@@ -8565,7 +8574,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
-            SET_reg_curpm(rex_sv);
+            S_set_reg_curpm(aTHX_ rex_sv, reginfo);
             rex = ReANY(rex_sv);
             rexi = RXi_GET(rex);
             {
@@ -8608,7 +8617,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
-            SET_reg_curpm(rex_sv);
+            S_set_reg_curpm(aTHX_ rex_sv, reginfo);
             rex = ReANY(rex_sv);
             rexi = RXi_GET(rex);
 
@@ -9696,7 +9705,7 @@ NULL
                 st->u.eval.cp = regcppush(rex, 0, maxopenparen);
                 rex_sv = CUR_EVAL.prev_rex;
                 is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
-                SET_reg_curpm(rex_sv);
+                S_set_reg_curpm(aTHX_ rex_sv, reginfo);
                 rex = ReANY(rex_sv);
                 rexi = RXi_GET(rex);
 
@@ -11269,7 +11278,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         }
 #endif
     }
-    SET_reg_curpm(reginfo->prog);
+    S_set_reg_curpm(aTHX_ reginfo->prog, reginfo);
     eval_state->curpm = PL_curpm;
     PL_curpm_under = PL_curpm;
     PL_curpm = PL_reg_curpm;
