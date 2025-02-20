@@ -4736,7 +4736,7 @@ Perl_seed(pTHX)
     UV time_ptr  = PTR2UV(&when);
 
     /* Mix all the states together with XOR and then hash them */
-    U32 ret = ptr_hash(uptime ^ pid ^ stack_ptr ^ time_ptr);
+    U32 ret = ptr_hash(uptime) ^ ptr_hash(pid) ^ ptr_hash(stack_ptr) ^ ptr_hash(time_ptr);
 
     /* PerlIO_printf(Perl_debug_log, "XXXX: TIME:%lu PID:%lu Stack:%lu PTR:%lu\n", uptime, pid, stack_ptr, time_ptr); */
     /* PerlIO_printf(Perl_debug_log, "SEED: %u\n", ret); */
