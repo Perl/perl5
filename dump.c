@@ -979,6 +979,13 @@ S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
 
     kidbar = ((bar << 1) | cBOOL(pm->op_flags & OPf_KIDS)) << 1;
 
+#ifdef USE_ITHREADS
+    S_opdump_indent(aTHX_ (OP*)pm, level, bar, file,
+                    "PMOFFSET = %" IVdf "\n", (IV)pm->op_pmoffset);
+#endif
+    S_opdump_indent(aTHX_ (OP*)pm, level, bar, file,
+                    "REGEX = 0x%" UVxf "\n", PTR2UV(PM_GETRE(pm)));
+
     if (PM_GETRE(pm)) {
         char ch = (pm->op_pmflags & PMf_ONCE) ? '?' : '/';
         S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_PRE %c%.*s%c\n",
