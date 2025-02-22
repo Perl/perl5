@@ -776,7 +776,10 @@ struct regmatch_slab;
  * regmatch_state stack at the start of execution */
 
 typedef struct {
-    regexp *rex;
+    REGEXP *rx;
+    PMOP   *old_op;           /* saved value of PL_op and ... */
+    REGEXP *old_op_val;       /* ... saved value of PM_GETRE(PL_op) if any */
+    REGEXP *old_regcurpm_val; /* saved value of PM_GETRE(PL_reg_curpm) */
     PMOP    *curpm;     /* saved PL_curpm */
 #ifdef PERL_ANY_COW
     SV      *saved_copy; /* saved saved_copy field from rex */
