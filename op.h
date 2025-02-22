@@ -298,9 +298,16 @@ struct pmop {
     OP *	op_code_list;	/* list of (?{}) code blocks */
 };
 
+/* The PM_GETRE_raw/PM_SETRE_raw variants get/set the slot without any
+ * processing or asserts */
 #ifdef USE_ITHREADS
+#define PM_GETRE_raw(o)	(REGEXP*)(PL_regex_pad[(o)->op_pmoffset])
 #define PM_GETRE(o)	(SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
                          ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
+
+#define PM_SETRE_raw(o,r)	STMT_START {					\
+                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(r); \
+                        } STMT_END
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
 /* With first class regexps not via a reference one needs to assign
@@ -315,7 +322,9 @@ struct pmop {
                             PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
                         } STMT_END
 #else
+#define PM_GETRE_raw(o) ((o)->op_pmregexp)
 #define PM_GETRE(o)     ((o)->op_pmregexp)
+#define PM_SETRE_raw(o,r) ((o)->op_pmregexp = (r))
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
 #endif
 

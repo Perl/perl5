@@ -11237,8 +11237,9 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     regexp *const rex = ReANY(reginfo->prog);
     regmatch_info_aux_eval *eval_state = reginfo->info_aux_eval;
 
-    eval_state->rex = rex;
-    eval_state->sv  = reginfo->sv;
+    eval_state->rx = reginfo->prog;
+    SvREFCNT_inc(eval_state->rx);
+    eval_state->sv = reginfo->sv;
 
     if (reginfo->sv) {
         /* Make $_ available to executed code. */
@@ -11278,6 +11279,26 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         }
 #endif
     }
+
+    /* if we're currently executing a MATCHish op, the only ref to the
+     * current regex might be from that op. If recursive code called from
+     * (?{...}) recompiles that regex, the old regex will be lost -
+     * meaning that $1 etc will stuff refer to the value from the inner
+     * match. So if possible restore the PMOPs regex to the outer value at
+     * the end of the outer match */
+    if (   PL_op
+        && (PL_opargs[PL_op->op_type] & OA_CLASS_MASK) == OA_PMOP
+        && PM_GETRE((PMOP*)PL_op))
+    {
+        eval_state->old_op     = (PMOP*)PL_op;
+        eval_state->old_op_val = PM_GETRE((PMOP*)PL_op);
+        SvREFCNT_inc(eval_state->old_op_val);
+    }
+    else
+        eval_state->old_op = NULL;
+
+    eval_state->old_regcurpm_val = PM_GETRE_raw(PL_reg_curpm);
+    SvREFCNT_inc(eval_state->old_regcurpm_val);
     S_set_reg_curpm(aTHX_ reginfo->prog, reginfo);
     eval_state->curpm = PL_curpm;
     PL_curpm_under = PL_curpm;
@@ -11320,7 +11341,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
         /* undo the effects of S_setup_eval_state() */
 
         if (eval_state->subbeg) {
-            regexp * const rex = eval_state->rex;
+            regexp * const rex = ReANY(eval_state->rx);
             RXp_SUBBEG(rex) = eval_state->subbeg;
             RXp_SUBLEN(rex)     = eval_state->sublen;
             RXp_SUBOFFSET(rex)  = eval_state->suboffset;
@@ -11340,6 +11361,17 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 
         PL_curpm = eval_state->curpm;
         SvREFCNT_dec(eval_state->sv);
+        SvREFCNT_dec(eval_state->rx);
+
+        REGEXP *old_rx = PM_GETRE(PL_reg_curpm);
+        PM_SETRE_raw(PL_reg_curpm, eval_state->old_regcurpm_val);
+        SvREFCNT_dec(old_rx);
+
+        if (eval_state->old_op) {
+            old_rx = PM_GETRE(eval_state->old_op);
+            PM_SETRE(eval_state->old_op, eval_state->old_op_val);
+            SvREFCNT_dec(old_rx);
+        }
     }
 
     PL_regmatch_state = aux->old_regmatch_state;
