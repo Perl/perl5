@@ -3894,6 +3894,12 @@ Perl_reginitcolors(pTHX);
 #define PERL_ARGS_ASSERT_REGINITCOLORS
 
 PERL_CALLCONV void
+Perl_release_RExC_state(pTHX_ void *vstate)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_RELEASE_REXC_STATE     \
+        assert(vstate)
+
+PERL_CALLCONV void
 Perl_repeatcpy(char *to, const char *from, SSize_t len, IV count);
 #define PERL_ARGS_ASSERT_REPEATCPY              \
         assert(to); assert(from)

@@ -44,44 +44,45 @@
 #define SAVEt_FREEPADNAME         23
 #define SAVEt_STRLEN_SMALL        24
 #define SAVEt_FREERCPV            25
+#define SAVEt_FREE_REXC_STATE     26
 
 /* two args */
 
-#define SAVEt_AV                  26
-#define SAVEt_DESTRUCTOR          27
-#define SAVEt_DESTRUCTOR_X        28
-#define SAVEt_GENERIC_PVREF       29
-#define SAVEt_GENERIC_SVREF       30
-#define SAVEt_GP                  31
-#define SAVEt_GVSV                32
-#define SAVEt_HINTS               33
-#define SAVEt_HPTR                34
-#define SAVEt_HV                  35
-#define SAVEt_I32                 36
-#define SAVEt_INT                 37
-#define SAVEt_ITEM                38
-#define SAVEt_IV                  39
-#define SAVEt_PPTR                40
-#define SAVEt_SAVESWITCHSTACK     41
-#define SAVEt_SHARED_PVREF        42
-#define SAVEt_SPTR                43
-#define SAVEt_STRLEN              44
-#define SAVEt_SV                  45
-#define SAVEt_SVREF               46
-#define SAVEt_VPTR                47
-#define SAVEt_ADELETE             48
-#define SAVEt_APTR                49
-#define SAVEt_RCPV                50
+#define SAVEt_AV                  27
+#define SAVEt_DESTRUCTOR          28
+#define SAVEt_DESTRUCTOR_X        29
+#define SAVEt_GENERIC_PVREF       30
+#define SAVEt_GENERIC_SVREF       31
+#define SAVEt_GP                  32
+#define SAVEt_GVSV                33
+#define SAVEt_HINTS               34
+#define SAVEt_HPTR                35
+#define SAVEt_HV                  36
+#define SAVEt_I32                 37
+#define SAVEt_INT                 38
+#define SAVEt_ITEM                39
+#define SAVEt_IV                  40
+#define SAVEt_PPTR                41
+#define SAVEt_SAVESWITCHSTACK     42
+#define SAVEt_SHARED_PVREF        43
+#define SAVEt_SPTR                44
+#define SAVEt_STRLEN              45
+#define SAVEt_SV                  46
+#define SAVEt_SVREF               47
+#define SAVEt_VPTR                48
+#define SAVEt_ADELETE             49
+#define SAVEt_APTR                50
+#define SAVEt_RCPV                51
 
 /* three args */
 
-#define SAVEt_HELEM               51
-#define SAVEt_PADSV_AND_MORTALIZE 52
-#define SAVEt_SET_SVFLAGS         53
-#define SAVEt_GVSLOT              54
-#define SAVEt_AELEM               55
-#define SAVEt_DELETE              56
-#define SAVEt_HINTS_HH            57
+#define SAVEt_HELEM               52
+#define SAVEt_PADSV_AND_MORTALIZE 53
+#define SAVEt_SET_SVFLAGS         54
+#define SAVEt_GVSLOT              55
+#define SAVEt_AELEM               56
+#define SAVEt_DELETE              57
+#define SAVEt_HINTS_HH            58
 
 static const U8 leave_scope_arg_counts[] = {
     0, /* SAVEt_ALLOC               */
@@ -110,6 +111,7 @@ static const U8 leave_scope_arg_counts[] = {
     1, /* SAVEt_FREEPADNAME         */
     1, /* SAVEt_STRLEN_SMALL        */
     1, /* SAVEt_FREERCPV            */
+    1, /* SAVEt_FREE_REXC_STATE     */
     2, /* SAVEt_AV                  */
     2, /* SAVEt_DESTRUCTOR          */
     2, /* SAVEt_DESTRUCTOR_X        */
@@ -144,6 +146,6 @@ static const U8 leave_scope_arg_counts[] = {
     3  /* SAVEt_HINTS_HH            */
 };
 
-#define MAX_SAVEt 57
+#define MAX_SAVEt 58
 
 /* ex: set ro ft=c: */

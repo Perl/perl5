@@ -1200,6 +1200,7 @@
 #   define refcounted_he_new_pv(a,b,c,d,e)      Perl_refcounted_he_new_pv(aTHX_ a,b,c,d,e)
 #   define refcounted_he_new_pvn(a,b,c,d,e,f)   Perl_refcounted_he_new_pvn(aTHX_ a,b,c,d,e,f)
 #   define refcounted_he_new_sv(a,b,c,d,e)      Perl_refcounted_he_new_sv(aTHX_ a,b,c,d,e)
+#   define release_RExC_state(a)                Perl_release_RExC_state(aTHX_ a)
 #   define report_evil_fh(a)                    Perl_report_evil_fh(aTHX_ a)
 #   define report_wrongway_fh(a,b)              Perl_report_wrongway_fh(aTHX_ a,b)
 #   define rpeep(a)                             Perl_rpeep(aTHX_ a)
