@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.9 - Haruki Murakami (tr. Alfred Birnbaum), "Hard-boiled Wonderland and the End of the World"
+
+L<Announced on 2025-02-24 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2025/02/msg269592.html>
+
+  It may be the End of the World, but it has to have a way out. I know
+  that for certain. Look at the sky. Where do those birds go when they
+  fly over the Wall? To another world. If there was nothing out there,
+  why surround the place with a Wall? It has to let out somewhere.
+
 =head2 v5.41.8 - Syou Ishida, trans. E. Madison Shimoda, "We'll Prescribe You a Cat"
 
 L<Announced on 2025-01-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/01/msg269458.html>
