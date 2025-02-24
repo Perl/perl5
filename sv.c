@@ -15515,6 +15515,11 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
             c = (char*)POPPTR(ss,ix);
             TOPPTR(nss,ix) = pv_dup_inc(c);
             break;
+        case SAVEt_FREE_REXC_STATE:
+            (void)POPPTR(ss, ix);
+            /* free only once */
+            TOPPTR(nss, ix) = NULL;
+            break;
         case SAVEt_FREERCPV:
             c = (char *)POPPTR(ss,ix);
             TOPPTR(nss,ix) = rcpv_copy(c);

@@ -2791,6 +2791,9 @@ Cp	|char * |re_intuit_start|NN REGEXP * const rx			\
 				|NULLOK re_scream_pos_data *data
 Cp	|SV *	|re_intuit_string					\
 				|NN REGEXP  * const r
+
+p	|void	|release_RExC_state					\
+				|NN void *vstate
 Xp	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
 				|int pat_count				\
 				|NULLOK OP *expr			\
@@ -2799,7 +2802,6 @@ Xp	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
 				|NULLOK bool *is_bare_re		\
 				|const U32 rx_flags			\
 				|const U32 pm_flags
-
 ATdp	|void	|repeatcpy	|NN char *to				\
 				|NN const char *from			\
 				|SSize_t len				\

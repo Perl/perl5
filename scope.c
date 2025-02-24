@@ -1391,6 +1391,12 @@ Perl_leave_scope(pTHX_ I32 base)
             Safefree(a0.any_ptr);
             break;
 
+        case SAVEt_FREE_REXC_STATE:
+            a0 = ap[0];
+            if (a0.any_ptr)
+                release_RExC_state(a0.any_ptr);
+            break;
+
         case SAVEt_CLEARPADRANGE:
         {
             I32 i;

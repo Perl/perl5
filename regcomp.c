@@ -1356,15 +1356,19 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
     return true;
 }
 
-static void
-release_RExC_state(pTHX_ void *vstate) {
-    RExC_state_t *pRExC_state = (RExC_state_t *)vstate;
+#ifdef PERL_RE_BUILD_AUX
 
+void
+Perl_release_RExC_state(pTHX_ void *vstate) {
+    PERL_ARGS_ASSERT_RELEASE_REXC_STATE;
+
+    RExC_state_t *pRExC_state = (RExC_state_t *)vstate;
+    
     /* Any or all of these might be NULL.
 
        There's no point in setting them to NULL after the free, since
        pRExC_state is about to be released.
-     */
+    */
     SvREFCNT_dec(RExC_rx_sv);
     Safefree(RExC_open_parens);
     Safefree(RExC_close_parens);
@@ -1373,6 +1377,8 @@ release_RExC_state(pTHX_ void *vstate) {
 
     Safefree(pRExC_state);
 }
+
+#endif
 
 /*
  * Perl_re_op_compile - the perl internal RE engine's function to compile a
@@ -1475,7 +1481,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * or error. */
     Newxz(pRExC_state, 1, RExC_state_t);
 
-    SAVEDESTRUCTOR_X(release_RExC_state, pRExC_state);
+    SAVE_FREE_REXC_STATE(pRExC_state);
 
     DEBUG_r({
         /* and then initialize RExC_mysv1 and RExC_mysv2 early so if
