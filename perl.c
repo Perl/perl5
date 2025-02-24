@@ -288,7 +288,7 @@ perl_construct(pTHXx)
     /* This is NOT the state used for C<rand()>, this is only
      * used in internal functionality */
 #ifdef NO_PERL_INTERNAL_RAND_SEED
-    Perl_drand48_init_r(&PL_internal_random_state, seed());
+    Perl_drand48_init_r(&PL_random_state_internal, seed());
 #else
     {
         UV seed;
@@ -301,7 +301,7 @@ perl_construct(pTHXx)
             /* use a randomly generated seed */
             seed = seed();
         }
-        Perl_drand48_init_r(&PL_internal_random_state, (U32)seed);
+        Perl_drand48_init_r(&PL_random_state_internal, (U32)seed);
     }
 #endif
 
@@ -2475,7 +2475,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (TAINT_get &&
         PerlProc_getuid() == PerlProc_geteuid() &&
         PerlProc_getgid() == PerlProc_getegid()) {
-        Perl_drand48_init_r(&PL_internal_random_state, seed());
+        Perl_drand48_init_r(&PL_random_state_internal, seed());
     }
 #endif
     if (DEBUG_h_TEST)

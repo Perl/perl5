@@ -1028,7 +1028,7 @@ PERLVARI(I, dump_re_max_len, STRLEN, 60)
  * This is important if the user has called srand() with a seed.
  */
 
-PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
+PERLVAR(I, random_state_internal, PL_RANDOM_STATE_TYPE)
 
 PERLVARA(I, TR_SPECIAL_HANDLING_UTF8, UTF8_MAXBYTES, char)
 

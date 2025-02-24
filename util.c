@@ -4809,7 +4809,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 #endif /* NO_PERL_HASH_ENV */
     {
         for( i = 0; i < PERL_HASH_SEED_BYTES; i++ ) {
-            seed_buffer[i] = (unsigned char)(Perl_internal_drand48() * (U8_MAX+1));
+            seed_buffer[i] = (unsigned char)(Perl_drand48_internal() * (U8_MAX+1));
         }
     }
 #ifdef USE_PERL_PERTURB_KEYS
@@ -5810,7 +5810,7 @@ S_my_mkostemp(char *templte, int flags) {
     do {
         int i;
         for (i = 1; i <= 6; ++i) {
-            templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
+            templte[len-i] = TEMP_FILE_CH[(int)(Perl_drand48_internal() * TEMP_FILE_CH_COUNT)];
         }
 #ifdef VMS
         if (delete_on_close) {
