@@ -51,6 +51,11 @@ Hence, for example, C<ibcmp()> is S<C<(! foldEQ())>>
 #define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
                     cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
+#define PL_PTR_RANDOM_STATE                 &PL_random_state
+#define PL_PTR_RANDOM_STATE_INTERNAL        &PL_random_state_internal
+#define PL_PTR_PROTO_RANDOM_STATE           &(proto_perl->Irandom_state)
+#define PL_PTR_PROTO_RANDOM_STATE_INTERNAL  &(proto_perl->Irandom_state_internal)
+
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of
    perl_drand48_t below, and that is visible outside of the core.  */
@@ -78,13 +83,13 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 
 #define PL_RANDOM_STATE_TYPE perl_drand48_t
 
-#define Perl_drand48_init(seed) (Perl_drand48_init_r(&PL_random_state, (seed)))
-#define Perl_drand48() (Perl_drand48_r(&PL_random_state))
+#define Perl_drand48_init(seed) (Perl_drand48_init_r(PL_PTR_RANDOM_STATE, (seed)))
+#define Perl_drand48() (Perl_drand48_r(PL_PTR_RANDOM_STATE))
 
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid interfering with the results
  * of rand() */
-#define Perl_drand48_internal() (Perl_drand48_r(&PL_random_state_internal))
+#define Perl_drand48_internal() (Perl_drand48_r(PL_PTR_RANDOM_STATE_INTERNAL))
 #endif
 
 #ifdef USE_C_BACKTRACE

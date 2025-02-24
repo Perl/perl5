@@ -9253,7 +9253,6 @@ END_EXTERN_C
 
 #define PERL_PARSE_ERROR_COUNT(f)     (f)
 
-
 /* Work around
 
   https://github.com/Perl/perl5/issues/21313
