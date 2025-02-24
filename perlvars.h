@@ -375,6 +375,8 @@ PERLVARA(G, hash_state_w, PERL_HASH_STATE_WORDS, PVT__PERL_HASH_WORD_TYPE) /* pe
 #define PERL_SINGLE_CHAR_HASH_CACHE_ELEMS ((1+256) * sizeof(U32))
 PERLVARA(G, hash_chars, PERL_SINGLE_CHAR_HASH_CACHE_ELEMS, unsigned char) /* perl.c and hv.h */
 #endif
+PERLVARI(G, hpool_mask, size_t, 0)
+PERLVARI(G, hpool_vm_seg, size_t, 0)
 
 /* The path separator can vary depending on whether we're running under DCL or
  * a Unix shell.

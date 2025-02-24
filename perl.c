@@ -231,6 +231,7 @@ perl_construct(pTHXx)
 
     PERL_ARGS_ASSERT_PERL_CONSTRUCT;
 
+
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
@@ -384,6 +385,16 @@ perl_construct(pTHXx)
             PERL_HASH_WITH_STATE(PL_hash_state,PL_hash_chars[256],str,0);
         }
 #endif
+        /* ASLR and CC linker alignment unknown until runtime */
+        Size_t hpstart = ((size_t)(&PL_hekpool));
+        Size_t hpend = ((size_t)(&PL_hekpool))+sizeof(HEKP_T);
+        //0xE78 amd64 ATM
+        Size_t mask = Size_t_MAX;
+        while((hpstart & mask) != (hpend & mask) ) {
+          mask = mask << 1;
+        }
+        PL_hpool_mask = mask;
+        PL_hpool_vm_seg = (hpstart & mask);
         /* at this point we have initialized the hash function, and we can start
          * constructing hashes */
         PL_hash_seed_set= TRUE;
@@ -400,8 +411,17 @@ perl_construct(pTHXx)
         /* SHAREKEYS tells us that the hash has its keys shared with PL_strtab,
          * which is not the case with PL_strtab itself */
         HvSHAREKEYS_off(PL_strtab);			/* mandatory */
-        hv_ksplit(PL_strtab, 1 << 11);
+        //hv_ksplit(PL_strtab, 1 << 11); BUGS in ksplit/free unknown sh hek,oversize stops it
+        hv_ksplit(PL_strtab, 1 <<14);
+        /* pick up GShHeHeks vivified from a thd build deallocated previous
+           my_perl instance, or no-thds build + embedder did, serially,
+           1 by 1, a perl_destruct() -> perl_construct() cycle */
     }
+    //gv_init_hekpool_autoload();
+    //sv_vivisome_hekpool();
+    sv_viviall_hekpool();
+    PL_lastcopfile.copfile_unsafe = NULL; /* not needed semantically */
+    PL_lastcopfile.cached_file = NULL;
 
 #ifdef USE_ITHREADS
     PL_compiling.cop_file = NULL;
@@ -1354,6 +1374,15 @@ perl_destruct(pTHXx)
         SvREFCNT_dec(PL_sv_consts[i]);
         PL_sv_consts[i] = NULL;
     }
+    {
+        HEK* cached_file = PL_lastcopfile.cached_file;
+        PL_lastcopfile.copfile_unsafe = NULL; /* not needed semantically */
+        if(cached_file) {
+            PL_lastcopfile.cached_file = NULL;
+            unshare_hek(cached_file);
+        }
+    }
+
 
     /* Destruct the global string table. */
     {
@@ -1374,7 +1403,48 @@ perl_destruct(pTHXx)
                 Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
                      "Unbalanced string table refcount: (%ld) for \"%s\"",
                      (long)hent->he_valu.hent_refcount, HeKEY(hent));
-                Safefree(hent);
+                if(IS_HEKPOOL(hent)) { /* is libperl C global, not from Newx() */
+                  struct shared_he * const newhe = (struct shared_he*)hent;
+                  Size_t * rcp = &newhe->shared_he_he.he_valu.hent_refcount;
+                  Size_t rc = *rcp;
+                  //__debugbreak();
+                  if(rc > 1 && rc <= SSize_t_MAX) {
+                   // __debugbreak();
+                     /* sv_vivihek() added a RC +1 owned by my_perl->PL_strtab */
+                    *rcp--;
+                  }
+                  else if(rc > SSize_t_MAX) {
+                   // __debugbreak();
+                  /* ithreads + not using atomic CAS == race + stupidity
+                     RC #1 is owned by the OS Kernel. HE/HEK is IMMORTAL.
+                     This race should be impossible in real life. It can
+                     only happen by intentionally using C breakpoints,
+                     disassembly view single steping, and thread freeze
+                     feature.  Regardless, this "reset to 1" code will stay
+                     here, since ~dozen bug tickets+fix patches have been done
+                     through history for Win32, especially for Server 2003,
+                     which likes to do,
+
+                     ithread #1 HW page fault->#1 frozen->disk read queued
+                     ->#2 is ready to run and attached to CPU
+                     ->#2 HW page fault same 4KB page->#2 frozen->
+                     disk answers-> kernel resumes ithread #2
+                     ->#2 runs ALOT of code->10s or 100-500 ms later
+                     ithread #1 finally wakes up
+
+                     What is the RC now? Atomic CAS wasn't used. Does #1's
+                     CPU reg context snapshot happen to have a stale copy
+                     of RC? Who knows. A range test can't be fooled. */
+                    *rcp = 1;
+                  }
+                  else {
+                   // __debugbreak();
+                   NOOP;
+                  }
+                }
+                else {
+                  Safefree(hent);
+                }
                 hent = next;
             }
             if (!hent) {
@@ -4148,7 +4218,7 @@ S_init_main_stash(pTHX)
     hv_name_sets(PL_defstash, "main", 0);
     GvHV(gv) = HvREFCNT_inc_simple(PL_defstash);
     SvREADONLY_on(gv);
-    PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpvs("INC", GV_ADD|GV_NOTQUAL,
+    PL_incgv = gv_HVadd(gv_AVadd(gv_fetchsv_nomg(SV_CONST2(INC), GV_ADD|GV_NOTQUAL,
                                              SVt_PVAV)));
     SvREFCNT_inc_simple_void(PL_incgv); /* Don't allow it to be freed */
     GvMULTI_on(PL_incgv);
@@ -4663,7 +4733,7 @@ S_init_predump_symbols(pTHX)
                       STR_WITH_LEN("Exporter::"),
                       NULL);
 
-    PL_stdingv = gv_fetchpvs("STDIN", GV_ADD|GV_NOTQUAL, SVt_PVIO);
+    PL_stdingv = gv_fetchsv_nomg(SV_CONST2(STDIN), GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
     io = GvIOp(PL_stdingv);
     IoTYPE(io) = IoTYPE_RDONLY;
@@ -4672,7 +4742,7 @@ S_init_predump_symbols(pTHX)
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = MUTABLE_IO(SvREFCNT_inc_simple(io));
 
-    tmpgv = gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO);
+    tmpgv = gv_fetchsv_nomg(SV_CONST2(STDOUT), GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(tmpgv);
     io = GvIOp(tmpgv);
     IoTYPE(io) = IoTYPE_WRONLY;
@@ -4682,7 +4752,7 @@ S_init_predump_symbols(pTHX)
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = MUTABLE_IO(SvREFCNT_inc_simple(io));
 
-    PL_stderrgv = gv_fetchpvs("STDERR", GV_ADD|GV_NOTQUAL, SVt_PVIO);
+    PL_stderrgv = gv_fetchsv_nomg(SV_CONST2(STDERR), GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stderrgv);
     io = GvIOp(PL_stderrgv);
     IoTYPE(io) = IoTYPE_WRONLY;
@@ -4718,7 +4788,7 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
                 sv_setiv(GvSV(gv_fetchpv(argv[0]+1, GV_ADD, SVt_PV)),1);
         }
     }
-    if ((PL_argvgv = gv_fetchpvs("ARGV", GV_ADD|GV_NOTQUAL, SVt_PVAV))) {
+    if ((PL_argvgv = gv_fetchsv_nomg(SV_CONST2(ARGV), GV_ADD|GV_NOTQUAL, SVt_PVAV))) {
         SvREFCNT_inc_simple_void_NN(PL_argvgv);
         GvMULTI_on(PL_argvgv);
         av_clear(GvAVn(PL_argvgv));
@@ -4760,7 +4830,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
     if ((tmpgv = gv_fetchpvs("0", GV_ADD|GV_NOTQUAL, SVt_PV))) {
         sv_setpv(GvSV(tmpgv),PL_origfilename);
     }
-    if ((PL_envgv = gv_fetchpvs("ENV", GV_ADD|GV_NOTQUAL, SVt_PVHV))) {
+    if ((PL_envgv = gv_fetchsv_nomg(SV_CONST2(ENV), GV_ADD|GV_NOTQUAL, SVt_PVHV))) {
         HV *hv;
         bool env_is_not_environ;
         SvREFCNT_inc_simple_void_NN(PL_envgv);

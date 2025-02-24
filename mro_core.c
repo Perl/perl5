@@ -359,7 +359,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
                     /* They have no stash.  So create ourselves an ->isa cache
                        as if we'd copied it from what theirs should be.  */
                     stored = MUTABLE_HV(newSV_type_mortal(SVt_PVHV));
-                    (void) hv_stores(stored, "UNIVERSAL", &PL_sv_undef);
+                    (void) hv_store_ent(stored, SV_CONST2(UNIVERSAL), &PL_sv_undef, 0);
                     av_push_simple(retval,
                             newSVhek(HeKEY_hek(hv_store_ent(stored, sv,
                                                             &PL_sv_undef, 0))));
@@ -369,7 +369,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     } else {
         /* We have no parents.  */
         stored = MUTABLE_HV(newSV_type_mortal(SVt_PVHV));
-        (void) hv_stores(stored, "UNIVERSAL", &PL_sv_undef);
+        (void) hv_store_ent(stored, SV_CONST2(UNIVERSAL), &PL_sv_undef, 0);
     }
 
     (void) hv_store_ent(stored, our_name, &PL_sv_undef, 0);
@@ -469,7 +469,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
                              HEK_LEN(canon_name), HEK_FLAGS(canon_name),
                              HV_FETCH_ISSTORE, &PL_sv_undef,
                              HEK_HASH(canon_name));
-            (void) hv_stores(isa_hash, "UNIVERSAL", &PL_sv_undef);
+            (void) hv_store_ent(isa_hash, SV_CONST2(UNIVERSAL), &PL_sv_undef, 0);
 
             SvREADONLY_on(isa_hash);
 
@@ -542,8 +542,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     svp = hv_fetchhek(PL_isarev, stashhek, 0);
     isarev = svp ? MUTABLE_HV(*svp) : NULL;
 
-    if((memEQs(stashname, stashname_len, "UNIVERSAL"))
-        || (isarev && hv_existss(isarev, "UNIVERSAL"))) {
+    if((memEQhp(stashname, stashname_len, UNIVERSAL, "UNIVERSAL"))
+        || (isarev && hv_exists_ent(isarev, SV_CONST2(UNIVERSAL), 0))) {
         PL_sub_generation++;
         is_universal = TRUE;
     }
@@ -1349,8 +1349,8 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
     /* If stash is UNIVERSAL, or one of UNIVERSAL's parents,
        invalidate all method caches globally */
-    if((memEQs(stashname, stashname_len, "UNIVERSAL"))
-        || (isarev && hv_existss(isarev, "UNIVERSAL"))) {
+    if((memEQhp(stashname, stashname_len, UNIVERSAL, "UNIVERSAL"))
+        || (isarev && hv_exists_ent(isarev, SV_CONST2(UNIVERSAL), 0))) {
         PL_sub_generation++;
         return;
     }

@@ -463,7 +463,8 @@ static void S_ensure_module_version(pTHX_ SV *module, SV *version)
 
     PUSHMARK(PL_stack_sp);
     rpp_xpush_2(module, version);
-    call_method("VERSION", G_VOID);
+    /* call_method("VERSION", G_VOID); */
+    call_sv(SV_CONST2(VERSION), G_VOID | G_METHOD);
 
     LEAVE;
 }

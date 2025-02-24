@@ -109,7 +109,8 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
         sv = SvRV(sv);
         if (SvTYPE(sv) == SVt_PVIO) {
             GV * const gv = MUTABLE_GV(sv_newmortal());
-            gv_init(gv, 0, "__ANONIO__", 10, 0);
+            /* gv_init(gv, 0, "__ANONIO__", 10, 0); */
+            gv_init_sv(gv, 0, SV_CONST2(__ANONIO__), GV_ADDMULTI*cBOOL(0));
             GvIOp(gv) = MUTABLE_IO(sv);
             SvREFCNT_inc_void_NN(sv);
             sv = MUTABLE_SV(gv);
@@ -137,7 +138,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
                         gv_init_sv(gv, stash, namesv, 0);
                     }
                     else {
-                        gv_init_pv(gv, stash, "__ANONIO__", 0);
+                        gv_init_sv(gv, stash, SV_CONST2(__ANONIO__), 0);
                     }
                     sv_setrv_noinc_mg(sv, MUTABLE_SV(gv));
                     goto wasref;
@@ -681,12 +682,16 @@ PP(pp_gelem)
         case 'P':
             if (memEQs(elem, len, "PACKAGE")) {
                 const HV * const stash = GvSTASH(gv);
-                const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
-                sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
+                const HEK * hek = stash ? HvNAME_HEK(stash) : NULL;
+                if(!hek) {
+                    SV_CONST2(__ANON__);
+                    hek = HEK_POOL(__ANON__,"__ANON__");
+                };
+                sv = newSVhek(hek);
             }
             break;
         case 'S':
-            if (memEQs(elem, len, "SCALAR"))
+            if (memEQhp(elem, len, SCALAR, "SCALAR"))
                 tmpRef = GvSVn(gv);
             break;
         }
@@ -6181,7 +6186,7 @@ PP_wrapped(pp_splice, 0, 1)
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-        return Perl_tied_method(aTHX_ SV_CONST(SPLICE), mark - 1, MUTABLE_SV(ary), mg,
+        return Perl_tied_method(aTHX_ SV_CONST2(SPLICE), mark - 1, MUTABLE_SV(ary), mg,
                                     GIMME_V | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     sp - mark);
     }
@@ -6399,7 +6404,7 @@ PP(pp_push)
 #endif
         *MARK-- = obj;
         PUSHMARK(MARK);
-        call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
+        call_sv(SV_CONST2(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
         LEAVE_with_name("call_PUSH");
     }
     else {
@@ -6466,7 +6471,7 @@ PP(pp_unshift)
 #endif
         *MARK-- = obj;
         PUSHMARK(MARK);
-        call_sv(SV_CONST(UNSHIFT),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
+        call_sv(SV_CONST2(UNSHIFT),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
         LEAVE_with_name("call_UNSHIFT");
     }
     else {
@@ -7081,7 +7086,7 @@ PP_wrapped(pp_split,
             av_clear(ary);
 
             ENTER_with_name("call_PUSH");
-            call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
+            call_sv(SV_CONST2(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
             LEAVE_with_name("call_PUSH");
             SPAGAIN;
 

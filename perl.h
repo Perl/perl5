@@ -6213,6 +6213,7 @@ END_EXTERN_C
 START_EXTERN_C
 
 #  include "perlvars.h"
+#  include "hekpool.h"
 
 END_EXTERN_C
 

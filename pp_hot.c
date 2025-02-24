@@ -2107,7 +2107,7 @@ PP(pp_print)
             *MARK = NULL;
             ++PL_stack_sp;
         }
-        return Perl_tied_method(aTHX_ SV_CONST(PRINT), mark - 1, MUTABLE_SV(io),
+        return Perl_tied_method(aTHX_ SV_CONST2(PRINT), mark - 1, MUTABLE_SV(io),
                                 mg,
                                 (G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK
                                  | (PL_op->op_type == OP_SAY
@@ -4072,7 +4072,7 @@ Perl_do_readline(pTHX)
 
             /* tied_method() frees everything currently above the passed
              * mark, and returns any values at mark[1] onwards */
-            Perl_tied_method(aTHX_ SV_CONST(READLINE),
+            Perl_tied_method(aTHX_ SV_CONST2(READLINE),
                 /* mark => */ PL_stack_sp,
                               MUTABLE_SV(io), mg, gimme, 0);
 

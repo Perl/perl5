@@ -3591,6 +3591,9 @@ Adp	|void	|sv_vcatpvfn_flags					\
 				|const Size_t sv_count			\
 				|NULLOK bool * const maybe_tainted	\
 				|const U32 flags
+Cp	|void	|sv_viviall_hekpool
+CRTXp	|SV *	|sv_vivihek	|NN SV * const sv
+Cp	|void	|sv_vivisome_hekpool
 Adp	|void	|sv_vsetpvf	|NN SV * const sv			\
 				|NN const char * const pat		\
 				|NULLOK va_list * const args
@@ -4460,13 +4463,6 @@ S	|bool	|find_default_stash					\
 				|const U32 is_utf8			\
 				|const I32 add				\
 				|const svtype sv_type
-i	|GV *	|gv_fetchmeth_internal					\
-				|NULLOK HV *stash			\
-				|NULLOK SV *meth			\
-				|NULLOK const char *name		\
-				|STRLEN len				\
-				|I32 level				\
-				|U32 flags
 S	|void	|gv_init_svtype |NN GV *gv				\
 				|const svtype sv_type
 S	|bool	|gv_is_in_main	|NN const char *name			\
@@ -4507,6 +4503,15 @@ S	|void	|require_tie_mod|NN GV *gv				\
 : Used in gv.c
 op	|void	|sv_add_backref |NN SV * const tsv			\
 				|NN SV * const sv
+#endif
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C)
+ep	|GV *	|gv_fetchmeth_internal					\
+				|NULLOK HV *stash			\
+				|NULLOK SV *meth			\
+				|NULLOK const char *name		\
+				|STRLEN len				\
+				|I32 level				\
+				|U32 flags
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 EGdp	|HV *	|gv_stashsvpvn_cached					\

@@ -43,8 +43,9 @@ within a package.  See L<perlguts/Stashes and Globs>
 #include "keywords.h"
 #include "feature.h"
 
-static const char S_autoload[] = "AUTOLOAD";
-#define S_autolen (sizeof("AUTOLOAD")-1)
+/* static const char * S_autoload = NULL;
+   #define S_autolen (sizeof("AUTOLOAD")-1) */
+
 
 /*
 =for apidoc gv_add_by_type
@@ -206,6 +207,8 @@ Perl_newGP(pTHX_ GV *const gv)
     U32 hash;
     const char *file;
     STRLEN len;
+    HEK* hek_cached;
+    HEK* hek;
 
     PERL_ARGS_ASSERT_NEWGP;
     Newxz(gp, 1, GP);
@@ -234,8 +237,27 @@ Perl_newGP(pTHX_ GV *const gv)
         len = 0;
     }
 
-    PERL_HASH(hash, file, len);
-    gp->gp_file_hek = share_hek(file, len, hash);
+    hek_cached = PL_lastcopfile.cached_file;
+    if( hek_cached
+        && (file == PL_lastcopfile.copfile_unsafe
+        /* TODO research chances of free(); malloc(); same addr,
+        len I32 not STRLEN  cache it also? #line and #file in PP can they
+        make a 4.5 GB filepath? */
+            || (len == HEK_LEN(hek_cached)
+                && memEQ(file, HEK_KEY(hek_cached), len)))) {
+        hek = share_hek_hek(hek_cached);
+    }
+    else {
+        PERL_HASH(hash, file, len);
+        hek = share_hek(file, len, hash);
+        hek_cached = PL_lastcopfile.cached_file;
+        PL_lastcopfile.cached_file = share_hek_hek(hek); /* no fn calls here */
+        PL_lastcopfile.copfile_unsafe = file;
+        if(hek_cached) {
+            unshare_hek(hek_cached);
+        }
+    }
+    gp->gp_file_hek = hek;
     gp->gp_refcnt = 1;
 
     return gp;
@@ -846,8 +868,8 @@ Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
 
 /* NOTE: No support for tied ISA */
 
-PERL_STATIC_INLINE GV*
-S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len, I32 level, U32 flags)
+GV*
+Perl_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len, I32 level, U32 flags)
 {
     GV** gvp;
     HE* he;
@@ -865,10 +887,11 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
     U32 topgen_cmp;
     U32 is_utf8 = flags & SVf_UTF8;
 
+    PERL_ARGS_ASSERT_GV_FETCHMETH_INTERNAL;
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
         create = 0;  /* probably appropriate */
-        if(!(stash = gv_stashpvs("UNIVERSAL", 0)))
+        if(!(stash = gv_stashsv(SV_CONST2(UNIVERSAL), 0)))
             return 0;
     }
 
@@ -948,14 +971,14 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
             if ( ckWARN(WARN_SYNTAX)) {
                 if(     /* these are loaded from Perl_Gv_AMupdate() one way or another */
                            ( len    && name[0] == '(' )  /* overload.pm related, in particular "()" */
-                        || ( memEQs( name, len, "DESTROY") )
+                        || (  memEQhp(name, len, DESTROY, "DESTROY"))
                 ) {
                      Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
                             "Can't locate package %" SVf " for @%" HEKf "::ISA",
                             SVfARG(linear_sv),
                             HEKfARG(HvNAME_HEK(stash)));
 
-                } else if( memEQs( name, len, "AUTOLOAD") ) {
+                } else if( memEQhp(name, len, AUTOLOAD, "AUTOLOAD") ) {
                     /* gobble this warning */
                 } else {
                     Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -1074,9 +1097,9 @@ Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I3
 
         if (!stash)
             return NULL;	/* UNIVERSAL::AUTOLOAD could cause trouble */
-        if (len == S_autolen && memEQ(name, S_autoload, S_autolen))
+        if (memEQhp(name, len, AUTOLOAD, "AUTOLOAD"))
             return NULL;
-        if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, flags)))
+        if (!(gv = gv_fetchmeth_sv_nomg_x(stash, SV_CONST2(AUTOLOAD), FALSE, flags)))
             return NULL;
         cv = GvCV(gv);
         if (!(CvROOT(cv) || CvXSUB(cv)))
@@ -1367,6 +1390,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 {
     GV* gv;
     CV* cv;
+    HE* varhe;
     HV* varstash;
     GV* vargv;
     SV* varsv;
@@ -1375,7 +1399,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 
     PERL_ARGS_ASSERT_GV_AUTOLOAD_PVN;
 
-    if (len == S_autolen && memEQ(name, S_autoload, S_autolen))
+    if (memEQhp(name, len, AUTOLOAD, "AUTOLOAD"))
         return NULL;
     if (stash) {
         if (SvTYPE(stash) < SVt_PVHV) {
@@ -1389,7 +1413,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
             packname = newSVhek_mortal(HvNAME_HEK(stash));
         if (flags & GV_SUPER) sv_catpvs(packname, "::SUPER");
     }
-    if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE,
+    if (!(gv = gv_fetchmeth_sv_nomg_x(stash, SV_CONST2(AUTOLOAD), FALSE,
                                 is_utf8 | (flags & GV_SUPER))))
         return NULL;
     cv = GvCV(gv);
@@ -1469,11 +1493,13 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
      * original package to look up $AUTOLOAD.
      */
     varstash = CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv));
-    vargv = *(GV**)hv_fetch(varstash, S_autoload, S_autolen, TRUE);
+    varhe = hv_fetch_ent(varstash, SV_CONST2(AUTOLOAD), TRUE, 0);
+    vargv = (GV*)HeVAL(varhe);
     ENTER;
 
     if (!isGV(vargv)) {
-        gv_init_pvn(vargv, varstash, S_autoload, S_autolen, 0);
+        /* gv_init_pvn(vargv, varstash, S_autoload, S_autolen, 0); */
+        gv_init_sv(vargv, varstash, SV_CONST2(AUTOLOAD), 0); /* TODO add NOVI */
 #ifdef PERL_DONT_CREATE_GVSV
         GvSV(vargv) = newSV_type(SVt_NULL);
 #endif

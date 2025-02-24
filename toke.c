@@ -5110,7 +5110,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 
     PERL_ARGS_ASSERT_FIND_IN_MY_STASH;
 
-    if (memEQs(pkgname, len, "__PACKAGE__"))
+    if (memEQhp(pkgname, len, __PACKAGE__, "__PACKAGE__"))
         return PL_curstash;
 
     if (len > 2
@@ -5630,8 +5630,11 @@ yyl_sub(pTHX_ char *s, const int key)
     }
 
     if (!have_name) {
-        if (PL_curstash)
-            sv_setpvs(PL_subname, "__ANON__");
+        if (PL_curstash) {
+            /* sv_setpvs(PL_subname, "__ANON__"); */
+            SV_CONST2(__ANON__);
+            sv_sethek(PL_subname, HEK_POOL(__ANON__, "__ANON__"));
+        }
         else
             sv_setpvs(PL_subname, "__ANON__::__ANON__");
         if (is_method)
@@ -6281,8 +6284,11 @@ yyl_subproto(pTHX_ char *s, CV *cv)
     }
 
     if (*proto == '&' && *s == '{') {
-        if (PL_curstash)
-            sv_setpvs(PL_subname, "__ANON__");
+        if (PL_curstash) {
+            /* sv_setpvs(PL_subname, "__ANON__"); */
+            SV_CONST2(__ANON__);
+            sv_sethek(PL_subname, HEK_POOL(__ANON__, "__ANON__"));
+        }
         else
             sv_setpvs(PL_subname, "__ANON__::__ANON__");
         if (!PL_lex_allbrackets
@@ -8031,7 +8037,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_chdir:
         /* may use HOME */
-        (void)gv_fetchpvs("ENV", GV_ADD|GV_NOTQUAL, SVt_PVHV);
+        (void)gv_fetchsv_nomg(SV_CONST2(ENV), GV_ADD|GV_NOTQUAL, SVt_PVHV);
         UNI(OP_CHDIR);
 
     case KEY_close:

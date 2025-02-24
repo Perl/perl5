@@ -683,6 +683,22 @@ typedef struct rcpv RCPV;
 
 #endif /* USE_ITHREADS */
 
+/* A cache of the last CopFILE char *, that was turned into a HEK*, probably
+   to be stored in a GP*.  This is a cache. HEK* might be stale, always compare
+   it to the current CopFILE.  This cache prevents alot of repetitive work
+   in Perl_newGP(), PERL_HASH(), share_hek_flags(), and HvARRAY(PL_strtab). */
+struct cop_lastfile {
+    char * copfile_unsafe; /* unsafe to deref, ptr that was used to create
+    this HEK*, the ptr was originally from CopFILE(PL_curcop).
+    The copfile_unsafe does not have any ownership or any RC on the ptr in it.
+    It could be freed by now. char * copfile_unsafe is only used as a ==
+    against the current char * (which has an undefined allocator), to skip
+    the memcmp(). The == will likely pass b/c of the RCPV API. RCPV is an
+    internals detail we don't know about. */
+    HEK * cached_file; /* This field owns a RC +1 HEK*.  If old HEK*
+    is not NULL, it must be --ed. New HEK* must be ++ed.  */
+};
+
 #define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
    /* cop_stash is not refcounted */
 #define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
