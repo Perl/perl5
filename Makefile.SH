@@ -1750,7 +1750,7 @@ TAGS: $(c_base) $(h)
 $spitshell >>$Makefile <<!GROK!THIS!
 
 ctags:
-	ctags -f Tags -N --totals --languages=c --langmap=c:+.h $ctags_exclude *.c *.h
+	ctags -N --languages=c --langmap=c:+.h $ctags_exclude *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
