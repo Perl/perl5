@@ -68,7 +68,6 @@ delete $rfuncs{setlocale_r} if $^O eq 'linux';
 my $netdb_r_obsolete;
 if ($^O eq 'hpux') {
     delete $rfuncs{crypt_r};
-    delete $rfuncs{drand48_r};
     delete $rfuncs{endgrent_r};
     delete $rfuncs{endpwent_r};
     delete $rfuncs{getgrent_r};

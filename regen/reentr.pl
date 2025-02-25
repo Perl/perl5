@@ -1205,10 +1205,7 @@ read_only_bottom_close_and_rename($c);
 
 # As of February 2024, the config.h entries that have reentrant prototypes that
 # aren't in this file are:
-#       drand48
-#       random
-#       srand48
-#       srandom
+#       None at this time.
 # Additionally, these are the POSIX defined _r functions that aren't defined
 #       getgrid_r
 #       rand_r

@@ -304,15 +304,12 @@ case "`oslevel`" in
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
     $define|true|[yY]*)
-	d_drand48_r='undef'
 	d_endgrent_r='undef'
 	d_endpwent_r='undef'
 	d_getgrent_r='undef'
 	d_getpwent_r='undef'
-	d_random_r='undef'
 	d_setgrent_r='undef'
 	d_setpwent_r='undef'
-	d_srand48_r='undef'
 	d_strerror_r='undef'
 
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"

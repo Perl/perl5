@@ -56,6 +56,8 @@ Hence, for example, C<ibcmp()> is S<C<(! foldEQ())>>
 #define PL_PTR_PROTO_RANDOM_STATE           &(proto_perl->Irandom_state)
 #define PL_PTR_PROTO_RANDOM_STATE_INTERNAL  &(proto_perl->Irandom_state_internal)
 
+
+
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of
    perl_drand48_t below, and that is visible outside of the core.  */
@@ -91,6 +93,11 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
  * of rand() */
 #define Perl_drand48_internal() (Perl_drand48_r(PL_PTR_RANDOM_STATE_INTERNAL))
 #endif
+
+#define Drand01()       Perl_drand48()
+#define Rand_seed_t     U32
+#define seedDrand01(x)  Perl_Drand48_init((Rand_seed_t)x)
+
 
 #ifdef USE_C_BACKTRACE
 
