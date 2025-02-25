@@ -51,12 +51,9 @@ Hence, for example, C<ibcmp()> is S<C<(! foldEQ())>>
 #define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
                     cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
-#define PL_PTR_RANDOM_STATE                 &PL_random_state
-#define PL_PTR_RANDOM_STATE_INTERNAL        &PL_random_state_internal
-#define PL_PTR_PROTO_RANDOM_STATE           &(proto_perl->Irandom_state)
-#define PL_PTR_PROTO_RANDOM_STATE_INTERNAL  &(proto_perl->Irandom_state_internal)
 
 
+#ifndef PERL_USE_WELL512A_RNG
 
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of
@@ -65,6 +62,13 @@ Hence, for example, C<ibcmp()> is S<C<(! foldEQ())>>
 /* use a faster implementation when quads are available */
 #    define PERL_DRAND48_QUAD
 #endif
+
+#define PL_PTR_RANDOM_STATE                 &PL_random_state
+#define PL_PTR_RANDOM_STATE_INTERNAL        &PL_random_state_internal
+#define PL_PTR_PROTO_RANDOM_STATE           &(proto_perl->Irandom_state)
+#define PL_PTR_PROTO_RANDOM_STATE_INTERNAL  &(proto_perl->Irandom_state_internal)
+
+#define PL_RANDOM_STATE_LENGTH 1
 
 #ifdef PERL_DRAND48_QUAD
 
@@ -83,21 +87,55 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 
 #endif
 
+
 #define PL_RANDOM_STATE_TYPE perl_drand48_t
 
-#define Perl_drand48_init(seed) (Perl_drand48_init_r(PL_PTR_RANDOM_STATE, (seed)))
-#define Perl_drand48() (Perl_drand48_r(PL_PTR_RANDOM_STATE))
+
+#define Perl_drand01_init_r(state,seed) (Perl_drand48_init_r((state), (seed)))
+#define Perl_drand01_r(state)           (Perl_drand48_r(state))
+
+
+#else
+/* stuff we need to use WELLRNG512 instead of Drand48 */
+
+#define PL_PTR_RANDOM_STATE                 PL_random_state
+#define PL_PTR_RANDOM_STATE_INTERNAL        PL_random_state_internal
+#define PL_PTR_PROTO_RANDOM_STATE           proto_perl->Irandom_state
+#define PL_PTR_PROTO_RANDOM_STATE_INTERNAL  proto_perl->Irandom_state_internal
+
+#define PL_RANDOM_STATE_LENGTH 17
+
+#define PL_RANDOM_STATE_TYPE U32
+
+#define Perl_drand01_init_r(state,seed) (Perl_wellrng512a_init_r(state, (seed)))
+#define Perl_drand01_r(state)           (Perl_drand01_wellrng512a_r(state))
+
+#endif
+
+#define Perl_drand01_init(seed) (Perl_drand01_init_r(PL_PTR_RANDOM_STATE, (seed)))
+#define Perl_drand01()          (Perl_drand01_r(PL_PTR_RANDOM_STATE))
 
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid interfering with the results
  * of rand() */
-#define Perl_drand48_internal() (Perl_drand48_r(PL_PTR_RANDOM_STATE_INTERNAL))
+#define Perl_drand01_internal() (Perl_drand01_r(PL_PTR_RANDOM_STATE_INTERNAL))
 #endif
 
-#define Drand01()       Perl_drand48()
-#define Rand_seed_t     U32
-#define seedDrand01(x)  Perl_Drand48_init((Rand_seed_t)x)
+/*
+=for apidoc_section $numeric
 
+=for apidoc Drand01
+This macro is to be used to generate uniformly distributed
+random numbers over the interval [0.0, 1.0)
+=for apidoc seedDrand01
+This symbol defines the macro to be used in seeding the
+random number generator (see Drand01).
+=cut
+*/
+
+#define Drand01()       Perl_drand01()
+#define Rand_seed_t     U32
+#define seedDrand01(x)  Perl_drand01_init((Rand_seed_t)x)
 
 #ifdef USE_C_BACKTRACE
 

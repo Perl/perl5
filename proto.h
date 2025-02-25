@@ -1028,16 +1028,6 @@ Perl_dowantarray(pTHX)
 #define PERL_ARGS_ASSERT_DOWANTARRAY
 
 PERL_CALLCONV void
-Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed);
-#define PERL_ARGS_ASSERT_DRAND48_INIT_R         \
-        assert(random_state)
-
-PERL_CALLCONV double
-Perl_drand48_r(perl_drand48_t *random_state);
-#define PERL_ARGS_ASSERT_DRAND48_R              \
-        assert(random_state)
-
-PERL_CALLCONV void
 Perl_dump_all(pTHX);
 #define PERL_ARGS_ASSERT_DUMP_ALL
 
@@ -10502,6 +10492,34 @@ Perl_sighandler(int sig)
 # define PERL_ARGS_ASSERT_SIGHANDLER
 
 #endif /* !defined(PERL_USE_3ARG_SIGHANDLER) */
+#if defined(PERL_USE_WELL512A_RNG)
+PERL_CALLCONV double
+Perl_drand01_wellrng512a_r(U32 *random_state);
+# define PERL_ARGS_ASSERT_DRAND01_WELLRNG512A_R \
+        assert(random_state)
+
+PERL_CALLCONV void
+Perl_wellrng512a_init_r(U32 *random_state, U32 seed);
+# define PERL_ARGS_ASSERT_WELLRNG512A_INIT_R    \
+        assert(random_state)
+
+PERL_CALLCONV U32
+Perl_wellrng512a_u_r(U32 *random_state);
+# define PERL_ARGS_ASSERT_WELLRNG512A_U_R       \
+        assert(random_state)
+
+#else /* if !defined(PERL_USE_WELL512A_RNG) */
+PERL_CALLCONV void
+Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed);
+# define PERL_ARGS_ASSERT_DRAND48_INIT_R        \
+        assert(random_state)
+
+PERL_CALLCONV double
+Perl_drand48_r(perl_drand48_t *random_state);
+# define PERL_ARGS_ASSERT_DRAND48_R             \
+        assert(random_state)
+
+#endif /* !defined(PERL_USE_WELL512A_RNG) */
 #if defined(U64TYPE)
 
 #endif

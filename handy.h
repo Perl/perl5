@@ -43,8 +43,9 @@ from it, and are very unlikely to change
 =for apidoc_defn Amu|token|CAT2|token x|token y
 =for apidoc_defn Amu|string|STRINGIFY|token x
 
-=for apidoc_defn Am|double|Drand01
-=for apidoc_defn Am|void|seedDrand01|Rand_seed_t x
+=for apidoc_defn AmT|double|Drand01
+=for apidoc_defn AmT|void|seedDrand01|Rand_seed_t x
+
 =for apidoc_defn Am|char *|Gconvert|double x|Size_t n|bool t|char * b
 
 =cut

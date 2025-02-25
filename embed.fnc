@@ -1149,9 +1149,6 @@ p	|void	|do_vop 	|I32 optype				\
 				|NN SV *left				\
 				|NN SV *right
 CDRdp	|U8	|dowantarray
-TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
-				|U32 seed
-TXop	|double |drand48_r	|NN perl_drand48_t *random_state
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Adhp	|void	|dump_eval
@@ -6283,6 +6280,18 @@ Tp	|Signal_t|sighandler	|int sig				\
 #else
 CTp	|Signal_t|csighandler	|int sig
 Tp	|Signal_t|sighandler	|int sig
+#endif
+#if defined(PERL_USE_WELL512A_RNG)
+TXop	|double |drand01_wellrng512a_r					\
+				|NN U32 *random_state
+TXop	|void	|wellrng512a_init_r					\
+				|NN U32 *random_state			\
+				|U32 seed
+TXop	|U32	|wellrng512a_u_r|NN U32 *random_state
+#else
+TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
+				|U32 seed
+TXop	|double |drand48_r	|NN perl_drand48_t *random_state
 #endif
 #if defined(U64TYPE)
 CRTip	|unsigned|lsbit_pos64	|U64 word
