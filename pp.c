@@ -1483,8 +1483,8 @@ PP(pp_multiply)
     } /* SvIOK(svr) */
 #endif
     {
-      NV right = SvNV_nomg(svr);
       NV left  = SvNV_nomg(svl);
+      NV right = SvNV_nomg(svr);
       NV result = left * right;
 
 #if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE && NVSIZE == 16
@@ -1611,8 +1611,8 @@ PP(pp_divide)
     } /* one operand wasn't SvIOK */
 #endif /* PERL_TRY_UV_DIVIDE */
     {
-        NV right = SvNV_nomg(svr);
         NV left  = SvNV_nomg(svl);
+        NV right = SvNV_nomg(svr);
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
         if (! Perl_isnan(right) && right == 0.0)
 #else
@@ -2061,14 +2061,10 @@ PP(pp_subtract)
     useleft = USE_LEFT(svl);
 #endif
     {
-        NV value = SvNV_nomg(svr);
-
-        if (!useleft) {
-            /* left operand is undef, treat as zero - value */
-            TARGn(-value, 1);
-            goto ret;
-        }
-        TARGn(SvNV_nomg(svl) - value, 1);
+        /* If left operand is undef, treat as zero - value */
+        NV value = useleft ? SvNV_nomg(svl) : 0.0;
+        value -= SvNV_nomg(svr);
+        TARGn(value, 1);
         goto ret;
     }
 
@@ -2356,8 +2352,8 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
     }
 #endif
     {
-      NV const rnv = SvNV_nomg(right);
       NV const lnv = SvNV_nomg(left);
+      NV const rnv = SvNV_nomg(right);
 
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
       if (Perl_isnan(lnv) || Perl_isnan(rnv)) {
@@ -2888,8 +2884,8 @@ PP(pp_i_multiply)
     if (rpp_try_AMAGIC_2(mult_amg, AMGf_assign))
         return NORMAL;
 
-    IV right = SvIV_nomg(PL_stack_sp[0]);
     IV left  = SvIV_nomg(PL_stack_sp[-1]);
+    IV right = SvIV_nomg(PL_stack_sp[0]);
 
     TARGi((IV)((UV)left * (UV)right), 1);
     rpp_replace_2_1_NN(targ);
@@ -2910,10 +2906,10 @@ PP(pp_i_divide)
     SV *left  = PL_stack_sp[-1];
 
     {
+      IV num = SvIV_nomg(left);
       IV value = SvIV_nomg(right);
       if (value == 0)
           DIE(aTHX_ "Illegal division by zero");
-      IV num = SvIV_nomg(left);
 
       /* avoid FPE_INTOVF on some platforms when num is IV_MIN */
       if (value == -1)
@@ -2936,8 +2932,8 @@ PP(pp_i_modulo)
     if (rpp_try_AMAGIC_2(modulo_amg, AMGf_assign))
         return NORMAL;
 
-    IV right = SvIV_nomg(PL_stack_sp[0]);
     IV left  = SvIV_nomg(PL_stack_sp[-1]);
+    IV right = SvIV_nomg(PL_stack_sp[0]);
 
      {
           if (!right)
@@ -2962,9 +2958,9 @@ PP(pp_i_add)
     if (rpp_try_AMAGIC_2(add_amg, AMGf_assign))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     SV *leftsv = PL_stack_sp[-1];
     IV left    = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     TARGi((IV)((UV)left + (UV)right), 1);
     rpp_replace_2_1_NN(targ);
@@ -2981,9 +2977,9 @@ PP(pp_i_subtract)
     if (rpp_try_AMAGIC_2(subtr_amg, AMGf_assign))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     SV *leftsv = PL_stack_sp[-1];
     IV left    = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     TARGi((IV)((UV)left - (UV)right), 1);
     rpp_replace_2_1_NN(targ);
@@ -2996,8 +2992,8 @@ PP(pp_i_lt)
     if (rpp_try_AMAGIC_2(lt_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left < right));
     return NORMAL;
@@ -3009,8 +3005,8 @@ PP(pp_i_gt)
     if (rpp_try_AMAGIC_2(gt_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left > right));
     return NORMAL;
@@ -3022,8 +3018,8 @@ PP(pp_i_le)
     if (rpp_try_AMAGIC_2(le_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left <= right));
     return NORMAL;
@@ -3035,8 +3031,8 @@ PP(pp_i_ge)
     if (rpp_try_AMAGIC_2(ge_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left >= right));
     return NORMAL;
@@ -3048,8 +3044,8 @@ PP(pp_i_eq)
     if (rpp_try_AMAGIC_2(eq_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left == right));
     return NORMAL;
@@ -3061,8 +3057,8 @@ PP(pp_i_ne)
     if (rpp_try_AMAGIC_2(ne_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left != right));
     return NORMAL;
@@ -3075,8 +3071,8 @@ PP(pp_i_ncmp)
     if (rpp_try_AMAGIC_2(ncmp_amg, 0))
         return NORMAL;
 
-    IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
 
 
     {
@@ -3122,8 +3118,8 @@ PP(pp_atan2)
     if (rpp_try_AMAGIC_2(atan2_amg, 0))
         return NORMAL;
 
-    NV right = SvNV_nomg(PL_stack_sp[0]);
     NV left  = SvNV_nomg(PL_stack_sp[-1]);
+    NV right = SvNV_nomg(PL_stack_sp[0]);
 
     TARGn(Perl_atan2(left, right), 1);
     rpp_replace_2_1_NN(targ);
