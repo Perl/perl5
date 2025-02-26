@@ -673,6 +673,19 @@ unless ($define{PERL_RC_STACK}) {
 			 );
 }
 
+if (!$define{PERL_USE_WELL512A_RNG}) {
+    ++$skip{$_} foreach qw(
+        Perl_drand01_wellrng512a_r
+        Perl_wellrng512a_init_r
+        Perl_wellrng512a_u_r
+    );
+} else {
+    ++$skip{$_} foreach qw(
+        Perl_drand48_init_r
+        Perl_drand48_r
+    );
+}
+
 # functions from *.sym files
 
 my @syms = qw(globvar.sym);
