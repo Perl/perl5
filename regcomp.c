@@ -6025,7 +6025,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 I32 num;
                 char * endbrace = NULL;
                 char * s = RExC_parse;
-                char * e = RExC_end;
 
                 if (*s == 'g') {
                     bool isrel = FALSE;
@@ -6061,12 +6060,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                         while (isBLANK(*s)) {
                             s++;
-                        }
-
-                        /* Ignore trailing blanks */
-                        e = endbrace;
-                        while (s < e && isBLANK(*(e - 1))) {
-                            e--;
                         }
                     }
 
