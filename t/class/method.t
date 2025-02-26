@@ -106,8 +106,10 @@ no warnings 'experimental::class';
 # ->& operator can invoke methods with lexical scope
 {
     class Testcase8 {
+        field $f = "private-result";
+
         my method priv {
-            return "private-result";
+            return $f;
         }
 
         method notpriv {
@@ -132,6 +134,24 @@ no warnings 'experimental::class';
 
     is(Testcase8Derived->new->pkgm, "pkg-result",
         '->&m operator does not follow inheritance');
+}
+
+# lexical methods with signatures work correctly (GH#23030)
+{
+    class Testcase9 {
+        field $x = 123;
+
+        my method priv ( $y ) {
+            return "X is $x and Y is $y for $self";
+        }
+
+        method test {
+            $self->&priv(456);
+        }
+    }
+
+    like(Testcase9->new->test, qr/^X is 123 and Y is 456 for Testcase9=OBJECT\(0x.*\)$/,
+        'lexical method with signature counts $self correctly');
 }
 
 done_testing;
