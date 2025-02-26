@@ -29,8 +29,8 @@ $v = $m1 + $m2;
 EXPECT
 Use of uninitialized value $m1 in addition (+) at - line 4.
 Use of uninitialized value $m2 in addition (+) at - line 5.
-Use of uninitialized value $m2 in addition (+) at - line 6.
 Use of uninitialized value $m1 in addition (+) at - line 6.
+Use of uninitialized value $m2 in addition (+) at - line 6.
 ########
 use warnings 'uninitialized';
 use utf8;
@@ -42,8 +42,8 @@ $v = $à1 + $ａ2;
 EXPECT
 Use of uninitialized value $à1 in addition (+) at - line 5.
 Use of uninitialized value $ａ2 in addition (+) at - line 6.
-Use of uninitialized value $ａ2 in addition (+) at - line 7.
 Use of uninitialized value $à1 in addition (+) at - line 7.
+Use of uninitialized value $ａ2 in addition (+) at - line 7.
 ########
 use warnings 'uninitialized';
 my ($m1, $v);
@@ -56,10 +56,10 @@ $v = $m1 + $g2;
 EXPECT
 Use of uninitialized value $g1 in addition (+) at - line 5.
 Use of uninitialized value $g2 in addition (+) at - line 6.
-Use of uninitialized value $g2 in addition (+) at - line 7.
 Use of uninitialized value $g1 in addition (+) at - line 7.
-Use of uninitialized value $g2 in addition (+) at - line 8.
+Use of uninitialized value $g2 in addition (+) at - line 7.
 Use of uninitialized value $m1 in addition (+) at - line 8.
+Use of uninitialized value $g2 in addition (+) at - line 8.
 ########
 use warnings 'uninitialized';
 my ($m1, @ma, $v);
@@ -72,8 +72,8 @@ $v = $ma[-1] + $ma[-2];
 EXPECT
 Use of uninitialized value $ma[5] in addition (+) at - line 4.
 Use of uninitialized value $ma[6] in addition (+) at - line 5.
-Use of uninitialized value $m1 in addition (+) at - line 6.
 Use of uninitialized value in addition (+) at - line 6.
+Use of uninitialized value $m1 in addition (+) at - line 6.
 Use of uninitialized value in addition (+) at - line 7.
 Use of uninitialized value in addition (+) at - line 7.
 Use of uninitialized value in addition (+) at - line 8.
@@ -97,14 +97,14 @@ Use of uninitialized value $mau[5] in addition (+) at - line 6.
 Use of uninitialized value $mau[-5] in addition (+) at - line 7.
 Use of uninitialized value $mau[6] in addition (+) at - line 8.
 Use of uninitialized value $mau[-6] in addition (+) at - line 9.
-Use of uninitialized value $mau[8] in addition (+) at - line 10.
 Use of uninitialized value $mau[7] in addition (+) at - line 10.
-Use of uninitialized value $mau[257] in addition (+) at - line 11.
+Use of uninitialized value $mau[8] in addition (+) at - line 10.
 Use of uninitialized value $mau[256] in addition (+) at - line 11.
-Use of uninitialized value $mau[-2] in addition (+) at - line 12.
+Use of uninitialized value $mau[257] in addition (+) at - line 11.
 Use of uninitialized value $mau[-1] in addition (+) at - line 12.
-Use of uninitialized value $mhu{"bar"} in addition (+) at - line 13.
+Use of uninitialized value $mau[-2] in addition (+) at - line 12.
 Use of uninitialized value $mhu{"foo"} in addition (+) at - line 13.
+Use of uninitialized value $mhu{"bar"} in addition (+) at - line 13.
 ########
 use warnings 'uninitialized';
 my ($v);
@@ -144,14 +144,14 @@ Use of uninitialized value $gau[8] in addition (+) at - line 6.
 Use of uninitialized value $gau[-8] in addition (+) at - line 7.
 Use of uninitialized value $gau[9] in addition (+) at - line 8.
 Use of uninitialized value $gau[-9] in addition (+) at - line 9.
-Use of uninitialized value $gau[11] in addition (+) at - line 10.
 Use of uninitialized value $gau[10] in addition (+) at - line 10.
-Use of uninitialized value $gau[257] in addition (+) at - line 11.
+Use of uninitialized value $gau[11] in addition (+) at - line 10.
 Use of uninitialized value $gau[256] in addition (+) at - line 11.
-Use of uninitialized value $gau[-2] in addition (+) at - line 12.
+Use of uninitialized value $gau[257] in addition (+) at - line 11.
 Use of uninitialized value $gau[-1] in addition (+) at - line 12.
-Use of uninitialized value $ghu{"bar"} in addition (+) at - line 13.
+Use of uninitialized value $gau[-2] in addition (+) at - line 12.
 Use of uninitialized value $ghu{"foo"} in addition (+) at - line 13.
+Use of uninitialized value $ghu{"bar"} in addition (+) at - line 13.
 ########
 use warnings 'uninitialized';
 my ($v);
@@ -173,18 +173,18 @@ $v = $mhu{$k1} + $mhu{$k2};
 $v = $ghu{$k1} + $ghu{$k2};
 $v = $ghu{$k1} + $ghu{$k3};
 EXPECT
-Use of uninitialized value $mau[20] in addition (+) at - line 14.
 Use of uninitialized value $mau[10] in addition (+) at - line 14.
-Use of uninitialized value $gau[20] in addition (+) at - line 15.
+Use of uninitialized value $mau[20] in addition (+) at - line 14.
 Use of uninitialized value $gau[10] in addition (+) at - line 15.
-Use of uninitialized value in addition (+) at - line 16.
+Use of uninitialized value $gau[20] in addition (+) at - line 15.
 Use of uninitialized value $gau[10] in addition (+) at - line 16.
-Use of uninitialized value $mhu{"bar"} in addition (+) at - line 17.
+Use of uninitialized value in addition (+) at - line 16.
 Use of uninitialized value $mhu{"foo"} in addition (+) at - line 17.
-Use of uninitialized value $ghu{"bar"} in addition (+) at - line 18.
+Use of uninitialized value $mhu{"bar"} in addition (+) at - line 17.
 Use of uninitialized value $ghu{"foo"} in addition (+) at - line 18.
-Use of uninitialized value in addition (+) at - line 19.
+Use of uninitialized value $ghu{"bar"} in addition (+) at - line 18.
 Use of uninitialized value $ghu{"foo"} in addition (+) at - line 19.
+Use of uninitialized value in addition (+) at - line 19.
 ########
 use warnings 'uninitialized';
 my ($m1, $m2, @ma, %mh, $v);
@@ -212,8 +212,8 @@ Use of uninitialized value $m1 in hash element at - line 10.
 Use of uninitialized value $g1 in hash element at - line 11.
 Use of uninitialized value $m2 in hash element at - line 12.
 Use of uninitialized value $g2 in hash element at - line 13.
-Use of uninitialized value $g1 in subtraction (-) at - line 15.
 Use of uninitialized value $m2 in subtraction (-) at - line 15.
+Use of uninitialized value $g1 in subtraction (-) at - line 15.
 Use of uninitialized value $m1 in addition (+) at - line 15.
 Use of uninitialized value $ga[3] in array element at - line 16.
 Use of uninitialized value $ma[4] in array element at - line 17.
@@ -574,31 +574,32 @@ $v = $m1 != $g1;
 $v = $m1 <=> $g1;
 $v = -$m1;
 EXPECT
-Use of uninitialized value $g1 in integer addition (+) at - line 6.
 Use of uninitialized value $m1 in integer addition (+) at - line 6.
-Use of uninitialized value $g1 in integer subtraction (-) at - line 7.
+Use of uninitialized value $g1 in integer addition (+) at - line 6.
 Use of uninitialized value $m1 in integer subtraction (-) at - line 7.
-Use of uninitialized value $g1 in integer multiplication (*) at - line 8.
+Use of uninitialized value $g1 in integer subtraction (-) at - line 7.
 Use of uninitialized value $m1 in integer multiplication (*) at - line 8.
+Use of uninitialized value $g1 in integer multiplication (*) at - line 8.
+Use of uninitialized value $m1 in integer division (/) at - line 9.
 Use of uninitialized value $g1 in integer division (/) at - line 9.
 Use of uninitialized value $m2 in integer division (/) at - line 10.
-Use of uninitialized value $g1 in integer modulus (%) at - line 11.
 Use of uninitialized value $m1 in integer modulus (%) at - line 11.
+Use of uninitialized value $g1 in integer modulus (%) at - line 11.
 Use of uninitialized value $m2 in integer modulus (%) at - line 12.
-Use of uninitialized value $g1 in integer lt (<) at - line 13.
 Use of uninitialized value $m1 in integer lt (<) at - line 13.
-Use of uninitialized value $g1 in integer gt (>) at - line 14.
+Use of uninitialized value $g1 in integer lt (<) at - line 13.
 Use of uninitialized value $m1 in integer gt (>) at - line 14.
-Use of uninitialized value $g1 in integer le (<=) at - line 15.
+Use of uninitialized value $g1 in integer gt (>) at - line 14.
 Use of uninitialized value $m1 in integer le (<=) at - line 15.
-Use of uninitialized value $g1 in integer ge (>=) at - line 16.
+Use of uninitialized value $g1 in integer le (<=) at - line 15.
 Use of uninitialized value $m1 in integer ge (>=) at - line 16.
-Use of uninitialized value $g1 in integer eq (==) at - line 17.
+Use of uninitialized value $g1 in integer ge (>=) at - line 16.
 Use of uninitialized value $m1 in integer eq (==) at - line 17.
-Use of uninitialized value $g1 in integer ne (!=) at - line 18.
+Use of uninitialized value $g1 in integer eq (==) at - line 17.
 Use of uninitialized value $m1 in integer ne (!=) at - line 18.
-Use of uninitialized value $g1 in integer comparison (<=>) at - line 19.
+Use of uninitialized value $g1 in integer ne (!=) at - line 18.
 Use of uninitialized value $m1 in integer comparison (<=>) at - line 19.
+Use of uninitialized value $g1 in integer comparison (<=>) at - line 19.
 Use of uninitialized value $m1 in integer negation (-) at - line 20.
 ########
 use warnings 'uninitialized';
@@ -655,8 +656,8 @@ Use of uninitialized value $m1 in sort at - line 6.
 Use of uninitialized value $g1 in sort at - line 6.
 Use of uninitialized value $m1 in sort at - line 7.
 Use of uninitialized value $g1 in sort at - line 7.
-Use of uninitialized value $g1 in sort at - line 7.
 Use of uninitialized value $m1 in sort at - line 7.
+Use of uninitialized value $g1 in sort at - line 7.
 Use of uninitialized value $a in subtraction (-) at - line 8.
 Use of uninitialized value $b in subtraction (-) at - line 8.
 Use of uninitialized value $m1 in sort at - line 9.
@@ -717,36 +718,36 @@ $v = $m1 ** $g1;
 $v = $m1 +  $g1;
 $v = $m1 -  $g1;
 EXPECT
-Use of uninitialized value $g1 in division (/) at - line 5.
 Use of uninitialized value $m1 in division (/) at - line 5.
+Use of uninitialized value $g1 in division (/) at - line 5.
 Use of uninitialized value $m2 in division (/) at - line 6.
 Use of uninitialized value $g1 in modulus (%) at - line 7.
 Use of uninitialized value $m1 in modulus (%) at - line 7.
 Use of uninitialized value $m2 in modulus (%) at - line 8.
-Use of uninitialized value $g1 in numeric eq (==) at - line 9.
 Use of uninitialized value $m1 in numeric eq (==) at - line 9.
-Use of uninitialized value $g1 in numeric ge (>=) at - line 10.
+Use of uninitialized value $g1 in numeric eq (==) at - line 9.
 Use of uninitialized value $m1 in numeric ge (>=) at - line 10.
-Use of uninitialized value $g1 in numeric gt (>) at - line 11.
+Use of uninitialized value $g1 in numeric ge (>=) at - line 10.
 Use of uninitialized value $m1 in numeric gt (>) at - line 11.
-Use of uninitialized value $g1 in numeric le (<=) at - line 12.
+Use of uninitialized value $g1 in numeric gt (>) at - line 11.
 Use of uninitialized value $m1 in numeric le (<=) at - line 12.
-Use of uninitialized value $g1 in numeric lt (<) at - line 13.
+Use of uninitialized value $g1 in numeric le (<=) at - line 12.
 Use of uninitialized value $m1 in numeric lt (<) at - line 13.
-Use of uninitialized value $g1 in multiplication (*) at - line 14.
+Use of uninitialized value $g1 in numeric lt (<) at - line 13.
 Use of uninitialized value $m1 in multiplication (*) at - line 14.
-Use of uninitialized value $g1 in numeric comparison (<=>) at - line 15.
+Use of uninitialized value $g1 in multiplication (*) at - line 14.
 Use of uninitialized value $m1 in numeric comparison (<=>) at - line 15.
-Use of uninitialized value $g1 in numeric ne (!=) at - line 16.
+Use of uninitialized value $g1 in numeric comparison (<=>) at - line 15.
 Use of uninitialized value $m1 in numeric ne (!=) at - line 16.
-Use of uninitialized value $g1 in subtraction (-) at - line 17.
+Use of uninitialized value $g1 in numeric ne (!=) at - line 16.
 Use of uninitialized value $m1 in subtraction (-) at - line 17.
+Use of uninitialized value $g1 in subtraction (-) at - line 17.
 Use of uninitialized value $g1 in exponentiation (**) at - line 18.
 Use of uninitialized value $m1 in exponentiation (**) at - line 18.
-Use of uninitialized value $g1 in addition (+) at - line 19.
 Use of uninitialized value $m1 in addition (+) at - line 19.
-Use of uninitialized value $g1 in subtraction (-) at - line 20.
+Use of uninitialized value $g1 in addition (+) at - line 19.
 Use of uninitialized value $m1 in subtraction (-) at - line 20.
+Use of uninitialized value $g1 in subtraction (-) at - line 20.
 ########
 use warnings 'uninitialized';
 sub TIESCALAR{bless[]}
@@ -967,8 +968,8 @@ $v = oct $m1;
 $v = oct;
 $v = length; # does not warn
 EXPECT
-Use of uninitialized value $g1 in atan2 at - line 5.
 Use of uninitialized value $m1 in atan2 at - line 5.
+Use of uninitialized value $g1 in atan2 at - line 5.
 Use of uninitialized value $m1 in sin at - line 6.
 Use of uninitialized value $m1 in cos at - line 7.
 Use of uninitialized value $m1 in rand at - line 8.
@@ -1163,8 +1164,8 @@ undef $^A; $v = $^A + ${^FOO}; # should output '^A' not chr(1)
 $v = $GLOB1 + 1;
 $v = $GLOB2 + 1;
 EXPECT
-Use of uninitialized value $^FOO in addition (+) at - line 4.
 Use of uninitialized value $^A in addition (+) at - line 4.
+Use of uninitialized value $^FOO in addition (+) at - line 4.
 Use of uninitialized value $GLOB1 in addition (+) at - line 6.
 Use of uninitialized value $GLOB2 in addition (+) at - line 7.
 ########
@@ -2150,8 +2151,8 @@ Use of uninitialized value $k in hash element at - line 9.
 Use of uninitialized value $k in hash element at - line 9.
 Use of uninitialized value $i in array element at - line 10.
 Use of uninitialized value $k in delete at - line 10.
-Use of uninitialized value $j in addition (+) at - line 11.
 Use of uninitialized value $i in addition (+) at - line 11.
+Use of uninitialized value $j in addition (+) at - line 11.
 Use of uninitialized value $k in hash element at - line 11.
 Use of uninitialized value $i in array element at - line 12.
 Use of uninitialized value $k in hash element at - line 12.

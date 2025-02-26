@@ -220,6 +220,14 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+This warning was issued in the reverse order (right-to-left) when both
+operands of a binary operator are uninitialized values.  This is now
+fixed to be consistent with evaluation order of operands.
+
 =back
 
 =head1 Utility Changes

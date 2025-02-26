@@ -2007,14 +2007,10 @@ PP(pp_add)
 #endif
 
     {
-        NV value = SvNV_nomg(svr);
-        if (!useleft) {
-            /* left operand is undef, treat as zero. + 0.0 is identity. */
-            TARGn(value, 1);
-        }
-        else {
-            TARGn(value + SvNV_nomg(svl), 1);
-        }
+        /* If left operand is undef, treat as zero. */
+        NV value = useleft ? SvNV_nomg(svl) : 0.0;
+        value += SvNV_nomg(svr);
+        TARGn(value, 1);
     }
 
   ret:
