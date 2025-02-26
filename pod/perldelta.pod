@@ -89,6 +89,13 @@ There may well be none in a stable release.
 
 =item *
 
+String reversal from a single argument, when the string buffer is not
+"swiped", is now done in a single pass and is noticeably faster.
+The extent of the improvement is compiler & hardware dependent.
+[GH #23012]
+
+=item *
+
 XXX
 
 =back
