@@ -118,9 +118,8 @@ in a variety of ways. At the workshops, subjects range from a beginner's
 introduction (such as the Pittsburgh Perl Workshop's "Zero To Perl") to much
 more advanced subjects.
 
-There are several great resources for locating workshops: the
-L<websites|"Websites"> mentioned above, the
-L<calendar|"Calendar of Perl Events"> mentioned below, and the YAPC Europe
+There are a couple of great resources for locating workshops: the
+L<websites|"Websites"> mentioned above, and the YAPC Europe
 website, L<http://www.yapceurope.org/>, which is probably the best resource for
 European Perl events.
 
