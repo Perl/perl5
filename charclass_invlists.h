@@ -6,22 +6,6 @@
 
 /* See the generating file for comments */
 
-/* This gives the number of code points that can be in the bitmap of an ANYOF
- * node.  The shift number must currently be one of: 8..12.  It can't be less
- * than 8 (256) because some code relies on it being at least that.  Above 12
- * (4096), and you start running into warnings that some data structure widths
- * have been exceeded, though the test suite as of this writing still passes
- * for up through 16, which is as high as anyone would ever want to go,
- * encompassing all of the Unicode BMP, and thus including all the economically
- * important world scripts.  At 12 most of them are: including Arabic,
- * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
- * Japanese, nor Korean.  The regnode sizing data structure in regnodes.h currently
- * uses a U8, and the trie types TRIEC and AHOCORASICKC are larger than U8 for
- * shift values above 12.)  Be sure to benchmark before changing, as larger sizes
- * do significantly slow down the test suite. */
-
-#define NUM_ANYOF_CODE_POINTS   (1 << 8)
-
 /* The precision to use in "%.*e" formats */
 #define PL_E_FORMAT_PRECISION 3
 
@@ -436021,13 +436005,6 @@ static const U8 WB_table[23][23] = {
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
-/* More than one code point may have the same code point as their fold.  This
- * gives the maximum number in the current Unicode release.  (The folded-to
- * code point is not included in this count.)  For example, both 'S' and
- * \x{17F} fold to 's', so the number for that fold is 2.  Another way to
- * look at it is the maximum length of all the IVCF_AUX_TABLE's */
-#define MAX_FOLD_FROMS 3
-
 /* Generated from:
  * 0e8307ab7c654d9c133ea885f5413a4eb5c0123ed2178f7e1cbabed36b67792c lib/Unicode/UCD.pm
  * eb840f36e0a7446293578c684a54c6d83d249abde7bdd4dfa89794af1d7fe9e9 lib/unicore/ArabicShaping.txt
@@ -436082,5 +436059,5 @@ static const U8 WB_table[23][23] = {
  * 55d90fdc3f902e5c0b16b3378f9eaa36e970a1c09723c33de7d47d0370044012 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
- * cdbafee25193032242e77f2a6332b731d8392ce342fa616dbabc2c14c7b44eb6 regen/mk_invlists.pl
+ * e7ba2c6c0577fbb8b767a1305dbebcfeec166d11aa010cfbad9001c5f5971ee6 regen/mk_invlists.pl
  * ex: set ro ft=c: */

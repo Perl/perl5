@@ -534,7 +534,8 @@ h = \
     handy.h hv.h hv_func.h iperlsys.h keywords.h l1_char_class_tab.h \
     mg.h mydtrace.h op.h op_reg_common.h opcode.h pad.h patchlevel.h \
     perl.h perlapi.h perly.h pp.h proto.h regcomp.h regcomp_internal.h \
-    regexp.h scope.h sv.h thread.h unixish.h utf8.h util.h warnings.h \
+    regexp.h regexp_constants.h scope.h sv.h thread.h unixish.h utf8.h \
+    util.h warnings.h \
     $(CONFIGH)
 
 c_base = \
