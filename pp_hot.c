@@ -4356,9 +4356,6 @@ PP(pp_helem)
     }
 
     if (localizing) {
-        MAGIC *mg;
-        HV *stash;
-
         /* Try to preserve the existence of a tied hash
          * element by using EXISTS and DELETE if possible.
          * Fall back to FETCH and STORE otherwise. */
@@ -4604,9 +4601,6 @@ PP(pp_multideref)
                     SV** svp;
 
                     if (UNLIKELY(localizing)) {
-                        MAGIC *mg;
-                        HV *stash;
-
                         /* Try to preserve the existence of a tied array
                          * element by using EXISTS and DELETE if possible.
                          * Fall back to FETCH and STORE otherwise. */
@@ -4797,9 +4791,6 @@ PP(pp_multideref)
                     HE* he;
 
                     if (UNLIKELY(localizing)) {
-                        MAGIC *mg;
-                        HV *stash;
-
                         /* Try to preserve the existence of a tied hash
                          * element by using EXISTS and DELETE if possible.
                          * Fall back to FETCH and STORE otherwise. */
@@ -6652,9 +6643,6 @@ PP(pp_aelem)
     }
 
     if (UNLIKELY(localizing)) {
-        MAGIC *mg;
-        HV *stash;
-
         /* Try to preserve the existence of a tied array
          * element by using EXISTS and DELETE if possible.
          * Fall back to FETCH and STORE otherwise. */

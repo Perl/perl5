@@ -5349,9 +5349,6 @@ PP(pp_aslice)
         bool can_preserve = FALSE;
 
         if (localizing) {
-            MAGIC *mg;
-            HV *stash;
-
             can_preserve = SvCANEXISTDELETE(av);
         }
 
@@ -5571,8 +5568,6 @@ S_do_delete_local(pTHX)
 {
     dSP;
     const U8 gimme = GIMME_V;
-    const MAGIC *mg;
-    HV *stash;
     const bool sliced = cBOOL(PL_op->op_private & OPpSLICE);
     SV **unsliced_keysv = sliced ? NULL : sp--;
     SV * const osv = POPs;
@@ -5874,9 +5869,6 @@ PP(pp_hslice)
     bool can_preserve = FALSE;
 
     if (localizing) {
-        MAGIC *mg;
-        HV *stash;
-
         if (SvCANEXISTDELETE(hv))
             can_preserve = TRUE;
     }
@@ -6546,9 +6538,6 @@ PP_wrapped(pp_reverse, 0, 1)
             if (SvMAGICAL(av)) {
                 SSize_t i, j;
                 SV *tmp = sv_newmortal();
-                /* For SvCANEXISTDELETE */
-                HV *stash;
-                const MAGIC *mg;
                 bool can_preserve = SvCANEXISTDELETE(av);
 
                 for (i = 0, j = av_top_index(av); i < j; ++i, --j) {
@@ -7490,8 +7479,6 @@ PP(pp_refassign)
     case SVt_PVAV:
         assert(key);
         if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
-            MAGIC *mg;
-            HV *stash;
             S_localise_aelem_lval(aTHX_ (AV *)left, key,
                                         SvCANEXISTDELETE(left));
         }
@@ -7500,8 +7487,6 @@ PP(pp_refassign)
     case SVt_PVHV:
         if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
             assert(key);
-            MAGIC *mg;
-            HV *stash;
             S_localise_helem_lval(aTHX_ (HV *)left, key,
                                         SvCANEXISTDELETE(left));
         }
@@ -7538,8 +7523,6 @@ PP_wrapped(pp_lvref,
         mg->mg_flags |= MGf_PERSIST;
     if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
       if (elem) {
-        MAGIC *mg;
-        HV *stash;
         assert(arg);
         {
             const bool can_preserve = SvCANEXISTDELETE(arg);
@@ -7568,8 +7551,6 @@ PP_wrapped(pp_lvrefslice, 0, 1)
     bool can_preserve = FALSE;
 
     if (UNLIKELY(localizing)) {
-        MAGIC *mg;
-        HV *stash;
         SV **svp;
 
         can_preserve = SvCANEXISTDELETE(av);
