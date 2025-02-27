@@ -680,6 +680,8 @@ and check for NULL.
 
 /* Stuff that needs to be included in the pluggable extension goes below here */
 
+#include "regexp_constants.h"
+
 #ifdef PERL_ANY_COW
 #  define RXp_MATCH_COPY_FREE(prog)                                 \
     STMT_START {                                                    \

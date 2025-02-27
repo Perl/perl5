@@ -3307,7 +3307,9 @@ typedef struct padname PADNAME;
 #endif
 
 #include "handy.h"
-#include "charclass_invlists.h"
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#  include "charclass_invlists.h"
+#endif
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
 #   if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)

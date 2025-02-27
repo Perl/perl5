@@ -1,6 +1,5 @@
-#!perl -w
-use 5.015;
-use strict;
+#!perl
+use v5.16;
 use warnings;
 use Unicode::UCD qw(prop_aliases
                     prop_values
@@ -59,13 +58,20 @@ my $out_fh = open_new('charclass_invlists.h', '>',
                       {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 
+my $regexp_constants_fh = open_new('regexp_constants.h', '>',
+                      {style => '*', by => 'regen/mk_invlists.pl',
+                      from => "Unicode::UCD"});
+
 my $in_file_pound_if = "";
 
 my $max_hdr_len = 3;    # In headings, how wide a name is allowed?
 
-print $out_fh "/* See the generating file for comments */\n\n";
-
 print $out_fh <<'EOF';
+/* See the generating file for comments */
+
+EOF
+
+print $regexp_constants_fh <<'EOF';
 /* This gives the number of code points that can be in the bitmap of an ANYOF
  * node.  The shift number must currently be one of: 8..12.  It can't be less
  * than 8 (256) because some code relies on it being at least that.  Above 12
@@ -84,7 +90,7 @@ EOF
 
 my $num_anyof_code_points = '(1 << 8)';
 
-print $out_fh "#define NUM_ANYOF_CODE_POINTS   $num_anyof_code_points\n\n";
+print $regexp_constants_fh "#define NUM_ANYOF_CODE_POINTS   $num_anyof_code_points\n\n";
 
 $num_anyof_code_points = eval $num_anyof_code_points;
 
@@ -3300,7 +3306,7 @@ end_file_pound_if;
 
 print "Computing fold data\n" if DEBUG;
 
-print $out_fh <<"EOF";
+print $regexp_constants_fh <<"EOF";
 
 /* More than one code point may have the same code point as their fold.  This
  * gives the maximum number in the current Unicode release.  (The folded-to
@@ -3336,6 +3342,8 @@ my @sources = qw(regen/mk_invlists.pl
         }
     }
 }
+
+read_only_bottom_close_and_rename($regexp_constants_fh, \@sources);
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
 
