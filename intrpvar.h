@@ -862,6 +862,7 @@ PERLVARI(I, scratch_locale_obj, locale_t, 0)
 #ifdef USE_LOCALE_CTYPE
 
 PERLVARI(I, ctype_name, const char *, NULL)   /* Name of current ctype locale */
+PERLVARI(I, isdigit_is_always_0_through_9, bool, false)   
 
 #  endif
 

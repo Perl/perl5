@@ -3696,6 +3696,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
         Copy(PL_fold, PL_fold_locale, 256, U8);
         PL_ctype_name = savepv(newctype);
         PL_in_utf8_CTYPE_locale = FALSE;
+        PL_isdigit_is_always_0_through_9 = true;
         return;
     }
 
@@ -3757,6 +3758,8 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
 
 #    endif
 
+        PL_isdigit_is_always_0_through_9 = true;
+
         for (unsigned i = 0; i < 256; i++) {
             if (isU8_UPPER_LC(i))
                 PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
@@ -3764,6 +3767,10 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
                 PL_fold_locale[i] = (U8) toU8_UPPER_LC(i);
             else
                 PL_fold_locale[i] = (U8) i;
+
+            if (isDIGIT_L1(i) != isdigit(i)) {
+                PL_isdigit_is_always_0_through_9 = false;
+            }
 
 #    ifdef DEBUGGING
 

@@ -152,6 +152,7 @@
 # define PL_inplace                             (vTHX->Iinplace)
 # define PL_internal_random_state               (vTHX->Iinternal_random_state)
 # define PL_isarev                              (vTHX->Iisarev)
+# define PL_isdigit_is_always_0_through_9       (vTHX->Iisdigit_is_always_0_through_9)
 # define PL_known_layers                        (vTHX->Iknown_layers)
 # define PL_langinfo_sv                         (vTHX->Ilanginfo_sv)
 # define PL_last_in_gv                          (vTHX->Ilast_in_gv)

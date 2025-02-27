@@ -1983,7 +1983,9 @@ END_EXTERN_C
 #  define is_posix_CASED(c)                                          \
    ((isupper((U8) (c)) || islower((U8) (c))) && ! is_posix_PUNCT(c))
 #  define is_posix_DIGIT(c)                                          \
-                          (isdigit((U8) (c)) && ! is_posix_PUNCT(c))
+        ((LIKELY(PL_isdigit_is_always_0_through_9))                  \
+                        ? isDIGIT_A(c)                               \
+                        : (isdigit((U8) (c)) && ! is_posix_PUNCT(c)))
 #  define is_posix_GRAPH(c)                                          \
                           (isgraph((U8) (c)) && ! is_posix_CNTRL(c))
 #  define is_posix_LOWER(c)                                          \
@@ -1998,12 +2000,15 @@ END_EXTERN_C
                          (isxdigit((U8) (c)) && ! is_posix_PUNCT(c))
 #else
 
-/* For all other platforms, as far as we know, isdigit(), etc. work sanely
+/* For all other platforms, as far as we know, isalpha(), etc. work sanely
  * enough */
 #  define is_posix_ALPHA(c)         isalpha((U8) (c))
 #  define is_posix_ALPHANUMERIC(c)  isalnum((U8) (c))
 #  define is_posix_CASED(c)        (islower((U8) (c)) || isupper((U8) (c)))
-#  define is_posix_DIGIT(c)         isdigit((U8) (c))
+#  define is_posix_DIGIT(c)                                          \
+        ((LIKELY(PL_isdigit_is_always_0_through_9))                  \
+                        ? isDIGIT_A(c)                               \
+                        : (isdigit((U8) (c))))
 
      /* ... But it seems that IBM products treat NBSP as both a space and a
       * graphic; these are the two platforms that we have active test beds for.
