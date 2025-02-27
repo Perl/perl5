@@ -1177,6 +1177,20 @@ Perl_rpp_invoke_xs(pTHX_ CV *cv)
 }
 
 
+/* for SvCANEXISTDELETE() macro in pp.h */
+PERL_STATIC_INLINE bool
+Perl_sv_can_existdelete(pTHX_ SV *sv)
+{
+    /* Anything without tie magic is fine */
+    MAGIC *mg;
+    if(!SvRMAGICAL(sv) || !(mg = mg_find(sv, PERL_MAGIC_tied)))
+        return true;
+
+    HV *stash = SvSTASH(SvRV(SvTIED_obj(sv, mg)));
+    return stash &&
+        gv_fetchmethod_autoload(stash, "EXISTS", TRUE) &&
+        gv_fetchmethod_autoload(stash, "DELETE", TRUE);
+}
 
 
 /* ----------------------------- regexp.h ----------------------------- */
