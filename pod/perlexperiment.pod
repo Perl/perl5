@@ -475,13 +475,13 @@ For a complete list of features check L<feature>.
 
 =head1 AUTHORS
 
-brian d foy C<< <brian.d.foy@gmail.com> >>
+brian d foy C<< <briandfoy@pobox.com> >>
 
 SE<eacute>bastien Aperghis-Tramoni C<< <saper@cpan.org> >>
 
 =head1 COPYRIGHT
 
-Copyright 2010, brian d foy C<< <brian.d.foy@gmail.com> >>
+Copyright 2010, brian d foy C<< <briandfoy@pobox.com> >>
 
 =head1 LICENSE
 
