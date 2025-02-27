@@ -5,12 +5,197 @@
  *
  * https://www.131002.net/siphash/
  *
- * This implementation seems to perform slightly slower than one-at-a-time for
- * short keys, but degrades slower for longer keys. Murmur Hash outperforms it
- * regardless of keys size.
+ * Naming convention:
  *
- * It is 64 bit only.
- */
+ * S_perl_hash_siphash_N_M: the N refers to how many rounds are performed per
+ * block. The M refers to how many rounds are performed as part of the
+ * finalizer. Increased values of either improve security, but decrease
+ * performance.
+ *
+ * _with_state: these functions take a 32 bit state vector prepared by
+ * S_perl_siphash_seed_state(). Functions without 'with_state' take a 16
+ * byte seed vector and call S_perl_siphash_seed_state() implicitly. If
+ * you are hashing many things with the same seed, the _with_state
+ * variants are faster.
+ *
+ * _64: returns a 64 bit hash
+ *
+ * no-suffix: returns a 32 bit hash.
+ *
+ * This file defines 9 functions related to implementing 2 variants of
+ * the Siphash family of hash functions, Siphash-2-4, and Siphash-1-3.
+
+=for apidoc_section $numeric
+=for apidoc   eST|void|S_perl_siphash_seed_state \
+                      |const unsigned char * const seed_buf \
+                      |unsigned char * state_buf
+
+Takes a 16 byte seed and converts it into a 32 byte state buffer. The
+contents of state_buf will be overwritten.
+
+If you need to hash a lot of things, then you can use this to process
+the seed once, and then reuse the state over and over.
+
+The siphash functions which take a seed argument will call this function
+implicitly every time they are used. Those which take a state argument
+require the seed to be converted into a state before they are used.
+
+See the various _with_state siphash functions for a usage example.
+
+=for apidoc   eSTP|U64|S_perl_hash_siphash_1_3_with_state_64\
+                      |const unsigned char * const state \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 1 round function
+per block, and 3 as part of the finalizer.
+
+Takes a 32 byte 'state' vector prepared by S_perl_siphash_seed_state()
+and uses it to hash C<inlen> bytes from the buffer pointed to by C<in>,
+returns a 64 bit hash.
+
+The following code should return 0xB70339FD9E758A5C
+
+    U8 state[32];
+    char seed[] = "Call me Ishmael.";
+    S_perl_siphash_seed_state((const U8*)seed, state);
+
+    char in[] = "It is not down on any map; true places never are.";
+    U64 hash = S_perl_hash_siphash_1_3_with_state_64(
+                state, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U32|S_perl_hash_siphash_1_3_with_state\
+                      |const unsigned char * const state \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 1 round function
+per block, and 3 as part of the finalizer.
+
+Takes a 32 byte 'state' vector prepared by S_perl_siphash_seed_state()
+and uses it to hash C<inlen> bytes from the buffer pointed to by C<in>,
+returns a 32 bit hash.
+
+The following code should return 0x2976B3A1
+
+    U8 state[32];
+    char seed[] = "Call me Ishmael.";
+    S_perl_siphash_seed_state((const U8*)seed, state);
+
+    char in[] = "It is not down on any map; true places never are.";
+    U32 hash = S_perl_hash_siphash_1_3_with_state(
+                state, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U64|S_perl_hash_siphash_1_3_64\
+                      |const unsigned char * const seed \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 1 round function
+per block, and 3 as part of the finalizer.
+
+Takes a 16 byte C<seed> vector, and uses it to hash C<inlen> bytes
+from the buffer pointed to by C<in>, returns a 64 bit hash.
+
+The following code should return 0xB70339FD9E758A5C
+
+    char seed[] = "Call me Ishmael.";
+    char in[] = "It is not down on any map; true places never are.";
+    U64 hash = S_perl_hash_siphash_1_3_64(
+                (const U8*)seed, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U64|S_perl_hash_siphash_1_3\
+                      |const unsigned char * const seed \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 1 round function
+per block, and 3 as part of the finalizer.
+
+Takes a 16 byte C<seed> vector, and uses it to hash C<inlen> bytes
+from the buffer pointed to by C<in>, returns a 32 bit hash.
+
+The following code should return 0x2976B3A1
+
+    char seed[] = "Call me Ishmael.";
+    char in[] = "It is not down on any map; true places never are.";
+    U32 hash = S_perl_hash_siphash_1_3(
+                (const U8*)seed, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U64|S_perl_hash_siphash_2_4_with_state_64\
+                      |const unsigned char * const state \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 2 round functions
+per block, and 4 as part of the finalizer.
+
+Takes a 32 byte 'state' vector prepared by S_perl_siphash_seed_state()
+and uses it to hash C<inlen> bytes from the buffer pointed to by C<in>,
+returns a 64 bit hash.
+
+The following code should return 0x1E84CF1D7AA516B7
+
+    U8 state[32];
+    char seed[] = "Call me Ishmael.";
+    S_perl_siphash_seed_state((const U8*)seed, state);
+
+    char in[] = "It is not down on any map; true places never are.";
+    U64 hash = S_perl_hash_siphash_2_4_with_state_64(
+                state, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U32|S_perl_hash_siphash_2_4_with_state\
+                      |const unsigned char * const state \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 2 round function
+per block, and 4 as part of the finalizer.
+
+Takes a 32 byte 'state' vector prepared by S_perl_siphash_seed_state()
+and uses it to hash C<inlen> bytes from the buffer pointed to by C<in>,
+returns a 32 bit hash.
+
+The following code should return 0x6421D9AA
+
+    U8 state[32];
+    char seed[] = "Call me Ishmael.";
+    S_perl_siphash_seed_state((const U8*)seed, state);
+
+    char in[] = "It is not down on any map; true places never are.";
+    U32 hash = S_perl_hash_siphash_2_4_with_state(
+                state, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U64|S_perl_hash_siphash_2_4_64\
+                      |const unsigned char * const seed \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 2 round functions
+per block, and 4 as part of the finalizer.
+
+Takes a 16 byte C<seed> vector, and uses it to hash C<inlen> bytes
+from the buffer pointed to by C<in>, returns a 64 bit hash.
+
+The following code should return 0x1E84CF1D7AA516B7
+
+    char seed[] = "Call me Ishmael.";
+    char in[] = "It is not down on any map; true places never are.";
+    U64 hash = S_perl_hash_siphash_2_4_64(
+                (const U8*)seed, (const U8*)in, sizeof(in)-1);
+
+=for apidoc   eSTP|U32|S_perl_hash_siphash_2_4\
+                      |const unsigned char * const seed \
+                      |const unsigned char *in|const STRLEN inlen
+
+Implements the variant of Siphash which performs 2 round functions
+per block, and 4 as part of the finalizer.
+
+Takes a 16 byte C<seed> vector, and uses it to hash C<inlen> bytes
+from the buffer pointed to by C<in>, returns a 32 bit hash.
+
+The following code should return 0x6421D9AA
+
+    char seed[] = "Call me Ishmael.";
+    char in[] = "It is not down on any map; true places never are.";
+    U32 hash = S_perl_hash_siphash_2_4(
+                (const U8*)seed, (const U8*)in, sizeof(in)-1);
+
+=cut
+*/
 
 #ifdef CAN64BITHASH
 
