@@ -43,29 +43,29 @@ void S_perl_siphash_seed_state(const unsigned char * const seed_buf, unsigned ch
 PERL_STATIC_INLINE U64 \
 FNC ## _with_state_64 \
   (const unsigned char * const state, const unsigned char *in, const STRLEN inlen) \
-{                                           \
-  const int left = inlen & 7;               \
-  const U8 *end = in + inlen - left;        \
-                                            \
-  U64 b = ( ( U64 )(inlen) ) << 56;         \
-  U64 m;                                    \
-  U64 v0 = U8TO64_LE(state);                \
-  U64 v1 = U8TO64_LE(state+8);              \
-  U64 v2 = U8TO64_LE(state+16);             \
-  U64 v3 = U8TO64_LE(state+24);             \
-                                            \
-  for ( ; in != end; in += 8 )              \
-  {                                         \
-    m = U8TO64_LE( in );                    \
-    v3 ^= m;                                \
-                                            \
-    SIP_ROUNDS;                             \
-                                            \
-    v0 ^= m;                                \
-  }                                         \
-                                            \
-  switch( left )                            \
-  {                                         \
+{                                   \
+  const int left = inlen & 7;       \
+  const U8 *end = in + inlen - left;\
+                                    \
+  U64 b = ( ( U64 )(inlen) ) << 56; \
+  U64 m;                            \
+  U64 v0 = U8TO64_LE(state);        \
+  U64 v1 = U8TO64_LE(state+8);      \
+  U64 v2 = U8TO64_LE(state+16);     \
+  U64 v3 = U8TO64_LE(state+24);     \
+                                    \
+  for ( ; in != end; in += 8 )      \
+  {                                 \
+    m = U8TO64_LE( in );            \
+    v3 ^= m;                        \
+                                    \
+    SIP_ROUNDS;                     \
+                                    \
+    v0 ^= m;                        \
+  }                                 \
+                                    \
+  switch( left )                    \
+  {                                 \
   case 7: b |= ( ( U64 )in[ 6] )  << 48; /*FALLTHROUGH*/    \
   case 6: b |= ( ( U64 )in[ 5] )  << 40; /*FALLTHROUGH*/    \
   case 5: b |= ( ( U64 )in[ 4] )  << 32; /*FALLTHROUGH*/    \
@@ -73,44 +73,51 @@ FNC ## _with_state_64 \
   case 3: b |= ( ( U64 )in[ 2] )  << 16; /*FALLTHROUGH*/    \
   case 2: b |= ( ( U64 )in[ 1] )  <<  8; /*FALLTHROUGH*/    \
   case 1: b |= ( ( U64 )in[ 0] ); break;    \
-  case 0: break;                            \
-  }                                         \
-                                            \
-  v3 ^= b;                                  \
-                                            \
-  SIP_ROUNDS;                               \
-                                            \
-  v0 ^= b;                                  \
-                                            \
-  v2 ^= 0xff;                               \
-                                            \
-  SIP_FINAL_ROUNDS                          \
-                                            \
-  b = v0 ^ v1 ^ v2  ^ v3;                   \
-  return b;                                 \
-}                                           \
-                                            \
-PERL_STATIC_INLINE U32                      \
-FNC ## _with_state                          \
+  case 0: break;            \
+  }                         \
+                            \
+  v3 ^= b;                  \
+                            \
+  SIP_ROUNDS;               \
+                            \
+  v0 ^= b;                  \
+                            \
+  v2 ^= 0xff;               \
+                            \
+  SIP_FINAL_ROUNDS          \
+                            \
+  b = v0 ^ v1 ^ v2  ^ v3;   \
+  return b;                 \
+}                           \
+                            \
+PERL_STATIC_INLINE U32      \
+FNC ## _with_state          \
   (const unsigned char * const state, const unsigned char *in, const STRLEN inlen) \
-{                                           \
-    union {                                 \
-        U64 h64;                            \
-        U32 h32[2];                         \
-    } h;                                    \
+{                           \
+    union {                 \
+        U64 h64;            \
+        U32 h32[2];         \
+    } h;                    \
     h.h64= FNC ## _with_state_64(state,in,inlen); \
-    return h.h32[0] ^ h.h32[1];             \
-}                                           \
-                                            \
-                                            \
-PERL_STATIC_INLINE U32                      \
+    return h.h32[0] ^ h.h32[1]; \
+}                           \
+                            \
+                            \
+PERL_STATIC_INLINE U32      \
 FNC (const unsigned char * const seed, const unsigned char *in, const STRLEN inlen) \
-{                                                                   \
-    U64 state[4];                                                   \
+{                           \
+    U64 state[4];           \
     SIPHASH_SEED_STATE(seed,state[0],state[1],state[2],state[3]);   \
     return FNC ## _with_state((U8*)state,in,inlen);                 \
+}                           \
+                            \
+PERL_STATIC_INLINE U64      \
+FNC ## _64 (const unsigned char * const seed, const unsigned char *in, const STRLEN inlen) \
+{                           \
+    U64 state[4];           \
+    SIPHASH_SEED_STATE(seed,state[0],state[1],state[2],state[3]);   \
+    return FNC ## _with_state_64((U8*)state,in,inlen);              \
 }
-
 
 PERL_SIPHASH_FNC(
     S_perl_hash_siphash_1_3
