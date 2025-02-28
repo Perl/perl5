@@ -13113,9 +13113,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         case 'l':  iv = va_arg(*args, long);       break;
                         case 'V':  iv = va_arg(*args, IV);         break;
                         case 'z':  iv = va_arg(*args, SSize_t);    break;
-#ifdef HAS_PTRDIFF_T
                         case 't':  iv = va_arg(*args, ptrdiff_t);  break;
-#endif
                         default:   iv = va_arg(*args, int);        break;
                         case 'j':  iv = (IV) va_arg(*args, PERL_INTMAX_T); break;
                         case 'q':
@@ -13168,11 +13166,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         case 'l': uv = va_arg(*args, unsigned long); break;
                         case 'V': uv = va_arg(*args, UV);            break;
                         case 'z': uv = va_arg(*args, Size_t);        break;
-#ifdef HAS_PTRDIFF_T
                                   /* will sign extend, but there is no
                                    * uptrdiff_t, so oh well */
                         case 't': uv = va_arg(*args, ptrdiff_t);     break;
-#endif
                         case 'j': uv = (UV) va_arg(*args, PERL_UINTMAX_T); break;
                         default:  uv = va_arg(*args, unsigned);      break;
                         case 'q':
@@ -13730,9 +13726,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     case 'l':  *(va_arg(*args, long*))      = i; break;
                     case 'V':  *(va_arg(*args, IV*))        = i; break;
                     case 'z':  *(va_arg(*args, SSize_t*))   = i; break;
-#ifdef HAS_PTRDIFF_T
                     case 't':  *(va_arg(*args, ptrdiff_t*)) = i; break;
-#endif
                     case 'j':  *(va_arg(*args, PERL_INTMAX_T*)) = i; break;
                     case 'q':
 #if IVSIZE >= 8

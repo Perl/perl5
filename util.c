@@ -613,8 +613,8 @@ Perl_delimcpy_no_escape(char *to, const char *to_end,
                         const int delim, I32 *retlen)
 {
     const char * delim_pos;
-    Ptrdiff_t from_len = from_end - from;
-    Ptrdiff_t to_len = to_end - to;
+    ptrdiff_t from_len = from_end - from;
+    ptrdiff_t to_len = to_end - to;
     SSize_t copy_len;
 
     PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE;
@@ -718,7 +718,7 @@ Perl_delimcpy(char *to, const char *to_end,
               const int delim, I32 *retlen)
 {
     const char * const orig_to = to;
-    Ptrdiff_t copy_len = 0;
+    ptrdiff_t copy_len = 0;
     bool stopped_early = FALSE;     /* Ran out of room to copy to */
 
     PERL_ARGS_ASSERT_DELIMCPY;
@@ -896,8 +896,8 @@ such occurrence.
 char *
 Perl_rninstr(const char *big, const char *bigend, const char *little, const char *lend)
 {
-    const Ptrdiff_t little_len = lend - little;
-    const Ptrdiff_t big_len = bigend - big;
+    const ptrdiff_t little_len = lend - little;
+    const ptrdiff_t big_len = bigend - big;
 
     PERL_ARGS_ASSERT_RNINSTR;
 
