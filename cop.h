@@ -1302,7 +1302,13 @@ typedef struct stackinfo PERL_SI;
 
 #ifdef DEBUGGING
 #  define SET_MARK_OFFSET \
-    PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
+    STMT_START {                                                                \
+        /* ensure .si_markoff is an I32 and can hold the pointer difference */  \
+        STATIC_ASSERT_STMT(sizeof PL_curstackinfo->si_markoff == sizeof (I32)); \
+        assert(PL_markstack_ptr >= PL_markstack);                               \
+        assert(PL_markstack_ptr - PL_markstack <= (ptrdiff_t)I32_MAX);          \
+        PL_curstackinfo->si_markoff = (I32)(PL_markstack_ptr - PL_markstack);   \
+    } STMT_END
 #else
 #  define SET_MARK_OFFSET NOOP
 #endif
