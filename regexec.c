@@ -3514,7 +3514,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     return s;
 }
 
-/* set RX_SAVED_COPY, RX_SUBBEG etc.
+/* S_reg_set_capture_string():
+ * Save a pointer (RX_SUBBEG) to the just-matched string, so that $1 etc
+ * will have retrievable values. Typically it will make a copy rather than
+ * pointing direct (flags & REXEC_COPY_STR), so that subsequent
+ * modifications to the string won't affect the value of $1 etc. If so,
+ * the RXp_MATCH_COPIED flag will be set. It can sometimes avoid copying
+ * by using COW.
+ *
  * flags have same meanings as with regexec_flags() */
 
 static void
@@ -11303,10 +11310,12 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     eval_state->curpm = PL_curpm;
     PL_curpm_under = PL_curpm;
     PL_curpm = PL_reg_curpm;
+    /* Temporarily set RXp_SUBBEG to the current string so that $1 etc
+     * are valid during code execution. If the current subbeg is a copy,
+     * then restore it at the end so that it gets properly freed when
+     * subbeg is finally updated after a successful match.
+     */
     if (RXp_MATCH_COPIED(rex)) {
-        /*  Here is a serious problem: we cannot rewrite subbeg,
-            since it may be needed if this match fails.  Thus
-            $` inside (?{}) could fail... */
         eval_state->subbeg     = RXp_SUBBEG(rex);
         eval_state->sublen     = RXp_SUBLEN(rex);
         eval_state->suboffset  = RXp_SUBOFFSET(rex);
