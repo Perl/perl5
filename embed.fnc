@@ -5342,7 +5342,7 @@ ES	|AV *	|add_multi_match|NULLOK AV *multi_char_matches		\
 				|const STRLEN cp_count
 ES	|void	|change_engine_size					\
 				|NN RExC_state_t *pRExC_state		\
-				|const Ptrdiff_t size
+				|const ptrdiff_t size
 ERS	|REGEXP *|compile_wildcard					\
 				|NN const char *subpattern		\
 				|const STRLEN len			\

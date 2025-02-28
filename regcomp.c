@@ -6264,7 +6264,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * multi-char folds, so allocate extra space for that.   We can't
              * make any other length assumptions, as a byte input sequence
              * could shrink down. */
-            Ptrdiff_t current_string_nodes = STR_SZ(max_string_len
+            ptrdiff_t current_string_nodes = STR_SZ(max_string_len
                                                  + ((! FOLD)
                                                     ? 0
                                                     : 2 * ((UTF)
@@ -7168,7 +7168,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             Size_t new_size = size
                                             + (oldp - redo_p)
                                             + UTF8_MAXBYTES_CASE + 1;
-                            Ptrdiff_t e_offset = redo_e - locfold_buf;
+                            ptrdiff_t e_offset = redo_e - locfold_buf;
 
                             Renew(locfold_buf, new_size, char);
                             Renew(loc_correspondence, new_size, Size_t);
@@ -7445,7 +7445,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* Free up any over-allocated space; cast is to silence bogus
              * warning in MS VC */
             change_engine_size(pRExC_state,
-                        - (Ptrdiff_t) (current_string_nodes - STR_SZ(len)));
+                        - (ptrdiff_t) (current_string_nodes - STR_SZ(len)));
 
             /* I (khw) don't know if you can get here with zero length, but the
              * old code handled this situation by creating a zero-length EXACT
@@ -12781,7 +12781,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 }
 
 STATIC void
-S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size)
+S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const ptrdiff_t size)
 {
     /* 'size' is the delta number of smallest regnode equivalents to add or
      * subtract from the current memory allocated to the regex engine being
@@ -12820,7 +12820,7 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_size)
     PERL_ARGS_ASSERT_REGNODE_GUTS;
 
     SIZE_ALIGN(RExC_size);
-    change_engine_size(pRExC_state, (Ptrdiff_t) 1 + extra_size);
+    change_engine_size(pRExC_state, (ptrdiff_t) 1 + extra_size);
     NODE_ALIGN_FILL(REGNODE_p(ret));
     return(ret);
 }
@@ -12940,7 +12940,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
                                     studying. If this is wrong then we need to adjust RExC_recurse
                                     below like we do with RExC_open_parens/RExC_close_parens. */
-    change_engine_size(pRExC_state, (Ptrdiff_t) size);
+    change_engine_size(pRExC_state, (ptrdiff_t) size);
     src = REGNODE_p(RExC_emit);
     RExC_emit += size;
     dst = REGNODE_p(RExC_emit);

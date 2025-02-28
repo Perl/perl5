@@ -717,16 +717,16 @@ based on the underlying C library functions):
 #define strBEGINs(s1,s2) (strncmp(s1,ASSERT_IS_LITERAL(s2), sizeof(s2)-1) == 0)
 
 #define memBEGINs(s1, l, s2)                                                \
-            (   (Ptrdiff_t) (l) >= (Ptrdiff_t) sizeof(s2) - 1               \
+            (   (ptrdiff_t) (l) >= (ptrdiff_t) sizeof(s2) - 1               \
              && memEQ(s1, ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memBEGINPs(s1, l, s2)                                               \
-            (   (Ptrdiff_t) (l) > (Ptrdiff_t) sizeof(s2) - 1                \
+            (   (ptrdiff_t) (l) > (ptrdiff_t) sizeof(s2) - 1                \
              && memEQ(s1, ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memENDs(s1, l, s2)                                                  \
-            (   (Ptrdiff_t) (l) >= (Ptrdiff_t) sizeof(s2) - 1               \
+            (   (ptrdiff_t) (l) >= (ptrdiff_t) sizeof(s2) - 1               \
              && memEQ(s1 + (l) - (sizeof(s2) - 1), ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memENDPs(s1, l, s2)                                                 \
-            (   (Ptrdiff_t) (l) > (Ptrdiff_t) sizeof(s2)                    \
+            (   (ptrdiff_t) (l) > (ptrdiff_t) sizeof(s2)                    \
              && memEQ(s1 + (l) - (sizeof(s2) - 1), ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #endif  /* End of making macros private */
 

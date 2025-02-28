@@ -1694,21 +1694,7 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #  define STRUCT_OFFSET(s,m)  offsetof(s,m)
 #endif
 
-/* ptrdiff_t is C11, so undef it under pedantic builds.  (Actually it is
- * in C89, but apparently there are platforms where it doesn't exist.  See
- * thread beginning at http://nntp.perl.org/group/perl.perl5.porters/251541.)
- * */
-#ifdef PERL_GCC_PEDANTIC
-#   undef HAS_PTRDIFF_T
-#endif
-
-#ifdef HAS_PTRDIFF_T
-#  define Ptrdiff_t ptrdiff_t
-#else
-#  define Ptrdiff_t SSize_t
-#endif
-
-#  include <string.h>
+#include <string.h>
 
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own in proto.h instead. */

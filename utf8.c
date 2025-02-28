@@ -696,7 +696,7 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
      *              \xff\x80\x80\x80\x80\x80\x80\x83 = 2**32 */
 #  define OVERFLOWS_MIN_STRING  "\xff\x80\x80\x80\x80\x80\x80\x82"
 
-    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS_MIN_STRING)) {
+    if (e - s < (ptrdiff_t) STRLENs(OVERFLOWS_MIN_STRING)) {
         return ALMOST_CERTAINLY_OVERFLOWS;  /* Not enough info to be sure */
     }
 
@@ -2613,7 +2613,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
             /* Take extra care to not exceed 'e' (which would be undefined
              * behavior) should the input be malformed, with a partial
              * character at the end */
-            Ptrdiff_t expected_byte_count = UTF8SKIP(s);
+            ptrdiff_t expected_byte_count = UTF8SKIP(s);
             if (UNLIKELY(e - s  < expected_byte_count)) {
                 goto warn_and_return;
             }
@@ -2698,7 +2698,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
         /* Here is a starter byte.  Use UTF8SKIP from now on */
         do {
-            Ptrdiff_t expected_byte_count = UTF8SKIP(s);
+            ptrdiff_t expected_byte_count = UTF8SKIP(s);
             if (UNLIKELY(e - s  < expected_byte_count)) {
                 break;
             }

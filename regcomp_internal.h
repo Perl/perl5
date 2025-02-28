@@ -949,7 +949,7 @@ static const scan_data_t zero_scan_data = {
  * generate any warnings */
 #define TO_OUTPUT_WARNINGS(loc)                                         \
   (   RExC_copy_start_in_constructed                                    \
-   && ((xI(loc)) - RExC_precomp) > (Ptrdiff_t) RExC_latest_warn_offset)
+   && ((xI(loc)) - RExC_precomp) > (ptrdiff_t) RExC_latest_warn_offset)
 
 /* After we've emitted a warning, we save the position in the input so we don't
  * output it again */

@@ -8265,7 +8265,7 @@ S_add_multi_match(pTHX_ AV *multi_char_matches, SV *multi_string, const STRLEN c
         assert(!multi_char_matches || SvTYPE(multi_char_matches) == SVt_PVAV)
 
 STATIC void
-S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const Ptrdiff_t size);
+S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const ptrdiff_t size);
 # define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE    \
         assert(pRExC_state)
 
