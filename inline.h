@@ -1144,9 +1144,9 @@ Perl_rpp_is_lone(pTHX_ SV *sv)
     assert(AvREAL(PL_curstack));
 #endif
 
-    return SvREFCNT(sv) <= cBOOL(SvTEMP(sv))
+    return SvREFCNT(sv) <= (U32)cBOOL(SvTEMP(sv))
 #ifdef PERL_RC_STACK
-                         + 1
+                         + 1u
             && !SvIMMORTAL(sv) /* PL_sv_undef etc are never stealable */
 #endif
     ;
