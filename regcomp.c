@@ -14919,9 +14919,9 @@ S_parse_uniprop_string(pTHX_
                                 Titlecase Mapping  (both full and simple)
                                 Uppercase Mapping  (both full and simple)
              * Handle these the same way Name is done, using say, _wild.pm, but
-             * having both loose and full, like in charclass_invlists.h.
+             * having both loose and full, like in charclass_invlists.inc.
              * Perhaps move block and script to that as they are somewhat large
-             * in charclass_invlists.h.
+             * in charclass_invlists.inc.
              * For properties where the default is the code point itself, such
              * as any of the case changing mappings, the string would otherwise
              * consist of all Unicode code points in UTF-8 strung together.
@@ -14935,7 +14935,7 @@ S_parse_uniprop_string(pTHX_
         } /* End of is a wildcard subppattern */
 
         /* \p{name=...} is handled specially.  Instead of using the normal
-         * mechanism involving charclass_invlists.h, it uses _charnames.pm
+         * mechanism involving charclass_invlists.inc, it uses _charnames.pm
          * which has the necessary (huge) data accessible to it, and which
          * doesn't get loaded unless necessary.  The legal syntax for names is
          * somewhat different than other properties due both to the vagaries of

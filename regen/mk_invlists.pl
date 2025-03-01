@@ -19,7 +19,7 @@ use re "/aa";
 
 print "Starting...\n" if DEBUG;
 
-# This program outputs charclass_invlists.h, which contains various inversion
+# This program outputs charclass_invlists.inc, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
 # Thus, the lists it contains are essentially pre-compiled, and need only a
 # light-weight fast wrapper to make them usable at run-time.
@@ -32,7 +32,7 @@ print "Starting...\n" if DEBUG;
 
 my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
-# charclass_invlists.h now also contains inversion maps and enum definitions
+# charclass_invlists.inc now also contains inversion maps and enum definitions
 # for those maps that have a finite number of possible values
 
 # integer or float (no exponent)
@@ -54,7 +54,7 @@ my $table_name_prefix = "UNI_";
 # ASCII \w
 my $enum_name_re = qr / ^ [[:alpha:]] \w* $ /ax;
 
-my $out_fh = open_new('charclass_invlists.h', '>',
+my $out_fh = open_new('charclass_invlists.inc', '>',
                       {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 

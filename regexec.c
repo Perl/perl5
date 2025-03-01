@@ -11543,7 +11543,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
      * pointers to auxiliary tables for each such situation.  Each aux array
      * lists all the scripts for the given situation.  There is another,
      * parallel, table that gives the number of entries in each aux table.
-     * These are all defined in charclass_invlists.h */
+     * These are all defined in charclass_invlists.inc */
 
     /* XXX Here are the additional things UTS 39 says could be done:
      *
