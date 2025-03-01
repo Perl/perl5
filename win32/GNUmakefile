@@ -1524,6 +1524,7 @@ MakePPPort : $(HAVEMINIPERL) $(CONFIGPM)
 	$(XCOPY) *.h $(COREDIR)\\*.*
 	$(RCOPY) include $(COREDIR)\\*.*
 	$(XCOPY) ..\\*.h $(COREDIR)\\*.*
+	$(XCOPY) ..\\charclass_invlists.inc $(COREDIR)\\*.*
 	rem. > $@
 
 perlmain$(o) : runperl.c $(CONFIGPM)
