@@ -981,22 +981,24 @@ EOF_BLURB
 {
     my @warn;
     local $SIG{__WARN__}= sub { push @warn, $_[0]; warn $_[0] };
-    local $::TODO;
-    $::TODO= "Absorbtion not implemented yet";
-    # currently we don't handle absorbtion: (A && (A || B || C ...)) == A
-    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
-    $hp->parse_text(<<~'EOF');
-        #if defined(X) && (defined(X) || defined(Y))
-        #define HAS_X
-        #endif
-        EOF
-    my $grouped= $hp->group_content();
-    my $as_text= $hp->lines_as_str($grouped);
-    is($as_text,<<~'EOF',my $tname= "simplification by absorbtion"); # or show_text($as_text);
-        #if defined(X)
-        # define HAS_X
-        #endif /* defined(X) */
-        EOF
+    my $tname = "simplification by absorbtion";
+    {
+        local $::TODO = "Absorbtion not implemented yet";
+        # currently we don't handle absorbtion: (A && (A || B || C ...)) == A
+        my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
+        $hp->parse_text(<<~'EOF');
+            #if defined(X) && (defined(X) || defined(Y))
+            #define HAS_X
+            #endif
+            EOF
+        my $grouped= $hp->group_content();
+        my $as_text= $hp->lines_as_str($grouped);
+        is($as_text,<<~'EOF', $tname); # or show_text($as_text);
+            #if defined(X)
+            # define HAS_X
+            #endif /* defined(X) */
+            EOF
+    }
     is(join("\n",@warn),"", "No warnings generated from $tname");
 }
 {
