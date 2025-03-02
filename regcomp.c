@@ -5511,12 +5511,19 @@ S_compute_EXACTish(RExC_state_t *pRExC_state)
  * in which case return I32_MAX (rather than possibly 32-bit wrapping) */
 
 static I32
-S_backref_value(char *p, char *e)
+S_backref_value(const char *p, const char *e, char **pe)
 {
-    const char* endptr = e;
+    const char *endptr = e;
     UV val;
-    if (grok_atoUV(p, &val, &endptr) && val <= I32_MAX)
+    if (grok_atoUV(p, &val, &endptr) && val <= I32_MAX) {
+        if (pe) {
+            *pe = (char *)endptr;
+        }
         return (I32)val;
+    }
+    if (pe) {
+        *pe = NULL;
+    }
     return I32_MAX;
 }
 
@@ -6021,7 +6028,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 char * e = RExC_end;
 
                 if (*s == 'g') {
-                    bool isrel = 0;
+                    bool isrel = FALSE;
 
                     s++;
                     if (*s == '{') {
@@ -6067,7 +6074,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * surrounding braces */
 
                     if (*s == '-') {
-                        isrel = 1;
+                        isrel = TRUE;
                         s++;
                     }
 
@@ -6076,7 +6083,20 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
 
                     RExC_parse_set(s);
-                    num = S_backref_value(RExC_parse, RExC_end);
+                    num = S_backref_value(RExC_parse, RExC_end, &s);
+
+                    if (endbrace && s) {
+                        while (isBLANK(*s)) {
+                            ++s;
+                        }
+                        assert(s <= endbrace);
+                        if (s != endbrace) {
+                            RExC_parse_set(s);
+                            vFAIL2("Sequence \\%s... not terminated", "g{");
+                        }
+                        ++s;
+                    }
+
                     if (num == 0)
                         vFAIL("Reference to invalid group 0");
                     else if (num == I32_MAX) {
@@ -6085,6 +6105,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         else
                             vFAIL("Unterminated \\g... pattern");
                     }
+                    assert(s != NULL);
 
                     if (isrel) {
                         num = RExC_npar - num;
@@ -6108,7 +6129,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
                 }
                 else {
-                    num = S_backref_value(RExC_parse, RExC_end);
+                    num = S_backref_value(RExC_parse, RExC_end, &s);
                     /* bare \NNN might be backref or octal - if it is larger
                      * than or equal RExC_npar then it is assumed to be an
                      * octal escape. Note RExC_npar is +1 from the actual
@@ -6131,6 +6152,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         RExC_parse_set(atom_parse_start);
                         goto defchar;
                     }
+
+                    if (!s) {
+                        for (s = RExC_parse; isDIGIT(*s); ++s)
+                            ;
+                    }
+
                     if (num < RExC_logical_npar) {
                         num = RExC_logical_to_parno[num];
                     }
@@ -6154,12 +6181,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  *
                  * We've already figured out what value the digits represent.
                  * Now, move the parse to beyond them. */
-                if (endbrace) {
-                    RExC_parse_set(endbrace + 1);
-                }
-                else while (isDIGIT(*RExC_parse)) {
-                    RExC_parse_inc_by(1);
-                }
+                assert(s != NULL);
+                RExC_parse_set(s);
                 if (num < 0)
                     vFAIL("Reference to nonexistent group");
 
@@ -6577,7 +6600,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         /* NOTE, RExC_npar is 1 more than the actual number of
                          * parens we have seen so far, hence the "<" as opposed
                          * to "<=" */
-                        if ( !isDIGIT(p[1]) || S_backref_value(p, RExC_end) < RExC_npar)
+                        if ( !isDIGIT(p[1]) || S_backref_value(p, RExC_end, NULL) < RExC_npar)
                         {  /* Not to be treated as an octal constant, go
                                    find backref */
                             p = oldp;

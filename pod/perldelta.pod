@@ -379,6 +379,13 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+In regexes, the contents of C<\g{...}> backreferences are now properly
+validated. Previously, C<\g{1 FOO}> was silently parsed as C<\g{1}>, ignoring
+everything after the first number.
+[GH #23050]
+
+=item *
+
 XXX
 
 =back
