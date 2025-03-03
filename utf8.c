@@ -4795,7 +4795,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
              break;
         }
 
-        u = utf8_to_uvchr_buf(s, e, &next_len);
+        u = utf8_to_uv_or_die(s, e, &next_len);
         assert(next_len > 0);
 
         if (u < 256) {
