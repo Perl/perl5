@@ -2399,7 +2399,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         REXEC_FBC_UTF8_CLASS_SCAN(
               (   (U8) NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
                && _invlist_contains_cp(anyofh_list,
-                                       utf8_to_uvchr_buf((U8 *) s,
+                                       utf8_to_uv_or_die((U8 *) s,
                                                          (U8 *) strend,
                                                          NULL))));
         break;
@@ -2413,7 +2413,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             anyofh_list = GET_ANYOFH_INVLIST(prog, c);
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
                    _invlist_contains_cp(anyofh_list,
-                                           utf8_to_uvchr_buf((U8 *) s,
+                                           utf8_to_uv_or_die((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL)));
         }
@@ -2441,7 +2441,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)),
                                 HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)))
                    && _invlist_contains_cp(anyofh_list,
-                                           utf8_to_uvchr_buf((U8 *) s,
+                                           utf8_to_uv_or_die((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL))));
         break;
@@ -2454,7 +2454,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         /* Note FLAGS is the string length in this regnode */
                         ((struct regnode_anyofhs *) c)->string + FLAGS(c),
                         _invlist_contains_cp(anyofh_list,
-                                             utf8_to_uvchr_buf((U8 *) s,
+                                             utf8_to_uv_or_die((U8 *) s,
                                                                (U8 *) strend,
                                                                NULL)));
         break;
@@ -2469,7 +2469,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFR_t8_p8:
         REXEC_FBC_UTF8_CLASS_SCAN(
                             (   NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
-                             && withinCOUNT(utf8_to_uvchr_buf((U8 *) s,
+                             && withinCOUNT(utf8_to_uv_or_die((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL),
                                             ANYOFRbase(c), ANYOFRdelta(c))));
@@ -2487,7 +2487,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             U8 first_byte = FLAGS(c);
 
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
-                                withinCOUNT(utf8_to_uvchr_buf((U8 *) s,
+                                withinCOUNT(utf8_to_uv_or_die((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL),
                                             ANYOFRbase(c), ANYOFRdelta(c)));
@@ -3203,7 +3203,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             REXEC_FBC_UTF8_CLASS_SCAN(
                         to_complement ^ cBOOL(_invlist_contains_cp(
                                                 PL_XPosix_ptrs[classnum],
-                                                utf8_to_uvchr_buf((U8 *) s,
+                                                utf8_to_uv_or_die((U8 *) s,
                                                                 (U8 *) strend,
                                                                 NULL))));
             break;
