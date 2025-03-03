@@ -1403,7 +1403,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
         SAVEFREESV(old_out_name);
 
     if (!PL_argvoutgv)
-        PL_argvoutgv = gv_fetchpvs("ARGVOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO);
+        PL_argvoutgv = gv_fetchsv_nomg(SV_CONST2(ARGVOUT), GV_ADD|GV_NOTQUAL, SVt_PVIO);
     if (io && (IoFLAGS(io) & (IOf_ARGV|IOf_START)) == (IOf_ARGV|IOf_START)) {
         IoFLAGS(io) &= ~IOf_START;
         if (PL_inplace) {
@@ -1473,7 +1473,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 
                 TAINT_PROPER("inplace open");
                 if (oldlen == 1 && *PL_oldname == '-') {
-                    setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL,
+                    setdefout(gv_fetchsv_nomg(SV_CONST2(STDOUT), GV_ADD|GV_NOTQUAL,
                                           SVt_PVIO));
                     return IoIFP(GvIOp(gv));
                 }
@@ -1604,7 +1604,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
             SvREFCNT_dec_NN(oldout);
             return NULL;
         }
-        setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO));
+        setdefout(gv_fetchsv_nomg(SV_CONST2(STDOUT), GV_ADD|GV_NOTQUAL, SVt_PVIO));
     }
     return NULL;
 }

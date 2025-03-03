@@ -227,7 +227,7 @@ mini_obj = perlmini$(O) $(obj1) $(obj2) $(obj3) $(obj4) $(obj5)
 obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4) $(obj5)
 
 h0 = av.h config.h cop.h cv.h embed.h embedvar.h
-h1 = EXTERN.h form.h gv.h handy.h hv.h l1_char_class_tab.h INTERN.h intrpvar.h
+h1 = EXTERN.h form.h gv.h handy.h hekpool.h hv.h l1_char_class_tab.h INTERN.h intrpvar.h
 h2 = iperlsys.h keywords.h mydtrace.h mg.h mg_vtable.h nostdio.h op.h 
 h3 = op_reg_common.h opcode.h opnames.h overload.h pad.h parser.h patchlevel.h 
 h4 = perl.h perlapi.h perlio.h perlsdio.h perlvars.h perly.h

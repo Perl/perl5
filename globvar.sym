@@ -19,6 +19,8 @@ PL_EXACT_REQ8_bitmask
 PL_extended_utf8_dfa_tab
 PL_fold
 PL_fold_latin1
+PL_hekpool
+PL_hekpoolsv
 PL_hexdigit
 PL_inf
 PL_interp_size

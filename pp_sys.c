@@ -834,7 +834,7 @@ PP_wrapped(pp_open, 0, 1)
         if (mg) {
             /* Method's args are same as ours ... */
             /* ... except handle is replaced by the object */
-            return Perl_tied_method(aTHX_ SV_CONST(OPEN), mark - 1, MUTABLE_SV(io), mg,
+            return Perl_tied_method(aTHX_ SV_CONST2(OPEN), mark - 1, MUTABLE_SV(io), mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     sp - mark);
         }
@@ -875,7 +875,7 @@ PP_wrapped(pp_close, MAXARG, 0)
         if (io) {
             const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
             if (mg) {
-                return tied_method0(SV_CONST(CLOSE), SP, MUTABLE_SV(io), mg);
+                return tied_method0(SV_CONST2(CLOSE), SP, MUTABLE_SV(io), mg);
             }
         }
     }
@@ -948,7 +948,7 @@ PP_wrapped(pp_fileno, MAXARG, 0)
     if (io
         && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
-        return tied_method0(SV_CONST(FILENO), SP, MUTABLE_SV(io), mg);
+        return tied_method0(SV_CONST2(FILENO), SP, MUTABLE_SV(io), mg);
     }
 
     if (io && IoDIRP(io)) {
@@ -1034,7 +1034,7 @@ PP_wrapped(pp_binmode, MAXARG, 0)
                function, which I don't think that the optimiser will be able to
                figure out. Although, as it's a static function, in theory it
                could.  */
-            return Perl_tied_method(aTHX_ SV_CONST(BINMODE), SP, MUTABLE_SV(io), mg,
+            return Perl_tied_method(aTHX_ SV_CONST2(BINMODE), SP, MUTABLE_SV(io), mg,
                                     G_SCALAR|TIED_METHOD_MORTALIZE_NOT_NEEDED,
                                     discp ? 1 : 0, discp);
         }
@@ -1078,7 +1078,7 @@ PP_wrapped(pp_tie, 0, 1)
     GV *gv = NULL;
     SV *sv;
     const SSize_t markoff = MARK - PL_stack_base;
-    const char *methname;
+    SV *methnamesv;
     int how = PERL_MAGIC_tied;
     SSize_t items;
     SV *varsv = *++MARK;
@@ -1087,7 +1087,7 @@ PP_wrapped(pp_tie, 0, 1)
         case SVt_PVHV:
         {
             HE *entry;
-            methname = "TIEHASH";
+            methnamesv = SV_CONST2(TIEHASH);
             if (HvLAZYDEL(varsv) && (entry = HvEITER_get((HV *)varsv))) {
                 HvLAZYDEL_off(varsv);
                 hv_free_ent(NULL, entry);
@@ -1097,7 +1097,7 @@ PP_wrapped(pp_tie, 0, 1)
             break;
         }
         case SVt_PVAV:
-            methname = "TIEARRAY";
+            methnamesv = SV_CONST2(TIEARRAY);
             if (!AvREAL(varsv)) {
                 if (!AvREIFY(varsv))
                     Perl_croak(aTHX_ "Cannot tie unreifiable array");
@@ -1109,7 +1109,7 @@ PP_wrapped(pp_tie, 0, 1)
         case SVt_PVGV:
         case SVt_PVLV:
             if (isGV_with_GP(varsv) && !SvFAKE(varsv)) {
-                methname = "TIEHANDLE";
+                methnamesv = SV_CONST2(TIEHANDLE);
                 how = PERL_MAGIC_tiedscalar;
                 /* For tied filehandles, we apply tiedscalar magic to the IO
                    slot of the GP rather than the GV itself. AMS 20010812 */
@@ -1124,7 +1124,7 @@ PP_wrapped(pp_tie, 0, 1)
             }
             /* FALLTHROUGH */
         default:
-            methname = "TIESCALAR";
+            methnamesv = SV_CONST2(TIESCALAR);
             how = PERL_MAGIC_tiedscalar;
             break;
     }
@@ -1137,7 +1137,8 @@ PP_wrapped(pp_tie, 0, 1)
         while (items--)
             PUSHs(*MARK++);
         PUTBACK;
-        call_method(methname, G_SCALAR);
+        /* call_method(methname, G_SCALAR); */
+        call_sv(methnamesv, G_SCALAR | G_METHOD);
     }
     else {
         /* Can't use call_method here, else this: fileno FOO; tie @a, "FOO"
@@ -1148,37 +1149,38 @@ PP_wrapped(pp_tie, 0, 1)
        stash = gv_stashsv(*MARK, 0);
        if (!stash) {
            if (SvROK(*MARK))
-               DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+               DIE(aTHX_ "Can't locate object method %" SVf_QUOTEDPREFIX
                          " via package %" SVf_QUOTEDPREFIX,
-                   methname, SVfARG(*MARK));
+                   methnamesv, SVfARG(*MARK));
            else if (isGV(*MARK)) {
                /* If the glob doesn't name an existing package, using
                 * SVfARG(*MARK) would yield "*Foo::Bar" or *main::Foo. So
                 * generate the name for the error message explicitly. */
                SV *stashname = sv_newmortal();
                gv_fullname4(stashname, (GV *) *MARK, NULL, FALSE);
-               DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+               DIE(aTHX_ "Can't locate object method %" SVf_QUOTEDPREFIX
                          " via package %" SVf_QUOTEDPREFIX,
-                   methname, SVfARG(stashname));
+                   methnamesv, SVfARG(stashname));
            }
            else {
                SV *stashname = !SvPOK(*MARK) ? &PL_sv_no
                              : SvCUR(*MARK)  ? *MARK
                              :                 newSVpvs_flags("main", SVs_TEMP);
-               DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+               DIE(aTHX_ "Can't locate object method %" SVf_QUOTEDPREFIX
                          " via package %" SVf_QUOTEDPREFIX
                    " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
-                   methname, SVfARG(stashname), SVfARG(stashname));
+                   methnamesv, SVfARG(stashname), SVfARG(stashname));
            }
        }
-       else if (!(gv = gv_fetchmethod(stash, methname))) {
+       /* else if (!(gv = gv_fetchmethod(stash, methname))) { */
+       else if (!(gv = gv_fetchmethod_sv_flags(stash, methnamesv, TRUE ? GV_AUTOLOAD : 0))) {
            /* The effective name can only be NULL for stashes that have
             * been deleted from the symbol table, which this one can't
             * be, since we just looked it up by name.
             */
-           DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+           DIE(aTHX_ "Can't locate object method %" SVf_QUOTEDPREFIX
                      " via package %" HEKf_QUOTEDPREFIX ,
-               methname, HvENAME_HEK_NN(stash));
+               methnamesv, HvENAME_HEK_NN(stash));
        }
         ENTER_with_name("call_TIE");
         PUSHSTACKi(PERLSI_MAGIC);
@@ -1229,7 +1231,8 @@ PP_wrapped(pp_untie, 1, 0)
     if ((mg = SvTIED_mg(sv, how))) {
         SV * const obj = SvRV(SvTIED_obj(sv, mg));
         if (obj && SvSTASH(obj)) {
-            GV * const gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE);
+            /* GV * const gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE); */
+            GV * const gv = gv_fetchmethod_sv_flags(SvSTASH(obj), SV_CONST2(UNTIE), FALSE ? GV_AUTOLOAD : 0);
             CV *cv;
             if (gv && isGV(gv) && (cv = GvCV(gv))) {
                PUSHMARK(SP);
@@ -1600,7 +1603,7 @@ PP_wrapped(pp_getc, MAXARG, 0)
         const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
             const U8 gimme = GIMME_V;
-            Perl_tied_method(aTHX_ SV_CONST(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
+            Perl_tied_method(aTHX_ SV_CONST2(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
             if (gimme == G_SCALAR) {
                 SPAGAIN;
                 SvSetMagicSV_nosteal(TARG, TOPs);
@@ -1854,7 +1857,7 @@ PP(pp_prtf)
                 *MARK = NULL;
                 ++PL_stack_sp;
             }
-            return Perl_tied_method(aTHX_ SV_CONST(PRINTF), mark - 1, MUTABLE_SV(io),
+            return Perl_tied_method(aTHX_ SV_CONST2(PRINTF), mark - 1, MUTABLE_SV(io),
                                     mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     PL_stack_sp - mark);

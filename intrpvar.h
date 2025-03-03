@@ -494,6 +494,7 @@ PERLVAR(I, incgv,	GV *)
 PERLVAR(I, hintgv,	GV *)
 PERLVAR(I, origfilename, char *)
 PERLVARI(I, xsubfilename, const char *, NULL)
+PERLVAR(I, lastcopfile, struct cop_lastfile)
 PERLVAR(I, diehook,	SV *)
 PERLVAR(I, warnhook,	SV *)
 /* keyword hooks*/

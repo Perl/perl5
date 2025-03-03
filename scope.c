@@ -1761,7 +1761,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
                 gimme_text = "VOID";
                 break;
             case G_SCALAR:
-                gimme_text = "SCALAR";
+                gimme_text = PV_POOL(SCALAR, "SCALAR");
                 break;
             case G_LIST:
                 gimme_text = "LIST";

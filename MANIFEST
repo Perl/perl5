@@ -42,6 +42,7 @@ globvar.sym				Global variables that need hiding when embedded
 gv.c					Glob value code
 gv.h					Glob value header
 handy.h					Handy definitions
+hekpool.h
 hv.c					Hash value code
 hv.h					Hash value header
 hv_func.h				Hash value static inline function header
@@ -5951,6 +5952,7 @@ regen/embed_lib.pl			Reads embed.fnc and regen/opcodes
 regen/feature.pl			Generates feature.pm
 regen/genpacksizetables.pl		Generate the size tables for pack/unpack
 regen/HeaderParser.pm			Module used to parse header files
+regen/hekpool.pl			Updates/creates hekpool.h
 regen/keywords.pl			Program to write keywords.h
 regen/lib_cleanup.pl			Generate lib/.gitignore from MANIFEST
 regen/locale.pl				Program to write locale_table.h

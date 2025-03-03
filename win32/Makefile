@@ -729,6 +729,7 @@ CORE_NOCFG_H	=		\
 		..\form.h	\
 		..\gv.h		\
 		..\handy.h	\
+		..\hekpool.h	\
 		..\hv.h		\
 		..\hv_func.h	\
 		..\iperlsys.h	\

@@ -4809,7 +4809,7 @@ S_require_file(pTHX_ SV *sv)
                         SvSetSV_nosteal(nsv,sv);
                     }
 
-                    const char *method = NULL;
+                    SV* methodsv = NULL;
                     bool is_incdir = FALSE;
                     SV * inc_idx_sv = save_scalar(PL_incgv);
                     sv_setiv(inc_idx_sv,inc_idx);
@@ -4818,14 +4818,16 @@ S_require_file(pTHX_ SV *sv)
                          * call the method.
                          */
                         HV *pkg = SvSTASH(SvRV(loader));
-                        GV * gv = gv_fetchmethod_pvn_flags(pkg, "INC", 3, GV_AUTOLOAD);
+                        SV* trymeth = SV_CONST2(INC);
+                        GV * gv = gv_fetchmethod_sv_flags(pkg, trymeth, GV_AUTOLOAD);
                         if (gv && isGV(gv)) {
-                            method = "INC";
+                            methodsv = trymeth;
                         } else {
+                            trymeth = SV_CONST2(INCDIR);
                             /* no point to autoload here, it would have been found above */
-                            gv = gv_fetchmethod_pvn_flags(pkg, "INCDIR", 6, 0);
+                            gv = gv_fetchmethod_sv_flags(pkg, trymeth, 0);
                             if (gv && isGV(gv)) {
-                                method = "INCDIR";
+                                methodsv = trymeth;
                                 is_incdir = TRUE;
                             }
                         }
@@ -4841,7 +4843,7 @@ S_require_file(pTHX_ SV *sv)
                          * Maybe in the future we can detect if it does
                          * have overloading and throw an error if not.
                          */
-                        if (!method) {
+                        if (!methodsv) {
                             if (SvTYPE(SvRV(loader)) != SVt_PVCV) {
                                 if (amagic_applies(loader,string_amg,AMGf_unary))
                                     goto treat_as_string;
@@ -4868,17 +4870,18 @@ S_require_file(pTHX_ SV *sv)
                     SAVETMPS;
                     PUSHMARK(PL_stack_sp);
                     /* add the args array for method calls */
-                    bool add_dirsv = (method && (loader != dirsv));
+                    bool add_dirsv = (methodsv && (loader != dirsv));
                     rpp_extend(2 + add_dirsv);
                     rpp_push_2(
                         /* always use the object for method calls */
-                        method ? loader : dirsv,
+                        methodsv ? loader : dirsv,
                         nsv
                     );
                     if (add_dirsv)
                         rpp_push_1(dirsv);
-                    if (method) {
-                        count = call_method(method, G_LIST|G_EVAL);
+                    if (methodsv) {
+                        /*count = call_method(method, G_LIST|G_EVAL); */
+                        count = call_sv(methodsv, G_LIST | G_EVAL | G_METHOD);
                     } else {
                         count = call_sv(loader, G_LIST|G_EVAL);
                     }
@@ -4998,9 +5001,9 @@ S_require_file(pTHX_ SV *sv)
                              * compat I think.
                              */
                             if (l>=12 && pv[l-1] == '\n' && pv[l-2] == '.' && isDIGIT(pv[l-3]))
-                                sv_catpvf(errsv, "%s %s hook died--halting @INC search",
-                                          method ? method : "INC",
-                                          method ? "method" : "sub");
+                                sv_catpvf(errsv, "%" SVf " %s hook died--halting @INC search",
+                                          methodsv ? methodsv : SV_CONST2(INC),
+                                          methodsv ? "method" : "sub");
                             croak_sv(errsv);
                         }
                     }

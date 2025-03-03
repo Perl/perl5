@@ -125,8 +125,8 @@
 #   define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
 
-static const char S_destroy[] = "DESTROY";
-#define S_destroy_len (sizeof(S_destroy)-1)
+/* static const char S_destroy[] = "DESTROY";
+   #define S_destroy_len (sizeof(S_destroy)-1) */
 
 /* ============================================================================
 
@@ -2979,8 +2979,19 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
             SV *const referent = SvRV(sv);
 
             if (!referent) {
-                len = 7;
-                retval = buffer = savepvn("NULLREF", len);
+                /* caller promised to behave, HPOOL strings are inter-ithread
+                   process global, but not HW RO/C const protected */
+                if (flags & SV_CONST_RETURN) {
+                /* wake up/vivify just in case of near-future copying */
+                    SV_CONST2(NULLREF);
+                    if (lp)
+                        *lp = STRLENs("NULLREF");
+                    retval = PV_POOL(NULLREF, "NULLREF");
+                    return retval;
+                }
+                const char * hekpv = PV_POOL(NULLREF,"NULLREF");
+                len = STRLENs("NULLREF");
+                retval = buffer = savepvn(hekpv, len);
             } else if (SvTYPE(referent) == SVt_REGEXP &&
                        (!(PL_curcop->cop_hints & HINT_NO_AMAGIC) ||
                         amagic_is_enabled(string_amg))) {
@@ -3020,8 +3031,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
                             SvUTF8_off(sv);
                         }
                     } else {
-                        stashname = "__ANON__";
-                        stashnamelen = 8;
+                        stashname = PV_POOL(__ANON__, "__ANON__");
+                        stashnamelen = STRLENs("__ANON__");
                     }
                     len = stashnamelen + 1 /* = */ + typelen + 3 /* (0x */
                         + 2 * sizeof(UV) + 2 /* )\0 */;
@@ -3848,7 +3859,8 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
     if(dtype == SVt_PVGV) {
         const char * const name = GvNAME((const GV *)dsv);
         const STRLEN len = GvNAMELEN(dsv);
-        if(memEQs(name, len, "ISA")
+        /* if(memEQs(name, len, "ISA") */
+        if(memEQhp(name, len, ISA, "ISA")
          /* The stash may have been detached from the symbol table, so
             check its name. */
          && GvSTASH(dsv) && HvHasENAME(GvSTASH(dsv))
@@ -4069,7 +4081,8 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
         }
         else if (
             stype == SVt_PVAV && sref != dref
-         && memEQs(GvNAME((GV*)dsv), GvNAMELEN((GV*)dsv), "ISA")
+         /* && memEQs(GvNAME((GV*)dsv), GvNAMELEN((GV*)dsv), "ISA") */
+            && memEQhp(GvNAME((GV*)dsv), GvNAMELEN((GV*)dsv), ISA, "ISA")
          /* The stash may have been detached from the symbol table, so
             check its name before doing anything. */
          && GvSTASH(dsv) && HvHasENAME(GvSTASH(dsv))
@@ -6670,6 +6683,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 {
     SV *gvname;
     GV *anongv;
+    HV *stash;
 
     PERL_ARGS_ASSERT_ANONYMISE_CV_MAYBE;
 
@@ -6688,9 +6702,14 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
     }
 
     /* if not, anonymise: */
-    gvname = (GvSTASH(gv) && HvHasNAME(GvSTASH(gv)) && HvHasENAME(GvSTASH(gv)))
-                    ? newSVhek(HvENAME_HEK(GvSTASH(gv)))
-                    : newSVpvn_flags( "__ANON__", 8, 0 );
+    stash = GvSTASH(gv);
+    if(stash && HvHasNAME(stash) && HvHasENAME(stash)) {
+        gvname = newSVhek(HvENAME_HEK(stash));
+    }
+    else {
+        SV_CONST2(__ANON__);
+        gvname = newSVhek(HEK_POOL(__ANON__, "__ANON__"));
+    }
     sv_catpvs(gvname, "::__ANON__");
     anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
     SvREFCNT_dec_NN(gvname);
@@ -7191,12 +7210,17 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
             }
             else {
                 bool autoload = FALSE;
+                /* GV *gv =
+                    gv_fetchmeth_pvn(stash, S_destroy, S_destroy_len, -1, 0); */
                 GV *gv =
-                    gv_fetchmeth_pvn(stash, S_destroy, S_destroy_len, -1, 0);
+                    gv_fetchmeth_sv_nomg_x(stash, SV_CONST2(DESTROY), -1, 0);
                 if (gv)
                     destructor = GvCV(gv);
                 if (!destructor) {
-                    gv = gv_autoload_pvn(stash, S_destroy, S_destroy_len,
+                    /* gv = gv_autoload_pvn(stash, S_destroy, S_destroy_len,
+                                         GV_AUTOLOAD_ISMETHOD); */
+                    /* TODO add NOVI */
+                    gv = gv_autoload_sv(stash, SV_CONST2(DESTROY),
                                          GV_AUTOLOAD_ISMETHOD);
                     if (gv)
                         destructor = GvCV(gv);
@@ -10600,18 +10624,18 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
                                 if (SvROK(sv))
                                     return "REF";
                                 else
-                                    return "SCALAR";
+                                    return PV_POOL(SCALAR, "SCALAR");
 
         case SVt_PVLV:		return (char *)  (SvROK(sv) ? "REF"
                                 /* tied lvalues should appear to be
                                  * scalars for backwards compatibility */
                                 : (isALPHA_FOLD_EQ(LvTYPE(sv), 't'))
-                                    ? "SCALAR" : "LVALUE");
+                                    ? PV_POOL(SCALAR, "SCALAR") : "LVALUE");
         case SVt_PVAV:		return "ARRAY";
         case SVt_PVHV:		return "HASH";
         case SVt_PVCV:		return "CODE";
         case SVt_PVGV:		return (char *) (isGV_with_GP(sv)
-                                    ? "GLOB" : "SCALAR");
+                                    ? "GLOB" : PV_POOL(SCALAR, "SCALAR"));
         case SVt_PVFM:		return "FORMAT";
         case SVt_PVIO:		return "IO";
         case SVt_INVLIST:	return "INVLIST";
@@ -10647,8 +10671,11 @@ Perl_sv_ref(pTHX_ SV *dst, const SV *const sv, const int ob)
     if (ob && SvOBJECT(sv)) {
         if (HvHasNAME(SvSTASH(sv)))
             sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)));
-        else
-            sv_setpvs(dst, "__ANON__");
+        else {
+            /* sv_setpvs(dst, "__ANON__"); */
+            SV_CONST2(__ANON__);
+            sv_sethek(dst, HEK_POOL(__ANON__, "__ANON__"));
+        }
     }
     else {
         const char * reftype = sv_reftype(sv, 0);
@@ -15601,7 +15628,9 @@ do_mark_cloneable_stash(pTHX_ SV *const sv)
 {
     const HEK * const hvname = HvNAME_HEK((const HV *)sv);
     if (hvname) {
-        GV* const cloner = gv_fetchmethod_autoload(MUTABLE_HV(sv), "CLONE_SKIP", 0);
+        /* GV* const cloner = gv_fetchmethod_autoload(MUTABLE_HV(sv), "CLONE_SKIP", 0); */
+        GV* const cloner = gv_fetchmethod_sv_flags(MUTABLE_HV(sv),
+            SV_CONST2(CLONE_SKIP), 0 ? GV_AUTOLOAD : 0);
         SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
         if (cloner && GvCV(cloner)) {
             dSP;
@@ -16001,12 +16030,50 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
     ptr_table_store(PL_ptr_table, &proto_perl->Ipadname_const,
                     &PL_padname_const);
+    if (0) {   /* Wake up all HEKP SV heads/HEK objects in parent my_perl */
+        SV* sv;
+        char * str;
+        struct shared_he * she;
+        HEK * hek;
+
+        PERL_SET_THX(proto_perl); /* sv_vivihek() needs parent my_perl */
+        sv = SV_POOLSTART;
+        while(sv < SV_POOLEND) {
+            str = SvPVX(sv);
+            she = (struct shared_he*)
+                ((Size_t)(((Size_t)str)
+                -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0])));
+            hek = &she->shared_he_he;
+            if(!HEK_HASH(hek))
+                sv = sv_vivihek(sv);
+            sv++;
+        }
+        PERL_SET_THX(my_perl);
+
+        /* make the immortal HEKPOOL SVs/HEKs spread through out the mem space
+           of child ithread.  Perhaps the child ithread will do more Perl API
+           COWing than the parent ithread is currently doing */
+        sv = SV_POOLSTART;
+        while(sv < SV_POOLEND) {
+            ptr_table_store(PL_ptr_table, sv, sv);
+            str = SvPVX(sv);
+            she = (struct shared_he*)
+                ((Size_t)(((Size_t)str)
+                -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0])));
+            hek = &she->shared_he_he;
+            ptr_table_store(PL_ptr_table, hek, hek);
+            sv++;
+        }
+    }
 
     /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
     HvSHAREKEYS_off(PL_strtab);
     hv_ksplit(PL_strtab, HvTOTALKEYS(proto_perl->Istrtab));
+    sv_vivisome_hekpool();
     ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
+    PL_lastcopfile.copfile_unsafe = NULL; /* not needed semantically */
+    PL_lastcopfile.cached_file = NULL;
 
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
 
@@ -16417,7 +16484,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     */
     while(av_count(param->stashes) != 0) {
         HV* const stash = MUTABLE_HV(av_shift(param->stashes));
-        GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
+        /* GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0); */
+        GV* const cloner = gv_fetchmethod_sv_flags(stash, SV_CONST2(CLONE), 0 ? GV_AUTOLOAD : 0);
         if (cloner && GvCV(cloner)) {
             ENTER;
             SAVETMPS;

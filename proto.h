@@ -1554,6 +1554,11 @@ Perl_gv_setref(pTHX_ SV * const dsv, SV * const ssv)
         assert(dsv); assert(ssv)
 
 PERL_CALLCONV HV *
+Perl_gv_stashhek(pTHX_ HEK *hek, I32 flags);
+#define PERL_ARGS_ASSERT_GV_STASHHEK            \
+        assert(hek)
+
+PERL_CALLCONV HV *
 Perl_gv_stashpv(pTHX_ const char *name, I32 flags);
 #define PERL_ARGS_ASSERT_GV_STASHPV             \
         assert(name)
@@ -1561,6 +1566,11 @@ Perl_gv_stashpv(pTHX_ const char *name, I32 flags);
 PERL_CALLCONV HV *
 Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags);
 #define PERL_ARGS_ASSERT_GV_STASHPVN            \
+        assert(name)
+
+PERL_CALLCONV HV *
+Perl_gv_stashpvs_p(pTHX_ I32 flags, const char *name);
+#define PERL_ARGS_ASSERT_GV_STASHPVS_P          \
         assert(name)
 
 PERL_CALLCONV HV *
@@ -5260,6 +5270,20 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV * const sv, const char * const pat, const STRLEN
         assert(sv); assert(pat)
 
 PERL_CALLCONV void
+Perl_sv_viviall_hekpool(pTHX);
+#define PERL_ARGS_ASSERT_SV_VIVIALL_HEKPOOL
+
+PERL_CALLCONV SV *
+Perl_sv_vivihek(SV * const sv)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_VIVIHEK             \
+        assert(sv)
+
+PERL_CALLCONV void
+Perl_sv_vivisome_hekpool(pTHX);
+#define PERL_ARGS_ASSERT_SV_VIVISOME_HEKPOOL
+
+PERL_CALLCONV void
 Perl_sv_vsetpvf(pTHX_ SV * const sv, const char * const pat, va_list * const args);
 #define PERL_ARGS_ASSERT_SV_VSETPVF             \
         assert(sv); assert(pat)
@@ -6878,16 +6902,12 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char *name, STRLEN len
         assert(gv); assert(varname); assert(name)
 
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE GV *
-S_gv_fetchmeth_internal(pTHX_ HV *stash, SV *meth, const char *name, STRLEN len, I32 level, U32 flags);
-#   define PERL_ARGS_ASSERT_GV_FETCHMETH_INTERNAL
-
 PERL_STATIC_INLINE HV *
 S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags);
 #   define PERL_ARGS_ASSERT_GV_STASHPVN_INTERNAL \
         assert(name)
 
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
+# endif
 #endif /* defined(PERL_IN_GV_C) */
 #if defined(PERL_IN_GV_C)  || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_PAD_C) || defined(PERL_IN_SV_C)
@@ -6898,12 +6918,23 @@ Perl_sv_add_backref(pTHX_ SV * const tsv, SV * const sv)
         assert(tsv); assert(sv)
 
 #endif
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C)
+PERL_CALLCONV GV *
+Perl_gv_fetchmeth_internal(pTHX_ HV *stash, SV *meth, const char *name, STRLEN len, I32 level, U32 flags);
+# define PERL_ARGS_ASSERT_GV_FETCHMETH_INTERNAL
+
+#endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 PERL_CALLCONV HV *
 Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
         __attribute__visibility__("hidden");
 
-#endif
+PERL_CALLCONV HV *
+Perl_gv_stashsvpvn_cached_p(pTHX_ I32 flags, void *namevp, ...);
+# define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED_P \
+        assert(namevp)
+
+#endif /* defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C) */
 #if defined(PERL_IN_HV_C)
 STATIC void
 S_clear_placeholders(pTHX_ HV *hv, U32 items);

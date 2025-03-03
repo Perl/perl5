@@ -177,6 +177,9 @@ S_new_he(pTHX)
 
 #endif
 
+STATIC HE *
+S_hek_vivipvn(const char *try_str, STRLEN len);
+
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {
@@ -232,9 +235,37 @@ Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
         (void)share_hek_hek(shared);
     }
     else {
+      if(IS_HEKPOOL(source)) {
+          HE* she = NUM2PTR(HE*, PTR2nat(source)
+              -STRUCT_OFFSET(struct shared_he,shared_he_hek));
+          U32 hash = HEK_HASH(source);
+          const U32 hindex = hash & (I32) HvMAX(PL_strtab);
+          HE* entry = (HvARRAY(PL_strtab))[hindex];
+          /* check if already added to new thread's PL_strtab*/
+          for (;entry; entry = HeNEXT(entry)) {
+              if (entry != she)		/* just match on gShHEHEK *, it will be the same for all ithreads b/c bottom of collision list rule */
+                  continue;
+              else
+                  break;
+          }
+          if(!entry) { // add gShHEHEK to HV* PL_strtab in the new thread
+              HE * gentry = S_hek_vivipvn(HEK_KEY(source), HEK_LEN(source));
+              if(!gentry) {
+                  goto make_he;
+              }
+              if(gentry != she) {
+                __debugbreak();
+              }
+          }
+          ++she->he_valu.hent_refcount; /* like share_hek_flags() */
+          shared = source;
+      }
+      else {
+        make_he:
         shared
             = share_hek_flags(HEK_KEY(source), HEK_LEN(source),
                               HEK_HASH(source), HEK_FLAGS(source));
+      }
         ptr_table_store(PL_ptr_table, source, shared);
     }
     return shared;
@@ -282,9 +313,37 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
             (void)share_hek_hek(shared);
         }
         else {
-            shared
+            if(IS_HEKPOOL(source)) {
+                HE* she = NUM2PTR(HE*, PTR2nat(source)
+                    -STRUCT_OFFSET(struct shared_he,shared_he_hek));
+                U32 hash = HEK_HASH(source);
+                const U32 hindex = hash & (I32) HvMAX(PL_strtab);
+                HE* entry = (HvARRAY(PL_strtab))[hindex];
+                /* check if already added to new thread's PL_strtab*/
+                for (;entry; entry = HeNEXT(entry)) {
+                    if (entry != she)		/* just match on gShHEHEK *, it will be the same for all ithreads b/c bottom of collision list rule */
+                        continue;
+                    else
+                        break;
+                }
+                if(!entry) { // add gShHEHEK to HV* PL_strtab in the new thread
+                    HE * gentry = S_hek_vivipvn(HEK_KEY(source), HEK_LEN(source));
+                    if(!gentry) {
+                        goto make_he;
+                    }
+                    if(gentry != she) {
+                      __debugbreak();
+                    }
+                }
+                ++she->he_valu.hent_refcount; /* like share_hek_flags() */
+                shared = source;
+            }
+            else {
+              make_he:
+                shared
                 = share_hek_flags(HEK_KEY(source), HEK_LEN(source),
                                   HEK_HASH(source), HEK_FLAGS(source));
+            }
             ptr_table_store(PL_ptr_table, source, shared);
         }
         HeKEY_hek(ret) = shared;
@@ -1708,12 +1767,25 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
             U32 j = (HeHASH(entry) & newsize);
             if (j != (U32)i) {
                 *oentry = HeNEXT(entry);
+/* all gHEKPOOLs must be on the tail ends of HE collision chains b/c they are
+   seen by multiple ithreads at the same time. If a Newx()ed per-interp ShHeHek
+   winds up after a GShHeHEK, a wrong inter-ithread refcnt++ and wrong RC
+   ownership will happen between 2 ithreads. And a likely Unix/100% Win32
+   SEGV will happen when an ithread is destroyed. 100% on Win32 b/c WinPerl
+   has its own malloc(), and doesn't use MS LibC/CRT malloc(). */
+                if(IS_HEKPOOL(entry)) {
+                  HE** ocursor = &aep[j];
+                  while (*ocursor && !IS_HEKPOOL(*ocursor) && HeNEXT(*ocursor)) {
+                    ocursor = &HeNEXT(*ocursor);
+                  }
+                  *ocursor = entry;
+                }
 #ifdef PERL_HASH_RANDOMIZE_KEYS
                 /* if the target cell is empty or PL_HASH_RAND_BITS_ENABLED is false
                  * insert to top, otherwise rotate the bucket rand 1 bit,
                  * and use the new low bit to decide if we insert at top,
                  * or next from top. IOW, we only rotate on a collision.*/
-                if (aep[j] && PL_HASH_RAND_BITS_ENABLED) {
+                else if (aep[j] && PL_HASH_RAND_BITS_ENABLED) {
                     UPDATE_HASH_RAND_BITS();
                     if (PL_hash_rand_bits & 1) {
                         HeNEXT(entry)= HeNEXT(aep[j]);
@@ -1768,7 +1840,16 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
     wantsize = (I32) newmax;                            /* possible truncation here */
     if (wantsize != newmax)
-        return;
+        return; /*XXX TODO add croak OOM, your code is PP leaking and
+      adding unstable-ness to perl VM state ???? 2 billion keys in 1 HV???
+      Are you okay with 67,108,863 HEs in HeARRAY and 2,147,483,648 - 67,108,863
+      2,147,483,648 - 67,108,863 = 2,080,374,785 HE collisions hanging
+      off in LLs?    Your newmax value says you actually will insert count
+      newmax new HV Keys/HEs, and you have the input data *somewhere* to
+      generate 2,147,483,648 unique ascii strings.
+      
+      Perl interp did not yet, do any voluntary/optional/speculative
+      performance round-ing ups, to your requested length. */
 
     wantsize= wantsize + (wantsize >> 1);           /* wantsize *= 1.5 */
     if (wantsize < newmax)                          /* overflow detection */
@@ -3351,12 +3432,15 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         }
     }
 
-    if (!entry)
+    if (!entry) {
+      //__debugbreak();
+    
         Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
                          "Attempt to free nonexistent shared string '%s'%s"
                          pTHX__FORMAT,
                          hek ? HEK_KEY(hek) : str,
                          ((k_flags & HVhek_UTF8) ? " (utf8)" : "") pTHX__VALUE);
+    }
     if (k_flags & HVhek_FREEKEY)
         Safefree(str);
 }
@@ -3399,12 +3483,82 @@ Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash)
     return share_hek_flags (str, len, hash, flags);
 }
 
+/* CHANGED!!! only vivifier that auto RC++es ans gives caller ownership of a RC + 1*/
+STATIC HE *
+S_hek_vivipvn(const char *try_str, STRLEN len) {
+    struct shared_he* she;
+    HEK* hek;
+    SV* sv;
+    SV* svstart;
+    SV* svend;
+    SV* svmid;
+    SV* svmid2;
+    const char *str;
+    Size_t idx;
+    U32 chrs32u;
+
+//U8TO32_LE(ptr)
+    svend = svstart = SV_POOLSTART;
+    svstart = NUM2PTR(SV*,PTR2nat(svstart)+PL_hpfastm.leninfo[len-HPOOLPV_MIN].svoffst);
+    sv = svstart;
+    if(SvCUR(sv) != len)
+      __debugbreak();
+    svend = NUM2PTR(SV*,PTR2nat(svend)+PL_hpfastm.leninfo[len-HPOOLPV_MIN].svoffend);
+    idx = ((svend-sv)>>1);
+    svmid = sv+idx;
+    svmid2 = &(sv[idx]);
+    //printf("sv %p sv %p  idx %d  sv %p sv %p c %c c %c\n", sv, svend , idx, svmid, svmid2, try_str[0], SvPVX(svmid)[0]);
+    if(try_str[0] > SvPVX(svmid)[0] ) {
+      if( svmid < svend) {
+        sv = svmid;
+      }
+    }
+    else if(try_str[0] < SvPVX(svmid)[0] ){
+      if(svmid >= svstart) {
+        svend = svmid;
+      }
+    }
+    chrs32u = U8TO32_LE(try_str);
+    if(len == 3)
+      chrs32u &= 0x00FFFFFF;
+    const char * const try_at4_str = len > 4 ? try_str+4 : NULL;
+    const U32 try_at4_len = len > 4 ? len-4 : 0;
+    while(sv < svend) {
+      str = (const char *)SvPVX(sv);
+      she = (struct shared_he*)((Size_t)(
+        ((Size_t)str)
+        -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0]))
+      );
+      hek = &she->shared_he_hek;
+      if(try_str == str
+          //|| (len == HEK_LEN(hek) /* we can be given a sub string ???  but incoming len already proved sv head lens and ranges*/
+        ||(  chrs32u == *(U32*)str /* start of hek_key is aligned */
+             && (try_at4_str
+                ? memEQ(try_at4_str, str+4, try_at4_len)
+                : TRUE)
+          )
+      ){
+          if(!HEK_HASH(hek)){
+            /* sv = */
+            sv_vivihek(sv);
+          }
+          /* behave like S_share_hek_flags() */
+          //she->shared_he_he.he_valu.hent_refcount++;
+          //hek = &she->shared_he_hek;
+          HE * he = &she->shared_he_he;
+          return he;
+      }
+      sv++;
+    }
+    return NULL;
+}
+
 STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
 {
     HE *entry;
     const U8 flags_masked = flags & HVhek_STORAGE_MASK;
-    const U32 hindex = hash & (I32) HvMAX(PL_strtab);
+
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
     assert(!(flags & HVhek_NOTSHARED));
@@ -3412,7 +3566,57 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
     if (UNLIKELY(len > (STRLEN) I32_MAX)) {
         Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes");
     }
-
+    //IS_MAYBE_HPOOL(str, len) 0.1.2.3
+    //                         
+    if(   ((PTR2nat(str) & PL_hpool_mask) == PL_hpool_vm_seg)
+        && (PTR2nat(str) >= 
+        PTR2nat(&(((struct shared_he*)(&PL_hekpool))->shared_he_hek.hek_key[0])))
+        && PTR2nat(str) < (((Size_t)(&PL_hekpool))+sizeof(PL_hekpool))) {
+        struct shared_he* she = (struct shared_he*) ((Size_t)(((Size_t)str)
+            -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0])));
+        HEK* sanityhek = &she->shared_he_hek;
+        I32 sanitylen = HEK_LEN(sanityhek);
+        U32 sanityhash = HEK_HASH(sanityhek);
+        if(len == sanitylen) {
+          if(sanityhash) {
+            if(hash == sanityhash) {
+                entry = (HE*)she;
+                goto have_he;
+            }
+            else{
+                __debugbreak(); // really bad, its a ptr, to somewhere random in our pool
+              //sub strs and offsets and chops and :: can make it happen
+              goto full_chk;
+            }
+          }
+          else {
+            goto full_chk;
+            //goto need_vivi;
+          }
+        }
+    }
+    full_chk:
+    if( len <= HPOOLPV_MAX /* shifting over 32 for U32 is Intel CPUs only */
+        //&& len >= HPOOLPV_MIN
+        && (1<<len) & HEKPOOL_LENMASK /* fastest reject, no mem read */
+        // cant reach arr slot if mask test failed&& PL_hpfastm.lenmasks[(len)-HPOOLPV_MIN] /*TODO UA mem read */
+        /* fast reject most PP syms since they have LC chars and currently
+           HPOOL is all UC A-Z and a rare '_' char, revist this logic if LC
+           is added, mask samples 5D 4F 57 00, 5F 57 5F 5F, 57 5F 5F 5F,
+           5F 5F 5F 5F, 5F 4F 5F 5F, 57 5D 57 5F, 57 5F 5F 5F
+           not very good at rejecting if all 4 PP user chars are UC
+           0x5F matches the entire A-Z range */
+        && (*((U32*)str)&(~PL_hpfastm.leninfo[len-HPOOLPV_MIN].fastmask)) == 0
+        && flags_masked == 0) {
+          need_vivi:
+          //__debugbreak();
+          HE * gentry = S_hek_vivipvn(str,len);
+          if(gentry) {
+              entry = gentry;
+              goto have_he;
+          }
+    }
+    const U32 hindex = hash & (I32) HvMAX(PL_strtab);
     /* what follows is the moral equivalent of:
 
     if (!(Svp = hv_fetch(PL_strtab, str, len, FALSE)))
@@ -3480,12 +3684,282 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
         }
     }
 
+    have_he:
     ++entry->he_valu.hent_refcount;
 
     if (flags & HVhek_FREEKEY)
         Safefree(str);
 
     return HeKEY_hek(entry);
+}
+/* SV* sv must be a SV* from/into the C static/global HEKPOOL.
+   This fn will fill in the U32 hash, and then add shared HE/HEK
+   object into the per-interp HV* PL_strtab. Once added, this C global
+   shared HE/HEK will never be freed or delinked for the remainder of the
+   perl process/my_perl lifetime.  ithread/psuedofork clone process will
+   inefficiently dup this HEKPOOL shared HE/HEK into a regular Newx()ed
+   shared HE/HEK. Tough luck, or write a fix.
+   
+   This function is not be called except through SV_CONST2(). Bad things
+   happen if called twice on same HEKPOOL SV*, or a non-HEKPOOL SV*.
+   
+   Parameter is a SV* instead of 0-based index for a reason. In each caller we
+   already paid the price in machine code to do "abs addr generation" in the
+   hot branch (x86 LEA op), so reuse the abs ptr as input for cold path,
+   vs the CC emitting "push_c_stk(3);" op or "push_c_stk(13);" op that will
+   almost never be executed. Savings: x86/x64 1/4 bytes (lit int U8/U32);
+   RISCs: 4 bytes/1 op, "store_to_reg(3,reg); push_c_stk(reg);" ->
+   "push_c_stk(reg);" For clarity, on __regcall ABI OSes, after CC -O1/-O2,
+   the conceptual "push_c_stk(reg);" op, was probably optimized away,
+   if you check with disasm view. */
+
+SV*
+Perl_sv_vivihek(SV* const sv) {
+  dTHX; /* Fn is 1 shot per proc.  Alot of unique callers/refs, but this
+  fn is very cold by call count, so minimize the machine code overhead of
+  error branch "sv_vivi(&PL_poolsv)" at the cost of 1-10 microsecs inside
+  error path to execute dTHX, inside a statement like this:
+
+  sv = !VIVIFIED(&PL_poolsv) ? sv_vivi(&PL_poolsv) : &PL_poolsv;     */
+  PERL_ARGS_ASSERT_SV_VIVIHEK;
+  struct shared_he * she;
+  const char * const str = (const char *)SvPVX(sv);
+  //const I32 len = (I32)SvCUR(sv);
+  U32 hash;
+  HEK* hek;
+  I32 len;
+
+
+
+  she = (struct shared_he*)
+      ((Size_t)(((Size_t)str)
+      -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0])));
+  hek = &she->shared_he_hek;
+  len = HEK_LEN(hek);
+  hash = HEK_HASH(hek);
+  if(hash)
+    __debugbreak();
+  else {
+    PERL_HASH(hash, str, len);
+    HEK_HASH(hek) = hash;
+  }
+
+/* Don't keep re-reading struct my_perl. PL_strtab = NULL;
+   is death by lighting.  local(HvARRAY(PL_strtab)); is a blood sport.
+   The bookie is open and taking wagers for LOC executed before perl
+   SEGVs or fatal exceptions.  In this fn, only HvARRAY can be realloced.
+   xhv will not realloc, b/c nothing here does basic HV body -> HvAUX() upgrade.
+   */
+  HV* _PL_strtab = PL_strtab;
+  XPVHV * xhv = (XPVHV*)SvANY(_PL_strtab);
+  const U32 hindex = hash & (I32) HvMAX((HV*)&xhv);
+  struct shared_he ** head = (struct shared_he **)&HvARRAY(_PL_strtab)[hindex];
+  HE *entry = (HE *)*head;
+  HE *col_entry = NULL;
+  for (;entry; entry = HeNEXT(entry)) {
+      col_entry = entry;
+      if (HeHASH(entry) != hash)		/* strings can't be equal */
+          continue;
+      if (HeKLEN(entry) != (SSize_t) len)
+          continue;
+      if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
+          continue;
+      if (HeKFLAGS(entry) != 0) /* HEKPOOL can't have UTF8 */
+          continue;
+      break;
+  }
+  if (entry) {
+      if((struct shared_he*)entry == she) {
+        return sv;
+      }
+      __debugbreak();
+  }
+  //struct shared_he ** const head = &HvARRAY(PL_strtab)[hindex];
+  //struct shared_he * const oldhe = *head;
+  struct shared_he * const oldhe = (struct shared_he *)entry; /* var unused */
+  struct shared_he * const newhe = (struct shared_he*)((Size_t)(
+    ((Size_t)str)
+    -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0]))
+  );
+  /* 99% chance this is 1 -> 2, RC #1 is owned by libperl.sp/perlXX.dll.
+     Remember about ithreads.  */
+  newhe->shared_he_he.he_valu.hent_refcount++;
+  xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
+   if(col_entry) {
+      HeNEXT(col_entry) = &newhe->shared_he_he;
+      if ( DO_HSPLIT(xhv) ) {
+          const STRLEN oldsize = HvMAX((HV*)&xhv) + 1;
+          hsplit(_PL_strtab, oldsize, oldsize * 2);
+      }
+  }
+  else {
+      *head = newhe;
+  }
+  return sv;
+}
+
+/* used during ithread clone process, injects the ENTIRE HEKPOOL into
+   pTHX's HV* PL_strtab, and RC +1s, with pTHX's HV* PL_strtab being the
+   owner of the +1. pTHX is supposed to be a brand new child my_perl.
+   This fn hasn't been tested on inflating the entire HEKPOOL into a root
+   my_perl or a RUN phase my_perl. To fix this, at minimum, fix this fn
+   to check for previous HEK_HASH() validity, and generate/set HEK_HASH()
+   if 0. Currently this fn assumes 1 nanosecond ago, the entire HEKPOOL was
+   inflated and injected into the root/parent my_perl.
+   
+   XXXX INCOMPL NOTE Note inside Perl_hek_dup/share_hek_hek/share_hek_flags
+   */
+
+void
+Perl_sv_viviall_hekpool(pTHX) {
+    const char * str;
+    I32 len;
+    U32 hash;
+    SV* sv;
+    struct shared_he* she;
+    HEK* hek;
+    U32 hindex;
+    HE *entry;
+    struct shared_he ** head;
+    struct shared_he * oldhe;
+    HE *col_entry;
+    HV* _PL_strtab = PL_strtab; /* Don't re-read, see Perl_sv_vivihek() */
+    XPVHV * xhv = (XPVHV*)SvANY(_PL_strtab);
+    hv_ksplit(_PL_strtab, HvTOTALKEYS((HV*)&xhv)+SV_POOLLEN); /* + ~35 */
+
+    sv = SV_POOLSTART;
+    while(sv < SV_POOLEND) {
+        len = (I32)SvCUR(sv);
+        str = (const char *)SvPVX(sv);
+        she = (struct shared_he*)
+            ((Size_t)(((Size_t)str)
+            -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0])));
+        hek = &she->shared_he_hek;
+        hash = HEK_HASH(hek);
+        if(!hash) {
+            PERL_HASH(hash, str, len);
+            HEK_HASH(hek) = hash;
+        }
+        hindex = hash & (I32) HvMAX((HV*)&xhv);
+        head = (struct shared_he **)&HvARRAY(_PL_strtab)[hindex];
+        entry = (HE *)*head;
+        col_entry = NULL;
+        for (;entry; entry = HeNEXT(entry)) {
+            col_entry = entry;
+            if (HeHASH(entry) != hash)		/* strings can't be equal */
+                continue;
+            if (HeKLEN(entry) != (SSize_t) len)
+                continue;
+            if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
+                continue;
+            if (HeKFLAGS(entry) != 0) /* HEKPOOL can't have UTF8 */
+                continue;
+            break;
+        }
+        if (entry) {
+          if((struct shared_he*)entry == she) {
+            sv++;
+            continue;
+          }
+          __debugbreak();
+        }
+        she->shared_he_he.he_valu.hent_refcount++;
+        xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
+        if(col_entry) {
+            HeNEXT(col_entry) = &she->shared_he_he;
+            if ( DO_HSPLIT(xhv) ) {
+                const STRLEN oldsize = HvMAX((HV*)&xhv) + 1;
+                hsplit(_PL_strtab, oldsize, oldsize * 2);
+            }
+        }
+        else {
+            *head = she;
+        }
+        sv++;
+    }
+}
+
+/* embedder using libperl inside 1 process lifespan:
+   my_perl #1 constructs or starts -> #1 runs alot of code -> #1 perl_destroy()
+   -> app does other things -> my_perl #2 constructs -> #2 runs alot of code
+   -> #2 perl_destroy()-> app does process exit()
+   
+   the 2 my_perl pointers were not aware of each other's existance, not in
+   overlapping time-wise parallel, not serially 1 after another, but the hash
+   numbers were already generated by an unknown previous my_perl, and sitting
+   in libperl.so/.dll, so slurp up all vivified HEKPOOL strings at the next
+   perl_construct(), we already paid for the CPU, and SV_CONST() lazy hasher
+   macro depends on "if(!HEK_HASH(GShHeHek) == 0) add_to_PL_strtab(GShHeHek);" */
+void
+Perl_sv_vivisome_hekpool(pTHX) {
+    const char * str;
+    I32 len;
+    U32 hash;
+    SV* sv;
+    struct shared_he* she;
+    HEK* hek;
+    //bool hekp_is_hashed;
+    U32 hindex;
+    HE *entry;
+    struct shared_he ** head;
+    struct shared_he * oldhe;
+    HE *col_entry;
+    HV* _PL_strtab = PL_strtab; /* Don't re-read, see Perl_sv_vivihek() */
+    XPVHV * xhv = (XPVHV*)SvANY(_PL_strtab);
+    hv_ksplit(_PL_strtab, HvTOTALKEYS((HV*)&xhv)+SV_POOLLEN); /* + ~35 */
+
+    sv = SV_POOLSTART;
+    while(sv < SV_POOLEND) {
+        len = (I32)SvCUR(sv);
+        str = (const char *)SvPVX(sv);
+        she = (struct shared_he*)
+            ((Size_t)(((Size_t)str)
+            -STRUCT_OFFSET(struct shared_he,shared_he_hek.hek_key[0])));
+        hek = &she->shared_he_hek;
+        hash = HEK_HASH(hek);
+        //hekp_is_hashed = hash ? TRUE : FALSE;
+        //if(!hekp_is_hashed) { /*no parallel or former my_perl ever vivifyed it, we dont either */
+        if(!hash) {
+            sv++;
+            continue;
+        }
+        hindex = hash & (I32) HvMAX((HV*)&xhv);
+        head = (struct shared_he **)&HvARRAY(_PL_strtab)[hindex];
+        entry = (HE *)*head;
+        col_entry = NULL;
+        for (;entry; entry = HeNEXT(entry)) {
+            col_entry = entry;
+            if (HeHASH(entry) != hash)		/* strings can't be equal */
+                continue;
+            if (HeKLEN(entry) != (SSize_t) len)
+                continue;
+            if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
+                continue;
+            if (HeKFLAGS(entry) != 0) /* HEKPOOL can't have UTF8 */
+                continue;
+            break;
+        }
+        if (entry) {
+          if((struct shared_he*)entry == she) {
+            sv++;
+            continue;
+          }
+          __debugbreak();
+        }
+        she->shared_he_he.he_valu.hent_refcount++;
+        xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
+        if(col_entry) {
+            HeNEXT(col_entry) = &she->shared_he_he;
+            if ( DO_HSPLIT(xhv) ) {
+                const STRLEN oldsize = HvMAX((HV*)&xhv) + 1;
+                hsplit(_PL_strtab, oldsize, oldsize * 2);
+            }
+        }
+        else {
+            *head = she;
+        }
+        sv++;
+    }
 }
 
 SSize_t *

@@ -116,7 +116,7 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLE
     if (stash && isa_lookup(stash, namesv, name, len, flags))
         return TRUE;
 
-    stash = gv_stashpvs("UNIVERSAL", 0);
+    stash = gv_stashsv(SV_CONST2(UNIVERSAL), 0);
     return stash && isa_lookup(stash, namesv, name, len, flags);
 }
 
@@ -508,7 +508,7 @@ XS(XS_UNIVERSAL_can)
     else {
         pkg = gv_stashsv(sv, 0);
         if (!pkg)
-            pkg = gv_stashpvs("UNIVERSAL", 0);
+            pkg = gv_stashsv(SV_CONST2(UNIVERSAL), 0);
     }
 
     if (pkg) {
@@ -714,7 +714,7 @@ XS(XS_constant__make_const)	/* This is dangerous stuff. */
 
     /* [perl #77776] - called as &foo() not foo() */
     if (!SvROK(svz) || items != 1)
-        croak_xs_usage(cv, "SCALAR");
+        croak_xs_usage(cv, PV_POOL(SCALAR, "SCALAR"));
 
     sv = SvRV(svz);
 

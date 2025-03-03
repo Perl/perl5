@@ -294,6 +294,7 @@
 # define gv_init_pvn(a,b,c,d,e)                 Perl_gv_init_pvn(aTHX_ a,b,c,d,e)
 # define gv_init_sv(a,b,c,d)                    Perl_gv_init_sv(aTHX_ a,b,c,d)
 # define gv_name_set(a,b,c,d)                   Perl_gv_name_set(aTHX_ a,b,c,d)
+# define gv_stashhek(a,b)                       Perl_gv_stashhek(aTHX_ a,b)
 # define gv_stashpv(a,b)                        Perl_gv_stashpv(aTHX_ a,b)
 # define gv_stashpvn(a,b,c)                     Perl_gv_stashpvn(aTHX_ a,b,c)
 # define gv_stashsv(a,b)                        Perl_gv_stashsv(aTHX_ a,b)
@@ -845,6 +846,9 @@
 # define sv_vcatpvf_mg(a,b,c)                   Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
 # define sv_vcatpvfn(a,b,c,d,e,f,g)             Perl_sv_vcatpvfn(aTHX_ a,b,c,d,e,f,g)
 # define sv_vcatpvfn_flags(a,b,c,d,e,f,g,h)     Perl_sv_vcatpvfn_flags(aTHX_ a,b,c,d,e,f,g,h)
+# define sv_viviall_hekpool()                   Perl_sv_viviall_hekpool(aTHX)
+# define sv_vivihek                             Perl_sv_vivihek
+# define sv_vivisome_hekpool()                  Perl_sv_vivisome_hekpool(aTHX)
 # define sv_vsetpvf(a,b,c)                      Perl_sv_vsetpvf(aTHX_ a,b,c)
 # define sv_vsetpvf_mg(a,b,c)                   Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 # define sv_vsetpvfn(a,b,c,d,e,f,g)             Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
@@ -1072,6 +1076,7 @@
 #   define get_opargs()                         Perl_get_opargs(aTHX)
 #   define gv_override(a,b)                     Perl_gv_override(aTHX_ a,b)
 #   define gv_setref(a,b)                       Perl_gv_setref(aTHX_ a,b)
+#   define gv_stashpvs_p(a,b)                   Perl_gv_stashpvs_p(aTHX_ a,b)
 #   define gv_try_downgrade(a)                  Perl_gv_try_downgrade(aTHX_ a)
 #   define hv_ename_add(a,b,c,d)                Perl_hv_ename_add(aTHX_ a,b,c,d)
 #   define hv_ename_delete(a,b,c,d)             Perl_hv_ename_delete(aTHX_ a,b,c,d)
@@ -1397,7 +1402,6 @@
 #   endif
 #   if defined(PERL_IN_GV_C)
 #     define find_default_stash(a,b,c,d,e,f)    S_find_default_stash(aTHX_ a,b,c,d,e,f)
-#     define gv_fetchmeth_internal(a,b,c,d,e,f) S_gv_fetchmeth_internal(aTHX_ a,b,c,d,e,f)
 #     define gv_init_svtype(a,b)                S_gv_init_svtype(aTHX_ a,b)
 #     define gv_is_in_main(a,b,c)               S_gv_is_in_main(aTHX_ a,b,c)
 #     define gv_magicalize(a,b,c,d,e)           S_gv_magicalize(aTHX_ a,b,c,d,e)
@@ -1407,6 +1411,9 @@
 #     define parse_gv_stash_name(a,b,c,d,e,f,g,h) S_parse_gv_stash_name(aTHX_ a,b,c,d,e,f,g,h)
 #     define require_tie_mod(a,b,c,d,e)         S_require_tie_mod(aTHX_ a,b,c,d,e)
 #   endif /* defined(PERL_IN_GV_C) */
+#   if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C)
+#     define gv_fetchmeth_internal(a,b,c,d,e,f) Perl_gv_fetchmeth_internal(aTHX_ a,b,c,d,e,f)
+#   endif
 #   if defined(PERL_IN_HV_C)
 #     define clear_placeholders(a,b)            S_clear_placeholders(aTHX_ a,b)
 #     define hsplit(a,b,c)                      S_hsplit(aTHX_ a,b,c)
@@ -1937,6 +1944,7 @@
 #   endif
 #   if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 #     define gv_stashsvpvn_cached(a,b,c,d)      Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
+#     define gv_stashsvpvn_cached_p(a,...)      Perl_gv_stashsvpvn_cached_p(aTHX_ a,__VA_ARGS__)
 #   endif
 #   if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 #     define get_invlist_iter_addr              S_get_invlist_iter_addr

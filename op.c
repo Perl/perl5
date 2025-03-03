@@ -8151,7 +8151,7 @@ Perl_package_version( pTHX_ OP *v )
     U32 savehints = PL_hints;
     PERL_ARGS_ASSERT_PACKAGE_VERSION;
     PL_hints &= ~HINT_STRICT_VARS;
-    sv_setsv( GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), cSVOPx(v)->op_sv );
+    sv_setsv( GvSV(gv_fetchsv_nomg(SV_CONST2(VERSION), GV_ADDMULTI, SVt_PV)), cSVOPx(v)->op_sv );
     PL_hints = savehints;
     op_free(v);
 }
@@ -8257,7 +8257,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
-        newSVOP(OP_CONST, 0, newSVpvs_share("BEGIN")),
+        newSVOP(OP_CONST, 0,
+        /* newSVpvs_share("BEGIN") */
+            SvREFCNT_inc_NN(SV_CONST2(BEGIN))
+        ),
         NULL,
         NULL,
         op_append_elem(OP_LINESEQ,
@@ -11080,7 +11083,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
         has_name = TRUE;
     } else if (PL_curstash) {
-        gv = gv_fetchpvs("__ANON__", gv_fetch_flags, SVt_PVCV);
+        /* gv = gv_fetchpvs("__ANON__", gv_fetch_flags, SVt_PVCV); */
+        gv = gv_fetchsv_nomg(SV_CONST2(__ANON__), gv_fetch_flags, SVt_PVCV);
         has_name = FALSE;
     } else {
         gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
@@ -12117,7 +12121,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 
     gv = o
         ? gv_fetchsv(cSVOPo->op_sv, GV_ADD, SVt_PVFM)
-        : gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVFM);
+        : gv_fetchsv_nomg(SV_CONST2(STDOUT), GV_ADD|GV_NOTQUAL, SVt_PVFM);
 
     GvMULTI_on(gv);
     if ((cv = GvFORM(gv))) {
@@ -13369,8 +13373,10 @@ Perl_ck_fun(pTHX_ OP *o)
                                       }
                                  }
                                  if (!name) {
-                                      name = "__ANONIO__";
-                                      len = 10;
+                                      /* name = "__ANONIO__"; */
+                                      SV_CONST2(__ANONIO__);
+                                      name = PV_POOL(__ANONIO__,"__ANONIO__");
+                                      len = STRLENs("__ANONIO__");
                                       want_dollar = FALSE;
                                  }
                                  op_lvalue(kid, type);
