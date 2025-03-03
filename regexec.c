@@ -616,7 +616,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
         case CC_ENUM_VERTSPACE_: return is_VERTWS_high(character);
         default:
             return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
-                                        utf8_to_uvchr_buf(character, e, NULL));
+                                        utf8_to_uv_or_die(character, e, NULL));
     }
     NOT_REACHED; /* NOTREACHED */
 }
