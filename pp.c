@@ -4591,7 +4591,7 @@ PP_wrapped(pp_uc, 1, 0)
             STRLEN ulen;
             UV uv;
             if (UNLIKELY(in_iota_subscript)) {
-                UV cp = utf8_to_uvchr_buf(s, send, NULL);
+                UV cp = utf8_to_uv_or_die(s, send, NULL);
 
                 if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
 
@@ -4611,8 +4611,9 @@ PP_wrapped(pp_uc, 1, 0)
 #else
             uv = _toUPPER_utf8_flags(s, send, tmpbuf, &ulen, 0);
 #endif
-            if (uv == GREEK_CAPITAL_LETTER_IOTA
-                && utf8_to_uvchr_buf(s, send, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
+            if (   uv == GREEK_CAPITAL_LETTER_IOTA
+                && utf8_to_uv_or_die(s, send, 0) ==
+                                                COMBINING_GREEK_YPOGEGRAMMENI)
             {
                 in_iota_subscript = TRUE;
             }
