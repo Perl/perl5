@@ -2963,8 +2963,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         }
         else {
             if (! _invlist_contains_cp(PL_utf8_charname_begin,
-                                       utf8_to_uvchr_buf((U8 *) s,
-                                                         (U8 *) e,
+                                       utf8_to_uv_or_die((const U8 *) s,
+                                                         (const U8 *) e,
                                                          NULL)))
             {
                 goto bad_charname;
@@ -2991,8 +2991,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
             }
             else {
                 if (! _invlist_contains_cp(PL_utf8_charname_continue,
-                                           utf8_to_uvchr_buf((U8 *) s,
-                                                             (U8 *) e,
+                                           utf8_to_uv_or_die((const U8 *) s,
+                                                             (const U8 *) e,
                                                              NULL)))
                 {
                     goto bad_charname;
@@ -11634,7 +11634,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         delim_byte_len = 1;
     }
     else {
-        open_delim_code = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend,
+        open_delim_code = utf8_to_uv_or_die((U8*)s, (U8*)PL_bufend,
                                             &delim_byte_len);
         if (UNLIKELY(! is_grapheme((U8 *) start,
                                    (U8 *) s,
