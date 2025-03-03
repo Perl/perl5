@@ -110,7 +110,7 @@ $AUTHOR_WARNINGS = ($ENV{AUTHOR_WARNINGS} || 0)
 # "impossible" keyword (multiple newline)
 my $END = "!End!\n\n";
 # Match an XS Keyword
-my $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
+our $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
 
 
 # All the valid fields of an ExtUtils::ParseXS hash object. The 'use
@@ -1861,15 +1861,26 @@ sub merge_section {
 
 
 # Process as many keyword lines/blocks as can be found which match the
-# pattern, by calling the FOO_handler() method for each keyword.
+# pattern, by calling the FOO_handler() method or the Node::parse method
+# for each keyword.
 
 sub process_keywords {
   my ExtUtils::ParseXS $self = shift;
   my ($pattern) = @_;
 
   while (my $kwd = $self->check_keyword($pattern)) {
-    my $method = $kwd . "_handler";
-    $self->$method($_); # $_ contains the rest of the line after KEYWORD:
+    my $class = "ExtUtils::ParseXS::Node::$kwd";
+    if ($class->can('parse')) {
+      # this branch handles the newer AST-oriented keyword processing
+      my $node  = $class->new();
+      $node->parse($self);
+      $node->as_code($self) if $class->can('as_code');
+    }
+    else {
+      # this branch handles the older KEYWORD_handler()-oriented processing
+      my $method = $kwd . "_handler";
+      $self->$method($_); # $_ contains the rest of the line after KEYWORD:
+    }
   }
 }
 
@@ -2258,12 +2269,6 @@ EOF
 
 
 sub CLEANUP_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
-sub PREINIT_handler {
   my ExtUtils::ParseXS $self = shift;
   $self->print_section();
 }

@@ -1490,6 +1490,138 @@ sub proto_string {
     return join '', @p;
 }
 
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::multiline;
+
+# Generic base class for keyword Nodes which can contain multiple lines,
+# e.g. C code or other data: so anything from ALIAS to PPCODE.
+# $self->lines[0] will be any text (on the same line) following the
+# keyword.
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::FIELDS,
+        'lines',    # Array ref of all lines until the next keyword
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+
+# Consume all the lines up until the next directive and store in
+# @$lines.
+
+sub parse {
+    my ExtUtils::ParseXS::Node::multiline $self = shift;
+    my ExtUtils::ParseXS                  $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my @lines;
+
+    # Consume lines until the next directive
+    while(defined($_) && !/^$ExtUtils::ParseXS::BLOCK_regexp/o) {
+        push @lines, $_;
+        $_ = shift(@{ $pxs->{line} });
+    }
+
+    $self->{lines} = \@lines;
+}
+
+# No as_code() method - we rely on the sub-classes for that
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::code;
+
+# Base class for Nodes which contain lines of literal C code
+# (such as PREINIT: and CODE:)
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node::multiline);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::multiline::FIELDS,
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+
+# No parse() method: we just use the inherited Node::multiline's one
+
+
+# Emit the lines of code, skipping any initial blank lines,
+# and possibly wrapping in '#line' directives.
+
+sub as_code {
+    my ExtUtils::ParseXS::Node::code $self = shift;
+    my ExtUtils::ParseXS             $pxs  = shift;
+
+    my @lines = map "$_\n", @{$self->{lines}};
+
+    my $n;
+
+    # Ignore any text following the keyword on the same line.
+    # XXX this quietly ignores any such text - really it should
+    # warn, but not yet for backwards compatibility.
+    $n++, shift @lines if @lines;
+
+    # strip leading blank lines
+    $n++, shift @lines while @lines && $lines[0] !~ /\S/;
+
+    # Add a leading '#line' if needed.
+    # The XSubPPtmp test is a bit of a hack - it skips synthetic blocks
+    # added to boot etc which may not have line numbers.
+    my $line0 = $lines[0];
+    if (   $pxs->{config_WantLineNumbers}
+        && ! (    defined $line0
+               && (   $line0 =~ /^\s*#\s*line\b/
+                   || $line0 =~ /^#if XSubPPtmp/
+                  )
+              )
+    ) {
+        unshift @lines,
+                  "#line "
+                . ($self->{line_no}  + $n)
+                . " \""
+                . ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                        $self->{file})
+                . "\"\n";
+    }
+
+    # Add a final "restoring" '#line'
+    push @lines, 'ExtUtils::ParseXS::CountLines'->end_marker . "\n"
+      if $pxs->{config_WantLineNumbers};
+
+    print for @lines;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::PREINIT;
+
+# Store the code lines associated with the PREINIT: keyword
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node::code);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::code::FIELDS,
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+# Currently all methods are just inherited.
+
+
 1;
 
 # vim: ts=4 sts=4 sw=4: et:
