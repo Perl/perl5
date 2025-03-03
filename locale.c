@@ -945,7 +945,7 @@ S_get_displayable_string(pTHX_
 
     while (t < e) {
         UV cp = (is_utf8)
-                ?  utf8_to_uvchr_buf((U8 *) t, e, NULL)
+                ?  utf8_to_uv_or_die((const U8 *) t, (const U8 *) e, NULL)
                 : * (U8 *) t;
         if (isPRINT(cp)) {
             if (! prev_was_printable) {
