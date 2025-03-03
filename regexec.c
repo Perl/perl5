@@ -2214,7 +2214,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 #define _generic_GET_BREAK_VAL_UTF8(cp_macro, pos, strend)                     \
              (__ASSERT_(pos < strend)                                          \
                  /* Note assumes is valid UTF-8 */                             \
-             (cp_macro(utf8_to_uvchr_buf((pos), (strend), NULL))))
+             (cp_macro(utf8_to_uv_or_die((pos), (strend), NULL))))
 
 /* Returns the GCB value for the input code point */
 #define getGCB_VAL_CP(cp)                                                      \
