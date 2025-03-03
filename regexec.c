@@ -7631,7 +7631,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8(*locinput)
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
                 || ! _invlist_contains_cp(anyofh_list,
-                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                          utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
             {
@@ -7646,7 +7646,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   ANYOF_FLAGS(scan) != (U8) *locinput
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
                 || ! _invlist_contains_cp(anyofh_list,
-                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                          utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
             {
@@ -7676,7 +7676,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                              HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(scan)))
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
                 || ! _invlist_contains_cp(anyofh_list,
-                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                          utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
             {
@@ -7692,7 +7692,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, FLAGS(scan))
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
                 || ! _invlist_contains_cp(anyofh_list,
-                                          utf8_to_uvchr_buf((U8 *) locinput,
+                                          utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
             {
@@ -7708,7 +7708,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             if (utf8_target) {
                 if (    ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8(*locinput)
-                   || ! withinCOUNT(utf8_to_uvchr_buf((U8 *) locinput,
+                   || ! withinCOUNT(utf8_to_uv_or_die((U8 *) locinput,
                                                 (U8 *) reginfo->strend,
                                                 NULL),
                                     ANYOFRbase(scan), ANYOFRdelta(scan)))
@@ -7733,7 +7733,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             if (utf8_target) {
                 if (     ANYOF_FLAGS(scan) != (U8) *locinput
-                    || ! withinCOUNT(utf8_to_uvchr_buf((U8 *) locinput,
+                    || ! withinCOUNT(utf8_to_uv_or_die((U8 *) locinput,
                                                 (U8 *) reginfo->strend,
                                                 NULL),
                                      ANYOFRbase(scan), ANYOFRdelta(scan)))
@@ -7880,7 +7880,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         if (! (to_complement
                            ^ cBOOL(_invlist_contains_cp(
                                       PL_XPosix_ptrs[classnum],
-                                      utf8_to_uvchr_buf((U8 *) locinput,
+                                      utf8_to_uv_or_die((U8 *) locinput,
                                                         (U8 *) reginfo->strend,
                                                         NULL)))))
                         {
