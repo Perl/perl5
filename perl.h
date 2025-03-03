@@ -7557,13 +7557,12 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
         STMT_START { /* Check if to warn before doing the conversion work */\
             if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
-                UV cp = utf8_to_uvchr_buf((U8 *) (s), (U8 *) (send), NULL); \
+                UV cp = utf8_to_uv_or_die((const U8 *) (s),                 \
+                                          (const U8 *) (send),              \
+                                          NULL);                            \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                    "Wide character (U+%" UVXf ") in %s",                   \
-                    (cp == 0)                                               \
-                     ? UNICODE_REPLACEMENT                                  \
-                     : (UV) cp,                                             \
-                    OP_DESC(PL_op));                                        \
+                        "Wide character (U+%" UVXf ") in %s",               \
+                        (UV) cp, OP_DESC(PL_op));                           \
             }                                                               \
         }  STMT_END
 
