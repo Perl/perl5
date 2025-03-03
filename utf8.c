@@ -4704,7 +4704,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                     /* This has a different warning than the one the called
                      * function would output, so can't just call it, unlike we
                      * do for the non-chars and above-unicodes */
-                    UV uv = utf8_to_uvchr_buf(s, e, NULL);
+                    UV uv = utf8_to_uv_or_die(s, e, NULL);
                     Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
                         "Unicode surrogate U+%04" UVXf " is illegal in UTF-8",
                                              uv);
