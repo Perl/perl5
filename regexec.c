@@ -1821,7 +1821,9 @@ STMT_START {                                                                \
     case trie_utf8_fold:                                                    \
       do_trie_utf8_fold:                                                    \
         if ( foldlen > 0 ) {                                                \
-            uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );\
+            (void) utf8_to_uv_flags( (const U8*) uscan, uscan + foldlen,    \
+                                    &uvc, &len,                             \
+                                    (uniflags|UTF8_DIE_IF_MALFORMED));      \
             foldlen -= len;                                                 \
             uscan += len;                                                   \
             len = 0;                                                        \
@@ -1843,7 +1845,9 @@ STMT_START {                                                                \
     case trie_latin_utf8_fold:                                              \
       do_trie_latin_utf8_fold:                                              \
         if ( foldlen > 0 ) {                                                \
-            uvc = utf8n_to_uvchr( (const U8*) uscan, foldlen, &len, uniflags );\
+            (void) utf8_to_uv_flags( (const U8*) uscan, uscan + foldlen,    \
+                                    &uvc, &len,                             \
+                                    (uniflags|UTF8_DIE_IF_MALFORMED));      \
             foldlen -= len;                                                 \
             uscan += len;                                                   \
             len = 0;                                                        \
@@ -1862,7 +1866,8 @@ STMT_START {                                                                \
         }                                                                   \
         /* FALLTHROUGH */                                                   \
     case trie_utf8:                                                         \
-        uvc = utf8n_to_uvchr( (const U8*) uc, uc_end - uc, &len, uniflags );\
+        (void) utf8_to_uv_flags( (const U8*) uc, uc_end, &uvc, &len,        \
+                                 (uniflags|UTF8_DIE_IF_MALFORMED));         \
         break;                                                              \
     case trie_plain:                                                        \
         uvc = (UV)*uc;                                                      \
