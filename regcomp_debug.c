@@ -609,7 +609,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                 NULL,
                                                 NULL,
                                                 0,
-                                                FALSE
+                                                false
                                                );
             sv_catpvs(sv, "]");
         }
@@ -806,7 +806,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                       UV_MAX);
         }
         else if (ANYOF_HAS_AUX(o)) {
-                (void) GET_REGCLASS_AUX_DATA(prog, o, FALSE,
+                (void) GET_REGCLASS_AUX_DATA(prog, o, false,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
@@ -912,7 +912,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
 
             contents = invlist_contents(nonbitmap_invlist,
-                                        FALSE /* output suitable for catsv */
+                                        false /* output suitable for catsv */
                                        );
 
             /* If the output is shorter than the permissible maximum, just do it. */
@@ -980,7 +980,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             _invlist_invert(cp_list);
         }
 
-        put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, 0, TRUE);
+        put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, 0, true);
         Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
         SvREFCNT_dec(cp_list);
@@ -990,7 +990,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
         sv_catsv(sv, invlist_contents(cp_list,
-                                      FALSE /* output suitable for catsv */
+                                      false /* output suitable for catsv */
                                      ));
         Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
@@ -1148,7 +1148,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                 /* Output the first part of the split range: the part that
                  * doesn't have printables, with the parameter set to not look
                  * for literals (otherwise we would infinitely recurse) */
-                put_range(sv, start, temp_end - 1, FALSE);
+                put_range(sv, start, temp_end - 1, false);
 
                 /* The 2nd part of the range (if any) starts here. */
                 start = temp_end;
@@ -1181,7 +1181,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                 /* For short ranges, don't duplicate the code above to output
                  * them; just call recursively */
                 if (temp_end - start < min_range_count) {
-                    put_range(sv, start, temp_end, FALSE);
+                    put_range(sv, start, temp_end, false);
                 }
                 else {  /* Output as a range */
                     put_code_point(sv, start);
@@ -1228,7 +1228,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 
                 /* And separately output the interior range that doesn't start
                  * or end with mnemonics */
-                put_range(sv, start, temp_end, FALSE);
+                put_range(sv, start, temp_end, false);
 
                 /* Then output the mnemonic trailing controls */
                 start = temp_end + 1;
@@ -1271,7 +1271,7 @@ S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
      * 'invlist' */
 
     UV start, end;
-    bool allow_literals = TRUE;
+    bool allow_literals = true;
 
     PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_INVLIST;
 
@@ -1299,7 +1299,7 @@ S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
                 start = ' ';
             }
             if (end - start >= MAX_PRINT_A - ' ' - 2) {
-                allow_literals = FALSE;
+                allow_literals = false;
             }
             break;
         }
@@ -1422,9 +1422,9 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      *      above two parameters are not null, and is passed so that this
      *      routine can tease apart the various reasons for them.
      *  'flags' is the flags field of 'node'
-     *  'force_as_is_display' is TRUE if this routine should definitely NOT try
+     *  'force_as_is_display' is true if this routine should definitely NOT try
      *      to invert things to see if that leads to a cleaner display.  If
-     *      FALSE, this routine is free to use its judgment about doing this.
+     *      false, this routine is free to use its judgment about doing this.
      *
      * It returns 0 if nothing was actually output.  (It may be that
      *              the bitmap, etc is empty.)
@@ -1433,7 +1433,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      *
      * When called for outputting the bitmap of a non-ANYOF node, just pass the
      * bitmap, with the succeeding parameters set to NULL, and the final one to
-     * FALSE.
+     * false.
      */
 
     /* In general, it tries to display the 'cleanest' representation of the
@@ -1501,7 +1501,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
              * determinable except during execution, so don't know enough here
              * to invert */
             if (flags & (ANYOFL_FOLD|ANYOF_MATCHES_POSIXL)) {
-                inverting_allowed = FALSE;
+                inverting_allowed = false;
             }
 
             /* What the posix classes match also varies at runtime, so these
@@ -1556,7 +1556,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
          * form of this list when it has things above the bitmap, so don't even
          * try */
         if (invlist_highest(only_utf8_locale) >= NUM_ANYOF_CODE_POINTS) {
-            inverting_allowed = FALSE;
+            inverting_allowed = false;
         }
     }
 
@@ -1584,12 +1584,12 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
          * the '^' */
         bool trial_invert;
         if (invert) {
-            trial_invert = FALSE;
+            trial_invert = false;
             as_is_bias = bias;
             inverted_bias = 0;
         }
         else {
-            trial_invert = TRUE;
+            trial_invert = true;
             as_is_bias = 0;
             inverted_bias = bias;
         }

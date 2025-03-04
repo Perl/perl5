@@ -317,9 +317,9 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 STATIC int
 S_ssc_is_anything(const regnode_ssc *ssc)
 {
-    /* Returns TRUE if the SSC 'ssc' can match the empty string and any code
-     * point; FALSE otherwise.  Thus, this is used to see if using 'ssc' buys
-     * us anything: if the function returns TRUE, 'ssc' hasn't been restricted
+    /* Returns true if the SSC 'ssc' can match the empty string and any code
+     * point; false otherwise.  Thus, this is used to see if using 'ssc' buys
+     * us anything: if the function returns true, 'ssc' hasn't been restricted
      * in any way, so there's no point in using it */
 
     UV start = 0, end = 0;  /* Initialize due to messages from dumb compiler */
@@ -330,7 +330,7 @@ S_ssc_is_anything(const regnode_ssc *ssc)
     assert(is_ANYOF_SYNTHETIC(ssc));
 
     if (! (ANYOF_FLAGS(ssc) & SSC_MATCHES_EMPTY_STRING)) {
-        return FALSE;
+        return false;
     }
 
     /* See if the list consists solely of the range 0 - Infinity */
@@ -342,7 +342,7 @@ S_ssc_is_anything(const regnode_ssc *ssc)
     invlist_iterfinish(ssc->invlist);
 
     if (ret) {
-        return TRUE;
+        return true;
     }
 
     /* If e.g., both \w and \W are set, matches everything */
@@ -350,12 +350,12 @@ S_ssc_is_anything(const regnode_ssc *ssc)
         int i;
         for (i = 0; i < ANYOF_POSIXL_MAX; i += 2) {
             if (ANYOF_POSIXL_TEST(ssc, i) && ANYOF_POSIXL_TEST(ssc, i+1)) {
-                return TRUE;
+                return true;
             }
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 void
@@ -390,7 +390,7 @@ STATIC int
 S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
                         const regnode_ssc *ssc)
 {
-    /* Returns TRUE if the SSC 'ssc' is in its initial state with regard only
+    /* Returns true if the SSC 'ssc' is in its initial state with regard only
      * to the list of code points matched, and locale posix classes; hence does
      * not check its flags) */
 
@@ -409,14 +409,14 @@ S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
     invlist_iterfinish(ssc->invlist);
 
     if (! ret) {
-        return FALSE;
+        return false;
     }
 
     if (RExC_contains_locale && ! ANYOF_POSIXL_SSC_TEST_ALL_SET(ssc)) {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -432,7 +432,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
-    bool new_node_has_latin1 = FALSE;
+    bool new_node_has_latin1 = false;
     const U8 flags = (REGNODE_TYPE(OP(node)) == ANYOF)
                       ? ANYOF_FLAGS(node)
                       : 0;
@@ -503,7 +503,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                     /* empty */
                 }
                 invlist = _add_range_to_invlist(invlist, start, i-1);
-                new_node_has_latin1 = TRUE;
+                new_node_has_latin1 = true;
             }
         }
     }
@@ -670,7 +670,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
         ssc_intersection(ssc,
                          anded_cp_list,
-                         FALSE /* Has already been inverted */
+                         false /* Has already been inverted */
                          );
 
         /* If either P1 or P2 is empty, the intersection will be also; can skip
@@ -747,10 +747,10 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             if (and_with_flags & ANYOF_MATCHES_POSIXL) {
                 ANYOF_POSIXL_AND((regnode_charclass_posixl*) and_with, ssc);
             }
-            ssc_union(ssc, anded_cp_list, FALSE);
+            ssc_union(ssc, anded_cp_list, false);
         }
         else { /* P1 = P2 = empty */
-            ssc_intersection(ssc, anded_cp_list, FALSE);
+            ssc_intersection(ssc, anded_cp_list, false);
         }
     }
 }
@@ -834,7 +834,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     ssc_union(ssc,
               ored_cp_list,
-              FALSE /* Already has been inverted */
+              false /* Already has been inverted */
               );
 }
 
@@ -889,7 +889,7 @@ S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 
     cp_list = add_cp_to_invlist(cp_list, cp);
     ssc_intersection(ssc, cp_list,
-                     FALSE /* Not inverted */
+                     false /* Not inverted */
                      );
     SvREFCNT_dec_NN(cp_list);
 }
@@ -1252,7 +1252,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     }
 
     *min_subtract = 0;
-    *unfolded_multi_char = FALSE;
+    *unfolded_multi_char = false;
 
     /* Here, all the adjacent mergeable EXACTish nodes have been merged.  We
      * can now analyze for sequences of problematic code points.  (Prior to
@@ -1302,7 +1302,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                         d += s_len;
                     }
                     else if (is_FOLDS_TO_MULTI_utf8(s)) {
-                        *unfolded_multi_char = TRUE;
+                        *unfolded_multi_char = true;
                         Copy(s, d, s_len, U8);
                         d += s_len;
                     }
@@ -1394,7 +1394,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             while (s < s_end) {
                 if (*s == LATIN_SMALL_LETTER_SHARP_S) {
                     OP(scan) = EXACTFAA_NO_TRIE;
-                    *unfolded_multi_char = TRUE;
+                    *unfolded_multi_char = true;
                     break;
                 }
                 s++;
@@ -1418,7 +1418,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     if (*s == LATIN_SMALL_LETTER_SHARP_S
                         && (OP(scan) == EXACTF || OP(scan) == EXACTFL))
                     {
-                        *unfolded_multi_char = TRUE;
+                        *unfolded_multi_char = true;
                     }
                     s++;
                     continue;
@@ -1483,8 +1483,8 @@ Perl_study_chunk(pTHX_
     regnode_ssc *and_withp, /* Valid if flags & SCF_DO_STCLASS_OR */
     U32 flags,              /* flags controlling this call, see SCF_ flags */
     U32 depth,              /* how deep have we recursed period */
-    bool was_mutate_ok      /* TRUE if in-place optimizations are allowed.
-                               FALSE only if the caller (recursively) was
+    bool was_mutate_ok      /* true if in-place optimizations are allowed.
+                               false only if the caller (recursively) was
                                prohibited from modifying the regops, because
                                a higher caller is holding a ptr to them. */
 )
@@ -1571,7 +1571,7 @@ Perl_study_chunk(pTHX_
         UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
-        bool unfolded_multi_char = FALSE;
+        bool unfolded_multi_char = false;
         /* avoid mutating ops if we are anywhere within the recursed or
          * enframed handling for a GOSUB: the outermost level will handle it.
          */
@@ -2369,10 +2369,10 @@ Perl_study_chunk(pTHX_
                         ssc_clear_locale(data->start_class);
                     ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
                     ANYOF_POSIXL_ZERO(data->start_class);
-                    ssc_intersection(data->start_class, EXACTF_invlist, FALSE);
+                    ssc_intersection(data->start_class, EXACTF_invlist, false);
                 }
                 else {  /* SCF_DO_STCLASS_OR */
-                    ssc_union(data->start_class, EXACTF_invlist, FALSE);
+                    ssc_union(data->start_class, EXACTF_invlist, false);
                     ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 
                     /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
@@ -2886,7 +2886,7 @@ Perl_study_chunk(pTHX_
             if (flags & SCF_DO_STCLASS) {
                 if (flags & SCF_DO_STCLASS_AND) {
                     ssc_intersection(data->start_class,
-                                    PL_XPosix_ptrs[CC_VERTSPACE_], FALSE);
+                                    PL_XPosix_ptrs[CC_VERTSPACE_], false);
                     ssc_clear_locale(data->start_class);
                     ANYOF_FLAGS(data->start_class)
                                                 &= ~SSC_MATCHES_EMPTY_STRING;
@@ -2894,7 +2894,7 @@ Perl_study_chunk(pTHX_
                 else if (flags & SCF_DO_STCLASS_OR) {
                     ssc_union(data->start_class,
                               PL_XPosix_ptrs[CC_VERTSPACE_],
-                              FALSE);
+                              false);
                     ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 
                     /* See commit msg for
@@ -2954,14 +2954,14 @@ Perl_study_chunk(pTHX_
                         if (flags & SCF_DO_STCLASS_OR) {
                             ssc_union(data->start_class,
                                       REG_ANY_invlist,
-                                      TRUE /* TRUE => invert, hence all but \n
+                                      true /* true => invert, hence all but \n
                                             */
                                       );
                         }
                         else if (flags & SCF_DO_STCLASS_AND) {
                             ssc_intersection(data->start_class,
                                              REG_ANY_invlist,
-                                             TRUE  /* TRUE => invert */
+                                             true  /* true => invert */
                                              );
                             ssc_clear_locale(data->start_class);
                         }
@@ -3002,7 +3002,7 @@ Perl_study_chunk(pTHX_
 
                 case NANYOFM: /* NANYOFM already contains the inversion of the
                                  input ANYOF data, so, unlike things like
-                                 NPOSIXA, don't change 'invert' to TRUE */
+                                 NPOSIXA, don't change 'invert' to true */
                     /* FALLTHROUGH */
                 case ANYOFM:
                   {
