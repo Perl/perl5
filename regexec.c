@@ -554,7 +554,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
                classnum);
 
     NOT_REACHED; /* NOTREACHED */
-    return FALSE;
+    return false;
 }
 
 PERL_STATIC_INLINE I32
@@ -1892,7 +1892,7 @@ STMT_START {                                                                \
                 startpos, doutf8, depth)
 
 #define GET_ANYOFH_INVLIST(prog, n)                                         \
-                        GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0, NULL, NULL)
+                        GET_REGCLASS_AUX_DATA(prog, n, true, 0, NULL, NULL)
 
 #define REXEC_FBC_UTF8_SCAN(CODE)                           \
     STMT_START {                                            \
@@ -1948,7 +1948,7 @@ STMT_START {                                                                \
 
 /* We keep track of where the next character should start after an occurrence
  * of the one we're looking for.  Knowing that, we can see right away if the
- * next occurrence is adjacent to the previous.  When 'doevery' is FALSE, we
+ * next occurrence is adjacent to the previous.  When 'doevery' is false, we
  * don't accept the 2nd and succeeding adjacent occurrences */
 #define FBC_CHECK_AND_TRY                                           \
         if (   (   doevery                                          \
@@ -2274,7 +2274,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     const char *strend, regmatch_info *reginfo)
 {
 
-    /* TRUE if x+ need not match at just the 1st pos of run of x's */
+    /* true if x+ need not match at just the 1st pos of run of x's */
     const I32 doevery = (prog->intflags & PREGf_SKIP) == 0;
 
     char *pat_string;   /* The pattern's exactish string */
@@ -2298,7 +2298,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     const bool utf8_target = reginfo->is_utf8_target;
     UV utf8_fold_flags = 0;
     const bool is_utf8_pat = reginfo->is_utf8_pat;
-    bool to_complement = FALSE; /* Invert the result?  Taking the xor of this
+    bool to_complement = false; /* Invert the result?  Taking the xor of this
                                    with a result inverts that result, as 0^1 =
                                    1 and 1^1 = 0 */
     char_class_number_ classnum;
@@ -3852,7 +3852,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
-    reginfo->warned = FALSE;
+    reginfo->warned = false;
     reginfo->sv = sv;
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     /* see how far we have to get to not match where we matched before */
@@ -4687,7 +4687,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
      * could be used for one or the other eventualities.
      *
      * If this function determines that no possible character in the target
-     * string can match, it returns FALSE; otherwise TRUE.  (The FALSE
+     * string can match, it returns false; otherwise true.  (The false
      * situation occurs if the first character in <text_node> requires UTF-8 to
      * represent, and the target string isn't in UTF-8.)
      *
@@ -4728,7 +4728,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
     /* Even if the first character in the node can match something in Latin1,
      * if there is anything in the node that can't, the match must fail */
     if (! utf8_target && isEXACT_REQ8(op)) {
-        return FALSE;
+        return false;
     }
 
 /* Define a temporary op for use in this function, using an existing one that
@@ -4809,7 +4809,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                                                                      pat[1]));
                     pat_len = 1;
                     pat = mod_pat;
-                    utf8_pat = FALSE;
+                    utf8_pat = false;
                 }
                 else {  /* Code point above 255, or needs special handling */
                     _to_utf8_fold_flags(pat, pat + pat_len,
@@ -4857,7 +4857,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
         Copy(LATIN_SMALL_LETTER_LONG_S_UTF8
              LATIN_SMALL_LETTER_LONG_S_UTF8, mod_pat, pat_len, U8);
         pat = mod_pat;
-        utf8_pat = TRUE;
+        utf8_pat = true;
     }
 
     /* Here, we have taken care of the initial work for a few very problematic
@@ -5076,7 +5076,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
 
     if (m->count == 0) {    /* If nothing found, can't match */
         m->min_length = 0;
-        return FALSE;
+        return false;
     }
 
     /* Have calculated all possible matches.  Now calculate the mask and AND
@@ -5183,7 +5183,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
     }
 
 
-    return TRUE;
+    return true;
 }
 
 PERL_STATIC_FORCE_INLINE    /* We want speed at the expense of size */
@@ -5198,7 +5198,7 @@ S_test_EXACTISH_ST(const char * loc,
 
     /* Check the first byte */
     if (((U8) loc[0] & info.first_byte_mask) != info.first_byte_anded)
-        return FALSE;
+        return false;
 
     /* Pack the next up-to-4 bytes into a 32 bit word */
     switch (info.min_length) {
@@ -5215,7 +5215,7 @@ S_test_EXACTISH_ST(const char * loc,
             input32 |= (U8) loc[1];
             break;
         case 1:
-            return TRUE;    /* We already tested and passed the 0th byte */
+            return true;    /* We already tested and passed the 0th byte */
         case 0:
             ASSUME(0);
     }
@@ -5235,10 +5235,10 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
 
     switch (GCB_table[before][after]) {
         case GCB_BREAKABLE:
-            return TRUE;
+            return true;
 
         case GCB_NOBREAK:
-            return FALSE;
+            return false;
 
         case GCB_RI_then_RI:
             {
@@ -5303,7 +5303,7 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                                   before, after, GCB_table[before][after]);
     assert(0);
 #endif
-    return TRUE;
+    return true;
 }
 
 STATIC GCB_enum
@@ -5381,11 +5381,11 @@ S_isLB(pTHX_ LB_enum before,
     before = prev;
     switch (LB_table[before][after]) {
         case LB_BREAKABLE:
-            return TRUE;
+            return true;
 
         case LB_NOBREAK:
         case LB_NOBREAK_EVEN_WITH_SP_BETWEEN:
-            return FALSE;
+            return false;
 
         case LB_SP_foo + LB_BREAKABLE:
         case LB_SP_foo + LB_NOBREAK:
@@ -5430,7 +5430,7 @@ S_isLB(pTHX_ LB_enum before,
              * So if we have a ZW just before this span, and to get here this
              * is the final space in the span. */
             if (prev == LB_ZWSpace) {
-                return TRUE;
+                return true;
             }
 
             /* Here, not ZW SP+.  There are several rules that have higher
@@ -5443,7 +5443,7 @@ S_isLB(pTHX_ LB_enum before,
             if (LB_table[LB_Space][after] - LB_SP_foo
                                             == LB_NOBREAK_EVEN_WITH_SP_BETWEEN)
             {
-                return FALSE;
+                return false;
             }
 
             /* If we get here, we have to XXX consider combining marks. */
@@ -5496,7 +5496,7 @@ S_isLB(pTHX_ LB_enum before,
             if (backup_one_LB(strbeg, &temp_pos, utf8_target)
                                                           == LB_Hebrew_Letter)
             {
-                return FALSE;
+                return false;
             }
 
             return LB_table[prev][after] - LB_HY_or_BA_then_foo == LB_BREAKABLE;
@@ -5506,7 +5506,7 @@ S_isLB(pTHX_ LB_enum before,
 
             /* LB25a (PR | PO) × ( OP | HY )? NU */
             if (advance_one_LB(&temp_pos, strend, utf8_target) == LB_Numeric) {
-                return FALSE;
+                return false;
             }
 
             return LB_table[prev][after] - LB_PR_or_PO_then_OP_or_HY
@@ -5523,7 +5523,7 @@ S_isLB(pTHX_ LB_enum before,
             }
             while (temp == LB_Break_Symbols || temp == LB_Infix_Numeric);
             if (temp == LB_Numeric) {
-                return FALSE;
+                return false;
             }
 
             return LB_table[prev][after] - LB_SY_or_IS_then_various
@@ -5544,7 +5544,7 @@ S_isLB(pTHX_ LB_enum before,
                 temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
             if (temp == LB_Numeric) {
-                return FALSE;
+                return false;
             }
             return LB_various_then_PO_or_PR;
         }
@@ -5580,7 +5580,7 @@ S_isLB(pTHX_ LB_enum before,
                                   before, after, LB_table[before][after]);
     assert(0);
 #endif
-    return TRUE;
+    return true;
 }
 
 STATIC LB_enum
@@ -5666,8 +5666,8 @@ S_isSB(pTHX_ SB_enum before,
      * between the inputs.  See https://www.unicode.org/reports/tr29/ */
 
     U8 * lpos = (U8 *) curpos;
-    bool has_para_sep = FALSE;
-    bool has_sp = FALSE;
+    bool has_para_sep = false;
+    bool has_sp = false;
 
     PERL_ARGS_ASSERT_ISSB;
 
@@ -5681,7 +5681,7 @@ S_isSB(pTHX_ SB_enum before,
 
     /* SB 3: Do not break within CRLF. */
     if (before == SB_CR && after == SB_LF) {
-        return FALSE;
+        return false;
     }
 
     /* Break after paragraph separators.  CR and LF are considered
@@ -5690,7 +5690,7 @@ S_isSB(pTHX_ SB_enum before,
      * care of wrapping without there being hard line-breaks in the text *./
        SB4.  Sep | CR | LF  ÷ */
     if (before == SB_Sep || before == SB_CR || before == SB_LF) {
-        return TRUE;
+        return true;
     }
 
     /* Ignore Format and Extend characters, except after sot, Sep, CR, or LF.
@@ -5702,7 +5702,7 @@ S_isSB(pTHX_ SB_enum before,
          * immediately prior to them except for those separator-type
          * characters.  And the rules earlier have already handled the case
          * when one of those immediately precedes the extend char */
-        return FALSE;
+        return false;
     }
 
     if (before == SB_Extend || before == SB_Format) {
@@ -5720,7 +5720,7 @@ S_isSB(pTHX_ SB_enum before,
         /* Here, both 'before' and 'backup' are these types; implied is that we
          * don't break between them */
         if (backup == SB_Extend || backup == SB_Format) {
-            return FALSE;
+            return false;
         }
     }
 
@@ -5734,7 +5734,7 @@ S_isSB(pTHX_ SB_enum before,
 
      * SB6. ATerm  ×  Numeric */
     if (before == SB_ATerm && after == SB_Numeric) {
-        return FALSE;
+        return false;
     }
 
     /* SB7.  (Upper | Lower) ATerm  ×  Upper */
@@ -5742,7 +5742,7 @@ S_isSB(pTHX_ SB_enum before,
         U8 * temp_pos = lpos;
         SB_enum backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
         if (backup == SB_Upper || backup == SB_Lower) {
-            return FALSE;
+            return false;
         }
     }
 
@@ -5753,12 +5753,12 @@ S_isSB(pTHX_ SB_enum before,
      * separator are found */
 
     if (before == SB_Sep || before == SB_CR || before == SB_LF) {
-        has_para_sep = TRUE;
+        has_para_sep = true;
         before = backup_one_SB(strbeg, &lpos, utf8_target);
     }
 
     if (before == SB_Sp) {
-        has_sp = TRUE;
+        has_sp = true;
         do {
             before = backup_one_SB(strbeg, &lpos, utf8_target);
         }
@@ -5805,7 +5805,7 @@ S_isSB(pTHX_ SB_enum before,
                     later = advance_one_SB(&rpos, strend, utf8_target);
                 }
                 if (later == SB_Lower) {
-                    return FALSE;
+                    return false;
                 }
             }
 
@@ -5813,7 +5813,7 @@ S_isSB(pTHX_ SB_enum before,
                 || after == SB_STerm
                 || after == SB_ATerm)
             {
-                return FALSE;
+                return false;
             }
 
             if (! has_sp) {     /* SB9 applies only if there was no Sp* */
@@ -5823,7 +5823,7 @@ S_isSB(pTHX_ SB_enum before,
                     || after == SB_CR
                     || after == SB_LF)
                 {
-                    return FALSE;
+                    return false;
                 }
             }
 
@@ -5835,18 +5835,18 @@ S_isSB(pTHX_ SB_enum before,
                 || after == SB_CR
                 || after == SB_LF)
             {
-                return FALSE;
+                return false;
             }
         }
 
         /* SB11.  */
-        return TRUE;
+        return true;
     }
 
     /* Otherwise, do not break.
     SB12.  Any  ×  Any */
 
-    return FALSE;
+    return false;
 }
 
 STATIC SB_enum
@@ -5962,14 +5962,14 @@ S_isWB(pTHX_ WB_enum previous,
     before = prev;
     switch (WB_table[before][after]) {
         case WB_BREAKABLE:
-            return TRUE;
+            return true;
 
         case WB_NOBREAK:
-            return FALSE;
+            return false;
 
         case WB_hs_then_hs:     /* 2 horizontal spaces in a row */
             next = advance_one_WB(&after_pos, strend, utf8_target,
-                                 FALSE /* Don't skip Extend nor Format */ );
+                                 false /* Don't skip Extend nor Format */ );
             /* A space immediately preceding an Extend or Format is attached
              * to by them, and hence gets separated from previous spaces.
              * Otherwise don't break between horizontal white space */
@@ -5998,7 +5998,7 @@ S_isWB(pTHX_ WB_enum previous,
             if (backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
                                                             == WB_Hebrew_Letter)
             {
-                return FALSE;
+                return false;
             }
 
              return WB_table[before][after] - WB_DQ_then_HL == WB_BREAKABLE;
@@ -6009,10 +6009,10 @@ S_isWB(pTHX_ WB_enum previous,
             /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
 
             if (advance_one_WB(&after_pos, strend, utf8_target,
-                                       TRUE /* Do skip Extend and Format */ )
+                                       true /* Do skip Extend and Format */ )
                                                             == WB_Hebrew_Letter)
             {
-                return FALSE;
+                return false;
             }
 
             return WB_table[before][after] - WB_HL_then_DQ == WB_BREAKABLE;
@@ -6024,11 +6024,11 @@ S_isWB(pTHX_ WB_enum previous,
              *       | Single_Quote) (ALetter | Hebrew_Letter) */
 
             next = advance_one_WB(&after_pos, strend, utf8_target,
-                                       TRUE /* Do skip Extend and Format */ );
+                                       true /* Do skip Extend and Format */ );
 
             if (next == WB_ALetter || next == WB_Hebrew_Letter)
             {
-                return FALSE;
+                return false;
             }
 
             return WB_table[before][after]
@@ -6043,7 +6043,7 @@ S_isWB(pTHX_ WB_enum previous,
             prev = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
             if (prev == WB_ALetter || prev == WB_Hebrew_Letter)
             {
-                return FALSE;
+                return false;
             }
 
             return WB_table[before][after]
@@ -6058,7 +6058,7 @@ S_isWB(pTHX_ WB_enum previous,
             if (backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
                                                             == WB_Numeric)
             {
-                return FALSE;
+                return false;
             }
 
             return WB_table[before][after]
@@ -6070,10 +6070,10 @@ S_isWB(pTHX_ WB_enum previous,
             /* WB12  Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric */
 
             if (advance_one_WB(&after_pos, strend, utf8_target,
-                                       TRUE /* Do skip Extend and Format */ )
+                                       true /* Do skip Extend and Format */ )
                                                             == WB_Numeric)
             {
-                return FALSE;
+                return false;
             }
 
             return WB_table[before][after]
@@ -6112,7 +6112,7 @@ S_isWB(pTHX_ WB_enum previous,
                                   before, after, WB_table[before][after]);
     assert(0);
 #endif
-    return TRUE;
+    return true;
 }
 
 STATIC WB_enum
@@ -6525,11 +6525,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     int to_complement;  /* Invert the result? */
     char_class_number_ classnum;
     bool is_utf8_pat = reginfo->is_utf8_pat;
-    bool match = FALSE;
+    bool match = false;
     I32 orig_savestack_ix = PL_savestack_ix;
     U8 * script_run_begin = NULL;
     char *match_end= NULL; /* where a match MUST end to be considered successful */
-    bool is_accepted = FALSE; /* have we hit an ACCEPT opcode? */
+    bool is_accepted = false; /* have we hit an ACCEPT opcode? */
     re_fold_t folder = NULL;  /* used by various EXACTish regops */
     const U8 * fold_array = NULL; /* used by various EXACTish regops */
 
@@ -6788,7 +6788,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.j_after_paren= trie->j_after_paren;
                 ST.me = scan;
                 ST.firstpos = NULL;
-                ST.longfold = FALSE; /* char longer if folded => it's harder */
+                ST.longfold = false; /* char longer if folded => it's harder */
                 ST.nextword = 0;
 
                 /* fully traverse the TRIE; note the position of the
@@ -6829,7 +6829,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                              foldbuf, uniflags);
                         charcount++;
                         if (foldlen > 0)
-                            ST.longfold = TRUE;
+                            ST.longfold = true;
                         if (charid &&
                              ( ((offset =
                               base + charid - 1 - trie->uniquecharcount)) >= 0)
@@ -7373,7 +7373,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
           boundu:
             if (UNLIKELY(reginfo->strbeg >= reginfo->strend)) {
-                match = FALSE;
+                match = false;
             }
             else if (utf8_target) {
               bound_utf8:
@@ -7399,7 +7399,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
                     case GCB_BOUND:
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
-                            match = TRUE; /* GCB always matches at begin and
+                            match = true; /* GCB always matches at begin and
                                              end */
                         }
                         else {
@@ -7420,10 +7420,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case LB_BOUND:
                         if (locinput == reginfo->strbeg) {
-                            match = FALSE;
+                            match = false;
                         }
                         else if (NEXTCHR_IS_EOS) {
-                            match = TRUE;
+                            match = true;
                         }
                         else {
                             match = isLB(getLB_VAL_UTF8(
@@ -7442,7 +7442,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case SB_BOUND: /* Always matches at begin and end */
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
-                            match = TRUE;
+                            match = true;
                         }
                         else {
                             match = isSB(getSB_VAL_UTF8(
@@ -7461,7 +7461,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case WB_BOUND:
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
-                            match = TRUE;
+                            match = true;
                         }
                         else {
                             match = isWB(WB_UNKNOWN,
@@ -7497,7 +7497,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case GCB_BOUND:
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
-                            match = TRUE; /* GCB always matches at begin and
+                            match = true; /* GCB always matches at begin and
                                              end */
                         }
                         else {  /* Only CR-LF combo isn't a GCB in 0-255
@@ -7509,10 +7509,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case LB_BOUND:
                         if (locinput == reginfo->strbeg) {
-                            match = FALSE;
+                            match = false;
                         }
                         else if (NEXTCHR_IS_EOS) {
-                            match = TRUE;
+                            match = true;
                         }
                         else {
                             match = isLB(getLB_VAL_CP(UCHARAT(locinput -1)),
@@ -7526,7 +7526,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case SB_BOUND: /* Always matches at begin and end */
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
-                            match = TRUE;
+                            match = true;
                         }
                         else {
                             match = isSB(getSB_VAL_CP(UCHARAT(locinput -1)),
@@ -7540,7 +7540,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     case WB_BOUND:
                         if (locinput == reginfo->strbeg || NEXTCHR_IS_EOS) {
-                            match = TRUE;
+                            match = true;
                         }
                         else {
                             match = isWB(WB_UNKNOWN,
@@ -9846,11 +9846,11 @@ NULL
             }
 
             /* Here, all starting positions have been tried. */
-            matched = FALSE;
+            matched = false;
             goto ifmatch_done;
 
         case IFMATCH_A: /* body of (?...A) succeeded */
-            matched = TRUE;
+            matched = true;
           ifmatch_done:
             sw = matched == ST.wanted;
             match_end = ST.prev_match_end;
@@ -10508,7 +10508,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case ANYOF_t8:
         while (   hardcount < max
                && scan < this_eol
-               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, true))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -10927,7 +10927,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     const char flags = (inRANGE(OP(n), ANYOFH, ANYOFHs))
                         ? 0
                         : ANYOF_FLAGS(n);
-    bool match = FALSE;
+    bool match = false;
     UV c = *p;
 
     PERL_ARGS_ASSERT_REGINCLASS;
@@ -10948,20 +10948,20 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     /* If this character is potentially in the bitmap, check it */
     if (c < NUM_ANYOF_CODE_POINTS && ! inRANGE(OP(n), ANYOFH, ANYOFHb)) {
         if (ANYOF_BITMAP_TEST(n, c))
-            match = TRUE;
+            match = true;
         else if (  (flags & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared)
                  && OP(n) == ANYOFD
                  && ! utf8_target
                  && ! isASCII(c))
         {
-            match = TRUE;
+            match = true;
         }
         else if (flags & ANYOF_LOCALE_FLAGS) {
             if (  (flags & ANYOFL_FOLD)
                 && c < 256
                 && ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
             {
-                match = TRUE;
+                match = true;
             }
             else if (   ANYOF_POSIXL_TEST_ANY_SET(n)
                      && c <= U8_MAX  /* param to isFOO_lc() */
@@ -10990,7 +10990,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     U8 bit_pos = lsbit_pos32(posixl_bits);
 
                     if (bit_pos % 2 ^ cBOOL(isFOO_lc(bit_pos/2, (U8) c))) {
-                        match = TRUE;
+                        match = true;
                         break;
                     }
 
@@ -11044,12 +11044,12 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                  * definitions of user-defined properties, if any.  It croaks
                  * if there is such a property but which still has no definition
                  * available */
-                SV * const definition = GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0,
+                SV * const definition = GET_REGCLASS_AUX_DATA(prog, n, true, 0,
                                                       &only_utf8_locale, NULL);
                 if (definition) {
                     /* Most likely is the outside-the-bitmap inversion list. */
                     if (_invlist_contains_cp(definition, c)) {
-                        match = TRUE;
+                        match = true;
                     }
                     else /* Failing that, hardcode the two tests for a Turkic
                             locale */
@@ -11062,13 +11062,13 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                             if (_invlist_contains_cp(definition,
                                          LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
                             {
-                                match = TRUE;
+                                match = true;
                             }
                         }
                         else if (_invlist_contains_cp(definition,
                                                  LATIN_SMALL_LETTER_DOTLESS_I))
                         {
-                            match = TRUE;
+                            match = true;
                         }
                     }
                 }
@@ -11088,12 +11088,12 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 if (utf8_target) {
                     if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
                         if (ANYOF_BITMAP_TEST(n, 'i')) {
-                            match = TRUE;
+                            match = true;
                         }
                     }
                     else if (c == LATIN_SMALL_LETTER_DOTLESS_I) {
                         if (ANYOF_BITMAP_TEST(n, 'I')) {
-                            match = TRUE;
+                            match = true;
                         }
                     }
                 }
@@ -11105,12 +11105,12 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     if (ANYOF_BITMAP_TEST(n,
                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
                     {
-                        match = TRUE;
+                        match = true;
                     }
                 }
                 else if (*p == 'I') {
                     if (ANYOF_BITMAP_TEST(n, LATIN_SMALL_LETTER_DOTLESS_I)) {
-                        match = TRUE;
+                        match = true;
                     }
                 }
 #endif
@@ -11390,7 +11390,7 @@ STATIC bool
 S_to_byte_substr(pTHX_ regexp *prog)
 {
     /* Converts substr fields in prog from UTF-8 to bytes, calling fbm_compile
-     * on the converted value; returns FALSE if can't be converted. */
+     * on the converted value; returns false if can't be converted. */
 
     int i = 1;
 
@@ -11400,9 +11400,9 @@ S_to_byte_substr(pTHX_ regexp *prog)
         if (prog->substrs->data[i].utf8_substr
             && !prog->substrs->data[i].substr) {
             SV* sv = newSVsv(prog->substrs->data[i].utf8_substr);
-            if (! sv_utf8_downgrade(sv, TRUE)) {
+            if (! sv_utf8_downgrade(sv, true)) {
                 SvREFCNT_dec_NN(sv);
-                return FALSE;
+                return false;
             }
             if (SvVALID(prog->substrs->data[i].utf8_substr)) {
                 if (SvTAIL(prog->substrs->data[i].utf8_substr)) {
@@ -11419,7 +11419,7 @@ S_to_byte_substr(pTHX_ regexp *prog)
         }
     } while (i--);
 
-    return TRUE;
+    return true;
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -11446,14 +11446,14 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
         || UNLIKELY(UNICODE_IS_NONCHAR(cp)))
     {
         /* These are considered graphemes */
-        return TRUE;
+        return true;
     }
 
     /* Otherwise, unassigned code points are forbidden */
     if (UNLIKELY(! ELEMENT_RANGE_MATCHES_INVLIST(
                                     _invlist_search(PL_Assigned_invlist, cp))))
     {
-        return FALSE;
+        return false;
     }
 
     cp_gcb_val = getGCB_VAL_CP(cp);
@@ -11469,9 +11469,9 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
 
     /* And check that is a grapheme boundary */
     if (! isGCB(prev_cp_gcb_val, cp_gcb_val, strbeg, s,
-                TRUE /* is UTF-8 encoded */ ))
+                true /* is UTF-8 encoded */ ))
     {
-        return FALSE;
+        return false;
     }
 
     /* Similarly verify there is a break between the current character and the
@@ -11484,7 +11484,7 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
         next_cp_gcb_val = getGCB_VAL_UTF8(s, strend);
     }
 
-    return isGCB(cp_gcb_val, next_cp_gcb_val, strbeg, s, TRUE);
+    return isGCB(cp_gcb_val, next_cp_gcb_val, strbeg, s, true);
 }
 
 /*
@@ -11493,33 +11493,33 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
 =for apidoc isSCRIPT_RUN
 
 Returns a bool as to whether or not the sequence of bytes from C<s> up to but
-not including C<send> form a "script run".  C<utf8_target> is TRUE iff the
+not including C<send> form a "script run".  C<utf8_target> is true iff the
 sequence starting at C<s> is to be treated as UTF-8.  To be precise, except for
-two degenerate cases given below, this function returns TRUE iff all code
+two degenerate cases given below, this function returns true iff all code
 points in it come from any combination of three "scripts" given by the Unicode
 "Script Extensions" property: Common, Inherited, and possibly one other.
 Additionally all decimal digits must come from the same consecutive sequence of
 10.
 
 For example, if all the characters in the sequence are Greek, or Common, or
-Inherited, this function will return TRUE, provided any decimal digits in it
+Inherited, this function will return true, provided any decimal digits in it
 are from the same block of digits in Common.  (These are the ASCII digits
 "0".."9" and additionally a block for full width forms of these, and several
 others used in mathematical notation.)   For scripts (unlike Greek) that have
 their own digits defined this will accept either digits from that set or from
 one of the Common digit sets, but not a combination of the two.  Some scripts,
 such as Arabic, have more than one set of digits.  All digits must come from
-the same set for this function to return TRUE.
+the same set for this function to return true.
 
-C<*ret_script>, if C<ret_script> is not NULL, will on return of TRUE
+C<*ret_script>, if C<ret_script> is not NULL, will on return of true
 contain the script found, using the C<SCX_enum> typedef.  Its value will be
-C<SCX_INVALID> if the function returns FALSE.
+C<SCX_INVALID> if the function returns false.
 
-If the sequence is empty, TRUE is returned, but C<*ret_script> (if asked for)
+If the sequence is empty, true is returned, but C<*ret_script> (if asked for)
 will be C<SCX_INVALID>.
 
 If the sequence contains a single code point which is unassigned to a character
-in the version of Unicode being used, the function will return TRUE, and the
+in the version of Unicode being used, the function will return true, and the
 script will be C<SCX_Unknown>.  Any other combination of unassigned code points
 in the input sequence will result in the function treating the input as not
 being a script run.
@@ -11562,7 +11562,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
     SV * decimals_invlist = PL_XPosix_ptrs[CC_DIGIT_];
     UV * decimals_array = invlist_array(decimals_invlist);
 
-    /* What code point is the digit '0' of the script run? (0 meaning FALSE if
+    /* What code point is the digit '0' of the script run? (0 meaning false if
      * not currently known) */
     UV zero_of_run = 0;
 
@@ -11574,7 +11574,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
     SCX_enum * intersection = NULL;
     PERL_UINT_FAST8_T intersection_len = 0;
 
-    bool retval = TRUE;
+    bool retval = true;
     SCX_enum * ret_script = NULL;
 
     assert(send >= s);
@@ -11586,20 +11586,20 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
      * script it is. */
     if (! utf8_target && LIKELY(send > s)) {
         if (ret_script == NULL) {
-            return TRUE;
+            return true;
         }
 
         /* If any character is Latin, the run is Latin */
         while (s < send) {
             if (isALPHA_L1(*s) && LIKELY(*s != MICRO_SIGN_NATIVE)) {
                 *ret_script = SCX_Latin;
-                return TRUE;
+                return true;
             }
         }
 
         /* Here, all are Common */
         *ret_script = SCX_Common;
-        return TRUE;
+        return true;
     }
 
     /* Look at each character in the sequence */
@@ -11616,12 +11616,12 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          * encountered.  digit ranges in Common are not similarly blessed) */
         if (UNLIKELY(isDIGIT(*s))) {
             if (UNLIKELY(script_of_run == SCX_Unknown)) {
-                retval = FALSE;
+                retval = false;
                 break;
             }
             if (zero_of_run) {
                 if (zero_of_run != '0') {
-                    retval = FALSE;
+                    retval = false;
                     break;
                 }
             }
@@ -11674,7 +11674,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             || UNLIKELY(   script_of_run != SCX_INVALID
                         && script_of_char == SCX_Unknown))
         {
-            retval = FALSE;
+            retval = false;
             break;
         }
 
@@ -11725,7 +11725,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         /* Too early a Unicode version to have a code point belonging to more
          * than one script, so, if the scripts don't exactly match, fail */
         PERL_UNUSED_VAR(intersection_len);
-        retval = FALSE;
+        retval = false;
         break;
 
 #else
@@ -11743,7 +11743,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             PERL_UINT_FAST8_T i;
 
             if (LIKELY(script_of_run >= 0)) {
-                retval = FALSE;
+                retval = false;
                 break;
             }
 
@@ -11765,7 +11765,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
                 }
             }
 
-            retval = FALSE;
+            retval = false;
             break;
         }
         else if (LIKELY(script_of_run >= 0)) {
@@ -11783,7 +11783,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
                 }
             }
 
-            retval = FALSE;
+            retval = false;
             break;
         }
         else {
@@ -11838,7 +11838,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             /* Here we've looked through everything.  If they have no scripts
              * in common, not a run */
             if (intersection_len == 0) {
-                retval = FALSE;
+                retval = false;
                 break;
             }
 
@@ -11917,7 +11917,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          * they better be the same. */
         if (zero_of_run) {
             if (zero_of_run != zero_of_char) {
-                retval = FALSE;
+                retval = false;
                 break;
             }
         }
@@ -12040,13 +12040,13 @@ Perl_reg_named_buff_exists(pTHX_ REGEXP * const r, SV * const key,
             SV *sv = CALLREG_NAMED_BUFF_FETCH(r, key, flags);
             if (sv) {
                 SvREFCNT_dec_NN(sv);
-                return TRUE;
+                return true;
             } else {
-                return FALSE;
+                return false;
             }
         }
     } else {
-        return FALSE;
+        return false;
     }
 }
 
@@ -12062,7 +12062,7 @@ Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const r, const U32 flags)
 
         return CALLREG_NAMED_BUFF_NEXTKEY(r, NULL, flags & ~RXapif_FIRSTKEY);
     } else {
-        return FALSE;
+        return NULL;
     }
 }
 
