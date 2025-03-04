@@ -3852,20 +3852,19 @@ PERL_STATIC_INLINE bool
 S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
                        SV* const invlist)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_COMMON;
+
     /* returns a boolean giving whether or not the UTF8-encoded character that
      * starts at <p>, and extending no further than <e - 1> is in the inversion
      * list <invlist>. */
 
     UV cp = utf8n_to_uvchr(p, e - p, NULL, 0);
 
-    PERL_ARGS_ASSERT_IS_UTF8_COMMON;
-
     if (cp == 0 && (p >= e || *p != '\0')) {
         force_out_malformed_utf8_message_(p, e, 0, MALFORMED_UTF8_DIE);
         NOT_REACHED; /* NOTREACHED */
     }
 
-    assert(invlist);
     return _invlist_contains_cp(invlist, cp);
 }
 
