@@ -128,8 +128,7 @@ everywhere.  It's fine to probe for additional C99 features and use
 them where available, providing there is also a fallback for compilers
 that don't support the feature.  For example, we use C11 thread local
 storage when available, but fall back to POSIX thread specific APIs
-otherwise, and we use C<char> for booleans if C<< <stdbool.h> >> isn't
-available.
+otherwise.
 
 Code can use (and rely on) the following C99 features being present
 
@@ -232,6 +231,13 @@ C<//> comments
 
 All compilers we tested support their use. Not all humans we tested
 support their use.
+
+=item *
+
+booleans
+
+You can use C<bool>, C<true>, and C<false> as provided by C<< <stdbool.h >>
+(or natively in C++).
 
 =back
 
