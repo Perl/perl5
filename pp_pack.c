@@ -1256,10 +1256,11 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             if (utf8) {
                 while (len-- > 0 && s < strend) {
                     STRLEN retlen;
-                    const UV val = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
-                                         ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-                    if (retlen == (STRLEN) -1)
+                    UV val;
+                    if (! utf8_to_uv((const U8 *) s, (const U8 *) strend,
+                                     &val, &retlen)) {
                         Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+                    }
                     s += retlen;
                     if (!checksum)
                         mPUSHu(val);
