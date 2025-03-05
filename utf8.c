@@ -3437,7 +3437,7 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
         }
 
         /* Here, 'uv' is the real U32 we want to find the UTF-8 of */
-        d = uvchr_to_utf8(d, uv);
+        d = uv_to_utf8(d, uv);
     }
 
     *newlen = d - dstart;
@@ -3842,7 +3842,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
         U8 utf8_c[UTF8_MAXBYTES + 1];
 
       needs_full_generality:
-        uvchr_to_utf8(utf8_c, c);
+        uv_to_utf8(utf8_c, c);
         return _toFOLD_utf8_flags(utf8_c, utf8_c + C_ARRAY_LENGTH(utf8_c),
                                   p, lenp, flags);
     }
@@ -4077,10 +4077,10 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
         U8 * d = ustrp;
         Size_t i;
 
-        d = uvchr_to_utf8(d, first);
+        d = uv_to_utf8(d, first);
 
         for (i = 0; i < remaining_count; i++) {
-            d = uvchr_to_utf8(d, remaining_list[i]);
+            d = uv_to_utf8(d, remaining_list[i]);
         }
 
         *d = '\0';
