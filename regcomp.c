@@ -6675,8 +6675,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                   normal_default:
                     if (! UTF8_IS_INVARIANT(*p) && UTF) {
                         STRLEN numlen;
-                        ender = utf8n_to_uvchr((U8*)p, RExC_end - p,
-                                               &numlen, UTF8_ALLOW_DEFAULT);
+                        ender = utf8_to_uv_or_die((U8*) p, (U8*) RExC_end,
+                                                  &numlen);
                         p += numlen;
                     }
                     else
@@ -9708,9 +9708,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             non_portable_endpoint = 0;
         }
         if (UTF && ! UTF8_IS_INVARIANT(* RExC_parse)) {
-            value = utf8n_to_uvchr((U8*)RExC_parse,
-                                   RExC_end - RExC_parse,
-                                   &numlen, UTF8_ALLOW_DEFAULT);
+            value = utf8_to_uv_or_die((U8*) RExC_parse, (U8*) RExC_end,
+                                      &numlen);
             RExC_parse_inc_by(numlen);
         }
         else {
@@ -9772,9 +9771,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
 
             if (UTF && ! UTF8_IS_INVARIANT(UCHARAT(RExC_parse))) {
-                value = utf8n_to_uvchr((U8*)RExC_parse,
-                                   RExC_end - RExC_parse,
-                                   &numlen, UTF8_ALLOW_DEFAULT);
+                value = utf8_to_uv_or_die((U8*) RExC_parse, (U8*) RExC_end,
+                                          &numlen);
                 RExC_parse_inc_by(numlen);
             }
             else {
