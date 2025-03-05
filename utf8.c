@@ -3490,15 +3490,8 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 
     while (s < send) {
         STRLEN retlen;
-        UV uv = utf8n_to_uvchr(s, send - s, &retlen,
-                               /* No surrogates nor above-Unicode */
-                               UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
-
-        /* The modern method is to keep going with malformed input,
-         * substituting the REPLACEMENT CHARACTER */
-        if (UNLIKELY(uv == 0 && *s != '\0')) {
-            uv = UNICODE_REPLACEMENT;
-        }
+        UV uv;
+        (void) c9strict_utf8_to_uv(s, send, &uv, &retlen);
 
         if (uv >= FIRST_IN_PLANE1) {    /* Requires a surrogate pair */
 
