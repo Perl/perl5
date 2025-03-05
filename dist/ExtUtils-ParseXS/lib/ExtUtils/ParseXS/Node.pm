@@ -1537,6 +1537,166 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::multiline_merged;
+
+# Generic base class for keyword Nodes which can contain multiple lines.
+# It's the same is is parent class, :Node::multiline, except that in
+# addition, leading black lines are skipped and the remainder concatenated
+# into a single line, 'text'.
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node::multiline);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::multiline::FIELDS,
+        'text',    # singe string contained all concatenated lines
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+
+# Consume all the lines up until the next directive and store in
+# @$lines, and in addition, concatenate and store in $text
+
+sub parse {
+    my ExtUtils::ParseXS::Node::multiline_merged $self = shift;
+    my ExtUtils::ParseXS                         $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, read lines
+
+    my @lines = @{$self->{lines}};
+    shift @lines while $lines[0] !~ /\S/;
+    # XXX ParseXS originally didn't include a trailing \n,
+    # so we carry on doing the same.
+    $self->{text} = join "\n", @lines;
+    ExtUtils::ParseXS::Utilities::trim_whitespace($self->{text});
+}
+
+# No as_code() method - we rely on the sub-classes for that
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_ARGS;
+
+# Handle C_ARGS keyword
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node::multiline_merged);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::multiline_merged::FIELDS,
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+sub parse {
+    my ExtUtils::ParseXS::Node::C_ARGS $self = shift;
+    my ExtUtils::ParseXS               $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+    $pxs->{xsub_sig}{auto_function_sig_override} = $self->{text};
+}
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INTERFACE;
+
+# Handle INTERFACE keyword
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node::multiline_merged);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::multiline_merged::FIELDS,
+        'map_short_orig', # hash mapping short IF names to original ones
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::INTERFACE $self = shift;
+    my ExtUtils::ParseXS                  $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+
+    my %map;
+
+    foreach (split /[\s,]+/, $self->{text}) {
+        my $short = $_;
+        $short =~ s/^$pxs->{PREFIX_pattern}//;
+        $map{$short} = $_;
+        $pxs->{xsub_map_interface_name_short_to_original}->{$short} = $_;
+    }
+
+    $self->{map_short_orig} = \%map;
+
+    $pxs->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
+    $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
+
+}
+
+
+sub as_code {
+    my ExtUtils::ParseXS::Node::INTERFACE $self = shift;
+    my ExtUtils::ParseXS                  $pxs  = shift;
+    print <<"EOF";
+    XSFUNCTION = $pxs->{xsub_interface_macro}($pxs->{xsub_return_type},cv,XSANY.any_dptr);
+EOF
+}
+
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INTERFACE_MACRO;
+
+# Handle INTERFACE_MACRO keyword
+
+BEGIN {
+    our @ISA = qw(ExtUtils::ParseXS::Node::multiline_merged);
+
+    our @FIELDS = (
+        @ExtUtils::ParseXS::Node::multiline_merged::FIELDS,
+        'get_macro', # name of macro to get interface
+        'set_macro', # name of macro to set interface
+    );
+
+    fields->import(@FIELDS) if $USING_FIELDS;
+}
+
+sub parse {
+    my ExtUtils::ParseXS::Node::INTERFACE_MACRO $self = shift;
+    my ExtUtils::ParseXS                        $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+
+    my $s = $self->{text};
+    my ($m1, $m2);
+    if ($s =~ /\s/) {        # two macros
+        ($m1, $m2) = split ' ', $s;
+    }
+    else {
+        # XXX rather than using a fake macro name which will probably
+        # give a compile error later, we should really warn/die here?
+        ($m1, $m2) = ($s, 'UNKNOWN_CVT');
+    }
+
+    $self->{get_macro} = $pxs->{xsub_interface_macro}     = $m1;
+    $self->{set_macro} = $pxs->{xsub_interface_macro_set} = $m2;
+
+    $pxs->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
+    $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
+
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::code;
 
 # Base class for Nodes which contain lines of literal C code

@@ -1840,26 +1840,6 @@ sub print_section {
 }
 
 
-# Consume, concatenate and return (as a single string), all the lines up
-# until the next directive (including $_ as the first line).
-
-sub merge_section {
-  my ExtUtils::ParseXS $self = shift;
-  my $in = '';
-
-  # skip blank lines
-  while (!/\S/ && @{ $self->{line} }) {
-    $_ = shift(@{ $self->{line} });
-  }
-
-  for (;  defined($_) && !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    $in .= "$_\n";
-  }
-  chomp $in;
-  return $in;
-}
-
-
 # Process as many keyword lines/blocks as can be found which match the
 # pattern, by calling the FOO_handler() method or the Node::parse method
 # for each keyword.
@@ -2210,61 +2190,6 @@ sub OUTPUT_handler {
 
     $param->as_output_code($self);
   } # foreach line in OUTPUT block
-}
-
-
-# Set $sig->{auto_function_sig_override} to the concatenation of all
-# the following lines (including $_).
-
-sub C_ARGS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  my $in = $self->merge_section();
-
-  trim_whitespace($in);
-  $self->{xsub_sig}{auto_function_sig_override} = $in;
-}
-
-
-# Concatenate the following lines (including $_), then split into
-# one or two macros names.
-
-sub INTERFACE_MACRO_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  my $in = $self->merge_section();
-
-  trim_whitespace($in);
-  if ($in =~ /\s/) {        # two
-    ($self->{xsub_interface_macro}, $self->{xsub_interface_macro_set})
-          = split ' ', $in;
-  }
-  else {
-    $self->{xsub_interface_macro} = $in;
-    $self->{xsub_interface_macro_set} = 'UNKNOWN_CVT'; # catch later
-  }
-  $self->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
-  $self->{seen_INTERFACE_or_MACRO} = 1;       # global
-}
-
-
-sub INTERFACE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  my $in = $self->merge_section();
-
-  trim_whitespace($in);
-
-  foreach (split /[\s,]+/, $in) {
-    my $iface_name = $_;
-    $iface_name =~ s/^$self->{PREFIX_pattern}//;
-    $self->{xsub_map_interface_name_short_to_original}->{$iface_name} = $_;
-  }
-  print Q(<<"EOF");
-    |    XSFUNCTION = $self->{xsub_interface_macro}($self->{xsub_return_type},cv,XSANY.any_dptr);
-EOF
-  $self->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
-  $self->{seen_INTERFACE_or_MACRO} = 1;       # global
 }
 
 
