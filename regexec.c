@@ -10936,14 +10936,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
      * UTF8_IS_INVARIANT() works even if not in UTF-8 */
     if (! UTF8_IS_INVARIANT(c) && utf8_target) {
         STRLEN c_len = 0;
-        const U32 utf8n_flags = UTF8_ALLOW_DEFAULT;
-        c = utf8n_to_uvchr(p, p_end - p, &c_len, utf8n_flags | UTF8_CHECK_ONLY);
-        if (c_len == (STRLEN)-1) {
-            force_out_malformed_utf8_message_(p, p_end,
-                                              utf8n_flags,
-                                              MALFORMED_UTF8_DIE);
-            NOT_REACHED; /* NOTREACHED */
-        }
+        c = utf8_to_uv_or_die(p, p_end, &c_len);
         if (     c > 255
             &&  (OP(n) == ANYOFL || OP(n) == ANYOFPOSIXL)
             && ! (flags & ANYOFL_UTF8_LOCALE_REQD))
