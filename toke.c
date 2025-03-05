@@ -2351,8 +2351,8 @@ Perl_str_to_version(pTHX_ SV *sv)
     NV retval = 0.0;
     NV nshift = 1.0;
     STRLEN len;
-    const char *start = SvPV_const(sv,len);
-    const char * const end = start + len;
+    const U8 *start = (const U8 *) SvPV_const(sv,len);
+    const U8 * const end = start + len;
     const bool utf = cBOOL(SvUTF8(sv));
 
     PERL_ARGS_ASSERT_STR_TO_VERSION;
@@ -2361,9 +2361,9 @@ Perl_str_to_version(pTHX_ SV *sv)
         STRLEN skip;
         UV n;
         if (utf)
-            n = utf8n_to_uvchr((U8*)start, len, &skip, 0);
+            n = utf8_to_uv_or_die(start, end, &skip);
         else {
-            n = *(U8*)start;
+            n = *start;
             skip = 1;
         }
         retval += ((NV)n)/nshift;
