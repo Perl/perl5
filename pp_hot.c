@@ -1142,7 +1142,6 @@ PP(pp_multiconcat)
             Copy(svpv_p->pv, targ_pv, len, char);
             targ_pv += len;
         }
-        const_lens += (svpv_end - svpv_base + 1);
     }
     else {
         /* Note that we iterate the loop nargs+1 times: to append nargs
