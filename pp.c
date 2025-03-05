@@ -4035,11 +4035,20 @@ PP(pp_ord)
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
 
-    TARGu(DO_UTF8(argsv)
-           ? (len ? utf8n_to_uvchr(s, len, 0, UTF8_ALLOW_ANYUV) : 0)
-           : (UV)(*s),
-        1);
+    UV cp; 
+    if (UNLIKELY(len == 0)) {
+        cp = 0;
+    }
+    else if (DO_UTF8(argsv)) {
+        if (! utf8_to_uv(s, s + len, &cp, 0)) {
+            cp = 0;
+        }
+    }
+    else {
+        cp = (UV) (*s);
+    }
 
+    TARGu(cp, 1);
     rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
