@@ -43,7 +43,8 @@ my $USING_FIELDS;
 
 BEGIN {
     our @FIELDS = (
-        # Currently there are no node fields common to all node types
+        'line_no',       # line number and ...
+        'file',          # ... filename where this node appeared in src
     );
 
     # do 'use fields', except: fields needs Hash::Util which is XS, which
@@ -73,6 +74,23 @@ sub new {
         $self = bless { %$args } => $class;
     }
     return $self;
+}
+
+
+# A very generic parse method that just notes the current file/line no.
+# Typically called first as a SUPER by the parse() method of real nodes.
+
+sub parse {
+    my ExtUtils::ParseXS::Node $self = shift;
+    my ExtUtils::ParseXS       $pxs  = shift;
+
+    $self->{file}    = $pxs->{in_pathname};
+                        # account for the line array getting shifted
+                        # as input lines are consumed, while line_no
+                        # array isn't ever shifted
+    $self->{line_no} = $pxs->{line_no}->[
+                            @{$pxs->{line_no}} - @{$pxs->{line}} - 1
+                        ];
 }
 
 
@@ -1098,6 +1116,8 @@ $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
 sub parse {
     my ExtUtils::ParseXS::Node::Sig $self = shift;
     my ExtUtils::ParseXS            $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
 
     # remove line continuation chars (\)
     $self->{sig_text} =~ s/\\\s*/ /g;
