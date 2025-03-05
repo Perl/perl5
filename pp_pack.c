@@ -408,16 +408,16 @@ STMT_START {					\
 } STMT_END
 
 /* Only to be used inside a loop (see the break) */
-#define NEXT_UNI_VAL(val, cur, str, end, utf8_flags)		\
-STMT_START {							\
-    STRLEN retlen;						\
-    if (str >= end) break;					\
-    val = utf8n_to_uvchr((U8 *) str, end-str, &retlen, utf8_flags);	\
-    if (retlen == (STRLEN) -1) {			        \
-        *cur = '\0';						\
-        croak("Malformed UTF-8 string in pack");	        \
-    }								\
-    str += retlen;						\
+#define NEXT_UNI_VAL(val, cur, str, end, utf8_flags)		            \
+STMT_START {							            \
+    STRLEN retlen;						            \
+    if (str >= end) break;					            \
+    if (! utf8_to_uv_flags((U8 *) str, (U8 *) end, &val, &retlen,           \
+                            utf8_flags)) {                                  \
+        *cur = '\0';						            \
+        croak("Malformed UTF-8 string in pack");	                    \
+    }								            \
+    str += retlen;						            \
 } STMT_END
 
 static const char *_action( const tempsym_t* symptr )
