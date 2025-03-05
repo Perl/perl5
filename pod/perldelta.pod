@@ -226,7 +226,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+Prevent this warning when accessing a function parameter in C<@_> that
+is an lvalue reference to an untied hash element where the key was
+undefined.  This warning is still produced at the point of call.  [GH
+#22423]
 
 =back
 
