@@ -2266,8 +2266,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
            keys then check its length, and whether we do either with or without
            an %ENV lookup first. prime_env_iter() returns quickly if nothing
            needs doing. */
-        if (SvRMAGICAL((const SV *)hv)
-            && mg_find((const SV *)hv, PERL_MAGIC_env)) {
+        if (hv_is_env(hv))
             prime_env_iter();
         }
 #endif

@@ -4564,6 +4564,9 @@ opx	|void	|sv_kill_backrefs					\
 				|NN SV * const sv			\
 				|NULLOK NOCHECK AV * const av
 #endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_PP_HOT_C)
+S	|bool	|hv_is_env	|NN HV *hv
+#endif
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
 op	|SV *	|hfree_next_entry					\
 				|NN HV *hv				\

@@ -6989,6 +6989,13 @@ Perl_sv_kill_backrefs(pTHX_ SV * const sv, AV * const av)
         assert(sv)
 
 #endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_PP_HOT_C)
+STATIC bool
+S_hv_is_env(pTHX_ HV *hv);
+# define PERL_ARGS_ASSERT_HV_IS_ENV             \
+        assert(hv); assert(SvTYPE(hv) == SVt_PVHV)
+
+#endif
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV SV *
 Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)

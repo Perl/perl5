@@ -1425,6 +1425,9 @@
 #       define new_he()                         S_new_he(aTHX)
 #     endif
 #   endif /* defined(PERL_IN_HV_C) */
+#   if defined(PERL_IN_HV_C) || defined(PERL_IN_PP_HOT_C)
+#     define hv_is_env(a)                       S_hv_is_env(aTHX_ a)
+#   endif
 #   if defined(PERL_IN_LOCALE_C)
 #     define get_locale_string_utf8ness_i(a,b,c,d) S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
 #     define ints_to_tm(a,b,c,d,e,f,g,h,i)      S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i)

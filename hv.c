@@ -604,7 +604,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 return (void *) entry;
             }
 #ifdef ENV_IS_CASELESS
-            else if (mg_find((const SV *)hv, PERL_MAGIC_env)) {
+            else if (hv_is_env(hv)) {
                 U32 i;
                 for (i = 0; i < klen; ++i)
                     if (isLOWER(key[i])) {
@@ -669,7 +669,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 return SvTRUE_NN(svret) ? (void *)hv : NULL;
                 }
 #ifdef ENV_IS_CASELESS
-            else if (mg_find((const SV *)hv, PERL_MAGIC_env)) {
+            else if (hv_is_env(hv)) {
                 /* XXX This code isn't UTF8 clean.  */
                 char * const keysave = (char * const)key;
                 /* Will need to free this, so set FREEKEY flag.  */
@@ -714,7 +714,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     return NULL;
                 }
 #ifdef ENV_IS_CASELESS
-                else if (mg_find((const SV *)hv, PERL_MAGIC_env)) {
+                else if (hv_is_env(hv)) {
                     /* XXX This code isn't UTF8 clean.  */
                     const char *keysave = key;
                     /* Will need to free this, so set FREEKEY flag.  */
@@ -737,8 +737,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (!HvARRAY(hv)) {
         if ((action & (HV_FETCH_LVALUE | HV_FETCH_ISSTORE))
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
-                 || (SvRMAGICAL((const SV *)hv)
-                     && mg_find((const SV *)hv, PERL_MAGIC_env))
+                 || (hv_is_env(hv))
 #endif
                                                                   ) {
             char *array;
@@ -944,9 +943,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
   not_found:
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
-    if (!(action & HV_FETCH_ISSTORE)
-        && SvRMAGICAL((const SV *)hv)
-        && mg_find((const SV *)hv, PERL_MAGIC_env)) {
+    if (!(action & HV_FETCH_ISSTORE) && hv_is_env(hv)) {
         unsigned long len;
         const char * const env = PerlEnv_ENVgetenv_len(key,&len);
         if (env) {
@@ -1196,7 +1193,7 @@ Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
     HE *entry;
     bool tied = SvRMAGICAL(hv) && (mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied)
 #ifdef DYNAMIC_ENV_FETCH  /* might not know number of keys yet */
-                                   || mg_find(MUTABLE_SV(hv), PERL_MAGIC_env)
+                                   || hv_is_env(hv)
 #endif
                                   );
     PERL_ARGS_ASSERT_HV_PUSHKV;
@@ -1348,7 +1345,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     return NULL;		/* element cannot be deleted */
                 }
 #ifdef ENV_IS_CASELESS
-                else if (mg_find((const SV *)hv, PERL_MAGIC_env)) {
+                else if (hv_is_env(hv)) {
                     /* XXX This code isn't UTF8 clean.  */
                     keysv = newSVpvn_flags(key, klen, SVs_TEMP);
                     if (k_flags & HVhek_FREEKEY) {
@@ -3063,8 +3060,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
         }
     }
 #if defined(DYNAMIC_ENV_FETCH) && defined(VMS)  /* set up %ENV for iteration */
-    if (!entry && SvRMAGICAL((const SV *)hv)
-        && mg_find((const SV *)hv, PERL_MAGIC_env)) {
+    if (!entry && hv_is_env(hv)) {
         prime_env_iter();
     }
 #endif
