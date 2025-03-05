@@ -2084,8 +2084,7 @@ STMT_START {                                                                \
     }                                                                       \
     else { /* Back-up to the start of the previous character */             \
         U8 * const r = reghop3((U8*)s, -1, (U8*)reginfo->strbeg);           \
-        tmp = utf8n_to_uvchr(r, (U8*) reginfo->strend - r,                  \
-                         0, UTF8_ALLOW_DEFAULT);                            \
+        tmp = utf8_to_uv_or_die(r, (U8*) reginfo->strend, 0);           \
     }                                                                       \
     tmp = TEST_UV(tmp);                                                     \
     REXEC_FBC_UTF8_SCAN(/* advances s while s < strend */                   \
