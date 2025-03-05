@@ -4157,10 +4157,10 @@ S_scan_const(pTHX_ char *start)
                                 char hex_string[2 * UTF8_MAXBYTES + 5];
 
                                 /* Get the first character of the result. */
-                                U32 uv = utf8n_to_uvchr((U8 *) str,
-                                                        len,
-                                                        &char_length,
-                                                        UTF8_ALLOW_ANYUV);
+                                U32 uv = utf8_to_uv_or_die(
+                                                         (const U8 *) str,
+                                                         (const U8 *) str_end,
+                                                         &char_length);
                                 /* Convert first code point to Unicode hex,
                                  * including the boiler plate before it. */
                                 output_length =
@@ -4181,10 +4181,10 @@ S_scan_const(pTHX_ char *start)
                                 * its Unicode code point in hex */
                                 while ((str += char_length) < str_end) {
                                     const STRLEN off = d - SvPVX_const(sv);
-                                    U32 uv = utf8n_to_uvchr((U8 *) str,
-                                                            str_end - str,
-                                                            &char_length,
-                                                            UTF8_ALLOW_ANYUV);
+                                    U32 uv = utf8_to_uv_or_die(
+                                                         (const U8 *) str,
+                                                         (const U8 *) str_end,
+                                                         &char_length);
                                     output_length =
                                         my_snprintf(hex_string,
                                              sizeof(hex_string),
