@@ -13090,8 +13090,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 if (!veclen)
                     goto done_valid_conversion;
                 if (vec_utf8)
-                    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
-                                        UTF8_ALLOW_ANYUV);
+                    (void) utf8_to_uv(vecstr, vecstr + veclen, &uv, &ulen);
                 else {
                     uv = *vecstr;
                     ulen = 1;
