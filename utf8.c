@@ -4687,8 +4687,10 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                 if (   ckWARN_d(WARN_NON_UNICODE)
                     || UNLIKELY(does_utf8_overflow(s, s + len) >= ALMOST_CERTAINLY_OVERFLOWS))
                 {
+                    UV dummy;
+
                     /* A side effect of this function will be to warn */
-                    (void) utf8n_to_uvchr(s, e - s, NULL, UTF8_WARN_SUPER);
+                    (void) utf8_to_uv_flags(s, e, &dummy, NULL, UTF8_WARN_SUPER);
                     ok = FALSE;
                 }
             }
@@ -4707,8 +4709,10 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
             else if (   UNLIKELY(UTF8_IS_NONCHAR(s, e))
                      && (ckWARN_d(WARN_NONCHAR)))
             {
+                UV dummy;
+
                 /* A side effect of this function will be to warn */
-                (void) utf8n_to_uvchr(s, e - s, NULL, UTF8_WARN_NONCHAR);
+                (void) utf8_to_uv_flags(s, e, &dummy, NULL, UTF8_WARN_NONCHAR);
                 ok = FALSE;
             }
         }
