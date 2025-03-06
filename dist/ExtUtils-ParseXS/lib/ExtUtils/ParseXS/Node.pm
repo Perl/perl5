@@ -29,6 +29,39 @@ directly: there are no getter/setter methods.
 
 =cut
 
+# Utility sub to handle all the boilerplate of declaring a Node subclass,
+# including setting up @INC and @FIELDS. Intended to be called from within
+# BEGIN. (Created as a lexical sub ref to make it easily accessible to
+# all subclasses in this file.)
+#
+# Arg 1 is name of parent, without E::PXS::Node:: prefix.
+# Remaining args are the names of fields. It also inherits the fields
+# of its parent.
+
+my $USING_FIELDS;
+
+my $build_subclass;
+BEGIN {
+    $build_subclass = sub {
+        my $parent = shift;
+
+        no strict 'refs';
+
+        my $class       = caller(0);
+        my $full_parent = 'ExtUtils::ParseXS::Node';
+        $full_parent   .= "::$parent" if length $parent;
+        my @fields      = (@{"${full_parent}::FIELDS"}, @_);
+
+        @{"${class}::ISA"}    = $full_parent;
+        @{"${class}::FIELDS"} = @fields;
+
+        if ($USING_FIELDS) {
+            eval qq{package $class; fields->import(\@fields); 1;}
+                or die $@;
+        }
+    };
+};
+
 
 # ======================================================================
 
@@ -39,7 +72,6 @@ package ExtUtils::ParseXS::Node;
 # The 'use fields' enables compile-time or run-time errors if code
 # attempts to use a key which isn't listed here.
 
-my $USING_FIELDS;
 
 BEGIN {
     our @FIELDS = (
@@ -56,7 +88,6 @@ BEGIN {
         fields->import(@FIELDS);
     }
 }
-
 
 # new(): takes one optional arg, $args, which is a hash ref of key/value
 # pairs to initialise the object with.
@@ -101,12 +132,7 @@ package ExtUtils::ParseXS::Node::Param;
 # Node subclass which holds the state of one XSUB parameter, based on the
 # XSUB's signature and/or an INPUT line.
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::FIELDS,
-
+BEGIN { $build_subclass->('', # parent
         # values derived from the XSUB's signature
         'in_out',    # The IN/OUT/OUTLIST etc value (if any)
         'var',       # the name of the parameter
@@ -137,11 +163,7 @@ BEGIN {
         # derived values calculated later
         'defer',     # deferred initialisation template code
         'proto',     # overridden prototype char(s) (if any) from typemap
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
-
+)};
 
 
 # check(): for a parsed INPUT line and/or typed parameter in a signature,
@@ -1025,11 +1047,7 @@ package ExtUtils::ParseXS::Node::Sig;
 # XSUB's actual signature plus any INPUT lines. It is a mainly a list of
 # Node::Param children.
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::FIELDS,
+BEGIN { $build_subclass->('', # parent
         'orig_params',   # Array ref of Node::Param objects representing
                          # the original (as parsed) parameters of this XSUB
 
@@ -1054,11 +1072,7 @@ BEGIN {
         'min_args',      # The minimum number of args allowed from caller
 
         'auto_function_sig_override', # the C_ARGS value, if any
-
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+)};
 
 
 # ----------------------------------------------------------------
@@ -1500,16 +1514,9 @@ package ExtUtils::ParseXS::Node::multiline;
 # $self->lines[0] will be any text (on the same line) following the
 # keyword.
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::FIELDS,
-        'lines',    # Array ref of all lines until the next keyword
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+BEGIN { $build_subclass->('', # parent
+    'lines',    # Array ref of all lines until the next keyword
+)};
 
 
 # Consume all the lines up until the next directive and store in
@@ -1544,16 +1551,9 @@ package ExtUtils::ParseXS::Node::multiline_merged;
 # addition, leading black lines are skipped and the remainder concatenated
 # into a single line, 'text'.
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node::multiline);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::multiline::FIELDS,
-        'text',    # singe string contained all concatenated lines
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+BEGIN { $build_subclass->('multiline', # parent
+    'text',    # singe string contained all concatenated lines
+)};
 
 
 # Consume all the lines up until the next directive and store in
@@ -1582,15 +1582,9 @@ package ExtUtils::ParseXS::Node::C_ARGS;
 
 # Handle C_ARGS keyword
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node::multiline_merged);
+BEGIN { $build_subclass->('multiline_merged', # parent
+)};
 
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::multiline_merged::FIELDS,
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
 
 sub parse {
     my ExtUtils::ParseXS::Node::C_ARGS $self = shift;
@@ -1606,16 +1600,9 @@ package ExtUtils::ParseXS::Node::INTERFACE;
 
 # Handle INTERFACE keyword
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node::multiline_merged);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::multiline_merged::FIELDS,
-        'map_short_orig', # hash mapping short IF names to original ones
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+BEGIN { $build_subclass->('multiline_merged', # parent
+    'map_short_orig', # hash mapping short IF names to original ones
+)};
 
 
 sub parse {
@@ -1657,17 +1644,11 @@ package ExtUtils::ParseXS::Node::INTERFACE_MACRO;
 
 # Handle INTERFACE_MACRO keyword
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node::multiline_merged);
+BEGIN { $build_subclass->('multiline_merged', # parent
+    'get_macro', # name of macro to get interface
+    'set_macro', # name of macro to set interface
+)};
 
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::multiline_merged::FIELDS,
-        'get_macro', # name of macro to get interface
-        'set_macro', # name of macro to set interface
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
 
 sub parse {
     my ExtUtils::ParseXS::Node::INTERFACE_MACRO $self = shift;
@@ -1702,15 +1683,8 @@ package ExtUtils::ParseXS::Node::code;
 # Base class for Nodes which contain lines of literal C code
 # (such as PREINIT: and CODE:)
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node::multiline);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::multiline::FIELDS,
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+BEGIN { $build_subclass->('multiline', # parent
+)};
 
 
 # No parse() method: we just use the inherited Node::multiline's one
@@ -1769,15 +1743,8 @@ package ExtUtils::ParseXS::Node::PREINIT;
 
 # Store the code lines associated with the PREINIT: keyword
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node::code);
-
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::code::FIELDS,
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+BEGIN { $build_subclass->('code', # parent
+)};
 
 # Currently all methods are just inherited.
 
