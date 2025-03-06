@@ -98,17 +98,14 @@ sub test_many {
             };
             $err = $@;
         });
+        $stderr = $err . $stderr if length $err;
 
         my $out = tied(*FH)->content;
         untie *FH;
 
-        if (length $err) {
-            die "$desc_prefix: eval error, aborting:\n$err\n";
-        }
-
         # trim the output to just the function in question to make
         # test diagnostics smaller.
-        if ($out =~ /\S/) {
+        if (!length($err) and $out =~ /\S/) {
             $out =~ s/\A.*? (^\w+\(${prefix} .*? ^}).*\z/$1/xms
                 or do {
                     # print STDERR $out;
@@ -3518,6 +3515,69 @@ EOF
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # Test ENABLE/DISABLE keywords
+    #
+    # Check that disallowed variants give errors and allowed variants
+    # get as far as generating a boot XSUB
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "VERSIONCHECK long word",
+            [ Q(<<'EOF') ],
+                |VERSIONCHECK: ENABLEblah
+EOF
+            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "VERSIONCHECK trailing text (stupid but legal)",
+            [ Q(<<'EOF') ],
+                |VERSIONCHECK: diSAble blah # bloo +$%
+EOF
+            [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
+        ],
+
+        [
+            "PROTOTYPES: long word",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: ENABLEblah
+EOF
+            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "PROTOTYPES: trailing text (stupid but legal)",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: diSAble blah # bloo +$%
+EOF
+            [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
+        ],
+
+        [
+            "EXPORT_XSUB_SYMBOLS: long word",
+            [ Q(<<'EOF') ],
+                |EXPORT_XSUB_SYMBOLS: ENABLEblah
+EOF
+            [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "EXPORT_XSUB_SYMBOLS: trailing text (stupid but legal)",
+            [ Q(<<'EOF') ],
+                |EXPORT_XSUB_SYMBOLS: diSAble blah # bloo +$%
+EOF
+            [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
 }
 
 done_testing;

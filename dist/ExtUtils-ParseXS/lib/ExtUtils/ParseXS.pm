@@ -2417,7 +2417,7 @@ sub VERSIONCHECK_handler {
 
   # check for ENABLE/DISABLE
   $self->death("Error: VERSIONCHECK: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)/i;
+    unless $setting =~ /^(ENABLE|DISABLE)\b/i;
 
   $self->{VERSIONCHECK_value} = 1 if $1 eq 'ENABLE';
   $self->{VERSIONCHECK_value} = 0 if $1 eq 'DISABLE';
@@ -2495,7 +2495,7 @@ sub PROTOTYPES_handler {
 
   # check for ENABLE/DISABLE
   $self->death("Error: PROTOTYPES: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)/i;
+    unless $setting =~ /^(ENABLE|DISABLE)\b/i;
 
   $self->{PROTOTYPES_value} = 1 if $1 eq 'ENABLE';
   $self->{PROTOTYPES_value} = 0 if $1 eq 'DISABLE';
@@ -2513,7 +2513,7 @@ sub EXPORT_XSUB_SYMBOLS_handler {
 
   # check for ENABLE/DISABLE
   $self->death("Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)/i;
+    unless $setting =~ /^(ENABLE|DISABLE)\b/i;
 
   my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
