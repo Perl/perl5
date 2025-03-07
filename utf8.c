@@ -1827,15 +1827,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
  * excluding starting an overlong sequence? */
 #define UTF8_IS_SYNTACTIC_START_BYTE(s)  (NATIVE_TO_I8(*s) >= 0xC0)
 
-    /* Check for overlong.  If no problems so far, 'uv' is the correct code
-     * point value.  Simply see if it is expressible in fewer bytes.  But if
-     * there are other malformations, we may be still be able to tell if this
-     * is an overlong by looking at the UTF-8 byte sequence itself */
-    if (   (   LIKELY(! possible_problems)
-            && UNLIKELY(expectlen > OFFUNISKIP(uv)))
-        || (   UNLIKELY(possible_problems)
-            && UTF8_IS_SYNTACTIC_START_BYTE(s0)
-            && UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))
+    /* Check for overlong. */
+    if (   UTF8_IS_SYNTACTIC_START_BYTE(s0)
+        && UNLIKELY(0 < is_utf8_overlong(s0, s - s0)))
     {
         possible_problems |= UTF8_GOT_LONG;
     }
