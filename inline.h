@@ -2351,8 +2351,9 @@ legal UTF-8 for a single character.
 
 With C<isUTF8_CHAR>, the code point can be any that will fit in an IV on this
 machine, using Perl's extension to official UTF-8 to represent those higher
-than the Unicode maximum of 0x10FFFF.  That means that this will consider valid
-bytes that are unrecognized or considered illegal by non-Perl applications.
+than the Unicode maximum of 0x10FFFF.  That means that this will consider byte
+sequences to be valid that are unrecognized or considered illegal by non-Perl
+applications.
 
 With C<L</isSTRICT_UTF8_CHAR>>, acceptable code points are restricted to those
 defined by Unicode to be fully interchangeable across applications.
