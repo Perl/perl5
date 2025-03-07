@@ -1678,7 +1678,7 @@ sub parse {
 
 # ======================================================================
 
-package ExtUtils::ParseXS::Node::code;
+package ExtUtils::ParseXS::Node::codeblock;
 
 # Base class for Nodes which contain lines of literal C code
 # (such as PREINIT: and CODE:)
@@ -1694,8 +1694,8 @@ BEGIN { $build_subclass->('multiline', # parent
 # and possibly wrapping in '#line' directives.
 
 sub as_code {
-    my ExtUtils::ParseXS::Node::code $self = shift;
-    my ExtUtils::ParseXS             $pxs  = shift;
+    my ExtUtils::ParseXS::Node::codeblock $self = shift;
+    my ExtUtils::ParseXS                  $pxs  = shift;
 
     my @lines = map "$_\n", @{$self->{lines}};
 
@@ -1743,7 +1743,7 @@ package ExtUtils::ParseXS::Node::PREINIT;
 
 # Store the code lines associated with the PREINIT: keyword
 
-BEGIN { $build_subclass->('code', # parent
+BEGIN { $build_subclass->('codeblock', # parent
 )};
 
 # Currently all methods are just inherited.
