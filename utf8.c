@@ -2280,7 +2280,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
-                             _byte_dump_string(s0, send - s0, 0),
+                             _byte_dump_string(s0, avail_len, 0),
                              (int)avail_len,
                              avail_len == 1 ? "" : "s", /* Pluralize */
                              (int)expectlen);
@@ -2294,7 +2294,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                          * end of the buffer */
                         int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
                                        ? (int) (s - s0)
-                                       : (int) (send - s0);
+                                       : (int) (avail_len);
                         message = Perl_form(aTHX_ "%s",
                             unexpected_non_continuation_text(s0,
                                                             printlen,
@@ -2341,7 +2341,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 "%s: %s (overlong; instead use %s to represent"
                                 " %s%0*" UVXf ")",
                                 malformed_text,
-                                _byte_dump_string(s0, send - s0, 0),
+                                _byte_dump_string(s0, avail_len, 0),
                                 _byte_dump_string(tmpbuf, e - tmpbuf, 0),
                                 preface,
                                 ((input_uv < 256) ? 2 : 4), /* Field width of 2
