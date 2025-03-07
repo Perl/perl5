@@ -1304,6 +1304,8 @@ C<*retlen> with the C<uvchr> family of functions (for the worse).  It is not
 likely to be of use to you.  You can use C<UTF8_ALLOW_ANY> (described below) to
 also turn off warnings, and that flag doesn't adversely affect C<*retlen>.
 
+This flag is ignored if C<UTF8_DIE_IF_MALFORMED> is also set.
+
 =item C<UTF8_FORCE_WARN_IF_MALFORMED>
 
 Normally, no warnings are generated if warnings are turned off lexically or
@@ -1414,8 +1416,6 @@ the C<_GOT_> bits list in C<L</utf8_to_uv_msgs>>.
 If the function would otherwise return C<false>, it instead croaks.  The
 C<UTF8_FORCE_WARN_IF_MALFORMED> flag is effectively turned on so that the cause
 of the croak is displayed.
-
-This flag is ignored if C<UTF8_CHECK_ONLY> is also set.
 
 =back
 
