@@ -976,32 +976,28 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
                                ? "immediately"
                                : form("%d bytes",
                                                  (int) non_cont_byte_pos);
-    const U8 * x = s + non_cont_byte_pos;
-    const U8 * e = s + print_len;
 
     /* We don't need to pass this parameter, but since it has already been
      * calculated, it's likely faster to pass it; verify under DEBUGGING */
     assert(expect_len == UTF8SKIP(s));
 
-    /* As a defensive coding measure, don't output anything past a NUL.  Such
-     * bytes shouldn't be in the middle of a malformation, and could mark the
-     * end of the allocated string, and what comes after is undefined */
-    for (; x < e; x++) {
-        if (*x == '\0') {
-            x++;            /* Output this particular NUL */
-            break;
-        }
-    }
-
+    /* As a defensive coding measure, we use strnlen() below to not output
+     * anything past a NUL (but include that NUL).  Such bytes shouldn't be in
+     * the middle of a malformation, and could mark the end of the allocated
+     * string, and what comes after is undefined */
+    print_len = MIN(print_len,
+                      1 /* Include the NUL */
+                        /* We know the NUL can't come before this, so no need
+                         * to examine the first part of the string */
+                    + non_cont_byte_pos
+                    + strnlen((char *) s + non_cont_byte_pos, print_len)
+                   );
     return form("%s: %s (unexpected non-continuation byte 0x%02x,"
-                           " %s after start byte 0x%02x; need %d bytes, got %d)",
-                           malformed_text,
-                           byte_dump_string_(s, x - s, 0),
-                           *(s + non_cont_byte_pos),
-                           where,
-                           *s,
-                           (int) expect_len,
-                           (int) non_cont_byte_pos);
+                " %s after start byte 0x%02x; need %d bytes, got %d)",
+                malformed_text,
+                byte_dump_string_(s, print_len, 0),
+                *(s + non_cont_byte_pos),
+                where, *s, (int) expect_len, (int) non_cont_byte_pos);
 }
 
 /*
