@@ -457,18 +457,22 @@ PERL_STATIC_INLINE int
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
-     * 's' + 'len' - 1 is an overlong.  It returns 1 if it is an overlong; 0 if
-     * it isn't, and -1 if there isn't enough information to tell.  This last
-     * return value can happen if the sequence is incomplete, missing some
-     * trailing bytes that would form a complete character.  If there are
-     * enough bytes to make a definitive decision, this function does so.
-     * Usually 2 bytes are sufficient.
+     * 's' + 'len' - 1 is an overlong.  It returns a positive number if it is
+     * an overlong; 0 if it isn't, and -1 if there isn't enough information to
+     * tell.  This last return value can happen if the sequence is incomplete,
+     * missing some trailing bytes that would form a complete character.  If
+     * there are enough bytes to make a definitive decision, this function does
+     * so.
      *
-     * Overlongs can occur whenever the number of continuation bytes changes.
-     * That means whenever the number of leading 1 bits in a start byte
-     * increases from the next lower start byte.  That happens for start bytes
-     * C0, E0, F0, F8, FC, FE, and FF.
-     */
+     * The positive number returned when it is overlong is how many bytes
+     * needed to be examined to make that determination.  Usually 1 or 2 bytes
+     * are sufficient.
+     *
+     * Overlongs can occur for a few of the smallest start bytes or whenever
+     * the number of continuation bytes changes.  The latter means whenever the
+     * number of leading 1 bits in a start byte increases from the next lower
+     * start byte.  That happens for start bytes C0, E0, F0, F8, FC, FE, and
+     * FF. */
 
     PERL_ARGS_ASSERT_IS_UTF8_OVERLONG;
 
@@ -494,7 +498,7 @@ S_is_utf8_overlong(const U8 * const s, const STRLEN len)
         return 1;
 #else
       case 0xE0:
-        return (len < 2) ? -1 : s[1] < 0xA0;
+        return (len < 2) ? -1 : (s[1] < 0xA0) ? 2 : 0;
 #endif
 
       case 0xF0:
@@ -504,8 +508,10 @@ S_is_utf8_overlong(const U8 * const s, const STRLEN len)
         return (len < 2)
                ? -1     /* This pattern encapsulates
                          * F0 => 0x10; F8 => 0x08; FC => 0x04; FF => 0x02 */
-               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE
-                                         + 0x100 - NATIVE_UTF8_TO_I8(s[0]);
+               : (NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE
+                                          + 0x100 - NATIVE_UTF8_TO_I8(s[0]))
+                 ? 2
+                 : 0;
       case 0xFF:
         return isFF_overlong(s, len);
     }
@@ -515,11 +521,15 @@ PERL_STATIC_INLINE int
 S_isFF_overlong(const U8 * const s, const STRLEN len)
 {
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
-     * 'e' - 1 is an overlong beginning with \xFF.  It returns 1 if it is; 0 if
-     * it isn't, and -1 if there isn't enough information to tell.  This last
-     * return value can happen if the sequence is incomplete, missing some
-     * trailing bytes that would form a complete character.  If there are
-     * enough bytes to make a definitive decision, this function does so. */
+     * 'e' - 1 is an overlong beginning with \xFF.  It returns a positive
+     * number if it is; 0 if it isn't, and -1 if there isn't enough
+     * information to tell.  This last return value can happen if the sequence
+     * is incomplete, missing some trailing bytes that would form a complete
+     * character.  If there are enough bytes to make a definitive decision,
+     * this function does so.
+     *
+     * A positive return gives the number of bytes needed to be examined to
+     * make the determination */
 
     PERL_ARGS_ASSERT_ISFF_OVERLONG;
 
@@ -542,7 +552,7 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
      * be there; what comes after them doesn't matter.  See tables in utf8.h,
      * utfebcdic.h. */
     if (len >= STRLENs(FF_OVERLONG_PREFIX)) {
-        return 1;
+        return STRLENs(FF_OVERLONG_PREFIX);
     }
 
     /* The missing bytes could cause the result to go one way or the other, so
