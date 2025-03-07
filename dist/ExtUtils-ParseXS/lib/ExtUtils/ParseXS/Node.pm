@@ -120,7 +120,7 @@ sub parse {
                         # as input lines are consumed, while line_no
                         # array isn't ever shifted
     $self->{line_no} = $pxs->{line_no}->[
-                            @{$pxs->{line_no}} - @{$pxs->{line}} - 1
+                            @{$pxs->{line_no}} - @{$pxs->{line}}
                         ];
 }
 
@@ -1531,9 +1531,10 @@ sub parse {
     my @lines;
 
     # Consume lines until the next directive
-    while(defined($_) && !/^$ExtUtils::ParseXS::BLOCK_regexp/o) {
-        push @lines, $_;
-        $_ = shift(@{ $pxs->{line} });
+    while(   @{$pxs->{line}}
+          && $pxs->{line}[0] !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o)
+    {
+        push @lines, shift @{$pxs->{line}};
     }
 
     $self->{lines} = \@lines;
@@ -1548,7 +1549,7 @@ package ExtUtils::ParseXS::Node::multiline_merged;
 
 # Generic base class for keyword Nodes which can contain multiple lines.
 # It's the same is is parent class, :Node::multiline, except that in
-# addition, leading black lines are skipped and the remainder concatenated
+# addition, leading blank lines are skipped and the remainder concatenated
 # into a single line, 'text'.
 
 BEGIN { $build_subclass->('multiline', # parent

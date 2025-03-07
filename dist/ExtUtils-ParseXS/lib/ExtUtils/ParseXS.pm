@@ -1853,8 +1853,11 @@ sub process_keywords {
     if ($class->can('parse')) {
       # this branch handles the newer AST-oriented keyword processing
       my $node  = $class->new();
+      unshift @{$self->{line}}, $_;
       $node->parse($self);
+      $_ = shift @{$self->{line}};
       $node->as_code($self) if $class->can('as_code');
+
     }
     else {
       # this branch handles the older KEYWORD_handler()-oriented processing
