@@ -150,17 +150,17 @@ const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
 These functions are identical.  THEY SHOULD BE USED IN ONLY VERY SPECIALIZED
 CIRCUMSTANCES.
 
-Most code should use C<L</uvchr_to_utf8_flags>()> rather than call this directly.
+Most code should use C<L</uv_to_utf8_flags>()> rather than call this directly.
 
 This function is for code that wants any warning and/or error messages to be
-returned to the caller rather than be displayed.  All messages that would have
-been displayed if all lexical warnings are enabled will be returned.
+returned to the caller rather than be displayed.  Any message that would have
+been displayed if all lexical warnings are enabled will instead be returned.
 
 It is just like C<L</uvchr_to_utf8_flags>> but it takes an extra parameter
 placed after all the others, C<msgs>.  If this parameter is 0, this function
 behaves identically to C<L</uvchr_to_utf8_flags>>.  Otherwise, C<msgs> should
 be a pointer to an C<HV *> variable, in which this function creates a new HV to
-contain any appropriate messages.  The hash has three key-value pairs, as
+contain any appropriate message.  The hash has three key-value pairs, as
 follows:
 
 =over 4
@@ -173,18 +173,36 @@ The text of the message as a C<SVpv>.
 
 The warning category (or categories) packed into a C<SVuv>.
 
-=item C<flag>
+=item C<flag_bit>
 
 A single flag bit associated with this message, in a C<SVuv>.
-The bit corresponds to some bit in the C<*errors> return value,
-such as C<UNICODE_GOT_SURROGATE>.
+The bit corresponds to some bit in the C<*errors> return value.
+The possibilities are:
+
+=over
+
+=item C<UNICODE_GOT_SURROGATE>
+
+=item C<UNICODE_GOT_NONCHAR>
+
+=item C<UNICODE_GOT_SUPER>
+
+=item C<UNICODE_GOT_PERL_EXTENDED>
+
+=back
 
 =back
 
 It's important to note that specifying this parameter as non-null will cause
-any warnings this function would otherwise generate to be suppressed, and
+any warning this function would otherwise generate to be suppressed, and
 instead be placed in C<*msgs>.  The caller can check the lexical warnings state
-(or not) when choosing what to do with the returned messages.
+(or not) when choosing what to do with the returned message.
+
+Only a single message is returned; if a code point requires Perl extended UTF-8
+to represent, it is also above-Unicode.  If either the
+C<UNICODE_WARN_PERL_EXTENDED> or C<UNICODE_DISALLOW_PERL_EXTENDED> flags are
+set, the return is controlled by them; if neither is set, the return is
+controlled by the  C<UNICODE_WARN_SUPER> and C<UNICODE_DISALLOW_SUPER> flags.
 
 The caller, of course, is responsible for freeing any returned HV.
 
@@ -192,7 +210,7 @@ The caller, of course, is responsible for freeing any returned HV.
 */
 
 /* Undocumented; we don't want people using this.  Instead they should use
- * uvchr_to_utf8_flags_msgs() */
+ * uv_to_utf8_msgs() */
 U8 *
 Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 {
