@@ -956,6 +956,8 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
                                          /* How many bytes should there be? */
                                          const STRLEN expect_len)
 {
+    PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
+
     /* Return the malformation warning text for an unexpected continuation
      * byte. */
 
@@ -965,8 +967,6 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
                                                  (int) non_cont_byte_pos);
     const U8 * x = s + non_cont_byte_pos;
     const U8 * e = s + print_len;
-
-    PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
 
     /* We don't need to pass this parameter, but since it has already been
      * calculated, it's likely faster to pass it; verify under DEBUGGING */
