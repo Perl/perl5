@@ -2260,7 +2260,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * function */
 
                 assert(0);
-                message = Perl_form(aTHX_ "%s (empty string)", malformed_text);
+                message = Perl_form(aTHX_ "%s: (empty string)", malformed_text);
                 break;
 
               case UTF8_GOT_CONTINUATION:
