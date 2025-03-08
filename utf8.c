@@ -2038,6 +2038,14 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         U32 error_flags_return = 0;
         AV * msgs_return = NULL;
 
+        /* The conditions that lead to the REPLACEMENT CHARACTER being returned
+         * are the ones which always lead to this, plus the ones specified by
+         * the input flags.  The former are the ones that are by default
+         * rejected, except UTF8_ALLOW_LONG_AND_ITS_VALUE, which explicitly
+         * requests the calculated value to be returned. */
+        U32 replaces = ( UTF8_ALLOW_ANY|UTF8_ALLOW_EMPTY)
+                        |(flags & UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+
         /* The following macro returns 0 if no message needs to be generated
          * for this problem even if everything else says to.  Otherwise returns
          * the warning category to use for the message..
@@ -2093,6 +2101,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             /* Turn off so next iteration doesn't retry this */
             possible_problems &= ~this_problem;
 
+            if (this_problem & replaces) {
+                uv = UNICODE_REPLACEMENT;
+            }
+
             /* The code is structured so that there is a case: in a switch()
              * for each problem type, so as to handle the different details of
              * each.  The only common part after setting things up is the
@@ -2113,7 +2125,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_EMPTY:
-                uv = UNICODE_REPLACEMENT;
                 if (! (flags & UTF8_ALLOW_EMPTY)) {
 
                     /* This so-called malformation is now treated as a bug in
@@ -2131,7 +2142,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_CONTINUATION:
-                uv = UNICODE_REPLACEMENT;
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
@@ -2146,8 +2156,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_SHORT:
-                uv = UNICODE_REPLACEMENT;
-
                 if (! (flags & UTF8_ALLOW_SHORT)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
@@ -2164,8 +2172,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_NON_CONTINUATION:
-                uv = UNICODE_REPLACEMENT;
-
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
                     disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
@@ -2187,10 +2193,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
 
               case UTF8_GOT_LONG:
-
-                if (! (flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
-                    uv = UNICODE_REPLACEMENT;
-                }
 
                 if (! (flags & ( UTF8_ALLOW_LONG
                                 |UTF8_ALLOW_LONG_AND_ITS_VALUE)))
@@ -2342,8 +2344,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 const char * non_cp_format;
 
               case UTF8_GOT_OVERFLOW:
-                uv = UNICODE_REPLACEMENT;   /* Can't represent this on this
-                                               platform */
                 /* For this overflow case, any format and message text are set
                  * up to create the warning for it.  If overflows are to be
                  * rejected, the warning is simply created, and we break to the
@@ -2580,7 +2580,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             }
 
             success = false;
-            uv = UNICODE_REPLACEMENT;
         }
     } /* End of there was a possible problem */
 
