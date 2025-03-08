@@ -2189,8 +2189,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * depend on earlier actions.  Also the ordering tries to cause any
              * messages to be displayed in kind of decreasing severity order.
              * */
-            U32 this_problem = 1U << lsbit_pos32(possible_problems);
 
+            U8 this_problem_bit = lsbit_pos32(possible_problems);
+            U32 this_problem = 1U << this_problem_bit;
             U32 this_flag_bit = this_problem;
 
             /* All cases set this */
@@ -2215,7 +2216,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * would be to handle the message.
              */
 
-            switch (this_problem) {
+            switch (this_problem_bit) {
               default:
                 croak("panic: Unexpected case value in utf8_to_uv_msgs() %"
                       U32uf, this_problem);
@@ -2232,7 +2233,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     continue;                                               \
                 }                                                           \
 
-              case UTF8_GOT_EMPTY:
+              case UTF8_GOT_EMPTY_BIT_POS_:
                 COMMON_DEFAULT_REJECTS(,);
 
                 /* This so-called malformation is now treated as a bug in the
@@ -2243,7 +2244,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 message = Perl_form(aTHX_ "%s (empty string)", malformed_text);
                 break;
 
-              case UTF8_GOT_CONTINUATION:
+              case UTF8_GOT_CONTINUATION_BIT_POS_:
                 COMMON_DEFAULT_REJECTS(,);
                 message = form(
                                 "%s: %s (unexpected continuation byte 0x%02x,"
@@ -2253,7 +2254,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 *s0);
                 break;
 
-              case UTF8_GOT_SHORT:
+              case UTF8_GOT_SHORT_BIT_POS_:
                 COMMON_DEFAULT_REJECTS(,);
                 message = form(
                              "%s: %s (too short; %d byte%s available, need %d)",
@@ -2264,7 +2265,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                              (int)expectlen);
                 break;
 
-              case UTF8_GOT_NON_CONTINUATION:
+              case UTF8_GOT_NON_CONTINUATION_BIT_POS_:
                {
                 COMMON_DEFAULT_REJECTS(,);
 
@@ -2282,8 +2283,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 break;
                }
 
-              case UTF8_GOT_LONG:
-              case UTF8_GOT_LONG_WITH_VALUE:
+              case UTF8_GOT_LONG_BIT_POS_:
+              case UTF8_GOT_LONG_WITH_VALUE_BIT_POS_:
                 COMMON_DEFAULT_REJECTS(,);
 
                 /* These error types cause 'input_uv' to be something that
@@ -2356,7 +2357,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     continue;                                               \
                 }
 
-              case UTF8_GOT_SURROGATE:
+              case UTF8_GOT_SURROGATE_BIT_POS_:
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SURROGATE,
                                          WARN_SURROGATE,,);
 
@@ -2374,7 +2375,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 break;
 
-              case UTF8_GOT_NONCHAR:
+              case UTF8_GOT_NONCHAR_BIT_POS_:
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_NONCHAR, WARN_NONCHAR,,);
 
                 /* The code above should have guaranteed that we don't get here
@@ -2406,13 +2407,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
               bool overflows;
               bool is_extended;
 
-              case UTF8_GOT_OVERFLOW:
+              case UTF8_GOT_OVERFLOW_BIT_POS_:
                 COMMON_DEFAULT_REJECTS(ckWARN_d, WARN_NON_UNICODE);
                 overflows = true;
                 is_extended = true;
                 goto super_common;
 
-              case UTF8_GOT_PERL_EXTENDED:
+              case UTF8_GOT_PERL_EXTENDED_BIT_POS_:
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_PERL_EXTENDED,
                                          WARN_NON_UNICODE, ckWARN_d,
                                          WARN_PORTABLE);
@@ -2420,7 +2421,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 is_extended = true;
                 goto super_common;
 
-              case UTF8_GOT_SUPER:
+              case UTF8_GOT_SUPER_BIT_POS_:
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SUPER, WARN_NON_UNICODE,,);
                 overflows = orig_problems & UTF8_GOT_OVERFLOW;
                 is_extended = UTF8_IS_PERL_EXTENDED(s0);
