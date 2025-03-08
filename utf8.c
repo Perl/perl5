@@ -2225,9 +2225,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 if (flags & UTF8_WARN_NONCHAR) {
                     if (NEED_MESSAGE(WARN_NONCHAR,,)) {
                         /* The code above should have guaranteed that we don't
-                         * get here with errors other than overlong */
-                        assert (! (  orig_problems
-                                   & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
+                         * get here with conditions other than these */
+                        assert (! (orig_problems & ~( UTF8_GOT_LONG
+                                                     |UTF8_GOT_LONG_WITH_VALUE
+                                                     |UTF8_GOT_PERL_EXTENDED
+                                                     |UTF8_GOT_NONCHAR)));
 
                         pack_warn = packWARN(WARN_NONCHAR);
                         message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
