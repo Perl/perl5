@@ -2090,41 +2090,49 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         U32 replaces = ( UTF8_ALLOW_ANY|UTF8_ALLOW_EMPTY)
                         |(flags & UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
 
-        /* The following macro returns 0 if no message needs to be generated
-         * for this problem even if everything else says to.  Otherwise returns
-         * the warning category to use for the message..
+        /* The following macro returns:
+         *    0   when there is no reason to generate a message for this
+         *        condition, because the appropriate warnings categories are
+         *        off and not overridden
+         *  < 0   when the only reason would be to return a message in an AV
+         *        structure.  This happens when the macro would otherwise
+         *        return 0, but detects there is an AV structure to fill in.
+         *  > 0   when there are warning categories effectively enabled.  If
+         *        so, the value is the result of calling the appropriate
+         *        packWARN macro on those categories.
          *
-         * No message need be generated if the UTF8_CHECK_ONLY flag has been
-         * set by the caller.  Otherwise, a message should be generated if:
-         *  1)  the caller has furnished a structure into which messages should
-         *      be returned to it (so it itself can decide what to do); or
-         *  2)  warnings are enabled for either of the category parameters to
-         *      the macro; or
-         *  3)  the special MALFORMED flags have been passed
+         * The first parameter 'warning' is a warnings category that applies to
+         * the condition.  The following tests are checked in this priority
+         * order; the first that matches is taken:
          *
-         * The 'warning' parameter is the higher priority warning category to
-         * check.  The macro calls ckWARN_d(warning), so warnings for it are
-         * considered to be on by default.
-         *
-         * The second, lower priority category is optional.  To specify not to
-         * use one, call the macro
-         * like:            NEED_MESSAGE(WARN_FOO,,)
-         * Otherwise like:  NEED_MESSAGE(WARN_FOO, ckWARN_d, WARN_BAR)
-         *
-         * The second parameter could also have been ckWARN to specify that the
-         * second category isn't on by default.
+         * 1)   'warning' is considered enabled if the UTF8_DIE_IF_MALFORMED
+         *      flag is set.
+         * 2)   'warning' is considered disabled if the UTF8_CHECK_ONLY flag is
+         *      set.
+         * 3)   'warning' is considered enabled if the
+         *      UTF8_FORCE_WARN_IF_MALFORMED flag is set
+         * 4)   'warning is considered enabled if ckWARN_d(warning) is true
+         * 5)   A secondary warning category is optionally passed, along with
+         *      either to use ckWARN or ckWARN_d on it.  This is considered
+         *      enabled if that returns true.
+         * 6)   -1 is returned if 'msgs' isn't NULL, which means the caller
+         *      wants any message stored into it
+         * 7)   0 is returned.
          *
          * When called without a second category, the macro outputs a bunch of
          * zeroes that the compiler should fold to nothing */
-#define NEED_MESSAGE(warning, extra_ckWARN, extra_category)                 \
-          ((flags & UTF8_CHECK_ONLY)                 ? 0                 :  \
-          ((ckWARN_d(warning))                       ? warning           :  \
-          ((extra_ckWARN(extra_category +0))         ? extra_category +0 :  \
-          ((flags & ( UTF8_DIE_IF_MALFORMED                                 \
-                     |UTF8_FORCE_WARN_IF_MALFORMED)) ? warning           :  \
-          ((msgs)                                    ? warning : 0)))))
+#define PACK_WARN(warning, extra_ckWARN, extra_category)                    \
+           (UNLIKELY(flags & UTF8_DIE_IF_MALFORMED)    ? packWARN(warning)  \
+          : (flags & UTF8_CHECK_ONLY)                  ? 0                  \
+          : UNLIKELY(flags & UTF8_FORCE_WARN_IF_MALFORMED) ? packWARN(warning)\
+          :  ckWARN_d(warning)                         ? packWARN(warning)  \
+          :  extra_ckWARN(extra_category +0)           ? packWARN2(warning, \
+                                                         extra_category +0) \
+          :  (msgs)                                    ? -1                 \
+          :  0)
 
         while (possible_problems) { /* Handle each possible problem */
+            IV pack_warn = 0;
             char * message = NULL;
 
             /* The lowest bit positions, as #defined in utf8.h, are handled
@@ -2158,10 +2166,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * handling of any generated warning message.  That means that if a
              * case: finds there is no message, it can 'continue' to the next
              * loop iteration instead of doing a 'break', whose only purpose
-             * would be to handle the message. */
-
-            /* Most case:s use this; overridden in a few */
-            U32 pack_warn = packWARN(WARN_UTF8);
+             * would be to handle the message.
+             */
 
             switch (this_problem) {
               default:
@@ -2179,7 +2185,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                      * this function */
                     assert(0);
 
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
+                    if (PACK_WARN(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_ "%s (empty string)",
                                                    malformed_text);
                     }
@@ -2189,7 +2195,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_CONTINUATION:
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
+                    if (PACK_WARN(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
@@ -2202,7 +2208,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_SHORT:
                 if (! (flags & UTF8_ALLOW_SHORT)) {
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
+                    if (PACK_WARN(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
@@ -2217,7 +2223,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_NON_CONTINUATION:
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
+                    if (PACK_WARN(WARN_UTF8,,)) {
 
                         /* If we don't know for sure that the input length is
                          * valid, avoid as much as possible reading past the
@@ -2240,7 +2246,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 if (! (flags & ( UTF8_ALLOW_LONG
                                 |UTF8_ALLOW_LONG_AND_ITS_VALUE)))
                 {
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
+                    if (PACK_WARN(WARN_UTF8,,)) {
 
                         /* These error types cause 'input_uv' to be something
                          * that isn't what was intended, so can't use it in the
@@ -2296,8 +2302,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * this case are true */
 
                 if (flags & UTF8_WARN_SURROGATE) {
-                    if (NEED_MESSAGE(WARN_SURROGATE,,)) {
-                        pack_warn = packWARN(WARN_SURROGATE);
+                    if (PACK_WARN(WARN_SURROGATE,,)) {
 
                         /* These are the only errors that can occur with a
                         * surrogate when the 'input_uv' isn't valid */
@@ -2323,7 +2328,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * this case are true */
 
                 if (flags & UTF8_WARN_NONCHAR) {
-                    if (NEED_MESSAGE(WARN_NONCHAR,,)) {
+                    if (PACK_WARN(WARN_NONCHAR,,)) {
                         /* The code above should have guaranteed that we don't
                          * get here with conditions other than these */
                         assert (! (orig_problems & ~( UTF8_GOT_LONG
@@ -2331,7 +2336,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                      |UTF8_GOT_PERL_EXTENDED
                                                      |UTF8_GOT_NONCHAR)));
 
-                        pack_warn = packWARN(WARN_NONCHAR);
                         message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
                     }
                 }
@@ -2424,7 +2428,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * is enabled, but which category to use?  Historically, we've
                  * used 'utf8' if it is enabled; and that seems like the more
                  * severe category, more befitting a malformation. */
-                pack_warn = NEED_MESSAGE(WARN_UTF8, ckWARN_d, WARN_NON_UNICODE);
+                pack_warn = PACK_WARN(WARN_UTF8, ckWARN_d, WARN_NON_UNICODE);
                 if (pack_warn) {
                     message = Perl_form(aTHX_ non_cp_format,
                                               _byte_dump_string(s0, curlen, 0));
@@ -2486,8 +2490,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                     /* These code points are non-portable, so warn if either
                      * category is enabled */
-                    if (NEED_MESSAGE(WARN_NON_UNICODE, ckWARN, WARN_PORTABLE)) {
-                        pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
+                    if (PACK_WARN(WARN_NON_UNICODE, ckWARN, WARN_PORTABLE)) {
                         if (cp_format) {
                             message = Perl_form(aTHX_ cp_format, input_uv);
                         }
@@ -2532,8 +2535,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * enabled).  */
                 error_flags_return |= this_flag_bit;
                 if (flags & UTF8_WARN_SUPER) {
-                    if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
-                        pack_warn = packWARN(WARN_NON_UNICODE);
+                    if (PACK_WARN(WARN_NON_UNICODE,,)) {
                         if (cp_format) {
                             message = Perl_form(aTHX_ cp_format, input_uv);
                         }
@@ -2558,7 +2560,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     }
 
                     av_push(msgs_return,
-                            newRV_noinc((SV*) new_msg_hv(message, pack_warn,
+                            /* Negative 'pack_warn' really means 0 here.  But
+                             * this converts that to UTF-8 to preserve broken
+                             * behavior depended upon by Encode. */
+                            newRV_noinc((SV*) new_msg_hv(message,
+                                                         ((pack_warn <= 0)
+                                                          ? packWARN(WARN_UTF8)
+                                                          : pack_warn),
                                                          this_flag_bit)));
                 }
                 else if (! (flags & UTF8_CHECK_ONLY)) {
