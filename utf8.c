@@ -2067,6 +2067,21 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
         U32 error_flags_return = 0;
         AV * msgs_return = NULL;
 
+        /* The conditions that are rejected by default are the ones for which
+         * you need a flag to accept.  There is a good reason for them being
+         * generally rejected.  All but LONG can't be evaluated to a specific
+         * code point.  And LONG is forbidden to do so because of the potential
+         * for hacking attacks. */
+#define DEFAULT_REJECTS                                                     \
+            (UTF8_ALLOW_ANY|UTF8_ALLOW_EMPTY|UTF8_ALLOW_LONG_AND_ITS_VALUE)
+
+        /* Determine which conditions the caller wants to reject.  Most are
+         * indicated by the corresponding flag being 0.  Complement these via
+         * xor, while leaving alone the conditions that require a 1 to reject.
+         * This normalizes 'rejects' so that a 1 bit means to reject the
+         * corresponding condition; 0 to accept. */
+        U32 rejects = flags ^ DEFAULT_REJECTS;
+
         /* The conditions that lead to the REPLACEMENT CHARACTER being returned
          * are the ones which always lead to this, plus the ones specified by
          * the input flags.  The former are the ones that are by default
@@ -2133,6 +2148,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             if (this_problem & replaces) {
                 uv = UNICODE_REPLACEMENT;
             }
+            if (this_problem & rejects) {
+                disallowed = true;
+            }
 
             /* The code is structured so that there is a case: in a switch()
              * for each problem type, so as to handle the different details of
@@ -2161,7 +2179,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                      * this function */
                     assert(0);
 
-                    disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_ "%s (empty string)",
                                                    malformed_text);
@@ -2172,7 +2189,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_CONTINUATION:
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
-                    disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_
                                 "%s: %s (unexpected continuation byte 0x%02x,"
@@ -2186,7 +2202,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_SHORT:
                 if (! (flags & UTF8_ALLOW_SHORT)) {
-                    disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
@@ -2202,7 +2217,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
               case UTF8_GOT_NON_CONTINUATION:
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
-                    disallowed = TRUE;
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
 
                         /* If we don't know for sure that the input length is
@@ -2226,8 +2240,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 if (! (flags & ( UTF8_ALLOW_LONG
                                 |UTF8_ALLOW_LONG_AND_ITS_VALUE)))
                 {
-                    disallowed = TRUE;
-
                     if (NEED_MESSAGE(WARN_UTF8,,)) {
 
                         /* These error types cause 'input_uv' to be something
@@ -2302,10 +2314,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     }
                 }
 
-                if (flags & UTF8_DISALLOW_SURROGATE) {
-                    disallowed = TRUE;
-                }
-
                 break;
 
               case UTF8_GOT_NONCHAR:
@@ -2326,10 +2334,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         pack_warn = packWARN(WARN_NONCHAR);
                         message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
                     }
-                }
-
-                if (flags & UTF8_DISALLOW_NONCHAR) {
-                    disallowed = TRUE;
                 }
 
                 break;
@@ -2409,7 +2413,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 /* Here, overflow is disallowed; handle everything in this
                  * case: */
-                disallowed = true;
 
                 /* Overflow is a hybrid.  If the word size on this platform
                  * were wide enough for this to not overflow, a non-Unicode
@@ -2498,7 +2501,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 /* Similarly if either of the two levels reject this, do it */
                 if (flags & (UTF8_DISALLOW_PERL_EXTENDED|UTF8_DISALLOW_SUPER)) {
-                    disallowed = true;
                     error_flags_return |= this_flag_bit;
                 }
 
@@ -2541,10 +2543,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                             _byte_dump_string(s0, curlen, 0));
                         }
                     }
-                }
-
-                if (flags & UTF8_DISALLOW_SUPER) {
-                    disallowed = true;
                 }
 
                 break;
