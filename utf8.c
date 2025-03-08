@@ -1733,6 +1733,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     Size_t curlen = 0;      /* How many bytes have we processed so far */
     UV uv = 0;              /* The accumulated code point, so far */
     const U8 * s = s0;      /* Our current position examining the sequence */
+    int overlong_detect_length = 0;
 
     /* Gives how many bytes are available, which may turn out to be less than
      * the expected length */
@@ -1828,10 +1829,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 #define UTF8_IS_SYNTACTIC_START_BYTE(s)  (NATIVE_TO_I8(*s) >= 0xC0)
 
     /* Check for overlong. */
-    if (   UTF8_IS_SYNTACTIC_START_BYTE(s0)
-        && UNLIKELY(0 < is_utf8_overlong(s0, s - s0)))
-    {
-        possible_problems |= UTF8_GOT_LONG;
+    if (UTF8_IS_SYNTACTIC_START_BYTE(s0)) {
+        overlong_detect_length = is_utf8_overlong(s0, s - s0);
+        if (UNLIKELY(overlong_detect_length > 0)) {
+            possible_problems |= UTF8_GOT_LONG;
+        }
     }
 
     /* Here, we have found all the possible problems, except for when the input
@@ -1841,27 +1843,51 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * investigate further. */
     if (   UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s0))
         && (flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                     |UTF8_WARN_ILLEGAL_INTERCHANGE))
-
-                    /* if overflow, we know without looking further that this
-                     * is a non-Unicode code point, which we deal with below in
-                     * the overflow handling code */
-        && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
+                     |UTF8_WARN_ILLEGAL_INTERCHANGE)))
     {
-        /* By examining just the first byte, we can see if this is using
-         * non-standard UTF-8.  Even if it is an overlong that reduces to a
-         * small code point, it is still using this Perl invention, so mark it
-         * as such */
+        /* Here, we care about problematic code points, and the input could be
+         * one of them.  By examining just the first byte, we can see if this
+         * is using non-standard UTF-8.  Even if it is an overlong that reduces
+         * to a small code point, it is still using this Perl invention, so
+         * mark it as such */
+        bool must_be_super = false;
         if (UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))) {
-            if (flags & ( UTF8_DISALLOW_PERL_EXTENDED|UTF8_DISALLOW_SUPER
-                         |UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
+            if (flags & (UTF8_DISALLOW_PERL_EXTENDED|UTF8_WARN_PERL_EXTENDED))
             {
                 possible_problems |= UTF8_GOT_PERL_EXTENDED;
             }
+
+            /* If the sequence overflows or isn't overlong, it must represent
+             * an above-Unicode code point.  Set it as well.  (In the case of
+             * not having enough information to determine if it is overlong, we
+             * must assume that it isn't.) */
+            if (   (possible_problems & UTF8_GOT_OVERFLOW)
+                || overlong_detect_length <= 0)
+            {
+                must_be_super = true;
+                if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
+                    possible_problems |= UTF8_GOT_SUPER;
+                }
+            }
         }
-        else {
-            /* See if the input has malformations besides possibly overlong */
-            if (   UNLIKELY(possible_problems & ~UTF8_GOT_LONG)
+
+        /* Perl extended UTF-8 can be used to represent any smaller code point
+         * if overlongs are allowed.  'must_be_super' is 'true' here if we
+         * found extended UTF-8 without overlongs.  If so, we know this can't
+         * be any other type of problematic code point. so no further
+         * processing is necessary. */
+        if (! must_be_super) {
+
+            /* Otherwise, we need to check if it actually is problematic.
+             * Either we know the code point exactly, or above we found this
+             * sequence includes a too-short malformation.  In the latter case,
+             * we may be able to determine if the input had to be the initial
+             * portion of one of the problematic code points.  This doesn't
+             * work for noncharacter code points (which can't be detected from
+             * a partial sequence), but if we're looking for something instead
+             * of or in addition to non-characters, try determining if the
+             * filled out sequence would have to be for one of them. */
+            if (   UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)
                 && LIKELY(flags & ~(UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)))
             {
 
@@ -1930,8 +1956,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         possible_problems |= UTF8_GOT_NONCHAR;
                     }
                 }
-        }
-    }   /* End of checking if is a special code point */
+        }  /* End of ! must_be_super */
+    }      /* End of checking if is a special code point */
 
   ready_to_handle_errors: ;
 
