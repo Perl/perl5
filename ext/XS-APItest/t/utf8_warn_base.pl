@@ -2020,8 +2020,12 @@ foreach my $test (@tests) {
                         @warnings_gotten = @returned_warnings;
                     }
 
+                  SKIP: {
+                    skip "$0 doesn't handle _msgs functions AV returns", 1
+                                                    if $utf8_func =~ /_msgs/;
                     do_warnings_test(@expected_warnings)
                       or diag "Call was: " . utf8n_display_call($eval_text);
+                    }
                     undef @warnings_gotten;
 
                     # Check CHECK_ONLY results when the input is
