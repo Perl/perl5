@@ -8,7 +8,7 @@
 # appropriately detected.
 
 use strict;
-use Test::More skip_all => 'Skipping testing for the next few commits';
+use Test::More;
 
 BEGIN {
     use_ok('XS::APItest');
