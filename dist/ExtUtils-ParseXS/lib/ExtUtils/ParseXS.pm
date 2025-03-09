@@ -697,8 +697,21 @@ EOM
     # lines.
 
     while (my $kwd = $self->check_keyword("REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
-      my $method = $kwd . "_handler";
-      $self->$method($_);
+
+      my $class = "ExtUtils::ParseXS::Node::$kwd";
+      if ($class->can('parse')) {
+        # this branch handles the newer AST-oriented keyword processing
+        my $node  = $class->new();
+        unshift @{$self->{line}}, $_;
+        $node->parse($self);
+        $node->as_code($self) if $class->can('as_code');
+      }
+      else {
+        # this branch handles the older KEYWORD_handler()-oriented processing
+        my $method = $kwd . "_handler";
+        $self->$method($_); # $_ contains the rest of the line after KEYWORD:
+      }
+
       next PARAGRAPH unless @{ $self->{line} };
       $_ = shift(@{ $self->{line} });
     }
@@ -2410,24 +2423,6 @@ sub REQUIRE_handler {
 }
 
 
-sub VERSIONCHECK_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain either ENABLE or
-  # DISABLE
-  my ($setting) = @_;
-
-  trim_whitespace($setting);
-
-  # check for ENABLE/DISABLE
-  $self->death("Error: VERSIONCHECK: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)\b/i;
-
-  $self->{VERSIONCHECK_value} = 1 if $1 eq 'ENABLE';
-  $self->{VERSIONCHECK_value} = 0 if $1 eq 'DISABLE';
-
-}
-
-
 # PROTOTYPE: Process one or more lines of the form
 #    DISABLE
 #    ENABLE
@@ -2468,74 +2463,6 @@ sub PROTOTYPE_handler {
   $self->{xsub_prototype} = 2 unless $specified;
 
   $self->{proto_behaviour_specified} = 1;
-}
-
-
-# Set $self->{xsub_SCOPE_enabled} to a boolean value based on DISABLE/ENABLE.
-
-sub SCOPE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # Rest of line should be either ENABLE or DISABLE
-  my ($setting) = @_;
-
-  $self->death("Error: Only 1 SCOPE declaration allowed per xsub")
-    if $self->{xsub_seen_SCOPE}++;
-
-  trim_whitespace($setting);
-  $self->death("Error: SCOPE: ENABLE/DISABLE")
-      unless $setting =~ /^(ENABLE|DISABLE)\b/i;
-  $self->{xsub_SCOPE_enabled} = ( uc($1) eq 'ENABLE' );
-
-  # XXX temp workaround. xsub-scoped handlers are supposed to set $_
-  # to the next line, while file-scope handlers aren't expected to.
-  # SCOPE is both a file-scoped and xsub-scoped keyword.
-  $_ = shift @{$self->{line}} if (caller(1))[3] =~ /process_keywords$/;
-
-}
-
-
-sub PROTOTYPES_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain either ENABLE or
-  # DISABLE
-  my ($setting) = @_;
-
-  trim_whitespace($setting);
-
-  # check for ENABLE/DISABLE
-  $self->death("Error: PROTOTYPES: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)\b/i;
-
-  $self->{PROTOTYPES_value} = 1 if $1 eq 'ENABLE';
-  $self->{PROTOTYPES_value} = 0 if $1 eq 'DISABLE';
-  $self->{proto_behaviour_specified} = 1;
-}
-
-
-sub EXPORT_XSUB_SYMBOLS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain either ENABLE or
-  # DISABLE
-  my ($setting) = @_;
-
-  trim_whitespace($setting);
-
-  # check for ENABLE/DISABLE
-  $self->death("Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)\b/i;
-
-  my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
-
-  print Q(<<"EOF");
-    |#undef XS_EUPXS
-    |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
-    |#  define XS_EUPXS(name) XS_EXTERNAL(name)
-    |#elif defined(PERL_EUPXS_NEVER_EXPORT)
-    |#  define XS_EUPXS(name) XS_INTERNAL(name)
-    |#else
-    |#  define XS_EUPXS(name) $xs_impl(name)
-    |#endif
-EOF
 }
 
 

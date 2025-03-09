@@ -1507,12 +1507,161 @@ sub proto_string {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::oneline;
+
+# Generic base class for keyword Nodes which consume only a single source
+# line, such as 'SCOPE: ENABLE'.
+# On entry, $self->lines[0] will be any text (on the same line) which
+# follows the keyword.
+
+BEGIN { $build_subclass->('', # parent
+    'text',    # any text following the keyword
+)};
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::oneline $self = shift;
+    my ExtUtils::ParseXS                $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    my $s = shift @{$pxs->{line}};
+    ExtUtils::ParseXS::Utilities::trim_whitespace($s);
+    $self->{text} = $s;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::enable;
+
+# Base class for keywords which accept ENABLE/DISABLE as an argument
+
+BEGIN { $build_subclass->('oneline', # parent
+    'enable',  # bool
+)};
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::enable $self = shift;
+    my ExtUtils::ParseXS               $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{text}
+    my $s = $self->{text};
+
+    #XXX note that for backwards compatibility, matching DIS/ENABLE is
+    #very lax: it is case insensitive, and ignores any trailing garbage
+    # on the line
+    unless ($s =~ /^(ENABLE|DISABLE)\b/i) {
+        my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
+        $pxs->death("Error: $keyword: ENABLE/DISABLE")
+    }
+    $self->{enable} = uc($1) eq 'ENABLE' ? 1 : 0;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS;
+
+# Handle EXPORT_XSUB_SYMBOLS keyword
+
+BEGIN { $build_subclass->('enable', # parent
+)};
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS $self = shift;
+    my ExtUtils::ParseXS                            $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+}
+
+
+sub as_code {
+    my ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS $self = shift;
+    my ExtUtils::ParseXS                            $pxs  = shift;
+
+    my $xs_impl = $self->{enable} ? 'XS_EXTERNAL' : 'XS_INTERNAL';
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |#undef XS_EUPXS
+        |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
+        |#  define XS_EUPXS(name) XS_EXTERNAL(name)
+        |#elif defined(PERL_EUPXS_NEVER_EXPORT)
+        |#  define XS_EUPXS(name) XS_INTERNAL(name)
+        |#else
+        |#  define XS_EUPXS(name) $xs_impl(name)
+        |#endif
+EOF
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::PROTOTYPES;
+
+# Handle PROTOTYPES keyword
+
+BEGIN { $build_subclass->('enable', # parent
+)};
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::PROTOTYPES $self = shift;
+    my ExtUtils::ParseXS                   $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    $pxs->{PROTOTYPES_value} = $self->{enable};
+    $pxs->{proto_behaviour_specified} = 1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::SCOPE;
+
+# Handle SCOPE keyword
+
+BEGIN { $build_subclass->('enable', # parent
+)};
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::SCOPE $self = shift;
+    my ExtUtils::ParseXS              $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    $pxs->{xsub_SCOPE_enabled} = $self->{enable};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::VERSIONCHECK;
+
+# Handle VERSIONCHECK keyword
+
+BEGIN { $build_subclass->('enable', # parent
+)};
+
+
+sub parse {
+    my ExtUtils::ParseXS::Node::VERSIONCHECK $self = shift;
+    my ExtUtils::ParseXS                     $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    $pxs->{VERSIONCHECK_value} = $self->{enable};
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::multiline;
 
 # Generic base class for keyword Nodes which can contain multiple lines,
 # e.g. C code or other data: so anything from ALIAS to PPCODE.
-# $self->lines[0] will be any text (on the same line) following the
-# keyword.
+# On entry, $self->lines[0] will be any text (on the same line) which
+# follows the keyword.
 
 BEGIN { $build_subclass->('', # parent
     'lines',    # Array ref of all lines until the next keyword
