@@ -2485,6 +2485,12 @@ sub SCOPE_handler {
   $self->death("Error: SCOPE: ENABLE/DISABLE")
       unless $setting =~ /^(ENABLE|DISABLE)\b/i;
   $self->{xsub_SCOPE_enabled} = ( uc($1) eq 'ENABLE' );
+
+  # XXX temp workaround. xsub-scoped handlers are supposed to set $_
+  # to the next line, while file-scope handlers aren't expected to.
+  # SCOPE is both a file-scoped and xsub-scoped keyword.
+  $_ = shift @{$self->{line}} if (caller(1))[3] =~ /process_keywords$/;
+
 }
 
 

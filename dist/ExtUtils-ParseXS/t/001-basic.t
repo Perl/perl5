@@ -3518,7 +3518,7 @@ EOF
 }
 
 {
-    # Test ENABLE/DISABLE keywords
+    # Test valid syntax of global-effect ENABLE/DISABLE keywords
     #
     # Check that disallowed variants give errors and allowed variants
     # get as far as generating a boot XSUB
@@ -3575,9 +3575,96 @@ EOF
 EOF
             [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
         ],
+
+        [
+            "file SCOPE long word",
+            [ Q(<<'EOF') ],
+                |SCOPE: ENABLEblah
+                |void
+                |foo()
+EOF
+            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+        ],
+
     );
 
     test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
+{
+    # Test per-XSUB ENABLE/DISABLE keywords
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |MyScopeInt        T_MYINT
+        |
+        |INPUT
+        |T_MYINT
+        |   $var = my_int($arg); /* SCOPE */
+        |EOF
+EOF
+
+    my @test_fns = (
+        [
+            "file SCOPE trailing text (stupid but legal)",
+            [ Q(<<'EOF') ],
+                |SCOPE: EnAble blah # bloo +$%
+                |void
+                |foo()
+EOF
+            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo();\E\s+}\s+LEAVE;},
+                    "has ENTER/LEAVE" ],
+        ],
+        [
+            "xsub SCOPE trailing text (stupid but legal)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |SCOPE: EnAble blah # bloo +$%
+EOF
+            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo();\E\s+}\s+LEAVE;},
+                    "has ENTER/LEAVE" ],
+        ],
+
+        [
+            "SCOPE: as file-scoped keyword",
+            [ Q(<<'EOF') ],
+                |SCOPE: EnablE
+                |void
+                |foo()
+                |C_ARGS: a,b,c
+EOF
+            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
+                    "has ENTER/LEAVE" ],
+        ],
+        [
+            "SCOPE: as xsub-scoped keyword",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |C_ARGS: a,b,c
+                |SCOPE: EnablE
+EOF
+            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
+                    "has ENTER/LEAVE" ],
+        ],
+        [
+            "/* SCOPE */ in typemap",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(i)
+                | MyScopeInt i
+EOF
+            [ 0, 0, qr{ENTER;\s+{.+\s+}\s+LEAVE;}s, "has ENTER/LEAVE" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
 done_testing;
