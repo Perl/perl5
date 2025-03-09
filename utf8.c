@@ -1890,48 +1890,47 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             if (   UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)
                 && LIKELY(flags & ~(UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)))
             {
+                /* Here, the input sequence was incomplete.  The range of
+                 * possible code points this beginning portion could represent
+                 * is limited; the more bytes we have available, the tighter
+                 * the possible range.  That range can be determined by
+                 * hypothetically filling out the sequence with the lowest
+                 * legal continuation bytes to get the lowest possible code
+                 * point, and by using the highest continuation bytes to get
+                 * the highest code point.  That's effectively what we do here.
+                 * It turns out that there is no need to find the high end of
+                 * the range, as using the highest possible continuation bytes
+                 * in all cases yields the upper limit of each type of
+                 * problematic condition that has an upper limit.   See the
+                 * commit message that added this code for a detailed analysis.
+                 *
+                 * The smallest legal continuation byte is generally
+                 * UTF8_MIN_CONTINUATION_BYTE.  But for a few start bytes it is
+                 * larger.  In all cases that matter only the byte immediately
+                 * following the start byte need be larger.  This is handled by
+                 * pretending we saw that larger minimum (if necessary) and
+                 * accumulating its value.  Then a loop is used filling in the
+                 * rest with the normal minimum.  (The formula was based on
+                 * manual inspection of UTF-8 conversion tables, just as was
+                 * done in S_is_utf8_overlong) */
+                Size_t modlen = curlen;
+                if (modlen == 1) {
+                    switch (NATIVE_UTF8_TO_I8(*s0)) {
+                      case 0xf0:
+                      case 0xf8:
+                      case 0xfc:
+                      case 0xfe:
+                   /* case 0xff:    See commit XXX message */
+                        uv = UTF8_ACCUMULATE(uv,
+                                             0x100 + 0x10
+                                           + UTF_MIN_CONTINUATION_BYTE
+                                           - NATIVE_UTF8_TO_I8(*s0));
+                        modlen++;
+                        break;
+                    }
+                }
 
-                /* Here, the input is malformed in some way besides possibly
-                 * overlong, except it doesn't overflow.  If you look at the
-                 * code above, to get here, it must be a too short string,
-                 * possibly overlong besides. */
-                assert(possible_problems & UTF8_GOT_TOO_SHORT);
-
-                /* There is no single code point it could be for, but there may
-                 * be enough information present to determine if what we have
-                 * so far would, if filled out completely, be for one of these
-                 * problematic code points we are being asked to check for.
-                 * But to determine if a code point is a non-character, we need
-                 * all bytes, so this effort would be wasted, hence the
-                 * conditional above excludes this step if those are the only
-                 * thing being checked for.
-                 *
-                 * The range of surrogates is
-                 *      ASCII platforms                  EBCDIC I8
-                 *      "\xed\xa0\x80"               "\xf1\xb6\xa0\xa0"
-                 * to   "\xed\xbf\xbf".              "\xf1\xb7\xbf\xbf"
-                 *
-                 * (Continuation byte range):
-                 *       \x80 to \xbf                     \xa0 to \xbf
-                 *
-                 * In both cases, if we have the first two bytes, we can tell
-                 * if it is a surrogate or not.  If we have only one byte, we
-                 * can't tell, so we have to assume it isn't a surrogate.
-                 *
-                 * It is more complicated for supers due to the possibility of
-                 * overlongs. For example, in ASCII, the first non-Unicode code
-                 * point is represented by the sequence \xf4\x90\x80\x80, so
-                 * \xf8\x80\x80\x80\x41 looks like it is for a much bigger code
-                 * point.  But it in fact is an overlong representation of the
-                 * letter "A".
-                 *
-                 * So what we do is calculate the smallest code point the input
-                 * could represent if there were no too short malformation.
-                 * This is done by pretending the input was filled out to its
-                 * full length with occurrences of the smallest continuation
-                 * byte.  For surrogates we could just look at the bytes, but
-                 * this single algorithm works for both those and supers. */
-                for (Size_t i = curlen; i < expectlen; i++) {
+                for (Size_t i = modlen; i < expectlen; i++) {
                     uv = UTF8_ACCUMULATE(uv, UTF8_MIN_CONTINUATION_BYTE);
                 }
             }
@@ -1980,7 +1979,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      sequence represents, as far as we were able to
      *                      determine.  This is the correct translation of the
      *                      input bytes if and only if no malformations were
-     *                      encountered.
+     *                      encountered.  If a too-short malformation was
+     *                      encountered, the code above, if it thinks it might
+     *                      make a difference, will have stored into this
+     *                      variable the minimum code point the sequence could
+     *                      possibly represent
      * s                    points to just after where we left off processing
      *                      the character
      * send                 points to just after where that character should
