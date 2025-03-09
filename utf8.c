@@ -1832,7 +1832,17 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     if (UTF8_IS_SYNTACTIC_START_BYTE(s0)) {
         overlong_detect_length = is_utf8_overlong(s0, s - s0);
         if (UNLIKELY(overlong_detect_length > 0)) {
-            possible_problems |= UTF8_GOT_LONG;
+
+            /* Two flags control the same malformation.  The more restrictive
+             * and less likely one causes the other one to be set as well, so
+             * as to simplify the code below. */
+            if (UNLIKELY(flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
+                possible_problems |= UTF8_GOT_LONG_WITH_VALUE;
+                flags |= UTF8_ALLOW_LONG;
+            }
+            else {
+                possible_problems |= UTF8_GOT_LONG;
+            }
         }
     }
 
@@ -2236,11 +2246,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                }
 
               case UTF8_GOT_LONG:
-
-                if (! (flags & ( UTF8_ALLOW_LONG
-                                |UTF8_ALLOW_LONG_AND_ITS_VALUE)))
-                {
-                    if (PACK_WARN(WARN_UTF8,,)) {
+              case UTF8_GOT_LONG_WITH_VALUE:
+                COMMON_DEFAULT_REJECTS(,);
 
                         /* These error types cause 'input_uv' to be something
                          * that isn't what was intended, so can't use it in the
@@ -2284,9 +2291,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                                points */
                                 UNI_TO_NATIVE(input_uv));
                         }
-                    }
-                }
-
                 break;
 
               case UTF8_GOT_SURROGATE:
