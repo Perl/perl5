@@ -4187,6 +4187,33 @@ S_sv_buf_to_rw(pTHX_ SV *sv)
 # define sv_buf_to_rw(sv)	NOOP
 #endif
 
+
+/* The test in this macro was extracted from Perl_sv_setsv_flags so that it
+ * could be used elsewhere. */
+#define S_SvPV_can_swipe_buf(ssv, sflags, cur, len)                   \
+    (( /* Either ... */                                                    \
+      /* slated for free anyway (and not COW)? */                          \
+      ((sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP)                        \
+      /* or a swipable TARG */                                             \
+      || ((sflags &                                                        \
+            (SVs_PADTMP|SVf_READONLY|SVf_PROTECT|SVf_IsCOW))== SVs_PADTMP  \
+            /* whose buffer is worth stealing */                           \
+            && CHECK_COWBUF_THRESHOLD(cur,len)                             \
+         )                                                                 \
+    ) && !(sflags & SVf_OOK)     /* and not involved in OOK hack? */       \
+      && (SvREFCNT(ssv) == 1)      /* and no other references to it? */    \
+      && len                    /* and really is a string */               \
+    )
+
+/* Perl_sv_can_swipe_pv_buf was originally created for pp_reverse. */
+bool
+Perl_sv_can_swipe_pv_buf(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_CAN_SWIPE_PV_BUF;
+    assert(sv);
+    return S_SvPV_can_swipe_buf(sv, SvFLAGS(sv), SvCUR(sv), SvLEN(sv)) ? true : false;
+}
+
 void
 Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 {
@@ -4593,23 +4620,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
            and doing it now facilitates the COW check.  */
         (void)SvPOK_only(dsv);
 
-        if (
-                 (              /* Either ... */
-                                /* slated for free anyway (and not COW)? */
-                    (sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP
-                                /* or a swipable TARG */
-                 || ((sflags &
-                           (SVs_PADTMP|SVf_READONLY|SVf_PROTECT|SVf_IsCOW))
-                       == SVs_PADTMP
-                                /* whose buffer is worth stealing */
-                     && CHECK_COWBUF_THRESHOLD(cur,len)
-                    )
-                 ) &&
-                 !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
-                 (!(flags & SV_NOSTEAL)) &&
-                                        /* and we're allowed to steal temps */
-                 SvREFCNT(ssv) == 1 &&   /* and no other references to it? */
-                 len)             /* and really is a string */
+        if ( !(flags & SV_NOSTEAL) && S_SvPV_can_swipe_buf(ssv, sflags, cur, len) )
         {	/* Passes the swipe test.  */
             if (SvPVX_const(dsv))	/* we know that dtype >= SVt_PV */
                 SvPV_free(dsv);

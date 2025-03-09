@@ -3114,6 +3114,8 @@ Adp	|SV *	|sv_bless	|NN SV * const sv			\
 Cdmp	|bool	|sv_2bool	|NN SV * const sv
 Cdp	|bool	|sv_2bool_flags |NN SV *sv				\
 				|I32 flags
+Cp	|bool	|sv_can_swipe_pv_buf					\
+				|NN SV *sv
 Adp	|bool	|sv_cat_decode	|NN SV *dsv				\
 				|NN SV *encoding			\
 				|NN SV *ssv				\

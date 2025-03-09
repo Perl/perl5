@@ -707,6 +707,7 @@
 # define sv_2uv_flags(a,b)                      Perl_sv_2uv_flags(aTHX_ a,b)
 # define sv_backoff                             Perl_sv_backoff
 # define sv_bless(a,b)                          Perl_sv_bless(aTHX_ a,b)
+# define sv_can_swipe_pv_buf(a)                 Perl_sv_can_swipe_pv_buf(aTHX_ a)
 # define sv_cat_decode(a,b,c,d,e,f)             Perl_sv_cat_decode(aTHX_ a,b,c,d,e,f)
 # define sv_catpv(a,b)                          Perl_sv_catpv(aTHX_ a,b)
 # define sv_catpv_flags(a,b,c)                  Perl_sv_catpv_flags(aTHX_ a,b,c)
