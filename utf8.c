@@ -1949,21 +1949,21 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * malformation is an overlong (which allows it to be fully
              * computed).  Or it may have been "cured" as best it can by the
              * loop just above. */
-                if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                    if (flags & (UTF8_DISALLOW_SURROGATE|UTF8_WARN_SURROGATE)) {
-                        possible_problems |= UTF8_GOT_SURROGATE;
-                    }
+            if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+                if (flags & (UTF8_DISALLOW_SURROGATE|UTF8_WARN_SURROGATE)) {
+                    possible_problems |= UTF8_GOT_SURROGATE;
                 }
-                else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-                    if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
-                        possible_problems |= UTF8_GOT_SUPER;
-                    }
+            }
+            else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
+                if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
+                    possible_problems |= UTF8_GOT_SUPER;
                 }
-                else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-                    if (flags & (UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)) {
-                        possible_problems |= UTF8_GOT_NONCHAR;
-                    }
+            }
+            else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+                if (flags & (UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)) {
+                    possible_problems |= UTF8_GOT_NONCHAR;
                 }
+            }
         }  /* End of ! must_be_super */
     }      /* End of checking if is a special code point */
 
@@ -2258,26 +2258,27 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
               case UTF8_GOT_EMPTY:
                 COMMON_DEFAULT_REJECTS(,);
 
-                    /* This so-called malformation is now treated as a bug in
-                     * the caller.  If you have nothing to decode, skip calling
-                     * this function */
-                    assert(0);
-                        message = Perl_form(aTHX_ "%s (empty string)",
-                                                   malformed_text);
+                /* This so-called malformation is now treated as a bug in the
+                 * caller.  If you have nothing to decode, skip calling this
+                 * function */
+
+                assert(0);
+                message = Perl_form(aTHX_ "%s (empty string)", malformed_text);
                 break;
 
               case UTF8_GOT_CONTINUATION:
                 COMMON_DEFAULT_REJECTS(,);
-                        message = Perl_form(aTHX_
+                message = Perl_form(aTHX_
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
                                 malformed_text,
-                                _byte_dump_string(s0, 1, 0), *s0);
+                                _byte_dump_string(s0, 1, 0),
+                                *s0);
                 break;
 
               case UTF8_GOT_SHORT:
                 COMMON_DEFAULT_REJECTS(,);
-                        message = Perl_form(aTHX_
+                message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
                              _byte_dump_string(s0, avail_len, 0),
@@ -2289,14 +2290,15 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
               case UTF8_GOT_NON_CONTINUATION:
                {
                 COMMON_DEFAULT_REJECTS(,);
-                        /* If we don't know for sure that the input length is
-                         * valid, avoid as much as possible reading past the
-                         * end of the buffer */
-                        int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
-                                       ? (int) (s - s0)
-                                       : (int) (avail_len);
-                        message = Perl_form(aTHX_ "%s",
-                            unexpected_non_continuation_text(s0,
+
+                /* If we don't know for sure that the input length is valid,
+                 * avoid as much as possible reading past the end of the buffer
+                 * */
+                int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
+                                ? (int) (s - s0)
+                                : (int) (avail_len);
+                message = Perl_form(aTHX_ "%s",
+                                    unexpected_non_continuation_text(s0,
                                                             printlen,
                                                             s - s0,
                                                             (int) expectlen));
@@ -2307,37 +2309,34 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
               case UTF8_GOT_LONG_WITH_VALUE:
                 COMMON_DEFAULT_REJECTS(,);
 
-                        /* These error types cause 'input_uv' to be something
-                         * that isn't what was intended, so can't use it in the
-                         * message.  The other error types either can't
-                         * generate an overlong, or else the 'input_uv' is
-                         * valid */
-                        if (orig_problems &
-                                        (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
-                        {
-                            message = Perl_form(aTHX_
-                                    "%s: %s (any UTF-8 sequence that starts"
-                                    " with \"%s\" is overlong which can and"
-                                    " should be represented with a"
-                                    " different, shorter sequence)",
-                                    malformed_text,
-                                    _byte_dump_string(s0, send - s0, 0),
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            U8 tmpbuf[UTF8_MAXBYTES+1];
-                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
+                /* These error types cause 'input_uv' to be something that
+                 * isn't what was intended, so can't use it in the message.
+                 * The other error types either can't generate an overlong, or
+                 * else the 'input_uv' is valid */
+                if (orig_problems & (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW)) {
+                    message = Perl_form(aTHX_
+                            "%s: %s (any UTF-8 sequence that starts with"
+                            " \"%s\" is overlong which can and should be"
+                            " represented with a different, shorter sequence)",
+                            malformed_text,
+                            _byte_dump_string(s0, send - s0, 0),
+                            _byte_dump_string(s0, curlen, 0));
+                }
+                else {
+                    U8 tmpbuf[UTF8_MAXBYTES+1];
+                    const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
                                                                 input_uv, 0);
-                            /* Don't use U+ for non-Unicode code points, which
-                             * includes those in the Latin1 range */
-                            const char * preface = (  UNICODE_IS_SUPER(input_uv)
+
+                    /* Don't use U+ for non-Unicode code points, which includes
+                     * those in the Latin1 range */
+                    const char * preface = (  UNICODE_IS_SUPER(input_uv)
 #ifdef EBCDIC
-                                                    || input_uv <= 0xFF
+                                            || input_uv <= 0xFF
 #endif
-                                                   )
-                                                   ? "0x"
-                                                   : "U+";
-                            message = Perl_form(aTHX_
+                                            )
+                                            ? "0x"
+                                            : "U+";
+                    message = Perl_form(aTHX_
                                 "%s: %s (overlong; instead use %s to represent"
                                 " %s%0*" UVXf ")",
                                 malformed_text,
@@ -2348,7 +2347,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                                for small code
                                                                points */
                                 UNI_TO_NATIVE(input_uv));
-                        }
+                }
                 break;
 
 /* PACK_WARN returns:
@@ -2384,33 +2383,30 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SURROGATE,
                                          WARN_SURROGATE,,);
 
-                        /* This is the only error that can occur with a
-                         * surrogate when the 'input_uv' isn't valid */
-                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
-                            message = Perl_form(aTHX_
-                                    "UTF-16 surrogate (any UTF-8 sequence that"
-                                    " starts with \"%s\" is for a surrogate)",
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            message = Perl_form(aTHX_ surrogate_cp_format,
-                                                      input_uv);
-                        }
+                /* This is the only error that can occur with a surrogate when
+                 * the 'input_uv' isn't valid */
+                if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                    message = Perl_form(aTHX_
+                                   "UTF-16 surrogate (any UTF-8 sequence that"
+                                   " starts with \"%s\" is for a surrogate)",
+                                   _byte_dump_string(s0, curlen, 0));
+                }
+                else {
+                    message = Perl_form(aTHX_ surrogate_cp_format, input_uv);
+                }
 
                 break;
 
               case UTF8_GOT_NONCHAR:
-
                 COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_NONCHAR, WARN_NONCHAR,,);
 
-                        /* The code above should have guaranteed that we don't
-                         * get here with conditions other than these */
-                        assert (! (orig_problems & ~( UTF8_GOT_LONG
-                                                     |UTF8_GOT_LONG_WITH_VALUE
-                                                     |UTF8_GOT_PERL_EXTENDED
-                                                     |UTF8_GOT_NONCHAR)));
-
-                        message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
+                /* The code above should have guaranteed that we don't get here
+                 * with conditions other than these */
+                assert (! (orig_problems & ~( UTF8_GOT_LONG
+                                             |UTF8_GOT_LONG_WITH_VALUE
+                                             |UTF8_GOT_PERL_EXTENDED
+                                             |UTF8_GOT_NONCHAR)));
+                message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
 
                 break;
 
@@ -2524,50 +2520,50 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             /* We only get here if there is a message to be displayed or
              * returned; each case statement in the switch above does a
              * continue if no message for it need be generated. */
-                if (msgs) {
-                    if (msgs_return == NULL) {
-                        msgs_return = newAV();
-                    }
+            if (msgs) {
+                if (msgs_return == NULL) {
+                    msgs_return = newAV();
+                }
 
-                    av_push(msgs_return,
-                            /* Negative 'pack_warn' really means 0 here.  But
-                             * this converts that to UTF-8 to preserve broken
-                             * behavior depended upon by Encode. */
-                            newRV_noinc((SV*) new_msg_hv(message,
-                                                         ((pack_warn <= 0)
-                                                          ? packWARN(WARN_UTF8)
-                                                          : pack_warn),
-                                                         this_flag_bit)));
+                av_push(msgs_return,
+                        /* Negative 'pack_warn' really means 0 here.  But this
+                         * converts that to UTF-8 to preserve broken behavior
+                         * depended upon by Encode. */
+                        newRV_noinc((SV*) new_msg_hv(message,
+                                                     ((pack_warn <= 0)
+                                                      ? packWARN(WARN_UTF8)
+                                                      : pack_warn),
+                                                     this_flag_bit)));
+            }
+            else {
+                if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
+                                      |UTF8_FORCE_WARN_IF_MALFORMED)))
+                {
+                    ENTER;
+                    SAVEI8(PL_dowarn);
+                    SAVESPTR(PL_curcop);
+
+                    PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
+                    if (PL_curcop) {
+                        SAVECURCOPWARNINGS();
+                        PL_curcop->cop_warnings = pWARN_ALL;
+                    }
+                }
+
+                if (PL_op) {
+                    Perl_warner(aTHX_ pack_warn, "%s in %s", message,
+                                                    OP_DESC(PL_op));
                 }
                 else {
-                    if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
-                                          |UTF8_FORCE_WARN_IF_MALFORMED)))
-                    {
-                        ENTER;
-                        SAVEI8(PL_dowarn);
-                        SAVESPTR(PL_curcop);
-
-                        PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
-                        if (PL_curcop) {
-                            SAVECURCOPWARNINGS();
-                            PL_curcop->cop_warnings = pWARN_ALL;
-                        }
-                    }
-
-                    if (PL_op) {
-                        Perl_warner(aTHX_ pack_warn, "%s in %s", message,
-                                                     OP_DESC(PL_op));
-                    }
-                    else {
-                        Perl_warner(aTHX_ pack_warn, "%s", message);
-                    }
-
-                    if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
-                                          |UTF8_FORCE_WARN_IF_MALFORMED)))
-                    {
-                        LEAVE;
-                    }
+                    Perl_warner(aTHX_ pack_warn, "%s", message);
                 }
+
+                if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
+                                      |UTF8_FORCE_WARN_IF_MALFORMED)))
+                {
+                    LEAVE;
+                }
+            }
         }   /* End of 'while (possible_problems)' */
 
         if (msgs_return) {
