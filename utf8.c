@@ -2177,38 +2177,38 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 /* NOTREACHED */
                 break;
 
+/* If this condition is allowed, no message is to be generated.  Similarly, if
+ * warnings for it aren't enabled.  All of these are controlled only by 'utf8'
+ * warnings.  This macro relies on the GOT and ACCEPT flags being identical. */
+#define COMMON_DEFAULT_REJECTS(p1, p2)                                      \
+                if (   (! (this_problem & rejects))                         \
+                    || ((pack_warn = PACK_WARN(WARN_UTF8,p1,p2)) == 0))     \
+                {                                                           \
+                    continue;                                               \
+                }                                                           \
+
               case UTF8_GOT_EMPTY:
-                if (! (flags & UTF8_ALLOW_EMPTY)) {
+                COMMON_DEFAULT_REJECTS(,);
 
                     /* This so-called malformation is now treated as a bug in
                      * the caller.  If you have nothing to decode, skip calling
                      * this function */
                     assert(0);
-
-                    if (PACK_WARN(WARN_UTF8,,)) {
                         message = Perl_form(aTHX_ "%s (empty string)",
                                                    malformed_text);
-                    }
-                }
-
                 break;
 
               case UTF8_GOT_CONTINUATION:
-                if (! (flags & UTF8_ALLOW_CONTINUATION)) {
-                    if (PACK_WARN(WARN_UTF8,,)) {
+                COMMON_DEFAULT_REJECTS(,);
                         message = Perl_form(aTHX_
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
                                 malformed_text,
                                 _byte_dump_string(s0, 1, 0), *s0);
-                    }
-                }
-
                 break;
 
               case UTF8_GOT_SHORT:
-                if (! (flags & UTF8_ALLOW_SHORT)) {
-                    if (PACK_WARN(WARN_UTF8,,)) {
+                COMMON_DEFAULT_REJECTS(,);
                         message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
@@ -2216,15 +2216,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                              (int)avail_len,
                              avail_len == 1 ? "" : "s",
                              (int)expectlen);
-                    }
-                }
-
                 break;
 
               case UTF8_GOT_NON_CONTINUATION:
-                if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
-                    if (PACK_WARN(WARN_UTF8,,)) {
-
+               {
+                COMMON_DEFAULT_REJECTS(,);
                         /* If we don't know for sure that the input length is
                          * valid, avoid as much as possible reading past the
                          * end of the buffer */
@@ -2236,10 +2232,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                             printlen,
                                                             s - s0,
                                                             (int) expectlen));
-                    }
-                }
-
                 break;
+               }
 
               case UTF8_GOT_LONG:
 
