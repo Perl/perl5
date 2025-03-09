@@ -2293,14 +2293,38 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                         }
                 break;
 
+/* PACK_WARN returns:
+ *    0   when there is no reason to generate a message for this condition
+ *        because the appropriate warnings categories are off and not
+ *        overridden
+ *  < 0   if the only reason would be to return a message in an AV structure;
+ *        but this is only done if this condition is to be rejected
+ *  > 0   if the categories are effectively on; but this is only done for these
+ *        default-accepted conditions if at least one of the following is true:
+ *          1) the caller has expicitly set the individual flag to demand
+ *             warnings for this condition; or
+ *          2) the caller has passed flags that demand all conditions generate
+ *             warnings; or
+ *          3) the condition is to be rejected and is to be passed back to the
+ *             caller in an AV structure
+ * This macro relies on each GOT and ACCEPT flags being identical.
+ */
+#define COMMON_DEFAULT_ACCEPTEDS(warn_flag, p1, p2, p3)                     \
+                pack_warn = PACK_WARN(p1, p2, p3);                          \
+                if (    pack_warn == 0                                      \
+                    || (pack_warn < 0 && ! (this_problem & rejects))        \
+                    || (   pack_warn > 0                                    \
+                        && (0 == (flags & ( warn_flag                       \
+                                           |UTF8_DIE_IF_MALFORMED           \
+                                           |UTF8_FORCE_WARN_IF_MALFORMED))) \
+                        && (! msgs || ! (this_problem & rejects))))         \
+                {                                                           \
+                    continue;                                               \
+                }
+
               case UTF8_GOT_SURROGATE:
-
-                /* Code earlier in this function has set things up so we don't
-                 * get here unless at least one of the two top-level 'if's in
-                 * this case are true */
-
-                if (flags & UTF8_WARN_SURROGATE) {
-                    if (PACK_WARN(WARN_SURROGATE,,)) {
+                COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SURROGATE,
+                                         WARN_SURROGATE,,);
 
                         /* These are the only errors that can occur with a
                         * surrogate when the 'input_uv' isn't valid */
@@ -2314,19 +2338,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                             message = Perl_form(aTHX_ surrogate_cp_format,
                                                       input_uv);
                         }
-                    }
-                }
 
                 break;
 
               case UTF8_GOT_NONCHAR:
 
-                /* Code earlier in this function has set things up so we don't
-                 * get here unless at least one of the two top-level 'if's in
-                 * this case are true */
+                COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_NONCHAR, WARN_NONCHAR,,);
 
-                if (flags & UTF8_WARN_NONCHAR) {
-                    if (PACK_WARN(WARN_NONCHAR,,)) {
                         /* The code above should have guaranteed that we don't
                          * get here with conditions other than these */
                         assert (! (orig_problems & ~( UTF8_GOT_LONG
@@ -2335,8 +2353,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                                      |UTF8_GOT_NONCHAR)));
 
                         message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
-                    }
-                }
 
                 break;
 
