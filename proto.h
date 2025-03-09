@@ -4535,6 +4535,11 @@ Perl_sv_bless(pTHX_ SV * const sv, HV * const stash);
         assert(sv); assert(stash)
 
 PERL_CALLCONV bool
+Perl_sv_can_swipe_pv_buf(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SV_CAN_SWIPE_PV_BUF    \
+        assert(sv)
+
+PERL_CALLCONV bool
 Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding, SV *ssv, int *offset, char *tstr, int tlen);
 #define PERL_ARGS_ASSERT_SV_CAT_DECODE          \
         assert(dsv); assert(encoding); assert(ssv); assert(offset); assert(tstr)
