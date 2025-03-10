@@ -386,7 +386,15 @@ everything after the first number.
 
 =item *
 
-XXX
+A run-time pattern which contained a code block which recursed back to the
+same bit of code which ran that match, could cause a crash. [GH #22869].
+
+For example:
+
+    my $r = qr/... (?{ foo() if ... }) .../;
+    sub foo { $string =~ $r }
+    foo()
+
 
 =back
 
