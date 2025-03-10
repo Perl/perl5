@@ -174,13 +174,17 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perldata>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Binary and octal floating-point constants (such as C<012.345p-2> and
+C<0b101.11p-1>) are now documented. This feature was first introduced in perl
+5.22.0 together with hexadecimal floating-point constants and had a few bug
+fixes in perl 5.28.0, but it was never formally documented.
+[GH #18664]
 
 =back
 
