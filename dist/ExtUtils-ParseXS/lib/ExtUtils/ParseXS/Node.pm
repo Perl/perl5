@@ -96,7 +96,7 @@ sub new {
     my ($class, $args) = @_;
     $args = {} unless defined $args;
 
-    my ExtUtils::ParseXS::Node $self;
+    my __PACKAGE__  $self = shift;
     if ($USING_FIELDS) {
         $self = fields::new($class);
         %$self = %$args;
@@ -112,8 +112,8 @@ sub new {
 # Typically called first as a SUPER by the parse() method of real nodes.
 
 sub parse {
-    my ExtUtils::ParseXS::Node $self = shift;
-    my ExtUtils::ParseXS       $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->{file}    = $pxs->{in_pathname};
                         # account for the line array getting shifted
@@ -172,8 +172,8 @@ BEGIN { $build_subclass->('', # parent
 # Return true if checks pass.
 
 sub check {
-    my ExtUtils::ParseXS::Node::Param $self = shift;
-    my ExtUtils::ParseXS              $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
   
     my $type = $self->{type};
 
@@ -201,8 +201,8 @@ sub check {
 # of that local var.
 
 sub as_code {
-    my ExtUtils::ParseXS::Node::Param $self = shift;
-    my ExtUtils::ParseXS              $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
   
     my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
         = @{$self}{qw(type arg_num var init no_init defer default)};
@@ -560,8 +560,8 @@ sub as_code {
 # code or typemaps.
 
 sub as_output_code {
-  my ExtUtils::ParseXS::Node::Param $self = shift;
-  my ExtUtils::ParseXS              $pxs  = shift;
+  my __PACKAGE__       $self = shift;
+  my ExtUtils::ParseXS $pxs  = shift;
   my $out_num = shift;
 
   my ($type, $num, $var, $do_setmagic, $output_code)
@@ -1128,8 +1128,8 @@ $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
-    my ExtUtils::ParseXS            $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -1414,7 +1414,7 @@ sub parse {
 # Return a string to be used in "usage: .." error messages.
 
 sub usage_string {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
+    my __PACKAGE__ $self = shift;
 
     my @args = map  {
                           $_->{var}
@@ -1439,8 +1439,8 @@ sub usage_string {
 # function, e.g. 'a, &b, c'.
 
 sub C_func_signature {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
-    my ExtUtils::ParseXS            $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     my @args;
     for my $param (@{$self->{params}}) {
@@ -1484,7 +1484,7 @@ sub C_func_signature {
 # e.g. '$$;$$@'.
 
 sub proto_string {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
+    my __PACKAGE__  $self = shift;
 
     # Generate a prototype entry for each param that's bound to a real
     # arg. Use '$' unless the typemap for that param has specified an
@@ -1520,8 +1520,8 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::oneline $self = shift;
-    my ExtUtils::ParseXS                $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
     my $s = shift @{$pxs->{line}};
@@ -1542,8 +1542,8 @@ BEGIN { $build_subclass->('oneline', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::enable $self = shift;
-    my ExtUtils::ParseXS               $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{text}
     my $s = $self->{text};
@@ -1570,16 +1570,16 @@ BEGIN { $build_subclass->('enable', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS $self = shift;
-    my ExtUtils::ParseXS                            $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
 }
 
 
 sub as_code {
-    my ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS $self = shift;
-    my ExtUtils::ParseXS                            $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     my $xs_impl = $self->{enable} ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
@@ -1607,8 +1607,8 @@ BEGIN { $build_subclass->('enable', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::PROTOTYPES $self = shift;
-    my ExtUtils::ParseXS                   $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
     $pxs->{PROTOTYPES_value} = $self->{enable};
@@ -1627,8 +1627,8 @@ BEGIN { $build_subclass->('enable', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::SCOPE $self = shift;
-    my ExtUtils::ParseXS              $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
     $pxs->{xsub_SCOPE_enabled} = $self->{enable};
@@ -1646,8 +1646,8 @@ BEGIN { $build_subclass->('enable', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::VERSIONCHECK $self = shift;
-    my ExtUtils::ParseXS                     $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
     $pxs->{VERSIONCHECK_value} = $self->{enable};
@@ -1672,8 +1672,8 @@ BEGIN { $build_subclass->('', # parent
 # @$lines.
 
 sub parse {
-    my ExtUtils::ParseXS::Node::multiline $self = shift;
-    my ExtUtils::ParseXS                  $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -1710,8 +1710,8 @@ BEGIN { $build_subclass->('multiline', # parent
 # @$lines, and in addition, concatenate and store in $text
 
 sub parse {
-    my ExtUtils::ParseXS::Node::multiline_merged $self = shift;
-    my ExtUtils::ParseXS                         $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, read lines
 
@@ -1737,8 +1737,8 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::C_ARGS $self = shift;
-    my ExtUtils::ParseXS               $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
     $pxs->{xsub_sig}{auto_function_sig_override} = $self->{text};
@@ -1756,8 +1756,8 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::INTERFACE $self = shift;
-    my ExtUtils::ParseXS                  $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
@@ -1779,8 +1779,9 @@ sub parse {
 
 
 sub as_code {
-    my ExtUtils::ParseXS::Node::INTERFACE $self = shift;
-    my ExtUtils::ParseXS                  $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
     print <<"EOF";
     XSFUNCTION = $pxs->{xsub_interface_macro}($pxs->{xsub_return_type},cv,XSANY.any_dptr);
 EOF
@@ -1801,8 +1802,8 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::INTERFACE_MACRO $self = shift;
-    my ExtUtils::ParseXS                        $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
@@ -1847,8 +1848,8 @@ BEGIN { $build_subclass->('multiline', # parent
 # XXX It's a design flaw that more than one line can be processed.
 
 sub parse {
-    my ExtUtils::ParseXS::Node::PROTOTYPE $self = shift;
-    my ExtUtils::ParseXS                  $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines
 
@@ -1905,8 +1906,8 @@ BEGIN { $build_subclass->('multiline', # parent
 # and possibly wrapping in '#line' directives.
 
 sub as_code {
-    my ExtUtils::ParseXS::Node::codeblock $self = shift;
-    my ExtUtils::ParseXS                  $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     my @lines = map "$_\n", @{$self->{lines}};
 
