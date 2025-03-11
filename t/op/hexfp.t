@@ -10,7 +10,7 @@ use strict;
 
 use Config;
 
-plan(tests => 125);
+plan(tests => 128);
 
 # Test hexfloat literals.
 
@@ -290,6 +290,41 @@ use overload;
 BEGIN { overload::constant float => sub { return eval $_[0]; }; }
 print 00.1p3;
 CODE
+
+{
+    # First 50 decimal digits (~166 significant bits) of Pi.
+    my $pi = 3.1415926535_8979323846_2643383279_5028841971_6939937510;
+
+    # Number of mantissa (significant) bits including implicit (hidden) bit.
+    my $nv_mant_dig = ($Config{usequadmath} ? 113 :
+                       ($Config{nvmantbits} +
+                        ((($Config{nvtype} eq 'long double' &&
+                           $Config{d_long_double_style_ieee_std}) ||
+                          ($Config{nvtype} eq 'double' &&
+                           $Config{d_double_style_ieee})) ? 1 : 0)));
+
+  SKIP:
+    {
+        skip("NV is not wide enough to hold 50-bit mantissa", 1)
+            unless $nv_mant_dig >= 50;
+        my $a = eval '0x1921fb54442.d18p-39'; # 41+9 bits.
+        within($a, $pi, 1e-15);
+    }
+  SKIP:
+    {
+        skip("NV is not wide enough to hold 64-bit mantissa", 1)
+            unless $nv_mant_dig >= 64;
+        my $a = eval '0xc90fdaa22168c23.5p-58'; # 60+4 bits.
+        within($a, $pi, 1e-19);
+    }
+  SKIP:
+    {
+        skip("NV is not wide enough to hold 110-bit mantissa", 1)
+            unless $nv_mant_dig >= 110;
+        my $a = eval '$a = 0x1921fb54442d18469898cc51701b.8p-107'; # 109+1 bits.
+        within($a, $pi, 1e-33);
+    }
+}
 
 # sprintf %a/%A testing is done in sprintf2.t,
 # trickier than necessary because of long doubles,
