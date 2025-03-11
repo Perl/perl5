@@ -2423,49 +2423,6 @@ sub REQUIRE_handler {
 }
 
 
-# PROTOTYPE: Process one or more lines of the form
-#    DISABLE
-#    ENABLE
-#    $$@      # a literal prototype
-#    <blank>
-#
-# It's probably a design flaw that more than one entry can be processed.
-
-sub PROTOTYPE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  my $specified;
-
-  $self->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
-    if $self->{xsub_seen_PROTOTYPE}++;
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    $specified = 1;
-    trim_whitespace($_);
-    if ($_ eq 'DISABLE') {
-      $self->{xsub_prototype} = 0;
-    }
-    elsif ($_ eq 'ENABLE') {
-      $self->{xsub_prototype} = 1;
-    }
-    else {
-      # remove any whitespace
-      s/\s+//g;
-      $self->death("Error: Invalid prototype '$_'")
-        unless valid_proto_string($_);
-      $self->{xsub_prototype} = C_string($_);
-    }
-  }
-
-  # If no prototype specified, then assume empty prototype ""
-  $self->{xsub_prototype} = 2 unless $specified;
-
-  $self->{proto_behaviour_specified} = 1;
-}
-
-
 # Push an entry on the @{ $self->{XS_parse_stack} } array containing the
 # current file state, in preparation for INCLUDEing a new file. (Note that
 # it doesn't handle type => 'if' style entries, only file entries.)

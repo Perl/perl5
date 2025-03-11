@@ -1828,6 +1828,67 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::PROTOTYPE;
+
+# Handle PROTOTYPE keyword
+
+BEGIN { $build_subclass->('multiline', # parent
+    'prototype', # 0 (disable), 1 (enable), 2 ("") or "$$@" etc
+)};
+
+
+# PROTOTYPE: Process one or more lines of the form
+#    DISABLE
+#    ENABLE
+#    $$@      # a literal prototype
+#    <blank>  # an empty prototype - equivalent to foo() { ...}
+#
+# The last line takes precedence.
+# XXX It's a design flaw that more than one line can be processed.
+
+sub parse {
+    my ExtUtils::ParseXS::Node::PROTOTYPE $self = shift;
+    my ExtUtils::ParseXS                  $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines
+
+    my $proto;
+
+    $pxs->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
+      if $pxs->{xsub_seen_PROTOTYPE}++;
+
+    for (@{$self->{lines}}) {
+        next unless /\S/;
+        ExtUtils::ParseXS::Utilities::trim_whitespace($_);
+
+        if ($_ eq 'DISABLE') {
+            $proto = 0;
+        }
+        elsif ($_ eq 'ENABLE') {
+            $proto = 1;
+        }
+        else {
+            s/\s+//g; # remove any whitespace
+            $pxs->death("Error: Invalid prototype '$_'")
+                unless ExtUtils::ParseXS::Utilities::valid_proto_string($_);
+            $proto = ExtUtils::ParseXS::Utilities::C_string($_);
+        }
+    }
+
+    # If no prototype specified, then assume empty prototype ""
+    $proto = 2 unless defined $proto;
+
+    $self->{prototype}     = $proto;
+    $pxs->{xsub_prototype} = $proto;
+
+
+    $pxs->{proto_behaviour_specified} = 1;
+}
+
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::codeblock;
 
 # Base class for Nodes which contain lines of literal C code

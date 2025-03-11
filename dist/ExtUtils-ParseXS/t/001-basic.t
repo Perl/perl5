@@ -1866,6 +1866,16 @@ EOF
         ],
 
         [
+            "explicit prototype with whitespace",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int a, int b, int c)
+                |    PROTOTYPE:     $   $    @   
+EOF
+            [ 0, 0, qr/"\$\$\@"/, "" ],
+        ],
+
+        [
             "explicit prototype with backslash etc",
             [
                 'void',
@@ -1881,6 +1891,29 @@ EOF
         ],
 
         [
+            # XXX The parsing code for the PROTOTYPE keyword treats the
+            # keyword as multi-line and uses the last seen value.
+            # Almost certainly a coding error, but preserve the behaviour
+            # for now.
+            "explicit multiline prototype",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int a, int b, int c)
+                |    PROTOTYPE:
+                |           
+                |       DISABLE
+                |
+                |       %%%%%%
+                |
+                |       $$@
+                |
+                |    C_ARGS: x,y,z
+EOF
+            [ 0, 0, qr/"\$\$\@"/, "" ],
+        ],
+
+
+        [
             "explicit empty prototype",
             [
                 'void',
@@ -1888,6 +1921,36 @@ EOF
                 '    PROTOTYPE:'
             ],
             [ 0, 0, qr/newXS.*, ""/, "" ],
+        ],
+
+        [
+            "explicit ENABLE prototype",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int a, int b, int c)
+                |    PROTOTYPE: ENABLE
+EOF
+            [ 0, 0, qr/"\$\$\$"/, "" ],
+        ],
+
+        [
+            "explicit DISABLE prototype",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int a, int b, int c)
+                |    PROTOTYPE: DISABLE
+EOF
+            [ 0, 1, qr/"\$\$\$"/, "" ],
+        ],
+
+        [
+            "explicit invalid prototype",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int a, int b, int c)
+                |    PROTOTYPE: ab
+EOF
+            [ 1, 0, qr/Error: Invalid prototype 'ab'/, "" ],
         ],
 
         [
