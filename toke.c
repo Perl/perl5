@@ -12637,6 +12637,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                          * end just multiply n by the right
                          * amount. */
                         n += (NV) b;
+                        significant_bits += shift;
                     }
 
                     /* this could be hexfp, but peek ahead
@@ -12664,11 +12665,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                  * detection will shortly be more thorough with the
                  * underbar checks. */
                 const char* h = s;
-                significant_bits = (u == 0) ? 0 : msbit_pos(u) + 1;
+                if (u != 0)
+                    significant_bits += msbit_pos(u) + 1;
 #ifdef HEXFP_UQUAD
-                hexfp_uquad = u;
+                hexfp_uquad = overflowed ? (Uquad_t)n : u;
 #else /* HEXFP_NV */
-                hexfp_nv = u;
+                hexfp_nv = overflowed ? n : (NV)u;
 #endif
                 if (*h == '.') {
 #ifdef HEXFP_NV

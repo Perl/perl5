@@ -379,6 +379,14 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Fix parsing of hexadecimal floating-point numbers whose significand
+(aka "mantissa") values are too large to fit in UV range.
+Such literals (for example, C<0x1234567890.1p+0> for 32-bit IV/UV
+platform, or C<0x1234567890_1234567890.1p+0> for 64-bit IV/UV)
+used to be parsed incorrectly.
+
+=item *
+
 XXX
 
 =back
