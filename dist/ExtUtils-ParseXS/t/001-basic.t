@@ -98,7 +98,10 @@ sub test_many {
             };
             $err = $@;
         });
-        $stderr = $err . $stderr if length $err;
+        if (defined $err and length $err) {
+            $stderr = "" unless defined $stderr;
+            $stderr = $err . $stderr;
+        }
 
         my $out = tied(*FH)->content;
         untie *FH;
