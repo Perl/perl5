@@ -3562,11 +3562,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             croak(
                                 "panic: reg_scan_name returned NULL");
                         if (!RExC_paren_names) {
-                            RExC_paren_names = newHV();
-                            sv_2mortal(MUTABLE_SV(RExC_paren_names));
+                            RExC_paren_names = MUTABLE_HV(newSV_type_mortal(SVt_PVHV));
 #ifdef DEBUGGING
-                            RExC_paren_name_list = newAV();
-                            sv_2mortal(MUTABLE_SV(RExC_paren_name_list));
+                            RExC_paren_name_list = MUTABLE_AV(newSV_type_mortal(SVt_PVAV));
 #endif
                         }
                         he_str = hv_fetch_ent( RExC_paren_names, svname, 1, 0 );
@@ -7685,8 +7683,8 @@ Perl_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 #define ADD_POSIX_WARNING(p, text)  STMT_START {                            \
         if (posix_warnings) {                                               \
             if (! RExC_warn_text ) RExC_warn_text =                         \
-                                         (AV *) sv_2mortal((SV *) newAV()); \
-            av_push_simple(RExC_warn_text, Perl_newSVpvf(aTHX_                     \
+                                   MUTABLE_AV(newSV_type_mortal(SVt_PVAV)); \
+            av_push_simple(RExC_warn_text, Perl_newSVpvf(aTHX_              \
                                              WARNING_PREFIX                 \
                                              text                           \
                                              REPORT_LOCATION,               \
