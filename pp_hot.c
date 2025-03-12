@@ -4189,7 +4189,8 @@ Perl_do_readline(pTHX)
     }
     else {
         /* XXX on RC builds, push on stack rather than mortalize ? */
-        sv = sv_2mortal(newSV(80));
+        sv = newSV_type_mortal(SVt_PV);
+        sv_grow_fresh(sv, 81);
         offset = 0;
     }
 
@@ -4316,7 +4317,8 @@ Perl_do_readline(pTHX)
                 SvPV_shrink_to_cur(sv);
             }
             /* XXX on RC builds, push on stack rather than mortalize ? */
-            sv = sv_2mortal(newSV(80));
+            sv = newSV_type_mortal(SVt_PV);
+            sv_grow_fresh(sv, 81);
             continue;
         }
 
