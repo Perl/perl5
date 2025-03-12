@@ -4612,8 +4612,7 @@ PP_wrapped(pp_system, 0, 1)
          * as numeric, not just retain the string value.
          */
         if (SvNIOK(origsv) || SvNIOKp(origsv)) {
-            copysv = newSV_type(SVt_PVNV);
-            sv_2mortal(copysv);
+            copysv = newSV_type_mortal(SVt_PVNV);
             if (SvPOK(origsv) || SvPOKp(origsv)) {
                 pv = SvPV_nomg(origsv, len);
                 sv_setpvn_fresh(copysv, pv, len);
