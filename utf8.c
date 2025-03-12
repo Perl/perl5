@@ -1249,7 +1249,7 @@ Because of these quirks, C<utf8_to_uvchr_buf> is very difficult to use
 correctly and handle all cases.  Generally, you need to bail out at the first
 failure it finds.
 
-The deprecated C<utf8_uvchr> behaves the same way as C<utf8_to_uvchr_buf> for
+The deprecated C<utf8_to_uvchr> behaves the same way as C<utf8_to_uvchr_buf> for
 well-formed input, and for the malformations it is capable of finding, but
 doesn't find all of them, and it can read beyond the end of the input buffer,
 which is why it is deprecated.
