@@ -471,7 +471,7 @@ static void S_ensure_module_version(pTHX_ SV *module, SV *version)
 static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
 {
     STRLEN svlen = SvCUR(sv);
-    bool do_utf8 = SvUTF8(sv);
+    U32 do_utf8 = SvUTF8(sv) ? SVf_UTF8 : 0;
 
     const char *paren_at = (const char *)memchr(SvPVX(sv), '(', svlen);
     if(paren_at) {
@@ -485,7 +485,7 @@ static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
              */
             /* diag_listed_as: SKIPME */
             croak("Malformed attribute string");
-        *namp = sv_2mortal(newSVpvn_utf8(SvPVX(sv), namelen, do_utf8));
+        *namp = newSVpvn_flags(SvPVX(sv), namelen, SVs_TEMP|do_utf8);
 
         const char *value_at = paren_at + 1;
         const char *value_max = SvPVX(sv) + svlen - 2;
@@ -499,7 +499,7 @@ static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
             value_max -= 1;
 
         if(value_max >= value_at)
-            *valp = sv_2mortal(newSVpvn_utf8(value_at, value_max - value_at + 1, do_utf8));
+            *valp = newSVpvn_flags(value_at, value_max - value_at + 1, SVs_TEMP|do_utf8);
         else
             *valp = NULL;
     }
