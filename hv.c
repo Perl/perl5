@@ -648,11 +648,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
                 if (keysv || is_utf8) {
                     if (!keysv) {
-                        keysv = newSVpvn_utf8(key, klen, TRUE);
+                        keysv = newSVpvn_flags(key, klen, SVf_UTF8|SVs_TEMP);
                     } else {
-                        keysv = newSVsv(keysv);
+                        keysv = sv_2mortal(newSVsv(keysv));
                     }
-                    mg_copy(MUTABLE_SV(hv), sv, (char *)sv_2mortal(keysv), HEf_SVKEY);
+                    mg_copy(MUTABLE_SV(hv), sv, (char *)keysv, HEf_SVKEY);
                 } else {
                     mg_copy(MUTABLE_SV(hv), sv, key, klen);
                 }
