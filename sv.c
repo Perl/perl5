@@ -10009,9 +10009,11 @@ Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 
     PERL_ARGS_ASSERT_VNEWSVPVF;
 
-    sv = newSV(1);
+    STRLEN patlen = strlen(pat);
+
+    sv = newSV(patlen);
     SvPVCLEAR_FRESH(sv);
-    sv_vcatpvfn_flags(sv, pat, strlen(pat), args, NULL, 0, NULL, 0);
+    sv_vcatpvfn_flags(sv, pat, patlen, args, NULL, 0, NULL, 0);
     return sv;
 }
 
