@@ -1342,7 +1342,8 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
 
     if ($has_unused) {
         $text .= "; $unused_table_hdr stands for \"unused in this Unicode"
-              .  " release\" (and the data in its row and column are garbage)"
+              .  " release\" (and the data in its row and column are"
+              .  " garbage).  See perluniprops for the rest"
     }
 
     my $indent = " " x 3;

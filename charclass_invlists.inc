@@ -192558,7 +192558,8 @@ UNI_wb_values
 static const U8 GCB_table[17][17] = {
    /* 'edg' stands for 'EDGE'; 'EPX' stands for 'ExtPict_XX'; u
     * stands for "unused in this Unicode release" (and the data in
-    * its row and column are garbage) */
+    * its row and column are garbage).  See perluniprops for the
+    * rest */
 /*        XX CN CR edg EPX EX  L LF LV LVT PP RI SM  T  V ZWJ  u */
 /* XX */ { 1, 1, 1,  1,  1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  0, 1 },
 /* CN */ { 1, 1, 1,  1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  1, 1 },
@@ -192592,7 +192593,7 @@ static const U8 GCB_table[17][17] = {
 
 static const U8 LB_table[42][42] = {
    /* 'EAO' stands for 'East_Asian_OP'; 'edg' stands for 'EDGE'; 'UEP' stands for 'Unassigned_Extended_Pictographic_Ideographic'; u stands for
-    * "unused in this Unicode release" (and the data in its row and column are garbage) */
+    * "unused in this Unicode release" (and the data in its row and column are garbage).  See perluniprops for the rest */
 /*        AL B2 BA BB BK CB CL CM CP CR EAO EB edg EM EX GL H2 H3 HL HY ID IN IS JL JT JV LF NL NS NU OP PO PR QU RI SP SY UEP WJ ZW ZWJ  u */
 /* AL */ { 0, 1, 0, 1, 0, 1, 2, 0, 2, 0,  1, 1,  1, 1, 2, 0, 1, 1, 0, 0, 1, 0, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2,  1, 0, 0,  0, 2 },
 /* B2 */ { 1, 2, 0, 1, 0, 1, 2, 0, 2, 0,  1, 1,  1, 1, 2, 0, 1, 1, 1, 0, 1, 0, 2, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 2,  1, 0, 0,  0, 2 },
@@ -192654,7 +192655,7 @@ static const U8 WB_table[23][23] = {
    /* 'edg' stands for 'EDGE'; 'EPL' stands for 'ExtPict_LE'; 'EPX' stands for
     * 'ExtPict_XX'; 'Ext' stands for 'Extend'; 'hs' stands for 'Perl_Tailored_HSpace';
     * u stands for "unused in this Unicode release" (and the data in its row and
-    * column are garbage) */
+    * column are garbage).  See perluniprops for the rest */
 /*        XX CR DQ edg EPL EPX EX Ext FO HL hs KA LE LF MB ML MN NL NU RI SQ ZWJ  u */
 /* XX */ { 1, 1, 1,  1,  1,  1, 1,  0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 1 },
 /* CR */ { 1, 0, 1,  1,  1,  1, 1,  1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,  1, 1 },
