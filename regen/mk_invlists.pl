@@ -526,11 +526,10 @@ sub output_invmap ($name,
                     $short_enum = 'hs';
                 }
                 else {
-
-                    # Use the official short name, if found.
+                    # lhs needs extra parens as per API
                     ($short_enum) = prop_value_aliases($type, $enum);
-                    if ( defined $short_enum) {
-                        $is_official_name = 1;
+                    if (defined $short_enum) {
+                        $is_official_name = 1;  # Use the official short name
                     }
                     else {
                         # But if there is no official name, use the name that
@@ -551,7 +550,7 @@ sub output_invmap ($name,
                         # collapsed into a single column, and their names
                         # don't matter)
                         if (grep { $_ eq $enum } @input_enums) {
-                            $short_enum = $enum
+                            $short_enum = $enum;
                         }
                         else {
                             $short_enum = lc $enum;
@@ -567,25 +566,26 @@ sub output_invmap ($name,
                         # if it is something like FooBar, FB is a better
                         # abbreviation than Foo.  That's not the case if it is
                         # entirely lowercase.
-                        my $uc = $short_enum;
-                        $uc =~ s/[[:^upper:]]//g;
-                        $short_enum = $uc if length $uc > 1
-                                          && length $uc < length $short_enum;
+                            my $uc = $short_enum;
+                            $uc =~ s/[[:^upper:]]//g;
+                            $short_enum = $uc if length $uc > 1
+                                            && length $uc < length $short_enum;
 
-                        $short_enum = substr($short_enum, 0, $max_hdr_len);
-                        $is_official_name = 0;
+                            # Truncate to the maximum permissible length
+                            $short_enum = substr($short_enum, 0, $max_hdr_len);
+                            $is_official_name = 0;
+
+                        # If the name we are to display conflicts, try another.
+                        if (grep { $_ eq $short_enum } @short_names) {
+                            $is_official_name = 0;
+                            do { # The increment operator on strings doesn't
+                                 # work on those containing an '_', so get rid
+                                 # of any final portion.
+                                $short_enum =~ s/_//g;
+                                $short_enum++;
+                            } while grep { $_ eq $short_enum } @short_names;
+                        }
                     }
-                }
-
-                # If the name we are to display conflicts, try another.
-                if (grep { $_ eq $short_enum } @short_names) {
-                    $is_official_name = 0;
-                    do { # The increment operator on strings doesn't work on
-                         # those containing an '_', so get rid of any final
-                         # portion.
-                        $short_enum =~ s/_//g;
-                        $short_enum++;
-                    } while grep { $_ eq $short_enum } @short_names;
                 }
 
                 push @short_names, $short_enum;
@@ -605,8 +605,8 @@ sub output_invmap ($name,
         $enums{$default} = $enum_val++;
 
         for my $enum (sort { ($name =~ $property_needs_table_re)
-                             ?     lc $short_enum_name{$a}  
-                               cmp lc $short_enum_name{$b}  
+                             ?     lc $short_enum_name{$a}
+                               cmp lc $short_enum_name{$b}
                              : lc $a cmp lc $b
                            } @enums)
         {
@@ -1105,7 +1105,7 @@ sub _Perl_IVCF {
                     }
                 }
             }
-                
+
             # Otherwise, sort numerically.  This places the highest code point
             # in the list at the tail end.  This is because Unicode keeps the
             # lowercase code points as higher ordinals than the uppercase, at
@@ -1334,40 +1334,41 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
 
     # If we have annotations, output it now.
     if ($has_unused || scalar %$abbreviations_ref) {
-        my $text = "";
-        foreach my $abbr (sort caselessly keys %$abbreviations_ref) {
-            $text .= "; " if $text;
-            $text .= "'$abbr' stands for '$abbreviations_ref->{$abbr}'";
-        }
-        if ($has_unused) {
-            $text .= "; $unused_table_hdr stands for 'unused in this Unicode"
-                   . " release (and the data in its row and column are garbage)"
-        }
+    my $text = "";
+    foreach my $abbr (sort caselessly keys %$abbreviations_ref) {
+        $text .= "; " if $text;
+        $text .= "'$abbr' stands for '$abbreviations_ref->{$abbr}'";
+    }
 
-        my $indent = " " x 3;
-        $text = $indent . "/* $text */";
+    if ($has_unused) {
+        $text .= "; $unused_table_hdr stands for \"unused in this Unicode"
+              .  " release\" (and the data in its row and column are garbage)"
+    }
 
-        # Wrap the text so that it is no wider than the table, which the
-        # header line gives.
-        my $output_width = length $header_line;
-        while (length $text > $output_width) {
-            my $cur_line = substr($text, 0, $output_width);
+    my $indent = " " x 3;
+    $text = $indent . "/* $text */";
 
-            # Find the first blank back from the right end to wrap at.
-            for (my $i = $output_width -1; $i > 0; $i--) {
-                if (substr($text, $i, 1) eq " ") {
-                    print $out_fh substr($text, 0, $i), "\n";
+    # Wrap the text so that it is no wider than the table, which the header
+    # line gives.
+    my $output_width = length $header_line;
+    while (length $text > $output_width) {
+        my $cur_line = substr($text, 0, $output_width);
 
-                    # Set so will look at just the remaining tail (which will
-                    # be indented and have a '*' after the indent
-                    $text = $indent . " * " . substr($text, $i + 1);
-                    last;
-                }
+        # Find the first blank back from the right end to wrap at.
+        for (my $i = $output_width -1; $i > 0; $i--) {
+            if (substr($text, $i, 1) eq " ") {
+                print $out_fh substr($text, 0, $i), "\n";
+
+                # Set so will look at just the remaining tail (which will be
+                # indented and have a '*' after the indent
+                $text = $indent . " * " . substr($text, $i + 1);
+                last;
             }
         }
+    }
 
-        # And any remaining
-        print $out_fh $text, "\n" if $text;
+    # And any remaining
+    print $out_fh $text, "\n" if $text;
     }
 
     # We calculated the header line earlier just to get its width so that we
@@ -1431,8 +1432,8 @@ sub output_GCB_table() {
     $gcb_table[$gcb_enums{'Regional_Indicator'}]
               [$gcb_enums{'Regional_Indicator'}] = $gcb_actions{GCB_RI_then_RI};
 
-    # Post 11.0: GB11  \p{Extended_Pictographic} Extend* ZWJ
-    #                                               × \p{Extended_Pictographic}
+    # Post 11.0: GB11   \p{Extended_Pictographic} Extend* ZWJ
+    #                 × \p{Extended_Pictographic}
     $gcb_table[$gcb_enums{'ZWJ'}][$gcb_enums{'ExtPict_XX'}] =
                                          $gcb_actions{GCB_Maybe_Emoji_NonBreak};
 
@@ -1537,11 +1538,11 @@ sub output_LB_table() {
         LB_NOBREAK_EVEN_WITH_SP_BETWEEN => 2,
 
         LB_CM_ZWJ_foo                   => 3,   # Rule 9
-        LB_SP_foo                       => 6,   # Rule 18
+        LB_SP_foo                       => 6,   # Rule 18, et. al
         LB_PR_or_PO_then_OP_or_HY       => 9,   # Rule 25
         LB_SY_or_IS_then_various        => 11,  # Rule 25
         LB_HY_or_BA_then_foo            => 13,  # Rule 21
-        LB_RI_then_RI	                => 15,  # Rule 30a
+        LB_RI_then_RI                   => 15,  # Rule 30a
 
         LB_various_then_PO_or_PR        => (1<<5),  # Rule 25
     );
@@ -1569,11 +1570,10 @@ sub output_LB_table() {
 
     # LB30b Do not break between an emoji base (or potential emoji) and an
     # emoji modifier.
-
     # EB × EM
-    # [\p{Extended_Pictographic}&\p{Cn}] × EM
     $lb_table[$lb_enums{'E_Base'}][$lb_enums{'E_Modifier'}]
                                                 = $lb_actions{'LB_NOBREAK'};
+    # [\p{Extended_Pictographic}&\p{Cn}] × EM
     $lb_table[$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
                       [$lb_enums{'E_Modifier'}] = $lb_actions{'LB_NOBREAK'};
 
@@ -1588,7 +1588,6 @@ sub output_LB_table() {
     # LB30 Do not break between letters, numbers, or ordinary symbols and
     # non-East-Asian opening punctuation nor non-East-Asian closing
     # parentheses.
-
     # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
     # (what we call CP and OP here have already been modified by mktables to
     # exclude the ea items
@@ -1672,14 +1671,18 @@ sub output_LB_table() {
     # http://www.unicode.org/reports/tr14/#Examples
     # We follow that tailoring because Unicode's test cases expect it
     # (PR | PO) × ( OP | HY )? NU
+    # This expands firstly to
+    # (PR | PO) × NU
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
-        # Given that (OP | HY )? is optional, we have to test for it in code.
-        # We add in the action (instead of overriding) for this, so that in
-        # the code we can recover the underlying break value.
+    # And secondly to
+    # (PR | PO) × ( OP | HY ) NU
+    # Given that (OP | HY )? is optional, we have to test for it in code.
+    # We add in the action (instead of overriding) for this, so that in
+    # the code we can recover the underlying break value.
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Open_Punctuation'}]
                                     += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'East_Asian_OP'}]
@@ -1700,7 +1703,7 @@ sub output_LB_table() {
                                                 = $lb_actions{'LB_NOBREAK'};
 
     # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
-    # which can be rewritten as:
+    # which expands firstly to:
     # NU (SY | IS)* × (NU | SY | IS | CL | CP )
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
@@ -1715,10 +1718,12 @@ sub output_LB_table() {
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'East_Asian_CP'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
+    # And then to
+    # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
         # Like earlier where we have to test in code, we add in the action so
         # that we can recover the underlying values.  This is done in rules
         # below, as well.  The code assumes that we haven't added 2 actions.
-        # Shoul a later Unicode release break that assumption, then tests
+        # Should a later Unicode release break that assumption, then tests
         # should start failing.
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Numeric'}]
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
@@ -1746,7 +1751,8 @@ sub output_LB_table() {
                                     += $lb_actions{'LB_SY_or_IS_then_various'};
 
     # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
-    # which can be rewritten as:
+    # We can eliminate the NU in the parenthesis, as there is a match as long
+    # as there is at least one NU.  This leads to:
     # NU (SY | IS)* (CL | CP)? × (PO | PR)
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Postfix_Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
@@ -1906,7 +1912,6 @@ sub output_LB_table() {
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Nonstarter'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
-
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
@@ -2087,8 +2092,8 @@ sub output_LB_table() {
         $lb_table[$i][$lb_enums{'Next_Line'}] = $lb_actions{'LB_NOBREAK'};
     }
 
-    # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line breaks.
-    # CR × LF
+    # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line
+    # breaks.
     # CR !
     # LF !
     # NL !
@@ -2124,7 +2129,7 @@ sub output_LB_table() {
     # In the absence of such criteria all characters with a specific
     # combination of original class and General_Category property value are
     # resolved as follows:
-    # Original 	   Resolved  General_Category
+    # Original     Resolved  General_Category
     # AI, SG, XX      AL      Any
     # SA              CM      Only Mn or Mc
     # SA              AL      Any except Mn and Mc
@@ -2150,14 +2155,14 @@ sub output_WB_table() {
         WB_NOBREAK                      => 0,
         WB_BREAKABLE                    => 1,
         WB_hs_then_hs                   => 2,
-        WB_Ex_or_FO_or_ZWJ_then_foo	=> 3,
-        WB_DQ_then_HL	                => 4,
-        WB_HL_then_DQ	                => 6,
-        WB_LE_or_HL_then_MB_or_ML_or_SQ	=> 8,
-        WB_MB_or_ML_or_SQ_then_LE_or_HL	=> 10,
-        WB_MB_or_MN_or_SQ_then_NU	=> 12,
-        WB_NU_then_MB_or_MN_or_SQ	=> 14,
-        WB_RI_then_RI	                => 16,
+        WB_Ex_or_FO_or_ZWJ_then_foo     => 3,
+        WB_DQ_then_HL                   => 4,
+        WB_HL_then_DQ                   => 6,
+        WB_LE_or_HL_then_MB_or_ML_or_SQ => 8,
+        WB_MB_or_ML_or_SQ_then_LE_or_HL => 10,
+        WB_MB_or_MN_or_SQ_then_NU       => 12,
+        WB_NU_then_MB_or_MN_or_SQ       => 14,
+        WB_RI_then_RI                   => 16,
     );
 
     # Construct the WB pair table.
@@ -2233,7 +2238,7 @@ sub output_WB_table() {
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'Single_Quote'}]
                                     += $wb_actions{'WB_NU_then_MB_or_MN_or_SQ'};
 
-    # WB11  Numeric (MidNum | (MidNumLet | Single_Quote))  ×  Numeric
+    # WB11  Numeric (MidNum | (MidNumLet | Single_Quote)  ×  Numeric
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'Numeric'}]
                                     += $wb_actions{'WB_MB_or_MN_or_SQ_then_NU'};
     $wb_table[$wb_enums{'MidNum'}][$wb_enums{'Numeric'}]
@@ -2276,8 +2281,9 @@ sub output_WB_table() {
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Single_Quote'}]
                                                 = $wb_actions{'WB_NOBREAK'};
 
-    # WB7  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet | Single_Quote)
-    #       × (ALetter | Hebrew_Letter)
+    # WB7   (ALetter | Hebrew_Letter)
+    #       (MidLetter | MidNumLet | Single_Quote)
+    #     × (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'ALetter'}]
                             += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'ExtPict_LE'}]
@@ -2338,7 +2344,9 @@ sub output_WB_table() {
                                                     = $wb_actions{'WB_NOBREAK'};
 
     # Ignore Format and Extend characters, except after sot, CR, LF, and
-    # Newline.  This also has the effect of: Any × (Format | Extend | ZWJ)
+    # Newline.  This also has the effect of:
+    #   Any × (Format | Extend | ZWJ)
+    #
     # WB4  X (Extend | Format | ZWJ)* → X
     for my $i (0 .. @wb_table - 1) {
         $wb_table[$wb_enums{'Extend'}][$i]
@@ -2371,6 +2379,7 @@ sub output_WB_table() {
 
     # Do not break within emoji zwj sequences.
     # WB3c ZWJ × ( Glue_After_Zwj | EBG )
+    #      ZWJ × \p{Extended_Pictographic}
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'Glue_After_Zwj'}]
                                                 = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'E_Base_GAZ'}]
@@ -2391,7 +2400,7 @@ sub output_WB_table() {
         }
     }
 
-    # But do not break within white space.
+    # Perl tailoring: Do not break within white space.
     # WB3  CR  ×  LF
     # et.al.
     for my $i ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
@@ -2493,10 +2502,15 @@ no warnings 'qw';
 my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &UpperLatin1
+
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,ExtPict_XX
+
                     _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,East_Asian_CP,East_Asian_OP,Unassigned_Extended_Pictographic_Ideographic
+
                     _Perl_SB,EDGE,SContinue,CR,Extend,LF
+
                     _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,ExtPict_XX,ExtPict_LE
+
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
                     Lowercase_Mapping
                     Titlecase_Mapping
@@ -2510,7 +2524,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 # after the property name, separated by commas, with the enums
                 # that aren't ever defined by Unicode (with some exceptions)
                 # containing at least 4 all-uppercase characters.
-                
+
                 # Some of the enums are current official property values that
                 # are needed for the rules in constructing certain tables in
                 # this file, and perhaps in regexec.c as well.  They are here
