@@ -77,6 +77,7 @@ BEGIN {
     our @FIELDS = (
         'line_no',       # line number and ...
         'file',          # ... filename where this node appeared in src
+        'kids',          # child nodes, if any
     );
 
     # do 'use fields', except: fields needs Hash::Util which is XS, which
@@ -1895,7 +1896,6 @@ sub parse {
 }
 
 
-
 # ======================================================================
 
 package ExtUtils::ParseXS::Node::codeblock;
@@ -1967,6 +1967,225 @@ BEGIN { $build_subclass->('codeblock', # parent
 )};
 
 # Currently all methods are just inherited.
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::keylines;
+
+# Base class for keyword FOO nodes which have a FOO_line kid node for
+# each line making up the keyword - such as OUTPUT etc.
+
+BEGIN { $build_subclass->('', # parent
+    'lines',   # Array ref of all lines until the next keyword
+)};
+
+
+# Process each line on and following the keyword line.
+# For each line, create a FOO_line kid and call its parse() method.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Consume and process lines until the next directive.
+    while(   @{$pxs->{line}}
+          && $pxs->{line}[0] !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o)
+    {
+        push @{$self->{lines}}, $pxs->{line}[0];
+        my $class = ref($self) . '_line';
+        my $kid = $class->new();
+        # Keep the current line in $self->{lines} for now so that the
+        # parse() method below sees the right line number. We rely on that
+        # method to actually pop the line.
+        $kid->parse($pxs, $self);
+        push @{$self->{kids}}, $kid;
+    }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::keyline;
+
+# Base class for FOO_line nodes which have a FOO node as
+# their parent.
+
+BEGIN { $build_subclass->('', # parent
+    'line',   # text of current line
+)};
+
+
+# The two jobs of this parse method are to grab the next line, and also to
+# set the right line number for any warning or error messages triggered by
+# the current line. It is called as a SUPER by the parse() methods of its
+# concrete subclasses.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    # By shifting *now*, the line above gets the correct line number of
+    # this src line, while subsequent processing gives the right line
+    # number for warnings etc, since the warn/err methods assume the line
+    # being processed has already been popped.
+    my $line = shift @{$pxs->{line}}; # line of text to be processed
+    $self->{line} = $line;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::ALIAS;
+
+# Handle ALIAS keyword
+
+BEGIN { $build_subclass->('keylines', # parent
+    'aliases', # hashref of all alias => value pairs
+)};
+
+
+# The inherited parse() method will call ALIAS_line->parse() for each line
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::ALIAS_line;
+
+# Handle one line from an ALIAS keyword block
+
+BEGIN { $build_subclass->('keyline', # parent
+)};
+
+
+# Parse one line from an ALIAS block
+#
+# Each line can have zero or more definitions, separated by white space.
+# Each definition is of one of the two forms:
+#
+#      name =  value
+#      name => other_name
+#
+#  where 'value' is a positive integer (or C macro) and the names are
+#  simple or qualified perl function names. E.g.
+#
+#     foo = 1   Bar::foo = 2   Bar::baz => Bar::foo
+#
+# The RHS of a '=>' is the name of an existing alias
+#
+# The results are added to a hash in the parent ALIAS node, as well as
+# to a couple of per-xsub hashes which accumulate the results across
+# possibly multiple ALIAS keywords.
+#
+# Updates:
+#   $parent->{aliases}{$alias} = $value;
+#   $pxs->{xsub_map_alias_name_to_value}->{$alias} = $value;
+#   $pxs->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
+
+sub parse {
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::ALIAS $parent = shift; # parent ALIAS node
+
+    $self->SUPER::parse($pxs); # set file/line_no/line
+    my $line = $self->{line};  # line of text to be processed
+
+    return unless $line =~ /\S/;
+    ExtUtils::ParseXS::Utilities::trim_whitespace($line);
+    # XXX this skip doesn't make sense - we've already confirmed
+    # line has non-whitespace  with the /\S/; so we just skip if the
+    # line is "0" ?
+    return unless $line;
+
+    my $orig = $line; # keep full line for error messages
+
+    # we use this later for symbolic aliases
+    my $fname = $pxs->{PACKAGE_class} . $pxs->{xsub_func_name};
+
+    # chop out and process one alias entry from $line
+
+    while ($line =~ s/^\s*([\w:]+)\s*=(>?)\s*([\w:]+)\s*//) {
+        my ($alias, $is_symbolic, $value) = ($1, $2, $3);
+        my $orig_alias = $alias;
+
+        $pxs->blurt("Error: In alias definition for '$alias' the value may not"
+                                    . " contain ':' unless it is symbolic.")
+                if !$is_symbolic and $value=~/:/;
+
+        # check for optional package definition in the alias
+        $alias = $pxs->{PACKAGE_class} . $alias if $alias !~ /::/;
+
+        if ($is_symbolic) {
+            my $orig_value = $value;
+            $value = $pxs->{PACKAGE_class} . $value if $value !~ /::/;
+            if (defined $pxs->{xsub_map_alias_name_to_value}->{$value}) {
+                $value = $pxs->{xsub_map_alias_name_to_value}->{$value};
+            } elsif ($value eq $fname) {
+                $value = 0;
+            } else {
+                $pxs->blurt("Error: Unknown alias '$value' in symbolic definition for '$orig_alias'");
+            }
+        }
+
+        # check for duplicate alias name & duplicate value
+        my $prev_value = $pxs->{xsub_map_alias_name_to_value}->{$alias};
+        if (defined $prev_value) {
+            if ($prev_value eq $value) {
+                $pxs->Warn("Warning: Ignoring duplicate alias '$orig_alias'")
+            } else {
+                $pxs->Warn("Warning: Conflicting duplicate alias '$orig_alias'"
+                                            . " changes definition from '$prev_value' to '$value'");
+                delete $pxs->{xsub_map_alias_value_to_name_seen_hash}->{$prev_value}{$alias};
+            }
+        }
+
+        # Check and see if this alias results in two aliases having the same
+        # value, we only check non-symbolic definitions as the whole point of
+        # symbolic definitions is to say we want to duplicate the value and
+        # it is NOT a mistake.
+        unless ($is_symbolic) {
+            my @keys= sort keys %{$pxs->{xsub_map_alias_value_to_name_seen_hash}->{$value}||{}};
+            # deal with an alias of 0, which might not be in the aliases
+            # dataset yet as 0 is the default for the base function ($fname)
+            push @keys, $fname
+                if $value eq "0" and !defined $pxs->{xsub_map_alias_name_to_value}{$fname};
+            if (@keys and $pxs->{config_author_warnings}) {
+                # We do not warn about value collisions unless author_warnings
+                # are enabled. They aren't helpful to a module consumer, only
+                # the module author.
+                @keys= map { "'$_'" }
+                                map { my $copy= $_;
+                                            $copy=~s/^$pxs->{PACKAGE_class}//;
+                                            $copy
+                                        } @keys;
+                $pxs->WarnHint(
+                                    "Warning: Aliases '$orig_alias' and "
+                                    . join(", ", @keys)
+                                    . " have identical values of $value"
+                                    . ( $value eq "0"
+                                            ? " - the base function"
+                                            : "" ),
+                                    !$pxs->{xsub_alias_clash_hinted}++
+                                    ? "If this is deliberate use a symbolic alias instead."
+                                    : undef
+                );
+            }
+        }
+
+        $parent->{aliases}{$alias} = $value;
+        $pxs->{xsub_map_alias_name_to_value}->{$alias} = $value;
+        $pxs->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
+    }
+
+    $pxs->blurt("Error: Cannot parse ALIAS definitions from '$orig'")
+        if $line;
+}
+
+
+# ======================================================================
 
 
 1;

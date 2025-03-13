@@ -360,12 +360,19 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 { # Alias check
   my $pxs = ExtUtils::ParseXS->new;
   tie *FH, 'Capture';
+  my $erred;
   my $stderr = PrimitiveCapture::capture_stderr(sub {
-    $pxs->process_file(
-      filename => 'XSAlias.xs',
-      output => \*FH,
-      prototypes => 1);
-  });
+      eval {
+        $pxs->process_file(
+          filename => 'XSAlias.xs',
+          output => \*FH,
+          prototypes => 1);
+      };
+      $erred = 1 if $@;
+      print STDERR "got eval err [$@]\n" if $@;
+    });
+  die $stderr if $erred; # don't hide stderr if code errors out
+
   my $content = tied(*FH)->{buf};
   my $count = 0;
   $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
@@ -3731,6 +3738,143 @@ EOF
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
+    # Test ALIAS keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "ALIAS basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: foo = 1
+                |           bar = 2
+                |           Baz::baz = 3
+                |           boz = BOZ_VAL
+                |           buz => foo
+                |           biz => Baz::baz
+EOF
+            [ 0, 0, qr{"Foo::foo",.*\n.*= 1;},
+                   "has Foo::foo" ],
+            [ 0, 0, qr{"Foo::bar",.*\n.*= 2;},
+                   "has Foo::bar" ],
+            [ 0, 0, qr{"Baz::baz",.*\n.*= 3;},
+                   "has Baz::baz" ],
+            [ 0, 0, qr{"Foo::boz",.*\n.*= BOZ_VAL;},
+                   "has Foo::boz" ],
+            [ 0, 0, qr{"Foo::buz",.*\n.*= 1;},
+                   "has Foo::buz" ],
+            [ 0, 0, qr{"Foo::biz",.*\n.*= 3;},
+                   "has Foo::biz" ],
+        ],
+
+        [
+            "ALIAS multi-perl-line, blank lines",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS:            foo   =    1       bar  =  2   
+                |
+                | Baz::baz  =  3      boz = BOZ_VAL
+                |       buz =>                          foo
+                |           biz => Baz::baz
+                |   
+                |
+EOF
+            [ 0, 0, qr{"Foo::foo",.*\n.*= 1;},
+                   "has Foo::foo" ],
+            [ 0, 0, qr{"Foo::bar",.*\n.*= 2;},
+                   "has Foo::bar" ],
+            [ 0, 0, qr{"Baz::baz",.*\n.*= 3;},
+                   "has Baz::baz" ],
+            [ 0, 0, qr{"Foo::boz",.*\n.*= BOZ_VAL;},
+                   "has Foo::boz" ],
+            [ 0, 0, qr{"Foo::buz",.*\n.*= 1;},
+                   "has Foo::buz" ],
+            [ 0, 0, qr{"Foo::biz",.*\n.*= 3;},
+                   "has Foo::biz" ],
+        ],
+
+        [
+            "ALIAS no colon",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: bar = X::Y
+EOF
+            [ 1, 0, qr{\QError: In alias definition for 'bar' the value may not contain ':' unless it is symbolic.\E.*line 7},
+                   "got expected error" ],
+        ],
+
+        [
+            "ALIAS unknown alias",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: Foo::bar => blurt
+EOF
+            [ 1, 0, qr{\QError: Unknown alias 'Foo::blurt' in symbolic definition for 'Foo::bar'\E.*line 7},
+                   "got expected error" ],
+        ],
+
+        [
+            "ALIAS warn duplicate",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: bar = 1
+                |           bar = 1
+EOF
+            [ 1, 0, qr{\QWarning: Ignoring duplicate alias 'bar'\E.*line 8},
+                   "got expected warning" ],
+        ],
+        [
+            "ALIAS warn conflict duplicate",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: bar = 1
+                |           bar = 2
+EOF
+            [ 1, 0, qr{\QWarning: Conflicting duplicate alias 'bar'\E.*line 8},
+                   "got expected warning" ],
+        ],
+
+        [
+            "ALIAS warn identical values",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: bar = 1
+                |           baz = 1
+EOF
+            [ 1, 0, qr{\QWarning: Aliases 'baz' and 'bar' have identical values of 1\E.*line 8},
+                   "got expected warning" ],
+        ],
+
+        [
+            "ALIAS unparseable entry",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: bar = 
+EOF
+            [ 1, 0, qr{\QError: Cannot parse ALIAS definitions from 'bar ='\E.*line 7},
+                   "got expected error" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
 }
 
 done_testing;

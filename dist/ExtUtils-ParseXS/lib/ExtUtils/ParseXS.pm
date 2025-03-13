@@ -2227,106 +2227,6 @@ sub INIT_handler {
 }
 
 
-# Process a line from an ALIAS: block
-#
-# Each line can have zero or more definitions, separated by white space.
-# Each definition is of one of the forms:
-#
-#      name = value
-#      name => other_name
-#
-#  where 'value' is a positive integer (or C macro) and the names are
-#  simple or qualified perl function names. E.g.
-#
-#     foo = 1   Bar::foo = 2   Bar::baz => Bar::foo
-#
-# Updates:
-#   $self->{xsub_map_alias_name_to_value}->{$alias} = $value;
-#   $self->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
-
-sub get_aliases {
-  my ExtUtils::ParseXS $self = shift;
-  my ($line) = @_;
-  my ($orig) = $line;
-
-  # we use this later for symbolic aliases
-  my $fname = $self->{PACKAGE_class} . $self->{xsub_func_name};
-
-  while ($line =~ s/^\s*([\w:]+)\s*=(>?)\s*([\w:]+)\s*//) {
-    my ($alias, $is_symbolic, $value) = ($1, $2, $3);
-    my $orig_alias = $alias;
-
-    blurt( $self, "Error: In alias definition for '$alias' the value may not"
-                  . " contain ':' unless it is symbolic.")
-        if !$is_symbolic and $value=~/:/;
-
-    # check for optional package definition in the alias
-    $alias = $self->{PACKAGE_class} . $alias if $alias !~ /::/;
-
-    if ($is_symbolic) {
-      my $orig_value = $value;
-      $value = $self->{PACKAGE_class} . $value if $value !~ /::/;
-      if (defined $self->{xsub_map_alias_name_to_value}->{$value}) {
-        $value = $self->{xsub_map_alias_name_to_value}->{$value};
-      } elsif ($value eq $fname) {
-        $value = 0;
-      } else {
-        blurt( $self, "Error: Unknown alias '$value' in symbolic definition for '$orig_alias'");
-      }
-    }
-
-    # check for duplicate alias name & duplicate value
-    my $prev_value = $self->{xsub_map_alias_name_to_value}->{$alias};
-    if (defined $prev_value) {
-      if ($prev_value eq $value) {
-        Warn( $self, "Warning: Ignoring duplicate alias '$orig_alias'")
-      } else {
-        Warn( $self, "Warning: Conflicting duplicate alias '$orig_alias'"
-                     . " changes definition from '$prev_value' to '$value'");
-        delete $self->{xsub_map_alias_value_to_name_seen_hash}->{$prev_value}{$alias};
-      }
-    }
-
-    # Check and see if this alias results in two aliases having the same
-    # value, we only check non-symbolic definitions as the whole point of
-    # symbolic definitions is to say we want to duplicate the value and
-    # it is NOT a mistake.
-    unless ($is_symbolic) {
-      my @keys= sort keys %{$self->{xsub_map_alias_value_to_name_seen_hash}->{$value}||{}};
-      # deal with an alias of 0, which might not be in the aliases
-      # dataset yet as 0 is the default for the base function ($fname)
-      push @keys, $fname
-        if $value eq "0" and !defined $self->{xsub_map_alias_name_to_value}{$fname};
-      if (@keys and $self->{config_author_warnings}) {
-        # We do not warn about value collisions unless author_warnings
-        # are enabled. They aren't helpful to a module consumer, only
-        # the module author.
-        @keys= map { "'$_'" }
-               map { my $copy= $_;
-                     $copy=~s/^$self->{PACKAGE_class}//;
-                     $copy
-                   } @keys;
-        WarnHint( $self,
-                  "Warning: Aliases '$orig_alias' and "
-                  . join(", ", @keys)
-                  . " have identical values of $value"
-                  . ( $value eq "0"
-                      ? " - the base function"
-                      : "" ),
-                  !$self->{xsub_alias_clash_hinted}++
-                  ? "If this is deliberate use a symbolic alias instead."
-                  : undef
-        );
-      }
-    }
-
-    $self->{xsub_map_alias_name_to_value}->{$alias} = $value;
-    $self->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
-  }
-
-  blurt( $self, "Error: Cannot parse ALIAS definitions from '$orig'")
-    if $line;
-}
 
 
 # Read each lines's worth of attributes into a string that is pushed
@@ -2343,21 +2243,6 @@ sub ATTRS_handler {
     next unless /\S/;
     trim_whitespace($_);
     push @{ $self->{xsub_attributes} }, $_;
-  }
-}
-
-
-# Process the line(s) following the ALIAS: keyword
-
-sub ALIAS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  # Consume and process alias lines until the next  directive.
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    trim_whitespace($_);
-    $self->get_aliases($_) if $_;
   }
 }
 
