@@ -1306,12 +1306,6 @@ $sysroot, instead of /.
 --sysroot is added to ccflags and friends so that make in
 ExtUtils::MakeMaker, and other extensions, will use it.
 
-=head2 Overriding an old config.sh
-
-If you want to use an old config.sh produced by a previous run of
-Configure, but override some of the items with command line options, you
-need to use B<Configure -O>.
-
 =head2 GNU-style configure
 
 If you prefer the GNU-style configure command line interface, you can
