@@ -246,14 +246,32 @@ S_invlist_trim(SV* invlist)
     /* Free the not currently-being-used space in an inversion list */
 
     /* But don't free up the space needed for the 0 UV that is always at the
-     * beginning of the list, nor the trailing NUL */
-    const UV min_size = TO_INTERNAL_SIZE(1) + 1;
+     * beginning of the list, nor the trailing NUL. The smallest possible
+     * allocation size may or may not be larger than this, depending upon
+     * the malloc implementation in use. */
+
+    const STRLEN min_size = MAX(PERL_STRLEN_NEW_MIN, TO_INTERNAL_SIZE(1) + 1);
 
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
     assert(is_invlist(invlist));
 
-    SvPV_renew(invlist, MAX(min_size, SvCUR(invlist) + 1));
+    /* Notes:
+     *     SvCUR(invlist) can be 0, often is min_size or larger
+     *
+     *     It's very common for SvLEN(invlist) to be equal to:
+     *     (TO_INTERNAL_SIZE(1) + 1)
+     *         ...or the minimum allocation size if larger
+     *     SvCUR(invlist) + 2
+     *     SvCUR(invlist) + "a few"
+     */
+
+    const STRLEN realistic_size = expected_size(
+                                      MAX( min_size, SvCUR(invlist) + 1)  );
+
+    if ( SvLEN(invlist) > realistic_size ) {
+        SvPV_renew(invlist, realistic_size);
+    }
 }
 
 PERL_STATIC_INLINE void
