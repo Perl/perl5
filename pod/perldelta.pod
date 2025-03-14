@@ -508,8 +508,22 @@ the F<perldelta> of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Andrew Main (ZEFRAM) passed away on March 10, 2025.
+
+Zefram was a brilliant person, seemingly knowledgeable in everything
+and happy to impart his knowledge and share his striking insights with a
+gentle, technical demeanor that often failed to convey the genuine care
+with which he communicated.
+
+It would be impossible to overstate the impact that Zefram has had on
+both the language and culture of Perl over the years. From his countless
+contributions to the code-base, to his often quirky but always distinctive
+appearances at conferences and gatherings, his influence and memory are
+sure to endure long into the future.
+
+Zefram wished to have no designated memorial location in
+meatspace. His designated memorial location in cyberspace is
+L<http://www.fysh.org/~zefram/personal/>.
 
 =head1 Acknowledgements
 
