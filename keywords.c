@@ -229,7 +229,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
             case 'l':
               if (name[2] == 'l')
               {                                   /* all              */
-                return (all_keywords || FEATURE_ALL_IS_ENABLED ? -KEY_all : 0);
+                return (all_keywords || FEATURE_KEYWORD_ALL_IS_ENABLED ? -KEY_all : 0);
               }
 
               goto unknown;
@@ -244,7 +244,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
 
                 case 'y':
                   {                               /* any              */
-                    return (all_keywords || FEATURE_ANY_IS_ENABLED ? -KEY_any : 0);
+                    return (all_keywords || FEATURE_KEYWORD_ANY_IS_ENABLED ? -KEY_any : 0);
                   }
 
                 default:
@@ -3590,5 +3590,5 @@ unknown:
 }
 
 /* Generated from:
- * c98bc3e43d3c015df56352665f8ae920fbfb3e2a035f4ce63dcc242190d25c9a regen/keywords.pl
+ * ad2656c0264d45b03ee74855fdffeffd57799d21d85991fbad0c541b732c9880 regen/keywords.pl
  * ex: set ro ft=c: */

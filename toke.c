@@ -7973,7 +7973,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_all:
         Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__ALL), "all is experimental");
+            packWARN(WARN_EXPERIMENTAL__KEYWORD_ALL), "all is experimental");
         BLKLOP(OP_ALLSTART);
 
     case KEY_and:
@@ -7983,7 +7983,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_any:
         Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__ANY), "any is experimental");
+            packWARN(WARN_EXPERIMENTAL__KEYWORD_ANY), "any is experimental");
         BLKLOP(OP_ANYSTART);
 
     case KEY_atan2:

@@ -92,7 +92,7 @@ sub testit {
         else {
             package test;
             use subs ();
-            no warnings qw( experimental::any experimental::all );
+            no warnings qw( experimental::keyword_any experimental::keyword_all );
             import subs $keyword;
             $code = "no warnings 'syntax'; no strict 'vars'; sub { ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";

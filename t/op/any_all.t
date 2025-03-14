@@ -6,8 +6,8 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-use feature qw( any all );
-no warnings qw( experimental::any experimental::all );
+use feature qw( keyword_any keyword_all );
+no warnings qw( experimental::keyword_any experimental::keyword_all );
 
 # Basic true/false testing
 ok(  (any { $_ > 10 } 1 .. 20), 'list contains a value above ten' );

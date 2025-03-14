@@ -51,8 +51,8 @@ my %feature = (
         defer
         module_true
         class
-        any
-        all
+        keyword_any
+        keyword_all
         smartmatch
     )
 );
@@ -618,7 +618,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.94';
+our $VERSION = '1.95';
 
 FEATURES
 
@@ -1081,34 +1081,30 @@ This only disables C<'> in symbols in your source code, the internal
 conversion from C<'> to C<::>, including for symbolic references, is
 always enabled.
 
-=head2 The 'any' feature
+=head2 The 'keyword_any' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
 change or be removed in future versions of Perl.  For this reason, Perl will
 warn when you use the feature, unless you have explicitly disabled the warning:
 
-    no warnings "experimental::any";
+    no warnings "experimental::keyword_any";
 
 This feature enables the L<C<any>|perlfunc/any BLOCK LIST> operator keyword.
 This allow testing whether any of the values in a list satisfy a given
 condition, with short-circuiting behaviour as soon as it finds one.
 
-=head2 The 'all' feature
+=head2 The 'keyword_all' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
 change or be removed in future versions of Perl.  For this reason, Perl will
 warn when you use the feature, unless you have explicitly disabled the warning:
 
-    no warnings "experimental::all";
+    no warnings "experimental::keyword_all";
 
 This feature enables the L<C<all>|perlfunc/all BLOCK LIST> operator keyword.
 This allow testing whether all of the values in a list satisfy a given
 condition, with short-circuiting behaviour as soon as it finds one that does
 not.
-
-B<Note:> remember that this enables one specific feature whose name is C<all>;
-it does not enable all of the features.  This is not C<use feature ':all'>.
-For that, see the section below.
 
 =head1 FEATURE BUNDLES
 

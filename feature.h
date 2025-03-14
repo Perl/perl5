@@ -13,20 +13,20 @@
 #define HINT_FEATURE_SHIFT	26
 
 /* Index 0 */
-#define FEATURE_ALL_BIT                             0x00000001
-#define FEATURE_ANY_BIT                             0x00000002
-#define FEATURE_APOS_AS_NAME_SEP_BIT                0x00000004
-#define FEATURE_BAREWORD_FILEHANDLES_BIT            0x00000008
-#define FEATURE_BITWISE_BIT                         0x00000010
-#define FEATURE_CLASS_BIT                           0x00000020
-#define FEATURE___SUB___BIT                         0x00000040
-#define FEATURE_MYREF_BIT                           0x00000080
-#define FEATURE_DEFER_BIT                           0x00000100
-#define FEATURE_EVALBYTES_BIT                       0x00000200
-#define FEATURE_MORE_DELIMS_BIT                     0x00000400
-#define FEATURE_FC_BIT                              0x00000800
-#define FEATURE_INDIRECT_BIT                        0x00001000
-#define FEATURE_ISA_BIT                             0x00002000
+#define FEATURE_APOS_AS_NAME_SEP_BIT                0x00000001
+#define FEATURE_BAREWORD_FILEHANDLES_BIT            0x00000002
+#define FEATURE_BITWISE_BIT                         0x00000004
+#define FEATURE_CLASS_BIT                           0x00000008
+#define FEATURE___SUB___BIT                         0x00000010
+#define FEATURE_MYREF_BIT                           0x00000020
+#define FEATURE_DEFER_BIT                           0x00000040
+#define FEATURE_EVALBYTES_BIT                       0x00000080
+#define FEATURE_MORE_DELIMS_BIT                     0x00000100
+#define FEATURE_FC_BIT                              0x00000200
+#define FEATURE_INDIRECT_BIT                        0x00000400
+#define FEATURE_ISA_BIT                             0x00000800
+#define FEATURE_KEYWORD_ALL_BIT                     0x00001000
+#define FEATURE_KEYWORD_ANY_BIT                     0x00002000
 #define FEATURE_MODULE_TRUE_BIT                     0x00004000
 #define FEATURE_MULTIDIMENSIONAL_BIT                0x00008000
 #define FEATURE_POSTDEREF_QQ_BIT                    0x00010000
@@ -40,8 +40,6 @@
 #define FEATURE_UNIEVAL_BIT                         0x01000000
 #define FEATURE_UNICODE_BIT                         0x02000000
 
-#define FEATURE_ALL_INDEX                             0
-#define FEATURE_ANY_INDEX                             0
 #define FEATURE_APOS_AS_NAME_SEP_INDEX                0
 #define FEATURE_BAREWORD_FILEHANDLES_INDEX            0
 #define FEATURE_BITWISE_INDEX                         0
@@ -54,6 +52,8 @@
 #define FEATURE_FC_INDEX                              0
 #define FEATURE_INDIRECT_INDEX                        0
 #define FEATURE_ISA_INDEX                             0
+#define FEATURE_KEYWORD_ALL_INDEX                     0
+#define FEATURE_KEYWORD_ANY_INDEX                     0
 #define FEATURE_MODULE_TRUE_INDEX                     0
 #define FEATURE_MULTIDIMENSIONAL_INDEX                0
 #define FEATURE_POSTDEREF_QQ_INDEX                    0
@@ -109,18 +109,6 @@
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_541) \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_FC_INDEX, FEATURE_FC_BIT)) \
-    )
-
-#define FEATURE_ALL_IS_ENABLED \
-    ( \
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
-	 FEATURE_IS_ENABLED_MASK(FEATURE_ALL_INDEX, FEATURE_ALL_BIT) \
-    )
-
-#define FEATURE_ANY_IS_ENABLED \
-    ( \
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
-	 FEATURE_IS_ENABLED_MASK(FEATURE_ANY_INDEX, FEATURE_ANY_BIT) \
     )
 
 #define FEATURE_ISA_IS_ENABLED \
@@ -219,6 +207,18 @@
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_541) \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE___SUB___INDEX, FEATURE___SUB___BIT)) \
+    )
+
+#define FEATURE_KEYWORD_ALL_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_KEYWORD_ALL_INDEX, FEATURE_KEYWORD_ALL_BIT) \
+    )
+
+#define FEATURE_KEYWORD_ANY_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_KEYWORD_ANY_INDEX, FEATURE_KEYWORD_ANY_BIT) \
     )
 
 #define FEATURE_MODULE_TRUE_IS_ENABLED \
@@ -373,19 +373,7 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
             return;
 
         case 'a':
-            if (keylen == sizeof("feature_all")-1
-                 && memcmp(subf+1, "ll", keylen - sizeof("feature_")) == 0) {
-                mask = FEATURE_ALL_BIT;
-                index = FEATURE_ALL_INDEX;
-                break;
-            }
-            else if (keylen == sizeof("feature_any")-1
-                 && memcmp(subf+1, "ny", keylen - sizeof("feature_")) == 0) {
-                mask = FEATURE_ANY_BIT;
-                index = FEATURE_ANY_INDEX;
-                break;
-            }
-            else if (keylen == sizeof("feature_apos_as_name_sep")-1
+            if (keylen == sizeof("feature_apos_as_name_sep")-1
                  && memcmp(subf+1, "pos_as_name_sep", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_APOS_AS_NAME_SEP_BIT;
                 index = FEATURE_APOS_AS_NAME_SEP_INDEX;
@@ -455,6 +443,21 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
                  && memcmp(subf+1, "sa", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_ISA_BIT;
                 index = FEATURE_ISA_INDEX;
+                break;
+            }
+            return;
+
+        case 'k':
+            if (keylen == sizeof("feature_keyword_all")-1
+                 && memcmp(subf+1, "eyword_all", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_KEYWORD_ALL_BIT;
+                index = FEATURE_KEYWORD_ALL_INDEX;
+                break;
+            }
+            else if (keylen == sizeof("feature_keyword_any")-1
+                 && memcmp(subf+1, "eyword_any", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_KEYWORD_ANY_BIT;
+                index = FEATURE_KEYWORD_ANY_INDEX;
                 break;
             }
             return;
@@ -585,20 +588,6 @@ struct perl_feature_bit {
 static const struct perl_feature_bit
 PL_feature_bits[] = {
     {
-        /* feature all */
-        "feature_all",
-        STRLENs("feature_all"),
-        FEATURE_ALL_BIT,
-        FEATURE_ALL_INDEX
-    },
-    {
-        /* feature any */
-        "feature_any",
-        STRLENs("feature_any"),
-        FEATURE_ANY_BIT,
-        FEATURE_ANY_INDEX
-    },
-    {
         /* feature apostrophe_as_package_separator */
         "feature_apos_as_name_sep",
         STRLENs("feature_apos_as_name_sep"),
@@ -681,6 +670,20 @@ PL_feature_bits[] = {
         STRLENs("feature_isa"),
         FEATURE_ISA_BIT,
         FEATURE_ISA_INDEX
+    },
+    {
+        /* feature keyword_all */
+        "feature_keyword_all",
+        STRLENs("feature_keyword_all"),
+        FEATURE_KEYWORD_ALL_BIT,
+        FEATURE_KEYWORD_ALL_INDEX
+    },
+    {
+        /* feature keyword_any */
+        "feature_keyword_any",
+        STRLENs("feature_keyword_any"),
+        FEATURE_KEYWORD_ANY_BIT,
+        FEATURE_KEYWORD_ANY_INDEX
     },
     {
         /* feature module_true */

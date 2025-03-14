@@ -160,8 +160,8 @@
 
 /* Warnings Categories added in Perl 5.041 */
 
-#define WARN_EXPERIMENTAL__ALL		 78
-#define WARN_EXPERIMENTAL__ANY		 79
+#define WARN_EXPERIMENTAL__KEYWORD_ALL	 78
+#define WARN_EXPERIMENTAL__KEYWORD_ANY	 79
 #define WARNsize			 20
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -354,8 +354,8 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__CLASS
 =for apidoc Amnh||WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS
 =for apidoc Amnh||WARN_DEPRECATED__SUBSEQUENT_USE_VERSION
-=for apidoc Amnh||WARN_EXPERIMENTAL__ALL
-=for apidoc Amnh||WARN_EXPERIMENTAL__ANY
+=for apidoc Amnh||WARN_EXPERIMENTAL__KEYWORD_ALL
+=for apidoc Amnh||WARN_EXPERIMENTAL__KEYWORD_ANY
 
 =cut
 */
