@@ -90,7 +90,6 @@ consent of the Steering Council.)
   Tatsuhiko Miyagawa <miyagawa@bulknews.net>
   Tony Cook <tony@develop-help.com>
   Yves Orton <demerphq@gmail.com>
-  Zefram <zefram@fysh.org>
   Ævar Arnfjörð Bjarmason <avar@cpan.org>
 
 =head1 AUTHOR
