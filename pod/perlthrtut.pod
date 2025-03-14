@@ -186,10 +186,10 @@ have code like this:
         if ($Config{useithreads}) {
             # We have threads
             require MyMod_threaded;
-            import MyMod_threaded;
+            MyMod_threaded->import();
         } else {
             require MyMod_unthreaded;
-            import MyMod_unthreaded;
+            MyMod_unthreaded->import();
         }
     }
 

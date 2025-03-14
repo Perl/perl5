@@ -490,7 +490,7 @@ pass("no crash when open autovivifies glob in freed package");
             skip "Errno not built yet", 8;
         }
         require Errno;
-        import Errno 'ENOENT';
+        Errno->import('ENOENT');
         # check handling of multiple arguments, which the original patch
         # mis-handled
         $! = 0;

@@ -9,7 +9,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; Config->import;
-    require File::Temp; import File::Temp qw/:POSIX/;
+    require File::Temp; File::Temp->import(qw/:POSIX/);
 
     require Win32;
     ($::os_id, $::os_major) = ( Win32::GetOSVersion() )[ 4, 1 ];
