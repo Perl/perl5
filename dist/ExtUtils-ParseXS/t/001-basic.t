@@ -1385,6 +1385,31 @@ EOF
 }
 
 {
+    # misc checks for length() pseudo-parameter
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "length() default value",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, length(s) = 0)
+EOF
+            [ 1, 0, qr{\QDefault value not allowed on length() parameter 's'\E.*line 6},
+                   "got expected error" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
     # check that args to an auto-called C function are correct
 
     my $preamble = Q(<<'EOF');
@@ -1954,6 +1979,17 @@ EOF
         ],
 
         [
+            "multiple prototype",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int a, int b, int c)
+                |    PROTOTYPE: $$$
+                |    PROTOTYPE: $$$
+EOF
+            [ 1, 0, qr/Error: Only 1 PROTOTYPE definition allowed per xsub/, "" ],
+        ],
+
+        [
             "explicit invalid prototype",
             [ Q(<<'EOF') ],
                 |void
@@ -2209,6 +2245,10 @@ EOF
         |MODULE = Foo PACKAGE = Foo
         |
         |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |blah T_BLAH
+        |EOF
         |
 EOF
 
@@ -2488,6 +2528,18 @@ EOF
 
             # should only be one SvSETMAGIC
             [ 0, 1, qr/\bSvSETMAGIC\b.*\bSvSETMAGIC\b/s,"only one SvSETMAGIC" ],
+        ],
+
+        [
+            "OUTPUT with no output typemap entry",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(blah a)
+                |    OUTPUT:
+                |      a
+EOF
+            [ 1, 1, qr/\QError: No OUTPUT definition for type 'blah', typekind 'T_BLAH'\E.*line 11/,
+                    "got expected error" ],
         ],
     );
 
@@ -3397,6 +3449,9 @@ EOF
         |
         |shortArray *       T_DAE
         |
+        |NooutputArray *   T_ARRAY
+        |Nooutput          T_Nooutput
+        |
         |INPUT
         |T_BLAH
         |   $var = my_get_blah($arg);
@@ -3584,6 +3639,16 @@ EOF
 EOF
             [ 1, 0, qr/Can't use typemap containing DO_ARRAY_ELEM for OUTLIST parameter/,
                     "gives err" ],
+        ],
+
+        [
+            "T_ARRAY no output typemap entry",
+            [ Q(<<'EOF') ],
+                |NooutputArray *
+                |foo()
+EOF
+            [ 1, 0, qr/\QError: No OUTPUT definition for type 'Nooutput', typekind 'T_Nooutput'\E.*line 38/,
+                    "gives expected error" ],
         ],
     );
 
