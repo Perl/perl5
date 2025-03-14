@@ -24,32 +24,37 @@ use warnings;
 
 # (feature name) => (internal name, used in %^H and macro names)
 my %feature = (
-    say                     => 'say',
-    state                   => 'state',
-    switch                  => 'switch',
-    bitwise                 => 'bitwise',
-    evalbytes               => 'evalbytes',
+    # A few features are publicly named differently than internally
     current_sub             => '__SUB__',
-    refaliasing             => 'refaliasing',
-    postderef_qq            => 'postderef_qq',
     unicode_eval            => 'unieval',
     declared_refs           => 'myref',
     unicode_strings         => 'unicode',
-    fc                      => 'fc',
-    signatures              => 'signatures',
-    isa                     => 'isa',
-    indirect                => 'indirect',
-    multidimensional        => 'multidimensional',
-    bareword_filehandles    => 'bareword_filehandles',
-    try                     => 'try',
-    defer                   => 'defer',
     extra_paired_delimiters => 'more_delims',
-    module_true             => 'module_true',
-    class                   => 'class',
     apostrophe_as_package_separator => 'apos_as_name_sep',
-    any                     => 'any',
-    all                     => 'all',
-    smartmatch              => 'smartmatch',
+
+    # Most features have identical public and internal names
+    map { $_ => $_ } qw(
+        say
+        state
+        switch
+        bitwise
+        evalbytes
+        refaliasing
+        postderef_qq
+        fc
+        signatures
+        isa
+        indirect
+        multidimensional
+        bareword_filehandles
+        try
+        defer
+        module_true
+        class
+        any
+        all
+        smartmatch
+    )
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
