@@ -3942,4 +3942,35 @@ EOF
     test_many($preamble, 'boot_Foo', \@test_fns);
 }
 
+{
+    # Test ATTRS keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "ATTRS basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ATTRS: a
+                |           b     c(x)
+                |    C_ARGS: foo
+                |    ATTRS: d(y(  z))  
+EOF
+            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "a\E\s+b\s+c\(x\)\s+\Qd(y(  z))", 0);},
+                   "has correct attrs arg" ],
+        ],
+
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
 done_testing;

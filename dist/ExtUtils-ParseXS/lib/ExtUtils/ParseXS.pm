@@ -2227,26 +2227,6 @@ sub INIT_handler {
 }
 
 
-
-
-# Read each lines's worth of attributes into a string that is pushed
-# to the {xsub_attributes} array. Note that it doesn't matter that multiple
-# space-separated attributes on the same line are stored as a single
-# string; later, all the attribute lines are joined together into a single
-# string to pass to apply_attrs_string().
-
-sub ATTRS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    trim_whitespace($_);
-    push @{ $self->{xsub_attributes} }, $_;
-  }
-}
-
-
 # Add all overload method names, like 'cmp', '<=>', etc, (possibly
 # multiple ones per line) until the next keyword line, as 'seen' keys to
 # the $self->{xsub_map_overload_name_to_seen} hash.

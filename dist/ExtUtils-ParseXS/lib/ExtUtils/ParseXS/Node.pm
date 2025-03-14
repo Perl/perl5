@@ -1838,6 +1838,34 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::ATTRS;
+
+# Handle ATTRS keyword
+
+BEGIN { $build_subclass->('multiline', # parent
+)};
+
+
+# Read each lines's worth of attributes into a string that is pushed
+# to the {xsub_attributes} array. Note that it doesn't matter that multiple
+# space-separated attributes on the same line are stored as a single
+# string; later, all the attribute lines are joined together into a single
+# string to pass to apply_attrs_string().
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines
+    for (@{$self->{lines}}) {
+        ExtUtils::ParseXS::Utilities::trim_whitespace($_);
+        push @{ $pxs->{xsub_attributes} }, $_;
+    }
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::PROTOTYPE;
 
 # Handle PROTOTYPE keyword
