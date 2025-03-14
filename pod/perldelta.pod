@@ -27,6 +27,33 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Renamed C<any> and C<all> features to C<keyword_any> and C<keyword_all>
+
+Perl release 5.41.7 introduced two new experimental features, called C<any>
+and C<all>, which enable keywords of the same names.  Those keywords provide
+list-processing operators inspired by the ones from L<List::Util> of the same
+name.  It was subsequently considered that the names of these two features
+are confusingly close to the ability of the C<feature> module to refer to all
+of its features by using the C<:all> export tag.
+(L<GH #23104|https://github.com/Perl/perl5/issues/23104>).
+
+As a consequence, these feature flags have now been renamed to C<keyword_any>
+and C<keyword_all> to avoid this confusion.  Likewise, the related
+experimental warning flags are also renamed to C<experimental::keyword_any>
+and C<experimental::keyword_all>.  Apart from these new flag names, the
+actual syntax and semantics of these two operators remains unchanged since
+their appearance in Perl release 5.41.7.
+
+    use v5.40;
+    use feature 'keyword_all';
+    no warnings 'experimental::keyword_all';
+
+    my @numbers = ...
+
+    if(all { $_ % 2 == 0 } @numbers) {
+        say "All the numbers are even";
+    }
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security

@@ -832,7 +832,7 @@ is roughly equivalent to
     if( @strings == grep { length $_ } @strings ) ...
 
 This operator is only available if the
-L<C<all> feature|feature/"The 'all' feature"> is enabled.
+L<C<keyword_all> feature|feature/"The 'keyword_all' feature"> is enabled.
 
 It is currently considered B<experimental>, and will issue a compile-time
 warning in the category C<experimental::all> unless that category is silenced.
@@ -862,7 +862,7 @@ is roughly equivalent to
     if( grep { length $_ } @strings ) ...
 
 This operator is only available if the
-L<C<any> feature|feature/"The 'any' feature"> is enabled.
+L<C<keyword_any> feature|feature/"The 'keyword_any' feature"> is enabled.
 
 It is currently considered B<experimental>, and will issue a compile-time
 warning in the category C<experimental::any> unless that category is silenced.
