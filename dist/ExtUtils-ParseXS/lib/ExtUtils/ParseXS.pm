@@ -2227,24 +2227,6 @@ sub INIT_handler {
 }
 
 
-# Add all overload method names, like 'cmp', '<=>', etc, (possibly
-# multiple ones per line) until the next keyword line, as 'seen' keys to
-# the $self->{xsub_map_overload_name_to_seen} hash.
-
-sub OVERLOAD_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    trim_whitespace($_);
-    while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
-      $self->{xsub_map_overload_name_to_seen}->{$1} = 1;
-    }
-  }
-}
-
-
 sub FALLBACK_handler {
   my ExtUtils::ParseXS $self = shift;
   my ($setting) = @_;

@@ -1838,6 +1838,34 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::OVERLOAD;
+
+# Handle OVERLOAD keyword
+
+BEGIN { $build_subclass->('multiline_merged', # parent
+    'ops', # has ref of overloaded op names
+)};
+
+# Add all overload method names, like 'cmp', '<=>', etc, (possibly
+# multiple ones per line) until the next keyword line, as 'seen' keys to
+# the $self->{xsub_map_overload_name_to_seen} hash.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+
+    my $s = $self->{text};
+    while ($s =~  s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
+        $self->{ops}{$1} = 1;
+        $pxs->{xsub_map_overload_name_to_seen}->{$1} = 1;
+    }
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::ATTRS;
 
 # Handle ATTRS keyword

@@ -3973,4 +3973,41 @@ EOF
 }
 
 
+{
+    # Test OVERLOAD keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "OVERLOAD basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    OVERLOAD:   cmp   <=>
+                |                  + - *    /
+                |    OVERLOAD:   >   <  >=
+EOF
+            [ 0, 0, qr{\Q"Foo::(*"},   "has Foo::(* method"   ],
+            [ 0, 0, qr{\Q"Foo::(+"},   "has Foo::(+ method"   ],
+            [ 0, 0, qr{\Q"Foo::(-"},   "has Foo::(- method"   ],
+            [ 0, 0, qr{\Q"Foo::(/"},   "has Foo::(/ method"   ],
+            [ 0, 0, qr{\Q"Foo::(<"},   "has Foo::(< method"   ],
+            [ 0, 0, qr{\Q"Foo::(<=>"}, "has Foo::(<=> method" ],
+            [ 0, 0, qr{\Q"Foo::(>"},   "has Foo::(> method"   ],
+            [ 0, 0, qr{\Q"Foo::(>="},  "has Foo::(>= method"  ],
+            [ 0, 0, qr{\Q"Foo::(cmp"}, "has Foo::(cmp method" ],
+        ],
+
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
 done_testing;
