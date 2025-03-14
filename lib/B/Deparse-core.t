@@ -93,7 +93,7 @@ sub testit {
             package test;
             use subs ();
             no warnings qw( experimental::keyword_any experimental::keyword_all );
-            import subs $keyword;
+            subs->import($keyword);
             $code = "no warnings 'syntax'; no strict 'vars'; sub { ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";
             $code = "use feature 'switch';\n$code" if $keyword eq "break";
@@ -610,7 +610,7 @@ recv             4     p
 ref              01    $
 rename           2     p
 # XXX This code prints 'Undefined subroutine &main::require called':
-#   use subs (); import subs 'require';
+#   use subs (); subs->import('require');
 #   eval q[no strict 'vars'; sub { () = require; }]; print $@;
 # so disable for now
 #require          01    $+

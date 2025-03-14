@@ -3,13 +3,13 @@
 # If you modify/add tests here, remember to update also t/op/lfs.t.
 
 BEGIN {
-	require Config; import Config;
+	require Config; Config->import;
 	# Don't bother if there are no quad offsets.
 	if ($Config{lseeksize} < 8) {
 		print "1..0 # Skip: no 64-bit file offsets\n";
 		exit(0);
 	}
-	require Fcntl; import Fcntl qw(/^O_/ /^SEEK_/);
+	require Fcntl; Fcntl->import(qw(/^O_/ /^SEEK_/));
 }
 
 use strict;

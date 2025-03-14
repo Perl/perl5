@@ -37,7 +37,7 @@ which determines whether you have delete access to a file.
 If you're running under VMS, the routines in this package are special,
 in that they're automatically made available to any Perl script,
 whether you're running F<miniperl> or the full F<perl>.  The C<use
-VMS::Filespec> or C<require VMS::Filespec; import VMS::Filespec ...>
+VMS::Filespec> or C<< require VMS::Filespec; VMS::Filespec->import(...) >>
 statement can be used to import the function names into the current
 package, but they're always available if you use the fully qualified
 name, whether or not you've mentioned the F<.pm> file in your script. 
@@ -223,7 +223,7 @@ This document was last revised 8-DEC-2007, for Perl 5.10.0
 package VMS::Filespec;
 require 5.006;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 # If you want to use this package on a non-VMS system,
 # uncomment the following line.
