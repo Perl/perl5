@@ -7,7 +7,7 @@ require Exporter;
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f test_d chmod
                   dos2unix);
-our $VERSION = '7.70';
+our $VERSION = '7.72';
 $VERSION =~ tr/_//d;
 
 my $Is_VMS   = $^O eq 'VMS';

@@ -1110,6 +1110,7 @@ cpan/ExtUtils-MakeMaker/t/prereq.t						See if MakeMaker works
 cpan/ExtUtils-MakeMaker/t/prereq_print.t					See if PREREQ_PRINT works
 cpan/ExtUtils-MakeMaker/t/problems.t						How MakeMaker reacts to build problems
 cpan/ExtUtils-MakeMaker/t/prompt.t						See if E::MM::prompt() works
+cpan/ExtUtils-MakeMaker/t/rec_att_keys.t
 cpan/ExtUtils-MakeMaker/t/recurs.t						See if recursive builds work
 cpan/ExtUtils-MakeMaker/t/revision.t						See if $Revision is correct
 cpan/ExtUtils-MakeMaker/t/several_authors.t					See if multiple AUTHORs work
