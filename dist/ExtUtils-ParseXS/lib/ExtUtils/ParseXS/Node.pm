@@ -2043,6 +2043,7 @@ BEGIN { $build_subclass->('', # parent
 sub parse {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
+    my $do_notimplemented      = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -2050,6 +2051,12 @@ sub parse {
     while(   @{$pxs->{line}}
           && $pxs->{line}[0] !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o)
     {
+        if ($do_notimplemented) {
+            # treat NOT_IMPLEMENTED_YET as another block separator, in
+            # addition to $BLOCK_regexp.
+            last if $pxs->{line}[0] =~ /^\s*NOT_IMPLEMENTED_YET/;
+        }
+
         push @{$self->{lines}}, $pxs->{line}[0];
         my $class = ref($self) . '_line';
         my $kid = $class->new();
@@ -2058,6 +2065,20 @@ sub parse {
         # method to actually pop the line.
         $kid->parse($pxs, $self);
         push @{$self->{kids}}, $kid;
+    }
+}
+
+
+# call as_code() on any kids which have that method
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    return unless $self->{kids};
+    for my $kid (@{$self->{kids}}) {
+        next unless $kid->can('as_code');
+        $kid->as_code($pxs);
     }
 }
 
@@ -2243,42 +2264,54 @@ sub parse {
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX tmp
+package ExtUtils::ParseXS::Node::INPUT;
 
-# INPUT_handler(): handle an explicit INPUT: block, or any implicit INPUT
+# Handle an explicit INPUT: block, or any implicit INPUT
 # block which can follow an xsub signature or CASE keyword.
 
-sub INPUT_handler {
-    my ExtUtils::ParseXS $self = shift;
-    my $line = shift;
+BEGIN { $build_subclass->('keylines', # parent
+)};
 
-    # In this loop: process each line until the next keyword or end of
-    # paragraph.
+# The inherited parse() method will call INPUT_line->parse() for each line
 
-    for (;  $line !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
-        # treat NOT_IMPLEMENTED_YET as another block separator, in addition to
-        # $BLOCK_regexp.
-        last if $line =~ /^\s*NOT_IMPLEMENTED_YET/;
 
-        $self->INPUT_handler_line($line);
-    } # foreach line in INPUT block
-    $_ = $line;
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    # Call the SUPER parse method, which will call INPUT_line->parse()
+    # for each lINPUT line. The '1' bool arg indicates to treat
+    # NOT_IMPLEMENTED_YET as another block separator, in addition to
+    # $BLOCK_regexp.
+    $self->SUPER::parse($pxs, 1);
 }
 
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX tmp
+package ExtUtils::ParseXS::Node::INPUT_line;
 
-# process a single line from an INPUT section
+# Handle one line from an INPUT keyword block
 
-sub INPUT_handler_line {
-    my ExtUtils::ParseXS $self = shift;
-    my $line = shift;
+BEGIN { $build_subclass->('keyline', # parent
+    'param', # the param object associated with this INPUT line.
+)};
+
+
+# Parse one line from an INPUT block
+#
+
+sub parse {
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::INPUT $parent = shift; # parent INPUT node
+
+    $self->SUPER::parse($pxs); # set file/line_no/line
+    my $line = $self->{line};  # line of text to be processed
 
     return unless $line =~ /\S/;  # skip blank lines
 
-    trim_whitespace($line);
+    ExtUtils::ParseXS::Utilities::trim_whitespace($line);
     my $orig_line = $line; # keep original line for error messages
 
     # remove any trailing semicolon, except for initialisations
@@ -2318,18 +2351,18 @@ sub INPUT_handler_line {
                 (\w+ | length\(\w+\)) # name or length(name)
                 $
             /xs
-        or $self->blurt("Error: invalid parameter declaration '$orig_line'"), return;
+        or $pxs->blurt("Error: invalid parameter declaration '$orig_line'"), return;
 
     # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
-        $self->blurt("Error: length() not permitted in INPUT section");
+        $pxs->blurt("Error: length() not permitted in INPUT section");
         return;
     }
 
     my ($var_num, $is_alien);
 
     my ExtUtils::ParseXS::Node::Param $param
-                = $self->{xsub_sig}{names}{$var_name};
+                = $pxs->{xsub_sig}{names}{$var_name};
 
 
     if (defined $param) {
@@ -2344,7 +2377,7 @@ sub INPUT_handler_line {
         if (   $param->{in_input}
             or (!$param->{is_synthetic} and defined $param->{type})
         ) {
-            $self->blurt(
+            $pxs->blurt(
                 "Error: duplicate definition of parameter '$var_name' ignored");
             return;
         }
@@ -2358,9 +2391,9 @@ sub INPUT_handler_line {
                 # type, and has already been moved to the correct position;
                 # otherwise, it's an alien var that didn't appear in the
                 # signature; move to the correct position.
-                @{$self->{xsub_sig}{params}} =
-                            grep $_ != $param, @{$self->{xsub_sig}{params}};
-                push @{$self->{xsub_sig}{params}}, $param;
+                @{$pxs->{xsub_sig}{params}} =
+                            grep $_ != $param, @{$pxs->{xsub_sig}{params}};
+                push @{$pxs->{xsub_sig}{params}}, $param;
                 $is_alien          = 1;
                 $param->{is_alien} = 1;
             }
@@ -2379,8 +2412,8 @@ sub INPUT_handler_line {
                     is_alien => 1,
                 });
 
-        push @{$self->{xsub_sig}{params}}, $param;
-        $self->{xsub_sig}{names}{$var_name} = $param;
+        push @{$pxs->{xsub_sig}{params}}, $param;
+        $pxs->{xsub_sig}{names}{$var_name} = $param;
     }
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -2407,7 +2440,7 @@ sub INPUT_handler_line {
             # "; extra code" or "+ extra code" :
             # append the extra code (after passing through eval) after all the
             # INPUT and PREINIT blocks have been processed, indirectly using
-            # the $self->{xsub_deferred_code_lines} mechanism.
+            # the $pxs->{xsub_deferred_code_lines} mechanism.
             # In addition, for '+', also generate the normal initialisation
             # code from the standard typemap - assuming that it's a real
             # parameter that appears in the signature as well as the INPUT
@@ -2435,18 +2468,31 @@ sub INPUT_handler_line {
         is_addr => !!$var_addr,
     );
 
-    $param->check($self)
+    $self->{param} = $param;
+
+    $param->check($pxs)
         or return;
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
+
+    my $param = $self->{param};
+    return unless $param; # might be blank line
 
     # Synthetic params like THIS will be emitted later - they
     # are treated like ANSI params, except the type can overridden
     # within an INPUT statement
     return if $param->{is_synthetic};
 
-    $param->as_code($self);
+    # The param object contains data from both the INPUT line and
+    # the XSUB signature.
+    $param->as_code($pxs);
 }
 
 

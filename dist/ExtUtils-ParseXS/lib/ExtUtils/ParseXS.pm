@@ -1041,7 +1041,13 @@ EOF
       $self->{xsub_targ_used}           = 0; # TARG hasn't yet been used
 
       # Process any implicit INPUT section.
-      $self->INPUT_handler($_);
+      {
+        my $input = ExtUtils::ParseXS::Node::INPUT->new();
+        unshift @{$self->{line}}, $_;
+        $input->parse($self);
+        $_ = shift @{$self->{line}};
+        $input->as_code($self);
+      }
 
       # keywords which can appear anywhere in an XSUB
       my $generic_xsub_keys =
