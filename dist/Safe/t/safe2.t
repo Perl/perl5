@@ -28,10 +28,10 @@ $Root::foo .= "";
 
 my $cpt;
 # create and destroy a couple of automatic Safe compartments first
-$cpt = new Safe or die;
-$cpt = new Safe or die;
+$cpt = Safe->new or die;
+$cpt = Safe->new or die;
 
-$cpt = new Safe "Root";
+$cpt = Safe->new("Root");
 
 $cpt->permit(qw(:base_io));
 
