@@ -1970,7 +1970,20 @@ sub INPUT_handler {
     # treat NOT_IMPLEMENTED_YET as another block separator, in addition to
     # $BLOCK_regexp.
     last if $line =~ /^\s*NOT_IMPLEMENTED_YET/;
-    next unless $line =~ /\S/;  # skip blank lines
+
+    $self->INPUT_handler_line($line);
+  } # foreach line in INPUT block
+  $_ = $line;
+}
+
+
+# process a single line from an INPUT section
+
+sub INPUT_handler_line {
+  my ExtUtils::ParseXS $self = shift;
+  my $line = shift;
+
+    return unless $line =~ /\S/;  # skip blank lines
 
     trim_whitespace($line);
     my $orig_line = $line; # keep original line for error messages
@@ -2012,12 +2025,12 @@ sub INPUT_handler {
             (\w+ | length\(\w+\)) # name or length(name)
             $
           /xs
-      or $self->blurt("Error: invalid parameter declaration '$orig_line'"), next;
+      or $self->blurt("Error: invalid parameter declaration '$orig_line'"), return;
 
     # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
       $self->blurt("Error: length() not permitted in INPUT section");
-      next;
+      return;
     }
 
     my ($var_num, $is_alien);
@@ -2040,7 +2053,7 @@ sub INPUT_handler {
       ) {
           $self->blurt(
             "Error: duplicate definition of parameter '$var_name' ignored");
-          next;
+          return;
       }
 
       if ($var_name eq 'RETVAL' and $param->{is_synthetic}) {
@@ -2130,7 +2143,7 @@ sub INPUT_handler {
     );
 
     $param->check($self)
-      or next;
+      or return;
 
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
@@ -2138,13 +2151,9 @@ sub INPUT_handler {
     # Synthetic params like THIS will be emitted later - they
     # are treated like ANSI params, except the type can overridden
     # within an INPUT statement
-    next if $param->{is_synthetic};
+    return if $param->{is_synthetic};
 
     $param->as_code($self);
-
-  } # foreach line in INPUT block
-
-  $_ = $line;
 }
 
 
