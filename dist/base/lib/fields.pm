@@ -1,10 +1,9 @@
 use 5.008;
 package fields;
 
-require 5.005;
 use strict;
 no strict 'refs';
-unless( eval q{require warnings::register; warnings::register->import; 1} ) {
+unless( eval {require warnings::register; warnings::register->import; 1} ) {
     *warnings::warnif = sub { 
         require Carp;
         Carp::carp(@_);
@@ -12,7 +11,7 @@ unless( eval q{require warnings::register; warnings::register->import; 1} ) {
 }
 our %attr;
 
-our $VERSION = '2.26';
+our $VERSION = '2.27';
 $VERSION =~ tr/_//d;
 
 # constant.pm is slow
