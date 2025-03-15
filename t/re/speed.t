@@ -18,8 +18,8 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib','.','../ext/re');
-    require Config; Config->import;
 }
+use Config;
 
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();

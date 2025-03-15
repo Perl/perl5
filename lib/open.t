@@ -3,10 +3,10 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
-	require Config; Config->import;
 	require './test.pl';
 	require './charset_tools.pl';
 }
+use Config;
 
 plan 11;
 

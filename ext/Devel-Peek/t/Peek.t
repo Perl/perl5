@@ -1,7 +1,7 @@
 #!./perl -T
 
+use Config;
 BEGIN {
-    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bDevel\/Peek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
         exit 0;

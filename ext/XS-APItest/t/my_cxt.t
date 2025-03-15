@@ -4,8 +4,8 @@
 # DAPM Dec 2005
 
 my $threads;
+use Config;
 BEGIN {
-    require Config; Config->import;
     $threads = $Config{'useithreads'};
     # must 'use threads' before 'use Test::More'
     eval 'use threads' if $threads;

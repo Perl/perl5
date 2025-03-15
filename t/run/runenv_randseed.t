@@ -4,9 +4,8 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    require Config;
-    Config->import;
 }
+use Config;
 
 skip_all_without_config('d_fork');
 skip_all("This perl is built with NO_PERL_RAND_SEED")

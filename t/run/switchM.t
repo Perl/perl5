@@ -3,10 +3,8 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config;
-    Config->import;
-
 }
+use Config;
 use strict;
 use warnings;
 

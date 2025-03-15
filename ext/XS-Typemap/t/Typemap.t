@@ -1,5 +1,5 @@
+use Config;
 BEGIN {
-    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bXS\/Typemap\b/) {
         print "1..0 # Skip: XS::Typemap was not built\n";
         exit 0;
