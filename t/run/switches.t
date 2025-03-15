@@ -7,10 +7,9 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; Config->import;
+    require "./test.pl";
+    require "./loc_tools.pl";
 }
-
-BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
 use Config;
 

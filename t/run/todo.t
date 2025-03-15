@@ -5,8 +5,8 @@ BEGIN {
     set_up_inc('../lib', '.', '../ext/re');
     require './charset_tools.pl';
     require './loc_tools.pl';
-    require Config; Config->import;
 }
+use Config;
 
 use strict;
 use warnings;

@@ -54,8 +54,8 @@ BEGIN {
 	exit;
     }
     $| = 1;
-    require Config; Config->import;
 }
+use Config;
 
 use feature 'fc';
 my @langinfo;

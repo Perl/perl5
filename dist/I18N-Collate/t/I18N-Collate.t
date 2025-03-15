@@ -6,8 +6,8 @@
 use strict;
 no warnings;
 
+use Config;
 BEGIN {
-    require Config; Config->import;
     if (!$::Config{d_setlocale} || $::Config{ccflags} =~ /\bD?NO_LOCALE\b/) {
 	print "1..0\n";
 	exit;
