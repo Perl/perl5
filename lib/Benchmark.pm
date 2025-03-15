@@ -482,7 +482,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.26;
+$VERSION = 1.27;
 
 # --- ':hireswallclock' special handling
 
@@ -492,9 +492,8 @@ sub mytime () { time }
 
 init();
 
-sub BEGIN {
-    if (eval 'require Time::HiRes') {
-	Time::HiRes->import('time');
+BEGIN {
+    if (eval { require Time::HiRes }) {
 	$hirestime = \&Time::HiRes::time;
     }
 }
