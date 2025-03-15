@@ -2249,20 +2249,20 @@ package ExtUtils::ParseXS; # XXX tmp
 # block which can follow an xsub signature or CASE keyword.
 
 sub INPUT_handler {
-  my ExtUtils::ParseXS $self = shift;
-  my $line = shift;
+    my ExtUtils::ParseXS $self = shift;
+    my $line = shift;
 
-  # In this loop: process each line until the next keyword or end of
-  # paragraph.
+    # In this loop: process each line until the next keyword or end of
+    # paragraph.
 
-  for (;  $line !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
-    # treat NOT_IMPLEMENTED_YET as another block separator, in addition to
-    # $BLOCK_regexp.
-    last if $line =~ /^\s*NOT_IMPLEMENTED_YET/;
+    for (;  $line !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
+        # treat NOT_IMPLEMENTED_YET as another block separator, in addition to
+        # $BLOCK_regexp.
+        last if $line =~ /^\s*NOT_IMPLEMENTED_YET/;
 
-    $self->INPUT_handler_line($line);
-  } # foreach line in INPUT block
-  $_ = $line;
+        $self->INPUT_handler_line($line);
+    } # foreach line in INPUT block
+    $_ = $line;
 }
 
 
@@ -2273,8 +2273,8 @@ package ExtUtils::ParseXS; # XXX tmp
 # process a single line from an INPUT section
 
 sub INPUT_handler_line {
-  my ExtUtils::ParseXS $self = shift;
-  my $line = shift;
+    my ExtUtils::ParseXS $self = shift;
+    my $line = shift;
 
     return unless $line =~ /\S/;  # skip blank lines
 
@@ -2310,77 +2310,77 @@ sub INPUT_handler_line {
     #     int a XYZ;
 
     my ($var_type, $var_addr, $var_name) =
-          $line =~ /^
-            ( .*? [^&\s] )        # type
-            \s*
-            (\&?)                 # addr
-            \s* \b
-            (\w+ | length\(\w+\)) # name or length(name)
-            $
-          /xs
-      or $self->blurt("Error: invalid parameter declaration '$orig_line'"), return;
+            $line =~ /^
+                ( .*? [^&\s] )        # type
+                \s*
+                (\&?)                 # addr
+                \s* \b
+                (\w+ | length\(\w+\)) # name or length(name)
+                $
+            /xs
+        or $self->blurt("Error: invalid parameter declaration '$orig_line'"), return;
 
     # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
-      $self->blurt("Error: length() not permitted in INPUT section");
-      return;
+        $self->blurt("Error: length() not permitted in INPUT section");
+        return;
     }
 
     my ($var_num, $is_alien);
 
     my ExtUtils::ParseXS::Node::Param $param
-          = $self->{xsub_sig}{names}{$var_name};
+                = $self->{xsub_sig}{names}{$var_name};
 
 
     if (defined $param) {
-      # The var appeared in the signature too.
+        # The var appeared in the signature too.
 
-      # Check for duplicate definitions of a particular parameter name.
-      # This can be either because it has appeared in multiple INPUT
-      # lines, or because the type was already defined in the signature,
-      # and thus shouldn't be defined again. The exception to this are
-      # synthetic params like THIS, which are assigned a provisional type
-      # which can be overridden.
-      if (   $param->{in_input}
-          or (!$param->{is_synthetic} and defined $param->{type})
-      ) {
-          $self->blurt(
-            "Error: duplicate definition of parameter '$var_name' ignored");
-          return;
-      }
-
-      if ($var_name eq 'RETVAL' and $param->{is_synthetic}) {
-        # Convert a synthetic RETVAL into a real parameter
-        delete $param->{is_synthetic};
-        delete $param->{no_init};
-        if (! defined $param->{arg_num}) {
-          # if has arg_num, RETVAL has appeared in signature but with no
-          # type, and has already been moved to the correct position;
-          # otherwise, it's an alien var that didn't appear in the
-          # signature; move to the correct position.
-          @{$self->{xsub_sig}{params}} =
-                    grep $_ != $param, @{$self->{xsub_sig}{params}};
-          push @{$self->{xsub_sig}{params}}, $param;
-          $is_alien          = 1;
-          $param->{is_alien} = 1;
+        # Check for duplicate definitions of a particular parameter name.
+        # This can be either because it has appeared in multiple INPUT
+        # lines, or because the type was already defined in the signature,
+        # and thus shouldn't be defined again. The exception to this are
+        # synthetic params like THIS, which are assigned a provisional type
+        # which can be overridden.
+        if (   $param->{in_input}
+            or (!$param->{is_synthetic} and defined $param->{type})
+        ) {
+            $self->blurt(
+                "Error: duplicate definition of parameter '$var_name' ignored");
+            return;
         }
-      }
 
-      $param->{in_input} = 1;
-      $var_num = $param->{arg_num};
+        if ($var_name eq 'RETVAL' and $param->{is_synthetic}) {
+            # Convert a synthetic RETVAL into a real parameter
+            delete $param->{is_synthetic};
+            delete $param->{no_init};
+            if (! defined $param->{arg_num}) {
+                # if has arg_num, RETVAL has appeared in signature but with no
+                # type, and has already been moved to the correct position;
+                # otherwise, it's an alien var that didn't appear in the
+                # signature; move to the correct position.
+                @{$self->{xsub_sig}{params}} =
+                            grep $_ != $param, @{$self->{xsub_sig}{params}};
+                push @{$self->{xsub_sig}{params}}, $param;
+                $is_alien          = 1;
+                $param->{is_alien} = 1;
+            }
+        }
+
+        $param->{in_input} = 1;
+        $var_num = $param->{arg_num};
     }
     else {
-      # The var is in an INPUT line, but not in signature. Treat it as a
-      # general var declaration (which really should have been in a
-      # PREINIT section). Legal but nasty: flag is as 'alien'
-      $is_alien = 1;
-      $param = ExtUtils::ParseXS::Node::Param->new({
-                  var      => $var_name,
-                  is_alien => 1,
-               });
+        # The var is in an INPUT line, but not in signature. Treat it as a
+        # general var declaration (which really should have been in a
+        # PREINIT section). Legal but nasty: flag is as 'alien'
+        $is_alien = 1;
+        $param = ExtUtils::ParseXS::Node::Param->new({
+                    var      => $var_name,
+                    is_alien => 1,
+                });
 
-      push @{$self->{xsub_sig}{params}}, $param;
-      $self->{xsub_sig}{names}{$var_name} = $param;
+        push @{$self->{xsub_sig}{params}}, $param;
+        $self->{xsub_sig}{names}{$var_name} = $param;
     }
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -2389,54 +2389,54 @@ sub INPUT_handler_line {
     my $no_init = $param->{no_init}; # may have had OUT in signature
 
     if (!$no_init && defined $init_op) {
-      # Emit the init code based on overridden $var_init, which was
-      # preceded by /[=;+]/ which has been extracted into $init_op
+        # Emit the init code based on overridden $var_init, which was
+        # preceded by /[=;+]/ which has been extracted into $init_op
 
-      if (    $init_op =~ /^[=;]$/
-          and $var_init =~ /^NO_INIT\s*;?\s*$/
-      ) {
-        # NO_INIT: skip initialisation
-        $no_init = 1;
-      }
-      elsif ($init_op  eq '=') {
-        # Overridden typemap, such as '= ($type)SvUV($arg)'
-        $var_init =~ s/;\s*$//;
-        $init = $var_init,
-      }
-      else {
-        # "; extra code" or "+ extra code" :
-        # append the extra code (after passing through eval) after all the
-        # INPUT and PREINIT blocks have been processed, indirectly using
-        # the $self->{xsub_deferred_code_lines} mechanism.
-        # In addition, for '+', also generate the normal initialisation
-        # code from the standard typemap - assuming that it's a real
-        # parameter that appears in the signature as well as the INPUT
-        # line.
-        $no_init = !($init_op eq '+' && !$is_alien);
-        # But in either case, add the deferred code
-        $defer = $var_init;
-      }
+        if (    $init_op =~ /^[=;]$/
+                and $var_init =~ /^NO_INIT\s*;?\s*$/
+        ) {
+            # NO_INIT: skip initialisation
+            $no_init = 1;
+        }
+        elsif ($init_op  eq '=') {
+            # Overridden typemap, such as '= ($type)SvUV($arg)'
+            $var_init =~ s/;\s*$//;
+            $init = $var_init,
+        }
+        else {
+            # "; extra code" or "+ extra code" :
+            # append the extra code (after passing through eval) after all the
+            # INPUT and PREINIT blocks have been processed, indirectly using
+            # the $self->{xsub_deferred_code_lines} mechanism.
+            # In addition, for '+', also generate the normal initialisation
+            # code from the standard typemap - assuming that it's a real
+            # parameter that appears in the signature as well as the INPUT
+            # line.
+            $no_init = !($init_op eq '+' && !$is_alien);
+            # But in either case, add the deferred code
+            $defer = $var_init;
+        }
     }
     else {
-      # no initialiser: emit var and init code based on typemap entry,
-      # unless: it's alien (so no stack arg to bind to it)
-      $no_init = 1 if $is_alien;
+        # no initialiser: emit var and init code based on typemap entry,
+        # unless: it's alien (so no stack arg to bind to it)
+        $no_init = 1 if $is_alien;
     }
 
     %$param = (
-      %$param,
-      type    => $var_type,
-      arg_num => $var_num,
-      var     => $var_name,
-      defer   => $defer,
-      init    => $init,
-      init_op => $init_op,
-      no_init => $no_init,
-      is_addr => !!$var_addr,
+        %$param,
+        type    => $var_type,
+        arg_num => $var_num,
+        var     => $var_name,
+        defer   => $defer,
+        init    => $init,
+        init_op => $init_op,
+        no_init => $no_init,
+        is_addr => !!$var_addr,
     );
 
     $param->check($self)
-      or return;
+        or return;
 
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
@@ -2448,6 +2448,7 @@ sub INPUT_handler_line {
 
     $param->as_code($self);
 }
+
 
 # ======================================================================
 
