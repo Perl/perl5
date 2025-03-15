@@ -6,7 +6,6 @@ BEGIN {
         print "1..0\n";
         exit 0;
     }
-
 }
 
 # Tests Todo:
@@ -24,11 +23,11 @@ use Test::More;
 
 my $cpt;
 # create and destroy some automatic Safe compartments first
-$cpt = new Safe or die;
-$cpt = new Safe or die;
-$cpt = new Safe or die;
+$cpt = Safe->new or die;
+$cpt = Safe->new or die;
+$cpt = Safe->new or die;
 
-$cpt = new Safe "Root" or die;
+$cpt = Safe->new("Root") or die;
 
 foreach(1..3) {
 	$foo = 42;
