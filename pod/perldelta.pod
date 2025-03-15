@@ -165,6 +165,12 @@ XXX If there was something important to note about this change, include that her
 
 =item *
 
+L<Search::Dict> has been upgraded from version 1.07 to 1.08.
+
+A missing parameter has been added to the sample code in the SYNOPSIS.
+
+=item *
+
 L<builtin> has been upgraded from version 0.017 to 0.018.
 
 On platforms that don't support Inf/NaN values in floating-point numbers (such
