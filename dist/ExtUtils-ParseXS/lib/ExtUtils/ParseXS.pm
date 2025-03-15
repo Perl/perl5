@@ -1961,30 +1961,30 @@ sub ST {
 
 sub INPUT_handler {
   my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
+  my $line = shift;
 
   # In this loop: process each line until the next keyword or end of
   # paragraph.
 
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
+  for (;  $line !~ /^$BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
     # treat NOT_IMPLEMENTED_YET as another block separator, in addition to
     # $BLOCK_regexp.
-    last if /^\s*NOT_IMPLEMENTED_YET/;
-    next unless /\S/;        # skip blank lines
+    last if $line =~ /^\s*NOT_IMPLEMENTED_YET/;
+    next unless $line =~ /\S/;  # skip blank lines
 
-    trim_whitespace($_);
-    my $ln = $_; # keep original line for error messages
+    trim_whitespace($line);
+    my $orig_line = $line; # keep original line for error messages
 
     # remove any trailing semicolon, except for initialisations
-    s/\s*;$//g unless /[=;+].*\S/;
+    $line =~ s/\s*;$//g unless $line =~ /[=;+].*\S/;
 
     # Extract optional initialisation code (which overrides the
     # normal typemap), such as 'int foo = ($type)SvIV($arg)'
     my $var_init = '';
     my $init_op;
-    ($init_op, $var_init) = ($1, $2) if s/\s* ([=;+]) \s* (.*) $//xs;
+    ($init_op, $var_init) = ($1, $2) if $line =~ s/\s* ([=;+]) \s* (.*) $//xs;
 
-    s/\s+/ /g;
+    $line =~ s/\s+/ /g;
 
     # Split 'char * &foo'  into  ('char *', '&', 'foo')
     # skip to next INPUT line if not valid.
@@ -2004,7 +2004,7 @@ sub INPUT_handler {
     #     int a XYZ;
 
     my ($var_type, $var_addr, $var_name) =
-          /^
+          $line =~ /^
             ( .*? [^&\s] )        # type
             \s*
             (\&?)                 # addr
@@ -2012,7 +2012,7 @@ sub INPUT_handler {
             (\w+ | length\(\w+\)) # name or length(name)
             $
           /xs
-      or $self->blurt("Error: invalid parameter declaration '$ln'"), next;
+      or $self->blurt("Error: invalid parameter declaration '$orig_line'"), next;
 
     # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
@@ -2143,6 +2143,8 @@ sub INPUT_handler {
     $param->as_code($self);
 
   } # foreach line in INPUT block
+
+  $_ = $line;
 }
 
 
