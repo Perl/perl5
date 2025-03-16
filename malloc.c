@@ -1251,7 +1251,7 @@ Perl_malloc(size_t nbytes)
         BARK_64K_LIMIT("Allocation",nbytes,nbytes);
 #ifdef DEBUGGING
         if ((long)nbytes < 0)
-            croak("%s", "panic: malloc");
+            croak("panic: malloc");
 #endif
 
         bucket = adjust_size_and_find_bucket(&nbytes);
@@ -1817,7 +1817,7 @@ Perl_mfree(Malloc_t where)
                 return;
 #ifdef DEBUGGING
         if (PTR2UV(cp) & (MEM_ALIGNBYTES - 1))
-            croak("%s", "wrong alignment in free()");
+            croak("wrong alignment in free()");
 #endif
         ovp = (union overhead *)((caddr_t)cp 
                                 - sizeof (union overhead) * CHUNK_SHIFT);
@@ -1918,7 +1918,7 @@ Perl_realloc(void *mp, size_t nbytes)
         MEM_SIZE size = nbytes;
 
         if ((long)nbytes < 0)
-            croak("%s", "panic: realloc");
+            croak("panic: realloc");
 #endif
 
         BARK_64K_LIMIT("Reallocation",nbytes,size);
