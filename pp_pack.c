@@ -361,14 +361,14 @@ STMT_START {							\
 #define SAFE_UTF8_EXPAND(var)	\
 STMT_START {				\
     if ((var) > SSize_t_MAX / UTF8_EXPAND) \
-        Perl_croak(aTHX_ "%s", "Out of memory during pack()"); \
+        Perl_croak(aTHX_ "Out of memory during pack()"); \
     (var) = (var) * UTF8_EXPAND; \
 } STMT_END
 
 #define GROWING2(utf8, cat, start, cur, item_size, item_count)	\
 STMT_START {							\
     if (SSize_t_MAX / (item_size) < (item_count))		\
-        Perl_croak(aTHX_ "%s", "Out of memory during pack()");	\
+        Perl_croak(aTHX_ "Out of memory during pack()");	\
     GROWING((utf8), (cat), (start), (cur), (item_size) * (item_count)); \
 } STMT_END
 
@@ -378,7 +378,7 @@ STMT_START {					\
     STRLEN catcur = (STRLEN)((cur) - (start));	\
     if (utf8) SAFE_UTF8_EXPAND(glen);		\
     if (SSize_t_MAX - glen < catcur)		\
-        Perl_croak(aTHX_ "%s", "Out of memory during pack()"); \
+        Perl_croak(aTHX_ "Out of memory during pack()"); \
     if (catcur + glen >= SvLEN(cat)) {	\
         (start) = sv_exp_grow(cat, glen);	\
         (cur) = (start) + SvCUR(cat);		\

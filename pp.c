@@ -1847,7 +1847,8 @@ PP_wrapped(pp_repeat,
             SSize_t max;
 
             if ( items > SSize_t_MAX / (SSize_t)sizeof(SV *) / count )
-               Perl_croak(aTHX_ "%s","Out of memory during list extend");
+                /* diag_listed_as: Out of memory during %s extend */
+                Perl_croak(aTHX_ "Out of memory during list extend");
             max = items * count;
             MEXTEND(MARK, max);
 
@@ -1885,8 +1886,8 @@ PP_wrapped(pp_repeat,
 
                 if (   len > (MEM_SIZE_MAX-1) / (UV)count /* max would overflow */
                 )
-                     Perl_croak(aTHX_ "%s",
-                                        "Out of memory during string extend");
+                    /* diag_listed_as: Out of memory during %s extend */
+                    Perl_croak(aTHX_ "Out of memory during string extend");
                 max = (UV)count * len + 1;
                 SvGROW(TARG, max);
 

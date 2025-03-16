@@ -4257,14 +4257,13 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
         char tmpname[sizeof(FAKE_BIT_BUCKET_TEMPLATE)] = {
             FAKE_BIT_BUCKET_TEMPLATE
         };
-        const char * const err = "Failed to create a fake bit bucket";
         if (strEQ(scriptname, BIT_BUCKET)) {
             int tmpfd = Perl_my_mkstemp_cloexec(tmpname);
             if (tmpfd > -1) {
                 scriptname = tmpname;
                 close(tmpfd);
             } else
-                Perl_croak(aTHX_ err);
+                Perl_croak(aTHX_ "Failed to create a fake bit bucket");
         }
 #endif
         rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);

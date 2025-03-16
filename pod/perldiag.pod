@@ -2588,6 +2588,11 @@ queue of such routines has been prematurely ended.
 (F) Closing an output file from in-place editing, as with the C<-i>
 command-line switch, failed.
 
+=item Failed to create a fake bit bucket
+
+(F) You tried to call perl with the B<-e> switch, but you're on a Cray system
+and perl's F</dev/null> emulation was unable to create an empty temporary file.
+
 =item False [] range "%s" in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp)(F) A character class range must start and end at a literal
@@ -4931,6 +4936,11 @@ the largest possible memory allocation.
 remaining memory (or virtual memory) to satisfy the request.  However,
 the request was judged large enough (compile-time default is 64K), so a
 possibility to shut down by trapping this error is granted.
+
+=item Out of memory during pack()
+
+(F) An attempt was made to extend a string beyond the largest possible memory
+allocation.
 
 =item Out of memory during request for %s
 
@@ -8293,6 +8303,10 @@ Warning is given and the operation is not done.
 
 (W closed) The filehandle you're writing to got itself closed sometime
 before now.  Check your control flow.
+
+=item wrong alignment in free()
+
+(P) An invalid pointer was passed to C<Perl_mfree> (also known as C<Safefree>).
 
 =item %s "\x%X" does not map to Unicode
 
