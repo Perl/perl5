@@ -2283,6 +2283,11 @@ L<builtin> by using the C<unimport> method (likely via C<no builtin ...>
 syntax), but the requested function has not been imported into the current
 scope.
 
+=item %s (%d) does not match %s (%d)
+
+(P) The size of a PerlIO function table passed by an extension is smaller than
+expected.
+
 =item Don't know how to get file name
 
 (P) C<PerlIO_getname>, a perl internal I/O function specific to VMS, was
@@ -2402,6 +2407,10 @@ specifications in either VMS or Unix syntax, it converts them to a
 single form when it must operate on them directly.  Either you've passed
 an invalid file specification to Perl, or you've found a case the
 conversion routines don't handle.  Drat.
+
+=item error creating/fetching widecharmap entry for 0x%X
+
+(P) A failure happened when folding a character for a regex trie.
 
 =item Error %s in expansion of %s
 
@@ -5082,6 +5091,14 @@ the glob and a destructor that adds a new object to the glob.
 
 (P) The lexer got into a bad state parsing a string with brackets.
 
+=item panic! In trie construction, no char mapping for %d
+
+(P) A failure happened in the construction of a regex trie.
+
+=item panic! In trie construction, unknown node type %u %s
+
+(P) An unexpected node type was encountered in regex trie construction.
+
 =item panic: kid popen errno read
 
 (F) A forked child returned an incomprehensible message about its errno.
@@ -6216,6 +6233,11 @@ requested.
 (F) In a subroutine signature, you put something after a slurpy (array or
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
+
+=item %s (%d) smaller than %s (%d)
+
+(P) The size of a PerlIO instance passed by an extension is smaller than
+expected.
 
 =item Smart matching a non-overloaded object breaks encapsulation
 
