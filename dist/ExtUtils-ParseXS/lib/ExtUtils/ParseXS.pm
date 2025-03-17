@@ -1092,13 +1092,6 @@ EOF
       # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
       my $implicit_OUTPUT_RETVAL;
 
-      # do code
-      if (/^\s*NOT_IMPLEMENTED_YET/) {
-        print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
-        $_ = '';
-      }
-      else {
-
         # Do any variable declarations associated with having a return value
         if ($self->{xsub_return_type} ne "void") {
 
@@ -1157,7 +1150,11 @@ EOF
         # wrapped function
         # ----------------------------------------------------------------
 
-        if ($self->check_keyword("PPCODE")) {
+        if (/^\s*NOT_IMPLEMENTED_YET/) {
+          print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
+          $_ = '';
+        }
+        elsif ($self->check_keyword("PPCODE")) {
           # Handle PPCODE: just emit the code block and then code to do
           # PUTBACK and return. The user of PPCODE is supposed to have
           # done all the return stack manipulation themselves.
@@ -1258,7 +1255,6 @@ EOF
 
         } # End: PPCODE: or CODE: or a default body
 
-      } # End: else NOT_IMPLEMENTED_YET
 
       # ----------------------------------------------------------------
       # Main body of function has now been emitted.

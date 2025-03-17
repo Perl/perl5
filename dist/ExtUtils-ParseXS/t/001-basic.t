@@ -4037,14 +4037,51 @@ EOF
 EOF
             [ 0, 0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
                     "has croak"   ],
-            # XXX TODO - the aaa decl doesn't yet appear
-            [ 0, 1, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [ 0, 0, qr{\bint\s+aaa},             "has aaa decl"   ],
             [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
             [ 0, 0, qr{\bunsigned\s+ccc},        "has ccc decl"   ],
-            # XXX TODO - the deferred ccc  init doesn't yet appear
-            [ 0, 1, qr{\Qset_uint(ccc, ST(2))},  "has ccc init"   ],
+            [ 0, 0, qr{\Qset_uint(ccc, ST(2))},  "has ccc init"   ],
         ],
-
+        [
+            "NOT_IMPLEMENTED_YET no input part",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |  NOT_IMPLEMENTED_YET
+EOF
+            [ 0, 0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+                    "has croak"   ],
+            [ 0, 1, qr{NOT_IMPLEMENTED_YET},     "no NIY"         ],
+        ],
+        [
+            "NOT_IMPLEMENTED_YET not special after C_ARGS",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(aaa)
+                |    int aaa
+                |  C_ARGS: a,b,
+                |  NOT_IMPLEMENTED_YET
+EOF
+            [ 0, 1, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+                    "doesn't has croak"   ],
+            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"         ],
+            [ 0, 0, qr{a,b,\n\s+NOT_IMPLEMENTED_YET}, "NIY is part of C_ARGS"],
+        ],
+        [
+            "NOT_IMPLEMENTED_YET not special after INIT",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(aaa)
+                |    int aaa
+                |  INIT:
+                |    ZZZ
+                |  NOT_IMPLEMENTED_YET
+EOF
+            [ 0, 1, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+                    "doesn't has croak"   ],
+            [ 0, 0, qr{\bint\s+aaa},                 "has aaa decl"     ],
+            [ 0, 0, qr{ZZZ\n\s+NOT_IMPLEMENTED_YET}, "NIY is part of init code"          ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
