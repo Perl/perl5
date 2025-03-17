@@ -2844,5 +2844,20 @@ Create a new IO, setting the reference count to 1.
 #endif
 
 /*
+=for apidoc    Am|const char *|SvVSTRING       |SV* sv|STRLEN len
+
+If the given SV has vstring magic, stores the length of it into the variable
+C<len>, and returns the string pointer.  If not, returns C<NULL>.
+
+This is a wrapper around the C<sv_vstring_get> function that conveniently
+takes the address of the C<len> variable, in a form similar to the C<SvPV>
+macro family.
+
+=cut
+*/
+
+#define SvVSTRING(sv, len)  (sv_vstring_get(sv, &(len)))
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

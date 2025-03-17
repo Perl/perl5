@@ -3602,6 +3602,9 @@ Adp	|void	|sv_vsetpvfn	|NN SV * const sv			\
 				|NULLOK SV ** const svargs		\
 				|const Size_t sv_count			\
 				|NULLOK bool * const maybe_tainted
+Adp	|const char *|sv_vstring_get					\
+				|NN SV * const sv			\
+				|NULLOK STRLEN *lenp
 Cipx	|void	|switch_argstack|NN AV *to
 Adp	|void	|switch_to_global_locale
 Adp	|bool	|sync_locale
