@@ -4010,4 +4010,45 @@ EOF
 }
 
 
+{
+    # Test NOT_IMPLEMENTED_YET pseudo-keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |INPUT
+        |T_UV
+        |    set_uint($var, $arg)
+        |EOF
+EOF
+
+    my @test_fns = (
+        [
+            "NOT_IMPLEMENTED_YET basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa, bbb, ccc)
+                |    short bbb
+                |    unsigned ccc
+                |  NOT_IMPLEMENTED_YET
+EOF
+            [ 0, 0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+                    "has croak"   ],
+            # XXX TODO - the aaa decl doesn't yet appear
+            [ 0, 1, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
+            [ 0, 0, qr{\bunsigned\s+ccc},        "has ccc decl"   ],
+            # XXX TODO - the deferred ccc  init doesn't yet appear
+            [ 0, 1, qr{\Qset_uint(ccc, ST(2))},  "has ccc init"   ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
 done_testing;
