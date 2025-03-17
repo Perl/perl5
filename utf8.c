@@ -33,8 +33,7 @@
 #include "perl.h"
 #include "invlist_inline.h"
 
-#define MALFORMED_TEXT  "Malformed UTF-8 character"
-static const char malformed_text[] = MALFORMED_TEXT;
+static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
@@ -1304,6 +1303,8 @@ C<*retlen> with the C<uvchr> family of functions (for the worse).  It is not
 likely to be of use to you.  You can use C<UTF8_ALLOW_ANY> (described below) to
 also turn off warnings, and that flag doesn't adversely affect C<*retlen>.
 
+This flag is ignored if C<UTF8_DIE_IF_MALFORMED> is also set.
+
 =item C<UTF8_FORCE_WARN_IF_MALFORMED>
 
 Normally, no warnings are generated if warnings are turned off lexically or
@@ -1414,8 +1415,6 @@ the C<_GOT_> bits list in C<L</utf8_to_uv_msgs>>.
 If the function would otherwise return C<false>, it instead croaks.  The
 C<UTF8_FORCE_WARN_IF_MALFORMED> flag is effectively turned on so that the cause
 of the croak is displayed.
-
-This flag is ignored if C<UTF8_CHECK_ONLY> is also set.
 
 =back
 
@@ -1568,9 +1567,10 @@ to a variable which has been declared to be an C<AV*>, and into which the
 function creates a new AV to store information, described below, about all the
 malformations that were encountered.
 
-If the flag C<UTF8_CHECK_ONLY> is passed, this parameter is ignored.
-Otherwise, when this parameter is set, the flags C<UTF8_DIE_IF_MALFORMED> and
-C<UTF8_FORCE_WARN_IF_MALFORMED> are ignored.
+When this parameter is non-NULL, the C<UTF8_DIE_IF_MALFORMED> and
+C<UTF8_FORCE_WARN_IF_MALFORMED> flags are asserted against in DEBUGGING builds,
+and are ignored in non-DEBUGGING ones.  The C<UTF8_CHECK_ONLY> flag is always
+ignored.
 
 What is considered a malformation is affected by C<flags>, the same as
 described in C<L</utf8_to_uv_flags>>.  No array element is generated for
@@ -1673,8 +1673,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     if (UNLIKELY(msgs)) {
         *msgs = NULL;
 
-        /* The msgs parameter has higher priority than these flags */
-        flags &= ~(UTF8_DIE_IF_MALFORMED|UTF8_FORCE_WARN_IF_MALFORMED);
+        /* This form of the function has higher priority than this flag */
+        flags &= ~UTF8_CHECK_ONLY;
     }
 
     /* Each of the affected Hanguls starts with \xED */
@@ -1733,9 +1733,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     Size_t curlen = 0;      /* How many bytes have we processed so far */
     UV uv = 0;              /* The accumulated code point, so far */
     const U8 * s = s0;      /* Our current position examining the sequence */
+    int overlong_detect_length = 0;
 
     /* Gives how many bytes are available, which may turn out to be less than
-     * the expected length */
+     * (but never more than) the expected length,  */
     Size_t avail_len;
 
     /* The ending position, plus 1, of the first character in the sequence
@@ -1756,7 +1757,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
     avail_len = send - s0;
 
     /* We now know we can examine the first byte of the input.  A continuation
-     * character can't start a valid sequence */
+     * byte can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(*s0))) {
         possible_problems |= UTF8_GOT_CONTINUATION;
         curlen = 1;
@@ -1820,94 +1821,126 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      * of the current character, even if partial, so the upper limit is 's' */
     if (UNLIKELY(does_utf8_overflow(s0, s) >= ALMOST_CERTAINLY_OVERFLOWS)) {
         possible_problems |= UTF8_GOT_OVERFLOW;
+        uv = UV_MAX;
     }
 
 /* Is the first byte of 's' a start byte in the UTF-8 encoding system, not
  * excluding starting an overlong sequence? */
 #define UTF8_IS_SYNTACTIC_START_BYTE(s)  (NATIVE_TO_I8(*s) >= 0xC0)
 
-    /* Check for overlong.  If no problems so far, 'uv' is the correct code
-     * point value.  Simply see if it is expressible in fewer bytes.  But if
-     * there are other malformations, we may be still be able to tell if this
-     * is an overlong by looking at the UTF-8 byte sequence itself */
-    if (   (   LIKELY(! possible_problems)
-            && UNLIKELY(expectlen > OFFUNISKIP(uv)))
-        || (   UNLIKELY(possible_problems)
-            && UTF8_IS_SYNTACTIC_START_BYTE(s0)
-            && UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))
-    {
-        possible_problems |= UTF8_GOT_LONG;
+    /* Check for overlong. */
+    if (UTF8_IS_SYNTACTIC_START_BYTE(s0)) {
+        overlong_detect_length = is_utf8_overlong(s0, s - s0);
+        if (UNLIKELY(overlong_detect_length > 0)) {
+
+            /* Two flags control the same malformation.  The more restrictive
+             * and less likely one causes the other one to be set as well, so
+             * as to simplify the code below. */
+            if (UNLIKELY(flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
+                possible_problems |= UTF8_GOT_LONG_WITH_VALUE;
+                flags |= UTF8_ALLOW_LONG;
+            }
+            else {
+                possible_problems |= UTF8_GOT_LONG;
+            }
+        }
     }
 
     /* Here, we have found all the possible problems, except for when the input
-     * is for a problematic code point not allowed by the input parameters.
-     * Check now for those parameters */
-    if (   flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                    |UTF8_WARN_ILLEGAL_INTERCHANGE)
-
-                    /* if overflow, we know without looking further that this
-                     * is a non-Unicode code point, which we deal with below in
-                     * the overflow handling code */
-        && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
+     * is for a problematic code point either rejected or warned about by the
+     * input parameters.  Do a quick check, and if the input could be one of
+     * those code points and any of those pararameter flags are set, we have to
+     * investigate further. */
+    if (   UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s0))
+        && (flags & ( UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                     |UTF8_WARN_ILLEGAL_INTERCHANGE)))
     {
-        /* By examining just the first byte, we can see if this is using
-         * non-standard UTF-8.  Even if it is an overlong that reduces to a
-         * small code point, it is still using this Perl invention, so mark it
-         * as such */
+        /* Here, we care about problematic code points, and the input could be
+         * one of them.  By examining just the first byte, we can see if this
+         * is using non-standard UTF-8.  Even if it is an overlong that reduces
+         * to a small code point, it is still using this Perl invention, so
+         * mark it as such */
+        bool must_be_super = false;
         if (UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))) {
-            if (flags & ( UTF8_DISALLOW_PERL_EXTENDED|UTF8_DISALLOW_SUPER
-                         |UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
+            if (flags & (UTF8_DISALLOW_PERL_EXTENDED|UTF8_WARN_PERL_EXTENDED))
             {
                 possible_problems |= UTF8_GOT_PERL_EXTENDED;
             }
+
+            /* If the sequence overflows or isn't overlong, it must represent
+             * an above-Unicode code point.  Set it as well.  (In the case of
+             * not having enough information to determine if it is overlong, we
+             * must assume that it isn't.) */
+            if (   (possible_problems & UTF8_GOT_OVERFLOW)
+                || overlong_detect_length <= 0)
+            {
+                must_be_super = true;
+                if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
+                    possible_problems |= UTF8_GOT_SUPER;
+                }
+            }
         }
-        else {
-            /* See if the input has malformations besides possibly overlong */
-            if (   UNLIKELY(possible_problems & ~UTF8_GOT_LONG)
+
+        /* Perl extended UTF-8 can be used to represent any smaller code point
+         * if overlongs are allowed.  'must_be_super' is 'true' here if we
+         * found extended UTF-8 without overlongs.  If so, we know this can't
+         * be any other type of problematic code point. so no further
+         * processing is necessary. */
+        if (! must_be_super) {
+
+            /* Otherwise, we need to check if it actually is problematic.
+             * Either we know the code point exactly, or above we found this
+             * sequence includes a too-short malformation.  In the latter case,
+             * we may be able to determine if the input had to be the initial
+             * portion of one of the problematic code points.  This doesn't
+             * work for noncharacter code points (which can't be detected from
+             * a partial sequence), but if we're looking for something instead
+             * of or in addition to non-characters, try determining if the
+             * filled out sequence would have to be for one of them. */
+            if (   UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)
                 && LIKELY(flags & ~(UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)))
             {
+                /* Here, the input sequence was incomplete.  The range of
+                 * possible code points this beginning portion could represent
+                 * is limited; the more bytes we have available, the tighter
+                 * the possible range.  That range can be determined by
+                 * hypothetically filling out the sequence with the lowest
+                 * legal continuation bytes to get the lowest possible code
+                 * point, and by using the highest continuation bytes to get
+                 * the highest code point.  That's effectively what we do here.
+                 * It turns out that there is no need to find the high end of
+                 * the range, as using the highest possible continuation bytes
+                 * in all cases yields the upper limit of each type of
+                 * problematic condition that has an upper limit.   See the
+                 * commit message that added this code for a detailed analysis.
+                 *
+                 * The smallest legal continuation byte is generally
+                 * UTF8_MIN_CONTINUATION_BYTE.  But for a few start bytes it is
+                 * larger.  In all cases that matter only the byte immediately
+                 * following the start byte need be larger.  This is handled by
+                 * pretending we saw that larger minimum (if necessary) and
+                 * accumulating its value.  Then a loop is used filling in the
+                 * rest with the normal minimum.  (The formula was based on
+                 * manual inspection of UTF-8 conversion tables, just as was
+                 * done in S_is_utf8_overlong) */
+                Size_t modlen = curlen;
+                if (modlen == 1) {
+                    switch (NATIVE_UTF8_TO_I8(*s0)) {
+                      case 0xf0:
+                      case 0xf8:
+                      case 0xfc:
+                      case 0xfe:
+                   /* case 0xff:    See commit XXX message */
+                        uv = UTF8_ACCUMULATE(uv,
+                                             0x100 + 0x10
+                                           + UTF_MIN_CONTINUATION_BYTE
+                                           - NATIVE_UTF8_TO_I8(*s0));
+                        modlen++;
+                        break;
+                    }
+                }
 
-                /* Here, the input is malformed in some way besides possibly
-                 * overlong, except it doesn't overflow.  If you look at the
-                 * code above, to get here, it must be a too short string,
-                 * possibly overlong besides. */
-                assert(possible_problems & UTF8_GOT_TOO_SHORT);
-
-                /* There is no single code point it could be for, but there may
-                 * be enough information present to determine if what we have
-                 * so far would, if filled out completely, be for one of these
-                 * problematic code points we are being asked to check for.
-                 * But to determine if a code point is a non-character, we need
-                 * all bytes, so this effort would be wasted, hence the
-                 * conditional above excludes this step if those are the only
-                 * thing being checked for.
-                 *
-                 * The range of surrogates is
-                 *      ASCII platforms                  EBCDIC I8
-                 *      "\xed\xa0\x80"               "\xf1\xb6\xa0\xa0"
-                 * to   "\xed\xbf\xbf".              "\xf1\xb7\xbf\xbf"
-                 *
-                 * (Continuation byte range):
-                 *       \x80 to \xbf                     \xa0 to \xbf
-                 *
-                 * In both cases, if we have the first two bytes, we can tell
-                 * if it is a surrogate or not.  If we have only one byte, we
-                 * can't tell, so we have to assume it isn't a surrogate.
-                 *
-                 * It is more complicated for supers due to the possibility of
-                 * overlongs. For example, in ASCII, the first non-Unicode code
-                 * point is represented by the sequence \xf4\x90\x80\x80, so
-                 * \xf8\x80\x80\x80\x41 looks like it is for a much bigger code
-                 * point.  But it in fact is an overlong representation of the
-                 * letter "A".
-                 *
-                 * So what we do is calculate the smallest code point the input
-                 * could represent if there were no too short malformation.
-                 * This is done by pretending the input was filled out to its
-                 * full length with occurrences of the smallest continuation
-                 * byte.  For surrogates we could just look at the bytes, but
-                 * this single algorithm works for both those and supers. */
-                for (Size_t i = curlen; i < expectlen; i++) {
+                for (Size_t i = modlen; i < expectlen; i++) {
                     uv = UTF8_ACCUMULATE(uv, UTF8_MIN_CONTINUATION_BYTE);
                 }
             }
@@ -1917,25 +1950,23 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * malformation is an overlong (which allows it to be fully
              * computed).  Or it may have been "cured" as best it can by the
              * loop just above. */
-            if (isUNICODE_POSSIBLY_PROBLEMATIC(uv)) {
-                if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                    if (flags & (UTF8_DISALLOW_SURROGATE|UTF8_WARN_SURROGATE)) {
-                        possible_problems |= UTF8_GOT_SURROGATE;
-                    }
-                }
-                else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-                    if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
-                        possible_problems |= UTF8_GOT_SUPER;
-                    }
-                }
-                else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-                    if (flags & (UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)) {
-                        possible_problems |= UTF8_GOT_NONCHAR;
-                    }
+            if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+                if (flags & (UTF8_DISALLOW_SURROGATE|UTF8_WARN_SURROGATE)) {
+                    possible_problems |= UTF8_GOT_SURROGATE;
                 }
             }
-        }
-    }   /* End of checking if is a special code point */
+            else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
+                if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
+                    possible_problems |= UTF8_GOT_SUPER;
+                }
+            }
+            else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+                if (flags & (UTF8_DISALLOW_NONCHAR|UTF8_WARN_NONCHAR)) {
+                    possible_problems |= UTF8_GOT_NONCHAR;
+                }
+            }
+        }  /* End of ! must_be_super */
+    }      /* End of checking if is a special code point */
 
   ready_to_handle_errors: ;
 
@@ -1945,7 +1976,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      expected to occupy, based on the value of the
      *                      presumed start byte in s0.  This will be 0 if the
      *                      sequence is empty, or 1 if s0 isn't actually a
-     *                      start byte.
+     *                      start byte.  CAUTION: this could be beyond the end
+     *                      of the buffer.
      * avail_len            gives the number of bytes in the sequence this
      *                      call can look at, one character's worth at most.
      * curlen               gives the number of bytes in the sequence that
@@ -1958,7 +1990,11 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
      *                      sequence represents, as far as we were able to
      *                      determine.  This is the correct translation of the
      *                      input bytes if and only if no malformations were
-     *                      encountered.
+     *                      encountered.  If a too-short malformation was
+     *                      encountered, the code above, if it thinks it might
+     *                      make a difference, will have stored into this
+     *                      variable the minimum code point the sequence could
+     *                      possibly represent
      * s                    points to just after where we left off processing
      *                      the character
      * send                 points to just after where that character should
@@ -1979,31 +2015,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *  2)  returning information about the problem to the caller in
          *      *errors and/or *msgs; and/or
          *  3)  raising appropriate warnings.
+         *  4)  potentially croaking if the input is a forbidden sequence, and
+         *      the flag has been set that indicates to croak on those.
          *
          * There are two main categories of potential problems.
          *
-         *  a)  One type is by default not considered to be a problem.  These
-         *      are for when the input was syntactically valid
-         *      Perl-extended-UTF-8 for a code point that is representable on
-         *      this platform, but that code point isn't considered by Unicode
-         *      to be freely exchangeable between applications.  To get here,
-         *      code earlier in this function has determined both that this
-         *      sequence is for such a code point, and that the 'flags'
-         *      parameter indicates that these are to be considered
-         *      problematic, meaning this sequence should be rejected, merely
-         *      warned about, or both.  *errors will be set for each of these.
-         *
-         *      If the caller to this function has set the corresponding
-         *      DISALLOW bit in 'flags', the translation of this sequence will
-         *      be the Unicode REPLACEMENT CHARACTER.
-         *
-         *      If the caller to this function has set the corresponding WARN
-         *      bit in 'flags' potentially a warning message will be generated,
-         *      using the rules common to both types of problems, and detailed
-         *      below.
-         *
-         *  b)  The other type is considered by default to be problematic.
-         *      There are three subclasses:
+         *  a)  One type is considered by default to be problematic.  There are
+         *      three subclasses:
          *      1)  Some syntactic malformation meant that no code point could
          *          be calculated for the input.  An example is that the
          *          sequence was incomplete, more bytes were called for than
@@ -2021,61 +2039,171 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
          *          otherwise the function returns the Unicode REPLACEMENT
          *          CHARACTER as the translation of these.
          *
-         *      In all cases the corresponding bit in *errors is set.  This is
-         *      in contrast to the other type of problem where the input
-         *      'flags' affect if the bit is set or not.
+         *      These all have the same results unless flags are passed to
+         *      change the behavior.  Without flags the behavior is:
          *
-         *      The default is to generate a warning for each of these.  If the
-         *      input 'flags' has a corresponding ALLOW flag, warnings are
-         *      suppressed.  The only other thing the ALLOW flags do is
-         *      determine if the function returns sucess or failure
+         *      1)  The function returns failure.
+         *      2)  *cp_p is set to the REPLACEMENT_CHARACTER
+         *      3)  For each problem, a bit is set in *errors denoting the
+         *          error, if errors is not NULL.
+         *      4)  For each problem, an entry is generated in *msgs, if msgs
+         *          is not NULL.
+         *      5)  a warning is raised if msgs is NULL and the appropriate
+         *          warning category(ies) are enabled.
          *
-         *  For both types of problems, if warnings are called for by the input
-         *  flags, also setting the UTF8_CHECK_ONLY flag overrides
-         *  generating them.  If 'msgs' is not NULL, they all will be returned
-         *  there; otherwise they will be raised if warnings are enabled.
+         *      Various flags change the behavior:
+         *
+         *          UTF8_FORCE_WARN_IF_MALFORMED is forbidden if msgs is not
+         *              NULL, and is ignored if UTF8_CHECK_ONLY is also
+         *              specified; otherwise it turns on all warnings
+         *              categories for the duration of the function.
+         *
+         *          UTF8_DIE_IF_MALFORMED is forbidden if msgs is not NULL;
+         *              otherwise it acts as if UTF8_FORCE_WARN_IF_MALFORMED
+         *              has also been specified, and also croaks rather than
+         *              returning.
+         *
+         *          UTF8_CHECK_ONLY is ignored if msgs is not NULL or if
+         *              UTF8_DIE_IF_MALFORMED is also set; otherwise it
+         *              suppresses any warnings; behaviors 1) through 4) above
+         *              are unchanged
+         *
+         *      Also there is a flag associated with each possible condition,
+         *      for example, UTF8_ALLOW_LONG.  If set, the behavior is modified
+         *      so that the corresponding condition:
+         *          1)  doesn't cause the function to return failure
+         *          2)  the REPLACEMENT_CHARACTER is still stored in *cp_p,
+         *              except for the flag UTF8_ALLOW_LONG_AND_ITS_VALUE,
+         *              which returns the calculated code point, even if plain
+         *              UTF8_ALLOW_LONG is also set.
+         *          3)  *errors still has a bit set.
+         *          4)  no entry is generated in *msgs.
+         *          5)  no warning is raised
+         *
+         *      Note that this means the UTF8_CHECK_ONLY flag has the same
+         *      effect as passing an ALLOW flag for every condition.
+         *
+         *      Note also that an entry is placed in *errors for each condition
+         *      found, regardless of the other flags.  The caller can rely on
+         *      this being an accurate accounting of all conditions found, even
+         *      if they aren't otherwise reported.
+         *
+         *  b)  The other type is by default not considered to be a problem.
+         *      These are for when the input was syntactically valid UTF-8 (as
+         *      extended by Perl) for a code point that is representable on
+         *      this platform, but that code point isn't considered by Unicode
+         *      to be freely exchangeable between applications.
+         *
+         *      The 'flags' parameter to this function must contain an
+         *      appropriate set bit in order for this function to consider them
+         *      to be problems.  And to get here, code earlier in this function
+         *      has determined one of those flags applies to this sequence.
+         *      This means that we know already that this input is problematic,
+         *      unlike the type a) items.
+         *
+         *      Each of these problematic sequences has two independent flags
+         *      associated with it.  The DISALLOW flag causes this code point
+         *      to be rejected; the WARN flag causes it to attempt to raise a
+         *      warning about it.  To do both, specify both flags.  This is
+         *      different from the type a) items, where the ALLOW flag affects
+         *      both the rejection and warning.  The same 5 actions as type a)
+         *      have to be done, but the conditions differ.  The actions when
+         *      the UTF8_CHECK_ONLY flag is not included are:
+         *
+         *      1)  If the DISALLOW flag is set, the function returns failure,
+         *          or croaks if the UTF8_DIE_IF_MALFORMED flag is included.
+         *      2)  If the DISALLOW flag is set, the REPLACEMENT_CHARACTER is
+         *          substituted for the returned code point
+         *      3)  A bit is set in *errors if errors is not NULL
+         *      4)  An entry in *msgs is generated if msgs is not NULL.  Since
+         *          to get here, we know the input is problematic, an entry is
+         *          unconditionally made.  The warnings category for it will be
+         *          zero if neither the corresponding WARN flag nor the
+         *          UTF8_FORCE_WARN_IF_MALFORMED flag are included.
+         *      5)  A warning is raised if msgs is NULL and either:
+         *            i)  the flag UTF8_FORCE_WARN_IF_MALFORMED is included; or
+         *           ii)  the corresponding WARN flag is included, and the
+         *                appropriate warning category(ies) are enabled.
+         *
+         *      Including the UTF8_CHECK_ONLY flag has no effect if the
+         *      UTF8_DIE_IF_MALFORMED is also included; otherwise it changes
+         *      the above actions only to not do 5); so no warnings get
+         *      generated.
          */
 
         bool disallowed = FALSE;
         const U32 orig_problems = possible_problems;
+        const UV input_uv = uv;
         U32 error_flags_return = 0;
         AV * msgs_return = NULL;
+        Size_t super_msgs_count = 0;
 
-        /* The following macro returns 0 if no message needs to be generated
-         * for this problem even if everything else says to.  Otherwise returns
-         * the warning category to use for the message..
+        /* The conditions that are rejected by default are the ones for which
+         * you need a flag to accept.  There is a good reason for them being
+         * generally rejected.  All but LONG can't be evaluated to a specific
+         * code point.  And LONG is forbidden to do so because of the potential
+         * for hacking attacks. */
+#define DEFAULT_REJECTS                                                     \
+            (UTF8_ALLOW_ANY|UTF8_ALLOW_EMPTY|UTF8_ALLOW_LONG_AND_ITS_VALUE)
+
+        /* Determine which conditions the caller wants to reject.  Most are
+         * indicated by the corresponding flag being 0.  Complement these via
+         * xor, while leaving alone the conditions that require a 1 to reject.
+         * This normalizes 'rejects' so that a 1 bit means to reject the
+         * corresponding condition; 0 to accept. */
+        U32 rejects = flags ^ DEFAULT_REJECTS;
+
+        /* The conditions that lead to the REPLACEMENT CHARACTER being returned
+         * are the ones which always lead to this, plus the ones specified by
+         * the input flags.  The former are the ones that are by default
+         * rejected, except UTF8_ALLOW_LONG_AND_ITS_VALUE, which explicitly
+         * requests the calculated value to be returned. */
+        U32 replaces = ( UTF8_ALLOW_ANY|UTF8_ALLOW_EMPTY)
+                        |(flags & UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+
+        /* The following macro returns:
+         *    0   when there is no reason to generate a message for this
+         *        condition, because the appropriate warnings categories are
+         *        off and not overridden
+         *  < 0   when the only reason would be to return a message in an AV
+         *        structure.  This happens when the macro would otherwise
+         *        return 0, but detects there is an AV structure to fill in.
+         *  > 0   when there are warning categories effectively enabled.  If
+         *        so, the value is the result of calling the appropriate
+         *        packWARN macro on those categories.
          *
-         * No message need be generated if the UTF8_CHECK_ONLY flag has been
-         * set by the caller.  Otherwise, a message should be generated if:
-         *  1)  the caller has furnished a structure into which messages should
-         *      be returned to it (so it itself can decide what to do); or
-         *  2)  warnings are enabled for either of the category parameters to
-         *      the macro; or
-         *  3)  the special MALFORMED flags have been passed
+         * The first parameter 'warning' is a warnings category that applies to
+         * the condition.  The following tests are checked in this priority
+         * order; the first that matches is taken:
          *
-         * The 'warning' parameter is the higher priority warning category to
-         * check.  The macro calls ckWARN_d(warning), so warnings for it are
-         * considered to be on by default.
-         *
-         * The second, lower priority category is optional.  To specify not to
-         * use one, call the macro
-         * like:            NEED_MESSAGE(WARN_FOO,,)
-         * Otherwise like:  NEED_MESSAGE(WARN_FOO, ckWARN_d, WARN_BAR)
-         *
-         * The second parameter could also have been ckWARN to specify that the
-         * second category isn't on by default.
+         * 1)   'warning' is considered enabled if the UTF8_DIE_IF_MALFORMED
+         *      flag is set.
+         * 2)   'warning' is considered disabled if the UTF8_CHECK_ONLY flag is
+         *      set.
+         * 3)   'warning' is considered enabled if the
+         *      UTF8_FORCE_WARN_IF_MALFORMED flag is set
+         * 4)   'warning is considered enabled if ckWARN_d(warning) is true
+         * 5)   A secondary warning category is optionally passed, along with
+         *      either to use ckWARN or ckWARN_d on it.  This is considered
+         *      enabled if that returns true.
+         * 6)   -1 is returned if 'msgs' isn't NULL, which means the caller
+         *      wants any message stored into it
+         * 7)   0 is returned.
          *
          * When called without a second category, the macro outputs a bunch of
          * zeroes that the compiler should fold to nothing */
-#define NEED_MESSAGE(warning, extra_ckWARN, extra_category)                 \
-          ((flags & UTF8_CHECK_ONLY)                 ? 0                 :  \
-          ((ckWARN_d(warning))                       ? warning           :  \
-          ((extra_ckWARN(extra_category +0))         ? extra_category +0 :  \
-          ((flags & ( UTF8_DIE_IF_MALFORMED                                 \
-                     |UTF8_FORCE_WARN_IF_MALFORMED)) ? warning           :  \
-          ((msgs)                                    ? warning : 0)))))
+#define PACK_WARN(warning, extra_ckWARN, extra_category)                    \
+           (UNLIKELY(flags & UTF8_DIE_IF_MALFORMED)    ? packWARN(warning)  \
+          : (flags & UTF8_CHECK_ONLY)                  ? 0                  \
+          : UNLIKELY(flags & UTF8_FORCE_WARN_IF_MALFORMED) ? packWARN(warning)\
+          :  ckWARN_d(warning)                         ? packWARN(warning)  \
+          :  extra_ckWARN(extra_category +0)           ? packWARN2(warning, \
+                                                         extra_category +0) \
+          :  (msgs)                                    ? -1                 \
+          :  0)
 
         while (possible_problems) { /* Handle each possible problem */
+            IV pack_warn = 0;
             char * message = NULL;
 
             /* The lowest bit positions, as #defined in utf8.h, are handled
@@ -2083,31 +2211,32 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
              * priority items are done before lower ones; some of which may
              * depend on earlier actions.  Also the ordering tries to cause any
              * messages to be displayed in kind of decreasing severity order.
-             * But the overlong must come last, as it changes 'uv' looked at by
-             * the others */
-
+             * */
             U32 this_problem = 1U << lsbit_pos32(possible_problems);
 
             U32 this_flag_bit = this_problem;
 
-            /* All cases but these two set this; it makes the cases simpler
-             * to do it here */
-            error_flags_return |= this_problem & ~( UTF8_GOT_PERL_EXTENDED
-                                                   |UTF8_GOT_SUPER);
+            /* All cases set this */
+            error_flags_return |= this_problem;
 
             /* Turn off so next iteration doesn't retry this */
             possible_problems &= ~this_problem;
 
+            if (this_problem & replaces) {
+                uv = UNICODE_REPLACEMENT;
+            }
+            if (this_problem & rejects) {
+                disallowed = true;
+            }
+
             /* The code is structured so that there is a case: in a switch()
-             * for each problem type, so as to handle the different details of
+             * for each condition type, so as to handle the different details of
              * each.  The only common part after setting things up is the
              * handling of any generated warning message.  That means that if a
              * case: finds there is no message, it can 'continue' to the next
              * loop iteration instead of doing a 'break', whose only purpose
-             * would be to handle the message. */
-
-            /* Most case:s use this; overridden in a few */
-            U32 pack_warn = packWARN(WARN_UTF8);
+             * would be to handle the message.
+             */
 
             switch (this_problem) {
               default:
@@ -2117,452 +2246,331 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 /* NOTREACHED */
                 break;
 
+/* If this condition is allowed, no message is to be generated.  Similarly, if
+ * warnings for it aren't enabled.  All of these are controlled only by 'utf8'
+ * warnings.  This macro relies on the GOT and ACCEPT flags being identical. */
+#define COMMON_DEFAULT_REJECTS(p1, p2)                                      \
+                if (   (! (this_problem & rejects))                         \
+                    || ((pack_warn = PACK_WARN(WARN_UTF8,p1,p2)) == 0))     \
+                {                                                           \
+                    continue;                                               \
+                }                                                           \
+
               case UTF8_GOT_EMPTY:
-                uv = UNICODE_REPLACEMENT;
-                if (! (flags & UTF8_ALLOW_EMPTY)) {
+                COMMON_DEFAULT_REJECTS(,);
 
-                    /* This so-called malformation is now treated as a bug in
-                     * the caller.  If you have nothing to decode, skip calling
-                     * this function */
-                    assert(0);
+                /* This so-called malformation is now treated as a bug in the
+                 * caller.  If you have nothing to decode, skip calling this
+                 * function */
 
-                    disallowed = TRUE;
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        message = Perl_form(aTHX_ "%s (empty string)",
-                                                   malformed_text);
-                    }
-                }
-
+                assert(0);
+                message = Perl_form(aTHX_ "%s (empty string)", malformed_text);
                 break;
 
               case UTF8_GOT_CONTINUATION:
-                uv = UNICODE_REPLACEMENT;
-                if (! (flags & UTF8_ALLOW_CONTINUATION)) {
-                    disallowed = TRUE;
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        message = Perl_form(aTHX_
+                COMMON_DEFAULT_REJECTS(,);
+                message = Perl_form(aTHX_
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
                                 malformed_text,
-                                _byte_dump_string(s0, 1, 0), *s0);
-                    }
-                }
-
+                                _byte_dump_string(s0, 1, 0),
+                                *s0);
                 break;
 
               case UTF8_GOT_SHORT:
-                uv = UNICODE_REPLACEMENT;
-
-                if (! (flags & UTF8_ALLOW_SHORT)) {
-                    disallowed = TRUE;
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
-                        message = Perl_form(aTHX_
+                COMMON_DEFAULT_REJECTS(,);
+                message = Perl_form(aTHX_
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
-                             _byte_dump_string(s0, send - s0, 0),
+                             _byte_dump_string(s0, avail_len, 0),
                              (int)avail_len,
-                             avail_len == 1 ? "" : "s",
+                             avail_len == 1 ? "" : "s", /* Pluralize */
                              (int)expectlen);
-                    }
-                }
-
                 break;
 
               case UTF8_GOT_NON_CONTINUATION:
-                uv = UNICODE_REPLACEMENT;
+               {
+                COMMON_DEFAULT_REJECTS(,);
 
-                if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
-                    disallowed = TRUE;
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
-
-                        /* If we don't know for sure that the input length is
-                         * valid, avoid as much as possible reading past the
-                         * end of the buffer */
-                        int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
-                                       ? (int) (s - s0)
-                                       : (int) (send - s0);
-                        message = Perl_form(aTHX_ "%s",
-                            unexpected_non_continuation_text(s0,
+                /* If we don't know for sure that the input length is valid,
+                 * avoid as much as possible reading past the end of the buffer
+                 * */
+                int printlen = (flags & UTF8_NO_CONFIDENCE_IN_CURLEN_)
+                                ? (int) (s - s0)
+                                : (int) (avail_len);
+                message = Perl_form(aTHX_ "%s",
+                                    unexpected_non_continuation_text(s0,
                                                             printlen,
                                                             s - s0,
                                                             (int) expectlen));
-                    }
-                }
+                break;
+               }
 
+              case UTF8_GOT_LONG:
+              case UTF8_GOT_LONG_WITH_VALUE:
+                COMMON_DEFAULT_REJECTS(,);
+
+                /* These error types cause 'input_uv' to be something that
+                 * isn't what was intended, so can't use it in the message.
+                 * The other error types either can't generate an overlong, or
+                 * else the 'input_uv' is valid */
+                if (orig_problems & (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW)) {
+                    message = Perl_form(aTHX_
+                            "%s: %s (any UTF-8 sequence that starts with"
+                            " \"%s\" is overlong which can and should be"
+                            " represented with a different, shorter sequence)",
+                            malformed_text,
+                            _byte_dump_string(s0, send - s0, 0),
+                            _byte_dump_string(s0, curlen, 0));
+                }
+                else {
+                    U8 tmpbuf[UTF8_MAXBYTES+1];
+                    const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
+                                                                input_uv, 0);
+
+                    /* Don't use U+ for non-Unicode code points, which includes
+                     * those in the Latin1 range */
+                    const char * preface = (  UNICODE_IS_SUPER(input_uv)
+#ifdef EBCDIC
+                                            || input_uv <= 0xFF
+#endif
+                                            )
+                                            ? "0x"
+                                            : "U+";
+                    message = Perl_form(aTHX_
+                                "%s: %s (overlong; instead use %s to represent"
+                                " %s%0*" UVXf ")",
+                                malformed_text,
+                                _byte_dump_string(s0, avail_len, 0),
+                                _byte_dump_string(tmpbuf, e - tmpbuf, 0),
+                                preface,
+                                ((input_uv < 256) ? 2 : 4), /* Field width of 2
+                                                               for small code
+                                                               points */
+                                UNI_TO_NATIVE(input_uv));
+                }
                 break;
 
-              case UTF8_GOT_SURROGATE:
-
-                /* Code earlier in this function has set things up so we don't
-                 * get here unless at least one of the two top-level 'if's in
-                 * this case are true */
-
-                if (flags & UTF8_WARN_SURROGATE) {
-                    if (NEED_MESSAGE(WARN_SURROGATE,,)) {
-                        pack_warn = packWARN(WARN_SURROGATE);
-
-                        /* These are the only errors that can occur with a
-                        * surrogate when the 'uv' isn't valid */
-                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
-                            message = Perl_form(aTHX_
-                                    "UTF-16 surrogate (any UTF-8 sequence that"
-                                    " starts with \"%s\" is for a surrogate)",
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            message = Perl_form(aTHX_ surrogate_cp_format, uv);
-                        }
-                    }
+/* PACK_WARN returns:
+ *    0   when there is no reason to generate a message for this condition
+ *        because the appropriate warnings categories are off and not
+ *        overridden
+ *  < 0   if the only reason would be to return a message in an AV structure;
+ *        but this is only done if this condition is to be rejected
+ *  > 0   if the categories are effectively on; but this is only done for these
+ *        default-accepted conditions if at least one of the following is true:
+ *          1) the caller has expicitly set the individual flag to demand
+ *             warnings for this condition; or
+ *          2) the caller has passed flags that demand all conditions generate
+ *             warnings; or
+ *          3) the condition is to be rejected and is to be passed back to the
+ *             caller in an AV structure
+ * This macro relies on each GOT and ACCEPT flags being identical.
+ */
+#define COMMON_DEFAULT_ACCEPTEDS(warn_flag, p1, p2, p3)                     \
+                pack_warn = PACK_WARN(p1, p2, p3);                          \
+                if (    pack_warn == 0                                      \
+                    || (pack_warn < 0 && ! (this_problem & rejects))        \
+                    || (   pack_warn > 0                                    \
+                        && (0 == (flags & ( warn_flag                       \
+                                           |UTF8_DIE_IF_MALFORMED           \
+                                           |UTF8_FORCE_WARN_IF_MALFORMED))) \
+                        && (! msgs || ! (this_problem & rejects))))         \
+                {                                                           \
+                    continue;                                               \
                 }
 
-                if (flags & UTF8_DISALLOW_SURROGATE) {
-                    disallowed = TRUE;
+              case UTF8_GOT_SURROGATE:
+                COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SURROGATE,
+                                         WARN_SURROGATE,,);
+
+                /* This is the only error that can occur with a surrogate when
+                 * the 'input_uv' isn't valid */
+                if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                    message = Perl_form(aTHX_
+                                   "UTF-16 surrogate (any UTF-8 sequence that"
+                                   " starts with \"%s\" is for a surrogate)",
+                                   _byte_dump_string(s0, curlen, 0));
+                }
+                else {
+                    message = Perl_form(aTHX_ surrogate_cp_format, input_uv);
                 }
 
                 break;
 
               case UTF8_GOT_NONCHAR:
+                COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_NONCHAR, WARN_NONCHAR,,);
 
-                /* Code earlier in this function has set things up so we don't
-                 * get here unless at least one of the two top-level 'if's in
-                 * this case are true */
-
-                if (flags & UTF8_WARN_NONCHAR) {
-                    if (NEED_MESSAGE(WARN_NONCHAR,,)) {
-                        /* The code above should have guaranteed that we don't
-                         * get here with errors other than overlong */
-                        assert (! (  orig_problems
-                                   & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
-
-                        pack_warn = packWARN(WARN_NONCHAR);
-                        message = Perl_form(aTHX_ nonchar_cp_format, uv);
-                    }
-                }
-
-                if (flags & UTF8_DISALLOW_NONCHAR) {
-                    disallowed = TRUE;
-                }
+                /* The code above should have guaranteed that we don't get here
+                 * with conditions other than these */
+                assert (! (orig_problems & ~( UTF8_GOT_LONG
+                                             |UTF8_GOT_LONG_WITH_VALUE
+                                             |UTF8_GOT_PERL_EXTENDED
+                                             |UTF8_GOT_NONCHAR)));
+                message = Perl_form(aTHX_ nonchar_cp_format, input_uv);
 
                 break;
 
-              case UTF8_GOT_LONG:
+                /* The final three cases are all closely related.  They are
+                 * ordered in execution by severity of the corresponding
+                 * condition */
+                STATIC_ASSERT_STMT(  UTF8_GOT_OVERFLOW
+                                   < UTF8_GOT_PERL_EXTENDED);
+                STATIC_ASSERT_STMT(UTF8_GOT_PERL_EXTENDED < UTF8_GOT_SUPER);
 
-                if (! (flags & UTF8_ALLOW_LONG_AND_ITS_VALUE)) {
-                    uv = UNICODE_REPLACEMENT;
-                }
+                /* And each is a subset of the next.  The code does a bit of
+                 * setup for each and then jumps to common handling.  This
+                 * structure comes from the desire to use the most dire warning
+                 * suitable for the condition even if the only warning class
+                 * that is enabled is a less severe one.  It just makes sense
+                 * that if someone wants to be warned about all above-Unicode
+                 * code points, and this one is so far above that it won't fit
+                 * in the platform's word size, that the overflow warning would
+                 * be output instead of the more mild one. */
 
-                if (! (flags & ( UTF8_ALLOW_LONG
-                                |UTF8_ALLOW_LONG_AND_ITS_VALUE)))
-                {
-                    disallowed = TRUE;
-
-                    if (NEED_MESSAGE(WARN_UTF8,,)) {
-
-                        /* These error types cause 'uv' to be something that
-                         * isn't what was intended, so can't use it in the
-                         * message.  The other error types either can't
-                         * generate an overlong, or else the 'uv' is valid */
-                        if (orig_problems &
-                                        (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
-                        {
-                            message = Perl_form(aTHX_
-                                    "%s: %s (any UTF-8 sequence that starts"
-                                    " with \"%s\" is overlong which can and"
-                                    " should be represented with a"
-                                    " different, shorter sequence)",
-                                    malformed_text,
-                                    _byte_dump_string(s0, send - s0, 0),
-                                    _byte_dump_string(s0, curlen, 0));
-                        }
-                        else {
-                            U8 tmpbuf[UTF8_MAXBYTES+1];
-                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
-                                                                        uv, 0);
-                            /* Don't use U+ for non-Unicode code points, which
-                             * includes those in the Latin1 range */
-                            const char * preface = (   UNICODE_IS_SUPER(uv)
-#ifdef EBCDIC
-                                                    || uv <= 0xFF
-#endif
-                                                   )
-                                                   ? "0x"
-                                                   : "U+";
-                            message = Perl_form(aTHX_
-                                "%s: %s (overlong; instead use %s to represent"
-                                " %s%0*" UVXf ")",
-                                malformed_text,
-                                _byte_dump_string(s0, send - s0, 0),
-                                _byte_dump_string(tmpbuf, e - tmpbuf, 0),
-                                preface,
-                                ((uv < 256) ? 2 : 4), /* Field width of 2 for
-                                                         small code points */
-                                UNI_TO_NATIVE(uv));
-                        }
-                    }
-                }
-
-                break;
-
-                /* The remaining cases all involve non-Unicode code points.
-                 * These come in three increasingly restrictive flavors.
-                 * SUPERs are simply all the ones above Unicode;
-                 * PERL_EXTENDED_UTF8 are the subset of these that are
-                 * expressed in a non-standard extension to UTF-8.  Unless also
-                 * overlong, these have a very high ordinal value.  Finally
-                 * OVERFLOWS are for such a high code point that they don't fit
-                 * into the word size of this platform.  Perl extended-UTF-8 is
-                 * required to express code points this high.  So an overflow
-                 * is a member of all three flavors; besides overflowing, it
-                 * also is using perl extended UTF-8 and is also plain
-                 * non-Unicode.
-                 *
-                 * There are cases in this switch for each of the three types.
-                 * Because they are related, there are tests of the input flags
-                 * to see what combination of these require warnings and/or
-                 * rejection.  And there a jumps between the cases.  The task
-                 * is simpler because the code earlier in the function has set
-                 * things up so that at most one problem flag bit is set for
-                 * any of them, the most restrictive case the input matches.
-                 * Also, for the non-overflow cases, there is no problem flag
-                 * bit if the caller doesn't want special handling for it.
-                 *
-                 * Each type has its own warning category and text,
-                 * corresponding to the specific problem.  Whenever a warning
-                 * is generated, it uses the one for the most dire type the
-                 * code point fits into.  Suppose the flags say we warn on all
-                 * non-Unicode code points, but not on overflowing and we get a
-                 * code point too large for the platform.  The generated
-                 * warning will be the text that says it overflowed, while the
-                 * returned bit will be for the SUPER type.  To accomplish
-                 * this, the formats are shared between the cases.  'cp_format'
-                 * is used if there is a specific representable code point that
-                 * the input translates to; if not, instead a more generic
-                 * format, 'non_cp_format' is used */
-                const char * cp_format;
-                const char * non_cp_format;
+              bool overflows;
+              bool is_extended;
 
               case UTF8_GOT_OVERFLOW:
-                uv = UNICODE_REPLACEMENT;   /* Can't represent this on this
-                                               platform */
-                /* For this overflow case, any format and message text are set
-                 * up to create the warning for it.  If overflows are to be
-                 * rejected, the warning is simply created, and we break to the
-                 * end of the switch() (where code common to all cases will
-                 * finish the job).  Otherwise it looks to see if either the
-                 * perl-extended or plain super cases are supposed to handle
-                 * things.  If so, it jumps into the code of the most
-                 * restrictive one so that that they will use this more dire
-                 * warning.  If neither handle it, the code just breaks; doing
-                 * nothing. */
-                non_cp_format = MALFORMED_TEXT ": %s (overflows)";
-
-                /* We can't exactly specify such a large code point, so can't
-                 * output it */
-                cp_format = NULL;
-
-                /* In the unlikely case that the caller has asked to "allow"
-                 * this malformation, we transfer to the next lower severity of
-                 * code that handles the case; or just 'break' if none. */
-                if (UNLIKELY(flags & UTF8_ALLOW_OVERFLOW)) {
-                    if (flags & ( UTF8_DISALLOW_PERL_EXTENDED
-                                 |UTF8_WARN_PERL_EXTENDED))
-                    {
-                        this_flag_bit = UTF8_GOT_PERL_EXTENDED;
-                        goto join_perl_extended;
-                    }
-                    if (flags & (UTF8_DISALLOW_SUPER|UTF8_WARN_SUPER)) {
-                        this_flag_bit = UTF8_GOT_SUPER;
-                        goto join_plain_supers;
-                    }
-
-                    break;
-                }
-
-                /* Here, overflow is disallowed; handle everything in this
-                 * case: */
-                disallowed = true;
-
-                /* Overflow is a hybrid.  If the word size on this platform
-                 * were wide enough for this to not overflow, a non-Unicode
-                 * code point would have been generated.  If the caller wanted
-                 * warnings for such code points, the warning category would be
-                 * WARN_NON_UNICODE, On the other hand, overflow is considered
-                 * a malformation, which is serious, and the category would be
-                 * just WARN_UTF8.  We clearly should warn if either category
-                 * is enabled, but which category to use?  Historically, we've
-                 * used 'utf8' if it is enabled; and that seems like the more
-                 * severe category, more befitting a malformation. */
-                pack_warn = NEED_MESSAGE(WARN_UTF8, ckWARN_d, WARN_NON_UNICODE);
-                if (pack_warn) {
-                    message = Perl_form(aTHX_ non_cp_format,
-                                              _byte_dump_string(s0, curlen, 0));
-                }
-
-                /* But the API says we flag all errors found that the calling
-                 * flags indicate should be */
-                if (flags & ( UTF8_WARN_PERL_EXTENDED
-                             |UTF8_DISALLOW_PERL_EXTENDED))
-                {
-                    error_flags_return |= UTF8_GOT_PERL_EXTENDED;
-                }
-                if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
-                    error_flags_return |= UTF8_GOT_SUPER;
-                }
-
-                break;
+                COMMON_DEFAULT_REJECTS(ckWARN_d, WARN_NON_UNICODE);
+                overflows = true;
+                is_extended = true;
+                goto super_common;
 
               case UTF8_GOT_PERL_EXTENDED:
-
-                /* We get here when the input uses Perl extended UTF-8, and the
-                 * caller has indicated that above-Unicode code points (of
-                 * which these are a subset) are to be disallowed and/or warned
-                 * about
-                 *
-                 * Set up the formats.  We can include the code point in the
-                 * message if we have an exact one (input not too short) and
-                 * it's not an overlong that reduces down to something too low.
-                 * (Otherwise, the message could say something untrue like
-                 * "Code point 0x41 is not Unicode ...".  But this would be a
-                 * lie; 0x41 is Unicode.  It was expressed in a non-standard
-                 * form of UTF-8 that Unicode doesn't approve of.) */
-                cp_format = (   (orig_problems & (UTF8_GOT_TOO_SHORT))
-                             || ! UNICODE_IS_PERL_EXTENDED(uv))
-                            ? NULL
-                            : PL_extended_cp_format;
-                non_cp_format = "Any UTF-8 sequence that starts with \"%s\""
-                                " is a Perl extension, and so is not portable";
-
-                /* We know here that the caller indicated at least one of the
-                 * EXTENDED or SUPER flags.  If it's not EXTENDED, use SUPER */
-                if (! (flags & ( UTF8_DISALLOW_PERL_EXTENDED
-                                |UTF8_WARN_PERL_EXTENDED)))
-                {
-                    this_flag_bit = UTF8_GOT_SUPER;
-                }
-
-              join_perl_extended:
-
-                /* Here this level is to warn, reject, or both.  The format has
-                 * been set up to be for this level, or maybe the overflow
-                 * case set up a more dire warning and jumped to the label just
-                 * above (after determining that warning/rejecting here was
-                 * enabled).  We warn at this level if either it is supposed to
-                 * warn, or plain supers are supposed to.  In the latter case,
-                 * we get this higher severity warning */
-                if (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER)) {
-                    error_flags_return |= this_flag_bit;
-
-                    /* These code points are non-portable, so warn if either
-                     * category is enabled */
-                    if (NEED_MESSAGE(WARN_NON_UNICODE, ckWARN, WARN_PORTABLE)) {
-                        pack_warn = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
-                        if (cp_format) {
-                            message = Perl_form(aTHX_ cp_format, uv);
-                        }
-                        else {
-                            message = Perl_form(aTHX_
-                                             non_cp_format,
-                                             _byte_dump_string(s0, curlen, 0));
-                        }
-                    }
-                }
-
-                /* Similarly if either of the two levels reject this, do it */
-                if (flags & (UTF8_DISALLOW_PERL_EXTENDED|UTF8_DISALLOW_SUPER)) {
-                    disallowed = true;
-                    error_flags_return |= this_flag_bit;
-                }
-
-                break;
+                COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_PERL_EXTENDED,
+                                         WARN_NON_UNICODE, ckWARN_d,
+                                         WARN_PORTABLE);
+                overflows = orig_problems & UTF8_GOT_OVERFLOW;
+                is_extended = true;
+                goto super_common;
 
               case UTF8_GOT_SUPER:
+                COMMON_DEFAULT_ACCEPTEDS(UTF8_WARN_SUPER, WARN_NON_UNICODE,,);
+                overflows = orig_problems & UTF8_GOT_OVERFLOW;
+                is_extended = UTF8_IS_PERL_EXTENDED(s0);
 
-                /* We get here when the input is for an above Unicode code
-                 * point, but it does not use Perl extended UTF-8, and the
-                 * caller has indicated that these are to be disallowed and/or
-                 * warned about */
-
-                non_cp_format = "Any UTF-8 sequence that starts with \"%s\""
-                                " is for a non-Unicode code point, may not be"
-                                " portable";
-
-                /* We can include the code point in the message if we have an
-                 * exact one (input not too short) */
-                cp_format = (orig_problems & (UTF8_GOT_TOO_SHORT))
-                            ? NULL
-                            : super_cp_format;
-
-              join_plain_supers:
-
-                /* Here this level is to warn, reject, or both.  The format has
-                 * been set up to be for this level, or maybe the overflow
-                 * case set up a more dire warning and jumped to the label just
-                 * above (after determining that warning/rejecting here was
-                 * enabled).  */
-                if (flags & UTF8_WARN_SUPER) {
-                    error_flags_return |= this_flag_bit;
-                    if (NEED_MESSAGE(WARN_NON_UNICODE,,)) {
-                        pack_warn = packWARN(WARN_NON_UNICODE);
-                        if (cp_format) {
-                            message = Perl_form(aTHX_ cp_format, uv);
-                        }
-                        else {
-                            message = Perl_form(aTHX_
-                                            non_cp_format,
-                                            _byte_dump_string(s0, curlen, 0));
-                        }
-                    }
+              super_common:
+               {
+                /* To get here the COMMON macros above determined that a
+                 * warning message needs to be generated for this case.
+                 * (Otherwise they would have executed a 'continue' statement
+                 * to try the next case.).  But they don't always catch if a
+                 * message has already been generated for the underlying
+                 * condition.  Skip if so. */
+                if (super_msgs_count++) {
+                    continue;
                 }
 
-                if (flags & UTF8_DISALLOW_SUPER) {
-                    error_flags_return |= this_flag_bit;
-                    disallowed = true;
+                /* Now generate the message text.  We can't include the code
+                 * point in it if there isn't a specific one, either because
+                 * this overflowed, or there weren't enough bytes to form a
+                 * complete character.
+                 *
+                 * We also can't include it if the resultant message would be
+                 * misleading.  This can happen when a sequence is an overlong,
+                 * using Perl extended UTF-8.  That could evaluate to a
+                 * character in the Unicode range, say the letter "A"; we don't
+                 * want a message saying that "A" isn't Unicode, because this
+                 * would be a lie.  "A" definitely is Unicode.  It was just
+                 * expressed in a non-standard form of UTF-8 that we warn
+                 * about.  If the sequence uses extended UTF-8 but the
+                 * resulting code point isn't for above Unicode, we know we
+                 * have this situation. */
+
+                if (overflows) {
+                    message = Perl_form(aTHX_ "%s: %s (overflows)",
+                                              malformed_text,
+                                              _byte_dump_string(s0, curlen, 0));
                 }
-
-                break;
-
-            } /* End of switch() on the possible problems */
-
-            /* Display or save the message (if any) for the problem being
-             * handled in this iteration of the loop */
-            if (message) {
-                if (msgs) {
-                    if (msgs_return == NULL) {
-                        msgs_return = newAV();
-                    }
-
-                    av_push(msgs_return,
-                            newRV_noinc((SV*) new_msg_hv(message, pack_warn,
-                                                         this_flag_bit)));
-                }
-                else if (! (flags & UTF8_CHECK_ONLY)) {
-                    if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
-                                          |UTF8_FORCE_WARN_IF_MALFORMED)))
-                    {
-                        ENTER;
-                        SAVEI8(PL_dowarn);
-                        SAVESPTR(PL_curcop);
-
-                        PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
-                        if (PL_curcop) {
-                            SAVECURCOPWARNINGS();
-                            PL_curcop->cop_warnings = pWARN_ALL;
-                        }
-                    }
-
-                    if (PL_op) {
-                        Perl_warner(aTHX_ pack_warn, "%s in %s", message,
-                                                     OP_DESC(PL_op));
+                else if (   (orig_problems & UTF8_GOT_TOO_SHORT)
+                         || (     UTF8_IS_PERL_EXTENDED(s0)
+                             && ! UNICODE_IS_SUPER(input_uv)))
+                {
+                    if (is_extended) {
+                        message = Perl_form(aTHX_
+                                        "Any UTF-8 sequence that starts with"
+                                        " \"%s\" is a Perl extension, and so"
+                                        " is not portable",
+                                        _byte_dump_string(s0, curlen, 0));
                     }
                     else {
-                        Perl_warner(aTHX_ pack_warn, "%s", message);
+                        message = Perl_form(aTHX_
+                                        "Any UTF-8 sequence that starts with"
+                                        " \"%s\" is for a non-Unicode code"
+                                        " point, may not be portable",
+                                        _byte_dump_string(s0, curlen, 0));
                     }
+                }
+                else if (is_extended) {
+                    message = Perl_form(aTHX_ PL_extended_cp_format, input_uv);
+                }
+                else {
+                    message = Perl_form(aTHX_ super_cp_format, input_uv);
+                }
 
-                    if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
-                                          |UTF8_FORCE_WARN_IF_MALFORMED)))
-                    {
-                        LEAVE;
+                /* This message only needs to output once.  Ww can potentially
+                 * save some loop iterations by turning off looking for
+                 * warnings for it. */
+                flags &= ~(UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER);
+
+                break;
+               }
+            } /* End of switch() on the possible problems */
+
+            /* We only get here if there is a message to be displayed or
+             * returned; each case statement in the switch above does a
+             * continue if no message for it need be generated. */
+            if (msgs) {
+
+                /* It's illegal to call this with these flags, but we only fail
+                 * in the unlikely event that it matters.  Outside of DEBUGGING
+                 * builds, those flags contradictory to this operation get
+                 * ignored */
+                assert(! (flags & ( UTF8_DIE_IF_MALFORMED
+                                   |UTF8_FORCE_WARN_IF_MALFORMED)));
+
+                if (msgs_return == NULL) {
+                    msgs_return = newAV();
+                }
+
+                av_push(msgs_return,
+                        /* Negative 'pack_warn' really means 0 here.  But this
+                         * converts that to UTF-8 to preserve broken behavior
+                         * depended upon by Encode. */
+                        newRV_noinc((SV*) new_msg_hv(message,
+                                                     ((pack_warn <= 0)
+                                                      ? packWARN(WARN_UTF8)
+                                                      : pack_warn),
+                                                     this_flag_bit)));
+            }
+            else {
+                if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
+                                      |UTF8_FORCE_WARN_IF_MALFORMED)))
+                {
+                    ENTER;
+                    SAVEI8(PL_dowarn);
+                    SAVESPTR(PL_curcop);
+
+                    PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
+                    if (PL_curcop) {
+                        SAVECURCOPWARNINGS();
+                        PL_curcop->cop_warnings = pWARN_ALL;
                     }
+                }
+
+                if (PL_op) {
+                    Perl_warner(aTHX_ pack_warn, "%s in %s", message,
+                                                    OP_DESC(PL_op));
+                }
+                else {
+                    Perl_warner(aTHX_ pack_warn, "%s", message);
+                }
+
+                if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
+                                      |UTF8_FORCE_WARN_IF_MALFORMED)))
+                {
+                    LEAVE;
                 }
             }
         }   /* End of 'while (possible_problems)' */
@@ -2581,7 +2589,6 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
             }
 
             success = false;
-            uv = UNICODE_REPLACEMENT;
         }
     } /* End of there was a possible problem */
 
