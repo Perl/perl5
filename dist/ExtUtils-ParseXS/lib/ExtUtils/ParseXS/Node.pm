@@ -167,31 +167,23 @@ BEGIN { $build_subclass->('', # parent
 )};
 
 
-# check(): for a parsed INPUT line and/or typed parameter in a signature,
-# update some global state and do some checks
-#
-# Return true if checks pass.
+# Set the 'proto' field of the param. This is based on the value, if any,
+# of the proto method of the typemap for that param's type. It will
+# typically be a single character like '$'.
 
-sub check {
+sub set_proto {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
   
+    # only needed for real args that the caller may pass.
+    return unless $self->{arg_num};
     my $type = $self->{type};
-
-    # Get the overridden prototype character, if any, associated with the
-    # typemap entry for this var's type.
-    # Note that something with a provisional type such as THIS can get
-    # the type changed later. It is important to update each time.
-    # It also can't be looked up only at BOOT code emitting time, because
-    # potentiall, the typmap may been bee updated last in the XS file
-    # after the XSUB was parsed.
-    if ($self->{arg_num}) {
-        my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $type);
-        my $p = $typemap && $typemap->proto;
-        $self->{proto} = $p if defined $p && length $p;
-    }
-  
-    return 1;
+    return unless defined $type;
+    my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $type);
+    return unless defined $typemap;
+    my $p = $typemap->proto;
+    return unless defined $p && length $p;
+    $self->{proto} = $p;
 }
 
 
@@ -1194,7 +1186,6 @@ sub parse {
                     });
         push @{$self->{params}}, $param;
         $self->{names}{$var} = $param;
-        $param->check($pxs)
     }
 
     # For non-void return types, add a fake RETVAL parameter. This triggers
@@ -1229,7 +1220,6 @@ sub parse {
 
         push @{$self->{params}}, $param;
         $self->{names}{RETVAL} = $param;
-        $param->check($pxs)
     }
 
     for (@param_texts) {
@@ -2504,9 +2494,6 @@ sub parse {
         no_init => $no_init,
         is_addr => !!$var_addr,
     );
-
-    $param->check($pxs)
-        or return;
 }
 
 

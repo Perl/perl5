@@ -1059,6 +1059,20 @@ EOF
       $self->process_keywords(
         "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$generic_xsub_keys");
 
+      # Now that the type of each param is finalised, calculate its
+      # overridden prototype character, if any.
+      #
+      # Note that the type of a param can change during parsing: e.g.
+      # THIS's type may be set provisionally based on the XSUB's package,
+      # then updated if it appears as a parameter or on an INPUT line.
+      # Also, typemaps can be overridden using the TYPEMAP keyword, so
+      # it's possible the typemap->proto() method will return something
+      # different by the time the proto field is used to emit boot code.
+      # So when to call this method is significant. Ideally just after all
+      # input processing is complete.
+
+      $_->set_proto($self) for @{$self->{xsub_sig}{params}};
+
       print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
         |   ENTER;
         |   [[
@@ -1104,8 +1118,8 @@ EOF
           }
         }
 
-        # Process any parameters which were declared with a type
-        # or length(foo). Do the length() ones first.
+        # Emit declaration/init code for any parameters which were
+        # declared with a type or length(foo). Do the length() ones first.
 
         for my $param (
             grep $_->{is_ansi},
@@ -1114,12 +1128,8 @@ EOF
                 grep(! $_->{is_length}, @{$self->{xsub_sig}{params}} ),
               )
         )
+
         {
-          # These check() calls really ought to come earlier, but this
-          # matches older behaviour for now (when ANSI params were
-          # injected into the src as fake INPUT lines at the *end*).
-          $param->check($self)
-            or next;
           $param->as_code($self);
         }
 
