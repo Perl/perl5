@@ -9986,7 +9986,6 @@ sub process_PropertyAliases($file) {
         for my $i (2 .. @data - 1) {
             $this->add_alias($data[$i]);
         }
-
     }
 
     my $scf = property_ref("Simple_Case_Folding");
@@ -15179,11 +15178,11 @@ END
 
     # Perl tailors the WordBreak property so that \b{wb} doesn't split
     # adjacent spaces into separate words.  Unicode 11.0 moved in that
-    # direction, but left TAB,  FIGURE SPACE (U+2007), and (ironically) NO
-    # BREAK SPACE as breaking, so we retained the original Perl customization.
-    # To do this, in the Perl copy of WB, simply replace the mappings of
-    # horizontal space characters that otherwise would map to the default or
-    # the 11.0 'WSegSpace' to instead map to our tailoring.
+    # direction, but left TAB,  FIGURE SPACE (U+2007), and (ironically)
+    # NO_BREAK SPACE as breaking, so we retained the original Perl
+    # customization.  To do this, in the Perl copy of WB, simply replace the
+    # mappings of horizontal space characters that otherwise would map to the
+    # default or the 11.0 'WSegSpace' to instead map to our tailoring.
     my $perl_wb = property_ref('_Perl_WB');
     my $default = $perl_wb->default_map;
     for my $range ($Blank->ranges) {
@@ -19779,12 +19778,18 @@ my @input_file_objects = (
     Input_file->new('IdStatus.txt', v13.0.0,
                     Pre_Handler => \&setup_IdStatus,
                     Property => 'Identifier_Status',
+
+                    # Part of UTS 39, so must be downloaded separately from
+                    # unicode.org
                     UCD => 0,
                    ),
     Input_file->new('IdType.txt', v13.0.0,
                     Pre_Handler => \&setup_IdType,
                     Each_Line_Handler => \&filter_IdType_line,
                     Property => 'Identifier_Type',
+
+                    # Part of UTS 39, so must be downloaded separately from
+                    # unicode.org
                     UCD => 0,
                    ),
     Input_file->new('confusables.txt', v15.0.0,
