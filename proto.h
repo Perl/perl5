@@ -5279,6 +5279,11 @@ Perl_sv_vsetpvfn(pTHX_ SV * const sv, const char * const pat, const STRLEN patle
 #define PERL_ARGS_ASSERT_SV_VSETPVFN            \
         assert(sv); assert(pat)
 
+PERL_CALLCONV const char *
+Perl_sv_vstring_get(pTHX_ SV * const sv, STRLEN *lenp);
+#define PERL_ARGS_ASSERT_SV_VSTRING_GET         \
+        assert(sv)
+
 PERL_CALLCONV void
 Perl_switch_to_global_locale(pTHX);
 #define PERL_ARGS_ASSERT_SWITCH_TO_GLOBAL_LOCALE

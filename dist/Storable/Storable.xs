@@ -296,6 +296,23 @@ typedef STRLEN ntag_t;
 #define VSTRING_CROAK() CROAK(("Cannot retrieve vstring in this perl"))
 #endif
 
+#ifndef sv_vstring_get
+#define sv_vstring_get(sv,lenp) S_sv_vstring_get(aTHX_ sv,lenp)
+static const char *S_sv_vstring_get(pTHX_ SV *sv, STRLEN *lenp)
+{
+  MAGIC *mg;
+  if(!SvMAGICAL(sv) || !(mg = mg_find(sv, PERL_MAGIC_vstring)))
+    return NULL;
+
+  *lenp = mg->mg_len;
+  return mg->mg_ptr;
+}
+#endif
+
+#ifndef SvVSTRING
+#define SvVSTRING(sv,len)  (sv_vstring_get(sv, &(len)))
+#endif
+
 #ifdef HvPLACEHOLDERS
 #define HAS_RESTRICTED_HASHES
 #else
@@ -2583,7 +2600,8 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 
     } else if (flags & (SVp_POK | SVp_NOK | SVp_IOK)) {
 #ifdef SvVOK
-        MAGIC *mg;
+        const char *vstr_pv;
+        STRLEN vstr_len;
 #endif
         UV wlen; /* For 64-bit machines */
 
@@ -2597,18 +2615,16 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
     string:
 
 #ifdef SvVOK
-        if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))) {
+        if ((vstr_pv = SvVSTRING(sv, vstr_len))) {
             /* The macro passes this by address, not value, and a lot of
                called code assumes that it's 32 bits without checking.  */
-            const SSize_t len = mg->mg_len;
             /* we no longer accept vstrings over I32_SIZE-1, so don't emit
                them, also, older Storables handle them badly.
             */
-            if (len >= I32_MAX) {
+            if (vstr_len >= I32_MAX) {
                 CROAK(("vstring too large to freeze"));
             }
-            STORE_PV_LEN((const char *)mg->mg_ptr,
-                         len, SX_VSTRING, SX_LVSTRING);
+            STORE_PV_LEN(vstr_pv, vstr_len, SX_VSTRING, SX_LVSTRING);
         }
 #endif
 

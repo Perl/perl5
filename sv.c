@@ -4741,10 +4741,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         }
         SvFLAGS(dsv) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
         {
-            const MAGIC * const smg = SvVSTRING_mg(ssv);
-            if (smg) {
-                sv_magic(dsv, NULL, PERL_MAGIC_vstring,
-                         smg->mg_ptr, smg->mg_len);
+            const char *vstr_pv;
+            STRLEN vstr_len;
+            if ((vstr_pv = SvVSTRING(ssv, vstr_len))) {
+                sv_magic(dsv, NULL, PERL_MAGIC_vstring, vstr_pv, vstr_len);
                 SvRMAGICAL_on(dsv);
             }
         }
@@ -17889,6 +17889,34 @@ Perl_sv_regex_global_pos_clear(pTHX_ SV *sv)
     MAGIC *mg = mg_find_mglob(sv);
     if(mg)
         mg->mg_len = -1;
+}
+
+/*
+=for apidoc sv_vstring_get
+
+If the given SV has vstring magic, stores the length of it into the variable
+addressed by C<lenp>, and returns the string pointer.  If not, returns
+C<NULL>.
+
+If a pointer is returned to the caller, it will point to memory owned by the
+SV itself.  The caller is not responsible for freeing it after this call,
+though it will not remain valid for longer than the lifetime of the SV itself.
+The caller should take a copy of it if it needs to be accessed after this
+time.
+
+=cut
+*/
+
+const char *
+Perl_sv_vstring_get(pTHX_ SV * const sv, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_SV_VSTRING_GET;
+
+    MAGIC *mg = SvVSTRING_mg(sv);
+    if(!mg) return NULL;
+
+    if(lenp) *lenp = mg->mg_len;
+    return mg->mg_ptr;
 }
 
 /*
