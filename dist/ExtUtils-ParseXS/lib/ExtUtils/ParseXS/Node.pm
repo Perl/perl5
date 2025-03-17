@@ -2312,7 +2312,6 @@ sub parse {
     return unless $line =~ /\S/;  # skip blank lines
 
     ExtUtils::ParseXS::Utilities::trim_whitespace($line);
-    my $orig_line = $line; # keep original line for error messages
 
     # remove any trailing semicolon, except for initialisations
     $line =~ s/\s*;$//g unless $line =~ /[=;+].*\S/;
@@ -2351,7 +2350,10 @@ sub parse {
                 (\w+ | length\(\w+\)) # name or length(name)
                 $
             /xs
-        or $pxs->blurt("Error: invalid parameter declaration '$orig_line'"), return;
+        or do {
+            $pxs->blurt("Error: invalid parameter declaration '$self->{line}'");
+            return;
+        };
 
     # length(s) is only allowed in the XSUB's signature.
     if ($var_name =~ /^length\((\w+)\)$/) {
