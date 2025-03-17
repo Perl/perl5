@@ -1092,168 +1092,168 @@ EOF
       # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
       my $implicit_OUTPUT_RETVAL;
 
-        # Do any variable declarations associated with having a return value
+      # Do any variable declarations associated with having a return value
+      if ($self->{xsub_return_type} ne "void") {
+
+        # Emit an early dXSTARG for backwards-compatibility reasons.
+        # Recent code emits a dXSTARG in a tighter scope and under
+        # additional circumstances, but some XS code relies on TARG
+        # having been declared. So continue to declare it early under
+        # the original circumstances.
+        my $outputmap = $self->{typemaps_object}->get_outputmap( ctype => $self->{xsub_return_type} );
+
+        if (    $self->{config_optimize}
+            and $outputmap
+            and $outputmap->targetable_legacy)
+        {
+          $self->{xsub_targ_declared_early} = 1;
+          print "\tdXSTARG;\n"
+        }
+      }
+
+      # Emit declaration/init code for any parameters which were
+      # declared with a type or length(foo). Do the length() ones first.
+
+      for my $param (
+          grep $_->{is_ansi},
+            (
+              grep(  $_->{is_length}, @{$self->{xsub_sig}{params}} ),
+              grep(! $_->{is_length}, @{$self->{xsub_sig}{params}} ),
+            )
+      )
+
+      {
+        $param->as_code($self);
+      }
+
+      # ----------------------------------------------------------------
+      # All C variable declarations have now been emitted. It's now time
+      # to emit any code which goes before the main body (i.e. the CODE:
+      # etc or the implicit call to the wrapped function).
+      # ----------------------------------------------------------------
+
+      # Emit any code which has been deferred until all declarations
+      # have been done. This is typically INPUT typemaps which don't
+      # start with a simple '$var =' and so would not have been emitted
+      # at the variable declaration stage.
+      print $self->{xsub_deferred_code_lines};
+
+      # Process as many keyword lines/blocks as can be found which match
+      # the pattern. At this stage it's looking for (possibly multiple)
+      # INIT blocks, plus any generic XSUB keywords.
+      $self->process_keywords(
+      "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$generic_xsub_keys");
+
+      # ----------------------------------------------------------------
+      # Time to emit the main body of the XSUB. Either the real code
+      # from a CODE: or PPCODE: block, or the implicit call to the
+      # wrapped function
+      # ----------------------------------------------------------------
+
+      if (/^\s*NOT_IMPLEMENTED_YET/) {
+        print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
+        $_ = '';
+      }
+      elsif ($self->check_keyword("PPCODE")) {
+        # Handle PPCODE: just emit the code block and then code to do
+        # PUTBACK and return. The user of PPCODE is supposed to have
+        # done all the return stack manipulation themselves.
+        # Note that PPCODE blocks often include a XSRETURN(1) or
+        # similar, so any final code we emit after that is in danger of
+        # triggering a "statement is unreachable" warning.
+
+        $self->print_section();
+        $self->death("PPCODE must be last thing") if @{ $self->{line} };
+
+        print "\tLEAVE;\n" if $self->{xsub_SCOPE_enabled};
+
+        # Suppress "statement is unreachable" warning on HPUX
+        print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+              "#pragma diag_suppress 2111\n",
+              "#endif\n"
+          if $^O eq "hpux";
+
+        print "\tPUTBACK;\n\treturn;\n";
+
+        # Suppress "statement is unreachable" warning on HPUX
+        print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+              "#pragma diag_default 2111\n",
+              "#endif\n"
+          if $^O eq "hpux";
+
+      }
+      elsif ($self->check_keyword("CODE")) {
+        # Handle CODE: just emit the code block and check if it
+        # includes "RETVAL". This check is for later use to warn if
+        # RETVAL is used but no OUTPUT block is present.
+        # Ignore if its only being used in an 'ignore this var'
+        # situation
+        my $consumed_code = $self->print_section();
+        if (   $consumed_code =~ /\bRETVAL\b/
+            && $consumed_code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/
+        ) {
+          $self->{xsub_seen_RETVAL_in_CODE} = 1;
+        }
+
+      }
+      elsif (    defined($self->{xsub_class})
+             and $self->{xsub_func_name} eq "DESTROY")
+      {
+        # Emit a default body for a C++ DESTROY method: "delete THIS;"
+        print "\n\t";
+        print "delete THIS;\n";
+
+      }
+      else {
+        # Emit a default body: this will be a call to the function being
+        # wrapped. Typically:
+        #    RETVAL = foo(args);
+        # with the function name being appropriately modified when it's
+        # a C++ new() method etc.
+
+        print "\n\t";
+
         if ($self->{xsub_return_type} ne "void") {
-
-          # Emit an early dXSTARG for backwards-compatibility reasons.
-          # Recent code emits a dXSTARG in a tighter scope and under
-          # additional circumstances, but some XS code relies on TARG
-          # having been declared. So continue to declare it early under
-          # the original circumstances.
-          my $outputmap = $self->{typemaps_object}->get_outputmap( ctype => $self->{xsub_return_type} );
-
-          if (    $self->{config_optimize}
-              and $outputmap
-              and $outputmap->targetable_legacy)
-          {
-            $self->{xsub_targ_declared_early} = 1;
-            print "\tdXSTARG;\n"
-          }
+          print "RETVAL = ";
+          # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
+          $implicit_OUTPUT_RETVAL = 1 unless $self->{xsub_seen_NO_OUTPUT};
         }
 
-        # Emit declaration/init code for any parameters which were
-        # declared with a type or length(foo). Do the length() ones first.
-
-        for my $param (
-            grep $_->{is_ansi},
-              (
-                grep(  $_->{is_length}, @{$self->{xsub_sig}{params}} ),
-                grep(! $_->{is_length}, @{$self->{xsub_sig}{params}} ),
-              )
-        )
-
-        {
-          $param->as_code($self);
-        }
-
-        # ----------------------------------------------------------------
-        # All C variable declarations have now been emitted. It's now time
-        # to emit any code which goes before the main body (i.e. the CODE:
-        # etc or the implicit call to the wrapped function).
-        # ----------------------------------------------------------------
-
-        # Emit any code which has been deferred until all declarations
-        # have been done. This is typically INPUT typemaps which don't
-        # start with a simple '$var =' and so would not have been emitted
-        # at the variable declaration stage.
-        print $self->{xsub_deferred_code_lines};
-
-        # Process as many keyword lines/blocks as can be found which match
-        # the pattern. At this stage it's looking for (possibly multiple)
-        # INIT blocks, plus any generic XSUB keywords.
-        $self->process_keywords(
-        "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$generic_xsub_keys");
-
-        # ----------------------------------------------------------------
-        # Time to emit the main body of the XSUB. Either the real code
-        # from a CODE: or PPCODE: block, or the implicit call to the
-        # wrapped function
-        # ----------------------------------------------------------------
-
-        if (/^\s*NOT_IMPLEMENTED_YET/) {
-          print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
-          $_ = '';
-        }
-        elsif ($self->check_keyword("PPCODE")) {
-          # Handle PPCODE: just emit the code block and then code to do
-          # PUTBACK and return. The user of PPCODE is supposed to have
-          # done all the return stack manipulation themselves.
-          # Note that PPCODE blocks often include a XSRETURN(1) or
-          # similar, so any final code we emit after that is in danger of
-          # triggering a "statement is unreachable" warning.
-
-          $self->print_section();
-          $self->death("PPCODE must be last thing") if @{ $self->{line} };
-
-          print "\tLEAVE;\n" if $self->{xsub_SCOPE_enabled};
-
-          # Suppress "statement is unreachable" warning on HPUX
-          print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-                "#pragma diag_suppress 2111\n",
-                "#endif\n"
-            if $^O eq "hpux";
-
-          print "\tPUTBACK;\n\treturn;\n";
-
-          # Suppress "statement is unreachable" warning on HPUX
-          print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-                "#pragma diag_default 2111\n",
-                "#endif\n"
-            if $^O eq "hpux";
-
-        }
-        elsif ($self->check_keyword("CODE")) {
-          # Handle CODE: just emit the code block and check if it
-          # includes "RETVAL". This check is for later use to warn if
-          # RETVAL is used but no OUTPUT block is present.
-          # Ignore if its only being used in an 'ignore this var'
-          # situation
-          my $consumed_code = $self->print_section();
-          if (   $consumed_code =~ /\bRETVAL\b/
-              && $consumed_code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/
-          ) {
-            $self->{xsub_seen_RETVAL_in_CODE} = 1;
-          }
-
-        }
-        elsif (    defined($self->{xsub_class})
-               and $self->{xsub_func_name} eq "DESTROY")
-        {
-          # Emit a default body for a C++ DESTROY method: "delete THIS;"
-          print "\n\t";
-          print "delete THIS;\n";
-
-        }
-        else {
-          # Emit a default body: this will be a call to the function being
-          # wrapped. Typically:
-          #    RETVAL = foo(args);
-          # with the function name being appropriately modified when it's
-          # a C++ new() method etc.
-
-          print "\n\t";
-
-          if ($self->{xsub_return_type} ne "void") {
-            print "RETVAL = ";
-            # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-            $implicit_OUTPUT_RETVAL = 1 unless $self->{xsub_seen_NO_OUTPUT};
-          }
-
-          if (defined($self->{xsub_class})) {
-            if ($self->{xsub_seen_static}) {
-              # it has a return type of 'static foo'
-              if ($self->{xsub_func_name} eq 'new') {
-                $self->{xsub_func_name} = "$self->{xsub_class}";
-              }
-              else {
-                print "$self->{xsub_class}::";
-              }
+        if (defined($self->{xsub_class})) {
+          if ($self->{xsub_seen_static}) {
+            # it has a return type of 'static foo'
+            if ($self->{xsub_func_name} eq 'new') {
+              $self->{xsub_func_name} = "$self->{xsub_class}";
             }
             else {
-              if ($self->{xsub_func_name} eq 'new') {
-                $self->{xsub_func_name} .= " $self->{xsub_class}";
-              }
-              else {
-                print "THIS->";
-              }
+              print "$self->{xsub_class}::";
             }
           }
+          else {
+            if ($self->{xsub_func_name} eq 'new') {
+              $self->{xsub_func_name} .= " $self->{xsub_class}";
+            }
+            else {
+              print "THIS->";
+            }
+          }
+        }
 
-          # Handle "xsubpp -s=strip_prefix" hack
-          my $strip = $self->{config_strip_c_func_prefix};
-          $self->{xsub_func_name} =~ s/^\Q$strip//
-            if defined $strip;
+        # Handle "xsubpp -s=strip_prefix" hack
+        my $strip = $self->{config_strip_c_func_prefix};
+        $self->{xsub_func_name} =~ s/^\Q$strip//
+          if defined $strip;
 
-          $self->{xsub_func_name} = 'XSFUNCTION'
-                    if $self->{xsub_seen_INTERFACE_or_MACRO};
+        $self->{xsub_func_name} = 'XSFUNCTION'
+                  if $self->{xsub_seen_INTERFACE_or_MACRO};
 
-          my $sig  = $self->{xsub_sig};
-          my $args = $sig->{auto_function_sig_override}; # C_ARGS
-          $args = $sig->C_func_signature($self)
-            unless defined $args;
-          print "$self->{xsub_func_name}($args);\n";
+        my $sig  = $self->{xsub_sig};
+        my $args = $sig->{auto_function_sig_override}; # C_ARGS
+        $args = $sig->C_func_signature($self)
+          unless defined $args;
+        print "$self->{xsub_func_name}($args);\n";
 
-        } # End: PPCODE: or CODE: or a default body
+      } # End: PPCODE: or CODE: or a default body
 
 
       # ----------------------------------------------------------------
