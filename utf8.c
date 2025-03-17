@@ -1912,7 +1912,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * the range, as using the highest possible continuation bytes
                  * in all cases yields the upper limit of each type of
                  * problematic condition that has an upper limit.   See the
-                 * commit message that added this code for a detailed analysis.
+                 * b1a21fc8531cf47ab0 commit message for a detailed analysis.
                  *
                  * The smallest legal continuation byte is generally
                  * UTF8_MIN_CONTINUATION_BYTE.  But for a few start bytes it is
@@ -1930,7 +1930,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                       case 0xf8:
                       case 0xfc:
                       case 0xfe:
-                   /* case 0xff:    See commit XXX message */
+                   /* case 0xff:    See message for b1a21fc8531cf47ab0 */
                         uv = UTF8_ACCUMULATE(uv,
                                              0x100 + 0x10
                                            + UTF_MIN_CONTINUATION_BYTE
