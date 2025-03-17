@@ -2294,11 +2294,35 @@ package ExtUtils::ParseXS::Node::INPUT_line;
 # Handle one line from an INPUT keyword block
 
 BEGIN { $build_subclass->('keyline', # parent
-    'param', # the param object associated with this INPUT line.
+    'param',   # The Param object associated with this INPUT line.
+
+               # The parsed components of this INPUT line:
+    'type',    #   char *
+    'is_addr', #           &
+    'name',    #            foo
+    'init_op', #                =
+    'init',    #                   SvIv($arg)
 )};
 
 
-# Parse one line from an INPUT block
+# Parse one line in an INPUT block. This method does two main things:
+#
+# It parses the line and stores its components in the fields of the
+# INPUT_line object (which aren't further used for parsing or code
+# generation)
+#
+# It also uses those values to create/update the Param object
+# associated with this variable. For example with
+#
+#    void
+#    foo(a = 0)
+#       int a
+#
+# a Param object will already have been created with the name 'a' and
+# default value '0' when the signature was parsed. Parsing the 'int a'
+# line will set the INPUT_line object's fields to (type => 'int',
+# name => 'a'), while the Param object will have its type field set to
+# 'int'. The INPUT_line object also stores a ref to the Param object.
 #
 
 sub parse {
@@ -2366,7 +2390,6 @@ sub parse {
     my ExtUtils::ParseXS::Node::Param $param
                 = $pxs->{xsub_sig}{names}{$var_name};
 
-
     if (defined $param) {
         # The var appeared in the signature too.
 
@@ -2424,7 +2447,7 @@ sub parse {
     my $no_init = $param->{no_init}; # may have had OUT in signature
 
     if (!$no_init && defined $init_op) {
-        # Emit the init code based on overridden $var_init, which was
+        # Use the init code based on overridden $var_init, which was
         # preceded by /[=;+]/ which has been extracted into $init_op
 
         if (    $init_op =~ /^[=;]$/
@@ -2458,6 +2481,18 @@ sub parse {
         $no_init = 1 if $is_alien;
     }
 
+    # Save the basic information parsed from this line
+
+    $self->{type}    = $var_type,
+    $self->{is_addr} = !!$var_addr,
+    $self->{name}    = $var_name,
+    $self->{init_op} = $init_op,
+    $self->{init}    = $var_init,
+
+    $self->{param}   = $param;
+
+    # and also update the param object using that information
+
     %$param = (
         %$param,
         type    => $var_type,
@@ -2469,8 +2504,6 @@ sub parse {
         no_init => $no_init,
         is_addr => !!$var_addr,
     );
-
-    $self->{param} = $param;
 
     $param->check($pxs)
         or return;
