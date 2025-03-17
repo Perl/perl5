@@ -1049,15 +1049,11 @@ EOF
         $input->as_code($self);
       }
 
-      # keywords which can appear anywhere in an XSUB
-      my $generic_xsub_keys =
-        $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt;
-
       # Process as many keyword lines/blocks as can be found which match
       # the pattern. At this stage it's looking for (possibly multiple)
       # INPUT and/or PREINIT blocks, plus any generic XSUB keywords.
       $self->process_keywords(
-        "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$generic_xsub_keys");
+        "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
 
       # Now that the type of each param is finalised, calculate its
       # overridden prototype character, if any.
@@ -1086,11 +1082,6 @@ EOF
 
       # This set later if CODE is using RETVAL
       $self->{xsub_seen_RETVAL_in_CODE} = 0;
-
-      # $implicit_OUTPUT_RETVAL (bool) indicates that a bodiless XSUB has
-      # a non-void return value, so needs to return RETVAL; or to put it
-      # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
-      my $implicit_OUTPUT_RETVAL;
 
       # Do any variable declarations associated with having a return value
       if ($self->{xsub_return_type} ne "void") {
@@ -1142,13 +1133,18 @@ EOF
       # the pattern. At this stage it's looking for (possibly multiple)
       # INIT blocks, plus any generic XSUB keywords.
       $self->process_keywords(
-      "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$generic_xsub_keys");
+      "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
 
       # ----------------------------------------------------------------
       # Time to emit the main body of the XSUB. Either the real code
       # from a CODE: or PPCODE: block, or the implicit call to the
       # wrapped function
       # ----------------------------------------------------------------
+
+      # $implicit_OUTPUT_RETVAL (bool) indicates that a bodiless XSUB has
+      # a non-void return value, so needs to return RETVAL; or to put it
+      # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
+      my $implicit_OUTPUT_RETVAL;
 
       if (/^\s*NOT_IMPLEMENTED_YET/) {
         print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
@@ -1266,7 +1262,7 @@ EOF
       # the pattern.
       # XXX POSTCALL is documented to precede OUTPUT, but here we allow
       # them in any order and multiplicity.
-      $self->process_keywords("OUTPUT|POSTCALL|$generic_xsub_keys");
+      $self->process_keywords("OUTPUT|POSTCALL|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
 
       {
         my $retval = $self->{xsub_sig}{names}{RETVAL};
@@ -1349,7 +1345,7 @@ EOF
 
       # Process as many keyword lines/blocks as can be found which match
       # the pattern.
-      $self->process_keywords("CLEANUP|$generic_xsub_keys");
+      $self->process_keywords("CLEANUP|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
 
       # ----------------------------------------------------------------
       # Emit function trailers
