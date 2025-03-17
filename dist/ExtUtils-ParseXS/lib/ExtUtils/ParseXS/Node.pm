@@ -155,6 +155,7 @@ BEGIN { $build_subclass->('', # parent
         'is_addr',   # INPUT var declared as '&foo'
         'is_alien',  # var declared in INPUT line, but not in signature
         'in_input',  # the parameter has appeared in an INPUT statement
+        'defer',     # deferred initialisation template code
 
         # values derived from the XSUB's OUTPUT line
         'in_output',   # the parameter has appeared in an OUTPUT statement
@@ -162,7 +163,6 @@ BEGIN { $build_subclass->('', # parent
         'output_code', # the optional setting-code for this parameter
 
         # derived values calculated later
-        'defer',     # deferred initialisation template code
         'proto',     # overridden prototype char(s) (if any) from typemap
 )};
 
