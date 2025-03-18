@@ -3900,10 +3900,8 @@ PP_wrapped(pp_chdir, MAXARG, 0)
         if (PL_op->op_flags & OPf_SPECIAL) {
             gv = gv_fetchsv(sv, 0, SVt_PVIO);
             if (!gv) {
-                if (ckWARN(WARN_UNOPENED)) {
-                    warner(packWARN(WARN_UNOPENED),
-                           "chdir() on unopened filehandle %" SVf, sv);
-                }
+                ck_warner(packWARN(WARN_UNOPENED),
+                          "chdir() on unopened filehandle %" SVf, sv);
                 SETERRNO(EBADF,RMS_IFI);
                 TAINT_PROPER("chdir");
                 RETPUSHNO;

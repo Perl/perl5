@@ -6626,10 +6626,10 @@ PP(pp_aelem)
     SV *sv;
     SV *retsv;
 
-    if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC)))
-        warner(packWARN(WARN_MISC),
-               "Use of reference \"%" SVf "\" as array index",
-               SVfARG(elemsv));
+    if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv)))
+        ck_warner(packWARN(WARN_MISC),
+                  "Use of reference \"%" SVf "\" as array index",
+                  SVfARG(elemsv));
     if (UNLIKELY(SvTYPE(av) != SVt_PVAV)) {
         retsv = &PL_sv_undef;
         goto ret;

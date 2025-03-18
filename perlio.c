@@ -1086,8 +1086,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	if (SvROK(arg)) {
 	    if (SvREADONLY(SvRV(arg)) && !SvIsCOW(SvRV(arg))
 	     && mode && *mode != 'r') {
-		if (ckWARN(WARN_LAYER))
-		    warner(packWARN(WARN_LAYER), "%s", PL_no_modify);
+                ck_warner(packWARN(WARN_LAYER), "%s", PL_no_modify);
 		SETERRNO(EACCES, RMS_PRV);
 		return -1;
 	    }
@@ -1115,8 +1114,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	if (SvPOK(s->var)) *SvPVX(s->var) = 0;
     }
     if (SvUTF8(s->var) && !sv_utf8_downgrade(s->var, TRUE)) {
-	if (ckWARN(WARN_UTF8))
-	    warner(packWARN(WARN_UTF8), code_point_warning);
+        ck_warner(packWARN(WARN_UTF8), code_point_warning);
 	SETERRNO(EINVAL, SS_IVCHAN);
 	SvREFCNT_dec(s->var);
 	s->var = NULL;
@@ -1181,8 +1179,7 @@ PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
         return -1;
     }
     if (new_posn < 0) {
-        if (ckWARN(WARN_LAYER))
-	    warner(packWARN(WARN_LAYER), "Offset outside string");
+        ck_warner(packWARN(WARN_LAYER), "Offset outside string");
 	SETERRNO(EINVAL, SS_IVCHAN);
 	return -1;
     }
@@ -1221,8 +1218,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	        p = SvPV_nomg(sv, len);
 	    }
 	    else {
-	        if (ckWARN(WARN_UTF8))
-		    warner(packWARN(WARN_UTF8), code_point_warning);
+                ck_warner(packWARN(WARN_UTF8), code_point_warning);
 	        SETERRNO(EINVAL, SS_IVCHAN);
 	        return -1;
 	    }
@@ -1265,8 +1261,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	if (!SvROK(sv)) sv_force_normal(sv);
 	if (SvOK(sv)) SvPV_force_nomg_nolen(sv);
 	if (SvUTF8(sv) && !sv_utf8_downgrade(sv, TRUE)) {
-	    if (ckWARN(WARN_UTF8))
-	        warner(packWARN(WARN_UTF8), code_point_warning);
+            ck_warner(packWARN(WARN_UTF8), code_point_warning);
 	    SETERRNO(EINVAL, SS_IVCHAN);
 	    return 0;
 	}

@@ -11444,10 +11444,8 @@ S_sv_catpvn_simple(pTHX_ SV *const sv, const char* const buf, const STRLEN len)
  */
 STATIC void
 S_warn_vcatpvfn_missing_argument(pTHX) {
-    if (ckWARN(WARN_MISSING)) {
-        warner(packWARN(WARN_MISSING), "Missing argument in %s",
-               PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
-    }
+    ck_warner(packWARN(WARN_MISSING), "Missing argument in %s",
+              PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
 }
 
 
@@ -13909,9 +13907,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     /* Now that we've consumed all our printf format arguments (svix)
      * do we have things left on the stack that we didn't use?
      */
-    if (!no_redundant_warning && sv_count >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
-        warner(packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-               PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+    if (!no_redundant_warning && sv_count >= svix + 1) {
+        ck_warner(packWARN(WARN_REDUNDANT), "Redundant argument in %s",
+                  PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
     }
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
