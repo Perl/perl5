@@ -1312,7 +1312,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     }
     else {
         if (!sv_utf8_downgrade(keysv, /* fail_ok */ TRUE)) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "setenv key (encoding to utf8)");
+            ck_warner_d(packWARN(WARN_UTF8), "Wide character in %s", "setenv key (encoding to utf8)");
         }
 
         key = SvPV_const(keysv,klen);
@@ -1327,7 +1327,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
         (void)SvPV_force_nomg_nolen(sv);
         (void)sv_utf8_downgrade(sv, /* fail_ok */ TRUE);
         if (SvUTF8(sv)) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "setenv");
+            ck_warner_d(packWARN(WARN_UTF8), "Wide character in %s", "setenv");
             SvUTF8_off(sv);
         }
         s = SvPVX(sv);
@@ -1778,8 +1778,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
         if (i <= 0) {
             if (sv) {
                 SV *tmp = sv_newmortal();
-                Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s",
-                                            pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
+                ck_warner(packWARN(WARN_SIGNAL), "No such signal: SIG%s",
+                          pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
             }
             return 0;
         }
@@ -2388,8 +2388,8 @@ Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
     if (obj) {
         av_fill(obj, SvIV(sv));
     } else {
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                       "Attempt to set length of freed array");
+        ck_warner(packWARN(WARN_MISC),
+                  "Attempt to set length of freed array");
     }
     return 0;
 }
@@ -2487,7 +2487,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
             negoff ? -(IV)offs : (IV)offs, !negoff,
             negrem ? -(IV)rem  : (IV)rem,  !negrem, &offs, &rem
     )) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
+        ck_warner(packWARN(WARN_SUBSTR), "substr outside of string");
         sv_set_undef(sv);
         return 0;
     }
@@ -2516,9 +2516,8 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 
     SvGETMAGIC(lsv);
     if (SvROK(lsv))
-        Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
-                            "Attempt to use reference as lvalue in substr"
-        );
+        ck_warner(packWARN(WARN_SUBSTR),
+                  "Attempt to use reference as lvalue in substr");
     SvPV_force_nomg(lsv,lsv_len);
     if (SvUTF8(lsv)) lsv_len = sv_len_utf8_nomg(lsv);
     if (!translate_substr_offsets(
@@ -3520,7 +3519,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                that same (UTF8-encoded) value. */
             sv_utf8_encode(GvSV(mg->mg_obj));
 
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "$0");
+            ck_warner_d(packWARN(WARN_UTF8), "Wide character in %s", "$0");
         }
 
         LOCK_DOLLARZERO_MUTEX;
@@ -3697,13 +3696,14 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
                            ? CvNAME_HEK(cv)
                            : cv && CvGV(cv) ? GvENAME_HEK(CvGV(cv)) : NULL;
         if (hek)
-            Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
-                                "SIG%s handler \"%" HEKf "\" not defined.\n",
-                                 PL_sig_name[sig], HEKfARG(hek));
-             /* diag_listed_as: SIG%s handler "%s" not defined */
-        else Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
-                           "SIG%s handler \"__ANON__\" not defined.\n",
-                            PL_sig_name[sig]);
+            ck_warner(packWARN(WARN_SIGNAL),
+                      "SIG%s handler \"%" HEKf "\" not defined.\n",
+                      PL_sig_name[sig], HEKfARG(hek));
+        else
+            /* diag_listed_as: SIG%s handler "%s" not defined */
+            ck_warner(packWARN(WARN_SIGNAL),
+                      "SIG%s handler \"__ANON__\" not defined.\n",
+                      PL_sig_name[sig]);
         goto cleanup;
     }
 

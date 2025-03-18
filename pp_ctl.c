@@ -634,7 +634,7 @@ PP_wrapped(pp_formline, 0, 1)
                 sv = *++MARK;
             else {
                 sv = &PL_sv_no;
-                Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Not enough format arguments");
+                ck_warner(packWARN(WARN_SYNTAX), "Not enough format arguments");
             }
             if (SvTAINTED(sv))
                 SvTAINTED_on(PL_formtarget);
@@ -1590,8 +1590,8 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
         case CXt_FORMAT:
         case CXt_NULL:
             /* diag_listed_as: Exiting subroutine via %s */
-            Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
-                           context_name[CxTYPE(cx)], OP_NAME(PL_op));
+            ck_warner(packWARN(WARN_EXITING), "Exiting %s via %s",
+                      context_name[CxTYPE(cx)], OP_NAME(PL_op));
             if (CxTYPE(cx) == CXt_NULL) /* sort BLOCK */
                 return -1;
             break;
@@ -1765,8 +1765,8 @@ S_dopoptoloop(pTHX_ I32 startingblock)
         case CXt_FORMAT:
         case CXt_NULL:
             /* diag_listed_as: Exiting subroutine via %s */
-            Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
-                           context_name[CxTYPE(cx)], OP_NAME(PL_op));
+            ck_warner(packWARN(WARN_EXITING), "Exiting %s via %s",
+                      context_name[CxTYPE(cx)], OP_NAME(PL_op));
             if ((CxTYPE(cx)) == CXt_NULL) /* sort BLOCK */
                 return -1;
             break;
@@ -1936,8 +1936,8 @@ Perl_qerror(pTHX_ SV *err)
     if (err!=NULL) {
         if (PL_in_eval) {
             if (PL_in_eval & EVAL_KEEPERR) {
-                    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
-                                                        SVfARG(err));
+                    ck_warner(packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
+                              SVfARG(err));
             }
             else {
                 sv_catsv(ERRSV, err);
@@ -2094,8 +2094,8 @@ Perl_die_unwind(pTHX_ SV *msv)
         }
 
         if (in_eval & EVAL_KEEPERR) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
-                           SVfARG(exceptsv));
+            ck_warner(packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
+                      SVfARG(exceptsv));
         }
 
         while ((cxix = dopoptoeval(cxstack_ix)) < 0
@@ -5244,10 +5244,10 @@ S_require_file(pTHX_ SV *sv)
 
             RESTORE_ERRNO;
             if (do_warn) {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED__DOT_IN_INC),
-                "do \"%s\" failed, '.' is no longer in @INC; "
-                "did you mean do \"./%s\"?",
-                name, name);
+                warner(packWARN(WARN_DEPRECATED__DOT_IN_INC),
+                       "do \"%s\" failed, '.' is no longer in @INC; "
+                       "did you mean do \"./%s\"?",
+                       name, name);
             }
 #endif
             CLEAR_ERRSV();

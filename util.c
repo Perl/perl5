@@ -2230,7 +2230,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
         vfatal_warner(err, pat, args);
     }
     else {
-        Perl_vwarn(aTHX_ pat, args);
+        vwarn(pat, args);
     }
 }
 
@@ -2523,7 +2523,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
             }
             return NULL;
         }
-        Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
+        ck_warner(packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
         sleep(5);
     }
     if (pid == 0) {
@@ -2696,7 +2696,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
                 croak("Can't fork: %s", Strerror(errno));
             return NULL;
         }
-        Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
+        ck_warner(packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
         sleep(5);
     }
     if (pid == 0) {
@@ -3789,11 +3789,11 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
         const char * const direction = have == '>' ? "out" : "in";
 
         if (name && HEK_LEN(name))
-            Perl_warner(aTHX_ packWARN(WARN_IO),
+            warner(packWARN(WARN_IO),
                         "Filehandle %" HEKf " opened only for %sput",
                         HEKfARG(name), direction);
         else
-            Perl_warner(aTHX_ packWARN(WARN_IO),
+            warner(packWARN(WARN_IO),
                         "Filehandle opened only for %sput", direction);
     }
 }
@@ -3832,7 +3832,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
             (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
              ? "socket" : "filehandle");
         const bool have_name = name && SvCUR(name);
-        Perl_warner(aTHX_ packWARN(warn_type),
+        warner(packWARN(warn_type),
                    "%s%s on %s %s%s%" SVf, func, pars, vile, type,
                     have_name ? " " : "",
                     SVfARG(have_name ? name : &PL_sv_no));

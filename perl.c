@@ -1304,19 +1304,19 @@ perl_destruct(pTHXx)
     FREETMPS;
     if (destruct_level >= 2) {
         if (PL_scopestack_ix != 0)
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                             "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
-                             (long)PL_scopestack_ix);
+            ck_warner_d(packWARN(WARN_INTERNAL),
+                        "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
+                        (long)PL_scopestack_ix);
         if (PL_savestack_ix != 0)
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                             "Unbalanced saves: %ld more saves than restores\n",
-                             (long)PL_savestack_ix);
+            ck_warner_d(packWARN(WARN_INTERNAL),
+                        "Unbalanced saves: %ld more saves than restores\n",
+                        (long)PL_savestack_ix);
         if (PL_tmps_floor != -1)
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced tmps: %ld more allocs than frees\n",
-                             (long)PL_tmps_floor + 1);
+            ck_warner_d(packWARN(WARN_INTERNAL),"Unbalanced tmps: %ld more allocs than frees\n",
+                        (long)PL_tmps_floor + 1);
         if (cxstack_ix != -1)
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced context: %ld more PUSHes than POPs\n",
-                             (long)cxstack_ix + 1);
+            ck_warner_d(packWARN(WARN_INTERNAL),"Unbalanced context: %ld more PUSHes than POPs\n",
+                        (long)cxstack_ix + 1);
     }
 
 #ifdef USE_ITHREADS
@@ -1371,9 +1371,9 @@ perl_destruct(pTHXx)
         for (;;) {
             if (hent && ckWARN_d(WARN_INTERNAL)) {
                 HE * const next = HeNEXT(hent);
-                Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-                     "Unbalanced string table refcount: (%ld) for \"%s\"",
-                     (long)hent->he_valu.hent_refcount, HeKEY(hent));
+                warner(packWARN(WARN_INTERNAL),
+                       "Unbalanced string table refcount: (%ld) for \"%s\"",
+                       (long)hent->he_valu.hent_refcount, HeKEY(hent));
                 Safefree(hent);
                 hent = next;
             }
@@ -1424,7 +1424,7 @@ perl_destruct(pTHXx)
     }
 
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
-        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Scalars leaked: %ld\n", (long)PL_sv_count);
+        warner(packWARN(WARN_INTERNAL),"Scalars leaked: %ld\n", (long)PL_sv_count);
 
 #ifdef DEBUG_LEAKING_SCALARS
     if (PL_sv_count != 0) {
@@ -2559,7 +2559,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
             Sighandler_t sigstate = rsignal_state(SIGCHLD);
             if (sigstate == (Sighandler_t) SIG_IGN) {
-                Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
+                ck_warner(packWARN(WARN_SIGNAL),
                                "Can't ignore signal CHLD, forcing to default");
                 (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
             }
@@ -3646,7 +3646,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
             if (d)
                 uv |= 1 << (d - debopts);
             else if (ckWARN_d(WARN_DEBUGGING))
-                Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
+                warner(packWARN(WARN_DEBUGGING),
                     "invalid option -D%c, use -D'' to see choices\n", **s);
         }
     }
@@ -3805,7 +3805,7 @@ Perl_moreswitches(pTHX_ const char *s)
         PL_debug = get_debug_opts( (const char **)&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
         if (ckWARN_d(WARN_DEBUGGING))
-            Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
+            warner(packWARN(WARN_DEBUGGING),
                    "Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)\n");
         for (s++; isWORDCHAR(*s); s++) ;
 #endif
@@ -4734,9 +4734,9 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
     }
 
     if (PL_inplace && (!PL_argvgv || AvFILL(GvAV(PL_argvgv)) == -1))
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
-                         "-i used with no filenames on the command line, "
-                         "reading from STDIN");
+        ck_warner_d(packWARN(WARN_INPLACE),
+                    "-i used with no filenames on the command line, "
+                    "reading from STDIN");
 }
 
 STATIC void

@@ -330,9 +330,7 @@ PP(pp_padsv_store)
       UNLIKELY(SvTEMP(targ)) && !SvSMAGICAL(targ) && SvREFCNT(targ) == 1 &&
       (!isGV_with_GP(targ) || SvFAKE(targ)) && ckWARN(WARN_MISC)
     )
-        Perl_warner(aTHX_
-            packWARN(WARN_MISC), "Useless assignment to a temporary"
-        );
+        warner(packWARN(WARN_MISC), "Useless assignment to a temporary");
     SvSetMagicSV(targ, val);
 
     assert(GIMME_V == G_VOID);
@@ -494,9 +492,7 @@ PP(pp_sassign)
       rpp_is_lone(left) && !SvSMAGICAL(left) &&
       (!isGV_with_GP(left) || SvFAKE(left)) && ckWARN(WARN_MISC)
     )
-        Perl_warner(aTHX_
-            packWARN(WARN_MISC), "Useless assignment to a temporary"
-        );
+        warner(packWARN(WARN_MISC), "Useless assignment to a temporary");
     SvSetMagicSV(left, right);
     if (LIKELY(GIMME_V == G_VOID))
         rpp_popfree_2_NN(); /* pop left and right */
@@ -2519,7 +2515,7 @@ S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
             }
             else
                 err = "Odd number of elements in hash assignment";
-            Perl_warner(aTHX_ packWARN(WARN_MISC), "%s", err);
+            warner(packWARN(WARN_MISC), "%s", err);
         }
 
     }
@@ -3456,10 +3452,8 @@ PP(pp_aassign)
                     rpp_is_lone(lsv) && !SvSMAGICAL(lsv) &&
                   (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
                 ))
-                    Perl_warner(aTHX_
-                       packWARN(WARN_MISC),
-                      "Useless assignment to a temporary"
-                    );
+                    warner(packWARN(WARN_MISC),
+                           "Useless assignment to a temporary");
 
 #ifndef PERL_RC_STACK
                 /* avoid freeing $$lsv if it might be needed for further
@@ -4227,10 +4221,10 @@ Perl_do_readline(pTHX)
                 */
                 PerlIO_clearerr(fp);
                 if (!do_close(PL_last_in_gv, FALSE)) {
-                    Perl_ck_warner(aTHX_ packWARN(WARN_GLOB),
-                                   "glob failed (child exited with status %d%s)",
-                                   (int)(STATUS_CURRENT >> 8),
-                                   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
+                    ck_warner(packWARN(WARN_GLOB),
+                              "glob failed (child exited with status %d%s)",
+                              (int)(STATUS_CURRENT >> 8),
+                              (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
                 }
             }
 
@@ -4305,9 +4299,9 @@ Perl_do_readline(pTHX)
 
                 if (!is_utf8_string_loc(s, len, &f))
                     /* Emulate :encoding(utf8) warning in the same case. */
-                    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                                "utf8 \"\\x%02X\" does not map to Unicode",
-                                f < (U8*)SvEND(sv) ? *f : 0);
+                    warner(packWARN(WARN_UTF8),
+                           "utf8 \"\\x%02X\" does not map to Unicode",
+                           f < (U8*)SvEND(sv) ? *f : 0);
              }
         }
 
@@ -4552,9 +4546,9 @@ PP(pp_multideref)
                 check_elem:
                     if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv)
                                             && ckWARN(WARN_MISC)))
-                        Perl_warner(aTHX_ packWARN(WARN_MISC),
-                                "Use of reference \"%" SVf "\" as array index",
-                                SVfARG(elemsv));
+                        warner(packWARN(WARN_MISC),
+                               "Use of reference \"%" SVf "\" as array index",
+                               SVfARG(elemsv));
                     /* the only time that S_find_uninit_var() needs this
                      * is to determine which index value triggered the
                      * undef warning. So just update it here. Note that
@@ -6590,9 +6584,9 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
     PERL_ARGS_ASSERT_SUB_CRUSH_DEPTH;
 
     if (CvANON(cv))
-        Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
+        warner(packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
-        Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%" SVf "\"",
+        warner(packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%" SVf "\"",
                     SVfARG(cv_name(cv,NULL,0)));
     }
 }
@@ -6633,9 +6627,9 @@ PP(pp_aelem)
     SV *retsv;
 
     if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC)))
-        Perl_warner(aTHX_ packWARN(WARN_MISC),
-                    "Use of reference \"%" SVf "\" as array index",
-                    SVfARG(elemsv));
+        warner(packWARN(WARN_MISC),
+               "Use of reference \"%" SVf "\" as array index",
+               SVfARG(elemsv));
     if (UNLIKELY(SvTYPE(av) != SVt_PVAV)) {
         retsv = &PL_sv_undef;
         goto ret;

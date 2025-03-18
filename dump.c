@@ -2964,7 +2964,7 @@ Perl_runops_debug(pTHX)
 #endif
 
     if (!PL_op) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
+        ck_warner_d(packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
         return 0;
     }
     DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));

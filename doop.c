@@ -833,8 +833,8 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 #ifdef UV_IS_QUAD
 
         if (size == 64) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
-                           "Bit vector size > 32 non-portable");
+            ck_warner(packWARN(WARN_PORTABLE),
+                      "Bit vector size > 32 non-portable");
         }
 #endif
         if (offset > Size_t_MAX / n - 1) /* would overflow */
@@ -961,8 +961,8 @@ Perl_do_vecset(pTHX_ SV *sv)
 #ifdef UV_IS_QUAD
 
       case 64:
-        Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
-                       "Bit vector size > 32 non-portable");
+        ck_warner(packWARN(WARN_PORTABLE),
+                  "Bit vector size > 32 non-portable");
         s[offset+7] = (U8)( lval      );    /* = size - 64 */
         s[offset+6] = (U8)( lval >>  8);    /* = size - 56 */
         s[offset+5] = (U8)( lval >> 16);    /* = size - 48 */

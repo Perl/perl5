@@ -726,7 +726,7 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
     else {
         if (status < 0) {
             if (ckWARN(WARN_EXEC))
-                Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't spawn \"%s\": %s", argv[0], strerror(errno));
+                warner(packWARN(WARN_EXEC), "Can't spawn \"%s\": %s", argv[0], strerror(errno));
             status = 255 * 256;
         }
         else
@@ -845,7 +845,7 @@ do_spawn2_handles(pTHX_ const char *cmd, int exectype, const int *handles)
     else {
         if (status < 0) {
             if (ckWARN(WARN_EXEC))
-                Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
+                warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
                      (exectype == EXECF_EXEC ? "exec" : "spawn"),
                      cmd, strerror(errno));
             status = 255 * 256;
@@ -3024,7 +3024,7 @@ win32_sleep(unsigned int t)
     dTHX;
     /* Win32 times are in ms so *1000 in and /1000 out */
     if (t > UINT_MAX / 1000) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+        ck_warner(packWARN(WARN_OVERFLOW),
                         "sleep(%lu) too large", t);
     }
     return win32_msgwait(aTHX_ 0, NULL, t * 1000, NULL) / 1000;

@@ -247,7 +247,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                                    : UNICODE_GOT_SUPER);
             }
             else {
-                Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                ck_warner_d(category, format, input_uv);
             }
 
             /* Don't output a 2nd msg */
@@ -290,7 +290,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                                        UNICODE_GOT_SUPER);
                 }
                 else {
-                    Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                    ck_warner_d(category, format, input_uv);
                 }
 
                 if (flags & UNICODE_DISALLOW_SUPER) {
@@ -322,7 +322,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                                            UNICODE_GOT_NONCHAR);
                     }
                     else {
-                        Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                        ck_warner_d(category, format, input_uv);
                     }
                 }
                 if (flags & UNICODE_DISALLOW_NONCHAR) {
@@ -339,7 +339,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
                                            UNICODE_GOT_SURROGATE);
                     }
                     else {
-                        Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                        ck_warner_d(category, format, input_uv);
                     }
                 }
                 if (flags & UNICODE_DISALLOW_SURROGATE) {
@@ -2559,11 +2559,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 }
 
                 if (PL_op) {
-                    Perl_warner(aTHX_ pack_warn, "%s in %s", message,
-                                                    OP_DESC(PL_op));
+                    warner(pack_warn, "%s in %s", message, OP_DESC(PL_op));
                 }
                 else {
-                    Perl_warner(aTHX_ pack_warn, "%s", message);
+                    warner(pack_warn, "%s", message);
                 }
 
                 if (UNLIKELY(flags & ( UTF8_DIE_IF_MALFORMED
@@ -2667,10 +2666,10 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
       warn_and_return:
         if (ckWARN_d(WARN_UTF8)) {
             if (PL_op)
-                Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                             "%s in %s", unees, OP_DESC(PL_op));
+                warner(packWARN(WARN_UTF8),
+                       "%s in %s", unees, OP_DESC(PL_op));
             else
-                Perl_warner(aTHX_ packWARN(WARN_UTF8), "%s", unees);
+                warner(packWARN(WARN_UTF8), "%s", unees);
         }
 
         return s - s0;
@@ -2795,19 +2794,19 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
                         c = EIGHT_BIT_UTF8_TO_NATIVE(c, c1);
                     } else {
                         /* diag_listed_as: Malformed UTF-8 character%s */
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
-                              "%s %s%s",
-                              unexpected_non_continuation_text(u - 2, 2, 1, 2),
-                              PL_op ? " in " : "",
-                              PL_op ? OP_DESC(PL_op) : "");
+                        ck_warner_d(packWARN(WARN_UTF8),
+                                    "%s %s%s",
+                                    unexpected_non_continuation_text(u - 2, 2, 1, 2),
+                                    PL_op ? " in " : "",
+                                    PL_op ? OP_DESC(PL_op) : "");
                         return -2;
                     }
                 } else {
                     if (PL_op)
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
-                                         "%s in %s", unees, OP_DESC(PL_op));
+                        ck_warner_d(packWARN(WARN_UTF8),
+                                    "%s in %s", unees, OP_DESC(PL_op));
                     else
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "%s", unees);
+                        ck_warner_d(packWARN(WARN_UTF8), "%s", unees);
                     return -2; /* Really want to return undef :-)  */
                 }
             } else {
@@ -3908,18 +3907,18 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
             }
 
             if (instr(file, "mathoms.c")) {
-                Perl_warner(aTHX_ category,
-                            "In %s, line %d, starting in Perl v5.32, %s()"
-                            " will be removed.  Avoid this message by"
-                            " converting to use %s().\n",
-                            file, line, name, alternative);
+                warner(category,
+                       "In %s, line %d, starting in Perl v5.32, %s()"
+                       " will be removed.  Avoid this message by"
+                       " converting to use %s().\n",
+                       file, line, name, alternative);
             }
             else {
-                Perl_warner(aTHX_ category,
-                            "In %s, line %d, starting in Perl v5.32, %s() will"
-                            " require an additional parameter.  Avoid this"
-                            " message by converting to use %s().\n",
-                            file, line, name, alternative);
+                warner(category,
+                       "In %s, line %d, starting in Perl v5.32, %s() will"
+                       " require an additional parameter.  Avoid this"
+                       " message by converting to use %s().\n",
+                       file, line, name, alternative);
             }
         }
     }
@@ -4008,9 +4007,9 @@ S_to_case_cp_list(pTHX_
             if (UNLIKELY(UNICODE_IS_SURROGATE(original))) {
                 if (ckWARN_d(WARN_SURROGATE)) {
                     const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-                    Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
-                        "Operation \"%s\" returns its argument for"
-                        " UTF-16 surrogate U+%04" UVXf, desc, original);
+                    warner(packWARN(WARN_SURROGATE),
+                           "Operation \"%s\" returns its argument for"
+                           " UTF-16 surrogate U+%04" UVXf, desc, original);
                 }
             }
             else if (UNLIKELY(UNICODE_IS_SUPER(original))) {
@@ -4019,9 +4018,9 @@ S_to_case_cp_list(pTHX_
                 }
                 if (ckWARN_d(WARN_NON_UNICODE)) {
                     const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-                    Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-                        "Operation \"%s\" returns its argument for"
-                        " non-Unicode code point 0x%04" UVXf, desc, original);
+                    warner(packWARN(WARN_NON_UNICODE),
+                           "Operation \"%s\" returns its argument for"
+                           " non-Unicode code point 0x%04" UVXf, desc, original);
                 }
             }
 
@@ -4230,12 +4229,10 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
     original = valid_utf8_to_uvchr(p, lenp);
 
     /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
-    Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                           "Can't do %s(\"\\x{%" UVXf "}\") on non-UTF-8"
-                           " locale; resolved to \"\\x{%" UVXf "}\".",
-                           OP_DESC(PL_op),
-                           original,
-                           original);
+    ck_warner(packWARN(WARN_LOCALE),
+              "Can't do %s(\"\\x{%" UVXf "}\") on non-UTF-8"
+              " locale; resolved to \"\\x{%" UVXf "}\".",
+              OP_DESC(PL_op), original, original);
     Copy(p, ustrp, *lenp, char);
     return original;
 }
@@ -4552,9 +4549,9 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
             if (memBEGINs((char *) p, e - p, CAP_SHARP_S))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
-                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                              "Can't do fc(\"\\x{1E9E}\") on non-UTF-8 locale; "
-                              "resolved to \"\\x{17F}\\x{17F}\".");
+                ck_warner(packWARN(WARN_LOCALE),
+                          "Can't do fc(\"\\x{1E9E}\") on non-UTF-8 locale; "
+                          "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
             else
@@ -4562,9 +4559,9 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
                  if (memBEGINs((char *) p, e - p, LONG_S_T))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
-                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                              "Can't do fc(\"\\x{FB05}\") on non-UTF-8 locale; "
-                              "resolved to \"\\x{FB06}\".");
+                ck_warner(packWARN(WARN_LOCALE),
+                          "Can't do fc(\"\\x{FB05}\") on non-UTF-8 locale; "
+                          "resolved to \"\\x{FB06}\".");
                 goto return_ligature_st;
             }
 
@@ -4580,9 +4577,9 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
              * this release) */
             else if (memBEGINs((char *) p, e - p, DOTTED_I)) {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
-                Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                              "Can't do fc(\"\\x{0130}\") on non-UTF-8 locale; "
-                              "resolved to \"\\x{0131}\".");
+                ck_warner(packWARN(WARN_LOCALE),
+                          "Can't do fc(\"\\x{0130}\") on non-UTF-8 locale; "
+                          "resolved to \"\\x{0131}\".");
                 goto return_dotless_i;
             }
 #endif
@@ -4701,8 +4698,8 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 
     while (s < e) {
         if (UTF8SKIP(s) > len) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
-                           "%s in %s", unees, PL_op ? OP_DESC(PL_op) : "print");
+            ck_warner_d(packWARN(WARN_UTF8),
+                        "%s in %s", unees, PL_op ? OP_DESC(PL_op) : "print");
             return FALSE;
         }
         if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
@@ -4723,9 +4720,9 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                      * function would output, so can't just call it, unlike we
                      * do for the non-chars and above-unicodes */
                     UV uv = utf8_to_uv_or_die(s, e, NULL);
-                    Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
-                        "Unicode surrogate U+%04" UVXf " is illegal in UTF-8",
-                                             uv);
+                    warner(packWARN(WARN_SURROGATE),
+                           "Unicode surrogate U+%04" UVXf " is illegal in UTF-8",
+                           uv);
                     ok = FALSE;
                 }
             }

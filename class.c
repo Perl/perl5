@@ -102,8 +102,7 @@ PP(pp_initfield)
                 STRLEN svcount = PL_stack_sp - svp + 1;
 
                 if(svcount % 2)
-                    Perl_warner(aTHX_
-                            packWARN(WARN_MISC), "Odd number of elements in hash field initialization");
+                    warner(packWARN(WARN_MISC), "Odd number of elements in hash field initialization");
 
                 while(svp <= PL_stack_sp) {
                     SV *key = *svp; svp++;

@@ -309,9 +309,9 @@ S_del_sv(pTHX_ SV *p)
             }
         }
         if (!ok) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                             "Attempt to free non-arena SV: 0x%" UVxf
-                             pTHX__FORMAT, PTR2UV(p) pTHX__VALUE);
+            ck_warner_d(packWARN(WARN_INTERNAL),
+                        "Attempt to free non-arena SV: 0x%" UVxf
+                        pTHX__FORMAT, PTR2UV(p) pTHX__VALUE);
             return;
         }
     }
@@ -1827,14 +1827,14 @@ S_not_a_number(pTHX_ SV *const sv)
      pv = sv_display(sv, tmpbuf, sizeof(tmpbuf));
 
     if (PL_op)
-        Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
-                    /* diag_listed_as: Argument "%s" isn't numeric%s */
-                    "Argument \"%s\" isn't numeric in %s", pv,
-                    OP_DESC(PL_op));
+        warner(packWARN(WARN_NUMERIC),
+               /* diag_listed_as: Argument "%s" isn't numeric%s */
+               "Argument \"%s\" isn't numeric in %s", pv,
+               OP_DESC(PL_op));
     else
-        Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
-                    /* diag_listed_as: Argument "%s" isn't numeric%s */
-                    "Argument \"%s\" isn't numeric", pv);
+        warner(packWARN(WARN_NUMERIC),
+               /* diag_listed_as: Argument "%s" isn't numeric%s */
+               "Argument \"%s\" isn't numeric", pv);
 }
 
 STATIC void
@@ -1846,8 +1846,8 @@ S_not_incrementable(pTHX_ SV *const sv) {
 
      pv = sv_display(sv, tmpbuf, sizeof(tmpbuf));
 
-     Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
-                 "Argument \"%s\" treated as 0 in increment (++)", pv);
+     warner(packWARN(WARN_NUMERIC),
+            "Argument \"%s\" treated as 0 in increment (++)", pv);
 }
 
 /*
@@ -4516,8 +4516,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     }
     else if (isGV_with_GP(dsv)) {
         if (!(sflags & SVf_OK)) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                           "Undefined value assigned to typeglob");
+            ck_warner(packWARN(WARN_MISC),
+                      "Undefined value assigned to typeglob");
         }
         else {
             GV *gv = gv_fetchsv_nomg(ssv, GV_ADD, SVt_PVGV);
@@ -4826,8 +4826,8 @@ Perl_sv_set_undef(pTHX_ SV *sv)
     SV_CHECK_THINKFIRST_COW_DROP(sv);
 
     if (isGV_with_GP(sv))
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                       "Undefined value assigned to typeglob");
+        ck_warner(packWARN(WARN_MISC),
+                  "Undefined value assigned to typeglob");
     else
         SvOK_off(sv);
 }
@@ -6127,7 +6127,7 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
     if (!SvROK(sv))
         croak("Can't weaken a nonreference");
     else if (SvWEAKREF(sv)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is already weak");
+        ck_warner(packWARN(WARN_MISC), "Reference is already weak");
         return sv;
     }
     else if (SvREADONLY(sv)) croak_no_modify();
@@ -6161,7 +6161,7 @@ Perl_sv_rvunweaken(pTHX_ SV *const sv)
     if (!SvROK(sv))
         croak("Can't unweaken a nonreference");
     else if (!SvWEAKREF(sv)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is not weak");
+        ck_warner(packWARN(WARN_MISC), "Reference is not weak");
         return sv;
     }
     else if (SvREADONLY(sv)) croak_no_modify();
@@ -7155,9 +7155,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             }
 #ifdef DEBUGGING
             if (SvTEMP(sv)) {
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
-                         "Attempt to free temp prematurely: SV 0x%" UVxf
-                         pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
+                ck_warner_d(packWARN(WARN_DEBUGGING),
+                            "Attempt to free temp prematurely: SV 0x%" UVxf
+                            pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
                 continue;
             }
 #endif
@@ -7351,9 +7351,9 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
         }
 #ifdef DEBUGGING
         if (SvTEMP(sv)) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
-                             "Attempt to free temp prematurely: SV 0x%" UVxf
-                             pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
+            ck_warner_d(packWARN(WARN_DEBUGGING),
+                        "Attempt to free temp prematurely: SV 0x%" UVxf
+                        pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
             return;
         }
 #endif
@@ -7393,9 +7393,9 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
         }
 #endif
         /* This may not return:  */
-        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-                    "Attempt to free unreferenced scalar: SV 0x%" UVxf
-                    pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
+        warner(packWARN(WARN_INTERNAL),
+               "Attempt to free unreferenced scalar: SV 0x%" UVxf
+               pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
 #endif
     }
 #ifdef DEBUG_LEAKING_SCALARS_ABORT
@@ -9360,9 +9360,9 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 #endif
             ) {
             /* diag_listed_as: Lost precision when %s %f by 1 */
-            Perl_ck_warner(aTHX_ packWARN(WARN_IMPRECISION),
-                           "Lost precision when incrementing %" NVff " by 1",
-                           was);
+            ck_warner(packWARN(WARN_IMPRECISION),
+                      "Lost precision when incrementing %" NVff " by 1",
+                      was);
         }
         (void)SvNOK_only(sv);
         SvNV_set(sv, was + 1.0);
@@ -9546,9 +9546,9 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 #endif
                 ) {
                 /* diag_listed_as: Lost precision when %s %f by 1 */
-                Perl_ck_warner(aTHX_ packWARN(WARN_IMPRECISION),
-                               "Lost precision when decrementing %" NVff " by 1",
-                               was);
+                ck_warner(packWARN(WARN_IMPRECISION),
+                          "Lost precision when decrementing %" NVff " by 1",
+                          was);
             }
             (void)SvNOK_only(sv);
             SvNV_set(sv, was - 1.0);
@@ -10184,7 +10184,7 @@ Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
     if (!old)
         return NULL;
     if (SvIS_FREED(old)) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
+        ck_warner_d(packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
         return NULL;
     }
     /* Do this here, otherwise we leak the new SV if this croaks. */
@@ -11445,8 +11445,8 @@ S_sv_catpvn_simple(pTHX_ SV *const sv, const char* const buf, const STRLEN len)
 STATIC void
 S_warn_vcatpvfn_missing_argument(pTHX) {
     if (ckWARN(WARN_MISSING)) {
-        Perl_warner(aTHX_ packWARN(WARN_MISSING), "Missing argument in %s",
-                PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+        warner(packWARN(WARN_MISSING), "Missing argument in %s",
+               PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
     }
 }
 
@@ -12944,8 +12944,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
                 else if (width) {
                     /* note width=4 or width=9 is handled under %d */
-                    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                         "internal %%<num>p might conflict with future printf extensions");
+                    ck_warner_d(packWARN(WARN_INTERNAL),
+                                "internal %%<num>p might conflict with future printf extensions");
                 }
             }
 
@@ -13074,8 +13074,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  */
                 if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
                     if ( hv_existss(HV_FROM_REF(vecsv), "alpha") ) {
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
-                        "vector argument not supported with alpha versions");
+                        ck_warner_d(packWARN(WARN_PRINTF),
+                                    "vector argument not supported with alpha versions");
                         vecsv = &PL_sv_no;
                     }
                     else {
@@ -13787,7 +13787,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 } else {
                     sv_catpvs(msg, "end of string");
                 }
-                Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%" SVf, SVfARG(msg)); /* yes, this is reentrant */
+                warner(packWARN(WARN_PRINTF), "%" SVf, SVfARG(msg)); /* yes, this is reentrant */
             }
 
             /* mangled format: output the '%', then continue from the
@@ -13910,8 +13910,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
      * do we have things left on the stack that we didn't use?
      */
     if (!no_redundant_warning && sv_count >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
-        Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-                PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+        warner(packWARN(WARN_REDUNDANT), "Redundant argument in %s",
+               PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
     }
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
@@ -17738,12 +17738,12 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
     GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
     if (desc)
         /* diag_listed_as: Use of uninitialized value%s */
-        Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit_sv,
-                SVfARG(varname ? varname : &PL_sv_no),
-                " in ", desc);
+        warner(packWARN(WARN_UNINITIALIZED), PL_warn_uninit_sv,
+               SVfARG(varname ? varname : &PL_sv_no),
+               " in ", desc);
     else
-        Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
-                "", "", "");
+        warner(packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
+               "", "", "");
     GCC_DIAG_RESTORE_STMT;
 }
 

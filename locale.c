@@ -3859,7 +3859,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
                                    " or crash the interpreter",
                                      newctype);
             if (IN_LC(LC_CTYPE)) {
-                Perl_warner(aTHX_ packWARN(WARN_LOCALE), "%s", msg);
+                warner(packWARN(WARN_LOCALE), "%s", msg);
             }
             else {
                 PL_warn_locale = newSV(0);
@@ -4067,8 +4067,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
             if (IN_LC(LC_CTYPE) || UNLIKELY(DEBUG_L_TEST)) {
 
                 /* The '0' below suppresses a bogus gcc compiler warning */
-                Perl_warner(aTHX_ packWARN(WARN_LOCALE), SvPVX(PL_warn_locale),
-                                                                            0);
+                warner(packWARN(WARN_LOCALE), SvPVX(PL_warn_locale), 0);
                 if (IN_LC(LC_CTYPE)) {
                     SvREFCNT_dec_NN(PL_warn_locale);
                     PL_warn_locale = NULL;
@@ -4088,9 +4087,9 @@ Perl_warn_problematic_locale()
      * CHECK_AND_WARN_PROBLEMATIC_LOCALE_ */
 
     if (PL_warn_locale) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),
-                             SvPVX(PL_warn_locale),
-                             0 /* dummy to avoid compiler warning */ );
+        ck_warner(packWARN(WARN_LOCALE),
+                  SvPVX(PL_warn_locale),
+                  0 /* dummy to avoid compiler warning */ );
         SvREFCNT_dec_NN(PL_warn_locale);
         PL_warn_locale = NULL;
     }
@@ -4498,10 +4497,9 @@ Perl_setlocale(const int category, const char * locale)
             }
 
             /* diag_listed_as: Unknown locale category %d; can't set it to %s */
-            Perl_warner(aTHX_
-                           packWARN(WARN_LOCALE),
-                           "Unknown locale category %d%s%s",
-                           category, conditional_warn_text, locale);
+            warner(packWARN(WARN_LOCALE),
+                   "Unknown locale category %d%s%s",
+                   category, conditional_warn_text, locale);
         }
 
         SET_EINVAL;
