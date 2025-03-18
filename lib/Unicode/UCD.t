@@ -1543,13 +1543,29 @@ foreach my $set_of_tables (\%Unicode::UCD::stricter_to_file_of, \%Unicode::UCD::
         chomp $official;
         $/ = $input_record_separator;
 
-        # If we are to test against an inverted file, it is easier to invert
-        # our array than the file.
         if ($invert) {
-            if (@tested && $tested[0] == 0) {
-                shift @tested;
-            } else {
-                unshift @tested, 0;
+
+            # Special case an inverted empty file
+            if (@tested == 0) {
+                if ($official ne 'V0') {
+                    fail_with_diff($mod_table, $official, 'V0',
+                                   "prop_invlist");
+                }
+                else {
+                    pass("prop_invlist('$mod_table')");
+                }
+
+                next;
+            }
+            else {
+
+                # If we are to test against an inverted file, it is easier to
+                # invert our array than the file.
+                if ($tested[0] == 0) {
+                    shift @tested;
+                } else {
+                    unshift @tested, 0;
+                }
             }
         }
 
@@ -2079,9 +2095,18 @@ foreach my $prop (sort(keys %props)) {
         # it's an error
         my %specials = %$specials_ref if $specials_ref;
 
+        # Special case an expected and gotten empty return
+        if (     @$invlist_ref - $upper_limit_subtract == 1
+            && $official =~ / ^ ( V0 | !Unicode::UCD::All ) \z /x)
+        {
+            pass("prop_invmap('$display_prop')");
+            next PROPERTY;
+        }
+
         # The extra -$upper_limit_subtract is because the final element may
         # have been tested above to be for anything above Unicode, in which
-        # case the file may not go that high.
+        # case the file may not go that high.  The upper bound may be changed
+        # in the loop, so can't pre-calculate it.
         for (my $i = 0; $i < @$invlist_ref - $upper_limit_subtract; $i++) {
 
             # If the map element is a reference, have to stringify it (but
