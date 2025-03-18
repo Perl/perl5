@@ -13779,6 +13779,10 @@ END
         next if $range->start == 0x1D7CE;   # This whole range was added in 3.1
         next if $range->end == 0x19DA && $v_version eq v5.2.0;
         next if $range->end - $range->start < 9 && $v_version le 4.0.0;
+
+        # 2 sequential series of 10 each were added in 16.0
+        next if $range->start == 0x116D0 && $range->end == 0x116E3;
+
         Carp::my_carp("Range $range unexpectedly doesn't contain 10"
                     . " decimal digits.  Code in regcomp.c assumes it does,"
                     . " and will have to be fixed.  Proceeding anyway.");
