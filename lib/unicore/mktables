@@ -19780,6 +19780,7 @@ my @input_file_objects = (
                    ),
     Input_file->new('IdStatus.txt', v13.0.0,
                     Pre_Handler => \&setup_IdStatus,
+                    Has_Missings_Defaults => $IGNORED,
                     Property => 'Identifier_Status',
 
                     # Part of UTS 39, so must be downloaded separately from
@@ -19788,6 +19789,7 @@ my @input_file_objects = (
                    ),
     Input_file->new('IdType.txt', v13.0.0,
                     Pre_Handler => \&setup_IdType,
+                    Has_Missings_Defaults => $IGNORED,
                     Each_Line_Handler => \&filter_IdType_line,
                     Property => 'Identifier_Type',
 
