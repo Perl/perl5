@@ -635,8 +635,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             /* New style explicit name, type is just mode and layer info */
 #ifdef USE_STDIO
             if (SvROK(*svp) && !memchr(oname, '&', len)) {
-                if (ckWARN(WARN_IO))
-                    warner(packWARN(WARN_IO), "Can't open a reference");
+                ck_warner(packWARN(WARN_IO), "Can't open a reference");
                 SETERRNO(EINVAL, LIB_INVARG);
                 fp = NULL;
                 goto say_false;
@@ -683,8 +682,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             }
             if (*name == '\0') {
                 /* command is missing 19990114 */
-                if (ckWARN(WARN_PIPE))
-                    warner(packWARN(WARN_PIPE), "Missing command in piped open");
+                ck_warner(packWARN(WARN_PIPE), "Missing command in piped open");
                 errno = EPIPE;
                 fp = NULL;
                 goto say_false;
@@ -694,8 +692,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             TAINT_PROPER("piped open");
             if (!num_svs && name[len-1] == '|') {
                 name[--len] = '\0' ;
-                if (ckWARN(WARN_PIPE))
-                    warner(packWARN(WARN_PIPE), "Can't open bidirectional pipe");
+                ck_warner(packWARN(WARN_PIPE), "Can't open bidirectional pipe");
             }
             mode[0] = 'w';
             writing = 1;
@@ -917,8 +914,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
             }
             if (*name == '\0') {
                 /* command is missing 19990114 */
-                if (ckWARN(WARN_PIPE))
-                    warner(packWARN(WARN_PIPE), "Missing command in piped open");
+                ck_warner(packWARN(WARN_PIPE), "Missing command in piped open");
                 errno = EPIPE;
                 fp = NULL;
                 goto say_false;
@@ -2359,12 +2355,10 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
             return PL_laststatval;
         }
         PL_laststatval = -1;
-        if (ckWARN(WARN_IO)) {
-            /* diag_listed_as: Use of -l on filehandle%s */
-            warner(packWARN(WARN_IO),
-                   "Use of -l on filehandle %" HEKf,
-                   HEKfARG(GvENAME_HEK(cGVOP_gv)));
-        }
+        /* diag_listed_as: Use of -l on filehandle%s */
+        ck_warner(packWARN(WARN_IO),
+                  "Use of -l on filehandle %" HEKf,
+                  HEKfARG(GvENAME_HEK(cGVOP_gv)));
         SETERRNO(EBADF,RMS_IFI);
         return -1;
     }
@@ -2416,9 +2410,8 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
     const int e = errno;
     PERL_ARGS_ASSERT_EXEC_FAILED;
 
-    if (ckWARN(WARN_EXEC))
-        warner(packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-                    cmd, Strerror(e));
+    ck_warner(packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
+              cmd, Strerror(e));
     if (do_report) {
         /* XXX silently ignore failures */
         PERL_UNUSED_RESULT(PerlLIO_write(fd, (void*)&e, sizeof(int)));
@@ -3519,9 +3512,9 @@ Perl_vms_start_glob
 #endif /* !VMS */
     LEAVE;
 
-    if (!fp && ckWARN(WARN_GLOB)) {
-        warner(packWARN(WARN_GLOB), "glob failed (can't start child: %s)",
-                    Strerror(errno));
+    if (!fp) {
+        ck_warner(packWARN(WARN_GLOB), "glob failed (can't start child: %s)",
+                  Strerror(errno));
     }
 
     return fp;

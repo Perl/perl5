@@ -1423,8 +1423,8 @@ perl_destruct(pTHXx)
         }
     }
 
-    if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
-        warner(packWARN(WARN_INTERNAL),"Scalars leaked: %ld\n", (long)PL_sv_count);
+    if (PL_sv_count != 0)
+        ck_warner_d(packWARN(WARN_INTERNAL), "Scalars leaked: %ld\n", (long)PL_sv_count);
 
 #ifdef DEBUG_LEAKING_SCALARS
     if (PL_sv_count != 0) {
@@ -3645,9 +3645,9 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
             const char * const d = strchr(debopts,**s);
             if (d)
                 uv |= 1 << (d - debopts);
-            else if (ckWARN_d(WARN_DEBUGGING))
-                warner(packWARN(WARN_DEBUGGING),
-                    "invalid option -D%c, use -D'' to see choices\n", **s);
+            else
+                ck_warner_d(packWARN(WARN_DEBUGGING),
+                            "invalid option -D%c, use -D'' to see choices\n", **s);
         }
     }
     else if (isDIGIT(**s)) {
@@ -3804,9 +3804,8 @@ Perl_moreswitches(pTHX_ const char *s)
         s++;
         PL_debug = get_debug_opts( (const char **)&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
-        if (ckWARN_d(WARN_DEBUGGING))
-            warner(packWARN(WARN_DEBUGGING),
-                   "Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)\n");
+        ck_warner_d(packWARN(WARN_DEBUGGING),
+                    "Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)\n");
         for (s++; isWORDCHAR(*s); s++) ;
 #endif
         return s;

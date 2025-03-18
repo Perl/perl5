@@ -725,8 +725,7 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
     }
     else {
         if (status < 0) {
-            if (ckWARN(WARN_EXEC))
-                warner(packWARN(WARN_EXEC), "Can't spawn \"%s\": %s", argv[0], strerror(errno));
+            ck_warner(packWARN(WARN_EXEC), "Can't spawn \"%s\": %s", argv[0], strerror(errno));
             status = 255 * 256;
         }
         else
@@ -844,10 +843,9 @@ do_spawn2_handles(pTHX_ const char *cmd, int exectype, const int *handles)
     }
     else {
         if (status < 0) {
-            if (ckWARN(WARN_EXEC))
-                warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
-                     (exectype == EXECF_EXEC ? "exec" : "spawn"),
-                     cmd, strerror(errno));
+            ck_warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
+                      (exectype == EXECF_EXEC ? "exec" : "spawn"),
+                      cmd, strerror(errno));
             status = 255 * 256;
         }
         else

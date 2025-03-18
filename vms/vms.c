@@ -974,9 +974,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
                      "Value of CLI symbol \"%s\" too long",lnm);
               } else
 #endif
-                if (ckWARN(WARN_MISC)) {
-                  warner(packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
-                }
+                  ck_warner(packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
             }
             strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
           }
@@ -1341,8 +1339,7 @@ prime_env_iter(void)
       for (j = 0; environ[j]; j++);
       for (j--; j >= 0; j--) {
         if (!(start = strchr(environ[j],'='))) {
-          if (ckWARN(WARN_INTERNAL)) 
-            warner(packWARN(WARN_INTERNAL),"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
+          ck_warner(packWARN(WARN_INTERNAL),"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
         }
         else {
           start++;
@@ -1410,8 +1407,8 @@ prime_env_iter(void)
         }
         continue;
       }
-      if (sts == SS$_BUFFEROVF && ckWARN(WARN_INTERNAL))
-        warner(packWARN(WARN_INTERNAL),"Buffer overflow in prime_env_iter: %s",buf);
+      if (sts == SS$_BUFFEROVF)
+        ck_warner(packWARN(WARN_INTERNAL),"Buffer overflow in prime_env_iter: %s",buf);
 
       for (cp1 = buf; *cp1 && isSPACE_L1(*cp1); cp1++) ;
       if (*cp1 == '(' || /* Logical name table name */
@@ -4260,10 +4257,8 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     } else {        /* uh, oh...we're in tempfile hell */
         tpipe = vmspipe_tempfile(aTHX);
         if (!tpipe) {       /* a fish popular in Boston */
-            if (ckWARN(WARN_PIPE)) {
-                Perl_warner(aTHX_ packWARN(WARN_PIPE),"unable to find VMSPIPE.COM for i/o piping");
-            }
-        return NULL;
+            ck_warner(packWARN(WARN_PIPE),"unable to find VMSPIPE.COM for i/o piping");
+            return NULL;
         }
         fgetname(tpipe,tfilebuf+1,1);
         vmspipedsc.dsc$w_length  = strlen(tfilebuf);
@@ -4291,9 +4286,9 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
           set_errno(EVMSERR); 
       }
       set_vaxc_errno(sts);
-      if (*in_mode != 'n' && ckWARN(WARN_PIPE)) {
-        Perl_warner(aTHX_ packWARN(WARN_PIPE),"Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
-      }
+      if (*in_mode != 'n')
+        ck_warner(packWARN(WARN_PIPE), "Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
+
       *psts = sts;
       return NULL; 
     }
@@ -10982,10 +10977,9 @@ Perl_vms_do_exec(pTHX_ const char *cmd)
         set_errno(EVMSERR); 
     }
     set_vaxc_errno(retsts);
-    if (ckWARN(WARN_EXEC)) {
-      Perl_warner(aTHX_ packWARN(WARN_EXEC),"Can't exec \"%*s\": %s",
-             vmscmd->dsc$w_length, vmscmd->dsc$a_pointer, Strerror(errno));
-    }
+    ck_warner(packWARN(WARN_EXEC),"Can't exec \"%*s\": %s",
+              vmscmd->dsc$w_length, vmscmd->dsc$a_pointer, Strerror(errno));
+
     vms_execfree(vmscmd);
   }
 
@@ -11082,10 +11076,8 @@ do_spawn2(pTHX_ const char *cmd, int flags)
           set_errno(EVMSERR);
       }
       set_vaxc_errno(sts);
-      if (ckWARN(WARN_EXEC)) {
-        Perl_warner(aTHX_ packWARN(WARN_EXEC),"Can't spawn: %s",
-                    Strerror(errno));
-      }
+      ck_warner(packWARN(WARN_EXEC),"Can't spawn: %s",
+                Strerror(errno));
     }
     sts = substs;
   }

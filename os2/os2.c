@@ -1165,9 +1165,8 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                     }
                     if (PerlIO_close(file) != 0) { /* Failure */
                       panic_file:
-                        if (ckWARN(WARN_EXEC))
-                           warner(packWARN(WARN_EXEC), "Error reading \"%s\": %s", 
-                             scr, Strerror(errno));
+                        ck_warner(packWARN(WARN_EXEC), "Error reading \"%s\": %s",
+                                  scr, Strerror(errno));
                         buf = "";	/* Not #! */
                         goto doshell_args;
                     }
@@ -1300,18 +1299,18 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                 errno = err;
             }
           } else if (errno == ENOEXEC) { /* Cannot transfer `real_name' via shell. */
-                if (rc < 0 && ckWARN(WARN_EXEC))
-                    warner(packWARN(WARN_EXEC), "Can't %s script `%s' with ARGV[0] being `%s'", 
-                         ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
-                          ? "spawn" : "exec"),
-                         real_name, argv[0]);
+                if (rc < 0)
+                    ck_warner(packWARN(WARN_EXEC), "Can't %s script `%s' with ARGV[0] being `%s'",
+                              ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC)
+                               ? "spawn" : "exec"),
+                              real_name, argv[0]);
                 goto warned;
           } else if (errno == ENOENT) { /* Cannot transfer `real_name' via shell. */
-                if (rc < 0 && ckWARN(WARN_EXEC))
-                    warner(packWARN(WARN_EXEC), "Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)", 
-                         ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
-                          ? "spawn" : "exec"),
-                         real_name, argv[0]);
+                if (rc < 0))
+                    ck_warner(packWARN(WARN_EXEC), "Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)",
+                              ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC)
+                               ? "spawn" : "exec"),
+                              real_name, argv[0]);
                 goto warned;
           }
         } else if (rc < 0 && pass == 2 && errno == ENOENT) { /* File not found */
@@ -1325,11 +1324,11 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                 goto retry;
             }
         }
-        if (rc < 0 && ckWARN(WARN_EXEC))
-            warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s\n", 
-                 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
-                  ? "spawn" : "exec"),
-                 real_name, Strerror(errno));
+        if (rc < 0))
+            ck_warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s\n",
+                      ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC)
+                       ? "spawn" : "exec"),
+                      real_name, Strerror(errno));
       warned:
         if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
             && ((trueflag & 0xFF) == P_WAIT)) 
@@ -1436,10 +1435,10 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
                 else
                    rc = result(aTHX_ P_WAIT,
                                spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
-                if (rc < 0 && ckWARN(WARN_EXEC))
-                    warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s", 
-                         (execf == EXECF_SPAWN ? "spawn" : "exec"),
-                         shell, Strerror(errno));
+                if (rc < 0)
+                    ck_warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
+                              (execf == EXECF_SPAWN ? "spawn" : "exec"),
+                              shell, Strerror(errno));
                 if (rc < 0)
                     rc = -1;
             }

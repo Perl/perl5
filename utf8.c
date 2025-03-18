@@ -2664,13 +2664,11 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         }
 
       warn_and_return:
-        if (ckWARN_d(WARN_UTF8)) {
-            if (PL_op)
-                warner(packWARN(WARN_UTF8),
-                       "%s in %s", unees, OP_DESC(PL_op));
-            else
-                warner(packWARN(WARN_UTF8), "%s", unees);
-        }
+        if (PL_op)
+            ck_warner_d(packWARN(WARN_UTF8),
+                        "%s in %s", unees, OP_DESC(PL_op));
+        else
+            ck_warner_d(packWARN(WARN_UTF8), "%s", unees);
 
         return s - s0;
     }
@@ -4005,23 +4003,21 @@ S_to_case_cp_list(pTHX_
          * points */
         if (isUNICODE_POSSIBLY_PROBLEMATIC(original)) {
             if (UNLIKELY(UNICODE_IS_SURROGATE(original))) {
-                if (ckWARN_d(WARN_SURROGATE)) {
-                    const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-                    warner(packWARN(WARN_SURROGATE),
-                           "Operation \"%s\" returns its argument for"
-                           " UTF-16 surrogate U+%04" UVXf, desc, original);
-                }
+                ck_warner_d(packWARN(WARN_SURROGATE),
+                            "Operation \"%s\" returns its argument for"
+                            " UTF-16 surrogate U+%04" UVXf,
+                            (PL_op) ? OP_DESC(PL_op) : normal,
+                            original);
             }
             else if (UNLIKELY(UNICODE_IS_SUPER(original))) {
-                if (UNLIKELY(original > MAX_LEGAL_CP)) {
+                if (UNLIKELY(original > MAX_LEGAL_CP))
                     croak("%s", form_cp_too_large_msg(16, NULL, 0, original));
-                }
-                if (ckWARN_d(WARN_NON_UNICODE)) {
-                    const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-                    warner(packWARN(WARN_NON_UNICODE),
-                           "Operation \"%s\" returns its argument for"
-                           " non-Unicode code point 0x%04" UVXf, desc, original);
-                }
+
+                ck_warner_d(packWARN(WARN_NON_UNICODE),
+                            "Operation \"%s\" returns its argument for"
+                            " non-Unicode code point 0x%04" UVXf,
+                            (PL_op) ? OP_DESC(PL_op) : normal,
+                            original);
             }
 
             /* Note that non-characters are perfectly legal, so no warning
