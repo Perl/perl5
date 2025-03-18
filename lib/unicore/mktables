@@ -10048,10 +10048,13 @@ sub finish_property_setup($file) {
     # file directly (it was documented in 5.12 and 5.14 as being thusly
     # usable), keep it from being adjusted.  (range_size_1 is
     # used to force the traditional format.)
-    if (defined (my $nfkc_cf = property_ref('NFKC_Casefold'))) {
-        $nfkc_cf->set_to_output_map($EXTERNAL_MAP);
-        $nfkc_cf->set_range_size_1(1);
+    foreach my $property (qw(NFKC_Casefold NFKC_Simple_Casefold)) {
+        if (defined (my $cf = property_ref($property))) {
+            $cf->set_to_output_map($EXTERNAL_MAP);
+            $cf->set_range_size_1(1);
+        }
     }
+
     if (defined (my $bmg = property_ref('Bidi_Mirroring_Glyph'))) {
         $bmg->set_to_output_map($EXTERNAL_MAP);
         $bmg->set_range_size_1(1);
