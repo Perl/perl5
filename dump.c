@@ -540,14 +540,14 @@ Perl_sv_peek(pTHX_ SV *sv)
             }
         }
         if (is_tmp || SvREFCNT(sv) > 1 || SvPADTMP(sv)) {
-            sv_catpvf(t, "<");
+            sv_catpvs(t, "<");
             if (SvREFCNT(sv) > 1)
                 sv_catpvf(t, "%" UVuf, (UV)SvREFCNT(sv));
             if (SvPADTMP(sv))
-                sv_catpvf(t, "%s",  "P");
+                sv_catpvs(t, "P");
             if (is_tmp)
-                sv_catpvf(t, "%s", SvTEMP(t) ? "T" : "t");
-            sv_catpvf(t, ">");
+                sv_catpv(t, SvTEMP(t) ? "T" : "t");
+            sv_catpvs(t, ">");
         }
     }
 

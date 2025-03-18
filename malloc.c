@@ -1704,7 +1704,7 @@ morecore(int bucket)
 #endif
         if (bucket == sizeof(MEM_SIZE)*8*BUCKETS_PER_POW2) {
             MALLOC_UNLOCK;
-            croak2("%s", "Out of memory during ridiculously large request");
+            croak2("Out of memory during ridiculously large request");
         }
         if (bucket > max_bucket)
             max_bucket = bucket;
@@ -1842,16 +1842,20 @@ Perl_mfree(Malloc_t where)
 #ifdef RCHECK
                 {
                     dTHX;
-                    if (!PERL_IS_ALIVE || !PL_curcop)
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%s free() ignored (RMAGIC, PERL_CORE)",
-                                         ovp->ov_rmagic == RMAGIC - 1 ?
-                                         "Duplicate" : "Bad");
+                    if (!PERL_IS_ALIVE || !PL_curcop) {
+                        if (ovp->ov_rmagic == RMAGIC - 1)
+                            Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC),
+                                             "Duplicate free() ignored (%s)", "RMAGIC, PERL_CORE");
+                        else
+                            Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC),
+                                             "Bad free() ignored (%s)", "RMAGIC, PERL_CORE");
+                    }
                 }
 #else
                 {
                     dTHX;
                     if (!PERL_IS_ALIVE || !PL_curcop)
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%s", "Bad free() ignored (PERL_CORE)");
+                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "Bad free() ignored (%s)", "PERL_CORE");
                 }
 #endif
                 return;				/* sanity */
@@ -1947,18 +1951,18 @@ Perl_realloc(void *mp, size_t nbytes)
 #ifdef RCHECK
                 {
                     dTHX;
-                    if (!PERL_IS_ALIVE || !PL_curcop)
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%srealloc() %signored",
-                                         (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
-                                         ovp->ov_rmagic == RMAGIC - 1
-                                         ? "of freed memory " : "");
+                    if (!PERL_IS_ALIVE || !PL_curcop) {
+                        if (ovp->ov_rmagic == RMAGIC - 1)
+                            Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "realloc() of freed memory ignored");
+                        else
+                            Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "Bad realloc() ignored");
+                    }
                 }
 #else
                 {
                     dTHX;
                     if (!PERL_IS_ALIVE || !PL_curcop)
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "%s",
-                                         "Bad realloc() ignored");
+                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "Bad realloc() ignored");
                 }
 #endif
                 return NULL;			/* sanity */
