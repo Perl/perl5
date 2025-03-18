@@ -269,9 +269,9 @@
 #  define MALLOC_UNLOCK		MUTEX_UNLOCK(&PL_malloc_mutex)
 #endif 
 
-#  ifndef fatalcroak				/* make depend */
-#    define fatalcroak(mess)	(write(2, (mess), strlen(mess)), exit(2))
-#  endif 
+#ifndef fatalcroak
+#  define fatalcroak(mess)      STMT_START { PERL_UNUSED_RESULT(write(2, (mess), strlen(mess))); exit(2); } STMT_END
+#endif
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
