@@ -361,7 +361,7 @@ S_output_non_portable(pTHX_ const U8 base)
      * are the first word, it would be hard for a user to find them there
      * starting with a %s */
     /* diag_listed_as: Hexadecimal number > 0xffffffff non-portable */
-    Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE), "%s non-portable", which);
+    ck_warner(packWARN(WARN_PORTABLE), "%s non-portable", which);
 }
 
 UV
@@ -529,12 +529,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                 if (   ! (input_flags & PERL_SCAN_SILENT_OVERFLOW)
                     &&    ckWARN_d(WARN_OVERFLOW))
                 {
-                    Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                                       "Integer overflow in %s number",
-                                       (base == 16) ? "hexadecimal"
-                                                    : (base == 2)
-                                                      ? "binary"
-                                                      : "octal");
+                    warner(packWARN(WARN_OVERFLOW),
+                           "Integer overflow in %s number",
+                           (base == 16) ? "hexadecimal"
+                                        : (base == 2)
+                                          ? "binary"
+                                          : "octal");
                 }
             }
             continue;
@@ -561,12 +561,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                 &&    ckWARN(WARN_DIGIT))
             {
                 if (base != 8) {
-                    Perl_warner(aTHX_ packWARN(WARN_DIGIT),
-                                           "Illegal %s digit '%c' ignored",
-                                           ((base == 2)
-                                            ? "binary"
-                                              : "hexadecimal"),
-                                            *s);
+                    warner(packWARN(WARN_DIGIT),
+                           "Illegal %s digit '%c' ignored",
+                           ((base == 2)
+                            ? "binary"
+                            : "hexadecimal"),
+                           *s);
                 }
                 else if (isDIGIT(*s)) { /* octal base */
 
@@ -575,8 +575,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                      * complain only if someone seems to want to use the digits
                      * eight and nine.  Since we know it is not octal, then if
                      * isDIGIT, must be an 8 or 9). */
-                    Perl_warner(aTHX_ packWARN(WARN_DIGIT),
-                                       "Illegal octal digit '%c' ignored", *s);
+                    warner(packWARN(WARN_DIGIT),
+                           "Illegal octal digit '%c' ignored", *s);
                 }
             }
 

@@ -1837,11 +1837,11 @@ Perl_mfree(Malloc_t where)
                     if (!PERL_IS_ALIVE || !PL_curcop) {
 #ifdef RCHECK
                         if (ovp->ov_rmagic == RMAGIC - 1) {
-                            Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "Duplicate free() ignored");
+                            ck_warner_d(packWARN(WARN_MALLOC), "Duplicate free() ignored");
                             return;
                         }
 #endif
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "Bad free() ignored");
+                        ck_warner_d(packWARN(WARN_MALLOC), "Bad free() ignored");
                     }
                 }
                 return;  /* sanity */
@@ -1939,11 +1939,11 @@ Perl_realloc(void *mp, size_t nbytes)
                     if (!PERL_IS_ALIVE || !PL_curcop) {
 #ifdef RCHECK
                         if (ovp->ov_rmagic == RMAGIC - 1) {
-                            Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "realloc() of freed memory ignored");
+                            ck_warner_d(packWARN(WARN_MALLOC), "realloc() of freed memory ignored");
                             return NULL;
                         }
 #endif
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_MALLOC), "Bad realloc() ignored");
+                        ck_warner_d(packWARN(WARN_MALLOC), "Bad realloc() ignored");
                     }
                 }
                 return NULL;  /* sanity */

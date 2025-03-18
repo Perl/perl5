@@ -1866,7 +1866,7 @@ S_scalarboolean(pTHX_ OP *o)
                    of the conditional, not the last.  */
                 CopLINE_set(PL_curcop, PL_parser->copline);
             }
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Found = in conditional, should be ==");
+            warner(packWARN(WARN_SYNTAX), "Found = in conditional, should be ==");
             CopLINE_set(PL_curcop, oldline);
         }
     }
@@ -1950,9 +1950,9 @@ Perl_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is
             PERL_DIAG_WARN_SYNTAX(
                 "%%%" SVf "%c%s%c in scalar context better written as $%" SVf "%c%s%c");
 
-        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
-                SVfARG(name), lbrack, keypv, rbrack,
-                SVfARG(name), lbrack, keypv, rbrack);
+        warner(packWARN(WARN_SYNTAX), msg,
+               SVfARG(name), lbrack, keypv, rbrack,
+               SVfARG(name), lbrack, keypv, rbrack);
     }
     else {
         msg = is_slice ?
@@ -1963,9 +1963,9 @@ Perl_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is
             PERL_DIAG_WARN_SYNTAX(
                 "%%%" SVf "%c%" SVf "%c in scalar context better written as $%" SVf "%c%" SVf "%c");
 
-        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
-                SVfARG(name), lbrack, SVfARG(keysv), rbrack,
-                SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+        warner(packWARN(WARN_SYNTAX), msg,
+               SVfARG(name), lbrack, SVfARG(keysv), rbrack,
+               SVfARG(name), lbrack, SVfARG(keysv), rbrack);
     }
 }
 
@@ -2068,7 +2068,7 @@ Perl_scalar(pTHX_ OP *o)
             break;
 
         case OP_SORT:
-            Perl_ck_warner(aTHX_ packWARN(WARN_SCALAR), "Useless use of %s in scalar context", "sort");
+            ck_warner(packWARN(WARN_SCALAR), "Useless use of %s in scalar context", "sort");
             break;
 
         case OP_KVHSLICE:
@@ -2489,14 +2489,14 @@ Perl_scalarvoid(pTHX_ OP *arg)
 
         if (useless_sv) {
             /* mortalise it, in case warnings are fatal.  */
-            Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                           "Useless use of %" SVf " in void context",
-                           SVfARG(sv_2mortal(useless_sv)));
+            ck_warner(packWARN(WARN_VOID),
+                      "Useless use of %" SVf " in void context",
+                      SVfARG(sv_2mortal(useless_sv)));
         }
         else if (useless) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                           "Useless use of %s in void context",
-                           useless);
+            ck_warner(packWARN(WARN_VOID),
+                      "Useless use of %s in void context",
+                      useless);
         }
 
       get_next_op:
@@ -3490,9 +3490,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
             if (!FEATURE_MYREF_IS_ENABLED)
                 croak("The experimental declared_refs "
                                  "feature is not enabled");
-            Perl_ck_warner_d(aTHX_
-                     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-                    "Declaring references is experimental");
+            ck_warner_d(packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+                        "Declaring references is experimental");
             next_kid = cUNOPo->op_first;
             goto do_next;
         }
@@ -3516,9 +3515,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                 if (!FEATURE_REFALIASING_IS_ENABLED)
                     croak(
                        "Experimental aliasing via reference not enabled");
-                Perl_ck_warner_d(aTHX_
-                                 packWARN(WARN_EXPERIMENTAL__REFALIASING),
-                                "Aliasing via reference is experimental");
+                ck_warner_d(packWARN(WARN_EXPERIMENTAL__REFALIASING),
+                            "Aliasing via reference is experimental");
             }
         }
         if (o->op_type == OP_REFGEN)
@@ -3578,8 +3576,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         case 0:
             break;
         case -1:
-            Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "Useless localization of %s", OP_DESC(o));
+            ck_warner(packWARN(WARN_SYNTAX),
+                      "Useless localization of %s", OP_DESC(o));
         }
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB
@@ -4040,9 +4038,9 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
                     if (new_proto && ckWARN(WARN_MISC)) {
                         STRLEN new_len;
                         const char * newp = SvPV(cSVOPo_sv, new_len);
-                        Perl_warner(aTHX_ packWARN(WARN_MISC),
-                            "Attribute prototype(%" UTF8f ") discards earlier prototype attribute in same sub",
-                            UTF8fARG(SvUTF8(cSVOPo_sv), new_len, newp));
+                        warner(packWARN(WARN_MISC),
+                               "Attribute prototype(%" UTF8f ") discards earlier prototype attribute in same sub",
+                               UTF8fARG(SvUTF8(cSVOPo_sv), new_len, newp));
                     }
                     op_free(new_proto);
                     new_proto = o;
@@ -4087,12 +4085,12 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
                 sv_catsv(svname, (SV *)name);
             }
 
-            Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-                "Prototype '%" UTF8f "' overridden by attribute 'prototype(%" UTF8f ")'"
-                " in %" SVf,
-                UTF8fARG(SvUTF8(cSVOPx_sv(*proto)), old_len, oldp),
-                UTF8fARG(SvUTF8(cSVOPx_sv(new_proto)), new_len, newp),
-                SVfARG(svname));
+            warner(packWARN(WARN_PROTOTYPE),
+                   "Prototype '%" UTF8f "' overridden by attribute 'prototype(%" UTF8f ")'"
+                   " in %" SVf,
+                   UTF8fARG(SvUTF8(cSVOPx_sv(*proto)), old_len, oldp),
+                   UTF8fARG(SvUTF8(cSVOPx_sv(new_proto)), new_len, newp),
+                   SVfARG(svname));
         }
         op_free(*proto);
         *proto = new_proto;
@@ -4158,9 +4156,8 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
         if (!FEATURE_MYREF_IS_ENABLED)
             croak("The experimental declared_refs "
                              "feature is not enabled");
-        Perl_ck_warner_d(aTHX_
-             packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-            "Declaring references is experimental");
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+                    "Declaring references is experimental");
         /* Kid is a nulled OP_LIST, handled above.  */
         my_kid(cUNOPo->op_first, attrs, imopsp);
         return o;
@@ -4271,15 +4268,15 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
       const bool isary = ltype == OP_RV2AV || ltype == OP_PADAV;
       SV * const name = op_varname(left);
       if (name)
-        Perl_warner(aTHX_ packWARN(WARN_MISC),
-             "Applying %s to %" SVf " will act on scalar(%" SVf ")",
-             desc, SVfARG(name), SVfARG(name));
+        warner(packWARN(WARN_MISC),
+               "Applying %s to %" SVf " will act on scalar(%" SVf ")",
+               desc, SVfARG(name), SVfARG(name));
       else {
         const char * const sample = (isary
              ? "@array" : "%hash");
-        Perl_warner(aTHX_ packWARN(WARN_MISC),
-             "Applying %s to %s will act on scalar(%s)",
-             desc, sample, sample);
+        warner(packWARN(WARN_MISC),
+               "Applying %s to %s will act on scalar(%s)",
+               desc, sample, sample);
       }
     }
 
@@ -4317,9 +4314,8 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
         }
         else {
             if (left->op_type == OP_NOT && !(left->op_flags & OPf_PARENS)) {
-                Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-                    "Possible precedence problem between ! and %s", PL_op_desc[rtype]
-                );
+                ck_warner(packWARN(WARN_PRECEDENCE),
+                          "Possible precedence problem between ! and %s", PL_op_desc[rtype]);
             }
             right->op_flags |= OPf_STACKED;
             if (rtype != OP_MATCH && rtype != OP_TRANSR &&
@@ -4382,8 +4378,8 @@ S_is_control_transfer(pTHX_ OP *op)
                 sub { not FEATURE and return or do_stuff(); }
          */
         if (!op->op_folded && !(op->op_flags & OPf_PARENS))
-            Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "Possible precedence issue with control flow operator (%s)", OP_DESC(op));
+            ck_warner(packWARN(WARN_SYNTAX),
+                      "Possible precedence issue with control flow operator (%s)", OP_DESC(op));
 
         return true;
     }
@@ -4845,15 +4841,15 @@ Perl_localize(pTHX_ OP *o, I32 lex)
                     break;
             }
             if (sigil && (*s == ';' || *s == '=')) {
-                Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
-                                "Parentheses missing around \"%s\" list",
-                                lex
-                                    ? (PL_parser->in_my == KEY_our
-                                        ? "our"
-                                        : PL_parser->in_my == KEY_state
-                                            ? "state"
-                                            : "my")
-                                    : "local");
+                warner(packWARN(WARN_PARENTHESIS),
+                       "Parentheses missing around \"%s\" list",
+                       lex
+                           ? (PL_parser->in_my == KEY_our
+                               ? "our"
+                               : PL_parser->in_my == KEY_state
+                                   ? "state"
+                                   : "my")
+                           : "local");
             }
         }
     }
@@ -7469,9 +7465,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     Safefree(r_map);
 
     if(del && rlen != 0 && r_count == t_count) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator");
+        ck_warner(packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator");
     } else if(r_count > t_count) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
+        ck_warner(packWARN(WARN_MISC), "Replacement list is longer than search list");
     }
 
     op_free(expr);
@@ -9086,7 +9082,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
         if (cstop->op_private & OPpCONST_STRICT)
             no_bareword_allowed(cstop);
         else if ((cstop->op_private & OPpCONST_BARE))
-                Perl_ck_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
+                ck_warner(packWARN(WARN_BAREWORD), "Bareword found in conditional");
         if ((type == OP_AND &&  SvTRUE(cSVOPx(cstop)->op_sv)) ||
             (type == OP_OR  && !SvTRUE(cSVOPx(cstop)->op_sv)) ||
             (type == OP_DOR && !SvOK(cSVOPx(cstop)->op_sv))) {
@@ -9169,11 +9165,11 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
             /* This ensures that warnings are reported at the first line
                of the construction, not the last.  */
             CopLINE_set(PL_curcop, PL_parser->copline);
-            Perl_warner(aTHX_ packWARN(WARN_MISC),
-                 "Value of %s%s can be \"0\"; test with defined()",
-                 PL_op_desc[warnop],
-                 ((warnop == OP_READLINE || warnop == OP_GLOB)
-                  ? " construct" : "() operator"));
+            warner(packWARN(WARN_MISC),
+                   "Value of %s%s can be \"0\"; test with defined()",
+                   PL_op_desc[warnop],
+                   ((warnop == OP_READLINE || warnop == OP_GLOB)
+                    ? " construct" : "() operator"));
             CopLINE_set(PL_curcop, oldline);
         }
     }
@@ -10395,7 +10391,7 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
         sv_catpvf(msg, "(%" UTF8f ")", UTF8fARG(flags & SVf_UTF8,len,p));
     else
         sv_catpvs(msg, "none");
-    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%" SVf, SVfARG(msg));
+    warner(packWARN(WARN_PROTOTYPE), "%" SVf, SVfARG(msg));
 }
 
 static void const_sv_xsub(pTHX_ CV* cv);
@@ -10516,7 +10512,7 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
             {
                 /* protect against fatal warnings leaking compcv */
                 SAVEFREESV(PL_compcv);
-                Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
+                warner(packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
                 SvREFCNT_inc_simple_void_NN(PL_compcv);
             }
             CvFLAGS(cv) |=
@@ -11120,10 +11116,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
          * nonexistent sub. */
         if (proto)
             /* diag_listed_as: %s on BEGIN block ignored */
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Prototype on BEGIN block ignored");
+            warner(packWARN(WARN_SYNTAX), "Prototype on BEGIN block ignored");
         if (attrs)
             /* diag_listed_as: %s on BEGIN block ignored */
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Attribute on BEGIN block ignored");
+            warner(packWARN(WARN_SYNTAX), "Attribute on BEGIN block ignored");
         proto = NULL;
         attrs = NULL;
     }
@@ -11253,9 +11249,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                       || SvTYPE(SvRV(gv)) == SVt_PVAV
                       || sv_cmp(SvRV(gv), const_sv)  ))) {
                 assert(cSVOPo);
-                Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-                          "Constant subroutine %" SVf " redefined",
-                          SVfARG(cSVOPo->op_sv));
+                warner(packWARN(WARN_REDEFINE),
+                       "Constant subroutine %" SVf " redefined",
+                       SVfARG(cSVOPo->op_sv));
             }
 
             SvREFCNT_inc_simple_void_NN(PL_compcv);
@@ -11689,8 +11685,8 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             if (strEQ(name, "CHECK")) {
                 if (PL_main_start)
                     /* diag_listed_as: Too late to run %s block */
-                    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                                   "Too late to run CHECK block");
+                    ck_warner(packWARN(WARN_VOID),
+                              "Too late to run CHECK block");
                 Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, MUTABLE_SV(cv));
             }
             else
@@ -11721,8 +11717,8 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 #endif
                 if (PL_main_start)
                     /* diag_listed_as: Too late to run %s block */
-                    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                                   "Too late to run INIT block");
+                    ck_warner(packWARN(WARN_VOID),
+                              "Too late to run INIT block");
                 Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
             }
             else
@@ -12128,12 +12124,12 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
             if (PL_parser && PL_parser->copline != NOLINE)
                 CopLINE_set(PL_curcop, PL_parser->copline);
             if (o) {
-                Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-                            "Format %" SVf " redefined", SVfARG(cSVOPo->op_sv));
+                warner(packWARN(WARN_REDEFINE),
+                       "Format %" SVf " redefined", SVfARG(cSVOPo->op_sv));
             } else {
                 /* diag_listed_as: Format %s redefined */
-                Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-                            "Format STDOUT redefined");
+                warner(packWARN(WARN_REDEFINE),
+                       "Format STDOUT redefined");
             }
             CopLINE_set(PL_curcop, oldline);
         }
@@ -12265,7 +12261,7 @@ Perl_oopsAV(pTHX_ OP *o)
         break;
 
     default:
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsAV");
+        ck_warner_d(packWARN(WARN_INTERNAL), "oops: oopsAV");
         break;
     }
     return o;
@@ -12292,7 +12288,7 @@ Perl_oopsHV(pTHX_ OP *o)
         break;
 
     default:
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "oops: oopsHV");
+        ck_warner_d(packWARN(WARN_INTERNAL), "oops: oopsHV");
         break;
     }
     return o;
@@ -12517,17 +12513,17 @@ Perl_ck_bitop(pTHX_ OP *o)
                 (left->op_flags & OPf_PARENS) == 0) ||
             (OP_IS_NUMCOMPARE(right->op_type) &&
                 (right->op_flags & OPf_PARENS) == 0))
-            Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-                          "Possible precedence problem on bitwise %s operator",
-                           o->op_type ==  OP_BIT_OR
-                         ||o->op_type == OP_NBIT_OR  ? "|"
-                        :  o->op_type ==  OP_BIT_AND
-                         ||o->op_type == OP_NBIT_AND ? "&"
-                        :  o->op_type ==  OP_BIT_XOR
-                         ||o->op_type == OP_NBIT_XOR ? "^"
-                        :  o->op_type == OP_SBIT_OR  ? "|."
-                        :  o->op_type == OP_SBIT_AND ? "&." : "^."
-                           );
+            ck_warner(packWARN(WARN_PRECEDENCE),
+                      "Possible precedence problem on bitwise %s operator",
+                       o->op_type ==  OP_BIT_OR
+                     ||o->op_type == OP_NBIT_OR  ? "|"
+                    :  o->op_type ==  OP_BIT_AND
+                     ||o->op_type == OP_NBIT_AND ? "&"
+                    :  o->op_type ==  OP_BIT_XOR
+                     ||o->op_type == OP_NBIT_XOR ? "^"
+                    :  o->op_type == OP_SBIT_OR  ? "|."
+                    :  o->op_type == OP_SBIT_AND ? "&." : "^."
+                       );
     }
     return o;
 }
@@ -12551,7 +12547,7 @@ check_precedence_not_vs_cmp(pTHX_ const OP *const o)
             || cUNOPx(left)->op_first->op_type != OP_NOT
         )
     ) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+        ck_warner(packWARN(WARN_PRECEDENCE),
             "Possible precedence problem between ! and %s", OP_DESC(o)
         );
     }
@@ -12600,8 +12596,8 @@ Perl_ck_cmp(pTHX_ OP *o)
                 )
            )
         )
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "$[ used in %s (did you mean $] ?)", OP_DESC(o));
+            warner(packWARN(WARN_SYNTAX),
+                   "$[ used in %s (did you mean $] ?)", OP_DESC(o));
     }
 
     check_precedence_not_vs_cmp(aTHX_ o);
@@ -13135,12 +13131,12 @@ Perl_ck_ftst(pTHX_ OP *o)
             SV *name = S_op_varname_subscript(aTHX_ (OP*)kid, 2);
             if (name) {
                 /* diag_listed_as: Array passed to stat will be coerced to a scalar%s */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%s (did you want stat %" SVf "?)",
-                            array_passed_to_stat, name);
+                warner(packWARN(WARN_SYNTAX), "%s (did you want stat %" SVf "?)",
+                       array_passed_to_stat, name);
             }
             else {
                 /* diag_listed_as: Array passed to stat will be coerced to a scalar%s */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%s", array_passed_to_stat);
+                warner(packWARN(WARN_SYNTAX), "%s", array_passed_to_stat);
             }
        }
         scalar((OP *) kid);
@@ -13239,9 +13235,9 @@ Perl_ck_fun(pTHX_ OP *o)
             case OA_AVREF:
                 if ((type == OP_PUSH || type == OP_UNSHIFT)
                     && !OpHAS_SIBLING(kid))
-                    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                                   "Useless use of %s with no values",
-                                   PL_op_desc[type]);
+                    ck_warner(packWARN(WARN_SYNTAX),
+                              "Useless use of %s with no values",
+                              PL_op_desc[type]);
 
                 if (kid->op_type == OP_CONST
                       && (  !SvROK(cSVOPx_sv(kid))
@@ -14023,9 +14019,8 @@ Perl_ck_refassign(pTHX_ OP *o)
     if (!FEATURE_REFALIASING_IS_ENABLED)
         croak(
                   "Experimental aliasing via reference not enabled");
-    Perl_ck_warner_d(aTHX_
-                     packWARN(WARN_EXPERIMENTAL__REFALIASING),
-                    "Aliasing via reference is experimental");
+    ck_warner_d(packWARN(WARN_EXPERIMENTAL__REFALIASING),
+                "Aliasing via reference is experimental");
     if (stacked) {
         o->op_flags |= OPf_STACKED;
         op_sibling_splice(o, right, 1, varop);
@@ -14352,12 +14347,10 @@ S_simplify_sort(pTHX_ OP *o)
                  && (  PadnamePV(name)[1] == 'a'
                     || PadnamePV(name)[1] == 'b'  ))
                     /* diag_listed_as: "my %s" used in sort comparison */
-                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                                     "\"%s %s\" used in sort comparison",
-                                      PadnameIsSTATE(name)
-                                        ? "state"
-                                        : "my",
-                                      PadnamePV(name));
+                    warner(packWARN(WARN_SYNTAX),
+                           "\"%s %s\" used in sort comparison",
+                           PadnameIsSTATE(name) ? "state" : "my",
+                           PadnamePV(name));
             }
         } while ((kid = OpSIBLING(kid)));
         return;
@@ -14437,8 +14430,8 @@ Perl_ck_split(pTHX_ OP *o)
     assert(kid->op_type == OP_MATCH || kid->op_type == OP_SPLIT);
 
     if (kPMOP->op_pmflags & PMf_GLOBAL) {
-      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
-                     "Use of /g modifier is meaningless in split");
+      ck_warner(packWARN(WARN_REGEXP),
+                "Use of /g modifier is meaningless in split");
     }
 
     /* eliminate the split op, and move the match op (plus any children)
@@ -14516,9 +14509,9 @@ Perl_ck_join(pTHX_ OP *o)
                     ? newSVpvn_flags( RX_PRECOMP_const(re), RX_PRELEN(re),
                                             SVs_TEMP | ( RX_UTF8(re) ? SVf_UTF8 : 0 ) )
                     : newSVpvs_flags( "STRING", SVs_TEMP );
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "/%" SVf "/ should probably be written as \"%" SVf "\"",
-                        SVfARG(msg), SVfARG(msg));
+            warner(packWARN(WARN_SYNTAX),
+                   "/%" SVf "/ should probably be written as \"%" SVf "\"",
+                   SVfARG(msg), SVfARG(msg));
         }
     }
     if (kid
@@ -15563,7 +15556,7 @@ Perl_ck_each(pTHX_ OP *o)
                     OP *k = S_last_non_null_kid(cUNOPx(kid)->op_first);
                     if (k && k->op_type == OP_ANONHASH) {
                         /* diag_listed_as: each on anonymous %s will always start from the beginning */
-                        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "each on anonymous hash will always start from the beginning");
+                        warner(packWARN(WARN_SYNTAX), "each on anonymous hash will always start from the beginning");
                     }
                 }
                 break;
@@ -15577,7 +15570,7 @@ Perl_ck_each(pTHX_ OP *o)
                     OP *k = S_last_non_null_kid(cUNOPx(kid)->op_first);
                     if (k && k->op_type == OP_ANONLIST) {
                         /* diag_listed_as: each on anonymous %s will always start from the beginning */
-                        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "each on anonymous array will always start from the beginning");
+                        warner(packWARN(WARN_SYNTAX), "each on anonymous array will always start from the beginning");
                     }
                 }
                 /* FALLTHROUGH */
@@ -15631,18 +15624,18 @@ Perl_ck_length(pTHX_ OP *o)
                     return o;
             }
             if (name)
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                warner(packWARN(WARN_SYNTAX),
                     "length() used on %" SVf " (did you mean \"scalar(%s%" SVf
                     ")\"?)",
                     SVfARG(name), hash ? "keys " : "", SVfARG(name)
                 );
             else if (hash)
      /* diag_listed_as: length() used on %s (did you mean "scalar(%s)"?) */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                warner(packWARN(WARN_SYNTAX),
                     "length() used on %%hash (did you mean \"scalar(keys %%hash)\"?)");
             else
      /* diag_listed_as: length() used on %s (did you mean "scalar(%s)"?) */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                warner(packWARN(WARN_SYNTAX),
                     "length() used on @array (did you mean \"scalar(@array)\"?)");
         }
     }
@@ -15667,7 +15660,7 @@ Perl_ck_isa(pTHX_ OP *o)
     OP *const objop = cBINOPo->op_first;
     /* !$x isa Some::Class  # probably meant !($x isa Some::Class) */
     if (objop->op_type == OP_NOT && !(objop->op_flags & OPf_PARENS)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+        ck_warner(packWARN(WARN_PRECEDENCE),
             "Possible precedence problem between ! and %s", OP_DESC(o)
         );
     }
@@ -16179,13 +16172,13 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
              sv_cmp(old_const_sv, *new_const_svp))
         )
         ) {
-        Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-                          is_const
-                            ? "Constant subroutine %" SVf " redefined"
-                            : CvIsMETHOD(old_cv)
-                              ? "Method %" SVf " redefined"
-                              : "Subroutine %" SVf " redefined",
-                          SVfARG(name));
+        warner(packWARN(WARN_REDEFINE),
+               is_const
+                 ? "Constant subroutine %" SVf " redefined"
+                 : CvIsMETHOD(old_cv)
+                   ? "Method %" SVf " redefined"
+                   : "Subroutine %" SVf " redefined",
+               SVfARG(name));
     }
 }
 

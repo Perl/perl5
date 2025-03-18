@@ -33,8 +33,8 @@ struct BuiltinFuncDescriptor {
 static void S_warn_experimental_builtin(pTHX_ const char *name)
 {
     /* diag_listed_as: Built-in function '%s' is experimental */
-    Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__BUILTIN),
-                     "Built-in function 'builtin::%s' is experimental", name);
+    ck_warner_d(packWARN(WARN_EXPERIMENTAL__BUILTIN),
+                "Built-in function 'builtin::%s' is experimental", name);
 }
 
 /* These three utilities might want to live elsewhere to be reused from other
@@ -498,13 +498,13 @@ Perl_XS_builtin_indexed(pTHX_ CV *cv)
 
     switch(GIMME_V) {
         case G_VOID:
-            Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                "Useless use of %s in void context", "builtin::indexed");
+            ck_warner(packWARN(WARN_VOID),
+                      "Useless use of %s in void context", "builtin::indexed");
             XSRETURN(0);
 
         case G_SCALAR:
-            Perl_ck_warner(aTHX_ packWARN(WARN_SCALAR),
-                "Useless use of %s in scalar context", "builtin::indexed");
+            ck_warner(packWARN(WARN_SCALAR),
+                      "Useless use of %s in scalar context", "builtin::indexed");
             ST(0) = sv_2mortal(newSViv(items * 2));
             XSRETURN(1);
 

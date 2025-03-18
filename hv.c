@@ -1058,10 +1058,10 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         /* Currently this makes various tests warn in annoying ways.
          * So Silenced for now. - Yves | bogus end of comment =>* /
         if (HvAUX(hv)->xhv_riter != -1) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                             "[TESTING] Inserting into a hash during each() traversal results in undefined behavior"
-                             pTHX__FORMAT
-                             pTHX__VALUE);
+            ck_warner_d(packWARN(WARN_INTERNAL),
+                        "[TESTING] Inserting into a hash during each() traversal results in undefined behavior"
+                        pTHX__FORMAT
+                        pTHX__VALUE);
         }
         */
         MAYBE_UPDATE_HASH_RAND_BITS_KEY(key,klen);
@@ -3090,10 +3090,10 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     if (iter->xhv_last_rand != iter->xhv_rand) {
         if (iter->xhv_riter != -1) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                             "Use of each() on hash after insertion without resetting hash iterator results in undefined behavior"
-                             pTHX__FORMAT
-                             pTHX__VALUE);
+            ck_warner_d(packWARN(WARN_INTERNAL),
+                        "Use of each() on hash after insertion without resetting hash iterator results in undefined behavior"
+                        pTHX__FORMAT
+                        pTHX__VALUE);
         }
         iter->xhv_last_rand = iter->xhv_rand;
     }
@@ -3352,11 +3352,11 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     }
 
     if (!entry)
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                         "Attempt to free nonexistent shared string '%s'%s"
-                         pTHX__FORMAT,
-                         hek ? HEK_KEY(hek) : str,
-                         ((k_flags & HVhek_UTF8) ? " (utf8)" : "") pTHX__VALUE);
+        ck_warner_d(packWARN(WARN_INTERNAL),
+                    "Attempt to free nonexistent shared string '%s'%s"
+                    pTHX__FORMAT,
+                    hek ? HEK_KEY(hek) : str,
+                    ((k_flags & HVhek_UTF8) ? " (utf8)" : "") pTHX__VALUE);
     if (k_flags & HVhek_FREEKEY)
         Safefree(str);
 }

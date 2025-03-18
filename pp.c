@@ -617,8 +617,8 @@ PP(pp_bless)
         }
         else ptr = SvPV_nomg_const(ssv,len);
         if (len == 0)
-            Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                           "Explicit blessing to '' (assuming package main)");
+            ck_warner(packWARN(WARN_MISC),
+                      "Explicit blessing to '' (assuming package main)");
         stash = gv_stashpvn(ptr, len, GV_ADD|SvUTF8(ssv));
     }
 
@@ -972,16 +972,16 @@ PP(pp_undef)
         break;
     case SVt_PVCV:
         if (cv_const_sv((const CV *)sv))
-            Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                          "Constant subroutine %" SVf " undefined",
-                           SVfARG(CvANON((const CV *)sv)
-                             ? newSVpvs_flags("(anonymous)", SVs_TEMP)
-                             : newSVhek_mortal(
-                                CvNAMED(sv)
-                                 ? CvNAME_HEK((CV *)sv)
-                                 : GvENAME_HEK(CvGV((const CV *)sv))
-                               )
-                           ));
+            ck_warner(packWARN(WARN_MISC),
+                      "Constant subroutine %" SVf " undefined",
+                       SVfARG(CvANON((const CV *)sv)
+                         ? newSVpvs_flags("(anonymous)", SVs_TEMP)
+                         : newSVhek_mortal(
+                            CvNAMED(sv)
+                             ? CvNAME_HEK((CV *)sv)
+                             : GvENAME_HEK(CvGV((const CV *)sv))
+                           )
+                       ));
         /* FALLTHROUGH */
     case SVt_PVFM:
             /* let user-undef'd sub keep its identity */
@@ -1830,12 +1830,12 @@ PP_wrapped(pp_repeat,
         count = SvIV_nomg(sv);
 
     if (infnan) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_NUMERIC),
-                       "Non-finite repeat count does nothing");
+        ck_warner(packWARN(WARN_NUMERIC),
+                  "Non-finite repeat count does nothing");
     } else if (count < 0) {
         count = 0;
-        Perl_ck_warner(aTHX_ packWARN(WARN_NUMERIC),
-                       "Negative repeat count does nothing");
+        ck_warner(packWARN(WARN_NUMERIC),
+                  "Negative repeat count does nothing");
     }
 
     if (gimme == G_LIST && PL_op->op_private & OPpREPEAT_DOLIST) {
@@ -3269,8 +3269,8 @@ PP_wrapped(pp_srand, MAXARG, 0)
         flags = grok_number(pv, len, &anum);
 
         if (!(flags & IS_NUMBER_IN_UV)) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
-                             "Integer overflow in srand");
+            ck_warner_d(packWARN(WARN_OVERFLOW),
+                        "Integer overflow in srand");
             anum = UV_MAX;
         }
     }
@@ -3640,9 +3640,8 @@ PP_wrapped(pp_substr,
         repl = SvPV_const(repl_sv, repl_len);
         SvGETMAGIC(sv);
         if (SvROK(sv))
-            Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
-                            "Attempt to use reference as lvalue in substr"
-            );
+            ck_warner(packWARN(WARN_SUBSTR),
+                      "Attempt to use reference as lvalue in substr");
         tmps = SvPV_force_nomg(sv, curlen);
         if (DO_UTF8(repl_sv) && repl_len) {
             if (!DO_UTF8(sv)) {
@@ -3717,7 +3716,7 @@ PP_wrapped(pp_substr,
   bound_fail:
     if (repl)
         croak("substr outside of string");
-    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
+    ck_warner(packWARN(WARN_SUBSTR), "substr outside of string");
     RETPUSHUNDEF;
 }
 
@@ -3743,9 +3742,8 @@ PP(pp_substr_left)
     if (do_chop) {
         SvGETMAGIC(sv);
         if (SvROK(sv))
-            Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
-                        "Attempt to use reference as lvalue in substr"
-            );
+            ck_warner(packWARN(WARN_SUBSTR),
+                      "Attempt to use reference as lvalue in substr");
         tmps = SvPV_force_nomg(sv, curlen);
     } else
         tmps = SvPV_const(sv, curlen);
@@ -4078,8 +4076,8 @@ PP(pp_chr)
                     SV *top2 = sv_mortalcopy_flags(top, SV_DO_COW_SVSETSV);
                     top = top2;
                 }
-                Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                            "Invalid negative number (%" SVf ") in chr", SVfARG(top));
+                warner(packWARN(WARN_UTF8),
+                       "Invalid negative number (%" SVf ") in chr", SVfARG(top));
             }
             value = UNICODE_REPLACEMENT;
         } else {
@@ -6160,7 +6158,7 @@ PP(pp_anonhash)
         }
         else
         {
-            Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
+            ck_warner(packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
             val = newSV_type(SVt_NULL);
         }
         (void)hv_store_ent(hv,key,val,0);
@@ -6225,7 +6223,7 @@ PP_wrapped(pp_splice, 0, 1)
     }
     if (offset > AvFILLp(ary) + 1) {
         if (num_args > 2)
-            Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "splice() offset past end of array" );
+            ck_warner(packWARN(WARN_MISC), "splice() offset past end of array" );
         offset = AvFILLp(ary) + 1;
     }
     after = AvFILLp(ary) + 1 - (offset + length);

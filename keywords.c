@@ -1613,7 +1613,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
                   name[4] == 'i' &&
                   name[5] == 'f')
               {                                   /* elseif           */
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "elseif should be elsif");
+                ck_warner_d(packWARN(WARN_SYNTAX), "elseif should be elsif");
               }
 
               goto unknown;
@@ -3590,5 +3590,5 @@ unknown:
 }
 
 /* Generated from:
- * ad2656c0264d45b03ee74855fdffeffd57799d21d85991fbad0c541b732c9880 regen/keywords.pl
+ * cc0991530edda2eb87e845d9347acc0f8d2debabab27608ef65ebd2b8d221c08 regen/keywords.pl
  * ex: set ro ft=c: */

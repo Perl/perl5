@@ -1242,9 +1242,9 @@ PP_wrapped(pp_untie, 1, 0)
                SPAGAIN;
             }
             else if (mg && SvREFCNT(obj) > 1) {
-                Perl_ck_warner(aTHX_ packWARN(WARN_UNTIE),
-                               "untie attempted while %" UVuf " inner references still exist",
-                               (UV)SvREFCNT(obj) - 1 ) ;
+                ck_warner(packWARN(WARN_UNTIE),
+                          "untie attempted while %" UVuf " inner references still exist",
+                          (UV)SvREFCNT(obj) - 1 ) ;
             }
         }
     }
@@ -1390,8 +1390,8 @@ PP_wrapped(pp_sselect, 4, 0)
         }
         else {
             if (!SvPOKp(sv))
-                Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                                    "Non-string passed as bitmask");
+                ck_warner(packWARN(WARN_MISC),
+                          "Non-string passed as bitmask");
             if (SvGAMAGIC(sv)) {
                 svs[i] = sv_newmortal();
                 sv_copypv_nomg(svs[i], sv);
@@ -1810,7 +1810,7 @@ PP(pp_leavewrite)
     }
     else {
         if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_IO), "page overflow");
+            ck_warner(packWARN(WARN_IO), "page overflow");
         }
         if (!do_print(PL_formtarget, fp))
             rpp_push_IMM(&PL_sv_no);
@@ -3065,12 +3065,12 @@ PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
         if (PL_op->op_type == OP_LSTAT) {
             if (gv != PL_defgv) {
             do_fstat_warning_check:
-                Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                               "lstat() on filehandle%s%" SVf,
-                                gv ? " " : "",
-                                SVfARG(gv
-                                        ? newSVhek_mortal(GvENAME_HEK(gv))
-                                        : &PL_sv_no));
+                ck_warner(packWARN(WARN_IO),
+                          "lstat() on filehandle%s%" SVf,
+                          gv ? " " : "",
+                          SVfARG(gv
+                                 ? newSVhek_mortal(GvENAME_HEK(gv))
+                                 : &PL_sv_no));
             } else if (PL_laststype != OP_LSTAT)
                 /* diag_listed_as: The stat preceding %s wasn't an lstat */
                 croak("The stat preceding lstat() wasn't an lstat");
@@ -3143,7 +3143,7 @@ PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
             if (ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
                 /* PL_warn_nl is constant */
                 GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-                Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
+                warner(packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
                 GCC_DIAG_RESTORE_STMT;
             }
             max = 0;
@@ -3793,7 +3793,7 @@ PP(pp_fttext)
             if (ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
                 /* PL_warn_nl is constant */
                 GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-                Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
+                warner(packWARN(WARN_NEWLINE), PL_warn_nl, "open");
                 GCC_DIAG_RESTORE_STMT;
             }
             FT_RETURNUNDEF;
@@ -3901,8 +3901,8 @@ PP_wrapped(pp_chdir, MAXARG, 0)
             gv = gv_fetchsv(sv, 0, SVt_PVIO);
             if (!gv) {
                 if (ckWARN(WARN_UNOPENED)) {
-                    Perl_warner(aTHX_ packWARN(WARN_UNOPENED),
-                                "chdir() on unopened filehandle %" SVf, sv);
+                    warner(packWARN(WARN_UNOPENED),
+                           "chdir() on unopened filehandle %" SVf, sv);
                 }
                 SETERRNO(EBADF,RMS_IFI);
                 TAINT_PROPER("chdir");
@@ -4277,15 +4277,15 @@ S_warn_not_dirhandle(pTHX_ GV *gv) {
     IO *io = GvIOn(gv);
 
     if (IoIFP(io)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "%s() attempted on handle %" HEKf
-                       " opened with open()",
-                       OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
+        ck_warner(packWARN(WARN_IO),
+                  "%s() attempted on handle %" HEKf
+                  " opened with open()",
+                  OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
     }
     else {
-        Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-                       "%s() attempted on invalid dirhandle %" HEKf,
-                       OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
+        ck_warner(packWARN(WARN_IO),
+                  "%s() attempted on invalid dirhandle %" HEKf,
+                  OP_DESC(PL_op), HEKfARG(GvENAME_HEK(gv)));
     }
 }
 
@@ -5011,8 +5011,8 @@ PP_wrapped(pp_gmtime, MAXARG, 0)
         when = (Time64_T)input;
         if (UNLIKELY(pl_isnan || when != input)) {
             /* diag_listed_as: gmtime(%f) too large */
-            Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                           "%s(%.0" NVff ") too large", opname, input);
+            ck_warner(packWARN(WARN_OVERFLOW),
+                      "%s(%.0" NVff ") too large", opname, input);
             if (pl_isnan) {
                 err = NULL;
                 goto failed;
@@ -5022,14 +5022,14 @@ PP_wrapped(pp_gmtime, MAXARG, 0)
 
     if ( TIME_LOWER_BOUND > when ) {
         /* diag_listed_as: gmtime(%f) too small */
-        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                       "%s(%.0" NVff ") too small", opname, when);
+        ck_warner(packWARN(WARN_OVERFLOW),
+                  "%s(%.0" NVff ") too small", opname, when);
         err = NULL;
     }
     else if( when > TIME_UPPER_BOUND ) {
         /* diag_listed_as: gmtime(%f) too small */
-        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                       "%s(%.0" NVff ") too large", opname, when);
+        ck_warner(packWARN(WARN_OVERFLOW),
+                  "%s(%.0" NVff ") too large", opname, when);
         err = NULL;
     }
     else {
@@ -5043,8 +5043,8 @@ PP_wrapped(pp_gmtime, MAXARG, 0)
         /* diag_listed_as: gmtime(%f) failed */
         /* XXX %lld broken for quads */
       failed:
-        Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-                       "%s(%.0" NVff ") failed", opname, when);
+        ck_warner(packWARN(WARN_OVERFLOW),
+                  "%s(%.0" NVff ") failed", opname, when);
     }
 
     if (GIMME_V != G_LIST) {	/* scalar context */
@@ -5099,8 +5099,8 @@ PP_wrapped(pp_alarm, 1, 0)
          * setitimer() and often being implemented in terms of
          * setitimer(), can fail. */
         /* diag_listed_as: %s() with negative argument */
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_MISC),
-                         "alarm() with negative argument");
+        ck_warner_d(packWARN(WARN_MISC),
+                    "alarm() with negative argument");
         SETERRNO(EINVAL, LIB_INVARG);
         RETPUSHUNDEF;
     }
@@ -5129,8 +5129,8 @@ PP_wrapped(pp_sleep, MAXARG, 0)
         const I32 duration = POPi;
         if (duration < 0) {
           /* diag_listed_as: %s() with negative argument */
-          Perl_ck_warner_d(aTHX_ packWARN(WARN_MISC),
-                           "sleep() with negative argument");
+          ck_warner_d(packWARN(WARN_MISC),
+                      "sleep() with negative argument");
           SETERRNO(EINVAL, LIB_INVARG);
           XPUSHs(&PL_sv_zero);
           RETURN;

@@ -71,7 +71,7 @@ Perl_grok_bslash_c(pTHX_ const char   source,
             *packed_warn = packWARN(WARN_SYNTAX);
         }
         else {
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), format, source, clearer);
+            warner(packWARN(WARN_SYNTAX), format, source, clearer);
         }
     }
 
@@ -360,7 +360,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
                 *packed_warn = packWARN(WARN_DIGIT);
             }
             else {
-                Perl_warner(aTHX_ packWARN(WARN_DIGIT), "%s", failure);
+                warner(packWARN(WARN_DIGIT), "%s", failure);
             }
         }
     }
@@ -467,7 +467,7 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
                                                               send, UTF, FALSE);
 
                 if (! packed_warn) {
-                    Perl_warner(aTHX_ packWARN(WARN_DIGIT), "%s", failure);
+                    warner(packWARN(WARN_DIGIT), "%s", failure);
                 }
                 else {
                     *message = failure;
@@ -546,7 +546,7 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
             const char * failure = form_alien_digit_msg(16, numbers_len, *s,
                                                                 send, UTF, TRUE);
             if (! packed_warn) {
-                Perl_warner(aTHX_ packWARN(WARN_DIGIT), "%s", failure);
+                warner(packWARN(WARN_DIGIT), "%s", failure);
             }
             else {
                 *message = failure;

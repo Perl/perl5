@@ -950,23 +950,23 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
                            ( len    && name[0] == '(' )  /* overload.pm related, in particular "()" */
                         || ( memEQs( name, len, "DESTROY") )
                 ) {
-                     Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                            "Can't locate package %" SVf " for @%" HEKf "::ISA",
-                            SVfARG(linear_sv),
-                            HEKfARG(HvNAME_HEK(stash)));
+                     ck_warner(packWARN(WARN_SYNTAX),
+                               "Can't locate package %" SVf " for @%" HEKf "::ISA",
+                               SVfARG(linear_sv),
+                               HEKfARG(HvNAME_HEK(stash)));
 
                 } else if( memEQs( name, len, "AUTOLOAD") ) {
                     /* gobble this warning */
                 } else {
-                    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "While trying to resolve method call %.*s->%.*s()"
-                        " can not locate package %" SVf_QUOTEDPREFIX " yet it is mentioned in @%.*s::ISA"
-                        " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
-                         (int) hvnamelen, hvname,
-                         (int) len, name,
-                        SVfARG(linear_sv),
-                         (int) hvnamelen, hvname,
-                         SVfARG(linear_sv));
+                    ck_warner(packWARN(WARN_SYNTAX),
+                              "While trying to resolve method call %.*s->%.*s()"
+                              " can not locate package %" SVf_QUOTEDPREFIX " yet it is mentioned in @%.*s::ISA"
+                              " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
+                              (int) hvnamelen, hvname,
+                              (int) len, name,
+                              SVfARG(linear_sv),
+                              (int) hvnamelen, hvname,
+                              SVfARG(linear_sv));
                 }
             }
             continue;
@@ -2698,7 +2698,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     faking_it = SvOK(gv);
 
     if (add & GV_ADDWARN)
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+        ck_warner_d(packWARN(WARN_INTERNAL),
                 "Had to create %" UTF8f " unexpectedly",
                  UTF8fARG(is_utf8, name_end-nambeg, nambeg));
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
@@ -2920,9 +2920,9 @@ Perl_gp_free(pTHX_ GV *gv)
     if (!gv || !isGV_with_GP(gv) || !(gp = GvGP(gv)))
         return;
     if (gp->gp_refcnt == 0) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                         "Attempt to free unreferenced glob pointers"
-                         pTHX__FORMAT pTHX__VALUE);
+        ck_warner_d(packWARN(WARN_INTERNAL),
+                    "Attempt to free unreferenced glob pointers"
+                    pTHX__FORMAT pTHX__VALUE);
         return;
     }
     if (gp->gp_refcnt > 1) {

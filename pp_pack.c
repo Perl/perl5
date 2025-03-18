@@ -260,9 +260,9 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
         croak("Malformed UTF-8 string in '%c' format in unpack",
                    (int) TYPE_NO_MODIFIERS(datumtype));
     if (val >= 0x100) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_UNPACK),
-                       "Character in '%c' format wrapped in unpack",
-                       (int) TYPE_NO_MODIFIERS(datumtype));
+        ck_warner(packWARN(WARN_UNPACK),
+                  "Character in '%c' format wrapped in unpack",
+                  (int) TYPE_NO_MODIFIERS(datumtype));
         val = (U8) val;
     }
     *s += retlen;
@@ -316,11 +316,11 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
             if (from > end) from = end;
         }
         if ((bad & 2))
-            Perl_ck_warner(aTHX_ packWARN(datumtype & TYPE_IS_PACK ?
-                                       WARN_PACK : WARN_UNPACK),
-                           "Character(s) in '%c' format wrapped in %s",
-                           (int) TYPE_NO_MODIFIERS(datumtype),
-                           datumtype & TYPE_IS_PACK ? "pack" : "unpack");
+            ck_warner(packWARN(datumtype & TYPE_IS_PACK ?
+                               WARN_PACK : WARN_UNPACK),
+                      "Character(s) in '%c' format wrapped in %s",
+                      (int) TYPE_NO_MODIFIERS(datumtype),
+                      datumtype & TYPE_IS_PACK ? "pack" : "unpack");
     }
     *s = from;
     return TRUE;
@@ -620,8 +620,8 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
         if (((symptr->flags & FLAG_COMMA) == 0) && ckWARN(WARN_UNPACK)){
           symptr->flags |= FLAG_COMMA;
           /* diag_listed_as: Invalid type '%s' in %s */
-          Perl_warner(aTHX_ packWARN(WARN_UNPACK),
-                      "Invalid type ',' in %s", _action( symptr ) );
+          warner(packWARN(WARN_UNPACK),
+                 "Invalid type ',' in %s", _action( symptr ) );
         }
         continue;
       }
@@ -683,10 +683,10 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
                      *patptr, _action( symptr ) );
 
         if ((code & modifier)) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_UNPACK),
-                           "Duplicate modifier '%c' after '%c' in %s",
-                           *patptr, (int) TYPE_NO_MODIFIERS(code),
-                           _action( symptr ) );
+            ck_warner(packWARN(WARN_UNPACK),
+                      "Duplicate modifier '%c' after '%c' in %s",
+                      *patptr, (int) TYPE_NO_MODIFIERS(code),
+                      _action( symptr ) );
         }
 
         code |= modifier;
@@ -2565,8 +2565,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 fromstr = NEXTFROM;
                 aiv = SvIV_no_inf(fromstr, datumtype);
                 if ((-128 > aiv || aiv > 127))
-                    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-                                   "Character in 'c' format wrapped in pack");
+                    ck_warner(packWARN(WARN_PACK),
+                              "Character in 'c' format wrapped in pack");
                 PUSH_BYTE(utf8, cur, (U8)aiv);
             }
             break;
@@ -2580,8 +2580,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 fromstr = NEXTFROM;
                 aiv = SvIV_no_inf(fromstr, datumtype);
                 if ((0 > aiv || aiv > 0xff))
-                    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-                                   "Character in 'C' format wrapped in pack");
+                    ck_warner(packWARN(WARN_PACK),
+                              "Character in 'C' format wrapped in pack");
                 PUSH_BYTE(utf8, cur, (U8)aiv);
             }
             break;
@@ -2620,8 +2620,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                             end = start+SvLEN(cat)-UTF8_MAXLEN;
                             goto W_utf8;
                         }
-                        Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-                                       "Character in 'W' format wrapped in pack");
+                        ck_warner(packWARN(WARN_PACK),
+                                  "Character in 'W' format wrapped in pack");
                         auv = (U8) auv;
                     }
                     if (cur >= end) {
@@ -3061,8 +3061,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         )
                          || (SvPADTMP(fromstr) &&
                              !SvREADONLY(fromstr)))) {
-                        Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-                                       "Attempt to pack pointer to temporary value");
+                        ck_warner(packWARN(WARN_PACK),
+                                  "Attempt to pack pointer to temporary value");
                     }
                     if (SvREADONLY(fromstr))
                         aptr = SvPV_nomg_const_nolen(fromstr);
@@ -3080,8 +3080,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             if (len <= 2) len = 45;
             else len = len / 3 * 3;
             if (len >= 64) {
-                Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
-                               "Field too wide in 'u' format in pack");
+                ck_warner(packWARN(WARN_PACK),
+                          "Field too wide in 'u' format in pack");
                 len = 63;
             }
             aptr = SvPV_const(fromstr, fromlen);

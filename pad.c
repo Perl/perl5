@@ -900,7 +900,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
                     PadnameFIELDINFO(pn)->fieldstash != PL_curstash)
                 break; /* field of a different class */
             /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
-            Perl_warner(aTHX_ packWARN(WARN_SHADOW),
+            warner(packWARN(WARN_SHADOW),
                 "\"%s\" %s %" PNf " masks earlier declaration in same %s",
                 (   is_our                         ? "our"   :
                     PL_parser->in_my == KEY_my     ? "my"    :
@@ -927,10 +927,10 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
                 && PadnameOURSTASH(pn) == ourstash
                 && memEQ(PadnamePV(pn), PadnamePV(name), PadnameLEN(name)))
             {
-                Perl_warner(aTHX_ packWARN(WARN_SHADOW),
+                warner(packWARN(WARN_SHADOW),
                     "\"our\" variable %" PNf " redeclared", PNfARG(pn));
                 if (off <= PL_comppad_name_floor)
-                    Perl_warner(aTHX_ packWARN(WARN_SHADOW),
+                    warner(packWARN(WARN_SHADOW),
                         "\t(Did you mean \"local\" instead of \"our\"?)\n");
                 break;
             }
@@ -1092,12 +1092,12 @@ static void
 S_unavailable(pTHX_ PADNAME *name)
 {
     /* diag_listed_as: Variable "%s" is not available */
-    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-                        "%s \"%" PNf "\" is not available",
-                         *PadnamePV(name) == '&'
-                                         ? "Subroutine"
-                                         : "Variable",
-                         PNfARG(name));
+    ck_warner(packWARN(WARN_CLOSURE),
+              "%s \"%" PNf "\" is not available",
+               *PadnamePV(name) == '&'
+                               ? "Subroutine"
+                               : "Variable",
+               PNfARG(name));
 }
 
 STATIC PADOFFSET
@@ -1216,7 +1216,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                         newwarn = 0;
                         /* diag_listed_as: Variable "%s" will not stay
                                            shared */
-                        Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
+                        warner(packWARN(WARN_CLOSURE),
                             "%s \"%" UTF8f "\" will not stay shared",
                              *namepv == '&' ? "Subroutine" : "Variable",
                              UTF8fARG(1, namelen, namepv));
@@ -1516,9 +1516,9 @@ Perl_pad_leavemy(pTHX)
         for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
             const PADNAME * const name = svp[off];
             if (name && PadnameLEN(name) && !PadnameOUTER(name))
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-                                      "%" PNf " never introduced",
-                                       PNfARG(name));
+                ck_warner_d(packWARN(WARN_INTERNAL),
+                            "%" PNf " never introduced",
+                            PNfARG(name));
         }
     }
     /* "Deintroduce" my variables that are leaving with this scope. */

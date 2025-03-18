@@ -1053,7 +1053,7 @@ S_warn_implicit_snail_cvsig(pTHX_ OP *o)
         cv = CvOUTSIDE(cv);
 
     if(cv && CvSIGNATURE(cv))
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
             "Implicit use of @_ in %s with signatured subroutine is experimental", OP_DESC(o));
 }
 
@@ -1116,7 +1116,7 @@ S_optimize_op(pTHX_ OP* o)
                 while(OP_TYPE_IS(parent, OP_NULL))
                     parent = op_parent(parent);
 
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
+                ck_warner_d(packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
                     "Use of @_ in %s with signatured subroutine is experimental", OP_DESC(parent));
             }
             break;
@@ -1259,9 +1259,9 @@ S_finalize_op(pTHX_ OP* o)
                     if (type != OP_EXIT && type != OP_WARN && type != OP_DIE) {
                         const line_t oldline = CopLINE(PL_curcop);
                         CopLINE_set(PL_curcop, CopLINE((COP*)sib));
-                        Perl_warner(aTHX_ packWARN(WARN_EXEC),
+                        warner(packWARN(WARN_EXEC),
                             "Statement unlikely to be reached");
-                        Perl_warner(aTHX_ packWARN(WARN_EXEC),
+                        warner(packWARN(WARN_EXEC),
                             "\t(Maybe you meant system() when you said exec()?)\n");
                         CopLINE_set(PL_curcop, oldline);
                     }
@@ -1276,9 +1276,9 @@ S_finalize_op(pTHX_ OP* o)
                     /* XXX could check prototype here instead of just carping */
                     SV * const sv = sv_newmortal();
                     gv_efullname3(sv, gv, NULL);
-                    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-                                "%" SVf "() called too early to check prototype",
-                                SVfARG(sv));
+                    warner(packWARN(WARN_PROTOTYPE),
+                           "%" SVf "() called too early to check prototype",
+                           SVfARG(sv));
                 }
             }
             break;

@@ -903,9 +903,9 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
                      * seen as an invalid separator character.
                      */
                     const char q = ((*s == '\'') ? '"' : '\'');
-                    Perl_ck_warner(aTHX_ packWARN(WARN_LAYER),
-                                   "Invalid separator character %c%c%c in PerlIO layer specification %s",
-                                   q, *s, q, s);
+                    ck_warner(packWARN(WARN_LAYER),
+                              "Invalid separator character %c%c%c in PerlIO layer specification %s",
+                              q, *s, q, s);
                     SETERRNO(EINVAL, LIB_INVARG);
                     return -1;
                 }
@@ -937,9 +937,9 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
                             /* Fall through */
                         case '\0':
                             e--;
-                            Perl_ck_warner(aTHX_ packWARN(WARN_LAYER),
-                                           "Argument list not closed for PerlIO layer \"%.*s\"",
-                                           (int) (e - s), s);
+                            ck_warner(packWARN(WARN_LAYER),
+                                      "Argument list not closed for PerlIO layer \"%.*s\"",
+                                      (int) (e - s), s);
                             return -1;
                         default:
                             /*
@@ -961,8 +961,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
                         SvREFCNT_dec(arg);
                     }
                     else {
-                        Perl_ck_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
-                                       (int) llen, s);
+                        ck_warner(packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
+                                  (int) llen, s);
                         return -1;
                     }
                 }
@@ -1087,7 +1087,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	    if (SvREADONLY(SvRV(arg)) && !SvIsCOW(SvRV(arg))
 	     && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))
-		    Perl_warner(aTHX_ packWARN(WARN_LAYER), "%s", PL_no_modify);
+		    warner(packWARN(WARN_LAYER), "%s", PL_no_modify);
 		SETERRNO(EACCES, RMS_PRV);
 		return -1;
 	    }
@@ -1116,7 +1116,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     }
     if (SvUTF8(s->var) && !sv_utf8_downgrade(s->var, TRUE)) {
 	if (ckWARN(WARN_UTF8))
-	    Perl_warner(aTHX_ packWARN(WARN_UTF8), code_point_warning);
+	    warner(packWARN(WARN_UTF8), code_point_warning);
 	SETERRNO(EINVAL, SS_IVCHAN);
 	SvREFCNT_dec(s->var);
 	s->var = NULL;
@@ -1182,7 +1182,7 @@ PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
     }
     if (new_posn < 0) {
         if (ckWARN(WARN_LAYER))
-	    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Offset outside string");
+	    warner(packWARN(WARN_LAYER), "Offset outside string");
 	SETERRNO(EINVAL, SS_IVCHAN);
 	return -1;
     }
@@ -1222,7 +1222,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    }
 	    else {
 	        if (ckWARN(WARN_UTF8))
-		    Perl_warner(aTHX_ packWARN(WARN_UTF8), code_point_warning);
+		    warner(packWARN(WARN_UTF8), code_point_warning);
 	        SETERRNO(EINVAL, SS_IVCHAN);
 	        return -1;
 	    }
@@ -1266,7 +1266,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	if (SvOK(sv)) SvPV_force_nomg_nolen(sv);
 	if (SvUTF8(sv) && !sv_utf8_downgrade(sv, TRUE)) {
 	    if (ckWARN(WARN_UTF8))
-	        Perl_warner(aTHX_ packWARN(WARN_UTF8), code_point_warning);
+	        warner(packWARN(WARN_UTF8), code_point_warning);
 	    SETERRNO(EINVAL, SS_IVCHAN);
 	    return 0;
 	}

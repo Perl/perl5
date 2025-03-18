@@ -98,7 +98,7 @@ sub perl_keyword
 
   if ($k eq 'elseif') {
     return <<END;
-Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "elseif should be elsif");
+ck_warner_d(packWARN(WARN_SYNTAX), "elseif should be elsif");
 END
   }
   elsif (my $feature = $feature_kw{$k}) {

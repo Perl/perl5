@@ -1057,7 +1057,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                     if (flag == P_NOWAIT)
                         flag = P_PM;
                     else if ((flag & 7) != P_PM && (flag & 7) != P_SESSION && ckWARN(WARN_EXEC))
-                        Perl_warner(aTHX_ packWARN(WARN_EXEC), "Starting PM process with flag=%d, mytype=%d",
+                        warner(packWARN(WARN_EXEC), "Starting PM process with flag=%d, mytype=%d",
                              flag, os2_mytype);
                 }
             }
@@ -1068,7 +1068,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                     if (flag == P_NOWAIT)
                         flag = P_SESSION;
                     else if ((flag & 7) != P_SESSION && ckWARN(WARN_EXEC))
-                        Perl_warner(aTHX_ packWARN(WARN_EXEC), "Starting Full Screen process with flag=%d, mytype=%d",
+                        warner(packWARN(WARN_EXEC), "Starting Full Screen process with flag=%d, mytype=%d",
                              flag, os2_mytype);
                 }
             }
@@ -1166,7 +1166,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                     if (PerlIO_close(file) != 0) { /* Failure */
                       panic_file:
                         if (ckWARN(WARN_EXEC))
-                           Perl_warner(aTHX_ packWARN(WARN_EXEC), "Error reading \"%s\": %s", 
+                           warner(packWARN(WARN_EXEC), "Error reading \"%s\": %s", 
                              scr, Strerror(errno));
                         buf = "";	/* Not #! */
                         goto doshell_args;
@@ -1210,7 +1210,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                         *s++ = 0;
                     }
                     if (nargs == -1) {
-                        Perl_warner(aTHX_ packWARN(WARN_EXEC), "Too many args on %.*s line of \"%s\"",
+                        warner(packWARN(WARN_EXEC), "Too many args on %.*s line of \"%s\"",
                              s1 - buf, buf, scr);
                         nargs = 4;
                         argsp = fargs;
@@ -1301,14 +1301,14 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
             }
           } else if (errno == ENOEXEC) { /* Cannot transfer `real_name' via shell. */
                 if (rc < 0 && ckWARN(WARN_EXEC))
-                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s script `%s' with ARGV[0] being `%s'", 
+                    warner(packWARN(WARN_EXEC), "Can't %s script `%s' with ARGV[0] being `%s'", 
                          ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
                           ? "spawn" : "exec"),
                          real_name, argv[0]);
                 goto warned;
           } else if (errno == ENOENT) { /* Cannot transfer `real_name' via shell. */
                 if (rc < 0 && ckWARN(WARN_EXEC))
-                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)", 
+                    warner(packWARN(WARN_EXEC), "Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)", 
                          ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
                           ? "spawn" : "exec"),
                          real_name, argv[0]);
@@ -1326,7 +1326,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
             }
         }
         if (rc < 0 && ckWARN(WARN_EXEC))
-            Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s\n", 
+            warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s\n", 
                  ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
                   ? "spawn" : "exec"),
                  real_name, Strerror(errno));
@@ -1437,7 +1437,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
                    rc = result(aTHX_ P_WAIT,
                                spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
                 if (rc < 0 && ckWARN(WARN_EXEC))
-                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s", 
+                    warner(packWARN(WARN_EXEC), "Can't %s \"%s\": %s", 
                          (execf == EXECF_SPAWN ? "spawn" : "exec"),
                          shell, Strerror(errno));
                 if (rc < 0)

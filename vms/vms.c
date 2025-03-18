@@ -975,7 +975,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
               } else
 #endif
                 if (ckWARN(WARN_MISC)) {
-                  Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
+                  warner(packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
                 }
             }
             strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
@@ -1342,7 +1342,7 @@ prime_env_iter(void)
       for (j--; j >= 0; j--) {
         if (!(start = strchr(environ[j],'='))) {
           if (ckWARN(WARN_INTERNAL)) 
-            Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
+            warner(packWARN(WARN_INTERNAL),"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
         }
         else {
           start++;
@@ -1411,7 +1411,7 @@ prime_env_iter(void)
         continue;
       }
       if (sts == SS$_BUFFEROVF && ckWARN(WARN_INTERNAL))
-        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Buffer overflow in prime_env_iter: %s",buf);
+        warner(packWARN(WARN_INTERNAL),"Buffer overflow in prime_env_iter: %s",buf);
 
       for (cp1 = buf; *cp1 && isSPACE_L1(*cp1); cp1++) ;
       if (*cp1 == '(' || /* Logical name table name */
@@ -1432,7 +1432,7 @@ prime_env_iter(void)
         cp1--;  /* stop on last non-space char */
       }
       if ((!keylen || (cp1 - cp2 < -1)) && ckWARN(WARN_INTERNAL)) {
-        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed message in prime_env_iter: |%s|",buf);
+        warner(packWARN(WARN_INTERNAL),"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
       PERL_HASH(hash,key,keylen);
@@ -1576,8 +1576,8 @@ Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s *
 
             nseg = (eqvdsc.dsc$w_length + LNM$C_NAMLENGTH - 1) / LNM$C_NAMLENGTH;
             if (nseg > PERL_LNM_MAX_ALLOWED_INDEX + 1) {
-              Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of logical \"%s\" too long. Truncating to %i bytes",
-                          lnm, LNM$C_NAMLENGTH * (PERL_LNM_MAX_ALLOWED_INDEX+1));
+              warner(packWARN(WARN_MISC),"Value of logical \"%s\" too long. Truncating to %i bytes",
+                     lnm, LNM$C_NAMLENGTH * (PERL_LNM_MAX_ALLOWED_INDEX+1));
               eqvdsc.dsc$w_length = LNM$C_NAMLENGTH * (PERL_LNM_MAX_ALLOWED_INDEX+1);
               nseg = PERL_LNM_MAX_ALLOWED_INDEX + 1;
             }
