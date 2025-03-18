@@ -476,7 +476,7 @@ most likely an unexpected right brace '}'.
 symbol has no filehandle associated with it.  Perhaps you didn't do an
 open(), or did it in another package.
 
-=item Bad free() ignored
+=item Bad free() ignored (%s)
 
 (S malloc) An internal routine called free() on something that had never
 been malloc()ed in the first place.  Mandatory, but can be disabled by
@@ -2324,7 +2324,7 @@ See L<perlfunc/dump>.
 
 (F) Your machine doesn't support dump/undump.
 
-=item Duplicate free() ignored
+=item Duplicate free() ignored (%s)
 
 (S malloc) An internal routine called free() on something that had
 already been freed.

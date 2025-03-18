@@ -701,7 +701,6 @@ setnetent not implemented!
 setprotoent not implemented!
 set %s %p %p %p
 setservent not implemented!
-%s free() ignored (RMAGIC, PERL_CORE)
 %s has too many errors.
 SIG%s handler "%s" not defined.
 %s in %s
@@ -709,7 +708,6 @@ Size magic not implemented
 %s: name `%s' too long
 %s not implemented!
 %s number > %s non-portable
-%srealloc() %signored
 %s on %s %s
 %s: %s
 Starting Full Screen process with flag=%d, mytype=%d
