@@ -2616,8 +2616,6 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 
 #ifdef SvVOK
         if ((vstr_pv = SvVSTRING(sv, vstr_len))) {
-            /* The macro passes this by address, not value, and a lot of
-               called code assumes that it's 32 bits without checking.  */
             /* we no longer accept vstrings over I32_SIZE-1, so don't emit
                them, also, older Storables handle them badly.
             */
