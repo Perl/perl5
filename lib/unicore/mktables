@@ -871,6 +871,15 @@ push @tables_that_may_be_empty, 'Grapheme_Cluster_Break=Prepend'
 push @tables_that_may_be_empty, 'Canonical_Combining_Class=CCC133'
                                                     if $v_version ge v6.2.0;
 
+# These properties of Egyptian hieroglyphs are not handled by Perl.  Their
+# intended audience is only specialist Egyptologists
+push @tables_that_may_be_empty, qw(kEH_Cat kEH_Desc kEH_HG kEH_IFAO
+                                   kEH_JSesh
+                                   kEH_NoMirror kEH_NoMirror=Yes
+                                   kEH_NoMirror=No
+                                   kEH_NoRotate kEH_NoRotate=Yes)
+                                                    if $v_version ge v16.0.0;
+
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
 # documentation easier.
@@ -13377,6 +13386,30 @@ sub filter_early_version_name_alias_line {
     return;
 }
 
+sub setup_Unikemet{
+
+    # These are provisional properties, so aren't in PropAliases.txt
+    my %properties = (
+                      Core => $ENUM,
+                      FVal => $STRING,
+                      Func => $STRING,
+                      UniK => $ENUM,
+                     );
+    for my $property (keys %properties) {
+        Property->new("kEH_$property",
+                      Default_Map => "",
+                      Type => $STRING,,
+                     );
+    }
+}
+
+sub filter_Unikemet_line {
+    $_ =~ s/;/,/g;      # mktables can't accept semi-colons
+    $_ =~ s/\t/; /g;
+    $_ =~ s/ ^ U\+ //x;
+    return;
+}
+
 sub filter_all_caps_script_names {
 
     # Some early Unicode releases had the script names in all CAPS.  This
@@ -19807,6 +19840,11 @@ my @input_file_objects = (
                    ),
     Input_file->new('intentional.txt', v15.0.0,
                     Skip => $Unused_Skip,
+                    UCD => 0,
+                   ),
+    Input_file->new('Unikemet.txt', v16.0.0,
+                    Pre_Handler => \&setup_Unikemet,
+                    Each_Line_Handler => \&filter_Unikemet_line,
                     UCD => 0,
                    ),
     Input_file->new('DoNotEmit.txt', v16.0.0,
