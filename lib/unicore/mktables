@@ -8820,7 +8820,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     # filesystem to distinguish between, this is used to manually give short
     # names for the directory name immediately under $match_tables that the
     # match tables for this property should be placed in.
-    main::set_access('match_subdir', \%match_subdir, 'r');
+    main::set_access('match_subdir', \%match_subdir, 'r', 's');
 
     my %has_dependency;
     # A boolean that gives whether some table somewhere is defined as the
@@ -10070,6 +10070,14 @@ sub finish_property_setup($file) {
     }
 
     property_ref('Numeric_Value')->set_to_output_map($OUTPUT_ADJUSTED);
+
+    # These two properties have no short names and the file names for them
+    # clash in DOS 8.3.  Work around this by creating shorter file names that
+    # work
+    my $IDCMStart = property_ref("ID_Compat_Math_Start");
+    $IDCMStart->set_match_subdir("IDCMStart") if defined $IDCMStart;
+    my $IDCMCont= property_ref("ID_Compat_Math_Continue");
+    $IDCMCont->set_match_subdir("IDCMContinue") if defined $IDCMCont;
 
     # The rest of this sub is for properties that need the Multi_Default class
     # to create objects for defaults.  As of v15.0, this is no longer needed.
