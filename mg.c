@@ -819,7 +819,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
     assert(SvOK(sv));
 
     if(strEQ(SvPVX(sv), "")) {
-        sv_catpv(sv, UNKNOWN_ERRNO_MSG);
+        sv_catpvs(sv, UNKNOWN_ERRNO_MSG);
     }
 }
 
