@@ -19809,6 +19809,12 @@ my @input_file_objects = (
                     Skip => $Unused_Skip,
                     UCD => 0,
                    ),
+    Input_file->new('DoNotEmit.txt', v16.0.0,
+                    # Advice about characters that are unwise to create; not
+                    # any properties, though we could create some.
+                    Skip => $Unused_Skip,
+                    UCD => 0,
+                   ),
 );
 
 # End of all the preliminaries.
