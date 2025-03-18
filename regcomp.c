@@ -14764,6 +14764,14 @@ S_parse_uniprop_string(pTHX_
     /* Here, we are either done with the whole property name, if it was simple;
      * or are positioned just after the '=' if it is compound. */
 
+    /* When we get a system inversion list, it is a global that needs to be
+     * preserved for later, and not coincidentally is in read-only memory.
+     * So we set this boolean to true once we've made a copy, and then we are
+     * free to modify the copy.  It has to be set here way above where it is
+     * needed, in order to not run afoul of the C++ compiler saying goto's
+     * cross its initialization */
+    bool cloned = false;
+
     if (equals_pos >= 0) {
         assert(stricter == Not_Strict); /* We shouldn't have set this yet */
 
@@ -15916,12 +15924,16 @@ S_parse_uniprop_string(pTHX_
                 _invlist_union(prop_definition, pu_invlist,
                                &expanded_prop_definition);
                 prop_definition = expanded_prop_definition;
+                cloned = true;
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__PRIVATE_USE), "The private_use feature is experimental");
             }
         }
     }
 
     if (invert_return) {
+        if (! cloned) {
+           prop_definition = sv_2mortal(invlist_clone(prop_definition, NULL));
+        }
         _invlist_invert(prop_definition);
     }
     return prop_definition;
