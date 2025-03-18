@@ -1506,17 +1506,24 @@ sub proto_string {
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX tmp
+package ExtUtils::ParseXS::Node::input_part;
 
-sub _parse_input_part {
-    my ExtUtils::ParseXS $self  = shift;
+BEGIN { $build_subclass->('', # parent
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
 
     # For each CASE, start with a fresh set of params based on the
     # original parsing of the XSUB's signature. This is because each set
     # of INPUT/OUTPUT blocks associated with each CASE may update the
     # param objects in a different way.
     #
-    # Note that $self->{xsub_sig}{names} provides a second set of
+    # Note that $pxs->{xsub_sig}{names} provides a second set of
     # references to most of these param objects; so the object hashes
     # themselves must be preserved, and merely their contents emptied
     # and repopulated each time. Hence also why creating the orig_params
@@ -1524,9 +1531,9 @@ sub _parse_input_part {
     #
     # XXX This is bit of a temporary hack.
 
-    for my $i (0.. @{$self->{xsub_sig}{orig_params}} - 1) {
-        my $op = $self->{xsub_sig}{orig_params}[$i];
-        my $p  = $self->{xsub_sig}{params}[$i];
+    for my $i (0.. @{$pxs->{xsub_sig}{orig_params}} - 1) {
+        my $op = $pxs->{xsub_sig}{orig_params}[$i];
+        my $p  = $pxs->{xsub_sig}{params}[$i];
         %$p = ();
         my @keys = sort keys %$op;
         @$p{@keys} = @$op{@keys};
@@ -1539,34 +1546,49 @@ sub _parse_input_part {
     # Emit opening brace. With cmd-line switch "-except", prefix it
     # with 'TRY'
     {
-        my $try = $self->{config_allow_exceptions} ? ' TRY' : '';
-        print Q(<<"EOF");
+        my $try = $pxs->{config_allow_exceptions} ? ' TRY' : '';
+        print ExtUtils::ParseXS::Q(<<"EOF");
             |   $try [[
 EOF
     }
 
     # First, initialize variables manipulated by INPUT_handler().
-    $self->{xsub_deferred_code_lines} = "";  # lines to be emitted after
+    $pxs->{xsub_deferred_code_lines} = "";  # lines to be emitted after
                                                                                     # PREINIT/INPUT
 
-    $self->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
-    $self->{xsub_targ_declared_early} = 0; # dXSTARG   not yet emitted
-    $self->{xsub_targ_used}           = 0; # TARG hasn't yet been used
+    $pxs->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
+    $pxs->{xsub_targ_declared_early} = 0; # dXSTARG   not yet emitted
+    $pxs->{xsub_targ_used}           = 0; # TARG hasn't yet been used
 
     # Process any implicit INPUT section.
     {
         my $input = ExtUtils::ParseXS::Node::INPUT->new();
-        unshift @{$self->{line}}, $_;
-        $input->parse($self);
-        $_ = shift @{$self->{line}};
-        $input->as_code($self);
+        $input->parse($pxs);
+        $input->as_code($pxs);
     }
 
-    # Process as many keyword lines/blocks as can be found which match
-    # the pattern. At this stage it's looking for (possibly multiple)
-    # INPUT and/or PREINIT blocks, plus any generic XSUB keywords.
-    $self->process_keywords(
-        "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
+    # XXX an expanded check_keyword() and process_keywords()
+    {
+        my $pat = "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt";
+
+        while (@{$pxs->{line}}) {
+            my $line = shift @{$pxs->{line}};
+            next unless $line =~ /\S/;
+            # extract/delete recognised keyword and any following comment
+            unless ($line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s) {
+                unshift @{$pxs->{line}}, $line;
+                last;
+            }
+            my $keyword = $2;
+            unshift @{$pxs->{line}}, $line;
+            # create a node for the keyword and parse any lines associated
+            # with it.
+            my $class = "ExtUtils::ParseXS::Node::$keyword";
+            my $node  = $class->new();
+            $node->parse($pxs);
+            $node->as_code($pxs) if $class->can('as_code');
+        }
+    }
 
     # Now that the type of each param is finalised, calculate its
     # overridden prototype character, if any.
@@ -1580,37 +1602,37 @@ EOF
     # So when to call this method is significant. Ideally just after all
     # input processing is complete.
 
-    $_->set_proto($self) for @{$self->{xsub_sig}{params}};
+    $_->set_proto($pxs) for @{$pxs->{xsub_sig}{params}};
 
-    print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
         |   ENTER;
         |   [[
 EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-    for my $param (grep $_->{is_synthetic}, @{$self->{xsub_sig}{params}}) {
-        $param->as_code($self);
+    for my $param (grep $_->{is_synthetic}, @{$pxs->{xsub_sig}{params}}) {
+        $param->as_code($pxs);
     }
 
     # This set later if CODE is using RETVAL
-    $self->{xsub_seen_RETVAL_in_CODE} = 0;
+    $pxs->{xsub_seen_RETVAL_in_CODE} = 0;
 
     # Do any variable declarations associated with having a return value
-    if ($self->{xsub_return_type} ne "void") {
+    if ($pxs->{xsub_return_type} ne "void") {
 
         # Emit an early dXSTARG for backwards-compatibility reasons.
         # Recent code emits a dXSTARG in a tighter scope and under
         # additional circumstances, but some XS code relies on TARG
         # having been declared. So continue to declare it early under
         # the original circumstances.
-        my $outputmap = $self->{typemaps_object}->get_outputmap( ctype => $self->{xsub_return_type} );
+        my $outputmap = $pxs->{typemaps_object}->get_outputmap( ctype => $pxs->{xsub_return_type} );
 
-        if (    $self->{config_optimize}
+        if (    $pxs->{config_optimize}
                 and $outputmap
                 and $outputmap->targetable_legacy)
         {
-            $self->{xsub_targ_declared_early} = 1;
+            $pxs->{xsub_targ_declared_early} = 1;
             print "\tdXSTARG;\n"
         }
     }
@@ -1621,13 +1643,13 @@ EOF
     for my $param (
             grep $_->{is_ansi},
                 (
-                    grep(  $_->{is_length}, @{$self->{xsub_sig}{params}} ),
-                    grep(! $_->{is_length}, @{$self->{xsub_sig}{params}} ),
+                    grep(  $_->{is_length}, @{$pxs->{xsub_sig}{params}} ),
+                    grep(! $_->{is_length}, @{$pxs->{xsub_sig}{params}} ),
                 )
     )
 
     {
-        $param->as_code($self);
+        $param->as_code($pxs);
     }
 
     # ----------------------------------------------------------------
@@ -1640,7 +1662,15 @@ EOF
     # have been done. This is typically INPUT typemaps which don't
     # start with a simple '$var =' and so would not have been emitted
     # at the variable declaration stage.
-    print $self->{xsub_deferred_code_lines};
+    print $pxs->{xsub_deferred_code_lines};
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    # XXX currently code is emitted by parse()
 }
 
 

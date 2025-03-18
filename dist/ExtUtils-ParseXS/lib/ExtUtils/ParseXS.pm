@@ -998,7 +998,13 @@ EOF
       # Note that each CASE: can precede multiple keyword blocks.
       $self->CASE_handler($_) if $self->check_keyword("CASE");
 
-      $self->_parse_input_part();
+      {
+          my $input_part = ExtUtils::ParseXS::Node::input_part->new();
+          unshift @{$self->{line}}, $_;
+          $input_part->parse($self);
+          $_ = shift @{$self->{line}};
+          $input_part->as_code($self);
+      }
 
       # Process as many keyword lines/blocks as can be found which match
       # the pattern. At this stage it's looking for (possibly multiple)
