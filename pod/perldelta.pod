@@ -54,6 +54,17 @@ their appearance in Perl release 5.41.7.
         say "All the numbers are even";
     }
 
+=head2 New C<SvVSTRING> API macro
+
+A new API macro has been added, which is used to obtain the second string
+buffer out of a "vstring" SV, in a manner similar to the C<SvPV> macro which
+obtains the regular string buffer out of a regular SV.
+
+    STRLEN len;
+    const char *vstr_pv = SvVSTRING(sv, vstr_len);
+
+See L<perlapi/C<SvVSTRING>>.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
