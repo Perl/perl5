@@ -127,6 +127,48 @@ sub parse {
 }
 
 
+# Repeatedly look for keywords matching the pattern. For each found
+# keyword, parse the text following them, and add any resultant nodes
+# as kids to the current node. Returns the number of successfully parsed
+# and added kids.
+# If $max is defined, it specifies the maximum number of keywords to
+# process. This value is typically passed as undef (unlimited) or 1
+# (just grab the next keyword).
+
+sub parse_keywords {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+    my $max                    = shift; # max number of keywords to process
+    my $pat                    = shift;
+
+    my $n = 0;
+    while (@{$pxs->{line}}) {
+        my $line = shift @{$pxs->{line}};
+        next unless $line =~ /\S/;
+        # extract/delete recognised keyword and any following comment
+        unless ($line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s) {
+            # stop at unrecognised line
+            unshift @{$pxs->{line}}, $line;
+            last;
+        }
+        my $keyword = $2;
+        unshift @{$pxs->{line}}, $line;
+        # create a node for the keyword and parse any lines associated
+        # with it.
+        my $class = "ExtUtils::ParseXS::Node::$keyword";
+        my $node  = $class->new();
+        if ($node->parse($pxs)) {
+            push @{$self->{kids}}, $node;
+        }
+
+        $n++;
+        last if defined $max and $max >= $n;
+    }
+
+    return $n;
+}
+
+
 sub as_code { }
 
 # ======================================================================
@@ -1560,29 +1602,16 @@ sub parse {
         }
     }
 
-    # XXX an expanded check_keyword() and process_keywords()
-    {
-        my $pat = "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt";
+    # Repeatedly look for INPUT or similar or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
+    $self->parse_keywords(
+            $pxs,
+            undef,  # implies process as many keywords as possible
 
-        while (@{$pxs->{line}}) {
-            my $line = shift @{$pxs->{line}};
-            next unless $line =~ /\S/;
-            # extract/delete recognised keyword and any following comment
-            unless ($line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s) {
-                unshift @{$pxs->{line}}, $line;
-                last;
-            }
-            my $keyword = $2;
-            unshift @{$pxs->{line}}, $line;
-            # create a node for the keyword and parse any lines associated
-            # with it.
-            my $class = "ExtUtils::ParseXS::Node::$keyword";
-            my $node  = $class->new();
-            if ($node->parse($pxs)) {
-                push @{$self->{kids}}, $node;
-            }
-        }
-    }
+              "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
 
     # Now that the type of each param is finalised, calculate its
     # overridden prototype character, if any.
