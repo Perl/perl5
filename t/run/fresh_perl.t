@@ -81,7 +81,7 @@ $array[128]=1
 ########
 $x=0x0eabcd; print $x->ref;
 EXPECT
-Can't locate object method "ref" via package "961485" (perhaps you forgot to load "961485"?) at - line 1.
+Can't locate object method "ref" via package "961485" (perhaps you forgot to load it?) at - line 1.
 ########
 chop ($str .= <DATA>);
 ########
