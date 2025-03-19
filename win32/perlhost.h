@@ -2140,16 +2140,20 @@ CPerlHost::CPerlHost(void)
     m_pHostperlProc	    = &perlProc;
 }
 
-#define SETUPEXCHANGE(xptr, iptr, table) \
-    STMT_START {				\
-        if (xptr) {				\
-            iptr = *xptr;			\
-            *xptr = &table;			\
-        }					\
-        else {					\
-            iptr = &table;			\
-        }					\
-    } STMT_END
+template<typename T>
+static void
+setupexchange(const T **xptr, const T *&iptr, const T *ptable)
+{
+    if (xptr) {
+        iptr = *xptr;
+        *xptr = ptable;
+    }
+    else {
+        iptr = ptable;
+    }
+}
+
+#define SETUPEXCHANGE(xptr, iptr, table) setupexchange(xptr, iptr, &(table))
 
 CPerlHost::CPerlHost(const struct IPerlMem** ppMem, const struct IPerlMem** ppMemShared,
                  const struct IPerlMem** ppMemParse, const struct IPerlEnv** ppEnv,
