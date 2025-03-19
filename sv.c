@@ -5895,7 +5895,6 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
         how == PERL_MAGIC_arylen ||
         how == PERL_MAGIC_regdata ||
         how == PERL_MAGIC_regdatum ||
-        how == PERL_MAGIC_symtab ||
         (SvTYPE(obj) == SVt_PVGV &&
             (GvSV(obj) == sv || GvHV(obj) == (const HV *)sv
              || GvAV(obj) == (const AV *)sv || GvCV(obj) == (const CV *)sv
