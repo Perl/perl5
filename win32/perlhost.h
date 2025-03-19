@@ -2143,11 +2143,11 @@ CPerlHost::CPerlHost(void)
 #define SETUPEXCHANGE(xptr, iptr, table) \
     STMT_START {				\
         if (xptr) {				\
-            *(void**)&iptr = (void*)xptr;			\
-            *(void**)&xptr = (void*)&table;			\
+            iptr = *xptr;			\
+            *xptr = &table;			\
         }					\
         else {					\
-            *(void**)&iptr = (void*)&table;			\
+            iptr = &table;			\
         }					\
     } STMT_END
 
