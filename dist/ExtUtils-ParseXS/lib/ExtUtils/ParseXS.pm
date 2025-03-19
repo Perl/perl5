@@ -999,18 +999,18 @@ EOF
       $self->CASE_handler($_) if $self->check_keyword("CASE");
 
       {
-          my $input_part = ExtUtils::ParseXS::Node::input_part->new();
           unshift @{$self->{line}}, $_;
-          $input_part->parse($self);
-          $_ = shift @{$self->{line}};
-          $input_part->as_code($self);
-      }
 
-      # Process as many keyword lines/blocks as can be found which match
-      # the pattern. At this stage it's looking for (possibly multiple)
-      # INIT blocks, plus any generic XSUB keywords.
-      $self->process_keywords(
-      "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
+          my $input_part = ExtUtils::ParseXS::Node::input_part->new();
+          $input_part->parse($self);
+          my $init_part = ExtUtils::ParseXS::Node::init_part->new();
+          $init_part->parse($self);
+
+          $_ = shift @{$self->{line}};
+
+          $input_part->as_code($self);
+          $init_part->as_code($self);
+      }
 
       # ----------------------------------------------------------------
       # Time to emit the main body of the XSUB. Either the real code
@@ -1914,12 +1914,6 @@ sub CLEANUP_handler {
 
 
 sub POSTCALL_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
-sub INIT_handler {
   my ExtUtils::ParseXS $self = shift;
   $self->print_section();
 }

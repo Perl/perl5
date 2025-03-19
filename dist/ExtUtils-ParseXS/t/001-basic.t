@@ -4011,6 +4011,42 @@ EOF
 
 
 {
+    # Test INIT: keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "INIT basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(aaa, short bbb)
+                |    int aaa
+                |  INIT:
+                |     XXX
+                |     YYY
+                |  CODE:
+                |     ZZZ
+EOF
+            [ 0, 0, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
+            [ 0, 0, qr{^\s+XXX\n\s+YYY\n}m,      "has XXX, YYY"   ],
+            [ 0, 0, qr{^\s+ZZZ\n}m,              "has ZZZ"        ],
+            [ 0, 0, qr{aaa.*bbb.*XXX.*YYY.*ZZZ}s,"in sequence"    ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
     # Test NOT_IMPLEMENTED_YET pseudo-keyword
 
     my $preamble = Q(<<'EOF');
