@@ -16266,39 +16266,82 @@ Perl_wrap_op_checker(pTHX_ Optype opcode,
 static void
 const_sv_xsub(pTHX_ CV* cv)
 {
+    SV * sv = MUTABLE_SV(XSANY.any_ptr);
     dXSARGS;
-    SV *const sv = MUTABLE_SV(XSANY.any_ptr);
-    PERL_UNUSED_ARG(items);
-    if (!sv) {
-        XSRETURN(0);
+    SP -= items; /* wipe incoming, this is a ... vararg on PP level */
+    /* Don't optimize/chk for G_VOID, very unlikely or caller bug
+       to reach this XSUB and discard its @_ retval. */
+    if (sv) {
+        EXTEND(SP, 1);
+        SV *const targ = GetXSTARG();
+        /* If we have it, write into it, to prevent and shortcut
+           the inevitable sv_setsv() the caller will do. */
+        if (targ) {
+            SV *const ssv = sv;
+            sv = targ;
+            sv_setsv_mg(targ, ssv);
+        }
+        PUSHs(sv);
     }
-    EXTEND(sp, 1);
-    ST(0) = sv;
-    XSRETURN(1);
+    PUTBACK; /* ret 0 or 1 SV*s */
 }
 
 static void
 const_av_xsub(pTHX_ CV* cv)
 {
-    dXSARGS;
     AV * const av = MUTABLE_AV(XSANY.any_ptr);
-    SP -= items;
+
+    if (av && SvRMAGICAL(av))
+        Perl_croak_nocontext("Magical list constants are not supported");
     assert(av);
+
+    dXSARGS;
+    SP = MARK; /* wipe all */
 #ifndef DEBUGGING
     if (!av) {
-        XSRETURN(0);
+        PUTBACK;
+        return;
     }
 #endif
-    if (SvRMAGICAL(av))
-        croak("Magical list constants are not supported");
-    if (GIMME_V != G_LIST) {
-        EXTEND(SP, 1);
-        ST(0) = sv_2mortal(newSViv((IV)AvFILLp(av)+1));
-        XSRETURN(1);
+    SSize_t av_cur = AvFILLp(av)+1;
+    /* protect PUTBACK before Copy(), in case perl's Copy()/memcpy()
+       returns execution control to PP code with longjmp(). */
+    MEM_WRAP_CHECK(av_cur, SV *);
+
+    SV * retsv;
+    U8 gm = GIMME_V;
+    if (gm != G_LIST) { /* group GIMME_V GetXSTARG so they share PL_op derefs */
+        retsv = GetXSTARG();
+        if (retsv)
+            sv_setiv_mg(retsv, (IV)av_cur);
+        else
+            retsv = sv_2mortal(newSViv((IV)av_cur));
     }
-    EXTEND(SP, AvFILLp(av)+1);
-    Copy(AvARRAY(av), &ST(0), AvFILLp(av)+1, SV *);
-    XSRETURN(AvFILLp(av)+1);
+    else if(av_cur == 0) { /* empty array */
+        PUTBACK;
+        return;
+    }
+    else
+        retsv = NULL;
+    EXTEND(SP, retsv ? 1 : av_cur);
+    SP++; /* move to ST(0), returning atleast 1 elem */
+    if (retsv) {
+        SETs(retsv);
+        PUTBACK;
+    }
+    else {
+        SV ** avarr = AvARRAY(av);
+        SV ** sp_start = SP;
+        perl_assert_ptr(sp_start);
+        perl_assert_ptr(avarr);
+        SP += (av_cur-1); /* leave SP on top of last valid element, not 1 after */
+        PUTBACK;
+        /* Ideally Copy() will tailcall to libc or do a theoretical unrealistic
+           croak() which resumes normal PP control flow. So do all of Copy()'s
+           croak()s and checks earlier. Now the PUTBACK to global state can be
+           done safely before Copy/memcpy executes, and tailcail out of here. */
+        memcpy((char*)(sp_start),(const char*)(avarr), (av_cur) * sizeof(SV *));
+    }
 }
 
 /* Copy an existing cop->cop_warnings field.
