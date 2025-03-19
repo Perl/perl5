@@ -123,6 +123,7 @@ sub parse {
     $self->{line_no} = $pxs->{line_no}->[
                             @{$pxs->{line_no}} - @{$pxs->{line}}
                         ];
+    1;
 }
 
 
@@ -1409,6 +1410,7 @@ sub parse {
 
     $self->{nargs}    = $nargs;
     $self->{min_args} = $nargs - $opt_args;
+    1;
 }
 
 
@@ -1552,8 +1554,7 @@ sub parse {
     # Process any implicit INPUT section.
     {
         my $input = ExtUtils::ParseXS::Node::INPUT->new();
-        $input->parse($pxs);
-        if ($input->{kids} && @{$input->{kids}}) {
+        if ($input->parse($pxs) && $input->{kids} && @{$input->{kids}}) {
             $input->{implicit} = 1;
             push @{$self->{kids}}, $input;
         }
@@ -1577,8 +1578,9 @@ sub parse {
             # with it.
             my $class = "ExtUtils::ParseXS::Node::$keyword";
             my $node  = $class->new();
-            $node->parse($pxs);
-            push @{$self->{kids}}, $node;
+            if ($node->parse($pxs)) {
+                push @{$self->{kids}}, $node;
+            }
         }
     }
 
@@ -1595,6 +1597,7 @@ sub parse {
     # input processing is complete.
 
     $_->set_proto($pxs) for @{$pxs->{xsub_sig}{params}};
+    1;
 }
 
 
@@ -1696,6 +1699,7 @@ sub parse {
     my $s = shift @{$pxs->{line}};
     ExtUtils::ParseXS::Utilities::trim_whitespace($s);
     $self->{text} = $s;
+    1;
 }
 
 
@@ -1725,6 +1729,7 @@ sub parse {
         $pxs->death("Error: $keyword: ENABLE/DISABLE")
     }
     $self->{enable} = uc($1) eq 'ENABLE' ? 1 : 0;
+    1;
 }
 
 
@@ -1743,6 +1748,7 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    1;
 }
 
 
@@ -1782,6 +1788,7 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
     $pxs->{PROTOTYPES_value} = $self->{enable};
     $pxs->{proto_behaviour_specified} = 1;
+    1;
 }
 
 
@@ -1801,6 +1808,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
     $pxs->{xsub_SCOPE_enabled} = $self->{enable};
+    1;
 }
 
 
@@ -1820,6 +1828,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
     $pxs->{VERSIONCHECK_value} = $self->{enable};
+    1;
 }
 
 
@@ -1856,6 +1865,7 @@ sub parse {
     }
 
     $self->{lines} = \@lines;
+    1;
 }
 
 # No as_code() method - we rely on the sub-classes for that
@@ -1890,6 +1900,7 @@ sub parse {
     # so we carry on doing the same.
     $self->{text} = join "\n", @lines;
     ExtUtils::ParseXS::Utilities::trim_whitespace($self->{text});
+    1;
 }
 
 # No as_code() method - we rely on the sub-classes for that
@@ -1911,6 +1922,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
     $pxs->{xsub_sig}{auto_function_sig_override} = $self->{text};
+    1;
 }
 
 # ======================================================================
@@ -1943,7 +1955,7 @@ sub parse {
 
     $pxs->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
     $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
-
+    1;
 }
 
 
@@ -1993,6 +2005,7 @@ sub parse {
     $pxs->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
     $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
 
+    1;
 }
 
 
@@ -2021,6 +2034,7 @@ sub parse {
         $self->{ops}{$1} = 1;
         $pxs->{xsub_map_overload_name_to_seen}->{$1} = 1;
     }
+    1;
 }
 
 
@@ -2049,6 +2063,7 @@ sub parse {
         ExtUtils::ParseXS::Utilities::trim_whitespace($_);
         push @{ $pxs->{xsub_attributes} }, $_;
     }
+    1;
 }
 
 
@@ -2109,6 +2124,7 @@ sub parse {
 
 
     $pxs->{proto_behaviour_specified} = 1;
+    1;
 }
 
 
@@ -2217,15 +2233,24 @@ sub parse {
             last if $pxs->{line}[0] =~ /^\s*NOT_IMPLEMENTED_YET/;
         }
 
+        unless ($pxs->{line}[0] =~ /\S/) {  # skip blank lines
+            shift @{$pxs->{line}};
+            next;
+        }
+
         push @{$self->{lines}}, $pxs->{line}[0];
+
         my $class = ref($self) . '_line';
         my $kid = $class->new();
         # Keep the current line in $self->{lines} for now so that the
         # parse() method below sees the right line number. We rely on that
         # method to actually pop the line.
-        $kid->parse($pxs, $self);
-        push @{$self->{kids}}, $kid;
+        if ($kid->parse($pxs, $self)) {
+            push @{$self->{kids}}, $kid;
+        }
     }
+
+    1;
 }
 
 
@@ -2268,6 +2293,7 @@ sub parse {
     # being processed has already been popped.
     my $line = shift @{$pxs->{line}}; # line of text to be processed
     $self->{line} = $line;
+    1;
 }
 
 
@@ -2327,7 +2353,6 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no/line
     my $line = $self->{line};  # line of text to be processed
 
-    return unless $line =~ /\S/;
     ExtUtils::ParseXS::Utilities::trim_whitespace($line);
     # XXX this skip doesn't make sense - we've already confirmed
     # line has non-whitespace  with the /\S/; so we just skip if the
@@ -2416,6 +2441,8 @@ sub parse {
 
     $pxs->blurt("Error: Cannot parse ALIAS definitions from '$orig'")
         if $line;
+
+    1;
 }
 
 
@@ -2443,6 +2470,8 @@ sub parse {
     # NOT_IMPLEMENTED_YET as another block separator, in addition to
     # $BLOCK_regexp.
     $self->SUPER::parse($pxs, 1);
+
+    1;
 }
 
 
@@ -2491,8 +2520,6 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no/line
     my $line = $self->{line};  # line of text to be processed
-
-    return unless $line =~ /\S/;  # skip blank lines
 
     ExtUtils::ParseXS::Utilities::trim_whitespace($line);
 
@@ -2663,6 +2690,8 @@ sub parse {
         no_init => $no_init,
         is_addr => !!$var_addr,
     );
+
+    1;
 }
 
 
@@ -2674,7 +2703,6 @@ sub as_code {
     # initialiser code.
 
     my $param = $self->{param};
-    return unless $param; # might be blank line
 
     # Synthetic params like THIS will be emitted later - they
     # are treated like ANSI params, except the type can overridden
