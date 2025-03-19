@@ -1611,7 +1611,9 @@ sub as_code {
 EOF
     }
 
-    $_->as_code($pxs) for @{$self->{kids}};
+    if ($self->{kids}) {
+        $_->as_code($pxs) for @{$self->{kids}};
+    }
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
         |   ENTER;
@@ -2234,9 +2236,7 @@ sub as_code {
     my ExtUtils::ParseXS $pxs  = shift;
 
     return unless $self->{kids};
-    for my $kid (@{$self->{kids}}) {
-        $kid->as_code($pxs);
-    }
+    $_->as_code($pxs) for @{$self->{kids}};
 }
 
 
