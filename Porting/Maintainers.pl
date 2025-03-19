@@ -763,8 +763,8 @@ our %Modules = (
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003004.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Thu Jan 23 12:59:32 2025',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.004001.tar.gz',
+        'SYNCINFO'     => 'mauke on Wed Mar 19 06:15:30 2025',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -782,9 +782,9 @@ our %Modules = (
         'EXCLUDED'     => [
             qr{^inc/},
             qr{^xt/},
-            qr{^t/Math/BigInt/Lib/TestUtil.pm},
             qw( t/00sig.t
                 t/01load.t
+                t/Math/BigInt/Lib/TestUtil.pm
                 ),
 
             # instead we use the versions of these test
