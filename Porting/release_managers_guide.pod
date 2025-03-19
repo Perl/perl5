@@ -22,6 +22,35 @@ POD.
 
  $ perl Porting/make-rmg-checklist --html --version [5.X.Y-RC#] > /tmp/rmg.html
 
+This file serves as a template for the checklist. In particular, the following
+placeholders in the instructions below are recognized and expanded by
+F<Porting/make-rmg-checklist>:
+
+=over
+
+=item C<5.X.Y>
+
+The perl version whose release is being prepared (e.g. C<5.41.9>).
+
+=item C<5.X>
+
+The perl version whose release is being prepared, but without the final
+component (e.g. C<5.41>).
+
+=item C<5.LAST>
+
+The "previous" perl version. Normally, this is just C<5.X.(Y-1)>, but if the
+last component is 0, it subtracts 2 from the middle component:
+
+    5.X.Y       5.LAST
+    ======      ======
+    5.41.9  ->  5.41.8
+    5.40.1  ->  5.40.0
+    5.40.0  ->  5.38.0
+    5.41.0  ->  5.39.0
+
+=back
+
 =head1 SYNOPSIS
 
 This document describes the series of tasks required - some automatic, some
