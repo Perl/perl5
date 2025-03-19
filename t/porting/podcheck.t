@@ -1034,15 +1034,15 @@ package My::Pod::Checker {      # Extend Pod::Checker
         return unless defined $running_CFL_text{$addr};
 
         while ($running_CFL_text{$addr} =~ m{
-                                ( (?: \w+ \s+ )* )  # The phrase before, if any
-                                \b [Ss]ee \s+
-                                ( ( [^L] )
-                                  <
-                                  ( [^<]*? )  # The not < excludes nested C<L<...
-                                  >
-                                )
-                                ( \s+ (?: under | in ) \s+ L< )?
-                            }xg)
+                ( (?: \w+ (?: ' (?: d | ll | m | re | s | ve ) )? \s+ )* )  # The phrase before, if any
+                \b [Ss]ee \s+
+                ( ( [^L] )
+                <
+                ( [^<]*? )  # The not < excludes nested C<L<...
+                >
+                )
+                ( \s+ (?: under | in ) \s+ L< )?
+            }xg)
         {
             my $prefix = $1 // "";
             my $construct = $2;     # The whole thing, like C<...>
