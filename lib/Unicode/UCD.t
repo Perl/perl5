@@ -1602,6 +1602,7 @@ is(@list, 0, "prop_invmap('Is_Is_Any') returns <undef> since two is's");
 # applications use them (though such use is deprecated).
 my @legacy_file_format = (qw( Bidi_Mirroring_Glyph
                               NFKC_Casefold
+                              NFKC_Simple_Casefold
                            )
                           );
 
