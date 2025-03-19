@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.79';
+our $VERSION = '0.80';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -3554,8 +3554,8 @@ format is the empty string.
 
 is a combination of the C<"al"> type and the C<"ae"> type.  Some of
 the map array elements have the forms given by C<"al">, and
-the rest are the empty string.  The property C<NFKC_Casefold> has this form.
-An example slice is:
+the rest are the empty string.  The properties C<NFKC_Casefold> and
+C<NFKC_Simple_Casefold> have this form.  An example slice is:
 
  @$ranges_ref  @$maps_ref         Note
     ...
@@ -3846,9 +3846,9 @@ RETRY:
     # in the new-style, and this routine is supposed to return old-style block
     # names.  The Name table is valid, but we need to execute the special code
     # below to add in the algorithmic-defined name entries.
-    # And NFKCCF needs conversion, so handle that here too.
+    # And NFKCCF NFKCSCF need conversion, so handle those here too.
     if (ref $swash eq ""
-        || $swash->{'TYPE'} =~ / ^ To (?: Blk | Na | NFKCCF ) $ /x)
+        || $swash->{'TYPE'} =~ / ^ To (?: Blk | Na | NFKCS?CF ) \z /x)
     {
 
         # Get the short name of the input property, in standard form
@@ -3993,7 +3993,7 @@ RETRY:
                 $decomps{'TYPE'} = "ToDt";
                 $SwashInfo{'ToDt'}{'missing'} = "None";
                 $SwashInfo{'ToDt'}{'format'} = "s";
-            }   # 'dm' is handled below, with 'nfkccf'
+            }   # 'dm' is handled below, with 'nfkcs?cf'
 
             $decomps{'LIST'} = "";
 
@@ -4045,11 +4045,11 @@ RETRY:
             }
             $swash = \%decomps;
         }
-        elsif ($second_try ne 'nfkccf') { # Don't know this property. Fail.
+        elsif ($second_try !~ /^nfkcs?cf\z/) { # Don't know this property. Fail.
             return;
         }
 
-        if ($second_try eq 'nfkccf' || $second_try eq 'dm') {
+        if ($second_try =~ / ^ (?: nfkcs?cf | dm ) \z /x) {
 
             # The 'nfkccf' property is stored in the old format for backwards
             # compatibility for any applications that has read its file
@@ -4180,7 +4180,9 @@ RETRY:
             } # End of loop constructing the converted list
 
             # Finish up the data structure for our converted swash
-            my $type = ($second_try eq 'nfkccf') ? 'ToNFKCCF' : 'ToDm';
+            my $type = ($second_try =~ / ^ ( nfkcs?cf ) \z /x)
+                       ? 'To' . uc $1
+                       : 'ToDm';
             $revised_swash{'LIST'} = $list;
             $revised_swash{'TYPE'} = $type;
             $revised_swash{'SPECIALS'} = $swash->{'SPECIALS'};
@@ -4265,6 +4267,10 @@ RETRY:
         # assumed to be 'Y'.
 
         foreach my $range (split "\n", $swash->{'LIST'}) {
+
+            # No code points matched
+            last if $range eq '!Unicode::UCD::All';
+
             $range =~ s/ \s* (?: \# .* )? $ //xg; # rmv trailing space, comments
 
             # Find the beginning and end of the range on the line
