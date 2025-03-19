@@ -1018,6 +1018,9 @@ EOF
       # wrapped function
       # ----------------------------------------------------------------
 
+      # This set later if CODE is using RETVAL
+      $self->{xsub_seen_RETVAL_in_CODE} = 0;
+
       # $implicit_OUTPUT_RETVAL (bool) indicates that a bodiless XSUB has
       # a non-void return value, so needs to return RETVAL; or to put it
       # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".

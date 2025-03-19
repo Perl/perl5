@@ -126,6 +126,8 @@ sub parse {
 }
 
 
+sub as_code { }
+
 # ======================================================================
 
 package ExtUtils::ParseXS::Node::Param;
@@ -1539,19 +1541,6 @@ sub parse {
         @$p{@keys} = @$op{@keys};
     }
 
-    # ----------------------------------------------------------------
-    # Handle all the XSUB parts which generate declarations
-    # ----------------------------------------------------------------
-
-    # Emit opening brace. With cmd-line switch "-except", prefix it
-    # with 'TRY'
-    {
-        my $try = $pxs->{config_allow_exceptions} ? ' TRY' : '';
-        print ExtUtils::ParseXS::Q(<<"EOF");
-            |   $try [[
-EOF
-    }
-
     # First, initialize variables manipulated by INPUT_handler().
     $pxs->{xsub_deferred_code_lines} = "";  # lines to be emitted after
                                                                                     # PREINIT/INPUT
@@ -1564,7 +1553,7 @@ EOF
     {
         my $input = ExtUtils::ParseXS::Node::INPUT->new();
         $input->parse($pxs);
-        $input->as_code($pxs);
+        push @{$self->{kids}}, $input;
     }
 
     # XXX an expanded check_keyword() and process_keywords()
@@ -1586,7 +1575,7 @@ EOF
             my $class = "ExtUtils::ParseXS::Node::$keyword";
             my $node  = $class->new();
             $node->parse($pxs);
-            $node->as_code($pxs) if $class->can('as_code');
+            push @{$self->{kids}}, $node;
         }
     }
 
@@ -1603,6 +1592,23 @@ EOF
     # input processing is complete.
 
     $_->set_proto($pxs) for @{$pxs->{xsub_sig}{params}};
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    # Emit opening brace. With cmd-line switch "-except", prefix it
+    # with 'TRY'
+    {
+        my $try = $pxs->{config_allow_exceptions} ? ' TRY' : '';
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |   $try [[
+EOF
+    }
+
+    $_->as_code($pxs) for @{$self->{kids}};
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
         |   ENTER;
@@ -1614,9 +1620,6 @@ EOF
     for my $param (grep $_->{is_synthetic}, @{$pxs->{xsub_sig}{params}}) {
         $param->as_code($pxs);
     }
-
-    # This set later if CODE is using RETVAL
-    $pxs->{xsub_seen_RETVAL_in_CODE} = 0;
 
     # Do any variable declarations associated with having a return value
     if ($pxs->{xsub_return_type} ne "void") {
@@ -1663,14 +1666,6 @@ EOF
     # start with a simple '$var =' and so would not have been emitted
     # at the variable declaration stage.
     print $pxs->{xsub_deferred_code_lines};
-}
-
-
-sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
-
-    # XXX currently code is emitted by parse()
 }
 
 
@@ -2237,7 +2232,6 @@ sub as_code {
 
     return unless $self->{kids};
     for my $kid (@{$self->{kids}}) {
-        next unless $kid->can('as_code');
         $kid->as_code($pxs);
     }
 }
