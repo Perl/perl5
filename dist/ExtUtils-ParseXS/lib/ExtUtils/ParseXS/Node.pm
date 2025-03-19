@@ -1553,7 +1553,10 @@ sub parse {
     {
         my $input = ExtUtils::ParseXS::Node::INPUT->new();
         $input->parse($pxs);
-        push @{$self->{kids}}, $input;
+        if ($input->{kids} && @{$input->{kids}}) {
+            $input->{implicit} = 1;
+            push @{$self->{kids}}, $input;
+        }
     }
 
     # XXX an expanded check_keyword() and process_keywords()
@@ -2424,6 +2427,8 @@ package ExtUtils::ParseXS::Node::INPUT;
 # block which can follow an xsub signature or CASE keyword.
 
 BEGIN { $build_subclass->('keylines', # parent
+    'implicit',   # bool: this is an INPUT section at the start of the
+                  #       XSUB without an explicit 'INPUT' keyword
 )};
 
 # The inherited parse() method will call INPUT_line->parse() for each line
