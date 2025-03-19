@@ -236,7 +236,7 @@ support their use.
 
 booleans
 
-You can use C<bool>, C<true>, and C<false> as provided by C<< <stdbool.h >>
+You can use C<bool>, C<true>, and C<false> as provided by C<< <stdbool.h> >>
 (or natively in C++).
 
 =back
@@ -2121,7 +2121,7 @@ C99, and so some workarounds were created.  The C<TRUE> and C<FALSE>
 macros are still available as alternatives for C<true> and C<false>.
 And the C<cBOOL> macro was created to correctly cast to a true/false
 value in all circumstances, but should no longer be necessary.  Using
-S<C<(bool)> I<expr>>> should now always work.
+S<C<(bool)> I<expr>> should now always work.
 
 There are no plans to remove any of C<TRUE>, C<FALSE>, nor C<cBOOL>.
 
