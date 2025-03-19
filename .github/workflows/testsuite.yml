@@ -833,7 +833,7 @@ jobs:
         uses: shogo82148/actions-setup-perl@v1.30.0
         with:
           perl-version: ${{ matrix.perl-version }}
-          multi-thread: ${{ matrix.threads.id }}
+          multi-thread: ${{ matrix.threads.enable }}
           install-modules:
             ExtUtils::MakeMaker
             Perl::OSType
