@@ -2271,6 +2271,56 @@ BEGIN { $build_subclass->('codeblock', # parent
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::PPCODE;
+
+# Store the code lines associated with the PPCODE keyword
+
+BEGIN { $build_subclass->('codeblock', # parent
+)};
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/lines
+    # The only thing left should be the special "!End!\n\n" token.
+    $pxs->death("PPCODE must be last thing") if @{$pxs->{line}} > 1;
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    # Just emit the code block and then code to do PUTBACK and return.
+    # The # user of PPCODE is supposed to have done all the return stack
+    # manipulation themselves.
+    # Note that PPCODE blocks often include a XSRETURN(1) or
+    # similar, so any final code we emit after that is in danger of
+    # triggering a "statement is unreachable" warning.
+
+    $self->SUPER::as_code($pxs); # emit code block
+
+    print "\tLEAVE;\n" if $pxs->{xsub_SCOPE_enabled};
+
+    # Suppress "statement is unreachable" warning on HPUX
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+          "#pragma diag_suppress 2111\n",
+          "#endif\n"
+        if $^O eq "hpux";
+
+    print "\tPUTBACK;\n\treturn;\n";
+
+    # Suppress "statement is unreachable" warning on HPUX
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+          "#pragma diag_default 2111\n",
+          "#endif\n"
+        if $^O eq "hpux";
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::PREINIT;
 
 # Store the code lines associated with the PREINIT: keyword

@@ -1031,32 +1031,11 @@ EOF
         $_ = '';
       }
       elsif ($self->check_keyword("PPCODE")) {
-        # Handle PPCODE: just emit the code block and then code to do
-        # PUTBACK and return. The user of PPCODE is supposed to have
-        # done all the return stack manipulation themselves.
-        # Note that PPCODE blocks often include a XSRETURN(1) or
-        # similar, so any final code we emit after that is in danger of
-        # triggering a "statement is unreachable" warning.
-
-        $self->print_section();
-        $self->death("PPCODE must be last thing") if @{ $self->{line} };
-
-        print "\tLEAVE;\n" if $self->{xsub_SCOPE_enabled};
-
-        # Suppress "statement is unreachable" warning on HPUX
-        print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-              "#pragma diag_suppress 2111\n",
-              "#endif\n"
-          if $^O eq "hpux";
-
-        print "\tPUTBACK;\n\treturn;\n";
-
-        # Suppress "statement is unreachable" warning on HPUX
-        print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-              "#pragma diag_default 2111\n",
-              "#endif\n"
-          if $^O eq "hpux";
-
+        my $ppcode = ExtUtils::ParseXS::Node::PPCODE->new();
+        unshift @{$self->{line}}, $_;
+        $ppcode->parse($self);
+        $_ = shift @{$self->{line}};
+        $ppcode->as_code($self);
       }
       elsif ($self->check_keyword("CODE")) {
         # Handle CODE: just emit the code block and check if it

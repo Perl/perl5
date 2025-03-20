@@ -4124,4 +4124,46 @@ EOF
 }
 
 
+{
+    # Test PPCODE keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "PPCODE basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa)
+                |  PPCODE:
+                |     YYY
+EOF
+            [ 0, 0, qr{\bint\s+aaa},           "has aaa decl"   ],
+            [ 0, 0, qr{YYY},                   "has code body"  ],
+            [ 0, 0, qr{aaa.*YYY}s,             "in sequence"    ],
+        ],
+        [
+            "PPCODE trailing keyword",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa)
+                |  PPCODE:
+                |     YYY
+                |  OUTPUT:
+                |     blah
+EOF
+            [ 1, 0, qr{PPCODE must be last thing}, "got expected err"  ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
 done_testing;
