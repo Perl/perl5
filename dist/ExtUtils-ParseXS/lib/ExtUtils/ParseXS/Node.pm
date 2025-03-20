@@ -2259,6 +2259,31 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::CODE;
+
+# Store the code lines associated with the CODE keyword
+
+BEGIN { $build_subclass->('codeblock', # parent
+)};
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/lines
+    # Check if the code block includes "RETVAL". This check is for later
+    # use to warn if RETVAL is used but no OUTPUT block is present.
+    # Ignore if its only being used in an 'ignore this var' situation.
+    my $code = join "\n", @{$self->{lines}};
+    $pxs->{xsub_seen_RETVAL_in_CODE} =
+                    $code =~ /\bRETVAL\b/
+                 && $code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/;
+    1;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::INIT;
 
 # Store the code lines associated with the INIT: keyword

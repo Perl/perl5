@@ -1038,18 +1038,11 @@ EOF
         $ppcode->as_code($self);
       }
       elsif ($self->check_keyword("CODE")) {
-        # Handle CODE: just emit the code block and check if it
-        # includes "RETVAL". This check is for later use to warn if
-        # RETVAL is used but no OUTPUT block is present.
-        # Ignore if its only being used in an 'ignore this var'
-        # situation
-        my $consumed_code = $self->print_section();
-        if (   $consumed_code =~ /\bRETVAL\b/
-            && $consumed_code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/
-        ) {
-          $self->{xsub_seen_RETVAL_in_CODE} = 1;
-        }
-
+        my $code = ExtUtils::ParseXS::Node::CODE->new();
+        unshift @{$self->{line}}, $_;
+        $code->parse($self);
+        $_ = shift @{$self->{line}};
+        $code->as_code($self);
       }
       elsif (    defined($self->{xsub_class})
              and $self->{xsub_func_name} eq "DESTROY")
