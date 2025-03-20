@@ -998,26 +998,6 @@ EOF
       # Note that each CASE: can precede multiple keyword blocks.
       $self->CASE_handler($_) if $self->check_keyword("CASE");
 
-      {
-          unshift @{$self->{line}}, $_;
-
-          my $input_part = ExtUtils::ParseXS::Node::input_part->new();
-          $input_part->parse($self);
-          my $init_part = ExtUtils::ParseXS::Node::init_part->new();
-          $init_part->parse($self);
-
-          $_ = shift @{$self->{line}};
-
-          $input_part->as_code($self);
-          $init_part->as_code($self);
-      }
-
-      # ----------------------------------------------------------------
-      # Time to emit the main body of the XSUB. Either the real code
-      # from a CODE: or PPCODE: block, or the implicit call to the
-      # wrapped function
-      # ----------------------------------------------------------------
-
       # This set later if CODE is using RETVAL
       $self->{xsub_seen_RETVAL_in_CODE} = 0;
 
@@ -1027,20 +1007,28 @@ EOF
       my $implicit_OUTPUT_RETVAL;
 
       {
-        my $code_part = ExtUtils::ParseXS::Node::code_part->new();
-        unshift @{$self->{line}}, $_;
-        $code_part->parse($self);
-        $_ = shift @{$self->{line}};
+          unshift @{$self->{line}}, $_;
 
-        if (   ref($code_part->{kids}[-1]) =~ /::autocall$/
-            && $self->{xsub_return_type} ne "void"
-            && !$self->{xsub_seen_NO_OUTPUT})
-        {
-          # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-          $implicit_OUTPUT_RETVAL = 1;
-        }
+          my $input_part = ExtUtils::ParseXS::Node::input_part->new();
+          $input_part->parse($self);
+          my $init_part = ExtUtils::ParseXS::Node::init_part->new();
+          $init_part->parse($self);
+          my $code_part = ExtUtils::ParseXS::Node::code_part->new();
+          $code_part->parse($self);
 
-        $code_part->as_code($self);
+          $_ = shift @{$self->{line}};
+
+          if (   ref($code_part->{kids}[-1]) =~ /::autocall$/
+              && $self->{xsub_return_type} ne "void"
+              && !$self->{xsub_seen_NO_OUTPUT})
+          {
+            # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
+            $implicit_OUTPUT_RETVAL = 1;
+          }
+
+          $input_part->as_code($self);
+          $init_part->as_code($self);
+          $code_part->as_code($self);
       }
 
       # ----------------------------------------------------------------
