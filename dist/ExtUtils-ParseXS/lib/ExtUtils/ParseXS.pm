@@ -1026,25 +1026,18 @@ EOF
       # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
       my $implicit_OUTPUT_RETVAL;
 
-      if (/^\s*NOT_IMPLEMENTED_YET/) {
-        print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
-        $_ = '';
+      my $XXX_saw_keyword;
+      {
+        my $code_part = ExtUtils::ParseXS::Node::code_part->new();
+          unshift @{$self->{line}}, $_;
+          $XXX_saw_keyword = $code_part->parse($self);
+          $_ = shift @{$self->{line}};
+          $code_part->as_code($self);
       }
-      elsif ($self->check_keyword("PPCODE")) {
-        my $ppcode = ExtUtils::ParseXS::Node::PPCODE->new();
-        unshift @{$self->{line}}, $_;
-        $ppcode->parse($self);
-        $_ = shift @{$self->{line}};
-        $ppcode->as_code($self);
-      }
-      elsif ($self->check_keyword("CODE")) {
-        my $code = ExtUtils::ParseXS::Node::CODE->new();
-        unshift @{$self->{line}}, $_;
-        $code->parse($self);
-        $_ = shift @{$self->{line}};
-        $code->as_code($self);
-      }
-      elsif (    defined($self->{xsub_class})
+
+      if (!$XXX_saw_keyword)
+      {
+      if (    defined($self->{xsub_class})
              and $self->{xsub_func_name} eq "DESTROY")
       {
         # Emit a default body for a C++ DESTROY method: "delete THIS;"
@@ -1102,6 +1095,7 @@ EOF
         print "$self->{xsub_func_name}($args);\n";
 
       } # End: PPCODE: or CODE: or a default body
+      }
 
 
       # ----------------------------------------------------------------

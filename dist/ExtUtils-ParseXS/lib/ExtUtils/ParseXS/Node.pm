@@ -140,13 +140,18 @@ sub parse_keywords {
     my ExtUtils::ParseXS $pxs  = shift;
     my $max                    = shift; # max number of keywords to process
     my $pat                    = shift;
+    my $do_notimplemented      = shift;
 
     my $n = 0;
     while (@{$pxs->{line}}) {
         my $line = shift @{$pxs->{line}};
         next unless $line =~ /\S/;
         # extract/delete recognised keyword and any following comment
-        unless ($line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s) {
+        unless (   $line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s
+                or (   $do_notimplemented
+                    && $line =~ s/^(\s*)(NOT_IMPLEMENTED_YET)/$1/
+                   )
+        ) {
             # stop at unrecognised line
             unshift @{$pxs->{line}}, $line;
             last;
@@ -1747,6 +1752,41 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::code_part;
+
+BEGIN { $build_subclass->('', # parent
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Look for a CODE/PPCODE/NOT_IMPLEMENTED_YET keyword; if found, add
+    # the kid to the current node.
+    return $self->parse_keywords(
+            $pxs,
+            1, # match at most one keyword
+            "CODE|PPCODE",
+            1, # also match NOT_IMPLEMENTED_YET
+        );
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs) for @{$self->{kids}};
+    }
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::oneline;
 
 # Generic base class for keyword Nodes which consume only a single source
@@ -1768,6 +1808,23 @@ sub parse {
     ExtUtils::ParseXS::Utilities::trim_whitespace($s);
     $self->{text} = $s;
     1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::NOT_IMPLEMENTED_YET;
+
+# Handle NOT_IMPLEMENTED_YET pseudo-keyword
+
+BEGIN { $build_subclass->('oneline', # parent
+)};
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    print "\n\tPerl_croak(aTHX_ \"$pxs->{xsub_func_full_perl_name}: not implemented yet\");\n";
 }
 
 

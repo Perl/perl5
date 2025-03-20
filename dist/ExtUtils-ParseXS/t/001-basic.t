@@ -4125,6 +4125,46 @@ EOF
 
 
 {
+    # Test CODE keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "CODE basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa)
+                |  CODE:
+                |     YYY
+EOF
+            [ 0, 0, qr{\bint\s+aaa},           "has aaa decl"   ],
+            [ 0, 0, qr{YYY},                   "has code body"  ],
+            [ 0, 0, qr{aaa.*YYY}s,             "in sequence"    ],
+            [ 0, 0, qr{\#line 8 .*\n\s+YYY},   "correct #line"  ],
+        ],
+        [
+            "CODE empty",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa)
+                |  CODE:
+EOF
+            [ 0, 0, qr{\bint\s+aaa},               "has aaa decl"   ],
+            [ 0, 0, qr{aaa.*\n\s*;\s*\n\#line 8 }, "correct #line"  ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
     # Test PPCODE keyword
 
     my $preamble = Q(<<'EOF');
@@ -4146,6 +4186,17 @@ EOF
             [ 0, 0, qr{\bint\s+aaa},           "has aaa decl"   ],
             [ 0, 0, qr{YYY},                   "has code body"  ],
             [ 0, 0, qr{aaa.*YYY}s,             "in sequence"    ],
+            [ 0, 0, qr{\#line 8 .*\n\s+YYY},   "correct #line"  ],
+        ],
+        [
+            "PPCODE empty",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa)
+                |  PPCODE:
+EOF
+            [ 0, 0, qr{\bint\s+aaa},               "has aaa decl"   ],
+            [ 0, 0, qr{aaa.*\n\s*;\s*\n\#line 8 }, "correct #line"  ],
         ],
         [
             "PPCODE trailing keyword",
