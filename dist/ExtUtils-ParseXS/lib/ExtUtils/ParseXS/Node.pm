@@ -1766,12 +1766,21 @@ sub parse {
 
     # Look for a CODE/PPCODE/NOT_IMPLEMENTED_YET keyword; if found, add
     # the kid to the current node.
-    return $self->parse_keywords(
-            $pxs,
-            1, # match at most one keyword
-            "CODE|PPCODE",
-            1, # also match NOT_IMPLEMENTED_YET
-        );
+    return 1 if $self->parse_keywords(
+                        $pxs,
+                        1, # match at most one keyword
+                        "CODE|PPCODE",
+                        1, # also match NOT_IMPLEMENTED_YET
+                    );
+
+    # Didn't find a CODE keyword or similar, so auto-generate a call
+    # to the same-named C library function.
+
+    my $autocall = ExtUtils::ParseXS::Node::autocall->new();
+    $autocall->parse($pxs); # mainly a NOOP, but sets line number etc.
+    push @{$self->{kids}}, $autocall;
+
+    1;
 }
 
 
@@ -1825,6 +1834,80 @@ sub as_code {
     my ExtUtils::ParseXS $pxs  = shift;
 
     print "\n\tPerl_croak(aTHX_ \"$pxs->{xsub_func_full_perl_name}: not implemented yet\");\n";
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::autocall;
+
+# Handle an empty XSUB body (i.e. no CODE or PPCODE)
+# by auto-generating a call to a C library function of the same
+# name
+
+BEGIN { $build_subclass->('', # parent
+)};
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    if (    defined($pxs->{xsub_class})
+        and $pxs->{xsub_func_name} eq "DESTROY")
+    {
+        # Emit a default body for a C++ DESTROY method: "delete THIS;"
+        print "\n\t";
+        print "delete THIS;\n";
+
+    }
+    else {
+        # Emit a default body: this will be a call to the function being
+        # wrapped. Typically:
+        #    RETVAL = foo(args);
+        # with the function name being appropriately modified when it's
+        # a C++ new() method etc.
+
+        print "\n\t";
+
+        if ($pxs->{xsub_return_type} ne "void") {
+            print "RETVAL = ";
+        }
+
+        if (defined($pxs->{xsub_class})) {
+            if ($pxs->{xsub_seen_static}) {
+                # it has a return type of 'static foo'
+                if ($pxs->{xsub_func_name} eq 'new') {
+                    $pxs->{xsub_func_name} = "$pxs->{xsub_class}";
+                }
+                else {
+                    print "$pxs->{xsub_class}::";
+                }
+            }
+            else {
+                if ($pxs->{xsub_func_name} eq 'new') {
+                    $pxs->{xsub_func_name} .= " $pxs->{xsub_class}";
+                }
+                else {
+                    print "THIS->";
+                }
+            }
+        }
+
+        # Handle "xsubpp -s=strip_prefix" hack
+        my $strip = $pxs->{config_strip_c_func_prefix};
+        $pxs->{xsub_func_name} =~ s/^\Q$strip//
+            if defined $strip;
+
+        $pxs->{xsub_func_name} = 'XSFUNCTION'
+                            if $pxs->{xsub_seen_INTERFACE_or_MACRO};
+
+        my $sig  = $pxs->{xsub_sig};
+        my $args = $sig->{auto_function_sig_override}; # C_ARGS
+        $args = $sig->C_func_signature($pxs)
+            unless defined $args;
+        print "$pxs->{xsub_func_name}($args);\n";
+
+    }
 }
 
 

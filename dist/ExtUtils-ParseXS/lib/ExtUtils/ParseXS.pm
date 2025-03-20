@@ -1026,77 +1026,22 @@ EOF
       # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
       my $implicit_OUTPUT_RETVAL;
 
-      my $XXX_saw_keyword;
       {
         my $code_part = ExtUtils::ParseXS::Node::code_part->new();
-          unshift @{$self->{line}}, $_;
-          $XXX_saw_keyword = $code_part->parse($self);
-          $_ = shift @{$self->{line}};
-          $code_part->as_code($self);
-      }
+        unshift @{$self->{line}}, $_;
+        $code_part->parse($self);
+        $_ = shift @{$self->{line}};
 
-      if (!$XXX_saw_keyword)
-      {
-      if (    defined($self->{xsub_class})
-             and $self->{xsub_func_name} eq "DESTROY")
-      {
-        # Emit a default body for a C++ DESTROY method: "delete THIS;"
-        print "\n\t";
-        print "delete THIS;\n";
-
-      }
-      else {
-        # Emit a default body: this will be a call to the function being
-        # wrapped. Typically:
-        #    RETVAL = foo(args);
-        # with the function name being appropriately modified when it's
-        # a C++ new() method etc.
-
-        print "\n\t";
-
-        if ($self->{xsub_return_type} ne "void") {
-          print "RETVAL = ";
+        if (   ref($code_part->{kids}[-1]) =~ /::autocall$/
+            && $self->{xsub_return_type} ne "void"
+            && !$self->{xsub_seen_NO_OUTPUT})
+        {
           # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-          $implicit_OUTPUT_RETVAL = 1 unless $self->{xsub_seen_NO_OUTPUT};
+          $implicit_OUTPUT_RETVAL = 1;
         }
 
-        if (defined($self->{xsub_class})) {
-          if ($self->{xsub_seen_static}) {
-            # it has a return type of 'static foo'
-            if ($self->{xsub_func_name} eq 'new') {
-              $self->{xsub_func_name} = "$self->{xsub_class}";
-            }
-            else {
-              print "$self->{xsub_class}::";
-            }
-          }
-          else {
-            if ($self->{xsub_func_name} eq 'new') {
-              $self->{xsub_func_name} .= " $self->{xsub_class}";
-            }
-            else {
-              print "THIS->";
-            }
-          }
-        }
-
-        # Handle "xsubpp -s=strip_prefix" hack
-        my $strip = $self->{config_strip_c_func_prefix};
-        $self->{xsub_func_name} =~ s/^\Q$strip//
-          if defined $strip;
-
-        $self->{xsub_func_name} = 'XSFUNCTION'
-                  if $self->{xsub_seen_INTERFACE_or_MACRO};
-
-        my $sig  = $self->{xsub_sig};
-        my $args = $sig->{auto_function_sig_override}; # C_ARGS
-        $args = $sig->C_func_signature($self)
-          unless defined $args;
-        print "$self->{xsub_func_name}($args);\n";
-
-      } # End: PPCODE: or CODE: or a default body
+        $code_part->as_code($self);
       }
-
 
       # ----------------------------------------------------------------
       # Main body of function has now been emitted.
