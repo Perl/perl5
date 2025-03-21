@@ -253,7 +253,15 @@ BEGIN {
                                # seen in this XSUB.
   
   'xsub_interface_macro',      # Str: current interface extraction macro.
+
+  'xsub_implicit_OUTPUT_RETVAL', # Bool indicates that a bodiless XSUB has
+                                 # a non-void return value, so needs to
+                                 # return RETVAL; or to put it another
+                                 # way, it indicates an implicit
+                                 # "OUTPUT:\n\tRETVAL".
   
+  'xsub_XSRETURN_count',       # Int: number SVs to return on stack
+
   'xsub_interface_macro_set',  # Str: current interface setting macro.
   
   'xsub_prototype',            # Str: is set to either the global PROTOTYPES
@@ -671,10 +679,8 @@ EOM
     $self->{xsub_seen_INTERFACE}            = 0;
     $self->{xsub_class}                     = undef;
     $self->{xsub_sig}                       = undef;
-
-    # used for emitting XSRETURN($XSRETURN_count) if > 0, or XSRETURN_EMPTY
-    my $XSRETURN_count = 0;
-
+    # used for emitting XSRETURN(N) if > 0, or XSRETURN_EMPTY
+    $self->{xsub_XSRETURN_count} = 0;
 
     # Process next line
 
@@ -886,7 +892,7 @@ EOM
     {
       my $EXPLICIT_RETURN = ($self->{xsub_seen_CODE} &&
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
-      $XSRETURN_count = 1 if $EXPLICIT_RETURN;
+      $self->{xsub_XSRETURN_count} = 1 if $EXPLICIT_RETURN;
     }
 
 
@@ -1000,11 +1006,8 @@ EOF
 
       # This set later if CODE is using RETVAL
       $self->{xsub_seen_RETVAL_in_CODE} = 0;
-
-      # $implicit_OUTPUT_RETVAL (bool) indicates that a bodiless XSUB has
-      # a non-void return value, so needs to return RETVAL; or to put it
-      # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
-      my $implicit_OUTPUT_RETVAL;
+      # This set later if there's an implied RETVAL to output
+      $self->{xsub_implicit_OUTPUT_RETVAL} = 0;
 
       {
           unshift @{$self->{line}}, $_;
@@ -1023,7 +1026,7 @@ EOF
               && !$self->{xsub_seen_NO_OUTPUT})
           {
             # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-            $implicit_OUTPUT_RETVAL = 1;
+            $self->{xsub_implicit_OUTPUT_RETVAL} = 1;
           }
 
           $input_part->as_code($self);
@@ -1076,7 +1079,8 @@ EOF
                                  @{$self->{xsub_sig}{params}};
         if ($outlist_count) {
           my $ext = $outlist_count;
-          ++$ext if ($retval && $retval->{in_output}) || $implicit_OUTPUT_RETVAL;
+          ++$ext if    ($retval && $retval->{in_output})
+                    || $self->{xsub_implicit_OUTPUT_RETVAL};
           print "\tXSprePUSH;\n";
           # XSprePUSH resets SP to the base of the stack frame; must PUSH
           # any return values
@@ -1092,19 +1096,22 @@ EOF
         # ----------------------------------------------------------------
         # All OUTPUT done; now handle an implicit or deferred RETVAL.
         # OUTPUT_handler() will have skipped any RETVAL line.
-        # Also, $implicit_OUTPUT_RETVAL indicates that an implicit RETVAL
-        # should be generated, due to a non-void CODE-less XSUB.
+        # Also, $self->{xsub_implicit_OUTPUT_RETVAL} indicates that an
+        # implicit RETVAL should be generated, due to a non-void CODE-less
+        # XSUB.
         # ----------------------------------------------------------------
 
-          if (($retval && $retval->{in_output}) || $implicit_OUTPUT_RETVAL) {
+          if (   ($retval && $retval->{in_output})
+              || $self->{xsub_implicit_OUTPUT_RETVAL})
+          {
             # emit a deferred RETVAL from OUTPUT or implicit RETVAL
             $retval->as_output_code($self);
           }
 
-        $XSRETURN_count = 1 if     $self->{xsub_return_type} ne "void"
+        $self->{xsub_XSRETURN_count} = 1 if  $self->{xsub_return_type} ne "void"
                                && !$self->{xsub_seen_NO_OUTPUT};
-        my $num = $XSRETURN_count;
-        $XSRETURN_count += $outlist_count;
+        my $num = $self->{xsub_XSRETURN_count};
+        $self->{xsub_XSRETURN_count} += $outlist_count;
 
         # Now that RETVAL is on the stack, also push any OUTLIST vars too
         for my $param (grep  {    defined $_->{in_out}
@@ -1185,9 +1192,9 @@ EOF
           "#endif\n"
       if $^O eq "hpux";
 
-    if ($XSRETURN_count) {
+    if ($self->{xsub_XSRETURN_count}) {
       print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
-        |    XSRETURN($XSRETURN_count);
+        |    XSRETURN($self->{xsub_XSRETURN_count});
 EOF
     }
     else {
