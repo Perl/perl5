@@ -36,7 +36,7 @@ Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
 Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcker, Eric Herman,
 John SJ Anderson, Karen Etheridge, Zak B. Elep, Tom Hukins, Richard Leach,
 Neil Bowers, Yves Orton, Paul Evans, Graham Knop, Philippe Bruhat (BooK),
-and Thibault Duponchelle.
+Thibault Duponchelle, and Lukas Mai.
 
 =head2 PUMPKIN?
 
@@ -793,6 +793,7 @@ the strings?).
  Max       5.41.7       2024-Dec-20
  Steve     5.41.8       2025-Jan-20
  Richard L 5.41.9       2025-Feb-24
+ Lukas     5.41.10      2025-Mar-21
 
 =head2 SELECTED RELEASE SIZES
 
