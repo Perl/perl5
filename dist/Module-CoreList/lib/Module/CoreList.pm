@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20250220';
+our $VERSION = '5.20250321';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -435,7 +435,7 @@ sub changes_between {
     5.040001 => '2025-01-18',
     5.041008 => '2025-01-20',
     5.041009 => '2025-02-24',
-    5.041010 => '2025-03-20',
+    5.041010 => '2025-03-21',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -22991,8 +22991,61 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.041010 => {
         delta_from => 5.041009,
         changed => {
+            'Archive::Tar'          => '3.04',
+            'Archive::Tar::Constant'=> '3.04',
+            'Archive::Tar::File'    => '3.04',
             'B::Op_private'         => '5.041010',
+            'Benchmark'             => '1.27',
             'Config'                => '5.04101',
+            'ExtUtils::Command'     => '7.72',
+            'ExtUtils::Command::MM' => '7.72',
+            'ExtUtils::Liblist'     => '7.72',
+            'ExtUtils::Liblist::Kid'=> '7.72',
+            'ExtUtils::MM'          => '7.72',
+            'ExtUtils::MM_AIX'      => '7.72',
+            'ExtUtils::MM_Any'      => '7.72',
+            'ExtUtils::MM_BeOS'     => '7.72',
+            'ExtUtils::MM_Cygwin'   => '7.72',
+            'ExtUtils::MM_DOS'      => '7.72',
+            'ExtUtils::MM_Darwin'   => '7.72',
+            'ExtUtils::MM_MacOS'    => '7.72',
+            'ExtUtils::MM_NW5'      => '7.72',
+            'ExtUtils::MM_OS2'      => '7.72',
+            'ExtUtils::MM_OS390'    => '7.72',
+            'ExtUtils::MM_QNX'      => '7.72',
+            'ExtUtils::MM_UWIN'     => '7.72',
+            'ExtUtils::MM_Unix'     => '7.72',
+            'ExtUtils::MM_VMS'      => '7.72',
+            'ExtUtils::MM_VOS'      => '7.72',
+            'ExtUtils::MM_Win32'    => '7.72',
+            'ExtUtils::MM_Win95'    => '7.72',
+            'ExtUtils::MY'          => '7.72',
+            'ExtUtils::MakeMaker'   => '7.72',
+            'ExtUtils::MakeMaker::Config'=> '7.72',
+            'ExtUtils::MakeMaker::Locale'=> '7.72',
+            'ExtUtils::MakeMaker::version'=> '7.72',
+            'ExtUtils::MakeMaker::version::regex'=> '7.72',
+            'ExtUtils::Mkbootstrap' => '7.72',
+            'ExtUtils::Mksymlists'  => '7.72',
+            'ExtUtils::testlib'     => '7.72',
+            'Math::BigFloat'        => '2.004001',
+            'Math::BigInt'          => '2.004001',
+            'Math::BigInt::Calc'    => '2.004001',
+            'Math::BigInt::FastCalc'=> '0.5019',
+            'Math::BigInt::Lib'     => '2.004001',
+            'Math::BigRat'          => '2.004001',
+            'Module::CoreList'      => '5.20250321',
+            'Module::CoreList::Utils'=> '5.20250321',
+            'Safe'                  => '2.47',
+            'Search::Dict'          => '1.08',
+            'Storable'              => '3.36',
+            'VMS::Filespec'         => '1.15',
+            'XS::APItest'           => '1.41',
+            'builtin'               => '0.018',
+            'feature'               => '1.95',
+            'fields'                => '2.27',
+            'threads'               => '2.43',
+            'warnings'              => '1.74',
         },
         removed => {
         }
