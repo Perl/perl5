@@ -24,6 +24,7 @@ my %cc2cxx = (
     xlc => [ 'xlC' ], # IBM C/C++ Set, xlc without thread-safety
     xlc_r => [ 'xlC_r' ], # IBM C/C++ Set, xlc with thread-safety
     cl    => [ 'cl' ], # Microsoft Visual Studio
+    clang => [ 'clang++' ], # LLVM compiler frontend
 );
 
 sub new {
