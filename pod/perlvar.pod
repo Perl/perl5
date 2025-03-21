@@ -1828,18 +1828,39 @@ Also, it's just like C<$/>, but it's what you get "back" from Perl.
 X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>
 
 If set to nonzero, forces a flush right away and after every write or
-print on the currently selected output channel.  Default is 0
-(regardless of whether the channel is really buffered by the system or
-not; C<$|> tells you only whether you've asked Perl explicitly to
-flush after each write).  STDOUT will typically be line buffered if
-output is to the terminal and block buffered otherwise.  Setting this
-variable is useful primarily when you are outputting to a pipe or
-socket, such as when you are running a Perl program under B<rsh> and
-want to see the output as it's happening.  This has no effect on input
-buffering.  See L<perlfunc/getc> for that.  See L<perlfunc/select> on
-how to select the output channel.  See also L<IO::Handle>.
+print on the currently selected output channel. The default is 0.
+
+C<STDOUT> will typically be line buffered if output is to the terminal
+and block buffered otherwise. Setting this variable is useful
+primarily when you are outputting to a pipe or socket. This would
+come into play when you are writing to a pipe and want to see the
+output "live" with no buffering.
+
+B<Examples:>
+
+    $|      = 1;  # Set autoflush for current channel
+    $is_buf = $|; # Get the current autoflush status
+
+    STDOUT->autoflush(1); # Enable autoflush for STDOUT
+    STDERR->autoflush(0); # Disable autoflush for STDERR
+
+B<Warning:> C<$|> tells you only if you have asked Perl explicitly to
+flush after each write. It is still possible the channel may be buffered
+by the system.
 
 Mnemonic: when you want your pipes to be piping hot.
+
+B<See also:>
+
+=over
+
+=item * L<perlfunc/select> to pick the output channel.
+
+=item * L<IO::Handle> for more fine grained IO control.
+
+=item * L<perlfunc/getc> for information on I<input> buffering.
+
+=back
 
 =item ${^LAST_FH}
 X<${^LAST_FH}>
