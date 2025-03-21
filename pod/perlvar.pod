@@ -1842,7 +1842,6 @@ B<Examples:>
     $is_buf = $|; # Get the current autoflush status
 
     STDOUT->autoflush(1); # Enable autoflush for STDOUT
-    STDERR->autoflush(0); # Disable autoflush for STDERR
 
 B<Warning:> C<$|> tells you only if you have asked Perl explicitly to
 flush after each write. It is still possible the channel may be buffered
