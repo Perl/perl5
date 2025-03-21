@@ -1748,15 +1748,15 @@ sub ST {
 sub OUTPUT_handler {
   my ExtUtils::ParseXS $self = shift;
 
-  $_ = shift;
+  my $line = shift;
 
   # In this loop: process each line until the next keyword or end of
   # paragraph
 
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;        # skip blank lines
+  for (;  $line !~ /^$BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
+    next unless $line =~ /\S/;        # skip blank lines
 
-    if (/^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
+    if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
       $self->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
       next;
     }
@@ -1765,7 +1765,7 @@ sub OUTPUT_handler {
     #    SomeVar
     #    SomeVar   sv_setsv(....);
     #
-    my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
+    my ($outarg, $outcode) = $line =~ /^\s*(\S+)\s*(.*?)\s*$/s;
 
     my ExtUtils::ParseXS::Node::Param $param =
                                         $self->{xsub_sig}{names}{$outarg};
@@ -1803,6 +1803,8 @@ sub OUTPUT_handler {
 
     $param->as_output_code($self);
   } # foreach line in OUTPUT block
+
+  $_ = $line;
 }
 
 
