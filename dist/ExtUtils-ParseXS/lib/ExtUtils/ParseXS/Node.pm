@@ -2436,6 +2436,18 @@ BEGIN { $build_subclass->('codeblock', # parent
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::POSTCALL;
+
+# Store the code lines associated with the POSTCALL: keyword
+
+BEGIN { $build_subclass->('codeblock', # parent
+)};
+
+# Currently all methods are just inherited.
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::PPCODE;
 
 # Store the code lines associated with the PPCODE keyword

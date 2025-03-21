@@ -4217,4 +4217,46 @@ EOF
 }
 
 
+{
+    # Test POSTCALL keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "POSTCALL basic",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(int aaa)
+                |  POSTCALL:
+                |     YYY
+EOF
+            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [ 0, 0, qr{^\s+\QRETVAL = foo(aaa);}m,    "has code body"     ],
+            [ 0, 0, qr{^\s+YYY\n}m,                   "has postcall body" ],
+            [ 0, 0, qr{aaa.*foo\(aaa\).*YYY.*TARGi}s, "in sequence"       ],
+            [ 0, 0, qr{\#line 8 .*\n\s+YYY},          "correct #line"     ],
+        ],
+        [
+             "POSTCALL empty",
+             [ Q(<<'EOF') ],
+                 |void
+                 |foo(int aaa)
+                 |  POSTCALL:
+EOF
+            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [ 0, 0, qr{^\s+\Qfoo(aaa);}m,             "has code body"     ],
+            [ 0, 0, qr{\Qfoo(aaa);\E\n\#line 8 },     "correct #line"     ],
+         ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
 done_testing;
