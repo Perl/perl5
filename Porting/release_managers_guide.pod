@@ -1146,7 +1146,7 @@ has dependencies; for example:
 
 Check that your perl can run this:
 
- $ bin/perl -Ilib -lwe "use Inline C => q[int f() { return 42;}]; print f"
+ $ bin/perl -lwe "use Inline C => q[int f() { return 42;}]; print f"
  42
  $
 
@@ -1195,7 +1195,7 @@ Once smoking is okay, upload it to PAUSE. This is the point of no return.
 If anything goes wrong after this point, you will need to re-prepare
 a new release with a new minor version or RC number.
 
- https://pause.perl.org/
+L<https://pause.perl.org/>
 
 (Log in, then select 'Upload a file to CPAN')
 
