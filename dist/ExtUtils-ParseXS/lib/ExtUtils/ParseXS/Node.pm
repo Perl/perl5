@@ -2424,6 +2424,18 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::CLEANUP;
+
+# Store the code lines associated with the CLEANUP: keyword
+
+BEGIN { $build_subclass->('codeblock', # parent
+)};
+
+# Currently all methods are just inherited.
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::INIT;
 
 # Store the code lines associated with the INIT: keyword

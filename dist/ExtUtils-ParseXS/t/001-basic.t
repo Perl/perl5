@@ -4123,6 +4123,48 @@ EOF
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
+{
+    # Test CLEANUP keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "CLEANUP basic",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(int aaa)
+                |  CLEANUP:
+                |     YYY
+EOF
+            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [ 0, 0, qr{^\s+\QRETVAL = foo(aaa);}m,    "has code body"     ],
+            [ 0, 0, qr{^\s+YYY\n}m,                   "has cleanup body" ],
+            [ 0, 0, qr{aaa.*foo\(aaa\).*TARGi.*YYY}s, "in sequence"       ],
+            [ 0, 0, qr{\#line 8 .*\n\s+YYY},          "correct #line"     ],
+        ],
+        [
+             "CLEANUP empty",
+             [ Q(<<'EOF') ],
+                 |void
+                 |foo(int aaa)
+                 |  CLEANUP:
+EOF
+            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [ 0, 0, qr{^\s+\Qfoo(aaa);}m,             "has code body"     ],
+            [ 0, 0, qr{\Qfoo(aaa);\E\n\#line 8 },     "correct #line"     ],
+         ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
 
 {
     # Test CODE keyword

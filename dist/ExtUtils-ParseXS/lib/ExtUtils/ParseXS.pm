@@ -1806,12 +1806,6 @@ sub OUTPUT_handler {
 }
 
 
-sub CLEANUP_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
 sub FALLBACK_handler {
   my ExtUtils::ParseXS $self = shift;
   my ($setting) = @_;
