@@ -17,6 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.10 - Terry Pratchett, Carpe Jugulum
+
+L<Announced on 2025-03-21 by Lukas Mai|https://www.nntp.perl.org/group/perl.perl5.porters/2025/03/msg269743.html>
+
+  "There's no greys, only white that's got grubby. I'm surprised you
+  don't know that. And sin, young man, is when you treat people as
+  things. Including yourself. That's what sin is."
+  "It's a lot more complicated than that -"
+  "No. It ain't. When people say things are a lot more complicated than
+  that, they means they're getting worried that they won't like the
+  truth. People as things, that's where it starts."
+
 =head2 v5.41.9 - Haruki Murakami (tr. Alfred Birnbaum), "Hard-boiled Wonderland and the End of the World"
 
 L<Announced on 2025-02-24 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2025/02/msg269592.html>
