@@ -1813,7 +1813,6 @@ sub _parse_output_part {
     # them in any order and multiplicity.
     $self->process_keywords("OUTPUT|POSTCALL|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
 
-{
     my $retval = $self->{xsub_sig}{names}{RETVAL};
 
     # A CODE section using RETVAL must also have an OUTPUT entry
@@ -1889,7 +1888,6 @@ sub _parse_output_part {
     ) {
         $param->as_output_code($self, $num++);
     }
-}
 }
 
 
