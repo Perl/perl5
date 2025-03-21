@@ -1020,6 +1020,8 @@ EOF
           $code_part->parse($self);
           my $output_part = ExtUtils::ParseXS::Node::output_part->new();
           $output_part->parse($self);
+          my $cleanup_part = ExtUtils::ParseXS::Node::cleanup_part->new();
+          $cleanup_part->parse($self);
 
           $_ = shift @{$self->{line}};
 
@@ -1035,16 +1037,9 @@ EOF
           $init_part->as_code($self);
           $code_part->as_code($self);
           $output_part->as_code($self);
+          $cleanup_part->as_code($self);
       }
 
-      # ----------------------------------------------------------------
-      # All RETVAL processing has been done.
-      # Next, process any CLEANUP blocks,
-      # ----------------------------------------------------------------
-
-      # Process as many keyword lines/blocks as can be found which match
-      # the pattern.
-      $self->process_keywords("CLEANUP|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
 
       # ----------------------------------------------------------------
       # Emit function trailers

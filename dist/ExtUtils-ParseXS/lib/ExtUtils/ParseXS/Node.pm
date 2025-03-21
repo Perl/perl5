@@ -1912,6 +1912,44 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::cleanup_part;
+
+BEGIN { $build_subclass->('', # parent
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Repeatedly look for INIT or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
+    $self->parse_keywords(
+            $pxs,
+            undef,  # implies process as many keywords as possible
+              "CLEANUP|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs) for @{$self->{kids}};
+    }
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::oneline;
 
 # Generic base class for keyword Nodes which consume only a single source
