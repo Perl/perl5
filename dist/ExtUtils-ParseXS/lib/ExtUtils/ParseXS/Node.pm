@@ -3036,40 +3036,41 @@ sub as_code {
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX tmp
+package ExtUtils::ParseXS::Node::OUTPUT;
 
-# Process the lines following the OUTPUT: keyword.
+# Handle an OUTPUT: block
 
-sub OUTPUT_handler {
-    my ExtUtils::ParseXS $self = shift;
+BEGIN { $build_subclass->('keylines', # parent
+)};
 
-    my $line = shift;
-
-    # In this loop: process each line until the next keyword or end of
-    # paragraph
-
-    for (;  $line !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
-        $self->OUTPUT_handler_line($line);
-    } # foreach line in OUTPUT block
-
-    $_ = $line;
-}
+# The inherited parse() method will call OUTPUT_line->parse() for each line
 
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX tmp
+package ExtUtils::ParseXS::Node::OUTPUT_line;
 
-# process a single line from an OUTPUT section
+# Handle one line from an OUTPUT keyword block
 
-sub OUTPUT_handler_line {
-    my ExtUtils::ParseXS $self = shift;
-    my $line = shift;
+BEGIN { $build_subclass->('keyline', # parent
+    'param', # the param object associated with this OUTPUT line.
+)};
+
+
+# Parse one line from an OUTPUT block
+
+sub parse {
+    my __PACKAGE__                     $self   = shift;
+    my ExtUtils::ParseXS               $pxs    = shift;
+    my ExtUtils::ParseXS::Node::OUTPUT $parent = shift; # parent OUTPUT node
+
+    $self->SUPER::parse($pxs); # set file/line_no/line
+    my $line = $self->{line};  # line of text to be processed
 
     return unless $line =~ /\S/;  # skip blank lines
 
     if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-        $self->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+        $pxs->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
         return;
     }
 
@@ -3080,15 +3081,16 @@ sub OUTPUT_handler_line {
     my ($outarg, $outcode) = $line =~ /^\s*(\S+)\s*(.*?)\s*$/s;
 
     my ExtUtils::ParseXS::Node::Param $param =
-                                        $self->{xsub_sig}{names}{$outarg};
+                                        $pxs->{xsub_sig}{names}{$outarg};
+    $self->{param} = $param;
 
     if ($param && $param->{in_output}) {
-        $self->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
+        $pxs->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
         return;
     }
 
-    if ($outarg eq "RETVAL" and $self->{xsub_seen_NO_OUTPUT}) {
-        $self->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
+    if ($outarg eq "RETVAL" and $pxs->{xsub_seen_NO_OUTPUT}) {
+        $pxs->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
         return;
     }
 
@@ -3096,14 +3098,14 @@ sub OUTPUT_handler_line {
                     # not bound to an arg which can be updated
                 or $outarg ne "RETVAL" && !$param->{arg_num})
     {
-        $self->blurt("Error: OUTPUT $outarg not a parameter");
+        $pxs->blurt("Error: OUTPUT $outarg not a parameter");
         return;
     }
 
     $param->{in_output} = 1;
     $param->{do_setmagic} = $outarg eq 'RETVAL'
                                 ? 0 # RETVAL never needs magic setting
-                                : $self->{xsub_SETMAGIC_state};
+                                : $pxs->{xsub_SETMAGIC_state};
     $param->{output_code} = $outcode if length $outcode;
 
     if ($outarg eq 'RETVAL') {
@@ -3112,7 +3114,17 @@ sub OUTPUT_handler_line {
         return;
     }
 
-    $param->as_output_code($self);
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    my $param = $self->{param};
+    return unless $param; # might be an ENABLE line with no param to emit
+    $param->as_output_code($pxs);
 }
 
 
