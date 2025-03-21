@@ -3053,7 +3053,11 @@ package ExtUtils::ParseXS::Node::OUTPUT_line;
 # Handle one line from an OUTPUT keyword block
 
 BEGIN { $build_subclass->('keyline', # parent
-    'param', # the param object associated with this OUTPUT line.
+    'param',       # the param object associated with this OUTPUT line.
+    'is_setmagic', # bool: the line is a SETMAGIC: line
+    'do_setmagic', # bool: the current SETMAGIC state
+    'name',        # name of the parameter to output
+    'code',        # optional setting code
 )};
 
 
@@ -3069,8 +3073,16 @@ sub parse {
 
     return unless $line =~ /\S/;  # skip blank lines
 
+    # set some sane default values in case we do one of the early returns
+    # below
+
+    $self->{do_setmagic} = $pxs->{xsub_SETMAGIC_state};
+    $self->{is_setmagic} = 0;
+
     if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
         $pxs->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+        $self->{do_setmagic} = $pxs->{xsub_SETMAGIC_state};
+        $self->{is_setmagic} = 1;
         return;
     }
 
@@ -3079,6 +3091,8 @@ sub parse {
     #    SomeVar   sv_setsv(....);
     #
     my ($outarg, $outcode) = $line =~ /^\s*(\S+)\s*(.*?)\s*$/s;
+
+    $self->{name} = $outarg;
 
     my ExtUtils::ParseXS::Node::Param $param =
                                         $pxs->{xsub_sig}{names}{$outarg};
@@ -3106,7 +3120,7 @@ sub parse {
     $param->{do_setmagic} = $outarg eq 'RETVAL'
                                 ? 0 # RETVAL never needs magic setting
                                 : $pxs->{xsub_SETMAGIC_state};
-    $param->{output_code} = $outcode if length $outcode;
+    $self->{code} = $param->{output_code} = $outcode if length $outcode;
 
     if ($outarg eq 'RETVAL') {
         # Postpone processing the RETVAL line to last (it's left to the
