@@ -2002,6 +2002,24 @@ package ExtUtils::ParseXS::Node::autocall;
 BEGIN { $build_subclass->('', # parent
 )};
 
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
+    if (    $pxs->{xsub_return_type} ne "void"
+        && !$pxs->{xsub_seen_NO_OUTPUT})
+    {
+         $pxs->{xsub_implicit_OUTPUT_RETVAL} = 1;
+    }
+
+    1;
+}
+
+
 sub as_code {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;

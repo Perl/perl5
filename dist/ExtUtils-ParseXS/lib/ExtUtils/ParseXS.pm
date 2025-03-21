@@ -1025,14 +1025,6 @@ EOF
 
           $_ = shift @{$self->{line}};
 
-          if (   ref($code_part->{kids}[-1]) =~ /::autocall$/
-              && $self->{xsub_return_type} ne "void"
-              && !$self->{xsub_seen_NO_OUTPUT})
-          {
-            # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-            $self->{xsub_implicit_OUTPUT_RETVAL} = 1;
-          }
-
           $input_part->as_code($self);
           $init_part->as_code($self);
           $code_part->as_code($self);
