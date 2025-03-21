@@ -3122,12 +3122,6 @@ sub parse {
                                 : $pxs->{xsub_SETMAGIC_state};
     $self->{code} = $param->{output_code} = $outcode if length $outcode;
 
-    if ($outarg eq 'RETVAL') {
-        # Postpone processing the RETVAL line to last (it's left to the
-        # caller to finish).
-        return;
-    }
-
     1;
 }
 
@@ -3136,8 +3130,41 @@ sub as_code {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
 
+    # An OUTPUT: line serves two logically distinct purposes.  First, any
+    # parameters listed are updated; i.e. the perl equivalent of
+    #
+    #    my $foo = $_[0];
+    #    # maybe $foo's value gets changed here
+    #    $_[0] = $foo;  # update caller's arg with current value
+    #
+    # The code for updating such OUTPUT vars is emitted here, in the
+    # same order they appear in OUTPUT lines, and preserving the order
+    # of any intermixed POSTCALL etc blocks.
+    #
+    # Second, it can be used to indicate that an SV should be created,
+    # set to the current value of RETVAL, and pushed on the stack; i.e
+    # the perl equivalent of
+    #
+    #   my $RETVAL;
+    #   # maybe $RETVAL's value gets set here
+    #   return $RETVAL;
+    #
+    # The code to return RETVAL is emitted later, after all other
+    # processing for XSUB is complete apart from any final CLEANUP block.
+    # It is done at the same time as any emitting for params declared as
+    # OUT or OUTLIST in the signature.
+    #
+    # There isn't any particularly strong reason to do things in this
+    # exact order; but the ordering was the result of how xsubpp was
+    # originally written and subsequently modified, and changing things
+    # now might break existing XS code which has come to rely on the
+    # ordering.
+
+    return if $self->{name} eq 'RETVAL';
+
     my $param = $self->{param};
     return unless $param; # might be an ENABLE line with no param to emit
+
     $param->as_output_code($pxs);
 }
 
