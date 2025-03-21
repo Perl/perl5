@@ -1796,31 +1796,50 @@ sub as_code {
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX tmp
+package ExtUtils::ParseXS::Node::output_part;
 
-sub _parse_output_part {
-    my ExtUtils::ParseXS $self  = shift;
+BEGIN { $build_subclass->('', # parent
+)};
 
-    # ----------------------------------------------------------------
-    # Main body of function has now been emitted.
-    # Next, process any POSTCALL or OUTPUT blocks,
-    # plus some post-processing of OUTPUT.
-    # ----------------------------------------------------------------
 
-    # Process as many keyword lines/blocks as can be found which match
-    # the pattern.
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Repeatedly look for POSTCALL, OUTPUT or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
     # XXX POSTCALL is documented to precede OUTPUT, but here we allow
     # them in any order and multiplicity.
-    $self->process_keywords("OUTPUT|POSTCALL|$ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt");
+    $self->parse_keywords(
+            $pxs,
+            undef,  # implies process as many keywords as possible
+              "POSTCALL|OUTPUT|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
 
-    my $retval = $self->{xsub_sig}{names}{RETVAL};
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs) for @{$self->{kids}};
+    }
+
+    my $retval = $pxs->{xsub_sig}{names}{RETVAL};
 
     # A CODE section using RETVAL must also have an OUTPUT entry
-    if (        $self->{xsub_seen_RETVAL_in_CODE}
+    if (        $pxs->{xsub_seen_RETVAL_in_CODE}
             and not ($retval && $retval->{in_output})
-            and     $self->{xsub_return_type} ne 'void')
+            and     $pxs->{xsub_return_type} ne 'void')
     {
-        $self->Warn("Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
+        $pxs->Warn("Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
     }
 
     # Process any OUT vars: i.e. vars that are declared OUT in
@@ -1832,9 +1851,9 @@ sub _parse_output_part {
                             && $_->{in_out} =~ /OUT$/
                             && !$_->{in_output}
                     }
-                    @{ $self->{xsub_sig}{params}})
+                    @{ $pxs->{xsub_sig}{params}})
     {
-        $param->as_output_code($self);
+        $param->as_output_code($pxs);
     }
 
     # If there are any OUTLIST vars to be pushed, first extend the
@@ -1842,51 +1861,51 @@ sub _parse_output_part {
     my $outlist_count = grep {    defined $_->{in_out}
                                && $_->{in_out} =~ /OUTLIST$/
                              }
-                             @{$self->{xsub_sig}{params}};
+                             @{$pxs->{xsub_sig}{params}};
 
     if ($outlist_count) {
         my $ext = $outlist_count;
         ++$ext if    ($retval && $retval->{in_output})
-                  || $self->{xsub_implicit_OUTPUT_RETVAL};
+                  || $pxs->{xsub_implicit_OUTPUT_RETVAL};
         print "\tXSprePUSH;\n";
         # XSprePUSH resets SP to the base of the stack frame; must PUSH
         # any return values
-        $self->{xsub_stack_was_reset} = 1;
+        $pxs->{xsub_stack_was_reset} = 1;
 
         # The entersub will gave been called with at least a GV or CV on
         # the stack in addition to at least min_args args, so only need
         # to extend if we're returning more than that.
         print "\tEXTEND(SP,$ext);\n"
-            if $ext > $self->{xsub_sig}{min_args} + 1;
+            if $ext > $pxs->{xsub_sig}{min_args} + 1;
     }
 
     # ----------------------------------------------------------------
     # All OUTPUT done; now handle an implicit or deferred RETVAL.
     # OUTPUT_handler() will have skipped any RETVAL line.
-    # Also, $self->{xsub_implicit_OUTPUT_RETVAL} indicates that an
+    # Also, $pxs->{xsub_implicit_OUTPUT_RETVAL} indicates that an
     # implicit RETVAL should be generated, due to a non-void CODE-less
     # XSUB.
     # ----------------------------------------------------------------
 
     if (  ($retval && $retval->{in_output})
-        || $self->{xsub_implicit_OUTPUT_RETVAL})
+        || $pxs->{xsub_implicit_OUTPUT_RETVAL})
     {
         # emit a deferred RETVAL from OUTPUT or implicit RETVAL
-        $retval->as_output_code($self);
+        $retval->as_output_code($pxs);
     }
 
-    $self->{xsub_XSRETURN_count} = 1 if     $self->{xsub_return_type} ne "void"
-                                        && !$self->{xsub_seen_NO_OUTPUT};
-    my $num = $self->{xsub_XSRETURN_count};
-    $self->{xsub_XSRETURN_count} += $outlist_count;
+    $pxs->{xsub_XSRETURN_count} = 1 if     $pxs->{xsub_return_type} ne "void"
+                                        && !$pxs->{xsub_seen_NO_OUTPUT};
+    my $num = $pxs->{xsub_XSRETURN_count};
+    $pxs->{xsub_XSRETURN_count} += $outlist_count;
 
     # Now that RETVAL is on the stack, also push any OUTLIST vars too
     for my $param (grep {   defined $_->{in_out}
                          && $_->{in_out} =~ /OUTLIST$/
                         }
-                        @{$self->{xsub_sig}{params}}
+                        @{$pxs->{xsub_sig}{params}}
     ) {
-        $param->as_output_code($self, $num++);
+        $param->as_output_code($pxs, $num++);
     }
 }
 

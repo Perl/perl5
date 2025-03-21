@@ -1018,6 +1018,8 @@ EOF
           $init_part->parse($self);
           my $code_part = ExtUtils::ParseXS::Node::code_part->new();
           $code_part->parse($self);
+          my $output_part = ExtUtils::ParseXS::Node::output_part->new();
+          $output_part->parse($self);
 
           $_ = shift @{$self->{line}};
 
@@ -1032,9 +1034,8 @@ EOF
           $input_part->as_code($self);
           $init_part->as_code($self);
           $code_part->as_code($self);
+          $output_part->as_code($self);
       }
-
-      $self->_parse_output_part();
 
       # ----------------------------------------------------------------
       # All RETVAL processing has been done.
