@@ -746,7 +746,7 @@ Check those files over carefully:
 Also edit Module::CoreList's new version number in its F<Changes> file.
 This file is F<dist/Module-CoreList/Changes>.
 (BLEAD-POINT releases should have had this done already as a post-release
-action from the last commit.)
+action from the last commit, but double-check the listed date.)
 
 =head4 Add Module::CoreList version bump to perldelta
 
@@ -760,7 +760,7 @@ will be automatically filled in below in L</"Finalize perldelta">.
 =head4 Update C<%Module::CoreList::released>
 
 For any release except an RC: Update this version's entry in the C<%released>
-hash within dist/Module-Corelist/lib/Module/Corelist.pm with today's date.
+hash within F<dist/Module-CoreList/lib/Module/CoreList.pm> with today's date.
 
 (BLEAD-POINT releases that happen on the expected date may not have to make
 any changes to this file at this point. If the release happens not on the
