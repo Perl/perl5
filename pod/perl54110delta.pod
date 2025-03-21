@@ -1,0 +1,352 @@
+=encoding utf8
+
+=head1 NAME
+
+perl54110delta - what is new for perl v5.41.10
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.41.9 release and the 5.41.10
+release.
+
+If you are upgrading from an earlier release such as 5.41.8, first read
+L<perl5419delta>, which describes differences between 5.41.8 and 5.41.9.
+
+=head1 Core Enhancements
+
+=head2 Renamed C<any> and C<all> features to C<keyword_any> and C<keyword_all>
+
+Perl release 5.41.7 introduced two new experimental features, called C<any>
+and C<all>, which enable keywords of the same names.  Those keywords provide
+list-processing operators inspired by the ones from L<List::Util> of the same
+name.  It was subsequently considered that the names of these two features
+are confusingly close to the ability of the C<feature> module to refer to all
+of its features by using the C<:all> export tag.
+[L<GH #23104|https://github.com/Perl/perl5/issues/23104>]
+
+As a consequence, these feature flags have now been renamed to C<keyword_any>
+and C<keyword_all> to avoid this confusion.  Likewise, the related
+experimental warning flags are also renamed to C<experimental::keyword_any>
+and C<experimental::keyword_all>.  Apart from these new flag names, the
+actual syntax and semantics of these two operators remain unchanged since
+their appearance in Perl release 5.41.7.
+
+    use v5.40;
+    use feature 'keyword_all';
+    no warnings 'experimental::keyword_all';
+
+    my @numbers = ...
+
+    if(all { $_ % 2 == 0 } @numbers) {
+        say "All the numbers are even";
+    }
+
+=head2 New C<SvVSTRING> API macro
+
+A new API macro has been added, which is used to obtain the second string
+buffer out of a "vstring" SV, in a manner similar to the C<SvPV> macro which
+obtains the regular string buffer out of a regular SV.
+
+    STRLEN len;
+    const char *vstr_pv = SvVSTRING(sv, vstr_len);
+
+See L<perlapi/C<SvVSTRING>>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+String reversal from a single argument, when the string buffer is not
+"swiped", is now done in a single pass and is noticeably faster.
+The extent of the improvement is compiler & hardware dependent.
+[L<GH #23012|https://github.com/Perl/perl5/issues/23012>]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 3.02_001 to 3.04.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<builtin> has been upgraded from version 0.017 to 0.018.
+
+On platforms that don't support Inf/NaN values in floating-point numbers (such
+as VAX), C<builtin::inf> and C<builtin::nan> now throw a runtime error (rather
+than breaking the perl build). [L<GH #22882|https://github.com/Perl/perl5/issues/22882>]
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.70 to 7.72.
+
+=item *
+
+L<ExtUtils::ParseXS> has been extensively refactored internally and
+extensive tests have been added. Most of these changes shouldn't be
+visible externally with a few exceptions, the main ones being:
+
+The generated C code, especially for returning values, may have changed
+slightly, and in some cases be slightly more efficient (in particular,
+using C<TARG> more often to return a value rather than creating a new
+temporary).
+
+The parser is more likely to give warnings now on XS errors which
+previously would have just silently generated invalid C code.
+
+One XS bug has been fixed in a way that may be highly visible. Previously
+when parsing the parameters of an XS sub declaration, if a parameter
+couldn't be parsed, it was quietly ignored. This meant that it would still
+consume an argument, but wouldn't declare a C variable: a bit like the
+Perl-level C<my ($a, undef, $c) = @_>. Now, it gives a compile error. This
+will break XS code that does (for example):
+
+    void
+    foo(int a, /* skip arg */, int c)
+
+because C-comments aren't part of XS syntax, and so the parameter was a
+syntax error and was quietly skipped. This is better written as
+
+    void
+    foo(int a, b, int c)
+
+since parameters which are not assigned a type act as placeholders.
+
+=item *
+
+L<feature> has been upgraded from version 1.94 to 1.95.
+
+=item *
+
+L<fields> has been upgraded from version 2.26 to 2.27.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 2.003004 to 2.004001.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5018 to 0.5019.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20250220 to 5.20250321.
+
+=item *
+
+L<Safe> has been upgraded from version 2.46 to 2.47.
+
+=item *
+
+L<Search::Dict> has been upgraded from version 1.07 to 1.08.
+
+A missing parameter has been added to the sample code in the SYNOPSIS.
+
+=item *
+
+L<Storable> has been upgraded from version 3.35 to 3.36.
+
+=item *
+
+L<threads> has been upgraded from version 2.42 to 2.43.
+
+=item *
+
+L<VMS::Filespec> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<warnings> has been upgraded from version 1.73 to 1.74.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.40 to 1.41.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document. If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perldata>
+
+=over 4
+
+=item *
+
+Binary and octal floating-point constants (such as C<012.345p-2> and
+C<0b101.11p-1>) are now documented. This feature was first introduced in perl
+5.22.0 together with hexadecimal floating-point constants and had a few bug
+fixes in perl 5.28.0, but it was never formally documented.
+[L<GH #18664|https://github.com/Perl/perl5/issues/18664>]
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages. For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+Prevent this warning when accessing a function parameter in C<@_> that
+is an lvalue reference to an untied hash element where the key was
+undefined.  This warning is still produced at the point of call.
+[L<GH #22423|https://github.com/Perl/perl5/issues/22423>]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Three new API functions have been added to interact with the regexp global
+match position stored in an SV.  These are C<sv_regex_global_pos_get()>,
+C<sv_regex_global_pos_set()> and C<sv_regex_global_pos_clear()>.  Using these
+API functions avoids XS modules needing to know about or interact directly
+with the way this position is currently stored, which involves the
+C<PERL_MAGIC_regex_global> magic type.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+In regexes, the contents of C<\g{...}> backreferences are now properly
+validated. Previously, C<\g{1 FOO}> was silently parsed as C<\g{1}>, ignoring
+everything after the first number.
+[L<GH #23050|https://github.com/Perl/perl5/issues/23050>]
+
+=item *
+
+A run-time pattern which contained a code block which recursed back to the
+same bit of code which ran that match, could cause a crash.
+[L<GH #22869|https://github.com/Perl/perl5/issues/22869>]
+
+For example:
+
+    my $r = qr/... (?{ foo() if ... }) .../;
+    sub foo { $string =~ $r }
+    foo()
+
+=back
+
+=head1 Obituary
+
+Andrew Main (ZEFRAM) passed away on March 10, 2025.
+
+Zefram was a brilliant person, seemingly knowledgeable in everything
+and happy to impart his knowledge and share his striking insights with a
+gentle, technical demeanor that often failed to convey the genuine care
+with which he communicated.
+
+It would be impossible to overstate the impact that Zefram has had on
+both the language and culture of Perl over the years. From his countless
+contributions to the code-base, to his often quirky but always distinctive
+appearances at conferences and gatherings, his influence and memory are
+sure to endure long into the future.
+
+Zefram wished to have no designated memorial location in
+meatspace. His designated memorial location in cyberspace is
+L<http://www.fysh.org/~zefram/personal/>.
+
+=head1 Acknowledgements
+
+Perl 5.41.10 represents approximately 4 weeks of development since Perl
+5.41.9 and contains approximately 19,000 lines of changes across 340 files
+from 14 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 16,000 lines of changes to 270 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.41.10:
+
+brian d foy, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, Daniel
+Dragan, David Mitchell, Graham Knop, Karl Williamson, Leon Timmermans, Lukas
+Mai, Paul Evans, Philippe Bruhat (BooK), Richard Leach, Tony Cook, Yves
+Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
