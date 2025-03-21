@@ -65,6 +65,10 @@ my %implies_numstat= (
 );
 
 sub main {
+    # we encode_utf8() manually
+    binmode STDOUT;
+    binmode STDERR;
+
     local $Data::Dumper::Sortkeys= 1;
     my %opts= (
         authors_file    => "AUTHORS",
