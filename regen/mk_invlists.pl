@@ -1932,16 +1932,14 @@ sub output_LB_table() {
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
-    # [^NU] × CL
-    # [^NU] × CP
+    # × CL
+    # × CP
     # × EX
-    # [^NU] × IS
-    # [^NU] × SY
+    # × IS
+    # × SY
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$i][$lb_enums{'Exclamation'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
-
-        next if $i == $lb_enums{'Numeric'};
 
         $lb_table[$i][$lb_enums{'Close_Punctuation'}]
                             = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
