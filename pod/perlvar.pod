@@ -1854,7 +1854,7 @@ B<See also:>
 
 =over
 
-=item * L<perlfunc/select> to pick the output channel.
+=item * L<perlfunc/select> to pick the output channel for C<$|>.
 
 =item * L<IO::Handle> for more fine grained IO control.
 
