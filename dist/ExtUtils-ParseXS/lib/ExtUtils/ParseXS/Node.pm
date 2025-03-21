@@ -3041,18 +3041,18 @@ package ExtUtils::ParseXS; # XXX tmp
 # Process the lines following the OUTPUT: keyword.
 
 sub OUTPUT_handler {
-  my ExtUtils::ParseXS $self = shift;
+    my ExtUtils::ParseXS $self = shift;
 
-  my $line = shift;
+    my $line = shift;
 
-  # In this loop: process each line until the next keyword or end of
-  # paragraph
+    # In this loop: process each line until the next keyword or end of
+    # paragraph
 
-  for (;  $line !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
-    $self->OUTPUT_handler_line($line);
-  } # foreach line in OUTPUT block
+    for (;  $line !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
+        $self->OUTPUT_handler_line($line);
+    } # foreach line in OUTPUT block
 
-  $_ = $line;
+    $_ = $line;
 }
 
 
@@ -3063,14 +3063,14 @@ package ExtUtils::ParseXS; # XXX tmp
 # process a single line from an OUTPUT section
 
 sub OUTPUT_handler_line {
-  my ExtUtils::ParseXS $self = shift;
-  my $line = shift;
+    my ExtUtils::ParseXS $self = shift;
+    my $line = shift;
 
     return unless $line =~ /\S/;  # skip blank lines
 
     if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-      $self->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
-      return;
+        $self->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+        return;
     }
 
     # Expect lines of the two forms
@@ -3083,34 +3083,33 @@ sub OUTPUT_handler_line {
                                         $self->{xsub_sig}{names}{$outarg};
 
     if ($param && $param->{in_output}) {
-      $self->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
-      return;
+        $self->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
+        return;
     }
 
     if ($outarg eq "RETVAL" and $self->{xsub_seen_NO_OUTPUT}) {
-      $self->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
-      return;
+        $self->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
+        return;
     }
 
     if (   !$param  # no such param or, for RETVAL, RETVAL was void
-           # not bound to an arg which can be updated
-        or $outarg ne "RETVAL" && !$param->{arg_num})
+                    # not bound to an arg which can be updated
+                or $outarg ne "RETVAL" && !$param->{arg_num})
     {
-      $self->blurt("Error: OUTPUT $outarg not a parameter");
-      return;
+        $self->blurt("Error: OUTPUT $outarg not a parameter");
+        return;
     }
-
 
     $param->{in_output} = 1;
     $param->{do_setmagic} = $outarg eq 'RETVAL'
-                              ? 0 # RETVAL never needs magic setting
-                              : $self->{xsub_SETMAGIC_state};
+                                ? 0 # RETVAL never needs magic setting
+                                : $self->{xsub_SETMAGIC_state};
     $param->{output_code} = $outcode if length $outcode;
 
     if ($outarg eq 'RETVAL') {
-      # Postpone processing the RETVAL line to last (it's left to the
-      # caller to finish).
-      return;
+        # Postpone processing the RETVAL line to last (it's left to the
+        # caller to finish).
+        return;
     }
 
     $param->as_output_code($self);
