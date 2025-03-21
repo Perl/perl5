@@ -1754,11 +1754,24 @@ sub OUTPUT_handler {
   # paragraph
 
   for (;  $line !~ /^$BLOCK_regexp/o;  $line = shift(@{ $self->{line} })) {
-    next unless $line =~ /\S/;        # skip blank lines
+    $self->OUTPUT_handler_line($line);
+  } # foreach line in OUTPUT block
+
+  $_ = $line;
+}
+
+
+# process a single line from an OUTPUT section
+
+sub OUTPUT_handler_line {
+  my ExtUtils::ParseXS $self = shift;
+  my $line = shift;
+
+    return unless $line =~ /\S/;  # skip blank lines
 
     if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
       $self->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
-      next;
+      return;
     }
 
     # Expect lines of the two forms
@@ -1772,12 +1785,12 @@ sub OUTPUT_handler {
 
     if ($param && $param->{in_output}) {
       $self->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
-      next;
+      return;
     }
 
     if ($outarg eq "RETVAL" and $self->{xsub_seen_NO_OUTPUT}) {
       $self->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
-      next;
+      return;
     }
 
     if (   !$param  # no such param or, for RETVAL, RETVAL was void
@@ -1785,7 +1798,7 @@ sub OUTPUT_handler {
         or $outarg ne "RETVAL" && !$param->{arg_num})
     {
       $self->blurt("Error: OUTPUT $outarg not a parameter");
-      next;
+      return;
     }
 
 
@@ -1798,13 +1811,10 @@ sub OUTPUT_handler {
     if ($outarg eq 'RETVAL') {
       # Postpone processing the RETVAL line to last (it's left to the
       # caller to finish).
-      next;
+      return;
     }
 
     $param->as_output_code($self);
-  } # foreach line in OUTPUT block
-
-  $_ = $line;
 }
 
 
