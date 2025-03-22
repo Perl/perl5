@@ -1,6 +1,14 @@
 #!perl
-use v5.16;
+use v5.41.9;
+use utf8;
+use re "/aa";
+use feature 'signatures';
+use feature 'state';
+use feature 'keyword_any';
 use warnings;
+no warnings 'experimental::keyword_any';
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
 use Unicode::UCD qw(prop_aliases
                     prop_values
                     prop_value_aliases
@@ -15,7 +23,6 @@ require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
 require './lib/unicore/UCD.pl';
 require './regen/mph.pl';
-use re "/aa";
 
 sub stack_trace {
     my $i = 0;
@@ -217,8 +224,7 @@ sub uniques {
 
 sub caselessly { lc $a cmp lc $b }
 
-sub a2n($) {
-    my $cp = shift;
+sub a2n($cp) {
 
     # Returns the input Unicode code point translated to native.
 
@@ -237,11 +243,7 @@ sub end_charset_pound_if {
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
-sub switch_pound_if ($$;$) {
-    my $name = shift;
-    my $new_pound_if = shift;
-    my $charset = shift;
-
+sub switch_pound_if ($name, $new_pound_if, $charset = undef) {
     my @new_pound_if = ref ($new_pound_if)
                        ? sort @$new_pound_if
                        : $new_pound_if;
@@ -287,27 +289,28 @@ sub switch_pound_if ($$;$) {
     }
 }
 
-sub start_charset_pound_if ($;$) {
-    print $out_fh "\n" . get_conditional_compile_line_start(shift, shift);
+sub start_charset_pound_if ($charset, $indent_level=undef) {
+    print $out_fh "\n"
+                . get_conditional_compile_line_start($charset, $indent_level);
 }
 
 {   # Closure
     my $fh;
     my $in_doinit = 0;
 
-    sub output_table_header($$$;$@) {
+    sub output_table_header($in_fh,
+                            $type,         # typedef of table, like UV, UV*
+                            $name,         # name of table
+                            $comment = "", # Optional comment to put on header
+                                           # line
+                            @sizes         # Optional sizes of each array
+                                           # index.  If omitted, there is a
+                                           # single index whose size is
+                                           # computed by the C compiler.
+    ) {
 
+        $fh = $in_fh;
         # Output to $fh the heading for a table given by the other inputs
-
-        $fh = shift;
-        my ($type,      # typedef of table, like UV, UV*
-            $name,      # name of table
-            $comment,   # Optional comment to put on header line
-            @sizes      # Optional sizes of each array index.  If omitted,
-                        # there is a single index whose size is computed by
-                        # the C compiler.
-            ) = @_;
-
         $type =~ s/ \s+ $ //x;
 
         # If a the typedef is a ptr, add in an extra const
@@ -362,12 +365,10 @@ EOF
     }
 } # End closure
 
-
-sub output_invlist ($$;$) {
-    my $name = shift;
-    my $invlist = shift;     # Reference to inversion list array
-    my $charset = shift // "";  # name of character set for comment
-
+sub output_invlist ($name,
+                    $invlist,       # Reference to inversion list array
+                    $charset = "")  # name of character set for comment
+{
     print "  output_invlist($name) $charset\n" if DEBUG;
 
     die "No inversion list for $name" unless defined $invlist
@@ -405,17 +406,16 @@ EOF
     output_table_trailer();
 }
 
-sub output_invmap ($$$$$$$) {
-    my $name = shift;
-    my $invmap = shift;     # Reference to inversion map array
-    my $prop_name = shift;
-    my $input_format = shift;   # The inversion map's format
-    my $default = shift;        # The property value for code points who
-                                # otherwise don't have a value specified.
-    my $extra_enums = shift;    # comma-separated list of our additions to the
-                                # property's standard possible values
-    my $charset = shift // "";  # name of character set for comment
-
+sub output_invmap ($name,
+                   $invmap,       # Reference to inversion map array
+                   $prop_name,
+                   $input_format, # The inversion map's format
+                   $default,      # The property value for code points who
+                                  # otherwise don't have a value specified.
+                   $extra_enums,  # comma-separated list of our additions to
+                                  # the property's standard possible values
+                   $charset = "") # name of character set for comment
+{
     print "  output_invmap($name,$prop_name) $charset\n" if DEBUG;
 
     # Output the inversion map $invmap for property $prop_name, but use $name
@@ -969,12 +969,10 @@ sub output_invmap ($$$$$$$) {
     output_table_trailer();
 }
 
-sub mk_invlist_from_sorted_cp_list {
+sub mk_invlist_from_sorted_cp_list($list_ref) {
 
     # Returns an inversion list constructed from the sorted input array of
     # code points
-
-    my $list_ref = shift;
 
     return unless @$list_ref;
 
@@ -1221,8 +1219,7 @@ sub _Perl_IVCF {
     return \@invlist, \@invmap, 'al', $default;
 }
 
-sub prop_name_for_cmp ($) { # Sort helper
-    my $name = shift;
+sub prop_name_for_cmp ($name) { # Sort helper
 
     # Returns the input lowercased, with non-alphas removed, as well as
     # everything starting with a comma
@@ -1266,15 +1263,11 @@ sub _Perl_CCC_non0_non230 {
     return \@return;
 }
 
-sub output_table_common {
-
+sub output_table_common($property, $table_value_defines_ref, $table_ref,
+                        $names_ref, $abbreviations_ref)
+{
     # Common subroutine to actually output the generated rules table.
 
-    my ($property,
-        $table_value_defines_ref,
-        $table_ref,
-        $names_ref,
-        $abbreviations_ref) = @_;
     my $size = @$table_ref;
 
     # Output the #define list, sorted by numeric value
@@ -2431,11 +2424,10 @@ sub output_WB_table() {
                         \@wb_table, \@wb_short_enums, \%wb_abbreviations);
 }
 
-sub sanitize_name ($) {
+sub sanitize_name ($sanitized) {
     # Change the non-word characters in the input string to standardized word
     # equivalents
-    #
-    my $sanitized = shift;
+
     $sanitized =~ s/=/__/;
     $sanitized =~ s/&/_AMP_/;
     $sanitized =~ s/\./_DOT_/;
@@ -2445,8 +2437,7 @@ sub sanitize_name ($) {
     return $sanitized;
 }
 
-sub token_name
-{
+sub token_name {
     my $name = sanitize_name(shift);
     warn "$name contains non-word" if $name =~ /\W/;
 
