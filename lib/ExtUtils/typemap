@@ -14,11 +14,12 @@ short			T_IV
 unsigned short		T_UV
 char			T_CHAR
 unsigned char		T_U_CHAR
-char *			T_PV
-unsigned char *		T_PV
+char *			T_PV_MUTABLE
+unsigned char *		T_PV_MUTABLE
 const char *		T_PV
+const unsigned char *	T_PV
 caddr_t			T_PV
-wchar_t *		T_PV
+wchar_t *		T_PV_MUTABLE
 wchar_t			T_IV
 # bool_t is defined in <rpc/rpc.h>
 bool_t			T_IV
@@ -28,7 +29,7 @@ time_t			T_NV
 unsigned long *		T_OPAQUEPTR
 char **			T_PACKEDARRAY
 void *			T_PTR
-Time_t *		T_PV
+Time_t *		T_PV_MUTABLE
 SV *			T_SV
 
 # These are the backwards-compatibility AV*/HV* typemaps that
@@ -207,6 +208,8 @@ T_DOUBLE
 	$var = (double)SvNV($arg)
 T_PV
 	$var = ($type)SvPV_nolen($arg)
+T_PV_MUTABLE
+	$var = ($type)SvPV_force_nolen($arg)
 T_PTR
 	$var = INT2PTR($type,SvIV($arg))
 T_PTRREF
@@ -376,6 +379,8 @@ T_NV
 T_DOUBLE
 	sv_setnv($arg, (double)$var);
 T_PV
+	sv_setpv((SV*)$arg, $var);
+T_PV_MUTABLE
 	sv_setpv((SV*)$arg, $var);
 T_PTR
 	sv_setiv($arg, PTR2IV($var));

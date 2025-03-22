@@ -88,8 +88,8 @@ BOOT:
 
 ODBM_File
 odbm_TIEHASH(dbtype, filename, flags, mode)
-	char *		dbtype
-	char *		filename
+	const char *	dbtype
+	const char *	filename
 	int		flags
 	int		mode
 	CODE:
@@ -135,7 +135,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
                if (!opened)
                    croak("ODBM_FILE: Can't open %s", filename);
 	    }
-	    dbp = (void*)(dbminit(filename) >= 0 ? &dbmrefcnt : 0);
+	    dbp = (void*)(dbminit((char*)filename) >= 0 ? &dbmrefcnt : 0);
 	    RETVAL = (ODBM_File)safecalloc(1, sizeof(ODBM_File_type));
 	    RETVAL->dbp = dbp ;
 	}

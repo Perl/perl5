@@ -165,7 +165,7 @@ use Carp;
 # Module not thread safe, so don't clone
 sub CLONE_SKIP { 1 }
 
-$VERSION = "1.859" ;
+$VERSION = "1.860" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {

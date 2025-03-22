@@ -159,7 +159,7 @@ BOOT:
 
 SV *
 dl_expandspec(filespec)
-    char *	filespec
+    const char *	filespec
     CODE:
     char vmsspec[NAM$C_MAXRSS], defspec[NAM$C_MAXRSS];
     size_t deflen;
@@ -222,7 +222,7 @@ dl_expandspec(filespec)
 
 SV *
 dl_load_file(filename, flags=0)
-    char *	filename
+    const char *	filename
     int		flags
     PREINIT:
     dTHX;
@@ -345,7 +345,7 @@ dl_undef_symbols()
 
 SV *
 dl_install_xsub(perl_name, symref, filename="$Package")
-    char *	perl_name
+    const char *	perl_name
     void *	symref 
     const char *	filename
     CODE:

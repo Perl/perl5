@@ -1578,10 +1578,10 @@ BOOT:
 
 DB_File
 db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_HASH)
-    int     isHASH
-    char *      dbtype
-    int     flags
-    int     mode
+    int          isHASH
+    const char * dbtype
+    int          flags
+    int          mode
     CODE:
     {
         char *  name = (char *) NULL ;

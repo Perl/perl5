@@ -1662,7 +1662,7 @@ test_utf8_to_bytes(bytes, len)
 
 AV *
 test_utf8n_to_uvchr_msgs(s, len, flags)
-        char *s
+        const char *s
         STRLEN len
         U32 flags
     PREINIT:
@@ -1702,7 +1702,7 @@ test_utf8n_to_uvchr_msgs(s, len, flags)
 AV *
 test_utf8n_to_uvchr_error(s, len, flags)
 
-        char *s
+        const char *s
         STRLEN len
         U32 flags
     PREINIT:
@@ -2788,7 +2788,7 @@ call_sv(sv, flags, ...)
 
 void
 call_pv(subname, flags, ...)
-    char* subname
+    const char* subname
     I32 flags
     PREINIT:
         I32 i;
@@ -2805,7 +2805,7 @@ call_pv(subname, flags, ...)
 
 void
 call_argv(subname, flags, ...)
-    char* subname
+    const char* subname
     I32 flags
     PREINIT:
         I32 i;
@@ -2834,7 +2834,7 @@ call_argv_cleanup()
 
 void
 call_method(methname, flags, ...)
-    char* methname
+    const char* methname
     I32 flags
     PREINIT:
         I32 i;
@@ -6620,7 +6620,7 @@ test_isPSXSPC_LC_utf8(U8 * p, int type)
         RETVAL
 
 STRLEN
-test_UTF8_IS_REPLACEMENT(char *s, STRLEN len)
+test_UTF8_IS_REPLACEMENT(const char *s, STRLEN len)
     CODE:
         RETVAL = UTF8_IS_REPLACEMENT(s, s + len);
     OUTPUT:
@@ -6669,7 +6669,7 @@ test_UVCHR_SKIP(UV ord)
         RETVAL
 
 UV
-test_UTF8_SKIP(char * ch)
+test_UTF8_SKIP(const char * ch)
     CODE:
         RETVAL = UTF8_SKIP(ch);
     OUTPUT:
@@ -6718,35 +6718,35 @@ test_isUTF8_POSSIBLY_PROBLEMATIC(char ch)
         RETVAL
 
 STRLEN
-test_isUTF8_CHAR(char *s, STRLEN len)
+test_isUTF8_CHAR(const char *s, STRLEN len)
     CODE:
         RETVAL = isUTF8_CHAR((U8 *) s, (U8 *) s + len);
     OUTPUT:
         RETVAL
 
 STRLEN
-test_isUTF8_CHAR_flags(char *s, STRLEN len, U32 flags)
+test_isUTF8_CHAR_flags(const char *s, STRLEN len, U32 flags)
     CODE:
         RETVAL = isUTF8_CHAR_flags((U8 *) s, (U8 *) s + len, flags);
     OUTPUT:
         RETVAL
 
 STRLEN
-test_isSTRICT_UTF8_CHAR(char *s, STRLEN len)
+test_isSTRICT_UTF8_CHAR(const char *s, STRLEN len)
     CODE:
         RETVAL = isSTRICT_UTF8_CHAR((U8 *) s, (U8 *) s + len);
     OUTPUT:
         RETVAL
 
 STRLEN
-test_isC9_STRICT_UTF8_CHAR(char *s, STRLEN len)
+test_isC9_STRICT_UTF8_CHAR(const char *s, STRLEN len)
     CODE:
         RETVAL = isC9_STRICT_UTF8_CHAR((U8 *) s, (U8 *) s + len);
     OUTPUT:
         RETVAL
 
 IV
-test_is_utf8_valid_partial_char_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_valid_partial_char_flags(const char *s, STRLEN len, U32 flags)
     CODE:
         /* RETVAL should be bool (here and in tests below), but making it IV
          * allows us to test it returning 0 or 1 */
@@ -6755,7 +6755,7 @@ test_is_utf8_valid_partial_char_flags(char *s, STRLEN len, U32 flags)
         RETVAL
 
 IV
-test_is_utf8_string(char *s, STRLEN len)
+test_is_utf8_string(const char *s, STRLEN len)
     CODE:
         RETVAL = is_utf8_string((U8 *) s, len);
     OUTPUT:
@@ -6804,7 +6804,7 @@ OUTPUT:
     RETVAL
 
 AV *
-test_is_utf8_string_loc(char *s, STRLEN len)
+test_is_utf8_string_loc(const char *s, STRLEN len)
     PREINIT:
         AV *av;
         const U8 * ep;
@@ -6817,7 +6817,7 @@ test_is_utf8_string_loc(char *s, STRLEN len)
         RETVAL
 
 AV *
-test_is_utf8_string_loclen(char *s, STRLEN len)
+test_is_utf8_string_loclen(const char *s, STRLEN len)
     PREINIT:
         AV *av;
         STRLEN ret_len;
@@ -6832,14 +6832,14 @@ test_is_utf8_string_loclen(char *s, STRLEN len)
         RETVAL
 
 IV
-test_is_utf8_string_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_string_flags(const char *s, STRLEN len, U32 flags)
     CODE:
         RETVAL = is_utf8_string_flags((U8 *) s, len, flags);
     OUTPUT:
         RETVAL
 
 AV *
-test_is_utf8_string_loc_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_string_loc_flags(const char *s, STRLEN len, U32 flags)
     PREINIT:
         AV *av;
         const U8 * ep;
@@ -6852,7 +6852,7 @@ test_is_utf8_string_loc_flags(char *s, STRLEN len, U32 flags)
         RETVAL
 
 AV *
-test_is_utf8_string_loclen_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_string_loclen_flags(const char *s, STRLEN len, U32 flags)
     PREINIT:
         AV *av;
         STRLEN ret_len;
@@ -6867,14 +6867,14 @@ test_is_utf8_string_loclen_flags(char *s, STRLEN len, U32 flags)
         RETVAL
 
 IV
-test_is_strict_utf8_string(char *s, STRLEN len)
+test_is_strict_utf8_string(const char *s, STRLEN len)
     CODE:
         RETVAL = is_strict_utf8_string((U8 *) s, len);
     OUTPUT:
         RETVAL
 
 AV *
-test_is_strict_utf8_string_loc(char *s, STRLEN len)
+test_is_strict_utf8_string_loc(const char *s, STRLEN len)
     PREINIT:
         AV *av;
         const U8 * ep;
@@ -6887,7 +6887,7 @@ test_is_strict_utf8_string_loc(char *s, STRLEN len)
         RETVAL
 
 AV *
-test_is_strict_utf8_string_loclen(char *s, STRLEN len)
+test_is_strict_utf8_string_loclen(const char *s, STRLEN len)
     PREINIT:
         AV *av;
         STRLEN ret_len;
@@ -6902,14 +6902,14 @@ test_is_strict_utf8_string_loclen(char *s, STRLEN len)
         RETVAL
 
 IV
-test_is_c9strict_utf8_string(char *s, STRLEN len)
+test_is_c9strict_utf8_string(const char *s, STRLEN len)
     CODE:
         RETVAL = is_c9strict_utf8_string((U8 *) s, len);
     OUTPUT:
         RETVAL
 
 AV *
-test_is_c9strict_utf8_string_loc(char *s, STRLEN len)
+test_is_c9strict_utf8_string_loc(const char *s, STRLEN len)
     PREINIT:
         AV *av;
         const U8 * ep;
@@ -6922,7 +6922,7 @@ test_is_c9strict_utf8_string_loc(char *s, STRLEN len)
         RETVAL
 
 AV *
-test_is_c9strict_utf8_string_loclen(char *s, STRLEN len)
+test_is_c9strict_utf8_string_loclen(const char *s, STRLEN len)
     PREINIT:
         AV *av;
         STRLEN ret_len;
@@ -6937,14 +6937,14 @@ test_is_c9strict_utf8_string_loclen(char *s, STRLEN len)
         RETVAL
 
 IV
-test_is_utf8_fixed_width_buf_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_fixed_width_buf_flags(const char *s, STRLEN len, U32 flags)
     CODE:
         RETVAL = is_utf8_fixed_width_buf_flags((U8 *) s, len, flags);
     OUTPUT:
         RETVAL
 
 AV *
-test_is_utf8_fixed_width_buf_loc_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_fixed_width_buf_loc_flags(const char *s, STRLEN len, U32 flags)
     PREINIT:
         AV *av;
         const U8 * ep;
@@ -6957,7 +6957,7 @@ test_is_utf8_fixed_width_buf_loc_flags(char *s, STRLEN len, U32 flags)
         RETVAL
 
 AV *
-test_is_utf8_fixed_width_buf_loclen_flags(char *s, STRLEN len, U32 flags)
+test_is_utf8_fixed_width_buf_loclen_flags(const char *s, STRLEN len, U32 flags)
     PREINIT:
         AV *av;
         STRLEN ret_len;

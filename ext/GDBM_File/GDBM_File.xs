@@ -312,8 +312,8 @@ gdbm_GDBM_version(package)
 	
 GDBM_File
 gdbm_TIEHASH(dbtype, name, read_write, mode)
-	char *		dbtype
-	char *		name
+	const char *	dbtype
+	const char *	name
 	int		read_write
 	int		mode
     PREINIT:
@@ -684,7 +684,7 @@ gdbm_count(db)
 void
 gdbm_dump(db, filename, ...)
 	GDBM_File	db
-        char *          filename
+        const char *    filename
     PREINIT:
         int             format = GDBM_DUMP_FMT_ASCII;
         int             flags = GDBM_WRCREAT;
@@ -725,7 +725,7 @@ gdbm_dump(db, filename, ...)
 void
 gdbm_load(db, filename, ...)
 	GDBM_File	db
-        char *          filename
+        const char *    filename
     PREINIT:
         int flag = GDBM_INSERT;
         int meta_mask = 0;
@@ -1012,8 +1012,8 @@ gdbm_convert(db, flag)
 int
 gdbm_failure_atomic(db, even, odd)
         GDBM_File       db
-        char *          even
-        char *          odd
+        const char *    even
+        const char *    odd
     INIT:
         CHECKDB(db);
     CLEANUP:
@@ -1023,8 +1023,8 @@ gdbm_failure_atomic(db, even, odd)
 
 void
 gdbm_latest_snapshot(package, even, odd)
-        char *          even
-        char *          odd
+        const char *    even
+        const char *    odd
     INIT:
         int             result;
         int             syserr;

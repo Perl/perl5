@@ -33,21 +33,21 @@ PROTOTYPES: DISABLE
 
 SDBM_File
 sdbm_TIEHASH(dbtype, filename, flags, mode, pagname=NULL)
-	char *		dbtype
-	char *		filename
+	const char *	dbtype
+	const char *	filename
 	int		flags
 	int		mode
-	char *		pagname
+	const char *	pagname
 	CODE:
 	{
 	    DBM * 	dbp ;
 
 	    RETVAL = NULL ;
 	    if (pagname == NULL) {
-	        dbp = sdbm_open(filename, flags, mode);
+	        dbp = sdbm_open((char*)filename, flags, mode);
 	    }
 	    else {
-	        dbp = sdbm_prep(filename, pagname, flags, mode);
+	        dbp = sdbm_prep((char*)filename, (char*)pagname, flags, mode);
 	    }
 	    if (dbp) {
 	        RETVAL = (SDBM_File)safecalloc(1, sizeof(SDBM_File_type));

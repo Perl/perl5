@@ -60,8 +60,8 @@ MODULE = NDBM_File	PACKAGE = NDBM_File	PREFIX = ndbm_
 
 NDBM_File
 ndbm_TIEHASH(dbtype, filename, flags, mode)
-	char *		dbtype
-	char *		filename
+	const char *	dbtype
+	const char *	filename
 	int		flags
 	int		mode
 	CODE:
@@ -69,7 +69,7 @@ ndbm_TIEHASH(dbtype, filename, flags, mode)
 	    DBM * 	dbp ;
 
 	    RETVAL = NULL ;
-	    if ((dbp =  dbm_open(filename, flags, mode))) {
+	    if ((dbp =  dbm_open((char*)filename, flags, mode))) {
 	        RETVAL = (NDBM_File)safecalloc(1, sizeof(NDBM_File_type));
 		RETVAL->dbp = dbp ;
 	    }
