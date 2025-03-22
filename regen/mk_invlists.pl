@@ -52,6 +52,12 @@ print "Starting...\n" if DEBUG;
 
 my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
+# Mostly this is automated when a new Unicode version is applied, but there is
+# a major pain in updating the line breaking rules.  You have to go look at
+# the Unicode release notes.  Any changes in  UAX #14 and UAX #29 have to be
+# manually factored in here.  See the comments at BREAK_PROPERTIES in this
+# file
+
 # charclass_invlists.inc now also contains inversion maps and enum definitions
 # for those maps that have a finite number of possible values
 
@@ -1262,6 +1268,69 @@ sub _Perl_CCC_non0_non230 {
     @return = mk_invlist_from_sorted_cp_list(\@return);
     return \@return;
 }
+
+# BREAK_PROPERTIES
+
+# All but the Sentence Break properties are implemented by two-dimensional
+# tables.  (That one does not lend itself to tabular lookup, and is rarely
+# changed, so it is all done in code in regexec.c.)  Unicode publishes
+# properties which assign a break class to every Unicode code point, even ones
+# that haven't been assigned to be characters.  (Perl uses that class for all
+# non-Unicode code points.)  Unicode also publishes rules for breaking based
+# on those break classes.  Here we create tables for each break property that
+# for a string xy, which have break classes x' and y', we tell whether a break
+# is allowed between x and y or not.  The rows of this table are the various
+# x'; the columns, the y'.  Often the table entry will be just 0 or 1.  But
+# increasingly in newer Unicode versions, more context is needed to make this
+# determination, and the table entry will be an enum (packed with other
+# information) that corresponds to a hand-crafted DFA in regexec.c that gets
+# executed.
+#
+# Unicode used to publish a table itself for the Line Break property, but
+# abandoned it as it got more complicated.  However, on their website in the
+# UCD data files, in the subdirectory 'auxiliary', there are files like
+# 'LineBreakTest.html' that do show annotated pairwise tables.  Unicode no
+# longer feels constrained to make their rules easy to implement this way.
+# Perl wants to keep using the table, as it makes it easier to find the break
+# status in the middle of the string instead of having to start each time at
+# the beginning, and a goodly number of the possibilities are 0 or 1 anyway,
+# without needing the DFA.  But this makes it a pain to update to a new
+# Unicode release when they add rules.  An example is in Unicode 15.1, where
+# new GCB rules make use of a new property, Indic_Conjunct_Break that is
+# unrelated to GCB.  In order for Perl to continue using the table, we have to
+# make new equivalence classes in GCB for the Indic property values.  This
+# would mean we need all combinations of the intersections
+#       GCB1_Indic1, GCB1_Indic2, ...  GCBn_Indic1, # GCB2_Indic1, ...
+# Fortunately all but 4 of these intersections are empty in 15.1.  But a
+# future release might change that, and this would have to be manually
+# compensated for.  The rules that involve GCB1 now have to change to also
+# include GCB1_Indic1, GCB1_Indic2, ...
+#
+# The code in this file populate the tables based on data output from
+# mktables.  The Unicode rules are listed in UAX #14 and UAX #29 in priority
+# order for each type of line break.  Suppose you want to determine if there
+# is a break between x and y.  You start at rule #1, and see if it applies.
+# If not, you proceed to rule #2, and so on, stopping at the first match.
+# What we do here is proceed in the reverse order.  We first fill the table
+# with the final rule #n, which always comes from Unicode as an unconditional
+# setting.  That is all cells in the table are set unconditionally to whatever
+# Unicode says they should be.  Then we take rule #n-1 from Unicode.  It
+# doesn't apply to every cell in the table (for otherwise we wouldn't have
+# needed a rule #n).  We overwrite the cells it does apply to with the value
+# that Unicode supplies.  Then we do the same with #n-2 ... #3, #2, #1.
+# By the end of this process the table is filled in with each cell containing
+# what the highest priority rule says to do with the cell.
+#
+# This works well when the cells unconditionally return break/no-break (1 or
+# 0).  But consider the case that we apply rule #a which requires a DFA.  If
+# that fails to match we're supposed to try rule #a+1, #a+2, ..., stopping at
+# the first match.  The table is constructed so that the final rule matches
+# everything, so the process is guaranteed to halt.  And it likely will halt
+# earlier at the first unconditional match.  But this kind of problem wasn't
+# foreseen when this code was written, and it is work to fix it.  As a result,
+# a cell can only refer to a single DFA (the highest priority one), and when
+# you write a DFA, you have to factor in lower priority rules that may also
+# apply.
 
 sub output_table_common($property, $table_value_defines_ref, $table_ref,
                         $names_ref, $abbreviations_ref)
