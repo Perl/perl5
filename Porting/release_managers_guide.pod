@@ -973,7 +973,7 @@ Then delete the temporary installation.
 
 Create the I<annotated> tag identifying this release (e.g.):
 
- $ git tag v5.11.0 -m 'First release of the v5.11 series!'
+ $ git tag v5.21.4 -m 'Perl 5.21.4'
 
 It is B<VERY> important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
@@ -988,8 +988,9 @@ Verify that your tag is annotated:
 The output must look similar to the following:
 
  tag v5.X.Y
- Tagger: Jesse Vincent <jesse@bestpractical.com>
- Date:   Fri Oct 2 16:29:56 2009 -0400
+ Tagger: Steve Hay <steve.m.hay@googlemail.com>
+ Date:   2014-09-20 11:09:51 +0100
+ ...
 
 =head3 Build the tarball
 
