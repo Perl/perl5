@@ -1384,11 +1384,27 @@ sub expand_column($table_size, $enums, $x) {
     #   A number giving the enum value of the column
     #   A string giving the full name enum value of the column
     #   A list, each element of which can be a number or string as above,
-    #   or another list
+    #       or another list.  The first element of the list may be the single
+    #       character '^' which means to expand to everything (except edges)
+    #       but the remainder of the list.
 
     my @list;
+    my @excludes;
     if (ref $x) {
+        if ($x->[0] eq '^') {
+            push @list, expand_column($table_size, $enums, '*')->@*;
+            # Get rid of the '^' and expand the input, yielding a list of
+            # things to exclude
+            @excludes = expand_column($table_size, $enums,
+                                                     [ @$x[1 .. $#$x] ])->@*;
+
+            # Unicode doesn't consider this to be something to be part of the
+            # complement of.
+            push @excludes, 'EDGE';
+        }
+        else {
             push @list, expand_column($table_size, $enums, $_)->@* for $x->@*;
+        }
     }
     elsif ($x eq '*') { # Call recursively with
         push @list, expand_column($table_size, $enums, $_)->@*
@@ -1403,8 +1419,17 @@ sub expand_column($table_size, $enums, $x) {
           . stack_trace() . "\n" . Dumper $enums;
     }
 
+    # Map everything to a number
+    for my $which (\@list, \@excludes) {
+        foreach my $element ($which->@*) {
+            next unless $element =~ /\D/;
+            $element = $enums->{$element};
+        }
+    }
+
     my %list;
     $list{$_} = 1 for @list;
+    delete $list{$_} for @excludes;     # This is how we exclude things
     @list = keys %list;
 
     if (@list == 0 || @list == 1 && $list[0] eq "") {
@@ -2199,17 +2224,8 @@ sub output_LB_table() {
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
     # [^SP BA HY] × GL
-    for my $i (0 .. @lb_table - 1) {
-        next if    $i == $lb_enums{'Space'}
-                || $i == $lb_enums{'Break_After'}
-                || $i == $lb_enums{'Hyphen'};
-
-        # We don't break, but if a property above has said don't break even
-        # with space between, don't override that (also in the next few rules)
-        next if $lb_table[$i][$lb_enums{'Glue'}]
-                            == $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
-        $lb_table[$i][$lb_enums{'Glue'}] = $lb_dfas{'LB_NOBREAK'};
-    }
+    set_lb_nobreak_no_override_ignoring_SP([ qw(^ Space Break_After Hyphen) ],
+                                           'Glue', '12a');
 
     # LB12 Do not break after NBSP and related characters.
     # GL ×
