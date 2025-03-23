@@ -1597,6 +1597,15 @@ sub as_code {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
 
+    # Emit opening brace. With cmd-line switch "-except", prefix it
+    # with 'TRY'
+    {
+        my $try = $pxs->{config_allow_exceptions} ? ' TRY' : '';
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |   $try [[
+EOF
+    }
+
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
     }
@@ -1710,15 +1719,6 @@ sub parse {
 sub as_code {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
-
-    # Emit opening brace. With cmd-line switch "-except", prefix it
-    # with 'TRY'
-    {
-        my $try = $pxs->{config_allow_exceptions} ? ' TRY' : '';
-        print ExtUtils::ParseXS::Q(<<"EOF");
-            |   $try [[
-EOF
-    }
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
