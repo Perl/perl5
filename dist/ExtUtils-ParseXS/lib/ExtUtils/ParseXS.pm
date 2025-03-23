@@ -1004,57 +1004,13 @@ EOF
       # Note that each CASE: can precede multiple keyword blocks.
       $self->CASE_handler($_) if $self->check_keyword("CASE");
 
-      # This set later if CODE is using RETVAL
-      $self->{xsub_seen_RETVAL_in_CODE} = 0;
-      # This set later if there's an implied RETVAL to output
-      $self->{xsub_implicit_OUTPUT_RETVAL} = 0;
-
       {
           unshift @{$self->{line}}, $_;
-
-          my $input_part = ExtUtils::ParseXS::Node::input_part->new();
-          $input_part->parse($self);
-          my $init_part = ExtUtils::ParseXS::Node::init_part->new();
-          $init_part->parse($self);
-          my $code_part = ExtUtils::ParseXS::Node::code_part->new();
-          $code_part->parse($self);
-          my $output_part = ExtUtils::ParseXS::Node::output_part->new();
-          $output_part->parse($self);
-          my $cleanup_part = ExtUtils::ParseXS::Node::cleanup_part->new();
-          $cleanup_part->parse($self);
-
+          my $xbody = ExtUtils::ParseXS::Node::xbody->new();
+          $xbody->parse($self);
           $_ = shift @{$self->{line}};
-
-          $input_part->as_code($self);
-          $init_part->as_code($self);
-          $code_part->as_code($self);
-          $output_part->as_code($self);
-          $cleanup_part->as_code($self);
+          $xbody->as_code($self);
       }
-
-
-      # ----------------------------------------------------------------
-      # Emit function trailers
-      # ----------------------------------------------------------------
-
-      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
-        |   ]]
-EOF
-
-      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled} and not $self->{xsub_seen_PPCODE};
-        |   LEAVE;
-EOF
-
-      print Q(<<"EOF");
-        |    ]]
-EOF
-
-      print Q(<<"EOF") if $self->{config_allow_exceptions};
-        |    BEGHANDLERS
-        |    CATCHALL
-        |    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
-        |    ENDHANDLERS
-EOF
 
       if ($self->check_keyword("CASE")) {
         $self->blurt("Error: No 'CASE:' at top of function")

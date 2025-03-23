@@ -1557,6 +1557,78 @@ sub proto_string {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::xbody;
+
+# This node holds all the foo_part nodes which make up the body of an
+# XSUB. Note that in the presence of CASE: keywords, an XSUB may have
+# multiple xbodys, one per CASE.
+# This node doesn't contain the signature, and nor is it responsible
+# for emitting the code for the closing part of an XSUB e.g. the
+# XSRETURN(N); there is only one of those per XSUB, so is handled by a
+# higher-level node.
+
+BEGIN { $build_subclass->('', # parent
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    # This set later if CODE is using RETVAL
+    $pxs->{xsub_seen_RETVAL_in_CODE} = 0;
+    # This set later if there's an implied RETVAL to output
+    $pxs->{xsub_implicit_OUTPUT_RETVAL} = 0;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    for my $part (qw(input init code output cleanup)) {
+        my $kid = "ExtUtils::ParseXS::Node::${part}_part"->new();;
+        if ($kid->parse($pxs)) {
+            push @{$self->{kids}}, $kid;
+        }
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs) for @{$self->{kids}};
+    }
+
+    # ----------------------------------------------------------------
+    # Emit trailers for the body of the XSUB
+    # ----------------------------------------------------------------
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
+      |   ]]
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled} and not $pxs->{xsub_seen_PPCODE};
+      |   LEAVE;
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+      |    ]]
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+      |    BEGHANDLERS
+      |    CATCHALL
+      |    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
+      |    ENDHANDLERS
+EOF
+
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::input_part;
 
 BEGIN { $build_subclass->('', # parent
