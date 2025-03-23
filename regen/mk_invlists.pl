@@ -1373,6 +1373,61 @@ sub _Perl_CCC_non0_non230 {
 
 # These functions access the cells of a break table, converting any mnemonics
 # to numeric.  They need $enums to be able to do this.
+sub expand_column($table_size, $enums, $x) {
+    print STDERR __FILE__, ": ", __LINE__, ": Entering expand_column ",
+                 stack_trace(), "\n",
+                 Dumper $x, $table_size, $enums if DEBUG;
+
+    # Expand a row or column denoted by $x into its constituents.  $x may be
+    # one of:
+    #   '*'     Use the entire column
+    #   A number giving the enum value of the column
+    #   A string giving the full name enum value of the column
+
+    my @list;
+    if ($x eq '*') {    # Call recursively with
+        push @list, expand_column($table_size, $enums, $_)->@*
+                                                     for 0 .. $table_size - 1;
+    }
+    elsif ($x ne "") {
+            push @list, $x;
+            $list[-1] = $enums->{$list[-1]} if $list[-1] =~ /\D/;
+    }
+    else {
+        die "Trying to expand empty string"
+          . stack_trace() . "\n" . Dumper $enums;
+    }
+
+    my %list;
+    $list{$_} = 1 for @list;
+    @list = keys %list;
+
+    if (@list == 0 || @list == 1 && $list[0] eq "") {
+        die "Expansion is to nothing" . stack_trace() . "\n"
+          . Dumper $x, $enums;
+    }
+
+    print STDERR __FILE__, ": ", __LINE__, ": expanded column returning ",
+                 Dumper \@list if DEBUG;
+    return \@list;
+}
+
+sub get_cell_list($table_size, $enums, $x, $y) {
+    my @x = expand_column($table_size, $enums, $x)->@*;
+    my @y = expand_column($table_size, $enums, $y)->@*;
+    my @list;
+
+    for my $row (@x) {
+        push @list, [$row, $_], for @y;
+    }
+
+    # It's a lot easier to work with under debugging if the list is sorted.
+    @list = sort { $a->[0] <=> $b->[0] or $a->[1] <=> $b->[1] } @list
+                                                                    if DEBUG;
+
+    return \@list;
+}
+
 sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
@@ -1384,6 +1439,11 @@ sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused)
             . stack_trace() . "\n"
             . Dumper $enums, $x, $y, $value, $rule;
     }
+
+    my $list_ref = get_cell_list($table_size, $enums, $x, $y);
+    for my $pair_ref ($list_ref->@*) {
+        my $x = $pair_ref->[0];
+        my $y = $pair_ref->[1];
 
         for my $which (\$x, \$y) {
             if ($$which =~ /\D/) {
@@ -1407,9 +1467,10 @@ sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused)
         }
 
         # Override whatever was going to go into an unused cell.
-        $value = 0 if $has_unused && (   $x == $table_size - 1
-                                      || $y == $table_size - 1);
-        $table->[$x][$y] = $value;
+        $table->[$x][$y] = ($has_unused && (   $x == $table_size - 1
+                                            || $y == $table_size - 1))
+                           ? 0
+                           : $value;
 
         print STDERR __FILE__, ": ", __LINE__,
           ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y] if DEBUG;
@@ -1447,9 +1508,15 @@ sub add_dfa($table, $table_size, $enums, $dfas, $x, $y, $dfa, $rule,
             . Dumper $dfas, $enums;
     }
 
+    my $list_ref = get_cell_list($table_size, $enums, $x, $y);
+
+    for my $pair_ref ($list_ref->@*) {
+        my $x = $pair_ref->[0];
+        my $y = $pair_ref->[1];
         my $old = get_cell_value($table, $enums, $x, $y);
         set_cells($table, $table_size, $enums, $x, $y, $old + $numeric_dfa,
                   $rule, $has_unused);
+    }
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
@@ -1637,11 +1704,7 @@ sub output_GCB_table() {
 
     # Otherwise, break everywhere.
     # GB99   Any ÷  Any
-    for my $i (0 .. $table_size - 1) {
-        for my $j (0 .. $table_size - 1) {
-            set_gcb_breakable($i, $j, 99);
-        }
-    }
+    set_gcb_breakable('*', '*', 99);
 
     # Do not break within emoji flag sequences. That is, do not break between
     # regional indicator (RI) symbols if there is an odd number of RI
@@ -1675,12 +1738,10 @@ sub output_GCB_table() {
     # GB9b  Prepend  ×
     # GB9a  × SpacingMark
     # GB9   ×  ( Extend | ZWJ )
-    for my $i (0 .. @gcb_table - 1) {
-        set_gcb_nobreak('Prepend', $i, '9b');
-        set_gcb_nobreak($i, 'SpacingMark', '9a');
-        set_gcb_nobreak($i, 'Extend', 9);
-        set_gcb_nobreak($i, 'ZWJ', 9);
-    }
+    set_gcb_nobreak('Prepend', '*', '9b');
+    set_gcb_nobreak('*', 'SpacingMark', '9a');
+    set_gcb_nobreak('*', 'Extend', 9);
+    set_gcb_nobreak('*', 'ZWJ', 9);
 
     # Do not break Hangul syllable sequences.
     # GB8  ( LVT | T)  ×  T
@@ -1705,14 +1766,12 @@ sub output_GCB_table() {
     # controls.
     # GB5   ÷  ( Control | CR | LF )
     # GB4  ( Control | CR | LF )  ÷
-    for my $i (0 .. @gcb_table - 1) {
-        set_gcb_breakable($i, 'Control', 5);
-        set_gcb_breakable($i, 'CR', 5);
-        set_gcb_breakable($i, 'LF', 5);
-        set_gcb_breakable('Control', $i, 4);
-        set_gcb_breakable('CR', $i, 4);
-        set_gcb_breakable('LF', $i, 4);
-    }
+    set_gcb_breakable('*', 'Control', 5);
+    set_gcb_breakable('*', 'CR', 5);
+    set_gcb_breakable('*', 'LF', 5);
+    set_gcb_breakable('Control', '*', 4);
+    set_gcb_breakable('CR', '*', 4);
+    set_gcb_breakable('LF', '*', 4);
 
     # GB3  CR  ×  LF
     set_gcb_nobreak('CR', 'LF', 3);
@@ -1720,10 +1779,8 @@ sub output_GCB_table() {
     # Break at the start and end of text, unless the text is empty
     # GB1  sot  ÷
     # GB2   ÷  eot
-    for my $i (0 .. @gcb_table - 1) {
-        set_gcb_breakable($i, 'EDGE', 2);
-        set_gcb_breakable('EDGE', $i, 1);
-    }
+    set_gcb_breakable('*', 'EDGE', 2);
+    set_gcb_breakable('EDGE', '*', 1);
     set_gcb_nobreak('EDGE', 'EDGE', 1);
 
     output_table_common('GCB', \%gcb_dfas, \@gcb_table, \@gcb_short_enums,
@@ -1825,11 +1882,7 @@ sub output_LB_table() {
     my $rule;
 
     # LB31. Break everywhere else
-    for my $i (0 .. $table_size - 1) {
-        for my $j (0 .. $table_size - 1) {
-            set_lb_breakable($i, $j, 31);
-        }
-    }
+    set_lb_breakable('*', '*', 31);
 
     # LB30b Do not break between an emoji base (or potential emoji) and an
     # emoji modifier.
@@ -2047,9 +2100,7 @@ sub output_LB_table() {
     set_lb_nobreak('Numeric', 'Hebrew_Letter', $rule);
 
     # LB22 Do not break before ellipses
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak($i, 'Inseparable', 22);
-    }
+    set_lb_nobreak('*', 'Inseparable', 22);
 
     # LB21b Don’t break between Solidus and Hebrew letters.
     # SY × HL
@@ -2058,10 +2109,8 @@ sub output_LB_table() {
     # LB21a Don't break after Hebrew + Hyphen.
     # HL (HY | BA) ×
     $rule = '21a';
-    for my $i (0 .. @lb_table - 1) {
-        add_lb_dfa('Hyphen', $i, 'LB_HY_or_BA_then_foo', $rule);
-        add_lb_dfa('Break_After', $i, 'LB_HY_or_BA_then_foo', $rule);
-    }
+    add_lb_dfa('Hyphen', '*', 'LB_HY_or_BA_then_foo', $rule);
+    add_lb_dfa('Break_After', '*', 'LB_HY_or_BA_then_foo', $rule);
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
     # spaces, small kana, and other non-starters, or after acute accents.
@@ -2070,12 +2119,10 @@ sub output_LB_table() {
     # × NS
     # BB ×
     $rule = 21;
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak($i, 'Break_After', $rule);
-        set_lb_nobreak($i, 'Hyphen', $rule);
-        set_lb_nobreak($i, 'Nonstarter', $rule);
-        set_lb_nobreak('Break_Before', $i, $rule);
-    }
+    set_lb_nobreak('*', 'Break_After', $rule);
+    set_lb_nobreak('*', 'Hyphen', $rule);
+    set_lb_nobreak('*', 'Nonstarter', $rule);
+    set_lb_nobreak('Break_Before', '*', $rule);
 
     # LB20 Break before and after unresolved CB.
     # ÷ CB
@@ -2084,25 +2131,19 @@ sub output_LB_table() {
     # rules. However, the default action is to treat unresolved CB as breaking
     # before and after.
     $rule = 20;
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_breakable($i, 'Contingent_Break', $rule);
-        set_lb_breakable('Contingent_Break', $i, $rule);
-    }
+    set_lb_breakable('*', 'Contingent_Break', $rule);
+    set_lb_breakable('Contingent_Break', '*', $rule);
 
     # LB19 Do not break before or after quotation marks, such as ‘ ” ’.
     # × QU
     # QU ×
     $rule = 19;
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak($i, 'Quotation', $rule);
-        set_lb_nobreak('Quotation', $i, $rule);
-    }
+    set_lb_nobreak('*', 'Quotation', $rule);
+    set_lb_nobreak('Quotation', '*', $rule);
 
     # LB18 Break after spaces
     # SP ÷
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_breakable('Space', $i, 18);
-    }
+    set_lb_breakable('Space', '*', 18);
 
     # LB17 Do not break within ‘——’, even with intervening spaces.
     # B2 SP* × B2
@@ -2123,10 +2164,8 @@ sub output_LB_table() {
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak_ignoring_SP('Open_Punctuation', $i, 14);
-        set_lb_nobreak_ignoring_SP('East_Asian_OP', $i, 14);
-    }
+    set_lb_nobreak_ignoring_SP('Open_Punctuation', '*', 14);
+    set_lb_nobreak_ignoring_SP('East_Asian_OP', '*', 14);
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
@@ -2136,14 +2175,12 @@ sub output_LB_table() {
     # × IS
     # × SY
     $rule = 13;
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak_ignoring_SP($i, 'Close_Punctuation', $rule);
-        set_lb_nobreak_ignoring_SP($i, 'Close_Parenthesis', $rule);
-        set_lb_nobreak_ignoring_SP($i, 'East_Asian_CP', $rule);
-        set_lb_nobreak_ignoring_SP($i, 'Exclamation', $rule);
-        set_lb_nobreak_ignoring_SP($i, 'Infix_Numeric', $rule);
-        set_lb_nobreak_ignoring_SP($i, 'Break_Symbols', $rule);
-    }
+    set_lb_nobreak_ignoring_SP('*', 'Close_Punctuation', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'Close_Parenthesis', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'East_Asian_CP', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'Exclamation', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'Infix_Numeric', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'Break_Symbols', $rule);
 
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
@@ -2162,17 +2199,13 @@ sub output_LB_table() {
 
     # LB12 Do not break after NBSP and related characters.
     # GL ×
-    for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'Glue'}][$i] = $lb_dfas{'LB_NOBREAK'};
-    }
+    set_lb_nobreak('Glue', '*', 12);
 
     # LB11 Do not break before or after Word joiner and related characters.
     # × WJ
+    set_lb_nobreak('*', 'Word_Joiner', 11);
     # WJ ×
-    for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Word_Joiner'}] = $lb_dfas{'LB_NOBREAK'};
-        $lb_table[$lb_enums{'Word_Joiner'}][$i] = $lb_dfas{'LB_NOBREAK'};
-    }
+    set_lb_nobreak('Word_Joiner', '*', 11);
 
     # Special case this here to avoid having to do a special case in the code,
     # by making this the same as other things with a SP in front of them that
@@ -2234,43 +2267,32 @@ sub output_LB_table() {
 
     # LB8a Do not break after a zero width joiner
     # ZWJ ×
-    for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_dfas{'LB_NOBREAK'};
-        set_lb_nobreak('ZWJ', $i, '8a');
-    }
+    set_lb_nobreak('ZWJ', '*', '8a');
 
     # LB8 Break before any character following a zero-width space, even if one
     # or more spaces intervene.
     # Firstly,
     # ZW ÷
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_breakable('ZWSpace', $i, 8);
-    }
+    set_lb_breakable('ZWSpace', '*', 8);
 
     # Next ZW SP+ ÷
     # Because of LB8-10, we need to look at context for "SP x", and this must
     # be done in the code.
-    for my $i (0 .. @lb_table - 1) {
-        add_lb_dfa('Space', $i, 'LB_SP_foo', 8);
-    }
+    add_lb_dfa('Space', '*', 'LB_SP_foo', 8);
 
     # LB7 Do not break before spaces or zero width space.
     # × SP
     # × ZW
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak($i, 'Space', 7);
-        set_lb_nobreak($i, 'ZWSpace', 7);
-    }
+    set_lb_nobreak('*', 'Space', 7);
+    set_lb_nobreak('*', 'ZWSpace', 7);
 
     # LB6 Do not break before hard line breaks.
     # × ( BK | CR | LF | NL )
     $rule = 6;
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak($i, 'Mandatory_Break', $rule);
-        set_lb_nobreak($i, 'Carriage_Return', $rule);
-        set_lb_nobreak($i, 'Line_Feed', $rule);
-        set_lb_nobreak($i, 'Next_Line', $rule);
-    }
+    set_lb_nobreak('*', 'Mandatory_Break', $rule);
+    set_lb_nobreak('*', 'Carriage_Return', $rule);
+    set_lb_nobreak('*', 'Line_Feed', $rule);
+    set_lb_nobreak('*', 'Next_Line', $rule);
 
     # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line
     # breaks.
@@ -2278,27 +2300,21 @@ sub output_LB_table() {
     # LF !
     # NL !
     $rule = 5;
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_breakable('Carriage_Return', $i, $rule);
-        set_lb_breakable('Line_Feed', $i, $rule);
-        set_lb_breakable('Next_Line', $i, $rule);
-    }
+    set_lb_breakable('Carriage_Return', '*', $rule);
+    set_lb_breakable('Line_Feed', '*', $rule);
+    set_lb_breakable('Next_Line', '*', $rule);
     set_lb_nobreak('Carriage_Return', 'Line_Feed', $rule);
 
     # LB4 Always break after hard line breaks.
     # BK !
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_breakable('Mandatory_Break', $i, 4);
-    }
+    set_lb_breakable('Mandatory_Break', '*', 4);
 
     # LB3 Always break at the end of text.
     # ! eot
+    set_lb_breakable('*', 'EDGE', 3);
     # LB2 Never break at the start of text.
     # sot ×
-    for my $i (0 .. @lb_table - 1) {
-        set_lb_breakable($i, 'EDGE', 3);
-        set_lb_nobreak('EDGE', $i, 2);
-    }
+    set_lb_nobreak('EDGE', '*', 2);
 
     # LB1 Assign a line breaking class to each code point of the input.
     # Resolve AI, CB, CJ, SA, SG, and XX into other line breaking classes
@@ -2388,11 +2404,7 @@ sub output_WB_table() {
 
     # Otherwise, break everywhere (including around ideographs).
     # WB99  Any  ÷  Any
-    for my $i (0 .. $table_size - 1) {
-        for my $j (0 .. $table_size - 1) {
-            set_wb_breakable($i, $j, 99);
-        }
-    }
+    set_wb_breakable('*', '*', 99);
 
     # Do not break within emoji flag sequences. That is, do not break between
     # regional indicator (RI) symbols if there is an odd number of RI
@@ -2528,25 +2540,20 @@ sub output_WB_table() {
     #
     # WB4  X (Extend | Format | ZWJ)* → X
     $rule = 4;
-    for my $i (0 .. @wb_table - 1) {
-        add_wb_dfa('Extend', $i, 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
-        add_wb_dfa('Format', $i, 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
-        add_wb_dfa('ZWJ', $i, 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
-    }
-    for my $i (0 .. @wb_table - 1) {
-        set_wb_nobreak($i, 'Extend', $rule);
-        set_wb_nobreak($i, 'Format', $rule);
-        set_wb_nobreak($i, 'ZWJ', $rule);
-    }
+    add_wb_dfa('Extend', '*', 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
+    add_wb_dfa('Format', '*', 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
+    add_wb_dfa('ZWJ', '*', 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
+
+    set_wb_nobreak('*', 'Extend', $rule);
+    set_wb_nobreak('*', 'Format', $rule);
+    set_wb_nobreak('*', 'ZWJ', $rule);
 
     # Implied is that these attach to the character before them, except for
     # the characters that mark the end of a region of text.  The rules below
     # override the ones set up here, for all the characters that need
     # overriding.
-    for my $i (0 .. @wb_table - 1) {
-        set_wb_nobreak($i, 'Extend', $rule);
-        set_wb_nobreak($i, 'Format', $rule);
-    }
+    set_wb_nobreak('*', 'Extend', $rule);
+    set_wb_nobreak('*', 'Format', $rule);
 
     # Keep horizontal whitespace together
     # Use perl's tailoring instead
@@ -2592,10 +2599,8 @@ sub output_WB_table() {
     # Break at the start and end of text, unless the text is empty
     # WB2  Any  ÷  eot
     # WB1  sot  ÷  Any
-    for my $i (0 .. @wb_table - 1) {
-        set_wb_breakable($i, 'EDGE', 1);
-        set_wb_breakable('EDGE', $i, 2);
-    }
+    set_wb_breakable('*', 'EDGE', 1);
+    set_wb_breakable('EDGE', '*', 2);
     set_wb_nobreak('EDGE', 'EDGE', 1);
 
     output_table_common('WB', \%wb_dfas, \@wb_table, \@wb_short_enums,
