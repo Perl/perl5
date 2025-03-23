@@ -2137,11 +2137,10 @@ sub output_LB_table() {
     # × SY
     $rule = 13;
     for my $i (0 .. @lb_table - 1) {
-        set_lb_nobreak_ignoring_SP($i, 'Exclamation', $rule);
-
         set_lb_nobreak_ignoring_SP($i, 'Close_Punctuation', $rule);
         set_lb_nobreak_ignoring_SP($i, 'Close_Parenthesis', $rule);
         set_lb_nobreak_ignoring_SP($i, 'East_Asian_CP', $rule);
+        set_lb_nobreak_ignoring_SP($i, 'Exclamation', $rule);
         set_lb_nobreak_ignoring_SP($i, 'Infix_Numeric', $rule);
         set_lb_nobreak_ignoring_SP($i, 'Break_Symbols', $rule);
     }
