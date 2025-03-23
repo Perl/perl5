@@ -1383,9 +1383,14 @@ sub expand_column($table_size, $enums, $x) {
     #   '*'     Use the entire column
     #   A number giving the enum value of the column
     #   A string giving the full name enum value of the column
+    #   A list, each element of which can be a number or string as above,
+    #   or another list
 
     my @list;
-    if ($x eq '*') {    # Call recursively with
+    if (ref $x) {
+            push @list, expand_column($table_size, $enums, $_)->@* for $x->@*;
+    }
+    elsif ($x eq '*') { # Call recursively with
         push @list, expand_column($table_size, $enums, $_)->@*
                                                      for 0 .. $table_size - 1;
     }
@@ -2573,21 +2578,14 @@ sub output_WB_table() {
     # WB3b     ÷  (Newline | CR | LF)
     # WB3a  (Newline | CR | LF)  ÷
     # et. al.
-    for my $i ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
-        for my $j (0 .. @wb_table - 1) {
-            set_wb_breakable($j, $i, '3b');
-            set_wb_breakable($i, $j, '3a');
-        }
-    }
+    my @space_list = qw(CR LF Newline Perl_Tailored_HSpace);
+    set_wb_breakable(\@space_list, '*', '3a');
+    set_wb_breakable('*', \@space_list, '3b');
 
     # Perl tailoring: Do not break within white space.
     # WB3  CR  ×  LF
     # et.al.
-    for my $i ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
-        for my $j ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
-            set_wb_nobreak($i, $j, 3);
-        }
-    }
+    set_wb_nobreak(\@space_list, \@space_list, 3);
 
     # And do not break horizontal space followed by Extend or Format or ZWJ
     $rule = '2z';
