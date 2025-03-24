@@ -650,7 +650,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     if (!keysv) {
                         keysv = newSVpvn_flags(key, klen, SVf_UTF8|SVs_TEMP);
                     } else {
-                        keysv = sv_2mortal(newSVsv(keysv));
+                        keysv = sv_mortalcopy_flags(keysv, SV_GMAGIC|SV_NOSTEAL);
                     }
                     mg_copy(MUTABLE_SV(hv), sv, (char *)keysv, HEf_SVKEY);
                 } else {
