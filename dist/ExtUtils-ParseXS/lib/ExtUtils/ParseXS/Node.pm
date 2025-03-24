@@ -183,6 +183,79 @@ sub as_code { }
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::ReturnType;
+
+# Handle the 'return type' line at the start of an XSUB.
+# It mainly consists of the return type, but there are also
+# extra keywords to process, such as NO_RETURN.
+
+BEGIN { $build_subclass->('', # parent
+    'type',      # Str: the XSUB's C return type
+    'no_output', # bool: saw 'NO_OUTPUT'
+    'extern_C',  # bool: saw 'extern C'
+    'static',    # bool: saw 'static'
+)};
+
+
+# Extract out the return type declaration from the start of an XSUB.
+# If the declaration and function name are on the same line, delete the
+# type part; else pop the first line.
+
+sub parse {
+    my __PACKAGE__                     $self   = shift;
+    my ExtUtils::ParseXS               $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Whitespace-tidy the line containing the return type, plus possibly
+    # the function name and arguments too.
+    # XXX Tidying the latter was probably an unintended side-effect of
+    # later allowing the return type and function to be on the same line.
+
+    my $line = shift @{$pxs->{line}};
+    $line = ExtUtils::Typemaps::tidy_type($line);
+    my $type = $line;
+
+    $self->{no_output} = $pxs->{xsub_seen_NO_OUTPUT} = 1
+        if $type =~ s/^NO_OUTPUT\s+//;
+
+    # Allow one-line declarations. This splits a single line like:
+    #    int foo(....)
+    # into the two lines:
+    #    int
+    #    foo(...)
+    #
+    # Note that this splits both K&R-style 'foo(a, b)' and ANSI-style
+    # 'foo(int a, int b)'. I don't know whether the former was intentional.
+    # As of 5.40.0, the docs don't suggest that a 1-line K&R is legal. Was
+    # added by 11416672a16, first appeared in 5.6.0.
+    #
+    # NB: $pxs->{config_allow_argtypes} is false if xsubpp was invoked
+    # with -noargtypes
+
+    unshift @{$pxs->{line}}, $2
+        if $pxs->{config_allow_argtypes}
+            and $type =~ s/^(.*?\w.*?) \s* \b (\w+\s*\(.*)/$1/sx;
+
+    # a function definition needs at least 2 lines
+    unless (@{$pxs->{line}}) {
+        $pxs->blurt("Error: Function definition too short '$line'");
+        return;
+    }
+
+    $self->{extern_C} = $pxs->{xsub_seen_extern_C} = 1
+                                                if $type =~ s/^extern "C"\s+//;
+    $self->{static}   = $pxs->{xsub_seen_static}   = 1
+                                                if $type =~ s/^static\s+//;
+
+    $self->{type}     = $pxs->{xsub_return_type}   = $type;
+
+    1;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::Param;
 
 # Node subclass which holds the state of one XSUB parameter, based on the

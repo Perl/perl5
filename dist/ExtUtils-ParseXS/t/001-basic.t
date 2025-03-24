@@ -108,7 +108,7 @@ sub test_many {
 
         # trim the output to just the function in question to make
         # test diagnostics smaller.
-        if (!length($err) and $out =~ /\S/) {
+        if (defined($prefix) and !length($err) and $out =~ /\S/) {
             $out =~ s/\A.*? (^\w+\(${prefix} .*? ^}).*\z/$1/xms
                 or do {
                     # print STDERR $out;
@@ -1358,6 +1358,77 @@ EOF
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
+
+
+{
+    # Test return type declarations
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "NO_OUTPUT",
+            [ Q(<<'EOF') ],
+                |NO_OUTPUT int
+                |foo()
+EOF
+            [ 0, 0, qr/\QRETVAL = foo();/, "has autocall"     ],
+            [ 0, 1, qr/\bTARG/,            "no setting TARG"  ],
+            [ 0, 1, qr/\QST(0)/,           "no setting ST(0)" ],
+        ],
+        [
+            "xsub decl on one line",
+            [ Q(<<'EOF') ],
+                | int foo(A, int  B )
+                |    char *A
+EOF
+            [ 0, 0, qr/^\s+char \*\s+A\s+=/m,  "has A decl"    ],
+            [ 0, 0, qr/^\s+int\s+B\s+=/m,      "has B decl"    ],
+            [ 0, 0, qr/\QRETVAL = foo(A, B);/, "has autocall"  ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
+    # Test return type declarations - don't cut down output
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES: DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "extern C",
+            [ Q(<<'EOF') ],
+                |extern "C"   int
+                |foo()
+EOF
+            [ 0, 0, qr/^extern "C"\nXS_EUPXS\(XS_Foo_foo\);/m,
+                    "has extern decl" ],
+        ],
+        [
+            "too short",
+            [ Q(<<'EOF') ],
+                |int
+EOF
+            [ 1, 0, qr/Error: Function definition too short 'int'/, "got err" ],
+        ]
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
 
 {
     # check that suitable "usage: " error strings are generated

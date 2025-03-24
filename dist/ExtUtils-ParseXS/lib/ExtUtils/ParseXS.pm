@@ -734,40 +734,14 @@ EOM
     # Process the presumed start of an XSUB
     # ----------------------------------------------------------------
 
-    # Whitespace-tidy the line containing the return type plus possibly
-    # the function name and arguments too (The latter was probably an
-    # unintended side-effect of later allowing the return type and
-    # function to be on the same line.)
-    ($self->{xsub_return_type}) = ExtUtils::Typemaps::tidy_type($_);
 
-    $self->{xsub_seen_NO_OUTPUT} = 1
-      if $self->{xsub_return_type} =~ s/^NO_OUTPUT\s+//;
+    my ExtUtils::ParseXS::Node::ReturnType $return_type
+          = ExtUtils::ParseXS::Node::ReturnType->new();
 
-    # Allow one-line declarations. This splits a single line like:
-    #    int foo(....)
-    # into the two lines:
-    #    int
-    #    foo(...)
-    # Note that this splits both K&R-style 'foo(a, b)' and ANSI-style
-    # 'foo(int a, int b)'. I don't know whether the former was intentional.
-    # As of 5.40.0, the docs don't suggest that a 1-line K&R is legal. Was
-    # added by 11416672a16, first appeared in 5.6.0.
-    #
-    # NB: $self->{config_allow_argtypes} is false if xsubpp was invoked
-    # with -noargtypes
+    unshift @{$self->{line}}, $_;
 
-    unshift @{ $self->{line} }, $2
-      if $self->{config_allow_argtypes}
-        and $self->{xsub_return_type} =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
-
-    # a function definition needs at least 2 lines
-    $self->blurt("Error: Function definition too short '$self->{xsub_return_type}'"), next PARAGRAPH
-      unless @{ $self->{line} };
-
-    $self->{xsub_seen_extern_C} = 1
-                          if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
-    $self->{xsub_seen_static}   = 1
-                          if $self->{xsub_return_type} =~ s/^static\s+//;
+    $return_type->parse($self)
+      or next PARAGRAPH;
 
     my ExtUtils::ParseXS::Node::Sig $sig
         = $self->{xsub_sig}
