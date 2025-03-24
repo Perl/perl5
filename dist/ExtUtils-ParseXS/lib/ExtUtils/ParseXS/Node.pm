@@ -461,7 +461,7 @@ sub as_code {
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
         if (    $xstype eq 'T_PV'
-                and exists $pxs->{xsub_sig}{names}{"length($var)"})
+                and exists $pxs->{xsub_params}{names}{"length($var)"})
         {
             print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
             die "default value not supported with length(NAME) supplied"
@@ -1170,11 +1170,12 @@ sub as_output_code {
 
 # ======================================================================
 
-package ExtUtils::ParseXS::Node::Sig;
+package ExtUtils::ParseXS::Node::Params;
 
-# Node subclass which holds the state of an XSUB's signature, based on the
-# XSUB's actual signature plus any INPUT lines. It is a mainly a list of
-# Node::Param children.
+# Node subclass which holds a list of the parameters for an XSUB
+# (both directly found in the foo(....) signature, plus possibly synthetic
+# ones such as THIS and RETVAL.
+# It is a mainly a list of Node::Param children.
 
 BEGIN { $build_subclass->('', # parent
         'orig_params',   # Array ref of Node::Param objects representing
@@ -1207,11 +1208,13 @@ BEGIN { $build_subclass->('', # parent
 # ----------------------------------------------------------------
 # Parse the XSUB's signature: $sig->{sig_text}
 #
-# Split the signature on commas into parameters, while allowing for
-# things like '(a = ",", b)'. Then for each parameter, parse its
-# various fields and store in a ExtUtils::ParseXS::Node::Param object.
-# Store those Param objects within the Sig object, plus any other state
-# deduced from the signature, such as min/max permitted number of args.
+# Split the XSUB's parameter list on commas into parameters, while
+# allowing for things like '(a = ",", b)'.
+#
+# Then for each parameter, parse its various fields and store in a
+# ExtUtils::ParseXS::Node::Param object. Store those Param objects within
+# the Params object, plus any other state deduced from the signature, such
+# as min/max permitted number of args.
 #
 # A typical signature might look like:
 #
@@ -1727,7 +1730,7 @@ sub parse {
     # of INPUT/OUTPUT blocks associated with each CASE may update the
     # param objects in a different way.
     #
-    # Note that $pxs->{xsub_sig}{names} provides a second set of
+    # Note that $pxs->{xsub_params}{names} provides a second set of
     # references to most of these param objects; so the object hashes
     # themselves must be preserved, and merely their contents emptied
     # and repopulated each time. Hence also why creating the orig_params
@@ -1735,9 +1738,9 @@ sub parse {
     #
     # XXX This is bit of a temporary hack.
 
-    for my $i (0.. @{$pxs->{xsub_sig}{orig_params}} - 1) {
-        my $op = $pxs->{xsub_sig}{orig_params}[$i];
-        my $p  = $pxs->{xsub_sig}{params}[$i];
+    for my $i (0.. @{$pxs->{xsub_params}{orig_params}} - 1) {
+        my $op = $pxs->{xsub_params}{orig_params}[$i];
+        my $p  = $pxs->{xsub_params}{params}[$i];
         %$p = ();
         my @keys = sort keys %$op;
         @$p{@keys} = @$op{@keys};
@@ -1783,7 +1786,7 @@ sub parse {
     # So when to call this method is significant. Ideally just after all
     # input processing is complete.
 
-    $_->set_proto($pxs) for @{$pxs->{xsub_sig}{params}};
+    $_->set_proto($pxs) for @{$pxs->{xsub_params}{params}};
     1;
 }
 
@@ -1804,7 +1807,7 @@ EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-    for my $param (grep $_->{is_synthetic}, @{$pxs->{xsub_sig}{params}}) {
+    for my $param (grep $_->{is_synthetic}, @{$pxs->{xsub_params}{params}}) {
         $param->as_code($pxs);
     }
 
@@ -1833,8 +1836,8 @@ EOF
     for my $param (
             grep $_->{is_ansi},
                 (
-                    grep(  $_->{is_length}, @{$pxs->{xsub_sig}{params}} ),
-                    grep(! $_->{is_length}, @{$pxs->{xsub_sig}{params}} ),
+                    grep(  $_->{is_length}, @{$pxs->{xsub_params}{params}} ),
+                    grep(! $_->{is_length}, @{$pxs->{xsub_params}{params}} ),
                 )
     )
 
@@ -1977,7 +1980,7 @@ sub as_code {
         $_->as_code($pxs) for @{$self->{kids}};
     }
 
-    my $retval = $pxs->{xsub_sig}{names}{RETVAL};
+    my $retval = $pxs->{xsub_params}{names}{RETVAL};
 
     # A CODE section using RETVAL must also have an OUTPUT entry
     if (        $pxs->{xsub_seen_RETVAL_in_CODE}
@@ -1996,7 +1999,7 @@ sub as_code {
                             && $_->{in_out} =~ /OUT$/
                             && !$_->{in_output}
                     }
-                    @{ $pxs->{xsub_sig}{params}})
+                    @{ $pxs->{xsub_params}{params}})
     {
         $param->as_output_code($pxs);
     }
@@ -2006,7 +2009,7 @@ sub as_code {
     my $outlist_count = grep {    defined $_->{in_out}
                                && $_->{in_out} =~ /OUTLIST$/
                              }
-                             @{$pxs->{xsub_sig}{params}};
+                             @{$pxs->{xsub_params}{params}};
 
     if ($outlist_count) {
         my $ext = $outlist_count;
@@ -2021,7 +2024,7 @@ sub as_code {
         # the stack in addition to at least min_args args, so only need
         # to extend if we're returning more than that.
         print "\tEXTEND(SP,$ext);\n"
-            if $ext > $pxs->{xsub_sig}{min_args} + 1;
+            if $ext > $pxs->{xsub_params}{min_args} + 1;
     }
 
     # ----------------------------------------------------------------
@@ -2048,7 +2051,7 @@ sub as_code {
     for my $param (grep {   defined $_->{in_out}
                          && $_->{in_out} =~ /OUTLIST$/
                         }
-                        @{$pxs->{xsub_sig}{params}}
+                        @{$pxs->{xsub_params}{params}}
     ) {
         $param->as_output_code($pxs, $num++);
     }
@@ -2218,7 +2221,7 @@ sub as_code {
         $pxs->{xsub_func_name} = 'XSFUNCTION'
                             if $pxs->{xsub_seen_INTERFACE_or_MACRO};
 
-        my $sig  = $pxs->{xsub_sig};
+        my $sig  = $pxs->{xsub_params};
         my $args = $sig->{auto_function_sig_override}; # C_ARGS
         $args = $sig->C_func_signature($pxs)
             unless defined $args;
@@ -2446,7 +2449,7 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
-    $pxs->{xsub_sig}{auto_function_sig_override} = $self->{text};
+    $pxs->{xsub_params}{auto_function_sig_override} = $self->{text};
     1;
 }
 
@@ -3210,7 +3213,7 @@ sub parse {
     my ($var_num, $is_alien);
 
     my ExtUtils::ParseXS::Node::Param $param
-                = $pxs->{xsub_sig}{names}{$var_name};
+                = $pxs->{xsub_params}{names}{$var_name};
 
     if (defined $param) {
         # The var appeared in the signature too.
@@ -3238,9 +3241,9 @@ sub parse {
                 # type, and has already been moved to the correct position;
                 # otherwise, it's an alien var that didn't appear in the
                 # signature; move to the correct position.
-                @{$pxs->{xsub_sig}{params}} =
-                            grep $_ != $param, @{$pxs->{xsub_sig}{params}};
-                push @{$pxs->{xsub_sig}{params}}, $param;
+                @{$pxs->{xsub_params}{params}} =
+                            grep $_ != $param, @{$pxs->{xsub_params}{params}};
+                push @{$pxs->{xsub_params}{params}}, $param;
                 $is_alien          = 1;
                 $param->{is_alien} = 1;
             }
@@ -3259,8 +3262,8 @@ sub parse {
                     is_alien => 1,
                 });
 
-        push @{$pxs->{xsub_sig}{params}}, $param;
-        $pxs->{xsub_sig}{names}{$var_name} = $param;
+        push @{$pxs->{xsub_params}{params}}, $param;
+        $pxs->{xsub_params}{names}{$var_name} = $param;
     }
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -3412,7 +3415,7 @@ sub parse {
     $self->{name} = $outarg;
 
     my ExtUtils::ParseXS::Node::Param $param =
-                                        $pxs->{xsub_sig}{names}{$outarg};
+                                        $pxs->{xsub_params}{names}{$outarg};
     $self->{param} = $param;
 
     if ($param && $param->{in_output}) {
