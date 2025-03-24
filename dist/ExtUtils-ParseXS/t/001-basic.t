@@ -3171,6 +3171,51 @@ EOF
         ],
 
 
+        [
+            "CASE: case follows unconditionl CASE",
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |    CASE: X
+                |        CODE:
+                |            AAA
+                |    CASE:
+                |        CODE:
+                |            BBB
+                |    CASE: Y
+                |        CODE:
+                |            CCC
+EOF
+            [ 1, 0, qr/\QError: 'CASE:' after unconditional 'CASE:'/,
+                    "expected err" ],
+        ],
+        [
+            "CASE: not at top of function",
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |    CODE:
+                |        AAA
+                |    CASE: X
+                |        CODE:
+EOF
+            [ 1, 0, qr/\QError: No 'CASE:' at top of function/,
+                    "expected err" ],
+        ],
+        [
+            "CASE: junk",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(a)
+                |CASE: X
+                |    SCOPE: ENABLE
+                |    INPUTx:
+EOF
+            [ 1, 0, qr/\QError: junk at end of function: "    INPUTx:" in /,
+                    "expected err" ],
+        ],
+
+
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

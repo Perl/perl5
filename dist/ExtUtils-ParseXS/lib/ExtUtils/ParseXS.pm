@@ -1021,7 +1021,9 @@ EOF
 
       last if $_ eq "$END:";
 
-      $self->death(/^$BLOCK_regexp/o ? "Misplaced '$1:'" : "Junk at end of function ($_)");
+      $self->death( /^$BLOCK_regexp/o
+                        ? "Error: misplaced '$1:'"
+                        : qq{Error: junk at end of function: "$_"});
 
     } # end while (@{ $self->{line} })
 
