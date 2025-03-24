@@ -2242,58 +2242,40 @@ sub output_LB_table() {
     # don't break, we avoid an extra test
     set_lb_nobreak_ignoring_SP('Space', 'Word_Joiner', $rule);
 
-    # LB9 and LB10 are done in the same loop
+    # Rules 9 and 10 are reversed here to fit better with the language of
+    # UAX14.  This reverse works out because they operate on disjoint sets of
+    # cells.
     #
     # LB9 Do not break a combining character sequence; treat it as if it has
     # the line breaking class of the base character in all of the
     # higher-numbered rules.  Treat ZWJ as if it were CM
     # Treat X (CM|ZWJ)* as if it were X.
     # where X is any line break class except BK, CR, LF, NL, SP, or ZW.
-
+    #
+    # khw found this language confusing, but basically it works out to don't
+    # break between a character and a character that combines with it,
+    # inheriting the type of nobreak from whatever the previous rules have
+    # filled in.  If the order is reversed, and the combining character
+    # precedes another one, we have to backup at runtime to find out if the
+    # combining character attached to an earlier character or not.
+    my @CM_doesnt_combine = qw(Mandatory_Break Carriage_Return
+                               Line_Feed Next_Line Space ZWSpace EDGE);
     # LB10 Treat any remaining combining mark or ZWJ as AL.  This catches the
     # case where a CM or ZWJ is the first character on the line or follows SP,
     # BK, CR, LF, NL, or ZW.
-    for my $i (0 .. @lb_table - 1) {
+    set_lb_cells(\@CM_doesnt_combine, $_,
+                 get_lb_cell_value($_, 'Alphabetic'), 10)
+                                                    for qw(Combining_Mark ZWJ);
 
-        # When the CM or ZWJ is the first in the pair, we don't know without
-        # looking behind whether the CM or ZWJ is going to attach to an
-        # earlier character, or not.  So have to figure this out at runtime in
-        # the code
-        add_lb_dfa('Combining_Mark', $i, 'LB_CM_ZWJ_foo', 9);
-        add_lb_dfa('ZWJ', $i, 'LB_CM_ZWJ_foo', 9);
+    # When the CM or ZWJ is the first in the pair, we don't know without
+    # looking behind whether the CM or ZWJ is going to attach to an earlier
+    # character, or not.  So have to figure this out at runtime in the code
+    add_lb_dfa($_, '*', 'LB_CM_ZWJ_foo', 9) for qw(Combining_Mark ZWJ);
 
-        if (   $i == $lb_enums{'Mandatory_Break'}
-            || $i == $lb_enums{'EDGE'}
-            || $i == $lb_enums{'Carriage_Return'}
-            || $i == $lb_enums{'Line_Feed'}
-            || $i == $lb_enums{'Next_Line'}
-            || $i == $lb_enums{'Space'}
-            || $i == $lb_enums{'ZWSpace'})
-        {
-            # For these classes, a following CM doesn't combine, and should do
-            # whatever 'Alphabetic' would do.
-            $lb_table[$i][$lb_enums{'Combining_Mark'}]
-                                    = $lb_table[$i][$lb_enums{'Alphabetic'}];
-            $lb_table[$i][$lb_enums{'ZWJ'}]
-                                    = $lb_table[$i][$lb_enums{'Alphabetic'}];
-        }
-        else {
-            # For these classes, the CM or ZWJ combines, so doesn't break,
-            # inheriting the type of nobreak from the master character.
-            if ($lb_table[$i][$lb_enums{'Combining_Mark'}]
-                            != $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
-            {
-                $lb_table[$i][$lb_enums{'Combining_Mark'}]
-                                        = $lb_dfas{'LB_NOBREAK'};
-            }
-            if ($lb_table[$i][$lb_enums{'ZWJ'}]
-                            != $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
-            {
-                $lb_table[$i][$lb_enums{'ZWJ'}]
-                                        = $lb_dfas{'LB_NOBREAK'};
-            }
-        }
-    }
+    # For the opposite classes, the CM or ZWJ combines, so doesn't break,
+    # but it inherits the type of nobreak from the master character.
+    set_lb_nobreak_no_override_ignoring_SP( [ '^', @CM_doesnt_combine ],
+                                           $_, 9) for qw(Combining_Mark ZWJ);
 
     # LB8a Do not break after a zero width joiner
     # ZWJ ×
