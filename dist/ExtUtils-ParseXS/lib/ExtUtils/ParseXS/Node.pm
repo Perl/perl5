@@ -1193,7 +1193,7 @@ BEGIN { $build_subclass->('', # parent
         'names',         # Hash ref mapping variable names to Node::Param
                          # objects
 
-        'sig_text',      # The original text of the sig, e.g.
+        'params_text',   # The original text of the sig, e.g.
                          #   'param1, int param2 = 0'
 
         'seen_ellipsis', # Bool: XSUB signature has (   ,...)
@@ -1206,7 +1206,7 @@ BEGIN { $build_subclass->('', # parent
 
 
 # ----------------------------------------------------------------
-# Parse the XSUB's signature: $sig->{sig_text}
+# Parse the parameter list of an XSUB's signature.
 #
 # Split the XSUB's parameter list on commas into parameters, while
 # allowing for things like '(a = ",", b)'.
@@ -1262,12 +1262,13 @@ $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
 sub parse {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
+     my $params_text           = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
     # remove line continuation chars (\)
-    $self->{sig_text} =~ s/\\\s*/ /g;
-    my $sig_text = $self->{sig_text};
+    $params_text =~ s/\\\s*/ /g;
+    $self->{params_text} = $params_text;
 
     my @param_texts;
     my $opt_args = 0; # how many params with default values seen
@@ -1275,8 +1276,8 @@ sub parse {
 
     # First, split signature into separate parameters
 
-    if ($sig_text =~ /\S/) {
-        my $sig_c = "$sig_text ,";
+    if ($params_text =~ /\S/) {
+        my $sig_c = "$params_text ,";
         use re 'eval'; # needed for 5.16.0 and earlier
         my $can_use_regex = ($sig_c =~ /^( (??{ $C_arg }) , )* $ /x);
         no re 'eval';
@@ -1292,8 +1293,8 @@ sub parse {
             # This is the fallback parameter-splitting path for when the
             # $C_arg regex doesn't work. This code path should ideally
             # never be reached, and indicates a design weakness in $C_arg.
-            @param_texts = split(/\s*,\s*/, $sig_text);
-            Warn($pxs, "Warning: cannot parse parameter list '$sig_text', fallback to split");
+            @param_texts = split(/\s*,\s*/, $params_text);
+            Warn($pxs, "Warning: cannot parse parameter list '$params_text', fallback to split");
         }
     }
     else {

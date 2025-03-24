@@ -747,6 +747,8 @@ EOM
         = $self->{xsub_params}
         = ExtUtils::ParseXS::Node::Params->new();
 
+    my $params_text;
+
     {
       my $func_header = shift(@{ $self->{line} });
 
@@ -761,7 +763,7 @@ EOM
       $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-      ($self->{xsub_class}, $self->{xsub_func_name}, $params->{sig_text})
+      ($self->{xsub_class}, $self->{xsub_func_name}, $params_text)
           = ($1, $2, $3);
 
       $self->{xsub_class} = "$4 $self->{xsub_class}" if $4;
@@ -797,7 +799,7 @@ EOM
       # $self->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
       # $self->{xsub_func_full_C_name}    'BAR__BAZ_bar';
       #
-      # $params->{sig_text}               'param1, param2, param3'
+      # $params_text                      'param1, param2, param3'
 
 
       # Check for a duplicate function definition, but ignoring multiple
@@ -823,10 +825,10 @@ EOM
     # ----------------------------------------------------------------
     # Process the XSUB's signature.
     #
-    # Split $self->{xsub_sub}{sig_text} into parameters, parse them,
-    # and store them as Node::Param objects within the Node::Params object.
+    # Split $params_text into parameters, parse them, and store them as
+    # Node::Param objects within the Node::Params object.
 
-    $params->parse($self);
+    $params->parse($self, $params_text);
 
     # ----------------------------------------------------------------
     # Peek ahead into the body of the XSUB looking for various conditions
