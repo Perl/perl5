@@ -544,10 +544,9 @@ Perl_new_version(pTHX_ SV *ver)
     }
 #ifdef SvVOK
     {
-        const MAGIC* const mg = SvVSTRING_mg(ver);
-        if ( mg ) { /* already a v-string */
-            const STRLEN len = mg->mg_len;
-            const char * const version = (const char*)mg->mg_ptr;
+        if (SvVOK(ver)) { /* already a v-string */
+            STRLEN len;
+            const char * const version = SvVSTRING(ver, len);
             char *raw, *under;
             static const char underscore[] = "_";
             sv_setpvn(rv,version,len);
@@ -618,9 +617,6 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #endif
 {
     const char *version, *s;
-#ifdef SvVOK
-    const MAGIC *mg;
-#endif
 
 #if PERL_VERSION_LT(5,19,8) && defined(USE_ITHREADS)
     ENTER;
@@ -820,8 +816,10 @@ VER_NV:
         SvREFCNT_dec(sv);
     }
 #ifdef SvVOK
-    else if ( (mg = SvVSTRING_mg(ver)) ) { /* already a v-string */
-        version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
+    else if (SvVOK(ver)) { /* already a v-string */
+        STRLEN len;
+        const char *pv = SvVSTRING(ver, len);
+        version = savepvn(pv, len);
         SAVEFREEPV(version);
         qv = TRUE;
     }
