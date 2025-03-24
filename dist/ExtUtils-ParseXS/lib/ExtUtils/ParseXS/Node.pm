@@ -29,6 +29,10 @@ directly: there are no getter/setter methods.
 
 =cut
 
+# store these in variables to hide them from brace-matching text editors
+my $open_brace  = '{';
+my $close_brace = '}';
+
 # Utility sub to handle all the boilerplate of declaring a Node subclass,
 # including setting up @INC and @FIELDS. Intended to be called from within
 # BEGIN. (Created as a lexical sub ref to make it easily accessible to
@@ -175,6 +179,7 @@ sub parse_keywords {
 
 
 sub as_code { }
+
 
 # ======================================================================
 
@@ -1597,14 +1602,9 @@ sub as_code {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
 
-    # Emit opening brace. With cmd-line switch "-except", prefix it
-    # with 'TRY'
-    {
-        my $try = $pxs->{config_allow_exceptions} ? ' TRY' : '';
-        print ExtUtils::ParseXS::Q(<<"EOF");
-            |   $try [[
-EOF
-    }
+    # Emit opening brace. With cmd-line switch "-except", prefix it with 'TRY'
+    print   +($pxs->{config_allow_exceptions} ? ' TRY' : '')
+          . "    $open_brace\n";
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
@@ -1614,17 +1614,16 @@ EOF
     # Emit trailers for the body of the XSUB
     # ----------------------------------------------------------------
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
-      |   ]]
-EOF
+    if ($pxs->{xsub_SCOPE_enabled}) {
+        # the matching opens were emitted in input_part->as_code()
+        print "   $close_brace\n";
+        # PPCODE->as_code emits its own LEAVE and return, so this
+        # line would never be reached.
+        print "   LEAVE;\n" unless $pxs->{xsub_seen_PPCODE};
+    }
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled} and not $pxs->{xsub_seen_PPCODE};
-      |   LEAVE;
-EOF
-
-    print ExtUtils::ParseXS::Q(<<"EOF");
-      |    ]]
-EOF
+    # matches the $open_brace at the start of this function
+    print "    $close_brace\n";
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
       |    BEGHANDLERS
@@ -1724,9 +1723,10 @@ sub as_code {
         $_->as_code($pxs) for @{$self->{kids}};
     }
 
+    # The matching closes will be emitted in xbody->as_code()
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
         |   ENTER;
-        |   [[
+        |   $open_brace
 EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
