@@ -203,7 +203,7 @@ sub parse {
     my $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
 
     $return_type->parse($pxs)
-      or return;
+        or return;
 
     my $params = $pxs->{xsub_params}
                = ExtUtils::ParseXS::Node::Params->new();
@@ -211,65 +211,65 @@ sub parse {
     my $params_text;
 
     {
-      my $func_header = shift(@{ $pxs->{line} });
+    my $func_header = shift(@{ $pxs->{line} });
 
-      # Decompose the function declaration: match a line like
-      #   Some::Class::foo_bar(  args  ) const ;
-      #   -----------  -------   ----    ----- --
-      #       $1        $2        $3      $4   $5
-      #
-      # where everything except $2 and $3 are optional and the 'const'
-      # is for C++ functions.
+    # Decompose the function declaration: match a line like
+    #   Some::Class::foo_bar(  args  ) const ;
+    #   -----------  -------   ----    ----- --
+    #       $1        $2        $3      $4   $5
+    #
+    # where everything except $2 and $3 are optional and the 'const'
+    # is for C++ functions.
 
-      $pxs->blurt("Error: Cannot parse function definition from '$func_header'"), return
+    $pxs->blurt("Error: Cannot parse function definition from '$func_header'"), return
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-      ($pxs->{xsub_class}, $pxs->{xsub_func_name}, $params_text)
-          = ($1, $2, $3);
+    ($pxs->{xsub_class}, $pxs->{xsub_func_name}, $params_text)
+            = ($1, $2, $3);
 
-      $pxs->{xsub_class} = "$4 $pxs->{xsub_class}" if $4;
+    $pxs->{xsub_class} = "$4 $pxs->{xsub_class}" if $4;
 
-      if ($pxs->{xsub_seen_static}
-          and !defined $pxs->{xsub_class})
-      {
+    if ($pxs->{xsub_seen_static}
+            and !defined $pxs->{xsub_class})
+    {
         $pxs->Warn(  "Ignoring 'static' type modifier:"
-                    . " only valid with an XSUB name which includes a class");
+                                . " only valid with an XSUB name which includes a class");
         $pxs->{xsub_seen_static} = 0;
-      }
+    }
 
-      ($pxs->{xsub_func_full_perl_name} = $pxs->{xsub_func_name}) =~
-          s/^($pxs->{PREFIX_pattern})?/$pxs->{PACKAGE_class}/;
+    ($pxs->{xsub_func_full_perl_name} = $pxs->{xsub_func_name}) =~
+            s/^($pxs->{PREFIX_pattern})?/$pxs->{PACKAGE_class}/;
 
-      my $clean_func_name;
-      ($clean_func_name = $pxs->{xsub_func_name}) =~ s/^$pxs->{PREFIX_pattern}//;
-      $pxs->{xsub_func_full_C_name} = "$pxs->{PACKAGE_C_name}_$clean_func_name";
-      if ($ExtUtils::ParseXS::Is_VMS) {
+    my $clean_func_name;
+    ($clean_func_name = $pxs->{xsub_func_name}) =~ s/^$pxs->{PREFIX_pattern}//;
+    $pxs->{xsub_func_full_C_name} = "$pxs->{PACKAGE_C_name}_$clean_func_name";
+    if ($ExtUtils::ParseXS::Is_VMS) {
         $pxs->{xsub_func_full_C_name} = $ExtUtils::ParseXS::VMS_SymSet->addsym( $pxs->{xsub_func_full_C_name} );
-      }
+    }
 
-      # At this point, supposing that the input so far was:
-      #
-      #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
-      #   int
-      #   Some::Class::foo_bar(  args  ) const ;
-      #
-      # we should have:
-      #
-      # $pxs->{xsub_class}               'const Some::Class'
-      # $pxs->{xsub_func_name}           'foo_bar'
-      # $pxs->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
-      # $pxs->{xsub_func_full_C_name}    'BAR__BAZ_bar';
-      #
-      # $params_text                      'param1, param2, param3'
+    # At this point, supposing that the input so far was:
+    #
+    #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
+    #   int
+    #   Some::Class::foo_bar(  args  ) const ;
+    #
+    # we should have:
+    #
+    # $pxs->{xsub_class}               'const Some::Class'
+    # $pxs->{xsub_func_name}           'foo_bar'
+    # $pxs->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
+    # $pxs->{xsub_func_full_C_name}    'BAR__BAZ_bar';
+    #
+    # $params_text                      'param1, param2, param3'
 
 
-      # Check for a duplicate function definition, but ignoring multiple
-      # definitions within the branches of an #if/#else/#endif
-      for my $tmp (@{ $pxs->{XS_parse_stack} }) {
+    # Check for a duplicate function definition, but ignoring multiple
+    # definitions within the branches of an #if/#else/#endif
+    for my $tmp (@{ $pxs->{XS_parse_stack} }) {
         next unless defined $tmp->{functions}{ $pxs->{xsub_func_full_C_name} };
         $pxs->Warn("Warning: duplicate function definition '$clean_func_name' detected");
         last;
-      }
+    }
     }
 
     # mark C function name as used
@@ -278,7 +278,7 @@ sub parse {
     # initialise more per-XSUB state
     delete $pxs->{xsub_map_alias_name_to_value};           # ALIAS: ...
     delete $pxs->{xsub_map_alias_value_to_name_seen_hash};
-                                            # INTERFACE: foo bar
+                                                                                    # INTERFACE: foo bar
     %{ $pxs->{xsub_map_interface_name_short_to_original} } = ();
     @{ $pxs->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
     $pxs->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
