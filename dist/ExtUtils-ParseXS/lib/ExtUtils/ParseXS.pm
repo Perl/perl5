@@ -736,7 +736,10 @@ EOM
 
     unshift @{$self->{line}}, $_;
 
-    $self->_parse_signature();
+    my ExtUtils::ParseXS::Node::xsub_decl $decl
+          = ExtUtils::ParseXS::Node::xsub_decl->new();
+    $decl->parse($self)
+      or next PARAGRAPH;
 
     # ----------------------------------------------------------------
     # Peek ahead into the body of the XSUB looking for various conditions

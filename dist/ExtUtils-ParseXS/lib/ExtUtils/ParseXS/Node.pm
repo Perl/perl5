@@ -183,23 +183,35 @@ sub as_code { }
 
 # ======================================================================
 
-package ExtUtils::ParseXS; # XXX
+package ExtUtils::ParseXS::Node::xsub_decl;
 
-sub _parse_signature {
-    my ExtUtils::ParseXS $self = shift;
+# Parse and store the complete declaration part of an XSUB, including
+# its parameters, name and return type.
 
-    my  $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
+BEGIN { $build_subclass->('', # parent
+)};
 
-    $return_type->parse($self)
-      or next PARAGRAPH;
 
-    my $params = $self->{xsub_params}
+# Parse the XSUB's declaration - i.e. return type, name and parameters.
+
+sub parse {
+    my __PACKAGE__                     $self   = shift;
+    my ExtUtils::ParseXS               $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
+
+    $return_type->parse($pxs)
+      or return;
+
+    my $params = $pxs->{xsub_params}
                = ExtUtils::ParseXS::Node::Params->new();
 
     my $params_text;
 
     {
-      my $func_header = shift(@{ $self->{line} });
+      my $func_header = shift(@{ $pxs->{line} });
 
       # Decompose the function declaration: match a line like
       #   Some::Class::foo_bar(  args  ) const ;
@@ -209,30 +221,30 @@ sub _parse_signature {
       # where everything except $2 and $3 are optional and the 'const'
       # is for C++ functions.
 
-      $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
+      $pxs->blurt("Error: Cannot parse function definition from '$func_header'"), return
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-      ($self->{xsub_class}, $self->{xsub_func_name}, $params_text)
+      ($pxs->{xsub_class}, $pxs->{xsub_func_name}, $params_text)
           = ($1, $2, $3);
 
-      $self->{xsub_class} = "$4 $self->{xsub_class}" if $4;
+      $pxs->{xsub_class} = "$4 $pxs->{xsub_class}" if $4;
 
-      if ($self->{xsub_seen_static}
-          and !defined $self->{xsub_class})
+      if ($pxs->{xsub_seen_static}
+          and !defined $pxs->{xsub_class})
       {
-        $self->Warn(  "Ignoring 'static' type modifier:"
+        $pxs->Warn(  "Ignoring 'static' type modifier:"
                     . " only valid with an XSUB name which includes a class");
-        $self->{xsub_seen_static} = 0;
+        $pxs->{xsub_seen_static} = 0;
       }
 
-      ($self->{xsub_func_full_perl_name} = $self->{xsub_func_name}) =~
-          s/^($self->{PREFIX_pattern})?/$self->{PACKAGE_class}/;
+      ($pxs->{xsub_func_full_perl_name} = $pxs->{xsub_func_name}) =~
+          s/^($pxs->{PREFIX_pattern})?/$pxs->{PACKAGE_class}/;
 
       my $clean_func_name;
-      ($clean_func_name = $self->{xsub_func_name}) =~ s/^$self->{PREFIX_pattern}//;
-      $self->{xsub_func_full_C_name} = "$self->{PACKAGE_C_name}_$clean_func_name";
+      ($clean_func_name = $pxs->{xsub_func_name}) =~ s/^$pxs->{PREFIX_pattern}//;
+      $pxs->{xsub_func_full_C_name} = "$pxs->{PACKAGE_C_name}_$clean_func_name";
       if ($ExtUtils::ParseXS::Is_VMS) {
-        $self->{xsub_func_full_C_name} = $ExtUtils::ParseXS::VMS_SymSet->addsym( $self->{xsub_func_full_C_name} );
+        $pxs->{xsub_func_full_C_name} = $ExtUtils::ParseXS::VMS_SymSet->addsym( $pxs->{xsub_func_full_C_name} );
       }
 
       # At this point, supposing that the input so far was:
@@ -243,33 +255,33 @@ sub _parse_signature {
       #
       # we should have:
       #
-      # $self->{xsub_class}               'const Some::Class'
-      # $self->{xsub_func_name}           'foo_bar'
-      # $self->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
-      # $self->{xsub_func_full_C_name}    'BAR__BAZ_bar';
+      # $pxs->{xsub_class}               'const Some::Class'
+      # $pxs->{xsub_func_name}           'foo_bar'
+      # $pxs->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
+      # $pxs->{xsub_func_full_C_name}    'BAR__BAZ_bar';
       #
       # $params_text                      'param1, param2, param3'
 
 
       # Check for a duplicate function definition, but ignoring multiple
       # definitions within the branches of an #if/#else/#endif
-      for my $tmp (@{ $self->{XS_parse_stack} }) {
-        next unless defined $tmp->{functions}{ $self->{xsub_func_full_C_name} };
-        $self->Warn("Warning: duplicate function definition '$clean_func_name' detected");
+      for my $tmp (@{ $pxs->{XS_parse_stack} }) {
+        next unless defined $tmp->{functions}{ $pxs->{xsub_func_full_C_name} };
+        $pxs->Warn("Warning: duplicate function definition '$clean_func_name' detected");
         last;
       }
     }
 
     # mark C function name as used
-    $self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{functions}{ $self->{xsub_func_full_C_name} }++;
+    $pxs->{XS_parse_stack}->[$pxs->{XS_parse_stack_top_if_idx}]{functions}{ $pxs->{xsub_func_full_C_name} }++;
 
     # initialise more per-XSUB state
-    delete $self->{xsub_map_alias_name_to_value};           # ALIAS: ...
-    delete $self->{xsub_map_alias_value_to_name_seen_hash};
+    delete $pxs->{xsub_map_alias_name_to_value};           # ALIAS: ...
+    delete $pxs->{xsub_map_alias_value_to_name_seen_hash};
                                             # INTERFACE: foo bar
-    %{ $self->{xsub_map_interface_name_short_to_original} } = ();
-    @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
-    $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
+    %{ $pxs->{xsub_map_interface_name_short_to_original} } = ();
+    @{ $pxs->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
+    $pxs->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
 
     # ----------------------------------------------------------------
     # Process the XSUB's signature.
@@ -277,8 +289,9 @@ sub _parse_signature {
     # Split $params_text into parameters, parse them, and store them as
     # Node::Param objects within the Node::Params object.
 
-    $params->parse($self, $params_text);
+    $params->parse($pxs, $params_text);
 
+    1;
 }
 
 
