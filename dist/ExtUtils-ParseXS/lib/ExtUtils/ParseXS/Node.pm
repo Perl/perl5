@@ -210,7 +210,6 @@ sub parse {
 
     my $params_text;
 
-    {
     my $func_header = shift(@{ $pxs->{line} });
 
     # Decompose the function declaration: match a line like
@@ -269,7 +268,6 @@ sub parse {
         next unless defined $tmp->{functions}{ $pxs->{xsub_func_full_C_name} };
         $pxs->Warn("Warning: duplicate function definition '$clean_func_name' detected");
         last;
-    }
     }
 
     # mark C function name as used
