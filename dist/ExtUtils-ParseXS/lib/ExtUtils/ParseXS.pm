@@ -108,7 +108,7 @@ $AUTHOR_WARNINGS = ($ENV{AUTHOR_WARNINGS} || 0)
     unless defined $AUTHOR_WARNINGS;
 
 # "impossible" keyword (multiple newline)
-my $END = "!End!\n\n";
+our $END = "!End!\n\n";
 # Match an XS Keyword
 our $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
 
@@ -744,8 +744,7 @@ EOM
 
     unshift @{$self->{line}}, $_;
 
-    my ExtUtils::ParseXS::Node::xsub_decl $decl
-          = ExtUtils::ParseXS::Node::xsub_decl->new();
+    my $decl = ExtUtils::ParseXS::Node::xsub_decl->new();
     $decl->parse($self)
       or next PARAGRAPH;
 
@@ -869,7 +868,7 @@ EOF
     $self->{xsub_CASE_condition} = ''; # last CASE: conditional
 
     # Append a fake EOF-keyword line
-    push(@{ $self->{line} }, "$END:");
+    push(@{ $self->{line} }, "$ExtUtils::ParseXS::END:");
     push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
 
     $_ = '';
@@ -914,9 +913,9 @@ EOF
         next;
       }
 
-      last if $_ eq "$END:";
+      last if $_ eq "$ExtUtils::ParseXS::END:";
 
-      $self->death( /^$BLOCK_regexp/o
+      $self->death( /^$ExtUtils::ParseXS::BLOCK_regexp/o
                         ? "Error: misplaced '$1:'"
                         : qq{Error: junk at end of function: "$_"});
 
