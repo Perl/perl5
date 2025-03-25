@@ -738,8 +738,12 @@ EOM
     @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
     $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
 
-    $self-> _parse_xsub()
+    unshift @{$self->{line}}, $_;
+
+    my $xsub = ExtUtils::ParseXS::Node::xsub->new();
+    $xsub->parse($self)
       or next PARAGRAPH;
+    $xsub->as_code();
 
   } # END 'PARAGRAPH' 'while' loop
 
