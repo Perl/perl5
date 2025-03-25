@@ -1398,7 +1398,9 @@ EOF
 
 
 {
-    # Test return type declarations - don't cut down output
+    # Test XSUB declarations declarations
+    # Generates errors which don't result in an XSUB being emitted,
+    # so use 'undef' in the test_many() call to not strip down output
 
     my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
@@ -1418,12 +1420,47 @@ EOF
                     "has extern decl" ],
         ],
         [
-            "too short",
+            "defn too short",
             [ Q(<<'EOF') ],
                 |int
 EOF
             [ 1, 0, qr/Error: Function definition too short 'int'/, "got err" ],
-        ]
+        ],
+        [
+            "defn not parseable 1",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(aaa
+                |    CODE:
+                |        AAA
+EOF
+            [ 1, 0, qr/\QError: Cannot parse function definition from 'foo(aaa' in\E.*line 6/,
+                    "got err" ],
+        ],
+        [
+            "defn not parseable 2",
+            [ Q(<<'EOF') ],
+                |int
+                |fo o(aaa)
+EOF
+            [ 1, 0, qr/\QError: Cannot parse function definition from 'fo o(aaa)' in\E.*line 6/,
+                    "got err" ],
+        ],
+        # note that  issuing this warning is somewhat controversial:
+        # see GH 19661. But while we cntinue to warn, test that we get a
+        # warning.
+        [
+            "dup fn warning",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(aaa)
+                |
+                |int
+                |foo(aaa)
+EOF
+            [ 1, 0, qr/\QWarning: duplicate function definition 'foo' detected in\E.*line 9/,
+                    "got warn" ],
+        ],
     );
 
     test_many($preamble, undef, \@test_fns);
