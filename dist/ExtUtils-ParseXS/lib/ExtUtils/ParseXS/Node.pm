@@ -423,6 +423,24 @@ EOF
             |
 EOF
 
+    $self->boot_code($pxs);
+
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+}
+
+
+sub boot_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
     # ----------------------------------------------------------------
     # Generate (but don't yet emit - push to $pxs->{bootcode_early}) the
     # boot code for the XSUB, including newXS() call(s) plus any
@@ -543,15 +561,6 @@ EOF
                 "        (void)$newXS(\"$overload\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
         }
     }
-
-    1;
-}
-
-
-sub as_code {
-    my __PACKAGE__        $self   = shift;
-    my ExtUtils::ParseXS  $pxs    = shift;
-
 }
 
 
