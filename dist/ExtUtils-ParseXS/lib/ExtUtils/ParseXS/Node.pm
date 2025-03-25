@@ -202,14 +202,14 @@ sub parse {
 
     my $decl = ExtUtils::ParseXS::Node::xsub_decl->new();
     $decl->parse($pxs)
-      or return;
+        or return;
 
     # ----------------------------------------------------------------
     # Peek ahead into the body of the XSUB looking for various conditions
     # that are needed to be known early.
     # ----------------------------------------------------------------
 
-    $pxs->{xsub_seen_ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $pxs->{line} });
+    $pxs->{xsub_seen_ALIAS}    =   grep(/^\s*ALIAS\s*:/,     @{$pxs->{line}});
 
     $pxs->{xsub_seen_PPCODE}   = !!grep(/^\s*PPCODE\s*:/,    @{$pxs->{line}});
     $pxs->{xsub_seen_CODE}     = !!grep(/^\s*CODE\s*:/,      @{$pxs->{line}});
@@ -240,9 +240,9 @@ sub parse {
     #
     # XXX this searches the whole XSUB, not just the CODE: section
     {
-      my $EXPLICIT_RETURN = ($pxs->{xsub_seen_CODE} &&
+        my $EXPLICIT_RETURN = ($pxs->{xsub_seen_CODE} &&
             ("@{ $pxs->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
-      $pxs->{xsub_XSRETURN_count} = 1 if $EXPLICIT_RETURN;
+        $pxs->{xsub_XSRETURN_count} = 1 if $EXPLICIT_RETURN;
     }
 
 
@@ -251,54 +251,54 @@ sub parse {
     # ----------------------------------------------------------------
 
     {
-      my $extern = $pxs->{xsub_seen_extern_C} ? qq[extern "C"] : "";
+        my $extern = $pxs->{xsub_seen_extern_C} ? qq[extern "C"] : "";
 
-    # Emit function header
-      print ExtUtils::ParseXS::Q(<<"EOF");
-        |$extern
-        |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
-        |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name})
-        |[[
-        |    dVAR; dXSARGS;
+        # Emit function header
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |$extern
+            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
+            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name})
+            |[[
+            |    dVAR; dXSARGS;
 EOF
     }
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_ALIAS};
-      |    dXSI32;
+        |    dXSI32;
 EOF
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_INTERFACE};
-      |    dXSFUNCTION($pxs->{xsub_return_type});
+        |    dXSFUNCTION($pxs->{xsub_return_type});
 EOF
 
 
     {
-      # the code to emit to determine whether the correct number of argument
-      # have been passed
-      my $condition_code =
-        ExtUtils::ParseXS::set_cond($pxs->{xsub_params}->{seen_ellipsis}, $pxs->{xsub_params}{min_args},
-                                        $pxs->{xsub_params}{nargs});
+        # the code to emit to determine whether the correct number of argument
+        # have been passed
+        my $condition_code =
+            ExtUtils::ParseXS::set_cond($pxs->{xsub_params}->{seen_ellipsis}, $pxs->{xsub_params}{min_args},
+                                                                            $pxs->{xsub_params}{nargs});
 
-      print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions}; # "-except" cmd line switch
-        |    char errbuf[1024];
-        |    *errbuf = '\\0';
+        print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions}; # "-except" cmd line switch
+            |    char errbuf[1024];
+            |    *errbuf = '\\0';
 EOF
 
-      if ($condition_code) {
-        my $p = $pxs->{xsub_params}->usage_string();
-        $p =~ s/"/\\"/g;
-        print ExtUtils::ParseXS::Q(<<"EOF");
-          |    if ($condition_code)
-          |       croak_xs_usage(cv,  "$p");
+        if ($condition_code) {
+            my $p = $pxs->{xsub_params}->usage_string();
+            $p =~ s/"/\\"/g;
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    if ($condition_code)
+                |       croak_xs_usage(cv,  "$p");
 EOF
-      }
-      else {
-        # cv and items likely to be unused
-        print ExtUtils::ParseXS::Q(<<"EOF");
-          |    PERL_UNUSED_VAR(cv); /* -W */
-          |    PERL_UNUSED_VAR(items); /* -W */
+        }
+        else {
+            # cv and items likely to be unused
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    PERL_UNUSED_VAR(cv); /* -W */
+                |    PERL_UNUSED_VAR(items); /* -W */
 EOF
-      }
+        }
     }
 
     # gcc -Wall: if an XSUB has PPCODE, it is possible that none of ST,
@@ -307,11 +307,11 @@ EOF
     # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     # but such a move could break third-party extensions
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
-      |    PERL_UNUSED_VAR(ax); /* -Wall */
+        |    PERL_UNUSED_VAR(ax); /* -Wall */
 EOF
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
-      |    SP -= items;
+        |    SP -= items;
 EOF
 
     # ----------------------------------------------------------------
@@ -338,8 +338,8 @@ EOF
 
     $pxs->{xsub_params}{orig_params} = [];
     for (@{$pxs->{xsub_params}{params}}) {
-      push @{$pxs->{xsub_params}{orig_params}},
-        ExtUtils::ParseXS::Node::Param->new($_);
+        push @{$pxs->{xsub_params}{orig_params}},
+            ExtUtils::ParseXS::Node::Param->new($_);
     }
 
     # ----------------------------------------------------------------
@@ -350,30 +350,30 @@ EOF
 
     while (@{ $pxs->{line} }) {
 
-      # For a 'CASE: foo' line, emit an 'else if (foo)' style line of C.
-      # Note that each CASE: can precede multiple keyword blocks.
-      $pxs->CASE_handler($_) if $pxs->check_keyword("CASE");
+        # For a 'CASE: foo' line, emit an 'else if (foo)' style line of C.
+        # Note that each CASE: can precede multiple keyword blocks.
+        $pxs->CASE_handler($_) if $pxs->check_keyword("CASE");
 
-      {
-          unshift @{$pxs->{line}}, $_;
-          my $xbody = ExtUtils::ParseXS::Node::xbody->new();
-          $xbody->parse($pxs);
-          $_ = shift @{$pxs->{line}};
-          $xbody->as_code($pxs);
-      }
+        {
+            unshift @{$pxs->{line}}, $_;
+            my $xbody = ExtUtils::ParseXS::Node::xbody->new();
+            $xbody->parse($pxs);
+            $_ = shift @{$pxs->{line}};
+            $xbody->as_code($pxs);
+        }
 
-      if ($pxs->check_keyword("CASE")) {
-        $pxs->blurt("Error: No 'CASE:' at top of function")
-          unless $pxs->{xsub_CASE_condition_count};
-        $_ = "CASE: $_";    # Restore CASE: label
-        next;
-      }
+        if ($pxs->check_keyword("CASE")) {
+            $pxs->blurt("Error: No 'CASE:' at top of function")
+                unless $pxs->{xsub_CASE_condition_count};
+            $_ = "CASE: $_";    # Restore CASE: label
+            next;
+        }
 
-      last if $_ eq "$ExtUtils::ParseXS::END:";
+        last if $_ eq "$ExtUtils::ParseXS::END:";
 
-      $pxs->death( /^$ExtUtils::ParseXS::BLOCK_regexp/o
-                        ? "Error: misplaced '$1:'"
-                        : qq{Error: junk at end of function: "$_"});
+        $pxs->death( /^$ExtUtils::ParseXS::BLOCK_regexp/o
+                                            ? "Error: misplaced '$1:'"
+                                            : qq{Error: junk at end of function: "$_"});
 
     } # end while (@{ $pxs->{line} })
 
@@ -385,8 +385,8 @@ EOF
     # ----------------------------------------------------------------
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
-        |    if (errbuf[0])
-        |    Perl_croak(aTHX_ errbuf);
+            |    if (errbuf[0])
+            |    Perl_croak(aTHX_ errbuf);
 EOF
 
     # Emit XSRETURN(N) or XSRETURN_EMPTY. It's possible that the user's
@@ -396,31 +396,31 @@ EOF
 
     # Suppress "statement is unreachable" warning on HPUX
     print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-          "#pragma diag_suppress 2128\n",
-          "#endif\n"
-      if $^O eq "hpux";
+                "#pragma diag_suppress 2128\n",
+                "#endif\n"
+        if $^O eq "hpux";
 
     if ($pxs->{xsub_XSRETURN_count}) {
-      print ExtUtils::ParseXS::Q(<<"EOF") unless $pxs->{xsub_seen_PPCODE};
-        |    XSRETURN($pxs->{xsub_XSRETURN_count});
+        print ExtUtils::ParseXS::Q(<<"EOF") unless $pxs->{xsub_seen_PPCODE};
+            |    XSRETURN($pxs->{xsub_XSRETURN_count});
 EOF
     }
     else {
-      print ExtUtils::ParseXS::Q(<<"EOF") unless $pxs->{xsub_seen_PPCODE};
-        |    XSRETURN_EMPTY;
+        print ExtUtils::ParseXS::Q(<<"EOF") unless $pxs->{xsub_seen_PPCODE};
+            |    XSRETURN_EMPTY;
 EOF
     }
 
     # Suppress "statement is unreachable" warning on HPUX
     print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-          "#pragma diag_default 2128\n",
-          "#endif\n"
-      if $^O eq "hpux";
+                "#pragma diag_default 2128\n",
+                "#endif\n"
+        if $^O eq "hpux";
 
     # Emit final closing bracket for the XSUB.
     print ExtUtils::ParseXS::Q(<<"EOF");
-        |]]
-        |
+            |]]
+            |
 EOF
 
     # ----------------------------------------------------------------
@@ -431,118 +431,117 @@ EOF
     # ----------------------------------------------------------------
 
     {
-      # Depending on whether the XSUB has a prototype, work out how to
-      # invoke one of the newXS() function variants. Set these:
-      #
-      my $newXS;     # the newXS() variant to be called in the boot section
-      my $file_arg;  # an extra      ', file' arg to be passed to newXS call
-      my $proto_arg; # an extra e.g. ', "$@"' arg to be passed to newXS call
+        # Depending on whether the XSUB has a prototype, work out how to
+        # invoke one of the newXS() function variants. Set these:
+        #
+        my $newXS;     # the newXS() variant to be called in the boot section
+        my $file_arg;  # an extra      ', file' arg to be passed to newXS call
+        my $proto_arg; # an extra e.g. ', "$@"' arg to be passed to newXS call
 
-      $proto_arg = "";
+        $proto_arg = "";
 
-      unless($pxs->{xsub_prototype}) {
-        # no prototype
-        $newXS = "newXS_deffile";
-        $file_arg = "";
-      }
-      else {
-        # needs prototype
-        $newXS = "newXSproto_portable";
-        $file_arg = ", file";
-
-        if ($pxs->{xsub_prototype} eq 2) {
-          # User has specified an empty prototype
-        }
-        elsif ($pxs->{xsub_prototype} eq 1) {
-          # Protoype enabled, but to be auto-generated by us
-          $proto_arg = $pxs->{xsub_params}->proto_string();
-          $proto_arg =~ s{\\}{\\\\}g; # escape backslashes
+        unless($pxs->{xsub_prototype}) {
+            # no prototype
+            $newXS = "newXS_deffile";
+            $file_arg = "";
         }
         else {
-          # User has manually specified a prototype
-          $proto_arg = $pxs->{xsub_prototype};
+            # needs prototype
+            $newXS = "newXSproto_portable";
+            $file_arg = ", file";
+
+            if ($pxs->{xsub_prototype} eq 2) {
+                # User has specified an empty prototype
+            }
+            elsif ($pxs->{xsub_prototype} eq 1) {
+                # Protoype enabled, but to be auto-generated by us
+                $proto_arg = $pxs->{xsub_params}->proto_string();
+                $proto_arg =~ s{\\}{\\\\}g; # escape backslashes
+            }
+            else {
+                # User has manually specified a prototype
+                $proto_arg = $pxs->{xsub_prototype};
+            }
+
+            $proto_arg = qq{, "$proto_arg"};
         }
 
-        $proto_arg = qq{, "$proto_arg"};
-      }
+        # Now use those values to append suitable newXS() and other code
+        # into @{ $pxs->{bootcode_early} }, for later insertion into the
+        # boot sub.
 
-      # Now use those values to append suitable newXS() and other code
-      # into @{ $pxs->{bootcode_early} }, for later insertion into the
-      # boot sub.
-
-      if (            $pxs->{xsub_map_alias_name_to_value}
-          and keys %{ $pxs->{xsub_map_alias_name_to_value} })
-      {
-        # For the main XSUB and for each alias name, generate a newXS() call
-        # and 'XSANY.any_i32 = ix' line.
-
-        # Make the main name one of the aliases if it isn't already
-        $pxs->{xsub_map_alias_name_to_value}->{ $pxs->{xsub_func_full_perl_name} } = 0
-          unless defined $pxs->{xsub_map_alias_name_to_value}->{ $pxs->{xsub_func_full_perl_name} };
-
-        foreach my $xname (sort keys %{ $pxs->{xsub_map_alias_name_to_value} }) {
-          my $value = $pxs->{xsub_map_alias_name_to_value}{$xname};
-          push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
-            |        cv = $newXS(\"$xname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
-            |        XSANY.any_i32 = $value;
-EOF
-        }
-      }
-      elsif (@{ $pxs->{xsub_attributes} }) {
-        # Generate a standard newXS() call, plus a single call to
-        # apply_attrs_string() call with the string of attributes.
-        push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
-          |        cv = $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
-          |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
-EOF
-      }
-      elsif ($pxs->{xsub_seen_INTERFACE_or_MACRO}) {
-        # For each interface name, generate both a newXS() and
-        # XSINTERFACE_FUNC_SET() call.
-        foreach my $yname (sort keys
-                    %{ $pxs->{xsub_map_interface_name_short_to_original} })
+        if (                $pxs->{xsub_map_alias_name_to_value}
+                and keys %{ $pxs->{xsub_map_alias_name_to_value} })
         {
-          my $value = $pxs->{xsub_map_interface_name_short_to_original}{$yname};
-          $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
-          push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
-            |        cv = $newXS(\"$yname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
-            |        $pxs->{xsub_interface_macro_set}(cv,$value);
+            # For the main XSUB and for each alias name, generate a newXS() call
+            # and 'XSANY.any_i32 = ix' line.
+
+            # Make the main name one of the aliases if it isn't already
+            $pxs->{xsub_map_alias_name_to_value}->{ $pxs->{xsub_func_full_perl_name} } = 0
+                unless defined $pxs->{xsub_map_alias_name_to_value}->{ $pxs->{xsub_func_full_perl_name} };
+
+            foreach my $xname (sort keys %{ $pxs->{xsub_map_alias_name_to_value} }) {
+                my $value = $pxs->{xsub_map_alias_name_to_value}{$xname};
+                push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+                    |        cv = $newXS(\"$xname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
+                    |        XSANY.any_i32 = $value;
+EOF
+            }
+        }
+        elsif (@{ $pxs->{xsub_attributes} }) {
+            # Generate a standard newXS() call, plus a single call to
+            # apply_attrs_string() call with the string of attributes.
+            push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+                |        cv = $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
+                |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
 EOF
         }
-      }
-      elsif ($newXS eq 'newXS_deffile'){
-        # Modified default: generate a standard newXS() call; but
-        # work around the CPAN 'P5NCI' distribution doing:
-        #     #undef newXS
-        #     #define newXS ;
-        # by omitting the initial (void).
-        # XXX DAPM 2024:
-        # this branch was originally: "elsif ($newXS eq 'newXS')"
-        # but when the standard name for the newXS variant changed in
-        # xsubpp, it was changed here too. So this branch no longer actually
-        # handles a workaround for '#define newXS ;'. I also don't
-        # understand how just omitting the '(void)' fixed the problem.
-        push(@{ $pxs->{bootcode_early} },
-         "        $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
-      }
-      else {
-        # Default: generate a standard newXS() call
-        push(@{ $pxs->{bootcode_early} },
-         "        (void)$newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
-      }
+        elsif ($pxs->{xsub_seen_INTERFACE_or_MACRO}) {
+            # For each interface name, generate both a newXS() and
+            # XSINTERFACE_FUNC_SET() call.
+            foreach my $yname (sort keys
+                    %{ $pxs->{xsub_map_interface_name_short_to_original} })
+            {
+                my $value = $pxs->{xsub_map_interface_name_short_to_original}{$yname};
+                $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
+                push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+                    |        cv = $newXS(\"$yname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
+                    |        $pxs->{xsub_interface_macro_set}(cv,$value);
+EOF
+            }
+        }
+        elsif ($newXS eq 'newXS_deffile'){
+            # Modified default: generate a standard newXS() call; but
+            # work around the CPAN 'P5NCI' distribution doing:
+            #     #undef newXS
+            #     #define newXS ;
+            # by omitting the initial (void).
+            # XXX DAPM 2024:
+            # this branch was originally: "elsif ($newXS eq 'newXS')"
+            # but when the standard name for the newXS variant changed in
+            # xsubpp, it was changed here too. So this branch no longer actually
+            # handles a workaround for '#define newXS ;'. I also don't
+            # understand how just omitting the '(void)' fixed the problem.
+            push(@{ $pxs->{bootcode_early} },
+                "        $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
+        }
+        else {
+            # Default: generate a standard newXS() call
+            push(@{ $pxs->{bootcode_early} },
+                "        (void)$newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
+        }
 
-      # For every overload operator, generate an additional newXS()
-      # call to add an alias such as "Foo::(<=>" for this XSUB.
+        # For every overload operator, generate an additional newXS()
+        # call to add an alias such as "Foo::(<=>" for this XSUB.
 
-      for my $operator (sort keys %{ $pxs->{xsub_map_overload_name_to_seen} })
-      {
-        $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
-          = $pxs->{PACKAGE_C_name};
-        my $overload = "$pxs->{PACKAGE_name}\::($operator";
-        push(@{ $pxs->{bootcode_early} },
-          "        (void)$newXS(\"$overload\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
-      }
-
+        for my $operator (sort keys %{ $pxs->{xsub_map_overload_name_to_seen} })
+        {
+            $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
+                = $pxs->{PACKAGE_C_name};
+            my $overload = "$pxs->{PACKAGE_name}\::($operator";
+            push(@{ $pxs->{bootcode_early} },
+                "        (void)$newXS(\"$overload\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
+        }
     }
 
     1;
