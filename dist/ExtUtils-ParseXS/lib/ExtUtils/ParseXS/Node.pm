@@ -189,6 +189,12 @@ package ExtUtils::ParseXS::Node::xsub_decl;
 # its parameters, name and return type.
 
 BEGIN { $build_subclass->('', # parent
+    'return_type',    # ReturnType object representing e.g "NO_OUTPUT char *"
+    'params',         # Params object representing e.g "a, int b, c=0"
+    'class',          # Str: the 'const Foo::Bar' part of the xsub's name
+    'name',           # Str: the 'foo' XSUB name
+    'full_perl_name', # Str: the 'Foo::Bar::foo' perl XSUB name
+    'full_C_name',    # Str: the 'Foo__Bar__foo' C XSUB name
 )};
 
 
@@ -200,17 +206,14 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no
 
+    # Parse return type
+
     my $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
 
     $return_type->parse($pxs)
         or return;
 
-    my $params = $pxs->{xsub_params}
-               = ExtUtils::ParseXS::Node::Params->new();
-
-    my $params_text;
-
-    my $func_header = shift(@{ $pxs->{line} });
+    $self->{return_type} = $return_type;
 
     # Decompose the function declaration: match a line like
     #   Some::Class::foo_bar(  args  ) const ;
@@ -220,58 +223,59 @@ sub parse {
     # where everything except $2 and $3 are optional and the 'const'
     # is for C++ functions.
 
+    my $func_header = shift(@{ $pxs->{line} });
     $pxs->blurt("Error: Cannot parse function definition from '$func_header'"), return
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-    ($pxs->{xsub_class}, $pxs->{xsub_func_name}, $params_text)
-            = ($1, $2, $3);
+    my ($class, $name, $params_text) = ($1, $2, $3);
+    $class = "$4 $class" if $4;
 
-    $pxs->{xsub_class} = "$4 $pxs->{xsub_class}" if $4;
-
-    if ($pxs->{xsub_seen_static}
-            and !defined $pxs->{xsub_class})
+    if ($pxs->{xsub_seen_static} and !defined $class)
     {
         $pxs->Warn(  "Ignoring 'static' type modifier:"
                                 . " only valid with an XSUB name which includes a class");
         $pxs->{xsub_seen_static} = 0;
     }
 
-    ($pxs->{xsub_func_full_perl_name} = $pxs->{xsub_func_name}) =~
+    (my $full_pname = $name) =~
             s/^($pxs->{PREFIX_pattern})?/$pxs->{PACKAGE_class}/;
 
-    my $clean_func_name;
-    ($clean_func_name = $pxs->{xsub_func_name}) =~ s/^$pxs->{PREFIX_pattern}//;
-    $pxs->{xsub_func_full_C_name} = "$pxs->{PACKAGE_C_name}_$clean_func_name";
-    if ($ExtUtils::ParseXS::Is_VMS) {
-        $pxs->{xsub_func_full_C_name} = $ExtUtils::ParseXS::VMS_SymSet->addsym( $pxs->{xsub_func_full_C_name} );
-    }
+    (my $clean_func_name = $name) =~ s/^$pxs->{PREFIX_pattern}//;
+
+    my $full_cname = "$pxs->{PACKAGE_C_name}_$clean_func_name";
+    $full_cname = $ExtUtils::ParseXS::VMS_SymSet->addsym($full_cname)
+        if $ExtUtils::ParseXS::Is_VMS;
+
+    $self->{class}          = $pxs->{xsub_class}                = $class;
+    $self->{name}           = $pxs->{xsub_func_name}            = $name;
+    $self->{full_perl_name} = $pxs->{xsub_func_full_perl_name}  = $full_pname;
+    $self->{full_C_name}    = $pxs->{xsub_func_full_C_name}     = $full_cname;
 
     # At this point, supposing that the input so far was:
     #
     #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
     #   int
-    #   Some::Class::foo_bar(  args  ) const ;
+    #   Some::Class::foo_bar(param1, param2, param3) const ;
     #
     # we should have:
     #
-    # $pxs->{xsub_class}               'const Some::Class'
-    # $pxs->{xsub_func_name}           'foo_bar'
-    # $pxs->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
-    # $pxs->{xsub_func_full_C_name}    'BAR__BAZ_bar';
-    #
-    # $params_text                      'param1, param2, param3'
-
+    # $self->{return_type}    an object holding "int"
+    # $self->{class}          "const Some::Class"
+    # $self->{name}           "foo_bar"
+    # $self->{full_perl_name} "BAR::BAZ::bar"
+    # $self->{full_C_name}    "BAR__BAZ_bar"
+    # $params_text            "param1, param2, param3"
 
     # Check for a duplicate function definition, but ignoring multiple
     # definitions within the branches of an #if/#else/#endif
     for my $tmp (@{ $pxs->{XS_parse_stack} }) {
-        next unless defined $tmp->{functions}{ $pxs->{xsub_func_full_C_name} };
+        next unless defined $tmp->{functions}{$full_cname};
         $pxs->Warn("Warning: duplicate function definition '$clean_func_name' detected");
         last;
     }
 
     # mark C function name as used
-    $pxs->{XS_parse_stack}->[$pxs->{XS_parse_stack_top_if_idx}]{functions}{ $pxs->{xsub_func_full_C_name} }++;
+    $pxs->{XS_parse_stack}->[$pxs->{XS_parse_stack_top_if_idx}]{functions}{$full_cname}++;
 
     # initialise more per-XSUB state
     delete $pxs->{xsub_map_alias_name_to_value};           # ALIAS: ...
@@ -287,7 +291,12 @@ sub parse {
     # Split $params_text into parameters, parse them, and store them as
     # Node::Param objects within the Node::Params object.
 
+    my $params = $self->{params}
+               = $pxs->{xsub_params}
+               = ExtUtils::ParseXS::Node::Params->new();
+
     $params->parse($pxs, $params_text);
+    $self->{params} = $params;
 
     1;
 }
