@@ -188,6 +188,7 @@ package ExtUtils::ParseXS::Node::xsub;
 # Process an entire XSUB declaration
 
 BEGIN { $build_subclass->('', # parent
+    'decl',    #  Node::xsub_decl object holding this XSUB declaration
 )};
 
 sub parse {
@@ -201,6 +202,7 @@ sub parse {
     # ----------------------------------------------------------------
 
     my $decl = ExtUtils::ParseXS::Node::xsub_decl->new();
+    $self->{decl} = $decl;
     $decl->parse($pxs)
         or return;
 
@@ -323,7 +325,10 @@ EOF
     $pxs->{xsub_CASE_condition_count} = 0;
     $pxs->{xsub_CASE_condition} = ''; # last CASE: conditional
 
-    # Append a fake EOF-keyword line
+    # Append a fake EOF-keyword line. This makes it easy to do "all lines
+    # until the next keyword" style loops, since the fake END line (which
+    # includes a \n so it can't appear in the wild) is also matched as a
+    # keyword.
     push(@{ $pxs->{line} }, "$ExtUtils::ParseXS::END:");
     push(@{ $pxs->{line_no} }, $pxs->{line_no}->[-1]);
 
