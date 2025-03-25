@@ -423,8 +423,8 @@ EOF
             |
 EOF
 
-    $self->boot_code($pxs);
-
+    # generate all the 'newXS()' etc boot code needed for this XSUB
+    push @{$pxs->{bootcode_early}}, $self->boot_code($pxs);
 
     1;
 }
@@ -437,16 +437,13 @@ sub as_code {
 }
 
 
+# Return a list of boot code strings for the XSUB, including newXS()
+# call(s) plus any additional boot stuff like handling attributes or
+# storing an alias index in the XSUB's CV.
+
 sub boot_code {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
-
-    # ----------------------------------------------------------------
-    # Generate (but don't yet emit - push to $pxs->{bootcode_early}) the
-    # boot code for the XSUB, including newXS() call(s) plus any
-    # additional boot stuff like handling attributes or storing an alias
-    # index in the XSUB's CV.
-    # ----------------------------------------------------------------
 
     # Depending on whether the XSUB has a prototype, work out how to
     # invoke one of the newXS() function variants. Set these:
@@ -454,6 +451,8 @@ sub boot_code {
     my $newXS;     # the newXS() variant to be called in the boot section
     my $file_arg;  # an extra      ', file' arg to be passed to newXS call
     my $proto_arg; # an extra e.g. ', "$@"' arg to be passed to newXS call
+
+    my @code; # boot code for each alias etc
 
     $proto_arg = "";
 
@@ -484,8 +483,7 @@ sub boot_code {
     }
 
     # Now use those values to append suitable newXS() and other code
-    # into @{ $pxs->{bootcode_early} }, for later insertion into the
-    # boot sub.
+    # into @code, for later insertion into the boot sub.
 
     if (                $pxs->{xsub_map_alias_name_to_value}
             and keys %{ $pxs->{xsub_map_alias_name_to_value} })
@@ -499,7 +497,7 @@ sub boot_code {
 
         foreach my $xname (sort keys %{ $pxs->{xsub_map_alias_name_to_value} }) {
             my $value = $pxs->{xsub_map_alias_name_to_value}{$xname};
-            push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+            push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$xname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
 EOF
@@ -508,7 +506,7 @@ EOF
     elsif (@{ $pxs->{xsub_attributes} }) {
         # Generate a standard newXS() call, plus a single call to
         # apply_attrs_string() call with the string of attributes.
-        push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+        push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
             |        cv = $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
             |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
 EOF
@@ -521,7 +519,7 @@ EOF
         {
             my $value = $pxs->{xsub_map_interface_name_short_to_original}{$yname};
             $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
-            push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+            push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$yname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
                 |        $pxs->{xsub_interface_macro_set}(cv,$value);
 EOF
@@ -539,12 +537,12 @@ EOF
         # xsubpp, it was changed here too. So this branch no longer actually
         # handles a workaround for '#define newXS ;'. I also don't
         # understand how just omitting the '(void)' fixed the problem.
-        push(@{ $pxs->{bootcode_early} },
+        push(@code,
             "        $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
     }
     else {
         # Default: generate a standard newXS() call
-        push(@{ $pxs->{bootcode_early} },
+        push(@code,
             "        (void)$newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
     }
 
@@ -556,9 +554,11 @@ EOF
         $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
             = $pxs->{PACKAGE_C_name};
         my $overload = "$pxs->{PACKAGE_name}\::($operator";
-        push(@{ $pxs->{bootcode_early} },
+        push(@code,
             "        (void)$newXS(\"$overload\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
     }
+
+    return @code;
 }
 
 
