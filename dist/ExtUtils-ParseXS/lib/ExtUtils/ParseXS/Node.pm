@@ -3061,9 +3061,6 @@ BEGIN { $build_subclass->('keylines', # parent
 )};
 
 
-# The inherited parse() method will call ALIAS_line->parse() for each line
-
-
 # ======================================================================
 
 package ExtUtils::ParseXS::Node::ALIAS_line;
@@ -3219,7 +3216,7 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     # Call the SUPER parse method, which will call INPUT_line->parse()
-    # for each lINPUT line. The '1' bool arg indicates to treat
+    # for each INPUT line. The '1' bool arg indicates to treat
     # NOT_IMPLEMENTED_YET as another block separator, in addition to
     # $BLOCK_regexp.
     $self->SUPER::parse($pxs, 1);
