@@ -405,14 +405,14 @@ sub process_file {
 
   # Global Constants
 
-  my ($Is_VMS, $VMS_SymSet);
+  our ($Is_VMS, $VMS_SymSet);
 
   if ($^O eq 'VMS') {
     $Is_VMS = 1;
     # Establish set of global symbols with max length 28, since xsubpp
     # will later add the 'XS_' prefix.
     require ExtUtils::XSSymSet;
-    $VMS_SymSet = ExtUtils::XSSymSet->new(28);
+    $ExtUtils::ParseXS::VMS_SymSet = ExtUtils::XSSymSet->new(28);
   }
 
   # XS_parse_stack is an array of hashes. Each hash records the current
@@ -734,18 +734,15 @@ EOM
     # Process the presumed start of an XSUB
     # ----------------------------------------------------------------
 
-
-    my ExtUtils::ParseXS::Node::ReturnType $return_type
-          = ExtUtils::ParseXS::Node::ReturnType->new();
-
     unshift @{$self->{line}}, $_;
+
+    my  $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
 
     $return_type->parse($self)
       or next PARAGRAPH;
 
-    my ExtUtils::ParseXS::Node::Params $params
-        = $self->{xsub_params}
-        = ExtUtils::ParseXS::Node::Params->new();
+    my $params = $self->{xsub_params}
+               = ExtUtils::ParseXS::Node::Params->new();
 
     my $params_text;
 
@@ -782,8 +779,8 @@ EOM
       my $clean_func_name;
       ($clean_func_name = $self->{xsub_func_name}) =~ s/^$self->{PREFIX_pattern}//;
       $self->{xsub_func_full_C_name} = "$self->{PACKAGE_C_name}_$clean_func_name";
-      if ($Is_VMS) {
-        $self->{xsub_func_full_C_name} = $VMS_SymSet->addsym( $self->{xsub_func_full_C_name} );
+      if ($ExtUtils::ParseXS::Is_VMS) {
+        $self->{xsub_func_full_C_name} = $ExtUtils::ParseXS::VMS_SymSet->addsym( $self->{xsub_func_full_C_name} );
       }
 
       # At this point, supposing that the input so far was:
@@ -806,7 +803,7 @@ EOM
       # definitions within the branches of an #if/#else/#endif
       for my $tmp (@{ $self->{XS_parse_stack} }) {
         next unless defined $tmp->{functions}{ $self->{xsub_func_full_C_name} };
-        Warn( $self, "Warning: duplicate function definition '$clean_func_name' detected");
+        $self->Warn("Warning: duplicate function definition '$clean_func_name' detected");
         last;
       }
     }
