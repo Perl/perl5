@@ -60,7 +60,7 @@ sub new {
 
           if( can_run( $cxx1 ) ) {
               $self->{config}{cxx} = $cxx1;
-	            last;
+              last;
           }
 
       }
@@ -69,12 +69,12 @@ sub new {
 
           if( can_run( $cxx2 ) ) {
               $self->{config}{cxx} = $cxx2;
-	            last;
+              last;
           }
 
           if( can_run( $cxx ) ) {
               $self->{config}{cxx} = $cxx;
-	            last;
+              last;
           }
 
       }
