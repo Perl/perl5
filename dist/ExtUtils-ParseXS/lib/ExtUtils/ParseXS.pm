@@ -730,6 +730,14 @@ EOM
       next PARAGRAPH;
     }
 
+    # Initialise more per-XSUB state
+
+    delete $self->{xsub_map_alias_name_to_value};           # ALIAS: ...
+    delete $self->{xsub_map_alias_value_to_name_seen_hash};
+    %{ $self->{xsub_map_interface_name_short_to_original} } = ();
+    @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
+    $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
+
     # ----------------------------------------------------------------
     # Process the presumed start of an XSUB
     # ----------------------------------------------------------------

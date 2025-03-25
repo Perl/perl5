@@ -277,14 +277,6 @@ sub parse {
     # mark C function name as used
     $pxs->{XS_parse_stack}->[$pxs->{XS_parse_stack_top_if_idx}]{functions}{$full_cname}++;
 
-    # initialise more per-XSUB state
-    delete $pxs->{xsub_map_alias_name_to_value};           # ALIAS: ...
-    delete $pxs->{xsub_map_alias_value_to_name_seen_hash};
-                                                                                    # INTERFACE: foo bar
-    %{ $pxs->{xsub_map_interface_name_short_to_original} } = ();
-    @{ $pxs->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
-    $pxs->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
-
     # ----------------------------------------------------------------
     # Process the XSUB's signature.
     #
