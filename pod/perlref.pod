@@ -629,7 +629,7 @@ string is effectively quoted.
 =head2 Pseudo-hashes: Using an array as a hash
 X<pseudo-hash> X<pseudo hash> X<pseudohash>
 
-Pseudo-hashes have been removed from Perl.  The 'fields' pragma
+Pseudo-hashes have been removed from Perl.  The L<fields> pragma
 remains available.
 
 =head2 Function Templates
