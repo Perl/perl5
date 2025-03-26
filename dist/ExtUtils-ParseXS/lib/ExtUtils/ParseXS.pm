@@ -288,11 +288,6 @@ BEGIN {
   'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
   'xsub_func_full_C_name',     # its full C function name     eg 'Foo__Bar__f'
 
-  'xsub_CASE_condition',       # Most recent CASE string.
-
-  'xsub_CASE_condition_count', # number of CASE keywords encountered.
-                               # Zero indicates none encountered yet.
-
   'xsub_map_overload_name_to_seen', # Hash: maps each overload method name
                                # (such as '<=>') to a boolean indicating
                                # whether that method has been listed by
@@ -739,10 +734,11 @@ EOM
     $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
 
     unshift @{$self->{line}}, $_;
-
     my $xsub = ExtUtils::ParseXS::Node::xsub->new();
     $xsub->parse($self)
       or next PARAGRAPH;
+    $_ = shift @{$self->{line}};
+
     $xsub->as_code();
 
   } # END 'PARAGRAPH' 'while' loop
@@ -1055,34 +1051,6 @@ sub print_section {
 }
 
 
-# Process as many keyword lines/blocks as can be found which match the
-# pattern, by calling the FOO_handler() method or the Node::parse method
-# for each keyword.
-
-sub process_keywords {
-  my ExtUtils::ParseXS $self = shift;
-  my ($pattern) = @_;
-
-  while (my $kwd = $self->check_keyword($pattern)) {
-    my $class = "ExtUtils::ParseXS::Node::$kwd";
-    if ($class->can('parse')) {
-      # this branch handles the newer AST-oriented keyword processing
-      my $node  = $class->new();
-      unshift @{$self->{line}}, $_;
-      $node->parse($self);
-      $_ = shift @{$self->{line}};
-      $node->as_code($self) if $class->can('as_code');
-
-    }
-    else {
-      # this branch handles the older KEYWORD_handler()-oriented processing
-      my $method = $kwd . "_handler";
-      $self->$method($_); # $_ contains the rest of the line after KEYWORD:
-    }
-  }
-}
-
-
 # Handle BOOT: keyword.
 # Save all the remaining lines in the paragraph to the bootcode_later
 # array, and prepend a '#line' if necessary.
@@ -1106,29 +1074,6 @@ sub BOOT_handler {
 
   # Save all the BOOT lines plus trailing empty line to be emitted later.
   push @{ $self->{bootcode_later} }, "$_\n" for @{ $self->{line} }, "";
-}
-
-
-# Handle CASE: keyword.
-# Extract the condition on the CASE: line and emit a suitable
-# 'else if (condition)' style line of C
-
-sub CASE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  $self->blurt("Error: 'CASE:' after unconditional 'CASE:'")
-    if     $self->{xsub_CASE_condition_count}
-        && $self->{xsub_CASE_condition} eq '';
-
-  $self->{xsub_CASE_condition} = $_;
-  trim_whitespace($self->{xsub_CASE_condition});
-  print "   ",
-        ($self->{xsub_CASE_condition_count}++ ? " else" : ""),
-        ($self->{xsub_CASE_condition}
-          ? " if ($self->{xsub_CASE_condition})\n"
-          : "\n"
-        );
-  $_ = '';
 }
 
 

@@ -133,7 +133,7 @@ sub parse {
 
 # Repeatedly look for keywords matching the pattern. For each found
 # keyword, parse the text following them, and add any resultant nodes
-# as kids to the current node. Returns the number of successfully parsed
+# as kids to the current node. Returns a list of the successfully parsed
 # and added kids.
 # If $max is defined, it specifies the maximum number of keywords to
 # process. This value is typically passed as undef (unlimited) or 1
@@ -147,6 +147,7 @@ sub parse_keywords {
     my $do_notimplemented      = shift;
 
     my $n = 0;
+    my @kids;
     while (@{$pxs->{line}}) {
         my $line = shift @{$pxs->{line}};
         next unless $line =~ /\S/;
@@ -168,13 +169,14 @@ sub parse_keywords {
         my $node  = $class->new();
         if ($node->parse($pxs)) {
             push @{$self->{kids}}, $node;
+            push @kids, $node;
         }
 
         $n++;
         last if defined $max and $max >= $n;
     }
 
-    return $n;
+    return @kids;
 }
 
 
@@ -321,10 +323,6 @@ EOF
     # body
     # ----------------------------------------------------------------
 
-    # Initialise any CASE: state
-    $pxs->{xsub_CASE_condition_count} = 0;
-    $pxs->{xsub_CASE_condition} = ''; # last CASE: conditional
-
     # Append a fake EOF-keyword line. This makes it easy to do "all lines
     # until the next keyword" style loops, since the fake END line (which
     # includes a \n so it can't appear in the wild) is also matched as a
@@ -353,32 +351,54 @@ EOF
     # this loop is only iterated once.
     # ----------------------------------------------------------------
 
+    my $num             = 0; # the number of CASE+bodiess seen
+    my $seen_bare_xbody = 0; # seen a previous body without a CASE
+    my $case_had_cond;       # the previous CASE had a condition
+
+    # Repeatedly look for CASE or XSUB body.
     while (@{ $pxs->{line} }) {
+        # Parse a CASE statement if present.
+        my ($case) =
+            $self->parse_keywords(
+                $pxs,
+                1,  # process maximum of one keyword
+                "CASE",
+            );
 
-        # For a 'CASE: foo' line, emit an 'else if (foo)' style line of C.
-        # Note that each CASE: can precede multiple keyword blocks.
-        $pxs->CASE_handler($_) if $pxs->check_keyword("CASE");
-
-        {
-            unshift @{$pxs->{line}}, $_;
-            my $xbody = ExtUtils::ParseXS::Node::xbody->new();
-            $xbody->parse($pxs);
-            $_ = shift @{$pxs->{line}};
-            $xbody->as_code($pxs);
-        }
-
-        if ($pxs->check_keyword("CASE")) {
+        if (defined $case) {
+            $case->{num} = ++$num;
+            $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'")
+                if $num > 1 && ! $case_had_cond;
+            $case_had_cond = length $case->{cond};
             $pxs->blurt("Error: No 'CASE:' at top of function")
-                unless $pxs->{xsub_CASE_condition_count};
-            $_ = "CASE: $_";    # Restore CASE: label
-            next;
+                if $seen_bare_xbody;
+        }
+        else {
+            $seen_bare_xbody = 1;
+            if ($num++) {
+                my $l = $pxs->{line}[0];
+                # After the first CASE+body, we should only encounter
+                # further CASE+bodies or end-of-paragraph
+                last if $l eq "$ExtUtils::ParseXS::END:";
+                $pxs->death(
+                    $l =~ /^$ExtUtils::ParseXS::BLOCK_regexp/o
+                            ? "Error: misplaced '$1:'"
+                            : qq{Error: junk at end of function: "$l"}
+                );
+            }
         }
 
-        last if $_ eq "$ExtUtils::ParseXS::END:";
+        my $xbody = ExtUtils::ParseXS::Node::xbody->new();
+        $xbody->parse($pxs);
 
-        $pxs->death( /^$ExtUtils::ParseXS::BLOCK_regexp/o
-                                            ? "Error: misplaced '$1:'"
-                                            : qq{Error: junk at end of function: "$_"});
+        if (defined $case) {
+            # make the xbody a child of the CASE
+            push @{$case->{kids}}, $xbody;
+            $xbody = $case;
+        }
+
+        push @{$self->{kids}}, $xbody;
+        $xbody->as_code($pxs);
 
     } # end while (@{ $pxs->{line} })
 
@@ -2636,6 +2656,40 @@ sub as_code {
     my ExtUtils::ParseXS $pxs  = shift;
 
     print "\n\tPerl_croak(aTHX_ \"$pxs->{xsub_func_full_perl_name}: not implemented yet\");\n";
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::CASE;
+
+# Process the 'CASE:' keyword
+
+BEGIN { $build_subclass->('oneline', # parent
+    'cond',  # the C code of the condition for the CASE, or ''
+    'num',   # which CASE number this is (starting at 1)
+)};
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+    $self->{cond} = $self->{text};
+    # Note that setting num, and consistency checking (like "else"
+    # without "if") is done by the caller, Node::xsub.
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    my $cond = $self->{cond};
+    $cond = " if ($cond)" if length $cond;
+    print "   ", ($self->{num} > 1 ? " else" : ""), $cond, "\n";
+    $_->as_code($pxs) for @{$self->{kids}};
 }
 
 
