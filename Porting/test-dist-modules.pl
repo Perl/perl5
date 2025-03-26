@@ -15,9 +15,11 @@ use Config;
 my $continue;
 my $separate;
 my $install;
+my $keep;
 GetOptions("c|continue" => \$continue,
            "s|separate" => \$separate,
            "i|install"  => \$install,
+           "k|keep"     => \$keep,
            "h|help"     => \&usage)
   or usage("Unknown options");
 
@@ -119,7 +121,9 @@ sub test_dist {
 
     print "::group::Testing $name\n" if $github_ci;
     print "*** Testing $name ***\n";
-    my $dir = tempdir( CLEANUP => 1);
+    my $dir = tempdir( CLEANUP => !$keep);
+    print "$name testing in $dir\n" if $keep;
+
     run("cp", "-a", "dist/$name/.", "$dir/.")
       or die "Cannot copy dist files to working directory\n";
     chdir $dir
