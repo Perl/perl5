@@ -1519,7 +1519,7 @@ sub output_GCB_table() {
 
     # Create and output the pair table for use in determining Grapheme Cluster
     # Breaks, given in http://www.unicode.org/reports/tr29/.
-    my %gcb_actions = (
+    my %gcb_dfas = (
         GCB_NOBREAK                      => 0,
         GCB_BREAKABLE                    => 1,
         GCB_RI_then_RI                   => 2,   # Rules 12 and 13
@@ -1546,12 +1546,12 @@ sub output_GCB_table() {
     # GB12 sot (RI RI)* RI × RI
     # GB13 [^RI] (RI RI)* RI × RI
     $gcb_table[$gcb_enums{'Regional_Indicator'}]
-              [$gcb_enums{'Regional_Indicator'}] = $gcb_actions{GCB_RI_then_RI};
+              [$gcb_enums{'Regional_Indicator'}] = $gcb_dfas{GCB_RI_then_RI};
 
     # Post 11.0: GB11   \p{Extended_Pictographic} Extend* ZWJ
     #                 × \p{Extended_Pictographic}
     $gcb_table[$gcb_enums{'ZWJ'}][$gcb_enums{'ExtPict_XX'}] =
-                                         $gcb_actions{GCB_Maybe_Emoji_NonBreak};
+                                         $gcb_dfas{GCB_Maybe_Emoji_NonBreak};
 
     # This and the rule GB10 obsolete starting with Unicode 11.0, can be left
     # in as there are no code points that match, so the code won't ever get
@@ -1563,7 +1563,7 @@ sub output_GCB_table() {
 
     # GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier
     $gcb_table[$gcb_enums{'Extend'}][$gcb_enums{'E_Modifier'}]
-                                                = $gcb_actions{GCB_EX_then_EM};
+                                                = $gcb_dfas{GCB_EX_then_EM};
     $gcb_table[$gcb_enums{'E_Base'}][$gcb_enums{'E_Modifier'}] = 0;
     $gcb_table[$gcb_enums{'E_Base_GAZ'}][$gcb_enums{'E_Modifier'}] = 0;
 
@@ -1621,7 +1621,7 @@ sub output_GCB_table() {
     }
     $gcb_table[$gcb_enums{'EDGE'}][$gcb_enums{'EDGE'}] = 0;
 
-    output_table_common('GCB', \%gcb_actions,
+    output_table_common('GCB', \%gcb_dfas,
                         \@gcb_table, \@gcb_short_enums, \%gcb_abbreviations);
 }
 
@@ -1637,7 +1637,7 @@ sub output_LB_table() {
 
     # The result is really just true or false.  But we follow along with tr14,
     # creating a rule which is false for something like X SP* X.  That gets
-    # encoding 2.  The rest of the actions are synthetic ones that indicate
+    # encoding 2.  The rest of the actions are synthetic dfas that indicate
     # some context handling is required.  These each are added to the
     # underlying 0, 1, or 2, instead of replacing them, so that the underlying
     # value can be retrieved.  Actually only rules from 7 through 18 (which
@@ -1651,7 +1651,7 @@ sub output_LB_table() {
     # its name, so it is assigned a power of 2 higher than the others can get
     # to so any addition would preserve all data.  (And the code will reach an
     # assert(0) on debugging builds should this happen.)
-    my %lb_actions = (
+    my %lb_dfas = (
         LB_NOBREAK                      => 0,
         LB_BREAKABLE                    => 1,
         LB_NOBREAK_EVEN_WITH_SP_BETWEEN => 2,
@@ -1680,7 +1680,7 @@ sub output_LB_table() {
     # LB31. Break everywhere else
     for my $i (0 .. $table_size - 1) {
         for my $j (0 .. $table_size - 1) {
-            $lb_table[$i][$j] = $lb_actions{'LB_BREAKABLE'};
+            $lb_table[$i][$j] = $lb_dfas{'LB_BREAKABLE'};
         }
     }
 
@@ -1688,10 +1688,10 @@ sub output_LB_table() {
     # emoji modifier.
     # EB × EM
     $lb_table[$lb_enums{'E_Base'}][$lb_enums{'E_Modifier'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     # [\p{Extended_Pictographic}&\p{Cn}] × EM
     $lb_table[$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
-                      [$lb_enums{'E_Modifier'}] = $lb_actions{'LB_NOBREAK'};
+                      [$lb_enums{'E_Modifier'}] = $lb_dfas{'LB_NOBREAK'};
 
     # LB30a Break between two regional indicator symbols if and only if there
     # are an even number of regional indicators preceding the position of the
@@ -1699,7 +1699,7 @@ sub output_LB_table() {
     # sot (RI RI)* RI × RI
     # [^RI] (RI RI)* RI × RI
     $lb_table[$lb_enums{'Regional_Indicator'}]
-             [$lb_enums{'Regional_Indicator'}] = $lb_actions{'LB_RI_then_RI'};
+             [$lb_enums{'Regional_Indicator'}] = $lb_dfas{'LB_RI_then_RI'};
 
     # LB30 Do not break between letters, numbers, or ordinary symbols and
     # non-East-Asian opening punctuation nor non-East-Asian closing
@@ -1708,79 +1708,79 @@ sub output_LB_table() {
     # (what we call CP and OP here have already been modified by mktables to
     # exclude the ea items
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Open_Punctuation'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Open_Punctuation'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Open_Punctuation'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # [CP-[\p{ea=F}\p{ea=W}\p{ea=H}]] × (AL | HL | NU)
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB29 Do not break between numeric punctuation and alphabetics (“e.g.”).
     # IS × (AL | HL)
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB28 Do not break between alphabetics (“at”).
     # (AL | HL) × (AL | HL)
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB27 Treat a Korean Syllable Block the same as ID.
     # (JL | JV | JT | H2 | H3) × PO
     $lb_table[$lb_enums{'JL'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'JV'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'JT'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'H2'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'H3'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # PR × (JL | JV | JT | H2 | H3)
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'JL'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'JV'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'JT'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'H2'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'H3'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB26 Do not break a Korean syllable.
     # JL × (JL | JV | H2 | H3)
-    $lb_table[$lb_enums{'JL'}][$lb_enums{'JL'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JL'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JL'}][$lb_enums{'H2'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JL'}][$lb_enums{'H3'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'JL'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'JV'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'H2'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'H3'}] = $lb_dfas{'LB_NOBREAK'};
 
     # (JV | H2) × (JV | JT)
-    $lb_table[$lb_enums{'JV'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H2'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JV'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H2'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JV'}][$lb_enums{'JV'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H2'}][$lb_enums{'JV'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JV'}][$lb_enums{'JT'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H2'}][$lb_enums{'JT'}] = $lb_dfas{'LB_NOBREAK'};
 
     # (JT | H3) × JT
-    $lb_table[$lb_enums{'JT'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H3'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JT'}][$lb_enums{'JT'}] = $lb_dfas{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H3'}][$lb_enums{'JT'}] = $lb_dfas{'LB_NOBREAK'};
 
     # LB25 Do not break between the following pairs of classes relevant to
     # numbers, as tailored by example 7 in
@@ -1790,9 +1790,9 @@ sub output_LB_table() {
     # This expands firstly to
     # (PR | PO) × NU
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # And secondly to
     # (PR | PO) × ( OP | HY ) NU
@@ -1800,178 +1800,178 @@ sub output_LB_table() {
     # We add in the action (instead of overriding) for this, so that in
     # the code we can recover the underlying break value.
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Open_Punctuation'}]
-                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+                                    += $lb_dfas{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'East_Asian_OP'}]
-                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+                                    += $lb_dfas{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Open_Punctuation'}]
-                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+                                    += $lb_dfas{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Hyphen'}]
-                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+                                    += $lb_dfas{'LB_PR_or_PO_then_OP_or_HY'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Hyphen'}]
-                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+                                    += $lb_dfas{'LB_PR_or_PO_then_OP_or_HY'};
 
     # ( OP | HY ) × NU
     $lb_table[$lb_enums{'Open_Punctuation'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'East_Asian_OP'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hyphen'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
     # which expands firstly to:
     # NU (SY | IS)* × (NU | SY | IS | CL | CP )
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Break_Symbols'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Infix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Close_Punctuation'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Close_Parenthesis'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'East_Asian_CP'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # And then to
     # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
-        # Like earlier where we have to test in code, we add in the action so
+        # Like earlier where we have to test in code, we add in the dfa so
         # that we can recover the underlying values.  This is done in rules
-        # below, as well.  The code assumes that we haven't added 2 actions.
+        # below, as well.  The code assumes that we haven't added 2 dfas.
         # Should a later Unicode release break that assumption, then tests
         # should start failing.
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Numeric'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Break_Symbols'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Infix_Numeric'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Close_Punctuation'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Close_Parenthesis'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'East_Asian_CP'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Numeric'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Break_Symbols'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Infix_Numeric'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Close_Punctuation'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Close_Parenthesis'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'East_Asian_CP'}]
-                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+                                    += $lb_dfas{'LB_SY_or_IS_then_various'};
 
     # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
     # We can eliminate the NU in the parenthesis, as there is a match as long
     # as there is at least one NU.  This leads to:
     # NU (SY | IS)* (CL | CP)? × (PO | PR)
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Prefix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Postfix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Postfix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Close_Punctuation'}][$lb_enums{'Postfix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Postfix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Postfix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
 
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Prefix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Prefix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Close_Punctuation'}][$lb_enums{'Prefix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Infix_Numeric'}][$lb_enums{'Prefix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Prefix_Numeric'}]
-                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+                                    += $lb_dfas{'LB_various_then_PO_or_PR'};
 
     # LB24 Do not break between numeric prefix/postfix and letters, or between
     # letters and prefix/postfix.
     # (PR | PO) × (AL | HL)
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # (AL | HL) × (PR | PO)
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Prefix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Prefix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB23a Do not break between numeric prefixes and ideographs, or between
     # ideographs and numeric postfixes.
     # PR × (ID | EB | EM)
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Ideographic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}]
         [$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'E_Base'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'E_Modifier'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # (ID | EB | EM) × PO
     $lb_table[$lb_enums{'Ideographic'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
-                 [$lb_enums{'Postfix_Numeric'}] = $lb_actions{'LB_NOBREAK'};
+                 [$lb_enums{'Postfix_Numeric'}] = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'E_Base'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'E_Modifier'}][$lb_enums{'Postfix_Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB23 Do not break between digits and letters
     # (AL | HL) × NU
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Numeric'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # NU × (AL | HL)
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Alphabetic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Numeric'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB22 Do not break before ellipses
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Inseparable'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Inseparable'}] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB21b Don’t break between Solidus and Hebrew letters.
     # SY × HL
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Hebrew_Letter'}]
-                                                = $lb_actions{'LB_NOBREAK'};
+                                                = $lb_dfas{'LB_NOBREAK'};
 
     # LB21a Don't break after Hebrew + Hyphen.
     # HL (HY | BA) ×
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$lb_enums{'Hyphen'}][$i]
-                                        += $lb_actions{'LB_HY_or_BA_then_foo'};
+                                        += $lb_dfas{'LB_HY_or_BA_then_foo'};
         $lb_table[$lb_enums{'Break_After'}][$i]
-                                        += $lb_actions{'LB_HY_or_BA_then_foo'};
+                                        += $lb_dfas{'LB_HY_or_BA_then_foo'};
     }
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
@@ -1981,10 +1981,10 @@ sub output_LB_table() {
     # × NS
     # BB ×
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Break_After'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$i][$lb_enums{'Hyphen'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$i][$lb_enums{'Nonstarter'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$lb_enums{'Break_Before'}][$i] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Break_After'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Hyphen'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Nonstarter'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'Break_Before'}][$i] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB20 Break before and after unresolved CB.
@@ -1995,54 +1995,54 @@ sub output_LB_table() {
     # before and after.
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$i][$lb_enums{'Contingent_Break'}]
-                                                = $lb_actions{'LB_BREAKABLE'};
+                                                = $lb_dfas{'LB_BREAKABLE'};
         $lb_table[$lb_enums{'Contingent_Break'}][$i]
-                                                = $lb_actions{'LB_BREAKABLE'};
+                                                = $lb_dfas{'LB_BREAKABLE'};
     }
 
     # LB19 Do not break before or after quotation marks, such as ‘ ” ’.
     # × QU
     # QU ×
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Quotation'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$lb_enums{'Quotation'}][$i] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Quotation'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'Quotation'}][$i] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB18 Break after spaces
     # SP ÷
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'Space'}][$i] = $lb_actions{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'Space'}][$i] = $lb_dfas{'LB_BREAKABLE'};
     }
 
     # LB17 Do not break within ‘——’, even with intervening spaces.
     # B2 SP* × B2
     $lb_table[$lb_enums{'Break_Both'}][$lb_enums{'Break_Both'}]
-                           = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                           = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
     # LB16 Do not break between closing punctuation and a nonstarter even with
     # intervening spaces.
     # (CL | CP) SP* × NS
     $lb_table[$lb_enums{'Close_Punctuation'}][$lb_enums{'Nonstarter'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     $lb_table[$lb_enums{'Close_Parenthesis'}][$lb_enums{'Nonstarter'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     $lb_table[$lb_enums{'East_Asian_CP'}][$lb_enums{'Nonstarter'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
     $lb_table[$lb_enums{'Quotation'}][$lb_enums{'Open_Punctuation'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     $lb_table[$lb_enums{'Quotation'}][$lb_enums{'East_Asian_OP'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$lb_enums{'Open_Punctuation'}][$i]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$lb_enums{'East_Asian_OP'}][$i]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     }
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
@@ -2054,18 +2054,18 @@ sub output_LB_table() {
     # × SY
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$i][$lb_enums{'Exclamation'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
         $lb_table[$i][$lb_enums{'Close_Punctuation'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$i][$lb_enums{'Close_Parenthesis'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$i][$lb_enums{'East_Asian_CP'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$i][$lb_enums{'Infix_Numeric'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$i][$lb_enums{'Break_Symbols'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
     }
 
     # LB12a Do not break before NBSP and related characters, except after
@@ -2079,29 +2079,29 @@ sub output_LB_table() {
         # We don't break, but if a property above has said don't break even
         # with space between, don't override that (also in the next few rules)
         next if $lb_table[$i][$lb_enums{'Glue'}]
-                            == $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
-        $lb_table[$i][$lb_enums{'Glue'}] = $lb_actions{'LB_NOBREAK'};
+                            == $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$i][$lb_enums{'Glue'}] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB12 Do not break after NBSP and related characters.
     # GL ×
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'Glue'}][$i] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'Glue'}][$i] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB11 Do not break before or after Word joiner and related characters.
     # × WJ
     # WJ ×
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Word_Joiner'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$lb_enums{'Word_Joiner'}][$i] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Word_Joiner'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'Word_Joiner'}][$i] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # Special case this here to avoid having to do a special case in the code,
     # by making this the same as other things with a SP in front of them that
     # don't break, we avoid an extra test
     $lb_table[$lb_enums{'Space'}][$lb_enums{'Word_Joiner'}]
-                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+                            = $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
 
     # LB9 and LB10 are done in the same loop
     #
@@ -2121,8 +2121,8 @@ sub output_LB_table() {
         # earlier character, or not.  So have to figure this out at runtime in
         # the code
         $lb_table[$lb_enums{'Combining_Mark'}][$i]
-                                        = $lb_actions{'LB_CM_ZWJ_foo'};
-        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_actions{'LB_CM_ZWJ_foo'};
+                                        = $lb_dfas{'LB_CM_ZWJ_foo'};
+        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_dfas{'LB_CM_ZWJ_foo'};
 
         if (   $i == $lb_enums{'Mandatory_Break'}
             || $i == $lb_enums{'EDGE'}
@@ -2143,16 +2143,16 @@ sub output_LB_table() {
             # For these classes, the CM or ZWJ combines, so doesn't break,
             # inheriting the type of nobreak from the master character.
             if ($lb_table[$i][$lb_enums{'Combining_Mark'}]
-                            != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
+                            != $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
             {
                 $lb_table[$i][$lb_enums{'Combining_Mark'}]
-                                        = $lb_actions{'LB_NOBREAK'};
+                                        = $lb_dfas{'LB_NOBREAK'};
             }
             if ($lb_table[$i][$lb_enums{'ZWJ'}]
-                            != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
+                            != $lb_dfas{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
             {
                 $lb_table[$i][$lb_enums{'ZWJ'}]
-                                        = $lb_actions{'LB_NOBREAK'};
+                                        = $lb_dfas{'LB_NOBREAK'};
             }
         }
     }
@@ -2160,40 +2160,40 @@ sub output_LB_table() {
     # LB8a Do not break after a zero width joiner
     # ZWJ ×
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB8 Break before any character following a zero-width space, even if one
     # or more spaces intervene.
     # ZW SP* ÷
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'ZWSpace'}][$i] = $lb_actions{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'ZWSpace'}][$i] = $lb_dfas{'LB_BREAKABLE'};
     }
 
     # Because of LB8-10, we need to look at context for "SP x", and this must
     # be done in the code.  So override the existing rules for that, by adding
     # a constant to get new rules that tell the code it needs to look at
-    # context.  By adding this action instead of replacing the existing one,
+    # context.  By adding this dfa instead of replacing the existing one,
     # we can get back to the original rule if necessary.
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$lb_enums{'Space'}][$i] += $lb_actions{'LB_SP_foo'};
+        $lb_table[$lb_enums{'Space'}][$i] += $lb_dfas{'LB_SP_foo'};
     }
 
     # LB7 Do not break before spaces or zero width space.
     # × SP
     # × ZW
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Space'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$i][$lb_enums{'ZWSpace'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Space'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'ZWSpace'}] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB6 Do not break before hard line breaks.
     # × ( BK | CR | LF | NL )
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'Mandatory_Break'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$i][$lb_enums{'Carriage_Return'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$i][$lb_enums{'Line_Feed'}] = $lb_actions{'LB_NOBREAK'};
-        $lb_table[$i][$lb_enums{'Next_Line'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Mandatory_Break'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Carriage_Return'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Line_Feed'}] = $lb_dfas{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'Next_Line'}] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line
@@ -2203,18 +2203,18 @@ sub output_LB_table() {
     # NL !
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$lb_enums{'Carriage_Return'}][$i]
-                                = $lb_actions{'LB_BREAKABLE'};
-        $lb_table[$lb_enums{'Line_Feed'}][$i] = $lb_actions{'LB_BREAKABLE'};
-        $lb_table[$lb_enums{'Next_Line'}][$i] = $lb_actions{'LB_BREAKABLE'};
+                                = $lb_dfas{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'Line_Feed'}][$i] = $lb_dfas{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'Next_Line'}][$i] = $lb_dfas{'LB_BREAKABLE'};
     }
     $lb_table[$lb_enums{'Carriage_Return'}][$lb_enums{'Line_Feed'}]
-                            = $lb_actions{'LB_NOBREAK'};
+                            = $lb_dfas{'LB_NOBREAK'};
 
     # LB4 Always break after hard line breaks.
     # BK !
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$lb_enums{'Mandatory_Break'}][$i]
-                                = $lb_actions{'LB_BREAKABLE'};
+                                = $lb_dfas{'LB_BREAKABLE'};
     }
 
     # LB3 Always break at the end of text.
@@ -2222,8 +2222,8 @@ sub output_LB_table() {
     # LB2 Never break at the start of text.
     # sot ×
     for my $i (0 .. @lb_table - 1) {
-        $lb_table[$i][$lb_enums{'EDGE'}] = $lb_actions{'LB_BREAKABLE'};
-        $lb_table[$lb_enums{'EDGE'}][$i] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'EDGE'}] = $lb_dfas{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'EDGE'}][$i] = $lb_dfas{'LB_NOBREAK'};
     }
 
     # LB1 Assign a line breaking class to each code point of the input.
@@ -2242,7 +2242,7 @@ sub output_LB_table() {
     # This is done in mktables, so we never see any of the remapped-from
     # classes.
 
-    output_table_common('LB', \%lb_actions,
+    output_table_common('LB', \%lb_dfas,
                         \@lb_table, \@lb_short_enums, \%lb_abbreviations);
 }
 
@@ -2255,10 +2255,10 @@ sub output_WB_table() {
     my $table_size = @wb_short_enums;
 
     # This uses the same mechanism in the other bounds tables generated by
-    # this file.  The actions that could override a 0 or 1 are added to those
-    # numbers; the actions that clearly don't depend on the underlying rule
+    # this file.  The dfas that could override a 0 or 1 are added to those
+    # numbers; the dfas that clearly don't depend on the underlying rule
     # simply overwrite
-    my %wb_actions = (
+    my %wb_dfas = (
         WB_NOBREAK                      => 0,
         WB_BREAKABLE                    => 1,
         WB_hs_then_hs                   => 2,
@@ -2281,7 +2281,7 @@ sub output_WB_table() {
     # WB99  Any  ÷  Any
     for my $i (0 .. $table_size - 1) {
         for my $j (0 .. $table_size - 1) {
-            $wb_table[$i][$j] = $wb_actions{'WB_BREAKABLE'};
+            $wb_table[$i][$j] = $wb_dfas{'WB_BREAKABLE'};
         }
     }
 
@@ -2291,161 +2291,161 @@ sub output_WB_table() {
     # WB16  [^RI] (RI RI)* RI × RI
     # WB15   sot    (RI RI)* RI × RI
     $wb_table[$wb_enums{'Regional_Indicator'}]
-             [$wb_enums{'Regional_Indicator'}] = $wb_actions{'WB_RI_then_RI'};
+             [$wb_enums{'Regional_Indicator'}] = $wb_dfas{'WB_RI_then_RI'};
 
     # Do not break within emoji modifier sequences.
     # WB14  ( E_Base | EBG )  ×  E_Modifier
     $wb_table[$wb_enums{'E_Base'}][$wb_enums{'E_Modifier'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'E_Base_GAZ'}][$wb_enums{'E_Modifier'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
 
     # Do not break from extenders.
     # WB13b  ExtendNumLet  ×  (ALetter | Hebrew_Letter | Numeric | Katakana)
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'ALetter'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'ExtPict_LE'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'Hebrew_Letter'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'Numeric'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'Katakana'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # WB13a  (ALetter | Hebrew_Letter | Numeric | Katakana | ExtendNumLet)
     #        × ExtendNumLet
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'ExtendNumLet'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'ExtendNumLet'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ExtendNumLet'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'ExtendNumLet'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Katakana'}][$wb_enums{'ExtendNumLet'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtendNumLet'}][$wb_enums{'ExtendNumLet'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # Do not break between Katakana.
     # WB13  Katakana  ×  Katakana
     $wb_table[$wb_enums{'Katakana'}][$wb_enums{'Katakana'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # Do not break within sequences, such as “3.2” or “3,456.789”.
     # WB12  Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'MidNumLet'}]
-                                    += $wb_actions{'WB_NU_then_MB_or_MN_or_SQ'};
+                                    += $wb_dfas{'WB_NU_then_MB_or_MN_or_SQ'};
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'MidNum'}]
-                                    += $wb_actions{'WB_NU_then_MB_or_MN_or_SQ'};
+                                    += $wb_dfas{'WB_NU_then_MB_or_MN_or_SQ'};
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'Single_Quote'}]
-                                    += $wb_actions{'WB_NU_then_MB_or_MN_or_SQ'};
+                                    += $wb_dfas{'WB_NU_then_MB_or_MN_or_SQ'};
 
     # WB11  Numeric (MidNum | (MidNumLet | Single_Quote)  ×  Numeric
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'Numeric'}]
-                                    += $wb_actions{'WB_MB_or_MN_or_SQ_then_NU'};
+                                    += $wb_dfas{'WB_MB_or_MN_or_SQ_then_NU'};
     $wb_table[$wb_enums{'MidNum'}][$wb_enums{'Numeric'}]
-                                    += $wb_actions{'WB_MB_or_MN_or_SQ_then_NU'};
+                                    += $wb_dfas{'WB_MB_or_MN_or_SQ_then_NU'};
     $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'Numeric'}]
-                                    += $wb_actions{'WB_MB_or_MN_or_SQ_then_NU'};
+                                    += $wb_dfas{'WB_MB_or_MN_or_SQ_then_NU'};
 
     # Do not break within sequences of digits, or digits adjacent to letters
     # (“3a”, or “A3”).
     # WB10  Numeric  ×  (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'ALetter'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'ExtPict_LE'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'Hebrew_Letter'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # WB9  (ALetter | Hebrew_Letter)  ×  Numeric
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'Numeric'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'Numeric'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Numeric'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # WB8  Numeric  ×  Numeric
     $wb_table[$wb_enums{'Numeric'}][$wb_enums{'Numeric'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # Do not break letters across certain punctuation.
     # WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter
     $wb_table[$wb_enums{'Double_Quote'}][$wb_enums{'Hebrew_Letter'}]
-                                            += $wb_actions{'WB_DQ_then_HL'};
+                                            += $wb_dfas{'WB_DQ_then_HL'};
 
     # WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Double_Quote'}]
-                                            += $wb_actions{'WB_HL_then_DQ'};
+                                            += $wb_dfas{'WB_HL_then_DQ'};
 
     # WB7a  Hebrew_Letter  ×  Single_Quote
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Single_Quote'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # WB7   (ALetter | Hebrew_Letter)
     #       (MidLetter | MidNumLet | Single_Quote)
     #     × (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'ALetter'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'ExtPict_LE'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidNumLet'}][$wb_enums{'Hebrew_Letter'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'ALetter'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'ExtPict_LE'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'MidLetter'}][$wb_enums{'Hebrew_Letter'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'ALetter'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'ExtPict_LE'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
     $wb_table[$wb_enums{'Single_Quote'}][$wb_enums{'Hebrew_Letter'}]
-                            += $wb_actions{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
+                            += $wb_dfas{'WB_MB_or_ML_or_SQ_then_LE_or_HL'};
 
     # WB6  (ALetter | Hebrew_Letter)  ×  (MidLetter | MidNumLet
     #       | Single_Quote) (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'MidNumLet'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'MidNumLet'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'MidNumLet'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'MidLetter'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'MidLetter'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'MidLetter'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'Single_Quote'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'Single_Quote'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Single_Quote'}]
-                            += $wb_actions{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
+                            += $wb_dfas{'WB_LE_or_HL_then_MB_or_ML_or_SQ'};
 
     # Do not break between most letters.
     # WB5  (ALetter | Hebrew_Letter)  ×  (ALetter | Hebrew_Letter)
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'ALetter'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'ALetter'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ALetter'}][$wb_enums{'Hebrew_Letter'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'Hebrew_Letter'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ALetter'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'ExtPict_LE'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Hebrew_Letter'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ExtPict_LE'}][$wb_enums{'ExtPict_LE'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
 
     # Ignore Format and Extend characters, except after sot, CR, LF, and
     # Newline.  This also has the effect of:
@@ -2454,16 +2454,16 @@ sub output_WB_table() {
     # WB4  X (Extend | Format | ZWJ)* → X
     for my $i (0 .. @wb_table - 1) {
         $wb_table[$wb_enums{'Extend'}][$i]
-                                = $wb_actions{'WB_Ex_or_FO_or_ZWJ_then_foo'};
+                                = $wb_dfas{'WB_Ex_or_FO_or_ZWJ_then_foo'};
         $wb_table[$wb_enums{'Format'}][$i]
-                                = $wb_actions{'WB_Ex_or_FO_or_ZWJ_then_foo'};
+                                = $wb_dfas{'WB_Ex_or_FO_or_ZWJ_then_foo'};
         $wb_table[$wb_enums{'ZWJ'}][$i]
-                                = $wb_actions{'WB_Ex_or_FO_or_ZWJ_then_foo'};
+                                = $wb_dfas{'WB_Ex_or_FO_or_ZWJ_then_foo'};
     }
     for my $i (0 .. @wb_table - 1) {
-        $wb_table[$i][$wb_enums{'Extend'}] = $wb_actions{'WB_NOBREAK'};
-        $wb_table[$i][$wb_enums{'Format'}] = $wb_actions{'WB_NOBREAK'};
-        $wb_table[$i][$wb_enums{'ZWJ'}]    = $wb_actions{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'Extend'}] = $wb_dfas{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'Format'}] = $wb_dfas{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'ZWJ'}]    = $wb_dfas{'WB_NOBREAK'};
     }
 
     # Implied is that these attach to the character before them, except for
@@ -2471,27 +2471,27 @@ sub output_WB_table() {
     # override the ones set up here, for all the characters that need
     # overriding.
     for my $i (0 .. @wb_table - 1) {
-        $wb_table[$i][$wb_enums{'Extend'}] = $wb_actions{'WB_NOBREAK'};
-        $wb_table[$i][$wb_enums{'Format'}] = $wb_actions{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'Extend'}] = $wb_dfas{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'Format'}] = $wb_dfas{'WB_NOBREAK'};
     }
 
     # Keep horizontal whitespace together
     # Use perl's tailoring instead
     # WB3d WSegSpace × WSegSpace
     #$wb_table[$wb_enums{'WSegSpace'}][$wb_enums{'WSegSpace'}]
-    #                                               = $wb_actions{'WB_NOBREAK'};
+    #                                               = $wb_dfas{'WB_NOBREAK'};
 
     # Do not break within emoji zwj sequences.
     # WB3c ZWJ × ( Glue_After_Zwj | EBG )
     #      ZWJ × \p{Extended_Pictographic}
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'Glue_After_Zwj'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'E_Base_GAZ'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'ExtPict_XX'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'ExtPict_LE'}]
-                                                = $wb_actions{'WB_NOBREAK'};
+                                                = $wb_dfas{'WB_NOBREAK'};
 
     # Break before and after newlines
     # WB3b     ÷  (Newline | CR | LF)
@@ -2499,8 +2499,8 @@ sub output_WB_table() {
     # et. al.
     for my $i ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
         for my $j (0 .. @wb_table - 1) {
-            $wb_table[$j][$wb_enums{$i}] = $wb_actions{'WB_BREAKABLE'};
-            $wb_table[$wb_enums{$i}][$j] = $wb_actions{'WB_BREAKABLE'};
+            $wb_table[$j][$wb_enums{$i}] = $wb_dfas{'WB_BREAKABLE'};
+            $wb_table[$wb_enums{$i}][$j] = $wb_dfas{'WB_BREAKABLE'};
         }
     }
 
@@ -2509,31 +2509,31 @@ sub output_WB_table() {
     # et.al.
     for my $i ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
         for my $j ('CR', 'LF', 'Newline', 'Perl_Tailored_HSpace') {
-            $wb_table[$wb_enums{$i}][$wb_enums{$j}] = $wb_actions{'WB_NOBREAK'};
+            $wb_table[$wb_enums{$i}][$wb_enums{$j}] = $wb_dfas{'WB_NOBREAK'};
         }
     }
 
     # And do not break horizontal space followed by Extend or Format or ZWJ
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}][$wb_enums{'Extend'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}][$wb_enums{'Format'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}][$wb_enums{'ZWJ'}]
-                                                    = $wb_actions{'WB_NOBREAK'};
+                                                    = $wb_dfas{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}]
               [$wb_enums{'Perl_Tailored_HSpace'}]
-                                                = $wb_actions{'WB_hs_then_hs'};
+                                                = $wb_dfas{'WB_hs_then_hs'};
 
     # Break at the start and end of text, unless the text is empty
     # WB2  Any  ÷  eot
     # WB1  sot  ÷  Any
     for my $i (0 .. @wb_table - 1) {
-        $wb_table[$i][$wb_enums{'EDGE'}] = $wb_actions{'WB_BREAKABLE'};
-        $wb_table[$wb_enums{'EDGE'}][$i] = $wb_actions{'WB_BREAKABLE'};
+        $wb_table[$i][$wb_enums{'EDGE'}] = $wb_dfas{'WB_BREAKABLE'};
+        $wb_table[$wb_enums{'EDGE'}][$i] = $wb_dfas{'WB_BREAKABLE'};
     }
     $wb_table[$wb_enums{'EDGE'}][$wb_enums{'EDGE'}] = 0;
 
-    output_table_common('WB', \%wb_actions,
+    output_table_common('WB', \%wb_dfas,
                         \@wb_table, \@wb_short_enums, \%wb_abbreviations);
 }
 
