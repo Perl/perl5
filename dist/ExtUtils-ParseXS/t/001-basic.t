@@ -3277,10 +3277,48 @@ EOF
             [ 0, 0, qr/\b\QXSRETURN(1)/,           "ret 1" ],
             [ 0, 1, qr/\bXSRETURN\b.*\bXSRETURN/s, "only a single XSRETURN" ],
         ],
+        [
+            "CASE with unconditional else",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    CASE: CCC1
+                |        CODE:
+                |            YYY1
+                |    CASE: CCC2
+                |        CODE:
+                |            YYY2
+                |    CASE:
+                |        CODE:
+                |            YYY3
+EOF
+            [ 0, 0, qr/
+                       ^ \s+ if \s+ \(CCC1\) \n
+                       ^ \s+ \{   \n
+                       .*
+                       ^\s+ YYY1  \n
+                       .*
+                       ^ \s+ \}   \n
+                       ^ \s+ else \s+ if \s+ \(CCC2\) \n
+                       ^ \s+ \{   \n
+                       .*
+                       ^\s+ YYY2  \n
+                       .*
+                       ^ \s+ \}   \n
+                       ^ \s+ else \n
+                       ^ \s+ \{   \n
+                       .*
+                       ^\s+ YYY3  \n
+                       .*
+                       ^ \s+ \}   \n
+                       ^ \s+ XSRETURN_EMPTY;\n
+
+                      /xms,                       "all present in order" ],
+        ],
 
 
         [
-            "CASE: case follows unconditionl CASE",
+            "CASE: case follows unconditional CASE",
             [ Q(<<'EOF') ],
                 |int
                 |foo()
