@@ -1373,10 +1373,10 @@ sub _Perl_CCC_non0_non230 {
 
 # These functions access the cells of a break table, converting any mnemonics
 # to numeric.  They need $enums to be able to do this.
-sub expand_column($table_size, $enums, $x) {
+sub expand_column($table_size, $splits, $enums, $x) {
     print STDERR __FILE__, ": ", __LINE__, ": Entering expand_column ",
                  stack_trace(), "\n",
-                 Dumper $x, $table_size, $enums if DEBUG;
+                 Dumper $x, $table_size, $enums, $splits if DEBUG;
 
     # Expand a row or column denoted by $x into its constituents.  $x may be
     # one of:
@@ -1392,10 +1392,10 @@ sub expand_column($table_size, $enums, $x) {
     my @excludes;
     if (ref $x) {
         if ($x->[0] eq '^') {
-            push @list, expand_column($table_size, $enums, '*')->@*;
+            push @list, expand_column($table_size, $splits, $enums, '*')->@*;
             # Get rid of the '^' and expand the input, yielding a list of
             # things to exclude
-            @excludes = expand_column($table_size, $enums,
+            @excludes = expand_column($table_size, $splits, $enums,
                                                      [ @$x[1 .. $#$x] ])->@*;
 
             # Unicode doesn't consider this to be something to be part of the
@@ -1403,20 +1403,40 @@ sub expand_column($table_size, $enums, $x) {
             push @excludes, 'EDGE';
         }
         else {
-            push @list, expand_column($table_size, $enums, $_)->@* for $x->@*;
+            push @list, expand_column($table_size, $splits, $enums, $_)->@*
+                                                                    for $x->@*;
         }
     }
     elsif ($x eq '*') { # Call recursively with
-        push @list, expand_column($table_size, $enums, $_)->@*
+        push @list, expand_column($table_size, $splits, $enums, $_)->@*
                                                      for 0 .. $table_size - 1;
     }
+    elsif ($splits->{$x}) {
+        # If this single item $x expands to multiple ones, it will be a key in
+        # %splits, and what it is to be replaced by is the value of the key.
+        # In order to avoid infinite recursion, $x is not expanded, but tacked
+        # on as-is, should the expansion include it.
+        my @split_expansion = $splits->{$x}->@*;
+        my @sans_x = grep { $_ ne $x } @split_expansion;
+        push @list, expand_column($table_size, $splits, $enums, \@sans_x)->@*;
+
+        # If it was in the original, the removed array will be smaller
+        # than the original.
+        push @list, $x if @sans_x < @split_expansion;
+    }
     elsif ($x ne "") {
-            push @list, $x;
-            $list[-1] = $enums->{$list[-1]} if $list[-1] =~ /\D/;
+        push @list, $x;
     }
     else {
         die "Trying to expand empty string"
           . stack_trace() . "\n" . Dumper $enums;
+    }
+
+    for my $which (\@list, \@excludes) {
+        foreach my $element ($which->@*) {
+            next unless $element =~ /\D/;
+            $element = $enums->{$element};
+        }
     }
 
     # Map everything to a number
@@ -1434,7 +1454,7 @@ sub expand_column($table_size, $enums, $x) {
 
     if (@list == 0 || @list == 1 && $list[0] eq "") {
         die "Expansion is to nothing" . stack_trace() . "\n"
-          . Dumper $x, $enums;
+          . Dumper $x, $splits, $enums;
     }
 
     print STDERR __FILE__, ": ", __LINE__, ": expanded column returning ",
@@ -1442,9 +1462,9 @@ sub expand_column($table_size, $enums, $x) {
     return \@list;
 }
 
-sub get_cell_list($table_size, $enums, $x, $y) {
-    my @x = expand_column($table_size, $enums, $x)->@*;
-    my @y = expand_column($table_size, $enums, $y)->@*;
+sub get_cell_list($table_size, $splits, $enums, $x, $y) {
+    my @x = expand_column($table_size, $splits, $enums, $x)->@*;
+    my @y = expand_column($table_size, $splits, $enums, $y)->@*;
     my @list;
 
     for my $row (@x) {
@@ -1458,8 +1478,8 @@ sub get_cell_list($table_size, $enums, $x, $y) {
     return \@list;
 }
 
-sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused,
-              $no_override=undef)
+sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
+              $has_unused, $no_override=undef)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
@@ -1471,7 +1491,7 @@ sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused,
             . Dumper $enums, $x, $y, $value, $rule;
     }
 
-    my $list_ref = get_cell_list($table_size, $enums, $x, $y);
+    my $list_ref = get_cell_list($table_size, $splits, $enums, $x, $y);
     for my $pair_ref ($list_ref->@*) {
         my $x = $pair_ref->[0];
         my $y = $pair_ref->[1];
@@ -1525,8 +1545,8 @@ sub get_cell_value($table, $enums, $x, $y) {
     return $table->[$x][$y];
 }
 
-sub add_dfa($table, $table_size, $enums, $dfas, $x, $y, $dfa, $rule,
-            $has_unused)
+sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
+            $rule, $has_unused)
 {
     # Currently, the dfa value is just added to the current cell contents
     # This is done so that we can recover the underlying values.  Not all
@@ -1540,14 +1560,14 @@ sub add_dfa($table, $table_size, $enums, $dfas, $x, $y, $dfa, $rule,
             . Dumper $dfas, $enums;
     }
 
-    my $list_ref = get_cell_list($table_size, $enums, $x, $y);
+    my $list_ref = get_cell_list($table_size, $splits, $enums, $x, $y);
 
     for my $pair_ref ($list_ref->@*) {
         my $x = $pair_ref->[0];
         my $y = $pair_ref->[1];
         my $old = get_cell_value($table, $enums, $x, $y);
-        set_cells($table, $table_size, $enums, $x, $y, $old + $numeric_dfa,
-                  $rule, $has_unused);
+        set_cells($table, $table_size, $splits, $enums, $x, $y,
+                  $old + $numeric_dfa, $rule, $has_unused);
     }
 }
 
@@ -1689,6 +1709,113 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
     output_table_trailer();
 }
 
+sub setup_splits($to_enum, $table_size, $has_unused, $splits) {
+    state $synthetic_enum = -1;
+
+    # $splits is a hashref that maps break names to what they expand to, like
+    #     'CP' => [ 'CP', 'East_Asian_CP' ],
+    # $to_enum is a hashref that maps break names to their respective enum
+    # numbers, like
+    #     'CP' => 8, Close_Parenthesis => 8,
+    #
+    # What this function does is add to $splits all the equivalent names, so
+    # that not only is there a
+    #     'CP' => [ 'CP', 'East_Asian_CP' ],
+    # but also a
+    #     'Close_Parenthesis' => [ 'CP', 'East_Asian_CP' ]
+    # This avoids extra work eash time in the main code having to worry about
+    # possibly different spellings of the same thing.  There is no need to
+    # create entries expanding 'CP' in the array, as those do already get
+    # resolved to the correct enum
+
+    # First create a true inversion of the hash.  So, we would have
+    #   8 => [ 'CP', 'Close_Parenthesis' ],
+    # to denote that both CP and Close_Parenthesis map to 8 in the original
+    # hash.  At this time this is used only in this routine, but it could be
+    # of more general use.
+    my %enum_to_names;
+    while (my ($key, $value) = each $to_enum->%*) {
+        push $enum_to_names{$value}->@*, $key;
+    }
+
+    # Order the expansions, so that items that depend on others are done after
+    # those others have been themselves expanded.  This relies on the data
+    # structure not being recursive, but each item that is expanded has a top
+    # level entry in $splits.
+    my @ordered;
+    my %new_splits;
+    while (keys $splits->%*){
+        my $before_count = keys $splits->%*;
+
+        # Look at each item that is split
+        foreach my $name (keys $splits->%*) {
+
+            # If any of the items this expands to are themselves split, this
+            # one isn't ready to be processed.  But an item can refer to
+            # itself.  That shouldn't count XXX
+            next if any { defined $splits->{$_} }
+                    grep { $_ ne $name } $splits->{$name}->@*;
+
+            push @ordered, $name;
+            $new_splits{$name} = delete $splits->{$name};
+        }
+
+        die "Would be infinite loop in ", Dumper $splits
+                                        if $before_count == keys $splits->%*;
+    }
+
+    # Now go through each item that is split.
+    foreach my $name (@ordered) {
+
+        # Find this item's enum.  Treat an item whose enum indicates it is not
+        # used in this Unicode version as not defined.
+        my $enum = $to_enum->{$name};
+        if (defined $enum && (! $has_unused || $enum < $table_size - 1)) {
+
+            # Get the list of all this item's equivalent names
+            my @equivalents = $enum_to_names{$enum}->@*;
+
+            # And add en entry for each equivalent.  These are references as
+            # opposed to copies, as they are just links to the original thing.
+            my $expansion = $new_splits{$name};
+
+            foreach my $equivalent (@equivalents) {
+                next if $equivalent eq $name;
+                $new_splits{$equivalent} = $expansion;
+            }
+        }
+        else {
+            # Here the item is split, and:
+            #   1) it doesn't have an enum or
+            #   2) its enum is such that it appears to be unused in this
+            #      Unicode version.
+            #  It must be that it is the name of an internal convenience macro
+            #  that is a shorthand for one or more break classes.  Unicode,
+            #  for example, defines AHLetter to mean either ALetter or
+            #  Hebrew_Letter, because those are commonly grouped together.
+            #  Doing this makes the rules easier to read.  For these, we
+            #  create an internal-only enum, distinguished by external ones by
+            #  being negative.
+            $enum = $synthetic_enum--;
+            $to_enum->{$name} = $enum;
+            $enum_to_names{$enum}->@* = $name;
+
+            # The components of these may also be split.  Go through each
+            # component, and if it is split, substitute its split value.
+            my $this_split = $new_splits{$name};
+            for (my $i = $this_split->@* - 1; $i >= 0; $i--) {
+                my $component = $this_split->[$i];
+                my $component_new_splits = $new_splits{$component};
+                next unless $component_new_splits;
+                splice $this_split->@*, $i, 1, $component_new_splits->@*;
+            }
+        }
+    }
+
+    #print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%new_splits;
+    return %new_splits;
+}
+
 sub output_GCB_table() {
 
     # Create and output the pair table for use in determining Grapheme Cluster
@@ -1703,6 +1830,8 @@ sub output_GCB_table() {
     my %gcb_all_enums = %gcb_enums;
     $gcb_all_enums{ $gcb_short_enums[$_] } = $_ for 0 .. $table_size - 1;
 
+    my %gcb_splits;
+
     my %gcb_dfas = (
         GCB_NOBREAK                      => 0,
         GCB_BREAKABLE                    => 1,
@@ -1715,8 +1844,8 @@ sub output_GCB_table() {
     # structures.  This hides this necessary boiler plate from the callers,
     # making them easier to read.
     my sub set_gcb_cells($x, $y, $value, $rule) {
-        return set_cells(\@gcb_table, $table_size, \%gcb_all_enums,
-                         $x, $y, $value, $rule, $has_unused);
+        return set_cells(\@gcb_table, $table_size, \%gcb_splits,
+                         \%gcb_all_enums, $x, $y, $value, $rule, $has_unused);
     }
     my sub set_gcb_breakable($x, $y, $rule) {
         return set_gcb_cells($x, $y, $gcb_dfas{GCB_BREAKABLE}, $rule);
@@ -1840,6 +1969,8 @@ sub output_LB_table() {
     my %lb_all_enums = %lb_enums;
     $lb_all_enums{ $lb_short_enums[$_] } = $_ for 0 .. $table_size - 1;
 
+    my %lb_splits;
+
     # The result is really just true or false.  But we follow along with tr14,
     # creating a rule which is false for something like X SP* X.  That gets
     # encoding 2.  The rest of the dfas are synthetic ones that indicate
@@ -1886,7 +2017,7 @@ sub output_LB_table() {
     # structures.  This hides this necessary boiler plate from the callers,
     # making them easier to read.
     my sub set_lb_cells($x, $y, $value, $rule) {
-        return set_cells(\@lb_table, $table_size, \%lb_all_enums,
+        return set_cells(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
                          $x, $y, $value, $rule, $has_unused);
     }
     my sub set_lb_breakable($x, $y, $rule) {
@@ -1896,12 +2027,12 @@ sub output_LB_table() {
         return set_lb_cells($x, $y, $lb_dfas{LB_NOBREAK}, $rule);
     }
     my sub set_lb_nobreak_ignoring_SP($x, $y, $rule) {
-        return set_cells(\@lb_table, $table_size, \%lb_enums,
+        return set_cells(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
                          $x, $y, $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN},
                          $rule, $has_unused);
     }
     my sub set_lb_nobreak_no_override_ignoring_SP($x, $y, $rule) {
-        return set_cells(\@lb_table, $table_size, \%lb_enums,
+        return set_cells(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
                          $x, $y, $lb_dfas{LB_NOBREAK}, $rule, $has_unused,
 
                          # Don't change if already has this value
@@ -1919,7 +2050,7 @@ sub output_LB_table() {
             return set_lb_cells($x, $y, $dfa, $rule);
         }
 
-        return add_dfa(\@lb_table, $table_size, \%lb_all_enums,
+        return add_dfa(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
                        \%lb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
     my sub get_lb_cell_value($x, $y) {
@@ -2376,6 +2507,8 @@ sub output_WB_table() {
     my %wb_all_enums = %wb_enums;
     $wb_all_enums{ $wb_short_enums[$_] } = $_ for 0 .. $table_size - 1;
 
+    my %wb_splits;
+
     # This uses the same mechanism in the other bounds tables generated by
     # this file.  The dfas that could override a 0 or 1 are added to those
     # numbers; the dfas that clearly don't depend on the underlying rule
@@ -2398,7 +2531,7 @@ sub output_WB_table() {
     # structures.  This hides this necessary boiler plate from the callers,
     # making them easier to read.
     my sub set_wb_cells($x, $y, $value, $rule) {
-        return set_cells(\@wb_table, $table_size, \%wb_all_enums,
+        return set_cells(\@wb_table, $table_size, \%wb_splits, \%wb_all_enums,
                          $x, $y, $value, $rule, $has_unused);
     }
     my sub set_wb_breakable($x, $y, $rule) {
@@ -2420,7 +2553,7 @@ sub output_WB_table() {
             return set_wb_cells($x, $y, $dfa, $rule);
         }
 
-        return add_dfa(\@wb_table, $table_size, \%wb_all_enums,
+        return add_dfa(\@wb_table, $table_size, \%wb_splits, \%wb_all_enums,
                        \%wb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
 
