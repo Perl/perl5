@@ -1386,7 +1386,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvs(retval, "undef");
 	}
 #ifdef SvVOK
-	else if (SvMAGICAL(val) && (mg = mg_find(val, 'V'))) {
+	else if (SvMAGICAL(val) && (mg = mg_find(val, PERL_MAGIC_vstring))) {
 # if !defined(PL_vtbl_vstring) && PERL_VERSION_LT(5,17,0)
 	    SV * const vecsv = sv_newmortal();
 #  if PERL_VERSION_LT(5,10,0)
@@ -1703,7 +1703,7 @@ Data_Dumper__vstring(sv)
 #ifdef SvVOK
 	    const MAGIC *mg;
 	    RETVAL =
-		SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))
+		SvMAGICAL(sv) && (mg = mg_find(sv, PERL_MAGIC_vstring))
 		 ? newSVpvn((const char *)mg->mg_ptr, mg->mg_len)
 		 : &PL_sv_undef;
 #else
