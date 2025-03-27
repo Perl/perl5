@@ -4972,6 +4972,10 @@ Tp	|bool	|translate_substr_offsets				\
 				|NN STRLEN *posp			\
 				|NN STRLEN *lenp
 #endif
+#if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
+p	|void	|mg_free_struct |NN SV *sv				\
+				|NN MAGIC *mg
+#endif
 #if defined(PERL_IN_MRO_C)
 S	|void	|mro_clean_isarev					\
 				|NN HV * const isa			\

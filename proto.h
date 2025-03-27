@@ -7406,6 +7406,14 @@ Perl_translate_substr_offsets(STRLEN curlen, IV pos1_iv, bool pos1_is_uv, IV len
         assert(posp); assert(lenp)
 
 #endif
+#if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
+PERL_CALLCONV void
+Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_MG_FREE_STRUCT        \
+        assert(sv); assert(mg)
+
+#endif
 #if defined(PERL_IN_MRO_C)
 STATIC void
 S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name, const STRLEN len, HV * const exceptions, U32 hash, U32 flags);

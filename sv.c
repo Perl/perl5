@@ -6516,19 +6516,7 @@ S_sv_unmagicext_flags(pTHX_ SV *const sv, const int type, const MGVTBL *vtbl, co
         const MGVTBL* const virt = mg->mg_virtual;
         if (mg->mg_type == type && (!flags || virt == vtbl)) {
             *mgp = mg->mg_moremagic;
-            if (virt && virt->svt_free)
-                virt->svt_free(aTHX_ sv, mg);
-            if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-                if (mg->mg_len > 0)
-                    Safefree(mg->mg_ptr);
-                else if (mg->mg_len == HEf_SVKEY)
-                    SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
-                else if (mg->mg_type == PERL_MAGIC_utf8)
-                    Safefree(mg->mg_ptr);
-            }
-            if (mg->mg_flags & MGf_REFCOUNTED)
-                SvREFCNT_dec(mg->mg_obj);
-            Safefree(mg);
+            mg_free_struct(sv, mg);
         }
         else
             mgp = &mg->mg_moremagic;
