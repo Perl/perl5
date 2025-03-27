@@ -1989,9 +1989,9 @@ sub output_LB_table() {
           CP => [ qw(CP East_Asian_CP) ],
           OP => [ qw(OP East_Asian_OP) ],
           EA => [ qw(East_Asian_OP East_Asian_CP) ],
-          Ideographic => [ 'Ideographic',
-                           'Unassigned_Extended_Pictographic_Ideographic'
-                         ],
+          Cn_ExtPict_ID => [ 'Unassigned_Extended_Pictographic_Ideographic' ],
+          Cn_ExtPict => [ 'Cn_ExtPict_ID' ],
+          ID => [ 'ID', 'Cn_ExtPict_ID' ],
         }
     );
 
@@ -2090,11 +2090,10 @@ sub output_LB_table() {
     # emoji modifier.
     # EB × EM
     $rule = '30b';
-    set_lb_nobreak('E_Base', 'E_Modifier', $rule);
+    set_lb_nobreak('EB', 'EM', $rule);
 
     # [\p{Extended_Pictographic}&\p{Cn}] × EM
-    set_lb_nobreak('Unassigned_Extended_Pictographic_Ideographic',
-                   'E_Modifier', $rule);
+    set_lb_nobreak('Cn_ExtPict', 'EM', $rule);
 
     # LB30a Break between two regional indicator symbols if and only if there
     # are an even number of regional indicators preceding the position of the
@@ -2108,44 +2107,44 @@ sub output_LB_table() {
     # parentheses.
     # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
     $rule = 30;
-    set_lb_nobreak('Alphabetic', 'Open_Punctuation_sans_EA', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Open_Punctuation_sans_EA', $rule);
-    set_lb_nobreak('Numeric', 'Open_Punctuation_sans_EA', $rule);
+    set_lb_nobreak('AL', 'OP_sans_EA', $rule);
+    set_lb_nobreak('HL', 'OP_sans_EA', $rule);
+    set_lb_nobreak('NU', 'OP_sans_EA', $rule);
 
     # [CP-[\p{ea=F}\p{ea=W}\p{ea=H}]] × (AL | HL | NU)
-    set_lb_nobreak('Close_Parenthesis_sans_EA', 'Alphabetic', $rule);
-    set_lb_nobreak('Close_Parenthesis_sans_EA', 'Hebrew_Letter', $rule);
-    set_lb_nobreak('Close_Parenthesis_sans_EA', 'Numeric', $rule);
+    set_lb_nobreak('CP_sans_EA', 'AL', $rule);
+    set_lb_nobreak('CP_sans_EA', 'HL', $rule);
+    set_lb_nobreak('CP_sans_EA', 'NU', $rule);
 
     # LB29 Do not break between numeric punctuation and alphabetics (“e.g.”).
     # IS × (AL | HL)
     $rule = 29;
-    set_lb_nobreak('Infix_Numeric', 'Alphabetic', $rule);
-    set_lb_nobreak('Infix_Numeric', 'Hebrew_Letter', $rule);
+    set_lb_nobreak('IS', 'AL', $rule);
+    set_lb_nobreak('IS', 'HL', $rule);
 
     # LB28 Do not break between alphabetics (“at”).
     # (AL | HL) × (AL | HL)
     $rule = 28;
-    set_lb_nobreak('Alphabetic', 'Alphabetic', $rule);
-    set_lb_nobreak('Alphabetic', 'Hebrew_Letter', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Alphabetic', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Hebrew_Letter', $rule);
+    set_lb_nobreak('AL', 'AL', $rule);
+    set_lb_nobreak('AL', 'HL', $rule);
+    set_lb_nobreak('HL', 'AL', $rule);
+    set_lb_nobreak('HL', 'HL', $rule);
 
     # LB27 Treat a Korean Syllable Block the same as ID.
     # (JL | JV | JT | H2 | H3) × PO
     $rule = 27;
-    set_lb_nobreak('JL', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('JV', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('JT', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('H2', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('H3', 'Postfix_Numeric', $rule);
+    set_lb_nobreak('JL', 'PO', $rule);
+    set_lb_nobreak('JV', 'PO', $rule);
+    set_lb_nobreak('JT', 'PO', $rule);
+    set_lb_nobreak('H2', 'PO', $rule);
+    set_lb_nobreak('H3', 'PO', $rule);
 
     # PR × (JL | JV | JT | H2 | H3)
-    set_lb_nobreak('Prefix_Numeric', 'JL', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'JV', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'JT', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'H2', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'H3', $rule);
+    set_lb_nobreak('PR', 'JL', $rule);
+    set_lb_nobreak('PR', 'JV', $rule);
+    set_lb_nobreak('PR', 'JT', $rule);
+    set_lb_nobreak('PR', 'H2', $rule);
+    set_lb_nobreak('PR', 'H3', $rule);
 
     # LB26 Do not break a Korean syllable.
     # JL × (JL | JV | H2 | H3)
@@ -2173,128 +2172,110 @@ sub output_LB_table() {
     # This expands firstly to
     # (PR | PO) × NU
     $rule = 25;
-    set_lb_nobreak('Prefix_Numeric', 'Numeric', $rule);
-    set_lb_nobreak('Postfix_Numeric', 'Numeric', $rule);
+    set_lb_nobreak('PR', 'NU', $rule);
+    set_lb_nobreak('PO', 'NU', $rule);
 
     # And secondly to
     # (PR | PO) × ( OP | HY ) NU
     # Given that (OP | HY )? is optional, we have to test for it in code.
-    add_lb_dfa('Prefix_Numeric', 'Open_Punctuation',
-                  'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('Postfix_Numeric', 'Open_Punctuation',
-                  'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('Prefix_Numeric', 'Hyphen', 'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('Postfix_Numeric', 'Hyphen', 'LB_PR_or_PO_then_OP_or_HY', $rule);
+    add_lb_dfa('PR', 'OP', 'LB_PR_or_PO_then_OP_or_HY', $rule);
+    add_lb_dfa('PO', 'OP', 'LB_PR_or_PO_then_OP_or_HY', $rule);
+    add_lb_dfa('PR', 'HY', 'LB_PR_or_PO_then_OP_or_HY', $rule);
+    add_lb_dfa('PO', 'HY', 'LB_PR_or_PO_then_OP_or_HY', $rule);
 
     # ( OP | HY ) × NU
-    set_lb_nobreak('Open_Punctuation', 'Numeric', $rule);
-    set_lb_nobreak('Hyphen', 'Numeric', $rule);
+    set_lb_nobreak('OP', 'NU', $rule);
+    set_lb_nobreak('HY', 'NU', $rule);
 
     # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
     # which expands firstly to:
     # NU (SY | IS)* × (NU | SY | IS | CL | CP )
-    set_lb_nobreak('Numeric', 'Numeric', $rule);
-    set_lb_nobreak('Numeric', 'Break_Symbols', $rule);
-    set_lb_nobreak('Numeric', 'Infix_Numeric', $rule);
-    set_lb_nobreak('Numeric', 'Close_Punctuation', $rule);
-    set_lb_nobreak('Numeric', 'Close_Parenthesis', $rule);
+    set_lb_nobreak('NU', 'NU', $rule);
+    set_lb_nobreak('NU', 'SY', $rule);
+    set_lb_nobreak('NU', 'IS', $rule);
+    set_lb_nobreak('NU', 'CL', $rule);
+    set_lb_nobreak('NU', 'CP', $rule);
 
     # And then to
     # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
-    add_lb_dfa('Break_Symbols', 'Numeric', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Break_Symbols', 'Break_Symbols',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Break_Symbols', 'Infix_Numeric',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Break_Symbols', 'Close_Punctuation',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Break_Symbols', 'Close_Parenthesis',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Infix_Numeric', 'Numeric', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Infix_Numeric', 'Break_Symbols',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Infix_Numeric', 'Infix_Numeric',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Infix_Numeric', 'Close_Punctuation',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Infix_Numeric', 'Close_Parenthesis',
-                  'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('SY', 'NU', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('SY', 'SY', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('SY', 'IS', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('SY', 'CL', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('SY', 'CP', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('IS', 'NU', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('IS', 'SY', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('IS', 'IS', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('IS', 'CL', 'LB_SY_or_IS_then_various', $rule);
+    add_lb_dfa('IS', 'CP', 'LB_SY_or_IS_then_various', $rule);
 
     # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
     # We can eliminate the NU in the parenthesis, as there is a match as long
     # as there is at least one NU.  This leads to:
     # NU (SY | IS)* (CL | CP)? × (PO | PR)
-    set_lb_nobreak('Numeric', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('Numeric', 'Prefix_Numeric', $rule);
+    set_lb_nobreak('NU', 'PO', $rule);
+    set_lb_nobreak('NU', 'PR', $rule);
 
-    add_lb_dfa('Close_Parenthesis', 'Postfix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('Close_Punctuation', 'Postfix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('Infix_Numeric', 'Postfix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('Break_Symbols', 'Postfix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('CP', 'PO', 'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('CL', 'PO', 'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('IS', 'PO', 'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('SY', 'PO', 'LB_various_then_PO_or_PR', $rule);
 
-    add_lb_dfa('Close_Parenthesis', 'Prefix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('Close_Punctuation', 'Prefix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('Infix_Numeric', 'Prefix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('Break_Symbols', 'Prefix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('CP', 'PR', 'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('CL', 'PR', 'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('IS', 'PR', 'LB_various_then_PO_or_PR', $rule);
+    add_lb_dfa('SY', 'PR', 'LB_various_then_PO_or_PR', $rule);
 
     # LB24 Do not break between numeric prefix/postfix and letters, or between
     # letters and prefix/postfix.
     # (PR | PO) × (AL | HL)
     $rule = 24;
-    set_lb_nobreak('Prefix_Numeric', 'Alphabetic', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'Hebrew_Letter', $rule);
-    set_lb_nobreak('Postfix_Numeric', 'Alphabetic', $rule);
-    set_lb_nobreak('Postfix_Numeric', 'Hebrew_Letter', $rule);
+    set_lb_nobreak('PR', 'AL', $rule);
+    set_lb_nobreak('PR', 'HL', $rule);
+    set_lb_nobreak('PO', 'AL', $rule);
+    set_lb_nobreak('PO', 'HL', $rule);
 
     # (AL | HL) × (PR | PO)
-    set_lb_nobreak('Alphabetic', 'Prefix_Numeric', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Prefix_Numeric', $rule);
-    set_lb_nobreak('Alphabetic', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Postfix_Numeric', $rule);
+    set_lb_nobreak('AL', 'PR', $rule);
+    set_lb_nobreak('HL', 'PR', $rule);
+    set_lb_nobreak('AL', 'PO', $rule);
+    set_lb_nobreak('HL', 'PO', $rule);
 
     # LB23a Do not break between numeric prefixes and ideographs, or between
     # ideographs and numeric postfixes.
     # PR × (ID | EB | EM)
     $rule = '23a';
-    set_lb_nobreak('Prefix_Numeric', 'Ideographic', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'E_Base', $rule);
-    set_lb_nobreak('Prefix_Numeric', 'E_Modifier', $rule);
+    set_lb_nobreak('PR', 'ID', $rule);
+    set_lb_nobreak('PR', 'EB', $rule);
+    set_lb_nobreak('PR', 'EM', $rule);
 
     # (ID | EB | EM) × PO
-    set_lb_nobreak('Ideographic', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('E_Base', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('E_Modifier', 'Postfix_Numeric', $rule);
+    set_lb_nobreak('ID', 'PO', $rule);
+    set_lb_nobreak('EB', 'PO', $rule);
+    set_lb_nobreak('EM', 'PO', $rule);
 
     # LB23 Do not break between digits and letters
     # (AL | HL) × NU
     $rule = 23;
-    set_lb_nobreak('Alphabetic', 'Numeric', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Numeric', $rule);
+    set_lb_nobreak('AL', 'NU', $rule);
+    set_lb_nobreak('HL', 'NU', $rule);
 
     # NU × (AL | HL)
-    set_lb_nobreak('Numeric', 'Alphabetic', $rule);
-    set_lb_nobreak('Numeric', 'Hebrew_Letter', $rule);
+    set_lb_nobreak('NU', 'AL', $rule);
+    set_lb_nobreak('NU', 'HL', $rule);
 
     # LB22 Do not break before ellipses
-    set_lb_nobreak('*', 'Inseparable', 22);
+    set_lb_nobreak('*', 'IN', 22);
 
     # LB21b Don’t break between Solidus and Hebrew letters.
     # SY × HL
-    set_lb_nobreak('Break_Symbols', 'Hebrew_Letter', '21b');
+    set_lb_nobreak('SY', 'HL', '21b');
 
-    # LB21a Don't break after Hebrew + Hyphen.
+    # LB21a Don't break after Hebrew + HY.
     # HL (HY | BA) ×
     $rule = '21a';
-    add_lb_dfa('Hyphen', '*', 'LB_HY_or_BA_then_foo', $rule);
-    add_lb_dfa('Break_After', '*', 'LB_HY_or_BA_then_foo', $rule);
+    add_lb_dfa('HY', '*', 'LB_HY_or_BA_then_foo', $rule);
+    add_lb_dfa('BA', '*', 'LB_HY_or_BA_then_foo', $rule);
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
     # spaces, small kana, and other non-starters, or after acute accents.
@@ -2303,10 +2284,10 @@ sub output_LB_table() {
     # × NS
     # BB ×
     $rule = 21;
-    set_lb_nobreak('*', 'Break_After', $rule);
-    set_lb_nobreak('*', 'Hyphen', $rule);
-    set_lb_nobreak('*', 'Nonstarter', $rule);
-    set_lb_nobreak('Break_Before', '*', $rule);
+    set_lb_nobreak('*', 'BA', $rule);
+    set_lb_nobreak('*', 'HY', $rule);
+    set_lb_nobreak('*', 'NS', $rule);
+    set_lb_nobreak('BB', '*', $rule);
 
     # LB20 Break before and after unresolved CB.
     # ÷ CB
@@ -2315,38 +2296,38 @@ sub output_LB_table() {
     # rules. However, the default action is to treat unresolved CB as breaking
     # before and after.
     $rule = 20;
-    set_lb_breakable('*', 'Contingent_Break', $rule);
-    set_lb_breakable('Contingent_Break', '*', $rule);
+    set_lb_breakable('*', 'CB', $rule);
+    set_lb_breakable('CB', '*', $rule);
 
     # LB19 Do not break before or after quotation marks, such as ‘ ” ’.
     # × QU
     # QU ×
     $rule = 19;
-    set_lb_nobreak('*', 'Quotation', $rule);
-    set_lb_nobreak('Quotation', '*', $rule);
+    set_lb_nobreak('*', 'QU', $rule);
+    set_lb_nobreak('QU', '*', $rule);
 
     # LB18 Break after spaces
     # SP ÷
-    set_lb_breakable('Space', '*', 18);
+    set_lb_breakable('SP', '*', 18);
 
     # LB17 Do not break within ‘——’, even with intervening spaces.
     # B2 SP* × B2
-    set_lb_nobreak_ignoring_SP('Break_Both', 'Break_Both', 17);
+    set_lb_nobreak_ignoring_SP('B2', 'B2', 17);
 
     # LB16 Do not break between closing punctuation and a nonstarter even with
     # intervening spaces.
     # (CL | CP) SP* × NS
     $rule = 16;
-    set_lb_nobreak_ignoring_SP('Close_Punctuation', 'Nonstarter', $rule);
-    set_lb_nobreak_ignoring_SP('Close_Parenthesis', 'Nonstarter', $rule);
+    set_lb_nobreak_ignoring_SP('CL', 'NS', $rule);
+    set_lb_nobreak_ignoring_SP('CP', 'NS', $rule);
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
-    set_lb_nobreak_ignoring_SP('Quotation', 'Open_Punctuation', 15);
+    set_lb_nobreak_ignoring_SP('QU', 'OP', 15);
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
-    set_lb_nobreak_ignoring_SP('Open_Punctuation', '*', 14);
+    set_lb_nobreak_ignoring_SP('OP', '*', 14);
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
@@ -2356,32 +2337,31 @@ sub output_LB_table() {
     # × IS
     # × SY
     $rule = 13;
-    set_lb_nobreak_ignoring_SP('*', 'Close_Punctuation', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'Close_Parenthesis', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'Exclamation', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'Infix_Numeric', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'Break_Symbols', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'CL', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'CP', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'EX', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'IS', $rule);
+    set_lb_nobreak_ignoring_SP('*', 'SY', $rule);
 
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
     # [^SP BA HY] × GL
-    set_lb_nobreak_no_override_ignoring_SP([ qw(^ Space Break_After Hyphen) ],
-                                           'Glue', '12a');
+    set_lb_nobreak_no_override_ignoring_SP([ qw(^ SP BA HY) ], 'GL', '12a');
 
     # LB12 Do not break after NBSP and related characters.
     # GL ×
-    set_lb_nobreak('Glue', '*', 12);
+    set_lb_nobreak('GL', '*', 12);
 
     # LB11 Do not break before or after Word joiner and related characters.
     # × WJ
-    set_lb_nobreak('*', 'Word_Joiner', 11);
+    set_lb_nobreak('*', 'WJ', 11);
     # WJ ×
-    set_lb_nobreak('Word_Joiner', '*', 11);
+    set_lb_nobreak('WJ', '*', 11);
 
     # Special case this here to avoid having to do a special case in the code,
     # by making this the same as other things with a SP in front of them that
     # don't break, we avoid an extra test
-    set_lb_nobreak_ignoring_SP('Space', 'Word_Joiner', $rule);
+    set_lb_nobreak_ignoring_SP('SP', 'WJ', $rule);
 
     # Rules 9 and 10 are reversed here to fit better with the language of
     # UAX14.  This reverse works out because they operate on disjoint sets of
@@ -2399,24 +2379,22 @@ sub output_LB_table() {
     # filled in.  If the order is reversed, and the combining character
     # precedes another one, we have to backup at runtime to find out if the
     # combining character attached to an earlier character or not.
-    my @CM_doesnt_combine = qw(Mandatory_Break Carriage_Return
-                               Line_Feed Next_Line Space ZWSpace EDGE);
+    my @CM_doesnt_combine = qw(BK CR LF NL SP ZWSpace EDGE);
     # LB10 Treat any remaining combining mark or ZWJ as AL.  This catches the
     # case where a CM or ZWJ is the first character on the line or follows SP,
     # BK, CR, LF, NL, or ZW.
-    set_lb_cells(\@CM_doesnt_combine, $_,
-                 get_lb_cell_value($_, 'Alphabetic'), 10)
-                                                    for qw(Combining_Mark ZWJ);
+    set_lb_cells(\@CM_doesnt_combine, $_, get_lb_cell_value($_, 'AL'), 10)
+                                                                for qw(CM ZWJ);
 
     # When the CM or ZWJ is the first in the pair, we don't know without
     # looking behind whether the CM or ZWJ is going to attach to an earlier
     # character, or not.  So have to figure this out at runtime in the code
-    add_lb_dfa($_, '*', 'LB_CM_ZWJ_foo', 9) for qw(Combining_Mark ZWJ);
+    add_lb_dfa($_, '*', 'LB_CM_ZWJ_foo', 9) for qw(CM ZWJ);
 
     # For the opposite classes, the CM or ZWJ combines, so doesn't break,
     # but it inherits the type of nobreak from the master character.
-    set_lb_nobreak_no_override_ignoring_SP( [ '^', @CM_doesnt_combine ],
-                                           $_, 9) for qw(Combining_Mark ZWJ);
+    set_lb_nobreak_no_override_ignoring_SP( [ '^', @CM_doesnt_combine ], $_, 9)
+                                                                for qw(CM ZWJ);
 
     # LB8a Do not break after a zero width joiner
     # ZWJ ×
@@ -2431,21 +2409,21 @@ sub output_LB_table() {
     # Next ZW SP+ ÷
     # Because of LB8-10, we need to look at context for "SP x", and this must
     # be done in the code.
-    add_lb_dfa('Space', '*', 'LB_SP_foo', 8);
+    add_lb_dfa('SP', '*', 'LB_SP_foo', 8);
 
     # LB7 Do not break before spaces or zero width space.
     # × SP
     # × ZW
-    set_lb_nobreak('*', 'Space', 7);
+    set_lb_nobreak('*', 'SP', 7);
     set_lb_nobreak('*', 'ZWSpace', 7);
 
     # LB6 Do not break before hard line breaks.
     # × ( BK | CR | LF | NL )
     $rule = 6;
-    set_lb_nobreak('*', 'Mandatory_Break', $rule);
-    set_lb_nobreak('*', 'Carriage_Return', $rule);
-    set_lb_nobreak('*', 'Line_Feed', $rule);
-    set_lb_nobreak('*', 'Next_Line', $rule);
+    set_lb_nobreak('*', 'BK', $rule);
+    set_lb_nobreak('*', 'CR', $rule);
+    set_lb_nobreak('*', 'LF', $rule);
+    set_lb_nobreak('*', 'NL', $rule);
 
     # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line
     # breaks.
@@ -2453,14 +2431,14 @@ sub output_LB_table() {
     # LF !
     # NL !
     $rule = 5;
-    set_lb_breakable('Carriage_Return', '*', $rule);
-    set_lb_breakable('Line_Feed', '*', $rule);
-    set_lb_breakable('Next_Line', '*', $rule);
-    set_lb_nobreak('Carriage_Return', 'Line_Feed', $rule);
+    set_lb_breakable('CR', '*', $rule);
+    set_lb_breakable('LF', '*', $rule);
+    set_lb_breakable('NL', '*', $rule);
+    set_lb_nobreak('CR', 'LF', $rule);
 
     # LB4 Always break after hard line breaks.
     # BK !
-    set_lb_breakable('Mandatory_Break', '*', 4);
+    set_lb_breakable('BK', '*', 4);
 
     # LB3 Always break at the end of text.
     # ! eot
