@@ -1606,7 +1606,13 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
             $max_name_length = $length if $length > $max_name_length;
         }
 
-        print $out_fh "\n";
+        print $out_fh <<~EOT;
+
+        /* regexec.c 'case' statements use these symbols whose values are in
+         * the below table to denote the DFA to execute for the corresponding
+         * cell.  '_v_' in the names shows where the candidate break position
+         * is. */
+        EOT
 
         # Output, so that the values are vertically aligned in a column after
         # the longest name
@@ -1849,9 +1855,9 @@ sub output_GCB_table() {
     my %gcb_dfas = (
         GCB_NOBREAK                      => 0,
         GCB_BREAKABLE                    => 1,
-        GCB_RI_then_RI                   => 2,   # Rules 12 and 13
-        GCB_EX_then_EM                   => 3,   # Rule 10
-        GCB_Maybe_Emoji_NonBreak         => 4,
+        GCB_various_then_RI_v_RI         => 2,   # Rules 12 and 13
+        GCB_EB_or_EBG_then_Extend_v_EM   => 3,   # Rule 10
+        GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict => 4,
     );
 
     # These just call the generic table access functions with the correct data
@@ -1893,12 +1899,12 @@ sub output_GCB_table() {
     # GB12 sot (RI RI)* RI × RI
     # GB13 [^RI] (RI RI)* RI × RI
     $rule = 12;
-    add_gcb_dfa('RI', 'RI', 'GCB_RI_then_RI', $rule);
+    add_gcb_dfa('RI', 'RI', 'GCB_various_then_RI_v_RI', $rule);
 
     # Post 11.0: GB11   \p{Extended_Pictographic} Extend* ZWJ
     #                 × \p{Extended_Pictographic}
-    add_gcb_dfa('ZWJ', 'Extended_Pictographic', 'GCB_Maybe_Emoji_NonBreak',
-                $rule);
+    $dfa = 'GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict';
+    add_gcb_dfa('ZWJ', 'Extended_Pictographic', $dfa, 11);
 
     # This and the rule GB10 obsolete starting with Unicode 11.0, can be left
     # in as there are no code points that match, so the code won't ever get
@@ -1909,7 +1915,8 @@ sub output_GCB_table() {
 
     # GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier
     $rule = 10;
-    add_gcb_dfa('Extend', 'E_Modifier', 'GCB_EX_then_EM', $rule);
+    add_gcb_dfa('Extend', 'E_Modifier', 'GCB_EB_or_EBG_then_Extend_v_EM',
+                $rule);
     set_gcb_nobreak('E_Base', 'E_Modifier', $rule);
     set_gcb_nobreak('E_Base_GAZ', 'E_Modifier', $rule);
 
@@ -2004,14 +2011,13 @@ sub output_LB_table() {
         LB_BREAKABLE                    => 1,
         LB_NOBREAK_EVEN_WITH_SP_BETWEEN => 2,
 
-        LB_CM_ZWJ_foo                   => 3,   # Rule 9
-        LB_SP_foo                       => 6,   # Rule 18, et. al
-        LB_PR_or_PO_then_OP_or_HY       => 9,   # Rule 25
-        LB_SY_or_IS_then_various        => 11,  # Rule 25
-        LB_HY_or_BA_then_foo            => 13,  # Rule 21
-        LB_RI_then_RI                   => 15,  # Rule 30a
-
-        LB_various_then_PO_or_PR        => (1<<5),  # Rule 25
+        LB_CM_ZWJ_v_any                 => 3,   # Rule 9
+        LB_ZW_then_SP_v_any             => 6,   # Rule 18, et. al
+        LB_PR_or_PO_v_OP_or_HY_then_NU  => 9,   # Rule 25
+        LB_NU_then_SY_or_IS_v_various   => 11,  # Rule 25
+        LB_HL_then_HY_or_BA_v_any       => 13,  # Rule 21
+        LB_various_then_RI_v_RI         => 15,  # Rule 30a
+        LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  => (1<<5), # Rule 25
     );
 
     # Construct the LB pair table.  This is based on the rules in
@@ -2055,8 +2061,8 @@ sub output_LB_table() {
         # These two don't reference the current value of the cell.  So use
         # set_cells for them.  This preserves current behavior, until we're
         # ready to change the dfa handling.
-        if (   $dfa eq 'LB_CM_ZWJ_foo'
-            || $dfa eq 'LB_RI_then_RI')
+        if (   $dfa eq 'LB_CM_ZWJ_v_any'
+            || $dfa eq 'LB_various_then_RI_v_RI')
         {
             $dfa = 0 + $lb_dfas{$dfa};
             return set_lb_cells($x, $y, $dfa, $rule);
@@ -2088,7 +2094,7 @@ sub output_LB_table() {
     # break.
     # sot (RI RI)* RI × RI
     # [^RI] (RI RI)* RI × RI
-    add_lb_dfa('RI', 'RI', 'LB_RI_then_RI', '30a');
+    add_lb_dfa('RI', 'RI', 'LB_various_then_RI_v_RI', '30a');
 
     # LB30 Do not break between letters, numbers, or ordinary symbols and
     # non-East-Asian opening punctuation nor non-East-Asian closing
@@ -2146,7 +2152,7 @@ sub output_LB_table() {
     # And secondly to
     # (PR | PO) × ( OP | HY ) NU
     # Given that (OP | HY )? is optional, we have to test for it in code.
-    $dfa = 'LB_PR_or_PO_then_OP_or_HY';
+    $dfa = 'LB_PR_or_PO_v_OP_or_HY_then_NU';
     for $lhs (qw(PR PO)) {
         add_lb_dfa($lhs, $_, $dfa, $rule) for qw(OP HY);
     }
@@ -2162,7 +2168,7 @@ sub output_LB_table() {
 
     # And then to
     # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
-    $dfa = 'LB_SY_or_IS_then_various';
+    $dfa = 'LB_NU_then_SY_or_IS_v_various';
     for $lhs (qw(SY IS)) {
         add_lb_dfa($lhs, $_, $dfa, $rule) for qw(NU SY IS CL CP);
     }
@@ -2174,7 +2180,7 @@ sub output_LB_table() {
     set_lb_nobreak('NU', 'PO', $rule);
     set_lb_nobreak('NU', 'PR', $rule);
 
-    $dfa = 'LB_various_then_PO_or_PR';
+    $dfa = 'LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR';
     for $lhs (qw(CP CL IS SY)) {
         add_lb_dfa($lhs, $_, $dfa, $rule) for qw(PO PR);
     }
@@ -2221,8 +2227,8 @@ sub output_LB_table() {
     # LB21a Don't break after Hebrew + HY.
     # HL (HY | BA) ×
     $rule = '21a';
-    add_lb_dfa('HY', '*', 'LB_HY_or_BA_then_foo', $rule);
-    add_lb_dfa('BA', '*', 'LB_HY_or_BA_then_foo', $rule);
+    add_lb_dfa('HY', '*', 'LB_HL_then_HY_or_BA_v_any', $rule);
+    add_lb_dfa('BA', '*', 'LB_HL_then_HY_or_BA_v_any', $rule);
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
     # spaces, small kana, and other non-starters, or after acute accents.
@@ -2329,7 +2335,7 @@ sub output_LB_table() {
     # When the CM or ZWJ is the first in the pair, we don't know without
     # looking behind whether the CM or ZWJ is going to attach to an earlier
     # character, or not.  So have to figure this out at runtime in the code
-    add_lb_dfa($_, '*', 'LB_CM_ZWJ_foo', 9) for qw(CM ZWJ);
+    add_lb_dfa($_, '*', 'LB_CM_ZWJ_v_any', 9) for qw(CM ZWJ);
 
     # For the opposite classes, the CM or ZWJ combines, so doesn't break,
     # but it inherits the type of nobreak from the master character.
@@ -2349,7 +2355,7 @@ sub output_LB_table() {
     # Next ZW SP+ ÷
     # Because of LB8-10, we need to look at context for "SP x", and this must
     # be done in the code.
-    add_lb_dfa('SP', '*', 'LB_SP_foo', 8);
+    add_lb_dfa('SP', '*', 'LB_ZW_then_SP_v_any', 8);
 
     # LB7 Do not break before spaces or zero width space.
     # × SP
@@ -2437,15 +2443,15 @@ sub output_WB_table() {
     my %wb_dfas = (
         WB_NOBREAK                      => 0,
         WB_BREAKABLE                    => 1,
-        WB_hs_then_hs                   => 2,
-        WB_Ex_or_FO_or_ZWJ_then_foo     => 3,
-        WB_DQ_then_HL                   => 4,
-        WB_HL_then_DQ                   => 6,
+        WB_hs_v_hs_then_Extend_or_FO_or_ZWJ => 2,
+        WB_Extend_or_FO_or_ZWJ_then_foo => 3,
+        WB_HL_then_DQ_v_HL              => 4,
+        WB_HL_v_DQ_then_HL              => 6,
         WB_AHL_v_ML_or_MNLQ_then_AHL    => 8,
         WB_AHL_then_ML_or_MNLQ_v_AHL    => 10,
         WB_NU_then_MN_or_MNLQ_v_NU      => 12,
         WB_NU_v_MN_or_MNLQ_then_NU      => 14,
-        WB_RI_then_RI                   => 16,
+        WB_various_then_RI_v_RI         => 16,
     );
 
     # These just call the generic table access functions with the correct data
@@ -2466,9 +2472,9 @@ sub output_WB_table() {
         # These three don't reference the current value of the cell.  So use
         # set_cells for them.  This preserves current behavior, until we're
         # ready to change the dfa handling.
-        if (   $dfa eq 'WB_Ex_or_FO_or_ZWJ_then_foo'
-            || $dfa eq 'WB_RI_then_RI'
-            || $dfa eq 'WB_hs_then_hs')
+        if (   $dfa eq 'WB_Extend_or_FO_or_ZWJ_then_foo'
+            || $dfa eq 'WB_various_then_RI_v_RI'
+            || $dfa eq 'WB_hs_v_hs_then_Extend_or_FO_or_ZWJ')
         {
             $dfa = 0 + $wb_dfas{$dfa};
             return set_wb_cells($x, $y, $dfa, $rule);
@@ -2489,7 +2495,7 @@ sub output_WB_table() {
     # characters before the break point.
     # WB16  [^RI] (RI RI)* RI × RI
     # WB15   sot    (RI RI)* RI × RI
-    add_wb_dfa('RI', 'RI', 'WB_RI_then_RI', 15);
+    add_wb_dfa('RI', 'RI', 'WB_various_then_RI_v_RI', 15);
 
     # Do not break within emoji modifier sequences.
     # WB14  ( E_Base | EBG )  ×  E_Modifier
@@ -2537,10 +2543,10 @@ sub output_WB_table() {
 
     # Do not break letters across certain punctuation.
     # WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter
-    add_wb_dfa('Double_Quote', 'Hebrew_Letter', 'WB_DQ_then_HL', '7c');
+    add_wb_dfa('Double_Quote', 'Hebrew_Letter', 'WB_HL_then_DQ_v_HL', '7c');
 
     # WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter
-    add_wb_dfa('Hebrew_Letter', 'Double_Quote', 'WB_HL_then_DQ', '7b');
+    add_wb_dfa('Hebrew_Letter', 'Double_Quote', 'WB_HL_v_DQ_then_HL', '7b');
 
     # WB7a  Hebrew_Letter  ×  Single_Quote
     set_wb_nobreak('Hebrew_Letter', 'Single_Quote', '7a');
@@ -2565,7 +2571,7 @@ sub output_WB_table() {
     #   Any × (Format | Extend | ZWJ)
     #
     # WB4  X (Extend | Format | ZWJ)* → X
-    $dfa = 'WB_Ex_or_FO_or_ZWJ_then_foo';
+    $dfa = 'WB_Extend_or_FO_or_ZWJ_then_foo';
     $rule = 4;
     add_wb_dfa($_, '*', $dfa, $rule) for qw(Extend Format ZWJ);
     set_wb_nobreak('*', $_, $rule) for qw(Extend Format ZWJ);
@@ -2605,7 +2611,7 @@ sub output_WB_table() {
     $rule = '2z';
     set_wb_nobreak('Perl_Tailored_HSpace', $_, $rule) for qw(Extend Format ZWJ);
     add_wb_dfa('Perl_Tailored_HSpace', 'Perl_Tailored_HSpace',
-               'WB_hs_then_hs', $rule);
+               'WB_hs_v_hs_then_Extend_or_FO_or_ZWJ', $rule);
 
     # Break at the start and end of text, unless the text is empty
     # WB2  Any  ÷  eot

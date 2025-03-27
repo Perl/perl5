@@ -5256,7 +5256,7 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
         case GCB_NOBREAK:
             return false;
 
-        case GCB_RI_then_RI:
+        case GCB_various_then_RI_v_RI:
             {
                 int RI_count = 1;
                 U8 * temp_pos = (U8 *) curpos;
@@ -5277,7 +5277,7 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 return RI_count % 2 != 1;
             }
 
-        case GCB_EX_then_EM:
+        case GCB_EB_or_EBG_then_Extend_v_EM:
 
             /* GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier */
             {
@@ -5292,7 +5292,7 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 return prev != GCB_E_Base && prev != GCB_E_Base_GAZ;
             }
 
-        case GCB_Maybe_Emoji_NonBreak:
+        case GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict:
 
             {
 
@@ -5403,9 +5403,9 @@ S_isLB(pTHX_ LB_enum before,
         case LB_NOBREAK_EVEN_WITH_SP_BETWEEN:
             return false;
 
-        case LB_SP_foo + LB_BREAKABLE:
-        case LB_SP_foo + LB_NOBREAK:
-        case LB_SP_foo + LB_NOBREAK_EVEN_WITH_SP_BETWEEN:
+        case LB_ZW_then_SP_v_any + LB_BREAKABLE:
+        case LB_ZW_then_SP_v_any + LB_NOBREAK:
+        case LB_ZW_then_SP_v_any + LB_NOBREAK_EVEN_WITH_SP_BETWEEN:
 
             /* When we have something following a SP, we have to look at the
              * context in order to know what to do.
@@ -5456,7 +5456,7 @@ S_isLB(pTHX_ LB_enum before,
              * before Word joiner, but we have specially encoded that in the
              * lookup table so it is caught by the single test below which
              * catches the other ones. */
-            if (LB_table[LB_Space][after] - LB_SP_foo
+            if (LB_table[LB_Space][after] - LB_ZW_then_SP_v_any
                                             == LB_NOBREAK_EVEN_WITH_SP_BETWEEN)
             {
                 return false;
@@ -5485,7 +5485,7 @@ S_isLB(pTHX_ LB_enum before,
              * that is overridden */
             return LB_table[prev][after] != LB_NOBREAK_EVEN_WITH_SP_BETWEEN;
 
-        case LB_CM_ZWJ_foo:
+        case LB_CM_ZWJ_v_any:
 
             /* We don't know how to treat the CM except by looking at the first
              * non-CM character preceding it.  ZWJ is treated as CM */
@@ -5503,8 +5503,8 @@ S_isLB(pTHX_ LB_enum before,
 
             goto redo;
 
-        case LB_HY_or_BA_then_foo + LB_BREAKABLE:
-        case LB_HY_or_BA_then_foo + LB_NOBREAK:
+        case LB_HL_then_HY_or_BA_v_any + LB_BREAKABLE:
+        case LB_HL_then_HY_or_BA_v_any + LB_NOBREAK:
 
             /* LB21a Don't break after Hebrew + Hyphen.
              * HL (HY | BA) × */
@@ -5515,21 +5515,21 @@ S_isLB(pTHX_ LB_enum before,
                 return false;
             }
 
-            return LB_table[prev][after] - LB_HY_or_BA_then_foo == LB_BREAKABLE;
+            return LB_table[prev][after] - LB_HL_then_HY_or_BA_v_any == LB_BREAKABLE;
 
-        case LB_PR_or_PO_then_OP_or_HY + LB_BREAKABLE:
-        case LB_PR_or_PO_then_OP_or_HY + LB_NOBREAK:
+        case LB_PR_or_PO_v_OP_or_HY_then_NU + LB_BREAKABLE:
+        case LB_PR_or_PO_v_OP_or_HY_then_NU + LB_NOBREAK:
 
             /* LB25a (PR | PO) × ( OP | HY )? NU */
             if (advance_one_LB(&temp_pos, strend, utf8_target) == LB_Numeric) {
                 return false;
             }
 
-            return LB_table[prev][after] - LB_PR_or_PO_then_OP_or_HY
+            return LB_table[prev][after] - LB_PR_or_PO_v_OP_or_HY_then_NU
                                                                 == LB_BREAKABLE;
 
-        case LB_SY_or_IS_then_various + LB_BREAKABLE:
-        case LB_SY_or_IS_then_various + LB_NOBREAK:
+        case LB_NU_then_SY_or_IS_v_various + LB_BREAKABLE:
+        case LB_NU_then_SY_or_IS_v_various + LB_NOBREAK:
         {
             /* LB25d NU (SY | IS)* × (NU | SY | IS | CL | CP ) */
 
@@ -5542,12 +5542,12 @@ S_isLB(pTHX_ LB_enum before,
                 return false;
             }
 
-            return LB_table[prev][after] - LB_SY_or_IS_then_various
+            return LB_table[prev][after] - LB_NU_then_SY_or_IS_v_various
                                                                == LB_BREAKABLE;
         }
 
-        case LB_various_then_PO_or_PR + LB_BREAKABLE:
-        case LB_various_then_PO_or_PR + LB_NOBREAK:
+        case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR + LB_BREAKABLE:
+        case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR + LB_NOBREAK:
         {
             /* LB25e NU (SY | IS)* (CL | CP)? × (PO | PR) */
 
@@ -5562,11 +5562,13 @@ S_isLB(pTHX_ LB_enum before,
             if (temp == LB_Numeric) {
                 return false;
             }
-            return LB_various_then_PO_or_PR;
+
+            return LB_table[prev][after]
+               - LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR == LB_BREAKABLE;
         }
 
-        case LB_RI_then_RI + LB_NOBREAK:
-        case LB_RI_then_RI + LB_BREAKABLE:
+        case LB_various_then_RI_v_RI + LB_NOBREAK:
+        case LB_various_then_RI_v_RI + LB_BREAKABLE:
             {
                 int RI_count = 1;
 
@@ -5983,7 +5985,8 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_NOBREAK:
             return false;
 
-        case WB_hs_then_hs:     /* 2 horizontal spaces in a row */
+        case WB_hs_v_hs_then_Extend_or_FO_or_ZWJ: /* 2 horizontal spaces in a
+                                                     row */
             next = advance_one_WB(&next_pos, strend, utf8_target,
                                  false /* Don't skip Extend nor Format */ );
             /* A space immediately preceding an Extend or Format is attached
@@ -6002,12 +6005,12 @@ S_isWB(pTHX_ WB_enum previous,
          * below, and backup a single character (not spacing over the extend
          * ones) and then see if that is one of the region-end characters and
          * go from there */
-        case WB_Ex_or_FO_or_ZWJ_then_foo:
+        case WB_Extend_or_FO_or_ZWJ_then_foo:
             prev = backup_one_WB(&previous, strbeg, &prev_pos, utf8_target);
             goto redo;
 
-        case WB_DQ_then_HL + WB_BREAKABLE:
-        case WB_DQ_then_HL + WB_NOBREAK:
+        case WB_HL_then_DQ_v_HL + WB_BREAKABLE:
+        case WB_HL_then_DQ_v_HL + WB_NOBREAK:
 
             /* WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
 
@@ -6017,10 +6020,10 @@ S_isWB(pTHX_ WB_enum previous,
                 return false;
             }
 
-             return WB_table[before][after] - WB_DQ_then_HL == WB_BREAKABLE;
+             return WB_table[before][after] - WB_HL_then_DQ_v_HL == WB_BREAKABLE;
 
-        case WB_HL_then_DQ + WB_BREAKABLE:
-        case WB_HL_then_DQ + WB_NOBREAK:
+        case WB_HL_v_DQ_then_HL + WB_BREAKABLE:
+        case WB_HL_v_DQ_then_HL + WB_NOBREAK:
 
             /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
 
@@ -6031,7 +6034,7 @@ S_isWB(pTHX_ WB_enum previous,
                 return false;
             }
 
-            return WB_table[before][after] - WB_HL_then_DQ == WB_BREAKABLE;
+            return WB_table[before][after] - WB_HL_v_DQ_then_HL == WB_BREAKABLE;
 
         case WB_AHL_v_ML_or_MNLQ_then_AHL + WB_NOBREAK:
         case WB_AHL_v_ML_or_MNLQ_then_AHL + WB_BREAKABLE:
@@ -6095,8 +6098,8 @@ S_isWB(pTHX_ WB_enum previous,
             return WB_table[before][after]
                                 - WB_NU_v_MN_or_MNLQ_then_NU == WB_BREAKABLE;
 
-        case WB_RI_then_RI + WB_NOBREAK:
-        case WB_RI_then_RI + WB_BREAKABLE:
+        case WB_various_then_RI_v_RI + WB_NOBREAK:
+        case WB_various_then_RI_v_RI + WB_BREAKABLE:
             {
                 int RI_count = 1;
 
