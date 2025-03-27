@@ -1682,6 +1682,9 @@
 #   if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 #     define translate_substr_offsets           Perl_translate_substr_offsets
 #   endif
+#   if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
+#     define mg_free_struct(a,b)                Perl_mg_free_struct(aTHX_ a,b)
+#   endif
 #   if defined(PERL_IN_MRO_C)
 #     define mro_clean_isarev(a,b,c,d,e,f)      S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)
 #     define mro_gather_and_rename(a,b,c,d,e)   S_mro_gather_and_rename(aTHX_ a,b,c,d,e)
