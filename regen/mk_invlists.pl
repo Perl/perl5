@@ -1982,16 +1982,8 @@ sub output_LB_table() {
     # × WJ
     # WJ ×
     for my $i (0 .. @lb_table - 1) {
-        if ($lb_table[$i][$lb_enums{'Word_Joiner'}]
-                        != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
-        {
-            $lb_table[$i][$lb_enums{'Word_Joiner'}] = $lb_actions{'LB_NOBREAK'};
-        }
-        if ($lb_table[$lb_enums{'Word_Joiner'}][$i]
-                        != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
-        {
-            $lb_table[$lb_enums{'Word_Joiner'}][$i] = $lb_actions{'LB_NOBREAK'};
-        }
+        $lb_table[$i][$lb_enums{'Word_Joiner'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'Word_Joiner'}][$i] = $lb_actions{'LB_NOBREAK'};
     }
 
     # Special case this here to avoid having to do a special case in the code,
