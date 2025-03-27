@@ -22,6 +22,7 @@
 #define NEED_newCONSTSUB
 #define NEED_newSVpvn_flags
 #define NEED_newRV_noinc
+#define NEED_sv_vstring_get
 #include "ppport.h"             /* handle old perls */
 
 #ifdef DEBUGGING
@@ -294,23 +295,6 @@ typedef STRLEN ntag_t;
 #endif
 #ifndef SvVOK
 #define VSTRING_CROAK() CROAK(("Cannot retrieve vstring in this perl"))
-#endif
-
-#ifndef sv_vstring_get
-#define sv_vstring_get(sv,lenp) S_sv_vstring_get(aTHX_ sv,lenp)
-static const char *S_sv_vstring_get(pTHX_ SV *sv, STRLEN *lenp)
-{
-  MAGIC *mg;
-  if(!SvMAGICAL(sv) || !(mg = mg_find(sv, PERL_MAGIC_vstring)))
-    return NULL;
-
-  *lenp = mg->mg_len;
-  return mg->mg_ptr;
-}
-#endif
-
-#ifndef SvVSTRING
-#define SvVSTRING(sv,len)  (sv_vstring_get(sv, &(len)))
 #endif
 
 #ifdef HvPLACEHOLDERS
