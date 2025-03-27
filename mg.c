@@ -2899,7 +2899,7 @@ Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
         (void)hv_store_ent((HV *)mg->mg_obj, (SV *)mg->mg_ptr,
                            SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
-    if (mg->mg_flags & MGf_PERSIST)
+    if (mg->mg_private & OPpLVREF_ITER)
         NOOP; /* This sv is in use as an iterator var and will be reused,
                  so we must leave the magic.  */
     else
