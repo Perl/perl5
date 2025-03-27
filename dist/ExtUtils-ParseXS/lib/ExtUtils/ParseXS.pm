@@ -739,7 +739,7 @@ EOM
       or next PARAGRAPH;
     $_ = shift @{$self->{line}};
 
-    $xsub->as_code();
+    $xsub->as_code($self);
 
   } # END 'PARAGRAPH' 'while' loop
 

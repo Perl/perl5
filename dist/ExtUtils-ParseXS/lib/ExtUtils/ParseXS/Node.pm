@@ -187,7 +187,7 @@ sub as_code { }
 
 package ExtUtils::ParseXS::Node::xsub;
 
-# Process an entire XSUB declaration
+# Process an entire XSUB definition
 
 BEGIN { $build_subclass->('', # parent
     'decl',    #  Node::xsub_decl object holding this XSUB declaration
@@ -396,8 +396,10 @@ EOF
             push @{$case->{kids}}, $xbody;
             $xbody = $case;
         }
+        else {
+            push @{$self->{kids}}, $xbody;
+        }
 
-        push @{$self->{kids}}, $xbody;
         $xbody->as_code($pxs);
 
     } # end while (@{ $pxs->{line} })
