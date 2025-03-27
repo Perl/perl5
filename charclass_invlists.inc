@@ -192549,11 +192549,15 @@ UNI_wb_values
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define GCB_NOBREAK                0
-#define GCB_BREAKABLE              1
-#define GCB_RI_then_RI             2
-#define GCB_EX_then_EM             3
-#define GCB_Maybe_Emoji_NonBreak   4
+/* regexec.c 'case' statements use these symbols whose values are in
+ * the below table to denote the DFA to execute for the corresponding
+ * cell.  '_v_' in the names shows where the candidate break position
+ * is. */
+#define GCB_NOBREAK                                  0
+#define GCB_BREAKABLE                                1
+#define GCB_various_then_RI_v_RI                     2
+#define GCB_EB_or_EBG_then_Extend_v_EM               3
+#define GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict   4
 
 static const U8 GCB_table[17][17] = {
    /* The comment rows give Unicode's rule number that
@@ -192583,16 +192587,20 @@ static const U8 GCB_table[17][17] = {
 /* u */ { 0, 0, 0,  0, 0,0, 0, 0,  0, 0, 0, 0,0,0,  0,0,0 }
 };
 
-#define LB_NOBREAK                        0
-#define LB_BREAKABLE                      1
-#define LB_NOBREAK_EVEN_WITH_SP_BETWEEN   2
-#define LB_CM_ZWJ_foo                     3
-#define LB_SP_foo                         6
-#define LB_PR_or_PO_then_OP_or_HY         9
-#define LB_SY_or_IS_then_various         11
-#define LB_HY_or_BA_then_foo             13
-#define LB_RI_then_RI                    15
-#define LB_various_then_PO_or_PR         32
+/* regexec.c 'case' statements use these symbols whose values are in
+ * the below table to denote the DFA to execute for the corresponding
+ * cell.  '_v_' in the names shows where the candidate break position
+ * is. */
+#define LB_NOBREAK                                     0
+#define LB_BREAKABLE                                   1
+#define LB_NOBREAK_EVEN_WITH_SP_BETWEEN                2
+#define LB_CM_ZWJ_v_any                                3
+#define LB_ZW_then_SP_v_any                            6
+#define LB_PR_or_PO_v_OP_or_HY_then_NU                 9
+#define LB_NU_then_SY_or_IS_v_various                 11
+#define LB_HL_then_HY_or_BA_v_any                     13
+#define LB_various_then_RI_v_RI                       15
+#define LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  32
 
 static const U8 LB_table[42][42] = {
    /* The comment rows give Unicode's rule number that applies to the cell immediately above it, except it is left blank for cells
@@ -192644,17 +192652,21 @@ static const U8 LB_table[42][42] = {
 /* u */ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0,  0,0,0 }
 };
 
-#define WB_NOBREAK                     0
-#define WB_BREAKABLE                   1
-#define WB_hs_then_hs                  2
-#define WB_Ex_or_FO_or_ZWJ_then_foo    3
-#define WB_DQ_then_HL                  4
-#define WB_HL_then_DQ                  6
-#define WB_AHL_v_ML_or_MNLQ_then_AHL   8
-#define WB_AHL_then_ML_or_MNLQ_v_AHL  10
-#define WB_NU_then_MN_or_MNLQ_v_NU    12
-#define WB_NU_v_MN_or_MNLQ_then_NU    14
-#define WB_RI_then_RI                 16
+/* regexec.c 'case' statements use these symbols whose values are in
+ * the below table to denote the DFA to execute for the corresponding
+ * cell.  '_v_' in the names shows where the candidate break position
+ * is. */
+#define WB_NOBREAK                            0
+#define WB_BREAKABLE                          1
+#define WB_hs_v_hs_then_Extend_or_FO_or_ZWJ   2
+#define WB_Extend_or_FO_or_ZWJ_then_foo       3
+#define WB_HL_then_DQ_v_HL                    4
+#define WB_HL_v_DQ_then_HL                    6
+#define WB_AHL_v_ML_or_MNLQ_then_AHL          8
+#define WB_AHL_then_ML_or_MNLQ_v_AHL         10
+#define WB_NU_then_MN_or_MNLQ_v_NU           12
+#define WB_NU_v_MN_or_MNLQ_then_NU           14
+#define WB_various_then_RI_v_RI              16
 
 static const U8 WB_table[23][23] = {
    /* The comment rows give Unicode's rule number that applies to the cell
