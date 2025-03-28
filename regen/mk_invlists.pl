@@ -1371,8 +1371,8 @@ sub _Perl_CCC_non0_non230 {
 # you write a DFA, you have to factor in lower priority rules that may also
 # apply.
 
-sub output_table_common($property, $table_value_defines_ref, $table_ref,
-                        $names_ref, $abbreviations_ref)
+sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
+                        $abbreviations_ref)
 {
     # Common subroutine to actually output the generated rules table.
 
@@ -1383,12 +1383,12 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     my @spacing;
 
     # Output the #define list, sorted by numeric value
-    if ($table_value_defines_ref) {
+    if ($dfas_ref) {
         my $max_name_length = 0;
         my @defines;
 
         # Put in order, and at the same time find the longest name
-        while (my ($enum, $value) = each %$table_value_defines_ref) {
+        while (my ($enum, $value) = each %$dfas_ref) {
             $defines[$value] = $enum;
 
             my $length = length $enum;
@@ -1412,13 +1412,13 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     my $table_type = 'U8';
 
     # Is there a row and column for unused values in this release?
-    my $has_unused = $names_ref->[$size-1] eq $unused_table_hdr;
+    my $has_unused = $short_names_ref->[$size-1] eq $unused_table_hdr;
 
     # Determine width of each column, so that heading will fit
     for my $i (0 .. $size - 1) {
         no warnings 'numeric';
-        $names_ref->[$i] = '$' if $names_ref->[$i] eq 'EDGE';
-        my $name_width = length($names_ref->[$i]);
+        $short_names_ref->[$i] = '$' if $short_names_ref->[$i] eq 'EDGE';
+        my $name_width = length($short_names_ref->[$i]);
         $spacing[$i] = $name_width;
     }
 
@@ -1434,7 +1434,7 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     # Now each column
     for my $i (0 .. $size - 1) {
         $header_line .= sprintf "%*s", $spacing[$i] + 1, # +1 for the ','
-                                       $names_ref->[$i];
+                                       $short_names_ref->[$i];
     }
     $header_line .= " */\n";
 
@@ -1487,7 +1487,7 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     for my $i (0 .. $size - 1) {
 
         # First the row heading.
-        my $row_header = $names_ref->[$i];
+        my $row_header = $short_names_ref->[$i];
         $row_header = '^' if $row_header eq '$';    # left edge
 
         # Center the label, biased towards the right
