@@ -1605,7 +1605,8 @@ sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
-                        $abbreviations_ref, $has_unused)
+                        $all_enums_ref, $splits_ref, $abbreviations_ref,
+                        $has_unused)
 {
     # Common subroutine to actually output the generated rules table.
 
@@ -1615,7 +1616,96 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
     # entry in it.
     my @spacing;
 
-    # Output the #define list, sorted by numeric value
+    # Create a hash for creating #defines for regexec.c to determine if a
+    # class is of a given type.  There are two sources for the definitions.
+    # The first is the enums for this property.  This is a hash like
+    #    CM => 6
+    # where the keys are all the names the break classes can possibly be.  The
+    # second is the hash defining the components when a break property class
+    # has been split up because Unicode wants to refer to a subset of the
+    # class, such as
+    #      'CP' => [ 'CP', 'East_Asian_CP' ],
+    # which means that CP is actually comprised of a subset of the entire CP,
+    # plus the intersection of East_Asian characters with CP.
+    #
+    # The latter type is done first, as it has extra information not known to
+    # $all_enums_ref, and the code below only looks at the first instance.
+    my %defines;
+    foreach my $source ($splits_ref, $all_enums_ref) {
+        next unless keys $source->%*;
+
+        foreach my $class (keys $source->%*) {
+
+            # No duplicates allowed
+            next if defined $defines{$class};
+
+            # One of the sources is an array.  For the other one, convert it
+            # to an array so that the same code can be used for both.
+            my @expansion = (ref $source->{$class})
+                            ? $source->{$class}->@*
+                            : $class;
+
+            # Look through each component that makes up this class.  We sort
+            # to standardize the output so that the lowest numbered enum will
+            # appear first in the expansion
+            my $rhs = "";
+            foreach my $contributor ( sort { $all_enums_ref->{$a} <=>
+                                             $all_enums_ref->{$b}
+                                           } @expansion)
+            {
+                # Get its numeric enum value
+                my $enum = $all_enums_ref->{$contributor};
+
+                # Internal enums don't show up externally
+                next if $enum < 0;
+
+                # The final row/column is garbage, and no macro should include
+                # anything in it.
+                if ($has_unused && $enum >= $size - 1) {
+                    $rhs = '0' if $rhs eq "";
+                    next;
+                }
+
+                # Add a branch component for this one.
+                $rhs .= ' || ' if $rhs ne "";
+                $rhs .= "x == $enum";   # 'x' is the formal parameter name
+            }
+
+            # If entirely empty, no component wasn't garbage; that is, all
+            # components are garbage
+            next unless $rhs ne "";
+
+            # The rhs looks like 'CP == 5 || CP == 8'.  If there is no '||',
+            # (that is, it is a single branch), we can use a simple #define
+            # expansion.  But if multiple, we need a scratch variable to avoid
+            # evaluating the parameter more than once.  regexec.c has to be
+            # chummy enough with us to know to declare, for example,
+            # 'isGCB_scratch' and not use it itself.  (The compilation will
+            # fail if it doesn't, when needed.)
+            my $name = "${property}_$class";
+            if ($rhs !~ /\Q||/) {
+                $defines{$class} = { lhs => "is$name(x)", rhs => $rhs };
+            }
+            else {
+                my $var_name = "is${property}_scratch";
+                $rhs =~ s/\bx\b/$var_name/g;  # Change to use variable instead
+                $defines{$class} = {
+                                     lhs => "is$name(x)",
+                                     rhs => "$var_name = (x), $rhs"
+                                   };
+            }
+        }
+    }
+
+    # And output them
+    print $out_fh "\n" if keys %defines;
+    for my $def(sort { $defines{$a}{lhs} cmp $defines{$b}{lhs} }
+                                                                keys %defines)
+    {
+        print $out_fh "#define $defines{$def}{lhs} ($defines{$def}{rhs})\n";
+    }
+
+    # Now output the dfa #define list, sorted by numeric value
     if ($dfas_ref) {
         my $max_name_length = 0;
         my @defines;
@@ -2047,7 +2137,8 @@ sub output_GCB_table() {
     set_gcb_nobreak('EDGE', 'EDGE', 1);
 
     output_table_common('GCB', \%gcb_dfas, \@gcb_table, \@gcb_short_enums,
-                        \%gcb_abbreviations, $has_unused);
+                        \%gcb_all_enums, \%gcb_splits, \%gcb_abbreviations,
+                        $has_unused);
 }
 
 sub output_LB_table() {
@@ -2532,7 +2623,8 @@ sub output_LB_table() {
     # classes.
 
     output_table_common('LB', \%lb_dfas, \@lb_table, \@lb_short_enums,
-                        \%lb_abbreviations, $has_unused);
+                        \%lb_all_enums, \%lb_splits, \%lb_abbreviations,
+                        $has_unused);
 }
 
 sub output_WB_table() {
@@ -2792,7 +2884,8 @@ sub output_WB_table() {
     set_wb_nobreak('EDGE', 'EDGE', 1);
 
     output_table_common('WB', \%wb_dfas, \@wb_table, \@wb_short_enums,
-                        \%wb_abbreviations, $has_unused);
+                        \%wb_all_enums, \%wb_splits, \%wb_abbreviations,
+                        $has_unused);
 }
 
 sub sanitize_name ($sanitized) {

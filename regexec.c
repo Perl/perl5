@@ -5267,9 +5267,8 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                  *  GB12   sot (RI RI)* RI × RI
                  *  GB13 [^RI] (RI RI)* RI × RI */
 
-                while (backup_one_GCB(strbeg,
-                                    &temp_pos,
-                                    utf8_target) == GCB_Regional_Indicator)
+                while (isGCB_RI(backup_one_GCB(strbeg, &temp_pos,
+                                utf8_target)))
                 {
                     RI_count++;
                 }
@@ -5277,6 +5276,8 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 return RI_count % 2 != 1;
             }
 
+/* Obsolete in later Unicode versions */
+#if defined(isGCB_E_Base) && defined(isGCB_E_Base_GAZ)
         case GCB_EB_or_EBG_then_Extend_v_EM:
 
             /* GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier */
@@ -5287,10 +5288,11 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 do {
                     prev = backup_one_GCB(strbeg, &temp_pos, utf8_target);
                 }
-                while (prev == GCB_Extend);
+                while (isGCB_Extend(prev));
 
-                return prev != GCB_E_Base && prev != GCB_E_Base_GAZ;
+                return ! isGCB_E_Base(prev) && ! isGCB_E_Base_GAZ(prev);
             }
+#endif
 
         case GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict:
 
@@ -5305,9 +5307,9 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
                 do {
                     prev = backup_one_GCB(strbeg, &temp_pos, utf8_target);
                 }
-                while (prev == GCB_Extend);
+                while (isGCB_Extend(prev));
 
-                return prev != GCB_ExtPict_XX;
+                return ! isGCB_ExtPict_XX(prev);
             }
 
         default:
@@ -5365,13 +5367,13 @@ S_backup_one_GCB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_ta
 
 /* Combining marks attach to most classes that precede them, but this defines
  * the exceptions (from TR14) */
-#define LB_CM_ATTACHES_TO(prev) ( ! (   prev == LB_EDGE                 \
-                                     || prev == LB_Mandatory_Break      \
-                                     || prev == LB_Carriage_Return      \
-                                     || prev == LB_Line_Feed            \
-                                     || prev == LB_Next_Line            \
-                                     || prev == LB_Space                \
-                                     || prev == LB_ZWSpace))
+#define LB_CM_ATTACHES_TO(prev) ( ! (   isLB_EDGE(prev)                 \
+                                     || isLB_Mandatory_Break(prev)      \
+                                     || isLB_Carriage_Return(prev)      \
+                                     || isLB_Line_Feed(prev)            \
+                                     || isLB_Next_Line(prev)            \
+                                     || isLB_Space(prev)                \
+                                     || isLB_ZWSpace(prev)))
 
 STATIC bool
 S_isLB(pTHX_ LB_enum before,
@@ -5413,7 +5415,7 @@ S_isLB(pTHX_ LB_enum before,
              * SP SP should not reach here because LB7: Do not break before
              * spaces.  (For two spaces in a row there is nothing that
              * overrides that) */
-            assert(after != LB_Space);
+            assert(! isLB_Space(after));
 
             /* Here we have a space followed by a non-space.  Mostly this is a
              * case of LB18: "Break after spaces".  But there are complications
@@ -5438,14 +5440,14 @@ S_isLB(pTHX_ LB_enum before,
             do {
                 prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
-            while (prev == LB_Space);
+            while (isLB_Space(prev));
 
             /* LB8 Break before any character following a zero-width space,
              * even if one or more spaces intervene.
              *      ZW SP* ÷
              * So if we have a ZW just before this span, and to get here this
              * is the final space in the span. */
-            if (prev == LB_ZWSpace) {
+            if (isLB_ZWSpace(prev)) {
                 return true;
             }
 
@@ -5463,14 +5465,14 @@ S_isLB(pTHX_ LB_enum before,
             }
 
             /* If we get here, we have to XXX consider combining marks. */
-            if (prev == LB_Combining_Mark) {
+            if (isLB_Combining_Mark(prev)) {
 
                 /* What happens with these depends on the character they
                  * follow.  */
                 do {
                     prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
                 }
-                while (prev == LB_Combining_Mark);
+                while (isLB_Combining_Mark(prev));
 
                 /* Most times these attach to and inherit the characteristics
                  * of that character, but not always, and when not, they are to
@@ -5492,7 +5494,7 @@ S_isLB(pTHX_ LB_enum before,
             do {
                 prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
-            while (prev == LB_Combining_Mark || prev == LB_ZWJ);
+            while (isLB_Combining_Mark(prev) || isLB_ZWJ(prev));
 
             /* Here, 'prev' is that first earlier non-CM character.  If the CM
              * attaches to it, then it inherits the behavior of 'prev'.  If it
@@ -5509,9 +5511,7 @@ S_isLB(pTHX_ LB_enum before,
             /* LB21a Don't break after Hebrew + Hyphen.
              * HL (HY | BA) × */
 
-            if (backup_one_LB(strbeg, &temp_pos, utf8_target)
-                                                          == LB_Hebrew_Letter)
-            {
+            if (isLB_HL(backup_one_LB(strbeg, &temp_pos, utf8_target))) {
                 return false;
             }
 
@@ -5521,7 +5521,7 @@ S_isLB(pTHX_ LB_enum before,
         case LB_PR_or_PO_v_OP_or_HY_then_NU + LB_NOBREAK:
 
             /* LB25a (PR | PO) × ( OP | HY )? NU */
-            if (advance_one_LB(&temp_pos, strend, utf8_target) == LB_Numeric) {
+            if (isLB_NU(advance_one_LB(&temp_pos, strend, utf8_target))) {
                 return false;
             }
 
@@ -5537,8 +5537,8 @@ S_isLB(pTHX_ LB_enum before,
             do {
                 temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
-            while (temp == LB_Break_Symbols || temp == LB_Infix_Numeric);
-            if (temp == LB_Numeric) {
+            while (isLB_Break_Symbols(temp) || isLB_Infix_Numeric(temp));
+            if (isLB_Numeric(temp)) {
                 return false;
             }
 
@@ -5552,14 +5552,14 @@ S_isLB(pTHX_ LB_enum before,
             /* LB25e NU (SY | IS)* (CL | CP)? × (PO | PR) */
 
             LB_enum temp = prev;
-            if (temp == LB_Close_Punctuation || temp == LB_Close_Parenthesis)
+            if (isLB_Close_Punctuation(temp) || isLB_Close_Parenthesis(temp))
             {
                 temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
-            while (temp == LB_Break_Symbols || temp == LB_Infix_Numeric) {
+            while (isLB_Break_Symbols(temp) || isLB_Infix_Numeric(temp)) {
                 temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
-            if (temp == LB_Numeric) {
+            if (isLB_Numeric(temp)) {
                 return false;
             }
 
@@ -5579,9 +5579,7 @@ S_isLB(pTHX_ LB_enum before,
                  *    sot (RI RI)* RI × RI
                  *  [^RI] (RI RI)* RI × RI */
 
-                while (backup_one_LB(strbeg,
-                                     &temp_pos,
-                                     utf8_target) == LB_Regional_Indicator)
+                while (isLB_RI(backup_one_LB(strbeg, &temp_pos, utf8_target)))
                 {
                     RI_count++;
                 }
@@ -5971,6 +5969,7 @@ S_isWB(pTHX_ WB_enum previous,
     U8 * next_pos = (U8 *) curpos;
     WB_enum prev = before;
     WB_enum next;
+    WB_enum isWB_scratch;   /* Used by generated isWB_foo() macros */
 
     PERL_ARGS_ASSERT_ISWB;
 
@@ -5992,7 +5991,7 @@ S_isWB(pTHX_ WB_enum previous,
             /* A space immediately preceding an Extend or Format is attached
              * to by them, and hence gets separated from previous spaces.
              * Otherwise don't break between horizontal white space */
-            return next == WB_Extend || next == WB_Format;
+            return isWB_Extend(next) || isWB_FO(next) || isWB_ZWJ(next);
 
         /* WB4 Ignore Format and Extend characters, except when they appear at
          * the beginning of a region of text.  This code currently isn't
@@ -6014,8 +6013,8 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
 
-            if (backup_one_WB(&previous, strbeg, &prev_pos, utf8_target)
-                                                            == WB_Hebrew_Letter)
+            if (isWB_Hebrew_Letter(backup_one_WB(&previous, strbeg,
+                                                 &prev_pos, utf8_target)))
             {
                 return false;
             }
@@ -6026,10 +6025,9 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_HL_v_DQ_then_HL + WB_NOBREAK:
 
             /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
-
-            if (advance_one_WB(&next_pos, strend, utf8_target,
-                                       true /* Do skip Extend and Format */ )
-                                                            == WB_Hebrew_Letter)
+            if (isWB_Hebrew_Letter(advance_one_WB(&next_pos, strend,
+                                                  utf8_target,
+                                       true /* Do skip Extend and Format */ )))
             {
                 return false;
             }
@@ -6039,14 +6037,12 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_AHL_v_ML_or_MNLQ_then_AHL + WB_NOBREAK:
         case WB_AHL_v_ML_or_MNLQ_then_AHL + WB_BREAKABLE:
 
-            /* WB6  (ALetter | Hebrew_Letter)  ×  (MidLetter | MidNumLet
-             *       | Single_Quote) (ALetter | Hebrew_Letter) */
+            /* WB6  AHLetter  ×  (MidLetter | MidNumLetQ ) AHLetter */
 
             next = advance_one_WB(&next_pos, strend, utf8_target,
                                        true /* Do skip Extend and Format */ );
 
-            if (next == WB_ALetter || next == WB_Hebrew_Letter)
-            {
+            if (isWB_AHLetter(next)) {
                 return false;
             }
 
@@ -6056,12 +6052,10 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_AHL_then_ML_or_MNLQ_v_AHL + WB_NOBREAK:
         case WB_AHL_then_ML_or_MNLQ_v_AHL + WB_BREAKABLE:
 
-            /* WB7  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet
-             *       | Single_Quote)  ×  (ALetter | Hebrew_Letter) */
+            /* WB7  AHLetter (MidLetter | MidNumLetQ)  ×  AHLetter */
 
             prev = backup_one_WB(&previous, strbeg, &prev_pos, utf8_target);
-            if (prev == WB_ALetter || prev == WB_Hebrew_Letter)
-            {
+            if (isWB_AHLetter(prev)) {
                 return false;
             }
 
@@ -6071,11 +6065,11 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_NU_then_MN_or_MNLQ_v_NU + WB_NOBREAK:
         case WB_NU_then_MN_or_MNLQ_v_NU + WB_BREAKABLE:
 
-            /* WB11  Numeric (MidNum | (MidNumLet | Single_Quote))  ×  Numeric
+            /* WB11  Numeric (MidNum | (MidNumLetQ))  ×  Numeric
              * */
 
-            if (backup_one_WB(&previous, strbeg, &prev_pos, utf8_target)
-                                                            == WB_Numeric)
+            if (isWB_Numeric(backup_one_WB(&previous, strbeg, &prev_pos,
+                                           utf8_target)))
             {
                 return false;
             }
@@ -6086,12 +6080,11 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_NU_v_MN_or_MNLQ_then_NU + WB_NOBREAK:
         case WB_NU_v_MN_or_MNLQ_then_NU + WB_BREAKABLE:
 
-            /* WB12  Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric */
+            /* WB12  Numeric  ×  (MidNum | MidNumLetQ) Numeric */
 
-            if (advance_one_WB(&next_pos, strend, utf8_target,
-                                       true /* Do skip Extend and Format */ )
-                                                            == WB_Numeric)
-            {
+            if (isWB_Numeric(advance_one_WB(&next_pos, strend, utf8_target,
+                                            true /* Do skip Extend, Format */
+            ))) {
                 return false;
             }
 
@@ -6102,7 +6095,6 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_various_then_RI_v_RI + WB_BREAKABLE:
             {
                 int RI_count = 1;
-
                 /* Do not break within emoji flag sequences. That is, do not
                  * break between regional indicator (RI) symbols if there is an
                  * odd number of RI characters before the potential break
@@ -6110,11 +6102,8 @@ S_isWB(pTHX_ WB_enum previous,
                  *
                  * WB15   sot (RI RI)* RI × RI
                  * WB16 [^RI] (RI RI)* RI × RI */
-
-                while (backup_one_WB(&previous,
-                                     strbeg,
-                                     &prev_pos,
-                                     utf8_target) == WB_Regional_Indicator)
+                while (isWB_RI(backup_one_WB(&previous, strbeg, &prev_pos,
+                                             utf8_target)))
                 {
                     RI_count++;
                 }
@@ -6158,7 +6147,7 @@ S_advance_one_WB(pTHX_ U8 ** curpos,
             }
             wb = getWB_VAL_UTF8(*curpos, strend);
         } while (    skip_Extend_Format
-                 && (wb == WB_Extend || wb == WB_Format));
+                 && (isWB_Extend(wb) || isWB_Format(wb)));
     }
     else {
         do {
@@ -6168,7 +6157,7 @@ S_advance_one_WB(pTHX_ U8 ** curpos,
             }
             wb = getWB_VAL_CP(**curpos);
         } while (    skip_Extend_Format
-                 && (wb == WB_Extend || wb == WB_Format));
+                 && (isWB_Extend(wb) || isWB_Format(wb)));
     }
 
     return wb;
@@ -6203,7 +6192,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
         }
 
         /* And we always back up over these three types */
-        if (wb != WB_Extend && wb != WB_Format && wb != WB_ZWJ) {
+        if (! isWB_Extend(wb) && ! isWB_Format(wb) && ! isWB_ZWJ(wb)) {
             return wb;
         }
     }
@@ -6234,7 +6223,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
                 *curpos = (U8 *) strbeg;
                 return WB_EDGE;
             }
-        } while (wb == WB_Extend || wb == WB_Format || wb == WB_ZWJ);
+        } while (isWB_Extend(wb) || isWB_Format(wb) || isWB_ZWJ(wb));
     }
     else {
         do {
@@ -6244,7 +6233,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
             }
             (*curpos)--;
             wb = getWB_VAL_CP(*(*curpos - 1));
-        } while (wb == WB_Extend || wb == WB_Format);
+        } while (isWB_Extend(wb) || isWB_Format(wb));
     }
 
     return wb;
