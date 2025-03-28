@@ -3315,6 +3315,28 @@ EOF
 
                       /xms,                       "all present in order" ],
         ],
+        [
+            "CASE with dup alien var",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(abc)
+                |    CASE: X
+                |            int abc
+                |            int def
+                |    CASE: Y
+                |            long abc
+                |            long def
+EOF
+            [ 0, 0, qr/
+                       if \s* \(X\)
+                       .*
+                       int \s+ def \s*;
+                       .*
+                       else \s+ if \s* \(Y\)
+                       .*
+                       long \s+ def \s*;
+                      /xs,                       "two alien declarations" ],
+        ],
 
 
         [

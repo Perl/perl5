@@ -231,6 +231,8 @@ BEGIN {
 
   # Per-XSUB parsing state:
 
+  'cur_xsub',                  # The Node::xsub currently being parsed
+
   'xsub_seen_NO_OUTPUT',       # Bool: XSUB declared as NO_OUTPUT
 
   'xsub_seen_extern_C',        # Bool: XSUB return type is 'extern "C" ...'
@@ -735,6 +737,7 @@ EOM
 
     unshift @{$self->{line}}, $_;
     my $xsub = ExtUtils::ParseXS::Node::xsub->new();
+    $self->{cur_xsub} = $xsub;
     $xsub->parse($self)
       or next PARAGRAPH;
     $_ = shift @{$self->{line}};
