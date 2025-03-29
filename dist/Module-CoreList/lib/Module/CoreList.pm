@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20250321';
+our $VERSION = '5.20250413_40';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -436,6 +436,7 @@ sub changes_between {
     5.041008 => '2025-01-20',
     5.041009 => '2025-02-24',
     5.041010 => '2025-03-21',
+    5.040002 => '2025-04-13',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -23050,6 +23051,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.040002 => {
+        delta_from => 5.040001,
+        changed => {
+            'B::Op_private'         => '5.040002',
+            'Config'                => '5.040002',
+            'Module::CoreList'      => '5.20250413_40',
+            'Module::CoreList::Utils'=> '5.20250413_40',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -24654,6 +24666,13 @@ sub is_core
         removed => {
         }
     },
+    5.040002 => {
+        delta_from => 5.040001,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -25148,7 +25167,6 @@ sub is_core
     'Test2::Util::HashBase' => 'cpan',
     'Test2::Util::Importer' => 'cpan',
     'Test2::Util::Ref'      => 'cpan',
-    'Test2::Util::Sig'      => 'cpan',
     'Test2::Util::Stash'    => 'cpan',
     'Test2::Util::Sub'      => 'cpan',
     'Test2::Util::Table'    => 'cpan',
@@ -25709,7 +25727,6 @@ sub is_core
     'Test2::Util::HashBase' => 'https://github.com/Test-More/test-more/issues',
     'Test2::Util::Importer' => 'https://github.com/Test-More/test-more/issues',
     'Test2::Util::Ref'      => 'https://github.com/Test-More/test-more/issues',
-    'Test2::Util::Sig'      => 'https://github.com/Test-More/test-more/issues',
     'Test2::Util::Stash'    => 'https://github.com/Test-More/test-more/issues',
     'Test2::Util::Sub'      => 'https://github.com/Test-More/test-more/issues',
     'Test2::Util::Table'    => 'https://github.com/Test-More/test-more/issues',
@@ -25773,11 +25790,11 @@ sub is_core
     'bignum'                => undef,
     'bigrat'                => undef,
     'encoding'              => undef,
-    'experimental'          => 'http://rt.cpan.org/Public/Dist/Display.html?Name=experimental',
+    'experimental'          => 'https://github.com/Dual-Life/experimental/issues',
     'ok'                    => 'https://github.com/Test-More/test-more/issues',
     'parent'                => undef,
     'perlfaq'               => 'https://github.com/perl-doc-cats/perlfaq/issues',
-    'stable'                => 'http://rt.cpan.org/Public/Dist/Display.html?Name=experimental',
+    'stable'                => 'https://github.com/Dual-Life/experimental/issues',
     'version'               => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
     'version::regex'        => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
 );
