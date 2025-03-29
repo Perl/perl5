@@ -432,6 +432,7 @@ sub changes_between {
     5.041006 => '2024-11-20',
     5.041007 => '2024-12-20',
     5.038003 => '2025-01-18',
+    5.040001 => '2025-01-18',
     5.041008 => '2025-01-20',
   );
 
@@ -22513,6 +22514,21 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.040001 => {
+        delta_from => 5.040000,
+        changed => {
+            'B::Op_private'         => '5.040001',
+            'Config'                => '5.040001',
+            'Cwd'                   => '3.91',
+            'File::Spec'            => '3.91',
+            'Module::CoreList'      => '5.20250118_40',
+            'Module::CoreList::Utils'=> '5.20250118_40',
+            'Pod::Functions::Functions'=> '1.14',
+            'warnings'              => '1.70',
+        },
+        removed => {
+        }
+    },
     5.041008 => {
         delta_from => 5.041007,
         changed => {
@@ -24095,6 +24111,13 @@ sub is_core
     },
     5.038003 => {
         delta_from => 5.038002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.040001 => {
+        delta_from => 5.040000,
         changed => {
         },
         removed => {
