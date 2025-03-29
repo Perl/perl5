@@ -50,7 +50,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
                  stat lstat utime
                 );
 
-our $VERSION = '1.9777';
+our $VERSION = '1.9778';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -74,8 +74,7 @@ sub AUTOLOAD {
 }
 
 sub import {
-    my $this = shift;
-    for my $i (@_) {
+    for my $i (@_[1 .. $#_]) {
         if (($i eq 'clock_getres'    && !&d_clock_getres)    ||
             ($i eq 'clock_gettime'   && !&d_clock_gettime)   ||
             ($i eq 'clock_nanosleep' && !&d_clock_nanosleep) ||
@@ -88,7 +87,7 @@ sub import {
             Carp::croak("Time::HiRes::$i(): unimplemented in this platform");
         }
     }
-    Time::HiRes->export_to_level(1, $this, @_);
+    goto &Exporter::import;
 }
 
 XSLoader::load( 'Time::HiRes', $XS_VERSION );
