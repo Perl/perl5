@@ -14,7 +14,20 @@ L<perl5383delta>, which describes differences between 5.38.2 and 5.38.3.
 
 =head1 Security
 
-=head2 [CVE-2024-56406] Heap buffer overflow vulnerability
+=head2 [CVE-2024-56406] Heap buffer overflow vulnerability with tr//
+
+A heap buffer overflow vulnerability was discovered in Perl.
+
+When there are non-ASCII bytes in the left-hand-side of the C<tr> operator,
+C<S_do_trans_invmap()> can overflow the destination pointer C<d>.
+
+  $ perl -e '$_ = "\x{FF}" x 1000000; tr/\xFF/\x{100}/;'
+  Segmentation fault (core dumped)
+
+It is believed that this vulnerability can enable Denial of Service or
+Arbitrary Code Execution attacks on platforms that lack sufficient defenses.
+
+Discovered by: Nathan Mills.
 
 =head1 Incompatible Changes
 
