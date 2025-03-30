@@ -192644,17 +192644,17 @@ static const U8 LB_table[42][42] = {
 /* u */ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0,  0,0,0 }
 };
 
-#define WB_NOBREAK                        0
-#define WB_BREAKABLE                      1
-#define WB_hs_then_hs                     2
-#define WB_Ex_or_FO_or_ZWJ_then_foo       3
-#define WB_DQ_then_HL                     4
-#define WB_HL_then_DQ                     6
-#define WB_LE_or_HL_then_MB_or_ML_or_SQ   8
-#define WB_MB_or_ML_or_SQ_then_LE_or_HL  10
-#define WB_MB_or_MN_or_SQ_then_NU        12
-#define WB_NU_then_MB_or_MN_or_SQ        14
-#define WB_RI_then_RI                    16
+#define WB_NOBREAK                         0
+#define WB_BREAKABLE                       1
+#define WB_hs_then_hs                      2
+#define WB_Ex_or_FO_or_ZWJ_then_foo        3
+#define WB_DQ_then_HL                      4
+#define WB_HL_then_DQ                      6
+#define WB_AHL_v_MB_or_ML_or_SQ_then_AHL   8
+#define WB_AHL_then_MB_or_ML_or_SQ_v_AHL  10
+#define WB_MB_or_MN_or_SQ_then_NU         12
+#define WB_NU_then_MB_or_MN_or_SQ         14
+#define WB_RI_then_RI                     16
 
 static const U8 WB_table[23][23] = {
    /* The comment rows give Unicode's rule number that applies to the cell

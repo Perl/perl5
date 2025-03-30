@@ -6033,8 +6033,8 @@ S_isWB(pTHX_ WB_enum previous,
 
             return WB_table[before][after] - WB_HL_then_DQ == WB_BREAKABLE;
 
-        case WB_LE_or_HL_then_MB_or_ML_or_SQ + WB_NOBREAK:
-        case WB_LE_or_HL_then_MB_or_ML_or_SQ + WB_BREAKABLE:
+        case WB_AHL_v_MB_or_ML_or_SQ_then_AHL + WB_NOBREAK:
+        case WB_AHL_v_MB_or_ML_or_SQ_then_AHL + WB_BREAKABLE:
 
             /* WB6  (ALetter | Hebrew_Letter)  ×  (MidLetter | MidNumLet
              *       | Single_Quote) (ALetter | Hebrew_Letter) */
@@ -6048,10 +6048,10 @@ S_isWB(pTHX_ WB_enum previous,
             }
 
             return WB_table[before][after]
-                            - WB_LE_or_HL_then_MB_or_ML_or_SQ == WB_BREAKABLE;
+                            - WB_AHL_v_MB_or_ML_or_SQ_then_AHL== WB_BREAKABLE;
 
-        case WB_MB_or_ML_or_SQ_then_LE_or_HL + WB_NOBREAK:
-        case WB_MB_or_ML_or_SQ_then_LE_or_HL + WB_BREAKABLE:
+        case WB_AHL_then_MB_or_ML_or_SQ_v_AHL + WB_NOBREAK:
+        case WB_AHL_then_MB_or_ML_or_SQ_v_AHL + WB_BREAKABLE:
 
             /* WB7  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet
              *       | Single_Quote)  ×  (ALetter | Hebrew_Letter) */
@@ -6063,7 +6063,7 @@ S_isWB(pTHX_ WB_enum previous,
             }
 
             return WB_table[before][after]
-                            - WB_MB_or_ML_or_SQ_then_LE_or_HL == WB_BREAKABLE;
+                            - WB_AHL_then_MB_or_ML_or_SQ_v_AHL == WB_BREAKABLE;
 
         case WB_MB_or_MN_or_SQ_then_NU + WB_NOBREAK:
         case WB_MB_or_MN_or_SQ_then_NU + WB_BREAKABLE:
