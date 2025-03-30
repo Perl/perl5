@@ -2516,6 +2516,7 @@ sub output_WB_table() {
     my %wb_splits = setup_splits(\%wb_all_enums, $table_size, $has_unused,
         {
           ALetter    => [ qw(ALetter ExtPict_LE) ],
+          AHLetter   => [ qw(ALetter Hebrew_Letter) ],
           Extended_Pictographic => [ qw(ExtPict_XX ExtPict_LE) ],
         }
     );
@@ -2531,8 +2532,8 @@ sub output_WB_table() {
         WB_Ex_or_FO_or_ZWJ_then_foo     => 3,
         WB_DQ_then_HL                   => 4,
         WB_HL_then_DQ                   => 6,
-        WB_LE_or_HL_then_MB_or_ML_or_SQ => 8,
-        WB_MB_or_ML_or_SQ_then_LE_or_HL => 10,
+        WB_AHL_v_MB_or_ML_or_SQ_then_AHL=> 8,
+        WB_AHL_then_MB_or_ML_or_SQ_v_AHL=> 10,
         WB_MB_or_MN_or_SQ_then_NU       => 12,
         WB_NU_then_MB_or_MN_or_SQ       => 14,
         WB_RI_then_RI                   => 16,
@@ -2588,18 +2589,15 @@ sub output_WB_table() {
     set_wb_nobreak('E_Base_GAZ', 'E_Modifier', $rule);
 
     # Do not break from extenders.
-    # WB13b  ExtendNumLet  ×  (ALetter | Hebrew_Letter | Numeric | Katakana)
+    # WB13b  ExtendNumLet  ×  (AHLetter | Numeric | Katakana)
     $rule = '13b';
-    set_wb_nobreak('ExtendNumLet', 'ALetter', $rule);
-    set_wb_nobreak('ExtendNumLet', 'Hebrew_Letter', $rule);
+    set_wb_nobreak('ExtendNumLet', 'AHLetter', $rule);
     set_wb_nobreak('ExtendNumLet', 'Numeric', $rule);
     set_wb_nobreak('ExtendNumLet', 'Katakana', $rule);
 
-    # WB13a  (ALetter | Hebrew_Letter | Numeric | Katakana | ExtendNumLet)
-    #        × ExtendNumLet
+    # WB13a  (AHLetter | Numeric | Katakana | ExtendNumLet) × ExtendNumLet
     $rule = '13a';
-    set_wb_nobreak('ALetter', 'ExtendNumLet', $rule);
-    set_wb_nobreak('Hebrew_Letter', 'ExtendNumLet', $rule);
+    set_wb_nobreak('AHLetter', 'ExtendNumLet', $rule);
     set_wb_nobreak('Numeric', 'ExtendNumLet', $rule);
     set_wb_nobreak('Katakana', 'ExtendNumLet', $rule);
     set_wb_nobreak('ExtendNumLet', 'ExtendNumLet', $rule);
@@ -2623,15 +2621,12 @@ sub output_WB_table() {
 
     # Do not break within sequences of digits, or digits adjacent to letters
     # (“3a”, or “A3”).
-    # WB10  Numeric  ×  (ALetter | Hebrew_Letter)
-    $rule = 10;
-    set_wb_nobreak('Numeric', 'ALetter', $rule);
-    set_wb_nobreak('Numeric', 'Hebrew_Letter', $rule);
+    # WB10  Numeric  ×  AHLetter
+    set_wb_nobreak('Numeric', 'AHLetter', 10);
 
-    # WB9  (ALetter | Hebrew_Letter)  ×  Numeric
+    # WB9  AHLetter  ×  Numeric
     $rule = 9;
-    set_wb_nobreak('ALetter', 'Numeric', $rule);
-    set_wb_nobreak('Hebrew_Letter', 'Numeric', $rule);
+    set_wb_nobreak('AHLetter', 'Numeric', 9);
 
     # WB8  Numeric  ×  Numeric
     set_wb_nobreak('Numeric', 'Numeric', 8);
@@ -2646,42 +2641,23 @@ sub output_WB_table() {
     # WB7a  Hebrew_Letter  ×  Single_Quote
     set_wb_nobreak('Hebrew_Letter', 'Single_Quote', '7a');
 
-    # WB7   (ALetter | Hebrew_Letter)
-    #       (MidLetter | MidNumLet | Single_Quote)
-    #     × (ALetter | Hebrew_Letter)
+    # WB7   AHLetter (MidLetter | MidNumLet | Single_Quote) × AHLetter
     $rule = 7;
-    add_wb_dfa('MidNumLet', 'ALetter', 'WB_MB_or_ML_or_SQ_then_LE_or_HL', $rule);
-    add_wb_dfa('MidNumLet', 'Hebrew_Letter',
-                  'WB_MB_or_ML_or_SQ_then_LE_or_HL', $rule);
-    add_wb_dfa('MidLetter', 'ALetter', 'WB_MB_or_ML_or_SQ_then_LE_or_HL', $rule);
-    add_wb_dfa('MidLetter', 'Hebrew_Letter',
-                  'WB_MB_or_ML_or_SQ_then_LE_or_HL', $rule);
-    add_wb_dfa('Single_Quote', 'ALetter',
-                  'WB_MB_or_ML_or_SQ_then_LE_or_HL', $rule);
-    add_wb_dfa('Single_Quote', 'Hebrew_Letter',
-                  'WB_MB_or_ML_or_SQ_then_LE_or_HL', $rule);
+    add_wb_dfa('MidNumLet', 'AHLetter', 'WB_AHL_then_MB_or_ML_or_SQ_v_AHL', $rule);
+    add_wb_dfa('MidLetter', 'AHLetter', 'WB_AHL_then_MB_or_ML_or_SQ_v_AHL', $rule);
+    add_wb_dfa('Single_Quote', 'AHLetter', 'WB_AHL_then_MB_or_ML_or_SQ_v_AHL', $rule);
 
-    # WB6  (ALetter | Hebrew_Letter)  ×  (MidLetter | MidNumLet
-    #       | Single_Quote) (ALetter | Hebrew_Letter)
+    # WB6  AHLetter  ×  (MidLetter | MidNumLet | Single_Quote) AHLetter
     $rule = 6;
-    add_wb_dfa('ALetter', 'MidNumLet', 'WB_LE_or_HL_then_MB_or_ML_or_SQ', $rule);
-    add_wb_dfa('Hebrew_Letter', 'MidNumLet',
-                  'WB_LE_or_HL_then_MB_or_ML_or_SQ', $rule);
-    add_wb_dfa('ALetter', 'MidLetter', 'WB_LE_or_HL_then_MB_or_ML_or_SQ', $rule);
-    add_wb_dfa('Hebrew_Letter', 'MidLetter',
-                  'WB_LE_or_HL_then_MB_or_ML_or_SQ', $rule);
-    add_wb_dfa('ALetter', 'Single_Quote',
-                  'WB_LE_or_HL_then_MB_or_ML_or_SQ', $rule);
-    add_wb_dfa('Hebrew_Letter', 'Single_Quote',
-                  'WB_LE_or_HL_then_MB_or_ML_or_SQ', $rule);
+    add_wb_dfa('AHLetter', 'MidNumLet', 'WB_AHL_v_MB_or_ML_or_SQ_then_AHL', $rule);
+    add_wb_dfa('AHLetter', 'MidLetter', 'WB_AHL_v_MB_or_ML_or_SQ_then_AHL', $rule);
+    add_wb_dfa('AHLetter', 'Single_Quote',
+                  'WB_AHL_v_MB_or_ML_or_SQ_then_AHL', $rule);
 
     # Do not break between most letters.
-    # WB5  (ALetter | Hebrew_Letter)  ×  (ALetter | Hebrew_Letter)
+    # WB5  AHLetter  ×  AHLetter
     $rule = 5;
-    set_wb_nobreak('ALetter', 'ALetter', $rule);
-    set_wb_nobreak('ALetter', 'Hebrew_Letter', $rule);
-    set_wb_nobreak('Hebrew_Letter', 'ALetter', $rule);
-    set_wb_nobreak('Hebrew_Letter', 'Hebrew_Letter', $rule);
+    set_wb_nobreak('AHLetter', 'AHLetter', $rule);
 
     # Ignore Format and Extend characters, except after sot, CR, LF, and
     # Newline.  This also has the effect of:
