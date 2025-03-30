@@ -2026,26 +2026,21 @@ cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml20.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml25.t				Pod-Simple
-cpan/Pod-Usage/lib/Pod/Usage.pm
-cpan/Pod-Usage/scripts/pod2usage.PL
-cpan/Pod-Usage/t/inc/Pod/InputObjects.pm
-cpan/Pod-Usage/t/inc/Pod/Parser.pm
-cpan/Pod-Usage/t/inc/Pod/PlainText.pm
-cpan/Pod-Usage/t/inc/Pod/Select.pm
-cpan/Pod-Usage/t/pod/headwithmarkup.pl
-cpan/Pod-Usage/t/pod/headwithmarkup.t
-cpan/Pod-Usage/t/pod/p2u_data.pl
-cpan/Pod-Usage/t/pod/pod2usage.t
-cpan/Pod-Usage/t/pod/pod2usage.xr
-cpan/Pod-Usage/t/pod/pod2usage2.t
-cpan/Pod-Usage/t/pod/selectheaders.pl
-cpan/Pod-Usage/t/pod/selectheaders.t
-cpan/Pod-Usage/t/pod/selectsections.pl
-cpan/Pod-Usage/t/pod/selectsections.t
-cpan/Pod-Usage/t/pod/testcmp.pl
-cpan/Pod-Usage/t/pod/testp2pt.pl
-cpan/Pod-Usage/t/pod/usage.pod
-cpan/Pod-Usage/t/pod/usage2.pod
+cpan/Pod-Usage/lib/Pod/Usage.pm		Module related to Pod::Usage
+cpan/Pod-Usage/scripts/pod2usage.PL	Pod::Usage
+cpan/Pod-Usage/t/pod/headwithmarkup.pl	Script related to Pod::Usage
+cpan/Pod-Usage/t/pod/headwithmarkup.t	Test file related to Pod::Usage
+cpan/Pod-Usage/t/pod/p2u_data.pl	Script related to Pod::Usage
+cpan/Pod-Usage/t/pod/pod2usage.t	Test file related to Pod::Usage
+cpan/Pod-Usage/t/pod/pod2usage.xr	Pod::Usage
+cpan/Pod-Usage/t/pod/pod2usage2.t	Test file related to Pod::Usage
+cpan/Pod-Usage/t/pod/selectheaders.pl	Script related to Pod::Usage
+cpan/Pod-Usage/t/pod/selectheaders.t	Test file related to Pod::Usage
+cpan/Pod-Usage/t/pod/selectsections.pl	Script related to Pod::Usage
+cpan/Pod-Usage/t/pod/selectsections.t	Test file related to Pod::Usage
+cpan/Pod-Usage/t/pod/testcmp.pl		Script related to Pod::Usage
+cpan/Pod-Usage/t/pod/usage.pod		Pod::Usage
+cpan/Pod-Usage/t/pod/usage2.pod		Pod::Usage
 cpan/podlators/docs/docknot.yaml				podlators
 cpan/podlators/lib/Pod/Man.pm					Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm				Perl an L<> formatting code in POD text

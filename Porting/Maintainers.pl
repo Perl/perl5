@@ -976,7 +976,8 @@ our %Modules = (
     },
 
     'Pod::Usage' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Usage-2.03.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Usage-2.05.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Mar 30 10:25:52 2025',
         'FILES'        => q[cpan/Pod-Usage],
         'EXCLUDED' => [
             qr{^t/00-},
