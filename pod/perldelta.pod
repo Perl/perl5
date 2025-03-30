@@ -14,11 +14,7 @@ L<perl5401delta>, which describes differences between 5.40.0 and 5.40.1.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-Selected Bug Fixes section.
-
-[ List each security issue as a =head2 entry ]
+=head2 [CVE-2024-56406] Heap buffer overflow vulnerability
 
 =head1 Incompatible Changes
 
