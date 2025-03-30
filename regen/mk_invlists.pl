@@ -2517,6 +2517,7 @@ sub output_WB_table() {
         {
           ALetter    => [ qw(ALetter ExtPict_LE) ],
           AHLetter   => [ qw(ALetter Hebrew_Letter) ],
+          MidNumLetQ => [ qw(MidNumLet Single_Quote) ],
           Extended_Pictographic => [ qw(ExtPict_XX ExtPict_LE) ],
         }
     );
@@ -2532,10 +2533,10 @@ sub output_WB_table() {
         WB_Ex_or_FO_or_ZWJ_then_foo     => 3,
         WB_DQ_then_HL                   => 4,
         WB_HL_then_DQ                   => 6,
-        WB_AHL_v_MB_or_ML_or_SQ_then_AHL=> 8,
-        WB_AHL_then_MB_or_ML_or_SQ_v_AHL=> 10,
-        WB_MB_or_MN_or_SQ_then_NU       => 12,
-        WB_NU_then_MB_or_MN_or_SQ       => 14,
+        WB_AHL_v_ML_or_MNLQ_then_AHL    => 8,
+        WB_AHL_then_ML_or_MNLQ_v_AHL    => 10,
+        WB_NU_then_MN_or_MNLQ_v_NU      => 12,
+        WB_NU_v_MN_or_MNLQ_then_NU      => 14,
         WB_RI_then_RI                   => 16,
     );
 
@@ -2607,17 +2608,15 @@ sub output_WB_table() {
     set_wb_nobreak('Katakana', 'Katakana', 13);
 
     # Do not break within sequences, such as “3.2” or “3,456.789”.
-    # WB12  Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric
+    # WB12  Numeric  ×  (MidNum | MidNumLetQ) Numeric
     $rule = 12;
-    add_wb_dfa('Numeric', 'MidNumLet', 'WB_NU_then_MB_or_MN_or_SQ', $rule);
-    add_wb_dfa('Numeric', 'MidNum', 'WB_NU_then_MB_or_MN_or_SQ', $rule);
-    add_wb_dfa('Numeric', 'Single_Quote', 'WB_NU_then_MB_or_MN_or_SQ', $rule);
+    add_wb_dfa('Numeric', 'MidNum', 'WB_NU_v_MN_or_MNLQ_then_NU', $rule);
+    add_wb_dfa('Numeric', 'MidNumLetQ', 'WB_NU_v_MN_or_MNLQ_then_NU', $rule);
 
-    # WB11  Numeric (MidNum | (MidNumLet | Single_Quote)  ×  Numeric
+    # WB11  Numeric (MidNum | (MidNumLetQ)  ×  Numeric
     $rule = 11;
-    add_wb_dfa('MidNumLet', 'Numeric', 'WB_MB_or_MN_or_SQ_then_NU', $rule);
-    add_wb_dfa('MidNum', 'Numeric', 'WB_MB_or_MN_or_SQ_then_NU', $rule);
-    add_wb_dfa('Single_Quote', 'Numeric', 'WB_MB_or_MN_or_SQ_then_NU', $rule);
+    add_wb_dfa('MidNum', 'Numeric', 'WB_NU_then_MN_or_MNLQ_v_NU', $rule);
+    add_wb_dfa('MidNumLetQ', 'Numeric', 'WB_NU_then_MN_or_MNLQ_v_NU', $rule);
 
     # Do not break within sequences of digits, or digits adjacent to letters
     # (“3a”, or “A3”).
@@ -2641,18 +2640,15 @@ sub output_WB_table() {
     # WB7a  Hebrew_Letter  ×  Single_Quote
     set_wb_nobreak('Hebrew_Letter', 'Single_Quote', '7a');
 
-    # WB7   AHLetter (MidLetter | MidNumLet | Single_Quote) × AHLetter
+    # WB7   AHLetter (MidLetter | MidNumLetQ) × AHLetter
     $rule = 7;
-    add_wb_dfa('MidNumLet', 'AHLetter', 'WB_AHL_then_MB_or_ML_or_SQ_v_AHL', $rule);
-    add_wb_dfa('MidLetter', 'AHLetter', 'WB_AHL_then_MB_or_ML_or_SQ_v_AHL', $rule);
-    add_wb_dfa('Single_Quote', 'AHLetter', 'WB_AHL_then_MB_or_ML_or_SQ_v_AHL', $rule);
+    add_wb_dfa('MidNumLetQ', 'AHLetter', 'WB_AHL_then_ML_or_MNLQ_v_AHL', $rule);
+    add_wb_dfa('MidLetter', 'AHLetter', 'WB_AHL_then_ML_or_MNLQ_v_AHL', $rule);
 
-    # WB6  AHLetter  ×  (MidLetter | MidNumLet | Single_Quote) AHLetter
+    # WB6  AHLetter  ×  (MidLetter | MidNumLetQ)  AHLetter
     $rule = 6;
-    add_wb_dfa('AHLetter', 'MidNumLet', 'WB_AHL_v_MB_or_ML_or_SQ_then_AHL', $rule);
-    add_wb_dfa('AHLetter', 'MidLetter', 'WB_AHL_v_MB_or_ML_or_SQ_then_AHL', $rule);
-    add_wb_dfa('AHLetter', 'Single_Quote',
-                  'WB_AHL_v_MB_or_ML_or_SQ_then_AHL', $rule);
+    add_wb_dfa('AHLetter', 'MidNumLetQ', 'WB_AHL_v_ML_or_MNLQ_then_AHL', $rule);
+    add_wb_dfa('AHLetter', 'MidLetter', 'WB_AHL_v_ML_or_MNLQ_then_AHL', $rule);
 
     # Do not break between most letters.
     # WB5  AHLetter  ×  AHLetter
