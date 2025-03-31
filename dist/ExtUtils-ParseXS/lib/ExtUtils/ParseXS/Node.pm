@@ -2721,6 +2721,7 @@ package ExtUtils::ParseXS::Node::autocall;
 # name
 
 BEGIN { $build_subclass->('', # parent
+    'args', # string to use for auto function call arguments
 )};
 
 
@@ -2736,6 +2737,12 @@ sub parse {
     {
          $pxs->{xsub_implicit_OUTPUT_RETVAL} = 1;
     }
+
+    my $sig  = $pxs->{xsub_params};
+    my $args = $sig->{auto_function_sig_override}; # C_ARGS
+    $args = $sig->C_func_signature($pxs)
+        unless defined $args;
+    $self->{args} = $args;
 
     1;
 }
@@ -2794,11 +2801,7 @@ sub as_code {
         $pxs->{xsub_func_name} = 'XSFUNCTION'
                             if $pxs->{xsub_seen_INTERFACE_or_MACRO};
 
-        my $sig  = $pxs->{xsub_params};
-        my $args = $sig->{auto_function_sig_override}; # C_ARGS
-        $args = $sig->C_func_signature($pxs)
-            unless defined $args;
-        print "$pxs->{xsub_func_name}($args);\n";
+        print "$pxs->{xsub_func_name}($self->{args});\n";
 
     }
 }

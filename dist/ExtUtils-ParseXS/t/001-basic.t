@@ -3358,8 +3358,18 @@ EOF
                        long \s+ def \s*;
                       /xs,                       "two alien declarations" ],
         ],
-
-
+        [
+            "CASE with variant keywords",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    CASE: X
+                |       C_ARGS: x,y
+                |    CASE: Y
+                |       C_ARGS: y,x
+EOF
+            [ 0, 0, qr/\(x,y\).*\(y,x\)/s, "C_ARGS" ],
+        ],
         [
             "CASE: case follows unconditional CASE",
             [ Q(<<'EOF') ],
