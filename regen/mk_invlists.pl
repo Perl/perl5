@@ -1973,8 +1973,6 @@ sub output_LB_table() {
     # LB12 Do not break after NBSP and related characters.
     # GL ×
     for my $i (0 .. @lb_table - 1) {
-        next if $lb_table[$lb_enums{'Glue'}][$i]
-                            == $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
         $lb_table[$lb_enums{'Glue'}][$i] = $lb_actions{'LB_NOBREAK'};
     }
 
