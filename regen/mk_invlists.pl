@@ -1502,6 +1502,24 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
             . Dumper $enums, $x, $y, $value, $rule;
     }
 
+    if (! defined $rule) {
+        die "Undefined rule"
+            . stack_trace() . "\n"
+            . Dumper $enums, $x, $y, $value;
+    }
+
+    # Currently don't handle multiple rules; just take the first
+    $rule = $rule->[0] if ref $rule;
+
+    # If rule isn't strictly numeric, make it so while defining
+    # $rule_as_string to include the non-numerics.
+    my $rule_as_string;
+    my $numeric_rule = $rule;
+    if ($numeric_rule =~ s/\D//g) {
+        $rule_as_string = $rule;
+        $rule = $numeric_rule;
+    }
+
     my $list_ref = get_cell_list($table_size, $splits, $enums, $x, $y);
     for my $pair_ref ($list_ref->@*) {
         my $x = $pair_ref->[0];
@@ -1527,13 +1545,17 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
               . stack_trace() . "\n"
               . Dumper $enums;
         }
-        next if defined $no_override && $table->[$x][$y] == $no_override;
+        next if defined $no_override && $table->[$x][$y]{value} == $no_override;
 
         # Override whatever was going to go into an unused cell.
-        $table->[$x][$y] = ($has_unused && (   $x == $table_size - 1
-                                            || $y == $table_size - 1))
+        my $this_value = ($has_unused && (   $x == $table_size - 1
+                                          || $y == $table_size - 1))
                            ? 0
                            : $value;
+
+        $table->[$x][$y] = { value => $this_value, rule => $rule };
+        $table->[$x][$y]->{rule_as_string} = $rule_as_string
+                                                   if defined $rule_as_string;
 
         print STDERR __FILE__, ": ", __LINE__,
           ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y] if DEBUG;
@@ -1553,7 +1575,7 @@ sub get_cell_value($table, $enums, $x, $y) {
     }
 
     return undef unless defined $table->[$x][$y];
-    return $table->[$x][$y];
+    return $table->[$x][$y]{value};
 }
 
 sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
@@ -1645,6 +1667,7 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
                                             # the '*/' for those that are at
                                             # the max
                     . " " x 3;    # Space for '*/ '
+
     # Now each column
     for my $i (0 .. $size - 1) {
         $header_line .= sprintf "%*s", $spacing[$i] + 1, # +1 for the ','
@@ -1697,6 +1720,18 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
     # could make sure the annotations fit into that.
     print $out_fh $header_line;
 
+    # To make the output table sparser, hence more readable, the rule number
+    # for the default rule is not output.  Calculate that number now; it is
+    # the highest rule number.
+    my $max_rule_number = 0;
+    for my $i (0 .. $size - 1) {
+        for my $j (0 .. $size - 1) {
+            $table_ref->[$i][$j]{rule} =~ s/\D//g;
+            $max_rule_number = $table_ref->[$i][$j]{rule}
+            if $max_rule_number < $table_ref->[$i][$j]{rule};
+        }
+    }
+
     # Now output the bulk of the table.
     for my $i (0 .. $size - 1) {
 
@@ -1715,12 +1750,44 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
 
         # Then each column
         for my $j (0 .. $size -1) {
-            printf $out_fh "%*d", $spacing[$j], $table_ref->[$i][$j];
+            printf $out_fh "%*d", $spacing[$j], $table_ref->[$i][$j]{value};
             print $out_fh "," if $j < $size - 1;
         }
         print $out_fh " }";
         print $out_fh "," if $i < $size - 1;
         print $out_fh "\n";
+
+        # Then the rule numbers; None for the garbage row
+        next if $has_unused && $i >= $size - 1;
+
+        # This line is accumulated in a string before being printed so that
+        # trailing space can be trimmed
+        my $comments = '//' . " " x ($max_hdr_len + 4);
+        for my $j (0 .. $size - 1 - $has_unused) {
+
+            # {rule} was set up to be entirely numeric.  If the original rule
+            # also contained letters, {rule_as_string} is defined We output
+            # only as much of the rule as fits in the column
+            my $rule = $table_ref->[$i][$j]{rule};
+
+            # Print only blanks for the default rule; print as string if has
+            # non-numeric portion; else as a pure number
+            if ($rule == $max_rule_number) {
+
+                # Don't output default rule; makes output more readable
+                $comments .= " " x ($spacing[$j]);
+            }
+            elsif (defined $table_ref->[$i][$j]{rule_as_string}) {
+
+                $comments .= sprintf "%*.*s", $spacing[$j], $spacing[$j],
+                                     $table_ref->[$i][$j]{rule_as_string};
+            }
+            else {
+                $comments .= sprintf "%*d", $spacing[$j], $rule;
+            }
+            $comments .= " " if $j < $size - 1 - $has_unused;
+        }
+        print $out_fh $comments, "\n";
     }
 
     output_table_trailer();
