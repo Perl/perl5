@@ -374,7 +374,8 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+In some cases an C<eval> would not add integer parts to the source
+lines saved by the debugger.  [GH #23151]
 
 =back
 
