@@ -1005,6 +1005,5 @@ Perl_sv_setpv_freshbuf(pTHX_ SV *const sv)
     return SvPVX(sv);
 }
 
-/*
  * ex: set ts=8 sts=4 sw=4 et:
  */
