@@ -2360,6 +2360,9 @@ Adp	|SV *	|newSVrv	|NN SV * const rv			\
 ARdmp	|SV *	|newSVsv	|NULLOK SV * const old
 ARdp	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
 				|I32 flags
+ARdp	|SV *	|newSVsv_flags_NN					\
+				|NN SV * const old			\
+				|I32 flags
 ARdmp	|SV *	|newSVsv_nomg	|NULLOK SV * const old
 ARdp	|SV *	|newSV_true
 ARdip	|SV *	|newSV_type	|const svtype type

@@ -4787,6 +4787,442 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         SvTAINT(dsv);
 }
 
+/* A helper for newSVsv_flags_NN, which does the heavy lifting for
+ * newSVsv_flags and sv_mortalcopy_flags. This helper function implements
+ * the swipe/COW/copy operation on pOK SVs.
+ * The code should heavily track the equivalent code in Perl_sv_setsv_flags,
+ * and some more detailed comments can be found there. However, this code has
+ * a number of specific divergences:
+ *    * "dsv" is a newly minted SV, so no need to handle existing buffers
+ *    * similarly, no need to check for the OOK hack
+ *    * The SVppv_STATIC case is not handled here, as it (at time of writing)
+ *      only applies to SVt_PVNVs and the hottest "dsv" path is for SVt_PVs.
+ *      The missing case is implemented in S_newSVsv_flags_NN_PVxx.
+ * This function is marked for inlining, also to benefit the hot SVt_PV case.
+ *
+ * [%] numbers are a rough percentage of calls to this function, as
+ * measured by a gcov build running the test harness. They are presented
+ * only for general information and will not be representative of all
+ * workloads or applications.
+ */
+PERL_STATIC_FORCE_INLINE SV*
+S_newSVsv_flags_NN_POK(pTHX_ SV* dsv, SV* ssv, const I32 flags)
+{
+    /* SvLEN, SvCUR, SvPVX for dsv are all uninitialized at this point */
+
+    const U32 sflags = SvFLAGS(ssv);
+    const STRLEN cur = SvCUR(ssv);
+    const STRLEN len = SvLEN(ssv);
+
+    assert(!SvIsCOW_static(ssv)); /* SVppv_STATIC: see newSVsv_flags_NN_PVxx */
+
+    if (!(flags & SV_NOSTEAL) &&
+                UNLIKELY(S_SvPV_can_swipe_buf(ssv, sflags, cur, len)) ) {
+        /* [ <1% ] */
+        /* Passes the swipe test.  */
+        char * buf = SvPVX_mutable(ssv);
+        SvLEN_set(dsv, len);
+        SvCUR_set(dsv, cur);
+        SvPV_set(dsv, buf);
+
+        assert(!SvOOK(ssv)); /* According to S_SvPV_can_swipe_buf() */
+        /* (void)SvOK_off(ssv); but without the superfluous SvOOK_off(ssv)) */
+        SvFLAGS(ssv) &= ~(SVf_OK|SVf_IVisUV|SVf_UTF8|SVs_TEMP);
+
+        SvPV_set(ssv, NULL);
+        SvLEN_set(ssv, 0);
+        SvCUR_set(ssv, 0);
+        return dsv;
+    }
+
+    /* S_SvPV_shared_hkey_or_CoWable() needs an accurate SvLEN(dsv) */
+    SvLEN_set(dsv, 0);
+
+    ASSUME(!(SvFLAGS(dsv) & SVf_BREAK));
+
+    if ((flags & SV_COW_SHARED_HASH_KEYS) &&
+        S_SvPV_shared_hkey_or_CoWable(ssv, dsv, sflags, cur, len)
+    ) { /* [ 47% ] */
+        /* Either it's a shared hash key, or it's suitable for
+           copy-on-write.  */
+#ifdef DEBUGGING
+        if (DEBUG_C_TEST) {
+            PerlIO_printf(Perl_debug_log, "Copy on write: ssv --> dsv\n");
+            sv_dump(ssv);
+            sv_dump(dsv);
+        }
+#endif
+#ifdef PERL_ANY_COW
+        if (!(sflags & SVf_IsCOW)) {
+                SvIsCOW_on(ssv);
+                CowREFCNT(ssv) = 0;
+        }
+
+        if (LIKELY(len)) { /* [ 43% ] */
+           if (sflags & SVf_IsCOW) {
+                sv_buf_to_rw(ssv);
+            }
+            CowREFCNT(ssv)++;
+            SvPV_set(dsv, SvPVX_mutable(ssv));
+            sv_buf_to_ro(ssv);
+        } else
+#endif
+        {  /* [ 4%] */
+        /* SvIsCOW_shared_hash */
+        DEBUG_C(PerlIO_printf(Perl_debug_log,
+                              "Copy on write: Sharing hash\n"));
+        SvPV_set(dsv,
+                 HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(ssv)))));
+        }
+        SvLEN_set(dsv, len);
+        SvIsCOW_on(dsv);
+    } else {  /* [ 52% ] */
+        /* Failed the swipe test, and we cannot do copy-on-write either.
+           Have to copy the string.  */
+
+#ifdef DEBUGGING
+        /* Perl_sv_grow_fresh asserts that cur == 0
+         * but doesn't actually need it to. */
+        SvCUR_set(dsv, 0);
+#endif
+        char * dsvpvx = sv_grow_fresh(dsv, cur + 1);
+
+        ASSUME(SvPVX_const(ssv) != SvPVX(dsv));
+        *(dsvpvx + cur) = 0;
+        Copy(SvPVX_const(ssv),dsvpvx,cur,char);
+    }
+    SvCUR_set(dsv, cur);
+    return dsv;
+}
+
+/* S_newSVsv_flags_NN_PVxx mainly handles source SV types above SVt_PV
+ * for Perl_newSVsv_flags_NN. This function may get inlined, even
+ * though it might be preferable if it didn't.
+ *
+ * Notes: it is the caller's responsibility to check GET magic.
+ *        Perl_sv_setsv_flags essentially ignores magic, except for
+ *        taint and vstring magic, which are also handled here.
+ *
+ * [%] numbers are a rough percentage of calls to this function, as
+ * measured by a gcov build running the test harness. They are presented
+ * only for general information and will not be representative of all
+ * workloads or applications.
+ */
+
+static SV*
+S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
+{
+    assert(ssv);
+    assert(dsv);
+
+    svtype stype = SvTYPE(ssv);
+    U32 sflags = SvFLAGS(ssv);
+
+    /* Only an SV head has been allocated */
+    assert(SvTYPE(dsv) == SVt_NULL);
+    assert(!SvANY(dsv));
+
+    switch(stype) {
+        case SVt_PV:  /* [ <0.1% ] */
+            {
+                SvANY(dsv) = new_XPV();
+                SV* svrv = NULL;
+                if (SvROK(ssv) ) {
+                    svrv = SvREFCNT_inc(SvRV(ssv));
+                    SvFLAGS(dsv) = SVt_PV|SVf_ROK;
+                } else {
+                    assert(!SvPOK(ssv));
+                    SvFLAGS(dsv) = SVt_PV;
+                }
+                SvRV_set(dsv, svrv);
+                SvCUR_set(dsv, 0);
+                SvLEN_set(dsv, 0);
+                return dsv;
+            }
+        case SVt_PVIV:  /* [ 9% ] */
+            SvANY(dsv) = new_XPVIV();
+            SvFLAGS(dsv) = SVt_PVIV;
+            break;
+        case SVt_PVNV:  /* [ 15 %] */
+            SvANY(dsv) = new_XPVNV();
+            SvFLAGS(dsv) = SVt_PVNV;
+            break;
+        case SVt_PVMG:  /* [ 71% ] */
+            if (flags & SV_GMAGIC && SvGMAGICAL(ssv))
+                goto call_sv_setsv_flags;
+
+            SvANY(dsv) = new_XPVMG();
+            SvFLAGS(dsv) = SVt_PVMG;
+            SvMAGIC(dsv) = NULL;
+            SvSTASH(dsv) = NULL;
+            break;
+        default:  /* [ 4% ] */
+            if (flags & SV_GMAGIC && SvGMAGICAL(ssv)) {  /* [ 3.5% ] */
+          call_sv_setsv_flags:
+                /* Avoid dsv being leaked if SvGETMAGIC croaks. */
+                EXTEND_MORTAL(1);
+                PL_tmps_stack[++PL_tmps_ix] = dsv;
+                SSize_t orig_ix = PL_tmps_ix;
+
+                SvGETMAGIC(ssv);
+                /* If we made it, disarm the leak guard */
+                if (LIKELY(PL_tmps_ix == orig_ix))
+                     PL_tmps_ix--;
+                else
+                    PL_tmps_stack[orig_ix] = &PL_sv_undef;
+            }
+            sv_setsv_flags(dsv, ssv, flags & ~SV_GMAGIC);
+            return dsv;
+        case SVt_INVLIST:  /* [ <<< 0.1% ] */
+            invlist_clone(ssv, dsv);
+            return dsv;
+        /* The following cases seem relatively rare, so have been kept out of
+         * Perl_newSVsv_flags_NN. */
+        case SVt_IV:  /* [ 0.1% ]  */
+            SET_SVANY_FOR_BODYLESS_IV(dsv);
+            if (SvROK(ssv) ) { /* SVprv_WEAKREF */
+#if defined (DEBUGGING) || defined (PERL_DEBUG_COW)
+                dsv->sv_u.svu_rv = SvREFCNT_inc(SvRV(ssv));
+#else
+                dsv->sv_u.svu_rv = SvREFCNT_inc( ssv->sv_u.svu_rv );
+#endif
+                SvFLAGS(dsv) = SVt_IV|SVf_ROK;
+            } else {
+                assert(!SvOK(ssv));
+                SvFLAGS(dsv) = SVt_IV;
+            }
+            return dsv;
+        case SVt_NV:  /* [ <<< 1%  ] */
+            assert(!SvOK(ssv));
+#if NVSIZE <= IVSIZE
+            SET_SVANY_FOR_BODYLESS_NV(dsv);
+#else
+            SvANY(dsv) = new_XNV();
+#endif
+            SvFLAGS(dsv) = SVt_NV;
+            return dsv;
+    }
+    assert(SvTYPE(dsv) == SVt_PVIV || SvTYPE(dsv) == SVt_PVNV || SvTYPE(dsv) == SVt_PVMG);
+
+    /* [ 92.5% of calls to this function made it here. ] */
+
+    /* This is the only place we set dsv's flags, with the exception
+       of SVf_IsCOW, which can't be on for S_newSVsv_flags_NN_POK */
+    SvFLAGS(dsv) |= sflags & (
+            SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK
+            |SVf_ROK|SVf_POK|SVp_POK|SVf_UTF8|SVppv_STATIC
+    );
+
+    SvPV_set(dsv, NULL);
+    SvCUR_set(dsv, 0);
+    SvLEN_set(dsv, 0);
+
+    switch(sflags & (SVp_IOK|SVp_NOK|SVf_ROK|SVp_POK|SVf_FAKE|SVppv_STATIC)) {
+        case SVp_IOK:  /* [ 50% ]*/
+            SvIV_set(dsv, SvIVX(ssv));
+            return dsv;
+        case SVp_POK|SVp_IOK|SVp_NOK:  /* [ 3% ] */
+            ASSUME(SvTYPE(dsv) != SVt_PVIV);
+            SvNV_set(dsv, SvNVX(ssv));
+            /* FALLTHROUGH */
+        case SVp_POK|SVp_IOK:  /* [ 7% ] */
+            SvIV_set(dsv, SvIVX(ssv));
+            break;
+        case SVp_POK:  /* [ 28% ] */
+            break;
+        case SVp_POK|SVp_IOK|SVp_NOK|SVppv_STATIC:  /* [ 6.5% ]*/
+            /* e.g. PL_sv_yes, PL_sv_no */
+            ASSUME(!(SvFLAGS(dsv) & SVf_BREAK));
+            ASSUME(SvTYPE(dsv) >= SVt_PVNV);
+            SvFLAGS(dsv) |= SVf_IsCOW;
+
+            SvPV_set(dsv, SvPVX(ssv));
+            SvCUR_set(dsv, SvCUR(ssv));
+
+            SvIV_set(dsv, SvIVX(ssv));
+            SvNV_set(dsv, SvNVX(ssv));
+            return dsv;
+        case SVp_POK|SVp_NOK:  /* [ 3% ]*/
+            SvNV_set(dsv, SvNVX(ssv));
+            break;
+        case SVf_ROK:  /* [ 3% ]*/
+            SvRV_set(dsv, SvREFCNT_inc(SvRV(ssv)));
+            return dsv;
+        default:  /* [ 2% ]*/
+            if(!SvOK(ssv))  /* [ ~2% ]*/
+                return dsv;
+            /* Some cases seem so rare that we may as well let
+             * sv_setsv_flags deal with them. For example:
+             *     SVp_IOK|SVp_NOK
+             *
+             * Some cases are (currently) not naturally occurring:
+             *     SVp_POK|SVppv_STATIC
+             *     SVp_POK|SVp_IOK|SVppv_STATIC
+             *     SVp_POK|SVp_NOK|SVppv_STATIC
+             *
+             * Other cases are also rare but also trickier to handle,
+             * so keeps this function smaller to not even try. */
+            sv_setsv_flags(dsv,ssv,flags);
+            return dsv;
+        case SVp_NOK:  /* [ << 1% ]*/
+            ASSUME(SvTYPE(dsv) != SVt_PVIV);
+            SvNV_set(dsv, SvNVX(ssv));
+            return dsv;
+    }
+    assert(SVp_POK); /* All other cases should have returned */
+
+    S_newSVsv_flags_NN_POK(aTHX_ dsv, ssv, flags);
+
+    if ( (sflags & (SVf_NOK|SVf_IOK)) && !(sflags & SVf_POK) ) {
+        /* ssv was assigned a numerical value that was later
+         * stringified, where the value isn't affected by the
+         * numeric locale and therefore its stringification can
+         * be cached. See the original checks in Perl_sv_setsv_flags
+         * for more information. The main point is that the
+         * SVf_POK should not have been set on dsv either and so
+         * we assert that here. */
+        assert(!(SvFLAGS(dsv) & SVf_POK));
+    }
+
+    {
+        const char *vstr_pv;
+        STRLEN vstr_len;
+        if ((vstr_pv = SvVSTRING(ssv, vstr_len))) {  /* [ <<< 1% ] */
+            sv_magic(dsv, NULL, PERL_MAGIC_vstring, vstr_pv, vstr_len);
+            SvRMAGICAL_on(dsv);
+        }
+    }
+    if (SvTAINTED(ssv)) /* [ <<< 1% ] */
+        SvTAINT(dsv);
+    return dsv;
+}
+
+/*
+=for apidoc newSVsv_flags_NN
+
+This creates a new SV which contains the values of the original SV.
+
+It does the bulk of the work for C<newSVsv_flags> and C<sv_mortalcopy_flags>.
+Less common cases are passed to C<sv_setsv_flags>.
+
+This function accepts the same flags as C<sv_setsv_flags>, with the single
+addition of C<SVs_TEMP>, which toggles the treatment of a freed source SV:
+  * Not present: emulate C<newSVsv_flags> by emitting a warning and
+                 returning NULL.
+  * Present:     emulate C<sv_mortalcopy_flags> behaviour: C<croak()>.
+
+=cut
+*/
+
+    /* Note: If a PVIV/PVNV/PVMG is only IOK, NOK, ROK, it is _mostly_
+     * possible to create just a headless SV to store that value.
+     * Some parts of core (Perl_amagic_call in gv.c specifically) do
+     * assume - and possibly CPAN might - that SvTYPE(dsv) == SvTYPE(ssv)
+     * though, which is why the code below does not try that type
+     * simplification. Perhaps this might be worth revisiting in the future.
+     * -- April 2025. */
+/*
+ * [%] numbers are a rough percentage of calls to this function, as
+ * measured by a gcov build running the test harness. They are presented
+ * only for general information and will not be representative of all
+ * workloads or applications.
+*/
+
+SV *
+Perl_newSVsv_flags_NN(pTHX_ SV *const old, I32 flags)
+{
+    PERL_ARGS_ASSERT_NEWSVSV_FLAGS_NN;
+    SV *dsv;
+    new_SV(dsv);
+
+    /* new_SV includes default initialization of SvFLAGS and SvANY.
+     * However, the SVt_IV cases in the switch below are both very common
+     * and very simple. If we initialize for those cases, a decent compiler
+     * will hopefully elide new_SVs defaults so no extra work is done.
+     * For all other cases, SvANY and SvFLAGS will be overwritten anyway. */
+    SET_SVANY_FOR_BODYLESS_IV(dsv);
+    SvFLAGS(dsv) = SVt_IV|SVf_IOK|SVp_IOK;
+
+    const U32 sflags = SvFLAGS(old);
+
+    /* These are the hottest and simplest cases */
+    switch( sflags & (SVTYPEMASK|SVf_IOK|SVf_IVisUV|SVf_ROK|SVf_NOK|SVf_POK) ) {
+        case SVt_IV|SVf_IOK: /* [ 31% ] */
+            assert(SvANY(dsv));
+            assert(SvFLAGS(dsv) == (SVt_IV|SVf_IOK|SVp_IOK) );
+
+            assert(    &(old->sv_u.svu_iv)
+                == &(((XPVIV*) SvANY(old))->xiv_iv));
+            assert(    &(dsv->sv_u.svu_iv)
+                == &(((XPVIV*) SvANY(dsv))->xiv_iv));
+            dsv->sv_u.svu_iv = old->sv_u.svu_iv;
+            break;
+        case SVt_IV|SVf_ROK: /* [ 11% ] */
+            assert(SvANY(dsv));
+            SvFLAGS(dsv) = SVt_IV|SVf_ROK;
+#if defined (DEBUGGING) || defined (PERL_DEBUG_COW)
+            dsv->sv_u.svu_rv = SvREFCNT_inc_NN(SvRV(old));
+#else
+            dsv->sv_u.svu_rv = SvREFCNT_inc_NN( old->sv_u.svu_rv );
+#endif
+            break;
+        case SVt_PV|SVf_POK: /* [ 33% ] */
+            SvANY(dsv) = new_XPV();
+            SvFLAGS(dsv) = SVt_PV|SVf_POK|SVp_POK|(sflags & SVf_UTF8);
+            return S_newSVsv_flags_NN_POK(aTHX_ dsv, old, flags);
+        case SVt_NV|SVf_NOK: /* [ < 1% ] - but won't be in float-heavy code! */
+#if NVSIZE <= IVSIZE
+            SET_SVANY_FOR_BODYLESS_NV(dsv);
+#else
+            SvANY(dsv) = new_XNV();
+#endif
+            SvFLAGS(dsv) = SVt_NV|SVf_NOK|SVp_NOK;
+#if NVSIZE <= IVSIZE
+            assert(    &(old->sv_u.svu_nv)
+                == &(((XPVNV*) SvANY(old))->xnv_u.xnv_nv));
+            assert(    &(dsv->sv_u.svu_nv)
+                == &(((XPVNV*) SvANY(dsv))->xnv_u.xnv_nv));
+            dsv->sv_u.svu_nv = old->sv_u.svu_nv;
+#else
+                SvNV_set(dsv, SvNVX(old));
+#endif
+            break;
+        default: /* [ 24% ] */
+            SvANY(dsv) = NULL;
+            goto second_switch;
+    }
+    return dsv;
+
+  second_switch:
+
+    /* Try again for SVt_NULL, the SVf_IVisUV case, and SVt_LAST,
+     * then send everything else to S_newSVsv_flags_NN_PVxx. */
+    switch( sflags & (SVTYPEMASK|SVf_IOK|SVf_IVisUV|SVf_ROK|SVf_NOK|SVf_POK) ) {
+        case SVt_NULL: /* [4%] */
+            SvFLAGS(dsv) = SVt_NULL;
+            break;
+        case SVt_IV|SVf_IOK|SVf_IVisUV: /* [<1%] */
+            SET_SVANY_FOR_BODYLESS_IV(dsv);
+            dsv->sv_u.svu_uv = old->sv_u.svu_uv;
+            SvFLAGS(dsv) = SVt_IV|SVf_IOK|SVp_IOK|SVf_IVisUV;
+            break;
+        case SVt_LAST: /* [0%] */
+            /* Note: sv_mortalcopy_flags sets the SVs_TEMP flag, newSVsv_flags does not. */
+            if (!(flags & SVs_TEMP)) { /* This is newSVsv_flags' traditional behaviour */
+                del_SV(dsv);
+                ck_warner_d(packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
+                return NULL;
+            }
+            /* sv_mortalcopy_flags traditionally had no special handling. */
+            /* FALLTHROUGH */
+        default:  /* [ 20% ] */
+            SvANY(dsv) = NULL;
+            SvFLAGS(dsv) = SVt_NULL;
+            return S_newSVsv_flags_NN_PVxx(aTHX_ dsv, old, flags);
+    }
+
+    return dsv;
+}
 
 /*
 =for apidoc sv_set_undef
@@ -9632,10 +10068,10 @@ S_push_extend_mortal(pTHX_ SV *const sv)
 =for apidoc_item sv_mortalcopy_flags
 
 These each create a new SV which is a copy of the original SV (using
-C<L</sv_setsv>>).  The new SV is marked as mortal.  It will be destroyed
-"soon", either by an
-explicit call to C<FREETMPS>, or by an implicit call at places such as
-statement boundaries.  See also C<L</sv_newmortal>> and C<L</sv_2mortal>>.
+C<L</newSVsv_flags_NN>>).  The new SV is marked as mortal.  It will be
+destroyed "soon", either by an explicit call to C<FREETMPS>, or by an
+implicit call at places such as statement boundaries.
+See also C<L</sv_newmortal>> and C<L</sv_2mortal>>.
 
 The two forms are identical, except C<sv_mortalcopy_flags> has an extra
 C<flags> parameter, the contents of which are passed along to
@@ -9644,23 +10080,25 @@ C<L</sv_setsv_flags>>.
 =cut
 */
 
-/* Make a string that will exist for the duration of the expression
+/* Make an SV that will exist for the duration of the expression
  * evaluation.  Actually, it may have to last longer than that, but
  * hopefully we won't free it until it has been assigned to a
  * permanent location. */
 
 SV *
-Perl_sv_mortalcopy_flags(pTHX_ SV *const oldstr, U32 flags)
+Perl_sv_mortalcopy_flags(pTHX_ SV *const old, U32 flags)
 {
-    SV *sv;
+    SV *dsv;
 
-    if (flags & SV_GMAGIC)
-        SvGETMAGIC(oldstr); /* before new_SV, in case it dies */
-    new_SV(sv);
-    sv_setsv_flags(sv,oldstr,flags & ~SV_GMAGIC);
-    push_extend_mortal(sv);
-    SvTEMP_on(sv);
-    return sv;
+    if (!old) {
+        new_SV(dsv);
+    } else {
+        dsv = newSVsv_flags_NN(old, flags);
+    }
+
+    push_extend_mortal(dsv);
+    SvTEMP_on(dsv);
+    return dsv;
 }
 
 /*
@@ -10194,20 +10632,10 @@ parameter.
 SV *
 Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
 {
-    SV *sv;
-
     if (!old)
         return NULL;
-    if (SvIS_FREED(old)) {
-        ck_warner_d(packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
-        return NULL;
-    }
-    /* Do this here, otherwise we leak the new SV if this croaks. */
-    if (flags & SV_GMAGIC)
-        SvGETMAGIC(old);
-    new_SV(sv);
-    sv_setsv_flags(sv, old, flags & ~SV_GMAGIC);
-    return sv;
+
+    return newSVsv_flags_NN(old, flags);
 }
 
 /*

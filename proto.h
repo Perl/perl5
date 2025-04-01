@@ -3125,6 +3125,11 @@ Perl_newSVsv_flags(pTHX_ SV * const old, I32 flags)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVSV_FLAGS
 
+Perl_newSVsv_flags_NN(pTHX_ SV * const old, I32 flags)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVSV_FLAGS_NN       \
+        assert(old)
+
 /* PERL_CALLCONV SV *
 Perl_newSVsv_nomg(pTHX_ SV * const old)
         __attribute__warn_unused_result__; */
