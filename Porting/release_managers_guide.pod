@@ -1387,7 +1387,7 @@ Skip to the end of its test output to see the options it offers you.
 
 When C<make test_porting> passes, commit the new perldelta.
 
- $ git commit -m'New perldelta for 5.X.Y'
+ $ git commit -m'Archive perldelta 5.X.Y'
 
 =back
 
