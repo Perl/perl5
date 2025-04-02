@@ -3627,6 +3627,11 @@ sub trace { return main::trace(@_); }
         return $standard_form{$addr} = main::standardize($value);
     }
 
+    sub count($self) {
+        my $addr = pack 'J', refaddr $self;
+        return $end{$addr} - $start{$addr} + 1;
+    }
+
     sub dump($self, $indent) {
         # Human, not machine readable.  For machine readable, comment out this
         # entire routine and let the standard one take effect.
@@ -4811,7 +4816,7 @@ sub trace { return main::trace(@_); }
 
         my $count = 0;
         foreach my $range (@{$ranges{$addr}}) {
-            $count += $range->end - $range->start + 1;
+            $count += $range->count;
         }
         return $count;
     }
@@ -6028,7 +6033,7 @@ END
                         # points"
                         my $count = ($set->type != 0)
                                     ? 1
-                                    : $set->end - $set->start + 1;
+                                    : $set->count;
                         $widths{$this_width} += $count;
                         $total += $count;
                         $max_map_width = $this_width
