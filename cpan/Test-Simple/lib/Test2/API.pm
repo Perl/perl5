@@ -10,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 
 my $INST;
@@ -1300,7 +1300,7 @@ formatter being used.
 In both cases events are generated and stored in an array. This array is
 eventually used to populate the C<subevents> attribute on the
 L<Test2::Event::Subtest> event that is generated at the end of the subtest.
-This flag has no effect on this part, it always happens.
+This flag has no effect on this part; it always happens.
 
 At the end of the subtest, the final L<Test2::Event::Subtest> event is sent to
 the formatter.

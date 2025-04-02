@@ -55,7 +55,7 @@ is(
 my ($events, $warn);
 $events = intercept {
     $warn = warning {
-        warning { warn "a\n"; warn "b\n" };
+        scalar warning { warn "a\n"; warn "b\n" };
     };
 };
 
@@ -72,6 +72,30 @@ like(
         event Note => { message => "b\n" };
     },
     "Got warnings as notes."
+);
+
+like(
+    warning { warns { 1 } },
+    qr/Useless use of warns\(\) in void context/,
+    "warns in void context"
+);
+
+like(
+    warning { warning { 1 } },
+    qr/Useless use of warning\(\) in void context/,
+    "warns in void context"
+);
+
+like(
+    warning { warnings { 1 } },
+    qr/Useless use of warnings\(\) in void context/,
+    "warns in void context"
+);
+
+like(
+    warning { no_warnings { 1 } },
+    qr/Useless use of no_warnings\(\) in void context/,
+    "warns in void context"
 );
 
 done_testing;

@@ -2,7 +2,7 @@ package Test2::Plugin::DieOnFail;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 use Test2::API qw/test2_add_callback_context_release/;
 

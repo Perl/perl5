@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::EndToEnd;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -155,12 +155,12 @@ If a new context was created, context-creation hooks will fire.
 =item $!, $@, $?, and $^E are restored.
 
 We make sure $!, $@, $?, and $^E are unchanged at this point so that changes we
-made will not effect anything else. This is done in case something inside the
+made will not affect anything else. This is done in case something inside the
 context construction accidentally changed these vars.
 
 =item The context is returned.
 
-You have a shiney new context object, or a clone of the existing context.
+You have a shiny new context object, or a clone of the existing context.
 
 =back
 
@@ -196,9 +196,9 @@ event can modify global test state.
 
 =item The global test state is updated to reflect the event.
 
-If the event effects test count then the count will be incremented. If the
+If the event affects test count then the count will be incremented. If the
 event causes failure then the failure count will be incremented. There are a
-couple other ways the global state can be effected as well.
+few other ways the global state can be affected as well.
 
 =item The event is sent to the formatter
 

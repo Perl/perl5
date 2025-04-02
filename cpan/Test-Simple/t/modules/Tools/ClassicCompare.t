@@ -257,7 +257,7 @@ $line = __LINE__ + 2;
 like(
     intercept {
         local $ENV{TS_TERM_SIZE} = 10000;
-        main::warning {
+        $warning = main::warning {
             cmp_ok($foo, '&& die', $foo, 'overload exception', 'extra diag')
         }
     },
@@ -312,12 +312,13 @@ note "cmp_ok() displaying good numbers"; {
 }
 
 
+my $warnings;
 note "cmp_ok() displaying bad numbers"; {
     my $have = "zero";
     my $want = "3point5";
     like(
         intercept {
-            warnings { cmp_ok($have, '>', $want) };
+            $warnings = warnings { cmp_ok($have, '>', $want) };
         },
         array {
             fail_events Ok => sub {

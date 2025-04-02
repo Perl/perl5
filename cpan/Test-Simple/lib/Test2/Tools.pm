@@ -2,7 +2,7 @@ package Test2::Tools;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -22,9 +22,9 @@ Tools are packages that export test functions, typically all related to a
 specific aspect of testing. If you have a couple different categories of
 exports then you may want to break them into separate modules.
 
-Tools should export testing functions. Loading tools B<should not> have side
+Tools should export testing functions. Loading tools B<should not> have side-
 effects, or alter the behavior of other tools. If you want to alter behaviors
-or create side effects then you probably want to write a L<Test2::Plugin>.
+or create side-effects then you probably want to write a L<Test2::Plugin>.
 
 =head1 FAQ
 

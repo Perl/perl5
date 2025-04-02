@@ -7,7 +7,7 @@ use Test2::Compare::Isa();
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 use Test2::Util::HashBase qw/items/;
 

@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -14,7 +14,7 @@ Test2::Manual::Anatomy::Event - The internals of events
 
 =head1 DESCRIPTION
 
-Events are how tools effect global state, and pass information along to the
+Events are how tools affect global state, and pass information along to the
 harness, or the human running the tests.
 
 =head1 HISTORY

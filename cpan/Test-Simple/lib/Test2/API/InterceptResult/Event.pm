@@ -2,7 +2,7 @@ package Test2::API::InterceptResult::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 use List::Util   qw/first/;
 use Test2::Util  qw/pkg_to_file/;
@@ -591,7 +591,7 @@ that subtest results can be turned into instances of it on demand.
 
 =item $copy = $event->clone
 
-Create a deep copy of the event. Modifying either event will not effect the
+Create a deep copy of the event. Modifying either event will not affect the
 other.
 
 =back

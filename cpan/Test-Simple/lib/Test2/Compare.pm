@@ -2,7 +2,7 @@ package Test2::Compare;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 use Scalar::Util qw/blessed/;
 use Test2::Util qw/try/;
@@ -277,7 +277,7 @@ listed first:
 =item implicit_end => 1
 
 This option toggles array/hash boundaries. If this is true then no extra hash
-keys or array indexes will be allowed. This setting effects generated compare
+keys or array indexes will be allowed. This setting affects generated compare
 objects as well as any passed in.
 
 =item use_regex => 1

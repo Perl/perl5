@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::Hubs;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -56,10 +56,10 @@ connection to the parent hub, and usually does not have a formatter.
 
 =head1 WHEN SHOULD I ADD A HUB TO THE STACK?
 
-Any time you want to intercept or block events from effecting the test state.
+Any time you want to intercept or block events from affecting the test state.
 Adding a new hub is essentially a way to create a sandbox where you have
 absolute control over what events do. Adding a new hub insures that the main
-test state will not be effected.
+test state will not be affected.
 
 =head1 WHERE IS THE STACK?
 

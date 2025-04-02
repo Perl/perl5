@@ -2,7 +2,7 @@ package Test2::Suite;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -47,11 +47,11 @@ any number of plugins.
 
 =back
 
-If you want to write something that both exports new functions, and effects
+If you want to write something that both exports new functions, and affects
 behavior, you should write both a Tools distribution, and a Plugin distribution,
 then a Bundle that loads them both. This is important as it helps avoid the
 problem where a package exports much-desired tools, but
-also produces undesirable side effects.
+also produces undesirable side-effects.
 
 =head1 INCLUDED BUNDLES
 

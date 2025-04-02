@@ -2,7 +2,7 @@ package Test2::Manual::Testing::Todo;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -71,7 +71,7 @@ todo).
 =head1 HOW THE TODO TOOLS WORK UNDER THE HOOD
 
 The L<Test2::Todo> library gets the current L<Test2::Hub> instance and adds a
-filter. The filter that is added will set the todo and effective pass fields on
+filter. The filter that is added will set the C<todo> and C<effective_pass> fields on
 any L<Test2::Event::Ok> events that pass through the hub. The filter also
 converts L<Test2::Event::Diag> events into L<Test2::Event::Note> events.
 

@@ -85,16 +85,16 @@ sub intercept_2(&) {
     );
     ok($CLASS->seed && $CLASS->seed != 1234, "set seed");
     is($CLASS->from, 'local date', "set from");
-    like($warning, $reseed_qr, $reseed_name);
+    $warning = like($warning, $reseed_qr, $reseed_name);
 
     my $hooks = Test2::API::test2_list_exit_callbacks();
     delete $ENV{HARNESS_IS_VERBOSE};
     $ENV{HARNESS_ACTIVE} = 1;
-    warning { $events = intercept { $CLASS->import() } };
-    warning { $events = intercept { $CLASS->import() } };
+    $warning = warning { $events = intercept { $CLASS->import() } };
+    $warning = warning { $events = intercept { $CLASS->import() } };
     is(Test2::API::test2_list_exit_callbacks, $hooks + 1, "added hook, but only once");
 
-    warning { $CLASS->import(undef) };
+    $warning = warning { $CLASS->import(undef) };
     is($CLASS->seed, 0 , "set seed");
     is($CLASS->from, 'import arg', "set from");
 }

@@ -2,7 +2,7 @@ package Test2::Manual::Tooling::Testing;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 1;
 
@@ -38,7 +38,7 @@ No events or contexts generated within the intercept codeblock will have any
 effect on the outside testing state. The C<intercept> function completely
 isolates the tools called within.
 
-B<Note:> Plugins and things that effect global API state may not be fully
+B<Note:> Plugins and things that affect global API state may not be fully
 isolated. C<intercept> is intended specifically for event isolation.
 
 The C<intercept> function will return an arrayref containing all the events

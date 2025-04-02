@@ -2,7 +2,7 @@ package Test2::Tools::Exception;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 use Carp qw/carp/;
 use Test2::API qw/context test2_add_pending_diag test2_clear_pending_diags/;

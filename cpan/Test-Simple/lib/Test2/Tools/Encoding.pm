@@ -8,7 +8,7 @@ use Test2::API qw/test2_stack/;
 
 use base 'Exporter';
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 our @EXPORT = qw/set_encoding/;
 

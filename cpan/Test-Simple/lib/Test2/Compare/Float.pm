@@ -6,7 +6,7 @@ use Carp qw/confess/;
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 our $DEFAULT_TOLERANCE = 1e-08;
 

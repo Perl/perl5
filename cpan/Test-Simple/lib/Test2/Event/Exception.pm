@@ -2,7 +2,7 @@ package Test2::Event::Exception;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }

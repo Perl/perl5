@@ -2,7 +2,7 @@ package Test2::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 use Scalar::Util qw/blessed reftype/;
 use Carp qw/croak/;
@@ -414,7 +414,7 @@ match.
 
 =item $e->add_amnesty({tag => $TAG, details => $DETAILS});
 
-This can be used to add amnesty to this event. Amnesty only effects failing
+This can be used to add amnesty to this event. Amnesty only affects failing
 assertions in most cases, but some formatters may display them for passing
 assertions, or even non-assertions as well.
 

@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Require';
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
 sub skip {
     my $class = shift;

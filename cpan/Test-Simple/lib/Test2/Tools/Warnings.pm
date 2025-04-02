@@ -2,8 +2,9 @@ package Test2::Tools::Warnings;
 use strict;
 use warnings;
 
-our $VERSION = '1.302209';
+our $VERSION = '1.302210';
 
+use Carp qw/carp/;
 use Test2::API qw/context test2_add_pending_diag/;
 
 our @EXPORT = qw/warns warning warnings no_warnings/;
@@ -11,6 +12,9 @@ use base 'Exporter';
 
 sub warns(&) {
     my $code = shift;
+
+    defined wantarray or carp "Useless use of warns() in void context";
+
     my $warnings = 0;
     local $SIG{__WARN__} = sub { $warnings++ };
     $code->();
@@ -18,6 +22,8 @@ sub warns(&) {
 }
 
 sub no_warnings(&) {
+    defined wantarray or carp "Useless use of no_warnings() in void context";
+
     my $warnings = &warnings(@_);
     return 1 if !@$warnings;
 
@@ -28,6 +34,9 @@ sub no_warnings(&) {
 
 sub warning(&) {
     my $code = shift;
+
+    defined wantarray or carp "Useless use of warning() in void context";
+
     my @warnings;
     {
         local $SIG{__WARN__} = sub { push @warnings => @_ };
@@ -47,6 +56,8 @@ sub warning(&) {
 
 sub warnings(&) {
     my $code = shift;
+
+    defined wantarray or carp "Useless use of warnings() in void context";
 
     my @warnings;
     local $SIG{__WARN__} = sub { push @warnings => @_ };
