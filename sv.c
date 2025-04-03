@@ -4220,6 +4220,28 @@ S_sv_buf_to_rw(pTHX_ SV *sv)
       && len                    /* and really is a string */               \
     )
 
+/* The test in this macro was also extracted from Perl_sv_setsv_flags so
+ * that it could be used elsewhere. */
+#ifdef PERL_COPY_ON_WRITE
+#define S_SvPV_shared_hkey_or_CoWable(ssv, dsv, sflags, cur, len)          \
+        (sflags & SVf_IsCOW                                                \
+            ? (!len ||                                                     \
+              ( (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dsv) < cur+1)    \
+                  /* If this is a regular (non-hek) COW, only so */        \
+                  /*  many COW "copies" are possible. */                   \
+                && CowREFCNT(ssv) != SV_COW_REFCNT_MAX  ))                 \
+            : ( (sflags & CAN_COW_MASK) == CAN_COW_FLAGS                   \
+                && !(SvFLAGS(dsv) & SVf_BREAK)                             \
+                && CHECK_COW_THRESHOLD(cur,len) && cur+1 < len             \
+                && (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dsv) < cur+1) \
+        ))
+#else
+#define S_SvPV_shared_hkey_or_CoWable(ssv, dsv, sflags, cur, len)          \
+        ( sflags & SVf_IsCOW                                               \
+        && !(SvFLAGS(dsv) & SVf_BREAK)                                     \
+        )
+#endif
+
 /* Perl_sv_can_swipe_pv_buf was originally created for pp_reverse. */
 bool
 Perl_sv_can_swipe_pv_buf(pTHX_ SV *sv)
@@ -4662,25 +4684,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
             SvCUR_set(dsv, cur);
             SvFLAGS(dsv) |= (SVf_IsCOW|SVppv_STATIC);
         }
-        else if (flags & SV_COW_SHARED_HASH_KEYS
-              &&
-#ifdef PERL_COPY_ON_WRITE
-                 (sflags & SVf_IsCOW
-                   ? (!len ||
-                       (  (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dsv) < cur+1)
-                          /* If this is a regular (non-hek) COW, only so
-                             many COW "copies" are possible. */
-                       && CowREFCNT(ssv) != SV_COW_REFCNT_MAX  ))
-                   : (  (sflags & CAN_COW_MASK) == CAN_COW_FLAGS
-                     && !(SvFLAGS(dsv) & SVf_BREAK)
-                     && CHECK_COW_THRESHOLD(cur,len) && cur+1 < len
-                     && (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dsv) < cur+1)
-                    ))
-#else
-                 sflags & SVf_IsCOW
-              && !(SvFLAGS(dsv) & SVf_BREAK)
-#endif
-            ) {
+        else if ((flags & SV_COW_SHARED_HASH_KEYS) &&
+                S_SvPV_shared_hkey_or_CoWable(ssv, dsv, sflags, cur, len)){
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write.  */
 #ifdef DEBUGGING
