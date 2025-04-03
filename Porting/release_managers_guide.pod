@@ -1604,7 +1604,7 @@ about blead's current version.
 Commit and push your changes.
 
  $ git add -u
- $ git commit -m "Prepare Module::Corelist for 5.X.Y"
+ $ git commit -m "Prepare Module::Corelist"
  $ git push origin
 
 =back
