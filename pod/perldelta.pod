@@ -376,6 +376,17 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+When both operands of arithmetic operators (C<+>, C<->, etc.) are
+L<overload>ed objects which have no method for that operator but have
+a C<0+> method and the C<fallback> option set to TRUE,
+perl will normally call the C<0+> method for the left operand first
+and then call one for the right operand, i.e. in the same order
+with operand evaluation order.
+But if C<S<use integer;>> is in effect, the C<0+> methods used to be
+called in wrong (reverse) order.
+
 =back
 
 =head1 Known Problems
