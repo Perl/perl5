@@ -1914,6 +1914,9 @@ EOF
         |P::Q *        T_OBJECT @
         |const P::Q *  T_OBJECT %
         |
+        |foo_t         T_IV @
+        |bar_t         T_IV %
+        |
         |INPUT
         |T_OBJECT
         |    $var = my_in($arg);
@@ -2143,6 +2146,24 @@ EOF
                 'C_ARGS: a, c',
             ],
             [ 0, 0, qr/"\$\$;\$"/, ""  ],
+        ],
+        [
+            "CASE with variant prototype char",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(abc)
+                |    CASE: X
+                |       foo_t abc
+                |    CASE: Y
+                |       int   abc
+                |    CASE: Z
+                |       bar_t abc
+EOF
+            [ 0, 0, qr/newXS.*"%"/, "has %" ],
+            [ 1, 0, qr/Warning: prototype for 'abc' varies: '\@' versus '\$' .*line 28/,
+                    "got 'varies' warning 1" ],
+            [ 1, 0, qr/Warning: prototype for 'abc' varies: '\$' versus '%' .*line 30/,
+                    "got 'varies' warning 2" ],
         ],
     );
 

@@ -810,6 +810,9 @@ BEGIN { $build_subclass->('', # parent
 # Set the 'proto' field of the param. This is based on the value, if any,
 # of the proto method of the typemap for that param's type. It will
 # typically be a single character like '$'.
+#
+# Note that params can have different types (and thus different proto
+# chars) in different CASE branches.
 
 sub set_proto {
     my __PACKAGE__       $self = shift;
@@ -2191,6 +2194,9 @@ sub parse {
 
         for my $op (@{$orig->{params}}) {
             my $p  = ExtUtils::ParseXS::Node::Param->new($op);
+            # don't copy the current proto state (from the most recent
+            # CASE) into the new CASE.
+            undef $p->{proto};
             push @{$ioparams->{params}}, $p;
             $ioparams->{names}{$p->{var}} = $p;
         }
@@ -2291,16 +2297,35 @@ sub parse {
     # Now that the type of each param is finalised, calculate its
     # overridden prototype character, if any.
     #
-    # Note that the type of a param can change during parsing: e.g.
-    # THIS's type may be set provisionally based on the XSUB's package,
-    # then updated if it appears as a parameter or on an INPUT line.
-    # Also, typemaps can be overridden using the TYPEMAP keyword, so
-    # it's possible the typemap->proto() method will return something
-    # different by the time the proto field is used to emit boot code.
-    # So when to call this method is significant. Ideally just after all
-    # input processing is complete.
+    # Note that the type of a param can change during parsing, so when to
+    # call this method is significant. In particular:
+    # - THIS's type may be set provisionally based on the XSUB's package,
+    #   then updated if it appears as a parameter or on an INPUT line.
+    # - typemaps can be overridden using the TYPEMAP keyword, so
+    #   it's possible the typemap->proto() method will return something
+    #   different by the time the proto field is used to emit boot code.
+    # - params can have different types (and thus typemap entries and
+    #   proto chars) per CASE branch.
+    # So we calculate the per-case/xbody params' proto values here, and
+    # also use that value to update the per-XSUB value, warning if the
+    # value changes.
 
-    $_->set_proto($pxs) for @{$pxs->{xsub_params}{params}};
+    for my $ioparam (@{$pxs->{xsub_params}{params}}) {
+        $ioparam->set_proto($pxs);
+        my $ioproto = $ioparam->{proto};
+        my $name    = $ioparam->{var};
+        next unless defined $name;
+        next unless $ioparam->{arg_num};
+
+        my $param = $pxs->{cur_xsub}{decl}{params}{names}{$name};
+        my $proto = $param->{proto};
+        $ioproto = '$' unless defined $ioproto;
+        if (defined $proto and $proto ne $ioproto) {
+            $pxs->Warn("Warning: prototype for '$name' varies: '$proto' versus '$ioproto'");
+        }
+        $param->{proto} = $ioproto;
+    }
+
     1;
 }
 
