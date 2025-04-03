@@ -475,6 +475,8 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
         AvALLOC(av) = ary;
         AvARRAY(av) = ary;
         AvMAX(av) = size - 1;
+        SSize_t *fillp = &AvFILLp(av);
+
         /* avoid av being leaked if croak when calling magic below */
         EXTEND_MORTAL(1);
         PL_tmps_stack[++PL_tmps_ix] = (SV*)av;
@@ -486,12 +488,8 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
             /* Don't let sv_setsv swipe, since our source array might
                have multiple references to the same temp scalar (e.g.
                from a list slice) */
-
-            SvGETMAGIC(*strp); /* before newSV, in case it dies */
-            AvFILLp(av)++;
-            ary[i] = newSV_type(SVt_NULL);
-            sv_setsv_flags(ary[i], *strp,
-                           SV_DO_COW_SVSETSV|SV_NOSTEAL);
+            ary[i] = newSVsv_flags(*strp, SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC);
+            *fillp = i;
             strp++;
         }
         /* disarm av's leak guard */
