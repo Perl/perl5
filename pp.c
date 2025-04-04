@@ -6419,10 +6419,11 @@ PP(pp_push)
         PL_delaymagic = DM_DELAY;
         for (++MARK; MARK <= PL_stack_sp; MARK++) {
             SV *sv;
-            if (*MARK) SvGETMAGIC(*MARK);
-            sv = newSV_type(SVt_NULL);
-            if (*MARK)
-                sv_setsv_nomg(sv, *MARK);
+            if (*MARK) {
+                sv = newSVsv_flags(*MARK, SV_DO_COW_SVSETSV|SV_GMAGIC);
+            } else
+                sv = newSV_type(SVt_NULL);
+
             av_store(ary, AvFILLp(ary)+1, sv);
         }
         if (PL_delaymagic & DM_ARRAY_ISA)
