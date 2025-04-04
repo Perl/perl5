@@ -4814,8 +4814,7 @@ S_require_file(pTHX_ SV *sv)
                     }
 
                     if (SvPADTMP(nsv)) {
-                        nsv = sv_newmortal();
-                        SvSetSV_nosteal(nsv,sv);
+                        nsv = sv_mortalcopy_flags(sv, SV_GMAGIC|SV_NOSTEAL|SV_DO_COW_SVSETSV);
                     }
 
                     const char *method = NULL;
