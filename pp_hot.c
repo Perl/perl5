@@ -5368,8 +5368,7 @@ PP(pp_subst)
     if (dstr) {
         /* replacement needing upgrading? */
         if (DO_UTF8(TARG) && !doutf8) {
-             nsv = sv_newmortal();
-             SvSetSV(nsv, dstr);
+             nsv = sv_mortalcopy_flags(dstr, SV_GMAGIC|SV_DO_COW_SVSETSV);
              sv_utf8_upgrade(nsv);
              c = SvPV_const(nsv, clen);
              doutf8 = TRUE;
