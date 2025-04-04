@@ -4418,13 +4418,11 @@ S_doopen_pm(pTHX_ SV *name)
         return NULL;
 
     if (memENDPs(p, namelen, ".pm")) {
-        SV *const pmcsv = sv_newmortal();
-        PerlIO * pmcio;
+        SV *const pmcsv = sv_mortalcopy_flags(name, SV_GMAGIC|SV_NOSTEAL|SV_DO_COW_SVSETSV);
 
-        SvSetSV_nosteal(pmcsv,name);
         sv_catpvs(pmcsv, "c");
 
-        pmcio = check_type_and_open(pmcsv);
+        PerlIO * pmcio = check_type_and_open(pmcsv);
         if (pmcio)
             return pmcio;
     }
