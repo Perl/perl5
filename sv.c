@@ -17034,8 +17034,7 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
         PUSHSTACK;
         SAVETMPS;
         if (SvPADTMP(nsv)) {
-            nsv = sv_newmortal();
-            SvSetSV_nosteal(nsv, sv);
+            nsv = sv_mortalcopy_flags(sv, SV_GMAGIC|SV_NOSTEAL|SV_DO_COW_SVSETSV);
         }
         save_re_context();
         PUSHMARK(sp);
