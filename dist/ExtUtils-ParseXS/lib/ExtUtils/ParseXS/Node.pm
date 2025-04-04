@@ -2204,8 +2204,8 @@ sub parse {
         $self->{ioparams} = $pxs->{xsub_params} = $ioparams;
     }
 
-    for my $part (qw(input init code output cleanup)) {
-        my $kid = "ExtUtils::ParseXS::Node::${part}_part"->new();;
+    for my $part (qw(input_part init_part code_part output_part cleanup_part)) {
+        my $kid = "ExtUtils::ParseXS::Node::$part"->new();
         if ($kid->parse($pxs)) {
             push @{$self->{kids}}, $kid;
         }
@@ -2224,7 +2224,7 @@ sub as_code {
           . "    $open_brace\n";
 
     if ($self->{kids}) {
-        $_->as_code($pxs) for @{$self->{kids}};
+        $_->as_code($pxs, $self) for @{$self->{kids}};
     }
 
     # ----------------------------------------------------------------
@@ -2331,8 +2331,9 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
@@ -2407,8 +2408,9 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -2428,8 +2430,9 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
@@ -2472,8 +2475,9 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
@@ -2512,8 +2516,9 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
@@ -2626,8 +2631,9 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
