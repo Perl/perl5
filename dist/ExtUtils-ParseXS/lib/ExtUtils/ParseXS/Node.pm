@@ -2335,6 +2335,8 @@ sub as_code {
     my ExtUtils::ParseXS              $pxs   = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
+    my $ioparams = $xbody->{ioparams};
+
     if ($self->{kids}) {
         $_->as_code($pxs) for @{$self->{kids}};
     }
@@ -2347,7 +2349,7 @@ EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-    for my $param (grep $_->{is_synthetic}, @{$pxs->{xsub_params}{params}}) {
+    for my $param (grep $_->{is_synthetic}, @{$ioparams->{params}}) {
         $param->as_code($pxs);
     }
 
@@ -2376,8 +2378,8 @@ EOF
     for my $param (
             grep $_->{is_ansi},
                 (
-                    grep(  $_->{is_length}, @{$pxs->{xsub_params}{params}} ),
-                    grep(! $_->{is_length}, @{$pxs->{xsub_params}{params}} ),
+                    grep(  $_->{is_length}, @{$ioparams->{params}} ),
+                    grep(! $_->{is_length}, @{$ioparams->{params}} ),
                 )
     )
 
@@ -2524,7 +2526,9 @@ sub as_code {
         $_->as_code($pxs) for @{$self->{kids}};
     }
 
-    my $retval = $pxs->{xsub_params}{names}{RETVAL};
+    my $ioparams = $xbody->{ioparams};
+
+    my $retval = $ioparams->{names}{RETVAL};
 
     # A CODE section using RETVAL must also have an OUTPUT entry
     if (        $pxs->{xsub_seen_RETVAL_in_CODE}
@@ -2543,7 +2547,7 @@ sub as_code {
                             && $_->{in_out} =~ /OUT$/
                             && !$_->{in_output}
                     }
-                    @{ $pxs->{xsub_params}{params}})
+                    @{$ioparams->{params}})
     {
         $param->as_output_code($pxs);
     }
@@ -2553,7 +2557,7 @@ sub as_code {
     my $outlist_count = grep {    defined $_->{in_out}
                                && $_->{in_out} =~ /OUTLIST$/
                              }
-                             @{$pxs->{xsub_params}{params}};
+                             @{$ioparams->{params}};
 
     if ($outlist_count) {
         my $ext = $outlist_count;
@@ -2568,7 +2572,7 @@ sub as_code {
         # the stack in addition to at least min_args args, so only need
         # to extend if we're returning more than that.
         print "\tEXTEND(SP,$ext);\n"
-            if $ext > $pxs->{xsub_params}{min_args} + 1;
+            if $ext > $ioparams->{min_args} + 1;
     }
 
     # ----------------------------------------------------------------
@@ -2595,7 +2599,7 @@ sub as_code {
     for my $param (grep {   defined $_->{in_out}
                          && $_->{in_out} =~ /OUTLIST$/
                         }
-                        @{$pxs->{xsub_params}{params}}
+                        @{$ioparams->{params}}
     ) {
         $param->as_output_code($pxs, $num++);
     }

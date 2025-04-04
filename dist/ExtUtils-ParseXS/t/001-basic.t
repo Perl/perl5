@@ -3371,6 +3371,41 @@ EOF
             [ 0, 0, qr/\(x,y\).*\(y,x\)/s, "C_ARGS" ],
         ],
         [
+            "CASE with variant THIS type",
+            [ Q(<<'EOF') ],
+                |void
+                |A::B::foo()
+                |    CASE: X
+                |       int THIS
+                |    CASE: Y
+                |       long THIS
+                |    CASE:
+                |       short THIS
+EOF
+            [ 0, 0, qr/int   \s+ THIS .*
+                       long  \s+ THIS .*
+                       short \s+ THIS/sx, "has three types" ],
+        ],
+        [
+            "CASE with variant RETVAL type",
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |    CASE: X
+                |       long RETVAL
+                |    CASE: Y
+                |       double RETVAL
+                |    CASE: Z
+                |       char * RETVAL
+EOF
+            [ 0, 0, qr/long        \s+ RETVAL .*
+                       double      \s+ RETVAL .*
+                       char \s* \* \s+ RETVAL/sx, "has three decl types" ],
+            [ 0, 0, qr/X .* TARGi .*
+                       Y .* TARGi .*
+                       Z .* TARGi .*/sx, "has one setting type" ],
+        ],
+        [
             "CASE: case follows unconditional CASE",
             [ Q(<<'EOF') ],
                 |int
