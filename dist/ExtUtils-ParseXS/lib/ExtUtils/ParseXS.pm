@@ -233,6 +233,8 @@ BEGIN {
 
   'cur_xsub',                  # The Node::xsub currently being parsed
 
+  'cur_xbody',                 # The Node::xbody currently being parsed
+
   'xsub_seen_NO_OUTPUT',       # Bool: XSUB declared as NO_OUTPUT
 
   'xsub_seen_extern_C',        # Bool: XSUB return type is 'extern "C" ...'
@@ -281,10 +283,6 @@ BEGIN {
   'xsub_class',                # Str: the class part of the XSUB's
                                # function name (if any). May include
                                # 'const' prefix.
-
-  'xsub_params',               # Node::Params object holding all the info
-                               # about the XSUB's parameters and INPUT
-                               # lines
 
   'xsub_func_name',            # The name of this XSUB        eg 'f'
   'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
@@ -675,7 +673,6 @@ EOM
     $self->{xsub_seen_CODE}                 = 0;
     $self->{xsub_seen_INTERFACE}            = 0;
     $self->{xsub_class}                     = undef;
-    $self->{xsub_params}                    = undef;
     # used for emitting XSRETURN(N) if > 0, or XSRETURN_EMPTY
     $self->{xsub_XSRETURN_count} = 0;
 

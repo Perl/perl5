@@ -381,6 +381,7 @@ EOF
         }
 
         my $xbody = ExtUtils::ParseXS::Node::xbody->new();
+        $pxs->{cur_xbody} = $xbody;
         $xbody->parse($pxs);
 
         if (defined $case) {
@@ -2214,7 +2215,7 @@ sub parse {
             $ioparams->{names}{$p->{var}} = $p;
         }
 
-        $self->{ioparams} = $pxs->{xsub_params} = $ioparams;
+        $self->{ioparams} = $ioparams;
     }
 
     for my $part (qw(input_part init_part code_part output_part cleanup_part)) {
@@ -2323,7 +2324,7 @@ sub parse {
     # also use that value to update the per-XSUB value, warning if the
     # value changes.
 
-    for my $ioparam (@{$pxs->{xsub_params}{params}}) {
+    for my $ioparam (@{$pxs->{cur_xbody}{ioparams}{params}}) {
         $ioparam->set_proto($pxs);
         my $ioproto = $ioparam->{proto};
         my $name    = $ioparam->{var};
@@ -2761,9 +2762,9 @@ sub parse {
          $pxs->{xsub_implicit_OUTPUT_RETVAL} = 1;
     }
 
-    my $sig  = $pxs->{xsub_params};
-    my $args = $sig->{auto_function_sig_override}; # C_ARGS
-    $args = $sig->C_func_signature($pxs)
+    my $ioparams  = $pxs->{cur_xbody}{ioparams};
+    my $args = $ioparams->{auto_function_sig_override}; # C_ARGS
+    $args = $ioparams->C_func_signature($pxs)
         unless defined $args;
     $self->{args} = $args;
 
@@ -3048,7 +3049,7 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
-    $pxs->{xsub_params}{auto_function_sig_override} = $self->{text};
+    $pxs->{cur_xbody}{ioparams}{auto_function_sig_override} = $self->{text};
     1;
 }
 
@@ -3808,8 +3809,9 @@ sub parse {
 
     my ($var_num, $is_alien);
 
-    my ExtUtils::ParseXS::Node::Param $param
-                = $pxs->{xsub_params}{names}{$var_name};
+    my $ioparams = $pxs->{cur_xbody}{ioparams};
+
+    my ExtUtils::ParseXS::Node::Param $param = $ioparams->{names}{$var_name};
 
     if (defined $param) {
         # The var appeared in the signature too.
@@ -3837,9 +3839,9 @@ sub parse {
                 # type, and has already been moved to the correct position;
                 # otherwise, it's an alien var that didn't appear in the
                 # signature; move to the correct position.
-                @{$pxs->{xsub_params}{params}} =
-                            grep $_ != $param, @{$pxs->{xsub_params}{params}};
-                push @{$pxs->{xsub_params}{params}}, $param;
+                @{$ioparams->{params}} =
+                            grep $_ != $param, @{$ioparams->{params}};
+                push @{$ioparams->{params}}, $param;
                 $is_alien          = 1;
                 $param->{is_alien} = 1;
             }
@@ -3858,8 +3860,8 @@ sub parse {
                     is_alien => 1,
                 });
 
-        push @{$pxs->{xsub_params}{params}}, $param;
-        $pxs->{xsub_params}{names}{$var_name} = $param;
+        push @{$ioparams->{params}}, $param;
+        $ioparams->{names}{$var_name} = $param;
     }
 
     # Parse the initialisation part of the INPUT line (if any)
@@ -4011,7 +4013,7 @@ sub parse {
     $self->{name} = $outarg;
 
     my ExtUtils::ParseXS::Node::Param $param =
-                                        $pxs->{xsub_params}{names}{$outarg};
+                                $pxs->{cur_xbody}{ioparams}{names}{$outarg};
     $self->{param} = $param;
 
     if ($param && $param->{in_output}) {
