@@ -1512,6 +1512,15 @@ EOF
             [ 1, 0, qr{\QDefault value not allowed on length() parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
+        [
+            "length() no matching var",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(length(s))
+EOF
+            [ 1, 0, qr{\QError: length() on non-parameter 's'\E.*line 6},
+                   "got expected error" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

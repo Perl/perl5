@@ -782,6 +782,7 @@ BEGIN { $build_subclass->('', # parent
         'default_usage', # how to report default value in "usage:..." error
         'is_ansi',   # param's type was specified in signature
         'is_length', # param is declared as 'length(foo)' in signature
+        'has_length',# this param has a matching 'length(foo)' param in sig
         'len_name' , # the 'foo' in 'length(foo)' in signature
         'is_synthetic',# var like 'THIS' - we pretend it was in the sig
 
@@ -975,9 +976,7 @@ sub as_code {
         # as a pseudo-parameter, then override the normal typedef - which
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
-        if (    $xstype eq 'T_PV'
-                and exists $pxs->{xsub_params}{names}{"length($var)"})
-        {
+        if ($xstype eq 'T_PV' and $self->{has_length}) {
             print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
             die "default value not supported with length(NAME) supplied"
                 if defined $default;
@@ -2048,6 +2047,20 @@ sub parse {
 
     $self->{nargs}    = $nargs;
     $self->{min_args} = $nargs - $opt_args;
+
+    # for each parameter of the form 'length(foo)', mark the corresponding
+    # 'foo' parameter as 'has_length', or error out if foo not found.
+    for my $param (@{$self->{params}}) {
+        next unless $param->{is_length};
+        my $name = $param->{len_name};
+        if (exists $self->{names}{$name}) {
+            $self->{names}{$name}{has_length} = 1;
+        }
+        else {
+            $pxs->blurt("Error: length() on non-parameter '$name'");
+        }
+    }
+
     1;
 }
 
