@@ -438,7 +438,7 @@ Now a no-op.
 #  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
 #endif
 #ifdef HASATTRIBUTE_NORETURN
-#  define __attribute__noreturn__           __attribute__((noreturn))
+#  define __attribute__noreturn__           __attribute__((__noreturn__))
 #endif
 #ifdef HASATTRIBUTE_PURE
 #  define __attribute__pure__               __attribute__((pure))
