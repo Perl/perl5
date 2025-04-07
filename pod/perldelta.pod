@@ -385,6 +385,11 @@ point part.  This should save 24 bytes per stored line for 64-bit
 systems, more for C<-Duselongdouble> or C<-Dusequadmath> builds.
 Discussed in [GH #23171].
 
+=item *
+
+Ensure cloning the save stack for fork emulation doesn't duplicate
+freeing the RExC state. [GH #23022]
+
 =back
 
 =head1 Known Problems
