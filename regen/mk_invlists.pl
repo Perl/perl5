@@ -1445,7 +1445,15 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     for my $i (0 .. $size - 1) {
 
         # First the row heading.
-        printf $out_fh "/* %-*s*/ ", $max_hdr_len, $names_ref->[$i];
+        my $row_header = $names_ref->[$i];
+
+        # Center the label, biased towards the right
+        use integer;
+        my $padding = ($max_hdr_len - length $row_header) / 2;
+        $row_header .= " " x $padding;
+        no integer;
+
+        printf $out_fh "/*%*s*/ ", $max_hdr_len, $row_header;
         print $out_fh "{";  # Then the brace for this row
 
         # Then each column
