@@ -1339,6 +1339,10 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
 
     my $size = @$table_ref;
 
+    # Used to find how wide a column needs to be to fit the maximum width
+    # entry in it.
+    my @spacing;
+
     # Output the #define list, sorted by numeric value
     if ($table_value_defines_ref) {
         my $max_name_length = 0;
@@ -1365,22 +1369,16 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
         }
     }
 
-    my $column_width = 2;   # We currently allow 2 digits for the number
-
     # Being above a U8 is not currently handled
     my $table_type = 'U8';
-
-    # If a name is longer than the width set aside for a column, its column
-    # needs to have increased spacing so that the name doesn't get truncated
-    # nor run into an adjacent column
-    my @spacers;
 
     # Is there a row and column for unused values in this release?
     my $has_unused = $names_ref->[$size-1] eq $unused_table_hdr;
 
+    # Determine width of each column, so that heading will fit
     for my $i (0 .. $size - 1) {
         no warnings 'numeric';
-        $spacers[$i] = " " x (length($names_ref->[$i]) - $column_width);
+        $spacing[$i] = length($names_ref->[$i]);
     }
 
     output_table_header($out_fh, $table_type, "${property}_table", undef,
@@ -1394,10 +1392,8 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
                     . " " x 3;    # Space for '*/ '
     # Now each column
     for my $i (0 .. $size - 1) {
-        $header_line .= sprintf "%s%*s",
-                                $spacers[$i],
-                                    $column_width + 1, # 1 for the ','
-                                     $names_ref->[$i];
+        $header_line .= sprintf "%*s", $spacing[$i] + 1, # +1 for the ','
+                                       $names_ref->[$i];
     }
     $header_line .= " */\n";
 
@@ -1454,8 +1450,7 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
 
         # Then each column
         for my $j (0 .. $size -1) {
-            print $out_fh $spacers[$j];
-            printf $out_fh "%*d", $column_width, $table_ref->[$i][$j];
+            printf $out_fh "%*d", $spacing[$j], $table_ref->[$i][$j];
             print $out_fh "," if $j < $size - 1;
         }
         print $out_fh " }";
