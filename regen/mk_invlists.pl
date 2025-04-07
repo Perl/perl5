@@ -571,18 +571,48 @@ sub output_invmap ($name,
                     # short enough, and remember that we did this so we can
                     # later add a comment in the generated file
                     if (length $short_enum > $max_hdr_len) {
-                        # First try using just the uppercase letters of the name;
-                        # if it is something like FooBar, FB is a better
-                        # abbreviation than Foo.  That's not the case if it is
-                        # entirely lowercase.
-                            my $uc = $short_enum;
-                            $uc =~ s/[[:^upper:]]//g;
-                            $short_enum = $uc if length $uc > 1
+                        # First try using just the letters immediately after
+                        # underscores
+                        my @segments = split /_+/, $short_enum;
+                        if (@segments == 2 && length $segments[0] == 2) {
+                            # But for just two segments where the first is
+                            # exactly two letters like 'AB_Cfoo', make that
+                            # 'ABC' Many synthetic split names are like this,
+                            # with the first two letters being the short name
+                            # of the first property.
+                            $short_enum = $segments[0]
+                                        . substr($segments[1], 0, 1);
+                            if (   length $segments[1] == 2
+                                && grep { $_ eq $short_enum } @short_names)
+                            {
+                                $short_enum = $segments[0]
+                                            . substr($segments[1], 1, 1);
+                            }
+                        }
+                        else {
+                            if (@segments > 2) {
+                                # For 2 or more underscores, just join
+                                # together the initial letters of each one
+                                $short_enum = join "",
+                                                   map { substr($_, 0, 1) }
+                                                                    @segments;
+                            }
+                            else {
+                                # Finally, try using just the uppercase
+                                # letters of the name; if it is something like
+                                # FooBar, FB is a better abbreviation than
+                                # Foo.  That's not the case if it is entirely
+                                # lowercase.
+                                my $uc = $short_enum;
+                                $uc =~ s/[[:^upper:]]//g;
+                                $short_enum = $uc if length $uc > 1
                                             && length $uc < length $short_enum;
+                            }
 
                             # Truncate to the maximum permissible length
                             $short_enum = substr($short_enum, 0, $max_hdr_len);
                             $is_official_name = 0;
+                        }
 
                         # If the name we are to display conflicts, try another.
                         if (grep { $_ eq $short_enum } @short_names) {
