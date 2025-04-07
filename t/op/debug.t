@@ -61,4 +61,64 @@ EXPECT
                   );
 }
 
+SKIP:
+{
+    # Historically lines were stored as PVMG, but we don't need
+    # magic on these lines.
+    #
+    # This checks that none of these lines get upgraded, ie. that
+    # we don't need them to be PVMG
+    #
+    # If this test fails perhaps we do need to make them PVMG
+    # and toke.c:S_update_debugger_info and pp_ctl.c:S_save_lines
+    # can be switched back to using SVt_PVMG and this test
+    # removed.
+    #
+    # See https://github.com/Perl/perl5/pull/23171#issuecomment-2780007725
+    skip_if_miniperl("need B");
+    local $ENV{PERL5DB} = 'sub DB::DB {}';
+    fresh_perl_is(<<'CODE', <<'EXPECT',
+use B;
+
+sub _do_eval {
+  eval $_[0] or die $!;
+}
+
+_do_eval(<<'EVAL');
+
+sub some_code {
+   print "Hello";
+}
+
+1;
+EVAL
+
+# check if any lines have been upgraded from PVIV
+my @files = grep /^_</, keys %::;
+for my $f (@files) {
+    my $lineno = 0;
+
+    for my $l (@{$f}) {
+        if ($l) {
+            my $b = B::svref_2object(\$l);
+            if (ref $b ne "B::PVIV") {
+               print "Not PVIV for $f:$lineno: $l\n";
+               last
+            }
+        }
+        ++$lineno;
+    }
+}
+print "Done\n";
+CODE
+Done
+EXPECT
+                  {
+                      switches => [ '-d' ],
+                      stderr => 1,
+                  },
+                  "saved lines are all PVIV"
+                  );
+}
+
 done_testing();

@@ -2012,10 +2012,11 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
         SV * sv;
-        if (PL_parser->preambling == NOLINE) sv = newSV_type(SVt_PVMG);
+        if (PL_parser->preambling == NOLINE)
+            sv = newSV_type(SVt_PVIV);
         else {
             sv = *av_fetch(av, 0, 1);
-            SvUPGRADE(sv, SVt_PVMG);
+            SvUPGRADE(sv, SVt_PVIV);
         }
         if (!SvPOK(sv)) SvPVCLEAR(sv);
         if (orig_sv)
