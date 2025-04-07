@@ -63,7 +63,6 @@ win32_checkTLS(PerlInterpreter *host_perl)
     if(tid != host_perl->Isys_intern.cur_tid) {
         dTHX; /* heavyweight */
         if (host_perl != my_perl) {
-            int *nowhere = NULL;
             abort();
         }
         host_perl->Isys_intern.cur_tid = tid;
@@ -71,7 +70,6 @@ win32_checkTLS(PerlInterpreter *host_perl)
 #else
     dTHX;
     if (host_perl != my_perl) {
-        int *nowhere = NULL;
         abort();
     }
 #endif
