@@ -330,9 +330,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not
+defined.
 
 =back
 
