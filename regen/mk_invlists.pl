@@ -1387,6 +1387,11 @@ sub expand_column($table_size, $splits, $enums, $x) {
     #       or another list.  The first element of the list may be the single
     #       character '^' which means to expand to everything (except edges)
     #       but the remainder of the list.
+    #   If the string contains any number of substrings '_sans_', it will be
+    #   split by the substring and the split sections ware considered names to
+    #       be individually expanded and the result subtracted from the
+    #       leftmost name.  So A_sans_B_sans_C is equivalent to
+    #       (A - B) + (A - C)
 
     my @list;
     my @excludes;
@@ -1410,6 +1415,12 @@ sub expand_column($table_size, $splits, $enums, $x) {
     elsif ($x eq '*') { # Call recursively with
         push @list, expand_column($table_size, $splits, $enums, $_)->@*
                                                      for 0 .. $table_size - 1;
+    }
+    elsif ($x =~ /_sans_/) {
+        my @groups = split /_sans_/, $x;
+        push @list, expand_column($table_size, $splits, $enums, $groups[0])->@*;
+        push @excludes, expand_column($table_size, $splits, $enums,
+                                      $groups[$_])->@* for 1 .. $#groups;
     }
     elsif ($splits->{$x}) {
         # If this single item $x expands to multiple ones, it will be a key in
