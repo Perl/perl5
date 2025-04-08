@@ -48,6 +48,13 @@ xs_init(pTHX)
 
 #include "perlhost.h"
 
+#define PANIC_THREAD_ID_MSG "panic: thread id mismatch\n"
+
+#define panic_thread_id() \
+    (void)WriteFile(GetStdHandle(STD_ERROR_HANDLE),         \
+        PANIC_THREAD_ID_MSG, sizeof(PANIC_THREAD_ID_MSG)-1, \
+        NULL, NULL)
+
 void
 win32_checkTLS(PerlInterpreter *host_perl)
 {
@@ -63,6 +70,8 @@ win32_checkTLS(PerlInterpreter *host_perl)
     if(tid != host_perl->Isys_intern.cur_tid) {
         dTHX; /* heavyweight */
         if (host_perl != my_perl) {
+            panic_thread_id();
+            DebugBreak();
             abort();
         }
         host_perl->Isys_intern.cur_tid = tid;
@@ -70,6 +79,8 @@ win32_checkTLS(PerlInterpreter *host_perl)
 #else
     dTHX;
     if (host_perl != my_perl) {
+        panic_thread_id();
+        DebugBreak();
         abort();
     }
 #endif
