@@ -1433,7 +1433,8 @@ sub get_cell_list($table_size, $enums, $x, $y) {
     return \@list;
 }
 
-sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused)
+sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused,
+              $no_override=undef)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
@@ -1470,6 +1471,7 @@ sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused)
               . stack_trace() . "\n"
               . Dumper $enums;
         }
+        next if defined $no_override && $table->[$x][$y] == $no_override;
 
         # Override whatever was going to go into an unused cell.
         $table->[$x][$y] = ($has_unused && (   $x == $table_size - 1
@@ -1864,6 +1866,13 @@ sub output_LB_table() {
         return set_cells(\@lb_table, $table_size, \%lb_enums,
                          $x, $y, $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN},
                          $rule, $has_unused);
+    }
+    my sub set_lb_nobreak_no_override_ignoring_SP($x, $y, $rule) {
+        return set_cells(\@lb_table, $table_size, \%lb_enums,
+                         $x, $y, $lb_dfas{LB_NOBREAK}, $rule, $has_unused,
+
+                         # Don't change if already has this value
+                         $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN});
     }
     my sub add_lb_dfa($x, $y, $dfa, $rule) {
 
