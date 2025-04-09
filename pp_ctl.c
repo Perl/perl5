@@ -5941,6 +5941,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-CodeRef\n"));
             if (numkeys == 0)
                 goto ret_yes;
+            push_stackinfo(PERLSI_SMARTMATCH, 1);
             while ( (he = hv_iternext(hv)) ) {
                 DEBUG_M(Perl_deb(aTHX_ "        testing hash key...\n"));
                 ENTER_with_name("smartmatch_hash_key_test");
@@ -5953,6 +5954,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 FREETMPS;
                 LEAVE_with_name("smartmatch_hash_key_test");
             }
+            pop_stackinfo();
             if (andedresults)
                 goto ret_yes;
             else
@@ -5967,6 +5969,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-CodeRef\n"));
             if (len == 0)
                 goto ret_yes;
+            push_stackinfo(PERLSI_SMARTMATCH, 1);
             for (i = 0; i < len; ++i) {
                 SV * const * const svp = av_fetch(av, i, FALSE);
                 DEBUG_M(Perl_deb(aTHX_ "        testing array element...\n"));
@@ -5981,6 +5984,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 FREETMPS;
                 LEAVE_with_name("smartmatch_array_elem_test");
             }
+            pop_stackinfo();
             if (andedresults)
                 goto ret_yes;
             else
@@ -5989,12 +5993,14 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         else {
           sm_any_sub:
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
+            push_stackinfo(PERLSI_SMARTMATCH, 1);
             ENTER_with_name("smartmatch_coderef");
             PUSHMARK(PL_stack_sp);
             rpp_xpush_1(d);
             (void)call_sv(e, G_SCALAR);
             LEAVE_with_name("smartmatch_coderef");
             SV *retsv = *PL_stack_sp--;
+            pop_stackinfo();
             rpp_replace_2_1(retsv);
 #ifdef PERL_RC_STACK
             SvREFCNT_dec(retsv);
