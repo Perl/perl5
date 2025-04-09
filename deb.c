@@ -237,7 +237,8 @@ static const char * const si_names[] = {
     "DIEHOOK",
     "REQUIRE",
     "MULTICALL",
-    "REGCOMP"
+    "REGCOMP",
+    "SMARTMATCH"
 };
 #endif
 
