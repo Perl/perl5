@@ -1373,7 +1373,8 @@ sub _Perl_CCC_non0_non230 {
 
 # These functions access the cells of a break table, converting any mnemonics
 # to numeric.  They need $enums to be able to do this.
-sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule) {
+sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule, $has_unused)
+{
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
                  Dumper $x, $y, $value, $rule, $has_unused, $enums
@@ -1405,6 +1406,9 @@ sub set_cells($table, $table_size, $enums, $x, $y, $value, $rule) {
               . Dumper $enums;
         }
 
+        # Override whatever was going to go into an unused cell.
+        $value = 0 if $has_unused && (   $x == $table_size - 1
+                                      || $y == $table_size - 1);
         $table->[$x][$y] = $value;
 
         print STDERR __FILE__, ": ", __LINE__,
@@ -1428,7 +1432,9 @@ sub get_cell_value($table, $enums, $x, $y) {
     return $table->[$x][$y];
 }
 
-sub add_dfa($table, $table_size, $enums, $dfas, $x, $y, $dfa, $rule) {
+sub add_dfa($table, $table_size, $enums, $dfas, $x, $y, $dfa, $rule,
+            $has_unused)
+{
     # Currently, the dfa value is just added to the current cell contents
     # This is done so that we can recover the underlying values.  Not all
     # dfas need this.  The individual category subs that call this know which
@@ -1442,7 +1448,8 @@ sub add_dfa($table, $table_size, $enums, $dfas, $x, $y, $dfa, $rule) {
     }
 
         my $old = get_cell_value($table, $enums, $x, $y);
-        set_cells($table, $table_size, $enums, $x, $y, $old + $numeric_dfa, $rule);
+        set_cells($table, $table_size, $enums, $x, $y, $old + $numeric_dfa,
+                  $rule, $has_unused);
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
@@ -1606,7 +1613,7 @@ sub output_GCB_table() {
     # making them easier to read.
     my sub set_gcb_cells($x, $y, $value, $rule) {
         return set_cells(\@gcb_table, $table_size, \%gcb_enums,
-                         $x, $y, $value, $rule);
+                         $x, $y, $value, $rule, $has_unused);
     }
     my sub set_gcb_breakable($x, $y, $rule) {
         return set_gcb_cells($x, $y, $gcb_dfas{GCB_BREAKABLE}, $rule);
@@ -1783,7 +1790,7 @@ sub output_LB_table() {
     # making them easier to read.
     my sub set_lb_cells($x, $y, $value, $rule) {
         return set_cells(\@lb_table, $table_size,
-                         \%lb_enums, $x, $y, $value, $rule);
+                         \%lb_enums, $x, $y, $value, $rule, $has_unused);
     }
     my sub set_lb_breakable($x, $y, $rule) {
         return set_lb_cells($x, $y, $lb_dfas{LB_BREAKABLE}, $rule);
@@ -1793,7 +1800,8 @@ sub output_LB_table() {
     }
     my sub set_lb_nobreak_ignoring_SP($x, $y, $rule) {
         return set_cells(\@lb_table, $table_size, \%lb_enums,
-                         $x, $y, $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN}, $rule);
+                         $x, $y, $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN},
+                         $rule, $has_unused);
     }
     my sub add_lb_dfa($x, $y, $dfa, $rule) {
 
@@ -1808,7 +1816,7 @@ sub output_LB_table() {
         }
 
         return add_dfa(\@lb_table, $table_size, \%lb_enums,
-                          \%lb_dfas, $x, $y, $dfa, $rule);
+                          \%lb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
     my sub get_lb_cell_value($x, $y) {
         return get_cell_value(\@lb_table, \%lb_enums, $x, $y);
@@ -2352,7 +2360,7 @@ sub output_WB_table() {
     # making them easier to read.
     my sub set_wb_cells($x, $y, $value, $rule) {
         return set_cells(\@wb_table, $table_size, \%wb_enums,
-                         $x, $y, $value, $rule);
+                         $x, $y, $value, $rule, $has_unused);
     }
     my sub set_wb_breakable($x, $y, $rule) {
         return set_wb_cells($x, $y, $wb_dfas{WB_BREAKABLE}, $rule);
@@ -2374,7 +2382,7 @@ sub output_WB_table() {
         }
 
         return add_dfa(\@wb_table, $table_size, \%wb_enums,
-                          \%wb_dfas, $x, $y, $dfa, $rule);
+                          \%wb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
 
     my $rule;
