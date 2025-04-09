@@ -76,7 +76,7 @@ win32_checkTLS(PerlInterpreter *host_perl)
         }
         host_perl->Isys_intern.cur_tid = tid;
     }
-#else
+#elif defined(PERL_MULTIPLICITY)
     dTHX;
     if (host_perl != my_perl) {
         panic_thread_id();
