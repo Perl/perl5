@@ -1986,6 +1986,9 @@ sub output_LB_table() {
 
     my %lb_splits = setup_splits(\%lb_all_enums, $table_size, $has_unused,
         {
+          CP => [ qw(CP East_Asian_CP) ],
+          OP => [ qw(OP East_Asian_OP) ],
+          EA => [ qw(East_Asian_OP East_Asian_CP) ],
           Ideographic => [ 'Ideographic',
                            'Unassigned_Extended_Pictographic_Ideographic'
                          ],
@@ -2104,17 +2107,15 @@ sub output_LB_table() {
     # non-East-Asian opening punctuation nor non-East-Asian closing
     # parentheses.
     # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
-    # (what we call CP and OP here have already been modified by mktables to
-    # exclude the ea items
     $rule = 30;
-    set_lb_nobreak('Alphabetic', 'Open_Punctuation', $rule);
-    set_lb_nobreak('Hebrew_Letter', 'Open_Punctuation', $rule);
-    set_lb_nobreak('Numeric', 'Open_Punctuation', $rule);
+    set_lb_nobreak('Alphabetic', 'Open_Punctuation_sans_EA', $rule);
+    set_lb_nobreak('Hebrew_Letter', 'Open_Punctuation_sans_EA', $rule);
+    set_lb_nobreak('Numeric', 'Open_Punctuation_sans_EA', $rule);
 
     # [CP-[\p{ea=F}\p{ea=W}\p{ea=H}]] × (AL | HL | NU)
-    set_lb_nobreak('Close_Parenthesis', 'Alphabetic', $rule);
-    set_lb_nobreak('Close_Parenthesis', 'Hebrew_Letter', $rule);
-    set_lb_nobreak('Close_Parenthesis', 'Numeric', $rule);
+    set_lb_nobreak('Close_Parenthesis_sans_EA', 'Alphabetic', $rule);
+    set_lb_nobreak('Close_Parenthesis_sans_EA', 'Hebrew_Letter', $rule);
+    set_lb_nobreak('Close_Parenthesis_sans_EA', 'Numeric', $rule);
 
     # LB29 Do not break between numeric punctuation and alphabetics (“e.g.”).
     # IS × (AL | HL)
@@ -2180,8 +2181,6 @@ sub output_LB_table() {
     # Given that (OP | HY )? is optional, we have to test for it in code.
     add_lb_dfa('Prefix_Numeric', 'Open_Punctuation',
                   'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('Prefix_Numeric', 'East_Asian_OP',
-                  'LB_PR_or_PO_then_OP_or_HY', $rule);
     add_lb_dfa('Postfix_Numeric', 'Open_Punctuation',
                   'LB_PR_or_PO_then_OP_or_HY', $rule);
     add_lb_dfa('Prefix_Numeric', 'Hyphen', 'LB_PR_or_PO_then_OP_or_HY', $rule);
@@ -2189,7 +2188,6 @@ sub output_LB_table() {
 
     # ( OP | HY ) × NU
     set_lb_nobreak('Open_Punctuation', 'Numeric', $rule);
-    set_lb_nobreak('East_Asian_OP', 'Numeric', $rule);
     set_lb_nobreak('Hyphen', 'Numeric', $rule);
 
     # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
@@ -2200,7 +2198,6 @@ sub output_LB_table() {
     set_lb_nobreak('Numeric', 'Infix_Numeric', $rule);
     set_lb_nobreak('Numeric', 'Close_Punctuation', $rule);
     set_lb_nobreak('Numeric', 'Close_Parenthesis', $rule);
-    set_lb_nobreak('Numeric', 'East_Asian_CP', $rule);
 
     # And then to
     # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
@@ -2213,8 +2210,6 @@ sub output_LB_table() {
                   'LB_SY_or_IS_then_various', $rule);
     add_lb_dfa('Break_Symbols', 'Close_Parenthesis',
                   'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Break_Symbols', 'East_Asian_CP',
-                  'LB_SY_or_IS_then_various', $rule);
     add_lb_dfa('Infix_Numeric', 'Numeric', 'LB_SY_or_IS_then_various', $rule);
     add_lb_dfa('Infix_Numeric', 'Break_Symbols',
                   'LB_SY_or_IS_then_various', $rule);
@@ -2223,8 +2218,6 @@ sub output_LB_table() {
     add_lb_dfa('Infix_Numeric', 'Close_Punctuation',
                   'LB_SY_or_IS_then_various', $rule);
     add_lb_dfa('Infix_Numeric', 'Close_Parenthesis',
-                  'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('Infix_Numeric', 'East_Asian_CP',
                   'LB_SY_or_IS_then_various', $rule);
 
     # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
@@ -2236,8 +2229,6 @@ sub output_LB_table() {
 
     add_lb_dfa('Close_Parenthesis', 'Postfix_Numeric',
                   'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('East_Asian_CP', 'Postfix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
     add_lb_dfa('Close_Punctuation', 'Postfix_Numeric',
                   'LB_various_then_PO_or_PR', $rule);
     add_lb_dfa('Infix_Numeric', 'Postfix_Numeric',
@@ -2246,8 +2237,6 @@ sub output_LB_table() {
                   'LB_various_then_PO_or_PR', $rule);
 
     add_lb_dfa('Close_Parenthesis', 'Prefix_Numeric',
-                  'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('East_Asian_CP', 'Prefix_Numeric',
                   'LB_various_then_PO_or_PR', $rule);
     add_lb_dfa('Close_Punctuation', 'Prefix_Numeric',
                   'LB_various_then_PO_or_PR', $rule);
@@ -2350,17 +2339,14 @@ sub output_LB_table() {
     $rule = 16;
     set_lb_nobreak_ignoring_SP('Close_Punctuation', 'Nonstarter', $rule);
     set_lb_nobreak_ignoring_SP('Close_Parenthesis', 'Nonstarter', $rule);
-    set_lb_nobreak_ignoring_SP('East_Asian_CP', 'Nonstarter', $rule);
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
     set_lb_nobreak_ignoring_SP('Quotation', 'Open_Punctuation', 15);
-    set_lb_nobreak_ignoring_SP('Quotation', 'East_Asian_OP', 15);
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
     set_lb_nobreak_ignoring_SP('Open_Punctuation', '*', 14);
-    set_lb_nobreak_ignoring_SP('East_Asian_OP', '*', 14);
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
@@ -2372,7 +2358,6 @@ sub output_LB_table() {
     $rule = 13;
     set_lb_nobreak_ignoring_SP('*', 'Close_Punctuation', $rule);
     set_lb_nobreak_ignoring_SP('*', 'Close_Parenthesis', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'East_Asian_CP', $rule);
     set_lb_nobreak_ignoring_SP('*', 'Exclamation', $rule);
     set_lb_nobreak_ignoring_SP('*', 'Infix_Numeric', $rule);
     set_lb_nobreak_ignoring_SP('*', 'Break_Symbols', $rule);
