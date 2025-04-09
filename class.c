@@ -175,6 +175,8 @@ XS(injected_constructor)
 
     SV *self = sv_2mortal(newRV_noinc(instance));
 
+    PUSHSTACKi(PERLSI_CONSTRUCTOR);
+
     assert(aux->xhv_class_initfields_cv);
     {
         ENTER;
@@ -220,6 +222,9 @@ XS(injected_constructor)
             LEAVE;
         }
     }
+
+    POPSTACK;
+    SPAGAIN;
 
     if(params && hv_iterinit(params) > 0) {
         /* TODO: consider sorting these into a canonical order, but that's awkward */

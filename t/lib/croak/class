@@ -185,3 +185,31 @@ class XXX {
 }
 EXPECT
 Cannot apply a :writer attribute to a non-scalar field at - line 6.
+########
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+sub f { last }
+class X {
+    field $x = ::f();
+}
+# two warnings since we exit the initfields cv and f()
+X->new for 0;
+EXPECT
+Exiting subroutine via last at - line 4.
+Exiting subroutine via last at - line 4.
+Can't "last" outside a loop block at - line 4.
+########
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class X {
+    field $x;
+    ADJUST {
+        last;
+    }
+}
+X->new for 0;
+EXPECT
+Exiting subroutine via last at - line 7.
+Can't "last" outside a loop block at - line 7.

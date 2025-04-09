@@ -1259,6 +1259,7 @@ struct context {
 #define PERLSI_MULTICALL       10
 #define PERLSI_REGCOMP         11
 #define PERLSI_SMARTMATCH      12
+#define PERLSI_CONSTRUCTOR     13
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
