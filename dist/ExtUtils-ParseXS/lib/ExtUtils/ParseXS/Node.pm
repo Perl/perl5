@@ -249,76 +249,6 @@ sub parse {
         $pxs->{xsub_XSRETURN_count} = 1 if $EXPLICIT_RETURN;
     }
 
-
-    # ----------------------------------------------------------------
-    # Emit initial C code for the XSUB
-    # ----------------------------------------------------------------
-
-    {
-        my $extern = $pxs->{xsub_seen_extern_C} ? qq[extern "C"] : "";
-
-        # Emit function header
-        print ExtUtils::ParseXS::Q(<<"EOF");
-            |$extern
-            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
-            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name})
-            |[[
-            |    dVAR; dXSARGS;
-EOF
-    }
-
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_ALIAS};
-        |    dXSI32;
-EOF
-
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_INTERFACE};
-        |    dXSFUNCTION($pxs->{xsub_return_type});
-EOF
-
-
-    {
-        my $params = $self->{decl}{params};
-        # the code to emit to determine whether the correct number of argument
-        # have been passed
-        my $condition_code =
-            ExtUtils::ParseXS::set_cond($params->{seen_ellipsis}, $params->{min_args},
-                                                                            $params->{nargs});
-
-        print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions}; # "-except" cmd line switch
-            |    char errbuf[1024];
-            |    *errbuf = '\\0';
-EOF
-
-        if ($condition_code) {
-            my $p = $params->usage_string();
-            $p =~ s/"/\\"/g;
-            print ExtUtils::ParseXS::Q(<<"EOF");
-                |    if ($condition_code)
-                |       croak_xs_usage(cv,  "$p");
-EOF
-        }
-        else {
-            # cv and items likely to be unused
-            print ExtUtils::ParseXS::Q(<<"EOF");
-                |    PERL_UNUSED_VAR(cv); /* -W */
-                |    PERL_UNUSED_VAR(items); /* -W */
-EOF
-        }
-    }
-
-    # gcc -Wall: if an XSUB has PPCODE, it is possible that none of ST,
-    # XSRETURN or XSprePUSH macros are used.  Hence 'ax' (setup by
-    # dXSARGS) is unused.
-    # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
-    # but such a move could break third-party extensions
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
-        |    PERL_UNUSED_VAR(ax); /* -Wall */
-EOF
-
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
-        |    SP -= items;
-EOF
-
     # ----------------------------------------------------------------
     # Now prepare to process the various keyword lines/blocks of an XSUB
     # body
@@ -392,11 +322,92 @@ EOF
         else {
             push @{$self->{kids}}, $xbody;
         }
-
-        $xbody->as_code($pxs);
-
     } # end while (@{ $pxs->{line} })
 
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+
+    # ----------------------------------------------------------------
+    # Emit initial C code for the XSUB
+    # ----------------------------------------------------------------
+
+    {
+        my $extern = $pxs->{xsub_seen_extern_C} ? qq[extern "C"] : "";
+
+        # Emit function header
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |$extern
+            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
+            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name})
+            |[[
+            |    dVAR; dXSARGS;
+EOF
+    }
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_ALIAS};
+        |    dXSI32;
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_INTERFACE};
+        |    dXSFUNCTION($pxs->{xsub_return_type});
+EOF
+
+
+    {
+        my $params = $self->{decl}{params};
+        # the code to emit to determine whether the correct number of argument
+        # have been passed
+        my $condition_code =
+            ExtUtils::ParseXS::set_cond($params->{seen_ellipsis}, $params->{min_args},
+                                                                            $params->{nargs});
+
+        print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions}; # "-except" cmd line switch
+            |    char errbuf[1024];
+            |    *errbuf = '\\0';
+EOF
+
+        if ($condition_code) {
+            my $p = $params->usage_string();
+            $p =~ s/"/\\"/g;
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    if ($condition_code)
+                |       croak_xs_usage(cv,  "$p");
+EOF
+        }
+        else {
+            # cv and items likely to be unused
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    PERL_UNUSED_VAR(cv); /* -W */
+                |    PERL_UNUSED_VAR(items); /* -W */
+EOF
+        }
+    }
+
+    # gcc -Wall: if an XSUB has PPCODE, it is possible that none of ST,
+    # XSRETURN or XSprePUSH macros are used.  Hence 'ax' (setup by
+    # dXSARGS) is unused.
+    # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
+    # but such a move could break third-party extensions
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
+        |    PERL_UNUSED_VAR(ax); /* -Wall */
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
+        |    SP -= items;
+EOF
+
+    # ----------------------------------------------------------------
+    # Emit the main body of the XSUB (all the CASE statements + bodies
+    # or a single body)
+    # ----------------------------------------------------------------
+
+    $_->as_code($pxs) for @{$self->{kids}};
 
     # ----------------------------------------------------------------
     # All of the body of the XSUB (including all CASE variants) has now
@@ -445,15 +456,6 @@ EOF
 
     # generate all the 'newXS()' etc boot code needed for this XSUB
     push @{$pxs->{bootcode_early}}, $self->boot_code($pxs);
-
-    1;
-}
-
-
-sub as_code {
-    my __PACKAGE__        $self   = shift;
-    my ExtUtils::ParseXS  $pxs    = shift;
-
 }
 
 
