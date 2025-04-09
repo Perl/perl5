@@ -177,14 +177,17 @@ Andreas' email address at:
 
 =head3 GitHub access
 
-You will need a working C<git> installation, checkout of the perl
-git repository and perl commit bit.  For information about working
-with perl and git, see L<perlgit>.
+You will need a working C<git> installation and a checkout of the perl
+git repository.  For information about working with perl and git, see
+L<perlgit>.
 
-If you are not yet a perl committer, you won't be able to make a
-release.  You will need to have a GitHub account (if you don't have one)
-and contact the Steering Council with your username to get membership in the
-L<< Perl-Releasers|https://github.com/orgs/Perl/teams/perl-releasers >> team.
+You will also need a L<GitHub account|https://github.com/>, a perl commit bit
+and be a member of the L<Perl
+Releasers|https://github.com/orgs/Perl/teams/perl-releasers> team.  If you are
+not yet a perl committer, you won't be able to commit changes to the main
+repository; if you are not in Perl Releasers, you won't be able to push new
+version tags.  Contact the Steering Council with your GitHub username to be
+added to the Perl Releasers team.
 
 =head3 Web-based file share
 
