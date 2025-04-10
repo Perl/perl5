@@ -856,10 +856,22 @@ available in hv.c. Similarly SVt_IV is re-used for HVAUX_ARENA_ROOT_IX.
 
 
 void *
-Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
-                  const size_t arena_size)
+Perl_more_bodies (pTHX_ const svtype sv_type)
 {
     void ** const root = &PL_body_roots[sv_type];
+
+    const struct body_details *type_details =
+        (sv_type > SVt_IV)
+            ? bodies_by_type + sv_type
+            : (sv_type == SVt_NULL)
+                ? NULL
+                : &fake_hv_with_aux
+                ;
+
+    const size_t body_size = (type_details) ? type_details->body_size
+                                            : sizeof(HE);
+    const size_t arena_size = (type_details) ? type_details->arena_size
+                                             : PERL_ARENA_SIZE;
     struct arena_desc *adesc;
     struct arena_set *aroot = (struct arena_set *) PL_body_arenas;
     unsigned int curr;
@@ -1291,7 +1303,7 @@ Perl_hv_auxalloc(pTHX_ HV *hv) {
 #ifdef PURIFY
     new_body = new_NOARENAZ(&fake_hv_with_aux);
 #else
-    new_body_from_arena(new_body, HVAUX_ARENA_ROOT_IX, fake_hv_with_aux);
+    new_body_from_arena(new_body, HVAUX_ARENA_ROOT_IX);
 #endif
 
     old_body = SvANY(hv);
@@ -14799,7 +14811,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 #ifdef PURIFY
                     new_body = new_NOARENA(sv_type_details);
 #else
-                    new_body_from_arena(new_body, HVAUX_ARENA_ROOT_IX, fake_hv_with_aux);
+                    new_body_from_arena(new_body, HVAUX_ARENA_ROOT_IX);
 #endif
                     goto have_body;
                 }

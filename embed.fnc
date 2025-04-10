@@ -2043,9 +2043,7 @@ p	|int	|mode_from_discipline					\
 				|STRLEN len
 
 : Used in sv.c and hv.c
-Cop	|void * |more_bodies	|const svtype sv_type			\
-				|const size_t body_size 		\
-				|const size_t arena_size
+Cop	|void * |more_bodies	|const svtype sv_type
 Cp	|const char *|moreswitches					\
 				|NN const char *s
 Adp	|void	|mortal_destructor_sv					\

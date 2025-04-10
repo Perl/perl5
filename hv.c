@@ -159,7 +159,7 @@ S_new_he(pTHX)
     void ** const root = &PL_body_roots[HE_ARENA_ROOT_IX];
 
     if (!*root)
-        Perl_more_bodies(aTHX_ HE_ARENA_ROOT_IX, sizeof(HE), PERL_ARENA_SIZE);
+        Perl_more_bodies(aTHX_ HE_ARENA_ROOT_IX);
     he = (HE*) *root;
     assert(he);
     *root = HeNEXT(he);
