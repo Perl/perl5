@@ -2493,7 +2493,7 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 #define PERL_ARGS_ASSERT_MODE_FROM_DISCIPLINE
 
 PERL_CALLCONV void *
-Perl_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
+Perl_more_bodies(pTHX_ const svtype sv_type);
 #define PERL_ARGS_ASSERT_MORE_BODIES
 
 PERL_CALLCONV const char *
