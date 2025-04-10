@@ -709,6 +709,7 @@ BEGIN { $build_subclass->('', # parent
     'no_output', # bool: saw 'NO_OUTPUT'
     'extern_C',  # bool: saw 'extern C'
     'static',    # bool: saw 'static'
+    'use_early_targ', # Bool: emit an early dTARG for backcompat
 )};
 
 
@@ -764,6 +765,24 @@ sub parse {
                                                 if $type =~ s/^static\s+//;
 
     $self->{type}     = $pxs->{xsub_return_type}   = $type;
+
+    if ($type ne "void") {
+        # Set a flag indicating that, for backwards-compatibility reasons,
+        # early dXSTARG should be emitted.
+        # Recent code emits a dXSTARG in a tighter scope and under
+        # additional circumstances, but some XS code relies on TARG
+        # having been declared. So continue to declare it early under
+        # the original circumstances.
+        my $outputmap = $pxs->{typemaps_object}->get_outputmap(
+                                            ctype => $pxs->{xsub_return_type});
+
+        if (    $pxs->{config_optimize}
+            and $outputmap
+            and $outputmap->targetable_legacy)
+        {
+            $self->{use_early_targ} = 1;
+        }
+    }
 
     1;
 }
@@ -1642,7 +1661,7 @@ sub as_output_code {
 
     # Do any declarations first
 
-    if ($retvar eq 'TARG' && !$pxs->{xsub_targ_declared_early}) {
+    if ($retvar eq 'TARG' && !$xsub->{decl}{return_type}{use_early_targ}) {
         push @lines, "\tdXSTARG;\n";
         $do_scope = 1;
     }
@@ -2292,7 +2311,6 @@ sub parse {
                                                                                     # PREINIT/INPUT
 
     $pxs->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
-    $pxs->{xsub_targ_declared_early} = 0; # dXSTARG   not yet emitted
     $pxs->{xsub_targ_used}           = 0; # TARG hasn't yet been used
 
     # Process any implicit INPUT section.
@@ -2375,23 +2393,12 @@ EOF
         $param->as_code($pxs, $xsub, $xbody);
     }
 
-    # Do any variable declarations associated with having a return value
-    if ($pxs->{xsub_return_type} ne "void") {
-
-        # Emit an early dXSTARG for backwards-compatibility reasons.
-        # Recent code emits a dXSTARG in a tighter scope and under
-        # additional circumstances, but some XS code relies on TARG
-        # having been declared. So continue to declare it early under
-        # the original circumstances.
-        my $outputmap = $pxs->{typemaps_object}->get_outputmap( ctype => $pxs->{xsub_return_type} );
-
-        if (    $pxs->{config_optimize}
-                and $outputmap
-                and $outputmap->targetable_legacy)
-        {
-            $pxs->{xsub_targ_declared_early} = 1;
-            print "\tdXSTARG;\n"
-        }
+    # Recent code emits a dXSTARG in a tighter scope and under
+    # additional circumstances, but some XS code relies on TARG
+    # having been declared. So continue to declare it early under
+    # the original circumstances.
+    if ($xsub->{decl}{return_type}{use_early_targ}) {
+        print "\tdXSTARG;\n";
     }
 
     # Emit declaration/init code for any parameters which were
