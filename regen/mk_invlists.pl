@@ -531,6 +531,9 @@ sub output_invmap ($name,
                 if ($enum eq 'Perl_Tailored_HSpace') {
                     $short_enum = 'hs';
                 }
+                elsif ($enum eq 'EDGE') {
+                    $short_enum = $enum;
+                }
                 else {
                     # lhs needs extra parens as per API
                     ($short_enum) = prop_value_aliases($type, $enum);
@@ -604,16 +607,22 @@ sub output_invmap ($name,
         # The default value always gets 0; the others are arbitrarily
         # assigned, but for the properties which have the extra table, it is
         # in the order we have computed above so the rows and columns appear
-        # alphabetically by heading abbreviation.
+        # alphabetically by heading abbreviation, except we make the edge last
         my $enum_val = 0;
         my $canonical_default = prop_value_aliases($prop_name, $default);
         $default = $canonical_default if defined $canonical_default;
         $enums{$default} = $enum_val++;
 
-        for my $enum (sort { ($name =~ $property_needs_table_re)
-                             ?     lc $short_enum_name{$a}
-                               cmp lc $short_enum_name{$b}
-                             : lc $a cmp lc $b
+        for my $enum (sort {
+                             ($name !~ $property_needs_table_re)
+                             ? lc $a cmp lc $b
+                             : $a eq 'EDGE'
+                               ? 1
+                               : $b eq 'EDGE'
+                                 ? -1
+                                 :     lc $short_enum_name{$a}
+                                   cmp lc $short_enum_name{$b}
+                                    or $a cmp $b
                            } @enums)
         {
             $enums{$enum} = $enum_val++ unless exists $enums{$enum};
@@ -1378,14 +1387,16 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     # Determine width of each column, so that heading will fit
     for my $i (0 .. $size - 1) {
         no warnings 'numeric';
-        $spacing[$i] = length($names_ref->[$i]);
+        $names_ref->[$i] = '$' if $names_ref->[$i] eq 'EDGE';
+        my $name_width = length($names_ref->[$i]);
+        $spacing[$i] = $name_width;
     }
 
     output_table_header($out_fh, $table_type, "${property}_table", undef,
                         $size, $size);
 
     # Calculate the column heading line
-    my $header_line = "/* "
+    my $header_line = "/*"
                     . (" " x $max_hdr_len)  # We let the row heading meld to
                                             # the '*/' for those that are at
                                             # the max
@@ -1397,12 +1408,14 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
     }
     $header_line .= " */\n";
 
-    # If we have annotations, output it now.
-    if ($has_unused || scalar %$abbreviations_ref) {
-    my $text = "";
+    my $text = "The comment rows give Unicode's rule number that applies"
+             . " to the cell immediately above it, except it is left blank"
+             . " for cells populated by the table's default rule."
+             . '  ^ and $ stand for their respective edges';
+
     foreach my $abbr (sort caselessly keys %$abbreviations_ref) {
-        $text .= "; " if $text;
-        $text .= "'$abbr' stands for '$abbreviations_ref->{$abbr}'";
+        next if $abbr eq 'EDGE';
+        $text .= "; '$abbr' stands for '$abbreviations_ref->{$abbr}'";
     }
 
     if ($has_unused) {
@@ -1435,7 +1448,6 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
 
     # And any remaining
     print $out_fh $text, "\n" if $text;
-    }
 
     # We calculated the header line earlier just to get its width so that we
     # could make sure the annotations fit into that.
@@ -1446,6 +1458,7 @@ sub output_table_common($property, $table_value_defines_ref, $table_ref,
 
         # First the row heading.
         my $row_header = $names_ref->[$i];
+        $row_header = '^' if $row_header eq '$';    # left edge
 
         # Center the label, biased towards the right
         use integer;
