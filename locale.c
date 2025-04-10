@@ -4423,7 +4423,7 @@ S_native_querylocale_i(pTHX_ const locale_category_index cat_index)
 /*
 =for apidoc Perl_setlocale
 
-This is an (almost) drop-in replacement for the system L<C<setlocale(3)>>,
+This is an (almost) drop-in replacement for the system C<L<setlocale(3)>>,
 taking the same parameters, and returning the same information, except that it
 returns the correct underlying C<LC_NUMERIC> locale.  Regular C<setlocale> will
 instead return C<C> if the underlying locale has a non-dot decimal point
@@ -10826,7 +10826,7 @@ change the locale (though changing the locale is antisocial and dangerous on
 multi-threaded systems that don't have multi-thread safe locale operations.
 (See L<perllocale/Multi-threaded operation>).
 
-Using the libc L<C<setlocale(3)>> function should be avoided.  Nevertheless,
+Using the libc C<L<setlocale(3)>> function should be avoided.  Nevertheless,
 certain non-Perl libraries called from XS, do call it, and their behavior may
 not be able to be changed.  This function, along with
 C<L</switch_to_global_locale>>, can be used to get seamless behavior in these

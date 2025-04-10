@@ -1516,7 +1516,7 @@ Perl_my_atof(pTHX_ const char* s)
 =for apidoc      my_atof
 =for apidoc_item Atof
 
-These each are L<C<atof>(3)>, but properly work with Perl locale handling,
+These each are C<L<atof(3)>>, but properly work with Perl locale handling,
 accepting a dot radix character always, but also the current locale's radix
 character if and only if called from within the lexical scope of a Perl C<use
 locale> statement.
