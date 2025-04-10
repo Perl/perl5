@@ -1224,21 +1224,24 @@ sub parse_config_h {
                                         | sh | SH | exe ) \b
                                     !xx;
                 my $path_name_qr = qr! (?: / \w+ )+ !x;
-                for my $re ($file_name_qr, $path_name_qr) {
-                    s! (*nlb:[ < \w / ]) ( $re ) !<$1>!gxx;
-                }
+                my $file_or_path_name_qr = qr!
+                        $file_name_qr
+                    |
+                        $path_name_qr
+                    |
+                        INSTALL \b
+                !x;
+                s! (*nlb:[ < \w / ]) ( $file_or_path_name_qr ) !<$1>!gxx;
 
                 # Enclose <... file/path names with F<...> (but no double
                 # angle brackets)
-                for my $re ($file_name_qr, $path_name_qr) {
-                    s! < ( $re ) > !F<$1>!gxx;
-                }
+                s! < ( $file_or_path_name_qr ) > !F<$1>!gxx;
 
                 # Explain metaconfig units
                 s/ ( \w+ \. U \b ) /$1 (part of metaconfig)/gx;
 
                 # Convert "See foo" to "See C<L</foo>>" if foo is described in
-                # this file.  Also create a link to the known file INSTALL.
+                # this file.
                 # And, to be more general, handle "See also foo and bar", and
                 # "See also foo, bar, and baz"
                 while (m/ \b [Ss]ee \s+
@@ -1249,10 +1252,7 @@ sub parse_config_h {
                     push @links, $2 if defined $2;
                     push @links, $3 if defined $3;
                     foreach my $link (@links) {
-                        if ($link eq 'INSTALL') {
-                            s/ \b INSTALL \b /C<L<INSTALL>>/xg;
-                        }
-                        elsif (grep { $link =~ / \b $_ \b /x } keys %configs) {
+                        if (grep { $link =~ / \b $_ \b /x } keys %configs) {
                             s| \b $link \b |C<L</$link>>|xg;
                             $configs{$link}{linked} = 1;
                             $configs{$name}{linked} = 1;
@@ -1261,7 +1261,6 @@ sub parse_config_h {
                 }
 
                 # Enclose what we think are symbols with C<...>.
-                no warnings 'experimental::vlb';
                 s/ (*nlb:<)
                    (
                         # Any word followed immediately with parens or
@@ -1269,7 +1268,7 @@ sub parse_config_h {
                         \b \w+ (?: \( [^)]* \)    # parameter list
                                  | \[ [^]]* \]    # or array reference
                                )
-                    | (*plb: ^ | \s ) -D \w+    # Also -Dsymbols.
+                    | (*nlb: \S ) -D \w+    # Also -Dsymbols.
                     | \b (?: struct | union ) \s \w+
 
                         # Words that contain underscores (which are
