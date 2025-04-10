@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If $VERSION is in scope, parse_version() breaks
 {
-our $VERSION = '7.72';
+our $VERSION = '7.74';
 $VERSION =~ tr/_//d;
 }
 
@@ -3191,10 +3191,10 @@ pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 
     # VMS will swallow '' and PM_FILTER is often empty.  So use q[]
     my $pm_to_blib = $self->oneliner(<<CODE, ['-MExtUtils::Install']);
-\$i=0; \$i++ until \$i > \$#ARGV or \$ARGV[\$i] eq "--";
-die "Failed to find -- in ".join("|",\@ARGV) if \$i > \$#ARGV;
+\$i=0; \$n=\$#ARGV; \$i++ until \$i > \$n or \$ARGV[\$i] eq q{--};
+die q{Failed to find -- in }.join(q{|},\@ARGV) if \$i > \$n;
 \@parts=splice \@ARGV,0,\$i+1;
-pop \@parts; \$filter=join " ", map qq{"\$_"}, \@parts;
+pop \@parts; \$filter=join q{ }, map qq{"\$_"}, \@parts;
 pm_to_blib({\@ARGV}, '$autodir', \$filter, '\$(PERM_DIR)')
 CODE
     $pm_to_blib .= q[ $(PM_FILTER) --];

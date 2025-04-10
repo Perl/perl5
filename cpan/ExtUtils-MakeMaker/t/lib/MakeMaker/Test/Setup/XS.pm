@@ -401,6 +401,30 @@ SNIP
 EOF
 };
 
+$label2files{subdirsskip3} = +{
+  %{ $label2files{subdirsskip} }, # make copy
+  'Other/Makefile.PL' => sprintf(
+    $MAKEFILEPL,
+    'Other', 'Other.pm', qq{},
+    <<'EOF',
+SKIP   => [qw(all static static_lib dynamic dynamic_lib test_dynamic test)],
+clean  => {'FILES' => 'libparser$(LIB_EXT)'},
+EOF
+  ) . <<'EOF',
+sub MY::top_targets {
+  my ($self) = @_;
+  <<'SNIP' . $self->static_lib_pure_cmd('$(O_FILES)');
+test ::
+test_static:
+test_dynamic:
+all :: static
+static :: libparser$(LIB_EXT)
+libparser$(LIB_EXT): $(O_FILES)
+SNIP
+}
+EOF
+};
+
 my $XS_MULTI = $XS_OTHER;
 # check compiling from top dir still can include local
 $XS_MULTI =~ s:(#include "XSUB.h"):$1\n#include "header.h":;
@@ -536,6 +560,7 @@ sub list_dynamic {
     [ 'xsbuild', '', '' ],
     [ 'subdirsskip', '', '' ],
     [ 'subdirsskip2', '', '' ],
+#    [ 'subdirsskip3', '', '' ], # Defanged I'm unsure how to magic a fix for this.
   );
 }
 

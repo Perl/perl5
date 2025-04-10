@@ -11,7 +11,7 @@ use warnings;
 
 use vars qw($VERSION $CLASS $STRICT $LAX);
 
-$VERSION = '7.72';
+$VERSION = '7.74';
 $VERSION =~ tr/_//d;
 
 #--------------------------------------------------------------------------#

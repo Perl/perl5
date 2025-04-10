@@ -25,7 +25,7 @@ our %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.72';
+our $VERSION = '7.74';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -864,27 +864,27 @@ sub WriteEmptyMakefile {
     }
     open my $mfh, '>', $new or die "open $new for write: $!";
     print $mfh <<'EOP';
-all :
+all ::
 
 manifypods :
 
-subdirs :
+subdirs ::
 
-dynamic :
+dynamic ::
 
-static :
+static ::
 
-clean :
+clean ::
 
-install :
+install ::
 
 makemakerdflt :
 
-test :
+test ::
 
-test_dynamic :
+test_dynamic ::
 
-test_static :
+test_static ::
 
 EOP
     close $mfh or die "close $new for write: $!";
