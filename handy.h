@@ -875,7 +875,7 @@ That is, each returns a boolean indicating whether the specified character is
 one of C<[A-Za-z0-9]>, analogous to C<m/[[:alnum:]]/>.
 
 The C<C> suffix in the names was meant to indicate that they correspond to the
-C language L<C<isalnum(3)>>.
+C language C<L<isalnum(3)>>.
 
 =for apidoc Am|bool|isASCII|UV ch
 =for apidoc_item ||isASCII_A|UV ch
