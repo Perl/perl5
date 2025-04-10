@@ -1922,7 +1922,7 @@ C<< Can't do {n,m} with n > m in regex; marked by <-- HERE in m/%s/ >>
 
 This fatal error has been turned into a warning that reads:
 
-L<< Quantifier {n,m} with n > m can't match in regex | perldiag/Quantifier {n,m} with n > m can't match in regex >>
+L<< Quantifier {n,m} with n > m can't match in regex|perldiag/Quantifier {n,m} with n > m can't match in regex >>
 
 (W regexp) Minima should be less than or equal to maxima.  If you really want
 your regexp to match something 0 times, just put {0}.
