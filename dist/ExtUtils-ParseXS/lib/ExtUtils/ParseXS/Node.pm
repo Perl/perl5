@@ -407,7 +407,7 @@ EOF
     # or a single body)
     # ----------------------------------------------------------------
 
-    $_->as_code($pxs) for @{$self->{kids}};
+    $_->as_code($pxs, $self) for @{$self->{kids}};
 
     # ----------------------------------------------------------------
     # All of the body of the XSUB (including all CASE variants) has now
@@ -841,8 +841,10 @@ sub set_proto {
 # of that local var.
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my                                $xbody = shift;
 
     my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
         = @{$self}{qw(type arg_num var init no_init defer default)};
@@ -1198,9 +1200,11 @@ sub as_code {
 # code or typemaps.
 
 sub as_output_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
-    my $out_num = shift;
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub   = shift;
+    my                                $xbody  = shift;
+    my                                $out_num = shift;
 
     my ($type, $num, $var, $do_setmagic, $output_code)
         = @{$self}{qw(type arg_num var do_setmagic output_code)};
@@ -2232,15 +2236,16 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
 
     # Emit opening brace. With cmd-line switch "-except", prefix it with 'TRY'
     print   +($pxs->{config_allow_exceptions} ? ' TRY' : '')
           . "    $open_brace\n";
 
     if ($self->{kids}) {
-        $_->as_code($pxs, $self) for @{$self->{kids}};
+        $_->as_code($pxs, $xsub, $self) for @{$self->{kids}};
     }
 
     # ----------------------------------------------------------------
@@ -2349,12 +2354,13 @@ sub parse {
 sub as_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     my $ioparams = $xbody->{ioparams};
 
     if ($self->{kids}) {
-        $_->as_code($pxs) for @{$self->{kids}};
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
     }
 
     # The matching closes will be emitted in xbody->as_code()
@@ -2366,7 +2372,7 @@ EOF
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
     for my $param (grep $_->{is_synthetic}, @{$ioparams->{params}}) {
-        $param->as_code($pxs);
+        $param->as_code($pxs, $xsub, $xbody);
     }
 
     # Do any variable declarations associated with having a return value
@@ -2400,7 +2406,7 @@ EOF
     )
 
     {
-        $param->as_code($pxs);
+        $param->as_code($pxs, $xsub, $xbody);
     }
 
     # ----------------------------------------------------------------
@@ -2450,10 +2456,11 @@ sub parse {
 sub as_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
-        $_->as_code($pxs) for @{$self->{kids}};
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
     }
 }
 
@@ -2495,10 +2502,11 @@ sub parse {
 sub as_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
-        $_->as_code($pxs) for @{$self->{kids}};
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
     }
 }
 
@@ -2536,10 +2544,11 @@ sub parse {
 sub as_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
-        $_->as_code($pxs) for @{$self->{kids}};
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
     }
 
     my $ioparams = $xbody->{ioparams};
@@ -2565,7 +2574,7 @@ sub as_code {
                     }
                     @{$ioparams->{params}})
     {
-        $param->as_output_code($pxs);
+        $param->as_output_code($pxs, $xsub, $xbody);
     }
 
     # If there are any OUTLIST vars to be pushed, first extend the
@@ -2603,7 +2612,7 @@ sub as_code {
         || $pxs->{xsub_implicit_OUTPUT_RETVAL})
     {
         # emit a deferred RETVAL from OUTPUT or implicit RETVAL
-        $retval->as_output_code($pxs);
+        $retval->as_output_code($pxs, $xsub, $xbody);
     }
 
     $pxs->{xsub_XSRETURN_count} = 1 if     $pxs->{xsub_return_type} ne "void"
@@ -2617,7 +2626,7 @@ sub as_code {
                         }
                         @{$ioparams->{params}}
     ) {
-        $param->as_output_code($pxs, $num++);
+        $param->as_output_code($pxs, $xsub, $xbody, $num++);
     }
 }
 
@@ -2653,10 +2662,11 @@ sub parse {
 sub as_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if ($self->{kids}) {
-        $_->as_code($pxs) for @{$self->{kids}};
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
     }
 }
 
@@ -2728,13 +2738,14 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
 
     my $cond = $self->{cond};
     $cond = " if ($cond)" if length $cond;
     print "   ", ($self->{num} > 1 ? " else" : ""), $cond, "\n";
-    $_->as_code($pxs) for @{$self->{kids}};
+    $_->as_code($pxs, $xsub) for @{$self->{kids}};
 }
 
 
@@ -2775,8 +2786,10 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     if (    defined($pxs->{xsub_class})
         and $pxs->{xsub_func_name} eq "DESTROY")
@@ -2883,8 +2896,10 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     my $xs_impl = $self->{enable} ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
@@ -3090,8 +3105,10 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     print <<"EOF";
     XSFUNCTION = $pxs->{xsub_interface_macro}($pxs->{xsub_return_type},cv,XSANY.any_dptr);
@@ -3276,8 +3293,10 @@ BEGIN { $build_subclass->('multiline', # parent
 # and possibly wrapping in '#line' directives.
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     my @lines = map "$_\n", @{$self->{lines}};
 
@@ -3400,8 +3419,10 @@ sub parse {
 }
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     # Just emit the code block and then code to do PUTBACK and return.
     # The # user of PPCODE is supposed to have done all the return stack
@@ -3410,7 +3431,7 @@ sub as_code {
     # similar, so any final code we emit after that is in danger of
     # triggering a "statement is unreachable" warning.
 
-    $self->SUPER::as_code($pxs); # emit code block
+    $self->SUPER::as_code($pxs, $xsub, $xbody); # emit code block
 
     print "\tLEAVE;\n" if $pxs->{xsub_SCOPE_enabled};
 
@@ -3498,11 +3519,13 @@ sub parse {
 # call as_code() on any kids which have that method
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     return unless $self->{kids};
-    $_->as_code($pxs) for @{$self->{kids}};
+    $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
 }
 
 
@@ -3935,8 +3958,10 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
@@ -3950,7 +3975,7 @@ sub as_code {
 
     # The param object contains data from both the INPUT line and
     # the XSUB signature.
-    $param->as_code($pxs);
+    $param->as_code($pxs, $xsub, $xbody);
 }
 
 
@@ -4047,8 +4072,10 @@ sub parse {
 
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     # An OUTPUT: line serves two logically distinct purposes.  First, any
     # parameters listed are updated; i.e. the perl equivalent of
