@@ -9878,9 +9878,10 @@ Perl_newRV_noinc(pTHX_ SV * const tmpRef)
 # define PERL_ARGS_ASSERT_NEWRV_NOINC           \
         assert(tmpRef)
 
-PERL_STATIC_INLINE SV *
+PERL_STATIC_FORCE_INLINE SV *
 Perl_newSV_type(pTHX_ const svtype type)
-        __attribute__warn_unused_result__;
+        __attribute__warn_unused_result__
+        __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPE
 
 PERL_STATIC_FORCE_INLINE SV *

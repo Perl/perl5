@@ -2339,7 +2339,7 @@ ARdp	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
 				|I32 flags
 ARdm	|SV *	|newSVsv_nomg	|NULLOK SV * const old
 ARdp	|SV *	|newSV_true
-ARdip	|SV *	|newSV_type	|const svtype type
+AIRdp	|SV *	|newSV_type	|const svtype type
 AIRdp	|SV *	|newSV_type_mortal					\
 				|const svtype type
 ARdp	|SV *	|newSVuv	|const UV u
