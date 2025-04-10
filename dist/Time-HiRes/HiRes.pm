@@ -357,7 +357,7 @@ delivered when the timer expires.  C<SIGPROF> can interrupt system calls.
 The semantics of interval timers for multithreaded programs are
 system-specific, and some systems may support additional interval
 timers.  For example, it is unspecified which thread gets the signals.
-See your L<C<setitimer(2)>> documentation.
+See your C<L<setitimer(2)>> documentation.
 
 =item getitimer ( $which )
 
@@ -653,10 +653,10 @@ gnukfreebsd seems to have non-functional futimens() and utimensat()
 
 Perl modules L<BSD::Resource>, L<Time::TAI64>.
 
-Your system documentation for L<C<clock(3)>>, L<C<clock_gettime(2)>>,
-L<C<clock_getres(3)>>, L<C<clock_nanosleep(3)>>, L<C<clock_settime(2)>>,
-L<C<getitimer(2)>>, L<C<gettimeofday(2)>>, L<C<setitimer(2)>>, L<C<sleep(3)>>,
-L<C<stat(2)>>, L<C<ualarm(3)>>.
+Your system documentation for C<L<clock(3)>>, C<L<clock_gettime(2)>>,
+C<L<clock_getres(3)>>, C<L<clock_nanosleep(3)>>, C<L<clock_settime(2)>>,
+C<L<getitimer(2)>>, C<L<gettimeofday(2)>>, C<L<setitimer(2)>>, C<L<sleep(3)>>,
+C<L<stat(2)>>, C<L<ualarm(3)>>.
 
 =head1 AUTHORS
 
