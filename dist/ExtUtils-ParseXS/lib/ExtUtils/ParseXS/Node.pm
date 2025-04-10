@@ -1616,12 +1616,12 @@ sub as_output_code {
 
         if (   $pxs->{config_optimize}
                 && ExtUtils::Typemaps::OutputMap->targetable($evalexpr)
-                && !$pxs->{xsub_targ_used})
+                && !$xbody->{targ_used})
         {
             # So TARG is available for use.
             $retvar = 'TARG';
             # can only use TARG to return one value
-            $pxs->{xsub_targ_used} = 1;
+            $xbody->{targ_used} = 1;
 
             # Since we're using TARG for the return SV, see if we can use
             # the TARG[iun] macros as appropriate to speed up setting it.
@@ -2201,6 +2201,11 @@ BEGIN { $build_subclass->('', # parent
     'ioparams', # per-body copy of params which accumulate extra
                 # info from any INPUT and OUTPUT sections (which can
                 # vary between different CASEs)
+
+    # State during code emitting
+
+    'targ_used', # Bool: the TARG has been allocated for this body,
+                 #       so is no longer available for use.
 )};
 
 
@@ -2259,6 +2264,9 @@ sub as_code {
     my ExtUtils::ParseXS             $pxs   = shift;
     my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
 
+    # TARG is available for use within this body.
+    $self->{targ_used} = 0;
+
     # Emit opening brace. With cmd-line switch "-except", prefix it with 'TRY'
     print   +($pxs->{config_allow_exceptions} ? ' TRY' : '')
           . "    $open_brace\n";
@@ -2311,7 +2319,6 @@ sub parse {
                                                                                     # PREINIT/INPUT
 
     $pxs->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
-    $pxs->{xsub_targ_used}           = 0; # TARG hasn't yet been used
 
     # Process any implicit INPUT section.
     {

@@ -3410,8 +3410,7 @@ EOF
             [ 0, 0, qr/long        \s+ RETVAL .*
                        double      \s+ RETVAL .*
                        char \s* \* \s+ RETVAL/sx, "has three decl types" ],
-            # XXX tmp expected to fail
-            [ 0, 1, qr/X .* TARGi .*
+            [ 0, 0, qr/X .* TARGi .*
                        Y .* TARGi .*
                        Z .* TARGi .*/sx, "has one setting type" ],
         ],

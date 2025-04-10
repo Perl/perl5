@@ -325,9 +325,6 @@ BEGIN {
 
   'xsub_stack_was_reset',      # An XSprePUSH was emitted, so return values
                                # should be PUSHed rather than just set.
-
-  'xsub_targ_used',            # The TARG has already been used
-
   );
 
   # do 'use fields', except: fields needs Hash::Util which is XS, which
