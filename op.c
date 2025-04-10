@@ -16551,6 +16551,9 @@ Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr
 
         if(defexpr->op_type == OP_NULL && !(defexpr->op_flags & OPf_KIDS))
         {
+            /* caller passed in newOP(OP_NULL, 0), so we should not leak it */
+            op_free(defexpr);
+
             /* handle '$=' special case */
             if(varop)
                 yyerror("Optional parameter lacks default expression");
