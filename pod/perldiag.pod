@@ -7910,9 +7910,9 @@ compile if the currently unassigned delimiter ends up being something
 that isn't a stand-alone grapheme.  Because Unicode is never going to
 assign
 L<non-character code points|perlunicode/Noncharacter code points>, nor
-L<code points that are above the legal Unicode maximum|
-perlunicode/Beyond Unicode code points>, those can be delimiters, and
-their use is legal.
+L<code points that are above the legal Unicode
+maximum|perlunicode/Beyond Unicode code points>, those can be delimiters,
+and their use is legal.
 
 =item Use of uninitialized value%s
 
