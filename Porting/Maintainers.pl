@@ -1261,8 +1261,8 @@ our %Modules = (
     },
 
     'Time::Piece' => {
-        'DISTRIBUTION' => 'PEVANS/Time-Piece-1.35.tar.gz',
-        'SYNCINFO'     => 'LeoNerd on Fri Jan 17 15:27:02 2025',
+        'DISTRIBUTION' => 'ESAYM/Time-Piece-1.36.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Fri Apr 11 07:13:44 2025',
         'FILES'        => q[cpan/Time-Piece],
         'EXCLUDED'     => [ qw[reverse_deps.txt] ],
     },
