@@ -2959,6 +2959,10 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+
+    $pxs->blurt("Error: Only one SCOPE declaration allowed per XSUB")
+        if $pxs->{xsub_seen_SCOPE}++;
+
     $pxs->{xsub_SCOPE_enabled} = $self->{enable};
     1;
 }

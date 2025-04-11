@@ -4088,6 +4088,17 @@ EOF
 EOF
             [ 0, 0, qr{ENTER;\s+{.+\s+}\s+LEAVE;}s, "has ENTER/LEAVE" ],
         ],
+        [
+            "xsub duplicate SCOPE",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |SCOPE: ENABLE
+                |SCOPE: ENABLE
+EOF
+            [ 1, 0, qr{\QError: Only one SCOPE declaration allowed per XSUB},
+                    "got expected error"],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
