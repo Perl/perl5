@@ -241,19 +241,8 @@ BEGIN {
 
   'xsub_seen_static',          # Bool: XSUB return type is 'static ...'
 
-  'xsub_seen_PPCODE',          # Bool: XSUB has PPCODE    (peek-ahead)
-
   'xsub_seen_CODE',            # Bool: XSUB has CODE      (peek-ahead)
 
-  'xsub_seen_INTERFACE',       # Bool: XSUB has INTERFACE (peek-ahead)
-
-  'xsub_seen_PROTOTYPE',       # Bool: PROTOTYPE keyword seen (for dup warning)
-  
-  'xsub_seen_SCOPE',           # Bool: SCOPE keyword seen (for dup warning).
-  
-  'xsub_seen_INTERFACE_or_MACRO',# Bool: INTERFACE or INTERFACE_MACRO
-                               # seen in this XSUB.
-  
   'xsub_interface_macro',      # Str: current interface extraction macro.
 
   'xsub_implicit_OUTPUT_RETVAL', # Bool indicates that a bodiless XSUB has
@@ -652,9 +641,6 @@ EOM
 
     # Initialize some per-XSUB instance variables:
 
-    $self->{xsub_seen_PROTOTYPE}       = 0;
-    $self->{xsub_seen_SCOPE}           = 0;
-    $self->{xsub_seen_INTERFACE_or_MACRO} = 0;
     $self->{xsub_interface_macro}      = 'XSINTERFACE_FUNC';
     $self->{xsub_interface_macro_set}  = 'XSINTERFACE_FUNC_SET';
     $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
@@ -663,9 +649,7 @@ EOM
     $self->{xsub_seen_NO_OUTPUT}            = 0;
     $self->{xsub_seen_extern_C}             = 0;
     $self->{xsub_seen_static}               = 0;
-    $self->{xsub_seen_PPCODE}               = 0;
     $self->{xsub_seen_CODE}                 = 0;
-    $self->{xsub_seen_INTERFACE}            = 0;
     $self->{xsub_class}                     = undef;
     # used for emitting XSRETURN(N) if > 0, or XSRETURN_EMPTY
     $self->{xsub_XSRETURN_count} = 0;

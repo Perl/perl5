@@ -4269,6 +4269,69 @@ EOF
 
 
 {
+    # Test INTERFACE keyword - boot code
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "INTERFACE basic boot",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: f1 f2
+EOF
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::f1", XS_Foo_foo);\E\n
+                       \s+\QXSINTERFACE_FUNC_SET(cv,f1);\E
+                      }x,
+                   "got f1 entries" ],
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::f2", XS_Foo_foo);\E\n
+                       \s+\QXSINTERFACE_FUNC_SET(cv,f2);\E
+                      }x,
+                   "got f2 entries" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+{
+    # Test INTERFACE keyword  - XSUB body
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'INTERFACE basic body',
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: f1 f2
+EOF
+            [ 0, 0, qr{\b\QdXSFUNCTION(void)},
+                   "got XSFUNCTION declaration" ],
+            [ 0, 0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(void,cv,XSANY.any_dptr);},
+                   "got XSFUNCTION assign" ],
+            [ 0, 0, qr{\bXSFUNCTION\(\)},
+                   "got XSFUNCTION call" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
     # Test ATTRS keyword
 
     my $preamble = Q(<<'EOF');
@@ -4577,6 +4640,19 @@ EOF
                 |     blah
 EOF
             [ 1, 0, qr{PPCODE must be last thing}, "got expected err"  ],
+        ],
+        [
+            "PPCODE code tweaks",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int aaa)
+                |  PPCODE:
+                |     YYY
+EOF
+            [ 0, 0, qr{\QPERL_UNUSED_VAR(ax);},   "got PERL_UNUSED_VAR"    ],
+            [ 0, 0, qr{\QSP -= items;},           "got SP -= items"        ],
+            [ 0, 1, qr{\QXSRETURN},               "no XSRETURN"            ],
+            [ 0, 0, qr{\bPUTBACK\b.*\breturn\b}s, "got PUTBACK and return" ],
         ],
 
     );

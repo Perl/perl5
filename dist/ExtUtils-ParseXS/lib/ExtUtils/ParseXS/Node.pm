@@ -191,8 +191,17 @@ package ExtUtils::ParseXS::Node::xsub;
 
 BEGIN { $build_subclass->('', # parent
     'decl',       # Node::xsub_decl object holding this XSUB declaration
-    'seen_ALIAS', # Seen at least one ALIAS: keyword in this XSUB
+
+    # Boolean flags: they indicate that at least one of each specified
+    # keywords has # been seen in this XSUB
+    'seen_ALIAS',
+    'seen_INTERFACE',
+    'seen_INTERFACE_MACRO',
+    'seen_PPCODE',
+    'seen_PROTOTYPE',
+    'seen_SCOPE',
 )};
+
 
 sub parse {
     my __PACKAGE__        $self   = shift;
@@ -207,9 +216,7 @@ sub parse {
     $decl->parse($pxs)
         or return;
 
-    $pxs->{xsub_seen_PPCODE}   = !!grep(/^\s*PPCODE\s*:/,    @{$pxs->{line}});
     $pxs->{xsub_seen_CODE}     = !!grep(/^\s*CODE\s*:/,      @{$pxs->{line}});
-    $pxs->{xsub_seen_INTERFACE}= !!grep(/^\s*INTERFACE\s*:/, @{$pxs->{line}});
 
     # Horrible 'void' return arg count hack.
     #
@@ -343,7 +350,7 @@ EOF
         |    dXSI32;
 EOF
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_INTERFACE};
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
         |    dXSFUNCTION($pxs->{xsub_return_type});
 EOF
 
@@ -383,11 +390,11 @@ EOF
     # dXSARGS) is unused.
     # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     # but such a move could break third-party extensions
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_PPCODE};
         |    PERL_UNUSED_VAR(ax); /* -Wall */
 EOF
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_PPCODE};
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_PPCODE};
         |    SP -= items;
 EOF
 
@@ -421,12 +428,12 @@ EOF
         if $^O eq "hpux";
 
     if ($pxs->{xsub_XSRETURN_count}) {
-        print ExtUtils::ParseXS::Q(<<"EOF") unless $pxs->{xsub_seen_PPCODE};
+        print ExtUtils::ParseXS::Q(<<"EOF") unless $self->{seen_PPCODE};
             |    XSRETURN($pxs->{xsub_XSRETURN_count});
 EOF
     }
     else {
-        print ExtUtils::ParseXS::Q(<<"EOF") unless $pxs->{xsub_seen_PPCODE};
+        print ExtUtils::ParseXS::Q(<<"EOF") unless $self->{seen_PPCODE};
             |    XSRETURN_EMPTY;
 EOF
     }
@@ -522,7 +529,9 @@ EOF
             |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
 EOF
     }
-    elsif ($pxs->{xsub_seen_INTERFACE_or_MACRO}) {
+    elsif (   $self->{seen_INTERFACE}
+           or $self->{seen_INTERFACE_MACRO})
+    {
         # For each interface name, generate both a newXS() and
         # XSINTERFACE_FUNC_SET() call.
         foreach my $yname (sort keys
@@ -2275,7 +2284,7 @@ sub as_code {
         print "   $close_brace\n";
         # PPCODE->as_code emits its own LEAVE and return, so this
         # line would never be reached.
-        print "   LEAVE;\n" unless $pxs->{xsub_seen_PPCODE};
+        print "   LEAVE;\n" unless $xsub->{seen_PPCODE};
     }
 
     # matches the $open_brace at the start of this function
@@ -2843,7 +2852,8 @@ sub as_code {
             if defined $strip;
 
         $pxs->{xsub_func_name} = 'XSFUNCTION'
-                            if $pxs->{xsub_seen_INTERFACE_or_MACRO};
+            if    $xsub->{seen_INTERFACE}
+               or $xsub->{seen_INTERFACE_MACRO};
 
         print "$pxs->{xsub_func_name}($self->{args});\n";
 
@@ -2959,7 +2969,8 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
 
     $pxs->blurt("Error: Only one SCOPE declaration allowed per XSUB")
-        if $pxs->{xsub_seen_SCOPE}++;
+        if $pxs->{cur_xsub}->{seen_SCOPE};
+    $pxs->{cur_xsub}->{seen_SCOPE} = 1;
 
     $pxs->{xsub_SCOPE_enabled} = $self->{enable};
     1;
@@ -3095,6 +3106,7 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+    $pxs->{cur_xsub}{seen_INTERFACE} = 1;
 
     my %map;
 
@@ -3107,7 +3119,6 @@ sub parse {
 
     $self->{map_short_orig} = \%map;
 
-    $pxs->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
     $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
     1;
 }
@@ -3144,6 +3155,8 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
+    $pxs->{cur_xsub}{seen_INTERFACE_MACRO} = 1;
+
     my $s = $self->{text};
     my ($m1, $m2);
     if ($s =~ /\s/) {        # two macros
@@ -3158,7 +3171,6 @@ sub parse {
     $self->{get_macro} = $pxs->{xsub_interface_macro}     = $m1;
     $self->{set_macro} = $pxs->{xsub_interface_macro_set} = $m2;
 
-    $pxs->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
     $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
 
     1;
@@ -3252,7 +3264,8 @@ sub parse {
     my $proto;
 
     $pxs->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
-      if $pxs->{xsub_seen_PROTOTYPE}++;
+        if $pxs->{cur_xsub}{seen_PROTOTYPE};
+    $pxs->{cur_xsub}{seen_PROTOTYPE} = 1;
 
     for (@{$self->{lines}}) {
         next unless /\S/;
@@ -3422,6 +3435,7 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no/lines
+    $pxs->{cur_xsub}{seen_PPCODE} = 1;
     # The only thing left should be the special "!End!\n\n" token.
     $pxs->death("PPCODE must be last thing") if @{$pxs->{line}} > 1;
     1;
