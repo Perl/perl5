@@ -190,7 +190,8 @@ package ExtUtils::ParseXS::Node::xsub;
 # Process an entire XSUB definition
 
 BEGIN { $build_subclass->('', # parent
-    'decl',    #  Node::xsub_decl object holding this XSUB declaration
+    'decl',       # Node::xsub_decl object holding this XSUB declaration
+    'seen_ALIAS', # Seen at least one ALIAS: keyword in this XSUB
 )};
 
 sub parse {
@@ -205,11 +206,6 @@ sub parse {
     $self->{decl} = $decl;
     $decl->parse($pxs)
         or return;
-
-    # Peek ahead into the body of the XSUB looking for various conditions
-    # that are needed to be known early.
-
-    $pxs->{xsub_seen_ALIAS}    =   grep(/^\s*ALIAS\s*:/,     @{$pxs->{line}});
 
     $pxs->{xsub_seen_PPCODE}   = !!grep(/^\s*PPCODE\s*:/,    @{$pxs->{line}});
     $pxs->{xsub_seen_CODE}     = !!grep(/^\s*CODE\s*:/,      @{$pxs->{line}});
@@ -343,7 +339,7 @@ sub as_code {
 EOF
     }
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_seen_ALIAS};
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_ALIAS};
         |    dXSI32;
 EOF
 
@@ -934,6 +930,7 @@ sub as_code {
         var           => $var,
         num           => $arg_num,
         arg           => $arg,
+        alias         => $xsub->{seen_ALIAS},
     };
 
     # The type looked up in the eval is Foo__Bar rather than Foo::Bar
@@ -1353,6 +1350,7 @@ sub as_output_code {
                         ntype       => $ntype,
                         arg         => $arg,
                         type        => $eval_type,
+                        alias       => $xsub->{seen_ALIAS},
                     };
 
 
@@ -3582,6 +3580,13 @@ BEGIN { $build_subclass->('keylines', # parent
     'aliases', # hashref of all alias => value pairs
 )};
 
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $pxs->{cur_xsub}{seen_ALIAS} = 1;
+    $self->SUPER::parse($pxs);
+}
 
 # ======================================================================
 

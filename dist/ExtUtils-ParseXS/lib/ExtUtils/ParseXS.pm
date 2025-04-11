@@ -251,8 +251,6 @@ BEGIN {
   
   'xsub_seen_SCOPE',           # Bool: SCOPE keyword seen (for dup warning).
   
-  'xsub_seen_ALIAS',           # Bool: ALIAS keyword seen in this XSUB.
-
   'xsub_seen_INTERFACE_or_MACRO',# Bool: INTERFACE or INTERFACE_MACRO
                                # seen in this XSUB.
   

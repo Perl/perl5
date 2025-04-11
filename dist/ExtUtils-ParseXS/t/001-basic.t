@@ -4106,7 +4106,7 @@ EOF
 
 
 {
-    # Test ALIAS keyword
+    # Test ALIAS keyword - boot code
 
     my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
@@ -4240,6 +4240,33 @@ EOF
 
     test_many($preamble, 'boot_Foo', \@test_fns);
 }
+
+{
+    # Test ALIAS keyword  - XSUB body
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'ALIAS with $ALIAS used in typemap entry',
+            [ Q(<<'EOF') ],
+                |void
+                |foo(AV *av)
+                |    ALIAS: bar = 1
+EOF
+            [ 0, 0, qr{croak.*\n.*\QGvNAME(CvGV(cv))},
+                   "got alias variant of croak message" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
 
 {
     # Test ATTRS keyword
