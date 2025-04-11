@@ -778,8 +778,8 @@ our %Modules = (
     },
 
     'Math::BigInt::FastCalc' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5019.tar.gz',
-        'SYNCINFO'     => 'mauke on Wed Mar 19 06:31:57 2025',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5020.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Thu Apr 10 20:46:45 2025',
         'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
             qr{^inc/},
