@@ -590,8 +590,8 @@ EOM
 
   # ----------------------------------------------------------------
   # Main loop: for each iteration, read in a paragraph's worth of XSUB
-  # definition or XS/CPP directives into @{ $self->{line} }, then (over
-  # the course of a thousand lines of code) try to interpret those lines.
+  # definition or XS/CPP directives into @{ $self->{line} }, then try to
+  # interpret those lines.
   # ----------------------------------------------------------------
 
  PARAGRAPH:
@@ -720,6 +720,10 @@ EOM
       next PARAGRAPH;
     }
 
+    # ----------------------------------------------------------------
+    # Parse and code-emit an XSUB
+    # ----------------------------------------------------------------
+
     # Initialise more per-XSUB state
 
     delete $self->{xsub_map_alias_name_to_value};           # ALIAS: ...
@@ -727,6 +731,7 @@ EOM
     %{ $self->{xsub_map_interface_name_short_to_original} } = ();
     @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
     $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
+
 
     unshift @{$self->{line}}, $_;
     my $xsub = ExtUtils::ParseXS::Node::xsub->new();
@@ -736,6 +741,10 @@ EOM
     $_ = shift @{$self->{line}};
 
     $xsub->as_code($self);
+
+    # ----------------------------------------------------------------
+    # end of XSUB
+    # ----------------------------------------------------------------
 
   } # END 'PARAGRAPH' 'while' loop
 

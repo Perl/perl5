@@ -199,19 +199,15 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no
 
-    # ----------------------------------------------------------------
-    # Process the presumed start of an XSUB
-    # ----------------------------------------------------------------
+    # Parse the XSUB's declaration (return type, name, parameters)
 
     my $decl = ExtUtils::ParseXS::Node::xsub_decl->new();
     $self->{decl} = $decl;
     $decl->parse($pxs)
         or return;
 
-    # ----------------------------------------------------------------
     # Peek ahead into the body of the XSUB looking for various conditions
     # that are needed to be known early.
-    # ----------------------------------------------------------------
 
     $pxs->{xsub_seen_ALIAS}    =   grep(/^\s*ALIAS\s*:/,     @{$pxs->{line}});
 
@@ -249,11 +245,6 @@ sub parse {
         $pxs->{xsub_XSRETURN_count} = 1 if $EXPLICIT_RETURN;
     }
 
-    # ----------------------------------------------------------------
-    # Now prepare to process the various keyword lines/blocks of an XSUB
-    # body
-    # ----------------------------------------------------------------
-
     # Append a fake EOF-keyword line. This makes it easy to do "all lines
     # until the next keyword" style loops, since the fake END line (which
     # includes a \n so it can't appear in the wild) is also matched as a
@@ -273,7 +264,7 @@ sub parse {
     # this loop is only iterated once.
     # ----------------------------------------------------------------
 
-    my $num             = 0; # the number of CASE+bodiess seen
+    my $num             = 0; # the number of CASE+bodies seen
     my $seen_bare_xbody = 0; # seen a previous body without a CASE
     my $case_had_cond;       # the previous CASE had a condition
 
@@ -309,6 +300,8 @@ sub parse {
                 );
             }
         }
+
+        # Parse the XSUB's body
 
         my $xbody = ExtUtils::ParseXS::Node::xbody->new();
         $pxs->{cur_xbody} = $xbody;
