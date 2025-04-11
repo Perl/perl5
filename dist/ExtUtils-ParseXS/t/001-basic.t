@@ -2586,6 +2586,23 @@ EOF
         ],
 
         [
+            "RETVAL in CODE without OUTPUT section, multiple CASEs",
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |  CASE: X
+                |    CODE:
+                |      RETVAL = 99
+                |    OUTPUT:
+                |      RETVAL
+                |  CASE: Y
+                |    CODE:
+                |      RETVAL = 99
+EOF
+            [ 1, 0, qr/Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+        ],
+
+        [
             "OUTPUT RETVAL not a parameter",
             [ Q(<<'EOF') ],
                 |void

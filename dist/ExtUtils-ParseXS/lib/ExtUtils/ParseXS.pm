@@ -288,8 +288,6 @@ BEGIN {
                                # (possibly multiple space-separated
                                # keywords per string).
 
-  'xsub_seen_RETVAL_in_CODE',  # Have seen 'RETVAL' within a CODE block.
-
   'xsub_map_alias_name_to_value', # Hash: maps ALIAS name to value.
 
   'xsub_map_alias_value_to_name_seen_hash', # Hash of hash of bools:

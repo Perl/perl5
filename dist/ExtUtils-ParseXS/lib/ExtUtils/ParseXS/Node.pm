@@ -2202,6 +2202,8 @@ BEGIN { $build_subclass->('', # parent
                 # info from any INPUT and OUTPUT sections (which can
                 # vary between different CASEs)
 
+    'seen_RETVAL_in_CODE', # Bool: have seen 'RETVAL' within a CODE block
+
     # State during code emitting
 
     'targ_used', # Bool: the TARG has been allocated for this body,
@@ -2213,8 +2215,6 @@ sub parse {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
 
-    # This set later if CODE is using RETVAL
-    $pxs->{xsub_seen_RETVAL_in_CODE} = 0;
     # This set later if there's an implied RETVAL to output
     $pxs->{xsub_implicit_OUTPUT_RETVAL} = 0;
 
@@ -2570,7 +2570,7 @@ sub as_code {
     my $retval = $ioparams->{names}{RETVAL};
 
     # A CODE section using RETVAL must also have an OUTPUT entry
-    if (        $pxs->{xsub_seen_RETVAL_in_CODE}
+    if (        $xbody->{seen_RETVAL_in_CODE}
             and not ($retval && $retval->{in_output})
             and     $pxs->{xsub_return_type} ne 'void')
     {
@@ -3374,11 +3374,12 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no/lines
+
     # Check if the code block includes "RETVAL". This check is for later
     # use to warn if RETVAL is used but no OUTPUT block is present.
     # Ignore if its only being used in an 'ignore this var' situation.
     my $code = join "\n", @{$self->{lines}};
-    $pxs->{xsub_seen_RETVAL_in_CODE} =
+    $pxs->{cur_xbody}{seen_RETVAL_in_CODE} =
                     $code =~ /\bRETVAL\b/
                  && $code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/;
     1;
