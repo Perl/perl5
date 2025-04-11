@@ -694,11 +694,11 @@ X<-m> X<-M>
 
 =item B<-[mM]>[B<->]I<module=arg[,arg]...>
 
-B<-m>I<module> executes C<use> I<module> C<();> before executing your
+B<-m>I<module> executes S<C<use I<module> ();>> before executing your
 program.  This loads the module, but does not call its C<import> method,
 so does not import subroutines and does not give effect to a pragma.
 
-B<-M>I<module> executes C<use> I<module> C<;> before executing your
+B<-M>I<module> executes S<C<use I<module>;>> before executing your
 program.  This loads the module and calls its C<import> method, causing
 the module to have its default effect, typically importing subroutines
 or giving effect to a pragma.
