@@ -235,12 +235,6 @@ BEGIN {
 
   'cur_xbody',                 # The Node::xbody currently being parsed
 
-  'xsub_seen_NO_OUTPUT',       # Bool: XSUB declared as NO_OUTPUT
-
-  'xsub_seen_extern_C',        # Bool: XSUB return type is 'extern "C" ...'
-
-  'xsub_seen_static',          # Bool: XSUB return type is 'static ...'
-
   'xsub_interface_macro',      # Str: current interface extraction macro.
 
   'xsub_implicit_OUTPUT_RETVAL', # Bool indicates that a bodiless XSUB has
@@ -260,8 +254,6 @@ BEGIN {
                                #    other: a specific prototype.
 
   'xsub_SCOPE_enabled',        # Bool: SCOPE ENABLEd
-
-  'xsub_return_type',          # Return type of the XSUB (whitespace-tidied).
 
   'xsub_class',                # Str: the class part of the XSUB's
                                # function name (if any). May include
@@ -640,9 +632,6 @@ EOM
     $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
     $self->{xsub_SCOPE_enabled}        = 0;
     $self->{xsub_map_overload_name_to_seen} = {};
-    $self->{xsub_seen_NO_OUTPUT}            = 0;
-    $self->{xsub_seen_extern_C}             = 0;
-    $self->{xsub_seen_static}               = 0;
     $self->{xsub_class}                     = undef;
 
     # Process next line

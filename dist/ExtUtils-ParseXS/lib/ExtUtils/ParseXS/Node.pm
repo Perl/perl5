@@ -311,8 +311,8 @@ sub parse {
 
     $self->{XSRETURN_count_basic} =
            (     $self->{CODE_sets_ST0}
-             or  (    $pxs->{xsub_return_type} ne "void"
-                  && !$pxs->{xsub_seen_NO_OUTPUT})
+             or  (    $self->{decl}{return_type}{type} ne "void"
+                  && !$self->{decl}{return_type}{no_output})
             )
             ? 1 : 0;
 
@@ -335,7 +335,8 @@ sub as_code {
     # ----------------------------------------------------------------
 
     {
-        my $extern = $pxs->{xsub_seen_extern_C} ? qq[extern "C"] : "";
+        my $extern = $self->{decl}{return_type}{extern_C}
+                        ? qq[extern "C"] : "";
 
         # Emit function header
         print ExtUtils::ParseXS::Q(<<"EOF");
@@ -352,7 +353,7 @@ EOF
 EOF
 
     print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
-        |    dXSFUNCTION($pxs->{xsub_return_type});
+        |    dXSFUNCTION($self->{decl}{return_type}{type});
 EOF
 
 
@@ -626,11 +627,11 @@ sub parse {
     my ($class, $name, $params_text) = ($1, $2, $3);
     $class = "$4 $class" if $4;
 
-    if ($pxs->{xsub_seen_static} and !defined $class)
+    if ($return_type->{static} and !defined $class)
     {
         $pxs->Warn(  "Ignoring 'static' type modifier:"
                                 . " only valid with an XSUB name which includes a class");
-        $pxs->{xsub_seen_static} = 0;
+        $return_type->{static} = 0;
     }
 
     (my $full_pname = $name) =~
@@ -725,8 +726,7 @@ sub parse {
     $line = ExtUtils::Typemaps::tidy_type($line);
     my $type = $line;
 
-    $self->{no_output} = $pxs->{xsub_seen_NO_OUTPUT} = 1
-        if $type =~ s/^NO_OUTPUT\s+//;
+    $self->{no_output} = 1 if $type =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line declarations. This splits a single line like:
     #    int foo(....)
@@ -752,12 +752,9 @@ sub parse {
         return;
     }
 
-    $self->{extern_C} = $pxs->{xsub_seen_extern_C} = 1
-                                                if $type =~ s/^extern "C"\s+//;
-    $self->{static}   = $pxs->{xsub_seen_static}   = 1
-                                                if $type =~ s/^static\s+//;
-
-    $self->{type}     = $pxs->{xsub_return_type}   = $type;
+    $self->{extern_C} = 1 if $type =~ s/^extern "C"\s+//;
+    $self->{static}   = 1 if $type =~ s/^static\s+//;
+    $self->{type}     = $type;
 
     if ($type ne "void") {
         # Set a flag indicating that, for backwards-compatibility reasons,
@@ -766,8 +763,7 @@ sub parse {
         # additional circumstances, but some XS code relies on TARG
         # having been declared. So continue to declare it early under
         # the original circumstances.
-        my $outputmap = $pxs->{typemaps_object}->get_outputmap(
-                                            ctype => $pxs->{xsub_return_type});
+        my $outputmap = $pxs->{typemaps_object}->get_outputmap(ctype => $type);
 
         if (    $pxs->{config_optimize}
             and $outputmap
@@ -1246,7 +1242,7 @@ sub as_output_code {
         # In the above, 'long' is used for the RETVAL C var's declaration,
         # while 'int' is used to generate the return code (for backwards
         # compatibility).
-        $type = $pxs->{xsub_return_type};
+        $type = $xsub->{decl}{return_type}{type};
     }
 
 
@@ -1834,7 +1830,9 @@ sub parse {
     # This affects arg numbering.
     if (defined($pxs->{xsub_class})) {
         my ($var, $type) =
-            ($pxs->{xsub_seen_static} or $pxs->{xsub_func_name} eq 'new')
+            (   $pxs->{cur_xsub}{decl}{return_type}{static}
+             or $pxs->{xsub_func_name} eq 'new'
+            )
                 ? ('CLASS', "char *")
                 : ('THIS',  "$pxs->{xsub_class} *");
 
@@ -1864,17 +1862,17 @@ sub parse {
     #                   @{$self->{params}}.
     #                   A RETVAL has appeared in the signature, but
     #                   without a type yet specified, so it continues to
-    #                   use {xsub_return_type}.
+    #                   use $xsub->{decl}{return_type}{type}.
     #
     #  real             is_synthetic, no_init flags turned off. Its
     #                   type comes from the sig or INPUT line. This is
     #                   just a normal parameter now.
 
-    if ($pxs->{xsub_return_type} ne 'void') {
+    if ($pxs->{cur_xsub}{decl}{return_type}{type} ne 'void') {
         my ExtUtils::ParseXS::Node::Param $param =
             ExtUtils::ParseXS::Node::Param->new( {
                 var          => 'RETVAL',
-                type         => $pxs->{xsub_return_type},
+                type         => $pxs->{cur_xsub}{decl}{return_type}{type},
                 no_init      => 1, # just declare the var, don't initialise it
                 is_synthetic => 1,
             } );
@@ -2567,7 +2565,7 @@ sub as_code {
     # A CODE section using RETVAL must also have an OUTPUT entry
     if (        $xbody->{seen_RETVAL_in_CODE}
             and not ($retval && $retval->{in_output})
-            and     $pxs->{xsub_return_type} ne 'void')
+            and     $xsub->{decl}{return_type}{type} ne 'void')
     {
         $pxs->Warn("Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
     }
@@ -2768,8 +2766,8 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no
 
     # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-    if (    $pxs->{xsub_return_type} ne "void"
-        && !$pxs->{xsub_seen_NO_OUTPUT})
+    if (    $pxs->{cur_xsub}{decl}{return_type}{type} ne "void"
+        && !$pxs->{cur_xsub}{decl}{return_type}{no_output})
     {
          $pxs->{xsub_implicit_OUTPUT_RETVAL} = 1;
     }
@@ -2807,12 +2805,12 @@ sub as_code {
 
         print "\n\t";
 
-        if ($pxs->{xsub_return_type} ne "void") {
+        if ($xsub->{decl}{return_type}{type} ne "void") {
             print "RETVAL = ";
         }
 
         if (defined($pxs->{xsub_class})) {
-            if ($pxs->{xsub_seen_static}) {
+            if ($xsub->{decl}{return_type}{static}) {
                 # it has a return type of 'static foo'
                 if ($pxs->{xsub_func_name} eq 'new') {
                     $pxs->{xsub_func_name} = "$pxs->{xsub_class}";
@@ -3116,7 +3114,7 @@ sub as_code {
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     print <<"EOF";
-    XSFUNCTION = $pxs->{xsub_interface_macro}($pxs->{xsub_return_type},cv,XSANY.any_dptr);
+    XSFUNCTION = $pxs->{xsub_interface_macro}($xsub->{decl}{return_type}{type},cv,XSANY.any_dptr);
 EOF
 }
 
@@ -4096,7 +4094,9 @@ sub parse {
         return;
     }
 
-    if ($outarg eq "RETVAL" and $pxs->{xsub_seen_NO_OUTPUT}) {
+    if (    $outarg eq "RETVAL"
+        and $pxs->{cur_xsub}{decl}{return_type}{no_output})
+    {
         $pxs->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
         return;
     }
