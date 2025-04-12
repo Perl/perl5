@@ -219,6 +219,7 @@ BEGIN {
   'seen_INTERFACE_or_MACRO', # Bool: at least one INTERFACE/INTERFACE_MACRO
                         # has been seen somewhere.
 
+  'seen_an_XSUB',       # Bool: at least one XSUB has been encountered
 
   # File-scoped code-emitting state:
 
@@ -703,6 +704,7 @@ EOM
     $_ = shift @{$self->{line}};
 
     $xsub->as_code($self);
+    $self->{seen_an_XSUB} = 1; # encountered at least one XSUB
 
     # ----------------------------------------------------------------
     # end of XSUB
@@ -793,7 +795,7 @@ EOF
 
   # Declare a 'file' var for passing to newXS() and variants.
   #
-  # If there is no $self->{xsub_func_full_C_name} then there are no xsubs
+  # If there is no $self->{seen_an_XSUB} then there are no xsubs
   # in this .xs so 'file' is unused, so silence warnings.
   #
   # 'file' can also be unused in other circumstances: in particular,
@@ -805,7 +807,7 @@ EOF
   # the wrong qualifier is used, it causes breakage with C++ compilers and
   # warnings with recent gcc.
 
-  print Q(<<"EOF") if $self->{xsub_func_full_C_name};
+  print Q(<<"EOF") if $self->{seen_an_XSUB};
     |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
     |    char* file = __FILE__;
     |#else
