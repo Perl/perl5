@@ -1830,7 +1830,10 @@ sub output_GCB_table() {
     my %gcb_all_enums = %gcb_enums;
     $gcb_all_enums{ $gcb_short_enums[$_] } = $_ for 0 .. $table_size - 1;
 
-    my %gcb_splits;
+    my %gcb_splits = setup_splits(\%gcb_all_enums, $table_size, $has_unused,
+                            {
+                              Extended_Pictographic => [ 'ExtPict_XX' ],
+                            });
 
     my %gcb_dfas = (
         GCB_NOBREAK                      => 0,
@@ -1882,7 +1885,8 @@ sub output_GCB_table() {
 
     # Post 11.0: GB11   \p{Extended_Pictographic} Extend* ZWJ
     #                 × \p{Extended_Pictographic}
-    add_gcb_dfa('ZWJ', 'ExtPict_XX', 'GCB_Maybe_Emoji_NonBreak', $rule);
+    add_gcb_dfa('ZWJ', 'Extended_Pictographic', 'GCB_Maybe_Emoji_NonBreak',
+                $rule);
 
     # This and the rule GB10 obsolete starting with Unicode 11.0, can be left
     # in as there are no code points that match, so the code won't ever get
@@ -1969,7 +1973,13 @@ sub output_LB_table() {
     my %lb_all_enums = %lb_enums;
     $lb_all_enums{ $lb_short_enums[$_] } = $_ for 0 .. $table_size - 1;
 
-    my %lb_splits;
+    my %lb_splits = setup_splits(\%lb_all_enums, $table_size, $has_unused,
+        {
+          Ideographic => [ 'Ideographic',
+                           'Unassigned_Extended_Pictographic_Ideographic'
+                         ],
+        }
+    );
 
     # The result is really just true or false.  But we follow along with tr14,
     # creating a rule which is false for something like X SP* X.  That gets
@@ -2255,15 +2265,11 @@ sub output_LB_table() {
     # PR × (ID | EB | EM)
     $rule = '23a';
     set_lb_nobreak('Prefix_Numeric', 'Ideographic', $rule);
-    set_lb_nobreak('Prefix_Numeric',
-                   'Unassigned_Extended_Pictographic_Ideographic', $rule);
     set_lb_nobreak('Prefix_Numeric', 'E_Base', $rule);
     set_lb_nobreak('Prefix_Numeric', 'E_Modifier', $rule);
 
     # (ID | EB | EM) × PO
     set_lb_nobreak('Ideographic', 'Postfix_Numeric', $rule);
-    set_lb_nobreak('Unassigned_Extended_Pictographic_Ideographic',
-                   'Postfix_Numeric', $rule);
     set_lb_nobreak('E_Base', 'Postfix_Numeric', $rule);
     set_lb_nobreak('E_Modifier', 'Postfix_Numeric', $rule);
 
@@ -2510,6 +2516,7 @@ sub output_WB_table() {
     my %wb_splits = setup_splits(\%wb_all_enums, $table_size, $has_unused,
         {
           ALetter    => [ qw(ALetter ExtPict_LE) ],
+          Extended_Pictographic => [ qw(ExtPict_XX ExtPict_LE) ],
         }
     );
 
@@ -2708,8 +2715,7 @@ sub output_WB_table() {
     $rule = '3c';
     set_wb_nobreak('ZWJ', 'Glue_After_Zwj', $rule);
     set_wb_nobreak('ZWJ', 'E_Base_GAZ', $rule);
-    set_wb_nobreak('ZWJ', 'ExtPict_XX', $rule);
-    set_wb_nobreak('ZWJ', 'ExtPict_LE', $rule);
+    set_wb_nobreak('ZWJ', 'Extended_Pictographic', $rule);
 
     # Break before and after newlines
     # WB3b     ÷  (Newline | CR | LF)
