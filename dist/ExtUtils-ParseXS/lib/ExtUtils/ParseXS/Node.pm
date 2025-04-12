@@ -200,6 +200,25 @@ BEGIN { $build_subclass->('', # parent
     'seen_PPCODE',
     'seen_PROTOTYPE',
     'seen_SCOPE',
+
+    # These three fields indicate how many SVs are returned to the caller,
+    # and so influence the emitting of EXTEND(n) and XSRETURN(n).
+    #
+    # XSRETURN_count_basic is 0 or 1 and indicates whether a basic return
+    # value is pushed onto the stack. It is usually directly related to
+    # whether the XSUB is declared void, but NO_RETURN and CODE_sets_ST0
+    # can alter that.
+    #
+    # XSRETURN_count_extra indicates how many SVs will be returned in
+    # addition the basic 0 or 1. These will be params declared as OUTLIST.
+    #
+    # CODE_sets_ST0 is a flag indicating that something within a CODE
+    # block is doing 'ST(0) = ..' or similar. This is a workaround for
+    # a bug. See the code comments "Horrible 'void' return arg count hack"
+    # in Node::CODE::parse() for more details.
+    'CODE_sets_ST0',             # Bool
+    'XSRETURN_count_basic',      # Int
+    'XSRETURN_count_extra',      # Int
 )};
 
 
@@ -215,38 +234,6 @@ sub parse {
     $self->{decl} = $decl;
     $decl->parse($pxs)
         or return;
-
-    $pxs->{xsub_seen_CODE}     = !!grep(/^\s*CODE\s*:/,      @{$pxs->{line}});
-
-    # Horrible 'void' return arg count hack.
-    #
-    # Until about 1996, xsubpp always emitted 'XSRETURN(1)', even for a
-    # void XSUB. This was fixed for CODE-less void XSUBs simply by
-    # actually honouring the 'void' type and emitting 'XSRETURN_EMPTY'
-    # instead. However, for CODE blocks, the documentation had already
-    # endorsed a coding style along the lines of
-    #
-    #    void
-    #    foo(...)
-    #       CODE:
-    #          ST(0) = sv_newmortal();
-    #
-    # i.e. the XSUB returns an SV even when the return type is 'void'.
-    # In 2024 there is still lots of code of this style out in the wild,
-    # even in the distros bundled with perl.
-    #
-    # So honouring the void type here breaks lots of existing code. Thus
-    # this hack specifically looks for: void XSUBs with a CODE block that
-    # appears to put stuff on the stack via 'ST(n)=' or 'XST_m()', and if
-    # so, emits 'XSRETURN(1)' rather than the 'XSRETURN_EMPTY' implied by
-    # the 'void' return type.
-    #
-    # XXX this searches the whole XSUB, not just the CODE: section
-    {
-        my $EXPLICIT_RETURN = ($pxs->{xsub_seen_CODE} &&
-            ("@{ $pxs->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
-        $pxs->{xsub_XSRETURN_count} = 1 if $EXPLICIT_RETURN;
-    }
 
     # Append a fake EOF-keyword line. This makes it easy to do "all lines
     # until the next keyword" style loops, since the fake END line (which
@@ -320,6 +307,20 @@ sub parse {
         }
     } # end while (@{ $pxs->{line} })
 
+    # Work out how many SVs will be returned
+
+    $self->{XSRETURN_count_basic} =
+           (     $self->{CODE_sets_ST0}
+             or  (    $pxs->{xsub_return_type} ne "void"
+                  && !$pxs->{xsub_seen_NO_OUTPUT})
+            )
+            ? 1 : 0;
+
+    $self->{XSRETURN_count_extra} =
+                        grep {    defined $_->{in_out}
+                               && $_->{in_out} =~ /OUTLIST$/
+                             }
+                        @{$self->{decl}{params}{params}};
     1;
 }
 
@@ -427,15 +428,12 @@ EOF
                 "#endif\n"
         if $^O eq "hpux";
 
-    if ($pxs->{xsub_XSRETURN_count}) {
-        print ExtUtils::ParseXS::Q(<<"EOF") unless $self->{seen_PPCODE};
-            |    XSRETURN($pxs->{xsub_XSRETURN_count});
-EOF
-    }
-    else {
-        print ExtUtils::ParseXS::Q(<<"EOF") unless $self->{seen_PPCODE};
-            |    XSRETURN_EMPTY;
-EOF
+    unless ($self->{seen_PPCODE}) {
+        my $nret = $self->{XSRETURN_count_basic}
+                 + $self->{XSRETURN_count_extra};
+
+        print $nret ? "    XSRETURN($nret);\n"
+                    : "    XSRETURN_EMPTY;\n";
     }
 
     # Suppress "statement is unreachable" warning on HPUX
@@ -2591,28 +2589,23 @@ sub as_code {
         $param->as_output_code($pxs, $xsub, $xbody);
     }
 
-    # If there are any OUTLIST vars to be pushed, first extend the
-    # stack, to fit all OUTLIST vars + RETVAL
-    my $outlist_count = grep {    defined $_->{in_out}
-                               && $_->{in_out} =~ /OUTLIST$/
-                             }
-                             @{$ioparams->{params}};
+    my $basic = $xsub->{XSRETURN_count_basic};
+    my $extra = $xsub->{XSRETURN_count_extra};
 
-    if ($outlist_count) {
-        my $ext = $outlist_count;
-        ++$ext if    ($retval && $retval->{in_output})
-                  || $pxs->{xsub_implicit_OUTPUT_RETVAL};
+    if ($extra) {
+        # If there are any OUTLIST vars to be returned, we reset SP to
+        # the base of the stack frame and then PUSH any return values.
         print "\tXSprePUSH;\n";
-        # XSprePUSH resets SP to the base of the stack frame; must PUSH
-        # any return values
         $pxs->{xsub_stack_was_reset} = 1;
-
-        # The entersub will gave been called with at least a GV or CV on
-        # the stack in addition to at least min_args args, so only need
-        # to extend if we're returning more than that.
-        print "\tEXTEND(SP,$ext);\n"
-            if $ext > $ioparams->{min_args} + 1;
     }
+
+    # Extend the stack if we're going to return more values than were
+    # passed to us: which would consist of the GV or CV on the stack
+    # plus at least min_args at the time ENTERSUB was called.
+
+    my $n = $basic + $extra;
+    print "\tEXTEND(SP,$n);\n"
+        if $n > $ioparams->{min_args} + 1;
 
     # ----------------------------------------------------------------
     # All OUTPUT done; now handle an implicit or deferred RETVAL.
@@ -2629,18 +2622,13 @@ sub as_code {
         $retval->as_output_code($pxs, $xsub, $xbody);
     }
 
-    $pxs->{xsub_XSRETURN_count} = 1 if     $pxs->{xsub_return_type} ne "void"
-                                        && !$pxs->{xsub_seen_NO_OUTPUT};
-    my $num = $pxs->{xsub_XSRETURN_count};
-    $pxs->{xsub_XSRETURN_count} += $outlist_count;
-
     # Now that RETVAL is on the stack, also push any OUTLIST vars too
     for my $param (grep {   defined $_->{in_out}
                          && $_->{in_out} =~ /OUTLIST$/
                         }
                         @{$ioparams->{params}}
     ) {
-        $param->as_output_code($pxs, $xsub, $xbody, $num++);
+        $param->as_output_code($pxs, $xsub, $xbody, $basic++);
     }
 }
 
@@ -3382,6 +3370,38 @@ sub parse {
     $pxs->{cur_xbody}{seen_RETVAL_in_CODE} =
                     $code =~ /\bRETVAL\b/
                  && $code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/;
+
+    # Horrible 'void' return arg count hack.
+    #
+    # Until about 1996, xsubpp always emitted 'XSRETURN(1)', even for a
+    # void XSUB. This was fixed for CODE-less void XSUBs simply by
+    # actually honouring the 'void' type and emitting 'XSRETURN_EMPTY'
+    # instead. However, for CODE blocks, the documentation had already
+    # endorsed a coding style along the lines of
+    #
+    #    void
+    #    foo(...)
+    #       CODE:
+    #          ST(0) = sv_newmortal();
+    #
+    # i.e. the XSUB returns an SV even when the return type is 'void'.
+    # In 2024 there is still lots of code of this style out in the wild,
+    # even in the distros bundled with perl.
+    #
+    # So honouring the void type here breaks lots of existing code. Thus
+    # this hack specifically looks for: void XSUBs with a CODE block that
+    # appears to put stuff on the stack via 'ST(n)=' or 'XST_m()', and if
+    # so, emits 'XSRETURN(1)' rather than the 'XSRETURN_EMPTY' implied by
+    # the 'void' return type.
+    #
+    # So set a flag which indicates that a CODE block sets ST(0). This
+    # will be used later when deciding how/whether to emit EXTEND(n) and
+    # XSRETURN(n).
+
+    $pxs->{cur_xsub}{CODE_sets_ST0} =
+             $code =~ m{  ( \b ST      \s* \( [^;]* = )
+                        | ( \b XST_m\w+\s* \(         ) }x;
+
     1;
 }
 

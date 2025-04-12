@@ -241,8 +241,6 @@ BEGIN {
 
   'xsub_seen_static',          # Bool: XSUB return type is 'static ...'
 
-  'xsub_seen_CODE',            # Bool: XSUB has CODE      (peek-ahead)
-
   'xsub_interface_macro',      # Str: current interface extraction macro.
 
   'xsub_implicit_OUTPUT_RETVAL', # Bool indicates that a bodiless XSUB has
@@ -251,8 +249,6 @@ BEGIN {
                                  # way, it indicates an implicit
                                  # "OUTPUT:\n\tRETVAL".
   
-  'xsub_XSRETURN_count',       # Int: number SVs to return on stack
-
   'xsub_interface_macro_set',  # Str: current interface setting macro.
   
   'xsub_prototype',            # Str: is set to either the global PROTOTYPES
@@ -647,10 +643,7 @@ EOM
     $self->{xsub_seen_NO_OUTPUT}            = 0;
     $self->{xsub_seen_extern_C}             = 0;
     $self->{xsub_seen_static}               = 0;
-    $self->{xsub_seen_CODE}                 = 0;
     $self->{xsub_class}                     = undef;
-    # used for emitting XSRETURN(N) if > 0, or XSRETURN_EMPTY
-    $self->{xsub_XSRETURN_count} = 0;
 
     # Process next line
 

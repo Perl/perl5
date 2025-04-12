@@ -1785,6 +1785,49 @@ EOF
             [ 0, 0, qr/\b\QTARGi((IV)A, 1);/,            "set ST[0]"       ],
             [ 0, 0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
         ],
+        [
+            "OUTLIST with multiple CASES",
+            [ Q(<<'EOF') ],
+                 |void
+                 |foo(OUTLIST int a, OUTLIST int b)
+                 |    CASE: A
+                 |        CODE:
+                 |            AAA
+                 |    CASE: B
+                 |        CODE:
+                 |            BBB
+EOF
+            [ 0, 0, qr{\bdXSTARG; .* \bdXSTARG;}xs,       "two dXSTARG"    ],
+            [ 0, 0, qr{   \b\QEXTEND(SP,2);\E
+                       .* \b\QEXTEND(SP,2);\E }xs,        "two EXTEND(2)"  ],
+            [ 0, 0, qr{\b\QST(0) = \E .* \b\QST(0) = }xs, "two ST(0)"      ],
+            [ 0, 0, qr{\b\QST(1) = \E .* \b\QST(1) = }xs, "two ST(1)"      ],
+            [ 0, 0, qr/\b\QXSRETURN(2);/,                 "XSRETURN(2)"    ],
+            [ 0, 1, qr{XSRETURN.*XSRETURN}xs,             "<2 XSRETURNs"   ],
+        ],
+        [
+            "OUTLIST with multiple CASES and void hack",
+            [ Q(<<'EOF') ],
+                 |void
+                 |foo(OUTLIST int a, OUTLIST int b)
+                 |    CASE: A
+                 |        CODE:
+                 |            ST(0) = 1;
+                 |    CASE: B
+                 |        CODE:
+                 |            ST(0) = 2;
+EOF
+            [ 0, 0, qr{\bdXSTARG; .* \bdXSTARG;}xs,       "two dXSTARG"    ],
+            [ 0, 0, qr{   \b\QEXTEND(SP,3);\E
+                       .* \b\QEXTEND(SP,3);\E }xs,        "two EXTEND(3)"  ],
+            [ 0, 0, qr{\b\QST(0) = 1\E .* \QST(0) = 2}xs, "two ST(0)"      ],
+            [ 0, 0, qr{   \b\QST(1) = TARG\E
+                       .* \b\QST(1) = TARG}xs,            "two ST(1)"      ],
+            [ 0, 0, qr{   \b\QST(2) = RETVAL\E
+                       .* \b\QST(2) = RETVAL}xs,          "two ST(2)"      ],
+            [ 0, 0, qr/\b\QXSRETURN(3);/,                 "XSRETURN(3)"    ],
+            [ 0, 1, qr{XSRETURN.*XSRETURN}xs,             "<2 XSRETURNs"   ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
