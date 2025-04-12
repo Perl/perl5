@@ -342,7 +342,7 @@ sub as_code {
             |$extern
             |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
             |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name})
-            |[[
+            |$open_brace
             |    dVAR; dXSARGS;
 EOF
     }
@@ -443,10 +443,7 @@ EOF
         if $^O eq "hpux";
 
     # Emit final closing bracket for the XSUB.
-    print ExtUtils::ParseXS::Q(<<"EOF");
-            |]]
-            |
-EOF
+    print "$close_brace\n\n";
 
     # generate all the 'newXS()' etc boot code needed for this XSUB
     push @{$pxs->{bootcode_early}}, $self->boot_code($pxs);
