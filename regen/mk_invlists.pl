@@ -1875,11 +1875,12 @@ sub output_GCB_table() {
         return set_gcb_cells($x, $y, $dfa, $rule);
     }
 
+    my ($lhs, $rhs, $dfa, $rule);
+
     # The table is constructed in reverse order of the rules, to make the
     # lower-numbered, higher priority ones override the later ones, as the
     # algorithm stops at the earliest matching rule
 
-    my $rule;
 
     # Otherwise, break everywhere.
     # GB99   Any ÷  Any
@@ -1904,8 +1905,7 @@ sub output_GCB_table() {
     # executed.
     # Do not break within emoji modifier sequences or emoji zwj sequences.
     # Pre 11.0: GB11  ZWJ  × ( Glue_After_Zwj | E_Base_GAZ )
-    set_gcb_nobreak('ZWJ', 'Glue_After_Zwj', 11);
-    set_gcb_nobreak('ZWJ', 'E_Base_GAZ', 11);
+    set_gcb_nobreak('ZWJ', $_, 11) for qw(Glue_After_Zwj  E_Base_GAZ);
 
     # GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier
     $rule = 10;
@@ -1920,38 +1920,26 @@ sub output_GCB_table() {
     # GB9   ×  ( Extend | ZWJ )
     set_gcb_nobreak('Prepend', '*', '9b');
     set_gcb_nobreak('*', 'SpacingMark', '9a');
-    set_gcb_nobreak('*', 'Extend', 9);
-    set_gcb_nobreak('*', 'ZWJ', 9);
+    set_gcb_nobreak('*', $_, 9) for qw(Extend ZWJ);
 
     # Do not break Hangul syllable sequences.
     # GB8  ( LVT | T)  ×  T
-    set_gcb_nobreak('LVT', 'T', 8);
-    set_gcb_nobreak('T', 'T', 8);
+    set_gcb_nobreak($_, 'T', 8) for qw(LVT T);
 
     # GB7  ( LV | V )  ×  ( V | T )
-    $rule = 7;
-    set_gcb_nobreak('LV', 'V', $rule);
-    set_gcb_nobreak('LV', 'T', $rule);
-    set_gcb_nobreak('V', 'V', $rule);
-    set_gcb_nobreak('V', 'T', $rule);
+    for $lhs (qw(LV V)) {
+        set_gcb_nobreak($lhs, $_, 7) for qw(V T);
+    }
 
     # GB6  L  ×  ( L | V | LV | LVT )
-    $rule = 6;
-    set_gcb_nobreak('L', 'L', $rule);
-    set_gcb_nobreak('L', 'V', $rule);
-    set_gcb_nobreak('L', 'LV', $rule);
-    set_gcb_nobreak('L', 'LVT', $rule);
+    set_gcb_nobreak('L', $_, 6) for qw(L V LV LVT);
 
     # Do not break between a CR and LF. Otherwise, break before and after
     # controls.
     # GB5   ÷  ( Control | CR | LF )
     # GB4  ( Control | CR | LF )  ÷
-    set_gcb_breakable('*', 'Control', 5);
-    set_gcb_breakable('*', 'CR', 5);
-    set_gcb_breakable('*', 'LF', 5);
-    set_gcb_breakable('Control', '*', 4);
-    set_gcb_breakable('CR', '*', 4);
-    set_gcb_breakable('LF', '*', 4);
+    set_gcb_breakable('*', $_, 5) for qw(Control CR LF);
+    set_gcb_breakable($_, '*', 4) for qw(Control CR LF);
 
     # GB3  CR  ×  LF
     set_gcb_nobreak('CR', 'LF', 3);
@@ -2081,7 +2069,7 @@ sub output_LB_table() {
         return get_cell_value(\@lb_table, \%lb_all_enums, $x, $y);
     }
 
-    my $rule;
+    my ($lhs, $rhs, $dfa, $rule);
 
     # LB31. Break everywhere else
     set_lb_breakable('*', '*', 31);
@@ -2107,58 +2095,38 @@ sub output_LB_table() {
     # parentheses.
     # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
     $rule = 30;
-    set_lb_nobreak('AL', 'OP_sans_EA', $rule);
-    set_lb_nobreak('HL', 'OP_sans_EA', $rule);
-    set_lb_nobreak('NU', 'OP_sans_EA', $rule);
+    set_lb_nobreak($_, 'OP_sans_EA', $rule) for qw(AL  HL  NU);
 
     # [CP-[\p{ea=F}\p{ea=W}\p{ea=H}]] × (AL | HL | NU)
-    set_lb_nobreak('CP_sans_EA', 'AL', $rule);
-    set_lb_nobreak('CP_sans_EA', 'HL', $rule);
-    set_lb_nobreak('CP_sans_EA', 'NU', $rule);
+    set_lb_nobreak('CP_sans_EA', $_, $rule) for qw(AL  HL  NU);
 
     # LB29 Do not break between numeric punctuation and alphabetics (“e.g.”).
     # IS × (AL | HL)
-    $rule = 29;
-    set_lb_nobreak('IS', 'AL', $rule);
-    set_lb_nobreak('IS', 'HL', $rule);
+    set_lb_nobreak('IS', $_, 29) for qw(AL HL);
 
     # LB28 Do not break between alphabetics (“at”).
     # (AL | HL) × (AL | HL)
-    $rule = 28;
-    set_lb_nobreak('AL', 'AL', $rule);
-    set_lb_nobreak('AL', 'HL', $rule);
-    set_lb_nobreak('HL', 'AL', $rule);
-    set_lb_nobreak('HL', 'HL', $rule);
+    for $lhs (qw(AL HL)) {
+        set_lb_nobreak($lhs, $_, 28) for qw(AL HL);
+    }
 
     # LB27 Treat a Korean Syllable Block the same as ID.
     # (JL | JV | JT | H2 | H3) × PO
     $rule = 27;
-    set_lb_nobreak('JL', 'PO', $rule);
-    set_lb_nobreak('JV', 'PO', $rule);
-    set_lb_nobreak('JT', 'PO', $rule);
-    set_lb_nobreak('H2', 'PO', $rule);
-    set_lb_nobreak('H3', 'PO', $rule);
+    set_lb_nobreak($_, 'PO', $rule) for qw(JL JV JT H2 H3);
 
     # PR × (JL | JV | JT | H2 | H3)
-    set_lb_nobreak('PR', 'JL', $rule);
-    set_lb_nobreak('PR', 'JV', $rule);
-    set_lb_nobreak('PR', 'JT', $rule);
-    set_lb_nobreak('PR', 'H2', $rule);
-    set_lb_nobreak('PR', 'H3', $rule);
+    set_lb_nobreak('PR', $_, $rule) for qw(JL JV JT H2 H3);
 
     # LB26 Do not break a Korean syllable.
     # JL × (JL | JV | H2 | H3)
     $rule = 26;
-    set_lb_nobreak('JL', 'JL', $rule);
-    set_lb_nobreak('JL', 'JV', $rule);
-    set_lb_nobreak('JL', 'H2', $rule);
-    set_lb_nobreak('JL', 'H3', $rule);
+    set_lb_nobreak('JL', $_, $rule) for qw(JL JV H2 H3);
 
     # (JV | H2) × (JV | JT)
-    set_lb_nobreak('JV', 'JV', $rule);
-    set_lb_nobreak('H2', 'JV', $rule);
-    set_lb_nobreak('JV', 'JT', $rule);
-    set_lb_nobreak('H2', 'JT', $rule);
+    for $lhs (qw(JV H2)) {
+        set_lb_nobreak($lhs, $_, $rule) for qw(JV JT);
+    }
 
     # (JT | H3) × JT
     set_lb_nobreak('JT', 'JT', $rule);
@@ -2178,10 +2146,10 @@ sub output_LB_table() {
     # And secondly to
     # (PR | PO) × ( OP | HY ) NU
     # Given that (OP | HY )? is optional, we have to test for it in code.
-    add_lb_dfa('PR', 'OP', 'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('PO', 'OP', 'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('PR', 'HY', 'LB_PR_or_PO_then_OP_or_HY', $rule);
-    add_lb_dfa('PO', 'HY', 'LB_PR_or_PO_then_OP_or_HY', $rule);
+    $dfa = 'LB_PR_or_PO_then_OP_or_HY';
+    for $lhs (qw(PR PO)) {
+        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(OP HY);
+    }
 
     # ( OP | HY ) × NU
     set_lb_nobreak('OP', 'NU', $rule);
@@ -2190,24 +2158,14 @@ sub output_LB_table() {
     # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
     # which expands firstly to:
     # NU (SY | IS)* × (NU | SY | IS | CL | CP )
-    set_lb_nobreak('NU', 'NU', $rule);
-    set_lb_nobreak('NU', 'SY', $rule);
-    set_lb_nobreak('NU', 'IS', $rule);
-    set_lb_nobreak('NU', 'CL', $rule);
-    set_lb_nobreak('NU', 'CP', $rule);
+    set_lb_nobreak('NU', $_, $rule) for qw(NU SY IS CL CP);
 
     # And then to
     # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
-    add_lb_dfa('SY', 'NU', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('SY', 'SY', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('SY', 'IS', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('SY', 'CL', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('SY', 'CP', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('IS', 'NU', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('IS', 'SY', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('IS', 'IS', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('IS', 'CL', 'LB_SY_or_IS_then_various', $rule);
-    add_lb_dfa('IS', 'CP', 'LB_SY_or_IS_then_various', $rule);
+    $dfa = 'LB_SY_or_IS_then_various';
+    for $lhs (qw(SY IS)) {
+        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(NU SY IS CL CP);
+    }
 
     # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
     # We can eliminate the NU in the parenthesis, as there is a match as long
@@ -2216,43 +2174,32 @@ sub output_LB_table() {
     set_lb_nobreak('NU', 'PO', $rule);
     set_lb_nobreak('NU', 'PR', $rule);
 
-    add_lb_dfa('CP', 'PO', 'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('CL', 'PO', 'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('IS', 'PO', 'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('SY', 'PO', 'LB_various_then_PO_or_PR', $rule);
-
-    add_lb_dfa('CP', 'PR', 'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('CL', 'PR', 'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('IS', 'PR', 'LB_various_then_PO_or_PR', $rule);
-    add_lb_dfa('SY', 'PR', 'LB_various_then_PO_or_PR', $rule);
+    $dfa = 'LB_various_then_PO_or_PR';
+    for $lhs (qw(CP CL IS SY)) {
+        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(PO PR);
+    }
 
     # LB24 Do not break between numeric prefix/postfix and letters, or between
     # letters and prefix/postfix.
     # (PR | PO) × (AL | HL)
     $rule = 24;
-    set_lb_nobreak('PR', 'AL', $rule);
-    set_lb_nobreak('PR', 'HL', $rule);
-    set_lb_nobreak('PO', 'AL', $rule);
-    set_lb_nobreak('PO', 'HL', $rule);
+    for $lhs (qw(PR PO)) {
+        set_lb_nobreak($lhs, $_, $rule) for qw(AL HL);
+    }
 
     # (AL | HL) × (PR | PO)
-    set_lb_nobreak('AL', 'PR', $rule);
-    set_lb_nobreak('HL', 'PR', $rule);
-    set_lb_nobreak('AL', 'PO', $rule);
-    set_lb_nobreak('HL', 'PO', $rule);
+    for $lhs (qw(AL HL)) {
+        set_lb_nobreak($lhs, $_, $rule) for qw(PR PO);
+    }
 
     # LB23a Do not break between numeric prefixes and ideographs, or between
     # ideographs and numeric postfixes.
     # PR × (ID | EB | EM)
     $rule = '23a';
-    set_lb_nobreak('PR', 'ID', $rule);
-    set_lb_nobreak('PR', 'EB', $rule);
-    set_lb_nobreak('PR', 'EM', $rule);
+    set_lb_nobreak('PR', $_, $rule) for qw(ID EB EM);
 
     # (ID | EB | EM) × PO
-    set_lb_nobreak('ID', 'PO', $rule);
-    set_lb_nobreak('EB', 'PO', $rule);
-    set_lb_nobreak('EM', 'PO', $rule);
+    set_lb_nobreak($_, 'PO', $rule) for qw(ID EB EM);
 
     # LB23 Do not break between digits and letters
     # (AL | HL) × NU
@@ -2284,9 +2231,7 @@ sub output_LB_table() {
     # × NS
     # BB ×
     $rule = 21;
-    set_lb_nobreak('*', 'BA', $rule);
-    set_lb_nobreak('*', 'HY', $rule);
-    set_lb_nobreak('*', 'NS', $rule);
+    set_lb_nobreak('*', $_, $rule) for qw(BA HY NS);
     set_lb_nobreak('BB', '*', $rule);
 
     # LB20 Break before and after unresolved CB.
@@ -2336,12 +2281,7 @@ sub output_LB_table() {
     # × EX
     # × IS
     # × SY
-    $rule = 13;
-    set_lb_nobreak_ignoring_SP('*', 'CL', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'CP', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'EX', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'IS', $rule);
-    set_lb_nobreak_ignoring_SP('*', 'SY', $rule);
+    set_lb_nobreak_ignoring_SP('*', $_, 13) for qw(CL CP EX IS SY);
 
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
@@ -2419,11 +2359,7 @@ sub output_LB_table() {
 
     # LB6 Do not break before hard line breaks.
     # × ( BK | CR | LF | NL )
-    $rule = 6;
-    set_lb_nobreak('*', 'BK', $rule);
-    set_lb_nobreak('*', 'CR', $rule);
-    set_lb_nobreak('*', 'LF', $rule);
-    set_lb_nobreak('*', 'NL', $rule);
+    set_lb_nobreak('*', $_, 6) for qw(BK CR LF NL);
 
     # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line
     # breaks.
@@ -2431,9 +2367,7 @@ sub output_LB_table() {
     # LF !
     # NL !
     $rule = 5;
-    set_lb_breakable('CR', '*', $rule);
-    set_lb_breakable('LF', '*', $rule);
-    set_lb_breakable('NL', '*', $rule);
+    set_lb_breakable($_, '*', $rule) for qw(CR LF NL);
     set_lb_nobreak('CR', 'LF', $rule);
 
     # LB4 Always break after hard line breaks.
@@ -2544,7 +2478,7 @@ sub output_WB_table() {
                        \%wb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
 
-    my $rule;
+    my ($lhs, $rhs, $dfa, $rule);
 
     # Otherwise, break everywhere (including around ideographs).
     # WB99  Any  ÷  Any
@@ -2566,16 +2500,13 @@ sub output_WB_table() {
     # Do not break from extenders.
     # WB13b  ExtendNumLet  ×  (AHLetter | Numeric | Katakana)
     $rule = '13b';
-    set_wb_nobreak('ExtendNumLet', 'AHLetter', $rule);
-    set_wb_nobreak('ExtendNumLet', 'Numeric', $rule);
-    set_wb_nobreak('ExtendNumLet', 'Katakana', $rule);
+    set_wb_nobreak('ExtendNumLet', $_, '13b') for qw(AHLetter Numeric Katakana);
 
     # WB13a  (AHLetter | Numeric | Katakana | ExtendNumLet) × ExtendNumLet
-    $rule = '13a';
-    set_wb_nobreak('AHLetter', 'ExtendNumLet', $rule);
-    set_wb_nobreak('Numeric', 'ExtendNumLet', $rule);
-    set_wb_nobreak('Katakana', 'ExtendNumLet', $rule);
-    set_wb_nobreak('ExtendNumLet', 'ExtendNumLet', $rule);
+    set_wb_nobreak($_, 'ExtendNumLet', '13a') for qw(AHLetter
+                                                     Numeric
+                                                     Katakana
+                                                     ExtendNumLet);
 
     # Do not break between Katakana.
     # WB13  Katakana  ×  Katakana
@@ -2584,13 +2515,13 @@ sub output_WB_table() {
     # Do not break within sequences, such as “3.2” or “3,456.789”.
     # WB12  Numeric  ×  (MidNum | MidNumLetQ) Numeric
     $rule = 12;
-    add_wb_dfa('Numeric', 'MidNum', 'WB_NU_v_MN_or_MNLQ_then_NU', $rule);
-    add_wb_dfa('Numeric', 'MidNumLetQ', 'WB_NU_v_MN_or_MNLQ_then_NU', $rule);
+    $dfa = 'WB_NU_v_MN_or_MNLQ_then_NU';
+    add_wb_dfa('Numeric', $_, $dfa, $rule) for qw(MidNum MidNumLetQ);
 
     # WB11  Numeric (MidNum | (MidNumLetQ)  ×  Numeric
     $rule = 11;
-    add_wb_dfa('MidNum', 'Numeric', 'WB_NU_then_MN_or_MNLQ_v_NU', $rule);
-    add_wb_dfa('MidNumLetQ', 'Numeric', 'WB_NU_then_MN_or_MNLQ_v_NU', $rule);
+    $dfa = 'WB_NU_then_MN_or_MNLQ_v_NU';
+    add_wb_dfa($_, 'Numeric', $dfa, $rule) for qw(MidNum MidNumLetQ);
 
     # Do not break within sequences of digits, or digits adjacent to letters
     # (“3a”, or “A3”).
@@ -2616,39 +2547,34 @@ sub output_WB_table() {
 
     # WB7   AHLetter (MidLetter | MidNumLetQ) × AHLetter
     $rule = 7;
-    add_wb_dfa('MidNumLetQ', 'AHLetter', 'WB_AHL_then_ML_or_MNLQ_v_AHL', $rule);
-    add_wb_dfa('MidLetter', 'AHLetter', 'WB_AHL_then_ML_or_MNLQ_v_AHL', $rule);
+    $dfa = 'WB_AHL_then_ML_or_MNLQ_v_AHL';
+    add_wb_dfa($_, 'AHLetter', $dfa, $rule) for qw(MidLetter MidNumLetQ);
 
     # WB6  AHLetter  ×  (MidLetter | MidNumLetQ)  AHLetter
     $rule = 6;
-    add_wb_dfa('AHLetter', 'MidNumLetQ', 'WB_AHL_v_ML_or_MNLQ_then_AHL', $rule);
-    add_wb_dfa('AHLetter', 'MidLetter', 'WB_AHL_v_ML_or_MNLQ_then_AHL', $rule);
+    $dfa = 'WB_AHL_v_ML_or_MNLQ_then_AHL';
+    add_wb_dfa('AHLetter', 'MidNumLetQ', $dfa, $rule);
+    add_wb_dfa('AHLetter', 'MidLetter', $dfa, $rule);
 
     # Do not break between most letters.
     # WB5  AHLetter  ×  AHLetter
-    $rule = 5;
-    set_wb_nobreak('AHLetter', 'AHLetter', $rule);
+    set_wb_nobreak('AHLetter', 'AHLetter', 5);
 
     # Ignore Format and Extend characters, except after sot, CR, LF, and
     # Newline.  This also has the effect of:
     #   Any × (Format | Extend | ZWJ)
     #
     # WB4  X (Extend | Format | ZWJ)* → X
+    $dfa = 'WB_Ex_or_FO_or_ZWJ_then_foo';
     $rule = 4;
-    add_wb_dfa('Extend', '*', 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
-    add_wb_dfa('Format', '*', 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
-    add_wb_dfa('ZWJ', '*', 'WB_Ex_or_FO_or_ZWJ_then_foo', $rule);
-
-    set_wb_nobreak('*', 'Extend', $rule);
-    set_wb_nobreak('*', 'Format', $rule);
-    set_wb_nobreak('*', 'ZWJ', $rule);
+    add_wb_dfa($_, '*', $dfa, $rule) for qw(Extend Format ZWJ);
+    set_wb_nobreak('*', $_, $rule) for qw(Extend Format ZWJ);
 
     # Implied is that these attach to the character before them, except for
     # the characters that mark the end of a region of text.  The rules below
     # override the ones set up here, for all the characters that need
     # overriding.
-    set_wb_nobreak('*', 'Extend', $rule);
-    set_wb_nobreak('*', 'Format', $rule);
+    set_wb_nobreak('*', $_, $rule) for qw(Extend Format);
 
     # Keep horizontal whitespace together
     # Use perl's tailoring instead
@@ -2658,10 +2584,9 @@ sub output_WB_table() {
     # Do not break within emoji zwj sequences.
     # WB3c ZWJ × ( Glue_After_Zwj | EBG )
     #      ZWJ × \p{Extended_Pictographic}
-    $rule = '3c';
-    set_wb_nobreak('ZWJ', 'Glue_After_Zwj', $rule);
-    set_wb_nobreak('ZWJ', 'E_Base_GAZ', $rule);
-    set_wb_nobreak('ZWJ', 'Extended_Pictographic', $rule);
+    set_wb_nobreak('ZWJ', $_, '3c') for qw(Glue_After_Zwj
+                                           E_Base_GAZ
+                                           Extended_Pictographic);
 
     # Break before and after newlines
     # WB3b     ÷  (Newline | CR | LF)
@@ -2678,10 +2603,9 @@ sub output_WB_table() {
 
     # And do not break horizontal space followed by Extend or Format or ZWJ
     $rule = '2z';
-    set_wb_nobreak('Perl_Tailored_HSpace', 'Extend', $rule);
-    set_wb_nobreak('Perl_Tailored_HSpace', 'Format', $rule);
-    set_wb_nobreak('Perl_Tailored_HSpace', 'ZWJ', $rule);
-    add_wb_dfa('Perl_Tailored_HSpace', 'Perl_Tailored_HSpace', 'WB_hs_then_hs', $rule);
+    set_wb_nobreak('Perl_Tailored_HSpace', $_, $rule) for qw(Extend Format ZWJ);
+    add_wb_dfa('Perl_Tailored_HSpace', 'Perl_Tailored_HSpace',
+               'WB_hs_then_hs', $rule);
 
     # Break at the start and end of text, unless the text is empty
     # WB2  Any  ÷  eot
