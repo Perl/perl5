@@ -1481,7 +1481,7 @@ sub get_cell_list($table_size, $splits, $enums, $x, $y) {
 }
 
 sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
-              $has_unused, $no_override=undef)
+              $has_unused)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
@@ -2236,15 +2236,6 @@ sub output_LB_table() {
                       $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN}{match_return},
                       $rule, $has_unused);
     }
-    my sub set_lb_nobreak_no_override_ignoring_SP($x, $y, $rule) {
-        return set_cells(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
-                         $x, $y, $lb_dfas{LB_NOBREAK}{match_return}, $rule,
-                         $has_unused,
-
-                         # Don't change if already has this value
-                        $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN}{match_return}
-                       );
-    }
     my sub add_lb_dfa($x, $y, $dfa, $rule) {
 
         # These two don't reference the current value of the cell.  So use
@@ -2370,8 +2361,7 @@ sub output_LB_table() {
 
     # For the classes where the CM or ZWJ combines, it doesn't break,
     # but it inherits the type of nobreak from the master character.
-    set_lb_nobreak_no_override_ignoring_SP( [ '^', @CM_doesnt_combine ], $_, 9)
-                                                                for qw(CM ZWJ);
+    set_lb_nobreak( [ '^', @CM_doesnt_combine ], $_, 9) for qw(CM ZWJ);
 
     # LB10 Treat any remaining combining mark or ZWJ as AL.  This catches the
     # case where a CM or ZWJ is the first character on the line or follows SP,
@@ -2397,7 +2387,7 @@ sub output_LB_table() {
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
     # [^SP BA HY] × GL
-    set_lb_nobreak_no_override_ignoring_SP([ qw(^ SP BA HY) ], 'GL', '12a');
+    set_lb_nobreak([ qw(^ SP BA HY) ], 'GL', '12a');
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
