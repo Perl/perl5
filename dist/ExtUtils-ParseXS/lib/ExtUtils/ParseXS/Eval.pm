@@ -40,11 +40,9 @@ Variables set up from C<$other_hashref>:
 sub eval_output_typemap_code {
   my ($_pxs, $_code, $_other) = @_;
 
-  my ($Package, $func_name, $Full_func_name, $pname)
-    = @{$_pxs}{qw(PACKAGE_name  xsub_func_name
-                  xsub_func_full_C_name xsub_func_full_perl_name)};
-  my ($var, $type, $ntype, $subtype, $arg, $ALIAS)
-    = @{$_other}{qw(var type ntype subtype arg alias)};
+  my ($Package) = @{$_pxs}{qw(PACKAGE_name)};
+  my ($var, $type, $ntype, $subtype, $arg, $ALIAS, $func_name, $Full_func_name, $pname)
+    = @{$_other}{qw(var type ntype subtype arg alias func_name full_C_name full_perl_name)};
 
   my $rv = eval $_code;
   warn $@ if $@;
@@ -74,12 +72,9 @@ Variables set up from C<$other_hashref>:
 sub eval_input_typemap_code {
   my ($_pxs, $_code, $_other) = @_;
 
-  my ($Package, $func_name, $Full_func_name, $pname)
-    = @{$_pxs}{qw(PACKAGE_name xsub_func_name
-                  xsub_func_full_C_name xsub_func_full_perl_name)};
-
-  my ($var, $type, $num, $init, $printed_name, $arg, $ntype, $argoff, $subtype, $ALIAS)
-    = @{$_other}{qw(var type num init printed_name arg ntype argoff subtype alias)};
+  my ($Package) = @{$_pxs}{qw(PACKAGE_name)};
+  my ($var, $type, $num, $init, $printed_name, $arg, $ntype, $argoff, $subtype, $ALIAS, $func_name, $Full_func_name, $pname)
+    = @{$_other}{qw(var type num init printed_name arg ntype argoff subtype alias func_name full_C_name full_perl_name)};
 
   my $rv = eval $_code;
   warn $@ if $@;

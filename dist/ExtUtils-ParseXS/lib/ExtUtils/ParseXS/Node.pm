@@ -337,12 +337,13 @@ sub as_code {
     {
         my $extern = $self->{decl}{return_type}{extern_C}
                         ? qq[extern "C"] : "";
+        my $cname = $self->{decl}{full_C_name};
 
         # Emit function header
         print ExtUtils::ParseXS::Q(<<"EOF");
             |$extern
-            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
-            |XS_EUPXS(XS_$pxs->{xsub_func_full_C_name})
+            |XS_EUPXS(XS_$cname); /* prototype to pass -Wmissing-prototypes */
+            |XS_EUPXS(XS_$cname)
             |$open_brace
             |    dVAR; dXSARGS;
 EOF
@@ -499,6 +500,9 @@ sub boot_code {
     # Now use those values to append suitable newXS() and other code
     # into @code, for later insertion into the boot sub.
 
+    my $pname = $pxs->{cur_xsub}{decl}{full_perl_name};
+    my $cname = $pxs->{cur_xsub}{decl}{full_C_name};
+
     if (                $pxs->{xsub_map_alias_name_to_value}
             and keys %{ $pxs->{xsub_map_alias_name_to_value} })
     {
@@ -506,13 +510,13 @@ sub boot_code {
         # and 'XSANY.any_i32 = ix' line.
 
         # Make the main name one of the aliases if it isn't already
-        $pxs->{xsub_map_alias_name_to_value}->{ $pxs->{xsub_func_full_perl_name} } = 0
-            unless defined $pxs->{xsub_map_alias_name_to_value}->{ $pxs->{xsub_func_full_perl_name} };
+        $pxs->{xsub_map_alias_name_to_value}->{$pname} = 0
+            unless defined $pxs->{xsub_map_alias_name_to_value}->{$pname};
 
         foreach my $xname (sort keys %{ $pxs->{xsub_map_alias_name_to_value} }) {
             my $value = $pxs->{xsub_map_alias_name_to_value}{$xname};
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
-                |        cv = $newXS(\"$xname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
+                |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
 EOF
         }
@@ -521,7 +525,7 @@ EOF
         # Generate a standard newXS() call, plus a single call to
         # apply_attrs_string() call with the string of attributes.
         push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
-            |        cv = $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
+            |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
             |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
 EOF
     }
@@ -536,7 +540,7 @@ EOF
             my $value = $pxs->{xsub_map_interface_name_short_to_original}{$yname};
             $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
-                |        cv = $newXS(\"$yname\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);
+                |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
                 |        $pxs->{xsub_interface_macro_set}(cv,$value);
 EOF
         }
@@ -554,12 +558,12 @@ EOF
         # handles a workaround for '#define newXS ;'. I also don't
         # understand how just omitting the '(void)' fixed the problem.
         push(@code,
-            "        $newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
+            "        $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);\n");
     }
     else {
         # Default: generate a standard newXS() call
         push(@code,
-            "        (void)$newXS(\"$pxs->{xsub_func_full_perl_name}\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
+            "        (void)$newXS(\"$pname\", XS_$cname$file_arg$proto_arg);\n");
     }
 
     # For every overload operator, generate an additional newXS()
@@ -571,7 +575,7 @@ EOF
             = $pxs->{PACKAGE_C_name};
         my $overload = "$pxs->{PACKAGE_name}\::($operator";
         push(@code,
-            "        (void)$newXS(\"$overload\", XS_$pxs->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
+            "        (void)$newXS(\"$overload\", XS_$cname$file_arg$proto_arg);\n");
     }
 
     return @code;
@@ -643,10 +647,10 @@ sub parse {
     $full_cname = $ExtUtils::ParseXS::VMS_SymSet->addsym($full_cname)
         if $ExtUtils::ParseXS::Is_VMS;
 
-    $self->{class}          = $pxs->{xsub_class}                = $class;
-    $self->{name}           = $pxs->{xsub_func_name}            = $name;
-    $self->{full_perl_name} = $pxs->{xsub_func_full_perl_name}  = $full_pname;
-    $self->{full_C_name}    = $pxs->{xsub_func_full_C_name}     = $full_cname;
+    $self->{class}          = $class;
+    $self->{name}           = $name;
+    $self->{full_perl_name} = $full_pname;
+    $self->{full_C_name}    = $full_cname;
 
     # At this point, supposing that the input so far was:
     #
@@ -913,7 +917,7 @@ sub as_code {
     }
     else {
         print "\t",
-                    ((defined($pxs->{xsub_class}) && $var eq 'CLASS')
+                    ((defined($xsub->{decl}{class}) && $var eq 'CLASS')
                         ? $type
                         : $pxs->map_type($type, undef)),
               "\t$var";
@@ -931,6 +935,9 @@ sub as_code {
         num           => $arg_num,
         arg           => $arg,
         alias         => $xsub->{seen_ALIAS},
+        func_name     => $xsub->{decl}{name},
+        full_perl_name  => $xsub->{decl}{full_perl_name},
+        full_C_name     => $xsub->{decl}{full_C_name},
     };
 
     # The type looked up in the eval is Foo__Bar rather than Foo::Bar
@@ -984,7 +991,7 @@ sub as_code {
         # on an object of the right class. Basically, for T_foo_OBJ, use
         # T_foo_REF instead. T_REF_IV_PTR was added in v5.22.0.
         $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
-            if $pxs->{xsub_func_name} =~ /DESTROY$/;
+            if $pxs->{cur_xsub}{decl}{name} =~ /DESTROY$/;
 
         # For a string-ish parameter foo, if length(foo) was also declared
         # as a pseudo-parameter, then override the normal typedef - which
@@ -1351,6 +1358,9 @@ sub as_output_code {
                         arg         => $arg,
                         type        => $eval_type,
                         alias       => $xsub->{seen_ALIAS},
+                        func_name   => $xsub->{decl}{name},
+                        full_perl_name  => $xsub->{decl}{full_perl_name},
+                        full_C_name     => $xsub->{decl}{full_C_name},
                     };
 
 
@@ -1828,13 +1838,13 @@ sub parse {
 
     # C++ methods get a fake object/class param at the start.
     # This affects arg numbering.
-    if (defined($pxs->{xsub_class})) {
+    if (defined($pxs->{cur_xsub}{decl}{class})) {
         my ($var, $type) =
             (   $pxs->{cur_xsub}{decl}{return_type}{static}
-             or $pxs->{xsub_func_name} eq 'new'
+             or $pxs->{cur_xsub}{decl}{name} eq 'new'
             )
                 ? ('CLASS', "char *")
-                : ('THIS',  "$pxs->{xsub_class} *");
+                : ('THIS',  "$pxs->{cur_xsub}{decl}{class} *");
 
         my ExtUtils::ParseXS::Node::Param $param
                 = ExtUtils::ParseXS::Node::Param->new( {
@@ -2704,10 +2714,11 @@ BEGIN { $build_subclass->('oneline', # parent
 )};
 
 sub as_code {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
 
-    print "\n\tPerl_croak(aTHX_ \"$pxs->{xsub_func_full_perl_name}: not implemented yet\");\n";
+    print "\n\tPerl_croak(aTHX_ \"$xsub->{decl}{full_perl_name}: not implemented yet\");\n";
 }
 
 
@@ -2788,8 +2799,12 @@ sub as_code {
     my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
-    if (    defined($pxs->{xsub_class})
-        and $pxs->{xsub_func_name} eq "DESTROY")
+    my $class = $xsub->{decl}{class};
+
+    my $name = $xsub->{decl}{name};
+
+    if (    defined $class
+        and $name eq "DESTROY")
     {
         # Emit a default body for a C++ DESTROY method: "delete THIS;"
         print "\n\t";
@@ -2809,19 +2824,19 @@ sub as_code {
             print "RETVAL = ";
         }
 
-        if (defined($pxs->{xsub_class})) {
+        if (defined $class) {
             if ($xsub->{decl}{return_type}{static}) {
                 # it has a return type of 'static foo'
-                if ($pxs->{xsub_func_name} eq 'new') {
-                    $pxs->{xsub_func_name} = "$pxs->{xsub_class}";
+                if ($name eq 'new') {
+                    $name = "$class";
                 }
                 else {
-                    print "$pxs->{xsub_class}::";
+                    print "${class}::";
                 }
             }
             else {
-                if ($pxs->{xsub_func_name} eq 'new') {
-                    $pxs->{xsub_func_name} .= " $pxs->{xsub_class}";
+                if ($name eq 'new') {
+                    $name .= " $class";
                 }
                 else {
                     print "THIS->";
@@ -2831,14 +2846,14 @@ sub as_code {
 
         # Handle "xsubpp -s=strip_prefix" hack
         my $strip = $pxs->{config_strip_c_func_prefix};
-        $pxs->{xsub_func_name} =~ s/^\Q$strip//
+        $name =~ s/^\Q$strip//
             if defined $strip;
 
-        $pxs->{xsub_func_name} = 'XSFUNCTION'
+        $name = 'XSFUNCTION'
             if    $xsub->{seen_INTERFACE}
                or $xsub->{seen_INTERFACE_MACRO};
 
-        print "$pxs->{xsub_func_name}($self->{args});\n";
+        print "$name($self->{args});\n";
 
     }
 }
@@ -3669,7 +3684,7 @@ sub parse {
     my $orig = $line; # keep full line for error messages
 
     # we use this later for symbolic aliases
-    my $fname = $pxs->{PACKAGE_class} . $pxs->{xsub_func_name};
+    my $fname = $pxs->{PACKAGE_class} . $pxs->{cur_xsub}{decl}{name};
 
     # chop out and process one alias entry from $line
 

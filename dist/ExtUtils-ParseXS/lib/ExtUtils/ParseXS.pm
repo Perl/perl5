@@ -256,14 +256,6 @@ BEGIN {
 
   'xsub_SCOPE_enabled',        # Bool: SCOPE ENABLEd
 
-  'xsub_class',                # Str: the class part of the XSUB's
-                               # function name (if any). May include
-                               # 'const' prefix.
-
-  'xsub_func_name',            # The name of this XSUB        eg 'f'
-  'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
-  'xsub_func_full_C_name',     # its full C function name     eg 'Foo__Bar__f'
-
   'xsub_map_overload_name_to_seen', # Hash: maps each overload method name
                                # (such as '<=>') to a boolean indicating
                                # whether that method has been listed by
@@ -633,7 +625,6 @@ EOM
     $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
     $self->{xsub_SCOPE_enabled}        = 0;
     $self->{xsub_map_overload_name_to_seen} = {};
-    $self->{xsub_class}                     = undef;
 
     # Process next line
 
