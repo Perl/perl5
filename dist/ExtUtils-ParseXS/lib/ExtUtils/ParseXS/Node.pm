@@ -2279,10 +2279,10 @@ sub as_code {
 
     if ($pxs->{xsub_SCOPE_enabled}) {
         # the matching opens were emitted in input_part->as_code()
-        print "   $close_brace\n";
+        print "      $close_brace\n";
         # PPCODE->as_code emits its own LEAVE and return, so this
         # line would never be reached.
-        print "   LEAVE;\n" unless $xsub->{seen_PPCODE};
+        print "      LEAVE;\n" unless $xsub->{seen_PPCODE};
     }
 
     # matches the $open_brace at the start of this function
@@ -2388,8 +2388,8 @@ sub as_code {
 
     # The matching closes will be emitted in xbody->as_code()
     print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
-        |   ENTER;
-        |   $open_brace
+        |      ENTER;
+        |      $open_brace
 EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
