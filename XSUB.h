@@ -188,10 +188,12 @@ is a lexical C<$_> in scope.
 
 #define dXSI32 I32 ix = XSANY.any_i32
 
-#ifdef __cplusplus
+#if defined(__cplusplus) || __STDC_VERSION__ >= 202311L
 #  define XSINTERFACE_CVT(ret,name) ret (*name)(...)
 #  define XSINTERFACE_CVT_ANON(ret) ret (*)(...)
 #else
+/* In C standards before C23, an empty prototype means that the function takes
+ * an unspecified number of arguments. */
 #  define XSINTERFACE_CVT(ret,name) ret (*name)()
 #  define XSINTERFACE_CVT_ANON(ret) ret (*)()
 #endif
