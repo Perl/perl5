@@ -21,7 +21,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '2.005002';
+our $VERSION = '2.005003';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -870,6 +870,130 @@ sub from_ieee754 {
     }
 
     croak("The format '$format' is not yet supported.");
+}
+
+sub from_fp80 {
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
+
+    # Don't modify constant (read-only) objects.
+
+    return $self if $selfref && $self -> modify('from_fp80');
+
+    my $in = shift;         # input string (or raw bytes)
+    my @r = @_;             # rounding parameters, if any
+
+    # Undefined input.
+
+    unless (defined $in) {
+        carp("Input is undefined");
+        return $self -> bzero(@r);
+    }
+
+    # The parameters for this format.
+
+    my $p = 64;                 # precision (in bits)
+    my $w = 15;                 # number of bits in exponent
+
+    # The maximum exponent, minimum exponent, and exponent bias.
+
+    my $emax = $class -> new(2) -> bpow($w - 1) -> bdec();      # = 16383
+    my $emin = 1 - $emax;                                       # = -16382
+    my $bias = $emax;                                           # = -16383
+
+    # Make sure input string is a string of zeros and ones.
+
+    my $len = CORE::length $in;
+    if (8 * $len == 80) {                       # bytes
+        $in = unpack "B*", $in;
+    } elsif (4 * $len == 80) {                  # hexadecimal
+        if ($in =~ /([^\da-f])/i) {
+            croak "Illegal hexadecimal digit '$1'";
+        }
+        $in = unpack "B*", pack "H*", $in;
+    } elsif ($len == 80) {                      # bits
+        if ($in =~ /([^01])/) {
+            croak "Illegal binary digit '$1'";
+        }
+    } else {
+        croak "Unknown input -- $in";
+    }
+
+    # Split bit string into sign, exponent, and mantissa/significand.
+
+    my $sign = substr($in, 0, 1) eq '1' ? '-' : '+';
+    my $expo = $class -> from_bin(substr($in, 1, $w));
+    my $mant = $class -> from_bin(substr($in, $w + 1));
+
+    my $x;
+
+    $expo -> bsub($bias);                       # subtract bias
+
+    # zero and subnormal numbers
+
+    if ($expo < $emin) {
+        if ($mant == 0) {                       # zero
+            $x = $class -> bzero();
+        } else {                                # subnormals
+            # compute (1/2)**N rather than 2**(-N)
+            $x = $class -> new("0.5");
+            $x -> bpow(-$emin - 1 + $p) -> bmul($mant);
+            $x -> bneg() if $sign eq '-';
+        }
+    }
+
+    # inf and nan
+
+    elsif ($expo > $emax) {
+
+        # if fraction of mantissa is zero, i.e., if mantissa is
+        # 0.000... or 1.000...
+
+        if (substr($in, 16) =~ /^[01]0+$/) {
+            $x = $class -> binf($sign);
+        } else {
+            $x = $class -> bnan();
+        }
+    }
+
+    # normal numbers
+
+    else {
+
+        # downscale mantissa
+        $mant -> blsft($p - 1, "0.5");      # brsft($p - 1, 2) does division
+
+        if ($expo < 0) {
+            # compute (1/2)**N rather than 2**(-N)
+            $x = $mant -> blsft(-$expo, "0.5");
+        } elsif ($expo > 0) {
+            $x = $mant -> blsft($expo, "2");
+        } else {
+            $x = $mant;
+        }
+
+        $x -> bneg() if $sign eq '-';
+    }
+
+    if ($selfref) {
+        $self -> {sign} = $x -> {sign};
+        $self -> {_m}   = $x -> {_m};
+        $self -> {_es}  = $x -> {_es};
+        $self -> {_e}   = $x -> {_e};
+    } else {
+        $self = $x;
+    }
+
+    $self -> round(@r);
+    $self -> _dng() if ($self -> is_int() ||
+                        $self -> is_inf() ||
+                        $self -> is_nan());
+    return $self;
 }
 
 sub from_base {
@@ -5016,7 +5140,7 @@ sub bblsft {
 
     # Don't modify constant (read-only) objects.
 
-    return $x if $x -> modify('bblsft');
+    return $x if ref($x) && $x -> modify('bblsft');
 
     # Let Math::BigInt do the job.
 
@@ -5064,7 +5188,7 @@ sub bbrsft {
 
     # Don't modify constant (read-only) objects.
 
-    return $x if $x -> modify('bbrsft');
+    return $x if ref($x) && $x -> modify('bbrsft');
 
     # Let Math::BigInt do the job.
 
@@ -5872,11 +5996,12 @@ sub fparts {
 
     my @flt_parts = ($x->{sign}, $x->{_m}, $x->{_es}, $x->{_e});
     my @rat_parts = $class -> _flt_lib_parts_to_rat_lib_parts(@flt_parts);
-    my $num = $class -> new($LIB -> _str($rat_parts[1]));
-    my $den = $class -> new($LIB -> _str($rat_parts[2]));
-    $num = $num -> bneg() if $rat_parts[0] eq "-";
-    return $num unless wantarray;
-    return $num, $den;
+    my $numer = $class -> new($LIB -> _str($rat_parts[1]));
+    $numer -> bneg() if $rat_parts[0] eq "-";
+    return $numer unless wantarray;
+
+    my $denom = $class -> new($LIB -> _str($rat_parts[2]));
+    return $numer, $denom;
 }
 
 # Given "123.4375", returns "1975", since "123.4375" is "1975/16".
@@ -6582,6 +6707,179 @@ sub to_ieee754 {
     croak("The format '$format' is not yet supported.");
 }
 
+sub to_fp80 {
+    my ($class, $x, $format, @r) = ref($_[0]) ? (ref($_[0]), @_)
+                                              : objectify(1, @_);
+
+    carp "Rounding is not supported for ", (caller(0))[3], "()" if @r;
+
+    # The maximum exponent, minimum exponent, and exponent bias.
+
+    my $emax = Math::BigFloat -> new("16383");
+    my $emin = 1 - $emax;
+    my $bias = $emax;
+
+    # Get numerical sign, exponent, and mantissa/significand for bit string.
+
+    my $sign = 0;
+    my $expo;
+    my $mant;
+
+    if ($x -> is_nan()) {                   # nan
+        $sign = 1;
+        $expo = $emax -> copy() -> binc();
+        $mant = $class -> new(2) -> bpow(64) -> bdec();
+
+    } elsif ($x -> is_inf()) {              # inf
+        $sign = 1 if $x -> is_neg();
+        $expo = $emax -> copy() -> binc();
+        $mant = $class -> bzero();
+
+    } elsif ($x -> is_zero()) {             # zero
+        $expo = $emin -> copy() -> bdec();
+        $mant = $class -> bzero();
+
+    } else {                                # normal and subnormal
+
+        $sign = 1 if $x -> is_neg();
+
+        # Now we need to compute the mantissa and exponent in base $b.
+
+        my $binv = $class -> new("0.5");
+        my $b    = $class -> new("2");
+        my $one  = $class -> bone();
+
+        # We start off by initializing the exponent to zero and the
+        # mantissa to the input value. Then we increase the mantissa and
+        # decrease the exponent, or vice versa, until the mantissa is in
+        # the desired range or we hit one of the limits for the exponent.
+
+        $mant = $x -> copy() -> babs();
+
+        # We need to find the base 2 exponent. First make an estimate of
+        # the base 2 exponent, before adjusting it below. We could skip
+        # this estimation and go straight to the while-loops below, but the
+        # loops are slow, especially when the final exponent is far from
+        # zero and even more so if the number of digits is large. This
+        # initial estimation speeds up the computation dramatically.
+        #
+        #   log2($m * 10**$e) = log10($m + 10**$e) * log(10)/log(2)
+        #                     = (log10($m) + $e) * log(10)/log(2)
+        #                     = (log($m)/log(10) + $e) * log(10)/log(2)
+
+        my ($m, $e) = $x -> nparts();
+        my $ms = $m -> numify();
+        my $es = $e -> numify();
+
+        my $expo_est = (log(abs($ms))/log(10) + $es) * log(10)/log(2);
+        $expo_est = int($expo_est);
+
+        # Limit the exponent.
+
+        if ($expo_est > $emax) {
+            $expo_est = $emax;
+        } elsif ($expo_est < $emin) {
+            $expo_est = $emin;
+        }
+
+        # Don't multiply by a number raised to a negative exponent. This
+        # will cause a division, whose result is truncated to some fixed
+        # number of digits. Instead, multiply by the inverse number raised
+        # to a positive exponent.
+
+        $expo = $class -> new($expo_est);
+        if ($expo_est > 0) {
+            $mant = $mant -> bmul($binv -> copy() -> bpow($expo));
+        } elsif ($expo_est < 0) {
+            my $expo_abs = $expo -> copy() -> bneg();
+            $mant = $mant -> bmul($b -> copy() -> bpow($expo_abs));
+        }
+
+        # Final adjustment of the estimate above.
+
+        while ($mant >= $b && $expo <= $emax) {
+            $mant = $mant -> bmul($binv);
+            $expo = $expo -> binc();
+        }
+
+        while ($mant < $one && $expo >= $emin) {
+            $mant = $mant -> bmul($b);
+            $expo = $expo -> bdec();
+        }
+
+        # This is when the magnitude is larger than what can be represented in
+        # this format. Encode as infinity.
+
+        if ($expo > $emax) {
+            $mant = $class -> bzero();
+            $expo = $emax -> copy() -> binc();
+        }
+
+        # This is when the magnitude is so small that the number is encoded as
+        # a subnormal number.
+        #
+        # If the magnitude is smaller than that of the smallest subnormal
+        # number, and rounded downwards, it is encoded as zero. This works
+        # transparently and does not need to be treated as a special case.
+        #
+        # If the number is between the largest subnormal number and the
+        # smallest normal number, and the value is rounded upwards, the value
+        # must be encoded as a normal number. This must be treated as a special
+        # case.
+
+        elsif ($expo < $emin) {
+
+            # Scale up the mantissa (significand), and round to integer.
+
+            my $const = $class -> new($b) -> bpow(62);
+            $mant -> bmul($const) -> bfround(0);
+
+            # If the mantissa overflowed, encode as the smallest normal number.
+
+            if ($mant == $const -> bmul($b)) {
+                $expo -> binc();
+            }
+        }
+
+        # This is when the magnitude is within the range of what can be encoded
+        # as a normal number.
+
+        else {
+
+            # Remove implicit leading bit, scale up the mantissa (significand)
+            # to an integer, and round.
+
+            my $const = $class -> new($b) -> bpow(63);
+            $mant -> bmul($const) -> bfround(0);
+
+            # If the mantissa overflowed, encode as the next larger value. If
+            # this caused the exponent to overflow, encode as infinity.
+
+            if ($mant == $const -> copy() -> bmul($b)) {
+                $expo -> binc();
+                if ($expo > $emax) {
+                    $mant = $class -> bzero();
+                } else {
+                    $mant = $const;
+                }
+            }
+        }
+    }
+
+    $expo = $expo -> badd($bias);               # add bias
+
+    my $signbit = "$sign";
+
+    my $mantbits = $mant -> to_bin();
+    $mantbits = ("0" x (64 - CORE::length($mantbits))) . $mantbits;
+
+    my $expobits = $expo -> to_bin();
+    $expobits = ("0" x (15 - CORE::length($expobits))) . $expobits;
+
+    my $bin = $signbit . $expobits . $mantbits;
+    return pack "B*", $bin;
+}
+
 sub as_hex {
     # return number as hexadecimal string (only for integers defined)
 
@@ -7285,6 +7583,7 @@ Math::BigFloat - arbitrary size floating point math package
   $x = Math::BigFloat->from_bytes($bytes);      # from byte string
   $x = Math::BigFloat->from_base('why', 36);    # from any base
   $x = Math::BigFloat->from_ieee754($b, $fmt);  # from IEEE-754 bytes
+  $x = Math::BigFloat->from_fp80($b);           # from x86 80-bit
   $x = Math::BigFloat->bzero();                 # create a +0
   $x = Math::BigFloat->bone();                  # create a +1
   $x = Math::BigFloat->bone('-');               # create a -1
@@ -7434,6 +7733,7 @@ Math::BigFloat - arbitrary size floating point math package
   $x->to_oct();           # as signed octal string
   $x->to_bytes();         # as byte string
   $x->to_ieee754($fmt);   # to bytes encoded according to IEEE 754-2008
+  $x->to_fp80();          # encode value in x86 80-bit format
 
   $x->as_hex();           # as signed hexadecimal string with "0x" prefix
   $x->as_bin();           # as signed binary string with "0b" prefix
@@ -7693,6 +7993,27 @@ etc. where the number of bits is a multiple of 32 for all formats larger than
 ("binary64"), "quadruple" ("binary128"), "octuple" ("binary256"), and
 "sexdecuple" ("binary512").
 
+See also L</to_ieee754()>.
+
+=item from_fp80()
+
+Interpret the input as a value encoded as an x86 80-bit floating point number. The input
+can be given as a 10 character byte string, 20 character hex string, or 80 character binary string. The input is
+assumed to be in big-endian byte-order.
+
+    # Both $xr, $xh, and $xb below are 3.141592...
+
+    $dbl = unpack "d>", "\x40\x09\x21\xfb\x54\x44\x2d\x18";
+
+    $raw = "\x40\x00\xc9\x0f\xda\xa2\x21\x68\xc2\x35";  # raw bytes
+    $xr  = Math::BigFloat -> from_fp80($raw);
+
+    $hex = "4000c90fdaa22168c235";
+    $xh  = Math::BigFloat -> from_fp80($hex);
+
+    $bin = "0100000000000000110010010000111111011010"
+         . "1010001000100001011010001100001000110101";
+    $xb  = Math::BigFloat -> from_fp80($bin);
 See also L</to_ieee754()>.
 
 =item from_base()
