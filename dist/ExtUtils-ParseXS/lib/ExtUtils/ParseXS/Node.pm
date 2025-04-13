@@ -2206,6 +2206,7 @@ BEGIN { $build_subclass->('', # parent
                 # vary between different CASEs)
 
     'seen_RETVAL_in_CODE', # Bool: have seen 'RETVAL' within a CODE block
+    'seen_autocall',       # Bool: this xbody has an autocall node
 
     # State during code emitting
 
@@ -2218,8 +2219,6 @@ sub parse {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
 
-    # This set later if there's an implied RETVAL to output
-    $pxs->{xsub_implicit_OUTPUT_RETVAL} = 0;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -2612,16 +2611,16 @@ sub as_code {
     print "\tEXTEND(SP,$n);\n"
         if $n > $ioparams->{min_args} + 1;
 
-    # ----------------------------------------------------------------
-    # All OUTPUT done; now handle an implicit or deferred RETVAL.
-    # OUTPUT_handler() will have skipped any RETVAL line.
-    # Also, $pxs->{xsub_implicit_OUTPUT_RETVAL} indicates that an
-    # implicit RETVAL should be generated, due to a non-void CODE-less
-    # XSUB.
-    # ----------------------------------------------------------------
+    # All OUTPUT done; now handle an implicit or deferred RETVAL:
+    # - OUTPUT_line::as_code() will have skipped/deferred any RETVAL line,
+    # - non-void CODE-less XSUBs have an implicit 'OUTPUT: RETVAL'
 
-    if (  ($retval && $retval->{in_output})
-        || $pxs->{xsub_implicit_OUTPUT_RETVAL})
+    if (   ($retval && $retval->{in_output})
+        or (    $xbody->{seen_autocall}
+            &&  $xsub->{decl}{return_type}{type} ne "void"
+            && !$xsub->{decl}{return_type}{no_output}
+           )
+        )
     {
         # emit a deferred RETVAL from OUTPUT or implicit RETVAL
         $retval->as_output_code($pxs, $xsub, $xbody);
@@ -2776,12 +2775,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no
 
-    # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-    if (    $pxs->{cur_xsub}{decl}{return_type}{type} ne "void"
-        && !$pxs->{cur_xsub}{decl}{return_type}{no_output})
-    {
-         $pxs->{xsub_implicit_OUTPUT_RETVAL} = 1;
-    }
+    $pxs->{cur_xbody}{seen_autocall} = 1;
 
     my $ioparams  = $pxs->{cur_xbody}{ioparams};
     my $args = $ioparams->{auto_function_sig_override}; # C_ARGS

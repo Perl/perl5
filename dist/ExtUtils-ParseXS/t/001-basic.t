@@ -3475,6 +3475,31 @@ EOF
                        Z .* TARGi .*/sx, "has one setting type" ],
         ],
         [
+            "CASE with variant autocall RETVAL",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(int a)
+                |    CASE: X
+                |
+                |    CASE: Y
+                |        CODE:
+                |            YYY
+EOF
+            [ 0, 0, qr{\Qif (X)\E
+                       .*
+                       dXSTARG;
+                       .*
+                       \QTARGi((IV)RETVAL, 1);\E
+                       .*
+                       \Qelse if (Y)\E
+                       }sx,                 "branch X returns RETVAL" ],
+
+            [ 0, 1, qr{\Qelse if (Y)\E
+                       .*
+                       \QPUSHi((IV)RETVAL);\E
+                       }sx,                 "branch Y doesn't return RETVAL" ],
+        ],
+        [
             "CASE: case follows unconditional CASE",
             [ Q(<<'EOF') ],
                 |int

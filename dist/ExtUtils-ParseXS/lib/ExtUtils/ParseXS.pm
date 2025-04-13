@@ -238,12 +238,6 @@ BEGIN {
 
   'xsub_interface_macro',      # Str: current interface extraction macro.
 
-  'xsub_implicit_OUTPUT_RETVAL', # Bool indicates that a bodiless XSUB has
-                                 # a non-void return value, so needs to
-                                 # return RETVAL; or to put it another
-                                 # way, it indicates an implicit
-                                 # "OUTPUT:\n\tRETVAL".
-  
   'xsub_interface_macro_set',  # Str: current interface setting macro.
   
   'xsub_prototype',            # Str: is set to either the global PROTOTYPES
