@@ -113,6 +113,29 @@ L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/gr
   is essential to progress; for, if you know too much, you won't try
   the thing.
 
+=head2 v5.40.2 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
+
+L<Announced on 2025-04-13 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/04/msg269803.html>
+
+Now, since 1740, Prussia had been under the rule of its third king,
+Frederick II, who was a member of the Hohenzollern family.  Known as
+Frederick the Great, he was without doubt one of the most cultivated men
+of his age.  He was on friendly terms with a number of Frenchmen who
+preached the ideas of the Enlightenment in their writings, and he
+himself wrote much on the subject in French.  For although he was king
+of Prussia he scorned the German language and customs, which, as a
+result of the Thirty Years War, were in a very poor state.  His aim and
+his duty, as he saw it, was to make Prussia a model state and in so
+doing demonstrate the value of the thinking of his friends in France.
+He liked to say that he saw himself as the first servant of the servant:
+the butler, as it were, rather than the owner.  And in that role he
+concerned himself with every detail of his project of putting the new
+ideas into practice.  One of the first things he did was to abolish the
+barbaric practice of torture.  He also relieved the peasants of some of
+the heavier duties to their landlords.  And he was always particularly
+concerned that all his subjects, from the poorest to the mightiest,
+should receive equal justice.  A rare thing in those days.
+
 =head2 v5.40.1 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
 
 L<Announced on 2025-01-18 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/01/msg269454.html>
@@ -265,6 +288,31 @@ counterparts across the Atlantic were busy blowing each other to pieces
 in a Civil War, they embarked on the construction of the Metropolitan
 Line knowing only one thing for certain - there was no way they were
 going to be able to run steam trains through it.
+
+=head2 v5.38.4 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
+
+L<Announced on 2025-04-13 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/04/msg269802.html>
+
+Frederick II of Hohenstaufen was even more remarkable, even greater and
+altogether more admirable than Barbarossa. [...] Like Pope Innocent III,
+he was convinced that he had been called to rule the world.  Frederick
+knew everything that Innocent had known — after all, Innocent had been
+his guardian.  He knew everything the Germans knew, for they were his
+family.  And finally, he knew everything the Arabs knew, for he had
+grown up in Sicily. [...] Above all, he knew about religions.  But there
+was one thing he could never understand: why people were always
+fighting.  He liked to have discussions with learned Muslims, even
+though he was a devout Christian.  When the pope got wind of this he was
+angrier than ever.  And in particular a pope whose name was Gregory.  He
+was just as powerful, but perhaps not as wise as his predecessor, Pope
+Innocent III.  He wanted Frederick to undertake a crusade at all costs,
+and threatened to excommunicate him if he didn't.  So in the end he did.
+But what all other crusades had achieved only through great sacrifices
+and loss of life, Frederick did without any fighting at all: Christian
+pilgrims were allowed to visit the Holy Sepulchre without fear of being
+attacked and all the land around Jerusalem was held to belong to them.
+And how did he do that?  He just sat down with the sultan who ruled
+there and they came to an agreement.
 
 =head2 v5.38.3 - E. H. Gombrich, trans. Caroline Mustill, "A Little History of the World"
 
