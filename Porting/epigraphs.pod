@@ -296,7 +296,7 @@ L<Announced on 2025-04-13 by Steve Hay|https://www.nntp.perl.org/group/perl.perl
 Frederick II of Hohenstaufen was even more remarkable, even greater and
 altogether more admirable than Barbarossa. [...] Like Pope Innocent III,
 he was convinced that he had been called to rule the world.  Frederick
-knew everything that Innocent had known — after all, Innocent had been
+knew everything that Innocent had known â€” after all, Innocent had been
 his guardian.  He knew everything the Germans knew, for they were his
 family.  And finally, he knew everything the Arabs knew, for he had
 grown up in Sicily. [...] Above all, he knew about religions.  But there
