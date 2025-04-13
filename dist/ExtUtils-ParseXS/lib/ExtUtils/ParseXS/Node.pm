@@ -519,6 +519,7 @@ sub boot_code {
                 |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
 EOF
+             $pxs->{need_boot_cv} = 1;
         }
     }
     elsif (@{ $pxs->{xsub_attributes} }) {
@@ -528,6 +529,7 @@ EOF
             |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
             |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
 EOF
+            $pxs->{need_boot_cv} = 1;
     }
     elsif (   $self->{seen_INTERFACE}
            or $self->{seen_INTERFACE_MACRO})
@@ -543,6 +545,7 @@ EOF
                 |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
                 |        $pxs->{xsub_interface_macro_set}(cv,$value);
 EOF
+            $pxs->{need_boot_cv} = 1;
         }
     }
     elsif ($newXS eq 'newXS_deffile'){
@@ -3110,8 +3113,6 @@ sub parse {
     }
 
     $self->{map_short_orig} = \%map;
-
-    $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
     1;
 }
 
@@ -3162,8 +3163,6 @@ sub parse {
 
     $self->{get_macro} = $pxs->{xsub_interface_macro}     = $m1;
     $self->{set_macro} = $pxs->{xsub_interface_macro_set} = $m2;
-
-    $pxs->{seen_INTERFACE_or_MACRO} = 1;       # global
 
     1;
 }

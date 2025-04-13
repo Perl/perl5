@@ -4225,6 +4225,7 @@ EOF
                    "has Foo::buz" ],
             [ 0, 0, qr{"Foo::biz",.*\n.*= 3;},
                    "has Foo::biz" ],
+            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
         ],
 
         [
@@ -4379,6 +4380,7 @@ EOF
                        \s+\QXSINTERFACE_FUNC_SET(cv,f2);\E
                       }x,
                    "got f2 entries" ],
+            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
         ],
     );
 
@@ -4437,6 +4439,7 @@ EOF
                 |    C_ARGS: foo
                 |    ATTRS: d(y(  z))  
 EOF
+            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
             [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "a\E\s+b\s+c\(x\)\s+\Qd(y(  z))", 0);},
                    "has correct attrs arg" ],
         ],

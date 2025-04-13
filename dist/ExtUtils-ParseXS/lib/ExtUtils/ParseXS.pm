@@ -216,12 +216,11 @@ BEGIN {
   'VERSIONCHECK_value', # Bool: most recent VERSIONCHECK: value. Defaults
                         # to the value of the "-noversioncheck" switch.
 
-  'seen_INTERFACE_or_MACRO', # Bool: at least one INTERFACE/INTERFACE_MACRO
-                        # has been seen somewhere.
-
   'seen_an_XSUB',       # Bool: at least one XSUB has been encountered
 
   # File-scoped code-emitting state:
+
+  'need_boot_cv',       # must declare 'cv' within the boot function
 
   'bootcode_early',     # Array of code lines to emit early in boot XSUB:
                         # typically newXS() calls
@@ -837,9 +836,7 @@ EOF
   #      XSANY.any_i32 = $value;
   #      XSINTERFACE_FUNC_SET(cv, $value);
 
-  if (   defined $self->{xsub_map_alias_name_to_value}
-      or defined $self->{seen_INTERFACE_or_MACRO})
-  {
+  if ($self->{need_boot_cv}) {
     print Q(<<"EOF");
       |    [[
       |        CV * cv;
@@ -886,9 +883,7 @@ EOF
 
   # Emit closing scope for the 'CV *cv' declaration
 
-  if (   defined $self->{xsub_map_alias_name_to_value}
-      or defined $self->{seen_INTERFACE_or_MACRO})
-  {
+  if ($self->{need_boot_cv}) {
     print Q(<<"EOF");
       |    ]]
 EOF
