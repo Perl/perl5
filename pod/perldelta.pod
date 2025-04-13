@@ -49,7 +49,7 @@ L<Module::CoreList> has been upgraded from version 5.20250118_38 to 5.20250413_3
 
 =head1 Acknowledgements
 
-Perl 5.38.4 represents approximately 2 months of development since Perl 5.38.3
+Perl 5.38.4 represents approximately 3 months of development since Perl 5.38.3
 and contains approximately 1,500 lines of changes across 36 files from 7
 authors.
 
