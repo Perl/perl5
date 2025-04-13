@@ -784,6 +784,7 @@ the strings?).
  Steve     5.40.1-RC1   2025-Jan-05
  Steve     5.40.1       2025-Jan-18
  Steve     5.40.2-RC1   2025-Mar-30
+ Steve     5.40.2       2025-Apr-13
 
  Graham K  5.41.0       2024-Jun-10     The 5.41 development track
  Philippe  5.41.1       2024-Jul-02
