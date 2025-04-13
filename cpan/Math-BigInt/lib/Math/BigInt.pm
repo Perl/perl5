@@ -24,7 +24,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '2.005002';
+our $VERSION = '2.005003';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -1235,6 +1235,36 @@ sub from_ieee754 {
 
     require Math::BigFloat;
     my $tmp = Math::BigFloat -> from_ieee754($in, $format, @r);
+    return $self -> bnan(@r) unless $tmp -> is_inf() || $tmp -> is_int();
+    $tmp = $tmp -> as_int();
+
+    # If called as a class method, initialize a new object.
+
+    $self = $class -> bzero(@r) unless $selfref;
+    $self -> {sign}  = $tmp -> {sign};
+    $self -> {value} = $tmp -> {value};
+
+    return $self;
+}
+
+sub from_fp80 {
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
+
+    # Don't modify constant (read-only) objects.
+
+    return $self if $selfref && $self -> modify('from_fp80');
+
+    my $in = shift;
+    my @r  = @_;
+
+    require Math::BigFloat;
+    my $tmp = Math::BigFloat -> from_fp80($in, @r);
     return $self -> bnan(@r) unless $tmp -> is_inf() || $tmp -> is_int();
     $tmp = $tmp -> as_int();
 
@@ -5834,7 +5864,11 @@ sub fparts {
 
     my $numer = $x -> copy() -> round(@r);
     return $numer unless wantarray;
-    my $denom = $class -> bone(@r);
+
+    my $denom = $x -> copy();
+    $denom -> {sign}  = "+";
+    $denom -> {value} = $LIB -> _one();
+    $denom -> round(@r);
     return $numer, $denom;
 }
 
@@ -6130,6 +6164,19 @@ sub to_ieee754 {
       unless $x -> is_int() || $x -> is_inf() || $x -> is_nan();
 
     return $x -> as_float() -> to_ieee754($format);
+}
+
+sub to_fp80 {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_)
+                                              : objectify(1, @_);
+
+    return $x -> _upg() -> to_fp80(@r)
+      if $class -> upgrade() && !$x -> isa(__PACKAGE__);
+
+    croak("the value to convert must be an integer, +/-infinity, or NaN")
+      unless $x -> is_int() || $x -> is_inf() || $x -> is_nan();
+
+    return $x -> as_float(@r) -> to_fp80();
 }
 
 sub to_base {
@@ -7510,6 +7557,7 @@ Math::BigInt - arbitrary size integer math package
   $x = Math::BigInt->from_base('why', 36);  # from any base
   $x = Math::BigInt->from_base_num([1, 0], 2);  # from any base
   $x = Math::BigInt->from_ieee754($b, $fmt);    # from IEEE-754 bytes
+  $x = Math::BigInt->from_fp80($b);         # from x86 80-bit
   $x = Math::BigInt->bzero();               # create a +0
   $x = Math::BigInt->bone();                # create a +1
   $x = Math::BigInt->bone('-');             # create a -1
@@ -7666,6 +7714,7 @@ Math::BigInt - arbitrary size integer math package
   $x->to_base($b);        # as string in any base
   $x->to_base_num($b);    # as array of integers in any base
   $x->to_ieee754($fmt);   # to bytes encoded according to IEEE 754-2008
+  $x->to_fp80();          # encode value in x86 80-bit format
 
   $x->as_hex();           # as signed hexadecimal string with "0x" prefix
   $x->as_bin();           # as signed binary string with "0b" prefix
@@ -8041,6 +8090,16 @@ Interpret the input as a value encoded as described in IEEE754-2008. NaN is
 returned if the value is neither +/-infinity nor an integer.
 
 See L<Math::BigFloat/from_ieee754()>.
+
+=item from_fp80()
+
+    # set $x to 314159
+    $x = Math::BigInt -> from_fp80("40119965e00000000000");
+
+Interpret the input as a value encoded in the x86 extended-precision 80-bit
+format.
+
+See L<Math::BigFloat/from_fp80()>.
 
 =item from_base()
 
@@ -9259,6 +9318,10 @@ The invocand must be a non-negative, finite integer. See also L</from_bytes()>.
 =item to_ieee754()
 
 See L<Math::BigFloat/to_ieee754()>.
+
+=item to_fp80()
+
+See L<Math::BigFloat/to_fp80()>.
 
 =item to_base()
 
