@@ -1604,22 +1604,6 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
     }
 }
 
-sub get_cell_value($table, $enums, $x, $y) {
-    for my $which (\$x, \$y) {
-        next unless $$which =~ /\D/;
-        my $resolved = $enums->{$$which};
-        if (! defined $resolved) {
-            die "Undefined value $$which "
-              . stack_trace() . "\n"
-              . Dumper $enums;
-        }
-        $$which = 0 + $resolved;
-    }
-
-    return undef unless defined $table->[$x][$y];
-    return $table->[$x][$y]{value};
-}
-
 sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
             $rule, $has_unused, $as_is = undef, $me_too = undef)
 {
@@ -2300,9 +2284,6 @@ sub output_LB_table() {
                        \%lb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is,
                        \%lb_me_too);
 
-    }
-    my sub get_lb_cell_value($x, $y) {
-        return get_cell_value(\@lb_table, \%lb_all_enums, $x, $y);
     }
     my sub set_lb_me_too($source_x, $source_y, $copy_x, $copy_y, $rule) {
         my @source = get_cell_list($table_size, \%lb_splits, \%lb_all_enums,
