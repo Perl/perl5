@@ -1481,6 +1481,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * or error. */
     Newxz(pRExC_state, 1, RExC_state_t);
 
+    ENTER_with_name("re_op_compile");
     SAVE_FREE_REXC_STATE(pRExC_state);
 
     DEBUG_r({
@@ -1578,6 +1579,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 "Precompiled pattern%s\n",
                     orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
+            LEAVE_with_name("re_op_compile");
+
             return (REGEXP*)re;
         }
     }
@@ -1593,7 +1596,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             pat = newSVpvn_flags(exp, plen, SVs_TEMP |
                                         (IN_BYTES ? 0 : SvUTF8(pat)));
         }
-        return CALLREGCOMP_ENG(eng, pat, orig_rx_flags);
+        REGEXP *re = CALLREGCOMP_ENG(eng, pat, orig_rx_flags);
+        LEAVE_with_name("re_op_compile");
+        return re;
     }
 
     /* ignore the utf8ness if the pattern is 0 length */
@@ -1643,6 +1648,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             Perl_re_printf( aTHX_  "%sSkipping recompilation of unchanged REx%s %s\n",
                           PL_colors[4], PL_colors[5], s);
         });
+        LEAVE_with_name("re_op_compile");
         return old_re;
     }
 
@@ -2477,6 +2483,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (old_re && SvREADONLY(old_re))
         SvREADONLY_on(Rx);
 #endif
+    LEAVE_with_name("re_op_compile");
     return Rx;
 }
 
