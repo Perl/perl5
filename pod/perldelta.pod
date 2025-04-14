@@ -401,6 +401,11 @@ Class initializers and C<ADJUST> blocks, per L<perlclass>, that
 called C<last> or other loop exits would crash perl.  Same cause as
 for [GH #16608].
 
+=item *
+
+Prevent a signature parameter of the form C<$ => from leaking an OP at
+compile-time.  [GH #23187]
+
 =back
 
 =head1 Known Problems
