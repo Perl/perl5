@@ -190,10 +190,10 @@ package ExtUtils::ParseXS::Node::xsub;
 # Process an entire XSUB definition
 
 BEGIN { $build_subclass->('', # parent
-    'decl',       # Node::xsub_decl object holding this XSUB declaration
+    'decl',       # Node::xsub_decl object holding this XSUB's declaration
 
     # Boolean flags: they indicate that at least one of each specified
-    # keywords has # been seen in this XSUB
+    # keyword has been seen in this XSUB
     'seen_ALIAS',
     'seen_INTERFACE',
     'seen_INTERFACE_MACRO',
@@ -214,21 +214,20 @@ BEGIN { $build_subclass->('', # parent
     #
     # CODE_sets_ST0 is a flag indicating that something within a CODE
     # block is doing 'ST(0) = ..' or similar. This is a workaround for
-    # a bug. See the code comments "Horrible 'void' return arg count hack"
+    # a bug: see the code comments "Horrible 'void' return arg count hack"
     # in Node::CODE::parse() for more details.
     'CODE_sets_ST0',             # Bool
     'XSRETURN_count_basic',      # Int
     'XSRETURN_count_extra',      # Int
 
-    # these maintain the alias parsing state across potentially multiple
+    # These maintain the alias parsing state across potentially multiple
     # ALIAS keywords and or lines:
 
     'map_alias_name_to_value',   # Hash: maps seen alias names to their value
 
-                                 # Hash of hash of bools:
+    'map_alias_value_to_name_seen_hash', # Hash of hash of bools:
                                  # indicates which alias names have been
                                  # used for each value.
-    'map_alias_value_to_name_seen_hash',
 
     'alias_clash_hinted',        # Bool: an ALIAS warn-hint has been emitted.
 
@@ -239,10 +238,12 @@ BEGIN { $build_subclass->('', # parent
                                # name, map the short (PREFIX removed) name
                                # to the original name.
 
+    # Maintain the ATTRS parsing state across potentially multiple
+    # ATTRS keywords and or lines:
+
     'attributes',              # Array of strings: all ATTRIBUTE keywords
                                # (possibly multiple space-separated
                                # keywords per string).
-
 )};
 
 
@@ -545,7 +546,7 @@ sub boot_code {
                 |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
 EOF
-             $pxs->{need_boot_cv} = 1;
+            $pxs->{need_boot_cv} = 1;
         }
     }
     elsif ($pxs->{cur_xsub}{attributes}) {
@@ -556,7 +557,7 @@ EOF
             |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
             |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "$attrs", 0);
 EOF
-            $pxs->{need_boot_cv} = 1;
+        $pxs->{need_boot_cv} = 1;
     }
     elsif (   $self->{seen_INTERFACE}
            or $self->{seen_INTERFACE_MACRO})
