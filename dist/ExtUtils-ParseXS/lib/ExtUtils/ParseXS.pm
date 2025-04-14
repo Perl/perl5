@@ -256,10 +256,6 @@ BEGIN {
    
   # Per-XSUB code-emitting state:
 
-  'xsub_deferred_code_lines',  # A multi-line string containing lines of
-                               # code to be emitted *after* all INPUT and
-                               # PREINIT keywords have been processed.
-
   'xsub_stack_was_reset',      # An XSprePUSH was emitted, so return values
                                # should be PUSHed rather than just set.
   );

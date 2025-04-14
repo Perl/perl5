@@ -915,7 +915,7 @@ sub as_code {
 
         print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
         # defer this line until after all the other declarations
-        $pxs->{xsub_deferred_code_lines} .=
+        $pxs->{cur_xbody}{input_part}{deferred_code_lines} .=
                 "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
 
         # this var will be declared using the normal typemap mechanism below
@@ -1125,7 +1125,7 @@ sub as_code {
         if ($default eq 'NO_INIT') {
             # for foo(a, b = NO_INIT), add code to initialise later only if
             # an arg was supplied.
-            $pxs->{xsub_deferred_code_lines}
+            $pxs->{cur_xbody}{input_part}{deferred_code_lines}
                 .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n",
                            $arg_num, $init_code;
         }
@@ -1135,7 +1135,7 @@ sub as_code {
             my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
 
             $default =~ s/"/\\"/g; # escape double quotes
-            $pxs->{xsub_deferred_code_lines}
+            $pxs->{cur_xbody}{input_part}{deferred_code_lines}
                 .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
                         $arg_num,
                         $var,
@@ -1153,7 +1153,8 @@ sub as_code {
 
         print ";\n";
 
-        $pxs->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code
+        $pxs->{cur_xbody}{input_part}{deferred_code_lines}
+                                        .= sprintf "\n%s;\n", $init_code
             if $init_code =~ /\S/;
     }
     else {
@@ -1167,7 +1168,7 @@ sub as_code {
     }
 
     if (defined $defer) {
-        $pxs->{xsub_deferred_code_lines}
+        $pxs->{cur_xbody}{input_part}{deferred_code_lines}
             .= $pxs->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
     }
 }
@@ -2236,6 +2237,18 @@ BEGIN { $build_subclass->('', # parent
                 # info from any INPUT and OUTPUT sections (which can
                 # vary between different CASEs)
 
+
+    # Objects representing the various parts of an xbody. These
+    # are aliases of the same objects in @{$self->{kids}} for easier
+    # access.
+    'input_part',
+    'init_part',
+    'code_part',
+    'output_part',
+    'cleanup_part',
+
+    # Misc parse state
+
     'seen_RETVAL_in_CODE', # Bool: have seen 'RETVAL' within a CODE block
     'seen_autocall',       # Bool: this xbody has an autocall node
     'OUTPUT_SETMAGIC_state', # Bool: most recent value of SETMAGIC in an
@@ -2291,6 +2304,7 @@ sub parse {
         my $kid = "ExtUtils::ParseXS::Node::$part"->new();
         if ($kid->parse($pxs)) {
             push @{$self->{kids}}, $kid;
+            $self->{$part} = $kid;
         }
     }
 
@@ -2344,6 +2358,12 @@ EOF
 package ExtUtils::ParseXS::Node::input_part;
 
 BEGIN { $build_subclass->('', # parent
+
+    # Used during code generation:
+    # a multi-line string containing lines of code to be emitted *after*
+    # all INPUT and PREINIT keywords have been processed.
+    'deferred_code_lines',
+
 )};
 
 
@@ -2352,10 +2372,6 @@ sub parse {
     my ExtUtils::ParseXS $pxs  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
-
-    # First, initialize variables manipulated by INPUT_handler().
-    $pxs->{xsub_deferred_code_lines} = "";  # lines to be emitted after
-                                                                                    # PREINIT/INPUT
 
     $pxs->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
 
@@ -2423,6 +2439,11 @@ sub as_code {
 
     my $ioparams = $xbody->{ioparams};
 
+    # Lines to be emitted after PREINIT/INPUT. This may get populated
+    # by the as_code() methods we call of our kids.
+    $self->{deferred_code_lines} = "";
+
+
     if ($self->{kids}) {
         $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
     }
@@ -2472,7 +2493,7 @@ EOF
     # have been done. This is typically INPUT typemaps which don't
     # start with a simple '$var =' and so would not have been emitted
     # at the variable declaration stage.
-    print $pxs->{xsub_deferred_code_lines};
+    print $self->{deferred_code_lines};
 }
 
 
@@ -4005,7 +4026,7 @@ sub parse {
             # "; extra code" or "+ extra code" :
             # append the extra code (after passing through eval) after all the
             # INPUT and PREINIT blocks have been processed, indirectly using
-            # the $pxs->{xsub_deferred_code_lines} mechanism.
+            # the $input_part->{deferred_code_lines} mechanism.
             # In addition, for '+', also generate the normal initialisation
             # code from the standard typemap - assuming that it's a real
             # parameter that appears in the signature as well as the INPUT
