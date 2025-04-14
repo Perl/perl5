@@ -2561,6 +2561,44 @@ EOF
         ],
 
         [
+            "OUTPUT vars with set magic mixture per-CASE",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(int a, int b)
+                |   CASE: X
+                |    OUTPUT:
+                |        a
+                |        SETMAGIC: DISABLE
+                |        b
+                |   CASE: Y
+                |    OUTPUT:
+                |        a
+                |        SETMAGIC: DISABLE
+                |        b
+EOF
+            [ 0, 0, qr{\Qif (X)\E
+                       .*
+                       \QSvSETMAGIC(ST(0));\E
+                       .*
+                       \Qelse if (Y)\E
+                       }sx,                          "X: set magic ST(0)" ],
+            [ 0, 1, qr{\Qif (X)\E
+                       .*
+                       \QSvSETMAGIC(ST(1));\E
+                       .*
+                       \Qelse if (Y)\E
+                       }sx,                          "X: no magic ST(1)" ],
+            [ 0, 0, qr{\Qelse if (Y)\E
+                       .*
+                       \QSvSETMAGIC(ST(0));\E
+                       }sx,                          "Y: set magic ST(0)" ],
+            [ 0, 1, qr{\Qelse if (Y)\E
+                       .*
+                       \QSvSETMAGIC(ST(1));\E
+                       }sx,                          "Y: no magic ST(1)" ],
+        ],
+
+        [
             "duplicate OUTPUT RETVAL",
             [ Q(<<'EOF') ],
                 |int

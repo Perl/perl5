@@ -2238,6 +2238,9 @@ BEGIN { $build_subclass->('', # parent
 
     'seen_RETVAL_in_CODE', # Bool: have seen 'RETVAL' within a CODE block
     'seen_autocall',       # Bool: this xbody has an autocall node
+    'OUTPUT_SETMAGIC_state', # Bool: most recent value of SETMAGIC in an
+                             #       OUTPUT section.
+
 
     # State during code emitting
 
@@ -2280,6 +2283,9 @@ sub parse {
 
         $self->{ioparams} = $ioparams;
     }
+
+    # by default, OUTPUT entries have SETMAGIC: ENABLE
+    $self->{OUTPUT_SETMAGIC_state} = 1;
 
     for my $part (qw(input_part init_part code_part output_part cleanup_part)) {
         my $kid = "ExtUtils::ParseXS::Node::$part"->new();
@@ -4107,12 +4113,12 @@ sub parse {
     # set some sane default values in case we do one of the early returns
     # below
 
-    $self->{do_setmagic} = $pxs->{xsub_SETMAGIC_state};
+    $self->{do_setmagic} = $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state};
     $self->{is_setmagic} = 0;
 
     if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-        $pxs->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
-        $self->{do_setmagic} = $pxs->{xsub_SETMAGIC_state};
+        $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+        $self->{do_setmagic} = $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state};
         $self->{is_setmagic} = 1;
         return;
     }
@@ -4152,7 +4158,7 @@ sub parse {
     $param->{in_output} = 1;
     $param->{do_setmagic} = $outarg eq 'RETVAL'
                                 ? 0 # RETVAL never needs magic setting
-                                : $pxs->{xsub_SETMAGIC_state};
+                                : $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state};
     $self->{code} = $param->{output_code} = $outcode if length $outcode;
 
     1;

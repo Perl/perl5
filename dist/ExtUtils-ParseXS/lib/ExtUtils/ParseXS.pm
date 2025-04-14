@@ -254,11 +254,6 @@ BEGIN {
                                # whether that method has been listed by
                                # OVERLOAD (for duplicate spotting).
    
-  # Per-XSUB OUTPUT section parsing state:
-
-  'xsub_SETMAGIC_state',       # Bool: most recent value of SETMAGIC in an
-                               # OUTPUT section.
-
   # Per-XSUB code-emitting state:
 
   'xsub_deferred_code_lines',  # A multi-line string containing lines of
@@ -653,11 +648,6 @@ EOM
     # ----------------------------------------------------------------
     # Parse and code-emit an XSUB
     # ----------------------------------------------------------------
-
-    # Initialise more per-XSUB state
-
-    $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
-
 
     unshift @{$self->{line}}, $_;
     my $xsub = ExtUtils::ParseXS::Node::xsub->new();
