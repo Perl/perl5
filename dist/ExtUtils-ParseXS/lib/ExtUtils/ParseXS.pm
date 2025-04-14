@@ -254,10 +254,6 @@ BEGIN {
                                # whether that method has been listed by
                                # OVERLOAD (for duplicate spotting).
    
-  'xsub_attributes',           # Array of strings: all ATTRIBUTE keywords
-                               # (possibly multiple space-separated
-                               # keywords per string).
-
   # Per-XSUB OUTPUT section parsing state:
 
   'xsub_SETMAGIC_state',       # Bool: most recent value of SETMAGIC in an
@@ -660,7 +656,6 @@ EOM
 
     # Initialise more per-XSUB state
 
-    @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
     $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
 
 

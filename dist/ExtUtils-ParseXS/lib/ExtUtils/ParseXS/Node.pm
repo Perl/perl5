@@ -238,6 +238,11 @@ BEGIN { $build_subclass->('', # parent
     'map_interface_name_short_to_original', # Hash: for each INTERFACE
                                # name, map the short (PREFIX removed) name
                                # to the original name.
+
+    'attributes',              # Array of strings: all ATTRIBUTE keywords
+                               # (possibly multiple space-separated
+                               # keywords per string).
+
 )};
 
 
@@ -543,12 +548,13 @@ EOF
              $pxs->{need_boot_cv} = 1;
         }
     }
-    elsif (@{ $pxs->{xsub_attributes} }) {
+    elsif ($pxs->{cur_xsub}{attributes}) {
         # Generate a standard newXS() call, plus a single call to
         # apply_attrs_string() call with the string of attributes.
+        my $attrs = "@{$pxs->{cur_xsub}{attributes}}";
         push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
             |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
-            |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "@{ $pxs->{xsub_attributes} }", 0);
+            |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "$attrs", 0);
 EOF
             $pxs->{need_boot_cv} = 1;
     }
@@ -3227,7 +3233,7 @@ BEGIN { $build_subclass->('multiline', # parent
 
 
 # Read each lines's worth of attributes into a string that is pushed
-# to the {xsub_attributes} array. Note that it doesn't matter that multiple
+# to the $xsub->{attributes} array. Note that it doesn't matter that multiple
 # space-separated attributes on the same line are stored as a single
 # string; later, all the attribute lines are joined together into a single
 # string to pass to apply_attrs_string().
@@ -3239,7 +3245,7 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, get lines
     for (@{$self->{lines}}) {
         ExtUtils::ParseXS::Utilities::trim_whitespace($_);
-        push @{ $pxs->{xsub_attributes} }, $_;
+        push @{$pxs->{cur_xsub}{attributes}}, $_;
     }
     1;
 }
