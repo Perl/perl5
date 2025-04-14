@@ -2370,6 +2370,24 @@ need a C<dTARG> in your variable declarations so that the C<*PUSH*>
 macros can make use of the local variable C<TARG>.  See also
 C<dTARGET> and C<dXSTARG>.
 
+Be careful with TARG: each non-recursive call to your OP, or XSUB for
+dXSTARG, will use the same SV for TARG for each call, so you can't
+assume the SV is pristine since the results from the previous call to
+your OP or XSUB may still be in TARG.
+
+Other state such as a cached numeric version of a PV or the cached
+UTF-8 length may also be set.  You can avoid problems with this by
+using the normal sv_set*() APIs instead of trying to optimize by
+directly manipulating the SV.
+
+For OPs that implement the C<OA_TARGLEX> optimization, TARG may be
+special in other ways, there may be references to it, it might be
+blessed, it might be tied, or magical in other ways.
+
+You must not use TARG to return a reference, since that reference will
+be live until the next time the OP or XSUB executes non-recursively,
+or until perl exits.
+
 =head2 Scratchpads
 
 The question remains on when the SVs which are I<target>s for opcodes
