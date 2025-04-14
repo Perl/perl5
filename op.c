@@ -16543,12 +16543,6 @@ Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr
     if(defexpr) {
         signature->optelems++;
 
-        I32 flags = 0;
-        if(defmode == OP_DORASSIGN)
-            flags |= OPpARG_IF_UNDEF << 8;
-        if(defmode == OP_ORASSIGN)
-            flags |= OPpARG_IF_FALSE << 8;
-
         if(defexpr->op_type == OP_NULL && !(defexpr->op_flags & OPf_KIDS))
         {
             /* caller passed in newOP(OP_NULL, 0), so we should not leak it */
@@ -16559,6 +16553,12 @@ Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr
                 yyerror("Optional parameter lacks default expression");
         }
         else {
+            I32 flags = 0;
+            if(defmode == OP_DORASSIGN)
+                flags |= OPpARG_IF_UNDEF << 8;
+            if(defmode == OP_ORASSIGN)
+                flags |= OPpARG_IF_FALSE << 8;
+
             /* a normal '=default' expression */
             OP *defop = newARGDEFELEMOP(flags, defexpr, argix);
 
