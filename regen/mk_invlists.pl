@@ -1464,13 +1464,39 @@ sub expand_column($table_size, $splits, $enums, $x) {
     return \@list;
 }
 
-sub get_cell_list($table_size, $splits, $enums, $x, $y) {
+sub get_cell_list($table_size, $splits, $enums, $x, $y, $me_too = undef) {
     my @x = expand_column($table_size, $splits, $enums, $x)->@*;
     my @y = expand_column($table_size, $splits, $enums, $y)->@*;
     my @list;
 
-    for my $row (@x) {
-        push @list, [$row, $_], for @y;
+    if (! $me_too) {
+        for my $row (@x) {
+            push @list, [$row, $_], for @y;
+        }
+    }
+    else {
+
+        # $me_too is a hashref that ties together multiple cells so that when
+        # the master cell is to be changed, the follower cells automatically
+        # have the same thing happen.  All that is needed is to look for tied
+        # cells whenever we are generating a list of them, and then add the
+        # follower cells to the list.
+        for my $row (@x) {
+            for my $column (@y) {
+                push @list, [$row, $column];
+                my $me_too_key = "$row,$column";
+                if ($me_too->{$me_too_key}) {
+                    foreach my $pair ($me_too->{$me_too_key}->@*) {
+                        my $copy_x = $pair->[0];
+                        my $copy_y = $pair->[1];
+                        next if any {   $copy_x == $_->[0]
+                                     && $copy_y == $_->[1]
+                                    } @list;
+                        push @list, [ $copy_x, $copy_y ];
+                    }
+                }
+            }
+        }
     }
 
     # It's a lot easier to work with under debugging if the list is sorted.
@@ -1481,11 +1507,11 @@ sub get_cell_list($table_size, $splits, $enums, $x, $y) {
 }
 
 sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
-              $has_unused, $as_is=undef)
+              $has_unused, $as_is=undef, $me_too = undef)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
-                 Dumper $x, $y, $value, $rule, $has_unused, $enums
+                 Dumper $x, $y, $value, $rule, $has_unused, $me_too, $enums
                                                                 if DEBUG;
     if (! defined $value) {
         die "Setting cells to undef"
@@ -1511,7 +1537,8 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
         $rule = $numeric_rule;
     }
 
-    my $list_ref = get_cell_list($table_size, $splits, $enums, $x, $y);
+    my $list_ref = get_cell_list($table_size, $splits, $enums, $x, $y,
+                                 $me_too);
     for my $pair_ref ($list_ref->@*) {
         my $x = $pair_ref->[0];
         my $y = $pair_ref->[1];
@@ -1594,7 +1621,7 @@ sub get_cell_value($table, $enums, $x, $y) {
 }
 
 sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
-            $rule, $has_unused, $as_is)
+            $rule, $has_unused, $as_is = undef, $me_too = undef)
 {
     # The default fall-back value for all properties is 1.  It is added in
     # most cases to the enum value.  For this intermediate commit, all cells
@@ -1604,7 +1631,7 @@ sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
                                       . stack_trace() . "\n"
                                       . Dumper $dfas, $enums;
     set_cells($table, $table_size, $splits, $enums, $x, $y,
-              $this_dfa->{enum}, $rule, $has_unused, $as_is);
+              $this_dfa->{enum}, $rule, $has_unused, $as_is, $me_too);
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
@@ -2148,6 +2175,7 @@ sub output_LB_table() {
 
     my @lb_table;
     my $table_size = @lb_short_enums;
+    my %lb_me_too;
 
     # Is there a row and column for unused values in this release?
     my $has_unused = $lb_short_enums[$table_size-1] eq $unused_table_hdr;
@@ -2245,7 +2273,7 @@ sub output_LB_table() {
     # making them easier to read.
     my sub set_lb_cells($x, $y, $value, $rule) {
         return set_cells(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
-                         $x, $y, $value, $rule, $has_unused);
+                         $x, $y, $value, $rule, $has_unused, \%lb_me_too);
     }
     my sub set_lb_breakable($x, $y, $rule) {
         return set_lb_cells($x, $y, $lb_dfas{LB_BREAKABLE}{match_return},
@@ -2269,10 +2297,24 @@ sub output_LB_table() {
                   || $dfa eq 'LB_various_then_RI_v_RI';
 
         return add_dfa(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
-                       \%lb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is);
+                       \%lb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is,
+                       \%lb_me_too);
+
     }
     my sub get_lb_cell_value($x, $y) {
         return get_cell_value(\@lb_table, \%lb_all_enums, $x, $y);
+    }
+    my sub set_lb_me_too($source_x, $source_y, $copy_x, $copy_y, $rule) {
+        my @source = get_cell_list($table_size, \%lb_splits, \%lb_all_enums,
+                                   $source_x, $source_y)->@*;
+        my @copy = get_cell_list($table_size, \%lb_splits, \%lb_all_enums,
+                                 $copy_x, $copy_y)->@*;
+        foreach my $source_pair (@source) {
+            foreach my $copy_pair (@copy) {
+                push $lb_me_too{"$source_pair->[0],$source_pair->[1]"}->@*,
+                     [ $copy_pair->[0], $copy_pair->[1] ];
+            }
+        }
     }
 
     my ($lhs, $rhs, $dfa, $rule);
@@ -2371,8 +2413,10 @@ sub output_LB_table() {
     # LB10 Treat any remaining combining mark or ZWJ as AL.  This catches the
     # case where a CM or ZWJ is the first character on the line or follows SP,
     # BK, CR, LF, NL, or ZW.
-    #set_lb_cells(\@CM_doesnt_combine, $_, get_lb_cell_value($_, 'AL'), 10)
-    #                                                            for qw(CM ZWJ);
+    for my $i (@CM_doesnt_combine) {
+        set_lb_me_too($i, 'AL', $i, 'CM', 10);
+        set_lb_me_too($i, 'AL', $i, 'ZWJ', 10);
+    }
 
     # Special case this here to avoid having to do a special case in the code,
     # by making this the same as other things with a SP in front of them that
