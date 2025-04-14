@@ -254,10 +254,6 @@ BEGIN {
                                # whether that method has been listed by
                                # OVERLOAD (for duplicate spotting).
    
-  'xsub_map_interface_name_short_to_original', # Hash: for each INTERFACE
-                               # name, map the short (PREFIX removed) name
-                               # to the original name.
-
   'xsub_attributes',           # Array of strings: all ATTRIBUTE keywords
                                # (possibly multiple space-separated
                                # keywords per string).
@@ -664,7 +660,6 @@ EOM
 
     # Initialise more per-XSUB state
 
-    %{ $self->{xsub_map_interface_name_short_to_original} } = ();
     @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
     $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
 

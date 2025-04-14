@@ -232,7 +232,12 @@ BEGIN { $build_subclass->('', # parent
 
     'alias_clash_hinted',        # Bool: an ALIAS warn-hint has been emitted.
 
+    # Maintain the INTERFACE parsing state across potentially multiple
+    # INTERFACE keywords and or lines:
 
+    'map_interface_name_short_to_original', # Hash: for each INTERFACE
+                               # name, map the short (PREFIX removed) name
+                               # to the original name.
 )};
 
 
@@ -553,9 +558,9 @@ EOF
         # For each interface name, generate both a newXS() and
         # XSINTERFACE_FUNC_SET() call.
         foreach my $yname (sort keys
-                %{ $pxs->{xsub_map_interface_name_short_to_original} })
+                %{ $pxs->{cur_xsub}{map_interface_name_short_to_original} })
         {
-            my $value = $pxs->{xsub_map_interface_name_short_to_original}{$yname};
+            my $value = $pxs->{cur_xsub}{map_interface_name_short_to_original}{$yname};
             $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
@@ -3108,7 +3113,6 @@ package ExtUtils::ParseXS::Node::INTERFACE;
 # Handle INTERFACE keyword
 
 BEGIN { $build_subclass->('multiline_merged', # parent
-    'map_short_orig', # hash mapping short IF names to original ones
 )};
 
 
@@ -3125,10 +3129,9 @@ sub parse {
         my $short = $_;
         $short =~ s/^$pxs->{PREFIX_pattern}//;
         $map{$short} = $_;
-        $pxs->{xsub_map_interface_name_short_to_original}->{$short} = $_;
+        $pxs->{cur_xsub}{map_interface_name_short_to_original}{$short} = $_;
     }
 
-    $self->{map_short_orig} = \%map;
     1;
 }
 
