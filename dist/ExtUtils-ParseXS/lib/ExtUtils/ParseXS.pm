@@ -262,15 +262,6 @@ BEGIN {
                                # (possibly multiple space-separated
                                # keywords per string).
 
-  'xsub_map_alias_name_to_value', # Hash: maps ALIAS name to value.
-
-  'xsub_map_alias_value_to_name_seen_hash', # Hash of hash of bools:
-                               # indicates which alias names have been
-                               # used for each value.
-
-  'xsub_alias_clash_hinted',   # Bool: an ALIAS warning-hint has been emitted.
-
-
   # Per-XSUB OUTPUT section parsing state:
 
   'xsub_SETMAGIC_state',       # Bool: most recent value of SETMAGIC in an
@@ -673,8 +664,6 @@ EOM
 
     # Initialise more per-XSUB state
 
-    delete $self->{xsub_map_alias_name_to_value};           # ALIAS: ...
-    delete $self->{xsub_map_alias_value_to_name_seen_hash};
     %{ $self->{xsub_map_interface_name_short_to_original} } = ();
     @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
     $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE

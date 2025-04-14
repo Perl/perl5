@@ -219,6 +219,20 @@ BEGIN { $build_subclass->('', # parent
     'CODE_sets_ST0',             # Bool
     'XSRETURN_count_basic',      # Int
     'XSRETURN_count_extra',      # Int
+
+    # these maintain the alias parsing state across potentially multiple
+    # ALIAS keywords and or lines:
+
+    'map_alias_name_to_value',   # Hash: maps seen alias names to their value
+
+                                 # Hash of hash of bools:
+                                 # indicates which alias names have been
+                                 # used for each value.
+    'map_alias_value_to_name_seen_hash',
+
+    'alias_clash_hinted',        # Bool: an ALIAS warn-hint has been emitted.
+
+
 )};
 
 
@@ -503,18 +517,20 @@ sub boot_code {
     my $pname = $pxs->{cur_xsub}{decl}{full_perl_name};
     my $cname = $pxs->{cur_xsub}{decl}{full_C_name};
 
-    if (                $pxs->{xsub_map_alias_name_to_value}
-            and keys %{ $pxs->{xsub_map_alias_name_to_value} })
+    if (                $pxs->{cur_xsub}{map_alias_name_to_value}
+            and keys %{ $pxs->{cur_xsub}{map_alias_name_to_value} })
     {
         # For the main XSUB and for each alias name, generate a newXS() call
         # and 'XSANY.any_i32 = ix' line.
 
         # Make the main name one of the aliases if it isn't already
-        $pxs->{xsub_map_alias_name_to_value}->{$pname} = 0
-            unless defined $pxs->{xsub_map_alias_name_to_value}->{$pname};
+        $pxs->{cur_xsub}{map_alias_name_to_value}->{$pname} = 0
+            unless defined $pxs->{cur_xsub}{map_alias_name_to_value}{$pname};
 
-        foreach my $xname (sort keys %{ $pxs->{xsub_map_alias_name_to_value} }) {
-            my $value = $pxs->{xsub_map_alias_name_to_value}{$xname};
+        foreach my $xname (sort keys
+                    %{ $pxs->{cur_xsub}{map_alias_name_to_value} })
+        {
+            my $value = $pxs->{cur_xsub}{map_alias_name_to_value}{$xname};
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
@@ -3657,8 +3673,9 @@ BEGIN { $build_subclass->('keyline', # parent
 #
 # Updates:
 #   $parent->{aliases}{$alias} = $value;
-#   $pxs->{xsub_map_alias_name_to_value}->{$alias} = $value;
-#   $pxs->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
+#   $xsub->{map_alias_name_to_value}{$alias} = $value;
+#   $xsub->{map_alias_value_to_name_seen_hash}{$value}{$alias}++;
+
 
 sub parse {
     my __PACKAGE__                    $self   = shift;
@@ -3695,8 +3712,8 @@ sub parse {
         if ($is_symbolic) {
             my $orig_value = $value;
             $value = $pxs->{PACKAGE_class} . $value if $value !~ /::/;
-            if (defined $pxs->{xsub_map_alias_name_to_value}->{$value}) {
-                $value = $pxs->{xsub_map_alias_name_to_value}->{$value};
+            if (defined $pxs->{cur_xsub}{map_alias_name_to_value}{$value}) {
+                $value = $pxs->{cur_xsub}{map_alias_name_to_value}{$value};
             } elsif ($value eq $fname) {
                 $value = 0;
             } else {
@@ -3705,14 +3722,16 @@ sub parse {
         }
 
         # check for duplicate alias name & duplicate value
-        my $prev_value = $pxs->{xsub_map_alias_name_to_value}->{$alias};
+        my $prev_value = $pxs->{cur_xsub}{map_alias_name_to_value}{$alias};
         if (defined $prev_value) {
             if ($prev_value eq $value) {
                 $pxs->Warn("Warning: Ignoring duplicate alias '$orig_alias'")
             } else {
                 $pxs->Warn("Warning: Conflicting duplicate alias '$orig_alias'"
                                             . " changes definition from '$prev_value' to '$value'");
-                delete $pxs->{xsub_map_alias_value_to_name_seen_hash}->{$prev_value}{$alias};
+                delete $pxs->{cur_xsub}->
+                       {map_alias_value_to_name_seen_hash}->
+                       {$prev_value}{$alias};
             }
         }
 
@@ -3721,11 +3740,13 @@ sub parse {
         # symbolic definitions is to say we want to duplicate the value and
         # it is NOT a mistake.
         unless ($is_symbolic) {
-            my @keys= sort keys %{$pxs->{xsub_map_alias_value_to_name_seen_hash}->{$value}||{}};
+            my @keys= sort keys %{$pxs->{cur_xsub}->
+                          {map_alias_value_to_name_seen_hash}->{$value}||{}};
             # deal with an alias of 0, which might not be in the aliases
             # dataset yet as 0 is the default for the base function ($fname)
             push @keys, $fname
-                if $value eq "0" and !defined $pxs->{xsub_map_alias_name_to_value}{$fname};
+                if $value eq "0" and
+                    !defined $pxs->{cur_xsub}{map_alias_name_to_value}{$fname};
             if (@keys and $pxs->{config_author_warnings}) {
                 # We do not warn about value collisions unless author_warnings
                 # are enabled. They aren't helpful to a module consumer, only
@@ -3742,7 +3763,7 @@ sub parse {
                                     . ( $value eq "0"
                                             ? " - the base function"
                                             : "" ),
-                                    !$pxs->{xsub_alias_clash_hinted}++
+                                    !$pxs->{cur_xsub}{alias_clash_hinted}++
                                     ? "If this is deliberate use a symbolic alias instead."
                                     : undef
                 );
@@ -3750,8 +3771,9 @@ sub parse {
         }
 
         $parent->{aliases}{$alias} = $value;
-        $pxs->{xsub_map_alias_name_to_value}->{$alias} = $value;
-        $pxs->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
+        $pxs->{cur_xsub}{map_alias_name_to_value}->{$alias} = $value;
+        $pxs->{cur_xsub}{map_alias_value_to_name_seen_hash}->
+                        {$value}{$alias}++;
     }
 
     $pxs->blurt("Error: Cannot parse ALIAS definitions from '$orig'")
