@@ -188,15 +188,19 @@ is a lexical C<$_> in scope.
 
 #define dXSI32 I32 ix = XSANY.any_i32
 
-#ifdef __cplusplus
-#  define XSINTERFACE_CVT(ret,name) ret (*name)(...)
-#  define XSINTERFACE_CVT_ANON(ret) ret (*)(...)
+#if __STDC_VERSION__ >= 202311L || defined(__GNUC__)
+#  define XSINTERFACE_CVT(ret, name, example_func_name) typeof(&example_func_name) name
+#  define XSINTERFACE_CVT_ANON(ret, example_func_name) typeof(&example_func_name)
+#elif defined(__cplusplus)
+#  define XSINTERFACE_CVT(ret, name, example_func_name) decltype(&example_func_name) name
+#  define XSINTERFACE_CVT_ANON(ret, example_func_name) decltype(&example_func_name)
 #else
-#  define XSINTERFACE_CVT(ret,name) ret (*name)()
-#  define XSINTERFACE_CVT_ANON(ret) ret (*)()
+#  define XSINTERFACE_CVT(ret,name, example_func_name) ret (*name)()
+#  define XSINTERFACE_CVT_ANON(ret, example_func_name) ret (*)()
 #endif
-#define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
-#define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT_ANON(ret))(f))
+
+#define dXSFUNCTION(ret, example_func_name) XSINTERFACE_CVT(ret, XSFUNCTION, example_func_name)
+#define XSINTERFACE_FUNC(ret,cv,f,example_func_name) ((XSINTERFACE_CVT_ANON(ret, example_func_name))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
                 CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 

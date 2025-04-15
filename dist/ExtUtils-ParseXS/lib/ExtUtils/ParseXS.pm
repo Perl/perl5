@@ -64,7 +64,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.57';
+  $VERSION = '3.58';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Node; ExtUtils::ParseXS::Node->VERSION($VERSION);
@@ -896,10 +896,6 @@ EOF
 
     print Q(<<"EOF") if $self->{xsub_seen_ALIAS};
       |    dXSI32;
-EOF
-
-    print Q(<<"EOF") if $self->{xsub_seen_INTERFACE};
-      |    dXSFUNCTION($self->{xsub_return_type});
 EOF
 
 
@@ -2244,13 +2240,17 @@ sub INTERFACE_handler {
 
   trim_whitespace($in);
 
+  # used for function pointer type inference
+  my $example_interface_function;
   foreach (split /[\s,]+/, $in) {
     my $iface_name = $_;
     $iface_name =~ s/^$self->{PREFIX_pattern}//;
     $self->{xsub_map_interface_name_short_to_original}->{$iface_name} = $_;
+    $example_interface_function = $_;
   }
+
   print Q(<<"EOF");
-    |    XSFUNCTION = $self->{xsub_interface_macro}($self->{xsub_return_type},cv,XSANY.any_dptr);
+    |    dXSFUNCTION($self->{xsub_return_type}, $example_interface_function) = $self->{xsub_interface_macro}($self->{xsub_return_type},cv,XSANY.any_dptr,$example_interface_function);
 EOF
   $self->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
   $self->{seen_INTERFACE_or_MACRO} = 1;       # global
