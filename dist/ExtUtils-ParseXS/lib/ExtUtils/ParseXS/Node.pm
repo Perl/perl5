@@ -1649,12 +1649,12 @@ sub as_output_code {
 
         if (   $pxs->{config_optimize}
                 && ExtUtils::Typemaps::OutputMap->targetable($evalexpr)
-                && !$xbody->{targ_used})
+                && !$xbody->{output_part}{targ_used})
         {
             # So TARG is available for use.
             $retvar = 'TARG';
             # can only use TARG to return one value
-            $xbody->{targ_used} = 1;
+            $xbody->{output_part}{targ_used} = 1;
 
             # Since we're using TARG for the return SV, see if we can use
             # the TARG[iun] macros as appropriate to speed up setting it.
@@ -2254,11 +2254,6 @@ BEGIN { $build_subclass->('', # parent
     'OUTPUT_SETMAGIC_state', # Bool: most recent value of SETMAGIC in an
                              #       OUTPUT section.
 
-
-    # State during code emitting
-
-    'targ_used', # Bool: the TARG has been allocated for this body,
-                 #       so is no longer available for use.
 )};
 
 
@@ -2316,9 +2311,6 @@ sub as_code {
     my __PACKAGE__                   $self  = shift;
     my ExtUtils::ParseXS             $pxs   = shift;
     my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
-
-    # TARG is available for use within this body.
-    $self->{targ_used} = 0;
 
     # Emit opening brace. With cmd-line switch "-except", prefix it with 'TRY'
     print   +($pxs->{config_allow_exceptions} ? ' TRY' : '')
@@ -2590,6 +2582,11 @@ sub as_code {
 package ExtUtils::ParseXS::Node::output_part;
 
 BEGIN { $build_subclass->('', # parent
+
+    # State during code emitting
+
+    'targ_used',        # Bool: the TARG has been allocated for this body,
+                        # so is no longer available for use.
 )};
 
 
@@ -2620,6 +2617,9 @@ sub as_code {
     my ExtUtils::ParseXS              $pxs   = shift;
     my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    # TARG is available for use within this body.
+    $self->{targ_used} = 0;
 
     if ($self->{kids}) {
         $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
