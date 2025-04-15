@@ -5644,7 +5644,7 @@ ERS	|LB_enum|advance_one_LB |NN U8 **curpos 			\
 ERS	|SB_enum|advance_one_SB |NN U8 **curpos 			\
 				|NN const U8 * const strend		\
 				|const bool utf8_target
-ERS	|WB_enum|advance_one_WB |NN U8 **curpos 			\
+ERS	|WB_enum|advance_one_WB_|NN U8 **curpos 			\
 				|NN const U8 * const strend		\
 				|const bool utf8_target 		\
 				|const bool skip_Extend_Format
