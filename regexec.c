@@ -5946,6 +5946,11 @@ S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_tar
     return sb;
 }
 
+#define advance_one_WB(cur, end, utf8)                                  \
+                                advance_one_WB_(cur, end, utf8, false)
+#define advance_one_WB_but_over_Extend_FO(cur, end, utf8)               \
+                                advance_one_WB_(cur, end, utf8, true)
+
 STATIC bool
 S_isWB(pTHX_ WB_enum previous,
              WB_enum before,
@@ -5986,8 +5991,7 @@ S_isWB(pTHX_ WB_enum previous,
 
         case WB_hs_v_hs_then_Extend_or_FO_or_ZWJ: /* 2 horizontal spaces in a
                                                      row */
-            next = advance_one_WB(&next_pos, strend, utf8_target,
-                                 false /* Don't skip Extend nor Format */ );
+            next = advance_one_WB(&next_pos, strend, utf8_target);
             /* A space immediately preceding an Extend or Format is attached
              * to by them, and hence gets separated from previous spaces.
              * Otherwise don't break between horizontal white space */
@@ -6025,9 +6029,10 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_HL_v_DQ_then_HL + WB_NOBREAK:
 
             /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
-            if (isWB_Hebrew_Letter(advance_one_WB(&next_pos, strend,
-                                                  utf8_target,
-                                       true /* Do skip Extend and Format */ )))
+            if (isWB_Hebrew_Letter(advance_one_WB_but_over_Extend_FO(
+                                                               &next_pos,
+                                                               strend,
+                                                               utf8_target)))
             {
                 return false;
             }
@@ -6039,9 +6044,9 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB6  AHLetter  ×  (MidLetter | MidNumLetQ ) AHLetter */
 
-            next = advance_one_WB(&next_pos, strend, utf8_target,
-                                       true /* Do skip Extend and Format */ );
-
+            next = advance_one_WB_but_over_Extend_FO(&next_pos,
+                                                     strend,
+                                                     utf8_target);
             if (isWB_AHLetter(next)) {
                 return false;
             }
@@ -6082,9 +6087,10 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB12  Numeric  ×  (MidNum | MidNumLetQ) Numeric */
 
-            if (isWB_Numeric(advance_one_WB(&next_pos, strend, utf8_target,
-                                            true /* Do skip Extend, Format */
-            ))) {
+            if (isWB_Numeric(advance_one_WB_but_over_Extend_FO(&next_pos,
+                                                               strend,
+                                                               utf8_target)))
+            {
                 return false;
             }
 
@@ -6124,14 +6130,14 @@ S_isWB(pTHX_ WB_enum previous,
 }
 
 STATIC WB_enum
-S_advance_one_WB(pTHX_ U8 ** curpos,
-                       const U8 * const strend,
-                       const bool utf8_target,
-                       const bool skip_Extend_Format)
+S_advance_one_WB_(pTHX_ U8 ** curpos,
+                        const U8 * const strend,
+                        const bool utf8_target,
+                        const bool skip_Extend_Format)
 {
-    WB_enum wb;
+    PERL_ARGS_ASSERT_ADVANCE_ONE_WB_;
 
-    PERL_ARGS_ASSERT_ADVANCE_ONE_WB;
+    WB_enum wb;
 
     if (*curpos >= strend) {
         return WB_EDGE;

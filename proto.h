@@ -8729,9 +8729,9 @@ S_advance_one_SB(pTHX_ U8 **curpos, const U8 * const strend, const bool utf8_tar
         assert(curpos); assert(strend)
 
 STATIC WB_enum
-S_advance_one_WB(pTHX_ U8 **curpos, const U8 * const strend, const bool utf8_target, const bool skip_Extend_Format)
+S_advance_one_WB_(pTHX_ U8 **curpos, const U8 * const strend, const bool utf8_target, const bool skip_Extend_Format)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_ADVANCE_ONE_WB        \
+# define PERL_ARGS_ASSERT_ADVANCE_ONE_WB_       \
         assert(curpos); assert(strend)
 
 STATIC GCB_enum

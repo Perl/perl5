@@ -2084,7 +2084,7 @@
 #   if defined(PERL_IN_REGEXEC_C)
 #     define advance_one_LB(a,b,c)              S_advance_one_LB(aTHX_ a,b,c)
 #     define advance_one_SB(a,b,c)              S_advance_one_SB(aTHX_ a,b,c)
-#     define advance_one_WB(a,b,c,d)            S_advance_one_WB(aTHX_ a,b,c,d)
+#     define advance_one_WB_(a,b,c,d)           S_advance_one_WB_(aTHX_ a,b,c,d)
 #     define backup_one_GCB(a,b,c)              S_backup_one_GCB(aTHX_ a,b,c)
 #     define backup_one_LB(a,b,c)               S_backup_one_LB(aTHX_ a,b,c)
 #     define backup_one_SB(a,b,c)               S_backup_one_SB(aTHX_ a,b,c)
