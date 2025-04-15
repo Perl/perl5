@@ -5679,7 +5679,8 @@ ERS	|LB_enum|backup_one_LB	|NN const U8 * const strbeg		\
 ERS	|SB_enum|backup_one_SB	|NN const U8 * const strbeg		\
 				|NN U8 **curpos 			\
 				|const bool utf8_target
-ERS	|WB_enum|backup_one_WB	|NN WB_enum *previous			\
+ERS	|WB_enum|backup_one_WB_but_over_Extend_FO			\
+				|NN WB_enum *previous			\
 				|NN const U8 * const strbeg		\
 				|NN U8 **curpos 			\
 				|const bool utf8_target

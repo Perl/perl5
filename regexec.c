@@ -6009,7 +6009,8 @@ S_isWB(pTHX_ WB_enum previous,
          * ones) and then see if that is one of the region-end characters and
          * go from there */
         case WB_Extend_or_FO_or_ZWJ_then_foo:
-            prev = backup_one_WB(&previous, strbeg, &prev_pos, utf8_target);
+            prev = backup_one_WB_but_over_Extend_FO(&previous, strbeg,
+                                                    &prev_pos, utf8_target);
             goto redo;
 
         case WB_HL_then_DQ_v_HL + WB_BREAKABLE:
@@ -6017,8 +6018,10 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
 
-            if (isWB_Hebrew_Letter(backup_one_WB(&previous, strbeg,
-                                                 &prev_pos, utf8_target)))
+            if (isWB_Hebrew_Letter(backup_one_WB_but_over_Extend_FO(&previous,
+                                                                strbeg,
+                                                                &prev_pos,
+                                                                utf8_target)))
             {
                 return false;
             }
@@ -6059,7 +6062,8 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB7  AHLetter (MidLetter | MidNumLetQ)  ×  AHLetter */
 
-            prev = backup_one_WB(&previous, strbeg, &prev_pos, utf8_target);
+            prev = backup_one_WB_but_over_Extend_FO(&previous, strbeg,
+                                                    &prev_pos, utf8_target);
             if (isWB_AHLetter(prev)) {
                 return false;
             }
@@ -6073,8 +6077,9 @@ S_isWB(pTHX_ WB_enum previous,
             /* WB11  Numeric (MidNum | (MidNumLetQ))  ×  Numeric
              * */
 
-            if (isWB_Numeric(backup_one_WB(&previous, strbeg, &prev_pos,
-                                           utf8_target)))
+            if (isWB_Numeric(backup_one_WB_but_over_Extend_FO(&previous,
+                                                            strbeg, &prev_pos,
+                                                            utf8_target)))
             {
                 return false;
             }
@@ -6108,8 +6113,9 @@ S_isWB(pTHX_ WB_enum previous,
                  *
                  * WB15   sot (RI RI)* RI × RI
                  * WB16 [^RI] (RI RI)* RI × RI */
-                while (isWB_RI(backup_one_WB(&previous, strbeg, &prev_pos,
-                                             utf8_target)))
+                while (isWB_RI(backup_one_WB_but_over_Extend_FO(&previous,
+                                                            strbeg, &prev_pos,
+                                                            utf8_target)))
                 {
                     RI_count++;
                 }
@@ -6170,11 +6176,14 @@ S_advance_one_WB_(pTHX_ U8 ** curpos,
 }
 
 STATIC WB_enum
-S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
+S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
+                                         const U8 * const strbeg,
+                                         U8 ** curpos,
+                                         const bool utf8_target)
 {
-    WB_enum wb;
+    PERL_ARGS_ASSERT_BACKUP_ONE_WB_BUT_OVER_EXTEND_FO;
 
-    PERL_ARGS_ASSERT_BACKUP_ONE_WB;
+    WB_enum wb;
 
     /* If we know what the previous character's break value is, don't have
         * to look it up */
