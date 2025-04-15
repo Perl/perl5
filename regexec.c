@@ -5390,6 +5390,7 @@ S_isLB(pTHX_ LB_enum before,
 {
     U8 * temp_pos = (U8 *) curpos;
     LB_enum prev = before;
+    LB_enum isLB_scratch;   /* Used by generated isLB_foo() macros */
 
     /* Is the boundary between 'before' and 'after' line-breakable?
      * Most of this is just a table lookup of a generated table from Unicode
