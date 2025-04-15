@@ -8858,9 +8858,9 @@ S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 **curpos, const bool utf8_targ
         assert(strbeg); assert(curpos)
 
 STATIC WB_enum
-S_backup_one_WB(pTHX_ WB_enum *previous, const U8 * const strbeg, U8 **curpos, const bool utf8_target)
+S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum *previous, const U8 * const strbeg, U8 **curpos, const bool utf8_target)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_BACKUP_ONE_WB         \
+# define PERL_ARGS_ASSERT_BACKUP_ONE_WB_BUT_OVER_EXTEND_FO \
         assert(previous); assert(strbeg); assert(curpos)
 
 STATIC char *
