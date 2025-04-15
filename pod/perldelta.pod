@@ -944,6 +944,11 @@ Added testing of the perl headers against the C++ compiler
 corresponding to the C compiler perl is being built with.
 [L<GH #22232|https://github.com/Perl/perl5/issues/22232>]
 
+=item *
+
+When testing embedding, add a sanity check to ensure the C<libperl> we
+link against matches the perl we are building.  [GH #22125]
+
 =back
 
 =head1 Platform Support
@@ -977,6 +982,11 @@ F<locale.t>), you can explicitly disable locale collation by adding the
 C<-Accflags=-DNO_LOCALE_COLLATE> option to your invocation of C<./Configure>,
 or just C<-DNO_LOCALE_COLLATE> to the C<ccflags> and C<cppflags>
 variables in F<config.sh>.
+
+=item OpenBSD
+
+When testing embedding, ensure we link against the correct static
+libperl. [GH #22125]
 
 =back
 
