@@ -1512,7 +1512,7 @@ sub as_output_code {
         #    OUTPUT:
         #       RETVAL output_code
         print "\t$output_code\n";
-        print "\t++SP;\n" if $pxs->{xsub_stack_was_reset};
+        print "\t++SP;\n" if $xbody->{output_part}{stack_was_reset};
         return;
     }
 
@@ -1737,7 +1737,7 @@ sub as_output_code {
     }
 
     print @lines;
-    print "\t++SP;\n" if $pxs->{xsub_stack_was_reset};
+    print "\t++SP;\n" if $xbody->{output_part}{stack_was_reset};
 }
 
 
@@ -2365,8 +2365,6 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no
 
-    $pxs->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
-
     # Process any implicit INPUT section.
     {
         my $input = ExtUtils::ParseXS::Node::INPUT->new();
@@ -2587,6 +2585,9 @@ BEGIN { $build_subclass->('', # parent
 
     'targ_used',        # Bool: the TARG has been allocated for this body,
                         # so is no longer available for use.
+
+    'stack_was_reset',  # Bool: An XSprePUSH was emitted, so return values
+                        # should be PUSHed rather than just set.
 )};
 
 
@@ -2620,6 +2621,9 @@ sub as_code {
 
     # TARG is available for use within this body.
     $self->{targ_used} = 0;
+
+    # SP still pointing at top arg
+    $self->{stack_was_reset} = 0;
 
     if ($self->{kids}) {
         $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
@@ -2658,7 +2662,7 @@ sub as_code {
         # If there are any OUTLIST vars to be returned, we reset SP to
         # the base of the stack frame and then PUSH any return values.
         print "\tXSprePUSH;\n";
-        $pxs->{xsub_stack_was_reset} = 1;
+        $self->{stack_was_reset} = 1;
     }
 
     # Extend the stack if we're going to return more values than were

@@ -253,11 +253,6 @@ BEGIN {
                                # (such as '<=>') to a boolean indicating
                                # whether that method has been listed by
                                # OVERLOAD (for duplicate spotting).
-   
-  # Per-XSUB code-emitting state:
-
-  'xsub_stack_was_reset',      # An XSprePUSH was emitted, so return values
-                               # should be PUSHed rather than just set.
   );
 
   # do 'use fields', except: fields needs Hash::Util which is XS, which
