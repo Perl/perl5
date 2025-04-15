@@ -1570,8 +1570,9 @@ why not just use C<SvGROW> if you're not sure about the provenance?
 
 =cut
 */
-#define SvPV_renew(sv,n) \
-        STMT_START { SvLEN_set(sv, n); \
+#define SvPV_renew(sv,n) STMT_START { \
+                assert(SvLEN(sv) > n && n > 0);\
+                SvLEN_set(sv, n); \
                 SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
                                 (char*)saferealloc((Malloc_t)SvPVX(sv), \
                                                    (MEM_SIZE)((n)))));  \

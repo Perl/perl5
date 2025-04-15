@@ -11878,7 +11878,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
     /* if we allocated too much space, give some back */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
-        SvLEN_set(sv, SvCUR(sv) + 1);
+        /* XXX SvLEN_set(sv, SvCUR(sv) + 1); */
         SvPV_shrink_to_cur(sv);
     }
 
