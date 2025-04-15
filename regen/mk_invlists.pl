@@ -1481,7 +1481,7 @@ sub get_cell_list($table_size, $splits, $enums, $x, $y) {
 }
 
 sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
-              $has_unused)
+              $has_unused, $as_is=undef)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
@@ -1536,17 +1536,41 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
               . stack_trace() . "\n"
               . Dumper $enums;
         }
-        next if defined $table->[$x][$y];
 
-        # Override whatever was going to go into an unused cell.
-        my $this_value = ($has_unused && (   $x == $table_size - 1
-                                          || $y == $table_size - 1))
-                           ? 0
-                           : $value;
+        my $this_value = $value;
+        my $is_final_value = $as_is || $this_value <= 2;
+        if (! defined $table->[$x][$y]) {
 
-        $table->[$x][$y] = { value => $this_value, rule => $rule };
-        $table->[$x][$y]->{rule_as_string} = $rule_as_string
-                                                   if defined $rule_as_string;
+                # A cell in the last row or column is unused,  Its contents
+                # are immaterial, except it is better to not put a dfa in it,
+                # as that might be the only use of that dfa, so it is
+                # effectively unused, and keeping it out here means we can do
+                # #ifdef's in regexec.c to not actually generate code for it.
+                $this_value = 0 if ($has_unused && (   $x == $table_size - 1
+                                                    || $y == $table_size - 1));
+                $table->[$x][$y] = {
+                                value           => $this_value,
+                                rule            => $rule ,
+                                has_final_value => $is_final_value,
+                               };
+                $table->[$x][$y]->{rule_as_string} = $rule_as_string
+                                                    if defined $rule_as_string;
+        }
+        else {
+
+            # Here the cell does have a value.  We don't modify it if that
+            # value is the final one, nor if this isn't a final value itself.
+            next if $table->[$x][$y]{has_final_value} || ! $is_final_value;
+
+            # Otherwise, the cell's contents are a dfa, and the way regexec.c
+            # is constructed, the value returned for it is encoded into the
+            # cell by adding the final value to the dfa enum.
+            $table->[$x][$y]{value} += $this_value;
+
+            # No further changes are allowed.
+            $table->[$x][$y]{has_final_value} = 1;
+        }
+
 
         print STDERR __FILE__, ": ", __LINE__,
           ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y] if DEBUG;
@@ -1570,7 +1594,7 @@ sub get_cell_value($table, $enums, $x, $y) {
 }
 
 sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
-            $rule, $has_unused)
+            $rule, $has_unused, $as_is)
 {
     # The default fall-back value for all properties is 1.  It is added in
     # most cases to the enum value.  For this intermediate commit, all cells
@@ -1580,7 +1604,7 @@ sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
                                       . stack_trace() . "\n"
                                       . Dumper $dfas, $enums;
     set_cells($table, $table_size, $splits, $enums, $x, $y,
-              1 + $this_dfa->{enum}, $rule, $has_unused);
+              $this_dfa->{enum}, $rule, $has_unused, $as_is);
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
@@ -2033,9 +2057,9 @@ sub output_GCB_table() {
     my sub add_gcb_dfa($x, $y, $dfa, $rule) {
 
         # None of the DFAs in this property reference the current value of the
-        # cell.  So use set_cells.
-        $dfa = 0 + $gcb_dfas{$dfa}{enum} if $dfa =~ /\D/;
-        return set_gcb_cells($x, $y, $dfa, $rule);
+        # cell.  The '1' indicates that
+        return add_dfa(\@gcb_table, $table_size, \%gcb_splits, \%gcb_all_enums,
+                       \%gcb_dfas, $x, $y, $dfa, $rule, $has_unused, 1);
     }
 
     my ($lhs, $rhs, $dfa, $rule);
@@ -2241,15 +2265,11 @@ sub output_LB_table() {
         # These two don't reference the current value of the cell.  So use
         # set_cells for them.  This preserves current behavior, until we're
         # ready to change the dfa handling.
-        if (   $dfa eq 'LB_CM_ZWJ_v_any'
-            || $dfa eq 'LB_various_then_RI_v_RI')
-        {
-            $dfa = 0 + $lb_dfas{$dfa}{enum};
-            return set_lb_cells($x, $y, $dfa, $rule);
-        }
+        my $as_is =  $dfa eq 'LB_CM_ZWJ_v_any'
+                  || $dfa eq 'LB_various_then_RI_v_RI';
 
         return add_dfa(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
-                       \%lb_dfas, $x, $y, $dfa, $rule, $has_unused);
+                       \%lb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is);
     }
     my sub get_lb_cell_value($x, $y) {
         return get_cell_value(\@lb_table, \%lb_all_enums, $x, $y);
@@ -2257,24 +2277,9 @@ sub output_LB_table() {
 
     my ($lhs, $rhs, $dfa, $rule);
 
-    # Reversing the order of the rules causes some issues.  Adding a DFA
-    # currently adds the current value of the cell to the dfa enum.  Now that
-    # things are reversed, the current value isn't known, so add_dfa() assumes
-    # it is 1, the default fall-back value for this.  But in the cases between
-    # here an LB1, that shouldn't happen because the fallback has been
-    # overridden with 0.  It was quite a bit easier to just handle those cases
-    # specially, than to try to do something special with them.  This code
-    # should be removed in the next few commits
-    my $enum = $lb_dfas{LB_HL_then_HY_or_BA_v_any}{enum};
-    set_lb_cells('HY', 'IN', $enum, '21a');
-    set_lb_cells('BA', 'IN', $enum, '21a');
-    set_lb_cells('HY', 'NU', $enum, '21a');
-
-    $enum = $lb_dfas{LB_ZW_then_SP_v_any}{enum}
-          + $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN }{enum};
-    set_lb_cells('SP', $_, $enum, 8) for qw(CL CP EX IS SY WJ);
-
-    $enum = $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN }{enum};
+    # Reversing the order of the rules causes some issues. regexec.c currently
+    # needs this special handling.  But this will be removed in a few commits
+    my $enum = $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN }{enum};
     for $lhs (qw(OP)) {
         set_lb_cells($lhs, $_, $enum, 14) for qw(CM GL ZWJ);
     }
@@ -2714,42 +2719,11 @@ sub output_WB_table() {
         # These three don't reference the current value of the cell.  So use
         # set_cells for them.  This preserves current behavior, until we're
         # ready to change the dfa handling.
-        if (   $dfa eq 'WB_Extend_or_FO_or_ZWJ_then_foo'
-            || $dfa eq 'WB_various_then_RI_v_RI'
-            || $dfa eq 'WB_hs_v_hs_then_Extend_or_FO_or_ZWJ')
-        {
-            $dfa = 0 + $wb_dfas{$dfa}{enum};
-            return set_wb_cells($x, $y, $dfa, $rule);
-        }
-
-        # Reversing the order of the rules causes some issues with Rule 7a.
-        # Adding a DFA currently adds the current value of the cell to the dfa
-        # enum.  Now that things are reversed, the current value isn't known,
-        # so add_dfa() assumes it is 1, the default fall-back value for this
-        # property.  But in the sole case of [HL,SQ] that has been changed by
-        # an earlier rule, so that would be inappropriate.  This is sort of
-        # general code to do this, changing the one cell, so that future
-        # attempts to fill it will be denied, and then calling add_dfa() for
-        # the rest.  This is temporary code until true stacking dfas are
-        # implemented.  The LB property has a similar issue, but for that it
-        # was easier to handle every cell individually.  That could have also
-        # been done here, but khw left it in as a template in the unlikely
-        # event this would ever be resurrected.
-        if (($rule =~ s/\D//r) < 7 && $dfa =~ /Q/) {
-            my $HL = $wb_all_enums{HL};
-            my $SQ = $wb_all_enums{SQ};
-            my $list_ref = get_cell_list($table_size, \%wb_splits,
-                                         \%wb_all_enums, $x, $y);
-            for my $cell ($list_ref->@*) {
-                if ($cell->[0] == $HL && $cell->[1] == $SQ) {
-                    set_wb_cells($HL, $SQ, $wb_dfas{$dfa}{enum}, $rule);
-                    last;
-                }
-            }
-        }
+        my $as_is = $dfa eq 'WB_Extend_or_FO_or_ZWJ_then_foo'
+                 || $dfa eq 'WB_various_then_RI_v_RI';
 
         return add_dfa(\@wb_table, $table_size, \%wb_splits, \%wb_all_enums,
-                       \%wb_dfas, $x, $y, $dfa, $rule, $has_unused);
+                       \%wb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is);
     }
 
     my ($lhs, $rhs, $dfa, $rule);
