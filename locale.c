@@ -1313,6 +1313,16 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 
     Size_t index;           /* Our internal index for the current category */
     const char * s = string;
+
+    /* Solaris setlocale(3C) returns composite locale prefixed by slash. For example
+     * "/en_US.UTF-8/C/C/C/C/C". See man page. We must remove it or this
+     * function will think that there is additional empty locale at the
+     * beginning of the string and the number of detected locales will not
+     * match expected LC_ALL_INDEX_. */
+    if (strnEQ(s, separator, separator_len)) {
+        s += separator_len;
+    }
+
     const char * e = s + strlen(string);
     const char * category_end = NULL;
     const char * saved_first = NULL;
