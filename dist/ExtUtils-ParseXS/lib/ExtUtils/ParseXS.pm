@@ -235,10 +235,6 @@ BEGIN {
 
   'cur_xbody',                 # The Node::xbody currently being parsed
 
-  'xsub_interface_macro',      # Str: current interface extraction macro.
-
-  'xsub_interface_macro_set',  # Str: current interface setting macro.
-  
   'xsub_prototype',            # Str: is set to either the global PROTOTYPES
                                #  values (0 or 1), or to what's been
                                #  overridden for this XSUB with PROTOTYPE
@@ -582,8 +578,6 @@ EOM
 
     # Initialize some per-XSUB instance variables:
 
-    $self->{xsub_interface_macro}      = 'XSINTERFACE_FUNC';
-    $self->{xsub_interface_macro_set}  = 'XSINTERFACE_FUNC_SET';
     $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
     $self->{xsub_SCOPE_enabled}        = 0;
     $self->{xsub_map_overload_name_to_seen} = {};

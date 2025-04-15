@@ -244,6 +244,11 @@ BEGIN { $build_subclass->('', # parent
     'attributes',              # Array of strings: all ATTRIBUTE keywords
                                # (possibly multiple space-separated
                                # keywords per string).
+
+    # INTERFACE_MACRO state
+
+    'interface_macro',      # Str: value of interface extraction macro.
+    'interface_macro_set',  # Str: value of interface setting macro.
 )};
 
 
@@ -569,9 +574,12 @@ EOF
         {
             my $value = $pxs->{cur_xsub}{map_interface_name_short_to_original}{$yname};
             $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
+
+            my $macro = $pxs->{cur_xsub}{interface_macro_set};
+            $macro = 'XSINTERFACE_FUNC_SET' unless defined $macro;
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
-                |        $pxs->{xsub_interface_macro_set}(cv,$value);
+                |        $macro(cv,$value);
 EOF
             $pxs->{need_boot_cv} = 1;
         }
@@ -3180,8 +3188,11 @@ sub as_code {
     my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
+    my $macro = $xsub->{interface_macro};
+    $macro = 'XSINTERFACE_FUNC' unless defined $macro;
+
     print <<"EOF";
-    XSFUNCTION = $pxs->{xsub_interface_macro}($xsub->{decl}{return_type}{type},cv,XSANY.any_dptr);
+    XSFUNCTION = $macro($xsub->{decl}{return_type}{type},cv,XSANY.any_dptr);
 EOF
 }
 
@@ -3218,8 +3229,8 @@ sub parse {
         ($m1, $m2) = ($s, 'UNKNOWN_CVT');
     }
 
-    $self->{get_macro} = $pxs->{xsub_interface_macro}     = $m1;
-    $self->{set_macro} = $pxs->{xsub_interface_macro_set} = $m2;
+    $self->{get_macro} = $pxs->{cur_xsub}{interface_macro}     = $m1;
+    $self->{set_macro} = $pxs->{cur_xsub}{interface_macro_set} = $m2;
 
     1;
 }
