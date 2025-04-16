@@ -1747,9 +1747,32 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
             # XXX and [1] is the value to return if the corresponding dfa matches.
             my @values = $value->@*;
 
+            # There is generally no point in pursuing a dfa if its matching
+            # value is the same as what is returned if it doesn't match.
+            # There may be cases where the runtime decision varies, so
+            # shouldn't be optimized out.  The dfa hash indicates if that is
+            # the case
+            #
+            # Start with the final result if nothing matches, and back up the
+            # stack until we find a dfa that would lead to a different result.
             my $final = pop @values;
+            while (   @values > 1
+                   && ! $dfas_ref->{$values[-2]}{dont_optimize_out})
+            {
+                my $match = $dfas_ref->{$values[-2]}{match_return};
+                $match = $dfas_ref->{$match}{match_return} if $match =~ /\D/;
+                last if $match != $final->{value};
+                pop @values; pop @values;
+            }
 
-            # The value that goes into the cell will be an index
+            # If the stack gets completely emptied, replace the cell with the
+            # unconditional result.
+            if (@values == 0) {
+                $table_ref->[$x][$y] = $final;
+                next;
+            }
+
+            # Otherwise the value that goes into the cell will be an index
             # into the dfa table, calculated later.  For now, we save the rule
             # number of the highest priority dfa, found in [0].
             undef $table_ref->[$x][$y];
@@ -2421,6 +2444,7 @@ sub output_LB_table() {
         LB_CM_ZWJ_v_any                 => {
                                              enum => 3,
                                              match_return => 'LB_NOBREAK',
+                                             dont_optimize_out => 1,
                                              rule => 9,
                                            },
         LB_OP_then_SP_v_any             => {
