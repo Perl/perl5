@@ -3538,6 +3538,28 @@ EOF
                        }sx,                 "branch Y doesn't return RETVAL" ],
         ],
         [
+            "CASE with variant deferred var inits",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc)
+                |    CASE: X
+                |     AV *abc
+                |
+                |    CASE: Y
+                |     HV *abc
+EOF
+            [ 0, 0, qr{\Qif (X)\E
+                       .*
+                       croak.*\Qnot an ARRAY reference\E
+                       .*
+                       \Qelse if (Y)\E
+                       .*
+                       croak.*\Qnot a HASH reference\E
+                       }sx,                 "differing croaks" ],
+
+        ],
+
+        [
             "CASE: case follows unconditional CASE",
             [ Q(<<'EOF') ],
                 |int

@@ -557,23 +557,23 @@ sub boot_code {
     # Now use those values to append suitable newXS() and other code
     # into @code, for later insertion into the boot sub.
 
-    my $pname = $pxs->{cur_xsub}{decl}{full_perl_name};
-    my $cname = $pxs->{cur_xsub}{decl}{full_C_name};
+    my $pname = $self->{decl}{full_perl_name};
+    my $cname = $self->{decl}{full_C_name};
 
-    if (                $pxs->{cur_xsub}{map_alias_name_to_value}
-            and keys %{ $pxs->{cur_xsub}{map_alias_name_to_value} })
+    if (                $self->{map_alias_name_to_value}
+            and keys %{ $self->{map_alias_name_to_value} })
     {
         # For the main XSUB and for each alias name, generate a newXS() call
         # and 'XSANY.any_i32 = ix' line.
 
         # Make the main name one of the aliases if it isn't already
-        $pxs->{cur_xsub}{map_alias_name_to_value}->{$pname} = 0
-            unless defined $pxs->{cur_xsub}{map_alias_name_to_value}{$pname};
+        $self->{map_alias_name_to_value}->{$pname} = 0
+            unless defined $self->{map_alias_name_to_value}{$pname};
 
         foreach my $xname (sort keys
-                    %{ $pxs->{cur_xsub}{map_alias_name_to_value} })
+                    %{ $self->{map_alias_name_to_value} })
         {
-            my $value = $pxs->{cur_xsub}{map_alias_name_to_value}{$xname};
+            my $value = $self->{map_alias_name_to_value}{$xname};
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
@@ -581,10 +581,10 @@ EOF
             $pxs->{need_boot_cv} = 1;
         }
     }
-    elsif ($pxs->{cur_xsub}{attributes}) {
+    elsif ($self->{attributes}) {
         # Generate a standard newXS() call, plus a single call to
         # apply_attrs_string() call with the string of attributes.
-        my $attrs = "@{$pxs->{cur_xsub}{attributes}}";
+        my $attrs = "@{$self->{attributes}}";
         push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
             |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
             |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "$attrs", 0);
@@ -597,12 +597,12 @@ EOF
         # For each interface name, generate both a newXS() and
         # XSINTERFACE_FUNC_SET() call.
         foreach my $yname (sort keys
-                %{ $pxs->{cur_xsub}{map_interface_name_short_to_original} })
+                %{ $self->{map_interface_name_short_to_original} })
         {
-            my $value = $pxs->{cur_xsub}{map_interface_name_short_to_original}{$yname};
+            my $value = $self->{map_interface_name_short_to_original}{$yname};
             $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
 
-            my $macro = $pxs->{cur_xsub}{interface_macro_set};
+            my $macro = $self->{interface_macro_set};
             $macro = 'XSINTERFACE_FUNC_SET' unless defined $macro;
             push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
                 |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
@@ -635,7 +635,7 @@ EOF
     # For every overload operator, generate an additional newXS()
     # call to add an alias such as "Foo::(<=>" for this XSUB.
 
-    for my $operator (sort keys %{ $pxs->{cur_xsub}{overload_name_seen} })
+    for my $operator (sort keys %{ $self->{overload_name_seen} })
     {
         $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
             = $pxs->{PACKAGE_C_name};
@@ -950,7 +950,7 @@ sub as_code {
 
         print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
         # defer this line until after all the other declarations
-        $pxs->{cur_xbody}{input_part}{deferred_code_lines} .=
+        $xbody->{input_part}{deferred_code_lines} .=
                 "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
 
         # this var will be declared using the normal typemap mechanism below
@@ -1057,7 +1057,7 @@ sub as_code {
         # on an object of the right class. Basically, for T_foo_OBJ, use
         # T_foo_REF instead. T_REF_IV_PTR was added in v5.22.0.
         $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
-            if $pxs->{cur_xsub}{decl}{name} =~ /DESTROY$/;
+            if $xsub->{decl}{name} =~ /DESTROY$/;
 
         # For a string-ish parameter foo, if length(foo) was also declared
         # as a pseudo-parameter, then override the normal typedef - which
@@ -1162,7 +1162,7 @@ sub as_code {
         if ($default eq 'NO_INIT') {
             # for foo(a, b = NO_INIT), add code to initialise later only if
             # an arg was supplied.
-            $pxs->{cur_xbody}{input_part}{deferred_code_lines}
+            $xbody->{input_part}{deferred_code_lines}
                 .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n",
                            $arg_num, $init_code;
         }
@@ -1172,7 +1172,7 @@ sub as_code {
             my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
 
             $default =~ s/"/\\"/g; # escape double quotes
-            $pxs->{cur_xbody}{input_part}{deferred_code_lines}
+            $xbody->{input_part}{deferred_code_lines}
                 .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
                         $arg_num,
                         $var,
@@ -1190,7 +1190,7 @@ sub as_code {
 
         print ";\n";
 
-        $pxs->{cur_xbody}{input_part}{deferred_code_lines}
+        $xbody->{input_part}{deferred_code_lines}
                                         .= sprintf "\n%s;\n", $init_code
             if $init_code =~ /\S/;
     }
@@ -1205,7 +1205,7 @@ sub as_code {
     }
 
     if (defined $defer) {
-        $pxs->{cur_xbody}{input_part}{deferred_code_lines}
+        $xbody->{input_part}{deferred_code_lines}
             .= $pxs->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
     }
 }
@@ -3581,7 +3581,7 @@ sub as_code {
 
     $self->SUPER::as_code($pxs, $xsub, $xbody); # emit code block
 
-    print "\tLEAVE;\n" if $pxs->{cur_xsub}{SCOPE_enabled};
+    print "\tLEAVE;\n" if $xsub->{SCOPE_enabled};
 
     # Suppress "statement is unreachable" warning on HPUX
     print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
