@@ -833,10 +833,7 @@ EOF
 EOF
   }
 
-  # Emit any lines derived from BOOT: sections. By putting the lines back
-  # into  $self->{line} and passing them through print_section(),
-  # a trailing '#line' may be emitted to effect the change back to the
-  # current foo.c line from the foo.xs part where the BOOT: code was.
+  # Emit any lines derived from BOOT: sections
 
   if (@{ $self->{bootcode_later} }) {
     print "\n    /* Initialisation Section */\n\n";
@@ -906,41 +903,6 @@ sub check_keyword {
   $_ = shift(@{ $self->{line} }) while !/\S/ && @{ $self->{line} };
 
   s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
-}
-
-
-# Emit, verbatim(ish), all the lines up till the next directive.
-# Typically used for sections that have blocks of code, like CODE. Return
-# a string which contains all the lines of code emitted except for the
-# extra '#line' type stuff.
-
-sub print_section {
-  my ExtUtils::ParseXS $self = shift;
-
-  # Strip leading blank lines. The "do" is required for the right semantics
-  do { $_ = shift(@{ $self->{line} }) } while !/\S/ && @{ $self->{line} };
-
-  my $consumed_code = '';
-
-  # Add a '#line' if needed. The XSubPPtmp test is a bit of a hack - it
-  # skips synthetic blocks added to boot etc which may not have line
-  # numbers.
-  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1], " \"",
-        escape_file_for_line_directive($self->{in_pathname}), "\"\n")
-    if     $self->{config_WantLineNumbers}
-        && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
-
-  # Emit lines until the next directive
-  for (;  defined($_) && !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    print "$_\n";
-    $consumed_code .= "$_\n";
-  }
-
-  # Emit a "restoring" '#line'
-  print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
-    if $self->{config_WantLineNumbers};
-
-  return $consumed_code;
 }
 
 
