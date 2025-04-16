@@ -216,7 +216,7 @@ by default, JSON::PP also enabled allow_nonref by default.
 This deprecation was scheduled to become fatal in 5.30, but has been
 delayed to 5.32 due to problems that showed up with some CPAN modules.
 For details of what's affected, see
-L<perldeprecation|perldeprecation/In XS code, use of various macros dealing with UTF-8.>.
+L<perldeprecation|perldeprecation/In XS code, use of various macros dealing with UTF-8>.
 
 =head1 Performance Enhancements
 
