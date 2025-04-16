@@ -1356,11 +1356,8 @@ sub _Perl_CCC_non0_non230 {
 # that fails to match we're supposed to try rule #a+1, #a+2, ..., stopping at
 # the first match.  The table is constructed so that the final rule matches
 # everything, so the process is guaranteed to halt.  And it likely will halt
-# earlier at the first unconditional match.  But this kind of problem wasn't
-# foreseen when this code was written, and it is work to fix it.  As a result,
-# a cell can only refer to a single DFA (the highest priority one), and when
-# you write a DFA, you have to factor in lower priority rules that may also
-# apply.
+# earlier at the first unconditional match.  Now this generates a chain of
+# DFAs for regexec.c to follow, stopping at the first successful match.
 
 # These functions access the cells of a break table, converting any mnemonics
 # to numeric.  They need $enums to be able to do this.
@@ -1513,6 +1510,33 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
                  stack_trace(), "\n",
                  Dumper $x, $y, $value, $rule, $has_unused, $me_too, $enums
                                                                 if DEBUG;
+    # Set cells given by ($x,$y) in $table (whose size is $table_size) to
+    # $value. $x and/or $y may expand to multiple cells.  All are set to
+    # $value.  $splits, $enums, and $me_too give data to help in performing
+    # that expansion.  All such are set to $value, and $rule is associated
+    # with why they are set here.
+    # $has_unused indicates if there is a row and column of unused values in
+    #   this Unicode version.  This will always be true with modern Unicodes.
+    #
+    # $value is a scalar if the cell is to receive an unconditional value.
+    # Otherwise it is an arrayref that determines a DFA to run. [0] is the
+    # name of the DFA, and [1] is the value to return should the DFA match.
+
+    # Unicode gives a list of rules to check, in priority order.  The first
+    # one that matches ends the process, and what it says to return is what
+    # regexec.c uses.  This function is called with the highest priority rules
+    # first.  So an unconditional value already in the cell has higher
+    # priority than whatever the current call says, and that wins out.  But a
+    # DFA is conditional; only if it matches does it return; otherwise the
+    # next lower priority thing is tried, ending with an unconditional value.
+    # For these, this return keeps an array in the cell containing the DFAs to
+    # try, in order.  A new one to be added is simply pushed to the end of the
+    # array.  Eventually, an unconditional value will be passed, and that
+    # becomes the fallback value to return if none of the higher priority DFAs
+    # match.  Should this function be called with another DFA after that, it
+    # would have no effect, as the unconditional value would prevail, so such
+    # calls don't get added to the list.
+
     if (! defined $value) {
         die "Setting cells to undef"
             . stack_trace() . "\n"
@@ -1537,12 +1561,45 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
         $rule = $numeric_rule;
     }
 
+    # The new entry is a scalar if it is an unconditional value; otherwise it
+    # is an array defining the DFA.
+    my $new_entry;
+    if (ref $value) {   # The interpreter will die if it isn't an array, so no
+                        # need to check ourselves
+        # The array has the enum name in [0], and the value to return if it
+        # matches in [1].
+        if ($value->[1] =~ /\D/) {
+            die "Setting cells to a non-numeric return in [1]"
+              . stack_trace() . "\n"
+              . Dumper $enums, $x, $y, $value, $rule;
+        }
+
+        $new_entry = $value;
+    }
+    else {  # new value is unconditional
+        if ($value =~ /\D/) {
+            die "Setting cells to a non-numeric value "
+              . stack_trace() . "\n"
+              . Dumper $enums, $x, $y, $value, $rule;
+        }
+
+        $new_entry = { value => $value, rule => $rule };
+        $new_entry->{rule_as_string} = $rule_as_string
+                                                   if defined $rule_as_string;
+    }
+
+    # Expand the inputs to the actual list of cells this call applies to
     my $list_ref = get_cell_list($table_size, $splits, $enums, $x, $y,
                                  $me_too);
+
+    # For each such cell ...
     for my $pair_ref ($list_ref->@*) {
+
+        # Get its x and y coordinates
         my $x = $pair_ref->[0];
         my $y = $pair_ref->[1];
 
+        # Check its validity
         for my $which (\$x, \$y) {
             if ($$which =~ /\D/) {
                 my $resolves_to = $enums->{$$which};
@@ -1564,40 +1621,67 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
               . Dumper $enums;
         }
 
-        my $this_value = $value;
-        my $is_final_value = $as_is || $this_value <= 2;
+        # Now ready to set its contents.  If nothing is currently in the cell,
+        # can add this value without needing to know anything else about it.
         if (! defined $table->[$x][$y]) {
 
+            # But handle cells that are unused in current Unicode specially.
+            if ($has_unused && (   $x == $table_size - 1
+                                || $y == $table_size - 1))
+            {
                 # A cell in the last row or column is unused,  Its contents
                 # are immaterial, except it is better to not put a dfa in it,
                 # as that might be the only use of that dfa, so it is
                 # effectively unused, and keeping it out here means we can do
                 # #ifdef's in regexec.c to not actually generate code for it.
-                $this_value = 0 if ($has_unused && (   $x == $table_size - 1
-                                                    || $y == $table_size - 1));
-                $table->[$x][$y] = {
-                                value           => $this_value,
-                                rule            => $rule ,
-                                has_final_value => $is_final_value,
-                               };
-                $table->[$x][$y]->{rule_as_string} = $rule_as_string
-                                                    if defined $rule_as_string;
+                # 0 for the value could just as easily have been 1.
+                $table->[$x][$y] = { value => 0, rule => $rule };
+            }
+            elsif (ref $new_entry eq 'ARRAY') {
+                push $table->[$x][$y]->@*, $new_entry->@*;
+            }
+            else {
+                $table->[$x][$y] = $new_entry;
+            }
+        }
+        elsif (ref $table->[$x][$y] eq 'HASH') {
+
+            # Here the cell's value is an unconditional one.  That means it
+            # has been locked with a higher priority rule than this new one.
+            next;
+        }
+        elsif (ref $table->[$x][$y] ne 'ARRAY') {
+            die "Somehow cell [$x,$y] is wrongly not an array"
+              . " [$table_size,$table_size]"
+              . stack_trace() . "\n"
+              . Dumper $enums;
+        }
+        elsif ($table->[$x][$y]->@* % 2 == 1) {
+
+            # Here the cell's value is an array with an odd number of
+            # elements.  The final one, making it odd, must be an
+            # unconditional fall-back rule to use if all the dfa's fail.  So
+            # the cell is locked.
+            next;
         }
         else {
 
-            # Here the cell does have a value.  We don't modify it if that
-            # value is the final one, nor if this isn't a final value itself.
-            next if $table->[$x][$y]{has_final_value} || ! $is_final_value;
+            # Otherwise, the cell is an array with an even number of elements,
+            # so is available to add this lower priority rule to.
+            if (ref $new_entry eq 'ARRAY') {
 
-            # Otherwise, the cell's contents are a dfa, and the way regexec.c
-            # is constructed, the value returned for it is encoded into the
-            # cell by adding the final value to the dfa enum.
-            $table->[$x][$y]{value} += $this_value;
+                # But it is possible for this function to get called multiple
+                # times with the same value.  Don't add it if already there.
+                # Theoretically, any existing occurrence would be only the
+                # final DFA, in element [-2].
+                next if $value->[0] eq $table->[$x][$y][-2];
 
-            # No further changes are allowed.
-            $table->[$x][$y]{has_final_value} = 1;
+                push $table->[$x][$y]->@*, $new_entry->@*;
+            }
+            else {  # Will be a hashref
+                push $table->[$x][$y]->@*, $new_entry;
+            }
         }
-
 
         print STDERR __FILE__, ": ", __LINE__,
           ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y] if DEBUG;
@@ -1607,15 +1691,15 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
 sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
             $rule, $has_unused, $as_is = undef, $me_too = undef)
 {
-    # The default fall-back value for all properties is 1.  It is added in
-    # most cases to the enum value.  For this intermediate commit, all cells
-    # where this isn't the case shouldn't call this function.
-
-    my $this_dfa = $dfas->{$dfa} // die "No entry for '$dfa' in dfa list"
-                                      . stack_trace() . "\n"
-                                      . Dumper $dfas, $enums;
+    my $match_return = $dfas->{$dfa}{match_return}
+          // die "$dfa not defined for [$x,$y] "
+               . stack_trace() . "\n"
+               . Dumper $dfas, $enums;
+    # Many refer to e.g., WB_BREAK; if so, need to dereference
+    $match_return = $dfas->{$match_return}{match_return}
+                                                    if $match_return =~ /\D/;
     set_cells($table, $table_size, $splits, $enums, $x, $y,
-              $this_dfa->{enum}, $rule, $has_unused, $as_is, $me_too);
+              [ $dfa, $match_return ], $rule, $has_unused, $as_is, $me_too);
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
@@ -1625,6 +1709,140 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
     # Common subroutine to actually output the generated rules table.
 
     my $size = @$table_ref;
+
+    # Go through the table looking for DFAs.  A cell with an array ref in it
+    # denotes a DFA.
+    #   [0] is the index of the highest priority dfa;
+    #   [1] is what to return if it matches
+    #   [2] is the index of the next highest priority dfa
+    #   [3] is what to return if it matches.
+    # and so on.  Elements in even numbered indices are the dfa; what to
+    # return are the odd numbered ones.
+    # The final odd-numbered element is the unconditional return if none of
+    # the DFA's matched.
+    #
+    # First, as we find dfa's in the table, store them in a a hash to get just
+    # the unique ones.  Join each step in each dfa together into a string that
+    # gives all its actions.  And keep a list of every cell each dfa applies
+    # to.
+    # To make the output table sparser, hence more readable, the rule number
+    # for the default rule is not output.  Calculate that number now as well;
+    # it is the highest rule number.
+
+    my %unique_dfas;
+    my $max_rule_number = 0;
+    for my $x (0 .. $size - 1) {
+        for my $y (0 .. $size - 1) {
+            my $value = $table_ref->[$x][$y];
+            if (ref $value eq 'HASH') {     # Not a dfa
+                $max_rule_number = $value->{rule}
+                                        if $max_rule_number < $value->{rule};
+                next;
+            }
+
+            # Here is a dfa.  Easier to read this code if use array instead of
+            # dereffing.  Element [0] is the highest priority dfa.  The final
+            # element is a hash defining the value to use if no dfa matched.
+            # Every other element is a subarray with two elements: [0] is the
+            # XXX and [1] is the value to return if the corresponding dfa matches.
+            my @values = $value->@*;
+
+            my $final = pop @values;
+
+            # The value that goes into the cell will be an index
+            # into the dfa table, calculated later.  For now, we save the rule
+            # number of the highest priority dfa, found in [0].
+            undef $table_ref->[$x][$y];
+
+            my $rule = $dfas_ref->{$values[0]}{rule};
+
+            # Currently don't handle multiple rules; just take the first
+            $rule = $rule->[0] if ref $rule;
+
+            if ($rule =~ s/\D//g) {
+                $table_ref->[$x][$y]{rule} = $rule;
+                $table_ref->[$x][$y]{rule_as_string} =
+                                                $dfas_ref->{$values[0]}{rule};
+            }
+            else {
+                $table_ref->[$x][$y]{rule} = $rule;
+            }
+
+            # Serialize the stack into a single string.
+            my $this_dfa_stack = join '!', @values, $final->{value};
+
+            # Use a hash with the serialized value as a key so as to get just
+            # the unique possible dfa chains.  Add this cell to the ones this
+            # chain applies to.
+            push $unique_dfas{$this_dfa_stack}->@*, [ $x, $y, $final->{rule} ];
+        }
+    }
+
+    # Now create a linear table of all the unique dfa's.  Start with two
+    # placeholder bytes, which avoid runtime clumsiness.
+    my $indent = " " x 4;
+    my @output_dfas = (
+                        "${indent}0,\t/* [0] placeholder */",
+                        "${indent}1,\t/* [1] placeholder */",
+                      );
+
+    # We will output the table shortest first, this will minimize the number
+    # of three digit entries in the table, as those will come after most other
+    # entries.
+    foreach my $chain (sort {
+                              my $a_count = split '!', $a;
+                              my $b_count = split '!', $b;
+                                 $a_count <=> $b_count
+                              or $a cmp $b;
+                            } keys %unique_dfas)
+    {
+        my %final_rules;
+
+        # And its value in the hash is a list of cells it applies to.
+        foreach my $cell ($unique_dfas{$chain}->@*) {
+            my $x = $cell->[0];
+            my $y = $cell->[1];
+            my $final_rule = $cell->[2];
+
+            # Set the value to just the numeric portion, for later sorting
+            $final_rules{$final_rule} = $final_rule =~ s/\D//gr;
+            $table_ref->[$x][$y]{value} = scalar @output_dfas;
+        }
+
+        my $else_string = '[' . @output_dfas . '] ';
+        my @steps = split '!', $chain;
+        for (my $i = 0; $i < @steps - 1; $i += 2) {
+            my $dfa_name = $steps[$i];
+            my $success_return = $steps[$i+1];
+            my $numeric = $dfas_ref->{$dfa_name}{enum};
+            my $rule_name = $dfas_ref->{$dfa_name}{rule};
+            if (ref $rule_name) {
+                $rule_name = "Rules $property"
+                           . join ", $property", $rule_name->@*;
+            }
+            else {
+                $rule_name = "Rule $property$rule_name";
+            }
+            push @output_dfas,
+                    "$indent$numeric,\t/* $else_string$dfa_name ($rule_name) */";
+            push @output_dfas,
+                    "$indent$success_return,\t/*\tif matches, return"
+                  . " $success_return */";
+
+            $else_string = "\telse try ";
+        }
+
+        my $final_rules_string = "(Rule";
+        $final_rules_string .= 's' if keys %final_rules > 1;
+        $final_rules_string .= " $property"
+                            . join(",", sort {     $final_rules{$a}
+                                               <=> $final_rules{$b}
+                                             } keys %final_rules)
+                            . ')';
+        push @output_dfas, "$indent$steps[-1],\t/*\telse return $steps[-1] "
+                         . " $final_rules_string */";
+    }
+    $output_dfas[-1] =~ s/,//;
 
     # Used to find how wide a column needs to be to fit the maximum width
     # entry in it.
@@ -1720,6 +1938,7 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
     }
 
     # Now output the dfa #define list, sorted by numeric value
+    print $out_fh "\n" if keys $dfas_ref->%*;
     if ($dfas_ref) {
         my $max_name_length = 0;
         my @defines;
@@ -1750,6 +1969,7 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
                                        $defines[$i],
                                           $i;
         }
+        print $out_fh "\n";
     }
 
     # Being above a U8 is not currently handled
@@ -1796,7 +2016,7 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
               .  " garbage).  See perluniprops for the rest"
     }
 
-    my $indent = " " x 3;
+    $indent = " " x 3;
     $text = $indent . "/* $text */";
 
     # Wrap the text so that it is no wider than the table, which the header
@@ -1824,18 +2044,6 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
     # We calculated the header line earlier just to get its width so that we
     # could make sure the annotations fit into that.
     print $out_fh $header_line;
-
-    # To make the output table sparser, hence more readable, the rule number
-    # for the default rule is not output.  Calculate that number now; it is
-    # the highest rule number.
-    my $max_rule_number = 0;
-    for my $i (0 .. $size - 1) {
-        for my $j (0 .. $size - 1) {
-            $table_ref->[$i][$j]{rule} =~ s/\D//g;
-            $max_rule_number = $table_ref->[$i][$j]{rule}
-            if $max_rule_number < $table_ref->[$i][$j]{rule};
-        }
-    }
 
     # Now output the bulk of the table.
     for my $i (0 .. $size - 1) {
@@ -1895,6 +2103,12 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
         print $out_fh $comments, "\n";
     }
 
+    output_table_trailer();
+
+    print $out_fh "\n";
+    output_table_header($out_fh, $table_type, "${property}_dfa_table");
+    print $out_fh "\t/* [n] corresponds to the numbers in the above table's cells */\n";
+    print $out_fh  join("\n", @output_dfas), "\n";
     output_table_trailer();
 }
 
@@ -2213,6 +2427,26 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => 9,
                                            },
+        LB_OP_then_SP_v_any             => {
+                                             enum => 16,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => 14,
+                                           },
+        LB_QU_then_SP_v_OP              => {
+                                             enum => 17,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => 15,
+                                           },
+        LB_CL_or_CP_then_SP_v_NS        => {
+                                             enum => 18,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => 16,
+                                           },
+        LB_B2_then_SP_v_B2             => {
+                                             enum => 19,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => 17,
+                                           },
         LB_HL_then_HY_or_BA_v_any       => {
                                              enum => 13,
                                              match_return => 'LB_NOBREAK',
@@ -2397,7 +2631,7 @@ sub output_LB_table() {
     # Special case this here to avoid having to do a special case in the code,
     # by making this the same as other things with a SP in front of them that
     # don't break, we avoid an extra test
-    set_lb_nobreak_ignoring_SP('SP', 'WJ', $rule);
+    #set_lb_nobreak_ignoring_SP('SP', 'WJ', $rule);
 
     # LB11 Do not break before or after Word joiner and related characters.
     # × WJ
@@ -2421,26 +2655,29 @@ sub output_LB_table() {
     # × EX
     # × IS
     # × SY
-    set_lb_nobreak_ignoring_SP('*', $_, 13) for qw(CL CP EX IS SY);
+    set_lb_nobreak('*', $_, 13) for qw(CL CP EX IS SY);
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
-    set_lb_nobreak_ignoring_SP('OP', '*', 14);
+    set_lb_nobreak('OP', '*', 14);
+    add_lb_dfa('SP', '*', 'LB_OP_then_SP_v_any', 14);
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
-    set_lb_nobreak_ignoring_SP('QU', 'OP', 15);
+    set_lb_nobreak('QU', 'OP', 15);
+    add_lb_dfa('SP', 'OP', 'LB_QU_then_SP_v_OP', 15);
 
     # LB16 Do not break between closing punctuation and a nonstarter even with
     # intervening spaces.
     # (CL | CP) SP* × NS
     $rule = 16;
-    set_lb_nobreak_ignoring_SP('CL', 'NS', $rule);
-    set_lb_nobreak_ignoring_SP('CP', 'NS', $rule);
+    set_lb_nobreak($_, 'NS', $rule) for qw(CL CP);
+    add_lb_dfa('SP', 'NS', 'LB_CL_or_CP_then_SP_v_NS', $rule);
 
     # LB17 Do not break within ‘——’, even with intervening spaces.
     # B2 SP* × B2
-    set_lb_nobreak_ignoring_SP('B2', 'B2', 17);
+    set_lb_nobreak('B2', 'B2', 17);
+    add_lb_dfa('SP', 'B2', 'LB_B2_then_SP_v_B2', 17);
 
     # LB18 Break after spaces
     # SP ÷
