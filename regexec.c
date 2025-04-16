@@ -5244,84 +5244,104 @@ S_test_EXACTISH_ST(const char * loc,
 STATIC bool
 S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strbeg, const U8 * const curpos, const bool utf8_target)
 {
+    PERL_ARGS_ASSERT_ISGCB;
+
     /* returns a boolean indicating if there is a Grapheme Cluster Boundary
      * between the inputs.  See https://www.unicode.org/reports/tr29/. */
 
-    PERL_ARGS_ASSERT_ISGCB;
+    U8 index = GCB_table[before][after];
+    do {
+        U8 * prev_pos = (U8 *) curpos;
 
-    switch (GCB_table[before][after]) {
-        case GCB_BREAKABLE:
+        GCB_enum prev = before;
+        bool matched = true;    /* Assume will match unless overridden */
+
+        switch (GCB_dfa_table[index]) {
+          case GCB_BREAKABLE:
             return true;
 
-        case GCB_NOBREAK:
+          case GCB_NOBREAK:
             return false;
 
-        case GCB_various_then_RI_v_RI:
-            {
-                int RI_count = 1;
-                U8 * temp_pos = (U8 *) curpos;
+          /* The other cases are for DFAs which execute and set 'matched' as to
+           * if the input matches what the DFA expects and then 'break's out of
+           * the switch.  */
 
-                /* Do not break within emoji flag sequences. That is, do not
-                 * break between regional indicator (RI) symbols if there is an
-                 * odd number of RI characters before the break point.
-                 *  GB12   sot (RI RI)* RI × RI
-                 *  GB13 [^RI] (RI RI)* RI × RI */
+          case GCB_various_then_RI_v_RI: ;
+            int RI_count;
 
-                while (isGCB_RI(backup_one_GCB(strbeg, &temp_pos,
-                                utf8_target)))
-                {
-                    RI_count++;
-                }
-
-                return RI_count % 2 != 1;
+            /* Do not break within emoji flag sequences. That is, do not break
+             * between regional indicator (RI) symbols if there is an odd
+             * number of RI characters before the break point.
+             *  GB12   sot (RI RI)* RI × RI
+             *  GB13 [^RI] (RI RI)* RI × RI */
+            RI_count = 1;
+            while (isGCB_RI(backup_one_GCB(strbeg, &prev_pos, utf8_target))) {
+                RI_count++;
             }
 
-/* Obsolete in later Unicode versions */
+            matched = RI_count % 2 == 1;
+            break;
+
 #if defined(isGCB_E_Base) && defined(isGCB_E_Base_GAZ)
-        case GCB_EB_or_EBG_then_Extend_v_EM:
+    /* Obsolete in later Unicode versions */
 
-            /* GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier */
-            {
-                U8 * temp_pos = (U8 *) curpos;
-                GCB_enum prev;
+          case GCB_EB_or_EBG_then_Extend_v_EM:
+            /* GB10  ( E_Base | E_Base_GAZ ) Extend*  ×  E_Modifier */
+            do {
+                prev = backup_one_GCB(strbeg, &prev_pos, utf8_target);
+            } while (isGCB_Extend(prev));
 
-                do {
-                    prev = backup_one_GCB(strbeg, &temp_pos, utf8_target);
-                }
-                while (isGCB_Extend(prev));
-
-                return ! isGCB_E_Base(prev) && ! isGCB_E_Base_GAZ(prev);
-            }
+            matched = isGCB_E_Base(prev) || isGCB_E_Base_GAZ(prev);
+            break;
 #endif
 
-        case GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict:
-
-            {
-
-            /* Do not break within emoji modifier sequences or emoji zwj sequences.
-              GB11 \p{Extended_Pictographic} Extend* ZWJ × \p{Extended_Pictographic}
-              */
-                U8 * temp_pos = (U8 *) curpos;
-                GCB_enum prev;
-
-                do {
-                    prev = backup_one_GCB(strbeg, &temp_pos, utf8_target);
-                }
-                while (isGCB_Extend(prev));
-
-                return ! isGCB_ExtPict_XX(prev);
+          case GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict:
+            /* Do not break within emoji modifier sequences or emoji zwj
+             * sequences.
+             *  GB11   \p{Extended_Pictographic} Extend* ZWJ
+             *       × \p{Extended_Pictographic} */
+            do {
+                prev = backup_one_GCB(strbeg, &prev_pos, utf8_target);
             }
+            while (isGCB_Extend(prev));
 
-        default:
+            matched = isGCB_ExtPict_XX(prev);
             break;
-    }
+
+          default:
+            /* Here, it's a bug, in which mk_invlists created a DFA which
+             * regexec.c doesn't know about.  But not getting the breaking just
+             * right isn't that big an issue, so we keep going.  We set to
+             * false in the hopes that there is a lower priority DFA that is
+             * known about, which the next loop iteration will use. */
+            matched = false;
 
 #ifdef DEBUGGING
-    Perl_re_printf( aTHX_  "Unhandled GCB pair: GCB_table[%d, %d] = %d\n",
-                                  before, after, GCB_table[before][after]);
-    assert(0);
+            Perl_re_printf( aTHX_
+                           "\nUnhandled GCB pair: GCB_table[%d, %d] = %d\n",
+                           before, after, GCB_table[before][after]);
+            //assert(0);
 #endif
-    return true;
+            break;
+
+        }  /* End of switch() */
+
+        /* Here 'matched' is true if the DFA matched the input.  If so,
+         * [index+1] contains the value to return */
+        if (matched) {
+            return GCB_dfa_table[index+1];
+        }
+
+        /* Here, it didn't match.  In [index+2] is stored the index into the
+         * DFA table of the next thing to try, which the next loop iteration
+         * does */
+        index += 2;
+
+    } while (index < C_ARRAY_LENGTH(GCB_dfa_table));
+
+    return true;   /* Shouldn't get here, fail-safe keep going, assuming a
+                      break */
 }
 
 STATIC GCB_enum
@@ -5388,218 +5408,207 @@ S_isLB(pTHX_ LB_enum before,
              const U8 * const strend,
              const bool utf8_target)
 {
-    U8 * temp_pos = (U8 *) curpos;
-    LB_enum prev = before;
-    LB_enum isLB_scratch;   /* Used by generated isLB_foo() macros */
+    PERL_ARGS_ASSERT_ISLB;
 
     /* Is the boundary between 'before' and 'after' line-breakable?
      * Most of this is just a table lookup of a generated table from Unicode
      * rules.  But some rules require context to decide, and so have to be
      * implemented in code */
 
-    PERL_ARGS_ASSERT_ISLB;
-
     /* Rule numbers in the comments below are as of Unicode 9.0 */
 
-  redo:
-    before = prev;
-    switch (LB_table[before][after]) {
-        case LB_BREAKABLE:
+    LB_enum isLB_scratch;   /* Used by generated isLB_foo() macros */
+    U8 index = LB_table[before][after];
+
+    do {
+        U8 * prev_pos = (U8 *) curpos;
+        U8 * next_pos = (U8 *) curpos;
+
+      redo: ;
+        LB_enum prev = before;
+        bool matched = true;    /* Assume will match unless overridden */
+
+        switch (LB_dfa_table[index]) {
+          case LB_BREAKABLE:
             return true;
 
-        case LB_NOBREAK:
-        case LB_NOBREAK_EVEN_WITH_SP_BETWEEN:
+          case LB_NOBREAK:
             return false;
 
-        case LB_ZW_then_SP_v_any + LB_BREAKABLE:
-        case LB_ZW_then_SP_v_any + LB_NOBREAK:
-        case LB_ZW_then_SP_v_any + LB_NOBREAK_EVEN_WITH_SP_BETWEEN:
+          //case 255:
+            assert(0);
+            matched = false;
+            break;
 
-            /* When we have something following a SP, we have to look at the
-             * context in order to know what to do.
-             *
-             * SP SP should not reach here because LB7: Do not break before
-             * spaces.  (For two spaces in a row there is nothing that
-             * overrides that) */
-            assert(! isLB_Space(after));
+          /* The other cases are for DFAs which execute and set 'matched' as to
+           * if the input matches what the DFA expects and then 'break's out of
+           * the switch.  */
 
-            /* Here we have a space followed by a non-space.  Mostly this is a
-             * case of LB18: "Break after spaces".  But there are complications
-             * as the handling of spaces is somewhat tricky.  They are in a
-             * number of rules, which have to be applied in priority order, but
-             * something earlier in the string can cause a rule to be skipped
-             * and a lower priority rule invoked.  A prime example is LB7 which
-             * says don't break before a space.  But rule LB8 (lower priority)
-             * says that the first break opportunity after a ZW is after any
-             * span of spaces immediately after it.  If a ZW comes before a SP
-             * in the input, rule LB8 applies, and not LB7.  Other such rules
-             * involve combining marks which are rules 9 and 10, but they may
-             * override higher priority rules if they come earlier in the
-             * string.  Since we're doing random access into the middle of the
-             * string, we have to look for rules that should get applied based
-             * on both string position and priority.  Combining marks do not
-             * attach to either ZW nor SP, so we don't have to consider them
-             * until later.
-             *
-             * To check for LB8, we have to find the first non-space character
-             * before this span of spaces */
-            do {
-                prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
-            }
-            while (isLB_Space(prev));
-
-            /* LB8 Break before any character following a zero-width space,
-             * even if one or more spaces intervene.
-             *      ZW SP* ÷
-             * So if we have a ZW just before this span, and to get here this
-             * is the final space in the span. */
-            if (isLB_ZWSpace(prev)) {
-                return true;
+          case LB_ZW_then_SP_v_any:
+            /* LB8  ZW SP  ÷  */
+            while (isLB_Space(prev)) {
+                prev =  backup_one_LB(strbeg, &prev_pos, utf8_target);
             }
 
-            /* Here, not ZW SP+.  There are several rules that have higher
-             * priority than LB18 and can be resolved now, as they don't depend
-             * on anything earlier in the string (except ZW, which we have
-             * already handled).  One of these rules is LB11 Do not break
-             * before Word joiner, but we have specially encoded that in the
-             * lookup table so it is caught by the single test below which
-             * catches the other ones. */
-            if (LB_table[LB_Space][after] - LB_ZW_then_SP_v_any
-                                            == LB_NOBREAK_EVEN_WITH_SP_BETWEEN)
-            {
-                return false;
-            }
+            matched = isLB_ZW(prev);
+            break;
 
-            /* If we get here, we have to XXX consider combining marks. */
-            if (isLB_Combining_Mark(prev)) {
+          case LB_CM_ZWJ_v_any:
 
-                /* What happens with these depends on the character they
-                 * follow.  */
-                do {
-                    prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
-                }
-                while (isLB_Combining_Mark(prev));
-
-                /* Most times these attach to and inherit the characteristics
-                 * of that character, but not always, and when not, they are to
-                 * be treated as AL by rule LB10. */
-                if (! LB_CM_ATTACHES_TO(prev)) {
-                    prev = LB_Alphabetic;
-                }
-            }
-
-            /* Here, we have the character preceding the span of spaces all set
-             * up.  We follow LB18: "Break after spaces" unless the table shows
-             * that is overridden */
-            return LB_table[prev][after] != LB_NOBREAK_EVEN_WITH_SP_BETWEEN;
-
-        case LB_CM_ZWJ_v_any:
-
-            /* We don't know how to treat the CM except by looking at the first
-             * non-CM character preceding it.  ZWJ is treated as CM */
-            prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &temp_pos,
+            /* These two classes break with the character following them iff
+             * the base character of the combining sequence they are part of
+             * breaks with that character.  Backup to find that that base
+             * character */
+            prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
                                                  utf8_target);
-            /* Here, 'prev' is that first earlier non-CM character.  If the CM
-             * attaches to it, then it inherits the behavior of 'prev'.  If it
-             * doesn't attach, it is to be treated as an AL */
+
+            /* Here, 'prev' is the base character.  If the CM/ZWJ attaches to
+             * it, then it inherits the behavior of 'prev'.  If it
+             * doesn't attach, LB4 says to use what would happen if the input
+             * was instead an AL class character with the character given by
+             * 'after'. */
             if (! LB_CM_ATTACHES_TO(prev)) {
                 prev = LB_Alphabetic;
             }
 
+            index = LB_table[prev][after];
             goto redo;
 
-        case LB_HL_then_HY_or_BA_v_any + LB_BREAKABLE:
-        case LB_HL_then_HY_or_BA_v_any + LB_NOBREAK:
+          case LB_OP_then_SP_v_any:
+            /* LB14 Do not break after ‘[’, even after spaces.
+             * OP SP* ×  */
+            while (   isLB_SP(prev)
+                   || isLB_CM(prev)
+                   || isLB_ZWJ(prev))
+            {
+                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
+                                                      &prev_pos, utf8_target);
+            }
 
+            matched = isLB_OP(prev);
+            break;
+
+          case LB_QU_then_SP_v_OP:
+            /* LB15 Do not break within ‘”[’, even with intervening spaces.
+             * QU SP* × OP  */
+            while (   isLB_SP(prev)
+                   || isLB_CM(prev)
+                   || isLB_ZWJ(prev))
+            {
+                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
+                                                      &prev_pos, utf8_target);
+            }
+
+            matched = isLB_QU(prev);
+            break;
+
+          case LB_CL_or_CP_then_SP_v_NS:
+            /* LB16 Do not break between closing punctuation and a nonstarter
+             * even with intervening spaces.
+             * (CL | CP) SP* × NS  */
+            while (   isLB_SP(prev)
+                   || isLB_CM(prev)
+                   || isLB_ZWJ(prev))
+            {
+                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
+                                                      &prev_pos, utf8_target);
+            }
+
+            matched = isLB_CL(prev)
+                   || isLB_CP(prev);
+            break;
+
+          case LB_B2_then_SP_v_B2:
+            /* LB17 Do not break within ‘——’, even with intervening spaces.
+             * B2 SP* × B2  */
+            while (   isLB_SP(prev)
+                   || isLB_CM(prev)
+                   || isLB_ZWJ(prev))
+            {
+                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
+                                                      &prev_pos, utf8_target);
+            }
+
+            matched = isLB_B2(prev);
+            break;
+
+          case LB_HL_then_HY_or_BA_v_any:
             /* LB21a Don't break after Hebrew + Hyphen.
              * HL (HY | BA) × */
-
-            if (isLB_HL(backup_one_LB_but_over_CM_ZWJ(strbeg, &temp_pos, utf8_target))) {
-                return false;
-            }
-
-            return LB_table[prev][after] - LB_HL_then_HY_or_BA_v_any == LB_BREAKABLE;
-
-        case LB_PR_or_PO_v_OP_or_HY_then_NU + LB_BREAKABLE:
-        case LB_PR_or_PO_v_OP_or_HY_then_NU + LB_NOBREAK:
-
-            /* LB25a (PR | PO) × ( OP | HY )? NU */
-            if (isLB_NU(advance_one_LB(&temp_pos, strend, utf8_target))) {
-                return false;
-            }
-
-            return LB_table[prev][after] - LB_PR_or_PO_v_OP_or_HY_then_NU
-                                                                == LB_BREAKABLE;
-
-        case LB_NU_then_SY_or_IS_v_various + LB_BREAKABLE:
-        case LB_NU_then_SY_or_IS_v_various + LB_NOBREAK:
-        {
-            /* LB25d NU (SY | IS)* × (NU | SY | IS | CL | CP ) */
-
-            LB_enum temp = prev;
-            do {
-                temp = backup_one_LB_but_over_CM_ZWJ(strbeg, &temp_pos, utf8_target);
-            }
-            while (isLB_Break_Symbols(temp) || isLB_Infix_Numeric(temp));
-            if (isLB_Numeric(temp)) {
-                return false;
-            }
-
-            return LB_table[prev][after] - LB_NU_then_SY_or_IS_v_various
-                                                               == LB_BREAKABLE;
-        }
-
-        case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR + LB_BREAKABLE:
-        case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR + LB_NOBREAK:
-        {
-            /* LB25e NU (SY | IS)* (CL | CP)? × (PO | PR) */
-
-            LB_enum temp = prev;
-            if (isLB_Close_Punctuation(temp) || isLB_Close_Parenthesis(temp))
-            {
-                temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
-            }
-            while (isLB_Break_Symbols(temp) || isLB_Infix_Numeric(temp)) {
-                temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
-            }
-            if (isLB_Numeric(temp)) {
-                return false;
-            }
-
-            return LB_table[prev][after]
-               - LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR == LB_BREAKABLE;
-        }
-
-        case LB_various_then_RI_v_RI + LB_NOBREAK:
-        case LB_various_then_RI_v_RI + LB_BREAKABLE:
-            {
-                int RI_count = 1;
-
-                /* LB30a Break between two regional indicator symbols if and
-                 * only if there are an even number of regional indicators
-                 * preceding the position of the break.
-                 *
-                 *    sot (RI RI)* RI × RI
-                 *  [^RI] (RI RI)* RI × RI */
-
-                while (isLB_RI(backup_one_LB(strbeg, &temp_pos, utf8_target)))
-                {
-                    RI_count++;
-                }
-
-                return RI_count % 2 == 0;
-            }
-
-        default:
+            matched = isLB_HL(backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
+                                                            utf8_target));
             break;
-    }
+
+          case LB_PR_or_PO_v_OP_or_HY_then_NU:
+            /* LB25 (PR | PO) × ( OP | HY )? NU */
+            matched = isLB_NU(advance_one_LB(&next_pos, strend, utf8_target));
+            break;
+
+
+          case LB_NU_then_SY_or_IS_v_various:
+          case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR:
+            /* LB25d NU (SY | IS)* × (NU | SY | IS | CL | CP )
+             * LB25e NU (SY | IS)* (CL | CP)? × (PO | PR) */
+            do {
+                prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
+                                                     utf8_target);
+            }
+            while (isLB_SY(prev) || isLB_IS(prev));
+
+            matched = isLB_NU(prev);
+            break;
+
+          case LB_various_then_RI_v_RI: ;
+            int RI_count;
+
+            /* LB30a Break between two regional indicator symbols if and only
+             * if there are an even number of regional indicators preceding the
+             * position of the break.
+             * sot (RI RI)* RI × RI
+             * [^RI] (RI RI)* RI × RI */
+            RI_count = 1;
+            while (isLB_RI(backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
+                                                         utf8_target)))
+            {
+                RI_count++;
+            }
+
+            matched = RI_count % 2 == 1;
+            break;
+
+          default:
+            /* Here, it's a bug, in which mk_invlists created a DFA which
+             * regexec.c doesn't know about.  But not getting the breaking just
+             * right isn't that big an issue, so we keep going.  We set to
+             * false in the hopes that there is a lower priority DFA that is
+             * known about, which the next loop iteration will use. */
+            matched = false;
 
 #ifdef DEBUGGING
-    Perl_re_printf( aTHX_  "Unhandled LB pair: LB_table[%d, %d] = %d\n",
-                                  before, after, LB_table[before][after]);
-    assert(0);
+            Perl_re_printf(aTHX_
+                           "\nUnhandled LB pair: LB_table[%d, %d] = %d\n",
+                           before, after, LB_table[before][after]);
+            //assert(0);
 #endif
-    return true;
+            break;
+
+        }  /* End of switch() */
+
+        /* Here 'matched' is true if the DFA matched the input.  If so,
+         * [index+1] contains the value to return */
+        if (matched) {
+            return LB_dfa_table[index+1];
+        }
+
+        /* Here, it didn't match.  In [index+2] is stored the index into the
+         * DFA table of the next thing to try, which the next loop iteration
+         * does */
+        index += 2;
+
+    } while (index < C_ARRAY_LENGTH(LB_dfa_table));
+
+    return true;   /* Shouldn't get here, fail-safe to keep going, assuming a
+                      break */
 }
 
 STATIC LB_enum
@@ -5977,6 +5986,8 @@ S_isWB(pTHX_ WB_enum previous,
              const U8 * const strend,
              const bool utf8_target)
 {
+    PERL_ARGS_ASSERT_ISWB;
+
     /*  Return a boolean as to if the boundary between 'before' and 'after' is
      *  a Unicode word break, using their published algorithm, but tailored for
      *  Perl by treating spans of white space as one unit.  Context may be
@@ -5987,169 +5998,150 @@ S_isWB(pTHX_ WB_enum previous,
      *  is, 'curpos' marks the position where the character whose wb value is
      *  'after' begins.  See https://www.unicode.org/reports/tr29/ */
 
-    U8 * prev_pos = (U8 *) curpos;
-    U8 * next_pos = (U8 *) curpos;
-    WB_enum prev = before;
-    WB_enum next;
-    WB_enum isWB_scratch;   /* Used by generated isWB_foo() macros */
-
-    PERL_ARGS_ASSERT_ISWB;
 
     /* Rule numbers in the comments below are as of Unicode 9.0 */
 
-  redo:
-    before = prev;
-    switch (WB_table[before][after]) {
-        case WB_BREAKABLE:
+    WB_enum isWB_scratch;   /* Used by generated isWB_foo() macros */
+    U8 index = WB_table[before][after];
+
+    do {
+        /* Otherwise the results come from a chain of dfas to execute,
+         * returning what the first successful one says; and returning a
+         * fallback if none succeed.  The chain starts at 'index' into
+         * WB_dfa_table[] */
+        U8 * prev_pos = (U8 *) curpos;
+        U8 * next_pos = (U8 *) curpos;
+
+      redo: ;
+        WB_enum prev;
+        WB_enum next;
+        bool matched = true;    /* Assume will match unless overridden */
+
+        switch (WB_dfa_table[index]) {
+          case WB_BREAKABLE:
             return true;
 
-        case WB_NOBREAK:
+          case WB_NOBREAK:
             return false;
 
-        case WB_hs_v_hs_then_Extend_or_FO_or_ZWJ: /* 2 horizontal spaces in a
+          /* The other cases are for DFAs which execute and set 'matched' as to
+           * if the input matches what the DFA expects and then 'break's out of
+           * the switch.  */
+
+          case WB_hs_v_hs_then_Extend_or_FO_or_ZWJ: /* 2 horizontal spaces in a
                                                      row */
             next = advance_one_WB(&next_pos, strend, utf8_target);
             /* A space immediately preceding an Extend or Format is attached
              * to by them, and hence gets separated from previous spaces.
              * Otherwise don't break between horizontal white space */
-            return isWB_Extend(next) || isWB_FO(next) || isWB_ZWJ(next);
+            matched = isWB_Extend(next) || isWB_FO(next) || isWB_ZWJ(next);
+            break;
 
-        /* WB4 Ignore Format and Extend characters, except when they appear at
-         * the beginning of a region of text.  This code currently isn't
-         * general purpose, but it works as the rules are currently and likely
-         * to be laid out.  The reason it works is that when 'they appear at
-         * the beginning of a region of text', the rule is to break before
-         * them, just like any other character.  Therefore, the default rule
-         * applies and we don't have to look in more depth.  Should this ever
-         * change, we would have to have 2 'case' statements, like in the rules
-         * below, and backup a single character (not spacing over the extend
-         * ones) and then see if that is one of the region-end characters and
-         * go from there */
-        case WB_Extend_or_FO_or_ZWJ_then_foo:
+          case WB_Extend_or_FO_or_ZWJ_then_foo:
+            /* WB4 Ignore Format and Extend characters, except when they appear
+             * at the beginning of a region of text. */
             prev = backup_one_WB_but_over_Extend_FO(&previous, strbeg,
                                                     &prev_pos, utf8_target);
+            index = WB_table[prev][after];
             goto redo;
 
-        case WB_HL_then_DQ_v_HL + WB_BREAKABLE:
-        case WB_HL_then_DQ_v_HL + WB_NOBREAK:
-
-            /* WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
-
-            if (isWB_Hebrew_Letter(backup_one_WB_but_over_Extend_FO(&previous,
-                                                                strbeg,
-                                                                &prev_pos,
-                                                                utf8_target)))
-            {
-                return false;
-            }
-
-             return WB_table[before][after] - WB_HL_then_DQ_v_HL == WB_BREAKABLE;
-
-        case WB_HL_v_DQ_then_HL + WB_BREAKABLE:
-        case WB_HL_v_DQ_then_HL + WB_NOBREAK:
-
-            /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
-            if (isWB_Hebrew_Letter(advance_one_WB_but_over_Extend_FO(
-                                                               &next_pos,
-                                                               strend,
-                                                               utf8_target)))
-            {
-                return false;
-            }
-
-            return WB_table[before][after] - WB_HL_v_DQ_then_HL == WB_BREAKABLE;
-
-        case WB_AHL_v_ML_or_MNLQ_then_AHL + WB_NOBREAK:
-        case WB_AHL_v_ML_or_MNLQ_then_AHL + WB_BREAKABLE:
-
-            /* WB6  AHLetter  ×  (MidLetter | MidNumLetQ ) AHLetter */
-
-            next = advance_one_WB_but_over_Extend_FO(&next_pos,
-                                                     strend,
-                                                     utf8_target);
-            if (isWB_AHLetter(next)) {
-                return false;
-            }
-
-            return WB_table[before][after]
-                            - WB_AHL_v_ML_or_MNLQ_then_AHL== WB_BREAKABLE;
-
-        case WB_AHL_then_ML_or_MNLQ_v_AHL + WB_NOBREAK:
-        case WB_AHL_then_ML_or_MNLQ_v_AHL + WB_BREAKABLE:
-
+          case WB_AHL_then_ML_or_MNLQ_v_AHL:
             /* WB7  AHLetter (MidLetter | MidNumLetQ)  ×  AHLetter */
-
-            prev = backup_one_WB_but_over_Extend_FO(&previous, strbeg,
-                                                    &prev_pos, utf8_target);
-            if (isWB_AHLetter(prev)) {
-                return false;
-            }
-
-            return WB_table[before][after]
-                            - WB_AHL_then_ML_or_MNLQ_v_AHL == WB_BREAKABLE;
-
-        case WB_NU_then_MN_or_MNLQ_v_NU + WB_NOBREAK:
-        case WB_NU_then_MN_or_MNLQ_v_NU + WB_BREAKABLE:
-
-            /* WB11  Numeric (MidNum | (MidNumLetQ))  ×  Numeric
-             * */
-
-            if (isWB_Numeric(backup_one_WB_but_over_Extend_FO(&previous,
-                                                            strbeg, &prev_pos,
-                                                            utf8_target)))
-            {
-                return false;
-            }
-
-            return WB_table[before][after]
-                                - WB_NU_then_MN_or_MNLQ_v_NU == WB_BREAKABLE;
-
-        case WB_NU_v_MN_or_MNLQ_then_NU + WB_NOBREAK:
-        case WB_NU_v_MN_or_MNLQ_then_NU + WB_BREAKABLE:
-
-            /* WB12  Numeric  ×  (MidNum | MidNumLetQ) Numeric */
-
-            if (isWB_Numeric(advance_one_WB_but_over_Extend_FO(&next_pos,
-                                                               strend,
-                                                               utf8_target)))
-            {
-                return false;
-            }
-
-            return WB_table[before][after]
-                                - WB_NU_v_MN_or_MNLQ_then_NU == WB_BREAKABLE;
-
-        case WB_various_then_RI_v_RI + WB_NOBREAK:
-        case WB_various_then_RI_v_RI + WB_BREAKABLE:
-            {
-                int RI_count = 1;
-                /* Do not break within emoji flag sequences. That is, do not
-                 * break between regional indicator (RI) symbols if there is an
-                 * odd number of RI characters before the potential break
-                 * point.
-                 *
-                 * WB15   sot (RI RI)* RI × RI
-                 * WB16 [^RI] (RI RI)* RI × RI */
-                while (isWB_RI(backup_one_WB_but_over_Extend_FO(&previous,
-                                                            strbeg, &prev_pos,
-                                                            utf8_target)))
-                {
-                    RI_count++;
-                }
-
-                return RI_count % 2 != 1;
-            }
-
-        default:
+            matched = isWB_AHLetter(
+                        backup_one_WB_but_over_Extend_FO(&previous, strbeg,
+                                                         &prev_pos,
+                                                         utf8_target));
             break;
-    }
+
+          case WB_AHL_v_ML_or_MNLQ_then_AHL:
+            /* WB8  AHLetter  ×  (MidLetter | MidNumLetQ) AHLetter */
+            matched = isWB_AHLetter(
+                        advance_one_WB_but_over_Extend_FO(&next_pos, strend,
+                                                          utf8_target));
+            break;
+
+          case WB_HL_v_DQ_then_HL:
+            /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
+            matched = isWB_Hebrew_Letter(
+                        advance_one_WB_but_over_Extend_FO(&next_pos, strend,
+                                                          utf8_target));
+            break;
+
+          case WB_HL_then_DQ_v_HL:
+            /* WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
+            matched = isWB_Hebrew_Letter(
+                        backup_one_WB_but_over_Extend_FO(&previous, strbeg,
+                                                         &prev_pos,
+                                                         utf8_target));
+            break;
+
+          case WB_NU_then_MN_or_MNLQ_v_NU:
+            /* WB11  Numeric (MidNum | (MidNumLetQ))  ×  Numeric */
+            matched = isWB_Numeric(
+                        backup_one_WB_but_over_Extend_FO(&previous, strbeg,
+                                                         &prev_pos,
+                                                         utf8_target));
+            break;
+
+          case WB_NU_v_MN_or_MNLQ_then_NU:
+            /* WB12  Numeric  ×  (MidNum | MidNumLetQ) Numeric */
+            matched = isWB_Numeric(
+                        advance_one_WB_but_over_Extend_FO(&next_pos, strend,
+                                                          utf8_target));
+            break;
+
+          case WB_various_then_RI_v_RI: ;
+            int RI_count;
+
+            /* Do not break within emoji flag sequences. That is, do not break
+             * between regional indicator (RI) symbols if there is an odd
+             * number of RI characters before the break point.
+             * WB15   sot    (RI RI)* RI × RI
+             * WB16  [^RI] (RI RI)* RI × RI */
+            RI_count = 1;
+            while (isWB_RI(backup_one_WB_but_over_Extend_FO(&previous, strbeg,
+                                                            &prev_pos,
+                                                            utf8_target)))
+            {
+                RI_count++;
+            }
+
+            matched = RI_count % 2 == 1;
+            break;
+
+          default:
+            /* Here, it's a bug, in which mk_invlists created a DFA which
+             * regexec.c doesn't know about.  But not getting the breaking just
+             * right isn't that big an issue, so we keep going.  We set to
+             * false in the hopes that there is a lower priority DFA that is
+             * known about, which the next loop iteration will use. */
+            matched = false;
 
 #ifdef DEBUGGING
-    Perl_re_printf( aTHX_  "Unhandled WB pair: WB_table[%d, %d] = %d\n",
-                                  before, after, WB_table[before][after]);
-    assert(0);
+            Perl_re_printf(aTHX_
+                           "\nUnhandled WB pair: WB_table[%d, %d] = %d\n",
+                           before, after, WB_table[before][after]);
+            //assert(0);
 #endif
-    return true;
+            break;
+
+        }  /* End of switch() */
+
+        /* Here 'matched' is true if the DFA matched the input.  If so,
+         * [index+1] contains the value to return */
+        if (matched) {
+            return WB_dfa_table[index+1];
+        }
+
+        /* Here, it didn't match.  In [index+2] is stored the index into the
+         * DFA table of the next thing to try, which the next loop iteration
+         * does */
+        index += 2;
+
+    } while (index < C_ARRAY_LENGTH(WB_dfa_table));
+
+    return true;   /* Shouldn't get here, fail-safe keep going, assuming a
+                      break */
 }
 
 STATIC WB_enum
@@ -6160,11 +6152,11 @@ S_advance_one_WB_(pTHX_ U8 ** curpos,
 {
     PERL_ARGS_ASSERT_ADVANCE_ONE_WB_;
 
-    WB_enum wb;
-
     if (*curpos >= strend) {
         return WB_EDGE;
     }
+
+    WB_enum wb;
 
     if (utf8_target) {
 
@@ -6199,6 +6191,10 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
                                          const bool utf8_target)
 {
     PERL_ARGS_ASSERT_BACKUP_ONE_WB_BUT_OVER_EXTEND_FO;
+
+    /* This always skips Extend and Format characters because Unicode rules WB4
+     * and up call for this behavior.  Rules WB1-3 don't require any backup, so
+     * no current need to make this optional.  This is unlikely to change */
 
     WB_enum wb;
 
