@@ -2522,13 +2522,6 @@ sub output_LB_table() {
 
     my ($lhs, $rhs, $dfa, $rule);
 
-    # Reversing the order of the rules causes some issues. regexec.c currently
-    # needs this special handling.  But this will be removed in a few commits
-    my $enum = $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN }{enum};
-    for $lhs (qw(OP)) {
-        set_lb_cells($lhs, $_, $enum, 14) for qw(CM GL ZWJ);
-    }
-
     # LB1 Assign a line breaking class to each code point of the input.
     # Resolve AI, CB, CJ, SA, SG, and XX into other line breaking classes
     # depending on criteria outside the scope of this algorithm.
