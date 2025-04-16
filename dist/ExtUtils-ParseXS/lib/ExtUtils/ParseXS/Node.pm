@@ -3007,6 +3007,11 @@ sub parse {
 package ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS;
 
 # Handle EXPORT_XSUB_SYMBOLS keyword
+#
+# Note that this keyword can appear both inside of and outside of an
+# XSUB; for the latter, it it is currently created as a temporary
+# object where as_code() is called immediately after parse() and then
+# the object is discarded.
 
 BEGIN { $build_subclass->('enable', # parent
 )};
@@ -3029,6 +3034,10 @@ sub as_code {
 
     my $xs_impl = $self->{enable} ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
+    # Change the definition of XS_EUPXS, so that any subsequent
+    # XS_EUPXS(fXS_Foo_foo) XSUB declarations will expand to
+    # XS_EXTERNAL/XS_INTERNAL as appropriate
+
     print ExtUtils::ParseXS::Q(<<"EOF");
         |#undef XS_EUPXS
         |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
@@ -3047,6 +3056,8 @@ EOF
 package ExtUtils::ParseXS::Node::PROTOTYPES;
 
 # Handle PROTOTYPES keyword
+#
+# Note that this keyword can appear both inside of and outside of an XSUB.
 
 BEGIN { $build_subclass->('enable', # parent
 )};
@@ -3068,6 +3079,8 @@ sub parse {
 package ExtUtils::ParseXS::Node::SCOPE;
 
 # Handle SCOPE keyword
+#
+# Note that this keyword can appear both inside of and outside of an XSUB.
 
 BEGIN { $build_subclass->('enable', # parent
 )};
@@ -3087,7 +3100,7 @@ sub parse {
 
     # Note that currently this parse method can be called either while
     # parsing an XSUB, or while processing file-scoped keywords
-    # just before an XSUB declaration. Sop potentially set both types of
+    # just before an XSUB declaration. So potentially set both types of
     # state.
     $xsub->{SCOPE_enabled}      = $self->{enable} if $xsub;
     $pxs->{file_SCOPE_enabled}  = $self->{enable};
@@ -3100,6 +3113,8 @@ sub parse {
 package ExtUtils::ParseXS::Node::VERSIONCHECK;
 
 # Handle VERSIONCHECK keyword
+#
+# Note that this keyword can appear both inside of and outside of an XSUB.
 
 BEGIN { $build_subclass->('enable', # parent
 )};
