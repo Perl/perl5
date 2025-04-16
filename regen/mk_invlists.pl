@@ -2261,6 +2261,8 @@ sub output_GCB_table() {
                                     %Unicode::UCD::gcb_components,
                                   }
                                  );
+
+    my $gcb_enum = 2;
     my %gcb_dfas = (
         GCB_NOBREAK                => {
                                         enum => 0,
@@ -2271,17 +2273,17 @@ sub output_GCB_table() {
                                         match_return => 1,
                                       },
         GCB_EB_or_EBG_then_Extend_v_EM => {
-                                        enum => 3,
+                                        enum => $gcb_enum++,
                                         match_return => 'GCB_NOBREAK',
                                         rule => 10,
                                       },
         GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict => {
-                                        enum => 4,
+                                        enum => $gcb_enum++,
                                         match_return => 'GCB_NOBREAK',
                                         rule => 11,
                                       },
         GCB_various_then_RI_v_RI   => {
-                                        enum => 2,
+                                        enum => $gcb_enum++,
                                         match_return => 'GCB_NOBREAK',
                                         rule => [12, 13],
                                       },
@@ -2427,6 +2429,8 @@ sub output_LB_table() {
     # its name, so it is assigned a power of 2 higher than the others can get
     # to so any addition would preserve all data.  (And the code will reach an
     # assert(0) on debugging builds should this happen.)
+
+    my $lb_enum = 2;
     my %lb_dfas = (
         LB_NOBREAK                    => {
                                             enum => 0,
@@ -2437,58 +2441,58 @@ sub output_LB_table() {
                                              match_return => 1,
                                            },
         LB_ZW_then_SP_v_any             => {
-                                             enum => 6,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_BREAKABLE',
                                              rule => 8,
                                            },
         LB_CM_ZWJ_v_any                 => {
-                                             enum => 3,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              dont_optimize_out => 1,
                                              rule => 9,
                                            },
         LB_OP_then_SP_v_any             => {
-                                             enum => 16,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 14,
                                            },
         LB_QU_then_SP_v_OP              => {
-                                             enum => 17,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 15,
                                            },
         LB_CL_or_CP_then_SP_v_NS        => {
-                                             enum => 18,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 16,
                                            },
         LB_B2_then_SP_v_B2             => {
-                                             enum => 19,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 17,
                                            },
         LB_HL_then_HY_or_BA_v_any       => {
-                                             enum => 13,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 21,
                                            },
         LB_PR_or_PO_v_OP_or_HY_then_NU  => {
-                                             enum => 9,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
                                            },
         LB_NU_then_SY_or_IS_v_various   => {
-                                             enum => 11,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
                                            },
         LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  => {
-                                             enum => (1<<5),
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
                                            },
         LB_various_then_RI_v_RI         => {
-                                             enum => 15,
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => '30a',
                                            },
@@ -2899,6 +2903,7 @@ sub output_WB_table() {
     # this file.  The dfas that could override a 0 or 1 are added to those
     # numbers; the dfas that clearly don't depend on the underlying rule
     # simply overwrite
+    my $wb_enum = 2;
     my %wb_dfas = (
         WB_NOBREAK                      => {
                                              enum => 0,
@@ -2909,47 +2914,47 @@ sub output_WB_table() {
                                              match_return => 1,
                                            },
         WB_hs_v_hs_then_Extend_or_FO_or_ZWJ => {
-                                             enum => 2,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_BREAKABLE',
                                              rule => '2z',
                                            },
         WB_Extend_or_FO_or_ZWJ_then_foo => {
-                                             enum => 3,
+                                             enum => $wb_enum++,
                                              match_return => 255,
                                              rule => 4,
                                            },
         WB_AHL_v_ML_or_MNLQ_then_AHL    => {
-                                             enum => 8,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => 6,
                                            },
         WB_AHL_then_ML_or_MNLQ_v_AHL    => {
-                                             enum => 10,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => 7,
                                            },
         WB_HL_v_DQ_then_HL              => {
-                                             enum => 6,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => '7b',
                                            },
         WB_HL_then_DQ_v_HL              => {
-                                             enum => 4,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => '7c',
                                            },
         WB_NU_then_MN_or_MNLQ_v_NU      => {
-                                             enum => 12,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => 11,
                                            },
         WB_NU_v_MN_or_MNLQ_then_NU      => {
-                                             enum => 14,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => 12,
                                            },
         WB_various_then_RI_v_RI         => {
-                                             enum => 16,
+                                             enum => $wb_enum++,
                                              match_return => 'WB_NOBREAK',
                                              rule => [ 15, 16 ],
                                            },

@@ -192968,9 +192968,9 @@ UNI_wb_values
  * is. */
 #define GCB_NOBREAK                                  0
 #define GCB_BREAKABLE                                1
-#define GCB_various_then_RI_v_RI                     2
-#define GCB_EB_or_EBG_then_Extend_v_EM               3
-#define GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict   4
+#define GCB_EB_or_EBG_then_Extend_v_EM               2
+#define GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict   3
+#define GCB_various_then_RI_v_RI                     4
 
 
 static const U8 GCB_table[17][17] = {
@@ -193022,10 +193022,10 @@ static const U8 GCB_dfa_table[] = {
 	/* [n] corresponds to the numbers in the above table's cells */
     0,	/* [0] placeholder */
     1,	/* [1] placeholder */
-    4,	/* [2] GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict (Rule GCB11) */
+    3,	/* [2] GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict (Rule GCB11) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule GCB99) */
-    2,	/* [5] GCB_various_then_RI_v_RI (Rules GCB12, GCB13) */
+    4,	/* [5] GCB_various_then_RI_v_RI (Rules GCB12, GCB13) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule GCB99) */
 };
@@ -193159,17 +193159,17 @@ static const U8 GCB_dfa_table[] = {
  * is. */
 #define LB_NOBREAK                                     0
 #define LB_BREAKABLE                                   1
+#define LB_ZW_then_SP_v_any                            2
 #define LB_CM_ZWJ_v_any                                3
-#define LB_ZW_then_SP_v_any                            6
+#define LB_OP_then_SP_v_any                            4
+#define LB_QU_then_SP_v_OP                             5
+#define LB_CL_or_CP_then_SP_v_NS                       6
+#define LB_B2_then_SP_v_B2                             7
+#define LB_HL_then_HY_or_BA_v_any                      8
 #define LB_PR_or_PO_v_OP_or_HY_then_NU                 9
-#define LB_NU_then_SY_or_IS_v_various                 11
-#define LB_HL_then_HY_or_BA_v_any                     13
-#define LB_various_then_RI_v_RI                       15
-#define LB_OP_then_SP_v_any                           16
-#define LB_QU_then_SP_v_OP                            17
-#define LB_CL_or_CP_then_SP_v_NS                      18
-#define LB_B2_then_SP_v_B2                            19
-#define LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  32
+#define LB_NU_then_SY_or_IS_v_various                 10
+#define LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  11
+#define LB_various_then_RI_v_RI                       12
 
 
 static const U8 LB_table[61][61] = {
@@ -193313,48 +193313,48 @@ static const U8 LB_dfa_table[] = {
     3,	/* [5] LB_CM_ZWJ_v_any (Rule LB9) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rules LB20,31) */
-    13,	/* [8] LB_HL_then_HY_or_BA_v_any (Rule LB21) */
+    8,	/* [8] LB_HL_then_HY_or_BA_v_any (Rule LB21) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    32,	/* [11] LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR (Rule LB25) */
+    11,	/* [11] LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    11,	/* [14] LB_NU_then_SY_or_IS_v_various (Rule LB25) */
+    10,	/* [14] LB_NU_then_SY_or_IS_v_various (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
     9,	/* [17] LB_PR_or_PO_v_OP_or_HY_then_NU (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    6,	/* [20] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [20] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     0,	/*	else return 0  (Rules LB11,13) */
-    15,	/* [23] LB_various_then_RI_v_RI (Rule LB30a) */
+    12,	/* [23] LB_various_then_RI_v_RI (Rule LB30a) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    6,	/* [26] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [26] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
-    16,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB18) */
-    6,	/* [31] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [31] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
-    16,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
-    19,	/* 	else try LB_B2_then_SP_v_B2 (Rule LB17) */
+    7,	/* 	else try LB_B2_then_SP_v_B2 (Rule LB17) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB18) */
-    6,	/* [38] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [38] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
-    16,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
-    18,	/* 	else try LB_CL_or_CP_then_SP_v_NS (Rule LB16) */
+    6,	/* 	else try LB_CL_or_CP_then_SP_v_NS (Rule LB16) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB18) */
-    6,	/* [45] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [45] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
-    16,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
-    17,	/* 	else try LB_QU_then_SP_v_OP (Rule LB15) */
+    5,	/* 	else try LB_QU_then_SP_v_OP (Rule LB15) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule LB18) */
 };
@@ -193419,13 +193419,13 @@ static const U8 LB_dfa_table[] = {
 #define WB_BREAKABLE                          1
 #define WB_hs_v_hs_then_Extend_or_FO_or_ZWJ   2
 #define WB_Extend_or_FO_or_ZWJ_then_foo       3
-#define WB_HL_then_DQ_v_HL                    4
+#define WB_AHL_v_ML_or_MNLQ_then_AHL          4
+#define WB_AHL_then_ML_or_MNLQ_v_AHL          5
 #define WB_HL_v_DQ_then_HL                    6
-#define WB_AHL_v_ML_or_MNLQ_then_AHL          8
-#define WB_AHL_then_ML_or_MNLQ_v_AHL         10
-#define WB_NU_then_MN_or_MNLQ_v_NU           12
-#define WB_NU_v_MN_or_MNLQ_then_NU           14
-#define WB_various_then_RI_v_RI              16
+#define WB_HL_then_DQ_v_HL                    7
+#define WB_NU_then_MN_or_MNLQ_v_NU            8
+#define WB_NU_v_MN_or_MNLQ_then_NU            9
+#define WB_various_then_RI_v_RI              10
 
 
 static const U8 WB_table[23][23] = {
@@ -193489,31 +193489,31 @@ static const U8 WB_dfa_table[] = {
 	/* [n] corresponds to the numbers in the above table's cells */
     0,	/* [0] placeholder */
     1,	/* [1] placeholder */
-    10,	/* [2] WB_AHL_then_ML_or_MNLQ_v_AHL (Rule WB7) */
+    5,	/* [2] WB_AHL_then_ML_or_MNLQ_v_AHL (Rule WB7) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
-    8,	/* [5] WB_AHL_v_ML_or_MNLQ_then_AHL (Rule WB6) */
+    4,	/* [5] WB_AHL_v_ML_or_MNLQ_then_AHL (Rule WB6) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
     3,	/* [8] WB_Extend_or_FO_or_ZWJ_then_foo (Rule WB4) */
     255,	/*	if matches, return 255 */
     1,	/*	else return 1  (Rule WB99) */
-    4,	/* [11] WB_HL_then_DQ_v_HL (Rule WB7c) */
+    7,	/* [11] WB_HL_then_DQ_v_HL (Rule WB7c) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
     6,	/* [14] WB_HL_v_DQ_then_HL (Rule WB7b) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
-    12,	/* [17] WB_NU_then_MN_or_MNLQ_v_NU (Rule WB11) */
+    8,	/* [17] WB_NU_then_MN_or_MNLQ_v_NU (Rule WB11) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
-    14,	/* [20] WB_NU_v_MN_or_MNLQ_then_NU (Rule WB12) */
+    9,	/* [20] WB_NU_v_MN_or_MNLQ_then_NU (Rule WB12) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
     2,	/* [23] WB_hs_v_hs_then_Extend_or_FO_or_ZWJ (Rule WB2z) */
     1,	/*	if matches, return 1 */
     0,	/*	else return 0  (Rule WB2) */
-    16,	/* [26] WB_various_then_RI_v_RI (Rules WB15, WB16) */
+    10,	/* [26] WB_various_then_RI_v_RI (Rules WB15, WB16) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule WB99) */
 };
