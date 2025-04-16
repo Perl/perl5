@@ -1922,9 +1922,9 @@ sub output_GCB_table() {
     my %gcb_dfas = (
         GCB_NOBREAK                      => 0,
         GCB_BREAKABLE                    => 1,
-        GCB_various_then_RI_v_RI         => 2,   # Rules 12 and 13
         GCB_EB_or_EBG_then_Extend_v_EM   => 3,   # Rule 10
         GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict => 4,
+        GCB_various_then_RI_v_RI         => 2,   # Rules 12 and 13
     );
 
     # These just call the generic table access functions with the correct data
@@ -2080,11 +2080,11 @@ sub output_LB_table() {
 
         LB_CM_ZWJ_v_any                 => 3,   # Rule 9
         LB_ZW_then_SP_v_any             => 6,   # Rule 18, et. al
+        LB_HL_then_HY_or_BA_v_any       => 13,  # Rule 21
         LB_PR_or_PO_v_OP_or_HY_then_NU  => 9,   # Rule 25
         LB_NU_then_SY_or_IS_v_various   => 11,  # Rule 25
-        LB_HL_then_HY_or_BA_v_any       => 13,  # Rule 21
-        LB_various_then_RI_v_RI         => 15,  # Rule 30a
         LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  => (1<<5), # Rule 25
+        LB_various_then_RI_v_RI         => 15,  # Rule 30a
     );
 
     # Construct the LB pair table.  This is based on the rules in
@@ -2512,10 +2512,10 @@ sub output_WB_table() {
         WB_BREAKABLE                    => 1,
         WB_hs_v_hs_then_Extend_or_FO_or_ZWJ => 2,
         WB_Extend_or_FO_or_ZWJ_then_foo => 3,
-        WB_HL_then_DQ_v_HL              => 4,
-        WB_HL_v_DQ_then_HL              => 6,
         WB_AHL_v_ML_or_MNLQ_then_AHL    => 8,
         WB_AHL_then_ML_or_MNLQ_v_AHL    => 10,
+        WB_HL_v_DQ_then_HL              => 6,
+        WB_HL_then_DQ_v_HL              => 4,
         WB_NU_then_MN_or_MNLQ_v_NU      => 12,
         WB_NU_v_MN_or_MNLQ_then_NU      => 14,
         WB_various_then_RI_v_RI         => 16,
