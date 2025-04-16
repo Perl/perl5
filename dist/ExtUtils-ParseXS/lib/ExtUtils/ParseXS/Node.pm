@@ -379,6 +379,18 @@ sub parse {
                                && $_->{in_out} =~ /OUTLIST$/
                              }
                         @{$self->{decl}{params}{kids}};
+
+    # If any aliases have been declared, make the main sub name ix 0
+    # if not specified.
+
+    if (            $self->{map_alias_name_to_value}
+        and keys %{ $self->{map_alias_name_to_value} })
+    {
+        my $pname = $self->{decl}{full_perl_name};
+        $self->{map_alias_name_to_value}{$pname} = 0
+            unless defined $self->{map_alias_name_to_value}{$pname};
+    }
+
     1;
 }
 
@@ -566,10 +578,6 @@ sub boot_code {
     {
         # For the main XSUB and for each alias name, generate a newXS() call
         # and 'XSANY.any_i32 = ix' line.
-
-        # Make the main name one of the aliases if it isn't already
-        $self->{map_alias_name_to_value}->{$pname} = 0
-            unless defined $self->{map_alias_name_to_value}{$pname};
 
         foreach my $xname (sort keys
                     %{ $self->{map_alias_name_to_value} })

@@ -4289,6 +4289,20 @@ EOF
         ],
 
         [
+            "ALIAS with main as default of 0",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS:
+                |           bar = 2
+EOF
+            [ 0, 0, qr{"Foo::foo",.*\n.*= 0;},
+                   "has Foo::foo" ],
+            [ 0, 0, qr{"Foo::bar",.*\n.*= 2;},
+                   "has Foo::bar" ],
+        ],
+
+        [
             "ALIAS multi-perl-line, blank lines",
             [ Q(<<'EOF') ],
                 |void
