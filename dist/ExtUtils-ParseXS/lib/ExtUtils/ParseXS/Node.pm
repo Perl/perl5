@@ -856,7 +856,9 @@ sub parse {
 package ExtUtils::ParseXS::Node::Param;
 
 # Node subclass which holds the state of one XSUB parameter, based on the
-# XSUB's signature and/or an INPUT line.
+# just the XSUB's signature. See also the Node::IO_Param subclass, which
+# augments the parameter declaration with info from INPUT and OUTPUT
+# lines.
 
 BEGIN { $build_subclass->('', # parent
         # values derived from the XSUB's signature
@@ -874,19 +876,6 @@ BEGIN { $build_subclass->('', # parent
         # values derived from both the XSUB's signature and/or INPUT line
         'type',      # The C type of the parameter
         'no_init',   # don't initialise the parameter
-
-        # values derived from the XSUB's INPUT line
-        'init_op',   # initialisation type: one of =/+/;
-        'init',      # initialisation template code
-        'is_addr',   # INPUT var declared as '&foo'
-        'is_alien',  # var declared in INPUT line, but not in signature
-        'in_input',  # the parameter has appeared in an INPUT statement
-        'defer',     # deferred initialisation template code
-
-        # values derived from the XSUB's OUTPUT line
-        'in_output',   # the parameter has appeared in an OUTPUT statement
-        'do_setmagic', # 'SETMAGIC: ENABLE' was active for this parameter
-        'output_code', # the optional setting-code for this parameter
 
         # derived values calculated later
         'proto',     # overridden prototype char(s) (if any) from typemap
@@ -916,13 +905,37 @@ sub set_proto {
 }
 
 
-# $self->as_code():
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::IO_Param;
+
+# Subclass of Node::Param which holds the state of one XSUB parameter,
+# based on the XSUB's signature, but also augmented by info from INPUT or
+# OUTPUT lines
+
+BEGIN { $build_subclass->('Param', # parent
+        # values derived from the XSUB's INPUT line
+        'init_op',   # initialisation type: one of =/+/;
+        'init',      # initialisation template code
+        'is_addr',   # INPUT var declared as '&foo'
+        'is_alien',  # var declared in INPUT line, but not in signature
+        'in_input',  # the parameter has appeared in an INPUT statement
+        'defer',     # deferred initialisation template code
+
+        # values derived from the XSUB's OUTPUT line
+        'in_output',   # the parameter has appeared in an OUTPUT statement
+        'do_setmagic', # 'SETMAGIC: ENABLE' was active for this parameter
+        'output_code', # the optional setting-code for this parameter
+)};
+
+
+# $self->as_input_code():
 #
 # Emit the param object as C code which declares and initialise the variable.
 # See also the as_output_code() method, which emits code to return the value
 # of that local var.
 
-sub as_code {
+sub as_input_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
     my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
@@ -1789,19 +1802,20 @@ package ExtUtils::ParseXS::Node::Params;
 # Node subclass which holds a list of the parameters for an XSUB
 # (both directly found in the foo(....) signature, plus possibly synthetic
 # ones such as THIS and RETVAL.
-# It is a mainly a list of Node::Param children.
+# It is a mainly a list of Node::Param or Node::IO_Param children.
 
 BEGIN { $build_subclass->('', # parent
 
-                         # inherited 'kids' field:
-                         # Array ref of Node::Param objects representing
-                         # the parameters of this XSUB - either the
-                         # original ones as seen in the XSUB's signature,
-                         # or per-xbody ones augmented by info from INPUT
-                         # and OUTPUT sections.
+                         # Inherited 'kids' field:
+                         #
+                         # Array ref of Node::Param or Node::IO_Param
+                         # objects representing the parameters of this
+                         # XSUB - either the original ones as seen in the
+                         # XSUB's signature, or per-xbody ones augmented
+                         # by info from INPUT and OUTPUT sections.
 
         'names',         # Hash ref mapping variable names to Node::Param
-                         # objects
+                         # or Node::IO_Param objects
 
         'params_text',   # The original text of the sig, e.g.
                          #   'param1, int param2 = 0'
@@ -2325,7 +2339,7 @@ sub parse {
         $ioparams->{names}  = {};
 
         for my $op (@{$orig->{kids}}) {
-            my $p  = ExtUtils::ParseXS::Node::Param->new($op);
+            my $p  = ExtUtils::ParseXS::Node::IO_Param->new($op);
             # don't copy the current proto state (from the most recent
             # CASE) into the new CASE.
             undef $p->{proto};
@@ -2495,8 +2509,8 @@ EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-    for my $param (grep $_->{is_synthetic}, @{$ioparams->{kids}}) {
-        $param->as_code($pxs, $xsub, $xbody);
+    for my $ioparam (grep $_->{is_synthetic}, @{$ioparams->{kids}}) {
+        $ioparam->as_input_code($pxs, $xsub, $xbody);
     }
 
     # Recent code emits a dXSTARG in a tighter scope and under
@@ -2510,7 +2524,7 @@ EOF
     # Emit declaration/init code for any parameters which were
     # declared with a type or length(foo). Do the length() ones first.
 
-    for my $param (
+    for my $ioparam (
             grep $_->{is_ansi},
                 (
                     grep(  $_->{is_length}, @{$ioparams->{kids}} ),
@@ -2519,7 +2533,7 @@ EOF
     )
 
     {
-        $param->as_code($pxs, $xsub, $xbody);
+        $ioparam->as_input_code($pxs, $xsub, $xbody);
     }
 
     # ----------------------------------------------------------------
@@ -3967,7 +3981,7 @@ package ExtUtils::ParseXS::Node::INPUT_line;
 # Handle one line from an INPUT keyword block
 
 BEGIN { $build_subclass->('keyline', # parent
-    'param',   # The Param object associated with this INPUT line.
+    'param',   # The IO_Param object associated with this INPUT line.
 
                # The parsed components of this INPUT line:
     'type',    #   char *
@@ -3984,18 +3998,18 @@ BEGIN { $build_subclass->('keyline', # parent
 # INPUT_line object (which aren't further used for parsing or code
 # generation)
 #
-# It also uses those values to create/update the Param object
+# It also uses those values to create/update the IO_Param object
 # associated with this variable. For example with
 #
 #    void
 #    foo(a = 0)
 #       int a
 #
-# a Param object will already have been created with the name 'a' and
+# a IO_Param object will already have been created with the name 'a' and
 # default value '0' when the signature was parsed. Parsing the 'int a'
 # line will set the INPUT_line object's fields to (type => 'int',
-# name => 'a'), while the Param object will have its type field set to
-# 'int'. The INPUT_line object also stores a ref to the Param object.
+# name => 'a'), while the IO_Param object will have its type field set to
+# 'int'. The INPUT_line object also stores a ref to the IO_Param object.
 #
 
 sub parse {
@@ -4062,7 +4076,7 @@ sub parse {
 
     my $ioparams = $xbody->{ioparams};
 
-    my ExtUtils::ParseXS::Node::Param $param = $ioparams->{names}{$var_name};
+    my ExtUtils::ParseXS::Node::IO_Param $param = $ioparams->{names}{$var_name};
 
     if (defined $param) {
         # The var appeared in the signature too.
@@ -4106,7 +4120,7 @@ sub parse {
         # general var declaration (which really should have been in a
         # PREINIT section). Legal but nasty: flag is as 'alien'
         $is_alien = 1;
-        $param = ExtUtils::ParseXS::Node::Param->new({
+        $param = ExtUtils::ParseXS::Node::IO_Param->new({
                     var      => $var_name,
                     is_alien => 1,
                 });
@@ -4192,16 +4206,16 @@ sub as_code {
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
 
-    my $param = $self->{param};
+    my $ioparam = $self->{param};
 
     # Synthetic params like THIS will be emitted later - they
     # are treated like ANSI params, except the type can overridden
     # within an INPUT statement
-    return if $param->{is_synthetic};
+    return if $ioparam->{is_synthetic};
 
     # The param object contains data from both the INPUT line and
     # the XSUB signature.
-    $param->as_code($pxs, $xsub, $xbody);
+    $ioparam->as_input_code($pxs, $xsub, $xbody);
 }
 
 
@@ -4267,7 +4281,7 @@ sub parse {
 
     $self->{name} = $outarg;
 
-    my ExtUtils::ParseXS::Node::Param $param =
+    my ExtUtils::ParseXS::Node::IO_Param $param =
                                 $xbody->{ioparams}{names}{$outarg};
     $self->{param} = $param;
 
