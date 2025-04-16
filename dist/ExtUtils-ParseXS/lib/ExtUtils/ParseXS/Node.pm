@@ -140,11 +140,13 @@ sub parse {
 # (just grab the next keyword).
 
 sub parse_keywords {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
-    my $max                    = shift; # max number of keywords to process
-    my $pat                    = shift;
-    my $do_notimplemented      = shift;
+    my __PACKAGE__       $self  = shift;
+    my ExtUtils::ParseXS $pxs   = shift;
+    my                   $xsub  = shift;
+    my                   $xbody = shift;
+    my $max                     = shift; # max number of keywords to process
+    my $pat                     = shift;
+    my $do_notimplemented       = shift;
 
     my $n = 0;
     my @kids;
@@ -167,7 +169,7 @@ sub parse_keywords {
         # with it.
         my $class = "ExtUtils::ParseXS::Node::$keyword";
         my $node  = $class->new();
-        if ($node->parse($pxs)) {
+        if ($node->parse($pxs, $xsub, $xbody)) {
             push @{$self->{kids}}, $node;
             push @kids, $node;
         }
@@ -289,7 +291,7 @@ sub parse {
 
     my $decl = ExtUtils::ParseXS::Node::xsub_decl->new();
     $self->{decl} = $decl;
-    $decl->parse($pxs)
+    $decl->parse($pxs, $self)
         or return;
 
     # Append a fake EOF-keyword line. This makes it easy to do "all lines
@@ -320,7 +322,7 @@ sub parse {
         # Parse a CASE statement if present.
         my ($case) =
             $self->parse_keywords(
-                $pxs,
+                $pxs, $self, undef,  # xbody not yet present so use undef
                 1,  # process maximum of one keyword
                 "CASE",
             );
@@ -351,9 +353,7 @@ sub parse {
         # Parse the XSUB's body
 
         my $xbody = ExtUtils::ParseXS::Node::xbody->new();
-        $pxs->{cur_xbody} = $xbody;
-        $xbody->parse($pxs);
-        undef $pxs->{cur_xbody};
+        $xbody->parse($pxs, $self);
 
         if (defined $case) {
             # make the xbody a child of the CASE
@@ -669,8 +669,10 @@ BEGIN { $build_subclass->('', # parent
 # Parse the XSUB's declaration - i.e. return type, name and parameters.
 
 sub parse {
-    my __PACKAGE__                     $self   = shift;
-    my ExtUtils::ParseXS               $pxs    = shift;
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -678,7 +680,7 @@ sub parse {
 
     my $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
 
-    $return_type->parse($pxs)
+    $return_type->parse($pxs, $xsub)
         or return;
 
     $self->{return_type} = $return_type;
@@ -754,7 +756,7 @@ sub parse {
     my $params = $self->{params}
                = ExtUtils::ParseXS::Node::Params->new();
 
-    $params->parse($pxs, $params_text);
+    $params->parse($pxs, $xsub, $params_text);
     $self->{params} = $params;
 
     1;
@@ -783,8 +785,9 @@ BEGIN { $build_subclass->('', # parent
 # type part; else pop the first line.
 
 sub parse {
-    my __PACKAGE__                     $self   = shift;
-    my ExtUtils::ParseXS               $pxs    = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -1865,9 +1868,10 @@ $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
-     my $params_text           = shift;
+    my __PACKAGE__                    $self = shift;
+    my ExtUtils::ParseXS              $pxs  = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub = shift;
+    my $params_text                         = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -1908,13 +1912,13 @@ sub parse {
 
     # C++ methods get a fake object/class param at the start.
     # This affects arg numbering.
-    if (defined($pxs->{cur_xsub}{decl}{class})) {
+    if (defined($xsub->{decl}{class})) {
         my ($var, $type) =
-            (   $pxs->{cur_xsub}{decl}{return_type}{static}
-             or $pxs->{cur_xsub}{decl}{name} eq 'new'
+            (   $xsub->{decl}{return_type}{static}
+             or $xsub->{decl}{name} eq 'new'
             )
                 ? ('CLASS', "char *")
-                : ('THIS',  "$pxs->{cur_xsub}{decl}{class} *");
+                : ('THIS',  "$xsub->{decl}{class} *");
 
         my ExtUtils::ParseXS::Node::Param $param
                 = ExtUtils::ParseXS::Node::Param->new( {
@@ -1948,11 +1952,11 @@ sub parse {
     #                   type comes from the sig or INPUT line. This is
     #                   just a normal parameter now.
 
-    if ($pxs->{cur_xsub}{decl}{return_type}{type} ne 'void') {
+    if ($xsub->{decl}{return_type}{type} ne 'void') {
         my ExtUtils::ParseXS::Node::Param $param =
             ExtUtils::ParseXS::Node::Param->new( {
                 var          => 'RETVAL',
-                type         => $pxs->{cur_xsub}{decl}{return_type}{type},
+                type         => $xsub->{decl}{return_type}{type},
                 no_init      => 1, # just declare the var, don't initialise it
                 is_synthetic => 1,
             } );
@@ -2296,9 +2300,9 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
-
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -2307,7 +2311,7 @@ sub parse {
         # accumulate any extra info from (per-CASE) INPUT and OUTPUT
         # sections.
 
-        my $orig = $pxs->{cur_xsub}{decl}{params};
+        my $orig = $xsub->{decl}{params};
 
         # make a shallow copy
         my $ioparams = ExtUtils::ParseXS::Node::Params->new($orig);
@@ -2335,7 +2339,7 @@ sub parse {
 
     for my $part (qw(input_part init_part code_part output_part cleanup_part)) {
         my $kid = "ExtUtils::ParseXS::Node::$part"->new();
-        if ($kid->parse($pxs)) {
+        if ($kid->parse($pxs, $xsub, $self)) {
             push @{$self->{kids}}, $kid;
             $self->{$part} = $kid;
         }
@@ -2398,15 +2402,20 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
     # Process any implicit INPUT section.
     {
         my $input = ExtUtils::ParseXS::Node::INPUT->new();
-        if ($input->parse($pxs) && $input->{kids} && @{$input->{kids}}) {
+        if (   $input->parse($pxs, $xsub, $xbody)
+            && $input->{kids}
+            && @{$input->{kids}})
+        {
             $input->{implicit} = 1;
             push @{$self->{kids}}, $input;
         }
@@ -2416,7 +2425,7 @@ sub parse {
     # parse the text following them, and add any resultant nodes
     # as kids to the current node.
     $self->parse_keywords(
-            $pxs,
+            $pxs, $xsub, $xbody,
             undef,  # implies process as many keywords as possible
 
               "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|"
@@ -2439,14 +2448,14 @@ sub parse {
     # also use that value to update the per-XSUB value, warning if the
     # value changes.
 
-    for my $ioparam (@{$pxs->{cur_xbody}{ioparams}{params}}) {
+    for my $ioparam (@{$xbody->{ioparams}{params}}) {
         $ioparam->set_proto($pxs);
         my $ioproto = $ioparam->{proto};
         my $name    = $ioparam->{var};
         next unless defined $name;
         next unless $ioparam->{arg_num};
 
-        my $param = $pxs->{cur_xsub}{decl}{params}{names}{$name};
+        my $param = $$xsub{decl}{params}{names}{$name};
         my $proto = $param->{proto};
         $ioproto = '$' unless defined $ioproto;
         if (defined $proto and $proto ne $ioproto) {
@@ -2536,6 +2545,7 @@ BEGIN { $build_subclass->('', # parent
 sub parse {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
@@ -2544,7 +2554,7 @@ sub parse {
     # parse the text following them, and add any resultant nodes
     # as kids to the current node.
     $self->parse_keywords(
-            $pxs,
+            $pxs, $xsub, $xbody,
             undef,  # implies process as many keywords as possible
 
               "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|"
@@ -2576,15 +2586,17 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
     # Look for a CODE/PPCODE/NOT_IMPLEMENTED_YET keyword; if found, add
     # the kid to the current node.
     return 1 if $self->parse_keywords(
-                        $pxs,
+                        $pxs, $xsub, $xbody,
                         1, # match at most one keyword
                         "CODE|PPCODE",
                         1, # also match NOT_IMPLEMENTED_YET
@@ -2594,7 +2606,8 @@ sub parse {
     # to the same-named C library function.
 
     my $autocall = ExtUtils::ParseXS::Node::autocall->new();
-    $autocall->parse($pxs); # mainly a NOOP, but sets line number etc.
+    # mainly a NOOP, but sets line number etc and flags that autocall seen
+    $autocall->parse($pxs, $xsub, $xbody);
     push @{$self->{kids}}, $autocall;
 
     1;
@@ -2630,8 +2643,10 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -2641,7 +2656,7 @@ sub parse {
     # XXX POSTCALL is documented to precede OUTPUT, but here we allow
     # them in any order and multiplicity.
     $self->parse_keywords(
-            $pxs,
+            $pxs, $xsub, $xbody,
             undef,  # implies process as many keywords as possible
               "POSTCALL|OUTPUT|"
             . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
@@ -2746,8 +2761,10 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -2755,7 +2772,7 @@ sub parse {
     # parse the text following them, and add any resultant nodes
     # as kids to the current node.
     $self->parse_keywords(
-            $pxs,
+            $pxs, $xsub, $xbody,
             undef,  # implies process as many keywords as possible
               "CLEANUP|"
             . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
@@ -2870,14 +2887,16 @@ BEGIN { $build_subclass->('', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
-    $pxs->{cur_xbody}{seen_autocall} = 1;
+    $xbody->{seen_autocall} = 1;
 
-    my $ioparams  = $pxs->{cur_xbody}{ioparams};
+    my $ioparams  = $xbody->{ioparams};
     my $args = $ioparams->{auto_function_sig_override}; # C_ARGS
     $args = $ioparams->C_func_signature($pxs)
         unless defined $args;
@@ -3055,21 +3074,23 @@ BEGIN { $build_subclass->('enable', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
 
     $pxs->blurt("Error: Only one SCOPE declaration allowed per XSUB")
-        if $pxs->{cur_xsub}->{seen_SCOPE};
-    $pxs->{cur_xsub}->{seen_SCOPE} = 1;
+        if $xsub->{seen_SCOPE};
+    $xsub->{seen_SCOPE} = 1;
 
     # Note that currently this parse method can be called either while
     # parsing an XSUB, or while processing file-scoped keywords
     # just before an XSUB declaration. Sop potentially set both types of
     # state.
-    $pxs->{cur_xsub}{SCOPE_enabled} = $self->{enable} if $pxs->{cur_xsub};
-    $pxs->{file_SCOPE_enabled}      = $self->{enable};
+    $xsub->{SCOPE_enabled}      = $self->{enable} if $xsub;
+    $pxs->{file_SCOPE_enabled}  = $self->{enable};
     1;
 }
 
@@ -3179,11 +3200,13 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
-    $pxs->{cur_xbody}{ioparams}{auto_function_sig_override} = $self->{text};
+    $xbody->{ioparams}{auto_function_sig_override} = $self->{text};
     1;
 }
 
@@ -3198,11 +3221,13 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
-    $pxs->{cur_xsub}{seen_INTERFACE} = 1;
+    $xsub->{seen_INTERFACE} = 1;
 
     my %map;
 
@@ -3210,7 +3235,7 @@ sub parse {
         my $short = $_;
         $short =~ s/^$pxs->{PREFIX_pattern}//;
         $map{$short} = $_;
-        $pxs->{cur_xsub}{map_interface_name_short_to_original}{$short} = $_;
+        $xsub->{map_interface_name_short_to_original}{$short} = $_;
     }
 
     1;
@@ -3246,12 +3271,14 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
-    $pxs->{cur_xsub}{seen_INTERFACE_MACRO} = 1;
+    $xsub->{seen_INTERFACE_MACRO} = 1;
 
     my $s = $self->{text};
     my ($m1, $m2);
@@ -3264,8 +3291,8 @@ sub parse {
         ($m1, $m2) = ($s, 'UNKNOWN_CVT');
     }
 
-    $self->{get_macro} = $pxs->{cur_xsub}{interface_macro}     = $m1;
-    $self->{set_macro} = $pxs->{cur_xsub}{interface_macro_set} = $m2;
+    $self->{get_macro} = $xsub->{interface_macro}     = $m1;
+    $self->{set_macro} = $xsub->{interface_macro_set} = $m2;
 
     1;
 }
@@ -3286,15 +3313,17 @@ BEGIN { $build_subclass->('multiline_merged', # parent
 # the $xsub->{overload_name_seen} hash.
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
     my $s = $self->{text};
     while ($s =~  s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
         $self->{ops}{$1} = 1;
-        $pxs->{cur_xsub}{overload_name_seen}{$1} = 1;
+        $xsub->{overload_name_seen}{$1} = 1;
     }
     1;
 }
@@ -3317,13 +3346,15 @@ BEGIN { $build_subclass->('multiline', # parent
 # string to pass to apply_attrs_string().
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines
     for (@{$self->{lines}}) {
         ExtUtils::ParseXS::Utilities::trim_whitespace($_);
-        push @{$pxs->{cur_xsub}{attributes}}, $_;
+        push @{$xsub->{attributes}}, $_;
     }
     1;
 }
@@ -3350,16 +3381,18 @@ BEGIN { $build_subclass->('multiline', # parent
 # XXX It's a design flaw that more than one line can be processed.
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no, get lines
 
     my $proto;
 
     $pxs->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
-        if $pxs->{cur_xsub}{seen_PROTOTYPE};
-    $pxs->{cur_xsub}{seen_PROTOTYPE} = 1;
+        if $xsub->{seen_PROTOTYPE};
+    $xsub->{seen_PROTOTYPE} = 1;
 
     for (@{$self->{lines}}) {
         next unless /\S/;
@@ -3383,7 +3416,7 @@ sub parse {
     $proto = 2 unless defined $proto;
 
     $self->{prototype}          = $proto;
-    $pxs->{cur_xsub}{prototype} = $proto;
+    $xsub->{prototype} = $proto;
 
     $pxs->{proto_behaviour_specified} = 1;
     1;
@@ -3463,8 +3496,10 @@ BEGIN { $build_subclass->('codeblock', # parent
 )};
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no/lines
 
@@ -3472,7 +3507,7 @@ sub parse {
     # use to warn if RETVAL is used but no OUTPUT block is present.
     # Ignore if its only being used in an 'ignore this var' situation.
     my $code = join "\n", @{$self->{lines}};
-    $pxs->{cur_xbody}{seen_RETVAL_in_CODE} =
+    $xbody->{seen_RETVAL_in_CODE} =
                     $code =~ /\bRETVAL\b/
                  && $code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/;
 
@@ -3503,7 +3538,7 @@ sub parse {
     # will be used later when deciding how/whether to emit EXTEND(n) and
     # XSRETURN(n).
 
-    $pxs->{cur_xsub}{CODE_sets_ST0} =
+    $xsub->{CODE_sets_ST0} =
              $code =~ m{  ( \b ST      \s* \( [^;]* = )
                         | ( \b XST_m\w+\s* \(         ) }x;
 
@@ -3557,11 +3592,13 @@ BEGIN { $build_subclass->('codeblock', # parent
 )};
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no/lines
-    $pxs->{cur_xsub}{seen_PPCODE} = 1;
+    $xsub->{seen_PPCODE} = 1;
     # The only thing left should be the special "!End!\n\n" token.
     $pxs->death("PPCODE must be last thing") if @{$pxs->{line}} > 1;
     1;
@@ -3628,9 +3665,11 @@ BEGIN { $build_subclass->('', # parent
 # For each line, create a FOO_line kid and call its parse() method.
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
-    my $do_notimplemented      = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+    my $do_notimplemented                    = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
 
@@ -3656,7 +3695,7 @@ sub parse {
         # Keep the current line in $self->{lines} for now so that the
         # parse() method below sees the right line number. We rely on that
         # method to actually pop the line.
-        if ($kid->parse($pxs, $self)) {
+        if ($kid->parse($pxs, $xsub, $xbody, $self)) {
             push @{$self->{kids}}, $kid;
         }
     }
@@ -3696,8 +3735,8 @@ BEGIN { $build_subclass->('', # parent
 # concrete subclasses.
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__       $self  = shift;
+    my ExtUtils::ParseXS $pxs   = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
     # By shifting *now*, the line above gets the correct line number of
@@ -3721,11 +3760,13 @@ BEGIN { $build_subclass->('keylines', # parent
 )};
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
-    $pxs->{cur_xsub}{seen_ALIAS} = 1;
-    $self->SUPER::parse($pxs);
+    $xsub->{seen_ALIAS} = 1;
+    $self->SUPER::parse($pxs, $xsub, $xbody);
 }
 
 # ======================================================================
@@ -3764,8 +3805,10 @@ BEGIN { $build_subclass->('keyline', # parent
 
 
 sub parse {
-    my __PACKAGE__                    $self   = shift;
-    my ExtUtils::ParseXS              $pxs    = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
     my ExtUtils::ParseXS::Node::ALIAS $parent = shift; # parent ALIAS node
 
     $self->SUPER::parse($pxs); # set file/line_no/line
@@ -3780,7 +3823,7 @@ sub parse {
     my $orig = $line; # keep full line for error messages
 
     # we use this later for symbolic aliases
-    my $fname = $pxs->{PACKAGE_class} . $pxs->{cur_xsub}{decl}{name};
+    my $fname = $pxs->{PACKAGE_class} . $xsub->{decl}{name};
 
     # chop out and process one alias entry from $line
 
@@ -3798,8 +3841,8 @@ sub parse {
         if ($is_symbolic) {
             my $orig_value = $value;
             $value = $pxs->{PACKAGE_class} . $value if $value !~ /::/;
-            if (defined $pxs->{cur_xsub}{map_alias_name_to_value}{$value}) {
-                $value = $pxs->{cur_xsub}{map_alias_name_to_value}{$value};
+            if (defined $xsub->{map_alias_name_to_value}{$value}) {
+                $value = $xsub->{map_alias_name_to_value}{$value};
             } elsif ($value eq $fname) {
                 $value = 0;
             } else {
@@ -3808,14 +3851,14 @@ sub parse {
         }
 
         # check for duplicate alias name & duplicate value
-        my $prev_value = $pxs->{cur_xsub}{map_alias_name_to_value}{$alias};
+        my $prev_value = $xsub->{map_alias_name_to_value}{$alias};
         if (defined $prev_value) {
             if ($prev_value eq $value) {
                 $pxs->Warn("Warning: Ignoring duplicate alias '$orig_alias'")
             } else {
                 $pxs->Warn("Warning: Conflicting duplicate alias '$orig_alias'"
                                             . " changes definition from '$prev_value' to '$value'");
-                delete $pxs->{cur_xsub}->
+                delete $xsub->
                        {map_alias_value_to_name_seen_hash}->
                        {$prev_value}{$alias};
             }
@@ -3826,13 +3869,13 @@ sub parse {
         # symbolic definitions is to say we want to duplicate the value and
         # it is NOT a mistake.
         unless ($is_symbolic) {
-            my @keys= sort keys %{$pxs->{cur_xsub}->
+            my @keys= sort keys %{$xsub->
                           {map_alias_value_to_name_seen_hash}->{$value}||{}};
             # deal with an alias of 0, which might not be in the aliases
             # dataset yet as 0 is the default for the base function ($fname)
             push @keys, $fname
                 if $value eq "0" and
-                    !defined $pxs->{cur_xsub}{map_alias_name_to_value}{$fname};
+                    !defined $xsub->{map_alias_name_to_value}{$fname};
             if (@keys and $pxs->{config_author_warnings}) {
                 # We do not warn about value collisions unless author_warnings
                 # are enabled. They aren't helpful to a module consumer, only
@@ -3849,7 +3892,7 @@ sub parse {
                                     . ( $value eq "0"
                                             ? " - the base function"
                                             : "" ),
-                                    !$pxs->{cur_xsub}{alias_clash_hinted}++
+                                    !$xsub->{alias_clash_hinted}++
                                     ? "If this is deliberate use a symbolic alias instead."
                                     : undef
                 );
@@ -3857,8 +3900,8 @@ sub parse {
         }
 
         $parent->{aliases}{$alias} = $value;
-        $pxs->{cur_xsub}{map_alias_name_to_value}->{$alias} = $value;
-        $pxs->{cur_xsub}{map_alias_value_to_name_seen_hash}->
+        $xsub->{map_alias_name_to_value}->{$alias} = $value;
+        $xsub->{map_alias_value_to_name_seen_hash}->
                         {$value}{$alias}++;
     }
 
@@ -3885,14 +3928,16 @@ BEGIN { $build_subclass->('keylines', # parent
 
 
 sub parse {
-    my __PACKAGE__       $self = shift;
-    my ExtUtils::ParseXS $pxs  = shift;
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
     # Call the SUPER parse method, which will call INPUT_line->parse()
     # for each INPUT line. The '1' bool arg indicates to treat
     # NOT_IMPLEMENTED_YET as another block separator, in addition to
     # $BLOCK_regexp.
-    $self->SUPER::parse($pxs, 1);
+    $self->SUPER::parse($pxs, $xsub, $xbody, 1);
 
     1;
 }
@@ -3939,6 +3984,8 @@ BEGIN { $build_subclass->('keyline', # parent
 sub parse {
     my __PACKAGE__                    $self   = shift;
     my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody  = shift;
     my ExtUtils::ParseXS::Node::INPUT $parent = shift; # parent INPUT node
 
     $self->SUPER::parse($pxs); # set file/line_no/line
@@ -3996,7 +4043,7 @@ sub parse {
 
     my ($var_num, $is_alien);
 
-    my $ioparams = $pxs->{cur_xbody}{ioparams};
+    my $ioparams = $xbody->{ioparams};
 
     my ExtUtils::ParseXS::Node::Param $param = $ioparams->{names}{$var_name};
 
@@ -4171,8 +4218,10 @@ BEGIN { $build_subclass->('keyline', # parent
 # Parse one line from an OUTPUT block
 
 sub parse {
-    my __PACKAGE__                     $self   = shift;
-    my ExtUtils::ParseXS               $pxs    = shift;
+    my __PACKAGE__                    $self    = shift;
+    my ExtUtils::ParseXS              $pxs     = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub    = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody   = shift;
     my ExtUtils::ParseXS::Node::OUTPUT $parent = shift; # parent OUTPUT node
 
     $self->SUPER::parse($pxs); # set file/line_no/line
@@ -4183,12 +4232,12 @@ sub parse {
     # set some sane default values in case we do one of the early returns
     # below
 
-    $self->{do_setmagic} = $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state};
+    $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
     $self->{is_setmagic} = 0;
 
     if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-        $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
-        $self->{do_setmagic} = $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state};
+        $xbody->{OUTPUT_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+        $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
         $self->{is_setmagic} = 1;
         return;
     }
@@ -4202,7 +4251,7 @@ sub parse {
     $self->{name} = $outarg;
 
     my ExtUtils::ParseXS::Node::Param $param =
-                                $pxs->{cur_xbody}{ioparams}{names}{$outarg};
+                                $xbody->{ioparams}{names}{$outarg};
     $self->{param} = $param;
 
     if ($param && $param->{in_output}) {
@@ -4211,7 +4260,7 @@ sub parse {
     }
 
     if (    $outarg eq "RETVAL"
-        and $pxs->{cur_xsub}{decl}{return_type}{no_output})
+        and $xsub->{decl}{return_type}{no_output})
     {
         $pxs->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
         return;
@@ -4228,7 +4277,7 @@ sub parse {
     $param->{in_output} = 1;
     $param->{do_setmagic} = $outarg eq 'RETVAL'
                                 ? 0 # RETVAL never needs magic setting
-                                : $pxs->{cur_xbody}{OUTPUT_SETMAGIC_state};
+                                : $xbody->{OUTPUT_SETMAGIC_state};
     $self->{code} = $param->{output_code} = $outcode if length $outcode;
 
     1;

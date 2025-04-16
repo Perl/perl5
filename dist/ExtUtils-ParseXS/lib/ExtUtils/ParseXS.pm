@@ -231,10 +231,6 @@ BEGIN {
 
   # Per-XSUB parsing state:
 
-  'cur_xsub',                  # The Node::xsub currently being parsed
-
-  'cur_xbody',                 # The Node::xbody currently being parsed
-
   'file_SCOPE_enabled',        # Bool: the current state of the file-scope
                                # (as opposed to
                                # XSUB-scope) SCOPE keyword
@@ -631,11 +627,9 @@ EOM
 
     unshift @{$self->{line}}, $_;
     my $xsub = ExtUtils::ParseXS::Node::xsub->new();
-    $self->{cur_xsub} = $xsub;
     $xsub->parse($self)
       or next PARAGRAPH;
     $_ = shift @{$self->{line}};
-    undef $self->{cur_xsub};
 
     $xsub->as_code($self);
     $self->{seen_an_XSUB} = 1; # encountered at least one XSUB
