@@ -235,20 +235,7 @@ BEGIN {
 
   'cur_xbody',                 # The Node::xbody currently being parsed
 
-  'xsub_prototype',            # Str: is set to either the global PROTOTYPES
-                               #  values (0 or 1), or to what's been
-                               #  overridden for this XSUB with PROTOTYPE
-                               #    "0": DISABLE
-                               #    "1": ENABLE
-                               #    "2": empty prototype
-                               #    other: a specific prototype.
-
   'xsub_SCOPE_enabled',        # Bool: SCOPE ENABLEd
-
-  'xsub_map_overload_name_to_seen', # Hash: maps each overload method name
-                               # (such as '<=>') to a boolean indicating
-                               # whether that method has been listed by
-                               # OVERLOAD (for duplicate spotting).
   );
 
   # do 'use fields', except: fields needs Hash::Util which is XS, which
@@ -578,9 +565,7 @@ EOM
 
     # Initialize some per-XSUB instance variables:
 
-    $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
     $self->{xsub_SCOPE_enabled}        = 0;
-    $self->{xsub_map_overload_name_to_seen} = {};
 
     # Process next line
 
