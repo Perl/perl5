@@ -2737,7 +2737,7 @@ foreach my $prop (@props) {
 
         my @invlist;
         my @invmap;
-        my $map_format = 0;;
+        my $map_format = 0;
         my $map_default;
         my $maps_to_code_point = 0;
         my $to_adjust = 0;
