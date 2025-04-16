@@ -353,6 +353,7 @@ sub parse {
         my $xbody = ExtUtils::ParseXS::Node::xbody->new();
         $pxs->{cur_xbody} = $xbody;
         $xbody->parse($pxs);
+        undef $pxs->{cur_xbody};
 
         if (defined $case) {
             # make the xbody a child of the CASE

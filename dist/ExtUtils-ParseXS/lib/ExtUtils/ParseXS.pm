@@ -635,6 +635,7 @@ EOM
     $xsub->parse($self)
       or next PARAGRAPH;
     $_ = shift @{$self->{line}};
+    undef $self->{cur_xsub};
 
     $xsub->as_code($self);
     $self->{seen_an_XSUB} = 1; # encountered at least one XSUB
