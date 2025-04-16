@@ -378,7 +378,7 @@ sub parse {
                         grep {    defined $_->{in_out}
                                && $_->{in_out} =~ /OUTLIST$/
                              }
-                        @{$self->{decl}{params}{params}};
+                        @{$self->{decl}{params}{kids}};
     1;
 }
 
@@ -1792,9 +1792,11 @@ package ExtUtils::ParseXS::Node::Params;
 # It is a mainly a list of Node::Param children.
 
 BEGIN { $build_subclass->('', # parent
-        'params',        # Array ref of Node::Param objects representing
+
+                         # inherited 'kids' field:
+                         # Array ref of Node::Param objects representing
                          # the parameters of this XSUB - either the
-                         # original ones as seen in thre XSUB's signature,
+                         # original ones as seen in the XSUB's signature,
                          # or per-xbody ones augmented by info from INPUT
                          # and OUTPUT sections.
 
@@ -1927,7 +1929,7 @@ sub parse {
                         is_synthetic => 1,
                         arg_num      => ++$nargs,
                     });
-        push @{$self->{params}}, $param;
+        push @{$self->{kids}}, $param;
         $self->{names}{$var} = $param;
     }
 
@@ -1943,7 +1945,7 @@ sub parse {
     #
     #  semi-real        Same as fully-synthetic, but with a defined
     #                   arg_num, and with an updated position within
-    #                   @{$self->{params}}.
+    #                   @{$self->{kids}}.
     #                   A RETVAL has appeared in the signature, but
     #                   without a type yet specified, so it continues to
     #                   use $xsub->{decl}{return_type}{type}.
@@ -1961,7 +1963,7 @@ sub parse {
                 is_synthetic => 1,
             } );
 
-        push @{$self->{params}}, $param;
+        push @{$self->{kids}}, $param;
         $self->{names}{RETVAL} = $param;
     }
 
@@ -2022,7 +2024,7 @@ sub parse {
             if (/^ SV \s* \* $/x) {
                 # special-case SV* as a placeholder for backwards
                 # compatibility.
-                push @{$self->{params}},
+                push @{$self->{kids}},
                     ExtUtils::ParseXS::Node::Param->new( {
                         var     => 'SV *',
                         arg_num => ++$nargs,
@@ -2053,7 +2055,7 @@ sub parse {
                 # been declared as a parameter too, override any implicit
                 # RETVAL declaration. Delete the original param from the
                 # param list.
-                @{$self->{params}} = grep $_ != $old_param, @{$self->{params}};
+                @{$self->{kids}} = grep $_ != $old_param, @{$self->{kids}};
                 # If the param declaration includes a type, it becomes a
                 # real parameter. Otherwise the param is kept as
                 # 'semi-real' (synthetic, but with an arg_num) until such
@@ -2068,7 +2070,7 @@ sub parse {
             }
         }
 
-        push @{$self->{params}}, $param;
+        push @{$self->{kids}}, $param;
         $self->{names}{$name} = $param;
 
         # Process optional IN/OUT etc modifier
@@ -2153,7 +2155,7 @@ sub parse {
 
     # for each parameter of the form 'length(foo)', mark the corresponding
     # 'foo' parameter as 'has_length', or error out if foo not found.
-    for my $param (@{$self->{params}}) {
+    for my $param (@{$self->{kids}}) {
         next unless $param->{is_length};
         my $name = $param->{len_name};
         if (exists $self->{names}{$name}) {
@@ -2183,7 +2185,7 @@ sub usage_string {
                grep {
                         defined $_->{arg_num},
                     }
-               @{$self->{params}};
+               @{$self->{kids}};
 
     push @args, '...' if $self->{seen_ellipsis};
     return join ', ', @args;
@@ -2200,7 +2202,7 @@ sub C_func_signature {
     my ExtUtils::ParseXS $pxs  = shift;
 
     my @args;
-    for my $param (@{$self->{params}}) {
+    for my $param (@{$self->{kids}}) {
         next if    $param->{is_synthetic} # THIS/CLASS/RETVAL
                    # if a synthetic RETVAL has acquired an arg_num, then
                    # it's appeared in the signature (although without a
@@ -2248,7 +2250,7 @@ sub proto_string {
     # overridden entry.
     my @p = map  defined $_->{proto} ? $_->{proto} : '$',
             grep defined $_->{arg_num} && $_->{arg_num} > 0,
-            @{$self->{params}};
+            @{$self->{kids}};
 
     my @sep = (';'); # separator between required and optional args
     my $min = $self->{min_args};
@@ -2319,15 +2321,15 @@ sub parse {
         # now duplicate (deep copy) any Param objects and regenerate a new
         # names-mapping hash
 
-        $ioparams->{params} = [];
+        $ioparams->{kids} = [];
         $ioparams->{names}  = {};
 
-        for my $op (@{$orig->{params}}) {
+        for my $op (@{$orig->{kids}}) {
             my $p  = ExtUtils::ParseXS::Node::Param->new($op);
             # don't copy the current proto state (from the most recent
             # CASE) into the new CASE.
             undef $p->{proto};
-            push @{$ioparams->{params}}, $p;
+            push @{$ioparams->{kids}}, $p;
             $ioparams->{names}{$p->{var}} = $p;
         }
 
@@ -2448,7 +2450,7 @@ sub parse {
     # also use that value to update the per-XSUB value, warning if the
     # value changes.
 
-    for my $ioparam (@{$xbody->{ioparams}{params}}) {
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
         $ioparam->set_proto($pxs);
         my $ioproto = $ioparam->{proto};
         my $name    = $ioparam->{var};
@@ -2493,7 +2495,7 @@ EOF
 
     # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
 
-    for my $param (grep $_->{is_synthetic}, @{$ioparams->{params}}) {
+    for my $param (grep $_->{is_synthetic}, @{$ioparams->{kids}}) {
         $param->as_code($pxs, $xsub, $xbody);
     }
 
@@ -2511,8 +2513,8 @@ EOF
     for my $param (
             grep $_->{is_ansi},
                 (
-                    grep(  $_->{is_length}, @{$ioparams->{params}} ),
-                    grep(! $_->{is_length}, @{$ioparams->{params}} ),
+                    grep(  $_->{is_length}, @{$ioparams->{kids}} ),
+                    grep(! $_->{is_length}, @{$ioparams->{kids}} ),
                 )
     )
 
@@ -2703,7 +2705,7 @@ sub as_code {
                             && $_->{in_out} =~ /OUT$/
                             && !$_->{in_output}
                     }
-                    @{$ioparams->{params}})
+                    @{$ioparams->{kids}})
     {
         $param->as_output_code($pxs, $xsub, $xbody);
     }
@@ -2745,7 +2747,7 @@ sub as_code {
     for my $param (grep {   defined $_->{in_out}
                          && $_->{in_out} =~ /OUTLIST$/
                         }
-                        @{$ioparams->{params}}
+                        @{$ioparams->{kids}}
     ) {
         $param->as_output_code($pxs, $xsub, $xbody, $basic++);
     }
@@ -4088,9 +4090,9 @@ sub parse {
                 # type, and has already been moved to the correct position;
                 # otherwise, it's an alien var that didn't appear in the
                 # signature; move to the correct position.
-                @{$ioparams->{params}} =
-                            grep $_ != $param, @{$ioparams->{params}};
-                push @{$ioparams->{params}}, $param;
+                @{$ioparams->{kids}} =
+                            grep $_ != $param, @{$ioparams->{kids}};
+                push @{$ioparams->{kids}}, $param;
                 $is_alien          = 1;
                 $param->{is_alien} = 1;
             }
@@ -4109,7 +4111,7 @@ sub parse {
                     is_alien => 1,
                 });
 
-        push @{$ioparams->{params}}, $param;
+        push @{$ioparams->{kids}}, $param;
         $ioparams->{names}{$var_name} = $param;
     }
 
