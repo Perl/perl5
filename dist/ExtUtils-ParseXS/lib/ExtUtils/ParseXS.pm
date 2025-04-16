@@ -235,7 +235,9 @@ BEGIN {
 
   'cur_xbody',                 # The Node::xbody currently being parsed
 
-  'xsub_SCOPE_enabled',        # Bool: SCOPE ENABLEd
+  'file_SCOPE_enabled',        # Bool: the current state of the file-scope
+                               # (as opposed to
+                               # XSUB-scope) SCOPE keyword
   );
 
   # do 'use fields', except: fields needs Hash::Util which is XS, which
@@ -563,9 +565,17 @@ EOM
         ." followed by a statement on column one?)")
       if $self->{line}->[0] =~ /^\s/;
 
-    # Initialize some per-XSUB instance variables:
+    # The SCOPE keyword can appear both in file scope (just before an
+    # XSUB) and as an XSUB keyword. This field maintains the state of the
+    # former: reset it at the start of processing any file-scoped
+    # keywords just before the XSUB (i.e. without any blank lines, e.g.
+    #     SCOPE: ENABLE
+    #     int
+    #     foo(...)
+    # These semantics may not be particularly sensible, but they maintain
+    # backwards compatibility for now.
 
-    $self->{xsub_SCOPE_enabled}        = 0;
+    $self->{file_SCOPE_enabled} = 0;
 
     # Process next line
 

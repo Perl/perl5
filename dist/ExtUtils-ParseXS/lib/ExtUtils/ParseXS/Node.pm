@@ -265,6 +265,9 @@ BEGIN { $build_subclass->('', # parent
                                #    "2": empty prototype
                                #    other: a specific prototype.
 
+    'SCOPE_enabled',           # "SCOPE: ENABLE" seen, in either the
+                               # file or XSUB part of the XS file
+
 )};
 
 
@@ -277,6 +280,10 @@ sub parse {
     # Initially inherit the prototype behaviour for the XSUB from the
     # global PROTOTYPES default
     $self->{prototype} = $pxs->{PROTOTYPES_value};
+
+    # inherit any SCOPE: value that immediately preceded the XSUB
+    # declaration
+    $self->{SCOPE_enabled} = $pxs->{file_SCOPE_enabled};
 
     # Parse the XSUB's declaration (return type, name, parameters)
 
@@ -1115,7 +1122,9 @@ sub as_code {
         }
 
         if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
-            $pxs->{xsub_SCOPE_enabled} = 1;
+            # XXX this really aught to be determined during parse rather
+            # than during code emitting.
+            $xsub->{SCOPE_enabled} = 1;
         }
 
         # Specify additional environment for when a template derived from a
@@ -1172,7 +1181,7 @@ sub as_code {
                         $else;
         }
     }
-    elsif ($pxs->{xsub_SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
+    elsif ($xsub->{SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
         # The template is likely a full block rather than a '$var = ...'
         # expression. Just terminate the variable declaration, and defer the
         # initialisation.
@@ -2352,7 +2361,7 @@ sub as_code {
     # Emit trailers for the body of the XSUB
     # ----------------------------------------------------------------
 
-    if ($pxs->{xsub_SCOPE_enabled}) {
+    if ($xsub->{SCOPE_enabled}) {
         # the matching opens were emitted in input_part->as_code()
         print "      $close_brace\n";
         # PPCODE->as_code emits its own LEAVE and return, so this
@@ -2467,7 +2476,7 @@ sub as_code {
     }
 
     # The matching closes will be emitted in xbody->as_code()
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{xsub_SCOPE_enabled};
+    print ExtUtils::ParseXS::Q(<<"EOF") if $xsub->{SCOPE_enabled};
         |      ENTER;
         |      $open_brace
 EOF
@@ -3054,7 +3063,12 @@ sub parse {
         if $pxs->{cur_xsub}->{seen_SCOPE};
     $pxs->{cur_xsub}->{seen_SCOPE} = 1;
 
-    $pxs->{xsub_SCOPE_enabled} = $self->{enable};
+    # Note that currently this parse method can be called either while
+    # parsing an XSUB, or while processing file-scoped keywords
+    # just before an XSUB declaration. Sop potentially set both types of
+    # state.
+    $pxs->{cur_xsub}{SCOPE_enabled} = $self->{enable} if $pxs->{cur_xsub};
+    $pxs->{file_SCOPE_enabled}      = $self->{enable};
     1;
 }
 
@@ -3567,7 +3581,7 @@ sub as_code {
 
     $self->SUPER::as_code($pxs, $xsub, $xbody); # emit code block
 
-    print "\tLEAVE;\n" if $pxs->{xsub_SCOPE_enabled};
+    print "\tLEAVE;\n" if $pxs->{cur_xsub}{SCOPE_enabled};
 
     # Suppress "statement is unreachable" warning on HPUX
     print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
