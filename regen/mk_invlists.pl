@@ -2345,6 +2345,7 @@ sub output_GCB_table() {
     # GB5   ÷  ( Control | CR | LF )
     set_gcb_breakable('*', $_, 5) for qw(Control CR LF);
 
+    # Do not break Hangul syllable or other conjoining sequences.
     # GB6  L  ×  ( L | V | LV | LVT )
     set_gcb_nobreak('L', $_, 6) for qw(L V LV LVT);
 
@@ -2415,8 +2416,7 @@ sub output_LB_table() {
 
     # Create and output the enums, #defines, and pair table for use in
     # determining Line Breaks.  This uses the default line break algorithm,
-    # given in http://www.unicode.org/reports/tr14/, but tailored by example 7
-    # in that page, as the Unicode-furnished tests assume that tailoring.
+    # given in http://www.unicode.org/reports/tr14/.
 
     my @lb_table;
     my $table_size = @lb_short_enums;
@@ -2494,6 +2494,11 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => '15b',
                                            },
+        LB_SP_v_IS_then_NU              => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_BREAKABLE',
+                                             rule => '15c',
+                                           },
         LB_CL_or_CP_then_SP_v_NS        => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
@@ -2504,28 +2509,38 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => 17,
                                            },
-        LB_HL_then_HY_or_BA_v_any       => {
+        LB_any_v_QU_then_nonEA_or_eot   => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
-                                             rule => 21,
+                                             rule => '19a',
                                            },
-        LB_PR_or_PO_v_OP_or_HY_then_NU  => {
+        LB_nonEA_or_sot_then_QU_v_any   => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
-                                             rule => 25,
+                                             rule => '19a',
                                            },
-        LB_NU_then_SY_or_IS_v_various   => {
+        LB_various_then_HY_or_U2010_v_AL => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
-                                             rule => 25,
+                                             rule => '20a',
+                                           },
+        LB_HL_then_HY_or_BA_sans_EA_v_nonHL => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => '21a',
                                            },
         LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
                                            },
-        LB_NU_then_SY_or_IS_v_PO_or_PR  => {
-                                             enum => 20,
+        LB_PO_or_PR_v_OP_then_IS_then_NU => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => 25,
+                                           },
+        LB_NU_then_SY_or_IS_v_NU        => {
+                                             enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
                                            },
@@ -2705,9 +2720,8 @@ sub output_LB_table() {
     # × CL
     # × CP
     # × EX
-    # × IS
     # × SY
-    set_lb_nobreak('*', $_, 13) for qw(CL CP EX IS SY);
+    set_lb_nobreak('*', $_, 13) for qw(CL CP EX SY);
 
     # LB14 Do not break after ‘[’, even after spaces.
     # OP SP* ×
@@ -2740,6 +2754,16 @@ sub output_LB_table() {
     $dfa = 'LB_any_v_PfQ_then_various';
     add_lb_dfa('*', 'Pf_QU', $dfa, '15b');
 
+    # LB15c Break before a decimal mark that follows a space, for instance, in
+    # ‘subtract .5’.
+    # SP ÷ IS NU
+    add_lb_dfa('SP', 'IS', 'LB_SP_v_IS_then_NU', '15c');
+
+    # LB15d Otherwise, do not break before ‘;’, ‘,’, or ‘.’, even after
+    # spaces.
+    # × IS
+    set_lb_nobreak('*', 'IS', '15d');
+
     # LB16 Do not break between closing punctuation and a nonstarter even with
     # intervening spaces.
     # (CL | CP) SP* × NS
@@ -2756,12 +2780,32 @@ sub output_LB_table() {
     # SP ÷
     set_lb_breakable('SP', '*', 18);
 
-    # LB19 Do not break before or after quotation marks, such as ‘ ” ’.
-    # × QU
-    # QU ×
+    # LB19 Do not break before non-initial unresolved quotation marks, such as
+    # ‘ ” ’ or ‘ " ’, nor after non-final unresolved quotation marks, such as
+    # ‘ “ ’ or ‘ " ’.
+    # × [ QU - \p{Pi} ]
+    #   [ QU - \p{Pf} ] ×
     $rule = 19;
-    set_lb_nobreak('*', 'QU', $rule);
-    set_lb_nobreak('QU', '*', $rule);
+    set_lb_nobreak('*', qw(QU_sans_Pi), $rule);
+    set_lb_nobreak(qw(QU_sans_Pf), '*', $rule);
+
+    # LB19a Unless surrounded by East Asian characters, do not break either
+    # side of any unresolved quotation marks.
+    $rule = '19a';
+
+    # [^$EastAsian] × QU
+    set_lb_nobreak( [ qw(^ EA) ], 'QU', $rule);
+
+    # × QU ( [^$EastAsian] | eot )
+    $dfa = 'LB_any_v_QU_then_nonEA_or_eot';
+    add_lb_dfa('*', 'QU', $dfa, $rule);
+
+    # QU × [^$EastAsian]
+    set_lb_nobreak( 'QU', [ qw(^ EA) ], $rule );
+
+    # ( sot | [^$EastAsian] ) QU ×
+    $dfa = 'LB_nonEA_or_sot_then_QU_v_any';
+    add_lb_dfa('QU', '*', $dfa, $rule);
 
     # LB20 Break before and after unresolved CB.
     # ÷ CB
@@ -2772,6 +2816,13 @@ sub output_LB_table() {
     $rule = 20;
     set_lb_breakable('*', 'CB', $rule);
     set_lb_breakable('CB', '*', $rule);
+
+    # LB20a Do not break after a word-initial hyphen.
+    #   ( sot | BK | CR | LF | NL | SP | ZW | CB | GL )
+    #   ( HY | [\x{2010} ] )
+    # × AL
+    $dfa = 'LB_various_then_HY_or_U2010_v_AL';
+    add_lb_dfa($_, 'AL', $dfa, '20a') for qw(HY U2010);
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
     # spaces, small kana, and other non-starters, or after acute accents.
@@ -2784,10 +2835,10 @@ sub output_LB_table() {
     set_lb_nobreak('BB', '*', $rule);
 
     # LB21a Don't break after Hebrew + HY.
-    # HL (HY | BA) ×
+    # HL (HY | [ BA - $EastAsian ]) × [^HL]
     $rule = '21a';
-    add_lb_dfa('HY', '*', 'LB_HL_then_HY_or_BA_v_any', $rule);
-    add_lb_dfa('BA', '*', 'LB_HL_then_HY_or_BA_v_any', $rule);
+    $dfa = 'LB_HL_then_HY_or_BA_sans_EA_v_nonHL';
+    add_lb_dfa($_, [ qw(^ HL) ], $dfa, $rule) for qw(HY BA_sans_EA);
 
     # LB21b Don’t break between Solidus and Hebrew letters.
     # SY × HL
@@ -2828,61 +2879,56 @@ sub output_LB_table() {
         set_lb_nobreak($lhs, $_, $rule) for qw(PR PO);
     }
 
-    # LB25 Do not break between the following pairs of classes relevant to
-    # numbers, as tailored by example 7 in
-    # http://www.unicode.org/reports/tr14/#Examples
-    # We follow that tailoring because Unicode's test cases expect it
-    # (PR | PO) × ( OP | HY )? NU
-    # This expands firstly to
-    # (PR | PO) × NU
-    $rule = 25;
-
-    # This expands firstly to
-    # (PR | PO) × NU
-    set_lb_nobreak('PR', 'NU', $rule);
-    set_lb_nobreak('PO', 'NU', $rule);
-
-    # And secondly to
-    # (PR | PO) × ( OP | HY ) NU
-    # Given that (OP | HY )? is optional, we have to test for it in code.
-    $dfa = 'LB_PR_or_PO_v_OP_or_HY_then_NU';
-    for $lhs (qw(PR PO)) {
-        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(OP HY);
-    }
-
-    # ( OP | HY ) × NU
-    set_lb_nobreak('OP', 'NU', $rule);
-    set_lb_nobreak('HY', 'NU', $rule);
-
-    # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
-    # which expands firstly to
-    # NU  × (NU | SY | IS | CL | CP )
-    set_lb_nobreak('NU', $_, $rule) for qw(NU SY IS CL CP);
-
-    # And then to
-    # NU (SY | IS)+ × (NU | SY | IS | CL | CP )
-    $dfa = 'LB_NU_then_SY_or_IS_v_various';
-    for $lhs (qw(SY IS)) {
-        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(NU SY IS CL CP);
-    }
-
-    # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
-    # We can eliminate the NU in the parenthesis, as there is a match as long
-    # as there is at least one NU.  This leads to:
-    # NU (SY | IS)* (CL | CP)? × (PO | PR)
-    set_lb_nobreak('NU', 'PO', $rule);
-    set_lb_nobreak('NU', 'PR', $rule);
-
+    # LB25 Do not break numbers:
+    # NU ( SY | IS )* CL × PO
+    # NU ( SY | IS )* CP × PO
+    # NU ( SY | IS )* CL × PR
+    # NU ( SY | IS )* CP × PR
+    # NU ( SY | IS )* × PO
+    # NU ( SY | IS )* × PR
+    #
+    # PO × OP NU
+    # PO × OP IS NU
+    # PO × NU
+    # PR × OP NU
+    # PR × OP IS NU
+    #
+    # PR × NU
+    # HY × NU
+    # IS × NU
+    #
+    # NU ( SY | IS )* × NU
+    #
+    # The first six can be rewritten as
+    # NU ( SY | IS )* ( CL | CP )? × ( PO | PR )
     $dfa = 'LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR';
-    for $lhs (qw(CP CL)) {
+    for $lhs (qw(CL CP SY IS)) {
         add_lb_dfa($lhs, $_, $dfa, $rule) for qw(PO PR);
     }
+    set_lb_nobreak('NU', $_, $rule) for qw(PO PR);
 
-    # CL and CP are optional.  Without them, we get
-    $dfa = 'LB_NU_then_SY_or_IS_v_PO_or_PR';
-    for $lhs (qw(IS SY)) {
-        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(PO PR);
-    }
+    # We can move PO × NU out of the second group to the next group without
+    # affecting any priorities, since it operates only on PO and the remaining
+    # ones in that group operate only on PR  This leaves in this group
+    # PO × OP NU
+    # PO × OP IS NU
+    # PR × OP NU
+    # PR × OP IS NU
+    $dfa = 'LB_PO_or_PR_v_OP_then_IS_then_NU';
+    add_lb_dfa($_, 'OP', $dfa, $rule) for qw(PO PR);
+
+    # The next group is now
+    # PO × NU
+    # PR × NU
+    # HY × NU
+    # IS × NU
+    set_lb_nobreak($_, 'NU', $rule) for qw(PO PR HY IS);
+
+    # And the final item is
+    # NU ( SY | IS )* × NU
+    $dfa = 'LB_NU_then_SY_or_IS_v_NU';
+    add_lb_dfa($_, 'NU', $dfa, $rule) for qw(SY IS);
+    set_lb_nobreak('NU', 'NU', $rule);
 
     # LB26 Do not break a Korean syllable.
     # JL × (JL | JV | H2 | H3)
@@ -3283,7 +3329,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
 
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,ExtPict_XX,Glue_After_Zwj,InCB_Consonant,InCB_Consonant_XX,InCB_Extend,InCB_Extend_EX,InCB_Linker,InCB_Linker_EX,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ
 
-                    _Perl_LB,EDGE,Aksara,Aksara_Prebase,Aksara_Start,AK,AP,Close_Parenthesis,Cn_ExtPict_ExtPict_ID,Contingent_Break,Dotted_Circle,Dotted_Circle_AL,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Pf_QU,Pi_QU,Regional_Indicator,VF,VI,Virama,Virama_Final,Word_Joiner,ZWJ
+                    _Perl_LB,EDGE,Aksara,Aksara_Prebase,Aksara_Start,AK,AP,Close_Parenthesis,Cn_ExtPict_ExtPict_ID,Contingent_Break,Dotted_Circle,Dotted_Circle_AL,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Pf_QU,Pi_QU,Regional_Indicator,U2010,VF,VI,Virama,Virama_Final,Word_Joiner,ZWJ
 
                     _Perl_SB,EDGE,CR,Extend,LF,SContinue
 

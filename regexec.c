@@ -5583,6 +5583,13 @@ S_isLB(pTHX_ LB_enum before,
                     );
             break;
 
+          case LB_SP_v_IS_then_NU:
+            /* LB15c Break before a decimal mark that follows a space, for
+             * instance, in ‘subtract .5’.
+             * SP ÷ IS NU */
+            matched = isLB_NU(advance_one_LB(&next_pos, strend, utf8_target));
+            break;
+
           case LB_CL_or_CP_then_SP_v_NS:
             /* LB16 Do not break between closing punctuation and a nonstarter
              * even with intervening spaces.
@@ -5599,6 +5606,25 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CP(prev);
             break;
 
+          case LB_various_then_HY_or_U2010_v_AL:
+            /* LB20a Do not break after a word-initial hyphen.
+             *   ( sot | BK | CR | LF | NL | SP | ZW | CB | GL )
+             *   ( HY | [\x{2010} ] )
+             * × AL */
+            prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
+                                                 utf8_target);
+            matched = (   isLB_EDGE(prev)
+                       || isLB_BK(prev)
+                       || isLB_CR(prev)
+                       || isLB_LF(prev)
+                       || isLB_NL(prev)
+                       || isLB_SP(prev)
+                       || isLB_ZW(prev)
+                       || isLB_CB(prev)
+                       || isLB_GL(prev)
+                    );
+            break;
+
           case LB_B2_then_SP_v_B2:
             /* LB17 Do not break within ‘——’, even with intervening spaces.
              * B2 SP* × B2  */
@@ -5607,30 +5633,34 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_ZWJ(prev))
             {
                 prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
-                                                      &prev_pos, utf8_target);
+                                                     &prev_pos, utf8_target);
             }
 
             matched = isLB_B2(prev);
             break;
 
-          case LB_HL_then_HY_or_BA_v_any:
-            /* LB21a Don't break after Hebrew + Hyphen.
-             * HL (HY | BA) × */
+          case LB_HL_then_HY_or_BA_sans_EA_v_nonHL:
+            /* LB21a Don't break after Hebrew + HY.
+             *       HL (HY | [ BA - $EastAsian ]) × [^HL] */
             matched = isLB_HL(backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
                                                             utf8_target));
             break;
 
-          case LB_PR_or_PO_v_OP_or_HY_then_NU:
-            /* LB25 (PR | PO) × ( OP | HY )? NU */
-            matched = isLB_NU(advance_one_LB(&next_pos, strend, utf8_target));
+          case LB_any_v_QU_then_nonEA_or_eot:
+            /* LB19a  × QU ( [^$EastAsian] | eot ) */
+            next = advance_one_LB(&next_pos, strend, utf8_target);
+            matched = isLB_EDGE(next) || ! isLB_EA(next);
             break;
 
+          case LB_nonEA_or_sot_then_QU_v_any:
+            prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
+                                                 utf8_target);
+            matched = isLB_EDGE(prev) || ! isLB_EA(prev);
+            break;
 
-          case LB_NU_then_SY_or_IS_v_various:
+          case LB_NU_then_SY_or_IS_v_NU:
           case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR:
-          case LB_NU_then_SY_or_IS_v_PO_or_PR:
-            /* LB25d NU (SY | IS)* × (NU | SY | IS | CL | CP )
-             * LB25e NU (SY | IS)* (CL | CP)? × (PO | PR) */
+            /* LB25 NU ( SY | IS )* × NU */
             do {
                 prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
                                                      utf8_target);
@@ -5640,12 +5670,23 @@ S_isLB(pTHX_ LB_enum before,
             matched = isLB_NU(prev);
             break;
 
+          case LB_PO_or_PR_v_OP_then_IS_then_NU:
+            /* LB25  PR × OP IS? NU */
+            next = advance_one_LB(&next_pos, strend, utf8_target);
+            if (isLB_IS(next)) {
+                next = advance_one_LB(&next_pos, strend, utf8_target);
+            }
+
+            matched = isLB_NU(next);
+            break;
+
           case LB_AKish_v_AKish_then_VF:
             matched = isLB_VF(advance_one_LB(&next_pos, strend, utf8_target));
             break;
 
           case LB_AKish_then_VI_v_AK_or_DOTTED:
-            matched = isLB_AKish(backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos, utf8_target));
+            matched = isLB_AKish(backup_one_LB_but_over_CM_ZWJ(strbeg,
+                                                     &prev_pos, utf8_target));
             break;
 
           case LB_various_then_RI_v_RI: ;
