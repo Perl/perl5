@@ -2413,10 +2413,6 @@ sub output_LB_table() {
                                              enum => 1,
                                              match_return => 1,
                                            },
-        LB_NOBREAK_EVEN_WITH_SP_BETWEEN => {
-                                             enum => 2,
-                                             match_return => 2,
-                                           },
         LB_ZW_then_SP_v_any             => {
                                              enum => 6,
                                              match_return => 'LB_BREAKABLE',
