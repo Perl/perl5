@@ -15633,6 +15633,13 @@ END
                          };
     }
 
+    if ($v_version ge 16.0.0) {
+        push @lb_splits, { name => 'U2010',
+                           ranges => Range_List->new(Initialize
+                                  => Range->new(0x2010, 0x2010))
+                         };
+    }
+
     %lb_components = split_property($lb, $perl_lb, \@lb_splits);
 
     # This property is a modification of the scx property
