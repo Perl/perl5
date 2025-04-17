@@ -6508,7 +6508,7 @@ static const UV _Perl_CCC_non0_non230_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
-	1851,	/* Number of elements */
+	1955,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -6526,8 +6526,11 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xAE,
 	0xAF,
 	0x300,
+	0x34F,
+	0x350,
 	0x370,
 	0x483,
+	0x488,
 	0x48A,
 	0x591,
 	0x5BE,
@@ -6587,8 +6590,10 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x8CA,
 	0x8E2,
 	0x8E3,
+	0x900,
 	0x903,
 	0x904,
+	0x915,
 	0x93A,
 	0x93B,
 	0x93C,
@@ -6600,12 +6605,24 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x94E,
 	0x950,
 	0x951,
+	0x955,
 	0x958,
+	0x960,
 	0x962,
 	0x964,
+	0x978,
+	0x980,
 	0x981,
 	0x982,
 	0x984,
+	0x995,
+	0x9A9,
+	0x9AA,
+	0x9B1,
+	0x9B2,
+	0x9B3,
+	0x9B6,
+	0x9BA,
 	0x9BC,
 	0x9BD,
 	0x9BE,
@@ -6619,8 +6636,14 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x9CE,
 	0x9D7,
 	0x9D8,
+	0x9DC,
+	0x9DE,
+	0x9DF,
+	0x9E0,
 	0x9E2,
 	0x9E4,
+	0x9F0,
+	0x9F2,
 	0x9FE,
 	0x9FF,
 	0xA01,
@@ -6644,6 +6667,14 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xA81,
 	0xA83,
 	0xA84,
+	0xA95,
+	0xAA9,
+	0xAAA,
+	0xAB1,
+	0xAB2,
+	0xAB4,
+	0xAB5,
+	0xABA,
 	0xABC,
 	0xABD,
 	0xABE,
@@ -6657,11 +6688,20 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xACE,
 	0xAE2,
 	0xAE4,
+	0xAF9,
 	0xAFA,
 	0xB00,
 	0xB01,
 	0xB02,
 	0xB04,
+	0xB15,
+	0xB29,
+	0xB2A,
+	0xB31,
+	0xB32,
+	0xB34,
+	0xB35,
+	0xB3A,
 	0xB3C,
 	0xB3D,
 	0xB3E,
@@ -6675,8 +6715,14 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xB4E,
 	0xB55,
 	0xB58,
+	0xB5C,
+	0xB5E,
+	0xB5F,
+	0xB60,
 	0xB62,
 	0xB64,
+	0xB71,
+	0xB72,
 	0xB82,
 	0xB83,
 	0xBBE,
@@ -6695,6 +6741,10 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xC01,
 	0xC04,
 	0xC05,
+	0xC15,
+	0xC29,
+	0xC2A,
+	0xC3A,
 	0xC3C,
 	0xC3D,
 	0xC3E,
@@ -6703,9 +6753,12 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xC46,
 	0xC49,
 	0xC4A,
+	0xC4D,
 	0xC4E,
 	0xC55,
 	0xC57,
+	0xC58,
+	0xC5B,
 	0xC62,
 	0xC64,
 	0xC81,
@@ -6734,6 +6787,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xD00,
 	0xD02,
 	0xD04,
+	0xD15,
 	0xD3B,
 	0xD3D,
 	0xD3E,
@@ -6770,15 +6824,21 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xE32,
 	0xE33,
 	0xE34,
+	0xE38,
 	0xE3B,
 	0xE47,
+	0xE48,
+	0xE4C,
 	0xE4F,
 	0xEB1,
 	0xEB2,
 	0xEB3,
 	0xEB4,
+	0xEB8,
+	0xEBB,
 	0xEBD,
 	0xEC8,
+	0xECC,
 	0xECF,
 	0xF18,
 	0xF1A,
@@ -6791,8 +6851,15 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xF3E,
 	0xF40,
 	0xF71,
+	0xF73,
+	0xF74,
+	0xF75,
+	0xF7A,
+	0xF7E,
 	0xF7F,
 	0xF80,
+	0xF81,
+	0xF82,
 	0xF85,
 	0xF86,
 	0xF88,
@@ -6805,6 +6872,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x102D,
 	0x1031,
 	0x1032,
+	0x1037,
 	0x1038,
 	0x1039,
 	0x103B,
@@ -6833,6 +6901,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x135D,
 	0x1360,
 	0x1712,
+	0x1714,
 	0x1715,
 	0x1716,
 	0x1732,
@@ -6849,6 +6918,8 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x17C6,
 	0x17C7,
 	0x17C9,
+	0x17D2,
+	0x17D3,
 	0x17D4,
 	0x17DD,
 	0x17DE,
@@ -6886,15 +6957,19 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1A65,
 	0x1A6D,
 	0x1A73,
+	0x1A75,
 	0x1A7D,
 	0x1A7F,
 	0x1A80,
 	0x1AB0,
+	0x1ABE,
+	0x1ABF,
 	0x1ACF,
 	0x1B00,
 	0x1B04,
 	0x1B05,
 	0x1B34,
+	0x1B35,
 	0x1B3B,
 	0x1B3C,
 	0x1B3D,
@@ -6912,6 +6987,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1BA8,
 	0x1BAA,
 	0x1BAB,
+	0x1BAC,
 	0x1BAE,
 	0x1BE6,
 	0x1BE7,
@@ -6926,6 +7002,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1C2C,
 	0x1C34,
 	0x1C36,
+	0x1C37,
 	0x1C38,
 	0x1CD0,
 	0x1CD3,
@@ -6956,6 +7033,10 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2060,
 	0x2070,
 	0x20D0,
+	0x20DD,
+	0x20E1,
+	0x20E2,
+	0x20E5,
 	0x20F1,
 	0x2122,
 	0x2123,
@@ -7059,6 +7140,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x3299,
 	0x329A,
 	0xA66F,
+	0xA670,
 	0xA673,
 	0xA674,
 	0xA67E,
@@ -7088,6 +7170,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0xA8FF,
 	0xA900,
 	0xA926,
+	0xA92B,
 	0xA92E,
 	0xA947,
 	0xA952,
@@ -7971,6 +8054,9 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x10A05,
 	0x10A07,
 	0x10A0C,
+	0x10A0D,
+	0x10A0E,
+	0x10A0F,
 	0x10A10,
 	0x10A38,
 	0x10A3B,
@@ -7999,12 +8085,14 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11073,
 	0x11075,
 	0x1107F,
+	0x11080,
 	0x11082,
 	0x11083,
 	0x110B0,
 	0x110B3,
 	0x110B7,
 	0x110B9,
+	0x110BA,
 	0x110BB,
 	0x110BD,
 	0x110BE,
@@ -8017,6 +8105,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11127,
 	0x1112C,
 	0x1112D,
+	0x11133,
 	0x11135,
 	0x11145,
 	0x11147,
@@ -8032,6 +8121,8 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x111C2,
 	0x111C4,
 	0x111C9,
+	0x111CA,
+	0x111CB,
 	0x111CD,
 	0x111CE,
 	0x111CF,
@@ -8042,6 +8133,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11234,
 	0x11235,
 	0x11236,
+	0x11237,
 	0x11238,
 	0x1123E,
 	0x1123F,
@@ -8050,6 +8142,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x112DF,
 	0x112E0,
 	0x112E3,
+	0x112E9,
 	0x112EB,
 	0x11300,
 	0x11302,
@@ -8093,6 +8186,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x114BF,
 	0x114C1,
 	0x114C2,
+	0x114C3,
 	0x114C4,
 	0x115AF,
 	0x115B0,
@@ -8102,6 +8196,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x115BC,
 	0x115BE,
 	0x115BF,
+	0x115C0,
 	0x115C1,
 	0x115DC,
 	0x115DE,
@@ -8125,11 +8220,13 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11722,
 	0x11726,
 	0x11727,
+	0x1172B,
 	0x1172C,
 	0x1182C,
 	0x1182F,
 	0x11838,
 	0x11839,
+	0x1183A,
 	0x1183B,
 	0x11930,
 	0x11931,
@@ -8157,6 +8254,8 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11A01,
 	0x11A0B,
 	0x11A33,
+	0x11A34,
+	0x11A35,
 	0x11A39,
 	0x11A3A,
 	0x11A3B,
@@ -8171,6 +8270,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11A8A,
 	0x11A97,
 	0x11A98,
+	0x11A99,
 	0x11A9A,
 	0x11C2F,
 	0x11C30,
@@ -8195,6 +8295,9 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11D3C,
 	0x11D3E,
 	0x11D3F,
+	0x11D42,
+	0x11D43,
+	0x11D44,
 	0x11D46,
 	0x11D47,
 	0x11D48,
@@ -8242,6 +8345,7 @@ static const UV _Perl_GCB_invlist[] = {  /* for ASCII/Latin1 */
 	0x16FF0,
 	0x16FF2,
 	0x1BC9D,
+	0x1BC9E,
 	0x1BC9F,
 	0x1BCA0,
 	0x1BCA4,
@@ -8379,27 +8483,27 @@ typedef enum {
 	GCB_CR = 2,
 	GCB_ExtPict_XX = 3,
 	GCB_Extend = 4,
-	GCB_L = 5,
-	GCB_LF = 6,
-	GCB_LV = 7,
-	GCB_LVT = 8,
-	GCB_Prepend = 9,
-	GCB_Regional_Indicator = 10,
-	GCB_SpacingMark = 11,
-	GCB_T = 12,
-	GCB_V = 13,
-	GCB_ZWJ = 14,
-	GCB_EDGE = 15,
-	GCB_E_Base = 16,
-	GCB_E_Base_GAZ = 16,
-	GCB_E_Modifier = 16,
-	GCB_Glue_After_Zwj = 16,
-	GCB_InCB_Consonant = 16,
-	GCB_InCB_Consonant_XX = 16,
-	GCB_InCB_Extend = 16,
-	GCB_InCB_Extend_EX = 16,
-	GCB_InCB_Linker = 16,
-	GCB_InCB_Linker_EX = 16
+	GCB_InCB_Consonant_XX = 5,
+	GCB_InCB_Extend_EX = 6,
+	GCB_InCB_Linker_EX = 7,
+	GCB_L = 8,
+	GCB_LF = 9,
+	GCB_LV = 10,
+	GCB_LVT = 11,
+	GCB_Prepend = 12,
+	GCB_Regional_Indicator = 13,
+	GCB_SpacingMark = 14,
+	GCB_T = 15,
+	GCB_V = 16,
+	GCB_ZWJ = 17,
+	GCB_EDGE = 18,
+	GCB_E_Base = 19,
+	GCB_E_Base_GAZ = 19,
+	GCB_E_Modifier = 19,
+	GCB_Glue_After_Zwj = 19,
+	GCB_InCB_Consonant = 19,
+	GCB_InCB_Extend = 19,
+	GCB_InCB_Linker = 19
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
@@ -8416,31 +8520,279 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Control,
 	GCB_ExtPict_XX,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Prepend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Control,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Prepend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Prepend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Prepend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Prepend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_InCB_Linker_EX,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Linker_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Linker_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Linker_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_InCB_Linker_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Consonant_XX,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Linker_EX,
 	GCB_Prepend,
 	GCB_Other,
 	GCB_Extend,
@@ -8448,200 +8800,6 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
-	GCB_Other,
-	GCB_Prepend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Prepend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Prepend,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Prepend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
 	GCB_Extend,
@@ -8661,9 +8819,58 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
 	GCB_SpacingMark,
@@ -8675,45 +8882,10 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
@@ -8721,9 +8893,10 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_V,
 	GCB_T,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_SpacingMark,
 	GCB_Other,
 	GCB_Extend,
@@ -8740,8 +8913,10 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Control,
@@ -8749,7 +8924,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
@@ -8759,9 +8934,9 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
@@ -8770,42 +8945,25 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
@@ -8813,25 +8971,48 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_Other,
+	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
+	GCB_SpacingMark,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_Other,
+	GCB_SpacingMark,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Control,
 	GCB_Extend,
@@ -8846,116 +9027,121 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Control,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_ExtPict_XX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
 	GCB_Other,
-	GCB_ExtPict_XX,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_ExtPict_XX,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_ExtPict_XX,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
@@ -8967,18 +9153,19 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
@@ -8988,7 +9175,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
@@ -9010,31 +9197,31 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
 	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
 	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_LV,
 	GCB_LVT,
@@ -9839,45 +10026,48 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_T,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Control,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Control,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_Control,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
-	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
@@ -9885,46 +10075,124 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Prepend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Prepend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Prepend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
+	GCB_Prepend,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
 	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_Prepend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_SpacingMark,
@@ -9935,92 +10203,25 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_Extend,
+	GCB_SpacingMark,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Extend,
-	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
@@ -10029,12 +10230,12 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Prepend,
 	GCB_SpacingMark,
 	GCB_Prepend,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
@@ -10047,12 +10248,14 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Prepend,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
@@ -10062,6 +10265,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_SpacingMark,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_SpacingMark,
 	GCB_Extend,
@@ -10086,6 +10290,9 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Prepend,
 	GCB_Extend,
 	GCB_Other,
@@ -10096,7 +10303,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_SpacingMark,
@@ -10111,14 +10318,20 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_SpacingMark,
 	GCB_Extend,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Control,
 	GCB_Extend,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
 	GCB_Extend,
+	GCB_Other,
+	GCB_SpacingMark,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
@@ -10127,12 +10340,7 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_SpacingMark,
 	GCB_Other,
 	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_SpacingMark,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Control,
 	GCB_Other,
@@ -10140,14 +10348,20 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_SpacingMark,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Control,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
+	GCB_Other,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
@@ -10161,35 +10375,29 @@ static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
 	GCB_Other,
 	GCB_Extend,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
-	GCB_Other,
-	GCB_Extend,
+	GCB_InCB_Extend_EX,
 	GCB_Other,
 	GCB_ExtPict_XX,
 	GCB_Other,
@@ -13207,7 +13415,7 @@ static const I32 _Perl_IVCF_invmap[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
-	2719,	/* Number of elements */
+	2797,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -13305,6 +13513,8 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x5EB,
 	0x5EF,
 	0x5F3,
+	0x600,
+	0x606,
 	0x609,
 	0x60C,
 	0x60E,
@@ -13324,6 +13534,7 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x6D5,
 	0x6D6,
 	0x6DD,
+	0x6DE,
 	0x6DF,
 	0x6E5,
 	0x6E7,
@@ -13358,6 +13569,8 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x82E,
 	0x859,
 	0x85C,
+	0x890,
+	0x892,
 	0x898,
 	0x8A0,
 	0x8CA,
@@ -13699,7 +13912,9 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1B00,
 	0x1B05,
 	0x1B34,
+	0x1B44,
 	0x1B45,
+	0x1B4D,
 	0x1B50,
 	0x1B5A,
 	0x1B5C,
@@ -13715,7 +13930,9 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1BAE,
 	0x1BB0,
 	0x1BBA,
+	0x1BC0,
 	0x1BE6,
+	0x1BF2,
 	0x1BF4,
 	0x1C24,
 	0x1C38,
@@ -13757,8 +13974,10 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2014,
 	0x2015,
 	0x2018,
+	0x2019,
 	0x201A,
 	0x201B,
+	0x201D,
 	0x201E,
 	0x201F,
 	0x2020,
@@ -13770,6 +13989,7 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2030,
 	0x2038,
 	0x2039,
+	0x203A,
 	0x203B,
 	0x203C,
 	0x203D,
@@ -13859,6 +14079,8 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x25B7,
 	0x25C0,
 	0x25C1,
+	0x25CC,
+	0x25CD,
 	0x25FB,
 	0x25FD,
 	0x25FF,
@@ -14051,6 +14273,16 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2D80,
 	0x2DE0,
 	0x2E00,
+	0x2E02,
+	0x2E03,
+	0x2E04,
+	0x2E05,
+	0x2E06,
+	0x2E09,
+	0x2E0A,
+	0x2E0B,
+	0x2E0C,
+	0x2E0D,
 	0x2E0E,
 	0x2E16,
 	0x2E17,
@@ -14058,8 +14290,10 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2E19,
 	0x2E1A,
 	0x2E1C,
+	0x2E1D,
 	0x2E1E,
 	0x2E20,
+	0x2E21,
 	0x2E22,
 	0x2E23,
 	0x2E24,
@@ -14104,7 +14338,6 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
 	0x3000,
 	0x3001,
 	0x3003,
@@ -14199,6 +14432,7 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x318F,
 	0x3190,
 	0x31E4,
+	0x31EF,
 	0x31F0,
 	0x3200,
 	0x321F,
@@ -14273,23 +14507,31 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0xA980,
 	0xA984,
 	0xA9B3,
+	0xA9C0,
 	0xA9C1,
 	0xA9C7,
 	0xA9CA,
+	0xA9CE,
+	0xA9CF,
 	0xA9D0,
 	0xA9DA,
+	0xA9DE,
+	0xA9E0,
 	0xA9E5,
 	0xA9E6,
 	0xA9F0,
 	0xA9FA,
+	0xAA00,
 	0xAA29,
 	0xAA37,
+	0xAA40,
 	0xAA43,
 	0xAA44,
 	0xAA4C,
 	0xAA4E,
 	0xAA50,
 	0xAA5A,
+	0xAA5C,
 	0xAA5D,
 	0xAA60,
 	0xAA7B,
@@ -15299,21 +15541,30 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x10F86,
 	0x11000,
 	0x11003,
+	0x11005,
 	0x11038,
+	0x11046,
 	0x11047,
 	0x11049,
+	0x1104E,
+	0x11052,
 	0x11066,
 	0x11070,
 	0x11071,
 	0x11073,
 	0x11075,
+	0x11076,
 	0x1107F,
+	0x11080,
 	0x11083,
 	0x110B0,
 	0x110BB,
+	0x110BD,
 	0x110BE,
 	0x110C2,
 	0x110C3,
+	0x110CD,
+	0x110CE,
 	0x110F0,
 	0x110FA,
 	0x11100,
@@ -15362,6 +15613,18 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x112FA,
 	0x11300,
 	0x11304,
+	0x11305,
+	0x1130D,
+	0x1130F,
+	0x11311,
+	0x11313,
+	0x11329,
+	0x1132A,
+	0x11331,
+	0x11332,
+	0x11334,
+	0x11335,
+	0x1133A,
 	0x1133B,
 	0x1133D,
 	0x1133E,
@@ -15369,9 +15632,15 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11347,
 	0x11349,
 	0x1134B,
+	0x1134D,
 	0x1134E,
+	0x11350,
+	0x11351,
 	0x11357,
 	0x11358,
+	0x1135D,
+	0x1135E,
+	0x11360,
 	0x11362,
 	0x11364,
 	0x11366,
@@ -15423,11 +15692,21 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1183B,
 	0x118E0,
 	0x118EA,
+	0x11900,
+	0x11907,
+	0x11909,
+	0x1190A,
+	0x1190C,
+	0x11914,
+	0x11915,
+	0x11917,
+	0x11918,
 	0x11930,
 	0x11936,
 	0x11937,
 	0x11939,
 	0x1193B,
+	0x1193E,
 	0x1193F,
 	0x11940,
 	0x11941,
@@ -15501,15 +15780,21 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x11D98,
 	0x11DA0,
 	0x11DAA,
+	0x11EE0,
+	0x11EF2,
 	0x11EF3,
 	0x11EF7,
+	0x11EF9,
 	0x11F00,
 	0x11F02,
 	0x11F03,
 	0x11F04,
+	0x11F11,
+	0x11F12,
 	0x11F34,
 	0x11F3B,
 	0x11F3E,
+	0x11F42,
 	0x11F43,
 	0x11F45,
 	0x11F50,
@@ -15533,6 +15818,7 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 	0x13379,
 	0x1337A,
 	0x1337C,
+	0x1342F,
 	0x13430,
 	0x13437,
 	0x13438,
@@ -15942,80 +16228,80 @@ static const UV _Perl_LB_invlist[] = {  /* for ASCII/Latin1 */
 
 typedef enum {
 	LB_Alphabetic = 0,
-	LB_Break_Both = 1,
-	LB_Break_After = 2,
-	LB_Break_Before = 3,
-	LB_Mandatory_Break = 4,
-	LB_Contingent_Break = 5,
-	LB_Cn_ExtPict_ExtPict_ID = 6,
-	LB_Close_Punctuation = 7,
-	LB_Combining_Mark = 8,
-	LB_Close_Parenthesis = 9,
-	LB_Carriage_Return = 10,
-	LB_EA_AL = 11,
-	LB_EA_BA = 12,
-	LB_EA_CL = 13,
-	LB_EA_EB = 14,
-	LB_EA_GL = 15,
-	LB_EA_ID = 16,
-	LB_EA_CM = 17,
-	LB_EA_IN = 18,
-	LB_EA_OP = 19,
-	LB_EA_PO = 20,
-	LB_EA_PR = 21,
-	LB_EA_IS = 22,
-	LB_EA_NS = 23,
-	LB_EA_EX = 24,
-	LB_E_Base = 25,
-	LB_EA_ExtPict_AL = 26,
-	LB_EA_ExtPict_ID = 27,
-	LB_E_Modifier = 28,
-	LB_ExtPict_AL = 29,
-	LB_ExtPict_EX = 30,
-	LB_ExtPict_ID = 31,
-	LB_ExtPict_NS = 32,
-	LB_Exclamation = 33,
-	LB_Glue = 34,
-	LB_H2 = 35,
-	LB_H3 = 36,
-	LB_Hebrew_Letter = 37,
-	LB_Hyphen = 38,
-	LB_Ideographic = 39,
-	LB_Inseparable = 40,
-	LB_Infix_Numeric = 41,
-	LB_JL = 42,
-	LB_JT = 43,
-	LB_JV = 44,
-	LB_Line_Feed = 45,
-	LB_Next_Line = 46,
-	LB_Nonstarter = 47,
-	LB_Numeric = 48,
-	LB_Open_Punctuation = 49,
-	LB_Postfix_Numeric = 50,
-	LB_Prefix_Numeric = 51,
-	LB_Quotation = 52,
-	LB_Regional_Indicator = 53,
-	LB_Space = 54,
-	LB_Break_Symbols = 55,
-	LB_Word_Joiner = 56,
-	LB_ZWSpace = 57,
-	LB_ZWJ = 58,
-	LB_EDGE = 59,
-	LB_AK = 60,
-	LB_Aksara = 60,
-	LB_Aksara_Prebase = 60,
-	LB_Aksara_Start = 60,
-	LB_AP = 60,
-	LB_Dotted_Circle = 60,
-	LB_Dotted_Circle_AL = 60,
-	LB_East_Asian_CP = 60,
-	LB_East_Asian_OP = 60,
-	LB_Pf_QU = 60,
-	LB_Pi_QU = 60,
-	LB_VF = 60,
-	LB_VI = 60,
-	LB_Virama = 60,
-	LB_Virama_Final = 60
+	LB_Aksara = 1,
+	LB_Aksara_Prebase = 2,
+	LB_Aksara_Start = 3,
+	LB_Break_Both = 4,
+	LB_Break_After = 5,
+	LB_Break_Before = 6,
+	LB_Mandatory_Break = 7,
+	LB_Contingent_Break = 8,
+	LB_Cn_ExtPict_ExtPict_ID = 9,
+	LB_Close_Punctuation = 10,
+	LB_Combining_Mark = 11,
+	LB_Close_Parenthesis = 12,
+	LB_Carriage_Return = 13,
+	LB_Dotted_Circle_AL = 14,
+	LB_EA_AL = 15,
+	LB_EA_BA = 16,
+	LB_EA_CL = 17,
+	LB_EA_EB = 18,
+	LB_EA_GL = 19,
+	LB_EA_ID = 20,
+	LB_EA_CM = 21,
+	LB_EA_IN = 22,
+	LB_EA_OP = 23,
+	LB_EA_PO = 24,
+	LB_EA_PR = 25,
+	LB_EA_IS = 26,
+	LB_EA_NS = 27,
+	LB_EA_EX = 28,
+	LB_E_Base = 29,
+	LB_EA_ExtPict_AL = 30,
+	LB_EA_ExtPict_ID = 31,
+	LB_E_Modifier = 32,
+	LB_ExtPict_AL = 33,
+	LB_ExtPict_EX = 34,
+	LB_ExtPict_ID = 35,
+	LB_ExtPict_NS = 36,
+	LB_Exclamation = 37,
+	LB_Glue = 38,
+	LB_H2 = 39,
+	LB_H3 = 40,
+	LB_Hebrew_Letter = 41,
+	LB_Hyphen = 42,
+	LB_Ideographic = 43,
+	LB_Inseparable = 44,
+	LB_Infix_Numeric = 45,
+	LB_JL = 46,
+	LB_JT = 47,
+	LB_JV = 48,
+	LB_Line_Feed = 49,
+	LB_Next_Line = 50,
+	LB_Nonstarter = 51,
+	LB_Numeric = 52,
+	LB_Open_Punctuation = 53,
+	LB_Pf_QU = 54,
+	LB_Pi_QU = 55,
+	LB_Postfix_Numeric = 56,
+	LB_Prefix_Numeric = 57,
+	LB_Quotation = 58,
+	LB_Regional_Indicator = 59,
+	LB_Space = 60,
+	LB_Break_Symbols = 61,
+	LB_Virama_Final = 62,
+	LB_Virama = 63,
+	LB_Word_Joiner = 64,
+	LB_ZWSpace = 65,
+	LB_ZWJ = 66,
+	LB_EDGE = 67,
+	LB_AK = 68,
+	LB_AP = 68,
+	LB_Dotted_Circle = 68,
+	LB_East_Asian_CP = 68,
+	LB_East_Asian_OP = 68,
+	LB_VF = 68,
+	LB_VI = 68
 } LB_enum;
 
 static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
@@ -16064,7 +16350,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Alphabetic,
 	LB_ExtPict_AL,
 	LB_Alphabetic,
-	LB_Quotation,
+	LB_Pi_QU,
 	LB_Alphabetic,
 	LB_Break_After,
 	LB_ExtPict_AL,
@@ -16074,7 +16360,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Alphabetic,
 	LB_Break_Before,
 	LB_Alphabetic,
-	LB_Quotation,
+	LB_Pf_QU,
 	LB_Alphabetic,
 	LB_Open_Punctuation,
 	LB_Alphabetic,
@@ -16113,6 +16399,8 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Alphabetic,
 	LB_Hebrew_Letter,
 	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
 	LB_Postfix_Numeric,
 	LB_Infix_Numeric,
 	LB_Alphabetic,
@@ -16131,6 +16419,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Exclamation,
 	LB_Alphabetic,
 	LB_Combining_Mark,
+	LB_Numeric,
 	LB_Alphabetic,
 	LB_Combining_Mark,
 	LB_Alphabetic,
@@ -16166,10 +16455,12 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Alphabetic,
 	LB_Combining_Mark,
 	LB_Alphabetic,
-	LB_Combining_Mark,
+	LB_Numeric,
 	LB_Alphabetic,
 	LB_Combining_Mark,
 	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Numeric,
 	LB_Combining_Mark,
 	LB_Alphabetic,
 	LB_Combining_Mark,
@@ -16505,25 +16796,29 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Combining_Mark,
 	LB_Alphabetic,
 	LB_Combining_Mark,
+	LB_Aksara,
+	LB_Combining_Mark,
+	LB_Virama,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Ideographic,
+	LB_Break_After,
+	LB_Ideographic,
+	LB_Break_After,
+	LB_Ideographic,
+	LB_Combining_Mark,
+	LB_Ideographic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
 	LB_Alphabetic,
 	LB_Combining_Mark,
 	LB_Alphabetic,
 	LB_Numeric,
-	LB_Break_After,
 	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
+	LB_Aksara_Start,
 	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
+	LB_Virama_Final,
 	LB_Alphabetic,
 	LB_Combining_Mark,
 	LB_Alphabetic,
@@ -16564,11 +16859,13 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Break_After,
 	LB_Break_Both,
 	LB_Alphabetic,
-	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
 	LB_Open_Punctuation,
-	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
 	LB_Open_Punctuation,
-	LB_Quotation,
+	LB_Pi_QU,
 	LB_Alphabetic,
 	LB_Inseparable,
 	LB_Break_After,
@@ -16577,7 +16874,8 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Glue,
 	LB_Postfix_Numeric,
 	LB_Alphabetic,
-	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
 	LB_Alphabetic,
 	LB_ExtPict_NS,
 	LB_Nonstarter,
@@ -16666,6 +16964,8 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_ExtPict_AL,
 	LB_Alphabetic,
 	LB_ExtPict_AL,
+	LB_Alphabetic,
+	LB_Dotted_Circle_AL,
 	LB_Alphabetic,
 	LB_ExtPict_AL,
 	LB_EA_ExtPict_AL,
@@ -16859,15 +17159,27 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Alphabetic,
 	LB_Combining_Mark,
 	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
+	LB_Pi_QU,
+	LB_Pf_QU,
+	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
+	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
 	LB_Break_After,
 	LB_Alphabetic,
 	LB_Break_After,
 	LB_Open_Punctuation,
 	LB_Break_After,
 	LB_Alphabetic,
-	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
 	LB_Alphabetic,
-	LB_Quotation,
+	LB_Pi_QU,
+	LB_Pf_QU,
 	LB_Open_Punctuation,
 	LB_Close_Punctuation,
 	LB_Open_Punctuation,
@@ -16912,7 +17224,6 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_EA_ID,
 	LB_Alphabetic,
 	LB_EA_ID,
-	LB_Alphabetic,
 	LB_EA_BA,
 	LB_EA_CL,
 	LB_EA_ID,
@@ -17007,6 +17318,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Alphabetic,
 	LB_EA_ID,
 	LB_Alphabetic,
+	LB_EA_ID,
 	LB_EA_NS,
 	LB_EA_ID,
 	LB_Alphabetic,
@@ -17079,25 +17391,33 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_JL,
 	LB_Alphabetic,
 	LB_Combining_Mark,
+	LB_Aksara,
+	LB_Combining_Mark,
+	LB_Virama,
+	LB_Ideographic,
+	LB_Break_After,
+	LB_Ideographic,
 	LB_Alphabetic,
+	LB_Break_After,
+	LB_Ideographic,
+	LB_Alphabetic,
+	LB_Ideographic,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Aksara_Start,
 	LB_Combining_Mark,
 	LB_Alphabetic,
 	LB_Break_After,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_After,
 	LB_Combining_Mark,
 	LB_Alphabetic,
-	LB_Numeric,
+	LB_Ideographic,
 	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
+	LB_Ideographic,
 	LB_Break_After,
 	LB_Alphabetic,
 	LB_Combining_Mark,
@@ -18106,221 +18426,264 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Combining_Mark,
 	LB_Alphabetic,
 	LB_Combining_Mark,
-	LB_Alphabetic,
+	LB_Aksara_Prebase,
+	LB_Aksara,
 	LB_Combining_Mark,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Break_Before,
-	LB_Break_After,
-	LB_Exclamation,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Break_After,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Break_Before,
-	LB_Exclamation,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Numeric,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
-	LB_Alphabetic,
-	LB_Combining_Mark,
+	LB_Virama,
 	LB_Break_After,
 	LB_Ideographic,
+	LB_Alphabetic,
+	LB_Ideographic,
+	LB_Aksara_Start,
+	LB_Combining_Mark,
+	LB_Aksara,
+	LB_Combining_Mark,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Glue,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
 	LB_Numeric,
+	LB_Break_After,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_After,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Virama,
+	LB_Alphabetic,
+	LB_Aksara_Start,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Aksara_Start,
+	LB_Aksara,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_Before,
+	LB_Break_After,
+	LB_Exclamation,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Virama,
+	LB_Aksara_Prebase,
+	LB_Combining_Mark,
+	LB_Aksara_Prebase,
+	LB_Combining_Mark,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Ideographic,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Break_Before,
+	LB_Exclamation,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Numeric,
+	LB_Alphabetic,
+	LB_Aksara_Start,
+	LB_Break_After,
+	LB_Combining_Mark,
+	LB_Break_After,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Aksara_Prebase,
+	LB_Combining_Mark,
+	LB_Aksara,
+	LB_Alphabetic,
+	LB_Aksara,
+	LB_Combining_Mark,
+	LB_Alphabetic,
+	LB_Combining_Mark,
+	LB_Virama,
+	LB_Break_After,
+	LB_Ideographic,
+	LB_Aksara_Start,
 	LB_Alphabetic,
 	LB_Postfix_Numeric,
 	LB_Alphabetic,
@@ -18341,6 +18704,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Open_Punctuation,
 	LB_Close_Punctuation,
 	LB_Alphabetic,
+	LB_Open_Punctuation,
 	LB_Glue,
 	LB_Open_Punctuation,
 	LB_Close_Punctuation,
@@ -18749,7 +19113,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
-	3262,	/* Number of elements */
+	3265,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -19935,6 +20299,7 @@ static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
 	0x1780,
 	0x17B4,
 	0x17D4,
+	0x17D6,
 	0x17D7,
 	0x17D8,
 	0x17DC,
@@ -22003,6 +22368,8 @@ static const UV _Perl_SB_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -22679,7 +23046,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_Other,
 	SB_OLetter,
 	SB_Other,
-	SB_Format,
+	SB_Numeric,
 	SB_Other,
 	SB_SContinue,
 	SB_Other,
@@ -22699,7 +23066,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_STerm,
 	SB_OLetter,
 	SB_Extend,
-	SB_Format,
+	SB_Numeric,
 	SB_Other,
 	SB_Extend,
 	SB_OLetter,
@@ -22758,12 +23125,12 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_Other,
 	SB_OLetter,
 	SB_Other,
-	SB_Format,
+	SB_Numeric,
 	SB_Other,
 	SB_Extend,
 	SB_OLetter,
 	SB_Extend,
-	SB_Format,
+	SB_Numeric,
 	SB_Extend,
 	SB_OLetter,
 	SB_Extend,
@@ -23226,6 +23593,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_Other,
 	SB_OLetter,
 	SB_Extend,
+	SB_STerm,
 	SB_Other,
 	SB_OLetter,
 	SB_Other,
@@ -24641,11 +25009,11 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_OLetter,
 	SB_Extend,
 	SB_Other,
-	SB_Format,
+	SB_Numeric,
 	SB_STerm,
 	SB_Extend,
 	SB_Other,
-	SB_Format,
+	SB_Numeric,
 	SB_Other,
 	SB_OLetter,
 	SB_Other,
@@ -25301,6 +25669,8 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 	SB_Other,
 	SB_OLetter,
 	SB_Other,
+	SB_OLetter,
+	SB_Other,
 	SB_Format,
 	SB_Other,
 	SB_Extend,
@@ -25318,7 +25688,7 @@ static const SB_enum _Perl_SB_invmap[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_SCX_invlist[] = {  /* for ASCII/Latin1 */
-	1750,	/* Number of elements */
+	1753,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -26044,8 +26414,6 @@ static const UV _Perl_SCX_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3001,
 	0x3003,
 	0x3004,
@@ -26085,6 +26453,7 @@ static const UV _Perl_SCX_invlist[] = {  /* for ASCII/Latin1 */
 	0x31A0,
 	0x31C0,
 	0x31E4,
+	0x31EF,
 	0x31F0,
 	0x3200,
 	0x321F,
@@ -26138,6 +26507,8 @@ static const UV _Perl_SCX_invlist[] = {  /* for ASCII/Latin1 */
 	0xA830,
 	0xA833,
 	0xA836,
+	0xA838,
+	0xA839,
 	0xA83A,
 	0xA840,
 	0xA878,
@@ -27060,6 +27431,8 @@ static const UV _Perl_SCX_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -27311,7 +27684,8 @@ typedef enum {
 	SCX_use_AUX_TABLE_56 = -56,
 	SCX_use_AUX_TABLE_57 = -57,
 	SCX_use_AUX_TABLE_58 = -58,
-	SCX_use_AUX_TABLE_59 = -59
+	SCX_use_AUX_TABLE_59 = -59,
+	SCX_use_AUX_TABLE_60 = -60
 } SCX_enum;
 
 #  endif	/* ASCII/Latin1 */
@@ -27575,8 +27949,10 @@ static const SCX_enum SCX_AUX_TABLE_33[] = {
 	SCX_Devanagari,
 	SCX_Grantha,
 	SCX_Kannada,
+	SCX_Malayalam,
 	SCX_Nandinagari,
 	SCX_Oriya,
+	SCX_Sinhala,
 	SCX_Telugu,
 	SCX_Tirhuta
 };
@@ -27687,6 +28063,7 @@ static const SCX_enum SCX_AUX_TABLE_47[] = {
 	SCX_Malayalam,
 	SCX_Modi,
 	SCX_Nandinagari,
+	SCX_Sharada,
 	SCX_Takri,
 	SCX_Tirhuta
 };
@@ -27703,6 +28080,7 @@ static const SCX_enum SCX_AUX_TABLE_48[] = {
 	SCX_Mahajani,
 	SCX_Modi,
 	SCX_Nandinagari,
+	SCX_Sharada,
 	SCX_Takri,
 	SCX_Tirhuta
 };
@@ -27723,53 +28101,68 @@ static const SCX_enum SCX_AUX_TABLE_49[] = {
 
 static const SCX_enum SCX_AUX_TABLE_50[] = {
 	SCX_Devanagari,
-	SCX_Tamil
+	SCX_Dogra,
+	SCX_Gujarati,
+	SCX_Gurmukhi,
+	SCX_Kaithi,
+	SCX_Khojki,
+	SCX_Khudawadi,
+	SCX_Mahajani,
+	SCX_Modi,
+	SCX_Sharada,
+	SCX_Takri,
+	SCX_Tirhuta
 };
 
 static const SCX_enum SCX_AUX_TABLE_51[] = {
+	SCX_Devanagari,
+	SCX_Tamil
+};
+
+static const SCX_enum SCX_AUX_TABLE_52[] = {
 	SCX_Kayah_Li,
 	SCX_Latin,
 	SCX_Myanmar
 };
 
-static const SCX_enum SCX_AUX_TABLE_52[] = {
+static const SCX_enum SCX_AUX_TABLE_53[] = {
 	SCX_Buginese,
 	SCX_Javanese
 };
 
-static const SCX_enum SCX_AUX_TABLE_53[] = {
+static const SCX_enum SCX_AUX_TABLE_54[] = {
 	SCX_Arabic,
 	SCX_Nko
 };
 
-static const SCX_enum SCX_AUX_TABLE_54[] = {
+static const SCX_enum SCX_AUX_TABLE_55[] = {
 	SCX_Arabic,
 	SCX_Thaana
 };
 
-static const SCX_enum SCX_AUX_TABLE_55[] = {
+static const SCX_enum SCX_AUX_TABLE_56[] = {
 	SCX_Cypriot,
 	SCX_Cypro_Minoan,
 	SCX_Linear_B
 };
 
-static const SCX_enum SCX_AUX_TABLE_56[] = {
+static const SCX_enum SCX_AUX_TABLE_57[] = {
 	SCX_Cypriot,
 	SCX_Linear_B
 };
 
-static const SCX_enum SCX_AUX_TABLE_57[] = {
+static const SCX_enum SCX_AUX_TABLE_58[] = {
 	SCX_Cypriot,
 	SCX_Linear_A,
 	SCX_Linear_B
 };
 
-static const SCX_enum SCX_AUX_TABLE_58[] = {
+static const SCX_enum SCX_AUX_TABLE_59[] = {
 	SCX_Arabic,
 	SCX_Coptic
 };
 
-static const SCX_enum SCX_AUX_TABLE_59[] = {
+static const SCX_enum SCX_AUX_TABLE_60[] = {
 	SCX_Manichaean,
 	SCX_Old_Uyghur
 };
@@ -27834,7 +28227,8 @@ static const SCX_enum * const SCX_AUX_TABLE_ptrs[] = {
 	SCX_AUX_TABLE_56,
 	SCX_AUX_TABLE_57,
 	SCX_AUX_TABLE_58,
-	SCX_AUX_TABLE_59
+	SCX_AUX_TABLE_59,
+	SCX_AUX_TABLE_60
 };
 
 /* Parallel table to the above, giving the number of elements in each table
@@ -27874,7 +28268,7 @@ static const U8 SCX_AUX_TABLE_lengths[] = {
 	2	/* SCX_AUX_TABLE_30 */,
 	6	/* SCX_AUX_TABLE_31 */,
 	2	/* SCX_AUX_TABLE_32 */,
-	8	/* SCX_AUX_TABLE_33 */,
+	10	/* SCX_AUX_TABLE_33 */,
 	3	/* SCX_AUX_TABLE_34 */,
 	2	/* SCX_AUX_TABLE_35 */,
 	2	/* SCX_AUX_TABLE_36 */,
@@ -27888,19 +28282,20 @@ static const U8 SCX_AUX_TABLE_lengths[] = {
 	2	/* SCX_AUX_TABLE_44 */,
 	2	/* SCX_AUX_TABLE_45 */,
 	5	/* SCX_AUX_TABLE_46 */,
-	14	/* SCX_AUX_TABLE_47 */,
-	13	/* SCX_AUX_TABLE_48 */,
+	15	/* SCX_AUX_TABLE_47 */,
+	14	/* SCX_AUX_TABLE_48 */,
 	11	/* SCX_AUX_TABLE_49 */,
-	2	/* SCX_AUX_TABLE_50 */,
-	3	/* SCX_AUX_TABLE_51 */,
-	2	/* SCX_AUX_TABLE_52 */,
+	12	/* SCX_AUX_TABLE_50 */,
+	2	/* SCX_AUX_TABLE_51 */,
+	3	/* SCX_AUX_TABLE_52 */,
 	2	/* SCX_AUX_TABLE_53 */,
 	2	/* SCX_AUX_TABLE_54 */,
-	3	/* SCX_AUX_TABLE_55 */,
-	2	/* SCX_AUX_TABLE_56 */,
-	3	/* SCX_AUX_TABLE_57 */,
-	2	/* SCX_AUX_TABLE_58 */,
-	2	/* SCX_AUX_TABLE_59 */
+	2	/* SCX_AUX_TABLE_55 */,
+	3	/* SCX_AUX_TABLE_56 */,
+	2	/* SCX_AUX_TABLE_57 */,
+	3	/* SCX_AUX_TABLE_58 */,
+	2	/* SCX_AUX_TABLE_59 */,
+	2	/* SCX_AUX_TABLE_60 */
 };
 
 /* This table, indexed by the script enum, gives the zero code point for that
@@ -28799,8 +29194,6 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_use_AUX_TABLE_38,
 	SCX_Unknown,
 	SCX_Common,
-	SCX_Unknown,
-	SCX_Common,
 	SCX_use_AUX_TABLE_39,
 	SCX_use_AUX_TABLE_40,
 	SCX_Common,
@@ -28840,6 +29233,7 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_use_AUX_TABLE_1,
 	SCX_use_AUX_TABLE_38,
 	SCX_Unknown,
+	SCX_Common,
 	SCX_use_AUX_TABLE_45,
 	SCX_use_AUX_TABLE_24,
 	SCX_Unknown,
@@ -28893,6 +29287,8 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_use_AUX_TABLE_47,
 	SCX_use_AUX_TABLE_48,
 	SCX_use_AUX_TABLE_49,
+	SCX_use_AUX_TABLE_50,
+	SCX_use_AUX_TABLE_49,
 	SCX_Unknown,
 	SCX_Phags_Pa,
 	SCX_Unknown,
@@ -28903,10 +29299,10 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Devanagari,
 	SCX_use_AUX_TABLE_29,
 	SCX_Devanagari,
-	SCX_use_AUX_TABLE_50,
+	SCX_use_AUX_TABLE_51,
 	SCX_Devanagari,
 	SCX_Kayah_Li,
-	SCX_use_AUX_TABLE_51,
+	SCX_use_AUX_TABLE_52,
 	SCX_Kayah_Li,
 	SCX_Rejang,
 	SCX_Unknown,
@@ -28915,7 +29311,7 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Unknown,
 	SCX_Javanese,
 	SCX_Unknown,
-	SCX_use_AUX_TABLE_52,
+	SCX_use_AUX_TABLE_53,
 	SCX_Javanese,
 	SCX_Unknown,
 	SCX_Javanese,
@@ -28984,17 +29380,17 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Arabic,
 	SCX_Unknown,
 	SCX_Arabic,
-	SCX_use_AUX_TABLE_53,
-	SCX_Arabic,
-	SCX_Unknown,
-	SCX_Arabic,
-	SCX_Unknown,
-	SCX_Arabic,
-	SCX_Unknown,
-	SCX_Arabic,
 	SCX_use_AUX_TABLE_54,
 	SCX_Arabic,
-	SCX_use_AUX_TABLE_54,
+	SCX_Unknown,
+	SCX_Arabic,
+	SCX_Unknown,
+	SCX_Arabic,
+	SCX_Unknown,
+	SCX_Arabic,
+	SCX_use_AUX_TABLE_55,
+	SCX_Arabic,
+	SCX_use_AUX_TABLE_55,
 	SCX_Arabic,
 	SCX_Inherited,
 	SCX_Common,
@@ -29055,12 +29451,12 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Unknown,
 	SCX_Linear_B,
 	SCX_Unknown,
-	SCX_use_AUX_TABLE_55,
 	SCX_use_AUX_TABLE_56,
-	SCX_Unknown,
 	SCX_use_AUX_TABLE_57,
 	SCX_Unknown,
-	SCX_use_AUX_TABLE_56,
+	SCX_use_AUX_TABLE_58,
+	SCX_Unknown,
+	SCX_use_AUX_TABLE_57,
 	SCX_Greek,
 	SCX_Unknown,
 	SCX_Common,
@@ -29074,7 +29470,7 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Unknown,
 	SCX_Carian,
 	SCX_Unknown,
-	SCX_use_AUX_TABLE_58,
+	SCX_use_AUX_TABLE_59,
 	SCX_Unknown,
 	SCX_Old_Italic,
 	SCX_Unknown,
@@ -29192,7 +29588,7 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Manichaean,
 	SCX_Unknown,
 	SCX_Manichaean,
-	SCX_use_AUX_TABLE_59,
+	SCX_use_AUX_TABLE_60,
 	SCX_Manichaean,
 	SCX_Unknown,
 	SCX_Avestan,
@@ -29821,6 +30217,8 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 	SCX_Unknown,
 	SCX_use_AUX_TABLE_38,
 	SCX_Unknown,
+	SCX_use_AUX_TABLE_38,
+	SCX_Unknown,
 	SCX_Common,
 	SCX_Unknown,
 	SCX_Common,
@@ -29838,7 +30236,7 @@ static const SCX_enum _Perl_SCX_invmap[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV _Perl_WB_invlist[] = {  /* for ASCII/Latin1 */
-	1979,	/* Number of elements */
+	1978,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -29976,7 +30374,6 @@ static const UV _Perl_WB_invlist[] = {  /* for ASCII/Latin1 */
 	0x6FF,
 	0x700,
 	0x70F,
-	0x710,
 	0x711,
 	0x712,
 	0x730,
@@ -31961,7 +32358,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_ALetter,
 	WB_MidLetter,
 	WB_Other,
-	WB_Format,
+	WB_Numeric,
 	WB_Other,
 	WB_MidNum,
 	WB_Other,
@@ -31982,7 +32379,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_Other,
 	WB_ALetter,
 	WB_Extend,
-	WB_Format,
+	WB_Numeric,
 	WB_Other,
 	WB_Extend,
 	WB_ALetter,
@@ -31995,7 +32392,6 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
-	WB_Format,
 	WB_ALetter,
 	WB_Extend,
 	WB_ALetter,
@@ -32034,12 +32430,12 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
-	WB_Format,
+	WB_Numeric,
 	WB_Other,
 	WB_Extend,
 	WB_ALetter,
 	WB_Extend,
-	WB_Format,
+	WB_Numeric,
 	WB_Extend,
 	WB_ALetter,
 	WB_Extend,
@@ -33217,11 +33613,11 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 	WB_ALetter,
 	WB_Extend,
 	WB_Other,
-	WB_Format,
+	WB_Numeric,
 	WB_Other,
 	WB_Extend,
 	WB_Other,
-	WB_Format,
+	WB_Numeric,
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
@@ -33852,7 +34248,7 @@ static const WB_enum _Perl_WB_invmap[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV Simple_Case_Folding_invlist[] = {  /* for ASCII/Latin1 */
-	1307,	/* Number of elements */
+	1313,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -34751,9 +35147,13 @@ static const UV Simple_Case_Folding_invlist[] = {  /* for ASCII/Latin1 */
 	0x1FC8,
 	0x1FCC,
 	0x1FCD,
+	0x1FD3,
+	0x1FD4,
 	0x1FD8,
 	0x1FDA,
 	0x1FDC,
+	0x1FE3,
+	0x1FE4,
 	0x1FE8,
 	0x1FEA,
 	0x1FEC,
@@ -35141,6 +35541,8 @@ static const UV Simple_Case_Folding_invlist[] = {  /* for ASCII/Latin1 */
 	0xA7F6,
 	0xAB70,
 	0xABC0,
+	0xFB05,
+	0xFB06,
 	0xFF21,
 	0xFF3B,
 	0x10400,
@@ -36069,8 +36471,12 @@ static const I32 Simple_Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
 	0x1F72,
 	0x1FC3,
 	0,
+	0x390,
+	0,
 	0x1FD0,
 	0x1F76,
+	0,
+	0x3B0,
 	0,
 	0x1FE0,
 	0x1F7A,
@@ -36458,6 +36864,8 @@ static const I32 Simple_Case_Folding_invmap[] = {  /* for ASCII/Latin1 */
 	0xA7F6,
 	0,
 	0x13A0,
+	0,
+	0xFB06,
 	0,
 	0xFF41,
 	0,
@@ -43644,8 +44052,6 @@ static const UV UNI_ASSIGNED_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -43657,7 +44063,7 @@ static const UV UNI_ASSIGNED_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -44503,6 +44909,8 @@ static const UV UNI_ASSIGNED_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -48035,7 +48443,7 @@ static const UV UNI_VERTSPACE_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_XPOSIXALNUM_invlist[] = {  /* for ASCII/Latin1 */
-	1545,	/* Number of elements */
+	1547,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -49578,6 +49986,8 @@ static const UV UNI_XPOSIXALNUM_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -49591,7 +50001,7 @@ static const UV UNI_XPOSIXALNUM_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_XPOSIXALPHA_invlist[] = {  /* for ASCII/Latin1 */
-	1465,	/* Number of elements */
+	1467,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -51054,6 +51464,8 @@ static const UV UNI_XPOSIXALPHA_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -51250,7 +51662,7 @@ static const UV UNI_XPOSIXDIGIT_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for ASCII/Latin1 */
-	1425,	/* Number of elements */
+	1427,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -51804,7 +52216,7 @@ static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3001,
 	0x3040,
 	0x3041,
@@ -51817,7 +52229,7 @@ static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for ASCII/Latin1 */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -52663,6 +53075,8 @@ static const UV UNI_XPOSIXGRAPH_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -54588,8 +55002,6 @@ static const UV UNI_XPOSIXPRINT_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -54601,7 +55013,7 @@ static const UV UNI_XPOSIXPRINT_invlist[] = {  /* for ASCII/Latin1 */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -55447,6 +55859,8 @@ static const UV UNI_XPOSIXPRINT_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -57200,7 +57614,7 @@ static const UV UNI_XPOSIXUPPER_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_XPOSIXWORD_invlist[] = {  /* for ASCII/Latin1 */
-	1543,	/* Number of elements */
+	1545,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -58739,6 +59153,8 @@ static const UV UNI_XPOSIXWORD_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -59072,7 +59488,7 @@ static const UV UNI__PERL_ANY_FOLDS_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI__PERL_CHARNAME_BEGIN_invlist[] = {  /* for ASCII/Latin1 */
-	1331,	/* Number of elements */
+	1333,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -60401,6 +60817,8 @@ static const UV UNI__PERL_CHARNAME_BEGIN_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -60414,7 +60832,7 @@ static const UV UNI__PERL_CHARNAME_BEGIN_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI__PERL_CHARNAME_CONTINUE_invlist[] = {  /* for ASCII/Latin1 */
-	1557,	/* Number of elements */
+	1561,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -61023,6 +61441,8 @@ static const UV UNI__PERL_CHARNAME_CONTINUE_invlist[] = {  /* for ASCII/Latin1 *
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x200C,
+	0x200E,
 	0x203F,
 	0x2041,
 	0x2054,
@@ -61967,6 +62387,8 @@ static const UV UNI__PERL_CHARNAME_CONTINUE_invlist[] = {  /* for ASCII/Latin1 *
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -62052,7 +62474,7 @@ static const UV UNI__PERL_FOLDS_TO_MULTI_CHAR_invlist[] = {  /* for ASCII/Latin1
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI__PERL_IDCONT_invlist[] = {  /* for ASCII/Latin1 */
-	1551,	/* Number of elements */
+	1555,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -62655,6 +63077,8 @@ static const UV UNI__PERL_IDCONT_invlist[] = {  /* for ASCII/Latin1 */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x200C,
+	0x200E,
 	0x203F,
 	0x2041,
 	0x2054,
@@ -63599,6 +64023,8 @@ static const UV UNI__PERL_IDCONT_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -63614,7 +64040,7 @@ static const UV UNI__PERL_IDCONT_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI__PERL_IDSTART_invlist[] = {  /* for ASCII/Latin1 */
-	1337,	/* Number of elements */
+	1339,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -64949,6 +65375,8 @@ static const UV UNI__PERL_IDSTART_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -65944,6 +66372,20 @@ static const UV UNI_AGE__15_invlist[] = {  /* for all charsets */
 	0x2B73A,
 	0x31350,
 	0x323B0
+};
+
+static const UV UNI_AGE__15_DOT_1_invlist[] = {  /* for all charsets */
+	7,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x2FFC,
+	0x3000,
+	0x31EF,
+	0x31F0,
+	0x2EBF0,
+	0x2EE5E
 };
 
 static const UV UNI_AGE__2_invlist[] = {  /* for all charsets */
@@ -69414,8 +69856,6 @@ static const UV UNI_BC__L_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3005,
 	0x3008,
 	0x3021,
@@ -69435,6 +69875,8 @@ static const UV UNI_BC__L_invlist[] = {  /* for ASCII/Latin1 */
 	0x30FC,
 	0x31C0,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x321D,
 	0x321F,
 	0x3250,
@@ -70666,7 +71108,7 @@ static const UV UNI_BC__NSM_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_BC__ON_invlist[] = {  /* for ASCII/Latin1 */
-	379,	/* Number of elements */
+	381,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -70842,7 +71284,7 @@ static const UV UNI_BC__ON_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3001,
 	0x3005,
 	0x3008,
@@ -70861,6 +71303,8 @@ static const UV UNI_BC__ON_invlist[] = {  /* for ASCII/Latin1 */
 	0x30FC,
 	0x31C0,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x321D,
 	0x321F,
 	0x3250,
@@ -72602,8 +73046,6 @@ static const UV UNI_C_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -72615,7 +73057,7 @@ static const UV UNI_C_invlist[] = {  /* for ASCII/Latin1 */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -73463,6 +73905,8 @@ static const UV UNI_C_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -76327,6 +76771,16 @@ static const UV UNI_CJKEXTH_invlist[] = {  /* for all charsets */
 	0x323B0
 };
 
+static const UV UNI_CJKEXTI_invlist[] = {  /* for all charsets */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x2EBF0,
+	0x2EE60
+};
+
 static const UV UNI_CJKRADICALSSUP_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -76901,8 +77355,6 @@ static const UV UNI_CN_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -76914,7 +77366,7 @@ static const UV UNI_CN_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -77760,6 +78212,8 @@ static const UV UNI_CN_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -89167,7 +89621,7 @@ static const UV UNI_EA__H_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_EA__N_invlist[] = {  /* for ASCII/Latin1 */
-	563,	/* Number of elements */
+	561,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -89549,8 +90003,6 @@ static const UV UNI_EA__N_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x303F,
 	0x3041,
 	0x3097,
@@ -89562,7 +90014,7 @@ static const UV UNI_EA__N_invlist[] = {  /* for ASCII/Latin1 */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0x4DC0,
@@ -89847,7 +90299,7 @@ static const UV UNI_EA__W_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3001,
 	0x303F,
 	0x3041,
@@ -89860,7 +90312,7 @@ static const UV UNI_EA__W_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0x3248,
@@ -93887,8 +94339,6 @@ static const UV UNI_GRBASE_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x302A,
 	0x3030,
 	0x3040,
@@ -93902,7 +94352,7 @@ static const UV UNI_GRBASE_invlist[] = {  /* for ASCII/Latin1 */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -94926,6 +95376,8 @@ static const UV UNI_GRBASE_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -95873,7 +96325,7 @@ static const UV UNI_HALFMARKS_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_HAN_invlist[] = {  /* for all charsets */
-	77,	/* Number of elements */
+	79,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -95948,6 +96400,8 @@ static const UV UNI_HAN_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -96229,7 +96683,7 @@ static const UV UNI_HYPHEN_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
-	1537,	/* Number of elements */
+	1539,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -96834,6 +97288,8 @@ static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x200C,
+	0x200E,
 	0x203F,
 	0x2041,
 	0x2054,
@@ -96923,8 +97379,6 @@ static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
 	0x3099,
 	0x30A0,
 	0x30A1,
-	0x30FB,
-	0x30FC,
 	0x3100,
 	0x3105,
 	0x3130,
@@ -97080,7 +97534,7 @@ static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF40,
 	0xFF41,
 	0xFF5B,
-	0xFF66,
+	0xFF65,
 	0xFFBF,
 	0xFFC2,
 	0xFFC8,
@@ -97762,6 +98216,8 @@ static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -97776,8 +98232,90 @@ static const UV UNI_IDC_invlist[] = {  /* for ASCII/Latin1 */
 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
+static const UV UNI_IDCOMPATMATHCONTINUE_invlist[] = {  /* for ASCII/Latin1 */
+	37,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0xB2,
+	0xB4,
+	0xB9,
+	0xBA,
+	0x2070,
+	0x2071,
+	0x2074,
+	0x207F,
+	0x2080,
+	0x208F,
+	0x2202,
+	0x2203,
+	0x2207,
+	0x2208,
+	0x221E,
+	0x221F,
+	0x1D6C1,
+	0x1D6C2,
+	0x1D6DB,
+	0x1D6DC,
+	0x1D6FB,
+	0x1D6FC,
+	0x1D715,
+	0x1D716,
+	0x1D735,
+	0x1D736,
+	0x1D74F,
+	0x1D750,
+	0x1D76F,
+	0x1D770,
+	0x1D789,
+	0x1D78A,
+	0x1D7A9,
+	0x1D7AA,
+	0x1D7C3,
+	0x1D7C4
+};
+
+#  endif	/* ASCII/Latin1 */
+
+static const UV UNI_IDCOMPATMATHSTART_invlist[] = {  /* for all charsets */
+	27,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x2202,
+	0x2203,
+	0x2207,
+	0x2208,
+	0x221E,
+	0x221F,
+	0x1D6C1,
+	0x1D6C2,
+	0x1D6DB,
+	0x1D6DC,
+	0x1D6FB,
+	0x1D6FC,
+	0x1D715,
+	0x1D716,
+	0x1D735,
+	0x1D736,
+	0x1D74F,
+	0x1D750,
+	0x1D76F,
+	0x1D770,
+	0x1D789,
+	0x1D78A,
+	0x1D7A9,
+	0x1D7AA,
+	0x1D7C3,
+	0x1D7C4
+};
+
+#  if 'A' == 65 /* ASCII/Latin1 */
+
 static const UV UNI_IDENTIFIERSTATUS__ALLOWED_invlist[] = {  /* for ASCII/Latin1 */
-	785,	/* Number of elements */
+	783,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -98474,10 +99012,6 @@ static const UV UNI_IDENTIFIERSTATUS__ALLOWED_invlist[] = {  /* for ASCII/Latin1
 	0xA794,
 	0xA7AA,
 	0xA7AB,
-	0xA7AE,
-	0xA7AF,
-	0xA7B8,
-	0xA7BA,
 	0xA7C0,
 	0xA7CB,
 	0xA7D0,
@@ -98562,6 +99096,8 @@ static const UV UNI_IDENTIFIERSTATUS__ALLOWED_invlist[] = {  /* for ASCII/Latin1
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x30000,
 	0x3134B,
 	0x31350,
@@ -98573,7 +99109,7 @@ static const UV UNI_IDENTIFIERSTATUS__ALLOWED_invlist[] = {  /* for ASCII/Latin1
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_IDENTIFIERSTATUS__RESTRICTED_invlist[] = {  /* for ASCII/Latin1 */
-	785,	/* Number of elements */
+	783,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -99270,10 +99806,6 @@ static const UV UNI_IDENTIFIERSTATUS__RESTRICTED_invlist[] = {  /* for ASCII/Lat
 	0xA794,
 	0xA7AA,
 	0xA7AB,
-	0xA7AE,
-	0xA7AF,
-	0xA7B8,
-	0xA7BA,
 	0xA7C0,
 	0xA7CB,
 	0xA7D0,
@@ -99358,6 +99890,8 @@ static const UV UNI_IDENTIFIERSTATUS__RESTRICTED_invlist[] = {  /* for ASCII/Lat
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x30000,
 	0x3134B,
 	0x31350,
@@ -100645,8 +101179,6 @@ static const UV UNI_IDENTIFIERTYPE__NOTCHARACTER_invlist[] = {  /* for ASCII/Lat
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -100658,7 +101190,7 @@ static const UV UNI_IDENTIFIERTYPE__NOTCHARACTER_invlist[] = {  /* for ASCII/Lat
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -101504,6 +102036,8 @@ static const UV UNI_IDENTIFIERTYPE__NOTCHARACTER_invlist[] = {  /* for ASCII/Lat
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE4B,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -102047,7 +102581,7 @@ static const UV UNI_IDENTIFIERTYPE__NOTNFKC_invlist[] = {  /* for ASCII/Latin1 *
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_IDENTIFIERTYPE__NOTXID_invlist[] = {  /* for ASCII/Latin1 */
-	709,	/* Number of elements */
+	711,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -102369,7 +102903,7 @@ static const UV UNI_IDENTIFIERTYPE__NOTXID_invlist[] = {  /* for ASCII/Latin1 */
 	0x2EA0,
 	0x2EF3,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3001,
 	0x3005,
 	0x3008,
@@ -102384,6 +102918,8 @@ static const UV UNI_IDENTIFIERTYPE__NOTXID_invlist[] = {  /* for ASCII/Latin1 */
 	0x3192,
 	0x31C0,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x3248,
 	0x3250,
 	0x327F,
@@ -102983,7 +103519,7 @@ static const UV UNI_IDENTIFIERTYPE__OBSOLETE_invlist[] = {  /* for all charsets 
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_IDENTIFIERTYPE__RECOMMENDED_invlist[] = {  /* for ASCII/Latin1 */
-	771,	/* Number of elements */
+	769,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -103666,10 +104202,6 @@ static const UV UNI_IDENTIFIERTYPE__RECOMMENDED_invlist[] = {  /* for ASCII/Lati
 	0xA794,
 	0xA7AA,
 	0xA7AB,
-	0xA7AE,
-	0xA7AF,
-	0xA7B8,
-	0xA7BA,
 	0xA7C0,
 	0xA7CB,
 	0xA7D0,
@@ -103754,6 +104286,8 @@ static const UV UNI_IDENTIFIERTYPE__RECOMMENDED_invlist[] = {  /* for ASCII/Lati
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE4B,
 	0x30000,
 	0x3134B,
 	0x31350,
@@ -103920,7 +104454,7 @@ static const UV UNI_IDENTIFIERTYPE__TECHNICAL_invlist[] = {  /* for all charsets
 	0xA730,
 	0xA78E,
 	0xA78F,
-	0xA7AF,
+	0xA7AE,
 	0xA7B0,
 	0xA7BA,
 	0xA7C0,
@@ -104113,7 +104647,7 @@ static const UV UNI_IDENTIFIERTYPE__UNCOMMONUSE_invlist[] = {  /* for all charse
 	0xA78F,
 	0xA790,
 	0xA7B2,
-	0xA7B8,
+	0xA7BA,
 	0xA8FC,
 	0xA8FE,
 	0xAB60,
@@ -104143,7 +104677,7 @@ static const UV UNI_IDENTIFIERTYPE__UNCOMMONUSE_invlist[] = {  /* for all charse
 };
 
 static const UV UNI_IDEO_invlist[] = {  /* for all charsets */
-	41,	/* Number of elements */
+	43,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -104182,6 +104716,8 @@ static const UV UNI_IDEO_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -104203,7 +104739,7 @@ static const UV UNI_IDEOGRAPHICSYMBOLS_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_IDS_invlist[] = {  /* for ASCII/Latin1 */
-	1319,	/* Number of elements */
+	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -105520,6 +106056,8 @@ static const UV UNI_IDS_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -105531,7 +106069,7 @@ static const UV UNI_IDS_invlist[] = {  /* for ASCII/Latin1 */
 #  endif	/* ASCII/Latin1 */
 
 static const UV UNI_IDSB_invlist[] = {  /* for all charsets */
-	5,	/* Number of elements */
+	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -105539,7 +106077,9 @@ static const UV UNI_IDSB_invlist[] = {  /* for all charsets */
 	0x2FF0,
 	0x2FF2,
 	0x2FF4,
-	0x2FFC
+	0x2FFE,
+	0x31EF,
+	0x31F0
 };
 
 static const UV UNI_IDST_invlist[] = {  /* for all charsets */
@@ -105550,6 +106090,16 @@ static const UV UNI_IDST_invlist[] = {  /* for all charsets */
 	0x0,
 	0x2FF2,
 	0x2FF4
+};
+
+static const UV UNI_IDSU_invlist[] = {  /* for all charsets */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x2FFE,
+	0x3000
 };
 
 static const UV UNI_IN__1_DOT_1_invlist[] = {  /* for all charsets */
@@ -115720,6 +116270,1443 @@ static const UV UNI_IN__15_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2F800,
+	0x2FA1E,
+	0x2FFFE,
+	0x3134B,
+	0x31350,
+	0x323B0,
+	0x3FFFE,
+	0x40000,
+	0x4FFFE,
+	0x50000,
+	0x5FFFE,
+	0x60000,
+	0x6FFFE,
+	0x70000,
+	0x7FFFE,
+	0x80000,
+	0x8FFFE,
+	0x90000,
+	0x9FFFE,
+	0xA0000,
+	0xAFFFE,
+	0xB0000,
+	0xBFFFE,
+	0xC0000,
+	0xCFFFE,
+	0xD0000,
+	0xDFFFE,
+	0xE0000,
+	0xE0001,
+	0xE0002,
+	0xE0020,
+	0xE0080,
+	0xE0100,
+	0xE01F0,
+	0xEFFFE,
+	0x110000
+};
+
+static const UV UNI_IN__15_DOT_1_invlist[] = {  /* for all charsets */
+	1430,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	0,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x378,
+	0x37A,
+	0x380,
+	0x384,
+	0x38B,
+	0x38C,
+	0x38D,
+	0x38E,
+	0x3A2,
+	0x3A3,
+	0x530,
+	0x531,
+	0x557,
+	0x559,
+	0x58B,
+	0x58D,
+	0x590,
+	0x591,
+	0x5C8,
+	0x5D0,
+	0x5EB,
+	0x5EF,
+	0x5F5,
+	0x600,
+	0x70E,
+	0x70F,
+	0x74B,
+	0x74D,
+	0x7B2,
+	0x7C0,
+	0x7FB,
+	0x7FD,
+	0x82E,
+	0x830,
+	0x83F,
+	0x840,
+	0x85C,
+	0x85E,
+	0x85F,
+	0x860,
+	0x86B,
+	0x870,
+	0x88F,
+	0x890,
+	0x892,
+	0x898,
+	0x984,
+	0x985,
+	0x98D,
+	0x98F,
+	0x991,
+	0x993,
+	0x9A9,
+	0x9AA,
+	0x9B1,
+	0x9B2,
+	0x9B3,
+	0x9B6,
+	0x9BA,
+	0x9BC,
+	0x9C5,
+	0x9C7,
+	0x9C9,
+	0x9CB,
+	0x9CF,
+	0x9D7,
+	0x9D8,
+	0x9DC,
+	0x9DE,
+	0x9DF,
+	0x9E4,
+	0x9E6,
+	0x9FF,
+	0xA01,
+	0xA04,
+	0xA05,
+	0xA0B,
+	0xA0F,
+	0xA11,
+	0xA13,
+	0xA29,
+	0xA2A,
+	0xA31,
+	0xA32,
+	0xA34,
+	0xA35,
+	0xA37,
+	0xA38,
+	0xA3A,
+	0xA3C,
+	0xA3D,
+	0xA3E,
+	0xA43,
+	0xA47,
+	0xA49,
+	0xA4B,
+	0xA4E,
+	0xA51,
+	0xA52,
+	0xA59,
+	0xA5D,
+	0xA5E,
+	0xA5F,
+	0xA66,
+	0xA77,
+	0xA81,
+	0xA84,
+	0xA85,
+	0xA8E,
+	0xA8F,
+	0xA92,
+	0xA93,
+	0xAA9,
+	0xAAA,
+	0xAB1,
+	0xAB2,
+	0xAB4,
+	0xAB5,
+	0xABA,
+	0xABC,
+	0xAC6,
+	0xAC7,
+	0xACA,
+	0xACB,
+	0xACE,
+	0xAD0,
+	0xAD1,
+	0xAE0,
+	0xAE4,
+	0xAE6,
+	0xAF2,
+	0xAF9,
+	0xB00,
+	0xB01,
+	0xB04,
+	0xB05,
+	0xB0D,
+	0xB0F,
+	0xB11,
+	0xB13,
+	0xB29,
+	0xB2A,
+	0xB31,
+	0xB32,
+	0xB34,
+	0xB35,
+	0xB3A,
+	0xB3C,
+	0xB45,
+	0xB47,
+	0xB49,
+	0xB4B,
+	0xB4E,
+	0xB55,
+	0xB58,
+	0xB5C,
+	0xB5E,
+	0xB5F,
+	0xB64,
+	0xB66,
+	0xB78,
+	0xB82,
+	0xB84,
+	0xB85,
+	0xB8B,
+	0xB8E,
+	0xB91,
+	0xB92,
+	0xB96,
+	0xB99,
+	0xB9B,
+	0xB9C,
+	0xB9D,
+	0xB9E,
+	0xBA0,
+	0xBA3,
+	0xBA5,
+	0xBA8,
+	0xBAB,
+	0xBAE,
+	0xBBA,
+	0xBBE,
+	0xBC3,
+	0xBC6,
+	0xBC9,
+	0xBCA,
+	0xBCE,
+	0xBD0,
+	0xBD1,
+	0xBD7,
+	0xBD8,
+	0xBE6,
+	0xBFB,
+	0xC00,
+	0xC0D,
+	0xC0E,
+	0xC11,
+	0xC12,
+	0xC29,
+	0xC2A,
+	0xC3A,
+	0xC3C,
+	0xC45,
+	0xC46,
+	0xC49,
+	0xC4A,
+	0xC4E,
+	0xC55,
+	0xC57,
+	0xC58,
+	0xC5B,
+	0xC5D,
+	0xC5E,
+	0xC60,
+	0xC64,
+	0xC66,
+	0xC70,
+	0xC77,
+	0xC8D,
+	0xC8E,
+	0xC91,
+	0xC92,
+	0xCA9,
+	0xCAA,
+	0xCB4,
+	0xCB5,
+	0xCBA,
+	0xCBC,
+	0xCC5,
+	0xCC6,
+	0xCC9,
+	0xCCA,
+	0xCCE,
+	0xCD5,
+	0xCD7,
+	0xCDD,
+	0xCDF,
+	0xCE0,
+	0xCE4,
+	0xCE6,
+	0xCF0,
+	0xCF1,
+	0xCF4,
+	0xD00,
+	0xD0D,
+	0xD0E,
+	0xD11,
+	0xD12,
+	0xD45,
+	0xD46,
+	0xD49,
+	0xD4A,
+	0xD50,
+	0xD54,
+	0xD64,
+	0xD66,
+	0xD80,
+	0xD81,
+	0xD84,
+	0xD85,
+	0xD97,
+	0xD9A,
+	0xDB2,
+	0xDB3,
+	0xDBC,
+	0xDBD,
+	0xDBE,
+	0xDC0,
+	0xDC7,
+	0xDCA,
+	0xDCB,
+	0xDCF,
+	0xDD5,
+	0xDD6,
+	0xDD7,
+	0xDD8,
+	0xDE0,
+	0xDE6,
+	0xDF0,
+	0xDF2,
+	0xDF5,
+	0xE01,
+	0xE3B,
+	0xE3F,
+	0xE5C,
+	0xE81,
+	0xE83,
+	0xE84,
+	0xE85,
+	0xE86,
+	0xE8B,
+	0xE8C,
+	0xEA4,
+	0xEA5,
+	0xEA6,
+	0xEA7,
+	0xEBE,
+	0xEC0,
+	0xEC5,
+	0xEC6,
+	0xEC7,
+	0xEC8,
+	0xECF,
+	0xED0,
+	0xEDA,
+	0xEDC,
+	0xEE0,
+	0xF00,
+	0xF48,
+	0xF49,
+	0xF6D,
+	0xF71,
+	0xF98,
+	0xF99,
+	0xFBD,
+	0xFBE,
+	0xFCD,
+	0xFCE,
+	0xFDB,
+	0x1000,
+	0x10C6,
+	0x10C7,
+	0x10C8,
+	0x10CD,
+	0x10CE,
+	0x10D0,
+	0x1249,
+	0x124A,
+	0x124E,
+	0x1250,
+	0x1257,
+	0x1258,
+	0x1259,
+	0x125A,
+	0x125E,
+	0x1260,
+	0x1289,
+	0x128A,
+	0x128E,
+	0x1290,
+	0x12B1,
+	0x12B2,
+	0x12B6,
+	0x12B8,
+	0x12BF,
+	0x12C0,
+	0x12C1,
+	0x12C2,
+	0x12C6,
+	0x12C8,
+	0x12D7,
+	0x12D8,
+	0x1311,
+	0x1312,
+	0x1316,
+	0x1318,
+	0x135B,
+	0x135D,
+	0x137D,
+	0x1380,
+	0x139A,
+	0x13A0,
+	0x13F6,
+	0x13F8,
+	0x13FE,
+	0x1400,
+	0x169D,
+	0x16A0,
+	0x16F9,
+	0x1700,
+	0x1716,
+	0x171F,
+	0x1737,
+	0x1740,
+	0x1754,
+	0x1760,
+	0x176D,
+	0x176E,
+	0x1771,
+	0x1772,
+	0x1774,
+	0x1780,
+	0x17DE,
+	0x17E0,
+	0x17EA,
+	0x17F0,
+	0x17FA,
+	0x1800,
+	0x181A,
+	0x1820,
+	0x1879,
+	0x1880,
+	0x18AB,
+	0x18B0,
+	0x18F6,
+	0x1900,
+	0x191F,
+	0x1920,
+	0x192C,
+	0x1930,
+	0x193C,
+	0x1940,
+	0x1941,
+	0x1944,
+	0x196E,
+	0x1970,
+	0x1975,
+	0x1980,
+	0x19AC,
+	0x19B0,
+	0x19CA,
+	0x19D0,
+	0x19DB,
+	0x19DE,
+	0x1A1C,
+	0x1A1E,
+	0x1A5F,
+	0x1A60,
+	0x1A7D,
+	0x1A7F,
+	0x1A8A,
+	0x1A90,
+	0x1A9A,
+	0x1AA0,
+	0x1AAE,
+	0x1AB0,
+	0x1ACF,
+	0x1B00,
+	0x1B4D,
+	0x1B50,
+	0x1B7F,
+	0x1B80,
+	0x1BF4,
+	0x1BFC,
+	0x1C38,
+	0x1C3B,
+	0x1C4A,
+	0x1C4D,
+	0x1C89,
+	0x1C90,
+	0x1CBB,
+	0x1CBD,
+	0x1CC8,
+	0x1CD0,
+	0x1CFB,
+	0x1D00,
+	0x1F16,
+	0x1F18,
+	0x1F1E,
+	0x1F20,
+	0x1F46,
+	0x1F48,
+	0x1F4E,
+	0x1F50,
+	0x1F58,
+	0x1F59,
+	0x1F5A,
+	0x1F5B,
+	0x1F5C,
+	0x1F5D,
+	0x1F5E,
+	0x1F5F,
+	0x1F7E,
+	0x1F80,
+	0x1FB5,
+	0x1FB6,
+	0x1FC5,
+	0x1FC6,
+	0x1FD4,
+	0x1FD6,
+	0x1FDC,
+	0x1FDD,
+	0x1FF0,
+	0x1FF2,
+	0x1FF5,
+	0x1FF6,
+	0x1FFF,
+	0x2000,
+	0x2065,
+	0x2066,
+	0x2072,
+	0x2074,
+	0x208F,
+	0x2090,
+	0x209D,
+	0x20A0,
+	0x20C1,
+	0x20D0,
+	0x20F1,
+	0x2100,
+	0x218C,
+	0x2190,
+	0x2427,
+	0x2440,
+	0x244B,
+	0x2460,
+	0x2B74,
+	0x2B76,
+	0x2B96,
+	0x2B97,
+	0x2CF4,
+	0x2CF9,
+	0x2D26,
+	0x2D27,
+	0x2D28,
+	0x2D2D,
+	0x2D2E,
+	0x2D30,
+	0x2D68,
+	0x2D6F,
+	0x2D71,
+	0x2D7F,
+	0x2D97,
+	0x2DA0,
+	0x2DA7,
+	0x2DA8,
+	0x2DAF,
+	0x2DB0,
+	0x2DB7,
+	0x2DB8,
+	0x2DBF,
+	0x2DC0,
+	0x2DC7,
+	0x2DC8,
+	0x2DCF,
+	0x2DD0,
+	0x2DD7,
+	0x2DD8,
+	0x2DDF,
+	0x2DE0,
+	0x2E5E,
+	0x2E80,
+	0x2E9A,
+	0x2E9B,
+	0x2EF4,
+	0x2F00,
+	0x2FD6,
+	0x2FF0,
+	0x3040,
+	0x3041,
+	0x3097,
+	0x3099,
+	0x3100,
+	0x3105,
+	0x3130,
+	0x3131,
+	0x318F,
+	0x3190,
+	0x31E4,
+	0x31EF,
+	0x321F,
+	0x3220,
+	0xA48D,
+	0xA490,
+	0xA4C7,
+	0xA4D0,
+	0xA62C,
+	0xA640,
+	0xA6F8,
+	0xA700,
+	0xA7CB,
+	0xA7D0,
+	0xA7D2,
+	0xA7D3,
+	0xA7D4,
+	0xA7D5,
+	0xA7DA,
+	0xA7F2,
+	0xA82D,
+	0xA830,
+	0xA83A,
+	0xA840,
+	0xA878,
+	0xA880,
+	0xA8C6,
+	0xA8CE,
+	0xA8DA,
+	0xA8E0,
+	0xA954,
+	0xA95F,
+	0xA97D,
+	0xA980,
+	0xA9CE,
+	0xA9CF,
+	0xA9DA,
+	0xA9DE,
+	0xA9FF,
+	0xAA00,
+	0xAA37,
+	0xAA40,
+	0xAA4E,
+	0xAA50,
+	0xAA5A,
+	0xAA5C,
+	0xAAC3,
+	0xAADB,
+	0xAAF7,
+	0xAB01,
+	0xAB07,
+	0xAB09,
+	0xAB0F,
+	0xAB11,
+	0xAB17,
+	0xAB20,
+	0xAB27,
+	0xAB28,
+	0xAB2F,
+	0xAB30,
+	0xAB6C,
+	0xAB70,
+	0xABEE,
+	0xABF0,
+	0xABFA,
+	0xAC00,
+	0xD7A4,
+	0xD7B0,
+	0xD7C7,
+	0xD7CB,
+	0xD7FC,
+	0xD800,
+	0xFA6E,
+	0xFA70,
+	0xFADA,
+	0xFB00,
+	0xFB07,
+	0xFB13,
+	0xFB18,
+	0xFB1D,
+	0xFB37,
+	0xFB38,
+	0xFB3D,
+	0xFB3E,
+	0xFB3F,
+	0xFB40,
+	0xFB42,
+	0xFB43,
+	0xFB45,
+	0xFB46,
+	0xFBC3,
+	0xFBD3,
+	0xFD90,
+	0xFD92,
+	0xFDC8,
+	0xFDCF,
+	0xFE1A,
+	0xFE20,
+	0xFE53,
+	0xFE54,
+	0xFE67,
+	0xFE68,
+	0xFE6C,
+	0xFE70,
+	0xFE75,
+	0xFE76,
+	0xFEFD,
+	0xFEFF,
+	0xFF00,
+	0xFF01,
+	0xFFBF,
+	0xFFC2,
+	0xFFC8,
+	0xFFCA,
+	0xFFD0,
+	0xFFD2,
+	0xFFD8,
+	0xFFDA,
+	0xFFDD,
+	0xFFE0,
+	0xFFE7,
+	0xFFE8,
+	0xFFEF,
+	0xFFF9,
+	0x1000C,
+	0x1000D,
+	0x10027,
+	0x10028,
+	0x1003B,
+	0x1003C,
+	0x1003E,
+	0x1003F,
+	0x1004E,
+	0x10050,
+	0x1005E,
+	0x10080,
+	0x100FB,
+	0x10100,
+	0x10103,
+	0x10107,
+	0x10134,
+	0x10137,
+	0x1018F,
+	0x10190,
+	0x1019D,
+	0x101A0,
+	0x101A1,
+	0x101D0,
+	0x101FE,
+	0x10280,
+	0x1029D,
+	0x102A0,
+	0x102D1,
+	0x102E0,
+	0x102FC,
+	0x10300,
+	0x10324,
+	0x1032D,
+	0x1034B,
+	0x10350,
+	0x1037B,
+	0x10380,
+	0x1039E,
+	0x1039F,
+	0x103C4,
+	0x103C8,
+	0x103D6,
+	0x10400,
+	0x1049E,
+	0x104A0,
+	0x104AA,
+	0x104B0,
+	0x104D4,
+	0x104D8,
+	0x104FC,
+	0x10500,
+	0x10528,
+	0x10530,
+	0x10564,
+	0x1056F,
+	0x1057B,
+	0x1057C,
+	0x1058B,
+	0x1058C,
+	0x10593,
+	0x10594,
+	0x10596,
+	0x10597,
+	0x105A2,
+	0x105A3,
+	0x105B2,
+	0x105B3,
+	0x105BA,
+	0x105BB,
+	0x105BD,
+	0x10600,
+	0x10737,
+	0x10740,
+	0x10756,
+	0x10760,
+	0x10768,
+	0x10780,
+	0x10786,
+	0x10787,
+	0x107B1,
+	0x107B2,
+	0x107BB,
+	0x10800,
+	0x10806,
+	0x10808,
+	0x10809,
+	0x1080A,
+	0x10836,
+	0x10837,
+	0x10839,
+	0x1083C,
+	0x1083D,
+	0x1083F,
+	0x10856,
+	0x10857,
+	0x1089F,
+	0x108A7,
+	0x108B0,
+	0x108E0,
+	0x108F3,
+	0x108F4,
+	0x108F6,
+	0x108FB,
+	0x1091C,
+	0x1091F,
+	0x1093A,
+	0x1093F,
+	0x10940,
+	0x10980,
+	0x109B8,
+	0x109BC,
+	0x109D0,
+	0x109D2,
+	0x10A04,
+	0x10A05,
+	0x10A07,
+	0x10A0C,
+	0x10A14,
+	0x10A15,
+	0x10A18,
+	0x10A19,
+	0x10A36,
+	0x10A38,
+	0x10A3B,
+	0x10A3F,
+	0x10A49,
+	0x10A50,
+	0x10A59,
+	0x10A60,
+	0x10AA0,
+	0x10AC0,
+	0x10AE7,
+	0x10AEB,
+	0x10AF7,
+	0x10B00,
+	0x10B36,
+	0x10B39,
+	0x10B56,
+	0x10B58,
+	0x10B73,
+	0x10B78,
+	0x10B92,
+	0x10B99,
+	0x10B9D,
+	0x10BA9,
+	0x10BB0,
+	0x10C00,
+	0x10C49,
+	0x10C80,
+	0x10CB3,
+	0x10CC0,
+	0x10CF3,
+	0x10CFA,
+	0x10D28,
+	0x10D30,
+	0x10D3A,
+	0x10E60,
+	0x10E7F,
+	0x10E80,
+	0x10EAA,
+	0x10EAB,
+	0x10EAE,
+	0x10EB0,
+	0x10EB2,
+	0x10EFD,
+	0x10F28,
+	0x10F30,
+	0x10F5A,
+	0x10F70,
+	0x10F8A,
+	0x10FB0,
+	0x10FCC,
+	0x10FE0,
+	0x10FF7,
+	0x11000,
+	0x1104E,
+	0x11052,
+	0x11076,
+	0x1107F,
+	0x110C3,
+	0x110CD,
+	0x110CE,
+	0x110D0,
+	0x110E9,
+	0x110F0,
+	0x110FA,
+	0x11100,
+	0x11135,
+	0x11136,
+	0x11148,
+	0x11150,
+	0x11177,
+	0x11180,
+	0x111E0,
+	0x111E1,
+	0x111F5,
+	0x11200,
+	0x11212,
+	0x11213,
+	0x11242,
+	0x11280,
+	0x11287,
+	0x11288,
+	0x11289,
+	0x1128A,
+	0x1128E,
+	0x1128F,
+	0x1129E,
+	0x1129F,
+	0x112AA,
+	0x112B0,
+	0x112EB,
+	0x112F0,
+	0x112FA,
+	0x11300,
+	0x11304,
+	0x11305,
+	0x1130D,
+	0x1130F,
+	0x11311,
+	0x11313,
+	0x11329,
+	0x1132A,
+	0x11331,
+	0x11332,
+	0x11334,
+	0x11335,
+	0x1133A,
+	0x1133B,
+	0x11345,
+	0x11347,
+	0x11349,
+	0x1134B,
+	0x1134E,
+	0x11350,
+	0x11351,
+	0x11357,
+	0x11358,
+	0x1135D,
+	0x11364,
+	0x11366,
+	0x1136D,
+	0x11370,
+	0x11375,
+	0x11400,
+	0x1145C,
+	0x1145D,
+	0x11462,
+	0x11480,
+	0x114C8,
+	0x114D0,
+	0x114DA,
+	0x11580,
+	0x115B6,
+	0x115B8,
+	0x115DE,
+	0x11600,
+	0x11645,
+	0x11650,
+	0x1165A,
+	0x11660,
+	0x1166D,
+	0x11680,
+	0x116BA,
+	0x116C0,
+	0x116CA,
+	0x11700,
+	0x1171B,
+	0x1171D,
+	0x1172C,
+	0x11730,
+	0x11747,
+	0x11800,
+	0x1183C,
+	0x118A0,
+	0x118F3,
+	0x118FF,
+	0x11907,
+	0x11909,
+	0x1190A,
+	0x1190C,
+	0x11914,
+	0x11915,
+	0x11917,
+	0x11918,
+	0x11936,
+	0x11937,
+	0x11939,
+	0x1193B,
+	0x11947,
+	0x11950,
+	0x1195A,
+	0x119A0,
+	0x119A8,
+	0x119AA,
+	0x119D8,
+	0x119DA,
+	0x119E5,
+	0x11A00,
+	0x11A48,
+	0x11A50,
+	0x11AA3,
+	0x11AB0,
+	0x11AF9,
+	0x11B00,
+	0x11B0A,
+	0x11C00,
+	0x11C09,
+	0x11C0A,
+	0x11C37,
+	0x11C38,
+	0x11C46,
+	0x11C50,
+	0x11C6D,
+	0x11C70,
+	0x11C90,
+	0x11C92,
+	0x11CA8,
+	0x11CA9,
+	0x11CB7,
+	0x11D00,
+	0x11D07,
+	0x11D08,
+	0x11D0A,
+	0x11D0B,
+	0x11D37,
+	0x11D3A,
+	0x11D3B,
+	0x11D3C,
+	0x11D3E,
+	0x11D3F,
+	0x11D48,
+	0x11D50,
+	0x11D5A,
+	0x11D60,
+	0x11D66,
+	0x11D67,
+	0x11D69,
+	0x11D6A,
+	0x11D8F,
+	0x11D90,
+	0x11D92,
+	0x11D93,
+	0x11D99,
+	0x11DA0,
+	0x11DAA,
+	0x11EE0,
+	0x11EF9,
+	0x11F00,
+	0x11F11,
+	0x11F12,
+	0x11F3B,
+	0x11F3E,
+	0x11F5A,
+	0x11FB0,
+	0x11FB1,
+	0x11FC0,
+	0x11FF2,
+	0x11FFF,
+	0x1239A,
+	0x12400,
+	0x1246F,
+	0x12470,
+	0x12475,
+	0x12480,
+	0x12544,
+	0x12F90,
+	0x12FF3,
+	0x13000,
+	0x13456,
+	0x14400,
+	0x14647,
+	0x16800,
+	0x16A39,
+	0x16A40,
+	0x16A5F,
+	0x16A60,
+	0x16A6A,
+	0x16A6E,
+	0x16ABF,
+	0x16AC0,
+	0x16ACA,
+	0x16AD0,
+	0x16AEE,
+	0x16AF0,
+	0x16AF6,
+	0x16B00,
+	0x16B46,
+	0x16B50,
+	0x16B5A,
+	0x16B5B,
+	0x16B62,
+	0x16B63,
+	0x16B78,
+	0x16B7D,
+	0x16B90,
+	0x16E40,
+	0x16E9B,
+	0x16F00,
+	0x16F4B,
+	0x16F4F,
+	0x16F88,
+	0x16F8F,
+	0x16FA0,
+	0x16FE0,
+	0x16FE5,
+	0x16FF0,
+	0x16FF2,
+	0x17000,
+	0x187F8,
+	0x18800,
+	0x18CD6,
+	0x18D00,
+	0x18D09,
+	0x1AFF0,
+	0x1AFF4,
+	0x1AFF5,
+	0x1AFFC,
+	0x1AFFD,
+	0x1AFFF,
+	0x1B000,
+	0x1B123,
+	0x1B132,
+	0x1B133,
+	0x1B150,
+	0x1B153,
+	0x1B155,
+	0x1B156,
+	0x1B164,
+	0x1B168,
+	0x1B170,
+	0x1B2FC,
+	0x1BC00,
+	0x1BC6B,
+	0x1BC70,
+	0x1BC7D,
+	0x1BC80,
+	0x1BC89,
+	0x1BC90,
+	0x1BC9A,
+	0x1BC9C,
+	0x1BCA4,
+	0x1CF00,
+	0x1CF2E,
+	0x1CF30,
+	0x1CF47,
+	0x1CF50,
+	0x1CFC4,
+	0x1D000,
+	0x1D0F6,
+	0x1D100,
+	0x1D127,
+	0x1D129,
+	0x1D1EB,
+	0x1D200,
+	0x1D246,
+	0x1D2C0,
+	0x1D2D4,
+	0x1D2E0,
+	0x1D2F4,
+	0x1D300,
+	0x1D357,
+	0x1D360,
+	0x1D379,
+	0x1D400,
+	0x1D455,
+	0x1D456,
+	0x1D49D,
+	0x1D49E,
+	0x1D4A0,
+	0x1D4A2,
+	0x1D4A3,
+	0x1D4A5,
+	0x1D4A7,
+	0x1D4A9,
+	0x1D4AD,
+	0x1D4AE,
+	0x1D4BA,
+	0x1D4BB,
+	0x1D4BC,
+	0x1D4BD,
+	0x1D4C4,
+	0x1D4C5,
+	0x1D506,
+	0x1D507,
+	0x1D50B,
+	0x1D50D,
+	0x1D515,
+	0x1D516,
+	0x1D51D,
+	0x1D51E,
+	0x1D53A,
+	0x1D53B,
+	0x1D53F,
+	0x1D540,
+	0x1D545,
+	0x1D546,
+	0x1D547,
+	0x1D54A,
+	0x1D551,
+	0x1D552,
+	0x1D6A6,
+	0x1D6A8,
+	0x1D7CC,
+	0x1D7CE,
+	0x1DA8C,
+	0x1DA9B,
+	0x1DAA0,
+	0x1DAA1,
+	0x1DAB0,
+	0x1DF00,
+	0x1DF1F,
+	0x1DF25,
+	0x1DF2B,
+	0x1E000,
+	0x1E007,
+	0x1E008,
+	0x1E019,
+	0x1E01B,
+	0x1E022,
+	0x1E023,
+	0x1E025,
+	0x1E026,
+	0x1E02B,
+	0x1E030,
+	0x1E06E,
+	0x1E08F,
+	0x1E090,
+	0x1E100,
+	0x1E12D,
+	0x1E130,
+	0x1E13E,
+	0x1E140,
+	0x1E14A,
+	0x1E14E,
+	0x1E150,
+	0x1E290,
+	0x1E2AF,
+	0x1E2C0,
+	0x1E2FA,
+	0x1E2FF,
+	0x1E300,
+	0x1E4D0,
+	0x1E4FA,
+	0x1E7E0,
+	0x1E7E7,
+	0x1E7E8,
+	0x1E7EC,
+	0x1E7ED,
+	0x1E7EF,
+	0x1E7F0,
+	0x1E7FF,
+	0x1E800,
+	0x1E8C5,
+	0x1E8C7,
+	0x1E8D7,
+	0x1E900,
+	0x1E94C,
+	0x1E950,
+	0x1E95A,
+	0x1E95E,
+	0x1E960,
+	0x1EC71,
+	0x1ECB5,
+	0x1ED01,
+	0x1ED3E,
+	0x1EE00,
+	0x1EE04,
+	0x1EE05,
+	0x1EE20,
+	0x1EE21,
+	0x1EE23,
+	0x1EE24,
+	0x1EE25,
+	0x1EE27,
+	0x1EE28,
+	0x1EE29,
+	0x1EE33,
+	0x1EE34,
+	0x1EE38,
+	0x1EE39,
+	0x1EE3A,
+	0x1EE3B,
+	0x1EE3C,
+	0x1EE42,
+	0x1EE43,
+	0x1EE47,
+	0x1EE48,
+	0x1EE49,
+	0x1EE4A,
+	0x1EE4B,
+	0x1EE4C,
+	0x1EE4D,
+	0x1EE50,
+	0x1EE51,
+	0x1EE53,
+	0x1EE54,
+	0x1EE55,
+	0x1EE57,
+	0x1EE58,
+	0x1EE59,
+	0x1EE5A,
+	0x1EE5B,
+	0x1EE5C,
+	0x1EE5D,
+	0x1EE5E,
+	0x1EE5F,
+	0x1EE60,
+	0x1EE61,
+	0x1EE63,
+	0x1EE64,
+	0x1EE65,
+	0x1EE67,
+	0x1EE6B,
+	0x1EE6C,
+	0x1EE73,
+	0x1EE74,
+	0x1EE78,
+	0x1EE79,
+	0x1EE7D,
+	0x1EE7E,
+	0x1EE7F,
+	0x1EE80,
+	0x1EE8A,
+	0x1EE8B,
+	0x1EE9C,
+	0x1EEA1,
+	0x1EEA4,
+	0x1EEA5,
+	0x1EEAA,
+	0x1EEAB,
+	0x1EEBC,
+	0x1EEF0,
+	0x1EEF2,
+	0x1F000,
+	0x1F02C,
+	0x1F030,
+	0x1F094,
+	0x1F0A0,
+	0x1F0AF,
+	0x1F0B1,
+	0x1F0C0,
+	0x1F0C1,
+	0x1F0D0,
+	0x1F0D1,
+	0x1F0F6,
+	0x1F100,
+	0x1F1AE,
+	0x1F1E6,
+	0x1F203,
+	0x1F210,
+	0x1F23C,
+	0x1F240,
+	0x1F249,
+	0x1F250,
+	0x1F252,
+	0x1F260,
+	0x1F266,
+	0x1F300,
+	0x1F6D8,
+	0x1F6DC,
+	0x1F6ED,
+	0x1F6F0,
+	0x1F6FD,
+	0x1F700,
+	0x1F777,
+	0x1F77B,
+	0x1F7DA,
+	0x1F7E0,
+	0x1F7EC,
+	0x1F7F0,
+	0x1F7F1,
+	0x1F800,
+	0x1F80C,
+	0x1F810,
+	0x1F848,
+	0x1F850,
+	0x1F85A,
+	0x1F860,
+	0x1F888,
+	0x1F890,
+	0x1F8AE,
+	0x1F8B0,
+	0x1F8B2,
+	0x1F900,
+	0x1FA54,
+	0x1FA60,
+	0x1FA6E,
+	0x1FA70,
+	0x1FA7D,
+	0x1FA80,
+	0x1FA89,
+	0x1FA90,
+	0x1FABE,
+	0x1FABF,
+	0x1FAC6,
+	0x1FACE,
+	0x1FADC,
+	0x1FAE0,
+	0x1FAE9,
+	0x1FAF0,
+	0x1FAF9,
+	0x1FB00,
+	0x1FB93,
+	0x1FB94,
+	0x1FBCB,
+	0x1FBF0,
+	0x1FBFA,
+	0x1FFFE,
+	0x2A6E0,
+	0x2A700,
+	0x2B73A,
+	0x2B740,
+	0x2B81E,
+	0x2B820,
+	0x2CEA2,
+	0x2CEB0,
+	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x2FFFE,
@@ -132547,8 +134534,6 @@ static const UV UNI_IN__NA_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -132560,7 +134545,7 @@ static const UV UNI_IN__NA_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -133402,6 +135387,8 @@ static const UV UNI_IN__NA_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x2FFFE,
@@ -133618,6 +135605,840 @@ static const UV UNI_INCAUCASIANALBANIAN_invlist[] = {  /* for all charsets */
 	0x0,
 	0x10530,
 	0x10570
+};
+
+static const UV UNI_INCB__CONSONANT_invlist[] = {  /* for all charsets */
+	53,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x915,
+	0x93A,
+	0x958,
+	0x960,
+	0x978,
+	0x980,
+	0x995,
+	0x9A9,
+	0x9AA,
+	0x9B1,
+	0x9B2,
+	0x9B3,
+	0x9B6,
+	0x9BA,
+	0x9DC,
+	0x9DE,
+	0x9DF,
+	0x9E0,
+	0x9F0,
+	0x9F2,
+	0xA95,
+	0xAA9,
+	0xAAA,
+	0xAB1,
+	0xAB2,
+	0xAB4,
+	0xAB5,
+	0xABA,
+	0xAF9,
+	0xAFA,
+	0xB15,
+	0xB29,
+	0xB2A,
+	0xB31,
+	0xB32,
+	0xB34,
+	0xB35,
+	0xB3A,
+	0xB5C,
+	0xB5E,
+	0xB5F,
+	0xB60,
+	0xB71,
+	0xB72,
+	0xC15,
+	0xC29,
+	0xC2A,
+	0xC3A,
+	0xC58,
+	0xC5B,
+	0xD15,
+	0xD3B
+};
+
+static const UV UNI_INCB__EXTEND_invlist[] = {  /* for all charsets */
+	339,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x300,
+	0x34F,
+	0x350,
+	0x370,
+	0x483,
+	0x488,
+	0x591,
+	0x5BE,
+	0x5BF,
+	0x5C0,
+	0x5C1,
+	0x5C3,
+	0x5C4,
+	0x5C6,
+	0x5C7,
+	0x5C8,
+	0x610,
+	0x61B,
+	0x64B,
+	0x660,
+	0x670,
+	0x671,
+	0x6D6,
+	0x6DD,
+	0x6DF,
+	0x6E5,
+	0x6E7,
+	0x6E9,
+	0x6EA,
+	0x6EE,
+	0x711,
+	0x712,
+	0x730,
+	0x74B,
+	0x7EB,
+	0x7F4,
+	0x7FD,
+	0x7FE,
+	0x816,
+	0x81A,
+	0x81B,
+	0x824,
+	0x825,
+	0x828,
+	0x829,
+	0x82E,
+	0x859,
+	0x85C,
+	0x898,
+	0x8A0,
+	0x8CA,
+	0x8E2,
+	0x8E3,
+	0x900,
+	0x93C,
+	0x93D,
+	0x951,
+	0x955,
+	0x9BC,
+	0x9BD,
+	0x9FE,
+	0x9FF,
+	0xA3C,
+	0xA3D,
+	0xABC,
+	0xABD,
+	0xB3C,
+	0xB3D,
+	0xC3C,
+	0xC3D,
+	0xC55,
+	0xC57,
+	0xCBC,
+	0xCBD,
+	0xD3B,
+	0xD3D,
+	0xE38,
+	0xE3B,
+	0xE48,
+	0xE4C,
+	0xEB8,
+	0xEBB,
+	0xEC8,
+	0xECC,
+	0xF18,
+	0xF1A,
+	0xF35,
+	0xF36,
+	0xF37,
+	0xF38,
+	0xF39,
+	0xF3A,
+	0xF71,
+	0xF73,
+	0xF74,
+	0xF75,
+	0xF7A,
+	0xF7E,
+	0xF80,
+	0xF81,
+	0xF82,
+	0xF85,
+	0xF86,
+	0xF88,
+	0xFC6,
+	0xFC7,
+	0x1037,
+	0x1038,
+	0x1039,
+	0x103B,
+	0x108D,
+	0x108E,
+	0x135D,
+	0x1360,
+	0x1714,
+	0x1715,
+	0x17D2,
+	0x17D3,
+	0x17DD,
+	0x17DE,
+	0x18A9,
+	0x18AA,
+	0x1939,
+	0x193C,
+	0x1A17,
+	0x1A19,
+	0x1A60,
+	0x1A61,
+	0x1A75,
+	0x1A7D,
+	0x1A7F,
+	0x1A80,
+	0x1AB0,
+	0x1ABE,
+	0x1ABF,
+	0x1ACF,
+	0x1B34,
+	0x1B35,
+	0x1B6B,
+	0x1B74,
+	0x1BAB,
+	0x1BAC,
+	0x1BE6,
+	0x1BE7,
+	0x1C37,
+	0x1C38,
+	0x1CD0,
+	0x1CD3,
+	0x1CD4,
+	0x1CE1,
+	0x1CE2,
+	0x1CE9,
+	0x1CED,
+	0x1CEE,
+	0x1CF4,
+	0x1CF5,
+	0x1CF8,
+	0x1CFA,
+	0x1DC0,
+	0x1E00,
+	0x200D,
+	0x200E,
+	0x20D0,
+	0x20DD,
+	0x20E1,
+	0x20E2,
+	0x20E5,
+	0x20F1,
+	0x2CEF,
+	0x2CF2,
+	0x2D7F,
+	0x2D80,
+	0x2DE0,
+	0x2E00,
+	0x302A,
+	0x3030,
+	0x3099,
+	0x309B,
+	0xA66F,
+	0xA670,
+	0xA674,
+	0xA67E,
+	0xA69E,
+	0xA6A0,
+	0xA6F0,
+	0xA6F2,
+	0xA82C,
+	0xA82D,
+	0xA8E0,
+	0xA8F2,
+	0xA92B,
+	0xA92E,
+	0xA9B3,
+	0xA9B4,
+	0xAAB0,
+	0xAAB1,
+	0xAAB2,
+	0xAAB5,
+	0xAAB7,
+	0xAAB9,
+	0xAABE,
+	0xAAC0,
+	0xAAC1,
+	0xAAC2,
+	0xAAF6,
+	0xAAF7,
+	0xABED,
+	0xABEE,
+	0xFB1E,
+	0xFB1F,
+	0xFE20,
+	0xFE30,
+	0x101FD,
+	0x101FE,
+	0x102E0,
+	0x102E1,
+	0x10376,
+	0x1037B,
+	0x10A0D,
+	0x10A0E,
+	0x10A0F,
+	0x10A10,
+	0x10A38,
+	0x10A3B,
+	0x10A3F,
+	0x10A40,
+	0x10AE5,
+	0x10AE7,
+	0x10D24,
+	0x10D28,
+	0x10EAB,
+	0x10EAD,
+	0x10EFD,
+	0x10F00,
+	0x10F46,
+	0x10F51,
+	0x10F82,
+	0x10F86,
+	0x11070,
+	0x11071,
+	0x1107F,
+	0x11080,
+	0x110BA,
+	0x110BB,
+	0x11100,
+	0x11103,
+	0x11133,
+	0x11135,
+	0x11173,
+	0x11174,
+	0x111CA,
+	0x111CB,
+	0x11236,
+	0x11237,
+	0x112E9,
+	0x112EB,
+	0x1133B,
+	0x1133D,
+	0x11366,
+	0x1136D,
+	0x11370,
+	0x11375,
+	0x11446,
+	0x11447,
+	0x1145E,
+	0x1145F,
+	0x114C3,
+	0x114C4,
+	0x115C0,
+	0x115C1,
+	0x116B7,
+	0x116B8,
+	0x1172B,
+	0x1172C,
+	0x1183A,
+	0x1183B,
+	0x1193E,
+	0x1193F,
+	0x11943,
+	0x11944,
+	0x11A34,
+	0x11A35,
+	0x11A47,
+	0x11A48,
+	0x11A99,
+	0x11A9A,
+	0x11D42,
+	0x11D43,
+	0x11D44,
+	0x11D46,
+	0x11D97,
+	0x11D98,
+	0x11F42,
+	0x11F43,
+	0x16AF0,
+	0x16AF5,
+	0x16B30,
+	0x16B37,
+	0x1BC9E,
+	0x1BC9F,
+	0x1D165,
+	0x1D166,
+	0x1D167,
+	0x1D16A,
+	0x1D16E,
+	0x1D173,
+	0x1D17B,
+	0x1D183,
+	0x1D185,
+	0x1D18C,
+	0x1D1AA,
+	0x1D1AE,
+	0x1D242,
+	0x1D245,
+	0x1E000,
+	0x1E007,
+	0x1E008,
+	0x1E019,
+	0x1E01B,
+	0x1E022,
+	0x1E023,
+	0x1E025,
+	0x1E026,
+	0x1E02B,
+	0x1E08F,
+	0x1E090,
+	0x1E130,
+	0x1E137,
+	0x1E2AE,
+	0x1E2AF,
+	0x1E2EC,
+	0x1E2F0,
+	0x1E4EC,
+	0x1E4F0,
+	0x1E8D0,
+	0x1E8D7,
+	0x1E944,
+	0x1E94B
+};
+
+static const UV UNI_INCB__LINKER_invlist[] = {  /* for all charsets */
+	13,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x94D,
+	0x94E,
+	0x9CD,
+	0x9CE,
+	0xACD,
+	0xACE,
+	0xB4D,
+	0xB4E,
+	0xC4D,
+	0xC4E,
+	0xD4D,
+	0xD4E
+};
+
+static const UV UNI_INCB__NONE_invlist[] = {  /* for all charsets */
+	401,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	0,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x300,
+	0x34F,
+	0x350,
+	0x370,
+	0x483,
+	0x488,
+	0x591,
+	0x5BE,
+	0x5BF,
+	0x5C0,
+	0x5C1,
+	0x5C3,
+	0x5C4,
+	0x5C6,
+	0x5C7,
+	0x5C8,
+	0x610,
+	0x61B,
+	0x64B,
+	0x660,
+	0x670,
+	0x671,
+	0x6D6,
+	0x6DD,
+	0x6DF,
+	0x6E5,
+	0x6E7,
+	0x6E9,
+	0x6EA,
+	0x6EE,
+	0x711,
+	0x712,
+	0x730,
+	0x74B,
+	0x7EB,
+	0x7F4,
+	0x7FD,
+	0x7FE,
+	0x816,
+	0x81A,
+	0x81B,
+	0x824,
+	0x825,
+	0x828,
+	0x829,
+	0x82E,
+	0x859,
+	0x85C,
+	0x898,
+	0x8A0,
+	0x8CA,
+	0x8E2,
+	0x8E3,
+	0x900,
+	0x915,
+	0x93A,
+	0x93C,
+	0x93D,
+	0x94D,
+	0x94E,
+	0x951,
+	0x955,
+	0x958,
+	0x960,
+	0x978,
+	0x980,
+	0x995,
+	0x9A9,
+	0x9AA,
+	0x9B1,
+	0x9B2,
+	0x9B3,
+	0x9B6,
+	0x9BA,
+	0x9BC,
+	0x9BD,
+	0x9CD,
+	0x9CE,
+	0x9DC,
+	0x9DE,
+	0x9DF,
+	0x9E0,
+	0x9F0,
+	0x9F2,
+	0x9FE,
+	0x9FF,
+	0xA3C,
+	0xA3D,
+	0xA95,
+	0xAA9,
+	0xAAA,
+	0xAB1,
+	0xAB2,
+	0xAB4,
+	0xAB5,
+	0xABA,
+	0xABC,
+	0xABD,
+	0xACD,
+	0xACE,
+	0xAF9,
+	0xAFA,
+	0xB15,
+	0xB29,
+	0xB2A,
+	0xB31,
+	0xB32,
+	0xB34,
+	0xB35,
+	0xB3A,
+	0xB3C,
+	0xB3D,
+	0xB4D,
+	0xB4E,
+	0xB5C,
+	0xB5E,
+	0xB5F,
+	0xB60,
+	0xB71,
+	0xB72,
+	0xC15,
+	0xC29,
+	0xC2A,
+	0xC3A,
+	0xC3C,
+	0xC3D,
+	0xC4D,
+	0xC4E,
+	0xC55,
+	0xC57,
+	0xC58,
+	0xC5B,
+	0xCBC,
+	0xCBD,
+	0xD15,
+	0xD3D,
+	0xD4D,
+	0xD4E,
+	0xE38,
+	0xE3B,
+	0xE48,
+	0xE4C,
+	0xEB8,
+	0xEBB,
+	0xEC8,
+	0xECC,
+	0xF18,
+	0xF1A,
+	0xF35,
+	0xF36,
+	0xF37,
+	0xF38,
+	0xF39,
+	0xF3A,
+	0xF71,
+	0xF73,
+	0xF74,
+	0xF75,
+	0xF7A,
+	0xF7E,
+	0xF80,
+	0xF81,
+	0xF82,
+	0xF85,
+	0xF86,
+	0xF88,
+	0xFC6,
+	0xFC7,
+	0x1037,
+	0x1038,
+	0x1039,
+	0x103B,
+	0x108D,
+	0x108E,
+	0x135D,
+	0x1360,
+	0x1714,
+	0x1715,
+	0x17D2,
+	0x17D3,
+	0x17DD,
+	0x17DE,
+	0x18A9,
+	0x18AA,
+	0x1939,
+	0x193C,
+	0x1A17,
+	0x1A19,
+	0x1A60,
+	0x1A61,
+	0x1A75,
+	0x1A7D,
+	0x1A7F,
+	0x1A80,
+	0x1AB0,
+	0x1ABE,
+	0x1ABF,
+	0x1ACF,
+	0x1B34,
+	0x1B35,
+	0x1B6B,
+	0x1B74,
+	0x1BAB,
+	0x1BAC,
+	0x1BE6,
+	0x1BE7,
+	0x1C37,
+	0x1C38,
+	0x1CD0,
+	0x1CD3,
+	0x1CD4,
+	0x1CE1,
+	0x1CE2,
+	0x1CE9,
+	0x1CED,
+	0x1CEE,
+	0x1CF4,
+	0x1CF5,
+	0x1CF8,
+	0x1CFA,
+	0x1DC0,
+	0x1E00,
+	0x200D,
+	0x200E,
+	0x20D0,
+	0x20DD,
+	0x20E1,
+	0x20E2,
+	0x20E5,
+	0x20F1,
+	0x2CEF,
+	0x2CF2,
+	0x2D7F,
+	0x2D80,
+	0x2DE0,
+	0x2E00,
+	0x302A,
+	0x3030,
+	0x3099,
+	0x309B,
+	0xA66F,
+	0xA670,
+	0xA674,
+	0xA67E,
+	0xA69E,
+	0xA6A0,
+	0xA6F0,
+	0xA6F2,
+	0xA82C,
+	0xA82D,
+	0xA8E0,
+	0xA8F2,
+	0xA92B,
+	0xA92E,
+	0xA9B3,
+	0xA9B4,
+	0xAAB0,
+	0xAAB1,
+	0xAAB2,
+	0xAAB5,
+	0xAAB7,
+	0xAAB9,
+	0xAABE,
+	0xAAC0,
+	0xAAC1,
+	0xAAC2,
+	0xAAF6,
+	0xAAF7,
+	0xABED,
+	0xABEE,
+	0xFB1E,
+	0xFB1F,
+	0xFE20,
+	0xFE30,
+	0x101FD,
+	0x101FE,
+	0x102E0,
+	0x102E1,
+	0x10376,
+	0x1037B,
+	0x10A0D,
+	0x10A0E,
+	0x10A0F,
+	0x10A10,
+	0x10A38,
+	0x10A3B,
+	0x10A3F,
+	0x10A40,
+	0x10AE5,
+	0x10AE7,
+	0x10D24,
+	0x10D28,
+	0x10EAB,
+	0x10EAD,
+	0x10EFD,
+	0x10F00,
+	0x10F46,
+	0x10F51,
+	0x10F82,
+	0x10F86,
+	0x11070,
+	0x11071,
+	0x1107F,
+	0x11080,
+	0x110BA,
+	0x110BB,
+	0x11100,
+	0x11103,
+	0x11133,
+	0x11135,
+	0x11173,
+	0x11174,
+	0x111CA,
+	0x111CB,
+	0x11236,
+	0x11237,
+	0x112E9,
+	0x112EB,
+	0x1133B,
+	0x1133D,
+	0x11366,
+	0x1136D,
+	0x11370,
+	0x11375,
+	0x11446,
+	0x11447,
+	0x1145E,
+	0x1145F,
+	0x114C3,
+	0x114C4,
+	0x115C0,
+	0x115C1,
+	0x116B7,
+	0x116B8,
+	0x1172B,
+	0x1172C,
+	0x1183A,
+	0x1183B,
+	0x1193E,
+	0x1193F,
+	0x11943,
+	0x11944,
+	0x11A34,
+	0x11A35,
+	0x11A47,
+	0x11A48,
+	0x11A99,
+	0x11A9A,
+	0x11D42,
+	0x11D43,
+	0x11D44,
+	0x11D46,
+	0x11D97,
+	0x11D98,
+	0x11F42,
+	0x11F43,
+	0x16AF0,
+	0x16AF5,
+	0x16B30,
+	0x16B37,
+	0x1BC9E,
+	0x1BC9F,
+	0x1D165,
+	0x1D166,
+	0x1D167,
+	0x1D16A,
+	0x1D16E,
+	0x1D173,
+	0x1D17B,
+	0x1D183,
+	0x1D185,
+	0x1D18C,
+	0x1D1AA,
+	0x1D1AE,
+	0x1D242,
+	0x1D245,
+	0x1E000,
+	0x1E007,
+	0x1E008,
+	0x1E019,
+	0x1E01B,
+	0x1E022,
+	0x1E023,
+	0x1E025,
+	0x1E026,
+	0x1E02B,
+	0x1E08F,
+	0x1E090,
+	0x1E130,
+	0x1E137,
+	0x1E2AE,
+	0x1E2AF,
+	0x1E2EC,
+	0x1E2F0,
+	0x1E4EC,
+	0x1E4F0,
+	0x1E8D0,
+	0x1E8D7,
+	0x1E944,
+	0x1E94B
 };
 
 static const UV UNI_INCHAKMA_invlist[] = {  /* for all charsets */
@@ -142731,7 +145552,7 @@ static const UV UNI_KTHI_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_L_invlist[] = {  /* for ASCII/Latin1 */
-	1319,	/* Number of elements */
+	1321,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -144048,6 +146869,8 @@ static const UV UNI_L_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -144536,10 +147359,58 @@ static const UV UNI_LB__AI_invlist[] = {  /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+static const UV UNI_LB__AK_invlist[] = {  /* for all charsets */
+	41,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x1B05,
+	0x1B34,
+	0x1B45,
+	0x1B4D,
+	0xA984,
+	0xA9B3,
+	0x11005,
+	0x11038,
+	0x11071,
+	0x11073,
+	0x11075,
+	0x11076,
+	0x11305,
+	0x1130D,
+	0x1130F,
+	0x11311,
+	0x11313,
+	0x11329,
+	0x1132A,
+	0x11331,
+	0x11332,
+	0x11334,
+	0x11335,
+	0x1133A,
+	0x11360,
+	0x11362,
+	0x11900,
+	0x11907,
+	0x11909,
+	0x1190A,
+	0x1190C,
+	0x11914,
+	0x11915,
+	0x11917,
+	0x11918,
+	0x11930,
+	0x11F04,
+	0x11F11,
+	0x11F12,
+	0x11F34
+};
+
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
-	1613,	/* Number of elements */
+	1529,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -144612,7 +147483,7 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x5C4,
 	0x5F3,
 	0x5F5,
-	0x600,
+	0x606,
 	0x609,
 	0x60E,
 	0x610,
@@ -144624,7 +147495,7 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x6D4,
 	0x6D5,
 	0x6D6,
-	0x6DD,
+	0x6DE,
 	0x6DF,
 	0x6E5,
 	0x6E7,
@@ -144666,12 +147537,8 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x86B,
 	0x870,
 	0x88F,
-	0x890,
-	0x892,
 	0x8A0,
 	0x8CA,
-	0x8E2,
-	0x8E3,
 	0x904,
 	0x93A,
 	0x93D,
@@ -144996,22 +147863,12 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x1A17,
 	0x1A1E,
 	0x1A20,
-	0x1B05,
-	0x1B34,
-	0x1B45,
-	0x1B4D,
-	0x1B5C,
-	0x1B5D,
-	0x1B61,
-	0x1B6B,
-	0x1B74,
-	0x1B7D,
 	0x1B83,
 	0x1BA1,
 	0x1BAE,
 	0x1BB0,
 	0x1BBA,
-	0x1BE6,
+	0x1BC0,
 	0x1BFC,
 	0x1C24,
 	0x1C4D,
@@ -145404,24 +148261,6 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0xA947,
 	0xA95F,
 	0xA960,
-	0xA984,
-	0xA9B3,
-	0xA9C1,
-	0xA9C7,
-	0xA9CA,
-	0xA9CE,
-	0xA9CF,
-	0xA9D0,
-	0xA9DE,
-	0xA9E0,
-	0xAA00,
-	0xAA29,
-	0xAA40,
-	0xAA43,
-	0xAA44,
-	0xAA4C,
-	0xAA5C,
-	0xAA5D,
 	0xAAE0,
 	0xAAEB,
 	0xAAF2,
@@ -145636,22 +148475,10 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x10FCC,
 	0x10FE0,
 	0x10FF7,
-	0x11003,
-	0x11038,
-	0x11049,
-	0x1104E,
-	0x11052,
-	0x11066,
-	0x11071,
-	0x11073,
-	0x11075,
-	0x11076,
 	0x11083,
 	0x110B0,
 	0x110BB,
-	0x110BE,
-	0x110CD,
-	0x110CE,
+	0x110BD,
 	0x110D0,
 	0x110E9,
 	0x11103,
@@ -145702,24 +148529,6 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x112A9,
 	0x112B0,
 	0x112DF,
-	0x11305,
-	0x1130D,
-	0x1130F,
-	0x11311,
-	0x11313,
-	0x11329,
-	0x1132A,
-	0x11331,
-	0x11332,
-	0x11334,
-	0x11335,
-	0x1133A,
-	0x1133D,
-	0x1133E,
-	0x11350,
-	0x11351,
-	0x1135D,
-	0x11362,
 	0x11400,
 	0x11435,
 	0x11447,
@@ -145757,19 +148566,7 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x118EA,
 	0x118F3,
 	0x118FF,
-	0x11907,
-	0x11909,
-	0x1190A,
-	0x1190C,
-	0x11914,
-	0x11915,
-	0x11917,
-	0x11918,
-	0x11930,
-	0x1193F,
-	0x11940,
-	0x11941,
-	0x11942,
+	0x11900,
 	0x119A0,
 	0x119A8,
 	0x119AA,
@@ -145822,16 +148619,6 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x11D8A,
 	0x11D98,
 	0x11D99,
-	0x11EE0,
-	0x11EF3,
-	0x11EF7,
-	0x11EF9,
-	0x11F02,
-	0x11F03,
-	0x11F04,
-	0x11F11,
-	0x11F12,
-	0x11F34,
 	0x11FB0,
 	0x11FB1,
 	0x11FC0,
@@ -145855,7 +148642,7 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 	0x1328A,
 	0x13379,
 	0x1337C,
-	0x13430,
+	0x1342F,
 	0x13441,
 	0x13447,
 	0x14400,
@@ -146160,6 +148947,44 @@ static const UV UNI_LB__AL_invlist[] = {  /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+static const UV UNI_LB__AP_invlist[] = {  /* for all charsets */
+	9,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x11003,
+	0x11005,
+	0x1193F,
+	0x11940,
+	0x11941,
+	0x11942,
+	0x11F02,
+	0x11F03
+};
+
+static const UV UNI_LB__AS_invlist[] = {  /* for all charsets */
+	15,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x1BC0,
+	0x1BE6,
+	0xAA00,
+	0xAA29,
+	0x11066,
+	0x11070,
+	0x11350,
+	0x11351,
+	0x1135E,
+	0x11360,
+	0x11EE0,
+	0x11EF2,
+	0x11F50,
+	0x11F5A
+};
+
 static const UV UNI_LB__B2_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -146175,7 +149000,7 @@ static const UV UNI_LB__B2_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_LB__BA_invlist[] = {  /* for ASCII/Latin1 */
-	203,	/* Number of elements */
+	217,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -146298,6 +149123,12 @@ static const UV UNI_LB__BA_invlist[] = {  /* for ASCII/Latin1 */
 	0xA930,
 	0xA9C7,
 	0xA9CA,
+	0xA9CF,
+	0xA9D0,
+	0xAA40,
+	0xAA43,
+	0xAA44,
+	0xAA4C,
 	0xAA5D,
 	0xAA60,
 	0xAAF0,
@@ -146340,6 +149171,10 @@ static const UV UNI_LB__BA_invlist[] = {  /* for ASCII/Latin1 */
 	0x1123D,
 	0x112A9,
 	0x112AA,
+	0x1133D,
+	0x1133E,
+	0x1135D,
+	0x1135E,
 	0x1144B,
 	0x1144F,
 	0x1145A,
@@ -146362,6 +149197,10 @@ static const UV UNI_LB__BA_invlist[] = {  /* for ASCII/Latin1 */
 	0x11AA3,
 	0x11C41,
 	0x11C46,
+	0x11EF2,
+	0x11EF3,
+	0x11EF7,
+	0x11EF9,
 	0x11F43,
 	0x11F45,
 	0x11FFF,
@@ -146992,7 +149831,7 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0x1B00,
 	0x1B05,
 	0x1B34,
-	0x1B45,
+	0x1B44,
 	0x1B6B,
 	0x1B74,
 	0x1B80,
@@ -147000,7 +149839,7 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0x1BA1,
 	0x1BAE,
 	0x1BE6,
-	0x1BF4,
+	0x1BF2,
 	0x1C24,
 	0x1C38,
 	0x1CD0,
@@ -147074,7 +149913,7 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0xA980,
 	0xA984,
 	0xA9B3,
-	0xA9C1,
+	0xA9C0,
 	0xAA29,
 	0xAA37,
 	0xAA43,
@@ -147128,12 +149967,12 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0x11000,
 	0x11003,
 	0x11038,
-	0x11047,
+	0x11046,
 	0x11070,
 	0x11071,
 	0x11073,
 	0x11075,
-	0x1107F,
+	0x11080,
 	0x11083,
 	0x110B0,
 	0x110BB,
@@ -147172,7 +150011,7 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0x11347,
 	0x11349,
 	0x1134B,
-	0x1134E,
+	0x1134D,
 	0x11357,
 	0x11358,
 	0x11362,
@@ -147204,7 +150043,7 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0x11937,
 	0x11939,
 	0x1193B,
-	0x1193F,
+	0x1193E,
 	0x11940,
 	0x11941,
 	0x11942,
@@ -147260,7 +150099,7 @@ static const UV UNI_LB__CM_invlist[] = {  /* for ASCII/Latin1 */
 	0x11F34,
 	0x11F3B,
 	0x11F3E,
-	0x11F43,
+	0x11F42,
 	0x13440,
 	0x13441,
 	0x13447,
@@ -147436,7 +150275,7 @@ static const UV UNI_LB__EX_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_LB__GL_invlist[] = {  /* for ASCII/Latin1 */
-	33,	/* Number of elements */
+	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -147467,6 +150306,8 @@ static const UV UNI_LB__GL_invlist[] = {  /* for ASCII/Latin1 */
 	0x2012,
 	0x202F,
 	0x2030,
+	0x1107F,
+	0x11080,
 	0x13430,
 	0x13437,
 	0x13439,
@@ -149132,11 +151973,19 @@ static const UV UNI_LB__HY_invlist[] = {  /* for ASCII/Latin1 */
 #  endif	/* ASCII/Latin1 */
 
 static const UV UNI_LB__ID_invlist[] = {  /* for all charsets */
-	337,	/* Number of elements */
+	365,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x1B50,
+	0x1B5A,
+	0x1B5C,
+	0x1B5D,
+	0x1B61,
+	0x1B6B,
+	0x1B74,
+	0x1B7D,
 	0x231A,
 	0x231C,
 	0x23F0,
@@ -149192,7 +152041,7 @@ static const UV UNI_LB__ID_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3003,
 	0x3005,
 	0x3006,
@@ -149259,6 +152108,8 @@ static const UV UNI_LB__ID_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x3200,
 	0x321F,
 	0x3220,
@@ -149271,6 +152122,18 @@ static const UV UNI_LB__ID_invlist[] = {  /* for all charsets */
 	0xA48D,
 	0xA490,
 	0xA4C7,
+	0xA9C1,
+	0xA9C7,
+	0xA9CA,
+	0xA9CE,
+	0xA9D0,
+	0xA9DA,
+	0xA9DE,
+	0xA9E0,
+	0xAA50,
+	0xAA5A,
+	0xAA5C,
+	0xAA5D,
 	0xF900,
 	0xFB00,
 	0xFE30,
@@ -149327,6 +152190,12 @@ static const UV UNI_LB__ID_invlist[] = {  /* for all charsets */
 	0xFFDD,
 	0xFFE2,
 	0xFFE5,
+	0x11049,
+	0x1104E,
+	0x11052,
+	0x11066,
+	0x11950,
+	0x1195A,
 	0x11F45,
 	0x11F50,
 	0x17000,
@@ -149603,14 +152472,22 @@ static const UV UNI_LB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x0,
 	0x30,
 	0x3A,
+	0x600,
+	0x606,
 	0x660,
 	0x66A,
 	0x66B,
 	0x66D,
+	0x6DD,
+	0x6DE,
 	0x6F0,
 	0x6FA,
 	0x7C0,
 	0x7CA,
+	0x890,
+	0x892,
+	0x8E2,
+	0x8E3,
 	0x966,
 	0x970,
 	0x9E6,
@@ -149653,8 +152530,6 @@ static const UV UNI_LB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x1A8A,
 	0x1A90,
 	0x1A9A,
-	0x1B50,
-	0x1B5A,
 	0x1BB0,
 	0x1BBA,
 	0x1C40,
@@ -149667,20 +152542,18 @@ static const UV UNI_LB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0xA8DA,
 	0xA900,
 	0xA90A,
-	0xA9D0,
-	0xA9DA,
 	0xA9F0,
 	0xA9FA,
-	0xAA50,
-	0xAA5A,
 	0xABF0,
 	0xABFA,
 	0x104A0,
 	0x104AA,
 	0x10D30,
 	0x10D3A,
-	0x11066,
-	0x11070,
+	0x110BD,
+	0x110BE,
+	0x110CD,
+	0x110CE,
 	0x110F0,
 	0x110FA,
 	0x11136,
@@ -149701,16 +152574,12 @@ static const UV UNI_LB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x1173A,
 	0x118E0,
 	0x118EA,
-	0x11950,
-	0x1195A,
 	0x11C50,
 	0x11C5A,
 	0x11D50,
 	0x11D5A,
 	0x11DA0,
 	0x11DAA,
-	0x11F50,
-	0x11F5A,
 	0x16A60,
 	0x16A6A,
 	0x16AC0,
@@ -149736,7 +152605,7 @@ static const UV UNI_LB__NU_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_LB__OP_invlist[] = {  /* for ASCII/Latin1 */
-	183,	/* Number of elements */
+	185,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -149913,6 +152782,8 @@ static const UV UNI_LB__OP_invlist[] = {  /* for ASCII/Latin1 */
 	0x13289,
 	0x13379,
 	0x1337A,
+	0x1342F,
+	0x13430,
 	0x13437,
 	0x13438,
 	0x1343C,
@@ -150205,6 +153076,36 @@ static const UV UNI_LB__SY_invlist[] = {  /* for ASCII/Latin1 */
 
 #  endif	/* ASCII/Latin1 */
 
+static const UV UNI_LB__VF_invlist[] = {  /* for all charsets */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x1BF2,
+	0x1BF4
+};
+
+static const UV UNI_LB__VI_invlist[] = {  /* for all charsets */
+	13,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x1B44,
+	0x1B45,
+	0xA9C0,
+	0xA9C1,
+	0x11046,
+	0x11047,
+	0x1134D,
+	0x1134E,
+	0x1193E,
+	0x1193F,
+	0x11F42,
+	0x11F43
+};
+
 static const UV UNI_LB__WJ_invlist[] = {  /* for all charsets */
 	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -150218,7 +153119,7 @@ static const UV UNI_LB__WJ_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_LB__XX_invlist[] = {  /* for all charsets */
-	1328,	/* Number of elements */
+	1326,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -150759,8 +153660,6 @@ static const UV UNI_LB__XX_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -150772,7 +153671,7 @@ static const UV UNI_LB__XX_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -151855,7 +154754,7 @@ static const UV UNI_LM_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_LO_invlist[] = {  /* for ASCII/Latin1 */
-	1021,	/* Number of elements */
+	1023,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -152874,6 +155773,8 @@ static const UV UNI_LO_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -154481,7 +157382,7 @@ static const UV UNI_MISCTECHNICAL_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_MLYM_invlist[] = {  /* for all charsets */
-	23,	/* Number of elements */
+	25,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -154506,6 +157407,8 @@ static const UV UNI_MLYM_invlist[] = {  /* for all charsets */
 	0xD80,
 	0x1CDA,
 	0x1CDB,
+	0x1CF2,
+	0x1CF3,
 	0xA830,
 	0xA833
 };
@@ -155796,7 +158699,7 @@ static const UV UNI_NB_invlist[] = {  /* for all charsets */
 	0x20000,
 	0x2A6E0,
 	0x2A700,
-	0x2EBF0,
+	0x2EE60,
 	0x2F800,
 	0x2FA20,
 	0x30000,
@@ -158834,7 +161737,7 @@ static const UV UNI_NT__DI_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
-	305,	/* Number of elements */
+	325,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -158917,6 +161820,8 @@ static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x4E08,
 	0x4E09,
 	0x4E0A,
+	0x4E24,
+	0x4E25,
 	0x4E5D,
 	0x4E5E,
 	0x4E8C,
@@ -158925,6 +161830,8 @@ static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x4E95,
 	0x4E96,
 	0x4E97,
+	0x4EAC,
+	0x4EAD,
 	0x4EBF,
 	0x4EC1,
 	0x4EDF,
@@ -158935,6 +161842,10 @@ static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x4F0E,
 	0x4F70,
 	0x4F71,
+	0x4FE9,
+	0x4FEA,
+	0x5006,
+	0x5007,
 	0x5104,
 	0x5105,
 	0x5146,
@@ -158967,18 +161878,26 @@ static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x5F0F,
 	0x5F10,
 	0x5F11,
+	0x62D0,
+	0x62D1,
 	0x62FE,
 	0x62FF,
 	0x634C,
 	0x634D,
 	0x67D2,
 	0x67D3,
+	0x6D1E,
+	0x6D1F,
 	0x6F06,
 	0x6F07,
 	0x7396,
 	0x7397,
 	0x767E,
 	0x767F,
+	0x7695,
+	0x7696,
+	0x79ED,
+	0x79EE,
 	0x8086,
 	0x8087,
 	0x842C,
@@ -158989,6 +161908,10 @@ static const UV UNI_NT__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x8CB4,
 	0x8D30,
 	0x8D31,
+	0x920E,
+	0x920F,
+	0x94A9,
+	0x94AA,
 	0x9621,
 	0x9622,
 	0x9646,
@@ -159170,7 +162093,7 @@ static const UV UNI_NV___MINUS_1_SLASH_2_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_NV__0_invlist[] = {  /* for ASCII/Latin1 */
-	171,	/* Number of elements */
+	173,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -159249,6 +162172,8 @@ static const UV UNI_NV__0_invlist[] = {  /* for ASCII/Latin1 */
 	0x2500,
 	0x3007,
 	0x3008,
+	0x6D1E,
+	0x6D1F,
 	0x96F6,
 	0x96F7,
 	0xA620,
@@ -160246,11 +163171,13 @@ static const UV UNI_NV__100000_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_NV__1000000_invlist[] = {  /* for all charsets */
-	3,	/* Number of elements */
+	5,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x5146,
+	0x5147,
 	0x16B5E,
 	0x16B5F
 };
@@ -160279,6 +163206,16 @@ static const UV UNI_NV__100000000_invlist[] = {  /* for all charsets */
 	0x16B60
 };
 
+static const UV UNI_NV__1000000000_invlist[] = {  /* for all charsets */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x79ED,
+	0x79EE
+};
+
 static const UV UNI_NV__10000000000_invlist[] = {  /* for all charsets */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -160290,15 +163227,23 @@ static const UV UNI_NV__10000000000_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_NV__1000000000000_invlist[] = {  /* for all charsets */
-	5,	/* Number of elements */
+	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
-	0x5146,
-	0x5147,
 	0x16B61,
 	0x16B62
+};
+
+static const UV UNI_NV__10000000000000000_invlist[] = {  /* for all charsets */
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x4EAC,
+	0x4EAD
 };
 
 static const UV UNI_NV__11_invlist[] = {  /* for all charsets */
@@ -160568,7 +163513,7 @@ static const UV UNI_NV__19_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_NV__2_invlist[] = {  /* for ASCII/Latin1 */
-	281,	/* Number of elements */
+	287,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -160671,8 +163616,14 @@ static const UV UNI_NV__2_invlist[] = {  /* for ASCII/Latin1 */
 	0x3282,
 	0x3483,
 	0x3484,
+	0x4E24,
+	0x4E25,
 	0x4E8C,
 	0x4E8D,
+	0x4FE9,
+	0x4FEA,
+	0x5006,
+	0x5007,
 	0x5169,
 	0x516A,
 	0x5F0D,
@@ -160970,11 +163921,13 @@ static const UV UNI_NV__20_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_NV__200_invlist[] = {  /* for all charsets */
-	13,	/* Number of elements */
+	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x7695,
+	0x7696,
 	0x1011A,
 	0x1011B,
 	0x102F4,
@@ -163048,7 +166001,7 @@ static const UV UNI_NV__600000_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_NV__7_invlist[] = {  /* for ASCII/Latin1 */
-	229,	/* Number of elements */
+	231,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -163147,6 +166100,8 @@ static const UV UNI_NV__7_invlist[] = {  /* for ASCII/Latin1 */
 	0x3B4E,
 	0x4E03,
 	0x4E04,
+	0x62D0,
+	0x62D1,
 	0x67D2,
 	0x67D3,
 	0x6F06,
@@ -163742,7 +166697,7 @@ static const UV UNI_NV__800000_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_NV__9_invlist[] = {  /* for ASCII/Latin1 */
-	227,	/* Number of elements */
+	231,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -163843,6 +166798,10 @@ static const UV UNI_NV__9_invlist[] = {  /* for ASCII/Latin1 */
 	0x5EFF,
 	0x7396,
 	0x7397,
+	0x920E,
+	0x920F,
+	0x94A9,
+	0x94AA,
 	0xA629,
 	0xA62A,
 	0xA6EE,
@@ -164086,7 +167045,7 @@ static const UV UNI_NV__900000_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
-	419,	/* Number of elements */
+	439,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -164221,6 +167180,8 @@ static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
 	0x4E08,
 	0x4E09,
 	0x4E0A,
+	0x4E24,
+	0x4E25,
 	0x4E5D,
 	0x4E5E,
 	0x4E8C,
@@ -164229,6 +167190,8 @@ static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
 	0x4E95,
 	0x4E96,
 	0x4E97,
+	0x4EAC,
+	0x4EAD,
 	0x4EBF,
 	0x4EC1,
 	0x4EDF,
@@ -164239,6 +167202,10 @@ static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
 	0x4F0E,
 	0x4F70,
 	0x4F71,
+	0x4FE9,
+	0x4FEA,
+	0x5006,
+	0x5007,
 	0x5104,
 	0x5105,
 	0x5146,
@@ -164271,18 +167238,26 @@ static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
 	0x5F0F,
 	0x5F10,
 	0x5F11,
+	0x62D0,
+	0x62D1,
 	0x62FE,
 	0x62FF,
 	0x634C,
 	0x634D,
 	0x67D2,
 	0x67D3,
+	0x6D1E,
+	0x6D1F,
 	0x6F06,
 	0x6F07,
 	0x7396,
 	0x7397,
 	0x767E,
 	0x767F,
+	0x7695,
+	0x7696,
+	0x79ED,
+	0x79EE,
 	0x8086,
 	0x8087,
 	0x842C,
@@ -164293,6 +167268,10 @@ static const UV UNI_NV__NAN_invlist[] = {  /* for ASCII/Latin1 */
 	0x8CB4,
 	0x8D30,
 	0x8D31,
+	0x920E,
+	0x920F,
+	0x94A9,
+	0x94AA,
 	0x9621,
 	0x9622,
 	0x9646,
@@ -166316,7 +169295,7 @@ static const UV UNI_RUNR_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_S_invlist[] = {  /* for ASCII/Latin1 */
-	465,	/* Number of elements */
+	467,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -166536,7 +169515,7 @@ static const UV UNI_S_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3004,
 	0x3005,
 	0x3012,
@@ -166555,6 +169534,8 @@ static const UV UNI_S_invlist[] = {  /* for ASCII/Latin1 */
 	0x31A0,
 	0x31C0,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x3200,
 	0x321F,
 	0x322A,
@@ -167582,25 +170563,17 @@ static const UV UNI_SB__EX_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_SB__FO_invlist[] = {  /* for ASCII/Latin1 */
-	43,	/* Number of elements */
+	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
 	0xAD,
 	0xAE,
-	0x600,
-	0x606,
 	0x61C,
 	0x61D,
-	0x6DD,
-	0x6DE,
 	0x70F,
 	0x710,
-	0x890,
-	0x892,
-	0x8E2,
-	0x8E3,
 	0x180E,
 	0x180F,
 	0x200B,
@@ -167617,10 +170590,6 @@ static const UV UNI_SB__FO_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF00,
 	0xFFF9,
 	0xFFFC,
-	0x110BD,
-	0x110BE,
-	0x110CD,
-	0x110CE,
 	0x13430,
 	0x13440,
 	0x1BCA0,
@@ -167634,7 +170603,7 @@ static const UV UNI_SB__FO_invlist[] = {  /* for ASCII/Latin1 */
 #  endif	/* ASCII/Latin1 */
 
 static const UV UNI_SB__LE_invlist[] = {  /* for all charsets */
-	1087,	/* Number of elements */
+	1089,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -168719,6 +171688,8 @@ static const UV UNI_SB__LE_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -170080,21 +173051,29 @@ static const UV UNI_SB__LO_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_SB__NU_invlist[] = {  /* for ASCII/Latin1 */
-	131,	/* Number of elements */
+	143,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
 	0x30,
 	0x3A,
+	0x600,
+	0x606,
 	0x660,
 	0x66A,
 	0x66B,
 	0x66D,
+	0x6DD,
+	0x6DE,
 	0x6F0,
 	0x6FA,
 	0x7C0,
 	0x7CA,
+	0x890,
+	0x892,
+	0x8E2,
+	0x8E3,
 	0x966,
 	0x970,
 	0x9E6,
@@ -170167,6 +173146,10 @@ static const UV UNI_SB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x10D3A,
 	0x11066,
 	0x11070,
+	0x110BD,
+	0x110BE,
+	0x110CD,
+	0x110CE,
 	0x110F0,
 	0x110FA,
 	0x11136,
@@ -170318,7 +173301,7 @@ static const UV UNI_SB__SP_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_SB__ST_invlist[] = {  /* for ASCII/Latin1 */
-	155,	/* Number of elements */
+	157,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -170355,6 +173338,8 @@ static const UV UNI_SB__ST_invlist[] = {  /* for ASCII/Latin1 */
 	0x166F,
 	0x1735,
 	0x1737,
+	0x17D4,
+	0x17D6,
 	0x1803,
 	0x1804,
 	0x1809,
@@ -171800,7 +174785,7 @@ static const UV UNI_SB__UP_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_SB__XX_invlist[] = {  /* for ASCII/Latin1 */
-	1681,	/* Number of elements */
+	1683,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -172318,7 +175303,7 @@ static const UV UNI_SB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0x1772,
 	0x1774,
 	0x1780,
-	0x17D4,
+	0x17D6,
 	0x17D7,
 	0x17D8,
 	0x17DC,
@@ -173473,6 +176458,8 @@ static const UV UNI_SB__XX_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -174168,7 +177155,7 @@ static const UV UNI_SC__GURU_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_SC__HAN_invlist[] = {  /* for all charsets */
-	43,	/* Number of elements */
+	45,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -174209,6 +177196,8 @@ static const UV UNI_SC__HAN_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -175235,8 +178224,6 @@ static const UV UNI_SC__ZYYY_invlist[] = {  /* for ASCII/Latin1 */
 	0x2E00,
 	0x2E5E,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3005,
 	0x3006,
 	0x3007,
@@ -175256,6 +178243,8 @@ static const UV UNI_SC__ZYYY_invlist[] = {  /* for ASCII/Latin1 */
 	0x31A0,
 	0x31C0,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x3220,
 	0x3260,
 	0x327F,
@@ -175591,7 +178580,7 @@ static const UV UNI_SHORTHANDFORMATCONTROLS_invlist[] = {  /* for all charsets *
 };
 
 static const UV UNI_SHRD_invlist[] = {  /* for all charsets */
-	13,	/* Number of elements */
+	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -175606,6 +178595,10 @@ static const UV UNI_SHRD_invlist[] = {  /* for all charsets */
 	0x1CDE,
 	0x1CE0,
 	0x1CE1,
+	0xA830,
+	0xA836,
+	0xA838,
+	0xA839,
 	0x11180,
 	0x111E0
 };
@@ -175639,7 +178632,7 @@ static const UV UNI_SIND_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_SINH_invlist[] = {  /* for all charsets */
-	29,	/* Number of elements */
+	31,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -175670,6 +178663,8 @@ static const UV UNI_SINH_invlist[] = {  /* for all charsets */
 	0xDF0,
 	0xDF2,
 	0xDF5,
+	0x1CF2,
+	0x1CF3,
 	0x111E1,
 	0x111F5
 };
@@ -175921,7 +178916,7 @@ static const UV UNI_SMALLKANAEXT_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_SO_invlist[] = {  /* for ASCII/Latin1 */
-	369,	/* Number of elements */
+	371,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -176099,7 +179094,7 @@ static const UV UNI_SO_invlist[] = {  /* for ASCII/Latin1 */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
+	0x3000,
 	0x3004,
 	0x3005,
 	0x3012,
@@ -176116,6 +179111,8 @@ static const UV UNI_SO_invlist[] = {  /* for ASCII/Latin1 */
 	0x31A0,
 	0x31C0,
 	0x31E4,
+	0x31EF,
+	0x31F0,
 	0x3200,
 	0x321F,
 	0x322A,
@@ -176355,7 +179352,7 @@ static const UV UNI_SPECIALS_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_STERM_invlist[] = {  /* for ASCII/Latin1 */
-	161,	/* Number of elements */
+	163,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -176394,6 +179391,8 @@ static const UV UNI_STERM_invlist[] = {  /* for ASCII/Latin1 */
 	0x166F,
 	0x1735,
 	0x1737,
+	0x17D4,
+	0x17D6,
 	0x1803,
 	0x1804,
 	0x1809,
@@ -177369,7 +180368,7 @@ static const UV UNI_UGAR_invlist[] = {  /* for all charsets */
 };
 
 static const UV UNI_UIDEO_invlist[] = {  /* for all charsets */
-	33,	/* Number of elements */
+	35,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -177402,6 +180401,8 @@ static const UV UNI_UIDEO_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x30000,
 	0x3134B,
 	0x31350,
@@ -178756,25 +181757,15 @@ static const UV UNI_WB__EXTEND_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_WB__FO_invlist[] = {  /* for ASCII/Latin1 */
-	41,	/* Number of elements */
+	27,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
 	0xAD,
 	0xAE,
-	0x600,
-	0x606,
 	0x61C,
 	0x61D,
-	0x6DD,
-	0x6DE,
-	0x70F,
-	0x710,
-	0x890,
-	0x892,
-	0x8E2,
-	0x8E3,
 	0x180E,
 	0x180F,
 	0x200E,
@@ -178789,10 +181780,6 @@ static const UV UNI_WB__FO_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF00,
 	0xFFF9,
 	0xFFFC,
-	0x110BD,
-	0x110BE,
-	0x110CD,
-	0x110CE,
 	0x13430,
 	0x13440,
 	0x1BCA0,
@@ -178919,7 +181906,7 @@ static const UV UNI_WB__LE_invlist[] = {  /* for ASCII/Latin1 */
 	0x6FD,
 	0x6FF,
 	0x700,
-	0x710,
+	0x70F,
 	0x711,
 	0x712,
 	0x730,
@@ -180126,21 +183113,29 @@ static const UV UNI_WB__NL_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_WB__NU_invlist[] = {  /* for ASCII/Latin1 */
-	131,	/* Number of elements */
+	143,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
 	0x30,
 	0x3A,
+	0x600,
+	0x606,
 	0x660,
 	0x66A,
 	0x66B,
 	0x66C,
+	0x6DD,
+	0x6DE,
 	0x6F0,
 	0x6FA,
 	0x7C0,
 	0x7CA,
+	0x890,
+	0x892,
+	0x8E2,
+	0x8E3,
 	0x966,
 	0x970,
 	0x9E6,
@@ -180213,6 +183208,10 @@ static const UV UNI_WB__NU_invlist[] = {  /* for ASCII/Latin1 */
 	0x10D3A,
 	0x11066,
 	0x11070,
+	0x110BD,
+	0x110BE,
+	0x110CD,
+	0x110CE,
 	0x110F0,
 	0x110FA,
 	0x11136,
@@ -181886,7 +184885,7 @@ static const UV UNI_WCHO_invlist[] = {  /* for all charsets */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
-	1551,	/* Number of elements */
+	1553,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -182491,6 +185490,8 @@ static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x200C,
+	0x200E,
 	0x203F,
 	0x2041,
 	0x2054,
@@ -182582,8 +185583,6 @@ static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
 	0x309D,
 	0x30A0,
 	0x30A1,
-	0x30FB,
-	0x30FC,
 	0x3100,
 	0x3105,
 	0x3130,
@@ -182751,7 +185750,7 @@ static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
 	0xFF40,
 	0xFF41,
 	0xFF5B,
-	0xFF66,
+	0xFF65,
 	0xFFBF,
 	0xFFC2,
 	0xFFC8,
@@ -183433,6 +186432,8 @@ static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -183448,7 +186449,7 @@ static const UV UNI_XIDC_invlist[] = {  /* for ASCII/Latin1 */
 #  if 'A' == 65 /* ASCII/Latin1 */
 
 static const UV UNI_XIDS_invlist[] = {  /* for ASCII/Latin1 */
-	1333,	/* Number of elements */
+	1335,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -184779,6 +187780,8 @@ static const UV UNI_XIDS_invlist[] = {  /* for ASCII/Latin1 */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -185075,8 +188078,6 @@ static const UV UNI_ZYYY_invlist[] = {  /* for ASCII/Latin1 */
 	0x2E44,
 	0x2E5E,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3001,
 	0x3004,
 	0x3005,
@@ -185086,6 +188087,8 @@ static const UV UNI_ZYYY_invlist[] = {  /* for ASCII/Latin1 */
 	0x3021,
 	0x3036,
 	0x3037,
+	0x31EF,
+	0x31F0,
 	0x3248,
 	0x3260,
 	0x327F,
@@ -185834,8 +188837,6 @@ static const UV UNI_ZZZZ_invlist[] = {  /* for all charsets */
 	0x2F00,
 	0x2FD6,
 	0x2FF0,
-	0x2FFC,
-	0x3000,
 	0x3040,
 	0x3041,
 	0x3097,
@@ -185847,7 +188848,7 @@ static const UV UNI_ZZZZ_invlist[] = {  /* for all charsets */
 	0x318F,
 	0x3190,
 	0x31E4,
-	0x31F0,
+	0x31EF,
 	0x321F,
 	0x3220,
 	0xA48D,
@@ -186693,6 +189694,8 @@ static const UV UNI_ZZZZ_invlist[] = {  /* for all charsets */
 	0x2CEA2,
 	0x2CEB0,
 	0x2EBE1,
+	0x2EBF0,
+	0x2EE5E,
 	0x2F800,
 	0x2FA1E,
 	0x30000,
@@ -186807,6 +189810,7 @@ typedef enum {
 	UNI_AGE__13,
 	UNI_AGE__14,
 	UNI_AGE__15,
+	UNI_AGE__15_DOT_1,
 	UNI_AGE__2,
 	UNI_AGE__2_DOT_1,
 	UNI_AGE__3,
@@ -186974,6 +189978,7 @@ typedef enum {
 	UNI_CJKEXTF,
 	UNI_CJKEXTG,
 	UNI_CJKEXTH,
+	UNI_CJKEXTI,
 	UNI_CJKRADICALSSUP,
 	UNI_CJKSTROKES,
 	UNI_CJKSYMBOLS,
@@ -187107,6 +190112,8 @@ typedef enum {
 	UNI_HUNG,
 	UNI_HYPHEN_perl_aux,
 	UNI_IDC,
+	UNI_IDCOMPATMATHCONTINUE,
+	UNI_IDCOMPATMATHSTART,
 	UNI_IDENTIFIERSTATUS__ALLOWED,
 	UNI_IDENTIFIERSTATUS__RESTRICTED,
 	UNI_IDENTIFIERTYPE__DEFAULTIGNORABLE,
@@ -187125,6 +190132,7 @@ typedef enum {
 	UNI_IDS,
 	UNI_IDSB,
 	UNI_IDST,
+	UNI_IDSU,
 	UNI_INADLAM,
 	UNI_INAHOM,
 	UNI_INANATOLIANHIEROGLYPHS,
@@ -187143,6 +190151,10 @@ typedef enum {
 	UNI_INBUHID,
 	UNI_INCARIAN,
 	UNI_INCAUCASIANALBANIAN,
+	UNI_INCB__CONSONANT,
+	UNI_INCB__EXTEND,
+	UNI_INCB__LINKER,
+	UNI_INCB__NONE,
 	UNI_INCHAKMA,
 	UNI_INCHAM,
 	UNI_INCHEROKEE,
@@ -187331,6 +190343,7 @@ typedef enum {
 	UNI_IN__13,
 	UNI_IN__14,
 	UNI_IN__15,
+	UNI_IN__15_DOT_1,
 	UNI_IN__1_DOT_1,
 	UNI_IN__2,
 	UNI_IN__2_DOT_1,
@@ -187498,7 +190511,10 @@ typedef enum {
 	UNI_LATINEXTG,
 	UNI_LATN,
 	UNI_LB__AI,
+	UNI_LB__AK,
 	UNI_LB__AL,
+	UNI_LB__AP,
+	UNI_LB__AS,
 	UNI_LB__B2,
 	UNI_LB__BA,
 	UNI_LB__BB,
@@ -187530,6 +190546,8 @@ typedef enum {
 	UNI_LB__SG_perl_aux,
 	UNI_LB__SP,
 	UNI_LB__SY,
+	UNI_LB__VF,
+	UNI_LB__VI,
 	UNI_LB__WJ,
 	UNI_LB__XX,
 	UNI_LB__ZW,
@@ -187619,8 +190637,10 @@ typedef enum {
 	UNI_NV__1000000,
 	UNI_NV__10000000,
 	UNI_NV__100000000,
+	UNI_NV__1000000000,
 	UNI_NV__10000000000,
 	UNI_NV__1000000000000,
+	UNI_NV__10000000000000000,
 	UNI_NV__11,
 	UNI_NV__11_SLASH_12,
 	UNI_NV__11_SLASH_2,
@@ -188051,6 +191071,7 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_AGE__13_invlist,
 	UNI_AGE__14_invlist,
 	UNI_AGE__15_invlist,
+	UNI_AGE__15_DOT_1_invlist,
 	UNI_AGE__2_invlist,
 	UNI_AGE__2_DOT_1_invlist,
 	UNI_AGE__3_invlist,
@@ -188218,6 +191239,7 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_CJKEXTF_invlist,
 	UNI_CJKEXTG_invlist,
 	UNI_CJKEXTH_invlist,
+	UNI_CJKEXTI_invlist,
 	UNI_CJKRADICALSSUP_invlist,
 	UNI_CJKSTROKES_invlist,
 	UNI_CJKSYMBOLS_invlist,
@@ -188351,6 +191373,8 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_HUNG_invlist,
 	UNI_HYPHEN_invlist,
 	UNI_IDC_invlist,
+	UNI_IDCOMPATMATHCONTINUE_invlist,
+	UNI_IDCOMPATMATHSTART_invlist,
 	UNI_IDENTIFIERSTATUS__ALLOWED_invlist,
 	UNI_IDENTIFIERSTATUS__RESTRICTED_invlist,
 	UNI_IDENTIFIERTYPE__DEFAULTIGNORABLE_invlist,
@@ -188369,6 +191393,7 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_IDS_invlist,
 	UNI_IDSB_invlist,
 	UNI_IDST_invlist,
+	UNI_IDSU_invlist,
 	UNI_INADLAM_invlist,
 	UNI_INAHOM_invlist,
 	UNI_INANATOLIANHIEROGLYPHS_invlist,
@@ -188387,6 +191412,10 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_INBUHID_invlist,
 	UNI_INCARIAN_invlist,
 	UNI_INCAUCASIANALBANIAN_invlist,
+	UNI_INCB__CONSONANT_invlist,
+	UNI_INCB__EXTEND_invlist,
+	UNI_INCB__LINKER_invlist,
+	UNI_INCB__NONE_invlist,
 	UNI_INCHAKMA_invlist,
 	UNI_INCHAM_invlist,
 	UNI_INCHEROKEE_invlist,
@@ -188575,6 +191604,7 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_IN__13_invlist,
 	UNI_IN__14_invlist,
 	UNI_IN__15_invlist,
+	UNI_IN__15_DOT_1_invlist,
 	UNI_IN__1_DOT_1_invlist,
 	UNI_IN__2_invlist,
 	UNI_IN__2_DOT_1_invlist,
@@ -188742,7 +191772,10 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_LATINEXTG_invlist,
 	UNI_LATN_invlist,
 	UNI_LB__AI_invlist,
+	UNI_LB__AK_invlist,
 	UNI_LB__AL_invlist,
+	UNI_LB__AP_invlist,
+	UNI_LB__AS_invlist,
 	UNI_LB__B2_invlist,
 	UNI_LB__BA_invlist,
 	UNI_LB__BB_invlist,
@@ -188774,6 +191807,8 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_LB__SG_invlist,
 	UNI_LB__SP_invlist,
 	UNI_LB__SY_invlist,
+	UNI_LB__VF_invlist,
+	UNI_LB__VI_invlist,
 	UNI_LB__WJ_invlist,
 	UNI_LB__XX_invlist,
 	UNI_LB__ZW_invlist,
@@ -188863,8 +191898,10 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI_NV__1000000_invlist,
 	UNI_NV__10000000_invlist,
 	UNI_NV__100000000_invlist,
+	UNI_NV__1000000000_invlist,
 	UNI_NV__10000000000_invlist,
 	UNI_NV__1000000000000_invlist,
+	UNI_NV__10000000000000000_invlist,
 	UNI_NV__11_invlist,
 	UNI_NV__11_SLASH_12_invlist,
 	UNI_NV__11_SLASH_2_invlist,
@@ -189355,6 +192392,7 @@ static const char * const UNI_age_values[] = {
 	"13.0",
 	"14.0",
 	"15.0",
+	"15.1",
 	"NA",
 	"na",
 	"Unassigned",
@@ -189366,6 +192404,7 @@ static const char * const UNI_age_values[] = {
 	"V13_0",
 	"V14_0",
 	"V15_0",
+	"V15_1",
 	"V1_1",
 	"V2_0",
 	"V2_1",
@@ -189392,6 +192431,7 @@ static const char * const UNI_age_values[] = {
 	"v130",
 	"v140",
 	"v150",
+	"v151",
 	"v20",
 	"v21",
 	"v30",
@@ -189716,6 +192756,8 @@ static const char * const UNI_blk_values[] = {
 	"cjkextg",
 	"CJK_Ext_H",
 	"cjkexth",
+	"CJK_Ext_I",
+	"cjkexti",
 	"CJK_Radicals_Sup",
 	"cjkradicalssup",
 	"CJK Radicals Supplement",
@@ -189756,6 +192798,9 @@ static const char * const UNI_blk_values[] = {
 	"CJK Unified Ideographs Extension H",
 	"CJK_Unified_Ideographs_Extension_H",
 	"cjkunifiedideographsextensionh",
+	"CJK Unified Ideographs Extension I",
+	"CJK_Unified_Ideographs_Extension_I",
+	"cjkunifiedideographsextensioni",
 	"Combining Diacritical Marks",
 	"Combining_Diacritical_Marks",
 	"combiningdiacriticalmarks",
@@ -191302,6 +194347,18 @@ static const char * const UNI_identifiertype_values[] = {
 	NULL
 };
 
+static const char * const UNI_incb_values[] = {
+	"Consonant",
+	"consonant",
+	"Extend",
+	"extend",
+	"Linker",
+	"linker",
+	"None",
+	"none",
+	NULL
+};
+
 static const char * const UNI_inpc_values[] = {
 	"Bottom",
 	"bottom",
@@ -191659,12 +194716,24 @@ static const char * const UNI_jt_values[] = {
 static const char * const UNI_lb_values[] = {
 	"AI",
 	"ai",
+	"AK",
+	"ak",
+	"Aksara",
+	"aksara",
+	"Aksara_Prebase",
+	"aksaraprebase",
+	"Aksara_Start",
+	"aksarastart",
 	"AL",
 	"al",
 	"Alphabetic",
 	"alphabetic",
 	"Ambiguous",
 	"ambiguous",
+	"AP",
+	"ap",
+	"AS",
+	"as",
 	"B2",
 	"b2",
 	"BA",
@@ -191807,6 +194876,14 @@ static const char * const UNI_lb_values[] = {
 	"sy",
 	"Unknown",
 	"unknown",
+	"VF",
+	"vf",
+	"VI",
+	"vi",
+	"Virama",
+	"virama",
+	"Virama_Final",
+	"viramafinal",
 	"WJ",
 	"wj",
 	"Word_Joiner",
@@ -192009,8 +195086,10 @@ static const char * const UNI_nv_values[] = {
 	"10000000",
 	"20000000",
 	"100000000",
+	"1000000000",
 	"10000000000",
 	"1000000000000",
+	"10000000000000000",
 	"NaN",
 	"nan",
 	NULL
@@ -192844,6 +195923,7 @@ UNI_gcb_values,
 UNI_hst_values,
 UNI_identifierstatus_values,
 UNI_identifiertype_values,
+UNI_incb_values,
 UNI_inpc_values,
 UNI_insc_values,
 UNI_jg_values,
@@ -192900,46 +195980,50 @@ UNI_wb_values
 #define UNI_hst_values_index  11
 #define UNI_hyphen_values_index  UNI_ahex_values_index
 #define UNI_idc_values_index  UNI_ahex_values_index
+#define UNI_idcompatmathcontinue_values_index  UNI_ahex_values_index
+#define UNI_idcompatmathstart_values_index  UNI_ahex_values_index
 #define UNI_identifierstatus_values_index  12
 #define UNI_identifiertype_values_index  13
 #define UNI_ideo_values_index  UNI_ahex_values_index
 #define UNI_ids_values_index  UNI_ahex_values_index
 #define UNI_idsb_values_index  UNI_ahex_values_index
 #define UNI_idst_values_index  UNI_ahex_values_index
+#define UNI_idsu_values_index  UNI_ahex_values_index
 #define UNI_in_values_index  UNI_age_values_index
-#define UNI_inpc_values_index  14
-#define UNI_insc_values_index  15
-#define UNI_jg_values_index  16
+#define UNI_incb_values_index  14
+#define UNI_inpc_values_index  15
+#define UNI_insc_values_index  16
+#define UNI_jg_values_index  17
 #define UNI_joinc_values_index  UNI_ahex_values_index
-#define UNI_jt_values_index  17
-#define UNI_lb_values_index  18
+#define UNI_jt_values_index  18
+#define UNI_lb_values_index  19
 #define UNI_loe_values_index  UNI_ahex_values_index
 #define UNI_lower_values_index  UNI_ahex_values_index
 #define UNI_math_values_index  UNI_ahex_values_index
 #define UNI_nchar_values_index  UNI_ahex_values_index
-#define UNI_nfcqc_values_index  19
-#define UNI_nfdqc_values_index  20
+#define UNI_nfcqc_values_index  20
+#define UNI_nfdqc_values_index  21
 #define UNI_nfkcqc_values_index  UNI_nfcqc_values_index
 #define UNI_nfkdqc_values_index  UNI_nfdqc_values_index
-#define UNI_nt_values_index  21
-#define UNI_nv_values_index  22
+#define UNI_nt_values_index  22
+#define UNI_nv_values_index  23
 #define UNI_patsyn_values_index  UNI_ahex_values_index
 #define UNI_patws_values_index  UNI_ahex_values_index
 #define UNI_pcm_values_index  UNI_ahex_values_index
 #define UNI_qmark_values_index  UNI_ahex_values_index
 #define UNI_radical_values_index  UNI_ahex_values_index
 #define UNI_ri_values_index  UNI_ahex_values_index
-#define UNI_sb_values_index  23
-#define UNI_sc_values_index  24
+#define UNI_sb_values_index  24
+#define UNI_sc_values_index  25
 #define UNI_scx_values_index  UNI_sc_values_index
 #define UNI_sd_values_index  UNI_ahex_values_index
 #define UNI_sterm_values_index  UNI_ahex_values_index
 #define UNI_term_values_index  UNI_ahex_values_index
 #define UNI_uideo_values_index  UNI_ahex_values_index
 #define UNI_upper_values_index  UNI_ahex_values_index
-#define UNI_vo_values_index  25
+#define UNI_vo_values_index  26
 #define UNI_vs_values_index  UNI_ahex_values_index
-#define UNI_wb_values_index  26
+#define UNI_wb_values_index  27
 #define UNI_wspace_values_index  UNI_ahex_values_index
 #define UNI_xidc_values_index  UNI_ahex_values_index
 #define UNI_xids_values_index  UNI_ahex_values_index
@@ -192951,38 +196035,41 @@ UNI_wb_values
 #define isGCB_CN(x) (x == 1)
 #define isGCB_CR(x) (x == 2)
 #define isGCB_Control(x) (x == 1)
-#define isGCB_EDGE(x) (x == 15)
+#define isGCB_EDGE(x) (x == 18)
 #define isGCB_EPX(x) (x == 3)
-#define isGCB_EX(x) (x == 4)
+#define isGCB_EX(x) (isGCB_scratch = (x), isGCB_scratch == 4 || isGCB_scratch == 6 || isGCB_scratch == 7)
 #define isGCB_E_Base(x) (0)
 #define isGCB_E_Base_GAZ(x) (0)
 #define isGCB_E_Modifier(x) (0)
 #define isGCB_ExtPict(x) (x == 3)
 #define isGCB_ExtPict_XX(x) (x == 3)
-#define isGCB_Extend(x) (x == 4)
+#define isGCB_Extend(x) (isGCB_scratch = (x), isGCB_scratch == 4 || isGCB_scratch == 6 || isGCB_scratch == 7)
 #define isGCB_Extended_Pictographic(x) (x == 3)
 #define isGCB_Glue_After_Zwj(x) (0)
-#define isGCB_InCB_Consonant(x) (0)
-#define isGCB_InCB_Consonant_XX(x) (0)
-#define isGCB_InCB_Extend(x) (0)
-#define isGCB_InCB_Extend_EX(x) (0)
-#define isGCB_InCB_Linker(x) (0)
-#define isGCB_InCB_Linker_EX(x) (0)
-#define isGCB_L(x) (x == 5)
-#define isGCB_LF(x) (x == 6)
-#define isGCB_LV(x) (x == 7)
-#define isGCB_LVT(x) (x == 8)
-#define isGCB_Other(x) (isGCB_scratch = (x), isGCB_scratch == 0 || isGCB_scratch == 3)
-#define isGCB_PP(x) (x == 9)
-#define isGCB_Prepend(x) (x == 9)
-#define isGCB_RI(x) (x == 10)
-#define isGCB_Regional_Indicator(x) (x == 10)
-#define isGCB_SM(x) (x == 11)
-#define isGCB_SpacingMark(x) (x == 11)
-#define isGCB_T(x) (x == 12)
-#define isGCB_V(x) (x == 13)
-#define isGCB_XX(x) (isGCB_scratch = (x), isGCB_scratch == 0 || isGCB_scratch == 3)
-#define isGCB_ZWJ(x) (x == 14)
+#define isGCB_ICX(x) (x == 5)
+#define isGCB_IEE(x) (x == 6)
+#define isGCB_ILE(x) (x == 7)
+#define isGCB_InCB_Consonant(x) (x == 5)
+#define isGCB_InCB_Consonant_XX(x) (x == 5)
+#define isGCB_InCB_Extend(x) (isGCB_scratch = (x), isGCB_scratch == 6 || isGCB_scratch == 17)
+#define isGCB_InCB_Extend_EX(x) (x == 6)
+#define isGCB_InCB_Linker(x) (x == 7)
+#define isGCB_InCB_Linker_EX(x) (x == 7)
+#define isGCB_L(x) (x == 8)
+#define isGCB_LF(x) (x == 9)
+#define isGCB_LV(x) (x == 10)
+#define isGCB_LVT(x) (x == 11)
+#define isGCB_Other(x) (isGCB_scratch = (x), isGCB_scratch == 0 || isGCB_scratch == 3 || isGCB_scratch == 5)
+#define isGCB_PP(x) (x == 12)
+#define isGCB_Prepend(x) (x == 12)
+#define isGCB_RI(x) (x == 13)
+#define isGCB_Regional_Indicator(x) (x == 13)
+#define isGCB_SM(x) (x == 14)
+#define isGCB_SpacingMark(x) (x == 14)
+#define isGCB_T(x) (x == 15)
+#define isGCB_V(x) (x == 16)
+#define isGCB_XX(x) (isGCB_scratch = (x), isGCB_scratch == 0 || isGCB_scratch == 3 || isGCB_scratch == 5)
+#define isGCB_ZWJ(x) (x == 17)
 #define isGCB_u(x) (0)
 
 
@@ -192998,48 +196085,55 @@ UNI_wb_values
 #define GCB_various_then_RI_v_RI                                              5
 
 
-static const U8 GCB_table[17][17] = {
-   /* The comment rows give Unicode's rule number that
-    * applies to the cell immediately above it, except it is
-    * left blank for cells populated by the table's default
-    * rule.  ^ and $ stand for their respective edges; 'EPX'
-    * stands for 'ExtPict_XX'; u stands for "unused in this
-    * Unicode release" (and the data in its row and column
-    * are garbage).  See perluniprops for the rest */
-/*       XX CN CR EPX EX L LF LV LVT PP RI SM T V ZWJ $ u */
-/* XX*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
-//           5  5      9    5              9a       9 2
-/* CN*/ { 1, 1, 1,  1, 1,1, 1, 1,  1, 1, 1, 1,1,1,  1,1,0 },
-//        4  4  4   4  4 4  4  4   4  4  4  4 4 4   4 2
-/* CR*/ { 1, 1, 1,  1, 1,1, 0, 1,  1, 1, 1, 1,1,1,  1,1,0 },
-//        4  4  4   4  4 4  3  4   4  4  4  4 4 4   4 2
-/*EPX*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
-//           5  5      9    5              9a       9 2
-/* EX*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
-//           5  5      9    5              9a       9 2
-/* L */ { 1, 1, 1,  1, 0,0, 1, 0,  0, 1, 1, 0,1,0,  0,1,0 },
-//           5  5      9 6  5  6   6       9a   6   9 2
-/* LF*/ { 1, 1, 1,  1, 1,1, 1, 1,  1, 1, 1, 1,1,1,  1,1,0 },
-//        4  4  4   4  4 4  4  4   4  4  4  4 4 4   4 2
-/* LV*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,0,0,  0,1,0 },
-//           5  5      9    5              9a 7 7   9 2
-/*LVT*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,0,1,  0,1,0 },
-//           5  5      9    5              9a 8     9 2
-/* PP*/ { 0, 1, 1,  0, 0,0, 1, 0,  0, 0, 0, 0,0,0,  0,1,0 },
-//       9b  5  5  9b  9 9  5 9b  9b 9b 9b 9a 9 9   9 2
-/* RI*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 5, 0,1,1,  0,1,0 },
-//           5  5      9    5           12 9a       9 2
-/* SM*/ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
-//           5  5      9    5              9a       9 2
-/* T */ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,0,1,  0,1,0 },
-//           5  5      9    5              9a 8     9 2
-/* V */ { 1, 1, 1,  1, 0,1, 1, 1,  1, 1, 1, 0,0,0,  0,1,0 },
-//           5  5      9    5              9a 7 7   9 2
-/*ZWJ*/ { 1, 1, 1,  2, 0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
-//           5  5  11  9    5              9a       9 2
-/* ^ */ { 1, 1, 1,  1, 1,1, 1, 1,  1, 1, 1, 1,1,1,  1,0,0 },
-//        1  1  1   1  1 1  1  1   1  1  1  1 1 1   1 1
-/* u */ { 0, 0, 0,  0, 0,0, 0, 0,  0, 0, 0, 0,0,0,  0,0,0 }
+static const U8 GCB_table[20][20] = {
+   /* The comment rows give Unicode's rule number that applies to the
+    * cell immediately above it, except it is left blank for cells
+    * populated by the table's default rule.  ^ and $ stand for their
+    * respective edges; 'EPX' stands for 'ExtPict_XX'; 'ICX' stands for
+    * 'InCB_Consonant_XX'; 'IEE' stands for 'InCB_Extend_EX'; 'ILE'
+    * stands for 'InCB_Linker_EX'; u stands for "unused in this Unicode
+    * release" (and the data in its row and column are garbage).  See
+    * perluniprops for the rest */
+/*       XX CN CR EPX EX ICX IEE ILE L LF LV LVT PP RI SM T V ZWJ $ u */
+/* XX*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9       9   9    5              9a       9 2
+/* CN*/ { 1, 1, 1,  1, 1,  1,  1,  1,1, 1, 1,  1, 1, 1, 1,1,1,  1,1,0 },
+//        4  4  4   4  4   4   4   4 4  4  4   4  4  4  4 4 4   4 2
+/* CR*/ { 1, 1, 1,  1, 1,  1,  1,  1,1, 0, 1,  1, 1, 1, 1,1,1,  1,1,0 },
+//        4  4  4   4  4   4   4   4 4  3  4   4  4  4  4 4 4   4 2
+/*EPX*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9       9   9    5              9a       9 2
+/* EX*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9       9   9    5              9a       9 2
+/*ICX*/ { 1, 1, 1,  1, 0,  5,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9  9c   9   9    5              9a       9 2
+/*IEE*/ { 1, 1, 1,  1, 0,  5,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9  9c   9   9    5              9a       9 2
+/*ILE*/ { 1, 1, 1,  1, 0,  5,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9  9c   9   9    5              9a       9 2
+/* L */ { 1, 1, 1,  1, 0,  1,  0,  0,0, 1, 0,  0, 1, 1, 0,1,0,  0,1,0 },
+//           5  5      9       9   9 6  5  6   6       9a   6   9 2
+/* LF*/ { 1, 1, 1,  1, 1,  1,  1,  1,1, 1, 1,  1, 1, 1, 1,1,1,  1,1,0 },
+//        4  4  4   4  4   4   4   4 4  4  4   4  4  4  4 4 4   4 2
+/* LV*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,0,0,  0,1,0 },
+//           5  5      9       9   9    5              9a 7 7   9 2
+/*LVT*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,0,1,  0,1,0 },
+//           5  5      9       9   9    5              9a 8     9 2
+/* PP*/ { 0, 1, 1,  0, 0,  0,  0,  0,0, 1, 0,  0, 0, 0, 0,0,0,  0,1,0 },
+//       9b  5  5  9b  9  9b   9   9 9  5 9b  9b 9b 9b 9a 9 9   9 2
+/* RI*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 8, 0,1,1,  0,1,0 },
+//           5  5      9       9   9    5           12 9a       9 2
+/* SM*/ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5      9       9   9    5              9a       9 2
+/* T */ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,0,1,  0,1,0 },
+//           5  5      9       9   9    5              9a 8     9 2
+/* V */ { 1, 1, 1,  1, 0,  1,  0,  0,1, 1, 1,  1, 1, 1, 0,0,0,  0,1,0 },
+//           5  5      9       9   9    5              9a 7 7   9 2
+/*ZWJ*/ { 1, 1, 1,  2, 0,  5,  0,  0,1, 1, 1,  1, 1, 1, 0,1,1,  0,1,0 },
+//           5  5  11  9  9c   9   9    5              9a       9 2
+/* ^ */ { 1, 1, 1,  1, 1,  1,  1,  1,1, 1, 1,  1, 1, 1, 1,1,1,  1,0,0 },
+//        1  1  1   1  1   1   1   1 1  1  1   1  1  1  1 1 1   1 1
+/* u */ { 0, 0, 0,  0, 0,  0,  0,  0,0, 0, 0,  0, 0, 0, 0,0,0,  0,0,0 }
 };
 
 
@@ -193050,144 +196144,153 @@ static const U8 GCB_dfa_table[] = {
     4,	/* [2] GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict (Rule GCB11) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule GCB99) */
-    5,	/* [5] GCB_various_then_RI_v_RI (Rules GCB12, GCB13) */
+    2,	/* [5] GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant (Rule GCB9c) */
+    0,	/*	if matches, return 0 */
+    1,	/*	else return 1  (Rule GCB99) */
+    5,	/* [8] GCB_various_then_RI_v_RI (Rules GCB12, GCB13) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule GCB99) */
 };
 
-#define isLB_AK(x) (0)
-#define isLB_AKish(x) (0)
-#define isLB_AL(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 11 || isLB_scratch == 29)
-#define isLB_AP(x) (0)
-#define isLB_Aksara(x) (0)
-#define isLB_Aksara_Prebase(x) (0)
-#define isLB_Aksara_Start(x) (0)
-#define isLB_Alphabetic(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 11 || isLB_scratch == 29)
-#define isLB_B2(x) (x == 1)
-#define isLB_BA(x) (isLB_scratch = (x), isLB_scratch == 2 || isLB_scratch == 12)
-#define isLB_BB(x) (x == 3)
-#define isLB_BK(x) (x == 4)
-#define isLB_Break_After(x) (isLB_scratch = (x), isLB_scratch == 2 || isLB_scratch == 12)
-#define isLB_Break_Before(x) (x == 3)
-#define isLB_Break_Both(x) (x == 1)
-#define isLB_Break_Symbols(x) (x == 55)
-#define isLB_CB(x) (x == 5)
-#define isLB_CEE(x) (x == 6)
-#define isLB_CL(x) (isLB_scratch = (x), isLB_scratch == 7 || isLB_scratch == 13)
-#define isLB_CM(x) (isLB_scratch = (x), isLB_scratch == 8 || isLB_scratch == 17)
-#define isLB_CP(x) (x == 9)
-#define isLB_CR(x) (x == 10)
-#define isLB_Carriage_Return(x) (x == 10)
-#define isLB_Close_Parenthesis(x) (x == 9)
-#define isLB_Close_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 7 || isLB_scratch == 13)
-#define isLB_Cn_ExtPict(x) (x == 6)
-#define isLB_Cn_ExtPict_ExtPict_ID(x) (x == 6)
-#define isLB_Combining_Mark(x) (isLB_scratch = (x), isLB_scratch == 8 || isLB_scratch == 17)
-#define isLB_Contingent_Break(x) (x == 5)
-#define isLB_Dotted_Circle(x) (0)
-#define isLB_Dotted_Circle_AL(x) (0)
-#define isLB_EA(x) (isLB_scratch = (x), isLB_scratch == 11 || isLB_scratch == 12 || isLB_scratch == 13 || isLB_scratch == 14 || isLB_scratch == 15 || isLB_scratch == 16 || isLB_scratch == 17 || isLB_scratch == 18 || isLB_scratch == 19 || isLB_scratch == 20 || isLB_scratch == 21 || isLB_scratch == 22 || isLB_scratch == 23 || isLB_scratch == 24 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 28 || isLB_scratch == 35 || isLB_scratch == 36 || isLB_scratch == 42)
-#define isLB_EAA(x) (x == 11)
-#define isLB_EAB(x) (x == 12)
-#define isLB_EAC(x) (x == 13)
-#define isLB_EAE(x) (x == 14)
-#define isLB_EAG(x) (x == 15)
-#define isLB_EAI(x) (x == 16)
-#define isLB_EAM(x) (x == 17)
-#define isLB_EAN(x) (x == 18)
-#define isLB_EAO(x) (x == 19)
-#define isLB_EAP(x) (x == 20)
-#define isLB_EAR(x) (x == 21)
-#define isLB_EAS(x) (x == 22)
-#define isLB_EAT(x) (x == 23)
-#define isLB_EAX(x) (x == 24)
-#define isLB_EA_AL(x) (x == 11)
-#define isLB_EA_BA(x) (x == 12)
-#define isLB_EA_CL(x) (x == 13)
-#define isLB_EA_CM(x) (x == 17)
-#define isLB_EA_EB(x) (x == 14)
-#define isLB_EA_EX(x) (x == 24)
-#define isLB_EA_ExtPict_AL(x) (x == 26)
-#define isLB_EA_ExtPict_ID(x) (x == 27)
-#define isLB_EA_GL(x) (x == 15)
-#define isLB_EA_ID(x) (x == 16)
-#define isLB_EA_IN(x) (x == 18)
-#define isLB_EA_IS(x) (x == 22)
-#define isLB_EA_NS(x) (x == 23)
-#define isLB_EA_OP(x) (x == 19)
-#define isLB_EA_PO(x) (x == 20)
-#define isLB_EA_PR(x) (x == 21)
-#define isLB_EB(x) (isLB_scratch = (x), isLB_scratch == 14 || isLB_scratch == 25)
-#define isLB_EDGE(x) (x == 59)
-#define isLB_EEA(x) (x == 26)
-#define isLB_EEI(x) (x == 27)
-#define isLB_EM(x) (x == 28)
-#define isLB_EPA(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 29)
-#define isLB_EPE(x) (x == 30)
-#define isLB_EPI(x) (isLB_scratch = (x), isLB_scratch == 6 || isLB_scratch == 27 || isLB_scratch == 31)
-#define isLB_EPN(x) (x == 32)
-#define isLB_EX(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 30 || isLB_scratch == 33)
-#define isLB_E_Base(x) (isLB_scratch = (x), isLB_scratch == 14 || isLB_scratch == 25)
-#define isLB_E_Modifier(x) (x == 28)
+#define isLB_AK(x) (x == 1)
+#define isLB_AKish(x) (isLB_scratch = (x), isLB_scratch == 1 || isLB_scratch == 3 || isLB_scratch == 14)
+#define isLB_AL(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 14 || isLB_scratch == 15 || isLB_scratch == 33)
+#define isLB_AP(x) (x == 2)
+#define isLB_AS(x) (x == 3)
+#define isLB_Aksara(x) (x == 1)
+#define isLB_Aksara_Prebase(x) (x == 2)
+#define isLB_Aksara_Start(x) (x == 3)
+#define isLB_Alphabetic(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 14 || isLB_scratch == 15 || isLB_scratch == 33)
+#define isLB_B2(x) (x == 4)
+#define isLB_BA(x) (isLB_scratch = (x), isLB_scratch == 5 || isLB_scratch == 16)
+#define isLB_BB(x) (x == 6)
+#define isLB_BK(x) (x == 7)
+#define isLB_Break_After(x) (isLB_scratch = (x), isLB_scratch == 5 || isLB_scratch == 16)
+#define isLB_Break_Before(x) (x == 6)
+#define isLB_Break_Both(x) (x == 4)
+#define isLB_Break_Symbols(x) (x == 61)
+#define isLB_CB(x) (x == 8)
+#define isLB_CEE(x) (x == 9)
+#define isLB_CL(x) (isLB_scratch = (x), isLB_scratch == 10 || isLB_scratch == 17)
+#define isLB_CM(x) (isLB_scratch = (x), isLB_scratch == 11 || isLB_scratch == 21)
+#define isLB_CP(x) (x == 12)
+#define isLB_CR(x) (x == 13)
+#define isLB_Carriage_Return(x) (x == 13)
+#define isLB_Close_Parenthesis(x) (x == 12)
+#define isLB_Close_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 10 || isLB_scratch == 17)
+#define isLB_Cn_ExtPict(x) (x == 9)
+#define isLB_Cn_ExtPict_ExtPict_ID(x) (x == 9)
+#define isLB_Combining_Mark(x) (isLB_scratch = (x), isLB_scratch == 11 || isLB_scratch == 21)
+#define isLB_Contingent_Break(x) (x == 8)
+#define isLB_DCA(x) (x == 14)
+#define isLB_Dotted_Circle(x) (x == 14)
+#define isLB_Dotted_Circle_AL(x) (x == 14)
+#define isLB_EA(x) (isLB_scratch = (x), isLB_scratch == 15 || isLB_scratch == 16 || isLB_scratch == 17 || isLB_scratch == 18 || isLB_scratch == 19 || isLB_scratch == 20 || isLB_scratch == 21 || isLB_scratch == 22 || isLB_scratch == 23 || isLB_scratch == 24 || isLB_scratch == 25 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 28 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 32 || isLB_scratch == 39 || isLB_scratch == 40 || isLB_scratch == 46)
+#define isLB_EAA(x) (x == 15)
+#define isLB_EAB(x) (x == 16)
+#define isLB_EAC(x) (x == 17)
+#define isLB_EAE(x) (x == 18)
+#define isLB_EAG(x) (x == 19)
+#define isLB_EAI(x) (x == 20)
+#define isLB_EAM(x) (x == 21)
+#define isLB_EAN(x) (x == 22)
+#define isLB_EAO(x) (x == 23)
+#define isLB_EAP(x) (x == 24)
+#define isLB_EAR(x) (x == 25)
+#define isLB_EAS(x) (x == 26)
+#define isLB_EAT(x) (x == 27)
+#define isLB_EAX(x) (x == 28)
+#define isLB_EA_AL(x) (x == 15)
+#define isLB_EA_BA(x) (x == 16)
+#define isLB_EA_CL(x) (x == 17)
+#define isLB_EA_CM(x) (x == 21)
+#define isLB_EA_EB(x) (x == 18)
+#define isLB_EA_EX(x) (x == 28)
+#define isLB_EA_ExtPict_AL(x) (x == 30)
+#define isLB_EA_ExtPict_ID(x) (x == 31)
+#define isLB_EA_GL(x) (x == 19)
+#define isLB_EA_ID(x) (x == 20)
+#define isLB_EA_IN(x) (x == 22)
+#define isLB_EA_IS(x) (x == 26)
+#define isLB_EA_NS(x) (x == 27)
+#define isLB_EA_OP(x) (x == 23)
+#define isLB_EA_PO(x) (x == 24)
+#define isLB_EA_PR(x) (x == 25)
+#define isLB_EB(x) (isLB_scratch = (x), isLB_scratch == 18 || isLB_scratch == 29)
+#define isLB_EDGE(x) (x == 67)
+#define isLB_EEA(x) (x == 30)
+#define isLB_EEI(x) (x == 31)
+#define isLB_EM(x) (x == 32)
+#define isLB_EPA(x) (isLB_scratch = (x), isLB_scratch == 30 || isLB_scratch == 33)
+#define isLB_EPE(x) (x == 34)
+#define isLB_EPI(x) (isLB_scratch = (x), isLB_scratch == 9 || isLB_scratch == 31 || isLB_scratch == 35)
+#define isLB_EPN(x) (x == 36)
+#define isLB_EX(x) (isLB_scratch = (x), isLB_scratch == 28 || isLB_scratch == 34 || isLB_scratch == 37)
+#define isLB_E_Base(x) (isLB_scratch = (x), isLB_scratch == 18 || isLB_scratch == 29)
+#define isLB_E_Modifier(x) (x == 32)
 #define isLB_East_Asian_CP(x) (0)
 #define isLB_East_Asian_OP(x) (0)
-#define isLB_Exclamation(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 30 || isLB_scratch == 33)
-#define isLB_ExtPict(x) (isLB_scratch = (x), isLB_scratch == 6 || isLB_scratch == 14 || isLB_scratch == 25 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 29 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 32)
-#define isLB_ExtPict_AL(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 29)
-#define isLB_ExtPict_EX(x) (x == 30)
-#define isLB_ExtPict_ID(x) (isLB_scratch = (x), isLB_scratch == 6 || isLB_scratch == 27 || isLB_scratch == 31)
-#define isLB_ExtPict_NS(x) (x == 32)
-#define isLB_Extended_Pictographic(x) (isLB_scratch = (x), isLB_scratch == 6 || isLB_scratch == 14 || isLB_scratch == 25 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 29 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 32)
-#define isLB_GL(x) (isLB_scratch = (x), isLB_scratch == 15 || isLB_scratch == 34)
-#define isLB_Glue(x) (isLB_scratch = (x), isLB_scratch == 15 || isLB_scratch == 34)
-#define isLB_H2(x) (x == 35)
-#define isLB_H3(x) (x == 36)
-#define isLB_HL(x) (x == 37)
-#define isLB_HY(x) (x == 38)
-#define isLB_Hebrew_Letter(x) (x == 37)
-#define isLB_Hyphen(x) (x == 38)
-#define isLB_ID(x) (isLB_scratch = (x), isLB_scratch == 16 || isLB_scratch == 31 || isLB_scratch == 39)
-#define isLB_IN(x) (isLB_scratch = (x), isLB_scratch == 18 || isLB_scratch == 40)
-#define isLB_IS(x) (isLB_scratch = (x), isLB_scratch == 22 || isLB_scratch == 41)
-#define isLB_Ideographic(x) (isLB_scratch = (x), isLB_scratch == 16 || isLB_scratch == 31 || isLB_scratch == 39)
-#define isLB_Infix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 22 || isLB_scratch == 41)
-#define isLB_Inseparable(x) (isLB_scratch = (x), isLB_scratch == 18 || isLB_scratch == 40)
-#define isLB_JL(x) (x == 42)
-#define isLB_JT(x) (x == 43)
-#define isLB_JV(x) (x == 44)
-#define isLB_LF(x) (x == 45)
-#define isLB_Line_Feed(x) (x == 45)
-#define isLB_Mandatory_Break(x) (x == 4)
-#define isLB_NL(x) (x == 46)
-#define isLB_NS(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 32 || isLB_scratch == 47)
-#define isLB_NU(x) (x == 48)
-#define isLB_Next_Line(x) (x == 46)
-#define isLB_Nonstarter(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 32 || isLB_scratch == 47)
-#define isLB_Numeric(x) (x == 48)
-#define isLB_OP(x) (isLB_scratch = (x), isLB_scratch == 19 || isLB_scratch == 49)
-#define isLB_Open_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 19 || isLB_scratch == 49)
-#define isLB_PO(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 50)
-#define isLB_PR(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 51)
-#define isLB_Pf_QU(x) (0)
-#define isLB_Pi_QU(x) (0)
-#define isLB_Postfix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 50)
-#define isLB_Prefix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 51)
-#define isLB_QU(x) (x == 52)
-#define isLB_Quotation(x) (x == 52)
-#define isLB_RI(x) (x == 53)
-#define isLB_Regional_Indicator(x) (x == 53)
-#define isLB_SP(x) (x == 54)
-#define isLB_SY(x) (x == 55)
-#define isLB_Space(x) (x == 54)
-#define isLB_VF(x) (0)
-#define isLB_VI(x) (0)
-#define isLB_Virama(x) (0)
-#define isLB_Virama_Final(x) (0)
-#define isLB_WJ(x) (x == 56)
-#define isLB_Word_Joiner(x) (x == 56)
-#define isLB_ZW(x) (x == 57)
-#define isLB_ZWJ(x) (x == 58)
-#define isLB_ZWSpace(x) (x == 57)
+#define isLB_Exclamation(x) (isLB_scratch = (x), isLB_scratch == 28 || isLB_scratch == 34 || isLB_scratch == 37)
+#define isLB_ExtPict(x) (isLB_scratch = (x), isLB_scratch == 9 || isLB_scratch == 18 || isLB_scratch == 29 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 33 || isLB_scratch == 34 || isLB_scratch == 35 || isLB_scratch == 36)
+#define isLB_ExtPict_AL(x) (isLB_scratch = (x), isLB_scratch == 30 || isLB_scratch == 33)
+#define isLB_ExtPict_EX(x) (x == 34)
+#define isLB_ExtPict_ID(x) (isLB_scratch = (x), isLB_scratch == 9 || isLB_scratch == 31 || isLB_scratch == 35)
+#define isLB_ExtPict_NS(x) (x == 36)
+#define isLB_Extended_Pictographic(x) (isLB_scratch = (x), isLB_scratch == 9 || isLB_scratch == 18 || isLB_scratch == 29 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 33 || isLB_scratch == 34 || isLB_scratch == 35 || isLB_scratch == 36)
+#define isLB_GL(x) (isLB_scratch = (x), isLB_scratch == 19 || isLB_scratch == 38)
+#define isLB_Glue(x) (isLB_scratch = (x), isLB_scratch == 19 || isLB_scratch == 38)
+#define isLB_H2(x) (x == 39)
+#define isLB_H3(x) (x == 40)
+#define isLB_HL(x) (x == 41)
+#define isLB_HY(x) (x == 42)
+#define isLB_Hebrew_Letter(x) (x == 41)
+#define isLB_Hyphen(x) (x == 42)
+#define isLB_ID(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 35 || isLB_scratch == 43)
+#define isLB_IN(x) (isLB_scratch = (x), isLB_scratch == 22 || isLB_scratch == 44)
+#define isLB_IS(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 45)
+#define isLB_Ideographic(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 35 || isLB_scratch == 43)
+#define isLB_Infix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 45)
+#define isLB_Inseparable(x) (isLB_scratch = (x), isLB_scratch == 22 || isLB_scratch == 44)
+#define isLB_JL(x) (x == 46)
+#define isLB_JT(x) (x == 47)
+#define isLB_JV(x) (x == 48)
+#define isLB_LF(x) (x == 49)
+#define isLB_Line_Feed(x) (x == 49)
+#define isLB_Mandatory_Break(x) (x == 7)
+#define isLB_NL(x) (x == 50)
+#define isLB_NS(x) (isLB_scratch = (x), isLB_scratch == 27 || isLB_scratch == 36 || isLB_scratch == 51)
+#define isLB_NU(x) (x == 52)
+#define isLB_Next_Line(x) (x == 50)
+#define isLB_Nonstarter(x) (isLB_scratch = (x), isLB_scratch == 27 || isLB_scratch == 36 || isLB_scratch == 51)
+#define isLB_Numeric(x) (x == 52)
+#define isLB_OP(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 53)
+#define isLB_Open_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 53)
+#define isLB_PO(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 56)
+#define isLB_PR(x) (isLB_scratch = (x), isLB_scratch == 25 || isLB_scratch == 57)
+#define isLB_Pf(x) (x == 54)
+#define isLB_PfQ(x) (x == 54)
+#define isLB_Pf_QU(x) (x == 54)
+#define isLB_Pi(x) (x == 55)
+#define isLB_PiQ(x) (x == 55)
+#define isLB_Pi_QU(x) (x == 55)
+#define isLB_Postfix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 56)
+#define isLB_Prefix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 25 || isLB_scratch == 57)
+#define isLB_QU(x) (isLB_scratch = (x), isLB_scratch == 54 || isLB_scratch == 55 || isLB_scratch == 58)
+#define isLB_Quotation(x) (isLB_scratch = (x), isLB_scratch == 54 || isLB_scratch == 55 || isLB_scratch == 58)
+#define isLB_RI(x) (x == 59)
+#define isLB_Regional_Indicator(x) (x == 59)
+#define isLB_SP(x) (x == 60)
+#define isLB_SY(x) (x == 61)
+#define isLB_Space(x) (x == 60)
+#define isLB_VF(x) (x == 62)
+#define isLB_VI(x) (x == 63)
+#define isLB_Virama(x) (x == 63)
+#define isLB_Virama_Final(x) (x == 62)
+#define isLB_WJ(x) (x == 64)
+#define isLB_Word_Joiner(x) (x == 64)
+#define isLB_ZW(x) (x == 65)
+#define isLB_ZWJ(x) (x == 66)
+#define isLB_ZWSpace(x) (x == 65)
 #define isLB_u(x) (0)
 
 
@@ -193215,134 +196318,150 @@ static const U8 GCB_dfa_table[] = {
 #define LB_NU_then_SY_or_IS_v_PO_or_PR                20
 
 
-static const U8 LB_table[61][61] = {
-   /* The comment rows give Unicode's rule number that applies to the cell immediately above it, except it is left blank for cells populated by the table's default rule.  ^ and $ stand for their respective edges;
-    * 'CEE' stands for 'Cn_ExtPict_ExtPict_ID'; 'EAA' stands for 'EA_AL'; 'EAB' stands for 'EA_BA'; 'EAC' stands for 'EA_CL'; 'EAE' stands for 'EA_EB'; 'EAG' stands for 'EA_GL'; 'EAI' stands for 'EA_ID'; 'EAM'
-    * stands for 'EA_CM'; 'EAN' stands for 'EA_IN'; 'EAO' stands for 'EA_OP'; 'EAP' stands for 'EA_PO'; 'EAR' stands for 'EA_PR'; 'EAS' stands for 'EA_IS'; 'EAT' stands for 'EA_NS'; 'EAX' stands for 'EA_EX'; 'EEA'
-    * stands for 'EA_ExtPict_AL'; 'EEI' stands for 'EA_ExtPict_ID'; 'EPA' stands for 'ExtPict_AL'; 'EPE' stands for 'ExtPict_EX'; 'EPI' stands for 'ExtPict_ID'; 'EPN' stands for 'ExtPict_NS'; u stands for "unused
-    * in this Unicode release" (and the data in its row and column are garbage).  See perluniprops for the rest */
-/*       AL B2 BA BB BK CB CEE CL CM CP CR EAA EAB EAC EAE EAG EAI EAM EAN EAO EAP EAR EAS EAT EAX EB EEA EEI EM EPA EPE EPI EPN EX GL H2 H3 HL HY ID IN IS JL JT JV LF NL NS NU OP PO PR QU RI SP SY WJ ZW ZWJ $ u */
-/* AL*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       28    21     6 20     13  9 13  6  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30 24 24 19     7 13 11  7   9 3
-/* B2*/ { 1, 0, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//          17 21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/* BA*/ { 8, 8, 0, 8, 0, 1,  8, 0, 0, 0, 0,  8,  0,  0,  8,  8,  8,  0,  0,  8,  8,  8,  0,  0,  0, 8,  8,  8, 8,  8,  0,  8,  0, 0, 8, 8, 8, 8, 0, 8, 0, 0, 8, 8, 8, 0, 0, 0, 8, 8, 8, 8, 0, 8, 0, 0, 0, 0,  0,1,0 },
-//       21 21 21 21  6 20  21 13  9 13  6  21  21  13  21  21  21   9  22  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 21 21 21 21 21 21 22 13 21 21 21  6  6 21 21 21 21 21 19 21  7 13 11  7   9 3
-/* BB*/ { 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       21 21 21 21  6 20  21 13  9 13  6  21  21  13  21 12a  21   9  21  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 12 21 21 21 21 21 21 13 21 21 21  6  6 21 21 21 21 21 19 21  7 13 11  7   9 3
-/* BK*/ { 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
-//        4  4  4  4  4  4   4  4  4  4  4   4   4   4   4   4   4   4   4   4   4   4   4   4   4  4   4   4  4   4   4   4   4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4   4 3
-/* CB*/ { 1, 1, 1, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  1,  0,  1,  0,  1,  1,  1,  1,  0,  1,  0, 1,  1,  1, 1,  1,  0,  1,  1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       20 20 20 20  6 20  20 13  9 13  6  20  20  13  20 12a  20   9  20  20  20  20  13  20  13 20  20  20 20  20  13  20  20 13 12 20 20 20 20 20 20 13 20 20 20  6  6 20 20 20 20 20 19 20  7 13 11  7   9 3
-/*CEE*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13            30      13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/* CL*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1, 11, 11,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,11,11, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      25  25  13  16  13                    13      16 13 12          21    22 13           6  6 16       25 25 19     7 13 11  7   9 3
-/* CM*/ { 5, 5, 2, 5, 0, 5,  5, 2, 2, 2, 0,  5,  2,  2,  5,  2,  5,  2,  2,  5,  5,  5,  2,  2,  2, 5,  5,  5, 5,  5,  2,  5,  2, 2, 2, 5, 5, 5, 2, 5, 2, 2, 5, 5, 5, 0, 0, 2, 5, 5, 5, 5, 2, 5, 0, 2, 2, 0,  2,1,0 },
-//        9  9  9  9  6  9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9  9  9  9  9  9  9  9  9  6  6  9  9  9  9  9  9  9  7  9  9  7   9 3
-/* CP*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 11, 11,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,11,11, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       30    21     6 20     13  9 13  6  30  21  13     12a       9  22      25  25  13  16  13     30         30  13      16 13 12       30 21    22 13           6  6 16 30    25 25 19     7 13 11  7   9 3
-/* CR*/ { 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
-//        5  5  5  5  5  5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5 3
-/*EAA*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       28    21     6 20     13  9 13  6  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30 24 24 19     7 13 11  7   9 3
-/*EAB*/ { 8, 8, 0, 8, 0, 1,  8, 0, 0, 0, 0,  8,  0,  0,  8,  8,  8,  0,  0,  8,  8,  8,  0,  0,  0, 8,  8,  8, 8,  8,  0,  8,  0, 0, 8, 8, 8, 8, 0, 8, 0, 0, 8, 8, 8, 0, 0, 0, 8, 8, 8, 8, 0, 8, 0, 0, 0, 0,  0,1,0 },
-//       21 21 21 21  6 20  21 13  9 13  6  21  21  13  21  21  21   9  22  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 21 21 21 21 21 21 22 13 21 21 21  6  6 21 21 21 21 21 19 21  7 13 11  7   9 3
-/*EAC*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1, 11, 11,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,11,11, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      25  25  13  16  13                    13      16 13 12          21    22 13           6  6 16       25 25 19     7 13 11  7   9 3
-/*EAE*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13            30      13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/*EAG*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       12 12 12 12  6 12  12 12  9 12  6  12  12  12  12  12  12   9  12  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12 12 12 12 12 12 12 12 12  6  6 12 12 12 12 12 12 12  7 12 11  7   9 3
-/*EAI*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/*EAM*/ { 5, 5, 2, 5, 0, 5,  5, 2, 2, 2, 0,  5,  2,  2,  5,  2,  5,  2,  2,  5,  5,  5,  2,  2,  2, 5,  5,  5, 5,  5,  2,  5,  2, 2, 2, 5, 5, 5, 2, 5, 2, 2, 5, 5, 5, 0, 0, 2, 5, 5, 5, 5, 2, 5, 0, 2, 2, 0,  2,1,0 },
-//        9  9  9  9  6  9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9  9  9  9  9  9  9  9  9  6  6  9  9  9  9  9  9  9  7  9  9  7   9 3
-/*EAN*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/*EAO*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       14 14 14 14  6 14  14 13  9 13  6  14  14  13  14 12a  14   9  14  14  14  14  13  14  13 14  14  14 14  14  13  14  14 13 12 14 14 14 14 14 14 13 14 14 14  6  6 14 14 14 14 14 14 14  7 13 11  7   9 3
-/*EAP*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0, 20,  1,  1,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,20, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       24    21     6 20     13  9 13  6  24  21  13     12a       9  22  25          13  21  13     24         24  13      21 13 12       24 21    22 13           6  6 21 25 25       19     7 13 11  7   9 3
-/*EAR*/ { 0, 1, 0, 1, 0, 1,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 20,  1,  1,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,20, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       24    21     6 20 23a 13  9 13  6  24  21  13 23a 12a 23a   9  22  25          13  21  13 23  24 23a 23  24  13 23a  21 13 12 27 27 24 21 23 22 13 27 27 27  6  6 21 25 25       19     7 13 11  7   9 3
-/*EAS*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 14, 14,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,17, 1,14,14, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       29    21     6 20     13  9 13  6  29  21  13     12a       9  22      25  25  13  21  13     29         29  13      21 13 12       29 21    22 13           6  6 21 25    25 25 19     7 13 11  7   9 3
-/*EAT*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/*EAX*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/* EB*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13            30      13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/*EEA*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       28    21     6 20     13  9 13  6  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30 24 24 19     7 13 11  7   9 3
-/*EEI*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/* EM*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/*EPA*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       28    21     6 20     13  9 13  6  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30 24 24 19     7 13 11  7   9 3
-/*EPE*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/*EPI*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/*EPN*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/* EX*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/* GL*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       12 12 12 12  6 12  12 12  9 12  6  12  12  12  12  12  12   9  12  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12 12 12 12 12 12 12 12 12  6  6 12 12 12 12 12 12 12  7 12 11  7   9 3
-/* H2*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26 26  6  6 21       27    19     7 13 11  7   9 3
-/* H3*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26     6  6 21       27    19     7 13 11  7   9 3
-/* HL*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       28    21     6 20     13  9 13  6  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30 24 24 19     7 13 11  7   9 3
-/* HY*/ { 8, 8, 0, 8, 0, 1,  8, 0, 0, 0, 0,  8,  0,  0,  8,  8,  8,  0,  0,  8,  8,  8,  0,  0,  0, 8,  8,  8, 8,  8,  0,  8,  0, 0, 8, 8, 8, 8, 0, 8, 0, 0, 8, 8, 8, 0, 0, 0, 0, 8, 8, 8, 0, 8, 0, 0, 0, 0,  0,1,0 },
-//       21 21 21 21  6 20  21 13  9 13  6  21  21  13  21  21  21   9  22  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 21 21 21 21 21 21 22 13 21 21 21  6  6 21 25 21 21 21 19 21  7 13 11  7   9 3
-/* ID*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21       23    19     7 13 11  7   9 3
-/* IN*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/* IS*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 14, 14,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,17, 1,14,14, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       29    21     6 20     13  9 13  6  29  21  13     12a       9  22      25  25  13  21  13     29         29  13      21 13 12       29 21    22 13           6  6 21 25    25 25 19     7 13 11  7   9 3
-/* JL*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      27      13  21  13                    13      21 13 12 26 26    21    22 13 26    26  6  6 21       27    19     7 13 11  7   9 3
-/* JT*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26     6  6 21       27    19     7 13 11  7   9 3
-/* JV*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26 26  6  6 21       27    19     7 13 11  7   9 3
-/* LF*/ { 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
-//        5  5  5  5  5  5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5 3
-/* NL*/ { 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
-//        5  5  5  5  5  5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5 3
-/* NS*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19     7 13 11  7   9 3
-/* NU*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       23    21     6 20     13  9 13  6  23  21  13     12a       9  22      25  25  13  21  13     23         23  13      21 13 12       23 21    22 13           6  6 21 25 30 25 25 19     7 13 11  7   9 3
-/* OP*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       14 14 14 14  6 14  14 13  9 13  6  14  14  13  14 12a  14   9  14  14  14  14  13  14  13 14  14  14 14  14  13  14  14 13 12 14 14 14 14 14 14 13 14 14 14  6  6 14 14 14 14 14 14 14  7 13 11  7   9 3
-/* PO*/ { 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  1,  0,  1,  0,  0, 20,  1,  1,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,20, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       24    21     6 20     13  9 13  6  24  21  13     12a       9  22  25          13  21  13     24         24  13      21 13 12       24 21    22 13           6  6 21 25 25       19     7 13 11  7   9 3
-/* PR*/ { 0, 1, 0, 1, 0, 1,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 20,  1,  1,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,20, 1, 1, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//       24    21     6 20 23a 13  9 13  6  24  21  13 23a 12a 23a   9  22  25          13  21  13 23  24 23a 23  24  13 23a  21 13 12 27 27 24 21 23 22 13 27 27 27  6  6 21 25 25       19     7 13 11  7   9 3
-/* QU*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       19 19 19 19  6 19  19 13  9 13  6  19  19  13  19 12a  19   9  19  15  19  19  13  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 13 19 19 19  6  6 19 19 15 19 19 19 19  7 13 11  7   9 3
-/* RI*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0,26, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19 30  7 13 11  7   9 3
-/* SP*/ {29,45,29,29, 0,29, 29,23,29,23, 0, 29, 29, 23, 29, 29, 29, 29, 29, 36, 29, 29, 23, 54, 23,29, 29, 29,29, 29, 23, 29, 54,23,29,29,29,29,29,29,29,23,29,29,29, 0, 0,54,29,36,29,29,29,29, 0,23,23, 0, 29,1,0 },
-//        8  8  8  8  6  8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8  8  8  8  8  7  8  8  7   8 3
-/* SY*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1, 14, 14,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,17, 1,14,14, 0, 1, 0, 0, 0, 0,  0,1,0 },
-//             21     6 20     13  9 13  6      21  13     12a       9  22      25  25  13  21  13                    13      21 13 12       21 21    22 13           6  6 21 25    25 25 19     7 13 11  7   9 3
-/* WJ*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       11 11 11 11  6 11  11 11  9 11  6  11  11  11  11  11  11   9  11  11  11  11  11  11  11 11  11  11 11  11  11  11  11 11 11 11 11 11 11 11 11 11 11 11 11  6  6 11 11 11 11 11 11 11  7 11 11  7   9 3
-/* ZW*/ { 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0,  1,1,0 },
-//        8  8  8  8  6  8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8  8  8  8  8  7  8  8  7   8 3
-/*ZWJ*/ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
-//       8a 8a 8a 8a  6 8a  8a 8a 8a 8a  6  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a 8a  8a  8a 8a  8a  8a  8a  8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a  6  6 8a 8a 8a 8a 8a 8a 8a  7 8a 8a  7  8a 3
-/* ^ */ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,0,0 },
-//        2  2  2  2  2  2   2  2  2  2  2   2   2   2   2   2   2   2   2   2   2   2   2   2   2  2   2   2  2   2   2   2   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2   2 2
-/* u */ { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,0,0 }
+static const U8 LB_table[69][69] = {
+   /* The comment rows give Unicode's rule number that applies to the cell immediately above it, except it is left blank for cells populated by the table's default rule.  ^ and $ stand for their respective edges; 'CEE' stands for
+    * 'Cn_ExtPict_ExtPict_ID'; 'DCA' stands for 'Dotted_Circle_AL'; 'EAA' stands for 'EA_AL'; 'EAB' stands for 'EA_BA'; 'EAC' stands for 'EA_CL'; 'EAE' stands for 'EA_EB'; 'EAG' stands for 'EA_GL'; 'EAI' stands for 'EA_ID'; 'EAM' stands for
+    * 'EA_CM'; 'EAN' stands for 'EA_IN'; 'EAO' stands for 'EA_OP'; 'EAP' stands for 'EA_PO'; 'EAR' stands for 'EA_PR'; 'EAS' stands for 'EA_IS'; 'EAT' stands for 'EA_NS'; 'EAX' stands for 'EA_EX'; 'EEA' stands for 'EA_ExtPict_AL'; 'EEI'
+    * stands for 'EA_ExtPict_ID'; 'EPA' stands for 'ExtPict_AL'; 'EPE' stands for 'ExtPict_EX'; 'EPI' stands for 'ExtPict_ID'; 'EPN' stands for 'ExtPict_NS'; 'PfQ' stands for 'Pf_QU'; 'PiQ' stands for 'Pi_QU'; u stands for "unused in this
+    * Unicode release" (and the data in its row and column are garbage).  See perluniprops for the rest */
+/*       AL AK AP AS B2 BA BB BK CB CEE CL CM CP CR DCA EAA EAB EAC EAE EAG EAI EAM EAN EAO EAP EAR EAS EAT EAX EB EEA EEI EM EPA EPE EPI EPN EX GL H2 H3 HL HY ID IN IS JL JT JV LF NL NS NU OP PfQ PiQ PO PR QU RI SP SY VF VI WJ ZW ZWJ $ u */
+/* AL*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20     13  9 13  6  28  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30  19  19 24 24 19     7 13       11  7   9 3
+/* AK*/ { 1, 5, 1, 5, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  5,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//          28    28    21     6 20     13  9 13  6 28a      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13 28 28 11  7   9 3
+/* AP*/ { 1, 0, 1, 0, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//          28    28    21     6 20     13  9 13  6 28a      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* AS*/ { 1, 5, 1, 5, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  5,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//          28    28    21     6 20     13  9 13  6 28a      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13 28 28 11  7   9 3
+/* B2*/ { 1, 1, 1, 1, 0, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                   17 21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* BA*/ {14,14,14,14,14, 0,14, 0, 1, 14, 0, 0, 0, 0, 14, 14,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,  0,14, 14, 14,14, 14,  0, 14,  0, 0,14,14,14,14, 0,14, 0, 0,14,14,14, 0, 0, 0,14,14,  0,  0,14,14, 0,14, 0, 0,14,14, 0, 0,  0,1,0 },
+//       21 21 21 21 21 21 21  6 20  21 13  9 13  6  21  21  21  13  21  21  21   9  22  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 21 21 21 21 21 21 22 13 21 21 21  6  6 21 21 21  19  19 21 21 19 21  7 13 21 21 11  7   9 3
+/* BB*/ { 0, 0, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       21 21 21 21 21 21 21  6 20  21 13  9 13  6  21  21  21  13  21 12a  21   9  21  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 12 21 21 21 21 21 21 13 21 21 21  6  6 21 21 21  19  19 21 21 19 21  7 13 21 21 11  7   9 3
+/* BK*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        4  4  4  4  4  4  4  4  4   4  4  4  4  4   4   4   4   4   4   4   4   4   4   4   4   4   4   4   4  4   4   4  4   4   4   4   4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4   4   4  4  4  4  4  4  4  4  4  4  4   4 3
+/* CB*/ { 1, 1, 1, 1, 1, 1, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  1,  0,  1,  0,  1,  0,  1,  1,  1,  1,  0,  1,  0, 1,  1,  1, 1,  1,  0,  1,  1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       20 20 20 20 20 20 20  6 20  20 13  9 13  6  20  20  20  13  20 12a  20   9  20  20  20  20  13  20  13 20  20  20 20  20  13  20  20 13 12 20 20 20 20 20 20 13 20 20 20  6  6 20 20 20  19  19 20 20 19 20  7 13 20 20 11  7   9 3
+/*CEE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13            30      13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/* CL*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      25  25  13  16  13                    13      16 13 12          21    22 13           6  6 16        19  19 25 25 19     7 13       11  7   9 3
+/* CM*/ {11,11,11,11,11, 8,11, 0,11, 11, 8, 8, 8, 0, 11, 11,  8,  8, 11,  8, 11,  8,  8, 11, 11, 11,  8,  8,  8,11, 11, 11,11, 11,  8, 11,  8, 8, 8,11,11,11, 8,11, 8, 8,11,11,11, 0, 0, 8,11,11,  8,  8,11,11, 8,11, 0, 8,11,11, 8, 0,  8,1,0 },
+//        9  9  9  9  9  9  9  6  9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9  9  9  9  9  9  9  9  9  6  6  9  9  9   9   9  9  9  9  9  7  9  9  9  9  7   9 3
+/* CP*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       30             21     6 20     13  9 13  6  30  30  21  13     12a       9  22      25  25  13  16  13     30         30  13      16 13 12       30 21    22 13           6  6 16 30     19  19 25 25 19     7 13       11  7   9 3
+/* CR*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        5  5  5  5  5  5  5  5  5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5  5  5  5  5   5 3
+/*DCA*/ { 0, 5, 1, 5, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       28 28    28    21     6 20     13  9 13  6  28  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30  19  19 24 24 19     7 13 28 28 11  7   9 3
+/*EAA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20     13  9 13  6  28  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30  19  19 24 24 19     7 13       11  7   9 3
+/*EAB*/ {14,14,14,14,14, 0,14, 0, 1, 14, 0, 0, 0, 0, 14, 14,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,  0,14, 14, 14,14, 14,  0, 14,  0, 0,14,14,14,14, 0,14, 0, 0,14,14,14, 0, 0, 0,14,14,  0,  0,14,14, 0,14, 0, 0,14,14, 0, 0,  0,1,0 },
+//       21 21 21 21 21 21 21  6 20  21 13  9 13  6  21  21  21  13  21  21  21   9  22  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 21 21 21 21 21 21 22 13 21 21 21  6  6 21 21 21  19  19 21 21 19 21  7 13 21 21 11  7   9 3
+/*EAC*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      25  25  13  16  13                    13      16 13 12          21    22 13           6  6 16        19  19 25 25 19     7 13       11  7   9 3
+/*EAE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13            30      13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/*EAG*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       12 12 12 12 12 12 12  6 12  12 12  9 12  6  12  12  12  12  12  12  12   9  12  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12 12 12 12 12 12 12 12 12  6  6 12 12 12  12  12 12 12 12 12  7 12 12 12 11  7   9 3
+/*EAI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/*EAM*/ {11,11,11,11,11, 8,11, 0,11, 11, 8, 8, 8, 0, 11, 11,  8,  8, 11,  8, 11,  8,  8, 11, 11, 11,  8,  8,  8,11, 11, 11,11, 11,  8, 11,  8, 8, 8,11,11,11, 8,11, 8, 8,11,11,11, 0, 0, 8,11,11,  8,  8,11,11, 8,11, 0, 8,11,11, 8, 0,  8,1,0 },
+//        9  9  9  9  9  9  9  6  9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9  9  9  9  9  9  9  9  9  6  6  9  9  9   9   9  9  9  9  9  7  9  9  9  9  7   9 3
+/*EAN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/*EAO*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       14 14 14 14 14 14 14  6 14  14 13  9 13  6  14  14  14  13  14 12a  14   9  14  14  14  14  13  14  13 14  14  14 14  14  13  14  14 13 12 14 14 14 14 14 14 13 14 14 14  6  6 14 14 14  14  14 14 14 14 14  7 13 14 14 11  7   9 3
+/*EAP*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0, 26,  1,  1,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,26,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20     13  9 13  6  24  24  21  13     12a       9  22  25          13  21  13     24         24  13      21 13 12       24 21    22 13           6  6 21 25 25  19  19       19     7 13       11  7   9 3
+/*EAR*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 26,  1,  1,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,26,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20 23a 13  9 13  6  24  24  21  13 23a 12a 23a   9  22  25          13  21  13 23  24 23a 23  24  13 23a  21 13 12 27 27 24 21 23 22 13 27 27 27  6  6 21 25 25  19  19       19     7 13       11  7   9 3
+/*EAS*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 20, 20,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,23, 1,  0,  0,20,20, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       29             21     6 20     13  9 13  6  29  29  21  13     12a       9  22      25  25  13  21  13     29         29  13      21 13 12       29 21    22 13           6  6 21 25     19  19 25 25 19     7 13       11  7   9 3
+/*EAT*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/*EAX*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* EB*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13            30      13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/*EEA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20     13  9 13  6  28  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30  19  19 24 24 19     7 13       11  7   9 3
+/*EEI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/* EM*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/*EPA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20     13  9 13  6  28  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30  19  19 24 24 19     7 13       11  7   9 3
+/*EPE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/*EPI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/*EPN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* EX*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* GL*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       12 12 12 12 12 12 12  6 12  12 12  9 12  6  12  12  12  12  12  12  12   9  12  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12 12 12 12 12 12 12 12 12  6  6 12 12 12  12  12 12 12 12 12  7 12 12 12 11  7   9 3
+/* H2*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26 26  6  6 21        19  19 27    19     7 13       11  7   9 3
+/* H3*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26     6  6 21        19  19 27    19     7 13       11  7   9 3
+/* HL*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20     13  9 13  6  28  28  21  13     12a       9  22      24  24  13  21  13     28         28  13      21 13 12       28 21    22 13           6  6 21 23 30  19  19 24 24 19     7 13       11  7   9 3
+/* HY*/ {14,14,14,14,14, 0,14, 0, 1, 14, 0, 0, 0, 0, 14, 14,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,  0,14, 14, 14,14, 14,  0, 14,  0, 0,14,14,14,14, 0,14, 0, 0,14,14,14, 0, 0, 0, 0,14,  0,  0,14,14, 0,14, 0, 0,14,14, 0, 0,  0,1,0 },
+//       21 21 21 21 21 21 21  6 20  21 13  9 13  6  21  21  21  13  21  21  21   9  22  21  21  21  13  21  13 21  21  21 21  21  13  21  21 13 21 21 21 21 21 21 22 13 21 21 21  6  6 21 25 21  19  19 21 21 19 21  7 13 21 21 11  7   9 3
+/* ID*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22     23a      13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19 23    19     7 13       11  7   9 3
+/* IN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* IS*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 20, 20,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,23, 1,  0,  0,20,20, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       29             21     6 20     13  9 13  6  29  29  21  13     12a       9  22      25  25  13  21  13     29         29  13      21 13 12       29 21    22 13           6  6 21 25     19  19 25 25 19     7 13       11  7   9 3
+/* JL*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      27      13  21  13                    13      21 13 12 26 26    21    22 13 26    26  6  6 21        19  19 27    19     7 13       11  7   9 3
+/* JT*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26     6  6 21        19  19 27    19     7 13       11  7   9 3
+/* JV*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      27      13  21  13                    13      21 13 12          21    22 13    26 26  6  6 21        19  19 27    19     7 13       11  7   9 3
+/* LF*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        5  5  5  5  5  5  5  5  5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5  5  5  5  5   5 3
+/* NL*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        5  5  5  5  5  5  5  5  5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5  5  5  5  5   5 3
+/* NS*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* NU*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       23             21     6 20     13  9 13  6  23  23  21  13     12a       9  22      25  25  13  21  13     23         23  13      21 13 12       23 21    22 13           6  6 21 25 30  19  19 25 25 19     7 13       11  7   9 3
+/* OP*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       14 14 14 14 14 14 14  6 14  14 13  9 13  6  14  14  14  13  14 12a  14   9  14  14  14  14  13  14  13 14  14  14 14  14  13  14  14 13 12 14 14 14 14 14 14 13 14 14 14  6  6 14 14 14  14  14 14 14 14 14  7 13 14 14 11  7   9 3
+/*PfQ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       19 19 19 19 19 19 19  6 19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  13  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 13 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13 19 19 11  7   9 3
+/*PiQ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       19 19 19 19 19 19 19  6 19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  13  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 13 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13 19 19 11  7   9 3
+/* PO*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0, 26,  1,  1,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,26,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20     13  9 13  6  24  24  21  13     12a       9  22  25          13  21  13     24         24  13      21 13 12       24 21    22 13           6  6 21 25 25  19  19       19     7 13       11  7   9 3
+/* PR*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 26,  1,  1,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,26,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20 23a 13  9 13  6  24  24  21  13 23a 12a 23a   9  22  25          13  21  13 23  24 23a 23  24  13 23a  21 13 12 27 27 24 21 23 22 13 27 27 27  6  6 21 25 25  19  19       19     7 13       11  7   9 3
+/* QU*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       19 19 19 19 19 19 19  6 19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  13  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 13 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13 19 19 11  7   9 3
+/* RI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0,32, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19 30  7 13       11  7   9 3
+/* SP*/ {35,35,35,35,42,35,35, 0,35, 35,29,35,29, 0, 35, 35, 35, 29, 35, 35, 35, 35, 35, 35, 35, 35, 29, 51, 29,35, 35, 35,35, 35, 29, 35, 51,29,35,35,35,35,35,35,35,29,35,35,35, 0, 0,51,35,35, 60, 35,35,35,35,35, 0,29,35,35,29, 0, 35,1,0 },
+//        8  8  8  8  8  8  8  6  8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8   8   8  8  8  8  8  7  8  8  8  8  7   8 3
+/* SY*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 20, 20,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,23, 1,  0,  0,20,20, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22      25  25  13  21  13                    13      21 13 12       21 21    22 13           6  6 21 25     19  19 25 25 19     7 13       11  7   9 3
+/* VF*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20     13  9 13  6          21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* VI*/ { 1, 2, 1, 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  2,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//          28          21     6 20     13  9 13  6 28a      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21        19  19       19     7 13       11  7   9 3
+/* WJ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       11 11 11 11 11 11 11  6 11  11 11  9 11  6  11  11  11  11  11  11  11   9  11  11  11  11  11  11  11 11  11  11 11  11  11  11  11 11 11 11 11 11 11 11 11 11 11 11 11  6  6 11 11 11  11  11 11 11 11 11  7 11 11 11 11  7   9 3
+/* ZW*/ { 1, 1, 1, 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1,  1,  1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0,  1,1,0 },
+//        8  8  8  8  8  8  8  6  8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8   8   8  8  8  8  8  7  8  8  8  8  7   8 3
+/*ZWJ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       8a 8a 8a 8a 8a 8a 8a  6 8a  8a 8a 8a 8a  6  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a 8a  8a  8a 8a  8a  8a  8a  8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a  6  6 8a 8a 8a  8a  8a 8a 8a 8a 8a  7 8a 8a 8a 8a  7  8a 3
+/* ^ */ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,0,0 },
+//        2  2  2  2  2  2  2  2  2   2  2  2  2  2   2   2   2   2   2   2   2   2   2   2   2   2   2   2   2  2   2   2  2   2   2   2   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2   2   2  2  2  2  2  2  2  2  2  2  2   2 2
+/* u */ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,0,0 }
 };
 
 
@@ -193350,50 +196469,47 @@ static const U8 LB_dfa_table[] = {
 	/* [n] corresponds to the numbers in the above table's cells */
     0,	/* [0] placeholder */
     1,	/* [1] placeholder */
-    3,	/* [2] LB_CM_ZWJ_v_any (Rule LB9) */
+    15,	/* [2] LB_AKish_then_VI_v_AK_or_DOTTED (Rule LB28a) */
+    0,	/*	if matches, return 0 */
+    1,	/*	else return 1  (Rule LB31) */
+    14,	/* [5] LB_AKish_v_AKish_then_VF (Rule LB28a) */
+    0,	/*	if matches, return 0 */
+    1,	/*	else return 1  (Rule LB31) */
+    3,	/* [8] LB_CM_ZWJ_v_any (Rule LB9) */
     0,	/*	if matches, return 0 */
     0,	/*	else return 0  (Rules LB9,11,12,13,19,21,22) */
-    3,	/* [5] LB_CM_ZWJ_v_any (Rule LB9) */
+    3,	/* [11] LB_CM_ZWJ_v_any (Rule LB9) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rules LB20,31) */
-    10,	/* [8] LB_HL_then_HY_or_BA_v_any (Rule LB21) */
+    10,	/* [14] LB_HL_then_HY_or_BA_v_any (Rule LB21) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    13,	/* [11] LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR (Rule LB25) */
+    13,	/* [17] LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    20,	/* [14] LB_NU_then_SY_or_IS_v_PO_or_PR (Rule LB25) */
+    20,	/* [20] LB_NU_then_SY_or_IS_v_PO_or_PR (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    12,	/* [17] LB_NU_then_SY_or_IS_v_various (Rule LB25) */
+    12,	/* [23] LB_NU_then_SY_or_IS_v_various (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    11,	/* [20] LB_PR_or_PO_v_OP_or_HY_then_NU (Rule LB25) */
-    0,	/*	if matches, return 0 */
-    1,	/*	else return 1  (Rule LB31) */
-    2,	/* [23] LB_ZW_then_SP_v_any (Rule LB8) */
-    1,	/*	if matches, return 1 */
-    0,	/*	else return 0  (Rules LB11,13) */
-    16,	/* [26] LB_various_then_RI_v_RI (Rule LB30a) */
+    11,	/* [26] LB_PR_or_PO_v_OP_or_HY_then_NU (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
     2,	/* [29] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
-    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    0,	/*	else return 0  (Rules LB11,13) */
+    16,	/* [32] LB_various_then_RI_v_RI (Rule LB30a) */
     0,	/*	if matches, return 0 */
-    6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
-    0,	/*	if matches, return 0 */
-    1,	/*	else return 1  (Rule LB18) */
-    2,	/* [36] LB_ZW_then_SP_v_any (Rule LB8) */
+    1,	/*	else return 1  (Rule LB31) */
+    2,	/* [35] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
-    5,	/* 	else try LB_QU_then_SP_v_OP (Rule LB15) */
-    0,	/*	if matches, return 0 */
     6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB18) */
-    2,	/* [45] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [42] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
@@ -193402,13 +196518,22 @@ static const U8 LB_dfa_table[] = {
     9,	/* 	else try LB_B2_then_SP_v_B2 (Rule LB17) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB18) */
-    2,	/* [54] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [51] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
     6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
     0,	/*	if matches, return 0 */
     8,	/* 	else try LB_CL_or_CP_then_SP_v_NS (Rule LB16) */
+    0,	/*	if matches, return 0 */
+    1,	/*	else return 1  (Rule LB18) */
+    2,	/* [60] LB_ZW_then_SP_v_any (Rule LB8) */
+    1,	/*	if matches, return 1 */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    0,	/*	if matches, return 0 */
+    6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
+    0,	/*	if matches, return 0 */
+    7,	/* 	else try LB_any_v_PfQ_then_various (Rule LB15b) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule LB18) */
 };
@@ -193575,4 +196700,58 @@ static const U8 WB_dfa_table[] = {
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 /* Generated from:
+ * 7229a97216f54f7d47d5cff56fc8dbc185dcfe40db20533f8034a1215af787fe lib/Unicode/UCD.pm
+ * c289c5fbc632fe3d5f969b5592d5f7fbdbc4b01f0f1370a38b83df5f6b94310c lib/unicore/ArabicShaping.txt
+ * 2f0531dc6a2aafa7462c7f89008c2845ade52e51267ac5ba39339adeefb8fe53 lib/unicore/BidiBrackets.txt
+ * 8116a6eea6a7ff8c15b2cfda2d50cfe92fe90d05f95145daf09a510595a65aa5 lib/unicore/BidiMirroring.txt
+ * 443ee0524a775bf021777c296f5b591b5611c8aef6bc922887d27b0bc13892b5 lib/unicore/Blocks.txt
+ * 4e55acfdc32825a22e87670e9056a3bf94ad7c5400065778e9e10f8314372bcf lib/unicore/CaseFolding.txt
+ * 59d2d9e3dfdf0a999cf9dae11d594f053631222679a2f5710315ea07f7fe82af lib/unicore/CompositionExclusions.txt
+ * 04e16379344bdb9973cdb6f6bf0a5dd66f7cd41b014cd9f79d848768ae757256 lib/unicore/DAge.txt
+ * f55d0db69123431a7317868725b1fcbf1eab6b265d756d1bd7f0f6d9f9ee108b lib/unicore/DCoreProperties.txt
+ * 8875dccee2bc1a7c1fe568a3b502a9e78c9e0495afd96b6568b4294d0ed1f7e1 lib/unicore/DNormalizationProps.txt
+ * b08191401dc125f4e84ef262a95754faae6b737c79538e17ea9664a63434e94e lib/unicore/EastAsianWidth.txt
+ * 460a08f497d0f3e45aae734708848fadf1ced44b752971bac37c23da55b33aa9 lib/unicore/EquivalentUnifiedIdeograph.txt
+ * 8539c7fdb3e8cd9efcc04a420061fa56a74762a3cb60fc9962c26093c8944427 lib/unicore/HangulSyllableType.txt
+ * d34efea5bd5f219a1ec8a6eee728ac1efafd2dacba66a241e213457e2a9155f4 lib/unicore/IdStatus.txt
+ * 783276e24a28ccf767f1f6fc77b5704fdb06391634de3111c2d5798233c06b23 lib/unicore/IdType.txt
+ * fff409378d6d762ea319c98d75cec4e27e5161c5a2fe20f7c417896b448cc10d lib/unicore/IndicPositionalCategory.txt
+ * e6c343adaa55cda45f1ba6920f50afc5875c7603c002e123d8f98bde6ad0d4bb lib/unicore/IndicSyllabicCategory.txt
+ * 214ddb44864aef47109d68a9d4562b16f4e772b2553231e267f0d5e986817596 lib/unicore/Jamo.txt
+ * a55cdc118493491e0a9c885b48eda953a6258a1e218f6050a11891231c79683f lib/unicore/LineBreak.txt
+ * fbf0e640bab36e165c4da5b6a98bdd963fcb4f923b5097f26f6f7f18b9678698 lib/unicore/NameAliases.txt
+ * 7700f03419912fc58c26962b6252e2fcac135240a26925440aff6a4c8b714795 lib/unicore/NamedSequences.txt
+ * 871238e37e3be0696ec2bd0891119a041b052da1a84485eda05a5438724b223e lib/unicore/NormTest.txt
+ * 05672956317b6296bc2ec3d6cef1f6452b57ff4f2efc6dc55b0a19277d5fcfd1 lib/unicore/PropList.txt
+ * 4b7411fc592c4985e5f03643aa0bddfdfd45250ff1790d358926614d20e37652 lib/unicore/PropValueAliases.txt
+ * 64d74b44d7abbfde59ea33009615c9d5b373e30a4d9e2f1fd2686c0acebfbad3 lib/unicore/PropertyAliases.txt
+ * fdfd54237a2c0452ba1060571fd1e58fd46aeecdfda7c5b5be1b716dad755cec lib/unicore/ScriptExtensions.txt
+ * 0eacb65169ae6eb1d399cd70826b3da15fff19f6f586eecf819b70c83b1d9b32 lib/unicore/Scripts.txt
+ * 55a477efd933a52cd27e6a9bf70265bb2d8814af31aab07767abc8eb421f27ef lib/unicore/SpecialCasing.txt
+ * 2fc713e6a31a87c4850a37fe2caffa4218180fadb5de86b43a143ddb4581fb86 lib/unicore/UnicodeData.txt
+ * ea508e6cea31cd7e7da6f0eca1507e3d275daea4bc91ad49b6b59cd002ccee18 lib/unicore/VerticalOrientation.txt
+ * ed9c5e92fd0911ccbeeb63c97cb19c519ea272ff1112ce843abd991582dd848f lib/unicore/auxiliary/GCBTest.txt
+ * a7e52eee647e52dc210b8719b4d7037276f4b353810293d69377fc46374cec3f lib/unicore/auxiliary/GraphemeBreakProperty.txt
+ * ae7af38ceb2d34e8382b43f08abce0835b1d44aba3b98a1d17ea8f5252284376 lib/unicore/auxiliary/LBTest.txt
+ * eab56cc4b51eaa1adbb7f9c53e541c000ea86d1a342a726dd49be7d54dd9d1ba lib/unicore/auxiliary/SBTest.txt
+ * fc54feae22eab6e4fe0fca2e3f70168363106a0edf9e5dcdf71aa559a071c82c lib/unicore/auxiliary/SentenceBreakProperty.txt
+ * 69506b2253b8defb1f15b1476397376285cfda3bafd9304ee50d48bbfa0a2ab4 lib/unicore/auxiliary/WBTest.txt
+ * 0f5f68bdab1bac4a2bf6576530dca10a322eadbc980b386a7627c89929053dc5 lib/unicore/auxiliary/WordBreakProperty.txt
+ * d7aef489c8fe4c14f09ea5695200277c6b93ac82ac60845cdd2161b0d6835cc1 lib/unicore/emoji/emoji.txt
+ * b57884c59a3a5348d86faed39965bbddb4e4493d3c16c1ec378ec26bfb5821be lib/unicore/extracted/DBidiClass.txt
+ * f47f4a84614038c979f34a19b1ff69a39313482249fbedee62e28872de2ce029 lib/unicore/extracted/DBinaryProperties.txt
+ * b2e69512b1a96e26105f73e8af42bca6d2e40814683ba31615977f276d6734ff lib/unicore/extracted/DCombiningClass.txt
+ * 09dbdd309a380ec0e9a7fc5241feee22b3dbd16c55377091bd9ab4da19d0472f lib/unicore/extracted/DDecompositionType.txt
+ * 2f72d06b6b2c07767d41bce3f70cab5e0123afcfa7d51c0e674ad3024b13e471 lib/unicore/extracted/DEastAsianWidth.txt
+ * 760720ac034f96b630a3055879a744e0907184e8aa811e89ba34583a7a487e85 lib/unicore/extracted/DGeneralCategory.txt
+ * 1d555a898bd875f4ac5e805efeeb368db7a57c640bb55fa416219951888e59f8 lib/unicore/extracted/DJoinGroup.txt
+ * 2e0ed3733272299007cf0b76e84a8a653192d99a4429d2232fffcabccfd2d462 lib/unicore/extracted/DJoinType.txt
+ * 5263eca2003b6990bfcf063a1a6a792878658c5f542e410397340aca0715111c lib/unicore/extracted/DLineBreak.txt
+ * 0f22ca7770c836211e2b5390c6c9c3b5faae8e60cd8a59f244a43f9f5421cddd lib/unicore/extracted/DNumType.txt
+ * 120a010f7f95c2123ecb4d61313f2f2121abf9289f6426e992f963ec076ee811 lib/unicore/extracted/DNumValues.txt
+ * 2ee7c5e2d247bcc29579c428fcf9117c03e6b263ce9051dcfdf0691876027dd2 lib/unicore/mktables
+ * 717a52b0d6956654dafb6b1b1ad015c559112917d0d660e62fad541208fb01d2 lib/unicore/version
+ * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
+ * c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
+ * 2e8589642fd60367c19f1d86aaa693f3127b38b28ecbf25e2f9286b4ad2b12f0 regen/mk_invlists.pl
  * ex: set ro ft=c: */

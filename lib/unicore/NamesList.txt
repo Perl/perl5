@@ -1,14 +1,14 @@
 ; charset=UTF-8
-@@@	The Unicode Standard 15.0.0
-@@@+	U15M220815.lst
-	Unicode 15.0.0 final names list.
+@@@	The Unicode Standard 15.1.0
+@@@+	U15M230728.lst
+	Unicode 15.1.0 final names list.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		© 2022 Unicode®, Inc.
+@+		© 2023 Unicode®, Inc.
 	For terms of use, see https://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -188,6 +188,7 @@
 	= star
 	* can have five or six spokes
 	x (arabic five pointed star - 066D)
+	x (reference mark - 203B)
 	x (asterism - 2042)
 	x (low asterisk - 204E)
 	x (two asterisks aligned vertically - 2051)
@@ -206,10 +207,11 @@
 	x (light greek cross - 1F7A2)
 @		ASCII punctuation
 002C	COMMA
-	= decimal separator
+	= the use as decimal or thousands separator is locale dependent
 	x (arabic comma - 060C)
 	x (arabic decimal separator - 066B)
 	x (single low-9 quotation mark - 201A)
+	x (hypodiastole - 2E12)
 	x (reversed comma - 2E41)
 	x (medieval comma - 2E4C)
 	x (ideographic comma - 3001)
@@ -231,6 +233,7 @@
 	= period, dot, decimal point
 	* the use as decimal point is locale dependent
 	* may be rendered as a raised decimal point in old style numbers
+	x (middle dot - 00B7)
 	x (arabic full stop - 06D4)
 	x (one dot leader - 2024)
 	x (horizontal ellipsis - 2026)
@@ -250,9 +253,15 @@
 	~ 0030 FE00 short diagonal stroke form
 0031	DIGIT ONE
 0032	DIGIT TWO
+	x (latin letter two with stroke - 01BB)
+	x (turned digit two - 218A)
 0033	DIGIT THREE
+	x (turned digit three - 218B)
+	x (latin capital letter reversed open e - A7AB)
 0034	DIGIT FOUR
+	x (latin capital letter cuatrillo - A72C)
 0035	DIGIT FIVE
+	x (latin capital letter tone five - 01BC)
 0036	DIGIT SIX
 0037	DIGIT SEVEN
 0038	DIGIT EIGHT
@@ -296,6 +305,7 @@
 	x (double hyphen - 2E40)
 	x (katakana-hiragana double hyphen - 30A0)
 	x (modifier letter short equals sign - A78A)
+	x (small equals sign - FE66)
 	x (roman sextans sign - 10190)
 	x (heavy equals sign - 1F7F0)
 003E	GREATER-THAN SIGN
@@ -318,11 +328,14 @@
 	x (replacement character - FFFD)
 0040	COMMERCIAL AT
 	= at sign
+	= arroba (old Spanish unit of weight)
+	x (circled latin small letter a - 24D0)
 @		Uppercase Latin alphabet
 0041	LATIN CAPITAL LETTER A
 0042	LATIN CAPITAL LETTER B
 	x (script capital b - 212C)
 0043	LATIN CAPITAL LETTER C
+	x (greek capital lunate sigma symbol - 03F9)
 	x (double-struck capital c - 2102)
 	x (degree celsius - 2103)
 	x (black-letter capital c - 212D)
@@ -330,6 +343,7 @@
 0044	LATIN CAPITAL LETTER D
 	x (roman numeral five hundred - 216E)
 0045	LATIN CAPITAL LETTER E
+	x (latin capital letter open e - 0190)
 	x (euler constant - 2107)
 	x (script capital e - 2130)
 0046	LATIN CAPITAL LETTER F
@@ -362,6 +376,7 @@
 	x (script capital p - 2118)
 	x (double-struck capital p - 2119)
 0051	LATIN CAPITAL LETTER Q
+	x (cyrillic capital letter qa - 051A)
 	x (double-struck capital q - 211A)
 	x (rotated capital q - 213A)
 0052	LATIN CAPITAL LETTER R
@@ -374,6 +389,7 @@
 0056	LATIN CAPITAL LETTER V
 	x (roman numeral five - 2164)
 0057	LATIN CAPITAL LETTER W
+	x (cyrillic capital letter we - 051C)
 0058	LATIN CAPITAL LETTER X
 	x (roman numeral ten - 2169)
 0059	LATIN CAPITAL LETTER Y
@@ -399,6 +415,7 @@
 	x (modifier letter circumflex accent - 02C6)
 	x (combining circumflex accent - 0302)
 	x (caret - 2038)
+	x (logical and - 2227)
 	x (up arrowhead - 2303)
 005F	LOW LINE
 	= spacing underscore (1.0)
@@ -410,20 +427,31 @@
 	x (double low line - 2017)
 	x (combining conjoining macron below - FE2D)
 0060	GRAVE ACCENT
+	= backtick, backquote
 	* this is a spacing character
+	* in some technical contexts functions as opening quote, paired with apostrophe
+	x (acute accent - 00B4)
 	x (modifier letter grave accent - 02CB)
 	x (combining grave accent - 0300)
+	x (greek varia - 1FEF)
+	x (left single quotation mark - 2018)
 	x (reversed prime - 2035)
 @		Lowercase Latin alphabet
 0061	LATIN SMALL LETTER A
+	x (latin small letter alpha - 0251)
 0062	LATIN SMALL LETTER B
 0063	LATIN SMALL LETTER C
+	x (greek lunate sigma symbol - 03F2)
+	x (latin letter small capital c - 1D04)
 0064	LATIN SMALL LETTER D
+	x (cyrillic small letter komi de - 0501)
 0065	LATIN SMALL LETTER E
 	x (estimated symbol - 212E)
 	x (script small e - 212F)
 	x (latin small letter blackletter e - AB32)
 0066	LATIN SMALL LETTER F
+	x (latin small letter f with hook - 0192)
+	x (latin small letter lenis f - AB35)
 0067	LATIN SMALL LETTER G
 	x (latin small letter script g - 0261)
 	x (script small g - 210A)
@@ -437,6 +465,7 @@
 	x (mathematical italic small dotless i - 1D6A4)
 006A	LATIN SMALL LETTER J
 	x (latin small letter dotless j - 0237)
+	x (greek letter yot - 03F3)
 	x (mathematical italic small dotless j - 1D6A5)
 006B	LATIN SMALL LETTER K
 006C	LATIN SMALL LETTER L
@@ -446,22 +475,28 @@
 006E	LATIN SMALL LETTER N
 	x (superscript latin small letter n - 207F)
 006F	LATIN SMALL LETTER O
+	x (latin letter small capital o - 1D0F)
 	x (script small o - 2134)
 	x (latin small letter blackletter o - AB3D)
 0070	LATIN SMALL LETTER P
 0071	LATIN SMALL LETTER Q
+	x (cyrillic small letter qa - 051B)
 0072	LATIN SMALL LETTER R
 0073	LATIN SMALL LETTER S
 	x (latin small letter long s - 017F)
+	x (latin letter small capital s - A731)
 0074	LATIN SMALL LETTER T
 0075	LATIN SMALL LETTER U
 0076	LATIN SMALL LETTER V
 0077	LATIN SMALL LETTER W
+	x (cyrillic small letter we - 051D)
+	x (latin letter small capital w - 1D21)
 0078	LATIN SMALL LETTER X
 	x (multiplication sign - 00D7)
 0079	LATIN SMALL LETTER Y
 007A	LATIN SMALL LETTER Z
 	x (latin small letter z with stroke - 01B6)
+	x (latin letter small capital z - 1D22)
 @		ASCII punctuation and symbols
 007B	LEFT CURLY BRACKET
 	= opening curly bracket (1.0)
@@ -584,6 +619,7 @@
 	x (musical symbol cut time - 1D135)
 00A3	POUND SIGN
 	= pound sterling, Irish punt, lira, etc.
+	* not to be confused with the unit of weight
 	* glyph may have one or two crossbars, in distinction from 20A4
 	x (lira sign - 20A4)
 	x (turkish lira sign - 20BA)
@@ -596,6 +632,8 @@
 	= yuan sign (renminbi)
 	* glyph may have one or two crossbars, but the official symbol in Japan and China has two
 	* in native context, specific ideographs may be used for units of these currencies
+	x (latin capital letter y with stroke - 024E)
+	x (cyrillic capital letter straight u with stroke - 04B0)
 	x 5143
 	x 5186
 00A6	BROKEN BAR
@@ -670,8 +708,10 @@
 	# <super> 0033
 00B4	ACUTE ACCENT
 	* this is a spacing character
+	x (grave accent - 0060)
 	x (modifier letter prime - 02B9)
 	x (modifier letter acute accent - 02CA)
+	x (double acute accent - 02DD)
 	x (combining acute accent - 0301)
 	x (greek tonos - 0384)
 	x (greek oxia - 1FFD)
@@ -693,7 +733,6 @@
 	x (full stop - 002E)
 	x (dot above - 02D9)
 	x (greek ano teleia - 0387)
-	x (runic single punctuation - 16EB)
 	x (bullet - 2022)
 	x (one dot leader - 2024)
 	x (hyphenation point - 2027)
@@ -716,6 +755,7 @@
 00BA	MASCULINE ORDINAL INDICATOR
 	* Spanish
 	x (modifier letter small o - 1D52)
+	x (superscript zero - 2070)
 	x (numero sign - 2116)
 	# <super> 006F
 00BB	RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
@@ -736,8 +776,9 @@
 	= turned question mark
 	* Spanish
 	x (question mark - 003F)
+	x (inverted interrobang - 2E18)
 	x (reversed question mark - 2E2E)
-@		Letters
+@		Uppercase letters
 00C0	LATIN CAPITAL LETTER A WITH GRAVE
 	: 0041 0300
 00C1	LATIN CAPITAL LETTER A WITH ACUTE
@@ -753,6 +794,7 @@
 	: 0041 030A
 00C6	LATIN CAPITAL LETTER AE
 	= latin capital ligature ae (1.1)
+	x (cyrillic capital ligature a ie - 04D4)
 00C7	LATIN CAPITAL LETTER C WITH CEDILLA
 	: 0043 0327
 00C8	LATIN CAPITAL LETTER E WITH GRAVE
@@ -799,10 +841,12 @@
 	x (vector or cross product - 2A2F)
 	x (cancellation x - 1F5D9)
 	x (light saltire - 1F7A9)
-@		Letters
+@		Uppercase letters
 00D8	LATIN CAPITAL LETTER O WITH STROKE
 	= o slash
+	x (latin capital letter o with middle tilde - 019F)
 	x (empty set - 2205)
+	x (latin capital letter o with long stroke overlay - A74A)
 00D9	LATIN CAPITAL LETTER U WITH GRAVE
 	: 0055 0300
 00DA	LATIN CAPITAL LETTER U WITH ACUTE
@@ -814,6 +858,7 @@
 00DD	LATIN CAPITAL LETTER Y WITH ACUTE
 	: 0059 0301
 00DE	LATIN CAPITAL LETTER THORN
+@		Lowercase letters
 00DF	LATIN SMALL LETTER SHARP S
 	= Eszett
 	* German
@@ -824,6 +869,8 @@
 	x (latin small letter ezh - 0292)
 	x (greek small letter beta - 03B2)
 	x (latin capital letter sharp s - 1E9E)
+	x (latin small letter beta - A7B5)
+	x (latin small letter middle scots s - A7D7)
 00E0	LATIN SMALL LETTER A WITH GRAVE
 	: 0061 0300
 00E1	LATIN SMALL LETTER A WITH ACUTE
@@ -844,6 +891,8 @@
 	* Danish, Norwegian, Icelandic, Faroese, Old English, French, IPA
 	x (latin small ligature oe - 0153)
 	x (cyrillic small ligature a ie - 04D5)
+	x (latin small letter turned ae - 1D02)
+	x (latin small letter a reversed-schwa - AB31)
 00E7	LATIN SMALL LETTER C WITH CEDILLA
 	: 0063 0327
 00E8	LATIN SMALL LETTER E WITH GRAVE
@@ -868,7 +917,9 @@
 	* uppercase is 00D0
 	x (latin small letter d with stroke - 0111)
 	x (greek small letter delta - 03B4)
+	x (latin small letter delta - 1E9F)
 	x (partial differential - 2202)
+	x (latin small letter insular d - A77A)
 00F1	LATIN SMALL LETTER N WITH TILDE
 	: 006E 0303
 00F2	LATIN SMALL LETTER O WITH GRAVE
@@ -889,18 +940,21 @@
 	* historically used as a punctuation mark to denote questionable passages in manuscripts
 	x (syriac harklean obelus - 070B)
 	x (commercial minus sign - 2052)
-	x (minus sign - 2212)
 	x (division slash - 2215)
 	x (divides - 2223)
 	x (ratio - 2236)
 	x (heavy division sign - 2797)
 	x (long division - 27CC)
 	x (dotted obelos - 2E13)
-@		Letters
+@		Lowercase letters
 00F8	LATIN SMALL LETTER O WITH STROKE
 	= o slash
 	* Danish, Norwegian, Faroese, IPA
+	x (latin small letter barred o - 0275)
 	x (diameter sign - 2300)
+	x (latin small letter o with long stroke overlay - A74B)
+	x (latin small letter old polish o - A7C1)
+	x (latin small letter blackletter o with stroke - AB3E)
 00F9	LATIN SMALL LETTER U WITH GRAVE
 	* French, Italian
 	: 0075 0300
@@ -916,7 +970,10 @@
 00FE	LATIN SMALL LETTER THORN
 	* Icelandic, Old English, phonetics
 	* Runic letter borrowed into Latin script
+	* replaced by "th" in modern English
+	x (greek small letter sho - 03F8)
 	x (runic letter thurisaz thurs thorn - 16A6)
+	x (latin small letter double thorn - A7D3)
 00FF	LATIN SMALL LETTER Y WITH DIAERESIS
 	* French, medieval Hungarian orthography
 	* uppercase is 0178
@@ -968,13 +1025,16 @@
 	: 0064 030C
 0110	LATIN CAPITAL LETTER D WITH STROKE
 	x (latin capital letter eth - 00D0)
-	x (latin small letter d with stroke - 0111)
 	x (latin capital letter african d - 0189)
+	x (latin capital letter d with short stroke overlay - A7C7)
 0111	LATIN SMALL LETTER D WITH STROKE
-	* Croatian, Serbian, Vietnamese, Sami
+	* Croatian, Serbian, Vietnamese, Sami, Moro
 	* an alternate glyph with the stroke through the bowl is used in Americanist orthographies
-	x (latin capital letter d with stroke - 0110)
+	x (latin small letter eth - 00F0)
 	x (cyrillic small letter dje - 0452)
+	x (latin small letter d with middle tilde - 1D6D)
+	x (dong sign - 20AB)
+	x (latin small letter d with short stroke overlay - A7C8)
 0112	LATIN CAPITAL LETTER E WITH MACRON
 	: 0045 0304
 0113	LATIN SMALL LETTER E WITH MACRON
@@ -1029,6 +1089,7 @@
 	* Esperanto
 	: 0068 0302
 0126	LATIN CAPITAL LETTER H WITH STROKE
+	x (modifier letter capital h with stroke - A7F8)
 0127	LATIN SMALL LETTER H WITH STROKE
 	* Maltese, IPA, ...
 	x (cyrillic small letter tshe - 045B)
@@ -1063,6 +1124,10 @@
 	* Turkish, Azerbaijani
 	* uppercase is 0049
 	x (latin small letter i - 0069)
+	x (latin small letter iota - 0269)
+	x (latin letter small capital i - 026A)
+	x (cyrillic small letter byelorussian-ukrainian i - 0456)
+	x (mathematical italic small dotless i - 1D6A4)
 0132	LATIN CAPITAL LIGATURE IJ
 	# 0049 004A
 0133	LATIN SMALL LIGATURE IJ
@@ -1080,6 +1145,8 @@
 	: 006B 0327
 0138	LATIN SMALL LETTER KRA
 	* Greenlandic (old orthography), Labrador Inuttut
+	x (cyrillic small letter ka - 043A)
+	x (latin letter small capital k - 1D0B)
 0139	LATIN CAPITAL LETTER L WITH ACUTE
 	: 004C 0301
 013A	LATIN SMALL LETTER L WITH ACUTE
@@ -1101,14 +1168,19 @@
 	* some fonts show the middle dot inside the L, but the preferred form has the dot following the L
 	# 004C 00B7
 0140	LATIN SMALL LETTER L WITH MIDDLE DOT
-	# 006C 00B7
-@+	* Catalan legacy compatibility character for ISO/IEC 6937
+	* Catalan legacy compatibility character for ISO/IEC 6937
 	* preferred representation for Catalan: 006C 00B7
+	# 006C 00B7
 0141	LATIN CAPITAL LETTER L WITH STROKE
 	x (latin capital letter l with bar - 023D)
+	x (latin letter small capital l with stroke - 1D0C)
+	x (latin capital letter l with middle tilde - 2C62)
+	x (latin capital letter l with high stroke - A748)
 0142	LATIN SMALL LETTER L WITH STROKE
-	* Polish, ...
+	* Polish, Sorbian, Iñupiaq, ...
+	* also used for Latin-based orthographies for Belarusian and Ukrainian
 	x (latin small letter l with bar - 019A)
+	x (latin small letter l with middle tilde - 026B)
 0143	LATIN CAPITAL LETTER N WITH ACUTE
 	: 004E 0301
 0144	LATIN SMALL LETTER N WITH ACUTE
@@ -1129,15 +1201,21 @@
 	= latin small letter apostrophe n (1.0)
 	* this character is deprecated and its use is strongly discouraged
 	* Afrikaans
-	# 02BC 006E
-@+	* legacy compatibility character for ISO/IEC 6937
+	* legacy compatibility character for ISO/IEC 6937
 	* uppercase is 02BC 004E
+	# 02BC 006E
 @		European Latin
 014A	LATIN CAPITAL LETTER ENG
 	* glyph may also have appearance of large form of the small letter
+	x (latin capital letter n with long right leg - 0220)
+	x (latin capital letter n with descender - A790)
 014B	LATIN SMALL LETTER ENG
 	= engma, angma
 	* Sami, Mende, IPA, ...
+	* velar nasal, nasalization
+	x (latin small letter n with long right leg - 019E)
+	x (latin small letter n with palatal hook - 1D87)
+	x (latin small letter n with descender - A791)
 014C	LATIN CAPITAL LETTER O WITH MACRON
 	: 004F 0304
 014D	LATIN SMALL LETTER O WITH MACRON
@@ -1159,6 +1237,10 @@
 	* French, IPA, Old Icelandic, Old English, ...
 	x (latin small letter ae - 00E6)
 	x (latin letter small capital oe - 0276)
+	x (latin small letter turned oe - 1D14)
+	x (modifier letter small ligature oe - A7F9)
+	x (latin small letter inverted oe - AB40)
+	x (latin small letter open oe - AB62)
 0154	LATIN CAPITAL LETTER R WITH ACUTE
 	: 0052 0301
 0155	LATIN SMALL LETTER R WITH ACUTE
@@ -1213,6 +1295,7 @@
 0166	LATIN CAPITAL LETTER T WITH STROKE
 0167	LATIN SMALL LETTER T WITH STROKE
 	* Sami
+	x (latin small letter t with middle tilde - 1D75)
 0168	LATIN CAPITAL LETTER U WITH TILDE
 	: 0055 0303
 0169	LATIN SMALL LETTER U WITH TILDE
@@ -1275,24 +1358,29 @@
 017F	LATIN SMALL LETTER LONG S
 	* in common use in Roman types until the 18th century
 	* in current use in Fraktur and Gaelic types
+	x (latin small letter sharp s - 00DF)
+	x (latin small ligature long s t - FB05)
 	# 0073 latin small letter s
 @@	0180	Latin Extended-B	024F
 @		Non-European and historic Latin
 0180	LATIN SMALL LETTER B WITH STROKE
 	* Americanist and Indo-Europeanist usage for phonetic beta
 	* Americanist orthographies use an alternate glyph with the stroke through the bowl
-	* Old Saxon
+	* also used in Old Saxon manuscripts
 	* uppercase is 0243
 	x (greek small letter beta - 03B2)
+	x (latin small letter b with middle tilde - 1D6C)
 	x (blank symbol - 2422)
 0181	LATIN CAPITAL LETTER B WITH HOOK
-	* Zulu, Pan-Nigerian alphabet
+	* African languages
 	* lowercase is 0253
 0182	LATIN CAPITAL LETTER B WITH TOPBAR
+	x (cyrillic capital letter be - 0411)
 0183	LATIN SMALL LETTER B WITH TOPBAR
 	* Zhuang (old orthography)
 	* former Soviet minority language scripts
-	x (cyrillic capital letter be - 0411)
+	x (latin small letter b with hook - 0253)
+	x (cyrillic small letter be - 0431)
 0184	LATIN CAPITAL LETTER TONE SIX
 0185	LATIN SMALL LETTER TONE SIX
 	* Zhuang (old orthography)
@@ -1305,8 +1393,10 @@
 	x (cyrillic small letter soft sign - 044C)
 0186	LATIN CAPITAL LETTER OPEN O
 	* typographically a turned C
-	* African
+	* African languages
 	* lowercase is 0254
+	x (latin letter small capital open o - 1D10)
+	x (roman numeral reversed one hundred - 2183)
 0187	LATIN CAPITAL LETTER C WITH HOOK
 0188	LATIN SMALL LETTER C WITH HOOK
 	* African
@@ -1327,19 +1417,23 @@
 	* archaic phonetic for labialized alveolar fricative
 	* recommended spellings 007A 02B7 or 007A 032B
 018E	LATIN CAPITAL LETTER REVERSED E
-	= turned e
+	= turned capital e
 	* Pan-Nigerian alphabet
 	* lowercase is 01DD
+	x (there exists - 2203)
+	x (latin letter small capital turned e - 2C7B)
 018F	LATIN CAPITAL LETTER SCHWA
 	* Azerbaijani, ...
 	* lowercase is 0259
 	x (cyrillic capital letter schwa - 04D8)
 0190	LATIN CAPITAL LETTER OPEN E
-	= epsilon
-	* African
+	= capital epsilon
+	* African languages
 	* lowercase is 025B
+	* not to be confused with glyph variants of capital E
 	x (euler constant - 2107)
 	x (turned digit three - 218B)
+	x (latin capital letter tresillo - A72A)
 0191	LATIN CAPITAL LETTER F WITH HOOK
 	* African
 	x (latin capital letter f with stroke - A798)
@@ -1355,43 +1449,56 @@
 	* African
 	* lowercase is 0263
 0195	LATIN SMALL LETTER HV
+	= hwair
 	* Gothic transliteration
 	* uppercase is 01F6
+	x (gothic letter hwair - 10348)
 0196	LATIN CAPITAL LETTER IOTA
-	* African
+	* African languages
 	* lowercase is 0269
+	x (cyrillic capital letter iota - A646)
 0197	LATIN CAPITAL LETTER I WITH STROKE
 	= barred i, i bar
-	* African
+	* African languages
 	* lowercase is 0268
 	* ISO 6438 gives lowercase as 026A, not 0268
 	x (latin letter small capital i - 026A)
+	x (latin small capital letter i with stroke - 1D7B)
 0198	LATIN CAPITAL LETTER K WITH HOOK
 0199	LATIN SMALL LETTER K WITH HOOK
 	* Hausa, Pan-Nigerian alphabet
 019A	LATIN SMALL LETTER L WITH BAR
 	= barred l
-	* Americanist phonetic usage for 026C
+	* Americanist phonetic usage for IPA ɬ
 	* uppercase is 023D
 	x (latin small letter l with stroke - 0142)
+	x (latin small letter l with belt - 026C)
+	x (latin small letter l with double bar - 2C61)
+	x (latin small letter l with high stroke - A749)
 019B	LATIN SMALL LETTER LAMBDA WITH STROKE
 	= barred lambda, lambda bar
-	* Americanist phonetic usage
+	* Americanist phonetic usage for IPA tɬ
+	x (greek small letter lamda - 03BB)
 019C	LATIN CAPITAL LETTER TURNED M
 	* Zhuang (old orthography)
 	* lowercase is 026F
+	x (latin letter small capital turned m - A7FA)
+	x (latin epigraphic letter inverted m - A7FD)
 019D	LATIN CAPITAL LETTER N WITH LEFT HOOK
 	* African
 	* lowercase is 0272
 019E	LATIN SMALL LETTER N WITH LONG RIGHT LEG
 	* archaic phonetic for Japanese 3093
 	* recommended spelling for syllabic n is 006E 0329
-	* Lakota (indicates nasalization of vowel)
+	* Lakota (indicates nasalization of vowel), superseded by 014B
 	* uppercase is 0220
+	x (latin small letter eng - 014B)
+	x (hiragana letter n - 3093)
 019F	LATIN CAPITAL LETTER O WITH MIDDLE TILDE
 	= barred o, o bar
+	* African languages
+	* the formal name does not describe the glyph
 	* lowercase is 0275
-	* African
 	x (cyrillic capital letter barred o - 04E8)
 01A0	LATIN CAPITAL LETTER O WITH HORN
 	: 004F 031B
@@ -1408,17 +1515,22 @@
 	* African
 01A6	LATIN LETTER YR
 	* Old Norse
-@+	* from German Standard DIN 31624 and ISO 5426-2
+	* from German Standard DIN 31624 and ISO 5426-2
 	* lowercase is 0280
 01A7	LATIN CAPITAL LETTER TONE TWO
+	x (latin letter voiced laryngeal spirant - 1D24)
+	x (cyrillic capital letter reversed dze - A644)
+	x (roman sextula sign - 10193)
 01A8	LATIN SMALL LETTER TONE TWO
 	* Zhuang (old orthography)
 	* typographically a reversed S
 	x (latin small letter tone six - 0185)
+	x (cyrillic small letter reversed dze - A645)
 01A9	LATIN CAPITAL LETTER ESH
-	* African
+	* African languages
 	* lowercase is 0283
 	x (greek capital letter sigma - 03A3)
+	x (n-ary summation - 2211)
 01AA	LATIN LETTER REVERSED ESH LOOP
 	* archaic phonetic for labialized palatoalveolar or palatal fricative
 	* Twi
@@ -1429,9 +1541,9 @@
 01AC	LATIN CAPITAL LETTER T WITH HOOK
 	* a glyph variant with hook at the right also occurs
 01AD	LATIN SMALL LETTER T WITH HOOK
-	* African
+	* African languages
 01AE	LATIN CAPITAL LETTER T WITH RETROFLEX HOOK
-	* African
+	* African languages
 	* lowercase is 0288
 01AF	LATIN CAPITAL LETTER U WITH HORN
 	: 0055 031B
@@ -1439,8 +1551,8 @@
 	* Vietnamese
 	: 0075 031B
 01B1	LATIN CAPITAL LETTER UPSILON
-	* African
-	* typographically based on turned capital Greek omega
+	* African languages
+	* typographically, turned capital Greek omega 03A9
 	* lowercase is 028A
 	x (inverted ohm sign - 2127)
 01B2	LATIN CAPITAL LETTER V WITH HOOK
@@ -1455,18 +1567,22 @@
 01B6	LATIN SMALL LETTER Z WITH STROKE
 	= barred z, z bar
 	* Pan-Turkic Latin orthography
-	* handwritten variant of Latin "z"
+	* also a handwritten variant of Latin "z"
 	x (latin small letter z - 007A)
+	x (latin small letter z with middle tilde - 1D76)
 01B7	LATIN CAPITAL LETTER EZH
 	* African, Skolt Sami
 	* lowercase is 0292
 	x (latin capital letter yogh - 021C)
 	x (cyrillic capital letter abkhasian dze - 04E0)
+	x (latin letter small capital ezh - 1D23)
+	x (latin capital letter reversed open e - A7AB)
 01B8	LATIN CAPITAL LETTER EZH REVERSED
+	x (latin capital letter open e - 0190)
 01B9	LATIN SMALL LETTER EZH REVERSED
 	* archaic phonetic for voiced pharyngeal fricative
-	* sometimes typographically rendered with a turned digit 3
-	* recommended spelling 0295
+	* sometimes typographically rendered as a turned digit 3
+	* recommended spelling is 0295
 	x (latin letter pharyngeal voiced fricative - 0295)
 	x (arabic letter ain - 0639)
 01BA	LATIN SMALL LETTER EZH WITH TAIL
@@ -1476,6 +1592,7 @@
 01BB	LATIN LETTER TWO WITH STROKE
 	* archaic phonetic for [dz] affricate
 	* recommended spellings 0292 or 0064 007A
+	x (latin capital letter tone two - 01A7)
 01BC	LATIN CAPITAL LETTER TONE FIVE
 01BD	LATIN SMALL LETTER TONE FIVE
 	* Zhuang (old orthography)
@@ -1484,6 +1601,8 @@
 	* archaic phonetic for [ts] affricate
 	* recommended spelling 0074 0073
 	* letter form is actually derived from ligation of ts, rather than inverted glottal stop
+	x (latin letter inverted glottal stop - 0296)
+	x (latin small letter ts digraph - 02A6)
 01BF	LATIN LETTER WYNN
 	= wen
 	* Runic letter borrowed into Latin script
@@ -1491,9 +1610,9 @@
 	* uppercase is 01F7
 	x (runic letter wunjo wynn w - 16B9)
 @		African letters for clicks
+@+		These click letters are from the Khoisan tradition. See also the bilabial click 0298 and the velar click 029E.
 01C0	LATIN LETTER DENTAL CLICK
 	= pipe
-	* Khoisan tradition
 	* "c" in Zulu orthography
 	x (solidus - 002F)
 	x (vertical line - 007C)
@@ -1501,22 +1620,22 @@
 	x (divides - 2223)
 01C1	LATIN LETTER LATERAL CLICK
 	= double pipe
-	* Khoisan tradition
 	* "x" in Zulu orthography
 	x (latin letter inverted glottal stop - 0296)
+	x (double vertical line - 2016)
 	x (parallel to - 2225)
 01C2	LATIN LETTER ALVEOLAR CLICK
 	= double-barred pipe
-	= palatoalveolar click (IPA)
-	* Khoisan tradition
+	* palatoalveolar click (IPA)
 	x (not equal to - 2260)
+	x (thermodynamic - 29E7)
 01C3	LATIN LETTER RETROFLEX CLICK
 	= latin letter exclamation mark (1.0)
-	= (post)alveolar click (IPA)
-	* Khoisan tradition
+	* (post)alveolar click (IPA)
 	* "q" in Zulu orthography
 	x (exclamation mark - 0021)
 	x (latin letter stretched c - 0297)
+	x (latin letter retroflex click with retroflex hook - 1DF0A)
 @		Latin digraphs matching Serbian Cyrillic letters
 @+		These digraphs are for Gaj's Latin alphabet, used in writing Bosnian, Croatian, Serbian, and Montenegrin.
 01C4	LATIN CAPITAL LETTER DZ WITH CARON
@@ -1647,6 +1766,8 @@
 	: 0067 0301
 01F6	LATIN CAPITAL LETTER HWAIR
 	* lowercase is 0195
+	x (cyrillic capital letter komi nje - 050A)
+	x (gothic letter hwair - 10348)
 01F7	LATIN CAPITAL LETTER WYNN
 	= wen
 	* lowercase is 01BF
@@ -1730,25 +1851,31 @@
 @		Miscellaneous additions
 021C	LATIN CAPITAL LETTER YOGH
 	x (latin capital letter ezh - 01B7)
+	x (cyrillic capital letter ze - 0417)
+	x (latin capital letter reversed open e - A7AB)
 021D	LATIN SMALL LETTER YOGH
 	* Middle English, Scots
 	x (latin small letter ezh - 0292)
 	x (latin small letter insular g - 1D79)
+	x (latin small letter et - A76B)
 021E	LATIN CAPITAL LETTER H WITH CARON
 	: 0048 030C
 021F	LATIN SMALL LETTER H WITH CARON
 	* Finnish Romany
 	: 0068 030C
 0220	LATIN CAPITAL LETTER N WITH LONG RIGHT LEG
-	* Lakota
+	* Lakota (nasalization), superseded by 014A
 	* lowercase is 019E
+	x (latin capital letter eng - 014A)
 0221	LATIN SMALL LETTER D WITH CURL
 	* phonetic use in Sinology
 0222	LATIN CAPITAL LETTER OU
+	x (latin letter small capital ou - 1D15)
 0223	LATIN SMALL LETTER OU
 	* Algonquin, Huron
 	x (digit eight - 0038)
 0224	LATIN CAPITAL LETTER Z WITH HOOK
+	x (latin capital letter z with descender - 2C6B)
 0225	LATIN SMALL LETTER Z WITH HOOK
 	* Middle High German
 0226	LATIN CAPITAL LETTER A WITH DOT ABOVE
@@ -1788,6 +1915,9 @@
 0236	LATIN SMALL LETTER T WITH CURL
 @		Miscellaneous addition
 0237	LATIN SMALL LETTER DOTLESS J
+	* this is a non-casing letter
+	x (greek letter yot - 03F3)
+	x (cyrillic small letter je - 0458)
 	x (mathematical italic small dotless j - 1D6A5)
 @		Additions for Africanist linguistics
 0238	LATIN SMALL LETTER DB DIGRAPH
@@ -1796,10 +1926,16 @@
 023A	LATIN CAPITAL LETTER A WITH STROKE
 	* lowercase is 2C65
 023B	LATIN CAPITAL LETTER C WITH STROKE
+	x (cedi sign - 20B5)
 023C	LATIN SMALL LETTER C WITH STROKE
 	* also used in Americanist linguistics
+	x (cent sign - 00A2)
 023D	LATIN CAPITAL LETTER L WITH BAR
 	* lowercase is 019A
+	x (latin capital letter l with stroke - 0141)
+	x (latin capital letter l with double bar - 2C60)
+	x (latin capital letter l with middle tilde - 2C62)
+	x (latin capital letter l with high stroke - A748)
 023E	LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
 	* lowercase is 2C66
 @		Additions for Africanist linguistics
@@ -1820,10 +1956,12 @@
 	x (modifier letter glottal stop - 02C0)
 0243	LATIN CAPITAL LETTER B WITH STROKE
 	* lowercase is 0180
+	x (latin letter small capital barred b - 1D03)
 0244	LATIN CAPITAL LETTER U BAR
 	* lowercase is 0289
 0245	LATIN CAPITAL LETTER TURNED V
 	* lowercase is 028C
+	x (greek capital letter lamda - 039B)
 0246	LATIN CAPITAL LETTER E WITH STROKE
 0247	LATIN SMALL LETTER E WITH STROKE
 0248	LATIN CAPITAL LETTER J WITH STROKE
@@ -1832,6 +1970,7 @@
 024B	LATIN SMALL LETTER Q WITH HOOK TAIL
 024C	LATIN CAPITAL LETTER R WITH STROKE
 024D	LATIN SMALL LETTER R WITH STROKE
+	x (latin small letter r with middle tilde - 1D72)
 024E	LATIN CAPITAL LETTER Y WITH STROKE
 024F	LATIN SMALL LETTER Y WITH STROKE
 @@	0250	IPA Extensions	02AF
@@ -1848,12 +1987,14 @@
 		x (greek small letter theta - 03B8)
 		x (greek small letter lamda - 03BB)
 		x (greek small letter chi - 03C7)
+@+		Many of the IPA characters in this block are also used in significant orthographies, such as those for African languages.
 0250	LATIN SMALL LETTER TURNED A
 	* low central unrounded vowel
 	* uppercase is 2C6F
 0251	LATIN SMALL LETTER ALPHA
 	= latin small letter script a (1.0)
 	* low back unrounded vowel
+	* the representative glyph appears like an allograph of Latin "a", but sometimes the character is rendered more like a Greek "α"
 	* uppercase is 2C6D
 	x (greek small letter alpha - 03B1)
 0252	LATIN SMALL LETTER TURNED ALPHA
@@ -1862,13 +2003,15 @@
 	x (latin small letter inverted alpha - AB64)
 0253	LATIN SMALL LETTER B WITH HOOK
 	* implosive bilabial stop
-	* Pan-Nigerian alphabet
 	* uppercase is 0181
+	x (cyrillic small letter be - 0431)
 0254	LATIN SMALL LETTER OPEN O
 	* typographically a turned c
 	* lower-mid back rounded vowel
-	* in older Danish usage "0254:" means "that is"
+	* in older Danish usage "0254:" stands for "that is"
 	* uppercase is 0186
+	x (latin letter small capital open o - 1D10)
+	x (latin small letter reversed c - 2184)
 0255	LATIN SMALL LETTER C WITH CURL
 	* voiceless alveolo-palatal laminal fricative
 	* used in transcription of Mandarin Chinese
@@ -1896,14 +2039,19 @@
 	* lower-mid front unrounded vowel
 	* uppercase is 0190
 	x (greek small letter epsilon - 03B5)
+	x (cyrillic small letter reversed ze - 0511)
 025C	LATIN SMALL LETTER REVERSED OPEN E
+	= reversed epsilon
 	* lower-mid central unrounded vowel
 	* uppercase is A7AB
+	x (cyrillic small letter ze - 0437)
+	x (latin small letter turned open e - 1D08)
 025D	LATIN SMALL LETTER REVERSED OPEN E WITH HOOK
 	* rhotacized lower-mid central vowel
 025E	LATIN SMALL LETTER CLOSED REVERSED OPEN E
 	= closed reversed epsilon
 	* lower-mid central rounded vowel
+	x (latin small letter closed open e - 029A)
 025F	LATIN SMALL LETTER DOTLESS J WITH STROKE
 	* voiced palatal stop
 	* typographically a turned f, but better thought of as a form of j
@@ -1916,6 +2064,7 @@
 	* voiced velar stop
 	* uppercase is A7AC
 	x (latin small letter g - 0067)
+	x (script small g - 210A)
 0262	LATIN LETTER SMALL CAPITAL G
 	* voiced uvular stop
 0263	LATIN SMALL LETTER GAMMA
@@ -1936,41 +2085,55 @@
 0267	LATIN SMALL LETTER HENG WITH HOOK
 	* voiceless coarticulated velar and palatoalveolar fricative
 	* "sj" in some Swedish dialects
+	x (latin small letter heng - A727)
 0268	LATIN SMALL LETTER I WITH STROKE
 	= barred i, i bar
 	* high central unrounded vowel
 	* uppercase is 0197
-@+	* ISO 6438 gives lowercase of 0197 as 026A, not 0268
+	* ISO 6438 gives lowercase of 0197 as 026A, not 0268
+	x (latin small capital letter i with stroke - 1D7B)
 0269	LATIN SMALL LETTER IOTA
 	* semi-high front unrounded vowel
 @+	* obsoleted by IPA in 1989
 	* preferred use is 026A latin letter small capital i
 	* uppercase is 0196
+	x (latin small letter dotless i - 0131)
 	x (greek small letter iota - 03B9)
+	x (cyrillic small letter iota - A647)
+	x (mathematical italic small dotless i - 1D6A4)
 026A	LATIN LETTER SMALL CAPITAL I
 	* semi-high front unrounded vowel
 	* preferred IPA alternate for 0269
 	* uppercase is A7AE
+	* ISO 6438 gives this as lowercase of 0197 instead of 0268
 	* glyph should have top and bottom serifs even in sans serif IPA font designs, to avoid confusion with lowercase l
+	x (latin small letter dotless i - 0131)
 026B	LATIN SMALL LETTER L WITH MIDDLE TILDE
 	* velarized voiced alveolar lateral approximant
 	* uppercase is 2C62
+	x (latin small letter l with stroke - 0142)
+	x (latin small letter l with inverted lazy s - AB37)
+	x (latin small letter l with double middle tilde - AB38)
 026C	LATIN SMALL LETTER L WITH BELT
 	* voiceless alveolar lateral fricative
 	* uppercase is A7AD
+	x (latin small letter l with bar - 019A)
 026D	LATIN SMALL LETTER L WITH RETROFLEX HOOK
 	* voiced retroflex lateral
+	x (latin small letter l with retroflex hook and belt - A78E)
 026E	LATIN SMALL LETTER LEZH
 	* voiced lateral fricative
 	* "dhl" in Zulu orthography
 026F	LATIN SMALL LETTER TURNED M
 	* high back unrounded vowel
 	* uppercase is 019C
+	x (latin letter small capital turned m - A7FA)
 0270	LATIN SMALL LETTER TURNED M WITH LONG LEG
 	* voiced velar approximant
 0271	LATIN SMALL LETTER M WITH HOOK
 	* voiced labiodental nasal
 	* uppercase is 2C6E
+	x (latin small letter m with palatal hook - 1D86)
 0272	LATIN SMALL LETTER N WITH LEFT HOOK
 	* voiced palatal nasal
 	* uppercase is 019D
@@ -1989,13 +2152,17 @@
 	* low front rounded vowel
 	x (latin small ligature oe - 0153)
 0277	LATIN SMALL LETTER CLOSED OMEGA
-	* semi-high back rounded vowel
+	* near-close near-back rounded vowel
 @+	* obsoleted by IPA in 1989
 	* preferred use is 028A latin small letter upsilon
+	x (latin small letter omega - A7B7)
 	x (greek letter small capital omega - AB65)
 0278	LATIN SMALL LETTER PHI
 	* voiceless bilabial fricative
+	* this is a non-casing letter
 	x (greek small letter phi - 03C6)
+	x (greek phi symbol - 03D5)
+	x (latin small letter tailless phi - 2C77)
 0279	LATIN SMALL LETTER TURNED R
 	* voiced alveolar approximant
 	x (modifier letter small turned r - 02B4)
@@ -2007,14 +2174,18 @@
 027C	LATIN SMALL LETTER R WITH LONG LEG
 	* voiced strident apico-alveolar trill
 @+	* obsoleted by IPA in 1989
-	* sound spelled with 0159 in Czech
+	* this sound is spelled with 0159 in Czech
 	* preferred phonetic representation for Czech is 0072 031D
 	* in current use in Gaelic types (as glyph variant of 0072)
+	x (latin small letter insular r - A783)
+	x (latin small letter insular s - A785)
 027D	LATIN SMALL LETTER R WITH TAIL
 	* voiced retroflex flap
 	* uppercase is 2C64
+	x (latin small letter turned r with tail - 2C79)
 027E	LATIN SMALL LETTER R WITH FISHHOOK
 	* voiced alveolar flap or tap
+	x (latin small letter long s - 017F)
 027F	LATIN SMALL LETTER REVERSED R WITH FISHHOOK
 	= long leg turned iota (a misnomer)
 	* apical dental vowel
@@ -2035,6 +2206,7 @@
 	* voiceless postalveolar fricative
 	* uppercase is 01A9
 	x (integral - 222B)
+	x (latin small letter baseline esh - AB4D)
 0284	LATIN SMALL LETTER DOTLESS J WITH STROKE AND HOOK
 	* implosive palatal stop
 	* typographically based on 025F, not on 0283
@@ -2054,12 +2226,15 @@
 0288	LATIN SMALL LETTER T WITH RETROFLEX HOOK
 	* voiceless retroflex stop
 	* uppercase is 01AE
+	x (latin small letter t with hook - 01AD)
+	x (latin small letter t with hook and retroflex hook - 1DF09)
 0289	LATIN SMALL LETTER U BAR
 	* high central rounded vowel
 	* uppercase is 0244
 	x (latin small capital letter u with stroke - 1D7E)
 028A	LATIN SMALL LETTER UPSILON
-	* semi-high back rounded vowel
+	* near-close near-back rounded vowel
+	* typographically, a turned Greek small capital omega AB65
 	* preferred IPA alternate to 0277
 	* uppercase is 01B1
 	x (greek small letter upsilon - 03C5)
@@ -2073,7 +2248,7 @@
 	* lower-mid back unrounded vowel
 	* uppercase is 0245
 	x (greek capital letter lamda - 039B)
-	x (caret - 2038)
+	x (greek letter small capital lamda - 1D27)
 	x (logical and - 2227)
 028D	LATIN SMALL LETTER TURNED W
 	* voiceless rounded labiovelar approximant
@@ -2088,7 +2263,7 @@
 	* voiced alveolo-palatal laminal fricative
 	* sound spelled with 017A in Polish
 0292	LATIN SMALL LETTER EZH
-	= dram
+	= dram sign
 	* voiced postalveolar fricative
 	* mistakenly named yogh in Unicode 1.0
 	* uppercase is 01B7
@@ -2097,6 +2272,7 @@
 	x (cyrillic small letter abkhasian dze - 04E1)
 	x (ounce sign - 2125)
 	x (alchemical symbol for half dram - 1F772)
+	x 2CF01
 0293	LATIN SMALL LETTER EZH WITH CURL
 	* palatalized voiced postalveolar fricative
 0294	LATIN LETTER GLOTTAL STOP
@@ -2119,17 +2295,22 @@
 	x (complement - 2201)
 0298	LATIN LETTER BILABIAL CLICK
 	= bullseye
+	* this is a non-casing letter
 	x (circled dot operator - 2299)
+	x (cyrillic capital letter monocular o - A668)
 0299	LATIN LETTER SMALL CAPITAL B
 	* bilabial trill
+	x (cyrillic small letter ve - 0432)
 029A	LATIN SMALL LETTER CLOSED OPEN E
 	= closed epsilon
 	* lower-mid front rounded vowel
 	* non-IPA alternate for the preferred 0153
+	x (latin small letter closed reversed open e - 025E)
 029B	LATIN LETTER SMALL CAPITAL G WITH HOOK
 	* voiced uvular implosive
 029C	LATIN LETTER SMALL CAPITAL H
 	* voiceless epiglottal fricative
+	x (cyrillic small letter en - 043D)
 	x (modifier letter capital h - 1D34)
 	x (modifier letter capital h with stroke - A7F8)
 029D	LATIN SMALL LETTER J WITH CROSSED-TAIL
@@ -2139,6 +2320,7 @@
 	* proposed for velar click
 	* uppercase is A7B0
 @+	* withdrawn by IPA in 1970
+	x (latin letter small capital turned k - 1DF10)
 029F	LATIN LETTER SMALL CAPITAL L
 	* velar lateral approximant
 02A0	LATIN SMALL LETTER Q WITH HOOK
@@ -2156,9 +2338,11 @@
 	* voiced alveolo-palatal affricate
 02A6	LATIN SMALL LETTER TS DIGRAPH
 	* voiceless dental affricate
+	x (latin letter inverted glottal stop with stroke - 01BE)
 	x (latin small letter ts digraph with retroflex hook - AB67)
 02A7	LATIN SMALL LETTER TESH DIGRAPH
 	* voiceless postalveolar affricate
+	x (latin small letter tz - A729)
 02A8	LATIN SMALL LETTER TC DIGRAPH WITH CURL
 	* voiceless alveolo-palatal affricate
 @		IPA characters for disordered speech
@@ -2242,7 +2426,9 @@
 	= apostrophe
 	* glottal stop, glottalization, ejective
 	* many languages use this as a letter of their alphabets
-	* used as a tone marker in Bodo, Dogri, and Maithili
+	* used as a tone marker in Bodo and Dogri
+	* indicates vowel elongation, or various truncations and ellipsis in Maithili
+	* used as a modifier letter in the Lisu script
 	* 2019 is the preferred character for a punctuation apostrophe
 	x (apostrophe - 0027)
 	x (combining comma above - 0313)
@@ -2328,6 +2514,7 @@
 	x (combining vertical line below - 0329)
 02CD	MODIFIER LETTER LOW MACRON
 	* low level tone
+	* used as a modifier letter in the Lisu script
 	x (low line - 005F)
 	x (combining macron below - 0331)
 02CE	MODIFIER LETTER LOW GRAVE ACCENT
@@ -2413,6 +2600,7 @@
 @		IPA modifiers
 02EC	MODIFIER LETTER VOICING
 02ED	MODIFIER LETTER UNASPIRATED
+	x (modifier letter short equals sign - A78A)
 @		Other modifier letter
 02EE	MODIFIER LETTER DOUBLE APOSTROPHE
 	* Nenets
@@ -4266,7 +4454,8 @@
 	* Uyghur, Kazakh
 06CC	ARABIC LETTER FARSI YEH
 	* Arabic, Persian, Urdu, Kashmiri, ...
-	* initial and medial forms of this letter have dots
+	* initial and medial forms of this letter have two horizontal dots below
+	* retains its dots in initial and medial forms when used in combination with 0654
 	x (arabic letter alef maksura - 0649)
 	x (arabic letter yeh - 064A)
 06CD	ARABIC LETTER YEH WITH TAIL
@@ -4301,6 +4490,8 @@
 06DC	ARABIC SMALL HIGH SEEN
 06DD	ARABIC END OF AYAH
 06DE	ARABIC START OF RUB EL HIZB
+	* indicates boundaries of parts of sections
+	* typically depicted as an eight-sided symbol, which may or may not appear starlike
 06DF	ARABIC SMALL HIGH ROUNDED ZERO
 	* smaller than the typical circular shape used for 0652
 06E0	ARABIC SMALL HIGH UPRIGHT RECTANGULAR ZERO
@@ -4338,13 +4529,12 @@
 06F2	EXTENDED ARABIC-INDIC DIGIT TWO
 06F3	EXTENDED ARABIC-INDIC DIGIT THREE
 06F4	EXTENDED ARABIC-INDIC DIGIT FOUR
-	* Persian has a different glyph than Sindhi and Urdu
+	* Urdu and Kashmiri have a different glyph than Persian
 06F5	EXTENDED ARABIC-INDIC DIGIT FIVE
-	* Persian, Sindhi, and Urdu share glyph different from Arabic
 06F6	EXTENDED ARABIC-INDIC DIGIT SIX
-	* Persian, Sindhi, and Urdu have glyphs different from Arabic
+	* Sindhi, Urdu, and Kashmiri have a different glyph than Persian
 06F7	EXTENDED ARABIC-INDIC DIGIT SEVEN
-	* Urdu and Sindhi have glyphs different from Arabic
+	* Sindhi, Urdu, and Kashmiri have a different glyph than Persian
 06F8	EXTENDED ARABIC-INDIC DIGIT EIGHT
 06F9	EXTENDED ARABIC-INDIC DIGIT NINE
 @		Extended Arabic letters
@@ -4950,6 +5140,8 @@
 @		Arabic letters for Arwi
 08B3	ARABIC LETTER AIN WITH THREE DOTS BELOW
 08B4	ARABIC LETTER KAF WITH DOT BELOW
+	* also used in Pegon
+	x (arabic letter kaf with three dots below - 06AE)
 @		Early Arabic letter
 08B5	ARABIC LETTER QAF WITH DOT BELOW AND NO DOTS ABOVE
 @		Arabic letters for Bravanese
@@ -11240,19 +11432,28 @@
 1D02	LATIN SMALL LETTER TURNED AE
 	* glyph can also have sideways orientation
 1D03	LATIN LETTER SMALL CAPITAL BARRED B
+	x (latin capital letter b with stroke - 0243)
 1D04	LATIN LETTER SMALL CAPITAL C
 1D05	LATIN LETTER SMALL CAPITAL D
 1D06	LATIN LETTER SMALL CAPITAL ETH
 1D07	LATIN LETTER SMALL CAPITAL E
 1D08	LATIN SMALL LETTER TURNED OPEN E
+	x (latin small letter reversed open e - 025C)
+	x (modifier letter small turned open e - 1D4C)
 1D09	LATIN SMALL LETTER TURNED I
 1D0A	LATIN LETTER SMALL CAPITAL J
 1D0B	LATIN LETTER SMALL CAPITAL K
+	x (latin small letter kra - 0138)
+	x (cyrillic small letter ka - 043A)
 1D0C	LATIN LETTER SMALL CAPITAL L WITH STROKE
 1D0D	LATIN LETTER SMALL CAPITAL M
 1D0E	LATIN LETTER SMALL CAPITAL REVERSED N
+	x (cyrillic small letter i - 0438)
+	x (modifier letter capital reversed n - 1D3B)
 1D0F	LATIN LETTER SMALL CAPITAL O
 1D10	LATIN LETTER SMALL CAPITAL OPEN O
+	x (latin small letter open o - 0254)
+	x (latin small letter reversed c - 2184)
 1D11	LATIN SMALL LETTER SIDEWAYS O
 1D12	LATIN SMALL LETTER SIDEWAYS OPEN O
 1D13	LATIN SMALL LETTER SIDEWAYS O WITH STROKE
@@ -11263,9 +11464,11 @@
 1D17	LATIN SMALL LETTER BOTTOM HALF O
 1D18	LATIN LETTER SMALL CAPITAL P
 	* represents a semi-voiced [p]
+	x (greek letter small capital rho - 1D29)
 1D19	LATIN LETTER SMALL CAPITAL REVERSED R
 1D1A	LATIN LETTER SMALL CAPITAL TURNED R
 1D1B	LATIN LETTER SMALL CAPITAL T
+	x (cyrillic small letter te - 0442)
 1D1C	LATIN LETTER SMALL CAPITAL U
 1D1D	LATIN SMALL LETTER SIDEWAYS U
 1D1E	LATIN SMALL LETTER SIDEWAYS DIAERESIZED U
@@ -11275,14 +11478,19 @@
 1D21	LATIN LETTER SMALL CAPITAL W
 1D22	LATIN LETTER SMALL CAPITAL Z
 1D23	LATIN LETTER SMALL CAPITAL EZH
+	x (cyrillic small letter abkhasian dze - 04E1)
 1D24	LATIN LETTER VOICED LARYNGEAL SPIRANT
 1D25	LATIN LETTER AIN
+	x (arabic letter ain - 0639)
+	x (latin small letter egyptological ain - A725)
 @		Greek letters
+@+		An additional Greek small capital letter is at AB65.
 1D26	GREEK LETTER SMALL CAPITAL GAMMA
 1D27	GREEK LETTER SMALL CAPITAL LAMDA
 1D28	GREEK LETTER SMALL CAPITAL PI
 1D29	GREEK LETTER SMALL CAPITAL RHO
 	* represents a voiceless uvular trill
+	x (latin letter small capital p - 1D18)
 1D2A	GREEK LETTER SMALL CAPITAL PSI
 @		Cyrillic letter
 1D2B	CYRILLIC LETTER SMALL CAPITAL EL
@@ -11389,6 +11597,7 @@
 1D5B	MODIFIER LETTER SMALL V
 	# <super> 0076
 1D5C	MODIFIER LETTER SMALL AIN
+	x (latin small letter egyptological ain - A725)
 	# <super> 1D25
 @		Greek superscript modifier letters
 1D5D	MODIFIER LETTER SMALL BETA
@@ -11421,7 +11630,7 @@
 	# <sub> 03C6
 1D6A	GREEK SUBSCRIPT SMALL LETTER CHI
 	# <sub> 03C7
-@		Latin letter
+@		Latin letter for American lexicography
 1D6B	LATIN SMALL LETTER UE
 @		Latin letters with middle tilde
 @+		Additional letters with middle tilde are found in other blocks.
@@ -11438,7 +11647,7 @@
 1D74	LATIN SMALL LETTER S WITH MIDDLE TILDE
 1D75	LATIN SMALL LETTER T WITH MIDDLE TILDE
 1D76	LATIN SMALL LETTER Z WITH MIDDLE TILDE
-@		Caucasian linguistics
+@		Letters for Caucasian linguistics
 1D77	LATIN SMALL LETTER TURNED G
 	* Georgian transcription
 	x (georgian letter turned gan - 10F9)
@@ -11460,6 +11669,7 @@
 	x (greek small letter theta - 03B8)
 1D7B	LATIN SMALL CAPITAL LETTER I WITH STROKE
 	* used with different meanings by Americanists and Oxford dictionaries
+	x (latin capital letter i with stroke - 0197)
 1D7C	LATIN SMALL LETTER IOTA WITH STROKE
 	* used by Russianists
 1D7D	LATIN SMALL LETTER P WITH STROKE
@@ -11481,7 +11691,9 @@
 1D84	LATIN SMALL LETTER K WITH PALATAL HOOK
 1D85	LATIN SMALL LETTER L WITH PALATAL HOOK
 1D86	LATIN SMALL LETTER M WITH PALATAL HOOK
+	x (latin small letter m with hook - 0271)
 1D87	LATIN SMALL LETTER N WITH PALATAL HOOK
+	x (latin small letter eng - 014B)
 1D88	LATIN SMALL LETTER P WITH PALATAL HOOK
 1D89	LATIN SMALL LETTER R WITH PALATAL HOOK
 1D8A	LATIN SMALL LETTER S WITH PALATAL HOOK
@@ -11490,6 +11702,7 @@
 1D8D	LATIN SMALL LETTER X WITH PALATAL HOOK
 1D8E	LATIN SMALL LETTER Z WITH PALATAL HOOK
 	* uppercase is A7C6
+	x (latin small letter z with hook - 0225)
 @		Latin letters with retroflex hook
 @+		IPA recommends transcribing vowels with r-coloring (rhoticity) with the rhotic hook instead.
 	x (modifier letter rhotic hook - 02DE)
@@ -11829,9 +12042,9 @@
 	: 004C 0323
 1E37	LATIN SMALL LETTER L WITH DOT BELOW
 	* Indic transliteration
-	: 006C 0323
-@+	* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
+	* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
 	x (combining ring below - 0325)
+	: 006C 0323
 1E38	LATIN CAPITAL LETTER L WITH DOT BELOW AND MACRON
 	: 1E36 0304
 1E39	LATIN SMALL LETTER L WITH DOT BELOW AND MACRON
@@ -11912,9 +12125,9 @@
 	: 0052 0323
 1E5B	LATIN SMALL LETTER R WITH DOT BELOW
 	* Indic transliteration
-	: 0072 0323
-@+	* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
+	* see ISO 15919 on the use of dot below versus ring below in Indic transliteration
 	x (combining ring below - 0325)
+	: 0072 0323
 1E5C	LATIN CAPITAL LETTER R WITH DOT BELOW AND MACRON
 	: 1E5A 0304
 1E5D	LATIN SMALL LETTER R WITH DOT BELOW AND MACRON
@@ -12071,8 +12284,11 @@
 	* not used in Swiss High German
 	* lowercase is 00DF
 	x (latin small letter sharp s - 00DF)
+	x (latin capital letter middle scots s - A7D6)
 @		Medievalist addition
 1E9F	LATIN SMALL LETTER DELTA
+	* this is a non-casing letter
+	x (greek small letter delta - 03B4)
 @		Latin extensions for Vietnamese
 1EA0	LATIN CAPITAL LETTER A WITH DOT BELOW
 	: 0041 0323
@@ -13245,6 +13461,7 @@
 	* Brazil
 20A3	FRENCH FRANC SIGN
 	* France
+	x (latin capital letter f with stroke - A798)
 20A4	LIRA SIGN
 	* intended for lira, but not widely used
 	* preferred character for lira is 00A3
@@ -13524,6 +13741,7 @@
 2125	OUNCE SIGN
 	x (latin small letter ezh - 0292)
 	x (alchemical symbol for half ounce - 1F773)
+	x 2CF04
 2126	OHM SIGN
 	* SI unit of resistance, named after G. S. Ohm, German physicist
 	* preferred representation is 03A9
@@ -14252,8 +14470,10 @@
 2266	LESS-THAN OVER EQUAL TO
 2267	GREATER-THAN OVER EQUAL TO
 2268	LESS-THAN BUT NOT EQUAL TO
+	x (less-than and single-line not equal to - 2A87)
 	~ 2268 FE00 with vertical stroke
 2269	GREATER-THAN BUT NOT EQUAL TO
+	x (greater-than and single-line not equal to - 2A88)
 	~ 2269 FE00 with vertical stroke
 226A	MUCH LESS-THAN
 	x (left-pointing double angle quotation mark - 00AB)
@@ -14562,7 +14782,7 @@
 	x (latin small letter o with stroke - 00F8)
 	x (empty set - 2205)
 2301	ELECTRIC ARROW
-@+	* from ISO 2047
+	* from ISO 2047
 	* symbol for End of Transmission
 2302	HOUSE
 2303	UP ARROWHEAD
@@ -14726,7 +14946,7 @@
 	x (reversed empty set - 29B0)
 234A	APL FUNCTIONAL SYMBOL DOWN TACK UNDERBAR
 	= up tack underbar
-@+	* preferred naming for APL tack symbols now follows the London Convention in ISO/IEC 13751:2000 (APL Extended)
+	* preferred naming for APL tack symbols now follows the London Convention in ISO/IEC 13751:2000 (APL Extended)
 	x (up tack - 22A5)
 234B	APL FUNCTIONAL SYMBOL DELTA STILE
 234C	APL FUNCTIONAL SYMBOL QUAD DOWN CARET
@@ -14794,19 +15014,19 @@
 237A	APL FUNCTIONAL SYMBOL ALPHA
 @		Graphics for control codes
 237B	NOT CHECK MARK
-@+	* from ISO 2047
+	* from ISO 2047
 	* symbol for Negative Acknowledge
 @		Miscellaneous technical
 237C	RIGHT ANGLE WITH DOWNWARDS ZIGZAG ARROW
 @		Graphics for control codes
 237D	SHOULDERED OPEN BOX
-@+	* from ISO 9995-7
+	* from ISO 9995-7
 	* keyboard symbol for No Break Space
 	x (open box - 2423)
 237E	BELL SYMBOL
-@+	* from ISO 2047
+	* from ISO 2047
 237F	VERTICAL LINE WITH MIDDLE DOT
-@+	* from ISO 2047
+	* from ISO 2047
 	* symbol for End of Medium
 @		Keyboard symbols from ISO 9995-7
 2380	INSERTION SYMBOL
@@ -15036,10 +15256,10 @@
 	x (large red circle - 1F534)
 @		Power symbols from ISO 7000:2012
 23FB	POWER SYMBOL
-@+	* IEC 5009 standby symbol
-@+	* IEEE 1621 power symbol
+	* IEC 5009 standby symbol
+	* IEEE 1621 power symbol
 23FC	POWER ON-OFF SYMBOL
-@+	* IEC 5010 power on-off symbol
+	* IEC 5010 power on-off symbol
 23FD	POWER ON SYMBOL
 	* use 2B58 for power off symbol
 	x (heavy circle - 2B58)
@@ -15096,11 +15316,11 @@
 2424	SYMBOL FOR NEWLINE
 @		Keyboard symbol
 2425	SYMBOL FOR DELETE FORM TWO
-@+	* from ISO 9995-7
+	* from ISO 9995-7
 	* keyboard symbol for undoable delete
 @		Specific symbol for control code
 2426	SYMBOL FOR SUBSTITUTE FORM TWO
-@+	* from ISO 2047
+	* from ISO 2047
 	x (arabic question mark - 061F)
 @@	2440	Optical Character Recognition	245F
 @		OCR-A
@@ -18695,9 +18915,13 @@
 @@	2C60	Latin Extended-C	2C7F
 @		Orthographic Latin additions
 2C60	LATIN CAPITAL LETTER L WITH DOUBLE BAR
+	x (latin capital letter l with bar - 023D)
 2C61	LATIN SMALL LETTER L WITH DOUBLE BAR
+	x (latin small letter l with bar - 019A)
+	x (latin small letter l with double middle tilde - AB38)
 2C62	LATIN CAPITAL LETTER L WITH MIDDLE TILDE
 	* lowercase is 026B
+	x (latin capital letter l with stroke - 0141)
 2C63	LATIN CAPITAL LETTER P WITH STROKE
 	* lowercase is 1D7D
 2C64	LATIN CAPITAL LETTER R WITH TAIL
@@ -18708,18 +18932,23 @@
 	* uppercase is 023E
 @		Additions for Uyghur
 2C67	LATIN CAPITAL LETTER H WITH DESCENDER
+	x (cyrillic capital letter en with descender - 04A2)
 2C68	LATIN SMALL LETTER H WITH DESCENDER
 2C69	LATIN CAPITAL LETTER K WITH DESCENDER
+	x (cyrillic capital letter ka with descender - 049A)
 2C6A	LATIN SMALL LETTER K WITH DESCENDER
 2C6B	LATIN CAPITAL LETTER Z WITH DESCENDER
+	x (latin capital letter z with hook - 0224)
 2C6C	LATIN SMALL LETTER Z WITH DESCENDER
 @		Miscellaneous additions
 2C6D	LATIN CAPITAL LETTER ALPHA
+	= capital script a
 	* lowercase is 0251
 2C6E	LATIN CAPITAL LETTER M WITH HOOK
 	* lowercase is 0271
 2C6F	LATIN CAPITAL LETTER TURNED A
 	* lowercase is 0250
+	x (for all - 2200)
 2C70	LATIN CAPITAL LETTER TURNED ALPHA
 	* lowercase is 0252
 2C71	LATIN SMALL LETTER V WITH RIGHT HOOK
@@ -18736,13 +18965,16 @@
 	x (latin capital letter reversed half h - A7F5)
 2C76	LATIN SMALL LETTER HALF H
 	x (greek small letter heta - 0371)
+	x (latin small letter reversed half h - A7F6)
 @		Additions for UPA
 2C77	LATIN SMALL LETTER TAILLESS PHI
 	* medium rounded o
+	x (greek small letter phi - 03C6)
 2C78	LATIN SMALL LETTER E WITH NOTCH
 2C79	LATIN SMALL LETTER TURNED R WITH TAIL
 2C7A	LATIN SMALL LETTER O WITH LOW RING INSIDE
 2C7B	LATIN LETTER SMALL CAPITAL TURNED E
+	x (latin capital letter reversed e - 018E)
 2C7C	LATIN SUBSCRIPT SMALL LETTER J
 	# <sub> 006A
 2C7D	MODIFIER LETTER CAPITAL V
@@ -18750,6 +18982,7 @@
 @		Additions for Shona
 2C7E	LATIN CAPITAL LETTER S WITH SWASH TAIL
 	* lowercase is 023F
+	x (latin capital letter s with hook - A7C5)
 2C7F	LATIN CAPITAL LETTER Z WITH SWASH TAIL
 	* lowercase is 0240
 @@	2C80	Coptic	2CFF
@@ -19288,8 +19521,10 @@
 	* indicates pronunciation on one side of the mouth only
 	x (section sign - 00A7)
 @		Dashes
+@+		These long dashes are shown in the code charts inside dashed square boxes because of their width. In production fonts they would simply display as extra-wide dashes. 
 2E3A	TWO-EM DASH
 	= omission dash
+	* may be used in Chinese for abrupt change of thought, inserting new content, or continuation of tone or sound
 	x (em dash - 2014)
 2E3B	THREE-EM DASH
 @		Alternate forms of punctuation
@@ -19390,726 +19625,1059 @@
 @+		For the characters in this block whose representative glyph takes up only a portion of the em-box, the placement relative to the em-box is either centered or respects prototypical usage. The placement of the representative glyph is for informational purposes only, and should not be considered a recommendation for implementations.
 @		CJK radicals supplement
 2E80	CJK RADICAL REPEAT
+	* variant of Kangxi Radical 3
 2E81	CJK RADICAL CLIFF
+	* variant of Kangxi Radical 27
 	x 5382
 	x 20086
 2E82	CJK RADICAL SECOND ONE
+	* variant of Kangxi Radical 5
 	x 4E5B
 2E83	CJK RADICAL SECOND TWO
+	* variant of Kangxi Radical 5
 	x 4E5A
 2E84	CJK RADICAL SECOND THREE
+	* variant of Kangxi Radical 5
 	x 4E59
 2E85	CJK RADICAL PERSON
+	* variant of Kangxi Radical 9
 	* form used on left side
 	x 4EBB
 2E86	CJK RADICAL BOX
+	* variant of Kangxi Radical 13
 	x 5182
 2E87	CJK RADICAL TABLE
+	* variant of Kangxi Radical 16
 	x 51E0
 	x 20628
 2E88	CJK RADICAL KNIFE ONE
+	* variant of Kangxi Radical 18
 	* form used at top
 	x 5200
 	x 2008A
 2E89	CJK RADICAL KNIFE TWO
+	* variant of Kangxi Radical 18
 	* form used on right side
 	x 5202
 2E8A	CJK RADICAL DIVINATION
+	* variant of Kangxi Radical 25
 	* form used at top
 	x 535C
 2E8B	CJK RADICAL SEAL
+	* variant of Kangxi Radical 26
 	* form used at bottom
 	x 353E
 2E8C	CJK RADICAL SMALL ONE
+	* variant of Kangxi Radical 42
 	* form used at top
 	x 5C0F
 2E8D	CJK RADICAL SMALL TWO
+	* variant of Kangxi Radical 42
 	* form used at top
 	x 5C0F
 	x 2D544
 2E8E	CJK RADICAL LAME ONE
+	* variant of Kangxi Radical 43
 	x 5C22
 	x 5140
 2E8F	CJK RADICAL LAME TWO
+	* variant of Kangxi Radical 43
 	x 5C23
 2E90	CJK RADICAL LAME THREE
+	* variant of Kangxi Radical 43
 	x 5C22
 2E91	CJK RADICAL LAME FOUR
+	* variant of Kangxi Radical 43
 	x 5C23
 	x 21BC2
 2E92	CJK RADICAL SNAKE
+	* variant of Kangxi Radical 49
 	x 5DF3
 2E93	CJK RADICAL THREAD
+	* variant of Kangxi Radical 52
 	x 5E7A
 2E94	CJK RADICAL SNOUT ONE
+	* variant of Kangxi Radical 58
 	x 5F51
 2E95	CJK RADICAL SNOUT TWO
+	* variant of Kangxi Radical 58
 	* actually a form of the radical for hand, despite its resemblance in shape to the radical for snout
 	x 5F50
 	x 2B739
 2E96	CJK RADICAL HEART ONE
+	* variant of Kangxi Radical 61
 	* form used on left side
 	x 5FC4
 2E97	CJK RADICAL HEART TWO
+	* variant of Kangxi Radical 61
 	* form used at bottom
 	x 38FA
 	x 5FC3
 2E98	CJK RADICAL HAND
+	* variant of Kangxi Radical 64
 	* form used on left side
 	x 624C
 2E99	CJK RADICAL RAP
+	* variant of Kangxi Radical 66
 	* form used on right side
 	x 6535
+2E9A	<reserved>
+	x (kangxi radical not - 2F46)
 2E9B	CJK RADICAL CHOKE
+	* variant of Kangxi Radical 71
 	x 65E1
 2E9C	CJK RADICAL SUN
+	* variant of Kangxi Radical 72
 	* actually a form of the radical for hat, despite its resemblance in shape to the radical for sun
 	x 5183
 	x 65E5
 2E9D	CJK RADICAL MOON
+	* variant of Kangxi Radical 74
 	x 6708
 2E9E	CJK RADICAL DEATH
+	* variant of Kangxi Radical 78
 	x 6B7A
 2E9F	CJK RADICAL MOTHER
+	* variant of Kangxi Radical 80
 	# 6BCD
 2EA0	CJK RADICAL CIVILIAN
+	* variant of Kangxi Radical 83
 	x 6C11
 2EA1	CJK RADICAL WATER ONE
+	* variant of Kangxi Radical 85
 	* form used on left side
 	x 6C35
 2EA2	CJK RADICAL WATER TWO
+	* variant of Kangxi Radical 85
 	* form used (rarely) at bottom
 	x 6C3A
 2EA3	CJK RADICAL FIRE
+	* variant of Kangxi Radical 86
 	* form used at bottom
 	x 706C
 2EA4	CJK RADICAL PAW ONE
+	* variant of Kangxi Radical 87
 	* form used at top
 	x 722B
 2EA5	CJK RADICAL PAW TWO
+	* variant of Kangxi Radical 87
 	* form used at top
 	x 722B
 2EA6	CJK RADICAL SIMPLIFIED HALF TREE TRUNK
+	* simplified variant of Kangxi Radical 90
 	x 4E2C
 2EA7	CJK RADICAL COW
+	* variant of Kangxi Radical 93
 	x 725B
 	x 20092
 2EA8	CJK RADICAL DOG
+	* variant of Kangxi Radical 94
 	* form used on left side
 	x 72AD
 2EA9	CJK RADICAL JADE
+	* variant of Kangxi Radical 96
 	* form used on left side
 	x 738B
 	x 248E9
 2EAA	CJK RADICAL BOLT OF CLOTH
+	* variant of Kangxi Radical 103
 	* form used on left side
 	x 758B
 	x 24D14
 2EAB	CJK RADICAL EYE
+	* variant of Kangxi Radical 109
+	* variant of Kangxi Radical 122
 	* form used at top
 	x (cjk radical net two - 2EB2)
 	x 76EE
 	x 7F52
 2EAC	CJK RADICAL SPIRIT ONE
+	* variant of Kangxi Radical 113
 	x 793A
 2EAD	CJK RADICAL SPIRIT TWO
+	* variant of Kangxi Radical 113
 	x 793B
 2EAE	CJK RADICAL BAMBOO
+	* variant of Kangxi Radical 118
 	x 7AF9
 	x 25AD7
 2EAF	CJK RADICAL SILK
+	* variant of Kangxi Radical 120
 	* form used on left side
 	x 7CF9
 2EB0	CJK RADICAL C-SIMPLIFIED SILK
+	* simplified Chinese variant of Kangxi Radical 120
 	* form used on left side
 	x 7E9F
 2EB1	CJK RADICAL NET ONE
+	* variant of Kangxi Radical 122
 	x 7F53
 2EB2	CJK RADICAL NET TWO
+	* variant of Kangxi Radical 109
+	* variant of Kangxi Radical 122
 	x (cjk radical eye - 2EAB)
 	x 7F52
 	x 26270
 2EB3	CJK RADICAL NET THREE
+	* variant of Kangxi Radical 122
 	x 34C1
 	x 7F51
 2EB4	CJK RADICAL NET FOUR
+	* variant of Kangxi Radical 122
 	x 34C1
 	x 7F51
 2EB5	CJK RADICAL MESH
+	* variant of Kangxi Radical 122
 	x 2626B
 2EB6	CJK RADICAL SHEEP
+	* variant of Kangxi Radical 123
 	* form used on left side
 	x 7F8A
 2EB7	CJK RADICAL RAM
+	* variant of Kangxi Radical 123
 	* form used at top
 	x 7F8A
 	x 2634C
 2EB8	CJK RADICAL EWE
+	* variant of Kangxi Radical 123
 	x 7F8B
 	x 2634B
 2EB9	CJK RADICAL OLD
+	* variant of Kangxi Radical 125
 	x 8002
 2EBA	CJK RADICAL BRUSH ONE
+	* variant of Kangxi Radical 129
 	x 8080
 2EBB	CJK RADICAL BRUSH TWO
+	* variant of Kangxi Radical 129
 	x 807F
 2EBC	CJK RADICAL MEAT
+	* variant of Kangxi Radical 130
 	x 8089
 2EBD	CJK RADICAL MORTAR
+	* variant of Kangxi Radical 134
 	x 81FC
 	x 26951
 2EBE	CJK RADICAL GRASS ONE
+	* simplified variant of Kangxi Radical 140
 	x 8279
 2EBF	CJK RADICAL GRASS TWO
+	* variant of Kangxi Radical 140
 	x 8279
 2EC0	CJK RADICAL GRASS THREE
+	* variant of Kangxi Radical 140
 	x 8279
 2EC1	CJK RADICAL TIGER
+	* variant of Kangxi Radical 141
 	x 864E
 2EC2	CJK RADICAL CLOTHES
+	* variant of Kangxi Radical 145
 	* form used on left side
 	x 8864
 2EC3	CJK RADICAL WEST ONE
+	* variant of Kangxi Radical 146
 	* form used at top
 	x 8980
 2EC4	CJK RADICAL WEST TWO
+	* variant of Kangxi Radical 146
 	* form used on left side
 	x 897F
 2EC5	CJK RADICAL C-SIMPLIFIED SEE
+	* simplified Chinese variant of Kangxi Radical 147
 	x 89C1
 2EC6	CJK RADICAL SIMPLIFIED HORN
+	* simplified Chinese variant of Kangxi Radical 148
 	x 89D2
 2EC7	CJK RADICAL HORN
+	* variant of Kangxi Radical 148
 	x 278B2
 2EC8	CJK RADICAL C-SIMPLIFIED SPEECH
+	* simplified Chinese variant of Kangxi Radical 149
 	x 8BA0
 2EC9	CJK RADICAL C-SIMPLIFIED SHELL
+	* simplified Chinese variant of Kangxi Radical 154
 	x 8D1D
 2ECA	CJK RADICAL FOOT
+	* variant of Kangxi Radical 157
 	* form used on left side
 	x 8DB3
 	x 27FB7
 2ECB	CJK RADICAL C-SIMPLIFIED CART
+	* simplified Chinese variant of Kangxi Radical 159
 	x 8F66
 2ECC	CJK RADICAL SIMPLIFIED WALK
+	* simplified variant of Kangxi Radical 162
 	x 8FB6
 2ECD	CJK RADICAL WALK ONE
+	* variant of Kangxi Radical 162
 	x 8FB6
 2ECE	CJK RADICAL WALK TWO
+	* variant of Kangxi Radical 162
 	x 8FB6
 2ECF	CJK RADICAL CITY
+	* variant of Kangxi Radical 163
 	* form used on right side
 	x 9091
 2ED0	CJK RADICAL C-SIMPLIFIED GOLD
+	* simplified Chinese variant of Kangxi Radical 167
 	x 9485
 2ED1	CJK RADICAL LONG ONE
+	* variant of Kangxi Radical 168
 	x 9577
 2ED2	CJK RADICAL LONG TWO
+	* variant of Kangxi Radical 168
 	* form used on left side
 	x 9578
 2ED3	CJK RADICAL C-SIMPLIFIED LONG
+	* simplified Chinese variant of Kangxi Radical 168
 	x 957F
 2ED4	CJK RADICAL C-SIMPLIFIED GATE
+	* simplified Chinese variant of Kangxi Radical 169
 	x 95E8
 2ED5	CJK RADICAL MOUND ONE
+	* variant of Kangxi Radical 170
 	x 961C
 	x 28E0F
 2ED6	CJK RADICAL MOUND TWO
+	* variant of Kangxi Radical 170
 	* form used on left side
 	x 961D
 2ED7	CJK RADICAL RAIN
+	* variant of Kangxi Radical 173
 	x 96E8
 2ED8	CJK RADICAL BLUE
+	* variant of Kangxi Radical 174
 	x 9752
 2ED9	CJK RADICAL C-SIMPLIFIED TANNED LEATHER
+	* simplified Chinese variant of Kangxi Radical 178
 	x 97E6
 2EDA	CJK RADICAL C-SIMPLIFIED LEAF
+	* simplified Chinese variant of Kangxi Radical 181
 	x 9875
 2EDB	CJK RADICAL C-SIMPLIFIED WIND
+	* simplified Chinese variant of Kangxi Radical 182
 	x 98CE
 2EDC	CJK RADICAL C-SIMPLIFIED FLY
+	* simplified Chinese variant of Kangxi Radical 183
 	x 98DE
 2EDD	CJK RADICAL EAT ONE
+	* variant of Kangxi Radical 184
 	* form used at bottom
 	x 98DF
 2EDE	CJK RADICAL EAT TWO
+	* variant of Kangxi Radical 184
 	* form used on left side
 	x 2967F
 2EDF	CJK RADICAL EAT THREE
+	* variant of Kangxi Radical 184
 	* form used on left side
 	x 98E0
 2EE0	CJK RADICAL C-SIMPLIFIED EAT
+	* simplified Chinese variant of Kangxi Radical 184
 	* form used on left side
 	x 9963
 2EE1	CJK RADICAL HEAD
+	* variant of Kangxi Radical 185
 	x 29810
 2EE2	CJK RADICAL C-SIMPLIFIED HORSE
+	* simplified Chinese variant of Kangxi Radical 187
 	x 9A6C
 2EE3	CJK RADICAL BONE
+	* simplified Chinese variant of Kangxi Radical 188
 	x 9AA8
 2EE4	CJK RADICAL GHOST
+	* variant of Kangxi Radical 194
 	x 9B3C
 2EE5	CJK RADICAL C-SIMPLIFIED FISH
+	* simplified Chinese variant of Kangxi Radical 195
 	x 9C7C
 2EE6	CJK RADICAL C-SIMPLIFIED BIRD
+	* simplified Chinese variant of Kangxi Radical 196
 	x 9E1F
 2EE7	CJK RADICAL C-SIMPLIFIED SALT
+	* simplified Chinese variant of Kangxi Radical 197
 	x 5364
 2EE8	CJK RADICAL SIMPLIFIED WHEAT
+	* simplified variant of Kangxi Radical 199
 	x 9EA6
 2EE9	CJK RADICAL SIMPLIFIED YELLOW
+	* simplified variant of Kangxi Radical 201
 	x 9EC4
 2EEA	CJK RADICAL C-SIMPLIFIED FROG
+	* simplified Chinese variant of Kangxi Radical 205
 	x 9EFE
 2EEB	CJK RADICAL J-SIMPLIFIED EVEN
+	* simplified Japanese variant of Kangxi Radical 210
 	x 6589
 2EEC	CJK RADICAL C-SIMPLIFIED EVEN
+	* simplified Chinese variant of Kangxi Radical 210
 	x 9F50
 2EED	CJK RADICAL J-SIMPLIFIED TOOTH
+	* simplified Japanese variant of Kangxi Radical 211
 	x 6B6F
 2EEE	CJK RADICAL C-SIMPLIFIED TOOTH
+	* simplified Chinese variant of Kangxi Radical 211
 	x 9F7F
 2EEF	CJK RADICAL J-SIMPLIFIED DRAGON
+	* simplified Japanese variant of Kangxi Radical 212
 	x 7ADC
 	x 9F8D
 2EF0	CJK RADICAL C-SIMPLIFIED DRAGON
+	* simplified Chinese variant of Kangxi Radical 212
 	x 9F99
 2EF1	CJK RADICAL TURTLE
+	* variant of Kangxi Radical 213
 	x 9F9C
 2EF2	CJK RADICAL J-SIMPLIFIED TURTLE
+	* simplified Japanese variant of Kangxi Radical 213
 	x 4E80
 2EF3	CJK RADICAL C-SIMPLIFIED TURTLE
+	* simplified Chinese variant of Kangxi Radical 213
 	# 9F9F
 @@	2F00	Kangxi Radicals	2FDF
 @		Kangxi radicals
 2F00	KANGXI RADICAL ONE
+	* Kangxi Radical 1
 	# 4E00
 2F01	KANGXI RADICAL LINE
+	* Kangxi Radical 2
 	# 4E28
 2F02	KANGXI RADICAL DOT
+	* Kangxi Radical 3
 	# 4E36
 2F03	KANGXI RADICAL SLASH
+	* Kangxi Radical 4
 	# 4E3F
 2F04	KANGXI RADICAL SECOND
+	* Kangxi Radical 5
 	# 4E59
 2F05	KANGXI RADICAL HOOK
+	* Kangxi Radical 6
 	# 4E85
 2F06	KANGXI RADICAL TWO
+	* Kangxi Radical 7
 	# 4E8C
 2F07	KANGXI RADICAL LID
+	* Kangxi Radical 8
 	# 4EA0
 2F08	KANGXI RADICAL MAN
+	* Kangxi Radical 9
 	# 4EBA
 2F09	KANGXI RADICAL LEGS
+	* Kangxi Radical 10
 	# 513F
 2F0A	KANGXI RADICAL ENTER
+	* Kangxi Radical 11
 	# 5165
 2F0B	KANGXI RADICAL EIGHT
+	* Kangxi Radical 12
 	# 516B
 2F0C	KANGXI RADICAL DOWN BOX
+	* Kangxi Radical 13
 	# 5182
 2F0D	KANGXI RADICAL COVER
+	* Kangxi Radical 14
 	# 5196
 2F0E	KANGXI RADICAL ICE
+	* Kangxi Radical 15
 	# 51AB
 2F0F	KANGXI RADICAL TABLE
+	* Kangxi Radical 16
 	# 51E0
 2F10	KANGXI RADICAL OPEN BOX
+	* Kangxi Radical 17
 	# 51F5
 2F11	KANGXI RADICAL KNIFE
+	* Kangxi Radical 18
 	# 5200
 2F12	KANGXI RADICAL POWER
+	* Kangxi Radical 19
 	# 529B
 2F13	KANGXI RADICAL WRAP
+	* Kangxi Radical 20
 	# 52F9
 2F14	KANGXI RADICAL SPOON
+	* Kangxi Radical 21
 	# 5315
 2F15	KANGXI RADICAL RIGHT OPEN BOX
+	* Kangxi Radical 22
 	# 531A
 2F16	KANGXI RADICAL HIDING ENCLOSURE
+	* Kangxi Radical 23
 	# 5338
 2F17	KANGXI RADICAL TEN
+	* Kangxi Radical 24
 	# 5341
 2F18	KANGXI RADICAL DIVINATION
+	* Kangxi Radical 25
 	# 535C
 2F19	KANGXI RADICAL SEAL
+	* Kangxi Radical 26
 	# 5369
 2F1A	KANGXI RADICAL CLIFF
+	* Kangxi Radical 27
 	# 5382
 2F1B	KANGXI RADICAL PRIVATE
+	* Kangxi Radical 28
 	# 53B6
 2F1C	KANGXI RADICAL AGAIN
+	* Kangxi Radical 29
 	# 53C8
 2F1D	KANGXI RADICAL MOUTH
+	* Kangxi Radical 30
 	# 53E3
 2F1E	KANGXI RADICAL ENCLOSURE
+	* Kangxi Radical 31
 	# 56D7
 2F1F	KANGXI RADICAL EARTH
+	* Kangxi Radical 32
 	# 571F
 2F20	KANGXI RADICAL SCHOLAR
+	* Kangxi Radical 33
 	# 58EB
 2F21	KANGXI RADICAL GO
+	* Kangxi Radical 34
 	# 5902
 2F22	KANGXI RADICAL GO SLOWLY
+	* Kangxi Radical 35
 	# 590A
 2F23	KANGXI RADICAL EVENING
+	* Kangxi Radical 36
 	# 5915
 2F24	KANGXI RADICAL BIG
+	* Kangxi Radical 37
 	# 5927
 2F25	KANGXI RADICAL WOMAN
+	* Kangxi Radical 38
 	# 5973
 2F26	KANGXI RADICAL CHILD
+	* Kangxi Radical 39
 	# 5B50
 2F27	KANGXI RADICAL ROOF
+	* Kangxi Radical 40
 	# 5B80
 2F28	KANGXI RADICAL INCH
+	* Kangxi Radical 41
 	# 5BF8
 2F29	KANGXI RADICAL SMALL
+	* Kangxi Radical 42
 	# 5C0F
 2F2A	KANGXI RADICAL LAME
+	* Kangxi Radical 43
 	x 21BC1
 	# 5C22
 2F2B	KANGXI RADICAL CORPSE
+	* Kangxi Radical 44
 	# 5C38
 2F2C	KANGXI RADICAL SPROUT
+	* Kangxi Radical 45
 	# 5C6E
 2F2D	KANGXI RADICAL MOUNTAIN
+	* Kangxi Radical 46
 	# 5C71
 2F2E	KANGXI RADICAL RIVER
+	* Kangxi Radical 47
 	# 5DDB
 2F2F	KANGXI RADICAL WORK
+	* Kangxi Radical 48
 	# 5DE5
 2F30	KANGXI RADICAL ONESELF
+	* Kangxi Radical 49
 	# 5DF1
 2F31	KANGXI RADICAL TURBAN
+	* Kangxi Radical 50
 	# 5DFE
 2F32	KANGXI RADICAL DRY
+	* Kangxi Radical 51
 	# 5E72
 2F33	KANGXI RADICAL SHORT THREAD
+	* Kangxi Radical 52
 	# 5E7A
 2F34	KANGXI RADICAL DOTTED CLIFF
+	* Kangxi Radical 53
 	# 5E7F
 2F35	KANGXI RADICAL LONG STRIDE
+	* Kangxi Radical 54
 	# 5EF4
 2F36	KANGXI RADICAL TWO HANDS
+	* Kangxi Radical 55
 	# 5EFE
 2F37	KANGXI RADICAL SHOOT
+	* Kangxi Radical 56
 	# 5F0B
 2F38	KANGXI RADICAL BOW
+	* Kangxi Radical 57
 	# 5F13
 2F39	KANGXI RADICAL SNOUT
+	* Kangxi Radical 58
 	# 5F50
 2F3A	KANGXI RADICAL BRISTLE
+	* Kangxi Radical 59
 	# 5F61
 2F3B	KANGXI RADICAL STEP
+	* Kangxi Radical 60
 	# 5F73
 2F3C	KANGXI RADICAL HEART
+	* Kangxi Radical 61
 	# 5FC3
 2F3D	KANGXI RADICAL HALBERD
+	* Kangxi Radical 62
 	# 6208
 2F3E	KANGXI RADICAL DOOR
+	* Kangxi Radical 63
 	# 6236
 2F3F	KANGXI RADICAL HAND
+	* Kangxi Radical 64
 	# 624B
 2F40	KANGXI RADICAL BRANCH
+	* Kangxi Radical 65
 	# 652F
 2F41	KANGXI RADICAL RAP
+	* Kangxi Radical 66
 	# 6534
 2F42	KANGXI RADICAL SCRIPT
+	* Kangxi Radical 67
 	# 6587
 2F43	KANGXI RADICAL DIPPER
+	* Kangxi Radical 68
 	# 6597
 2F44	KANGXI RADICAL AXE
+	* Kangxi Radical 69
 	# 65A4
 2F45	KANGXI RADICAL SQUARE
+	* Kangxi Radical 70
 	# 65B9
 2F46	KANGXI RADICAL NOT
+	* Kangxi Radical 71
 	# 65E0
 2F47	KANGXI RADICAL SUN
+	* Kangxi Radical 72
 	# 65E5
 2F48	KANGXI RADICAL SAY
+	* Kangxi Radical 73
 	# 66F0
 2F49	KANGXI RADICAL MOON
+	* Kangxi Radical 74
 	# 6708
 2F4A	KANGXI RADICAL TREE
+	* Kangxi Radical 75
 	# 6728
 2F4B	KANGXI RADICAL LACK
+	* Kangxi Radical 76
 	# 6B20
 2F4C	KANGXI RADICAL STOP
+	* Kangxi Radical 77
 	# 6B62
 2F4D	KANGXI RADICAL DEATH
+	* Kangxi Radical 78
 	# 6B79
 2F4E	KANGXI RADICAL WEAPON
+	* Kangxi Radical 79
 	# 6BB3
 2F4F	KANGXI RADICAL DO NOT
+	* Kangxi Radical 80
 	# 6BCB
 2F50	KANGXI RADICAL COMPARE
+	* Kangxi Radical 81
 	# 6BD4
 2F51	KANGXI RADICAL FUR
+	* Kangxi Radical 82
 	# 6BDB
 2F52	KANGXI RADICAL CLAN
+	* Kangxi Radical 83
 	# 6C0F
 2F53	KANGXI RADICAL STEAM
+	* Kangxi Radical 84
 	# 6C14
 2F54	KANGXI RADICAL WATER
+	* Kangxi Radical 85
 	# 6C34
 2F55	KANGXI RADICAL FIRE
+	* Kangxi Radical 86
 	# 706B
 2F56	KANGXI RADICAL CLAW
+	* Kangxi Radical 87
 	# 722A
 2F57	KANGXI RADICAL FATHER
+	* Kangxi Radical 88
 	# 7236
 2F58	KANGXI RADICAL DOUBLE X
+	* Kangxi Radical 89
 	# 723B
 2F59	KANGXI RADICAL HALF TREE TRUNK
+	* Kangxi Radical 90
 	# 723F
 2F5A	KANGXI RADICAL SLICE
+	* Kangxi Radical 91
 	# 7247
 2F5B	KANGXI RADICAL FANG
+	* Kangxi Radical 92
 	# 7259
 2F5C	KANGXI RADICAL COW
+	* Kangxi Radical 93
 	# 725B
 2F5D	KANGXI RADICAL DOG
+	* Kangxi Radical 94
 	# 72AC
 2F5E	KANGXI RADICAL PROFOUND
+	* Kangxi Radical 95
 	# 7384
 2F5F	KANGXI RADICAL JADE
+	* Kangxi Radical 96
 	# 7389
 2F60	KANGXI RADICAL MELON
+	* Kangxi Radical 97
 	# 74DC
 2F61	KANGXI RADICAL TILE
+	* Kangxi Radical 98
 	# 74E6
 2F62	KANGXI RADICAL SWEET
+	* Kangxi Radical 99
 	# 7518
 2F63	KANGXI RADICAL LIFE
+	* Kangxi Radical 100
 	# 751F
 2F64	KANGXI RADICAL USE
+	* Kangxi Radical 101
 	# 7528
 2F65	KANGXI RADICAL FIELD
+	* Kangxi Radical 102
 	# 7530
 2F66	KANGXI RADICAL BOLT OF CLOTH
+	* Kangxi Radical 103
 	# 758B
 2F67	KANGXI RADICAL SICKNESS
+	* Kangxi Radical 104
 	# 7592
 2F68	KANGXI RADICAL DOTTED TENT
+	* Kangxi Radical 105
 	# 7676
 2F69	KANGXI RADICAL WHITE
+	* Kangxi Radical 106
 	# 767D
 2F6A	KANGXI RADICAL SKIN
+	* Kangxi Radical 107
 	# 76AE
 2F6B	KANGXI RADICAL DISH
+	* Kangxi Radical 108
 	# 76BF
 2F6C	KANGXI RADICAL EYE
+	* Kangxi Radical 109
 	# 76EE
 2F6D	KANGXI RADICAL SPEAR
+	* Kangxi Radical 110
 	# 77DB
 2F6E	KANGXI RADICAL ARROW
+	* Kangxi Radical 111
 	# 77E2
 2F6F	KANGXI RADICAL STONE
+	* Kangxi Radical 112
 	# 77F3
 2F70	KANGXI RADICAL SPIRIT
+	* Kangxi Radical 113
 	# 793A
 2F71	KANGXI RADICAL TRACK
+	* Kangxi Radical 114
 	# 79B8
 2F72	KANGXI RADICAL GRAIN
+	* Kangxi Radical 115
 	# 79BE
 2F73	KANGXI RADICAL CAVE
+	* Kangxi Radical 116
 	# 7A74
 2F74	KANGXI RADICAL STAND
+	* Kangxi Radical 117
 	# 7ACB
 2F75	KANGXI RADICAL BAMBOO
+	* Kangxi Radical 118
 	# 7AF9
 2F76	KANGXI RADICAL RICE
+	* Kangxi Radical 119
 	# 7C73
 2F77	KANGXI RADICAL SILK
+	* Kangxi Radical 120
 	# 7CF8
 2F78	KANGXI RADICAL JAR
+	* Kangxi Radical 121
 	# 7F36
 2F79	KANGXI RADICAL NET
+	* Kangxi Radical 122
 	# 7F51
 2F7A	KANGXI RADICAL SHEEP
+	* Kangxi Radical 123
 	# 7F8A
 2F7B	KANGXI RADICAL FEATHER
+	* Kangxi Radical 124
 	# 7FBD
 2F7C	KANGXI RADICAL OLD
+	* Kangxi Radical 125
 	# 8001
 2F7D	KANGXI RADICAL AND
+	* Kangxi Radical 126
 	# 800C
 2F7E	KANGXI RADICAL PLOW
+	* Kangxi Radical 127
 	# 8012
 2F7F	KANGXI RADICAL EAR
+	* Kangxi Radical 128
 	# 8033
 2F80	KANGXI RADICAL BRUSH
+	* Kangxi Radical 129
 	# 807F
 2F81	KANGXI RADICAL MEAT
+	* Kangxi Radical 130
 	# 8089
 2F82	KANGXI RADICAL MINISTER
+	* Kangxi Radical 131
 	# 81E3
 2F83	KANGXI RADICAL SELF
+	* Kangxi Radical 132
 	# 81EA
 2F84	KANGXI RADICAL ARRIVE
+	* Kangxi Radical 133
 	# 81F3
 2F85	KANGXI RADICAL MORTAR
+	* Kangxi Radical 134
 	# 81FC
 2F86	KANGXI RADICAL TONGUE
+	* Kangxi Radical 135
 	# 820C
 2F87	KANGXI RADICAL OPPOSE
+	* Kangxi Radical 136
 	# 821B
 2F88	KANGXI RADICAL BOAT
+	* Kangxi Radical 137
 	# 821F
 2F89	KANGXI RADICAL STOPPING
+	* Kangxi Radical 138
 	# 826E
 2F8A	KANGXI RADICAL COLOR
+	* Kangxi Radical 139
 	# 8272
 2F8B	KANGXI RADICAL GRASS
+	* Kangxi Radical 140
 	# 8278
 2F8C	KANGXI RADICAL TIGER
+	* Kangxi Radical 141
 	# 864D
 2F8D	KANGXI RADICAL INSECT
+	* Kangxi Radical 142
 	# 866B
 2F8E	KANGXI RADICAL BLOOD
+	* Kangxi Radical 143
 	# 8840
 2F8F	KANGXI RADICAL WALK ENCLOSURE
+	* Kangxi Radical 144
 	# 884C
 2F90	KANGXI RADICAL CLOTHES
+	* Kangxi Radical 145
 	# 8863
 2F91	KANGXI RADICAL WEST
+	* Kangxi Radical 146
 	# 897E
 2F92	KANGXI RADICAL SEE
+	* Kangxi Radical 147
 	# 898B
 2F93	KANGXI RADICAL HORN
+	* Kangxi Radical 148
 	# 89D2
 2F94	KANGXI RADICAL SPEECH
+	* Kangxi Radical 149
 	# 8A00
 2F95	KANGXI RADICAL VALLEY
+	* Kangxi Radical 150
 	# 8C37
 2F96	KANGXI RADICAL BEAN
+	* Kangxi Radical 151
 	# 8C46
 2F97	KANGXI RADICAL PIG
+	* Kangxi Radical 152
 	# 8C55
 2F98	KANGXI RADICAL BADGER
+	* Kangxi Radical 153
 	# 8C78
 2F99	KANGXI RADICAL SHELL
+	* Kangxi Radical 154
 	# 8C9D
 2F9A	KANGXI RADICAL RED
+	* Kangxi Radical 155
 	# 8D64
 2F9B	KANGXI RADICAL RUN
+	* Kangxi Radical 156
 	# 8D70
 2F9C	KANGXI RADICAL FOOT
+	* Kangxi Radical 157
 	# 8DB3
 2F9D	KANGXI RADICAL BODY
+	* Kangxi Radical 158
 	# 8EAB
 2F9E	KANGXI RADICAL CART
+	* Kangxi Radical 159
 	# 8ECA
 2F9F	KANGXI RADICAL BITTER
+	* Kangxi Radical 160
 	# 8F9B
 2FA0	KANGXI RADICAL MORNING
+	* Kangxi Radical 161
 	# 8FB0
 2FA1	KANGXI RADICAL WALK
+	* Kangxi Radical 162
 	# 8FB5
 2FA2	KANGXI RADICAL CITY
+	* Kangxi Radical 163
 	# 9091
 2FA3	KANGXI RADICAL WINE
+	* Kangxi Radical 164
 	# 9149
 2FA4	KANGXI RADICAL DISTINGUISH
+	* Kangxi Radical 165
 	# 91C6
 2FA5	KANGXI RADICAL VILLAGE
+	* Kangxi Radical 166
 	# 91CC
 2FA6	KANGXI RADICAL GOLD
+	* Kangxi Radical 167
 	# 91D1
 2FA7	KANGXI RADICAL LONG
+	* Kangxi Radical 168
 	# 9577
 2FA8	KANGXI RADICAL GATE
+	* Kangxi Radical 169
 	# 9580
 2FA9	KANGXI RADICAL MOUND
+	* Kangxi Radical 170
 	# 961C
 2FAA	KANGXI RADICAL SLAVE
+	* Kangxi Radical 171
 	# 96B6
 2FAB	KANGXI RADICAL SHORT TAILED BIRD
+	* Kangxi Radical 172
 	# 96B9
 2FAC	KANGXI RADICAL RAIN
+	* Kangxi Radical 173
 	# 96E8
 2FAD	KANGXI RADICAL BLUE
+	* Kangxi Radical 174
 	# 9751
 2FAE	KANGXI RADICAL WRONG
+	* Kangxi Radical 175
 	# 975E
 2FAF	KANGXI RADICAL FACE
+	* Kangxi Radical 176
 	# 9762
 2FB0	KANGXI RADICAL LEATHER
+	* Kangxi Radical 177
 	# 9769
 2FB1	KANGXI RADICAL TANNED LEATHER
+	* Kangxi Radical 178
 	# 97CB
 2FB2	KANGXI RADICAL LEEK
+	* Kangxi Radical 179
 	# 97ED
 2FB3	KANGXI RADICAL SOUND
+	* Kangxi Radical 180
 	# 97F3
 2FB4	KANGXI RADICAL LEAF
+	* Kangxi Radical 181
 	# 9801
 2FB5	KANGXI RADICAL WIND
+	* Kangxi Radical 182
 	# 98A8
 2FB6	KANGXI RADICAL FLY
+	* Kangxi Radical 183
 	# 98DB
 2FB7	KANGXI RADICAL EAT
+	* Kangxi Radical 184
 	# 98DF
 2FB8	KANGXI RADICAL HEAD
+	* Kangxi Radical 185
 	# 9996
 2FB9	KANGXI RADICAL FRAGRANT
+	* Kangxi Radical 186
 	# 9999
 2FBA	KANGXI RADICAL HORSE
+	* Kangxi Radical 187
 	# 99AC
 2FBB	KANGXI RADICAL BONE
+	* Kangxi Radical 188
 	# 9AA8
 2FBC	KANGXI RADICAL TALL
+	* Kangxi Radical 189
 	# 9AD8
 2FBD	KANGXI RADICAL HAIR
+	* Kangxi Radical 190
 	# 9ADF
 2FBE	KANGXI RADICAL FIGHT
+	* Kangxi Radical 191
 	# 9B25
 2FBF	KANGXI RADICAL SACRIFICIAL WINE
+	* Kangxi Radical 192
 	# 9B2F
 2FC0	KANGXI RADICAL CAULDRON
+	* Kangxi Radical 193
 	# 9B32
 2FC1	KANGXI RADICAL GHOST
+	* Kangxi Radical 194
 	# 9B3C
 2FC2	KANGXI RADICAL FISH
+	* Kangxi Radical 195
 	# 9B5A
 2FC3	KANGXI RADICAL BIRD
+	* Kangxi Radical 196
 	# 9CE5
 2FC4	KANGXI RADICAL SALT
+	* Kangxi Radical 197
 	# 9E75
 2FC5	KANGXI RADICAL DEER
+	* Kangxi Radical 198
 	# 9E7F
 2FC6	KANGXI RADICAL WHEAT
+	* Kangxi Radical 199
 	# 9EA5
 2FC7	KANGXI RADICAL HEMP
+	* Kangxi Radical 200
 	# 9EBB
 2FC8	KANGXI RADICAL YELLOW
+	* Kangxi Radical 201
 	# 9EC3
 2FC9	KANGXI RADICAL MILLET
+	* Kangxi Radical 202
 	# 9ECD
 2FCA	KANGXI RADICAL BLACK
+	* Kangxi Radical 203
 	# 9ED1
 2FCB	KANGXI RADICAL EMBROIDERY
+	* Kangxi Radical 204
 	# 9EF9
 2FCC	KANGXI RADICAL FROG
+	* Kangxi Radical 205
 	# 9EFD
 2FCD	KANGXI RADICAL TRIPOD
+	* Kangxi Radical 206
 	# 9F0E
 2FCE	KANGXI RADICAL DRUM
+	* Kangxi Radical 207
 	# 9F13
 2FCF	KANGXI RADICAL RAT
+	* Kangxi Radical 208
 	# 9F20
 2FD0	KANGXI RADICAL NOSE
+	* Kangxi Radical 209
 	# 9F3B
 2FD1	KANGXI RADICAL EVEN
+	* Kangxi Radical 210
 	# 9F4A
 2FD2	KANGXI RADICAL TOOTH
+	* Kangxi Radical 211
 	# 9F52
 2FD3	KANGXI RADICAL DRAGON
+	* Kangxi Radical 212
 	# 9F8D
 2FD4	KANGXI RADICAL TURTLE
+	* Kangxi Radical 213
 	# 9F9C
 2FD5	KANGXI RADICAL FLUTE
+	* Kangxi Radical 214
 	# 9FA0
 @@	2FF0	Ideographic Description Characters	2FFF
 @		Ideographic description characters
@@ -20126,6 +20694,10 @@
 2FF9	IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM UPPER RIGHT
 2FFA	IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM LOWER LEFT
 2FFB	IDEOGRAPHIC DESCRIPTION CHARACTER OVERLAID
+2FFC	IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM RIGHT
+2FFD	IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM LOWER RIGHT
+2FFE	IDEOGRAPHIC DESCRIPTION CHARACTER HORIZONTAL REFLECTION
+2FFF	IDEOGRAPHIC DESCRIPTION CHARACTER ROTATION
 @@	3000	CJK Symbols and Punctuation	303F
 @@+
 @		CJK symbols and punctuation
@@ -20992,6 +21564,10 @@
 	* 1st stroke of 4E44
 31E3	CJK STROKE Q
 	* 6th stroke of 3514
+@		Ideographic description character
+@+		This is a visibly displayed graphic character, not an invisible composition control. It is used with other characters from the Ideographic Description Characters block.
+31EF	IDEOGRAPHIC DESCRIPTION CHARACTER SUBTRACTION
+	* used to describe a character with a stroke removed
 @@	31F0	Katakana Phonetic Extensions	31FF
 @		Phonetic extensions for Ainu
 31F0	KATAKANA LETTER SMALL KU
@@ -23528,6 +24104,9 @@ A4F5	LISU LETTER UE
 A4F6	LISU LETTER UH
 A4F7	LISU LETTER OE
 @		Tones
+@+		The script also uses modifier letters in the Spacing Modifier Letters block.
+	x (modifier letter apostrophe - 02BC)
+	x (modifier letter low macron - 02CD)
 A4F8	LISU LETTER TONE MYA TI
 A4F9	LISU LETTER TONE NA PO
 A4FA	LISU LETTER TONE MYA CYA
@@ -24175,24 +24754,44 @@ A721	MODIFIER LETTER STRESS AND LOW TONE
 @		Egyptological additions
 A722	LATIN CAPITAL LETTER EGYPTOLOGICAL ALEF
 A723	LATIN SMALL LETTER EGYPTOLOGICAL ALEF
+	x (hebrew letter alef - 05D0)
+	x (arabic letter alef with hamza above - 0623)
 A724	LATIN CAPITAL LETTER EGYPTOLOGICAL AIN
 A725	LATIN SMALL LETTER EGYPTOLOGICAL AIN
-	* this is a case pair
+	x (modifier letter left half ring - 02BF)
+	x (hebrew letter ayin - 05E2)
+	x (arabic letter ain - 0639)
 	x (latin letter ain - 1D25)
 	x (modifier letter small ain - 1D5C)
 	x (latin small letter glottal i - A7BD)
 @		Mayanist additions
+@+		These are used for Mayan orthographies of the colonial period.
 A726	LATIN CAPITAL LETTER HENG
+	x (cyrillic capital letter en with hook - 04C7)
+	x (latin capital letter h with descender - 2C67)
 A727	LATIN SMALL LETTER HENG
+	* uvular fricative, see 0281
+	* also used in Bantu linguistics for the voiced alveolar lateral fricative, see 026E
+	x (latin small letter heng with hook - 0267)
+	x (latin small letter h with palatal hook - A795)
+	x (modifier letter small heng - AB5C)
 A728	LATIN CAPITAL LETTER TZ
 A729	LATIN SMALL LETTER TZ
+	= tezh digraph
+	* palatoalveolar affricate [ts]
+	x (latin small letter ts digraph - 02A6)
+	x (latin small letter tesh digraph - 02A7)
 A72A	LATIN CAPITAL LETTER TRESILLO
 A72B	LATIN SMALL LETTER TRESILLO
+	* uvular ejective stop [qʼ]
 	x (turned digit three - 218B)
 A72C	LATIN CAPITAL LETTER CUATRILLO
 A72D	LATIN SMALL LETTER CUATRILLO
+	* velar ejective stop [kʼ]
+	x (digit four - 0034)
 A72E	LATIN CAPITAL LETTER CUATRILLO WITH COMMA
 A72F	LATIN SMALL LETTER CUATRILLO WITH COMMA
+	* alveolar ejective affricate [tsʼ]
 @		Medievalist additions
 A730	LATIN LETTER SMALL CAPITAL F
 A731	LATIN LETTER SMALL CAPITAL S
@@ -24210,7 +24809,9 @@ A73B	LATIN SMALL LETTER AV WITH HORIZONTAL BAR
 A73C	LATIN CAPITAL LETTER AY
 A73D	LATIN SMALL LETTER AY
 A73E	LATIN CAPITAL LETTER REVERSED C WITH DOT
+	x (greek capital reversed dotted lunate sigma symbol - 03FF)
 A73F	LATIN SMALL LETTER REVERSED C WITH DOT
+	x (greek small reversed dotted lunate sigma symbol - 037D)
 A740	LATIN CAPITAL LETTER K WITH STROKE
 A741	LATIN SMALL LETTER K WITH STROKE
 A742	LATIN CAPITAL LETTER K WITH DIAGONAL STROKE
@@ -24220,15 +24821,24 @@ A745	LATIN SMALL LETTER K WITH STROKE AND DIAGONAL STROKE
 A746	LATIN CAPITAL LETTER BROKEN L
 A747	LATIN SMALL LETTER BROKEN L
 A748	LATIN CAPITAL LETTER L WITH HIGH STROKE
+	x (latin capital letter l with bar - 023D)
 A749	LATIN SMALL LETTER L WITH HIGH STROKE
+	x (latin small letter l with bar - 019A)
 A74A	LATIN CAPITAL LETTER O WITH LONG STROKE OVERLAY
+	x (latin capital letter o with middle tilde - 019F)
 A74B	LATIN SMALL LETTER O WITH LONG STROKE OVERLAY
+	x (latin small letter o with stroke - 00F8)
+	x (latin small letter barred o - 0275)
 A74C	LATIN CAPITAL LETTER O WITH LOOP
 A74D	LATIN SMALL LETTER O WITH LOOP
 A74E	LATIN CAPITAL LETTER OO
 A74F	LATIN SMALL LETTER OO
+	x (cyrillic small letter double o - A699)
 A750	LATIN CAPITAL LETTER P WITH STROKE THROUGH DESCENDER
+	x (ruble sign - 20BD)
 A751	LATIN SMALL LETTER P WITH STROKE THROUGH DESCENDER
+	x (greek rho with stroke symbol - 03FC)
+	x (latin small letter p with middle tilde - 1D71)
 A752	LATIN CAPITAL LETTER P WITH FLOURISH
 A753	LATIN SMALL LETTER P WITH FLOURISH
 A754	LATIN CAPITAL LETTER P WITH SQUIRREL TAIL
@@ -24247,6 +24857,7 @@ A760	LATIN CAPITAL LETTER VY
 A761	LATIN SMALL LETTER VY
 A762	LATIN CAPITAL LETTER VISIGOTHIC Z
 A763	LATIN SMALL LETTER VISIGOTHIC Z
+	x (latin small letter c with cedilla - 00E7)
 A764	LATIN CAPITAL LETTER THORN WITH STROKE
 A765	LATIN SMALL LETTER THORN WITH STROKE
 	* Old English, Old Norse
@@ -24257,12 +24868,16 @@ A767	LATIN SMALL LETTER THORN WITH STROKE THROUGH DESCENDER
 A768	LATIN CAPITAL LETTER VEND
 A769	LATIN SMALL LETTER VEND
 A76A	LATIN CAPITAL LETTER ET
+	x (latin capital letter reversed open e - A7AB)
 A76B	LATIN SMALL LETTER ET
+	x (latin small letter yogh - 021D)
 A76C	LATIN CAPITAL LETTER IS
 A76D	LATIN SMALL LETTER IS
 A76E	LATIN CAPITAL LETTER CON
+	x (digit nine - 0039)
 A76F	LATIN SMALL LETTER CON
 A770	MODIFIER LETTER US
+	x (superscript nine - 2079)
 	# <super> A76F
 A771	LATIN SMALL LETTER DUM
 A772	LATIN SMALL LETTER LUM
@@ -24273,34 +24888,52 @@ A776	LATIN LETTER SMALL CAPITAL RUM
 A777	LATIN SMALL LETTER TUM
 A778	LATIN SMALL LETTER UM
 @		Insular and Celticist letters
+@+		These letters are meant for transcriptions of medieval manuscripts, or for modern phonetic notations, for cases where the letters contrast with their Carolingian forms. For representing whole texts in an Insular style, one should use the regular Latin letters and display them with an Insular typeface.
 A779	LATIN CAPITAL LETTER INSULAR D
 A77A	LATIN SMALL LETTER INSULAR D
+	* dental fricative [ð]
+	x (latin small letter eth - 00F0)
+	x (latin small letter delta - 1E9F)
 A77B	LATIN CAPITAL LETTER INSULAR F
 A77C	LATIN SMALL LETTER INSULAR F
 A77D	LATIN CAPITAL LETTER INSULAR G
 	* lowercase is 1D79
+	x (latin capital letter closed insular g - A7D0)
 A77E	LATIN CAPITAL LETTER TURNED INSULAR G
 A77F	LATIN SMALL LETTER TURNED INSULAR G
+	* velar nasal [ŋ]
+	x (latin small letter turned g - 1D77)
 A780	LATIN CAPITAL LETTER TURNED L
 A781	LATIN SMALL LETTER TURNED L
+	* voiceless alveolar lateral fricative [ɬ]
 A782	LATIN CAPITAL LETTER INSULAR R
 A783	LATIN SMALL LETTER INSULAR R
+	x (latin small letter r with long leg - 027C)
 A784	LATIN CAPITAL LETTER INSULAR S
 A785	LATIN SMALL LETTER INSULAR S
+	x (latin small letter long s - 017F)
 A786	LATIN CAPITAL LETTER INSULAR T
 A787	LATIN SMALL LETTER INSULAR T
+	* voiceless dental fricative [θ]
 @		Modifier letters
 A788	MODIFIER LETTER LOW CIRCUMFLEX ACCENT
+	* used as a tone letter for Lahu and Akha
 	x (modifier letter circumflex accent - 02C6)
+	x (modifier letter low up arrowhead - 02F0)
 	x (caret - 2038)
 A789	MODIFIER LETTER COLON
 	* used as a tone letter in some orthographies
-	* Budu (Congo), Sabaot (Kenya), and several Papua New Guinea languages
+	* Budu (Congo), Sabaot (Kenya), Grebo (Liberia), and several Papua New Guinea languages
 	x (colon - 003A)
+	x (modifier letter triangular colon - 02D0)
+	x (modifier letter raised colon - 02F8)
+	x (lisu letter tone mya jeu - A4FD)
 A78A	MODIFIER LETTER SHORT EQUALS SIGN
-	* used as a tone letter in some orthographies
-	* Budu (Congo)
+	* used as a tone letter for Budu
 	x (equals sign - 003D)
+	x (modifier letter unaspirated - 02ED)
+	x (double hyphen - 2E40)
+	x (small equals sign - FE66)
 @		Orthographic letters for glottals
 A78B	LATIN CAPITAL LETTER SALTILLO
 	* Me'phaa (Mexico)
@@ -24315,23 +24948,34 @@ A78C	LATIN SMALL LETTER SALTILLO
 @		Additional letter
 A78D	LATIN CAPITAL LETTER TURNED H
 	* used in the Dan/Gio orthography in Liberia
+	* also historically used in Latin-based orthographies for Abaza and Abkhaz
 	* lowercase is 0265
+	x (cyrillic capital letter che - 0427)
 @		Phonetic symbol
 A78E	LATIN SMALL LETTER L WITH RETROFLEX HOOK AND BELT
 	* voiceless lateral retroflex fricative
 	* used to transcribe Toda
-@		Transliteration letter
+	x (latin small letter l with belt - 026C)
+@		Transliteration letter for sinology
 A78F	LATIN LETTER SINOLOGICAL DOT
 	* used in transliteration of Phags-Pa and in phonetic transcription of Tangut
 	x (middle dot - 00B7)
+	x (bullet - 2022)
 @		Additional letters
 A790	LATIN CAPITAL LETTER N WITH DESCENDER
 A791	LATIN SMALL LETTER N WITH DESCENDER
-	* Janalif
+	* velar nasal [ŋ]
+	* Yañalif
+	x (latin small letter eng - 014B)
+	x (latin small letter n with long right leg - 019E)
+	x (cyrillic small letter en with descender - 04A3)
 A792	LATIN CAPITAL LETTER C WITH BAR
 	= Cambrian symbol
+	x (euro sign - 20AC)
 A793	LATIN SMALL LETTER C WITH BAR
-	* Nanai
+	* voiceless postalveolar affricate [tʃ]
+	* Nanai, ...
+	x (cyrillic small letter ukrainian ie - 0454)
 @		Additions for Lithuanian dialectology
 A794	LATIN SMALL LETTER C WITH PALATAL HOOK
 	* uppercase is A7C4
@@ -24343,9 +24987,10 @@ A797	LATIN SMALL LETTER B WITH FLOURISH
 @		Archaic letters for Ewe
 A798	LATIN CAPITAL LETTER F WITH STROKE
 	x (latin capital letter f with hook - 0191)
+	x (french franc sign - 20A3)
 A799	LATIN SMALL LETTER F WITH STROKE
 	* old Ewe orthography
-	* also used in German dialectology
+	* also used in the Anthropos phonetic alphabet
 @		Archaic letters for Volapük
 A79A	LATIN CAPITAL LETTER VOLAPUK AE
 A79B	LATIN SMALL LETTER VOLAPUK AE
@@ -24366,20 +25011,28 @@ A7A8	LATIN CAPITAL LETTER S WITH OBLIQUE STROKE
 A7A9	LATIN SMALL LETTER S WITH OBLIQUE STROKE
 	* also used in pre-1950 Lower Sorbian orthography
 	x (latin small letter long s with diagonal stroke - 1E9C)
+	x (latin small letter s with short stroke overlay - A7CA)
 @		Additional letters
 A7AA	LATIN CAPITAL LETTER H WITH HOOK
 	* lowercase is 0266
 	* used in Chad
 A7AB	LATIN CAPITAL LETTER REVERSED OPEN E
 	* lowercase is 025C
+	x (latin capital letter ezh - 01B7)
+	x (latin capital letter yogh - 021C)
+	x (cyrillic capital letter ze - 0417)
 A7AC	LATIN CAPITAL LETTER SCRIPT G
 	* lowercase is 0261
 A7AD	LATIN CAPITAL LETTER L WITH BELT
 	* lowercase is 026C
+	x (latin capital letter l with bar - 023D)
+	x (latin letter small capital l with belt - 1DF04)
 @		Letter for West African languages
 A7AE	LATIN CAPITAL LETTER SMALL CAPITAL I
 	* lowercase is 026A
 	* also used in Unifon
+	x (latin capital letter i - 0049)
+	x (latin letter small capital i - 026A)
 @		Letter for Japanese phonemic transcription
 A7AF	LATIN LETTER SMALL CAPITAL Q
 	* used to represent gemination
@@ -24400,10 +25053,14 @@ A7B3	LATIN CAPITAL LETTER CHI
 @		Letters for African languages
 A7B4	LATIN CAPITAL LETTER BETA
 A7B5	LATIN SMALL LETTER BETA
+	x (latin small letter sharp s - 00DF)
 	x (greek small letter beta - 03B2)
 A7B6	LATIN CAPITAL LETTER OMEGA
 A7B7	LATIN SMALL LETTER OMEGA
+	x (latin small letter closed omega - 0277)
 	x (greek small letter omega - 03C9)
+	x (cyrillic small letter omega - 0461)
+	x (cyrillic small letter broad omega - A64D)
 @		Letters for Mazahua (México)
 A7B8	LATIN CAPITAL LETTER U WITH STROKE
 A7B9	LATIN SMALL LETTER U WITH STROKE
@@ -24435,11 +25092,15 @@ A7C6	LATIN CAPITAL LETTER Z WITH PALATAL HOOK
 	* lowercase is 1D8E
 @		Additional letters for Gaulish
 A7C7	LATIN CAPITAL LETTER D WITH SHORT STROKE OVERLAY
+	x (latin capital letter eth - 00D0)
+	x (latin capital letter d with stroke - 0110)
 A7C8	LATIN SMALL LETTER D WITH SHORT STROKE OVERLAY
 	= tau gallicum
 	* indicates a dental affricate
+	x (latin small letter d with stroke - 0111)
 A7C9	LATIN CAPITAL LETTER S WITH SHORT STROKE OVERLAY
 A7CA	LATIN SMALL LETTER S WITH SHORT STROKE OVERLAY
+	* attested in handwritten documents used in pairs as an alternate tau gallicum
 @		Letters used in the Middle English Ormulum
 A7D0	LATIN CAPITAL LETTER CLOSED INSULAR G
 A7D1	LATIN SMALL LETTER CLOSED INSULAR G
@@ -24471,6 +25132,7 @@ A7F5	LATIN CAPITAL LETTER REVERSED HALF H
 	* appears in inscriptions from the Roman provinces of Gaul
 	x (latin capital letter half h - 2C75)
 A7F6	LATIN SMALL LETTER REVERSED HALF H
+	* the lowercase is not attested in inscriptions but is used by scholars when transcribing
 A7F7	LATIN EPIGRAPHIC LETTER SIDEWAYS I
 	* Celtic inscriptions
 @		Additions for Extended IPA
@@ -24484,12 +25146,20 @@ A7F9	MODIFIER LETTER SMALL LIGATURE OE
 	# <super> 0153
 @		Addition for UPA
 A7FA	LATIN LETTER SMALL CAPITAL TURNED M
+	* voiceless closed central vowel
+	x (latin small letter turned m - 026F)
+	x (cyrillic small letter sha - 0448)
 @		Ancient Roman epigraphic letters
 A7FB	LATIN EPIGRAPHIC LETTER REVERSED F
+	= filia (daughter), femina (woman, female)
 A7FC	LATIN EPIGRAPHIC LETTER REVERSED P
+	= puella (girl)
 A7FD	LATIN EPIGRAPHIC LETTER INVERTED M
+	= mulier, matrona (married woman)
+	x (latin capital letter turned m - 019C)
 A7FE	LATIN EPIGRAPHIC LETTER I LONGA
 A7FF	LATIN EPIGRAPHIC LETTER ARCHAIC M
+	* logograph for the praenomen "Manius"
 @@	A800	Syloti Nagri	A82F
 @		Independent vowels and dvisvara
 A800	SYLOTI NAGRI LETTER A
@@ -25555,6 +26225,7 @@ AB30	LATIN SMALL LETTER BARRED ALPHA
 @+		* This letter is a Latin alpha with a horizontal strikethrough bar. In some font designs, the bar might not extend beyond the edge of the letter, and in such cases, the letter should not be confused with a ligature of epsilon and iota.
 AB31	LATIN SMALL LETTER A REVERSED-SCHWA
 AB32	LATIN SMALL LETTER BLACKLETTER E
+	x (mathematical fraktur small e - 1D522)
 AB33	LATIN SMALL LETTER BARRED E
 AB34	LATIN SMALL LETTER E WITH FLOURISH
 AB35	LATIN SMALL LETTER LENIS F
@@ -25562,12 +26233,17 @@ AB35	LATIN SMALL LETTER LENIS F
 AB36	LATIN SMALL LETTER SCRIPT G WITH CROSSED-TAIL
 AB37	LATIN SMALL LETTER L WITH INVERTED LAZY S
 AB38	LATIN SMALL LETTER L WITH DOUBLE MIDDLE TILDE
+	x (latin small letter l with middle tilde - 026B)
+	x (latin small letter l with double bar - 2C61)
 AB39	LATIN SMALL LETTER L WITH MIDDLE RING
 AB3A	LATIN SMALL LETTER M WITH CROSSED-TAIL
 AB3B	LATIN SMALL LETTER N WITH CROSSED-TAIL
 AB3C	LATIN SMALL LETTER ENG WITH CROSSED-TAIL
 AB3D	LATIN SMALL LETTER BLACKLETTER O
+	x (mathematical fraktur small o - 1D52C)
 AB3E	LATIN SMALL LETTER BLACKLETTER O WITH STROKE
+@+		* This letter was encoded based on a misinterpretation of a low quality copy of Sievers 1901. It is not actually used in German dialectology.
+	x (latin small letter o with stroke - 00F8)
 AB3F	LATIN SMALL LETTER OPEN O WITH STROKE
 AB40	LATIN SMALL LETTER INVERTED OE
 	= latin small letter o reversed-schwa
@@ -25582,8 +26258,10 @@ AB48	LATIN SMALL LETTER DOUBLE R
 AB49	LATIN SMALL LETTER R WITH CROSSED-TAIL
 AB4A	LATIN SMALL LETTER DOUBLE R WITH CROSSED-TAIL
 AB4B	LATIN SMALL LETTER SCRIPT R
+	x (mathematical script small r - 1D4C7)
 AB4C	LATIN SMALL LETTER SCRIPT R WITH RING
 AB4D	LATIN SMALL LETTER BASELINE ESH
+	x (latin small letter esh - 0283)
 AB4E	LATIN SMALL LETTER U WITH SHORT RIGHT LEG
 AB4F	LATIN SMALL LETTER U BAR WITH SHORT RIGHT LEG
 AB50	LATIN SMALL LETTER UI
@@ -25601,8 +26279,9 @@ AB59	LATIN SMALL LETTER X WITH LONG LEFT LEG WITH SERIF
 AB5A	LATIN SMALL LETTER Y WITH SHORT RIGHT LEG
 @		Modifier letters for German dialectology
 AB5B	MODIFIER BREVE WITH INVERTED BREVE
+	* indicates a short vowel
 	x (breve - 02D8)
-	x (close up - 2050)
+	x (equivalent to - 224D)
 	x (metrical breve - 23D1)
 	x (inverted low kavyka with kavyka above - 2E46)
 AB5C	MODIFIER LETTER SMALL HENG
@@ -25624,13 +26303,14 @@ AB62	LATIN SMALL LETTER OPEN OE
 AB63	LATIN SMALL LETTER UO
 @		Letters for Americanist orthographies
 AB64	LATIN SMALL LETTER INVERTED ALPHA
+	* unrounded low back vowel
 	x (latin small letter turned alpha - 0252)
 AB65	GREEK LETTER SMALL CAPITAL OMEGA
 	* obsolete for mid back rounded vowel
+@+		Other Greek small capital letters are located in the range 1D26-1D2A.
 	x (latin small letter closed omega - 0277)
-	x (greek small letter omega - 03C9)
-@		Letters for Sinological transcription
-@+		These letters are used in Sinological and Tibetanist systems of phonetic transcription.
+	x (greek capital letter omega - 03A9)
+@		Letters for sinological and Tibetanist phonetic transcription
 AB66	LATIN SMALL LETTER DZ DIGRAPH WITH RETROFLEX HOOK
 	* voiced retroflex affricate
 	x (latin small letter z with retroflex hook - 0290)
@@ -25939,7 +26619,7 @@ D7FB	HANGUL JONGSEONG PHIEUPH-THIEUTH
 @@+
 @+		This block, despite its name, contains a number of unified CJK ideographs. Each is also individually identified by an annotation.
 @+		Subheaders identifying sources for subranges do not indicate required usage or preclude mappings to other sources. For example, many pronunciation variants from KS X 1001:1998 are also mapped to a J source.
-@		Pronunciation variants from KS X 1001:1998
+@		Pronunciation variants from KS X 1001:1998
 F900	CJK COMPATIBILITY IDEOGRAPH-F900
 	: 8C48
 F901	CJK COMPATIBILITY IDEOGRAPH-F901
@@ -38540,7 +39220,7 @@ FFFF	<not a character>
 1342F	EGYPTIAN HIEROGLYPH V011D
 	* knotted beginning of cartouche
 	* not to be confused with 13378
-@~	!
+@~	Standardized Variation Sequences
 @@	13430	Egyptian Hieroglyph Format Controls	1345F
 @+		These format controls are used to render Egyptian hieroglyphic spatial arrangements, including quadrats, overlays, insertions, and blank, lost or damaged sections.
 @		Joiners
@@ -43345,6 +44025,7 @@ FFFF	<not a character>
 1BC01	DUPLOYAN LETTER X
 	* Salishan
 @		Line consonants
+@+		Small arrows shown in the chart glyphs for some strokes and arcs indicate the handwriting direction of these characters, and are not visibly rendered.
 1BC02	DUPLOYAN LETTER P
 	* Chinook number 1
 1BC03	DUPLOYAN LETTER T
@@ -47778,24 +48459,31 @@ FFFF	<not a character>
 @@	1DF00	Latin Extended-G	1DFFF
 @		Extended IPA for disordered speech
 1DF00	LATIN SMALL LETTER FENG DIGRAPH WITH TRILL
+	x (latin small letter feng digraph - 02A9)
 1DF01	LATIN SMALL LETTER REVERSED SCRIPT G
 1DF02	LATIN LETTER SMALL CAPITAL TURNED G
+	x (latin small letter turned g - 1D77)
 1DF03	LATIN SMALL LETTER REVERSED K
 1DF04	LATIN LETTER SMALL CAPITAL L WITH BELT
+	x (latin capital letter l with belt - A7AD)
 1DF05	LATIN SMALL LETTER LEZH WITH RETROFLEX HOOK
 1DF06	LATIN SMALL LETTER TURNED Y WITH BELT
 1DF07	LATIN SMALL LETTER REVERSED ENG
 @		IPA extensions
 1DF08	LATIN SMALL LETTER TURNED R WITH LONG LEG AND RETROFLEX HOOK
 1DF09	LATIN SMALL LETTER T WITH HOOK AND RETROFLEX HOOK
+	x (latin small letter t with hook - 01AD)
 1DF0A	LATIN LETTER RETROFLEX CLICK WITH RETROFLEX HOOK
 @		Clicks
 1DF0B	LATIN SMALL LETTER ESH WITH DOUBLE BAR
+	x (integral with double stroke - 2A0E)
 1DF0C	LATIN SMALL LETTER ESH WITH DOUBLE BAR AND CURL
 1DF0D	LATIN SMALL LETTER TURNED T WITH CURL
 1DF0E	LATIN LETTER INVERTED GLOTTAL STOP WITH CURL
 1DF0F	LATIN LETTER STRETCHED C WITH CURL
 1DF10	LATIN LETTER SMALL CAPITAL TURNED K
+	x (latin small letter turned k - 029E)
+	x (latin capital letter turned k - A7B0)
 @		Lateral
 1DF11	LATIN SMALL LETTER L WITH FISHHOOK
 @		Letters with palatal hooks
@@ -53514,8 +54202,9 @@ FFFF	<not a character>
 @@	2B740	CJK Unified Ideographs Extension D	2B81D
 @@	2B820	CJK Unified Ideographs Extension E	2CEA1
 @@	2CEB0	CJK Unified Ideographs Extension F	2EBE0
+@@	2EBF0	CJK Unified Ideographs Extension I	2EE5D
 @@	2F800	CJK Compatibility Ideographs Supplement	2FA1F
-@		Duplicate characters from CNS 11643-1992
+@		Duplicate characters from CNS 11643-1992
 2F800	CJK COMPATIBILITY IDEOGRAPH-2F800
 	: 4E3D
 2F801	CJK COMPATIBILITY IDEOGRAPH-2F801

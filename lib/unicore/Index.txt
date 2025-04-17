@@ -955,6 +955,7 @@ CJK Unified Ideographs Extension E	2B820
 CJK Unified Ideographs Extension F	2CEB0
 CJK Unified Ideographs Extension G	30000
 CJK Unified Ideographs Extension H	31350
+CJK Unified Ideographs Extension I	2EBF0
 CLAPPING HANDS SIGN	1F44F
 claudian antisigma	2183
 claudian digamma inversum	2132
@@ -2657,6 +2658,7 @@ Ideographs Extension E, CJK Unified	2B820
 Ideographs Extension F, CJK Unified	2CEB0
 Ideographs Extension G, CJK Unified	30000
 Ideographs Extension H, CJK Unified	31350
+Ideographs Extension I, CJK Unified	2EBF0
 Ideographs Supplement, CJK Compatibility	2F800
 Ideographs, Circled	3280
 Ideographs, CJK Compatibility	F900

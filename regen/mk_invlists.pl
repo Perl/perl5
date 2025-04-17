@@ -4131,11 +4131,9 @@ my @sources = qw(regen/mk_invlists.pl
     }
 }
 
-undef @sources;
 read_only_bottom_close_and_rename($regexp_constants_fh, \@sources);
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
-__END__
 
 my %name_to_index;
 for my $i (0 .. @enums - 1) {
