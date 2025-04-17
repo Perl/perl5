@@ -908,11 +908,12 @@ BEGIN { $build_subclass->('', # parent
 #                      $pxs->{config_allow_argtypes}
 
 sub parse {
-    my ExtUtils::ParseXS::Node::Param  $param  = shift;
+    my __PACKAGE__                     $self   = shift;
     my ExtUtils::ParseXS               $pxs    = shift;
     my                                 $params = shift; # parent Params
     my $param_text                             = shift;
 
+    $self->SUPER::parse($pxs); # set file/line_no
     $_ = $param_text;
 
     # Decompose parameter into its components.
@@ -941,7 +942,7 @@ sub parse {
         if (/^ SV \s* \* $/x) {
             # special-case SV* as a placeholder for backwards
             # compatibility.
-            $param->{var} = 'SV *';
+            $self->{var} = 'SV *';
             return 1;
         }
         $pxs->blurt("Unparseable XSUB parameter: '$_'");
@@ -949,7 +950,7 @@ sub parse {
     }
 
     undef $type unless length($type) && $type =~ /\S/;
-    $param->{var} = $name;
+    $self->{var} = $name;
 
     # Check for duplicates
 
@@ -965,7 +966,7 @@ sub parse {
             # RETVAL is currently fully synthetic. Now that it has
             # been declared as a parameter too, override any implicit
             # RETVAL declaration. Delete the original param from the
-            # param list and later re-add it as a parameter in it's
+            # param list and later re-add it as a parameter in its
             # correct position.
             @{$params->{kids}} = grep $_ != $old_param, @{$params->{kids}};
             # If the param declaration includes a type, it becomes a
@@ -973,7 +974,7 @@ sub parse {
             # 'semi-real' (synthetic, but with an arg_num) until such
             # time as it gets a type set in INPUT, which would remove
             # the synthetic/no_init.
-            %$param = %$old_param unless defined $type;
+            %$self = %$old_param unless defined $type;
         }
         else {
             $pxs->blurt(
@@ -1026,17 +1027,17 @@ sub parse {
     # and which thus don't need a matching INPUT line.
 
     if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-        @$param{qw(type is_ansi)} = ($type, 1);
+        @$self{qw(type is_ansi)} = ($type, 1);
 
         if ($is_length) {
-            $param->{no_init}   = 1;
-            $param->{is_length} = 1;
-            $param->{len_name}  = $len_name;
+            $self->{no_init}   = 1;
+            $self->{is_length} = 1;
+            $self->{len_name}  = $len_name;
         }
     }
 
-    $param->{in_out} = $out_type if length $out_type;
-    $param->{no_init} = 1        if $out_type =~ /^OUT/;
+    $self->{in_out} = $out_type if length $out_type;
+    $self->{no_init} = 1        if $out_type =~ /^OUT/;
 
     # Process the default expression, including making the text
     # to be used in "usage: ..." error messages.
@@ -1046,8 +1047,8 @@ sub parse {
         # sometimes preserve the spaces either side of the '='
         $report_def =    ((defined $type or $is_length) ? '' : $sp1)
                        . "=$sp2$default";
-        $param->{default_usage} = $report_def;
-        $param->{default} = $default;
+        $self->{default_usage} = $report_def;
+        $self->{default} = $default;
     }
 
     1;
