@@ -1,11 +1,11 @@
 # IdentifierStatus.txt
-# Date: 2023-08-11, 17:46:41 GMT
-# © 2023 Unicode®, Inc.
+# Date: 2024-05-04, 21:31:06 GMT
+# © 2024 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
-# For terms of use, see https://www.unicode.org/terms_of_use.html
+# For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
 # Unicode Security Mechanisms for UTS #39
-# Version: 15.1.0
+# Version: 16.0.0
 #
 # For documentation and usage, see https://www.unicode.org/reports/tr39
 #
@@ -16,7 +16,7 @@
 #
 # For the purpose of regular expressions, the property Identifier_Status is defined as
 # an enumerated property of code points.
-# The short name of Identifier_Status is the same as the long name.
+# The short name of Identifier_Status is ID_Status.
 # The possible values are:
 #   Allowed, Restricted
 # The short name of each value is the same as its long name.

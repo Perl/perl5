@@ -5539,6 +5539,7 @@ lib/unicore/CompositionExclusions.txt		Unicode character database
 lib/unicore/DAge.txt				Unicode character database
 lib/unicore/DCoreProperties.txt			Unicode character database
 lib/unicore/DNormalizationProps.txt		Unicode character database
+lib/unicore/DoNotEmit.txt			Unicode character database
 lib/unicore/EastAsianWidth.txt			Unicode character database
 lib/unicore/emoji/emoji.txt			Unicode character database
 lib/unicore/EmojiSources.txt			Unicode character database
@@ -5583,6 +5584,7 @@ lib/unicore/StandardizedVariants.txt		Unicode character database
 lib/unicore/TestNorm.pl				Unicode character database
 lib/unicore/uni_keywords.pl			Indices into array in charclass_invlists.inc
 lib/unicore/UnicodeData.txt			Unicode character database
+lib/unicore/Unikemet.txt			Unicode character database
 lib/unicore/version				The version of the Unicode
 lib/unicore/VerticalOrientation.txt		Unicode character database
 lib/UNIVERSAL.pm			Base class for ALL classes
