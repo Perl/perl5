@@ -193159,7 +193159,6 @@ static const U8 GCB_dfa_table[] = {
  * is. */
 #define LB_NOBREAK                                     0
 #define LB_BREAKABLE                                   1
-#define LB_NOBREAK_EVEN_WITH_SP_BETWEEN                2
 #define LB_CM_ZWJ_v_any                                3
 #define LB_ZW_then_SP_v_any                            6
 #define LB_PR_or_PO_v_OP_or_HY_then_NU                 9
