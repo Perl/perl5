@@ -890,6 +890,170 @@ BEGIN { $build_subclass->('', # parent
 )};
 
 
+# Parse a parameter. A parameter is of the general form:
+#
+#    OUT char* foo = expression
+#
+#  where:
+#    IN/OUT/OUTLIST etc are only allowed under
+#                      $pxs->{config_allow_inout}
+#
+#    a C type       is only allowed under
+#                      $pxs->{config_allow_argtypes}
+#
+#    foo            can be a plain C variable name, or can be
+#    length(foo)    but only under $pxs->{config_allow_argtypes}
+#
+#    = default      default value - only allowed under
+#                      $pxs->{config_allow_argtypes}
+
+sub parse {
+    my ExtUtils::ParseXS::Node::Param  $param  = shift;
+    my ExtUtils::ParseXS               $pxs    = shift;
+    my                                 $params = shift; # parent Params
+    my $param_text                             = shift;
+
+    $_ = $param_text;
+
+    # Decompose parameter into its components.
+    # Note that $name can be either 'foo' or 'length(foo)'
+
+    my ($out_type, $type, $name, $sp1, $sp2, $default) =
+            /^
+                 (?:
+                     (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
+                     \b\s*
+                 )?
+                 (.*?)                             # optional type
+                 \s*
+                 \b
+                 (   \w+                           # var
+                     | length\( \s*\w+\s* \)       # length(var)
+                 )
+                 (?:
+                        (\s*) = (\s*) ( .*?)       # default expr
+                 )?
+                 \s*
+             $
+            /x;
+
+    unless (defined $name) {
+        if (/^ SV \s* \* $/x) {
+            # special-case SV* as a placeholder for backwards
+            # compatibility.
+            $param->{var} = 'SV *';
+            return 1;
+        }
+        $pxs->blurt("Unparseable XSUB parameter: '$_'");
+        return;
+    }
+
+    undef $type unless length($type) && $type =~ /\S/;
+    $param->{var} = $name;
+
+    # Check for duplicates
+
+    my $old_param = $params->{names}{$name};
+    if ($old_param) {
+        # Normally a dup parameter is an error, but we allow RETVAL as
+        # a real parameter, which overrides the synthetic one which
+        # was added earlier if the return value isn't void.
+        if (    $name eq 'RETVAL'
+                and $old_param->{is_synthetic}
+                and !defined $old_param->{arg_num})
+        {
+            # RETVAL is currently fully synthetic. Now that it has
+            # been declared as a parameter too, override any implicit
+            # RETVAL declaration. Delete the original param from the
+            # param list and later re-add it as a parameter in it's
+            # correct position.
+            @{$params->{kids}} = grep $_ != $old_param, @{$params->{kids}};
+            # If the param declaration includes a type, it becomes a
+            # real parameter. Otherwise the param is kept as
+            # 'semi-real' (synthetic, but with an arg_num) until such
+            # time as it gets a type set in INPUT, which would remove
+            # the synthetic/no_init.
+            %$param = %$old_param unless defined $type;
+        }
+        else {
+            $pxs->blurt(
+                    "Error: duplicate definition of parameter '$name' ignored");
+            return;
+        }
+    }
+
+    # Process optional IN/OUT etc modifier
+
+    if (defined $out_type) {
+        if ($pxs->{config_allow_inout}) {
+            $out_type =  $out_type eq 'IN' ? '' : $out_type;
+        }
+        else {
+            $pxs->blurt("parameter IN/OUT modifier not allowed under -noinout");
+        }
+    }
+    else {
+        $out_type = '';
+    }
+
+    # Process optional type
+
+    if (defined($type) && !$pxs->{config_allow_argtypes}) {
+        $pxs->blurt("parameter type not allowed under -noargtypes");
+        undef $type;
+    }
+
+    # Process 'length(foo)' pseudo-parameter
+
+    my $is_length;
+    my $len_name;
+
+    if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
+        if ($pxs->{config_allow_argtypes}) {
+            $len_name = $1;
+            $is_length = 1;
+            if (defined $default) {
+                $pxs->blurt("Default value not allowed on length() parameter '$len_name'");
+                undef $default;
+            }
+        }
+        else {
+            $pxs->blurt("length() pseudo-parameter not allowed under -noargtypes");
+        }
+    }
+
+    # Handle ANSI params: those which have a type or 'length(s)',
+    # and which thus don't need a matching INPUT line.
+
+    if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
+        @$param{qw(type is_ansi)} = ($type, 1);
+
+        if ($is_length) {
+            $param->{no_init}   = 1;
+            $param->{is_length} = 1;
+            $param->{len_name}  = $len_name;
+        }
+    }
+
+    $param->{in_out} = $out_type if length $out_type;
+    $param->{no_init} = 1        if $out_type =~ /^OUT/;
+
+    # Process the default expression, including making the text
+    # to be used in "usage: ..." error messages.
+    my $report_def = '';
+    if (defined $default) {
+        # The default expression for reporting usage. For backcompat,
+        # sometimes preserve the spaces either side of the '='
+        $report_def =    ((defined $type or $is_length) ? '' : $sp1)
+                       . "=$sp2$default";
+        $param->{default_usage} = $report_def;
+        $param->{default} = $default;
+    }
+
+    1;
+}
+
+
 # Set the 'proto' field of the param. This is based on the value, if any,
 # of the proto method of the typemap for that param's type. It will
 # typically be a single character like '$'.
@@ -1990,22 +2154,7 @@ sub parse {
     }
 
     for my $param_text (@param_texts) {
-        # Process each parameter. A parameter is of the general form:
-        #
-        #    OUT char* foo = expression
-        #
-        #  where:
-        #    IN/OUT/OUTLIST etc are only allowed under
-        #                      $pxs->{config_allow_inout}
-        #
-        #    a C type       is only allowed under
-        #                      $pxs->{config_allow_argtypes}
-        #
-        #    foo            can be a plain C variable name, or can be
-        #    length(foo)    but only under $pxs->{config_allow_argtypes}
-        #
-        #    = default      default value - only allowed under
-        #                      $pxs->{config_allow_argtypes}
+        # Parse each parameter.
 
         $param_text =~ s/^\s+//;
         $param_text =~ s/\s+$//;
@@ -2021,152 +2170,7 @@ sub parse {
         }
 
         my $param = ExtUtils::ParseXS::Node::Param->new();
-
-    sub {
-        my ExtUtils::ParseXS::Node::Param  $param  = shift;
-        my ExtUtils::ParseXS               $pxs    = shift;
-        my                                 $params = shift; # parent Params
-        my $param_text                             = shift;
-
-        $_ = $param_text;
-
-        # Decompose parameter into its components.
-        # Note that $name can be either 'foo' or 'length(foo)'
-
-        my ($out_type, $type, $name, $sp1, $sp2, $default) =
-                /^
-                     (?:
-                         (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
-                         \b\s*
-                     )?
-                     (.*?)                             # optional type
-                     \s*
-                     \b
-                     (   \w+                           # var
-                         | length\( \s*\w+\s* \)       # length(var)
-                     )
-                     (?:
-                            (\s*) = (\s*) ( .*?)       # default expr
-                     )?
-                     \s*
-                 $
-                /x;
-
-        unless (defined $name) {
-            if (/^ SV \s* \* $/x) {
-                # special-case SV* as a placeholder for backwards
-                # compatibility.
-                $param->{var} = 'SV *';
-                return 1;
-            }
-            $pxs->blurt("Unparseable XSUB parameter: '$_'");
-            return;
-        }
-
-        undef $type unless length($type) && $type =~ /\S/;
-        $param->{var} = $name;
-
-        # Check for duplicates
-
-        my $old_param = $params->{names}{$name};
-        if ($old_param) {
-            # Normally a dup parameter is an error, but we allow RETVAL as
-            # a real parameter, which overrides the synthetic one which
-            # was added earlier if the return value isn't void.
-            if (    $name eq 'RETVAL'
-                    and $old_param->{is_synthetic}
-                    and !defined $old_param->{arg_num})
-            {
-                # RETVAL is currently fully synthetic. Now that it has
-                # been declared as a parameter too, override any implicit
-                # RETVAL declaration. Delete the original param from the
-                # param list and later re-add it as a parameter in it's
-                # correct position.
-                @{$params->{kids}} = grep $_ != $old_param, @{$params->{kids}};
-                # If the param declaration includes a type, it becomes a
-                # real parameter. Otherwise the param is kept as
-                # 'semi-real' (synthetic, but with an arg_num) until such
-                # time as it gets a type set in INPUT, which would remove
-                # the synthetic/no_init.
-                %$param = %$old_param unless defined $type;
-            }
-            else {
-                $pxs->blurt(
-                        "Error: duplicate definition of parameter '$name' ignored");
-                return;
-            }
-        }
-
-        # Process optional IN/OUT etc modifier
-
-        if (defined $out_type) {
-            if ($pxs->{config_allow_inout}) {
-                $out_type =  $out_type eq 'IN' ? '' : $out_type;
-            }
-            else {
-                $pxs->blurt("parameter IN/OUT modifier not allowed under -noinout");
-            }
-        }
-        else {
-            $out_type = '';
-        }
-
-        # Process optional type
-
-        if (defined($type) && !$pxs->{config_allow_argtypes}) {
-            $pxs->blurt("parameter type not allowed under -noargtypes");
-            undef $type;
-        }
-
-        # Process 'length(foo)' pseudo-parameter
-
-        my $is_length;
-        my $len_name;
-
-        if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-            if ($pxs->{config_allow_argtypes}) {
-                $len_name = $1;
-                $is_length = 1;
-                if (defined $default) {
-                    $pxs->blurt("Default value not allowed on length() parameter '$len_name'");
-                    undef $default;
-                }
-            }
-            else {
-                $pxs->blurt("length() pseudo-parameter not allowed under -noargtypes");
-            }
-        }
-
-        # Handle ANSI params: those which have a type or 'length(s)',
-        # and which thus don't need a matching INPUT line.
-
-        if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-            @$param{qw(type is_ansi)} = ($type, 1);
-
-            if ($is_length) {
-                $param->{no_init}   = 1;
-                $param->{is_length} = 1;
-                $param->{len_name}  = $len_name;
-            }
-        }
-
-        $param->{in_out} = $out_type if length $out_type;
-        $param->{no_init} = 1        if $out_type =~ /^OUT/;
-
-        # Process the default expression, including making the text
-        # to be used in "usage: ..." error messages.
-        my $report_def = '';
-        if (defined $default) {
-            # The default expression for reporting usage. For backcompat,
-            # sometimes preserve the spaces either side of the '='
-            $report_def =    ((defined $type or $is_length) ? '' : $sp1)
-                           . "=$sp2$default";
-            $param->{default_usage} = $report_def;
-            $param->{default} = $default;
-        }
-
-        1;
-    }->($param, $pxs, $self, $param_text)
+        $param->parse($pxs, $self, $param_text)
             or next;
 
         push @{$self->{kids}}, $param;
