@@ -2504,13 +2504,13 @@ my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &UpperLatin1
 
-                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,ExtPict_XX
+                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,ExtPict_XX,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ
 
-                    _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,East_Asian_CP,East_Asian_OP,Unassigned_Extended_Pictographic_Ideographic
+                    _Perl_LB,EDGE,Close_Parenthesis,Contingent_Break,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Regional_Indicator,Unassigned_Extended_Pictographic_Ideographic,Word_Joiner,ZWJ
 
-                    _Perl_SB,EDGE,SContinue,CR,Extend,LF
+                    _Perl_SB,EDGE,CR,Extend,LF,SContinue
 
-                    _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,ExtPict_XX,ExtPict_LE
+                    _Perl_WB,Perl_Tailored_HSpace,EDGE,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,ExtPict_LE,ExtPict_XX,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,UNKNOWN,ZWJ
 
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
                     Lowercase_Mapping
