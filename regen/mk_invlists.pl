@@ -2491,12 +2491,6 @@ sub output_LB_table() {
     my sub set_lb_nobreak($x, $y, $rule) {
         return set_lb_cells($x, $y, $lb_dfas{LB_NOBREAK}{match_return}, $rule);
     }
-    my sub set_lb_nobreak_ignoring_SP($x, $y, $rule) {
-        return set_cells(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
-                         $x, $y,
-                      $lb_dfas{LB_NOBREAK_EVEN_WITH_SP_BETWEEN}{match_return},
-                      $rule, $has_unused);
-    }
     my sub add_lb_dfa($x, $y, $dfa, $rule) {
         return add_dfa(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
                        \%lb_dfas, $x, $y, $dfa, $rule, $has_unused,
