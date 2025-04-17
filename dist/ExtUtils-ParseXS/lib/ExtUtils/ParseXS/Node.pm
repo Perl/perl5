@@ -1989,7 +1989,7 @@ sub parse {
         $self->{names}{RETVAL} = $param;
     }
 
-    for (@param_texts) {
+    for my $param_text (@param_texts) {
         # Process each parameter. A parameter is of the general form:
         #
         #    OUT char* foo = expression
@@ -2007,18 +2007,28 @@ sub parse {
         #    = default      default value - only allowed under
         #                      $pxs->{config_allow_argtypes}
 
-        s/^\s+//;
-        s/\s+$//;
+        $param_text =~ s/^\s+//;
+        $param_text =~ s/\s+$//;
 
         # Process ellipsis (...)
 
         $pxs->blurt("further XSUB parameter seen after ellipsis (...)")
             if $self->{seen_ellipsis};
 
-        if ($_ eq '...') {
+        if ($param_text eq '...') {
             $self->{seen_ellipsis} = 1;
             next;
         }
+
+        my $param = ExtUtils::ParseXS::Node::Param->new();
+
+    sub {
+        my ExtUtils::ParseXS::Node::Param  $param  = shift;
+        my ExtUtils::ParseXS               $pxs    = shift;
+        my                                 $params = shift; # parent Params
+        my $param_text                             = shift;
+
+        $_ = $param_text;
 
         # Decompose parameter into its components.
         # Note that $name can be either 'foo' or 'length(foo)'
@@ -2046,29 +2056,23 @@ sub parse {
             if (/^ SV \s* \* $/x) {
                 # special-case SV* as a placeholder for backwards
                 # compatibility.
-                push @{$self->{kids}},
-                    ExtUtils::ParseXS::Node::Param->new( {
-                        var     => 'SV *',
-                        arg_num => ++$nargs,
-                    });
+                $param->{var} = 'SV *';
+                return 1;
             }
-            else {
-                $pxs->blurt("Unparseable XSUB parameter: '$_'");
-            }
-            next;
+            $pxs->blurt("Unparseable XSUB parameter: '$_'");
+            return;
         }
 
         undef $type unless length($type) && $type =~ /\S/;
-
-        my ExtUtils::ParseXS::Node::Param $param
-                = ExtUtils::ParseXS::Node::Param->new( {
-                        var => $name,
-                    });
+        $param->{var} = $name;
 
         # Check for duplicates
 
-        my $old_param = $self->{names}{$name};
+        my $old_param = $params->{names}{$name};
         if ($old_param) {
+            # Normally a dup parameter is an error, but we allow RETVAL as
+            # a real parameter, which overrides the synthetic one which
+            # was added earlier if the return value isn't void.
             if (    $name eq 'RETVAL'
                     and $old_param->{is_synthetic}
                     and !defined $old_param->{arg_num})
@@ -2076,24 +2080,22 @@ sub parse {
                 # RETVAL is currently fully synthetic. Now that it has
                 # been declared as a parameter too, override any implicit
                 # RETVAL declaration. Delete the original param from the
-                # param list.
-                @{$self->{kids}} = grep $_ != $old_param, @{$self->{kids}};
+                # param list and later re-add it as a parameter in it's
+                # correct position.
+                @{$params->{kids}} = grep $_ != $old_param, @{$params->{kids}};
                 # If the param declaration includes a type, it becomes a
                 # real parameter. Otherwise the param is kept as
                 # 'semi-real' (synthetic, but with an arg_num) until such
                 # time as it gets a type set in INPUT, which would remove
                 # the synthetic/no_init.
-                $param = $old_param if !defined $type;
+                %$param = %$old_param unless defined $type;
             }
             else {
                 $pxs->blurt(
                         "Error: duplicate definition of parameter '$name' ignored");
-                next;
+                return;
             }
         }
-
-        push @{$self->{kids}}, $param;
-        $self->{names}{$name} = $param;
 
         # Process optional IN/OUT etc modifier
 
@@ -2155,7 +2157,6 @@ sub parse {
         # to be used in "usage: ..." error messages.
         my $report_def = '';
         if (defined $default) {
-            $opt_args++;
             # The default expression for reporting usage. For backcompat,
             # sometimes preserve the spaces either side of the '='
             $report_def =    ((defined $type or $is_length) ? '' : $sp1)
@@ -2164,12 +2165,18 @@ sub parse {
             $param->{default} = $default;
         }
 
-        if ($out_type eq "OUTLIST" or $is_length) {
-            $param->{arg_num} = undef;
-        }
-        else {
-            $param->{arg_num} = ++$nargs;
-        }
+        1;
+    }->($param, $pxs, $self, $param_text)
+            or next;
+
+        push @{$self->{kids}}, $param;
+        $self->{names}{$param->{var}} = $param unless $param->{var} eq 'SV *';
+        $opt_args++ if defined $param->{default};
+        # Give the param a number if it will consume one of the passed args
+        $param->{arg_num} = ++$nargs
+            unless (  defined $param->{in_out} && $param->{in_out} eq "OUTLIST"
+                    or $param->{is_length})
+
     } # for (@param_texts)
 
     $self->{nargs}    = $nargs;
