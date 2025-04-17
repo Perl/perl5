@@ -1710,6 +1710,10 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
 
     my $size = @$table_ref;
 
+    # Used to find how wide a column needs to be to fit the maximum width
+    # entry in it.
+    my @spacing;
+
     # Go through the table looking for DFAs.  A cell with an array ref in it
     # denotes a DFA.
     #   [0] is the index of the highest priority dfa;
@@ -1830,6 +1834,14 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
             # Set the value to just the numeric portion, for later sorting
             $final_rules{$final_rule} = $final_rule =~ s/\D//gr;
             $table_ref->[$x][$y]{value} = scalar @output_dfas;
+
+            my $value = scalar @output_dfas;
+            $table_ref->[$x][$y]{value} = $value;
+
+            # Keep track of the maximum width in this column so far..
+            my $value_width = length $value;
+            $spacing[$y] = $value_width if ! defined $spacing[$y]
+                                        || $spacing[$y] < $value_width;
         }
 
         my $else_string = '[' . @output_dfas . '] ';
@@ -1866,10 +1878,6 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
                          . " $final_rules_string */";
     }
     $output_dfas[-1] =~ s/,//;
-
-    # Used to find how wide a column needs to be to fit the maximum width
-    # entry in it.
-    my @spacing;
 
     # Create a hash for creating #defines for regexec.c to determine if a
     # class is of a given type.  There are two sources for the definitions.
@@ -2003,7 +2011,8 @@ sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
         no warnings 'numeric';
         $short_names_ref->[$i] = '$' if $short_names_ref->[$i] eq 'EDGE';
         my $name_width = length($short_names_ref->[$i]);
-        $spacing[$i] = $name_width;
+        $spacing[$i] = $name_width if ! defined $spacing[$i]
+                                     || $spacing[$i] < $name_width;;
     }
 
     output_table_header($out_fh, $table_type, "${property}_table", undef,
