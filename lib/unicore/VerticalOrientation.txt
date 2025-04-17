@@ -1,11 +1,11 @@
-# VerticalOrientation-15.0.0.txt
-# Date: 2022-08-07, 18:01:57 GMT [EM, KI, LI, KW, MS]
-# © 2022 Unicode®, Inc.
+# VerticalOrientation-15.1.0.txt
+# Date: 2023-07-28, 23:34:39 GMT
+# © 2023 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see https://www.unicode.org/terms_of_use.html
 #
 # Unicode Character Database
-# For documentation, see https://www.unicode.org/reports/tr44/
+#   For documentation, see https://www.unicode.org/reports/tr44/
 #
 # Vertical_Orientation (vo) Property
 #
@@ -73,7 +73,6 @@
 # the code point count in square brackets.
 #
 # @missing: 0000..10FFFF; R
-
 0000..001F     ; R  # Cc    [32] <control-0000>..<control-001F>
 0020           ; R  # Zs         SPACE
 0021..0023     ; R  # Po     [3] EXCLAMATION MARK..NUMBER SIGN
@@ -133,7 +132,7 @@
 00D7           ; U  # Sm         MULTIPLICATION SIGN
 00D8..00F6     ; R  # L&    [31] LATIN CAPITAL LETTER O WITH STROKE..LATIN SMALL LETTER O WITH DIAERESIS
 00F7           ; U  # Sm         DIVISION SIGN
-00F8..00FF     ; R  # L&     [8] LATIN SMALL LETTER O WITH STROKE..LATIN SMALL LETTER Y WITH DIAERESIS
+00F8..00FF     ; R  # Ll     [8] LATIN SMALL LETTER O WITH STROKE..LATIN SMALL LETTER Y WITH DIAERESIS
 0100..017F     ; R  # L&   [128] LATIN CAPITAL LETTER A WITH MACRON..LATIN SMALL LETTER LONG S
 0180..01BA     ; R  # L&    [59] LATIN SMALL LETTER B WITH STROKE..LATIN SMALL LETTER EZH WITH TAIL
 01BB           ; R  # Lo         LATIN LETTER TWO WITH STROKE
@@ -1185,8 +1184,7 @@
 2F00..2FD5     ; U  # So   [214] KANGXI RADICAL ONE..KANGXI RADICAL FLUTE
 2FD6..2FDF     ; U  # Cn    [10] <reserved-2FD6>..<reserved-2FDF>
 2FE0..2FEF     ; U  # Cn    [16] <reserved-2FE0>..<reserved-2FEF>
-2FF0..2FFB     ; U  # So    [12] IDEOGRAPHIC DESCRIPTION CHARACTER LEFT TO RIGHT..IDEOGRAPHIC DESCRIPTION CHARACTER OVERLAID
-2FFC..2FFF     ; U  # Cn     [4] <reserved-2FFC>..<reserved-2FFF>
+2FF0..2FFF     ; U  # So    [16] IDEOGRAPHIC DESCRIPTION CHARACTER LEFT TO RIGHT..IDEOGRAPHIC DESCRIPTION CHARACTER ROTATION
 3000           ; U  # Zs         IDEOGRAPHIC SPACE
 3001..3002     ; Tu # Po     [2] IDEOGRAPHIC COMMA..IDEOGRAPHIC FULL STOP
 3003           ; U  # Po         DITTO MARK
@@ -1294,7 +1292,8 @@
 3196..319F     ; U  # So    [10] IDEOGRAPHIC ANNOTATION TOP MARK..IDEOGRAPHIC ANNOTATION MAN MARK
 31A0..31BF     ; U  # Lo    [32] BOPOMOFO LETTER BU..BOPOMOFO LETTER AH
 31C0..31E3     ; U  # So    [36] CJK STROKE T..CJK STROKE Q
-31E4..31EF     ; U  # Cn    [12] <reserved-31E4>..<reserved-31EF>
+31E4..31EE     ; U  # Cn    [11] <reserved-31E4>..<reserved-31EE>
+31EF           ; U  # So         IDEOGRAPHIC DESCRIPTION CHARACTER SUBTRACTION
 31F0..31FF     ; Tu # Lo    [16] KATAKANA LETTER SMALL KU..KATAKANA LETTER SMALL RO
 3200..321E     ; U  # So    [31] PARENTHESIZED HANGUL KIYEOK..PARENTHESIZED KOREAN CHARACTER O HU
 321F           ; U  # Cn         <reserved-321F>
@@ -1499,7 +1498,9 @@ D7B0..D7C6     ; U  # Lo    [23] HANGUL JUNGSEONG O-YEO..HANGUL JUNGSEONG ARAEA-
 D7C7..D7CA     ; U  # Cn     [4] <reserved-D7C7>..<reserved-D7CA>
 D7CB..D7FB     ; U  # Lo    [49] HANGUL JONGSEONG NIEUN-RIEUL..HANGUL JONGSEONG PHIEUPH-THIEUTH
 D7FC..D7FF     ; U  # Cn     [4] <reserved-D7FC>..<reserved-D7FF>
-D800..DFFF     ; R  # Cs  [2048] <surrogate-D800>..<surrogate-DFFF>
+D800..DB7F     ; R  # Cs   [896] <surrogate-D800>..<surrogate-DB7F>
+DB80..DBFF     ; R  # Cs   [128] <surrogate-DB80>..<surrogate-DBFF>
+DC00..DFFF     ; R  # Cs  [1024] <surrogate-DC00>..<surrogate-DFFF>
 E000..F8FF     ; U  # Co  [6400] <private-use-E000>..<private-use-F8FF>
 F900..FA6D     ; U  # Lo   [366] CJK COMPATIBILITY IDEOGRAPH-F900..CJK COMPATIBILITY IDEOGRAPH-FA6D
 FA6E..FA6F     ; U  # Cn     [2] <reserved-FA6E>..<reserved-FA6F>
@@ -2424,9 +2425,12 @@ FFFC..FFFD     ; U  # So     [2] OBJECT REPLACEMENT CHARACTER..REPLACEMENT CHARA
 2B820..2CEA1   ; U  # Lo  [5762] CJK UNIFIED IDEOGRAPH-2B820..CJK UNIFIED IDEOGRAPH-2CEA1
 2CEA2..2CEAF   ; U  # Cn    [14] <reserved-2CEA2>..<reserved-2CEAF>
 2CEB0..2EBE0   ; U  # Lo  [7473] CJK UNIFIED IDEOGRAPH-2CEB0..CJK UNIFIED IDEOGRAPH-2EBE0
-2EBE1..2F7FF   ; U  # Cn  [3103] <reserved-2EBE1>..<reserved-2F7FF>
+2EBE1..2EBEF   ; U  # Cn    [15] <reserved-2EBE1>..<reserved-2EBEF>
+2EBF0..2EE5D   ; U  # Lo   [622] CJK UNIFIED IDEOGRAPH-2EBF0..CJK UNIFIED IDEOGRAPH-2EE5D
+2EE5E..2F7FF   ; U  # Cn  [2466] <reserved-2EE5E>..<reserved-2F7FF>
 2F800..2FA1D   ; U  # Lo   [542] CJK COMPATIBILITY IDEOGRAPH-2F800..CJK COMPATIBILITY IDEOGRAPH-2FA1D
-2FA1E..2FFFD   ; U  # Cn  [1504] <reserved-2FA1E>..<reserved-2FFFD>
+2FA1E..2FA1F   ; U  # Cn     [2] <reserved-2FA1E>..<reserved-2FA1F>
+2FA20..2FFFD   ; U  # Cn  [1502] <reserved-2FA20>..<reserved-2FFFD>
 30000..3134A   ; U  # Lo  [4939] CJK UNIFIED IDEOGRAPH-30000..CJK UNIFIED IDEOGRAPH-3134A
 3134B..3134F   ; U  # Cn     [5] <reserved-3134B>..<reserved-3134F>
 31350..323AF   ; U  # Lo  [4192] CJK UNIFIED IDEOGRAPH-31350..CJK UNIFIED IDEOGRAPH-323AF

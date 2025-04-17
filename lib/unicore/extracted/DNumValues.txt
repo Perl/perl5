@@ -1,6 +1,6 @@
-# DerivedNumericValues-15.0.0.txt
-# Date: 2022-02-26, 00:38:37 GMT
-# © 2022 Unicode®, Inc.
+# DerivedNumericValues-15.1.0.txt
+# Date: 2023-01-05, 20:34:41 GMT
+# © 2023 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see https://www.unicode.org/terms_of_use.html
 #
@@ -76,6 +76,7 @@
 24EA          ; 0.0 ; ; 0 # No       CIRCLED DIGIT ZERO
 24FF          ; 0.0 ; ; 0 # No       NEGATIVE CIRCLED DIGIT ZERO
 3007          ; 0.0 ; ; 0 # Nl       IDEOGRAPHIC NUMBER ZERO
+6D1E          ; 0.0 ; ; 0 # Lo       CJK UNIFIED IDEOGRAPH-6D1E
 96F6          ; 0.0 ; ; 0 # Lo       CJK UNIFIED IDEOGRAPH-96F6
 A620          ; 0.0 ; ; 0 # Nd       VAI DIGIT ZERO
 A6EF          ; 0.0 ; ; 0 # Nl       BAMUM LETTER KOGHOM
@@ -125,7 +126,7 @@ FF10          ; 0.0 ; ; 0 # Nd       FULLWIDTH DIGIT ZERO
 1F10B..1F10C  ; 0.0 ; ; 0 # No   [2] DINGBAT CIRCLED SANS-SERIF DIGIT ZERO..DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT ZERO
 1FBF0         ; 0.0 ; ; 0 # Nd       SEGMENTED DIGIT ZERO
 
-# Total code points: 87
+# Total code points: 88
 
 # ================================================
 
@@ -611,7 +612,10 @@ FF11          ; 1.0 ; ; 1 # Nd       FULLWIDTH DIGIT ONE
 3221          ; 2.0 ; ; 2 # No       PARENTHESIZED IDEOGRAPH TWO
 3281          ; 2.0 ; ; 2 # No       CIRCLED IDEOGRAPH TWO
 3483          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-3483
+4E24          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-4E24
 4E8C          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-4E8C
+4FE9          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-4FE9
+5006          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-5006
 5169          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-5169
 5F0D          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-5F0D
 5F10          ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-5F10
@@ -703,7 +707,7 @@ FF12          ; 2.0 ; ; 2 # Nd       FULLWIDTH DIGIT TWO
 1FBF2         ; 2.0 ; ; 2 # Nd       SEGMENTED DIGIT TWO
 22390         ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-22390
 
-# Total code points: 143
+# Total code points: 146
 
 # ================================================
 
@@ -1320,6 +1324,7 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 3286          ; 7.0 ; ; 7 # No       CIRCLED IDEOGRAPH SEVEN
 3B4D          ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-3B4D
 4E03          ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-4E03
+62D0          ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-62D0
 67D2          ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-67D2
 6F06          ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-6F06
 A627          ; 7.0 ; ; 7 # Nd       VAI DIGIT SEVEN
@@ -1388,7 +1393,7 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 1FBF7         ; 7.0 ; ; 7 # Nd       SEGMENTED DIGIT SEVEN
 20001         ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-20001
 
-# Total code points: 116
+# Total code points: 117
 
 # ================================================
 
@@ -1568,6 +1573,8 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 4E5D          ; 9.0 ; ; 9 # Lo       CJK UNIFIED IDEOGRAPH-4E5D
 5EFE          ; 9.0 ; ; 9 # Lo       CJK UNIFIED IDEOGRAPH-5EFE
 7396          ; 9.0 ; ; 9 # Lo       CJK UNIFIED IDEOGRAPH-7396
+920E          ; 9.0 ; ; 9 # Lo       CJK UNIFIED IDEOGRAPH-920E
+94A9          ; 9.0 ; ; 9 # Lo       CJK UNIFIED IDEOGRAPH-94A9
 A629          ; 9.0 ; ; 9 # Nd       VAI DIGIT NINE
 A6EE          ; 9.0 ; ; 9 # Nl       BAMUM LETTER KOVUU
 A8D9          ; 9.0 ; ; 9 # Nd       SAURASHTRA DIGIT NINE
@@ -1634,7 +1641,7 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 1FBF9         ; 9.0 ; ; 9 # Nd       SEGMENTED DIGIT NINE
 2F890         ; 9.0 ; ; 9 # Lo       CJK COMPATIBILITY IDEOGRAPH-2F890
 
-# Total code points: 116
+# Total code points: 118
 
 # ================================================
 
@@ -2209,6 +2216,7 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 
 # ================================================
 
+7695          ; 200.0 ; ; 200 # Lo       CJK UNIFIED IDEOGRAPH-7695
 1011A         ; 200.0 ; ; 200 # No       AEGEAN NUMBER TWO HUNDRED
 102F4         ; 200.0 ; ; 200 # No       COPTIC EPACT NUMBER TWO HUNDRED
 109D3         ; 200.0 ; ; 200 # No       MEROITIC CURSIVE NUMBER TWO HUNDRED
@@ -2216,7 +2224,7 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 1EC84         ; 200.0 ; ; 200 # No       INDIC SIYAQ NUMBER TWO HUNDRED
 1ED14         ; 200.0 ; ; 200 # No       OTTOMAN SIYAQ NUMBER TWO HUNDRED
 
-# Total code points: 6
+# Total code points: 7
 
 # ================================================
 
@@ -2574,9 +2582,10 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 
 # ================================================
 
+5146          ; 1000000.0 ; ; 1000000 # Lo       CJK UNIFIED IDEOGRAPH-5146
 16B5E         ; 1000000.0 ; ; 1000000 # No       PAHAWH HMONG NUMBER MILLIONS
 
-# Total code points: 1
+# Total code points: 2
 
 # ================================================
 
@@ -2600,15 +2609,26 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 
 # ================================================
 
+79ED          ; 1000000000.0 ; ; 1000000000 # Lo       CJK UNIFIED IDEOGRAPH-79ED
+
+# Total code points: 1
+
+# ================================================
+
 16B60         ; 10000000000.0 ; ; 10000000000 # No       PAHAWH HMONG NUMBER TEN BILLIONS
 
 # Total code points: 1
 
 # ================================================
 
-5146          ; 1000000000000.0 ; ; 1000000000000 # Lo       CJK UNIFIED IDEOGRAPH-5146
 16B61         ; 1000000000000.0 ; ; 1000000000000 # No       PAHAWH HMONG NUMBER TRILLIONS
 
-# Total code points: 2
+# Total code points: 1
+
+# ================================================
+
+4EAC          ; 10000000000000000.0 ; ; 10000000000000000 # Lo       CJK UNIFIED IDEOGRAPH-4EAC
+
+# Total code points: 1
 
 # EOF
