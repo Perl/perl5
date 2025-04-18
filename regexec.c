@@ -5965,8 +5965,8 @@ S_isWB(pTHX_ WB_enum previous,
      *  is, 'curpos' marks the position where the character whose wb value is
      *  'after' begins.  See https://www.unicode.org/reports/tr29/ */
 
-    U8 * before_pos = (U8 *) curpos;
-    U8 * after_pos = (U8 *) curpos;
+    U8 * prev_pos = (U8 *) curpos;
+    U8 * next_pos = (U8 *) curpos;
     WB_enum prev = before;
     WB_enum next;
 
@@ -5984,7 +5984,7 @@ S_isWB(pTHX_ WB_enum previous,
             return false;
 
         case WB_hs_then_hs:     /* 2 horizontal spaces in a row */
-            next = advance_one_WB(&after_pos, strend, utf8_target,
+            next = advance_one_WB(&next_pos, strend, utf8_target,
                                  false /* Don't skip Extend nor Format */ );
             /* A space immediately preceding an Extend or Format is attached
              * to by them, and hence gets separated from previous spaces.
@@ -6003,7 +6003,7 @@ S_isWB(pTHX_ WB_enum previous,
          * ones) and then see if that is one of the region-end characters and
          * go from there */
         case WB_Ex_or_FO_or_ZWJ_then_foo:
-            prev = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
+            prev = backup_one_WB(&previous, strbeg, &prev_pos, utf8_target);
             goto redo;
 
         case WB_DQ_then_HL + WB_BREAKABLE:
@@ -6011,7 +6011,7 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB7c  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
 
-            if (backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
+            if (backup_one_WB(&previous, strbeg, &prev_pos, utf8_target)
                                                             == WB_Hebrew_Letter)
             {
                 return false;
@@ -6024,7 +6024,7 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB7b  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
 
-            if (advance_one_WB(&after_pos, strend, utf8_target,
+            if (advance_one_WB(&next_pos, strend, utf8_target,
                                        true /* Do skip Extend and Format */ )
                                                             == WB_Hebrew_Letter)
             {
@@ -6039,7 +6039,7 @@ S_isWB(pTHX_ WB_enum previous,
             /* WB6  (ALetter | Hebrew_Letter)  ×  (MidLetter | MidNumLet
              *       | Single_Quote) (ALetter | Hebrew_Letter) */
 
-            next = advance_one_WB(&after_pos, strend, utf8_target,
+            next = advance_one_WB(&next_pos, strend, utf8_target,
                                        true /* Do skip Extend and Format */ );
 
             if (next == WB_ALetter || next == WB_Hebrew_Letter)
@@ -6056,7 +6056,7 @@ S_isWB(pTHX_ WB_enum previous,
             /* WB7  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet
              *       | Single_Quote)  ×  (ALetter | Hebrew_Letter) */
 
-            prev = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
+            prev = backup_one_WB(&previous, strbeg, &prev_pos, utf8_target);
             if (prev == WB_ALetter || prev == WB_Hebrew_Letter)
             {
                 return false;
@@ -6071,7 +6071,7 @@ S_isWB(pTHX_ WB_enum previous,
             /* WB11  Numeric (MidNum | (MidNumLet | Single_Quote))  ×  Numeric
              * */
 
-            if (backup_one_WB(&previous, strbeg, &before_pos, utf8_target)
+            if (backup_one_WB(&previous, strbeg, &prev_pos, utf8_target)
                                                             == WB_Numeric)
             {
                 return false;
@@ -6085,7 +6085,7 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB12  Numeric  ×  (MidNum | MidNumLet | Single_Quote) Numeric */
 
-            if (advance_one_WB(&after_pos, strend, utf8_target,
+            if (advance_one_WB(&next_pos, strend, utf8_target,
                                        true /* Do skip Extend and Format */ )
                                                             == WB_Numeric)
             {
@@ -6110,7 +6110,7 @@ S_isWB(pTHX_ WB_enum previous,
 
                 while (backup_one_WB(&previous,
                                      strbeg,
-                                     &before_pos,
+                                     &prev_pos,
                                      utf8_target) == WB_Regional_Indicator)
                 {
                     RI_count++;
