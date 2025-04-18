@@ -5513,7 +5513,7 @@ S_isLB(pTHX_ LB_enum before,
             /* LB21a Don't break after Hebrew + Hyphen.
              * HL (HY | BA) × */
 
-            if (isLB_HL(backup_one_LB(strbeg, &temp_pos, utf8_target))) {
+            if (isLB_HL(backup_one_LB_but_over_CM_ZWJ(strbeg, &temp_pos, utf8_target))) {
                 return false;
             }
 
@@ -5537,7 +5537,7 @@ S_isLB(pTHX_ LB_enum before,
 
             LB_enum temp = prev;
             do {
-                temp = backup_one_LB(strbeg, &temp_pos, utf8_target);
+                temp = backup_one_LB_but_over_CM_ZWJ(strbeg, &temp_pos, utf8_target);
             }
             while (isLB_Break_Symbols(temp) || isLB_Infix_Numeric(temp));
             if (isLB_Numeric(temp)) {
