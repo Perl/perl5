@@ -2272,6 +2272,11 @@ sub output_GCB_table() {
                                         enum => 1,
                                         match_return => 1,
                                       },
+        GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant => {
+                                        enum => $gcb_enum++,
+                                        match_return => 'GCB_NOBREAK',
+                                        rule => '9c',
+                                      },
         GCB_EB_or_EBG_then_Extend_v_EM => {
                                         enum => $gcb_enum++,
                                         match_return => 'GCB_NOBREAK',
@@ -2352,6 +2357,14 @@ sub output_GCB_table() {
     # GB9b  Prepend  ×
     set_gcb_nobreak('Prepend', '*', '9b');
 
+    # GB9c  \p{InCB=Consonant} [ \p{InCB=Extend} \p{InCB=Linker} ]*
+    #       \p{InCB=Linker}    [ \p{InCB=Extend} \p{InCB=Linker} ]*
+    #   ×   \p{InCB=Consonant}
+    $dfa = 'GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant';
+    add_gcb_dfa( [ qw(InCB_Consonant
+                      InCB_Linker
+                      InCB_Extend) ], 'InCB_Consonant', $dfa, '9c');
+
     # GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier
     $rule = 10;
     add_gcb_dfa('Extend', 'E_Modifier', 'GCB_EB_or_EBG_then_Extend_v_EM',
@@ -2408,9 +2421,10 @@ sub output_LB_table() {
     $lb_all_enums{ $lb_short_enums[$_] } = $_ for 0 .. $table_size - 1;
 
     my %lb_splits = setup_splits(\%lb_all_enums, $table_size, $has_unused,
-                                 {
-                                   %Unicode::UCD::lb_components,
-                                 }
+                      {
+                        %Unicode::UCD::lb_components,
+                        AKish => [ qw(Aksara  Dotted_Circle  Aksara_Start) ],
+                      }
     );
 
     # The result is really just true or false.  But we follow along with tr14,
@@ -2461,6 +2475,16 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => 15,
                                            },
+        LB_various_then_PiQ_then_SP_v_any => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => '15a',
+                                           },
+        LB_any_v_PfQ_then_various       => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => '15b',
+                                           },
         LB_CL_or_CP_then_SP_v_NS        => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
@@ -2495,6 +2519,16 @@ sub output_LB_table() {
                                              enum => 20,
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
+                                           },
+        LB_AKish_v_AKish_then_VF        => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => '28a',
+                                           },
+        LB_AKish_then_VI_v_AK_or_DOTTED => {
+                                             enum => $lb_enum++,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => '28a',
                                            },
         LB_various_then_RI_v_RI         => {
                                              enum => $lb_enum++,
@@ -2673,8 +2707,29 @@ sub output_LB_table() {
 
     # LB15 Do not break within ‘”[’, even with intervening spaces.
     # QU SP* × OP
-    set_lb_nobreak('QU', 'OP', 15);
-    add_lb_dfa('SP', 'OP', 'LB_QU_then_SP_v_OP', 15);
+    # LB15 is superceded by LB15a, when that is present
+    if (   ! defined $lb_all_enums{Pi_QU}
+        || (   $has_unused && $lb_all_enums{Pi_QU} >= $table_size - 1))
+    {
+        set_lb_nobreak('QU', 'OP', 15);
+        add_lb_dfa('SP', 'OP', 'LB_QU_then_SP_v_OP', 15);
+    }
+
+    # LB15a Do not break after an unresolved initial punctuation that lies at
+    # the start of the line, after a space, after opening punctuation, or
+    # after an unresolved quotation mark, even after spaces.
+    # (sot | BK | CR | LF | NL | OP | QU | GL | SP | ZW) [\p{Pi}&QU] SP* ×
+    $dfa = 'LB_various_then_PiQ_then_SP_v_any';
+    add_lb_dfa('Pi_QU', '*', $dfa, '15a');
+    add_lb_dfa('SP', '*', $dfa, '15a');
+
+    # LB15b Do not break before an unresolved final punctuation that lies at
+    # the end of the line, before a space, before a prohibited break, or
+    # before an unresolved quotation mark, even after spaces.
+    # × [\p{Pf}&QU] ( SP | GL | WJ | CL | QU | CP | EX | IS | SY | BK | CR
+    #               | LF | NL | ZW | eot)
+    $dfa = 'LB_any_v_PfQ_then_various';
+    add_lb_dfa('*', 'Pf_QU', $dfa, '15b');
 
     # LB16 Do not break between closing punctuation and a nonstarter even with
     # intervening spaces.
@@ -2847,6 +2902,22 @@ sub output_LB_table() {
     for $lhs (qw(AL HL)) {
         set_lb_nobreak($lhs, $_, 28) for qw(AL HL);
     }
+
+    # LB28a Do not break inside the orthographic syllables of Brahmic scripts.
+    # AP × (AK | ◌ | AS)
+    $rule = '28a';
+    set_lb_nobreak('AP', 'AKish', $rule);
+
+    # (AK | ◌ | AS) × (VF | VI)
+    set_lb_nobreak('AKish', $_, $rule) for qw(VF VI);
+
+    # (AK | ◌ | AS) VI × (AK | ◌)
+    $dfa = 'LB_AKish_then_VI_v_AK_or_DOTTED';
+    add_lb_dfa('VI', $_, $dfa, $rule) for qw(AK Dotted_Circle);
+
+    # (AK | ◌ | AS) × (AK | ◌ | AS) VF
+    $dfa = 'LB_AKish_v_AKish_then_VF';
+    add_lb_dfa('AKish', 'AKish', $dfa, $rule);
 
     # LB29 Do not break between numeric punctuation and alphabetics (“e.g.”).
     # IS × (AL | HL)
@@ -3201,9 +3272,9 @@ my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &UpperLatin1
 
-                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,ExtPict_XX,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ
+                    _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,ExtPict_XX,Glue_After_Zwj,InCB_Consonant,InCB_Consonant_XX,InCB_Extend,InCB_Extend_EX,InCB_Linker,InCB_Linker_EX,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ
 
-                    _Perl_LB,EDGE,Close_Parenthesis,Contingent_Break,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Regional_Indicator,Unassigned_Extended_Pictographic_Ideographic,Word_Joiner,ZWJ
+                    _Perl_LB,EDGE,Aksara,Aksara_Prebase,Aksara_Start,AK,AP,Close_Parenthesis,Cn_ExtPict_ExtPict_ID,Contingent_Break,Dotted_Circle,Dotted_Circle_AL,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Pf_QU,Pi_QU,Regional_Indicator,VF,VI,Virama,Virama_Final,Word_Joiner,ZWJ
 
                     _Perl_SB,EDGE,CR,Extend,LF,SContinue
 
