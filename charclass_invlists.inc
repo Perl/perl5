@@ -193518,8 +193518,8 @@ static const U8 WB_dfa_table[] = {
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule WB99) */
     2,	/* [26] WB_hs_v_hs_then_Extend_or_FO_or_ZWJ (Rule WB2z) */
-    255,	/*	if matches, return 255 */
-    0,	/*	else return 0  (Rule WB3) */
+    1,	/*	if matches, return 1 */
+    0,	/*	else return 0  (Rule WB2) */
     16,	/* [29] WB_various_then_RI_v_RI (Rules WB15, WB16) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule WB99) */
