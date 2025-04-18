@@ -1102,82 +1102,28 @@ BEGIN { $build_subclass->('Param', # parent
 )};
 
 
-# $self->as_input_code():
+# Given a param with known type etc, extract its typemap INPUT template
+# and also create a hash of vars that can be used to eval that template.
+# An undef returned hash ref signifies that the returned template string
+# doesn't need to be evalled.
 #
-# Emit the param object as C code which declares and initialise the variable.
-# See also the as_output_code() method, which emits code to return the value
-# of that local var.
+# Returns ($expr, $eval_vars, $is_template)
+# or empty list on failure.
+#
+# $expr:        text like '$var = SvIV($arg)'
+# $eval_vars:   hash ref like { var => 'foo', arg => 'ST(0)', ... }
+# $is_template: $expr has '$arg' etc and needs evalling
 
-sub as_input_code {
+sub lookup_input_typemap {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
     my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
     my                                $xbody = shift;
 
-    my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
-        = @{$self}{qw(type arg_num var init no_init defer default)};
-
+    my ($type, $arg_num, $var, $init, $no_init, $default)
+        = @{$self}{qw(type arg_num var init no_init default)};
+    $var = "XSauto_length_of_$self->{len_name}" if $self->{is_length};
     my $arg = $pxs->ST($arg_num);
-
-    if ($self->{is_length}) {
-        # Process length(foo) parameter.
-        # Basically for something like foo(char *s, int length(s)),
-        # create *two* local C vars: one with STRLEN type, and one with the
-        # type specified in the signature. Eventually, generate code looking
-        # something like:
-        #   STRLEN  STRLEN_length_of_s;
-        #   int     XSauto_length_of_s;
-        #   char *s = (char *)SvPV(ST(0), STRLEN_length_of_s);
-        #   XSauto_length_of_s = STRLEN_length_of_s;
-        #   RETVAL = foo(s, XSauto_length_of_s);
-        #
-        # Note that the SvPV() code line is generated via a separate call to
-        # this sub with s as the var (as opposed to *this* call, which is
-        # handling length(s)), by overriding the normal T_PV typemap (which
-        # uses PV_nolen()).
-
-        my $name = $self->{len_name};
-
-        print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
-        # defer this line until after all the other declarations
-        $xbody->{input_part}{deferred_code_lines} .=
-                "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
-
-        # this var will be declared using the normal typemap mechanism below
-        $var = "XSauto_length_of_$name";
-    }
-
-    # Emit the variable's type and name.
-    #
-    # Includes special handling for function pointer types. An INPUT line
-    # always has the C type followed by the variable name. The C code
-    # which is emitted normally follows the same pattern. However for
-    # function pointers, the code is different: the variable name has to
-    # be embedded *within* the type. For example, these two INPUT lines:
-    #
-    #    char *        s
-    #    int (*)(int)  fn_ptr
-    #
-    # cause the following lines of C to be emitted;
-    #
-    #    char *              s = [something from a typemap]
-    #    int (* fn_ptr)(int)   = [something from a typemap]
-    #
-    # So handle specially the specific case of a type containing '(*)' by
-    # embedding the variable name *within* rather than *after* the type.
-
-
-    if ($type =~ / \( \s* \* \s* \) /x) {
-        # for a fn ptr type, embed the var name in the type declaration
-        print "\t" . $pxs->map_type($type, $var);
-    }
-    else {
-        print "\t",
-                    ((defined($xsub->{decl}{class}) && $var eq 'CLASS')
-                        ? $type
-                        : $pxs->map_type($type, undef)),
-              "\t$var";
-    }
 
     # whitespace-tidy the type
     $type = ExtUtils::Typemaps::tidy_type($type);
@@ -1186,14 +1132,14 @@ sub as_input_code {
     # Only the common ones are specified here. Other fields may be added
     # later.
     my $eval_vars = {
-        type          => $type,
-        var           => $var,
-        num           => $arg_num,
-        arg           => $arg,
-        alias         => $xsub->{seen_ALIAS},
-        func_name     => $xsub->{decl}{name},
-        full_perl_name  => $xsub->{decl}{full_perl_name},
-        full_C_name     => $xsub->{decl}{full_C_name},
+        type           => $type,
+        var            => $var,
+        num            => $arg_num,
+        arg            => $arg,
+        alias          => $xsub->{seen_ALIAS},
+        func_name      => $xsub->{decl}{name},
+        full_perl_name => $xsub->{decl}{full_perl_name},
+        full_C_name    => $xsub->{decl}{full_C_name},
     };
 
     # The type looked up in the eval is Foo__Bar rather than Foo::Bar
@@ -1254,10 +1200,10 @@ sub as_input_code {
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
         if ($xstype eq 'T_PV' and $self->{has_length}) {
-            print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
             die "default value not supported with length(NAME) supplied"
                 if defined $default;
-            return;
+            return "($type)SvPV($arg, STRLEN_length_of_$var);",
+                   $eval_vars, 0;
         }
 
         # Get the ExtUtils::Typemaps::InputMap object associated with the
@@ -1312,8 +1258,6 @@ sub as_input_code {
         }
 
         if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
-            # XXX this really aught to be determined during parse rather
-            # than during code emitting.
             $xsub->{SCOPE_enabled} = 1;
         }
 
@@ -1322,6 +1266,98 @@ sub as_input_code {
         @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
         $init_template = $expr;
     }
+
+    return ($init_template, $eval_vars, 1);
+}
+
+
+# $self->as_input_code():
+#
+# Emit the param object as C code which declares and initialise the variable.
+# See also the as_output_code() method, which emits code to return the value
+# of that local var.
+
+sub as_input_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my                                $xbody = shift;
+
+    my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
+        = @{$self}{qw(type arg_num var init no_init defer default)};
+
+    my $arg = $pxs->ST($arg_num);
+
+    if ($self->{is_length}) {
+        # Process length(foo) parameter.
+        # Basically for something like foo(char *s, int length(s)),
+        # create *two* local C vars: one with STRLEN type, and one with the
+        # type specified in the signature. Eventually, generate code looking
+        # something like:
+        #   STRLEN  STRLEN_length_of_s;
+        #   int     XSauto_length_of_s;
+        #   char *s = (char *)SvPV(ST(0), STRLEN_length_of_s);
+        #   XSauto_length_of_s = STRLEN_length_of_s;
+        #   RETVAL = foo(s, XSauto_length_of_s);
+        #
+        # Note that the SvPV() code line is generated via a separate call to
+        # this sub with s as the var (as opposed to *this* call, which is
+        # handling length(s)), by overriding the normal T_PV typemap (which
+        # uses PV_nolen()).
+
+        my $name = $self->{len_name};
+
+        print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
+        # defer this line until after all the other declarations
+        $xbody->{input_part}{deferred_code_lines} .=
+                "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
+        $var = "XSauto_length_of_$name";
+    }
+
+    # Emit the variable's type and name.
+    #
+    # Includes special handling for function pointer types. An INPUT line
+    # always has the C type followed by the variable name. The C code
+    # which is emitted normally follows the same pattern. However for
+    # function pointers, the code is different: the variable name has to
+    # be embedded *within* the type. For example, these two INPUT lines:
+    #
+    #    char *        s
+    #    int (*)(int)  fn_ptr
+    #
+    # cause the following lines of C to be emitted;
+    #
+    #    char *              s = [something from a typemap]
+    #    int (* fn_ptr)(int)   = [something from a typemap]
+    #
+    # So handle specially the specific case of a type containing '(*)' by
+    # embedding the variable name *within* rather than *after* the type.
+
+
+    if ($type =~ / \( \s* \* \s* \) /x) {
+        # for a fn ptr type, embed the var name in the type declaration
+        print "\t" . $pxs->map_type($type, $var);
+    }
+    else {
+        print "\t",
+                    ((defined($xsub->{decl}{class}) && $var eq 'CLASS')
+                        ? $type
+                        : $pxs->map_type($type, undef)),
+              "\t$var";
+    }
+
+    my ($init_template, $eval_vars, $is_template) =
+            $self->lookup_input_typemap($pxs, $xsub, $xbody);
+
+    return unless defined $init_template; # an error occurred
+    unless ($is_template) {
+        # template already expanded
+        print " = $init_template\n";
+        return;
+    }
+
+    # whitespace-tidy the type
+    $type = ExtUtils::Typemaps::tidy_type($type);
 
     # Now finally, emit the actual variable declaration and initialisation
     # line(s). The variable type and name will already have been emitted.

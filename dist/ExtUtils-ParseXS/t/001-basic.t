@@ -1504,6 +1504,24 @@ EOF
 
     my @test_fns = (
         [
+            "length() basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, int length(s))
+EOF
+            [ 0, 0, qr{^\s+STRLEN\s+STRLEN_length_of_s;}m,  "decl STRLEN" ],
+            [ 0, 0, qr{^\s+int\s+XSauto_length_of_s;}m,     "decl int"    ],
+
+            [ 0, 0, qr{^ \s+ \Qchar *\E \s+
+                        \Qs = (char *)SvPV(ST(0), STRLEN_length_of_s);}xm,
+                                                            "decl s"      ],
+
+            [ 0, 0, qr{^\s+\QXSauto_length_of_s = STRLEN_length_of_s}m,
+                                                            "assign"     ],
+
+            [ 0, 0, qr{^\s+\Qfoo(s, XSauto_length_of_s);}m, "autocall"   ],
+        ],
+        [
             "length() default value",
             [ Q(<<'EOF') ],
                 |void
