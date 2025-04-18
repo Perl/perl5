@@ -2491,6 +2491,11 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => 25,
                                            },
+        LB_NU_then_SY_or_IS_v_PO_or_PR  => {
+                                             enum => 20,
+                                             match_return => 'LB_NOBREAK',
+                                             rule => 25,
+                                           },
         LB_various_then_RI_v_RI         => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
@@ -2805,7 +2810,13 @@ sub output_LB_table() {
     set_lb_nobreak('NU', 'PR', $rule);
 
     $dfa = 'LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR';
-    for $lhs (qw(CP CL IS SY)) {
+    for $lhs (qw(CP CL)) {
+        add_lb_dfa($lhs, $_, $dfa, $rule) for qw(PO PR);
+    }
+
+    # CL and CP are optional.  Without them, we get
+    $dfa = 'LB_NU_then_SY_or_IS_v_PO_or_PR';
+    for $lhs (qw(IS SY)) {
         add_lb_dfa($lhs, $_, $dfa, $rule) for qw(PO PR);
     }
 

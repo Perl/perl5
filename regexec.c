@@ -5547,6 +5547,7 @@ S_isLB(pTHX_ LB_enum before,
 
           case LB_NU_then_SY_or_IS_v_various:
           case LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR:
+          case LB_NU_then_SY_or_IS_v_PO_or_PR:
             /* LB25d NU (SY | IS)* × (NU | SY | IS | CL | CP )
              * LB25e NU (SY | IS)* (CL | CP)? × (PO | PR) */
             do {
