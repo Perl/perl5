@@ -15516,6 +15516,23 @@ END
     my $perl_gcb = property_ref('_Perl_GCB');
     my @gcb_splits;
     push @gcb_splits, $ep_splits if defined $ep_splits && defined $perl_gcb;
+
+    # In Unicode 15.1, the Indic Conjunct Break property (InCB) was added,
+    # which causes us to have to split GCB into subclasses that match some of
+    # the subclasses of InCB
+    my $incb = property_ref('InCB');
+    if (defined $perl_gcb && defined $incb) {
+
+        # To avoid namespace clashes, we prefix our internal names with
+        # "InCB_"
+        push @gcb_splits,
+             {
+               name => "InCB_$_",
+               ranges => Range_List->new(Initialize => $incb->table($_))
+             }
+             for qw(Consonant  Linker  Extend);
+    }
+
     %gcb_components = split_property($gcb, $perl_gcb, \@gcb_splits)
                                                                if @gcb_splits;
 
@@ -15602,7 +15619,21 @@ END
         }
     }
 
-    %lb_components = split_property($lb, $perl_lb, \@lb_splits) if @lb_splits;
+    if ($v_version ge 15.1.0) {
+
+        # Unicode 15.1 splits LB=QU initial quotes and final quotes, and regular
+        # quotes
+        push @lb_splits, { name => 'Pi', ranges => $gc->table('Pi') };
+        push @lb_splits, { name => 'Pf', ranges => $gc->table('Pf') };
+
+        # And it treats the dotted circle specially
+        push @lb_splits, { name => 'Dotted_Circle',
+                           ranges => Range_List->new(Initialize
+                                  => Range->new(0x25cc, 0x25cc))
+                         };
+    }
+
+    %lb_components = split_property($lb, $perl_lb, \@lb_splits);
 
     # This property is a modification of the scx property
     my $perl_scx = Property->new('_Perl_SCX',
