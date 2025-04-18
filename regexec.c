@@ -5375,6 +5375,11 @@ S_backup_one_GCB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_ta
                                      || isLB_Space(prev)                \
                                      || isLB_ZWSpace(prev)))
 
+#define backup_one_LB(begin, cur, utf8)                                 \
+                                backup_one_LB_(begin, cur, utf8, false)
+#define backup_one_LB_but_over_CM_ZWJ(begin, cur, utf8)                 \
+                                backup_one_LB_(begin, cur, utf8, true)
+
 STATIC bool
 S_isLB(pTHX_ LB_enum before,
              LB_enum after,
@@ -5491,11 +5496,8 @@ S_isLB(pTHX_ LB_enum before,
 
             /* We don't know how to treat the CM except by looking at the first
              * non-CM character preceding it.  ZWJ is treated as CM */
-            do {
-                prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
-            }
-            while (isLB_Combining_Mark(prev) || isLB_ZWJ(prev));
-
+            prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &temp_pos,
+                                                 utf8_target);
             /* Here, 'prev' is that first earlier non-CM character.  If the CM
              * attaches to it, then it inherits the behavior of 'prev'.  If it
              * doesn't attach, it is to be treated as an AL */
@@ -5630,41 +5632,55 @@ S_advance_one_LB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_ta
 }
 
 STATIC LB_enum
-S_backup_one_LB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
+S_backup_one_LB_(pTHX_ const U8 * const strbeg,
+                       U8 ** curpos,
+                       const bool utf8_target,
+                       bool skip_CM_ZWJ)
 {
-    LB_enum lb;
+    PERL_ARGS_ASSERT_BACKUP_ONE_LB_;
 
-    PERL_ARGS_ASSERT_BACKUP_ONE_LB;
+    LB_enum isLB_scratch;   /* Used by generated isLB_foo() macros */
 
     if (*curpos < strbeg) {
         return LB_EDGE;
     }
 
+    LB_enum lb;
+
     if (utf8_target) {
         U8 * prev_char_pos = reghopmaybe3(*curpos, -1, strbeg);
-        U8 * prev_prev_char_pos;
-
         if (! prev_char_pos) {
             return LB_EDGE;
         }
 
-        if ((prev_prev_char_pos = reghopmaybe3((U8 *) prev_char_pos, -1, strbeg))) {
-            lb = getLB_VAL_UTF8(prev_prev_char_pos, prev_char_pos);
-            *curpos = prev_char_pos;
-            prev_char_pos = prev_prev_char_pos;
-        }
-        else {
-            *curpos = (U8 *) strbeg;
-            return LB_EDGE;
-        }
+        /* Back up one.  Keep going if result is CM or ZWJ and caller wants
+         * those skipped.  curpos is always just to the right of the character
+         * whose value we are getting */
+        do {
+            U8 * prev_prev_char_pos;
+            if ((prev_prev_char_pos = reghopmaybe3((U8 *) prev_char_pos,
+                                                   -1,
+                                                   strbeg)))
+            {
+                lb = getLB_VAL_UTF8(prev_prev_char_pos, prev_char_pos);
+                *curpos = prev_char_pos;
+                prev_char_pos = prev_prev_char_pos;
+            }
+            else {
+                *curpos = (U8 *) strbeg;
+                return LB_EDGE;
+            }
+        } while (skip_CM_ZWJ && (isLB_CM(lb) || isLB_ZWJ(lb)));
     }
     else {
-        if (*curpos - 2 < strbeg) {
-            *curpos = (U8 *) strbeg;
-            return LB_EDGE;
-        }
-        (*curpos)--;
-        lb = getLB_VAL_CP(*(*curpos - 1));
+        do {
+            if (*curpos - 2 < strbeg) {
+                *curpos = (U8 *) strbeg;
+                return LB_EDGE;
+            }
+            (*curpos)--;
+            lb = getLB_VAL_CP(*(*curpos - 1));
+        } while (skip_CM_ZWJ && (isLB_CM(lb) || isLB_ZWJ(lb)));
     }
 
     return lb;
