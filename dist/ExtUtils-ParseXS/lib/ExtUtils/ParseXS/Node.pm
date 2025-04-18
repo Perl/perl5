@@ -1271,6 +1271,227 @@ sub lookup_input_typemap {
 }
 
 
+
+# Given a param with known type etc, extract its typemap OUTPUT template
+# and also create a hash of vars that can be used to eval that template.
+# An undef returned hash ref signifies that the returned template string
+# doesn't need to be evalled.
+# $out_num, if defined, signifies that this lookup is for an OUTLIST param
+#
+# Returns ($expr, $eval_vars, $is_template, $saw_DAE)
+# or empty list on failure.
+#
+# $expr:        text like 'sv_setiv($arg, $var)'
+# $eval_vars:   hash ref like { var => 'foo', arg => 'ST(0)', ... }
+# $is_template: $expr has '$arg' etc and needs evalling
+# $saw_DAE:     DO_ARRAY_ELEM was encountered
+#
+
+sub lookup_output_typemap {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my                                $xbody = shift;
+    my                                $out_num = shift;
+
+    my ($type, $num, $var, $do_setmagic, $output_code)
+        = @{$self}{qw(type arg_num var do_setmagic output_code)};
+
+    # values to return
+    my ($expr, $eval_vars, $is_template, $saw_DAE);
+    $is_template = 1;
+
+    if ($var eq 'RETVAL') {
+        # Do some preliminary RETVAL-specific checks and settings.
+
+        # Only OUT/OUTPUT vars (which update one of the passed args) should be
+        # calling set magic; RETVAL and OUTLIST should be setting the value of
+        # a fresh mortal or TARG. Note that a param can be both OUTPUT and
+        # OUTLIST - the value of $do_setmagic only applies to its use as an
+        # OUTPUT (updating) value.
+
+        $pxs->death("Internal error: do set magic requested on RETVAL")
+            if $do_setmagic;
+
+        # RETVAL normally has an undefined arg_num, although it can be
+        # set to a real index if RETVAL is also declared as a parameter.
+        # But when returning its value, it's always stored at ST(0).
+        $num = 1;
+
+        # It is possible for RETVAL to have multiple types, e.g.
+        #     int
+        #     foo(long RETVAL)
+        #
+        # In the above, 'long' is used for the RETVAL C var's declaration,
+        # while 'int' is used to generate the return code (for backwards
+        # compatibility).
+        $type = $xsub->{decl}{return_type}{type};
+    }
+
+    # ------------------------------------------------------------------
+    # Do initial processing of $type, including creating various derived
+    # values
+
+    unless (defined $type) {
+        $pxs->blurt("Can't determine output type for '$var'");
+        return;
+    }
+
+    # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
+    # valid vars which can appear within a typemap template.
+    (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+    $ntype =~ s/\(\)//g;
+
+    # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
+    # where it's the type of each array element. But it's also passed to
+    # the typemap template (although undocumented and virtually unused).
+    # Basically for a type like FooArray or FooArrayPtr, the subtype is Foo.
+    (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+
+    # whitespace-tidy the type
+    $type = ExtUtils::Typemaps::tidy_type($type);
+
+    # The type as supplied to the eval is Foo__Bar rather than Foo::Bar
+    my $eval_type = $type;
+    $eval_type =~ tr/:/_/
+        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
+
+    # We can be called twice for the same variable: once to update the
+    # original arg (via an entry in OUTPUT) and once to push the param's
+    # value (via OUTLIST). When doing the latter, any override code on an
+    # OUTPUT line should not be used.
+    undef $output_code if defined $out_num;
+
+    # ------------------------------------------------------------------
+    # Find the template code (pre any eval) and store it in $expr.
+    # This is typically obtained via a typemap lookup, but can be
+    # overridden. Also set vars ready for evalling the typemap template.
+
+    my $outputmap;
+    my $typemaps = $pxs->{typemaps_object};
+
+    if (defined $output_code) {
+        # An override on an OUTPUT line: use that instead of the typemap.
+        # Note that we don't set $expr here, because $expr holds a template
+        # string pre-eval, while OUTPUT override code is *not*
+        # template-expanded, so $output_code is effectively post-eval code.
+        $is_template = 0;
+        $expr = $output_code;
+    }
+    elsif ($type =~ /^array\(([^,]*),(.*)\)/) {
+        # Specially handle the implicit array return type, "array(type, nlelem)"
+        # rather than using a typemap entry. It returns a string SV whose
+        # buffer is a copy of $var, which it assumes is a C array of
+        # type 'type' with 'nelem' elements.
+
+        my ($atype, $nitems) = ($1, $2);
+
+        if ($var ne 'RETVAL') {
+            # This special type is intended for use only as the return type of
+            # an XSUB
+            $pxs->blurt(  "Can't use array(type,nitems) type for "
+                        . (defined $out_num ? "OUTLIST" : "OUT")
+                        . " parameter");
+            return;
+        }
+
+        $expr = "\tsv_setpvn(\$arg, (char *)\$var, $nitems * sizeof($atype));\n";
+    }
+    else {
+        # Handle a normal return type via a typemap.
+
+        # Get the output map entry for this type; complain if not found.
+        my $typemap = $typemaps->get_typemap(ctype => $type);
+        if (not $typemap) {
+            $pxs->report_typemap_failure($typemaps, $type);
+            return;
+        }
+
+        $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
+        if (not $outputmap) {
+            $pxs->blurt("Error: No OUTPUT definition for type '$type', typekind '"
+                        . $typemap->xstype . "' found");
+            return;
+        }
+
+        # Get the text of the typemap template, with a few transformations to
+        # make it work better with fussy C compilers. In particular, strip
+        # trailing semicolons and remove any leading white space before a '#'.
+
+        $expr = $outputmap->cleaned_code;
+    }
+
+    my $arg = $pxs->ST(defined $out_num ? $out_num + 1 : $num);
+
+    # Specify the environment for if/when the code template is evalled.
+    $eval_vars = {
+                        num         => $num,
+                        var         => $var,
+                        do_setmagic => $do_setmagic,
+                        subtype     => $subtype,
+                        ntype       => $ntype,
+                        arg         => $arg,
+                        type        => $eval_type,
+                        alias       => $xsub->{seen_ALIAS},
+                        func_name   => $xsub->{decl}{name},
+                        full_perl_name  => $xsub->{decl}{full_perl_name},
+                        full_C_name     => $xsub->{decl}{full_C_name},
+                    };
+
+
+    # ------------------------------------------------------------------
+    # Handle DO_ARRAY_ELEM token as a very special case
+
+    if (!defined $output_code and $expr =~ /\bDO_ARRAY_ELEM\b/) {
+        # See the comments in ExtUtils::ParseXS::Node::Param::as_code() that
+        # explain the similar code for the DO_ARRAY_ELEM hack there.
+
+        if ($var ne 'RETVAL') {
+            # Typemap templates containing DO_ARRAY_ELEM are assumed to
+            # contain a loop which explicitly stores a new mortal SV at
+            # each of the locations ST(0) .. ST(n-1), and which then uses
+            # the code from the typemap for the underlying array element
+            # to set each SV's value.
+            #
+            # This is a horrible hack for RETVAL, which would probably
+            # fail with OUTLIST due to stack offsets being wrong, and
+            # definitely would fail with OUT, which is supposed to be
+            # updating parameter SVs, not pushing anything on the stack.
+            # So forbid all except RETVAL.
+            $pxs->blurt("Can't use typemap containing DO_ARRAY_ELEM for "
+                                        . (defined $out_num ? "OUTLIST" : "OUT")
+                                        . " parameter");
+            return;
+        }
+
+        my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
+        if (not $subtypemap) {
+            $pxs->report_typemap_failure($typemaps, $subtype);
+            return;
+        }
+
+        my $suboutputmap =
+            $typemaps->get_outputmap(xstype => $subtypemap->xstype);
+        if (not $suboutputmap) {
+            $pxs->blurt("Error: No OUTPUT definition for type '$subtype', typekind '"
+                        . $subtypemap->xstype . "' found");
+            return;
+        }
+
+        my $subexpr = $suboutputmap->cleaned_code;
+        $subexpr =~ s/ntype/subtype/g;
+        $subexpr =~ s/\$arg/ST(ix_$var)/g;
+        $subexpr =~ s/\$var/${var}\[ix_$var]/g;
+        $subexpr =~ s/\n\t/\n\t\t/g;
+        $expr =~ s/\bDO_ARRAY_ELEM\b/$subexpr/;
+
+        $saw_DAE = 1;
+    }
+
+    return $expr, $eval_vars, $is_template, $saw_DAE;
+}
+
+
 # $self->as_input_code():
 #
 # Emit the param object as C code which declares and initialise the variable.
@@ -1517,26 +1738,10 @@ sub as_output_code {
     my                                $xbody  = shift;
     my                                $out_num = shift;
 
-    my ($type, $num, $var, $do_setmagic, $output_code)
-        = @{$self}{qw(type arg_num var do_setmagic output_code)};
+    my ($type, $var, $do_setmagic, $output_code)
+        = @{$self}{qw(type var do_setmagic output_code)};
 
     if ($var eq 'RETVAL') {
-        # Do some preliminary RETVAL-specific checks and settings.
-
-        # Only OUT/OUTPUT vars (which update one of the passed args) should be
-        # calling set magic; RETVAL and OUTLIST should be setting the value of
-        # a fresh mortal or TARG. Note that a param can be both OUTPUT and
-        # OUTLIST - the value of $do_setmagic only applies to its use as an
-        # OUTPUT (updating) value.
-
-        $pxs->death("Internal error: do set magic requested on RETVAL")
-            if $do_setmagic;
-
-        # RETVAL normally has an undefined arg_num, although it can be
-        # set to a real index if RETVAL is also declared as a parameter.
-        # But when returning its value, it's always stored at ST(0).
-        $num = 1;
-
         # It is possible for RETVAL to have multiple types, e.g.
         #     int
         #     foo(long RETVAL)
@@ -1547,34 +1752,8 @@ sub as_output_code {
         $type = $xsub->{decl}{return_type}{type};
     }
 
-
-    # ------------------------------------------------------------------
-    # Do initial processing of $type, including creating various derived
-    # values
-
-    unless (defined $type) {
-        $pxs->blurt("Can't determine output type for '$var'");
-        return;
-    }
-
-    # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
-    # valid vars which can appear within a typemap template.
-    (my $ntype = $type) =~ s/\s*\*/Ptr/g;
-    $ntype =~ s/\(\)//g;
-
-    # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
-    # where it's the type of each array element. But it's also passed to
-    # the typemap template (although undocumented and virtually unused).
-    # Basically for a type like FooArray or FooArrayPtr, the subtype is Foo.
-    (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-
     # whitespace-tidy the type
     $type = ExtUtils::Typemaps::tidy_type($type);
-
-    # The type as supplied to the eval is Foo__Bar rather than Foo::Bar
-    my $eval_type = $type;
-    $eval_type =~ tr/:/_/
-        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
 
     # We can be called twice for the same variable: once to update the
     # original arg (via an entry in OUTPUT) and once to push the param's
@@ -1583,128 +1762,12 @@ sub as_output_code {
     undef $output_code if defined $out_num;
 
 
-    # ------------------------------------------------------------------
-    # Find the template code (pre any eval) and store it in $expr.
-    # This is typically obtained via a typemap lookup, but can be
-    # overridden. Also set vars ready for evalling the typemap template.
+    my ($expr, $eval_vars, $is_template, $saw_DAE) = 
+        $self->lookup_output_typemap($pxs, $xsub, $xbody, $out_num);
 
-    my $expr;
-    my $outputmap;
-    my $typemaps = $pxs->{typemaps_object};
+    return unless defined $expr; # error
 
-    if (defined $output_code) {
-        # An override on an OUTPUT line: use that instead of the typemap.
-        # Note that we don't set $expr here, because $expr holds a template
-        # string pre-eval, while OUTPUT override code is *not*
-        # template-expanded, so $output_code is effectively post-eval code.
-    }
-    elsif ($type =~ /^array\(([^,]*),(.*)\)/) {
-        # Specially handle the implicit array return type, "array(type, nlelem)"
-        # rather than using a typemap entry. It returns a string SV whose
-        # buffer is a copy of $var, which it assumes is a C array of
-        # type 'type' with 'nelem' elements.
-
-        my ($atype, $nitems) = ($1, $2);
-
-        if ($var ne 'RETVAL') {
-            # This special type is intended for use only as the return type of
-            # an XSUB
-            $pxs->blurt(  "Can't use array(type,nitems) type for "
-                        . (defined $out_num ? "OUTLIST" : "OUT")
-                        . " parameter");
-            return;
-        }
-
-        $expr = "\tsv_setpvn(\$arg, (char *)\$var, $nitems * sizeof($atype));\n";
-    }
-    else {
-        # Handle a normal return type via a typemap.
-
-        # Get the output map entry for this type; complain if not found.
-        my $typemap = $typemaps->get_typemap(ctype => $type);
-        if (not $typemap) {
-            $pxs->report_typemap_failure($typemaps, $type);
-            return;
-        }
-
-        $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
-        if (not $outputmap) {
-            $pxs->blurt("Error: No OUTPUT definition for type '$type', typekind '"
-                        . $typemap->xstype . "' found");
-            return;
-        }
-
-        # Get the text of the typemap template, with a few transformations to
-        # make it work better with fussy C compilers. In particular, strip
-        # trailing semicolons and remove any leading white space before a '#'.
-
-        $expr = $outputmap->cleaned_code;
-    }
-
-    my $arg = $pxs->ST(defined $out_num ? $out_num + 1 : $num);
-
-    # Specify the environment for if/when the code template is evalled.
-    my $eval_vars = {
-                        num         => $num,
-                        var         => $var,
-                        do_setmagic => $do_setmagic,
-                        subtype     => $subtype,
-                        ntype       => $ntype,
-                        arg         => $arg,
-                        type        => $eval_type,
-                        alias       => $xsub->{seen_ALIAS},
-                        func_name   => $xsub->{decl}{name},
-                        full_perl_name  => $xsub->{decl}{full_perl_name},
-                        full_C_name     => $xsub->{decl}{full_C_name},
-                    };
-
-
-    # ------------------------------------------------------------------
-    # Handle DO_ARRAY_ELEM token as a very special case
-
-    if (!defined $output_code and $expr =~ /\bDO_ARRAY_ELEM\b/) {
-        # See the comments in ExtUtils::ParseXS::Node::Param::as_code() that
-        # explain the similar code for the DO_ARRAY_ELEM hack there.
-
-        if ($var ne 'RETVAL') {
-            # Typemap templates containing DO_ARRAY_ELEM are assumed to
-            # contain a loop which explicitly stores a new mortal SV at
-            # each of the locations ST(0) .. ST(n-1), and which then uses
-            # the code from the typemap for the underlying array element
-            # to set each SV's value.
-            #
-            # This is a horrible hack for RETVAL, which would probably
-            # fail with OUTLIST due to stack offsets being wrong, and
-            # definitely would fail with OUT, which is supposed to be
-            # updating parameter SVs, not pushing anything on the stack.
-            # So forbid all except RETVAL.
-            $pxs->blurt("Can't use typemap containing DO_ARRAY_ELEM for "
-                                        . (defined $out_num ? "OUTLIST" : "OUT")
-                                        . " parameter");
-            return;
-        }
-
-        my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
-        if (not $subtypemap) {
-            $pxs->report_typemap_failure($typemaps, $subtype);
-            return;
-        }
-
-        my $suboutputmap =
-            $typemaps->get_outputmap(xstype => $subtypemap->xstype);
-        if (not $suboutputmap) {
-            $pxs->blurt("Error: No OUTPUT definition for type '$subtype', typekind '"
-                        . $subtypemap->xstype . "' found");
-            return;
-        }
-
-        my $subexpr = $suboutputmap->cleaned_code;
-        $subexpr =~ s/ntype/subtype/g;
-        $subexpr =~ s/\$arg/ST(ix_$var)/g;
-        $subexpr =~ s/\$var/${var}\[ix_$var]/g;
-        $subexpr =~ s/\n\t/\n\t\t/g;
-        $expr =~ s/\bDO_ARRAY_ELEM\b/$subexpr/;
-
+    if ($saw_DAE) {
         # We do our own code emitting and return here (rather than control
         # passing on to normal RETVAL processing) since that processing is
         # expecting to push a single temp onto the stack, while our code
@@ -1712,6 +1775,15 @@ sub as_output_code {
         print $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
         return;
     }
+    elsif (!$is_template) {
+        # $expr doesn't need evalling - use as-is
+        $output_code = $expr;
+    }
+
+    my $ntype = $eval_vars->{ntype};
+    my $num   = $eval_vars->{num};
+    my $arg   = $eval_vars->{arg};
+    
 
 
     # ------------------------------------------------------------------
