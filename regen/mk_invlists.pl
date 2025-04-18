@@ -2910,7 +2910,7 @@ sub output_WB_table() {
                                            },
         WB_hs_v_hs_then_Extend_or_FO_or_ZWJ => {
                                              enum => 2,
-                                             match_return => 255,
+                                             match_return => 'WB_BREAKABLE',
                                              rule => '2z',
                                            },
         WB_Extend_or_FO_or_ZWJ_then_foo => {
@@ -2996,6 +2996,7 @@ sub output_WB_table() {
     set_wb_nobreak('Perl_Tailored_HSpace', $_, $rule) for qw(Extend Format ZWJ);
     add_wb_dfa('Perl_Tailored_HSpace', 'Perl_Tailored_HSpace',
                'WB_hs_v_hs_then_Extend_or_FO_or_ZWJ', $rule);
+    set_wb_nobreak('Perl_Tailored_HSpace', 'Perl_Tailored_HSpace', $rule);
 
     # Perl tailoring: Do not break within white space.
     # WB3  CR  ×  LF
