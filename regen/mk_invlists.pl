@@ -1504,7 +1504,7 @@ sub get_cell_list($table_size, $splits, $enums, $x, $y, $me_too = undef) {
 }
 
 sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
-              $has_unused, $as_is=undef, $me_too = undef)
+              $has_unused, $me_too = undef)
 {
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
@@ -1689,7 +1689,7 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
 }
 
 sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
-            $rule, $has_unused, $as_is = undef, $me_too = undef)
+            $rule, $has_unused, $me_too = undef)
 {
     my $match_return = $dfas->{$dfa}{match_return}
           // die "$dfa not defined for [$x,$y] "
@@ -1699,7 +1699,7 @@ sub add_dfa($table, $table_size, $splits, $enums, $dfas, $x, $y, $dfa,
     $match_return = $dfas->{$match_return}{match_return}
                                                     if $match_return =~ /\D/;
     set_cells($table, $table_size, $splits, $enums, $x, $y,
-              [ $dfa, $match_return ], $rule, $has_unused, $as_is, $me_too);
+              [ $dfa, $match_return ], $rule, $has_unused, $me_too);
 }
 
 sub output_table_common($property, $dfas_ref, $table_ref, $short_names_ref,
@@ -2284,7 +2284,7 @@ sub output_GCB_table() {
         # None of the DFAs in this property reference the current value of the
         # cell.  The '1' indicates that
         return add_dfa(\@gcb_table, $table_size, \%gcb_splits, \%gcb_all_enums,
-                       \%gcb_dfas, $x, $y, $dfa, $rule, $has_unused, 1);
+                       \%gcb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
 
     my ($lhs, $rhs, $dfa, $rule);
@@ -2502,15 +2502,8 @@ sub output_LB_table() {
                       $rule, $has_unused);
     }
     my sub add_lb_dfa($x, $y, $dfa, $rule) {
-
-        # These two don't reference the current value of the cell.  So use
-        # set_cells for them.  This preserves current behavior, until we're
-        # ready to change the dfa handling.
-        my $as_is =  $dfa eq 'LB_CM_ZWJ_v_any'
-                  || $dfa eq 'LB_various_then_RI_v_RI';
-
         return add_dfa(\@lb_table, $table_size, \%lb_splits, \%lb_all_enums,
-                       \%lb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is,
+                       \%lb_dfas, $x, $y, $dfa, $rule, $has_unused,
                        \%lb_me_too);
 
     }
@@ -2970,15 +2963,8 @@ sub output_WB_table() {
         return set_wb_cells($x, $y, $wb_dfas{WB_NOBREAK}{match_return}, $rule);
     }
     my sub add_wb_dfa($x, $y, $dfa, $rule) {
-
-        # These three don't reference the current value of the cell.  So use
-        # set_cells for them.  This preserves current behavior, until we're
-        # ready to change the dfa handling.
-        my $as_is = $dfa eq 'WB_Extend_or_FO_or_ZWJ_then_foo'
-                 || $dfa eq 'WB_various_then_RI_v_RI';
-
         return add_dfa(\@wb_table, $table_size, \%wb_splits, \%wb_all_enums,
-                       \%wb_dfas, $x, $y, $dfa, $rule, $has_unused, $as_is);
+                       \%wb_dfas, $x, $y, $dfa, $rule, $has_unused);
     }
 
     my ($lhs, $rhs, $dfa, $rule);
