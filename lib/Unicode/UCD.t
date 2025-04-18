@@ -878,8 +878,10 @@ if ($v_unicode_version ge v5.2.0) {
 }
 if ($v_unicode_version gt v3.2.0) { # Is missing from non-Unihan files before
                                     # this
-    is(num("\N{U+5146}"), 1000000000000,
-                                'Verify num("\N{U+5146}") == 1000000000000');
+    # Extrapolating from Unicode documentation, they moved away here from
+    # Taiwanese/Japanese usage in favor of mainland China usage.
+    my $value = ($v_unicode_version lt v15.1.0) ? 1000000000000 : 1000000;
+    is(num("\N{U+5146}"), $value, 'Verify num("\N{U+5146}") == ' . $value);
 }
 
 # Create a user-defined property
