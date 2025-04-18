@@ -2086,7 +2086,7 @@
 #     define advance_one_SB(a,b,c)              S_advance_one_SB(aTHX_ a,b,c)
 #     define advance_one_WB_(a,b,c,d)           S_advance_one_WB_(aTHX_ a,b,c,d)
 #     define backup_one_GCB(a,b,c)              S_backup_one_GCB(aTHX_ a,b,c)
-#     define backup_one_LB(a,b,c)               S_backup_one_LB(aTHX_ a,b,c)
+#     define backup_one_LB_(a,b,c,d)            S_backup_one_LB_(aTHX_ a,b,c,d)
 #     define backup_one_SB(a,b,c)               S_backup_one_SB(aTHX_ a,b,c)
 #     define backup_one_WB_but_over_Extend_FO(a,b,c,d) S_backup_one_WB_but_over_Extend_FO(aTHX_ a,b,c,d)
 #     define capture_clear(a,b,c,d)             S_capture_clear(aTHX_ a,b,c,d comma_aDEPTH)

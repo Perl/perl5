@@ -8741,9 +8741,9 @@ S_backup_one_GCB(pTHX_ const U8 * const strbeg, U8 **curpos, const bool utf8_tar
         assert(strbeg); assert(curpos)
 
 STATIC LB_enum
-S_backup_one_LB(pTHX_ const U8 * const strbeg, U8 **curpos, const bool utf8_target)
+S_backup_one_LB_(pTHX_ const U8 * const strbeg, U8 **curpos, const bool utf8_target, bool skip_CM_ZWJ)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_BACKUP_ONE_LB         \
+# define PERL_ARGS_ASSERT_BACKUP_ONE_LB_        \
         assert(strbeg); assert(curpos)
 
 STATIC SB_enum

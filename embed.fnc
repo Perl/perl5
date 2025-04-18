@@ -5673,9 +5673,10 @@ ERS	|WB_enum|advance_one_WB_|NN U8 **curpos 			\
 ERS	|GCB_enum|backup_one_GCB|NN const U8 * const strbeg		\
 				|NN U8 **curpos 			\
 				|const bool utf8_target
-ERS	|LB_enum|backup_one_LB	|NN const U8 * const strbeg		\
+ERS	|LB_enum|backup_one_LB_ |NN const U8 * const strbeg		\
 				|NN U8 **curpos 			\
-				|const bool utf8_target
+				|const bool utf8_target 		\
+				|bool skip_CM_ZWJ
 ERS	|SB_enum|backup_one_SB	|NN const U8 * const strbeg		\
 				|NN U8 **curpos 			\
 				|const bool utf8_target
