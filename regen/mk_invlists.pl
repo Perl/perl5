@@ -17,6 +17,19 @@ require './lib/unicore/UCD.pl';
 require './regen/mph.pl';
 use re "/aa";
 
+sub stack_trace {
+    my $i = 0;
+    my $return = "";
+    while (1) {
+        my @caller = caller $i++;
+        last unless @caller;
+        $return .= ":" if $return;
+        $return .= $caller[2];
+    }
+
+    return "; called from line(s) $return";
+}
+
 print "Starting...\n" if DEBUG;
 
 # This program outputs charclass_invlists.inc, which contains various inversion
