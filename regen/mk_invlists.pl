@@ -2720,6 +2720,7 @@ foreach my $prop (@props) {
 
     for my $charset (get_supported_code_pages()) {
         @a2n = @{get_a2n($charset)};
+        next unless $charset =~ /ascii/i;
 
         my @invlist;
         my @invmap;
@@ -3343,9 +3344,11 @@ my @sources = qw(regen/mk_invlists.pl
     }
 }
 
+undef @sources;
 read_only_bottom_close_and_rename($regexp_constants_fh, \@sources);
 
 read_only_bottom_close_and_rename($out_fh, \@sources);
+__END__
 
 my %name_to_index;
 for my $i (0 .. @enums - 1) {
