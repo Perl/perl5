@@ -8393,7 +8393,13 @@ typedef enum {
 	GCB_E_Base = 16,
 	GCB_E_Base_GAZ = 16,
 	GCB_E_Modifier = 16,
-	GCB_Glue_After_Zwj = 16
+	GCB_Glue_After_Zwj = 16,
+	GCB_InCB_Consonant = 16,
+	GCB_InCB_Consonant_XX = 16,
+	GCB_InCB_Extend = 16,
+	GCB_InCB_Extend_EX = 16,
+	GCB_InCB_Linker = 16,
+	GCB_InCB_Linker_EX = 16
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = {  /* for ASCII/Latin1 */
@@ -15995,9 +16001,21 @@ typedef enum {
 	LB_ZWSpace = 57,
 	LB_ZWJ = 58,
 	LB_EDGE = 59,
+	LB_AK = 60,
+	LB_Aksara = 60,
+	LB_Aksara_Prebase = 60,
+	LB_Aksara_Start = 60,
+	LB_AP = 60,
+	LB_Dotted_Circle = 60,
+	LB_Dotted_Circle_AL = 60,
 	LB_East_Asian_CP = 60,
 	LB_East_Asian_OP = 60,
-	LB_Unassigned_Extended_Pictographic_Ideographic = 60
+	LB_Pf_QU = 60,
+	LB_Pi_QU = 60,
+	LB_VF = 60,
+	LB_VI = 60,
+	LB_Virama = 60,
+	LB_Virama_Final = 60
 } LB_enum;
 
 static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
@@ -192944,6 +192962,12 @@ UNI_wb_values
 #define isGCB_Extend(x) (x == 4)
 #define isGCB_Extended_Pictographic(x) (x == 3)
 #define isGCB_Glue_After_Zwj(x) (0)
+#define isGCB_InCB_Consonant(x) (0)
+#define isGCB_InCB_Consonant_XX(x) (0)
+#define isGCB_InCB_Extend(x) (0)
+#define isGCB_InCB_Extend_EX(x) (0)
+#define isGCB_InCB_Linker(x) (0)
+#define isGCB_InCB_Linker_EX(x) (0)
 #define isGCB_L(x) (x == 5)
 #define isGCB_LF(x) (x == 6)
 #define isGCB_LV(x) (x == 7)
@@ -192966,11 +192990,12 @@ UNI_wb_values
  * the below table to denote the DFA to execute for the corresponding
  * cell.  '_v_' in the names shows where the candidate break position
  * is. */
-#define GCB_NOBREAK                                  0
-#define GCB_BREAKABLE                                1
-#define GCB_EB_or_EBG_then_Extend_v_EM               2
-#define GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict   3
-#define GCB_various_then_RI_v_RI                     4
+#define GCB_NOBREAK                                                           0
+#define GCB_BREAKABLE                                                         1
+#define GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant   2
+#define GCB_EB_or_EBG_then_Extend_v_EM                                        3
+#define GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict                            4
+#define GCB_various_then_RI_v_RI                                              5
 
 
 static const U8 GCB_table[17][17] = {
@@ -193022,15 +193047,21 @@ static const U8 GCB_dfa_table[] = {
 	/* [n] corresponds to the numbers in the above table's cells */
     0,	/* [0] placeholder */
     1,	/* [1] placeholder */
-    3,	/* [2] GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict (Rule GCB11) */
+    4,	/* [2] GCB_ExtPict_then_Extend_then_ZWJ_v_ExtPict (Rule GCB11) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule GCB99) */
-    4,	/* [5] GCB_various_then_RI_v_RI (Rules GCB12, GCB13) */
+    5,	/* [5] GCB_various_then_RI_v_RI (Rules GCB12, GCB13) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule GCB99) */
 };
 
+#define isLB_AK(x) (0)
+#define isLB_AKish(x) (0)
 #define isLB_AL(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 11 || isLB_scratch == 29)
+#define isLB_AP(x) (0)
+#define isLB_Aksara(x) (0)
+#define isLB_Aksara_Prebase(x) (0)
+#define isLB_Aksara_Start(x) (0)
 #define isLB_Alphabetic(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 11 || isLB_scratch == 29)
 #define isLB_B2(x) (x == 1)
 #define isLB_BA(x) (isLB_scratch = (x), isLB_scratch == 2 || isLB_scratch == 12)
@@ -193053,6 +193084,8 @@ static const U8 GCB_dfa_table[] = {
 #define isLB_Cn_ExtPict_ExtPict_ID(x) (x == 6)
 #define isLB_Combining_Mark(x) (isLB_scratch = (x), isLB_scratch == 8 || isLB_scratch == 17)
 #define isLB_Contingent_Break(x) (x == 5)
+#define isLB_Dotted_Circle(x) (0)
+#define isLB_Dotted_Circle_AL(x) (0)
 #define isLB_EA(x) (isLB_scratch = (x), isLB_scratch == 11 || isLB_scratch == 12 || isLB_scratch == 13 || isLB_scratch == 14 || isLB_scratch == 15 || isLB_scratch == 16 || isLB_scratch == 17 || isLB_scratch == 18 || isLB_scratch == 19 || isLB_scratch == 20 || isLB_scratch == 21 || isLB_scratch == 22 || isLB_scratch == 23 || isLB_scratch == 24 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 28 || isLB_scratch == 35 || isLB_scratch == 36 || isLB_scratch == 42)
 #define isLB_EAA(x) (x == 11)
 #define isLB_EAB(x) (x == 12)
@@ -193135,6 +193168,8 @@ static const U8 GCB_dfa_table[] = {
 #define isLB_Open_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 19 || isLB_scratch == 49)
 #define isLB_PO(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 50)
 #define isLB_PR(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 51)
+#define isLB_Pf_QU(x) (0)
+#define isLB_Pi_QU(x) (0)
 #define isLB_Postfix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 50)
 #define isLB_Prefix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 51)
 #define isLB_QU(x) (x == 52)
@@ -193144,7 +193179,10 @@ static const U8 GCB_dfa_table[] = {
 #define isLB_SP(x) (x == 54)
 #define isLB_SY(x) (x == 55)
 #define isLB_Space(x) (x == 54)
-#define isLB_Unassigned_Extended_Pictographic_Ideographic(x) (0)
+#define isLB_VF(x) (0)
+#define isLB_VI(x) (0)
+#define isLB_Virama(x) (0)
+#define isLB_Virama_Final(x) (0)
 #define isLB_WJ(x) (x == 56)
 #define isLB_Word_Joiner(x) (x == 56)
 #define isLB_ZW(x) (x == 57)
@@ -193163,13 +193201,17 @@ static const U8 GCB_dfa_table[] = {
 #define LB_CM_ZWJ_v_any                                3
 #define LB_OP_then_SP_v_any                            4
 #define LB_QU_then_SP_v_OP                             5
-#define LB_CL_or_CP_then_SP_v_NS                       6
-#define LB_B2_then_SP_v_B2                             7
-#define LB_HL_then_HY_or_BA_v_any                      8
-#define LB_PR_or_PO_v_OP_or_HY_then_NU                 9
-#define LB_NU_then_SY_or_IS_v_various                 10
-#define LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  11
-#define LB_various_then_RI_v_RI                       12
+#define LB_various_then_PiQ_then_SP_v_any              6
+#define LB_any_v_PfQ_then_various                      7
+#define LB_CL_or_CP_then_SP_v_NS                       8
+#define LB_B2_then_SP_v_B2                             9
+#define LB_HL_then_HY_or_BA_v_any                     10
+#define LB_PR_or_PO_v_OP_or_HY_then_NU                11
+#define LB_NU_then_SY_or_IS_v_various                 12
+#define LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  13
+#define LB_AKish_v_AKish_then_VF                      14
+#define LB_AKish_then_VI_v_AK_or_DOTTED               15
+#define LB_various_then_RI_v_RI                       16
 #define LB_NU_then_SY_or_IS_v_PO_or_PR                20
 
 
@@ -193288,7 +193330,7 @@ static const U8 LB_table[61][61] = {
 //       19 19 19 19  6 19  19 13  9 13  6  19  19  13  19 12a  19   9  19  15  19  19  13  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 13 19 19 19  6  6 19 19 15 19 19 19 19  7 13 11  7   9 3
 /* RI*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0,26, 0, 0, 0, 0,  0,1,0 },
 //             21     6 20     13  9 13  6      21  13     12a       9  22              13  21  13                    13      21 13 12          21    22 13           6  6 21             19 30  7 13 11  7   9 3
-/* SP*/ {29,34,29,29, 0,29, 29,23,29,23, 0, 29, 29, 23, 29, 29, 29, 29, 29, 48, 29, 29, 23, 41, 23,29, 29, 29,29, 29, 23, 29, 41,23,29,29,29,29,29,29,29,23,29,29,29, 0, 0,41,29,48,29,29,29,29, 0,23,23, 0, 29,1,0 },
+/* SP*/ {29,45,29,29, 0,29, 29,23,29,23, 0, 29, 29, 23, 29, 29, 29, 29, 29, 36, 29, 29, 23, 54, 23,29, 29, 29,29, 29, 23, 29, 54,23,29,29,29,29,29,29,29,23,29,29,29, 0, 0,54,29,36,29,29,29,29, 0,23,23, 0, 29,1,0 },
 //        8  8  8  8  6  8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8  8  8  8  8  7  8  8  7   8 3
 /* SY*/ { 1, 1, 0, 1, 0, 1,  1, 0, 0, 0, 0,  1,  0,  0,  1,  0,  1,  0,  0,  1, 14, 14,  0,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,17, 1,14,14, 0, 1, 0, 0, 0, 0,  0,1,0 },
 //             21     6 20     13  9 13  6      21  13     12a       9  22      25  25  13  21  13                    13      21 13 12       21 21    22 13           6  6 21 25    25 25 19     7 13 11  7   9 3
@@ -193314,51 +193356,59 @@ static const U8 LB_dfa_table[] = {
     3,	/* [5] LB_CM_ZWJ_v_any (Rule LB9) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rules LB20,31) */
-    8,	/* [8] LB_HL_then_HY_or_BA_v_any (Rule LB21) */
+    10,	/* [8] LB_HL_then_HY_or_BA_v_any (Rule LB21) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    11,	/* [11] LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR (Rule LB25) */
+    13,	/* [11] LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
     20,	/* [14] LB_NU_then_SY_or_IS_v_PO_or_PR (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    10,	/* [17] LB_NU_then_SY_or_IS_v_various (Rule LB25) */
+    12,	/* [17] LB_NU_then_SY_or_IS_v_various (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    9,	/* [20] LB_PR_or_PO_v_OP_or_HY_then_NU (Rule LB25) */
+    11,	/* [20] LB_PR_or_PO_v_OP_or_HY_then_NU (Rule LB25) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
     2,	/* [23] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     0,	/*	else return 0  (Rules LB11,13) */
-    12,	/* [26] LB_various_then_RI_v_RI (Rule LB30a) */
+    16,	/* [26] LB_various_then_RI_v_RI (Rule LB30a) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
     2,	/* [29] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
-    1,	/*	else return 1  (Rule LB18) */
-    2,	/* [34] LB_ZW_then_SP_v_any (Rule LB8) */
-    1,	/*	if matches, return 1 */
-    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
-    0,	/*	if matches, return 0 */
-    7,	/* 	else try LB_B2_then_SP_v_B2 (Rule LB17) */
+    6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB18) */
-    2,	/* [41] LB_ZW_then_SP_v_any (Rule LB8) */
-    1,	/*	if matches, return 1 */
-    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
-    0,	/*	if matches, return 0 */
-    6,	/* 	else try LB_CL_or_CP_then_SP_v_NS (Rule LB16) */
-    0,	/*	if matches, return 0 */
-    1,	/*	else return 1  (Rule LB18) */
-    2,	/* [48] LB_ZW_then_SP_v_any (Rule LB8) */
+    2,	/* [36] LB_ZW_then_SP_v_any (Rule LB8) */
     1,	/*	if matches, return 1 */
     4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
     0,	/*	if matches, return 0 */
     5,	/* 	else try LB_QU_then_SP_v_OP (Rule LB15) */
+    0,	/*	if matches, return 0 */
+    6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
+    0,	/*	if matches, return 0 */
+    1,	/*	else return 1  (Rule LB18) */
+    2,	/* [45] LB_ZW_then_SP_v_any (Rule LB8) */
+    1,	/*	if matches, return 1 */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    0,	/*	if matches, return 0 */
+    6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
+    0,	/*	if matches, return 0 */
+    9,	/* 	else try LB_B2_then_SP_v_B2 (Rule LB17) */
+    0,	/*	if matches, return 0 */
+    1,	/*	else return 1  (Rule LB18) */
+    2,	/* [54] LB_ZW_then_SP_v_any (Rule LB8) */
+    1,	/*	if matches, return 1 */
+    4,	/* 	else try LB_OP_then_SP_v_any (Rule LB14) */
+    0,	/*	if matches, return 0 */
+    6,	/* 	else try LB_various_then_PiQ_then_SP_v_any (Rule LB15a) */
+    0,	/*	if matches, return 0 */
+    8,	/* 	else try LB_CL_or_CP_then_SP_v_NS (Rule LB16) */
     0,	/*	if matches, return 0 */
     1	/*	else return 1  (Rule LB18) */
 };
