@@ -3526,7 +3526,7 @@ Adp	|int	|sv_unmagic	|NN SV * const sv			\
 Adp	|int	|sv_unmagicext	|NN SV * const sv			\
 				|const int type 			\
 				|NULLOK const MGVTBL *vtbl
-Admp	|void	|sv_unref	|NN SV *sv
+AMbdp	|void	|sv_unref	|NN SV *sv
 Adp	|void	|sv_unref_flags |NN SV * const ref			\
 				|const U32 flags
 Cdp	|void	|sv_untaint	|NN SV * const sv
@@ -4789,7 +4789,7 @@ ST	|int	|adjust_size_and_find_bucket				\
 #endif
 #if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
-mp	|OP *	|ref		|NULLOK OP *o				\
+Mbp	|OP *	|ref		|NULLOK OP *o				\
 				|I32 type
 #endif
 #if defined(PERL_IN_MG_C)
