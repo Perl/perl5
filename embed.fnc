@@ -1703,7 +1703,7 @@ CRp	|bool	|_is_uni_perl_idstart					\
 				|UV c
 ARTdip	|Size_t |isUTF8_CHAR	|NN const U8 * const s0 		\
 				|NN const U8 * const e
-ATdmp	|STRLEN |is_utf8_char_buf					\
+AMTbdp	|STRLEN |is_utf8_char_buf					\
 				|NN const U8 *buf			\
 				|NN const U8 *buf_end
 ARTdip	|Size_t |isUTF8_CHAR_flags					\

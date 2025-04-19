@@ -1334,7 +1334,7 @@ point's representation.
 /* Should be removed; maybe deprecated, but not used in CPAN */
 #define SHARP_S_SKIP 2
 
-#define Perl_is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
+#define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 
 typedef enum {
     PL_utf8_to_bytes_overwrite = 0,
