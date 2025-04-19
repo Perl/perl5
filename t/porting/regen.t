@@ -13,8 +13,6 @@ require './regen/regen_lib.pl';
 require './t/test.pl';
 $::NO_ENDING = $::NO_ENDING = 1;
 
-skip_all("Temporarily in this branch dealing with mk_invlists");
-
 if ( $^O eq "VMS" ) {
   skip_all( "- regen.pl needs porting." );
 }
