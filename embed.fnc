@@ -2105,7 +2105,7 @@ Adpr	|void	|my_exit	|U32 status
 Adpr	|void	|my_failure_exit
 Cdp	|I32	|my_fflush_all
 CTdp	|Pid_t	|my_fork
-mp	|I32	|my_lstat
+m	|I32	|my_lstat
 Xp	|I32	|my_lstat_flags |NULLOK const U32 flags
 RTop	|int	|my_mkostemp_cloexec					\
 				|NN char *templte			\
@@ -2126,7 +2126,7 @@ CTdp	|int	|my_socketpair	|int family				\
 				|int type				\
 				|int protocol				\
 				|int fd[2]
-mp	|I32	|my_stat
+m	|I32	|my_stat
 Xp	|I32	|my_stat_flags	|NULLOK const U32 flags
 p	|const char *|my_strerror					\
 				|const int errnum			\
