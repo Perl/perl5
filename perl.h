@@ -8403,10 +8403,9 @@ so no C<x++>.
 #  define do_exec(cmd)			do_exec3(cmd,0,0)
 #endif
 #ifdef OS2
-#  define Perl_do_aexec			Perl_do_aexec
+#  define do_aexec			Perl_do_aexec
 #else
-#  define Perl_do_aexec(mTHX_, really, mark,sp)                         \
-          Perl_do_aexec5(aTHX_ really, mark, sp, 0, 0)
+#  define do_aexec(really, mark,sp)	do_aexec5(really, mark, sp, 0, 0)
 #endif
 
 
