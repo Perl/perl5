@@ -406,6 +406,11 @@ for [GH #16608].
 Prevent a signature parameter of the form C<$ => from leaking an OP at
 compile-time.  [GH #23187]
 
+=item *
+
+Some strings returned by C<setlocale> on Solaris were not properly
+parsed. [GH #23195]
+
 =back
 
 =head1 Known Problems
