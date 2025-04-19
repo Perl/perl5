@@ -29,7 +29,12 @@
 #ifdef poll
 # undef poll
 #endif
-#define poll Perl_my_poll
+
+#if defined(PERL_IMPLICIT_SYS)
+#  define poll(_fds, _nfds, _tm) Perl_my_poll_cxt(aTHX_ _fds, _nfds, _tm)
+#else
+#  define poll Perl_my_poll
+#endif
 
 #if WINVER < 0x0600
 typedef struct pollfd {
@@ -55,7 +60,11 @@ typedef struct pollfd {
 
 #endif
 
-int poll (struct pollfd *, unsigned long, int);
+#if defined(PERL_IMPLICIT_SYS)
+  int Perl_my_poll_cxt(pTHX_ struct pollfd *, unsigned long, int);
+#else
+  int Perl_my_poll(struct pollfd *, unsigned long, int);
+#endif
 
 #ifndef HAS_POLL
 #  define HAS_POLL
