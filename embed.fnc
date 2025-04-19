@@ -1016,7 +1016,7 @@ Adpr	|OP *	|die_sv 	|NN SV *baseex
 : Used in util.c
 pr	|void	|die_unwind	|NN SV *msv
 : FIXME
-mp	|bool	|do_aexec	|NULLOK SV *really			\
+Mbp	|bool	|do_aexec	|NULLOK SV *really			\
 				|NN SV **mark				\
 				|NN SV **sp
 : Used in pp_sys.c
