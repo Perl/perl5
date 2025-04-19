@@ -236,8 +236,7 @@ to fit one element without extending:
 
 */
 
-#define Perl_newAV(mTHX)  MUTABLE_AV(Perl_newSV_type(aTHX_ SVt_PVAV))
-
+#define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
 #define newAV_mortal()	MUTABLE_AV(newSV_type_mortal(SVt_PVAV))
 #define newAV_alloc_x(size)  av_new_alloc(size,0)
 #define newAV_alloc_xz(size) av_new_alloc(size,1)
