@@ -47,16 +47,19 @@ sub new {
      if defined $ENV{LDFLAGS};
 
   unless ( exists $self->{config}{cxx} ) {
+    print STDERR "XXX: inside unless loop line 49\n";
 
     my ($ccbase, $ccpath, $ccsfx ) = fileparse($self->{config}{cc}, qr/\.[^.]*/);
 
     ## If the path is just "cc", fileparse returns $ccpath as "./"
     $ccpath = "" if $self->{config}{cc} =~ /^\Q$ccbase$ccsfx\E$/;
+    print STDERR "PPP: ccpath <$ccpath>\n";
 
     foreach my $cxx (@{$cc2cxx{$ccbase}}) {
 
       if ( $ccpath ) {
           my $cxx1 = File::Spec->catfile( $ccpath, $cxx . $ccsfx);
+          print STDERR "AAA: cxx1 $cxx1\n";
 
           if( can_run( $cxx1 ) ) {
               $self->{config}{cxx} = $cxx1;
@@ -66,6 +69,7 @@ sub new {
       }
       else {
           my $cxx2 = $cxx . $ccsfx;
+          print STDERR "BBB: cxx2 $cxx2\n";
 
           if( can_run( $cxx2 ) ) {
               $self->{config}{cxx} = $cxx2;
@@ -73,6 +77,7 @@ sub new {
           }
 
           if( can_run( $cxx ) ) {
+          print STDERR "CCC: cxx $cxx\n";
               $self->{config}{cxx} = $cxx;
               last;
           }
@@ -80,6 +85,7 @@ sub new {
       }
     }
     unless ( exists $self->{config}{cxx} ) {
+          print STDERR "YYY: inside unless loop at line 86\n";
       $self->{config}{cxx} = $self->{config}{cc};
       my $cflags = $self->{config}{ccflags};
       $self->{config}{cxxflags} = '-x c++';
