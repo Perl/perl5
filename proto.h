@@ -1362,15 +1362,6 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
 #define PERL_ARGS_ASSERT_GROK_OCT               \
         assert(start); assert(len_p); assert(flags)
 
-/* PERL_CALLCONV GV *
-Perl_gv_AVadd(pTHX_ GV *gv); */
-
-/* PERL_CALLCONV GV *
-Perl_gv_HVadd(pTHX_ GV *gv); */
-
-/* PERL_CALLCONV GV *
-Perl_gv_IOadd(pTHX_ GV *gv); */
-
 PERL_CALLCONV GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type);
 #define PERL_ARGS_ASSERT_GV_ADD_BY_TYPE
@@ -1407,9 +1398,6 @@ Perl_gv_const_sv(pTHX_ GV *gv)
 PERL_CALLCONV void
 Perl_gv_dump(pTHX_ GV *gv);
 #define PERL_ARGS_ASSERT_GV_DUMP
-
-/* PERL_CALLCONV void
-Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix); */
 
 PERL_CALLCONV void
 Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain);
@@ -1462,9 +1450,6 @@ Perl_gv_fetchmeth_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 #define PERL_ARGS_ASSERT_GV_FETCHMETH_SV_AUTOLOAD \
         assert(namesv)
 
-/* PERL_CALLCONV GV *
-Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name); */
-
 PERL_CALLCONV GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload);
 #define PERL_ARGS_ASSERT_GV_FETCHMETHOD_AUTOLOAD \
@@ -1499,9 +1484,6 @@ PERL_CALLCONV GV *
 Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type);
 #define PERL_ARGS_ASSERT_GV_FETCHSV             \
         assert(name)
-
-/* PERL_CALLCONV void
-Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix); */
 
 PERL_CALLCONV void
 Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain);
@@ -5893,6 +5875,33 @@ PERL_CALLCONV bool
 Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp);
 # define PERL_ARGS_ASSERT_DO_OPEN               \
         assert(gv); assert(name)
+
+PERL_CALLCONV GV *
+Perl_gv_AVadd(pTHX_ GV *gv);
+# define PERL_ARGS_ASSERT_GV_AVADD
+
+PERL_CALLCONV GV *
+Perl_gv_HVadd(pTHX_ GV *gv);
+# define PERL_ARGS_ASSERT_GV_HVADD
+
+PERL_CALLCONV GV *
+Perl_gv_IOadd(pTHX_ GV *gv);
+# define PERL_ARGS_ASSERT_GV_IOADD
+
+PERL_CALLCONV void
+Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
+# define PERL_ARGS_ASSERT_GV_EFULLNAME3         \
+        assert(sv); assert(gv)
+
+PERL_CALLCONV GV *
+Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name);
+# define PERL_ARGS_ASSERT_GV_FETCHMETHOD        \
+        assert(stash); assert(name)
+
+PERL_CALLCONV void
+Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
+# define PERL_ARGS_ASSERT_GV_FULLNAME3          \
+        assert(sv); assert(gv)
 
 PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
