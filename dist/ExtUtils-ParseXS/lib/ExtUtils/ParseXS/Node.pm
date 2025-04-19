@@ -1093,6 +1093,16 @@ BEGIN { $build_subclass->('Param', # parent
         'in_output',   # the parameter has appeared in an OUTPUT statement
         'do_setmagic', # 'SETMAGIC: ENABLE' was active for this parameter
         'output_code', # the optional setting-code for this parameter
+
+        # ArrayRefs: results of looking up typemaps (which are done in the
+        # parse phase, as the typemap definitions can in theory change
+        # further down in the XS file). For now these just store
+        # uninterpreted, the list returned by the call to
+        # lookup_input_typemap() etc, for later use by the as_input_code()
+        # etc methods.
+        'input_typemap_vals',          # result of lookup_input_typemap()
+        'output_typemap_vals',         # result of lookup_output_typemap(...)
+        'output_typemap_vals_outlist', # result of lookup_output_typemap(..., n)
 )};
 
 
@@ -1561,10 +1571,15 @@ sub as_input_code {
               "\t$var";
     }
 
-    my ($init_template, $eval_vars, $is_template) =
-            $self->lookup_input_typemap($pxs, $xsub, $xbody);
+    # Result of parse-phase lookup of INPUT typemap for this param's type.
+    my $lookup = $self->{input_typemap_vals};
+    $pxs->death("Internal error: parameter '$var' doesn't have input_typemap_vals")
+        unless $lookup;
+
+    my ($init_template, $eval_vars, $is_template) = @$lookup;
 
     return unless defined $init_template; # an error occurred
+
     unless ($is_template) {
         # template already expanded
         print " = $init_template\n";
@@ -1755,9 +1770,14 @@ sub as_output_code {
     # OUTPUT line should not be used.
     undef $output_code if defined $out_num;
 
+    # Result of parse-phase lookup of OUTPUT typemap for this param's type.
+    my $lookup = defined $out_num
+                            ? $self->{output_typemap_vals_outlist}
+                            : $self->{output_typemap_vals};
+    $pxs->death("Internal error: parameter '$var' doesn't have output_typemap_vals")
+        unless $lookup;
 
-    my ($expr, $eval_vars, $is_template, $saw_DAE) = 
-        $self->lookup_output_typemap($pxs, $xsub, $xbody, $out_num);
+    my ($expr, $eval_vars, $is_template, $saw_DAE) = @$lookup;
 
     return unless defined $expr; # error
 
@@ -2570,6 +2590,17 @@ sub parse {
             . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
         );
 
+
+    # For each param, look up its INPUT typemap information now (at parse
+    # time) and save the results for use later in as_input_code().
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        # might be placeholder param which doesn't get emitted
+        next unless defined $ioparam->{type};
+        $ioparam->{input_typemap_vals} =
+            [ $ioparam->lookup_input_typemap($pxs, $xsub, $xbody) ];
+    }
+
     # Now that the type of each param is finalised, calculate its
     # overridden prototype character, if any.
     #
@@ -2810,6 +2841,50 @@ sub parse {
                   && !$xsub->{decl}{return_type}{no_output})
             )
             ? 1 : 0;
+
+    # For each param, look up its OUTPUT typemap information now (at parse
+    # time) and save the results for use later in as_output_code_().
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        # might be placeholder param which doesn't get emitted
+        # XXXX next unless defined $ioparam->{type};
+
+        next unless
+            # XXX simplify all this
+                (      defined $ioparam->{in_out}
+                    && $ioparam->{in_out} =~ /OUT$/
+                    && !$ioparam->{in_output}
+                )
+            ||
+
+                (
+                    $ioparam->{var} eq "RETVAL"
+                 && (   $ioparam->{in_output}
+                     or (     $xbody->{seen_autocall}
+                          &&  $xsub->{decl}{return_type}{type} ne "void"
+                          && !$xsub->{decl}{return_type}{no_output}
+                        )
+                    )
+                )
+            ||
+                (
+                        $ioparam->{in_output}
+                     && $ioparam->{var} ne 'RETVAL'
+                 )
+        ;
+
+        $ioparam->{output_typemap_vals} =
+            [ $ioparam->lookup_output_typemap($pxs, $xsub, $xbody) ];
+    }
+
+    my $out_num = $xsub->{XSRETURN_count_basic};
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        next unless   defined $ioparam->{in_out}
+                   && $ioparam->{in_out} =~ /OUTLIST$/;
+        $ioparam->{output_typemap_vals_outlist} =
+            [ $ioparam->lookup_output_typemap($pxs, $xsub, $xbody, $out_num++) ];
+    }
 
     1;
 }
