@@ -3562,7 +3562,6 @@ foreach my $prop (@props) {
 
     for my $charset (get_supported_code_pages()) {
         @a2n = @{get_a2n($charset)};
-        next unless $charset =~ /ascii/i;
 
         my @invlist;
         my @invmap;
