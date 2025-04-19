@@ -224,7 +224,9 @@ Perl_rpp_free_2_(pTHX_ SV *const sv1,  SV *const sv2,
 
 PP(pp_const)
 {
-    rpp_xpush_1(cSVOP_sv);
+    rpp_extend(1);      /* Keep together all PL_op derefs (cSVOP_sv/NORMAL) */
+    SV* sv = cSVOP_sv;  /* in this hot pp op. stack_grow() is a function. */
+    rpp_push_1(sv);     /* Previously rpp_xpush_1(). */
     return NORMAL;
 }
 
