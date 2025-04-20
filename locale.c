@@ -9451,11 +9451,32 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #undef GET_DESCRIPTION
 #ifdef USE_LOCALE_COLLATE
 
-STATIC void
+STATIC bool
 S_compute_collxfrm_coefficients(pTHX)
 {
-
-    /* A locale collation definition includes primary, secondary, tertiary,
+    /* This is called from mem_collxfrm() the first time the latter is called
+     * on the current locale to do initialization for it.
+     *
+     * This returns true and initializes the coefficients for a linear equation
+     * that, given a string of some length, predicts how much memory it will
+     * take to hold the result of calling mem_collxfrm() on that string.  The
+     * equation is of the form:
+     *      m * length + b
+     * where m = PL_collxfrm_mult and b = PL_collxfrm_base
+     *
+     * It returns false if the locale does not appear to be sane.
+     *
+     * The prediction is just an educated guess to save time and,
+     * mem_collxrfm() may adjust it based on experience with strings it
+     * encounters.
+     *
+     * This function also:
+     *      sets 'PL_in_utf8_COLLATE_locale' to indicate if the locale is a
+     *          UTF-8 one
+     *      initializes 'PL_strxfrm_NUL_replacement' to NUL
+     *      initializes 'PL_strxfrm_max_cp' = 0;
+     *
+     * A locale collation definition includes primary, secondary, tertiary,
      * etc. weights for each character.  To sort, the primary weights are used,
      * and only if they compare equal, then the secondary weights are used, and
      * only if they compare equal, then the tertiary, etc.
@@ -9564,8 +9585,9 @@ S_compute_collxfrm_coefficients(pTHX)
                 "Disabling locale collation for LC_COLLATE='%s';"
                 " length for shorter sample=%zu; longer=%zu\n",
                 PL_collation_name, x_len_shorter, x_len_longer));
+        return false;
     }
-    else {
+
         SSize_t base;       /* Temporary */
 
         /* We have both: m * strlen(longer)  + b = x_len_longer
@@ -9597,7 +9619,6 @@ S_compute_collxfrm_coefficients(pTHX)
 
         /* Add 1 for the trailing NUL */
         PL_collxfrm_base = base + 1;
-    }
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "?UTF-8 locale=%d; x_len_shorter=%zu, "
@@ -9606,6 +9627,7 @@ S_compute_collxfrm_coefficients(pTHX)
                           PL_in_utf8_COLLATE_locale,
                           x_len_shorter, x_len_longer,
                           PL_collxfrm_mult, PL_collxfrm_base));
+    return true;
 }
 
 char *
@@ -9668,7 +9690,9 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
         /* (mult, base) == (0,0) means we need to calculate mult and base
          * before proceeding */
-        S_compute_collxfrm_coefficients(aTHX);
+        if (! S_compute_collxfrm_coefficients(aTHX)) {
+            return NULL;    /* locale collation not sane */
+        }
     }
 
     /* Replace any embedded NULs with the control that sorts before any others.
