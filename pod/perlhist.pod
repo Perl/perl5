@@ -798,6 +798,7 @@ the strings?).
  Steve     5.41.8       2025-Jan-20
  Richard L 5.41.9       2025-Feb-24
  Lukas     5.41.10      2025-Mar-21
+ Ether     5.41.11      2025-Apr-20
 
 =head2 SELECTED RELEASE SIZES
 
