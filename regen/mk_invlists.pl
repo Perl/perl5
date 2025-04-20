@@ -1311,53 +1311,50 @@ sub _Perl_CCC_non0_non230 {
 # BREAK_PROPERTIES
 
 # All but the Sentence Break properties are implemented by two-dimensional
-# tables.  (That one does not lend itself to tabular lookup, and is rarely
-# changed, so it is all done in code in regexec.c.)  Unicode publishes
-# properties which assign a break class to every Unicode code point, even ones
-# that haven't been assigned to be characters.  (Perl uses that class for all
-# non-Unicode code points.)  Unicode also publishes rules for breaking based
-# on those break classes.  Here we create tables for each break property that
-# for a string xy, which have break classes x' and y', we tell whether a break
-# is allowed between x and y or not.  The rows of this table are the various
-# x'; the columns, the y'.  Often the table entry will be just 0 or 1.  But
-# increasingly in newer Unicode versions, more context is needed to make this
-# determination, and the table entry will be an enum (packed with other
-# information) that corresponds to a hand-crafted DFA in regexec.c that gets
-# executed.
+# tables, with additional small DFAs for when the tables are insufficient.
+# (SB does not lend itself to tabular lookup, and is rarely changed, so it is
+# all done in code in regexec.c.)  Unicode publishes properties which assign a
+# break class to every Unicode code point, even ones that haven't been
+# assigned to be characters.  (Perl uses that class for all non-Unicode code
+# points.)  Unicode also publishes rules for breaking based on those break
+# classes.  Here we create tables for each break property that for a string
+# xy, which have break classes x' and y', we tell whether a break is allowed
+# between x and y or not.  The rows of this table are the various x'; the
+# columns, the y'.  Often the table entry will be just the booleans 0 or 1.
+# But increasingly in newer Unicode versions, more context is needed to make
+# this determination.  Looking around at the context requires a DFA.  Each of
+# these is hand-coded in regexec.c, and is identified by a number which is
+# a case: in a switch() statement there.  This program creates #defines for
+# those DFA numbers.  XXX an enhancement would be to make these enums.  The
+# (x,y) cell contents when a DFA is needed are described below.
 #
-# Unicode used to publish a table itself for the Line Break property, but
-# abandoned it as it got more complicated.  However, on their website in the
-# UCD data files, in the subdirectory 'auxiliary', there are files like
-# 'LineBreakTest.html' that do show annotated pairwise tables.  Unicode no
-# longer feels constrained to make their rules easy to implement this way.
-# Perl wants to keep using the table, as it makes it easier to find the break
-# status in the middle of the string instead of having to start each time at
-# the beginning, and a goodly number of the possibilities are 0 or 1 anyway,
-# without needing the DFA.  But this makes it a pain to update to a new
-# Unicode release when they add rules.  An example is in Unicode 15.1, where
-# new GCB rules make use of a new property, Indic_Conjunct_Break that is
-# unrelated to GCB.  In order for Perl to continue using the table, we have to
-# make new equivalence classes in GCB for the Indic property values.  This
-# would mean we need all combinations of the intersections
-#       GCB1_Indic1, GCB1_Indic2, ...  GCBn_Indic1, # GCB2_Indic1, ...
-# Fortunately all but 4 of these intersections are empty in 15.1.  But a
-# future release might change that, and this would have to be manually
-# compensated for.  The rules that involve GCB1 now have to change to also
-# include GCB1_Indic1, GCB1_Indic2, ...
+# The Unicode rules are listed in UAX #14 and UAX #29 in priority order for
+# each type of break.  When context is needed, more than one DFA may apply to
+# a given cell.  For example, in the Line Break property, when x is a space,
+# and y is almost anything else, we have to look behind to see what came
+# before the space. (Usualy we have to back up to the first non-space when
+# there are multiple spaces in a row.)  If that non-space is a quote we likely
+# will have a different rule than if it is a right parenthesis.  For all cells
+# in this type of situation, this program creates a chain of DFAs to apply in
+# priority order.  The first one that matches the situation is used; if none
+# do, there is a fallback 0 or 1 that ends the chain.
 #
-# The code in this file populate the tables based on data output from
-# mktables.  The Unicode rules are listed in UAX #14 and UAX #29 in priority
-# order for each type of line break.  Suppose you want to determine if there
-# is a break between x and y.  You start at rule #1, and see if it applies.
-# If not, you proceed to rule #2, and so on, stopping at the first match.
+# This program creates a linear array of all the chains strung together.  What
+# gets stored in the (x,y) cell of the main table is the index into this array
+# where the first DFA number for its chain is stored.
 #
-# This works well when the cells unconditionally return break/no-break (1 or
-# 0).  But consider the case that we apply rule #a which requires a DFA.  If
-# that fails to match we're supposed to try rule #a+1, #a+2, ..., stopping at
-# the first match.  The table is constructed so that the final rule matches
-# everything, so the process is guaranteed to halt.  And it likely will halt
-# earlier at the first unconditional match.  Now this generates a chain of
-# DFAs for regexec.c to follow, stopping at the first successful match.
+# Unicode no longer feels constrained to make their rules easy to implement
+# in a pair-wise table.  An example is in Unicode 15.1, where new GCB rules
+# make use of a new property, Indic_Conjunct_Break that is unrelated to GCB.
+# In order for Perl to continue using the table, we have to make new
+# equivalence classes in GCB for the Indic property values.  Thus we would
+# need to split the code points in class GCBx into the ones that are in
+# GCBx-nonIndic, the ones that are in GCBx-Indic1, the ones that are in
+# GCBx-Indic2, ....  And class GCBx would be subdivided into the appropriate
+# subclasses.  (It turns out that many of these don't contain any code points,
+# so aren't actually needed)  It is now possible to tell mktables what a split
+# should be, and it takes care of the rest, passing to this program the
+# results, in a data structure.
 
 # These functions access the cells of a break table, converting any mnemonics
 # to numeric.  They need $enums to be able to do this.
@@ -2435,23 +2432,6 @@ sub output_LB_table() {
                         AKish => [ qw(Aksara  Dotted_Circle  Aksara_Start) ],
                       }
     );
-
-    # The result is really just true or false.  But we follow along with tr14,
-    # creating a rule which is false for something like X SP* X.  That gets
-    # encoding 2.  The rest of the dfas are synthetic ones that indicate
-    # some context handling is required.  These each are added to the
-    # underlying 0, 1, or 2, instead of replacing them, so that the underlying
-    # value can be retrieved.  Actually only rules from 7 through 18 (which
-    # are the ones where space matter) are possible to have 2 added to them.
-    # The others below add just 0 or 1.  It might be possible for one
-    # synthetic rule to be added to another, yielding a larger value.  This
-    # doesn't happen in the Unicode 8.0 rule set, and as you can see from the
-    # names of the middle grouping below, it is impossible for that to occur
-    # for them because they all start with mutually exclusive classes.  That
-    # the final rule can't be added to any of the others isn't obvious from
-    # its name, so it is assigned a power of 2 higher than the others can get
-    # to so any addition would preserve all data.  (And the code will reach an
-    # assert(0) on debugging builds should this happen.)
 
     my $lb_enum = 2;
     my %lb_dfas = (
