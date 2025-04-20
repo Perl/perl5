@@ -35,11 +35,20 @@ introduced in 15.1 L<https://www.unicode.org/versions/Unicode15.1.0/>.
 
 =head1 Security
 
-XXX Any security-related notices go here. In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 [CVE-2024-56406] Heap buffer overflow vulnerability with tr//
 
-[ List each security issue as a =head2 entry ]
+A heap buffer overflow vulnerability was discovered in Perl.
+
+When there are non-ASCII bytes in the left-hand-side of the C<tr> operator,
+C<S_do_trans_invmap()> can overflow the destination pointer C<d>.
+
+  $ perl -e '$_ = "\x{FF}" x 1000000; tr/\xFF/\x{100}/;'
+  Segmentation fault (core dumped)
+
+It is believed that this vulnerability can enable Denial of Service or
+Arbitrary Code Execution attacks on platforms that lack sufficient defenses.
+
+Discovered by: Nathan Mills.
 
 =head1 Incompatible Changes
 
@@ -180,13 +189,13 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlguts>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Additional caveats have been added to the description of C<TARG>.
 
 =back
 
@@ -374,7 +383,7 @@ manager will later use a regex to expand these into links.
 =item *
 
 In some cases an C<eval> would not add integer parts to the source
-lines saved by the debugger.  [GH #23151]
+lines saved by the debugger. [GH #23151]
 
 =item *
 
@@ -392,7 +401,7 @@ freeing the RExC state. [GH #23022]
 =item *
 
 Smartmatch against a code reference that uses a loop exit such as
-C<last> would crash perl.  [GH #16608]
+C<last> would crash perl. [GH #16608]
 
 =item *
 
@@ -403,7 +412,7 @@ for [GH #16608].
 =item *
 
 Prevent a signature parameter of the form C<$ => from leaking an OP at
-compile-time.  [GH #23187]
+compile-time. [GH #23187]
 
 =back
 
