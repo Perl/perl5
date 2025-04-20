@@ -1286,6 +1286,13 @@ foreach my $hash (\%Unicode::UCD::loose_to_file_of, \%Unicode::UCD::stricter_to_
             is_deeply(\@l_, \@LC, "prop_value_aliases('$mod_prop', '$mod_value) returns the same list as prop_value_aliases('gc', 'lc')");
         }
         else {
+            use Scalar::Util qw(looks_like_number);
+
+            # This test is not valid if the value is a number which gets
+            # converted to scientific notation on this machine (this would be
+            # because it doesn't fit in the word size).
+            next if looks_like_number($value) && (0 + $value) =~ /e\+/;
+
             ok((grep { &Unicode::UCD::loose_name(lc $_) eq &Unicode::UCD::loose_name(lc $value) }
                 prop_value_aliases($mod_prop, $mod_value)),
                 "'$value' is listed as an alias for prop_value_aliases('$mod_prop', '$mod_value')");
