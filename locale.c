@@ -9538,13 +9538,13 @@ S_compute_collxfrm_coefficients(pTHX)
     PL_strxfrm_NUL_replacement = '\0';
     PL_strxfrm_max_cp = 0;
 
-    /* mem_collxfrm_() is used get the transformation (though here we are
-     * interested only in its length).  It is used because it has the
-     * intelligence to handle all cases, but to work, it needs some values of
-     * 'm' and 'b' to get it started.  For the purposes of this calculation we
-     * use a very conservative estimate of 'm' and 'b'.  This assumes a weight
-     * can be multiple bytes, enough to hold any UV on the platform, and there
-     * are 5 levels, 4 weight bytes, and a trailing NUL.  */
+    /* mem_collxfrm_() is used recursively to get the transformation (though
+     * here we are interested only in its length).  It is used because it has
+     * the intelligence to handle all cases, but to work, it needs some values
+     * of 'm' and 'b' to get it started.  For the purposes of this calculation
+     * we use a very conservative estimate of 'm' and 'b'.  This assumes a
+     * weight can be multiple bytes, enough to hold any UV on the platform, and
+     * there are 5 levels, 4 weight bytes, and a trailing NUL.  */
     PL_collxfrm_base = 5;
     PL_collxfrm_mult = 5 * sizeof(UV);
 
@@ -9588,37 +9588,36 @@ S_compute_collxfrm_coefficients(pTHX)
         return false;
     }
 
-        SSize_t base;       /* Temporary */
+    SSize_t base;       /* Temporary */
 
-        /* We have both: m * strlen(longer)  + b = x_len_longer
-         *               m * strlen(shorter) + b = x_len_shorter;
-         * subtracting yields:
-         *          m * (strlen(longer) - strlen(shorter))
-         *                             = x_len_longer - x_len_shorter
-         * But we have set things up so that 'shorter' is 1 byte smaller than
-         * 'longer'.  Hence:
-         *          m = x_len_longer - x_len_shorter
-         *
-         * But if something went wrong, make sure the multiplier is at least 1.
-         */
-        if (x_len_longer > x_len_shorter) {
-            PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
-        }
-        else {
-            PL_collxfrm_mult = 1;
-        }
+    /* We have both: m * strlen(longer)  + b = x_len_longer
+     *               m * strlen(shorter) + b = x_len_shorter;
+     * subtracting yields:
+     *          m * (strlen(longer) - strlen(shorter))
+     *                              = x_len_longer - x_len_shorter
+     * But we have set things up so that 'shorter' is 1 byte smaller than
+     * 'longer'.  Hence:
+     *          m = x_len_longer - x_len_shorter
+     *
+     * But if something went wrong, make sure the multiplier is at least 1.
+     */
+    if (x_len_longer > x_len_shorter) {
+        PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
+    }
+    else {
+        PL_collxfrm_mult = 1;
+    }
 
-        /*     mx + b = len
-         * so:      b = len - mx
-         * but in case something has gone wrong, make sure it is non-negative
-         * */
-        base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
-        if (base < 0) {
-            base = 0;
-        }
+    /*     mx + b = len
+     * so:      b = len - mx
+     * but in case something has gone wrong, make sure it is non-negative */
+    base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
+    if (base < 0) {
+        base = 0;
+    }
 
-        /* Add 1 for the trailing NUL */
-        PL_collxfrm_base = base + 1;
+    /* Add 1 for the trailing NUL */
+    PL_collxfrm_base = base + 1;
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "?UTF-8 locale=%d; x_len_shorter=%zu, "
@@ -9765,7 +9764,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                     /* Create a 1-char string of the current code point */
                     cur_source[0] = (char) j;
 
-                    /* Then transform it */
+                    /* Then transform it using a recursive call */
                     x = mem_collxfrm_(cur_source, trial_len, &x_len,
                                       0 /* The string is not in UTF-8 */);
 
@@ -9925,7 +9924,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                     /* Create a 1-char string of the current code point */
                     cur_source[0] = (char) j;
 
-                    /* Then transform it */
+                    /* Then transform it (recursively) */
                     x = mem_collxfrm_(cur_source, 1, &x_len, FALSE);
 
                     /* If something went wrong (which it shouldn't), just
@@ -10221,7 +10220,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                     PL_collxfrm_mult = new_m;
                     PL_collxfrm_base = 1;   /* +1 For trailing NUL */
                     computed_guess = PL_collxfrm_base
-                                    + (PL_collxfrm_mult * length_in_chars);
+                                   + (PL_collxfrm_mult * length_in_chars);
                     if (computed_guess < needed) {
                         PL_collxfrm_base += needed - computed_guess;
                     }
