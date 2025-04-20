@@ -3999,9 +3999,6 @@ PERL_CALLCONV void
 Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void *p);
 #define PERL_ARGS_ASSERT_SAVE_DESTRUCTOR_X
 
-/* PERL_CALLCONV void
-Perl_save_freepv(pTHX_ char *pv); */
-
 PERL_CALLCONV void
 Perl_save_freercpv(pTHX_ char *rcpv);
 #define PERL_ARGS_ASSERT_SAVE_FREERCPV          \
@@ -5951,6 +5948,10 @@ Perl_newSVsv(pTHX_ SV * const old)
 PERL_CALLCONV void
 Perl_save_freeop(pTHX_ OP *o);
 # define PERL_ARGS_ASSERT_SAVE_FREEOP
+
+PERL_CALLCONV void
+Perl_save_freepv(pTHX_ char *pv);
+# define PERL_ARGS_ASSERT_SAVE_FREEPV
 
 PERL_CALLCONV void
 Perl_save_freesv(pTHX_ SV *sv);
