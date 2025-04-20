@@ -264,14 +264,6 @@ L</Platform Support> section, instead.
 
 [ List changes as an =item entry ].
 
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Testing
 
 XXX Any significant changes to the testing of a freshly built perl should be
@@ -344,9 +336,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item MacOS (Darwin)
 
-XXX
+Collation of strings using locales on MacOS 15 (Darwin 24) and up has
+been turned off due to a failed assertion in its libc.
 
 =back
 

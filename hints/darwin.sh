@@ -371,6 +371,12 @@ ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
 # See comments in locale.c about this #define
 ccflags="$ccflags -DHAS_BROKEN_LANGINFO_CODESET"
 
+# Get: "Assertion failed: (p->val == key), function lookup_substsearch, file
+# collate.c, line 596."
+if [ "$darwin_major" -ge 24 && "$perl_revision" -ge 5 -a ( "$perl_version" -ge 42 -o ( "$perl_version" -eq 41 -a "$perl_subversion" -ge 11 ) ) ]; then
+    ccflags="$ccflags -DNO_LOCALE_COLLATE"
+fi
+
 ldlibpthname='DYLD_LIBRARY_PATH';
 
 # useshrplib=true results in much slower startup times.
