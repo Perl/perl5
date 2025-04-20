@@ -447,31 +447,8 @@
 :        created that #defines 'foo' as 'Perl_foo'.  This can be used to make
 :        any macro have a long name, perhaps to avoid name collisions.  If
 :        instead you define the macro as 'PERL_FOO' (all uppercase), the
-:        embed.h entry will use all uppercase.
-:
-:	 It is particularly useful tp preserve backward compatibility when a
-:	 function is converted to be a macro (remembering to not create a macro
-:	 which evaluates its parameters more than once).  Most of mathoms.c
-:	 could be converted to use this facility.  When there is no thread
-:	 context involved, you just do something like
-:
-:           #define Perl_foo(a, b, c)  Perl_bar(a, b, 0, c)
-:
-:        Otherwise consider this general case where there is a series of macros
-:        that build on the previous ones by calling something with a different
-:        name or with an extra parameter beyond what the previous one did:
-:
-:           #define Perl_foo(mTHX, a)         Perl_bar1(aTHX, a)
-:           #define Perl_bar1(mTHX, a)        Perl_bar2(aTHX, a, 0)
-:           #define Perl_bar2(mTHX, a, b)     Perl_bar3(aTHX, a, b, 0)
-:           #define Perl_bar3(mTHX, a, b, c)  Perl_func(aTHX_ a, b, c, 0)
-:
-:        Use the formal parameter name 'mTHX,' (which stands for "macro thread
-:        context") as the first in each macro definition, and call the next
-:        macro in the sequence with 'aTHX,' (Note the commas).  Eventually, the
-:        sequence will end with a function call (or else there would be no need
-:        for thread context).  For that instead call it with 'aTHX_' (with an
-:        underscore instead of a comma).
+:        embed.h entry will use all uppercase.  Without the T flag the behavior
+:        is subject to change when both 'm' and 'p are specified.
 :
 :         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols available on all
