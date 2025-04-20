@@ -3620,6 +3620,21 @@ EOF
             [ 1, 0, qr/\QError: junk at end of function: "    INPUTx:" in /,
                     "expected err" ],
         ],
+        [
+            "CASE: setting ST(0)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(a)
+                |CASE: X
+                |    CODE:
+                |      ST(0) = 1;
+                |CASE: Y
+                |    CODE:
+                |      blah
+EOF
+            [ 1, 0, qr/\QWarning: ST(0) isn't consistently set in every CASE's CODE block/,
+                    "expected err" ],
+        ],
 
 
     );

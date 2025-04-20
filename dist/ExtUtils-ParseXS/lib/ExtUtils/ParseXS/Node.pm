@@ -204,7 +204,8 @@ BEGIN { $build_subclass->('', # parent
     'seen_SCOPE',
 
     # These three fields indicate how many SVs are returned to the caller,
-    # and so influence the emitting of EXTEND(n) and XSRETURN(n).
+    # and so influence the emitting of 'EXTEND(n)', 'XSRETURN(n)', and
+    # potentially, the value of n in 'ST(n) = ...'.
     #
     # XSRETURN_count_basic is 0 or 1 and indicates whether a basic return
     # value is pushed onto the stack. It is usually directly related to
@@ -364,21 +365,6 @@ sub parse {
             push @{$self->{kids}}, $xbody;
         }
     } # end while (@{ $pxs->{line} })
-
-    # Work out how many SVs will be returned
-
-    $self->{XSRETURN_count_basic} =
-           (     $self->{CODE_sets_ST0}
-             or  (    $self->{decl}{return_type}{type} ne "void"
-                  && !$self->{decl}{return_type}{no_output})
-            )
-            ? 1 : 0;
-
-    $self->{XSRETURN_count_extra} =
-                        grep {    defined $_->{in_out}
-                               && $_->{in_out} =~ /OUTLIST$/
-                             }
-                        @{$self->{decl}{params}{kids}};
 
     # If any aliases have been declared, make the main sub name ix 0
     # if not specified.
@@ -766,6 +752,14 @@ sub parse {
 
     $params->parse($pxs, $xsub, $params_text);
     $self->{params} = $params;
+
+    # How many OUTLIST SVs get returned in addition to RETVAL
+    $xsub->{XSRETURN_count_extra} =
+                        grep {    defined $_->{in_out}
+                               && $_->{in_out} =~ /OUTLIST$/
+                             }
+                        @{$self->{params}{kids}};
+
 
     1;
 }
@@ -2806,6 +2800,17 @@ sub parse {
             . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
         );
 
+    # Work out whether a RETVAL SV will be returned. Note that this should
+    # be consistent across CASEs; we warn elsewhere if CODE_sets_ST0 isn't
+    # consistent.
+
+    $xsub->{XSRETURN_count_basic} =
+           (     $xsub->{CODE_sets_ST0}
+             or  (    $xsub->{decl}{return_type}{type} ne "void"
+                  && !$xsub->{decl}{return_type}{no_output})
+            )
+            ? 1 : 0;
+
     1;
 }
 
@@ -3697,9 +3702,14 @@ sub parse {
     # will be used later when deciding how/whether to emit EXTEND(n) and
     # XSRETURN(n).
 
-    $xsub->{CODE_sets_ST0} =
+    my $st0 =
              $code =~ m{  ( \b ST      \s* \( [^;]* = )
                         | ( \b XST_m\w+\s* \(         ) }x;
+
+    $pxs->Warn("Warning: ST(0) isn't consistently set in every CASE's CODE block")
+        if     defined $xsub->{CODE_sets_ST0}
+            && $xsub->{CODE_sets_ST0} ne $st0;
+    $xsub->{CODE_sets_ST0} = $st0;
 
     1;
 }
