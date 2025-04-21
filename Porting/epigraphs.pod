@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.11 - Friedrich Nietzsche, "Jenseits von Gut und Böse" (1886) ch. 4, no. 146
+
+L<Announced on 2025-04-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/03/msg269817.html>
+
+  "He who fights with monsters might take care lest he thereby become a
+  monster. And if you gaze for long into an abyss, the abyss gazes also into
+  you."
+
 =head2 v5.41.10 - Terry Pratchett, Carpe Jugulum
 
 L<Announced on 2025-03-21 by Lukas Mai|https://www.nntp.perl.org/group/perl.perl5.porters/2025/03/msg269743.html>
