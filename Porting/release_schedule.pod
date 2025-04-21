@@ -58,6 +58,7 @@ you should reset the version numbers to the next blead series.
                                                 correctly functioning
                                                 programs freeze
   2025-04-20  5.41.11 ✓       Karen Etheridge   Full program freeze
+  2025-04-21  5.41.12 ✓       Karen Etheridge
   2025-05-20  5.42.0          ?                 New perl!
 
 =head1 VICTIMS
