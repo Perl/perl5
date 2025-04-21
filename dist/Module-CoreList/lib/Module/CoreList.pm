@@ -23334,6 +23334,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Time::HiRes'           => '1.9778',
             'Time::Piece'           => '1.36',
             'Time::Seconds'         => '1.36',
+            'Unicode'               => '16.0.0',
             'Unicode::UCD'          => '0.80',
             'XS::APItest'           => '1.42',
             'ok'                    => '1.302210',
@@ -23346,7 +23347,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.041012',
             'Config'                => '5.041012',
-            'Unicode'               => '16.0.0',
         },
         removed => {
         }
