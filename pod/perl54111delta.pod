@@ -1,0 +1,254 @@
+=encoding utf8
+
+=head1 NAME
+
+perl54111delta - what is new for perl v5.41.11
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.41.10 release and the 5.41.11
+release.
+
+If you are upgrading from an earlier release such as 5.41.9, first read
+L<perl54110delta>, which describes differences between 5.41.9 and 5.41.10.
+
+=head1 Core Enhancements
+
+=head2 Unicode 16.0 supported
+
+Perl now supports Unicode 16.0
+L<https://www.unicode.org/versions/Unicode16.0.0/> including the changes
+introduced in 15.1 L<https://www.unicode.org/versions/Unicode15.1.0/>.
+
+=head1 Security
+
+=head2 [CVE-2024-56406] Heap buffer overflow vulnerability with tr//
+
+A heap buffer overflow vulnerability was discovered in Perl.
+
+When there are non-ASCII bytes in the left-hand-side of the C<tr> operator,
+C<S_do_trans_invmap()> can overflow the destination pointer C<d>.
+
+  $ perl -e '$_ = "\x{FF}" x 1000000; tr/\xFF/\x{100}/;'
+  Segmentation fault (core dumped)
+
+It is believed that this vulnerability can enable Denial of Service or
+Arbitrary Code Execution attacks on platforms that lack sufficient defenses.
+
+Discovered by: Nathan Mills.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.191 to 2.192.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.72 to 7.74.
+
+=item *
+
+L<Fcntl> has been upgraded from version 1.19 to 1.20.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.92 to 3.94.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 2.004001 to 2.005002.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5019 to 0.5020.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20250321 to 5.20250420.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 2.03 to 2.05.
+
+=item *
+
+L<Storable> has been upgraded from version 3.36 to 3.37.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302209 to 1.302210.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9777 to 1.9778.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.79 to 0.80.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.41 to 1.42.
+
+This fixes [L<GH #16654|https://github.com/Perl/perl5/issues/16654>].
+
+=back
+
+=head1 Documentation
+
+=head2 perlop
+
+=over 4
+
+=item *
+
+Normalized alignment of verbatim sections, fixing how they are displayed by
+some Pod viewers that strip indentation.
+
+=back
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document. If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Additional caveats have been added to the description of C<TARG>.
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item MacOS (Darwin)
+
+Collation of strings using locales on MacOS 15 (Darwin 24) and up has
+been turned off due to a failed assertion in its libc.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+In some cases an C<eval> would not add integer parts to the source
+lines saved by the debugger. [L<GH #23151|https://github.com/Perl/perl5/issues/23151>]
+
+=item *
+
+Save debugger lines as C<PVIV> SVs rather than as C<PVMG> SVs as they
+don't need magic, aren't blessed and don't need to store a floating
+point part.  This should save 24 bytes per stored line for 64-bit
+systems, more for C<-Duselongdouble> or C<-Dusequadmath> builds.
+Discussed in [L<GH #23171|https://github.com/Perl/perl5/issues/23171>].
+
+=item *
+
+Ensure cloning the save stack for fork emulation doesn't duplicate
+freeing the RExC state. [L<GH #23022|https://github.com/Perl/perl5/issues/23022>]
+
+=item *
+
+Smartmatch against a code reference that uses a loop exit such as
+C<last> would crash perl. [L<GH #16608|https://github.com/Perl/perl5/issues/16608>]
+
+=item *
+
+Class initializers and C<ADJUST> blocks, per L<perlclass>, that
+called C<last> or other loop exits would crash perl.  Same cause as
+for [L<GH #16608|https://github.com/Perl/perl5/issues/16608>].
+
+=item *
+
+Prevent a signature parameter of the form C<$ => from leaking an OP at
+compile-time. [L<GH #23187|https://github.com/Perl/perl5/issues/23187>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.41.11 represents approximately 4 weeks of development since Perl
+5.41.10 and contains approximately 250,000 lines of changes across 460 files
+from 22 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 39,000 lines of changes to 320 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.41.11:
+
+Chad Granum, Chris 'BinGOs' Williams, Dan Book, Daniel Dragan, Graham Knop,
+James E Keenan, Karen Etheridge, Karl Williamson, Leon Timmermans, Lukas
+Mai, Marek Rouchal, Paul Evans, Peter Eisentraut, Peter John Acklam,
+Philippe Bruhat (BooK), Richard Leach, Steve Hay, TAKAI Kousuke, Thibault
+Duponchelle, Tony Cook, Unicode Consortium, Vladimír Marek.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
