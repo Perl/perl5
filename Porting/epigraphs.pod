@@ -17,9 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.12 - Sam Brown
+
+L<Announced on 2025-04-21 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/04/msg269818.html>
+
+  "Never offend people with style when you can offend them with substance."
+
 =head2 v5.41.11 - Friedrich Nietzsche, "Jenseits von Gut und Böse" (1886) ch. 4, no. 146
 
-L<Announced on 2025-04-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/03/msg269817.html>
+L<Announced on 2025-04-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/04/msg269817.html>
 
   "He who fights with monsters might take care lest he thereby become a
   monster. And if you gaze for long into an abyss, the abyss gazes also into
