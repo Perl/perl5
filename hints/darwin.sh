@@ -373,7 +373,7 @@ ccflags="$ccflags -DHAS_BROKEN_LANGINFO_CODESET"
 
 # Get: "Assertion failed: (p->val == key), function lookup_substsearch, file
 # collate.c, line 596."
-if [ "$darwin_major" -ge 24 && "$perl_revision" -ge 5 -a ( "$perl_version" -ge 42 -o ( "$perl_version" -eq 41 -a "$perl_subversion" -ge 11 ) ]; then
+if test "$darwin_major" -ge 24 && test "$perl_revision" -ge 5 && ( test "$perl_version" -ge 42 || ( test "$perl_version" -eq 41 && test "$perl_subversion" -ge 11 ) ); then
     ccflags="$ccflags -DNO_LOCALE_COLLATE"
 fi
 
