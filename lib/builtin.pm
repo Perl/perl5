@@ -1,4 +1,4 @@
-package builtin 0.018;
+package builtin 0.019;
 
 use v5.40;
 
@@ -42,6 +42,10 @@ can be requested for convenience.
 
 Individual named functions can be imported by listing them as import
 parameters on the C<use> statement for this pragma.
+
+The L<builtin::compat> module from CPAN provides versions of many of these
+functions that can be used on Perl versions where C<builtin> or specific
+functions are not yet available.
 
 B<Warning>:  At present, many of the functions in the C<builtin> namespace are
 experimental.  Calling them will trigger warnings of the
@@ -414,14 +418,11 @@ A complete list is in L<perlrecharclass/Whitespace>.
 
 C<trim> is equivalent to:
 
-    $str =~ s/\A\s+|\s+\z//urg;
+    my $trimmed = $str =~ s/\A\s+//ur =~ s/\s+\z//ur;
 
 Available starting with Perl 5.36. Since Perl 5.40, it is no longer
 experimental and it is included in the 5.40 and higher builtin version
 bundles.
-
-For Perl versions where this function is not available look at the
-L<String::Util> module for a comparable implementation.
 
 =head2 is_tainted
 
@@ -487,4 +488,4 @@ Available starting with Perl 5.40.
 
 =head1 SEE ALSO
 
-L<perlop>, L<perlfunc>, L<Scalar::Util>
+L<perlop>, L<perlfunc>, L<Scalar::Util>, L<builtin::compat>
