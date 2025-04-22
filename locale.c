@@ -10096,7 +10096,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Store the collation id */
     *(PERL_UINTMAX_T *)xbuf = PL_collation_ix;
 
-#  define CLEANUP_STRXFRM_COMMON                                        \
+#  define CLEANUP_NON_STRXFRM                                           \
         STMT_START {                                                    \
             Safefree(free_me);                                          \
             Safefree(sans_nuls);                                        \
@@ -10119,7 +10119,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         STMT_START {                                                    \
             if (constructed_locale != (locale_t) 0)                     \
                 freelocale(constructed_locale);                         \
-            CLEANUP_STRXFRM_COMMON;                                     \
+            CLEANUP_NON_STRXFRM;                                        \
         } STMT_END
 #  else
 #    define my_strxfrm(dest, src, n)  strxfrm(dest, src, n)
@@ -10130,10 +10130,10 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 #      define CLEANUP_STRXFRM                                           \
         STMT_START {                                                    \
                 restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);  \
-                CLEANUP_STRXFRM_COMMON;                                 \
+                CLEANUP_NON_STRXFRM;                                    \
         } STMT_END
 #    else
-#      define CLEANUP_STRXFRM  CLEANUP_STRXFRM_COMMON
+#      define CLEANUP_STRXFRM  CLEANUP_NON_STRXFRM
 #    endif
 #  endif
 
