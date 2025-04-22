@@ -3851,6 +3851,9 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
 
     const int mb_cur_max = MB_CUR_MAX;
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "MB_CUR_MAX=%d, utf8?=%d\n",
+                                        mb_cur_max, PL_in_utf8_CTYPE_locale));
+
     if (mb_cur_max > 1 && ! PL_in_utf8_CTYPE_locale
 
             /* Some platforms return MB_CUR_MAX > 1 for even the "C" locale.
