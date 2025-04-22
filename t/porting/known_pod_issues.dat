@@ -40,6 +40,7 @@ bc(1)
 Benchmark::Perl::Formance
 bind(2)
 BSD::Resource
+builtin::compat
 ByteLoader
 bzip2(1)
 Carp::Always
