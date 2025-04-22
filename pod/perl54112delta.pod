@@ -28,7 +28,7 @@ As in release 5.41.11, collation of strings using locales on MacOS 15 (Darwin
 
 If earlier versions are also experiencing issues (such as failures in
 F<locale.t>), you can explicitly disable locale collation by adding the
-C<-DNO_LOCALE_COLLATE> option to your invokation of C<./Configure>,
+C<-DNO_LOCALE_COLLATE> option to your invocation of C<./Configure>,
 or to the C<ccflags> and C<cppflags> variables in F<config.sh>.
 
 =back
