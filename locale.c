@@ -9663,7 +9663,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         if (PL_collxfrm_base != 0) { /* bad collation => skip */
             DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "mem_collxfrm_: locale's collation is defective\n"));
-            goto bad;
+            goto bad_no_strxfrm;
         }
 
         /* (mult, base) == (0,0) means we need to calculate mult and base
@@ -9789,7 +9789,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                     "mem_collxfrm_: Couldn't find any character to replace"
                     " embedded NULs in locale %s with", PL_collation_name));
-                goto bad;
+                goto bad_no_strxfrm;
             }
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -9930,7 +9930,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                         "mem_collxfrm_: Couldn't find any character to"
                         " replace above-Latin1 chars in locale %s with",
                         PL_collation_name));
-                    goto bad;
+                    goto bad_no_strxfrm;
                 }
 
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -10090,7 +10090,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     if (UNLIKELY(! xbuf)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                       "mem_collxfrm_: Couldn't malloc %zu bytes\n", xAlloc));
-        goto bad;
+        goto bad_no_strxfrm;
     }
 
     /* Store the collation id */
@@ -10119,7 +10119,6 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
         STMT_START {                                                    \
             if (constructed_locale != (locale_t) 0)                     \
                 freelocale(constructed_locale);                         \
-            CLEANUP_NON_STRXFRM;                                        \
         } STMT_END
 #  else
 #    define my_strxfrm(dest, src, n)  strxfrm(dest, src, n)
@@ -10128,12 +10127,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
 
 #      define CLEANUP_STRXFRM                                           \
-        STMT_START {                                                    \
-                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);  \
-                CLEANUP_NON_STRXFRM;                                    \
-        } STMT_END
-#    else
-#      define CLEANUP_STRXFRM  CLEANUP_NON_STRXFRM
+            restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 #    endif
 #  endif
 
@@ -10275,6 +10269,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
     DEBUG_L(print_collxfrm_input_and_return(s, s + len, xbuf, *xlen, utf8));
     CLEANUP_STRXFRM;
+    CLEANUP_NON_STRXFRM;
 
     /* Free up unneeded space; retain enough for trailing NUL */
     Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
@@ -10286,9 +10281,12 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     DEBUG_L(print_collxfrm_input_and_return(s, s + len, NULL, 0, utf8));
     CLEANUP_STRXFRM;
 
+  bad_no_strxfrm:   /* Found a problem before strxfrm() got called */
+    DEBUG_L(print_collxfrm_input_and_return(s, s + len, NULL, 0, utf8));
+
     Safefree(xbuf);
     *xlen = 0;
-
+    CLEANUP_NON_STRXFRM;
     return NULL;
 }
 
