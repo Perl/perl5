@@ -305,7 +305,7 @@ tie *FH, 'Capture';
 my $stderr = PrimitiveCapture::capture_stderr(sub {
   $pxs->process_file(filename => 'XSBroken.xs', output => \*FH);
 });
-like $stderr, '/No INPUT definition/', "Exercise typemap error";
+like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
 }
 #####################################################################
 
@@ -377,18 +377,18 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
   my $count = 0;
   $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
   is $stderr,
-    "Warning: Aliases 'pox' and 'dox', 'lox' have"
+    "Warning: aliases 'pox' and 'dox', 'lox' have"
     . " identical values of 1 in XSAlias.xs, line 9\n"
     . "    (If this is deliberate use a symbolic alias instead.)\n"
-    . "Warning: Conflicting duplicate alias 'pox' changes"
+    . "Warning: conflicting duplicate alias 'pox' changes"
     . " definition from '1' to '2' in XSAlias.xs, line 10\n"
-    . "Warning: Aliases 'docks' and 'dox', 'lox' have"
+    . "Warning: aliases 'docks' and 'dox', 'lox' have"
     . " identical values of 1 in XSAlias.xs, line 11\n"
-    . "Warning: Aliases 'xunx' and 'do' have identical values"
+    . "Warning: aliases 'xunx' and 'do' have identical values"
     . " of 0 - the base function in XSAlias.xs, line 13\n"
-    . "Warning: Aliases 'do' and 'xunx', 'do' have identical values"
+    . "Warning: aliases 'do' and 'xunx', 'do' have identical values"
     . " of 0 - the base function in XSAlias.xs, line 14\n"
-    . "Warning: Aliases 'xunx2' and 'do', 'xunx' have"
+    . "Warning: aliases 'xunx2' and 'do', 'xunx' have"
     . " identical values of 0 - the base function in XSAlias.xs, line 15\n"
     ,
     "Saw expected warnings from XSAlias.xs in AUTHOR_WARNINGS mode";
@@ -431,7 +431,7 @@ EOF_CONTENT
   my $count = 0;
   $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
   is $stderr,
-    "Warning: Conflicting duplicate alias 'pox' changes"
+    "Warning: conflicting duplicate alias 'pox' changes"
     . " definition from '1' to '2' in XSAlias.xs, line 10\n",
     "Saw expected warnings from XSAlias.xs";
 
@@ -718,7 +718,7 @@ EOF
         $pxs->process_file( filename => \$text, output => \*FH);
     });
 
-    like($stderr, qr/No INPUT definition for type 'Foo::Bar'/,
+    like($stderr, qr/Error: no INPUT definition for type 'Foo::Bar'/,
                     "No INPUT definition");
 }
 
@@ -1005,13 +1005,13 @@ EOF
         }
     });
 
-    like $stderr, qr{\Qparameter type not allowed under -noargtypes},
+    like $stderr, qr{\QError: parameter type not allowed under -noargtypes},
                  "no type under -noargtypes";
-    like $stderr, qr{\Qlength() pseudo-parameter not allowed under -noargtypes},
+    like $stderr, qr{\QError: length() pseudo-parameter not allowed under -noargtypes},
                  "no length under -noargtypes";
-    like $stderr, qr{\Qparameter IN/OUT modifier not allowed under -noinout},
+    like $stderr, qr{\QError: parameter IN/OUT modifier not allowed under -noinout},
                  "no IN/OUT under -noinout";
-    like $stderr, qr{\QUnparseable XSUB parameter: '+++'},
+    like $stderr, qr{\QError: unparseable XSUB parameter: '+++'},
                  "unparseable parameter";
 }
 
@@ -1067,7 +1067,7 @@ EOF
         }
     });
 
-    like $stderr, qr{\Qfurther XSUB parameter seen after ellipsis},
+    like $stderr, qr{\QError: further XSUB parameter seen after ellipsis},
                  "further XSUB parameter seen after ellipsis";
 }
 
@@ -1132,7 +1132,7 @@ EOF
             ],
             [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
-            [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
+            [ 1, 0, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
         ],
 
         [
@@ -1144,7 +1144,7 @@ EOF
             ],
             [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [ 0, 0, qr/\Qfoo(aaa)/,                          "autocall" ],
-            [ 1, 0, qr/Ignoring 'static' type modifier/,     "warning"  ],
+            [ 1, 0, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
         ],
 
         [
@@ -1424,7 +1424,7 @@ EOF
             [ Q(<<'EOF') ],
                 |int
 EOF
-            [ 1, 0, qr/Error: Function definition too short 'int'/, "got err" ],
+            [ 1, 0, qr/Error: function definition too short 'int'/, "got err" ],
         ],
         [
             "defn not parseable 1",
@@ -1434,7 +1434,7 @@ EOF
                 |    CODE:
                 |        AAA
 EOF
-            [ 1, 0, qr/\QError: Cannot parse function definition from 'foo(aaa' in\E.*line 6/,
+            [ 1, 0, qr/\QError: cannot parse function definition from 'foo(aaa' in\E.*line 6/,
                     "got err" ],
         ],
         [
@@ -1443,11 +1443,12 @@ EOF
                 |int
                 |fo o(aaa)
 EOF
-            [ 1, 0, qr/\QError: Cannot parse function definition from 'fo o(aaa)' in\E.*line 6/,
+            [ 1, 0, qr/\QError: cannot parse function definition from 'fo o(aaa)' in\E.*line 6/,
                     "got err" ],
         ],
+
         # note that  issuing this warning is somewhat controversial:
-        # see GH 19661. But while we cntinue to warn, test that we get a
+        # see GH 19661. But while we continue to warn, test that we get a
         # warning.
         [
             "dup fn warning",
@@ -1460,6 +1461,21 @@ EOF
 EOF
             [ 1, 0, qr/\QWarning: duplicate function definition 'foo' detected in\E.*line 9/,
                     "got warn" ],
+        ],
+        [
+            "dup fn warning",
+            [ Q(<<'EOF') ],
+                |#if X
+                |int
+                |foo(aaa)
+                |
+                |#else
+                |int
+                |foo(aaa)
+                |#endif
+EOF
+            [ 1, 1, qr/\QWarning: duplicate function definition/,
+                    "no warning" ],
         ],
     );
 
@@ -1527,7 +1543,7 @@ EOF
                 |void
                 |foo(char *s, length(s) = 0)
 EOF
-            [ 1, 0, qr{\QDefault value not allowed on length() parameter 's'\E.*line 6},
+            [ 1, 0, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -2167,7 +2183,7 @@ EOF
                 |    PROTOTYPE: $$$
                 |    PROTOTYPE: $$$
 EOF
-            [ 1, 0, qr/Error: Only 1 PROTOTYPE definition allowed per xsub/, "" ],
+            [ 1, 0, qr/Error: only one PROTOTYPE definition allowed per xsub/, "" ],
         ],
 
         [
@@ -2177,7 +2193,7 @@ EOF
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: ab
 EOF
-            [ 1, 0, qr/Error: Invalid prototype 'ab'/, "" ],
+            [ 1, 0, qr/Error: invalid prototype 'ab'/, "" ],
         ],
 
         [
@@ -2438,6 +2454,57 @@ EOF
 }
 
 {
+    # Test INPUT: keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "INPUT bad line",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc)
+                |    int +
+EOF
+            [ 1, 0, qr/^\QError: invalid parameter declaration '    int +'\E.* line 7\n/,   "got expected error" ],
+        ],
+        [
+            "INPUT no length()",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc)
+                |    int length(abc)
+EOF
+            [ 1, 0, qr/^\QError: length() not permitted in INPUT section\E.* line 7\n/,   "got expected error" ],
+        ],
+        [
+            "INPUT dup",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc, int def)
+                |    int abc
+                |    int abc
+                |    int def
+EOF
+            [ 1, 0, qr/^\QError: duplicate definition of parameter 'abc' ignored in\E.* line 8\n/m,
+                                        "abc: got expected error" ],
+
+            [ 1, 0, qr/^\QError: duplicate definition of parameter 'def' ignored in\E.* line 9\n/m,
+                                        "def: got expected error" ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
     # Test OUTPUT: keyword
 
     my $preamble = Q(<<'EOF');
@@ -2653,7 +2720,7 @@ EOF
                 |    CODE:
                 |      RETVAL = 99
 EOF
-            [ 1, 0, qr/Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+            [ 1, 0, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
         ],
 
         [
@@ -2668,7 +2735,7 @@ EOF
                 |    CODE:
                 |      RETVAL = 99
 EOF
-            [ 1, 1, qr/Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "no warn" ],
+            [ 1, 1, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "no warn" ],
         ],
 
         [
@@ -2681,7 +2748,7 @@ EOF
                 |    OUTPUT:
                 |      aaa
 EOF
-            [ 1, 0, qr/Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+            [ 1, 0, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
         ],
 
         [
@@ -2698,7 +2765,7 @@ EOF
                 |    CODE:
                 |      RETVAL = 99
 EOF
-            [ 1, 0, qr/Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+            [ 1, 0, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
         ],
 
         [
@@ -2792,7 +2859,7 @@ EOF
                 |    OUTPUT:
                 |      a
 EOF
-            [ 1, 1, qr/\QError: No OUTPUT definition for type 'blah', typekind 'T_BLAH'\E.*line 11/,
+            [ 1, 1, qr/\QError: no OUTPUT definition for type 'blah', typekind 'T_BLAH'\E.*line 11/,
                     "got expected error" ],
         ],
     );
@@ -3605,7 +3672,7 @@ EOF
                 |    CASE: X
                 |        CODE:
 EOF
-            [ 1, 0, qr/\QError: No 'CASE:' at top of function/,
+            [ 1, 0, qr/\QError: no 'CASE:' at top of function/,
                     "expected err" ],
         ],
         [
@@ -3620,6 +3687,19 @@ EOF
             [ 1, 0, qr/\QError: junk at end of function: "    INPUTx:" in /,
                     "expected err" ],
         ],
+        [
+            "keyword after end of xbody",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |  CODE:
+                |     abc
+                |  C_ARGS:
+EOF
+            [ 1, 0, qr{\QError: misplaced 'C_ARGS:' in\E.*line 8},
+                                                    "got expected error"  ],
+        ],
+
         [
             "CASE: setting ST(0)",
             [ Q(<<'EOF') ],
@@ -3710,7 +3790,7 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 1, 0, qr/Can't determine output type for 'BBB'/, "got type err" ],
+            [ 1, 0, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
         ],
 
         [
@@ -3721,7 +3801,7 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 1, 0, qr/Can't determine output type for 'BBB'/, "got type err" ],
+            [ 1, 0, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
         ],
 
         [
@@ -3732,7 +3812,7 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 1, 0, qr/Can't determine output type for 'BBB'/, "got type err" ],
+            [ 1, 0, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
         ],
 
         [
@@ -3875,7 +3955,7 @@ EOF
                 |int
                 |foo(OUT array(int,5) AAA)
 EOF
-            [ 1, 0, qr/\QCan't use array(type,nitems) type for OUT parameter/,
+            [ 1, 0, qr/\QError: can't use array(type,nitems) type for OUT parameter/,
                         "got err" ],
         ],
 
@@ -3885,7 +3965,7 @@ EOF
                 |int
                 |foo(OUTLIST array(int,5) AAA)
 EOF
-            [ 1, 0, qr/\QCan't use array(type,nitems) type for OUTLIST parameter/,
+            [ 1, 0, qr/\QError: can't use array(type,nitems) type for OUTLIST parameter/,
                     "got err" ],
         ],
     );
@@ -3913,7 +3993,9 @@ EOF
         |
         |nosuchtypeArray * T_ARRAY
         |
-        |shortArray *       T_DAE
+        |shortArray *      T_DAE
+        |NoInputArray *    T_DAE
+        |NoInput           T_Noinput
         |
         |NooutputArray *   T_ARRAY
         |Nooutput          T_Nooutput
@@ -4071,6 +4153,15 @@ EOF
                                                     "template vars ok" ],
             [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
+        [
+            "T_DAE bad input",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(NoInputArray * abc)
+EOF
+            [ 1, 0, qr/\QError: no INPUT definition for subtype 'NoInput', typekind 'T_Noinput' found in\E.*line 40/,
+                                                    "got expected error" ],
+        ],
 
         # Use overridden return code with an OUTPUT line.
         [
@@ -4094,7 +4185,7 @@ EOF
                 |int
                 |foo(OUT intArray * abc)
 EOF
-            [ 1, 0, qr/Can't use typemap containing DO_ARRAY_ELEM for OUT parameter/,
+            [ 1, 0, qr/Error: can't use typemap containing DO_ARRAY_ELEM for OUT parameter/,
                     "gives err" ],
         ],
         [
@@ -4103,7 +4194,7 @@ EOF
                 |int
                 |foo(OUTLIST intArray * abc)
 EOF
-            [ 1, 0, qr/Can't use typemap containing DO_ARRAY_ELEM for OUTLIST parameter/,
+            [ 1, 0, qr/Error: can't use typemap containing DO_ARRAY_ELEM for OUTLIST parameter/,
                     "gives err" ],
         ],
 
@@ -4113,7 +4204,7 @@ EOF
                 |NooutputArray *
                 |foo()
 EOF
-            [ 1, 0, qr/\QError: No OUTPUT definition for type 'Nooutput', typekind 'T_Nooutput'\E.*line 38/,
+            [ 1, 0, qr/\QError: no OUTPUT definition for subtype 'Nooutput', typekind 'T_Nooutput'\E.*line 40/,
                     "gives expected error" ],
         ],
     );
@@ -4274,7 +4365,7 @@ EOF
                 |SCOPE: ENABLE
                 |SCOPE: ENABLE
 EOF
-            [ 1, 0, qr{\QError: Only one SCOPE declaration allowed per XSUB},
+            [ 1, 0, qr{\QError: only one SCOPE declaration allowed per XSUB},
                     "got expected error"],
         ],
     );
@@ -4369,7 +4460,7 @@ EOF
                 |foo()
                 |    ALIAS: bar = X::Y
 EOF
-            [ 1, 0, qr{\QError: In alias definition for 'bar' the value may not contain ':' unless it is symbolic.\E.*line 7},
+            [ 1, 0, qr{\QError: in alias definition for 'bar' the value may not contain ':' unless it is symbolic.\E.*line 7},
                    "got expected error" ],
         ],
 
@@ -4380,7 +4471,7 @@ EOF
                 |foo()
                 |    ALIAS: Foo::bar => blurt
 EOF
-            [ 1, 0, qr{\QError: Unknown alias 'Foo::blurt' in symbolic definition for 'Foo::bar'\E.*line 7},
+            [ 1, 0, qr{\QError: unknown alias 'Foo::blurt' in symbolic definition for 'Foo::bar'\E.*line 7},
                    "got expected error" ],
         ],
 
@@ -4392,7 +4483,7 @@ EOF
                 |    ALIAS: bar = 1
                 |           bar = 1
 EOF
-            [ 1, 0, qr{\QWarning: Ignoring duplicate alias 'bar'\E.*line 8},
+            [ 1, 0, qr{\QWarning: ignoring duplicate alias 'bar'\E.*line 8},
                    "got expected warning" ],
         ],
         [
@@ -4403,7 +4494,7 @@ EOF
                 |    ALIAS: bar = 1
                 |           bar = 2
 EOF
-            [ 1, 0, qr{\QWarning: Conflicting duplicate alias 'bar'\E.*line 8},
+            [ 1, 0, qr{\QWarning: conflicting duplicate alias 'bar'\E.*line 8},
                    "got expected warning" ],
         ],
 
@@ -4415,7 +4506,7 @@ EOF
                 |    ALIAS: bar = 1
                 |           baz = 1
 EOF
-            [ 1, 0, qr{\QWarning: Aliases 'baz' and 'bar' have identical values of 1\E.*line 8},
+            [ 1, 0, qr{\QWarning: aliases 'baz' and 'bar' have identical values of 1\E.*line 8},
                    "got expected warning" ],
         ],
 
@@ -4426,7 +4517,7 @@ EOF
                 |foo()
                 |    ALIAS: bar = 
 EOF
-            [ 1, 0, qr{\QError: Cannot parse ALIAS definitions from 'bar ='\E.*line 7},
+            [ 1, 0, qr{\QError: cannot parse ALIAS definitions from 'bar ='\E.*line 7},
                    "got expected error" ],
         ],
     );
@@ -4834,7 +4925,7 @@ EOF
                 |  OUTPUT:
                 |     blah
 EOF
-            [ 1, 0, qr{PPCODE must be last thing}, "got expected err"  ],
+            [ 1, 0, qr{Error: PPCODE must be the last thing}, "got expected err"  ],
         ],
         [
             "PPCODE code tweaks",

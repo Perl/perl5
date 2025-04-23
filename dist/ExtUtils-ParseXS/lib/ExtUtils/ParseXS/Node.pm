@@ -333,7 +333,7 @@ sub parse {
             $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'")
                 if $num > 1 && ! $case_had_cond;
             $case_had_cond = length $case->{cond};
-            $pxs->blurt("Error: No 'CASE:' at top of function")
+            $pxs->blurt("Error: no 'CASE:' at top of function")
                 if $seen_bare_xbody;
         }
         else {
@@ -688,7 +688,7 @@ sub parse {
     # is for C++ functions.
 
     my $func_header = shift(@{ $pxs->{line} });
-    $pxs->blurt("Error: Cannot parse function definition from '$func_header'"), return
+    $pxs->blurt("Error: cannot parse function definition from '$func_header'"), return
         unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
     my ($class, $name, $params_text) = ($1, $2, $3);
@@ -696,8 +696,8 @@ sub parse {
 
     if ($return_type->{static} and !defined $class)
     {
-        $pxs->Warn(  "Ignoring 'static' type modifier:"
-                                . " only valid with an XSUB name which includes a class");
+        $pxs->Warn(  "Warning: ignoring 'static' type modifier:"
+                   . " only valid with an XSUB name which includes a class");
         $return_type->{static} = 0;
     }
 
@@ -824,7 +824,7 @@ sub parse {
 
     # a function definition needs at least 2 lines
     unless (@{$pxs->{line}}) {
-        $pxs->blurt("Error: Function definition too short '$line'");
+        $pxs->blurt("Error: function definition too short '$line'");
         return;
     }
 
@@ -939,7 +939,7 @@ sub parse {
             $self->{var} = 'SV *';
             return 1;
         }
-        $pxs->blurt("Unparseable XSUB parameter: '$_'");
+        $pxs->blurt("Error: unparseable XSUB parameter: '$_'");
         return;
     }
 
@@ -984,7 +984,7 @@ sub parse {
             $out_type =  $out_type eq 'IN' ? '' : $out_type;
         }
         else {
-            $pxs->blurt("parameter IN/OUT modifier not allowed under -noinout");
+            $pxs->blurt("Error: parameter IN/OUT modifier not allowed under -noinout");
         }
     }
     else {
@@ -994,7 +994,7 @@ sub parse {
     # Process optional type
 
     if (defined($type) && !$pxs->{config_allow_argtypes}) {
-        $pxs->blurt("parameter type not allowed under -noargtypes");
+        $pxs->blurt("Error: parameter type not allowed under -noargtypes");
         undef $type;
     }
 
@@ -1008,12 +1008,12 @@ sub parse {
             $len_name = $1;
             $is_length = 1;
             if (defined $default) {
-                $pxs->blurt("Default value not allowed on length() parameter '$len_name'");
+                $pxs->blurt("Error: default value not allowed on length() parameter '$len_name'");
                 undef $default;
             }
         }
         else {
-            $pxs->blurt("length() pseudo-parameter not allowed under -noargtypes");
+            $pxs->blurt("Error: length() pseudo-parameter not allowed under -noargtypes");
         }
     }
 
@@ -1215,7 +1215,7 @@ sub lookup_input_typemap {
         # e.g. 'SvPV_nolen($arg)'
         my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
         if (not defined $inputmap) {
-            $pxs->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
+            $pxs->blurt("Error: no INPUT definition for type '$type', typekind '$xstype' found");
             return;
         }
 
@@ -1246,8 +1246,9 @@ sub lookup_input_typemap {
             my $subinputmap =
                 $typemaps->get_inputmap(xstype => $subtypemap->xstype);
             if (not $subinputmap) {
-                $pxs->blurt("Error: No INPUT definition for type '$subtype',
-                            typekind '" . $subtypemap->xstype . "' found");
+                $pxs->blurt("Error: no INPUT definition for subtype "
+                            . "'$subtype', typekind '"
+                            . $subtypemap->xstype . "' found");
                 return;
             }
 
@@ -1337,7 +1338,7 @@ sub lookup_output_typemap {
     # values
 
     unless (defined $type) {
-        $pxs->blurt("Can't determine output type for '$var'");
+        $pxs->blurt("Error: can't determine output type for '$var'");
         return;
     }
 
@@ -1393,7 +1394,7 @@ sub lookup_output_typemap {
         if ($var ne 'RETVAL') {
             # This special type is intended for use only as the return type of
             # an XSUB
-            $pxs->blurt(  "Can't use array(type,nitems) type for "
+            $pxs->blurt(  "Error: can't use array(type,nitems) type for "
                         . (defined $out_num ? "OUTLIST" : "OUT")
                         . " parameter");
             return;
@@ -1413,7 +1414,7 @@ sub lookup_output_typemap {
 
         $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
         if (not $outputmap) {
-            $pxs->blurt("Error: No OUTPUT definition for type '$type', typekind '"
+            $pxs->blurt("Error: no OUTPUT definition for type '$type', typekind '"
                         . $typemap->xstype . "' found");
             return;
         }
@@ -1462,7 +1463,7 @@ sub lookup_output_typemap {
             # definitely would fail with OUT, which is supposed to be
             # updating parameter SVs, not pushing anything on the stack.
             # So forbid all except RETVAL.
-            $pxs->blurt("Can't use typemap containing DO_ARRAY_ELEM for "
+            $pxs->blurt("Error: can't use typemap containing DO_ARRAY_ELEM for "
                                         . (defined $out_num ? "OUTLIST" : "OUT")
                                         . " parameter");
             return;
@@ -1477,7 +1478,7 @@ sub lookup_output_typemap {
         my $suboutputmap =
             $typemaps->get_outputmap(xstype => $subtypemap->xstype);
         if (not $suboutputmap) {
-            $pxs->blurt("Error: No OUTPUT definition for type '$subtype', typekind '"
+            $pxs->blurt("Error: no OUTPUT definition for subtype '$subtype', typekind '"
                         . $subtypemap->xstype . "' found");
             return;
         }
@@ -1655,7 +1656,9 @@ sub as_input_code {
         # been emitted, so remove it from the typemap before evalling it,
 
         $init_code =~ s/^\s*\Q$var\E(\s*=\s*)/$1/
-            or $pxs->death("panic: typemap doesn't start with '\$var='\n");
+            # we just checked above that it starts with var=, so this
+            # should never happen
+            or $pxs->death("Internal error: typemap doesn't start with '\$var='\n");
 
         printf "%s;\n", $init_code;
     }
@@ -2284,7 +2287,7 @@ sub parse {
 
         # Process ellipsis (...)
 
-        $pxs->blurt("further XSUB parameter seen after ellipsis (...)")
+        $pxs->blurt("Error: further XSUB parameter seen after ellipsis (...)")
             if $self->{seen_ellipsis};
 
         if ($param_text eq '...') {
@@ -2915,7 +2918,7 @@ sub as_code {
             and not ($retval && $retval->{in_output})
             and     $xsub->{decl}{return_type}{type} ne 'void')
     {
-        $pxs->Warn("Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
+        $pxs->Warn("Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
     }
 
     # Process any OUT vars: i.e. vars that are declared OUT in
@@ -3318,7 +3321,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
 
-    $pxs->blurt("Error: Only one SCOPE declaration allowed per XSUB")
+    $pxs->blurt("Error: only one SCOPE declaration allowed per XSUB")
         if $xsub->{seen_SCOPE};
     $xsub->{seen_SCOPE} = 1;
 
@@ -3629,7 +3632,7 @@ sub parse {
 
     my $proto;
 
-    $pxs->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
+    $pxs->death("Error: only one PROTOTYPE definition allowed per xsub")
         if $xsub->{seen_PROTOTYPE};
     $xsub->{seen_PROTOTYPE} = 1;
 
@@ -3645,7 +3648,7 @@ sub parse {
         }
         else {
             s/\s+//g; # remove any whitespace
-            $pxs->death("Error: Invalid prototype '$_'")
+            $pxs->death("Error: invalid prototype '$_'")
                 unless ExtUtils::ParseXS::Utilities::valid_proto_string($_);
             $proto = ExtUtils::ParseXS::Utilities::C_string($_);
         }
@@ -3844,7 +3847,7 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no/lines
     $xsub->{seen_PPCODE} = 1;
     # The only thing left should be the special "!End!\n\n" token.
-    $pxs->death("PPCODE must be last thing") if @{$pxs->{line}} > 1;
+    $pxs->death("Error: PPCODE must be the last thing") if @{$pxs->{line}} > 1;
     1;
 }
 
@@ -4075,7 +4078,7 @@ sub parse {
         my ($alias, $is_symbolic, $value) = ($1, $2, $3);
         my $orig_alias = $alias;
 
-        $pxs->blurt("Error: In alias definition for '$alias' the value may not"
+        $pxs->blurt("Error: in alias definition for '$alias' the value may not"
                                     . " contain ':' unless it is symbolic.")
                 if !$is_symbolic and $value=~/:/;
 
@@ -4090,7 +4093,7 @@ sub parse {
             } elsif ($value eq $fname) {
                 $value = 0;
             } else {
-                $pxs->blurt("Error: Unknown alias '$value' in symbolic definition for '$orig_alias'");
+                $pxs->blurt("Error: unknown alias '$value' in symbolic definition for '$orig_alias'");
             }
         }
 
@@ -4098,9 +4101,9 @@ sub parse {
         my $prev_value = $xsub->{map_alias_name_to_value}{$alias};
         if (defined $prev_value) {
             if ($prev_value eq $value) {
-                $pxs->Warn("Warning: Ignoring duplicate alias '$orig_alias'")
+                $pxs->Warn("Warning: ignoring duplicate alias '$orig_alias'")
             } else {
-                $pxs->Warn("Warning: Conflicting duplicate alias '$orig_alias'"
+                $pxs->Warn("Warning: conflicting duplicate alias '$orig_alias'"
                                             . " changes definition from '$prev_value' to '$value'");
                 delete $xsub->
                        {map_alias_value_to_name_seen_hash}->
@@ -4130,7 +4133,7 @@ sub parse {
                                             $copy
                                         } @keys;
                 $pxs->WarnHint(
-                                    "Warning: Aliases '$orig_alias' and "
+                                    "Warning: aliases '$orig_alias' and "
                                     . join(", ", @keys)
                                     . " have identical values of $value"
                                     . ( $value eq "0"
@@ -4149,7 +4152,7 @@ sub parse {
                         {$value}{$alias}++;
     }
 
-    $pxs->blurt("Error: Cannot parse ALIAS definitions from '$orig'")
+    $pxs->blurt("Error: cannot parse ALIAS definitions from '$orig'")
         if $line;
 
     1;
