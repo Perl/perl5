@@ -11717,11 +11717,17 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 
                 }
 #endif
-                if (PL_main_start)
+                if (PL_main_start) {
                     /* diag_listed_as: Too late to run %s block */
                     ck_warner(packWARN(WARN_VOID),
                               "Too late to run INIT block");
-                Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
+                    /* callers may touch cv after we return so don't
+                       just release it.
+                    */
+                    SAVEFREESV(cv);
+                }
+                else
+                    Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
             }
             else
                 return FALSE;
