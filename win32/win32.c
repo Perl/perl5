@@ -43,8 +43,6 @@
 /* #include "config.h" */
 
 
-#define PerlIO FILE
-
 #include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
