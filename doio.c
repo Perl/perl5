@@ -1026,9 +1026,6 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
             }
 #endif
 
-#if !defined(WIN32)
-           /* PL_fdpid isn't used on Windows, so avoid this useless work.
-            * XXX Probably the same for a lot of other places. */
             {
                 Pid_t pid;
                 SV *sv;
@@ -1041,7 +1038,6 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
                 SvUPGRADE(sv, SVt_IV);
                 SvIV_set(sv, pid);
             }
-#endif
 
             if (was_fdopen) {
                 /* need to close fp without closing underlying fd */

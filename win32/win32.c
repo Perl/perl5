@@ -51,6 +51,8 @@
 #define PERL_NO_GET_CONTEXT
 #include "XSUB.h"
 
+#include "perliol.h" /* For PerlIOUnix_refcnt */
+
 #include <fcntl.h>
 #ifndef __GNUC__
 /* assert.h conflicts with #define of assert in perl.h */
@@ -3622,7 +3624,7 @@ do_popen(const char *mode, const char *command, IV narg, SV **args) {
 
         win32_close(p[child]);
 
-        sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
+        sv_setiv(*av_fetch(PL_fdpid, p[parent], TRUE), childpid);
 
         /* set process id so that it can be returned by perl's open() */
         PL_forkprocess = childpid;
@@ -3665,34 +3667,38 @@ win32_pclose(PerlIO *pf)
 #ifdef USE_RTL_POPEN
     return _pclose(pf);
 #else
+    /* this should roughly match Perl_my_pclose() in util.c */
     dTHX;
-    int childpid, status;
-    SV *sv;
+    int fd = PerlIO_fileno(pf);
 
-    sv = *av_fetch(w32_fdpid, PerlIO_fileno(pf), TRUE);
+    SV **svp = av_fetch(PL_fdpid, fd, FALSE);
+    int childpid = -1;
+    if (svp) {
+        childpid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
+        SvREFCNT_dec(*svp);
+        *svp = NULL;
+    }
 
-    if (SvIOK(sv))
-        childpid = SvIVX(sv);
-    else
-        childpid = 0;
+    bool should_wait = PerlIOUnix_refcnt(fd) == 1 && childpid > 0;
 
-    if (!childpid) {
-        errno = EBADF;
+    bool close_failed = (PerlIO_close(pf) == EOF);
+
+    int status;
+    dSAVE_ERRNO;
+    int wait_result;
+    if (should_wait) {
+        wait_result = win32_waitpid(childpid, &status, 0);
+    }
+
+    if (close_failed) {
+        RESTORE_ERRNO; /* error from the close */
         return -1;
     }
 
-#ifdef USE_PERLIO
-    PerlIO_close(pf);
-#else
-    fclose(pf);
-#endif
-    SvIVX(sv) = 0;
-
-    if (win32_waitpid(childpid, &status, 0) == -1)
-        return -1;
-
-    return status;
-
+    return should_wait
+        ? (wait_result < 0 ? wait_result :
+           (status == 0 ? 0 : (errno = 0, status)))
+        : 0;
 #endif /* USE_RTL_POPEN */
 }
 
@@ -5685,7 +5691,6 @@ Perl_sys_intern_init(pTHX)
     w32_perlshell_tokens	= NULL;
     w32_perlshell_vec		= (char**)NULL;
     w32_perlshell_items		= 0;
-    w32_fdpid			= newAV();
     Newx(w32_children, 1, child_tab);
     w32_num_children		= 0;
 #  ifdef USE_ITHREADS
@@ -5728,7 +5733,6 @@ Perl_sys_intern_clear(pTHX)
 
     Safefree(w32_perlshell_tokens);
     Safefree(w32_perlshell_vec);
-    /* NOTE: w32_fdpid is freed by sv_clean_all() */
     Safefree(w32_children);
     if (w32_timerid) {
         KillTimer(w32_message_hwnd, w32_timerid);
@@ -5767,7 +5771,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->perlshell_tokens	= NULL;
     dst->perlshell_vec		= (char**)NULL;
     dst->perlshell_items	= 0;
-    dst->fdpid			= newAV();
     Newxz(dst->children, 1, child_tab);
     dst->pseudo_id		= 0;
     dst->cur_tid = 0;

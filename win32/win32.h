@@ -568,7 +568,6 @@ struct interp_intern {
     char *	perlshell_tokens;
     char **	perlshell_vec;
     long	perlshell_items;
-    struct av *	fdpid;
     child_tab *	children;
 #ifdef USE_ITHREADS
     DWORD	pseudo_id;
