@@ -3513,9 +3513,12 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
 
-    $pxs->blurt("Error: only one SCOPE declaration allowed per XSUB")
-        if $xsub->{seen_SCOPE};
-    $xsub->{seen_SCOPE} = 1;
+    # $xsub not defined for file-scoped SCOPE
+    if ($xsub) {
+        $pxs->blurt("Error: only one SCOPE declaration allowed per XSUB")
+            if $xsub->{seen_SCOPE};
+        $xsub->{seen_SCOPE} = 1;
+    }
 
     # Note that currently this parse method can be called either while
     # parsing an XSUB, or while processing file-scoped keywords
