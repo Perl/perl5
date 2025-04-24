@@ -294,6 +294,7 @@ sub parse {
     $self->{decl} = $decl;
     $decl->parse($pxs, $self)
         or return;
+    push @{$self->{kids}}, $decl;
 
     # Append a fake EOF-keyword line. This makes it easy to do "all lines
     # until the next keyword" style loops, since the fake END line (which
@@ -678,6 +679,7 @@ sub parse {
         or return;
 
     $self->{return_type} = $return_type;
+    push @{$self->{kids}}, $return_type;
 
     # Decompose the function declaration: match a line like
     #   Some::Class::foo_bar(  args  ) const ;
@@ -752,6 +754,7 @@ sub parse {
 
     $params->parse($pxs, $xsub, $params_text);
     $self->{params} = $params;
+    push @{$self->{kids}}, $params;
 
     # How many OUTLIST SVs get returned in addition to RETVAL
     $xsub->{XSRETURN_count_extra} =
