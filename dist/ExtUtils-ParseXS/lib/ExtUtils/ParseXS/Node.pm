@@ -4225,7 +4225,7 @@ package ExtUtils::ParseXS::Node::INPUT_line;
 # Handle one line from an INPUT keyword block
 
 BEGIN { $build_subclass->(parent => 'keyline',
-    'param',   # The IO_Param object associated with this INPUT line.
+    'ioparam', # The IO_Param object associated with this INPUT line.
 
                # The parsed components of this INPUT line:
     'type',    # Str:  char *
@@ -4320,9 +4320,10 @@ sub parse {
 
     my $ioparams = $xbody->{ioparams};
 
-    my ExtUtils::ParseXS::Node::IO_Param $param = $ioparams->{names}{$var_name};
+    my ExtUtils::ParseXS::Node::IO_Param $ioparam =
+                $ioparams->{names}{$var_name};
 
-    if (defined $param) {
+    if (defined $ioparam) {
         # The var appeared in the signature too.
 
         # Check for duplicate definitions of a particular parameter name.
@@ -4331,52 +4332,52 @@ sub parse {
         # and thus shouldn't be defined again. The exception to this are
         # synthetic params like THIS, which are assigned a provisional type
         # which can be overridden.
-        if (   $param->{in_input}
-            or (!$param->{is_synthetic} and defined $param->{type})
+        if (   $ioparam->{in_input}
+            or (!$ioparam->{is_synthetic} and defined $ioparam->{type})
         ) {
             $pxs->blurt(
                 "Error: duplicate definition of parameter '$var_name' ignored");
             return;
         }
 
-        if ($var_name eq 'RETVAL' and $param->{is_synthetic}) {
+        if ($var_name eq 'RETVAL' and $ioparam->{is_synthetic}) {
             # Convert a synthetic RETVAL into a real parameter
-            delete $param->{is_synthetic};
-            delete $param->{no_init};
-            if (! defined $param->{arg_num}) {
+            delete $ioparam->{is_synthetic};
+            delete $ioparam->{no_init};
+            if (! defined $ioparam->{arg_num}) {
                 # if has arg_num, RETVAL has appeared in signature but with no
                 # type, and has already been moved to the correct position;
                 # otherwise, it's an alien var that didn't appear in the
                 # signature; move to the correct position.
                 @{$ioparams->{kids}} =
-                            grep $_ != $param, @{$ioparams->{kids}};
-                push @{$ioparams->{kids}}, $param;
-                $is_alien          = 1;
-                $param->{is_alien} = 1;
+                            grep $_ != $ioparam, @{$ioparams->{kids}};
+                push @{$ioparams->{kids}}, $ioparam;
+                $is_alien            = 1;
+                $ioparam->{is_alien} = 1;
             }
         }
 
-        $param->{in_input} = 1;
-        $var_num = $param->{arg_num};
+        $ioparam->{in_input} = 1;
+        $var_num = $ioparam->{arg_num};
     }
     else {
         # The var is in an INPUT line, but not in signature. Treat it as a
         # general var declaration (which really should have been in a
         # PREINIT section). Legal but nasty: flag is as 'alien'
         $is_alien = 1;
-        $param = ExtUtils::ParseXS::Node::IO_Param->new({
+        $ioparam = ExtUtils::ParseXS::Node::IO_Param->new({
                     var      => $var_name,
                     is_alien => 1,
                 });
 
-        push @{$ioparams->{kids}}, $param;
-        $ioparams->{names}{$var_name} = $param;
+        push @{$ioparams->{kids}}, $ioparam;
+        $ioparams->{names}{$var_name} = $ioparam;
     }
 
     # Parse the initialisation part of the INPUT line (if any)
 
     my ($init, $defer);
-    my $no_init = $param->{no_init}; # may have had OUT in signature
+    my $no_init = $ioparam->{no_init}; # may have had OUT in signature
 
     if (!$no_init && defined $init_op) {
         # Use the init code based on overridden $var_init, which was
@@ -4420,12 +4421,12 @@ sub parse {
     $self->{name}    = $var_name,
     $self->{init_op} = $init_op,
     $self->{init}    = $var_init,
-    $self->{param}   = $param;
+    $self->{ioparam} = $ioparam;
 
-    # and also update the param object using that information
+    # and also update the ioparam object using that information
 
-    %$param = (
-        %$param,
+    %$ioparam = (
+        %$ioparam,
         type    => $var_type,
         arg_num => $var_num,
         var     => $var_name,
@@ -4449,14 +4450,14 @@ sub as_code {
     # Emit "type var" declaration and possibly various forms of
     # initialiser code.
 
-    my $ioparam = $self->{param};
+    my $ioparam = $self->{ioparam};
 
     # Synthetic params like THIS will be emitted later - they
     # are treated like ANSI params, except the type can overridden
     # within an INPUT statement
     return if $ioparam->{is_synthetic};
 
-    # The param object contains data from both the INPUT line and
+    # The ioparam object contains data from both the INPUT line and
     # the XSUB signature.
     $ioparam->as_input_code($pxs, $xsub, $xbody);
 }
@@ -4481,7 +4482,7 @@ package ExtUtils::ParseXS::Node::OUTPUT_line;
 # Handle one line from an OUTPUT keyword block
 
 BEGIN { $build_subclass->(parent => 'keyline',
-    'param',       # the IO_Param object associated with this OUTPUT line.
+    'ioparam',     # the IO_Param object associated with this OUTPUT line.
     'is_setmagic', # Bool: the line is a SETMAGIC: line
     'do_setmagic', # Bool: the current SETMAGIC state
     'name',        # Str:  name of the parameter to output
@@ -4524,11 +4525,11 @@ sub parse {
 
     $self->{name} = $outarg;
 
-    my ExtUtils::ParseXS::Node::IO_Param $param =
+    my ExtUtils::ParseXS::Node::IO_Param $ioparam =
                                 $xbody->{ioparams}{names}{$outarg};
-    $self->{param} = $param;
+    $self->{ioparam} = $ioparam;
 
-    if ($param && $param->{in_output}) {
+    if ($ioparam && $ioparam->{in_output}) {
         $pxs->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
         return;
     }
@@ -4541,19 +4542,19 @@ sub parse {
         return;
     }
 
-    if (   !$param  # no such param or, for RETVAL, RETVAL was void
-                    # not bound to an arg which can be updated
-                or $outarg ne "RETVAL" && !$param->{arg_num})
+    if (  !$ioparam # no such param or, for RETVAL, RETVAL was void;
+           # not bound to an arg which can be updated
+        or $outarg ne "RETVAL" && !$ioparam->{arg_num})
     {
         $pxs->blurt("Error: OUTPUT $outarg not a parameter");
         return;
     }
 
-    $param->{in_output} = 1;
-    $param->{do_setmagic} = $outarg eq 'RETVAL'
+    $ioparam->{in_output} = 1;
+    $ioparam->{do_setmagic} = $outarg eq 'RETVAL'
                                 ? 0 # RETVAL never needs magic setting
                                 : $xbody->{OUTPUT_SETMAGIC_state};
-    $self->{code} = $param->{output_code} = $outcode if length $outcode;
+    $self->{code} = $ioparam->{output_code} = $outcode if length $outcode;
 
     1;
 }
@@ -4597,10 +4598,10 @@ sub as_code {
 
     return if $self->{name} eq 'RETVAL';
 
-    my $param = $self->{param};
-    return unless $param; # might be an ENABLE line with no param to emit
+    my $ioparam = $self->{ioparam};
+    return unless $ioparam; # might be an ENABLE line with no param to emit
 
-    $param->as_output_code($pxs);
+    $ioparam->as_output_code($pxs);
 }
 
 
