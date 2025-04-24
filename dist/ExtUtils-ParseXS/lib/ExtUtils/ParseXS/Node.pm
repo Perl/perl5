@@ -39,8 +39,12 @@ my $close_brace = '}';
 # BEGIN. (Created as a lexical sub ref to make it easily accessible to
 # all subclasses in this file.)
 #
-# Arg 1 is name of parent, without E::PXS::Node:: prefix.
-# Remaining args are the names of fields. It also inherits the fields
+# Arg 1 and 2 should be
+#         'parent' => Foo
+# where the node's class should be ExtUtils::ParseXS::Node::Foo prefix.
+# An empty string implies the parent is E::PXS::Node .
+#
+# Any remaining args are the names of fields. It also inherits the fields
 # of its parent.
 
 my $USING_FIELDS;
@@ -48,14 +52,17 @@ my $USING_FIELDS;
 my $build_subclass;
 BEGIN {
     $build_subclass = sub {
-        my $parent = shift;
+        my ($key, $parent, @fields) = @_;
+
+        die "Internal error: key '$key' not 'parent'\n"
+            unless $key eq 'parent';
 
         no strict 'refs';
 
         my $class       = caller(0);
         my $full_parent = 'ExtUtils::ParseXS::Node';
         $full_parent   .= "::$parent" if length $parent;
-        my @fields      = (@{"${full_parent}::FIELDS"}, @_);
+        @fields         = (@{"${full_parent}::FIELDS"}, @fields);
 
         @{"${class}::ISA"}    = $full_parent;
         @{"${class}::FIELDS"} = @fields;
@@ -194,7 +201,7 @@ package ExtUtils::ParseXS::Node::xsub;
 
 # Process an entire XSUB definition
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'decl',       # Node::xsub_decl object holding this XSUB's declaration
 
     # Boolean flags: they indicate that at least one of each specified
@@ -655,7 +662,7 @@ package ExtUtils::ParseXS::Node::xsub_decl;
 # Parse and store the complete declaration part of an XSUB, including
 # its parameters, name and return type.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'return_type',    # ReturnType object representing e.g "NO_OUTPUT char *"
     'params',         # Params object representing e.g "a, int b, c=0"
     'class',          # Str: the 'const Foo::Bar' part of the xsub's name
@@ -781,7 +788,7 @@ package ExtUtils::ParseXS::Node::ReturnType;
 # It mainly consists of the return type, but there are also
 # extra keywords to process, such as NO_RETURN.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'type',           # Str: the XSUB's C return type
     'no_output',      # bool: saw 'NO_OUTPUT'
     'extern_C',       # bool: saw 'extern C'
@@ -870,7 +877,7 @@ package ExtUtils::ParseXS::Node::Param;
 # augments the parameter declaration with info from INPUT and OUTPUT
 # lines.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     # values derived from the XSUB's signature
     'in_out',        # The IN/OUT/OUTLIST etc value (if any)
     'var',           # the name of the parameter
@@ -1091,7 +1098,7 @@ package ExtUtils::ParseXS::Node::IO_Param;
 # based on the XSUB's signature, but also augmented by info from INPUT or
 # OUTPUT lines
 
-BEGIN { $build_subclass->('Param', # parent
+BEGIN { $build_subclass->(parent => 'Param',
     # values derived from the XSUB's INPUT line
 
     'init_op',     # initialisation type: one of =/+/;
@@ -2119,7 +2126,7 @@ package ExtUtils::ParseXS::Node::Params;
 # ones such as THIS and RETVAL.
 # It is a mainly a list of Node::Param or Node::IO_Param children.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
 
                      # Inherited 'kids' field:
                      #
@@ -2452,7 +2459,7 @@ package ExtUtils::ParseXS::Node::xbody;
 # XSRETURN(N); there is only one of those per XSUB, so is handled by a
 # higher-level node.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'ioparams', # per-body copy of params which accumulate extra
                 # info from any INPUT and OUTPUT sections (which can
                 # vary between different CASEs)
@@ -2569,7 +2576,7 @@ EOF
 
 package ExtUtils::ParseXS::Node::input_part;
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
 
     # Used during code generation:
     # a multi-line string containing lines of code to be emitted *after*
@@ -2725,7 +2732,7 @@ EOF
 
 package ExtUtils::ParseXS::Node::init_part;
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
 )};
 
 
@@ -2768,7 +2775,7 @@ sub as_code {
 
 package ExtUtils::ParseXS::Node::code_part;
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
 )};
 
 
@@ -2817,7 +2824,7 @@ sub as_code {
 
 package ExtUtils::ParseXS::Node::output_part;
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
 
     # State during code emitting
 
@@ -2999,7 +3006,7 @@ sub as_code {
 
 package ExtUtils::ParseXS::Node::cleanup_part;
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
 )};
 
 
@@ -3046,7 +3053,7 @@ package ExtUtils::ParseXS::Node::oneline;
 # On entry, $self->lines[0] will be any text (on the same line) which
 # follows the keyword.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'text',    # any text following the keyword
 )};
 
@@ -3069,7 +3076,7 @@ package ExtUtils::ParseXS::Node::NOT_IMPLEMENTED_YET;
 
 # Handle NOT_IMPLEMENTED_YET pseudo-keyword
 
-BEGIN { $build_subclass->('oneline', # parent
+BEGIN { $build_subclass->(parent => 'oneline',
 )};
 
 sub as_code {
@@ -3089,7 +3096,7 @@ package ExtUtils::ParseXS::Node::CASE;
 
 # Process the 'CASE:' keyword
 
-BEGIN { $build_subclass->('oneline', # parent
+BEGIN { $build_subclass->(parent => 'oneline',
     'cond',  # the C code of the condition for the CASE, or ''
     'num',   # which CASE number this is (starting at 1)
 )};
@@ -3127,7 +3134,7 @@ package ExtUtils::ParseXS::Node::autocall;
 # by auto-generating a call to a C library function of the same
 # name
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'args', # string to use for auto function call arguments
 )};
 
@@ -3223,7 +3230,7 @@ package ExtUtils::ParseXS::Node::enable;
 
 # Base class for keywords which accept ENABLE/DISABLE as an argument
 
-BEGIN { $build_subclass->('oneline', # parent
+BEGIN { $build_subclass->(parent => 'oneline',
     'enable',  # bool
 )};
 
@@ -3258,7 +3265,7 @@ package ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS;
 # object where as_code() is called immediately after parse() and then
 # the object is discarded.
 
-BEGIN { $build_subclass->('enable', # parent
+BEGIN { $build_subclass->(parent => 'enable',
 )};
 
 
@@ -3304,7 +3311,7 @@ package ExtUtils::ParseXS::Node::PROTOTYPES;
 #
 # Note that this keyword can appear both inside of and outside of an XSUB.
 
-BEGIN { $build_subclass->('enable', # parent
+BEGIN { $build_subclass->(parent => 'enable',
 )};
 
 
@@ -3327,7 +3334,7 @@ package ExtUtils::ParseXS::Node::SCOPE;
 #
 # Note that this keyword can appear both inside of and outside of an XSUB.
 
-BEGIN { $build_subclass->('enable', # parent
+BEGIN { $build_subclass->(parent => 'enable',
 )};
 
 
@@ -3361,7 +3368,7 @@ package ExtUtils::ParseXS::Node::VERSIONCHECK;
 #
 # Note that this keyword can appear both inside of and outside of an XSUB.
 
-BEGIN { $build_subclass->('enable', # parent
+BEGIN { $build_subclass->(parent => 'enable',
 )};
 
 
@@ -3384,7 +3391,7 @@ package ExtUtils::ParseXS::Node::multiline;
 # On entry, $self->lines[0] will be any text (on the same line) which
 # follows the keyword.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'lines',    # Array ref of all lines until the next keyword
 )};
 
@@ -3422,7 +3429,7 @@ package ExtUtils::ParseXS::Node::multiline_merged;
 # addition, leading blank lines are skipped and the remainder concatenated
 # into a single line, 'text'.
 
-BEGIN { $build_subclass->('multiline', # parent
+BEGIN { $build_subclass->(parent => 'multiline',
     'text',    # singe string contained all concatenated lines
 )};
 
@@ -3454,7 +3461,7 @@ package ExtUtils::ParseXS::Node::C_ARGS;
 
 # Handle C_ARGS keyword
 
-BEGIN { $build_subclass->('multiline_merged', # parent
+BEGIN { $build_subclass->(parent => 'multiline_merged',
 )};
 
 
@@ -3476,7 +3483,7 @@ package ExtUtils::ParseXS::Node::INTERFACE;
 
 # Handle INTERFACE keyword
 
-BEGIN { $build_subclass->('multiline_merged', # parent
+BEGIN { $build_subclass->(parent => 'multiline_merged',
 )};
 
 
@@ -3523,7 +3530,7 @@ package ExtUtils::ParseXS::Node::INTERFACE_MACRO;
 
 # Handle INTERFACE_MACRO keyword
 
-BEGIN { $build_subclass->('multiline_merged', # parent
+BEGIN { $build_subclass->(parent => 'multiline_merged',
     'get_macro', # name of macro to get interface
     'set_macro', # name of macro to set interface
 )};
@@ -3563,7 +3570,7 @@ package ExtUtils::ParseXS::Node::OVERLOAD;
 
 # Handle OVERLOAD keyword
 
-BEGIN { $build_subclass->('multiline_merged', # parent
+BEGIN { $build_subclass->(parent => 'multiline_merged',
     'ops', # has ref of overloaded op names
 )};
 
@@ -3594,7 +3601,7 @@ package ExtUtils::ParseXS::Node::ATTRS;
 
 # Handle ATTRS keyword
 
-BEGIN { $build_subclass->('multiline', # parent
+BEGIN { $build_subclass->(parent => 'multiline',
 )};
 
 
@@ -3625,7 +3632,7 @@ package ExtUtils::ParseXS::Node::PROTOTYPE;
 
 # Handle PROTOTYPE keyword
 
-BEGIN { $build_subclass->('multiline', # parent
+BEGIN { $build_subclass->(parent => 'multiline',
     'prototype', # 0 (disable), 1 (enable), 2 ("") or "$$@" etc
 )};
 
@@ -3689,7 +3696,7 @@ package ExtUtils::ParseXS::Node::codeblock;
 # Base class for Nodes which contain lines of literal C code
 # (such as PREINIT: and CODE:)
 
-BEGIN { $build_subclass->('multiline', # parent
+BEGIN { $build_subclass->(parent => 'multiline',
 )};
 
 
@@ -3751,7 +3758,7 @@ package ExtUtils::ParseXS::Node::CODE;
 
 # Store the code lines associated with the CODE keyword
 
-BEGIN { $build_subclass->('codeblock', # parent
+BEGIN { $build_subclass->(parent => 'codeblock',
 )};
 
 sub parse {
@@ -3816,7 +3823,7 @@ package ExtUtils::ParseXS::Node::CLEANUP;
 
 # Store the code lines associated with the CLEANUP: keyword
 
-BEGIN { $build_subclass->('codeblock', # parent
+BEGIN { $build_subclass->(parent => 'codeblock',
 )};
 
 # Currently all methods are just inherited.
@@ -3828,7 +3835,7 @@ package ExtUtils::ParseXS::Node::INIT;
 
 # Store the code lines associated with the INIT: keyword
 
-BEGIN { $build_subclass->('codeblock', # parent
+BEGIN { $build_subclass->(parent => 'codeblock',
 )};
 
 # Currently all methods are just inherited.
@@ -3840,7 +3847,7 @@ package ExtUtils::ParseXS::Node::POSTCALL;
 
 # Store the code lines associated with the POSTCALL: keyword
 
-BEGIN { $build_subclass->('codeblock', # parent
+BEGIN { $build_subclass->(parent => 'codeblock',
 )};
 
 # Currently all methods are just inherited.
@@ -3852,7 +3859,7 @@ package ExtUtils::ParseXS::Node::PPCODE;
 
 # Store the code lines associated with the PPCODE keyword
 
-BEGIN { $build_subclass->('codeblock', # parent
+BEGIN { $build_subclass->(parent => 'codeblock',
 )};
 
 sub parse {
@@ -3908,7 +3915,7 @@ package ExtUtils::ParseXS::Node::PREINIT;
 
 # Store the code lines associated with the PREINIT: keyword
 
-BEGIN { $build_subclass->('codeblock', # parent
+BEGIN { $build_subclass->(parent => 'codeblock',
 )};
 
 # Currently all methods are just inherited.
@@ -3921,7 +3928,7 @@ package ExtUtils::ParseXS::Node::keylines;
 # Base class for keyword FOO nodes which have a FOO_line kid node for
 # each line making up the keyword - such as OUTPUT etc.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'lines',   # Array ref of all lines until the next keyword
 )};
 
@@ -3989,7 +3996,7 @@ package ExtUtils::ParseXS::Node::keyline;
 # Base class for FOO_line nodes which have a FOO node as
 # their parent.
 
-BEGIN { $build_subclass->('', # parent
+BEGIN { $build_subclass->(parent => '',
     'line',   # text of current line
 )};
 
@@ -4020,7 +4027,7 @@ package ExtUtils::ParseXS::Node::ALIAS;
 
 # Handle ALIAS keyword
 
-BEGIN { $build_subclass->('keylines', # parent
+BEGIN { $build_subclass->(parent => 'keylines',
     'aliases', # hashref of all alias => value pairs
 )};
 
@@ -4041,7 +4048,7 @@ package ExtUtils::ParseXS::Node::ALIAS_line;
 
 # Handle one line from an ALIAS keyword block
 
-BEGIN { $build_subclass->('keyline', # parent
+BEGIN { $build_subclass->(parent => 'keyline',
 )};
 
 
@@ -4186,7 +4193,7 @@ package ExtUtils::ParseXS::Node::INPUT;
 # Handle an explicit INPUT: block, or any implicit INPUT
 # block which can follow an xsub signature or CASE keyword.
 
-BEGIN { $build_subclass->('keylines', # parent
+BEGIN { $build_subclass->(parent => 'keylines',
     'implicit',   # bool: this is an INPUT section at the start of the
                   #       XSUB without an explicit 'INPUT' keyword
 )};
@@ -4216,7 +4223,7 @@ package ExtUtils::ParseXS::Node::INPUT_line;
 
 # Handle one line from an INPUT keyword block
 
-BEGIN { $build_subclass->('keyline', # parent
+BEGIN { $build_subclass->(parent => 'keyline',
     'param',   # The IO_Param object associated with this INPUT line.
 
                # The parsed components of this INPUT line:
@@ -4460,7 +4467,7 @@ package ExtUtils::ParseXS::Node::OUTPUT;
 
 # Handle an OUTPUT: block
 
-BEGIN { $build_subclass->('keylines', # parent
+BEGIN { $build_subclass->(parent => 'keylines',
 )};
 
 # The inherited parse() method will call OUTPUT_line->parse() for each line
@@ -4472,7 +4479,7 @@ package ExtUtils::ParseXS::Node::OUTPUT_line;
 
 # Handle one line from an OUTPUT keyword block
 
-BEGIN { $build_subclass->('keyline', # parent
+BEGIN { $build_subclass->(parent => 'keyline',
     'param',       # the param object associated with this OUTPUT line.
     'is_setmagic', # bool: the line is a SETMAGIC: line
     'do_setmagic', # bool: the current SETMAGIC state
