@@ -6,26 +6,193 @@ our $VERSION = '3.58';
 
 =head1 NAME
 
-ExtUtils::ParseXS::Node - Classes for nodes of an ExtUtils::ParseXS AST
+ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
 
 =head1 SYNOPSIS
 
-XXX TBC
+    # Create a node to represent the Foo part of an XSUB; then
+    # top-down parse it into a subtree; then top-down emit the
+    # contents of the subtree as C code.
+
+    my $foo = ExtUtils::ParseXS::Node::Foo->new();
+    $foo->parse(...)
+        or die;
+    $foo->as_code(...);
 
 =head1 DESCRIPTION
 
-XXX Sept 2024: this is Work In Progress. This API is currently private and
-subject to change. Most of ParseXS doesn't use an AST, and instead
-maintains just enough state to emit code as it parses. This module
-represents the start of an effort to make it use an AST instead.
+This API is currently private and subject to change.
 
-An C<ExtUtils::ParseXS::Node> class, and its various subclasses, hold the
+Node that as of May 2025, this is a Work In Progress. An AST is created
+for each parsed XSUB, but those nodes aren't yet linked into a
+higher-level tree representing the whole XS file.
+
+The C<ExtUtils::ParseXS::Node> class, and its various subclasses, hold the
 state for the nodes of an Abstract Syntax Tree (AST), which represents the
 parsed state of an XS file.
 
-Each node is basically a hash of fields. Which field names are legal
-varies by the node type. The hash keys and values can be accessed
-directly: there are no getter/setter methods.
+Each node is a hash of fields. Which field names are legal varies by the
+node type. The hash keys and values can be accessed directly: there are no
+getter/setter methods.
+
+Each node may have a C<kids> field which points to an array of all the
+children of that node: this is what provides the tree structure. In
+addition, some of those kids may also have direct links from fields for
+quick access. For example, the C<xsub_decl> child object of an C<xsub>
+object can be accessed in either of these ways:
+
+    $xsub_object->{kids}[0]
+    $xsub_object->{decl}
+
+Most object-valued node fields within a tree point only to their direct
+children; however, both C<INPUT_line> and C<OUTPUT_line> have an
+C<ioparam> field which points to the C<IO_Param> object associated with
+this line, which is located elsewhere in the tree.
+
+The various C<foo_part> nodes divide the parsing of the main body of the
+XSUB into sections where different sets of keywords are allowable, and
+where various bits of code can be conveniently emitted.
+
+=head2 Methods
+
+There are two main methods, in addition to new(), which are present in all
+subclasses. First, parse() consumes lines from the source to satisfy the
+construct being parsed. It may itself create objects of lower-level
+constructs and call parse on them. For example, C<Node::xbody::parse()>
+may create a C<Node::input_part> node and call parse() on it, which will
+create C<Node::INPUT> or C<Node::PREINIT> nodes as appropriate, and so on.
+
+Secondly, as_code() descends its sub-tree, outputting the tree as C code.
+
+Note that parsing and code-generation are done as two separate phases;
+parse() should only build a tree and never emit code.
+
+In addition to C<$self>, both these methods are always provided with
+these three parameters:
+
+=over
+
+=item C<$pxs>
+
+An C<ExtUtils::ParseXS> object which contains the overall processing
+state. In particular, it has warning and croaking methods, and holds the
+lines read in from the source file for the current paragraph.
+
+=item C<$xsub>
+
+The current C<ExtUtils::ParseXS::xsub> node being processed.
+
+=item C<$xbody>
+
+The current C<ExtUtils::ParseXS::xbody> node being processed. Note that
+in the presence of a C<CASE> keyword, an XSUB can have multiple bodies.
+
+=back
+
+The parse() and as_code() methods for some subclasses may have additional
+parameters.
+
+Some subclasses may have additional helper methods.
+
+=head2 Class Hierachy
+
+C<Node> and its sub-classes form the following inheritance hierarchy.
+Various abstract classes are used by concrete subclasses where the
+processing and/or fields are similar: for example, C<CODE>, C<PPCODE> etc
+all consume a block of uninterpreted lines from the source file until the
+next keyword, and emit that code, possibly wrapped in C<#line> directives.
+This common behaviour is provided by the C<codeblock> class.
+
+    Node
+        xsub
+        xsub_decl
+        ReturnType
+        Param
+            IO_Param
+        Params
+        xbody
+        input_part
+        init_part
+        code_part
+        output_part
+        cleanup_part
+        autocall
+        oneline
+            NOT_IMPLEMENTED_YET
+            CASE
+            enable
+                EXPORT_XSUB_SYMBOLS
+                PROTOTYPES
+                SCOPE
+                VERSIONCHECK
+        multiline
+            multiline_merged
+                C_ARGS
+                INTERFACE
+                INTERFACE_MACRO
+                OVERLOAD
+            ATTRS
+            PROTOTYPE
+            codeblock
+                CODE
+                CLEANUP
+                INIT
+                POSTCALL
+                PPCODE
+                PREINIT
+        keylines
+            ALIAS
+            INPUT
+            OUTPUT
+        keyline
+            ALIAS_line
+            INPUT_line
+            OUTPUT_line
+
+
+=head2 Abstract Syntax Tree structure
+
+A typical XSUB might compile to a tree with a structure similar to the
+following. Note that this is unrelated to the inheritance hierarchy
+shown above.
+
+    xsub
+        xsub_decl
+            ReturnType
+            Params
+                Param
+                Param
+                ...
+        CASE   # for when a CASE keyword being present implies multiple
+               # bodies; otherwise, just a bare xbody node.
+            xbody
+                # per-body copy of declaration Params, augmented by
+                # data from INPUT and OUTPUT sections
+                Params
+                    IO_Param
+                    IO_Param
+                    ...
+                input_part
+                    INPUT
+                        INPUT_line
+                        INPUT_line
+                        ...
+                    PREINIT
+                init_part
+                    INIT
+                code_part
+                    CODE
+                output_part
+                    OUTPUT
+                        OUTPUT_line
+                        OUTPUT_line
+                        ...
+                    POSTCALL
+                cleanup_part
+                    CLEANUP
+        CASE
+            xbody
+                ...
 
 =cut
 
