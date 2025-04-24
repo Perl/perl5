@@ -2121,20 +2121,21 @@ sub as_output_code {
 
 package ExtUtils::ParseXS::Node::Params;
 
-# Node subclass which holds a list of the parameters for an XSUB
-# (both directly found in the foo(....) signature, plus possibly synthetic
-# ones such as THIS and RETVAL.
-# It is a mainly a list of Node::Param or Node::IO_Param children.
+# A Node subclass which holds a list of the parameters for an XSUB.
+# It is a mainly a list of Node::Param or Node::IO_Param kids, and is
+# used in two contexts.
+#
+# First, as a field of an xsub_decl node, where it holds a list of Param
+# objects which represent the individual parameters found within an XSUB's
+# signature, plus possibly extra synthetic ones such as THIS and RETVAL.
+#
+# Second, as a field of an xbody node, where it contains a copy of the
+# signature's Params object (and Param children), but where the children
+# are in fact IO_param objects and hold augmented information provided by
+# any INPUT and OUTPUT blocks within that XSUB body (of which there can be
+# more than one in the presence of CASE).
 
 BEGIN { $build_subclass->(parent => '',
-
-                     # Inherited 'kids' field:
-                     #
-                     # Array ref of Node::Param or Node::IO_Param
-                     # objects representing the parameters of this
-                     # XSUB - either the original ones as seen in the
-                     # XSUB's signature, or per-xbody ones augmented
-                     # by info from INPUT and OUTPUT sections.
 
     'names',         # Hash ref mapping variable names to Node::Param
                      # or Node::IO_Param objects
@@ -3018,7 +3019,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no
 
-    # Repeatedly look for INIT or generic keywords,
+    # Repeatedly look for CLEANUP or generic keywords,
     # parse the text following them, and add any resultant nodes
     # as kids to the current node.
     $self->parse_keywords(
