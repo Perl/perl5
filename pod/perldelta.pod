@@ -110,6 +110,12 @@ There may well be none in a stable release.
 
 =item *
 
+Simple (non-overflowing) addition (C<+>), subtraction (C<->) and
+multiplication (C<*>) of IVs are slightly sped up, as long as
+sufficient underlying C compiler support is available.
+
+=item *
+
 XXX
 
 =back

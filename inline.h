@@ -3413,6 +3413,192 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
     return FALSE;
 }
 
+/*
+ * S_iv_{add,sub,mul}_may_overflow(a, b, p) virtually compute "a <op> b"
+ * (where <op> is +, -, or *) in infinite precision, and, if the result
+ * is (or may be) not representable with IV, return true.
+ * Otherwise (no overflow), store the result to *p and return false.
+ * These functions allow false positives (so their names contain "may")
+ * to speed up simple common cases.
+ */
+
+/* Define IV_*_OVERFLOW_IS_EXPENSIVE below to nonzero value
+ * if strict overflow checks are too expensive
+ * (for example, for CPUs that have no hardware overflow detection flags).
+ * If these macros have nonzero value, or overflow-checking compiler intrinsics
+ * are not available, good-old heuristics (with some false positives)
+ * will be used.  */
+#  ifndef IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
+#    define IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE 0
+#  endif
+#  ifndef IV_MUL_OVERFLOW_IS_EXPENSIVE
+/* Strict overflow check for IV multiplication is generally expensive
+ * when IV is a multi-word integer.
+ * We assume that PTRSIZE matches the platform word size; LONGSIZE might not
+ * match for LLP64 platforms such as Win32 x86-64.  */
+#    define IV_MUL_OVERFLOW_IS_EXPENSIVE (IVSIZE > PTRSIZE)
+#  endif
+
+#  if defined(I_STDCKDINT) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
+/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
+#    define S_iv_add_may_overflow(il, ir, result) ckd_add(result, il, ir)
+#  elif defined(HAS_BUILTIN_ADD_OVERFLOW) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
+#    define S_iv_add_may_overflow __builtin_add_overflow
+#  else
+PERL_STATIC_INLINE bool
+S_iv_add_may_overflow (IV il, IV ir, IV *const result)
+{
+    /* topl and topr hold only 2 bits */
+    PERL_UINT_FAST8_T const topl = ((UV)il) >> (UVSIZE * 8 - 2);
+    PERL_UINT_FAST8_T const topr = ((UV)ir) >> (UVSIZE * 8 - 2);
+
+    /* if both are in a range that can't under/overflow, do a simple integer
+     * add: if the top of both numbers are 00  or 11, then it's safe */
+    if (!( ((topl+1) | (topr+1)) & 2)) {
+        *result = il + ir;
+        return false;
+    }
+    return true;                   /* addition may overflow */
+}
+#  endif
+
+/*
+ * S_uv_{add,sub,mul}_overflow(a, b, p) are similar, but the results are UV
+ * and they should perform strict overflow check (no false positives).
+ */
+
+#  if defined(I_STDCKDINT)
+/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
+#    define S_uv_add_overflow(auv, buv, result) ckd_add(result, auv, buv)
+#  elif defined(HAS_BUILTIN_ADD_OVERFLOW)
+#    define S_uv_add_overflow __builtin_add_overflow
+#  else
+PERL_STATIC_INLINE bool
+S_uv_add_overflow (UV auv, UV buv, UV *const result)
+{
+    /* (auv + buv) < auv means that the addition wrapped around,
+       i.e. overflowed.  Note that unsigned integer overflow is well-defined
+       in standard C to wrap around, in constrast to signed integer overflow
+       whose behaviour is undefined.  */
+    return (*result = auv + buv) < auv;
+}
+#  endif
+
+#  if defined(I_STDCKDINT) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
+/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
+#    define S_iv_sub_may_overflow(il, ir, result) ckd_sub(result, il, ir)
+#  elif defined(HAS_BUILTIN_SUB_OVERFLOW) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
+#    define S_iv_sub_may_overflow __builtin_sub_overflow
+#  else
+PERL_STATIC_INLINE bool
+S_iv_sub_may_overflow (IV il, IV ir, IV *const result)
+{
+    PERL_UINT_FAST8_T const topl = ((UV)il) >> (UVSIZE * 8 - 2);
+    PERL_UINT_FAST8_T const topr = ((UV)ir) >> (UVSIZE * 8 - 2);
+
+    /* if both are in a range that can't under/overflow, do a simple integer
+     * subtract: if the top of both numbers are 00  or 11, then it's safe */
+    if (!( ((topl+1) | (topr+1)) & 2)) {
+        *result = il - ir;
+        return false;
+    }
+    return true;                   /* subtraction may overflow */
+}
+#  endif
+
+#  if defined(I_STDCKDINT)
+/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
+#    define S_uv_sub_overflow(auv, buv, result) ckd_sub(result, auv, buv)
+#  elif defined(HAS_BUILTIN_SUB_OVERFLOW)
+#    define S_uv_sub_overflow __builtin_sub_overflow
+#  else
+PERL_STATIC_INLINE bool
+S_uv_sub_overflow (UV auv, UV buv, UV *const result)
+{
+    return (*result = auv - buv) > auv;
+}
+#  endif
+
+#  if defined(I_STDCKDINT) && !IV_MUL_OVERFLOW_IS_EXPENSIVE
+/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
+#    define S_iv_mul_may_overflow(il, ir, result) ckd_mul(result, il, ir)
+#  elif defined(HAS_BUILTIN_MUL_OVERFLOW) && !IV_MUL_OVERFLOW_IS_EXPENSIVE
+#    define S_iv_mul_may_overflow __builtin_mul_overflow
+#  else
+PERL_STATIC_INLINE bool
+S_iv_mul_may_overflow (IV il, IV ir, IV *const result)
+{
+    UV const topl = ((UV)il) >> (UVSIZE * 4 - 1);
+    UV const topr = ((UV)ir) >> (UVSIZE * 4 - 1);
+
+    /* if both are in a range that can't under/overflow, do a simple integer
+     * multiply: if the top halves(*) of both numbers are 00...00  or 11...11,
+     * then it's safe.
+     * (*) for 32-bits, the "top half" is the top 17 bits,
+     *     for 64-bits, its 33 bits */
+    if (!(
+              ((topl+1) | (topr+1))
+            & ( (((UV)1) << (UVSIZE * 4 + 1)) - 2) /* 11..110 */
+    )) {
+        *result = il * ir;
+        return false;
+    }
+    return true;                   /* multiplication may overflow */
+}
+#  endif
+
+#  if defined(I_STDCKDINT)
+/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
+#    define S_uv_mul_overflow(auv, buv, result) ckd_mul(result, auv, buv)
+#  elif defined(HAS_BUILTIN_MUL_OVERFLOW)
+#    define S_uv_mul_overflow   __builtin_mul_overflow
+#  else
+PERL_STATIC_INLINE bool
+S_uv_mul_overflow (UV auv, UV buv, UV *const result)
+{
+    const UV topmask = (~ (UV)0) << (4 * sizeof (UV));
+    const UV botmask = ~topmask;
+
+#    if UVSIZE > LONGSIZE && UVSIZE <= 2 * LONGSIZE
+    /* If UV is double-word integer, declare these variables as single-word
+       integers to help compiler to avoid double-word multiplication.  */
+    unsigned long alow, ahigh, blow, bhigh;
+#    else
+    UV alow, ahigh, blow, bhigh;
+#    endif
+
+    /* If this does sign extension on unsigned it's time for plan B  */
+    ahigh = auv >> (4 * sizeof (UV));
+    alow  = auv & botmask;
+    bhigh = buv >> (4 * sizeof (UV));
+    blow  = buv & botmask;
+
+    if (ahigh && bhigh)
+        /* eg 32 bit is at least 0x10000 * 0x10000 == 0x100000000
+           which is overflow.  */
+        return true;
+
+    UV product_middle = 0;
+    if (ahigh || bhigh) {
+        /* One operand is large, 1 small */
+        /* Either ahigh or bhigh is zero here, so the addition below
+           can't overflow.  */
+        product_middle = (UV)ahigh * blow + (UV)alow * bhigh;
+        if (product_middle & topmask)
+            return true;
+        /* OK, product_middle won't lose bits when we shift it.  */
+        product_middle <<= 4 * sizeof (UV);
+    }
+    /* else: eg 32 bit is at most 0xFFFF * 0xFFFF == 0xFFFE0001
+       so the unsigned multiply cannot overflow.  */
+
+    /* (UV) cast below is necessary to force the multiplication to produce
+       UV result, as alow and blow might be narrower than UV */
+    UV product_low = (UV)alow * blow;
+    return S_uv_add_overflow(product_middle, product_low, result);
+}
+#  endif
+
 #endif
 
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */

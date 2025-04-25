@@ -1336,23 +1336,12 @@ PP(pp_multiply)
         U32 flags = (svl->sv_flags & svr->sv_flags);
         if (flags & SVf_IOK) {
             /* both args are simple IVs */
-            UV topl, topr;
+            IV result;
             il = SvIVX(svl);
             ir = SvIVX(svr);
           do_iv:
-            topl = ((UV)il) >> (UVSIZE * 4 - 1);
-            topr = ((UV)ir) >> (UVSIZE * 4 - 1);
-
-            /* if both are in a range that can't under/overflow, do a
-             * simple integer multiply: if the top halves(*) of both numbers
-             * are 00...00  or 11...11, then it's safe.
-             * (*) for 32-bits, the "top half" is the top 17 bits,
-             *     for 64-bits, its 33 bits */
-            if (!(
-                      ((topl+1) | (topr+1))
-                    & ( (((UV)1) << (UVSIZE * 4 + 1)) - 2) /* 11..110 */
-            )) {
-                TARGi(il * ir, 0); /* args not GMG, so can't be tainted */
+            if (!S_iv_mul_may_overflow(il, ir, &result)) {
+                TARGi(result, 0); /* args not GMG, so can't be tainted */
                 goto ret;
             }
             goto generic;
@@ -1388,12 +1377,9 @@ PP(pp_multiply)
         if (SvIV_please_nomg(svl)) {
             bool auvok = SvUOK(svl);
             bool buvok = SvUOK(svr);
-            const UV topmask = (~ (UV)0) << (4 * sizeof (UV));
-            const UV botmask = ~((~ (UV)0) << (4 * sizeof (UV)));
             UV alow;
-            UV ahigh;
             UV blow;
-            UV bhigh;
+            UV product;
 
             if (auvok) {
                 alow = SvUVX(svl);
@@ -1420,19 +1406,7 @@ PP(pp_multiply)
                 }
             }
 
-            /* If this does sign extension on unsigned it's time for plan B  */
-            ahigh = alow >> (4 * sizeof (UV));
-            alow &= botmask;
-            bhigh = blow >> (4 * sizeof (UV));
-            blow &= botmask;
-            if (ahigh && bhigh) {
-                NOOP;
-                /* eg 32 bit is at least 0x10000 * 0x10000 == 0x100000000
-                   which is overflow. Drop to NVs below.  */
-            } else if (!ahigh && !bhigh) {
-                /* eg 32 bit is at most 0xFFFF * 0xFFFF == 0xFFFE0001
-                   so the unsigned multiply cannot overflow.  */
-                const UV product = alow * blow;
+            if (!S_uv_mul_overflow(alow, blow, &product)) {
                 if (auvok == buvok) {
                     /* -ve * -ve or +ve * +ve gives a +ve result.  */
                     TARGu(product, 1);
@@ -1442,42 +1416,6 @@ PP(pp_multiply)
                     TARGi(NEGATE_2IV(product), 1);
                     goto ret;
                 } /* else drop to NVs below. */
-            } else {
-                /* One operand is large, 1 small */
-                UV product_middle;
-                if (bhigh) {
-                    /* swap the operands */
-                    ahigh = bhigh;
-                    bhigh = blow; /* bhigh now the temp var for the swap */
-                    blow = alow;
-                    alow = bhigh;
-                }
-                /* now, ((ahigh * blow) << half_UV_len) + (alow * blow)
-                   multiplies can't overflow. shift can, add can, -ve can.  */
-                product_middle = ahigh * blow;
-                if (!(product_middle & topmask)) {
-                    /* OK, (ahigh * blow) won't lose bits when we shift it.  */
-                    UV product_low;
-                    product_middle <<= (4 * sizeof (UV));
-                    product_low = alow * blow;
-
-                    /* as for pp_add, UV + something mustn't get smaller.
-                       IIRC ANSI mandates this wrapping *behaviour* for
-                       unsigned whatever the actual representation*/
-                    product_low += product_middle;
-                    if (product_low >= product_middle) {
-                        /* didn't overflow */
-                        if (auvok == buvok) {
-                            /* -ve * -ve or +ve * +ve gives a +ve result.  */
-                            TARGu(product_low, 1);
-                            goto ret;
-                        } else if (product_low <= ABS_IV_MIN) {
-                            /* -ve result, which could overflow an IV  */
-                            TARGi(NEGATE_2IV(product_low), 1);
-                            goto ret;
-                        } /* else drop to NVs below. */
-                    }
-                } /* product_middle too large */
             } /* ahigh && bhigh */
         } /* SvIOK(svl) */
     } /* SvIOK(svr) */
@@ -1929,18 +1867,12 @@ PP(pp_subtract)
         U32 flags = (svl->sv_flags & svr->sv_flags);
         if (flags & SVf_IOK) {
             /* both args are simple IVs */
-            UV topl, topr;
+            IV result;
             il = SvIVX(svl);
             ir = SvIVX(svr);
           do_iv:
-            topl = ((UV)il) >> (UVSIZE * 8 - 2);
-            topr = ((UV)ir) >> (UVSIZE * 8 - 2);
-
-            /* if both are in a range that can't under/overflow, do a
-             * simple integer subtract: if the top of both numbers
-             * are 00  or 11, then it's safe */
-            if (!( ((topl+1) | (topr+1)) & 2)) {
-                TARGi(il - ir, 0); /* args not GMG, so can't be tainted */
+            if (!S_iv_sub_may_overflow(il, ir, &result)) {
+                TARGi(result, 0); /* args not GMG, so can't be tainted */
                 goto ret;
             }
             goto generic;
