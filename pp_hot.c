@@ -1827,18 +1827,12 @@ PP(pp_add)
         U32 flags = (svl->sv_flags & svr->sv_flags);
         if (flags & SVf_IOK) {
             /* both args are simple IVs */
-            UV topl, topr;
+            IV result;
             il = SvIVX(svl);
             ir = SvIVX(svr);
           do_iv:
-            topl = ((UV)il) >> (UVSIZE * 8 - 2);
-            topr = ((UV)ir) >> (UVSIZE * 8 - 2);
-
-            /* if both are in a range that can't under/overflow, do a
-             * simple integer add: if the top of both numbers
-             * are 00  or 11, then it's safe */
-            if (!( ((topl+1) | (topr+1)) & 2)) {
-                TARGi(il + ir, 0); /* args not GMG, so can't be tainted */
+            if (!S_iv_add_may_overflow(il, ir, &result)) {
+                TARGi(result, 0); /* args not GMG, so can't be tainted */
                 goto ret;
             }
             goto generic;

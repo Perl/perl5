@@ -469,4 +469,30 @@ cmp_ok  0x3ffffffffffffffe % -0xc000000000000000, '==', -0x8000000000000002, 'mo
 cmp_ok  0x3fffffffffffffff % -0xc000000000000000, '==', -0x8000000000000001, 'modulo is (IV_MIN-1)';
 cmp_ok  0x4000000000000000 % -0xc000000000000000, '==', -0x8000000000000000, 'modulo is IV_MIN';
 
+# Arithmetic close to IV overflow
+
+# These had been handled in generic (slower) code, but now in fast path
+# (as "simple common case").  Either way, these tests should pass.
+$q = 9223372036854775800;
+cmp_ok 5 + $q, '==', 9223372036854775805, "5 + $q";
+cmp_ok $q - -5, '==', 9223372036854775805, "$q - -5";
+$q = 1111111111111111111;
+cmp_ok $q * 5, '==', 5555555555555555555, "$q * 5";
+
+# IV <op> IV -> UV/NV promotion
+
+$q = 7777777777777777777;
+$r = 2222222222222222223;
+# Note 10000000000000000000 can be represented accurately in both
+# IEEE double (binary64; 0x1.158e460913dp+63) and decimal format (1e+19)
+cmp_ok $q + $r, '==', 10000000000000000000, 'IV + IV promotes to UV';
+cmp_ok -$q + -$r, '==', -10000000000000000000, 'IV + IV promotes to NV';
+cmp_ok $q - -$r, '==', 10000000000000000000, 'IV - IV promotes to UV';
+cmp_ok -$q - $r, '==', -10000000000000000000, 'IV - IV promotes to NV';
+$q = 3000000000;
+$r = 4000000000;
+cmp_ok $q * $r, '==', 12000000000000000000, 'IV * IV promotes to UV';
+cmp_ok $q * -$r, '==', -12000000000000000000, 'IV * IV promotes to UV then NV';
+cmp_ok +($q * 2) * $r, '==', 24000000000000000000, 'IV * IV promotes to NV';
+
 done_testing();
