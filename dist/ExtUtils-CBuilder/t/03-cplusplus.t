@@ -16,6 +16,16 @@ use File::Spec;
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
 my ($source_file, $object_file, $lib_file);
 
+my $b = ExtUtils::CBuilder->new(quiet => $quiet);
+
+# test plan
+if ( ! $b->have_cplusplus ) {
+  plan skip_all => "no compiler available for testing";
+}
+else {
+  plan tests => 7;
+}
+
 {
     # GH #23146
     my $fake_cc = File::Spec->rel2abs(File::Spec->catfile(qw(some directory what doesnt exist), 'cc'));
@@ -27,16 +37,6 @@ my ($source_file, $object_file, $lib_file);
     );
 
     is $cb->{config}{cxx}, $fake_cc, "did not search PATH for C++ compiler when given absolute path to C compiler";
-}
-
-my $b = ExtUtils::CBuilder->new(quiet => $quiet);
-
-# test plan
-if ( ! $b->have_cplusplus ) {
-  plan skip_all => "no compiler available for testing";
-}
-else {
-  plan tests => 7;
 }
 
 ok $b->have_cplusplus, "have_cplusplus";
