@@ -26,8 +26,6 @@ else {
   plan tests => 7;
 }
 
-ok $b, "created EU::CB object";
-
 ok $b->have_cplusplus, "have_cplusplus";
 
 $source_file = File::Spec->catfile('t', 'cplust.cc');
@@ -60,5 +58,18 @@ for ($source_file, $object_file, $lib_file) {
 if ($^O eq 'VMS') {
    1 while unlink 'CPLUST.LIS';
    1 while unlink 'CPLUST.OPT';
+}
+
+{
+    # GH #23146
+    my $fake_cc = File::Spec->rel2abs(File::Spec->catfile(qw(some directory what doesnt exist), 'cc'));
+    my $cb = ExtUtils::CBuilder->new(
+        quiet => $quiet,
+        config => {
+            cc => $fake_cc,
+        },
+    );
+
+    is $cb->{config}{cxx}, $fake_cc, "did not search PATH for C++ compiler when given absolute path to C compiler";
 }
 
