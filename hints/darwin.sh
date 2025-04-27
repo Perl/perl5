@@ -277,18 +277,18 @@ add_macosx_version_min () {
 # But starting from perl 5.8.1/Darwin 7 the default is the two-level.
 case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
 1.[0-3].*) # OS X 10.0.x
-   lddlflags="${ldflags} -bundle -undefined suppress"
+   lddlflags="-bundle -undefined suppress"
    ;;
 1.*)       # OS X 10.1
    ldflags="${ldflags} -flat_namespace"
-   lddlflags="${ldflags} -bundle -undefined suppress"
+   lddlflags="-bundle -undefined suppress"
    ;;
 [2-6].*)   # OS X 10.1.x - 10.2.x (though [2-4] never existed publicly)
    ldflags="${ldflags} -flat_namespace"
-   lddlflags="${ldflags} -bundle -undefined suppress"
+   lddlflags="-bundle -undefined suppress"
    ;;
 [7-8].*)   # OS X 10.3.x - 10.4.x
-   lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
+   lddlflags="-bundle -undefined dynamic_lookup"
    case "$ld" in
        *MACOSX_DEPLOYMENT_TARGET*) ;;
        *) ld="env MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
@@ -357,7 +357,7 @@ EOM
         esac
     fi
 
-   lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
+   lddlflags="-bundle -undefined dynamic_lookup"
    ;;
 esac
 
