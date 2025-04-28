@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.83;
+package B::Deparse 1.84;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -3485,7 +3485,7 @@ sub pp_substr_left {
 
    my $val = 'substr(' . $self->deparse($op->first->sibling, $cx)
              . ', 0, ' . $self->deparse($op->first->sibling->sibling->sibling, $cx)
-             . ( (($op->private & 7) == 3) ? '' : ", '')" );
+             . ( (($op->private & 7) == 3) ? ')' : ", '')" );
 
     if ($lex) {
         my $targ = $op->targ;
