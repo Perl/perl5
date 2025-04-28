@@ -289,7 +289,7 @@ catch_paren:	empty
 			/* not really valid grammar but we detect it in the
 			 * action block to throw a nicer error message */
 	|	PERLY_PAREN_OPEN
-			{ parser->in_my = 1; }
+			{ parser->in_my = KEY_catch; }
 		scalar
 			{ parser->in_my = 0; intro_my(); }
 		PERLY_PAREN_CLOSE
