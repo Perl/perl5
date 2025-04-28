@@ -198,6 +198,22 @@ and L</New Warnings>
 
 XXX L<message|perldiag/"message">
 
+=item *
+
+L<Can't redeclare catch variable as "%s"|perldiag/"Can't redeclare catch variable as "%s"">
+
+(F) A C<my>, C<our> or C<state> keyword was used with the exception variable in
+a C<catch> block:
+
+    try { ... }
+    catch (my $e) { ... }
+    # or catch (our $e) { ... }
+    # or catch (state $e) { ... }
+
+This is not valid syntax. C<catch> takes a bare variable name, which is
+automatically lexically declared.
+[GH #23222]
+
 =back
 
 =head3 New Warnings
