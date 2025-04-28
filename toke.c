@@ -7190,17 +7190,37 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
     OPERATOR(KW_DO);
 }
 
+static const char *
+declarator_name(I32 k) {
+    switch (k) {
+        case KEY_my:    return "my";
+        case KEY_state: return "state";
+        case KEY_our:   return "our";
+        case KEY_field: return "field";
+        case KEY_catch: return "catch";
+        default: return "???";
+    }
+}
+
 static int
 yyl_my(pTHX_ char *s, I32 my)
 {
+    assert(my == KEY_my || my == KEY_state || my == KEY_our);
     if (PL_in_my) {
         PL_bufptr = s;
-        yyerror(form(
-                          "Can't redeclare \"%s\" in \"%s\"",
-                           my       == KEY_my    ? "my" :
-                           my       == KEY_state ? "state" : "our",
-                           PL_in_my == KEY_my    ? "my" :
-                           PL_in_my == KEY_state ? "state" : "our"));
+        if (PL_in_my == KEY_catch) {
+            yyerror(form(
+                "Can't redeclare catch variable as \"%s\"",
+                    declarator_name(my)
+            ));
+        } else {
+            assert(PL_in_my == KEY_my || PL_in_my == KEY_state || PL_in_my == KEY_our);
+            yyerror(form(
+                "Can't redeclare \"%s\" in \"%s\"",
+                    declarator_name(my),
+                    declarator_name(PL_in_my)
+            ));
+        }
     }
     PL_in_my = (U16)my;
     s = skipspace(s);

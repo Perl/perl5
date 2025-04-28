@@ -423,6 +423,30 @@ EXPECT
 Can't redeclare "state" in "state" at - line 2, near ", state"
 Execution of - aborted due to compilation errors.
 ########
+# NAME catch (my $x) errors
+use feature 'try';
+try {} catch (my $x) {}
+EXPECT
+Can't redeclare catch variable as "my" at - line 2, near "(my"
+syntax error at - line 2, near "(my "
+Execution of - aborted due to compilation errors.
+########
+# NAME catch (our $x) errors
+use feature 'try';
+try {} catch (our $x) {}
+EXPECT
+Can't redeclare catch variable as "our" at - line 2, near "(our"
+syntax error at - line 2, near "(our "
+Execution of - aborted due to compilation errors.
+########
+# NAME catch (state $x) errors
+use feature 'try', 'state';
+try {} catch (state $x) {}
+EXPECT
+Can't redeclare catch variable as "state" at - line 2, near "(state"
+syntax error at - line 2, near "(state "
+Execution of - aborted due to compilation errors.
+########
 # NAME BEGIN <> [perl #125341]
 BEGIN <>
 EXPECT
