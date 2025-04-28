@@ -1825,6 +1825,14 @@ print sort(foo('bar'));
 substr(my $a, 0, 0) = (foo(), bar());
 $a++;
 ####
+# 3-arg substr (non-chop)
+my $str = 'ABCD';
+my $bbb = substr($str, 1, 1);
+####
+# 3-arg substr (chop)
+my $str = 'ABCD';
+my $aaa = substr($str, 0, 1);
+####
 # 4-arg substr (non-chop)
 my $str = 'ABCD';
 my $bbb = substr($str, 1, 1, '');
