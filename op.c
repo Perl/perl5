@@ -4142,7 +4142,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
         } else if (attrs) {
             GV * const gv = cGVOPx_gv(cUNOPo->op_first);
             assert(PL_parser);
-            PL_parser->in_my = FALSE;
+            PL_parser->in_my = KEY_NULL;
             PL_parser->in_my_stash = NULL;
             apply_attrs(GvSTASH(gv),
                         (type == OP_RV2SV ? GvSVn(gv) :
@@ -4175,7 +4175,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
         HV *stash;
 
         assert(PL_parser);
-        PL_parser->in_my = FALSE;
+        PL_parser->in_my = KEY_NULL;
         PL_parser->in_my_stash = NULL;
 
         /* check for C<my Dog $spot> when deciding package */
@@ -4233,7 +4233,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
             o = op_append_list(OP_LIST, o, rops);
         }
     }
-    PL_parser->in_my = FALSE;
+    PL_parser->in_my = KEY_NULL;
     PL_parser->in_my_stash = NULL;
     return o;
 }
@@ -4863,7 +4863,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
         o = my(o);
     else
         o = op_lvalue(o, OP_NULL);		/* a bit kludgey */
-    PL_parser->in_my = FALSE;
+    PL_parser->in_my = KEY_NULL;
     PL_parser->in_my_stash = NULL;
     return o;
 }
