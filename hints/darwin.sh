@@ -295,6 +295,7 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
    esac
    ;;
 *)        # OS X 10.5.x - current
+   lddlflags="-bundle -undefined dynamic_lookup"
    # The MACOSX_DEPLOYMENT_TARGET is not needed,
    # but the -mmacosx-version-min option is always used.
 
@@ -304,6 +305,7 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
     [1-9][0-9].*)
       add_macosx_version_min ccflags $MACOSX_DEPLOYMENT_TARGET
       add_macosx_version_min ldflags $MACOSX_DEPLOYMENT_TARGET
+      add_macosx_version_min lddlflags $MACOSX_DEPLOYMENT_TARGET
       ;;
     '')
       # Empty MACOSX_DEPLOYMENT_TARGET is okay.
@@ -357,7 +359,6 @@ EOM
         esac
     fi
 
-   lddlflags="-bundle -undefined dynamic_lookup"
    ;;
 esac
 
