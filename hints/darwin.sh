@@ -315,7 +315,7 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
 
 *** Unexpected MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET
 ***
-*** Please either set it to a valid macOS version number (e.g., 10.15) or to empty.
+*** Please either set it to a valid macOS version number (e.g., 10.15 or 11.0) or to empty.
 
 EOM
       exit 1
