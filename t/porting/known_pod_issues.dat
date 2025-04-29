@@ -661,9 +661,14 @@ perl5380delta
 perl5381delta
 perl5382delta
 perl5383delta
+perl5384delta
 perl5400delta
 perl5401delta
+perl5402delta
 perl5410delta
+perl54110delta
+perl54111delta
+perl54112delta
 perl5411delta
 perl5412delta
 perl5413delta
@@ -1251,6 +1256,7 @@ pod/perldebtut.pod	Verbatim line length including indents exceeds 78 by	2
 pod/perldtrace.pod	Verbatim line length including indents exceeds 78 by	-1
 pod/perlgit.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlgit.pod	Verbatim line length including indents exceeds 78 by	1
+pod/perlgpl.pod	Verbatim line length including indents exceeds 78 by	7
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlinterp.pod	? Should you be using L<...> instead of	1
 pod/perlmacosx.pod	Verbatim line length including indents exceeds 78 by	3
