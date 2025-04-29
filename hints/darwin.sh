@@ -322,28 +322,6 @@ EOM
       ;;
     esac
 
-    # Keep the prodvers leading whitespace (Configure magic).
-    # Cannot use $osvers here since that is the kernel version.
-    # sw_vers output                 what we want
-    # "ProductVersion:    10.10.5"   "10.10"
-    # "ProductVersion:    10.11"     "10.11"
-        prodvers=`sw_vers|awk '/^ProductVersion:/{print $2}'|awk -F. '{print $1"."$2}'`
-    case "$prodvers" in
-    [1-9][0-9].*)
-      add_macosx_version_min ccflags $prodvers
-      add_macosx_version_min ldflags $prodvers
-      ;;
-    *)
-      cat <<EOM >&4
-
-*** Unexpected product version $prodvers.
-***
-*** Try running sw_vers and see what its ProductVersion says.
-
-EOM
-      exit 1
-    esac
-
     darwin_major=$(echo $osvers|awk -F. '{print $1}')
 
     # macOS 10.12 (darwin 16.0.0) deprecated syscall().
