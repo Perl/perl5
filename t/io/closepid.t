@@ -19,7 +19,6 @@ my $killsig = 'HUP';
 $killsig = 1 unless $Config{sig_name} =~ /\bHUP\b/;
 
 {
-    local $::TODO = $^O eq "MSWin32" ? "not fixed yet #4106" : undef;
     # github #4106
     open my $saveout, ">&", \*STDOUT or die;
     my $start = time();
@@ -38,8 +37,6 @@ SKIP:
 {
     skip("Not relevant to $^O", 3)
         if $^O eq "VMS";
-    skip "Waits for any child on Windows", 3
-        if $^O eq "MSWin32";
     skip("only matters for waitpid or wait4", 3)
       unless $Config{d_waitpid} || $Config{d_wait4};
     # [perl #119893]
