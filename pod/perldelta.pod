@@ -502,6 +502,11 @@ When a scalar variable used as the target of a filehandle is C<undef>'ed
 while being output, garbage bytes would be left in that scalar.
 [GH #24008]
 
+=item *
+
+C<close(STDOUT)> when C<STDOUT> has been opened as a pipe will now
+properly wait for the child to exit on Windows.  [GH #4106]
+
 =back
 
 =head1 Known Problems
