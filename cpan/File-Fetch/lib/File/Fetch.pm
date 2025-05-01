@@ -1,6 +1,7 @@
 package File::Fetch;
 
 use strict;
+use warnings;
 use FileHandle;
 use File::Temp;
 use File::Copy;
@@ -22,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN $FORCEIPV4
             ];
 
-$VERSION        = '1.04';
+$VERSION        = '1.08';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -39,7 +40,7 @@ $FORCEIPV4      = 0;
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
     http    => [ qw|lwp httptiny wget curl lftp fetch httplite lynx iosock| ],
-    https   => [ qw|lwp wget curl| ],
+    https   => [ qw|lwp httptiny wget curl| ],
     ftp     => [ qw|lwp netftp wget curl lftp fetch ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ],
@@ -58,7 +59,7 @@ use constant ON_VMS     => ($^O eq 'VMS');
 use constant ON_UNIX    => (!ON_WIN);
 use constant HAS_VOL    => (ON_WIN);
 use constant HAS_SHARE  => (ON_WIN);
-use constant HAS_FETCH  => ( $^O =~ m!^(freebsd|netbsd|dragonfly)$! );
+use constant HAS_FETCH  => ( $^O =~ m!^(freebsd|netbsd|dragonfly|midnightbsd)$! );
 
 =pod
 
@@ -400,9 +401,12 @@ sub _parse_uri {
         ### rebuild the path from the leftover parts;
         $href->{path} = join '/', '', splice( @parts, $index, $#parts );
 
-    } else {
+    } elsif ( $href->{scheme} eq 'http' || $href->{scheme} eq 'https' ) {
         ### using anything but qw() in hash slices may produce warnings
         ### in older perls :-(
+        @{$href}{ qw(userinfo host path) } = $uri =~ m|(?:([^\@:]*:[^\:\@]*)@)?([^/]*)(/.*)?$|s;
+        $href->{path} = '/' unless defined $href->{path};
+    } else {
         @{$href}{ qw(userinfo host path) } = $uri =~ m|(?:([^\@:]*:[^\:\@]*)@)?([^/]*)(/.*)$|s;
     }
 
@@ -491,7 +495,9 @@ sub fetch {
         next if grep { lc $_ eq $method } @$BLACKLIST;
 
         ### method is known to fail ###
-        next if $METHOD_FAIL->{$method};
+        next if ref $METHOD_FAIL->{$method}
+            ? $METHOD_FAIL->{$method}{$self->scheme}
+            : $METHOD_FAIL->{$method};
 
         ### there's serious issues with IPC::Run and quoting of command
         ### line arguments. using quotes in the wrong place breaks things,
@@ -569,15 +575,22 @@ sub _lwp_fetch {
 
     };
 
-    if ($self->scheme eq 'https') {
-        $use_list->{'LWP::Protocol::https'} = '0';
-    }
-
     ### Fix CVE-2016-1238 ###
     local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load( modules => $use_list ) ) {
         $METHOD_FAIL->{'lwp'} = 1;
         return;
+    }
+
+    if ($self->scheme eq 'https') {
+        my $https_use_list = {
+            'LWP::Protocol::https' => '0.0',
+        };
+
+        unless ( can_load(modules => $https_use_list) ) {
+            $METHOD_FAIL->{'lwp'} = { 'https' => 1 };
+            return;
+        }
     }
 
     ### setup the uri object
@@ -635,6 +648,10 @@ sub _httptiny_fetch {
     ### Fix CVE-2016-1238 ###
     local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load(modules => $use_list) ) {
+        $METHOD_FAIL->{'httptiny'} = 1;
+        return;
+    }
+    if ( $self->scheme eq 'https' && !HTTP::Tiny->can_ssl ) {
         $METHOD_FAIL->{'httptiny'} = 1;
         return;
     }
@@ -961,6 +978,9 @@ sub _lftp_fetch {
 
     ### if a timeout is set, add it ###
     $str .= "set net:timeout $TIMEOUT;\n" if $TIMEOUT;
+
+    ### lftp can get stuck in a loop of retries without this
+    $str .= "set net:reconnect-interval-base 5;\nset net:max-retries 2;\n";
 
     ### run passive if specified ###
     $str .= "set ftp:passive-mode 1;\n" if $FTP_PASSIVE;

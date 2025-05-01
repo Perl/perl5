@@ -533,7 +533,8 @@ our %Modules = (
     },
 
     'File::Fetch' => {
-        'DISTRIBUTION' => 'BINGOS/File-Fetch-1.04.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/File-Fetch-1.08.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Thu May  1 07:12:12 2025',
         'FILES'        => q[cpan/File-Fetch],
     },
 
