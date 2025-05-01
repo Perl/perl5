@@ -9610,17 +9610,18 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
     sv_setnv(sv,Atof(SvPVX_const(sv)) - 1.0);	/* punt */
 }
 
-/* this define is used to eliminate a chunk of duplicated but shared logic
- * it has the suffix __SV_C to signal that it isnt API, and isnt meant to be
- * used anywhere but here - yves
+/* This internal function is used to eliminate a chunk of duplicated but shared
+ * logic.
  */
-#define PUSH_EXTEND_MORTAL__SV_C(AnSv) \
-    STMT_START {      \
-        SSize_t ix = ++PL_tmps_ix;		\
-        if (UNLIKELY(ix >= PL_tmps_max))	\
-            ix = tmps_grow_p(ix);			\
-        PL_tmps_stack[ix] = (AnSv); \
-    } STMT_END
+PERL_STATIC_INLINE void
+S_push_extend_mortal(pTHX_ SV *const sv)
+{
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = tmps_grow_p(ix);
+    PL_tmps_stack[ix] = sv;
+}
+#define push_extend_mortal(sv) S_push_extend_mortal(aTHX_ sv)
 
 /*
 =for apidoc      sv_mortalcopy
@@ -9653,7 +9654,7 @@ Perl_sv_mortalcopy_flags(pTHX_ SV *const oldstr, U32 flags)
         SvGETMAGIC(oldstr); /* before new_SV, in case it dies */
     new_SV(sv);
     sv_setsv_flags(sv,oldstr,flags & ~SV_GMAGIC);
-    PUSH_EXTEND_MORTAL__SV_C(sv);
+    push_extend_mortal(sv);
     SvTEMP_on(sv);
     return sv;
 }
@@ -9676,7 +9677,7 @@ Perl_sv_newmortal(pTHX)
 
     new_SV(sv);
     SvFLAGS(sv) = SVs_TEMP;
-    PUSH_EXTEND_MORTAL__SV_C(sv);
+    push_extend_mortal(sv);
     return sv;
 }
 
@@ -9726,7 +9727,7 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
     SvFLAGS(sv) |= flags;
 
     if(flags & SVs_TEMP){
-        PUSH_EXTEND_MORTAL__SV_C(sv);
+        push_extend_mortal(sv);
     }
 
     return sv;
@@ -9752,7 +9753,7 @@ Perl_sv_2mortal(pTHX_ SV *const sv)
     if (SvIMMORTAL(sv))
         return sv;
     SvTEMP_on(sv); /* optimize for RISC, SvIMMORTAL() contains SvREADONLY() */
-    PUSH_EXTEND_MORTAL__SV_C(sv);;
+    push_extend_mortal(sv);
     return sv;
 }
 
@@ -9825,7 +9826,7 @@ Perl_newSVhek_mortal(pTHX_ const HEK *const hek)
     assert(sv);
     assert(!SvIMMORTAL(sv));
 
-    PUSH_EXTEND_MORTAL__SV_C(sv);
+    push_extend_mortal(sv);
     SvTEMP_on(sv);
     return sv;
 }
