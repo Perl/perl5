@@ -1,6 +1,7 @@
 BEGIN { chdir 't' if -d 't' };
 
 use strict;
+use warnings;
 use lib '../lib';
 
 use Test::More 'no_plan';
@@ -16,7 +17,9 @@ use_ok('File::Fetch');
 $File::Fetch::DEBUG = $File::Fetch::DEBUG   = 1 if $ARGV[0];
 $IPC::Cmd::DEBUG    = $IPC::Cmd::DEBUG      = 1 if $ARGV[0];
 
-$File::Fetch::FORCEIPV4=1;
+$File::Fetch::FORCEIPV4 = $File::Fetch::FORCEIPV4 = 1;
+
+$File::Fetch::TIMEOUT = $File::Fetch::TIMEOUT = 30;
 
 unless( $ENV{PERL_CORE} ) {
     warn qq[
@@ -76,6 +79,12 @@ my @map = (
         host    => 'localhost',          # host is empty only on 'file://'
         path    => '/tmp/',
         file    => 'index.txt',
+    },
+    {   uri     => 'http://localhost',   # non-canonical URI
+        scheme  => 'http',
+        host    => 'localhost',
+        path    => '/',                  # default path is '/'
+        file    => '',
     },
 
     ### only test host part, the rest is OS dependant
@@ -195,14 +204,15 @@ for my $entry (@map) {
 ### Heuristics
 {
   require IO::Socket::INET;
-  my $sock = IO::Socket::INET->new( PeerAddr => 'httpbin.org', PeerPort => 80, Timeout => 20 )
+  my $sock = IO::Socket::INET->new( PeerAddr => 'httpbingo.org', PeerPort => 80, Timeout => 20 )
      or $heuristics{http} = 0;
 }
 
 ### http:// tests ###
-{   for my $uri ( 'http://httpbin.org/html',
-                  'http://httpbin.org/response-headers?q=1',
-                  'http://httpbin.org/response-headers?q=1&y=2',
+{   for my $uri ( 'http://httpbingo.org',
+                  'http://httpbingo.org/html',
+                  'http://httpbingo.org/response-headers?q=1',
+                  'http://httpbingo.org/response-headers?q=1&y=2',
                   #'http://www.cpan.org/index.html?q=1&y=2',
                   #'http://user:passwd@httpbin.org/basic-auth/user/passwd',
     ) {
@@ -300,11 +310,3 @@ sub _fetch_uri {
         }}
     }
 }
-
-
-
-
-
-
-
-
