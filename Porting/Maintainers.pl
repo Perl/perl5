@@ -434,8 +434,8 @@ our %Modules = (
     },
 
     'experimental' => {
-        'DISTRIBUTION' => 'LEONT/experimental-0.034.tar.gz',
-        'SYNCINFO'     => 'mauke on Sun Jan 12 01:01:29 2025',
+        'DISTRIBUTION' => 'LEONT/experimental-0.035.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Thu May  1 06:44:57 2025',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
     },
