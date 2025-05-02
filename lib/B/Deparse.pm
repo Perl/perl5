@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.84;
+package B::Deparse 1.85;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -3318,9 +3318,16 @@ sub pp_and { logop(@_, "and", 3, "&&", 11, "if") }
 sub pp_or  { logop(@_, "or",  2, "||", 10, "unless") }
 sub pp_dor { logop(@_, "//", 10) }
 
-# xor is syntactically a logop, but it's really a binop (contrary to
-# old versions of opcode.pl). Syntax is what matters here.
-sub pp_xor { logop(@_, "xor", 2, "^^", 10, "") }
+sub pp_xor {
+    my $self = shift;
+    my ($op, $cx) = @_;
+    if ($cx > 2 or $op->flags & OPf_STACKED) {
+        binop($self, @_, "^^", 10, ASSIGN);
+    }
+    else {
+        binop($self, @_, "xor", 2);
+    }
+}
 
 sub logassignop {
     my $self = shift;

@@ -6097,6 +6097,10 @@ yyl_caret(pTHX_ char *s)
             TOKEN(0);
         }
         pl_yylval.ival = OP_XOR;
+        if (*s == '=') {
+            s++;
+            OPERATOR(ASSIGNOP);
+        }
         OPERATOR(OROR);
     }
     if (bof && s[1] == '.')
