@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Assigning logical xor C<^^=> operator
+
+Perl 5.40.0 introduced the logical medium-precedence exclusive-or operator
+C<^^>.  It was not noticed at the time that the assigning variant C<^^=> was
+also missing.  This is now added.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security

@@ -2172,11 +2172,16 @@ Perl_die_unwind(pTHX_ SV *msv)
 
 PP(pp_xor)
 {
-    SV *left  = PL_stack_sp[0];
-    SV *right = PL_stack_sp[-1];
-    rpp_replace_2_IMM_NN(SvTRUE_NN(left) != SvTRUE_NN(right)
-                    ? &PL_sv_yes
-                    : &PL_sv_no);
+    SV *left  = PL_stack_sp[-1];
+    SV *right = PL_stack_sp[0];
+    bool ret = SvTRUE_NN(left) != SvTRUE_NN(right);
+    if (PL_op->op_flags & OPf_STACKED) {
+        sv_setbool(left, ret);
+        rpp_replace_2_1(left);
+    }
+    else {
+        rpp_replace_2_IMM_NN(boolSV(ret));
+    }
     return NORMAL;
 }
 

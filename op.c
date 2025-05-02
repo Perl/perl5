@@ -3230,6 +3230,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_I_MODULO:
     case OP_I_ADD:
     case OP_I_SUBTRACT:
+    case OP_XOR:
         if (!(o->op_flags & OPf_STACKED))
             goto nomod;
         PL_modcount++;

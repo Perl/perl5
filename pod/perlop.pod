@@ -1341,7 +1341,7 @@ That should probably be written more simply as:
 =head2 Assignment Operators
 X<assignment> X<operator, assignment> X<=> X<**=> X<+=> X<*=> X<&=>
 X<<< <<= >>> X<&&=> X<-=> X</=> X<|=> X<<< >>= >>> X<||=> X<//=> X<.=>
-X<%=> X<^=> X<x=> X<&.=> X<|.=> X<^.=>
+X<%=> X<^=> X<x=> X<&.=> X<|.=> X<^.=> X<^^=>
 
 C<"="> is the ordinary assignment operator.
 
@@ -1360,7 +1360,7 @@ The following are recognized:
     **=    +=    *=    &=    &.=    <<=    &&=
            -=    /=    |=    |.=    >>=    ||=
            .=    %=    ^=    ^.=           //=
-                 x=
+                 x=                        ^^=
 
 Although these are grouped by family, they all have the precedence
 of assignment.  These combined assignment operators can only operate on
