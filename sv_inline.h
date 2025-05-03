@@ -307,6 +307,8 @@ static const struct body_details bodies_by_type[] = {
 #if !(NVSIZE <= IVSIZE)
 #  define new_XNV()    safemalloc(sizeof(XPVNV))
 #endif
+#define new_XPV()    safemalloc(sizeof(XPV))
+#define new_XPVIV()    safemalloc(sizeof(XPVIV))
 #define new_XPVNV()    safemalloc(sizeof(XPVNV))
 #define new_XPVMG()    safemalloc(sizeof(XPVMG))
 
@@ -317,6 +319,8 @@ static const struct body_details bodies_by_type[] = {
 #if !(NVSIZE <= IVSIZE)
 #  define new_XNV()    new_body_allocated(SVt_NV)
 #endif
+#define new_XPV()    new_body_allocated(SVt_PV)
+#define new_XPVIV()    new_body_allocated(SVt_PVIV)
 #define new_XPVNV()    new_body_allocated(SVt_PVNV)
 #define new_XPVMG()    new_body_allocated(SVt_PVMG)
 
