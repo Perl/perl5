@@ -16558,8 +16558,16 @@ Perl_rcpv_copy(pTHX_ char *pv) {
 /* Subroutine signature parsing */
 
 struct yy_parser_signature {
-    UV          elems;      /* number of signature elements seen so far */
-    UV          optelems;   /* number of optional signature elems seen */
+    /* A note on terminology. We call each variable that appears in a
+     * signature a "parameter", and each scalar value the caller passes in at
+     * call time we call an "argument".
+     * Each scalar parameter variable will correspond to one argument value.
+     * The complication arises when we consider a slurpy array or hash
+     * parameter. Here, while it is exactly one *parameter*, it may account
+     * zero or more arguments.
+     */
+    UV          next_argix; /* the argument index of the next parameter we add */
+    UV          opt_params; /* number of optional scalar parameters */
     char        slurpy;     /* the sigil of the slurpy var (or null) */
     OP         *elemops;    /* NULL, or an OP_LINESEQ of individual element and fence ops */
 };
@@ -16590,8 +16598,8 @@ Perl_subsignature_start(pTHX)
     Newx(signature, 1, yy_parser_signature);
     SAVEDESTRUCTOR_X(&destroy_subsignature_context, signature);
 
-    signature->elems    = 0;
-    signature->optelems = 0;
+    signature->next_argix = 0;
+    signature->opt_params = 0;
     signature->slurpy   = 0;
 
     signature->elemops = NULL;
@@ -16649,7 +16657,8 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
     if(signature->slurpy)
         yyerror("Slurpy parameter not last");
 
-    UV argix = signature->elems;
+    UV argix = signature->next_argix;
+    signature->next_argix++;
 
     OP *varop = NULL;
     if(padix) {
@@ -16661,10 +16670,8 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
         cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
     }
 
-    signature->elems++;
-
     if(defexpr) {
-        signature->optelems++;
+        signature->opt_params++;
 
         if(defexpr->op_type == OP_NULL && !(defexpr->op_flags & OPf_KIDS))
         {
@@ -16704,7 +16711,7 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
         }
     }
     else
-        if(signature->optelems)
+        if(signature->opt_params)
             yyerror("Mandatory parameter follows optional parameter");
 
     if(varop) {
@@ -16731,7 +16738,8 @@ Perl_subsignature_append_slurpy(pTHX_ I32 sigil, PADOFFSET padix)
     if(signature->slurpy)
         yyerror("Multiple slurpy parameters not allowed");
 
-    UV argix = signature->elems;
+    UV argix = signature->next_argix;
+    /* do not increment */
 
     signature->slurpy = (char)sigil;
 
@@ -16771,8 +16779,8 @@ Perl_subsignature_finish(pTHX)
     struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
         PerlMemShared_malloc( sizeof(struct op_argcheck_aux));
 
-    aux->params     = signature->elems;
-    aux->opt_params = signature->optelems;
+    aux->params     = signature->next_argix;
+    aux->opt_params = signature->opt_params;
     aux->slurpy     = signature->slurpy;
 
     OP *check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
