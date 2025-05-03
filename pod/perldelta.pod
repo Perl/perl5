@@ -368,7 +368,19 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Exceptions thrown and caught entirely within a C<defer {}> or C<finally {}>
+block no longer stop the outer run-loop.
+
+Code such as the following would stop running the contents of the C<defer>
+block once the inner exception in the inner C<try>/C<catch> block was caught.
+This has now been fixed, and runs as expected. ([GH #23064]).
+
+    defer {
+        try { die "It breaks\n"; }
+        catch ($e) { warn $e }
+
+        say "This line would never run";
+    }
 
 =back
 

@@ -6475,9 +6475,37 @@ _invoke_defer_block(pTHX_ U8 type, void *_arg)
     SAVETMPS;
 
     SAVEOP();
+    OP *was_PL_op = PL_op;
     PL_op = start;
 
-    CALLRUNOPS(aTHX);
+    dJMPENV;
+    int ret;
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 0: /* normal start */
+redo_body:
+        CALLRUNOPS(aTHX);
+        break;
+
+    case 3: /* exception happened */
+        if (PL_restartjmpenv == PL_top_env) {
+            if (!PL_restartop)
+                break;
+            PL_restartjmpenv = NULL;
+            PL_op = PL_restartop;
+            PL_restartop = NULL;
+            goto redo_body;
+        }
+
+        /* FALLTHROUGH */
+    default:
+        JMPENV_POP;
+        PL_op = was_PL_op;
+        JMPENV_JUMP(ret);
+        NOT_REACHED;
+    }
+
+    JMPENV_POP;
 
     FREETMPS;
     LEAVE;

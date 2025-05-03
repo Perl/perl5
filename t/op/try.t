@@ -330,6 +330,25 @@ no warnings 'experimental::try';
     ok($finally_invoked, 'finally block still invoked for side-effects');
 }
 
+# Variant of GH#23604
+{
+    my $ok;
+    try {
+        # nothing
+    }
+    catch ($e) {}
+    finally {
+        try {
+            die "Ignore this error\n"
+        }
+        catch ($e) {}
+
+        $ok = "ok";
+    }
+
+    is($ok, "ok", 'try{die} inside try/finally does not stop runloop');
+}
+
 # Nicer compiletime errors
 {
     my $e;
