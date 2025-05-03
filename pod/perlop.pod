@@ -1144,11 +1144,11 @@ As a scalar operator:
     if (101 .. 200) { print; } # print 2nd hundred lines, short for
                                #  if ($. == 101 .. $. == 200) { print; }
 
-    next LINE if (1 .. /^$/);  # skip header lines, short for
-                               #   next LINE if ($. == 1 .. /^$/);
+    next LINE if 1 .. /^$/;    # skip header lines, short for
+                               #   next LINE if $. == 1 .. /^$/;
                                # (typically in a loop labeled LINE)
 
-    s/^/> / if (/^$/ .. eof());  # quote body
+    s/^/> / if /^$/ .. eof();  # quote body
 
     # parse mail messages
     while (<>) {
