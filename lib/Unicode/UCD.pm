@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.81';
+our $VERSION = '0.82';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -14,25 +14,26 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw(charinfo
-		    charblock charscript
-		    charblocks charscripts
-		    charinrange
-		    charprop
-		    charprops_all
-		    general_categories bidi_types
-		    compexcl
-		    casefold all_casefolds casespec
-		    namedseq
-                    num
-                    prop_aliases
-                    prop_value_aliases
-                    prop_values
-                    prop_invlist
-                    prop_invmap
-                    search_invlist
-                    MAX_CP
-                );
+our @EXPORT_OK = qw(
+    charinfo
+    charblock charscript
+    charblocks charscripts
+    charinrange
+    charprop
+    charprops_all
+    general_categories bidi_types
+    compexcl
+    casefold all_casefolds casespec
+    namedseq
+    num
+    prop_aliases
+    prop_value_aliases
+    prop_values
+    prop_invlist
+    prop_invmap
+    search_invlist
+    MAX_CP
+);
 
 use Carp;
 
