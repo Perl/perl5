@@ -4627,9 +4627,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
          *
          */
 
-        /* Whichever path we take through the next code, we want this true,
-           and doing it now facilitates the COW check.  */
-        (void)SvPOK_only(dsv);
+        (void)SvOK_off(dsv);
+        SvFLAGS(dsv) |= sflags &
+            (SVf_POK|SVp_POK|SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK|SVf_UTF8);
 
         if ( !(flags & SV_NOSTEAL) && S_SvPV_can_swipe_buf(ssv, sflags, cur, len) )
         {	/* Passes the swipe test.  */
@@ -4735,22 +4735,20 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
                   affected by the numeric locale, hence we can cache the
                   stringification. Currently that's  +Inf, -Inf and NaN, but
                   conceivably we might extend this to -9 .. +9 (excluding -0).
-                  So mark destination the same: */
-                SvFLAGS(dsv) &= ~SVf_POK;
+                  So confirm the destination doesn't have SVf_POK set. */
+                assert(!(SvFLAGS(dsv) & SVf_POK));
             }
         }
         if (sflags & SVp_IOK) {
             SvIV_set(dsv, SvIVX(ssv));
-            if (sflags & SVf_IVisUV)
-                SvIsUV_on(dsv);
             if ((sflags & SVf_IOK) && !(sflags & SVf_POK)) {
                 /* Source was SVf_IOK|SVp_IOK|SVp_POK but not SVf_POK, meaning
-                   a value set as an integer and later stringified. So mark
-                   destination the same: */
-                SvFLAGS(dsv) &= ~SVf_POK;
+                   a value set as an integer and later stringified. So confirm
+                   the destination doesn't have SVf_POK set. */
+                assert(!(SvFLAGS(dsv) & SVf_POK)); 
             }
         }
-        SvFLAGS(dsv) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
+
         {
             const char *vstr_pv;
             STRLEN vstr_len;
