@@ -2626,7 +2626,8 @@ using it now triggers a compilation error: C<$# is no longer supported>.
 
 This is not the sigil you use in front of an array name to get the
 last index, like C<$#array>.  That's still how you get the last index
-of an array in Perl.  The two have nothing to do with each other.
+of an array in Perl.  (See L<perlintro/Arrays>.)
+The two have nothing to do with each other.
 
 Deprecated in Perl 5.
 
