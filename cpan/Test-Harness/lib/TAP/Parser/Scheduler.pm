@@ -13,11 +13,11 @@ TAP::Parser::Scheduler - Schedule tests during parallel testing
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 SYNOPSIS
 
@@ -58,7 +58,7 @@ The "C<rules>" data structure is the the heart of the scheduler. It allows you
 to express simple rules like "run all tests in sequence" or "run all tests in
 parallel except these five tests.". However, the rules structure also supports
 glob-style pattern matching and recursive definitions, so you can also express
-arbitarily complicated patterns.
+arbitrarily complicated patterns.
 
 The rule must only have one top level key: either 'par' for "parallel" or 'seq'
 for "sequence".
@@ -67,7 +67,7 @@ Values must be either strings with possible glob-style matching, or arrayrefs
 of strings or hashrefs which follow this pattern recursively.
 
 Every element in an arrayref directly below a 'par' key is eligible to be run
-in parallel, while vavalues directly below a 'seq' key must be run in sequence.
+in parallel, while values directly below a 'seq' key must be run in sequence.
 
 =head3 Rules examples
 

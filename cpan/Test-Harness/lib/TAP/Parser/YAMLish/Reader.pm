@@ -5,7 +5,7 @@ use warnings;
 
 use base 'TAP::Object';
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
                              # No EBCDIC support on early perls
 *to_native = (ord "A" == 65 || $] < 5.008)
@@ -137,23 +137,9 @@ sub _read_scalar {
     return {} if $string eq '{}';
     return [] if $string eq '[]';
 
-    if ( $string eq '>' || $string eq '|' ) {
-
-        my ( $line, $indent ) = $self->_peek;
-        die "Multi-line scalar content missing" unless defined $line;
-
-        my @multiline = ($line);
-
-        while (1) {
-            $self->_next;
-            my ( $next, $ind ) = $self->_peek;
-            last if $ind < $indent;
-
-            my $pad = $string eq '|' ? ( ' ' x ( $ind - $indent ) ) : '';
-            push @multiline, $pad . $next;
-        }
-
-        return join( ( $string eq '>' ? ' ' : "\n" ), @multiline ) . "\n";
+    if ( $string =~ /^([>|])([+-]?)([1-9]?)$/ ) {
+        my ( $style, $chomping, $indent_base ) = ( $1, $2, $3 );
+        return $self->_read_block_scalar( $style, $chomping, $indent_base );
     }
 
     if ( $string =~ /^ ' (.*) ' $/x ) {
@@ -173,6 +159,62 @@ sub _read_scalar {
 
     # Regular unquoted string
     return $string;
+}
+
+sub _read_block_scalar {
+    my ( $self, $style, $chomping, $indent_base ) = @_;
+
+    my ( $line, $line_indent ) = $self->_peek;
+    die "Multi-line scalar content missing" unless defined $line;
+
+    $indent_base ||= $line_indent;
+
+    my $pad = ' ' x ( $line_indent - $indent_base );
+    my @multi_lines = [ $pad, $line ];
+
+    while (1) {
+        $self->_next;
+        my ( $content, $line_indent ) = $self->_peek;
+        last if $line_indent < $indent_base;
+
+        my $pad = ' ' x ( $line_indent - $indent_base );
+        push @multi_lines, [ $pad, $content ];
+    }
+
+    my $block = '';
+    my $previous_line;
+
+    for my $current_line ( @multi_lines ) {
+        my ( $pad, $content ) = @$current_line;
+        unless ( defined $previous_line ) {
+            $block .= join( '', $pad, $content );
+            $previous_line = $current_line;
+            next;
+        }
+
+        if ( $style eq '>'
+             && length $content > 0
+             && length $pad == 0
+             && length $previous_line->[0] == 0
+             && length $previous_line->[1] > 0 )
+        {
+            $block .= ' ' . $content;
+        } else {
+            $block .= join( '', "\n", $pad, $content );
+        }
+        $previous_line = $current_line;
+    }
+
+    $block .= "\n";
+
+    if ( $chomping eq '-' ) {
+        $block =~ s/\n+$//;
+    } elsif ( $chomping eq '+' ) {
+        # noop: keep newlines
+    } else {
+         $block =~ s/\n+$/\n/;
+    }
+    return $block;
 }
 
 sub _read_nested {
@@ -284,7 +326,7 @@ TAP::Parser::YAMLish::Reader - Read YAMLish data from iterator
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =head1 SYNOPSIS
 

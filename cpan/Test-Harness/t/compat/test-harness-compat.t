@@ -150,14 +150,17 @@ if ($NoTaintSupport) {
                     'name'   => "$TEST_DIR/too_many",
                     'wstat'  => '1024'
                 },
-                "$TEST_DIR/vms_nit" => {
-                    'canon'  => 1,
-                    'estat'  => '',
-                    'failed' => 1,
-                    'max'    => 2,
-                    'name'   => "$TEST_DIR/vms_nit",
-                    'wstat'  => ''
-                }
+                ( $^O eq 'VMS' ?
+                    ("$TEST_DIR/vms_nit" => {
+                       'canon'  => 1,
+                       'estat'  => '',
+                       'failed' => 1,
+                       'max'    => 2,
+                       'name'   => "$TEST_DIR/vms_nit",
+                       'wstat'  => ''
+                    })
+                    : ()
+                )
             },
             'todo' => {
                 "$TEST_DIR/todo_inline" => {
@@ -170,12 +173,12 @@ if ($NoTaintSupport) {
                 }
             },
             'totals' => {
-                'bad'         => ($NoTaintSupport ? 11 : 12),
+                'bad'         => ($NoTaintSupport ? 11 : 12)-($^O eq 'VMS' ? 0 : 1),
                 'bonus'       => 1,
                 'files'       => ($NoTaintSupport ? 24 : 27),
-                'good'        => ($NoTaintSupport ? 13 : 15),
+                'good'        => ($NoTaintSupport ? 13 : 15)+($^O eq 'VMS' ? 0 : 1),
                 'max'         => ($NoTaintSupport ? 72 : 76),
-                'ok'          => ($NoTaintSupport ? 75 : 78),
+                'ok'          => ($NoTaintSupport ? 75 : 78)+($^O eq 'VMS' ? 0 : 1),
                 'skipped'     => 2,
                 'sub_skipped' => 2,
                 'tests'       => ($NoTaintSupport ? 24 : 27),
@@ -739,31 +742,35 @@ if ($NoTaintSupport) {
                 'todo'        => 0
             }
         },
-        'vms_nit' => {
-            'failed' => {
-                "$TEST_DIR/vms_nit" => {
-                    'canon'  => 1,
-                    'estat'  => '',
-                    'failed' => 1,
-                    'max'    => 2,
-                    'name'   => "$TEST_DIR/vms_nit",
-                    'wstat'  => ''
+        ( $^O eq 'VMS' ?
+            ('vms_nit' => {
+                'failed' => {
+                    "$TEST_DIR/vms_nit" => {
+                        'canon'  => 1,
+                        'estat'  => '',
+                        'failed' => 1,
+                        'max'    => 2,
+                        'name'   => "$TEST_DIR/vms_nit",
+                        'wstat'  => ''
+                    }
+                },
+                'skip_if' => sub { $^O ne 'VMS' },
+                'todo'   => {},
+                'totals' => {
+                    'bad'         => 1,
+                    'bonus'       => 0,
+                    'files'       => 1,
+                    'good'        => 0,
+                    'max'         => 2,
+                    'ok'          => 1,
+                    'skipped'     => 0,
+                    'sub_skipped' => 0,
+                    'tests'       => 1,
+                    'todo'        => 0
                 }
-            },
-            'todo'   => {},
-            'totals' => {
-                'bad'         => 1,
-                'bonus'       => 0,
-                'files'       => 1,
-                'good'        => 0,
-                'max'         => 2,
-                'ok'          => 1,
-                'skipped'     => 0,
-                'sub_skipped' => 0,
-                'tests'       => 1,
-                'todo'        => 0
-            }
-        }
+            })
+            : ()
+        )
     };
 
     my $num_tests = ( keys %$results ) * $PER_LOOP;

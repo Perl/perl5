@@ -155,16 +155,20 @@ for my $test (@schedule) {
 
 {
 
+    my $iterator;
     # coverage test for VMS case
 
-    my $iterator = make_iterator(
-        [   'not ',
-            'ok 1 - I hate VMS',
-        ]
-    );
+    SKIP : {
+        skip('Not VMS', 1) if $^O ne 'VMS';
+        $iterator = make_iterator(
+            [   'not ',
+                'ok 1 - I hate VMS',
+            ]
+        );
 
-    is $iterator->next, 'not ok 1 - I hate VMS',
-      'coverage of VMS line-splitting case';
+        is $iterator->next, 'not ok 1 - I hate VMS',
+          'coverage of VMS line-splitting case';
+    }
 
     # coverage test for VMS case - nothing after 'not'
 

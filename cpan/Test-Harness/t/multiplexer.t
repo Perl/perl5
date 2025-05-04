@@ -153,6 +153,9 @@ for my $test (@schedule) {
 
         # use Data::Dumper;
         # diag Dumper( { stash => $stash, result => $result } );
+        my @err = $parser->parse_errors();
+        ok(!@err, "$name: Parser has no parse errors");
+        diag @err if @err;
         if ( defined $result ) {
             my $expect = ( shift @$stash ) || ' OOPS ';
             my $got = $result->raw;
