@@ -2144,7 +2144,7 @@ Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
 on two hashes may result in a different order for each hash.  Any insertion
 into the hash may change the order, as will any deletion, with the exception
-that the most recent key returned by L<C<each>|/each HASH> or
+that the most recent key returned by C<each> or
 L<C<keys>|/keys HASH> may be deleted without changing the order.  So
 long as a given hash is unmodified you may rely on
 L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and
@@ -2154,20 +2154,20 @@ details on why hash order is randomized.  Aside from the guarantees
 provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
 
-After L<C<each>|/each HASH> has returned all entries from the hash or
-array, the next call to L<C<each>|/each HASH> returns the empty list in
+After C<each> has returned all entries from the hash or
+array, the next call to C<each> returns the empty list in
 list context and L<C<undef>|/undef EXPR> in scalar context; the next
 call following I<that> one restarts iteration.  Each hash or array has
-its own internal iterator, accessed by L<C<each>|/each HASH>,
+its own internal iterator, accessed by C<each>,
 L<C<keys>|/keys HASH>, and L<C<values>|/values HASH>.  The iterator is
-implicitly reset when L<C<each>|/each HASH> has reached the end as just
+implicitly reset when C<each> has reached the end as just
 described; it can be explicitly reset by calling L<C<keys>|/keys HASH>
 or L<C<values>|/values HASH> on the hash or array, or by referencing
 the hash (but not array) in list context.  If you add or delete
 a hash's elements while iterating over it, the effect on the iterator is
 unspecified; for example, entries may be skipped or duplicated--so don't
 do that.  Exception: It is always safe to delete the item most recently
-returned by L<C<each>|/each HASH>, so the following code works properly:
+returned by C<each>, so the following code works properly:
 
     while (my ($key, $value) = each %hash) {
         print $key, "\n";
@@ -2227,10 +2227,10 @@ but in a different order:
     }
 
 Starting with Perl 5.14, an experimental feature allowed
-L<C<each>|/each HASH> to take a scalar expression. This experiment has
+C<each> to take a scalar expression. This experiment has
 been deemed unsuccessful, and was removed as of Perl 5.24.
 
-As of Perl 5.18 you can use a bare L<C<each>|/each HASH> in a C<while>
+As of Perl 5.18 you can use a bare C<each> in a C<while>
 loop, which will set L<C<$_>|perlvar/$_> on every iteration.
 If either an C<each> expression or an explicit assignment of an C<each>
 expression to a scalar is used as a C<while>/C<for> condition, then
@@ -3943,9 +3943,9 @@ order is specific to a given hash; the exact same series of operations
 on two hashes may result in a different order for each hash.  Any insertion
 into the hash may change the order, as will any deletion, with the exception
 that the most recent key returned by L<C<each>|/each HASH> or
-L<C<keys>|/keys HASH> may be deleted without changing the order.  So
+C<keys> may be deleted without changing the order.  So
 long as a given hash is unmodified you may rely on
-L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and L<C<each>|/each
+C<keys>, L<C<values>|/values HASH> and L<C<each>|/each
 HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
@@ -3954,10 +3954,10 @@ traversal order are subject to change in any release of Perl.  Tied hashes
 may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
 
-As a side effect, calling L<C<keys>|/keys HASH> resets the internal
+As a side effect, calling C<keys> resets the internal
 iterator of the HASH or ARRAY (see L<C<each>|/each HASH>) before
 yielding the keys.  In
-particular, calling L<C<keys>|/keys HASH> in void context resets the
+particular, calling C<keys> in void context resets the
 iterator with no other overhead.
 
 Here is yet another way to print your environment:
@@ -3986,7 +3986,7 @@ sort of a hash by its values:
         printf "%4d %s\n", $hash{$key}, $key;
     }
 
-Used as an lvalue, L<C<keys>|/keys HASH> allows you to increase the
+Used as an lvalue C<keys> allows you to increase the
 number of hash buckets
 allocated for the given hash.  This can gain you a measure of efficiency if
 you know the hash is going to get big.  (This is similar to pre-extending
@@ -3999,12 +3999,12 @@ in fact, since it rounds up to the next power of two.  These
 buckets will be retained even if you do C<%hash = ()>, use C<undef
 %hash> if you want to free the storage while C<%hash> is still in scope.
 You can't shrink the number of buckets allocated for the hash using
-L<C<keys>|/keys HASH> in this way (but you needn't worry about doing
+C<keys> in this way (but you needn't worry about doing
 this by accident, as trying has no effect).  C<keys @array> in an lvalue
 context is a syntax error.
 
 Starting with Perl 5.14, an experimental feature allowed
-L<C<keys>|/keys HASH> to take a scalar expression. This experiment has
+C<keys> to take a scalar expression. This experiment has
 been deemed unsuccessful, and was removed as of Perl 5.24.
 
 To avoid confusing would-be users of your code who are running earlier
@@ -10509,7 +10509,7 @@ into the hash may change the order, as will any deletion, with the exception
 that the most recent key returned by L<C<each>|/each HASH> or
 L<C<keys>|/keys HASH> may be deleted without changing the order.  So
 long as a given hash is unmodified you may rely on
-L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and
+L<C<keys>|/keys HASH>, C<values> and
 L<C<each>|/each HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
@@ -10518,10 +10518,10 @@ traversal order are subject to change in any release of Perl.  Tied hashes
 may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
 
-As a side effect, calling L<C<values>|/values HASH> resets the HASH or
+As a side effect, calling C<values> resets the HASH or
 ARRAY's internal iterator (see L<C<each>|/each HASH>) before yielding the
 values.  In particular,
-calling L<C<values>|/values HASH> in void context resets the iterator
+calling C<values> in void context resets the iterator
 with no other overhead.
 
 Apart from resetting the iterator,
@@ -10537,7 +10537,7 @@ modify the contents of the hash:
     for (@hash{keys %hash}) { s/foo/bar/g }  # same
 
 Starting with Perl 5.14, an experimental feature allowed
-L<C<values>|/values HASH> to take a
+C<values> to take a
 scalar expression. This experiment has been deemed unsuccessful, and was
 removed as of Perl 5.24.
 
