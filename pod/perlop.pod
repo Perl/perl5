@@ -3357,6 +3357,7 @@ mean C</^/m>.
 =head2 I/O Operators
 X<operator, i/o> X<operator, io> X<io> X<while> X<filehandle>
 X<< <> >> X<< <<>> >> X<@ARGV>
+X<diamond operator> X<double diamond operator>
 
 There are several I/O operators you should know about.
 
@@ -3488,7 +3489,7 @@ and call it with S<C<perl dangerous.pl 'rm -rfv *|'>>, it actually opens a
 pipe, executes the C<rm> command and reads C<rm>'s output from that pipe.
 If you want all items in C<@ARGV> to be interpreted as file names, you
 can use the module C<ARGV::readonly> from CPAN, or use the double
-diamond bracket:
+diamond operator:
 
     while (<<>>) {
         print;
