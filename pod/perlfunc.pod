@@ -2130,15 +2130,17 @@ X<each> X<hash, iterator>
 =item each ARRAY
 X<array, iterator>
 
-=for Pod::Functions retrieve the next key/value pair from a hash or
-index/value from an array
+=for Pod::Functions retrieve the next key/value pair from a hash or index/value from an array
 
 When called on a hash in list context, returns a 2-element list
-consisting of the key and value for the next element of a hash.  In Perl
-5.12 and later only, it will also return the index and value for the next
-element of an array so that you can iterate over it; older Perls consider
-this a syntax error.  When called in scalar context, returns only the key
-(not the value) in a hash, or the index in an array.
+consisting of the key and value for the next element of a hash.
+When called in scalar context, returns only the key (not the value).
+
+When called on an array in list context, in Perl 5.12 and later, it
+returns a 2-element list consisting of the index and value for the next
+element of the array so that you can iterate over it; older Perls
+consider this a syntax error.  When called in scalar context, returns
+only the index in the array.
 
 Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
@@ -2153,6 +2155,17 @@ as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
 provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
+
+Array entries are returned lowest index first.
+
+ my @colors = (qw(red, green, blue));
+ while (my ($index, $value) = each @colors) {
+     print "[$index] = $value\n";
+ }
+
+ [0] = red
+ [1] = green
+ [2] = blue
 
 After C<each> has returned all entries from the hash or
 array, the next call to C<each> returns the empty list in
@@ -2179,7 +2192,7 @@ implementation.
 
 The iterator used by C<each> is attached to the hash or array, and is
 shared between all iteration operations applied to the same hash or array.
-Thus all uses of C<each> on a single hash or array advance the same
+Thus all uses of C<each> on a particular hash or array advance the same
 iterator location.  All uses of C<each> are also subject to having the
 iterator reset by any use of C<keys> or C<values> on the same hash or
 array, or by the hash (but not array) being referenced in list context.
@@ -3934,9 +3947,11 @@ X<keys> X<key>
 =for Pod::Functions retrieve list of indices from a hash or array
 
 Called in list context, returns a list consisting of all the keys of the
-named hash, or in Perl 5.12 or later only, the indices of an array.  Perl
+named hash, or in Perl 5.12 or later, the indices of an array.  Perl
 releases prior to 5.12 will produce a syntax error if you try to use an
 array argument.  In scalar context, returns the number of keys or indices.
+
+Array entries are returned lowest index first.
 
 Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
@@ -3986,7 +4001,7 @@ sort of a hash by its values:
         printf "%4d %s\n", $hash{$key}, $key;
     }
 
-Used as an lvalue C<keys> allows you to increase the
+Used as an lvalue on a hash, C<keys> allows you to increase the
 number of hash buckets
 allocated for the given hash.  This can gain you a measure of efficiency if
 you know the hash is going to get big.  (This is similar to pre-extending
@@ -4000,8 +4015,9 @@ buckets will be retained even if you do C<%hash = ()>, use C<undef
 %hash> if you want to free the storage while C<%hash> is still in scope.
 You can't shrink the number of buckets allocated for the hash using
 C<keys> in this way (but you needn't worry about doing
-this by accident, as trying has no effect).  C<keys @array> in an lvalue
-context is a syntax error.
+this by accident, as trying has no effect).
+
+C<keys @array> in an lvalue context is a syntax error.
 
 Starting with Perl 5.14, an experimental feature allowed
 C<keys> to take a scalar expression. This experiment has
@@ -10497,10 +10513,12 @@ X<values>
 
 =for Pod::Functions return a list of the values in a hash or array
 
-In list context, returns a list consisting of all the values of the named
-hash.  In Perl 5.12 or later only, will also return a list of the values of
-an array; prior to that release, attempting to use an array argument will
-produce a syntax error.  In scalar context, returns the number of values.
+Called in list context, returns a list consisting of all the value of the
+named hash, or in Perl 5.12 or later, the values of an array.  Perl
+releases prior to 5.12 will produce a syntax error if you try to use an
+array argument.  In scalar context, returns the number of keys or indices.
+
+Array entries are returned in the order of lowest index first.
 
 Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
