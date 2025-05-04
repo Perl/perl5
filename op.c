@@ -1027,11 +1027,13 @@ Perl_op_free(pTHX_ OP *o)
 /* S_op_clear_gv(): free a GV attached to an OP */
 
 STATIC
-#ifdef USE_ITHREADS
-void S_op_clear_gv(pTHX_ OP *o, PADOFFSET *ixp)
-#else
-void S_op_clear_gv(pTHX_ OP *o, SV**svp)
-#endif
+void S_op_clear_gv(pTHX_ OP *o,
+    #ifdef USE_ITHREADS
+        PADOFFSET *ixp
+    #else
+        SV**svp
+    #endif
+)
 {
 
     GV *gv = (o->op_type == OP_GV || o->op_type == OP_GVSV
