@@ -58,11 +58,11 @@ TAP::Formatter::Base - Base class for harness output delegates
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 DESCRIPTION
 
@@ -419,9 +419,7 @@ sub _summary_test_header {
 }
 
 sub _output {
-    my $self = shift;
-
-    print { $self->stdout } @_;
+    print { shift->stdout } @_;
 }
 
 sub _failure_output {

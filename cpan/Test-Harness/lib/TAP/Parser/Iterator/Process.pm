@@ -8,7 +8,7 @@ use IO::Handle;
 
 use base 'TAP::Parser::Iterator';
 
-my $IS_WIN32 = ( $^O =~ /^(MS)?Win32$/ );
+use constant IS_WIN32 => !!( $^O =~ /^(MS)?Win32$/ );
 
 =head1 NAME
 
@@ -16,11 +16,11 @@ TAP::Parser::Iterator::Process - Iterator for process-based TAP sources
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 SYNOPSIS
 
@@ -91,8 +91,7 @@ Get the exit status for this iterator's process.
 }
 
 sub _use_open3 {
-    my $self = shift;
-    return unless $Config{d_fork} || $IS_WIN32;
+    return unless $Config{d_fork} || IS_WIN32;
     for my $module (qw( IPC::Open3 IO::Select )) {
         eval "use $module";
         return if $@;
@@ -147,7 +146,7 @@ sub _initialize {
 
         # }}}
 
-        if ($IS_WIN32) {
+        if (IS_WIN32) {
             $err = $merge ? '' : '>&STDERR';
             eval {
                 $pid = open3(
@@ -340,7 +339,7 @@ sub _finish {
 
     # Sometimes we get -1 on Windows. Presumably that means status not
     # available.
-    $status = 0 if $IS_WIN32 && $status == -1;
+    $status = 0 if IS_WIN32 && $status == -1;
 
     $self->{wait} = $status;
     $self->{exit} = $self->_wait2exit($status);

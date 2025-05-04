@@ -27,11 +27,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 14;
@@ -1340,9 +1340,9 @@ sub _make_state_table {
         my $st = { %state_globals, %{ $states{$name} } };
 
         # Add defaults
-        for my $next ( sort keys %{$st} ) {
+        for my $next ( keys %$st ) {
             if ( my $default = $state_defaults{$next} ) {
-                for my $def ( sort keys %{$default} ) {
+                for my $def ( keys %$default ) {
                     $st->{$next}->{$def} ||= $default->{$def};
                 }
             }

@@ -14,11 +14,11 @@ TAP::Parser::Source - a TAP source & meta data about it
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 SYNOPSIS
 

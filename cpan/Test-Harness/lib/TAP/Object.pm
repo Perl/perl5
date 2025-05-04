@@ -9,11 +9,11 @@ TAP::Object - Base class that provides common functionality to all C<TAP::*> mod
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 SYNOPSIS
 
@@ -50,9 +50,7 @@ L</_initialize> method.  Returns a new object.
 =cut
 
 sub new {
-    my $class = shift;
-    my $self = bless {}, $class;
-    return $self->_initialize(@_);
+    return bless({}, shift)->_initialize(@_);
 }
 
 =head2 Instance Methods

@@ -16,11 +16,11 @@ TAP::Parser::IteratorFactory - Figures out which SourceHandler objects to use fo
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 SYNOPSIS
 

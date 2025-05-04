@@ -26,11 +26,11 @@ TAP::Formatter::Console::Session - Harness output delegate for default console o
 
 =head1 VERSION
 
-Version 3.50
+Version 3.52
 
 =cut
 
-our $VERSION = '3.50';
+our $VERSION = '3.52';
 
 =head1 DESCRIPTION
 
@@ -128,10 +128,8 @@ sub _closures {
                 my $planned = $parser->tests_planned || '?';
                 $plan = "/$planned ";
             }
-            $output = $formatter->_get_output_method($parser);
 
             if ( $show_count and $is_test ) {
-                my $number = $result->number;
                 my $now    = CORE::time;
 
                 # Print status roughly once per second.
@@ -139,6 +137,8 @@ sub _closures {
                 # $last_status_printed starting with the value 0, which $now
                 # will never be. (Unless someone sets their clock to 1970)
                 if ( $last_status_printed != $now ) {
+                    my $number = $result->number;
+                    $output = $formatter->_get_output_method($parser);
                     $formatter->$output("\r$pretty$number$plan");
                     $last_status_printed = $now;
                 }
