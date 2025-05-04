@@ -13,7 +13,7 @@ between threads must be explicit.  The user-level interface for I<ithreads>
 uses the L<threads> class.
 
 B<NOTE>: There was another older Perl threading flavor called the 5.005 model
-that used the L<threads> class.  This old model was known to have problems, is
+that used the L<Thread> class.  This old model was known to have problems, was
 deprecated, and was removed for release 5.10.  You are
 strongly encouraged to migrate any existing 5.005 threads code to the new
 model as soon as possible.
@@ -24,6 +24,15 @@ If you have C<useithreads=define> you have ithreads, if you
 have C<use5005threads=define> you have 5.005 threads.
 If you have neither, you don't have any thread support built in.
 If you have both, you are in trouble.
+
+In more modern times, the terms C<ithreads> and C<threads> are
+synonymous, and are used interchangeably.  The best practice is to use
+C<useithreads> if your code is dependent on something specific about that
+implementation, and to use C<usethreads> if it isn't.  That way, in the
+very unlikely event that some new threading model comes along, your code
+is more protected from needing to change.  (The corresponding symbols at
+the C language level are C<USE_ITHREADS> and C<USE_THREADS>; these are
+currently totally synonymous, but not absolutely guaranteed to remain so.)
 
 The L<threads> and L<threads::shared> modules are included in the core Perl
 distribution.  Additionally, they are maintained as separate modules on
