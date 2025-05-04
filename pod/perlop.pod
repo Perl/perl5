@@ -2842,15 +2842,12 @@ must use an C<eval()>:
     eval "tr/$oldlist/$newlist/, 1" or die $@;
 
 =item C<< <<I<EOF> >>
-X<here-doc> X<heredoc> X<here-document> X<<< << >>>
+X<here-doc> X<here-docs> X<heredoc> X<here-document> X<<< << >>>
 
 A line-oriented form of quoting is based on the shell "here-document"
 syntax.  Following a C<< << >> you specify a string to terminate
 the quoted material, and all lines following the current line down to
 the terminating string are the value of the item.
-
-Prefixing the terminating string with a C<~> specifies that you
-want to use L</Indented Here-docs> (see below).
 
 The terminating string may be either an identifier (a word), or some
 quoted text.  An unquoted identifier works like double quotes.
@@ -2861,6 +2858,52 @@ on the terminating line.
 
 If the terminating string is quoted, the type of quotes used determine
 the treatment of the text.
+
+ my $person = 'John';
+
+ print uc << "EOT";
+ Hello, $person!  
+ And the text goes on.
+ EOT
+
+This yields
+
+ HELLO, JOHN!  
+ AND THE TEXT GOES ON.
+
+The same result happens if the double quotes are omitted 
+
+ my $person = 'John';
+ print uc <<EOT;
+ Hello, $person!  
+ And the text goes on.
+ EOT
+
+ HELLO, JOHN!  
+ AND THE TEXT GOES ON.
+
+If instead, single quotes are used, we get
+
+ my $person = 'John';
+ print uc <<'EOT';
+ Hello, $person!  
+ And the text goes on.
+ EOT
+
+ HELLO, $PERSON!  
+ AND THE TEXT GOES ON.
+
+You can do fancy things like call a function with the here-document
+
+ print uc(<<EOF);
+ abc
+ EOF
+
+ ABC
+
+It is usually easier to read the code if the here-document is indented.
+Prefixing the terminating string with a C<~> specifies that you
+want to use L</Indented Here-docs> (see below).
 
 =over 4
 
