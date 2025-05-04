@@ -2130,7 +2130,8 @@ X<each> X<hash, iterator>
 =item each ARRAY
 X<array, iterator>
 
-=for Pod::Functions retrieve the next key/value pair from a hash
+=for Pod::Functions retrieve the next key/value pair from a hash or
+index/value from an array
 
 When called on a hash in list context, returns a 2-element list
 consisting of the key and value for the next element of a hash.  In Perl
@@ -3930,7 +3931,7 @@ X<keys> X<key>
 
 =item keys ARRAY
 
-=for Pod::Functions retrieve list of indices from a hash
+=for Pod::Functions retrieve list of indices from a hash or array
 
 Called in list context, returns a list consisting of all the keys of the
 named hash, or in Perl 5.12 or later only, the indices of an array.  Perl
@@ -10494,7 +10495,7 @@ X<values>
 
 =item values ARRAY
 
-=for Pod::Functions return a list of the values in a hash
+=for Pod::Functions return a list of the values in a hash or array
 
 In list context, returns a list consisting of all the values of the named
 hash.  In Perl 5.12 or later only, will also return a list of the values of
