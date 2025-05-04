@@ -330,7 +330,9 @@ If the LABEL is omitted, the loop control statement
 refers to the innermost enclosing loop.  This may include dynamically
 searching through your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the C<use warnings>
-pragma or the B<-w> flag.
+pragma or the B<-w> flag.  If more than one label with the same name
+occurs, any reference to that name refers to the one labelling the
+innermost enclosing loop.
 
 If the condition expression of a C<while> statement is based
 on any of a group of iterative expression types then it gets
