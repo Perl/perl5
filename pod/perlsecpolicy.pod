@@ -350,7 +350,7 @@ opportunity to respond before the issue is closed.
 The team may discuss potential fixes with you or provide you with
 patches for testing purposes during this time frame.
 
-=head3 The CVE is drated
+=head3 The CVE is drafted
 
 Once an issue is fully confirmed and a potential fix has been found,
 the security team will communicate with the
