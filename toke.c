@@ -9997,25 +9997,7 @@ S_pending_ident(pTHX)
                 GCC_DIAG_RESTORE_STMT;
             }
 
-            if (PL_in_my == KEY_sigvar) {
-                /* A signature 'padop' needs in addition, an op_first to
-                 * point to a child sigdefelem, and an extra field to hold
-                 * the signature index. We can achieve both by using an
-                 * UNOP_AUX and (ab)using the op_aux field to hold the
-                 * index. If we ever need more fields, use a real malloced
-                 * aux strut instead.
-                 */
-                assert(PL_parser->signature);
-                /* We don't yet know the argindex but subsignature_append_*()
-                 * will fill it in
-                 */
-                o = newUNOP_AUX(OP_ARGELEM, 0, NULL, NULL);
-                o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
-                                  : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
-                                  :                         OPpARGELEM_HV);
-            }
-            else
-                o = newOP(OP_PADANY, 0);
+            o = newOP(OP_PADANY, 0);
             o->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
                                                         UTF ? SVf_UTF8 : 0);
             if (PL_in_my == KEY_sigvar)
