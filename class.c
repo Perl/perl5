@@ -254,9 +254,14 @@ XS(injected_constructor)
 /* TODO: People would probably expect to find this in pp.c  ;) */
 PP(pp_methstart)
 {
-    /* note that if AvREAL(@_), be careful not to leak self:
-     * so keep it in @_ for now, and only shift it later */
-    SV *self = *(av_fetch(GvAV(PL_defgv), 0, 1));
+    bool self_in_pad = PL_op->op_private & OPpSELF_IN_PAD;
+    SV *self;
+    if (self_in_pad)
+        self = PAD_SVl(PADIX_SELF);
+    else
+        /* note that if AvREAL(@_), be careful not to leak self:
+         * so keep it in @_ for now, and only shift it later */
+        self = *(av_fetch(GvAV(PL_defgv), 0, 1));
     SV *rv = NULL;
 
     /* pp_methstart happens before the first OP_NEXTSTATE of the method body,
@@ -285,8 +290,10 @@ PP(pp_methstart)
         croak("Cannot invoke a method of %" HvNAMEf_QUOTEDPREFIX " on an instance of %" HvNAMEf_QUOTEDPREFIX,
             HvNAMEfARG(CvSTASH(curcv)), HvNAMEfARG(SvSTASH(rv)));
 
-    save_clearsv(&PAD_SVl(PADIX_SELF));
-    sv_setsv(PAD_SVl(PADIX_SELF), self);
+    if (!self_in_pad) {
+        save_clearsv(&PAD_SVl(PADIX_SELF));
+        sv_setsv(PAD_SVl(PADIX_SELF), self);
+    }
 
     UNOP_AUX_item *aux = cUNOP_AUX->op_aux;
     if(aux) {
@@ -318,10 +325,12 @@ PP(pp_methstart)
         }
     }
 
-    /* safe to shift and free self now */
-    self = av_shift(GvAV(PL_defgv));
-    if (AvREAL(GvAV(PL_defgv)))
-        SvREFCNT_dec_NN(self);
+    if (!self_in_pad) {
+        /* safe to shift and free self now */
+        self = av_shift(GvAV(PL_defgv));
+        if (AvREAL(GvAV(PL_defgv)))
+            SvREFCNT_dec_NN(self);
+    }
 
     if(PL_op->op_private & OPpINITFIELDS) {
         SV *params = *av_fetch(GvAV(PL_defgv), 0, 0);
@@ -1107,7 +1116,7 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
         (ap++)->uv = padix;
         (ap++)->uv = fieldix;
 
-        methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
+        methstartop = newUNOP_AUX(OP_METHSTART, OPpSELF_IN_PAD << 8, NULL, aux);
     }
 
     OP *retop;
@@ -1201,7 +1210,7 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
         (ap++)->uv = padix;
         (ap++)->uv = fieldix;
 
-        methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
+        methstartop = newUNOP_AUX(OP_METHSTART, OPpSELF_IN_PAD << 8, NULL, aux);
     }
 
     OP *assignop = newBINOP(OP_SASSIGN, 0,
