@@ -33,7 +33,7 @@ no warnings 'experimental::class';
     # Read accessor does not permit arguments
     ok(!eval { $o->s("value") },
         'Reader accessor fails with argument');
-    like($@, qr/^Too many arguments for subroutine \'Testcase1::s\' \(got 1; expected 0\) at /,
+    like($@, qr/^Too many arguments for subroutine \'Testcase1::s\' \(got 2; expected 1\) at /,
         'Failure from argument to accessor');
 }
 
@@ -51,11 +51,11 @@ no warnings 'experimental::class';
     # Write accessor wants exactly one argument
     ok(!eval { $o->set_s() },
         'Reader accessor fails with no argument');
-    like($@, qr/^Too few arguments for subroutine \'Testcase2::set_s\' \(got 0; expected 1\) at /,
+    like($@, qr/^Too few arguments for subroutine \'Testcase2::set_s\' \(got 1; expected 2\) at /,
         'Failure from argument to accessor');
     ok(!eval { $o->set_s(1, 2) },
         'Reader accessor fails with 2 arguments');
-    like($@, qr/^Too many arguments for subroutine \'Testcase2::set_s\' \(got 2; expected 1\) at /,
+    like($@, qr/^Too many arguments for subroutine \'Testcase2::set_s\' \(got 3; expected 2\) at /,
         'Failure from argument to accessor');
 }
 

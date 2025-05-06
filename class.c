@@ -1080,10 +1080,16 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
 
     I32 save_ix = block_start(TRUE);
 
+    subsignature_start();
+
     PADOFFSET padix;
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    subsignature_append_positional(padix, 0, NULL);
+
+    OP *sigop = subsignature_finish();
 
     padix = pad_add_name_pvn(PadnamePV(pn), PadnameLEN(pn), 0, NULL, NULL);
     intro_my();
@@ -1104,18 +1110,6 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
         methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
     }
 
-    OP *argcheckop;
-    {
-        struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
-            PerlMemShared_malloc(sizeof(*aux));
-
-        aux->params     = 0;
-        aux->opt_params = 0;
-        aux->slurpy     = 0;
-
-        argcheckop = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
-    }
-
     OP *retop;
     {
         OPCODE optype = 0;
@@ -1132,8 +1126,8 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     }
 
     OP *ops = newLISTOPn(OP_LINESEQ, 0,
+            sigop,
             methstartop,
-            argcheckop,
             retop,
             NULL);
 
@@ -1145,18 +1139,6 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
     if (cv)
         CvIsMETHOD_on(cv);
-}
-
-/* If '@_' is called "snail", then elements of it can be called "slugs"; i.e.
- * snails out of their container. */
-#define newSLUGOP(idx)  S_newSLUGOP(aTHX_ idx)
-static OP *
-S_newSLUGOP(pTHX_ IV idx)
-{
-    assert(idx >= 0 && idx <= 255);
-    OP *op = newGVOP(OP_AELEMFAST, 0, PL_defgv);
-    op->op_private = idx;
-    return op;
 }
 
 static void
@@ -1185,10 +1167,23 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
 
     I32 save_ix = block_start(TRUE);
 
+    subsignature_start();
+
     PADOFFSET padix;
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    subsignature_append_positional(padix, 0, NULL);
+
+    /* param pad variable doesn't technically need a name, so don't bother as
+     * reusing the field name will provoke a warning */
+    PADOFFSET param_padix = padix = pad_add_name_pvn("$", 1, 0, NULL, NULL);
+    intro_my();
+
+    subsignature_append_positional(param_padix, 0, NULL);
+
+    OP *sigop = subsignature_finish();
 
     padix = pad_add_name_pvn(PadnamePV(pn), PadnameLEN(pn), 0, NULL, NULL);
     intro_my();
@@ -1209,20 +1204,8 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
         methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
     }
 
-    OP *argcheckop;
-    {
-        struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
-            PerlMemShared_malloc(sizeof(*aux));
-
-        aux->params     = 1;
-        aux->opt_params = 0;
-        aux->slurpy     = 0;
-
-        argcheckop = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
-    }
-
     OP *assignop = newBINOP(OP_SASSIGN, 0,
-            newSLUGOP(0),
+            newPADxVOP(OP_PADSV, 0, param_padix),
             newPADxVOP(OP_PADSV, OPf_MOD|OPf_REF, padix));
 
     OP *retop = newLISTOP(OP_RETURN, 0,
@@ -1230,8 +1213,8 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
             newPADxVOP(OP_PADSV, 0, PADIX_SELF));
 
     OP *ops = newLISTOPn(OP_LINESEQ, 0,
+            sigop,
             methstartop,
-            argcheckop,
             assignop,
             retop,
             NULL);
