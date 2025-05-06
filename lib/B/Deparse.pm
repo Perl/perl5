@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.86;
+package B::Deparse 1.87;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -26,6 +26,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
          OPpARG_IF_UNDEF OPpARG_IF_FALSE
+         OPpPARAM_IF_UNDEF OPpPARAM_IF_FALSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP
          CVf_NOWARN_AMBIGUOUS CVf_LVALUE CVf_IsMETHOD
@@ -1180,6 +1181,94 @@ sub pad_subs {
 }
 
 
+# deparse_multiparam(): deparse, if possible, a sequence of ops into a
+# subroutine signature. If possible, returns a string representing the
+# signature syntax, minus the surrounding parentheses.
+
+sub deparse_multiparam {
+    my ($self, $topop, $cv) = @_;
+
+    $topop = $topop->first;
+    return unless $$topop and $topop->name eq 'lineseq';
+
+    # last op should be nextstate
+    my $last = $topop->last;
+    return unless $$last
+                    and (   _op_is_or_was($last, OP_NEXTSTATE)
+                         or _op_is_or_was($last, OP_DBSTATE));
+
+    # first OP_NEXTSTATE
+
+    my $o = $topop->first;
+    return unless $$o;
+    return if $o->label;
+
+    # OP_MULTIPARAM
+
+    $o = $o->sibling;
+    return unless $$o and $o->name eq 'multiparam';
+
+    my ($min_args, $max_args, $slurpy, @rest) = $o->aux_list($cv);
+    my $nparams = $max_args;
+    my @param_padix = splice @rest, 0, $nparams, ();
+    my ($slurpy_padix) = @rest;
+
+    my @sig;
+    my %parami_for_padix;
+
+    # Initial scalars
+    foreach my $parami ( 0 .. $max_args-1 ) {
+        my $padix = $param_padix[$parami];
+        $sig[$parami] = $self->padname($padix) || '$';
+        $parami_for_padix{$padix} = $parami;
+    }
+
+    $o = $o->sibling;
+    for (; $o and !null $o; $o = $o->sibling) {
+        # Look for OP_NULL[OP_PARAMTEST[OP_PARAMSTORE]]
+        my $ofirst;
+        if ($o->name eq 'null' and $o->flags & OPf_KIDS and
+                ($ofirst = $o->first)->name eq 'paramtest' and
+                $ofirst->first->name eq 'paramstore') {
+            # A defaulting expression
+
+            my $parami = $parami_for_padix{$ofirst->targ};
+
+            my $assign = "=";
+            $assign = "//=" if $ofirst->private == OPpPARAM_IF_UNDEF;
+            $assign = "||=" if $ofirst->private == OPpPARAM_IF_FALSE;
+
+            length $sig[$parami] > 1 ?
+                ( $sig[$parami] .= ' ' ) :
+                ( $sig[$parami] = '$' ); # intentionally no trailing space
+
+            my $defop = $ofirst->first->first;
+            if ($defop->name eq "stub") {
+                $sig[$parami] .= "$assign";
+            }
+            else {
+                my $def = $self->deparse($defop, 7);
+                $def = "($def)" if $defop->flags & OPf_PARENS;
+
+                $sig[$parami] .= "$assign $def";
+            }
+        }
+    }
+
+    if ($cv->CvFLAGS & CVf_IsMETHOD) {
+        # Remove the implied `$self` argument
+        warn "Expected first signature argument to be named \$self"
+            unless @sig and $sig[0] eq '$self';
+        shift @sig;
+    }
+
+    if ($slurpy) {
+        push @sig, $slurpy_padix ? $self->padname($slurpy_padix) : $slurpy;
+    }
+
+    return join(", ", @sig);
+}
+
 # deparse_argops(): deparse, if possible, a sequence of argcheck + argelem
 # ops into a subroutine signature. If successful, return the first op
 # following the signature ops plus the signature string; else return the
@@ -1377,7 +1466,8 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
             and $firstop->name eq 'null'
             and $firstop->targ == OP_ARGCHECK
         ) {
-            my ($mysig) = $self->deparse_argops($firstop, $cv);
+            my ($mysig) = $self->deparse_multiparam($firstop, $cv) //
+                          $self->deparse_argops($firstop, $cv);
             if (defined $mysig) {
                 $sig = $mysig;
                 $firstop = $is_list ? $firstop->sibling : undef;

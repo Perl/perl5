@@ -1393,6 +1393,20 @@ aux_list(o, cv)
                 XSRETURN(len);
 
             } /* OP_MULTIDEREF */
+
+        case OP_MULTIPARAM:
+            {
+                struct op_multiparam_aux *p = (struct op_multiparam_aux *)aux;
+                UV nparams = p->n_positional;
+                EXTEND(SP, (IV)(3 + nparams + 1));
+                mPUSHu(p->min_args);
+                mPUSHu(p->n_positional);
+                PUSHs(sv_2mortal(p->slurpy ? newSVpvf("%c", p->slurpy) : &PL_sv_no));
+                for(UV parami = 0; parami < nparams; parami++)
+                    mPUSHu(p->param_padix[parami]);
+                mPUSHu(p->slurpy_padix);
+                XSRETURN(3 + nparams + 1);
+            }
         } /* switch */
 
 

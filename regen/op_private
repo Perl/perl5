@@ -925,6 +925,12 @@ addbits('argdefelem',
     6 => qw(OPpARG_IF_FALSE  IF_FALSE),
 );
 
+# These paramtest bits must be in the same place as argdefelem
+addbits('paramtest',
+    7 => qw(OPpPARAM_IF_UNDEF  IF_UNDEF),
+    6 => qw(OPpPARAM_IF_FALSE  IF_FALSE),
+);
+
 addbits('helemexistsor',
     7 => qw(OPpHELEMEXISTSOR_DELETE DELETE),
 );

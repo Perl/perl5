@@ -611,3 +611,7 @@ methstart	method start		ck_null		+
 initfield	initialise field	ck_null		+
 
 classname	class name		ck_classname		0t
+
+multiparam	signature processing	ck_null		+
+paramtest	signature argument value test	ck_null	|
+paramstore	signature parameter default expression	ck_null	1
