@@ -574,6 +574,9 @@ EXTCONST char* const PL_op_name[] INIT({
 	"methstart",
 	"initfield",
 	"classname",
+	"multiparam",
+	"paramtest",
+	"paramstore",
         "freed",
 });
 
@@ -1004,6 +1007,9 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"method start",
 	"initialise field",
 	"class name",
+	"signature processing",
+	"signature argument value test",
+	"signature parameter default expression",
     "freed op",
 });
 
@@ -1439,6 +1445,9 @@ INIT({
 	Perl_pp_methstart,
 	Perl_pp_initfield,
 	Perl_pp_classname,
+	Perl_pp_multiparam,
+	Perl_pp_paramtest,
+	Perl_pp_paramstore,
 });
 
 EXT Perl_check_t PL_check[] /* or perlvars.h */
@@ -1869,6 +1878,9 @@ INIT({
 	Perl_ck_null,		/* methstart */
 	Perl_ck_null,		/* initfield */
 	Perl_ck_classname,	/* classname */
+	Perl_ck_null,		/* multiparam */
+	Perl_ck_null,		/* paramtest */
+	Perl_ck_null,		/* paramstore */
 });
 
 EXTCONST U32 PL_opargs[] INIT({
@@ -2298,6 +2310,9 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00000f00,	/* methstart */
 	0x00000f00,	/* initfield */
 	0x00000008,	/* classname */
+	0x00000f00,	/* multiparam */
+	0x00000300,	/* paramtest */
+	0x00000100,	/* paramstore */
 });
 
 END_EXTERN_C
@@ -2413,6 +2428,7 @@ END_EXTERN_C
 #define OPpOPEN_OUT_RAW         0x40
 #define OPpOUR_INTRO            0x40
 #define OPpPAD_STATE            0x40
+#define OPpPARAM_IF_FALSE       0x40
 #define OPpREFCOUNTED           0x40
 #define OPpREPEAT_DOLIST        0x40
 #define OPpSELF_IN_PAD          0x40
@@ -2431,6 +2447,7 @@ END_EXTERN_C
 #define OPpLVAL_INTRO           0x80
 #define OPpOFFBYONE             0x80
 #define OPpOPEN_OUT_CRLF        0x80
+#define OPpPARAM_IF_UNDEF       0x80
 #define OPpPV_IS_UTF8           0x80
 #define OPpTRANS_DELETE         0x80
 #define OPpCONST_TOKEN_MASK     0xc0
@@ -3031,6 +3048,9 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      267, /* methstart */
      270, /* initfield */
       -1, /* classname */
+       0, /* multiparam */
+     194, /* paramtest */
+       0, /* paramstore */
 
 };
 
@@ -3049,7 +3069,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, anywhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, anywhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted, multiparam, paramstore */
     0x3cfc, 0x54f9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x077e, 0x0554, 0x1b70, 0x55ac, 0x5148, 0x4225, /* const */
@@ -3106,7 +3126,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x3cfc, 0x1198, 0x04f6, 0x014c, 0x58a8, 0x55a4, 0x2cc1, /* entersub */
     0x4b98, 0x0003, /* leavesub, leavesublv, leavewrite, leaveeval */
     0x03ca, 0x0003, /* argelem */
-    0x2adc, 0x29b8, 0x0003, /* argdefelem */
+    0x2adc, 0x29b8, 0x0003, /* argdefelem, paramtest */
     0x00bc, 0x02af, /* caller */
     0x27f5, /* nextstate, dbstate */
     0x3b9c, 0x4b99, /* leave */
@@ -3566,6 +3586,9 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* METHSTART  */ (OPpARG1_MASK|OPpSELF_IN_PAD|OPpINITFIELDS),
     /* INITFIELD  */ (OPpARG1_MASK|OPpINITFIELD_AV|OPpINITFIELD_HV),
     /* CLASSNAME  */ (0),
+    /* MULTIPARAM */ (OPpARG1_MASK),
+    /* PARAMTEST  */ (OPpARG1_MASK|OPpPARAM_IF_FALSE|OPpPARAM_IF_UNDEF),
+    /* PARAMSTORE */ (OPpARG1_MASK),
 
 };
 

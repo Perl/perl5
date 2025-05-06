@@ -1406,25 +1406,25 @@ is scalar(t145()), undef;
         sub t152x { @b = qw(a b c); 1 }
         $a . '-' . join(':', @b);
     }
-    is t152(), "1-", "t152: closure can make new lexical array non-empty";
+    is t152(), "1-a:b:c", "t152: closure can make new lexical array non-empty";
 
     sub t153 ($a = t153x(), %b) {
         sub t153x { %b = qw(a 10 b 20); 1 }
         $a . '-' . join(':', sort %b);
     }
-    is t153(), "1-", "t153: closure can make new lexical hash non-empty";
+    is t153(), "1-10:20:a:b", "t153: closure can make new lexical hash non-empty";
 
     sub t154 ($a = t154x(), @b) {
         sub t154x { tie @b, 'Tie::StdArray'; @b = qw(a b c); 1 }
         $a . '-' . join(':', @b);
     }
-    is t154(), "1-", "t154: closure can make new lexical array tied";
+    is t154(), "1-a:b:c", "t154: closure can make new lexical array tied";
 
     sub t155 ($a = t155x(), %b) {
         sub t155x { tie %b, 'Tie::StdHash'; %b = qw(a 10 b 20); 1 }
         $a . '-' . join(':', sort %b);
     }
-    is t155(), "1-", "t155: closure can make new lexical hash tied";
+    is t155(), "1-10:20:a:b", "t155: closure can make new lexical hash tied";
 
     # see if we can handle the equivalent of @a = ($a[1], $a[0])
 

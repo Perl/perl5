@@ -1146,6 +1146,63 @@ test_opcount(0, "foreach 2 lexicals on imported indexed LIST",
                     enteriter => 1,
                     iter      => 1,
                 });
+{
+    use feature qw( signatures );
+
+    test_opcount(0, "Zero-arg empty subroutine uses OP_MULTIPARAM",
+        sub () {},
+        {
+            multiparam => 1,
+            argcheck => 0,
+        });
+
+    test_opcount(0, "Zero-arg subroutine uses OP_MULTIPARAM",
+        sub () { return; },
+        {
+            multiparam => 1,
+            argcheck => 0,
+        });
+
+    test_opcount(0, "Two-arg subroutine uses OP_MULTIPARAM",
+        sub ($x, $y) { return; },
+        {
+            multiparam => 1,
+            argcheck => 0,
+            argelem => 0,
+        });
+
+    test_opcount(0, "Two-arg one-optional subroutine uses OP_MULTIPARAM",
+        sub ($x, $y = "default") { return; },
+        {
+            multiparam => 1,
+            argcheck => 0,
+            argelem => 0,
+        });
+
+    test_opcount(0, "Two-arg one-anon subroutine uses OP_MULTIPARAM",
+        sub ($, $y) { return; },
+        {
+            multiparam => 1,
+            argcheck => 0,
+            argelem => 0,
+        });
+
+    test_opcount(0, "One-arg plus slurpy array subroutine uses OP_MULTIPARAM",
+        sub ($x, @rest) { return; },
+        {
+            multiparam => 1,
+            argcheck => 0,
+            argelem => 0,
+        });
+
+    test_opcount(0, "One-arg plus slurpy hash subroutine uses OP_MULTIPARAM",
+        sub ($x, %rest) { return; },
+        {
+            multiparam => 1,
+            argcheck => 0,
+            argelem => 0,
+        });
+}
 
 # substr with const zero offset and "" replacements
 test_opcount(0, "substr with const zero offset and '' repl (void)",

@@ -1,4 +1,4 @@
-package Opcode 1.69;
+package Opcode 1.70;
 
 use strict;
 
@@ -309,6 +309,7 @@ invert_opset function.
 
     rv2hv helem hslice kvhslice each values keys exists delete
     aeach akeys avalues multideref argelem argdefelem argcheck
+    multiparam paramtest paramstore
 
     preinc i_preinc predec i_predec postinc i_postinc
     postdec i_postdec int hex oct abs pow multiply i_multiply

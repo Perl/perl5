@@ -1665,6 +1665,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
     case OP_ENTERWHEN:
     case OP_ENTERTRY:
     case OP_ONCE:
+    case OP_PARAMTEST:
         S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");
         S_opdump_link(aTHX_ o, cLOGOPo->op_other, file);
         break;
@@ -1779,6 +1780,35 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
     {
         UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
         S_opdump_indent(aTHX_ o, level, bar, file, "FIELDIX = %" UVuf "\n", aux[0].uv);
+        break;
+    }
+
+    case OP_MULTIPARAM:
+    {
+        struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUXo->op_aux;
+        UV min_args = aux->min_args;
+        UV n_positional = aux->n_positional;
+        if(n_positional > min_args)
+            S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %" UVuf " .. %" UVuf "\n",
+                    min_args, n_positional);
+        else
+            S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %" UVuf "\n",
+                    min_args);
+
+        for(Size_t i = 0; i < n_positional; i++) {
+            PADOFFSET padix = aux->param_padix[i];
+            if(padix)
+                S_opdump_indent(aTHX_ o, level, bar, file, "  PARAM [%zd] PADIX = %" UVuf "%s\n",
+                        i, aux->param_padix[i], i >= min_args ? " OPT" : "");
+            else
+                S_opdump_indent(aTHX_ o, level, bar, file, "  PARAM [%zd] ANON\n",
+                        i);
+        }
+
+        if(aux->slurpy)
+            S_opdump_indent(aTHX_ o, level, bar, file, "SLURPY = '%c' PADIX = %" UVuf "\n",
+                    aux->slurpy, aux->slurpy_padix);
+
         break;
     }
 

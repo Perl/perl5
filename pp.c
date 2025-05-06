@@ -7885,6 +7885,144 @@ PP(pp_argcheck)
     return NORMAL;
 }
 
+PP(pp_multiparam)
+{
+    struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUX->op_aux;
+    UV nparams = aux->n_positional;
+    char slurpy = aux->slurpy;
+    PADOFFSET *param_padix = aux->param_padix;
+    AV  *defav = GvAV(PL_defgv); /* @_ */
+
+    assert(!SvMAGICAL(defav));
+    UV argc = (UV)(AvFILLp(defav) + 1);
+
+    S_check_argc(aTHX_ argc, nparams, nparams - aux->min_args, slurpy);
+
+    UV parami;
+    for(parami = 0; parami < nparams; parami++) {
+        PADOFFSET padix = param_padix[parami];
+        if(!padix) {
+            if(argc)
+                argc--;
+            continue;
+        }
+
+        SV **padentry = &PAD_SVl(padix);
+        save_clearsv(padentry);
+
+        if(!argc) {
+            /* Ran out of arg values for this param. It must be a missing
+             * optional. Remark that it's missing so a subsequent OP_PARAMTEST
+             * knows */
+            SvPADSTALE_on(*padentry);
+            continue;
+        }
+
+        SV **valp = av_fetch(defav, parami, FALSE);
+        SV *val = valp ? *valp : &PL_sv_undef;
+        argc--;
+
+        assert(TAINTING_get || !TAINT_get);
+        if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+            TAINT_NOT;
+
+        SvSetMagicSV(*padentry, val);
+    }
+
+    if(!slurpy || !aux->slurpy_padix)
+        return PL_op->op_next;
+
+    /* Now we know we have a slurpy */
+    SV **padentry = &PAD_SVl(aux->slurpy_padix);
+    save_clearsv(padentry);
+
+    if(slurpy == '@') {
+        AV *av = (AV *)*padentry;
+        assert(SvTYPE(av) == SVt_PVAV);
+
+        if(av_count(av)) {
+            /* see "target should be empty" comments in pp_argelem above */
+            av_refresh_elements_range(defav, parami, parami + argc);
+            av_clear(av);
+        }
+
+        av_extend(av, argc);
+
+        IV avidx = 0;
+        for(; argc; parami++, argc--) {
+            SV **valp = av_fetch(defav, parami, FALSE);
+            SV *val = valp ? *valp : &PL_sv_undef;
+
+            assert(TAINTING_get || !TAINT_get);
+            if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                TAINT_NOT;
+
+            av_store(av, avidx++, newSVsv(val));
+        }
+    }
+    else if(slurpy == '%') {
+        HV *hv = (HV *)*padentry;
+        assert(SvTYPE(hv) == SVt_PVHV);
+
+        if(SvRMAGICAL(hv) || HvUSEDKEYS(hv) > 0) {
+            /* see "target should be empty" comments in pp_argelem above */
+            av_refresh_elements_range(defav, parami, parami + argc);
+            hv_clear(hv);
+        }
+
+        assert((argc % 2) == 0);
+
+        while(argc) {
+            SV **svp;
+
+            svp = av_fetch(defav, parami, FALSE); parami++;
+            SV *key = svp ? *svp : &PL_sv_undef;
+            svp = av_fetch(defav, parami, FALSE); parami++;
+            SV *val = svp ? *svp : &PL_sv_undef;
+            argc -= 2;
+
+            if (UNLIKELY(SvGMAGICAL(key)))
+                key = sv_mortalcopy(key);
+
+            hv_store_ent(hv, key, newSVsv(val), 0);
+            if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                TAINT_NOT;
+        }
+    }
+
+    return PL_op->op_next;
+}
+
+PP(pp_paramtest)
+{
+    dTARGET;
+    U8 priv = PL_op->op_private;
+
+    bool ok = TARG && !SvPADSTALE(TARG);
+
+    if (ok && (priv & OPpPARAM_IF_UNDEF) && !SvOK(TARG))
+        ok = false;
+    if (ok && (priv & OPpPARAM_IF_FALSE) && !SvTRUE(TARG))
+        ok = false;
+
+    if(!ok)
+        return cLOGOP->op_other;
+
+    return PL_op->op_next;
+}
+
+PP_wrapped(pp_paramstore, 1, 0)
+{
+    dSP;
+    dTARGET;
+    SV *value = POPs;
+
+    SvPADSTALE_off(TARG);
+    SvSetMagicSV(TARG, value);
+
+    RETURN;
+}
+
 PP_wrapped(pp_isa, 2, 0)
 {
     dSP;

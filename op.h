@@ -1189,6 +1189,16 @@ struct op_argcheck_aux {
     char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
 };
 
+/* for OP_MULTIPARAM */
+
+struct op_multiparam_aux {
+    UV    min_args;     /* = the number of mandatory scalar parameters */
+    UV    n_positional; /* = the number of mandatory + optional scalar parameters, not counting a final slurpy */
+    char  slurpy;
+    PADOFFSET *param_padix; /* points at storage allocated along with the struct itself, immediately following */
+    PADOFFSET slurpy_padix;
+};
+
 #define MI_INIT_WORKAROUND_PACK "Module::Install::DSL"
 
 

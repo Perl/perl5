@@ -3634,6 +3634,7 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_RANGE:
         case OP_ONCE:
         case OP_ARGDEFELEM:
+        case OP_PARAMTEST:
             while (cLOGOP->op_other->op_type == OP_NULL)
                 cLOGOP->op_other = cLOGOP->op_other->op_next;
             DEFER(cLOGOP->op_other);

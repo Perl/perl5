@@ -1226,6 +1226,10 @@ Perl_op_clear(pTHX_ OP *o)
         PerlMemShared_free(cUNOP_AUXo->op_aux);
         break;
 
+    case OP_MULTIPARAM:
+        PerlMemShared_free(cUNOP_AUXo->op_aux);
+        break;
+
     case OP_MULTICONCAT:
         {
             UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
@@ -16557,6 +16561,14 @@ Perl_rcpv_copy(pTHX_ char *pv) {
 
 /* Subroutine signature parsing */
 
+struct yy_parser_signature_param {
+    UV         argix;        /* positional index of the param */
+    PADOFFSET  padix;        /* pad index of the var holding the param */
+    OP        *defcop;
+    OPCODE     defmode;
+    OP        *defexpr;
+};
+
 struct yy_parser_signature {
     /* A note on terminology. We call each variable that appears in a
      * signature a "parameter", and each scalar value the caller passes in at
@@ -16569,7 +16581,12 @@ struct yy_parser_signature {
     UV          next_argix; /* the argument index of the next parameter we add */
     UV          opt_params; /* number of optional scalar parameters */
     char        slurpy;     /* the sigil of the slurpy var (or null) */
-    OP         *elemops;    /* NULL, or an OP_LINESEQ of individual element and fence ops */
+
+    UV          nparams;     /* number of elements of the following array that are in use */
+    UV          params_size; /* number of elements we could store in the following array */
+    struct yy_parser_signature_param *params;
+
+    OP         *fenceops;     /* NULL, or an OP_LINESEQ containing the ops */
 };
 
 static void
@@ -16577,10 +16594,46 @@ destroy_subsignature_context(pTHX_ void *p)
 {
     yy_parser_signature *signature = (yy_parser_signature *)p;
 
-    if(signature->elemops)
-        op_free(signature->elemops);
+    if(signature->params) {
+        for(UV parami = 0; parami < signature->nparams; parami++) {
+            struct yy_parser_signature_param *param = signature->params + parami;
+
+            if(param->defcop)
+                op_free(param->defcop);
+            if(param->defexpr)
+                op_free(param->defexpr);
+        }
+        Safefree(signature->params);
+    }
+
+    if(signature->fenceops)
+        op_free(signature->fenceops);
 
     Safefree(signature);
+}
+
+#define subsignature_push_param() S_subsignature_push_param(aTHX)
+static struct yy_parser_signature_param *
+S_subsignature_push_param(pTHX)
+{
+    assert(PL_parser);
+    yy_parser_signature *signature = PL_parser->signature;
+    assert(signature);
+
+    if(signature->nparams >= signature->params_size) {
+        signature->params_size *= 2;
+        Renew(signature->params, signature->params_size, struct yy_parser_signature_param);
+    }
+    struct yy_parser_signature_param *param = signature->params + signature->nparams;
+    signature->nparams++;
+
+    param->argix = 0;
+    param->padix = 0;
+    param->defcop = NULL;
+    param->defmode = 0;
+    param->defexpr = NULL;
+
+    return param;
 }
 
 /* Called from perly.y on encountering the '(' of a subroutine signature.
@@ -16595,14 +16648,14 @@ Perl_subsignature_start(pTHX)
     assert(PL_parser);
 
     yy_parser_signature *signature;
-    Newx(signature, 1, yy_parser_signature);
+    Newxz(signature, 1, yy_parser_signature);
     SAVEDESTRUCTOR_X(&destroy_subsignature_context, signature);
 
-    signature->next_argix = 0;
-    signature->opt_params = 0;
-    signature->slurpy   = 0;
-
-    signature->elemops = NULL;
+    /* Most signatured subs probably won't have more than 4 params. If they do
+     * we'll just realloc anyway
+     */
+    signature->params_size = 4;
+    Newxz(signature->params, signature->params_size, struct yy_parser_signature_param);
 
     SAVEVPTR(PL_parser->signature);
     PL_parser->signature = signature;
@@ -16634,8 +16687,10 @@ Perl_subsignature_append_fence_op(pTHX_ OP *o)
     yy_parser_signature *signature = PL_parser->signature;
     assert(signature);
 
-    signature->elemops = op_append_elem(OP_LINESEQ, signature->elemops,
-            o);
+    if(signature->fenceops)
+        op_append_elem(OP_LINESEQ, signature->fenceops, o);
+    else
+        signature->fenceops = newLISTOP(OP_LINESEQ, 0, o, NULL);
 }
 
 /* Appends another positional scalar parameter to the accumulated set of
@@ -16654,21 +16709,37 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
     yy_parser_signature *signature = PL_parser->signature;
     assert(signature);
 
-    if(signature->slurpy)
+    if(signature->slurpy) {
         yyerror("Slurpy parameter not last");
+        return;
+    }
+
+    if(!defexpr && signature->opt_params) {
+        yyerror("Mandatory parameter follows optional parameter");
+        return;
+    }
 
     UV argix = signature->next_argix;
     signature->next_argix++;
 
-    OP *varop = NULL;
+    if(!padix && !defexpr)
+        /* This param has no var and no defaulting expression. There's 
+         * nothing else for us to do here.
+         */
+        return;
+
+    struct yy_parser_signature_param *param = subsignature_push_param();
+    param->argix = argix;
+
     if(padix) {
         assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[padix])[0] == '$');
 
-        varop = newUNOP_AUX(OP_ARGELEM, 0, NULL, NULL);
-        varop->op_private |= OPpARGELEM_SV;
-        varop->op_targ = padix;
-        cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
+        param->padix = padix;
+
+        intro_my(); /* introduce the new pad variable now */
     }
+    else
+        param->padix = 0;
 
     if(defexpr) {
         signature->opt_params++;
@@ -16678,46 +16749,30 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
             /* caller passed in newOP(OP_NULL, 0), so we should not leak it */
             op_free(defexpr);
 
+            defexpr = newOP(OP_STUB, OPf_WANT_SCALAR);
+
             /* handle '$=' special case */
-            if(varop)
+            if(padix)
                 yyerror("Optional parameter lacks default expression");
         }
-        else {
-            I32 flags = 0;
-            if(defmode == OP_DORASSIGN)
-                flags |= OPpARG_IF_UNDEF << 8;
-            if(defmode == OP_ORASSIGN)
-                flags |= OPpARG_IF_FALSE << 8;
 
-            /* a normal '=default' expression */
-            OP *defop = newARGDEFELEMOP(flags, defexpr, argix);
+        /* generate the COP here so the line number is correct */
+        param->defcop = newSTATEOP(0, NULL, NULL);
 
-            if(varop) {
-                varop->op_flags |= OPf_STACKED;
-                (void)op_sibling_splice(varop, NULL, 0, defop);
-                scalar(defop);
-            }
-            else
-                varop = newUNOP(OP_NULL, 0, defop);
+        param->defmode = defmode;
+        param->defexpr = defexpr;
+        scalar(defexpr);
 
-            LINKLIST(varop);
-            /* NB: normally the first child of a logop is executed before the
-             * logop, and it pushes a boolean result ready for the logop. For
-             * ARGDEFELEM, the op itself does the boolean calculation, so set
-             * the first op to it instead.
+        if(!padix) {
+            /* A defaulting expression with anonymous var still needs to be
+             * conditional. We'll just have to allocate a pad temporary to
+             * store the value in anyway, so OP_PARAMTEST can check it.
              */
-            varop->op_next   = defop;
-            defexpr->op_next = varop;
+            param->padix = pad_add_name_pvn("$", 1, padadd_NO_DUP_CHECK, NULL, NULL);
         }
     }
-    else
-        if(signature->opt_params)
-            yyerror("Mandatory parameter follows optional parameter");
 
-    if(varop) {
-        signature->elemops = op_append_list(OP_LINESEQ, signature->elemops,
-                newSTATEOP(0, NULL, varop));
-    }
+    assert(param->padix || param->defexpr);
 }
 
 /* Appends a final slurpy parameter to the accumulated set of subroutine
@@ -16743,20 +16798,16 @@ Perl_subsignature_append_slurpy(pTHX_ I32 sigil, PADOFFSET padix)
 
     signature->slurpy = (char)sigil;
 
-    if(padix) {
-        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[padix])[0] == sigil);
+    if(!padix)
+        return;
 
-        OP *varop = newUNOP_AUX(OP_ARGELEM, 0, NULL, NULL);
-        if(sigil == '@')
-            varop->op_private |= OPpARGELEM_AV;
-        if(sigil == '%')
-            varop->op_private |= OPpARGELEM_HV;
-        varop->op_targ = padix;
-        cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
+    struct yy_parser_signature_param *param = subsignature_push_param();
 
-        signature->elemops = op_append_list(OP_LINESEQ, signature->elemops,
-                newSTATEOP(0, NULL, varop));
-    }
+    param->argix = argix;
+
+    assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[padix])[0] == sigil);
+
+    param->padix = padix;
 }
 
 /* Called from perly.y on encountering the closing `)` of a subroutine
@@ -16773,26 +16824,115 @@ Perl_subsignature_finish(pTHX)
     yy_parser_signature *signature = PL_parser->signature;
     assert(signature);
 
-    OP *sigops = signature->elemops;
-    signature->elemops = NULL;
-
-    struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
-        PerlMemShared_malloc( sizeof(struct op_argcheck_aux));
-
-    aux->params     = signature->next_argix;
-    aux->opt_params = signature->opt_params;
-    aux->slurpy     = signature->slurpy;
-
-    OP *check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
-
-    sigops = op_prepend_elem(OP_LINESEQ,
-            check,
-            sigops);
+    OP *sigops = NULL;
 
     /* a nextstate right at the beginning */
-    sigops = op_prepend_elem(OP_LINESEQ,
-            newSTATEOP(0, NULL, NULL),
-            sigops);
+    sigops = op_append_elem(OP_LINESEQ, sigops,
+            newSTATEOP(0, NULL, NULL));
+
+    UV end_argix = signature->next_argix;
+
+    struct op_multiparam_aux *aux = (struct op_multiparam_aux *)PerlMemShared_malloc(
+            sizeof(struct op_multiparam_aux) + (end_argix * sizeof(PADOFFSET)));
+    aux->param_padix = (PADOFFSET *)((char *)aux + sizeof(struct op_multiparam_aux));
+
+    aux->min_args     = end_argix - signature->opt_params;
+    aux->n_positional = end_argix;
+    aux->slurpy       = signature->slurpy;
+    aux->slurpy_padix = 0;
+
+    OP *multiparam = newUNOP_AUX(OP_MULTIPARAM, 0, NULL, (UNOP_AUX_item *)aux);
+
+    sigops = op_append_elem(OP_LINESEQ, sigops,
+            multiparam);
+
+    if(signature->fenceops) {
+        LISTOP *fenceops = cLISTOPx(signature->fenceops);
+
+        /* Move the entire chain of kid ops in one go */
+        OpMORESIB_set(cLISTOPx(sigops)->op_last, fenceops->op_first);
+        cLISTOPx(sigops)->op_last = fenceops->op_last;
+        OpLASTSIB_set(cLISTOPx(sigops)->op_last, sigops);
+
+        fenceops->op_first = fenceops->op_last = NULL;
+        fenceops->op_flags &= ~OPf_KIDS;
+        op_free((OP *)fenceops);
+        signature->fenceops = NULL;
+    }
+
+    struct yy_parser_signature_param *params = signature->params;
+    UV max_argix = 0;
+
+    for(UV parami = 0; parami < signature->nparams; parami++) {
+        struct yy_parser_signature_param *param = params + parami;
+
+        UV argix        = param->argix;
+        PADOFFSET padix = param->padix;
+
+        while(max_argix < argix) {
+            aux->param_padix[max_argix] = 0;
+            max_argix++;
+        }
+
+        if(argix < aux->min_args) {
+            /* This is a mandatory param */
+            aux->param_padix[argix] = padix;
+        }
+        else if(argix < aux->n_positional) {
+            /* This is an optional param */
+            assert(padix);
+
+            aux->param_padix[argix] = padix;
+
+            OP *defexpr = param->defexpr;
+            assert(defexpr);
+            OP *defexpr_start = LINKLIST(defexpr);
+
+            /* Need to build OP_PARAMTEST[ other: OP_PARAMSTORE[ default-expr ] ] */
+            OP *paramstore;
+            OP *paramtest = (OP *)alloc_LOGOP(OP_PARAMTEST,
+                paramstore = newUNOP(OP_PARAMSTORE, 0, defexpr),
+                defexpr_start);
+
+            paramtest->op_flags |= OPf_WANT_VOID;
+            paramtest->op_targ = paramstore->op_targ = padix;
+
+            if(param->defmode == OP_DORASSIGN)
+                paramtest->op_private |= OPpPARAM_IF_UNDEF;
+            if(param->defmode == OP_ORASSIGN)
+                paramtest->op_private |= OPpPARAM_IF_FALSE;
+
+            defexpr->op_next = paramstore;
+
+            /* Wrap both in an outer OP_NULL so we can point both ->op_next
+             * pointers within into it
+             */
+            OP *o = newUNOP(OP_NULL, 0, paramtest);
+
+            paramstore->op_next = o;
+            paramtest->op_next = o;
+            o->op_next = paramtest; /* set start of o */
+
+            sigops = op_append_elem(OP_LINESEQ, sigops,
+                    param->defcop);
+            param->defcop = NULL;
+
+            sigops = op_append_elem(OP_LINESEQ, sigops,
+                    o);
+            param->defexpr = NULL;
+        }
+        else {
+            /* This is the final slurpy */
+            aux->slurpy_padix = padix;
+        }
+
+        max_argix = argix + 1;
+    }
+
+    while(max_argix < end_argix) {
+        aux->param_padix[max_argix] = 0;
+        max_argix++;
+    }
 
     /* a nextstate at the end handles context correctly for an empty sub body */
     sigops = op_append_elem(OP_LINESEQ, sigops,
