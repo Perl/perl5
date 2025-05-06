@@ -584,10 +584,32 @@ the meantime, here's a quick cheat sheet:
  ^                   start of string
  $                   end of string
 
-Quantifiers can be used to specify how many of the previous thing you
-want to match on, where "thing" means either a literal character, one
-of the metacharacters listed above, or a group of characters or
-metacharacters in parentheses.
+Note that in the above, C<$> doesn't match a dollar sign.  Similarly
+C<.>, C<\>, C<[>, C<]>, C<(>, C<)>, and C<^> don't match the characters
+you might expect.  These are called "metacharacters".  In contrast, the
+characters C<a>, C<e>, C<i>, C<o>, and C<u>, for example, are not
+metacharacters.  They match themselves literally.  Metacharacters
+normally match something that isn't their literal value.  There are a few
+more metacharacters than the ones above.  Some quantifier ones are
+given below, and the full list is in L<perlre/Metacharacters>.
+
+To make a metacharacter match its literal value, you "escape" (or "quote")
+it, by preceding it with a backslash.  Hence, C<\$> does match a dollar sign,
+and C<\\> matches a literal backslash.
+
+Note also that above, the string C<\s>, for example, doesn't match a
+backslash followed by the letter C<s>.  In this case, preceding the
+non-metacharacter C<s> with a backslash turns it into something that
+doesn't match its literal value.  Such a sequence is called an "escape
+sequence".  L<perlrebackslash> documents all of the current ones.
+
+A warning is raised if you escape a character that isn't a metacharacter
+and isn't part of a currently defined escape sequence.
+
+You can specify how many of the previous thing you want to match on by
+using quantifiers (where "thing" means one of: a literal character, one
+of the constructs listed above, or a group of either of them in
+parentheses).
 
  *                   zero or more of the previous thing
  +                   one or more of the previous thing
