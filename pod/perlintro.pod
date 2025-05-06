@@ -569,8 +569,7 @@ expressions.  These are documented at great length in L<perlre>, but for
 the meantime, here's a quick cheat sheet:
 
  .                   a single character
- \s                  a whitespace character (space, tab, newline,
-                     ...)
+ \s                  a whitespace character (space, tab, newline, ...)
  \S                  non-whitespace character
  \d                  a digit (0-9)
  \D                  a non-digit
