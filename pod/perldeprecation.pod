@@ -465,7 +465,7 @@ quantifiers, as quote delimiters in C<qI<X>...I<X>> (where I<X> is
 the C<chr()> of a large code point), and as the upper limits in
 loops.
 
-The use of out of range code points was deprecated in Perl 5.24; as of
+The use of out-of-range code points was deprecated in Perl 5.24; as of
 Perl 5.28 using a code point exceeding C<IV_MAX> throws a fatal error.
 
 If your code is to run on various platforms, keep in mind that the upper
