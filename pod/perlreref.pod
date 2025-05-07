@@ -318,7 +318,7 @@ Captured groups are numbered according to their I<opening> paren.
    fc          Foldcase a string
 
    pos         Return or set current match position
-   quotemeta   Quote metacharacters
+   quotemeta   Quote metacharacters (escape their normal meaning)
    reset       Reset m?pattern? status
    study       Analyze string for optimizing matching
 

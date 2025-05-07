@@ -5082,7 +5082,7 @@ PP(pp_quotemeta)
                 else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, s + len)) {
                     if (
 #ifdef USE_LOCALE_CTYPE
-                    /* In locale, we quote all non-ASCII Latin1 chars.
+                    /* In locale, we escape all non-ASCII Latin1 chars.
                      * Otherwise use the quoting rules */
 
                     IN_LC_RUNTIME(LC_CTYPE)
@@ -5116,7 +5116,7 @@ PP(pp_quotemeta)
             }
         }
         else {
-            /* For non UNI_8_BIT (and hence in locale) just quote all \W
+            /* For non UNI_8_BIT (and hence in locale) just escape all \W
              * including everything above ASCII */
             while (len--) {
                 if (!isWORDCHAR_A(*s))

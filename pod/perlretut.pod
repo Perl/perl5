@@ -187,7 +187,7 @@ C<"["> respectively; other gotchas apply.
 The significance of each of these will be explained
 in the rest of the tutorial, but for now, it is important only to know
 that a metacharacter can be matched as-is by putting a backslash before
-it:
+it.  This is called "escaping" or "quoting" it.  Some examples:
 
     "2+2=4" =~ /2+2/;    # doesn't match, + is a metacharacter
     "2+2=4" =~ /2\+2/;   # matches, \+ is treated like an ordinary +
