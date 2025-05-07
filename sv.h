@@ -1045,7 +1045,7 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 #define BOOL_INTERNALS_sv_isbool_false(sv)      (SvIsCOW_static(sv) && \
         (SvPVX_const(sv) == PL_No))
 
-#define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
+#define SvIsUV(sv)		((SvFLAGS(sv) & SVf_IVisUV) != 0)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
 #define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
 
