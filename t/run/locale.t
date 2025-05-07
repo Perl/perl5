@@ -592,7 +592,7 @@ SKIP:
 {
     skip "didn't find a suitable non-UTF-8 locale", 1 unless
                                                             @non_utf8_locales;
-    my $locale = $non_utf8_locales[0];
+    my $locale = $non_utf8_locales[0] // '';
 
     fresh_perl_is(<<"EOF", "ok\n", {}, "cmp() handles above Latin1 and NUL in non-UTF8 locale");
 use locale;
@@ -613,7 +613,7 @@ EOF
 SKIP:
 {
     skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
-    my $locale = $utf8_ref->[0];
+    my $locale = $non_utf8_locales[0] // '';
 
     fresh_perl_is(<<"EOF", "ok\n", {}, "Handles above Unicode in a UTF8 locale");
 use locale;
@@ -636,7 +636,7 @@ SKIP:
     my $is64bit = length sprintf("%x", ~0) > 8;
     skip "32-bit ASCII platforms can't physically have extended UTF-8", 1
                                                    if $::IS_ASCII  && ! $is64bit;
-    my $locale = $utf8_ref->[0];
+    my $locale = $non_utf8_locales[0] // '';
 
     fresh_perl_is(<<"EOF", "ok\n", {}, "cmp() handles Perl extended UTF-8");
 use locale;
@@ -686,7 +686,7 @@ SKIP: {   # GH #20054
                     && $Config{d_setlocale_accepts_any_locale_name} eq 'define';
 	
     my @lc_all_locales = find_locales('LC_ALL');
-    my $locale = $lc_all_locales[0];
+    my $locale = $non_utf8_locales[0] // '';
     skip "LC_ALL not enabled on this platform", 1 unless $locale;
     my $fallback = ($^O eq "MSWin32")
                     ? "system default"
