@@ -1154,7 +1154,7 @@ PP(pp_pow)
                 bool baseuok;
                 UV baseuv;
 
-                if (SvUOK(svr)) {
+                if (SvIsUV(svr)) {
                     power = SvUVX(svr);
                 } else {
                     const IV iv = SvIVX(svr);
@@ -1165,7 +1165,7 @@ PP(pp_pow)
                     }
                 }
 
-                baseuok = SvUOK(svl);
+                baseuok = SvIsUV(svl);
                 if (baseuok) {
                     baseuv = SvUVX(svl);
                 } else {
@@ -1375,8 +1375,8 @@ PP(pp_multiply)
            we know the left is integer.  */
         /* Left operand is defined, so is it IV? */
         if (SvIV_please_nomg(svl)) {
-            bool auvok = SvUOK(svl);
-            bool buvok = SvUOK(svr);
+            bool auvok = SvIsUV(svl);
+            bool buvok = SvIsUV(svr);
             UV alow;
             UV blow;
             UV product;
@@ -1469,8 +1469,8 @@ PP(pp_divide)
 
 #ifdef PERL_TRY_UV_DIVIDE
     if (SvIV_please_nomg(svr) && SvIV_please_nomg(svl)) {
-            bool left_non_neg = SvUOK(svl);
-            bool right_non_neg = SvUOK(svr);
+            bool left_non_neg = SvIsUV(svl);
+            bool right_non_neg = SvIsUV(svr);
             UV left;
             UV right;
 
@@ -1588,7 +1588,7 @@ PP(pp_modulo)
         SV * const svr = PL_stack_sp[0];
         SV * const svl = PL_stack_sp[-1];
         if (SvIV_please_nomg(svr)) {
-            right_neg = !SvUOK(svr);
+            right_neg = !SvIsUV(svr);
             if (!right_neg) {
                 right = SvUVX(svr);
             } else {
@@ -1618,7 +1618,7 @@ PP(pp_modulo)
            a UV.  In range NV has been rounded down to nearest UV and
            use_double false.  */
         if (!use_double && SvIV_please_nomg(svl)) {
-                left_neg = !SvUOK(svl);
+                left_neg = !SvIsUV(svl);
                 if (!left_neg) {
                     left = SvUVX(svl);
                 } else {
@@ -1911,7 +1911,7 @@ PP(pp_subtract)
         } else {
             /* Left operand is defined, so is it IV? */
             if (SvIV_please_nomg(svl)) {
-                if ((auvok = SvUOK(svl)))
+                if ((auvok = SvIsUV(svl)))
                     auv = SvUVX(svl);
                 else {
                     const IV aiv = SvIVX(svl);
@@ -1929,7 +1929,7 @@ PP(pp_subtract)
             bool result_good = 0;
             UV result;
             UV buv;
-            bool buvok = SvUOK(svr);
+            bool buvok = SvIsUV(svr); /* svr is always IOK here */
 
             if (buvok)
                 buv = SvUVX(svr);
@@ -2248,9 +2248,9 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 #ifdef PERL_PRESERVE_IVUV
     /* Fortunately it seems NaN isn't IOK */
     if (SvIV_please_nomg(right) && SvIV_please_nomg(left)) {
-            if (!SvUOK(left)) {
+            if (!SvIsUV(left)) {
                 const IV leftiv = SvIVX(left);
-                if (!SvUOK(right)) {
+                if (!SvIsUV(right)) {
                     /* ## IV <=> IV ## */
                     const IV rightiv = SvIVX(right);
                     return (leftiv > rightiv) - (leftiv < rightiv);
@@ -2265,7 +2265,7 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
                 }
             }
 
-            if (SvUOK(right)) {
+            if (SvIsUV(right)) {
                 /* ## UV <=> UV ## */
                 const UV leftuv = SvUVX(left);
                 const UV rightuv = SvUVX(right);

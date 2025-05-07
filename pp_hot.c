@@ -1920,7 +1920,7 @@ PP(pp_add)
         } else {
             /* Left operand is defined, so is it IV? */
             if (SvIV_please_nomg(svl)) {
-                if ((auvok = SvUOK(svl)))
+                if ((auvok = SvIsUV(svl)))
                     auv = SvUVX(svl);
                 else {
                     const IV aiv = SvIVX(svl);
@@ -1938,7 +1938,7 @@ PP(pp_add)
             bool result_good = 0;
             UV result;
             UV buv;
-            bool buvok = SvUOK(svr);
+            bool buvok = SvIsUV(svr); /* svr is always IOK here */
         
             if (buvok)
                 buv = SvUVX(svr);
