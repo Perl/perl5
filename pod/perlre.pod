@@ -1350,24 +1350,42 @@ X</p> X<p modifier>
 
 =head2 Quoting metacharacters
 
-Backslashed metacharacters in Perl are alphanumeric, such as C<\b>,
-C<\w>, C<\n>.  Unlike some other regular expression languages, there
-are no backslashed symbols that aren't alphanumeric.  So anything
-that looks like C<\\>, C<\(>, C<\)>, C<\[>, C<\]>, C<\{>, or C<\}> is
-always
-interpreted as a literal character, not a metacharacter.  This was
-once used in a common idiom to disable or quote the special meanings
-of regular expression metacharacters in a string that you want to
-use for a pattern. Simply quote all non-"word" characters:
+(Also known as "escaping".)
 
-    $pattern =~ s/(\W)/\\$1/g;
+To cause a metacharacter to match its literal self, you precede it with
+a backslash.  Unlike some other regular expression languages, any
+sequence consisting of a backslash followed by a non-alphanumeric
+matches that non-alphanumeric, literally.  So things like C<\\>, C<\(>,
+C<\)>, C<\[>, C<\]>, C<\{>, or C<\}> are always interpreted as the
+literal character that follows the backslash.
 
-(If C<use locale> is set, then this depends on the current locale.)
-Today it is more common to use the C<L<quotemeta()|perlfunc/quotemeta>>
-function or the C<\Q> metaquoting escape sequence to disable all
-metacharacters' special meanings like this:
+(That's not true when an alphanumeric character is preceded by a
+backslash.  There are a few such "escape sequences", like C<\w>, which have
+special matching behaviors in Perl.  All such are currently limited to
+ASCII-range alphanumerics.)
 
-    /$unquoted\Q$quoted\E$unquoted/
+The best method to escape metacharacters is to use the
+C<L<quotemeta()|perlfunc/quotemeta>> function, or the equivalent, but the
+more flexible, and often more convenient, C<\Q> metaquoting escape
+sequence
+
+    quotemeta $pattern;
+
+This changes C<$pattern> so that the metacharacters are quoted.  You can
+then do
+
+    $string =~ s/$pattern/foo/;
+
+and be assured that any metacharacters in C<$pattern> will match their
+literal selves.  If you instead use C<\Q>, like:
+
+    $string =~ s/\Qpattern/foo/;
+
+you don't have to have a separate C<$pattern> variable.  Further, there
+is an additional escape sequence, C<\E> that can be combined with C<\Q>
+to allow you to escape whatever portions of the pattern you desire:
+
+    $string =~ s/$unquoted\Q$quoted\E$unquoted/foo/;
 
 Beware that if you put literal backslashes (those not inside
 interpolated variables) between C<\Q> and C<\E>, double-quotish
@@ -1375,7 +1393,18 @@ backslash interpolation may lead to confusing results.  If you
 I<need> to use literal backslashes within C<\Q...\E>,
 consult L<perlop/"Gory details of parsing quoted constructs">.
 
-C<quotemeta()> and C<\Q> are fully described in L<perlfunc/quotemeta>.
+In older code, you may see something like this:
+
+    $pattern =~ s/(\W)/\\$1/g;
+    $string =~ s/$pattern/foo/;
+
+This simply adds backslashes before all non-"word" characters to disable
+any special meanings they might have.  (If S<C<use locale>> is in
+effect, the current locale can affect the results.)  This paradigm is
+inadequate for Unicode.
+
+C<quotemeta()> and C<\Q> are more fully described in
+L<perlfunc/quotemeta>.
 
 =head2 Extended Patterns
 

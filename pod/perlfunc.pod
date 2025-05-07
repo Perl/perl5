@@ -6536,6 +6536,11 @@ the C<\Q> escape in double-quoted strings.
 
 If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
 
+The motivation behind this is to make all characters in EXPR match their
+literal selves.  Otherwise any metacharacters in it could trigger
+their "magic" matching behaviors.  The characters this function has been
+applied to are said to be "quoted" or "escaped".
+
 quotemeta (and C<\Q> ... C<\E>) are useful when interpolating strings into
 regular expressions, because by default an interpolated variable will be
 considered a mini-regular expression.  For example:

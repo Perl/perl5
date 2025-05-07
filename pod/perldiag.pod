@@ -2602,8 +2602,8 @@ and perl's F</dev/null> emulation was unable to create an empty temporary file.
 (W regexp)(F) A character class range must start and end at a literal
 character, not another character class like C<\d> or C<[:alpha:]>.  The "-"
 in your false range is interpreted as a literal "-".  In a C<(?[...])>
-construct, this is an error, rather than a warning.  Consider quoting
-the "-", "\-".  The S<<-- HERE> shows whereabouts in the regular expression
+construct, this is an error, rather than a warning.  Consider escaping
+the "-" as "\-".  The S<<-- HERE> shows whereabouts in the regular expression
 the problem was discovered.  See L<perlre>.
 
 =item Fatal VMS error (status=%d) at %s, line %d
@@ -5453,7 +5453,7 @@ S<<-- HERE> in m/%s/
 (F) Within regular expression character classes ([]) the syntax beginning
 with "[." and ending with ".]" is reserved for future extensions.  If you
 need to represent those character sequences inside a regular expression
-character class, just quote the square brackets with the backslash: "\[."
+character class, just escape the square brackets with the backslash: "\[."
 and ".\]".  The S<<-- HERE> shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
@@ -5463,7 +5463,7 @@ S<<-- HERE> in m/%s/
 (F) Within regular expression character classes ([]) the syntax beginning
 with "[=" and ending with "=]" is reserved for future extensions.  If you
 need to represent those character sequences inside a regular expression
-character class, just quote the square brackets with the backslash: "\[="
+character class, just escape the square brackets with the backslash: "\[="
 and "=\]".  The S<<-- HERE> shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
