@@ -3856,7 +3856,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     } else if (SvPOK(value)) {
         value_type = HVrhek_PV;
     } else if (SvIOK(value)) {
-        value_type = SvUOK((const SV *)value) ? HVrhek_UV : HVrhek_IV;
+        value_type = SvIsUV(value) ? HVrhek_UV : HVrhek_IV;
     } else if (!SvOK(value)) {
         value_type = HVrhek_undef;
     } else {
