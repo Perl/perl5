@@ -2458,7 +2458,7 @@ producing a warning if warnings are enabled.
 
 =back
 
-=head3 Quote-Like Operators
+=head3 Simpler Quote-Like Operators
 X<operator, quote-like>
 
 =over 4
@@ -2637,16 +2637,22 @@ put comments into a multi-line C<qw>-string.  For this reason, the
 S<C<use warnings>> pragma and the B<-w> switch (that is, the C<$^W> variable)
 produces warnings if the I<STRING> contains the C<","> or the C<"#"> character.
 
+=back
+
+=head3 Transliteration Quote-Like Operators
+
+=over
+
 =item C<tr/I<SEARCHLIST>/I<REPLACEMENTLIST>/cdsr>
 X<tr> X<y> X<transliterate> X</c> X</d> X</s>
 
 =item C<y/I<SEARCHLIST>/I<REPLACEMENTLIST>/cdsr>
 
-Transliterates all occurrences of the characters found (or not found
+These transliterate all occurrences of the characters found (or not found
 if the C</c> modifier is specified) in the search list with the
 positionally corresponding character in the replacement list, possibly
 deleting some, depending on the modifiers specified.  Unless the C</r>
-flag is specified, it returns the number of characters replaced or
+flag is specified, they return the number of characters replaced or
 deleted.  If no string is specified via the C<=~> or C<!~> operator, the
 C<$_> string is transliterated.
 
@@ -3881,6 +3887,10 @@ only to prevent breaking any pre-existing links to it from outside.
 This section has been superceded by
 L</C-style Logical Or, Xor, and Defined Or>.  The heading is retained
 only to prevent breaking any pre-existing links to it from outside.
+
+=head2 Quote-Like Operators
+
+This section has been replaced by L</Simpler Quote-Like Operators>
 
 =head1 APPENDIX
 
