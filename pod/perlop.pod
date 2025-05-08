@@ -1914,7 +1914,7 @@ expectations of shell programmers, back-quotes do I<NOT> interpolate
 within double quotes, nor do single quotes impede evaluation of
 variables when used within double quotes.
 
-=head2 Regexp Quote-Like Operators
+=head3 Regexp Quote-Like Operators
 X<operator, regexp>
 
 Here are the quote-like operators that apply to pattern
@@ -2458,7 +2458,7 @@ producing a warning if warnings are enabled.
 
 =back
 
-=head2 Quote-Like Operators
+=head3 Quote-Like Operators
 X<operator, quote-like>
 
 =over 4
@@ -3071,7 +3071,7 @@ should be safe.
 
 =back
 
-=head2 Gory details of parsing quoted constructs
+=head3 Gory details of parsing quoted constructs
 X<quote, gory details>
 
 When presented with something that might have several different
