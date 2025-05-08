@@ -1027,7 +1027,10 @@ either construct raises an exception.
 
 =head3 Extended Bracketed Character Classes
 X<character class>
+X<regex_sets>
 X<set operations>
+
+(Also called C<regex_sets>.)
 
 This is a fancy bracketed character class that can be used for more
 readable and less error-prone classes, and to perform set operations,
