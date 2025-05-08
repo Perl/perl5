@@ -365,8 +365,9 @@ X<-d> X<-dt>
 =item B<-dt>
 
 runs the program under the Perl debugger.  See L<perldebug>.
-If B<t> is specified, it indicates to the debugger that threads
-will be used in the code being debugged.
+If B<t> is specified, C<PERL5DB_THREADED=1> is set in the environment
+to indicate to the debugger that threads will be used in the code
+being debugged.
 
 =item B<-d:>I<MOD[=bar,baz]>
 X<-d> X<-dt>

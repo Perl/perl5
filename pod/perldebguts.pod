@@ -34,6 +34,12 @@ Perl inserts the contents of C<$ENV{PERL5DB}> (or C<BEGIN {require
 
 =item *
 
+If the C<-dt> switch is supplied, C<PERL5DB_THREADED=1> is set in the
+environment.  C<perl5db.pl> or your custom debugger can use this to
+enable threading support.
+
+=item *
+
 Each array C<@{"_<$filename"}> holds the lines of $filename for a
 file compiled by Perl.  The same is also true for C<eval>ed strings
 that contain subroutines, or which are currently being executed.
