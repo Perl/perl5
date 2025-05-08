@@ -1914,6 +1914,187 @@ expectations of shell programmers, back-quotes do I<NOT> interpolate
 within double quotes, nor do single quotes impede evaluation of
 variables when used within double quotes.
 
+=head3 Simpler Quote-Like Operators
+X<operator, quote-like>
+
+=over 4
+
+=item C<q/I<STRING>/>
+X<q> X<quote, single> X<'> X<''>
+
+=item C<'I<STRING>'>
+
+A single-quoted, literal string.  A backslash represents a backslash
+unless followed by the delimiter or another backslash, in which case
+the delimiter or backslash is interpolated.
+
+    $foo = q!I said, "You said, 'She said it.'"!;
+    $bar = q('This is it.');
+    $baz = '\n';                # a two-character string
+
+=item C<qq/I<STRING>/>
+X<qq> X<quote, double> X<"> X<"">
+
+=item C<"I<STRING>">
+
+A double-quoted, interpolated string.
+
+    $_ .= qq
+     (*** The previous line contains the naughty word "$1".\n)
+                if /\b(tcl|java|python)\b/i;      # :-)
+    $baz = "\n";                # a one-character string
+
+=item C<qx/I<STRING>/>
+X<qx> X<`> X<``> X<backtick>
+
+=item C<`I<STRING>`>
+
+A string which is (possibly) interpolated and then executed as a
+system command, via F</bin/sh> or its equivalent if required.  Shell
+wildcards, pipes, and redirections will be honored.  Similarly to
+C<system>, if the string contains no shell metacharacters then it will
+be executed directly.  The collected standard output of the command is
+returned; standard error is unaffected.  In scalar context, it comes
+back as a single (potentially multi-line) string, or C<undef> if the
+shell (or command) could not be started.  In list context, returns a
+list of lines (however you've defined lines with C<$/> or
+C<$INPUT_RECORD_SEPARATOR>), or an empty list if the shell (or command)
+could not be started.
+
+    print qx/date/; # prints "Sun Jan 28 06:16:19 CST 2024"
+
+Because backticks do not affect standard error, use shell file descriptor
+syntax (assuming the shell supports this) if you care to address this.
+To capture a command's STDERR and STDOUT together:
+
+    $output = `cmd 2>&1`;
+
+To capture a command's STDOUT but discard its STDERR:
+
+    $output = `cmd 2>/dev/null`;
+
+To capture a command's STDERR but discard its STDOUT (ordering is
+important here):
+
+    $output = `cmd 2>&1 1>/dev/null`;
+
+To exchange a command's STDOUT and STDERR in order to capture the STDERR
+but leave its STDOUT to come out the old STDERR:
+
+    $output = `cmd 3>&1 1>&2 2>&3 3>&-`;
+
+To read both a command's STDOUT and its STDERR separately, it's easiest
+to redirect them separately to files, and then read from those files
+when the program is done:
+
+    system("program args 1>program.stdout 2>program.stderr");
+
+The STDIN filehandle used by the command is inherited from Perl's STDIN.
+For example:
+
+    open(SPLAT, "stuff")   || die "can't open stuff: $!";
+    open(STDIN, "<&SPLAT") || die "can't dupe SPLAT: $!";
+    print STDOUT `sort`;
+
+will print the sorted contents of the file named F<"stuff">.
+
+Using single-quote as a delimiter protects the command from Perl's
+double-quote interpolation, passing it on to the shell instead:
+
+    $perl_info  = qx(ps $$);            # that's Perl's $$
+    $shell_info = qx'ps $$';            # that's the new shell's $$
+
+How that string gets evaluated is entirely subject to the command
+interpreter on your system.  On most platforms, you will have to protect
+shell metacharacters if you want them treated literally.  This is in
+practice difficult to do, as it's unclear how to escape which characters.
+See L<perlsec> for a clean and safe example of a manual C<fork()> and C<exec()>
+to emulate backticks safely.
+
+On some platforms (notably DOS-like ones), the shell may not be
+capable of dealing with multiline commands, so putting newlines in
+the string may not get you what you want.  You may be able to evaluate
+multiple commands in a single line by separating them with the command
+separator character, if your shell supports that (for example, C<;> on
+many Unix shells and C<&> on the Windows NT C<cmd> shell).
+
+Perl will attempt to flush all files opened for
+output before starting the child process, but this may not be supported
+on some platforms (see L<perlport>).  To be safe, you may need to set
+C<$|> (C<$AUTOFLUSH> in C<L<English>>) or call the C<autoflush()> method of
+C<L<IO::Handle>> on any open handles.
+
+Beware that some command shells may place restrictions on the length
+of the command line.  You must ensure your strings don't exceed this
+limit after any necessary interpolations.  See the platform-specific
+release notes for more details about your particular environment.
+
+Using this operator can lead to programs that are difficult to port,
+because the shell commands called vary between systems, and may in
+fact not be present at all.  As one example, the C<type> command under
+the POSIX shell is very different from the C<type> command under DOS.
+That doesn't mean you should go out of your way to avoid backticks
+when they're the right way to get something done.  Perl was made to be
+a glue language, and one of the things it glues together is commands.
+Just understand what you're getting yourself into.
+
+Like C<system>, backticks put the child process exit code in C<$?>.
+If you'd like to manually inspect failure, you can check all possible
+failure modes by inspecting C<$?> like this:
+
+    if ($? == -1) {
+        print "failed to execute: $!\n";
+    }
+    elsif ($? & 127) {
+        printf "child died with signal %d, %s coredump\n",
+            ($? & 127),  ($? & 128) ? 'with' : 'without';
+    }
+    else {
+        printf "child exited with value %d\n", $? >> 8;
+    }
+
+Use the L<open> pragma to control the I/O layers used when reading the
+output of the command, for example:
+
+    use open IN => ":encoding(UTF-8)";
+    my $x = `cmd-producing-utf-8`;
+
+C<qx//> can also be called like a function with L<perlfunc/readpipe>.
+
+See L</"I/O Operators"> for more discussion.
+
+=item C<qw/I<STRING>/>
+X<qw> X<quote, list> X<quote, words>
+
+Evaluates to a list of the words extracted out of I<STRING>, using embedded
+whitespace as the word delimiters.  It can be understood as being roughly
+equivalent to:
+
+    split(" ", q/STRING/);
+
+the differences being that it only splits on ASCII whitespace,
+generates a real list at compile time, and
+in scalar context it returns the last element in the list.  So
+this expression:
+
+    qw(foo bar baz)
+
+is semantically equivalent to the list:
+
+    "foo", "bar", "baz"
+
+Some frequently seen examples:
+
+    use POSIX qw( setlocale localeconv )
+    @EXPORT = qw( foo bar baz );
+
+A common mistake is to try to separate the words with commas or to
+put comments into a multi-line C<qw>-string.  For this reason, the
+S<C<use warnings>> pragma and the B<-w> switch (that is, the C<$^W> variable)
+produces warnings if the I<STRING> contains the C<","> or the C<"#"> character.
+
+=back
+
 =head3 Regexp Quote-Like Operators
 X<operator, regexp>
 
@@ -2455,187 +2636,6 @@ to occur that you might want.  Here are two common cases:
 
 X</c>While C<s///> accepts the C</c> flag, it has no effect beyond
 producing a warning if warnings are enabled.
-
-=back
-
-=head3 Simpler Quote-Like Operators
-X<operator, quote-like>
-
-=over 4
-
-=item C<q/I<STRING>/>
-X<q> X<quote, single> X<'> X<''>
-
-=item C<'I<STRING>'>
-
-A single-quoted, literal string.  A backslash represents a backslash
-unless followed by the delimiter or another backslash, in which case
-the delimiter or backslash is interpolated.
-
-    $foo = q!I said, "You said, 'She said it.'"!;
-    $bar = q('This is it.');
-    $baz = '\n';                # a two-character string
-
-=item C<qq/I<STRING>/>
-X<qq> X<quote, double> X<"> X<"">
-
-=item C<"I<STRING>">
-
-A double-quoted, interpolated string.
-
-    $_ .= qq
-     (*** The previous line contains the naughty word "$1".\n)
-                if /\b(tcl|java|python)\b/i;      # :-)
-    $baz = "\n";                # a one-character string
-
-=item C<qx/I<STRING>/>
-X<qx> X<`> X<``> X<backtick>
-
-=item C<`I<STRING>`>
-
-A string which is (possibly) interpolated and then executed as a
-system command, via F</bin/sh> or its equivalent if required.  Shell
-wildcards, pipes, and redirections will be honored.  Similarly to
-C<system>, if the string contains no shell metacharacters then it will
-be executed directly.  The collected standard output of the command is
-returned; standard error is unaffected.  In scalar context, it comes
-back as a single (potentially multi-line) string, or C<undef> if the
-shell (or command) could not be started.  In list context, returns a
-list of lines (however you've defined lines with C<$/> or
-C<$INPUT_RECORD_SEPARATOR>), or an empty list if the shell (or command)
-could not be started.
-
-    print qx/date/; # prints "Sun Jan 28 06:16:19 CST 2024"
-
-Because backticks do not affect standard error, use shell file descriptor
-syntax (assuming the shell supports this) if you care to address this.
-To capture a command's STDERR and STDOUT together:
-
-    $output = `cmd 2>&1`;
-
-To capture a command's STDOUT but discard its STDERR:
-
-    $output = `cmd 2>/dev/null`;
-
-To capture a command's STDERR but discard its STDOUT (ordering is
-important here):
-
-    $output = `cmd 2>&1 1>/dev/null`;
-
-To exchange a command's STDOUT and STDERR in order to capture the STDERR
-but leave its STDOUT to come out the old STDERR:
-
-    $output = `cmd 3>&1 1>&2 2>&3 3>&-`;
-
-To read both a command's STDOUT and its STDERR separately, it's easiest
-to redirect them separately to files, and then read from those files
-when the program is done:
-
-    system("program args 1>program.stdout 2>program.stderr");
-
-The STDIN filehandle used by the command is inherited from Perl's STDIN.
-For example:
-
-    open(SPLAT, "stuff")   || die "can't open stuff: $!";
-    open(STDIN, "<&SPLAT") || die "can't dupe SPLAT: $!";
-    print STDOUT `sort`;
-
-will print the sorted contents of the file named F<"stuff">.
-
-Using single-quote as a delimiter protects the command from Perl's
-double-quote interpolation, passing it on to the shell instead:
-
-    $perl_info  = qx(ps $$);            # that's Perl's $$
-    $shell_info = qx'ps $$';            # that's the new shell's $$
-
-How that string gets evaluated is entirely subject to the command
-interpreter on your system.  On most platforms, you will have to protect
-shell metacharacters if you want them treated literally.  This is in
-practice difficult to do, as it's unclear how to escape which characters.
-See L<perlsec> for a clean and safe example of a manual C<fork()> and C<exec()>
-to emulate backticks safely.
-
-On some platforms (notably DOS-like ones), the shell may not be
-capable of dealing with multiline commands, so putting newlines in
-the string may not get you what you want.  You may be able to evaluate
-multiple commands in a single line by separating them with the command
-separator character, if your shell supports that (for example, C<;> on
-many Unix shells and C<&> on the Windows NT C<cmd> shell).
-
-Perl will attempt to flush all files opened for
-output before starting the child process, but this may not be supported
-on some platforms (see L<perlport>).  To be safe, you may need to set
-C<$|> (C<$AUTOFLUSH> in C<L<English>>) or call the C<autoflush()> method of
-C<L<IO::Handle>> on any open handles.
-
-Beware that some command shells may place restrictions on the length
-of the command line.  You must ensure your strings don't exceed this
-limit after any necessary interpolations.  See the platform-specific
-release notes for more details about your particular environment.
-
-Using this operator can lead to programs that are difficult to port,
-because the shell commands called vary between systems, and may in
-fact not be present at all.  As one example, the C<type> command under
-the POSIX shell is very different from the C<type> command under DOS.
-That doesn't mean you should go out of your way to avoid backticks
-when they're the right way to get something done.  Perl was made to be
-a glue language, and one of the things it glues together is commands.
-Just understand what you're getting yourself into.
-
-Like C<system>, backticks put the child process exit code in C<$?>.
-If you'd like to manually inspect failure, you can check all possible
-failure modes by inspecting C<$?> like this:
-
-    if ($? == -1) {
-        print "failed to execute: $!\n";
-    }
-    elsif ($? & 127) {
-        printf "child died with signal %d, %s coredump\n",
-            ($? & 127),  ($? & 128) ? 'with' : 'without';
-    }
-    else {
-        printf "child exited with value %d\n", $? >> 8;
-    }
-
-Use the L<open> pragma to control the I/O layers used when reading the
-output of the command, for example:
-
-    use open IN => ":encoding(UTF-8)";
-    my $x = `cmd-producing-utf-8`;
-
-C<qx//> can also be called like a function with L<perlfunc/readpipe>.
-
-See L</"I/O Operators"> for more discussion.
-
-=item C<qw/I<STRING>/>
-X<qw> X<quote, list> X<quote, words>
-
-Evaluates to a list of the words extracted out of I<STRING>, using embedded
-whitespace as the word delimiters.  It can be understood as being roughly
-equivalent to:
-
-    split(" ", q/STRING/);
-
-the differences being that it only splits on ASCII whitespace,
-generates a real list at compile time, and
-in scalar context it returns the last element in the list.  So
-this expression:
-
-    qw(foo bar baz)
-
-is semantically equivalent to the list:
-
-    "foo", "bar", "baz"
-
-Some frequently seen examples:
-
-    use POSIX qw( setlocale localeconv )
-    @EXPORT = qw( foo bar baz );
-
-A common mistake is to try to separate the words with commas or to
-put comments into a multi-line C<qw>-string.  For this reason, the
-S<C<use warnings>> pragma and the B<-w> switch (that is, the C<$^W> variable)
-produces warnings if the I<STRING> contains the C<","> or the C<"#"> character.
 
 =back
 
