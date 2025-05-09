@@ -7805,13 +7805,6 @@ middle of an iteration causes Perl to see a freed value.
 operator.  Since C<split> always tries to match the pattern
 repeatedly, the C</g> has no effect.
 
-=item Use of "goto" to jump into a construct is deprecated
-
-(D deprecated::goto_construct) Using C<goto> to jump from an outer scope into an inner
-scope is deprecated and will be removed completely in Perl 5.42.
-
-This was deprecated in Perl 5.12.
-
 =item Use of '%s' in \p{} or \P{} is deprecated because: %s
 
 (D deprecated::unicode_property_name) Certain properties are deprecated
