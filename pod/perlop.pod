@@ -3840,7 +3840,7 @@ Choose wisely.
 
 =head2 List of Extra Paired Delimiters
 
-The complete list of accepted paired delimiters as of Unicode 14.0 is:
+The complete list of accepted paired delimiters as of Unicode 16.0 is:
 
  (  )    U+0028, U+0029   LEFT/RIGHT PARENTHESIS
  <  >    U+003C, U+003E   LESS-THAN/GREATER-THAN SIGN
@@ -4228,3 +4228,4 @@ The complete list of accepted paired delimiters as of Unicode 14.0 is:
  🢩  🢨    U+1F8A9, U+1F8A8 RIGHT/LEFTWARDS BACK-TILTED SHADOWED WHITE ARROW
  🢫  🢪    U+1F8AB, U+1F8AA RIGHT/LEFTWARDS FRONT-TILTED SHADOWED WHITE
                           ARROW
+ 🢶  🢴    U+1F8B6, U+1F8B4 NEGATIVE SQUARED RIGHT/LEFTWARDS ARROW
