@@ -1348,9 +1348,7 @@ their punctuation character equivalents, however at the trade-off that you
 have to tell perl when you want to use them.
 X</p> X<p modifier>
 
-=head2 Quoting metacharacters
-
-(Also known as "escaping".)
+=head2 Quoting (escaping) metacharacters
 
 To cause a metacharacter to match its literal self, you precede it with
 a backslash.  Unlike some other regular expression languages, any
@@ -3412,6 +3410,10 @@ Backreference to a named capture group. Equivalent to C<< \g{I<NAME>} >>.
 Subroutine call to a named capture group. Equivalent to C<< (?&I<NAME>) >>.
 
 =back
+
+=head2 Quoting metacharacters
+
+This section has been replaced by L</Quoting (escaping) metacharacters>.
 
 =head1 BUGS
 
