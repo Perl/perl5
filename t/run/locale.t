@@ -612,7 +612,8 @@ EOF
 
 SKIP:
 {
-    skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
+    skip "didn't find a suitable UTF-8 locale", 1
+                                            unless $utf8_ref && $utf8_ref->@*;
     my $locale = $utf8_ref->[0];
 
     fresh_perl_is(<<"EOF", "ok\n", {}, "Handles above Unicode in a UTF8 locale");
@@ -632,7 +633,8 @@ EOF
 
 SKIP:
 {
-    skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
+    skip "didn't find a suitable UTF-8 locale", 1
+                                            unless $utf8_ref && $utf8_ref->@*;
     my $is64bit = length sprintf("%x", ~0) > 8;
     skip "32-bit ASCII platforms can't physically have extended UTF-8", 1
                                                    if $::IS_ASCII  && ! $is64bit;
@@ -655,7 +657,8 @@ EOF
 }
 
 SKIP: {   # GH #20085
-    skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
+    skip "didn't find a suitable UTF-8 locale", 1
+                                            unless $utf8_ref && $utf8_ref->@*;
     local $ENV{LC_CTYPE} = $utf8_ref->[0];
     local $ENV{LC_ALL} = undef;
     fresh_perl_is(<<~'EOF', "ok\n", {}, "check that setlocale overrides startup");
