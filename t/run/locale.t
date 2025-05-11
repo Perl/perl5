@@ -17,7 +17,7 @@ use warnings;
 BEGIN {
     eval { require POSIX; POSIX->import("locale_h") };
     if ($@) {
-	skip_all("could not load the POSIX module"); # running minitest?
+        skip_all("could not load the POSIX module"); # running minitest?
     }
 }
 use Config;
@@ -685,7 +685,7 @@ SKIP: {   # GH #20054
     skip "Even illegal locale names are accepted", 1
                     if $Config{d_setlocale_accepts_any_locale_name}
                     && $Config{d_setlocale_accepts_any_locale_name} eq 'define';
-	
+
     my @lc_all_locales = find_locales('LC_ALL');
     my $locale = $lc_all_locales[0];
     skip "LC_ALL not enabled on this platform", 1 unless $locale;
