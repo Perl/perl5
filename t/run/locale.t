@@ -655,10 +655,8 @@ EOF
 }
 
 SKIP: {   # GH #20085
-    my @utf8_locales = find_utf8_ctype_locales();
-    skip "didn't find a UTF-8 locale", 1 unless @utf8_locales;
-
-    local $ENV{LC_CTYPE} = $utf8_locales[0];
+    skip "didn't find a suitable UTF-8 locale", 1 unless $utf8_ref;
+    local $ENV{LC_CTYPE} = $utf8_ref->[0];
     local $ENV{LC_ALL} = undef;
     fresh_perl_is(<<~'EOF', "ok\n", {}, "check that setlocale overrides startup");
         use POSIX;
