@@ -16755,6 +16755,11 @@ define:define:?*)
 	;;
 esac
 
+if test $ivsize -lt $ptrsize; then
+    echo "Re-run Configure adding -Duse64bitint so as to make integers as large as pointer values" >&4
+    exit 1
+fi
+
 case "$uselongdouble:$d_longdbl" in
 define:define)
 	nvtype="long double"
