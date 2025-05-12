@@ -4446,6 +4446,12 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
         assert(cv); assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
+Perl_subsignature_append_fence_op(pTHX_ OP *o)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_FENCE_OP \
+        assert(o)
+
+PERL_CALLCONV void
 Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *defexpr)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_POSITIONAL

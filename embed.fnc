@@ -3110,6 +3110,8 @@ CRp	|NV	|str_to_version |NN SV *sv
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV *cv
 : Used in perly.y
+p	|void	|subsignature_append_fence_op				\
+				|NN OP *o
 p	|void	|subsignature_append_positional 			\
 				|PADOFFSET padix			\
 				|OPCODE defmode 			\

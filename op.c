@@ -16479,7 +16479,7 @@ struct yy_parser_signature {
     UV          elems;      /* number of signature elements seen so far */
     UV          optelems;   /* number of optional signature elems seen */
     char        slurpy;     /* the sigil of the slurpy var (or null) */
-    OP         *elemops;    /* NULL, or an OP_LINESEQ of individual element ops */
+    OP         *elemops;    /* NULL, or an OP_LINESEQ of individual element and fence ops */
 };
 
 static void
@@ -16516,6 +16516,24 @@ Perl_subsignature_start(pTHX)
 
     SAVEVPTR(PL_parser->signature);
     PL_parser->signature = signature;
+}
+
+/* Appends another arbitrary optree into the accumulated set of signature-
+ * handling ops. This op will be invoked at some time after all of the
+ * parameters already present have received their values, but before any of
+ * the defaulting expressions for later parameters are executed.
+ */
+
+void
+Perl_subsignature_append_fence_op(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_FENCE_OP;
+    assert(PL_parser);
+    yy_parser_signature *signature = PL_parser->signature;
+    assert(signature);
+
+    signature->elemops = op_append_elem(OP_LINESEQ, signature->elemops,
+            o);
 }
 
 /* Appends another positional scalar parameter to the accumulated set of
