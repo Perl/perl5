@@ -11360,7 +11360,7 @@ S_scan_subst(pTHX_ char *start)
         /* the IVX field indicates that the replacement string is a s///e;
          * the NVX field indicates how many src code lines the replacement
          * spreads over */
-        sv_upgrade(PL_parser->lex_sub_repl, SVt_PVNV);
+        SvUPGRADE(PL_parser->lex_sub_repl, SVt_PVNV);
         ((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xnv_lines = linediff;
         ((XPVIV*)SvANY(PL_parser->lex_sub_repl))->xiv_u.xivu_eval_seen =
                                                                     cBOOL(es);
