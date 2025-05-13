@@ -19,6 +19,9 @@ require './regen/HeaderParser.pm';
 
 skip_all_if_miniperl("needs Data::Dumper");
 
+# It could fairly easily be ported, but no need to do so, so far
+skip_all("HeaderParser hasn't been ported to EBCDIC") if $::IS_EBCDIC;
+
 require Data::Dumper;
 
 my $update_key= "PERL_DEV_UPDATE_TESTFILE";
