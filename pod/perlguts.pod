@@ -36,7 +36,8 @@ Each typedef has specific routines that manipulate the various data types.
 =head2 What is an "IV"?
 
 Perl uses a special typedef IV which is a simple signed integer type that is
-guaranteed to be large enough to hold a pointer (as well as an integer).
+guaranteed to be large enough to hold a pointer, but may be larger,
+depending on how perl is Configured.
 Additionally, there is the UV, which is simply an unsigned IV.
 
 Perl also uses several special typedefs to declare variables to hold
