@@ -765,7 +765,7 @@ for it (unfortunately) is "Default".
 
 Whenever you can, use the
 L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
-to cause X</u> to be the default instead.
+to cause C</u> to be the default instead.
 
 =head4 /a (and /aa)
 
