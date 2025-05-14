@@ -5,7 +5,7 @@
 # Additions copyright 1996 by Charles Bailey.  Permission is granted
 # to distribute the revised code under the same terms as Perl itself.
 
-package File::Copy 2.42;
+package File::Copy 2.43;
 
 use v5.40;
 no warnings 'newline';
@@ -163,6 +163,11 @@ sub copy {
 	open $to_h, ">", $to or goto fail_open2;
 	binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
+    }
+
+    # Copy file tags on os390
+    if ($^O eq 'os390') {
+      ZOS::Filespec::copytags_fd(fileno($from_h), fileno($to_h));
     }
 
     $! = 0;
