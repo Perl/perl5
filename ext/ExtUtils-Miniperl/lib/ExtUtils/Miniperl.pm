@@ -5,7 +5,7 @@ use Exporter 'import';
 use ExtUtils::Embed 1.31, qw(xsi_header xsi_protos xsi_body);
 
 our @EXPORT = qw(writemain);
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -68,11 +68,13 @@ sub writemain{
  */
 
 #ifdef OEMVS
+#ifndef __LP64__
 #ifdef MYMALLOC
 /* sbrk is limited to first heap segment so make it big */
 #pragma runopts(HEAP(8M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
 #else
 #pragma runopts(HEAP(2M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
+#endif
 #endif
 #endif
 
