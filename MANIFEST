@@ -5665,6 +5665,7 @@ os2/os2thread.h				pthread-like typedefs
 os2/perl2cmd.pl				Corrects installed binaries under OS/2
 os2/perlrexx.c				Support perl interpreter embedded in REXX
 os2/perlrexx.cmd			Test perl interpreter embedded in REXX
+os390/os390.c				z/OS specific code
 plan9/9front.patch			Plan9 port: patch for 9front-specific flavor of Plan 9
 plan9/aperl				Plan9 port: shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h			Plan9 port: replacement C header file
