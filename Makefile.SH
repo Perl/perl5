@@ -127,7 +127,7 @@ true)
 		;;
 	os390*)
             case "$use64bitall" in
-            define|true|[yY]*) shrpldflags='-Wl,LP64,dll'
+            define|true|[yY]*) shrpldflags='-shared'	# From IBM
                    linklibperl='libperl.x'
                    ;;
             *)     shrpldflags='-Wl,XPLINK,dll'
@@ -442,6 +442,7 @@ FIRSTMAKEFILE = $firstmakefile
 
 # Any special object files needed by this architecture, e.g. os2/os2.obj
 ARCHOBJS = $archobjs
+ARCH_MAIN_OBJS = $arch_main_objs
 
 .SUFFIXES: .c \$(OBJ_EXT) .i .s .c.depends
 
@@ -611,9 +612,9 @@ miniperl_dtrace_objs = $(miniperl_objs_nodt:%=mpdtrace/%)
 perllib_dtrace_objs = $(perllib_objs_nodt:%=libpdtrace/%)
 perlmain_dtrace_objs = maindtrace/perlmain$(OBJ_EXT)
 
-miniperl_objs = $(miniperl_dtrace_objs) $(DTRACE_MINI_O)
+miniperl_objs = $(miniperl_dtrace_objs) $(DTRACE_MINI_O) $(ARCH_MAIN_OBJS)
 perllib_objs  = $(perllib_dtrace_objs) $(DTRACE_PERLLIB_O)
-perlmain_objs = $(perlmain_dtrace_objs) $(DTRACE_MAIN_O)
+perlmain_objs = $(perlmain_dtrace_objs) $(DTRACE_MAIN_O) $(ARCH_MAIN_OBJS)
 
 miniperl_dep = $(DTRACE_MINI_O)
 perllib_dep = $(DTRACE_PERLLIB_O)
@@ -624,9 +625,9 @@ perlmain_dep = $(DTRACE_MAIN_O)
 *)
     $spitshell >>$Makefile <<'!NO!SUBS!'
 
-miniperl_objs = $(miniperl_objs_nodt) $(DTRACE_MINI_O)
+miniperl_objs = $(miniperl_objs_nodt) $(DTRACE_MINI_O) $(ARCH_MAIN_OBJS)
 perllib_objs  = $(perllib_objs_nodt) $(DTRACE_PERLLIB_O)
-perlmain_objs = perlmain$(OBJ_EXT) $(DTRACE_MAIN_O)
+perlmain_objs = perlmain$(OBJ_EXT) $(DTRACE_MAIN_O) $(ARCH_MAIN_OBJS)
 
 miniperl_dep = $(miniperl_objs)
 perllib_dep = $(perllib_objs)
@@ -949,7 +950,7 @@ $(LIBPERL): $& $(perllib_dep) $(DYNALOADER) $(LIBPERLEXPORT)
 	true)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 	rm -f $@
-	$(LD) -o $@ $(SHRPLDFLAGS) $(perllib_objs) $(DYNALOADER) $(libs)
+	$(LD) -o $@ $(SHRPLDFLAGS) $(LDFLAGS) $(perllib_objs) $(DYNALOADER) $(libs)
 !NO!SUBS!
 		case "$osname" in
 		aix)
