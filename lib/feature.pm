@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.95';
+our $VERSION = '1.96';
 
 our %feature = (
     fc                              => 'feature_fc',
@@ -196,21 +196,13 @@ See L<perlop/"Smartmatch Operator"> for details.
 
 =head2 The 'switch' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::smartmatch";
-
 C<use feature 'switch'> tells the compiler to enable the Raku
 given/when construct.
 
 See L<perlsyn/"Switch Statements"> for details.
 
-This feature is available starting with Perl 5.10.
-It is deprecated starting with Perl 5.38, and using
-C<given>, C<when> or smartmatch will throw a warning.
-It will be removed in Perl 5.42.
+This feature is available starting with Perl 5.10.  It is enabled by
+feature bundles 5.10 through 5.34.
 
 =head2 The 'unicode_strings' feature
 
