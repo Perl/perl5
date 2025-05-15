@@ -650,9 +650,9 @@ other and with respect to the equality operators of the same precedence.
 C<"lt">, C<"le">, C<"ge">, C<"gt"> and C<"cmp"> use the collation (sort)
 order specified by the current C<LC_COLLATE> locale if a S<C<use
 locale>> form that includes collation is in effect.  See L<perllocale>.
-Do not mix these with Unicode,
-only use them with legacy 8-bit locale encodings.
-The standard C<L<Unicode::Collate>> and
+Depending on the capabilities of the platform, these can give reasonable
+results with Unicode, but
+the standard C<L<Unicode::Collate>> and
 C<L<Unicode::Collate::Locale>> modules offer much more powerful
 solutions to collation issues.
 
