@@ -1590,9 +1590,22 @@ L</C<SV_CHECK_THINKFIRST_COW_DROP>> before calling this.
 =cut
 */
 
-#define SvPV_shrink_to_cur(sv) STMT_START { \
-                   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
-                   SvPV_renew(sv, _lEnGtH); \
+/* Notes: Ensure the buffer is big enough to be COWed in the future, so
+          + 1 for the trailing null byte + 1 for the COW count.
+ * The `expected_size` call will, at worst, ensure that the buffer size
+ * is no smaller than the expected minimim allocation and that the given
+ * size is rounded up to the closest PTRSIZE boundary. Depending on
+ * per-malloc implementation, it might return the exact size that would
+ * be allocated for the specified _lEnGtH. If the return value from
+ * `expected_size` is not smaller than the current buffer allocation,
+ * there is no point in calling SvPV_renew.
+*/
+
+#define SvPV_shrink_to_cur(sv) STMT_START {                       \
+                   const STRLEN _lEnGtH = SvCUR(sv) + 2;          \
+                   const STRLEN _eXpEcT = expected_size(_lEnGtH); \
+                   if (SvLEN(sv) > _eXpEcT)                       \
+                       SvPV_renew(sv, _eXpEcT);                   \
                  } STMT_END
 
 /*
