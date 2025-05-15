@@ -10,7 +10,6 @@ MIME::Base64 cpan/MIME-Base64/Base64.xs ad617fe2d01932c35b92defa26d40aba601a95a8
 MIME::Base64 cpan/MIME-Base64/lib/MIME/Base64.pm 18e38d197c7c83f96b24f48bef514e93908e6a82
 MIME::Base64 cpan/MIME-Base64/lib/MIME/QuotedPrint.pm 36cbb455ab57b9bbca7e86f50987c8b1df1a8122
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
-Pod::Simple cpan/Pod-Simple/lib/Pod/Simple/HTMLLegacy.pm 2ccd1b70ca64410a8c05c228ff91420355d3d685
 Scalar::Util cpan/Scalar-List-Utils/lib/List/Util.pm 98dbc1cb98d448bd929fe42cf0fc47da978df196
 Scalar::Util cpan/Scalar-List-Utils/lib/List/Util/XS.pm 0e2ef5dcbebb5d808edd4b7adec8f6553cdde916
 Scalar::Util cpan/Scalar-List-Utils/lib/Scalar/Util.pm dddbfb9e26de572f88598cdf06353902718eb2ec
