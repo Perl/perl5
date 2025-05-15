@@ -4421,8 +4421,9 @@ S_scan_const(pTHX_ char *start)
         SvUTF8_on(sv);
     }
 
-    /* shrink the sv if we allocated more than we used */
-    if (SvCUR(sv) + 5 < SvLEN(sv)) {
+    /* shrink the sv if we allocated more than we used - and conceivably
+     * could actually shrink it */
+    if (SvCUR(sv) + 2 + PTRSIZE < SvLEN(sv)) {
         SvPV_shrink_to_cur(sv);
     }
 
@@ -9793,7 +9794,9 @@ Perl_yylex(pTHX)
                 PL_parser->lex_shared->re_eval_str = NULL;
                 SvCUR_set(sv,
                          PL_bufptr - PL_parser->lex_shared->re_eval_start);
-                SvPV_shrink_to_cur(sv);
+                if (SvCUR(sv) + PTRSIZE + 2 < SvLEN(sv)) {
+                    SvPV_shrink_to_cur(sv);
+                }
             }
             else sv = newSVpvn(PL_parser->lex_shared->re_eval_start,
                          PL_bufptr - PL_parser->lex_shared->re_eval_start);
@@ -11348,7 +11351,7 @@ S_scan_heredoc(pTHX_ char *s)
         SvREFCNT_dec_NN(newstr);
     }
 
-    if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
+    if (SvCUR(tmpstr) + 2 + PTRSIZE < SvLEN(tmpstr)) {
         SvPV_shrink_to_cur(tmpstr);
     }
 
@@ -11877,8 +11880,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     PL_parser->herelines = herelines;
 
     /* if we allocated too much space, give some back */
-    if (SvCUR(sv) + 5 < SvLEN(sv)) {
-        SvLEN_set(sv, SvCUR(sv) + 1);
+    if (SvCUR(sv) + 2 + PTRSIZE < SvLEN(sv)) {
         SvPV_shrink_to_cur(sv);
     }
 
