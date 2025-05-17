@@ -1522,9 +1522,15 @@ takes higher precedence.
 Then again, you could always use parentheses.
 
 Binary C<"xor"> returns the logical exclusive disjunction of the two
-surrounding expressions.
-It cannot short-circuit (of course).
+surrounding expressions.  That means it returns C<true> if either, but
+not both, are true.  It's equivalent to C<^^> except for it having very
+low precedence.  It cannot short-circuit (of course).  It tends to be
+used to verify that two mutually-exclusive conditions are actually
+mutually exclusive.  For example, in Perl's test suite, we might want to
+test that a regular expression pattern can't both match and not match,
+for otherwise it would be a bug in our pattern matching code.
 
+ ($x =~ qr/$pat/ xor $x !~ qr/$pat/) or die;
 
 =head2 C Operators Missing From Perl
 X<operator, missing from perl> X<&> X<*>
