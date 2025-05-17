@@ -1017,6 +1017,12 @@ if the left operand is false, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
 is evaluated.
 
+As an alternative to C<&&> when used for control flow, Perl provides the
+C<and> operator (see L<below|/Logical And>).
+The short-circuit behavior is identical.  The precedence of C<"and"> is
+much lower, however, so that you can safely use it after a list operator
+without the need for parentheses.
+
 =head2 C-style Logical Or
 X<||> X<operator, logical, or>
 
@@ -1024,6 +1030,29 @@ Binary C<"||"> performs a short-circuit logical OR operation.  That is,
 if the left operand is true, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
 is evaluated.
+
+As an alternative to C<||> when used for control flow, Perl provides the
+C<or> operator (L<see below|/Logical or and Exclusive Or>).
+The short-circuit behavior is identical.  The precedence of C<"or"> is
+much lower, however, so that you can safely use it after a list operator
+without the need for parentheses:
+
+    unlink "alpha", "beta", "gamma"
+            or gripe(), next LINE;
+
+With the C-style operator that would have been written like this:
+
+    unlink("alpha", "beta", "gamma")
+            || (gripe(), next LINE);
+
+It would be even more readable to write that this way:
+
+    unless(unlink("alpha", "beta", "gamma")) {
+        gripe();
+        next LINE;
+    }
+
+Using C<"or"> for assignment is unlikely to do what you want; see below.
 
 =head2 C-style Logical Xor
 X<^^> X<operator, logical, xor>
@@ -1063,29 +1092,6 @@ for selecting between two aggregates for assignment:
     @a = @b || @c;            # This doesn't do the right thing
     @a = scalar(@b) || @c;    # because it really means this.
     @a = @b ? @b : @c;        # This works fine, though.
-
-As alternatives to C<&&> and C<||> when used for
-control flow, Perl provides the C<and> and C<or> operators (see below).
-The short-circuit behavior is identical.  The precedence of C<"and">
-and C<"or"> is much lower, however, so that you can safely use them after a
-list operator without the need for parentheses:
-
-    unlink "alpha", "beta", "gamma"
-            or gripe(), next LINE;
-
-With the C-style operators that would have been written like this:
-
-    unlink("alpha", "beta", "gamma")
-            || (gripe(), next LINE);
-
-It would be even more readable to write that this way:
-
-    unless(unlink("alpha", "beta", "gamma")) {
-        gripe();
-        next LINE;
-    }
-
-Using C<"or"> for assignment is unlikely to do what you want; see below.
 
 =head2 Range Operators
 X<operator, range> X<range> X<..> X<...>
