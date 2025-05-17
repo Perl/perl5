@@ -223,7 +223,7 @@ as well as L</"I/O Operators">.
 X<arrow> X<dereference> X<< -> >>
 
 "C<< -> >>" is an infix dereference operator, just as it is in C
-and C++.  If the right side is either a C<[...]>, C<{...}>, or a
+and C++.  If the right side is one of a C<[...]>, C<{...}>, or a
 C<(...)> subscript, then the left side must be either a hard or
 symbolic reference to an array, a hash, or a subroutine respectively.
 (Or technically speaking, a location capable of holding a hard
@@ -482,7 +482,7 @@ in logical shift zero bits come in from the left.
 Either way, the implementation isn't going to generate results larger
 than the size of the integer type Perl was built with (32 bits or 64 bits).
 
-Shifting by negative number of bits means the reverse shift: left
+Shifting by a negative number of bits means the reverse shift: left
 shift becomes right shift, right shift becomes left shift.  This is
 unlike in C, where negative shift is undefined.
 
@@ -542,7 +542,7 @@ X<isa operator>
 
 Binary C<isa> evaluates to true when the left argument is an object instance of
 the class (or a subclass derived from that class) given by the right argument.
-If the left argument is not defined, not a blessed object instance, nor does
+If the left argument is not defined, not a blessed object instance, and does
 not derive from the class given by the right argument, the operator evaluates
 as false. The right argument may give the class either as a bareword or a
 scalar expression that yields a string class name:
