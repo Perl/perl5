@@ -1017,14 +1017,19 @@ if the left operand is false, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
 is evaluated.
 
+C<&&> returns the last value evaluated (unlike C's C<&&>, which returns
+0 or 1).
+
 As an alternative to C<&&> when used for control flow, Perl provides the
 C<and> operator (see L<below|/Logical And>).
 The short-circuit behavior is identical.  The precedence of C<"and"> is
 much lower, however, so that you can safely use it after a list operator
 without the need for parentheses.
 
-=head2 C-style Logical Or
+=head2 C-style Logical Or, Xor, and Defined Or
 X<||> X<operator, logical, or>
+X<^^> X<operator, logical, xor>
+X<//> X<operator, logical, defined-or>
 
 Binary C<"||"> performs a short-circuit logical OR operation.  That is,
 if the left operand is true, the right operand is not even evaluated.
@@ -1054,15 +1059,9 @@ It would be even more readable to write that this way:
 
 Using C<"or"> for assignment is unlikely to do what you want; see below.
 
-=head2 C-style Logical Xor
-X<^^> X<operator, logical, xor>
-
 Binary C<"^^"> performs a logical XOR operation.  Both operands are
 evaluated and the result is true only if exactly one of the operands is true.
 Scalar or list context propagates down to the right operand.
-
-=head2 Logical Defined-Or
-X<//> X<operator, logical, defined-or>
 
 Although it has no direct equivalent in C, Perl's C<//> operator is related
 to its C-style "or".  In fact, it's exactly the same as C<||>, except that it
@@ -1077,8 +1076,8 @@ cannot).  This is very useful for
 providing default values for variables.  If you actually want to test if
 at least one of C<$x> and C<$y> is defined, use S<C<defined($x // $y)>>.
 
-The C<||>, C<//> and C<&&> operators return the last value evaluated
-(unlike C's C<||> and C<&&>, which return 0 or 1).  Thus, a reasonably
+The C<||>, C<^^> and C<//> operators return the last value evaluated
+(unlike C's C<||> which returns 0 or 1).  Thus, a reasonably
 portable way to find out the home directory might be:
 
     $home =  $ENV{HOME}
@@ -3851,6 +3850,24 @@ Here is a short, but incomplete summary:
     Math::GMPf             an interface to libgmp's floating point numbers
 
 Choose wisely.
+
+=head2 C-style Logical Or
+
+This section has been superceded by
+L</C-style Logical Or, Xor, and Defined Or>.  The heading is retained
+only to prevent breaking any pre-existing links to it from outside.
+
+=head2 C-style Logical Xor
+
+This section has been superceded by
+L</C-style Logical Or, Xor, and Defined Or>.  The heading is retained
+only to prevent breaking any pre-existing links to it from outside.
+
+=head2 Logical Defined-Or
+
+This section has been superceded by
+L</C-style Logical Or, Xor, and Defined Or>.  The heading is retained
+only to prevent breaking any pre-existing links to it from outside.
 
 =head1 APPENDIX
 
