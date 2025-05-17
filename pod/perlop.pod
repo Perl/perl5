@@ -1501,6 +1501,8 @@ X<operator, logical, or> X<operator, logical, xor>
 X<operator, logical, exclusive or>
 X<or> X<xor>
 
+There is no low precedence operator for defined-OR.
+
 Binary C<"or"> returns the logical disjunction of the two surrounding
 expressions.  It's equivalent to C<||> except for the very low precedence.
 This makes it useful for control flow:
@@ -1528,7 +1530,6 @@ Then again, you could always use parentheses.
 Binary C<"xor"> returns the exclusive-OR of the two surrounding expressions.
 It cannot short-circuit (of course).
 
-There is no low precedence operator for defined-OR.
 
 =head2 C Operators Missing From Perl
 X<operator, missing from perl> X<&> X<*>
