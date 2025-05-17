@@ -18,7 +18,7 @@ means that Perl has two versions of some operators, one for numeric
 and one for string comparison.  For example S<C<$x == $y>> compares
 two numbers for equality, and S<C<$x eq $y>> compares two strings.
 
-There are a few exceptions though: C<x> can be either string
+There are a few exceptions though: The operator C<x> can be either string
 repetition or list repetition, depending on the type of the left
 operand, and C<&>, C<|>, C<^> and C<~> can be either string or numeric bit
 operations.
@@ -216,7 +216,7 @@ Also parsed as terms are the S<C<do {}>> and S<C<eval {}>> constructs, as
 well as subroutine and method calls, and the anonymous
 constructors C<[]> and C<{}>.
 
-See also L</Quote and Quote-like Operators> toward the end of this section,
+See also L</Quote and Quote-like Operators> below,
 as well as L</"I/O Operators">.
 
 =head2 The Arrow Operator
@@ -1046,7 +1046,7 @@ X<//> X<operator, logical, defined-or>
 Binary C<"||"> performs a short-circuit logical OR operation.  That is,
 if the left operand is true, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
-is evaluated.
+does get evaluated.
 
 As an alternative to C<||> when used for control flow, Perl provides the
 C<or> operator (L<see below|/Logical or and Exclusive Or>).
