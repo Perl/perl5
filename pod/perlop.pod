@@ -664,15 +664,15 @@ Binary C<"cmp"> returns -1, 0, or 1 depending on whether the left
 argument is stringwise less than, equal to, or greater than the right
 argument.
 
-Here we can see the difference between <=> and cmp,
+Here we can see the difference between C<< <=> >> and C<cmp>,
 
     print 10 <=> 2 #prints 1
     print 10 cmp 2 #prints -1
 
 X<cmp>
 (likewise between the relational operators that were described in the
-L<previous section|/Relational Operators>: gt and >, lt and
-<, etc.)
+L<previous section|/Relational Operators>: C<gt> and C<< > >>, C<lt> and
+C<< < >>, I<etc>.)
 
 Binary C<"~~"> does a smartmatch between its arguments.  Smart matching
 is described in the next section.
