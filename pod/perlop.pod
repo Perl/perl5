@@ -998,9 +998,13 @@ C<"experimental::bitwise"> category.
 X<operator, bitwise, or> X<bitwise or> X<|> X<operator, bitwise, xor>
 X<bitwise xor> X<^>
 
-Binary C<"|"> returns its operands ORed together bit by bit.
+Binary C<"|"> returns its operands ORed together bit by bit.  If both
+corresponding bits are 0, the resulting bit is 0; if either is 1, the result is
+1.
 
-Binary C<"^"> returns its operands XORed together bit by bit.
+Binary C<"^"> returns its operands XORed together bit by bit.  If both
+corresponding bits are 0 or both are 1, the resulting bit is 0; if just
+one is 1, the result is 1.
 
 Although no warning is currently raised, the results are not well
 defined when these operations are performed on operands that aren't either
