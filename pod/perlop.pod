@@ -79,16 +79,16 @@ at all if the short-circuiting means that it's not required for any
 comparisons.)  This matters if the computation of an interior argument
 is expensive or non-deterministic.  For example,
 
-    if($x < expensive_sub() <= $z) { ...
+    if ($x < expensive_sub() <= $z) { ...
 
 is not entirely like
 
-    if($x < expensive_sub() && expensive_sub() <= $z) { ...
+    if ($x < expensive_sub() && expensive_sub() <= $z) { ...
 
 but instead closer to
 
     my $tmp = expensive_sub();
-    if($x < $tmp && $tmp <= $z) { ...
+    if ($x < $tmp && $tmp <= $z) { ...
 
 in that the subroutine is only called once.  However, it's not exactly
 like this latter code either, because the chained comparison doesn't
@@ -547,10 +547,10 @@ not derive from the class given by the right argument, the operator evaluates
 as false. The right argument may give the class either as a bareword or a
 scalar expression that yields a string class name:
 
-    if( $obj isa Some::Class ) { ... }
+    if ( $obj isa Some::Class ) { ... }
 
-    if( $obj isa "Different::Class" ) { ... }
-    if( $obj isa $name_of_class ) { ... }
+    if ( $obj isa "Different::Class" ) { ... }
+    if ( $obj isa $name_of_class ) { ... }
 
 This feature is available from Perl 5.31.6 onwards when enabled by
 C<use feature 'isa'>. This feature is enabled automatically by a
@@ -1591,7 +1591,7 @@ is the same as
 
 Note, however, that this does not always work for quoting Perl code:
 
-    $s = q{ if($x eq "}") ... }; # WRONG
+    $s = q{ if ($x eq "}") ... }; # WRONG
 
 is a syntax error.  The C<L<Text::Balanced>> module (standard as of v5.8,
 and from CPAN before then) is able to do this properly.
