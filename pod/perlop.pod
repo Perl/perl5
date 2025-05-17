@@ -1505,9 +1505,9 @@ X<operator, logical, xor> X<operator, logical, exclusive or> X<xor>
 
 There is no low precedence operator for defined-OR.
 
-Binary C<"or"> returns the logical disjunction of the two surrounding
-expressions.  It's equivalent to C<||> except for the very low precedence.
-This makes it useful for control flow:
+Binary C<"or"> returns the logical inclusive disjunction of the two
+surrounding expressions.  It's equivalent to C<||> except for it having
+very low precedence.  This makes it useful for control flow:
 
     print FH $data              or die "Can't write to FH: $!";
 
@@ -1529,7 +1529,8 @@ takes higher precedence.
 
 Then again, you could always use parentheses.
 
-Binary C<"xor"> returns the exclusive-OR of the two surrounding expressions.
+Binary C<"xor"> returns the logical exclusive disjunction of the two
+surrounding expressions.
 It cannot short-circuit (of course).
 
 
