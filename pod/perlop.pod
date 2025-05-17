@@ -1500,9 +1500,8 @@ precedence.  This means that it short-circuits: the right
 expression is evaluated only if the left expression is true.
 
 =head2 Logical or and Exclusive Or
-X<operator, logical, or> X<operator, logical, xor>
-X<operator, logical, exclusive or>
-X<or> X<xor>
+X<operator, logical, or> X<or>
+X<operator, logical, xor> X<operator, logical, exclusive or> X<xor>
 
 There is no low precedence operator for defined-OR.
 
