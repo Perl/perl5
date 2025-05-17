@@ -604,6 +604,20 @@ the section L</"Operator Precedence and Associativity">.
 Beware that they do not chain with equality operators, which have lower
 precedence.
 
+C<"lt">, C<"le">, C<"ge">, C<"gt">, and C<"cmp"> (this last is described
+in the L<next section|/Equality Operators>) use the collation (sort)
+order specified by the current C<LC_COLLATE> locale if a S<C<use
+locale>> form that includes collation is in effect.  See L<perllocale>.
+Depending on the capabilities of the platform, these can give reasonable
+results with Unicode, but the standard C<L<Unicode::Collate>> and
+C<L<Unicode::Collate::Locale>> modules offer much more powerful
+solutions to collation issues.
+
+For case-insensitive comparisons, look at the L<perlfunc/fc> case-folding
+function, available in Perl v5.16 or later:
+
+    if ( fc($x) eq fc($y) ) { ... }
+
 =head2 Equality Operators
 X<equality> X<equal> X<equals> X<operator, equality>
 
@@ -655,8 +669,10 @@ Here we can see the difference between <=> and cmp,
     print 10 <=> 2 #prints 1
     print 10 cmp 2 #prints -1
 
-(likewise between gt and >, lt and <, etc.)
 X<cmp>
+(likewise between the relational operators that were described in the
+L<previous section|/Relational Operators>: gt and >, lt and
+<, etc.)
 
 Binary C<"~~"> does a smartmatch between its arguments.  Smart matching
 is described in the next section.
@@ -665,20 +681,6 @@ X<~~>
 The two-sided ordering operators C<"E<lt>=E<gt>"> and C<"cmp">, and the
 smartmatch operator C<"~~">, are non-associative with respect to each
 other and with respect to the equality operators of the same precedence.
-
-C<"lt">, C<"le">, C<"ge">, C<"gt"> and C<"cmp"> use the collation (sort)
-order specified by the current C<LC_COLLATE> locale if a S<C<use
-locale>> form that includes collation is in effect.  See L<perllocale>.
-Depending on the capabilities of the platform, these can give reasonable
-results with Unicode, but
-the standard C<L<Unicode::Collate>> and
-C<L<Unicode::Collate::Locale>> modules offer much more powerful
-solutions to collation issues.
-
-For case-insensitive comparisons, look at the L<perlfunc/fc> case-folding
-function, available in Perl v5.16 or later:
-
-    if ( fc($x) eq fc($y) ) { ... }
 
 =head2 Smartmatch Operator
 
