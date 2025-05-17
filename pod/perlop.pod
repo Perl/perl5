@@ -152,8 +152,9 @@ values only, not array values.
     left        and
     left        or xor
 
-In the following sections, these operators are covered in detail, in the
-same order in which they appear in the table above.
+The following sections cover these operators in detail.  Each section
+covers all the operators for a single precedence level.  The sections
+are ordered highest precedence first, same as in the table above.
 
 Many operators can be overloaded for objects.  See L<overload>.
 
