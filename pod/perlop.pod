@@ -675,14 +675,15 @@ L<previous section|/Relational Operators>: C<gt> and C<< > >>, C<lt> and
 C<< < >>, I<etc>.)
 
 Binary C<"~~"> does a smartmatch between its arguments.  Smart matching
-is described in the next section.
+is complicated enough to warrant
+L<two subsections|/Smartmatch Operator>, starting just below.
 X<~~>
 
 The two-sided ordering operators C<"E<lt>=E<gt>"> and C<"cmp">, and the
 smartmatch operator C<"~~">, are non-associative with respect to each
 other and with respect to the equality operators of the same precedence.
 
-=head2 Smartmatch Operator
+=head3 Smartmatch Operator
 
 The C<smartmatch> feature is discouraged for new code and retained for
 backward compatibility.
