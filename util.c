@@ -75,6 +75,10 @@ int putenv(char *);
 # include <sys/mman.h>
 #endif
 
+#ifdef __MVS__
+# include <arpa/inet.h>
+#endif
+
 #define FLUSH
 
 /* NOTE:  Do not call the next three routines directly.  Use the macros
