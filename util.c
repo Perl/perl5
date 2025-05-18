@@ -2534,12 +2534,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
         /* Close parent's end of error status pipe (if any) */
         if (did_pipes)
             PerlLIO_close(pp[0]);
-#if defined(OEMVS)
-  #if (__CHARSET_LIB == 1)
-        chgfdccsid(p[THIS], 819);
-        chgfdccsid(p[THAT], 819);
-  #endif
-#endif
         /* Now dup our end of _the_ pipe to right position */
         if (p[THIS] != (*mode == 'r')) {
             PerlLIO_dup2(p[THIS], *mode == 'r');
@@ -2615,20 +2609,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     }
     if (did_pipes)
          PerlLIO_close(pp[0]);
-#if defined(OEMVS)
-  #if (__CHARSET_LIB == 1)
-    PerlIO* io = PerlIO_fdopen(p[This], mode);
-    if (io) {
-      chgfdccsid(p[This], 819);
-    }
-    return io;
-  #else
     return PerlIO_fdopen(p[This], mode);
-  #endif
-#else
-    return PerlIO_fdopen(p[This], mode);
-#endif
-
 #else
 #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
     return my_syspopen4(aTHX_ NULL, mode, n, args);
@@ -2706,12 +2687,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #define THAT This
         if (did_pipes)
             PerlLIO_close(pp[0]);
-#if defined(OEMVS)
-  #if (__CHARSET_LIB == 1)
-        chgfdccsid(p[THIS], 819);
-        chgfdccsid(p[THAT], 819);
-  #endif
-#endif
         if (p[THIS] != (*mode == 'r')) {
             PerlLIO_dup2(p[THIS], *mode == 'r');
             PerlLIO_close(p[THIS]);
@@ -2798,19 +2773,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     }
     if (did_pipes)
          PerlLIO_close(pp[0]);
-#if defined(OEMVS)
-  #if (__CHARSET_LIB == 1)
-    PerlIO* io = PerlIO_fdopen(p[This],	mode);
-    if (io) {
-      chgfdccsid(p[This], 819);
-    }
-    return io;
-  #else
     return PerlIO_fdopen(p[This], mode);
-  #endif
-#else
-    return PerlIO_fdopen(p[This], mode);
-#endif
 }
 #elif defined(__LIBCATAMOUNT__)
 PerlIO *
