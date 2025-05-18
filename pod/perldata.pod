@@ -43,8 +43,8 @@ the inner working of Perl have names containing punctuation characters.
 These are documented in L<perlvar>.
 X<variable, built-in>
 
-Scalar values are always named with the sigil '$', even when referring to a
-scalar that is part of an array or a hash.  The '$' symbol works
+Scalar values are always named with the sigil C<'$'>, even when referring to a
+scalar that is part of an array or a hash.  The C<'$'> symbol works
 semantically like the English word "the" in that it indicates a
 single value is expected.
 X<scalar>
@@ -55,7 +55,7 @@ X<scalar>
     $#days		# the last index of array @days
 
 Entire arrays (and slices of arrays and hashes) are denoted by the sigil
-'@', which works much as the word "these" or "those" does in English,
+C<'@'>, which works much as the word "these" or "those" does in English,
 in that it indicates multiple values are expected.
 X<array>
 
@@ -68,9 +68,9 @@ X<hash>
 
     %days		# (key1, val1, key2, val2 ...)
 
-In addition, subroutines are named with an initial sigil '&', though this
+In addition, subroutines are named with an initial sigil C<'&'>, though this
 is optional when unambiguous, just as the word "do" is often redundant
-in English.  Symbol table entries can be named with an initial '*',
+in English.  Symbol table entries can be named with an initial C<'*'>,
 but you don't really care about that yet (if ever :-).
 
 Every variable type has its own namespace, as do several
@@ -83,8 +83,8 @@ is a part of @foo, not a part of $foo.  This may seem a bit weird,
 but that's okay, because it is weird.
 X<namespace>
 
-Because variable references always start with the sigils '$', '@', or
-'%', the "reserved" words aren't in fact reserved with respect to
+Because variable references always start with the sigils C<'$'>, C<'@'>, or
+C<'%'>, the "reserved" words aren't in fact reserved with respect to
 variable
 names.  They I<are> reserved with respect to labels and filehandles,
 however, which don't have an initial special character.  You can't
@@ -1158,10 +1158,10 @@ Slices in scalar context return the last item of the slice.
     $t = @a[0, 1];                  # $t is now 'second'
     $u = @h{'first', 'second'};     # $u is now 'B'
 
-If you're confused about why you use an '@' there on a hash slice
-instead of a '%', think of it like this.  The type of bracket (square
+If you're confused about why you use an C<'@'> there on a hash slice
+instead of a C<'%'>, think of it like this.  The type of bracket (square
 or curly) governs whether it's an array or a hash being looked at.
-On the other hand, the leading symbol ('$' or '@') on the array or
+On the other hand, the leading symbol (C<'$'> or C<'@'>) on the array or
 hash indicates whether you are getting back a singular value (a
 scalar) or a plural one (a list).
 
