@@ -222,57 +222,6 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
 #endif
 }
 
-#if defined(OEMVS)
-  #if (__CHARSET_LIB == 1)
-#   include <stdio.h>
-#   include <stdlib.h>
-
-    static int setccsid(int fd, int ccsid) 
-    {
-      attrib_t attr;
-      int rc;
-
-      memset(&attr, 0, sizeof(attr));
-      attr.att_filetagchg = 1;
-      attr.att_filetag.ft_ccsid = ccsid;
-      attr.att_filetag.ft_txtflag = 1;
-
-      rc = __fchattr(fd, &attr, sizeof(attr));
-      return rc;
-    }
-
-    static void updateccsid(int fd, const char* path, int oflag, int perm) 
-    { 
-      int rc;
-      if (oflag & O_CREAT) {
-        rc = setccsid(fd, 819);
-      }
-    }
-
-    int asciiopen(const char* path, int oflag) 
-    {
-      int rc;
-      int fd = open(path, oflag);
-      if (fd == -1) { 
-        return fd;
-      }
-      updateccsid(fd, path, oflag, -1);
-      return fd; 
-    }
-
-    int asciiopen3(const char* path, int oflag, int perm) 
-    {
-      int rc;
-      int fd = open(path, oflag, perm);
-      if (fd == -1) { 
-        return fd;
-      }
-      updateccsid(fd, path, oflag, perm);
-      return fd;
-    } 
-  #endif
-#endif
-
 int
 Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 {
@@ -302,9 +251,6 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 }
 
 #if defined(OEMVS)
-  #if (__CHARSET_LIB == 1)
-    #define TEMP_CCSID 819
-  #endif
 static int Internal_Perl_my_mkstemp_cloexec(char *templte)
 {     
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
@@ -321,9 +267,6 @@ int
 Perl_my_mkstemp_cloexec(char *templte) 
 {
     int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
-#  if defined(TEMP_CCSID)
-    setccsid(tempfd, TEMP_CCSID);
-#  endif
     return tempfd;
 }
 
@@ -1471,6 +1414,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #endif
                 PL_filemode = statbuf.st_mode;
                 fileuid = statbuf.st_uid;
+#ifdef __MVS__
+                int txtflag = statbuf.st_tag.ft_txtflag;
+                int ccsid = statbuf.st_tag.ft_ccsid;
+#endif
                 filegid = statbuf.st_gid;
                 if (!S_ISREG(PL_filemode)) {
                     ck_warner_d(packWARN(WARN_INPLACE),
@@ -1548,6 +1495,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
                 if (PL_lastfd >= 0) {
                     (void)PerlLIO_fstat(PL_lastfd,&statbuf);
+#ifdef __MVS__
+                    __setfdccsid(PL_lastfd, (txtflag << 16) | ccsid);
+#endif
 #ifdef HAS_FCHMOD
                     (void)fchmod(PL_lastfd,PL_filemode);
 #else
@@ -2558,6 +2508,11 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
             }
           doshell:
             PERL_FPU_PRE_EXEC
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+            unsetenv("_TAG_REDIR_ERR");
+  #endif
+#endif
             PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char *)NULL);
             PERL_FPU_POST_EXEC
             S_exec_failed(aTHX_ PL_sh_path, fd, do_report);
