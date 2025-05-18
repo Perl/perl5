@@ -2597,7 +2597,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     if (xsinit)
         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
+#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__) || defined(__MVS__)
     init_os_extras();
 #endif
 
