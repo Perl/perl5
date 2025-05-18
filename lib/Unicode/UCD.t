@@ -834,6 +834,16 @@ is($ret_len, 5, "... and the returned length is 5");
 ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}", \$ret_len),
    'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
 is($ret_len, 5, "... but the returned length is 5");
+{
+    local $@;
+    my @dummy = 5;
+    eval { num("98765", \@dummy); };
+    like($@, qr/::num: second parameter must be a scalar reference/,
+        "num: Incorrect type for second parameter; must be scalar ref");
+    my $x=\1;
+    eval { num("98765", \$x); };
+    is($@, "", 'num: Views $x=\1 as a scalar ref');
+}
 my $tai_lue_2;
 if ($v_unicode_version ge v4.1.0) {
     my $tai_lue_1 = charnames::string_vianame("NEW TAI LUE DIGIT ONE");

@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.82';
+our $VERSION = '0.83';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -2534,10 +2534,15 @@ change these into digits, and then call C<num> on the result.
 sub num ($;$) {
     my ($string, $retlen_ref) = @_;
 
+    if (defined $retlen_ref) {
+        eval { $$retlen_ref = 0; 1 }    # Initialize to assume failure
+            or croak __PACKAGE__,
+                     "::num: second parameter must be a scalar reference";
+    }
+                                                    
     use feature 'unicode_strings';
 
     _numeric unless %NUMERIC;
-    $$retlen_ref = 0 if $retlen_ref;    # Assume will fail
 
     my $length = length $string;
     return if $length == 0;
