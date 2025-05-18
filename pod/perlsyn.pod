@@ -863,12 +863,15 @@ C<defer>.
 
 X<switch> X<case> X<given> X<when> X<default>
 
+The C<switch> feature is discouraged for new code and is retained for
+backward compatibility.
+
 Starting from Perl 5.10.1 (well, 5.10.0, but it didn't work
 right), you can say
 
     use feature "switch";
 
-to enable an experimental switch feature.  This is loosely based on an
+to enable the switch feature.  This is loosely based on an
 old version of a Raku proposal, but it no longer resembles the Raku
 construct.  You also get the switch feature whenever you declare that your
 code prefers to run under a version of Perl between 5.10 and 5.34.  For
@@ -876,7 +879,7 @@ example:
 
     use v5.14;
 
-Under the "switch" feature, Perl gains the experimental keywords
+Under the "switch" feature, Perl gains the keywords
 C<given>, C<when>, C<default>, C<continue>, and C<break>.
 Starting from Perl 5.16, one can prefix the switch
 keywords with C<CORE::> to access the feature without a C<use feature>
@@ -893,8 +896,8 @@ in the previous section could be rewritten as
         default       { $nothing = 1 }
     }
 
-The C<foreach> is the non-experimental way to set a topicalizer.
-If you wish to use the highly experimental C<given>, that could be
+The C<foreach> is another way to set a topicalizer.
+If you wish to use C<given>, that could be
 written like this:
 
     use v5.10.1;
