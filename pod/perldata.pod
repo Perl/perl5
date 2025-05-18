@@ -17,7 +17,8 @@ values indexed by their associated string key.
 
 Values are usually referred to by name, or through a named reference.
 The first character of the name tells you to what sort of data
-structure it refers.  The rest of the name tells you the particular
+structure it refers.  This character is called a "sigil".  The rest of
+the name tells you the particular
 value to which it refers.  Usually this name is a single I<identifier>,
 that is, a string beginning with a letter or underscore, and
 containing letters, underscores, and digits.  In some cases, it may
@@ -28,8 +29,9 @@ to locate the namespace in which to look up the final identifier
 on identifiers, see L</Identifier parsing>.  It's possible to
 substitute for a simple identifier, an expression that produces a reference
 to the value at runtime.   This is described in more detail below
-and in L<perlref>.
-X<identifier>
+and in L<perlref>.  It is legal, but not recommended, to separate a
+variable's sigil from its name by space and/or tab characters.
+X<identifier> X<sigil>
 
 Perl also has its own built-in variables whose names don't follow
 these rules.  They have strange names so they don't accidentally
@@ -41,7 +43,7 @@ the inner working of Perl have names containing punctuation characters.
 These are documented in L<perlvar>.
 X<variable, built-in>
 
-Scalar values are always named with '$', even when referring to a
+Scalar values are always named with the sigil '$', even when referring to a
 scalar that is part of an array or a hash.  The '$' symbol works
 semantically like the English word "the" in that it indicates a
 single value is expected.
@@ -52,8 +54,8 @@ X<scalar>
     $days{'Feb'}	# the 'Feb' value from hash %days
     $#days		# the last index of array @days
 
-Entire arrays (and slices of arrays and hashes) are denoted by '@',
-which works much as the word "these" or "those" does in English,
+Entire arrays (and slices of arrays and hashes) are denoted by the sigil
+'@', which works much as the word "these" or "those" does in English,
 in that it indicates multiple values are expected.
 X<array>
 
@@ -61,12 +63,12 @@ X<array>
     @days[3,4,5]	# same as ($days[3],$days[4],$days[5])
     @days{'a','c'}	# same as ($days{'a'},$days{'c'})
 
-Entire hashes are denoted by '%':
+Entire hashes are denoted by the sigil '%':
 X<hash>
 
     %days		# (key1, val1, key2, val2 ...)
 
-In addition, subroutines are named with an initial '&', though this
+In addition, subroutines are named with an initial sigil '&', though this
 is optional when unambiguous, just as the word "do" is often redundant
 in English.  Symbol table entries can be named with an initial '*',
 but you don't really care about that yet (if ever :-).
@@ -81,8 +83,9 @@ is a part of @foo, not a part of $foo.  This may seem a bit weird,
 but that's okay, because it is weird.
 X<namespace>
 
-Because variable references always start with '$', '@', or '%', the
-"reserved" words aren't in fact reserved with respect to variable
+Because variable references always start with the sigils '$', '@', or
+'%', the "reserved" words aren't in fact reserved with respect to
+variable
 names.  They I<are> reserved with respect to labels and filehandles,
 however, which don't have an initial special character.  You can't
 have a filehandle named "log", for instance.  Hint: you could say
