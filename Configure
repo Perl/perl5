@@ -8729,10 +8729,14 @@ case "$useshrplib" in
 true)
 	case "$userelocatableinc" in
 	true|define)
-		echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
-		echo "See INSTALL for an explanation why that won't work." >&4
-		exit 4
-		;;
+    case "$osname" in
+      os390) echo "Perl on z/OS uses LIBPATH to dynamically locate shared objects." ;;
+      *)
+        echo "Cannot build with both -Duserelocatableinc and -Duseshrplib" >&4
+        echo "See INSTALL for an explanation why that won't work." >&4
+        exit 4
+        ;;
+    esac
 	esac
 	case "$libperl" in
 	'')
