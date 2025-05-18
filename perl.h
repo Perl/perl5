@@ -4469,7 +4469,7 @@ intrinsic function, see its documents for more details.
             cBOOL(PerlLIO_setmode(fileno(fp), mode) != -1)
 #endif
 
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__MVS__)
 void init_os_extras(void);
 #endif
 
