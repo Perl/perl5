@@ -1353,7 +1353,7 @@
 1;
 
 # Generated from:
-# 6cbf3f0fc04bbb22420eb9689126b5030bd714ad06397d0904702714feabe28e lib/Unicode/UCD.pm
+# 198105a1b3637a4bc7240628bae2f65f6d0c31df2cee4f0242c2561421ea2e75 lib/Unicode/UCD.pm
 # 764f420cedfc8b43d9fec251c957a5d55fc45d40f6573f162990ed1dce7e36e0 lib/unicore/ArabicShaping.txt
 # b8f32554c6f658821fb0ee742d21c5b1f2086b9bf13071fed04894b022f93d67 lib/unicore/BidiBrackets.txt
 # d7afdadd1bbd66f5a663ac0e8f7958f18fd9491fc0bc59ec5877cb82db71db7d lib/unicore/BidiMirroring.txt
