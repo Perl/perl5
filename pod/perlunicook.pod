@@ -442,6 +442,7 @@ ASCII digits only, but Perl’s implicit string-to-number
 conversion does not currently recognize these.  Here’s how to
 convert such strings manually.
 
+ use utf8;
  use v5.14;  # needed for num() function
  use Unicode::UCD qw(num);
  my $str = "got Ⅻ and ४५६७ and ⅞ and 兆 here";
