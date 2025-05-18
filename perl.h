@@ -4470,7 +4470,16 @@ intrinsic function, see its documents for more details.
 #endif
 
 #if defined(__CYGWIN__) || defined(__MVS__)
+
 void init_os_extras(void);
+
+#endif
+#if defined(__MVS__)
+#  ifdef EBCDIC
+#    define __setfdccsid(to_fd,  bits)  0
+#  else
+#    include <zos.h>
+#  endif
 #endif
 
 union any {

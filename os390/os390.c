@@ -11,7 +11,6 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <termios.h>
-#include <zos.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
