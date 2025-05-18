@@ -35,7 +35,7 @@
 #endif
 #ifdef HAS_SHM
 #include <sys/shm.h>
-# ifndef HAS_SHMAT_PROTOTYPE
+# if ! defined(HAS_SHMAT_PROTOTYPE) && ! defined(__MVS__)
     extern Shmat_t shmat (int, char *, int);
 # endif
 #endif
