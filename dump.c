@@ -1380,6 +1380,25 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 
     case OP_CONST:
     case OP_HINTSEVAL:
+    case OP_COREARGS:
+        /* an SVOP. On non-threaded builds, these OPs use op_sv to hold
+         * the SV associated with the const / hints hash / op num.
+         * On threaded builds, op_sv initially holds the SV, then at the
+         * end of compiling the sub, the SV is moved into the pad by
+         * op_relocate_sv() and indexed by op_targ.
+         * XXX Currently the SV isn't relocated for OP_COREARGS.
+         */
+        S_opdump_indent(aTHX_ o, level, bar, file,
+                            "OP_SV = 0x%" UVxf "\n", cSVOPo->op_sv);
+#ifdef USE_ITHREADS
+        /* SV is stored in the pad, and the right pad may not be active
+         * here, so skip dumping the SV */
+#else
+        S_opdump_indent(aTHX_ o, level, bar, file, "SV = %s\n",
+                        SvPEEK(cSVOP_sv));
+#endif
+        break;
+
     case OP_METHOD_NAMED:
     case OP_METHOD_SUPER:
     case OP_METHOD_REDIR:
@@ -1391,6 +1410,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
                         SvPEEK(cMETHOPo_meth));
 #endif
         break;
+
     case OP_NULL:
         if (o->op_targ != OP_NEXTSTATE && o->op_targ != OP_DBSTATE)
             break;
