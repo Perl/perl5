@@ -8629,7 +8629,10 @@ S_strftime8(pTHX_ const char * fmt,
 
       case UTF8NESS_YES:    /* Known to be UTF-8; must be UTF-8 locale if can't
                                downgrade. */
-        if (! is_locale_utf8(locale)) {
+        if (is_locale_utf8(locale)) {
+            locale_utf8ness = LOCALE_IS_UTF8;
+        }
+        else {
             locale_utf8ness = LOCALE_NOT_UTF8;
 
             Size_t fmt_len = strlen(fmt);
@@ -8638,9 +8641,6 @@ S_strftime8(pTHX_ const char * fmt,
                 SET_EINVAL;
                 return false;
             }
-        }
-        else {
-            locale_utf8ness = LOCALE_IS_UTF8;
         }
 
         break;
