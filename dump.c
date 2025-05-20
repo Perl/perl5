@@ -1093,6 +1093,123 @@ S_pm_description(pTHX_ const PMOP *pm)
     return desc;
 }
 
+
+/* S_get_sv_from_pad(): a helper function for op_dump().
+ *
+ * On threaded builds, try to find the SV indexed by the OP o (e.g. via
+ * op_targ or op_padix) at pad offset po.
+ * Since an op can be dumped at any time, there is no guarantee that the
+ * OP is associated with the current PL_curpad. So try to find the currently
+ * running CV or eval, and see if it contains the OP. Or if it's
+ * compile-time, see if the op is contained within one of the op subtrees
+ * on the parser stack.
+ *
+ * Return NULL if it can't be found.
+ *
+ * Since this may be called during debugging and things may not be in a
+ * sane state, be conservative, and if in doubt, return NULL.
+ */
+
+#ifdef USE_ITHREADS
+static SV *
+S_get_sv_from_pad(pTHX_ const OP *o, PADOFFSET po)
+{
+    PADLIST *padlist; /* declare early to work round compiler quirks */
+
+    if (!po)
+        return NULL;
+
+    CV *cv = NULL;
+
+    /* Find the root of the optree this op is embedded in. For a compiled
+     * sub, this root will typically be a leavesub or similar attached to
+     * a CV. If compiling, this may be a small subtree on the parser
+     * stack. Limit the number of hops, in case there is some sort of
+     * loop or other weirdness.
+     */
+    int n = 100;
+    OP *oproot = (OP*)o;
+    while (1) {
+        if (--n <= 0)
+            return NULL;
+        OP *p = op_parent(oproot);
+        if (!p)
+            break;
+        oproot = p;
+    }
+
+    /* We may be compiling; so first look for the op within the subtrees
+     * on the parse stack, if any */
+    if (PL_parser && PL_parser->stack) {
+        yy_stack_frame *ps;
+
+        for (ps = PL_parser->ps; ps > PL_parser->stack; ps--) {
+            if (ps->val.opval == oproot) {
+                cv = ps->compcv;
+                if (!cv)
+                    return NULL; /* this shouldn't actually happen */
+                goto got_cv;
+            }
+        }
+    }
+
+    /* Find the currently running CV or eval, if any, and see if our op
+     * is part of that CV's optree. If no contexts are found, we're
+     * probably running the main program.
+     */
+    I32 i;
+    for (i = cxstack_ix; i >= 0; i--) {
+        const PERL_CONTEXT * const cx = &cxstack[i];
+        switch (CxTYPE(cx)) {
+        default:
+            continue;
+        case CXt_EVAL:
+            if (CxTRY(cx)) /* eval { } doesn't have a separate optree */
+                continue;
+            cv = cxstack[i].blk_eval.cv;
+            /* XXX note that an EVAL's CV doesn't actually hold a pointer
+             * to the optree's root; we have to hope that PL_eval_root
+             * does instead */
+            if (!cv || !CvEVAL(cv) || oproot != PL_eval_root)
+                continue;
+            goto got_cv;
+        case CXt_SUB:
+            if (cx->cx_type & CXp_SUB_RE_FAKE)
+                continue;
+            /* FALLTHROUGH */
+        case CXt_FORMAT:
+            cv = cxstack[i].blk_sub.cv;
+            if (!cv || CvISXSUB(cv) || oproot != CvROOT(cv))
+                continue;
+            goto got_cv;
+        }
+    }
+
+    if (PL_main_cv && PL_main_root == oproot) {
+        cv = PL_main_cv;
+        goto got_cv;
+    }
+    return NULL;
+
+   /* Lookup the entry in the pad associated with this CV.
+    * Note that for SVs moved into the pad, they are shared at all pad
+    * depths, so we only have to look at depth 1 and not worry about
+    * CvDEPTH(). */
+   got_cv:
+    padlist = CvPADLIST(cv);
+    if (!padlist)
+        return NULL;
+    PAD *comppad = PadlistARRAY(padlist)[1];
+    if (!comppad)
+        return NULL;
+    SV **curpad = AvARRAY(comppad);
+    if (!curpad)
+        return NULL;
+    return curpad[po];
+}
+#endif
+
+
 /*
 =for apidoc pmop_dump
 
@@ -1346,15 +1463,21 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_AELEMFAST:
     case OP_GVSV:
     case OP_GV:
+    {
+        GV *gv;
 #ifdef USE_ITHREADS
         S_opdump_indent(aTHX_ o, level, bar, file,
                         "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
+        gv = (GV*)S_get_sv_from_pad(aTHX_ o, cPADOPx(o)->op_padix);
 #else
-        S_opdump_indent(aTHX_ o, level, bar, file,
-            "GV = %" SVf " (0x%" UVxf ")\n",
-            SVfARG(S_gv_display(aTHX_ cGVOPo_gv)), PTR2UV(cGVOPo_gv));
+        gv = (GV*)cSVOPx(o)->op_sv;
 #endif
+        if (gv)
+            S_opdump_indent(aTHX_ o, level, bar, file,
+                "GV = %" SVf " (0x%" UVxf ")\n",
+                SVfARG(S_gv_display(aTHX_ gv)), PTR2UV(gv));
         break;
+    }
 
     case OP_MULTIDEREF:
     {
@@ -1388,15 +1511,23 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
          * op_relocate_sv() and indexed by op_targ.
          * XXX Currently the SV isn't relocated for OP_COREARGS.
          */
-        S_opdump_indent(aTHX_ o, level, bar, file,
-                            "OP_SV = 0x%" UVxf "\n", cSVOPo->op_sv);
+        {
+            SV *sv = cSVOPo->op_sv;
+            if (!sv) {
+                S_opdump_indent(aTHX_ o, level, bar, file,
+                            "OP_SV = 0x0\n");
 #ifdef USE_ITHREADS
-        /* SV is stored in the pad, and the right pad may not be active
-         * here, so skip dumping the SV */
-#else
-        S_opdump_indent(aTHX_ o, level, bar, file, "SV = %s\n",
-                        SvPEEK(cSVOP_sv));
+                sv = S_get_sv_from_pad(aTHX_ o, o->op_targ);
 #endif
+            }
+
+            if (sv)
+                S_opdump_indent(aTHX_ o, level, bar, file,
+                        "%s = %s (0x%" UVxf ")\n",
+                        cSVOPo->op_sv ? "OP_SV" : "SV",
+                        SvPEEK(sv),
+                        PTR2UV(sv));
+        }
         break;
 
     case OP_METHOD:             /* $obj->$foo             */
@@ -1406,19 +1537,40 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_METHOD_SUPER:       /* $obj->SUPER::foo       */
     case OP_METHOD_REDIR:       /* $obj->BAR::foo         */
     case OP_METHOD_REDIR_SUPER: /* $obj->BAR::SUPER::foo  */
-#ifndef USE_ITHREADS
-        /* with ITHREADS, consts are stored in the pad, and the right pad
-         * may not be active here, so skip */
-        /* display method name (e.g. 'foo') */
-        S_opdump_indent(aTHX_ o, level, bar, file, "SV = %s\n",
-                        SvPEEK(cMETHOPo_meth));
-
-        /* display redirect class (e.g. 'BAR') */
-        if (optype == OP_METHOD_REDIR || optype == OP_METHOD_REDIR_SUPER) {
-            S_opdump_indent(aTHX_ o, level, bar, file, "RCLASS = %s\n",
-                        SvPEEK(cMETHOPo_rclass));
-        }
+        {
+            /* display method name (e.g. 'foo') */
+            SV *sv = cMETHOPo->op_u.op_meth_sv;
+            if (!sv) {
+                S_opdump_indent(aTHX_ o, level, bar, file,
+                            "OP_METH_SV = 0x0\n");
+#ifdef USE_ITHREADS
+                sv = S_get_sv_from_pad(aTHX_ o, o->op_targ);
 #endif
+            }
+
+            if (sv)
+                S_opdump_indent(aTHX_ o, level, bar, file,
+                        "%s = %s (0x%" UVxf ")\n",
+                        cMETHOPo->op_u.op_meth_sv ? "OP_METH_SV" : "METH",
+                        SvPEEK(sv),
+                        PTR2UV(sv));
+
+            if (optype == OP_METHOD_REDIR || optype == OP_METHOD_REDIR_SUPER) {
+                /* display redirect class (e.g. 'BAR') */
+#ifdef USE_ITHREADS
+                S_opdump_indent(aTHX_ o, level, bar, file,
+                    "RCLASS_TARG = %" IVdf "\n", (IV)cMETHOPo->op_rclass_targ);
+                sv = S_get_sv_from_pad(aTHX_ o, cMETHOPo->op_rclass_targ);
+#else
+                sv = cMETHOPo->op_rclass_sv;
+#endif
+                if (sv)
+                    S_opdump_indent(aTHX_ o, level, bar, file,
+                        "RCLASS = %s (0x%" UVxf ")\n",
+                        SvPEEK(sv),
+                        PTR2UV(sv));
+            }
+        }
         break;
 
     case OP_NULL:
