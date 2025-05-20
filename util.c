@@ -5491,8 +5491,9 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
             Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
         }
     }
-    /* newSV() allocates one more than needed */
-    p = (void*)SvPVX(newSV(size-1));
+    /* newSV() allocates one more than needed, hence the size-1.
+     * But if its arg is zero, it doesn't allocate a PVX at all. */
+    p = (void*)SvPVX(newSV(size > 1 ? size-1 : 1));
     PL_my_cxt_list[index] = p;
     Zero(p, size, char);
     return p;
