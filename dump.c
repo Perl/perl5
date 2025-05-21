@@ -1399,15 +1399,25 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 #endif
         break;
 
-    case OP_METHOD_NAMED:
-    case OP_METHOD_SUPER:
-    case OP_METHOD_REDIR:
-    case OP_METHOD_REDIR_SUPER:
+    case OP_METHOD:             /* $obj->$foo             */
+        break;
+
+    case OP_METHOD_NAMED:       /* $obj->foo              */
+    case OP_METHOD_SUPER:       /* $obj->SUPER::foo       */
+    case OP_METHOD_REDIR:       /* $obj->BAR::foo         */
+    case OP_METHOD_REDIR_SUPER: /* $obj->BAR::SUPER::foo  */
 #ifndef USE_ITHREADS
         /* with ITHREADS, consts are stored in the pad, and the right pad
          * may not be active here, so skip */
+        /* display method name (e.g. 'foo') */
         S_opdump_indent(aTHX_ o, level, bar, file, "SV = %s\n",
                         SvPEEK(cMETHOPo_meth));
+
+        /* display redirect class (e.g. 'BAR') */
+        if (optype == OP_METHOD_REDIR || optype == OP_METHOD_REDIR_SUPER) {
+            S_opdump_indent(aTHX_ o, level, bar, file, "RCLASS = %s\n",
+                        SvPEEK(cMETHOPo_rclass));
+        }
 #endif
         break;
 
