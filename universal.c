@@ -384,8 +384,7 @@ A specialised variant of C<croak()> for emitting the usage message for xsubs
 works out the package name and subroutine name from C<cv>, and then calls
 C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
- diag_listed_as: SKIPME
- croak("Usage: %" SVf "::%" SVf "(%s)", "ouch" "awk",
+ croak("Usage: %" SVf "::%" SVf "(%s)", "ouch", "awk",
                                                      "eee_yow");
 
 =cut
