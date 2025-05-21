@@ -4422,9 +4422,7 @@ S_scan_const(pTHX_ char *start)
     }
 
     /* shrink the sv if we allocated more than we used */
-    if (SvCUR(sv) + 5 < SvLEN(sv)) {
-        SvPV_shrink_to_cur(sv);
-    }
+    SvPV_shrink_to_cur(sv);
 
     /* return the substring (via pl_yylval) only if we parsed anything */
     if (s > start) {
@@ -11348,9 +11346,7 @@ S_scan_heredoc(pTHX_ char *s)
         SvREFCNT_dec_NN(newstr);
     }
 
-    if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
-        SvPV_shrink_to_cur(tmpstr);
-    }
+    SvPV_shrink_to_cur(tmpstr);
 
     if (!IN_BYTES) {
         if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
@@ -11877,10 +11873,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     PL_parser->herelines = herelines;
 
     /* if we allocated too much space, give some back */
-    if (SvCUR(sv) + 5 < SvLEN(sv)) {
-        SvLEN_set(sv, SvCUR(sv) + 1);
-        SvPV_shrink_to_cur(sv);
-    }
+    SvPV_shrink_to_cur(sv);
 
     /* decide whether this is the first or second quoted string we've read
        for this op
