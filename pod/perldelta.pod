@@ -93,9 +93,21 @@ There may well be none in a stable release.
 
 =over 4
 
-=item *
+=item minor over-allocating leak fixed in XS MY_CXT_INIT() & MY_CXT_CLONE()
 
-XXX
+In the MY_CXT_INIT()/MY_CXT_CLONE() APIs. The final length passed to libc,
+of each XS module's C<struct my_cxt_t>, was being wastefully bumped up a
+small amount through various code paths that did multiple rounds of
+I<string> buffer optimizations intended for scalar strings, onto all the
+fixed-length C<struct my_cxt_t> (static) types. Optimizations like +1 byte,
+align to a natural machine type, round up speculativly for future string
+concats. The over-allocations and number of bytes recovered was on small end,
+1 PTRSIZE (4/8 bytes), and likely worst case was 4 PTRSIZE units (16/32 bytes).
+
+Macros L<perlapi/"MY_CXT_INIT"> and L<perlapi/"MY_CXT_CLONE"> in the
+interpreter and backported analogs in L<Devel::PPPort> were fixed to not use
+char string buffer length semantics on fixed-length C types, and use C
+fixed-length C types, code patterns.
 
 =back
 
@@ -354,6 +366,9 @@ well.
 
 =over 4
 
+=item *
+
+XXX
 =item *
 
 XXX

@@ -1,5 +1,11 @@
 Revision history for Devel-PPPort
 
+3.74 - ?
+ * rework MY_CXT_INIT and MY_CXT_CLONE to not speculativly over allocate
+   memory for all XS module's "struct my_cxt_t" as if they are strings.
+   The lost memory amount, was PTRSIZE-1 bytes on the small end, and
+   worst case 4 x PTRSIZE, depending on logic in sv.c and defaults in Configure.
+
 3.68 - 2022-03-18
 
  * fix newSVsv_flags: rename variable to fix C++ compilation issue

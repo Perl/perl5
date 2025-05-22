@@ -8150,12 +8150,18 @@ C<strtoul>.
 
 /* Clones the per-interpreter data. */
 #  define MY_CXT_CLONE \
-        my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-        void * old_my_cxtp = PL_my_cxt_list[MY_CXT_INDEX];		\
-        PL_my_cxt_list[MY_CXT_INDEX] = my_cxtp;				\
-        Copy(old_my_cxtp, my_cxtp, 1, my_cxt_t);
+        SV *my_cxtsv_ = newSV_type(SVt_PV); \
+        my_cxt_t *my_cxtp; \
+        void *old_my_cxtp; \
+        Newx(my_cxtp, 1, my_cxt_t); \
+        SvPV_set(my_cxtsv_, (char*)my_cxtp); \
+        old_my_cxtp = PL_my_cxt_list[MY_CXT_INDEX]; \
+        SvLEN_set(my_cxtsv_, sizeof(my_cxt_t)); \
+        PL_my_cxt_list[MY_CXT_INDEX] = my_cxtp; \
+        my_cxtp = CopyD(old_my_cxtp, my_cxtp, 1, my_cxt_t);
 
-
+/* Put CopyD() last. If its an intrinsic, and right after many overlapped
+   assignments, encourage the CC to drop out the CopyD() instructions. */
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MY_CXT.some_data */

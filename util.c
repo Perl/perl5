@@ -5453,6 +5453,30 @@ off, by allocating or extending the interpreter's C<PL_my_cxt_list> array
 =cut
 */
 
+/*  Bug history, newSV() was removed here b/c it and similar _pvX()s, add
+    1, 2 or more bytes to the request size. After that, they will round up
+    again (1*PTRSIZE~4*PTRSIZE???). The rounding up code, is very platform/build
+    specific and fluid. Don't fight the rounding here by artificially
+    decreasing the size before passing it. Just use Newx() directly with the
+    fixed (in the caller) C struct size, then attach PV to the SV.
+    String semantics COW, UTF, OOK, and extra backup +1s for null,
+    dont apply to MY_CXT API.
+
+    Since the start of the current implementation, in commit
+    "add Series 90 support" jhi 1/1/2007 or commit f16dd614 davem 12/29/2005
+    "re-implement MY_CXT API more efficiently, and add explicit".
+    The SV* and PV* are leaked until per-interp global destruction or proc exit.
+
+    It is assumed, until perl adds formal support for runtime unloading XS
+    modules (.so/.dll) from virtual memory, this leak is harmless. A PV in an
+    arena SV, guarentees the PV is freed at my_perl destroy time, on all OSes.
+    No dependency on "malloc()" having "pools" like Win32 Perl.
+
+    There is no formal API, between the interp and XS mods, to free resources
+    obtained from my_cxt_init() before proc exit. Multiple workarounds have
+    been invented on CPAN but none are formal, or problems exist in edge cases.
+*/
+
 void *
 Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
 {
@@ -5491,10 +5515,16 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
             Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
         }
     }
-    /* newSV() allocates one more than needed */
-    p = (void*)SvPVX(newSV(size-1));
+
+
+    {   /*  Implementation detail. Where MY_CXT gets it's memory
+            blocks from, is opaque/undefined. */
+        SV *sv = newSV_type(SVt_PV);
+        Newxz(p, size, char);
+        SvPV_set(sv, (char*)p);
+        SvLEN_set(sv, size);
+    }
     PL_my_cxt_list[index] = p;
-    Zero(p, size, char);
     return p;
 }
 

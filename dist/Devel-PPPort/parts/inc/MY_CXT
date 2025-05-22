@@ -65,21 +65,41 @@ _aMY_CXT
                                   sizeof(MY_CXT_KEY)-1, TRUE)
 #endif /* < perl5.004_68 */
 
+#ifdef HAS_MEMSET
+__UNDEFINED__  ZeroD(d,n,t)    memzero((char*)(d), (n) * sizeof(t))
+#else
+__UNDEFINED__  ZeroD(d,n,t)    ((void)memzero((char*)(d), (n) * sizeof(t)), d)
+#endif
+
 /* This declaration should be used within all functions that use the
  * interpreter-local data. */
 #define dMY_CXT \
         dMY_CXT_SV;                                                     \
-        my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*,SvUV(my_cxt_sv))
+        my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*,SvPVX(my_cxt_sv))
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when
  * the interpreter goes away.) */
 #define MY_CXT_INIT \
-        dMY_CXT_SV;                                                     \
-        /* newSV() allocates one more than needed */                    \
-        my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-        Zero(my_cxtp, 1, my_cxt_t);                                     \
-        sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+        dMY_CXT_SV;                                                      \
+        my_cxt_t *my_cxtp;                                               \
+        SvUPGRADE(my_cxt_sv, SVt_PVIV);                                  \
+        if(SvLEN(my_cxt_sv) != sizeof(my_cxt_t) {                        \
+            if( SvTHINKFIRST(my_cxt_sv)                                  \
+                || (SvLEN(my_cxt_sv)) {                                  \
+                my_cxtp = INT2PTR(my_cxt_t*,sv_grow(my_cxt_sv,1));       \
+                Safefree(my_cxtp);                                       \
+                SvCUR_set(my_cxt_sv, 0);                                 \
+            } \
+            SvLEN_set(my_cxt_sv, sizeof(my_cxt_t));                      \
+            New(0, my_cxtp, 1, my_cxt_t);                                \
+            SvPV_set(my_cxt_sv, (char*)my_cxtp);                         \
+        } \
+        else { \
+            my_cxtp = INT2PTR(my_cxt_t*,SvPVX(my_cxt_sv));               \
+        } \
+        SvUV_set(my_cxt_sv, INT2PTR(UV, my_cxtp));                       \
+        my_cxtp = ZeroD(my_cxtp, 1, my_cxt_t);
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
@@ -98,11 +118,27 @@ _aMY_CXT
 
 #ifndef MY_CXT_CLONE
 /* Clones the per-interpreter data. */
-#define MY_CXT_CLONE \
-        dMY_CXT_SV;                                                     \
-        my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-        Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
-        sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+#  define MY_CXT_CLONE                                                   \
+        dMY_CXT_SV;                                                      \
+        my_cxt_t *my_cxtp;                                               \
+        my_cxt_t *old_my_cxtp;                                           \
+        SvUPGRADE(my_cxt_sv, SVt_PVIV);                                  \
+        if(SvLEN(my_cxt_sv) != sizeof(my_cxt_t) {                        \
+            if( SvTHINKFIRST(my_cxt_sv)                                  \
+                || (SvLEN(my_cxt_sv)) {                                  \
+                my_cxtp = INT2PTR(my_cxt_t*,sv_grow(my_cxt_sv,1));       \
+                Safefree(my_cxtp);                                       \
+            } \
+            SvLEN_set(my_cxt_sv, sizeof(my_cxt_t));                      \
+            New(0, my_cxtp, 1, my_cxt_t);                                \
+            SvPV_set(my_cxt_sv, (char*)my_cxtp);                         \
+        } \
+        else { \
+            my_cxtp = INT2PTR(my_cxt_t*,SvPVX(my_cxt_sv)); \
+        }  \
+        old_my_cxtp = INT2PTR(my_cxt_t*, SvUVX(my_cxt_sv));              \
+        SvUV_set(my_cxt_sv, INT2PTR(UV, my_cxtp));                       \
+        my_cxtp = CopyD(old_my_cxtp, my_cxtp, 1, my_cxt_t);
 #endif
 
 #else /* single interpreter */
