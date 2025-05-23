@@ -478,6 +478,7 @@ d_fd_set=''
 d_fds_bits=''
 d_fdclose=''
 d_fdim=''
+d_fdopendir=''
 d_fegetround=''
 d_ffs=''
 d_ffsl=''
@@ -13344,6 +13345,10 @@ esac
 set i_fcntl
 eval $setvar
 
+: see if fdopendir exists
+set fdopendir d_fdopendir
+eval $inlibc
+
 : see if fork exists
 set fork d_fork
 eval $inlibc
@@ -25052,6 +25057,7 @@ d_flockproto='$d_flockproto'
 d_fma='$d_fma'
 d_fmax='$d_fmax'
 d_fmin='$d_fmin'
+d_fdopendir='$d_fdopendir'
 d_fork='$d_fork'
 d_fp_class='$d_fp_class'
 d_fp_classify='$d_fp_classify'
