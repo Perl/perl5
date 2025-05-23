@@ -11,7 +11,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 16;
+plan tests => 11;
 
 use Fcntl qw(:seek);
 
@@ -44,26 +44,8 @@ SKIP:
 }
 
 {
-    my $fn = \&CORE::open;
-    ok($fn->(my $fh, "+>", undef), "(\\&CORE::open)->(my \$fh, '+>', undef)");
-    print $fh "the right write stuff";
-    ok(seek($fh, 0, SEEK_SET), "seek to zero");
-    my $data = <$fh>;
-    is($data, "the right write stuff", "found the right stuff");
-}
-
-{
-    # GH #22385
-    my %hash;
-    my $warnings = '';
-    local $SIG{__WARN__} = sub { $warnings .= $_[0] };
-    my $r = open my $fh, "+>", delete $hash{nosuchkey};
-    my $enoent = $!{ENOENT};
-    is $r, undef, "open(my \$fh, '+>', delete \$hash{nosuchkey}) fails";
-    SKIP: {
-        skip "This system doesn't understand ENOENT", 1
-            unless exists $!{ENOENT};
-        ok $enoent, "\$! is ENOENT";
-    }
-    like $warnings, qr/^Use of uninitialized value in open/, "it warns about undef";
+    # minimal-reproduction moral equivalent of the autodie wrapper for open()
+    # because APIs that wrap open() should be able to expose this behaviour
+    sub wrapped_open (*;$@) { open $_[0], $_[1], $_[2] }
+    ok((wrapped_open my $fh, "+>", undef), "wrapped_open my \$fh, '+>', undef");
 }
