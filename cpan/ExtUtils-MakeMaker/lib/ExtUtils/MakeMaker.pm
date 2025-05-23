@@ -25,7 +25,7 @@ our %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.74';
+our $VERSION = '7.76';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -624,7 +624,7 @@ END
         elsif (
             $cmr
                 ? !$cmr->accepts_module($prereq, $pr_version)
-                : $required_version > $pr_version
+                : version->new($required_version) > version->new($pr_version)
         ) {
             warn sprintf "Warning: prerequisite %s %s not found. We have %s.\n",
               $prereq, $required_version, ($pr_version || 'unknown version')
