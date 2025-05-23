@@ -212,6 +212,7 @@ d_fd_macros='define'
 d_fd_set='define'
 d_fdclose='undef'
 d_fdim='undef'
+d_fdopendir=undef
 d_fds_bits='undef'
 d_fegetround='define'
 d_ffs='undef'
