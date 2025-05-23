@@ -44,8 +44,8 @@ SKIP:
 }
 
 {
-    my $fn = \&CORE::open;
-    ok($fn->(my $fh, "+>", undef), "(\\&CORE::open)->(my \$fh, '+>', undef)");
+    sub wrapped_open { &CORE::open }
+    ok((wrapped_open my $fh, "+>", undef), "wrapped_open my \$fh, '+>', undef");
     print $fh "the right write stuff";
     ok(seek($fh, 0, SEEK_SET), "seek to zero");
     my $data = <$fh>;
