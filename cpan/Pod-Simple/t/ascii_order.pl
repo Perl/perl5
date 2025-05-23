@@ -5,7 +5,7 @@ sub native_to_uni($) {  # Convert from platform character set to Unicode
     my $string = shift;
 
     return $string if ord("A") == 65
-                      || $] lt 5.007_003; # Doesn't work on early EBCDIC Perls
+                      || "$]" < 5.007_003; # Doesn't work on early EBCDIC Perls
     my $output = "";
     for my $i (0 .. length($string) - 1) {
         $output .= chr(utf8::native_to_unicode(ord(substr($string, $i, 1))));

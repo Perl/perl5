@@ -1,7 +1,7 @@
 # t/xhtml01.t - check basic output from Pod::Simple::XHTML
 use strict;
 use warnings;
-use Test::More tests => 64;
+use Test::More tests => 66;
 
 use_ok('Pod::Simple::XHTML') or exit;
 
@@ -11,7 +11,8 @@ isa_ok ($parser, 'Pod::Simple::XHTML');
 my $results;
 
 my $PERLDOC = "https://metacpan.org/pod";
-my $MANURL = "http://man.he.net/man";
+my $MANURL = "https://man7.org/linux/man-pages/man";
+my $MANURL_POSTFIX = ".html";
 
 initialize($parser, $results);
 $parser->parse_string_document( "=head1 Poit!" );
@@ -457,6 +458,27 @@ is($results, <<'EOHTML', 'multiparagraph nested lists');
 
 EOHTML
 
+
+initialize($parser, $results);
+$parser->parse_string_document(<<'EOPOD');
+=over
+
+Over section without any =item directives.
+
+=back
+
+EOPOD
+
+is($results, <<'EOHTML', 'multiparagraph nested lists');
+<blockquote>
+
+<p>Over section without any =item directives.</p>
+
+</blockquote>
+
+EOHTML
+
+
 initialize($parser, $results);
 $parser->parse_string_document(<<'EOPOD');
 =pod
@@ -622,6 +644,18 @@ is($results, <<"EOHTML", "File name in a paragraph");
 
 EOHTML
 
+initialize($parser, $results);
+$parser->parse_string_document(<<'EOPOD');
+=pod
+
+A plain paragraph with U<underlined text>.
+EOPOD
+is($results, <<"EOHTML", "Underlined text in a paragraph");
+<p>A plain paragraph with <u>underlined text</u>.</p>
+
+EOHTML
+
+
 # It's not important that 's (apostrophes) be encoded for XHTML output.
 initialize($parser, $results);
 $parser->parse_string_document(<<'EOPOD');
@@ -755,11 +789,11 @@ is $parser->resolve_pod_page_link('perlpod', 'this that'),
     'POD link with fragment with space';
 
 is $parser->resolve_man_page_link('crontab(5)', 'EXAMPLE CRON FILE'),
-    "${MANURL}5/crontab", 'Man link with fragment';
+    "${MANURL}5/crontab.5${MANURL_POSTFIX}", 'Man link with fragment';
 is $parser->resolve_man_page_link('crontab(5)'),
-    "${MANURL}5/crontab", 'Man link without fragment';
+    "${MANURL}5/crontab.5${MANURL_POSTFIX}", 'Man link without fragment';
 is $parser->resolve_man_page_link('crontab'),
-    "${MANURL}1/crontab", 'Man link without section';
+    "${MANURL}1/crontab.1${MANURL_POSTFIX}", 'Man link without section';
 
 # Make sure that batch_mode_page_object_init() works.
 ok $parser->batch_mode_page_object_init(0, 0, 0, 0, 6),

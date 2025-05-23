@@ -55,7 +55,7 @@ __DATA__
 
 <p>Test POD ERROR section</p>
 
-<ul>
+<blockquote>
 
 <p>This text is not allowed</p>
 
@@ -67,7 +67,7 @@ __DATA__
 
 <p>The waz item.</p>
 
-</ul>
+</blockquote>
 
 
 </body>

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Pod::Simple::PullParser ();
 our @ISA = ('Pod::Simple::PullParser');
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 BEGIN {
   if(defined &DEBUG) { } # no-op
   elsif( defined &Pod::Simple::DEBUG ) { *DEBUG = \&Pod::Simple::DEBUG }
@@ -35,8 +35,8 @@ $Perldoc_URL_Postfix = ''
  unless defined $Perldoc_URL_Postfix;
 
 
-our $Man_URL_Prefix  = 'http://man.he.net/man';
-our $Man_URL_Postfix = '';
+our $Man_URL_Prefix  = 'https://man7.org/linux/man-pages/man';
+our $Man_URL_Postfix = '.html';
 
 our $Title_Prefix;
 $Title_Prefix  = '' unless defined $Title_Prefix;
@@ -59,7 +59,7 @@ __PACKAGE__->_accessorize(
    # In turning L<crontab(5)> into http://whatever/man/1/crontab, what
    #  to put before the "1/crontab".
  'man_url_postfix',
-   #  what to put after the "1/crontab" in the URL. Normally "".
+   #  what to put after the "1/crontab" in the URL. Normally ".html".
 
  'batch_mode', # whether we're in batch mode
  'batch_mode_current_level',
@@ -125,7 +125,7 @@ our %Tagmap = (
 
   changes(qw(
     Para=p
-    B=b I=i
+    B=b I=i U=u
     over-bullet=ul
     over-number=ol
     over-text=dl
@@ -164,6 +164,7 @@ our %Tagmap = (
 
   'B'      =>  "<b>",                  '/B'     =>  "</b>",
   'I'      =>  "<i>",                  '/I'     =>  "</i>",
+  'U'      =>  "<u>",                  '/U'     =>  "</u>",
   'F'      =>  "<em$Computerese>",     '/F'     =>  "</em>",
   'C'      =>  "<code$Computerese>",   '/C'     =>  "</code>",
   'L'  =>  "<a href='YOU_SHOULD_NEVER_SEE_THIS'>", # ideally never used!
@@ -701,7 +702,7 @@ sub section_name_tidy {
   $section =~ s/^\s+//;
   $section =~ s/\s+$//;
   $section =~ tr/ /_/;
-  if ($] ge 5.006) {
+  if ("$]" >= 5.006) {
     $section =~ s/[[:cntrl:][:^ascii:]]//g; # drop crazy characters
   } elsif ('A' eq chr(65)) { # But not on early EBCDIC
     $section =~ tr/\x00-\x1F\x80-\x9F//d;
@@ -724,7 +725,7 @@ sub general_url_escape {
   # A pretty conservative escaping, behoovey even for query components
   #  of a URL (see RFC 2396)
 
-  if ($] ge 5.007_003) {
+  if ("$]" >= 5.007_003) {
     $string =~ s/([^-_\.!~*()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/sprintf('%%%02X',utf8::native_to_unicode(ord($1)))/eg;
   } else { # Is broken for non-ASCII platforms on early perls
     $string =~ s/([^-_\.!~*()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/sprintf('%%%02X',ord($1))/eg;
@@ -796,7 +797,7 @@ sub resolve_man_page_link {
   $section ||= 1;
 
   return $self->man_url_prefix . "$section/"
-      . $self->manpage_url_escape($page)
+      . $self->manpage_url_escape($page) . ".$section"
       . $self->man_url_postfix;
 }
 
@@ -862,7 +863,7 @@ sub esc { # a function.
       @_ = splice @_; # break aliasing
     } else {
       my $x = shift;
-      if ($] ge 5.007_003) {
+      if ("$]" >= 5.007_003) {
         $x =~ s/([^-\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/'&#'.(utf8::native_to_unicode(ord($1))).';'/eg;
       } else { # Is broken for non-ASCII platforms on early perls
         $x =~ s/([^-\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/'&#'.(ord($1)).';'/eg;
@@ -873,7 +874,7 @@ sub esc { # a function.
   foreach my $x (@_) {
     # Escape things very cautiously:
     if (defined $x) {
-      if ($] ge 5.007_003) {
+      if ("$]" >= 5.007_003) {
         $x =~ s/([^-\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/'&#'.(utf8::native_to_unicode(ord($1))).';'/eg
       } else { # Is broken for non-ASCII platforms on early perls
         $x =~ s/([^-\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/'&#'.(ord($1)).';'/eg
@@ -1134,14 +1135,6 @@ under the same terms as Perl itself.
 This program is distributed in the hope that it will be useful, but
 without any warranty; without even the implied warranty of
 merchantability or fitness for a particular purpose.
-
-=head1 ACKNOWLEDGEMENTS
-
-Thanks to L<Hurricane Electric|http://he.net/> for permission to use its
-L<Linux man pages online|http://man.he.net/> site for man page links.
-
-Thanks to L<search.cpan.org|http://search.cpan.org/> for permission to use the
-site for Perl module links.
 
 =head1 AUTHOR
 

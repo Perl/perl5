@@ -2,34 +2,31 @@
 use strict;
 use warnings;
 
+use Test::More;
 BEGIN {
     use Config;
-    if ($Config::Config{'extensions'} !~ /\bEncode\b/) {
-      print "1..0 # Skip: Encode was not built\n";
-      exit 0;
+    if ($Config{extensions} !~ /\bEncode\b/) {
+      plan skip_all => "Encode was not built";
     }
     if (ord("A") != 65) {
-      print "1..0 # Skip: Encode not fully working on non-ASCII platforms at this time\n";
-      exit 0;
+      plan skip_all => "Encode not fully working on non-ASCII platforms at this time";
     }
 }
 
 #use Pod::Simple::Debug (10);
-use Test::More;
 
 use File::Spec;
-use Cwd ();
 use File::Basename ();
 
 my(@testfiles, %xmlfiles, %wouldxml);
 #use Pod::Simple::Debug (10);
 BEGIN {
-  my $corpusdir = File::Spec->catdir(File::Basename::dirname(Cwd::abs_path(__FILE__)), 'corpus');
-  print "#Corpusdir: $corpusdir\n";
+  my $corpusdir = File::Spec->catdir(File::Basename::dirname(File::Spec->rel2abs(__FILE__)), 'corpus');
+  note "Corpusdir: $corpusdir";
 
-  opendir(INDIR, $corpusdir) or die "Can't opendir corpusdir : $!";
-  my @f = map File::Spec::->catfile($corpusdir, $_), readdir(INDIR);
-  closedir(INDIR);
+  opendir(my $indir, $corpusdir) or die "Can't opendir $corpusdir : $!";
+  my @f = map File::Spec::->catfile($corpusdir, $_), readdir($indir);
+  closedir($indir);
   my %f;
   @f{@f} = ();
   foreach my $maybetest (sort @f) {
@@ -50,18 +47,16 @@ BEGIN {
   plan tests => (2*@testfiles - 1);
 }
 
-my $HACK = 1;
-#@testfiles = ('nonesuch.txt');
+my $HACK = 0;
+# 1: write generated XML dump to *.xml_out files for debugging
+# 2: write generated XML to *.xml files, updating/overwriting test corpus
 
-my $skippy =  ($] < 5.008) ? "skip because perl ($]) pre-dates v5.8.0" : 0;
-if($skippy) {
-  print "# This is just perl v$], so I'm skipping many many tests.\n";
-}
+#@testfiles = ('nonesuch.txt');
 
 {
   my @x = @testfiles;
-  print "# Files to test:\n";
-  while(@x) {  print "#  ", join(' ', splice @x,0,3), "\n" }
+  note "Files to test:";
+  while(@x) { note " ", join(' ', splice @x,0,3); }
 }
 
 require Pod::Simple::DumpAsXML;
@@ -69,10 +64,11 @@ require Pod::Simple::DumpAsXML;
 
 foreach my $f (@testfiles) {
   my $xml = $xmlfiles{$f};
+  note "";
   if($xml) {
-    print "#\n#To test $f against $xml\n";
+    note "To test $f against $xml";
   } else {
-    print "#\n# $f has no xml to test it against\n";
+    note "$f has no xml to test it against";
   }
 
   my $outstring;
@@ -83,17 +79,12 @@ foreach my $f (@testfiles) {
     undef $p;
   };
 
-  if($@) {
-    my $x = "#** Couldn't parse $f:\n $@";
-    $x =~ s/([\n\r]+)/\n#** /g;
-    print $x, "\n";
-    ok 0;
+  is $@, '', "parsed $f without error" or do {
     ok 0;
     next;
-  } else {
-    print "# OK, parsing $f generated ", length($outstring), " bytes\n";
-    ok 1;
-  }
+  };
+
+  note "generated " . length($outstring) . " bytes";
 
   die "Null outstring?" unless $outstring;
 
@@ -101,45 +92,30 @@ foreach my $f (@testfiles) {
 
   my $outfilename = ($HACK > 1) ? $wouldxml{$f} : "$wouldxml{$f}\_out";
   if($HACK) {
-    open OUT, ">$outfilename" or die "Can't write-open $outfilename: $!\n";
-    binmode(OUT);
-    print OUT $outstring;
-    close(OUT);
+    open my $out, ">", $outfilename or die "Can't write-open $outfilename: $!\n";
+    binmode($out);
+    print $out $outstring;
+    close($out);
   }
   unless($xml) {
-    print "#  (no comparison done)\n";
+    note " (no comparison done)";
     ok 1;
     next;
   }
 
-  open(IN, "<$xml") or die "Can't read-open $xml: $!";
+  open(my $in, "<", $xml) or die "Can't read-open $xml: $!";
   #binmode(IN);
   local $/;
-  my $xmlsource = <IN>;
-  close(IN);
+  my $xmlsource = <$in>;
+  close($in);
 
-  print "# There's errata!\n" if $outstring =~ m/start_line="-321"/;
+  note "There's errata!" if $outstring =~ m/start_line="-321"/;
 
-  if(
-    $xmlsource eq $outstring
-    or do {
-      $xmlsource =~ s/[\n\r]+/\n/g;
-      $outstring =~ s/[\n\r]+/\n/g;
-      $xmlsource eq $outstring;
-    }
-  ) {
-    print "#  (Perfect match to $xml)\n";
-    unlink $outfilename unless $outfilename =~ m/\.xml$/is;
-    ok 1;
-    next;
-  }
+  $xmlsource =~ s/[\n\r]+/\n/g;
+  $outstring =~ s/[\n\r]+/\n/g;
+  ok $xmlsource eq $outstring, "perfect match to $xml" or do {
+    diag `diff $xml $outfilename` if $HACK;
+  };
 
-  if($skippy) {
-    skip $skippy, 0;
-  } else {
-    print STDERR "#  $outfilename and $xml don't match!\n";
-    print STDERR `diff $xml $outfilename`;
-    ok 0;
-  }
-
+  unlink $outfilename if $HACK == 1;
 }

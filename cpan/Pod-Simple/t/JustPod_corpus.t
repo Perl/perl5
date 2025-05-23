@@ -13,20 +13,21 @@ BEGIN {
 use File::Find;
 use File::Spec;
 use Test::More;
+use File::Basename;
 
 use Pod::Simple::JustPod;
 
 my @test_files;
 
 BEGIN {
-  my $test_dir = File::Basename::dirname(Cwd::abs_path(__FILE__));
+  my $test_dir = File::Basename::dirname(File::Spec->rel2abs(__FILE__));
 
   print "# TESTDIR: $test_dir\n";
 
   sub wanted {
     push @test_files, $File::Find::name
       if $File::Find::name =~ /\.pod$/
-      && $File::Find::name !~ /temp/; # ignore any files named temp,
+      && basename($File::Find::name) !~ /temp/; # ignore any files named temp,
                                       # a different test file may have
                                       # created it
   }

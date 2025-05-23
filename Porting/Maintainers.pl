@@ -967,8 +967,8 @@ our %Modules = (
     },
 
     'Pod::Simple' => {
-        'DISTRIBUTION' => 'KHW/Pod-Simple-3.45.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Wed Aug  2 19:32:39 2023',
+        'DISTRIBUTION' => 'KHW/Pod-Simple-3.47.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Fri May 23 17:15:52 2025',
         'FILES'        => q[cpan/Pod-Simple],
         'EXCLUDED' => [
             qw{.ChangeLog.swp},

@@ -214,6 +214,7 @@ sub start_E { _start_fcode('E', @_); }
 sub start_F { _start_fcode('F', @_); }
 sub start_I { _start_fcode('I', @_); }
 sub start_S { _start_fcode('S', @_); }
+sub start_U { _start_fcode('U', @_); }
 sub start_X { _start_fcode('X', @_); }
 sub start_Z { _start_fcode('Z', @_); }
 
@@ -242,6 +243,7 @@ sub _end_fcode {
 *end_F   = *_end_fcode;
 *end_I   = *_end_fcode;
 *end_S   = *_end_fcode;
+*end_U   = *_end_fcode;
 *end_X   = *_end_fcode;
 *end_Z   = *_end_fcode;
 

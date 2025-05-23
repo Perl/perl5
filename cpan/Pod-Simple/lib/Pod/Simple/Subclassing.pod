@@ -38,10 +38,10 @@ existing Pod formatter, instead see its documentation and see also the
 docs in L<Pod::Simple>.
 
 B<The zeroeth step> in writing a Pod formatter is to make sure that there
-isn't already a decent one in CPAN. See L<http://search.cpan.org/>, and
+isn't already a decent one in CPAN. See L<https://metacpan.org/>, and
 run a search on the name of the format you want to render to. Also
 consider joining the Pod People list
-L<http://lists.perl.org/showlist.cgi?name=pod-people> and asking whether
+L<https://lists.perl.org/showlist.cgi?name=pod-people> and asking whether
 anyone has a formatter for that format -- maybe someone cobbled one
 together but just hasn't released it.
 
@@ -172,7 +172,7 @@ produces this event structure:
       in the document.
     </Para>
 
-=item events with an element_name of B, C, F, or I.
+=item events with an element_name of B, C, F, I, or U.
 
 Parsing a BE<lt>...E<gt> formatting code (or of course any of its
 semantically identical syntactic variants
@@ -190,7 +190,7 @@ Parsing C, F, or I codes produce the same structure, with only a
 different element name.
 
 If your parser object has been set to accept other formatting codes,
-then they will be presented like these B/C/F/I codes -- i.e., without
+then they will be presented like these B/C/F/I/U codes -- i.e., without
 any attributes.
 
 =item events with an element_name of S
@@ -212,7 +212,7 @@ means non-breaking space.
 =item events with an element_name of X
 
 Normally, parsing an XE<lt>...E<gt> sequence produces this event
-structure, just as if it were a B/C/F/I code:
+structure, just as if it were a B/C/F/I/U code:
 
       <X>
         ...stuff...
@@ -367,7 +367,7 @@ produces this event structure:
   </L>
 
 In cases of links to a section in a different Pod document,
-there are both a I<section> attribute and a L<to> attribute.
+there are both a I<section> attribute and a I<to> attribute.
 For example, this Pod source:
 
   L<perlsyn/"Basic BLOCKs and Switch Statements">
@@ -775,7 +775,7 @@ At time of writing, I don't think you'll need to use this.
 =item C<< $parser->accept_codes( I<Codename>, I<Codename>...  ) >>
 
 This tells the parser that you accept additional formatting codes,
-beyond just the standard ones (I B C L F S X, plus the two weird ones
+beyond just the standard ones (I B C L F S U X, plus the two weird ones
 you don't actually see in the parse tree, Z and E). For example, to also
 accept codes "N", "R", and "W":
 

@@ -1943,6 +1943,8 @@ cpan/Pod-Simple/t/fcodes.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_e.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_l.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_s.t				Pod::Simple test file
+cpan/Pod-Simple/t/filter.t				Pod-Simple
+cpan/Pod-Simple/t/filter-html.t				Pod-Simple
 cpan/Pod-Simple/t/for.t					Pod::Simple test file
 cpan/Pod-Simple/t/fornot.t				Pod::Simple test file
 cpan/Pod-Simple/t/github_issue_79.t			Test file related to Pod::Simple

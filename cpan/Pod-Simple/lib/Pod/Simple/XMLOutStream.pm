@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp ();
 use Pod::Simple ();
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 BEGIN {
   our @ISA = ('Pod::Simple');
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG;
@@ -76,7 +76,7 @@ sub _handle_element_end {
 sub _xml_escape {
   foreach my $x (@_) {
     # Escape things very cautiously:
-    if ($] ge 5.007_003) {
+    if ("$]" >= 5.007_003) {
       $x =~ s/([^-\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/'&#'.(utf8::native_to_unicode(ord($1))).';'/eg;
     } else { # Is broken for non-ASCII platforms on early perls
       $x =~ s/([^-\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/'&#'.(ord($1)).';'/eg;

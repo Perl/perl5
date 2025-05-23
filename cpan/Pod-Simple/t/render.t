@@ -14,7 +14,6 @@ $Pod::Simple::Text::FREAKYMODE = 1;
 use Pod::Simple::TiedOutFH ();
 
 use File::Spec;
-use Cwd ();
 use File::Basename ();
 
 my $outfile = '10000';
@@ -26,7 +25,7 @@ foreach my $file (
   "perlfaq.pod",
   "perlvar.pod",
 ) {
-  my $full_file = File::Spec->catfile(File::Basename::dirname(Cwd::abs_path(__FILE__)), $file);
+  my $full_file = File::Spec->catfile(File::Basename::dirname(File::Spec->rel2abs(__FILE__)), $file);
 
   unless(-e $full_file) {
     ok 0;

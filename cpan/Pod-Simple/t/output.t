@@ -5,10 +5,9 @@ use warnings;
 use Test::More tests => 36;
 
 use File::Spec;
-use Cwd ();
 use File::Basename ();
 
-my $t_dir = File::Basename::dirname(Cwd::abs_path(__FILE__));
+my $t_dir = File::Basename::dirname(File::Spec->rel2abs(__FILE__));
 
 for my $format (qw(XHTML HTML Text RTF)) {
     my $class = "Pod::Simple::$format";

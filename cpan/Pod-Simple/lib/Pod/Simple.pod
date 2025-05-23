@@ -5,7 +5,19 @@ Pod::Simple - framework for parsing Pod
 
 =head1 SYNOPSIS
 
- TODO
+    # using an existing formatter
+    use Pod::Simple::XHTML;
+    my $parser = Pod::Simple::XHTML->new;
+    $parser->parse_file('path/to/file.pod');
+
+    # creating a new formatter
+    package Pod::Simple::SomeFormatter;
+    use parent qw(Pod::Simple);
+    sub _handle_element_start {
+        my ($parser, $element_name, $attr_hash_r) = @_;
+        ...
+    }
+    ...
 
 =head1 DESCRIPTION
 
@@ -256,7 +268,7 @@ effected.
 
 =item C<< $parser->accept_code( @codes ) >>X<accept_code>
 
-Alias for L<< accept_codes >>.
+Alias for L<< accept_codes|/$parser->accept_codes( @codes ) >>.
 
 =item C<< $parser->accept_codes( @codes ) >>X<accept_codes>
 
@@ -285,11 +297,11 @@ can be used to implement user-defined directives.
 
 =item C<< $parser->accept_target( @targets ) >>X<accept_target>
 
-Alias for L<< accept_targets >>.
+Alias for L<< accept_targets|/$parser->accept_targets( @targets ) >>.
 
 =item C<< $parser->accept_target_as_text( @targets ) >>X<accept_target_as_text>
 
-Alias for L<< accept_targets_as_text >>.
+Alias for L<< accept_targets_as_text|/$parser->accept_targets_as_text( @targets ) >>.
 
 =item C<< $parser->accept_targets( @targets ) >>X<accept_targets>
 
@@ -339,7 +351,7 @@ Log an error that can't be ignored.
 
 =item C<< $parser->unaccept_code( @codes ) >>X<unaccept_code>
 
-Alias for L<< unaccept_codes >>.
+Alias for L<< unaccept_codes|/$parser->unaccept_codes( @codes ) >>.
 
 =item C<< $parser->unaccept_codes( @codes ) >>X<unaccept_codes>
 
@@ -347,7 +359,7 @@ Removes C<< @codes >> as valid codes for the parse.
 
 =item C<< $parser->unaccept_directive( @directives ) >>X<unaccept_directive>
 
-Alias for L<< unaccept_directives >>.
+Alias for L<< unaccept_directives|/$parser->unaccept_directives( @directives ) >>.
 
 =item C<< $parser->unaccept_directives( @directives ) >>X<unaccept_directives>
 
@@ -355,7 +367,7 @@ Removes C<< @directives >> as valid directives for the parse.
 
 =item C<< $parser->unaccept_target( @targets ) >>X<unaccept_target>
 
-Alias for L<< unaccept_targets >>.
+Alias for L<< unaccept_targets|/$parser->unaccept_targets( @targets ) >>.
 
 =item C<< $parser->unaccept_targets( @targets ) >>X<unaccept_targets>
 

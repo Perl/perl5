@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp ();
 use Pod::Simple ();
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 BEGIN {
   our @ISA = ('Pod::Simple');
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG;
