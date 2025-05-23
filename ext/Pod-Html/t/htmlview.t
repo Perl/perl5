@@ -107,7 +107,7 @@ my $module = My::Module-&gt;new();</code></pre>
 
 <p>The bar item.</p>
 
-<ul>
+<blockquote>
 
 <p>This is a list within a list</p>
 
@@ -119,7 +119,7 @@ my $module = My::Module-&gt;new();</code></pre>
 
 <p>The waz item.</p>
 
-</ul>
+</blockquote>
 
 </dd>
 <dt id="baz">baz</dt>

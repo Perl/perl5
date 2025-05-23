@@ -1,6 +1,6 @@
 package Pod::Simple::HTMLBatch;
 use strict;
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 our @ISA = ();  # Yup, we're NOT a subclass of Pod::Simple::HTML!
 
 # TODO: nocontents stylesheets. Strike some of the color variations?
@@ -1112,7 +1112,7 @@ Example:
 =item $batchconv = Pod::Simple::HTMLBatch->new;
 
 This creates a new batch converter.  The method doesn't take parameters.
-To change the converter's attributes, use the L<"/ACCESSOR METHODS">
+To change the converter's attributes, use the L</"ACCESSOR METHODS">
 below.
 
 =item $batchconv->batch_convert( I<indirs>, I<outdir> );

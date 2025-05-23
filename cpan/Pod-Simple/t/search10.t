@@ -15,10 +15,9 @@ die "Couldn't make an object!?" unless ok defined $x;
 $x->inc(0);
 
 use File::Spec;
-use Cwd ();
 use File::Basename ();
 
-my $t_dir = File::Basename::dirname(Cwd::abs_path(__FILE__));
+my $t_dir = File::Basename::dirname(File::Spec->rel2abs(__FILE__));
 
 my $here = File::Spec->catdir($t_dir, 'testlib1');
 

@@ -215,7 +215,8 @@ is(
 # Test HTML output of links.
 use Pod::Simple::HTML;
 my $PERLDOC = "https://metacpan.org/pod";
-my $MANURL = "http://man.he.net/man";
+my $MANURL = "https://man7.org/linux/man-pages/man";
+my $MANURL_POSTFIX = ".html";
 sub x {
     Pod::Simple::HTML->_out(
         sub {  $_[0]->bare_output(1)  },
@@ -240,7 +241,7 @@ is(
 
 is(
     x(qq{L<crontab(5)>\n}),
-    qq{\n<p><a href="${MANURL}5/crontab" class="podlinkman"\n>crontab(5)</a></p>\n}
+    qq{\n<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}" class="podlinkman"\n>crontab(5)</a></p>\n}
 );
 
 is(
@@ -300,12 +301,12 @@ is(
 
 is(
     x(qq{L<things|crontab(5)>\n}),
-    qq{\n<p><a href="${MANURL}5/crontab" class="podlinkman"\n>things</a></p>\n}
+    qq{\n<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}" class="podlinkman"\n>things</a></p>\n}
 );
 
 is(
     x(qq{L<things|crontab(5)/ENVIRONMENT>\n}),
-    qq{\n<p><a href="${MANURL}5/crontab" class="podlinkman"\n>things</a></p>\n}
+    qq{\n<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}" class="podlinkman"\n>things</a></p>\n}
 );
 
 is(
@@ -362,7 +363,7 @@ is(
 
 is(
     o(qq{L<crontab(5)>}),
-    qq{<p><a href="${MANURL}5/crontab">crontab(5)</a></p>\n\n}
+    qq{<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}">crontab(5)</a></p>\n\n}
 );
 
 is(
@@ -422,12 +423,12 @@ is(
 
 is(
     o(qq{L<things|crontab(5)>}),
-    qq{<p><a href="${MANURL}5/crontab">things</a></p>\n\n}
+    qq{<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}">things</a></p>\n\n}
 );
 
 is(
     o(qq{L<things|crontab(5)/ENVIRONMENT>}),
-    qq{<p><a href="${MANURL}5/crontab">things</a></p>\n\n}
+    qq{<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}">things</a></p>\n\n}
 );
 
 is(

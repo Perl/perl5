@@ -11,10 +11,9 @@ else {
 }
 
 use File::Spec;
-use Cwd ();
 use File::Basename ();
 
-my $t_dir = File::Basename::dirname(Cwd::abs_path(__FILE__));
+my $t_dir = File::Basename::dirname(File::Spec->rel2abs(__FILE__));
 
 my $expected = join "", <DATA>;
 
@@ -85,6 +84,7 @@ __DATA__
 {\*\cs17 \additive \i\lang1024\noproof \sbasedon10 pod-F;}
 {\*\cs18 \additive \b \sbasedon10 pod-B;}
 {\*\cs19 \additive \f1\lang1024\noproof\sbasedon10 pod-C;}
+{\*\cs30 \additive \ul \sbasedon10 pod-U;}
 {\s20\ql \li0\ri0\sa180\widctlpar\f1\fs18\lang1024\noproof\sbasedon0 \snext0 pod-codeblock;}
 {\*\cs21 \additive \lang1024\noproof \sbasedon10 pod-computerese;}
 {\*\cs22 \additive \i\lang1024\noproof\sbasedon10 pod-L-pod;}

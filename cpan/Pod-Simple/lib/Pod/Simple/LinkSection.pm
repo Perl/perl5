@@ -4,7 +4,7 @@ package Pod::Simple::LinkSection;
 use strict;
 use warnings;
 use Pod::Simple::BlackBox;
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 
 use overload( # So it'll stringify nice
   '""'   => \&Pod::Simple::BlackBox::stringify_lol,

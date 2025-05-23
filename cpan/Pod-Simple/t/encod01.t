@@ -13,11 +13,10 @@ use Pod::Simple::DumpAsXML;
 my $thefile;
 
 use File::Spec;
-use Cwd ();
 use File::Basename ();
 
 BEGIN {
-  my $corpusdir = File::Spec->catdir(File::Basename::dirname(Cwd::abs_path(__FILE__)), 'corpus');
+  my $corpusdir = File::Spec->catdir(File::Basename::dirname(File::Spec->rel2abs(__FILE__)), 'corpus');
   $thefile = File::Spec->catfile($corpusdir, 'nonesuch.txt');
 }
 

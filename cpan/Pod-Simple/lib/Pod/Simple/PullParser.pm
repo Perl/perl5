@@ -1,6 +1,6 @@
 package Pod::Simple::PullParser;
 use strict;
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 use Pod::Simple ();
 BEGIN {our @ISA = ('Pod::Simple')}
 

@@ -18,7 +18,7 @@ use Pod::Simple::XMLOutStream;
 my $x97;
 my $x91;
 my $dash;
-if ($] ge 5.007_003) {
+if ("$]" >= 5.007_003) {
     $x97 = chr utf8::unicode_to_native(0x97);
     $x91 = chr utf8::unicode_to_native(0x91);
     $dash = '&#8212';

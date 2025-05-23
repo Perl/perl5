@@ -11,9 +11,9 @@ use Pod::Simple::TiedOutFH;
 #use utf8;
 
 our @ISA = ('Pod::Simple::BlackBox');
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 
-our @Known_formatting_codes = qw(I B C L E F S X Z);
+our @Known_formatting_codes = qw(I B C L E F S U X Z);
 our %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
 our @Known_directives       = qw(head1 head2 head3 head4 head5 head6 item over back);
 our %Known_directives       = map(($_=>'Plain'), @Known_directives);
@@ -33,8 +33,8 @@ BEGIN {
     die "MANY_LINES is too small (", MANY_LINES(), ")!\nAborting";
   }
   if(defined &UNICODE) { }
-  elsif($] >= 5.008)   { *UNICODE = sub() {1}  }
-  else                 { *UNICODE = sub() {''} }
+  elsif( do { no integer; "$]" >= 5.008 } ) { *UNICODE = sub() {1}  }
+  else                                      { *UNICODE = sub() {''} }
 }
 if(DEBUG > 2) {
   print STDERR "# We are ", ASCII ? '' : 'not ', "in ASCII-land\n";
@@ -42,8 +42,8 @@ if(DEBUG > 2) {
 }
 
 # The NO BREAK SPACE and SOFT HYHPEN are used in several submodules.
-if ($] ge 5.007_003) {  # On sufficiently modern Perls we can handle any
-                        # character set
+if ( do { no integer; "$]" >= 5.007_003 } ) {  # On sufficiently modern Perls we can handle any
+                          # character set
   $Pod::Simple::nbsp = chr utf8::unicode_to_native(0xA0);
   $Pod::Simple::shy  = chr utf8::unicode_to_native(0xAD);
 }
@@ -754,7 +754,7 @@ sub _remap_sequences {
         ref($map->{$_}) ? join(",", @{$map->{$_}}) : $map->{$_}
       ),
       sort keys %$map ),
-    ("B~C~E~F~I~L~S~X~Z" eq join '~', sort keys %$map)
+    ("B~C~E~F~I~L~S~U~X~Z" eq join '~', sort keys %$map)
      ? "  (all normal)\n" : "\n"
   ;
 

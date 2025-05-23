@@ -6,7 +6,7 @@ use warnings;
 #sub Pod::Simple::DEBUG () {4};
 #sub Pod::Simple::PullParser::DEBUG () {4};
 
-our $VERSION = '3.45';
+our $VERSION = '3.47';
 use Pod::Simple::PullParser ();
 our @ISA;
 BEGIN {@ISA = ('Pod::Simple::PullParser')}
@@ -18,7 +18,7 @@ sub to_uni ($) {    # Convert native code point to Unicode
     my $x = shift;
 
     # Broken for early EBCDICs
-    $x = chr utf8::native_to_unicode(ord $x) if $] ge 5.007_003
+    $x = chr utf8::native_to_unicode(ord $x) if "$]" >= 5.007_003
                                              && ord("A") != 65;
     return $x;
 }
@@ -86,6 +86,7 @@ our %Tagmap = (
  _openclose(
   'B=cs18\b',
   'I=cs16\i',
+  'U=cs30\ul',
   'C=cs19\f1\lang1024\noproof',
   'F=cs17\i\lang1024\noproof',
 
@@ -413,6 +414,7 @@ sub stylesheet {
 {\*\cs17 \additive \i\lang1024\noproof \sbasedon10 pod-F;}
 {\*\cs18 \additive \b \sbasedon10 pod-B;}
 {\*\cs19 \additive \f1\lang1024\noproof\sbasedon10 pod-C;}
+{\*\cs30 \additive \ul \sbasedon10 pod-U;}
 {\s20\ql \li0\ri0\sa180\widctlpar\f1\fs%s\lang1024\noproof\sbasedon0 \snext0 pod-codeblock;}
 {\*\cs21 \additive \lang1024\noproof \sbasedon10 pod-computerese;}
 {\*\cs22 \additive \i\lang1024\noproof\sbasedon10 pod-L-pod;}
@@ -549,7 +551,7 @@ my $other_unicode =
         Pod::Simple::BlackBox::my_qr('([\x{10000}-\x{10FFFF}])', "\x{10000}");
 
 sub esc_uni($) {
-    use if $] le 5.006002, 'utf8';
+    use if do { no integer; "$]" <= 5.006002 }, 'utf8';
 
     my $x = shift;
 

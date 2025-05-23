@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 #use Pod::Simple::Debug (10);
 use Pod::Simple::HTML;
@@ -20,6 +20,7 @@ my @pairs = (
 [ 'C<code>'         => qq{\n<p><code>code</code></p>\n} ],
 [ 'F</tmp/foo>'     => qq{\n<p><em>/tmp/foo</em></p>\n} ],
 [ 'F</tmp/foo>'     => qq{\n<p><em>/tmp/foo</em></p>\n} ],
+[ 'U<underlined>'   => qq{\n<p><u>underlined</u></p>\n} ],
 );
 
 

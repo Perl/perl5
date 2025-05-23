@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More skip_all => 'slow';
 
 #sub Pod::Simple::Search::DEBUG () {5};
 
