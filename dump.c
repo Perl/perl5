@@ -1478,6 +1478,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
     case OP_AELEMFAST:
     case OP_GVSV:
     case OP_GV:
+    case OP_RCATLINE:
     {
         GV *gv;
 #ifdef USE_ITHREADS
@@ -1519,6 +1520,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
     case OP_CONST:
     case OP_HINTSEVAL:
     case OP_COREARGS:
+    case OP_ANONCODE:
         /* an SVOP. On non-threaded builds, these OPs use op_sv to hold
          * the SV associated with the const / hints hash / op num.
          * On threaded builds, op_sv initially holds the SV, then at the
