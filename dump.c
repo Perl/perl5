@@ -3519,15 +3519,40 @@ Perl_debop(pTHX_ const OP *o)
         break;
     case OP_GVSV:
     case OP_GV:
+    case OP_AELEMFAST:
+    case OP_RCATLINE:
         PerlIO_printf(Perl_debug_log, "(%" SVf ")",
                 SVfARG(S_gv_display(aTHX_ cGVOPo_gv)));
+        if (o->op_type == OP_AELEMFAST)
+          do_fast_ix:
+            PerlIO_printf(Perl_debug_log, "[%" IVdf "]",
+                (IV)(I8)o->op_private);
+        break;
+
+    case OP_METHOD_NAMED:       /* $obj->foo              */
+    case OP_METHOD_SUPER:       /* $obj->SUPER::foo       */
+    case OP_METHOD_REDIR:       /* $obj->BAR::foo         */
+    case OP_METHOD_REDIR_SUPER: /* $obj->BAR::SUPER::foo  */
+        PerlIO_printf(Perl_debug_log, "(%s)",
+                SvPEEK(cMETHOPo_meth));
+        if (   o->op_type == OP_METHOD_REDIR
+            || o->op_type == OP_METHOD_REDIR_SUPER)
+        {
+            PerlIO_printf(Perl_debug_log, "(%s)",
+                SvPEEK(cMETHOPo_rclass));
+        }
         break;
 
     case OP_PADSV:
     case OP_PADAV:
     case OP_PADHV:
     case OP_ARGELEM:
+    case OP_PADSV_STORE:
+    case OP_AELEMFAST_LEX:
+      do_lex:
         S_deb_padvar(aTHX_ o->op_targ, 1, 1);
+        if (o->op_type == OP_AELEMFAST_LEX)
+            goto do_fast_ix;
         break;
 
     case OP_PADRANGE:
@@ -3546,6 +3571,10 @@ Perl_debop(pTHX_ const OP *o)
         break;
 
     default:
+        if (   (PL_opargs[o->op_type] & OA_TARGLEX)
+            && (o->op_private & OPpTARGET_MY))
+          goto do_lex;
+
         break;
     }
     PerlIO_printf(Perl_debug_log, "\n");
