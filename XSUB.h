@@ -603,10 +603,12 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #    define signal		PerlProc_signal
 #    define getpid		PerlProc_getpid
 #    define gettimeofday	PerlProc_gettimeofday
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
 #    define htonl		PerlSock_htonl
 #    define htons		PerlSock_htons
 #    define ntohl		PerlSock_ntohl
 #    define ntohs		PerlSock_ntohs
+#endif
 #    define accept		PerlSock_accept
 #    define bind		PerlSock_bind
 #    define connect		PerlSock_connect

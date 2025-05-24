@@ -4571,23 +4571,61 @@ struct ptr_tbl {
     struct ptr_tbl_ent		*tbl_arena_end;
 };
 
-#if defined(htonl) && !defined(HAS_HTONL)
-#define HAS_HTONL
+/* Override the C compiler's built in byte order swapping functions and
+   implement our own BE/LE conversion functions. All modern CCs on all CPU archs
+   should be using an inline intrinsic, that maps to 1 CPU instructions, max 3.
+   Worst possible correct and incompetent implementation a C compiler can do:
+
+   libperl calls symbol htonl() through PLT/GOT to libc, libc then declares
+   stack 2 x unsigned char buf[4]; plus 2 calls through PLT/GOT to symbol
+   memcpy(); plus for( i=0; i<4; i++) {} loop.
+
+   Before defining PERL_MY_HOST_NET_BYTE_SWAP, remember to read the -O1 or -O2
+   optimized assembly code created by a production grade C compiler, to see
+   if there actually is a defect/flaw or not with the permutation of CC/CPU/OS
+   you are using. Don't accidentally turn 1 CPU op into 6 CPU ops, and document
+   that change as an "optimization".
+
+   The only known flawed CC is MSVC all versions and build numbers of
+   cl.exe/link.exe released to the pubic before Fall 2023. It has a 1 of 5
+   stars, if C token "htonl()" is used (perl uses Win32's PLT/GOT).
+   2 of 5 stars if "& << |" expression is used. Build numbers of MSVC released
+   during or after Fall 2023, produce correct and perfect machine code identical
+   to what GCC/Clang would emit. */
+
+#ifdef PERL_MY_HOST_NET_BYTE_SWAP
+#  undef htonl
+#  undef HAS_HTONL
+#  undef htons
+#  undef HAS_HTONS
+#  undef ntohl
+#  undef HAS_NTOHL
+#  undef ntohl
+#  undef HAS_NTOHL
+#  undef ntohs
+#  undef HAS_NTOHS
+#  undef htonll
+#  undef HAS_HTONLL
+#else
+#  if defined(htonl) && !defined(HAS_HTONL)
+#    define HAS_HTONL
+#  endif
+#  if defined(htons) && !defined(HAS_HTONS)
+#    define HAS_HTONS
+#  endif
+#  if defined(ntohl) && !defined(HAS_NTOHL)
+#    define HAS_NTOHL
+#  endif
+#  if defined(ntohs) && !defined(HAS_NTOHS)
+#    define HAS_NTOHS
+#  endif
 #endif
-#if defined(htons) && !defined(HAS_HTONS)
-#define HAS_HTONS
-#endif
-#if defined(ntohl) && !defined(HAS_NTOHL)
-#define HAS_NTOHL
-#endif
-#if defined(ntohs) && !defined(HAS_NTOHS)
-#define HAS_NTOHS
-#endif
+
 #ifndef HAS_HTONL
-#define HAS_HTONS
-#define HAS_HTONL
-#define HAS_NTOHS
-#define HAS_NTOHL
+#  define HAS_HTONS
+#  define HAS_HTONL
+#  define HAS_NTOHS
+#  define HAS_NTOHL
 #  if (BYTEORDER & 0xffff) == 0x4321
 /* Big endian system, so ntohl, ntohs, htonl and htons do not need to
    re-order their values. However, to behave identically to the alternative
@@ -4604,21 +4642,65 @@ struct ptr_tbl {
    that *declare* the various functions are still seen. If we declare our own
    htonl etc they will clash with the declarations in the Win32 headers.  */
 
+#    ifdef _MSC_VER
+#      pragma intrinsic(_byteswap_ulong)
+#      pragma intrinsic(_byteswap_ushort)
+#    endif
+
+#    if !defined(_MSC_VER) || (defined(_MSC_VER) && defined(DEBUGGING))
 PERL_STATIC_INLINE U32
 my_swap32(const U32 x) {
+#      ifdef _MSC_VER
+    return _byteswap_ulong(x);
+#      else
     return ((x & 0xFF) << 24) | ((x >> 24) & 0xFF)
         | ((x & 0x0000FF00) << 8) | ((x & 0x00FF0000) >> 8);
+#      endif
 }
 
 PERL_STATIC_INLINE U16
 my_swap16(const U16 x) {
-    return ((x & 0xFF) << 8) | ((x >> 8) & 0xFF);
-}
 
-#    define htonl(x)    my_swap32(x)
-#    define ntohl(x)    my_swap32(x)
-#    define ntohs(x)    my_swap16(x)
-#    define htons(x)    my_swap16(x)
+#      ifdef _MSC_VER
+    return _byteswap_ushort(x);
+#      else
+    return ((x & 0xFF) << 8) | ((x >> 8) & 0xFF);
+#      endif
+}
+#    endif
+
+/* all CCs except MSVC use the static inlines above, unoptimized MSVC Perl
+   built with -DDEBUGGING, also uses the statics above, to make single stepping
+   and breakpoints easier to use. MSVC's C/C++ front end parser does not
+   recogize the traditional "& << |" expression as a synonym for i386/x64/ARM's
+   byteswap CPU instruction. This MSVC bug was fixed in MSVC 2022 build number
+   19.37/17.7 released Aug 8 2023. All MSVC 2022 build numbers <= 19.36/17.6
+   have the bug. Explicitly tell MSVC to use the byte swap opcode solves the
+   problem. VC's _byteswap_ulong() is declared as an intrinsic function.
+   It will not cause multi-eval problems the way a macro would. So skip the
+   my_swap() wrappers.
+
+   TODO: add special casing for __bswap_32(), __builtin_bswap32(),
+   bswap_32(), cpu_to_be32(), swap32(), read_be32(), write_be32(), htobe32(),
+   OSSwapInt32(), and on April 1st, impliment RtlUlongByteSwap(). Remember to
+   the history and HW compatibility of each of these CC tokens before adding
+   them. If hello_world.c executes and the Desktop GUI works, the defaults
+   in Configure can't produce a binary that SIGILLs on 1 of 2 systems,
+   made 2 years apart, running the same OS version, after a copy paste or
+   cloud server deployment of a /usr/bin/perl file.
+*/
+
+#    if !defined(_MSC_VER) || (defined(_MSC_VER) && defined(DEBUGGING))
+#      define htonl(x)    my_swap32(x)
+#      define ntohl(x)    my_swap32(x)
+#      define ntohs(x)    my_swap16(x)
+#      define htons(x)    my_swap16(x)
+#    else
+#      define htonl(x)    _byteswap_ulong(x)
+#      define ntohl(x)    _byteswap_ulong(x)
+#      define ntohs(x)    _byteswap_ushort(x)
+#      define htons(x)    _byteswap_ushort(x)
+#    endif
 #  else
 #    error "Unsupported byteorder"
 /* The C pre-processor doesn't let us return the value of BYTEORDER as part of
@@ -4632,6 +4714,51 @@ my_swap16(const U16 x) {
    If you have a system with a different byte order, please see
    pod/perlhack.pod for how to submit a patch to add supporting code.
 */
+#  endif
+#endif
+
+#if defined(htonll) && !defined(HAS_HTONLL)
+#  define HAS_HTONLL
+#endif
+
+#ifndef HAS_HTONLL
+#  define HAS_HTONLL
+#  if (BYTEORDER & 0xffff) == 0x4321
+#    define ntohll(x)    ((x)&0xFFFFFFFFFFFFFFFF)
+#    define htonll(x)    ntohll(x)
+#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#    ifdef _MSC_VER
+#      pragma intrinsic(_byteswap_uint64)
+#    endif
+
+#    if !defined(_MSC_VER) || (defined(_MSC_VER) && defined(DEBUGGING))
+PERL_STATIC_INLINE U64
+my_swap64(const U64 x) {
+#      ifdef _MSC_VER
+    return _byteswap_uint64(x);
+#      else
+/*  return ( ((x & 0xff00000000000000) >> 56) | ((x & 0x00ff000000000000) >> 40)
+           | ((x & 0x0000ff0000000000) >> 24) | ((x & 0x000000ff00000000) >> 8)
+           | ((x & 0x00000000ff000000) << 8)  | ((x & 0x0000000000ff0000) << 24)
+           | ((x & 0x000000000000ff00) << 40) | ((x & 0x00000000000000ff) << 56));
+    return ((U64)htonl(x & 0xFFFFFFFF) << 32) | htonl(x >> 32); */
+    U64 r;
+    r = (x & 0x00000000FFFFFFFF) << 32 | (x & 0xFFFFFFFF00000000) >> 32;
+    r = (r & 0x0000FFFF0000FFFF) << 16 | (r & 0xFFFF0000FFFF0000) >> 16;
+    r = (r & 0x00FF00FF00FF00FF) << 8  | (r & 0xFF00FF00FF00FF00) >> 8;
+    return r;
+#      endif
+}
+#    endif
+#    if !defined(_MSC_VER) || (defined(_MSC_VER) && defined(DEBUGGING))
+#      define htonll(x)    my_swap64(x)
+#      define ntohll(x)    my_swap64(x)
+#    else
+#      define htonll(x)    _byteswap_uint64(x)
+#      define ntohll(x)    _byteswap_uint64(x)
+#    endif
+#  else
+#    error "Unsupported byteorder"
 #  endif
 #endif
 

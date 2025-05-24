@@ -6468,7 +6468,13 @@ p	|bool	|get_win32_message_utf8ness				\
 				|NULLOK const char *string
 Teor	|void	|win32_croak_not_implemented				\
 				|NN const char *fname
-#else
+# if !defined(PERL_MY_HOST_NET_BYTE_SWAP)
+DTbo	|u_long |win32_htonl	|u_long hostlong
+DTbo	|u_short|win32_htons	|u_short hostshort
+DTbo	|u_long |win32_ntohl	|u_long netlong
+DTbo	|u_short|win32_ntohs	|u_short netshort
+# endif
+#else /* if !defined(WIN32) */
 p	|bool	|do_exec3	|NN const char *incmd			\
 				|int fd 				\
 				|int do_report

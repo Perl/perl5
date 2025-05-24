@@ -1144,10 +1144,12 @@ struct IPerlProcInfo
 /* PerlSock             */
 struct IPerlSock;
 struct IPerlSockInfo;
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
 typedef u_long          (*LPHtonl)(const struct IPerlSock**, u_long);
 typedef u_short         (*LPHtons)(const struct IPerlSock**, u_short);
 typedef u_long          (*LPNtohl)(const struct IPerlSock**, u_long);
 typedef u_short         (*LPNtohs)(const struct IPerlSock**, u_short);
+#endif
 typedef SOCKET          (*LPAccept)(const struct IPerlSock**, SOCKET,
                             struct sockaddr*, int*);
 typedef int             (*LPBind)(const struct IPerlSock**, SOCKET,
@@ -1208,10 +1210,12 @@ typedef int             (*LPClosesocket)(const struct  IPerlSock**, SOCKET s);
 
 struct IPerlSock
 {
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
     LPHtonl             pHtonl;
     LPHtons             pHtons;
     LPNtohl             pNtohl;
     LPNtohs             pNtohs;
+#endif
     LPAccept            pAccept;
     LPBind              pBind;
     LPConnect           pConnect;
@@ -1262,6 +1266,19 @@ struct IPerlSockInfo
     struct IPerlSock    perlSockList;
 };
 
+#ifdef PERL_MY_HOST_NET_BYTE_SWAP
+   /* perl.h has provides a much more efficient inlined implementation of
+      htonl(), htons(), ntohl(), ntohs() compared to the "native" exported
+      extern linkage functions exported by ws2_32.dll. Both Mingw GCCs
+      and MSVCs headers, only offer exports from ws2_32.dll for those 4
+      tokens, without any alternative. Writing "r = htonl(n);" a C Windows
+      app is an improper anti-pattern. The official, correct, identifier is
+      RtlUlongByteSwap() on the Windows Platform. */
+#  define PerlSock_htonl(x)             htonl(x)
+#  define PerlSock_htons(x)             htons(x)
+#  define PerlSock_ntohl(x)             ntohl(x)
+#  define PerlSock_ntohs(x)             ntohs(x)
+#else
 #  define PerlSock_htonl(x)                                             \
         ((*(PL_Sock))->pHtonl)(PL_Sock, x)
 #  define PerlSock_htons(x)                                             \
@@ -1270,6 +1287,8 @@ struct IPerlSockInfo
         ((*(PL_Sock))->pNtohl)(PL_Sock, x)
 #  define PerlSock_ntohs(x)                                             \
         ((*(PL_Sock))->pNtohs)(PL_Sock, x)
+#endif
+
 #  define PerlSock_accept(s, a, l)                                      \
         ((*(PL_Sock))->pAccept)(PL_Sock, s, a, l)
 #  define PerlSock_bind(s, n, l)                                        \

@@ -883,6 +883,57 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
     return utf8_to_uvchr_buf(s, s + UTF8_CHK_SKIP(s), retlen);
 }
 
+/* These 4 exported functions are unused/deprecated/mathoms. WinPerl hooks
+   and replaces the htonl(), ntohl(), etc symbols provided by Mingw GCC and
+   MSVC headers, which are exported extern "C" functions from ws2_32.dll,
+   with 1 CPU instruction big, inline intrinsics. ws2_32.dll's implementation
+   is 11-15 instructions long. Clang and GCC for WinOS correctly convert
+   expression "& << |" to 1 CPU instruction, MSVC build numbers released prior
+   to Fall 2023 don't do that 1 CPU opcode optimization.
+   Because of frozen public API src code compatibility and object code linker
+   reasons, neither (Mingw or MS SDK) Clang, Mingw GCC or MSVC compilers can
+   correct the day 1 1993 mistake that tokens htonl(), ntohl(), etc, are
+   external linkage symbols from ws2_32.dll,
+
+   cpangrep shows exactly 1 module uses WinPerl's win32_*() prefixed sockets API
+   byte order swappers.
+
+   cpangrep: win32_htonl|win32_htons|win32_ntohl|win32_ntohs
+   https://metacpan.org/release/Prima/source/win32/files.c#L750
+
+   For now, these symbols are still exported, incase they are linked by a
+   XS .dll, that has a TU/.o/.c that doesn't #include "perl.h" and
+   declared function win32_htonl() themselves or they are using GetProcAddress(). */
+
+#undef win32_htonl
+#undef win32_htons
+#undef win32_ntohl
+#undef win32_ntohs
+
+u_long
+win32_htonl(u_long hostlong)
+{
+    return htonl(hostlong);
+}
+
+u_short
+win32_htons(u_short hostshort)
+{
+    return htons(hostshort);
+}
+
+u_long
+win32_ntohl(u_long netlong)
+{
+    return ntohl(netlong);
+}
+
+u_short
+win32_ntohs(u_short netshort)
+{
+    return ntohs(netshort);
+}
+
 GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */

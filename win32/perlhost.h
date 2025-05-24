@@ -1291,6 +1291,9 @@ const struct IPerlDir perlDir =
 
 
 /* IPerlSock */
+
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
+
 u_long
 PerlSockHtonl(const struct IPerlSock** piPerl, u_long hostlong)
 {
@@ -1318,6 +1321,8 @@ PerlSockNtohs(const struct IPerlSock** piPerl, u_short netshort)
     PERL_UNUSED_ARG(piPerl);
     return win32_ntohs(netshort);
 }
+
+#endif
 
 SOCKET PerlSockAccept(const struct IPerlSock** piPerl, SOCKET s, struct sockaddr* addr, int* addrlen)
 {
@@ -1607,10 +1612,12 @@ PerlSockIoctlsocket(const struct IPerlSock** piPerl, SOCKET s, long cmd, u_long 
 
 const struct IPerlSock perlSock =
 {
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
     PerlSockHtonl,
     PerlSockHtons,
     PerlSockNtohl,
     PerlSockNtohs,
+#endif
     PerlSockAccept,
     PerlSockBind,
     PerlSockConnect,

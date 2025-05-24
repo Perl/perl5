@@ -25,6 +25,17 @@
 #  define PERL_TEXTMODE_SCRIPTS
 #endif
 
+/* Don't use ws2_32.dll's extern "C" implementation of these 4 tokens.
+   perl.h's implementation of these is just a 1 CPU instruction big intrinsic.
+   ws2_32.dll's implementation is 13 CPU instructions long. Perl_pp_pack() and
+   Perl_pp_unpack() have no good rational, to transfer control flow to a TCPIP
+   driver. */
+#undef HAS_NTOHL
+#undef HAS_HTONL
+#undef HAS_HTONS
+#undef HAS_NTOHS
+#define PERL_MY_HOST_NET_BYTE_SWAP
+
 #if defined(PERL_IMPLICIT_SYS)
 #  define DYNAMIC_ENV_FETCH
 #  define HAS_GETENV_LEN

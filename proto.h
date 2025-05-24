@@ -11044,6 +11044,31 @@ win32_croak_not_implemented(const char *fname)
 # define PERL_ARGS_ASSERT_WIN32_CROAK_NOT_IMPLEMENTED \
         assert(fname)
 
+# if !defined(PERL_MY_HOST_NET_BYTE_SWAP)
+
+#   if !defined(NO_MATHOMS)
+PERL_CALLCONV u_long
+win32_htonl(u_long hostlong)
+        __attribute__deprecated__;
+#     define PERL_ARGS_ASSERT_WIN32_HTONL
+
+PERL_CALLCONV u_short
+win32_htons(u_short hostshort)
+        __attribute__deprecated__;
+#     define PERL_ARGS_ASSERT_WIN32_HTONS
+
+PERL_CALLCONV u_long
+win32_ntohl(u_long netlong)
+        __attribute__deprecated__;
+#     define PERL_ARGS_ASSERT_WIN32_NTOHL
+
+PERL_CALLCONV u_short
+win32_ntohs(u_short netshort)
+        __attribute__deprecated__;
+#     define PERL_ARGS_ASSERT_WIN32_NTOHS
+
+#   endif /* !defined(NO_MATHOMS) */
+# endif /* !defined(PERL_MY_HOST_NET_BYTE_SWAP) */
 #else /* if !defined(WIN32) */
 PERL_CALLCONV bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
