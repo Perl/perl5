@@ -16373,6 +16373,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
     */
+
+    SV *param_sv = newSVuv(PTR2UV(param));
+
     while(av_count(param->stashes) != 0) {
         HV* const stash = MUTABLE_HV(av_shift(param->stashes));
         GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
@@ -16380,16 +16383,21 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
             ENTER;
             SAVETMPS;
             PUSHMARK(PL_stack_sp);
-            rpp_extend(1);
+            rpp_extend(2);
             SV *newsv = newSVhek(HvNAME_HEK(stash));
             *++PL_stack_sp = newsv;
-            if (!rpp_stack_is_rc())
+            *++PL_stack_sp = param_sv;
+            if (rpp_stack_is_rc())
+                SvREFCNT_inc(param_sv);
+            else
                 sv_2mortal(newsv);
             call_sv(MUTABLE_SV(GvCV(cloner)), G_DISCARD);
             FREETMPS;
             LEAVE;
         }
     }
+
+    SvREFCNT_dec(param_sv);
 
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
