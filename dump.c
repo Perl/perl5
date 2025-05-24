@@ -873,6 +873,12 @@ Perl_dump_sub(pTHX_ const GV *gv)
     dump_sub_perl(gv, FALSE);
 }
 
+
+/* forward decl */
+static void
+S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o);
+
+
 void
 Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
 {
@@ -901,7 +907,7 @@ Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
             PTR2UV(CvXSUB(cv)),
             (int)CvXSUBANY(cv).any_i32);
     else if (CvROOT(cv))
-        op_dump(CvROOT(cv));
+        S_do_op_dump_bar(aTHX_ 0, 0, Perl_debug_log, CvROOT(cv));
     else
         Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
 }
@@ -964,11 +970,6 @@ S_gv_display(pTHX_ GV *gv)
     return name;
 }
 
-
-
-/* forward decl */
-static void
-S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o);
 
 
 static void
