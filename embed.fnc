@@ -1053,7 +1053,7 @@ Rp	|I32	|do_ncmp	|NN SV * const left			\
 Cp	|void	|do_op_dump	|I32 level				\
 				|NN PerlIO *file			\
 				|NULLOK const OP *o
-Amp	|bool	|do_open	|NN GV *gv				\
+Cmp	|bool	|do_open	|NN GV *gv				\
 				|NN const char *name			\
 				|I32 len				\
 				|int as_raw				\
@@ -1066,7 +1066,7 @@ px	|bool	|do_open6	|NN GV *gv				\
 				|NULLOK PerlIO *supplied_fp		\
 				|NULLOK SV **svp			\
 				|U32 num
-Ap	|bool	|do_openn	|NN GV *gv				\
+Cp	|bool	|do_openn	|NN GV *gv				\
 				|NN const char *oname			\
 				|I32 len				\
 				|int as_raw				\
