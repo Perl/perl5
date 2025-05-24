@@ -1607,10 +1607,11 @@ dumpindent is 4 at -e line 1.
                  |   
 7                +--gv SVOP(0xNNN) ===> 5 [entersub 0xNNN]
                      FLAGS = (SCALAR,SLABBED)
-                     GV_OR_PADIX
+                     OPT_PADIX
+                     GV = t::DumpProg (0xNNN)
 EODUMP
 
-    $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg (0xNNN)"/e;
+    $e =~ s/^(\s+)OPT_PADIX\n/$threads ? "${1}PADIX = 2\n" : ""/me;
     $e =~ s/SVOP/PADOP/g if $threads;
     my $out = t::runperl
                  switches => ['-Ilib'],

@@ -876,7 +876,8 @@ Perl_dump_sub(pTHX_ const GV *gv)
 
 /* forward decl */
 static void
-S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o);
+S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
+                    CV* rootcv);
 
 
 void
@@ -907,7 +908,7 @@ Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
             PTR2UV(CvXSUB(cv)),
             (int)CvXSUBANY(cv).any_i32);
     else if (CvROOT(cv))
-        S_do_op_dump_bar(aTHX_ 0, 0, Perl_debug_log, CvROOT(cv));
+        S_do_op_dump_bar(aTHX_ 0, 0, Perl_debug_log, CvROOT(cv), cv);
     else
         Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
 }
@@ -973,7 +974,8 @@ S_gv_display(pTHX_ GV *gv)
 
 
 static void
-S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
+S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm,
+                   CV* rootcv)
 {
     UV kidbar;
 
@@ -1013,7 +1015,7 @@ S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
             S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_REPL =\n");
             S_do_op_dump_bar(aTHX_ level + 2,
                 (kidbar|cBOOL(OpHAS_SIBLING(pm->op_pmreplrootu.op_pmreplroot))),
-                file, pm->op_pmreplrootu.op_pmreplroot);
+                file, pm->op_pmreplrootu.op_pmreplroot, rootcv);
         }
     }
 
@@ -1022,7 +1024,7 @@ S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
             S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "CODE_LIST =\n");
             S_do_op_dump_bar(aTHX_ level + 2,
                             (kidbar | cBOOL(OpHAS_SIBLING(pm->op_code_list))),
-                            file, pm->op_code_list);
+                            file, pm->op_code_list, rootcv);
         }
         else
             S_opdump_indent(aTHX_ (OP*)pm, level, bar, file,
@@ -1035,7 +1037,7 @@ void
 Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 {
     PERL_ARGS_ASSERT_DO_PMOP_DUMP;
-    S_do_pmop_dump_bar(aTHX_ level, 0, file, pm);
+    S_do_pmop_dump_bar(aTHX_ level, 0, file, pm, NULL);
 }
 
 
@@ -1107,13 +1109,16 @@ S_pm_description(pTHX_ const PMOP *pm)
  *
  * Return NULL if it can't be found.
  *
+ * Sometimes the caller *does* know what CV is being dumped; if so, it
+ * is passed as rootcv.
+ *
  * Since this may be called during debugging and things may not be in a
  * sane state, be conservative, and if in doubt, return NULL.
  */
 
 #ifdef USE_ITHREADS
 static SV *
-S_get_sv_from_pad(pTHX_ const OP *o, PADOFFSET po)
+S_get_sv_from_pad(pTHX_ const OP *o, PADOFFSET po, CV *rootcv)
 {
     PADLIST *padlist; /* declare early to work round compiler quirks */
 
@@ -1121,6 +1126,11 @@ S_get_sv_from_pad(pTHX_ const OP *o, PADOFFSET po)
         return NULL;
 
     CV *cv = NULL;
+
+    if (rootcv) {
+        cv = rootcv;
+        goto got_cv;
+    }
 
     /* Find the root of the optree this op is embedded in. For a compiled
      * sub, this root will typically be a leavesub or similar attached to
@@ -1296,10 +1306,14 @@ const char * const op_class_names[] = {
  * For heavily nested output, the level may exceed the number of bits
  * in bar; in this case the first few columns in the output will simply
  * not have a bar, which is harmless.
+ *
+ * rootcv is the CV (if any) whose CvROOT() is the root of the optree
+ * currently being dumped.
  */
 
 static void
-S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
+S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
+                 CV* rootcv)
 {
     const OPCODE optype = o->op_type;
 
@@ -1469,7 +1483,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 #ifdef USE_ITHREADS
         S_opdump_indent(aTHX_ o, level, bar, file,
                         "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
-        gv = (GV*)S_get_sv_from_pad(aTHX_ o, cPADOPx(o)->op_padix);
+        gv = (GV*)S_get_sv_from_pad(aTHX_ o, cPADOPx(o)->op_padix, rootcv);
 #else
         gv = (GV*)cSVOPx(o)->op_sv;
 #endif
@@ -1518,7 +1532,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
                 S_opdump_indent(aTHX_ o, level, bar, file,
                             "OP_SV = 0x0\n");
 #ifdef USE_ITHREADS
-                sv = S_get_sv_from_pad(aTHX_ o, o->op_targ);
+                sv = S_get_sv_from_pad(aTHX_ o, o->op_targ, rootcv);
 #endif
             }
 
@@ -1545,7 +1559,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
                 S_opdump_indent(aTHX_ o, level, bar, file,
                             "OP_METH_SV = 0x0\n");
 #ifdef USE_ITHREADS
-                sv = S_get_sv_from_pad(aTHX_ o, o->op_targ);
+                sv = S_get_sv_from_pad(aTHX_ o, o->op_targ, rootcv);
 #endif
             }
 
@@ -1561,7 +1575,8 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 #ifdef USE_ITHREADS
                 S_opdump_indent(aTHX_ o, level, bar, file,
                     "RCLASS_TARG = %" IVdf "\n", (IV)cMETHOPo->op_rclass_targ);
-                sv = S_get_sv_from_pad(aTHX_ o, cMETHOPo->op_rclass_targ);
+                sv = S_get_sv_from_pad(aTHX_ o, cMETHOPo->op_rclass_targ,
+                                        rootcv);
 #else
                 sv = cMETHOPo->op_rclass_sv;
 #endif
@@ -1651,7 +1666,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_MATCH:
     case OP_QR:
     case OP_SUBST:
-        S_do_pmop_dump_bar(aTHX_ level, bar, file, cPMOPo);
+        S_do_pmop_dump_bar(aTHX_ level, bar, file, cPMOPo, rootcv);
         break;
     case OP_LEAVE:
     case OP_LEAVEEVAL:
@@ -1788,7 +1803,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
             S_do_op_dump_bar(aTHX_ level,
                             (bar | cBOOL(OpHAS_SIBLING(kid))),
-                            file, kid);
+                            file, kid, rootcv);
     }
 }
 
@@ -1796,7 +1811,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
-    S_do_op_dump_bar(aTHX_ level, 0, file, o);
+    S_do_op_dump_bar(aTHX_ level, 0, file, o, NULL);
 }
 
 
