@@ -76,7 +76,7 @@ names in the current package.  Some even have medium names, generally
 borrowed from B<awk>.  For more info, please see L<English>.
 
 Before you continue, note the sort order for variables.  In general, we
-first list the variables in case-insensitive, almost-lexigraphical
+first list the variables in case-insensitive, almost-lexicographical
 order (ignoring the C<{> or C<^> preceding words, as in C<${^UNICODE}>
 or C<$^T>), although C<$_> and C<@_> move up to the top of the pile.
 For variables with the same identifier, we list it in order of scalar,
@@ -1016,7 +1016,7 @@ Consider the following code:
 Notice that each successful match in the exact same scope overrides the
 match context of the previous successful match, but that unsuccessful
 matches do not. Also note that in an inner nested scope the previous
-state from an outer dynamic scope persists until it has been overriden
+state from an outer dynamic scope persists until it has been overridden
 by another successful match, but that when the inner nested scope exits
 whatever match context was in effect before the inner successful match
 is restored when the scope concludes.
