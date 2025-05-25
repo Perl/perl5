@@ -195,7 +195,7 @@ sequences by using the L<charnames> module.  These custom names are
 lexically scoped, and so a given code point may have different names
 in different scopes.  The name used is what is in effect at the time the
 C<\N{}> is expanded.  For patterns in double-quotish context, that means
-at the time the pattern is parsed.  But for patterns that are delimitted
+at the time the pattern is parsed.  But for patterns that are delimited
 by single quotes, the expansion is deferred until pattern compilation
 time, which may very well have a different C<charnames> translator in
 effect.
