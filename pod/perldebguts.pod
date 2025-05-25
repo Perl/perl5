@@ -784,7 +784,7 @@ will be lost.
                              rules.
  REFFL            num 2      Match already matched string, using /li
                              rules.
- REFFU            num 2      Match already matched string, usng /ui.
+ REFFU            num 2      Match already matched string, using /ui.
  REFFA            num 2      Match already matched string, using /aai
                              rules.
 
