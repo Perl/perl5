@@ -56,8 +56,6 @@ use warnings;
 use re '/aa';
 
 my $main_dir = $0;
-my $source_dir = $ARGV[0];
-die "Need base directory as argument" unless -e $source_dir;
 
 # Up one level
 $main_dir =~ s;[^/]*$;;;
