@@ -836,10 +836,12 @@ package ExtUtils::ParseXS::Node::xsub_decl;
 BEGIN { $build_subclass->(
     'return_type',    # ReturnType object representing e.g "NO_OUTPUT char *"
     'params',         # Params object representing e.g "a, int b, c=0"
-    'class',          # Str: the 'const Foo::Bar' part of the xsub's name
+    'class',          # Str: the 'Foo::Bar' part of an XSUB's name;
+                      #   - if defined, this is a C++ method
     'name',           # Str: the 'foo' XSUB name
     'full_perl_name', # Str: the 'Foo::Bar::foo' perl XSUB name
     'full_C_name',    # Str: the 'Foo__Bar__foo' C XSUB name
+    'is_const',       # Bool: declaration had postfix C++ 'const' modifier
 )};
 
 
@@ -879,14 +881,9 @@ sub parse {
 
     my ($class, $name, $params_text, $const) = ($1, $2, $3, $4);
 
-    if (defined $const) {
-        if (defined $class) {
-            $class = "$const $class";
-        }
-        else {
-            $pxs->blurt("const modifier only allowed on XSUBs which are C++ methods");
-            undef $const;
-        }
+    if (defined $const and !defined $class) {
+        $pxs->blurt("const modifier only allowed on XSUBs which are C++ methods");
+        undef $const;
     }
 
     if ($return_type->{static} and !defined $class)
@@ -906,6 +903,7 @@ sub parse {
         if $ExtUtils::ParseXS::Is_VMS;
 
     $self->{class}          = $class;
+    $self->{is_const}       = defined $const;
     $self->{name}           = $name;
     $self->{full_perl_name} = $full_pname;
     $self->{full_C_name}    = $full_cname;
@@ -919,7 +917,8 @@ sub parse {
     # we should have:
     #
     # $self->{return_type}    an object holding "int"
-    # $self->{class}          "const Some::Class"
+    # $self->{class}          "Some::Class"
+    # $self->{is_const}       TRUE
     # $self->{name}           "foo_bar"
     # $self->{full_perl_name} "BAR::BAZ::bar"
     # $self->{full_C_name}    "BAR__BAZ_bar"
@@ -2439,7 +2438,8 @@ sub parse {
              or $xsub->{decl}{name} eq 'new'
             )
                 ? ('CLASS', "char *")
-                : ('THIS',  "$xsub->{decl}{class} *");
+                : ('THIS',    ($xsub->{decl}{is_const} ? "const " : "")
+                            . "$xsub->{decl}{class} *");
 
         my ExtUtils::ParseXS::Node::Param $param
                 = ExtUtils::ParseXS::Node::Param->new( {

@@ -1212,6 +1212,48 @@ EOF
                 "got expected err" ],
         ],
 
+        # autocall variants with const
+
+        [
+            "C++: static const",
+            [ Q(<<'EOF') ],
+                |static int
+                |X::Y::foo() const
+EOF
+            [ 0, 0, qr/\QRETVAL = X::Y::foo()/,
+                "autocall doesn't have const" ],
+        ],
+
+        [
+            "C++: static new const",
+            [ Q(<<'EOF') ],
+                |static int
+                |X::Y::new() const
+EOF
+            [ 0, 0, qr/\QRETVAL = X::Y()/,
+                "autocall doesn't have const" ],
+        ],
+
+        [
+            "C++: const",
+            [ Q(<<'EOF') ],
+                |int
+                |X::Y::foo() const
+EOF
+            [ 0, 0, qr/\QRETVAL = THIS->foo()/,
+                "autocall doesn't have const" ],
+        ],
+
+        [
+            "C++: new const",
+            [ Q(<<'EOF') ],
+                |int
+                |X::Y::new() const
+EOF
+            [ 0, 0, qr/\QRETVAL = new X::Y()/,
+                "autocall doesn't have const" ],
+        ],
+
         [
             "",
             [
