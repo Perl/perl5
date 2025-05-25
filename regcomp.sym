@@ -239,7 +239,7 @@ REFFL       REF,        num 2 V   ; Match already matched string, using /li rule
 # N?REFF[AU] could have been implemented using the FLAGS field of the
 # regnode, but by having a separate node type, we can use the existing switch
 # statement to avoid some tests
-REFFU       REF,        num 2 V   ; Match already matched string, usng /ui.
+REFFU       REF,        num 2 V   ; Match already matched string, using /ui.
 REFFA       REF,        num 2 V   ; Match already matched string, using /aai rules.
 
 #*Named references.  Code in regcomp.c assumes that these all are after
