@@ -877,8 +877,17 @@ sub parse {
         unless $func_header =~
             /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
-    my ($class, $name, $params_text) = ($1, $2, $3);
-    $class = "$4 $class" if $4;
+    my ($class, $name, $params_text, $const) = ($1, $2, $3, $4);
+
+    if (defined $const) {
+        if (defined $class) {
+            $class = "$const $class";
+        }
+        else {
+            $pxs->blurt("const modifier only allowed on XSUBs which are C++ methods");
+            undef $const;
+        }
+    }
 
     if ($return_type->{static} and !defined $class)
     {
