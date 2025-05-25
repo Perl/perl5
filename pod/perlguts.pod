@@ -4883,7 +4883,7 @@ in summary:
  rpp_xpush_1(sv)         XPUSHs(sv)
  rpp_xpush_2(sv1, sv2))  EXTEND(SP,2); PUSHs(sv1); PUSHs(sv2);
 
- rpp_push_1_norc(sv)     mPUSHs(sv)     // on RC bulds, skips RC++;
+ rpp_push_1_norc(sv)     mPUSHs(sv)     // on RC builds, skips RC++;
                                         // on non-RC builds, mortalises
  rpp_popfree_1()         (void)POPs;
  rpp_popfree_2()         (void)POPs; (void)POPs;
