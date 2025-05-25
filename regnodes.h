@@ -912,7 +912,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFL_t8_p8                       303  /*      0x12f */
 
 #define REFFU                        76        /* 0x4c Match already matched
-                                                  string, usng /ui. */
+                                                  string, using /ui. */
 #define REFFU_tb                       152     /*      0x098 */
 #define REFFU_t8                       153     /*      0x099 */
 #define REFFU_tb_pb                       304  /*      0x130 */
