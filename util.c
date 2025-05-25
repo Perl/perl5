@@ -5440,6 +5440,7 @@ Perl_my_clearenv(pTHX)
 #ifdef MULTIPLICITY
 
 /*
+=for apidoc_section $XS
 =for apidoc my_cxt_init
 
 Implements the L<perlxs/C<MY_CXT_INIT>> macro, which you should use instead.
