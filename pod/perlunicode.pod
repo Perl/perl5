@@ -1135,7 +1135,7 @@ in any (single) script
  # digits.  When specifying a subset of these, we must include \d to
  # prevent things like U+00B2 SUPERSCRIPT TWO from matching
  my $zero_through_255 =
-  qr/ \b (*sr:                                  # All from same sript
+  qr/ \b (*sr:                                  # All from same script
             (?[ \p{nv=0} & \d ])*               # Optional leading zeros
         (                                       # Then one of:
                                   \d{1,2}       #   0 - 99
@@ -1541,7 +1541,7 @@ UTF-8.
 
 UTF-16, UTF-16BE, UTF-16LE, Surrogates, and C<BOM>'s (Byte Order Marks)
 
-The followings items are mostly for reference and general Unicode
+The following items are mostly for reference and general Unicode
 knowledge, Perl doesn't use these constructs internally.
 
 Like UTF-8, UTF-16 is a variable-width encoding, but where
