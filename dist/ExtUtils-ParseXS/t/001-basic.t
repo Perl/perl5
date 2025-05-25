@@ -4279,18 +4279,32 @@ EOF
 
     my @test_fns = (
         [
-            "VERSIONCHECK long word",
+            "VERSIONCHECK: long word",
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: ENABLEblah
 EOF
             [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
         ],
         [
-            "VERSIONCHECK trailing text (stupid but legal)",
+            "VERSIONCHECK: trailing text",
             [ Q(<<'EOF') ],
-                |VERSIONCHECK: diSAble blah # bloo +$%
+                |VERSIONCHECK: DISABLE blah # bloo +$%
 EOF
-            [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
+            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "VERSIONCHECK: lower case",
+            [ Q(<<'EOF') ],
+                |VERSIONCHECK: disable
+EOF
+            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "VERSIONCHECK: semicolon",
+            [ Q(<<'EOF') ],
+                |VERSIONCHECK: DISABLE;
+EOF
+            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
         ],
 
         [
@@ -4316,17 +4330,33 @@ EOF
             [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
         ],
         [
-            "EXPORT_XSUB_SYMBOLS: trailing text (stupid but legal)",
+            "EXPORT_XSUB_SYMBOLS: trailing text",
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: diSAble blah # bloo +$%
 EOF
-            [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
+            [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "EXPORT_XSUB_SYMBOLS: lower case",
+            [ Q(<<'EOF') ],
+                |EXPORT_XSUB_SYMBOLS: disable
+EOF
+            [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
         ],
 
         [
-            "file SCOPE long word",
+            "file SCOPE: long word",
             [ Q(<<'EOF') ],
                 |SCOPE: ENABLEblah
+                |void
+                |foo()
+EOF
+            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "file SCOPE: lower case",
+            [ Q(<<'EOF') ],
+                |SCOPE: enable
                 |void
                 |foo()
 EOF
@@ -4358,30 +4388,46 @@ EOF
 
     my @test_fns = (
         [
-            "file SCOPE trailing text (stupid but legal)",
+            "file SCOPE: trailing text",
             [ Q(<<'EOF') ],
                 |SCOPE: EnAble blah # bloo +$%
                 |void
                 |foo()
 EOF
-            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo();\E\s+}\s+LEAVE;},
-                    "has ENTER/LEAVE" ],
+            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
         ],
         [
-            "xsub SCOPE trailing text (stupid but legal)",
+            "xsub SCOPE: trailing text",
             [ Q(<<'EOF') ],
                 |void
                 |foo()
                 |SCOPE: EnAble blah # bloo +$%
 EOF
-            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo();\E\s+}\s+LEAVE;},
-                    "has ENTER/LEAVE" ],
+            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "xsub SCOPE: lower case",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |SCOPE: enable
+EOF
+            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "xsub SCOPE: semicolon",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |SCOPE: ENABLE;
+EOF
+            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
         ],
 
         [
             "SCOPE: as file-scoped keyword",
             [ Q(<<'EOF') ],
-                |SCOPE: EnablE
+                |SCOPE: ENABLE
                 |void
                 |foo()
                 |C_ARGS: a,b,c
@@ -4395,7 +4441,7 @@ EOF
                 |void
                 |foo()
                 |C_ARGS: a,b,c
-                |SCOPE: EnablE
+                |SCOPE: ENABLE
 EOF
             [ 0, 0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
                     "has ENTER/LEAVE" ],

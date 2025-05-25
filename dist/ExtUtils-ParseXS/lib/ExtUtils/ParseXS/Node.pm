@@ -3422,14 +3422,25 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, self->{text}
     my $s = $self->{text};
 
-    #XXX note that for backwards compatibility, matching DIS/ENABLE is
-    #very lax: it is case insensitive, and ignores any trailing garbage
-    # on the line
-    unless ($s =~ /^(ENABLE|DISABLE)\b/i) {
-        my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
-        $pxs->death("Error: $keyword: ENABLE/DISABLE")
+    my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
+
+    if ($keyword eq 'PROTOTYPES') {
+        # XXX note that for backwards compatibility, parsing the PROTOTYPES
+        # keyword's value is very lax: it is case insensitive, and ignores
+        # any trailing garbage on the line
+        unless ($s =~ /^(ENABLE|DISABLE)\b/i) {
+            my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
+            $pxs->death("Error: $keyword: ENABLE/DISABLE")
+        }
+        $self->{enable} = uc($1) eq 'ENABLE' ? 1 : 0;
     }
-    $self->{enable} = uc($1) eq 'ENABLE' ? 1 : 0;
+    else {
+        # SCOPE / VERSIONCHECK / EXPORT_XSUB_SYMBOLS
+        $s =~ /^(ENABLE|DISABLE)\s*$/
+            or $pxs->death("Error: $keyword: ENABLE/DISABLE");
+        $self->{enable} = $1 eq 'ENABLE' ? 1 : 0;
+    }
+
     1;
 }
 
