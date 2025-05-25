@@ -7363,7 +7363,7 @@ required code itself had thrown an exception.
 
 The C<${^HOOK}{require__before}> hook may return a code reference, in
 which case the code reference will be executed (in an eval with the
-filname as a parameter) after the require completes. It will be executed
+filename as a parameter) after the require completes. It will be executed
 regardless of how the compilation completed, and even if the require
 throws a fatal exception.  The function may consult C<%INC> to determine
 if the require failed or not.  For instance the following code will print
