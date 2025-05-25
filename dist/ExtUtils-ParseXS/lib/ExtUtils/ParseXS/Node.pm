@@ -3851,7 +3851,7 @@ sub parse {
     # If no prototype specified, then assume empty prototype ""
     $proto = 2 unless defined $proto;
 
-    $self->{prototype}          = $proto;
+    $self->{prototype} = $proto;
     $xsub->{prototype} = $proto;
 
     $pxs->{proto_behaviour_specified} = 1;
