@@ -240,6 +240,8 @@ B<BUT BEWARE>, if this is used in a situation where something that is using it
 is in a call stack with something else that is using it, this variable would
 get zapped, leading to hard-to-diagnose errors.
 
+These days using an inline function is generally preferred instead.
+
 =cut
 */
 PERLVAR(I, Sv,		SV *)
