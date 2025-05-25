@@ -385,7 +385,7 @@ Perl also has conflicts with that.
 
 Perl reserves for its use any symbol beginning with C<Perl>, C<perl>,
 or C<PL_>.  Any time you introduce a macro into a header file that
-doesn't follow that convention, you are creating the possiblity of a
+doesn't follow that convention, you are creating the possibility of a
 namespace clash with an existing XS module, unless you restrict it by,
 say,
 
