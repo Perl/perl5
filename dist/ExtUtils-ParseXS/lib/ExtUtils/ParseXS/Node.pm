@@ -3425,14 +3425,21 @@ sub parse {
     my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
 
     if ($keyword eq 'PROTOTYPES') {
-        # XXX note that for backwards compatibility, parsing the PROTOTYPES
-        # keyword's value is very lax: it is case insensitive, and ignores
-        # any trailing garbage on the line
-        unless ($s =~ /^(ENABLE|DISABLE)\b/i) {
-            my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
+        # For backwards compatibility, parsing the PROTOTYPES
+        # keyword's value is very lax: in particular, anything that
+        # didn't match 'ENABLE' (such as 'Enabled' or 'ENABLED') used to
+        # be treated as valid but false. Continue to use this
+        # interpretation for backcomp, but warn.
+
+        unless ($s =~ /^ ((ENABLE|DISABLE) D? ;?) \s* $ /xi) {
             $pxs->death("Error: $keyword: ENABLE/DISABLE")
         }
-        $self->{enable} = uc($1) eq 'ENABLE' ? 1 : 0;
+        my ($value, $en_dis) = ($1, $2);
+        $self->{enable} = $en_dis eq 'ENABLE' ? 1 : 0;
+        unless ($value =~ /^(ENABLE|DISABLE)$/) {
+            $pxs->Warn("Warning: invalid PROTOTYPES value '$value' interpreted as "
+                . ($self->{enable} ? 'ENABLE' : 'DISABLE'));
+        }
     }
     else {
         # SCOPE / VERSIONCHECK / EXPORT_XSUB_SYMBOLS

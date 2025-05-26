@@ -4308,21 +4308,6 @@ EOF
         ],
 
         [
-            "PROTOTYPES: long word",
-            [ Q(<<'EOF') ],
-                |PROTOTYPES: ENABLEblah
-EOF
-            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
-        ],
-        [
-            "PROTOTYPES: trailing text (stupid but legal)",
-            [ Q(<<'EOF') ],
-                |PROTOTYPES: diSAble blah # bloo +$%
-EOF
-            [ 0, 0, qr{dXSARGS}, "boot fn generated" ],
-        ],
-
-        [
             "EXPORT_XSUB_SYMBOLS: long word",
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: ENABLEblah
@@ -4370,7 +4355,125 @@ EOF
 
 
 {
-    # Test per-XSUB ENABLE/DISABLE keywords
+    # Test PROTOTYPES keyword. Note that there is a lot of
+    # backwards-compatibility oddness in the keyword's value
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "PROTOTYPES: ENABLE",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: ENABLE
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 0, 0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
+        ],
+        [
+            "PROTOTYPES: ENABLED",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: ENABLED
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 0, 0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
+            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'ENABLED' interpreted as ENABLE},
+                    "got warning" ],
+        ],
+        [
+            "PROTOTYPES: ENABLE;",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: ENABLE;
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 0, 0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
+            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'ENABLE;' interpreted as ENABLE},
+                    "got warning" ],
+        ],
+
+        [
+            "PROTOTYPES: DISABLE",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: DISABLE
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 0, 1, qr{"\$\$"}, "doesn't have proto" ],
+        ],
+        [
+            "PROTOTYPES: DISABLED",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: DISABLED
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 0, 1, qr{"\$\$"}, "doesn't have proto" ],
+            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'DISABLED' interpreted as DISABLE},
+                    "got warning" ],
+        ],
+        [
+            "PROTOTYPES: DISABLE;",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: DISABLE;
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 0, 1, qr{"\$\$"}, "doesn't have proto" ],
+            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'DISABLE;' interpreted as DISABLE},
+                    "got warning" ],
+        ],
+
+        [
+            "PROTOTYPES: long word",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: ENABLEblah
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "PROTOTYPES: trailing text",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: ENABLE blah
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+        ],
+        [
+            "PROTOTYPES: trailing text and comment)",
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: DISABLE blah # bloo +$%
+                |
+                |void
+                |foo(int a, int b)
+EOF
+            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+        ],
+
+
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
+{
+    # Test per-XSUB ENABLE/DISABLE keywords except PROTOTYPES
 
     my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
