@@ -77,11 +77,11 @@ my $known_flags_re =
                 qr/[aA bC dD eE fF Gh iI mM nN oO pP rR sS T uU vW xX y;#?]/xx;
 
 # Flags that don't apply to this program, like implementation details.
-my $irrelevant_flags_re = qr/[ab eE G iI P rR vX?]/xx;
+my $irrelevant_flags_re = qr/[a eE G iI P rR vX?]/xx;
 
 # Only certain flags dealing with what gets displayed, are acceptable for
 # apidoc_item
-my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
+my $item_flags_re = qr/[ b dD fF mM nN oO pT uU Wx; ]/xx;
 
 use constant {
               NOT_APIDOC         => -1,
@@ -1625,6 +1625,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     print $fh "\n=item C<${$_}->{name}>\n" for @items;
 
     my @where_froms;
+    my @bin_compat;
     my @deprecated;
     my @experimental;
     my @xrefs;
@@ -1642,8 +1643,15 @@ sub docout ($fh, $section_name, $element_name, $docref) {
             # entry, so no X<> here.
             push @xrefs, $name unless $item->{flags} =~ /h/;
 
-            push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
-            push @experimental, "C<$name>" if $item->{flags} =~ /x/;
+            if ($item->{flags} =~ /D/) {
+                push @deprecated,   "C<$name>";
+            }
+            elsif ($item->{flags} =~ /b/) {
+                push @bin_compat,   "C<$name>";
+            }
+            elsif ($item->{flags} =~ /x/) {
+                push @experimental, "C<$name>";
+            }
         }
 
         # While we're going though the items, construct a nice list of where
@@ -1695,7 +1703,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     print $fh format_pod_indexes(\@xrefs);
     print $fh "\n" if @xrefs;
 
-    for my $which (\@deprecated, \@experimental) {
+    for my $which (\@deprecated, \@experimental, \@bin_compat) {
         next unless $which->@*;
 
         my $is;
@@ -1729,6 +1737,13 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 C<B<DEPRECATED!>>  It is planned to remove $list
                 from a future release of Perl.  Do not use $it for
                 new code; remove $it from existing code.
+                EOT
+        }
+        elsif ($which == \@bin_compat) {
+            print $fh <<~"EOT";
+
+                C<B<DO NOT USE FOR NEW CODE!>>  $list $is retained only so
+                that existing applications that use $it don't have to change.
                 EOT
         }
         else {
@@ -2696,7 +2711,7 @@ my %intern = ( podname => $intern, docs => $docs{$intern} );
 # documentation is missing
 
 for my $which (\%api, \%intern) {
-    my (@deprecated, @experimental, @missings);
+    my (@deprecated, @experimental, @missings, @bin_compat);
     for my $name (sort dictionary_order keys %elements) {
         my $element = $elements{$name};
 
@@ -2724,6 +2739,9 @@ for my $which (\%api, \%intern) {
                 elsif ($element->{flags} =~ /x/) {
                     push @experimental, $name;
                 }
+                elsif ($element->{flags} =~ /b/) {
+                    push @bin_compat, $name;
+                }
                 else {
                     push @missings, $name;
                 }
@@ -2734,6 +2752,7 @@ for my $which (\%api, \%intern) {
     $which->{missings}->@* = (
                                missings_hdr     => \@missings,
                                experimental_hdr => \@experimental,
+                               bin_compat_hdr   => \@bin_compat,
                                deprecated_hdr   => \@deprecated,
                              );
 }
@@ -2897,6 +2916,12 @@ $api{missings_hdr} = <<'_EOT_';
 |usable by you.
 _EOT_
 
+$api{bin_compat_hdr} = <<"_EOT_";
+|
+|Next are the API-flagged elements that are retained only so that code that
+|already uses them doesn't have to change.  DO NOT ADD ANY NEW USES FOR THESE.
+_EOT_
+
 $api{experimental_hdr} = <<"_EOT_";
 |
 |Next are the API-flagged elements that are considered experimental.  Using one
@@ -2949,9 +2974,15 @@ $intern{missings_hdr} = <<"_EOT_";
 |This section lists the elements that are otherwise undocumented.  If you use
 |any of them, please consider creating and submitting documentation for it.
 |
-|Experimental and deprecated undocumented elements are listed separately at the
-|end.
+|Elements that are problematic to use (such as being experimental) are listed
+|separately at the end.
 |
+_EOT_
+
+$intern{bin_compat_hdr} = <<"_EOT_";
+|
+|Next are the elements that are retained only so that code that already uses
+|them doesn't have to change.  DO NOT ADD ANY NEW USES FOR THESE.
 _EOT_
 
 $intern{experimental_hdr} = <<"_EOT_";
