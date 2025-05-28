@@ -309,8 +309,11 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
     if (flags & SAVEf_KEEPOLDELEM)
         sv = osv;
     else {
-        sv  = (*sptr = newSV_type(SVt_NULL));
-        if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv))
+        U8 old_type = SvTYPE(osv);
+        bool is_mg = old_type >= SVt_PVMG && SvMAGIC(osv);
+        sv  = (*sptr = newSV_type(is_mg && /* GV*s can't circulate with all nulls */
+            (old_type == SVt_PVMG || old_type == SVt_PVLV) ? old_type : SVt_NULL));
+        if (is_mg)
             mg_localize(osv, sv, cBOOL(flags & SAVEf_SETMAGIC));
     }
 
