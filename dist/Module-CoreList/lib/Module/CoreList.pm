@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20250422';
+our $VERSION = '5.20250528';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -440,7 +440,7 @@ sub changes_between {
     5.040002 => '2025-04-13',
     5.041011 => '2025-04-20',
     5.041012 => '2025-04-21',
-    5.041013 => '2025-04-22',
+    5.041013 => '2025-05-28',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -23355,12 +23355,69 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.041013 => {
         delta_from => 5.041012,
         changed => {
+            'B::Deparse'            => '1.85',
             'B::Op_private'         => '5.041013',
             'Config'                => '5.041013',
-            'Module::CoreList'      => '5.20250422',
-            'Module::CoreList::Utils'=> '5.20250422',
+            'ExtUtils::CBuilder'    => '0.280241',
+            'ExtUtils::CBuilder::Base'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::Unix'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::VMS'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::Windows'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::Windows::BCC'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::Windows::GCC'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::Windows::MSVC'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::aix'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::android'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::cygwin'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::darwin'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::dec_osf'=> '0.280241',
+            'ExtUtils::CBuilder::Platform::os2'=> '0.280241',
+            'ExtUtils::Command'     => '7.76',
+            'ExtUtils::Command::MM' => '7.76',
+            'ExtUtils::Liblist'     => '7.76',
+            'ExtUtils::Liblist::Kid'=> '7.76',
+            'ExtUtils::MM'          => '7.76',
+            'ExtUtils::MM_AIX'      => '7.76',
+            'ExtUtils::MM_Any'      => '7.76',
+            'ExtUtils::MM_BeOS'     => '7.76',
+            'ExtUtils::MM_Cygwin'   => '7.76',
+            'ExtUtils::MM_DOS'      => '7.76',
+            'ExtUtils::MM_Darwin'   => '7.76',
+            'ExtUtils::MM_MacOS'    => '7.76',
+            'ExtUtils::MM_NW5'      => '7.76',
+            'ExtUtils::MM_OS2'      => '7.76',
+            'ExtUtils::MM_OS390'    => '7.76',
+            'ExtUtils::MM_QNX'      => '7.76',
+            'ExtUtils::MM_UWIN'     => '7.76',
+            'ExtUtils::MM_Unix'     => '7.76',
+            'ExtUtils::MM_VMS'      => '7.76',
+            'ExtUtils::MM_VOS'      => '7.76',
+            'ExtUtils::MM_Win32'    => '7.76',
+            'ExtUtils::MM_Win95'    => '7.76',
+            'ExtUtils::MY'          => '7.76',
+            'ExtUtils::MakeMaker'   => '7.76',
+            'ExtUtils::MakeMaker::Config'=> '7.76',
+            'ExtUtils::MakeMaker::Locale'=> '7.76',
+            'ExtUtils::MakeMaker::version'=> '7.76',
+            'ExtUtils::MakeMaker::version::regex'=> '7.76',
+            'ExtUtils::Mkbootstrap' => '7.76',
+            'ExtUtils::Mksymlists'  => '7.76',
+            'ExtUtils::testlib'     => '7.76',
+            'Module::CoreList'      => '5.20250528',
+            'Module::CoreList::Utils'=> '5.20250528',
+            'SelfLoader'            => '1.28',
+            'Thread'                => '3.06',
+            'Tie::File'             => '1.10',
+            'Unicode::UCD'          => '0.81',
+            'builtin'               => '0.019',
+            'experimental'          => '0.035',
+            'feature'               => '1.96',
+            're'                    => '0.48',
+            'stable'                => '0.035',
+            'strict'                => '1.14',
         },
         removed => {
+            'unicore::Name'         => 1,
         }
     },
 );
