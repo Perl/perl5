@@ -800,6 +800,7 @@ the strings?).
  Lukas     5.41.10      2025-Mar-21
  Ether     5.41.11      2025-Apr-20
  Ether     5.41.12      2025-Apr-21
+ Philippe  5.41.13      2025-May-28
 
 =head2 SELECTED RELEASE SIZES
 
