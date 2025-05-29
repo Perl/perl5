@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.41.13 - George Orwell, "1984"
+
+L<Announced on 2025-05-28 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2025/05/msg269950.html>
+
+  "It was a bright cold day in April, and the clocks were striking thirteen."
+
 =head2 v5.41.12 - Sam Brown
 
 L<Announced on 2025-04-21 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/04/msg269818.html>
