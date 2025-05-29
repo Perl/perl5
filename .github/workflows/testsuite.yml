@@ -304,15 +304,15 @@ jobs:
   # |_|_|_| |_|\__,_/_/\_\    |_|____/ \___/ \___/
 
   linux-i386:
-    name: "linux i386/ubuntu"
+    name: "linux i386/debian"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_linux_i386 == 'true'))
 
-    # https://hub.docker.com/r/i386/ubuntu/
+    # https://hub.docker.com/r/i386/debian/
     container:
-      image: i386/ubuntu:latest
+      image: i386/debian:latest
 
     strategy:
       fail-fast: false
