@@ -9,6 +9,9 @@ BEGIN {
     skip_all_if_miniperl();
 }
 
+$^O eq "MSWin32"
+    and skip_all("Win32 can't make a pipe non-blocking");
+
 use strict;
 use IO::Select;
 
