@@ -61,6 +61,8 @@ if ($^O eq 'VMS') {
 }
 
 {
+    local $ENV{CXX};
+    delete $ENV{CXX};
     # GH #23146
     my $fake_cc = File::Spec->rel2abs(File::Spec->catfile(qw(some directory what doesnt exist), 'cc'));
     my $cb = ExtUtils::CBuilder->new(
