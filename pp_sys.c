@@ -4707,15 +4707,12 @@ PP_wrapped(pp_system, 0, 1)
 #else
         Pid_t childpid;
 #endif
-        int pp[2];
-        I32 did_pipes = 0;
-        bool child_success = FALSE;
 #ifdef HAS_SIGPROCMASK
         sigset_t newset, oldset;
 #endif
 
-#ifdef HAS_POSIX_SPAWN
         SV** mark = ORIGMARK;
+#ifdef HAS_POSIX_SPAWN
 
         posix_spawnattr_t attrp;
         posix_spawnattr_init(&attrp);
@@ -4723,7 +4720,15 @@ PP_wrapped(pp_system, 0, 1)
         sigemptyset(&newset);
         sigaddset(&newset, SIGCHLD);
         sigprocmask(SIG_BLOCK, &newset, &oldset);
-        posix_spawnattr_getsigmask(&attrp, &oldset);
+        posix_spawnattr_setsigmask(&attrp, &oldset);
+
+        if (PL_sigfpe_saved == SIG_DFL) {
+            sigset_t defaulting;
+            sigemptyset(&defaulting);
+            sigaddset(&newset, SIGFPE);
+            posix_spawnattr_setsigdefault(&attrp, &defaulting);
+        }
+
 
         int success;
         if (sp - mark > 1) {
@@ -4776,6 +4781,10 @@ PP_wrapped(pp_system, 0, 1)
             STATUS_NATIVE_CHILD_SET(status);
         XPUSHi(STATUS_CURRENT);
 #else
+        int pp[2];
+        I32 did_pipes = 0;
+        bool child_success = FALSE;
+
         if (PerlProc_pipe_cloexec(pp) >= 0)
             did_pipes = 1;
 #ifdef __amigaos4__
