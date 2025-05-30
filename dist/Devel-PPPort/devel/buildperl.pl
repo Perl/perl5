@@ -174,12 +174,12 @@ my $job_string = "";
 $job_string = "-j$opt{jobs}" if $opt{jobs} != 1;
 
 if ($opt{patch} || $opt{oneshot}) {
-  @{$opt{perl}} == 1 or die "Exactly one --perl must be given with --patch or --oneshot\n";
+  @{$opt{perl}} == 1 or die "Exactly one --perl must be given with --patch or --oneshot";
   my $perl = $opt{perl}[0];
   patch_source($perl) if !exists $opt{patch} || $opt{patch};
   if (exists $opt{oneshot}) {
     eval { require String::ShellQuote };
-    die "--oneshot requires String::ShellQuote to be installed\n" if $@;
+    die "--oneshot requires String::ShellQuote to be installed" if $@;
     %current = (config => 'oneshot', version => $perl);
     $config{oneshot} = { config_args => String::ShellQuote::shell_quote(@ARGV) };
     build_and_install($perl{$perl});
@@ -189,7 +189,7 @@ if ($opt{patch} || $opt{oneshot}) {
 
 if (exists $opt{config}) {
   for my $cfg (@{$opt{config}}) {
-    exists $config{$cfg} or die "Unknown configuration: $cfg\n";
+    exists $config{$cfg} or die "Unknown configuration: $cfg";
   }
 }
 else {
@@ -206,7 +206,7 @@ if (exists $opt{perl}) {
     my $p = $perl;
     exists $perl{$p} or $p = "perl$perl";
     exists $perl{$p} or $p = "perl-$perl";
-    exists $perl{$p} or die "Cannot find perl: $perl\n";
+    exists $perl{$p} or die "Cannot find perl: $perl";
     push @perls, $p;
   }
 }
@@ -218,21 +218,21 @@ if ($opt{'test-archives'}) {
   my $test = 'test';
   my $cwd = cwd;
   -d $test or mkpath($test);
-  chdir $test or die "chdir $test: $!\n";
+  chdir $test or die "chdir $test: $!";
   for my $perl (@perls) {
     eval {
       my $d = extract_source($perl{$perl});
       if ($opt{'test-archives'} > 2) {
         my $cwd2 = cwd;
-        chdir $d or die "chdir $d: $!\n";
+        chdir $d or die "chdir $d: $!";
         patch_source($perl{$perl}{version});
-        chdir $cwd2 or die "chdir $cwd2:$!\n"
+        chdir $cwd2 or die "chdir $cwd2:$!"
       }
       rmtree($d) if -e $d;
     };
     warn $@ if $@;
   }
-  chdir $cwd or die "chdir $cwd: $!\n";
+  chdir $cwd or die "chdir $cwd: $!";
   print STDERR "cleaning up\n";
   rmtree($test);
   exit 0;
@@ -257,12 +257,12 @@ for my $cfg (@{$opt{config}}) {
 
     my $build = expand($opt{build});
     -d $build or mkpath($build);
-    chdir $build or die "chdir $build: $!\n";
+    chdir $build or die "chdir $build: $!";
 
     print STDERR "building $perl with configuration $cfg\n";
     buildperl($perl, $config);
 
-    chdir $cwd or die "chdir $cwd: $!\n";
+    chdir $cwd or die "chdir $cwd: $!";
   }
 }
 
@@ -297,7 +297,7 @@ sub buildperl
   my($perl, $cfg) = @_;
 
   my $d = extract_source($perl{$perl});
-  chdir $d or die "chdir $d: $!\n";
+  chdir $d or die "chdir $d: $!";
 
   patch_source($perl{$perl}{version});
 
@@ -307,7 +307,7 @@ sub buildperl
 sub extract_source
 {
   eval { require Archive::Tar };
-  die "Archive processing requires Archive::Tar to be installed\n" if $@;
+  die "Archive processing requires Archive::Tar to be installed" if $@;
 
   my $perl = shift;
 
@@ -318,7 +318,7 @@ sub extract_source
 
   for my $f (Archive::Tar->list_archive($perl->{source})) {
     my($t) = $f =~ /^([^\\\/]+)/ or die "ooops, should always match...\n";
-    die "refusing to extract $perl->{source}, as it would not extract to a single directory\n"
+    die "refusing to extract $perl->{source}, as it would not extract to a single directory"
         if defined $target and $target ne $t;
     $target = $t;
   }
@@ -332,9 +332,9 @@ sub extract_source
     print "extracting $perl->{source}\n";
 
     Archive::Tar->extract_archive($perl->{source})
-        or die "extract failed: " . Archive::Tar->error() . "\n";
+        or die "extract failed: " . Archive::Tar->error();
 
-    -d $target or die "oooops, $target not found\n";
+    -d $target or die "oooops, $target not found";
   }
 
   return $target;
@@ -503,26 +503,26 @@ sub patch
   my $diff = 'tmp.diff';
   write_or_die($diff, $patch);
   run_or_die("patch -s -p0 <$diff");
-  unlink $diff or die "unlink $diff: $!\n";
+  unlink $diff or die "unlink $diff: $!";
 }
 
 sub write_or_die
 {
   my($file, $data) = @_;
-  my $fh = new IO::File ">$file" or die "$file: $!\n";
+  my $fh = new IO::File ">$file" or die "$file: $!";
   $fh->print($data);
 }
 
 sub run_or_die
 {
   # print "[running @_]\n";
-  system "@_" and die "@_: $?\n";
+  system "@_" and die "@_: $?";
 }
 
 sub run
 {
   # print "[running @_]\n";
-  system "@_" and warn "@_: $?\n";
+  system "@_" and warn "@_: $?";
 }
 
 __END__
