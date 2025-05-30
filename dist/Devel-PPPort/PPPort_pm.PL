@@ -280,7 +280,7 @@ $data =~ s{^__UNSUPPORTED_API__(\s*?)^}
 $data =~ s{__MIN_PERL__}{$MIN_PERL}g;
 $data =~ s{__MAX_PERL__}{$MAX_PERL}g;
 
-open FH, ">PPPort.pm" or die "PPPort.pm: $!\n";
+open FH, ">PPPort.pm" or die "PPPort.pm: $!";
 print FH $data;
 close FH;
 
@@ -428,7 +428,7 @@ sub expand_pp_expr
 
   if ($expr =~ /^\s*need\s+(\w+)\s*$/i) {
     my $func = $1;
-    my $e = $embed{$func} or die "unknown API function '$func' in NEED\n";
+    my $e = $embed{$func} or die "unknown API function '$func' in NEED";
     my $proto = make_prototype($e);
     if (exists $prototypes{$func}) {
       if (compare_prototypes($proto, $prototypes{$func})) {
@@ -464,7 +464,7 @@ sub expand_pp_expr
          . "$embed\n";
   }
 
-  die "cannot expand preprocessor expression '$expr'\n";
+  die "cannot expand preprocessor expression '$expr'";
 }
 
 sub make_embed
