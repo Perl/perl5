@@ -27,7 +27,7 @@ sub run {
     die "Cannot find $f: $!" unless -e $file_to_patch;
 
     my $content;
-    open( my $fh, '+<', $file_to_patch ) or die "$f: $!\n";
+    open( my $fh, '+<', $file_to_patch ) or die "$f: $!";
     {
         local $/;
         $content = <$fh>;
