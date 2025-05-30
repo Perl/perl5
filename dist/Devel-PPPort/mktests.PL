@@ -36,7 +36,7 @@ sub generate_tests
     if (exists $spec->{tests}) {
       exists $spec->{OPTIONS}{tests} &&
       exists $spec->{OPTIONS}{tests}{plan}
-          or die "No plan for tests in $file\n";
+          or die "No plan for tests in $file";
 
       print "generating $testfile\n";
 
@@ -47,7 +47,7 @@ sub generate_tests
       $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
       $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
 
-      open FH, ">$testfile" or die "$testfile: $!\n";
+      open FH, ">$testfile" or die "$testfile: $!";
       binmode FH;
       print FH $tmpl;
       close FH;
