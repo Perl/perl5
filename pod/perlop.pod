@@ -2875,85 +2875,151 @@ must use an C<eval()>:
 
     eval "tr/$oldlist/$newlist/, 1" or die $@;
 
-=item C<< <<I<EOF> >>
-X<here-doc> X<heredoc> X<here-document> X<<< << >>>
+=back
+
+=head3 Here-docs
+X<here-doc> X<here-docs> X<heredoc> X<here-document> X<<< << >>>
+
+=over 4
+
+=item C<< <<I<EOT> >>
+
+=item C<< <<~I<EOT> >>
 
 A line-oriented form of quoting is based on the shell "here-document"
 syntax.  Following a C<< << >> you specify a string to terminate
 the quoted material, and all lines following the current line down to
 the terminating string are the value of the item.
 
-Prefixing the terminating string with a C<~> specifies that you
-want to use L</Indented Here-docs> (see below).
+An example is
 
-The terminating string may be either an identifier (a word), or some
-quoted text.  An unquoted identifier works like double quotes.
-There may not be a space between the C<< << >> and the identifier,
-unless the identifier is explicitly quoted.  The terminating string
-must appear by itself (unquoted and with no surrounding whitespace)
-on the terminating line.
+ my $endng = <<WHIMPER;
+ This is the way the text ends.
+ This is the way the text ends.
+ Not with a bang, but with a
+ WHIMPER
 
-If the terminating string is quoted, the type of quotes used determine
-the treatment of the text.
+In this case, the terminator is an identifier, the word "WHIMPER".  Most
+usually, people capitalize the identifier, just so it stands out, but
+this is just a convention that isn't necessary.
 
-=over 4
+The terminator may be enclosed in quotes, as detailed below, but without
+them, the text of the here-doc acts exactly as if it were double-quoted.
 
-=item Double Quotes
+ my $person = 'John';
 
-Double quotes indicate that the text will be interpolated using exactly
-the same rules as normal double quoted strings.
+ print uc <<EOT;
+ Hello, $person!
+ And the text goes on.
+ EOT
 
-    print <<EOF;
-    The price is $Price.
-    EOF
+This yields:
 
-    print << "EOF"; # same as above
-    The price is $Price.
-    EOF
+ HELLO, JOHN!
+ AND THE TEXT GOES ON.
 
+The parentheses in the C<uc> function call don't have to be omitted:
 
-=item Single Quotes
+ print uc(<<EOT);
+ Hello, $person!
+ And the text goes on.
+ EOT
 
-Single quotes indicate the text is to be treated literally with no
-interpolation of its content.  This is similar to single quoted
-strings except that backslashes have no special meaning, with C<\\>
-being treated as two backslashes and not one as they would in every
-other quoting construct.
+ HELLO, JOHN!
+ AND THE TEXT GOES ON.
 
-Just as in the shell, a backslashed bareword following the C<<< << >>>
-means the same thing as a single-quoted string does:
+And you can intermix a here-document with other things:
 
-    $cost = <<'VISTA';  # hasta la ...
-    That'll be $10 please, ma'am.
-    VISTA
+ print <<EOT, "Followed by the next argument\n";
+ Hello, $person!
+ And the text goes on.
+ EOT
 
-    $cost = <<\VISTA;   # Same thing!
-    That'll be $10 please, ma'am.
-    VISTA
+ Hello, John!
+ And the text goes on.
+ Followed by the next argument
 
-This is the only form of quoting in perl where there is no need
-to worry about escaping content, something that code generators
-can and do make good use of.
+And you can have multiple here-documents:
 
-=item Backticks
+ print <<EOT1, <<EOT2;
+ Hello, $person!
+ And the text goes on.
+ EOT1
+ Followed by the next argument
+ EOT2
 
-The content of the here doc is treated just as it would be if the
-string were embedded in backticks.  Thus the content is interpolated
-as though it were double quoted and then executed via the shell, with
-the results of the execution returned.
+ Hello, John!
+ And the text goes on.
+ Followed by the next argument
 
-    print << `EOC`; # execute command and get results
-    echo hi there
-    EOC
+The terminator doesn't have to be a single word; it may also be some
+quoted text:
 
-=back
+ my $pagliaci = << "La Commedia e finita!";
+ A troupe comes to town to perform a play, a comedy.  The lead actress
+ and lead actor are in an unhappy marriage.  On stage, he stabs her
+ for real; then he stabs her lover who has rushed from the audience to
+ defend her.  Both die.
+ La Commedia e finita!
 
-=over 4
+There may not be a space between the C<< << >> and the identifier unless
+the terminator is quoted, as demonstrated in the example just above.
+Quoting rules for the terminator are unrelated to Perl's quoting rules.
+Only C<"">, C<''>, and C<``> can be used to quote it, NOT C<q()>,
+C<qq()>, and the like.  The only interpolation is for backslashing the
+quoting character:
 
-=item Indented Here-docs
+    print << "abc\"def";
+    testing...
+    abc"def
 
-The here-doc modifier C<~> allows you to indent your here-docs to make
-the code more readable:
+The terminating string must appear by itself (unquoted and with no
+surrounding whitespace) on the terminating line.  Also, it cannot span
+multiple lines.  The general rule is that the identifier must be a
+string literal.  Stick with that, and you should be safe.
+
+Don't forget that you have to put a semicolon on the end to finish the
+statement, as Perl doesn't know you're not going to try to do this:
+
+    print <<ABC
+    10
+    ABC
+       + 20;
+
+which prints C<30> and no line terminator.
+
+If you want your here-doc to not have a line terminator on the final
+line, use C<chomp()>.
+
+    chomp($string = <<'END');
+    This is the first line.
+    This second line won't end in a \n.
+    END
+
+If you use a here-doc within a delimited construct, such as in C<s///eg>,
+the quoted material must still come on the line following the
+C<<< <<TERMINATOR >>> marker, which means it may be inside the delimited
+construct:
+
+    s/this/<<E . 'that'
+    the other
+    E
+     . 'more '/eg;
+
+(It works this way as of Perl 5.18.  Historically, it was inconsistent, and
+you would have to write
+
+    s/this/<<E . 'that'
+     . 'more '/eg;
+    the other
+    E
+
+outside of string evals.)
+
+A problem with the Here-doc syntax given so far is that it must be at the
+left margin of your program, messing up the indentation.  Starting in
+Perl v5.26, the tilde C<~> modifier allows you to indent your here-docs
+to make the code more readable.
 
     if ($some_var) {
         print <<~EOF;
@@ -2983,97 +3049,90 @@ remain tabs and are not expanded.
 Additional beginning whitespace (beyond what preceded the
 delimiter) will be preserved:
 
-    print <<~EOF;
-      This text is not indented
-        This text is indented with two spaces
-                This text is indented with two tabs
-      EOF
-
-Finally, the modifier may be used with all of the forms
-mentioned above:
-
-    <<~\EOF;
-    <<~'EOF'
-    <<~"EOF"
-    <<~`EOF`
-
-And whitespace may be used between the C<~> and quoted delimiters:
-
-    <<~ 'EOF'; # ... "EOF", `EOF`
+ print <<~EOF;
+   This text is not indented
+     This text is indented with two spaces
+		This line is indented with two tabs, though those may
+                have been converted to spaces by various filters by
+                the time you read this. 
+   EOF
 
 =back
 
-It is possible to stack multiple here-docs in a row:
+=head4 Quoting the delimiter
 
-    print <<"foo", <<"bar"; # you can stack them
-    I said foo.
-    foo
-    I said bar.
-    bar
+As mentioned above, the terminating string may be quoted.  There are
+three types of quoting possible.  The type used determines the treatment
+of the text.
 
-    myfunc(<< "THIS", 23, <<'THAT');
-    Here's a line
-    or two.
-    THIS
-    and here's another.
-    THAT
+=over 4
 
-Just don't forget that you have to put a semicolon on the end
-to finish the statement, as Perl doesn't know you're not going to
-try to do this:
+=item Double Quotes
 
-    print <<ABC
-    179231
-    ABC
-       + 20;
+Double quotes surrounding the terminating word or string behave as if
+no quotes were there, namely the text will be interpolated using exactly
+the same rules as normal double quoted strings, as in all the examples
+above.  So
 
-If you want to remove the line terminator from your here-docs,
-use C<chomp()>.
+ my $person = 'John';
 
-    chomp($string = <<'END');
-    This is a string.
-    END
+ print uc << "EOT";
+ Hello, $person!
+ And the text goes on.
+ EOT
 
-If you want your here-docs to be indented with the rest of the code,
-use the C<<< <<~FOO >>> construct described under L</Indented Here-docs>:
+yields:
 
-    $quote = <<~'FINIS';
-       The Road goes ever on and on,
-       down from the door where it began.
-       FINIS
+ HELLO, JOHN!
+ AND THE TEXT GOES ON.
 
-If you use a here-doc within a delimited construct, such as in C<s///eg>,
-the quoted material must still come on the line following the
-C<<< <<FOO >>> marker, which means it may be inside the delimited
-construct:
+which is the same result as without quotes.
 
-    s/this/<<E . 'that'
-    the other
-    E
-     . 'more '/eg;
+=item Single Quotes
 
-It works this way as of Perl 5.18.  Historically, it was inconsistent, and
-you would have to write
+If instead, single quotes are used, the text is treated literally, with
+no interpolation of its content.
 
-    s/this/<<E . 'that'
-     . 'more '/eg;
-    the other
-    E
+ my $person = 'John';
+ print uc <<'EOT';
+ Hello, $person!
+ And the text goes on.
+ EOT
 
-outside of string evals.
+ HELLO, $PERSON!
+ AND THE TEXT GOES ON.
 
-Additionally, quoting rules for the end-of-string identifier are
-unrelated to Perl's quoting rules.  C<q()>, C<qq()>, and the like are not
-supported in place of C<''> and C<"">, and the only interpolation is for
-backslashing the quoting character:
+The difference between a single-quoted here-doc and a single-quoted
+string is that backslashes have no special meaning in a here-doc, with
+C<\\> being treated as two backslashes and not one as they would in
+every other quoting construct.
 
-    print << "abc\"def";
-    testing...
-    abc"def
+Just as in the shell, a backslashed bareword following the C<<< << >>>
+means the same thing as a single-quoted string does:
 
-Finally, quoted strings cannot span multiple lines.  The general rule is
-that the identifier must be a string literal.  Stick with that, and you
-should be safe.
+    $cost = <<'VISTA';  # hasta la ...
+    That'll be $10 please, ma'am.
+    VISTA
+
+    $cost = <<\VISTA;   # Same thing!
+    That'll be $10 please, ma'am.
+    VISTA
+
+These two forms are the only ways of quoting in Perl where there is no
+need to worry about escaping content, something that code generators can
+and do make good use of.
+
+=item Backticks
+
+Finally, if instead backticks are used to quote the terminating string,
+the content of the here doc is treated just as it would be if it were a
+string embedded in backticks.  Thus the content is interpolated as
+though it were double quoted and then executed via the shell, with the
+results of the execution returned.
+
+    print << `EOC`; # execute command and get results
+    echo hi there
+    EOC
 
 =back
 
@@ -3891,6 +3950,10 @@ only to prevent breaking any pre-existing links to it from outside.
 =head2 Quote-Like Operators
 
 This section has been replaced by L</Simpler Quote-Like Operators>
+
+=head2 Indented Here-docs
+
+This section has been merged into L</Here-docs>
 
 =head1 APPENDIX
 
