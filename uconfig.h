@@ -107,6 +107,12 @@
  */
 /*#define HAS_FCNTL		/ **/
 
+/* HAS_FDOPENDIR:
+ * This symbol, if defined, indicates that the fdopen routine is
+ * available to open a directory descriptor.
+ */
+/*#define HAS_FDOPENDIR		/ **/
+
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -5382,6 +5388,6 @@
 #endif
 
 /* Generated from:
- * e17a83ff6ae98071d846d4a001f6ce1a669df08c357fe153c2370adc4910135e config_h.SH
- * 8d785207fec43bbad5118a8125e625d1cc654455994f09a76c1625b2ae2ae2d0 uconfig.sh
+ * c796c0132aa033f4707372996512746e1e011e74dea6362470008afc9fbc6d6c config_h.SH
+ * da4c4a7e80d19de664a97a9ed97e2a362b015a320553fa72ec4b98e57dee58c3 uconfig.sh
  * ex: set ro ft=c: */
