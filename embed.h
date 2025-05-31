@@ -1767,6 +1767,9 @@
 #     define quadmath_format_valid              Perl_quadmath_format_valid
 #   endif
 #   if defined(WIN32)
+#     define die_cbrod                          Perl_die_cbrod
+#     define die_csig                           Perl_die_csig
+#     define die_cwait                          Perl_die_cwait
 #     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)
 #   else
 #     define do_exec3(a,b,c)                    Perl_do_exec3(aTHX_ a,b,c)

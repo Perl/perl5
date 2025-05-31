@@ -11028,6 +11028,21 @@ Perl_do_spawn_nowait(pTHX_ char *cmd);
 
 #endif /* defined(VMS) || defined(WIN32) */
 #if defined(WIN32)
+PERL_CALLCONV_NO_RET void
+Perl_die_cbrod(void)
+        __attribute__noreturn__;
+# define PERL_ARGS_ASSERT_DIE_CBROD
+
+PERL_CALLCONV_NO_RET void
+Perl_die_csig(void)
+        __attribute__noreturn__;
+# define PERL_ARGS_ASSERT_DIE_CSIG
+
+PERL_CALLCONV_NO_RET void
+Perl_die_cwait(void)
+        __attribute__noreturn__;
+# define PERL_ARGS_ASSERT_DIE_CWAIT
+
 PERL_CALLCONV void *
 Perl_get_context(void)
         __attribute__warn_unused_result__;

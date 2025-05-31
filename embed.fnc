@@ -6463,6 +6463,9 @@ Cp	|int	|do_spawn	|NN char *cmd
 Cp	|int	|do_spawn_nowait|NN char *cmd
 #endif
 #if defined(WIN32)
+TXpr	|void	|die_cbrod
+TXpr	|void	|die_csig
+TXpr	|void	|die_cwait
 CRTdp	|void * |get_context
 p	|bool	|get_win32_message_utf8ness				\
 				|NULLOK const char *string
