@@ -1389,6 +1389,7 @@ perl_destruct(pTHXx)
         HvTOTALKEYS(PL_strtab) = 0;
     }
     SvREFCNT_dec(PL_strtab);
+    PL_strtab = NULL;
 
 #ifdef USE_ITHREADS
     /* free the pointer tables used for cloning */
