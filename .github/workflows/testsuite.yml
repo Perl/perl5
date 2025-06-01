@@ -459,7 +459,7 @@ jobs:
 
   windows-msvc142:
     name: "Windows msvc142"
-    runs-on: windows-2019
+    runs-on: windows-2025
     timeout-minutes: 120
     needs: sanity_check
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_msvc142 == 'true'))
@@ -491,7 +491,7 @@ jobs:
       - name: Build
         shell: cmd
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
           nmake CCTYPE=MSVC142 CFG=Debug
       - name: Show Config
@@ -502,7 +502,7 @@ jobs:
       - name: Run Tests
         shell: cmd
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
           nmake CCTYPE=MSVC142 CFG=Debug test
 
