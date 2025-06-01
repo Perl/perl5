@@ -1915,7 +1915,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00009b8c,	/* schop */
 	0x00002b1d,	/* chomp */
 	0x00009b9c,	/* schomp */
-	0x00009b84,	/* defined */
+	0x00009b86,	/* defined */
 	0x0000fb04,	/* undef */
 	0x00009b84,	/* study */
 	0x0000fb8c,	/* pos */
