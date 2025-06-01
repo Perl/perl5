@@ -5011,6 +5011,12 @@ S_fold_constants(pTHX_ OP *const o)
         if (cUNOPx(cUNOPo->op_first)->op_first->op_type != OP_CONST
          || SvPADTMP(cSVOPx_sv(cUNOPx(cUNOPo->op_first)->op_first)))
             goto nope;
+        break;
+    case OP_DEFINED:
+        if ( (cUNOPo->op_first->op_type != OP_CONST)
+          || cUNOPo->op_first->op_moresib )
+            goto nope;
+        break;
     }
 
     if (PL_parser && PL_parser->error_count)

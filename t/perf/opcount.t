@@ -1106,4 +1106,12 @@ test_opcount(0, "substr with const zero offset  (gv)",
                     sassign      => 1
                 });
 
+# defined(SOMECONST) gets constant folded
+test_opcount(0, "defined(ABC) gets constant folded",
+                sub { use constant ABC => 1; my $x = (defined(ABC)) ? 1 : 0 },
+                {
+                    cond_expr    => 0,
+                    defined      => 0,
+                });
+
 done_testing();
