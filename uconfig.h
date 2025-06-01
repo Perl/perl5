@@ -108,7 +108,7 @@
 /*#define HAS_FCNTL		/ **/
 
 /* HAS_FDOPENDIR:
- * This symbol, if defined, indicates that the fdopen routine is
+ * This symbol, if defined, indicates that the fdopendir routine is
  * available to open a directory descriptor.
  */
 /*#define HAS_FDOPENDIR		/ **/
@@ -5388,6 +5388,6 @@
 #endif
 
 /* Generated from:
- * c796c0132aa033f4707372996512746e1e011e74dea6362470008afc9fbc6d6c config_h.SH
+ * 4cfa1b44dbf1bf89d68499a49713f020f11d1a6c812073902b43e2d61cc2721b config_h.SH
  * da4c4a7e80d19de664a97a9ed97e2a362b015a320553fa72ec4b98e57dee58c3 uconfig.sh
  * ex: set ro ft=c: */
