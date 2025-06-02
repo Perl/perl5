@@ -4343,24 +4343,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         /* Should preserve some dsv flags - at least SVs_TEMP, */
         /* so cannot just set SvFLAGS(dsv) = new_dflags        */
         /* First clear the flags that we do want to clobber    */
-        (void)SvOK_off(dsv);
-        SvFLAGS(dsv) &= ~SVTYPEMASK;
+        SvFLAGS(dsv) &= ~(SVTYPEMASK|SVf_OK|SVf_IVisUV);
         /* Now set the new flags */
         SvFLAGS(dsv) |= new_dflags;
 
         SvREFCNT_dec(old_rv);
         return;
     }
-/*
-#if NVSIZE <= IVSIZE
-    both_type = (stype | dtype);
-#endif
-*/
+
     if (UNLIKELY(both_type == SVTYPEMASK)) {
         croak_sv_setsv_flags(dsv, ssv);
         NOT_REACHED;
     }
-
 
     SV_CHECK_THINKFIRST_COW_DROP(dsv);
     dtype = SvTYPE(dsv); /* THINKFIRST may have changed type */
@@ -4666,7 +4660,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
             SvCUR_set(dsv, SvCUR(ssv));
 
             SvTEMP_off(dsv);
-            (void)SvOK_off(ssv);	/* NOTE: nukes most SvFLAGS on ssv */
+
+            assert(!SvOOK(ssv)); /* According to S_SvPV_can_swipe_buf() */
+            /* NOTE: nukes most SvFLAGS on ssv */
+            SvFLAGS(ssv) &= ~(SVf_OK|SVf_IVisUV|SVf_UTF8);
+
             SvPV_set(ssv, NULL);
             SvLEN_set(ssv, 0);
             SvCUR_set(ssv, 0);
