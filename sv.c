@@ -10611,30 +10611,6 @@ Perl_newRV(pTHX_ SV *const sv)
 }
 
 /*
-=for apidoc newSVsv
-=for apidoc_item newSVsv_flags
-=for apidoc_item newSVsv_nomg
-
-These create a new SV which is an exact duplicate of the original SV
-(using C<sv_setsv>.)
-
-They differ only in that C<newSVsv> performs 'get' magic; C<newSVsv_nomg> skips
-any magic; and C<newSVsv_flags> allows you to explicitly set a C<flags>
-parameter.
-
-=cut
-*/
-
-SV *
-Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
-{
-    if (!old)
-        return NULL;
-
-    return newSVsv_flags_NN(old, flags);
-}
-
-/*
 =for apidoc sv_reset
 
 Underlying implementation for the C<reset> Perl function.

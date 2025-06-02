@@ -1005,5 +1005,30 @@ Perl_sv_setpv_freshbuf(pTHX_ SV *const sv)
     return SvPVX(sv);
 }
 
+/*
+=for apidoc newSVsv
+=for apidoc_item newSVsv_flags
+=for apidoc_item newSVsv_nomg
+
+These create a new SV which is an exact duplicate of the original SV
+(using C<newSVsv_flags_NN>.)
+
+They differ only in that C<newSVsv> performs 'get' magic; C<newSVsv_nomg> skips
+any magic; and C<newSVsv_flags> allows you to explicitly set a C<flags>
+parameter.
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV *
+Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
+{
+    if (!old)
+        return NULL;
+
+    return newSVsv_flags_NN(old, flags);
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

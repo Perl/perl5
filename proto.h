@@ -3171,10 +3171,6 @@ Perl_newSVsv(pTHX_ SV * const old)
         __attribute__warn_unused_result__; */
 
 PERL_CALLCONV SV *
-Perl_newSVsv_flags(pTHX_ SV * const old, I32 flags)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_NEWSVSV_FLAGS
-
 Perl_newSVsv_flags_NN(pTHX_ SV * const old, I32 flags)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVSV_FLAGS_NN       \
@@ -9925,6 +9921,11 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
         __attribute__warn_unused_result__
         __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
+
+PERL_STATIC_INLINE SV *
+Perl_newSVsv_flags(pTHX_ SV * const old, I32 flags)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_NEWSVSV_FLAGS
 
 PERL_STATIC_INLINE SV *
 Perl_new_sv(pTHX_ const char *file, int line, const char *func);
