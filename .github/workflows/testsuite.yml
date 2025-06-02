@@ -17,7 +17,7 @@
 #   - CI_FORCE_LINUX_I386: if set to a true value: run the 'linux-i386' job;
 #   - CI_FORCE_INSTALL: if set to a true value: run the 'install' job;
 #   - CI_FORCE_MACOS: if set to a true value: run the 'smoke-macos-14' job;
-#   - CI_FORCE_MSVC142: if set to a true value: run the 'windows-msvc142' job;
+#   - CI_FORCE_MSVC143: if set to a true value: run the 'windows-msvc143' job;
 #   - CI_FORCE_MINGW64: if set to a true value: run the 'mingw64' job;
 #   - CI_FORCE_CYGWIN: if set to a true value: run the 'cygwin' job;
 #   - CI_FORCE_MINITEST: if set to a true value: run the 'miniperl' job;
@@ -139,7 +139,7 @@ jobs:
       ci_force_linux_i386: ${{ steps.ci_config.outputs.ci_force_linux_i386 }}
       ci_force_install: ${{ steps.ci_config.outputs.ci_force_install }}
       ci_force_macos: ${{ steps.ci_config.outputs.ci_force_macos }}
-      ci_force_msvc142: ${{ steps.ci_config.outputs.ci_force_msvc142 }}
+      ci_force_msvc143: ${{ steps.ci_config.outputs.ci_force_msvc143 }}
       ci_force_mingw64: ${{ steps.ci_config.outputs.ci_force_mingw64 }}
       ci_force_cygwin: ${{ steps.ci_config.outputs.ci_force_cygwin }}
       ci_force_minitest: ${{ steps.ci_config.outputs.ci_force_minitest }}
@@ -160,7 +160,7 @@ jobs:
           CI_FORCE_LINUX_I386: ${{ vars.CI_FORCE_LINUX_I386 }}
           CI_FORCE_INSTALL: ${{ vars.CI_FORCE_INSTALL }}
           CI_FORCE_MACOS: ${{ vars.CI_FORCE_MACOS }}
-          CI_FORCE_MSVC142: ${{ vars.CI_FORCE_MSVC142 }}
+          CI_FORCE_MSVC143: ${{ vars.CI_FORCE_MSVC143 }}
           CI_FORCE_MINGW64: ${{ vars.CI_FORCE_MINGW64 }}
           CI_FORCE_CYGWIN: ${{ vars.CI_FORCE_CYGWIN }}
           CI_FORCE_MINITEST: ${{ vars.CI_FORCE_MINITEST }}
@@ -174,7 +174,7 @@ jobs:
           [[ -n "${CI_FORCE_LINUX_I386}"   ]] && [[ "${CI_FORCE_LINUX_I386%[!0 ]*}"   != "${CI_FORCE_LINUX_I386}"   ]] && echo "ci_force_linux_i386=true" >> "$GITHUB_OUTPUT"
           [[ -n "${CI_FORCE_INSTALL}"      ]] && [[ "${CI_FORCE_INSTALL%[!0 ]*}"      != "${CI_FORCE_INSTALL}"      ]] && echo "ci_force_install=true" >> "$GITHUB_OUTPUT"
           [[ -n "${CI_FORCE_MACOS}"        ]] && [[ "${CI_FORCE_MACOS%[!0 ]*}"        != "${CI_FORCE_MACOS}"        ]] && echo "ci_force_macos=true" >> "$GITHUB_OUTPUT"
-          [[ -n "${CI_FORCE_MSVC142}"      ]] && [[ "${CI_FORCE_MSVC142%[!0 ]*}"      != "${CI_FORCE_MSVC142}"      ]] && echo "ci_force_msvc142=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_MSVC143}"      ]] && [[ "${CI_FORCE_MSVC143%[!0 ]*}"      != "${CI_FORCE_MSVC143}"      ]] && echo "ci_force_msvc143=true" >> "$GITHUB_OUTPUT"
           [[ -n "${CI_FORCE_MINGW64}"      ]] && [[ "${CI_FORCE_MINGW64%[!0 ]*}"      != "${CI_FORCE_MINGW64}"      ]] && echo "ci_force_mingw64=true" >> "$GITHUB_OUTPUT"
           [[ -n "${CI_FORCE_CYGWIN}"       ]] && [[ "${CI_FORCE_CYGWIN%[!0 ]*}"       != "${CI_FORCE_CYGWIN}"       ]] && echo "ci_force_cygwin=true" >> "$GITHUB_OUTPUT"
           [[ -n "${CI_FORCE_MINITEST}"     ]] && [[ "${CI_FORCE_MINITEST%[!0 ]*}"     != "${CI_FORCE_MINITEST}"     ]] && echo "ci_force_minitest=true" >> "$GITHUB_OUTPUT"
@@ -457,12 +457,12 @@ jobs:
   # \ V  V / | ' \/ _` / _ \ V  V (_-<
   #  \_/\_/|_|_||_\__,_\___/\_/\_//__/
 
-  windows-msvc142:
-    name: "Windows msvc142"
+  windows-msvc143:
+    name: "Windows msvc143"
     runs-on: windows-2025
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_msvc142 == 'true'))
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_msvc143 == 'true'))
 
     steps:
       - run: git config --global core.autocrlf false
@@ -493,7 +493,7 @@ jobs:
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
-          nmake CCTYPE=MSVC142 CFG=Debug
+          nmake CCTYPE=MSVC143 CFG=Debug
       - name: Show Config
         shell: cmd
         run: |
@@ -504,7 +504,7 @@ jobs:
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
-          nmake CCTYPE=MSVC142 CFG=Debug test
+          nmake CCTYPE=MSVC143 CFG=Debug test
 
   #            _                       __   _  _
   #  _ __ ___ (_)_ __   __ ___      __/ /_ | || |
