@@ -2358,7 +2358,7 @@ ARdp	|OP *	|newSVREF	|NN OP *o
 Adp	|SV *	|newSVrv	|NN SV * const rv			\
 				|NULLOK const char * const classname
 ARdmp	|SV *	|newSVsv	|NULLOK SV * const old
-ARdp	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
+ARdip	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
 				|I32 flags
 ARdp	|SV *	|newSVsv_flags_NN					\
 				|NN SV * const old			\
