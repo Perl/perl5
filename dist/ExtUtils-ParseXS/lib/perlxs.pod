@@ -626,27 +626,7 @@ begins with C<;> or C<+>, then it is performed after
 all of the input variables have been declared.  In the C<;>
 case the initialization normally supplied by the typemap is not performed.
 For the C<+> case, the declaration for the variable will include the
-initialization from the typemap.  A global
-variable, C<%v>, is available for the truly rare case where
-information from one initialization is needed in another
-initialization.
-
-Here's a truly obscure example:
-
-     bool_t
-     rpcb_gettime(host,timep)
-          time_t &timep; /* \$v{timep}=@{[$v{timep}=$arg]} */
-          char *host + SvOK($v{timep}) ? SvPVbyte_nolen($arg) : NULL;
-        OUTPUT:
-          timep
-
-The construct C<\$v{timep}=@{[$v{timep}=$arg]}> used in the above
-example has a two-fold purpose: first, when this line is processed by
-B<xsubpp>, the Perl snippet C<$v{timep}=$arg> is evaluated.  Second,
-the text of the evaluated snippet is output into the generated C file
-(inside a C comment)!  During the processing of C<char *host> line,
-C<$arg> will evaluate to C<ST(0)>, and C<$v{timep}> will evaluate to
-C<ST(1)>.
+initialization from the typemap.
 
 =head2 Default Parameter Values
 
