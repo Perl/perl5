@@ -685,6 +685,8 @@ SKIP: {   # GH #20054
     skip "Even illegal locale names are accepted", 1
                     if $Config{d_setlocale_accepts_any_locale_name}
                     && $Config{d_setlocale_accepts_any_locale_name} eq 'define';
+    skip "z/OS setlocale() crashes with illegal locale names", 1
+                                                           if $^O eq 'os390';
 
     my @lc_all_locales = find_locales('LC_ALL');
     my $locale = $lc_all_locales[0];
