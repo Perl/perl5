@@ -119,7 +119,7 @@ indicates that while the C subroutine we provide an interface to has
 a non-C<void> return type, the return value of this C subroutine should not
 be returned from the generated Perl subroutine.
 
-With this keyword present L<The RETVAL Variable> is created, and in the
+With this keyword present the C<RETVAL> variable is created, and in the
 generated call to the subroutine this variable is assigned to, but the value
 of this variable is not going to be used in the auto-generated code.
 
@@ -697,8 +697,8 @@ the XSUB returns back to Perl.
 
 The generated trailer for a CODE: section ensures that the number of return
 values Perl will see is either 0 or 1 (depending on the C<void>ness of the
-return value of the C function, and heuristics mentioned in
-L<"The RETVAL Variable">).  The trailer generated for a PPCODE: section
+return value of the C function, and heuristics to work around CODE
+setting C<ST(0)> on a C<void> XSUB.  The trailer generated for a PPCODE: section
 is based on the number of return values and on the number of times
 C<SP> was updated by C<[X]PUSH*()> macros.
 
@@ -769,7 +769,7 @@ executed after the C subroutine call is performed.  When the POSTCALL:
 keyword is used it must precede OUTPUT: and CLEANUP: blocks which are
 present in the XSUB.
 
-See examples in L<"The NO_OUTPUT Keyword"> and L<"Returning Undef And Empty Lists">.
+See examples in L<"The NO_OUTPUT Keyword">.
 
 The POSTCALL: block does not make a lot of sense when the C subroutine
 call is supplied by user by providing either CODE: or PPCODE: section.

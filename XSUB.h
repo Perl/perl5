@@ -30,7 +30,7 @@ C<L</THIS>>.
 =for apidoc Amnu|type|RETVAL
 Variable which is setup by C<xsubpp> to hold the return value for an
 XSUB.  This is always the proper type for the XSUB.  See
-L<perlxs/"The RETVAL Variable">.
+L<perlxs>.
 
 =for apidoc Amnu|type|THIS
 Variable which is setup by C<xsubpp> to designate the object in a C++
