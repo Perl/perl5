@@ -30,6 +30,10 @@ Module:
 
 **Perl configuration**
 <!-- Please paste `perl -V` output just below. -->
+<details>
+
 ```
 # perl -V output goes here
 ```
+
+</details>
