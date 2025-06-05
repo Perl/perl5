@@ -4871,23 +4871,24 @@ Perl_debug_hash_seed(pTHX_ bool via_debug_h)
         bool via_env = cBOOL(s && strNE(s, "0") && strNE(s,""));
 
         if ( via_env != via_debug_h ) {
+            PerlIO * debug_log = Perl_debug_log;
             const unsigned char *seed= PERL_HASH_SEED;
             const unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
-            PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
+            PerlIO_printf(debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
             while (seed < seed_end) {
-                PerlIO_printf(Perl_debug_log, "%02x", *seed++);
+                PerlIO_printf(debug_log, "%02x", *seed++);
             }
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-            PerlIO_printf(Perl_debug_log, " PERTURB_KEYS = %d (%s)",
+            PerlIO_printf(debug_log, " PERTURB_KEYS = %d (%s)",
                     PL_HASH_RAND_BITS_ENABLED,
                     PL_HASH_RAND_BITS_ENABLED == 0 ? "NO" :
                     PL_HASH_RAND_BITS_ENABLED == 1 ? "RANDOM"
                                                    : "DETERMINISTIC");
             if (DEBUG_h_TEST)
-                PerlIO_printf(Perl_debug_log,
+                PerlIO_printf(debug_log,
                         " RAND_BITS=0x%" UVxf, PL_hash_rand_bits);
 #endif
-            PerlIO_printf(Perl_debug_log, "\n");
+            PerlIO_printf(debug_log, "\n");
         }
     }
 #endif /* #if (defined(USE_HASH_SEED) ... */

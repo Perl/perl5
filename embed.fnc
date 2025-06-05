@@ -4616,6 +4616,7 @@ S	|const char *|native_querylocale_i				\
 S	|void	|new_LC_ALL	|NN const char *lc_all			\
 				|bool force
 S	|void	|output_check_environment_warning			\
+				|NN PerlIO * const error_log		\
 				|NULLOK const char * const language	\
 				|NULLOK const char * const lc_all	\
 				|NULLOK const char * const lang

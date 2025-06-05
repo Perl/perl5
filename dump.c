@@ -877,33 +877,36 @@ void
 Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
 {
     CV *cv;
+    PerlIO * debug_log;
+    bool is_gv;
 
     PERL_ARGS_ASSERT_DUMP_SUB_PERL;
 
-    cv = isGV_with_GP(gv) ? GvCV(gv) : CV_FROM_REF((SV*)gv);
+    cv = (is_gv = cBOOL(isGV_with_GP(gv))) ? GvCV(gv) : CV_FROM_REF((SV*)gv);
     if (justperl && (CvISXSUB(cv) || !CvROOT(cv)))
         return;
 
-    if (isGV_with_GP(gv)) {
+    debug_log = Perl_debug_log;
+    if (is_gv) {
         SV * const namesv = newSVpvs_flags("", SVs_TEMP);
         SV *escsv = newSVpvs_flags("", SVs_TEMP);
         const char *namepv;
         STRLEN namelen;
         gv_fullname3(namesv, gv, NULL);
         namepv = SvPV_const(namesv, namelen);
-        Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ",
+        Perl_dump_indent(aTHX_ 0, debug_log, "\nSUB %s = ",
                      generic_pv_escape(escsv, namepv, namelen, SvUTF8(namesv)));
     } else {
-        Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB = ");
+        Perl_dump_indent(aTHX_ 0, debug_log, "\nSUB = ");
     }
     if (CvISXSUB(cv))
-        Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%" UVxf " %d)\n",
+        Perl_dump_indent(aTHX_ 0, debug_log, "(xsub 0x%" UVxf " %d)\n",
             PTR2UV(CvXSUB(cv)),
             (int)CvXSUBANY(cv).any_i32);
     else if (CvROOT(cv))
         op_dump(CvROOT(cv));
     else
-        Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
+        Perl_dump_indent(aTHX_ 0, debug_log, "<undef>\n");
 }
 
 /*
@@ -1646,26 +1649,27 @@ Perl_gv_dump(pTHX_ GV *gv)
 {
     STRLEN len;
     const char* name;
+    PerlIO * debug_log = Perl_debug_log;
     SV *sv, *tmp = newSVpvs_flags("", SVs_TEMP);
 
     if (!gv) {
-        PerlIO_printf(Perl_debug_log, "{}\n");
+        PerlIO_printf(debug_log, "{}\n");
         return;
     }
     sv = sv_newmortal();
-    PerlIO_printf(Perl_debug_log, "{\n");
+    PerlIO_printf(debug_log, "{\n");
     gv_fullname3(sv, gv, NULL);
     name = SvPV_const(sv, len);
-    Perl_dump_indent(aTHX_ 1, Perl_debug_log, "GV_NAME = %s",
+    Perl_dump_indent(aTHX_ 1, debug_log, "GV_NAME = %s",
                      generic_pv_escape( tmp, name, len, SvUTF8(sv) ));
     if (gv != GvEGV(gv)) {
         gv_efullname3(sv, GvEGV(gv), NULL);
         name = SvPV_const(sv, len);
-        Perl_dump_indent(aTHX_ 1, Perl_debug_log, "-> %s",
+        Perl_dump_indent(aTHX_ 1, debug_log, "-> %s",
                      generic_pv_escape( tmp, name, len, SvUTF8(sv) ));
     }
-    (void)PerlIO_putc(Perl_debug_log, '\n');
-    Perl_dump_indent(aTHX_ 0, Perl_debug_log, "}\n");
+    (void)PerlIO_putc(debug_log, '\n');
+    Perl_dump_indent(aTHX_ 0, debug_log, "}\n");
 }
 
 
@@ -3022,24 +3026,25 @@ S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
     CV * const cv = deb_curcv(cxstack_ix);
     PADNAMELIST *comppad = NULL;
     int i;
+    PerlIO * debug_log = Perl_debug_log;
 
     if (cv) {
         PADLIST * const padlist = CvPADLIST(cv);
         comppad = PadlistNAMES(padlist);
     }
     if (paren)
-        PerlIO_printf(Perl_debug_log, "(");
+        PerlIO_printf(debug_log, "(");
     for (i = 0; i < n; i++) {
         if (comppad && (sv = padnamelist_fetch(comppad, off + i)))
-            PerlIO_printf(Perl_debug_log, "%" PNf, PNfARG(sv));
+            PerlIO_printf(debug_log, "%" PNf, PNfARG(sv));
         else
-            PerlIO_printf(Perl_debug_log, "[%" UVuf "]",
+            PerlIO_printf(debug_log, "[%" UVuf "]",
                     (UV)(off+i));
         if (i < n - 1)
-            PerlIO_printf(Perl_debug_log, ",");
+            PerlIO_printf(debug_log, ",");
     }
     if (paren)
-        PerlIO_printf(Perl_debug_log, ")");
+        PerlIO_printf(debug_log, ")");
 }
 
 
@@ -3297,12 +3302,15 @@ Implements B<-Dt> perl command line option on OP C<o>.
 I32
 Perl_debop(pTHX_ const OP *o)
 {
+    PerlIO * debug_log;
+
     PERL_ARGS_ASSERT_DEBOP;
 
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
         return 0;
 
     Perl_deb(aTHX_ "%s", OP_NAME(o));
+    debug_log = Perl_debug_log;
     switch (o->op_type) {
     case OP_CONST:
     case OP_HINTSEVAL:
@@ -3313,11 +3321,11 @@ Perl_debop(pTHX_ const OP *o)
 #ifdef USE_ITHREADS
         if ((((SVOP*)o)->op_sv) || !IN_PERL_COMPILETIME)
 #endif
-            PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
+            PerlIO_printf(debug_log, "(%s)", SvPEEK(cSVOPo_sv));
         break;
     case OP_GVSV:
     case OP_GV:
-        PerlIO_printf(Perl_debug_log, "(%" SVf ")",
+        PerlIO_printf(debug_log, "(%" SVf ")",
                 SVfARG(S_gv_display(aTHX_ cGVOPo_gv)));
         break;
 
@@ -3334,19 +3342,19 @@ Perl_debop(pTHX_ const OP *o)
         break;
 
     case OP_MULTIDEREF:
-        PerlIO_printf(Perl_debug_log, "(%" SVf ")",
+        PerlIO_printf(debug_log, "(%" SVf ")",
             SVfARG(multideref_stringify(o, deb_curcv(cxstack_ix))));
         break;
 
     case OP_MULTICONCAT:
-        PerlIO_printf(Perl_debug_log, "(%" SVf ")",
+        PerlIO_printf(debug_log, "(%" SVf ")",
             SVfARG(multiconcat_stringify(o)));
         break;
 
     default:
         break;
     }
-    PerlIO_printf(Perl_debug_log, "\n");
+    PerlIO_printf(debug_log, "\n");
     return 0;
 }
 
@@ -3548,9 +3556,12 @@ S_debprof(pTHX_ const OP *o)
 
     if (!DEBUG_J_TEST_ && CopSTASH_eq(PL_curcop, PL_debstash))
         return;
-    if (!PL_profiledata)
-        Newxz(PL_profiledata, MAXO, U32);
-    ++PL_profiledata[o->op_type];
+    U32 * profiledata = PL_profiledata;
+    if (!profiledata) {
+        Newxz(profiledata, MAXO, U32);
+        PL_profiledata = profiledata;
+    }
+    ++profiledata[o->op_type];
 }
 
 /*
@@ -3568,11 +3579,14 @@ Perl_debprofdump(pTHX)
     unsigned i;
     if (!PL_profiledata)
         return;
+    PerlIO * debug_log = Perl_debug_log;
+    U32 * profiledata = PL_profiledata;
+    const char * const * const x_PL_op_names = PL_op_name;
     for (i = 0; i < MAXO; i++) {
-        if (PL_profiledata[i])
-            PerlIO_printf(Perl_debug_log,
-                          "%5lu %s\n", (unsigned long)PL_profiledata[i],
-                                       PL_op_name[i]);
+        if (profiledata[i])
+            PerlIO_printf(debug_log,
+                          "%5lu %s\n", (unsigned long)profiledata[i],
+                                       x_PL_op_names[i]);
     }
 }
 
