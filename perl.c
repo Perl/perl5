@@ -4227,6 +4227,19 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
                 Safefree(PL_origfilename);
                 PL_origfilename = (char *)scriptname;
             }
+            else {
+                char proc_fd_path[64];
+                snprintf(proc_fd_path, sizeof(proc_fd_path), "/proc/self/fd/%d", fdscript);
+                char target_path[MAXPATHLEN];
+                SSize_t len = readlink(proc_fd_path, target_path, sizeof(target_path) - 1);
+                if (len != -1) {
+                    Stat_t statbuf;
+                    target_path[len] = '\0';
+                    if (PerlLIO_stat(target_path, &statbuf) == 0 && S_ISREG(statbuf.st_mode)) {
+                        scriptname = PL_origfilename = find_script(target_path, dosearch, NULL, 1);
+                    }
+                }
+            }
         }
     }
 
