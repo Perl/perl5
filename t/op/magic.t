@@ -765,7 +765,7 @@ fresh_perl_is
 # ${^OPEN} and $^H interaction
 # Setting ${^OPEN} causes $^H to change, but setting $^H would only some-
 # times make ${^OPEN} change, depending on whether it was in the same BEGIN
-# block.  Don’t test actual values (subject to change); just test for
+# block.  Don't test actual values (subject to change); just test for
 # consistency.
 my @stuff;
 eval '
