@@ -279,19 +279,31 @@ X<-C>
 
 The B<-C> flag controls some of the Perl Unicode features.
 
+B<CAUTION:> As with the L<C<:utf8> PerlIO layer|PerlIO/:utf8>, none of
+the features enabled by this flag or the equivalent C<PERL_UNICODE>
+environment variable validate that input is valid UTF-8, nor guarantee
+to produce valid UTF-8. Instead it will assume input is provided in
+Perl's internal upgraded byte encoding, and provide output in this
+encoding, which is a superset of UTF-8 that can encode any character
+allowed in Perl strings. (On EBCDIC systems, it is a superset of
+UTF-EBCDIC instead.) This can result in broken Perl strings or output
+bytes which are not valid in UTF-8. This internal encoding will be
+referred to as C<utf8> below to differentiate it from a strict UTF-8
+encoding format.
+
 As of 5.8.1, the B<-C> can be followed either by a number or a list
 of option letters.  The letters, their numeric values, and effects
 are as follows; listing the letters is equal to summing the numbers.
 
-    I     1   STDIN is assumed to be in UTF-8
-    O     2   STDOUT will be in UTF-8
-    E     4   STDERR will be in UTF-8
+    I     1   STDIN is assumed to be in utf8
+    O     2   STDOUT will be in utf8
+    E     4   STDERR will be in utf8
     S     7   I + O + E
-    i     8   UTF-8 is the default PerlIO layer for input streams
-    o    16   UTF-8 is the default PerlIO layer for output streams
+    i     8   :utf8 is the default PerlIO layer for input streams
+    o    16   :utf8 is the default PerlIO layer for output streams
     D    24   i + o
     A    32   the @ARGV elements are expected to be strings encoded
-              in UTF-8
+              in utf8
     L    64   normally the "IOEioA" are unconditional, the L makes
               them conditional on the locale environment variables
               (the LC_ALL, LC_CTYPE, and LANG, in the order of
@@ -307,14 +319,14 @@ perl.h gives W/128 as PERL_UNICODE_WIDESYSCALLS "/* for Sarathy */"
 perltodo mentions Unicode in %ENV and filenames. I guess that these will be
 options e and f (or F).
 
-For example, B<-COE> and B<-C6> will both turn on UTF-8-ness on both
+For example, B<-COE> and B<-C6> will both turn on utf8-ness on both
 STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
 nor toggling.
 
 The C<io> options mean that any subsequent open() (or similar I/O
 operations) in main program scope will have the C<:utf8> PerlIO layer
-implicitly applied to them, in other words, UTF-8 is expected from any
-input stream, and UTF-8 is produced to any output stream.  This is just
+implicitly applied to them, in other words, utf8 is expected from any
+input stream, and utf8 is produced to any output stream.  This is just
 the default set via L<C<${^OPEN}>|perlvar/${^OPEN}>,
 with explicit layers in open() and with binmode() one can
 manipulate streams as usual.  This has no effect on code run in modules.
@@ -322,7 +334,7 @@ manipulate streams as usual.  This has no effect on code run in modules.
 B<-C> on its own (not followed by any number or option list), or the
 empty string C<""> for the L</PERL_UNICODE> environment variable, has the
 same effect as B<-CSDL>.  In other words, the standard I/O handles and
-the default C<open()> layer are UTF-8-fied I<but> only if the locale
+the default C<open()> layer are utf8-fied I<but> only if the locale
 environment variables indicate a UTF-8 locale.  This behaviour follows
 the I<implicit> (and problematic) UTF-8 behaviour of Perl 5.8.0.
 (See L<perl581delta/UTF-8 no longer default under UTF-8 locales>.)
