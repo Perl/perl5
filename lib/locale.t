@@ -134,11 +134,7 @@ our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 
 # Certain tests have been shown to be problematical for a few locales.  Don't
 # fail them unless at least this percentage of the tested locales fail.
-# EBCDIC os390 has more locales fail than normal, because it has locales that
-# move various critical characters like '['.
-my $acceptable_failure_percentage = ($os =~ / ^ ( os390 ) $ /x)
-                                    ? 10
-                                    : 5;
+my $acceptable_failure_percentage = 5;
 
 # The list of test numbers of the problematic tests.
 my %problematical_tests;
