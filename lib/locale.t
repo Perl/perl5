@@ -150,6 +150,11 @@ my %known_bad_locales = (
                           darwin => qr/ ^ lt_LT.ISO8859 /ix,
                           netbsd => qr/\bISO8859-2\b/i,
 
+                          # NBSP is considered graphical in this locale, and
+                          # not a \s.  Other IBM code pages have it be both,
+                          # and handy.h handles that case.
+                          os390 => qr/ IBM-924 /ix,
+
                           # This may be the same bug as the cygwin below; it's
                           # generating malformed UTF-8 on the radix being
                           # mulit-byte
