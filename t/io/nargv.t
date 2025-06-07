@@ -114,6 +114,14 @@ sub other {
     # available, which I believe is the case for the Win32 CRTs too.
     # If this turns out not to be the case this test will need to skip on
     # such platforms or only run on a small set of known-good platforms.
+    if ($^O eq 'os390') {
+        print
+           "ok 7 # skip z/OS doesn't necessarily allocate fd's as expected\n";
+        # khw checked by hand (on June 6, 2025) the failure that led to this test,
+        # https://github.com/perl/perl5/issues/16602, and it did not fail.
+        # So, the test would flap there
+    }
+    else {
     my $tfile = mkfiles(1);
     open my $f, "<", $tfile
       or die "Cannot open temp: $!";
@@ -125,6 +133,7 @@ sub other {
     close $f;
     close $f2;
     close $f3;
+    }
 }
 
 
