@@ -27,10 +27,10 @@ sub open_print_header {
 
 my $l = open_print_header('locale_table.h');
 print $l <<EOF;
-/* This defines a macro for each individual locale category used on the this
- * system.  (The congomerate category LC_ALL is not included.)  This
- * file will be #included as the interior of various parallel arrays and in
- * other constructs; each usage will re-#define the macro to generate its
+/* This defines a macro for each individual locale category used on this
+ * system.  (The conglomerate category LC_ALL is not included.)  This file
+ * will be #included as the interior of various parallel arrays and in other
+ * constructs; each usage will re-#define the macro to generate its
  * appropriate data.
  *
  * This guarantees the arrays will be parallel, and populated in the order
