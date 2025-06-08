@@ -1114,13 +1114,40 @@ sub generate_opcode_h_pl_check {
     INIT({
     END
 
+
     for (@ops) {
         print "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
     }
 
     print <<~'END';
-    });
+
+    /* The final entries are function pointers not attached to an opcode.
+     * These are to be used to compare with function pointers in the earlier
+     * part of the array, since in some platforms (notably z/OS), it is
+     * undefined behavior to compare function pointers for equality, even
+     * though calling them will invoke the same function.  IBM personnel say
+     * that the comparisons do work when the pointers are compiled in the same
+     * translation unit.  Hence, ck_null in all positions in the array will
+     * have the same value.  See GH #23399 */
     END
+    my @perl_internal_extras = qw(ck_null ck_exists ck_delete);
+    for (@perl_internal_extras) {
+        print "\t", tab(3, "Perl_$_,"), "\n";
+    }
+
+    print <<~'END';
+    });
+
+    /* Indexes into PL_check for the comparison function pointers */
+    #ifdef PERL_IN_PEEP_C
+    END
+
+    for (my $i = 0; $i < @perl_internal_extras; $i++) {
+        my $index = @ops + $i;
+        my $define = uc $perl_internal_extras[$i];
+        print "  #define PERL_$define  $index\n";
+    }
+    print "#endif\n";
 }
 
 sub generate_opcode_h_pl_opargs {

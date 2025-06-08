@@ -1881,7 +1881,26 @@ INIT({
 	Perl_ck_null,		/* multiparam */
 	Perl_ck_null,		/* paramtest */
 	Perl_ck_null,		/* paramstore */
+
+/* The final entries are function pointers not attached to an opcode.
+ * These are to be used to compare with function pointers in the earlier
+ * part of the array, since in some platforms (notably z/OS), it is
+ * undefined behavior to compare function pointers for equality, even
+ * though calling them will invoke the same function.  IBM personnel say
+ * that the comparisons do work when the pointers are compiled in the same
+ * translation unit.  Hence, ck_null in all positions in the array will
+ * have the same value.  See GH #23399 */
+	Perl_ck_null,	
+	Perl_ck_exists,	
+	Perl_ck_delete,	
 });
+
+/* Indexes into PL_check for the comparison function pointers */
+#ifdef PERL_IN_PEEP_C
+  #define PERL_CK_NULL  429
+  #define PERL_CK_EXISTS  430
+  #define PERL_CK_DELETE  431
+#endif
 
 EXTCONST U32 PL_opargs[] INIT({
 	0x00000000,	/* null */

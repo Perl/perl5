@@ -2205,14 +2205,14 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             /* if a custom array/hash access checker is in scope,
              * abandon optimisation attempt */
             if (  (o->op_type == OP_AELEM || o->op_type == OP_HELEM)
-               && PL_check[o->op_type] != Perl_ck_null)
+               && PL_check[o->op_type] != PL_check[PERL_CK_NULL])
                 return;
             /* similarly for customised exists and delete */
             if (  (o->op_type == OP_EXISTS)
-               && PL_check[o->op_type] != Perl_ck_exists)
+               && PL_check[o->op_type] != PL_check[PERL_CK_EXISTS])
                 return;
             if (  (o->op_type == OP_DELETE)
-               && PL_check[o->op_type] != Perl_ck_delete)
+               && PL_check[o->op_type] != PL_check[PERL_CK_DELETE])
                 return;
 
             if (   o->op_type != OP_AELEM
