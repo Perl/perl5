@@ -13959,7 +13959,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 
     PERL_UNUSED_ARG(param);
 
-    ret = fdopendir(dup(my_dirfd(dp)));
+    ret = fdopendir(PerlLIO_dup_cloexec(my_dirfd(dp)));
 
 #elif defined(WIN32)
     ret = win32_dirp_dup(dp, param);
