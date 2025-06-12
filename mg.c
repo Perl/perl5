@@ -1009,20 +1009,20 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         {
             dSAVE_ERRNO;
 #ifdef VMS
-            sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
+            sv_setnv(sv, (NV)((saved_errno == EVMSERR) ? vaxc$errno : saved_errno));
 #else
-            sv_setnv(sv, (NV)errno);
+            sv_setnv(sv, (NV)saved_errno);
 #endif
 #ifdef OS2
-            if (errno == errno_isOS2 || errno == errno_isOS2_set)
+            if (saved_errno == errno_isOS2 || saved_errno == errno_isOS2_set)
                 sv_setpv(sv, os2error(Perl_rc));
             else
 #endif
-            if (! errno) {
+            if (! saved_errno) {
                 SvPVCLEAR(sv);
             }
             else {
-                sv_string_from_errnum(errno, sv);
+                sv_string_from_errnum(saved_errno, sv);
                 /* If no useful string is available, don't
                  * claim to have a string part.  The SvNOK_on()
                  * below will cause just the number part to be valid */
