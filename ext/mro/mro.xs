@@ -11,7 +11,6 @@ static const struct mro_alg c3_alg =
     {S_mro_get_linear_isa_c3, "c3", 2, 0, 0};
 
 /*
-=for apidoc mro_get_linear_isa_c3
 
 Returns the C3 linearization of C<@ISA>
 the given stash.  The return value is a read-only AV*
@@ -25,7 +24,6 @@ semi-permanently (otherwise it might be deleted
 out from under you the next time the cache is
 invalidated).
 
-=cut
 */
 
 static AV*
