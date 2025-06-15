@@ -72,12 +72,13 @@ foreach my $num (0 .. $#lines) {
 
 $c_code .= <<EOF_C;
 
+#ifdef WANT_LEAVE_SCOPE_ARG_COUNTS
 static const U8 leave_scope_arg_counts[] = {
 EOF_C
 
 foreach my $tuple (@arg_num) {
     my ($nargs, $type)= @$tuple;
-    $c_code .= sprintf "    %d%s /* %*s */\n",
+    $c_code .= sprintf "  %d%s /* %*s */\n",
         $nargs, $tuple == $arg_num[-1] ? " " : ",",
         -$tlen, $type;
 }
@@ -85,6 +86,7 @@ my $max_savet= $#arg_num;
 
 $c_code .= <<EOF_C;
 };
+#endif
 
 #define MAX_SAVEt $max_savet
 EOF_C

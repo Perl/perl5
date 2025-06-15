@@ -24,6 +24,7 @@
 
 #include "EXTERN.h"
 #define PERL_IN_SCOPE_C
+#define WANT_LEAVE_SCOPE_ARG_COUNTS
 #include "perl.h"
 #include "feature.h"
 
