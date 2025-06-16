@@ -6680,6 +6680,8 @@ PP_wrapped(pp_reverse, 0, 1)
                 } else {
                     STRLEN i = 0;
                     STRLEN j = len;
+                    U32 u32_1, u32_2;
+                    U16 u16_1, u16_2;
                     char * outp= SvPVX(TARG);
                     /* Take a chunk of bytes from the front and from the
                      * back, reverse the bytes in each and and swap the
@@ -6688,30 +6690,47 @@ PP_wrapped(pp_reverse, 0, 1)
                      * into bswap instructions by the compiler.
                      */
 #ifdef HAS_QUAD
+                    U64 u64_1, u64_2;
                     while (j - i >= 16) {
-                        *(U64 *)(outp + i) = _swab_64_( *(U64 *)(src + j - 8) );
-                        *(U64 *)(outp + j - 8) = _swab_64_( *(U64 *)(src + i) );
+                        memcpy(&u64_1, src + j - 8, 8);
+                        memcpy(&u64_2, src + i, 8);
+                        u64_1 = _swab_64_(u64_1);
+                        u64_2 = _swab_64_(u64_2);
+                        memcpy(outp + j - 8, &u64_2, 8);
+                        memcpy(outp + i, &u64_1, 8);
                         i += 8;
                         j -= 8;
                     }
 
                     if (j - i >= 8) {
-                        *(U32 *)(outp + i) = _swab_32_( *(U32 *)(src + j - 4) );
-                        *(U32 *)(outp + j - 4) = _swab_32_( *(U32 *)(src + i) );
+                        memcpy(&u32_1, src + j - 4, 4);
+                        memcpy(&u32_2, src + i, 4);
+                        u32_1 = _swab_32_(u32_1);
+                        u32_2 = _swab_32_(u32_2);
+                        memcpy(outp + j - 4, &u32_2, 4);
+                        memcpy(outp + i, &u32_1, 4);
                         i += 4;
                         j -= 4;
                     }
 #else
                     while (j - i >= 8) {
-                        *(U32 *)(outp + i) = _swab_32_( *(U32 *)(src + j - 4) );
-                        *(U32 *)(outp + j - 4) = _swab_32_( *(U32 *)(src + i) );
+                        memcpy(&u32_1, src + j - 4, 4);
+                        memcpy(&u32_2, src + i, 4);
+                        u32_1 = _swab_32_(u32_1);
+                        u32_2 = _swab_32_(u32_2);
+                        memcpy(outp + j - 4, &u32_2, 4);
+                        memcpy(outp + i, &u32_1, 4);
                         i += 4;
                         j -= 4;
                     }
 #endif
                     if (j - i >= 4) {
-                        *(U16 *)(outp + i) = _swab_16_( *(U16 *)(src + j - 2) );
-                        *(U16 *)(outp + j - 2) = _swab_16_( *(U16 *)(src + i) );
+                        memcpy(&u16_1, src + j - 2, 2);
+                        memcpy(&u16_2, src + i, 2);
+                        u16_1 = _swab_16_(u16_1);
+                        u16_2 = _swab_16_(u16_2);
+                        memcpy(outp + j - 2, &u16_2, 2);
+                        memcpy(outp + i, &u16_1, 2);
                         i += 2;
                         j -= 2;
                     }
@@ -6761,40 +6780,51 @@ PP_wrapped(pp_reverse, 0, 1)
             }
             STRLEN i = 0;
             STRLEN j = len;
+            U32 u32_1, u32_2;
+            U16 u16_1, u16_2;
             /* Reverse the buffer in place, in chunks where possible */
 #ifdef HAS_QUAD
+            U64 u64_1, u64_2;
             while (j - i >= 16) {
-                U64 lchunk = _swab_64_( *(U64 *)(up + j - 8) );
-                U64 rchunk = _swab_64_( *(U64 *)(up + i) );
-                *(U64 *)(up + i) = lchunk;
-                *(U64 *)(up + j - 8) = rchunk;
+                memcpy(&u64_1, up + j - 8, 8);
+                memcpy(&u64_2, up + i, 8);
+                u64_1 = _swab_64_(u64_1);
+                u64_2 = _swab_64_(u64_2);
+                memcpy(up + j - 8, &u64_2, 8);
+                memcpy(up + i, &u64_1, 8);
                 i += 8;
                 j -= 8;
             }
 
             if (j - i >= 8) {
-                U32 lchunk = _swab_32_( *(U32 *)(up + j - 4) );
-                U32 rchunk = _swab_32_( *(U32 *)(up + i) );
-                *(U32 *)(up + i) = lchunk;
-                *(U32 *)(up + j - 4) = rchunk;
+                memcpy(&u32_1, up + j - 4, 4);
+                memcpy(&u32_2, up + i, 4);
+                u32_1 = _swab_32_(u32_1);
+                u32_2 = _swab_32_(u32_2);
+                memcpy(up + j - 4, &u32_2, 4);
+                memcpy(up + i, &u32_1, 4);
                 i += 4;
                 j -= 4;
             }
 #else
             while (j - i >= 8) {
-                U32 lchunk = _swab_32_( *(U32 *)(up + j - 4) );
-                U32 rchunk = _swab_32_( *(U32 *)(up + i) );
-                *(U32 *)(up + i) = lchunk;
-                *(U32 *)(up + j - 4) = rchunk;
+                memcpy(&u32_1, up + j - 4, 4);
+                memcpy(&u32_2, up + i, 4);
+                u32_1 = _swab_32_(u32_1);
+                u32_2 = _swab_32_(u32_2);
+                memcpy(up + j - 4, &u32_2, 4);
+                memcpy(up + i, &u32_1, 4);
                 i += 4;
                 j -= 4;
             }
 #endif
             if (j - i >= 4) {
-                U16 lchunk = _swab_16_( *(U16 *)(up + j - 2) );
-                U16 rchunk = _swab_16_( *(U16 *)(up + i) );
-                *(U16 *)(up + i) = lchunk;
-                *(U16 *)(up + j - 2) = rchunk;
+                memcpy(&u16_1, up + j - 2, 2);
+                memcpy(&u16_2, up + i, 2);
+                u16_1 = _swab_16_(u16_1);
+                u16_2 = _swab_16_(u16_2);
+                memcpy(up + j - 2, &u16_2, 2);
+                memcpy(up + i, &u16_1, 2);
                 i += 2;
                 j -= 2;
             }
