@@ -6680,8 +6680,8 @@ PP_wrapped(pp_reverse, 0, 1)
                 } else {
                     STRLEN i = 0;
                     STRLEN j = len;
-                    U32 u32_1, u32_2;
-                    U16 u16_1, u16_2;
+                    uint32_t u32_1, u32_2;
+                    uint16_t u16_1, u16_2;
                     char * outp= SvPVX(TARG);
                     /* Take a chunk of bytes from the front and from the
                      * back, reverse the bytes in each and and swap the
@@ -6690,7 +6690,7 @@ PP_wrapped(pp_reverse, 0, 1)
                      * into bswap instructions by the compiler.
                      */
 #ifdef HAS_QUAD
-                    U64 u64_1, u64_2;
+                    uint64_t u64_1, u64_2;
                     while (j - i >= 16) {
                         memcpy(&u64_1, src + j - 8, 8);
                         memcpy(&u64_2, src + i, 8);
@@ -6780,11 +6780,11 @@ PP_wrapped(pp_reverse, 0, 1)
             }
             STRLEN i = 0;
             STRLEN j = len;
-            U32 u32_1, u32_2;
-            U16 u16_1, u16_2;
+            uint32_t u32_1, u32_2;
+            uint16_t u16_1, u16_2;
             /* Reverse the buffer in place, in chunks where possible */
 #ifdef HAS_QUAD
-            U64 u64_1, u64_2;
+            uint64_t u64_1, u64_2;
             while (j - i >= 16) {
                 memcpy(&u64_1, up + j - 8, 8);
                 memcpy(&u64_2, up + i, 8);
