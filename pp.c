@@ -6529,6 +6529,20 @@ PP(pp_unshift)
     return NORMAL;
 }
 
+#ifdef _MSC_VER
+#  pragma intrinsic(_byteswap_ushort, _byteswap_ulong, _byteswap_uint64)
+#  define S_bswap16(_x) _byteswap_ushort(_x)
+#  define S_bswap32(_x) _byteswap_ulong(_x)
+#  define S_bswap64(_x) _byteswap_uint64(_x)
+PERL_STATIC_FORCE_INLINE void *
+    S_memcpy(void *dest, const void *src,size_t count);
+#else
+#  define S_bswap16(_x) _swab_16_(_x)
+#  define S_bswap32(_x) _swab_32_(_x)
+#  define S_bswap64(_x) _swab_64_(_x)
+#  define S_memcpy(_d,_s,_n) memcpy((_d),(_s),(_n))
+#endif
+
 PP_wrapped(pp_reverse, 0, 1)
 {
     dSP; dMARK;
@@ -6554,15 +6568,17 @@ PP_wrapped(pp_reverse, 0, 1)
                     SV *begin, *end;
 
                     if (can_preserve) {
-                        if (!av_exists(av, i)) {
-                            if (av_exists(av, j)) {
+                        bool exi = av_exists(av, i);
+                        bool exj = av_exists(av, j);
+                        if (!exi) {
+                            if (exj) {
                                 SV *sv = av_delete(av, j, 0);
                                 begin = *av_fetch(av, i, TRUE);
                                 sv_setsv_mg(begin, sv);
                             }
                             continue;
                         }
-                        else if (!av_exists(av, j)) {
+                        else if (!exj) {
                             SV *sv = av_delete(av, i, 0);
                             end = *av_fetch(av, j, TRUE);
                             sv_setsv_mg(end, sv);
@@ -6643,18 +6659,19 @@ PP_wrapped(pp_reverse, 0, 1)
                       * in a single pass, rather than 2-3 passes. */
 
                 const char * src = SvPV_const(src_sv, len);
+                U8* dd;
 
                 /* Prepare the TARG. */
-                if (SvTYPE(TARG) < SVt_PV) {
+                if (SvTHINKFIRST(TARG))
+                     SV_CHECK_THINKFIRST_COW_DROP(TARG); /* Drops any buffer or RV */
+                if (SvTYPE(TARG) < SVt_PV)
                     SvUPGRADE(TARG, SvTYPE(src_sv)); /* No buffer allocation here */
-                } else if(SvTHINKFIRST(TARG)) {
-                     SV_CHECK_THINKFIRST_COW_DROP(TARG); /* Drops any buffer */
-                }
-                SvSETMAGIC(TARG);
-                SvGROW(TARG, len + 1);
+                else /* can't have SMG if < PVMG, SvROK/SvAMAGIC doesn't apply */
+                    SvSETMAGIC(TARG);
+                dd = (U8*)SvGROW(TARG, len + 1);
                 SvCUR_set(TARG, len);
                 SvPOK_only(TARG);
-                *SvEND(TARG) = '\0';
+                dd[len] = '\0';
                 if (SvTAINTED(src_sv))
                     SvTAINT(TARG);
 
@@ -6663,9 +6680,9 @@ PP_wrapped(pp_reverse, 0, 1)
                     SvUTF8_on(TARG);
 
                     const U8* s = (const U8*)src;
-                    U8* dd = (U8*)(SvPVX(TARG) + len);
                     const U8* send = (const U8*)(s + len);
                     int bytes = 0;
+                    dd = dd + len;
                     while (s < send) {
                         bytes = UTF8SKIP(s);
                         if (bytes == 1) {
@@ -6680,9 +6697,9 @@ PP_wrapped(pp_reverse, 0, 1)
                 } else {
                     STRLEN i = 0;
                     STRLEN j = len;
-                    uint32_t u32_1, u32_2;
-                    uint16_t u16_1, u16_2;
-                    char * outp= SvPVX(TARG);
+                    U32 u32_1, u32_2;
+                    U16 u16_1, u16_2;
+                    char * outp = NUM2PTR(char*,dd);
                     /* Take a chunk of bytes from the front and from the
                      * back, reverse the bytes in each and and swap the
                      * chunks over. This should have generally good
@@ -6690,47 +6707,47 @@ PP_wrapped(pp_reverse, 0, 1)
                      * into bswap instructions by the compiler.
                      */
 #ifdef HAS_QUAD
-                    uint64_t u64_1, u64_2;
+                    U64 u64_1, u64_2;
                     while (j - i >= 16) {
-                        memcpy(&u64_1, src + j - 8, 8);
-                        memcpy(&u64_2, src + i, 8);
-                        u64_1 = _swab_64_(u64_1);
-                        u64_2 = _swab_64_(u64_2);
-                        memcpy(outp + j - 8, &u64_2, 8);
-                        memcpy(outp + i, &u64_1, 8);
+                        S_memcpy(&u64_1, src + j - 8, 8);
+                        S_memcpy(&u64_2, src + i, 8);
+                        u64_1 = S_bswap64(u64_1);
+                        u64_2 = S_bswap64(u64_2);
+                        S_memcpy(outp + j - 8, &u64_2, 8);
+                        S_memcpy(outp + i, &u64_1, 8);
                         i += 8;
                         j -= 8;
                     }
 
                     if (j - i >= 8) {
-                        memcpy(&u32_1, src + j - 4, 4);
-                        memcpy(&u32_2, src + i, 4);
-                        u32_1 = _swab_32_(u32_1);
-                        u32_2 = _swab_32_(u32_2);
-                        memcpy(outp + j - 4, &u32_2, 4);
-                        memcpy(outp + i, &u32_1, 4);
+                        S_memcpy(&u32_1, src + j - 4, 4);
+                        S_memcpy(&u32_2, src + i, 4);
+                        u32_1 = S_bswap32(u32_1);
+                        u32_2 = S_bswap32(u32_2);
+                        S_memcpy(outp + j - 4, &u32_2, 4);
+                        S_memcpy(outp + i, &u32_1, 4);
                         i += 4;
                         j -= 4;
                     }
 #else
                     while (j - i >= 8) {
-                        memcpy(&u32_1, src + j - 4, 4);
-                        memcpy(&u32_2, src + i, 4);
-                        u32_1 = _swab_32_(u32_1);
-                        u32_2 = _swab_32_(u32_2);
-                        memcpy(outp + j - 4, &u32_2, 4);
-                        memcpy(outp + i, &u32_1, 4);
+                        S_memcpy(&u32_1, src + j - 4, 4);
+                        S_memcpy(&u32_2, src + i, 4);
+                        u32_1 = S_bswap32(u32_1);
+                        u32_2 = S_bswap32(u32_2);
+                        S_memcpy(outp + j - 4, &u32_2, 4);
+                        S_memcpy(outp + i, &u32_1, 4);
                         i += 4;
                         j -= 4;
                     }
 #endif
                     if (j - i >= 4) {
-                        memcpy(&u16_1, src + j - 2, 2);
-                        memcpy(&u16_2, src + i, 2);
-                        u16_1 = _swab_16_(u16_1);
-                        u16_2 = _swab_16_(u16_2);
-                        memcpy(outp + j - 2, &u16_2, 2);
-                        memcpy(outp + i, &u16_1, 2);
+                        S_memcpy(&u16_1, src + j - 2, 2);
+                        S_memcpy(&u16_2, src + i, 2);
+                        u16_1 = S_bswap16(u16_1);
+                        u16_2 = S_bswap16(u16_2);
+                        S_memcpy(outp + j - 2, &u16_2, 2);
+                        S_memcpy(outp + i, &u16_1, 2);
                         i += 2;
                         j -= 2;
                     }
@@ -6755,7 +6772,8 @@ PP_wrapped(pp_reverse, 0, 1)
             /* The traditional way, operate on the current byte buffer */
             if (DO_UTF8(TARG)) {	/* first reverse each character */
                 char *down;
-                U8* s = (U8*)SvPVX(TARG);
+                assert(SvPVX(TARG) == up);
+                U8* s = (U8*)up;
                 const U8* send = (U8*)(s + len);
                 while (s < send) {
                     if (UTF8_IS_INVARIANT(*s)) {
@@ -6780,51 +6798,51 @@ PP_wrapped(pp_reverse, 0, 1)
             }
             STRLEN i = 0;
             STRLEN j = len;
-            uint32_t u32_1, u32_2;
-            uint16_t u16_1, u16_2;
+            U32 u32_1, u32_2;
+            U16 u16_1, u16_2;
             /* Reverse the buffer in place, in chunks where possible */
 #ifdef HAS_QUAD
-            uint64_t u64_1, u64_2;
+            U64 u64_1, u64_2;
             while (j - i >= 16) {
-                memcpy(&u64_1, up + j - 8, 8);
-                memcpy(&u64_2, up + i, 8);
-                u64_1 = _swab_64_(u64_1);
-                u64_2 = _swab_64_(u64_2);
-                memcpy(up + j - 8, &u64_2, 8);
-                memcpy(up + i, &u64_1, 8);
+                S_memcpy(&u64_1, up + j - 8, 8);
+                S_memcpy(&u64_2, up + i, 8);
+                u64_1 = S_bswap64(u64_1);
+                u64_2 = S_bswap64(u64_2);
+                S_memcpy(up + j - 8, &u64_2, 8);
+                S_memcpy(up + i, &u64_1, 8);
                 i += 8;
                 j -= 8;
             }
 
             if (j - i >= 8) {
-                memcpy(&u32_1, up + j - 4, 4);
-                memcpy(&u32_2, up + i, 4);
-                u32_1 = _swab_32_(u32_1);
-                u32_2 = _swab_32_(u32_2);
-                memcpy(up + j - 4, &u32_2, 4);
-                memcpy(up + i, &u32_1, 4);
+                S_memcpy(&u32_1, up + j - 4, 4);
+                S_memcpy(&u32_2, up + i, 4);
+                u32_1 = S_bswap32(u32_1);
+                u32_2 = S_bswap32(u32_2);
+                S_memcpy(up + j - 4, &u32_2, 4);
+                S_memcpy(up + i, &u32_1, 4);
                 i += 4;
                 j -= 4;
             }
 #else
             while (j - i >= 8) {
-                memcpy(&u32_1, up + j - 4, 4);
-                memcpy(&u32_2, up + i, 4);
-                u32_1 = _swab_32_(u32_1);
-                u32_2 = _swab_32_(u32_2);
-                memcpy(up + j - 4, &u32_2, 4);
-                memcpy(up + i, &u32_1, 4);
+                S_memcpy(&u32_1, up + j - 4, 4);
+                S_memcpy(&u32_2, up + i, 4);
+                u32_1 = S_bswap32(u32_1);
+                u32_2 = S_bswap32(u32_2);
+                S_memcpy(up + j - 4, &u32_2, 4);
+                S_memcpy(up + i, &u32_1, 4);
                 i += 4;
                 j -= 4;
             }
 #endif
             if (j - i >= 4) {
-                memcpy(&u16_1, up + j - 2, 2);
-                memcpy(&u16_2, up + i, 2);
-                u16_1 = _swab_16_(u16_1);
-                u16_2 = _swab_16_(u16_2);
-                memcpy(up + j - 2, &u16_2, 2);
-                memcpy(up + i, &u16_1, 2);
+                S_memcpy(&u16_1, up + j - 2, 2);
+                S_memcpy(&u16_2, up + i, 2);
+                u16_1 = S_bswap16(u16_1);
+                u16_2 = S_bswap16(u16_2);
+                S_memcpy(up + j - 2, &u16_2, 2);
+                S_memcpy(up + i, &u16_1, 2);
                 i += 2;
                 j -= 2;
             }
@@ -6842,6 +6860,11 @@ PP_wrapped(pp_reverse, 0, 1)
     }
     RETURN;
 }
+
+#undef S_memcpy
+#undef S_bswap16
+#undef S_bswap32
+#undef S_bswap64
 
 PP_wrapped(pp_split,
               (   (PL_op->op_private & OPpSPLIT_ASSIGN)
@@ -8178,6 +8201,18 @@ PP(pp_is_tainted)
     rpp_replace_1_IMM_NN(boolSV(SvTAINTED(arg)));
     return NORMAL;
 }
+
+#ifdef _MSC_VER
+/* this pragma can't be push/pop-ed vs whatever the cmd line to cl.exe was */
+#  pragma intrinsic(memcpy)
+
+void *
+S_memcpy(void *dest, const void *src, size_t count)
+{
+    return memcpy(dest, src, count);
+}
+
+#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

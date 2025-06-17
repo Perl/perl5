@@ -1452,18 +1452,26 @@ Use C<L</UINTMAX_C>> to get the largest type available on the platform.
 =cut
 */
 #ifndef UINT16_C
-#  if INTSIZE >= 2
-#    define UINT16_C(x) ((U16_TYPE)x##U)
+#  ifdef _MSC_VER
+#    define UINT16_C(x) ((U16TYPE)x##ui16)
 #  else
-#    define UINT16_C(x) ((U16_TYPE)x##UL)
+#    if INTSIZE >= 2
+#      define UINT16_C(x) ((U16TYPE)x##U)
+#    else
+#      define UINT16_C(x) ((U16TYPE)x##UL)
+#    endif
 #  endif
 #endif
 
 #ifndef UINT32_C
-#  if INTSIZE >= 4
-#    define UINT32_C(x) ((U32_TYPE)x##U)
+#  ifdef _MSC_VER
+#    define UINT32_C(x) ((U32TYPE)x##ui32)
 #  else
-#    define UINT32_C(x) ((U32_TYPE)x##UL)
+#    if INTSIZE >= 4
+#      define UINT32_C(x) ((U32TYPE)x##U)
+#    else
+#      define UINT32_C(x) ((U32TYPE)x##UL)
+#    endif
 #  endif
 #endif
 
