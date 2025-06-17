@@ -4000,7 +4000,10 @@ win32_isatty(int fd)
         return 0;
     }
 
-    if (GetConsoleMode(fh, &mode))
+    /* Prevent executing RtlNtStatusToDosError() for disk files and sockets
+       inside GetConsoleMode(). RtlNtStatusToDosError() does a slow linear
+       search. For details, see PR for this commit.*/
+    if (GetFileType(fh) == FILE_TYPE_CHAR && GetConsoleMode(fh, &mode))
         return 1;
 
     errno = ENOTTY;
