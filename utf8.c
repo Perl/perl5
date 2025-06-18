@@ -1619,7 +1619,6 @@ The caller, of course, is responsible for freeing any returned AV.
 =for apidoc Amnh||UTF8_ALLOW_LONG
 =for apidoc Amnh||UTF8_ALLOW_NON_CONTINUATION
 =for apidoc Amnh||UTF8_ALLOW_OVERFLOW
-=for apidoc Amnh||UTF8_ALLOW_PERL_EXTENDED
 =for apidoc Amnh||UTF8_ALLOW_SHORT
 =for apidoc Amnh||UTF8_CHECK_ONLY
 =for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
