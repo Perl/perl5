@@ -60,8 +60,8 @@ similar to the way that C<:reader> already creates reader accessors.
 
 =head2 New C<any> and C<all> operators
 
-Two new experimental features have been added, which add two new list-processing
-operators, C<any> and C<all>.
+Two new experimental features have been added, which introduce the
+list-processing operators C<any> and C<all>.
 
     use v5.40;
     use feature 'keyword_all';
@@ -69,7 +69,7 @@ operators, C<any> and C<all>.
 
     my @numbers = ...
 
-    if(all { $_ % 2 == 0 } @numbers) {
+    if ( all { $_ % 2 == 0 } @numbers ) {
         say "All the numbers are even";
     }
 
@@ -87,7 +87,7 @@ invoking the code block.
 The feature flags enabling those keywords have been named
 L<C<keyword_any>|feature/"The 'keyword_any' feature">
 and L<C<keyword_all>|feature/"The 'keyword_all' feature">
-to avoid confusion with to the ability of the C<feature> module
+to avoid confusion with the ability of the C<feature> module
 to refer to all of its features by using the C<:all>
 export tag.  [L<GH #23104|https://github.com/Perl/perl5/issues/23104>]
 
@@ -132,7 +132,7 @@ package visibility.  See L<perlclass> for more detail.
 
 Along with the ability to declare methods lexically, this release also permits
 invoking a lexical subroutine as if it were a method, bypassing the usual
-name-based method resolution by name.
+name-based method resolution.
 
 Combined with lexical method declaration, these two new abilities create the
 effect of having private methods.
@@ -145,12 +145,9 @@ v5.10.  Their behavior was significantly changed in v5.10.1.  When the
 retroactively declared experimental.  Over the years, proposals to fix or
 supplement the features have come and gone.
 
-They were deprecated in Perl v5.38.0 and scheduled for removal in Perl
-5.42.0, and entirely removed in Perl 5.41.3.
-
-After some discussion these have been re-instated in 5.41.9.
-
-Using them no longer produces a deprecation warning.
+They were deprecated in Perl v5.38.0 and scheduled for removal in
+Perl v5.42.0. After extensive discussion their removal has been indefinitely
+postponed. Using them no longer produces a deprecation warning.
 
 Switch itself still requires the C<switch> feature, which is enabled
 by default for feature bundles from v5.9.5 through to v5.34.  Switch
@@ -178,17 +175,6 @@ enabled:
 
 [L<GH #22752|https://github.com/Perl/perl5/issues/22752>]
 
-=head2 New C<SvVSTRING> API macro
-
-A new API macro has been added, which is used to obtain the second string
-buffer out of a "vstring" SV, in a manner similar to the C<SvPV> macro which
-obtains the regular string buffer out of a regular SV.
-
-    STRLEN len;
-    const char *vstr_pv = SvVSTRING(sv, vstr_len);
-
-See L<perlapi/C<SvVSTRING>>.
-
 =head2 Unicode 16.0 supported
 
 Perl now supports Unicode 16.0
@@ -215,6 +201,10 @@ C<S_do_trans_invmap()> can overflow the destination pointer C<d>.
 
 It is believed that this vulnerability can enable Denial of Service or
 Arbitrary Code Execution attacks on platforms that lack sufficient defenses.
+
+The patch to fix this issue (87f42aa0e0096e9a346c9672aa3a0bd3bef8c1dd)
+is applicable to all perls that are vulnerable, including those
+out-of-support.
 
 Discovered by: Nathan Mills.
 
@@ -247,47 +237,6 @@ functions from enclosing functions may not be visible in the debugger.
 
 Note that calling C<eval EXPR> in a function unconditionally causes a function
 to reference its enclosing functions as it always has.
-
-=head2 Switch and Smart Match operator reinstated
-
-The "switch" feature and the smartmatch operator, C<~~>, were introduced in
-v5.10.  Their behavior was significantly changed in v5.10.1.  When the
-"experiment" system was added in v5.18.0, switch and smartmatch were
-retroactively declared experimental.  Over the years, proposals to fix or
-supplement the features have come and gone.
-
-They were deprecated in Perl v5.38.0 and scheduled for removal in Perl
-5.42.0, and entirely removed in Perl 5.41.3.
-
-After some discussion these have been re-instated.
-
-Using them no longer produces a deprecation warning.
-
-Switch itself still requires the C<switch> feature, which is enabled
-by default for feature bundles from v5.9.5 through to v5.34.  Switch
-remains disabled in feature bundles 5.35 and later, but can be
-separately enabled:
-
-  # no switch here
-  use v5.10;
-  # switch here
-  use v5.36;
-  # no switch here
-  use feature "switch";
-  # switch here
-
-Smart match now requires the C<smartmatch> feature, which is enabled
-by default and included in all feature bundles up to 5.40.  It is
-disabled for the 5.41 feature bundle and later, but can be separately
-enabled:
-
-  # smartmatch here
-  use v5.41;
-  # no smartmatch here
-  use feature "smartmatch";
-  # smartmatch here
-
-[L<GH #22752|https://github.com/Perl/perl5/issues/22752>]
 
 =head1 Deprecations
 
@@ -346,10 +295,6 @@ C<("A" x 1_000_000).time> might be a suitable small change.
 
 =item *
 
-C<Perl_leave_adjust_stacks>: additional efficiency for mortal copies.
-
-=item *
-
 C<tr///> now runs at the same speed regardless of the internal
 representation of its operand, as long as the only characters being
 translated are ASCII-range, for example C<tr/A-Z/a-z/>.  Previously, if
@@ -394,21 +339,6 @@ and swaps in a new dedicated operator (C<OP_SUBSTR_LEFT>).
 The stringification of integers by L<perlfunc/print> and L<perlfunc/say>,
 when coming from an C<SVt_IV>, is now more efficient.
 [L<GH #22927|https://github.com/Perl/perl5/issues/22927>]
-
-=item *
-
-Subroutines in packages no longer need to be stored in typeglobs:
-declaring a subroutine will now put a simple sub reference directly in the
-stash if possible, saving memory.  The typeglob still notionally exists,
-so accessing it will cause the stash entry to be upgraded to a typeglob
-(i.e. this is just an internal implementation detail).
-This optimization does not currently apply to XSUBs or exported
-subroutines, and method calls will undo it, since they cache things in
-typeglobs.
-[L<GH #23001|https://github.com/Perl/perl5/issues/23001>]
-
-(This optimization was originally announced in L<perl5220delta>, but due to a
-bug it only worked for subroutines in package C<main>, not in modules.)
 
 =item *
 
@@ -493,6 +423,7 @@ All forms of C<gv_fetchmeth()> are now documented together.
 =item *
 
 C<gv_autoload4> is now documented with C<gv_autoload_pv> and additional notes added.
+The long C<Perl_> forms are now listed when available.
 
 =back
 
@@ -522,6 +453,11 @@ to built-in types and class names.
 =item *
 
 Clarified that perl C<sort> is stable (and has been since v5.8.0).
+
+=item *
+
+The recommended alternatives to the C<rand()> function were updated to modern modules recommended by the CPAN Security Group.
+[L<GH #22873|https://github.com/Perl/perl5/pull/22873>]
 
 =back
 
@@ -560,6 +496,32 @@ Additional caveats have been added to the description of C<TARG>.
 =head3 L<perlop>
 
 =over 4
+
+=item *
+
+Portions of perlop are supposed to be ordered so that all the operators
+wth the same precedence are in a single section, and the sections are
+ordered so that the highest precedence operators appear first.
+This ordering has now been restored.  Other reorganization was done to
+improve clarity, with more basic operations described before ones that
+depend on them.
+
+=item *
+
+The documentation for here-docs has been cleaned up and reorganized.
+Indented here-docs were formerly documented separately, now the two
+types have interwoven documentation which is more compact, and easier to
+understand.
+
+=item *
+
+The documentation of the C<xor> operator has been expanded.
+
+=item *
+
+Outdated advice about using relational string operators in UTF-8 locales
+has been removed.  Use L<Unicode::Collate> for the best results, but
+these operators will give adequate results on many platforms.
 
 =item *
 
@@ -773,7 +735,7 @@ made:
 =item *
 
 A new F<t/run/todo.t> test script was added as a place for TODO tests
-for known unfixed bugs.
+for known unfixed bugs. Patches are welcome to add to this file.
 
 =item *
 
@@ -813,10 +775,9 @@ Changes to F<perl_langinfo.h> for Android [L<GH #22650|https://github.com/Perl/p
 
 F<cygwin.c>: fix several silly/terrible C errors. [L<GH #22724|https://github.com/Perl/perl5/issues/22724>]
 
-Workaround DLL load address conflict. [L<GH #22696|https://github.com/Perl/perl5/issues/22696>]
-
 Supply an explicit base address for C<cygperl*.dll> that cannot
-conflict with those generated by C<--enable-auto-image-base>.  [L<GH #22695|https://github.com/Perl/perl5/issues/22695>][L<GH #22104|https://github.com/Perl/perl5/issues/22104>]
+
+conflicl with those generated by C<--enable-auto-image-base>.  [L<GH #22695|https://github.com/Perl/perl5/issues/22695>][L<GH #22104|https://github.com/Perl/perl5/issues/22104>]
 
 =item MacOS (Darwin)
 
@@ -908,14 +869,6 @@ C<op_dump()> now also has the facility to print extra debugging information
 about custom operators, if those operators register a helper function via the
 new C<xop_dump> element of the C<XOP> structure. For more information, see the
 relevant additions to L<perlguts|perlguts/"Custom Operators">.
-
-=item *
-
-Enable removing most of F<mathoms.c> and stub functions [L<GH #22691|https://github.com/Perl/perl5/issues/22691>] and [L<GH #22714|https://github.com/Perl/perl5/issues/22714>].
-
-=item *
-
-C<pp_reverse>: don't COW buffer just to then un-COW it. [L<GH #22729|https://github.com/Perl/perl5/issues/22729>]
 
 =item *
 
@@ -1042,11 +995,34 @@ API functions avoids XS modules needing to know about or interact directly
 with the way this position is currently stored, which involves the
 C<PERL_MAGIC_regex_global> magic type.
 
+=item *
+
+New C<SvVSTRING> API macro
+
+A new API macro has been added, which is used to obtain the second string
+buffer out of a "vstring" SV, in a manner similar to the C<SvPV> macro which
+obtains the regular string buffer out of a regular SV.
+
+    STRLEN len;
+    const char *vstr_pv = SvVSTRING(sv, vstr_len);
+
+See L<perlapi/C<SvVSTRING>>.
+
 =back
 
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+[CVE-2025-40909] Perl threads have a working directory race condition where file operations may target unintended paths
+
+Perl thread cloning had a working directory race condition where file operations may target unintended paths. Perl 5.42 will no longer chdir to each handle.
+
+This problem was reported by Vincent Lefèvre via [L<GH #23010|https://github.com/Perl/perl5/issues/23010>] and assigned [L<CVE-2025-40909: Perl threads have a working directory race condition where file operations may target unintended paths|https://lists.security.metacpan.org/cve-announce/msg/30017499/>].
+
+Fixes were provided via [L<GH #23019|https://github.com/Perl/perl5/pull/23019>] and [L<GH #23361|https://github.com/Perl/perl5/pull/23361>].
 
 =item *
 
@@ -1058,31 +1034,11 @@ Fix feature 'class' Segmentation fault in DESTROY [L<GH #22278|https://github.co
 
 =item *
 
-Fix C<POSIX::strftime()> [L<GH #22369|https://github.com/Perl/perl5/issues/22369>].
-
-=item *
-
 C<chdir> now returns real booleans (as its documentation describes), not
 integers. This means the result of a failed C<chdir> now stringifies to C<''>,
 not C<'0'>.
 
 [L<GH #22365|https://github.com/Perl/perl5/issues/22365>]
-
-=item *
-
-L<C<open>|perlfunc/open> automatically creates an anonymous temporary file when
-passed C<undef> as a filename:
-
-    open(my $fh, "+>", undef) or die ...
-
-Due to the way this feature was implemented, it would also trigger for
-non-existent elements of arrays or hashes:
-
-    open(my $fh, "+>", $hash{no_such_key}) or die ...
-    # unexpectedly succeeds and creates a temp file
-
-Now a temporary file is only created if a literal C<undef> is passed.
-[L<GH #22385|https://github.com/Perl/perl5/issues/22385>]
 
 =item *
 
@@ -1095,7 +1051,7 @@ Compound assignment operators return lvalues that can be further modified:
 
 However, the separate numeric/string bitwise operators provided by L<the
 C<bitwise> feature|feature/The 'bitwise' feature>, C<< &= ^= |= &.= ^.= |.= >>,
-did not do so:
+did not return such lvalues:
 
     use feature qw(bitwise);
     ($x &= $y) += $z;
@@ -1113,6 +1069,8 @@ string that wasn't actually a string, but a number, C<undef>, or an object
 
 Now C<strftime> stringifies its first argument, as before.
 [L<GH #22498|https://github.com/Perl/perl5/issues/22498>]
+
+Also, fix C<POSIX::strftime()> [L<GH #22369|https://github.com/Perl/perl5/issues/22369>].
 
 =item *
 
@@ -1158,7 +1116,8 @@ such as C<Encode.pm>.
 
 =item *
 
-The perl parser would erroneously parse like C<=cut> some other POD directives
+The perl parser would erroneously parse some POD directives 
+as if they were C<=cut>. Some other POD directives
 whose names start with I<cut>, prematurely terminating an embedded POD section.
 The following cases were affected: I<cut> followed by a digit (e.g.
 C<=cut2studio>), I<cut> followed by an underscore (e.g. C<=cut_grass>), and in
@@ -1173,7 +1132,7 @@ with a misaligned access early in the build. [L<GH #22577|https://github.com/Per
 =item *
 
 On threaded builds on POSIX-like systems, if the perl signal handler
-receives we now resend the signal to the main perl thread.  Previously
+receives a signal, we now resend the signal to the main perl thread.  Previously
 this would crash.  [GH #22487]
 
 =item *
@@ -1191,7 +1150,8 @@ second evaluation.  Properly clear any cached values. [GH #22784]
 =item *
 
 L<perlfunc/shmread> and L<perlfunc/shmwrite> are no longer limited to 31-bit
-values for their POS and SIZE arguments.
+values and can use all the available bits on a platform for their POS and 
+SIZE arguments.
 [L<GH #22895|https://github.com/Perl/perl5/issues/22895>]
 
 =item *
@@ -1253,9 +1213,11 @@ lines saved by the debugger. [L<GH #23151|https://github.com/Perl/perl5/issues/2
 
 =item *
 
-Save debugger lines as C<PVIV> SVs rather than as C<PVMG> SVs as they
-don't need magic, aren't blessed and don't need to store a floating
-point part.  This should save 24 bytes per stored line for 64-bit
+In debugging mode, perl saves source lines from all files
+(plus an indication of whether each line is breakable)
+for use by the debugger. The internal storage format has been
+optimized to use less memory.
+This should save 24 bytes per stored line for 64-bit
 systems, more for C<-Duselongdouble> or C<-Dusequadmath> builds.
 Discussed in [L<GH #23171|https://github.com/Perl/perl5/issues/23171>].
 
@@ -1277,11 +1239,6 @@ for [L<GH #16608|https://github.com/Perl/perl5/issues/16608>].
 
 =item *
 
-Prevent a signature parameter of the form C<$ => from leaking an OP at
-compile-time. [L<GH #23187|https://github.com/Perl/perl5/issues/23187>]
-
-=item *
-
 Exceptions thrown and caught entirely within a C<defer {}> or C<finally {}>
 block no longer stop the outer run-loop.
 
@@ -1300,7 +1257,7 @@ This has now been fixed, and runs as expected. ([L<GH #23064|https://github.com/
 
 L<perlfunc/readline> now clears the error flag if an error occurs when
 reading and that error is C<EAGAIN> or C<EWOULDBLOCK>.  This allows
-old code that depended on C<readline> to clear all errors to ignore
+code that depended on C<readline> to clear all errors to ignore
 these relatively harmless errors.  [L<GH #22883|https://github.com/Perl/perl5/issues/22883>]
 
 =item *
@@ -1330,25 +1287,6 @@ time being.
 =head1 Known Problems
 
 =over 4
-
-=item *
-
-C<cygwin> builds may fail during testing due to a conflict between the
-load addresses of F<cygperl5_41_6.dll> and
-F<olib/auto/I18N/Langinfo/Langinfo.dll>.  This will also be visible
-for anything that attempts to fork() with C<I18N::LangInfo> loaded.
-
-This is known to fail for builds with options that increase the size
-of the binary, such as C<-DDEBUGGING>, C<-Doptimize="-O0 -g"> or
-C<-Doptimize="-O2 -g -march=x86-64-v2">.
-
-This can be avoided by building perl with
-C<-Astatic_ext=I18N/Langinfo>.
-
-The base addresses are generated by the linker based on the names of
-the DLLs, so this is expected to clear up for 5.41.7.
-
-[L<GH #22695|https://github.com/Perl/perl5/issues/22695>]
 
 =back
 
