@@ -916,7 +916,8 @@ our %Modules = (
     },
 
     'perlfaq' => {
-        'DISTRIBUTION' => 'ETHER/perlfaq-5.20240218.tar.gz',
+        'DISTRIBUTION' => 'ETHER/perlfaq-5.20250619.tar.gz',
+        'SYNCINFO'     => 'ether on Wed Jun 18 20:32:25 2025',
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [ qr/^inc/, qr/^xt/, qr{^t/00-} ],
     },
