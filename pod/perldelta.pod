@@ -84,9 +84,11 @@ except that they are implemented as direct core operators, and thus perform
 faster, and do not produce an additional subroutine call stack frame for
 invoking the code block.
 
-The feature flags enabling those keywords have been named L<keyword_any>
-and L<keyword_all> to avoid confusion with to the ability of the
-C<feature> module to refer to all of its features by using the C<:all>
+The feature flags enabling those keywords have been named
+L<C<keyword_any>|feature/"The 'keyword_any' feature">
+and L<C<keyword_all>|feature/"The 'keyword_all' feature">
+to avoid confusion with to the ability of the C<feature> module
+to refer to all of its features by using the C<:all>
 export tag.  [L<GH #23104|https://github.com/Perl/perl5/issues/23104>]
 
 The related experimental warning flags are consequently named
@@ -335,7 +337,7 @@ each containing one million "A"s:
     my @scalars; push @scalars, ("A" x 1_000_000) for 0..9;
 
 Now a single buffer is allocated and shared between a CONST OP and
-the ten scalar elements of L<@scalars>.
+the ten scalar elements of C<@scalars>.
 
 Note that any code using this sort of constant to simulate memory leaks
 (perhaps in test files) must now permute the string in order to trigger
@@ -449,72 +451,9 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
-L<IPC::Open3> has been upgraded from version 1.23 to 1.24.
-L<IPC::Open2> has been upgraded from version 1.07 to 1.08.
+L<XXX> has been upgraded from version A.xx to B.yy.
 
-There is now a way to pass lexical filehandles to child processes directly
-(instead of having the module create a pipe internally). Previously, only
-bareword filehandles could be used in "dup mode".
-
-=item *
-
-L<Math::Complex> has been upgraded from version 1.62 to 1.63.
-
-The complex number parser for string inputs has been improved. In particular,
-C<1+i>, C<123i>, C<inf>, C<-inf>, C<infi>, and C<-infi> are now handled
-correctly.
-
-=item *
-
-L<builtin> has been upgraded from version 0.017 to 0.018.
-
-On platforms that don't support Inf/NaN values in floating-point numbers (such
-as VAX), C<builtin::inf> and C<builtin::nan> now throw a runtime error (rather
-than breaking the perl build). [L<GH #22882|https://github.com/Perl/perl5/issues/22882>]
-
-=item *
-
-L<ExtUtils::ParseXS> has been extensively refactored internally and
-extensive tests have been added. Most of these changes shouldn't be
-visible externally with a few exceptions, the main ones being:
-
-The generated C code, especially for returning values, may have changed
-slightly, and in some cases be slightly more efficient (in particular,
-using C<TARG> more often to return a value rather than creating a new
-temporary).
-
-The parser is more likely to give warnings now on XS errors which
-previously would have just silently generated invalid C code.
-
-One XS bug has been fixed in a way that may be highly visible. Previously
-when parsing the parameters of an XS sub declaration, if a parameter
-couldn't be parsed, it was quietly ignored. This meant that it would still
-consume an argument, but wouldn't declare a C variable: a bit like the
-Perl-level C<my ($a, undef, $c) = @_>. Now, it gives a compile error. This
-will break XS code that does (for example):
-
-    void
-    foo(int a, /* skip arg */, int c)
-
-because C-comments aren't part of XS syntax, and so the parameter was a
-syntax error and was quietly skipped. This is better written as
-
-    void
-    foo(int a, b, int c)
-
-since parameters which are not assigned a type act as placeholders.
-
-=item *
-
-L<Search::Dict> has been upgraded from version 1.07 to 1.08.
-
-A missing parameter has been added to the sample code in the SYNOPSIS.
-
-=item *
-
-L<XS::APItest> has been upgraded from version 1.41 to 1.42.
-
-This fixes [L<GH #16654|https://github.com/Perl/perl5/issues/16654>].
+XXX If there was something important to note about this change, include that here.
 
 =back
 
@@ -568,6 +507,8 @@ C<0b101.11p-1>) are now documented. This feature was first introduced in perl
 5.22.0 together with hexadecimal floating-point constants and had a few bug
 fixes in perl 5.28.0, but it was never formally documented.
 [L<GH #18664|https://github.com/Perl/perl5/issues/18664>]
+
+=back
 
 =head3 L<perlfunc>
 
@@ -855,8 +796,6 @@ XXX List any platforms that this version of perl compiles on, that previous
 versions did not. These will either be enabled by new files in the F<hints/>
 directories, or new subdirectories and F<README> files at the top level of the
 source tree.
-
-=over 4
 
 =head2 Platform-Specific Notes
 
