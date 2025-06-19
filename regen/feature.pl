@@ -618,7 +618,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.96';
+our $VERSION = '1.97';
 
 FEATURES
 
@@ -733,7 +733,8 @@ given/when construct.
 See L<perlsyn/"Switch Statements"> for details.
 
 This feature is available starting with Perl 5.10.  It is enabled by
-feature bundles 5.10 through 5.34.
+feature bundles 5.10 through 5.34, and disabled from the 5.36 feature
+bundle onwards.
 
 =head2 The 'unicode_strings' feature
 
@@ -951,7 +952,7 @@ disallow indirect object syntax.
 This feature is available under this name from Perl 5.32 onwards. In
 previous versions, it was simply on all the time.  To disallow (or
 warn on) indirect object syntax on older Perls, see the L<indirect>
-CPAN module.
+CPAN module.  It is disabled from the 5.36 feature bundle onwards.
 
 =head2 The 'multidimensional' feature
 
@@ -965,7 +966,8 @@ When this feature is disabled the syntax that is normally replaced
 will report a compilation error.
 
 This feature is available under this name from Perl 5.34 onwards. In
-previous versions, it was simply on all the time.
+previous versions, it was simply on all the time.  It is disabled from
+the 5.36 feature bundle onwards.
 
 You can use the L<multidimensional> module on CPAN to disable
 multidimensional array emulation for older versions of Perl.
@@ -981,7 +983,8 @@ The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
 C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
 This feature is available under this name from Perl 5.34 onwards.  In
-previous versions it was simply on all the time.
+previous versions it was simply on all the time.  It is disabled from
+the 5.38 feature bundle onwards.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
@@ -1066,7 +1069,7 @@ which implement the "new" object system, previously codenamed "Corinna".
 This feature enables use C<'> (apostrophe) as an alternative to using
 C<::> as a separate in package and other global names.
 
-This is enabled by default, but disabled from the 5.41 feature bundle
+This is enabled by default, but disabled from the 5.42 feature bundle
 onwards.  In previous versions it was enabled all the time.
 
 This only disables C<'> in symbols in your source code, the internal
