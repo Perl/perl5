@@ -80,21 +80,7 @@ POD = perl.pod	\
 	perl5400delta.pod	\
 	perl5401delta.pod	\
 	perl5402delta.pod	\
-	perl5410delta.pod	\
-	perl54110delta.pod	\
-	perl54111delta.pod	\
-	perl54112delta.pod	\
-	perl54113delta.pod	\
-	perl54114delta.pod	\
-	perl5411delta.pod	\
-	perl5412delta.pod	\
-	perl5413delta.pod	\
-	perl5414delta.pod	\
-	perl5415delta.pod	\
-	perl5416delta.pod	\
-	perl5417delta.pod	\
-	perl5418delta.pod	\
-	perl5419delta.pod	\
+	perl5420delta.pod	\
 	perl561delta.pod	\
 	perl56delta.pod	\
 	perl581delta.pod	\
@@ -275,21 +261,7 @@ MAN = perl.man	\
 	perl5400delta.man	\
 	perl5401delta.man	\
 	perl5402delta.man	\
-	perl5410delta.man	\
-	perl54110delta.man	\
-	perl54111delta.man	\
-	perl54112delta.man	\
-	perl54113delta.man	\
-	perl54114delta.man	\
-	perl5411delta.man	\
-	perl5412delta.man	\
-	perl5413delta.man	\
-	perl5414delta.man	\
-	perl5415delta.man	\
-	perl5416delta.man	\
-	perl5417delta.man	\
-	perl5418delta.man	\
-	perl5419delta.man	\
+	perl5420delta.man	\
 	perl561delta.man	\
 	perl56delta.man	\
 	perl581delta.man	\
@@ -470,21 +442,7 @@ HTML = perl.html	\
 	perl5400delta.html	\
 	perl5401delta.html	\
 	perl5402delta.html	\
-	perl5410delta.html	\
-	perl54110delta.html	\
-	perl54111delta.html	\
-	perl54112delta.html	\
-	perl54113delta.html	\
-	perl54114delta.html	\
-	perl5411delta.html	\
-	perl5412delta.html	\
-	perl5413delta.html	\
-	perl5414delta.html	\
-	perl5415delta.html	\
-	perl5416delta.html	\
-	perl5417delta.html	\
-	perl5418delta.html	\
-	perl5419delta.html	\
+	perl5420delta.html	\
 	perl561delta.html	\
 	perl56delta.html	\
 	perl581delta.html	\
@@ -665,21 +623,7 @@ TEX = perl.tex	\
 	perl5400delta.tex	\
 	perl5401delta.tex	\
 	perl5402delta.tex	\
-	perl5410delta.tex	\
-	perl54110delta.tex	\
-	perl54111delta.tex	\
-	perl54112delta.tex	\
-	perl54113delta.tex	\
-	perl54114delta.tex	\
-	perl5411delta.tex	\
-	perl5412delta.tex	\
-	perl5413delta.tex	\
-	perl5414delta.tex	\
-	perl5415delta.tex	\
-	perl5416delta.tex	\
-	perl5417delta.tex	\
-	perl5418delta.tex	\
-	perl5419delta.tex	\
+	perl5420delta.tex	\
 	perl561delta.tex	\
 	perl56delta.tex	\
 	perl581delta.tex	\
