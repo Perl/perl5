@@ -1716,7 +1716,7 @@ automatically if you use a variable length positive lookbehind assertion.
 
 In Perl 5.35.10 the scope of the experimental nature of this construct
 has been reduced, and experimental warnings will only be produced when
-the construct contains capturing parenthesis. The warnings will be
+the construct contains capturing parentheses. The warnings will be
 raised at pattern compilation time, unless turned off, in the
 C<experimental::vlb> category.  This is to warn you that the exact
 contents of capturing buffers in a variable length positive lookbehind
