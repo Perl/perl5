@@ -441,7 +441,7 @@ sub changes_between {
     5.041011 => '2025-04-20',
     5.041012 => '2025-04-21',
     5.041013 => '2025-05-28',
-    5.041014 => '2025-06-20',
+    5.042000 => '2025-06-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -23421,13 +23421,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'unicore::Name'         => 1,
         }
     },
-    5.041014 => {
+    5.042000 => {
         delta_from => 5.041013,
         changed => {
-            'Config'                => '5.041014',
+            'B::Op_private'         => '5.042000',
+            'Config'                => '5.042',
             'Module::CoreList'      => '5.20250620',
             'Module::CoreList::Utils'=> '5.20250620',
-            'unicore::Name'         => undef,
+            'perlfaq'               => '5.20250619',
         },
         removed => {
         }
@@ -25071,7 +25072,7 @@ sub is_core
         removed => {
         }
     },
-    5.041014 => {
+    5.042000 => {
         delta_from => 5.041013,
         changed => {
         },
