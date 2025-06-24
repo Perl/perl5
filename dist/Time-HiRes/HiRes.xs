@@ -1014,9 +1014,9 @@ usleep(useconds)
                     useconds -= NV_1E6 * seconds;
                 }
             } else if (useconds < 0.0)
-                croak("Time::HiRes::usleep(%" NVgf
-                      "): negative time not invented yet", useconds);
-
+                croak("%s(%" NVgf "%s",
+                      "Time::HiRes::usleep", useconds,
+                      "): negative time not invented yet");
             usleep((U32)useconds);
         } else
             PerlProc_pause();
@@ -1039,8 +1039,8 @@ nanosleep(nsec)
         struct timespec sleepfor, unslept;
     CODE:
         if (nsec < 0.0)
-            croak("Time::HiRes::nanosleep(%" NVgf
-                  "): negative time not invented yet", nsec);
+            croak("%s(%" NVgf "%s", "Time::HiRes::nanosleep", nsec,
+                  "): negative time not invented yet");
         nanosleep_init(nsec, &sleepfor, &unslept);
         if (nanosleep(&sleepfor, &unslept) == 0) {
             RETVAL = nsec;
@@ -1085,15 +1085,16 @@ sleep(...)
                     useconds = -(IV)useconds;
 #  endif /* #if defined(__sparc64__) && defined(__GNUC__) */
                     if ((IV)useconds < 0)
-                        croak("Time::HiRes::sleep(%" NVgf
+                        croak("%s(%" NVgf
                               "): internal error: useconds < 0 (unsigned %" UVuf
-                              " signed %" IVdf ")",
+                              " signed %" IVdf ")", "Time::HiRes::sleep",
                               seconds, useconds, (IV)useconds);
                 }
                 usleep(useconds);
             } else
-                croak("Time::HiRes::sleep(%" NVgf
-                      "): negative time not invented yet", seconds);
+                croak("%s(%" NVgf "%s",
+                      "Time::HiRes::sleep", seconds,
+                      "): negative time not invented yet");
         } else
             PerlProc_pause();
 
@@ -1128,7 +1129,9 @@ ualarm(useconds,uinterval=0)
     int uinterval
     CODE:
         if (useconds < 0 || uinterval < 0)
-            croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, uinterval);
+            croak("%s(%d, %d%s",
+                "Time::HiRes::ualarm", useconds, uinterval,
+                "): negative time not invented yet");
 #  if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
         {
             struct itimerval itv;
@@ -1158,9 +1161,9 @@ alarm(seconds,interval=0)
     NV interval
     CODE:
         if (seconds < 0.0 || interval < 0.0)
-            croak("Time::HiRes::alarm(%" NVgf ", %" NVgf
-                  "): negative time not invented yet", seconds, interval);
-
+            croak("%s(%" NVgf ", %" NVgf "%s",
+                  "Time::HiRes::alarm", seconds, interval,
+                  "): negative time not invented yet");
         {
             IV iseconds = (IV)seconds;
             IV iinterval = (IV)interval;
@@ -1281,9 +1284,10 @@ setitimer(which, seconds, interval = 0)
         struct itimerval oldit;
     PPCODE:
         if (seconds < 0.0 || interval < 0.0)
-            croak("Time::HiRes::setitimer(%" IVdf ", %" NVgf ", %" NVgf
-                  "): negative time not invented yet",
-                  (IV)which, seconds, interval);
+            croak("%s(%" IVdf ", %" NVgf ", %" NVgf "%s",
+                  "Time::HiRes::setitimer",
+                  (IV)which, seconds, interval,
+                  "): negative time not invented yet");
         newit.it_value.tv_sec  = (IV)seconds;
         newit.it_value.tv_usec =
           (IV)((seconds  - (NV)newit.it_value.tv_sec)    * NV_1E6);
@@ -1350,9 +1354,9 @@ PROTOTYPE: $$@
             utbufp = NULL;
         else {
             if (SvNV(accessed) < 0.0 || SvNV(modified) < 0.0)
-                croak("Time::HiRes::utime(%" NVgf ", %" NVgf
-                      "): negative time not invented yet",
-                          SvNV(accessed), SvNV(modified));
+                croak("%s(%" NVgf ", %" NVgf "%s", "Time::HiRes::utime",
+                          SvNV(accessed), SvNV(modified),
+                          "): negative time not invented yet");
             Zero(&utbuf, sizeof utbuf, char);
 
             utbuf[0].tv_sec = (Time_t)SvNV(accessed);  /* time accessed */
@@ -1499,8 +1503,9 @@ clock_nanosleep(clock_id, nsec, flags = 0)
         struct timespec sleepfor, unslept;
     CODE:
         if (nsec < 0.0)
-            croak("Time::HiRes::clock_nanosleep(..., %" NVgf
-                  "): negative time not invented yet", nsec);
+            croak("%s(..., %" NVgf "%s",
+                  "Time::HiRes::clock_nanosleep", nsec,
+                  "): negative time not invented yet");
         nanosleep_init(nsec, &sleepfor, &unslept);
         if (clock_nanosleep(clock_id, flags, &sleepfor, &unslept) == 0) {
             RETVAL = nsec;
