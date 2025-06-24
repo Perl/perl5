@@ -1515,39 +1515,56 @@ void
 stat(...)
 PROTOTYPE: ;$
     PREINIT:
-        OP fakeop;
-        int nret;
+        SSize_t nret;
+        SV* sv_arg;
+        SV** SPBASE;
     ALIAS:
         Time::HiRes::lstat = 1
     PPCODE:
-        XPUSHs(sv_2mortal(newSVsv(items == 1 ? ST(0) : DEFSV)));
+        sv_arg = items == 1 ? ST(0) : DEFSV;
+        EXTEND(SP, 13);
+        /* XXX will pp_stat()/pp_lstat() really modify $_[0] ? */
+        PUSHs(sv_2mortal(newSVsv(sv_arg)));
         PUTBACK;
         ENTER;
         PL_laststatval = -1;
         SAVEOP();
-        Zero(&fakeop, 1, OP);
-        fakeop.op_type = ix ? OP_LSTAT : OP_STAT;
-        fakeop.op_ppaddr = PL_ppaddr[fakeop.op_type];
-        fakeop.op_flags = GIMME_V == G_LIST ? OPf_WANT_LIST :
-            GIMME_V == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID;
-        PL_op = &fakeop;
-        (void)fakeop.op_ppaddr(aTHX);
-        SPAGAIN;
+        {
+            OP* (*ppaddr)(pTHX);
+            U8 gimme = GIMME_V; /* ILP */
+/* extern "C" memset() doesn't know struct OP's alignment. ISO C doesn't
+   promise Zero(); and memset(); will inline.  But this does. Now the CC can
+   detangle for us, what OP fields will get a 0/NULL, or our values. */
+            OP fakeop = {0};
+            U16 op_type = ix ? OP_LSTAT : OP_STAT;
+            fakeop.op_flags = gimme == G_LIST ? OPf_WANT_LIST :
+                gimme == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID; /* ILP */
+            ppaddr = PL_ppaddr[op_type];
+            fakeop.op_type = op_type;
+            fakeop.op_ppaddr = ppaddr; /* ILP */
+            PL_op = &fakeop;
+            (void)ppaddr(aTHX);
+        }
         LEAVE;
-        nret = SP+1 - &ST(0);
+        SPAGAIN;
+        SPBASE = &ST(0);
+        nret = SP+1 - SPBASE;
         if (nret == 13) {
-            UV atime = SvUV(ST( 8));
-            UV mtime = SvUV(ST( 9));
-            UV ctime = SvUV(ST(10));
             UV atime_nsec;
             UV mtime_nsec;
             UV ctime_nsec;
             hrstatns(&atime_nsec, &mtime_nsec, &ctime_nsec);
-            if (atime_nsec)
-                ST( 8) = sv_2mortal(newSVnv(atime + (NV) atime_nsec / NV_1E9));
-            if (mtime_nsec)
-                ST( 9) = sv_2mortal(newSVnv(mtime + (NV) mtime_nsec / NV_1E9));
-            if (ctime_nsec)
-                ST(10) = sv_2mortal(newSVnv(ctime + (NV) ctime_nsec / NV_1E9));
+            if (atime_nsec) { /* on certain configs hrstatns() is a NOOP */
+                UV atime = SvUV(SPBASE[ 8]);
+                SPBASE[ 8] = sv_2mortal(newSVnv(atime + (NV) atime_nsec / NV_1E9));
+            }
+            if (mtime_nsec) {
+                UV mtime = SvUV(SPBASE[ 9]);
+                SPBASE[ 9] = sv_2mortal(newSVnv(mtime + (NV) mtime_nsec / NV_1E9));
+            }
+            if (ctime_nsec) {
+                UV ctime = SvUV(SPBASE[10]);
+                SPBASE[10] = sv_2mortal(newSVnv(ctime + (NV) ctime_nsec / NV_1E9));
+            }
         }
         XSRETURN(nret);
