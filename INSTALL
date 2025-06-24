@@ -13,8 +13,8 @@ INSTALL - Build and Installation guide for perl 5.
 First, make sure you have an up-to-date version of the Perl source code.  If
 you didn't get your Perl source from CPAN, check the latest version at
 L<https://www.cpan.org/src/>.  Perl uses a version scheme where even-numbered
-subreleases (like 5.38.x and 5.40.x) are stable maintenance releases and
-odd-numbered subreleases (like 5.39.x and 5.41.x) are unstable
+subreleases (like 5.40.x and 5.42.x) are stable maintenance releases and
+odd-numbered subreleases (like 5.41.x and 5.43.x) are unstable
 development releases.  Development releases should not be used in
 production environments.  Fixes and new features are first carefully
 tested in development releases and only if they prove themselves to be
@@ -2665,9 +2665,9 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.41.12 or earlier
+=head2 Upgrading from 5.40.0 or earlier
 
-B<Perl 5.42.0 may not be binary compatible with Perl 5.41.12 or
+B<Perl 5.42.0 may not be binary compatible with Perl 5.40.0 or
 earlier Perl releases.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
 used with 5.42.0.  If you find you do need to rebuild an extension with
