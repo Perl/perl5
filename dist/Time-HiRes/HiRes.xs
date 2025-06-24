@@ -1433,7 +1433,7 @@ clock_gettime(clock_id = CLOCK_REALTIME)
     clockid_t clock_id
     PREINIT:
         struct timespec ts;
-        int status = -1;
+        int status;
     CODE:
 #  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
         status = syscall(SYS_clock_gettime, clock_id, &ts);
@@ -1465,7 +1465,7 @@ NV
 clock_getres(clock_id = CLOCK_REALTIME)
     clockid_t clock_id
     PREINIT:
-        int status = -1;
+        int status;
         struct timespec ts;
     CODE:
 #  ifdef TIME_HIRES_CLOCK_GETRES_SYSCALL
