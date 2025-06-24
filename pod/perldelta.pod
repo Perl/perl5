@@ -1281,19 +1281,19 @@ with a misaligned access early in the build. [L<GH #22577|https://github.com/Per
 
 On threaded builds on POSIX-like systems, if the perl signal handler
 receives a signal, we now resend the signal to the main perl thread.  Previously
-this would crash.  [GH #22487]
+this would crash.  [L<GH #22487|https://github.com/Perl/perl5/issues/22487>]
 
 =item *
 
 Declaring a lexically scoped array or hash using C<state> within a subroutine
 and then immediately returning no longer triggers a "Bizarre copy of HASH/ARRAY
-in subroutine exit" error. [GH #18630]
+in subroutine exit" error. [L<GH #18630|https://github.com/Perl/perl5/issues/18630>]
 
 =item *
 
 C<builtin::trim()> didn't properly clear C<TARG> which could result in
 out of date cached numeric versions of the value being used on a
-second evaluation.  Properly clear any cached values. [GH #22784]
+second evaluation.  Properly clear any cached values. [L<GH #22784|https://github.com/Perl/perl5/issues/22784>]
 
 =item *
 
