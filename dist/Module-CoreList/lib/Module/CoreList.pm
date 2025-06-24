@@ -23418,7 +23418,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'strict'                => '1.14',
         },
         removed => {
-            'unicore::Name'         => 1,
         }
     },
     5.042000 => {
