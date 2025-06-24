@@ -802,6 +802,8 @@ the strings?).
  Ether     5.41.12      2025-Apr-21
  Philippe  5.41.13      2025-May-28
 
+ Thibault  5.42.0-RC1   2025-Jun-24     The 5.42 maintenance track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
