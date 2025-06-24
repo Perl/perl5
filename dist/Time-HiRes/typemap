@@ -33,6 +33,7 @@ clockid_t               T_IV
 IV                      T_IV
 UV                      T_UV
 NV                      T_NV
+NV_DIE                  T_NV_DIE
 I32                     T_IV
 I16                     T_IV
 I8                      T_IV
@@ -238,6 +239,8 @@ T_FLOAT
     sv_setnv($arg, (double)$var);
 T_NV
     sv_setnv($arg, (NV)$var);
+T_NV_DIE
+    croak_xs_usage(cv, "T_NV_DIE");
 T_DOUBLE
     sv_setnv($arg, (double)$var);
 T_PV

@@ -89,6 +89,9 @@
 #  undef ITIMER_REALPROF
 #endif
 
+/* special type used by croak("unimplemented") XSUBs to neutralize */
+typedef NV NV_DIE; /* unused dXSTARG/sv_newmortal() calls */
+
 #ifndef TIME_HIRES_CLOCKID_T
 typedef int clockid_t;
 #endif
@@ -1010,12 +1013,12 @@ nanosleep(nsec)
 
 #  else  /* #if defined(TIME_HIRES_NANOSLEEP) */
 
-NV
+NV_DIE
 nanosleep(nsec)
     NV nsec
     CODE:
         PERL_UNUSED_ARG(nsec);
-        croak("Time::HiRes::nanosleep(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::nanosleep");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1066,12 +1069,12 @@ sleep(...)
 
 #else  /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
 
-NV
+NV_DIE
 usleep(useconds)
     NV useconds
     CODE:
         PERL_UNUSED_ARG(useconds);
-        croak("Time::HiRes::usleep(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::usleep");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1169,19 +1172,19 @@ ualarm(useconds,interval=0)
     CODE:
         PERL_UNUSED_ARG(useconds);
         PERL_UNUSED_ARG(interval);
-        croak("Time::HiRes::ualarm(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::ualarm");
         RETVAL = -1;
     OUTPUT:
         RETVAL
 
-NV
+NV_DIE
 alarm(seconds,interval=0)
     NV seconds
     NV interval
     CODE:
         PERL_UNUSED_ARG(seconds);
         PERL_UNUSED_ARG(interval);
-        croak("Time::HiRes::alarm(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::alarm");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1338,10 +1341,10 @@ PROTOTYPE: $$@
                             tot++;
                         }
                     } else {
-                        croak("futimens unimplemented in this platform");
+                        croak("%s unimplemented in this platform", "futimens");
                     }
 #  else  /* HAS_FUTIMENS */
-                    croak("futimens unimplemented in this platform");
+                    croak("%s unimplemented in this platform", "futimens");
 #  endif /* HAS_FUTIMENS */
                 }
             }
@@ -1356,10 +1359,10 @@ PROTOTYPE: $$@
                         tot++;
                     }
                 } else {
-                    croak("utimensat unimplemented in this platform");
+                    croak("%s unimplemented in this platform", "utimensat");
                 }
 #  else  /* HAS_UTIMENSAT */
-                croak("utimensat unimplemented in this platform");
+                croak("%s unimplemented in this platform", "utimensat");
 #  endif /* HAS_UTIMENSAT */
             }
         } /* while items */
@@ -1373,7 +1376,7 @@ PROTOTYPE: $$@
 I32
 utime(accessed, modified, ...)
     CODE:
-        croak("Time::HiRes::utime(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::utime");
         RETVAL = 0;
     OUTPUT:
         RETVAL
@@ -1401,12 +1404,12 @@ clock_gettime(clock_id = CLOCK_REALTIME)
 
 #else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
 
-NV
+NV_DIE
 clock_gettime(clock_id = 0)
     clockid_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
-        croak("Time::HiRes::clock_gettime(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::clock_gettime");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1434,12 +1437,12 @@ clock_getres(clock_id = CLOCK_REALTIME)
 
 #else  /* if defined(TIME_HIRES_CLOCK_GETRES) */
 
-NV
+NV_DIE
 clock_getres(clock_id = 0)
     clockid_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
-        croak("Time::HiRes::clock_getres(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::clock_getres");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1470,7 +1473,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 
 #else  /* if defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME) */
 
-NV
+NV_DIE
 clock_nanosleep(clock_id, nsec, flags = 0)
     clockid_t clock_id
     NV  nsec
@@ -1479,7 +1482,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
         PERL_UNUSED_ARG(clock_id);
         PERL_UNUSED_ARG(nsec);
         PERL_UNUSED_ARG(flags);
-        croak("Time::HiRes::clock_nanosleep(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::clock_nanosleep");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1501,10 +1504,10 @@ clock()
 
 #else  /* if defined(TIME_HIRES_CLOCK) && defined(CLOCKS_PER_SEC) */
 
-NV
+NV_DIE
 clock()
     CODE:
-        croak("Time::HiRes::clock(): unimplemented in this platform");
+        croak("%s(): unimplemented in this platform", "Time::HiRes::clock");
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
