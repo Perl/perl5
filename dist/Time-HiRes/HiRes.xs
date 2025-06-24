@@ -91,6 +91,9 @@
 
 /* special type used by croak("unimplemented") XSUBs to neutralize */
 typedef NV NV_DIE; /* unused dXSTARG/sv_newmortal() calls */
+typedef I32 I32_DIE;
+
+#define die_t
 
 #ifndef TIME_HIRES_CLOCKID_T
 typedef int clockid_t;
@@ -1034,7 +1037,7 @@ nanosleep(nsec)
 
 NV_DIE
 nanosleep(nsec)
-    NV nsec
+    NV_DIE nsec
     CODE:
         PERL_UNUSED_ARG(nsec);
         croak("%s(): unimplemented in this platform", "Time::HiRes::nanosleep");
@@ -1090,7 +1093,7 @@ sleep(...)
 
 NV_DIE
 usleep(useconds)
-    NV useconds
+    NV_DIE useconds
     CODE:
         PERL_UNUSED_ARG(useconds);
         croak("%s(): unimplemented in this platform", "Time::HiRes::usleep");
@@ -1184,10 +1187,10 @@ alarm(seconds,interval=0)
 
 #else /* #ifdef HAS_UALARM */
 
-int
+int die_t
 ualarm(useconds,interval=0)
-    int useconds
-    int interval
+    int die_t useconds
+    int die_t interval
     CODE:
         PERL_UNUSED_ARG(useconds);
         PERL_UNUSED_ARG(interval);
@@ -1198,8 +1201,8 @@ ualarm(useconds,interval=0)
 
 NV_DIE
 alarm(seconds,interval=0)
-    NV seconds
-    NV interval
+    NV_DIE seconds
+    NV_DIE interval
     CODE:
         PERL_UNUSED_ARG(seconds);
         PERL_UNUSED_ARG(interval);
@@ -1392,7 +1395,7 @@ PROTOTYPE: $$@
 
 #else  /* #if defined(TIME_HIRES_UTIME) */
 
-I32
+I32_DIE
 utime(accessed, modified, ...)
     CODE:
         croak("%s(): unimplemented in this platform", "Time::HiRes::utime");
@@ -1425,7 +1428,7 @@ clock_gettime(clock_id = CLOCK_REALTIME)
 
 NV_DIE
 clock_gettime(clock_id = 0)
-    clockid_t clock_id
+    clockid_t die_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
         croak("%s(): unimplemented in this platform", "Time::HiRes::clock_gettime");
@@ -1458,7 +1461,7 @@ clock_getres(clock_id = CLOCK_REALTIME)
 
 NV_DIE
 clock_getres(clock_id = 0)
-    clockid_t clock_id
+    clockid_t die_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
         croak("%s(): unimplemented in this platform", "Time::HiRes::clock_getres");
@@ -1494,9 +1497,9 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 
 NV_DIE
 clock_nanosleep(clock_id, nsec, flags = 0)
-    clockid_t clock_id
-    NV  nsec
-    int flags
+    clockid_t die_t clock_id
+    NV_DIE  nsec
+    int die_t flags
     CODE:
         PERL_UNUSED_ARG(clock_id);
         PERL_UNUSED_ARG(nsec);
