@@ -55,6 +55,10 @@
 #  define GCC_DIAG_IGNORE_CPP_COMPAT_RESTORE_STMT GCC_DIAG_RESTORE_STMT
 #endif
 
+#ifndef PERL_STATIC_FORCE_INLINE
+#  define PERL_STATIC_FORCE_INLINE STATIC
+#endif
+
 #if PERL_VERSION_GE(5,7,3) && !PERL_VERSION_GE(5,10,1)
 #  undef SAVEOP
 #  define SAVEOP() SAVEVPTR(PL_op)
@@ -136,10 +140,10 @@ typedef union {
 #  define MY_CXT_KEY "Time::HiRes_" XS_VERSION
 
 typedef struct {
-    unsigned long run_count;
     unsigned __int64 base_ticks;
     FT_t base_systime_as_filetime;
     unsigned __int64 reset_time;
+    unsigned long run_count;
 } my_cxt_t;
 
 static unsigned __int64 tick_frequency = 0;
@@ -190,7 +194,7 @@ START_MY_CXT
    for performance reasons */
 
 #  undef gettimeofday
-#  define gettimeofday(tp, not_used) _gettimeofday(aTHX_ tp, not_used)
+#  define gettimeofday(tp, not_used)  ((*(tp) = _gettimeofday_x(aTHX)), 0)
 
 #  undef GetSystemTimePreciseAsFileTime
 #  define GetSystemTimePreciseAsFileTime(out)  (void)(*(out) = _GetSystemTimePreciseAsFileTime(aTHX))
@@ -239,78 +243,99 @@ START_MY_CXT
  * the pointer for long term Interlocked or Atomic message passing from an
  * unknown 2nd OS thread running on another CPU Core.
  */
+
 static FILETIME
 _GetSystemTimePreciseAsFileTime(pTHX)
 {
-    dMY_CXT;
-    FT_t ft;
+#define MY_CXTX (*MY_CXT_x)
+    unsigned __int64 ticks;
+    unsigned __int64 ticks_mem;
+    unsigned __int64 timesys;
+    __int64 diff;
+/*  If no threads, CC will probably optimize away all MY_CXT_x references
+    so they directly access the C static global struct. */
+    my_cxt_t * MY_CXT_x;
 
-    if (MY_CXT.run_count++ == 0 ||
-        MY_CXT.base_systime_as_filetime.ft_i64 > MY_CXT.reset_time) {
-
-        QueryPerformanceCounter((LARGE_INTEGER*)&MY_CXT.base_ticks);
-        GetSystemTimeAsFileTime(&MY_CXT.base_systime_as_filetime.ft_val);
-        ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64;
-        MY_CXT.reset_time = ft.ft_i64 + MAX_PERF_COUNTER_TICKS;
+    QueryPerformanceCounter((LARGE_INTEGER*)&ticks_mem);
+    /* Inform the CC nothing external or in this fn (ptr aliasing) can ever
+       rewrite the value in ticks. Increases chance of CC using registers. */
+    ticks = ticks_mem;
+    {
+        dMY_CXT;
+        MY_CXT_x = &(MY_CXT);
+    }
+    if (MY_CXTX.run_count++ == 0 ||
+        MY_CXTX.base_systime_as_filetime.ft_i64 > MY_CXTX.reset_time) {
+        MY_CXTX.base_ticks = ticks;
+        GetSystemTimeAsFileTime(&MY_CXTX.base_systime_as_filetime.ft_val);
+        timesys = MY_CXTX.base_systime_as_filetime.ft_i64;
+        MY_CXTX.reset_time = timesys + MAX_PERF_COUNTER_TICKS;
     }
     else {
-        __int64 diff;
-        unsigned __int64 ticks;
-        QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
-        ticks -= MY_CXT.base_ticks;
-        ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
+        ticks -= MY_CXTX.base_ticks;
+        timesys = MY_CXTX.base_systime_as_filetime.ft_i64
                     + Const64(IV_1E7) * (ticks / tick_frequency)
                     +(Const64(IV_1E7) * (ticks % tick_frequency)) / tick_frequency;
-        diff = ft.ft_i64 - MY_CXT.base_systime_as_filetime.ft_i64;
+        diff = timesys - MY_CXTX.base_systime_as_filetime.ft_i64;
         if (diff < -MAX_PERF_COUNTER_SKEW || diff > MAX_PERF_COUNTER_SKEW) {
-            MY_CXT.base_ticks += ticks;
-            GetSystemTimeAsFileTime(&MY_CXT.base_systime_as_filetime.ft_val);
-            ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64;
+            MY_CXTX.base_ticks += ticks;
+            GetSystemTimeAsFileTime(&MY_CXTX.base_systime_as_filetime.ft_val);
+            timesys = MY_CXTX.base_systime_as_filetime.ft_i64;
         }
     }
-
-    return ft.ft_val;
+#undef MY_CXTX
+    {
+        FT_t ft;
+        ft.ft_i64 = timesys;
+        return ft.ft_val;
+    }
 }
 
-static int
-_gettimeofday(pTHX_ struct timeval *tp, void *not_used)
+/* former prototype: static int _gettimeofday(pTHX_ struct timeval *tp, void *not_used);
+
+   B/c _gettimeofday_x() is not capable of failing, and retval was always
+   constant 0, and its a static fn that never leaves this TU, repurpose the
+   retval for something better. */
+
+PERL_STATIC_FORCE_INLINE struct timeval
+_gettimeofday_x(pTHX)
 {
     FT_t ft;
-
-    PERL_UNUSED_ARG(not_used);
+    struct timeval tp;
 
     GetSystemTimePreciseAsFileTime(&ft.ft_val);
 
     /* seconds since epoch */
-    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(IV_1E7));
+    tp.tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(IV_1E7));
 
     /* microseconds remaining */
-    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(IV_1E6));
+    tp.tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(IV_1E6));
 
-    return 0;
+    return tp;
 }
 
-static int
+/* force inline it, because XS_Time__HiRes_clock_gettime() is the only caller */
+
+PERL_STATIC_FORCE_INLINE int
 _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
 {
+    FT_t ft;
+    unsigned __int64 ticks;
+    unsigned __int64 time_sys;
+
     switch (clock_id) {
-    case CLOCK_REALTIME: {
-        FT_t ft;
-
+    case CLOCK_REALTIME:
         GetSystemTimePreciseAsFileTime(&ft.ft_val);
-        tp->tv_sec = (time_t)((ft.ft_i64 - EPOCH_BIAS) / IV_1E7);
-        tp->tv_nsec = (long)((ft.ft_i64 % IV_1E7) * 100);
+        time_sys = ft.ft_i64;
+        tp->tv_sec = (time_t)((time_sys - EPOCH_BIAS) / IV_1E7);
+        tp->tv_nsec = (long)((time_sys % IV_1E7) * 100);
         break;
-    }
-    case CLOCK_MONOTONIC: {
-        unsigned __int64 ticks;
-
-        QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
-
+    case CLOCK_MONOTONIC:
+        QueryPerformanceCounter((LARGE_INTEGER*)&ft.ft_i64);
+        ticks = ft.ft_i64;
         tp->tv_sec = (time_t)(ticks / tick_frequency);
         tp->tv_nsec = (long)((IV_1E9 * (ticks % tick_frequency)) / tick_frequency);
         break;
-    }
     default:
         errno = EINVAL;
         return 1;
