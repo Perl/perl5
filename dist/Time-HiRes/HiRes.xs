@@ -193,7 +193,7 @@ START_MY_CXT
 #  define gettimeofday(tp, not_used) _gettimeofday(aTHX_ tp, not_used)
 
 #  undef GetSystemTimePreciseAsFileTime
-#  define GetSystemTimePreciseAsFileTime(out) _GetSystemTimePreciseAsFileTime(aTHX_ out)
+#  define GetSystemTimePreciseAsFileTime(out)  (void)(*(out) = _GetSystemTimePreciseAsFileTime(aTHX))
 
 #  undef clock_gettime
 #  define clock_gettime(clock_id, tp) _clock_gettime(aTHX_ clock_id, tp)
@@ -219,9 +219,28 @@ START_MY_CXT
  * Windows 8 introduced GetSystemTimePreciseAsFileTime(), but currently we have
  * to support older systems, so for now we provide our own implementation.
  * In the future we will switch to the real deal.
+ *
+ * FILETIME, switch to "return by copy", vs MS's "return by reference" prototype.
+ * We never take the fn ptr of static fn _GetSystemTimePreciseAsFileTime(pTHX).
+ * The MS API GetSystemTimePreciseAsFileTime() has a void return type but we
+ * have no reason to match ABI compatibility with MS's function symbol.
+ * Return by copy, encourages CC optimizations, since the C stack FILETIME var
+ * never escaped the function that declared it. This allows the CC, in the
+ * caller of _GetSystemTimePreciseAsFileTime(), to keep C stack FILETIME var
+ * in CPU registers at all times in its function body, if the CC wants to
+ * do that.
+ *
+ * Note even on Win64 x64, where "return by copy" return types > 8 bytes, become
+ * secret C++ "this"-style first arguments, a > 8 bytes "return by copy" retval
+ * is still more efficient!!! than explicitly passing a ptr to a C stack alloced
+ * temporary C struct in C code. The latter requires the CC to re-read the
+ * temporary C struct each time after any child function call, since the CC
+ * can't know if SvPV() or GetSystemTimePreciseAsFileTime(), permanently saved
+ * the pointer for long term Interlocked or Atomic message passing from an
+ * unknown 2nd OS thread running on another CPU Core.
  */
-static void
-_GetSystemTimePreciseAsFileTime(pTHX_ FILETIME *out)
+static FILETIME
+_GetSystemTimePreciseAsFileTime(pTHX)
 {
     dMY_CXT;
     FT_t ft;
@@ -250,9 +269,7 @@ _GetSystemTimePreciseAsFileTime(pTHX_ FILETIME *out)
         }
     }
 
-    *out = ft.ft_val;
-
-    return;
+    return ft.ft_val;
 }
 
 static int
