@@ -135,10 +135,16 @@ typedef union {
 typedef struct {
     unsigned long run_count;
     unsigned __int64 base_ticks;
-    unsigned __int64 tick_frequency;
     FT_t base_systime_as_filetime;
     unsigned __int64 reset_time;
 } my_cxt_t;
+
+static unsigned __int64 tick_frequency = 0;
+static unsigned __int64 qpc_res_ns = 0;
+static unsigned __int64 qpc_res_ns_realtime = 0;
+
+#define S_InterlockedExchange64(_d,_s) \
+    InterlockedExchange64((LONG64 volatile *)(_d),(LONG64)(_s))
 
 /* Visual C++ 2013 and older don't have the timespec structure.
  * Neither do mingw.org compilers with MinGW runtimes older than 3.22. */
@@ -220,7 +226,6 @@ _GetSystemTimePreciseAsFileTime(pTHX_ FILETIME *out)
     if (MY_CXT.run_count++ == 0 ||
         MY_CXT.base_systime_as_filetime.ft_i64 > MY_CXT.reset_time) {
 
-        QueryPerformanceFrequency((LARGE_INTEGER*)&MY_CXT.tick_frequency);
         QueryPerformanceCounter((LARGE_INTEGER*)&MY_CXT.base_ticks);
         GetSystemTimeAsFileTime(&MY_CXT.base_systime_as_filetime.ft_val);
         ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64;
@@ -232,8 +237,8 @@ _GetSystemTimePreciseAsFileTime(pTHX_ FILETIME *out)
         QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
         ticks -= MY_CXT.base_ticks;
         ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
-                    + Const64(IV_1E7) * (ticks / MY_CXT.tick_frequency)
-                    +(Const64(IV_1E7) * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
+                    + Const64(IV_1E7) * (ticks / tick_frequency)
+                    +(Const64(IV_1E7) * (ticks % tick_frequency)) / tick_frequency;
         diff = ft.ft_i64 - MY_CXT.base_systime_as_filetime.ft_i64;
         if (diff < -MAX_PERF_COUNTER_SKEW || diff > MAX_PERF_COUNTER_SKEW) {
             MY_CXT.base_ticks += ticks;
@@ -278,13 +283,12 @@ _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
         break;
     }
     case CLOCK_MONOTONIC: {
-        unsigned __int64 freq, ticks;
+        unsigned __int64 ticks;
 
-        QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
         QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
 
-        tp->tv_sec = (time_t)(ticks / freq);
-        tp->tv_nsec = (long)((IV_1E9 * (ticks % freq)) / freq);
+        tp->tv_sec = (time_t)(ticks / tick_frequency);
+        tp->tv_nsec = (long)((IV_1E9 * (ticks % tick_frequency)) / tick_frequency);
         break;
     }
     default:
@@ -298,17 +302,10 @@ _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
 static int
 _clock_getres(clockid_t clock_id, struct timespec *tp)
 {
-    unsigned __int64 freq, qpc_res_ns;
-
-    QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-    qpc_res_ns = IV_1E9 > freq ? IV_1E9 / freq : 1;
-
     switch (clock_id) {
     case CLOCK_REALTIME:
         tp->tv_sec = 0;
-        /* the resolution can't be smaller than 100ns because our implementation
-         * of CLOCK_REALTIME is using FILETIME internally */
-        tp->tv_nsec = (long)(qpc_res_ns > 100 ? qpc_res_ns : 100);
+        tp->tv_nsec = (long)qpc_res_ns_realtime;
         break;
 
     case CLOCK_MONOTONIC:
@@ -928,6 +925,28 @@ BOOT:
     {
 #ifdef MY_CXT_KEY
         MY_CXT_INIT;
+#endif
+#if defined(WIN32) || defined(CYGWIN_WITH_W32API)
+        if (tick_frequency == 0) { /* no DllMain() in very rare static Perls */
+            unsigned __int64 l_tick_frequency;
+/* from MSDN: >= WinXP, function will always succeed and never return zero */
+            if (!QueryPerformanceFrequency((LARGE_INTEGER*)&l_tick_frequency))
+                croak("%s(): unimplemented in this platform", "QueryPerformanceFrequency");
+             /* 32-bit CPU anti-sharding paranoia */
+            S_InterlockedExchange64(&tick_frequency, l_tick_frequency);
+        }
+        if (qpc_res_ns == 0) {
+            unsigned __int64 l_qpc_res_ns =
+                IV_1E9 > tick_frequency ? IV_1E9 / tick_frequency : 1;
+            S_InterlockedExchange64(&qpc_res_ns, l_qpc_res_ns);
+        }
+        if (qpc_res_ns_realtime == 0) {
+        /* the resolution can't be smaller than 100ns because our implementation
+         * of CLOCK_REALTIME is using FILETIME internally */
+            unsigned __int64 l_qpc_res_ns_realtime =
+                qpc_res_ns > 100 ? qpc_res_ns : 100;
+            S_InterlockedExchange64(&qpc_res_ns_realtime, l_qpc_res_ns_realtime);
+        }
 #endif
 #ifdef HAS_GETTIMEOFDAY
         {
