@@ -630,10 +630,13 @@ myNVtime()
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
 
-static void
-hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
+/*  Force inline this because it has only 1 caller:
+        XSUB void stat(...) PROTOTYPE: ;$
+    Change back to plain "static", if in the future a 2nd call site is added */
+
+PERL_STATIC_FORCE_INLINE void
+S_hrstatns(pTHX_ UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
 {
-    dTHX;
 #if TIME_HIRES_STAT == 1
     *atime_nsec = PL_statcache.st_atimespec.tv_nsec;
     *mtime_nsec = PL_statcache.st_mtimespec.tv_nsec;
@@ -660,6 +663,8 @@ hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
     *ctime_nsec = 0;
 #endif /* !TIME_HIRES_STAT */
 }
+
+#define hrstatns(_at,_mt,_ct) S_hrstatns(aTHX_ (_at),(_mt),(_ct))
 
 /* Until Apple implements clock_gettime()
  * (ditto clock_getres() and clock_nanosleep())
