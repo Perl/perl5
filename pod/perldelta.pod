@@ -201,6 +201,19 @@ out-of-support.
 
 Discovered by: Nathan Mills.
 
+=head2 [CVE-2025-40909] Perl threads have a working directory race condition where file operations may target unintended paths
+
+Perl thread cloning had a working directory race condition where file
+operations may target unintended paths. Perl 5.42 will no longer chdir
+to each handle.
+
+This problem was reported by Vincent Lefèvre via [L<GH #23010|https://github.com/Perl/perl5/issues/23010>]
+and assigned [L<CVE-2025-40909|https://lists.security.metacpan.org/cve-announce/msg/30017499/>]
+by the L<CPAN Security Group|https://security.metacpan.org/>.
+
+Fixes were provided via [L<GH #23019|https://github.com/Perl/perl5/pull/23019>]
+and [L<GH #23361|https://github.com/Perl/perl5/pull/23361>].
+
 =head1 Incompatible Changes
 
 =head2 Removed containing function references for functions without eval
@@ -1161,16 +1174,6 @@ See L<perlapi/C<SvVSTRING>>.
 =head1 Selected Bug Fixes
 
 =over 4
-
-=item *
-
-[CVE-2025-40909] Perl threads have a working directory race condition where file operations may target unintended paths
-
-Perl thread cloning had a working directory race condition where file operations may target unintended paths. Perl 5.42 will no longer chdir to each handle.
-
-This problem was reported by Vincent Lefèvre via [L<GH #23010|https://github.com/Perl/perl5/issues/23010>] and assigned [L<CVE-2025-40909: Perl threads have a working directory race condition where file operations may target unintended paths|https://lists.security.metacpan.org/cve-announce/msg/30017499/>].
-
-Fixes were provided via [L<GH #23019|https://github.com/Perl/perl5/pull/23019>] and [L<GH #23361|https://github.com/Perl/perl5/pull/23361>].
 
 =item *
 
