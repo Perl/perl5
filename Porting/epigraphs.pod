@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.42.0-RC1 - Douglas Adams, "The Long Dark Tea-Time of the Soul"
+
+L<Announced on 2025-06-24 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/06/msg270038.html>
+
+  I may not have gone where I intended to go,
+  but I think I have ended up where I needed to be.
+
 =head2 v5.41.13 - George Orwell, "1984"
 
 L<Announced on 2025-05-28 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2025/05/msg269950.html>
