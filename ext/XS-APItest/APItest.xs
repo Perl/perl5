@@ -1593,6 +1593,121 @@ XSPP_wrapped(my_pp_anonlist, 0, 1)
     RETURN;
 }
 
+static NV (*myNVtime)() = NULL;
+static NV (*myNVtime_cxt)(pTHX) = NULL;
+static void (*myU2time)(pTHX_ UV ret[2]) = NULL;
+
+#if defined(MULTIPLICITY) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
+#  undef aTHX
+#  undef aTHX_
+#  define aTHX		my_perl
+#  define aTHX_		aTHX,
+#endif
+
+XS_INTERNAL(XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_Init)
+{
+    dVAR; dXSARGS;
+    if (items != 0)
+       croak_xs_usage(cv,  "");
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    {
+        HV* modglobal = PL_modglobal;
+        SV **svp = hv_fetchs(modglobal, "Time::NVtime", 0);
+        SV* sv;
+        if (!svp)
+            croak("Time::HiRes is required");
+        sv = *svp;
+        if (!SvIOK(sv) || !SvIVX(sv))
+            croak("Time::NVtime isn't a function pointer");
+        myNVtime = INT2PTR(NV(*)(), SvIVX(sv));
+        if (!SvPOK(sv) || SvCUR(sv) != sizeof(void*) || SvPVX(sv) == NULL
+            || *((void**)SvPVX(sv)) == NULL)
+            croak("Time::NVtime_cxt isn't a function pointer");
+        else
+            myNVtime_cxt = INT2PTR(NV(*)(pTHX), *((void**)SvPVX(sv)));
+
+        svp = hv_fetchs(modglobal, "Time::U2time", 0);
+        if (!svp)
+            croak("Time::HiRes is required");
+        sv = *svp;
+        if (!SvIOK(sv) || !SvIVX(sv))
+            croak("Time::U2time isn't a function pointer");
+        myU2time = INT2PTR(void(*)(pTHX_ UV ret[2]), SvIVX(sv));
+    }
+    XSRETURN_YES;
+}
+
+XS_INTERNAL(XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_myNVtime)
+{
+    dVAR; dXSARGS;
+    if (items != 0)
+       croak_xs_usage(cv,  "");
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    {
+        dXSTARG;
+        PUSHs(TARG);
+        PUTBACK;
+        {
+            NV nv = myNVtime();
+            TARGn(nv,1);
+        }
+    }
+    return;
+}
+
+XS_INTERNAL(XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_myNVtime_cxt)
+{
+    dVAR; dXSARGS;
+    if (items != 0)
+       croak_xs_usage(cv,  "");
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    {
+        SV* TARG;
+        SV* TARG2;
+        if(GIMME_V != G_LIST) {
+            dXSTARG;
+            TARG2 = TARG;
+        }
+        TARG = TARG2;
+        PUSHs(TARG);
+        PUTBACK;
+        {
+            NV nv = myNVtime_cxt(aTHX);
+            TARGn(nv,1);
+        }
+    }
+    return;
+}
+
+XS_INTERNAL(XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_myU2time)
+{
+    dVAR;
+    dXSARGS;
+    EXTEND(SP, 2);
+    if (items != 0)
+       croak_xs_usage(cv,  "");
+    PERL_UNUSED_VAR(ax); /* -Wall */
+    {
+        dXSTARG;
+        UV ret[2];
+        SV* sv2;
+        PUSHs(TARG);
+        sv2 = sv_2mortal(newSVuv(0));
+        PUSHs(sv2);
+        PUTBACK;
+        myU2time(aTHX_ ret);
+        TARGu(ret[0],1);
+        SvUV_set(sv2, ret[1]);
+    }
+    return;
+}
+
+#if defined(MULTIPLICITY) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
+#  undef aTHX
+#  undef aTHX_
+#  define aTHX		PERL_GET_THX
+#  define aTHX_		aTHX,
+#endif
 
 #include "const-c.inc"
 
@@ -1873,6 +1988,11 @@ BOOT:
     newXS("XS::APItest::XSUB::XS_VERSION_undef", XS_XS__APItest__XSUB_XS_VERSION_undef, __FILE__);
     newXS("XS::APItest::XSUB::XS_VERSION_empty", XS_XS__APItest__XSUB_XS_VERSION_empty, __FILE__);
     newXS("XS::APItest::XSUB::XS_APIVERSION_invalid", XS_XS__APItest__XSUB_XS_APIVERSION_invalid, __FILE__);
+    newXS("XS::APItest::XSUB::Time::HiRes::Init", XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_Init, __FILE__);
+    newXS("XS::APItest::XSUB::Time::HiRes::myNVtime", XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_myNVtime, __FILE__);
+    newXS("XS::APItest::XSUB::Time::HiRes::myNVtime_cxt", XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_myNVtime_cxt, __FILE__);
+    newXS("XS::APItest::XSUB::Time::HiRes::myU2time", XS__APItest__XSUB_XS_APIVERSION_Time_HiRes_myU2time , __FILE__);
+
 
 void
 XS_VERSION_defined(...)

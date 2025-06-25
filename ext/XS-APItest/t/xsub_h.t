@@ -4,6 +4,7 @@ use strict;
 use Test::More;
 
 BEGIN { use_ok('XS::APItest') };
+BEGIN { use_ok('Time::HiRes') };
 
 our ($XS_VERSION, $VERSION);
 
@@ -149,6 +150,19 @@ my @xs_empty = XS::APItest::XSUB::xsreturn_empty();
 is scalar @xs_empty, 0, 'XSRETURN_EMPTY returns empty list in array context';
 my $xs_empty = XS::APItest::XSUB::xsreturn_empty();
 is $xs_empty, undef, 'XSRETURN_EMPTY returns undef in scalar context';
+
+{
+	ok(XS::APItest::XSUB::Time::HiRes::Init(), "XS::APItest::XSUB::Time::HiRes::Init");
+	my $num = XS::APItest::XSUB::Time::HiRes::myNVtime();
+	ok($num && $num != -1.0 &&  int($num) != -1, "XS::APItest::XSUB::Time::HiRes::myNVtime true");
+	$num = XS::APItest::XSUB::Time::HiRes::myNVtime_cxt();
+	ok($num && $num != -1.0 &&  int($num) != -1, "XS::APItest::XSUB::Time::HiRes::myNVtime_cxt true");
+	$num = [XS::APItest::XSUB::Time::HiRes::myU2time()];
+	ok(scalar(@{$num}) == 2, "XS::APItest::XSUB::Time::HiRes::myNVtime_cxt 2 element array");
+	ok($num->[0] && $num->[0] != -1, "XS::APItest::XSUB::Time::HiRes::myNVtime_cxt array[0] true");
+	ok($num->[1] && $num->[1] != -1, "XS::APItest::XSUB::Time::HiRes::myNVtime_cxt array[1] true");
+	ok(!defined($num->[2]), "XS::APItest::XSUB::Time::HiRes::myNVtime_cxt array[2] is undef");
+}
 
 
 done_testing();

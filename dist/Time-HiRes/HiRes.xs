@@ -671,17 +671,37 @@ myU2time(pTHX_ UV *ret)
     return status;
 }
 
+#ifdef PERL_IMPLICIT_CONTEXT
+static NV myNVtime_cxt(pTHX);
+#endif
+
 static NV
 myNVtime()
 {
 #  ifdef WIN32
     dTHX;
+#    ifdef PERL_IMPLICIT_CONTEXT
+   return myNVtime_cxt(aTHX);
+#    endif
 #  endif
     struct timeval Tp;
     int status;
     status = gettimeofday (&Tp, NULL);
     return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
 }
+
+#ifdef PERL_IMPLICIT_CONTEXT
+
+static NV
+myNVtime_cxt(pTHX)
+{
+    struct timeval Tp;
+    int status;
+    status = gettimeofday (&Tp, NULL);
+    return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
+}
+
+#endif
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
 
@@ -1050,9 +1070,26 @@ BOOT:
 #endif
 #ifdef HAS_GETTIMEOFDAY
         {
-            HV* const modglobal = PL_modglobal;
-            (void)hv_stores(modglobal, "Time::NVtime", newSViv(PTR2IV(myNVtime)));
-            (void)hv_stores(modglobal, "Time::U2time", newSViv(PTR2IV(myU2time)));
+            SV* sv = newSV_type(SVt_PVIV);
+#ifdef PERL_IMPLICIT_CONTEXT
+            static NV (* const pMyNVtime_cxt)(pTHX) = myNVtime_cxt;
+#else
+            static NV (* const pMyNVtime_cxt)(pTHX) = myNVtime;
+#endif
+/*          Don't bother making a 5/9 byte struct{void*; char;} just for '\0'.
+            It is 8/16 bytes after padding. This SVPV will never be "printed". */
+            SvCUR_set(sv, sizeof(pMyNVtime_cxt));
+            SvLEN_set(sv, 0);
+            SvIV_set(sv, PTR2IV(myNVtime));
+            SvPV_set(sv, (char *)(&pMyNVtime_cxt));
+            SvPOK_on(sv);
+            SvIOK_on(sv);
+            SvREADONLY_on(sv);
+            {
+                HV* const modglobal = PL_modglobal;
+                (void)hv_stores(modglobal, "Time::NVtime", sv);
+                (void)hv_stores(modglobal, "Time::U2time", newSViv(PTR2IV(myU2time)));
+            }
         }
 #endif
 #if defined(PERL_DARWIN)
