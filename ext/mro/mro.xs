@@ -43,10 +43,10 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     stashhek = HvENAME_HEK(stash);
     if (!stashhek) stashhek = HvNAME_HEK(stash);
     if (!stashhek)
-      Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
+      Perl_croak_nocontext("Can't linearize anonymous symbol table");
 
     if (level > 100)
-        Perl_croak(aTHX_ "Recursive inheritance detected in package '%" HEKf
+        Perl_croak_nocontext("Recursive inheritance detected in package '%" HEKf
                          "'",
                           HEKfARG(stashhek));
 
@@ -263,7 +263,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 SvREFCNT_dec(retval);
                 Safefree(heads);
 
-                Perl_croak(aTHX_ "%" SVf, SVfARG(errmsg));
+                Perl_croak_nocontext("%" SVf, SVfARG(errmsg));
             }
         }
     }
@@ -323,7 +323,7 @@ mro_get_linear_isa(...)
     else if(items > 1) {
 	const struct mro_alg *const algo = Perl_mro_get_from_name(aTHX_ ST(1));
 	if (!algo)
-	    Perl_croak(aTHX_ "Invalid mro name: '%" SVf "'", ST(1));
+	    Perl_croak_nocontext("Invalid mro name: '%" SVf "'", ST(1));
 	RETVAL = algo->resolve(aTHX_ class_stash, 0);
     }
     else {
@@ -346,7 +346,7 @@ mro_set_mro(...)
 
     classname = ST(0);
     class_stash = gv_stashsv(classname, GV_ADD);
-    if(!class_stash) Perl_croak(aTHX_ "Cannot create class: '%" SVf "'!", SVfARG(classname));
+    if(!class_stash) Perl_croak_nocontext("Cannot create class: '%" SVf "'!", SVfARG(classname));
     meta = HvMROMETA(class_stash);
 
     Perl_mro_set_mro(aTHX_ meta, ST(1));
@@ -496,7 +496,7 @@ mro__nextcan(...)
 
     hvname = HvNAME_get(selfstash);
     if (!hvname)
-        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
+        Perl_croak_nocontext("Can't use anonymous symbol table for method lookup");
 
     /* This block finds the contextually-enclosing fully-qualified subname,
        much like looking at (caller($i))[3] until you find a real sub that
@@ -509,7 +509,7 @@ mro__nextcan(...)
             /* we may be in a higher stacklevel, so dig down deeper */
             while (cxix < 0) {
                 if(top_si->si_type == PERLSI_MAIN)
-                    Perl_croak(aTHX_ "next::method/next::can/maybe::next::method must be used in method context");
+                    Perl_croak_nocontext("next::method/next::can/maybe::next::method must be used in method context");
                 top_si = top_si->si_prev;
                 ccstack = top_si->si_cxstack;
                 cxix = __dopoptosub_at(ccstack, top_si->si_cxix);
@@ -548,7 +548,7 @@ mro__nextcan(...)
 		subname = strrchr(fq_subname, ':');
             }
             if(!subname)
-                Perl_croak(aTHX_ "next::method/next::can/maybe::next::method cannot find enclosing method");
+                Perl_croak_nocontext("next::method/next::can/maybe::next::method cannot find enclosing method");
 
             subname_utf8 = SvUTF8(sv) ? 1 : 0;
             subname++;
@@ -576,7 +576,7 @@ mro__nextcan(...)
 	    SV* const val = HeVAL(cache_entry);
 	    if(val == &PL_sv_undef) {
 		if(throw_nomethod)
-		    Perl_croak(aTHX_
+		    Perl_croak_nocontext(
                        "No next::method '%" SVf "' found for %" HEKf,
                         SVfARG(newSVpvn_flags(subname, subname_len,
                                 SVs_TEMP | ( subname_utf8 ? SVf_UTF8 : 0 ) )),
@@ -658,7 +658,7 @@ mro__nextcan(...)
 
     (void)hv_store_ent(nmcache, sv, &PL_sv_undef, 0);
     if(throw_nomethod)
-        Perl_croak(aTHX_ "No next::method '%" SVf "' found for %" HEKf,
+        Perl_croak_nocontext("No next::method '%" SVf "' found for %" HEKf,
                          SVfARG(newSVpvn_flags(subname, subname_len,
                                 SVs_TEMP | ( subname_utf8 ? SVf_UTF8 : 0 ) )),
                         HEKfARG( HvNAME_HEK(selfstash) ));
