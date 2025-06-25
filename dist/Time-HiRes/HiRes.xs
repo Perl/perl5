@@ -972,33 +972,38 @@ BOOT:
         MY_CXT_INIT;
 #endif
 #if defined(WIN32) || defined(CYGWIN_WITH_W32API)
-        if (tick_frequency == 0) { /* no DllMain() in very rare static Perls */
-            unsigned __int64 l_tick_frequency;
+{
+    unsigned __int64 l_qpc_res_ns;
+    unsigned __int64 l_qpc_res_ns_realtime;
+    unsigned __int64 l_tick_frequency = tick_frequency;
+    if (l_tick_frequency == 0) { /* no DllMain() in very rare static Perls */
 /* from MSDN: >= WinXP, function will always succeed and never return zero */
-            if (!QueryPerformanceFrequency((LARGE_INTEGER*)&l_tick_frequency))
+        unsigned __int64 l_tick_frequency_mem;
+        if (!QueryPerformanceFrequency((LARGE_INTEGER*)&l_tick_frequency_mem))
                 croak("%s(): unimplemented in this platform", "QueryPerformanceFrequency");
+        l_tick_frequency = l_tick_frequency_mem;
              /* 32-bit CPU anti-sharding paranoia */
-            S_InterlockedExchange64(&tick_frequency, l_tick_frequency);
-        }
-        if (qpc_res_ns == 0) {
-            unsigned __int64 l_qpc_res_ns =
-                IV_1E9 > tick_frequency ? IV_1E9 / tick_frequency : 1;
-            S_InterlockedExchange64(&qpc_res_ns, l_qpc_res_ns);
-        }
-        if (qpc_res_ns_realtime == 0) {
-        /* the resolution can't be smaller than 100ns because our implementation
-         * of CLOCK_REALTIME is using FILETIME internally */
-            unsigned __int64 l_qpc_res_ns_realtime =
-                qpc_res_ns > 100 ? qpc_res_ns : 100;
-            S_InterlockedExchange64(&qpc_res_ns_realtime, l_qpc_res_ns_realtime);
-        }
+        S_InterlockedExchange64(&tick_frequency, l_tick_frequency);
+    }
+    l_qpc_res_ns = qpc_res_ns;
+    if (l_qpc_res_ns == 0) {
+        l_qpc_res_ns = IV_1E9 > l_tick_frequency ? IV_1E9 / l_tick_frequency : 1;
+        S_InterlockedExchange64(&qpc_res_ns, l_qpc_res_ns);
+    }
+    l_qpc_res_ns_realtime = qpc_res_ns_realtime;
+    if (l_qpc_res_ns_realtime == 0) {
+    /* the resolution can't be smaller than 100ns because our implementation
+     * of CLOCK_REALTIME is using FILETIME internally */
+        l_qpc_res_ns_realtime = l_qpc_res_ns > 100 ? l_qpc_res_ns : 100;
+        S_InterlockedExchange64(&qpc_res_ns_realtime, l_qpc_res_ns_realtime);
+    }
+}
 #endif
 #ifdef HAS_GETTIMEOFDAY
         {
-            (void) hv_store(PL_modglobal, "Time::NVtime", 12,
-                            newSViv(PTR2IV(myNVtime)), 0);
-            (void) hv_store(PL_modglobal, "Time::U2time", 12,
-                            newSViv(PTR2IV(myU2time)), 0);
+            HV* const modglobal = PL_modglobal;
+            (void)hv_stores(modglobal, "Time::NVtime", newSViv(PTR2IV(myNVtime)));
+            (void)hv_stores(modglobal, "Time::U2time", newSViv(PTR2IV(myU2time)));
         }
 #endif
 #if defined(PERL_DARWIN)
