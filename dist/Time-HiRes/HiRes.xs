@@ -979,6 +979,10 @@ static void
 S_croak_xs_unimplemented(const CV *const cv)
 {
     dTHX;
+    SV* sv = cv_name(cv, NULL, 0);
+    Perl_croak_nocontext(
+        "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1), SvPVX(sv));
+#if 0
     char buf[sizeof("CODE(0x%" UVxf ")") + (sizeof(UV)*8)];
     const char * pv1;
     const GV *const gv = CvGV(cv);
@@ -1002,6 +1006,7 @@ S_croak_xs_unimplemented(const CV *const cv)
             "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1),
             pv1);
     }
+#endif
 }
 #define croak_xs_unimplemented        S_croak_xs_unimplemented
 
