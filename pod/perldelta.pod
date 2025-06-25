@@ -56,7 +56,7 @@ similar to the way that C<:reader> already creates reader accessors.
 Two new experimental features have been added, which introduce the
 list-processing operators C<any> and C<all>.
 
-    use v5.40;
+    use v5.42;
     use feature 'keyword_all';
     no warnings 'experimental::keyword_all';
 
