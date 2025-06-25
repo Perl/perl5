@@ -1313,17 +1313,21 @@ void
 gettimeofday()
     PREINIT:
         struct timeval Tp;
-    PPCODE:
         int status;
+        U8 is_G_LIST = GIMME_V == G_LIST;
+    PPCODE:
+        if (is_G_LIST)
+            EXTEND(sp, 2);
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
-            if (GIMME_V == G_LIST) {
-                EXTEND(sp, 2);
-                PUSHs(sv_2mortal(newSViv(Tp.tv_sec)));
-                PUSHs(sv_2mortal(newSViv(Tp.tv_usec)));
+            if (is_G_LIST) { /* copy to registers to prove sv_2mortal/newSViv */
+                IV sec = Tp.tv_sec; /* can't modify the values */
+                IV usec = Tp.tv_usec;
+                PUSHs(sv_2mortal(newSViv(sec)));
+                PUSHs(sv_2mortal(newSViv(usec)));
             } else {
-                EXTEND(sp, 1);
-                PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / NV_1E6))));
+                NV nv = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
+                PUSHs(sv_2mortal(newSVnv(nv)));
             }
         }
 
@@ -1373,10 +1377,8 @@ setitimer(which, seconds, interval = 0)
          */
         GCC_DIAG_IGNORE_CPP_COMPAT_STMT;
         if (setitimer(which, &newit, &oldit) == 0) {
-            EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
             if (GIMME_V == G_LIST) {
-                EXTEND(sp, 1);
                 PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
             }
         }
@@ -1393,7 +1395,6 @@ getitimer(which)
          */
         GCC_DIAG_IGNORE_CPP_COMPAT_STMT;
         if (getitimer(which, &nowit) == 0) {
-            EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
             if (GIMME_V == G_LIST) {
                 EXTEND(sp, 1);
@@ -1427,28 +1428,31 @@ PROTOTYPE: $$@
         if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
             utbufp = NULL;
         else {
-            if (SvNV(accessed) < 0.0 || SvNV(modified) < 0.0)
+            NV modified_nv = SvNV(modified);
+            NV accessed_nv = SvNV(accessed);
+            if (accessed_nv < 0.0 || modified_nv < 0.0)
                 croak("%s(%" NVgf ", %" NVgf "%s", "Time::HiRes::utime",
-                          SvNV(accessed), SvNV(modified),
+                          accessed_nv, modified_nv,
                           "): negative time not invented yet");
             Zero(&utbuf, sizeof utbuf, char);
 
-            utbuf[0].tv_sec = (Time_t)SvNV(accessed);  /* time accessed */
+            utbuf[0].tv_sec = (Time_t)accessed_nv;  /* time accessed */
             utbuf[0].tv_nsec = (long)(
-                (SvNV(accessed) - (NV)utbuf[0].tv_sec)
+                (accessed_nv - (NV)utbuf[0].tv_sec)
                 * NV_1E9 + (NV)0.5);
 
-            utbuf[1].tv_sec = (Time_t)SvNV(modified);  /* time modified */
+            utbuf[1].tv_sec = (Time_t)modified_nv;  /* time modified */
             utbuf[1].tv_nsec = (long)(
-                (SvNV(modified) - (NV)utbuf[1].tv_sec)
+                (modified_nv - (NV)utbuf[1].tv_sec)
                 * NV_1E9 + (NV)0.5);
         }
 
         while (items > 0) {
+            PerlIO * pio;
             file = POPs; items--;
 
-            if (SvROK(file) && GvIO(SvRV(file)) && IoIFP(sv_2io(SvRV(file)))) {
-	        int fd =  PerlIO_fileno(IoIFP(sv_2io(file)));
+            if (SvROK(file) && GvIO(SvRV(file)) && (pio = IoIFP(sv_2io(SvRV(file))))) {
+	        int fd =  PerlIO_fileno(pio);
                 if (fd < 0) {
                     SETERRNO(EBADF,RMS_IFI);
                 } else {
@@ -1469,7 +1473,7 @@ PROTOTYPE: $$@
 #  ifdef HAS_UTIMENSAT
                 if (UTIMENSAT_AVAILABLE) {
                     STRLEN len;
-                    char * name = SvPV(file, len);
+                    const char * name = SvPV_const(file, len);
                     if (IS_SAFE_PATHNAME(name, len, "utime") &&
                         utimensat(AT_FDCWD, name, utbufp, 0) == 0) {
 
