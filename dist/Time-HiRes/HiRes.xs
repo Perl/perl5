@@ -64,6 +64,16 @@
 #  define SAVEOP() SAVEVPTR(PL_op)
 #endif
 
+#if defined(SV_COW_SHARED_HASH_KEYS) && defined(SV_COW_OTHER_PVS)
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL|SV_COW_SHARED_HASH_KEYS|SV_COW_OTHER_PVS)
+#elif defined(SV_COW_SHARED_HASH_KEYS)
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL|SV_COW_SHARED_HASH_KEYS)
+#elif defined(SV_COW_OTHER_PVS)
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL|SV_COW_OTHER_PVS)
+#else
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL)
+#endif
+
 #define IV_1E6 1000000
 #define IV_1E7 10000000
 #define IV_1E9 1000000000
@@ -1595,13 +1605,15 @@ PROTOTYPE: ;$
         SSize_t nret;
         SV* sv_arg;
         SV** SPBASE;
+        U32 op_type = (U32)ix;
     ALIAS:
-        Time::HiRes::lstat = 1
+        Time::HiRes::stat = OP_STAT
+        Time::HiRes::lstat = OP_LSTAT
     PPCODE:
-        sv_arg = items == 1 ? ST(0) : DEFSV;
         EXTEND(SP, 13);
+        sv_arg = items == 1 ? ST(0) : DEFSV;
         /* XXX will pp_stat()/pp_lstat() really modify $_[0] ? */
-        PUSHs(sv_2mortal(newSVsv(sv_arg)));
+        PUSHs(sv_2mortal(THR_newSVsv_cow(sv_arg)));
         PUTBACK;
         ENTER;
         PL_laststatval = -1;
@@ -1613,11 +1625,10 @@ PROTOTYPE: ;$
    promise Zero(); and memset(); will inline.  But this does. Now the CC can
    detangle for us, what OP fields will get a 0/NULL, or our values. */
             OP fakeop = {0};
-            U16 op_type = ix ? OP_LSTAT : OP_STAT;
             fakeop.op_flags = gimme == G_LIST ? OPf_WANT_LIST :
                 gimme == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID; /* ILP */
             ppaddr = PL_ppaddr[op_type];
-            fakeop.op_type = op_type;
+            fakeop.op_type = (U16)op_type;
             fakeop.op_ppaddr = ppaddr; /* ILP */
             PL_op = &fakeop;
             (void)ppaddr(aTHX);
