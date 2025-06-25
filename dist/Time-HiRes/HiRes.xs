@@ -972,6 +972,39 @@ nsec_without_unslept(struct timespec *sleepfor,
 #  define IS_SAFE_PATHNAME(pv, len, opname) (((len)>1)&&memchr((pv), 0, (len)-1)?(SETERRNO(ENOENT, LIB_INVARG),WARNEMU(opname),FALSE):(TRUE))
 #endif
 
+static void
+S_croak_xs_unimplemented(const CV *const cv);
+
+static void
+S_croak_xs_unimplemented(const CV *const cv)
+{
+    dTHX;
+    char buf[sizeof("CODE(0x%" UVxf ")") + (sizeof(UV)*8)];
+    const char * pv1;
+    const GV *const gv = CvGV(cv);
+    if (gv) {
+        const char *const gvname = GvNAME(gv);
+        const HV *const stash = GvSTASH(gv);
+        const char *const hvname = stash ? HvNAME(stash) : NULL;
+        if (hvname)
+            Perl_croak_nocontext("%s::%s(): unimplemented in this platform",
+                hvname, gvname);
+        else {
+            pv1 = gvname;
+            goto one_str;
+        }
+    } else {
+        my_sprintf(buf, sizeof(buf), "CODE(0x%" UVxf ")", PTR2UV(cv));
+        pv1 = buf;
+
+        one_str:
+        Perl_croak_nocontext(
+            "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1),
+            pv1);
+    }
+}
+#define croak_xs_unimplemented        S_croak_xs_unimplemented
+
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
 
 PROTOTYPES: ENABLE
@@ -990,7 +1023,8 @@ BOOT:
 /* from MSDN: >= WinXP, function will always succeed and never return zero */
         unsigned __int64 l_tick_frequency_mem;
         if (!QueryPerformanceFrequency((LARGE_INTEGER*)&l_tick_frequency_mem))
-                croak("%s(): unimplemented in this platform", "QueryPerformanceFrequency");
+            croak("%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1),
+                "QueryPerformanceFrequency");
         l_tick_frequency = l_tick_frequency_mem;
              /* 32-bit CPU anti-sharding paranoia */
         S_InterlockedExchange64(&tick_frequency, l_tick_frequency);
@@ -1097,7 +1131,7 @@ nanosleep(nsec)
     NV_DIE nsec
     CODE:
         PERL_UNUSED_ARG(nsec);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::nanosleep");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1154,7 +1188,7 @@ usleep(useconds)
     NV_DIE useconds
     CODE:
         PERL_UNUSED_ARG(useconds);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::usleep");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1254,7 +1288,7 @@ ualarm(useconds,interval=0)
     CODE:
         PERL_UNUSED_ARG(useconds);
         PERL_UNUSED_ARG(interval);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::ualarm");
+        croak_xs_unimplemented(cv);
         RETVAL = -1;
     OUTPUT:
         RETVAL
@@ -1266,7 +1300,7 @@ alarm(seconds,interval=0)
     CODE:
         PERL_UNUSED_ARG(seconds);
         PERL_UNUSED_ARG(interval);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::alarm");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1459,7 +1493,7 @@ PROTOTYPE: $$@
 I32_DIE
 utime(accessed, modified, ...)
     CODE:
-        croak("%s(): unimplemented in this platform", "Time::HiRes::utime");
+        croak_xs_unimplemented(cv);
         RETVAL = 0;
     OUTPUT:
         RETVAL
@@ -1492,7 +1526,7 @@ clock_gettime(clock_id = 0)
     clockid_t die_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::clock_gettime");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1525,7 +1559,7 @@ clock_getres(clock_id = 0)
     clockid_t die_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::clock_getres");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1566,7 +1600,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
         PERL_UNUSED_ARG(clock_id);
         PERL_UNUSED_ARG(nsec);
         PERL_UNUSED_ARG(flags);
-        croak("%s(): unimplemented in this platform", "Time::HiRes::clock_nanosleep");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1591,7 +1625,7 @@ clock()
 NV_DIE
 clock()
     CODE:
-        croak("%s(): unimplemented in this platform", "Time::HiRes::clock");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
