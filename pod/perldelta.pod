@@ -195,11 +195,12 @@ C<S_do_trans_invmap()> can overflow the destination pointer C<d>.
 It is believed that this vulnerability can enable Denial of Service or
 Arbitrary Code Execution attacks on platforms that lack sufficient defenses.
 
-The patch to fix this issue (87f42aa0e0096e9a346c9672aa3a0bd3bef8c1dd)
-is applicable to all perls that are vulnerable, including those
-out-of-support.
+This problem was discovered by Nathan Mills and assigned
+[L<CVE-2024-56406|https://lists.security.metacpan.org/cve-announce/msg/28708725/>]
+by the L<CPAN Security Group|https://security.metacpan.org/>.
 
-Discovered by: Nathan Mills.
+The patch to fix this issue (L<87f42aa0e0096e9a346c9672aa3a0bd3bef8c1dd|https://github.com/Perl/perl5/commit/87f42aa0e0096e9a346c9672aa3a0bd3bef8c1dd>) is applicable to all perls that are vulnerable, including those
+out-of-support.
 
 =head2 [CVE-2025-40909] Perl threads have a working directory race condition where file operations may target unintended paths
 
@@ -665,7 +666,8 @@ Clarified that perl C<sort> is stable (and has been since v5.8.0).
 
 =item *
 
-The recommended alternatives to the C<rand()> function were updated to modern modules recommended by the CPAN Security Group.
+The recommended alternatives to the C<rand()> function were updated to modern modules
+recommended by the L<CPAN Security Group|https://security.metacpan.org/>.
 [L<GH #22873|https://github.com/Perl/perl5/pull/22873>]
 
 =back
@@ -1267,7 +1269,7 @@ such as C<Encode.pm>.
 
 =item *
 
-The perl parser would erroneously parse some POD directives 
+The perl parser would erroneously parse some POD directives
 as if they were C<=cut>. Some other POD directives
 whose names start with I<cut>, prematurely terminating an embedded POD section.
 The following cases were affected: I<cut> followed by a digit (e.g.
@@ -1301,7 +1303,7 @@ second evaluation.  Properly clear any cached values. [L<GH #22784|https://githu
 =item *
 
 L<perlfunc/shmread> and L<perlfunc/shmwrite> are no longer limited to 31-bit
-values and can use all the available bits on a platform for their POS and 
+values and can use all the available bits on a platform for their POS and
 SIZE arguments.
 [L<GH #22895|https://github.com/Perl/perl5/issues/22895>]
 
