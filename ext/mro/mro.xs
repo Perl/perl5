@@ -31,6 +31,18 @@ init_MY_CXT(pTHX_ pMY_CXT)
   SvREADONLY_on(MY_CXT.sv_ISA);
 }
 
+static SV*
+S_mro_newSVsvhekok(pTHX_ SV* sv)
+{
+    char * pv = SvPVX(sv);
+    if (    ((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK)
+            && SvIsCOW_shared_hash(sv))
+        return newSVhek(SvSHARED_HEK_FROM_PV(pv));
+     else
+        return newSVsv(sv);
+}
+#define mro_newSVsvhekok(_sv) S_mro_newSVsvhekok(aTHX_ _sv)
+
 /*
 =for apidoc mro_get_linear_isa_c3
 
@@ -110,7 +122,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 /* if no stash, make a temporary fake MRO
                    containing just itself */
                 AV* const isa_lin = newAV_alloc_xz(4);
-                av_push_simple(isa_lin, newSVsv(isa_item));
+                av_push_simple(isa_lin, mro_newSVsvhekok(isa_item));
                 av_push_simple(seqs, MUTABLE_SV(isa_lin));
             }
             else {
@@ -139,16 +151,17 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 		    /* First entry is this class.  We happen to make a shared
 		       hash key scalar because it's the cheapest and fastest
 		       way to do it.  */
-		    *svp++ = newSVhek(stashhek);
+		    *svp++ = newSVhek(stashhek); /* Ex: Diamond_A */
 
 		    while(subrv_items--) {
 			/* These values are unlikely to be shared hash key
 			   scalars, so no point in adding code to optimising
 			   for a case that is unlikely to be true.
 			   (Or prove me wrong and do it.)  */
-
+			/* Update: Example SVPV HEK*s seen on this line:
+			   MRO_A MRO_B Diamond_A */
 			SV *const val = *subrv_p++;
-			*svp++ = newSVsv(val);
+			*svp++ = mro_newSVsvhekok(val);
 		    }
 
 		    SvREFCNT_inc(retval);
@@ -223,7 +236,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                        && (val = HeVAL(tail_entry))
                        && (SvIVX(val) > 0))
                            continue;
-                    winner = newSVsv(cand);
+                 /* Examples: SVPVHEK*s MRO_A HEK Diamond_B or a 0xd byte
+                    unprintable string. Rarely a NewXed buffer like "Test::O" */
+                    winner = mro_newSVsvhekok(cand);
                     av_push_simple(retval, winner);
                     /* note however that even when we find a winner,
                        we continue looping over @seqs to do housekeeping */
@@ -371,7 +386,7 @@ mro_get_linear_isa(...)
     if(!class_stash) {
         /* No stash exists yet, give them just the classname */
         AV* isalin = newAV_alloc_xz(4);
-        av_push_simple(isalin, newSVsv(classname));
+        av_push_simple(isalin, mro_newSVsvhekok(classname));
         ST(0) = sv_2mortal(newRV_noinc(MUTABLE_SV(isalin)));
         XSRETURN(1);
     }
