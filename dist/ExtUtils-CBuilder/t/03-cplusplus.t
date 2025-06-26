@@ -61,6 +61,9 @@ if ($^O eq 'VMS') {
 }
 
 {
+    # GH #23355
+    local $ENV{CC};
+    delete $ENV{CC};
     local $ENV{CXX};
     delete $ENV{CXX};
     # GH #23146
