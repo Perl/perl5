@@ -10,6 +10,27 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level);
 static struct mro_alg c3_alg =
     {S_mro_get_linear_isa_c3, "c3", 2, 0, 0};
 
+#define MY_CXT_KEY "mro::_guts"
+
+typedef struct {
+  SV *sv_UNIVERSAL;
+  SV *sv_dfs;
+  SV *sv_ISA;
+} my_cxt_t;
+
+START_MY_CXT
+
+static void
+init_MY_CXT(pTHX_ pMY_CXT)
+{
+  MY_CXT.sv_UNIVERSAL = newSVpvs_share("UNIVERSAL");
+  SvREADONLY_on(MY_CXT.sv_UNIVERSAL);
+  MY_CXT.sv_dfs = newSVpvs_share("dfs");
+  SvREADONLY_on(MY_CXT.sv_dfs);
+  MY_CXT.sv_ISA = newSVpvs_share("ISA");
+  SvREADONLY_on(MY_CXT.sv_ISA);
+}
+
 /*
 =for apidoc mro_get_linear_isa_c3
 
@@ -32,7 +53,6 @@ static AV*
 S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 {
     AV* retval;
-    GV** gvp;
     GV* gv;
     AV* isa;
     const HEK* stashhek;
@@ -58,9 +78,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     }
 
     /* not in cache, make a new one */
-
-    gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
-    isa = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
+    dMY_CXT;
+    HE* he = hv_fetch_ent(stash, MY_CXT.sv_ISA, FALSE, 0);
+    isa = (he && (gv = (GV*)HeVAL(he)) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
     /* For a better idea how the rest of this works, see the much clearer
        pure perl version in Algorithm::C3 0.01:
@@ -299,6 +319,41 @@ __dopoptosub_at(const PERL_CONTEXT *cxstk, I32 startingblock) {
 
 MODULE = mro		PACKAGE = mro		PREFIX = mro_
 
+#ifdef MULTIPLICITY
+
+void CLONE (...)
+CODE:
+#undef memcpy
+#define memcpy(a,b,c) NOOP
+    {
+        MY_CXT_CLONE; /* possible declaration */
+        init_MY_CXT(aTHX_ aMY_CXT);
+    }
+#undef memcpy
+    /* skip implicit PUTBACK, returning @_ to caller, more efficient */
+    return;
+
+#endif
+
+void END(...)
+PREINIT:
+    SV * sv;
+PPCODE:
+    if (PL_perl_destruct_level) {
+        dMY_CXT;
+        sv = MY_CXT.sv_UNIVERSAL;
+        MY_CXT.sv_UNIVERSAL = NULL;
+        SvREFCNT_dec_NN(sv);
+        sv = MY_CXT.sv_dfs;
+        MY_CXT.sv_dfs = NULL;
+        SvREFCNT_dec_NN(sv);
+        sv = MY_CXT.sv_ISA;
+        MY_CXT.sv_ISA = NULL;
+        SvREFCNT_dec_NN(sv);
+    }
+	/* skip implicit PUTBACK, returning @_ to caller, more efficient*/
+    return;
+
 void
 mro_get_linear_isa(...)
   PROTOTYPE: $;$
@@ -359,6 +414,7 @@ mro_get_mro(...)
   PREINIT:
     SV* classname;
     HV* class_stash;
+    SV* retsv;
   PPCODE:
     if (items != 1)
 	croak_xs_usage(cv, "classname");
@@ -368,13 +424,14 @@ mro_get_mro(...)
 
     if (class_stash) {
         const struct mro_alg *const meta = HvMROMETA(class_stash)->mro_which;
- 	ST(0) = newSVpvn_flags(meta->name, meta->length,
+	retsv = newSVpvn_flags(meta->name, meta->length,
 			       SVs_TEMP
 			       | ((meta->kflags & HVhek_UTF8) ? SVf_UTF8 : 0));
     } else {
-      ST(0) = newSVpvn_flags("dfs", 3, SVs_TEMP);
+        dMY_CXT;
+        retsv = newSVhek_mortal(SvSHARED_HEK_FROM_PV(SvPVX(MY_CXT.sv_dfs)));
     }
-    XSRETURN(1);
+    PUSHs(retsv);
 
 void
 mro_get_isarev(...)
@@ -397,12 +454,13 @@ mro_get_isarev(...)
     if(isarev) {
         HE* iter;
         hv_iterinit(isarev);
-        while((iter = hv_iternext(isarev)))
-            av_push_simple(ret_array, newSVsv(hv_iterkeysv(iter)));
+        while((iter = hv_iternext(isarev))) {
+            assert(HeKLEN(iter) != HEf_SVKEY);
+            SV* ksv = newSVhek(HeKEY_hek(iter)); /* prev hv_iterkeysv(iter) */
+            av_push_simple(ret_array, ksv);
+        }
     }
-    mXPUSHs(newRV_noinc(MUTABLE_SV(ret_array)));
-
-    PUTBACK;
+    mPUSHs(newRV_noinc(MUTABLE_SV(ret_array)));
 
 void
 mro_is_universal(...)
@@ -410,37 +468,45 @@ mro_is_universal(...)
   PREINIT:
     SV* classname;
     HV* isarev;
-    char* classname_pv;
-    STRLEN classname_len;
     HE* he;
+    SV* rsv;
   PPCODE:
     if (items != 1)
 	croak_xs_usage(cv, "classname");
 
     classname = ST(0);
 
-    classname_pv = SvPV(classname,classname_len);
-
     he = hv_fetch_ent(PL_isarev, classname, 0, 0);
     isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
 
-    if((memEQs(classname_pv, classname_len, "UNIVERSAL"))
-        || (isarev && hv_existss(isarev, "UNIVERSAL")))
-        XSRETURN_YES;
-    else
-        XSRETURN_NO;
+    STRLEN classname_len;
+    const char* classname_pv = SvPV_const(classname, classname_len);
+    if(memEQs(classname_pv, classname_len, "UNIVERSAL"))
+        rsv = &PL_sv_yes;
+    else {
+        if (isarev) {
+            dMY_CXT;
+            if (hv_exists_ent(isarev, MY_CXT.sv_UNIVERSAL, 0))
+                rsv = &PL_sv_yes;
+            else
+                rsv = &PL_sv_no;
+        }
+        else
+            rsv = &PL_sv_no;
+    }
+    PUSHs(rsv);
 
 
 void
 mro_invalidate_all_method_caches(...)
   PROTOTYPE: 
   PPCODE:
+    SP = MARK;
+    PUTBACK;
     if (items != 0)
 	croak_xs_usage(cv, "");
-
     PL_sub_generation++;
-
-    XSRETURN_EMPTY;
+    return;
 
 void
 mro_get_pkg_gen(...)
@@ -448,17 +514,18 @@ mro_get_pkg_gen(...)
   PREINIT:
     SV* classname;
     HV* class_stash;
+    IV  RETVAL;
+    dXSTARG; /* CODE: + IV retval + prototypes seems to be broken in EU::PXS */
   PPCODE:
     if(items != 1)
 	croak_xs_usage(cv, "classname");
-    
     classname = ST(0);
-
-    class_stash = gv_stashsv(classname, 0);
-
-    mXPUSHi(class_stash ? HvMROMETA(class_stash)->pkg_gen : 0);
-    
+    PUSHs(TARG);
     PUTBACK;
+    class_stash = gv_stashsv(classname, 0);
+    RETVAL = class_stash ? HvMROMETA(class_stash)->pkg_gen : 0;
+    TARGi(RETVAL,1);
+    return;
 
 void
 mro__nextcan(...)
@@ -676,3 +743,7 @@ BOOT:
         }
     }
     Perl_mro_register(aTHX_ &c3_alg);
+    {
+        MY_CXT_INIT;
+        init_MY_CXT(aTHX_ aMY_CXT);
+    }
