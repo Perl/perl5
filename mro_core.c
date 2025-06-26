@@ -31,7 +31,7 @@ Also see L<perlmroapi>.
 #define PERL_IN_MRO_CORE_C
 #include "perl.h"
 
-static const struct mro_alg dfs_alg =
+static struct mro_alg dfs_alg =
     {S_mro_get_linear_isa_dfs, "dfs", 3, 0, 0};
 
 SV *
@@ -1429,6 +1429,16 @@ Perl_boot_core_mro(pTHX)
 {
     static const char file[] = __FILE__;
 
+    {
+        U32 hash = dfs_alg.hash;
+        if (hash == 0) {
+            assert(dfs_alg.name == "dfs" && dfs_alg.length == STRLENs("dfs"));
+            /* Using "dfs" will aggressively SBOX32 CC const fold.
+               But RW const char * dfs_alg.name can not. */
+            PERL_HASH(hash, "dfs", STRLENs("dfs"));
+            dfs_alg.hash = hash;
+        }
+    }
     Perl_mro_register(aTHX_ &dfs_alg);
 
     newXSproto("mro::method_changed_in", XS_mro_method_changed_in, file, "$");

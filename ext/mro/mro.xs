@@ -7,7 +7,7 @@
 static AV*
 S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level);
 
-static const struct mro_alg c3_alg =
+static struct mro_alg c3_alg =
     {S_mro_get_linear_isa_c3, "c3", 2, 0, 0};
 
 /*
@@ -665,4 +665,14 @@ mro__nextcan(...)
     XSRETURN_EMPTY;
 
 BOOT:
+    {
+        U32 hash = c3_alg.hash;
+        if (hash == 0) {
+            assert(c3_alg.name == "c3" && c3_alg.length == (sizeof("c3")-1));
+            /* Using "c3" will aggressively SBOX32 CC const fold.
+               But RW const char * c3_alg.name can not. */
+            PERL_HASH(hash, "c3", (sizeof("c3")-1));
+            c3_alg.hash = hash;
+        }
+    }
     Perl_mro_register(aTHX_ &c3_alg);
