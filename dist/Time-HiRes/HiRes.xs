@@ -1293,6 +1293,113 @@ BOOT:
         MUTEX_INIT(&darwin_time_mutex);
 #  endif
 #endif
+#if defined(HAS_GETITIMER) && defined(HAS_SETITIMER)
+#  define GETITIMER_SUBSTR "Time::HiRes::getitimer"+13
+#  define SETITIMER_SUBSTR "Time::HiRes::setitimer"+13
+#else
+#  define GETITIMER_SUBSTR "d_getitimer"+2
+#  define SETITIMER_SUBSTR "d_setitimer"+2
+#endif
+#define INIT1 INIT2(sym_usleep, "Time::HiRes::usleep"+13, sizeof("usleep")-1, NULL, 0) \
+INIT2(sym_sleep, "Time::HiRes::sleep"+13, sizeof("sleep")-1, NULL, 0) \
+INIT2(sym_ualarm, "Time::HiRes::ualarm"+13, sizeof("ualarm")-1, NULL, 0) \
+INIT2(sym_alarm, "Time::HiRes::alarm"+13, sizeof("alarm")-1, NULL, 0) \
+INIT2(sym_gettimeofday, "Time::HiRes::gettimeofday"+13, sizeof("gettimeofday")-1, NULL, 0) \
+INIT2(sym_time, "Time::HiRes::time"+13, sizeof("time")-1, NULL, 0) \
+INIT2(sym_tv_interval, "tv_interval", sizeof("tv_interval")-1, NULL, 0) \
+INIT2(sym_getitimer, GETITIMER_SUBSTR, sizeof("getitimer")-1, NULL, 0) \
+INIT2(sym_setitimer, SETITIMER_SUBSTR, sizeof("setitimer")-1, NULL, 0) \
+INIT2(sym_nanosleep, "Time::HiRes::nanosleep"+13, sizeof("nanosleep")-1, NULL, 0) \
+INIT2(sym_clock_gettime, "Time::HiRes::clock_gettime"+13, sizeof("clock_gettime")-1, NULL, 0) \
+INIT2(sym_clock_getres, "Time::HiRes::clock_getres"+13, sizeof("clock_getres")-1, NULL, 0) \
+INIT2(sym_clock, "Time::HiRes::clock"+13, sizeof("clock")-1, NULL, 0) \
+INIT2(sym_clock_nanosleep, "Time::HiRes::clock_nanosleep"+13, sizeof("clock_nanosleep")-1, NULL, 0) \
+INIT2(sym_CLOCKS_PER_SEC, "CLOCKS_PER_SEC", sizeof("CLOCKS_PER_SEC")-1, NULL, 0) \
+INIT2(sym_CLOCK_BOOTTIME, "CLOCK_BOOTTIME", sizeof("CLOCK_BOOTTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_HIGHRES, "CLOCK_HIGHRES", sizeof("CLOCK_HIGHRES")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC, "CLOCK_MONOTONIC", sizeof("CLOCK_MONOTONIC")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_COARSE, "CLOCK_MONOTONIC_COARSE", sizeof("CLOCK_MONOTONIC_COARSE")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_FAST, "CLOCK_MONOTONIC_FAST", sizeof("CLOCK_MONOTONIC_FAST")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_PRECISE, "CLOCK_MONOTONIC_PRECISE", sizeof("CLOCK_MONOTONIC_PRECISE")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_RAW, "CLOCK_MONOTONIC_RAW", sizeof("CLOCK_MONOTONIC_RAW")-1, NULL, 0) \
+INIT2(sym_CLOCK_PROCESS_CPUTIME_ID, "CLOCK_PROCESS_CPUTIME_ID", sizeof("CLOCK_PROCESS_CPUTIME_ID")-1, NULL, 0) \
+INIT2(sym_CLOCK_PROF, "CLOCK_PROF", sizeof("CLOCK_PROF")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME, "CLOCK_REALTIME", sizeof("CLOCK_REALTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_COARSE, "CLOCK_REALTIME_COARSE", sizeof("CLOCK_REALTIME_COARSE")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_FAST, "CLOCK_REALTIME_FAST", sizeof("CLOCK_REALTIME_FAST")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_PRECISE, "CLOCK_REALTIME_PRECISE", sizeof("CLOCK_REALTIME_PRECISE")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_RAW, "CLOCK_REALTIME_RAW", sizeof("CLOCK_REALTIME_RAW")-1, NULL, 0) \
+INIT2(sym_CLOCK_SECOND, "CLOCK_SECOND", sizeof("CLOCK_SECOND")-1, NULL, 0) \
+INIT2(sym_CLOCK_SOFTTIME, "CLOCK_SOFTTIME", sizeof("CLOCK_SOFTTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_THREAD_CPUTIME_ID, "CLOCK_THREAD_CPUTIME_ID", sizeof("CLOCK_THREAD_CPUTIME_ID")-1, NULL, 0) \
+INIT2(sym_CLOCK_TIMEOFDAY, "CLOCK_TIMEOFDAY", sizeof("CLOCK_TIMEOFDAY")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME, "CLOCK_UPTIME", sizeof("CLOCK_UPTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_COARSE, "CLOCK_UPTIME_COARSE", sizeof("CLOCK_UPTIME_COARSE")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_FAST, "CLOCK_UPTIME_FAST", sizeof("CLOCK_UPTIME_FAST")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_PRECISE, "CLOCK_UPTIME_PRECISE", sizeof("CLOCK_UPTIME_PRECISE")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_RAW, "CLOCK_UPTIME_RAW", sizeof("CLOCK_UPTIME_RAW")-1, NULL, 0) \
+INIT2(sym_CLOCK_VIRTUAL, "CLOCK_VIRTUAL", sizeof("CLOCK_VIRTUAL")-1, NULL, 0) \
+INIT2(sym_ITIMER_PROF, "ITIMER_PROF", sizeof("ITIMER_PROF")-1, NULL, 0) \
+INIT2(sym_ITIMER_REAL, "ITIMER_REAL", sizeof("ITIMER_REAL")-1, NULL, 0) \
+INIT2(sym_ITIMER_REALPROF, "ITIMER_REALPROF", sizeof("ITIMER_REALPROF")-1, NULL, 0) \
+INIT2(sym_ITIMER_VIRTUAL, "ITIMER_VIRTUAL", sizeof("ITIMER_VIRTUAL")-1, NULL, 0) \
+INIT2(sym_TIMER_ABSTIME, "TIMER_ABSTIME", sizeof("TIMER_ABSTIME")-1, NULL, 0) \
+INIT2(sym_d_usleep, "d_usleep", sizeof("d_usleep")-1, "Time::HiRes::usleep"+13, 1) \
+INIT2(sym_d_ualarm, "d_ualarm", sizeof("d_ualarm")-1, "Time::HiRes::ualarm"+13, 1) \
+INIT2(sym_d_gettimeofday, "d_gettimeofday", sizeof("d_gettimeofday")-1, "Time::HiRes::gettimeofday"+13, 1) \
+INIT2(sym_d_getitimer, "d_getitimer", sizeof("d_getitimer")-1, GETITIMER_SUBSTR, 1) \
+INIT2(sym_d_setitimer, "d_setitimer", sizeof("d_setitimer")-1, SETITIMER_SUBSTR, 1) \
+INIT2(sym_d_nanosleep, "d_nanosleep", sizeof("d_nanosleep")-1, "Time::HiRes::nanosleep"+13, 1) \
+INIT2(sym_d_clock_gettime, "d_clock_gettime", sizeof("d_clock_gettime")-1, "Time::HiRes::clock_gettime"+13, 1) \
+INIT2(sym_d_clock_getres, "d_clock_getres", sizeof("d_clock_getres")-1, "Time::HiRes::clock_getres"+13, 1) \
+INIT2(sym_d_clock, "d_clock", sizeof("d_clock")-1, "Time::HiRes::clock"+13, 1) \
+INIT2(sym_d_clock_nanosleep, "d_clock_nanosleep", sizeof("d_clock_nanosleep")-1, "Time::HiRes::clock_nanosleep"+13, 1) \
+INIT2(sym_d_hires_stat, "d_hires_stat", sizeof("d_hires_stat")-1, NULL, 0) \
+INIT2(sym_d_futimens, "d_futimens", sizeof("d_futimens")-1, NULL, 0) \
+INIT2(sym_d_utimensat, "d_utimensat", sizeof("d_utimensat")-1, NULL, 0) \
+INIT2(sym_d_hires_utime, "d_hires_utime", sizeof("d_hires_utime")-1, NULL, 0) \
+INIT2(sym_stat, "Time::HiRes::stat"+13, sizeof("stat")-1, NULL, 0) \
+INIT2(sym_lstat, "Time::HiRes::lstat"+13, sizeof("lstat")-1, NULL, 0) \
+INIT2(sym_utime, "Time::HiRes::utime"+13, sizeof("utime")-1, NULL, 0)
+/* A test inside ../dist/XSLoader/t/XSLoader.t, doesn't allow us to
+   pass any args from our .pm to .xs. So this idea is rejected:
+        XSLoader::load( 'Time::HiRes', $XS_VERSION, \@EXPORT_OK );
+        if (items != 3 || !SvROK((rv=ST(2))) || (SvTYPE(SvRV(rv))!=SVt_PVAV)
+            croak_xs_usage(cv, "class, version, export_ok"); */
+#undef INIT2
+#define INIT2(_s, _str, _l, _d, _db) ((_db) ? (_d) : (_str)),
+        { /* All C strings are shared with EU::PXS's or constant()'s codegen. */
+            static const char * const expokpv[] = {
+                INIT1
+            };
+#undef INIT2
+#define INIT2(_s, _str, _l, _d, _db) ((_db) ? ((I8)-((I8)(_l))) : (_l)),
+            static const I8 expoklen[] = {
+                INIT1
+            };
+#undef INIT2
+            char buf [64];
+            GV* gv = gv_fetchpvs("Time::HiRes::EXPORT_OK", GV_ADDMULTI, SVt_PVAV);
+            AV* av = GvAV(gv);
+            int i = 0;
+            buf[0] = 'd';
+            buf[1] = '_';
+            av_extend(av, C_ARRAY_LENGTH(expoklen));
+            for(;i < C_ARRAY_LENGTH(expoklen); i++) {
+                I8 l = expoklen[i];
+                const char * pv = expokpv[i];
+                if (l < 0) { /* neg val is a "d_" prefixed identifier */
+                    l = -l; /* +1 for "\0" -2 for "d_" */
+                    Copy(pv, &buf[2], (l+1)-2, char);
+                    pv = buf;
+                }
+#ifdef av_store_simple
+                av_store_simple(av, i, newSVpvn_share(pv, l, 0));
+#else
+                av_store(av, i, newSVpvn_share(pv, l, 0));
+#endif
+            }
+        }
     }
 
 #if defined(USE_ITHREADS) && defined(MY_CXT_KEY)
@@ -1792,10 +1899,10 @@ PROTOTYPE: $$@
                             tot++;
                         }
                     } else {
-                        croak("%s unimplemented in this platform", "futimens");
+                        croak("%s unimplemented in this platform", "d_futimens"+2);
                     }
 #  else  /* HAS_FUTIMENS */
-                    croak("%s unimplemented in this platform", "futimens");
+                    croak("%s unimplemented in this platform", "d_futimens"+2);
 #  endif /* HAS_FUTIMENS */
                 }
             }
@@ -1810,10 +1917,10 @@ PROTOTYPE: $$@
                         tot++;
                     }
                 } else {
-                    croak("%s unimplemented in this platform", "utimensat");
+                    croak("%s unimplemented in this platform", "d_utimensat"+2);
                 }
 #  else  /* HAS_UTIMENSAT */
-                croak("%s unimplemented in this platform", "utimensat");
+                croak("%s unimplemented in this platform", "d_utimensat"+2);
 #  endif /* HAS_UTIMENSAT */
             }
         } /* while items */
