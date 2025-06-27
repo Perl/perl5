@@ -156,12 +156,20 @@ typedef struct {
     unsigned long run_count;
 } my_cxt_t;
 
+typedef BOOL (WINAPI *pfnQueryPerformanceCounter_T)(LARGE_INTEGER*);
+
 static unsigned __int64 tick_frequency = 0;
 static unsigned __int64 qpc_res_ns = 0;
 static unsigned __int64 qpc_res_ns_realtime = 0;
+static pfnQueryPerformanceCounter_T pfnQueryPerformanceCounter = NULL;
 
 #define S_InterlockedExchange64(_d,_s) \
     InterlockedExchange64((LONG64 volatile *)(_d),(LONG64)(_s))
+#define S_InterlockedExchangePointer(_d,_s) \
+    InterlockedExchangePointer((PVOID volatile *)(_d),(PVOID)(_s))
+
+#undef QueryPerformanceCounter
+#define QueryPerformanceCounter pfnQueryPerformanceCounter
 
 /* Visual C++ 2013 and older don't have the timespec structure.
  * Neither do mingw.org compilers with MinGW runtimes older than 3.22. */
@@ -259,17 +267,19 @@ _GetSystemTimePreciseAsFileTime(pTHX)
 {
 #define MY_CXTX (*MY_CXT_x)
     unsigned __int64 ticks;
-    unsigned __int64 ticks_mem;
+
     unsigned __int64 timesys;
-    __int64 diff;
 /*  If no threads, CC will probably optimize away all MY_CXT_x references
     so they directly access the C static global struct. */
     my_cxt_t * MY_CXT_x;
 
-    QueryPerformanceCounter((LARGE_INTEGER*)&ticks_mem);
+    {
+        unsigned __int64 ticks_mem;
+        QueryPerformanceCounter((LARGE_INTEGER*)&ticks_mem);
     /* Inform the CC nothing external or in this fn (ptr aliasing) can ever
        rewrite the value in ticks. Increases chance of CC using registers. */
-    ticks = ticks_mem;
+        ticks = ticks_mem;
+    }
     {
         dMY_CXT;
         MY_CXT_x = &(MY_CXT);
@@ -282,6 +292,7 @@ _GetSystemTimePreciseAsFileTime(pTHX)
         MY_CXTX.reset_time = timesys + MAX_PERF_COUNTER_TICKS;
     }
     else {
+        __int64 diff;
         ticks -= MY_CXTX.base_ticks;
         timesys = MY_CXTX.base_systime_as_filetime.ft_i64
                     + Const64(IV_1E7) * (ticks / tick_frequency)
@@ -292,6 +303,7 @@ _GetSystemTimePreciseAsFileTime(pTHX)
             GetSystemTimeAsFileTime(&MY_CXTX.base_systime_as_filetime.ft_val);
             timesys = MY_CXTX.base_systime_as_filetime.ft_i64;
         }
+        /* Note this invisible else {} branch, SKIPS calling GetSystemTimeAsFileTime() */
     }
 #undef MY_CXTX
     {
@@ -1002,7 +1014,7 @@ S_croak_xs_unimplemented(const CV *const cv)
     SV* sv = cv_name(cv, NULL, 0);
     Perl_croak_nocontext(
         "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1), SvPVX(sv));
-#if 0
+#if 0 /* former implementation, retired because of machine code bloat */
     char buf[sizeof("CODE(0x%" UVxf ")") + (sizeof(UV)*8)];
     const char * pv1;
     const GV *const gv = CvGV(cv);
@@ -1065,6 +1077,25 @@ BOOT:
      * of CLOCK_REALTIME is using FILETIME internally */
         l_qpc_res_ns_realtime = l_qpc_res_ns > 100 ? l_qpc_res_ns : 100;
         S_InterlockedExchange64(&qpc_res_ns_realtime, l_qpc_res_ns_realtime);
+    }
+    {/* Remove a couple jump stub funcs between kernel32->kernelbase->ntdll
+        for perf reasons. RtlQueryPerformanceCounter() was added in NT 6.1,
+        so a fallback path is still required to QPC()@K32.dll. */
+        pfnQueryPerformanceCounter_T QPCfn = pfnQueryPerformanceCounter;
+        if (!QPCfn) {
+            HMODULE hmod = GetModuleHandleW(L"NTDLL.DLL");
+            if (hmod) {
+                QPCfn = (pfnQueryPerformanceCounter_T)GetProcAddress(hmod,"RtlQueryPerformanceCounter");
+                if (QPCfn)
+                    goto QPC_done;
+            }
+#undef QueryPerformanceCounter
+            QPCfn = QueryPerformanceCounter; /* Get the public API fallback sym. */
+#undef QueryPerformanceCounter
+#QueryPerformanceCounter pfnQueryPerformanceCounter
+            QPC_done:
+            S_InterlockedExchangePointer(&pfnQueryPerformanceCounter, QPCfn);
+        }
     }
 }
 #endif
