@@ -1312,11 +1312,19 @@ void
 usleep(useconds)
     NV useconds
     PREINIT:
+#ifndef HAS_NV_GETTIMEOFDAY
         struct timeval Ta, Tb;
+#else
+        NV Ta_nv, Tb_nv;
+#endif
         SV* rsv;
         NV RETVAL;
     CODE:
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Ta, NULL);
+#else
+        Ta_nv = nv_gettimeofday();
+#endif
         if (items > 0) {
             if (useconds >= NV_1E6) {
                 IV seconds = (IV) (useconds / NV_1E6);
@@ -1334,12 +1342,16 @@ usleep(useconds)
             usleep((U32)useconds);
         } else
             PerlProc_pause();
-
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Tb, NULL);
 #  if 0
         printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #  endif
         RETVAL = NV_1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
+#else
+        Tb_nv = nv_gettimeofday();
+        RETVAL = NV_1E6*(Tb_nv - Ta_nv);
+#endif
     TMR_TARGn(rsv, RETVAL, 1);
     SETs(rsv);
     return; /* no PUTBACK no PUSH, 1 in, 1 out */
@@ -1384,11 +1396,19 @@ nanosleep(nsec)
 void
 sleep(...)
     PREINIT:
+#ifndef HAS_NV_GETTIMEOFDAY
         struct timeval Ta, Tb;
+#else
+        NV Ta_nv, Tb_nv;
+#endif
         SV* rsv;
         NV RETVAL;
     PPCODE:
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Ta, NULL);
+#else
+        Ta_nv = nv_gettimeofday();
+#endif
         if (items > 0) {
             NV seconds  = SvNV(ST(0));
             if (seconds >= 0.0) {
@@ -1416,12 +1436,16 @@ sleep(...)
                       "): negative time not invented yet");
         } else
             PerlProc_pause();
-
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Tb, NULL);
 #  if 0
         printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #  endif
         RETVAL = (NV)(Tb.tv_sec-Ta.tv_sec)+0.000001*(NV)(Tb.tv_usec-Ta.tv_usec);
+#else
+        Tb_nv = nv_gettimeofday();
+        RETVAL = Tb_nv - Ta_nv;
+#endif
         TMR_TARGn(rsv, RETVAL, 1);
         PUSHs(rsv);
         PUTBACK;
