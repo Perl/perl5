@@ -1,13 +1,13 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
-0.280642
+0.280242
 
  Fix:
 
  - account for possibility of envvar $CC being defined
    https://github.com/Perl/perl5/issues/23355
 
-0.280641
+0.280241
 
  Fix:
 
