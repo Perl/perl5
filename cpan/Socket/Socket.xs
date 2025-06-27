@@ -997,17 +997,21 @@ pack_sockaddr_in(port_sv, ip_address_sv)
         STRLEN addrlen;
         unsigned short port = 0;
         char * ip_address;
+
+        SvGETMAGIC(port_sv);
         if (SvOK(port_sv)) {
-            port = SvUV(port_sv);
-            if (SvUV(port_sv) > 0xFFFF)
+            port = SvUV_nomg(port_sv);
+            if (SvUV_nomg(port_sv) > 0xFFFF)
                 warn("Port number above 0xFFFF, will be truncated to %d for %s",
                         port, "Socket::pack_sockaddr_in");
         }
+
+        SvGETMAGIC(ip_address_sv);
         if (!SvOK(ip_address_sv))
             croak("Undefined address for %s", "Socket::pack_sockaddr_in");
+        ip_address = SvPVbyte_nomg(ip_address_sv, addrlen);
         if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
             croak("Wide character in %s", "Socket::pack_sockaddr_in");
-        ip_address = SvPVbyte(ip_address_sv, addrlen);
         if (addrlen == sizeof(addr) || addrlen == 4)
             addr.s_addr =
                 (unsigned int)(ip_address[0] & 0xFF) << 24 |
@@ -1073,17 +1077,21 @@ pack_sockaddr_in6(port_sv, sin6_addr, scope_id=0, flowinfo=0)
         struct sockaddr_in6 sin6;
         char * addrbytes;
         STRLEN addrlen;
+
+        SvGETMAGIC(port_sv);
         if (SvOK(port_sv)) {
-            port = SvUV(port_sv);
-            if (SvUV(port_sv) > 0xFFFF)
+            port = SvUV_nomg(port_sv);
+            if (SvUV_nomg(port_sv) > 0xFFFF)
                 warn("Port number above 0xFFFF, will be truncated to %d for %s",
                         port, "Socket::pack_sockaddr_in6");
         }
+
+        SvGETMAGIC(sin6_addr);
         if (!SvOK(sin6_addr))
             croak("Undefined address for %s", "Socket::pack_sockaddr_in6");
+        addrbytes = SvPVbyte_nomg(sin6_addr, addrlen);
         if (DO_UTF8(sin6_addr) && !sv_utf8_downgrade(sin6_addr, 1))
             croak("Wide character in %s", "Socket::pack_sockaddr_in6");
-        addrbytes = SvPVbyte(sin6_addr, addrlen);
         if (addrlen != sizeof(sin6.sin6_addr))
             croak("Bad arg length %s, length is %" UVuf ", should be %" UVuf,
                     "Socket::pack_sockaddr_in6", (UV)addrlen, (UV)sizeof(sin6.sin6_addr));

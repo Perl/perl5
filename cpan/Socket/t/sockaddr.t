@@ -12,7 +12,7 @@ use Socket qw(
     sockaddr_family
     sockaddr_un
 );
-use Test::More tests => 50;
+use Test::More tests => 52;
 
 # inet_aton, inet_ntoa
 {
@@ -99,6 +99,12 @@ SKIP: {
         'pack_sockaddr_in oversized port is allowed' );
     like( $warnings, qr/^Port number above 0xFFFF, will be truncated to 33229 for Socket::pack_sockaddr_in at /,
         'pack_sockaddr_in oversized port warning' );
+
+    # GETMAGIC is invoked (RT166524)
+    local $1;
+    "2057" =~ m/^(\d+)$/;
+    $sin = pack_sockaddr_in $1, inet_aton("10.20.30.40");
+    is( (unpack_sockaddr_in($sin))[0], 2057, 'pack_sockaddr_in invokes GETMAGIC on port argument' );
 }
 
 # pack_sockaddr_in6, unpack_sockaddr_in6
@@ -140,6 +146,12 @@ SKIP: {
         'pack_sockaddr_in6 oversized port is allowed' );
     like( $warnings, qr/^Port number above 0xFFFF, will be truncated to 33229 for Socket::pack_sockaddr_in6 at /,
         'pack_sockaddr_in6 oversized port warning' );
+
+    # GETMAGIC is invoked (RT166524)
+    local $1;
+    "2057" =~ m/^(\d+)$/;
+    $sin6 = Socket::pack_sockaddr_in6 $1, "0123456789abcdef";
+    is( (Socket::unpack_sockaddr_in6($sin6))[0], 2057, 'pack_sockaddr_in6 invokes GETMAGIC on port argument' );
 }
 
 # sockaddr_un on abstract paths
