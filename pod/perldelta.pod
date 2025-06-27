@@ -395,7 +395,7 @@ L<Exporter> has been upgraded from version 5.78 to 5.79.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded from version 0.280240 to 0.280241.
+L<ExtUtils::CBuilder> has been upgraded from version 0.280240 to 0.280242.
 
 =item *
 
@@ -415,7 +415,7 @@ L<Fcntl> has been upgraded from version 1.18 to 1.20.
 
 =item *
 
-L<feature> has been upgraded from version 1.89 to 1.96.
+L<feature> has been upgraded from version 1.89 to 1.97.
 
 =item *
 
@@ -467,7 +467,7 @@ L<Memoize> has been upgraded from version 1.16 to 1.17.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20240609 to 5.20250620.
+L<Module::CoreList> has been upgraded from version 5.20240609 to 5.20250627.
 
 =item *
 
