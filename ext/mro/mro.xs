@@ -15,6 +15,7 @@ static struct mro_alg c3_alg =
 typedef struct {
   SV *sv_UNIVERSAL;
   SV *sv_dfs;
+  SV *sv_c3;
   SV *sv_ISA;
 } my_cxt_t;
 
@@ -27,6 +28,8 @@ init_MY_CXT(pTHX_ pMY_CXT)
   SvREADONLY_on(MY_CXT.sv_UNIVERSAL);
   MY_CXT.sv_dfs = newSVpvs_share("dfs");
   SvREADONLY_on(MY_CXT.sv_dfs);
+  MY_CXT.sv_c3 = newSVpvn_share("c3", sizeof("c3")-1, c3_alg.hash);
+  SvREADONLY_on(MY_CXT.sv_c3);
   MY_CXT.sv_ISA = newSVpvs_share("ISA");
   SvREADONLY_on(MY_CXT.sv_ISA);
 }
@@ -121,8 +124,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
             if(!isa_item_stash) {
                 /* if no stash, make a temporary fake MRO
                    containing just itself */
+                SV* nsv = mro_newSVsvhekok(isa_item);
                 AV* const isa_lin = newAV_alloc_xz(4);
-                av_push_simple(isa_lin, mro_newSVsvhekok(isa_item));
+                av_push_simple(isa_lin, nsv);
                 av_push_simple(seqs, MUTABLE_SV(isa_lin));
             }
             else {
@@ -202,11 +206,12 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 }
             }
         }
-
+        {
         /* Initialize retval to build the return value in */
-        retval = newAV_alloc_xz(4);
-        av_push_simple(retval, newSVhek(stashhek)); /* us first */
-
+            SV* nsv = newSVhek(stashhek);
+            retval = newAV_alloc_xz(4);
+            av_push_simple(retval, nsv); /* us first */
+        }
         /* This loop won't terminate until we either finish building
            the MRO, or get an exception. */
         while(1) {
@@ -280,14 +285,12 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
             /* If we had candidates, but nobody won, then the @ISA
                hierarchy is not C3-incompatible */
             if(!winner) {
-                SV *errmsg;
-                Size_t i;
-
-                errmsg = newSVpvf(
+                SV *errmsg = newSVpvf(
                            "Inconsistent hierarchy during C3 merge of class '%" HEKf "':\n\t"
                             "current merge results [\n",
                             HEKfARG(stashhek));
-                for (i = 0; i < av_count(retval); i++) {
+                SSize_t count = av_count(retval);
+                for (SSize_t i = 0; i < count; i++) {
                     SV **elem = av_fetch(retval, i, 0);
                     sv_catpvf(errmsg, "\t\t%" SVf ",\n", SVfARG(*elem));
                 }
@@ -303,9 +306,12 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
         }
     }
     else { /* @ISA was undefined or empty */
+/* Do this 1st, the next 2 AV* API calls are likely to be inlined and
+   optimize away alot of AvFILL/memset/Renew logic if nothing is between them. */
+        SV* nsv = newSVhek(stashhek);
         /* build a retval containing only ourselves */
         retval = newAV_alloc_xz(4);
-        av_push_simple(retval, newSVhek(stashhek));
+        av_push_simple(retval, nsv);
     }
 
  done:
@@ -362,6 +368,9 @@ PPCODE:
         sv = MY_CXT.sv_dfs;
         MY_CXT.sv_dfs = NULL;
         SvREFCNT_dec_NN(sv);
+        sv = MY_CXT.sv_c3;
+        MY_CXT.sv_c3 = NULL;
+        SvREFCNT_dec_NN(sv);
         sv = MY_CXT.sv_ISA;
         MY_CXT.sv_ISA = NULL;
         SvREFCNT_dec_NN(sv);
@@ -385,8 +394,9 @@ mro_get_linear_isa(...)
 
     if(!class_stash) {
         /* No stash exists yet, give them just the classname */
+        SV* nsv = mro_newSVsvhekok(classname);
         AV* isalin = newAV_alloc_xz(4);
-        av_push_simple(isalin, mro_newSVsvhekok(classname));
+        av_push_simple(isalin, nsv);
         ST(0) = sv_2mortal(newRV_noinc(MUTABLE_SV(isalin)));
         XSRETURN(1);
     }
@@ -430,6 +440,7 @@ mro_get_mro(...)
     SV* classname;
     HV* class_stash;
     SV* retsv;
+    U32 which_my_cxt; /* rel offset MY_CXT, prevents 2 sep dMY_CXT deref lines */
   PPCODE:
     if (items != 1)
 	croak_xs_usage(cv, "classname");
@@ -439,12 +450,28 @@ mro_get_mro(...)
 
     if (class_stash) {
         const struct mro_alg *const meta = HvMROMETA(class_stash)->mro_which;
-	retsv = newSVpvn_flags(meta->name, meta->length,
-			       SVs_TEMP
-			       | ((meta->kflags & HVhek_UTF8) ? SVf_UTF8 : 0));
+        if (memEQs(meta->name, meta->length, "dfs")) /* skipping meta->kflags & HVhek_UTF8 */
+            goto ret_dfs;
+        /* "c3" shows up here running mro's .t'es */
+        else if (memEQs(meta->name, meta->length, "c3")) {
+            which_my_cxt = STRUCT_OFFSET(my_cxt_t, sv_c3);
+            goto ret_my_cxt_hek;
+        }
+        else { /* pretty sure this string already exists inside PL_strtab by now */
+            I32 i32len = meta->kflags & HVhek_UTF8 ? -(I32)meta->length : (I32)meta->length;
+            retsv = sv_2mortal(newSVpvn_share(meta->name, i32len, meta->hash));
+        }
     } else {
-        dMY_CXT;
-        retsv = newSVhek_mortal(SvSHARED_HEK_FROM_PV(SvPVX(MY_CXT.sv_dfs)));
+        ret_dfs:
+        which_my_cxt = STRUCT_OFFSET(my_cxt_t, sv_dfs);
+
+        ret_my_cxt_hek:
+        {
+            dMY_CXT;
+            SV** svp = NUM2PTR(SV**,(PTR2nat(&MY_CXT)+which_my_cxt));
+            SV* svhek = *svp;
+            retsv = newSVhek_mortal(SvSHARED_HEK_FROM_PV(SvPVX(svhek)));
+        }
     }
     PUSHs(retsv);
 
@@ -546,7 +573,7 @@ void
 mro__nextcan(...)
   PREINIT:
     SV* self = ST(0);
-    const I32 throw_nomethod = SvIVX(ST(1));
+    const bool throw_nomethod = cBOOL(SvIVX(ST(1)));
     I32 cxix = cxstack_ix;
     const PERL_CONTEXT *ccstack = cxstack;
     const PERL_SI *top_si = PL_curstackinfo;
@@ -649,8 +676,10 @@ mro__nextcan(...)
     /* Initialize the next::method cache for this stash
        if necessary */
     selfmeta = HvMROMETA(selfstash);
-    if(!(nmcache = selfmeta->mro_nextmethod)) {
-        nmcache = selfmeta->mro_nextmethod = newHV();
+    nmcache = selfmeta->mro_nextmethod;
+    if (!nmcache) {
+        nmcache = newHV();
+        selfmeta->mro_nextmethod = nmcache;
     }
     else { /* Use the cached coderef if it exists */
 	HE* cache_entry = hv_fetch_ent(nmcache, sv, 0, 0);
@@ -673,8 +702,10 @@ mro__nextcan(...)
     /* beyond here is just for cache misses, so perf isn't as critical */
 
     stashname_len = subname - fq_subname - 2;
-    stashname = newSVpvn_flags(fq_subname, stashname_len,
-                                SVs_TEMP | (subname_utf8 ? SVf_UTF8 : 0));
+    {   /* strs like "Qux::foo" "TTop::foo" show up here */
+        I32 i32len = subname_utf8 ? -(I32)stashname_len : (I32)stashname_len;
+        stashname = sv_2mortal(newSVpvn_share(fq_subname, i32len, 0));
+    }
 
     /* has ourselves at the top of the list */
     linear_av = S_mro_get_linear_isa_c3(aTHX_ selfstash, 0);
