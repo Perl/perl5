@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 
 use Carp qw/confess croak/;
@@ -74,7 +74,7 @@ sub DESTROY {
         # Sometimes $@ is uninitialized, not a problem in this case so do not
         # show the warning about using eq.
         no warnings 'uninitialized';
-        if($self->{+EVAL_ERROR} eq $@ && $hub->is_local) {
+        if($self->{+EVAL_ERROR} eq $@ && $hub->is_local && !$hub->suppress_release_error) {
             require Carp;
             my $mess = Carp::longmess("Context destroyed");
             my $frame = $self->{+_IS_SPAWN} || $self->{+TRACE}->frame;

@@ -5,7 +5,7 @@ use warnings;
 use Carp qw/croak/;
 use Scalar::Util qw/reftype/;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
 use Test2::Util::HashBase;
@@ -182,7 +182,7 @@ Call the custom callback if one is set, otherwise this does nothing.
 
 Set the custom callback. The custom callback must be a coderef. The first
 argument to your callback will be the event itself, the second will be the
-L<Test2::Event::Hub> that is using the callback.
+L<Test2::Hub> that is using the callback.
 
 =item $bool = $e->causes_fail
 

@@ -2,7 +2,7 @@ package Test2::Tools::Tester;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use Carp qw/croak/;
 use Test2::Util::Ref qw/rtype/;

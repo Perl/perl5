@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -2004,7 +2004,7 @@ L<Test::Most> Most commonly needed test functions and features.
 
 =head1 ENVIRONMENT VARIABLES
 
-See L<Test2::Env> for a list of meaningul environment variables.
+See L<Test2::Env> for a list of meaningful environment variables.
 
 =head1 AUTHORS
 

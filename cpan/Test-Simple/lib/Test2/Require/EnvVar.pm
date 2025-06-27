@@ -5,7 +5,7 @@ use warnings;
 use Carp qw/confess/;
 use base 'Test2::Require';
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 sub skip {
     my $class = shift;

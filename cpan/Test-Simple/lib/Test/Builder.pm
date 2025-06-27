@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use Scalar::Util qw/blessed reftype weaken/;
 

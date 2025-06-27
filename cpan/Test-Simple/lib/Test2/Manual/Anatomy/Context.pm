@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 1;
 
@@ -69,8 +69,9 @@ acquired. State includes IPC instance, Formatter class, Root PID, etc.
 =head2 FIND/CREATE THE CURRENT/ROOT HUB
 
 L<Test2> has a stack of hubs, the stack can be accessed via
-L<Test2::API::test2_stack>. When you get a context it will find the current
-hub, if there is no current hub then the root one will be initialized.
+L<Test2::API::test2_stack|Test2::API/"$stack = test2_stack()">. When you get a
+context it will find the current hub, if there is no current hub then the root
+one will be initialized.
 
 =head2 PROVIDE HOOKS
 
