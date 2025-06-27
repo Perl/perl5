@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Require';
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use Test2::Util qw/pkg_to_file/;
 

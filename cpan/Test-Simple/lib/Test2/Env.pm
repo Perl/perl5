@@ -2,7 +2,7 @@ package Test2::Env;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 1;
 

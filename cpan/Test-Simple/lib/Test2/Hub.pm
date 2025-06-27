@@ -2,7 +2,7 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 
 use Carp qw/carp croak confess/;
@@ -25,6 +25,8 @@ use Test2::Util::HashBase qw{
     _context_init
     _context_release
 
+    suppress_release_error
+
     uuid
     active
     count
@@ -35,6 +37,14 @@ use Test2::Util::HashBase qw{
     _plan
     skip_reason
 };
+
+{
+    no warnings 'once';
+    # Support an originally mispelled method name, at least 1 downstream
+    # release already uses it. It will be fixed, but we do not want to break
+    # things before it is fixed.
+    *surpress_release_error = \&suppress_release_error;
+}
 
 my $UUID_VIA;
 
@@ -448,8 +458,10 @@ sub finalize {
         my (undef, $ffile, $fline) = @{$self->{+ENDED}};
         my (undef, $sfile, $sline) = @$frame;
 
+        $self->{+SUPPRESS_RELEASE_ERROR} = 1;
+
         die <<"        EOT"
-Test already ended!
+Test already ended! (Did you call done_testing twice?)
 First End:  $ffile line $fline
 Second End: $sfile line $sline
         EOT
@@ -713,7 +725,7 @@ process or thread. You can always add a pre_filter.
 These can be used to remove filters and pre_filters. The C<$sub> argument is
 the reference returned by C<filter()> or C<pre_filter()>.
 
-=item $hub->follow_op(sub { ... })
+=item $hub->follow_up(sub { ... })
 
 Use this to add behaviors that are called just before the hub is finalized. The
 only argument to your codeblock will be a L<Test2::EventFacet::Trace> instance.

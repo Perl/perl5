@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 1;
 
@@ -338,7 +338,7 @@ code here. Exit code of 0 means exit success, any other integer means exit with
 failure.
 
 This is used by L<Test2::Event::Plan> to exit 0 when the plan is
-'skip_all'. This is also used by L<Test2::Event:Bail> to force the test
+'skip_all'. This is also used by L<Test2::Event::Bail> to force the test
 to exit with a failure.
 
 This is called after the event has been sent to the formatter in order to

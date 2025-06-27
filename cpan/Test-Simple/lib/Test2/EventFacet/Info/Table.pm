@@ -2,7 +2,7 @@ package Test2::EventFacet::Info::Table;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use Carp qw/confess/;
 
@@ -42,7 +42,7 @@ Test2::EventFacet::Info::Table - Intermediary representation of a table.
 =head1 DESCRIPTION
 
 Intermediary representation of a table for use in specialized
-L<Test::API::Context> methods which generate L<Test2::EventFacet::Info> facets.
+L<Test2::API::Context> methods which generate L<Test2::EventFacet::Info> facets.
 
 =head1 SYNOPSIS
 

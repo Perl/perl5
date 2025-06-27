@@ -453,7 +453,7 @@ tests state => sub {
     ok(!$ok, "died");
 
     is($err, <<"    EOT", "Got expected error");
-Test already ended!
+Test already ended! (Did you call done_testing twice?)
 First End:  foo.t line 42
 Second End: foo.t line 42
     EOT

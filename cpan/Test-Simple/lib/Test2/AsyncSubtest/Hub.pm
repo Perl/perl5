@@ -2,11 +2,15 @@ package Test2::AsyncSubtest::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use base 'Test2::Hub::Subtest';
 use Test2::Util::HashBase qw/ast_ids ast/;
 use Test2::Util qw/get_tid/;
+
+my $NO_WARN_FOR_PLAN = 0;
+
+sub do_not_warn_on_plan { $NO_WARN_FOR_PLAN = 1 };
 
 sub init {
     my $self = shift;
@@ -40,14 +44,16 @@ sub send {
     my $self = shift;
     my ($e) = @_;
 
-    if (my $ast = $self->ast) {
-        if ($$ != $ast->pid || get_tid != $ast->tid) {
-            if (my $plan = $e->facet_data->{plan}) {
-                unless ($plan->{skip}) {
-                    my $trace = $e->facet_data->{trace};
-                    bless($trace, 'Test2::EventFacet::Trace');
-                    $trace->alert("A plan should not be set inside an async-subtest (did you call done_testing()?)");
-                    return;
+    unless ($NO_WARN_FOR_PLAN) {
+        if (my $ast = $self->ast) {
+            if ($$ != $ast->pid || get_tid != $ast->tid) {
+                if (my $plan = $e->facet_data->{plan}) {
+                    unless ($plan->{skip}) {
+                        my $trace = $e->facet_data->{trace};
+                        bless($trace, 'Test2::EventFacet::Trace');
+                        $trace->alert("A plan should not be set inside an async-subtest (did you call done_testing()?)");
+                        return;
+                    }
                 }
             }
         }

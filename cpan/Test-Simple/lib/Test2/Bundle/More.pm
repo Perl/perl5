@@ -2,7 +2,7 @@ package Test2::Bundle::More;
 use strict;
 use warnings;
 
-our $VERSION = '1.302210';
+our $VERSION = '1.302214';
 
 use Test2::Plugin::ExitSummary;
 
