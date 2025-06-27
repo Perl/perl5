@@ -74,6 +74,117 @@
 #  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL)
 #endif
 
+/* PL_op->op_private & OPpENTERSUB_HASTARG feature was added in
+
+d30110745a - Ilya Zakharevich -8/26/1999 11:33:01 PM - 5.5.61
+Speeding up XSUB calls up to 66%
+Addendum: it's "only" 33% speedup.
+
+   These 3 are highly optimized version of 3 macros from pp.h that were
+   purpose made mostly for EU::PXS's private use, but we DO NOT want to execute
+   a slower sv_newmortal() + sv_set_i_u_n_v_mg(), instead of
+   sv_2mortal(newSV_i_u_n_v()).
+
+   These macros do not put the new SV* on the stack. Caller is responsible for
+   that.
+
+   Arg _nsv is an uninitialized SV* variable, a new SV* will be placed in
+   the _nsv var. SvREFCNT()/SV* lifecycle details are handled by the macro.
+   The caller IS NOT allowed to execute a "sv_2mortal(_nsv);" on the new SV*.
+
+   sv_set_i_u_n_v_mg() is required to a huge amount of safety checks like
+   de-COW PVs RVs, COWs, sv_upgrade(), copy old SV body contents to a higher
+   order SV body, etc.
+
+   Also if G_LIST context, we do not want Perl_leave_adjust_stacks() to create
+   a mortal copy of our PAD SV* TARG. Example of returning a dXSTARG, and
+   Perl_leave_adjust_stacks() instantly makes a mortal dup of it is this code
+       $self->logtime(time());
+*/
+
+
+
+/* set TARG to the IV value i. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TMR_TARGi(_nsv, i, do_taint) \
+STMT_START { \
+    IV TARGi_iv = i; \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) \
+        _nsv = sv_2mortal(newSViv(TARGi_iv)); \
+    else { \
+        _nsv = PAD_SV(PL_op->op_targ); \
+        if (LIKELY( \
+              ((SvFLAGS(_nsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
+            & (do_taint ? !TAINT_get : 1))) \
+        { \
+            /* Cheap SvIOK_only(). \
+             * Assert that flags which SvIOK_only() would test or \
+             * clear can't be set, because we're SVt_IV */ \
+            assert(!(SvFLAGS(_nsv) & \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK))))); \
+            SvFLAGS(_nsv) |= (SVf_IOK|SVp_IOK); \
+            /* SvIV_set() where sv_any points to head */ \
+            _nsv->sv_u.svu_iv = TARGi_iv; \
+        } \
+        else \
+            sv_setiv_mg(_nsv, TARGi_iv); \
+    } \
+} STMT_END
+
+/* set TARG to the UV value u. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TMR_TARGu(_nsv, u, do_taint) \
+STMT_START { \
+    UV TARGu_uv = u; \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) \
+        _nsv = sv_2mortal(newSVuv(TARGu_uv)); \
+    else { \
+        _nsv = PAD_SV(PL_op->op_targ); \
+        if (LIKELY( \
+              ((SvFLAGS(_nsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
+            & (do_taint ? !TAINT_get : 1) \
+            & (TARGu_uv <= (UV)IV_MAX))) \
+        { \
+            /* Cheap SvIOK_only(). \
+             * Assert that flags which SvIOK_only() would test or \
+             * clear can't be set, because we're SVt_IV */ \
+            assert(!(SvFLAGS(_nsv) & \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK))))); \
+            SvFLAGS(_nsv) |= (SVf_IOK|SVp_IOK); \
+            /* SvIV_set() where sv_any points to head */ \
+            _nsv->sv_u.svu_iv = TARGu_uv; \
+        } \
+        else \
+            sv_setuv_mg(_nsv, TARGu_uv); \
+    } \
+} STMT_END
+
+/* set TARG to the NV value n. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TMR_TARGn(_nsv, n, do_taint) \
+STMT_START { \
+    NV TARGn_nv = n; \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) \
+        _nsv = sv_2mortal(newSVnv(TARGn_nv)); \
+    else { \
+        _nsv = PAD_SV(PL_op->op_targ); \
+        if (LIKELY( \
+              ((SvFLAGS(_nsv) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_NV) \
+            & (do_taint ? !TAINT_get : 1))) \
+        { \
+            /* Cheap SvNOK_only(). \
+             * Assert that flags which SvNOK_only() would test or \
+             * clear can't be set, because we're SVt_NV */ \
+            assert(!(SvFLAGS(_nsv) & \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_NOK|SVp_NOK))))); \
+            SvFLAGS(_nsv) |= (SVf_NOK|SVp_NOK); \
+            SvNV_set(_nsv, TARGn_nv); \
+        } \
+        else \
+            sv_setnv_mg(_nsv, TARGn_nv); \
+    } \
+} STMT_END
+
 #define IV_1E6 1000000
 #define IV_1E7 10000000
 #define IV_1E9 1000000000
@@ -1143,11 +1254,13 @@ INCLUDE: const-xs.inc
 
 #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY)
 
-NV
+void
 usleep(useconds)
     NV useconds
     PREINIT:
         struct timeval Ta, Tb;
+        SV* rsv;
+        NV RETVAL;
     CODE:
         gettimeofday(&Ta, NULL);
         if (items > 0) {
@@ -1173,17 +1286,19 @@ usleep(useconds)
         printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #  endif
         RETVAL = NV_1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
-
-    OUTPUT:
-        RETVAL
+    TMR_TARGn(rsv, RETVAL, 1);
+    SETs(rsv);
+    return; /* no PUTBACK no PUSH, 1 in, 1 out */
 
 #  if defined(TIME_HIRES_NANOSLEEP)
 
-NV
+void
 nanosleep(nsec)
     NV nsec
     PREINIT:
         struct timespec sleepfor, unslept;
+        SV* rsv;
+        NV RETVAL;
     CODE:
         if (nsec < 0.0)
             croak("%s(%" NVgf "%s", "Time::HiRes::nanosleep", nsec,
@@ -1194,8 +1309,9 @@ nanosleep(nsec)
         } else {
             RETVAL = nsec_without_unslept(&sleepfor, &unslept);
         }
-    OUTPUT:
-        RETVAL
+        TMR_TARGn(rsv, RETVAL, 1);
+        SETs(rsv);
+        return; /* no PUTBACK no PUSH, 1 in, 1 out */
 
 #  else  /* #if defined(TIME_HIRES_NANOSLEEP) */
 
@@ -1211,11 +1327,13 @@ nanosleep(nsec)
 
 #  endif /* #if defined(TIME_HIRES_NANOSLEEP) */
 
-NV
+void
 sleep(...)
     PREINIT:
         struct timeval Ta, Tb;
-    CODE:
+        SV* rsv;
+        NV RETVAL;
+    PPCODE:
         gettimeofday(&Ta, NULL);
         if (items > 0) {
             NV seconds  = SvNV(ST(0));
@@ -1250,9 +1368,10 @@ sleep(...)
         printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #  endif
         RETVAL = (NV)(Tb.tv_sec-Ta.tv_sec)+0.000001*(NV)(Tb.tv_usec-Ta.tv_usec);
-
-    OUTPUT:
-        RETVAL
+        TMR_TARGn(rsv, RETVAL, 1);
+        PUSHs(rsv);
+        PUTBACK;
+        return;
 
 #else  /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
 
@@ -1270,11 +1389,14 @@ usleep(useconds)
 
 #ifdef HAS_UALARM
 
-IV
+void
 ualarm(useconds,uinterval=0)
     int useconds
     int uinterval
-    CODE:
+    PREINIT:
+        SV* rsv;
+        IV RETVAL;
+    PPCODE:
         if (useconds < 0 || uinterval < 0)
             croak("%s(%d, %d%s",
                 "Time::HiRes::ualarm", useconds, uinterval,
@@ -1298,15 +1420,19 @@ ualarm(useconds,uinterval=0)
 
         RETVAL = ualarm(useconds, uinterval);
 #  endif
+    TMR_TARGi(rsv, RETVAL, 1);
+    PUSHs(rsv);
+    PUTBACK;
+    return;
 
-    OUTPUT:
-        RETVAL
-
-NV
+void
 alarm(seconds,interval=0)
     NV seconds
     NV interval
-    CODE:
+    PREINIT:
+        SV* rsv;
+        NV RETVAL;
+    PPCODE:
         if (seconds < 0.0 || interval < 0.0)
             croak("%s(%" NVgf ", %" NVgf "%s",
                   "Time::HiRes::alarm", seconds, interval,
@@ -1348,9 +1474,10 @@ alarm(seconds,interval=0)
             RETVAL = (NV)ualarm( useconds, uinterval ) / NV_1E6;
 #  endif
         }
-
-    OUTPUT:
-        RETVAL
+    TMR_TARGn(rsv, RETVAL, 1);
+    PUSHs(rsv);
+    PUTBACK;
+    return;
 
 #else /* #ifdef HAS_UALARM */
 
@@ -1387,6 +1514,7 @@ gettimeofday()
     PREINIT:
         struct timeval Tp;
         int status;
+        OP* const op = PL_op;
         U8 is_G_LIST = GIMME_V == G_LIST;
     PPCODE:
         if (is_G_LIST)
@@ -1399,15 +1527,41 @@ gettimeofday()
                 PUSHs(sv_2mortal(newSViv(sec)));
                 PUSHs(sv_2mortal(newSViv(usec)));
             } else {
+                /* no Perl_leave_adjust_stacks() hazard here,
+                   only a PP vs call_sv() hazard */
                 NV nv = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
-                PUSHs(sv_2mortal(newSVnv(nv)));
+                const U8 do_taint = 1;
+                NV TARGn_nv = nv;
+                SV* rsv;
+                if (op->op_private & OPpENTERSUB_HASTARG) {
+                    rsv = PAD_SV(op->op_targ);
+                    if (LIKELY(
+                          ((SvFLAGS(rsv) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_NV)
+                        & (do_taint ? !TAINT_get : 1)))
+                    {
+                        /* Cheap SvNOK_only().
+                         * Assert that flags which SvNOK_only() would test or
+                         * clear can't be set, because we're SVt_NV */
+                        assert(!(SvFLAGS(rsv) &
+                            (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_NOK|SVp_NOK)))));
+                        SvFLAGS(rsv) |= (SVf_NOK|SVp_NOK);
+                        SvNV_set(rsv, TARGn_nv);
+                    }
+                    else
+                        sv_setnv_mg(rsv, TARGn_nv);
+                }
+                else
+                    rsv = sv_2mortal(newSVnv(TARGn_nv));
+                PUSHs(rsv);
             }
         }
 
-NV
+void
 time()
     PREINIT:
         struct timeval Tp;
+        SV* rsv;
+        NV RETVAL;
     CODE:
         int status;
         status = gettimeofday (&Tp, NULL);
@@ -1416,8 +1570,10 @@ time()
         } else {
             RETVAL = -1.0;
         }
-    OUTPUT:
-        RETVAL
+        TMR_TARGn(rsv, RETVAL, 1);
+        PUSHs(rsv); /* 0 in, 1 out, entersub guarenteed 1 slot */
+        PUTBACK;
+        return;
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
 
@@ -1579,22 +1735,25 @@ utime(accessed, modified, ...)
 
 #if defined(TIME_HIRES_CLOCK_GETTIME)
 
-NV
+void
 clock_gettime(clock_id = CLOCK_REALTIME)
     clockid_t clock_id
     PREINIT:
         struct timespec ts;
         int status;
-    CODE:
+        SV* rsv;
+        NV RETVAL;
+    PPCODE:
 #  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
         status = syscall(SYS_clock_gettime, clock_id, &ts);
 #  else
         status = clock_gettime(clock_id, &ts);
 #  endif
         RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
-
-    OUTPUT:
-        RETVAL
+        TMR_TARGn(rsv, RETVAL, 1);
+        PUSHs(rsv); /* 0 or 1 in, 1 out, PPCODE: did rewind */
+        PUTBACK;
+        return;
 
 #else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
 
