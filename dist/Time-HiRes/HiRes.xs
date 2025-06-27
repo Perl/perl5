@@ -246,6 +246,10 @@ typedef int clockid_t;
 #    define HAS_GETTIMEOFDAY
 #  endif
 
+#  ifndef HAS_NV_GETTIMEOFDAY
+#    define HAS_NV_GETTIMEOFDAY
+#  endif
+
 /* shows up in winsock.h?
 struct timeval {
     long tv_sec;
@@ -270,6 +274,7 @@ typedef struct {
 typedef BOOL (WINAPI *pfnQueryPerformanceCounter_T)(LARGE_INTEGER*);
 
 static unsigned __int64 tick_frequency = 0;
+static NV tick_frequency_nv = 0;
 static unsigned __int64 qpc_res_ns = 0;
 static unsigned __int64 qpc_res_ns_realtime = 0;
 static pfnQueryPerformanceCounter_T pfnQueryPerformanceCounter = NULL;
@@ -330,6 +335,10 @@ START_MY_CXT
 
 #  undef clock_gettime
 #  define clock_gettime(clock_id, tp) _clock_gettime(aTHX_ clock_id, tp)
+
+#  define TIME_HIRES_NV_CLOCK_GETTIME
+#  undef nv_clock_gettime
+#  define nv_clock_gettime(clock_id, _bp) _nv_clock_gettime(aTHX_ clock_id, _bp)
 
 #  undef clock_getres
 #  define clock_getres(clock_id, tp) _clock_getres(clock_id, tp)
@@ -447,6 +456,18 @@ _gettimeofday_x(pTHX)
     return tp;
 }
 
+PERL_STATIC_FORCE_INLINE NV
+nv_gettimeofday_x(pTHX)
+{
+    FT_t ft;
+
+    GetSystemTimePreciseAsFileTime(&ft.ft_val);
+
+    /* FP seconds since epoch */
+    return ((NV)((U64)((U64)ft.ft_i64) - ((U64)EPOCH_BIAS))) / ((NV)NV_1E7);
+}
+#define nv_gettimeofday() nv_gettimeofday_x(aTHX)
+
 /* force inline it, because XS_Time__HiRes_clock_gettime() is the only caller */
 
 PERL_STATIC_FORCE_INLINE int
@@ -475,6 +496,30 @@ _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
     }
 
     return 0;
+}
+
+PERL_STATIC_FORCE_INLINE NV
+_nv_clock_gettime(pTHX_ clockid_t clock_id, bool * statusp)
+{
+    FT_t ft;
+    unsigned __int64 ticks;
+    unsigned __int64 time_sys;
+
+    *statusp = 0;
+    switch (clock_id) {
+    case CLOCK_REALTIME:
+        GetSystemTimePreciseAsFileTime(&ft.ft_val);
+        time_sys = ft.ft_i64;
+        return ((NV)((U64)((U64)time_sys) - ((U64)EPOCH_BIAS))) / ((NV)NV_1E7);
+    case CLOCK_MONOTONIC:
+        QueryPerformanceCounter((LARGE_INTEGER*)&ft.ft_i64);
+        ticks = ft.ft_i64;
+        return ((NV)ticks) / tick_frequency_nv;
+    default:
+        *statusp = 1;
+        errno = EINVAL;
+        return -1.0;
+    }
 }
 
 static int
@@ -807,10 +852,14 @@ myNVtime()
    return myNVtime_cxt(aTHX);
 #    endif
 #  endif
+#ifdef HAS_NV_GETTIMEOFDAY
+    return nv_gettimeofday();
+#else
     struct timeval Tp;
     int status;
     status = gettimeofday (&Tp, NULL);
     return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
+#endif
 }
 
 #ifdef PERL_IMPLICIT_CONTEXT
@@ -818,10 +867,14 @@ myNVtime()
 static NV
 myNVtime_cxt(pTHX)
 {
+#ifdef HAS_NV_GETTIMEOFDAY
+    return nv_gettimeofday();
+#else
     struct timeval Tp;
     int status;
     status = gettimeofday (&Tp, NULL);
     return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
+#endif
 }
 
 #endif
@@ -1116,10 +1169,10 @@ nsec_without_unslept(struct timespec *sleepfor,
 #endif
 
 static void
-S_croak_xs_unimplemented(const CV *const cv);
+S_croak_xs_unimplemented(CV *const cv);
 
 static void
-S_croak_xs_unimplemented(const CV *const cv)
+S_croak_xs_unimplemented(CV *const cv)
 {
     dTHX;
     SV* sv = cv_name(cv, NULL, 0);
@@ -1175,6 +1228,7 @@ BOOT:
                 "QueryPerformanceFrequency");
         l_tick_frequency = l_tick_frequency_mem;
              /* 32-bit CPU anti-sharding paranoia */
+        tick_frequency_nv = (NV)l_tick_frequency;
         S_InterlockedExchange64(&tick_frequency, l_tick_frequency);
     }
     l_qpc_res_ns = qpc_res_ns;
@@ -1509,6 +1563,12 @@ alarm(seconds,interval=0)
 
 #ifdef HAS_GETTIMEOFDAY
 
+#ifdef HAS_NV_GETTIMEOFDAY
+#  define HAS_NV_GETTIMEOFDAY_BOOL 1
+#else
+#  define HAS_NV_GETTIMEOFDAY_BOOL 0
+#endif
+
 void
 gettimeofday()
     PREINIT:
@@ -1516,12 +1576,21 @@ gettimeofday()
         int status;
         OP* const op = PL_op;
         U8 is_G_LIST = GIMME_V == G_LIST;
+        NV nv;
+        const U8 do_taint = 1;
     PPCODE:
         if (is_G_LIST)
             EXTEND(sp, 2);
+        else if(HAS_NV_GETTIMEOFDAY_BOOL) {
+#ifdef HAS_NV_GETTIMEOFDAY
+            nv = nv_gettimeofday();
+#endif
+            goto ret_1_nv;
+        }
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
-            if (is_G_LIST) { /* copy to registers to prove sv_2mortal/newSViv */
+            if (HAS_NV_GETTIMEOFDAY_BOOL || is_G_LIST) {
+                /* copy to registers to prove sv_2mortal/newSViv */
                 IV sec = Tp.tv_sec; /* can't modify the values */
                 IV usec = Tp.tv_usec;
                 PUSHs(sv_2mortal(newSViv(sec)));
@@ -1529,10 +1598,12 @@ gettimeofday()
             } else {
                 /* no Perl_leave_adjust_stacks() hazard here,
                    only a PP vs call_sv() hazard */
-                NV nv = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
-                const U8 do_taint = 1;
-                NV TARGn_nv = nv;
+                NV TARGn_nv;
                 SV* rsv;
+                nv = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
+
+                ret_1_nv:
+                TARGn_nv = nv;
                 if (op->op_private & OPpENTERSUB_HASTARG) {
                     rsv = PAD_SV(op->op_targ);
                     if (LIKELY(
@@ -1559,17 +1630,23 @@ gettimeofday()
 void
 time()
     PREINIT:
-        struct timeval Tp;
         SV* rsv;
         NV RETVAL;
-    CODE:
+#ifndef HAS_NV_GETTIMEOFDAY
+        struct timeval Tp;
         int status;
+#endif
+    CODE:
+#ifndef HAS_NV_GETTIMEOFDAY
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
             RETVAL = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
         } else {
             RETVAL = -1.0;
         }
+#else
+        RETVAL = nv_gettimeofday();
+#endif
         TMR_TARGn(rsv, RETVAL, 1);
         PUSHs(rsv); /* 0 in, 1 out, entersub guarenteed 1 slot */
         PUTBACK;
@@ -1739,17 +1816,27 @@ void
 clock_gettime(clock_id = CLOCK_REALTIME)
     clockid_t clock_id
     PREINIT:
+#ifndef TIME_HIRES_NV_CLOCK_GETTIME
         struct timespec ts;
         int status;
+#endif
         SV* rsv;
         NV RETVAL;
     PPCODE:
 #  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
         status = syscall(SYS_clock_gettime, clock_id, &ts);
 #  else
+#    ifndef TIME_HIRES_NV_CLOCK_GETTIME
         status = clock_gettime(clock_id, &ts);
-#  endif
         RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
+#    else
+        {
+            bool status;
+            NV nv = nv_clock_gettime(clock_id, &status);
+            RETVAL = status == 0 ? nv : -1;
+        }
+#    endif
+#  endif
         TMR_TARGn(rsv, RETVAL, 1);
         PUSHs(rsv); /* 0 or 1 in, 1 out, PPCODE: did rewind */
         PUTBACK;
