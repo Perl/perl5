@@ -418,20 +418,21 @@ mro_set_mro(...)
   PROTOTYPE: $$
   PREINIT:
     SV* classname;
+    SV* type;
     HV* class_stash;
     struct mro_meta* meta;
-  PPCODE:
+  CODE:
     if (items != 2)
 	croak_xs_usage(cv, "classname, type");
-
-    classname = ST(0);
+    type = POPs;
+    classname = POPs;
+    PUTBACK; /* return empty list */
     class_stash = gv_stashsv(classname, GV_ADD);
     if(!class_stash) Perl_croak_nocontext("Cannot create class: '%" SVf "'!", SVfARG(classname));
     meta = HvMROMETA(class_stash);
 
-    Perl_mro_set_mro(aTHX_ meta, ST(1));
-
-    XSRETURN_EMPTY;
+    Perl_mro_set_mro(aTHX_ meta, type);
+    return; /* skip implied PUTBACK; */
 
 void
 mro_get_mro(...)
