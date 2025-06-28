@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.42.0-RC2 - Douglas Adams, "The Hitchhiker's Guide to the Galaxy"
+
+L<Announced on 2025-06-27 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/06/msg270053.html>
+
+  Don't Panic.
+
 =head2 v5.42.0-RC1 - Douglas Adams, "The Long Dark Tea-Time of the Soul"
 
 L<Announced on 2025-06-24 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/06/msg270038.html>
