@@ -3000,8 +3000,9 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 
                 return RX_WRAPPED(re);
             } else {
-                const char *const typestring = sv_reftype(referent, 0);
-                const STRLEN typelen = strlen(typestring);
+                HEK * const typestring_hek = sv_reftypehek(referent, 0);
+                const char *const typestring = HEK_KEY(typestring_hek);
+                const I32 typelen = HEK_LEN(typestring_hek);
                 UV addr = PTR2UV(referent);
                 const char *stashname = NULL;
                 STRLEN stashnamelen = 0; /* hush, gcc */
@@ -10634,6 +10635,150 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
     }
 }
 
+/* Experimental faster variant of sv_reftype(). Identical to sv_reftype() except
+   it returns a HEK* from PL_strtab. Does not bump the RC on the HEK*.
+   Caller must bump the RC of the HEK* if they want to preserve it for future
+   use. The easiest way to do the RC bump is with sv_sethek() or newSVhek().
+   It is exported for private P5P experiments with Inline::C or EU::PXS, but
+   it is not a public API for CPAN authors and may change at any time. */
+
+HEK*
+Perl_sv_reftypehek(pTHX_ const SV *const sv, const int ob)
+{
+    PERL_ARGS_ASSERT_SV_REFTYPEHEK;
+
+    if (ob && SvOBJECT(sv))
+        return sv_refhek(sv, ob);
+    else {
+        SV* rsv;
+        /* The SV_CONST() macro can not be used here or else the switch table
+           below will have 17 unique callsites to exported libperl symbol
+           Perl_newSVpvn_share(). In the future, this switch statement can be
+           optimized to an array mapping U8 sv_type codes, to U8 or U16s indexes
+           pointing into array PL_sv_consts, with negative indexs being
+           if (){} else {} special cases needing extra checks.*/
+        U32 idx;
+        /* WARNING - There is code, for instance in mg.c, that assumes that
+         * the only reason that sv_reftype(sv,0) would return a string starting
+         * with 'L' or 'S' is that it is a LVALUE or a SCALAR.
+         * Yes this a dodgy way to do type checking, but it saves practically reimplementing
+         * this routine inside other subs, and it saves time.
+         * Do not change this assumption without searching for "dodgy type check" in
+         * the code.
+         * - Yves */
+        switch (SvTYPE(sv)) {
+        case SVt_NULL:
+        case SVt_IV:
+        case SVt_NV:
+        case SVt_PV:
+        case SVt_PVIV:
+        case SVt_PVNV:
+        case SVt_PVMG:
+            if (SvVOK(sv)) {
+                idx = SV_CONST_VSTRING;
+                break;
+            }
+            else if (SvROK(sv)) {
+                idx = SV_CONST_REF;
+                break;
+            }
+            else {
+                idx = SV_CONST_SCALAR;
+                break;
+            }
+        case SVt_PVLV:		idx = (SvROK(sv) ? SV_CONST_REF
+                                /* tied lvalues should appear to be
+                                 * scalars for backwards compatibility */
+                                : (isALPHA_FOLD_EQ(LvTYPE(sv), 't'))
+                                    ? SV_CONST_SCALAR : SV_CONST_LVALUE); break;
+        case SVt_PVAV: {	idx = SV_CONST_ARRAY; break; }
+        case SVt_PVHV: {	idx = SV_CONST_HASH; break; }
+        case SVt_PVCV: {	idx = SV_CONST_CODE; break; }
+        case SVt_PVGV: {
+            idx = isGV_with_GP(sv) ? SV_CONST_GLOB : SV_CONST_SCALAR;
+            break;
+        }
+        case SVt_PVFM: {	idx = SV_CONST_FORMAT; break; }
+        case SVt_PVIO: {	idx = SV_CONST_IO; break; }
+        case SVt_INVLIST: {	idx = SV_CONST_INVLIST; break; }
+        case SVt_REGEXP: {	idx = SV_CONST_REGEXP; break; }
+        case SVt_PVOBJ: {	idx = SV_CONST_OBJECT; break; }
+        default: {			idx = SV_CONST_UNKNOWN; break; }
+        }
+
+        rsv = PL_sv_consts[idx];
+        if (!rsv) {
+            U8 len;
+            const char * pv;
+            switch(idx) {
+                case SV_CONST_ARRAY:
+                    pv = "ARRAY";
+                    len = STRLENs("ARRAY");
+                    break;
+                case SV_CONST_CODE:
+                    pv = "CODE";
+                    len = STRLENs("CODE");
+                    break;
+                case SV_CONST_FORMAT:
+                    pv = "FORMAT";
+                    len = STRLENs("FORMAT");
+                    break;
+                case SV_CONST_GLOB:
+                    pv = "GLOB";
+                    len = STRLENs("GLOB");
+                    break;
+                case SV_CONST_HASH:
+                    pv = "HASH";
+                    len = STRLENs("HASH");
+                    break;
+                case SV_CONST_INVLIST:
+                    pv = "INVLIST";
+                    len = STRLENs("INVLIST");
+                    break;
+                case SV_CONST_IO:
+                    pv = "IO";
+                    len = STRLENs("IO");
+                    break;
+                case SV_CONST_LVALUE:
+                    pv = "LVALUE";
+                    len = STRLENs("LVALUE");
+                    break;
+                case SV_CONST_OBJECT:
+                    pv = "OBJECT";
+                    len = STRLENs("OBJECT");
+                    break;
+                case SV_CONST_REF:
+                    pv = "REF";
+                    len = STRLENs("REF");
+                    break;
+                case SV_CONST_REGEXP:
+                    pv = "REGEXP";
+                    len = STRLENs("REGEXP");
+                    break;
+                case SV_CONST_SCALAR:
+                    pv = "SCALAR";
+                    len = STRLENs("SCALAR");
+                    break;
+                case SV_CONST_UNKNOWN:
+                    pv = "UNKNOWN";
+                    len = STRLENs("UNKNOWN");
+                    break;
+                case SV_CONST_VSTRING:
+                    pv = "VSTRING";
+                    len = STRLENs("VSTRING");
+                    break;
+                default: /* unreachable, don't make a verbose long string */
+                    croak_no_mem_ext(STR_WITH_LEN("sv_reftypehek"));
+            }
+            rsv = newSVpvn_share(pv, len, 0);
+            PL_sv_consts[idx] = rsv;
+        } /* Never return our secret PL_sv_consts[idx] SV*s to any caller for
+             any reason. We don't SvREADONLY_on(), and we don't trust PP code.
+             Example: my $klass = \ref($self); ${$klass} .= "::Base"; */
+        return SvSHARED_HEK_FROM_PV(SvPVX_const(rsv));
+    }
+}
+
 /*
 =for apidoc sv_ref
 
@@ -10667,6 +10812,33 @@ Perl_sv_ref(pTHX_ SV *dst, const SV *const sv, const int ob)
         sv_setpv(dst, reftype);
     }
     return dst;
+}
+
+/* Experimental faster variant of sv_ref(). Identical to sv_ref() except
+   it returns a HEK* from PL_strtab. Does not bump the RC on the HEK*.
+   Caller must bump the RC of the HEK* if they want to preserve it for future
+   use. The easiest way to do the RC bump is with sv_sethek() or newSVhek().
+   It is exported for private P5P experiments with Inline::C or EU::PXS, but
+   it is not a public API for CPAN authors and may change at any time. */
+
+HEK *
+Perl_sv_refhek(pTHX_ const SV *const sv, const int ob)
+{
+    HEK * hek;
+    PERL_ARGS_ASSERT_SV_REFHEK;
+
+    if (ob && SvOBJECT(sv)) {
+        HV* stash = SvSTASH(sv);
+        if (HvHasNAME(stash))
+            hek = HvNAME_HEK(stash);
+        else {
+            SV * rsv = SV_CONST(__ANON__);
+            hek = SvSHARED_HEK_FROM_PV(SvPVX_const(rsv));
+        }
+    }
+    else
+        hek = sv_reftypehek(sv, 0);
+    return hek;
 }
 
 /*

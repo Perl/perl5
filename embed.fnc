@@ -3366,9 +3366,12 @@ AMTdip	|SV *	|SvREFCNT_inc	|NULLOK SV *sv
 AMTdip	|SV *	|SvREFCNT_inc_NN|NN SV *sv
 AMTdip	|void	|SvREFCNT_inc_void					\
 				|NULLOK SV *sv
+EXp	|HEK *	|sv_refhek	|NN const SV * const sv 		\
+				|const int ob
 ARdp	|const char *|sv_reftype|NN const SV * const sv 		\
 				|const int ob
-
+ERXp	|HEK *	|sv_reftypehek	|NN const SV * const sv 		\
+				|const int ob
 Adp	|void	|sv_regex_global_pos_clear				\
 				|NN SV *sv
 ARdp	|bool	|sv_regex_global_pos_get				\

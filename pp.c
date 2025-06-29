@@ -573,13 +573,13 @@ PP(pp_ref)
 
   do_sv_ref:
     {
+        HEK* hek = sv_refhek(SvRV(sv), TRUE);
         dTARGET;
-        sv_ref(TARG, SvRV(sv), TRUE);
+        sv_sethek(TARG, hek);
         rpp_replace_1_1_NN(TARG);
         SvSETMAGIC(TARG);
         return NORMAL;
     }
-
 }
 
 

@@ -4758,10 +4758,21 @@ Perl_sv_ref(pTHX_ SV *dst, const SV * const sv, const int ob);
 #define PERL_ARGS_ASSERT_SV_REF                 \
         assert(sv)
 
+PERL_CALLCONV HEK *
+Perl_sv_refhek(pTHX_ const SV * const sv, const int ob);
+#define PERL_ARGS_ASSERT_SV_REFHEK              \
+        assert(sv)
+
 PERL_CALLCONV const char *
 Perl_sv_reftype(pTHX_ const SV * const sv, const int ob)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SV_REFTYPE             \
+        assert(sv)
+
+PERL_CALLCONV HEK *
+Perl_sv_reftypehek(pTHX_ const SV * const sv, const int ob)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_REFTYPEHEK          \
         assert(sv)
 
 PERL_CALLCONV void

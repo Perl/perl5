@@ -563,17 +563,43 @@ PP(pp_refaddr)
 
 PP(pp_reftype)
 {
-    dXSTARG;
-    SV *arg = *PL_stack_sp;
+    HEK *hek;
+    SV *rsv;
+    SV ** svp = PL_stack_sp;
+    SV *arg = *svp;
 
     SvGETMAGIC(arg);
 
     if(SvROK(arg))
-        sv_setpv_mg(TARG, sv_reftype(SvRV(arg), FALSE));
+        hek = sv_reftypehek(SvRV(arg), FALSE);
     else
-        sv_setsv(TARG, &PL_sv_undef);
+        hek = NULL;
 
-    rpp_replace_1_1_NN(TARG);
+    /* unrolled dXSTARG; avoid slower sv_setxv_mg(sv_newmortal(), ); */
+    if (PL_op->op_private & OPpENTERSUB_HASTARG) {
+        rsv = PAD_SV(PL_op->op_targ);
+        if (hek)
+            sv_sethek(rsv, hek);
+        /* If a PAD TARG exists, returning &PL_sv_undef will force a slow trip
+           through sv_setsv() in next OP, so do the undef assignment here,
+           with the streamlined sv_set_undef() call, vs universal and complex
+           sv_setsv() call. Note, the prior code here, only fired SMG magic
+           on the sv_sethek()/sv_setpvs() branch, not on the sv_set_undef()
+           branch. */
+        else
+            sv_set_undef(rsv);
+        SvSETMAGIC(rsv);
+        rpp_replace_1_1_NN(rsv); /* no RC_STK =, RC_STK RC++ = */
+    }
+    else {
+        if (!hek)
+            rpp_replace_1_IMM_NN(&PL_sv_undef);
+        else {
+            rsv = newSVhek(hek);
+            rpp_replace_at_norc(svp, rsv); /* no RC_STK mortal =, RC_STK RC++ = */
+        }
+    }
+
     return NORMAL;
 }
 

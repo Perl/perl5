@@ -1810,6 +1810,8 @@
 #   define skipspace_flags(a,b)                 Perl_skipspace_flags(aTHX_ a,b)
 #   define sv_magicext_mglob(a)                 Perl_sv_magicext_mglob(aTHX_ a)
 #   define sv_only_taint_gmagic                 Perl_sv_only_taint_gmagic
+#   define sv_refhek(a,b)                       Perl_sv_refhek(aTHX_ a,b)
+#   define sv_reftypehek(a,b)                   Perl_sv_reftypehek(aTHX_ a,b)
 #   define utf16_to_utf8_base(a,b,c,d,e,f)      Perl_utf16_to_utf8_base(aTHX_ a,b,c,d,e,f)
 #   define utf8_to_utf16_base(a,b,c,d,e,f)      Perl_utf8_to_utf16_base(aTHX_ a,b,c,d,e,f)
 #   define validate_proto(a,b,c,d)              Perl_validate_proto(aTHX_ a,b,c,d)
