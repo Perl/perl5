@@ -2664,8 +2664,12 @@ Create a new IO, setting the reference count to 1.
 #  define SV_CONST_FETCHSIZE 5
 #  define SV_CONST_STORE 6
 #  define SV_CONST_STORESIZE 7
-#  define SV_CONST_EXISTS 8
+#endif
 
+/* required by Perl_sv_can_existdelete() */
+#define SV_CONST_EXISTS 8
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #  define SV_CONST_PUSH 9
 #  define SV_CONST_POP 10
 #  define SV_CONST_SHIFT 11
@@ -2690,8 +2694,12 @@ Create a new IO, setting the reference count to 1.
 #  define SV_CONST_BINMODE 28
 #  define SV_CONST_FILENO 29
 #  define SV_CONST_CLOSE 30
+#endif
 
+/* required by Perl_sv_can_existdelete() */
 #  define SV_CONST_DELETE 31
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #  define SV_CONST_CLEAR 32
 #  define SV_CONST_UNTIE 33
 #  define SV_CONST_DESTROY 34

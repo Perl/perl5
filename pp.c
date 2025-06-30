@@ -681,8 +681,12 @@ PP(pp_gelem)
         case 'P':
             if (memEQs(elem, len, "PACKAGE")) {
                 const HV * const stash = GvSTASH(gv);
-                const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
-                sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
+                const HEK * hek = stash ? HvNAME_HEK(stash) : NULL;
+                if (!hek) {
+                    SV * sv_hek = SV_CONST(__ANON__);
+                    hek = SvSHARED_HEK_FROM_PV(SvPVX_const(sv_hek));
+                }
+                sv = newSVhek(hek);
             }
             break;
         case 'S':

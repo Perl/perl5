@@ -1176,6 +1176,11 @@ Perl_rpp_invoke_xs(pTHX_ CV *cv)
         CvXSUB(cv)(aTHX_ cv);
 }
 
+/* SV_CONST() is limited to #ifdef PERL_CORE, so make a temporary macro. */
+#define x_SV_CONST(name) PL_sv_consts[SV_CONST_##name] \
+    ? PL_sv_consts[SV_CONST_##name] \
+    : (PL_sv_consts[SV_CONST_##name] = newSVpv_share(#name, 0))
+
 
 /* for SvCANEXISTDELETE() macro in pp.h */
 PERL_STATIC_INLINE bool
@@ -1188,10 +1193,11 @@ Perl_sv_can_existdelete(pTHX_ SV *sv)
 
     HV *stash = SvSTASH(SvRV(SvTIED_obj(sv, mg)));
     return stash &&
-        gv_fetchmethod_autoload(stash, "EXISTS", TRUE) &&
-        gv_fetchmethod_autoload(stash, "DELETE", TRUE);
+        gv_fetchmethod_sv_flags(stash, x_SV_CONST(EXISTS), GV_AUTOLOAD) &&
+        gv_fetchmethod_sv_flags(stash, x_SV_CONST(DELETE), GV_AUTOLOAD);
 }
 
+#undef x_SV_CONST
 
 /* ----------------------------- regexp.h ----------------------------- */
 

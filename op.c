@@ -11080,7 +11080,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
         has_name = TRUE;
     } else if (PL_curstash) {
-        gv = gv_fetchpvs("__ANON__", gv_fetch_flags, SVt_PVCV);
+        gv = gv_fetchsv(SV_CONST(__ANON__), gv_fetch_flags, SVt_PVCV);
         has_name = FALSE;
     } else {
         gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
