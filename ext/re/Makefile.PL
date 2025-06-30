@@ -32,9 +32,9 @@ my %args;
 for my $arg (@ARGV) {
     $args{$1} = $2 if $arg =~ /^(\w+)=(.*)$/;
 }
-if ($args{LINKTYPE} eq "static") {
-    $defines .= ' -DPERL_EXT_RE_STATIC';
-}
+
+$defines .= ' -DPERL_EXT_RE_STATIC'
+	if exists($args{LINKTYPE}) && $args{LINKTYPE} eq 'static';
 
 my @libs;
 if ($^O eq 'cygwin' && $Config{usequadmath}) {
