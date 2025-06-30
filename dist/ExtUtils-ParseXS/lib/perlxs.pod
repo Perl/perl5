@@ -1,8 +1,1353 @@
 =head1 NAME
 
-perlxs - XS language reference manual
+perlxs - the XS Language Reference Manual
+
+=head1 SYNOPSIS
+
+    /* This is a simple example of an XS file. The first half of an XS
+     * file is uninterpreted C code; all lines are passed through
+     * unprocessed. */
+
+    =pod
+    Except that any POD is stripped.
+    =cut
+
+    /* Standard boilerplate: */
+
+    /* For efficiency, always define PERL_NO_GET_CONTEXT: not enabled by
+     * default for backwards compatibility. For details, see
+     * L<perlguts|perlguts/
+         How multiple interpreters and concurrency are supported>
+     */
+    #define PERL_NO_GET_CONTEXT
+
+    #include "EXTERN.h"
+    #include "perl.h"
+    #include "XSUB.h"
+    #include "ppport.h"
+
+    /* Any general C code here; for example: */
+
+    #define FOO 1
+    static int
+    my_helper_function(int i) { /* do stuff */ }
+
+    /* The first MODULE line starts the XS half of the file: */
+
+    MODULE = Foo::Bar PACKAGE = Foo::Bar
+
+      # Indented '#' are XS code comments.
+      # C preprocessor directives are still allowed and are passed
+      # through:
+    #define BAR 2
+
+      # File-scoped XS directives
+    PROTOTYPES: DISABLE
+
+      # A simple XSUB: generate a wrapper for the strlen() C library
+      # function.
+
+    int
+    strlen(char *s)
+
+    =pod
+    A more complex example:
+    C<multi16(i,j)>: do a 16-bit multiply
+    =cut
+
+    unsigned int
+    multi16(unsigned int i, \
+            unsigned int j)
+      CODE:
+        i = i & 0xFFFF;
+        j = j & 0xFFFF;
+        RETVAL = (i * j) & 0xFFFF;
+      OUTPUT:
+        RETVAL
 
 =head1 DESCRIPTION
+
+This is the reference manual for the XS language. This is a type of
+template language from which is generated a C code source file that
+contains functions written in C, but which can be called from Perl, and
+which behave just like Perl subs. These are known as I<external> or
+I<extension> subs, or XSUBs for short.
+
+Note that this POD file was heavily rewritten and modernised in 2025.
+Various old practices, such as "K&R" XSUB function signature declarations,
+are no longer encouraged; but much old code will still be using them, so
+be cautious when using old code as examples for writing new code.
+
+The syntax described in this document is valid for Perl installations back
+to 5.8.0 unless otherwise specified.
+
+=head1 THE FORMAL SYNTAX OF AN XS FILE
+
+XXX TBC
+
+=head1 OVERVIEW OF XS AND XSUBS
+
+=head2 Initial and Further Reading
+
+This document is structured on the assumption that you are already
+familiar with the very basics of XS and XSUBs; in particular, the code
+examples may make use of common keywords that are only described later in
+the file. But once you have that basic familiarity, then this document
+may be read through in order.
+
+It is in two main parts. First there is a long overview part, which
+explains (in great detail) what XS and XSUBs are, how the perl interpreter
+calls XSUBs, and how data is passed to and from an XSUB. There is much
+more detail here than is strictly necessary for writing simple XSUBs, but
+this document is intended to be comprehensive. Then comes the reference
+manual proper, which has a section for each keyword and other parts of an
+XSUB declaration and definition, plus a few more general topics, such as
+using typemaps and storing static data.
+
+If necessary, read L<perlxstut> first for a gentler tutorial introduction.
+In addition, you may find the following Perl documents useful.
+
+=over
+
+=item *
+
+L<perlxstypemap>: this describes typemap files and how to create new
+typemaps. These are code templates which are used by the XS compiler to
+automatically generate code which converts between Perl and C data types.
+Creating an interface to a C library is sometimes mainly a case of adding
+new typemap entries to handle the new data types which the library uses.
+
+=item *
+
+L<perlguts>: this contains details of selected parts of the internals of
+the Perl interpreter. A better understanding of that may help when writing
+more complex XSUBs, or when debugging.
+
+Note that much of the L<data passing overview|/Overview of how data is
+passed to and from an XSUB> part of this document is just a summary of
+the parts of of perlguts which are most relevant to writing XS code,
+possibly saving you from having to actually read that document.
+
+=item *
+
+L<perlclib>: this describes how and when to use the basic C and OS library
+functions from XS. Often, the Perl API contains functions which you should
+use I<instead> of the standard C library ones, e.g. using C<PerlIO_read()>
+instead of C<fread()>.
+
+=item *
+
+L<perlcall>: this describes how to call Perl functions and do the
+equivalent of C<eval ""> from C.
+
+=item *
+
+L<perlembed>: this describes how to embed a complete Perl interpreter
+within another application.
+
+=back
+
+=head2 An Introduction to XS and XSUBs
+
+Formally, an XSUB is a compiled function, typically written in C or C++,
+which can be called from Perl as if it was a Perl function. A collection
+of them are compiled into a C<.so> or C<.dll> library file and are usually
+dynamically loaded at C<use Foo::Bar> time (but can in principle be
+statically linked into the perl interpreter).
+
+From Perl, an XSUB looks just like any other sub and is called in the same
+way. In the most general case, an XSUB can be passed and return arbitrary
+lists of values. More commonly, such as when XSUBs are being used as thin
+wrappers to call existing C library functions, they might take a fixed list
+of arguments and return a single result (or zero items for a C<void>
+function).
+
+An XS file is a template file format which contains a mixture of C code
+and XSUB declarations. It is used to generate XSUBs where most boilerplate
+code is handled automatically: e.g. converting argument values between C
+and Perl.
+
+Note that this document refers to both the thing in the XS file, and to
+the C function generated from it, as an XSUB. It should be clear from the
+context which is being referred to.
+
+When XSUBs are being used as a thin wrapper between Perl and the functions
+in a particular C library, the XSUB definitions in the XS file are often
+just a couple of lines, consisting of a declaration of the name,
+parameters and return type. The XS parser will do almost all the heavy
+lifting for you,
+
+XS is optional; in principle you can write your own C code directly, or
+use other systems such as C<Inline::C> or SWIG. For creating simple
+bindings to existing compiled libraries, there is also the
+L<libffi|http://sourceware.org/libffi/> interface via CPAN modules like
+L<FFI::Platypus> or L<FFI::Raw>. Note that creating XS may initially take
+more effort than those, but it is lightweight in terms of dependencies.
+
+XSUBs have three main roles. They can be used as thin wrappers for C
+library functions, e.g. L<Digest::SHA>. They can be used to write
+functions which are faster than pure Perl or easier to do in C, e.g.
+L<List::Util>. Or they can be used to extend the Perl interpreter itself,
+e.g. L<threads>.
+
+XS has extensive support for the first role, and makes writing the second
+need less boilerplate code. This document doesn't cover the third role,
+which often requires extensive knowledge of the Perl interpreter's
+internals.
+
+The F<h2xs> utility bundled with Perl can in principle be used to generate
+an initial XS file from a C header file, which (with possibly only minor
+edits) can be used to wrap an entire C API. But note that this utility is
+rather old and may not handle more modern C header code.
+
+F<h2xs> (as well as other tools) can also be used to generate an initial
+"empty" skeleton distribution even when not deriving from a header file
+(see L<perlxstut> for more details).
+
+Typemaps are sets of rules which map C types such as C<int> to logical XS
+types such as C<T_IV>, and from there to C<INPUT> and C<OUTPUT> templates
+such as C<$var = ($type)SvIV($arg)> and C<sv_setiv($arg, (IV)$var)>
+which, after variable expansion, generate C code which converts back and
+forth between Perl arguments and C auto variables.
+
+There is a standard system typemap file which contains rules for common C
+and Perl types, but you can add your own typemap file in addition, and
+from perl 5.16.0 onwards you can also add typemap declarations inline
+within the XS file. You can either just add mappings from new C types to
+existing XS types to make use of existing templates, or you can add new
+templates too. As an example of the former, if you're using a C header
+file which has:
+
+    typedef int my_int;
+
+then adding this typemap entry:
+
+    my_int T_IV
+
+is sufficient for the XS parser to know to use the existing C<T_IV>
+templates when processing an XSUB which has a C<my_int> parameter type.
+See L<Using Typemaps> and L<perlxstypemap> for more information.
+
+An XS file is parsed by L<ExtUtils::ParseXS>, or by the F<xsubpp> utility
+(which is a thin wrapper over the module), and generates a C<.c> file.
+F<xsubpp> is typically called at build time from the Makefile of a
+distribution (as generated by L<ExtUtils::MakeMaker>); or
+L<ExtUtils::ParseXS> can be used directly, e.g. by L<Module::Build>. The C
+file is then compiled into a C<.so> or C<.dll>, again at module build and
+install time.
+
+=head2 The Structure of an XS File
+
+An XS file has two parts, which are parsed and treated completely
+differently: the C half and the XS half.
+
+Anything before the first L<MODULE|/The MODULE Declaration> directive line
+is treated as pure C (except for any sections of POD, which are
+discarded). All such lines, including C preprocessor directives and C code
+comments, are passed through unprocessed into the destination C file. XS
+comments (as described below) aren't recognised by the XS parser, and are
+just passed through unprocessed.
+
+It is possible that machine-generated C code inserted in this section
+could include an equal sign character in column one, which would be
+misinterpreted as POD; if this is a risk, make sure that this hypothetical
+code generator includes a leading space character.
+
+This half of the file is the place to put things which will be of use to
+the XSUB code further down: such as C<#include>, C<#define>, C<typedef>,
+and static C functions. Note that you should (in general) avoid declaring
+static I<data> in XS files; see L</Safely Storing Static Data in XS> for
+details and workarounds.
+
+After the first C<MODULE> line, the rest of the file is interpreted as XS
+syntax. Further C<MODULE> keywords may appear where needed to change the
+current package (in a similar fashion to a single Perl F<Foo.pm> file
+having multiple C<package> statements).
+
+This second half consists mostly of a series of XSUB definitions. Between
+these XSUBs, there can be a few file-scope keywords (including further
+C<MODULE> lines), POD, C preprocessor directives, XS (C<#>) comments, and
+blank lines. See L</File-scoped XS Keywords and Directives> for more
+details.
+
+The XS half of the file can be thought of as being parsed in two stages.
+In the initial processing step, the XS parser does the following basic
+text processing actions.
+
+=over
+
+=item *
+
+A trailing backslash (i.e. C</\\\n/>) within the XS part of the file is
+treated as a line continuation: any such series of lines are concatenated.
+They are then treated as single line by the main (line-orientated) XS
+Parser. This means that the next line loses any special significance; for
+example, it may not be recognised as a keyword or end-of-XSUB blank line.
+
+Note however that the two characters C<"\\\n"> are kept in the
+concatenated line, to be subsequently interpreted by the main part of the
+XS parser. Mostly these two extra characters will just confuse the parser;
+but where such lines are just passed-through to the output C file as-is
+(such as for C<CODE> blocks and C preprocessor directives), this results
+in the backslash and newline appearing in the C code.
+
+The main exception to leaving the continuation characters in the line is
+in an XSUB's signature, where any trailing backslashes are stripped away
+before parsing.
+
+=item *
+
+The parser discards any POD lines. Any sequence of lines matching
+C</^=/ .. /^=cut\s*$/> is considered POD.
+
+=item *
+
+It discards any XS comment lines. Any line starting with C</^\s*#/> which
+I<isn't> recognised by the XS parser as a valid C preprocessor directive,
+is treated as an XS comment line.
+
+It is recommended to include at least one space before an XS C<#> comment
+to avoid any possible confusion with C preprocessor directives.
+
+If an XS comment line ends with a backslash, then the line following it is
+treated as part of that comment line and is also discarded.
+
+=back
+
+Once that basic textual preprocessing has been performed, the main XS
+parsing takes place. XS syntax is very line-orientated. XS lines and
+sections mostly start with a keyword of the form;
+
+    /^\s*[A-Z_]+:/
+
+It is best to position file-scoped keywords at column one, while
+XSUB-scoped keywords are best indented. This may avoid surprises with edge
+cases in the XS parser.
+
+Keywords can be either single line, e.g. C<PROTOTYPES: ENABLE>, or
+multi-line. The latter consume lines until the next keyword, or until the
+possible start of a new XSUB (C</\n\n\S/>), or to EOF. Multi-line keywords
+treat the rest of the text on the line which follows the keyword as the
+first line of data. The exception to this is keywords which introduce a
+block of code, such as C<CODE:>  or C<BOOT:>, which silently ignore the
+rest of the first line. (Yes, this is a implementation flaw.)
+
+It is best to include a blank line between each file-scoped item, and
+before the start of each XSUB. While some items I<are> processed correctly
+if they are on the line immediately preceding the start of an XSUB, the
+parser is inconsistent in their handling.
+
+An XSUB ends when C</\n\n\S/> is encountered: i.e. a blank line followed
+by something on column one. (This is why it's recommended to indent
+XSUB-scoped keywords.) If the thing at column one matches any of the items
+which can appear in between XSUBs (such as file-scoped keywords) then it,
+and any subsequent lines, are processed as such. Anything starting on
+column one which isn't otherwise recognised, is interpreted as the first
+line of the next XSUB definition. In particular it is interpreted as the
+return type of the XSUB: this can lead to weird errors when something is
+unexpectedly interpreted as the start of a new XSUB, such as C</* */>,
+which isn't valid in the XS half of the file apart from within code
+blocks.
+
+Some multi-line keywords, such as C<C_ARGS>, are treated as just a single
+uninterpreted multi-line string. Others, such as C<OUTPUT>, have a
+specific per-line syntax, where each line within the section is parsed.
+Finally, code blocks such as C<CODE> are just copied as-is to the output C
+file (possibly sandwiched between C<#line> directives to ensure that
+compiler error messages report from the correct location).
+
+The XS parser doesn't recognise C comments, so don't use them apart from
+in C code (e.g. not in an XSUB signature). More generally, the XS parser
+doesn't understand C syntax or semantics; it just uses crude regexes to
+parse the XS file. For example in an XSUB declaration like
+
+    int
+    foo(int a, char *b = "),")
+
+the parser just extracts out everything between (...) and splits on
+commas, with just enough intelligence to ignore commas etc within matching
+pairs of double-quotes. The parser doesn't understand C type declaration
+syntax; for example it typically just extracts everything before what
+appears to be a parameter name, and assumes that it must be the type. That
+"type" will later be looked up in a typemap, and if no entry is found,
+will only then raise an error.
+
+In addition, the XS parser has historically been very permissive, even to
+the point of accepting nonsense as input. Since Perl 5.44, more things are
+likely to warn or raise errors during XS parsing, rather than silently
+generating a non-compilable C code file.
+
+As mentioned earlier, an XSUB definition typically starts with C</\n\n\S/>
+and continues until the next C</\n\n\S/>. The XSUB definition consists of
+a declaration, followed by an optional body. The declaration gives the
+function's name, parameters and return type, and is intended to mimic a C
+function declaration. It is usually two lines long.
+
+The XSUB's body consists of a series of keywords. The main C code of an
+XSUB is specified by a C<CODE> or C<PPCODE> section. In the absence of
+this, a short body is generated automatically, which consists of a call to
+a C function with the same name and arguments as the XSUB. In this way,
+the XSUB becomes a short wrapper function between Perl and the C library
+function, with the wrapper handling the conversion been Perl and C
+arguments. This is referred to in this document as I<autocall>.
+
+Other keywords can be used to modify the code generated for the XSUB, or
+to alter how it is registered with the interpreter (e.g. adding
+attributes).
+
+So that is the basic structure of an XSUB. What a real XSUB looks like
+will be covered later in L</The Anatomy of an XSUB>, but first a slight
+digression follows.
+
+=head2 Overview of how data is passed to and from an XSUB
+
+This section contains a basic background on how XSUBs are invoked, what
+their arguments consist of, and how XSUB arguments are passed to and from
+Perl. It is essentially a summary of some relevant sections within
+L<perlguts>; see that document for  a more detailed exploration.
+
+Note that most of the information in this section isn't needed to create
+basic XSUBs; but for more complex needs or for debugging, it helps to
+understand what's happening behind the scenes.
+
+=head3 Perl OPs
+
+An C<OP> is is a data structure within the perl interpreter. It is used to
+hold the nodes within a tree structure created when the perl source is
+compiled. It usually represents a single operation within the perl source,
+such as an add, or a function call. The structure has various flags and
+data, and a pointer to a C function (called the PP function) which is used
+to implement the actions of that OP. The main loop of the perl interpreter
+consists of calling the PP function associated with the current OP
+(C<PL_op>) and then updating it, typically to C<< PL_op->op_next >>. In
+particular, the C<OP_ENTERSUB> performs (or at least starts) a function
+call.
+
+=head3 SVs and the Perl interpreter's argument stack
+
+Almost all runtime data within the Perl interpreter, including all Perl
+variables, are stored in an I<SV> structure. These SVs can hold data of
+many different types, including integers (IV - integer value), strings (PV
+- pointer value), references (RV), arrays (AV), elements of arrays,
+subroutines (CV - code value) etc. These will be discussed in more detail
+below.
+
+Perl has an I<argument> stack, which is a C array of SV pointers. Most of
+the run-time actions of the PP functions consist of pushing SV pointers
+onto the stack or popping them off and processing them. There is a
+companion I<mark> stack, which is an array of integers which are argument
+stack offsets. These marks serve to delineate the stack into frames.
+
+Consider this subroutine call:
+
+    @a = foo(1, $x);
+
+The various OPs executed by the Perl interpreter up until the function is
+called will: push a mark indicating the start of a new argument stack
+frame; push an SV containing the integer value 1; push the SV currently
+bound to the variable C<$x>; and push the C<*foo> typeglob. Then the
+PP function C<pp_entersub()> associated with the C<OP_ENTERSUB> will pop
+that typeglob, extract the C<&foo> CV from it, and see whether it is a
+normal CV or an XSUB CV.
+
+For a normal Perl subroutine call, C<pp_entersub()> will then: pop the
+topmost mark off the mark stack; pop the SV pointers between that mark and
+the top of the stack and store them in C<@_>; then set C<PL_op> to the
+first  OP pointed to by the C<&foo> CV. Those OPs will then be run by the
+main loop, until the OPs associated with the last statement of the
+function (or an explicit return) will leave any return values as SV
+pointers on the stack.
+
+For an XSUB sub, C<pp_entersub()> will instead note the value of the
+topmost mark (but not pop it) and call the C function pointed to from the
+CV; this is the XSUB which has been generated by the XS parser. The XSUB
+itself is responsible for popping the mark stack, doing any processing of
+its arguments on the stack, and then pushing return values. But note that
+for straightforward XSUBs, this is usually all done by boilerplate code
+generated by the XS parser. Exactly what is done automatically and what
+can be overridden and handled manually if needed, is one of the themes of
+this document. Finally, C<pp_entersub()> will do any post-processing of
+the returned values; for example discarding all but the top-most stack
+item if the function call was in scalar context.
+
+=head3 An SV's reference count
+
+Perl uses reference counting as its garbage collection method. One of the
+always-present fields in an SV is its reference count, accessible as
+C<SvREFCNT(sv)>.
+
+Usually an SV's reference count is incremented each time a pointer to the
+SV is stored somewhere, and decremented any time such a pointer is
+removed. When the reference count reaches zero, any destructor associated
+with that SV is called, then the SV is freed. Mismanaging reference counts
+can lead to SVs leaking or being prematurely freed.
+
+When relying on XS to generate all the boilerplate code, reference count
+bookkeeping is usually handled for you automatically. Once you start
+handling this yourself, then there are some specific considerations.
+
+Functions which create a new SV, such as as C<newSViv(i)>, return an SV
+that has an initial C<SvREFCNT()> of I<one>. This is actually one too
+high, since there are not yet any pointers to this SV stored anywhere. The
+expectation is that the SV will shortly be embedded somewhere - such as
+stored in an array - which will take "ownership" of that one count. If the
+program calls C<croak()> or similar before the new SV has been embedded,
+then it will leak. Note that C<croak()> can be trapped by C<eval()>, so
+it's possible that C<croak()> could be called many times, leaking each
+time. Note also that many things may indirectly trigger a C<croak()>. For
+example accessing the value of an SV associated with a tied variable may
+trigger a call to its C<FETCH()> method, which could call C<die>. So a new
+SV needs to be embedded quickly.
+
+Since such new SVs already have a reference count of one, when embedding
+them it should be done in a way which doesn't increase its reference
+count. For example, this modifies C<sv> to be a reference to a
+newly-created SV holding an integer value, i.e. the perl equivalent of
+C<$sv =\99>:
+
+    sv_setrv_noinc(sv, newSViv(99));
+
+The C<_noinc> variant is used here as it doesn't increment the reference
+count of the integer-valued SV when creating a reference to it.
+
+Where appropriate, reference counts can be adjusted with C<SvREFCNT_inc()>
+and C<SvREFCNT_dec()> and their variants.
+
+An exception to this system is the argument stack. Pointers on the
+argument stack to SVs do I<not> contribute to the reference count of that
+SV. The code typically generated by XS takes advantage of this. For
+example when ready to return a single value, the XSUB just stores a new SV
+pointer at the base of the current stack frame, overwriting the old value,
+then resets the argument stack pointer to the base of the frame plus one,
+and returns. All the original values on the stack are discarded, without
+adjusting any reference counts.
+
+This can be a problem if the XSUB is returning a new SV. Since this SV
+isn't embedded anywhere apart from on the stack (which doesn't hold a
+reference count to it), then if the code croaks, the SV on the stack will
+leak. To avoid this, there is a separate I<temps> stack in the Perl
+interpreter. Items on this stack I<are> reference counted. Typically the
+temps stack is reset at start of each statement, back to some particular
+level. Each SV above this level has its reference count decremented.
+Putting an SV on the temps stack is referred to as I<mortalising> it. It
+is common to create a new SV and mortalise it at the same time: here are
+some examples:
+
+    SV *sv_99  = sv_2mortal(newSViv(99));
+    SV *sv_abc = newSVpvn_flags("abc", 3, SVs_TEMP);
+
+Many OPs have an SV attached to them called a I<PADTMP>. This SV has a
+lifetime which is the same as the sub which the OP is a part of, and
+usually has a reference count of one. It is used by many OPs to avoid
+having to create (and later free) a temporary SV to return a value. For
+example the C<ADD> op in C<$a + $b> typically extracts the integer values
+of its two arguments, calculates its sum, sets its C<PADTMP> to that value
+and pushes it onto the stack. The C<OP_ENTERSUB> which typically invokes
+an XSUB usually has a C<PADTMP> attached to it, and when returning a
+value, the XSUB's boilerplate code generated by XS will usually try to use
+it to return the value, rather than creating a fresh mortal SV on each
+call.
+
+Note that there is a I<highly experimental> perl interpreter build option,
+C<PERL_RC_STACK>, under which the argument stack I<is> reference counted,
+but that is currently beyond the scope of this document.
+
+=head3 The IV, NV etc types
+
+An C<IV> (Integer Value) is a typedef in the perl interpreter's header
+files that maps to a C integer. The exact integer type and size will
+depend on the build configuration of the interpreter. It is guaranteed to
+be large enough to hold a pointer. A C<UV> is the same but unsigned. An
+C<NV> (numeric value) is a floating-point value; usually a C<double>.
+These types are used widely within the perl interpreter.
+
+A PV (pointer value) "type" is often used informally within documentation
+and within the names of structure fields etc to refer to a string pointer
+(C<char*>), but it is not actually a declared type. Similarly, RV
+(reference value) is informally a pointer to another SV.
+
+There are also C<SSize_t> and C<Size_t>, which are large enough to hold
+signed and unsigned integer values representing the number of items in a C
+array. C<STRLEN> is used specifically for variables which store the number
+of characters in a string (it is typically just an alias for C<Size_t>).
+
+=head3 The SV scalar value structure
+
+As mentioned above, almost runtime data within the perl interpreter is
+stored in an SV (scalar value) structure. The head of an SV structure
+consists of three or four words: a reference count; a type and flags; a
+pointer to a body; and since perl 5.10.0, a general payload field. There
+are around 17 types, and the type indicates what body (if any) is pointed
+to from the SV's head. The body type only indicates what I<sorts> of data
+the body is capable of holding; the actual "type" of the SV (IV, NV, PV,
+RV etc) is mostly indicated by what flags are set.
+
+Simple SVs may not have a body. Undefined values typically don't have one.
+Also, some IV, NV, and RV values are stored directly in the payload field,
+with the body pointer pointing back to the head with a suitable offset so
+that the SV appears to have a body with an IV or whatever at a suitable
+offset.
+
+For SVs which have a body, the payload field in the head is usually used
+to store one common value which would otherwise have to be stored in the
+body and require a further pointer indirection to access. For example, the
+C<char*> pointer of a perl string SV is stored in the head, while the
+length is stored in the body.
+
+The fields of an SV (both in the head and in the body) are usually
+accessed via macros, which has allowed various rearrangements of the head
+and body fields over the years while maintaining backwards compatibility.
+Always use the macros. For example, C<SvIVX(sv)> directly accesses the IV
+field of the SV (which may be in the head or body depending on the SV's
+type). If the SV has a valid integer value, then the C<SVf_IOK> flag will
+be set, which can be tested with the macro C<SvIOK(sv)>.
+
+The body of an SV may be upgraded to a "bigger" one during the SV's
+lifetime, but it is not usually downgraded. For example, during the course
+of executing this perl code:
+
+    my $x;
+    $x = "1";
+    $u = $x + 1;
+    undef $x;
+
+Initially the SV has no body and none of the C<SVf_IOK>, C<SVf_NOK>,
+C<SVf_POK>, nor C<SVf_ROK> flags are set, indicating that it has neither
+an IV, NV, PV or RV value. The complete lack of those flags indicates an
+undefined value. After the string is assigned to it, its body type is set
+to C<SVt_PV>, and it is given the corresponding body. The string pointer
+and length are stored in the body (or perhaps the pointer in the payload
+word), and the C<SVf_POK> flag is set, indicating that the SV holds a
+valid string value.
+
+When Perl wants to use that SV as an integer, it uses a macro like
+C<SvIV(sv)> to return the integer value. Unlike the direct C<SvIVX()>
+macro, this first checks C<SvIOK(sv)>, and if not true, calls a function
+which calculates the integer value from its current string value. The
+effect of this call is to update the SV's type and body to C<SVt_PVIV>
+which is capable of holding both a string I<and> and integer value, and
+then to set the C<SVf_IOK> flag in addition to the C<SVf_POK>.
+
+Finally, the C<undef> frees the string and turns off the C<SVf_IOK> and
+C<SVf_POK> flags, but leaves the body type as C<SVt_PVIV>. (Hence why an
+SV's current Perl-level type should be determined by its flags, not its
+body type.)
+
+Note that you should never directly access fields using macros like
+C<SvIVX()> (the C<X> implies direct) I<unless> you have just tested for
+C<SvIOK()>. In general, always use macros such as C<SvIV()>, which will do
+any checking and conversion for you.
+
+There is a further complication with SVs: they can have one or more items
+of I<magic> attached to them. These are small payloads, along with a
+pointer to a jump table of pointers to functions with get/set etc actions.
+They are used to implement things like C<$1>, C<$.> and tied variables.
+The idea is that macros like C<SvIV()> will first check whether the SV has
+I<get> magic (using C<SvGMAGICAL(sv)>); and if so call its get method
+first. For example, for a tied variable, this C-level get function will
+call the perl-level C<FETCH()> method and assign the return value of that
+to the SV. Only then will C<SvIV()> do its C<SvIOK()> check.
+
+When presented with an unknown SV, it should always have its magic checked
+before examining the values of the SVs flags.
+
+In total, the C<SvIV(sv)> macro does roughly the equivalent of:
+
+    if (SvGMAGICAL(sv))
+        mg_get(sv);   /* do FETCH() etc; update the SV's value / flags */
+    if (!SvIOK(sv))
+        sv_2iv(sv);   /* convert undef to 0, "1" to 1 etc */
+    return SvIVX(sv); /* use the raw value */
+
+You will see soon that XS's typemap templates mostly use high-level macros
+like C<SvIV()>, so this is usually all handled automatically for you. Only
+if you start to do your own type conversions will you need to worry about
+these details.
+
+Forgetting to test for, and to call, C<get> magic will typically appear to
+work fine until the first time someone passes a tied variable or similar
+to your XSUB, and C<FETCH()> doesn't get called. Accessing fields with
+C<SvPVX()> etc without testing for C<SvPOK()> first may access a field in
+a body which doesn't exist and possibly trigger a SEGV.
+
+Magic should only be called once per "use"; for example if a tied scalar
+is passed as an argument to your XSUB, you would expect C<FETCH()> to only
+be called once. Normally this is easy because you (or the typemap code)
+does a single C<SvIV()> call. Occasionally you may have explicitly called
+C<mg_get()> first, perhaps in order to check some flags; if so, you can
+skip a second magic call with variants like C<SvIV_nomg()>. For example:
+
+    SvGETMAGIC(sv); /* this calls mg_get() if SvGMAGICAL() */
+    if (SvNOK(sv))
+        /* special-case: do something with a floating-point value */
+    else {
+        IV i = SvIV_nomg(sv);
+        /* fall-back to treating it as an integer value */
+    }
+
+
+A Perl reference is just another type of scalar. It is indicated by
+C<SvROK()> being true, and the pointer to the referent SV is accessed
+using C<SvRV()>.
+
+The equivalent of C<SvIV()> for strings is
+
+    STRLEN len;
+    char *pv = SvPV(sv, len);
+
+(and variants) which both retrieves a string pointer and sets C<len> to
+its length. Note that there is no guarantee that after this call
+C<SvPOK(sv)> is true, nor that C<pv == SvPVX(sv)>. For example, C<sv> may
+be a reference to a blessed object with an overloaded stringify (C<"">)
+method.  In which case, behind the scenes there may be a temporary SV
+containing the result of the call to the method, with C<pv> pointing to
+I<that> SV's string buffer. C<sv> remains a reference. Similarly, a
+non-overloaded reference to an array may return a temporary string like
+C<"ARRAY(0x12345678)">.
+
+If you need to coerce an SV to a string (e.g. before modifying its string
+value) then use C<SvPV_force()> or one of its variants. For example if
+used on an array reference, the SV will be converted from a reference into
+a plain string SV with an C<SvPVX()> value of C<"ARRAY(0x12345678)">, and
+the array's reference count decremented.
+
+Once an SV has been coerced into a PV (C<SvPOK(sv)> is true), then
+C<SvLEN(sv)> represents the size of the allocated buffer, while
+C<SvCUR(sv)> represents the current length (in bytes) of the string. Note
+that with Unicode, C<SvCUR(sv)> may not necessarily equal the value
+returned by the  Perl built-in C<length(sv)>, which is the length in
+I<characters>. That can be obtained using the C<sv_len_utf8(sv)> function.
+See L</Unicode and UTF-8> below for more details.
+
+The SV structure can also be used to store things which aren't simple
+scalar values: in particular, arrays, hashes and code values. There are
+typedefs for AV, HV and CV structures (plus a few others). These
+structures are identical to SVs and can generally be used interchangeably
+with suitable casting, e.g. C<SV *ret = (SV*)av>. The main feature of
+these non-scalar SVs is that the value of the type field in these cases,
+C<SVt_PVAV>, C<SVt_PVHV>, C<SVt_PVCV> etc, actually I<do> indicate the
+Perl type, rather than just indicating what sort of body they have.
+
+An important thing to note is that AVs and HVs are never directly pushed
+onto the stack when calling and returning from subroutines and XSUBs.
+Instead where necessary, references to them are pushed. You will likely
+first spot such an error when you start getting "Bizarre copy of ..."
+error messages.
+
+=head3 Unicode and UTF-8
+
+A simple Perl string SV uses what is sometimes referred to as byte
+encoding: each character is represented using a single byte. But when a
+Perl string contains code points >= 0x100, each character of the string is
+stored as a variable number of bytes using the UTF-8 encoding scheme, with
+the C<SvUTF8(sv)> flag being set to indicate this. Other strings may or
+may not be using UTF-8 encoding, depending on the history of the string.
+For example, with:
+
+    my $s = "A\x80";
+    $s .= "\x{100}";
+    chop $s;
+
+the string starts off in byte encoding, with C<SvCUR(sv) == 2,
+sv_len_utf8(sv) == 2> and with each byte representing one character. When
+the extra character is appended, the string gets upgraded to UTF-8, with
+C<SvCUR(sv) == 5, sv_len_utf8(sv) == 3> and the second and third
+characters each using two bytes of storage. Once the third character is
+removed, the string stays in UTF-8 encoding, with C<SvCUR(sv) == 3,
+sv_len_utf8(sv) == 2> and the second character using two bytes. So such a
+string SV when passed to an XSUB has two possible representations; and
+which will be used is somewhat unpredictable.
+
+Unfortunately XS currently has no support for UTF-8. All the standard
+typemap entries, such as C<char *>, assume that the buffer of a string SV
+is just an array of bytes to be manipulated by the XSUB or passed on
+uninterpreted to a C function. If it is necessary for the XSUB to control
+the UTF-8 status of an argument, then it is best to declare the parameter
+as type C<SV*> and do your own manipulation of it. Similarly for returning
+string values.
+
+An SV's string representation can be forced to bytes using C<SvPVbyte()>
+and variants; if the string contains any characters not representable in
+a single byte, then that call croaks with a C<Wide character> error.
+Conversely, C<SvPVutf8()> and variants will force the string to UTF-8.
+
+See L<perlunicode> for more details.
+
+=head2 The Anatomy of an XSUB
+
+The previous section has explained how arguments are pushed onto the
+stack, what those arguments look like, and how XSUBs are called. We will
+now look at what happens I<inside> an XSUB function once called; in
+particular, how it retrieves values from its arguments on the stack and
+later returns a value or values on the stack; and how XS and typemaps
+automate most of this.
+
+This section will provide both an overview of what an XSUB looks like in
+XS, I<and> what sort of C code is generated for it. The majority of the
+rest of this document will then describe in more detail the various parts
+of an XSUB mentioned here. Note that the various keywords within an XSUB's
+definition usually correspond closely (and in the same order) to what C
+code is generated for the XSUB. Most of the boilerplate code generated for
+an XSUB is concerned with getting argument values off the stack at the
+start, then returning zero or one result values on the stack at the end.
+
+A typical XSUB definition might look like:
+
+    MODULE = Foo::Bar PACKAGE = Foo::Bar
+
+    short
+    baz(int a, char *b = "")
+      PREINIT:
+        long z = ...;
+      CODE:
+        ... do stuff ...;
+        RETVAL = some_function(a, b, z);
+      OUTPUT:
+        RETVAL
+
+The first two lines of an XSUB are its declaration, which must be preceded
+by a blank line. It gives the XSUB's return type, its name, and its
+parameters (including any default values). While it is modelled on C
+syntax, it is actually XS syntax (so for example C</* ... */> isn't
+recognised). The return type and name must both start on column one,
+although The XS parser actually allows both to be on the same line, such
+as
+
+    short baz(...)
+
+This XSUB definition will be translated into a C function whose start may
+look something like this (the exact details may vary across XS parser
+releases):
+
+    void
+    XS_Foo__Bar_baz(pTHX_ CV* cv)
+    {
+        dVAR; dXSARGS;
+        if (items < 1 || items > 2)
+           croak_xs_usage(cv,  "a, b= \"\"");
+
+Note that the first line of the function is actually specified using a
+macro such as C<XS_EXTERNAL()>, but for explanatory purposes, what is
+shown above is one possible expansion of that macro, depending on the Perl
+version and XS configuration.
+
+The important thing to note is that the XSUB's arguments are I<not> passed
+as arguments of the C function; they are still on the Perl argument stack.
+Nor is the XSUB's return value returned by the C function.
+
+The C function's name is based on the XSUB's name plus the current XS
+package (with C<s/:/_/g>). Apart from debugging, you don't generally need
+to know this name.
+
+The function's parameters are the CV associated with this XSUB (i.e.
+C<&Foo::Bar::baz>) and, on MULTIPLICITY/threaded builds, a pointer to the
+current Perl interpreter context. You won't need to directly use these
+most of the time.
+
+The first few lines of code in the C function are standard boilerplate
+added to to all XSUBs.  Note that the naming convention for Perl
+interpreter macros is that ones starting with a C<d> are declarations; they
+go in places where a variable can be declared, and typically declare one
+or more variables and possibly their initialisations.
+
+C<dXSARGS> pops one index off the mark stack and sets up some auto
+variables to allow the arguments on the stack to be accessed:
+specifically, the variable C<items> is declared, which indicates how many
+arguments were passed, and some hidden variables are also declared which
+are used by the macro C<ST(n)> to retrieve a pointer to argument C<n> from
+the stack (counting from 0). The stack pointer is not actually decremented
+yet.
+
+For a generic list-processing XSUB, these argument-accessing variables and
+macros may be used directly. But more commonly, for an XSUB which has a
+fixed signature (as in the example above), the parser will declare an auto
+C variable for each parameter, and (using the system or a user typemap)
+assign them values extracted from C<ST(0)> etc.  It will also declare a
+variable called C<RETVAL> with the XSUB's return type (unless that is
+C<void>), which is typically assigned to by the coder and then whose value
+is automatically returned. Continuing the example above, the generated
+code for the input part of the XSUB is similar to:
+
+    {
+        long z = ...;
+        short RETVAL;
+        int   a = (int)SvIV(ST(0));
+        char *b;
+
+        if (items < 2)
+            b = "";
+        else
+            b = (char *)SvPV_nolen(ST(1));
+
+This consists of declarations for C<a>, C<b>, C<z> and C<RETVAL>, plus
+code to initialise them. The part of the code which extracts a value from
+an SV on the stack, such as C<(int)SvIV(ST(0))>, is derived from a typemap
+entry. For a simple entry such the one for C<a>, the code may be added as
+part of the declaration of the variable itself; otherwise the
+initialisation may be done as a separate statement after all the variable
+declarations (such as for C<b>).
+
+Variable declarations appear in the order they appear in C<INPUT> and
+C<PREINIT> blocks, followed by C<RETVAL> and then any parameters defined
+completely within the signature (i.e. which don't use an C<INPUT> section
+to specify their type).
+
+Perls before 5.36 used C89 compiler semantics, which didn't allow variable
+declarations after statements. To work round this, the C<PREINIT> keyword
+allows you to inject additional variable declaration code.
+
+Following on from the input part, the main body of the function is output;
+this is copied exactly as-is from the C<CODE> or C<PPCODE> section, if
+present. If neither is present, the parser will assume that this XSUB is
+just wrapping a C library function of the same name as the XSUB, and will
+automatically generate some code like the following:
+
+    RETVAL = baz(a, b);
+
+The C<INIT> and C<POSTCALL> keywords may be used to add code just before
+and after the main code; typically only useful for autocall.
+
+C<PPCODE> is the same as C<CODE> except that after argument processing,
+the stack pointer is reset to the base of the frame, and the coder becomes
+responsible for pushing any return values onto the stack. No further
+keywords can follow C<PPCODE>.  This is typically used for XSUBs which
+need to return a list or have other complex requirements beyond just
+returning a single value.
+
+For C<CODE> and autocall, unless the return type is void, the parser will
+generate code to return the value of C<RETVAL>. This is automatic in the
+case of autocall, but for C<CODE> you have to ask the parser to do so
+with C<OUTPUT: RETVAL>. The code generated in either case may look
+something like
+
+    {
+        SV *RETVALSV = sv_newmortal();
+        sv_setiv(RETVALSV, (IV)RETVAL);
+        ST(0) = RETVALSV;
+    }
+
+A temporary SV will be created, set to the value of C<RETVAL> (again,
+using a typemap template), then placed on the stack. In practice, various
+optimisations may be used; in particular, the C<PADTMP> target SV which is
+attached to the calling C<OP_ENTERSUB> may be used instead of allocating
+and freeing an SV for each call, as explained earlier.
+
+XSUB parameters declared as C<OUT> or C<OUTLIST> will cause additional
+output code to be generated which respectively: updates the value of one
+of the passed arguments; or pushes the value of that parameter onto the
+stack (in addition to C<RETVAL>).
+
+Finally, (apart from C<PPCODE>), a macro like this is added to the end of
+the C function:
+
+    XSRETURN(1);
+
+This resets the stack pointer to one above the base of the frame (so the
+top item on the stack is C<ST(0)>), then does C<return>.
+
+For a C<void> XSUB, C<XSRETURN_EMPTY> is used instead.
+
+=head2 Returning Values from an XSUB
+
+An XSUB's declared return type is typically a C type such as C<int> or
+C<char*>. XS is very good at automating this common case of returning a
+single C-ish value: behind the scenes it creates a temporary SV; then,
+using an appropriate typemap template, sets that SV to the value of
+C<RETVAL> and returns that SV on the stack.
+
+But sometimes you want to return a Perl-ish value rather than a C-ish
+value, for example, Perl's undef value or a Perl array reference. Or you
+may want to return multiple values, or update one of the passed
+arguments. The following subsections describe various such cases.
+
+Note that XSUBs are somewhat like Perl lvalue subs, in that they return
+the actual SV to the caller, while normal Perl subs return a temporary
+copy of each return value. When returning a C value like C<int> this
+doesn't matter, since the XSUB is returning a temporary SV anyway; but
+when returning your own SV, it could in theory make a visible difference.
+For example,
+
+    sub foo { $_[0]++ }
+    foo(an_xsub_which_returns_element_0_of_an_array(\@a));
+
+would increment C<$a[0]>.
+
+=head3 Returning undef / TRUE / FALSE / empty list
+
+Sometimes you need to return an undefined value, e.g. to indicate failure.
+It's possible to return early from a CODE block with an undefined value,
+bypassing the normal creation of a temporary SV and the setting of its
+value. For example:
+
+    int
+    file_size(char *filename)
+      CODE:
+        RETVAL = file_size(filename);
+        if (RETVAL == -1)
+            XSRETURN_UNDEF;
+      OUTPUT:
+        RETVAL
+
+The C<XSRETURN_UNDEF> macro causes the address of the special Perl SV
+C<PL_sv_undef>  to be stored at C<ST(0)> (this is the same value that the
+Perl function C<undef> returns), and then to immediately return.
+
+If using autocall, then you can instead return early in a C<POSTCALL>
+section:
+
+    int
+    file_size(char *filename)
+      POSTCALL:
+        if (RETVAL == -1)
+            XSRETURN_UNDEF;
+
+There are similar macros
+
+    XSRETURN_YES
+    XSRETURN_NO
+    XSRETURN_EMPTY
+
+which allow you to return Perl's true and false values, or to return
+an empty list.
+
+If your XSUB will always explicitly return a special SV and won't ever
+require typemap conversions (e.g. it always returns via C<XSRETURN_YES> or
+C<XSRETURN_NO>), then just declare the return type as C<SV*>.
+
+Note that any early return from an XSUB should always be via one of the
+C<XSRETURN> macros and not directly via C<return>; the former will do any
+bookkeeping associated with the argument stack.
+
+=head3 Returning an SV*
+
+More generally, you may want to create and return an SV yourself, rather
+than relying on the boilerplate XSUB code to generate a temporary SV and
+set it to a C-ish value. Here you would declare the return type as C<SV*>.
+For example:
+
+    SV*
+    abc(bool uc)
+      CODE:
+        RETVAL = newSVpv(uc ? "ABC" : "abc", 3);
+      OUTPUT:
+        RETVAL
+
+There is some special processing which happens when using a return type
+such as C<SV*>. First, consider that for a C return type like C<int>, the
+typemap template which sets the temporary SV's value may look something
+like:
+
+    sv_setiv($arg, (IV)$var);
+
+which after expansion may look like:
+
+    sv_setiv(RETVALSV, (IV)RETVAL);
+
+where the temporary SV has previously been assigned to C<RETVALSV>.
+
+Now, if you declare an XSUB with a return type of C<SV*>, you I<might>
+expect the typemap template to look something like:
+
+    sv_setsv($arg, (SV*)$var);
+
+This Perl library function copies the value of one SV to another (the
+XS user's equivalent of the Perl C<$a = $b>).
+
+However, the design decision was made that for the C<SV*> type in
+particular, the typemap template would be
+
+    $arg = $var;
+
+Here is where the special processing comes in. The XS compiler, in the
+case of an output template beginning C<$arg = ...>, skips creating a
+temporary SV, and just returns the SV in C<RETVAL> directly. So the
+typemap template would be expanded to
+
+    ST(0) = RETVAL;
+
+This is faster than copying.
+
+But in addition, for I<any> C<$arg = ...> template (not just the template
+for C<SV*>), the XS compiler makes one further assumption: that the
+expression to the right of the assign evaluates to an SV with a reference
+count count I<one too high>, and so in addition, the XS compiler emits:
+
+    sv_2mortal(RETVAL);
+
+or similar, which causes the reference count of the SV to be decremented
+by one at (typically) the start of the next statement. This makes sense if
+the SV is newly created with one of the C<newSVfoo()> family of functions:
+see the discussion on this in L<An SV's reference count>
+
+However, if the SV comes from elsewhere, for example via a Perl array
+lookup, then its reference count doesn't need to be adjusted, and so the
+mortalising will cause it to be prematurely freed. In this case, you need
+to artificially increase the SV's reference count.
+
+The previous example showed creating a new SV using C<newSVpv()>; here's an
+example where the SV pre-exists in an array:
+
+    SV*
+    lookup(int i)
+      CODE:
+        {
+            SV** svp = av_fetch(some_array_AV, i, 0);
+            if (!svp)
+                XSRETURN_UNDEF;
+            /* compensate for the implicit mortalisation */
+            RETVAL = SvREFCNT_inc(*svp);
+        }
+      OUTPUT:
+        RETVAL
+
+Finally, note that some very old  (pre-1996) XS documentation suggested
+that you could return your own SV using code like:
+
+    void
+    foo(...)
+      CODE:
+        ST(0) = some_SV;
+
+This is very wrong, as the C<void> declaration tells the XS code to expect
+to return I<zero> items on the stack. There is still come code like this
+in the wild, and to work around it, the XS compiler does a very special
+and ugly hack for a C<void> XSUB when it sees C<ST(0)> being assigned to
+within a C<CODE> block: it pretends that the XSUB was actually declared as
+returning C<SV*> and so emits C<XSRETURN(1)> rather than
+C<XSRETURN_EMPTY>.  But don't rely on this: it is likely to warn
+eventually. If your XSUB is doing its own setting of C<ST(0)>, then always
+declare the return type as C<SV*>.
+
+The mark stack isn't used when returning arguments; instead, the caller of
+the XSUB (usually the C<OP_ENTERSUB>) notes the offset of the base of
+the argument stack frame before calling the XSUB and the offset of the
+stack pointer on return, and can deduce the number of returned arguments
+from that.
+
+=head3 Returning AV* etc refs
+
+Sometimes you want to return a non-scalar SV, such as an AV, HV or CV.
+However, these aren't allowed directly on the argument stack. You are
+supposed instead to return a I<reference> to the AV: a bit like a Perl sub
+returning C<\@foo>.
+
+The standard typemaps can create this reference for you automatically. So
+for example an XSUB with a return type of C<AV*> will actually create and
+return an RV scalar which references the AV in C<RETVAL>. So the XS
+equivalent of Perl's C<return [8,9]> might be:
+
+    AV *
+    array89()
+      CODE:
+        RETVAL = newAV();
+        /* see text below for why this line is needed */
+        sv_2mortal((SV*)RETVAL);
+        av_store(RETVAL, 0, newSViv(8));
+        av_store(RETVAL, 1, newSViv(9));
+      OUTPUT:
+        RETVAL
+
+Note that the C<RETVAL> variable is declared as type C<AV*>, but what is
+actually returned to the caller is a temporary SV which is a reference to
+C<RETVAL>. The standard output typemap template for the C<AV*> type looks
+like:
+
+    $arg = newRV((SV*)$var);
+
+This means it creates a new RV which refers to to the AV. Because of the
+rule for C<$arg = ...> typemaps, the RV will be correctly mortalised
+before being returned. However, the C<newRV()> function increments the
+reference count of the thing being referred to (the C<RETVAL> AV in this
+case). Since the AV has just been created by C<newAV()> with a reference
+count one too high, it will leak. This why the C<sv_2mortal()> is
+required.  Conversely for a pre-existing AV, the mortalisation isn't
+required.
+
+Since perl 5.16, there are a set of alternative XS types which can be used
+for AVs etc which I<don't> increment the reference count of the AV when
+being pointed to from the new RV. These can be enabled by mapping the
+C<AV*> etc C types to these new XS types:
+
+    TYPEMAP: <<EOF
+    AV*   T_AVREF_REFCOUNT_FIXED
+    HV*   T_HVREF_REFCOUNT_FIXED
+    CV*   T_CVREF_REFCOUNT_FIXED
+    SVREF T_SVREF_REFCOUNT_FIXED
+    EOF
+
+Or alternatively you could just declare the return type as C<SV*> and
+handle the RV generation yourself:
+
+    SV *
+    create_array_ref()
+      CODE:
+        RETVAL =  newRV_noinc((SV*)newAV());
+      OUTPUT:
+        RETVAL
+
+If instead you want to return a flattened array (the equivalent of Perl's
+C<return @a>) then you would have to push the elements of the array
+individually onto the stack in a C<PPCODE> block. See L</Returning a
+list> below.
+
+Finally, the C C<SVREF> type in the standard typemap is a way of creating
+and returning a reference to a scalar (as opposed to the C<SV*> type,
+which just returns a scalar). In this case you have to tell the C compiler
+that C<SVREF> is just another name for C<SV*>:
+
+    typedef SV *SVREF;
+
+Then in an XSUB like
+
+    SVREF
+    foo()
+      CODE:
+        RETVAL = newSViv(9);
+        sv_2mortal(RETVAL);
+      OUTPUT:
+        RETVAL
+
+C<RETVAL> will be declared with type C<SVREF>, and the XSUB will return a
+reference to an integer: the perl equivalent of C<my $x = 9; return \$x>.
+
+=head3 Updating arguments and returning multiple values.
+
+By using the C<IN_OUT> and similar parameter modifiers, XS provides
+limited support for returning extra values in addition to (or instead of)
+C<RETVAL>, either by updating the values of passed arguments (C<OUT>), or
+by returning some of the parameters (and pseudo-parameters) as extra
+return values (C<OUTLIST>). For returning an arbitrary list of values, see
+the next section.
+
+Here are a couple of simple XS examples with their approximate perl
+equivalents:
+
+    # Update a passed argument
+
+    void                          sub inc9 {
+    inc9(IN_OUT int i)                my $i = $_[0];
+      CODE:                           $i += 9;
+        i += 9                        $_[0] = $i;
+                                  }
+
+    # Return (2*$i, 3*$i)
+
+    void                         sub mul23 {
+    mul23(int i, \                   my $i = $_[0];
+          OUTLIST int x, \           my ($x, $y);
+          OUTLIST int y)             $x = $i * 2;
+      CODE                           $y = $i * 3;:
+        x = i * 2;                   return $x, $y;
+        y = i * 3;               }
+
+See L</"Updating and returning parameter values: the IN_OUT etc keywords">
+for the full details,
+
+=head3 Returning a list
+
+If you want to return a list, i.e. an arbitrary number of items on the
+stack, you generally have to forgo the convenience of some of the
+boilerplate code generated by XS, which is biased towards returning a
+single value. Instead you will have to create and push the SVs yourself.
+The L<PPCODE|/The PPCODE: Keyword> keyword is specifically intended for
+this purpose. Here is a simple example which does the same as the
+Perl-level C<return 1..$n>:
+
+    void
+    one_to_n(int n)
+      PPCODE:
+        {
+            int i;
+            if (n < 1)
+                Perl_croak_nocontext(
+                    "one_to_n(): argument %d must be >= 1", n);
+            EXTEND(SP, n);
+            for (i = 1; i <= n; i++)
+                mPUSHi(i);
+        }
+
+The C<PPCODE> keyword causes the argument stack pointer to be initially
+reset to the base of the frame (discarding any passed arguments), and
+suppresses any automatic return code generation. The return type of the
+XSUB is ignored, except that declaring it C<void> suppresses the
+declaration of a C<RETVAL> variable.
+
+The C<EXTEND()> macro makes sure that there are at least that many free
+slots on the stack (its first argument should always be C<SP>).  The
+C<mPUSHi()> macro creates a new SV, mortalises it, sets its value to the
+integer C<i>, and pushes it on the stack.
+
+Here's another example, which flattens the array passed as an argument:
+the equivalent of this Perl:
+
+    sub flatten { my $aref = $_[0]; @$aref: }
+
+In this example, the SVs being pushed aren't freshly created with a
+reference count one too high, so don't need mortalising.
+
+    void
+    flatten(AV *av)
+      PPCODE:
+        {
+            int i;
+            int max_ix = AvFILL(av);
+            SV **svp;
+            EXTEND(SP, max_ix + 1);
+            for (i = 0; i <= max_ix; i++)  {
+                svp = av_fetch(av, i, 0);
+                PUSHs(svp ? *svp : &PL_sv_undef);
+            }
+        }
+
+This function actually expects to be passed a I<reference> to an array:
+the input typemap entry for C<AV*> automatically takes care of
+dereferencing the argument and croaking if it's not actually a reference.
+The C<PUSHs()> macro simply pushes an SV onto the stack, without any
+mortalising or copying. Any "holes" in the array are filled with undefs.
+
+=head2 Bootstrapping
+
+In addition to the C<XS_Foo__Bar_baz()> C function generated for each XSUB
+declaration, a C<boot_Foo__Bar()> C function is also automatically
+generated, one for each XS file. This XSUB function is called once when
+the module is first loaded. For each declared XSUB in the file, a line
+similar to the following is added to the boot function:
+
+        newXS("Foo::Bar::baz", XS_Foo__Bar_baz);
+
+(the exact details of the code will vary across releases and
+configurations).  This call creates a CV, flags it as being an XSUB, adds
+a pointer from it to C<XS_Foo__Bar_baz()>, then adds the CV to the
+C<*FOO::Bar::baz> typeglob in the Perl interpreter's symbol table. It is
+the XS equivalent of the Perl-level
+
+    *FOO::Bar::baz  = sub { ... }
+
+For some XSUBs, additional lines may be added by the parser to the boot
+XSUB to handle things like aliases or overloading.
+
+You can add your own additional lines to the boot XSUB using the C<BOOT>
+keyword.
+
+A typical Perl module like F<Foo/Bar.pm> should have code in it similar
+to:
+
+    package Foo::Bar;
+    our $VERSION = '1.01';
+    require XSLoader;
+    XSLoader::load(__PACKAGE__, $VERSION);
+
+This causes the F<Bar.so> or F<Bar.dll> file to be dynamically linked in
+and then the C<boot_Foo__Bar()> function called. This boilerplate code is
+typically created automatically with F<h2xs> when you first create the
+skeleton of a new distribution. See L<perlxstut> for more details.
+
+=head1 REFERENCE MANUAL
+
+This part of the document explains what each XS keyword does. They are
+arranged in the approximate order in which they might appear within an XS
+file, and then might appear within an XSUB declaration. Related keywords
+are grouped together.
 
 =head2 The MODULE Keyword
 
