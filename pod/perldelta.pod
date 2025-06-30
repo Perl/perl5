@@ -208,7 +208,7 @@ Perl thread cloning had a working directory race condition where file
 operations may target unintended paths. Perl 5.42 will no longer chdir
 to each handle.
 
-This problem was reported by Vincent Lefèvre via [L<GH #23010|https://github.com/Perl/perl5/issues/23010>]
+This problem was discovered by Vincent Lefèvre via [L<GH #23010|https://github.com/Perl/perl5/issues/23010>]
 and assigned [L<CVE-2025-40909|https://lists.security.metacpan.org/cve-announce/msg/30017499/>]
 by the L<CPAN Security Group|https://security.metacpan.org/>.
 
