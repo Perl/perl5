@@ -30,6 +30,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="tonyc" id="85e9706628" issue="22487" pull="22758" desc="csighandler3: forward signals to the main thread if not a perl thread"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
