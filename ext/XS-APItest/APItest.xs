@@ -5032,6 +5032,15 @@ sv_regex_global_pos_set(SV *sv, STRLEN pos, U32 flags = 0)
 void
 sv_regex_global_pos_clear(SV *sv)
 
+SV *
+newSVpvf_blank()
+    CODE:
+        GCC_DIAG_IGNORE_STMT(-Wformat-zero-length);
+        RETVAL = newSVpvf("");
+        GCC_DIAG_RESTORE_STMT;
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
