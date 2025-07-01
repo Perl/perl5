@@ -804,6 +804,7 @@ the strings?).
 
  Thibault  5.42.0-RC1   2025-Jun-24     The 5.42 maintenance track
  Thibault  5.42.0-RC2   2025-Jun-27
+ Philippe  5.42.0       2025-Jul-02
 
 =head2 SELECTED RELEASE SIZES
 
