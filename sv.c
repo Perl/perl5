@@ -10004,13 +10004,12 @@ Perl_newSVpvf(pTHX_ const char *const pat, ...)
 SV *
 Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 {
-    SV *sv;
-
     PERL_ARGS_ASSERT_VNEWSVPVF;
 
     STRLEN patlen = strlen(pat);
 
-    sv = newSV(patlen);
+    /* newSV(0) would allocate a blank bodyless SV */
+    SV *sv = newSV(patlen ? patlen : 1);
     SvPVCLEAR_FRESH(sv);
     sv_vcatpvfn_flags(sv, pat, patlen, args, NULL, 0, NULL, 0);
     return sv;
