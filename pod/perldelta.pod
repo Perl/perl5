@@ -1481,7 +1481,7 @@ L<http://www.fysh.org/~zefram/personal/>.
 =head1 Acknowledgements
 
 Perl 5.42.0 represents approximately 13 months of development since Perl
-5.40.0 and contains approximately 280,000 lines of changes across 1,500
+5.40.0 and contains approximately 280,000 lines of changes across 1,600
 files from 65 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
