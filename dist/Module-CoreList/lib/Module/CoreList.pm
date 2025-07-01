@@ -23441,6 +23441,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'ExtUtils::CBuilder::Platform::os2'=> '0.280242',
             'Module::CoreList'      => '5.20250702',
             'Module::CoreList::Utils'=> '5.20250702',
+            'XS::APItest'           => '1.43',
             'feature'               => '1.97',
             'perlfaq'               => '5.20250619',
         },
