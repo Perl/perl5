@@ -603,7 +603,7 @@ L<Win32> has been upgraded from version 0.59 to 0.59_01.
 
 =item *
 
-L<XS::APItest> has been upgraded from version 1.36 to 1.42.
+L<XS::APItest> has been upgraded from version 1.36 to 1.43.
 
 =back
 
