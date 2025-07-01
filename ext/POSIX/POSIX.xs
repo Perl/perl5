@@ -2060,7 +2060,7 @@ WEXITSTATUS(status)
 
 SysRet
 open(filename, flags = O_RDONLY, mode = 0666)
-	char *		filename
+	const char *	filename
 	int		flags
 	Mode_t		mode
     CODE:
@@ -3174,7 +3174,7 @@ uname()
 SysRet
 write(fd, buffer, nbytes)
 	POSIX::Fd	fd
-	char *		buffer
+	const char *		buffer
 	size_t		nbytes
 
 void
@@ -3325,8 +3325,8 @@ wctomb(s, wchar)
 
 int
 strcoll(s1, s2)
-	char *		s1
-	char *		s2
+	const char *		s1
+	const char *		s2
     CODE:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 	LC_COLLATE_LOCK;
@@ -3337,7 +3337,7 @@ strcoll(s1, s2)
 
 void
 strtod(str)
-	char *		str
+	const char *		str
     PREINIT:
 	double num;
 	char *unparsed;
@@ -3359,7 +3359,7 @@ strtod(str)
 
 void
 strtold(str)
-	char *		str
+	const char *		str
     PREINIT:
 	long double num;
 	char *unparsed;
@@ -3381,7 +3381,7 @@ strtold(str)
 
 void
 strtol(str, base = 0)
-	char *		str
+	const char *		str
 	int		base
     PREINIT:
 	long num;
@@ -3460,7 +3460,7 @@ strxfrm(src)
 
 SysRet
 mkfifo(filename, mode)
-	char *		filename
+	const char *	filename
 	Mode_t		mode
     ALIAS:
 	access = 1
@@ -3680,7 +3680,7 @@ fpathconf(fd, name)
 
 SysRetLong
 pathconf(filename, name)
-	char *		filename
+	const char *	filename
 	int		name
 
 SysRet
@@ -3725,7 +3725,7 @@ SysRet
 lchown(uid, gid, path)
        Uid_t           uid
        Gid_t           gid
-       char *          path
+       const char *    path
     CODE:
 #ifdef HAS_LCHOWN
        /* yes, the order of arguments is different,

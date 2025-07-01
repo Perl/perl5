@@ -595,8 +595,18 @@ T_DOUBLE( in )
 
 ## T_PV
 
-char *
+const char *
 T_PV( in )
+  const char * in
+ CODE:
+  RETVAL = in;
+ OUTPUT:
+  RETVAL
+
+## T_PV_MUTABLE
+
+char *
+T_PV_MUTABLE( in )
   char * in
  CODE:
   RETVAL = in;

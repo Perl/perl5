@@ -156,7 +156,7 @@ BOOT:
 
 void *
 dl_load_file(filename, flags=0)
-    char *	filename
+    const char *	filename
     int		flags
     CODE:
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
@@ -174,7 +174,7 @@ dl_load_file(filename, flags=0)
 void *
 dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *		libhandle
-    char *		symbolname
+    const char *	symbolname
     int	        	ign_err
     CODE:
     symbolname = Perl_form_nocontext("_%s", symbolname);
@@ -202,7 +202,7 @@ dl_undef_symbols()
 
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
-    char *	perl_name
+    const char *	perl_name
     void *	symref
     const char *	filename
     CODE:

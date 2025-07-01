@@ -776,7 +776,7 @@ BOOT:
 
 void
 inet_aton(host)
-    char *  host
+    const char *  host
     CODE:
     {
 #ifdef HAS_GETADDRINFO

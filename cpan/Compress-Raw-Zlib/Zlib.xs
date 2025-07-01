@@ -2262,15 +2262,17 @@ getLastBufferOffset(s)
 	RETVAL
 
 void
-resetLastBlockByte(s, byte)
+resetLastBlockByte(s, byte_sv)
     Compress::Raw::Zlib::inflateScanStream	s
-    unsigned char*                      byte
+    SV*                      byte_sv
     CODE:
 #ifndef MAGIC_APPEND
         croak("resetLastBlockByte needs zlib 1.2.1 or better");
 #else
-        if (byte != NULL)
+        if (SvOK(byte_sv)) {
+            unsigned char* byte = (unsigned char*)SvPV_force_nolen(byte_sv);
             *byte = *byte ^ (1 << ((8 - s->window_lastbit) & 7));
+        }
 #endif
 
 

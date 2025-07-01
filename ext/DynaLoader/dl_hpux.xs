@@ -55,7 +55,7 @@ BOOT:
 
 void
 dl_load_file(filename, flags=0)
-    char *	filename
+    const char *	filename
     int		flags
     PREINIT:
     shl_t obj = NULL;
@@ -120,7 +120,7 @@ dl_unload_file(libref)
 void
 dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
-    char *	symbolname
+    const char *	symbolname
     int   	ign_err
     PREINIT:
     shl_t obj = (shl_t) libhandle;
@@ -162,7 +162,7 @@ dl_undef_symbols()
 
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
-    char *	perl_name
+    const char *	perl_name
     void *	symref 
     const char *	filename
     CODE:
