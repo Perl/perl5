@@ -5156,6 +5156,7 @@ ext/XS-APItest/t/my_strtod.t			XS::APItest: test my_strtod
 ext/XS-APItest/t/newAV.t			XS::APItest: test newAV* functions
 ext/XS-APItest/t/newCONSTSUB.t			XS::APItest: test newCONSTSUB(_flags)
 ext/XS-APItest/t/newDEFSVOP.t			XS::APItest: test newDEFSVOP
+ext/XS-APItest/t/newSVpvf.t			XS::APItest: test newSVpvf
 ext/XS-APItest/t/Null.pm			Helper for ./blockhooks.t
 ext/XS-APItest/t/op.t				XS::APItest: tests for OP related APIs
 ext/XS-APItest/t/op_contextualize.t		test op_contextualize() API
