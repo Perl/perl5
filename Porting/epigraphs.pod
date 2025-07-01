@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.42.0-RC3 - Bernard de Chartres
+
+L<Announced on 2025-07-01 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/07/msg270063.html>
+
+  Nanos gigantum umeris insidentes
+
 =head2 v5.42.0-RC2 - Douglas Adams, "The Hitchhiker's Guide to the Galaxy"
 
 L<Announced on 2025-06-27 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/06/msg270053.html>
