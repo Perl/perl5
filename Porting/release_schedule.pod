@@ -13,7 +13,7 @@ deemed necessary by the Steering Council.
 
 =head2 Perl 5.44
 
-  2025-??-??  5.44.0
+  2026-??-??  5.44.0
 
 =head2 Perl 5.42
 
