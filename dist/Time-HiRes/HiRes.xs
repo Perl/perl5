@@ -213,8 +213,8 @@ STMT_START { \
 
 #  define TMR_newSVnv_mortal(_nsv, _nv) STMT_START { \
     _nsv = newSV_type_mortal(SVt_NV); \
-    SvNV_set(_nsv, _nv); \
     SvNOK_on(_nsv); \
+    SvNV_set(_nsv, _nv); \
 } STMT_END
 
 #else
