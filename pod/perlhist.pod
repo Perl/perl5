@@ -438,10 +438,10 @@ the strings?).
 
  Jesse    5.12.0        2010-Apr-12
 
- Jesse    5.12.1-RC2    2010-May-13     The 5.12 maintenance track
-          5.12.1-RC1    2010-May-09
+ Jesse    5.12.1-RC1    2010-May-09     The 5.12 maintenance track
+          5.12.1-RC2    2010-May-13
           5.12.1        2010-May-16
-          5.12.2-RC2    2010-Aug-31
+          5.12.2-RC1    2010-Aug-31
           5.12.2        2010-Sep-06
  Ricardo  5.12.3-RC1    2011-Jan-09
  Ricardo  5.12.3-RC2    2011-Jan-14
@@ -463,9 +463,9 @@ the strings?).
  Jesse    5.13.9        2011-Jan-20
  Ævar     5.13.10       2011-Feb-20
  Florian  5.13.11       2011-Mar-20
- Jesse    5.14.0RC1     2011-Apr-20
- Jesse    5.14.0RC2     2011-May-04
- Jesse    5.14.0RC3     2011-May-11
+ Jesse    5.14.0-RC1    2011-Apr-20
+ Jesse    5.14.0-RC2    2011-May-04
+ Jesse    5.14.0-RC3    2011-May-11
 
  Jesse    5.14.0        2011-May-14     The 5.14 maintenance track
  Jesse    5.14.1        2011-Jun-16
