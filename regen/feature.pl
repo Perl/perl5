@@ -81,6 +81,7 @@ use constant V5_41  => sort
   grep {; $_ ne 'apostrophe_as_package_separator'
        && $_ ne 'smartmatch' }
   ( +V5_39 );
+use constant V5_43  => sort ( +V5_41 );
 
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
@@ -116,6 +117,8 @@ my %feature_bundle = (
     "5.39"  => [ +V5_39 ],
     # using 5.41 features bundle
     "5.41"  => [ +V5_41 ],
+    # using 5.43 features bundle
+    "5.43"  => [ +V5_43 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -618,7 +621,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.97';
+our $VERSION = '1.98';
 
 FEATURES
 
