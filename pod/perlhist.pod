@@ -807,6 +807,8 @@ the strings?).
  Thibault  5.42.0-RC3   2025-Jul-01
  Philippe  5.42.0       2025-Jul-03
 
+ Philippe  5.43.0       2025-Jul-03     The 5.43 development track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
