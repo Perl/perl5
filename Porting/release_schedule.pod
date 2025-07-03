@@ -11,6 +11,10 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Steering Council.
 
+=head2 Perl 5.44
+
+  2025-??-??  5.44.0
+
 =head2 Perl 5.42
 
   2025-07-02  5.42.0  ✓       Philippe Bruhat
