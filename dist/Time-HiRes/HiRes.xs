@@ -109,8 +109,9 @@ Addendum: it's "only" 33% speedup.
 #define TMR_TARGi(_nsv, i, do_taint) \
 STMT_START { \
     IV TARGi_iv = i; \
-    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) \
-        _nsv = sv_2mortal(newSViv(TARGi_iv)); \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) { \
+        TMR_newSViv_mortal(_nsv, TARGi_iv); \
+    } \
     else { \
         _nsv = PAD_SV(PL_op->op_targ); \
         if (LIKELY( \
@@ -136,8 +137,9 @@ STMT_START { \
 #define TMR_TARGu(_nsv, u, do_taint) \
 STMT_START { \
     UV TARGu_uv = u; \
-    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) \
-        _nsv = sv_2mortal(newSVuv(TARGu_uv)); \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) { \
+        TMR_newSVuv_mortal(_nsv, TARGu_uv); \
+    } \
     else { \
         _nsv = PAD_SV(PL_op->op_targ); \
         if (LIKELY( \
@@ -164,8 +166,9 @@ STMT_START { \
 #define TMR_TARGn(_nsv, n, do_taint) \
 STMT_START { \
     NV TARGn_nv = n; \
-    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) \
-        _nsv = sv_2mortal(newSVnv(TARGn_nv)); \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) { \
+        TMR_newSVnv_mortal(_nsv, TARGn_nv); \
+    } \
     else { \
         _nsv = PAD_SV(PL_op->op_targ); \
         if (LIKELY( \
@@ -184,6 +187,52 @@ STMT_START { \
             sv_setnv_mg(_nsv, TARGn_nv); \
     } \
 } STMT_END
+
+
+/* newSV_type_mortal() is faster than sv_2mortal() */
+
+#ifdef newSV_type_mortal
+
+#  define TMR_newSViv_mortal(_nsv, _iv) STMT_START { \
+    _nsv = newSV_type_mortal(SVt_IV); \
+    SvIOK_on(_nsv); \
+    SvIV_set(_nsv, _iv); \
+} STMT_END
+
+#  define TMR_newSVuv_mortal(_nsv, _uv) STMT_START { \
+    _nsv = newSV_type_mortal(SVt_IV); \
+    SvIOK_on(_nsv); \
+    if (_uv <= (UV)IV_MAX) { \
+        SvIV_set(_nsv, (IV)_uv); \
+    } \
+    else { \
+        SvIsUV_on(_nsv);\
+        SvUV_set(_nsv, _uv); \
+    } \
+} STMT_END
+
+#  define TMR_newSVnv_mortal(_nsv, _nv) STMT_START { \
+    _nsv = newSV_type_mortal(SVt_NV); \
+    SvNV_set(_nsv, _nv); \
+    SvNOK_on(_nsv); \
+} STMT_END
+
+#else
+
+#  define TMR_newSViv_mortal(_nsv, _iv) STMT_START { \
+    _nsv = sv_2mortal(newSViv(_iv)); \
+} STMT_END
+
+#  define TMR_newSVuv_mortal(_nsv, _uv) STMT_START { \
+    _nsv = sv_2mortal(newSVuv(_uv)); \
+} STMT_END
+
+#  define TMR_newSVnv_mortal(_nsv, _nv) STMT_START { \
+    _nsv = sv_2mortal(newSVnv(_nv)); \
+} STMT_END
+
+#endif
+
 
 #define IV_1E6 1000000
 #define IV_1E7 10000000
@@ -1724,8 +1773,11 @@ gettimeofday()
                 /* copy to registers to prove sv_2mortal/newSViv */
                 IV sec = Tp.tv_sec; /* can't modify the values */
                 IV usec = Tp.tv_usec;
-                PUSHs(sv_2mortal(newSViv(sec)));
-                PUSHs(sv_2mortal(newSViv(usec)));
+                SV* rsv;
+                TMR_newSViv_mortal(rsv, sec);
+                PUSHs(rsv);
+                TMR_newSViv_mortal(rsv, usec);
+                PUSHs(rsv);
             } else {
                 /* no Perl_leave_adjust_stacks() hazard here,
                    only a PP vs call_sv() hazard */
@@ -1752,8 +1804,9 @@ gettimeofday()
                     else
                         sv_setnv_mg(rsv, TARGn_nv);
                 }
-                else
-                    rsv = sv_2mortal(newSVnv(TARGn_nv));
+                else {
+                    TMR_newSVnv_mortal(rsv, TARGn_nv);
+                }
                 PUSHs(rsv);
             }
         }
