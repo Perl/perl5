@@ -321,12 +321,14 @@ typedef struct {
 } my_cxt_t;
 
 typedef BOOL (WINAPI *pfnQueryPerformanceCounter_T)(LARGE_INTEGER*);
+typedef VOID (WINAPI *pfnGetSystemTimeAsFileTime_T) (PFILETIME);
 
 static unsigned __int64 tick_frequency = 0;
 static NV tick_frequency_nv = 0;
 static unsigned __int64 qpc_res_ns = 0;
 static unsigned __int64 qpc_res_ns_realtime = 0;
 static pfnQueryPerformanceCounter_T pfnQueryPerformanceCounter = NULL;
+static pfnGetSystemTimeAsFileTime_T pfnGetSystemTimeAsFileTime = NULL;
 
 #define S_InterlockedExchange64(_d,_s) \
     InterlockedExchange64((LONG64 volatile *)(_d),(LONG64)(_s))
@@ -335,6 +337,8 @@ static pfnQueryPerformanceCounter_T pfnQueryPerformanceCounter = NULL;
 
 #undef QueryPerformanceCounter
 #define QueryPerformanceCounter pfnQueryPerformanceCounter
+#undef GetSystemTimeAsFileTime
+#define GetSystemTimeAsFileTime pfnGetSystemTimeAsFileTime
 
 /* Visual C++ 2013 and older don't have the timespec structure.
  * Neither do mingw.org compilers with MinGW runtimes older than 3.22. */
@@ -1309,6 +1313,24 @@ BOOT:
 #QueryPerformanceCounter pfnQueryPerformanceCounter
             QPC_done:
             S_InterlockedExchangePointer(&pfnQueryPerformanceCounter, QPCfn);
+        }
+    }
+    {/* Remove 2 jump stub funcs between kernel32->kernelbase for perf reasons.
+        kernelbase.dll is somewhat new to the Win32/NT OS, so keep the fallback. */
+        pfnGetSystemTimeAsFileTime_T GSTAFTfn = pfnGetSystemTimeAsFileTime;
+        if (!GSTAFTfn) {
+            HMODULE hmod = GetModuleHandleW(L"KERNELBASE.DLL");
+            if (hmod) {
+                GSTAFTfn = (pfnGetSystemTimeAsFileTime_T)GetProcAddress(hmod,"GetSystemTimeAsFileTime");
+                if (GSTAFTfn)
+                    goto GSTAFT_done;
+            }
+#undef GetSystemTimeAsFileTime
+            GSTAFTfn = GetSystemTimeAsFileTime; /* Get the public API fallback sym. */
+#undef GetSystemTimeAsFileTime
+#GetSystemTimeAsFileTime pfnGetSystemTimeAsFileTime
+            GSTAFT_done:
+            S_InterlockedExchangePointer(&pfnGetSystemTimeAsFileTime, GSTAFTfn);
         }
     }
 }
