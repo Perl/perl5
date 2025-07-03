@@ -74,6 +74,20 @@
 #  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL)
 #endif
 
+/* Added in 5.17.6 in commit 284167a54e2 10/9/2012 5:19:37 AM
+   Add C define to remove taint support from perl */
+#ifndef TAINT_get
+#  define TAINT_get		(PL_tainted)
+#endif
+
+#ifndef LIKELY
+#  define LIKELY(x)                      (x)
+#endif
+
+#ifndef UNLIKELY
+#  define UNLIKELY(x)                    (x)
+#endif
+
 /* PL_op->op_private & OPpENTERSUB_HASTARG feature was added in
 
 d30110745a - Ilya Zakharevich -8/26/1999 11:33:01 PM - 5.5.61
@@ -1228,10 +1242,12 @@ static void
 S_croak_xs_unimplemented(CV *const cv)
 {
     dTHX;
+    /* added in 5.21.4 commit c5569a55d2 - 8/28/2014 6:56:30 PM - cv_name */
+#ifdef cv_name
     SV* sv = cv_name(cv, NULL, 0);
     Perl_croak_nocontext(
         "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1), SvPVX(sv));
-#if 0 /* former implementation, retired because of machine code bloat */
+#else
     char buf[sizeof("CODE(0x%" UVxf ")") + (sizeof(UV)*8)];
     const char * pv1;
     const GV *const gv = CvGV(cv);
@@ -1365,26 +1381,26 @@ BOOT:
 #  endif
 #endif
 #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER)
-#  define GETITIMER_SUBSTR "Time::HiRes::getitimer"+13
-#  define SETITIMER_SUBSTR "Time::HiRes::setitimer"+13
+#  define GETITIMER_SUBSTR NUM2PTR(const char *, "Time::HiRes::getitimer")+13
+#  define SETITIMER_SUBSTR NUM2PTR(const char *, "Time::HiRes::setitimer")+13
 #else
-#  define GETITIMER_SUBSTR "d_getitimer"+2
-#  define SETITIMER_SUBSTR "d_setitimer"+2
+#  define GETITIMER_SUBSTR NUM2PTR(const char *, "d_getitimer")+2
+#  define SETITIMER_SUBSTR NUM2PTR(const char *, "d_setitimer")+2
 #endif
-#define INIT1 INIT2(sym_usleep, "Time::HiRes::usleep"+13, sizeof("usleep")-1, NULL, 0) \
-INIT2(sym_sleep, "Time::HiRes::sleep"+13, sizeof("sleep")-1, NULL, 0) \
-INIT2(sym_ualarm, "Time::HiRes::ualarm"+13, sizeof("ualarm")-1, NULL, 0) \
-INIT2(sym_alarm, "Time::HiRes::alarm"+13, sizeof("alarm")-1, NULL, 0) \
-INIT2(sym_gettimeofday, "Time::HiRes::gettimeofday"+13, sizeof("gettimeofday")-1, NULL, 0) \
-INIT2(sym_time, "Time::HiRes::time"+13, sizeof("time")-1, NULL, 0) \
+#define INIT1 INIT2(sym_usleep, NUM2PTR(const char *, "Time::HiRes::usleep")+13, sizeof("usleep")-1, NULL, 0) \
+INIT2(sym_sleep, NUM2PTR(const char *, "Time::HiRes::sleep")+13, sizeof("sleep")-1, NULL, 0) \
+INIT2(sym_ualarm, NUM2PTR(const char *, "Time::HiRes::ualarm")+13, sizeof("ualarm")-1, NULL, 0) \
+INIT2(sym_alarm, NUM2PTR(const char *, "Time::HiRes::alarm")+13, sizeof("alarm")-1, NULL, 0) \
+INIT2(sym_gettimeofday, NUM2PTR(const char *, "Time::HiRes::gettimeofday")+13, sizeof("gettimeofday")-1, NULL, 0) \
+INIT2(sym_time, NUM2PTR(const char *, "Time::HiRes::time")+13, sizeof("time")-1, NULL, 0) \
 INIT2(sym_tv_interval, "tv_interval", sizeof("tv_interval")-1, NULL, 0) \
 INIT2(sym_getitimer, GETITIMER_SUBSTR, sizeof("getitimer")-1, NULL, 0) \
 INIT2(sym_setitimer, SETITIMER_SUBSTR, sizeof("setitimer")-1, NULL, 0) \
-INIT2(sym_nanosleep, "Time::HiRes::nanosleep"+13, sizeof("nanosleep")-1, NULL, 0) \
-INIT2(sym_clock_gettime, "Time::HiRes::clock_gettime"+13, sizeof("clock_gettime")-1, NULL, 0) \
-INIT2(sym_clock_getres, "Time::HiRes::clock_getres"+13, sizeof("clock_getres")-1, NULL, 0) \
-INIT2(sym_clock, "Time::HiRes::clock"+13, sizeof("clock")-1, NULL, 0) \
-INIT2(sym_clock_nanosleep, "Time::HiRes::clock_nanosleep"+13, sizeof("clock_nanosleep")-1, NULL, 0) \
+INIT2(sym_nanosleep, NUM2PTR(const char *, "Time::HiRes::nanosleep")+13, sizeof("nanosleep")-1, NULL, 0) \
+INIT2(sym_clock_gettime, NUM2PTR(const char *, "Time::HiRes::clock_gettime")+13, sizeof("clock_gettime")-1, NULL, 0) \
+INIT2(sym_clock_getres, NUM2PTR(const char *, "Time::HiRes::clock_getres")+13, sizeof("clock_getres")-1, NULL, 0) \
+INIT2(sym_clock, NUM2PTR(const char *, "Time::HiRes::clock")+13, sizeof("clock")-1, NULL, 0) \
+INIT2(sym_clock_nanosleep, NUM2PTR(const char *, "Time::HiRes::clock_nanosleep")+13, sizeof("clock_nanosleep")-1, NULL, 0) \
 INIT2(sym_CLOCKS_PER_SEC, "CLOCKS_PER_SEC", sizeof("CLOCKS_PER_SEC")-1, NULL, 0) \
 INIT2(sym_CLOCK_BOOTTIME, "CLOCK_BOOTTIME", sizeof("CLOCK_BOOTTIME")-1, NULL, 0) \
 INIT2(sym_CLOCK_HIGHRES, "CLOCK_HIGHRES", sizeof("CLOCK_HIGHRES")-1, NULL, 0) \
@@ -1415,23 +1431,23 @@ INIT2(sym_ITIMER_REAL, "ITIMER_REAL", sizeof("ITIMER_REAL")-1, NULL, 0) \
 INIT2(sym_ITIMER_REALPROF, "ITIMER_REALPROF", sizeof("ITIMER_REALPROF")-1, NULL, 0) \
 INIT2(sym_ITIMER_VIRTUAL, "ITIMER_VIRTUAL", sizeof("ITIMER_VIRTUAL")-1, NULL, 0) \
 INIT2(sym_TIMER_ABSTIME, "TIMER_ABSTIME", sizeof("TIMER_ABSTIME")-1, NULL, 0) \
-INIT2(sym_d_usleep, "d_usleep", sizeof("d_usleep")-1, "Time::HiRes::usleep"+13, 1) \
-INIT2(sym_d_ualarm, "d_ualarm", sizeof("d_ualarm")-1, "Time::HiRes::ualarm"+13, 1) \
-INIT2(sym_d_gettimeofday, "d_gettimeofday", sizeof("d_gettimeofday")-1, "Time::HiRes::gettimeofday"+13, 1) \
+INIT2(sym_d_usleep, "d_usleep", sizeof("d_usleep")-1, NUM2PTR(const char *, "Time::HiRes::usleep")+13, 1) \
+INIT2(sym_d_ualarm, "d_ualarm", sizeof("d_ualarm")-1, NUM2PTR(const char *, "Time::HiRes::ualarm")+13, 1) \
+INIT2(sym_d_gettimeofday, "d_gettimeofday", sizeof("d_gettimeofday")-1, NUM2PTR(const char *, "Time::HiRes::gettimeofday")+13, 1) \
 INIT2(sym_d_getitimer, "d_getitimer", sizeof("d_getitimer")-1, GETITIMER_SUBSTR, 1) \
 INIT2(sym_d_setitimer, "d_setitimer", sizeof("d_setitimer")-1, SETITIMER_SUBSTR, 1) \
-INIT2(sym_d_nanosleep, "d_nanosleep", sizeof("d_nanosleep")-1, "Time::HiRes::nanosleep"+13, 1) \
-INIT2(sym_d_clock_gettime, "d_clock_gettime", sizeof("d_clock_gettime")-1, "Time::HiRes::clock_gettime"+13, 1) \
-INIT2(sym_d_clock_getres, "d_clock_getres", sizeof("d_clock_getres")-1, "Time::HiRes::clock_getres"+13, 1) \
-INIT2(sym_d_clock, "d_clock", sizeof("d_clock")-1, "Time::HiRes::clock"+13, 1) \
-INIT2(sym_d_clock_nanosleep, "d_clock_nanosleep", sizeof("d_clock_nanosleep")-1, "Time::HiRes::clock_nanosleep"+13, 1) \
+INIT2(sym_d_nanosleep, "d_nanosleep", sizeof("d_nanosleep")-1, NUM2PTR(const char *, "Time::HiRes::nanosleep")+13, 1) \
+INIT2(sym_d_clock_gettime, "d_clock_gettime", sizeof("d_clock_gettime")-1, NUM2PTR(const char *, "Time::HiRes::clock_gettime")+13, 1) \
+INIT2(sym_d_clock_getres, "d_clock_getres", sizeof("d_clock_getres")-1, NUM2PTR(const char *, "Time::HiRes::clock_getres")+13, 1) \
+INIT2(sym_d_clock, "d_clock", sizeof("d_clock")-1, NUM2PTR(const char *, "Time::HiRes::clock")+13, 1) \
+INIT2(sym_d_clock_nanosleep, "d_clock_nanosleep", sizeof("d_clock_nanosleep")-1, NUM2PTR(const char *, "Time::HiRes::clock_nanosleep")+13, 1) \
 INIT2(sym_d_hires_stat, "d_hires_stat", sizeof("d_hires_stat")-1, NULL, 0) \
 INIT2(sym_d_futimens, "d_futimens", sizeof("d_futimens")-1, NULL, 0) \
 INIT2(sym_d_utimensat, "d_utimensat", sizeof("d_utimensat")-1, NULL, 0) \
 INIT2(sym_d_hires_utime, "d_hires_utime", sizeof("d_hires_utime")-1, NULL, 0) \
-INIT2(sym_stat, "Time::HiRes::stat"+13, sizeof("stat")-1, NULL, 0) \
-INIT2(sym_lstat, "Time::HiRes::lstat"+13, sizeof("lstat")-1, NULL, 0) \
-INIT2(sym_utime, "Time::HiRes::utime"+13, sizeof("utime")-1, NULL, 0)
+INIT2(sym_stat, NUM2PTR(const char *, "Time::HiRes::stat")+13, sizeof("stat")-1, NULL, 0) \
+INIT2(sym_lstat, NUM2PTR(const char *, "Time::HiRes::lstat")+13, sizeof("lstat")-1, NULL, 0) \
+INIT2(sym_utime, NUM2PTR(const char *, "Time::HiRes::utime")+13, sizeof("utime")-1, NULL, 0)
 /* A test inside ../dist/XSLoader/t/XSLoader.t, doesn't allow us to
    pass any args from our .pm to .xs. So this idea is rejected:
         XSLoader::load( 'Time::HiRes', $XS_VERSION, \@EXPORT_OK );
@@ -1444,7 +1460,7 @@ INIT2(sym_utime, "Time::HiRes::utime"+13, sizeof("utime")-1, NULL, 0)
                 INIT1
             };
 #undef INIT2
-#define INIT2(_s, _str, _l, _d, _db) ((_db) ? ((I8)-((I8)(_l))) : (_l)),
+#define INIT2(_s, _str, _l, _d, _db) ((_db) ? NUM2PTR(I8,-NUM2PTR(I8,_l)) : NUM2PTR(I8,_l)),
             static const I8 expoklen[] = {
                 INIT1
             };
@@ -1974,10 +1990,10 @@ PROTOTYPE: $$@
                             tot++;
                         }
                     } else {
-                        croak("%s unimplemented in this platform", "d_futimens"+2);
+                        croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_futimens")+2);
                     }
 #  else  /* HAS_FUTIMENS */
-                    croak("%s unimplemented in this platform", "d_futimens"+2);
+                    croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_futimens")+2);
 #  endif /* HAS_FUTIMENS */
                 }
             }
@@ -1992,10 +2008,10 @@ PROTOTYPE: $$@
                         tot++;
                     }
                 } else {
-                    croak("%s unimplemented in this platform", "d_utimensat"+2);
+                    croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_utimensat")+2);
                 }
 #  else  /* HAS_UTIMENSAT */
-                croak("%s unimplemented in this platform", "d_utimensat"+2);
+                croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_utimensat")+2);
 #  endif /* HAS_UTIMENSAT */
             }
         } /* while items */
