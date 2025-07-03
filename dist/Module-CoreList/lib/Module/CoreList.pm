@@ -23449,11 +23449,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.04300 => {
+
+    5.043000 => {
         delta_from => 5.042000,
         changed => {
             'B::Op_private'         => '5.043000',
-            'Config'                => '5.043000',
+            'Config'                => '5.043',
+            'Math::BigFloat'        => '2.005003',
+            'Math::BigInt'          => '2.005003',
+            'Math::BigInt::Calc'    => '2.005003',
+            'Math::BigInt::Lib'     => '2.005003',
+            'Math::BigRat'          => '2.005003',
             'Module::CoreList'      => '5.20250703',
             'Module::CoreList::Utils'=> '5.20250703',
             'feature'               => '1.98',
@@ -23461,7 +23467,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-
 );
 
 sub is_core
@@ -25103,6 +25108,13 @@ sub is_core
     },
     5.042000 => {
         delta_from => 5.041013,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.043000 => {
+        delta_from => 5.042,
         changed => {
         },
         removed => {
