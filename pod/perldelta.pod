@@ -5,7 +5,7 @@
 [ this is a template for a new perldelta file. Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.42.1
+perldelta - what is new for perl v5.43.0
 
 =head1 DESCRIPTION
 
