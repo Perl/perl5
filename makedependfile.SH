@@ -18,16 +18,16 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-echo "Extracting makedepend_file (with variable substitutions)"
-rm -f makedepend_file
-$spitshell >makedepend_file <<!GROK!THIS!
+echo "Extracting makedependfile (with variable substitutions)"
+rm -f makedependfile
+$spitshell >makedependfile <<!GROK!THIS!
 $startsh
-# makedepend_file.SH
+# makedependfile.SH
 #
 MAKE=$make
 trnl='$trnl'
 !GROK!THIS!
-$spitshell >>makedepend_file <<'!NO!SUBS!'
+$spitshell >>makedependfile <<'!NO!SUBS!'
 
 file=$1
 shift
@@ -172,5 +172,5 @@ esac
     $echo "$filebase\$(OBJ_EXT): $@" >>$outfile
 
 !NO!SUBS!
-$eunicefix makedepend_file
-chmod +x makedepend_file
+$eunicefix makedependfile
+chmod +x makedependfile
