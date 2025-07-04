@@ -5821,6 +5821,7 @@ yyl_qw(pTHX_ char *s, STRLEN len)
     if (SvCUR(PL_lex_stuff)) {
         int warned_comma = !ckWARN(WARN_QW);
         int warned_comment = warned_comma;
+        int warned_escape = warned_comma;
         char *d = SvPV_force(PL_lex_stuff, len);
         while (len) {
             for (; isSPACE(*d) && len; --len, ++d)
@@ -5839,6 +5840,11 @@ yyl_qw(pTHX_ char *s, STRLEN len)
                             warner(packWARN(WARN_QW),
                                    "Possible attempt to put comments in qw() list");
                             ++warned_comment;
+                        }
+                        else if (!warned_escape && *d == '\\' && len > 1 && isSPACE(*(d+1)) ) {
+                            warner(packWARN(WARN_QW),
+                                   "Possible attempt to escape whitespace in qw() list");
+                            ++warned_escape;
                         }
                     }
                 }

@@ -5467,6 +5467,33 @@ character class, just escape the square brackets with the backslash: "\[="
 and "=\]".  The S<<-- HERE> shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
+=item Possible attempt to escape whitespace in qw() list
+
+(W qw) qw() lists contain items separated by whitespace; contrary to
+what some might expect, backslash characters cannot be used to "protect"
+whitespace from being split, but are instead treated as literal data.
+(You may have used different delimiters than the parentheses shown here;
+braces are also frequently used.)
+
+You probably wrote something like this:
+
+    @list = qw(
+        a\ string
+        another
+    );
+
+expecting to get a two elements list containing the strings C<'a string'>
+and C<'another'>.  Instead the list will hold four elements: C<'a\'>
+(with a literal backslash), C<'string'> and C<'another'>.
+
+If you really want whitespace in your strings, build your list the
+old-fashioned way, with quotes and commas:
+
+    @list = ( 'a string', 'another' );
+
+Note that this warnings is I<only> emitted when the backslash is followed
+by actual whitespace (that C<qw> splits on).
+
 =item Possible attempt to put comments in qw() list
 
 (W qw) qw() lists contain items separated by whitespace; as with literal

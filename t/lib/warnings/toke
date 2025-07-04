@@ -49,6 +49,9 @@ toke.c	AOK
      Possible attempt to put comments in qw() list 
 	@a = qw(a b # c) ;
 
+     Possible attempt to escape whitespace in qw() list
+	@a = qw( foo bar\ baz ) ;
+
      %s (...) interpreted as function 
 	print ("")
 	printf ("")
@@ -364,6 +367,12 @@ no warnings 'qw' ;
 EXPECT
 Possible attempt to separate words with commas at - line 3.
 Possible attempt to put comments in qw() list at - line 3.
+########
+# toke.c
+use warnings 'qw';
+@a = qw( foo bar\ baz );
+EXPECT
+Possible attempt to escape whitespace in qw() list at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;
