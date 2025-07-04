@@ -717,54 +717,32 @@ F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>
 
 =head4 Update C<Module::CoreList> with module version data for the new release
 
-Note that if this is a MAINT release, you should run the following actions
-from the maint branch, but commit the C<CoreList.pm> changes in
-I<blead> and subsequently cherry-pick any releases since the last
-maint release and then your recent commit.  XXX need a better example
-
-[ Note that the procedure for handling Module::CoreList in maint branches
-is a bit complex, and the RMG currently don't describe a full and
-workable approach. The main issue is keeping Module::CoreList
-and its version number synchronised across all maint branches, blead and
-CPAN, while having to bump its version number for every RC release.
-See this brief p5p thread:
-
- Message-ID: <20130311174402.GZ2294@iabyn.com>
-
-If you can devise a workable system, feel free to try it out, and to
-update the RMG accordingly!
-
-DAPM May 2013 ]
-
-F<corelist.pl> uses www.cpan.org to verify information about dual-lived
-modules on CPAN. It can use a full, local CPAN mirror and/or fall back
-on HTTP::Tiny to fetch package metadata remotely.
-
-(If you'd prefer to have a full CPAN mirror, see
-L<How to mirror CPAN|https://www.cpan.org/misc/how-to-mirror.html>)
-
-Change to your perl checkout, and if necessary,
-
- $ make
-
-Then, If you have a local CPAN mirror, run:
-
- $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
-
-Otherwise, run:
+For BLEAD-POINT, RC and BLEAD-FINAL, run:
 
  $ ./perl -Ilib Porting/corelist.pl cpan
-
-This will chug for a while, possibly reporting various warnings about
-badly-indexed CPAN modules unrelated to the modules actually in core.
-Assuming all goes well, it will update
-F<dist/Module-CoreList/lib/Module/CoreList.pm> and possibly
-F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
 
 Check those files over carefully:
 
  $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
  $ git diff dist/Module-CoreList/lib/Module/CoreList/Utils.pm
+
+If you have a L<local CPAN mirror|https://www.cpan.org/misc/how-to-mirror.html>, run:
+
+ $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
+
+For MAINT, the prodecure is not straightforward and implies to pick past
+updates (e.g. from BLEAD-POINT) into the corelist.
+
+In practice, you should run the previous actions
+from the maint branch, but commit the C<CoreList.pm> changes in
+I<blead> and subsequently cherry-pick any releases since the last
+maint release and then your recent commit.
+
+The main issue is keeping Module::CoreList
+and its version number synchronised across all maint branches, blead and
+CPAN, while having to bump its version number for every RC release.
+
+See L<Handling Module::CoreList in MAINT branches (Dave Mitchell)|https://www.nntp.perl.org/group/perl.perl5.porters/2013/03/msg200007.html>.
 
 =head4 Bump version in Module::CoreList F<Changes>
 
@@ -1567,13 +1545,13 @@ and F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
 
 =item *
 
-If you have a local CPAN mirror, run:
-
- $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
-
-Otherwise, run:
+In most cases, run:
 
  $ ./perl -Ilib Porting/corelist.pl cpan
+
+If you have a L<local CPAN mirror|https://www.cpan.org/misc/how-to-mirror.html>, run:
+
+ $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
 
 This will update F<dist/Module-CoreList/lib/Module/CoreList.pm> and
 F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> as it did before,
