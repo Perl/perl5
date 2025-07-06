@@ -416,11 +416,14 @@ BEGIN { $build_subclass->(
     'alias_clash_hinted',      # Bool: an ALIAS warn-hint has been emitted.
 
     # Maintain the INTERFACE parsing state across potentially multiple
-    # INTERFACE keywords and or lines:
+    # INTERFACE keywords and/or lines:
 
     'map_interface_name_short_to_original', # Hash: for each INTERFACE
                                # name, map the short (PREFIX removed) name
                                # to the original name.
+
+    # Maintain the OVERLOAD parsing state across potentially multiple
+    # OVERLOAD keywords and/or lines:
 
     'overload_name_seen',      # Hash of Bools: indicates overload method
                                # names (such as '<=>') which have been
