@@ -781,20 +781,42 @@ and the code for rpcb_gettime() can be rewritten as
 
 =head2 The SCOPE: Keyword
 
-The SCOPE: keyword allows scoping to be enabled for a particular XSUB. If
-enabled, the XSUB will invoke ENTER and LEAVE automatically.
+The SCOPE: keyword allows scoping to be enabled for a particular XSUB.
+Its effect is to wrap the main body of the XSUB (i.e. the C<CODE> or
+C<PPCODE> or implicit) with an C<ENTER> and C<LEAVE> pair. This has the
+effect of clearing any accumulated savestack entries at the end of the
+code body. It is disabled by default.
 
-To support potentially complex type mappings, if a typemap entry used
-by an XSUB contains a comment like C</*scope*/> then scoping will
-be automatically enabled for that XSUB.
+The SCOPE keyword may appear either within the XSUB body (anywhere before
+a C<CODE:> could appear), or just before the XSUB declaration, but part of
+the same paragraph (i.e. no intervening blank lines). For example:
 
-To enable scoping:
+    void
+    foo()
+        INPUT:
+            ...
+        PREINIT:
+            ...
+        SCOPE: ENABLE
+        CODE:
+            ...
+
 
     SCOPE: ENABLE
+    void
+    bar()
+        ...
 
-To disable scoping:
+The first form (within the XSUB body) has been available since perl-5.004,
+but was broken by perl-5.12.0 (xsubpp v2.21) and fixed in perl-5.44.0
+(xsubpp v3.58). The second form has been available since perl-5.12.0 .
 
-    SCOPE: DISABLE
+Note that to support potentially complex type mappings, if a typemap entry
+used by an XSUB contains a comment like C</* SCOPE */>, then scoping will
+be automatically enabled for any XSUB which uses that typemap entry for an
+C<INPUT> parameter. This currently only works for parameters whose type
+is specified in a separate C<INPUT> line rather than any ANSI-style
+declaration (C<foo(int i)>).
 
 =head2 The INPUT: Keyword
 
@@ -2209,7 +2231,7 @@ this model, the less likely conflicts will occur.
 =head1 XS VERSION
 
 This document covers features supported by C<ExtUtils::ParseXS>
-(also known as C<xsubpp>) 3.57.
+(also known as C<xsubpp>) 3.58.
 
 =head1 AUTHOR DIAGNOSTICS
 

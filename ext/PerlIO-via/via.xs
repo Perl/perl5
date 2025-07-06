@@ -704,7 +704,7 @@ static PERLIO_FUNCS_DECL(PerlIO_object) = {
 #endif /* Layers available */
 
 MODULE = PerlIO::via	PACKAGE = PerlIO::via
-PROTOTYPES: ENABLE;
+PROTOTYPES: DISABLE
 
 BOOT:
 {

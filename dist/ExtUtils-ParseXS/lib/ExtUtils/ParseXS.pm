@@ -64,7 +64,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.57';
+  $VERSION = '3.58';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Node; ExtUtils::ParseXS::Node->VERSION($VERSION);
@@ -108,9 +108,9 @@ $AUTHOR_WARNINGS = ($ENV{AUTHOR_WARNINGS} || 0)
     unless defined $AUTHOR_WARNINGS;
 
 # "impossible" keyword (multiple newline)
-my $END = "!End!\n\n";
+our $END = "!End!\n\n";
 # Match an XS Keyword
-my $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
+our $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
 
 
 # All the valid fields of an ExtUtils::ParseXS hash object. The 'use
@@ -216,11 +216,11 @@ BEGIN {
   'VERSIONCHECK_value', # Bool: most recent VERSIONCHECK: value. Defaults
                         # to the value of the "-noversioncheck" switch.
 
-  'seen_INTERFACE_or_MACRO', # Bool: at least one INTERFACE/INTERFACE_MACRO
-                        # has been seen somewhere.
-
+  'seen_an_XSUB',       # Bool: at least one XSUB has been encountered
 
   # File-scoped code-emitting state:
+
+  'need_boot_cv',       # must declare 'cv' within the boot function
 
   'bootcode_early',     # Array of code lines to emit early in boot XSUB:
                         # typically newXS() calls
@@ -231,101 +231,9 @@ BEGIN {
 
   # Per-XSUB parsing state:
 
-  'xsub_seen_NO_OUTPUT',       # Bool: XSUB declared as NO_OUTPUT
-
-  'xsub_seen_extern_C',        # Bool: XSUB return type is 'extern "C" ...'
-
-  'xsub_seen_static',          # Bool: XSUB return type is 'static ...'
-
-  'xsub_seen_PPCODE',          # Bool: XSUB has PPCODE    (peek-ahead)
-
-  'xsub_seen_CODE',            # Bool: XSUB has CODE      (peek-ahead)
-
-  'xsub_seen_INTERFACE',       # Bool: XSUB has INTERFACE (peek-ahead)
-
-  'xsub_seen_PROTOTYPE',       # Bool: PROTOTYPE keyword seen (for dup warning)
-  
-  'xsub_seen_SCOPE',           # Bool: SCOPE keyword seen (for dup warning).
-  
-  'xsub_seen_ALIAS',           # Bool: ALIAS keyword seen in this XSUB.
-
-  'xsub_seen_INTERFACE_or_MACRO',# Bool: INTERFACE or INTERFACE_MACRO
-                               # seen in this XSUB.
-  
-  'xsub_interface_macro',      # Str: current interface extraction macro.
-  
-  'xsub_interface_macro_set',  # Str: current interface setting macro.
-  
-  'xsub_prototype',            # Str: is set to either the global PROTOTYPES
-                               #  values (0 or 1), or to what's been
-                               #  overridden for this XSUB with PROTOTYPE
-                               #    "0": DISABLE
-                               #    "1": ENABLE
-                               #    "2": empty prototype
-                               #    other: a specific prototype.
-
-  'xsub_SCOPE_enabled',        # Bool: SCOPE ENABLEd
-
-  'xsub_return_type',          # Return type of the XSUB (whitespace-tidied).
-
-  'xsub_class',                # Str: the class part of the XSUB's
-                               # function name (if any). May include
-                               # 'const' prefix.
-
-  'xsub_sig',                  # Node::Sig object holding all the info
-                               # about the XSUB's signature and INPUT
-                               # lines
-
-  'xsub_func_name',            # The name of this XSUB        eg 'f'
-  'xsub_func_full_perl_name',  # its full Perl function name  eg. 'Foo::Bar::f'
-  'xsub_func_full_C_name',     # its full C function name     eg 'Foo__Bar__f'
-
-  'xsub_CASE_condition',       # Most recent CASE string.
-
-  'xsub_CASE_condition_count', # number of CASE keywords encountered.
-                               # Zero indicates none encountered yet.
-
-  'xsub_map_overload_name_to_seen', # Hash: maps each overload method name
-                               # (such as '<=>') to a boolean indicating
-                               # whether that method has been listed by
-                               # OVERLOAD (for duplicate spotting).
-   
-  'xsub_map_interface_name_short_to_original', # Hash: for each INTERFACE
-                               # name, map the short (PREFIX removed) name
-                               # to the original name.
-
-  'xsub_attributes',           # Array of strings: all ATTRIBUTE keywords
-                               # (possibly multiple space-separated
-                               # keywords per string).
-
-  'xsub_seen_RETVAL_in_CODE',  # Have seen 'RETVAL' within a CODE block.
-
-  'xsub_map_alias_name_to_value', # Hash: maps ALIAS name to value.
-
-  'xsub_map_alias_value_to_name_seen_hash', # Hash of hash of bools:
-                               # indicates which alias names have been
-                               # used for each value.
-
-  'xsub_alias_clash_hinted',   # Bool: an ALIAS warning-hint has been emitted.
-
-
-  # Per-XSUB OUTPUT section parsing state:
-
-  'xsub_SETMAGIC_state',       # Bool: most recent value of SETMAGIC in an
-                               # OUTPUT section.
-
-  # Per-XSUB code-emitting state:
-
-  'xsub_deferred_code_lines',  # A multi-line string containing lines of
-                               # code to be emitted *after* all INPUT and
-                               # PREINIT keywords have been processed.
-
-  'xsub_stack_was_reset',      # An XSprePUSH was emitted, so return values
-                               # should be PUSHed rather than just set.
-
-  'xsub_targ_declared_early',  # A wide-scoped dXSTARG was emitted early
-  'xsub_targ_used',            # The TARG has already been used
-
+  'file_SCOPE_enabled',        # Bool: the current state of the file-scope
+                               # (as opposed to
+                               # XSUB-scope) SCOPE keyword
   );
 
   # do 'use fields', except: fields needs Hash::Util which is XS, which
@@ -397,14 +305,14 @@ sub process_file {
 
   # Global Constants
 
-  my ($Is_VMS, $VMS_SymSet);
+  our ($Is_VMS, $VMS_SymSet);
 
   if ($^O eq 'VMS') {
     $Is_VMS = 1;
     # Establish set of global symbols with max length 28, since xsubpp
     # will later add the 'XS_' prefix.
     require ExtUtils::XSSymSet;
-    $VMS_SymSet = ExtUtils::XSSymSet->new(28);
+    $ExtUtils::ParseXS::VMS_SymSet = ExtUtils::XSSymSet->new(28);
   }
 
   # XS_parse_stack is an array of hashes. Each hash records the current
@@ -591,8 +499,8 @@ EOM
 
   # ----------------------------------------------------------------
   # Main loop: for each iteration, read in a paragraph's worth of XSUB
-  # definition or XS/CPP directives into @{ $self->{line} }, then (over
-  # the course of a thousand lines of code) try to interpret those lines.
+  # definition or XS/CPP directives into @{ $self->{line} }, then try to
+  # interpret those lines.
   # ----------------------------------------------------------------
 
  PARAGRAPH:
@@ -653,28 +561,17 @@ EOM
         ." followed by a statement on column one?)")
       if $self->{line}->[0] =~ /^\s/;
 
-    # Initialize some per-XSUB instance variables:
+    # The SCOPE keyword can appear both in file scope (just before an
+    # XSUB) and as an XSUB keyword. This field maintains the state of the
+    # former: reset it at the start of processing any file-scoped
+    # keywords just before the XSUB (i.e. without any blank lines, e.g.
+    #     SCOPE: ENABLE
+    #     int
+    #     foo(...)
+    # These semantics may not be particularly sensible, but they maintain
+    # backwards compatibility for now.
 
-    $self->{xsub_seen_PROTOTYPE}       = 0;
-    $self->{xsub_seen_SCOPE}           = 0;
-    $self->{xsub_seen_INTERFACE_or_MACRO} = 0;
-    $self->{xsub_interface_macro}      = 'XSINTERFACE_FUNC';
-    $self->{xsub_interface_macro_set}  = 'XSINTERFACE_FUNC_SET';
-    $self->{xsub_prototype}            = $self->{PROTOTYPES_value};
-    $self->{xsub_SCOPE_enabled}        = 0;
-    $self->{xsub_map_overload_name_to_seen} = {};
-    $self->{xsub_seen_NO_OUTPUT}            = 0;
-    $self->{xsub_seen_extern_C}             = 0;
-    $self->{xsub_seen_static}               = 0;
-    $self->{xsub_seen_PPCODE}               = 0;
-    $self->{xsub_seen_CODE}                 = 0;
-    $self->{xsub_seen_INTERFACE}            = 0;
-    $self->{xsub_class}                     = undef;
-    $self->{xsub_sig}                       = undef;
-
-    # used for emitting XSRETURN($XSRETURN_count) if > 0, or XSRETURN_EMPTY
-    my $XSRETURN_count = 0;
-
+    $self->{file_SCOPE_enabled} = 0;
 
     # Process next line
 
@@ -697,8 +594,21 @@ EOM
     # lines.
 
     while (my $kwd = $self->check_keyword("REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
-      my $method = $kwd . "_handler";
-      $self->$method($_);
+
+      my $class = "ExtUtils::ParseXS::Node::$kwd";
+      if ($class->can('parse')) {
+        # this branch handles the newer AST-oriented keyword processing
+        my $node  = $class->new();
+        unshift @{$self->{line}}, $_;
+        $node->parse($self);
+        $node->as_code($self) if $class->can('as_code');
+      }
+      else {
+        # this branch handles the older KEYWORD_handler()-oriented processing
+        my $method = $kwd . "_handler";
+        $self->$method($_); # $_ contains the rest of the line after KEYWORD:
+      }
+
       next PARAGRAPH unless @{ $self->{line} };
       $_ = shift(@{ $self->{line} });
     }
@@ -712,823 +622,21 @@ EOM
     }
 
     # ----------------------------------------------------------------
-    # Process the presumed start of an XSUB
+    # Parse and code-emit an XSUB
     # ----------------------------------------------------------------
 
-    # Whitespace-tidy the line containing the return type plus possibly
-    # the function name and arguments too (The latter was probably an
-    # unintended side-effect of later allowing the return type and
-    # function to be on the same line.)
-    ($self->{xsub_return_type}) = ExtUtils::Typemaps::tidy_type($_);
+    unshift @{$self->{line}}, $_;
+    my $xsub = ExtUtils::ParseXS::Node::xsub->new();
+    $xsub->parse($self)
+      or next PARAGRAPH;
+    $_ = shift @{$self->{line}};
 
-    $self->{xsub_seen_NO_OUTPUT} = 1
-      if $self->{xsub_return_type} =~ s/^NO_OUTPUT\s+//;
-
-    # Allow one-line declarations. This splits a single line like:
-    #    int foo(....)
-    # into the two lines:
-    #    int
-    #    foo(...)
-    # Note that this splits both K&R-style 'foo(a, b)' and ANSI-style
-    # 'foo(int a, int b)'. I don't know whether the former was intentional.
-    # As of 5.40.0, the docs don't suggest that a 1-line K&R is legal. Was
-    # added by 11416672a16, first appeared in 5.6.0.
-    #
-    # NB: $self->{config_allow_argtypes} is false if xsubpp was invoked
-    # with -noargtypes
-
-    unshift @{ $self->{line} }, $2
-      if $self->{config_allow_argtypes}
-        and $self->{xsub_return_type} =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
-
-    # a function definition needs at least 2 lines
-    $self->blurt("Error: Function definition too short '$self->{xsub_return_type}'"), next PARAGRAPH
-      unless @{ $self->{line} };
-
-    $self->{xsub_seen_extern_C} = 1
-                          if $self->{xsub_return_type} =~ s/^extern "C"\s+//;
-    $self->{xsub_seen_static}   = 1
-                          if $self->{xsub_return_type} =~ s/^static\s+//;
-
-    my ExtUtils::ParseXS::Node::Sig $sig
-        = $self->{xsub_sig}
-        = ExtUtils::ParseXS::Node::Sig->new();
-
-    {
-      my $func_header = shift(@{ $self->{line} });
-
-      # Decompose the function declaration: match a line like
-      #   Some::Class::foo_bar(  args  ) const ;
-      #   -----------  -------   ----    ----- --
-      #       $1        $2        $3      $4   $5
-      #
-      # where everything except $2 and $3 are optional and the 'const'
-      # is for C++ functions.
-
-      $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
-        unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
-
-      ($self->{xsub_class}, $self->{xsub_func_name}, $sig->{sig_text})
-          = ($1, $2, $3);
-
-      $self->{xsub_class} = "$4 $self->{xsub_class}" if $4;
-
-      if ($self->{xsub_seen_static}
-          and !defined $self->{xsub_class})
-      {
-        $self->Warn(  "Ignoring 'static' type modifier:"
-                    . " only valid with an XSUB name which includes a class");
-        $self->{xsub_seen_static} = 0;
-      }
-
-      ($self->{xsub_func_full_perl_name} = $self->{xsub_func_name}) =~
-          s/^($self->{PREFIX_pattern})?/$self->{PACKAGE_class}/;
-
-      my $clean_func_name;
-      ($clean_func_name = $self->{xsub_func_name}) =~ s/^$self->{PREFIX_pattern}//;
-      $self->{xsub_func_full_C_name} = "$self->{PACKAGE_C_name}_$clean_func_name";
-      if ($Is_VMS) {
-        $self->{xsub_func_full_C_name} = $VMS_SymSet->addsym( $self->{xsub_func_full_C_name} );
-      }
-
-      # At this point, supposing that the input so far was:
-      #
-      #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
-      #   int
-      #   Some::Class::foo_bar(  args  ) const ;
-      #
-      # we should have:
-      #
-      # $self->{xsub_class}               'const Some::Class'
-      # $self->{xsub_func_name}           'foo_bar'
-      # $self->{xsub_func_full_perl_name} 'BAR::BAZ::bar'
-      # $self->{xsub_func_full_C_name}    'BAR__BAZ_bar';
-      #
-      # $sig->{sig_text}                  'param1, param2, param3'
-
-
-      # Check for a duplicate function definition, but ignoring multiple
-      # definitions within the branches of an #if/#else/#endif
-      for my $tmp (@{ $self->{XS_parse_stack} }) {
-        next unless defined $tmp->{functions}{ $self->{xsub_func_full_C_name} };
-        Warn( $self, "Warning: duplicate function definition '$clean_func_name' detected");
-        last;
-      }
-    }
-
-    # mark C function name as used
-    $self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{functions}{ $self->{xsub_func_full_C_name} }++;
-
-    # initialise more per-XSUB state
-    delete $self->{xsub_map_alias_name_to_value};           # ALIAS: ...
-    delete $self->{xsub_map_alias_value_to_name_seen_hash};
-                                            # INTERFACE: foo bar
-    %{ $self->{xsub_map_interface_name_short_to_original} } = ();
-    @{ $self->{xsub_attributes} }  = ();    # ATTRS:     lvalue method
-    $self->{xsub_SETMAGIC_state} = 1;       # SETMAGIC:  ENABLE
+    $xsub->as_code($self);
+    $self->{seen_an_XSUB} = 1; # encountered at least one XSUB
 
     # ----------------------------------------------------------------
-    # Process the XSUB's signature.
-    #
-    # Split $self->{xsub_sub}{sig_text} into parameters, parse them,
-    # and store them as Node::Param objects within the Node::Sig object.
-
-    $sig->parse($self);
-
+    # end of XSUB
     # ----------------------------------------------------------------
-    # Peek ahead into the body of the XSUB looking for various conditions
-    # that are needed to be known early.
-    # ----------------------------------------------------------------
-
-    $self->{xsub_seen_ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
-
-    $self->{xsub_seen_PPCODE}   = !!grep(/^\s*PPCODE\s*:/,    @{$self->{line}});
-    $self->{xsub_seen_CODE}     = !!grep(/^\s*CODE\s*:/,      @{$self->{line}});
-    $self->{xsub_seen_INTERFACE}= !!grep(/^\s*INTERFACE\s*:/, @{$self->{line}});
-
-    # Horrible 'void' return arg count hack.
-    #
-    # Until about 1996, xsubpp always emitted 'XSRETURN(1)', even for a
-    # void XSUB. This was fixed for CODE-less void XSUBs simply by
-    # actually honouring the 'void' type and emitting 'XSRETURN_EMPTY'
-    # instead. However, for CODE blocks, the documentation had already
-    # endorsed a coding style along the lines of
-    #
-    #    void
-    #    foo(...)
-    #       CODE:
-    #          ST(0) = sv_newmortal();
-    #
-    # i.e. the XSUB returns an SV even when the return type is 'void'.
-    # In 2024 there is still lots of code of this style out in the wild,
-    # even in the distros bundled with perl.
-    #
-    # So honouring the void type here breaks lots of existing code. Thus
-    # this hack specifically looks for: void XSUBs with a CODE block that
-    # appears to put stuff on the stack via 'ST(n)=' or 'XST_m()', and if
-    # so, emits 'XSRETURN(1)' rather than the 'XSRETURN_EMPTY' implied by
-    # the 'void' return type.
-    #
-    # XXX this searches the whole XSUB, not just the CODE: section
-    {
-      my $EXPLICIT_RETURN = ($self->{xsub_seen_CODE} &&
-            ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
-      $XSRETURN_count = 1 if $EXPLICIT_RETURN;
-    }
-
-
-    # ----------------------------------------------------------------
-    # Emit initial C code for the XSUB
-    # ----------------------------------------------------------------
-
-    {
-      my $extern = $self->{xsub_seen_extern_C} ? qq[extern "C"] : "";
-
-    # Emit function header
-      print Q(<<"EOF");
-        |$extern
-        |XS_EUPXS(XS_$self->{xsub_func_full_C_name}); /* prototype to pass -Wmissing-prototypes */
-        |XS_EUPXS(XS_$self->{xsub_func_full_C_name})
-        |[[
-        |    dVAR; dXSARGS;
-EOF
-    }
-
-    print Q(<<"EOF") if $self->{xsub_seen_ALIAS};
-      |    dXSI32;
-EOF
-
-    print Q(<<"EOF") if $self->{xsub_seen_INTERFACE};
-      |    dXSFUNCTION($self->{xsub_return_type});
-EOF
-
-
-    {
-      # the code to emit to determine whether the correct number of argument
-      # have been passed
-      my $condition_code =
-        set_cond($sig->{seen_ellipsis}, $self->{xsub_sig}{min_args},
-                                        $self->{xsub_sig}{nargs});
-
-      print Q(<<"EOF") if $self->{config_allow_exceptions}; # "-except" cmd line switch
-        |    char errbuf[1024];
-        |    *errbuf = '\\0';
-EOF
-
-      if ($condition_code) {
-        my $p = $self->{xsub_sig}->usage_string();
-        $p =~ s/"/\\"/g;
-        print Q(<<"EOF");
-          |    if ($condition_code)
-          |       croak_xs_usage(cv,  "$p");
-EOF
-      }
-      else {
-        # cv and items likely to be unused
-        print Q(<<"EOF");
-          |    PERL_UNUSED_VAR(cv); /* -W */
-          |    PERL_UNUSED_VAR(items); /* -W */
-EOF
-      }
-    }
-
-    # gcc -Wall: if an XSUB has PPCODE, it is possible that none of ST,
-    # XSRETURN or XSprePUSH macros are used.  Hence 'ax' (setup by
-    # dXSARGS) is unused.
-    # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
-    # but such a move could break third-party extensions
-    print Q(<<"EOF") if $self->{xsub_seen_PPCODE};
-      |    PERL_UNUSED_VAR(ax); /* -Wall */
-EOF
-
-    print Q(<<"EOF") if $self->{xsub_seen_PPCODE};
-      |    SP -= items;
-EOF
-
-    # ----------------------------------------------------------------
-    # Now prepare to process the various keyword lines/blocks of an XSUB
-    # body
-    # ----------------------------------------------------------------
-
-    # Initialise any CASE: state
-    $self->{xsub_CASE_condition_count} = 0;
-    $self->{xsub_CASE_condition} = ''; # last CASE: conditional
-
-    # Append a fake EOF-keyword line
-    push(@{ $self->{line} }, "$END:");
-    push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
-
-    $_ = '';
-
-    # Check all the @{ $self->{line}} lines for balance: all the
-    # #if, #else, #endif etc within the XSUB should balance out.
-    check_conditional_preprocessor_statements();
-
-    # Save a deep copy the params created from parsing the signature.
-    # See the comments below starting "For each CASE" for details.
-
-    $self->{xsub_sig}{orig_params} = [];
-    for (@{$self->{xsub_sig}{params}}) {
-      push @{$self->{xsub_sig}{orig_params}},
-        ExtUtils::ParseXS::Node::Param->new($_);
-    }
-
-    # ----------------------------------------------------------------
-    # Each iteration of this loop will process 1 optional CASE: line,
-    # followed by all the other blocks. In the absence of a CASE: line,
-    # this loop is only iterated once.
-    # ----------------------------------------------------------------
-
-    while (@{ $self->{line} }) {
-
-      # For a 'CASE: foo' line, emit an 'else if (foo)' style line of C.
-      # Note that each CASE: can precede multiple keyword blocks.
-      $self->CASE_handler($_) if $self->check_keyword("CASE");
-
-      # For each CASE, start with a fresh set of params based on the
-      # original parsing of the XSUB's signature. This is because each set
-      # of INPUT/OUTPUT blocks associated with each CASE may update the
-      # param objects in a different way.
-      #
-      # Note that $self->{xsub_sig}{names} provides a second set of
-      # references to most of these param objects; so the object hashes
-      # themselves must be preserved, and merely their contents emptied
-      # and repopulated each time. Hence also why creating the orig_params
-      # snapshot above must be a deep copy.
-      #
-      # XXX This is bit of a temporary hack.
-
-      for my $i (0.. @{$self->{xsub_sig}{orig_params}} - 1) {
-        my $op = $self->{xsub_sig}{orig_params}[$i];
-        my $p  = $self->{xsub_sig}{params}[$i];
-        %$p = ();
-        my @keys = sort keys %$op;
-        @$p{@keys} = @$op{@keys};
-      }
-
-      # ----------------------------------------------------------------
-      # Handle all the XSUB parts which generate declarations
-      # ----------------------------------------------------------------
-
-      # Emit opening brace. With cmd-line switch "-except", prefix it
-      # with 'TRY'
-      {
-        my $try = $self->{config_allow_exceptions} ? ' TRY' : '';
-        print Q(<<"EOF");
-          |   $try [[
-EOF
-      }
-
-      # First, initialize variables manipulated by INPUT_handler().
-      $self->{xsub_deferred_code_lines} = "";  # lines to be emitted after
-                                               # PREINIT/INPUT
-
-      $self->{xsub_stack_was_reset}     = 0; # XSprePUSH not yet emitted
-      $self->{xsub_targ_declared_early} = 0; # dXSTARG   not yet emitted
-      $self->{xsub_targ_used}           = 0; # TARG hasn't yet been used
-
-      # Process any implicit INPUT section.
-      $self->INPUT_handler($_);
-
-      # keywords which can appear anywhere in an XSUB
-      my $generic_xsub_keys =
-        $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt;
-
-      # Process as many keyword lines/blocks as can be found which match
-      # the pattern. At this stage it's looking for (possibly multiple)
-      # INPUT and/or PREINIT blocks, plus any generic XSUB keywords.
-      $self->process_keywords(
-        "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|$generic_xsub_keys");
-
-      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
-        |   ENTER;
-        |   [[
-EOF
-
-      # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
-
-      for my $param (grep $_->{is_synthetic}, @{$self->{xsub_sig}{params}}) {
-        $param->as_code($self);
-      }
-
-      # This set later if CODE is using RETVAL
-      $self->{xsub_seen_RETVAL_in_CODE} = 0;
-
-      # $implicit_OUTPUT_RETVAL (bool) indicates that a bodiless XSUB has
-      # a non-void return value, so needs to return RETVAL; or to put it
-      # another way, it indicates an implicit "OUTPUT:\n\tRETVAL".
-      my $implicit_OUTPUT_RETVAL;
-
-      # do code
-      if (/^\s*NOT_IMPLEMENTED_YET/) {
-        print "\n\tPerl_croak(aTHX_ \"$self->{xsub_func_full_perl_name}: not implemented yet\");\n";
-        $_ = '';
-      }
-      else {
-
-        # Do any variable declarations associated with having a return value
-        if ($self->{xsub_return_type} ne "void") {
-
-          # Emit an early dXSTARG for backwards-compatibility reasons.
-          # Recent code emits a dXSTARG in a tighter scope and under
-          # additional circumstances, but some XS code relies on TARG
-          # having been declared. So continue to declare it early under
-          # the original circumstances.
-          my $outputmap = $self->{typemaps_object}->get_outputmap( ctype => $self->{xsub_return_type} );
-
-          if (    $self->{config_optimize}
-              and $outputmap
-              and $outputmap->targetable_legacy)
-          {
-            $self->{xsub_targ_declared_early} = 1;
-            print "\tdXSTARG;\n"
-          }
-        }
-
-        # Process any parameters which were declared with a type
-        # or length(foo). Do the length() ones first.
-
-        for my $param (
-            grep $_->{is_ansi},
-              (
-                grep(  $_->{is_length}, @{$self->{xsub_sig}{params}} ),
-                grep(! $_->{is_length}, @{$self->{xsub_sig}{params}} ),
-              )
-        )
-        {
-          # These check() calls really ought to come earlier, but this
-          # matches older behaviour for now (when ANSI params were
-          # injected into the src as fake INPUT lines at the *end*).
-          $param->check($self)
-            or next;
-          $param->as_code($self);
-        }
-
-        # ----------------------------------------------------------------
-        # All C variable declarations have now been emitted. It's now time
-        # to emit any code which goes before the main body (i.e. the CODE:
-        # etc or the implicit call to the wrapped function).
-        # ----------------------------------------------------------------
-
-        # Emit any code which has been deferred until all declarations
-        # have been done. This is typically INPUT typemaps which don't
-        # start with a simple '$var =' and so would not have been emitted
-        # at the variable declaration stage.
-        print $self->{xsub_deferred_code_lines};
-
-        # Process as many keyword lines/blocks as can be found which match
-        # the pattern. At this stage it's looking for (possibly multiple)
-        # INIT blocks, plus any generic XSUB keywords.
-        $self->process_keywords(
-        "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|$generic_xsub_keys");
-
-        # ----------------------------------------------------------------
-        # Time to emit the main body of the XSUB. Either the real code
-        # from a CODE: or PPCODE: block, or the implicit call to the
-        # wrapped function
-        # ----------------------------------------------------------------
-
-        if ($self->check_keyword("PPCODE")) {
-          # Handle PPCODE: just emit the code block and then code to do
-          # PUTBACK and return. The user of PPCODE is supposed to have
-          # done all the return stack manipulation themselves.
-          # Note that PPCODE blocks often include a XSRETURN(1) or
-          # similar, so any final code we emit after that is in danger of
-          # triggering a "statement is unreachable" warning.
-
-          $self->print_section();
-          $self->death("PPCODE must be last thing") if @{ $self->{line} };
-
-          print "\tLEAVE;\n" if $self->{xsub_SCOPE_enabled};
-
-          # Suppress "statement is unreachable" warning on HPUX
-          print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-                "#pragma diag_suppress 2111\n",
-                "#endif\n"
-            if $^O eq "hpux";
-
-          print "\tPUTBACK;\n\treturn;\n";
-
-          # Suppress "statement is unreachable" warning on HPUX
-          print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-                "#pragma diag_default 2111\n",
-                "#endif\n"
-            if $^O eq "hpux";
-
-        }
-        elsif ($self->check_keyword("CODE")) {
-          # Handle CODE: just emit the code block and check if it
-          # includes "RETVAL". This check is for later use to warn if
-          # RETVAL is used but no OUTPUT block is present.
-          # Ignore if its only being used in an 'ignore this var'
-          # situation
-          my $consumed_code = $self->print_section();
-          if (   $consumed_code =~ /\bRETVAL\b/
-              && $consumed_code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/
-          ) {
-            $self->{xsub_seen_RETVAL_in_CODE} = 1;
-          }
-
-        }
-        elsif (    defined($self->{xsub_class})
-               and $self->{xsub_func_name} eq "DESTROY")
-        {
-          # Emit a default body for a C++ DESTROY method: "delete THIS;"
-          print "\n\t";
-          print "delete THIS;\n";
-
-        }
-        else {
-          # Emit a default body: this will be a call to the function being
-          # wrapped. Typically:
-          #    RETVAL = foo(args);
-          # with the function name being appropriately modified when it's
-          # a C++ new() method etc.
-
-          print "\n\t";
-
-          if ($self->{xsub_return_type} ne "void") {
-            print "RETVAL = ";
-            # There's usually an implied 'OUTPUT: RETVAL' in bodiless XSUBs
-            $implicit_OUTPUT_RETVAL = 1 unless $self->{xsub_seen_NO_OUTPUT};
-          }
-
-          if (defined($self->{xsub_class})) {
-            if ($self->{xsub_seen_static}) {
-              # it has a return type of 'static foo'
-              if ($self->{xsub_func_name} eq 'new') {
-                $self->{xsub_func_name} = "$self->{xsub_class}";
-              }
-              else {
-                print "$self->{xsub_class}::";
-              }
-            }
-            else {
-              if ($self->{xsub_func_name} eq 'new') {
-                $self->{xsub_func_name} .= " $self->{xsub_class}";
-              }
-              else {
-                print "THIS->";
-              }
-            }
-          }
-
-          # Handle "xsubpp -s=strip_prefix" hack
-          my $strip = $self->{config_strip_c_func_prefix};
-          $self->{xsub_func_name} =~ s/^\Q$strip//
-            if defined $strip;
-
-          $self->{xsub_func_name} = 'XSFUNCTION'
-                    if $self->{xsub_seen_INTERFACE_or_MACRO};
-
-          my $sig  = $self->{xsub_sig};
-          my $args = $sig->{auto_function_sig_override}; # C_ARGS
-          $args = $sig->C_func_signature($self)
-            unless defined $args;
-          print "$self->{xsub_func_name}($args);\n";
-
-        } # End: PPCODE: or CODE: or a default body
-
-      } # End: else NOT_IMPLEMENTED_YET
-
-      # ----------------------------------------------------------------
-      # Main body of function has now been emitted.
-      # Next, process any POSTCALL or OUTPUT blocks,
-      # plus some post-processing of OUTPUT.
-      # ----------------------------------------------------------------
-
-      # Process as many keyword lines/blocks as can be found which match
-      # the pattern.
-      # XXX POSTCALL is documented to precede OUTPUT, but here we allow
-      # them in any order and multiplicity.
-      $self->process_keywords("OUTPUT|POSTCALL|$generic_xsub_keys");
-
-      {
-        my $retval = $self->{xsub_sig}{names}{RETVAL};
-
-        # A CODE section using RETVAL must also have an OUTPUT entry
-        if (        $self->{xsub_seen_RETVAL_in_CODE}
-            and not ($retval && $retval->{in_output})
-            and     $self->{xsub_return_type} ne 'void')
-        {
-          $self->Warn("Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
-        }
-
-        # Process any OUT vars: i.e. vars that are declared OUT in
-        # the XSUB's signature rather than in an OUTPUT section.
-
-        for my $param (
-                grep {
-                       defined $_->{in_out}
-                    && $_->{in_out} =~ /OUT$/
-                    && !$_->{in_output}
-                }
-                @{ $self->{xsub_sig}{params}})
-        {
-          $param->as_output_code($self);
-        }
-
-        # If there are any OUTLIST vars to be pushed, first extend the
-        # stack, to fit all OUTLIST vars + RETVAL
-        my $outlist_count = grep {    defined $_->{in_out}
-                                   && $_->{in_out} =~ /OUTLIST$/
-                                 }
-                                 @{$self->{xsub_sig}{params}};
-        if ($outlist_count) {
-          my $ext = $outlist_count;
-          ++$ext if ($retval && $retval->{in_output}) || $implicit_OUTPUT_RETVAL;
-          print "\tXSprePUSH;\n";
-          # XSprePUSH resets SP to the base of the stack frame; must PUSH
-          # any return values
-          $self->{xsub_stack_was_reset} = 1;
-
-          # The entersub will gave been called with at least a GV or CV on
-          # the stack in addition to at least min_args args, so only need
-          # to extend if we're returning more than that.
-          print "\tEXTEND(SP,$ext);\n"
-                              if $ext > $self->{xsub_sig}{min_args} + 1;
-        }
-
-        # ----------------------------------------------------------------
-        # All OUTPUT done; now handle an implicit or deferred RETVAL.
-        # OUTPUT_handler() will have skipped any RETVAL line.
-        # Also, $implicit_OUTPUT_RETVAL indicates that an implicit RETVAL
-        # should be generated, due to a non-void CODE-less XSUB.
-        # ----------------------------------------------------------------
-
-          if (($retval && $retval->{in_output}) || $implicit_OUTPUT_RETVAL) {
-            # emit a deferred RETVAL from OUTPUT or implicit RETVAL
-            $retval->as_output_code($self);
-          }
-
-        $XSRETURN_count = 1 if     $self->{xsub_return_type} ne "void"
-                               && !$self->{xsub_seen_NO_OUTPUT};
-        my $num = $XSRETURN_count;
-        $XSRETURN_count += $outlist_count;
-
-        # Now that RETVAL is on the stack, also push any OUTLIST vars too
-        for my $param (grep  {    defined $_->{in_out}
-                               && $_->{in_out} =~ /OUTLIST$/
-                             }
-                             @{$self->{xsub_sig}{params}}
-        ) {
-          $param->as_output_code($self, $num++);
-        }
-      }
-
-
-      # ----------------------------------------------------------------
-      # All RETVAL processing has been done.
-      # Next, process any CLEANUP blocks,
-      # ----------------------------------------------------------------
-
-      # Process as many keyword lines/blocks as can be found which match
-      # the pattern.
-      $self->process_keywords("CLEANUP|$generic_xsub_keys");
-
-      # ----------------------------------------------------------------
-      # Emit function trailers
-      # ----------------------------------------------------------------
-
-      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled};
-        |   ]]
-EOF
-
-      print Q(<<"EOF") if $self->{xsub_SCOPE_enabled} and not $self->{xsub_seen_PPCODE};
-        |   LEAVE;
-EOF
-
-      print Q(<<"EOF");
-        |    ]]
-EOF
-
-      print Q(<<"EOF") if $self->{config_allow_exceptions};
-        |    BEGHANDLERS
-        |    CATCHALL
-        |    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
-        |    ENDHANDLERS
-EOF
-
-      if ($self->check_keyword("CASE")) {
-        $self->blurt("Error: No 'CASE:' at top of function")
-          unless $self->{xsub_CASE_condition_count};
-        $_ = "CASE: $_";    # Restore CASE: label
-        next;
-      }
-
-      last if $_ eq "$END:";
-
-      $self->death(/^$BLOCK_regexp/o ? "Misplaced '$1:'" : "Junk at end of function ($_)");
-
-    } # end while (@{ $self->{line} })
-
-
-    # ----------------------------------------------------------------
-    # All of the body of the XSUB (including all CASE variants) has now
-    # been processed. Now emit any XSRETURN or similar, plus any closing
-    # bracket.
-    # ----------------------------------------------------------------
-
-    print Q(<<"EOF") if $self->{config_allow_exceptions};
-        |    if (errbuf[0])
-        |    Perl_croak(aTHX_ errbuf);
-EOF
-
-    # Emit XSRETURN(N) or XSRETURN_EMPTY. It's possible that the user's
-    # CODE section rolled its own return, so this code may be
-    # unreachable. So suppress any compiler warnings.
-    # XXX Currently this is just for HP. Make more generic??
-
-    # Suppress "statement is unreachable" warning on HPUX
-    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-          "#pragma diag_suppress 2128\n",
-          "#endif\n"
-      if $^O eq "hpux";
-
-    if ($XSRETURN_count) {
-      print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
-        |    XSRETURN($XSRETURN_count);
-EOF
-    }
-    else {
-      print Q(<<"EOF") unless $self->{xsub_seen_PPCODE};
-        |    XSRETURN_EMPTY;
-EOF
-    }
-
-    # Suppress "statement is unreachable" warning on HPUX
-    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
-          "#pragma diag_default 2128\n",
-          "#endif\n"
-      if $^O eq "hpux";
-
-    # Emit final closing bracket for the XSUB.
-    print Q(<<"EOF");
-        |]]
-        |
-EOF
-
-    # ----------------------------------------------------------------
-    # Generate (but don't yet emit - push to $self->{bootcode_early}) the
-    # boot code for the XSUB, including newXS() call(s) plus any
-    # additional boot stuff like handling attributes or storing an alias
-    # index in the XSUB's CV.
-    # ----------------------------------------------------------------
-
-    {
-      # Depending on whether the XSUB has a prototype, work out how to
-      # invoke one of the newXS() function variants. Set these:
-      #
-      my $newXS;     # the newXS() variant to be called in the boot section
-      my $file_arg;  # an extra      ', file' arg to be passed to newXS call
-      my $proto_arg; # an extra e.g. ', "$@"' arg to be passed to newXS call
-
-      $proto_arg = "";
-
-      unless($self->{xsub_prototype}) {
-        # no prototype
-        $newXS = "newXS_deffile";
-        $file_arg = "";
-      }
-      else {
-        # needs prototype
-        $newXS = "newXSproto_portable";
-        $file_arg = ", file";
-
-        if ($self->{xsub_prototype} eq 2) {
-          # User has specified an empty prototype
-        }
-        elsif ($self->{xsub_prototype} eq 1) {
-          # Protoype enabled, but to be auto-generated by us
-          $proto_arg = $self->{xsub_sig}->proto_string();
-          $proto_arg =~ s{\\}{\\\\}g; # escape backslashes
-        }
-        else {
-          # User has manually specified a prototype
-          $proto_arg = $self->{xsub_prototype};
-        }
-
-        $proto_arg = qq{, "$proto_arg"};
-      }
-
-      # Now use those values to append suitable newXS() and other code
-      # into @{ $self->{bootcode_early} }, for later insertion into the
-      # boot sub.
-
-      if (            $self->{xsub_map_alias_name_to_value}
-          and keys %{ $self->{xsub_map_alias_name_to_value} })
-      {
-        # For the main XSUB and for each alias name, generate a newXS() call
-        # and 'XSANY.any_i32 = ix' line.
-
-        # Make the main name one of the aliases if it isn't already
-        $self->{xsub_map_alias_name_to_value}->{ $self->{xsub_func_full_perl_name} } = 0
-          unless defined $self->{xsub_map_alias_name_to_value}->{ $self->{xsub_func_full_perl_name} };
-
-        foreach my $xname (sort keys %{ $self->{xsub_map_alias_name_to_value} }) {
-          my $value = $self->{xsub_map_alias_name_to_value}{$xname};
-          push(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-            |        cv = $newXS(\"$xname\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
-            |        XSANY.any_i32 = $value;
-EOF
-        }
-      }
-      elsif (@{ $self->{xsub_attributes} }) {
-        # Generate a standard newXS() call, plus a single call to
-        # apply_attrs_string() call with the string of attributes.
-        push(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-          |        cv = $newXS(\"$self->{xsub_func_full_perl_name}\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
-          |        apply_attrs_string("$self->{PACKAGE_name}", cv, "@{ $self->{xsub_attributes} }", 0);
-EOF
-      }
-      elsif ($self->{xsub_seen_INTERFACE_or_MACRO}) {
-        # For each interface name, generate both a newXS() and
-        # XSINTERFACE_FUNC_SET() call.
-        foreach my $yname (sort keys
-                    %{ $self->{xsub_map_interface_name_short_to_original} })
-        {
-          my $value = $self->{xsub_map_interface_name_short_to_original}{$yname};
-          $yname = "$self->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
-          push(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-            |        cv = $newXS(\"$yname\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);
-            |        $self->{xsub_interface_macro_set}(cv,$value);
-EOF
-        }
-      }
-      elsif ($newXS eq 'newXS_deffile'){
-        # Modified default: generate a standard newXS() call; but
-        # work around the CPAN 'P5NCI' distribution doing:
-        #     #undef newXS
-        #     #define newXS ;
-        # by omitting the initial (void).
-        # XXX DAPM 2024:
-        # this branch was originally: "elsif ($newXS eq 'newXS')"
-        # but when the standard name for the newXS variant changed in
-        # xsubpp, it was changed here too. So this branch no longer actually
-        # handles a workaround for '#define newXS ;'. I also don't
-        # understand how just omitting the '(void)' fixed the problem.
-        push(@{ $self->{bootcode_early} },
-         "        $newXS(\"$self->{xsub_func_full_perl_name}\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
-      }
-      else {
-        # Default: generate a standard newXS() call
-        push(@{ $self->{bootcode_early} },
-         "        (void)$newXS(\"$self->{xsub_func_full_perl_name}\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
-      }
-
-      # For every overload operator, generate an additional newXS()
-      # call to add an alias such as "Foo::(<=>" for this XSUB.
-
-      for my $operator (sort keys %{ $self->{xsub_map_overload_name_to_seen} })
-      {
-        $self->{map_overloaded_package_to_C_package}->{$self->{PACKAGE_name}}
-          = $self->{PACKAGE_C_name};
-        my $overload = "$self->{PACKAGE_name}\::($operator";
-        push(@{ $self->{bootcode_early} },
-          "        (void)$newXS(\"$overload\", XS_$self->{xsub_func_full_C_name}$file_arg$proto_arg);\n");
-      }
-
-    }
 
   } # END 'PARAGRAPH' 'while' loop
 
@@ -1615,7 +723,7 @@ EOF
 
   # Declare a 'file' var for passing to newXS() and variants.
   #
-  # If there is no $self->{xsub_func_full_C_name} then there are no xsubs
+  # If there is no $self->{seen_an_XSUB} then there are no xsubs
   # in this .xs so 'file' is unused, so silence warnings.
   #
   # 'file' can also be unused in other circumstances: in particular,
@@ -1627,7 +735,7 @@ EOF
   # the wrong qualifier is used, it causes breakage with C++ compilers and
   # warnings with recent gcc.
 
-  print Q(<<"EOF") if $self->{xsub_func_full_C_name};
+  print Q(<<"EOF") if $self->{seen_an_XSUB};
     |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
     |    char* file = __FILE__;
     |#else
@@ -1672,9 +780,7 @@ EOF
   #      XSANY.any_i32 = $value;
   #      XSINTERFACE_FUNC_SET(cv, $value);
 
-  if (   defined $self->{xsub_map_alias_name_to_value}
-      or defined $self->{seen_INTERFACE_or_MACRO})
-  {
+  if ($self->{need_boot_cv}) {
     print Q(<<"EOF");
       |    [[
       |        CV * cv;
@@ -1721,18 +827,13 @@ EOF
 
   # Emit closing scope for the 'CV *cv' declaration
 
-  if (   defined $self->{xsub_map_alias_name_to_value}
-      or defined $self->{seen_INTERFACE_or_MACRO})
-  {
+  if ($self->{need_boot_cv}) {
     print Q(<<"EOF");
       |    ]]
 EOF
   }
 
-  # Emit any lines derived from BOOT: sections. By putting the lines back
-  # into  $self->{line} and passing them through print_section(),
-  # a trailing '#line' may be emitted to effect the change back to the
-  # current foo.c line from the foo.xs part where the BOOT: code was.
+  # Emit any lines derived from BOOT: sections
 
   if (@{ $self->{bootcode_later} }) {
     print "\n    /* Initialisation Section */\n\n";
@@ -1805,75 +906,6 @@ sub check_keyword {
 }
 
 
-# Emit, verbatim(ish), all the lines up till the next directive.
-# Typically used for sections that have blocks of code, like CODE. Return
-# a string which contains all the lines of code emitted except for the
-# extra '#line' type stuff.
-
-sub print_section {
-  my ExtUtils::ParseXS $self = shift;
-
-  # Strip leading blank lines. The "do" is required for the right semantics
-  do { $_ = shift(@{ $self->{line} }) } while !/\S/ && @{ $self->{line} };
-
-  my $consumed_code = '';
-
-  # Add a '#line' if needed. The XSubPPtmp test is a bit of a hack - it
-  # skips synthetic blocks added to boot etc which may not have line
-  # numbers.
-  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1], " \"",
-        escape_file_for_line_directive($self->{in_pathname}), "\"\n")
-    if     $self->{config_WantLineNumbers}
-        && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
-
-  # Emit lines until the next directive
-  for (;  defined($_) && !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    print "$_\n";
-    $consumed_code .= "$_\n";
-  }
-
-  # Emit a "restoring" '#line'
-  print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
-    if $self->{config_WantLineNumbers};
-
-  return $consumed_code;
-}
-
-
-# Consume, concatenate and return (as a single string), all the lines up
-# until the next directive (including $_ as the first line).
-
-sub merge_section {
-  my ExtUtils::ParseXS $self = shift;
-  my $in = '';
-
-  # skip blank lines
-  while (!/\S/ && @{ $self->{line} }) {
-    $_ = shift(@{ $self->{line} });
-  }
-
-  for (;  defined($_) && !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    $in .= "$_\n";
-  }
-  chomp $in;
-  return $in;
-}
-
-
-# Process as many keyword lines/blocks as can be found which match the
-# pattern, by calling the FOO_handler() method for each keyword.
-
-sub process_keywords {
-  my ExtUtils::ParseXS $self = shift;
-  my ($pattern) = @_;
-
-  while (my $kwd = $self->check_keyword($pattern)) {
-    my $method = $kwd . "_handler";
-    $self->$method($_); # $_ contains the rest of the line after KEYWORD:
-  }
-}
-
-
 # Handle BOOT: keyword.
 # Save all the remaining lines in the paragraph to the bootcode_later
 # array, and prepend a '#line' if necessary.
@@ -1900,29 +932,6 @@ sub BOOT_handler {
 }
 
 
-# Handle CASE: keyword.
-# Extract the condition on the CASE: line and emit a suitable
-# 'else if (condition)' style line of C
-
-sub CASE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  $self->blurt("Error: 'CASE:' after unconditional 'CASE:'")
-    if     $self->{xsub_CASE_condition_count}
-        && $self->{xsub_CASE_condition} eq '';
-
-  $self->{xsub_CASE_condition} = $_;
-  trim_whitespace($self->{xsub_CASE_condition});
-  print "   ",
-        ($self->{xsub_CASE_condition_count}++ ? " else" : ""),
-        ($self->{xsub_CASE_condition}
-          ? " if ($self->{xsub_CASE_condition})\n"
-          : "\n"
-        );
-  $_ = '';
-}
-
-
 # ST(): helper function for the various INPUT / OUTPUT code emitting
 # parts.  Generate an "ST(n)" string. This is normally just:
 #
@@ -1946,491 +955,6 @@ sub ST {
   my ($self, $num) = @_;
   return "ST(" . ($num-1) . ")" if defined $num;
   return '/* not a parameter */';
-}
-
-
-# INPUT_handler(): handle an explicit INPUT: block, or any implicit INPUT
-# block which can follow an xsub signature or CASE keyword.
-
-sub INPUT_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  # In this loop: process each line until the next keyword or end of
-  # paragraph.
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    # treat NOT_IMPLEMENTED_YET as another block separator, in addition to
-    # $BLOCK_regexp.
-    last if /^\s*NOT_IMPLEMENTED_YET/;
-    next unless /\S/;        # skip blank lines
-
-    trim_whitespace($_);
-    my $ln = $_; # keep original line for error messages
-
-    # remove any trailing semicolon, except for initialisations
-    s/\s*;$//g unless /[=;+].*\S/;
-
-    # Extract optional initialisation code (which overrides the
-    # normal typemap), such as 'int foo = ($type)SvIV($arg)'
-    my $var_init = '';
-    my $init_op;
-    ($init_op, $var_init) = ($1, $2) if s/\s* ([=;+]) \s* (.*) $//xs;
-
-    s/\s+/ /g;
-
-    # Split 'char * &foo'  into  ('char *', '&', 'foo')
-    # skip to next INPUT line if not valid.
-    #
-    # Note that this pattern has a very liberal sense of what is "valid",
-    # since we don't fully parse C types.  For example:
-    #
-    #    int foo(a)
-    #        int a XYZ
-    #
-    # would be interpreted as an "alien" (i.e. not in the signature)
-    # variable called "XYZ", with a type of "int a". And because it's
-    # alien the initialiser is skipped, so 'int a' is never looked up in
-    # a typemap, so we don't detect anything wrong. Later on, the C
-    # compiler is likely to trip over on the emitted declaration
-    # however:
-    #     int a XYZ;
-
-    my ($var_type, $var_addr, $var_name) =
-          /^
-            ( .*? [^&\s] )        # type
-            \s*
-            (\&?)                 # addr
-            \s* \b
-            (\w+ | length\(\w+\)) # name or length(name)
-            $
-          /xs
-      or $self->blurt("Error: invalid parameter declaration '$ln'"), next;
-
-    # length(s) is only allowed in the XSUB's signature.
-    if ($var_name =~ /^length\((\w+)\)$/) {
-      $self->blurt("Error: length() not permitted in INPUT section");
-      next;
-    }
-
-    my ($var_num, $is_alien);
-
-    my ExtUtils::ParseXS::Node::Param $param
-          = $self->{xsub_sig}{names}{$var_name};
-
-
-    if (defined $param) {
-      # The var appeared in the signature too.
-
-      # Check for duplicate definitions of a particular parameter name.
-      # This can be either because it has appeared in multiple INPUT
-      # lines, or because the type was already defined in the signature,
-      # and thus shouldn't be defined again. The exception to this are
-      # synthetic params like THIS, which are assigned a provisional type
-      # which can be overridden.
-      if (   $param->{in_input}
-          or (!$param->{is_synthetic} and defined $param->{type})
-      ) {
-          $self->blurt(
-            "Error: duplicate definition of parameter '$var_name' ignored");
-          next;
-      }
-
-      if ($var_name eq 'RETVAL' and $param->{is_synthetic}) {
-        # Convert a synthetic RETVAL into a real parameter
-        delete $param->{is_synthetic};
-        delete $param->{no_init};
-        if (! defined $param->{arg_num}) {
-          # if has arg_num, RETVAL has appeared in signature but with no
-          # type, and has already been moved to the correct position;
-          # otherwise, it's an alien var that didn't appear in the
-          # signature; move to the correct position.
-          @{$self->{xsub_sig}{params}} =
-                    grep $_ != $param, @{$self->{xsub_sig}{params}};
-          push @{$self->{xsub_sig}{params}}, $param;
-          $is_alien          = 1;
-          $param->{is_alien} = 1;
-        }
-      }
-
-      $param->{in_input} = 1;
-      $var_num = $param->{arg_num};
-    }
-    else {
-      # The var is in an INPUT line, but not in signature. Treat it as a
-      # general var declaration (which really should have been in a
-      # PREINIT section). Legal but nasty: flag is as 'alien'
-      $is_alien = 1;
-      $param = ExtUtils::ParseXS::Node::Param->new({
-                  var      => $var_name,
-                  is_alien => 1,
-               });
-
-      push @{$self->{xsub_sig}{params}}, $param;
-      $self->{xsub_sig}{names}{$var_name} = $param;
-    }
-
-    # Parse the initialisation part of the INPUT line (if any)
-
-    my ($init, $defer);
-    my $no_init = $param->{no_init}; # may have had OUT in signature
-
-    if (!$no_init && defined $init_op) {
-      # Emit the init code based on overridden $var_init, which was
-      # preceded by /[=;+]/ which has been extracted into $init_op
-
-      if (    $init_op =~ /^[=;]$/
-          and $var_init =~ /^NO_INIT\s*;?\s*$/
-      ) {
-        # NO_INIT: skip initialisation
-        $no_init = 1;
-      }
-      elsif ($init_op  eq '=') {
-        # Overridden typemap, such as '= ($type)SvUV($arg)'
-        $var_init =~ s/;\s*$//;
-        $init = $var_init,
-      }
-      else {
-        # "; extra code" or "+ extra code" :
-        # append the extra code (after passing through eval) after all the
-        # INPUT and PREINIT blocks have been processed, indirectly using
-        # the $self->{xsub_deferred_code_lines} mechanism.
-        # In addition, for '+', also generate the normal initialisation
-        # code from the standard typemap - assuming that it's a real
-        # parameter that appears in the signature as well as the INPUT
-        # line.
-        $no_init = !($init_op eq '+' && !$is_alien);
-        # But in either case, add the deferred code
-        $defer = $var_init;
-      }
-    }
-    else {
-      # no initialiser: emit var and init code based on typemap entry,
-      # unless: it's alien (so no stack arg to bind to it)
-      $no_init = 1 if $is_alien;
-    }
-
-    %$param = (
-      %$param,
-      type    => $var_type,
-      arg_num => $var_num,
-      var     => $var_name,
-      defer   => $defer,
-      init    => $init,
-      init_op => $init_op,
-      no_init => $no_init,
-      is_addr => !!$var_addr,
-    );
-
-    $param->check($self)
-      or next;
-
-    # Emit "type var" declaration and possibly various forms of
-    # initialiser code.
-
-    # Synthetic params like THIS will be emitted later - they
-    # are treated like ANSI params, except the type can overridden
-    # within an INPUT statement
-    next if $param->{is_synthetic};
-
-    $param->as_code($self);
-
-  } # foreach line in INPUT block
-}
-
-
-# Process the lines following the OUTPUT: keyword.
-
-sub OUTPUT_handler {
-  my ExtUtils::ParseXS $self = shift;
-
-  $_ = shift;
-
-  # In this loop: process each line until the next keyword or end of
-  # paragraph
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;        # skip blank lines
-
-    if (/^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-      $self->{xsub_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
-      next;
-    }
-
-    # Expect lines of the two forms
-    #    SomeVar
-    #    SomeVar   sv_setsv(....);
-    #
-    my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
-
-    my ExtUtils::ParseXS::Node::Param $param =
-                                        $self->{xsub_sig}{names}{$outarg};
-
-    if ($param && $param->{in_output}) {
-      $self->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
-      next;
-    }
-
-    if ($outarg eq "RETVAL" and $self->{xsub_seen_NO_OUTPUT}) {
-      $self->blurt("Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared");
-      next;
-    }
-
-    if (   !$param  # no such param or, for RETVAL, RETVAL was void
-           # not bound to an arg which can be updated
-        or $outarg ne "RETVAL" && !$param->{arg_num})
-    {
-      $self->blurt("Error: OUTPUT $outarg not a parameter");
-      next;
-    }
-
-
-    $param->{in_output} = 1;
-    $param->{do_setmagic} = $outarg eq 'RETVAL'
-                              ? 0 # RETVAL never needs magic setting
-                              : $self->{xsub_SETMAGIC_state};
-    $param->{output_code} = $outcode if length $outcode;
-
-    if ($outarg eq 'RETVAL') {
-      # Postpone processing the RETVAL line to last (it's left to the
-      # caller to finish).
-      next;
-    }
-
-    $param->as_output_code($self);
-  } # foreach line in OUTPUT block
-}
-
-
-# Set $sig->{auto_function_sig_override} to the concatenation of all
-# the following lines (including $_).
-
-sub C_ARGS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  my $in = $self->merge_section();
-
-  trim_whitespace($in);
-  $self->{xsub_sig}{auto_function_sig_override} = $in;
-}
-
-
-# Concatenate the following lines (including $_), then split into
-# one or two macros names.
-
-sub INTERFACE_MACRO_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  my $in = $self->merge_section();
-
-  trim_whitespace($in);
-  if ($in =~ /\s/) {        # two
-    ($self->{xsub_interface_macro}, $self->{xsub_interface_macro_set})
-          = split ' ', $in;
-  }
-  else {
-    $self->{xsub_interface_macro} = $in;
-    $self->{xsub_interface_macro_set} = 'UNKNOWN_CVT'; # catch later
-  }
-  $self->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
-  $self->{seen_INTERFACE_or_MACRO} = 1;       # global
-}
-
-
-sub INTERFACE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  my $in = $self->merge_section();
-
-  trim_whitespace($in);
-
-  foreach (split /[\s,]+/, $in) {
-    my $iface_name = $_;
-    $iface_name =~ s/^$self->{PREFIX_pattern}//;
-    $self->{xsub_map_interface_name_short_to_original}->{$iface_name} = $_;
-  }
-  print Q(<<"EOF");
-    |    XSFUNCTION = $self->{xsub_interface_macro}($self->{xsub_return_type},cv,XSANY.any_dptr);
-EOF
-  $self->{xsub_seen_INTERFACE_or_MACRO} = 1;  # local
-  $self->{seen_INTERFACE_or_MACRO} = 1;       # global
-}
-
-
-sub CLEANUP_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
-sub PREINIT_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
-sub POSTCALL_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
-sub INIT_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $self->print_section();
-}
-
-
-# Process a line from an ALIAS: block
-#
-# Each line can have zero or more definitions, separated by white space.
-# Each definition is of one of the forms:
-#
-#      name = value
-#      name => other_name
-#
-#  where 'value' is a positive integer (or C macro) and the names are
-#  simple or qualified perl function names. E.g.
-#
-#     foo = 1   Bar::foo = 2   Bar::baz => Bar::foo
-#
-# Updates:
-#   $self->{xsub_map_alias_name_to_value}->{$alias} = $value;
-#   $self->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
-
-sub get_aliases {
-  my ExtUtils::ParseXS $self = shift;
-  my ($line) = @_;
-  my ($orig) = $line;
-
-  # we use this later for symbolic aliases
-  my $fname = $self->{PACKAGE_class} . $self->{xsub_func_name};
-
-  while ($line =~ s/^\s*([\w:]+)\s*=(>?)\s*([\w:]+)\s*//) {
-    my ($alias, $is_symbolic, $value) = ($1, $2, $3);
-    my $orig_alias = $alias;
-
-    blurt( $self, "Error: In alias definition for '$alias' the value may not"
-                  . " contain ':' unless it is symbolic.")
-        if !$is_symbolic and $value=~/:/;
-
-    # check for optional package definition in the alias
-    $alias = $self->{PACKAGE_class} . $alias if $alias !~ /::/;
-
-    if ($is_symbolic) {
-      my $orig_value = $value;
-      $value = $self->{PACKAGE_class} . $value if $value !~ /::/;
-      if (defined $self->{xsub_map_alias_name_to_value}->{$value}) {
-        $value = $self->{xsub_map_alias_name_to_value}->{$value};
-      } elsif ($value eq $fname) {
-        $value = 0;
-      } else {
-        blurt( $self, "Error: Unknown alias '$value' in symbolic definition for '$orig_alias'");
-      }
-    }
-
-    # check for duplicate alias name & duplicate value
-    my $prev_value = $self->{xsub_map_alias_name_to_value}->{$alias};
-    if (defined $prev_value) {
-      if ($prev_value eq $value) {
-        Warn( $self, "Warning: Ignoring duplicate alias '$orig_alias'")
-      } else {
-        Warn( $self, "Warning: Conflicting duplicate alias '$orig_alias'"
-                     . " changes definition from '$prev_value' to '$value'");
-        delete $self->{xsub_map_alias_value_to_name_seen_hash}->{$prev_value}{$alias};
-      }
-    }
-
-    # Check and see if this alias results in two aliases having the same
-    # value, we only check non-symbolic definitions as the whole point of
-    # symbolic definitions is to say we want to duplicate the value and
-    # it is NOT a mistake.
-    unless ($is_symbolic) {
-      my @keys= sort keys %{$self->{xsub_map_alias_value_to_name_seen_hash}->{$value}||{}};
-      # deal with an alias of 0, which might not be in the aliases
-      # dataset yet as 0 is the default for the base function ($fname)
-      push @keys, $fname
-        if $value eq "0" and !defined $self->{xsub_map_alias_name_to_value}{$fname};
-      if (@keys and $self->{config_author_warnings}) {
-        # We do not warn about value collisions unless author_warnings
-        # are enabled. They aren't helpful to a module consumer, only
-        # the module author.
-        @keys= map { "'$_'" }
-               map { my $copy= $_;
-                     $copy=~s/^$self->{PACKAGE_class}//;
-                     $copy
-                   } @keys;
-        WarnHint( $self,
-                  "Warning: Aliases '$orig_alias' and "
-                  . join(", ", @keys)
-                  . " have identical values of $value"
-                  . ( $value eq "0"
-                      ? " - the base function"
-                      : "" ),
-                  !$self->{xsub_alias_clash_hinted}++
-                  ? "If this is deliberate use a symbolic alias instead."
-                  : undef
-        );
-      }
-    }
-
-    $self->{xsub_map_alias_name_to_value}->{$alias} = $value;
-    $self->{xsub_map_alias_value_to_name_seen_hash}->{$value}{$alias}++;
-  }
-
-  blurt( $self, "Error: Cannot parse ALIAS definitions from '$orig'")
-    if $line;
-}
-
-
-# Read each lines's worth of attributes into a string that is pushed
-# to the {xsub_attributes} array. Note that it doesn't matter that multiple
-# space-separated attributes on the same line are stored as a single
-# string; later, all the attribute lines are joined together into a single
-# string to pass to apply_attrs_string().
-
-sub ATTRS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    trim_whitespace($_);
-    push @{ $self->{xsub_attributes} }, $_;
-  }
-}
-
-
-# Process the line(s) following the ALIAS: keyword
-
-sub ALIAS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  # Consume and process alias lines until the next  directive.
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    trim_whitespace($_);
-    $self->get_aliases($_) if $_;
-  }
-}
-
-
-# Add all overload method names, like 'cmp', '<=>', etc, (possibly
-# multiple ones per line) until the next keyword line, as 'seen' keys to
-# the $self->{xsub_map_overload_name_to_seen} hash.
-
-sub OVERLOAD_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    trim_whitespace($_);
-    while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
-      $self->{xsub_map_overload_name_to_seen}->{$1} = 1;
-    }
-  }
 }
 
 
@@ -2474,129 +998,6 @@ sub REQUIRE_handler {
 
   $self->death("Error: xsubpp $ver (or better) required--this is only $VERSION.")
     unless $VERSION >= $ver;
-}
-
-
-sub VERSIONCHECK_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain either ENABLE or
-  # DISABLE
-  my ($setting) = @_;
-
-  trim_whitespace($setting);
-
-  # check for ENABLE/DISABLE
-  $self->death("Error: VERSIONCHECK: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)/i;
-
-  $self->{VERSIONCHECK_value} = 1 if $1 eq 'ENABLE';
-  $self->{VERSIONCHECK_value} = 0 if $1 eq 'DISABLE';
-
-}
-
-
-# PROTOTYPE: Process one or more lines of the form
-#    DISABLE
-#    ENABLE
-#    $$@      # a literal prototype
-#    <blank>
-#
-# It's probably a design flaw that more than one entry can be processed.
-
-sub PROTOTYPE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-
-  my $specified;
-
-  $self->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
-    if $self->{xsub_seen_PROTOTYPE}++;
-
-  for (;  !/^$BLOCK_regexp/o;  $_ = shift(@{ $self->{line} })) {
-    next unless /\S/;
-    $specified = 1;
-    trim_whitespace($_);
-    if ($_ eq 'DISABLE') {
-      $self->{xsub_prototype} = 0;
-    }
-    elsif ($_ eq 'ENABLE') {
-      $self->{xsub_prototype} = 1;
-    }
-    else {
-      # remove any whitespace
-      s/\s+//g;
-      $self->death("Error: Invalid prototype '$_'")
-        unless valid_proto_string($_);
-      $self->{xsub_prototype} = C_string($_);
-    }
-  }
-
-  # If no prototype specified, then assume empty prototype ""
-  $self->{xsub_prototype} = 2 unless $specified;
-
-  $self->{proto_behaviour_specified} = 1;
-}
-
-
-# Set $self->{xsub_SCOPE_enabled} to a boolean value based on DISABLE/ENABLE.
-
-sub SCOPE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # Rest of line should be either ENABLE or DISABLE
-  my ($setting) = @_;
-
-  $self->death("Error: Only 1 SCOPE declaration allowed per xsub")
-    if $self->{xsub_seen_SCOPE}++;
-
-  trim_whitespace($setting);
-  $self->death("Error: SCOPE: ENABLE/DISABLE")
-      unless $setting =~ /^(ENABLE|DISABLE)\b/i;
-  $self->{xsub_SCOPE_enabled} = ( uc($1) eq 'ENABLE' );
-}
-
-
-sub PROTOTYPES_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain either ENABLE or
-  # DISABLE
-  my ($setting) = @_;
-
-  trim_whitespace($setting);
-
-  # check for ENABLE/DISABLE
-  $self->death("Error: PROTOTYPES: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)/i;
-
-  $self->{PROTOTYPES_value} = 1 if $1 eq 'ENABLE';
-  $self->{PROTOTYPES_value} = 0 if $1 eq 'DISABLE';
-  $self->{proto_behaviour_specified} = 1;
-}
-
-
-sub EXPORT_XSUB_SYMBOLS_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain either ENABLE or
-  # DISABLE
-  my ($setting) = @_;
-
-  trim_whitespace($setting);
-
-  # check for ENABLE/DISABLE
-  $self->death("Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE")
-    unless $setting =~ /^(ENABLE|DISABLE)/i;
-
-  my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
-
-  print Q(<<"EOF");
-    |#undef XS_EUPXS
-    |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
-    |#  define XS_EUPXS(name) XS_EXTERNAL(name)
-    |#elif defined(PERL_EUPXS_NEVER_EXPORT)
-    |#  define XS_EUPXS(name) XS_INTERNAL(name)
-    |#else
-    |#  define XS_EUPXS(name) $xs_impl(name)
-    |#endif
-EOF
 }
 
 

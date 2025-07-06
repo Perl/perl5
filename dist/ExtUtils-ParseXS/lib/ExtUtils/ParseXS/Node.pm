@@ -2,32 +2,248 @@ package ExtUtils::ParseXS::Node;
 use strict;
 use warnings;
 
-our $VERSION = '3.57';
+our $VERSION = '3.58';
 
 =head1 NAME
 
-ExtUtils::ParseXS::Node - Classes for nodes of an ExtUtils::ParseXS AST
+ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
 
 =head1 SYNOPSIS
 
-XXX TBC
+    # Create a node to represent the Foo part of an XSUB; then
+    # top-down parse it into a subtree; then top-down emit the
+    # contents of the subtree as C code.
+
+    my $foo = ExtUtils::ParseXS::Node::Foo->new();
+    $foo->parse(...)
+        or die;
+    $foo->as_code(...);
 
 =head1 DESCRIPTION
 
-XXX Sept 2024: this is Work In Progress. This API is currently private and
-subject to change. Most of ParseXS doesn't use an AST, and instead
-maintains just enough state to emit code as it parses. This module
-represents the start of an effort to make it use an AST instead.
+This API is currently private and subject to change.
 
-An C<ExtUtils::ParseXS::Node> class, and its various subclasses, hold the
+Node that as of May 2025, this is a Work In Progress. An AST is created
+for each parsed XSUB, but those nodes aren't yet linked into a
+higher-level tree representing the whole XS file.
+
+The C<ExtUtils::ParseXS::Node> class, and its various subclasses, hold the
 state for the nodes of an Abstract Syntax Tree (AST), which represents the
 parsed state of an XS file.
 
-Each node is basically a hash of fields. Which field names are legal
-varies by the node type. The hash keys and values can be accessed
-directly: there are no getter/setter methods.
+Each node is a hash of fields. Which field names are legal varies by the
+node type. The hash keys and values can be accessed directly: there are no
+getter/setter methods.
+
+Each node may have a C<kids> field which points to an array of all the
+children of that node: this is what provides the tree structure. In
+addition, some of those kids may also have direct links from fields for
+quick access. For example, the C<xsub_decl> child object of an C<xsub>
+object can be accessed in either of these ways:
+
+    $xsub_object->{kids}[0]
+    $xsub_object->{decl}
+
+Most object-valued node fields within a tree point only to their direct
+children; however, both C<INPUT_line> and C<OUTPUT_line> have an
+C<ioparam> field which points to the C<IO_Param> object associated with
+this line, which is located elsewhere in the tree.
+
+The various C<foo_part> nodes divide the parsing of the main body of the
+XSUB into sections where different sets of keywords are allowable, and
+where various bits of code can be conveniently emitted.
+
+=head2 Methods
+
+There are two main methods, in addition to new(), which are present in all
+subclasses. First, parse() consumes lines from the source to satisfy the
+construct being parsed. It may itself create objects of lower-level
+constructs and call parse on them. For example, C<Node::xbody::parse()>
+may create a C<Node::input_part> node and call parse() on it, which will
+create C<Node::INPUT> or C<Node::PREINIT> nodes as appropriate, and so on.
+
+Secondly, as_code() descends its sub-tree, outputting the tree as C code.
+
+Note that parsing and code-generation are done as two separate phases;
+parse() should only build a tree and never emit code.
+
+In addition to C<$self>, both these methods are always provided with
+these three parameters:
+
+=over
+
+=item C<$pxs>
+
+An C<ExtUtils::ParseXS> object which contains the overall processing
+state. In particular, it has warning and croaking methods, and holds the
+lines read in from the source file for the current paragraph.
+
+=item C<$xsub>
+
+The current C<ExtUtils::ParseXS::xsub> node being processed.
+
+=item C<$xbody>
+
+The current C<ExtUtils::ParseXS::xbody> node being processed. Note that
+in the presence of a C<CASE> keyword, an XSUB can have multiple bodies.
+
+=back
+
+The parse() and as_code() methods for some subclasses may have additional
+parameters.
+
+Some subclasses may have additional helper methods.
+
+=head2 Class Hierachy
+
+C<Node> and its sub-classes form the following inheritance hierarchy.
+Various abstract classes are used by concrete subclasses where the
+processing and/or fields are similar: for example, C<CODE>, C<PPCODE> etc
+all consume a block of uninterpreted lines from the source file until the
+next keyword, and emit that code, possibly wrapped in C<#line> directives.
+This common behaviour is provided by the C<codeblock> class.
+
+    Node
+        xsub
+        xsub_decl
+        ReturnType
+        Param
+            IO_Param
+        Params
+        xbody
+        input_part
+        init_part
+        code_part
+        output_part
+        cleanup_part
+        autocall
+        oneline
+            NOT_IMPLEMENTED_YET
+            CASE
+            enable
+                EXPORT_XSUB_SYMBOLS
+                PROTOTYPES
+                SCOPE
+                VERSIONCHECK
+        multiline
+            multiline_merged
+                C_ARGS
+                INTERFACE
+                INTERFACE_MACRO
+                OVERLOAD
+            ATTRS
+            PROTOTYPE
+            codeblock
+                CODE
+                CLEANUP
+                INIT
+                POSTCALL
+                PPCODE
+                PREINIT
+        keylines
+            ALIAS
+            INPUT
+            OUTPUT
+        keyline
+            ALIAS_line
+            INPUT_line
+            OUTPUT_line
+
+
+=head2 Abstract Syntax Tree structure
+
+A typical XSUB might compile to a tree with a structure similar to the
+following. Note that this is unrelated to the inheritance hierarchy
+shown above.
+
+    xsub
+        xsub_decl
+            ReturnType
+            Params
+                Param
+                Param
+                ...
+        CASE   # for when a CASE keyword being present implies multiple
+               # bodies; otherwise, just a bare xbody node.
+            xbody
+                # per-body copy of declaration Params, augmented by
+                # data from INPUT and OUTPUT sections
+                Params
+                    IO_Param
+                    IO_Param
+                    ...
+                input_part
+                    INPUT
+                        INPUT_line
+                        INPUT_line
+                        ...
+                    PREINIT
+                init_part
+                    INIT
+                code_part
+                    CODE
+                output_part
+                    OUTPUT
+                        OUTPUT_line
+                        OUTPUT_line
+                        ...
+                    POSTCALL
+                cleanup_part
+                    CLEANUP
+        CASE
+            xbody
+                ...
 
 =cut
+
+# store these in variables to hide them from brace-matching text editors
+my $open_brace  = '{';
+my $close_brace = '}';
+
+
+# Utility sub to handle all the boilerplate of declaring a Node subclass,
+# including setting up @INC and @FIELDS. Intended to be called from within
+# BEGIN. (Created as a lexical sub ref to make it easily accessible to
+# all subclasses in this file.)
+#
+# The first two args can optionally be ('-parent', 'Foo'), in which case
+# the parent of this subclass will be ExtUtils::ParseXS::Node::Foo.
+# If not specified, the parent will be ExtUtils::ParseXS::Node.
+#
+# Any remaining args are the names of fields. It also inherits the fields
+# of its parent.
+
+my $USING_FIELDS;
+
+my $build_subclass;
+BEGIN {
+    $build_subclass = sub {
+        my (@fields) = @_;
+
+        my $parent = 'ExtUtils::ParseXS::Node';
+        if (@fields and $fields[0] eq '-parent') {
+            shift @fields;
+            my $p = shift @fields;
+            $parent .= "::$p";
+        }
+
+        my @bad = grep !/^\w+$/, @fields;
+        die "Internal error: bad field name(s) in build_subclass: (@bad)\n"
+            if @bad;
+
+        no strict 'refs';
+
+        my $class = caller(0);
+        @fields   = (@{"${parent}::FIELDS"}, @fields);
+        @{"${class}::ISA"}    = $parent;
+        @{"${class}::FIELDS"} = @fields;
+
+        if ($USING_FIELDS) {
+            eval qq{package $class; fields->import(\@fields); 1;}
+                or die $@;
+        }
+    };
+};
 
 
 # ======================================================================
@@ -39,11 +255,11 @@ package ExtUtils::ParseXS::Node;
 # The 'use fields' enables compile-time or run-time errors if code
 # attempts to use a key which isn't listed here.
 
-my $USING_FIELDS;
-
 BEGIN {
     our @FIELDS = (
-        # Currently there are no node fields common to all node types
+        'line_no',       # line number and ...
+        'file',          # ... filename where this node appeared in src
+        'kids',          # child nodes, if any
     );
 
     # do 'use fields', except: fields needs Hash::Util which is XS, which
@@ -64,15 +280,773 @@ sub new {
     my ($class, $args) = @_;
     $args = {} unless defined $args;
 
-    my ExtUtils::ParseXS::Node $self;
+    my __PACKAGE__  $self = shift;
+
     if ($USING_FIELDS) {
         $self = fields::new($class);
         %$self = %$args;
     }
     else {
         $self = bless { %$args } => $class;
+
     }
     return $self;
+}
+
+
+# A very generic parse method that just notes the current file/line no.
+# Typically called first as a SUPER by the parse() method of real nodes.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->{file}    = $pxs->{in_pathname};
+                        # account for the line array getting shifted
+                        # as input lines are consumed, while line_no
+                        # array isn't ever shifted
+    $self->{line_no} = $pxs->{line_no}->[
+                            @{$pxs->{line_no}} - @{$pxs->{line}}
+                        ];
+    1;
+}
+
+
+# Repeatedly look for keywords matching the pattern. For each found
+# keyword, parse the text following them, and add any resultant nodes
+# as kids to the current node. Returns a list of the successfully parsed
+# and added kids.
+# If $max is defined, it specifies the maximum number of keywords to
+# process. This value is typically passed as undef (unlimited) or 1
+# (just grab the next keyword).
+
+sub parse_keywords {
+    my __PACKAGE__       $self  = shift;
+    my ExtUtils::ParseXS $pxs   = shift;
+    my                   $xsub  = shift;
+    my                   $xbody = shift;
+    my $max                     = shift; # max number of keywords to process
+    my $pat                     = shift;
+    my $do_notimplemented       = shift;
+
+    my $n = 0;
+    my @kids;
+    while (@{$pxs->{line}}) {
+        my $line = shift @{$pxs->{line}};
+        next unless $line =~ /\S/;
+        # extract/delete recognised keyword and any following comment
+        unless (   $line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s
+                or (   $do_notimplemented
+                    && $line =~ s/^(\s*)(NOT_IMPLEMENTED_YET)/$1/
+                   )
+        ) {
+            # stop at unrecognised line
+            unshift @{$pxs->{line}}, $line;
+            last;
+        }
+        my $keyword = $2;
+        unshift @{$pxs->{line}}, $line;
+        # create a node for the keyword and parse any lines associated
+        # with it.
+        my $class = "ExtUtils::ParseXS::Node::$keyword";
+        my $node  = $class->new();
+        if ($node->parse($pxs, $xsub, $xbody)) {
+            push @{$self->{kids}}, $node;
+            push @kids, $node;
+        }
+
+        $n++;
+        last if defined $max and $max >= $n;
+    }
+
+    return @kids;
+}
+
+
+sub as_code { }
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::xsub;
+
+# Process an entire XSUB definition
+
+BEGIN { $build_subclass->(
+    'decl',       # Node::xsub_decl object holding this XSUB's declaration
+
+    # Boolean flags: they indicate that at least one of each specified
+    # keyword has been seen in this XSUB
+    'seen_ALIAS',
+    'seen_INTERFACE',
+    'seen_INTERFACE_MACRO',
+    'seen_PPCODE',
+    'seen_PROTOTYPE',
+    'seen_SCOPE',
+
+    # These three fields indicate how many SVs are returned to the caller,
+    # and so influence the emitting of 'EXTEND(n)', 'XSRETURN(n)', and
+    # potentially, the value of n in 'ST(n) = ...'.
+    #
+    # XSRETURN_count_basic is 0 or 1 and indicates whether a basic return
+    # value is pushed onto the stack. It is usually directly related to
+    # whether the XSUB is declared void, but NO_RETURN and CODE_sets_ST0
+    # can alter that.
+    #
+    # XSRETURN_count_extra indicates how many SVs will be returned in
+    # addition the basic 0 or 1. These will be params declared as OUTLIST.
+    #
+    # CODE_sets_ST0 is a flag indicating that something within a CODE
+    # block is doing 'ST(0) = ..' or similar. This is a workaround for
+    # a bug: see the code comments "Horrible 'void' return arg count hack"
+    # in Node::CODE::parse() for more details.
+    'CODE_sets_ST0',           # Bool
+    'XSRETURN_count_basic',    # Int
+    'XSRETURN_count_extra',    # Int
+
+    # These maintain the alias parsing state across potentially multiple
+    # ALIAS keywords and or lines:
+
+    'map_alias_name_to_value', # Hash: maps seen alias names to their value
+
+    'map_alias_value_to_name_seen_hash', # Hash of Hash of Bools:
+                               # indicates which alias names have been
+                               # used for each value.
+
+    'alias_clash_hinted',      # Bool: an ALIAS warn-hint has been emitted.
+
+    # Maintain the INTERFACE parsing state across potentially multiple
+    # INTERFACE keywords and/or lines:
+
+    'map_interface_name_short_to_original', # Hash: for each INTERFACE
+                               # name, map the short (PREFIX removed) name
+                               # to the original name.
+
+    # Maintain the OVERLOAD parsing state across potentially multiple
+    # OVERLOAD keywords and/or lines:
+
+    'overload_name_seen',      # Hash of Bools: indicates overload method
+                               # names (such as '<=>') which have been
+                               # listed by OVERLOAD (for newXS boot code
+                               # emitting).
+
+    # Maintain the ATTRS parsing state across potentially multiple
+    # ATTRS keywords and or lines:
+
+    'attributes',              # Array of Strs: all ATTRIBUTE keywords
+                               # (possibly multiple space-separated
+                               # keywords per string).
+
+    # INTERFACE_MACRO state
+
+    'interface_macro',         # Str: value of interface extraction macro.
+    'interface_macro_set',     # Str: value of interface setting macro.
+
+    # PROTOTYPE value
+
+    'prototype',               # Str: is set to either the global PROTOTYPES
+                               #  values (0 or 1), or to what's been
+                               #  overridden for this XSUB with PROTOTYPE
+                               #    "0": DISABLE
+                               #    "1": ENABLE
+                               #    "2": empty prototype
+                               #    other: a specific prototype.
+
+    'SCOPE_enabled',           # Bool: "SCOPE: ENABLE" seen, in either the
+                               # file or XSUB part of the XS file
+
+)};
+
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Initially inherit the prototype behaviour for the XSUB from the
+    # global PROTOTYPES default
+    $self->{prototype} = $pxs->{PROTOTYPES_value};
+
+    # inherit any SCOPE: value that immediately preceded the XSUB
+    # declaration
+    $self->{SCOPE_enabled} = $pxs->{file_SCOPE_enabled};
+
+    # Parse the XSUB's declaration (return type, name, parameters)
+
+    my $decl = ExtUtils::ParseXS::Node::xsub_decl->new();
+    $self->{decl} = $decl;
+    $decl->parse($pxs, $self)
+        or return;
+    push @{$self->{kids}}, $decl;
+
+    # Append a fake EOF-keyword line. This makes it easy to do "all lines
+    # until the next keyword" style loops, since the fake END line (which
+    # includes a \n so it can't appear in the wild) is also matched as a
+    # keyword.
+    push(@{ $pxs->{line} }, "$ExtUtils::ParseXS::END:");
+    push(@{ $pxs->{line_no} }, $pxs->{line_no}->[-1]);
+
+    $_ = '';
+
+    # Check all the @{ $pxs->{line}} lines for balance: all the
+    # #if, #else, #endif etc within the XSUB should balance out.
+    ExtUtils::ParseXS::check_conditional_preprocessor_statements();
+
+    # ----------------------------------------------------------------
+    # Each iteration of this loop will process 1 optional CASE: line,
+    # followed by all the other blocks. In the absence of a CASE: line,
+    # this loop is only iterated once.
+    # ----------------------------------------------------------------
+
+    my $num             = 0; # the number of CASE+bodies seen
+    my $seen_bare_xbody = 0; # seen a previous body without a CASE
+    my $case_had_cond;       # the previous CASE had a condition
+
+    # Repeatedly look for CASE or XSUB body.
+    while (@{ $pxs->{line} }) {
+        # Parse a CASE statement if present.
+        my ($case) =
+            $self->parse_keywords(
+                $pxs, $self, undef,  # xbody not yet present so use undef
+                1,  # process maximum of one keyword
+                "CASE",
+            );
+
+        if (defined $case) {
+            $case->{num} = ++$num;
+            $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'")
+                if $num > 1 && ! $case_had_cond;
+            $case_had_cond = length $case->{cond};
+            $pxs->blurt("Error: no 'CASE:' at top of function")
+                if $seen_bare_xbody;
+        }
+        else {
+            $seen_bare_xbody = 1;
+            if ($num++) {
+                my $l = $pxs->{line}[0];
+                # After the first CASE+body, we should only encounter
+                # further CASE+bodies or end-of-paragraph
+                last if $l eq "$ExtUtils::ParseXS::END:";
+                $pxs->death(
+                    $l =~ /^$ExtUtils::ParseXS::BLOCK_regexp/o
+                            ? "Error: misplaced '$1:'"
+                            : qq{Error: junk at end of function: "$l"}
+                );
+            }
+        }
+
+        # Parse the XSUB's body
+
+        my $xbody = ExtUtils::ParseXS::Node::xbody->new();
+        $xbody->parse($pxs, $self);
+
+        if (defined $case) {
+            # make the xbody a child of the CASE
+            push @{$case->{kids}}, $xbody;
+            $xbody = $case;
+        }
+        else {
+            push @{$self->{kids}}, $xbody;
+        }
+    } # end while (@{ $pxs->{line} })
+
+    # If any aliases have been declared, make the main sub name ix 0
+    # if not specified.
+
+    if (            $self->{map_alias_name_to_value}
+        and keys %{ $self->{map_alias_name_to_value} })
+    {
+        my $pname = $self->{decl}{full_perl_name};
+        $self->{map_alias_name_to_value}{$pname} = 0
+            unless defined $self->{map_alias_name_to_value}{$pname};
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # ----------------------------------------------------------------
+    # Emit initial C code for the XSUB
+    # ----------------------------------------------------------------
+
+    {
+        my $extern = $self->{decl}{return_type}{extern_C}
+                        ? qq[extern "C"] : "";
+        my $cname = $self->{decl}{full_C_name};
+
+        # Emit function header
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |$extern
+            |XS_EUPXS(XS_$cname); /* prototype to pass -Wmissing-prototypes */
+            |XS_EUPXS(XS_$cname)
+            |$open_brace
+            |    dVAR; dXSARGS;
+EOF
+    }
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_ALIAS};
+        |    dXSI32;
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
+        |    dXSFUNCTION($self->{decl}{return_type}{type});
+EOF
+
+
+    {
+        my $params = $self->{decl}{params};
+        # the code to emit to determine whether the correct number of argument
+        # have been passed
+        my $condition_code =
+            ExtUtils::ParseXS::set_cond($params->{seen_ellipsis},
+                                        $params->{min_args},
+                                        $params->{nargs});
+
+        # "-except" cmd line switch
+        print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+            |    char errbuf[1024];
+            |    *errbuf = '\\0';
+EOF
+
+        if ($condition_code) {
+            my $p = $params->usage_string();
+            $p =~ s/"/\\"/g;
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    if ($condition_code)
+                |       croak_xs_usage(cv,  "$p");
+EOF
+        }
+        else {
+            # cv and items likely to be unused
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    PERL_UNUSED_VAR(cv); /* -W */
+                |    PERL_UNUSED_VAR(items); /* -W */
+EOF
+        }
+    }
+
+    # gcc -Wall: if an XSUB has PPCODE, it is possible that none of ST,
+    # XSRETURN or XSprePUSH macros are used.  Hence 'ax' (setup by
+    # dXSARGS) is unused.
+    # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
+    # but such a move could break third-party extensions
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_PPCODE};
+        |    PERL_UNUSED_VAR(ax); /* -Wall */
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_PPCODE};
+        |    SP -= items;
+EOF
+
+    # ----------------------------------------------------------------
+    # Emit the main body of the XSUB (all the CASE statements + bodies
+    # or a single body)
+    # ----------------------------------------------------------------
+
+    $_->as_code($pxs, $self) for @{$self->{kids}};
+
+    # ----------------------------------------------------------------
+    # All of the body of the XSUB (including all CASE variants) has now
+    # been processed. Now emit any XSRETURN or similar, plus any closing
+    # bracket.
+    # ----------------------------------------------------------------
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+            |    if (errbuf[0])
+            |    Perl_croak(aTHX_ errbuf);
+EOF
+
+    # Emit XSRETURN(N) or XSRETURN_EMPTY. It's possible that the user's
+    # CODE section rolled its own return, so this code may be
+    # unreachable. So suppress any compiler warnings.
+    # XXX Currently this is just for HP. Make more generic??
+
+    # Suppress "statement is unreachable" warning on HPUX
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+                "#pragma diag_suppress 2128\n",
+                "#endif\n"
+        if $^O eq "hpux";
+
+    unless ($self->{seen_PPCODE}) {
+        my $nret = $self->{XSRETURN_count_basic}
+                 + $self->{XSRETURN_count_extra};
+
+        print $nret ? "    XSRETURN($nret);\n"
+                    : "    XSRETURN_EMPTY;\n";
+    }
+
+    # Suppress "statement is unreachable" warning on HPUX
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+                "#pragma diag_default 2128\n",
+                "#endif\n"
+        if $^O eq "hpux";
+
+    # Emit final closing bracket for the XSUB.
+    print "$close_brace\n\n";
+
+    # generate all the 'newXS()' etc boot code needed for this XSUB
+    push @{$pxs->{bootcode_early}}, $self->boot_code($pxs);
+}
+
+
+# Return a list of boot code strings for the XSUB, including newXS()
+# call(s) plus any additional boot stuff like handling attributes or
+# storing an alias index in the XSUB's CV.
+
+sub boot_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Depending on whether the XSUB has a prototype, work out how to
+    # invoke one of the newXS() function variants. Set these:
+    #
+    my $newXS;     # the newXS() variant to be called in the boot section
+    my $file_arg;  # an extra      ', file' arg to be passed to newXS call
+    my $proto_arg; # an extra e.g. ', "$@"' arg to be passed to newXS call
+
+    my @code; # boot code for each alias etc
+
+    $proto_arg = "";
+
+    unless($self->{prototype}) {
+        # no prototype
+        $newXS = "newXS_deffile";
+        $file_arg = "";
+    }
+    else {
+        # needs prototype
+        $newXS = "newXSproto_portable";
+        $file_arg = ", file";
+
+        if ($self->{prototype} eq 2) {
+            # User has specified an empty prototype
+        }
+        elsif ($self->{prototype} eq 1) {
+            # Protoype enabled, but to be auto-generated by us
+            $proto_arg = $self->{decl}{params}->proto_string();
+            $proto_arg =~ s{\\}{\\\\}g; # escape backslashes
+        }
+        else {
+            # User has manually specified a prototype
+            $proto_arg = $self->{prototype};
+        }
+
+        $proto_arg = qq{, "$proto_arg"};
+    }
+
+    # Now use those values to append suitable newXS() and other code
+    # into @code, for later insertion into the boot sub.
+
+    my $pname = $self->{decl}{full_perl_name};
+    my $cname = $self->{decl}{full_C_name};
+
+    if (                $self->{map_alias_name_to_value}
+            and keys %{ $self->{map_alias_name_to_value} })
+    {
+        # For the main XSUB and for each alias name, generate a newXS() call
+        # and 'XSANY.any_i32 = ix' line.
+
+        foreach my $xname (sort keys
+                    %{ $self->{map_alias_name_to_value} })
+        {
+            my $value = $self->{map_alias_name_to_value}{$xname};
+            push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
+                |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
+                |        XSANY.any_i32 = $value;
+EOF
+            $pxs->{need_boot_cv} = 1;
+        }
+    }
+    elsif ($self->{attributes}) {
+        # Generate a standard newXS() call, plus a single call to
+        # apply_attrs_string() call with the string of attributes.
+        my $attrs = "@{$self->{attributes}}";
+        push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
+          |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
+          |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "$attrs", 0);
+EOF
+        $pxs->{need_boot_cv} = 1;
+    }
+    elsif (   $self->{seen_INTERFACE}
+           or $self->{seen_INTERFACE_MACRO})
+    {
+        # For each interface name, generate both a newXS() and
+        # XSINTERFACE_FUNC_SET() call.
+        foreach my $yname (sort keys
+                %{ $self->{map_interface_name_short_to_original} })
+        {
+            my $value = $self->{map_interface_name_short_to_original}{$yname};
+            $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
+
+            my $macro = $self->{interface_macro_set};
+            $macro = 'XSINTERFACE_FUNC_SET' unless defined $macro;
+            push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
+                |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
+                |        $macro(cv,$value);
+EOF
+            $pxs->{need_boot_cv} = 1;
+        }
+    }
+    elsif ($newXS eq 'newXS_deffile'){
+        # Modified default: generate a standard newXS() call; but
+        # work around the CPAN 'P5NCI' distribution doing:
+        #     #undef newXS
+        #     #define newXS ;
+        # by omitting the initial (void).
+        # XXX DAPM 2024:
+        # this branch was originally: "elsif ($newXS eq 'newXS')"
+        # but when the standard name for the newXS variant changed in
+        # xsubpp, it was changed here too. So this branch no longer actually
+        # handles a workaround for '#define newXS ;'. I also don't
+        # understand how just omitting the '(void)' fixed the problem.
+        push(@code,
+            "        $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);\n");
+    }
+    else {
+        # Default: generate a standard newXS() call
+        push(@code,
+          "        (void)$newXS(\"$pname\", XS_$cname$file_arg$proto_arg);\n");
+    }
+
+    # For every overload operator, generate an additional newXS()
+    # call to add an alias such as "Foo::(<=>" for this XSUB.
+
+    for my $operator (sort keys %{ $self->{overload_name_seen} })
+    {
+        $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
+            = $pxs->{PACKAGE_C_name};
+        my $overload = "$pxs->{PACKAGE_name}\::($operator";
+        push(@code,
+        "        (void)$newXS(\"$overload\", XS_$cname$file_arg$proto_arg);\n");
+    }
+
+    return @code;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::xsub_decl;
+
+# Parse and store the complete declaration part of an XSUB, including
+# its parameters, name and return type.
+
+BEGIN { $build_subclass->(
+    'return_type',    # ReturnType object representing e.g "NO_OUTPUT char *"
+    'params',         # Params object representing e.g "a, int b, c=0"
+    'class',          # Str: the 'Foo::Bar' part of an XSUB's name;
+                      #   - if defined, this is a C++ method
+    'name',           # Str: the 'foo' XSUB name
+    'full_perl_name', # Str: the 'Foo::Bar::foo' perl XSUB name
+    'full_C_name',    # Str: the 'Foo__Bar__foo' C XSUB name
+    'is_const',       # Bool: declaration had postfix C++ 'const' modifier
+)};
+
+
+# Parse the XSUB's declaration - i.e. return type, name and parameters.
+
+sub parse {
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Parse return type
+
+    my $return_type = ExtUtils::ParseXS::Node::ReturnType->new();
+
+    $return_type->parse($pxs, $xsub)
+        or return;
+
+    $self->{return_type} = $return_type;
+    push @{$self->{kids}}, $return_type;
+
+    # Decompose the function declaration: match a line like
+    #   Some::Class::foo_bar(  args  ) const ;
+    #   -----------  -------   ----    ----- --
+    #       $1        $2        $3      $4   $5
+    #
+    # where everything except $2 and $3 are optional and the 'const'
+    # is for C++ functions.
+
+    my $func_header = shift(@{ $pxs->{line} });
+    $pxs->blurt("Error: cannot parse function definition from '$func_header'"),
+      return
+        unless $func_header =~
+            /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
+
+    my ($class, $name, $params_text, $const) = ($1, $2, $3, $4);
+
+    if (defined $const and !defined $class) {
+        $pxs->blurt("const modifier only allowed on XSUBs which are C++ methods");
+        undef $const;
+    }
+
+    if ($return_type->{static} and !defined $class)
+    {
+        $pxs->Warn(  "Warning: ignoring 'static' type modifier:"
+                   . " only valid with an XSUB name which includes a class");
+        $return_type->{static} = 0;
+    }
+
+    (my $full_pname = $name) =~
+            s/^($pxs->{PREFIX_pattern})?/$pxs->{PACKAGE_class}/;
+
+    (my $clean_func_name = $name) =~ s/^$pxs->{PREFIX_pattern}//;
+
+    my $full_cname = "$pxs->{PACKAGE_C_name}_$clean_func_name";
+    $full_cname = $ExtUtils::ParseXS::VMS_SymSet->addsym($full_cname)
+        if $ExtUtils::ParseXS::Is_VMS;
+
+    $self->{class}          = $class;
+    $self->{is_const}       = defined $const;
+    $self->{name}           = $name;
+    $self->{full_perl_name} = $full_pname;
+    $self->{full_C_name}    = $full_cname;
+
+    # At this point, supposing that the input so far was:
+    #
+    #   MODULE = ... PACKAGE = BAR::BAZ PREFIX = foo_
+    #   int
+    #   Some::Class::foo_bar(param1, param2, param3) const ;
+    #
+    # we should have:
+    #
+    # $self->{return_type}    an object holding "int"
+    # $self->{class}          "Some::Class"
+    # $self->{is_const}       TRUE
+    # $self->{name}           "foo_bar"
+    # $self->{full_perl_name} "BAR::BAZ::bar"
+    # $self->{full_C_name}    "BAR__BAZ_bar"
+    # $params_text            "param1, param2, param3"
+
+    # Check for a duplicate function definition, but ignoring multiple
+    # definitions within the branches of an #if/#else/#endif
+    for my $tmp (@{ $pxs->{XS_parse_stack} }) {
+        next unless defined $tmp->{functions}{$full_cname};
+        $pxs->Warn(  "Warning: duplicate function definition "
+                   . "'$clean_func_name' detected");
+        last;
+    }
+
+    # mark C function name as used
+    $pxs->{XS_parse_stack}->
+        [$pxs->{XS_parse_stack_top_if_idx}]{functions}{$full_cname}++;
+
+    # ----------------------------------------------------------------
+    # Process the XSUB's signature.
+    #
+    # Split $params_text into parameters, parse them, and store them as
+    # Node::Param objects within the Node::Params object.
+
+    my $params = $self->{params} = ExtUtils::ParseXS::Node::Params->new();
+
+    $params->parse($pxs, $xsub, $params_text);
+    $self->{params} = $params;
+    push @{$self->{kids}}, $params;
+
+    # How many OUTLIST SVs get returned in addition to RETVAL
+    $xsub->{XSRETURN_count_extra} =
+                        grep {    defined $_->{in_out}
+                               && $_->{in_out} =~ /OUTLIST$/
+                             }
+                        @{$self->{params}{kids}};
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::ReturnType;
+
+# Handle the 'return type' line at the start of an XSUB.
+# It mainly consists of the return type, but there are also
+# extra keywords to process, such as NO_RETURN.
+
+BEGIN { $build_subclass->(
+    'type',           # Str:  the XSUB's C return type
+    'no_output',      # Bool: saw 'NO_OUTPUT'
+    'extern_C',       # Bool: saw 'extern C'
+    'static',         # Bool: saw 'static'
+    'use_early_targ', # Bool: emit an early dTARG for backcompat
+)};
+
+
+# Extract out the return type declaration from the start of an XSUB.
+# If the declaration and function name are on the same line, delete the
+# type part; else pop the first line.
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Whitespace-tidy the line containing the return type, plus possibly
+    # the function name and arguments too.
+    # XXX Tidying the latter was probably an unintended side-effect of
+    # later allowing the return type and function to be on the same line.
+
+    my $line = shift @{$pxs->{line}};
+    $line = ExtUtils::Typemaps::tidy_type($line);
+    my $type = $line;
+
+    $self->{no_output} = 1 if $type =~ s/^NO_OUTPUT\s+//;
+
+    # Allow one-line declarations. This splits a single line like:
+    #    int foo(....)
+    # into the two lines:
+    #    int
+    #    foo(...)
+    #
+    # Note that this splits both K&R-style 'foo(a, b)' and ANSI-style
+    # 'foo(int a, int b)'. I don't know whether the former was intentional.
+    # As of 5.40.0, the docs don't suggest that a 1-line K&R is legal. Was
+    # added by 11416672a16, first appeared in 5.6.0.
+    #
+    # NB: $pxs->{config_allow_argtypes} is false if xsubpp was invoked
+    # with -noargtypes
+
+    unshift @{$pxs->{line}}, $2
+        if $pxs->{config_allow_argtypes}
+            and $type =~ s/^(.*?\w.*?) \s* \b (\w+\s*\(.*)/$1/sx;
+
+    # a function definition needs at least 2 lines
+    unless (@{$pxs->{line}}) {
+        $pxs->blurt("Error: function definition too short '$line'");
+        return;
+    }
+
+    $self->{extern_C} = 1 if $type =~ s/^extern "C"\s+//;
+    $self->{static}   = 1 if $type =~ s/^static\s+//;
+    $self->{type}     = $type;
+
+    if ($type ne "void") {
+        # Set a flag indicating that, for backwards-compatibility reasons,
+        # early dXSTARG should be emitted.
+        # Recent code emits a dXSTARG in a tighter scope and under
+        # additional circumstances, but some XS code relies on TARG
+        # having been declared. So continue to declare it early under
+        # the original circumstances.
+        my $outputmap = $pxs->{typemaps_object}->get_outputmap(ctype => $type);
+
+        if (    $pxs->{config_optimize}
+            and $outputmap
+            and $outputmap->targetable_legacy)
+        {
+            $self->{use_early_targ} = 1;
+        }
+    }
+
+    1;
 }
 
 
@@ -81,94 +1055,672 @@ sub new {
 package ExtUtils::ParseXS::Node::Param;
 
 # Node subclass which holds the state of one XSUB parameter, based on the
-# XSUB's signature and/or an INPUT line.
+# just the XSUB's signature. See also the Node::IO_Param subclass, which
+# augments the parameter declaration with info from INPUT and OUTPUT
+# lines.
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node);
+BEGIN { $build_subclass->(
+    # values derived from the XSUB's signature
+    'in_out',        # Str:  The IN/OUT/OUTLIST etc value (if any)
+    'var',           # Str:  the name of the parameter
+    'arg_num',       # Int   The arg number (starting at 1) mapped to this param
+    'default',       # Str:  default value (if any)
+    'default_usage', # Str:  how to report default value in "usage:..." error
+    'is_ansi',       # Bool: param's type was specified in signature
+    'is_length',     # Bool: param is declared as 'length(foo)' in signature
+    'has_length',    # Bool: this param has a matching 'length(foo)'
+                     #       parameter in the signature
+    'len_name' ,     # Str:  the 'foo' in 'length(foo)' in signature
+    'is_synthetic',  # Bool: var like 'THIS': we pretend it was in the sig
 
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::FIELDS,
+    # values derived from both the XSUB's signature and/or INPUT line
+    'type',          # Str:  The C type of the parameter
+    'no_init',       # Bool: don't initialise the parameter
 
-        # values derived from the XSUB's signature
-        'in_out',    # The IN/OUT/OUTLIST etc value (if any)
-        'var',       # the name of the parameter
-        'arg_num',   # The arg number (starting at 1) mapped to this param
-        'default',   # default value (if any)
-        'default_usage', # how to report default value in "usage:..." error
-        'is_ansi',   # param's type was specified in signature
-        'is_length', # param is declared as 'length(foo)' in signature
-        'len_name' , # the 'foo' in 'length(foo)' in signature
-        'is_synthetic',# var like 'THIS' - we pretend it was in the sig
-
-        # values derived from both the XSUB's signature and/or INPUT line
-        'type',      # The C type of the parameter
-        'no_init',   # don't initialise the parameter
-
-        # values derived from the XSUB's INPUT line
-        'init_op',   # initialisation type: one of =/+/;
-        'init',      # initialisation template code
-        'is_addr',   # INPUT var declared as '&foo'
-        'is_alien',  # var declared in INPUT line, but not in signature
-        'in_input',  # the parameter has appeared in an INPUT statement
-
-        # values derived from the XSUB's OUTPUT line
-        'in_output',   # the parameter has appeared in an OUTPUT statement
-        'do_setmagic', # 'SETMAGIC: ENABLE' was active for this parameter
-        'output_code', # the optional setting-code for this parameter
-
-        # derived values calculated later
-        'defer',     # deferred initialisation template code
-        'proto',     # overridden prototype char(s) (if any) from typemap
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+    # derived values calculated later
+    'proto',         # Str: overridden prototype char(s) (if any) from typemap
+)};
 
 
-
-# check(): for a parsed INPUT line and/or typed parameter in a signature,
-# update some global state and do some checks
+# Parse a parameter. A parameter is of the general form:
 #
-# Return true if checks pass.
+#    OUT char* foo = expression
+#
+#  where:
+#    IN/OUT/OUTLIST etc are only allowed under
+#                      $pxs->{config_allow_inout}
+#
+#    a C type       is only allowed under
+#                      $pxs->{config_allow_argtypes}
+#
+#    foo            can be a plain C variable name, or can be
+#    length(foo)    but only under $pxs->{config_allow_argtypes}
+#
+#    = default      default value - only allowed under
+#                      $pxs->{config_allow_argtypes}
 
-sub check {
-    my ExtUtils::ParseXS::Node::Param $self = shift;
-    my ExtUtils::ParseXS              $pxs  = shift;
-  
-    my $type = $self->{type};
+sub parse {
+    my __PACKAGE__                     $self   = shift;
+    my ExtUtils::ParseXS               $pxs    = shift;
+    my                                 $params = shift; # parent Params
+    my $param_text                             = shift;
 
-    # Get the overridden prototype character, if any, associated with the
-    # typemap entry for this var's type.
-    # Note that something with a provisional type such as THIS can get
-    # the type changed later. It is important to update each time.
-    # It also can't be looked up only at BOOT code emitting time, because
-    # potentiall, the typmap may been bee updated last in the XS file
-    # after the XSUB was parsed.
-    if ($self->{arg_num}) {
-        my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $type);
-        my $p = $typemap && $typemap->proto;
-        $self->{proto} = $p if defined $p && length $p;
+    $self->SUPER::parse($pxs); # set file/line_no
+    $_ = $param_text;
+
+    # Decompose parameter into its components.
+    # Note that $name can be either 'foo' or 'length(foo)'
+
+    my ($out_type, $type, $name, $sp1, $sp2, $default) =
+            /^
+                 (?:
+                     (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
+                     \b\s*
+                 )?
+                 (.*?)                             # optional type
+                 \s*
+                 \b
+                 (   \w+                           # var
+                     | length\( \s*\w+\s* \)       # length(var)
+                 )
+                 (?:
+                        (\s*) = (\s*) ( .*?)       # default expr
+                 )?
+                 \s*
+             $
+            /x;
+
+    unless (defined $name) {
+        if (/^ SV \s* \* $/x) {
+            # special-case SV* as a placeholder for backwards
+            # compatibility.
+            $self->{var} = 'SV *';
+            return 1;
+        }
+        $pxs->blurt("Error: unparseable XSUB parameter: '$_'");
+        return;
     }
-  
-    return 1;
+
+    undef $type unless length($type) && $type =~ /\S/;
+    $self->{var} = $name;
+
+    # Check for duplicates
+
+    my $old_param = $params->{names}{$name};
+    if ($old_param) {
+        # Normally a dup parameter is an error, but we allow RETVAL as
+        # a real parameter, which overrides the synthetic one which
+        # was added earlier if the return value isn't void.
+        if (    $name eq 'RETVAL'
+                and $old_param->{is_synthetic}
+                and !defined $old_param->{arg_num})
+        {
+            # RETVAL is currently fully synthetic. Now that it has
+            # been declared as a parameter too, override any implicit
+            # RETVAL declaration. Delete the original param from the
+            # param list and later re-add it as a parameter in its
+            # correct position.
+            @{$params->{kids}} = grep $_ != $old_param, @{$params->{kids}};
+            # If the param declaration includes a type, it becomes a
+            # real parameter. Otherwise the param is kept as
+            # 'semi-real' (synthetic, but with an arg_num) until such
+            # time as it gets a type set in INPUT, which would remove
+            # the synthetic/no_init.
+            %$self = %$old_param unless defined $type;
+        }
+        else {
+            $pxs->blurt(
+                    "Error: duplicate definition of parameter '$name' ignored");
+            return;
+        }
+    }
+
+    # Process optional IN/OUT etc modifier
+
+    if (defined $out_type) {
+        if ($pxs->{config_allow_inout}) {
+            $out_type =  $out_type eq 'IN' ? '' : $out_type;
+        }
+        else {
+            $pxs->blurt("Error: parameter IN/OUT modifier not allowed under -noinout");
+        }
+    }
+    else {
+        $out_type = '';
+    }
+
+    # Process optional type
+
+    if (defined($type) && !$pxs->{config_allow_argtypes}) {
+        $pxs->blurt("Error: parameter type not allowed under -noargtypes");
+        undef $type;
+    }
+
+    # Process 'length(foo)' pseudo-parameter
+
+    my $is_length;
+    my $len_name;
+
+    if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
+        if ($pxs->{config_allow_argtypes}) {
+            $len_name = $1;
+            $is_length = 1;
+            if (defined $default) {
+                $pxs->blurt(  "Error: default value not allowed on "
+                            . "length() parameter '$len_name'");
+                undef $default;
+            }
+        }
+        else {
+            $pxs->blurt(  "Error: length() pseudo-parameter not allowed "
+                        . "under -noargtypes");
+        }
+    }
+
+    # Handle ANSI params: those which have a type or 'length(s)',
+    # and which thus don't need a matching INPUT line.
+
+    if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
+        @$self{qw(type is_ansi)} = ($type, 1);
+
+        if ($is_length) {
+            $self->{no_init}   = 1;
+            $self->{is_length} = 1;
+            $self->{len_name}  = $len_name;
+        }
+    }
+
+    $self->{in_out} = $out_type if length $out_type;
+    $self->{no_init} = 1        if $out_type =~ /^OUT/;
+
+    # Process the default expression, including making the text
+    # to be used in "usage: ..." error messages.
+
+    my $report_def = '';
+    if (defined $default) {
+        # The default expression for reporting usage. For backcompat,
+        # sometimes preserve the spaces either side of the '='
+        $report_def =    ((defined $type or $is_length) ? '' : $sp1)
+                       . "=$sp2$default";
+        $self->{default_usage} = $report_def;
+        $self->{default} = $default;
+    }
+
+    1;
 }
 
 
-# $self->as_code():
+# Set the 'proto' field of the param. This is based on the value, if any,
+# of the proto method of the typemap for that param's type. It will
+# typically be a single character like '$'.
+#
+# Note that params can have different types (and thus different proto
+# chars) in different CASE branches.
+
+sub set_proto {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    # only needed for real args that the caller may pass.
+    return unless $self->{arg_num};
+    my $type = $self->{type};
+    return unless defined $type;
+    my $typemap = $pxs->{typemaps_object}->get_typemap(ctype => $type);
+    return unless defined $typemap;
+    my $p = $typemap->proto;
+    return unless defined $p && length $p;
+    $self->{proto} = $p;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::IO_Param;
+
+# Subclass of Node::Param which holds the state of one XSUB parameter,
+# based on the XSUB's signature, but also augmented by info from INPUT or
+# OUTPUT lines
+
+BEGIN { $build_subclass->(-parent => 'Param',
+    # values derived from the XSUB's INPUT line
+
+    'init_op',     # Str:  initialisation type: one of =/+/;
+    'init',        # Str:  initialisation template code
+    'is_addr',     # Bool: INPUT var declared as '&foo'
+    'is_alien',    # Bool: var declared in INPUT line, but not in signature
+    'in_input',    # Bool: the parameter has appeared in an INPUT statement
+    'defer',       # Str:  deferred initialisation template code
+
+    # values derived from the XSUB's OUTPUT line
+    #
+    'in_output',   # Bool: the parameter has appeared in an OUTPUT statement
+    'do_setmagic', # Bool: 'SETMAGIC: ENABLE' was active for this parameter
+    'output_code', # Str:  the optional setting-code for this parameter
+
+    # ArrayRefs: results of looking up typemaps (which are done in the
+    # parse phase, as the typemap definitions can in theory change
+    # further down in the XS file). For now these just store
+    # uninterpreted, the list returned by the call to
+    # lookup_input_typemap() etc, for later use by the as_input_code()
+    # etc methods.
+    #
+    'input_typemap_vals',          # result of lookup_input_typemap()
+    'output_typemap_vals',         # result of lookup_output_typemap(...)
+    'output_typemap_vals_outlist', # result of lookup_output_typemap(..., n)
+)};
+
+
+# Given a param with known type etc, extract its typemap INPUT template
+# and also create a hash of vars that can be used to eval that template.
+# An undef returned hash ref signifies that the returned template string
+# doesn't need to be evalled.
+#
+# Returns ($expr, $eval_vars, $is_template)
+# or empty list on failure.
+#
+# $expr:        text like '$var = SvIV($arg)'
+# $eval_vars:   hash ref like { var => 'foo', arg => 'ST(0)', ... }
+# $is_template: $expr has '$arg' etc and needs evalling
+
+sub lookup_input_typemap {
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
+    my                               $xbody = shift;
+
+    my ($type, $arg_num, $var, $init, $no_init, $default)
+        = @{$self}{qw(type arg_num var init no_init default)};
+    $var = "XSauto_length_of_$self->{len_name}" if $self->{is_length};
+    my $arg = $pxs->ST($arg_num);
+
+    # whitespace-tidy the type
+    $type = ExtUtils::Typemaps::tidy_type($type);
+
+    # Specify the environment for when the initialiser template is evaled.
+    # Only the common ones are specified here. Other fields may be added
+    # later.
+    my $eval_vars = {
+        type           => $type,
+        var            => $var,
+        num            => $arg_num,
+        arg            => $arg,
+        alias          => $xsub->{seen_ALIAS},
+        func_name      => $xsub->{decl}{name},
+        full_perl_name => $xsub->{decl}{full_perl_name},
+        full_C_name    => $xsub->{decl}{full_C_name},
+    };
+
+    # The type looked up in the eval is Foo__Bar rather than Foo::Bar
+    $eval_vars->{type} =~ tr/:/_/
+        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
+
+    my $init_template;
+
+    if (defined $init) {
+        # Use the supplied code template rather than getting it from the
+        # typemap
+
+        $pxs->death(
+                "Internal error: ExtUtils::ParseXS::Node::Param::as_code(): "
+              . "both init and no_init supplied")
+            if $no_init;
+
+        $eval_vars->{init} = $init;
+        $init_template = "\$var = $init";
+    }
+    elsif ($no_init) {
+        # don't add initialiser
+        $init_template = "";
+    }
+    else {
+        # Get the initialiser template from the typemap
+
+        my $typemaps = $pxs->{typemaps_object};
+
+        # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
+        # which can appear within a typemap template.
+        (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+
+        # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
+        # where it's the type of each array element. But it's also passed to
+        # the typemap template (although undocumented and virtually unused).
+        (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+
+        # look up the TYPEMAP entry for this C type and grab the corresponding
+        # XS type name (e.g. $type of 'char *'  gives $xstype of 'T_PV'
+        my $typemap = $typemaps->get_typemap(ctype => $type);
+        if (not $typemap) {
+            $pxs->report_typemap_failure($typemaps, $type);
+            return;
+        }
+        my $xstype = $typemap->xstype;
+
+        # An optimisation: for the typemaps which check that the dereferenced
+        # item is blessed into the right class, skip the test for DESTROY()
+        # methods, as more or less by definition, DESTROY() will be called
+        # on an object of the right class. Basically, for T_foo_OBJ, use
+        # T_foo_REF instead. T_REF_IV_PTR was added in v5.22.0.
+        $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
+            if $xsub->{decl}{name} =~ /DESTROY$/;
+
+        # For a string-ish parameter foo, if length(foo) was also declared
+        # as a pseudo-parameter, then override the normal typedef - which
+        # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
+        # STRLEN_length_of_foo)
+        if ($xstype eq 'T_PV' and $self->{has_length}) {
+            die "default value not supported with length(NAME) supplied"
+                if defined $default;
+            return "($type)SvPV($arg, STRLEN_length_of_$var);",
+                   $eval_vars, 0;
+        }
+
+        # Get the ExtUtils::Typemaps::InputMap object associated with the
+        # xstype. This contains the template of the code to be embedded,
+        # e.g. 'SvPV_nolen($arg)'
+        my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
+        if (not defined $inputmap) {
+            $pxs->blurt("Error: no INPUT definition for type '$type', typekind '$xstype' found");
+            return;
+        }
+
+        # Get the text of the template, with a few transformations to make it
+        # work better with fussy C compilers. In particular, strip trailing
+        # semicolons and remove any leading white space before a '#'.
+        my $expr = $inputmap->cleaned_code;
+
+        my $argoff = $arg_num - 1;
+
+        # Process DO_ARRAY_ELEM. This is an undocumented hack that makes the
+        # horrible T_ARRAY typemap work. "DO_ARRAY_ELEM" appears as a token
+        # in the INPUT and OUTPUT code for for T_ARRAY, within a "for each
+        # element" loop, and the purpose of this branch is to substitute the
+        # token for some real code which will process each element, based
+        # on the type of the array elements (the $subtype).
+        #
+        # Note: This gruesome bit either needs heavy rethinking or
+        # documentation. I vote for the former. --Steffen, 2011
+        # Seconded, DAPM 2024.
+        if ($expr =~ /\bDO_ARRAY_ELEM\b/) {
+            my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
+            if (not $subtypemap) {
+                $pxs->report_typemap_failure($typemaps, $subtype);
+                return;
+            }
+
+            my $subinputmap =
+                $typemaps->get_inputmap(xstype => $subtypemap->xstype);
+            if (not $subinputmap) {
+                $pxs->blurt("Error: no INPUT definition for subtype "
+                            . "'$subtype', typekind '"
+                            . $subtypemap->xstype . "' found");
+                return;
+            }
+
+            my $subexpr = $subinputmap->cleaned_code;
+            $subexpr =~ s/\$type/\$subtype/g;
+            $subexpr =~ s/ntype/subtype/g;
+            $subexpr =~ s/\$arg/ST(ix_$var)/g;
+            $subexpr =~ s/\n\t/\n\t\t/g;
+            $subexpr =~ s/is not of (.*\")/[arg %d] is not of $1, ix_$var + 1/g;
+            $subexpr =~ s/\$var/${var}\[ix_$var - $argoff]/;
+            $expr =~ s/\bDO_ARRAY_ELEM\b/$subexpr/;
+        }
+
+        if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
+            $xsub->{SCOPE_enabled} = 1;
+        }
+
+        # Specify additional environment for when a template derived from a
+        # *typemap* is evalled.
+        @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
+        $init_template = $expr;
+    }
+
+    return ($init_template, $eval_vars, 1);
+}
+
+
+
+# Given a param with known type etc, extract its typemap OUTPUT template
+# and also create a hash of vars that can be used to eval that template.
+# An undef returned hash ref signifies that the returned template string
+# doesn't need to be evalled.
+# $out_num, if defined, signifies that this lookup is for an OUTLIST param
+#
+# Returns ($expr, $eval_vars, $is_template, $saw_DAE)
+# or empty list on failure.
+#
+# $expr:        text like 'sv_setiv($arg, $var)'
+# $eval_vars:   hash ref like { var => 'foo', arg => 'ST(0)', ... }
+# $is_template: $expr has '$arg' etc and needs evalling
+# $saw_DAE:     DO_ARRAY_ELEM was encountered
+#
+
+sub lookup_output_typemap {
+    my __PACKAGE__                   $self    = shift;
+    my ExtUtils::ParseXS             $pxs     = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub    = shift;
+    my                               $xbody   = shift;
+    my                               $out_num = shift;
+
+    my ($type, $num, $var, $do_setmagic, $output_code)
+        = @{$self}{qw(type arg_num var do_setmagic output_code)};
+
+    # values to return
+    my ($expr, $eval_vars, $is_template, $saw_DAE);
+    $is_template = 1;
+
+    if ($var eq 'RETVAL') {
+        # Do some preliminary RETVAL-specific checks and settings.
+
+        # Only OUT/OUTPUT vars (which update one of the passed args) should be
+        # calling set magic; RETVAL and OUTLIST should be setting the value of
+        # a fresh mortal or TARG. Note that a param can be both OUTPUT and
+        # OUTLIST - the value of $do_setmagic only applies to its use as an
+        # OUTPUT (updating) value.
+
+        $pxs->death("Internal error: do set magic requested on RETVAL")
+            if $do_setmagic;
+
+        # RETVAL normally has an undefined arg_num, although it can be
+        # set to a real index if RETVAL is also declared as a parameter.
+        # But when returning its value, it's always stored at ST(0).
+        $num = 1;
+
+        # It is possible for RETVAL to have multiple types, e.g.
+        #     int
+        #     foo(long RETVAL)
+        #
+        # In the above, 'long' is used for the RETVAL C var's declaration,
+        # while 'int' is used to generate the return code (for backwards
+        # compatibility).
+        $type = $xsub->{decl}{return_type}{type};
+    }
+
+    # ------------------------------------------------------------------
+    # Do initial processing of $type, including creating various derived
+    # values
+
+    unless (defined $type) {
+        $pxs->blurt("Error: can't determine output type for '$var'");
+        return;
+    }
+
+    # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
+    # valid vars which can appear within a typemap template.
+    (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+    $ntype =~ s/\(\)//g;
+
+    # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
+    # where it's the type of each array element. But it's also passed to
+    # the typemap template (although undocumented and virtually unused).
+    # Basically for a type like FooArray or FooArrayPtr, the subtype is Foo.
+    (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+
+    # whitespace-tidy the type
+    $type = ExtUtils::Typemaps::tidy_type($type);
+
+    # The type as supplied to the eval is Foo__Bar rather than Foo::Bar
+    my $eval_type = $type;
+    $eval_type =~ tr/:/_/
+        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
+
+    # We can be called twice for the same variable: once to update the
+    # original arg (via an entry in OUTPUT) and once to push the param's
+    # value (via OUTLIST). When doing the latter, any override code on an
+    # OUTPUT line should not be used.
+    undef $output_code if defined $out_num;
+
+    # ------------------------------------------------------------------
+    # Find the template code (pre any eval) and store it in $expr.
+    # This is typically obtained via a typemap lookup, but can be
+    # overridden. Also set vars ready for evalling the typemap template.
+
+    my $outputmap;
+    my $typemaps = $pxs->{typemaps_object};
+
+    if (defined $output_code) {
+        # An override on an OUTPUT line: use that instead of the typemap.
+        # Note that we don't set $expr here, because $expr holds a template
+        # string pre-eval, while OUTPUT override code is *not*
+        # template-expanded, so $output_code is effectively post-eval code.
+        $is_template = 0;
+        $expr = $output_code;
+    }
+    elsif ($type =~ /^array\(([^,]*),(.*)\)/) {
+        # Specially handle the implicit array return type, "array(type, nlelem)"
+        # rather than using a typemap entry. It returns a string SV whose
+        # buffer is a copy of $var, which it assumes is a C array of
+        # type 'type' with 'nelem' elements.
+
+        my ($atype, $nitems) = ($1, $2);
+
+        if ($var ne 'RETVAL') {
+            # This special type is intended for use only as the return type of
+            # an XSUB
+            $pxs->blurt(  "Error: can't use array(type,nitems) type for "
+                        . (defined $out_num ? "OUTLIST" : "OUT")
+                        . " parameter");
+            return;
+        }
+
+        $expr =
+            "\tsv_setpvn(\$arg, (char *)\$var, $nitems * sizeof($atype));\n";
+    }
+    else {
+        # Handle a normal return type via a typemap.
+
+        # Get the output map entry for this type; complain if not found.
+        my $typemap = $typemaps->get_typemap(ctype => $type);
+        if (not $typemap) {
+            $pxs->report_typemap_failure($typemaps, $type);
+            return;
+        }
+
+        $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
+        if (not $outputmap) {
+            $pxs->blurt(  "Error: no OUTPUT definition for type '$type', "
+                        . "typekind '" . $typemap->xstype . "' found");
+            return;
+        }
+
+        # Get the text of the typemap template, with a few transformations to
+        # make it work better with fussy C compilers. In particular, strip
+        # trailing semicolons and remove any leading white space before a '#'.
+
+        $expr = $outputmap->cleaned_code;
+    }
+
+    my $arg = $pxs->ST(defined $out_num ? $out_num + 1 : $num);
+
+    # Specify the environment for if/when the code template is evalled.
+    $eval_vars =
+        {
+            num             => $num,
+            var             => $var,
+            do_setmagic     => $do_setmagic,
+            subtype         => $subtype,
+            ntype           => $ntype,
+            arg             => $arg,
+            type            => $eval_type,
+            alias           => $xsub->{seen_ALIAS},
+            func_name       => $xsub->{decl}{name},
+            full_perl_name  => $xsub->{decl}{full_perl_name},
+            full_C_name     => $xsub->{decl}{full_C_name},
+        };
+
+
+    # ------------------------------------------------------------------
+    # Handle DO_ARRAY_ELEM token as a very special case
+
+    if (!defined $output_code and $expr =~ /\bDO_ARRAY_ELEM\b/) {
+        # See the comments in ExtUtils::ParseXS::Node::Param::as_code() that
+        # explain the similar code for the DO_ARRAY_ELEM hack there.
+
+        if ($var ne 'RETVAL') {
+            # Typemap templates containing DO_ARRAY_ELEM are assumed to
+            # contain a loop which explicitly stores a new mortal SV at
+            # each of the locations ST(0) .. ST(n-1), and which then uses
+            # the code from the typemap for the underlying array element
+            # to set each SV's value.
+            #
+            # This is a horrible hack for RETVAL, which would probably
+            # fail with OUTLIST due to stack offsets being wrong, and
+            # definitely would fail with OUT, which is supposed to be
+            # updating parameter SVs, not pushing anything on the stack.
+            # So forbid all except RETVAL.
+            $pxs->blurt("Error: can't use typemap containing DO_ARRAY_ELEM for "
+                        . (defined $out_num ? "OUTLIST" : "OUT")
+                        . " parameter");
+            return;
+        }
+
+        my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
+        if (not $subtypemap) {
+            $pxs->report_typemap_failure($typemaps, $subtype);
+            return;
+        }
+
+        my $suboutputmap =
+            $typemaps->get_outputmap(xstype => $subtypemap->xstype);
+
+        if (not $suboutputmap) {
+            $pxs->blurt(  "Error: no OUTPUT definition for subtype '$subtype', "
+                        . "typekind '" . $subtypemap->xstype . "' found");
+            return;
+        }
+
+        my $subexpr = $suboutputmap->cleaned_code;
+        $subexpr =~ s/ntype/subtype/g;
+        $subexpr =~ s/\$arg/ST(ix_$var)/g;
+        $subexpr =~ s/\$var/${var}\[ix_$var]/g;
+        $subexpr =~ s/\n\t/\n\t\t/g;
+        $expr =~ s/\bDO_ARRAY_ELEM\b/$subexpr/;
+
+        $saw_DAE = 1;
+    }
+
+    return $expr, $eval_vars, $is_template, $saw_DAE;
+}
+
+
+# $self->as_input_code():
 #
 # Emit the param object as C code which declares and initialise the variable.
 # See also the as_output_code() method, which emits code to return the value
 # of that local var.
 
-sub as_code {
-    my ExtUtils::ParseXS::Node::Param $self = shift;
-    my ExtUtils::ParseXS              $pxs  = shift;
-  
+sub as_input_code {
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
+    my                               $xbody = shift;
+
     my ($type, $arg_num, $var, $init, $no_init, $defer, $default)
         = @{$self}{qw(type arg_num var init no_init defer default)};
-  
+
     my $arg = $pxs->ST($arg_num);
-  
+
     if ($self->{is_length}) {
         # Process length(foo) parameter.
         # Basically for something like foo(char *s, int length(s)),
@@ -185,18 +1737,16 @@ sub as_code {
         # this sub with s as the var (as opposed to *this* call, which is
         # handling length(s)), by overriding the normal T_PV typemap (which
         # uses PV_nolen()).
-  
+
         my $name = $self->{len_name};
-  
+
         print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
         # defer this line until after all the other declarations
-        $pxs->{xsub_deferred_code_lines} .=
+        $xbody->{input_part}{deferred_code_lines} .=
                 "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
-  
-        # this var will be declared using the normal typemap mechanism below
         $var = "XSauto_length_of_$name";
     }
-  
+
     # Emit the variable's type and name.
     #
     # Includes special handling for function pointer types. An INPUT line
@@ -215,169 +1765,48 @@ sub as_code {
     #
     # So handle specially the specific case of a type containing '(*)' by
     # embedding the variable name *within* rather than *after* the type.
-  
-  
+
+
     if ($type =~ / \( \s* \* \s* \) /x) {
         # for a fn ptr type, embed the var name in the type declaration
         print "\t" . $pxs->map_type($type, $var);
     }
     else {
-        print "\t",
-                    ((defined($pxs->{xsub_class}) && $var eq 'CLASS')
-                        ? $type
-                        : $pxs->map_type($type, undef)),
-              "\t$var";
+        print   "\t",
+                ((defined($xsub->{decl}{class}) && $var eq 'CLASS')
+                    ? $type
+                    : $pxs->map_type($type, undef)),
+                "\t$var";
     }
-  
+
+    # Result of parse-phase lookup of INPUT typemap for this param's type.
+    my $lookup = $self->{input_typemap_vals};
+    $pxs->death(  "Internal error: parameter '$var' "
+                . "doesn't have input_typemap_vals")
+        unless $lookup;
+
+    my ($init_template, $eval_vars, $is_template) = @$lookup;
+
+    return unless defined $init_template; # an error occurred
+
+    unless ($is_template) {
+        # template already expanded
+        print " = $init_template\n";
+        return;
+    }
+
     # whitespace-tidy the type
     $type = ExtUtils::Typemaps::tidy_type($type);
-  
-    # Specify the environment for when the initialiser template is evaled.
-    # Only the common ones are specified here. Other fields may be added
-    # later.
-    my $eval_vars = {
-        type          => $type,
-        var           => $var,
-        num           => $arg_num,
-        arg           => $arg,
-    };
-  
-    # The type looked up in the eval is Foo__Bar rather than Foo::Bar
-    $eval_vars->{type} =~ tr/:/_/
-        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
-  
-    my $init_template;
-  
-    if (defined $init) {
-        # Use the supplied code template rather than getting it from the
-        # typemap
-  
-        $pxs->death(
-                "Internal error: ExtUtils::ParseXS::Node::Param::as_code(): "
-              . "both init and no_init supplied")
-            if $no_init;
-  
-        $eval_vars->{init} = $init;
-        $init_template = "\$var = $init";
-    }
-    elsif ($no_init) {
-        # don't add initialiser
-        $init_template = "";
-    }
-    else {
-        # Get the initialiser template from the typemap
-  
-        my $typemaps = $pxs->{typemaps_object};
-  
-        # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
-        # which can appear within a typemap template.
-        (my $ntype = $type) =~ s/\s*\*/Ptr/g;
-  
-        # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
-        # where it's the type of each array element. But it's also passed to
-        # the typemap template (although undocumented and virtually unused).
-        (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-  
-        # look up the TYPEMAP entry for this C type and grab the corresponding
-        # XS type name (e.g. $type of 'char *'  gives $xstype of 'T_PV'
-        my $typemap = $typemaps->get_typemap(ctype => $type);
-        if (not $typemap) {
-            $pxs->report_typemap_failure($typemaps, $type);
-            return;
-        }
-        my $xstype = $typemap->xstype;
-  
-        # An optimisation: for the typemaps which check that the dereferenced
-        # item is blessed into the right class, skip the test for DESTROY()
-        # methods, as more or less by definition, DESTROY() will be called
-        # on an object of the right class. Basically, for T_foo_OBJ, use
-        # T_foo_REF instead. T_REF_IV_PTR was added in v5.22.0.
-        $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
-            if $pxs->{xsub_func_name} =~ /DESTROY$/;
-  
-        # For a string-ish parameter foo, if length(foo) was also declared
-        # as a pseudo-parameter, then override the normal typedef - which
-        # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
-        # STRLEN_length_of_foo)
-        if (    $xstype eq 'T_PV'
-                and exists $pxs->{xsub_sig}{names}{"length($var)"})
-        {
-            print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
-            die "default value not supported with length(NAME) supplied"
-                if defined $default;
-            return;
-        }
-  
-        # Get the ExtUtils::Typemaps::InputMap object associated with the
-        # xstype. This contains the template of the code to be embedded,
-        # e.g. 'SvPV_nolen($arg)'
-        my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
-        if (not defined $inputmap) {
-            $pxs->blurt("Error: No INPUT definition for type '$type', typekind '$xstype' found");
-            return;
-        }
-  
-        # Get the text of the template, with a few transformations to make it
-        # work better with fussy C compilers. In particular, strip trailing
-        # semicolons and remove any leading white space before a '#'.
-        my $expr = $inputmap->cleaned_code;
-  
-        my $argoff = $arg_num - 1;
-  
-        # Process DO_ARRAY_ELEM. This is an undocumented hack that makes the
-        # horrible T_ARRAY typemap work. "DO_ARRAY_ELEM" appears as a token
-        # in the INPUT and OUTPUT code for for T_ARRAY, within a "for each
-        # element" loop, and the purpose of this branch is to substitute the
-        # token for some real code which will process each element, based
-        # on the type of the array elements (the $subtype).
-        #
-        # Note: This gruesome bit either needs heavy rethinking or
-        # documentation. I vote for the former. --Steffen, 2011
-        # Seconded, DAPM 2024.
-        if ($expr =~ /\bDO_ARRAY_ELEM\b/) {
-            my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
-            if (not $subtypemap) {
-                $pxs->report_typemap_failure($typemaps, $subtype);
-                return;
-            }
-  
-            my $subinputmap =
-                $typemaps->get_inputmap(xstype => $subtypemap->xstype);
-            if (not $subinputmap) {
-                $pxs->blurt("Error: No INPUT definition for type '$subtype',
-                            typekind '" . $subtypemap->xstype . "' found");
-                return;
-            }
-  
-            my $subexpr = $subinputmap->cleaned_code;
-            $subexpr =~ s/\$type/\$subtype/g;
-            $subexpr =~ s/ntype/subtype/g;
-            $subexpr =~ s/\$arg/ST(ix_$var)/g;
-            $subexpr =~ s/\n\t/\n\t\t/g;
-            $subexpr =~ s/is not of (.*\")/[arg %d] is not of $1, ix_$var + 1/g;
-            $subexpr =~ s/\$var/${var}\[ix_$var - $argoff]/;
-            $expr =~ s/\bDO_ARRAY_ELEM\b/$subexpr/;
-        }
-  
-        if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
-            $pxs->{xsub_SCOPE_enabled} = 1;
-        }
-  
-        # Specify additional environment for when a template derived from a
-        # *typemap* is evalled.
-        @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
-        $init_template = $expr;
-    }
-  
+
     # Now finally, emit the actual variable declaration and initialisation
     # line(s). The variable type and name will already have been emitted.
-  
+
     my $init_code =
         length $init_template
             ? $pxs->eval_input_typemap_code("qq\a$init_template\a", $eval_vars)
             : "";
-  
-  
+
+
     if (defined $default
         # XXX for now, for backcompat, ignore default if the
         # param has a typemap override
@@ -388,63 +1817,69 @@ sub as_code {
     ) {
         # Has a default value. Just terminate the variable declaration, and
         # defer the initialisation.
-  
+
         print ";\n";
-  
+
         # indent the code 1 step further
         $init_code =~ s/(\t+)/$1    /g;
         $init_code =~ s/        /\t/g;
-  
+
         if ($default eq 'NO_INIT') {
             # for foo(a, b = NO_INIT), add code to initialise later only if
             # an arg was supplied.
-            $pxs->{xsub_deferred_code_lines}
+            $xbody->{input_part}{deferred_code_lines}
                 .= sprintf "\n\tif (items >= %d) {\n%s;\n\t}\n",
                            $arg_num, $init_code;
         }
         else {
             # for foo(a, b = default), add code to initialise later to either
             # the arg or default value
-            my $else = ($init_code =~ /\S/) ? "\telse {\n$init_code;\n\t}\n" : "";
-  
+            my $else = $init_code =~ /\S/
+                        ? "\telse {\n$init_code;\n\t}\n"
+                        : "";
+
             $default =~ s/"/\\"/g; # escape double quotes
-            $pxs->{xsub_deferred_code_lines}
+            $xbody->{input_part}{deferred_code_lines}
                 .= sprintf "\n\tif (items < %d)\n\t    %s = %s;\n%s",
-                        $arg_num,
-                        $var,
-                        $pxs->eval_input_typemap_code("qq\a$default\a",
-                                                       $eval_vars),
-                        $else;
+                    $arg_num,
+                    $var,
+                    $pxs->eval_input_typemap_code("qq\a$default\a",
+                                                   $eval_vars),
+                    $else;
         }
     }
-    elsif ($pxs->{xsub_SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
+    elsif ($xsub->{SCOPE_enabled} or $init_code !~ /^\s*\Q$var\E =/) {
         # The template is likely a full block rather than a '$var = ...'
         # expression. Just terminate the variable declaration, and defer the
         # initialisation.
         # Note that /\Q$var\E/ matches the string containing whatever $var
         # was expanded to in the eval.
-  
+
         print ";\n";
-  
-        $pxs->{xsub_deferred_code_lines} .= sprintf "\n%s;\n", $init_code
+
+        $xbody->{input_part}{deferred_code_lines}
+                                        .= sprintf "\n%s;\n", $init_code
             if $init_code =~ /\S/;
     }
     else {
         # The template starts with '$var = ...'. The variable name has already
         # been emitted, so remove it from the typemap before evalling it,
-  
+
         $init_code =~ s/^\s*\Q$var\E(\s*=\s*)/$1/
-            or $pxs->death("panic: typemap doesn't start with '\$var='\n");
-  
+            # we just checked above that it starts with var=, so this
+            # should never happen
+            or $pxs->death(
+                "Internal error: typemap doesn't start with '\$var='\n");
+
         printf "%s;\n", $init_code;
     }
-  
+
     if (defined $defer) {
-        $pxs->{xsub_deferred_code_lines}
-            .= $pxs->eval_input_typemap_code("qq\a$defer\a", $eval_vars) . "\n";
+        $xbody->{input_part}{deferred_code_lines}
+            .=   $pxs->eval_input_typemap_code("qq\a$defer\a", $eval_vars)
+               . "\n";
     }
 }
-
 
 
 # $param->as_output_code($ParseXS_object, $out_num])
@@ -520,537 +1955,396 @@ sub as_code {
 # code or typemaps.
 
 sub as_output_code {
-  my ExtUtils::ParseXS::Node::Param $self = shift;
-  my ExtUtils::ParseXS              $pxs  = shift;
-  my $out_num = shift;
+    my __PACKAGE__                   $self   = shift;
+    my ExtUtils::ParseXS             $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub   = shift;
+    my                               $xbody  = shift;
+    my                               $out_num = shift;
 
-  my ($type, $num, $var, $do_setmagic, $output_code)
-    = @{$self}{qw(type arg_num var do_setmagic output_code)};
+    my ($type, $var, $do_setmagic, $output_code)
+        = @{$self}{qw(type var do_setmagic output_code)};
 
-  if ($var eq 'RETVAL') {
-    # Do some preliminary RETVAL-specific checks and settings.
+    if ($var eq 'RETVAL') {
+        # It is possible for RETVAL to have multiple types, e.g.
+        #     int
+        #     foo(long RETVAL)
+        #
+        # In the above, 'long' is used for the RETVAL C var's declaration,
+        # while 'int' is used to generate the return code (for backwards
+        # compatibility).
+        $type = $xsub->{decl}{return_type}{type};
+    }
 
-    # Only OUT/OUTPUT vars (which update one of the passed args) should be
-    # calling set magic; RETVAL and OUTLIST should be setting the value of
-    # a fresh mortal or TARG. Note that a param can be both OUTPUT and
-    # OUTLIST - the value of $do_setmagic only applies to its use as an
-    # OUTPUT (updating) value.
+    # whitespace-tidy the type
+    $type = ExtUtils::Typemaps::tidy_type($type);
 
-    $pxs->death("Internal error: do set magic requested on RETVAL")
-      if $do_setmagic;
+    # We can be called twice for the same variable: once to update the
+    # original arg (via an entry in OUTPUT) and once to push the param's
+    # value (via OUTLIST). When doing the latter, any override code on an
+    # OUTPUT line should not be used.
+    undef $output_code if defined $out_num;
 
-    # RETVAL normally has an undefined arg_num, although it can be
-    # set to a real index if RETVAL is also declared as a parameter.
-    # But when returning its value, it's always stored at ST(0).
-    $num = 1;
+    # Result of parse-phase lookup of OUTPUT typemap for this param's type.
+    my $lookup = defined $out_num
+                            ? $self->{output_typemap_vals_outlist}
+                            : $self->{output_typemap_vals};
+    $pxs->death(  "Internal error: parameter '$var' "
+                . "doesn't have output_typemap_vals")
+        unless $lookup;
 
-    # It is possible for RETVAL to have multiple types, e.g.
-    #     int
-    #     foo(long RETVAL)
+    my ($expr, $eval_vars, $is_template, $saw_DAE) = @$lookup;
+
+    return unless defined $expr; # error
+
+    if ($saw_DAE) {
+        # We do our own code emitting and return here (rather than control
+        # passing on to normal RETVAL processing) since that processing is
+        # expecting to push a single temp onto the stack, while our code
+        # pushes several temps.
+        print $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
+        return;
+    }
+    elsif (!$is_template) {
+        # $expr doesn't need evalling - use as-is
+        $output_code = $expr;
+    }
+
+    my $ntype = $eval_vars->{ntype};
+    my $num   = $eval_vars->{num};
+    my $arg   = $eval_vars->{arg};
+
+    # ------------------------------------------------------------------
+    # Now emit code for the three types of return value:
     #
-    # In the above, 'long' is used for the RETVAL C var's declaration,
-    # while 'int' is used to generate the return code (for backwards
-    # compatibility).
-    $type = $pxs->{xsub_return_type};
-  }
-
-
-  # ------------------------------------------------------------------
-  # Do initial processing of $type, including creating various derived
-  # values
-
-  unless (defined $type) {
-    $pxs->blurt("Can't determine output type for '$var'");
-    return;
-  }
-
-  # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
-  # valid vars which can appear within a typemap template.
-  (my $ntype = $type) =~ s/\s*\*/Ptr/g;
-  $ntype =~ s/\(\)//g;
-
-  # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
-  # where it's the type of each array element. But it's also passed to
-  # the typemap template (although undocumented and virtually unused).
-  # Basically for a type like FooArray or FooArrayPtr, the subtype is Foo.
-  (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-
-  # whitespace-tidy the type
-  $type = ExtUtils::Typemaps::tidy_type($type);
-
-  # The type as supplied to the eval is Foo__Bar rather than Foo::Bar
-  my $eval_type = $type;
-  $eval_type =~ tr/:/_/ unless $pxs->{config_RetainCplusplusHierarchicalTypes};
-
-  # We can be called twice for the same variable: once to update the
-  # original arg (via an entry in OUTPUT) and once to push the param's
-  # value (via OUTLIST). When doing the latter, any override code on an
-  # OUTPUT line should not be used.
-  undef $output_code if defined $out_num;
-
-
-  # ------------------------------------------------------------------
-  # Find the template code (pre any eval) and store it in $expr.
-  # This is typically obtained via a typemap lookup, but can be
-  # overridden. Also set vars ready for evalling the typemap template.
-
-  my $expr;
-  my $outputmap;
-  my $typemaps = $pxs->{typemaps_object};
-
-  if (defined $output_code) {
-    # An override on an OUTPUT line: use that instead of the typemap.
-    # Note that we don't set $expr here, because $expr holds a template
-    # string pre-eval, while OUTPUT override code is *not*
-    # template-expanded, so $output_code is effectively post-eval code.
-  }
-  elsif ($type =~ /^array\(([^,]*),(.*)\)/) {
-    # Specially handle the implicit array return type, "array(type, nlelem)"
-    # rather than using a typemap entry. It returns a string SV whose
-    # buffer is a copy of $var, which it assumes is a C array of
-    # type 'type' with 'nelem' elements.
-
-    my ($atype, $nitems) = ($1, $2);
-
-    if ($var ne 'RETVAL') {
-      # This special type is intended for use only as the return type of
-      # an XSUB
-      $pxs->blurt("Can't use array(type,nitems) type for "
-                    . (defined $out_num ? "OUTLIST" : "OUT")
-                    . " parameter");
-      return;
-    }
-
-    $expr = "\tsv_setpvn(\$arg, (char *)\$var, $nitems * sizeof($atype));\n";
-  }
-  else {
-    # Handle a normal return type via a typemap.
-
-    # Get the output map entry for this type; complain if not found.
-    my $typemap = $typemaps->get_typemap(ctype => $type);
-    if (not $typemap) {
-      $pxs->report_typemap_failure($typemaps, $type);
-      return;
-    }
-
-    $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
-    if (not $outputmap) {
-      $pxs->blurt("Error: No OUTPUT definition for type '$type', typekind '"
-                   . $typemap->xstype . "' found");
-      return;
-    }
-
-    # Get the text of the typemap template, with a few transformations to
-    # make it work better with fussy C compilers. In particular, strip
-    # trailing semicolons and remove any leading white space before a '#'.
-
-    $expr = $outputmap->cleaned_code;
-  }
-
-  my $arg = $pxs->ST(defined $out_num ? $out_num + 1 : $num);
-
-  # Specify the environment for if/when the code template is evalled.
-  my $eval_vars = {
-                    num         => $num,
-                    var         => $var,
-                    do_setmagic => $do_setmagic,
-                    subtype     => $subtype,
-                    ntype       => $ntype,
-                    arg         => $arg,
-                    type        => $eval_type,
-                  };
-
-
-  # ------------------------------------------------------------------
-  # Handle DO_ARRAY_ELEM token as a very special case
-
-  if (!defined $output_code and $expr =~ /\bDO_ARRAY_ELEM\b/) {
-    # See the comments in ExtUtils::ParseXS::Node::Param::as_code() that
-    # explain the similar code for the DO_ARRAY_ELEM hack there.
-
-    if ($var ne 'RETVAL') {
-      # Typemap templates containing DO_ARRAY_ELEM are assumed to contain
-      # a loop which explicitly stores a new mortal SV at each of the
-      # locations ST(0) .. ST(n-1), and which then uses the code from the
-      # typemap for the underlying array element to set each SV's value.
-      #
-      # This is a horrible hack for RETVAL, which would probably fail with
-      # OUTLIST due to stack offsets being wrong, and definitely would
-      # fail with OUT, which is supposed to be updating parameter SVs, not
-      # pushing anything on the stack. So forbid all except RETVAL.
-      $pxs->blurt("Can't use typemap containing DO_ARRAY_ELEM for "
-                    . (defined $out_num ? "OUTLIST" : "OUT")
-                    . " parameter");
-      return;
-    }
-
-    my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
-    if (not $subtypemap) {
-      $pxs->report_typemap_failure($typemaps, $subtype);
-      return;
-    }
-
-    my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
-    if (not $suboutputmap) {
-      $pxs->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
-      return;
-    }
-
-    my $subexpr = $suboutputmap->cleaned_code;
-    $subexpr =~ s/ntype/subtype/g;
-    $subexpr =~ s/\$arg/ST(ix_$var)/g;
-    $subexpr =~ s/\$var/${var}\[ix_$var]/g;
-    $subexpr =~ s/\n\t/\n\t\t/g;
-    $expr =~ s/\bDO_ARRAY_ELEM\b/$subexpr/;
-
-    # We do our own code emitting and return here (rather than control
-    # passing on to normal RETVAL processing) since that processing is
-    # expecting to push a single temp onto the stack, while our code
-    # pushes several temps.
-    print $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
-    return;
-  }
-
-
-  # ------------------------------------------------------------------
-  # Now emit code for the three types of return value:
-  #
-  #   RETVAL           - The usual case: store an SV at ST(0) which is set
-  #                      to the value of RETVAL. This is typically a new
-  #                      mortal, but may be optimised to use TARG.
-  #
-  #   OUTLIST param    - if $out_num is defined (and will be >= 0) Push
-  #                      after any RETVAL, new mortal(s) containing the
-  #                      current values of the local var set from that
-  #                      parameter. (May also use TARG if not already used
-  #                      by RETVAL).
-  #
-  #   OUT/OUTPUT param - update passed arg SV at ST($num-1) (which
-  #                      corresponds to param) with the current value of
-  #                      the local var set from that parameter.
-
-  if ($var ne 'RETVAL' and not defined $out_num) {
-    # This is a normal OUTPUT var: i.e. a named parameter whose
-    # corresponding arg on the stack should be updated with the
-    # parameter's current value by using the code contained in the
-    # output typemap.
+    #   RETVAL           - The usual case: store an SV at ST(0) which is set
+    #                      to the value of RETVAL. This is typically a new
+    #                      mortal, but may be optimised to use TARG.
     #
-    # Note that for args being *updated* (as opposed to replaced), this
-    # branch relies on the typemap to Do The Right Thing. For example,
-    # T_BOOL currently has this typemap entry:
+    #   OUTLIST param    - if $out_num is defined (and will be >= 0) Push
+    #                      after any RETVAL, new mortal(s) containing the
+    #                      current values of the local var set from that
+    #                      parameter. (May also use TARG if not already used
+    #                      by RETVAL).
     #
-    # ${"$var" eq "RETVAL" ? \"$arg = boolSV($var);"
-    #                      : \"sv_setsv($arg, boolSV($var));"}
-    #
-    # which means that if we hit this branch, $evalexpr will have been
-    # expanded to something like "sv_setsv(ST(2), boolSV(foo))".
+    #   OUT/OUTPUT param - update passed arg SV at ST($num-1) (which
+    #                      corresponds to param) with the current value of
+    #                      the local var set from that parameter.
 
-    unless (defined $num) {
-      $pxs->blurt("Internal error: OUT parameter has undefined argument number");
-      return;
+    if ($var ne 'RETVAL' and not defined $out_num) {
+        # This is a normal OUTPUT var: i.e. a named parameter whose
+        # corresponding arg on the stack should be updated with the
+        # parameter's current value by using the code contained in the
+        # output typemap.
+        #
+        # Note that for args being *updated* (as opposed to replaced), this
+        # branch relies on the typemap to Do The Right Thing. For example,
+        # T_BOOL currently has this typemap entry:
+        #
+        # ${"$var" eq "RETVAL" ? \"$arg = boolSV($var);"
+        #                      : \"sv_setsv($arg, boolSV($var));"}
+        #
+        # which means that if we hit this branch, $evalexpr will have been
+        # expanded to something like "sv_setsv(ST(2), boolSV(foo))".
+
+        unless (defined $num) {
+            $pxs->blurt(
+                "Internal error: OUT parameter has undefined argument number");
+            return;
+        }
+
+        # Use the code on the OUTPUT line if specified, otherwise use the
+        # typemap
+        my $code = defined $output_code
+                ? "\t$output_code\n"
+                : $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
+        print $code;
+
+        # For parameters in the OUTPUT section, honour the SETMAGIC in force
+        # at the time. For parameters instead being output because of an OUT
+        # keyword in the signature, assume set magic always.
+        print "\tSvSETMAGIC($arg);\n" if !$self->{in_output} || $do_setmagic;
+        return;
     }
 
-    # Use the code on the OUTPUT line if specified, otherwise use the
-    # typemap
-    my $code = defined $output_code
-        ? "\t$output_code\n"
-        : $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
-    print $code;
+    # ------------------------------------------------------------------
+    # The rest of this main body handles RETVAL or "OUTLIST foo".
 
-    # For parameters in the OUTPUT section, honour the SETMAGIC in force
-    # at the time. For parameters instead being output because of an OUT
-    # keyword in the signature, assume set magic always.
-    print "\tSvSETMAGIC($arg);\n" if !$self->{in_output} || $do_setmagic;
-    return;
-  }
+    if (defined $output_code and !defined $out_num) {
+        # Handle this (just emit overridden code as-is):
+        #    OUTPUT:
+        #       RETVAL output_code
+        print "\t$output_code\n";
+        print "\t++SP;\n" if $xbody->{output_part}{stack_was_reset};
+        return;
+    }
 
+    # Emit a standard RETVAL/OUTLIST return
 
-  # ------------------------------------------------------------------
-  # The rest of this main body handles RETVAL or "OUTLIST foo".
+    # ------------------------------------------------------------------
+    # First, evaluate the typemap, expanding any vars like $var and $arg,
+    # for example,
+    #
+    #     $arg = newFoo($var);
+    # or
+    #     sv_setFoo($arg, $var);
+    #
+    # However, rather than using the actual destination (such as ST(0))
+    # for the value of $arg, we instead set it initially to RETVALSV. This
+    # is because often the SV will be used in more than one statement,
+    # and so it is more efficient to temporarily store it in a C auto var.
+    # So we normally emit code such as:
+    #
+    #  {
+    #     SV *RETVALSV;
+    #     RETVALSV = newFoo(RETVAL);
+    #     RETVALSV = sv_2mortal(RETVALSV);
+    #     ST(0) = RETVALSV;
+    #  }
+    #
+    # Rather than
+    #
+    #     ST(0) = newFoo(RETVAL);
+    #     sv_2mortal(ST(0));
+    #
+    # Later we sometimes modify the evalled typemap to change 'RETVALSV'
+    # to some other value:
+    #   - back to e.g. 'ST(0)' if there is no other use of the SV;
+    #   - to TARG when we are using the OP_ENTERSUB's targ;
+    #   - to $var when then return type is SV* (and thus ntype is SVPtr)
+    #     and so the variable will already have been declared as type 'SV*'
+    #     and thus there is no need for a RETVALSV too.
+    #
+    # Note that we evaluate the typemap early here so that the various
+    # regexes below such as /^\s*\Q$arg\E\s*=/ can be matched against
+    # the *evalled* result of typemap entries such as
+    #
+    # ${ "$var" eq "RETVAL" ? \"$arg = $var;" : \"sv_setsv_mg($arg, $var);" }
+    #
+    # which may eval to something like "RETVALSV = RETVAL" and
+    # subsequently match /^\s*\Q$arg\E =/ (where $arg is "RETVAL"), but
+    # couldn't have matched against the original typemap.
+    # This is why we *always* set $arg to 'RETVALSV' first and then modify
+    # the typemap later - we don't know what final value we want for $arg
+    # until after we've examined the evalled result.
 
-  if (defined $output_code and !defined $out_num) {
-    # Handle this (just emit overridden code as-is):
-    #    OUTPUT:
-    #       RETVAL output_code
-    print "\t$output_code\n";
-    print "\t++SP;\n" if $pxs->{xsub_stack_was_reset};
-    return;
-  }
+    my $orig_arg = $arg;
+    $eval_vars->{arg} = $arg = 'RETVALSV';
+    my $evalexpr = $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
 
-  # Emit a standard RETVAL/OUTLIST return
+    # ------------------------------------------------------------------
+    # Examine the just-evalled typemap code to determine what optimisations
+    # etc can be performed and what sort of code needs emitting. The two
+    # halves of this following if/else examine the two forms of evalled
+    # typemap:
+    #
+    #     RETVALSV = newFoo((Foo)RETVAL);
+    # and
+    #     sv_setFoo(RETVALSV, (Foo)RETVAL);
+    #
+    # In particular, the first form is assumed to be returning an SV which
+    # the function has generated itself (e.g. newSVREF()) and which may
+    # just need mortalising; while the second form generally needs a call
+    # to sv_newmortal() first to create an SV which the function can then
+    # set the value of.
 
+    my $do_mortalize   = 0;  # Emit an sv_2mortal()
+    my $want_newmortal = 0;  # Emit an sv_newmortal()
+    my $retvar = 'RETVALSV'; # The name of the C var which holds the SV
+                             # (likely tmp) to set to the value of the var
 
-  # ------------------------------------------------------------------
-  # First, evaluate the typemap, expanding any vars like $var and $arg,
-  # for example,
-  #
-  #     $arg = newFoo($var);
-  # or
-  #     sv_setFoo($arg, $var);
-  #
-  # However, rather than using the actual destination (such as ST(0))
-  # for the value of $arg, we instead set it initially to RETVALSV. This
-  # is because often the SV will be used in more than one statement,
-  # and so it is more efficient to temporarily store it in a C auto var.
-  # So we normally emit code such as:
-  #
-  #  {
-  #     SV *RETVALSV;
-  #     RETVALSV = newFoo(RETVAL);
-  #     RETVALSV = sv_2mortal(RETVALSV);
-  #     ST(0) = RETVALSV;
-  #  }
-  #
-  # Rather than
-  #
-  #     ST(0) = newFoo(RETVAL);
-  #     sv_2mortal(ST(0));
-  #
-  # Later we sometimes modify the evalled typemap to change 'RETVALSV'
-  # to some other value:
-  #   - back to e.g. 'ST(0)' if there is no other use of the SV;
-  #   - to TARG when we are using the OP_ENTERSUB's targ;
-  #   - to $var when then return type is SV* (and thus ntype is SVPtr)
-  #     and so the variable will already have been declared as type 'SV*'
-  #     and thus there is no need for a RETVALSV too.
-  #
-  # Note that we evaluate the typemap early here so that the various
-  # regexes below such as /^\s*\Q$arg\E\s*=/ can be matched against
-  # the *evalled* result of typemap entries such as
-  #
-  # ${ "$var" eq "RETVAL" ? \"$arg = $var;" : \"sv_setsv_mg($arg, $var);" }
-  #
-  # which may eval to something like "RETVALSV = RETVAL" and
-  # subsequently match /^\s*\Q$arg\E =/ (where $arg is "RETVAL"), but
-  # couldn't have matched against the original typemap.
-  # This is why we *always* set $arg to 'RETVALSV' first and then modify
-  # the typemap later - we don't know what final value we want for $arg
-  # until after we've examined the evalled result.
+    if ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
+        # Handle this form: RETVALSV = newFoo((Foo)RETVAL);
+        # newFoo creates its own SV: we just need to mortalise and return it
 
-  my $orig_arg = $arg;
-  $eval_vars->{arg} = $arg = 'RETVALSV';
-  my $evalexpr = $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
+        # Is the SV one of the immortal SVs?
+        if ($evalexpr =~
+                /^\s*
+                    \Q$arg\E
+                    \s*=\s*
+                    (  boolSV\(.*\)
+                    |  &PL_sv_yes
+                    |  &PL_sv_no
+                    |  &PL_sv_undef
+                    |  &PL_sv_zero
+                    )
+                    \s*;\s*$
+                /x)
+        {
+            # If so, we can skip mortalising it to stop it leaking.
+            $retvar = $orig_arg; # just assign to ST(N) directly
+        }
+        else {
+            # general '$arg = newFOO()' typemap
+            $do_mortalize = 1;
 
-
-  # ------------------------------------------------------------------
-  # Examine the just-evalled typemap code to determine what optimisations
-  # etc can be performed and what sort of code needs emitting. The two
-  # halves of this following if/else examine the two forms of evalled
-  # typemap:
-  #
-  #     RETVALSV = newFoo((Foo)RETVAL);
-  # and
-  #     sv_setFoo(RETVALSV, (Foo)RETVAL);
-  #
-  # In particular, the first form is assumed to be returning an SV which
-  # the function has generated itself (e.g. newSVREF()) and which may
-  # just need mortalising; while the second form generally needs a call
-  # to sv_newmortal() first to create an SV which the function can then
-  # set the value of.
-
-  my $do_mortalize   = 0;  # Emit an sv_2mortal()
-  my $want_newmortal = 0;  # Emit an sv_newmortal()
-  my $retvar = 'RETVALSV'; # The name of the C var which holds the SV
-                           # (likely tmp) to set to the value of the var
-
-  if ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
-    # Handle this form: RETVALSV = newFoo((Foo)RETVAL);
-    # newFoo creates its own SV: we just need to mortalise and return it
-
-    # Is the SV one of the immortal SVs?
-    if ($evalexpr =~
-        /^\s*
-          \Q$arg\E
-          \s*=\s*
-          (  boolSV\(.*\)
-          |  &PL_sv_yes
-          |  &PL_sv_no
-          |  &PL_sv_undef
-          |  &PL_sv_zero
-          )
-          \s*;\s*$
-        /x)
-    {
-      # If so, we can skip mortalising it to stop it leaking.
-      $retvar = $orig_arg; # just assign to ST(N) directly
+            # If $var is already of type SV*, then use that instead of
+            # declaring 'SV* RETVALSV' as an intermediate var.
+            $retvar = $var if $ntype eq "SVPtr";
+        }
     }
     else {
-      # general '$arg = newFOO()' typemap
-      $do_mortalize = 1;
+        # Handle this (eval-expanded) form of typemap:
+        #     sv_setFoo(RETVALSV, (Foo)var);
+        # We generally need to supply a mortal SV for the typemap code to
+        # set, and then return it on the stack,
 
-      # If $var is already of type SV*, then use that instead of
-      # declaring 'SV* RETVALSV' as an intermediate var.
-      $retvar = $var if $ntype eq "SVPtr";
+        # First, see if we can use the targ (if any) attached to the current
+        # OP_ENTERSUB, to avoid having to create a new mortal.
+        #
+        # The targetable() OutputMap class method looks at whether the code
+        # snippet is of a form suitable for using TARG as the destination.
+        # It looks for one of a known list of well-behaved setting function
+        # calls, like sv_setiv() which will set the TARG to a value that
+        # doesn't include magic, tieing, being a reference (which would leak
+        # as the TARG is never freed), etc. If so, emit dXSTARG and replace
+        # RETVALSV with TARG.
+        #
+        # For backwards-compatibility, dXSTARG may have already been emitted
+        # early in the XSUB body, when a more restrictive set of targ-
+        # compatible typemap entries were checked for. Note that dXSTARG is
+        # defined as something like:
+        #
+        #   SV * targ = (PL_op->op_private & OPpENTERSUB_HASTARG)
+        #               ? PAD_SV(PL_op->op_targ) : sv_newmortal()
+
+        if (   $pxs->{config_optimize}
+                && ExtUtils::Typemaps::OutputMap->targetable($evalexpr)
+                && !$xbody->{output_part}{targ_used})
+        {
+            # So TARG is available for use.
+            $retvar = 'TARG';
+            # can only use TARG to return one value
+            $xbody->{output_part}{targ_used} = 1;
+
+            # Since we're using TARG for the return SV, see if we can use
+            # the TARG[iun] macros as appropriate to speed up setting it.
+            # If so, convert "sv_setiv(RETVALSV, val)" to "TARGi(val,1)"
+            # and similarly for uv and nv. These macros skip a function
+            # call for the common case where TARG is already a simple
+            # IV/UV/NV. Convert the _mg forms too: since we're setting the
+            # TARG, there shouldn't be set magic on it, so the _mg action
+            # can be safely ignored.
+
+            $evalexpr =~ s{
+                              ^
+                              (\s*)
+                              sv_set([iun])v(?:_mg)?
+                              \(
+                                  \s* RETVALSV \s* ,
+                                  \s* (.*)
+                              \)
+                              ( \s* ; \s*)
+                              $
+                          }
+                          {$1TARG$2($3, 1)$4}x;
+        }
+        else {
+            # general typemap: give it a fresh SV to set the value of.
+            $want_newmortal = 1;
+        }
     }
-  }
-  else {
-    # Handle this (eval-expanded) form of typemap:
-    #     sv_setFoo(RETVALSV, (Foo)var);
-    # We generally need to supply a mortal SV for the typemap code to
-    # set, and then return it on the stack,
 
-    # First, see if we can use the targ (if any) attached to the current
-    # OP_ENTERSUB, to avoid having to create a new mortal.
-    #
-    # The targetable() OutputMap class method looks at whether the code
-    # snippet is of a form suitable for using TARG as the destination.
-    # It looks for one of a known list of well-behaved setting function
-    # calls, like sv_setiv() which will set the TARG to a value that
-    # doesn't include magic, tieing, being a reference (which would leak
-    # as the TARG is never freed), etc. If so, emit dXSTARG and replace
-    # RETVALSV with TARG.
-    #
-    # For backwards-compatibility, dXSTARG may have already been emitted
-    # early in the XSUB body, when a more restrictive set of targ-
-    # compatible typemap entries were checked for. Note that dXSTARG is
-    # defined as something like:
-    #
-    #   SV * targ = (PL_op->op_private & OPpENTERSUB_HASTARG)
-    #               ? PAD_SV(PL_op->op_targ) : sv_newmortal()
+    # ------------------------------------------------------------------
+    # Now emit the return C code, based on the various flags and values
+    # determined above.
 
-    if (   $pxs->{config_optimize}
-        && ExtUtils::Typemaps::OutputMap->targetable($evalexpr)
-        && !$pxs->{xsub_targ_used})
-    {
-      # So TARG is available for use.
-      $retvar = 'TARG';
-      $pxs->{xsub_targ_used} = 1;  # can only use TARG to return one value
+    my $do_scope; # wrap code in a {} block
+    my @lines;    # Lines of code to eventually emit
 
-      # Since we're using TARG for the return SV, see if we can use the
-      # TARG[iun] macros as appropriate to speed up setting it.
-      # If so, convert "sv_setiv(RETVALSV, val)" to "TARGi(val,1)" and
-      # similarly for uv and nv. These macros skip a function call for the
-      # common case where TARG is already a simple IV/UV/NV. Convert the
-      # _mg forms too: since we're setting the TARG, there shouldn't be
-      # set magic on it, so the _mg action can be safely ignored.
+    # Do any declarations first
 
-      $evalexpr =~ s{
-                    ^
-                    (\s*)
-                    sv_set([iun])v(?:_mg)?
-                    \(
-                      \s* RETVALSV \s* ,
-                      \s* (.*)
-                    \)
-                    ( \s* ; \s*)
-                    $
-                    }
-                    {$1TARG$2($3, 1)$4}x;
+    if ($retvar eq 'TARG' && !$xsub->{decl}{return_type}{use_early_targ}) {
+        push @lines, "\tdXSTARG;\n";
+        $do_scope = 1;
     }
-    else {
-      # general typemap: give it a fresh SV to set the value of.
-      $want_newmortal = 1;
+    elsif ($retvar eq 'RETVALSV') {
+        push @lines, "\tSV * $retvar;\n";
+        $do_scope = 1;
     }
-  }
 
+    push @lines, "\tRETVALSV = sv_newmortal();\n" if $want_newmortal;
 
-  # ------------------------------------------------------------------
-  # Now emit the return C code, based on the various flags and values
-  # determined above.
+    # Emit the typemap, while changing the name of the destination SV back
+    # from RETVALSV to one of the other forms (varname/TARG/ST(N)) if was
+    # determined earlier to be necessary.
+    # Skip emitting it if it's of the trivial form "var = var", which is
+    # generated when the typemap is of the form '$arg = $var' and the SVPtr
+    # optimisation is using $var for the destination.
 
-  my $do_scope; # wrap code in a {} block
-  my @lines;    # Lines of code to eventually emit
+    $evalexpr =~ s/\bRETVALSV\b/$retvar/g if $retvar ne 'RETVALSV';
 
-  # Do any declarations first
-
-  if ($retvar eq 'TARG' && !$pxs->{xsub_targ_declared_early}) {
-    push @lines, "\tdXSTARG;\n";
-    $do_scope = 1;
-  }
-  elsif ($retvar eq 'RETVALSV') {
-    push @lines, "\tSV * $retvar;\n";
-    $do_scope = 1;
-  }
-
-  push @lines, "\tRETVALSV = sv_newmortal();\n" if $want_newmortal;
-
-  # Emit the typemap, while changing the name of the destination SV back
-  # from RETVALSV to one of the other forms (varname/TARG/ST(N)) if was
-  # determined earlier to be necessary.
-  # Skip emitting it if it's of the trivial form "var = var", which is
-  # generated when the typemap is of the form '$arg = $var' and the SVPtr
-  # optimisation is using $var for the destination.
-
-  $evalexpr =~ s/\bRETVALSV\b/$retvar/g if $retvar ne 'RETVALSV';
-
-  unless ($evalexpr =~ /^\s*\Q$var\E\s*=\s*\Q$var\E\s*;\s*$/) {
-    push @lines, split /^/, $evalexpr
-  }
-
-  # Emit mortalisation on the result SV if needed
-  push @lines, "\t$retvar = sv_2mortal($retvar);\n" if $do_mortalize;
-
-  # Emit the final 'ST(n) = RETVALSV' or similar, unless ST(n)
-  # was already assigned to earlier directly by the typemap.
-  push @lines, "\t$orig_arg = $retvar;\n" unless $retvar eq $orig_arg;
-
-  if ($do_scope) {
-    # Add an extra 4-indent, then wrap the output code in a new block
-    for (@lines) {
-      s/\t/        /g;   # break down all tabs into spaces
-      s/^/    /;         # add 4-space extra indent
-      s/        /\t/g;   # convert 8 spaces back to tabs
+    unless ($evalexpr =~ /^\s*\Q$var\E\s*=\s*\Q$var\E\s*;\s*$/) {
+        push @lines, split /^/, $evalexpr
     }
-    unshift @lines,  "\t{\n";
-    push    @lines,  "\t}\n";
-  }
 
-  print @lines;
-  print "\t++SP;\n" if $pxs->{xsub_stack_was_reset};
+    # Emit mortalisation on the result SV if needed
+    push @lines, "\t$retvar = sv_2mortal($retvar);\n" if $do_mortalize;
+
+    # Emit the final 'ST(n) = RETVALSV' or similar, unless ST(n)
+    # was already assigned to earlier directly by the typemap.
+    push @lines, "\t$orig_arg = $retvar;\n" unless $retvar eq $orig_arg;
+
+    if ($do_scope) {
+        # Add an extra 4-indent, then wrap the output code in a new block
+        for (@lines) {
+            s/\t/        /g;   # break down all tabs into spaces
+            s/^/    /;         # add 4-space extra indent
+            s/        /\t/g;   # convert 8 spaces back to tabs
+        }
+        unshift @lines,  "\t{\n";
+        push    @lines,  "\t}\n";
+    }
+
+    print @lines;
+    print "\t++SP;\n" if $xbody->{output_part}{stack_was_reset};
 }
+
 
 # ======================================================================
 
-package ExtUtils::ParseXS::Node::Sig;
+package ExtUtils::ParseXS::Node::Params;
 
-# Node subclass which holds the state of an XSUB's signature, based on the
-# XSUB's actual signature plus any INPUT lines. It is a mainly a list of
-# Node::Param children.
+# A Node subclass which holds a list of the parameters for an XSUB.
+# It is a mainly a list of Node::Param or Node::IO_Param kids, and is
+# used in two contexts.
+#
+# First, as a field of an xsub_decl node, where it holds a list of Param
+# objects which represent the individual parameters found within an XSUB's
+# signature, plus possibly extra synthetic ones such as THIS and RETVAL.
+#
+# Second, as a field of an xbody node, where it contains a copy of the
+# signature's Params object (and Param children), but where the children
+# are in fact IO_param objects and hold augmented information provided by
+# any INPUT and OUTPUT blocks within that XSUB body (of which there can be
+# more than one in the presence of CASE).
 
-BEGIN {
-    our @ISA = qw(ExtUtils::ParseXS::Node);
+BEGIN { $build_subclass->(
 
-    our @FIELDS = (
-        @ExtUtils::ParseXS::Node::FIELDS,
-        'orig_params',   # Array ref of Node::Param objects representing
-                         # the original (as parsed) parameters of this XSUB
+    'names',         # Hash ref mapping variable names to Node::Param
+                     # or Node::IO_Param objects
 
-        'params',        # Array ref of Node::Param objects representing
-                         # the current parameters of this XSUB - this
-                         # is orig_params plus any updated fields from
-                         # processing INPUT and OUTPUT lines. Note that
-                         # with multiple CASE: blocks, there can be
-                         # multiple sets of INPUT and OUTPUT etc blocks.
-                         # params is reset to the contents of orig_params
-                         # after the start of each new CASE: block.
+    'params_text',   # Str:  The original text of the sig, e.g.
+                     #         "param1, int param2 = 0"
 
-        'names',         # Hash ref mapping variable names to Node::Param
-                         # objects
+    'seen_ellipsis', # Bool: XSUB signature has (   ,...)
 
-        'sig_text',      # The original text of the sig, e.g.
-                         #   'param1, int param2 = 0'
+    'nargs',         # Int:  The number of args expected from caller
+    'min_args',      # Int:  The minimum number of args allowed from caller
 
-        'seen_ellipsis', # Bool: XSUB signature has (   ,...)
-
-        'nargs',         # The number of args expected from caller
-        'min_args',      # The minimum number of args allowed from caller
-
-        'auto_function_sig_override', # the C_ARGS value, if any
-
-    );
-
-    fields->import(@FIELDS) if $USING_FIELDS;
-}
+    'auto_function_sig_override', # Str: the C_ARGS value, if any
+)};
 
 
 # ----------------------------------------------------------------
-# Parse the XSUB's signature: $sig->{sig_text}
+# Parse the parameter list of an XSUB's signature.
 #
-# Split the signature on commas into parameters, while allowing for
-# things like '(a = ",", b)'. Then for each parameter, parse its
-# various fields and store in a ExtUtils::ParseXS::Node::Param object.
-# Store those Param objects within the Sig object, plus any other state
-# deduced from the signature, such as min/max permitted number of args.
+# Split the XSUB's parameter list on commas into parameters, while
+# allowing for things like '(a = ",", b)'.
+#
+# Then for each parameter, parse its various fields and store in a
+# ExtUtils::ParseXS::Node::Param object. Store those Param objects within
+# the Params object, plus any other state deduced from the signature, such
+# as min/max permitted number of args.
 #
 # A typical signature might look like:
 #
@@ -1096,12 +2390,16 @@ $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
 
 
 sub parse {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
-    my ExtUtils::ParseXS            $pxs  = shift;
+    my __PACKAGE__                   $self = shift;
+    my ExtUtils::ParseXS             $pxs  = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub = shift;
+    my $params_text                        = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
 
     # remove line continuation chars (\)
-    $self->{sig_text} =~ s/\\\s*/ /g;
-    my $sig_text = $self->{sig_text};
+    $params_text =~ s/\\\s*/ /g;
+    $self->{params_text} = $params_text;
 
     my @param_texts;
     my $opt_args = 0; # how many params with default values seen
@@ -1109,8 +2407,8 @@ sub parse {
 
     # First, split signature into separate parameters
 
-    if ($sig_text =~ /\S/) {
-        my $sig_c = "$sig_text ,";
+    if ($params_text =~ /\S/) {
+        my $sig_c = "$params_text ,";
         use re 'eval'; # needed for 5.16.0 and earlier
         my $can_use_regex = ($sig_c =~ /^( (??{ $C_arg }) , )* $ /x);
         no re 'eval';
@@ -1126,8 +2424,9 @@ sub parse {
             # This is the fallback parameter-splitting path for when the
             # $C_arg regex doesn't work. This code path should ideally
             # never be reached, and indicates a design weakness in $C_arg.
-            @param_texts = split(/\s*,\s*/, $sig_text);
-            Warn($pxs, "Warning: cannot parse parameter list '$sig_text', fallback to split");
+            @param_texts = split(/\s*,\s*/, $params_text);
+            Warn($pxs,   "Warning: cannot parse parameter list "
+                       . "'$params_text', fallback to split");
         }
     }
     else {
@@ -1136,11 +2435,14 @@ sub parse {
 
     # C++ methods get a fake object/class param at the start.
     # This affects arg numbering.
-    if (defined($pxs->{xsub_class})) {
+    if (defined($xsub->{decl}{class})) {
         my ($var, $type) =
-            ($pxs->{xsub_seen_static} or $pxs->{xsub_func_name} eq 'new')
+            (   $xsub->{decl}{return_type}{static}
+             or $xsub->{decl}{name} eq 'new'
+            )
                 ? ('CLASS', "char *")
-                : ('THIS',  "$pxs->{xsub_class} *");
+                : ('THIS',    ($xsub->{decl}{is_const} ? "const " : "")
+                            . "$xsub->{decl}{class} *");
 
         my ExtUtils::ParseXS::Node::Param $param
                 = ExtUtils::ParseXS::Node::Param->new( {
@@ -1149,9 +2451,8 @@ sub parse {
                         is_synthetic => 1,
                         arg_num      => ++$nargs,
                     });
-        push @{$self->{params}}, $param;
+        push @{$self->{kids}}, $param;
         $self->{names}{$var} = $param;
-        $param->check($pxs)
     }
 
     # For non-void return types, add a fake RETVAL parameter. This triggers
@@ -1161,226 +2462,86 @@ sub parse {
     #
     # Note that a RETVAL param can be in three main states:
     #
-    #  fully-synthetic  What is being created here. RETVAL hasn't appeared
-    #                   in a signature or INPUT.
+    # fully-synthetic  What is being created here. RETVAL hasn't appeared
+    #                  in a signature or INPUT.
     #
-    #  semi-real        Same as fully-synthetic, but with a defined
-    #                   arg_num, and with an updated position within
-    #                   @{$self->{params}}.
-    #                   A RETVAL has appeared in the signature, but
-    #                   without a type yet specified, so it continues to
-    #                   use {xsub_return_type}.
+    # semi-real        Same as fully-synthetic, but with a defined arg_num,
+    #                  and with an updated position within
+    #                  @{$self->{kids}}.  A RETVAL has appeared in the
+    #                  signature, but without a type yet specified, so it
+    #                  continues to use $xsub->{decl}{return_type}{type}.
     #
-    #  real             is_synthetic, no_init flags turned off. Its
-    #                   type comes from the sig or INPUT line. This is
-    #                   just a normal parameter now.
+    # real             is_synthetic, no_init flags turned off. Its type
+    #                  comes from the sig or INPUT line. This is just a
+    #                  normal parameter now.
 
-    if ($pxs->{xsub_return_type} ne 'void') {
+    if ($xsub->{decl}{return_type}{type} ne 'void') {
         my ExtUtils::ParseXS::Node::Param $param =
             ExtUtils::ParseXS::Node::Param->new( {
                 var          => 'RETVAL',
-                type         => $pxs->{xsub_return_type},
+                type         => $xsub->{decl}{return_type}{type},
                 no_init      => 1, # just declare the var, don't initialise it
                 is_synthetic => 1,
             } );
 
-        push @{$self->{params}}, $param;
+        push @{$self->{kids}}, $param;
         $self->{names}{RETVAL} = $param;
-        $param->check($pxs)
     }
 
-    for (@param_texts) {
-        # Process each parameter. A parameter is of the general form:
-        #
-        #    OUT char* foo = expression
-        #
-        #  where:
-        #    IN/OUT/OUTLIST etc are only allowed under
-        #                      $pxs->{config_allow_inout}
-        #
-        #    a C type       is only allowed under
-        #                      $pxs->{config_allow_argtypes}
-        #
-        #    foo            can be a plain C variable name, or can be
-        #    length(foo)    but only under $pxs->{config_allow_argtypes}
-        #
-        #    = default      default value - only allowed under
-        #                      $pxs->{config_allow_argtypes}
+    for my $param_text (@param_texts) {
+        # Parse each parameter.
 
-        s/^\s+//;
-        s/\s+$//;
+        $param_text =~ s/^\s+//;
+        $param_text =~ s/\s+$//;
 
         # Process ellipsis (...)
 
-        $pxs->blurt("further XSUB parameter seen after ellipsis (...)")
+        $pxs->blurt("Error: further XSUB parameter seen after ellipsis (...)")
             if $self->{seen_ellipsis};
 
-        if ($_ eq '...') {
+        if ($param_text eq '...') {
             $self->{seen_ellipsis} = 1;
             next;
         }
 
-        # Decompose parameter into its components.
-        # Note that $name can be either 'foo' or 'length(foo)'
+        my $param = ExtUtils::ParseXS::Node::Param->new();
+        $param->parse($pxs, $self, $param_text)
+            or next;
 
-        my ($out_type, $type, $name, $sp1, $sp2, $default) =
-                /^
-                     (?:
-                         (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
-                         \b\s*
-                     )?
-                     (.*?)                             # optional type
-                     \s*
-                     \b
-                     (   \w+                           # var
-                         | length\( \s*\w+\s* \)       # length(var)
-                     )
-                     (?:
-                            (\s*) = (\s*) ( .*?)       # default expr
-                     )?
-                     \s*
-                 $
-                /x;
+        push @{$self->{kids}}, $param;
+        $self->{names}{$param->{var}} = $param unless $param->{var} eq 'SV *';
+        $opt_args++ if defined $param->{default};
+        # Give the param a number if it will consume one of the passed args
+        $param->{arg_num} = ++$nargs
+            unless (  defined $param->{in_out} && $param->{in_out} eq "OUTLIST"
+                    or $param->{is_length})
 
-        unless (defined $name) {
-            if (/^ SV \s* \* $/x) {
-                # special-case SV* as a placeholder for backwards
-                # compatibility.
-                push @{$self->{params}},
-                    ExtUtils::ParseXS::Node::Param->new( {
-                        var     => 'SV *',
-                        arg_num => ++$nargs,
-                    });
-            }
-            else {
-                $pxs->blurt("Unparseable XSUB parameter: '$_'");
-            }
-            next;
-        }
-
-        undef $type unless length($type) && $type =~ /\S/;
-
-        my ExtUtils::ParseXS::Node::Param $param
-                = ExtUtils::ParseXS::Node::Param->new( {
-                        var => $name,
-                    });
-
-        # Check for duplicates
-
-        my $old_param = $self->{names}{$name};
-        if ($old_param) {
-            if (    $name eq 'RETVAL'
-                    and $old_param->{is_synthetic}
-                    and !defined $old_param->{arg_num})
-            {
-                # RETVAL is currently fully synthetic. Now that it has
-                # been declared as a parameter too, override any implicit
-                # RETVAL declaration. Delete the original param from the
-                # param list.
-                @{$self->{params}} = grep $_ != $old_param, @{$self->{params}};
-                # If the param declaration includes a type, it becomes a
-                # real parameter. Otherwise the param is kept as
-                # 'semi-real' (synthetic, but with an arg_num) until such
-                # time as it gets a type set in INPUT, which would remove
-                # the synthetic/no_init.
-                $param = $old_param if !defined $type;
-            }
-            else {
-                $pxs->blurt(
-                        "Error: duplicate definition of parameter '$name' ignored");
-                next;
-            }
-        }
-
-        push @{$self->{params}}, $param;
-        $self->{names}{$name} = $param;
-
-        # Process optional IN/OUT etc modifier
-
-        if (defined $out_type) {
-            if ($pxs->{config_allow_inout}) {
-                $out_type =  $out_type eq 'IN' ? '' : $out_type;
-            }
-            else {
-                $pxs->blurt("parameter IN/OUT modifier not allowed under -noinout");
-            }
-        }
-        else {
-            $out_type = '';
-        }
-
-        # Process optional type
-
-        if (defined($type) && !$pxs->{config_allow_argtypes}) {
-            $pxs->blurt("parameter type not allowed under -noargtypes");
-            undef $type;
-        }
-
-        # Process 'length(foo)' pseudo-parameter
-
-        my $is_length;
-        my $len_name;
-
-        if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-            if ($pxs->{config_allow_argtypes}) {
-                $len_name = $1;
-                $is_length = 1;
-                if (defined $default) {
-                    $pxs->blurt("Default value not allowed on length() parameter '$len_name'");
-                    undef $default;
-                }
-            }
-            else {
-                $pxs->blurt("length() pseudo-parameter not allowed under -noargtypes");
-            }
-        }
-
-        # Handle ANSI params: those which have a type or 'length(s)',
-        # and which thus don't need a matching INPUT line.
-
-        if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-            @$param{qw(type is_ansi)} = ($type, 1);
-
-            if ($is_length) {
-                $param->{no_init}   = 1;
-                $param->{is_length} = 1;
-                $param->{len_name}  = $len_name;
-            }
-        }
-
-        $param->{in_out} = $out_type if length $out_type;
-        $param->{no_init} = 1        if $out_type =~ /^OUT/;
-
-        # Process the default expression, including making the text
-        # to be used in "usage: ..." error messages.
-        my $report_def = '';
-        if (defined $default) {
-            $opt_args++;
-            # The default expression for reporting usage. For backcompat,
-            # sometimes preserve the spaces either side of the '='
-            $report_def =    ((defined $type or $is_length) ? '' : $sp1)
-                           . "=$sp2$default";
-            $param->{default_usage} = $report_def;
-            $param->{default} = $default;
-        }
-
-        if ($out_type eq "OUTLIST" or $is_length) {
-            $param->{arg_num} = undef;
-        }
-        else {
-            $param->{arg_num} = ++$nargs;
-        }
     } # for (@param_texts)
 
     $self->{nargs}    = $nargs;
     $self->{min_args} = $nargs - $opt_args;
+
+    # for each parameter of the form 'length(foo)', mark the corresponding
+    # 'foo' parameter as 'has_length', or error out if foo not found.
+    for my $param (@{$self->{kids}}) {
+        next unless $param->{is_length};
+        my $name = $param->{len_name};
+        if (exists $self->{names}{$name}) {
+            $self->{names}{$name}{has_length} = 1;
+        }
+        else {
+            $pxs->blurt("Error: length() on non-parameter '$name'");
+        }
+    }
+
+    1;
 }
 
 
 # Return a string to be used in "usage: .." error messages.
 
 sub usage_string {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
+    my __PACKAGE__ $self = shift;
 
     my @args = map  {
                           $_->{var}
@@ -1392,7 +2553,7 @@ sub usage_string {
                grep {
                         defined $_->{arg_num},
                     }
-               @{$self->{params}};
+               @{$self->{kids}};
 
     push @args, '...' if $self->{seen_ellipsis};
     return join ', ', @args;
@@ -1405,11 +2566,11 @@ sub usage_string {
 # function, e.g. 'a, &b, c'.
 
 sub C_func_signature {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
-    my ExtUtils::ParseXS            $pxs  = shift;
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
 
     my @args;
-    for my $param (@{$self->{params}}) {
+    for my $param (@{$self->{kids}}) {
         next if    $param->{is_synthetic} # THIS/CLASS/RETVAL
                    # if a synthetic RETVAL has acquired an arg_num, then
                    # it's appeared in the signature (although without a
@@ -1434,7 +2595,7 @@ sub C_func_signature {
         # isn't passed from perl (so no arg_num), but *is* passed to
         # the C function and then back to perl.
         next unless defined $param->{arg_num} or $io eq 'OUTLIST';
-        
+
         my $a = $param->{var};
         $a = "&$a" if $param->{is_addr} or $io =~ /OUT/;
         push @args, $a;
@@ -1450,14 +2611,14 @@ sub C_func_signature {
 # e.g. '$$;$$@'.
 
 sub proto_string {
-    my ExtUtils::ParseXS::Node::Sig $self = shift;
+    my __PACKAGE__ $self = shift;
 
     # Generate a prototype entry for each param that's bound to a real
     # arg. Use '$' unless the typemap for that param has specified an
     # overridden entry.
     my @p = map  defined $_->{proto} ? $_->{proto} : '$',
             grep defined $_->{arg_num} && $_->{arg_num} > 0,
-            @{$self->{params}};
+            @{$self->{kids}};
 
     my @sep = (';'); # separator between required and optional args
     my $min = $self->{min_args};
@@ -1469,6 +2630,2187 @@ sub proto_string {
     push @p, @sep, '@' if $self->{seen_ellipsis};  # '...'
     return join '', @p;
 }
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::xbody;
+
+# This node holds all the foo_part nodes which make up the body of an
+# XSUB. Note that in the presence of CASE: keywords, an XSUB may have
+# multiple xbodys, one per CASE.
+# This node doesn't contain the signature, and nor is it responsible
+# for emitting the code for the closing part of an XSUB e.g. the
+# XSRETURN(N); there is only one of those per XSUB, so is handled by a
+# higher-level node.
+
+BEGIN { $build_subclass->(
+    'ioparams', # Params object: per-body copy of params which accumulate
+                # extra info from any INPUT and OUTPUT sections (which can
+                # vary between different CASEs)
+
+    # Node objects representing the various parts of an xbody. These
+    # are aliases of the same objects in @{$self->{kids}} for easier
+    # access.
+    'input_part',
+    'init_part',
+    'code_part',
+    'output_part',
+    'cleanup_part',
+
+    # Misc parse state
+
+    'seen_RETVAL_in_CODE',   # Bool: have seen 'RETVAL' within a CODE block
+    'seen_autocall',         # Bool: this xbody has an autocall node
+    'OUTPUT_SETMAGIC_state', # Bool: most recent value of SETMAGIC in an
+                             #       OUTPUT section.
+
+)};
+
+
+sub parse {
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    {
+        # Make a per-xbody copy of the Params object, which will
+        # accumulate any extra info from (per-CASE) INPUT and OUTPUT
+        # sections.
+
+        my $orig = $xsub->{decl}{params};
+
+        # make a shallow copy
+        my $ioparams = ExtUtils::ParseXS::Node::Params->new($orig);
+
+        # now duplicate (deep copy) any Param objects and regenerate a new
+        # names-mapping hash
+
+        $ioparams->{kids} = [];
+        $ioparams->{names}  = {};
+
+        for my $op (@{$orig->{kids}}) {
+            my $p  = ExtUtils::ParseXS::Node::IO_Param->new($op);
+            # don't copy the current proto state (from the most recent
+            # CASE) into the new CASE.
+            undef $p->{proto};
+            push @{$ioparams->{kids}}, $p;
+            $ioparams->{names}{$p->{var}} = $p;
+        }
+
+        $self->{ioparams} = $ioparams;
+    }
+
+    # by default, OUTPUT entries have SETMAGIC: ENABLE
+    $self->{OUTPUT_SETMAGIC_state} = 1;
+
+    for my $part (qw(input_part init_part code_part output_part cleanup_part)) {
+        my $kid = "ExtUtils::ParseXS::Node::$part"->new();
+        if ($kid->parse($pxs, $xsub, $self)) {
+            push @{$self->{kids}}, $kid;
+            $self->{$part} = $kid;
+        }
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
+
+    # Emit opening brace. With cmd-line switch "-except", prefix it with 'TRY'
+    print   +($pxs->{config_allow_exceptions} ? ' TRY' : '')
+          . "    $open_brace\n";
+
+    if ($self->{kids}) {
+        $_->as_code($pxs, $xsub, $self) for @{$self->{kids}};
+    }
+
+    # ----------------------------------------------------------------
+    # Emit trailers for the body of the XSUB
+    # ----------------------------------------------------------------
+
+    if ($xsub->{SCOPE_enabled}) {
+        # the matching opens were emitted in input_part->as_code()
+        print "      $close_brace\n";
+        # PPCODE->as_code emits its own LEAVE and return, so this
+        # line would never be reached.
+        print "      LEAVE;\n" unless $xsub->{seen_PPCODE};
+    }
+
+    # matches the $open_brace at the start of this function
+    print "    $close_brace\n";
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+      |    BEGHANDLERS
+      |    CATCHALL
+      |    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
+      |    ENDHANDLERS
+EOF
+
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::input_part;
+
+BEGIN { $build_subclass->(
+
+    # Str: used during code generation:
+    # a multi-line string containing lines of code to be emitted *after*
+    # all INPUT and PREINIT keywords have been processed.
+    'deferred_code_lines',
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Process any implicit INPUT section.
+    {
+        my $input = ExtUtils::ParseXS::Node::INPUT->new();
+        if (   $input->parse($pxs, $xsub, $xbody)
+            && $input->{kids}
+            && @{$input->{kids}})
+        {
+            $input->{implicit} = 1;
+            push @{$self->{kids}}, $input;
+        }
+    }
+
+    # Repeatedly look for INPUT or similar or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
+    $self->parse_keywords(
+            $pxs, $xsub, $xbody,
+            undef,  # implies process as many keywords as possible
+
+              "C_ARGS|INPUT|INTERFACE_MACRO|PREINIT|SCOPE|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
+
+    # For each param, look up its INPUT typemap information now (at parse
+    # time) and save the results for use later in as_input_code().
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        # might be placeholder param which doesn't get emitted
+        next unless defined $ioparam->{type};
+        $ioparam->{input_typemap_vals} =
+            [ $ioparam->lookup_input_typemap($pxs, $xsub, $xbody) ];
+    }
+
+    # Now that the type of each param is finalised, calculate its
+    # overridden prototype character, if any.
+    #
+    # Note that the type of a param can change during parsing, so when to
+    # call this method is significant. In particular:
+    # - THIS's type may be set provisionally based on the XSUB's package,
+    #   then updated if it appears as a parameter or on an INPUT line.
+    # - typemaps can be overridden using the TYPEMAP keyword, so
+    #   it's possible the typemap->proto() method will return something
+    #   different by the time the proto field is used to emit boot code.
+    # - params can have different types (and thus typemap entries and
+    #   proto chars) per CASE branch.
+    # So we calculate the per-case/xbody params' proto values here, and
+    # also use that value to update the per-XSUB value, warning if the
+    # value changes.
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        $ioparam->set_proto($pxs);
+        my $ioproto = $ioparam->{proto};
+        my $name    = $ioparam->{var};
+        next unless defined $name;
+        next unless $ioparam->{arg_num};
+
+        my $param = $$xsub{decl}{params}{names}{$name};
+        my $proto = $param->{proto};
+        $ioproto = '$' unless defined $ioproto;
+        if (defined $proto and $proto ne $ioproto) {
+            $pxs->Warn("Warning: prototype for '$name' varies: '$proto' versus '$ioproto'");
+        }
+        $param->{proto} = $ioproto;
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    my $ioparams = $xbody->{ioparams};
+
+    # Lines to be emitted after PREINIT/INPUT. This may get populated
+    # by the as_code() methods we call of our kids.
+    $self->{deferred_code_lines} = "";
+
+    if ($self->{kids}) {
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
+    }
+
+    # The matching closes will be emitted in xbody->as_code()
+    print ExtUtils::ParseXS::Q(<<"EOF") if $xsub->{SCOPE_enabled};
+        |      ENTER;
+        |      $open_brace
+EOF
+
+    # Emit any 'char * CLASS' or 'Foo::Bar *THIS' declaration if needed
+
+    for my $ioparam (grep $_->{is_synthetic}, @{$ioparams->{kids}}) {
+        $ioparam->as_input_code($pxs, $xsub, $xbody);
+    }
+
+    # Recent code emits a dXSTARG in a tighter scope and under
+    # additional circumstances, but some XS code relies on TARG
+    # having been declared. So continue to declare it early under
+    # the original circumstances.
+    if ($xsub->{decl}{return_type}{use_early_targ}) {
+        print "\tdXSTARG;\n";
+    }
+
+    # Emit declaration/init code for any parameters which were
+    # declared with a type or length(foo). Do the length() ones first.
+
+    for my $ioparam (
+            grep $_->{is_ansi},
+                (
+                    grep(  $_->{is_length}, @{$ioparams->{kids}} ),
+                    grep(! $_->{is_length}, @{$ioparams->{kids}} ),
+                )
+    )
+
+    {
+        $ioparam->as_input_code($pxs, $xsub, $xbody);
+    }
+
+    # ----------------------------------------------------------------
+    # All C variable declarations have now been emitted. It's now time
+    # to emit any code which goes before the main body (i.e. the CODE:
+    # etc or the implicit call to the wrapped function).
+    # ----------------------------------------------------------------
+
+    # Emit any code which has been deferred until all declarations
+    # have been done. This is typically INPUT typemaps which don't
+    # start with a simple '$var =' and so would not have been emitted
+    # at the variable declaration stage.
+    print $self->{deferred_code_lines};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::init_part;
+
+BEGIN { $build_subclass->(
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Repeatedly look for INIT or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
+    $self->parse_keywords(
+            $pxs, $xsub, $xbody,
+            undef,  # implies process as many keywords as possible
+
+              "C_ARGS|INIT|INTERFACE|INTERFACE_MACRO|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
+    }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::code_part;
+
+BEGIN { $build_subclass->(
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Look for a CODE/PPCODE/NOT_IMPLEMENTED_YET keyword; if found, add
+    # the kid to the current node.
+    return 1 if $self->parse_keywords(
+                        $pxs, $xsub, $xbody,
+                        1, # match at most one keyword
+                        "CODE|PPCODE",
+                        1, # also match NOT_IMPLEMENTED_YET
+                    );
+
+    # Didn't find a CODE keyword or similar, so auto-generate a call
+    # to the same-named C library function.
+
+    my $autocall = ExtUtils::ParseXS::Node::autocall->new();
+    # mainly a NOOP, but sets line number etc and flags that autocall seen
+    $autocall->parse($pxs, $xsub, $xbody);
+    push @{$self->{kids}}, $autocall;
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
+    }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::output_part;
+
+BEGIN { $build_subclass->(
+
+    # State during code emitting
+
+    'targ_used',       # Bool: the TARG has been allocated for this body,
+                       # so is no longer available for use.
+
+    'stack_was_reset', # Bool: An XSprePUSH was emitted, so return values
+                       # should be PUSHed rather than just set.
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Repeatedly look for POSTCALL, OUTPUT or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
+    # XXX POSTCALL is documented to precede OUTPUT, but here we allow
+    # them in any order and multiplicity.
+    $self->parse_keywords(
+            $pxs, $xsub, $xbody,
+            undef,  # implies process as many keywords as possible
+              "POSTCALL|OUTPUT|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
+
+    # Work out whether a RETVAL SV will be returned. Note that this should
+    # be consistent across CASEs; we warn elsewhere if CODE_sets_ST0 isn't
+    # consistent.
+
+    $xsub->{XSRETURN_count_basic} =
+           (     $xsub->{CODE_sets_ST0}
+             or  (    $xsub->{decl}{return_type}{type} ne "void"
+                  && !$xsub->{decl}{return_type}{no_output})
+            )
+            ? 1 : 0;
+
+    # For each param, look up its OUTPUT typemap information now (at parse
+    # time) and save the results for use later in as_output_code_().
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        # might be placeholder param which doesn't get emitted
+        # XXXX next unless defined $ioparam->{type};
+
+        next unless
+            # XXX simplify all this
+                (      defined $ioparam->{in_out}
+                    && $ioparam->{in_out} =~ /OUT$/
+                    && !$ioparam->{in_output}
+                )
+            ||
+
+                (
+                    $ioparam->{var} eq "RETVAL"
+                 && (   $ioparam->{in_output}
+                     or (     $xbody->{seen_autocall}
+                          &&  $xsub->{decl}{return_type}{type} ne "void"
+                          && !$xsub->{decl}{return_type}{no_output}
+                        )
+                    )
+                )
+            ||
+                (
+                        $ioparam->{in_output}
+                     && $ioparam->{var} ne 'RETVAL'
+                 )
+        ;
+
+        $ioparam->{output_typemap_vals} =
+            [ $ioparam->lookup_output_typemap($pxs, $xsub, $xbody) ];
+    }
+
+    my $out_num = $xsub->{XSRETURN_count_basic};
+
+    for my $ioparam (@{$xbody->{ioparams}{kids}}) {
+        next unless   defined $ioparam->{in_out}
+                   && $ioparam->{in_out} =~ /OUTLIST$/;
+        $ioparam->{output_typemap_vals_outlist} =
+            [ $ioparam->lookup_output_typemap($pxs, $xsub, $xbody, $out_num++) ];
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    # TARG is available for use within this body.
+    $self->{targ_used} = 0;
+
+    # SP still pointing at top arg
+    $self->{stack_was_reset} = 0;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
+    }
+
+    my $ioparams = $xbody->{ioparams};
+
+    my $retval = $ioparams->{names}{RETVAL};
+
+    # A CODE section using RETVAL must also have an OUTPUT entry
+    if (        $xbody->{seen_RETVAL_in_CODE}
+            and not ($retval && $retval->{in_output})
+            and     $xsub->{decl}{return_type}{type} ne 'void')
+    {
+        $pxs->Warn(  "Warning: found a 'CODE' section which seems to be "
+                   . "using 'RETVAL' but no 'OUTPUT' section.");
+    }
+
+    # Process any OUT vars: i.e. vars that are declared OUT in
+    # the XSUB's signature rather than in an OUTPUT section.
+
+    for my $param (
+                    grep {
+                               defined $_->{in_out}
+                            && $_->{in_out} =~ /OUT$/
+                            && !$_->{in_output}
+                    }
+                    @{$ioparams->{kids}})
+    {
+        $param->as_output_code($pxs, $xsub, $xbody);
+    }
+
+    my $basic = $xsub->{XSRETURN_count_basic};
+    my $extra = $xsub->{XSRETURN_count_extra};
+
+    if ($extra) {
+        # If there are any OUTLIST vars to be returned, we reset SP to
+        # the base of the stack frame and then PUSH any return values.
+        print "\tXSprePUSH;\n";
+        $self->{stack_was_reset} = 1;
+    }
+
+    # Extend the stack if we're going to return more values than were
+    # passed to us: which would consist of the GV or CV on the stack
+    # plus at least min_args at the time ENTERSUB was called.
+
+    my $n = $basic + $extra;
+    print "\tEXTEND(SP,$n);\n"
+        if $n > $ioparams->{min_args} + 1;
+
+    # All OUTPUT done; now handle an implicit or deferred RETVAL:
+    # - OUTPUT_line::as_code() will have skipped/deferred any RETVAL line,
+    # - non-void CODE-less XSUBs have an implicit 'OUTPUT: RETVAL'
+
+    if (   ($retval && $retval->{in_output})
+        or (    $xbody->{seen_autocall}
+            &&  $xsub->{decl}{return_type}{type} ne "void"
+            && !$xsub->{decl}{return_type}{no_output}
+           )
+        )
+    {
+        # emit a deferred RETVAL from OUTPUT or implicit RETVAL
+        $retval->as_output_code($pxs, $xsub, $xbody);
+    }
+
+    # Now that RETVAL is on the stack, also push any OUTLIST vars too
+    for my $param (grep {   defined $_->{in_out}
+                         && $_->{in_out} =~ /OUTLIST$/
+                        }
+                        @{$ioparams->{kids}}
+    ) {
+        $param->as_output_code($pxs, $xsub, $xbody, $basic++);
+    }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::cleanup_part;
+
+BEGIN { $build_subclass->(
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Repeatedly look for CLEANUP or generic keywords,
+    # parse the text following them, and add any resultant nodes
+    # as kids to the current node.
+    $self->parse_keywords(
+            $pxs, $xsub, $xbody,
+            undef,  # implies process as many keywords as possible
+              "CLEANUP|"
+            . $ExtUtils::ParseXS::Constants::generic_xsub_keywords_alt,
+        );
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    if ($self->{kids}) {
+        $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
+    }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::oneline;
+
+# Generic base class for keyword Nodes which consume only a single source
+# line, such as 'SCOPE: ENABLE'.
+# On entry, $self->lines[0] will be any text (on the same line) which
+# follows the keyword.
+
+BEGIN { $build_subclass->(
+    'text',    # Str: any text following the keyword
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    my $s = shift @{$pxs->{line}};
+    ExtUtils::ParseXS::Utilities::trim_whitespace($s);
+    $self->{text} = $s;
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::NOT_IMPLEMENTED_YET;
+
+# Handle NOT_IMPLEMENTED_YET pseudo-keyword
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+)};
+
+sub as_code {
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
+
+    print   "\n"
+          . "\tPerl_croak(aTHX_ \"$xsub->{decl}{full_perl_name}: "
+          . "not implemented yet\");\n";
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::CASE;
+
+# Process the 'CASE:' keyword
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'cond',  # Str: the C code of the condition for the CASE, or ''
+    'num',   # Int: which CASE number this is (starting at 1)
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+    $self->{cond} = $self->{text};
+    # Note that setting num, and consistency checking (like "else"
+    # without "if") is done by the caller, Node::xsub.
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                   $self  = shift;
+    my ExtUtils::ParseXS             $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
+
+    my $cond = $self->{cond};
+    $cond = " if ($cond)" if length $cond;
+    print "   ", ($self->{num} > 1 ? " else" : ""), $cond, "\n";
+    $_->as_code($pxs, $xsub) for @{$self->{kids}};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::autocall;
+
+# Handle an empty XSUB body (i.e. no CODE or PPCODE)
+# by auto-generating a call to a C library function of the same
+# name
+
+BEGIN { $build_subclass->(
+    'args', # Str: text to use for auto function call arguments
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    $xbody->{seen_autocall} = 1;
+
+    my $ioparams  = $xbody->{ioparams};
+    my $args = $ioparams->{auto_function_sig_override}; # C_ARGS
+    $args = $ioparams->C_func_signature($pxs)
+        unless defined $args;
+    $self->{args} = $args;
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    my $class = $xsub->{decl}{class};
+    my $name = $xsub->{decl}{name};
+
+    if (    defined $class
+        and $name eq "DESTROY")
+    {
+        # Emit a default body for a C++ DESTROY method: "delete THIS;"
+        print "\n\t";
+        print "delete THIS;\n";
+
+    }
+    else {
+        # Emit a default body: this will be a call to the function being
+        # wrapped. Typically:
+        #    RETVAL = foo(args);
+        # with the function name being appropriately modified when it's
+        # a C++ new() method etc.
+
+        print "\n\t";
+
+        if ($xsub->{decl}{return_type}{type} ne "void") {
+            print "RETVAL = ";
+        }
+
+        if (defined $class) {
+            if ($xsub->{decl}{return_type}{static}) {
+                # it has a return type of 'static foo'
+                if ($name eq 'new') {
+                    $name = "$class";
+                }
+                else {
+                    print "${class}::";
+                }
+            }
+            else {
+                if ($name eq 'new') {
+                    $name .= " $class";
+                }
+                else {
+                    print "THIS->";
+                }
+            }
+        }
+
+        # Handle "xsubpp -s=strip_prefix" hack
+        my $strip = $pxs->{config_strip_c_func_prefix};
+        $name =~ s/^\Q$strip//
+            if defined $strip;
+
+        $name = 'XSFUNCTION'
+            if    $xsub->{seen_INTERFACE}
+               or $xsub->{seen_INTERFACE_MACRO};
+
+        print "$name($self->{args});\n";
+
+    }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::enable;
+
+# Base class for keywords which accept ENABLE/DISABLE as an argument
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'enable',  # Bool
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{text}
+    my $s = $self->{text};
+
+    my ($keyword) = ($self =~ /(\w+)=/); # final component of class name
+
+    if ($keyword eq 'PROTOTYPES') {
+        # For backwards compatibility, parsing the PROTOTYPES
+        # keyword's value is very lax: in particular, anything that
+        # didn't match 'ENABLE' (such as 'Enabled' or 'ENABLED') used to
+        # be treated as valid but false. Continue to use this
+        # interpretation for backcomp, but warn.
+
+        unless ($s =~ /^ ((ENABLE|DISABLE) D? ;?) \s* $ /xi) {
+            $pxs->death("Error: $keyword: ENABLE/DISABLE")
+        }
+        my ($value, $en_dis) = ($1, $2);
+        $self->{enable} = $en_dis eq 'ENABLE' ? 1 : 0;
+        unless ($value =~ /^(ENABLE|DISABLE)$/) {
+            $pxs->Warn("Warning: invalid PROTOTYPES value '$value' interpreted as "
+                . ($self->{enable} ? 'ENABLE' : 'DISABLE'));
+        }
+    }
+    else {
+        # SCOPE / VERSIONCHECK / EXPORT_XSUB_SYMBOLS
+        $s =~ /^(ENABLE|DISABLE)\s*$/
+            or $pxs->death("Error: $keyword: ENABLE/DISABLE");
+        $self->{enable} = $1 eq 'ENABLE' ? 1 : 0;
+    }
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::EXPORT_XSUB_SYMBOLS;
+
+# Handle EXPORT_XSUB_SYMBOLS keyword
+#
+# Note that this keyword can appear both inside of and outside of an
+# XSUB; for the latter, it it is currently created as a temporary
+# object where as_code() is called immediately after parse() and then
+# the object is discarded.
+
+BEGIN { $build_subclass->(-parent => 'enable',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    my $xs_impl = $self->{enable} ? 'XS_EXTERNAL' : 'XS_INTERNAL';
+
+    # Change the definition of XS_EUPXS, so that any subsequent
+    # XS_EUPXS(fXS_Foo_foo) XSUB declarations will expand to
+    # XS_EXTERNAL/XS_INTERNAL as appropriate
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |#undef XS_EUPXS
+        |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
+        |#  define XS_EUPXS(name) XS_EXTERNAL(name)
+        |#elif defined(PERL_EUPXS_NEVER_EXPORT)
+        |#  define XS_EUPXS(name) XS_INTERNAL(name)
+        |#else
+        |#  define XS_EUPXS(name) $xs_impl(name)
+        |#endif
+EOF
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::PROTOTYPES;
+
+# Handle PROTOTYPES keyword
+#
+# Note that this keyword can appear both inside of and outside of an XSUB.
+
+BEGIN { $build_subclass->(-parent => 'enable',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    $pxs->{PROTOTYPES_value} = $self->{enable};
+    $pxs->{proto_behaviour_specified} = 1;
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::SCOPE;
+
+# Handle SCOPE keyword
+#
+# Note that this keyword can appear both inside of and outside of an XSUB.
+
+BEGIN { $build_subclass->(-parent => 'enable',
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+
+    # $xsub not defined for file-scoped SCOPE
+    if ($xsub) {
+        $pxs->blurt("Error: only one SCOPE declaration allowed per XSUB")
+            if $xsub->{seen_SCOPE};
+        $xsub->{seen_SCOPE} = 1;
+    }
+
+    # Note that currently this parse method can be called either while
+    # parsing an XSUB, or while processing file-scoped keywords
+    # just before an XSUB declaration. So potentially set both types of
+    # state.
+    $xsub->{SCOPE_enabled}      = $self->{enable} if $xsub;
+    $pxs->{file_SCOPE_enabled}  = $self->{enable};
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::VERSIONCHECK;
+
+# Handle VERSIONCHECK keyword
+#
+# Note that this keyword can appear both inside of and outside of an XSUB.
+
+BEGIN { $build_subclass->(-parent => 'enable',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, self->{enable}
+    $pxs->{VERSIONCHECK_value} = $self->{enable};
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::multiline;
+
+# Generic base class for keyword Nodes which can contain multiple lines,
+# e.g. C code or other data: so anything from ALIAS to PPCODE.
+# On entry, $self->lines[0] will be any text (on the same line) which
+# follows the keyword.
+
+BEGIN { $build_subclass->(
+    'lines', # Array ref of all lines until the next keyword
+)};
+
+
+# Consume all the lines up until the next directive and store in @$lines.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my @lines;
+
+    # Consume lines until the next directive
+    while(   @{$pxs->{line}}
+          && $pxs->{line}[0] !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o)
+    {
+        push @lines, shift @{$pxs->{line}};
+    }
+
+    $self->{lines} = \@lines;
+    1;
+}
+
+# No as_code() method - we rely on the sub-classes for that
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::multiline_merged;
+
+# Generic base class for keyword Nodes which can contain multiple lines.
+# It's the same is is parent class, :Node::multiline, except that in
+# addition, leading blank lines are skipped and the remainder concatenated
+# into a single line, 'text'.
+
+BEGIN { $build_subclass->(-parent => 'multiline',
+    'text', # Str: singe string containing all concatenated lines
+)};
+
+
+# Consume all the lines up until the next directive and store in
+# @$lines, and in addition, concatenate and store in $text
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, read lines
+
+    my @lines = @{$self->{lines}};
+    shift @lines while $lines[0] !~ /\S/;
+    # XXX ParseXS originally didn't include a trailing \n,
+    # so we carry on doing the same.
+    $self->{text} = join "\n", @lines;
+    ExtUtils::ParseXS::Utilities::trim_whitespace($self->{text});
+    1;
+}
+
+# No as_code() method - we rely on the sub-classes for that
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_ARGS;
+
+# Handle C_ARGS keyword
+
+BEGIN { $build_subclass->(-parent => 'multiline_merged',
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+    $xbody->{ioparams}{auto_function_sig_override} = $self->{text};
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INTERFACE;
+
+# Handle INTERFACE keyword
+
+BEGIN { $build_subclass->(-parent => 'multiline_merged',
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+    $xsub->{seen_INTERFACE} = 1;
+
+    my %map;
+
+    foreach (split /[\s,]+/, $self->{text}) {
+        my $short = $_;
+        $short =~ s/^$pxs->{PREFIX_pattern}//;
+        $map{$short} = $_;
+        $xsub->{map_interface_name_short_to_original}{$short} = $_;
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    my $macro = $xsub->{interface_macro};
+    $macro = 'XSINTERFACE_FUNC' unless defined $macro;
+
+    print <<"EOF";
+    XSFUNCTION = $macro($xsub->{decl}{return_type}{type},cv,XSANY.any_dptr);
+EOF
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INTERFACE_MACRO;
+
+# Handle INTERFACE_MACRO keyword
+
+BEGIN { $build_subclass->(-parent => 'multiline_merged',
+    'get_macro', # Str: name of macro to get interface
+    'set_macro', # Str: name of macro to set interface
+)};
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+
+    $xsub->{seen_INTERFACE_MACRO} = 1;
+
+    my $s = $self->{text};
+    my ($m1, $m2);
+    if ($s =~ /\s/) {        # two macros
+        ($m1, $m2) = split ' ', $s;
+    }
+    else {
+        # XXX rather than using a fake macro name which will probably
+        # give a compile error later, we should really warn/die here?
+        ($m1, $m2) = ($s, 'UNKNOWN_CVT');
+    }
+
+    $self->{get_macro} = $xsub->{interface_macro}     = $m1;
+    $self->{set_macro} = $xsub->{interface_macro_set} = $m2;
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::OVERLOAD;
+
+# Handle OVERLOAD keyword
+
+BEGIN { $build_subclass->(-parent => 'multiline_merged',
+    'ops', # Hash ref of seen overloaded op names
+)};
+
+# Add all overload method names, like 'cmp', '<=>', etc, (possibly
+# multiple ones per line) until the next keyword line, as 'seen' keys to
+# the $xsub->{overload_name_seen} hash.
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
+
+    my $s = $self->{text};
+    while ($s =~  s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
+        $self->{ops}{$1} = 1;
+        $xsub->{overload_name_seen}{$1} = 1;
+    }
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::ATTRS;
+
+# Handle ATTRS keyword
+
+BEGIN { $build_subclass->(-parent => 'multiline',
+)};
+
+
+# Read each lines's worth of attributes into a string that is pushed
+# to the $xsub->{attributes} array. Note that it doesn't matter that multiple
+# space-separated attributes on the same line are stored as a single
+# string; later, all the attribute lines are joined together into a single
+# string to pass to apply_attrs_string().
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines
+    for (@{$self->{lines}}) {
+        ExtUtils::ParseXS::Utilities::trim_whitespace($_);
+        push @{$xsub->{attributes}}, $_;
+    }
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::PROTOTYPE;
+
+# Handle PROTOTYPE keyword
+
+BEGIN { $build_subclass->(-parent => 'multiline',
+    'prototype', # Str: 0 (disable), 1 (enable), 2 ("") or "$$@" etc
+)};
+
+
+# PROTOTYPE: Process one or more lines of the form
+#    DISABLE
+#    ENABLE
+#    $$@      # a literal prototype
+#    <blank>  # an empty prototype - equivalent to foo() { ...}
+#
+# The last line takes precedence.
+# XXX It's a design flaw that more than one line can be processed.
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no, get lines
+
+    my $proto;
+
+    $pxs->death("Error: only one PROTOTYPE definition allowed per xsub")
+        if $xsub->{seen_PROTOTYPE};
+    $xsub->{seen_PROTOTYPE} = 1;
+
+    for (@{$self->{lines}}) {
+        next unless /\S/;
+        ExtUtils::ParseXS::Utilities::trim_whitespace($_);
+
+        if ($_ eq 'DISABLE') {
+            $proto = 0;
+        }
+        elsif ($_ eq 'ENABLE') {
+            $proto = 1;
+        }
+        else {
+            s/\s+//g; # remove any whitespace
+            $pxs->death("Error: invalid prototype '$_'")
+                unless ExtUtils::ParseXS::Utilities::valid_proto_string($_);
+            $proto = ExtUtils::ParseXS::Utilities::C_string($_);
+        }
+    }
+
+    # If no prototype specified, then assume empty prototype ""
+    $proto = 2 unless defined $proto;
+
+    $self->{prototype} = $proto;
+    $xsub->{prototype} = $proto;
+
+    $pxs->{proto_behaviour_specified} = 1;
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::codeblock;
+
+# Base class for Nodes which contain lines of literal C code
+# (such as PREINIT: and CODE:)
+
+BEGIN { $build_subclass->(-parent => 'multiline',
+)};
+
+
+# No parse() method: we just use the inherited Node::multiline's one
+
+
+# Emit the lines of code, skipping any initial blank lines,
+# and possibly wrapping in '#line' directives.
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    my @lines = map "$_\n", @{$self->{lines}};
+
+    my $n;
+
+    # Ignore any text following the keyword on the same line.
+    # XXX this quietly ignores any such text - really it should
+    # warn, but not yet for backwards compatibility.
+    $n++, shift @lines if @lines;
+
+    # strip leading blank lines
+    $n++, shift @lines while @lines && $lines[0] !~ /\S/;
+
+    # Add a leading '#line' if needed.
+    # The XSubPPtmp test is a bit of a hack - it skips synthetic blocks
+    # added to boot etc which may not have line numbers.
+    my $line0 = $lines[0];
+    if (   $pxs->{config_WantLineNumbers}
+        && ! (    defined $line0
+               && (   $line0 =~ /^\s*#\s*line\b/
+                   || $line0 =~ /^#if XSubPPtmp/
+                  )
+              )
+    ) {
+        unshift @lines,
+                  "#line "
+                . ($self->{line_no}  + $n)
+                . " \""
+                . ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                        $self->{file})
+                . "\"\n";
+    }
+
+    # Add a final "restoring" '#line'
+    push @lines, 'ExtUtils::ParseXS::CountLines'->end_marker . "\n"
+      if $pxs->{config_WantLineNumbers};
+
+    print for @lines;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::CODE;
+
+# Store the code lines associated with the CODE keyword
+
+BEGIN { $build_subclass->(-parent => 'codeblock',
+)};
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/lines
+
+    # Check if the code block includes "RETVAL". This check is for later
+    # use to warn if RETVAL is used but no OUTPUT block is present.
+    # Ignore if its only being used in an 'ignore this var' situation.
+    my $code = join "\n", @{$self->{lines}};
+    $xbody->{seen_RETVAL_in_CODE} =
+                    $code =~ /\bRETVAL\b/
+                 && $code !~ /\b\QPERL_UNUSED_VAR(RETVAL)/;
+
+    # Horrible 'void' return arg count hack.
+    #
+    # Until about 1996, xsubpp always emitted 'XSRETURN(1)', even for a
+    # void XSUB. This was fixed for CODE-less void XSUBs simply by
+    # actually honouring the 'void' type and emitting 'XSRETURN_EMPTY'
+    # instead. However, for CODE blocks, the documentation had already
+    # endorsed a coding style along the lines of
+    #
+    #    void
+    #    foo(...)
+    #       CODE:
+    #          ST(0) = sv_newmortal();
+    #
+    # i.e. the XSUB returns an SV even when the return type is 'void'.
+    # In 2024 there is still lots of code of this style out in the wild,
+    # even in the distros bundled with perl.
+    #
+    # So honouring the void type here breaks lots of existing code. Thus
+    # this hack specifically looks for: void XSUBs with a CODE block that
+    # appears to put stuff on the stack via 'ST(n)=' or 'XST_m()', and if
+    # so, emits 'XSRETURN(1)' rather than the 'XSRETURN_EMPTY' implied by
+    # the 'void' return type.
+    #
+    # So set a flag which indicates that a CODE block sets ST(0). This
+    # will be used later when deciding how/whether to emit EXTEND(n) and
+    # XSRETURN(n).
+
+    my $st0 =
+             $code =~ m{  ( \b ST      \s* \( [^;]* = )
+                        | ( \b XST_m\w+\s* \(         ) }x;
+
+    $pxs->Warn("Warning: ST(0) isn't consistently set in every CASE's CODE block")
+        if     defined $xsub->{CODE_sets_ST0}
+            && $xsub->{CODE_sets_ST0} ne $st0;
+    $xsub->{CODE_sets_ST0} = $st0;
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::CLEANUP;
+
+# Store the code lines associated with the CLEANUP: keyword
+
+BEGIN { $build_subclass->(-parent => 'codeblock',
+)};
+
+# Currently all methods are just inherited.
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INIT;
+
+# Store the code lines associated with the INIT: keyword
+
+BEGIN { $build_subclass->(-parent => 'codeblock',
+)};
+
+# Currently all methods are just inherited.
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::POSTCALL;
+
+# Store the code lines associated with the POSTCALL: keyword
+
+BEGIN { $build_subclass->(-parent => 'codeblock',
+)};
+
+# Currently all methods are just inherited.
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::PPCODE;
+
+# Store the code lines associated with the PPCODE keyword
+
+BEGIN { $build_subclass->(-parent => 'codeblock',
+)};
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/lines
+    $xsub->{seen_PPCODE} = 1;
+    # The only thing left should be the special "!End!\n\n" token.
+    $pxs->death("Error: PPCODE must be the last thing") if @{$pxs->{line}} > 1;
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    # Just emit the code block and then code to do PUTBACK and return.
+    # The # user of PPCODE is supposed to have done all the return stack
+    # manipulation themselves.
+    # Note that PPCODE blocks often include a XSRETURN(1) or
+    # similar, so any final code we emit after that is in danger of
+    # triggering a "statement is unreachable" warning.
+
+    $self->SUPER::as_code($pxs, $xsub, $xbody); # emit code block
+
+    print "\tLEAVE;\n" if $xsub->{SCOPE_enabled};
+
+    # Suppress "statement is unreachable" warning on HPUX
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+          "#pragma diag_suppress 2111\n",
+          "#endif\n"
+        if $^O eq "hpux";
+
+    print "\tPUTBACK;\n\treturn;\n";
+
+    # Suppress "statement is unreachable" warning on HPUX
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+          "#pragma diag_default 2111\n",
+          "#endif\n"
+        if $^O eq "hpux";
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::PREINIT;
+
+# Store the code lines associated with the PREINIT: keyword
+
+BEGIN { $build_subclass->(-parent => 'codeblock',
+)};
+
+# Currently all methods are just inherited.
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::keylines;
+
+# Base class for keyword FOO nodes which have a FOO_line kid node for
+# each line making up the keyword - such as OUTPUT etc.
+
+BEGIN { $build_subclass->(
+    'lines',   # Array ref of all lines until the next keyword
+)};
+
+
+# Process each line on and following the keyword line.
+# For each line, create a FOO_line kid and call its parse() method.
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+    my $do_notimplemented                    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Consume and process lines until the next directive.
+    while(   @{$pxs->{line}}
+          && $pxs->{line}[0] !~ /^$ExtUtils::ParseXS::BLOCK_regexp/o)
+    {
+        if ($do_notimplemented) {
+            # treat NOT_IMPLEMENTED_YET as another block separator, in
+            # addition to $BLOCK_regexp.
+            last if $pxs->{line}[0] =~ /^\s*NOT_IMPLEMENTED_YET/;
+        }
+
+        unless ($pxs->{line}[0] =~ /\S/) {  # skip blank lines
+            shift @{$pxs->{line}};
+            next;
+        }
+
+        push @{$self->{lines}}, $pxs->{line}[0];
+
+        my $class = ref($self) . '_line';
+        my $kid = $class->new();
+        # Keep the current line in $self->{lines} for now so that the
+        # parse() method below sees the right line number. We rely on that
+        # method to actually pop the line.
+        if ($kid->parse($pxs, $xsub, $xbody, $self)) {
+            push @{$self->{kids}}, $kid;
+        }
+    }
+
+    1;
+}
+
+
+# call as_code() on any kids which have that method
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    return unless $self->{kids};
+    $_->as_code($pxs, $xsub, $xbody) for @{$self->{kids}};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::keyline;
+
+# Base class for FOO_line nodes which have a FOO node as
+# their parent.
+
+BEGIN { $build_subclass->(
+    'line',   # Str: text of current line
+)};
+
+
+# The two jobs of this parse method are to grab the next line, and also to
+# set the right line number for any warning or error messages triggered by
+# the current line. It is called as a SUPER by the parse() methods of its
+# concrete subclasses.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    # By shifting *now*, the line above gets the correct line number of
+    # this src line, while subsequent processing gives the right line
+    # number for warnings etc, since the warn/err methods assume the line
+    # being processed has already been popped.
+    my $line = shift @{$pxs->{line}}; # line of text to be processed
+    $self->{line} = $line;
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::ALIAS;
+
+# Handle ALIAS keyword
+
+BEGIN { $build_subclass->(-parent => 'keylines',
+    'aliases', # hashref of all alias => value pairs.
+               # Populated by ALIAS_line::parse()
+)};
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    $xsub->{seen_ALIAS} = 1;
+    $self->SUPER::parse($pxs, $xsub, $xbody);
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::ALIAS_line;
+
+# Handle one line from an ALIAS keyword block
+
+BEGIN { $build_subclass->(-parent => 'keyline',
+)};
+
+
+# Parse one line from an ALIAS block
+#
+# Each line can have zero or more definitions, separated by white space.
+# Each definition is of one of the two forms:
+#
+#      name =  value
+#      name => other_name
+#
+#  where 'value' is a positive integer (or C macro) and the names are
+#  simple or qualified perl function names. E.g.
+#
+#     foo = 1   Bar::foo = 2   Bar::baz => Bar::foo
+#
+# The RHS of a '=>' is the name of an existing alias
+#
+# The results are added to a hash in the parent ALIAS node, as well as
+# to a couple of per-xsub hashes which accumulate the results across
+# possibly multiple ALIAS keywords.
+#
+# Updates:
+#   $parent->{aliases}{$alias} = $value;
+#   $xsub->{map_alias_name_to_value}{$alias} = $value;
+#   $xsub->{map_alias_value_to_name_seen_hash}{$value}{$alias}++;
+
+
+sub parse {
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody  = shift;
+    my ExtUtils::ParseXS::Node::ALIAS $parent = shift; # parent ALIAS node
+
+    $self->SUPER::parse($pxs); # set file/line_no/line
+    my $line = $self->{line};  # line of text to be processed
+
+    ExtUtils::ParseXS::Utilities::trim_whitespace($line);
+    # XXX this skip doesn't make sense - we've already confirmed
+    # line has non-whitespace  with the /\S/; so we just skip if the
+    # line is "0" ?
+    return unless $line;
+
+    my $orig = $line; # keep full line for error messages
+
+    # we use this later for symbolic aliases
+    my $fname = $pxs->{PACKAGE_class} . $xsub->{decl}{name};
+
+    # chop out and process one alias entry from $line
+
+    while ($line =~ s/^\s*([\w:]+)\s*=(>?)\s*([\w:]+)\s*//) {
+        my ($alias, $is_symbolic, $value) = ($1, $2, $3);
+        my $orig_alias = $alias;
+
+        $pxs->blurt(  "Error: in alias definition for '$alias' the value "
+                    . "may not contain ':' unless it is symbolic.")
+                if !$is_symbolic and $value=~/:/;
+
+        # check for optional package definition in the alias
+        $alias = $pxs->{PACKAGE_class} . $alias if $alias !~ /::/;
+
+        if ($is_symbolic) {
+            my $orig_value = $value;
+            $value = $pxs->{PACKAGE_class} . $value if $value !~ /::/;
+            if (defined $xsub->{map_alias_name_to_value}{$value}) {
+                $value = $xsub->{map_alias_name_to_value}{$value};
+            } elsif ($value eq $fname) {
+                $value = 0;
+            } else {
+                $pxs->blurt(  "Error: unknown alias '$value' in "
+                            . "symbolic definition for '$orig_alias'");
+            }
+        }
+
+        # check for duplicate alias name & duplicate value
+        my $prev_value = $xsub->{map_alias_name_to_value}{$alias};
+        if (defined $prev_value) {
+            if ($prev_value eq $value) {
+                $pxs->Warn("Warning: ignoring duplicate alias '$orig_alias'")
+            } else {
+                $pxs->Warn(  "Warning: conflicting duplicate alias "
+                           . "'$orig_alias' changes definition "
+                           . "from '$prev_value' to '$value'");
+                delete $xsub->{map_alias_value_to_name_seen_hash}
+                            ->{$prev_value}{$alias};
+            }
+        }
+
+        # Check and see if this alias results in two aliases having the same
+        # value, we only check non-symbolic definitions as the whole point of
+        # symbolic definitions is to say we want to duplicate the value and
+        # it is NOT a mistake.
+        unless ($is_symbolic) {
+            my @keys= sort keys %{$xsub->
+                          {map_alias_value_to_name_seen_hash}->{$value}||{}};
+            # deal with an alias of 0, which might not be in the aliases
+            # dataset yet as 0 is the default for the base function ($fname)
+            push @keys, $fname
+                if $value eq "0" and
+                    !defined $xsub->{map_alias_name_to_value}{$fname};
+            if (@keys and $pxs->{config_author_warnings}) {
+                # We do not warn about value collisions unless author_warnings
+                # are enabled. They aren't helpful to a module consumer, only
+                # the module author.
+                @keys= map { "'$_'" }
+                                map { my $copy= $_;
+                                            $copy=~s/^$pxs->{PACKAGE_class}//;
+                                            $copy
+                                        } @keys;
+                $pxs->WarnHint(
+                                    "Warning: aliases '$orig_alias' and "
+                                    . join(", ", @keys)
+                                    . " have identical values of $value"
+                                    . ( $value eq "0"
+                                            ? " - the base function"
+                                            : "" ),
+                                    !$xsub->{alias_clash_hinted}++
+                                    ?   "If this is deliberate use a "
+                                      . "symbolic alias instead."
+                                    : undef
+                );
+            }
+        }
+
+        $parent->{aliases}{$alias} = $value;
+        $xsub->{map_alias_name_to_value}->{$alias} = $value;
+        $xsub->{map_alias_value_to_name_seen_hash}{$value}{$alias}++;
+    }
+
+    $pxs->blurt("Error: cannot parse ALIAS definitions from '$orig'")
+        if $line;
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INPUT;
+
+# Handle an explicit INPUT: block, or any implicit INPUT
+# block which can follow an xsub signature or CASE keyword.
+
+BEGIN { $build_subclass->(-parent => 'keylines',
+    'implicit',   # Bool: this is an INPUT section at the start of the
+                  #       XSUB/CASE, without an explicit 'INPUT' keyword
+)};
+
+# The inherited parse() method will call INPUT_line->parse() for each line
+
+
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    # Call the SUPER parse method, which will call INPUT_line->parse()
+    # for each INPUT line. The '1' bool arg indicates to treat
+    # NOT_IMPLEMENTED_YET as another block separator, in addition to
+    # $BLOCK_regexp.
+    $self->SUPER::parse($pxs, $xsub, $xbody, 1);
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INPUT_line;
+
+# Handle one line from an INPUT keyword block
+
+BEGIN { $build_subclass->(-parent => 'keyline',
+    'ioparam', # The IO_Param object associated with this INPUT line.
+
+               # The parsed components of this INPUT line:
+    'type',    # Str:  char *
+    'is_addr', # Bool:         &
+    'name',    # Str:           foo
+    'init_op', # Str:                =
+    'init',    # Str:                  SvIv($arg)
+)};
+
+
+# Parse one line in an INPUT block. This method does two main things:
+#
+# It parses the line and stores its components in the fields of the
+# INPUT_line object (which aren't further used for parsing or code
+# generation)
+#
+# It also uses those values to create/update the IO_Param object
+# associated with this variable. For example with
+#
+#    void
+#    foo(a = 0)
+#       int a
+#
+# a IO_Param object will already have been created with the name 'a' and
+# default value '0' when the signature was parsed. Parsing the 'int a'
+# line will set the INPUT_line object's fields to (type => 'int',
+# name => 'a'), while the IO_Param object will have its type field set to
+# 'int'. The INPUT_line object also stores a ref to the IO_Param object.
+#
+
+sub parse {
+    my __PACKAGE__                    $self   = shift;
+    my ExtUtils::ParseXS              $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub   = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody  = shift;
+    my ExtUtils::ParseXS::Node::INPUT $parent = shift; # parent INPUT node
+
+    $self->SUPER::parse($pxs); # set file/line_no/line
+    my $line = $self->{line};  # line of text to be processed
+
+    ExtUtils::ParseXS::Utilities::trim_whitespace($line);
+
+    # remove any trailing semicolon, except for initialisations
+    $line =~ s/\s*;$//g unless $line =~ /[=;+].*\S/;
+
+    # Extract optional initialisation code (which overrides the
+    # normal typemap), such as 'int foo = ($type)SvIV($arg)'
+    my $var_init = '';
+    my $init_op;
+    ($init_op, $var_init) = ($1, $2) if $line =~ s/\s* ([=;+]) \s* (.*) $//xs;
+
+    $line =~ s/\s+/ /g;
+
+    # Split 'char * &foo'  into  ('char *', '&', 'foo')
+    # skip to next INPUT line if not valid.
+    #
+    # Note that this pattern has a very liberal sense of what is "valid",
+    # since we don't fully parse C types.  For example:
+    #
+    #    int foo(a)
+    #        int a XYZ
+    #
+    # would be interpreted as an "alien" (i.e. not in the signature)
+    # variable called "XYZ", with a type of "int a". And because it's
+    # alien the initialiser is skipped, so 'int a' is never looked up in
+    # a typemap, so we don't detect anything wrong. Later on, the C
+    # compiler is likely to trip over on the emitted declaration
+    # however:
+    #     int a XYZ;
+
+    my ($var_type, $var_addr, $var_name) =
+            $line =~ /^
+                ( .*? [^&\s] )        # type
+                \s*
+                (\&?)                 # addr
+                \s* \b
+                (\w+ | length\(\w+\)) # name or length(name)
+                $
+            /xs
+        or do {
+            $pxs->blurt("Error: invalid parameter declaration '$self->{line}'");
+            return;
+        };
+
+    # length(s) is only allowed in the XSUB's signature.
+    if ($var_name =~ /^length\((\w+)\)$/) {
+        $pxs->blurt("Error: length() not permitted in INPUT section");
+        return;
+    }
+
+    my ($var_num, $is_alien);
+
+    my $ioparams = $xbody->{ioparams};
+
+    my ExtUtils::ParseXS::Node::IO_Param $ioparam =
+                $ioparams->{names}{$var_name};
+
+    if (defined $ioparam) {
+        # The var appeared in the signature too.
+
+        # Check for duplicate definitions of a particular parameter name.
+        # This can be either because it has appeared in multiple INPUT
+        # lines, or because the type was already defined in the signature,
+        # and thus shouldn't be defined again. The exception to this are
+        # synthetic params like THIS, which are assigned a provisional type
+        # which can be overridden.
+        if (   $ioparam->{in_input}
+            or (!$ioparam->{is_synthetic} and defined $ioparam->{type})
+        ) {
+            $pxs->blurt(
+                "Error: duplicate definition of parameter '$var_name' ignored");
+            return;
+        }
+
+        if ($var_name eq 'RETVAL' and $ioparam->{is_synthetic}) {
+            # Convert a synthetic RETVAL into a real parameter
+            delete $ioparam->{is_synthetic};
+            delete $ioparam->{no_init};
+            if (! defined $ioparam->{arg_num}) {
+                # if has arg_num, RETVAL has appeared in signature but with no
+                # type, and has already been moved to the correct position;
+                # otherwise, it's an alien var that didn't appear in the
+                # signature; move to the correct position.
+                @{$ioparams->{kids}} =
+                            grep $_ != $ioparam, @{$ioparams->{kids}};
+                push @{$ioparams->{kids}}, $ioparam;
+                $is_alien            = 1;
+                $ioparam->{is_alien} = 1;
+            }
+        }
+
+        $ioparam->{in_input} = 1;
+        $var_num = $ioparam->{arg_num};
+    }
+    else {
+        # The var is in an INPUT line, but not in signature. Treat it as a
+        # general var declaration (which really should have been in a
+        # PREINIT section). Legal but nasty: flag is as 'alien'
+        $is_alien = 1;
+        $ioparam = ExtUtils::ParseXS::Node::IO_Param->new({
+                    var      => $var_name,
+                    is_alien => 1,
+                });
+
+        push @{$ioparams->{kids}}, $ioparam;
+        $ioparams->{names}{$var_name} = $ioparam;
+    }
+
+    # Parse the initialisation part of the INPUT line (if any)
+
+    my ($init, $defer);
+    my $no_init = $ioparam->{no_init}; # may have had OUT in signature
+
+    if (!$no_init && defined $init_op) {
+        # Use the init code based on overridden $var_init, which was
+        # preceded by /[=;+]/ which has been extracted into $init_op
+
+        if (    $init_op =~ /^[=;]$/
+                and $var_init =~ /^NO_INIT\s*;?\s*$/
+        ) {
+            # NO_INIT: skip initialisation
+            $no_init = 1;
+        }
+        elsif ($init_op  eq '=') {
+            # Overridden typemap, such as '= ($type)SvUV($arg)'
+            $var_init =~ s/;\s*$//;
+            $init = $var_init,
+        }
+        else {
+            # "; extra code" or "+ extra code" :
+            # append the extra code (after passing through eval) after all the
+            # INPUT and PREINIT blocks have been processed, indirectly using
+            # the $input_part->{deferred_code_lines} mechanism.
+            # In addition, for '+', also generate the normal initialisation
+            # code from the standard typemap - assuming that it's a real
+            # parameter that appears in the signature as well as the INPUT
+            # line.
+            $no_init = !($init_op eq '+' && !$is_alien);
+            # But in either case, add the deferred code
+            $defer = $var_init;
+        }
+    }
+    else {
+        # no initialiser: emit var and init code based on typemap entry,
+        # unless: it's alien (so no stack arg to bind to it)
+        $no_init = 1 if $is_alien;
+    }
+
+    # Save the basic information parsed from this line
+
+    $self->{type}    = $var_type,
+    $self->{is_addr} = !!$var_addr,
+    $self->{name}    = $var_name,
+    $self->{init_op} = $init_op,
+    $self->{init}    = $var_init,
+    $self->{ioparam} = $ioparam;
+
+    # and also update the ioparam object using that information
+
+    %$ioparam = (
+        %$ioparam,
+        type    => $var_type,
+        arg_num => $var_num,
+        var     => $var_name,
+        defer   => $defer,
+        init    => $init,
+        init_op => $init_op,
+        no_init => $no_init,
+        is_addr => !!$var_addr,
+    );
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    # Emit "type var" declaration and possibly various forms of
+    # initialiser code.
+
+    my $ioparam = $self->{ioparam};
+
+    # Synthetic params like THIS will be emitted later - they
+    # are treated like ANSI params, except the type can overridden
+    # within an INPUT statement
+    return if $ioparam->{is_synthetic};
+
+    # The ioparam object contains data from both the INPUT line and
+    # the XSUB signature.
+    $ioparam->as_input_code($pxs, $xsub, $xbody);
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::OUTPUT;
+
+# Handle an OUTPUT: block
+
+BEGIN { $build_subclass->(-parent => 'keylines',
+)};
+
+# The inherited parse() method will call OUTPUT_line->parse() for each line
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::OUTPUT_line;
+
+# Handle one line from an OUTPUT keyword block
+
+BEGIN { $build_subclass->(-parent => 'keyline',
+    'ioparam',     # the IO_Param object associated with this OUTPUT line.
+    'is_setmagic', # Bool: the line is a SETMAGIC: line
+    'do_setmagic', # Bool: the current SETMAGIC state
+    'name',        # Str:  name of the parameter to output
+    'code',        # Str:  optional setting code
+)};
+
+
+# Parse one line from an OUTPUT block
+
+sub parse {
+    my __PACKAGE__                     $self   = shift;
+    my ExtUtils::ParseXS               $pxs    = shift;
+    my ExtUtils::ParseXS::Node::xsub   $xsub   = shift;
+    my ExtUtils::ParseXS::Node::xbody  $xbody  = shift;
+    my ExtUtils::ParseXS::Node::OUTPUT $parent = shift; # parent OUTPUT node
+
+    $self->SUPER::parse($pxs); # set file/line_no/line
+    my $line = $self->{line};  # line of text to be processed
+
+    return unless $line =~ /\S/;  # skip blank lines
+
+    # set some sane default values in case we do one of the early returns
+    # below
+
+    $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
+    $self->{is_setmagic} = 0;
+
+    if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
+        $xbody->{OUTPUT_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+        $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
+        $self->{is_setmagic} = 1;
+        return;
+    }
+
+    # Expect lines of the two forms
+    #    SomeVar
+    #    SomeVar   sv_setsv(....);
+    #
+    my ($outarg, $outcode) = $line =~ /^\s*(\S+)\s*(.*?)\s*$/s;
+
+    $self->{name} = $outarg;
+
+    my ExtUtils::ParseXS::Node::IO_Param $ioparam =
+                                $xbody->{ioparams}{names}{$outarg};
+    $self->{ioparam} = $ioparam;
+
+    if ($ioparam && $ioparam->{in_output}) {
+        $pxs->blurt("Error: duplicate OUTPUT parameter '$outarg' ignored");
+        return;
+    }
+
+    if (    $outarg eq "RETVAL"
+        and $xsub->{decl}{return_type}{no_output})
+    {
+        $pxs->blurt(  "Error: can't use RETVAL in OUTPUT "
+                    . "when NO_OUTPUT declared");
+        return;
+    }
+
+    if (  !$ioparam # no such param or, for RETVAL, RETVAL was void;
+           # not bound to an arg which can be updated
+        or $outarg ne "RETVAL" && !$ioparam->{arg_num})
+    {
+        $pxs->blurt("Error: OUTPUT $outarg not a parameter");
+        return;
+    }
+
+    $ioparam->{in_output} = 1;
+    $ioparam->{do_setmagic} = $outarg eq 'RETVAL'
+                                ? 0 # RETVAL never needs magic setting
+                                : $xbody->{OUTPUT_SETMAGIC_state};
+    $self->{code} = $ioparam->{output_code} = $outcode if length $outcode;
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
+
+    # An OUTPUT: line serves two logically distinct purposes.  First, any
+    # parameters listed are updated; i.e. the perl equivalent of
+    #
+    #    my $foo = $_[0];
+    #    # maybe $foo's value gets changed here
+    #    $_[0] = $foo;  # update caller's arg with current value
+    #
+    # The code for updating such OUTPUT vars is emitted here, in the
+    # same order they appear in OUTPUT lines, and preserving the order
+    # of any intermixed POSTCALL etc blocks.
+    #
+    # Second, it can be used to indicate that an SV should be created,
+    # set to the current value of RETVAL, and pushed on the stack; i.e
+    # the perl equivalent of
+    #
+    #   my $RETVAL;
+    #   # maybe $RETVAL's value gets set here
+    #   return $RETVAL;
+    #
+    # The code to return RETVAL is emitted later, after all other
+    # processing for XSUB is complete apart from any final CLEANUP block.
+    # It is done at the same time as any emitting for params declared as
+    # OUT or OUTLIST in the signature.
+    #
+    # There isn't any particularly strong reason to do things in this
+    # exact order; but the ordering was the result of how xsubpp was
+    # originally written and subsequently modified, and changing things
+    # now might break existing XS code which has come to rely on the
+    # ordering.
+
+    return if $self->{name} eq 'RETVAL';
+
+    my $ioparam = $self->{ioparam};
+    return unless $ioparam; # might be an ENABLE line with no param to emit
+
+    $ioparam->as_output_code($pxs);
+}
+
+
+# ======================================================================
+
 
 1;
 

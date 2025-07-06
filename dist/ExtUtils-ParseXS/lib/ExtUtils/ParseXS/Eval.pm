@@ -2,7 +2,7 @@ package ExtUtils::ParseXS::Eval;
 use strict;
 use warnings;
 
-our $VERSION = '3.57';
+our $VERSION = '3.58';
 
 =head1 NAME
 
@@ -29,23 +29,20 @@ Warns the contents of C<$@> if any.
 Not all these variables are necessarily considered "public" wrt. use in
 typemaps, so beware. Variables set up from the ExtUtils::ParseXS object:
 
-  $Package $ALIAS $func_name $Full_func_name $pname
+  $Package $func_name $Full_func_name $pname
 
 Variables set up from C<$other_hashref>:
 
-  $var $type $ntype $subtype $arg
+  $var $type $ntype $subtype $arg $ALIAS
 
 =cut
 
 sub eval_output_typemap_code {
   my ($_pxs, $_code, $_other) = @_;
 
-  my ($Package, $ALIAS, $func_name, $Full_func_name, $pname)
-    = @{$_pxs}{qw(PACKAGE_name xsub_seen_ALIAS xsub_func_name
-                  xsub_func_full_C_name xsub_func_full_perl_name)};
-
-  my ($var, $type, $ntype, $subtype, $arg)
-    = @{$_other}{qw(var type ntype subtype arg)};
+  my ($Package) = @{$_pxs}{qw(PACKAGE_name)};
+  my ($var, $type, $ntype, $subtype, $arg, $ALIAS, $func_name, $Full_func_name, $pname)
+    = @{$_other}{qw(var type ntype subtype arg alias func_name full_C_name full_perl_name)};
 
   my $rv = eval $_code;
   warn $@ if $@;
@@ -64,23 +61,20 @@ Warns the contents of C<$@> if any.
 Not all these variables are necessarily considered "public" wrt. use in
 typemaps, so beware. Variables set up from the ExtUtils::ParseXS object:
 
-  $Package $ALIAS $func_name $Full_func_name $pname
+  $Package $func_name $Full_func_name $pname
 
 Variables set up from C<$other_hashref>:
 
-  $var $type $ntype $subtype $num $init $printed_name $arg $argoff
+  $var $type $ntype $subtype $num $init $printed_name $arg $argoff $ALIAS
 
 =cut
 
 sub eval_input_typemap_code {
   my ($_pxs, $_code, $_other) = @_;
 
-  my ($Package, $ALIAS, $func_name, $Full_func_name, $pname)
-    = @{$_pxs}{qw(PACKAGE_name xsub_seen_ALIAS xsub_func_name
-                  xsub_func_full_C_name xsub_func_full_perl_name)};
-
-  my ($var, $type, $num, $init, $printed_name, $arg, $ntype, $argoff, $subtype)
-    = @{$_other}{qw(var type num init printed_name arg ntype argoff subtype)};
+  my ($Package) = @{$_pxs}{qw(PACKAGE_name)};
+  my ($var, $type, $num, $init, $printed_name, $arg, $ntype, $argoff, $subtype, $ALIAS, $func_name, $Full_func_name, $pname)
+    = @{$_other}{qw(var type num init printed_name arg ntype argoff subtype alias func_name full_C_name full_perl_name)};
 
   my $rv = eval $_code;
   warn $@ if $@;
