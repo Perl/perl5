@@ -1171,6 +1171,38 @@ obtains the regular string buffer out of a regular SV.
 
 See L<perlapi/C<SvVSTRING>>.
 
+=item *
+
+L<ExtUtils::ParseXS> has been extensively refactored internally and
+extensive tests have been added. Most of these changes shouldn't be
+visible externally with a few exceptions, the main ones being:
+
+The generated C code, especially for returning values, may have changed
+slightly, and in some cases be slightly more efficient (in particular,
+using C<TARG> more often to return a value rather than creating a new
+temporary).
+
+The parser is more likely to give warnings now on XS errors which
+previously would have just silently generated invalid C code.
+
+One XS bug has been fixed in a way that may be highly visible. Previously
+when parsing the parameters of an XS sub declaration, if a parameter
+couldn't be parsed, it was quietly ignored. This meant that it would still
+consume an argument, but wouldn't declare a C variable: a bit like the
+Perl-level C<my ($a, undef, $c) = @_>. Now, it gives a compile error. This
+will break XS code that does (for example):
+
+    void
+    foo(int a, /* skip arg */, int c)
+
+because C-comments aren't part of XS syntax, and so the parameter was a
+syntax error and was quietly skipped. This is better written as
+
+    void
+    foo(int a, b, int c)
+
+since parameters which are not assigned a type act as placeholders.
+
 =back
 
 =head1 Selected Bug Fixes
