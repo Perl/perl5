@@ -1559,62 +1559,56 @@ arranged in the approximate order in which they might appear within an XS
 file, and then might appear within an XSUB declaration. Related keywords
 are grouped together.
 
-=head2 The MODULE Keyword
+=head2 The MODULE Declaration
 
-The MODULE keyword is used to start the XS code and to specify the package
-of the functions which are being defined.  All text preceding the first
-MODULE keyword is considered C code and is passed through to the output with
-POD stripped, but otherwise untouched.  Every XS module will have a
-bootstrap function which is used to hook the XSUBs into Perl.  The package
-name of this bootstrap function will match the value of the last MODULE
-statement in the XS source files.  The value of MODULE should always remain
-constant within the same XS file, though this is not required.
+    MODULE = Foo::Bar  PACKAGE = Foo::Bar
+    MODULE = Foo::Bar  PACKAGE = Foo::Bar::Baz
+    MODULE = Foo::Bar  PACKAGE = Foo::Bar      PREFIX = foobar_
 
-The following example will start the XS code and will place
-all functions in a package named RPC.
+The C<MODULE> keyword is used to start the XS half of the file, and to
+specify the package of the functions which are being defined. The
+C<MODULE> keyword must start on column one. All text preceding the first
+C<MODULE> keyword is considered C code and is passed through to the output
+with POD stripped, but otherwise untouched.
 
-    MODULE = RPC
+It is usually necessary to include a blank line before each MODULE
+declaration.
 
-=head3 The PACKAGE Keyword
+For the first such declaration, the C<MODULE> and C<PACKAGE> values are
+typically the same. In subsequent entries, the C<PACKAGE> value varies,
+while the C<MODULE> value is kept unchanged. In fact, only the C<MODULE>
+value from the I<last> such declaration is used, and specifies the name of
+the boot XSUB which is called when the module is loaded (typically via
+C<use Foo::Bar>).
 
-When functions within an XS source file must be separated into packages
-the PACKAGE keyword should be used.  This keyword is used with the MODULE
-keyword and must follow immediately after it when used.
+The value of the C<PACKAGE> keyword is analogous to the Perl C<package>
+keyword, and determines which package any subsequent XSUBs will be created
+in. It is permissible to have the same C<PACKAGE> value appear more than
+once, again similarly to Perl.
 
-    MODULE = RPC  PACKAGE = RPC
+In theory the C<PACKAGE> keyword is optional, and defaults to C<''>. This
+means that any subsequent XSUBs will be placed in the C<main::> package.
+In practice, you should always specify the package.
 
-    [ XS code in package RPC ]
+The optional C<PREFIX> value is stripped from the XSUB's name when
+generating the XSUB's Perl name. It is typically used to simplify creating
+autocall XSUBs. It addresses the issue that while Perl has package names,
+C only has function name prefixes. Consider a C library called C<foobar>,
+which has functions such as C<foobar_read()> and C<foobar_write()>. We
+want to make these accessible from a Perl module called C<Foo::Bar>. In
+the presence of C<PREFIX = foobar_>, any such prefix of each XSUB
+name will be stripped off when determining the XSUB's Perl name. For
+example:
 
-    MODULE = RPC  PACKAGE = RPCB
+    MODULE = Foo::Bar  PACKAGE = Foo::Bar  PREFIX = foobar_
 
-    [ XS code in package RPCB ]
+    char* foobar_read(int n)
 
-    MODULE = RPC  PACKAGE = RPC
+    int   foobar_write(char *text, int n)
 
-    [ XS code in package RPC ]
-
-The same package name can be used more than once, allowing for
-non-contiguous code. This is useful if you have a stronger ordering
-principle than package names.
-
-Although this keyword is optional and in some cases provides redundant
-information it should always be used.  This keyword will ensure that the
-XSUBs appear in the desired package.
-
-=head3 The PREFIX Keyword
-
-The PREFIX keyword designates prefixes which should be
-removed from the Perl function names.  If the C function is
-C<rpcb_gettime()> and the PREFIX value is C<rpcb_> then Perl will
-see this function as C<gettime()>.
-
-This keyword should follow the PACKAGE keyword when used.
-If PACKAGE is not used then PREFIX should follow the MODULE
-keyword.
-
-    MODULE = RPC  PREFIX = rpc_
-
-    MODULE = RPC  PACKAGE = RPCB  PREFIX = rpcb_
+This will insert two XSUBs into the Perl namespace, called
+C<Foo::Bar::read()> and C<Foo::Bar::write()>, which when called, will
+themselves call the C functions C<foobar_read()> and C<foobar_write()>.
 
 =head2 File-scoped XS Keywords and Directives
 
