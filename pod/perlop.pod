@@ -2272,6 +2272,9 @@ The bottom line is that using C</o> is almost never a good idea.
 
 =item The empty pattern C<//>
 
+(This subsection applies to C<//>, C<m//>, and C<s///>, but not to
+C<qr//>.)
+
 If the I<PATTERN> evaluates to the empty string, the last
 I<successfully> matched regular expression in the current dynamic
 scope is used instead (see also L<perlvar/Scoping Rules of Regex Variables>).
