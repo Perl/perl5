@@ -83,7 +83,217 @@ to 5.8.0 unless otherwise specified.
 
 =head1 THE FORMAL SYNTAX OF AN XS FILE
 
-XXX TBC
+This is a BNF-like description of the syntax of an XS file. It is intended
+to be human-readable rather than machine-readable, and doesn't try to
+accurately specify where line breaks can occur.
+
+ Key:
+
+    foo         BNF token.
+    "bar"       Literal terminal symbol.
+    /.../       Terminal symbol defined by a pattern.
+    [Foo::Bar]  Terminal symbol defined by way of an example.
+    * + ? | ( ) These have their usual regex-style meanings.
+    // ...      BNF Comments.
+
+
+ XS_file           = C_file_part ( module_decl  XS_file_part )+
+
+ C_file_part       = (
+                        // Lines of C code (including /* ... */),
+                        // which are all passed through uninterpreted.
+                     |
+                        pod // These are stripped.
+                     )*
+
+ pod               = /^=/ .. /^=cut\s*$/
+
+ module_decl       = blank_line
+                     // NB: all on one line:
+                     "MODULE =" [Foo::Bar] "PACKAGE =" [Foo::Bar]
+                                             ( "PREFIX =" [foo_] )?
+
+ blank_line        = /^\s*$/
+
+ XS_file_part      = ( file_scoped_decls* xsub )*
+
+ file_scoped_decls =
+                     blank_line
+                     // Any valid CPP directive: these are passed through:
+                   | "#if" | "#  if" | "#define" | // etc
+                   | #comment // anything not recognised as CPP directive
+                   | pod
+                   | "SCOPE:"               enable
+                   | "EXPORT_XSUB_SYMBOLS:" enable
+                   | "PROTOTYPES:"          enable
+                   | "VERSIONCHECK:"        enable
+                   | "FALLBACK:"            ("TRUE" | "FALSE" | "UNDEF")
+                   | "INCLUDE:"             [foo.xs]
+                   | "INCLUDE_COMMAND:"     [... some command line ...]
+                   | "REQUIRE:"             [1.23] // min xsubpp version
+                   | "BOOT:"
+                         code_block
+                   | "TYPEMAP: <<"[EOF]
+                        // Heredoc with typemap declarations.
+                     [EOF]
+
+ enable            = ( "ENABLE" | "DISABLE" )
+
+ code_block        = // Lines of C and/or blank lines terminated by the
+                     // next keyword or XSUB start. POD is stripped.
+
+ xsub              = blank_line // not *always* necessary
+                     xsub_decl
+                     ( cases | xbody )
+
+ xsub_decl         = return_type
+                     xsub_name "(" parameters ")" "const" ?
+
+ return_type       = "NO_OUTPUT" ? "extern \"C\"" ? "static" ? C_type
+
+ C_type            = [const char *]  // etc: any valid C type
+
+ C_expression      = [foo(ix) + 1]   // etc: any valid C expression
+
+ xsub_name         = [foo] | [X::Y::foo] // simple name or C++ name
+
+ parameters        =   empty
+                     | parameter ( "," parameter )*
+
+ empty             = /\s*/
+
+ parameter         = (
+                       in_out_decl ?
+                       C_type ?
+                       /\w+/   // variable name
+                       // Default or optional value:
+                       ( "=" ( C_expression | "NO_INIT" ) )?
+
+                       // Pseudo-param: foo must match another param name:
+                     | C_type "length(" [foo] ")"
+                     | "..."
+                     )
+
+ in_out_decl       = "IN" | "OUT" | "IN_OUT" | "OUTLIST" | "IN_OUTLIST"
+
+ cases             = (
+                        "CASE:" ( C_expression | empty )
+                        xbody
+                     )+
+
+ xbody             = implicit_input     ?
+                     xbody_input_part   *
+                     xbody_init_part    *
+                     xbody_code_part
+                     xbody_output_part  * // Not after PPCODE.
+                     xbody_cleanup_part * // Not after PPCODE.
+
+ implicit_input    = ( blank_line | input_line )+
+
+ xbody_input_part  =
+                       "INPUT:" ( blank_line | input_line )*
+                     | "PREINIT:"
+                           code_block
+                     | xbody_generic_key
+                     | c_args
+                     | interface_macro
+                     | "SCOPE:" enable  // Only in perl 5.44.0 onwards.
+
+ input_line        = C_type
+                     "&" ?
+                     /\w+/   // variable name
+                     // Optional initialiser:
+                     (
+                       ( "=" | ";" ) "NO_INIT"
+                     |
+                       // Override or add to the default typemap.
+                       // The expression is eval()ed as a
+                       // double-quotish string.
+                       "=" [ a_typemap_override($arg) ]
+                     |
+                       ("+" | ";")  [ a_deferred_initialiser($arg) ]
+                     )?
+                     ";" ?
+
+ xbody_init_part   =   "INIT:"
+                           code_block
+                     | xbody_generic_key
+                     | c_args
+                     | interface
+                     | interface_macro
+
+ xbody_code_part   =
+                       autocall
+                     | "CODE:"
+                           code_block
+                     | "PPCODE:"
+                           code_block
+                     | // Only recognised if immediately following
+                       // an INPUT section:
+                       "NOT_IMPLEMENTED_YET:"
+
+                     // Implicit call to wrapped library function.
+ autocall          = empty
+
+ xbody_output_part =
+                      xbody_postcall *
+                      xbody_output *
+
+ xbody_postcall    =   "POSTCALL:"
+                           code_block
+                     | xbody_generic_key
+
+ xbody_output      =   "OUTPUT:"
+                        ( blank_line
+                        | output_line
+                        | "SETMAGIC:" enable
+                        )*
+                     | xbody_generic_key
+
+                     // Variable name with optional expression which
+                     // overrides the typemap
+ output_line       = /\w+/ ( [ sv_setfoo(ST[0], RETVAL) ] )?
+
+ xbody_cleanup_part = "CLEANUP:"
+                           code_block
+                     | xbody_generic_key
+
+                     // Text to use as the arguments for an autocall;
+                     // may be spread over multiple lines:
+ c_args            = "C_ARGS:" [foo, bar, baz]
+
+                     // Comma-separated list of Perl subroutine names
+                     // which use the XSUB, over one or more lines:
+ interface         = "INTERFACE:"  [foo, bar, Bar::baz]
+
+ interface_macro   =
+                     "INTERFACE_MACRO:"
+                       [GET_MACRO_NAME]
+                       [SET_MACRO_NAME] ?
+
+
+                       // These can appear anywhere in an XSUB.
+ xbody_generic_key =   pod
+                     | alias
+                     | "PROTOTYPE:" ( enable | [$$@] )
+
+                       // Whitespace-separated list of overload types,
+                       // over one or more lines:
+                     | "OVERLOAD:"  [ cmp eq <=> etc ]
+
+                       // Whitespace-separated list of attribute names,
+                       // over one or more lines:
+                     | "ATTRS:" [foo bar baz]
+
+
+ alias             = "ALIAS:"
+                       // One or more lines; each with zero or more
+                       // {alias_name, op, index} triplets:
+                       (
+                         [bar]       "="  [5]
+                       | [Foo::baz]  "="  [A_CPP_DEFINE]
+                       | [Bar::boz]  "=>" [Foo::baz]
+                       )*
 
 =head1 OVERVIEW OF XS AND XSUBS
 
