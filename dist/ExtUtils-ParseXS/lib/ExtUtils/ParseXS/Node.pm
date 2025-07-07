@@ -3648,7 +3648,7 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, read lines
 
     my @lines = @{$self->{lines}};
-    shift @lines while $lines[0] !~ /\S/;
+    shift @lines while @lines && $lines[0] !~ /\S/;
     # XXX ParseXS originally didn't include a trailing \n,
     # so we carry on doing the same.
     $self->{text} = join "\n", @lines;
