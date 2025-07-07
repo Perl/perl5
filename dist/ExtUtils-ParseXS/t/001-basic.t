@@ -1657,6 +1657,16 @@ EOF
         ],
 
         [
+            "autocall args empty C_ARGS",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int  a)
+                |    C_ARGS:
+EOF
+            [ 0, 0, qr/\Qfoo()/,  "" ],
+        ],
+
+        [
             # Whether this is sensible or not is another matter.
             # For now, just check that it works as-is.
             "autocall args C_ARGS multi-line",
