@@ -1999,6 +1999,158 @@ test_mismatch_xs_handshake_api_ver(...)
 #endif
     }
 
+bool
+PL_valid_types_IRNPVX_arrays()
+    PREINIT:
+        int i;
+        int t;
+        SV fksv;
+        const bool * arr;
+        const bool * p_arrs [] = {
+            PL_valid_types_IVX,
+            PL_valid_types_NVX,
+            PL_valid_types_PVX,
+            PL_valid_types_RV,
+            PL_valid_types_IV_set,
+            PL_valid_types_NV_set
+        };
+    CODE:
+        for(i=0; i< C_ARRAY_LENGTH(p_arrs); i++){
+            arr = p_arrs[i];
+            switch(i) {
+                case 0:
+                    for(t = 0; t <SVt_LAST; t++) {
+                        SvFLAGS(&fksv) = t;
+                        if (cBOOL(SVVALIDIVX(&fksv))
+                            != cBOOL(arr[SvTYPE(&fksv) & SVt_MASK]))
+                            goto failed;
+                    }
+                    break;
+                case 1:
+                    for(t = 0; t <SVt_LAST; t++) {
+                        SvFLAGS(&fksv) = t;
+                        if (cBOOL(SVVALIDNVX(&fksv))
+                            != cBOOL(arr[SvTYPE(&fksv) & SVt_MASK]))
+                            goto failed;
+                    }
+                    break;
+                case 2:
+                    for(t = 0; t <SVt_LAST; t++) {
+                        SvFLAGS(&fksv) = t;
+                        if (cBOOL(SVVALIDPVX(&fksv))
+                            != cBOOL(arr[SvTYPE(&fksv) & SVt_MASK]))
+                            goto failed;
+                    }
+                    break;
+                case 3:
+                    for(t = 0; t <SVt_LAST; t++) {
+                        SvFLAGS(&fksv) = t;
+                        if (cBOOL(SVVALIDRV(&fksv))
+                            != cBOOL(arr[SvTYPE(&fksv) & SVt_MASK]))
+                            goto failed;
+                    }
+                    break;
+                case 4:
+                    for(t = 0; t <SVt_LAST; t++) {
+                        SvFLAGS(&fksv) = t;
+                        if (cBOOL(SVVALIDIV_set(&fksv))
+                            != cBOOL(arr[SvTYPE(&fksv) & SVt_MASK]))
+                            goto failed;
+                    }
+                    break;
+                case 5:
+                    for(t = 0; t <SVt_LAST; t++) {
+                        SvFLAGS(&fksv) = t;
+                        if (cBOOL(SVVALIDNV_set(&fksv))
+                            != cBOOL(arr[SvTYPE(&fksv) & SVt_MASK]))
+                            goto failed;
+                    }
+                    break;
+            }
+        }
+        RETVAL = TRUE;
+        if (0){
+            failed:
+            RETVAL = FALSE;
+        }
+    OUTPUT:
+        RETVAL
+
+bool
+PL_valid_types_IRNPVX_arrays_part2()
+    PREINIT:
+        SV * svnl = newSV_type_mortal(SVt_NULL);
+        SV * sviv = newSV_type_mortal(SVt_IV);
+        SV * svnv = newSV_type_mortal(SVt_NV);
+        SV * svpv = newSV_type_mortal(SVt_PV);
+    CODE:
+#define OLD_IVX(_svivx) (PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK])
+#define OLD_NVX(_svnvx) (PL_valid_types_NVX[SvTYPE(_svnvx) & SVt_MASK])
+#define OLD_PVX(_svpvx) (PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK])
+        /* NULL */
+        if(SVVALIDIVX(svnl))
+            goto failed;
+        if(OLD_IVX(svnl))
+            goto failed;
+        if(SVVALIDNVX(svnl))
+            goto failed;
+        if(OLD_NVX(svnl))
+            goto failed;
+        if(SVVALIDPVX(svnl))
+            goto failed;
+        if(OLD_PVX(svnl))
+            goto failed;
+        /* IV */
+        if(!SVVALIDIVX(sviv))
+            goto failed;
+        if(!OLD_IVX(sviv))
+            goto failed;
+        if(SVVALIDNVX(sviv))
+            goto failed;
+        if(OLD_NVX(sviv))
+            goto failed;
+        if(SVVALIDPVX(sviv))
+            goto failed;
+        if(OLD_PVX(sviv))
+            goto failed;
+        /* NV */
+        if(SVVALIDIVX(svnv))
+            goto failed;
+        if(OLD_IVX(svnv))
+            goto failed;
+        if(!SVVALIDNVX(svnv))
+            goto failed;
+        if(!OLD_NVX(svnv))
+            goto failed;
+        if(SVVALIDPVX(svnv))
+            goto failed;
+        if(OLD_PVX(svnv))
+            goto failed;
+        /* PV */
+        if(SVVALIDIVX(svpv))
+            goto failed;
+        if(OLD_IVX(svpv))
+            goto failed;
+        if(SVVALIDNVX(svpv))
+            goto failed;
+        if(OLD_NVX(svpv))
+            goto failed;
+        if(!SVVALIDPVX(svpv))
+            goto failed;
+        if(!OLD_PVX(svpv))
+            goto failed;
+        if(0) {
+            failed:
+            RETVAL = FALSE;
+        }
+        else
+            RETVAL = TRUE;
+#undef OLD_IVX
+#undef OLD_NVX
+#undef OLD_PVX
+    OUTPUT:
+        RETVAL
+
 
 MODULE = XS::APItest:Hash               PACKAGE = XS::APItest::Hash
 

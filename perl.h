@@ -6265,6 +6265,51 @@ EXTCONST U8 PL_magic_data[256] =
 EXTCONST U8 PL_magic_data[256];
 #endif
 
+#define SVtVALIDIVX ((0<<0)/*NL*/|(1<<1)/*IV*/|(0<<2)/*NV*/|(0<<3)/*PV*/ \
+    |(0<<4)/*INV*/|(1<<5)/*PI*/|(1<<6)/*PN*/|(1<<7)/*MG*/|(0<<8)/*RX*/ \
+    |(1<<9)/*GV*/|(1<<10)/*LV*/|(0<<11)/*AV*/|(0<<12)/*HV*/|(0<<13)/*CV*/ \
+    |(0<<14)/*FM*/|(0<<15)/*IO*/|(0<<16)/*OBJ*/)
+#define SVtVALIDNVX ((0<<0)/*NL*/|(0<<1)/*IV*/|(1<<2)/*NV*/|(0<<3)/*PV*/ \
+    |(0<<4)/*INV*/|(0<<5)/*PI*/|(1<<6)/*PN*/|(1<<7)/*MG*/|(0<<8)/*RX*/ \
+    |(1<<9)/*GV*/|(1<<10)/*LV*/|(0<<11)/*AV*/|(0<<12)/*HV*/|(0<<13)/*CV*/ \
+    |(0<<14)/*FM*/|(0<<15)/*IO*/|(0<<16)/*OBJ*/)
+#define SVtVALIDPVX ((0<<0)/*NL*/|(0<<1)/*IV*/|(0<<2)/*NV*/|(1<<3)/*PV*/ \
+    |(1<<4)/*INV*/|(1<<5)/*PI*/|(1<<6)/*PN*/|(1<<7)/*MG*/|(1<<8)/*RX*/ \
+    |(1<<9)/*GV*/|(1<<10)/*LV*/|(0<<11)/*AV*/|(0<<12)/*HV*/|(1<<13)/*CV*/ \
+    |(1<<14)/*FM*/|(1<<15)/*IO*/|(0<<16)/*OBJ*/)
+#define SVtVALIDRV ((0<<0)/*NL*/|(1<<1)/*IV*/|(0<<2)/*NV*/|(1<<3)/*PV*/ \
+    |(0<<4)/*INV*/|(1<<5)/*PI*/|(1<<6)/*PN*/|(1<<7)/*MG*/|(1<<8)/*RX*/ \
+    |(1<<9)/*GV*/|(1<<10)/*LV*/|(0<<11)/*AV*/|(0<<12)/*HV*/|(0<<13)/*CV*/ \
+    |(0<<14)/*FM*/|(1<<15)/*IO*/|(0<<16)/*OBJ*/)
+#define SVtVALIDIV_set ((0<<0)/*NL*/|(1<<1)/*IV*/|(0<<2)/*NV*/|(0<<3)/*PV*/ \
+    |(0<<4)/*INV*/|(1<<5)/*PI*/|(1<<6)/*PN*/|(1<<7)/*MG*/|(1<<8)/*RX*/ \
+    |(1<<9)/*GV*/|(1<<10)/*LV*/|(0<<11)/*AV*/|(0<<12)/*HV*/|(0<<13)/*CV*/ \
+    |(1<<14)/*FM*/|(1<<15)/*IO*/|(0<<16)/*OBJ*/)
+#define SVtVALIDNV_set ((0<<0)/*NL*/|(0<<1)/*IV*/|(1<<2)/*NV*/|(0<<3)/*PV*/ \
+    |(0<<4)/*INV*/|(0<<5)/*PI*/|(1<<6)/*PN*/|(1<<7)/*MG*/|(1<<8)/*RX*/ \
+    |(1<<9)/*GV*/|(1<<10)/*LV*/|(0<<11)/*AV*/|(0<<12)/*HV*/|(0<<13)/*CV*/ \
+    |(0<<14)/*FM*/|(0<<15)/*IO*/|(0<<16)/*OBJ*/)
+
+/* Experimental. Only for PERL_CORE. Not for CPAN XS or private XS code.
+ *
+ * Faster but identical to the assert tests inside sv.h that look like :
+ *
+ *      assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);
+ *
+ * These macros don't do an extra memory read from a 17 byte array like
+ * the assert() above.  The intent is these macros could be used in
+ * -O1/-O2 non-DEBUGGING builds, either temporarily in blead, or permanently
+ * in stable releases. Probably the only useful macro is SVVALIDPVX() vs
+ *      if ((type >= SVt_PV && type <= SVt_PVLV) || type == SVt_PVCV) { 0; }
+ */
+
+#define SVVALIDIVX(_sv) ((1<<SvTYPE(_sv))&SVtVALIDIVX)
+#define SVVALIDNVX(_sv) ((1<<SvTYPE(_sv))&SVtVALIDNVX)
+#define SVVALIDPVX(_sv) ((1<<SvTYPE(_sv))&SVtVALIDPVX)
+#define SVVALIDRV(_sv) ((1<<SvTYPE(_sv))&SVtVALIDRV)
+#define SVVALIDIV_set(_sv) ((1<<SvTYPE(_sv))&SVtVALIDIV_set)
+#define SVVALIDNV_set(_sv) ((1<<SvTYPE(_sv))&SVtVALIDNV_set)
+
 #ifdef DOINIT
                         /* NL IV NV PV INV PI PN MG RX GV LV AV HV CV FM IO OBJ */
 EXTCONST bool

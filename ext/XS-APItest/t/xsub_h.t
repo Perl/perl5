@@ -150,5 +150,9 @@ is scalar @xs_empty, 0, 'XSRETURN_EMPTY returns empty list in array context';
 my $xs_empty = XS::APItest::XSUB::xsreturn_empty();
 is $xs_empty, undef, 'XSRETURN_EMPTY returns undef in scalar context';
 
+ok( XS::APItest::XSUB::PL_valid_types_IRNPVX_arrays(),
+    "APItest::XSUB::PL_valid_types_IRNPVX_arrays returned true");
+ok( XS::APItest::XSUB::PL_valid_types_IRNPVX_arrays_part2(),
+    "APItest::XSUB::PL_valid_types_IRNPVX_arrays_part2 returned true");
 
 done_testing();
