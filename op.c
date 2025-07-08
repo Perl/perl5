@@ -10368,12 +10368,31 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
         else if (SvPOK(gv) && *SvPVX((SV *)gv) == '&')
             name = newSVpvn_flags(SvPVX((SV *)gv)+1, SvCUR(gv)-1, SvUTF8(gv)|SVs_TEMP);
         else if (flags & CV_CKPROTO_CURSTASH || SvROK(gv)) {
-            name = newSVhek_mortal(HvNAME_HEK(PL_curstash));
-            sv_catpvs(name, "::");
+            HEK* const stashname = HvNAME_HEK(PL_curstash);
+            HEK* cvname_hek;
+            U32 cat_len;
+
             if (SvROK(gv)) {
                 assert (SvTYPE(SvRV_const(gv)) == SVt_PVCV);
                 assert (CvNAMED(SvRV_const(gv)));
-                sv_cathek(name, CvNAME_HEK(MUTABLE_CV(SvRV_const(gv))));
+                cvname_hek = CvNAME_HEK(MUTABLE_CV(SvRV_const(gv)));
+                cat_len = HEK_LEN(cvname_hek);
+            }
+            else {
+                cvname_hek = NULL;
+                cat_len = 0;
+            }
+            I32 hek_len = HEK_LEN(stashname);
+            STRLEN total_len = hek_len + STRLENs("::") + cat_len + 1;
+            name = sv_2mortal(newSVpvz(total_len));
+            sv_cathek(name, stashname);
+            assert(SvCUR(name) == hek_len);
+            char * pv = SvPVX(name) + hek_len;
+            SvCUR_set(name, hek_len + STRLENs("::"));
+            Copy("::", pv, STRLENs("::"), char);
+
+            if (cvname_hek) {
+                sv_cathek(name, cvname_hek);
             }
             else sv_catsv(name, (SV *)gv);
         }
@@ -14247,12 +14266,18 @@ Perl_ck_sort(pTHX_ OP *o)
             off = pad_findmy_pvn(tmpbuf, len+1, 0);
             if (off != NOT_IN_PAD) {
                 if (PAD_COMPNAME_FLAGS_isOUR(off)) {
-                    SV * const fq =
-                        newSVhek(HvNAME_HEK(PAD_COMPNAME_OURSTASH(off)));
-                    sv_catpvs(fq, "::");
-                    sv_catsv(fq, kSVOP_sv);
-                    SvREFCNT_dec_NN(kSVOP_sv);
+                    HEK* hek = HvNAME_HEK(PAD_COMPNAME_OURSTASH(off));
+                    SV * const kid_sv = kSVOP_sv;
+                    I32 hek_len = HEK_LEN(hek);
+                    STRLEN cat_len = SvPOK(kid_sv) ? SvCUR(kid_sv) : 0;
+                    SV * const fq = newSVpvz(hek_len + STRLENs("::") + cat_len + 1);
+                    sv_cathek(fq, hek);
+                    char * pv = SvPVX(fq) + hek_len;
+                    SvCUR_set(fq, hek_len + STRLENs("::"));
+                    Copy("::", pv, STRLENs("::"), char);
+                    sv_catsv(fq, kid_sv);
                     kSVOP->op_sv = fq;
+                    SvREFCNT_dec_NN(kid_sv);
                 }
                 else {
                     /* replace the const op with the pad op */

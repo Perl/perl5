@@ -7723,10 +7723,15 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
     if (!c.sv)
         c.sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len);
     if (c.gvp) {
-        SV *sv = newSVpvs("CORE::GLOBAL::");
+        /* SvPOK() + SvCUR() is a good guess, but not a guarantee. */
+        SV *sv = newSVpvz(  STRLENs("CORE::GLOBAL::")
+                            + (SvPOK(c.sv) ? SvCUR(c.sv) : 0) + 1);
+        SvCUR_set(sv, STRLENs("CORE::GLOBAL::"));
+        Copy("CORE::GLOBAL::", SvPVX(sv), sizeof("CORE::GLOBAL::"), char);
         sv_catsv(sv, c.sv);
-        SvREFCNT_dec(c.sv);
+        SV *oldsv = c.sv;
         c.sv = sv;
+        SvREFCNT_dec_NN(oldsv);
     }
 
     /* Presume this is going to be a bareword of some sort. */
@@ -9038,10 +9043,16 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
             if (PAD_COMPNAME_FLAGS_isOUR(c.off)) {
                 HV *  const stash = PAD_COMPNAME_OURSTASH(c.off);
                 HEK * const stashname = HvNAME_HEK(stash);
-                c.sv = newSVhek(stashname);
-                sv_catpvs(c.sv, "::");
-                sv_catpvn_flags(c.sv, PL_tokenbuf, len,
+                I32 hek_len = HEK_LEN(stashname);
+                SV * sym = newSVpvz(hek_len + STRLENs("::") + len + 1);
+                sv_cathek(sym, stashname);
+                char * pv = SvPVX(sym) + hek_len;
+                SvCUR_set(sym, hek_len + STRLENs("::"));
+                Copy("::", pv, STRLENs("::"), char);
+
+                sv_catpvn_flags(sym, PL_tokenbuf, len,
                                 (UTF ? SV_CATUTF8 : SV_CATBYTES));
+                c.sv = sym;
                 c.gv = gv_fetchsv(c.sv, GV_NOADD_NOINIT | SvUTF8(c.sv),
                                   SVt_PVCV);
                 c.off = 0;
@@ -10023,9 +10034,16 @@ S_pending_ident(pTHX)
                 /* build ops for a bareword */
                 HV *  const stash = PAD_COMPNAME_OURSTASH(tmp);
                 HEK * const stashname = HvNAME_HEK(stash);
-                SV *  const sym = newSVhek(stashname);
-                sv_catpvs(sym, "::");
-                sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len > 0 ? tokenbuf_len - 1 : 0, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
+                /* terminating COW/'\0' bytes, pvz +1, we +1, total = 2 */
+                I32 hek_len = HEK_LEN(stashname);
+                STRLEN cat_len = tokenbuf_len > 0 ? tokenbuf_len - 1 : 0;
+                SV *  const sym = newSVpvz(hek_len + STRLENs("::") + cat_len + 1);
+                sv_cathek(sym, stashname);
+                char * pv = SvPVX(sym) + hek_len;
+                SvCUR_set(sym, hek_len + STRLENs("::"));
+                Copy("::", pv, sizeof("::"), char);
+
+                sv_catpvn_flags(sym, PL_tokenbuf+1, cat_len, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
                 pl_yylval.opval = newSVOP(OP_CONST, 0, sym);
                 pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 if (pit != '&')
@@ -11477,9 +11495,16 @@ S_scan_inputsymbol(pTHX_ char *start)
                 if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
                     HV * const stash = PAD_COMPNAME_OURSTASH(tmp);
                     HEK * const stashname = HvNAME_HEK(stash);
-                    SV * const sym = newSVhek_mortal(stashname);
-                    sv_catpvs(sym, "::");
-                    sv_catpv(sym, d+1);
+                    STRLEN cat_len = strlen(d=(d+1));
+                    I32 hek_len = HEK_LEN(stashname);
+                    STRLEN total_len = hek_len + STRLENs("::") + cat_len + 1;
+                    SV *  const sym = sv_2mortal(newSVpvz(total_len));
+                    sv_cathek(sym, stashname);
+                    char * pv = SvPVX(sym) + hek_len;
+                    SvCUR_set(sym, hek_len + STRLENs("::"));
+                    Copy("::", pv, STRLENs("::"), char);
+
+                    sv_catpvn(sym, d, cat_len);
                     d = SvPVX(sym);
                     goto intro_sym;
                 }
