@@ -263,7 +263,14 @@ automatically lexically declared.
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Possible attempt to escape whitespace in qw() list|perldiag/"Possible attempt to escape whitespace in qw() list">
+
+(W qw) qw() lists contain items separated by whitespace; contrary to
+what some might expect, backslash characters cannot be used to "protect"
+whitespace from being split, but are instead treated as literal data.
+
+Note that this warnings is I<only> emitted when the backslash is followed
+by actual whitespace (that C<qw> splits on).
 
 =back
 
