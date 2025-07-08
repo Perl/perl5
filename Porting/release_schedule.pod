@@ -87,6 +87,7 @@ consent of the Steering Council.)
   Stevan Little <stevan@cpan.org>
   Steve Hay <steve.m.hay@googlemail.com>
   Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+  Thibault Duponchelle <thibault.duponchelle@gmail.com>
   Tony Cook <tony@develop-help.com>
   Yves Orton <demerphq@gmail.com>
   Ævar Arnfjörð Bjarmason <avar@cpan.org>
