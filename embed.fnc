@@ -678,6 +678,7 @@ Apx	|void	|apply_attrs_string					\
 Adp	|OP *	|apply_builtin_cv_attributes				\
 				|NN CV *cv				\
 				|NULLOK OP *attrlist
+CTp	|void	|atfork_child
 CTp	|void	|atfork_lock
 CTp	|void	|atfork_unlock
 Cop	|SV **	|av_arylen_p	|NN AV *av

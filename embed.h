@@ -130,6 +130,7 @@
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
 # define apply_builtin_cv_attributes(a,b)       Perl_apply_builtin_cv_attributes(aTHX_ a,b)
+# define atfork_child                           Perl_atfork_child
 # define atfork_lock                            Perl_atfork_lock
 # define atfork_unlock                          Perl_atfork_unlock
 # define av_clear(a)                            Perl_av_clear(aTHX_ a)

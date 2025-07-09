@@ -2872,6 +2872,18 @@ Perl_atfork_unlock(void)
 #endif
 }
 
+void
+Perl_atfork_child(void) {
+#ifdef USE_ITHREADS
+    /* so we can resend signals received in a non-perl thread to the
+       new main thread
+    */
+    PTHREAD_INIT_SELF(PL_main_thread);
+#endif
+
+    Perl_atfork_unlock();
+}
+
 /*
 =for apidoc_section $concurrency
 =for apidoc my_fork
