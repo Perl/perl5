@@ -210,9 +210,9 @@ the strings?).
 
  Charles    5.002_01      1996-Mar-25
 
-           5.003          1996-Jun-25     Security release.
+ Charles   5.003          1996-Jun-25     Security release.
 
-            5.003_01      1996-Jul-31
+ Charles    5.003_01      1996-Jul-31
  Nick       5.003_02      1996-Aug-10
  Andy       5.003_03      1996-Aug-28
             5.003_04      1996-Sep-02
