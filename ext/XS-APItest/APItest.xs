@@ -6723,7 +6723,7 @@ test_UTF8_IS_REPLACEMENT(char *s, STRLEN len)
 bool
 test_isQUOTEMETA(UV ord)
     CODE:
-        RETVAL = _isQUOTEMETA(ord);
+        RETVAL = isQUOTEMETA(ord);
     OUTPUT:
         RETVAL
 
