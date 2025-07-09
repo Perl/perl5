@@ -5,7 +5,7 @@ use Exporter 'import';
 use ExtUtils::Embed 1.31, qw(xsi_header xsi_protos xsi_body);
 
 our @EXPORT = qw(writemain);
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -122,7 +122,7 @@ main(int argc, char **argv, char **env)
      * --GSAR 2001-07-20 */
     PTHREAD_ATFORK(Perl_atfork_lock,
                    Perl_atfork_unlock,
-                   Perl_atfork_unlock);
+                   Perl_atfork_child);
 #endif
 
     PERL_SYS_FPU_INIT;

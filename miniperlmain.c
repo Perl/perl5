@@ -96,7 +96,7 @@ main(int argc, char **argv, char **env)
      * --GSAR 2001-07-20 */
     PTHREAD_ATFORK(Perl_atfork_lock,
                    Perl_atfork_unlock,
-                   Perl_atfork_unlock);
+                   Perl_atfork_child);
 #endif
 
     PERL_SYS_FPU_INIT;
