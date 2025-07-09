@@ -444,11 +444,11 @@ the strings?).
             5.12.2-RC1    2010-Aug-31
             5.12.2        2010-Sep-06
  Ricardo    5.12.3-RC1    2011-Jan-09
- Ricardo    5.12.3-RC2    2011-Jan-14
- Ricardo    5.12.3-RC3    2011-Jan-17
- Ricardo    5.12.3        2011-Jan-21
+            5.12.3-RC2    2011-Jan-14
+            5.12.3-RC3    2011-Jan-17
+            5.12.3        2011-Jan-21
  Leon       5.12.4-RC1    2011-Jun-08
- Leon       5.12.4        2011-Jun-20
+            5.12.4        2011-Jun-20
  Dominic    5.12.5        2012-Nov-10
 
  Leon       5.13.0        2010-Apr-20     The 5.13 development track
@@ -464,8 +464,8 @@ the strings?).
  Ævar       5.13.10       2011-Feb-20
  Florian    5.13.11       2011-Mar-20
  Jesse      5.14.0-RC1    2011-Apr-20
- Jesse      5.14.0-RC2    2011-May-04
- Jesse      5.14.0-RC3    2011-May-11
+            5.14.0-RC2    2011-May-04
+            5.14.0-RC3    2011-May-11
 
  Jesse     5.14.0         2011-May-14
 
@@ -474,8 +474,8 @@ the strings?).
             5.14.2        2011-Sep-26
  Dominic    5.14.3        2012-Oct-12
  David M    5.14.4-RC1    2013-Mar-05
- David M    5.14.4-RC2    2013-Mar-07
- David M    5.14.4        2013-Mar-10
+            5.14.4-RC2    2013-Mar-07
+            5.14.4        2013-Mar-10
 
  David G    5.15.0        2011-Jun-20     The 5.15 development track
  Zefram     5.15.1        2011-Jul-20
@@ -488,51 +488,51 @@ the strings?).
  Max M      5.15.8        2012-Feb-20
  Abigail    5.15.9        2012-Mar-20
  Ricardo    5.16.0-RC0    2012-May-10
- Ricardo    5.16.0-RC1    2012-May-14
- Ricardo    5.16.0-RC2    2012-May-15
+            5.16.0-RC1    2012-May-14
+            5.16.0-RC2    2012-May-15
 
  Ricardo   5.16.0         2012-May-20
 
  Ricardo    5.16.1        2012-Aug-08     The 5.16 maintenance track
- Ricardo    5.16.2        2012-Nov-01
- Ricardo    5.16.3-RC1    2013-Mar-06
- Ricardo    5.16.3        2013-Mar-11
+            5.16.2        2012-Nov-01
+            5.16.3-RC1    2013-Mar-06
+            5.16.3        2013-Mar-11
 
  Zefram     5.17.0        2012-May-26     The 5.17 development track
  Jesse L    5.17.1        2012-Jun-20
  TonyC      5.17.2        2012-Jul-20
  Steve      5.17.3        2012-Aug-20
  Florian    5.17.4        2012-Sep-20
- Florian    5.17.5        2012-Oct-20
+            5.17.5        2012-Oct-20
  Ricardo    5.17.6        2012-Nov-20
  Dave R     5.17.7        2012-Dec-18
  Aaron      5.17.8        2013-Jan-20
  BinGOs     5.17.9        2013-Feb-20
  Max M      5.17.10       2013-Mar-21
  Ricardo    5.17.11       2013-Apr-20
- Ricardo    5.18.0-RC1    2013-May-11
- Ricardo    5.18.0-RC2    2013-May-12
- Ricardo    5.18.0-RC3    2013-May-13
- Ricardo    5.18.0-RC4    2013-May-15
+            5.18.0-RC1    2013-May-11
+            5.18.0-RC2    2013-May-12
+            5.18.0-RC3    2013-May-13
+            5.18.0-RC4    2013-May-15
 
  Ricardo   5.18.0         2013-May-18
 
  Ricardo    5.18.1-RC1    2013-Aug-01     The 5.18 maintenance track
- Ricardo    5.18.1-RC2    2013-Aug-03
- Ricardo    5.18.1-RC3    2013-Aug-08
- Ricardo    5.18.1        2013-Aug-12
- Ricardo    5.18.2        2014-Jan-06
- Ricardo    5.18.3-RC1    2014-Sep-17
- Ricardo    5.18.3-RC2    2014-Sep-27
- Ricardo    5.18.3        2014-Oct-01
- Ricardo    5.18.4        2014-Oct-01
+            5.18.1-RC2    2013-Aug-03
+            5.18.1-RC3    2013-Aug-08
+            5.18.1        2013-Aug-12
+            5.18.2        2014-Jan-06
+            5.18.3-RC1    2014-Sep-17
+            5.18.3-RC2    2014-Sep-27
+            5.18.3        2014-Oct-01
+            5.18.4        2014-Oct-01
 
  Ricardo    5.19.0       2013-May-20     The 5.19 development track
  David G    5.19.1       2013-Jun-21
  Aristotle  5.19.2       2013-Jul-22
  Steve      5.19.3       2013-Aug-20
- Steve      5.19.4       2013-Sep-20
- Steve      5.19.5       2013-Oct-20
+            5.19.4       2013-Sep-20
+            5.19.5       2013-Oct-20
  BinGOs     5.19.6       2013-Nov-20
  Abigail    5.19.7       2013-Dec-20
  Ricardo    5.19.8       2014-Jan-20
@@ -544,13 +544,13 @@ the strings?).
  Ricardo   5.20.0        2014-May-27
 
  Steve      5.20.1-RC1   2014-Aug-25     The 5.20 maintenance track
- Steve      5.20.1-RC2   2014-Sep-07
- Steve      5.20.1       2014-Sep-14
- Steve      5.20.2-RC1   2015-Jan-31
- Steve      5.20.2       2015-Feb-14
- Steve      5.20.3-RC1   2015-Aug-22
- Steve      5.20.3-RC2   2015-Aug-29
- Steve      5.20.3       2015-Sep-12
+            5.20.1-RC2   2014-Sep-07
+            5.20.1       2014-Sep-14
+            5.20.2-RC1   2015-Jan-31
+            5.20.2       2015-Feb-14
+            5.20.3-RC1   2015-Aug-22
+            5.20.3-RC2   2015-Aug-29
+            5.20.3       2015-Sep-12
 
  Ricardo    5.21.0       2014-May-27     The 5.21 development track
  Matthew H  5.21.1       2014-Jun-20
@@ -563,31 +563,31 @@ the strings?).
  Matthew H  5.21.8       2015-Jan-20
  Sawyer X   5.21.9       2015-Feb-20
  Steve      5.21.10      2015-Mar-20
- Steve      5.21.11      2015-Apr-20
+            5.21.11      2015-Apr-20
  Ricardo    5.22.0-RC1   2015-May-19
- Ricardo    5.22.0-RC2   2015-May-21
+            5.22.0-RC2   2015-May-21
 
  Ricardo   5.22.0        2015-Jun-01
 
  Steve      5.22.1-RC1   2015-Oct-31     The 5.22 maintenance track
- Steve      5.22.1-RC2   2015-Nov-15
- Steve      5.22.1-RC3   2015-Dec-02
- Steve      5.22.1-RC4   2015-Dec-08
- Steve      5.22.1       2015-Dec-13
- Steve      5.22.2-RC1   2016-Apr-10
- Steve      5.22.2       2016-Apr-29
- Steve      5.22.3-RC1   2016-Jul-17
- Steve      5.22.3-RC2   2016-Jul-25
- Steve      5.22.3-RC3   2016-Aug-11
- Steve      5.22.3-RC4   2016-Oct-12
- Steve      5.22.3-RC5   2017-Jan-02
- Steve      5.22.3       2017-Jan-14
- Steve      5.22.4-RC1   2017-Jul-01
- Steve      5.22.4       2017-Jul-15
+            5.22.1-RC2   2015-Nov-15
+            5.22.1-RC3   2015-Dec-02
+            5.22.1-RC4   2015-Dec-08
+            5.22.1       2015-Dec-13
+            5.22.2-RC1   2016-Apr-10
+            5.22.2       2016-Apr-29
+            5.22.3-RC1   2016-Jul-17
+            5.22.3-RC2   2016-Jul-25
+            5.22.3-RC3   2016-Aug-11
+            5.22.3-RC4   2016-Oct-12
+            5.22.3-RC5   2017-Jan-02
+            5.22.3       2017-Jan-14
+            5.22.4-RC1   2017-Jul-01
+            5.22.4       2017-Jul-15
 
  Ricardo    5.23.0       2015-Jun-20     The 5.23 development track
  Matthew H  5.23.1       2015-Jul-20
- Matthew H  5.23.2       2015-Aug-20
+            5.23.2       2015-Aug-20
  Peter      5.23.3       2015-Sep-20
  Steve      5.23.4       2015-Oct-20
  Abigail    5.23.5       2015-Nov-20
@@ -596,25 +596,25 @@ the strings?).
  Sawyer X   5.23.8       2016-Feb-20
  Abigail    5.23.9       2016-Mar-20
  Ricardo    5.24.0-RC1   2016-Apr-13
- Ricardo    5.24.0-RC2   2016-Apr-23
- Ricardo    5.24.0-RC3   2016-Apr-26
- Ricardo    5.24.0-RC4   2016-May-02
- Ricardo    5.24.0-RC5   2016-May-04
+            5.24.0-RC2   2016-Apr-23
+            5.24.0-RC3   2016-Apr-26
+            5.24.0-RC4   2016-May-02
+            5.24.0-RC5   2016-May-04
 
  Ricardo   5.24.0        2016-May-09
 
  Steve      5.24.1-RC1   2016-Jul-17     The 5.24 maintenance track
- Steve      5.24.1-RC2   2016-Jul-25
- Steve      5.24.1-RC3   2016-Aug-11
- Steve      5.24.1-RC4   2016-Oct-12
- Steve      5.24.1-RC5   2017-Jan-02
- Steve      5.24.1       2017-Jan-14
- Steve      5.24.2-RC1   2017-Jul-01
- Steve      5.24.2       2017-Jul-15
- Steve      5.24.3-RC1   2017-Sep-10
- Steve      5.24.3       2017-Sep-22
- Steve      5.24.4-RC1   2018-Mar-24
- Steve      5.24.4       2018-Apr-14
+            5.24.1-RC2   2016-Jul-25
+            5.24.1-RC3   2016-Aug-11
+            5.24.1-RC4   2016-Oct-12
+            5.24.1-RC5   2017-Jan-02
+            5.24.1       2017-Jan-14
+            5.24.2-RC1   2017-Jul-01
+            5.24.2       2017-Jul-15
+            5.24.3-RC1   2017-Sep-10
+            5.24.3       2017-Sep-22
+            5.24.4-RC1   2018-Mar-24
+            5.24.4       2018-Apr-14
 
  Ricardo    5.25.0       2016-May-09     The 5.25 development track
  Sawyer X   5.25.1       2016-May-20
@@ -628,18 +628,18 @@ the strings?).
  Abigail    5.25.9       2017-Jan-20
  Renee      5.25.10      2017-Feb-20
  Sawyer X   5.25.11      2017-Mar-20
- Sawyer X   5.25.12      2017-Apr-20
- Sawyer X   5.26.0-RC1   2017-May-11
- Sawyer X   5.26.0-RC2   2017-May-23
+            5.25.12      2017-Apr-20
+            5.26.0-RC1   2017-May-11
+            5.26.0-RC2   2017-May-23
 
  Sawyer X  5.26.0        2017-May-30
 
  Steve      5.26.1-RC1   2017-Sep-10     The 5.26 maintenance track
- Steve      5.26.1       2017-Sep-22
- Steve      5.26.2-RC1   2018-Mar-24
- Steve      5.26.2       2018-Apr-14
- Steve      5.26.3-RC1   2018-Nov-08
- Steve      5.26.3       2018-Nov-29
+            5.26.1       2017-Sep-22
+            5.26.2-RC1   2018-Mar-24
+            5.26.2       2018-Apr-14
+            5.26.3-RC1   2018-Nov-08
+            5.26.3       2018-Nov-29
 
  Sawyer X   5.27.0       2017-May-31     The 5.27 development track
  Eric       5.27.1       2017-Jun-20
@@ -653,19 +653,19 @@ the strings?).
  Renee      5.27.9       2018-Feb-20
  Todd       5.27.10      2018-Mar-20
  Sawyer X   5.27.11      2018-Apr-20
- Sawyer X   5.28.0-RC1   2018-May-21
- Sawyer X   5.28.0-RC2   2018-Jun-06
- Sawyer X   5.28.0-RC3   2018-Jun-18
- Sawyer X   5.28.0-RC4   2018-Jun-19
+            5.28.0-RC1   2018-May-21
+            5.28.0-RC2   2018-Jun-06
+            5.28.0-RC3   2018-Jun-18
+            5.28.0-RC4   2018-Jun-19
 
  Sawyer X  5.28.0        2018-Jun-22
 
  Steve      5.28.1-RC1   2018-Nov-08     The 5.28 maintenance track
- Steve      5.28.1       2018-Nov-29
- Steve      5.28.2-RC1   2019-Apr-05
- Steve      5.28.2       2019-Apr-19
- Steve      5.28.3-RC1   2020-May-18
- Steve      5.28.3       2020-Jun-01
+            5.28.1       2018-Nov-29
+            5.28.2-RC1   2019-Apr-05
+            5.28.2       2019-Apr-19
+            5.28.3-RC1   2020-May-18
+            5.28.3       2020-Jun-01
 
  Sawyer X   5.29.0       2018-Jun-26     The 5.29 development track
  Steve      5.29.1       2018-Jul-20
@@ -674,21 +674,21 @@ the strings?).
  Aaron      5.29.4       2018-Oct-20
  Ether      5.29.5       2018-Nov-20
  Abigail    5.29.6       2018-Dec-18
- Abigail    5.29.7       2019-Jan-20
+            5.29.7       2019-Jan-20
  Nicolas R  5.29.8       2019-Feb-20
  Zak Elep   5.29.9       2019-Mar-20
  Sawyer X   5.29.10      2019-Apr-20
- Sawyer X   5.30.0-RC1   2019-May-11
- Sawyer X   5.30.0-RC2   2019-May-17
+            5.30.0-RC1   2019-May-11
+            5.30.0-RC2   2019-May-17
 
  Sawyer X  5.30.0        2019-May-22
 
  Steve      5.30.1-RC1   2019-Oct-27     The 5.30 maintenance track
- Steve      5.30.1       2019-Nov-10
- Steve      5.30.2-RC1   2020-Feb-29
- Steve      5.30.2       2020-Mar-14
- Steve      5.30.3-RC1   2020-May-18
- Steve      5.30.3       2020-Jun-01
+            5.30.1       2019-Nov-10
+            5.30.2-RC1   2020-Feb-29
+            5.30.2       2020-Mar-14
+            5.30.3-RC1   2020-May-18
+            5.30.3       2020-Jun-01
 
  Sawyer X   5.31.0       2019-May-24     The 5.31 development track
  Ether      5.31.1       2019-Jun-20
@@ -701,14 +701,14 @@ the strings?).
  Matthew H  5.31.8       2020-Jan-20
  Renee      5.31.9       2020-Feb-20
  Sawyer X   5.31.10      2020-Mar-20
- Sawyer X   5.31.11      2020-Apr-28
- Sawyer X   5.32.0-RC0   2020-May-30
- Sawyer X   5.32.0-RC1   2020-Jun-07
+            5.31.11      2020-Apr-28
+            5.32.0-RC0   2020-May-30
+            5.32.0-RC1   2020-Jun-07
 
  Sawyer X  5.32.0        2020-Jun-20
 
  Steve      5.32.1-RC1   2021-Jan-09     The 5.32 maintenance track
- Steve      5.32.1       2021-Jan-23
+            5.32.1       2021-Jan-23
 
  Sawyer X   5.33.0       2020-Jul-17     The 5.33 development track
  Ether      5.33.1       2020-Aug-20
@@ -721,15 +721,15 @@ the strings?).
  Nicolas R  5.33.8       2021-Mar-20
  Todd R     5.33.9       2021-Apr-20
  Sawyer X   5.34.0-RC1   2021-May-04
- Sawyer X   5.34.0-RC2   2021-May-15
+            5.34.0-RC2   2021-May-15
 
  Sawyer X  5.34.0        2021-May-20
 
  Steve      5.34.1-RC1   2022-Feb-27     The 5.34 maintenance track
- Steve      5.34.1-RC2   2022-Mar-06
- Steve      5.34.1       2022-Mar-13
+            5.34.1-RC2   2022-Mar-06
+            5.34.1       2022-Mar-13
  Paul E     5.34.2       2023-Nov-25
- Paul E     5.34.3       2023-Nov-29
+            5.34.3       2023-Nov-29
 
  Ricardo    5.35.0       2021-May-20     The 5.35 development track
  Max        5.35.1       2021-Jun-20
@@ -744,17 +744,17 @@ the strings?).
  Sawyer X   5.35.10      2022-Mar-20
  Steve      5.35.11      2022-Apr-20
  Ricardo    5.36.0-RC1   2022-May-20
- Ricardo    5.36.0-RC2   2022-May-20
- Ricardo    5.36.0-RC3   2022-May-22
+            5.36.0-RC2   2022-May-20
+            5.36.0-RC3   2022-May-22
 
  Ricardo   5.36.0        2022-May-27
 
  Steve      5.36.1-RC1   2023-Apr-10     The 5.36 maintenance track
- Steve      5.36.1-RC2   2023-Apr-11
- Steve      5.36.1-RC3   2023-Apr-16
- Steve      5.36.1       2023-Apr-23
+            5.36.1-RC2   2023-Apr-11
+            5.36.1-RC3   2023-Apr-16
+            5.36.1       2023-Apr-23
  Paul E     5.36.2       2023-Nov-25
- Paul E     5.36.3       2023-Nov-29
+            5.36.3       2023-Nov-29
 
  Ricardo    5.37.0       2022-May-27     The 5.37 development track
  Matthew H  5.37.1       2022-Jun-20
@@ -769,16 +769,16 @@ the strings?).
  Yves       5.37.10      2023-Mar-20
  Steve      5.37.11      2023-Apr-20
  Ricardo    5.38.0-RC1   2023-Jun-15
- Ricardo    5.38.0-RC2   2023-Jun-23
+            5.38.0-RC2   2023-Jun-23
 
  Ricardo   5.38.0        2023-Jul-02
 
  Paul E     5.38.1       2023-Nov-25     The 5.38 maintenance track
- Paul E     5.38.2       2023-Nov-29
+            5.38.2       2023-Nov-29
  Steve      5.38.3-RC1   2025-Jan-05
- Steve      5.38.3       2025-Jan-18
- Steve      5.38.4-RC1   2025-Mar-30
- Steve      5.38.4       2025-Apr-13
+            5.38.3       2025-Jan-18
+            5.38.4-RC1   2025-Mar-30
+            5.38.4       2025-Apr-13
 
  Ricardo    5.39.0       2023-Jun-30     The 5.39 development track
  Steve      5.39.1       2023-Jul-20
@@ -790,16 +790,16 @@ the strings?).
  Max        5.39.7       2024-Jan-20
  Renee      5.39.8       2024-Feb-23
  Paul E     5.39.9       2024-Mar-20
- Paul E     5.39.10      2024-Apr-29
+            5.39.10      2024-Apr-29
  Graham K   5.40.0-RC1   2024-May-24
- Graham K   5.40.0-RC2   2024-Jun-04
+            5.40.0-RC2   2024-Jun-04
 
  Graham K  5.40.0        2024-Jun-09
 
  Steve      5.40.1-RC1   2025-Jan-05     The 5.40 maintenance track
- Steve      5.40.1       2025-Jan-18
- Steve      5.40.2-RC1   2025-Mar-30
- Steve      5.40.2       2025-Apr-13
+            5.40.1       2025-Jan-18
+            5.40.2-RC1   2025-Mar-30
+            5.40.2       2025-Apr-13
 
  Graham K   5.41.0       2024-Jun-10     The 5.41 development track
  Philippe   5.41.1       2024-Jul-02
@@ -813,11 +813,11 @@ the strings?).
  Richard L  5.41.9       2025-Feb-24
  Lukas      5.41.10      2025-Mar-21
  Ether      5.41.11      2025-Apr-20
- Ether      5.41.12      2025-Apr-21
+            5.41.12      2025-Apr-21
  Philippe   5.41.13      2025-May-28
  Thibault   5.42.0-RC1   2025-Jun-24
- Thibault   5.42.0-RC2   2025-Jun-27
- Thibault   5.42.0-RC3   2025-Jul-01
+            5.42.0-RC2   2025-Jun-27
+            5.42.0-RC3   2025-Jul-01
 
  Philippe  5.42.0        2025-Jul-03
 
