@@ -1691,7 +1691,9 @@ END_EXTERN_C
       (   (! cBOOL(FITS_IN_8_BITS(c)))                                      \
        || (PL_charclass[(U8) (c)] & CC_mask_(CC_NONLATIN1_FOLD_)))
 
-#   define _isQUOTEMETA(c) generic_isCC_(c, CC_QUOTEMETA_)
+#  if defined(PERL_CORE) || defined(PERL_IN_XS_APITEST)
+#    define isQUOTEMETA(c) generic_isCC_(c, CC_QUOTEMETA_)
+#  endif
 
 /* is c a control character for which we have a mnemonic? */
 #  if defined(PERL_CORE) || defined(PERL_EXT)
@@ -1822,7 +1824,9 @@ END_EXTERN_C
     /* The following are not fully accurate in the above-ASCII range.  I (khw)
      * don't think it's necessary to be so for the purposes where this gets
      * compiled */
-#   define isQUOTEMETA_(c)      (FITS_IN_8_BITS(c) && ! isWORDCHAR_L1(c))
+#   if defined(PERL_CORE) || defined(PERL_IN_XS_APITEST)
+#     define isQUOTEMETA(c)      (FITS_IN_8_BITS(c) && ! isWORDCHAR_L1(c))
+#   endif
 
     /* Many of the macros later in this file are defined in terms of these.  By
      * implementing them with a function, which converts the class number into

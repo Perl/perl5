@@ -5073,7 +5073,7 @@ PP(pp_quotemeta)
                 bool to_quote = FALSE;
 
                 if (UTF8_IS_INVARIANT(*s)) {
-                    if (_isQUOTEMETA(*s)) {
+                    if (isQUOTEMETA(*s)) {
                         to_quote = TRUE;
                     }
                 }
@@ -5086,7 +5086,7 @@ PP(pp_quotemeta)
                     IN_LC_RUNTIME(LC_CTYPE)
                         ||
 #endif
-                        _isQUOTEMETA(EIGHT_BIT_UTF8_TO_NATIVE(*s, *(s + 1))))
+                        isQUOTEMETA(EIGHT_BIT_UTF8_TO_NATIVE(*s, *(s + 1))))
                     {
                         to_quote = TRUE;
                     }
@@ -5108,7 +5108,7 @@ PP(pp_quotemeta)
         }
         else if (IN_UNI_8_BIT) {
             while (len--) {
-                if (_isQUOTEMETA(*s))
+                if (isQUOTEMETA(*s))
                     *d++ = '\\';
                 *d++ = *s++;
             }
