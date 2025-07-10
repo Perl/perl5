@@ -399,8 +399,18 @@ the F<perldelta> of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+"WELL VOLUNTEERED!" echoed across conferences and IRC. Matt S. Trout's battle
+cry that transformed reluctant volunteers into community leaders. With profound
+sadness, we announce Matt's passing. Since the early 2000s, Matt shaped Perl
+through sheer force of will: IRC operator, PAUSE administrator, ShadowCat
+co-founder, architect of DBIx::Class. His opinions came wrapped in profanity
+and delivered at maximum volume. He suffered no fools and grew to sometimes
+realize he should apologize. Yet this same abrasive exterior protected fierce
+dedication to mentoring, developers he harangued into volunteering now lead the
+community themselves. Matt's deliberately mind-bending code pushed Perl
+forward. Every modern Perl developer touches his legacy daily.
+
+Well volunteered, Matt. Rest in peace.
 
 =head1 Acknowledgements
 
