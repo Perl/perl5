@@ -3888,7 +3888,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 
         Perl_load_module(
           aTHX_ PERL_LOADMOD_IMPORT_OPS,
-          newSVpvs(ATTRSMODULE),
+          newSVpvs_share(ATTRSMODULE),
           NULL,
           op_prepend_elem(OP_LIST,
                           newSVOP(OP_CONST, 0, stashsv),
@@ -3903,7 +3903,7 @@ STATIC void
 S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 {
     OP *pack, *imop, *arg;
-    SV *meth, *stashsv, **svp;
+    SV *meth, *stashsv, *attrpkg, **svp;
 
     PERL_ARGS_ASSERT_APPLY_ATTRS_MY;
 
@@ -3914,17 +3914,25 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
            target->op_type == OP_PADHV ||
            target->op_type == OP_PADAV);
 
+    attrpkg = newSVpvs_share(ATTRSMODULE);
+    /* no sv_2mortal() or its freed by time of leave_scope() -> replace_sv() */
+    SAVEFREESV(attrpkg);
+
     /* Ensure that attributes.pm is loaded. */
     /* Don't force the C<use> if we don't need it. */
     svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
     if (svp && *svp != &PL_sv_undef)
         NOOP;	/* already in %INC */
-    else
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                               newSVpvs(ATTRSMODULE), NULL);
+    else {
+     /* Can't use 1 SV* head with 2 refcounts for attrpkg.
+        Perl_load_module()'s callee will modify the buf with sv_catpvs(".pm"). */
+        SV * sv = newSVhek(SvSHARED_HEK_FROM_PV(SvPVX(attrpkg)));
+        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, sv, NULL);
+    }
 
     /* Need package name for method call. */
-    pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
+    SvREFCNT_inc_simple_void_NN(attrpkg);
+    pack = newSVOP(OP_CONST, 0, attrpkg);
 
     /* Build up the real arg-list. */
     stashsv = newSVhek(HvNAME_HEK(stash));
@@ -3989,7 +3997,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
     }
 
     Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-                     newSVpvs(ATTRSMODULE),
+                     newSVpvs_share(ATTRSMODULE),
                      NULL, op_prepend_elem(OP_LIST,
                                   newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
                                   op_prepend_elem(OP_LIST,
