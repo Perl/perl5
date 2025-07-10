@@ -1601,6 +1601,17 @@ destruct_test(pTHX_ void *p) {
     warn("In destruct_test: %" SVf "\n", (SV*)p);
 }
 
+#if defined(USE_ITHREADS) && !defined(WIN32)
+
+static void *
+signal_thread_start(void *arg) {
+  PERL_UNUSED_ARG(arg);
+  raise(SIGUSR1);
+  return NULL;
+}
+
+#endif
+
 #ifdef PERL_USE_HWM
 #  define hwm_checks_enabled() true
 #else
@@ -4364,6 +4375,21 @@ thread_id_matches()
 CODE:
     /* pthread_t might not be a scalar type */
     RETVAL = pthread_equal(pthread_self(), PL_main_thread);
+OUTPUT:
+    RETVAL
+
+pthread_t
+make_signal_thread()
+CODE:
+    if (pthread_create(&RETVAL, NULL, signal_thread_start, NULL) != 0)
+        XSRETURN_EMPTY;
+OUTPUT:
+    RETVAL
+
+int
+join_signal_thread(pthread_t tid)
+CODE:
+    RETVAL = pthread_join(tid, NULL);
 OUTPUT:
     RETVAL
 
