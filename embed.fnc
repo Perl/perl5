@@ -1177,11 +1177,12 @@ AOdp	|SV *	|eval_pv	|NN const char *p			\
 				|I32 croak_on_error
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
-ATdmp	|bool	|extended_utf8_to_uv					\
+ATdp	|bool	|extended_utf8_to_uv					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
-				|NULLOK Size_t *advance_p
+				|NULLOK Size_t *advance_p		\
+	      = utf8_to_uv(s,e,cp_p,advance_p)
 Adfpv	|void	|fatal_warner	|U32 err				\
 				|NN const char *pat			\
 				|...

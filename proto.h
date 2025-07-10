@@ -1101,9 +1101,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags);
 #define PERL_ARGS_ASSERT_EVAL_SV                \
         assert(sv)
 
-/* PERL_CALLCONV bool
-Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
-
 PERL_CALLCONV void
 Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
         __attribute__format__(__printf__,pTHX_2,pTHX_3);

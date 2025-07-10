@@ -165,8 +165,6 @@ typedef enum {
         Perl_utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, 0)
 #define Perl_utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, errors)      \
           Perl_utf8_to_uv_msgs(  s, e, cp_p, advance_p, flags, errors, 0)
-#define Perl_extended_utf8_to_uv(s, e, cp_p, advance_p)                     \
-                 Perl_utf8_to_uv(s, e, cp_p, advance_p)
 #define Perl_strict_utf8_to_uv(  s, e, cp_p, advance_p)                     \
         Perl_utf8_to_uv_flags(   s, e, cp_p, advance_p,                     \
                                         UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
