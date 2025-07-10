@@ -9739,8 +9739,8 @@ Perl_sv_2mortal(pTHX_ SV *const sv)
         return sv;
     if (SvIMMORTAL(sv))
         return sv;
-    PUSH_EXTEND_MORTAL__SV_C(sv);
-    SvTEMP_on(sv);
+    SvTEMP_on(sv); /* optimize for RISC, SvIMMORTAL() contains SvREADONLY() */
+    PUSH_EXTEND_MORTAL__SV_C(sv);;
     return sv;
 }
 
