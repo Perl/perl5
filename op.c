@@ -8506,7 +8506,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 
     PERL_ARGS_ASSERT_DOFILE;
 
-    if (!force_builtin && (gv = gv_override("do", 2))) {
+    if (!force_builtin && (gv = gv_override_pvs("do"))) {
         doop = S_new_entersubop(aTHX_ gv, term);
     }
     else {
@@ -12482,7 +12482,7 @@ Perl_ck_backtick(pTHX_ OP *o)
     o = ck_fun(o);
     /* qx and `` have a null pushmark; CORE::readpipe has only one kid. */
     if (o->op_flags & OPf_KIDS && (sibl = OpSIBLING(cUNOPo->op_first))
-     && (gv = gv_override("readpipe",8)))
+     && (gv = gv_override_pvs("readpipe")))
     {
         /* detach rest of siblings from o and its first child */
         op_sibling_splice(o, cUNOPo->op_first, -1, NULL);
@@ -13441,7 +13441,7 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !OpHAS_SIBLING(cLISTOPo->op_first))
         op_append_elem(OP_GLOB, o, newDEFSVOP()); /* glob() => glob($_) */
 
-    if (!(o->op_flags & OPf_SPECIAL) && (gv = gv_override("glob", 4)))
+    if (!(o->op_flags & OPf_SPECIAL) && (gv = gv_override_pvs("glob")))
     {
         /* convert
          *     glob
@@ -14118,7 +14118,7 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (!(o->op_flags & OPf_SPECIAL) /* Wasn't written as CORE::require */
         /* handle override, if any */
-     && (gv = gv_override("require", 7))) {
+     && (gv = gv_override_pvs("require"))) {
         OP *kid, *newop;
         if (o->op_flags & OPf_KIDS) {
             kid = cUNOPo->op_first;

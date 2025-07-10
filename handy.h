@@ -468,6 +468,10 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
             Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(name), flags, sv_type)
 #define  gv_fetchpvn  gv_fetchpvn_flags
 
+/* gv_override() is not exported from libperl */
+#ifdef PERL_CORE
+#  define gv_override_pvs(name) Perl_gv_override(aTHX_ STR_WITH_LEN(name))
+#endif
 
 /*
 =for apidoc_defn mx|void|lex_stuff_pvs|"pv"|U32 flags

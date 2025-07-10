@@ -11462,7 +11462,7 @@ S_scan_inputsymbol(pTHX_ char *start)
             Copy("ARGV",d,5,char);
 
         /* Check whether readline() is overridden */
-        if ((gv_readline = gv_override("readline",8)))
+        if ((gv_readline = gv_override_pvs("readline")))
             readline_overridden = TRUE;
 
         /* if <$fh>, create the ops to turn the variable into a
