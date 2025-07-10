@@ -8214,7 +8214,21 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
                 croak("Version number must be a constant number");
 
             /* Make copy of idop so we don't free it twice */
-            pack = newSVOP(OP_CONST, 0, newSVsv(cSVOPx(idop)->op_sv));
+            SV* new_pkg_sv;
+            SV* old_pkg_sv = cSVOPx(idop)->op_sv;
+            if (!SvPOK(old_pkg_sv) || SvGMAGICAL(old_pkg_sv)
+                /* block COW 255 SV*s from spreading in favor of HEK* SV*s */
+                || SvIsCOW_shared_hash(old_pkg_sv) || SvCUR(old_pkg_sv) > I32_MAX) {
+                /* equivalent to newSVsv(sv) + COW-aware */
+                new_pkg_sv = newSVsv_flags(old_pkg_sv,
+                    SV_GMAGIC|SV_NOSTEAL|SV_DO_COW_SVSETSV);
+            }
+            else {
+                STRLEN len = SvCUR(old_pkg_sv);
+                I32 i32len = SvUTF8(old_pkg_sv) ? -((I32)len): (I32)len;
+                new_pkg_sv = newSVpvn_share(SvPVX_const(old_pkg_sv), i32len, 0);
+            }
+            pack = newSVOP(OP_CONST, 0, new_pkg_sv);
 
             /* Fake up a method call to VERSION */
             meth = newSVpvs_share("VERSION");
@@ -8241,7 +8255,21 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         SV *meth;
 
         /* Make copy of idop so we don't free it twice */
-        pack = newSVOP(OP_CONST, 0, newSVsv(cSVOPx(idop)->op_sv));
+        SV* new_pkg_sv;
+        SV* old_pkg_sv = cSVOPx(idop)->op_sv;
+        if (!SvPOK(old_pkg_sv) || SvGMAGICAL(old_pkg_sv)
+            /* block COW 255 SV*s from spreading in favor of HEK* SV*s */
+            || SvIsCOW_shared_hash(old_pkg_sv) || SvCUR(old_pkg_sv) > I32_MAX) {
+            /* equivalent to newSVsv(sv) + COW-aware */
+            new_pkg_sv = newSVsv_flags(old_pkg_sv,
+                SV_GMAGIC|SV_NOSTEAL|SV_DO_COW_SVSETSV);
+        }
+        else {
+            STRLEN len = SvCUR(old_pkg_sv);
+            I32 i32len = SvUTF8(old_pkg_sv) ? -((I32)len): (I32)len;
+            new_pkg_sv = newSVpvn_share(SvPVX_const(old_pkg_sv), i32len, 0);
+        }
+        pack = newSVOP(OP_CONST, 0, new_pkg_sv);
 
         /* Fake up a method call to import/unimport */
         meth = aver
@@ -8462,6 +8490,14 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     lex_start(NULL, NULL, LEX_START_SAME_FILTER);
     floor = start_subparse(FALSE, 0);
 
+    if (SvPOK(name) && !SvGMAGICAL(name) && !SvIsCOW_shared_hash(name)
+        && !(SvCUR(name) > I32_MAX)) {
+        I32 len = SvUTF8(name) ? -((I32)SvCUR(name)) : (I32)SvCUR(name);
+        SV *nsv = newSVpvn_share(SvPVX_const(name), len, 0);
+        SV *name_old = name;
+        name = nsv;
+        SvREFCNT_dec_NN(name_old);
+    }
     modname = newSVOP(OP_CONST, 0, name);
     modname->op_private |= OPpCONST_BARE;
     if (ver) {
@@ -15347,24 +15383,26 @@ Perl_ck_subr(pTHX_ OP *o)
             /* constant string might be replaced with object, f.e. bigint */
             if (const_class && SvPOK(*const_class)) {
                 assert(const_op);
+                SV * old_sv = *const_class;
                 STRLEN len;
-                const char* str = SvPV(*const_class, len);
+                const char* str = SvPV(old_sv, len);
                 if (len) {
                     if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED
                         && !is_standard_filehandle_name(str)
                         && (const_op->op_private & OPpCONST_BARE)) {
                         cvop->op_private |= OPpMETH_NO_BAREWORD_IO;
                     }
-
-                    SV* const shared = newSVpvn_share(
-                        str, SvUTF8(*const_class)
-                                    ? -(SSize_t)len : (SSize_t)len,
-                        0
-                    );
-                    if (SvREADONLY(*const_class))
-                        SvREADONLY_on(shared);
-                    SvREFCNT_dec(*const_class);
-                    *const_class = shared;
+                    if (!SvIsCOW_shared_hash(old_sv)) {
+                        SV* const shared = newSVpvn_share(
+                            str, SvUTF8(old_sv)
+                                        ? -(SSize_t)len : (SSize_t)len,
+                            0
+                        );
+                        if (SvREADONLY(old_sv))
+                            SvREADONLY_on(shared);
+                        SvREFCNT_dec_NN(old_sv);
+                        *const_class = shared;
+                    }
                 }
             }
             break;
