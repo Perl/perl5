@@ -404,8 +404,9 @@ the F<perldelta> of a previous release.
 
 =head1 Obituary
 
-"WELL VOLUNTEERED!" echoed across conferences and IRC. Matt S. Trout's battle
-cry that transformed reluctant volunteers into community leaders. With profound
+"WELL VOLUNTEERED!" echoed across conference rooms and IRC channels. Matt S. Trout's battle
+cry that transformed reluctant volunteers into community leaders.
+With profound
 sadness, we announce Matt's passing. Since the early 2000s, Matt shaped Perl
 through sheer force of will: IRC operator, PAUSE administrator, ShadowCat
 co-founder, architect of DBIx::Class. His opinions came wrapped in profanity
