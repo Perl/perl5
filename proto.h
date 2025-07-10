@@ -10276,11 +10276,6 @@ Perl_utf8n_to_uvchr_msgs(const U8 * const s0, STRLEN curlen, STRLEN *retlen, con
         assert(s0)
 
 PERL_STATIC_INLINE U8 *
-Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
-# define PERL_ARGS_ASSERT_UV_TO_UTF8_FLAGS      \
-        assert(d)
-
-PERL_STATIC_INLINE U8 *
 Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs);
 # define PERL_ARGS_ASSERT_UV_TO_UTF8_MSGS       \
         assert(d)
