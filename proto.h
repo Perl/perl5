@@ -4309,9 +4309,6 @@ Perl_str_to_version(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_STR_TO_VERSION         \
         assert(sv)
 
-/* PERL_CALLCONV bool
-Perl_strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
-
 PERL_CALLCONV void
 Perl_sub_crush_depth(pTHX_ CV *cv)
         __attribute__visibility__("hidden");

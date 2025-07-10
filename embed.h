@@ -652,7 +652,8 @@
 # define stack_grow(a,b,c)                      Perl_stack_grow(aTHX_ a,b,c)
 # define start_subparse(a,b)                    Perl_start_subparse(aTHX_ a,b)
 # define str_to_version(a)                      Perl_str_to_version(aTHX_ a)
-# define strict_utf8_to_uv                      Perl_strict_utf8_to_uv
+# define strict_utf8_to_uv(s,e,cp_p,advance_p)  utf8_to_uv_flags(s,e,cp_p,advance_p,UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
+# define Perl_strict_utf8_to_uv                 strict_utf8_to_uv
 # define suspend_compcv(a)                      Perl_suspend_compcv(aTHX_ a)
 # define sv_2bool_flags(a,b)                    Perl_sv_2bool_flags(aTHX_ a,b)
 # define sv_2cv(a,b,c,d)                        Perl_sv_2cv(aTHX_ a,b,c,d)

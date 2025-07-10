@@ -3086,11 +3086,12 @@ dopx	|PerlIO *|start_glob	|NN SV *tmpglob 			\
 				|NN IO *io
 Adp	|I32	|start_subparse |I32 is_format				\
 				|U32 flags
-ATdmp	|bool	|strict_utf8_to_uv					\
+ATdp	|bool	|strict_utf8_to_uv					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
-				|NULLOK Size_t *advance_p
+				|NULLOK Size_t *advance_p		\
+	      = utf8_to_uv_flags(s,e,cp_p,advance_p,UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
 CRp	|NV	|str_to_version |NN SV *sv
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV *cv
