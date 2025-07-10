@@ -35,14 +35,33 @@
 :		Supported at least since perl-5.23.8, with or without ppport.h.
 :
 : Lines in this file are of the form:
-:    flags|return_type|name|arg1|arg2|...|argN
+:    flags|return_type|name|arg1|arg2|...|argN [ = implementation ]
 :
-: 'flags' is a string of single letters.  Most of the flags are meaningful only
-: to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
-: comments here mostly don't include how Devel::PPPort or diag.t use them:
-: All the possible flags and their meanings are given below.
+: 'name'    is the name of the entity being declared; usually its a function
 :
-: A function taking no parameters will have no 'arg' elements.
+: 'flags'   is a string of single letters.  Most of the flags are meaningful
+:	    only to embed.pl; some only to autodoc.pl, and others only to
+:	    makedef.pl.  The comments here mostly don't include how
+:	    Devel::PPPort or diag.t use them: All the possible flags and their
+:	    meanings are given a ways below.
+:
+: 'return_type' is the type of value that 'name' returns, or 'void' if there is
+:	    no returned value.
+:
+: 'arg1' .. argN' are the arguments to 'name'.  These are omitted for an entity
+:	    taking no parameters.
+:
+: '= implementation  is optional; if present it defines the implementation of
+:	    'name'.  Its presence indicates that 'name' is a macro, so the 'm'
+:	    flag is implied and isn't required to be present.  This is intended
+:	    for macros that are simple, typically a variation on another entity
+:	    defined in this file, like calling such an entity with an extra,
+:	    fixed, parameter.  For example the implementation
+:		= bar(a,b,c,0)
+:	    means that 'name(a,b,c)' is defined to be 'bar(a,b,c,0)'
+:	    This facility automatically will generate any required long names
+:	    with any needed thread context parameters.
+:
 : A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
 :

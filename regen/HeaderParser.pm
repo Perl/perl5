@@ -744,6 +744,8 @@ sub tidy_embed_fnc_entry {
     $line =~ s/\s*\\\n/ /g;
     $line =~ s/\s+\z//;
     ($line)= expand($line);
+    $line =~ s/ \s* = \s* (.*?) \s* \z //x;
+    my $implementation = $1;
     my ($flags, $ret, $name, @args)= split /\s*\|\s*/, $line;
     my %flag_seen;
     $flags= join "", grep !$flag_seen{$_}++, sort split //, $flags;
@@ -759,28 +761,55 @@ sub tidy_embed_fnc_entry {
             . " in 'embed.fnc' at line $line_data->{start_line_num}\n"
             . "Did you a forget a line continuation on the previous line?\n";
     }
-    for ($ret, @args) {
+    for ($ret, @args, $implementation) {
+        next unless defined $_;
         s/(\w)\*/$1 */g;
         s/\*\s+(\w)/*$1/g;
         s/\*const/* const/g;
     }
     my $head= sprintf "%-8s|%-7s", $flags, $ret;
     $head .= sprintf "|%*s", -(31 - length($head)), $name;
-    if (@args and length($head) > 32) {
+    if ((@args || $implementation) and length($head) > 32) {
         $head .= "\\\n";
         $head .= " " x 32;
     }
     foreach my $ix (0 .. $#args) {
         my $arg= $args[$ix];
         $head .= "|$arg";
-        $head .= "\\\n" . (" " x 32) if $ix < $#args;
+
+        # Append continuation marker for all but final line
+        $head .= "\\\n" if $ix < $#args || $implementation;
+
+        # indent next argument line; $implementation line indented
+        # separately below
+        $head .= (" " x 32) if $ix < $#args;
     }
+
+    if ($implementation) {
+
+        # Get rid of spaces around punctuation
+        $implementation =~ s/ \s* ( [[:punct:]] ) \s* /$1/xg;
+
+        # Use 14 spaces so as to generally line up with $name
+        $head .= (" " x 14) . "= $implementation";
+    }
+
     $line= $head . "\n";
 
     if ($line =~ /\\\n/) {
+
+        # Create continuation line markers so as to all be in the same column,
+        # and at least in column 72
         my @lines= split /\s*\\\n/, $line;
         my $len= length($lines[0]);
-        $len < length($_) and $len= length($_) for @lines;
+
+        # Any implementation line doesn't cause the marker to be output
+        # further right than the argument lines.  Otherwise, could move them
+        # far to the right, giving more of a bad display.  XXX We could fold
+        # the implementation line.
+        my $upper_bound = ($implementation) ? $#lines - 1 : $#lines;
+
+        $len < length($_) and $len= length($_) for @lines[ 0 .. $upper_bound ];
         $len= int(($len + 7) / 8) * 8;
         $len= 72 if $len < 72;
         $line= join("\\\n",
@@ -794,6 +823,7 @@ sub tidy_embed_fnc_entry {
         return_type => $ret,
         name        => $name,
         args        => \@args,
+        implementation => $implementation,
     );
     $line =~ s/\s+\z/\n/;
     $line_data->{line}= $line;

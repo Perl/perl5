@@ -796,8 +796,10 @@ unless ($Config{d_wcrtomb}) {
     foreach (@$embed_array) {
         my $embed= $_->{embed}
             or next;
-	my ($flags, $retval, $func, $args) = @{$embed}{qw(flags return_type name args)};
+	my ($flags, $retval, $func, $args, $implementation) =
+                    @{$embed}{qw(flags return_type name args implementation)};
 	next unless $func;
+	next if $implementation;    # Having this implies it is a macro
 	if (($flags =~ /[AXC]/ && $flags !~ $excludedre)
             || (!$define{'NO_MATHOMS'} && $flags =~ /b/))
         {

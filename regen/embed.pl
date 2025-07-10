@@ -121,7 +121,10 @@ sub generate_proto_h {
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
-        my ($flags,$retval,$plain_func,$args) = @{$embed}{qw(flags return_type name args)};
+        my ($flags,$retval,$plain_func,$args,$implementation) = @{$embed}{qw(flags return_type name args implementation)};
+	my $has_implementation = defined $implementation;
+	$flags .= 'M' if $has_implementation && $flags !~ /M/;
+
         if ($flags =~ / ( [^AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /x) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
@@ -221,6 +224,7 @@ sub generate_proto_h {
                             if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
         die_at_end "For '$plain_func', I and i flags are mutually exclusive"
                                             if $flags =~ /I/ && $flags =~ /i/;
+	next if $has_implementation;
 
         $ret = "";
         $ret .= "$retval\n";
@@ -505,12 +509,65 @@ sub embed_h {
         }
         my $level= $_->{level};
         my $embed= $_->{embed} or next;
-        my ($flags,$retval,$func,$args) = @{$embed}{qw(flags return_type name args)};
+        my ($flags,$retval,$func,$args,$implementation) = @{$embed}{qw(flags return_type name args implementation)};
+
         my $ret = "";
         my $ind= $level ? " " : "";
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
-        if ($flags !~ /[omM]/ or ($flags =~ /m/ && $flags =~ /p/)) {
+
+	if ($implementation) {
+
+            # Currently, uses the simplistic assumption that the basic
+            # argument is comprised of the the final \w+ chars, so gets rid of
+            # any NULLOK, and pointers '*'
+            $_ =~ s/ ^ .* \W //x for $args->@*;
+
+            # Use the furnished implementation as the base definition
+            my $arglist = join ",", $args->@*;
+	    $ret = "#${ind}define $func($arglist)";
+	    add_indent($ret);
+	    $ret .= $implementation . "\n";
+
+            # And add a full name definition if it differs from the base
+	    my $caller_full_name = full_name($func, $flags);
+	    if ($caller_full_name ne $func) {
+		my $no_thread_full_define =
+				indent_define($caller_full_name, $func, $ind);
+		if ($flags =~ /[T]/) {
+
+                    # Without threads, the full name call has nothing extra
+		    $ret .= $no_thread_full_define;
+		}
+		else {
+		    # XXX This assumes that if the caller has a pTHX, so does
+                    # the callee.
+                    my ($callee_name, $callee_args_plus_r_paren) =
+                                $implementation =~ m/ ^
+                                                         ( .+? )
+                                                         \(
+                                                         ( .*? )
+                                                         \s*
+                                                       \z
+                                                    /xx;
+                    die "The implementation must be of the form: '"
+                      . "foo(a,b, ...)'" unless $callee_name
+                                            and $callee_args_plus_r_paren;
+		    my $callee_full_name = full_name($callee_name, $flags);
+
+                    # mTHX in both caller and callee in the threaded case will
+                    # match aTHX
+		    $ret .= "#${ind}ifdef USE_THREADS\n"
+                         .  "#${ind}  define $caller_full_name(mTHX,"
+                         .  "$arglist)  $callee_full_name(mTHX,"
+                         .  "$callee_args_plus_r_paren\n"
+                         .  "#${ind}else\n"
+                         .  "$ind  $no_thread_full_define"
+                         .  "#${ind}endif\n";
+		}
+            }
+	}
+        elsif ($flags !~ /[omM]/ or ($flags =~ /m/ && $flags =~ /p/)) {
             my $argc = scalar @$args;
             if ($flags =~ /[T]/) {
                 my $full_name = full_name($func, $flags);

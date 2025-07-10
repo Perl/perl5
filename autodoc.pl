@@ -2570,14 +2570,23 @@ while (my $input = <$fh>) {
     }
     elsif ($file eq "embed.h") {
 
-        # embed.h won't have any apidoc lines in it.  Instead look for lines
-        # that define the obsolete 'perl_' lines.  Then we can check later
-        # that such a definition actually exists when we encounter input that
-        # claims there is
+        # embed.h won't have any apidoc lines in it.  Instead look for:
+        #   1) lines that define Perl_foo, the long name for 'foo'; and
+        #   2) lines that define the obsolete 'perl_' lines.
+
+        # Then we can check later that such a definition actually exists when
+        # we encounter input that claims there is
         open my $fh, '<', $file or die "Cannot open $file for docs: $!\n";
         while (defined (my $input = <$fh>)) {
-            $protos{$1} = $2
-                if $input =~ / ^\# \s* define \s+ ( perl_\w+ ) ( [^)]* \) ) /x;
+            if ($input =~ s/ ^ \# \s* define \s+ ( [Pp] erl_\w+ ) \s* //x) {
+                my $full_name = $1;
+
+                # The full name might be followed by an argument list, but not
+                # necessarily
+                $input =~ s/ \( [^)]* \) \s* (\w+) //x;
+
+                $protos{$full_name} = $1;
+            }
         }
         close $fh or die "Error closing $file: $!\n";
     }
