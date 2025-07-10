@@ -3857,8 +3857,9 @@ Cp	|U8 *	|uvoffuni_to_utf8_flags_msgs				\
 				|const UV flags 			\
 				|NULLOK HV **msgs
 
-Adip	|U8 *	|uv_to_utf8	|NN U8 *d				\
-				|UV uv
+Adp	|U8 *	|uv_to_utf8	|NN U8 *d				\
+				|UV uv					\
+	      = uv_to_utf8_flags(d,uv,0)
 Adip	|U8 *	|uv_to_utf8_flags					\
 				|NN U8 *d				\
 				|UV uv					\

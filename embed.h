@@ -826,7 +826,7 @@
 # define utf8n_to_uvchr                         Perl_utf8n_to_uvchr
 # define utf8n_to_uvchr_error                   Perl_utf8n_to_uvchr_error
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
-# define uv_to_utf8(a,b)                        Perl_uv_to_utf8(aTHX_ a,b)
+# define uv_to_utf8(d,uv)                       uv_to_utf8_flags(d,uv,0)
 # define uv_to_utf8_flags(a,b,c)                Perl_uv_to_utf8_flags(aTHX_ a,b,c)
 # define uv_to_utf8_msgs(a,b,c,d)               Perl_uv_to_utf8_msgs(aTHX_ a,b,c,d)
 # define uvoffuni_to_utf8_flags_msgs(a,b,c,d)   Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
@@ -2263,10 +2263,12 @@
 # endif /* defined(USE_PERLIO) */
 # if defined(USE_THREADS)
 #   define Perl_sv_utf8_downgrade(mTHX,sv,fail_ok) Perl_sv_utf8_downgrade_flags(mTHX,sv,fail_ok,SV_GMAGIC)
+#   define Perl_uv_to_utf8(mTHX,d,uv)           Perl_uv_to_utf8_flags(mTHX,d,uv,0)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
 # else
 #   define Perl_sv_utf8_downgrade               sv_utf8_downgrade
+#   define Perl_uv_to_utf8                      uv_to_utf8
 # endif
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)

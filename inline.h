@@ -3273,17 +3273,10 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 }
 
 PERL_STATIC_INLINE U8 *
-Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return uv_to_utf8_msgs(d, uv, 0, 0);
-}
-
-PERL_STATIC_INLINE U8 *
 Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     return uv_to_utf8_msgs(d, uv, flags, 0);
 }
-
 PERL_STATIC_INLINE U8 *
 Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags , HV **msgs)
 {
