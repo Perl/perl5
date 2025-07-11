@@ -84,7 +84,7 @@ while (<DATA>) { # Read in the categories
 
     my $extra = "";
     $extra = $extra_conditional{$name} if defined $extra_conditional{$name};
-    print $l "#  if defined(NO_LOCALE) || defined(NO_LOCALE_${name})$extra\n";
+    print $l "#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_${name})$extra\n";
 
     print $l "\n    $macro_unless_name\n\n" if $macro_unless_name;
     print $l <<~EOF;

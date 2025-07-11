@@ -30,7 +30,7 @@
  */
 
 #ifdef LC_CTYPE
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_CTYPE)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_CTYPE)
 
     PERL_LOCALE_TABLE_ENTRY(CTYPE, NULL)
 
@@ -47,7 +47,7 @@
 #  define LC_CTYPE_AVAIL_  0
 #endif
 #ifdef LC_NUMERIC
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_NUMERIC)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_NUMERIC)
 
     PERL_LOCALE_TABLE_ENTRY(NUMERIC, NULL)
 
@@ -68,7 +68,7 @@
         /* Perl outsources all its collation efforts to the libc strxfrm(), so
          * if it isn't available on the system, default "C" locale collation
          * gets used */
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_COLLATE) || ! defined(HAS_STRXFRM)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_COLLATE) || ! defined(HAS_STRXFRM)
 
     PERL_LOCALE_TABLE_ENTRY(COLLATE, NULL)
 
@@ -88,7 +88,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(TIME, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_TIME)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_TIME)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_TIME_AVAIL_  0
 #  else
@@ -102,7 +102,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(MESSAGES, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_MESSAGES)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_MESSAGES)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_MESSAGES_AVAIL_  0
 #  else
@@ -116,7 +116,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(MONETARY, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_MONETARY)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_MONETARY)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_MONETARY_AVAIL_  0
 #  else
@@ -130,7 +130,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(ADDRESS, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_ADDRESS)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_ADDRESS)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_ADDRESS_AVAIL_  0
 #  else
@@ -144,7 +144,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(IDENTIFICATION, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_IDENTIFICATION)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_IDENTIFICATION)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_IDENTIFICATION_AVAIL_  0
 #  else
@@ -158,7 +158,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(MEASUREMENT, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_MEASUREMENT)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_MEASUREMENT)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_MEASUREMENT_AVAIL_  0
 #  else
@@ -172,7 +172,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(PAPER, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_PAPER)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_PAPER)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_PAPER_AVAIL_  0
 #  else
@@ -186,7 +186,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(TELEPHONE, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_TELEPHONE)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_TELEPHONE)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_TELEPHONE_AVAIL_  0
 #  else
@@ -200,7 +200,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(NAME, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_NAME)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_NAME)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_NAME_AVAIL_  0
 #  else
@@ -214,7 +214,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(SYNTAX, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_SYNTAX)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_SYNTAX)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_SYNTAX_AVAIL_  0
 #  else
@@ -228,7 +228,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(TOD, NULL)
 
-#  if defined(NO_LOCALE) || defined(NO_LOCALE_TOD)
+#  if ! defined(USE_LOCALE) || defined(NO_LOCALE_TOD)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_TOD_AVAIL_  0
 #  else
