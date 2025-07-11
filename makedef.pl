@@ -145,6 +145,9 @@ if (! $define{NO_LOCALE}) {
     elsif ($define{HAS_SETLOCALE}) {
         $define{USE_LOCALE} = 1;
     }
+    else {
+        undef $define{USE_LOCALE};
+    }
 }
 
 # https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B#Internal_version_numbering
