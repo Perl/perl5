@@ -1725,23 +1725,55 @@ options.
 
 =head3 The PROTOTYPES: Keyword
 
-The PROTOTYPES: keyword corresponds to B<xsubpp>'s C<-prototypes> and
-C<-noprototypes> options.  This keyword overrides the command line options.
-Prototypes are disabled by default.  When prototypes are enabled, XSUBs will
-be given Perl prototypes.  This keyword may be used multiple times in an XS
-module to enable and disable prototypes for different parts of the module.
-Note that B<xsubpp> will nag you if you don't explicitly enable or disable
-prototypes, with:
+    PROTOTYPES: DISABLE | ENABLE
 
-    Please specify prototyping behavior for Foo.xs (see perlxs manual)
+When prototypes are enabled (they are disabled by default), any
+subsequent XSUBs will be given a Perl prototype. The prototype string is
+usually generated from the XSUB's parameter list. This keyword may be used
+multiple times in an XS module to enable and disable prototypes for
+different parts of the module.
 
-To enable prototypes:
+For example, these two XSUB declarations:
+
+    int add1(int a, int b)
 
     PROTOTYPES: ENABLE
 
-To disable prototypes:
+    int add2(int a, int b)
+
+behave similarly to the perl-level:
+
+    sub add1     { ... }
+    sub add2($$) { ... }
+
+Note also that prototypes can be overridden on a per-XSUB basis with the
+XSUB-level L<PROTOTYPE|/The PROTOTYPE: Keyword> keyword.
+
+In general, XSUB prototypes (similarly to perl sub prototypes) are of very
+limited use and are typically only used to mimic the behaviour of Perl
+builtins. For example there is no way to implement a C<push @a, ...;>
+style function without a way of telling the Perl interpreter not to
+flatten C<@a>. Outside of these  narrow uses, it is generally a mistake to
+use prototypes.
+
+In the early days of XS it was thought that using prototypes was probably
+a Good Thing, and prototypes were enabled by default. This was soon
+changed to disabled by default, and a warning was added if you haven't
+explicitly indicated your preference: so in the absence of any
+C<PROTOTYPES> keyword, you will get this nagging warning:
+
+    Please specify prototyping behavior for Foo.xs (see perlxs manual)
+
+So 99% of the time you will want to add
 
     PROTOTYPES: DISABLE
+
+to the start of the XS half of your C<.xs> file.
+
+The C<PROTOTYPES> keyword corresponds to F<xsubpp>'s C<-prototypes> and
+C<-noprototypes> options.
+
+See L<perlsub/Prototypes> for more information about Perl prototypes.
 
 =head3 The EXPORT_XSUB_SYMBOLS: Keyword
 
