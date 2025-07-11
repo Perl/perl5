@@ -705,12 +705,12 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 75: /* barestmt: YADAYADA PERLY_SEMICOLON  */
+  case 75: /* barestmt: MST PERLY_SEMICOLON  */
 #line 637 "perly.y"
                         {
-                          /* diag_listed_as: Unimplemented */
+                          /* diag_listed_as: WellVolunteered */
 			  (yyval.opval) = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+				newSVOP(OP_CONST, 0, newSVpvs("Well Volunteered")));
 			}
 
     break;

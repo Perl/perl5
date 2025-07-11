@@ -1004,12 +1004,12 @@ Beginning in Perl 5.12, Perl accepts an ellipsis, "C<...>", as a
 placeholder for code that you haven't implemented yet.
 When Perl 5.12 or later encounters an ellipsis statement, it parses this
 without error, but if and when you should actually try to execute it, Perl
-throws an exception with the text C<Unimplemented>:
+throws an exception with the text C<Well Volunteered>:
 
     use v5.12;
     sub unimplemented { ... }
     eval { unimplemented() };
-    if ($@ =~ /^Unimplemented at /) {
+    if ($@ =~ /^Well Volunteered at /) {
         say "I found an ellipsis!";
     }
 
@@ -1058,7 +1058,8 @@ C<{ ... }> is a block and not a hash reference constructor.
 
 Note: Some folks colloquially refer to this bit of punctuation as a
 "yada-yada" or "triple-dot", but its true name
-is actually an ellipsis.
+is actually an ellipsis. It has now been renamed the MST operator, in
+honor of Matt S. Trout.
 
 =head2 PODs: Embedded Documentation
 X<POD> X<documentation>

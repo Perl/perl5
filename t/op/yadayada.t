@@ -11,17 +11,17 @@ use strict;
 plan 34;
 
 my $err;
-my $err1 = "Unimplemented at $0 line ";
+my $err1 = "Well Volunteered at $0 line ";
 my $err2 = ".\n";
 
 $err = $err1 . ( __LINE__ + 1 ) . $err2;
 eval { ... };
-is $@, $err, "Execution of ellipsis statement reported 'Unimplemented' code";
+is $@, $err, "Execution of ellipsis statement reported 'Well Volunteered' code";
 $@ = '';
 
 my $i = 0;
 is eval { $i++; ...; $i+=10; 123 }, undef;
-like $@, qr/\AUnimplemented /;
+like $@, qr/\AWell Volunteered /;
 is $i, 1;
 
 note("RT #122661: Semicolon before ellipsis statement disambiguates to indicate block rather than hash reference");

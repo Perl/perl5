@@ -85,7 +85,7 @@
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
 %token <opval> LABEL
-%token <ival> LOOPEX DOTDOT YADAYADA
+%token <ival> LOOPEX DOTDOT MST
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP BLKLSTOP
 %token <ival> POWOP MULOP ADDOP
 %token <ival> DOLSHARP HASHBRACK NOAMP
@@ -633,11 +633,11 @@ barestmt:	PLUGSTMT
 			{
 			  $$ = newDEFEROP(0, op_scope($2));
 			}
-	|	YADAYADA PERLY_SEMICOLON
+	|	MST PERLY_SEMICOLON
 			{
-                          /* diag_listed_as: Unimplemented */
+                          /* diag_listed_as: WellVolunteered */
 			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+				newSVOP(OP_CONST, 0, newSVpvs("Well Volunteered")));
 			}
 	|	PERLY_SEMICOLON
 			{

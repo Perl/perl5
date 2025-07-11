@@ -130,7 +130,7 @@ extern int yydebug;
     LABEL = 324,                   /* LABEL  */
     LOOPEX = 325,                  /* LOOPEX  */
     DOTDOT = 326,                  /* DOTDOT  */
-    YADAYADA = 327,                /* YADAYADA  */
+    MST = 327,                /* MST  */
     FUNC0 = 328,                   /* FUNC0  */
     FUNC1 = 329,                   /* FUNC1  */
     FUNC = 330,                    /* FUNC  */

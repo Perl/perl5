@@ -536,7 +536,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (OPNUM, UNIOP),
     DEBUG_TOKEN (OPVAL, UNIOPSUB),
     DEBUG_TOKEN (OPVAL, BAREWORD),
-    DEBUG_TOKEN (IVAL,  YADAYADA),
+    DEBUG_TOKEN (IVAL,  MST),
     { 0,		TOKENTYPE_NONE,		NULL }
 };
 
@@ -9460,7 +9460,7 @@ yyl_try(pTHX_ char *s)
         }
         if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
             s += 3;
-            OPERATOR(YADAYADA);
+            OPERATOR(MST);
         }
         if (PL_expect == XOPERATOR || !isDIGIT(s[1])) {
             char tmp = *s++;

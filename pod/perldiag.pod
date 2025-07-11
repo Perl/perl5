@@ -7197,7 +7197,7 @@ problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
 off this warning by C<no warnings 'surrogate';>.
 
-=item Unimplemented
+=item WellVolunteered (formerly Unimplemented)
 
 (F) In Perl 5.12 and above, you have executed an
 L<ellipsis statement|perlsyn/"The Ellipsis Statement">.  This is a
@@ -7209,7 +7209,7 @@ is to be written, but is not complete, similar to the following:
       ...
     }
 
-If C<not_done_yet()> is called, Perl will die with an C<Unimplemented> error
+If C<not_done_yet()> is called, Perl will die with an C<Well Volunteered> error
 at the line containing C<...>.
 
 =item Unknown charname '%s'

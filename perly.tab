@@ -80,7 +80,7 @@ enum yysymbol_kind_t
   YYSYMBOL_LABEL = 69,                     /* LABEL  */
   YYSYMBOL_LOOPEX = 70,                    /* LOOPEX  */
   YYSYMBOL_DOTDOT = 71,                    /* DOTDOT  */
-  YYSYMBOL_YADAYADA = 72,                  /* YADAYADA  */
+  YYSYMBOL_MST = 72,                  /* MST  */
   YYSYMBOL_FUNC0 = 73,                     /* FUNC0  */
   YYSYMBOL_FUNC1 = 74,                     /* FUNC1  */
   YYSYMBOL_FUNC = 75,                      /* FUNC  */
@@ -396,7 +396,7 @@ static const char *const yytname[] =
   "KW_SUB_named_sig", "KW_SUB_anon", "KW_SUB_anon_sig", "KW_METHOD_named",
   "KW_METHOD_anon", "BAREWORD", "METHCALL0", "METHCALL", "THING", "PMFUNC",
   "PRIVATEREF", "QWLIST", "FUNC0OP", "FUNC0SUB", "UNIOPSUB", "LSTOPSUB",
-  "PLUGEXPR", "PLUGSTMT", "LABEL", "LOOPEX", "DOTDOT", "YADAYADA", "FUNC0",
+  "PLUGEXPR", "PLUGSTMT", "LABEL", "LOOPEX", "DOTDOT", "MST", "FUNC0",
   "FUNC1", "FUNC", "UNIOP", "LSTOP", "BLKLSTOP", "POWOP", "MULOP", "ADDOP",
   "DOLSHARP", "HASHBRACK", "NOAMP", "COLONATTR", "FORMLBRACK",
   "FORMRBRACK", "SUBLEXSTART", "SUBLEXEND", "PHASER", "PREC_LOW",
