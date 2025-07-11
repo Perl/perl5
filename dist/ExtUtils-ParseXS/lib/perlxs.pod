@@ -1818,22 +1818,61 @@ interpreter which is running the XS parser.
 
 =head3 The TYPEMAP: Keyword
 
-Starting with Perl 5.16, you can embed typemaps into your XS code
-instead of or in addition to typemaps in a separate file.  Multiple
-such embedded typemaps will be processed in order of appearance in
-the XS code and like local typemap files take precedence over the
-default typemap, the embedded typemaps may overwrite previous
-definitions of TYPEMAP, INPUT, and OUTPUT stanzas.  The syntax for
-embedded typemaps is
+    TYPEMAP: <<EOF
+    myint  T_MYIV
+    INPUT
+        T_MYIV
+            $var = ($type)my_SvIV($arg)
+    OUTPUT
+        T_MYIV
+            my_sv_setiv($arg, (IV)$var);
+    EOF
 
-    TYPEMAP: <<HERE
-    ... your typemap code here ...
-    HERE
+Since 5.16.0.
 
-where the C<TYPEMAP> keyword must appear in the first column of a
-new line.
+Typemaps are mappings and code templates which allow the XS parser to
+automatically generate code snippets which convert between Perl and C
+values. The C<TYPEMAP> keyword can be used to embed typemap declarations
+directly into your XS code, instead of (or in addition to) typemaps in a
+separate file. Multiple such embedded typemaps will be processed in order
+of appearance in the XS code. Typemaps are processed in the order:
 
-Refer to L<perlxstypemap> for details on writing typemaps.
+=over
+
+=item *
+
+The system typemap file.
+
+=item *
+
+A local typemap file, typically specified by C<xsubpp -typemap typemap>
+in the F<Makefile>.
+
+=item *
+
+C<TYPEMAP:> entries, in order.
+
+=back
+
+The most recently-applied entries take precedence, so for example you can
+use C<TYPEMAP:> to individually override specific C<TYPEMAP>, C<INPUT>, or
+C<OUTPUT> entries in the system typemap. In general, typemap changes
+affect any subsequent XSUBs within the file, until further updates.  Note
+however that due a quirk in parsing, it is possible for a C<TYPEMAP:>
+entry immediately I<after> an XSUB to affect that XSUB.
+
+The C<TYPEMAP> keyword syntax is intended to mimic Perl's "heredoc"
+syntax, and the keyword must be followed by one of these three forms:
+
+    <<  FOO
+    << 'FOO'
+    << "FOO"
+
+where C<FOO> can be just about any sequence of characters, which must be
+matched at the start of a subsequent line.
+
+See L</Using Typemaps> and L<perlxstypemap> for more details on writing
+typemaps.
 
 =head3 The BOOT: Keyword
 
