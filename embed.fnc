@@ -3540,7 +3540,8 @@ AMbdp	|void	|sv_usepvn_mg	|NN SV *sv				\
 Adp	|bool	|sv_utf8_decode |NN SV * const sv
 AMbdp	|bool	|sv_utf8_downgrade					\
 				|NN SV * const sv			\
-				|const bool fail_ok
+				|const bool fail_ok			\
+	      = sv_utf8_downgrade_flags(sv,fail_ok,SV_GMAGIC)
 Adp	|bool	|sv_utf8_downgrade_flags				\
 				|NN SV * const sv			\
 				|const bool fail_ok			\

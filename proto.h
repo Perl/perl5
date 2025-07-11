@@ -6107,11 +6107,6 @@ Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
 # define PERL_ARGS_ASSERT_SV_USEPVN_MG          \
         assert(sv)
 
-PERL_CALLCONV bool
-Perl_sv_utf8_downgrade(pTHX_ SV * const sv, const bool fail_ok);
-# define PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE     \
-        assert(sv)
-
 PERL_CALLCONV STRLEN
 Perl_sv_utf8_upgrade(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE       \

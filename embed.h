@@ -776,6 +776,7 @@
 # define sv_upgrade(a,b)                        Perl_sv_upgrade(aTHX_ a,b)
 # define sv_usepvn_flags(a,b,c,d)               Perl_sv_usepvn_flags(aTHX_ a,b,c,d)
 # define sv_utf8_decode(a)                      Perl_sv_utf8_decode(aTHX_ a)
+# define sv_utf8_downgrade(sv,fail_ok)          sv_utf8_downgrade_flags(sv,fail_ok,SV_GMAGIC)
 # define sv_utf8_downgrade_flags(a,b,c)         Perl_sv_utf8_downgrade_flags(aTHX_ a,b,c)
 # define sv_utf8_encode(a)                      Perl_sv_utf8_encode(aTHX_ a)
 # define sv_utf8_upgrade_flags_grow(a,b,c)      Perl_sv_utf8_upgrade_flags_grow(aTHX_ a,b,c)
@@ -2259,8 +2260,11 @@
 #   define PerlIO_write(a,b,c)                  Perl_PerlIO_write(aTHX_ a,b,c)
 # endif /* defined(USE_PERLIO) */
 # if defined(USE_THREADS)
+#   define Perl_sv_utf8_downgrade(mTHX,sv,fail_ok) Perl_sv_utf8_downgrade_flags(mTHX,sv,fail_ok,SV_GMAGIC)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
+# else
+#   define Perl_sv_utf8_downgrade               sv_utf8_downgrade
 # endif
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)
