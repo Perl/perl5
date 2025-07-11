@@ -1777,61 +1777,44 @@ See L<perlsub/Prototypes> for more information about Perl prototypes.
 
 =head3 The EXPORT_XSUB_SYMBOLS: Keyword
 
-The EXPORT_XSUB_SYMBOLS: keyword is likely something you will never need.
-In perl versions earlier than 5.16.0, this keyword does nothing. Starting
-with 5.16, XSUB symbols are no longer exported by default. That is, they
-are C<static> functions. If you include
+    EXPORT_XSUB_SYMBOLS: ENABLE | DISABLE
 
-    EXPORT_XSUB_SYMBOLS: ENABLE
+This keyword is present since 5.16.0, and its value is disabled by
+default.
 
-in your XS code, the XSUBs following this line will not be declared C<static>.
-You can later disable this with
-
-    EXPORT_XSUB_SYMBOLS: DISABLE
-
-which, again, is the default that you should probably never change.
-You cannot use this keyword on versions of perl before 5.16 to make
-XSUBs C<static>.
+Before 5.16.0, the C function which implemented an XSUB was exported.
+Since 5.16.0, it is declared C<static>. The old behaviour can be restored
+by enabling it. You are very unlikely to have a need for this keyword.
 
 =head3 The INCLUDE: Keyword
 
-This keyword can be used to pull other files into the XS module.  The other
-files may have XS code.  INCLUDE: can also be used to run a command to
-generate the XS code to be pulled into the module.
+    INCLUDE: const-xs.inc
+    INCLUDE: some_command |
 
-The file F<Rpcb1.xsh> contains our C<rpcb_gettime()> function:
+This keyword can be used to pull in the contents of another file to the
+"XS" part of an XS file. Unlike a top-level XS file, included files don't
+have a "C" first half, and the entire contents of the file are treated as
+XS, as if it had all been inserted at that line.
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
-      OUTPUT:
-        timep
+One common use of C<INCLUDE> is to include constant definitions generated
+by F<ExtUtils::Constant>.
 
-The XS module can use INCLUDE: to pull that file into it.
-
-    INCLUDE: Rpcb1.xsh
-
-If the parameters to the INCLUDE: keyword are followed by a pipe (C<|>) then
-the compiler will interpret the parameters as a command. This feature is
-mildly deprecated in favour of the C<INCLUDE_COMMAND:> directive, as documented
-below.
-
-    INCLUDE: cat Rpcb1.xsh |
-
-Do not use this to run perl: C<INCLUDE: perl |> will run the perl that
-happens to be the first in your path and not necessarily the same perl that is
-used to run C<xsubpp>. See L<"The INCLUDE_COMMAND: Keyword">.
+If the parameters to the C<INCLUDE> keyword are followed by a pipe (C<|>)
+then the XS parser will interpret the parameters as a command. This
+feature is mildly deprecated in favour of the C<INCLUDE_COMMAND:>
+directive, as documented below. The latter can be used to ensure that the
+perl (if any) used in the command is the same as the one running the XS
+parser.
 
 =head3 The INCLUDE_COMMAND: Keyword
 
-Runs the supplied command and includes its output into the current XS
-document. C<INCLUDE_COMMAND> assigns special meaning to the C<$^X> token
-in that it runs the same perl interpreter that is running C<xsubpp>:
+    INCLUDE_COMMAND: $^X -e '...'
 
-    INCLUDE_COMMAND: cat Rpcb1.xsh
+Since 5.14.0.
 
-    INCLUDE_COMMAND: $^X -e ...
+Similar to C<INCLUDE: some_command|> except that the C<|> is implicit, and
+it converts the special token C<$^X>, if present, to the path of the perl
+interpreter which is running the XS parser.
 
 =head3 The TYPEMAP: Keyword
 
