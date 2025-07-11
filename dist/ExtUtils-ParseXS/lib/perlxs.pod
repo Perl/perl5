@@ -1680,34 +1680,48 @@ but is described further down as an XSUB keyword.
 
 =head3 The REQUIRE: Keyword
 
-The REQUIRE: keyword is used to indicate the minimum version of the
-B<xsubpp> compiler needed to compile the XS module.  An XS module which
-contains the following statement will compile with only B<xsubpp> version
-1.922 or greater:
+    REQUIRE: 3.58
 
-    REQUIRE: 1.922
+The C<REQUIRE> keyword is used to indicate the minimum version of the
+C<ExtUtils::ParseXS> XS compiler (and its F<xsubpp> wrapper) needed to
+compile the XS module. It is expected to be a floating-point number of the
+form C<\d+\.\d+/>. It is analogous to the perl C<use v5.xx>.
 
 =head3 The VERSIONCHECK: Keyword
 
-The VERSIONCHECK: keyword corresponds to B<xsubpp>'s C<-versioncheck> and
-C<-noversioncheck> options.  This keyword overrides the command line
-options.  Version checking is enabled by default.  When version checking is
-enabled the XS module will attempt to verify that its version matches the
-version of the PM module.
+    VERSIONCHECK: DISABLE | ENABLE
 
-To enable version checking:
+Version checking (enabled by default) checks that the version compiled
+into the C<.so> or C<.dll> file matches the C<.pm> file's C<$VERSION>
+value, and if not, dies with an error message like:
 
-    VERSIONCHECK: ENABLE
+    Foo::Bar object version 1.03 does not match bootstrap parameter 1.04
 
-To disable version checking:
+Typically, when a module is built for the first time, the value of the
+C<$VERSION> variable in the C<.pm> file is copied to the generated
+C<Makefile> as C<XS_VERSION>, and from there, via a C<-DXS_VERSION=...>
+compiler option, is baked into the boot XSUB. When the module is loaded
+and the boot code called, the versions are compared, and it croaks if
+there's a mismatch. This usually indicates that the C<.so> and C<.pm>
+files are from different installs: for example someone copied over a more
+recent version of the C<.pm> file but forgot to copy or rebuild the
+C<.so>.
 
-    VERSIONCHECK: DISABLE
+If the version of the PM module is a floating point number, it will be
+stringified before the comparison, with a possible loss of precision
+(currently chopping to nine decimal places), so it may not match the
+version of the XS module any more. Quoting the C<$VERSION> declaration to
+make it a string is recommended if long version numbers are used.
 
-Note that if the version of the PM module is an NV (a floating point
-number), it will be stringified with a possible loss of precision
-(currently chopping to nine decimal places) so that it may not match
-the version of the XS module anymore. Quoting the $VERSION declaration
-to make it a string is recommended if long version numbers are used.
+There is rarely any good reason to disable this check.
+
+Note that this module version checking is completely unrelated to the
+C<REQUIRE> keyword, which is a check against the version of the I<XS
+compiler>.
+
+The C<VERSIONCHECK> keyword corresponds to F<xsubpp>'s C<-versioncheck>
+and C<-noversioncheck> options. This keyword overrides the command line
+options.
 
 =head3 The PROTOTYPES: Keyword
 
