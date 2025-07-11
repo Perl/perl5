@@ -1175,6 +1175,8 @@ violations are fatal.
 #    define USE_LOCALE
 #  elif defined(HAS_SETLOCALE)
 #    define USE_LOCALE
+#  else
+#    undef USE_LOCALE
 #  endif
 #endif
 
