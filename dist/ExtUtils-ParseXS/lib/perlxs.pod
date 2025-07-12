@@ -1911,40 +1911,177 @@ present. See L<overload/fallback> for more details.
 
 =head2 The Structure of an XSUB
 
-XXX TBC
+Following any file-scoped XS keywords and directives, an XSUB may appear.
+The start of an XSUB is usually indicated by a blank line followed by
+something starting on column one which isn't otherwise recognised as an
+XSUB keyword or file-scoped directive.
 
-XXX mention that XS comments and POD can appear between keywords
+An XSUB definition consists of a declaration (typically two lines),
+followed by an optional body. The declaration specifies the XSUB's name,
+parameters and return type. The body consists of sections started by
+keywords, which may specify how its parameters and any any return value
+should be processed, and what the main C code body of the XSUB consists
+of. Other keywords can change the behaviour of the XSUB, or affect how it
+is registered with Perl, e.g. with extra named aliases. In the absence of
+an explicit main C code body specified by the C<CODE> or C<PPCODE>
+keywords, the parser will generate a body automatically; this is referred
+to as L<autocall|/"Auto-calling a C function"> in this document.
+
+Nothing can appear between keyword sections apart from POD, XS comments,
+and trailing blank lines, all of which are stripped out before the main
+parsing takes place. Anything else will either raise an error, or be
+interpreted as the start of a new XSUB.
+
+An XSUB's body can be thought of as having up to five parts. These are, in
+order of appearance, the L<Input|/"The XSUB Input Part">, L<Init|/"The
+XSUB Init Part">, L<Code|/"The XSUB Code Part">, L<Output|/"The XSUB
+Output Part"> and L<Cleanup|/"The XSUB Cleanup Part"> parts. There is no
+formal syntax to define this structure; it's just an understanding that
+certain keywords may only appear in certain parts and thus may only appear
+after certain other keywords etc.
+
 
 =head2 An XSUB Declaration
 
-XXX TBC
+    # A simple declaration:
 
-=head3 The NO_OUTPUT Keyword
+    int
+    foo1(int i, char *s)
 
-The NO_OUTPUT can be placed as the first token of the XSUB.  This keyword
-indicates that while the C subroutine we provide an interface to has
-a non-C<void> return type, the return value of this C subroutine should not
-be returned from the generated Perl subroutine.
+    # All on one line; plus a default parameter value:
 
-With this keyword present the C<RETVAL> variable is created, and in the
-generated call to the subroutine this variable is assigned to, but the value
-of this variable is not going to be used in the auto-generated code.
+    int foo2(int i, char *s = "")
 
-This keyword makes sense only if C<RETVAL> is going to be accessed by the
-user-supplied code.  It is especially useful to make a function interface
-more Perl-like, especially when the C return value is just an error condition
-indicator.  For example,
+    # Complex parameters; plus variable argument count:
+
+    int
+    foo3(OUT int i, IN_OUTLIST char *s, STRLEN length(s), ...)
+
+    # No automatic argument processing:
+
+    void
+    foo4(...)
+        PPCODE:
+
+    # C++ method; plus various return type qualifiers:
+
+    NO_OUTPUT extern "C" static int
+    X::Y::foo5(int i, char *s) const
+
+
+An XSUB declaration consists of a return type, name, parameters, and
+optional C<NO_OUTPUT>, C<extern "C">, C<static> and C<const> keywords.
+
+=head3 An XSUB's return type and the NO_OUTPUT keyword
+
+The return type can be any valid C type, including C<void>. When non-void,
+it serves two purposes. First, it causes a C auto variable of that type
+to be declared, called C<RETVAL>. Second, it (usually) makes the XSUB
+return a single SV whose value is set to C<RETVAL>'s value at the time of
+return. In addition, a non-void autocall XSUB will call the underlying C
+library function and assign its return value to C<RETVAL>.
+
+If the return type is prefixed with the C<NO_OUTPUT> keyword, then the
+C<RETVAL> variable is still declared, but code to return its value is
+suppressed. It is typically useful when making an autocall function
+interface more Perl-like, especially when the C return value is just an
+error condition indicator. For example,
 
     NO_OUTPUT int
     delete_file(char *name)
+      # implicit autocall code here: RETVAL = delete_file(name);
       POSTCALL:
         if (RETVAL != 0)
             croak("Error %d while deleting file '%s'", RETVAL, name);
 
-Here the generated XS function returns nothing on success, and will die()
-with a meaningful error message on error.
+Here the generated XS function returns nothing on success, and will
+C<die()> with a meaningful error message on error. The XSUB's return type
+of C<int> is only meaningful for declaring C<RETVAL> and for doing the
+autocall.
 
-=head2 XSUB Parameters
+The return type can also include the C<extern "C"> and C<static>
+modifiers, which if present must be in that order, and come between any
+C<NO_OUTPUT> keyword and the return type. The C<extern> declaration must
+be written exactly as shown, i.e. with a single space and with double
+quotes around the C<C>. These two modifiers are mainly of use for XSUBs
+written in C++. A C++ XSUB declaration is also allowed to have a trailing
+C<const> keyword, which mimics the C++ syntax. See L</"Using XS With C++">
+for more details.
+
+=head3 An XSUB's name
+
+The name of the XSUB is usually put on the line following the type, in
+which case it must be on column one. It is permissible for both the return
+type and name to be on the same line.
+
+The name can be any valid Perl subroutine name. The C<PACKAGE> value from
+the most recent C<MODULE> declaration is used to give the XSUB it's
+fully-qualified Perl name.
+
+If the name includes the package separator, C<::>, then it is treated as
+as a C++ method declaration, and various extra bits of processing take
+place, such as declaring an implicit C<THIS> parameter. The XSUB's I<Perl>
+package name is still determined by the current XS package, and not the
+C++ class name. See L</"Using XS With C++"> for more details.
+
+=head3 An XSUB's parameter list
+
+Following the XSUB's name, there is a comma-separated list of parameters
+within parentheses. Although this looks superficially the same as a C
+function declaration, it is different. In particular, it is parsed by the
+XS compiler, which is a simple regex-based text processor and which
+doesn't understand the full C type syntax; nor does it recognise C-style
+comments.
+
+In fact all it does is extract the text between the C<(...)> and split on
+commas, while having enough intelligence to ignore commas and a closing
+parenthesis within a double-quoted string. Once each parameter declaration
+is extracted, it is processed, as described below in
+L</"An XSUB Parameter">.
+
+Each parameter declaration usually generates a C auto variable declaration
+of the same name, along with initialisation code which assigns the value
+of the corresponding passed argument to that variable. Under some
+circumstances code can also be generated to return the value too.
+
+Note that the original XS syntax required the type for each parameter to
+be specified separately in one or more INPUT sections, mimicking pre-C89
+"K&R" C syntax. To support this, directly after the declaration there is an
+implicit INPUT section, without a need to include the actual keyword. You
+will see this pattern very frequently in older XS code.
+
+Old style with an implicit INPUT keyword (a common pattern):
+
+    int
+    foo(a, b)
+        long  a
+        char *b
+      CODE:
+        ...
+
+Old style with explicit INPUT keyword (unusual):
+
+    int
+    foo(a, b)
+      INPUT:
+        long  a
+        char *b
+      CODE:
+        ...
+
+New style (recommended for new code):
+
+    int
+    foo(long a, char *b)
+      CODE:
+        ...
+
+Generally there no reason to use the old style any more, apart from a few
+obscure features that can be specified on an INPUT line but not in the
+signature.
+
+
+=head2 An XSUB Parameter
 
 =head3 The IN/OUTLIST/IN_OUTLIST/OUT/IN_OUT Keywords
 
@@ -1971,7 +2108,7 @@ pointers.
 
 The return list of the generated Perl function consists of the C return value
 from the function (unless the XSUB is of C<void> return type or
-C<The NO_OUTPUT Keyword> was used) followed by all the C<OUTLIST>
+C<NO_OUTPUT> was used) followed by all the C<OUTLIST>
 and C<IN_OUTLIST> parameters (in the order of appearance).  On the
 return from the XSUB the C<IN_OUT>/C<OUT> Perl parameter will be
 modified to have the values written by the C function.
@@ -2614,7 +2751,7 @@ executed after the C subroutine call is performed.  When the POSTCALL:
 keyword is used it must precede OUTPUT: and CLEANUP: blocks which are
 present in the XSUB.
 
-See examples in L<"The NO_OUTPUT Keyword">.
+See an example in L<"An XSUB Declaration">.
 
 The POSTCALL: block does not make a lot of sense when the C subroutine
 call is supplied by user by providing either CODE: or PPCODE: section.
