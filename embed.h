@@ -160,7 +160,7 @@
 # define bytes_to_utf8(a,b)                     Perl_bytes_to_utf8(aTHX_ a,b)
 # define bytes_to_utf8_free_me(a,b,c)           Perl_bytes_to_utf8_free_me(aTHX_ a,b,c)
 # define bytes_to_utf8_temp_pv(a,b)             Perl_bytes_to_utf8_temp_pv(aTHX_ a,b)
-# define c9strict_utf8_to_uv                    Perl_c9strict_utf8_to_uv
+# define Perl_c9strict_utf8_to_uv               c9strict_utf8_to_uv
 # define call_argv(a,b,c)                       Perl_call_argv(aTHX_ a,b,c)
 # define call_atexit(a,b)                       Perl_call_atexit(aTHX_ a,b)
 # define call_list(a,b)                         Perl_call_list(aTHX_ a,b)
@@ -225,7 +225,7 @@
 # define dump_vindent(a,b,c,d)                  Perl_dump_vindent(aTHX_ a,b,c,d)
 # define eval_pv(a,b)                           Perl_eval_pv(aTHX_ a,b)
 # define eval_sv(a,b)                           Perl_eval_sv(aTHX_ a,b)
-# define extended_utf8_to_uv                    Perl_extended_utf8_to_uv
+# define Perl_extended_utf8_to_uv               extended_utf8_to_uv
 # define fbm_compile(a,b)                       Perl_fbm_compile(aTHX_ a,b)
 # define fbm_instr(a,b,c,d)                     Perl_fbm_instr(aTHX_ a,b,c,d)
 # define filter_add(a,b)                        Perl_filter_add(aTHX_ a,b)
@@ -312,7 +312,7 @@
 # define init_i18nl10n(a)                       Perl_init_i18nl10n(aTHX_ a)
 # define init_stacks()                          Perl_init_stacks(aTHX)
 # define init_tm(a)                             Perl_init_tm(aTHX_ a)
-# define instr                                  Perl_instr
+# define Perl_instr                             instr
 # define intro_my()                             Perl_intro_my(aTHX)
 # define isC9_STRICT_UTF8_CHAR                  Perl_isC9_STRICT_UTF8_CHAR
 # define isSTRICT_UTF8_CHAR                     Perl_isSTRICT_UTF8_CHAR
@@ -328,7 +328,7 @@
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
-# define is_utf8_string_loc                     Perl_is_utf8_string_loc
+# define Perl_is_utf8_string_loc                is_utf8_string_loc
 # define is_utf8_string_loclen                  Perl_is_utf8_string_loclen
 # define is_utf8_string_loclen_flags            Perl_is_utf8_string_loclen_flags
 # define is_utf8_valid_partial_char_flags       Perl_is_utf8_valid_partial_char_flags
@@ -651,7 +651,7 @@
 # define stack_grow(a,b,c)                      Perl_stack_grow(aTHX_ a,b,c)
 # define start_subparse(a,b)                    Perl_start_subparse(aTHX_ a,b)
 # define str_to_version(a)                      Perl_str_to_version(aTHX_ a)
-# define strict_utf8_to_uv                      Perl_strict_utf8_to_uv
+# define Perl_strict_utf8_to_uv                 strict_utf8_to_uv
 # define suspend_compcv(a)                      Perl_suspend_compcv(aTHX_ a)
 # define sv_2bool_flags(a,b)                    Perl_sv_2bool_flags(aTHX_ a,b)
 # define sv_2cv(a,b,c,d)                        Perl_sv_2cv(aTHX_ a,b,c,d)
@@ -802,26 +802,26 @@
 # define upg_version(a,b)                       Perl_upg_version(aTHX_ a,b)
 # define utf8_distance(a,b)                     Perl_utf8_distance(aTHX_ a,b)
 # define utf8_hop                               Perl_utf8_hop
-# define utf8_hop_back                          Perl_utf8_hop_back
+# define Perl_utf8_hop_back                     utf8_hop_back
 # define utf8_hop_back_overshoot                Perl_utf8_hop_back_overshoot
-# define utf8_hop_forward                       Perl_utf8_hop_forward
+# define Perl_utf8_hop_forward                  utf8_hop_forward
 # define utf8_hop_forward_overshoot             Perl_utf8_hop_forward_overshoot
 # define utf8_hop_overshoot                     Perl_utf8_hop_overshoot
-# define utf8_hop_safe                          Perl_utf8_hop_safe
+# define Perl_utf8_hop_safe                     utf8_hop_safe
 # define utf8_length(a,b)                       Perl_utf8_length(aTHX_ a,b)
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)
 # define utf8_to_bytes_(a,b,c,d)                Perl_utf8_to_bytes_(aTHX_ a,b,c,d)
 # define utf8_to_bytes_new_pv(a,b,c)            Perl_utf8_to_bytes_new_pv(aTHX_ a,b,c)
 # define utf8_to_bytes_overwrite(a,b)           Perl_utf8_to_bytes_overwrite(aTHX_ a,b)
 # define utf8_to_bytes_temp_pv(a,b)             Perl_utf8_to_bytes_temp_pv(aTHX_ a,b)
-# define utf8_to_uv                             Perl_utf8_to_uv
-# define utf8_to_uv_errors                      Perl_utf8_to_uv_errors
-# define utf8_to_uv_flags                       Perl_utf8_to_uv_flags
+# define Perl_utf8_to_uv                        utf8_to_uv
+# define Perl_utf8_to_uv_errors                 utf8_to_uv_errors
+# define Perl_utf8_to_uv_flags                  utf8_to_uv_flags
 # define utf8_to_uv_msgs                        Perl_utf8_to_uv_msgs
 # define utf8_to_uv_msgs_helper_                Perl_utf8_to_uv_msgs_helper_
 # define utf8_to_uv_or_die                      Perl_utf8_to_uv_or_die
-# define utf8n_to_uvchr                         Perl_utf8n_to_uvchr
-# define utf8n_to_uvchr_error                   Perl_utf8n_to_uvchr_error
+# define Perl_utf8n_to_uvchr                    utf8n_to_uvchr
+# define Perl_utf8n_to_uvchr_error              utf8n_to_uvchr_error
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
 # define uv_to_utf8(a,b)                        Perl_uv_to_utf8(aTHX_ a,b)
 # define uv_to_utf8_flags(a,b,c)                Perl_uv_to_utf8_flags(aTHX_ a,b,c)

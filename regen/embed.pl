@@ -514,7 +514,7 @@ sub embed_h {
         if ($flags =~ /m/ && $flags =~ /p/) {
             my $full_name = full_name($func, $flags);
             next if $full_name eq $func;    # Don't output a no-op.
-            $ret = indent_define($func, $full_name, $ind);
+            $ret = indent_define($full_name, $func, $ind);
         }
         elsif ($flags !~ /[omM]/) {
             my $argc = scalar @$args;

@@ -145,34 +145,34 @@ typedef enum {
 #define uvchr_to_utf8                   uv_to_utf8
 #define uvchr_to_utf8_flags             uv_to_utf8_flags
 #define uvchr_to_utf8_flags_msgs        uv_to_utf8_msgs
-#define Perl_uvchr_to_utf8              Perl_uv_to_utf8
-#define Perl_uvchr_to_utf8_flags        Perl_uv_to_utf8_flags
-#define Perl_uvchr_to_utf8_flags_msgs   Perl_uv_to_utf8_msgs
+#define uvchr_to_utf8              uv_to_utf8
+#define uvchr_to_utf8_flags        uv_to_utf8_flags
+#define uvchr_to_utf8_flags_msgs   uv_to_utf8_msgs
 
 /* This is needed to cast the parameters for all those calls that had them
  * improperly as chars */
-#define utf8_to_uvchr_buf(s, e, lenp)                                          \
+#define utf8_to_uvchr_buf(s, e, lenp)                                   \
     Perl_utf8_to_uvchr_buf(aTHX_ (const U8 *) (s), (const U8 *) e, lenp)
 
-#define Perl_utf8n_to_uvchr(s, len, lenp, flags)                               \
-                          Perl_utf8n_to_uvchr_error(s, len, lenp, flags, 0)
-#define Perl_utf8n_to_uvchr_error(s, len, lenp, flags, errors)                 \
-                    Perl_utf8n_to_uvchr_msgs(s, len, lenp, flags, errors, 0)
+#define utf8n_to_uvchr(s, len, lenp, flags)                             \
+                          utf8n_to_uvchr_error(s, len, lenp, flags, 0)
+#define utf8n_to_uvchr_error(s, len, lenp, flags, errors)               \
+                    utf8n_to_uvchr_msgs(s, len, lenp, flags, errors, 0)
 
-#define Perl_utf8_to_uv(         s, e, cp_p, advance_p)                     \
-        Perl_utf8_to_uv_flags(   s, e, cp_p, advance_p, 0)
-#define Perl_utf8_to_uv_flags(   s, e, cp_p, advance_p, flags)              \
-        Perl_utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, 0)
-#define Perl_utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, errors)      \
-          Perl_utf8_to_uv_msgs(  s, e, cp_p, advance_p, flags, errors, 0)
-#define Perl_extended_utf8_to_uv(s, e, cp_p, advance_p)                     \
-                 Perl_utf8_to_uv(s, e, cp_p, advance_p)
-#define Perl_strict_utf8_to_uv(  s, e, cp_p, advance_p)                     \
-        Perl_utf8_to_uv_flags(   s, e, cp_p, advance_p,                     \
-                                        UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
-#define Perl_c9strict_utf8_to_uv(s, e, cp_p, advance_p)                     \
-        Perl_utf8_to_uv_flags(   s, e, cp_p, advance_p,                     \
-                                     UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
+#define utf8_to_uv(         s, e, cp_p, advance_p)                      \
+        utf8_to_uv_flags(   s, e, cp_p, advance_p, 0)
+#define utf8_to_uv_flags(   s, e, cp_p, advance_p, flags)               \
+        utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, 0)
+#define utf8_to_uv_errors(  s, e, cp_p, advance_p, flags, errors)       \
+          utf8_to_uv_msgs(  s, e, cp_p, advance_p, flags, errors, 0)
+#define extended_utf8_to_uv(s, e, cp_p, advance_p)                      \
+                 utf8_to_uv(s, e, cp_p, advance_p)
+#define strict_utf8_to_uv(  s, e, cp_p, advance_p)                      \
+        utf8_to_uv_flags(   s, e, cp_p, advance_p,                      \
+                                    UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
+#define c9strict_utf8_to_uv(s, e, cp_p, advance_p)                      \
+        utf8_to_uv_flags(   s, e, cp_p, advance_p,                      \
+                                 UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
 
 #define utf16_to_utf8(p, d, bytelen, newlen)                                \
                             utf16_to_utf8_base(p, d, bytelen, newlen, 0, 1)
