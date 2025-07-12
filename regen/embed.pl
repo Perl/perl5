@@ -510,7 +510,13 @@ sub embed_h {
         my $ind= $level ? " " : "";
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
-        if ($flags !~ /[omM]/ or ($flags =~ /m/ && $flags =~ /p/)) {
+
+        if ($flags =~ /m/ && $flags =~ /p/) {
+            my $full_name = full_name($func, $flags);
+            next if $full_name eq $func;    # Don't output a no-op.
+            $ret = indent_define($func, $full_name, $ind);
+        }
+        elsif ($flags !~ /[omM]/) {
             my $argc = scalar @$args;
             if ($flags =~ /[T]/) {
                 my $full_name = full_name($func, $flags);
