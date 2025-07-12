@@ -3284,12 +3284,6 @@ Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     return uv_to_utf8_msgs(d, uv, flags, 0);
 }
 
-PERL_STATIC_INLINE U8 *
-Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags , HV **msgs)
-{
-    return uvoffuni_to_utf8_flags_msgs(d, NATIVE_TO_UNI(uv), flags, msgs);
-}
-
 /* ------------------------------- perl.h ----------------------------- */
 
 /*

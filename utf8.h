@@ -149,6 +149,9 @@ typedef enum {
 #define uvchr_to_utf8_flags        uv_to_utf8_flags
 #define uvchr_to_utf8_flags_msgs   uv_to_utf8_msgs
 
+#define uv_to_utf8_msgs(d, uv, flags, msgs)                             \
+        uvoffuni_to_utf8_flags_msgs(d, NATIVE_TO_UNI(uv), flags, msgs)
+
 /* This is needed to cast the parameters for all those calls that had them
  * improperly as chars */
 #define utf8_to_uvchr_buf(s, e, lenp)                                   \

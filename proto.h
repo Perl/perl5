@@ -5263,6 +5263,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         assert(idop)
 
 /* PERL_CALLCONV U8 *
+Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs); */
+
+/* PERL_CALLCONV U8 *
 uvchr_to_utf8(pTHX_ U8 *d, UV uv); */
 
 /* PERL_CALLCONV U8 *
@@ -10294,11 +10297,6 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv);
 PERL_STATIC_INLINE U8 *
 Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
 # define PERL_ARGS_ASSERT_UV_TO_UTF8_FLAGS      \
-        assert(d)
-
-PERL_STATIC_INLINE U8 *
-Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs);
-# define PERL_ARGS_ASSERT_UV_TO_UTF8_MSGS       \
         assert(d)
 
 PERL_STATIC_INLINE UV
