@@ -447,8 +447,7 @@
 :        created that #defines 'foo' as 'Perl_foo'.  This can be used to make
 :        any macro have a long name, perhaps to avoid name collisions.  If
 :        instead you define the macro as 'PERL_FOO' (all uppercase), the
-:        embed.h entry will use all uppercase.  Without the T flag the behavior
-:        is subject to change when both 'm' and 'p are specified.
+:        embed.h entry will use all uppercase.
 :
 :         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols available on all

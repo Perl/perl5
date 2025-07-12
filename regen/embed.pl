@@ -514,7 +514,40 @@ sub embed_h {
         if ($flags =~ /m/ && $flags =~ /p/) {
             my $full_name = full_name($func, $flags);
             next if $full_name eq $func;    # Don't output a no-op.
+
+            # Yields
+            #   #define Perl_func  func
+            # which works when there is no thread context.
             $ret = indent_define($full_name, $func, $ind);
+
+            if ($flags !~ /[T]/) {
+
+                # But when there is the possibility of a thread context
+                # parameter, $ret works only on non-threaded builds
+                my $no_thread_full_define = $ret;
+
+                # And we have to do more when there are threads.  First,
+                # convert the input argument list to 'a', 'b' ....  This keeps
+                # us from having to worry about all the extra stuff in the
+                # input list; stuff like the type declarations, things like
+                # NULLOK, and pointers '*'.
+                my $argname = 'a';
+                my @stripped_args;
+                push @stripped_args, $argname++ for $args->@*;
+                my $arglist = join ",", @stripped_args;
+
+                # In the threaded case, the Perl_ form is expecting an aTHX
+                # first argument.  Use mTHX to match that, which isn't passed
+                # on to the short form name, as that is expecting an implicit
+                # aTHX.  The non-threaded case just uses what we generated
+                # above for the /T/ flag case.
+                $ret = "#${ind}ifdef USE_THREADS\n"
+                     . "#${ind}  define $full_name(mTHX,$arglist)"
+                     .           "  $func($arglist)\n"
+                     . "#${ind}else\n"
+                     . "$ind  $no_thread_full_define" # No \n because no chomp
+                     . "#${ind}endif\n";
+            }
         }
         elsif ($flags !~ /[omM]/) {
             my $argc = scalar @$args;
