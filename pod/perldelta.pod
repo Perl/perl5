@@ -366,7 +366,29 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Certain constructs involving a two-variable C<for> loop would crash the perl
+compiler in v5.42.0:
+
+    # Two-variable for loop over a list returned from a method call:
+    for my ($x, $y) (Some::Class->foo()) { ... }
+    for my ($x, $y) ($object->foo()) { ... }
+
+and
+
+    # Two-variable for loop over a list returned from a call to a
+    # lexical(ly imported) subroutine, all inside a lexically scoped
+    # or anonymous subroutine:
+    my sub foo { ... }
+    my $fn = sub {
+        for my ($x, $y) (foo()) { ... }
+    };
+
+    use builtin qw(indexed);  # lexical import!
+    my sub bar {
+        for my ($x, $y) (indexed(...)) { ... }
+    }
+
+These have been fixed.  [GH #23405]
 
 =back
 
