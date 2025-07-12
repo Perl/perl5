@@ -2180,8 +2180,8 @@ Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
     return TRUE;
 }
 
-#define Perl_is_utf8_string_loc(s, len, ep)          \
-        Perl_is_utf8_string_loclen(s, len, ep, 0)
+#define is_utf8_string_loc(s, len, ep)          \
+        is_utf8_string_loclen(s, len, ep, 0)
 
 PERL_STATIC_INLINE bool
 Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
@@ -2759,8 +2759,8 @@ unchanged.
 
 =cut
 */
-# define Perl_utf8_hop_forward(          s, off, end)           \
-         Perl_utf8_hop_forward_overshoot(s, off, end, NULL)
+# define utf8_hop_forward(          s, off, end)           \
+         utf8_hop_forward_overshoot(s, off, end, NULL)
 
 PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_forward_overshoot(const U8 * s, SSize_t off,
@@ -2845,8 +2845,8 @@ displaced.
 =cut
 */
 
-# define Perl_utf8_hop_back(          s, off, start)            \
-         Perl_utf8_hop_back_overshoot(s, off, start, NULL)
+# define utf8_hop_back(          s, off, start)            \
+         utf8_hop_back_overshoot(s, off, start, NULL)
 
 PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_back_overshoot(const U8 *s, SSize_t off,
@@ -2912,7 +2912,7 @@ the excess count is the absolute value of C<remaining>.
 =cut
 */
 
-#define Perl_utf8_hop_safe(s, o, b, e)  Perl_utf8_hop_overshoot(s, o, b, e, 0)
+#define utf8_hop_safe(s, o, b, e)  utf8_hop_overshoot(s, o, b, e, 0)
 
 PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_overshoot(const U8 *s, SSize_t off,

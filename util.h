@@ -241,7 +241,7 @@ returning NULL if not found.  The terminating NUL bytes are not compared.
 */
 
 
-#define Perl_instr(haystack, needle) strstr(haystack, needle)
+#define instr(haystack, needle) strstr(haystack, needle)
 
 #ifdef HAS_MEMMEM
 #   define ninstr(big, bigend, little, lend)                                \
