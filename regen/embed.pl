@@ -51,10 +51,10 @@ sub full_name ($$) { # Returns the function name with potentially the
 
     if ($flags =~ /[ps]/) {
 
-	# An all uppercase macro name gets an uppercase prefix.
-	return ($flags =~ /m/ && $flags =~ /p/ && $func !~ /[[:lower:]]/)
-	       ? "PERL_$func"
-	       : "Perl_$func";
+        # An all uppercase macro name gets an uppercase prefix.
+        return ($flags =~ /m/ && $flags =~ /p/ && $func !~ /[[:lower:]]/)
+               ? "PERL_$func"
+               : "Perl_$func";
     }
 
     return "S_$func" if $flags =~ /[SIi]/;
@@ -144,14 +144,14 @@ sub generate_proto_h {
 
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                             if $flags =~ /S/ && $flags =~ /p/;
-	if ($has_mflag) {
-	    if ($flags =~ /S/) {
-		die_at_end "$plain_func: m and S flags are mutually exclusive";
-	    }
-	}
-	else {
-	    die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
-	}
+        if ($has_mflag) {
+            if ($flags =~ /S/) {
+                die_at_end "$plain_func: m and S flags are mutually exclusive";
+            }
+        }
+        else {
+            die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
+        }
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
@@ -244,7 +244,7 @@ sub generate_proto_h {
 
                     $arg = "const char * const $name";
                     die_at_end 'm flag required for "literal" argument'
-							    unless $has_mflag;
+                                                            unless $has_mflag;
                 }
                 elsif (   $args_assert_line
                        && $arg =~ /\*/
@@ -535,7 +535,7 @@ sub embed_h {
                     $use_va_list ? ("__VA_ARGS__") : ());
                 $ret = "#${ind}define $func($paramlist) ";
                 add_indent($ret,full_name($func, $flags) . "(aTHX");
-		if ($replacelist) {
+                if ($replacelist) {
                     $ret .= ($flags =~ /m/) ? "," : "_ ";
                     $ret .= $replacelist;
                 }
@@ -720,4 +720,4 @@ sub update_headers {
 
 update_headers() unless caller;
 
-# ex: set ts=8 sts=4 sw=4 noet:
+# ex: set ts=8 sts=4 sw=4 et:
