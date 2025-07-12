@@ -3840,7 +3840,7 @@ Adip	|U8 *	|uv_to_utf8_flags					\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags
-Adip	|U8 *	|uv_to_utf8_msgs|NN U8 *d				\
+Admp	|U8 *	|uv_to_utf8_msgs|NN U8 *d				\
 				|UV uv					\
 				|UV flags				\
 				|NULLOK HV **msgs

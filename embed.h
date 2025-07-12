@@ -825,7 +825,6 @@
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
 # define uv_to_utf8(a,b)                        Perl_uv_to_utf8(aTHX_ a,b)
 # define uv_to_utf8_flags(a,b,c)                Perl_uv_to_utf8_flags(aTHX_ a,b,c)
-# define uv_to_utf8_msgs(a,b,c,d)               Perl_uv_to_utf8_msgs(aTHX_ a,b,c,d)
 # define uvoffuni_to_utf8_flags_msgs(a,b,c,d)   Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 # define valid_identifier_pve(a,b,c)            Perl_valid_identifier_pve(aTHX_ a,b,c)
 # define valid_identifier_pvn(a,b,c)            Perl_valid_identifier_pvn(aTHX_ a,b,c)
@@ -2259,8 +2258,11 @@
 #   define PerlIO_write(a,b,c)                  Perl_PerlIO_write(aTHX_ a,b,c)
 # endif /* defined(USE_PERLIO) */
 # if defined(USE_THREADS)
+#   define Perl_uv_to_utf8_msgs(mTHX,a,b,c,d)   uv_to_utf8_msgs(a,b,c,d)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
+# else
+#   define Perl_uv_to_utf8_msgs                 uv_to_utf8_msgs
 # endif
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)
