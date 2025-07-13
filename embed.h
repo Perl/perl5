@@ -2258,12 +2258,40 @@
 #   define PerlIO_write(a,b,c)                  Perl_PerlIO_write(aTHX_ a,b,c)
 # endif /* defined(USE_PERLIO) */
 # if defined(USE_THREADS)
+#   define Perl_gv_AVadd(mTHX,a)                gv_AVadd(a)
+#   define Perl_gv_HVadd(mTHX,a)                gv_HVadd(a)
+#   define Perl_newSVsv(mTHX,a)                 newSVsv(a)
+#   define Perl_save_freeop(mTHX,a)             save_freeop(a)
+#   define Perl_save_freepv(mTHX,a)             save_freepv(a)
+#   define Perl_save_freesv(mTHX,a)             save_freesv(a)
+#   define Perl_save_mortalizesv(mTHX,a)        save_mortalizesv(a)
+#   define Perl_save_op(mTHX)                   save_op()
+#   define Perl_sv_2pvbyte(mTHX,a,b)            sv_2pvbyte(a,b)
+#   define Perl_sv_2pvutf8(mTHX,a,b)            sv_2pvutf8(a,b)
+#   define Perl_sv_utf8_downgrade(mTHX,a,b)     sv_utf8_downgrade(a,b)
 #   define Perl_uv_to_utf8_msgs(mTHX,a,b,c,d)   uv_to_utf8_msgs(a,b,c,d)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
-# else
+#   if defined(PERL_DONT_CREATE_GVSV)
+#     define Perl_gv_SVadd(mTHX,a)              gv_SVadd(a)
+#   endif
+# else /* if !defined(USE_THREADS) */
+#   define Perl_gv_AVadd                        gv_AVadd
+#   define Perl_gv_HVadd                        gv_HVadd
+#   define Perl_newSVsv                         newSVsv
+#   define Perl_save_freeop                     save_freeop
+#   define Perl_save_freepv                     save_freepv
+#   define Perl_save_freesv                     save_freesv
+#   define Perl_save_mortalizesv                save_mortalizesv
+#   define Perl_save_op                         save_op
+#   define Perl_sv_2pvbyte                      sv_2pvbyte
+#   define Perl_sv_2pvutf8                      sv_2pvutf8
+#   define Perl_sv_utf8_downgrade               sv_utf8_downgrade
 #   define Perl_uv_to_utf8_msgs                 uv_to_utf8_msgs
-# endif
+#   if defined(PERL_DONT_CREATE_GVSV)
+#     define Perl_gv_SVadd                      gv_SVadd
+#   endif
+# endif /* !defined(USE_THREADS) */
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)
 #   define do_spawn(a)                          Perl_do_spawn(aTHX_ a)
