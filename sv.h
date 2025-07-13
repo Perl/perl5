@@ -1721,6 +1721,9 @@ inputs such as locale settings.  C<SvTAINT> propagates that taintedness to
 the outputs of an expression in a pessimistic fashion; i.e., without paying
 attention to precisely which outputs are influenced by which inputs.
 
+=for apidoc sv_taint
+Taint an SV.  Use C<SvTAINTED_on> instead.
+
 =cut
 */
 
@@ -2212,7 +2215,23 @@ immediately written again.
 /* all these 'functions' are now just macros */
 
 #define sv_pv(sv) SvPV_nolen(sv)
+
+/*
+=for apidoc sv_pvutf8
+
+Use the C<SvPVutf8_nolen> macro instead
+
+=cut
+*/
 #define sv_pvutf8(sv) SvPVutf8_nolen(sv)
+
+/*
+=for apidoc sv_pvbyte
+
+Use C<SvPVbyte_nolen> instead.
+
+=cut
+*/
 #define sv_pvbyte(sv) SvPVbyte_nolen(sv)
 
 #define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
@@ -2246,10 +2265,41 @@ immediately written again.
 #define sv_copypv(dsv, ssv) sv_copypv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_copypv_nomg(dsv, ssv) sv_copypv_flags(dsv, ssv, 0)
 #define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
+
+/*
+=for apidoc sv_2pv_nolen
+
+Like C<sv_2pv()>, but doesn't return the length too.  You should usually
+use the macro wrapper C<SvPV_nolen(sv)> instead.
+
+=cut
+*/
 #define sv_2pv_nolen(sv) sv_2pv(sv, 0)
 #define sv_2pvbyte(sv, lp) sv_2pvbyte_flags(sv, lp, SV_GMAGIC)
+
+/*
+=for apidoc sv_2pvbyte_nolen
+
+Return a pointer to the byte-encoded representation of the SV.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVbyte_nolen> macro.
+
+=cut
+*/
 #define sv_2pvbyte_nolen(sv) sv_2pvbyte(sv, 0)
 #define sv_2pvutf8(sv, lp) sv_2pvutf8_flags(sv, lp, SV_GMAGIC)
+
+/*
+=for apidoc sv_2pvutf8_nolen
+
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8_nolen> macro.
+
+=cut
+*/
 #define sv_2pvutf8_nolen(sv) sv_2pvutf8(sv, 0)
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
