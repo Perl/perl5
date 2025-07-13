@@ -541,8 +541,10 @@ sub embed_h {
                 # on to the short form name, as that is expecting an implicit
                 # aTHX.  The non-threaded case just uses what we generated
                 # above for the /T/ flag case.
+                my $mTHX_ = "mTHX";
+                $mTHX_ .= ',' if $arglist ne "";
                 $ret = "#${ind}ifdef USE_THREADS\n"
-                     . "#${ind}  define $full_name(mTHX,$arglist)"
+                     . "#${ind}  define $full_name($mTHX_$arglist)"
                      .           "  $func($arglist)\n"
                      . "#${ind}else\n"
                      . "$ind  $no_thread_full_define" # No \n because no chomp
