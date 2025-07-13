@@ -90,15 +90,6 @@ Perl_sv_unref(pTHX_ SV *sv)
     sv_unref_flags(sv, 0);
 }
 
-/*
-=for apidoc_section $tainting
-=for apidoc sv_taint
-
-Taint an SV.  Use C<SvTAINTED_on> instead.
-
-=cut
-*/
-
 void
 Perl_sv_taint(pTHX_ SV *sv)
 {
@@ -154,34 +145,12 @@ Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp)
     return sv_2pv_flags(sv, lp, SV_GMAGIC);
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_2pv_nolen
-
-Like C<sv_2pv()>, but doesn't return the length too.  You should usually
-use the macro wrapper C<SvPV_nolen(sv)> instead.
-
-=cut
-*/
-
 char *
 Perl_sv_2pv_nolen(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SV_2PV_NOLEN;
     return sv_2pv(sv, NULL);
 }
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_2pvbyte_nolen
-
-Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVbyte_nolen> macro.
-
-=cut
-*/
 
 char *
 Perl_sv_2pvbyte_nolen(pTHX_ SV *sv)
@@ -190,18 +159,6 @@ Perl_sv_2pvbyte_nolen(pTHX_ SV *sv)
 
     return sv_2pvbyte(sv, NULL);
 }
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_2pvutf8_nolen
-
-Return a pointer to the UTF-8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8_nolen> macro.
-
-=cut
-*/
 
 char *
 Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
@@ -319,25 +276,6 @@ Perl_sv_pvbyte(pTHX_ SV *sv)
     (void)sv_utf8_downgrade(sv, FALSE);
     return sv_pv(sv);
 }
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_pvbyte
-
-Use C<SvPVbyte_nolen> instead.
-
-=cut
-*/
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_pvutf8
-
-Use the C<SvPVutf8_nolen> macro instead
-
-=cut
-*/
-
 
 char *
 Perl_sv_pvutf8(pTHX_ SV *sv)
