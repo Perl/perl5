@@ -1325,7 +1325,7 @@ ARdp	|GV *	|gv_autoload_pvn|NULLOK NOCHECK HV *stash		\
 ARdp	|GV *	|gv_autoload_sv |NULLOK NOCHECK HV *stash		\
 				|NN SV *namesv				\
 				|U32 flags
-AMbdp	|GV *	|gv_AVadd	|NULLOK GV *gv
+Admp	|GV *	|gv_AVadd	|NULLOK GV *gv
 Cp	|void	|gv_check	|NN HV *stash
 : Used in pp.c and pp_sys.c
 ARdp	|SV *	|gv_const_sv	|NN GV *gv
@@ -1421,7 +1421,7 @@ Adp	|void	|gv_fullname4	|NN SV *sv				\
 				|bool keepmain
 CRdp	|CV *	|gv_handler	|NULLOK HV *stash			\
 				|I32 id
-AMbdp	|GV *	|gv_HVadd	|NULLOK GV *gv
+Admp	|GV *	|gv_HVadd	|NULLOK GV *gv
 Adm	|void	|gv_init	|NN GV *gv				\
 				|NULLOK HV *stash			\
 				|NN const char *name			\
@@ -2313,7 +2313,7 @@ ARdp	|SV *	|newSVpvz	|const STRLEN len
 ARdp	|OP *	|newSVREF	|NN OP *o
 Adp	|SV *	|newSVrv	|NN SV * const rv			\
 				|NULLOK const char * const classname
-AMRbdp	|SV *	|newSVsv	|NULLOK SV * const old
+ARdmp	|SV *	|newSVsv	|NULLOK SV * const old
 ARdp	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
 				|I32 flags
 ARdm	|SV *	|newSVsv_nomg	|NULLOK SV * const old
@@ -2913,10 +2913,10 @@ Cp	|void	|save_destructor_x					\
 				|DESTRUCTORFUNC_t f			\
 				|NULLOK void *p
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
-CMbp	|void	|save_freeop	|NULLOK OP *o
-CMbp	|void	|save_freepv	|NULLOK char *pv
+Cmp	|void	|save_freeop	|NULLOK OP *o
+Cmp	|void	|save_freepv	|NULLOK char *pv
 Cdp	|void	|save_freercpv	|NN char *rcpv
-CMbp	|void	|save_freesv	|NULLOK SV *sv
+Cmp	|void	|save_freesv	|NULLOK SV *sv
 Cdp	|void	|save_generic_pvref					\
 				|NN char **str
 Cdp	|void	|save_generic_svref					\
@@ -2942,10 +2942,10 @@ Cp	|void	|save_I8	|NN I8 *bytep
 Cp	|void	|save_int	|NN int *intp
 Adhp	|void	|save_item	|NN SV *item
 Cp	|void	|save_iv	|NN IV *ivp
-CMbp	|void	|save_mortalizesv					\
+Cmp	|void	|save_mortalizesv					\
 				|NN SV *sv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
-CMbdp	|void	|save_op
+Cdmp	|void	|save_op
 Cdp	|void	|save_padsv_and_mortalize				\
 				|PADOFFSET off
 Cp	|void	|save_pptr	|NN char **pptr
@@ -3309,9 +3309,9 @@ Adp	|STRLEN |sv_pos_u2b_flags					\
 AMbdp	|char * |sv_2pv 	|NN SV *sv				\
 				|NULLOK STRLEN *lp
 CMRbdp	|char * |sv_pv		|NN SV *sv
-AMbdp	|char * |sv_2pvbyte	|NN SV *sv				\
+Admp	|char * |sv_2pvbyte	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
-CMRbdp	|char * |sv_pvbyte	|NN SV *sv
+CMRdp	|char * |sv_pvbyte	|NN SV *sv
 Adp	|char * |sv_2pvbyte_flags					\
 				|NN SV *sv				\
 				|NULLOK STRLEN * const lp		\
@@ -3335,7 +3335,7 @@ Adp	|char * |sv_pvn_force_flags					\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
 CMRbdp	|char * |sv_2pv_nolen	|NN SV *sv
-AMbdp	|char * |sv_2pvutf8	|NN SV *sv				\
+Admp	|char * |sv_2pvutf8	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
 CMRbdp	|char * |sv_pvutf8	|NN SV *sv
 Adp	|char * |sv_2pvutf8_flags					\
@@ -3521,7 +3521,7 @@ AMbdp	|void	|sv_usepvn_mg	|NN SV *sv				\
 				|NULLOK char *ptr			\
 				|STRLEN len
 Adp	|bool	|sv_utf8_decode |NN SV * const sv
-AMbdp	|bool	|sv_utf8_downgrade					\
+Admp	|bool	|sv_utf8_downgrade					\
 				|NN SV * const sv			\
 				|const bool fail_ok
 Adp	|bool	|sv_utf8_downgrade_flags				\
@@ -4182,7 +4182,7 @@ Mp	|bool	|do_exec	|NN const char *cmd
 p	|bool	|do_exec	|NN const char *cmd
 #endif
 #if defined(PERL_DONT_CREATE_GVSV)
-AMbdp	|GV *	|gv_SVadd	|NULLOK GV *gv
+Admp	|GV *	|gv_SVadd	|NULLOK GV *gv
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 CTo	|PerlInterpreter *|perl_alloc_using				\

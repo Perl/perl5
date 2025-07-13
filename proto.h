@@ -1362,6 +1362,12 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
 #define PERL_ARGS_ASSERT_GROK_OCT               \
         assert(start); assert(len_p); assert(flags)
 
+/* PERL_CALLCONV GV *
+Perl_gv_AVadd(pTHX_ GV *gv); */
+
+/* PERL_CALLCONV GV *
+Perl_gv_HVadd(pTHX_ GV *gv); */
+
 PERL_CALLCONV GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type);
 #define PERL_ARGS_ASSERT_GV_ADD_BY_TYPE
@@ -3062,6 +3068,10 @@ Perl_newSVrv(pTHX_ SV * const rv, const char * const classname);
 #define PERL_ARGS_ASSERT_NEWSVRV                \
         assert(rv)
 
+/* PERL_CALLCONV SV *
+Perl_newSVsv(pTHX_ SV * const old)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV SV *
 Perl_newSVsv_flags(pTHX_ SV * const old, I32 flags)
         __attribute__warn_unused_result__;
@@ -3999,10 +4009,19 @@ PERL_CALLCONV void
 Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void *p);
 #define PERL_ARGS_ASSERT_SAVE_DESTRUCTOR_X
 
+/* PERL_CALLCONV void
+Perl_save_freeop(pTHX_ OP *o); */
+
+/* PERL_CALLCONV void
+Perl_save_freepv(pTHX_ char *pv); */
+
 PERL_CALLCONV void
 Perl_save_freercpv(pTHX_ char *rcpv);
 #define PERL_ARGS_ASSERT_SAVE_FREERCPV          \
         assert(rcpv)
+
+/* PERL_CALLCONV void
+Perl_save_freesv(pTHX_ SV *sv); */
 
 PERL_CALLCONV void
 Perl_save_generic_pvref(pTHX_ char **str);
@@ -4060,6 +4079,12 @@ PERL_CALLCONV void
 Perl_save_iv(pTHX_ IV *ivp);
 #define PERL_ARGS_ASSERT_SAVE_IV                \
         assert(ivp)
+
+/* PERL_CALLCONV void
+Perl_save_mortalizesv(pTHX_ SV *sv); */
+
+/* PERL_CALLCONV void
+Perl_save_op(pTHX); */
 
 PERL_CALLCONV void
 Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off);
@@ -4386,10 +4411,16 @@ Perl_sv_2pv_flags(pTHX_ SV * const sv, STRLEN * const lp, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_2PV_FLAGS           \
         assert(sv)
 
+/* PERL_CALLCONV char *
+Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN * const lp); */
+
 PERL_CALLCONV char *
 Perl_sv_2pvbyte_flags(pTHX_ SV *sv, STRLEN * const lp, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_2PVBYTE_FLAGS       \
         assert(sv)
+
+/* PERL_CALLCONV char *
+Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN * const lp); */
 
 PERL_CALLCONV char *
 Perl_sv_2pvutf8_flags(pTHX_ SV *sv, STRLEN * const lp, const U32 flags);
@@ -4734,6 +4765,12 @@ Perl_sv_pos_u2b_flags(pTHX_ SV * const sv, STRLEN uoffset, STRLEN * const lenp, 
         assert(sv)
 
 PERL_CALLCONV char *
+Perl_sv_pvbyte(pTHX_ SV *sv)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_PVBYTE              \
+        assert(sv)
+
+PERL_CALLCONV char *
 Perl_sv_pvbyten_force(pTHX_ SV * const sv, STRLEN * const lp);
 #define PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE       \
         assert(sv)
@@ -5032,6 +5069,9 @@ PERL_CALLCONV bool
 Perl_sv_utf8_decode(pTHX_ SV * const sv);
 #define PERL_ARGS_ASSERT_SV_UTF8_DECODE         \
         assert(sv)
+
+/* PERL_CALLCONV bool
+Perl_sv_utf8_downgrade(pTHX_ SV * const sv, const bool fail_ok); */
 
 PERL_CALLCONV bool
 Perl_sv_utf8_downgrade_flags(pTHX_ SV * const sv, const bool fail_ok, const U32 flags);
@@ -5829,14 +5869,6 @@ Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, i
         assert(gv); assert(name)
 
 PERL_CALLCONV GV *
-Perl_gv_AVadd(pTHX_ GV *gv);
-# define PERL_ARGS_ASSERT_GV_AVADD
-
-PERL_CALLCONV GV *
-Perl_gv_HVadd(pTHX_ GV *gv);
-# define PERL_ARGS_ASSERT_GV_HVADD
-
-PERL_CALLCONV GV *
 Perl_gv_IOadd(pTHX_ GV *gv);
 # define PERL_ARGS_ASSERT_GV_IOADD
 
@@ -5934,32 +5966,6 @@ PERL_CALLCONV CV *
 Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block);
 # define PERL_ARGS_ASSERT_NEWSUB
 
-PERL_CALLCONV SV *
-Perl_newSVsv(pTHX_ SV * const old)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_NEWSVSV
-
-PERL_CALLCONV void
-Perl_save_freeop(pTHX_ OP *o);
-# define PERL_ARGS_ASSERT_SAVE_FREEOP
-
-PERL_CALLCONV void
-Perl_save_freepv(pTHX_ char *pv);
-# define PERL_ARGS_ASSERT_SAVE_FREEPV
-
-PERL_CALLCONV void
-Perl_save_freesv(pTHX_ SV *sv);
-# define PERL_ARGS_ASSERT_SAVE_FREESV
-
-PERL_CALLCONV void
-Perl_save_mortalizesv(pTHX_ SV *sv);
-# define PERL_ARGS_ASSERT_SAVE_MORTALIZESV      \
-        assert(sv)
-
-PERL_CALLCONV void
-Perl_save_op(pTHX);
-# define PERL_ARGS_ASSERT_SAVE_OP
-
 PERL_CALLCONV bool
 Perl_sv_2bool(pTHX_ SV * const sv);
 # define PERL_ARGS_ASSERT_SV_2BOOL              \
@@ -5982,19 +5988,9 @@ Perl_sv_2pv_nolen(pTHX_ SV *sv)
         assert(sv)
 
 PERL_CALLCONV char *
-Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN * const lp);
-# define PERL_ARGS_ASSERT_SV_2PVBYTE            \
-        assert(sv)
-
-PERL_CALLCONV char *
 Perl_sv_2pvbyte_nolen(pTHX_ SV *sv)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SV_2PVBYTE_NOLEN      \
-        assert(sv)
-
-PERL_CALLCONV char *
-Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN * const lp);
-# define PERL_ARGS_ASSERT_SV_2PVUTF8            \
         assert(sv)
 
 PERL_CALLCONV char *
@@ -6069,12 +6065,6 @@ Perl_sv_pv(pTHX_ SV *sv)
         assert(sv)
 
 PERL_CALLCONV char *
-Perl_sv_pvbyte(pTHX_ SV *sv)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_SV_PVBYTE             \
-        assert(sv)
-
-PERL_CALLCONV char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp);
 # define PERL_ARGS_ASSERT_SV_PVN_FORCE          \
         assert(sv)
@@ -6110,11 +6100,6 @@ Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
 # define PERL_ARGS_ASSERT_SV_USEPVN_MG          \
         assert(sv)
 
-PERL_CALLCONV bool
-Perl_sv_utf8_downgrade(pTHX_ SV * const sv, const bool fail_ok);
-# define PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE     \
-        assert(sv)
-
 PERL_CALLCONV STRLEN
 Perl_sv_utf8_upgrade(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE       \
@@ -6144,12 +6129,6 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 # define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
         assert(d)
 
-# if defined(PERL_DONT_CREATE_GVSV)
-PERL_CALLCONV GV *
-Perl_gv_SVadd(pTHX_ GV *gv);
-#   define PERL_ARGS_ASSERT_GV_SVADD
-
-# endif
 # if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
 PERL_CALLCONV OP *
@@ -6270,6 +6249,11 @@ Perl_do_exec(pTHX_ const char *cmd)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_EXEC               \
         assert(cmd)
+
+#endif
+#if defined(PERL_DONT_CREATE_GVSV)
+/* PERL_CALLCONV GV *
+Perl_gv_SVadd(pTHX_ GV *gv); */
 
 #endif
 #if defined(PERL_IMPLICIT_SYS)

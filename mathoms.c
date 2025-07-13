@@ -578,64 +578,6 @@ Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len,
     sv_insert_flags(bigstr, offset, len, little, littlelen, SV_GMAGIC);
 }
 
-void
-Perl_save_freesv(pTHX_ SV *sv)
-{
-    save_freesv(sv);
-}
-
-void
-Perl_save_mortalizesv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SAVE_MORTALIZESV;
-
-    save_mortalizesv(sv);
-}
-
-void
-Perl_save_freeop(pTHX_ OP *o)
-{
-    save_freeop(o);
-}
-
-void
-Perl_save_freepv(pTHX_ char *pv)
-{
-    save_freepv(pv);
-}
-
-void
-Perl_save_op(pTHX)
-{
-    save_op();
-}
-
-#ifdef PERL_DONT_CREATE_GVSV
-GV *
-Perl_gv_SVadd(pTHX_ GV *gv)
-{
-    return gv_SVadd(gv);
-}
-#endif
-
-GV *
-Perl_gv_AVadd(pTHX_ GV *gv)
-{
-    return gv_AVadd(gv);
-}
-
-GV *
-Perl_gv_HVadd(pTHX_ GV *gv)
-{
-    return gv_HVadd(gv);
-}
-
-GV *
-Perl_gv_IOadd(pTHX_ GV *gv)
-{
-    return gv_IOadd(gv);
-}
-
 IO *
 Perl_newIO(pTHX)
 {
@@ -740,36 +682,6 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
-}
-
-SV *
-Perl_newSVsv(pTHX_ SV *const old)
-{
-    return newSVsv(old);
-}
-
-bool
-Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
-{
-    PERL_ARGS_ASSERT_SV_UTF8_DOWNGRADE;
-
-    return sv_utf8_downgrade(sv, fail_ok);
-}
-
-char *
-Perl_sv_2pvutf8(pTHX_ SV *sv, STRLEN *const lp)
-{
-    PERL_ARGS_ASSERT_SV_2PVUTF8;
-
-    return sv_2pvutf8(sv, lp);
-}
-
-char *
-Perl_sv_2pvbyte(pTHX_ SV *sv, STRLEN *const lp)
-{
-    PERL_ARGS_ASSERT_SV_2PVBYTE;
-
-    return sv_2pvbyte(sv, lp);
 }
 
 U8 *
