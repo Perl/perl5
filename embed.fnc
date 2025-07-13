@@ -997,7 +997,7 @@ Adpr	|OP *	|die_sv 	|NN SV *baseex
 : Used in util.c
 pr	|void	|die_unwind	|NN SV *msv
 : FIXME
-Mbp	|bool	|do_aexec	|NULLOK SV *really			\
+mp	|bool	|do_aexec	|NULLOK SV *really			\
 				|NN SV **mark				\
 				|NN SV **sp
 : Used in pp_sys.c
@@ -1053,7 +1053,7 @@ Rp	|I32	|do_ncmp	|NN SV * const left			\
 Cp	|void	|do_op_dump	|I32 level				\
 				|NN PerlIO *file			\
 				|NULLOK const OP *o
-AMbp	|bool	|do_open	|NN GV *gv				\
+Amp	|bool	|do_open	|NN GV *gv				\
 				|NN const char *name			\
 				|I32 len				\
 				|int as_raw				\
@@ -1330,7 +1330,7 @@ Cp	|void	|gv_check	|NN HV *stash
 : Used in pp.c and pp_sys.c
 ARdp	|SV *	|gv_const_sv	|NN GV *gv
 Adp	|void	|gv_dump	|NULLOK GV *gv
-AMbdp	|void	|gv_efullname3	|NN SV *sv				\
+Admp	|void	|gv_efullname3	|NN SV *sv				\
 				|NN const GV *gv			\
 				|NULLOK const char *prefix
 Adp	|void	|gv_efullname4	|NN SV *sv				\
@@ -1351,7 +1351,7 @@ Adm	|GV *	|gv_fetchmeth_autoload					\
 				|NN const char *name			\
 				|STRLEN len				\
 				|I32 level
-AMbdp	|GV *	|gv_fetchmethod |NN NOCHECK HV *stash			\
+Admp	|GV *	|gv_fetchmethod |NN NOCHECK HV *stash			\
 				|NN const char *name
 Adp	|GV *	|gv_fetchmethod_autoload				\
 				|NN NOCHECK HV *stash			\
@@ -1412,7 +1412,7 @@ Adp	|GV *	|gv_fetchpvn_flags					\
 Adp	|GV *	|gv_fetchsv	|NN SV *name				\
 				|I32 flags				\
 				|const svtype sv_type
-AMbdp	|void	|gv_fullname3	|NN SV *sv				\
+Admp	|void	|gv_fullname3	|NN SV *sv				\
 				|NN const GV *gv			\
 				|NULLOK const char *prefix
 Adp	|void	|gv_fullname4	|NN SV *sv				\
@@ -1440,7 +1440,7 @@ Adp	|void	|gv_init_sv	|NN GV *gv				\
 				|NULLOK HV *stash			\
 				|NN SV *namesv				\
 				|U32 flags
-AMbdp	|GV *	|gv_IOadd	|NULLOK GV *gv
+Admp	|GV *	|gv_IOadd	|NULLOK GV *gv
 Adp	|void	|gv_name_set	|NN GV *gv				\
 				|NN const char *name			\
 				|U32 len				\
@@ -1492,7 +1492,7 @@ AMbdp	|SV *	|hv_delete	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen				\
 				|I32 flags
-AMbdp	|SV *	|hv_delete_ent	|NULLOK HV *hv				\
+Admp	|SV *	|hv_delete_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|I32 flags				\
 				|U32 hash
@@ -1511,14 +1511,14 @@ dp	|void	|hv_ename_delete|NN HV *hv				\
 AMRbdp	|bool	|hv_exists	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen
-AMRbdp	|bool	|hv_exists_ent	|NULLOK HV *hv				\
+ARdmp	|bool	|hv_exists_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|U32 hash
 AMbdp	|SV **	|hv_fetch	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen				\
 				|I32 lval
-AMbdp	|HE *	|hv_fetch_ent	|NULLOK HV *hv				\
+Admp	|HE *	|hv_fetch_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|I32 lval				\
 				|U32 hash
@@ -1529,7 +1529,7 @@ Adp	|I32	|hv_iterinit	|NN HV *hv
 ARdp	|char * |hv_iterkey	|NN HE *entry				\
 				|NN I32 *retlen
 ARdp	|SV *	|hv_iterkeysv	|NN HE *entry
-AMRbdp	|HE *	|hv_iternext	|NN HV *hv
+ARdmp	|HE *	|hv_iternext	|NN HV *hv
 ARdpx	|HE *	|hv_iternext_flags					\
 				|NN HV *hv				\
 				|I32 flags
@@ -1540,7 +1540,7 @@ ARdp	|SV *	|hv_iterval	|NN HV *hv				\
 				|NN HE *entry
 Adp	|void	|hv_ksplit	|NN HV *hv				\
 				|IV newmax
-AMbdp	|void	|hv_magic	|NN HV *hv				\
+Admp	|void	|hv_magic	|NN HV *hv				\
 				|NULLOK GV *gv				\
 				|int how
 Adp	|void	|hv_name_set	|NN HV *hv				\
@@ -1568,11 +1568,11 @@ AMbdp	|SV **	|hv_store	|NULLOK HV *hv				\
 				|I32 klen				\
 				|NULLOK SV *val 			\
 				|U32 hash
-AMbdp	|HE *	|hv_store_ent	|NULLOK HV *hv				\
+Admp	|HE *	|hv_store_ent	|NULLOK HV *hv				\
 				|NULLOK SV *key 			\
 				|NULLOK SV *val 			\
 				|U32 hash
-AMbpx	|SV **	|hv_store_flags |NULLOK HV *hv				\
+Ampx	|SV **	|hv_store_flags |NULLOK HV *hv				\
 				|NULLOK const char *key 		\
 				|I32 klen				\
 				|NULLOK SV *val 			\
@@ -1684,7 +1684,7 @@ CRp	|bool	|_is_uni_perl_idstart					\
 				|UV c
 ARTdip	|Size_t |isUTF8_CHAR	|NN const U8 * const s0 		\
 				|NN const U8 * const e
-AMTbdp	|STRLEN |is_utf8_char_buf					\
+ATdmp	|STRLEN |is_utf8_char_buf					\
 				|NN const U8 *buf			\
 				|NN const U8 *buf_end
 ARTdip	|Size_t |isUTF8_CHAR_flags					\
@@ -2084,7 +2084,7 @@ Adpr	|void	|my_exit	|U32 status
 Adpr	|void	|my_failure_exit
 Cdp	|I32	|my_fflush_all
 CTdp	|Pid_t	|my_fork
-m	|I32	|my_lstat
+mp	|I32	|my_lstat
 Xp	|I32	|my_lstat_flags |NULLOK const U32 flags
 RTop	|int	|my_mkostemp_cloexec					\
 				|NN char *templte			\
@@ -2105,7 +2105,7 @@ CTdp	|int	|my_socketpair	|int family				\
 				|int type				\
 				|int protocol				\
 				|int fd[2]
-m	|I32	|my_stat
+mp	|I32	|my_stat
 Xp	|I32	|my_stat_flags	|NULLOK const U32 flags
 p	|const char *|my_strerror					\
 				|const int errnum			\
@@ -2155,7 +2155,7 @@ Xdp	|CV *	|newATTRSUB_x	|I32 floor				\
 				|NULLOK OP *attrs			\
 				|NULLOK OP *block			\
 				|bool o_is_gv
-AMRbdp	|AV *	|newAV
+ARdmp	|AV *	|newAV
 ARdm	|AV *	|newAV_alloc_x	|SSize_t size
 ARdm	|AV *	|newAV_alloc_xz |SSize_t size
 ARdp	|AV *	|newAVav	|NULLOK AV *oav
@@ -2208,7 +2208,7 @@ ARdp	|OP *	|newGVREF	|I32 type				\
 AMRbdp	|HV *	|newHV
 ARdp	|HV *	|newHVhv	|NULLOK HV *hv
 ARdp	|OP *	|newHVREF	|NN OP *o
-AMRbdp	|IO *	|newIO
+ARdmp	|IO *	|newIO
 ARdp	|OP *	|newLISTOP	|I32 type				\
 				|I32 flags				\
 				|NULLOK OP *first			\
@@ -2274,7 +2274,7 @@ ARdp	|OP *	|newSTATEOP	|I32 flags				\
 				|NULLOK OP *o
 p	|CV *	|newSTUB	|NN GV *gv				\
 				|bool fake
-AMbdp	|CV *	|newSUB 	|I32 floor				\
+Admp	|CV *	|newSUB 	|I32 floor				\
 				|NULLOK OP *o				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *block
@@ -3092,7 +3092,7 @@ ATdip	|void	|SvAMAGIC_on	|NN SV *sv
 ATdp	|void	|sv_backoff	|NN SV * const sv
 Adp	|SV *	|sv_bless	|NN SV * const sv			\
 				|NN NOCHECK HV * const stash
-CMbdp	|bool	|sv_2bool	|NN SV * const sv
+Cdmp	|bool	|sv_2bool	|NN SV * const sv
 Cdp	|bool	|sv_2bool_flags |NN SV *sv				\
 				|I32 flags
 Cp	|bool	|sv_can_swipe_pv_buf					\
@@ -3116,22 +3116,22 @@ Adfpv	|void	|sv_catpvf_mg	|NN SV * const sv			\
 				|...
 Adp	|void	|sv_catpv_mg	|NN SV * const dsv			\
 				|NULLOK const char * const sstr
-AMbdp	|void	|sv_catpvn	|NN SV * const dsv			\
+Admp	|void	|sv_catpvn	|NN SV * const dsv			\
 				|NN const char *sstr			\
 				|STRLEN len
 Adp	|void	|sv_catpvn_flags|NN SV * const dsv			\
 				|NN const char *sstr			\
 				|const STRLEN len			\
 				|const I32 flags
-AMbdp	|void	|sv_catpvn_mg	|NN SV * const dsv			\
+Admp	|void	|sv_catpvn_mg	|NN SV * const dsv			\
 				|NN const char *sstr			\
 				|STRLEN len
-AMbdp	|void	|sv_catsv	|NN SV * const dsv			\
+Admp	|void	|sv_catsv	|NN SV * const dsv			\
 				|NULLOK SV * const sstr
 Adp	|void	|sv_catsv_flags |NN SV * const dsv			\
 				|NULLOK SV * const sstr 		\
 				|const I32 flags
-AMbdp	|void	|sv_catsv_mg	|NN SV * const dsv			\
+Admp	|void	|sv_catsv_mg	|NN SV * const dsv			\
 				|NULLOK SV * const sstr
 Adp	|void	|sv_chop	|NN SV * const sv			\
 				|NULLOK const char * const ptr
@@ -3151,7 +3151,7 @@ Adp	|I32	|sv_cmp_locale_flags					\
 				|NULLOK SV * const sv1			\
 				|NULLOK SV * const sv2			\
 				|const U32 flags
-AMbdp	|void	|sv_copypv	|NN SV * const dsv			\
+Admp	|void	|sv_copypv	|NN SV * const dsv			\
 				|NN SV * const ssv
 Adp	|void	|sv_copypv_flags|NN SV * const dsv			\
 				|NN SV * const ssv			\
@@ -3201,12 +3201,12 @@ ARdp	|bool	|sv_does_sv	|NN SV *sv				\
 Adp	|void	|sv_dump	|NULLOK SV *sv
 Adp	|void	|sv_dump_depth	|NULLOK SV *sv				\
 				|I32 depth
-AMbdp	|I32	|sv_eq		|NULLOK SV *sv1 			\
+Admp	|I32	|sv_eq		|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|I32	|sv_eq_flags	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
-AMbdp	|void	|sv_force_normal|NN SV *sv
+Admp	|void	|sv_force_normal|NN SV *sv
 Adp	|void	|sv_force_normal_flags					\
 				|NN SV * const sv			\
 				|const U32 flags
@@ -3226,7 +3226,7 @@ Cdp	|char * |sv_grow_fresh	|NN SV * const sv			\
 				|STRLEN newlen
 Adp	|void	|sv_inc 	|NULLOK SV * const sv
 Adp	|void	|sv_inc_nomg	|NULLOK SV * const sv
-AMbdp	|void	|sv_insert	|NN SV * const bigstr			\
+Admp	|void	|sv_insert	|NN SV * const bigstr			\
 				|const STRLEN offset			\
 				|const STRLEN len			\
 				|NN const char * const little		\
@@ -3244,7 +3244,7 @@ ARdp	|bool	|sv_isa_sv	|NN SV *sv				\
 				|NN SV *namesv
 Adp	|int	|sv_isobject	|NULLOK SV *sv
 Adip	|IV	|SvIV		|NN SV *sv
-CMbp	|IV	|sv_2iv 	|NN SV *sv
+Cmp	|IV	|sv_2iv 	|NN SV *sv
 Adp	|IV	|sv_2iv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|IV	|SvIV_nomg	|NN SV *sv
@@ -3306,7 +3306,7 @@ Adp	|STRLEN |sv_pos_u2b_flags					\
 				|STRLEN uoffset 			\
 				|NULLOK STRLEN * const lenp		\
 				|U32 flags
-AMbdp	|char * |sv_2pv 	|NN SV *sv				\
+Admp	|char * |sv_2pv 	|NN SV *sv				\
 				|NULLOK STRLEN *lp
 CMRbdp	|char * |sv_pv		|NN SV *sv
 Admp	|char * |sv_2pvbyte	|NN SV *sv				\
@@ -3323,18 +3323,18 @@ ip	|char * |sv_pvbyten_force_wrapper				\
 				|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 dummy
-CMRbdp	|char * |sv_2pvbyte_nolen					\
+CRdmp	|char * |sv_2pvbyte_nolen					\
 				|NN SV *sv
 Adp	|char * |sv_2pv_flags	|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
-CMbdp	|char * |sv_pvn_force	|NN SV *sv				\
+Cdmp	|char * |sv_pvn_force	|NN SV *sv				\
 				|NULLOK STRLEN *lp
 Adp	|char * |sv_pvn_force_flags					\
 				|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
-CMRbdp	|char * |sv_2pv_nolen	|NN SV *sv
+CRdmp	|char * |sv_2pv_nolen	|NN SV *sv
 Admp	|char * |sv_2pvutf8	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
 CMRbdp	|char * |sv_pvutf8	|NN SV *sv
@@ -3349,7 +3349,7 @@ ip	|char * |sv_pvutf8n_force_wrapper				\
 				|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 dummy
-CMRbdp	|char * |sv_2pvutf8_nolen					\
+CRdmp	|char * |sv_2pvutf8_nolen					\
 				|NN SV *sv
 AIdp	|bool	|SvPVXtrue	|NN SV *sv
 Adp	|char * |sv_recode_to_utf8					\
@@ -3487,7 +3487,7 @@ Adp	|SV *	|sv_strftime_tm |NN SV *fmt				\
 Adp	|SV *	|sv_string_from_errnum					\
 				|int errnum				\
 				|NULLOK SV *tgtsv
-CMbdp	|void	|sv_taint	|NN SV *sv
+Cdmp	|void	|sv_taint	|NN SV *sv
 CRdp	|bool	|sv_tainted	|NN SV * const sv
 Adip	|bool	|SvTRUE 	|NULLOK SV *sv
 Cdp	|I32	|sv_true	|NULLOK SV * const sv
@@ -3504,20 +3504,20 @@ Adp	|int	|sv_unmagic	|NN SV * const sv			\
 Adp	|int	|sv_unmagicext	|NN SV * const sv			\
 				|const int type 			\
 				|NULLOK const MGVTBL *vtbl
-AMbdp	|void	|sv_unref	|NN SV *sv
+Admp	|void	|sv_unref	|NN SV *sv
 Adp	|void	|sv_unref_flags |NN SV * const ref			\
 				|const U32 flags
 Cdp	|void	|sv_untaint	|NN SV * const sv
 Adp	|void	|sv_upgrade	|NN SV * const sv			\
 				|svtype new_type
-AMbdp	|void	|sv_usepvn	|NN SV *sv				\
+Admp	|void	|sv_usepvn	|NN SV *sv				\
 				|NULLOK char *ptr			\
 				|STRLEN len
 Adp	|void	|sv_usepvn_flags|NN SV * const sv			\
 				|NULLOK char *ptr			\
 				|const STRLEN len			\
 				|const U32 flags
-AMbdp	|void	|sv_usepvn_mg	|NN SV *sv				\
+Admp	|void	|sv_usepvn_mg	|NN SV *sv				\
 				|NULLOK char *ptr			\
 				|STRLEN len
 Adp	|bool	|sv_utf8_decode |NN SV * const sv
@@ -3543,7 +3543,7 @@ Adp	|STRLEN |sv_utf8_upgrade_flags_grow				\
 Adm	|STRLEN |sv_utf8_upgrade_nomg					\
 				|NN SV *sv
 Adip	|UV	|SvUV		|NN SV *sv
-CMbp	|UV	|sv_2uv 	|NN SV *sv
+Cmp	|UV	|sv_2uv 	|NN SV *sv
 Adp	|UV	|sv_2uv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|UV	|SvUV_nomg	|NN SV *sv
@@ -6387,7 +6387,7 @@ p	|int	|magic_setcollxfrm					\
 				|NN MAGIC *mg
 EXop	|SV *	|strxfrm	|NN SV *src
 : Defined in locale.c, used only in sv.c
-AMbdp	|char * |sv_collxfrm	|NN SV * const sv			\
+Admp	|char * |sv_collxfrm	|NN SV * const sv			\
 				|NN STRLEN * const nxp
 Adp	|char * |sv_collxfrm_flags					\
 				|NN SV * const sv			\

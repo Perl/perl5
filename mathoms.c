@@ -82,100 +82,6 @@ Perl_ref(pTHX_ OP *o, I32 type)
     return doref(o, type, TRUE);
 }
 
-void
-Perl_sv_unref(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_UNREF;
-
-    sv_unref(sv);
-}
-
-void
-Perl_sv_taint(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_TAINT;
-
-    sv_taint(sv);
-}
-
-/* sv_2iv() is now a macro using Perl_sv_2iv_flags();
- * this function provided for binary compatibility only
- */
-
-IV
-Perl_sv_2iv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2IV;
-
-    return sv_2iv(sv);
-}
-
-/* sv_2uv() is now a macro using Perl_sv_2uv_flags();
- * this function provided for binary compatibility only
- */
-
-UV
-Perl_sv_2uv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2UV;
-
-    return sv_2uv(sv);
-}
-
-/* sv_2nv() is now a macro using Perl_sv_2nv_flags();
- * this function provided for binary compatibility only
- */
-
-NV
-Perl_sv_2nv(pTHX_ SV *sv)
-{
-    return sv_2nv(sv);
-}
-
-
-/* sv_2pv() is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp)
-{
-    PERL_ARGS_ASSERT_SV_2PV;
-
-    return sv_2pv(sv, lp);
-}
-
-char *
-Perl_sv_2pv_nolen(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2PV_NOLEN;
-    return sv_2pv_nolen(sv);
-}
-
-char *
-Perl_sv_2pvbyte_nolen(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2PVBYTE_NOLEN;
-
-    return sv_2pvbyte_nolen(sv);
-}
-
-char *
-Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_2PVUTF8_NOLEN;
-
-    return sv_2pvutf8_nolen(sv);
-}
-
-void
-Perl_sv_force_normal(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_FORCE_NORMAL;
-
-    sv_force_normal(sv);
-}
-
 /* sv_setsv() is now a macro using Perl_sv_setsv_flags();
  * this function provided for binary compatibility only
  */
@@ -186,46 +92,6 @@ Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv)
     PERL_ARGS_ASSERT_SV_SETSV;
 
     sv_setsv_flags(dsv, ssv, SV_GMAGIC);
-}
-
-/* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
-{
-    PERL_ARGS_ASSERT_SV_CATPVN;
-
-    sv_catpvn(dsv, sstr, slen);
-}
-
-void
-Perl_sv_catpvn_mg(pTHX_ SV *dsv, const char *sstr, STRLEN len)
-{
-    PERL_ARGS_ASSERT_SV_CATPVN_MG;
-
-    sv_catpvn_mg(dsv,sstr,len);
-}
-
-/* sv_catsv() is now a macro using Perl_sv_catsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catsv(pTHX_ SV *dsv, SV * const sstr)
-{
-    PERL_ARGS_ASSERT_SV_CATSV;
-
-    sv_catsv(dsv, sstr);
-}
-
-void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, SV * const sstr)
-{
-    PERL_ARGS_ASSERT_SV_CATSV_MG;
-
-    sv_catsv_mg(dsv,sstr);
 }
 
 /*
@@ -250,18 +116,6 @@ Perl_sv_pv(pTHX_ SV *sv)
         return SvPVX(sv);
 
     return sv_2pv(sv, NULL);
-}
-
-/* sv_pvn_force() is now a macro using Perl_sv_pvn_force_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
-{
-    PERL_ARGS_ASSERT_SV_PVN_FORCE;
-
-    return sv_pvn_force(sv, lp);
 }
 
 /* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
@@ -315,65 +169,6 @@ Perl_huge(void)
 }
 #endif
 
-void
-Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
-{
-    PERL_ARGS_ASSERT_GV_FULLNAME3;
-
-    gv_fullname3(sv, gv, prefix);
-}
-
-void
-Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
-{
-    PERL_ARGS_ASSERT_GV_EFULLNAME3;
-
-    gv_efullname3(sv, gv, prefix);
-}
-
-GV *
-Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
-{
-    PERL_ARGS_ASSERT_GV_FETCHMETHOD;
-
-    return gv_fetchmethod(stash, name);
-}
-
-HE *
-Perl_hv_iternext(pTHX_ HV *hv)
-{
-    PERL_ARGS_ASSERT_HV_ITERNEXT;
-
-    return hv_iternext(hv);
-}
-
-void
-Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
-{
-    PERL_ARGS_ASSERT_HV_MAGIC;
-
-    hv_magic(hv, gv, how);
-}
-
-bool
-Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw,
-             int rawmode, int rawperm, PerlIO *supplied_fp)
-{
-    PERL_ARGS_ASSERT_DO_OPEN;
-
-    return do_open(gv, name, len, as_raw, rawmode, rawperm, supplied_fp);
-}
-
-#ifndef OS2
-bool
-Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp)
-{
-    PERL_ARGS_ASSERT_DO_AEXEC;
-
-    return do_aexec(really, mark, sp);
-}
-#endif
-
 /*
 =for apidoc_section $SV
 =for apidoc sv_nolocking
@@ -417,60 +212,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
-}
-
-void
-Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
-{
-    PERL_ARGS_ASSERT_SV_USEPVN_MG;
-
-    sv_usepvn_mg(sv,ptr,len);
-}
-
-
-void
-Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
-{
-    PERL_ARGS_ASSERT_SV_USEPVN;
-
-    sv_usepvn(sv,ptr,len);
-}
-
-HE *
-Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
-{
-  return hv_store_ent(hv, keysv, val, hash);
-}
-
-bool
-Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
-{
-    PERL_ARGS_ASSERT_HV_EXISTS_ENT;
-
-    return hv_exists_ent(hv, keysv, hash);
-}
-
-HE *
-Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
-{
-    PERL_ARGS_ASSERT_HV_FETCH_ENT;
-
-    return hv_fetch_ent(hv, keysv, lval, hash);
-}
-
-SV *
-Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
-{
-    PERL_ARGS_ASSERT_HV_DELETE_ENT;
-
-    return hv_delete_ent(hv, keysv, flags, hash);
-}
-
-SV**
-Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash,
-                    int flags)
-{
-    return hv_store_flags(hv, key, klen, val, hash, flags);
 }
 
 SV**
@@ -547,12 +288,6 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
                                 NULL, 0));
 }
 
-AV *
-Perl_newAV(pTHX)
-{
-    return newAV();
-}
-
 HV *
 Perl_newHV(pTHX)
 {
@@ -562,82 +297,10 @@ Perl_newHV(pTHX)
     return hv;
 }
 
-void
-Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, 
-              const char *const little, const STRLEN littlelen)
-{
-    PERL_ARGS_ASSERT_SV_INSERT;
-    sv_insert(bigstr, offset, len, little, littlelen);
-}
-
-IO *
-Perl_newIO(pTHX)
-{
-    return newIO();
-}
-
-I32
-Perl_my_stat(pTHX)
-{
-    return my_stat();
-}
-
-I32
-Perl_my_lstat(pTHX)
-{
-    return my_lstat();
-}
-
-I32
-Perl_sv_eq(pTHX_ SV *sv1, SV *sv2)
-{
-    return sv_eq(sv1, sv2);
-}
-
-#ifdef USE_LOCALE_COLLATE
-char *
-Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
-{
-    PERL_ARGS_ASSERT_SV_COLLXFRM;
-    return sv_collxfrm(sv, nxp);
-}
-
-#endif
-
-bool
-Perl_sv_2bool(pTHX_ SV *const sv)
-{
-    PERL_ARGS_ASSERT_SV_2BOOL;
-    return sv_2bool(sv);
-}
-
-CV *
-Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
-{
-    return newSUB(floor, o, proto, block);
-}
-
 SV *
 Perl_sv_mortalcopy(pTHX_ SV *const oldsv)
 {
     return Perl_sv_mortalcopy_flags(aTHX_ oldsv, SV_GMAGIC);
-}
-
-void
-Perl_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
-{
-    PERL_ARGS_ASSERT_SV_COPYPV;
-
-    sv_copypv(dsv, ssv);
-}
-
-STRLEN
-Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
-{
-
-    PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
-
-    return is_utf8_char_buf(buf,  buf_end);
 }
 
 /*
