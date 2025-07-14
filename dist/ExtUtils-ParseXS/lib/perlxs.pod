@@ -1612,48 +1612,71 @@ themselves call the C functions C<foobar_read()> and C<foobar_write()>.
 
 =head2 File-scoped XS Keywords and Directives
 
-XXX TBC
+After the first C<MODULE> keyword, everything else in the file consists of
+XSUB definitions, plus anything that comes between the XSUBs. The XSUBs
+will be explained further down, but this section addresses the in-between
+stuff, which can consist of any of the following.
 
-XXX NB: L<SCOPE|/The SCOPE: Keyword> can technically be a file-scoped
-keyword too, but is dealt with elsewhere.
+=over
 
-=head3 Inserting POD, Comments and C Preprocessor Directives
+=item *
 
-C preprocessor directives are allowed within BOOT:, PREINIT: INIT:, CODE:,
-PPCODE:, POSTCALL:, and CLEANUP: blocks, as well as outside the functions.
-Comments are allowed anywhere after the MODULE keyword.  The compiler will
-pass the preprocessor directives through untouched and will remove the
-commented lines. POD documentation is allowed at any point, both in the
-C and XS language sections. POD must be terminated with a C<=cut> command;
-C<xsubpp> will exit with an error if it does not. It is very unlikely that
-human generated C code will be mistaken for POD, as most indenting styles
-result in whitespace in front of any line starting with C<=>. Machine
-generated XS files may fall into this trap unless care is taken to
-ensure that a space breaks the sequence "\n=".
+A few file-scoped keywords (including further MODULE declarations), whose
+effects usually last for the rest of the file. These keywords will be
+detailed further down in this section.
 
-Comments can be added to XSUBs by placing a C<#> as the first
-non-whitespace of a line.  Care should be taken to avoid making the
-comment look like a C preprocessor directive, lest it be interpreted as
-such.  The simplest way to prevent this is to put whitespace in front of
-the C<#>.
+=item *
 
-If you use preprocessor directives to choose one of two
-versions of a function, use
+POD, which is stripped out. It must be terminated with C<=cut>.
 
-    #if ... version1
-    #else /* ... version2  */
+=item *
+
+Blank lines, which are discarded.
+
+=item *
+
+Known C</^#/> C preprocessor directives, which are passed through as-is.
+Conditional ones, such as C<#if> and C<#else>, have some basic analysis
+performed on them which, in particular, allows two variants of the same
+XSUB to be declared without raising a "duplicate XSUB" warning. This
+warning suppression only works for the if/else/endif form. For example
+this works:
+
+    #ifdef USE_2ARG
+
+    int foo(int a, int b)
+
+    #else
+
+    int foo(int a)
+
     #endif
 
-and not
+while this form will still raise warnings:
 
-    #if ... version1
-    #endif
-    #if ... version2
+    #ifdef USE_2ARG
+    ...
     #endif
 
-because otherwise B<xsubpp> will believe that you made a duplicate
-definition of the function.  Also, put a blank line before the
-#else/#endif so it will not be seen as part of the function body.
+    #ifndef USE_2ARG
+    ...
+    #endif
+
+=item *
+
+XS comment lines, which are stripped out; either a C</^#/> which isn't
+recognised as a C preprocessor directive, or C</^\s+#>/.
+
+=item *
+
+Anything else is an error, unless it starts on column one, in which case
+it will be treated as the start of a new XSUB.
+
+=back
+
+The following file-scoped keywords are supported.  Note that the
+L<SCOPE|/The SCOPE: Keyword> can technically be a file-scoped keyword too,
+but is described further down as an XSUB keyword.
 
 =head3 The REQUIRE: Keyword
 
@@ -1820,6 +1843,8 @@ L<overload/fallback> for more details.
 =head2 The Structure of an XSUB
 
 XXX TBC
+
+XXX mention that XS comments and POD can appear between keywords
 
 =head2 An XSUB Declaration
 
