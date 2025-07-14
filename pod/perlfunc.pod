@@ -11141,8 +11141,10 @@ documented in L<perlsyn/"Switch Statements">.
 
 =item finally
 
-These flow-control keywords related to the experimental C<try> feature are
-documented in L<perlsyn/"Try Catch Exception Handling">.
+These flow-control keywords related to the C<try> feature are
+documented in L<perlsyn/"Try Catch Exception Handling">.  C<finally> is still
+deemed to be experimental; C<try> and C<catch> are considered non-experimental
+as of perl-5.40.
 
 =back
 
