@@ -2329,10 +2329,22 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
       else (void)POPs;
     }
 
+    /* pp_caller traditionally had separate EXTEND(SP, 1) checks where
+     * that was all that was needed, with this larger check occuring later.
+     * However, when an application reaches a steady stack size - and often
+     * prior to that, the stack will already have space to accomodate 11
+     * more pointers. For example, during a perl build and run of the test
+     * harness, gcov showed that pp_caller never had to extend the stack.
+     * Consolidating the EXTENDs was found to shrink pp_caller by 46
+     * instructions on a non-DEBUGGING, non-threaded gcc build.
+     * Additionally, subsequent commits will cause pp_caller to push
+     * a varying assortment of SV*s to the stack, so an early catch-all
+     * check will be even more desirable at that point.*/
+    EXTEND(SP, 11);
+
     cx = caller_cx(count + cBOOL(PL_op->op_private & OPpOFFBYONE), &dbcx);
     if (!cx) {
         if (gimme != G_LIST) {
-            EXTEND(SP, 1);
             RETPUSHUNDEF;
         }
         RETURN;
@@ -2380,7 +2392,6 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
       ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))
       : NULL;
     if (gimme != G_LIST) {
-        EXTEND(SP, 1);
         if (!stash_hek)
             PUSHs(&PL_sv_undef);
         else {
@@ -2390,8 +2401,6 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
         }
         RETURN;
     }
-
-    EXTEND(SP, 11);
 
     if (!stash_hek)
         PUSHs(&PL_sv_undef);
