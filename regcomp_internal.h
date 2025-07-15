@@ -131,7 +131,7 @@ struct RExC_state_t {
     bool        orig_utf8;      /* whether the pattern was originally in utf8 */
                                 /* XXX use this for future optimisation of case
                                  * where pattern must be upgraded to utf8. */
-    I32         uni_semantics;  /* If a d charset modifier should use unicode
+    bool        uni_semantics;  /* If a d charset modifier should use unicode
                                    rules, even if the pattern is not in
                                    utf8 */
 
@@ -497,7 +497,7 @@ struct RExC_state_t {
     STMT_START {                                                            \
             if (DEPENDS_SEMANTICS) {                                        \
                 set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
-                RExC_uni_semantics = 1;                                     \
+                RExC_uni_semantics = true;                                  \
                 if (RExC_seen_d_op && LIKELY(! IN_PARENS_PASS)) {           \
                     /* No need to restart the parse if we haven't seen      \
                      * anything that differs between /u and /d, and no need \

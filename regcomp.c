@@ -1669,7 +1669,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* Set to use unicode semantics if the pattern is in utf8 and has the
          * 'depends' charset specified, as it means unicode when utf8  */
         set_regex_charset(&rx_flags, REGEX_UNICODE_CHARSET);
-        RExC_uni_semantics = 1;
+        RExC_uni_semantics = true;
     }
 
     RExC_pm_flags = pm_flags;
