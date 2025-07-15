@@ -142,7 +142,7 @@ struct RExC_state_t {
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     bool        in_lookaround;
     bool        contains_locale;
-    I32         recode_x_to_native;
+    bool        recode_x_to_native;
     I32         in_multi_char_class;
     int         code_index;             /* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})

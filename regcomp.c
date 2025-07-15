@@ -1694,7 +1694,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_maxlen = 0;
     RExC_in_lookaround = false;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
-    RExC_recode_x_to_native = 0;
+    RExC_recode_x_to_native = false;
     RExC_in_multi_char_class = 0;
 
     RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = RExC_precomp = exp;
@@ -5453,7 +5453,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
         /* The values are Unicode, and therefore have to be converted to native
          * on a non-Unicode (meaning non-ASCII) platform. */
-        SET_recode_x_to_native(1);
+        SET_recode_x_to_native(true);
     }
 
     /* Here, we have the string the name evaluates to, ready to be parsed,
@@ -5479,7 +5479,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     RExC_start = save_start;
     RExC_parse_set(endbrace);
     RExC_end = orig_end;
-    SET_recode_x_to_native(0);
+    SET_recode_x_to_native(true);
 
     SvREFCNT_dec_NN(substitute_parse);
 
