@@ -143,7 +143,7 @@ struct RExC_state_t {
     bool        in_lookaround;
     bool        contains_locale;
     bool        recode_x_to_native;
-    I32         in_multi_char_class;
+    bool        in_multi_char_class;
     int         code_index;             /* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
                                             within pattern */

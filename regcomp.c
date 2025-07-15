@@ -1695,7 +1695,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_in_lookaround = false;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_recode_x_to_native = false;
-    RExC_in_multi_char_class = 0;
+    RExC_in_multi_char_class = false;
 
     RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = RExC_precomp = exp;
     RExC_precomp_end = RExC_end = exp + plen;
@@ -10822,7 +10822,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_parse_set( RExC_start );
         RExC_copy_start_in_constructed = RExC_start + constructed_prefix_len;
         RExC_end = RExC_parse + len;
-        RExC_in_multi_char_class = 1;
+        RExC_in_multi_char_class = true;
 
         ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
@@ -10832,7 +10832,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_parse_set(save_parse);
         RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = save_start;
         RExC_end = save_end;
-        RExC_in_multi_char_class = 0;
+        RExC_in_multi_char_class = false;
         SvREFCNT_dec_NN(multi_char_matches);
         SvREFCNT_dec(properties);
         SvREFCNT_dec(cp_list);
