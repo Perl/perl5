@@ -2319,14 +2319,16 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
     const PERL_CONTEXT *dbcx;
     U8 gimme = GIMME_V;
     const HEK *stash_hek;
-    I32 count = 0;
-    bool has_arg = (PL_op->op_flags & OPf_KIDS) && TOPs;
+    bool has_arg = false;
+    I32 count = cBOOL(PL_op->op_private & OPpOFFBYONE);
     const COP *lcop;
 
     if (PL_op->op_flags & OPf_KIDS) {
-      if (has_arg)
-        count = POPi;
-      else (void)POPs;
+        if (PL_stack_sp[0]) {
+            has_arg = true;
+            count += (IV)SvIVx(PL_stack_sp[0]);
+        }
+        (void)POPs;
     }
 
     /* pp_caller traditionally had separate EXTEND(SP, 1) checks where
@@ -2342,7 +2344,7 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
      * check will be even more desirable at that point.*/
     EXTEND(SP, 11);
 
-    cx = caller_cx(count + cBOOL(PL_op->op_private & OPpOFFBYONE), &dbcx);
+    cx = caller_cx(count, &dbcx);
     if (!cx) {
         if (gimme != G_LIST) {
             RETPUSHUNDEF;
