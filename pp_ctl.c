@@ -2312,7 +2312,7 @@ Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
     return cx;
 }
 
-PP_wrapped(pp_caller, MAXARG, 0)
+PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
 {
     dSP;
     const PERL_CONTEXT *cx;
@@ -2320,10 +2320,10 @@ PP_wrapped(pp_caller, MAXARG, 0)
     U8 gimme = GIMME_V;
     const HEK *stash_hek;
     I32 count = 0;
-    bool has_arg = MAXARG && TOPs;
+    bool has_arg = (PL_op->op_flags & OPf_KIDS) && TOPs;
     const COP *lcop;
 
-    if (MAXARG) {
+    if (PL_op->op_flags & OPf_KIDS) {
       if (has_arg)
         count = POPi;
       else (void)POPs;
