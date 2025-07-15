@@ -54,6 +54,15 @@ struct RExC_state_t {
     regnode_offset emit;                /* Code-emit pointer */
     I32         naughty;                /* How bad is this pattern? */
     bool        sawback;                /* Did we see \1, ...? */
+
+    bool        utf8;           /* whether the pattern is utf8 or not */
+    bool        orig_utf8;      /* whether the pattern was originally in utf8 */
+                                /* XXX use this for future optimisation of case
+                                 * where pattern must be upgraded to utf8. */
+    bool        uni_semantics;  /* If a d charset modifier should use unicode
+                                   rules, even if the pattern is not in
+                                   utf8 */
+
     SSize_t     size;                   /* Number of regnode equivalents in
                                            pattern */
     Size_t      sets_depth;              /* Counts recursion depth of already-
@@ -127,23 +136,15 @@ struct RExC_state_t {
                                            accept */
     I32         seen_zerolen;
     regnode     *end_op;                /* END node in program */
-    bool        utf8;           /* whether the pattern is utf8 or not */
-    bool        orig_utf8;      /* whether the pattern was originally in utf8 */
-                                /* XXX use this for future optimisation of case
-                                 * where pattern must be upgraded to utf8. */
-    bool        uni_semantics;  /* If a d charset modifier should use unicode
-                                   rules, even if the pattern is not in
-                                   utf8 */
-
+    bool        in_lookaround;
+    bool        contains_locale;
+    bool        recode_x_to_native;
+    bool        in_multi_char_class;
     I32         recurse_count;          /* Number of recurse regops we have generated */
     regnode     **recurse;              /* Recurse regops */
     U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
-    bool        in_lookaround;
-    bool        contains_locale;
-    bool        recode_x_to_native;
-    bool        in_multi_char_class;
     int         code_index;             /* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
                                             within pattern */
@@ -151,13 +152,13 @@ struct RExC_state_t {
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
-    AV         *warn_text;
-    HV         *unlexed_names;
-    SV          *runtime_code_qr;       /* qr with the runtime code blocks */
     bool        seen_d_op;
     bool        strict;
     bool        study_started;
     bool        in_script_run;
+    AV         *warn_text;
+    HV         *unlexed_names;
+    SV          *runtime_code_qr;       /* qr with the runtime code blocks */
     bool        use_BRANCHJ;
     bool        sWARN_EXPERIMENTAL__VLB;
     bool        sWARN_EXPERIMENTAL__REGEX_SETS;
@@ -170,12 +171,12 @@ struct RExC_state_t {
      * See GH Issue #21558 and also ba6e2c38aafc23cf114f3ba0d0ff3baead34328b
      */
 #if defined(DEBUGGING) || !defined(USE_DYNAMIC_LOADING)
-    const char  *lastparse;
     I32         lastnum;
-    U32         study_chunk_recursed_count;
+    const char  *lastparse;
     AV          *paren_name_list;       /* idx -> name */
     SV          *mysv1;
     SV          *mysv2;
+    U32         study_chunk_recursed_count;
 #endif
 };
 
