@@ -5901,7 +5901,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_seen_d_op = true;
             }
             else if (op == BOUNDL) {
-                RExC_contains_locale = 1;
+                RExC_contains_locale = true;
             }
 
             if (invert) {
@@ -6770,7 +6770,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * existing node, so can start a new node with this one */
                     if (! len) {
                         node_type = EXACTFL;
-                        RExC_contains_locale = 1;
+                        RExC_contains_locale = true;
                     }
                     else if (node_type == EXACT) {
                         p = oldp;
@@ -11245,7 +11245,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
 
     if (anyof_flags & ANYOF_LOCALE_FLAGS) {
-        RExC_contains_locale = 1;
+        RExC_contains_locale = true;
     }
 
     if (optimizable) {
