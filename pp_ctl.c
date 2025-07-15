@@ -2312,9 +2312,8 @@ Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
     return cx;
 }
 
-PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
+PP(pp_caller)
 {
-    dSP;
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *dbcx;
     U8 gimme = GIMME_V;
@@ -2328,7 +2327,7 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
             has_arg = true;
             count += (IV)SvIVx(PL_stack_sp[0]);
         }
-        (void)POPs;
+        rpp_popfree_1();
     }
 
     /* pp_caller traditionally had separate EXTEND(SP, 1) checks where
@@ -2342,14 +2341,14 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
      * Additionally, subsequent commits will cause pp_caller to push
      * a varying assortment of SV*s to the stack, so an early catch-all
      * check will be even more desirable at that point.*/
-    EXTEND(SP, 11);
+    rpp_extend(11);
 
     cx = caller_cx(count, &dbcx);
     if (!cx) {
         if (gimme != G_LIST) {
-            RETPUSHUNDEF;
+            rpp_push_IMM(&PL_sv_undef);
         }
-        RETURN;
+        return NORMAL;
     }
 
     /* populate @DB::args ? */
@@ -2395,82 +2394,84 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
       : NULL;
     if (gimme != G_LIST) {
         if (!stash_hek)
-            PUSHs(&PL_sv_undef);
+            rpp_push_IMM(&PL_sv_undef);
         else {
             dTARGET;
             sv_sethek(TARG, stash_hek);
-            PUSHs(TARG);
+            rpp_push_1(TARG);
         }
-        RETURN;
+        return NORMAL;
     }
 
     if (!stash_hek)
-        PUSHs(&PL_sv_undef);
+        rpp_push_IMM(&PL_sv_undef);
     else {
         dTARGET;
         sv_sethek(TARG, stash_hek);
-        PUSHTARG;
+        rpp_push_1(TARG);
     }
-    mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
+    rpp_push_1_norc(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
     lcop = closest_cop(cx->blk_oldcop, OpSIBLING(cx->blk_oldcop),
                        cx->blk_sub.retop, TRUE);
     if (!lcop)
         lcop = cx->blk_oldcop;
-    mPUSHu(CopLINE(lcop));
+    rpp_push_1_norc( newSVuv( (UV)(CopLINE(lcop)) ) );
+
     if (!has_arg)
-        RETURN;
+        return NORMAL;
+
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
         /* So is ccstack[dbcxix]. */
         if (CvHasNAME(dbcx->blk_sub.cv)) {
-            PUSHs(cv_name(dbcx->blk_sub.cv, 0, 0));
-            PUSHs(boolSV(CxHASARGS(cx)));
+            rpp_push_1(cv_name(dbcx->blk_sub.cv, 0, 0));
+            rpp_push_IMM(boolSV(CxHASARGS(cx)));
         }
         else {
-            PUSHs(newSVpvs_flags("(unknown)", SVs_TEMP));
-            PUSHs(boolSV(CxHASARGS(cx)));
+            rpp_push_1_norc( newSVpvs_flags("(unknown)", 0));
+            rpp_push_IMM(boolSV(CxHASARGS(cx)));
         }
     }
     else {
-        PUSHs(newSVpvs_flags("(eval)", SVs_TEMP));
-        PUSHs(&PL_sv_zero);
+        rpp_push_1_norc( newSVpvs_flags("(eval)", 0) );
+        rpp_push_IMM(&PL_sv_zero);
     }
     gimme = cx->blk_gimme;
     if (gimme == G_VOID)
-        PUSHs(&PL_sv_undef);
+        rpp_push_IMM(&PL_sv_undef);
     else
-        PUSHs(boolSV((gimme & G_WANT) == G_LIST));
+        rpp_push_IMM(boolSV((gimme & G_WANT) == G_LIST));
     if (CxTYPE(cx) == CXt_EVAL) {
         /* eval STRING */
         if (CxOLD_OP_TYPE(cx) == OP_ENTEREVAL) {
             SV *cur_text = cx->blk_eval.cur_text;
             if (SvCUR(cur_text) >= 2) {
-                PUSHs(newSVpvn_flags(SvPVX(cur_text), SvCUR(cur_text)-2,
-                                     SvUTF8(cur_text)|SVs_TEMP));
+                rpp_push_1_norc( newSVpvn_flags(SvPVX(cur_text), SvCUR(cur_text)-2,
+                                     SvUTF8(cur_text)) );
             }
             else {
                 /* I think this is will always be "", but be sure */
-                PUSHs(sv_mortalcopy_flags(cur_text, SV_GMAGIC|SV_NOSTEAL));
+                rpp_push_1_norc(newSVsv_flags(cur_text, SV_GMAGIC|SV_NOSTEAL));
             }
 
-            PUSHs(&PL_sv_no);
+            rpp_push_IMM(&PL_sv_no);
         }
         /* require */
         else if (cx->blk_eval.old_namesv) {
-            mPUSHs(newSVsv(cx->blk_eval.old_namesv));
-            PUSHs(&PL_sv_yes);
+            rpp_push_1_norc(newSVsv(cx->blk_eval.old_namesv));
+            rpp_push_IMM(&PL_sv_yes);
         }
         /* eval BLOCK (eval blocks have old_namesv == 0) */
         else {
-            PUSHs(&PL_sv_undef);
-            PUSHs(&PL_sv_undef);
+            rpp_push_IMM(&PL_sv_undef);
+            rpp_push_IMM(&PL_sv_undef);
         }
     }
     else {
-        PUSHs(&PL_sv_undef);
-        PUSHs(&PL_sv_undef);
+        rpp_push_IMM(&PL_sv_undef);
+        rpp_push_IMM(&PL_sv_undef);
     }
 
-    mPUSHi(CopHINTS_get(cx->blk_oldcop));
+    rpp_push_1_norc(newSViv( (IV)(CopHINTS_get(cx->blk_oldcop)) ));
     {
         SV * mask ;
         char *old_warnings = cx->blk_oldcop->cop_warnings;
@@ -2485,13 +2486,16 @@ PP_wrapped(pp_caller, ((PL_op->op_flags & OPf_KIDS) ? 1 : 0), 0)
         }
         else
             mask = newSVpvn(old_warnings, RCPV_LEN(old_warnings));
-        mPUSHs(mask);
+        rpp_push_1_norc(mask);
     }
 
-    PUSHs(cx->blk_oldcop->cop_hints_hash ?
-          sv_2mortal(newRV_noinc(MUTABLE_SV(cop_hints_2hv(cx->blk_oldcop, 0))))
-          : &PL_sv_undef);
-    RETURN;
+    if (cx->blk_oldcop->cop_hints_hash) {
+        rpp_push_1_norc( newRV_noinc(MUTABLE_SV(cop_hints_2hv(cx->blk_oldcop, 0))) );
+    } else {
+        rpp_push_IMM(&PL_sv_undef);
+    }
+
+    return NORMAL;
 }
 
 
