@@ -53,7 +53,7 @@ struct RExC_state_t {
     regnode     *emit_start;            /* Start of emitted-code area */
     regnode_offset emit;                /* Code-emit pointer */
     I32         naughty;                /* How bad is this pattern? */
-    I32         sawback;                /* Did we see \1, ...? */
+    bool        sawback;                /* Did we see \1, ...? */
     SSize_t     size;                   /* Number of regnode equivalents in
                                            pattern */
     Size_t      sets_depth;              /* Counts recursion depth of already-

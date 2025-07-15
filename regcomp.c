@@ -1688,7 +1688,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     assert(!pRExC_state->runtime_code_qr);
 
-    RExC_sawback = 0;
+    RExC_sawback = false;
 
     RExC_seen = 0;
     RExC_maxlen = 0;
@@ -2910,7 +2910,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
         RExC_rxi->data->data[num]=(void*)sv_dat;
         SvREFCNT_inc_simple_void_NN(sv_dat);
     }
-    RExC_sawback = 1;
+    RExC_sawback = true;
     ret = reg2node(pRExC_state,
                    ((! FOLD)
                      ? REFN
@@ -6203,7 +6203,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         REQUIRE_PARENS_PASS;
                     }
                 }
-                RExC_sawback = 1;
+                RExC_sawback = true;
                 ret = reg2node(pRExC_state,
                                ((! FOLD)
                                  ? REF
