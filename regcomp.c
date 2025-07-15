@@ -595,7 +595,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     *plen_p = d - dst;
     *pat_p = (char*) dst;
     SAVEFREEPV(*pat_p);
-    RExC_orig_utf8 = RExC_utf8 = 1;
+    RExC_orig_utf8 = RExC_utf8 = true;
 }
 
 
@@ -1602,7 +1602,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     /* ignore the utf8ness if the pattern is 0 length */
-    RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
+    RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? false : cBOOL(SvUTF8(pat));
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
 
 
@@ -1637,7 +1637,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (   old_re
         && !recompile
-        && cBOOL(RX_UTF8(old_re)) == cBOOL(RExC_utf8)
+        && cBOOL(RX_UTF8(old_re)) == RExC_utf8
         && ( RX_COMPFLAGS(old_re) == ( orig_rx_flags & RXf_PMf_FLAGCOPYMASK ) )
         && RX_PRELEN(old_re) == plen
         && memEQ(RX_PRECOMP(old_re), exp, plen)

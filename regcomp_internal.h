@@ -127,8 +127,8 @@ struct RExC_state_t {
                                            accept */
     I32         seen_zerolen;
     regnode     *end_op;                /* END node in program */
-    I32         utf8;           /* whether the pattern is utf8 or not */
-    I32         orig_utf8;      /* whether the pattern was originally in utf8 */
+    bool        utf8;           /* whether the pattern is utf8 or not */
+    bool        orig_utf8;      /* whether the pattern was originally in utf8 */
                                 /* XXX use this for future optimisation of case
                                  * where pattern must be upgraded to utf8. */
     I32         uni_semantics;  /* If a d charset modifier should use unicode
@@ -740,7 +740,7 @@ static const scan_data_t zero_scan_data = {
 
 
 
-#define UTF cBOOL(RExC_utf8)
+#define UTF RExC_utf8
 
 /* The enums for all these are ordered so things work out correctly */
 #define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
