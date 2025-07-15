@@ -140,7 +140,7 @@ struct RExC_state_t {
     U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
-    I32         in_lookaround;
+    bool        in_lookaround;
     I32         contains_locale;
     I32         recode_x_to_native;
     I32         in_multi_char_class;

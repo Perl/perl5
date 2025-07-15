@@ -1692,7 +1692,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_seen = 0;
     RExC_maxlen = 0;
-    RExC_in_lookaround = 0;
+    RExC_in_lookaround = false;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_recode_x_to_native = 0;
     RExC_in_multi_char_class = 0;
@@ -2945,7 +2945,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
  * If the construct is empty generates a NOTHING op and returns its
  * regnode_offset, which the caller would then return to its caller.
  *
- * If the construct is not empty increments RExC_in_lookaround, and turns
+ * If the construct is not empty sets RExC_in_lookaround, and turns
  * on any flags provided in RExC_seen, and then returns 0 to signify
  * that parsing should continue.
  *
@@ -2976,7 +2976,7 @@ S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
     }
 
     RExC_seen |= flags;
-    RExC_in_lookaround++;
+    RExC_in_lookaround = true;
     return 0; /* keep parsing! */
 }
 
@@ -2993,7 +2993,7 @@ S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
  * If the construct is empty generates an OPFAIL op and returns its
  * regnode_offset which the caller should then return to its caller.
  *
- * If the construct is not empty increments RExC_in_lookaround, and also
+ * If the construct is not empty sets RExC_in_lookaround, and also
  * increments RExC_seen_zerolen, and turns on the flags provided in
  * RExC_seen, and then returns 0 to signify that parsing should continue.
  *
@@ -3026,7 +3026,7 @@ S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags,
      * does not match ever. */
     RExC_seen_zerolen++;
     RExC_seen |= flags;
-    RExC_in_lookaround++;
+    RExC_in_lookaround = true;
     return 0; /* keep parsing! */
 }
 
@@ -3105,7 +3105,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 after_freeze = 0;
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
-    I32 was_in_lookaround = RExC_in_lookaround;
+    bool was_in_lookaround = RExC_in_lookaround;
     I32 fake_eval = 0; /* matches paren */
 
     /* The difference between the following variables can be seen with  *
@@ -3427,7 +3427,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
 
                 RExC_seen_zerolen++;
-                RExC_in_lookaround++;
+                RExC_in_lookaround = true;
                 RExC_seen |= seen_flag_set;
 
                 RExC_parse_set(start_arg);
