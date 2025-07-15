@@ -7824,6 +7824,7 @@ PP_wrapped(pp_argelem,
             return o->op_next;
         assert(argc % 2 == 0);
 
+        SV* keynomg = NULL;
         i = 0;
         while (argc) {
             SV **svp = av_fetch(defav, ix + i++, FALSE);
@@ -7832,8 +7833,13 @@ PP_wrapped(pp_argelem,
             SV *val = svp ? *svp : &PL_sv_undef;
 
             argc -= 2;
-            if (UNLIKELY(SvGMAGICAL(key)))
-                key = sv_mortalcopy(key);
+            if (UNLIKELY(SvGMAGICAL(key))) {
+                if (!keynomg)
+                    keynomg = sv_mortalcopy(key);
+                else
+                    sv_setsv_flags(keynomg, key, SV_GMAGIC|SV_DO_COW_SVSETSV);
+                key = keynomg;
+            }
             SV *tmpsv = newSVsv_flags(val, SV_GMAGIC|SV_DO_COW_SVSETSV);
             hv_store_ent((HV*)targ, key, tmpsv, 0);
             TAINT_NOT;
