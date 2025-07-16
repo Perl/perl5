@@ -39,14 +39,6 @@ SKIP:
 }
 
 {
-    my $saw_signal;
-    local $SIG{USR1} = sub { ++$saw_signal };
-    my $pid = make_signal_thread();
-    join_signal_thread($pid);
-    ok($saw_signal, "saw signal sent to non-perl thread");
-}
-
-{
     $Config{d_fork}
       or skip "Need fork", 1;
     my $pid = fork;
@@ -67,5 +59,14 @@ SKIP:
         is($?, 0, "child success");
     }
 }
+
+{
+    my $saw_signal;
+    local $SIG{USR1} = sub { ++$saw_signal };
+    my $pid = make_signal_thread();
+    join_signal_thread($pid);
+    ok($saw_signal, "saw signal sent to non-perl thread");
+}
+
 
 done_testing();
