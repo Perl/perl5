@@ -621,7 +621,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.98';
+our $VERSION = '1.99';
 
 FEATURES
 
@@ -1067,6 +1067,8 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 This feature enables the C<class> block syntax and other associated keywords
 which implement the "new" object system, previously codenamed "Corinna".
 
+This feature is available starting in Perl 5.38.
+
 =head2 The 'apostrophe_as_package_separator' feature
 
 This feature enables use C<'> (apostrophe) as an alternative to using
@@ -1091,6 +1093,8 @@ This feature enables the L<C<any>|perlfunc/any BLOCK LIST> operator keyword.
 This allow testing whether any of the values in a list satisfy a given
 condition, with short-circuiting behaviour as soon as it finds one.
 
+This feature is available starting in Perl 5.42.
+
 =head2 The 'keyword_all' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
@@ -1103,6 +1107,8 @@ This feature enables the L<C<all>|perlfunc/all BLOCK LIST> operator keyword.
 This allow testing whether all of the values in a list satisfy a given
 condition, with short-circuiting behaviour as soon as it finds one that does
 not.
+
+This feature is available starting in Perl 5.42.
 
 =head1 FEATURE BUNDLES
 
