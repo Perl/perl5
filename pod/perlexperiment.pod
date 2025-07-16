@@ -173,6 +173,18 @@ example:
 The ticket for this experiment is
 L<[perl #19765]|https://github.com/Perl/perl5/issues/19765>.
 
+=item New object system and C<class> syntax
+
+Introduced in Perl 5.37.9.
+
+Using this feature triggers warnings in the category C<experimental::class>.
+
+This feature enables the new object system and its associated keywords
+C<class>, C<field>, C<method>.
+
+The ticket for this experiment is
+L<[perl #22139]|https://github.com/Perl/perl5/issues/22139>.
+
 =item C<any> and C<all> list processing operators
 
 Introduced in Perl 5.41.7.
