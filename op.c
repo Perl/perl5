@@ -2027,6 +2027,10 @@ Perl_scalar(pTHX_ OP *o)
         case OP_LIST:
             kid = cLISTOPo->op_first;
             goto do_kids;
+        case OP_LSLICE:
+                assert(OP_TYPE_IS_OR_WAS(cLISTOPo->op_first, OP_LIST));
+                kid = cLISTOPx(cLISTOPo->op_first)->op_first;
+                goto do_kids;
         case OP_LEAVE:
         case OP_LEAVETRY:
             kid = cLISTOPo->op_first;
