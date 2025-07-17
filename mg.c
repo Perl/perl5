@@ -1566,7 +1566,7 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
 
 #if defined(USE_ITHREADS) && !defined(WIN32)
     if (!aTHX) {
-        /* presumably ths signal is being delivered to a non-perl
+        /* presumably this signal is being delivered to a non-perl
          * thread, presumably created by a library, redirect it to the
          * main thread.
          */
