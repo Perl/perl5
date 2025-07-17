@@ -220,6 +220,21 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+L<Useless use of %s in void context|perldiag/"Useless use of %s in void context">
+
+Scalar context was not always applied to arguments passed to list/array
+slices in the same way that is is applied elsewhere. This has been improved
+to reduce unnecessary OPs being executed at runtime. As a consequence, some
+statements may now trigger warnings when they previously did not.
+
+For example, in C<my $x = (caller)[4,3,2];> or C<my $x = @y[4,3,2];>,
+warnings will now be emitted for the C<4> and C<3> arguments.
+
+Note that the existing, documented behaviour of not warning for numerical
+constants equal to C<0> or C<1> still applies.
+
 =back
 
 =head1 Utility Changes
