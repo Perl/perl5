@@ -8409,17 +8409,7 @@ so no C<x++>.
 #endif
 
 
-/*
-=for apidoc_section $utility
-
-=for apidoc Am|bool|IS_SAFE_SYSCALL|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
-
-Same as L</is_safe_syscall>.
-
-=cut
-
-Allows one ending \0
-*/
+/* Allows one ending \0 */
 #define IS_SAFE_SYSCALL(p, len, what, op_name) (Perl_is_safe_syscall(aTHX_ (p), (len), (what), (op_name)))
 
 #define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))

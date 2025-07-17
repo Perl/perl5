@@ -3295,9 +3295,12 @@ Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags , HV **msgs)
 /*
 =for apidoc_section $utility
 
-=for apidoc is_safe_syscall
+=for apidoc        is_safe_syscall
+=for apidoc_item ||IS_SAFE_SYSCALL|
 
-Test that the given C<pv> (with length C<len>) doesn't contain any internal
+These are synonymous.
+
+They test that the given C<pv> (with length C<len>) doesn't contain any internal
 C<NUL> characters.
 If it does, set C<errno> to C<ENOENT>, optionally warn using the C<syscalls>
 category, and return FALSE.
@@ -3305,8 +3308,6 @@ category, and return FALSE.
 Return TRUE if the name is safe.
 
 C<what> and C<op_name> are used in any warning.
-
-Used by the C<IS_SAFE_SYSCALL()> macro.
 
 =cut
 */
