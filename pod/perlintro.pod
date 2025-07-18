@@ -284,7 +284,7 @@ To get at hash elements:
  $fruit_color{"apple"};           # gives "red"
 
 Note again the use of the C<$> sigil to access a single hash element.
-The curly braces C<{...}> indicate that it is an hash that we are
+The curly braces C<{...}> indicate that it is a hash that we are
 getting the value from.
 
 And we can get multiple values using a slice
