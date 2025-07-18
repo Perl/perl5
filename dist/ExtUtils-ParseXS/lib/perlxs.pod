@@ -2083,6 +2083,103 @@ signature.
 
 =head2 An XSUB Parameter
 
+Some examples of valid XSUB parameter declarations:
+
+    char *foo             # parameter with type
+    char *foo = "abc"     # default value
+    char *foo = NO_INIT   # doesn't complain if arg missing
+    OUT char *foo         # caller's arg gets updated
+    IN_OUTLIST char *foo  # parameter value gets returned
+    int length(foo)       # pseudo-parameter that gets the length of foo
+    foo                   # placeholder, or parameter without type
+    SV*                   # placeholder
+    ...                   # ellipsis: zero or more further arguments
+
+The most straightforward type of declaration in an XSUB's parameter list
+consists of just a C type followed by a parameter name, such as C<char
+*foo>. This has two main effects. First, it causes a C auto variable of
+that name to be declared; and second, the variable is initialised to the
+value of the passed argument which corresponds to that parameter. For
+example,
+
+    void
+    foo(int i, char *s)
+
+is roughly equivalent to the Perl:
+
+    sub foo {
+        my $i = int($_[0]);
+        my $s = "$_[1]";
+        ...
+    }
+
+and the generated C code may look something like:
+
+    if (items != 2)
+       croak_xs_usage(cv,  "i, s");
+
+    {
+        int   i = (int)SvIV(ST(0));
+        char *s = (char *)SvPV_nolen(ST(1));
+        foo(i, s); /* autocall */
+        ...
+    }
+
+In addition to the variable declaration and initialisation, the name of
+the parameter will usually be used in the usage message and in any
+autocall, as shown above. These variables are accessible for any user code
+in a C<CODE> block or similar. Their values aren't normally returned.
+
+There are several variations on this basic pattern, which are explained in
+the following subsections.
+
+=head3 XSUB Parameter Placeholders
+
+Sometimes you want to skip an argument. There are two supported techniques
+for efficiently declaring a placeholder. Both of these will completely
+skip any declaration and initialisation of a C auto variable, but will
+still consume an argument.
+
+A bare parameter name is treated as a placeholder if has a name but no
+type specified: neither in the signature, nor in any following C<INPUT>
+section. For example:
+
+    void
+    foo(int a, b, char *c)
+      CODE:
+        ...
+
+is roughly equivalent to the Perl:
+
+    sub foo {
+        my $a = int($_[0]);
+        my $c = "$_[2]";
+        ...
+    }
+
+A parameter containing just the specific type C<SV*> and no name is
+treated specially. A bug in the XS parser meant that it used to skip any
+parameter declaration which wasn't parsable. This inadvertently made many
+things de facto placeholder declarations. A common usage was C<SV*>, which
+is now officially treated as a placeholder for backwards compatibility.
+Any other bare types without a parameter name are errors since
+C<ExtUtils::ParseXS> 3.57. Note that the C<SV*> text will appear in any
+C<usage()> error message. For example,
+
+    void
+    foo(int a, SV*, char *c)
+
+may croak with:
+
+    Usage: Foo::Bar::foo(a, SV*, c) at ...
+
+Placeholders can't be used with autocall unless you use C<C_ARGS> to
+override the missing argument. For example:
+
+    void
+    foo(int a, b, char *c)
+        C_ARGS: a, c
+
 =head3 The IN/OUTLIST/IN_OUTLIST/OUT/IN_OUT Keywords
 
 In the list of parameters for an XSUB, one can precede parameter names
