@@ -125,6 +125,7 @@ sub generate_proto_h {
         if ($flags =~ / ( [^ AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
+
         my @nonnull;
         my $args_assert_line = ( $flags !~ /[Gm]/ );
         my $has_depth = ( $flags =~ /W/ );
@@ -184,6 +185,14 @@ sub generate_proto_h {
             $static_inline = $type =~ /^PERL_STATIC(?:_FORCE)?_INLINE/;
         }
         else {
+
+            # A publicly accessible non-static element needs to have a Perl_
+            # prefix available to call it with (in case of name conflicts).
+            die_at_end "'$plain_func' requires p flag because has A or C flag"
+                                    if $flags !~ /p/
+                                    && $flags =~ /[AC]/
+                                    && $plain_func !~ /[Pp]erl/;
+
             if ($never_returns) {
                 $retval = "PERL_CALLCONV_NO_RET $retval";
             }
