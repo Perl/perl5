@@ -23079,7 +23079,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         },
         removed => {
         }
-    }
+    },
     5.041011 => {
         delta_from => 5.041010,
         changed => {
