@@ -3454,7 +3454,7 @@ Adp	|void	|sv_setrv_noinc |NN SV * const sv			\
 Adp	|void	|sv_setrv_noinc_mg					\
 				|NN SV * const sv			\
 				|NN SV * const ref
-AMbdp	|void	|sv_setsv	|NN SV *dsv				\
+Admp	|void	|sv_setsv	|NN SV *dsv				\
 				|NULLOK SV *ssv
 Adp	|void	|sv_setsv_flags |NN SV *dsv				\
 				|NULLOK SV *ssv 			\

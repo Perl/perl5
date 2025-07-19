@@ -5088,6 +5088,9 @@ Perl_sv_setrv_noinc_mg(pTHX_ SV * const sv, SV * const ref);
 #define PERL_ARGS_ASSERT_SV_SETRV_NOINC_MG      \
         assert(sv); assert(ref)
 
+/* PERL_CALLCONV void
+Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv); */
+
 PERL_CALLCONV void
 Perl_sv_setsv_flags(pTHX_ SV *dsv, SV *ssv, const I32 flags);
 #define PERL_ARGS_ASSERT_SV_SETSV_FLAGS         \
@@ -6026,11 +6029,6 @@ Perl_sv_pvutf8(pTHX_ SV *sv)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SV_PVUTF8             \
         assert(sv)
-
-PERL_CALLCONV void
-Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv);
-# define PERL_ARGS_ASSERT_SV_SETSV              \
-        assert(dsv)
 
 PERL_CALLCONV STRLEN
 Perl_sv_utf8_upgrade(pTHX_ SV *sv);
