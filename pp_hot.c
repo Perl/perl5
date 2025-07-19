@@ -1811,6 +1811,7 @@ PP(pp_add)
     SV *targ = (PL_op->op_flags & OPf_STACKED)
                     ? PL_stack_sp[-1]
                     : PAD_SV(PL_op->op_targ);
+    NV nv;
 
     if (rpp_try_AMAGIC_2(add_amg, AMGf_assign|AMGf_numeric))
         return NORMAL;
@@ -1994,7 +1995,8 @@ PP(pp_add)
                         TARGi(NEGATE_2IV(result), 1);
                     else {
                         /* result valid, but out of range for IV.  */
-                        TARGn(-(NV)result, 1);
+                        nv = -(NV)result;
+                        goto ret_nv;
                     }
                 }
                 goto ret;
@@ -2006,16 +2008,13 @@ PP(pp_add)
     useleft = USE_LEFT(svl);
 #endif
 
-    {
-        NV value = SvNV_nomg(svr);
-        if (!useleft) {
-            /* left operand is undef, treat as zero. + 0.0 is identity. */
-            TARGn(value, 1);
-        }
-        else {
-            TARGn(value + SvNV_nomg(svl), 1);
-        }
-    }
+    /* If left operand is undef, treat as zero. */
+    nv = useleft ? SvNV_nomg(svl) : 0.0;
+    /* Separate statements here to ensure SvNV_nomg(svl) is evaluated
+       before SvNV_nomg(svr) */
+    nv += SvNV_nomg(svr);
+  ret_nv:
+    TARGn(nv, 1);
 
   ret:
     rpp_replace_2_1_NN(targ);

@@ -220,6 +220,14 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+This warning was issued in the reverse order (right-to-left) when both
+operands of a binary operator are uninitialized values.  This is now
+fixed to be consistent with evaluation order of operands.
+
 =back
 
 =head1 Utility Changes
@@ -348,7 +356,9 @@ well.
 
 =item *
 
-XXX
+The XS parser, L<ExtUtils::ParseXS>, has been extensively restructured
+internally. Most of these changes shouldn't be visible externally, but
+might affect XS code which was using invalid or unsupported syntax.
 
 =back
 
@@ -367,6 +377,17 @@ manager will later use a regex to expand these into links.
 =item *
 
 XXX
+
+=item *
+
+When both operands of arithmetic operators (C<+>, C<->, etc.) are
+L<overload>ed objects which have no method for that operator but have
+a C<0+> method and the C<fallback> option set to TRUE,
+perl will normally call the C<0+> method for the left operand first
+and then call one for the right operand, i.e. in the same order
+with operand evaluation order.
+But if C<S<use integer;>> is in effect, the C<0+> methods used to be
+called in wrong (reverse) order.
 
 =back
 
@@ -399,8 +420,20 @@ the F<perldelta> of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+"WELL VOLUNTEERED!" echoed across conference rooms and IRC channels. Matt S. Trout's battle
+cry that transformed reluctant volunteers into community leaders.
+
+With profound sadness, we announce Matt's passing. Since the early 2000s, Matt
+shaped Perl through sheer force of will: IRC operator, PAUSE administrator,
+Shadowcat Systems co-founder, architect of DBIx::Class. His opinions came wrapped in
+profanity and delivered at maximum volume. He suffered no fools and grew to
+sometimes realize he should apologize. Yet this same abrasive exterior
+protected fierce dedication to mentoring, developers he harangued into
+volunteering now lead the community themselves. Matt's deliberately
+mind-bending code pushed Perl forward. Every modern Perl developer touches his
+legacy daily.
+
+Well volunteered, Matt. Rest in peace.
 
 =head1 Acknowledgements
 

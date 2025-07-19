@@ -595,7 +595,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     *plen_p = d - dst;
     *pat_p = (char*) dst;
     SAVEFREEPV(*pat_p);
-    RExC_orig_utf8 = RExC_utf8 = 1;
+    RExC_orig_utf8 = RExC_utf8 = true;
 }
 
 
@@ -1602,7 +1602,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     /* ignore the utf8ness if the pattern is 0 length */
-    RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
+    RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? false : cBOOL(SvUTF8(pat));
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
 
 
@@ -1637,7 +1637,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (   old_re
         && !recompile
-        && cBOOL(RX_UTF8(old_re)) == cBOOL(RExC_utf8)
+        && cBOOL(RX_UTF8(old_re)) == RExC_utf8
         && ( RX_COMPFLAGS(old_re) == ( orig_rx_flags & RXf_PMf_FLAGCOPYMASK ) )
         && RX_PRELEN(old_re) == plen
         && memEQ(RX_PRECOMP(old_re), exp, plen)
@@ -1669,7 +1669,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* Set to use unicode semantics if the pattern is in utf8 and has the
          * 'depends' charset specified, as it means unicode when utf8  */
         set_regex_charset(&rx_flags, REGEX_UNICODE_CHARSET);
-        RExC_uni_semantics = 1;
+        RExC_uni_semantics = true;
     }
 
     RExC_pm_flags = pm_flags;
@@ -1688,14 +1688,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     assert(!pRExC_state->runtime_code_qr);
 
-    RExC_sawback = 0;
+    RExC_sawback = false;
 
     RExC_seen = 0;
     RExC_maxlen = 0;
-    RExC_in_lookaround = 0;
+    RExC_in_lookaround = false;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
-    RExC_recode_x_to_native = 0;
-    RExC_in_multi_char_class = 0;
+    RExC_recode_x_to_native = false;
+    RExC_in_multi_char_class = false;
 
     RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = RExC_precomp = exp;
     RExC_precomp_end = RExC_end = exp + plen;
@@ -2910,7 +2910,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
         RExC_rxi->data->data[num]=(void*)sv_dat;
         SvREFCNT_inc_simple_void_NN(sv_dat);
     }
-    RExC_sawback = 1;
+    RExC_sawback = true;
     ret = reg2node(pRExC_state,
                    ((! FOLD)
                      ? REFN
@@ -2945,7 +2945,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
  * If the construct is empty generates a NOTHING op and returns its
  * regnode_offset, which the caller would then return to its caller.
  *
- * If the construct is not empty increments RExC_in_lookaround, and turns
+ * If the construct is not empty sets RExC_in_lookaround, and turns
  * on any flags provided in RExC_seen, and then returns 0 to signify
  * that parsing should continue.
  *
@@ -2976,7 +2976,7 @@ S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
     }
 
     RExC_seen |= flags;
-    RExC_in_lookaround++;
+    RExC_in_lookaround = true;
     return 0; /* keep parsing! */
 }
 
@@ -2993,7 +2993,7 @@ S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
  * If the construct is empty generates an OPFAIL op and returns its
  * regnode_offset which the caller should then return to its caller.
  *
- * If the construct is not empty increments RExC_in_lookaround, and also
+ * If the construct is not empty sets RExC_in_lookaround, and also
  * increments RExC_seen_zerolen, and turns on the flags provided in
  * RExC_seen, and then returns 0 to signify that parsing should continue.
  *
@@ -3026,7 +3026,7 @@ S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags,
      * does not match ever. */
     RExC_seen_zerolen++;
     RExC_seen |= flags;
-    RExC_in_lookaround++;
+    RExC_in_lookaround = true;
     return 0; /* keep parsing! */
 }
 
@@ -3105,7 +3105,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 after_freeze = 0;
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
-    I32 was_in_lookaround = RExC_in_lookaround;
+    bool was_in_lookaround = RExC_in_lookaround;
     I32 fake_eval = 0; /* matches paren */
 
     /* The difference between the following variables can be seen with  *
@@ -3427,7 +3427,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
 
                 RExC_seen_zerolen++;
-                RExC_in_lookaround++;
+                RExC_in_lookaround = true;
                 RExC_seen |= seen_flag_set;
 
                 RExC_parse_set(start_arg);
@@ -5453,7 +5453,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
         /* The values are Unicode, and therefore have to be converted to native
          * on a non-Unicode (meaning non-ASCII) platform. */
-        SET_recode_x_to_native(1);
+        SET_recode_x_to_native(true);
     }
 
     /* Here, we have the string the name evaluates to, ready to be parsed,
@@ -5479,7 +5479,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     RExC_start = save_start;
     RExC_parse_set(endbrace);
     RExC_end = orig_end;
-    SET_recode_x_to_native(0);
+    SET_recode_x_to_native(true);
 
     SvREFCNT_dec_NN(substitute_parse);
 
@@ -5901,7 +5901,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_seen_d_op = true;
             }
             else if (op == BOUNDL) {
-                RExC_contains_locale = 1;
+                RExC_contains_locale = true;
             }
 
             if (invert) {
@@ -6203,7 +6203,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         REQUIRE_PARENS_PASS;
                     }
                 }
-                RExC_sawback = 1;
+                RExC_sawback = true;
                 ret = reg2node(pRExC_state,
                                ((! FOLD)
                                  ? REF
@@ -6770,7 +6770,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * existing node, so can start a new node with this one */
                     if (! len) {
                         node_type = EXACTFL;
-                        RExC_contains_locale = 1;
+                        RExC_contains_locale = true;
                     }
                     else if (node_type == EXACT) {
                         p = oldp;
@@ -10822,7 +10822,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_parse_set( RExC_start );
         RExC_copy_start_in_constructed = RExC_start + constructed_prefix_len;
         RExC_end = RExC_parse + len;
-        RExC_in_multi_char_class = 1;
+        RExC_in_multi_char_class = true;
 
         ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
@@ -10832,7 +10832,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_parse_set(save_parse);
         RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = save_start;
         RExC_end = save_end;
-        RExC_in_multi_char_class = 0;
+        RExC_in_multi_char_class = false;
         SvREFCNT_dec_NN(multi_char_matches);
         SvREFCNT_dec(properties);
         SvREFCNT_dec(cp_list);
@@ -11245,7 +11245,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
 
     if (anyof_flags & ANYOF_LOCALE_FLAGS) {
-        RExC_contains_locale = 1;
+        RExC_contains_locale = true;
     }
 
     if (optimizable) {

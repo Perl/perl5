@@ -283,7 +283,7 @@ my %valid_sections = (
 
             =head2 List of capability C<HAS_I<foo>> symbols
 
-            This is a list of those symbols that dont appear elsewhere in ths
+            This is a list of those symbols that dont appear elsewhere in this
             document that indicate if the current platform has a certain
             capability.  Their names all begin with C<HAS_>.  Only those
             symbols whose capability is directly derived from the name are

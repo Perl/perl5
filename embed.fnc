@@ -6363,9 +6363,9 @@ CRdp	|PERL_SI *|si_dup	|NULLOK PERL_SI *si			\
 				|NN CLONE_PARAMS *param
 CRdp	|ANY *	|ss_dup 	|NN PerlInterpreter *proto_perl 	\
 				|NN CLONE_PARAMS *param
-ARp	|SV *	|sv_dup 	|NULLOK const SV * const ssv		\
+CRdp	|SV *	|sv_dup 	|NULLOK const SV * const ssv		\
 				|NN CLONE_PARAMS * const param
-ARp	|SV *	|sv_dup_inc	|NULLOK const SV * const ssv		\
+CRdp	|SV *	|sv_dup_inc	|NULLOK const SV * const ssv		\
 				|NN CLONE_PARAMS * const param
 # if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
 p	|void	|op_relocate_sv |NN SV **svp				\
