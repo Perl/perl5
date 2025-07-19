@@ -4888,11 +4888,12 @@ Perl_sv_pos_u2b_flags(pTHX_ SV * const sv, STRLEN uoffset, STRLEN * const lenp, 
 #define PERL_ARGS_ASSERT_SV_POS_U2B_FLAGS       \
         assert(sv)
 
-PERL_CALLCONV char *
+/* PERL_CALLCONV char *
+Perl_sv_pv(pTHX_ SV *sv); */
+
+/* PERL_CALLCONV char *
 Perl_sv_pvbyte(pTHX_ SV *sv)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SV_PVBYTE              \
-        assert(sv)
+        __attribute__warn_unused_result__; */
 
 PERL_CALLCONV char *
 Perl_sv_pvbyten_force(pTHX_ SV * const sv, STRLEN * const lp);
@@ -6016,12 +6017,6 @@ PERL_CALLCONV void
 Perl_sv_nounlocking(pTHX_ SV *sv)
         __attribute__deprecated__;
 # define PERL_ARGS_ASSERT_SV_NOUNLOCKING
-
-PERL_CALLCONV char *
-Perl_sv_pv(pTHX_ SV *sv)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_SV_PV                 \
-        assert(sv)
 
 PERL_CALLCONV UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
