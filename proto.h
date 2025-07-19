@@ -1619,6 +1619,9 @@ Perl_hv_delayfree_ent(pTHX_ HV *notused, HE *entry);
 #define PERL_ARGS_ASSERT_HV_DELAYFREE_ENT
 
 /* PERL_CALLCONV SV *
+Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags); */
+
+/* PERL_CALLCONV SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash); */
 
 PERL_CALLCONV void
@@ -1649,8 +1652,15 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         assert(hv); assert(name); assert(SvTYPE(hv) == SVt_PVHV)
 
 /* PERL_CALLCONV bool
+Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
+        __attribute__warn_unused_result__; */
+
+/* PERL_CALLCONV bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
         __attribute__warn_unused_result__; */
+
+/* PERL_CALLCONV SV **
+Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval); */
 
 /* PERL_CALLCONV HE *
 Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash); */
@@ -1760,6 +1770,9 @@ Perl_hv_scalar(pTHX_ HV *hv)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_SCALAR              \
         assert(hv); assert(SvTYPE(hv) == SVt_PVHV)
+
+/* PERL_CALLCONV SV **
+Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash); */
 
 /* PERL_CALLCONV HE *
 Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash); */
@@ -5983,26 +5996,6 @@ Perl_malloced_size(void *p)
 
 #endif /* defined(MYMALLOC) */
 #if !defined(NO_MATHOMS)
-PERL_CALLCONV SV *
-Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags);
-# define PERL_ARGS_ASSERT_HV_DELETE             \
-        assert(key); assert(!hv || SvTYPE(hv) == SVt_PVHV)
-
-PERL_CALLCONV bool
-Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_HV_EXISTS             \
-        assert(key); assert(!hv || SvTYPE(hv) == SVt_PVHV)
-
-PERL_CALLCONV SV **
-Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval);
-# define PERL_ARGS_ASSERT_HV_FETCH              \
-        assert(key); assert(!hv || SvTYPE(hv) == SVt_PVHV)
-
-PERL_CALLCONV SV **
-Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash);
-# define PERL_ARGS_ASSERT_HV_STORE
-
 PERL_CALLCONV HV *
 Perl_newHV(pTHX)
         __attribute__warn_unused_result__;

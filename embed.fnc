@@ -1488,7 +1488,7 @@ ARdp	|HV *	|hv_copy_hints_hv					\
 Cp	|void	|hv_delayfree_ent					\
 				|NULLOK HV *notused			\
 				|NULLOK HE *entry
-AMbdp	|SV *	|hv_delete	|NULLOK HV *hv				\
+Admp	|SV *	|hv_delete	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen				\
 				|I32 flags
@@ -1508,13 +1508,13 @@ dp	|void	|hv_ename_delete|NN HV *hv				\
 				|NN const char *name			\
 				|U32 len				\
 				|U32 flags
-AMRbdp	|bool	|hv_exists	|NULLOK HV *hv				\
+ARdmp	|bool	|hv_exists	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen
 ARdmp	|bool	|hv_exists_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|U32 hash
-AMbdp	|SV **	|hv_fetch	|NULLOK HV *hv				\
+Admp	|SV **	|hv_fetch	|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen				\
 				|I32 lval
@@ -1563,7 +1563,7 @@ Cdop	|void	|hv_riter_set	|NN HV *hv				\
 				|I32 riter
 
 ARdp	|SV *	|hv_scalar	|NN HV *hv
-AMbdp	|SV **	|hv_store	|NULLOK HV *hv				\
+Admp	|SV **	|hv_store	|NULLOK HV *hv				\
 				|NULLOK const char *key 		\
 				|I32 klen				\
 				|NULLOK SV *val 			\
