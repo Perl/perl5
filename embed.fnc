@@ -99,6 +99,9 @@
 :         placed in perlapi.  If no documentation exists, that fact is also
 :         noted in perlapi.
 :
+:         These require one of the /[iIpS]/ flags to give callers a name to use
+:         that won't possibly collide with their own
+:
 : The 'C' flag is used instead for functions and their short names that need to
 :         be accessible everywhere, typically because they are called from a
 :         publicly available macro or inline function, but they are not for
@@ -106,7 +109,8 @@
 :         perlintern.  If no documentation exists, that fact is also noted in
 :         perlintern.
 :
-:         These really need the 'p' flag to avoid name space collisions.
+:         These require one of the /[iIpS]/ flags to give callers a name to use
+:         that won't possibly collide with their own
 :
 :         Some of these have been constructed so that the wrapper macro names
 :         begin with an underscore to lessen the chances of a name collision.
@@ -278,8 +282,8 @@
 : The remainder of these introductory comments detail all the possible flags:
 :
 :   'A'  Both long and short names are accessible fully everywhere (usually
-:        part of the public API). If the function is not part of the public
-:        API, instead use 'C', 'E', or 'X'.
+:        part of the public API). Requires one of /[iIpS]/ flags.  If the
+:	 function is not part of the public API, instead use 'C', 'E', or 'X'.
 :
 :        * adds entry to the list of symbols available on all platforms unless
 :          'e' or 'm' are also specified;
@@ -335,6 +339,7 @@
 :        for example. Some functions have to be accessible everywhere even if
 :        they are not intended for public use. An example is helper functions
 :        that are called from inline ones that are publicly available.
+:        Requires one of /[iIpS]/ flags.
 :
 :        * add entry to the list of symbols available on all platforms unless e
 :          or m are also specified;
@@ -1204,7 +1209,7 @@ Cip	|I32	|foldEQ_latin1	|NN const char *a			\
 Adip	|I32	|foldEQ_locale	|NN const char *a			\
 				|NN const char *b			\
 				|I32 len
-Adm	|I32	|foldEQ_utf8	|NN const char *s1			\
+Admp	|I32	|foldEQ_utf8	|NN const char *s1			\
 				|NULLOK char **pe1			\
 				|UV l1					\
 				|bool u1				\
@@ -1342,11 +1347,11 @@ Adp	|GV *	|gv_fetchfile_flags					\
 				|NN const char * const name		\
 				|const STRLEN len			\
 				|const U32 flags
-Adm	|GV *	|gv_fetchmeth	|NULLOK NOCHECK HV *stash		\
+Admp	|GV *	|gv_fetchmeth	|NULLOK NOCHECK HV *stash		\
 				|NN const char *name			\
 				|STRLEN len				\
 				|I32 level
-Adm	|GV *	|gv_fetchmeth_autoload					\
+Admp	|GV *	|gv_fetchmeth_autoload					\
 				|NULLOK NOCHECK HV *stash		\
 				|NN const char *name			\
 				|STRLEN len				\
@@ -1422,7 +1427,7 @@ Adp	|void	|gv_fullname4	|NN SV *sv				\
 CRdp	|CV *	|gv_handler	|NULLOK HV *stash			\
 				|I32 id
 Admp	|GV *	|gv_HVadd	|NULLOK GV *gv
-Adm	|void	|gv_init	|NN GV *gv				\
+Admp	|void	|gv_init	|NN GV *gv				\
 				|NULLOK HV *stash			\
 				|NN const char *name			\
 				|STRLEN len				\
@@ -1578,19 +1583,19 @@ Ampx	|SV **	|hv_store_flags |NULLOK HV *hv				\
 				|NULLOK SV *val 			\
 				|U32 hash				\
 				|int flags
-Adm	|SV **	|hv_stores	|NULLOK HV *hv				\
+Admp	|SV **	|hv_stores	|NULLOK HV *hv				\
 				|"key"					\
 				|NULLOK SV *val
-Adm	|void	|hv_undef	|NULLOK HV *hv
+Admp	|void	|hv_undef	|NULLOK HV *hv
 Xop	|void	|hv_undef_flags |NULLOK HV *hv				\
 				|U32 flags
-APdm	|I32	|ibcmp		|NN const char *a			\
+APdmp	|I32	|ibcmp		|NN const char *a			\
 				|NN const char *b			\
 				|I32 len
-APdm	|I32	|ibcmp_locale	|NN const char *a			\
+APdmp	|I32	|ibcmp_locale	|NN const char *a			\
 				|NN const char *b			\
 				|I32 len
-Adm	|I32	|ibcmp_utf8	|NN const char *s1			\
+Admp	|I32	|ibcmp_utf8	|NN const char *s1			\
 				|NULLOK char **pe1			\
 				|UV l1					\
 				|bool u1				\
@@ -1637,10 +1642,10 @@ p	|bool	|io_close	|NN IO *io				\
 ARTdip	|Size_t |isC9_STRICT_UTF8_CHAR					\
 				|NN const U8 * const s0 		\
 				|NN const U8 * const e
-ARTdm	|bool	|is_c9strict_utf8_string				\
+ARTdmp	|bool	|is_c9strict_utf8_string				\
 				|NN const U8 *s 			\
 				|STRLEN len
-ATdm	|bool	|is_c9strict_utf8_string_loc				\
+ATdmp	|bool	|is_c9strict_utf8_string_loc				\
 				|NN const U8 *s 			\
 				|STRLEN len				\
 				|NN const U8 **ep
@@ -1664,10 +1669,10 @@ ARdip	|bool	|is_safe_syscall|NN const char *pv			\
 ARTdip	|Size_t |isSTRICT_UTF8_CHAR					\
 				|NN const U8 * const s0 		\
 				|NN const U8 * const e
-ARTdm	|bool	|is_strict_utf8_string					\
+ARTdmp	|bool	|is_strict_utf8_string					\
 				|NN const U8 *s 			\
 				|STRLEN len
-ATdm	|bool	|is_strict_utf8_string_loc				\
+ATdmp	|bool	|is_strict_utf8_string_loc				\
 				|NN const U8 *s 			\
 				|STRLEN len				\
 				|NN const U8 **ep
@@ -1699,11 +1704,11 @@ CPRTp	|Size_t |is_utf8_FF_helper_					\
 				|NN const U8 * const s0 		\
 				|NN const U8 * const e			\
 				|const bool require_partial
-ATdm	|bool	|is_utf8_fixed_width_buf_flags				\
+ATdmp	|bool	|is_utf8_fixed_width_buf_flags				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|const U32 flags
-ATdm	|bool	|is_utf8_fixed_width_buf_loc_flags			\
+ATdmp	|bool	|is_utf8_fixed_width_buf_loc_flags			\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep			\
@@ -1727,7 +1732,7 @@ CRp	|bool	|_is_utf8_perl_idcont					\
 CRp	|bool	|_is_utf8_perl_idstart					\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
-ARTdm	|bool	|is_utf8_string |NN const U8 *s 			\
+ARTdmp	|bool	|is_utf8_string |NN const U8 *s 			\
 				|STRLEN len
 ARTdip	|bool	|is_utf8_string_flags					\
 				|NN const U8 *s 			\
@@ -1737,7 +1742,7 @@ ATdmp	|bool	|is_utf8_string_loc					\
 				|NN const U8 *s 			\
 				|const STRLEN len			\
 				|NN const U8 **ep
-ATdm	|bool	|is_utf8_string_loc_flags				\
+ATdmp	|bool	|is_utf8_string_loc_flags				\
 				|NN const U8 *s 			\
 				|STRLEN len				\
 				|NN const U8 **ep			\
@@ -1753,7 +1758,7 @@ ATdip	|bool	|is_utf8_string_loclen_flags				\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
-APTdm	|bool	|is_utf8_valid_partial_char				\
+APTdmp	|bool	|is_utf8_valid_partial_char				\
 				|NN const U8 * const s0 		\
 				|NN const U8 * const e
 ARTdip	|bool	|is_utf8_valid_partial_char_flags			\
@@ -2145,7 +2150,7 @@ ARdp	|OP *	|newASSIGNOP	|I32 flags				\
 				|NULLOK OP *left			\
 				|I32 optype				\
 				|NULLOK OP *right
-Adm	|CV *	|newATTRSUB	|I32 floor				\
+Admp	|CV *	|newATTRSUB	|I32 floor				\
 				|NULLOK OP *o				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *attrs			\
@@ -2157,11 +2162,11 @@ Xdp	|CV *	|newATTRSUB_x	|I32 floor				\
 				|NULLOK OP *block			\
 				|bool o_is_gv
 ARdmp	|AV *	|newAV
-ARdm	|AV *	|newAV_alloc_x	|SSize_t size
-ARdm	|AV *	|newAV_alloc_xz |SSize_t size
+ARdmp	|AV *	|newAV_alloc_x	|SSize_t size
+ARdmp	|AV *	|newAV_alloc_xz |SSize_t size
 ARdp	|AV *	|newAVav	|NULLOK AV *oav
 ARdp	|AV *	|newAVhv	|NULLOK HV *ohv
-ARdm	|AV *	|newAV_mortal
+ARdmp	|AV *	|newAV_mortal
 ARdp	|OP *	|newAVREF	|NN OP *o
 ARdp	|OP *	|newBINOP	|I32 type				\
 				|I32 flags				\
@@ -2198,7 +2203,7 @@ ARdp	|OP *	|newGIVENOP	|NN OP *cond				\
 				|PADOFFSET defsv_off
 : Used in scope.c
 eopx	|GP *	|newGP		|NN GV * const gv
-Adm	|GV *	|newGVgen	|NN const char *pack
+Admp	|GV *	|newGVgen	|NN const char *pack
 ARdp	|GV *	|newGVgen_flags |NN const char *pack			\
 				|U32 flags
 ARdp	|OP *	|newGVOP	|I32 type				\
@@ -2317,7 +2322,7 @@ Adp	|SV *	|newSVrv	|NN SV * const rv			\
 ARdmp	|SV *	|newSVsv	|NULLOK SV * const old
 ARdp	|SV *	|newSVsv_flags	|NULLOK SV * const old			\
 				|I32 flags
-ARdm	|SV *	|newSVsv_nomg	|NULLOK SV * const old
+ARdmp	|SV *	|newSVsv_nomg	|NULLOK SV * const old
 ARdp	|SV *	|newSV_true
 ARdip	|SV *	|newSV_type	|const svtype type
 AIRdp	|SV *	|newSV_type_mortal					\
@@ -2409,7 +2414,7 @@ Adfp	|void	|opdump_printf	|NN struct Perl_OpDumpContext *ctx	\
 Adp	|OP *	|op_force_list	|NULLOK OP *o
 Adp	|void	|op_free	|NULLOK OP *arg
 Adp	|OP *	|op_linklist	|NN OP *o
-Admx	|OP *	|op_lvalue	|NULLOK OP *o				\
+Admpx	|OP *	|op_lvalue	|NULLOK OP *o				\
 				|I32 type
 Xop	|OP *	|op_lvalue_flags|NULLOK OP *o				\
 				|I32 type				\
@@ -2563,7 +2568,7 @@ CTp	|Signal_t|perly_sighandler					\
 				|NULLOK void *uap			\
 				|bool safe
 
-Adm	|const char * const|phase_name					\
+Admp	|const char * const|phase_name					\
 				|enum perl_phase
 Adp	|void	|pmop_dump	|NULLOK PMOP *pm
 : Used in perly.y
@@ -2797,9 +2802,9 @@ p	|void	|report_wrongway_fh					\
 AOdp	|void	|require_pv	|NN const char *pv
 Cop	|void	|resume_compcv	|NN struct suspended_compcv *buffer	\
 				|bool save
-Adm	|void	|resume_compcv_and_save 				\
+Admp	|void	|resume_compcv_and_save 				\
 				|NN struct suspended_compcv *buffer
-Adm	|void	|resume_compcv_final					\
+Admp	|void	|resume_compcv_final					\
 				|NN struct suspended_compcv *buffer
 APTdp	|char * |rninstr	|NN const char *big			\
 				|NN const char *bigend			\
@@ -2891,7 +2896,7 @@ ARTdp	|Malloc_t|safesysrealloc|Malloc_t where 			\
 				|MEM_SIZE nbytes
 Cdp	|void	|save_adelete	|NN AV *av				\
 				|SSize_t key
-Adm	|void	|save_aelem	|NN AV *av				\
+Admp	|void	|save_aelem	|NN AV *av				\
 				|SSize_t idx				\
 				|NN SV **sptr
 Adp	|void	|save_aelem_flags					\
@@ -2927,7 +2932,7 @@ Adp	|void	|save_gp	|NN GV *gv				\
 Adhp	|HV *	|save_hash	|NN GV *gv
 Cdp	|void	|save_hdelete	|NN HV *hv				\
 				|NN SV *keysv
-Adm	|void	|save_helem	|NN HV *hv				\
+Admp	|void	|save_helem	|NN HV *hv				\
 				|NN SV *key				\
 				|NN SV **sptr
 Adp	|void	|save_helem_flags					\
@@ -3157,7 +3162,7 @@ Admp	|void	|sv_copypv	|NN SV * const dsv			\
 Adp	|void	|sv_copypv_flags|NN SV * const dsv			\
 				|NN SV * const ssv			\
 				|const I32 flags
-Adm	|void	|sv_copypv_nomg |NN SV * const dsv			\
+Admp	|void	|sv_copypv_nomg |NN SV * const dsv			\
 				|NN SV * const ssv
 Adp	|CV *	|sv_2cv 	|NULLOK SV *sv				\
 				|NN HV ** const st			\
@@ -3278,7 +3283,7 @@ Cdp	|SV *	|sv_newref	|NULLOK SV * const sv
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 : Used in pp.c, pp_hot.c, sv.c
 dpx	|SV *	|sv_2num	|NN SV * const sv
-Adm	|bool	|sv_numeq	|NULLOK SV *sv1 			\
+Admp	|bool	|sv_numeq	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|bool	|sv_numeq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
@@ -3360,7 +3365,7 @@ AMdip	|void	|SvREFCNT_dec	|NULLOK SV *sv
 AMdip	|void	|SvREFCNT_dec_NN|NN SV *sv
 Adip	|SV *	|SvREFCNT_dec_ret_NULL					\
 				|NULLOK SV *sv
-Adm	|void	|SvREFCNT_dec_set_NULL					\
+Admp	|void	|SvREFCNT_dec_set_NULL					\
 				|NULLOK SV *sv
 AMTdip	|SV *	|SvREFCNT_inc	|NULLOK SV *sv
 AMTdip	|SV *	|SvREFCNT_inc_NN|NN SV *sv
@@ -3466,7 +3471,7 @@ Adp	|void	|sv_setuv	|NN SV * const sv			\
 				|const UV num
 Adp	|void	|sv_setuv_mg	|NN SV * const sv			\
 				|const UV u
-Adm	|bool	|sv_streq	|NULLOK SV *sv1 			\
+Admp	|bool	|sv_streq	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|bool	|sv_streq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
@@ -3526,19 +3531,19 @@ Adp	|bool	|sv_utf8_downgrade_flags				\
 				|NN SV * const sv			\
 				|const bool fail_ok			\
 				|const U32 flags
-Adm	|bool	|sv_utf8_downgrade_nomg 				\
+Admp	|bool	|sv_utf8_downgrade_nomg 				\
 				|NN SV * const sv			\
 				|const bool fail_ok
 Adp	|void	|sv_utf8_encode |NN SV * const sv
 Admp	|STRLEN |sv_utf8_upgrade|NN SV *sv
-Adm	|STRLEN |sv_utf8_upgrade_flags					\
+Admp	|STRLEN |sv_utf8_upgrade_flags					\
 				|NN SV * const sv			\
 				|const I32 flags
 Adp	|STRLEN |sv_utf8_upgrade_flags_grow				\
 				|NN SV * const sv			\
 				|const I32 flags			\
 				|STRLEN extra
-Adm	|STRLEN |sv_utf8_upgrade_nomg					\
+Admp	|STRLEN |sv_utf8_upgrade_nomg					\
 				|NN SV *sv
 Adip	|UV	|SvUV		|NN SV *sv
 Cmp	|UV	|sv_2uv 	|NN SV *sv
@@ -3606,7 +3611,7 @@ Fpv	|OP *	|tied_method	|NN SV *methname			\
 				|...
 Xp	|SSize_t|tmps_grow_p	|SSize_t ix
 Xiop	|Stack_off_t|TOPMARK
-Cm	|UV	|to_uni_fold	|UV c					\
+Cmp	|UV	|to_uni_fold	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
 Cp	|UV	|_to_uni_fold_flags					\
@@ -3814,13 +3819,13 @@ p	|void	|utilize	|int aver				\
 				|NN OP *idop				\
 				|NULLOK OP *arg
 
-Adm	|U8 *	|uvchr_to_utf8	|NN U8 *d				\
+Admp	|U8 *	|uvchr_to_utf8	|NN U8 *d				\
 				|UV uv
-Adm	|U8 *	|uvchr_to_utf8_flags					\
+Admp	|U8 *	|uvchr_to_utf8_flags					\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags
-Adm	|U8 *	|uvchr_to_utf8_flags_msgs				\
+Admp	|U8 *	|uvchr_to_utf8_flags_msgs				\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags				\
@@ -3911,7 +3916,7 @@ Adp	|void	|warn_sv	|NN SV *baseex
 RXop	|I32	|was_lvalue_sub
 : FIXME
 p	|void	|watch		|NN char **addr
-Adm	|I32	|whichsig	|NN const char *sig
+Admp	|I32	|whichsig	|NN const char *sig
 Adp	|I32	|whichsig_pv	|NN const char *sig
 Adp	|I32	|whichsig_pvn	|NN const char *sig			\
 				|STRLEN len
@@ -6373,7 +6378,7 @@ p	|void	|op_relocate_sv |NN SV **svp				\
 				|NN PADOFFSET *targp
 # endif
 #else /* if !defined(USE_ITHREADS) */
-Adm	|void	|CopFILEGV_set	|NN COP *c				\
+Admp	|void	|CopFILEGV_set	|NN COP *c				\
 				|NN GV *gv
 #endif
 #if defined(USE_LOCALE_COLLATE)
