@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20250627';
+our $VERSION = '5.20250702';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -23439,8 +23439,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'ExtUtils::CBuilder::Platform::darwin'=> '0.280242',
             'ExtUtils::CBuilder::Platform::dec_osf'=> '0.280242',
             'ExtUtils::CBuilder::Platform::os2'=> '0.280242',
-            'Module::CoreList'      => '5.20250627',
-            'Module::CoreList::Utils'=> '5.20250627',
+            'Module::CoreList'      => '5.20250702',
+            'Module::CoreList::Utils'=> '5.20250702',
             'feature'               => '1.97',
             'perlfaq'               => '5.20250619',
         },
