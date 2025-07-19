@@ -3337,7 +3337,7 @@ Adp	|char * |sv_pvn_force_flags					\
 CRdmp	|char * |sv_2pv_nolen	|NN SV *sv
 Admp	|char * |sv_2pvutf8	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
-CMRbdp	|char * |sv_pvutf8	|NN SV *sv
+CRdmp	|char * |sv_pvutf8	|NN SV *sv
 Adp	|char * |sv_2pvutf8_flags					\
 				|NN SV *sv				\
 				|NULLOK STRLEN * const lp		\

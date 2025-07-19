@@ -119,15 +119,6 @@ Perl_sv_pvbyte(pTHX_ SV *sv)
     return sv_pv(sv);
 }
 
-char *
-Perl_sv_pvutf8(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_PVUTF8;
-
-    sv_utf8_upgrade(sv);
-    return sv_pv(sv);
-}
-
 #if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
 /*
  * This hack is to force load of "huge" support from libm.a
