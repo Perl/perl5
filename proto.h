@@ -5225,6 +5225,9 @@ Perl_sv_utf8_encode(pTHX_ SV * const sv);
         assert(sv)
 
 /* PERL_CALLCONV STRLEN
+Perl_sv_utf8_upgrade(pTHX_ SV *sv); */
+
+/* PERL_CALLCONV STRLEN
 sv_utf8_upgrade_flags(pTHX_ SV * const sv, const I32 flags); */
 
 PERL_CALLCONV STRLEN
@@ -6021,11 +6024,6 @@ PERL_CALLCONV char *
 Perl_sv_pvutf8(pTHX_ SV *sv)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SV_PVUTF8             \
-        assert(sv)
-
-PERL_CALLCONV STRLEN
-Perl_sv_utf8_upgrade(pTHX_ SV *sv);
-# define PERL_ARGS_ASSERT_SV_UTF8_UPGRADE       \
         assert(sv)
 
 PERL_CALLCONV UV

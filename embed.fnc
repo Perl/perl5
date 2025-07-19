@@ -3532,7 +3532,7 @@ Adm	|bool	|sv_utf8_downgrade_nomg 				\
 				|NN SV * const sv			\
 				|const bool fail_ok
 Adp	|void	|sv_utf8_encode |NN SV * const sv
-AMbdp	|STRLEN |sv_utf8_upgrade|NN SV *sv
+Admp	|STRLEN |sv_utf8_upgrade|NN SV *sv
 Adm	|STRLEN |sv_utf8_upgrade_flags					\
 				|NN SV * const sv			\
 				|const I32 flags
