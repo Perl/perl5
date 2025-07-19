@@ -181,15 +181,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
     PERL_UNUSED_ARG(sv);
 }
 
-HV *
-Perl_newHV(pTHX)
-{
-    HV * const hv = MUTABLE_HV(newSV_type(SVt_PVHV));
-    assert(!SvOK(hv));
-
-    return hv;
-}
-
 /*
 =for apidoc_section $unicode
 =for apidoc utf8_to_uvuni
