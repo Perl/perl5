@@ -116,7 +116,7 @@
 : The 'E' flag is used instead for a function and its short name that is
 :         supposed to be used only in the core plus extensions compiled with
 :         the PERL_EXT symbol defined.  Again, on some platforms, the function
-:         will be visible everywhere, so one of the 'p' or 'S' flags is
+:         will be visible everywhere, so one of the /[iIpS]/ flags are
 :         generally needed.  Also note that an XS writer can always cheat and
 :         pretend to be an extension by #defining PERL_EXT.
 :
@@ -365,7 +365,7 @@
 :         into               "#if defined(PERL_CORE) || defined(PERL_EXT)"
 :
 :        To be usable from dynamically loaded extensions, either:
-:        1) it must be static to its containing file ('i' or 'S' flag); or
+:        1) it must be static to its containing file (/[iIS]/ flags); or
 :        2) be combined with the 'X' flag.
 :
 :   'e'  Not exported
