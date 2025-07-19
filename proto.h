@@ -4903,6 +4903,10 @@ Perl_sv_pvn_force_flags(pTHX_ SV * const sv, STRLEN * const lp, const U32 flags)
 #define PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS     \
         assert(sv)
 
+/* PERL_CALLCONV char *
+Perl_sv_pvutf8(pTHX_ SV *sv)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV char *
 Perl_sv_pvutf8n_force(pTHX_ SV * const sv, STRLEN * const lp);
 #define PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE       \
@@ -6018,12 +6022,6 @@ PERL_CALLCONV char *
 Perl_sv_pv(pTHX_ SV *sv)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SV_PV                 \
-        assert(sv)
-
-PERL_CALLCONV char *
-Perl_sv_pvutf8(pTHX_ SV *sv)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_SV_PVUTF8             \
         assert(sv)
 
 PERL_CALLCONV UV
