@@ -297,12 +297,6 @@ Perl_newHV(pTHX)
     return hv;
 }
 
-SV *
-Perl_sv_mortalcopy(pTHX_ SV *const oldsv)
-{
-    return Perl_sv_mortalcopy_flags(aTHX_ oldsv, SV_GMAGIC);
-}
-
 /*
 =for apidoc_section $unicode
 =for apidoc utf8_to_uvuni
