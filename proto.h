@@ -2902,6 +2902,10 @@ Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 #define PERL_ARGS_ASSERT_NEWGVGEN_FLAGS         \
         assert(pack)
 
+/* PERL_CALLCONV HV *
+Perl_newHV(pTHX)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV OP *
 Perl_newHVREF(pTHX_ OP *o)
         __attribute__warn_unused_result__;
@@ -6003,11 +6007,6 @@ Perl_malloced_size(void *p)
 
 #endif /* defined(MYMALLOC) */
 #if !defined(NO_MATHOMS)
-PERL_CALLCONV HV *
-Perl_newHV(pTHX)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_NEWHV
-
 PERL_CALLCONV void
 Perl_sv_nolocking(pTHX_ SV *sv)
         __attribute__deprecated__;

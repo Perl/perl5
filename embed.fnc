@@ -2205,7 +2205,7 @@ ARdp	|OP *	|newGVOP	|I32 type				\
 				|NN GV *gv
 ARdp	|OP *	|newGVREF	|I32 type				\
 				|NULLOK OP *o
-AMRbdp	|HV *	|newHV
+ARdmp	|HV *	|newHV
 ARdp	|HV *	|newHVhv	|NULLOK HV *hv
 ARdp	|OP *	|newHVREF	|NN OP *o
 ARdmp	|IO *	|newIO
