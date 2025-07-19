@@ -82,43 +82,6 @@ Perl_ref(pTHX_ OP *o, I32 type)
     return doref(o, type, TRUE);
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_pv
-
-Use the C<SvPV_nolen> macro instead
-
-=cut
-*/
-
-/* sv_pv() is now a macro using SvPV_nolen();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pv(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_PV;
-
-    if (SvPOK(sv))
-        return SvPVX(sv);
-
-    return sv_2pv(sv, NULL);
-}
-
-/* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvbyte(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SV_PVBYTE;
-
-    (void)sv_utf8_downgrade(sv, FALSE);
-    return sv_pv(sv);
-}
-
 #if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
 /*
  * This hack is to force load of "huge" support from libm.a
