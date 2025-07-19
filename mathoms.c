@@ -82,18 +82,6 @@ Perl_ref(pTHX_ OP *o, I32 type)
     return doref(o, type, TRUE);
 }
 
-/* sv_setsv() is now a macro using Perl_sv_setsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv)
-{
-    PERL_ARGS_ASSERT_SV_SETSV;
-
-    sv_setsv_flags(dsv, ssv, SV_GMAGIC);
-}
-
 /*
 =for apidoc_section $SV
 =for apidoc sv_pv
