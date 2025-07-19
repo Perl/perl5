@@ -4363,7 +4363,7 @@ m	|void	|_invlist_subtract					\
 				|NN SV * const a			\
 				|NN SV * const b			\
 				|NN SV **result
-Cm	|void	|_invlist_union |NULLOK SV * const a			\
+m	|void	|_invlist_union |NULLOK SV * const a			\
 				|NN SV * const b			\
 				|NN SV **output
 EXp	|void	|_invlist_union_maybe_complement_2nd			\
