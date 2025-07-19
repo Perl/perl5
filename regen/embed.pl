@@ -122,7 +122,7 @@ sub generate_proto_h {
         my $inner_ind= $ind ? "  " : " ";
 
         my ($flags,$retval,$plain_func,$args) = @{$embed}{qw(flags return_type name args)};
-        if ($flags =~ / ( [^AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /x) {
+        if ($flags =~ / ( [^ AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
         my @nonnull;
