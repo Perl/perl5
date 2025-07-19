@@ -2325,6 +2325,7 @@
 #   define Perl_sv_usepvn(mTHX,a,b,c)           sv_usepvn(a,b,c)
 #   define Perl_sv_usepvn_mg(mTHX,a,b,c)        sv_usepvn_mg(a,b,c)
 #   define Perl_sv_utf8_downgrade(mTHX,a,b)     sv_utf8_downgrade(a,b)
+#   define Perl_sv_utf8_upgrade(mTHX,a)         sv_utf8_upgrade(a)
 #   define Perl_uv_to_utf8_msgs(mTHX,a,b,c,d)   uv_to_utf8_msgs(a,b,c,d)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
@@ -2384,6 +2385,7 @@
 #   define Perl_sv_usepvn                       sv_usepvn
 #   define Perl_sv_usepvn_mg                    sv_usepvn_mg
 #   define Perl_sv_utf8_downgrade               sv_utf8_downgrade
+#   define Perl_sv_utf8_upgrade                 sv_utf8_upgrade
 #   define Perl_uv_to_utf8_msgs                 uv_to_utf8_msgs
 #   if defined(PERL_DONT_CREATE_GVSV)
 #     define Perl_gv_SVadd                      gv_SVadd
