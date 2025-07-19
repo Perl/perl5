@@ -3268,7 +3268,7 @@ Adp	|MAGIC *|sv_magicext	|NN SV * const sv			\
 EXp	|MAGIC *|sv_magicext_mglob					\
 				|NN SV *sv
 Adp	|SV *	|sv_2mortal	|NULLOK SV * const sv
-AMRbdp	|SV *	|sv_mortalcopy	|NULLOK SV * const oldsv
+ARdmp	|SV *	|sv_mortalcopy	|NULLOK SV * const oldsv
 ARdp	|SV *	|sv_mortalcopy_flags					\
 				|NULLOK SV * const oldsv		\
 				|U32 flags

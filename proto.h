@@ -4818,6 +4818,10 @@ Perl_sv_magicext_mglob(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_MAGICEXT_MGLOB      \
         assert(sv)
 
+/* PERL_CALLCONV SV *
+Perl_sv_mortalcopy(pTHX_ SV * const oldsv)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV SV *
 Perl_sv_mortalcopy_flags(pTHX_ SV * const oldsv, U32 flags)
         __attribute__warn_unused_result__;
@@ -6000,11 +6004,6 @@ PERL_CALLCONV HV *
 Perl_newHV(pTHX)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_NEWHV
-
-PERL_CALLCONV SV *
-Perl_sv_mortalcopy(pTHX_ SV * const oldsv)
-        __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_SV_MORTALCOPY
 
 PERL_CALLCONV void
 Perl_sv_nolocking(pTHX_ SV *sv)
