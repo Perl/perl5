@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.035';
+$experimental::VERSION = '0.036';
 use strict;
 use warnings;
 use version ();
@@ -24,6 +24,7 @@ my %min_version = (
 	autoderef       => '5.14.0',
 	bitwise         => '5.22.0',
 	builtin         => '5.35.7',
+	class           => '5.37.9',
 	const_attr      => '5.22.0',
 	current_sub     => '5.16.0',
 	declared_refs   => '5.26.0',
@@ -33,6 +34,8 @@ my %min_version = (
 	fc              => '5.16.0',
 	for_list        => '5.35.5',
 	isa             => '5.31.7',
+	keyword_all     => '5.41.7',
+	keyword_any     => '5.41.7',
 	lexical_topic   => '5.10.0',
 	lexical_subs    => '5.18.0',
 	postderef       => '5.20.0',
@@ -142,7 +145,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.035
+version 0.036
 
 =head1 SYNOPSIS
 
@@ -199,6 +202,10 @@ This was added in perl 5.36.0
 
 This was added in perl 5.22.0.
 
+=item * C<class> - enables the C<class>, C<field>, and C<method> syntax
+
+This was added in perl 5.38.0.
+
 =item * C<declared_refs> - enables aliasing via assignment to references
 
 This was added in perl 5.26.0.
@@ -219,6 +226,14 @@ This was added in perl 5.36.0
 =item * C<isa> - allow the use of the C<isa> infix operator
 
 This was added in perl 5.32.0.
+
+=item * C<keyword_all> - enables the C<all> operator
+
+This was added in perl 5.42.0.
+
+=item * C<keyword_any> - enables the C<any> operator
+
+This was added in perl 5.42.0.
 
 =item * C<lexical_topic> - allow the use of lexical C<$_> via C<my $_>.
 

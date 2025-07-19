@@ -1,5 +1,5 @@
 package stable;
-$stable::VERSION = '0.035';
+$stable::VERSION = '0.036';
 use strict;
 use warnings;
 use version ();
@@ -55,7 +55,7 @@ stable - Experimental features made easy, once we know they're stable
 
 =head1 VERSION
 
-version 0.035
+version 0.036
 
 =head1 SYNOPSIS
 
