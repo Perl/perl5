@@ -14974,18 +14974,18 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 
 In spite of their generic names, these are very specialized functions mainly
 for use when cloning an interpreter instance.  You are probably looking for
-L<perlapi/newSVsv>.
+L<perlapi/newSVsv>. Generally speaking you will only want to use these in
+either a C<svt_dup> magic handler, or a C<CLONE> method.
 
 They duplicate an SV of any type (not just a plain SV, but including AV, HV
-I<etc>.), returning a pointer to the cloned object.  The difference is that the
-new SV under C<sv_dup> has a reference count of 0, but 1 under C<sv_dup_inc>.
-Only specialized cases will want a zero reference count, almost certainly only
-when you aren't already holding a reference.  Thus, you almost always want to
-use the C<sv_dup_inc> form.
+I<etc>.), returning a pointer to the cloned object. The cloning process uses a
+lookup table, so that if a particular source SV address has already been duped,
+that duped SV is returned rather than creating a second duplicate.
 
-The cloning process uses a cache, so that if a particular SV address has
-already been duped, that duped SV is returned again rather than creating a
-second duplicate.
+The difference is that the new SV under C<sv_dup> will not have its reference count incremented
+(potentially causing it to be zero), unlike under C<sv_dup_inc>. This is only
+desirable when cloning a non-owning pointer. Thus, you almost always want to use
+the C<sv_dup_inc> form.
 
 C<param> has type S<C<CLONE_PARAMS *>>.  This is mostly for internal core use
 when duplicating something more complicated than an SV (code in common is
