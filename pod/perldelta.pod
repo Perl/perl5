@@ -14,11 +14,19 @@ L<perl5402delta>, which describes differences between 5.40.1 and 5.40.2.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-Selected Bug Fixes section.
+=head2 [CVE-2025-40909] Perl threads have a working directory race condition where file operations may target unintended paths
 
-[ List each security issue as a =head2 entry ]
+Perl thread cloning had a working directory race condition where file
+operations may target unintended paths.  Perl 5.42 will no longer chdir to each
+handle.
+
+This problem was discovered by Vincent Lefèvre via
+[L<GH #23010|https://github.com/Perl/perl5/issues/23010>] and assigned
+[L<CVE-2025-40909|https://lists.security.metacpan.org/cve-announce/msg/30017499/>]
+by the L<CPAN Security Group|https://security.metacpan.org/>.
+
+Fixes were provided via [L<GH #23019|https://github.com/Perl/perl5/pull/23019>]
+and [L<GH #23361|https://github.com/Perl/perl5/pull/23361>].
 
 =head1 Incompatible Changes
 
