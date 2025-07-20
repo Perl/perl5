@@ -105,30 +105,6 @@ S_new_msg_hv(pTHX_ const char * const message, /* The message text */
     return msg_hv;
 }
 
-/*
-=for apidoc uvoffuni_to_utf8_flags
-
-THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
-Instead, B<Almost all code should use L<perlapi/uv_to_utf8> or
-L<perlapi/uv_to_utf8_flags>>.
-
-This function is like them, but the input is a strict Unicode
-(as opposed to native) code point.  Only in very rare circumstances should code
-not be using the native code point.
-
-For details, see the description for L<perlapi/uv_to_utf8_flags>.
-
-=cut
-*/
-
-U8 *
-Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
-{
-    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
-
-    return uvoffuni_to_utf8_flags_msgs(d, uv, flags, NULL);
-}
-
 /* All these formats take a single UV code point argument */
 const char surrogate_cp_format[] = "UTF-16 surrogate U+%04" UVXf;
 const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf

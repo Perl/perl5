@@ -3856,7 +3856,7 @@ Admp	|U8 *	|uvchr_to_utf8_flags_msgs				\
 				|UV uv					\
 				|UV flags				\
 				|NULLOK HV **msgs
-CMdp	|U8 *	|uvoffuni_to_utf8_flags 				\
+Cdmp	|U8 *	|uvoffuni_to_utf8_flags 				\
 				|NN U8 *d				\
 				|UV uv					\
 				|UV flags

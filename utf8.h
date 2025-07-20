@@ -139,6 +139,21 @@ typedef enum {
 #define is_ascii_string(s, len)     is_utf8_invariant_string(s, len)
 #define is_invariant_string(s, len) is_utf8_invariant_string(s, len)
 
+/*
+=for apidoc uvoffuni_to_utf8_flags
+
+THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+Instead, B<Almost all code should use L<perlapi/uv_to_utf8> or
+L<perlapi/uv_to_utf8_flags>>.
+
+This function is like them, but the input is a strict Unicode
+(as opposed to native) code point.  Only in very rare circumstances should code
+not be using the native code point.
+
+For details, see the description for L<perlapi/uv_to_utf8_flags>.
+
+=cut
+*/
 #define uvoffuni_to_utf8_flags(d,uv,flags)                                     \
                                uvoffuni_to_utf8_flags_msgs(d, uv, flags, 0)
 

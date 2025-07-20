@@ -2372,6 +2372,7 @@
 #   define Perl_uvchr_to_utf8(mTHX,a,b)         uvchr_to_utf8(a,b)
 #   define Perl_uvchr_to_utf8_flags(mTHX,a,b,c) uvchr_to_utf8_flags(a,b,c)
 #   define Perl_uvchr_to_utf8_flags_msgs(mTHX,a,b,c,d) uvchr_to_utf8_flags_msgs(a,b,c,d)
+#   define Perl_uvoffuni_to_utf8_flags(mTHX,a,b,c) uvoffuni_to_utf8_flags(a,b,c)
 #   define Perl_whichsig(mTHX,a)                whichsig(a)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
@@ -2472,6 +2473,7 @@
 #   define Perl_uvchr_to_utf8                   uvchr_to_utf8
 #   define Perl_uvchr_to_utf8_flags             uvchr_to_utf8_flags
 #   define Perl_uvchr_to_utf8_flags_msgs        uvchr_to_utf8_flags_msgs
+#   define Perl_uvoffuni_to_utf8_flags          uvoffuni_to_utf8_flags
 #   define Perl_whichsig                        whichsig
 #   if defined(PERL_DONT_CREATE_GVSV)
 #     define Perl_gv_SVadd                      gv_SVadd
