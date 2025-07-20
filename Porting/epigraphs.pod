@@ -17,6 +17,17 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.34.1 - Ed Conway, "Material World"
+
+L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2025/07/msg270117.html>
+
+  The water from the brine is evaporated in enormous hot vessels,
+  which leave the salt about the same consistency as wet sand.
+  After a run through another oven, what emerges are glistening
+  pure crystals of salt. I run my hands through the grains as
+  they emerge, surprised for a moment by how hot they are to touch.
+    'This is ultra fine,' says Joe. 'It goes into Wotsits.'
+
 =head2 v5.42.0 - Douglas Adams, "The Hitchhiker's Guide to the Galaxy"
 
 L<Announced on 2025-07-03 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2025/07/msg270067.html>
