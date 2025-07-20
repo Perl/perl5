@@ -1,0 +1,199 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5431delta - what is new for perl v5.43.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.43.0 release and the 5.43.1
+release.
+
+If you are upgrading from an earlier release such as 5.42.0, first read
+L<perl5430delta>, which describes differences between 5.42.0 and 5.43.0.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<experimental> has been upgraded from version 0.035 to 0.036.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.57 to 3.58.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.57 to 3.58.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 1.04 to 1.08.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20250703 to 5.20250720.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.19 to 0.20.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.45 to 3.47.
+
+=item *
+
+L<Socket> has been upgraded from version 2.038 to 2.040.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.50 to 3.52.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302210 to 1.302214.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.81 to 0.82.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages. For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+This warning was issued in the reverse order (right-to-left) when both
+operands of a binary operator are uninitialized values.  This is now
+fixed to be consistent with evaluation order of operands.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The XS parser, L<ExtUtils::ParseXS>, has been extensively restructured
+internally. Most of these changes shouldn't be visible externally, but
+might affect XS code which was using invalid or unsupported syntax.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+When both operands of arithmetic operators (C<+>, C<->, etc.) are
+L<overload>ed objects which have no method for that operator but have
+a C<0+> method and the C<fallback> option set to TRUE,
+perl will normally call the C<0+> method for the left operand first
+and then call one for the right operand, i.e. in the same order
+with operand evaluation order.
+But if C<S<use integer;>> is in effect, the C<0+> methods used to be
+called in wrong (reverse) order.
+
+=back
+
+=head1 Obituary
+
+"WELL VOLUNTEERED!" echoed across conference rooms and IRC channels. Matt S. Trout's battle
+cry that transformed reluctant volunteers into community leaders.
+
+With profound sadness, we announce Matt's passing. Since the early 2000s, Matt
+shaped Perl through sheer force of will: IRC operator, PAUSE administrator,
+Shadowcat Systems co-founder, architect of DBIx::Class. His opinions came wrapped in
+profanity and delivered at maximum volume. He suffered no fools and grew to
+sometimes realize he should apologize. Yet this same abrasive exterior
+protected fierce dedication to mentoring, developers he harangued into
+volunteering now lead the community themselves. Matt's deliberately
+mind-bending code pushed Perl forward. Every modern Perl developer touches his
+legacy daily.
+
+Well volunteered, Matt. Rest in peace.
+
+=head1 Acknowledgements
+
+Perl 5.43.1 represents approximately 2 weeks of development since Perl
+5.43.0 and contains approximately 15,000 lines of changes across 410 files
+from 21 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 12,000 lines of changes to 360 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.43.1:
+
+Alexander Karelas, Chad Granum, Chris 'BinGOs' Williams, Chris Prather,
+Dagfinn Ilmari Mannsåker, Dan Book, Daniel Dragan, Daniel Laügt, Dave Cross,
+David Mitchell, James E Keenan, Karen Etheridge, Karl Williamson, Leon
+Timmermans, Paul Evans, Philippe Bruhat (BooK), Richard Leach, Štěpán Němec,
+TAKAI Kousuke, Thibault Duponchelle, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
