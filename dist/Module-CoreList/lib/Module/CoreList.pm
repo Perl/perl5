@@ -23469,7 +23469,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.043001 => {
-        delta_from => 5.043000,
+        delta_from => 5.043,
         changed => {
             'App::Prove'            => '3.52',
             'App::Prove::State'     => '3.52',
@@ -23519,6 +23519,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Pod::Simple::TranscodeSmart'=> '3.47',
             'Pod::Simple::XHTML'    => '3.47',
             'Pod::Simple::XMLOutStream'=> '3.47',
+            'Socket'                => '2.040',
             'TAP::Base'             => '3.52',
             'TAP::Formatter::Base'  => '3.52',
             'TAP::Formatter::Color' => '3.52',
@@ -23759,7 +23760,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Test::Tester::Delegate'=> '1.302214',
             'Test::use::ok'         => '1.302214',
             'Unicode::UCD'          => '0.82',
+            'experimental'          => '0.036',
             'ok'                    => '1.302214',
+            'stable'                => '0.036',
         },
         removed => {
         }
@@ -25418,7 +25421,7 @@ sub is_core
         }
     },
     5.043001 => {
-        delta_from => 5.043,
+        delta_from => 5.043000,
         changed => {
         },
         removed => {
