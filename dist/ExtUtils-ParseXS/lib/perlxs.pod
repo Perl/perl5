@@ -2180,90 +2180,173 @@ override the missing argument. For example:
     foo(int a, b, char *c)
         C_ARGS: a, c
 
-=head3 The IN/OUTLIST/IN_OUTLIST/OUT/IN_OUT Keywords
+=head3 Updating and returning parameter values: the IN_OUT etc keywords
 
-In the list of parameters for an XSUB, one can precede parameter names
-by the C<IN>/C<OUTLIST>/C<IN_OUTLIST>/C<OUT>/C<IN_OUT> keywords.
-C<IN> keyword is the default, the other keywords indicate how the Perl
-interface should differ from the C interface.
+               int i
+    IN         int i
+    IN_OUT     int i
+    IN_OUTLIST int i
+    OUT        int i
+    OUTLIST    int i
 
-Parameters preceded by C<OUTLIST>/C<IN_OUTLIST>/C<OUT>/C<IN_OUT>
-keywords are considered to be used by the C subroutine I<via
-pointers>.  C<OUTLIST>/C<OUT> keywords indicate that the C subroutine
-does not inspect the memory pointed by this parameter, but will write
-through this pointer to provide additional return values.
+Normally a parameter declaration causes a C auto variable of the same name
+to be declared and initialised to the value of the corresponding passed
+argument. These modifiers can make parameters also update or return
+values, and can also cause the initialisation to be skipped. They come at
+the start of a parameter declaration.
 
-Parameters preceded by C<OUTLIST> keyword do not appear in the usage
-signature of the generated Perl function.
+These modifiers address the issue that, because a simple C function takes
+a fixed number of I<read-only> parameters and returns a I<single> value,
+the basic XSUB syntax has been designed to reflect that pattern.
 
-Parameters preceded by C<IN_OUTLIST>/C<IN_OUT>/C<OUT> I<do> appear as
-parameters to the Perl function.  With the exception of
-C<OUT>-parameters, these parameters are converted to the corresponding
-C type, then pointers to these data are given as arguments to the C
-function.  It is expected that the C function will write through these
-pointers.
+The usual way to make a more complex C function API is to pass pointers to
+variables, which the C function will use to set or update the variables.
+For example, a couple of hypothetical C functions might be called as:
 
-The return list of the generated Perl function consists of the C return value
-from the function (unless the XSUB is of C<void> return type or
-C<NO_OUTPUT> was used) followed by all the C<OUTLIST>
-and C<IN_OUTLIST> parameters (in the order of appearance).  On the
-return from the XSUB the C<IN_OUT>/C<OUT> Perl parameter will be
-modified to have the values written by the C function.
+    int time = ....;      // an integer in the range 0..86399
+    int hour, min, sec;
+    parse_time(time, &hour, &min, &sec); // set    hour, min, sec
+    increment_time(&hour, &min, &sec);   // update hour, min, sec
 
-For example, an XSUB
+The XS C<IN_OUT> etc modifiers allow you to write XSUBs which can wrap
+such functions with autocall, and in general update passed arguments or
+return multiple values.
+
+The rules of these parameter modifiers are:
+
+=over
+
+=item *
+
+All such parameters, regardless of the modifier, cause a C auto variable
+of the same name to be declared.
+
+=item *
+
+In the absence of a modifier, it defaults to C<IN>.
+
+=item *
+
+The text of the modifier has up to two parts, separated by an underscore.
+The input part comes first and can have the value C<''> or C<IN>, while
+the output part can be one of C<''>, C<OUT>, or C<OUTLIST>.
+
+=item *
+
+An input part of C<IN> (the default) causes that variable to be
+initialised to the value of the corresponding passed argument. Otherwise
+the initialisation is skipped: in particular, this means that an autocall
+function will be passed a pointer to an uninitialised value: the
+assumption being that the library function will set, but not use, that
+value.
+
+=item *
+
+An output part of C<''> (the default) means nothing is done to return the
+value of the auto variable.
+
+=item *
+
+An output part of C<OUT> or C<OUTLIST> causes the value to be returned in
+some fashion, and in addition, any autocall code will prefix such
+variables with C<&> when calling the wrapped C library function.
+
+=item *
+
+An output part of C<OUT> causes the corresponding passed argument to be
+I<updated> with the value of the variable.
+
+=item *
+
+An output part of C<OUTLIST> causes the value of the variable to be
+returned as an extra SV after the C<RETVAL> value, if any. They are
+returned in the order they appear in the XSUB's parameter list.
+
+=item *
+
+For the specific case of the modifier being C<OUTLIST>, it is a
+pseudo-parameter, and I<no argument is consumed>. It doesn't form part of
+the signature of the XSUB, although it I<is> used for any autocall. So for
+example:
+
+    int
+    foo(int a, OUTLIST int b, int c)
+
+gets converted to roughly this C code:
+
+    if (items != 2)
+       croak_xs_usage(cv,  "a, c");
+    {
+        int RETVAL;
+        int a = (int)SvIV(ST(0));
+        int b;
+        int c = (int)SvIV(ST(1));
+        RETVAL = foo(a, &b, c);
+    }
+    ... push the values of RETVAL and b onto the stack and return ...
+
+=back
+
+The approximate perl equivalents for these modifiers are given in the
+examples below, where the perl code C<real_foo(\$i)> stands in for the C
+autocall C<foo(&i)>.
+
+
+       int i             sub foo {
+    IN int i                  my $i = $_[N];
+                              real_foo($i);
+                         }
+
+    IN_OUT int i         sub foo {
+                              my $i = $_[N];
+                              real_foo(\$i);
+                              $_[N] = $i;
+                         }
+
+    IN_OUTLIST int i     sub foo {
+                              my $i = $_[N];
+                              real_foo(\$i);
+                              return ..., $i, ...;
+                         }
+
+    OUT int i            sub foo {
+                              my $i;
+                              real_foo(\$i);
+                              $_[N] = $i;
+
+    OUTLIST int i        sub foo {
+                              my $i; # NB $_[N] is not consumed
+                              real_foo(\$i);
+                              return ..., $i, ...;
+                         }
+
+Together, they allow you to wrap C functions which use pointers to return
+extra values; either preserving the C-ish API in perl (C<OUT>), or
+providing a more Perl-like API (C<OUTLIST>). For example, wrapping the
+C<parse_time()> function from the example above could be done using
+C<OUT>:
 
     void
-    day_month(OUTLIST day, IN unix_time, OUTLIST month)
-        int day
-        int unix_time
-        int month
+    parse_time(int time, \
+               OUT int hour, OUT int min, OUT int sec)
 
-should be used from Perl as
+which could be called from perl as:
 
-    my ($day, $month) = day_month(time);
+    my ($hour, $min, $sec);
+    # set ($hour, $min, $sec) to (23,59,59):
+    parse_time(86399, $hour, $min, $sec);
 
-The C signature of the corresponding function should be
-
-    void day_month(int *day, int unix_time, int *month);
-
-The C<IN>/C<OUTLIST>/C<IN_OUTLIST>/C<IN_OUT>/C<OUT> keywords can be
-mixed with ANSI-style declarations, as in
+Or by using C<OUTLIST>:
 
     void
-    day_month(OUTLIST int day, int unix_time, OUTLIST int month)
+    parse_time(int time, \
+               OUTLIST int hour, OUTLIST int min, OUTLIST int sec)
 
-(here the optional C<IN> keyword is omitted).
+which could be called from perl as:
 
-The C<IN_OUT> parameters are identical with parameters introduced with
-L<The & Unary Operator> and put into the C<OUTPUT:> section (see
-L<The OUTPUT: Keyword>).  The C<IN_OUTLIST> parameters are very similar,
-the only difference being that the value C function writes through the
-pointer would not modify the Perl parameter, but is put in the output
-list.
+    # set ($hour, $min, $sec) to (23,59,59):
+    my ($hour, $min, $sec) = parse_time(86399);
 
-The C<OUTLIST>/C<OUT> parameter differ from C<IN_OUTLIST>/C<IN_OUT>
-parameters only by the initial value of the Perl parameter not
-being read (and not being given to the C function - which gets some
-garbage instead).  For example, the same C function as above can be
-interfaced with as
-
-    void day_month(OUT int day, int unix_time, OUT int month);
-
-or
-
-    void
-    day_month(day, unix_time, month)
-        int &day       = NO_INIT
-        int  unix_time
-        int &month     = NO_INIT
-      OUTPUT:
-        day
-        month
-
-However, the generated Perl function is called in very C-ish style:
-
-    my ($day, $month);
-    day_month($day, time, $month);
 
 =head3 Default Parameter Values
 
