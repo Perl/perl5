@@ -17,7 +17,7 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.34.1 - Ed Conway, "Material World"
+=head2 v5.43.1 - Ed Conway, "Material World"
 
 L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2025/07/msg270117.html>
 
