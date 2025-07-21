@@ -224,9 +224,11 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
     for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
         SV ** const tmp = av_fetch_simple( revcharmap, charid, 0);
         if ( tmp ) {
+            STRLEN n;
+            const char *s = SvPV_const(*tmp, n);
             Perl_re_printf( aTHX_  "%*s",
                 colwidth,
-                pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth,
+                pv_pretty(sv, s, n, colwidth,
                             PL_colors[0], PL_colors[1],
                             (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
                             PERL_PV_ESCAPE_FIRSTCHAR
