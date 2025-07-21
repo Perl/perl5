@@ -9652,6 +9652,33 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
     return o;
 }
 
+#define find_argop_from_entersub(op) S_find_argop_from_entersub(op)
+static OP *
+S_find_argop_from_entersub(OP *entersubop) {
+    assert(entersubop != NULL);
+
+    OP *aop = cUNOPx(entersubop)->op_first;
+    if (!OpHAS_SIBLING(aop)) {
+        aop = cUNOPx(aop)->op_first;
+    }
+    /* move past pushmark */
+    aop = OpSIBLING(aop);
+
+    return aop;
+}
+
+#define find_cvop_from_argop(op) S_find_cvop_from_argop(op)
+static OP *
+S_find_cvop_from_argop(OP *cvop)  {
+    assert(cvop != NULL);
+
+    /* CV is the last argument to entersub */
+    while (OpHAS_SIBLING(cvop)) {
+        cvop = OpSIBLING(cvop);
+    }
+    return cvop;
+}
+
 #define op_is_cv_xsub(o, xsub)  S_op_is_cv_xsub(aTHX_ o, xsub)
 static bool
 S_op_is_cv_xsub(pTHX_ OP *o, XSUBADDR_t xsub)
@@ -9693,13 +9720,8 @@ S_op_is_call_to_cv_xsub(pTHX_ OP *o, XSUBADDR_t xsub)
         return false;
 
     /* entersub may be a UNOP, not a LISTOP, so we can't just use op_last */
-    OP *aop = cUNOPo->op_first;
-    if (!OpHAS_SIBLING(aop)) {
-        aop = cUNOPx(aop)->op_first;
-    }
-    aop = OpSIBLING(aop);
-    OP *cvop;
-    for (cvop = aop; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop)) ;
+    OP *aop = find_argop_from_entersub(o);
+    OP *cvop = find_cvop_from_argop(aop);
 
     return op_is_cv_xsub(cvop, xsub);
 }
@@ -14723,10 +14745,7 @@ Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
 
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST;
 
-    aop = cUNOPx(entersubop)->op_first;
-    if (!OpHAS_SIBLING(aop))
-        aop = cUNOPx(aop)->op_first;
-    for (aop = OpSIBLING(aop); OpHAS_SIBLING(aop); aop = OpSIBLING(aop)) {
+    for (aop = find_argop_from_entersub(entersubop); OpHAS_SIBLING(aop); aop = OpSIBLING(aop)) {
         /* skip the extra attributes->import() call implicitly added in
          * something like foo(my $x : bar)
          */
@@ -14773,7 +14792,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
     STRLEN proto_len;
     const char *proto, *proto_end;
-    OP *aop, *prev, *cvop, *parent;
+    OP *aop, *prev, *parent;
     int optional = 0;
     I32 arg = 0;
     I32 contextclass = 0;
@@ -14795,7 +14814,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     }
     prev = aop;
     aop = OpSIBLING(aop);
-    for (cvop = aop; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop)) ;
+    OP *cvop = find_cvop_from_argop(aop);
     while (aop != cvop) {
         OP* o3 = aop;
 
@@ -15030,18 +15049,17 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop,
 OP *
 Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
+    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
+
     IV cvflags = SvIVX(protosv);
     int opnum = cvflags & 0xffff;
     OP *aop = cUNOPx(entersubop)->op_first;
 
-    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
-
     if (!opnum) {
-        OP *cvop;
         if (!OpHAS_SIBLING(aop))
             aop = cUNOPx(aop)->op_first;
         aop = OpSIBLING(aop);
-        for (cvop = aop; OpSIBLING(cvop); cvop = OpSIBLING(cvop)) ;
+        OP *cvop = find_cvop_from_argop(aop);
         if (aop != cvop) {
             SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
             yyerror_pv(form("Too many arguments for %" SVf,
@@ -15319,21 +15337,15 @@ S_entersub_alloc_targ(pTHX_ OP * const o)
 OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
-    OP *aop, *cvop;
-    CV *cv;
-    GV *namegv;
     SV **const_class = NULL;
     OP *const_op = NULL;
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
-    aop = cUNOPx(o)->op_first;
-    if (!OpHAS_SIBLING(aop))
-        aop = cUNOPx(aop)->op_first;
-    aop = OpSIBLING(aop);
-    for (cvop = aop; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop)) ;
-    cv = rv2cv_op_cv(cvop, RV2CVOPCV_MARK_EARLY);
-    namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_MAYBE_NAME_GV) : NULL;
+    OP *aop = find_argop_from_entersub(o);
+    OP *cvop = find_cvop_from_argop(aop);
+    CV *cv = rv2cv_op_cv(cvop, RV2CVOPCV_MARK_EARLY);
+    GV *namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_MAYBE_NAME_GV) : NULL;
 
     o->op_private &= ~1;
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
