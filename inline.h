@@ -61,6 +61,18 @@ Perl_av_count(pTHX_ AV *av)
     return AvFILL(av) + 1;
 }
 
+PERL_STATIC_INLINE SSize_t
+Perl_AvFILL_(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_AVFILL_;
+
+    if (SvRMAGICAL((const SV *) (av))) {
+        return mg_size((SV *) av);
+    }
+
+    return AvFILLp(av);
+}
+
 /* ------------------------------- av.c ------------------------------- */
 
 /*

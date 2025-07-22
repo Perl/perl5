@@ -707,6 +707,7 @@ ARdp	|SV **	|av_fetch	|NN AV *av				\
 CRdip	|SV **	|av_fetch_simple|NN AV *av				\
 				|SSize_t key				\
 				|I32 lval
+CRip	|SSize_t|AvFILL_	|NN AV *av
 Adp	|void	|av_fill	|NN AV *av				\
 				|SSize_t fill
 Cop	|IV *	|av_iter_p	|NN AV *av
