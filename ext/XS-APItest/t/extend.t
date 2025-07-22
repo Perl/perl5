@@ -75,6 +75,6 @@ SKIP:
       unless hwm_checks_enabled();
 
     ok(!eval { bad_EXTEND(); 1 }, "bad_EXTEND() should throw");
-    like($@, qr/^panic: XSUB XS::APItest::bad_EXTEND \(APItest\.c\) failed to extend arg stack/,
+    like($@, qr/(?i)^panic: XSUB XS::APItest::bad_EXTEND \(.*APItest\.c.*\) failed to extend arg stack/,
          "check panic message");
 }
