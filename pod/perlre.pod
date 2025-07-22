@@ -13,7 +13,7 @@ a quick-start introduction is available in L<perlrequick>.
 
 Except for L</The Basics> section, this page assumes you are familiar
 with regular expression basics, like what is a "pattern", what does it
-look like, and how it is basically used.  For a reference on how they
+look like, and how it basically is used.  For a reference on how they
 are used, plus various examples of the same, see discussions of C<m//>,
 C<s///>, C<qr//> and C<"??"> in L<perlop/"Regexp Quote-Like Operators">.
 
