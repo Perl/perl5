@@ -1687,6 +1687,23 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #  define PERL_STRLEN_EXPAND_SHIFT 2
 #endif
 
+/* "expected_size" is a functional stub for building on in the future.
+ * The intention is to pass it a number of bytes, prior to using that
+ * number in a call to something like malloc() or realloc(), and a best-
+ * guess at the size to be allocated will be returned. ("Best-guess"
+ * may vary by platform and malloc implementation.)
+ * This will be useful to (1) grow strings (or anything else) in a way
+ * that results in SvLEN more accurately reflecting the usable space
+ * that has been allocated, and (2) we don't try to shrink an
+ * allocation that won't actually shrink in practice.
+ * Right now, this macro just rounds up a given number to the nearest
+ * multiple of PTRSIZE, for a minimum of PERL_STRLEN_NEW_MIN. This is
+ * not entirely useless, just not terribly accurate.
+ */
+#define expected_size(n) ( ((n) > PERL_STRLEN_NEW_MIN)               \
+                            ? (((n) + PTRSIZE - 1) & ~(PTRSIZE - 1)) \
+                            : PERL_STRLEN_NEW_MIN )
+
 /* This use of offsetof() requires /Zc:offsetof- for VS2017 (and presumably
  * onwards) when building Socket.xs, but we can just use a different definition
  * for STRUCT_OFFSET instead. */

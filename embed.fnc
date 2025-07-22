@@ -1193,6 +1193,7 @@ AOdp	|SV *	|eval_pv	|NN const char *p			\
 				|I32 croak_on_error
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
+EMTpx	|Size_t |expected_size	|UV size
 ATdmp	|bool	|extended_utf8_to_uv					\
 				|NN const U8 * const s			\
 				|NN const U8 * const e			\
