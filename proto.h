@@ -20,6 +20,7 @@
  */
 
 START_EXTERN_C
+
 PERL_CALLCONV int
 Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing);
 #define PERL_ARGS_ASSERT_GV_AMUPDATE            \
@@ -9588,6 +9589,12 @@ Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name, Mallo
 
 #endif /* defined(PERL_MEM_LOG) */
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE SSize_t
+Perl_AvFILL_(pTHX_ AV *av)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_AVFILL_               \
+        assert(av); assert(SvTYPE(av) == SVt_PVAV)
+
 PERL_STATIC_INLINE I32 *
 Perl_CvDEPTH(const CV * const sv);
 # define PERL_ARGS_ASSERT_CVDEPTH               \
