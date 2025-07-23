@@ -3667,6 +3667,8 @@ Given an opcode from the enum in F<opcodes.h>, C<PL_op_name[opcode]> returns a
 pointer to a C language string giving its name.
 
 =cut
+
+Deprecated since 5.38
 */
 
 char **
@@ -3684,6 +3686,8 @@ Given an opcode from the enum in F<opcodes.h>, C<PL_op_desc[opcode]> returns a
 pointer to a C language string giving its description.
 
 =cut
+
+Deprecated since 5.38
 */
 
 char **
@@ -3696,21 +3700,21 @@ Perl_get_op_descs(pTHX)
 const char *
 Perl_get_no_modify(pTHX)
 {
-    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return PL_no_modify;
 }
 
 U32 *
 Perl_get_opargs(pTHX)
 {
-    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return (U32 *)PL_opargs;
 }
 
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
-    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return (PPADDR_t*)PL_ppaddr;
 }
 

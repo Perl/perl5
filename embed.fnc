@@ -344,7 +344,12 @@
 :        * makes the short name defined for everywhere, not just for PERL_CORE
 :          or PERL_EXT
 :
-:   'D'  Function is deprecated:
+:   'D'  Function is deprecated.
+:
+:	(Add a comment to the function source when adding this flag indicating
+:	what release it is first being deprecated in.  This will prevent having
+:	to dig up this information when deciding if enough releases have passed
+:	to actually remove the function.)
 :
 :        proto.h: add __attribute__deprecated__
 :        autodoc.pl adds a note to this effect in the doc entry

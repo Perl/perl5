@@ -1634,6 +1634,9 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 Implements the deprecated L<perlapi/C<GIMME>>.
 
 =cut
+
+Deprecated since 5.38
+
 */
 
 U8

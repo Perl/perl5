@@ -746,6 +746,8 @@ next possible position in C<s> that could begin a non-malformed character.
 See L<perlapi/utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
+
+Deprecated since 5.38 
 */
 
 UV
@@ -815,7 +817,7 @@ convert to Unicode using L<perlapi/C<NATIVE_TO_UNI>>.
 UV
 Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
-    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
+    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI; /* Deprecated since 5.38 */
 
     return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
 }
@@ -823,7 +825,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
-    PERL_ARGS_ASSERT_UTF8_TO_UVCHR;
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR; /* Deprecated since 5.38 */
 
     /* This function is unsafe if malformed UTF-8 input is given it, which is
      * why the function is deprecated.  If the first byte of the input
