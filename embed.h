@@ -955,7 +955,6 @@
 #   define utf8_to_uvchr(a,b)                   Perl_utf8_to_uvchr(aTHX_ a,b)
 #   define utf8_to_uvuni(a,b)                   Perl_utf8_to_uvuni(aTHX_ a,b)
 #   define utf8n_to_uvuni(a,b,c,d)              Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
-#   define uvuni_to_utf8(a,b)                   Perl_uvuni_to_utf8(aTHX_ a,b)
 # endif
 # if defined(PERL_ANY_COW)
 #   define sv_setsv_cow(a,b)                    Perl_sv_setsv_cow(aTHX_ a,b)
