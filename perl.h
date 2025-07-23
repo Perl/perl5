@@ -1142,15 +1142,6 @@ violations are fatal.
 #   include <xlocale.h>
 #endif
 
-/* Even if not using locales, this header should be #included so as to #define
- * some symbols which avoid #ifdefs to get things to compile.  But make sure
- * the macro it calls does nothing */
-#undef PERL_LOCALE_TABLE_ENTRY
-#define PERL_LOCALE_TABLE_ENTRY(name, call_back)
-#include "locale_table.h"
-
-#include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
-
 /* =========================================================================
  * The defines from here to the following ===== line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */
@@ -1182,6 +1173,15 @@ violations are fatal.
 
 /* end of makedef.pl logic duplication.  But there are other groups below.
  * ========================================================================= */
+
+/* Even if not using locales, this header should be #included so as to #define
+ * some symbols which avoid #ifdefs to get things to compile.  But make sure
+ * the macro it calls does nothing */
+#undef PERL_LOCALE_TABLE_ENTRY
+#define PERL_LOCALE_TABLE_ENTRY(name, call_back)
+#include "locale_table.h"
+
+#include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
 
 #ifdef USE_LOCALE
 #   define HAS_SKIP_LOCALE_INIT /* Solely for XS code to test for this
