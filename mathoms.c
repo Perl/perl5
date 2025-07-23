@@ -180,14 +180,6 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
 }
 
-U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    PERL_ARGS_ASSERT_UVUNI_TO_UTF8;
-
-    return uvoffuni_to_utf8_flags(d, uv, 0);
-}
-
 /*
 =for apidoc_section $unicode
 =for apidoc utf8n_to_uvuni
