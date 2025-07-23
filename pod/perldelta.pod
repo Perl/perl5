@@ -350,6 +350,26 @@ well.
 
 XXX
 
+=item *
+
+C<Perl_expected_size> has been added as an experimental stub macro. The
+intention is to build on this such that it can be passed a size in bytes,
+then returns the interpreter's best informed guess of what actual usable
+allocation size would be returned by the malloc implementation in use.
+
+This would help with sizing allocations such that SvLEN is more accurate
+and not trying to shrink string buffers to save size when the intended
+saving is unrealistic.
+
+=item *
+
+C<SvPV_shrink_to_cur> has been revised to include a byte for COW, so that
+the resulting string could be COWed in the future.
+
+It also now uses C<Perl_expected_size>, compared against the current
+buffer size, and does not try to do a reallocation if the requested
+memory saving is unrealistic.
+
 =back
 
 =head1 Selected Bug Fixes
