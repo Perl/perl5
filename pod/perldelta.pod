@@ -378,6 +378,10 @@ well.
 Removed the deprecated (since 5.32) functions C<sv_locking()> and
 C<sv_unlocking>.
 
+=item *
+
+Removed the deprecated (since 5.32) function C<uvuni_to_utf8()>
+
 =back
 
 =head1 Selected Bug Fixes
