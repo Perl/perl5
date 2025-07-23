@@ -6052,16 +6052,6 @@ Perl_sv_mortalcopy(pTHX_ SV * const oldsv)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SV_MORTALCOPY
 
-PERL_CALLCONV void
-Perl_sv_nolocking(pTHX_ SV *sv)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_SV_NOLOCKING
-
-PERL_CALLCONV void
-Perl_sv_nounlocking(pTHX_ SV *sv)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_SV_NOUNLOCKING
-
 PERL_CALLCONV char *
 Perl_sv_pv(pTHX_ SV *sv)
         __attribute__warn_unused_result__;
