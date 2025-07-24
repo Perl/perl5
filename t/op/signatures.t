@@ -1728,6 +1728,7 @@ SKIP: {
 SKIP: {
     use Config;
     $Config{useithreads} or skip "No threads", 1;
+    skip_if_miniperl("no dynamic loading on miniperl, no threads", 1);
 
     ok(eval <<'EOPERL',
         no warnings 'closure';
