@@ -180,6 +180,7 @@ ALIGNED_TYPE(XPVOBJ);
         STRUCT_OFFSET(type, last_member) \
         + sizeof (((type*)SvANY((const SV *)0))->last_member)
 
+/* sz_if_arena, copy_sz, ghost_sz, SVt, !upg, NV=0; , has_arena, arena_sz */
 static const struct body_details bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
     { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
@@ -206,7 +207,7 @@ static const struct body_details bodies_by_type[] = {
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
+/* sz_if_arena, copy_sz, ghost_sz, SVt, !upg, NV=0; , has_arena, arena_sz */
     { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
@@ -238,6 +239,7 @@ static const struct body_details bodies_by_type[] = {
       SVt_PVNV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 #endif
+/* sz_if_arena, copy_sz, ghost_sz, SVt, !upg, NV=0; , has_arena, arena_sz */
     { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
@@ -271,7 +273,7 @@ static const struct body_details bodies_by_type[] = {
       0,
       SVt_PVCV, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
-
+/* sz_if_arena, copy_sz, ghost_sz, SVt, !upg, NV=0; , has_arena, arena_sz */
     { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
       sizeof(XPVFM),
       0,
