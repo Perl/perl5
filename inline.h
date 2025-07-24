@@ -56,7 +56,6 @@ PERL_STATIC_INLINE Size_t
 Perl_av_count(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_COUNT;
-    assert(SvTYPE(av) == SVt_PVAV);
 
     return AvFILL(av) + 1;
 }
@@ -100,7 +99,6 @@ Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val)
     SV** ary;
 
     PERL_ARGS_ASSERT_AV_STORE_SIMPLE;
-    assert(SvTYPE(av) == SVt_PVAV);
     assert(!SvMAGICAL(av));
     assert(!SvREADONLY(av));
     assert(AvREAL(av));
@@ -143,7 +141,6 @@ PERL_STATIC_INLINE SV**
 Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
 {
     PERL_ARGS_ASSERT_AV_FETCH_SIMPLE;
-    assert(SvTYPE(av) == SVt_PVAV);
     assert(!SvMAGICAL(av));
     assert(!SvREADONLY(av));
     assert(AvREAL(av));
@@ -160,7 +157,6 @@ PERL_STATIC_INLINE void
 Perl_av_push_simple(pTHX_ AV *av, SV *val)
 {
     PERL_ARGS_ASSERT_AV_PUSH_SIMPLE;
-    assert(SvTYPE(av) == SVt_PVAV);
     assert(!SvMAGICAL(av));
     assert(!SvREADONLY(av));
     assert(AvREAL(av));
@@ -3885,7 +3881,6 @@ Perl_clear_defarray_simple(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_CLEAR_DEFARRAY_SIMPLE;
 
-    assert(SvTYPE(av) == SVt_PVAV);
     assert(!SvREADONLY(av));
     assert(!SvMAGICAL(av));
     assert(SvREFCNT(av) == 1);

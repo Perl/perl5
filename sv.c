@@ -1297,7 +1297,6 @@ Perl_hv_auxalloc(pTHX_ HV *hv) {
     void *new_body;
 
     PERL_ARGS_ASSERT_HV_AUXALLOC;
-    assert(SvTYPE(hv) == SVt_PVHV);
     assert(!HvHasAUX(hv));
 
 #ifdef PURIFY
