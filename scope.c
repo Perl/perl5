@@ -583,7 +583,7 @@ Perl_save_bool(pTHX_ bool *boolp)
     PERL_ARGS_ASSERT_SAVE_BOOL;
 
     SS_ADD_PTR(boolp);
-    SS_ADD_UV(SAVEt_BOOL | (*boolp << 8));
+    SS_ADD_UV(SAVEt_BOOL | (((UV)((bool)(*boolp))) << 8));
     SS_ADD_END(2);
 }
 
@@ -1302,7 +1302,7 @@ Perl_leave_scope(pTHX_ I32 base)
 
         case SAVEt_BOOL:			/* bool reference */
             a0 = ap[0];
-            *(bool*)a0.any_ptr = cBOOL(uv >> 8);
+            *((bool*)a0.any_ptr) = cBOOL((bool)((UV)uv >> 8));
 #ifdef NO_TAINT_SUPPORT
             PERL_UNUSED_VAR(was);
 #else
@@ -1312,7 +1312,7 @@ Perl_leave_scope(pTHX_ I32 base)
                  * restore it when we exit this routine.  Note that this won't
                  * work if this value was saved in a wider-than necessary type,
                  * such as I32 */
-                was = *(bool*)a0.any_ptr;
+                was = *((bool*)a0.any_ptr);
             }
 #endif
             break;
