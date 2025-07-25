@@ -936,7 +936,13 @@ PERLVARI(I, lockhook,	share_proc_t, Perl_sv_nosharing)
 GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 MSVC_DIAG_IGNORE(4996)
 
-PERLVARI(I, unlockhook,	share_proc_t, Perl_sv_nosharing)
+#ifdef NO_MATHOMS
+#  define PERL_UNLOCK_HOOK Perl_sv_nosharing
+#else
+/* This reference ensures that the mathoms are linked with perl */
+#  define PERL_UNLOCK_HOOK Perl_sv_nounlocking
+#endif
+PERLVARI(I, unlockhook,	share_proc_t, PERL_UNLOCK_HOOK)
 
 MSVC_DIAG_RESTORE
 GCC_DIAG_RESTORE
