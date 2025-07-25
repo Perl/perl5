@@ -19,6 +19,16 @@ L<perl5431delta>, which describes differences between 5.43.0 and 5.43.1.
 
 XXX Any important notices here
 
+=over
+
+=item *
+
+The ibm-clang/ibm-clang_r IBM Open XL C/C++ compiler is now supported for AIX
+7.2 and 7.3. This is the recommended compiler to use when compiling Perl on
+these versions of AIX.
+
+=back
+
 =head1 Core Enhancements
 
 XXX New core language features go here. Summarize user-visible core language
