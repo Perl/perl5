@@ -90,7 +90,12 @@ case "$archname" in
     '') archname="$osname" ;;
     esac
 
-cc=${cc:-cc}
+default_cc=cc
+which ibm-clang_r >/dev/null 2>&1 && ibm_clang=ibm-clang_r
+[ -z "$ibm_clang" ] && ibm_clang=$(find /opt/IBM/openxlC -name ibm-clang_r | tail -1)
+[ -n "$ibm_clang" ] && default_cc="$ibm_clang"
+
+cc=${cc:-"$default_cc"}
 
 ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
 case "$cc" in
