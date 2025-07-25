@@ -3398,9 +3398,12 @@ X<endnetent> X<endprotoent> X<endservent>
 
 =for Pod::Functions be done using services file
 
-These routines are the same as their counterparts in the
-system C library.  In list context, the return values from the
-various get routines are as follows:
+These routines are the same as their counterparts in the system
+C library. (This means that platform-specific quirks may be
+encountered, please refer to L<perlport> for examples.)
+
+In list context, the return values from the various get routines
+are as follows:
 
  #    0        1          2           3         4
  my ( $name,   $passwd,   $gid,       $members  ) = getgr*
