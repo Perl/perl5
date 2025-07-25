@@ -1782,6 +1782,12 @@ Not implemented.
 C<gethostbyname('localhost')> does not work everywhere: you may have
 to use C<gethostbyname('127.0.0.1')>.
 
+(S<Win32>)
+If the C<NAME> argument is an empty string (C<"">) or something that
+coerces to it (such as C<undef>), the F<winsock.f> implementation treats
+this as a C<gethostname> call and will return the standard hostname for
+the local computer.
+
 =item gethostent
 
 (Win32)
