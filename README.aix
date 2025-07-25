@@ -28,7 +28,8 @@ the AIX Toolbox which is shipped with AIX.
 
 Currently all versions of IBM's "xlc", "xlc_r", "cc", "cc_r" or
 "vac" ANSI/C compiler will work for building Perl if that compiler
-works on your system.
+works on your system. ibm-clang and ibm-clang_r will work as well,
+which is recommended on AIX 7.2 and 7.3.
 
 If you plan to link Perl to any module that requires thread-support,
 like DBD::Oracle, it is better to use the _r version of the compiler.
@@ -55,10 +56,20 @@ from IBM (April 2009 PTF for XL C/C++ Enterprise Edition for AIX, V9.0).
 If you choose XL C/C++ V11 you need the April 2010 PTF (or newer)
 installed otherwise you will not get a working Perl version.
 
-Perl can be compiled with either IBM's ANSI C compiler or with gcc.
-The former is recommended, as not only it can compile Perl with no
-difficulty, but also can take advantage of features listed later
-that require the use of IBM compiler-specific command-line flags.
+I<IBM Open XL C/C++ for AIX> is also supported for AIX 7.2 and 7.3.
+As of 2025-07, the following version is supported:
+
+    IBM Open XL C/C++ for AIX V17
+
+If you choose the Open XL C/C++ compiler (ibm-clang/ibm-clang_r), it should
+work out of the box.
+
+Perl can be compiled with either IBM's ANSI C compiler, IBM's Open XL clang
+compiler, or with gcc. It is recommended to use the Open XL clang compiler, as
+not only can it compile Perl with no difficulty, but also can take advantage
+of features listed later that require the use of IBM compiler-specific
+command-line flags and support newer compiler features only available in clang
+and gcc.
 
 If you decide to use gcc, make sure your installation is recent and
 complete, and be sure to read the Perl INSTALL file for more gcc-specific
@@ -127,7 +138,7 @@ Should yield no problems.
 
 =head2 Threaded Perl
 
-Should yield no problems with AIX 5.1 / 5.2 / 5.3 / 6.1 / 7.1.
+Should yield no problems with AIX 5.1 / 5.2 / 5.3 / 6.1 / 7.1 / 7.2 / 7.3.
 
 IBM uses the AIX system Perl (V5.6.0 on AIX 5.1 and V5.8.2 on
 AIX 5.2 / 5.3 and 6.1; V5.8.8 on AIX 5.3 TL11 and AIX 6.1 TL4; V5.10.1
@@ -175,6 +186,22 @@ enable long doubles, for most of the broken things Perl has implemented
 workarounds, but the handling of the special values infinity and NaN
 remains badly broken: for example infinity plus zero results in NaN.
 
+=head2 Recommended Options AIX 7.2 and 7.3 (threaded/32-bit)
+
+With the following options you get a threaded Perl version which
+passes all make tests in threaded 32-bit mode.
+
+    rm config.sh
+    ./Configure \
+    -d \
+    -Dcc=/opt/IBM/openxlC/17.1.3/bin/ibm-clang_r
+    -Duseshrplib \
+    -Dusethreads \
+    -Dprefix=/usr/opt/perl5_32
+
+The -Dprefix option will install Perl in a directory parallel to the
+IBM AIX system Perl installation.
+
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (threaded/32-bit)
 
 With the following options you get a threaded Perl version which
@@ -189,12 +216,27 @@ configuration for the Perl builds that AIX ships with.
     -Dusethreads \
     -Dprefix=/usr/opt/perl5_32
 
-The -Dprefix option will install Perl in a directory parallel to the 
+The -Dprefix option will install Perl in a directory parallel to the
+IBM AIX system Perl installation.
+
+=head2 Recommended Options AIX 7.2 and 7.3 (32-bit)
+
+With the following options you get a Perl version which passes
+all make tests in 32-bit mode.
+
+    rm config.sh
+    ./Configure \
+    -d \
+    -Dcc=/opt/IBM/openxlC/17.1.3/bin/ibm-clang_r
+    -Duseshrplib \
+    -Dprefix=/usr/opt/perl5_32
+
+The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.
 
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (32-bit)
 
-With the following options you get a Perl version which passes 
+With the following options you get a Perl version which passes
 all make tests in 32-bit mode.
 
     rm config.sh
@@ -207,36 +249,72 @@ all make tests in 32-bit mode.
 The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.
 
+=head2 Recommended Options AIX 7.2 and 7.3 (threaded/64-bit)
+
+With the following options you get a threaded Perl version which
+passes all make tests in threaded 64-bit mode.
+
+    export OBJECT_MODE=64
+    # or (depending on your shell)
+    setenv OBJECT_MODE 64
+    rm config.sh
+    ./Configure \
+    -d \
+    -Dcc=/opt/IBM/openxlC/17.1.3/bin/ibm-clang_r
+    -Duseshrplib \
+    -Dusethreads \
+    -Duse64bitall \
+    -Dprefix=/usr/opt/perl5_64
+
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (threaded/64-bit)
 
 With the following options you get a threaded Perl version which
 passes all make tests in 64-bit mode.
 
- export OBJECT_MODE=64 / setenv OBJECT_MODE 64 (depending on your shell)
+    export OBJECT_MODE=64
+    # or (depending on your shell)
+    setenv OBJECT_MODE 64
+    rm config.sh
+    ./Configure \
+    -d \
+    -Dcc=cc_r \
+    -Duseshrplib \
+    -Dusethreads \
+    -Duse64bitall \
+    -Dprefix=/usr/opt/perl5_64
 
- rm config.sh
- ./Configure \
- -d \
- -Dcc=cc_r \
- -Duseshrplib \
- -Dusethreads \
- -Duse64bitall \
- -Dprefix=/usr/opt/perl5_64
+=head2 Recommended Options AIX 7.2 and 7.3 (64-bit)
+
+With the following options you get a threaded Perl version which
+passes all make tests in threaded 64-bit mode.
+
+    export OBJECT_MODE=64
+    # or (depending on your shell)
+    setenv OBJECT_MODE 64
+    rm config.sh
+    ./Configure \
+    -d \
+    -Dcc=/opt/IBM/openxlC/17.1.3/bin/ibm-clang_r
+    -Duseshrplib \
+    -Duse64bitall \
+    -Dprefix=/usr/opt/perl5_64
+
 
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (64-bit)
 
 With the following options you get a Perl version which passes all
-make tests in 64-bit mode. 
+make tests in 64-bit mode.
 
- export OBJECT_MODE=64 / setenv OBJECT_MODE 64 (depending on your shell)
-
- rm config.sh
- ./Configure \
- -d \
- -Dcc=cc_r \
- -Duseshrplib \
- -Duse64bitall \
- -Dprefix=/usr/opt/perl5_64
+     export OBJECT_MODE=64
+     # or (depending on your shell)
+     setenv OBJECT_MODE 64
+     rm config.sh
+     ./Configure \
+     -d \
+     -Dcc=cc_r \
+     -Duseshrplib \
+     -Duse64bitall \
+     -Dprefix=/usr/opt/perl5_64
 
 The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.
@@ -246,7 +324,6 @@ following option:
 
     -Dcc='gcc -maix64'
 
-
 =head2 Compiling Perl 5 on AIX 7.1.0
 
 A regression in AIX 7 causes a failure in make test in Time::Piece during
@@ -254,7 +331,6 @@ daylight savings time.  APAR IV16514 provides the fix for this.  A quick
 test to see if it's required, assuming it is currently daylight savings
 in Eastern Time, would be to run C< TZ=EST5 date +%Z >.  This will come
 back with C<EST> normally, but nothing if you have the problem.
-
 
 =head2 Compiling Perl 5 on older AIX versions up to 4.3.3
 
@@ -482,7 +558,7 @@ threads are used in combination with 64-bit configurations.
 
 You may get a warning when doing a threaded build:
 
-  "pp_sys.c", line 4640.39: 1506-280 (W) Function argument assignment 
+  "pp_sys.c", line 4640.39: 1506-280 (W) Function argument assignment
   between types "unsigned char*" and "const void*" is not allowed.
 
 The exact line number may vary, but if the warning (W) comes from a line
