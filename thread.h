@@ -436,12 +436,6 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 #  endif /* PERL_SET_CONTEXT */
 #endif /* PERL_THREAD_LOCAL */
 
-#ifndef INIT_THREADS
-#  ifdef NEED_PTHREAD_INIT
-#    define INIT_THREADS pthread_init()
-#  endif
-#endif
-
 #ifndef ALLOC_THREAD_KEY
 #  define ALLOC_THREAD_KEY \
     STMT_START {						\

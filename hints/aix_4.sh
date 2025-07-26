@@ -315,7 +315,6 @@ case "$usethreads" in
 	d_srand48_r='undef'
 	d_strerror_r='undef'
 
-	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
 	    *gcc*)
 		ccflags="-D_THREAD_SAFE $ccflags"
