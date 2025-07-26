@@ -1807,6 +1807,7 @@ ERXp	|HV *	|load_charnames |NN SV *char_name			\
 				|NN const char *context 		\
 				|const STRLEN context_len		\
 				|NN const char **error_msg
+MTbp	|void	|load_mathoms
 AFdpv	|void	|load_module	|U32 flags				\
 				|NN SV *name				\
 				|NULLOK SV *ver 			\

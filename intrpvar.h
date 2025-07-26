@@ -1101,6 +1101,18 @@ PERLVAR(I, prevailing_version, U16)
 PERLVARI(I, in_diehook, bool, FALSE)
 PERLVARI(I, in_warnhook, bool, FALSE)
 
+/* Perl_load_mathoms is defined in mathoms.c, so this forces the loading of the
+ * functions in that file when NO_MATHOMS isn't defined.  Otherwise, it is just
+ * a pointer to a function that is always going to exist.  The use of
+ * Perl_noshutdownhook is solely because there is a typedef for its signature
+ * and has no arguments that need to be passed */
+#ifdef NO_MATHOMS
+#  define PERL_LOAD_MATHOMS_HOOK  Perl_noshutdownhook
+#else
+#  define PERL_LOAD_MATHOMS_HOOK  Perl_load_mathoms
+#endif
+PERLVARI(I, load_mathoms, shutdown_proc_t, PERL_LOAD_MATHOMS_HOOK)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

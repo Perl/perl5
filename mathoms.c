@@ -73,6 +73,13 @@
  * without a compiler warning */
 GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 
+void
+Perl_load_mathoms()
+{
+    /* This exists only to make sure the functions in this file get loaded, as
+     * it is referred to by a structure element in intrpvar.h */
+}
+
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */
