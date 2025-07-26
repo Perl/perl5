@@ -3751,6 +3751,9 @@ EXTERN_C int perl_tsa_mutex_lock(perl_mutex* mutex)
 EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
   PERL_TSA_RELEASE(*mutex)
   PERL_TSA_NO_TSA;
+#elif defined(USE_ITHREADS) && defined(I_PTHREAD)
+EXTERN_C int perl_tsa_mutex_lock(perl_mutex* mutex);
+EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex);
 #endif
 
 #if defined(WIN32)
