@@ -94,7 +94,7 @@ cc=${cc:-cc}
 
 ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
 case "$cc" in
-    *gcc*|*g++*) ;;
+    *gcc*|*g++*|*clang*) ;;
     *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias -qlanglvl=extc99" ;;
     esac
 nm_opt='-B'
@@ -109,7 +109,7 @@ d_setreuid='undef'
 cccdlflags='none'	# All AIX code is position independent
    cc_type=xlc		# do not export to config.sh
 case "$cc" in
-    *gcc*|*g++*)
+    *gcc*|*g++*|*clang*)
 	cc_type=gcc
 	ccdlflags='-Xlinker'
 	if [ "X$gccversion" = "X" ]; then
@@ -189,7 +189,7 @@ case $cc_type in
     esac
 
 case "$cc" in
-    *gcc*|*g++*) ;;
+    *gcc*|*g++*|*clang*) ;;
 
     cc*|xlc*) # cc should've been set by line 116 or so if empty.
 	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
@@ -236,9 +236,8 @@ case "$usethreads" in
 	d_srandom_r='undef'
 	d_strerror_r='undef'
 
-	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
-	    *gcc*|*g++*)
+	    *gcc*|*g++*|*clang*)
 	      ccflags="-D_THREAD_SAFE $ccflags"
 	      ;;
 	    cc_r)
@@ -429,7 +428,7 @@ EOM
 	ccflags="`echo $ccflags | sed -e 's@-q32@@'`"
 	ldflags="`echo $ldflags | sed -e 's@-b32@@'`"
 	case "$cc" in
-	    *gcc*|*g++*)
+	    *gcc*|*g++*|*clang*)
 		ccflags="`echo $ccflags | sed -e 's@-q64@-maix64@'`"
 		ccflags_uselargefiles="`echo $ccflags_uselargefiles | sed -e 's@-q64@-maix64@'`"
 		qacflags="`echo $qacflags | sed -e 's@-q64@-maix64@'`"
@@ -474,10 +473,10 @@ if test $usenativedlopen = 'true' ; then
     #			    libraries. AIX allows both .so and .a libraries to
     #			    contain dynamic shared objects.
     case "$cc" in
-	*gcc*|*g++*) ldflags="$ldflags -Wl,-brtl -Wl,-bdynamic" ;;
+	*gcc*|*g++*|*clang*) ldflags="$ldflags -Wl,-brtl -Wl,-bdynamic" ;;
 	*)           ldflags="$ldflags -brtl -bdynamic" ;;
 	esac
-elif test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
+elif test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep -E 'gcc|clang'`" = X; then
     # If the C++ libraries, libC and libC_r, are available we will
     # prefer them over the vanilla libc, because the libC contain
     # loadAndInit() and terminateAndUnload() which work correctly
