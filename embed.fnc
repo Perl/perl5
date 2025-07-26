@@ -3275,10 +3275,7 @@ ARdp	|SV *	|sv_mortalcopy_flags					\
 				|U32 flags
 ARdp	|SV *	|sv_newmortal
 Cdp	|SV *	|sv_newref	|NULLOK SV * const sv
-ADbdp	|void	|sv_nolocking	|NULLOK SV *sv
-
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
-ADbdp	|void	|sv_nounlocking |NULLOK SV *sv
 : Used in pp.c, pp_hot.c, sv.c
 dpx	|SV *	|sv_2num	|NN SV * const sv
 Adm	|bool	|sv_numeq	|NULLOK SV *sv1 			\

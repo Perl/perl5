@@ -107,51 +107,6 @@ Perl_huge(void)
 #endif
 
 /*
-=for apidoc_section $SV
-=for apidoc sv_nolocking
-
-Dummy routine which "locks" an SV when there is no locking module present.
-Exists to avoid test for a C<NULL> function pointer and because it could
-potentially warn under some level of strict-ness.
-
-"Superseded" by C<sv_nosharing()>.
-
-=cut
-*/
-
-void
-Perl_sv_nolocking(pTHX_ SV *sv)
-{
-    PERL_UNUSED_CONTEXT;
-    PERL_UNUSED_ARG(sv);
-}
-
-
-/*
-=for apidoc_section $SV
-=for apidoc sv_nounlocking
-
-Dummy routine which "unlocks" an SV when there is no locking module present.
-Exists to avoid test for a C<NULL> function pointer and because it could
-potentially warn under some level of strict-ness.
-
-"Superseded" by C<sv_nosharing()>.
-
-=cut
-
-PERL_UNLOCK_HOOK in intrpvar.h is the macro that refers to this, and guarantees
-that mathoms gets loaded.
-
-*/
-
-void
-Perl_sv_nounlocking(pTHX_ SV *sv)
-{
-    PERL_UNUSED_CONTEXT;
-    PERL_UNUSED_ARG(sv);
-}
-
-/*
 =for apidoc_section $unicode
 =for apidoc utf8_to_uvuni
 
