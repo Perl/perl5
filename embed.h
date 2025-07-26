@@ -924,8 +924,6 @@
 #   endif
 # endif
 # if !defined(NO_MATHOMS)
-#   define sv_nolocking(a)                      Perl_sv_nolocking(aTHX_ a)
-#   define sv_nounlocking(a)                    Perl_sv_nounlocking(aTHX_ a)
 #   define utf8_to_uvchr(a,b)                   Perl_utf8_to_uvchr(aTHX_ a,b)
 #   define utf8_to_uvuni(a,b)                   Perl_utf8_to_uvuni(aTHX_ a,b)
 #   define utf8n_to_uvuni(a,b,c,d)              Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)

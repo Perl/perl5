@@ -6012,16 +6012,6 @@ PERL_CALLCONV void
 Perl_load_mathoms(void);
 # define PERL_ARGS_ASSERT_LOAD_MATHOMS
 
-PERL_CALLCONV void
-Perl_sv_nolocking(pTHX_ SV *sv)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_SV_NOLOCKING
-
-PERL_CALLCONV void
-Perl_sv_nounlocking(pTHX_ SV *sv)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_SV_NOUNLOCKING
-
 PERL_CALLCONV UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
         __attribute__deprecated__;

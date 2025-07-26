@@ -349,7 +349,8 @@ well.
 
 =item *
 
-XXX
+Removed the deprecated (since 5.32) functions C<sv_locking()> and
+C<sv_unlocking>.
 
 =back
 
