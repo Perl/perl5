@@ -1166,6 +1166,13 @@ elsif (PLATFORM eq 'os2') {
 		 ));
 }
 
+if ($define{USE_ITHREADS} && $define{I_PTHREAD}) {
+    try_symbols(qw(
+		      perl_tsa_mutex_lock
+		      perl_tsa_mutex_unlock
+		 ));
+}
+
 # When added this code was only run for Win32 (and WinCE at the time)
 # Currently only Win32 links static extensions into the shared library.
 # For *nix (and presumably OS/2) with a shared libperl, Makefile.SH compiles
