@@ -6009,6 +6009,10 @@ Perl_malloced_size(void *p)
 #endif /* defined(MYMALLOC) */
 #if !defined(NO_MATHOMS)
 PERL_CALLCONV void
+Perl_load_mathoms(void);
+# define PERL_ARGS_ASSERT_LOAD_MATHOMS
+
+PERL_CALLCONV void
 Perl_sv_nolocking(pTHX_ SV *sv)
         __attribute__deprecated__;
 # define PERL_ARGS_ASSERT_SV_NOLOCKING

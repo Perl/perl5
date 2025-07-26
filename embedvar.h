@@ -164,6 +164,7 @@
 # define PL_less_dicey_locale_buf               (vTHX->Iless_dicey_locale_buf)
 # define PL_less_dicey_locale_bufsize           (vTHX->Iless_dicey_locale_bufsize)
 # define PL_LIO                                 (vTHX->ILIO)
+# define PL_load_mathoms                        (vTHX->Iload_mathoms)
 # define PL_locale_mutex_depth                  (vTHX->Ilocale_mutex_depth)
 # define PL_localizing                          (vTHX->Ilocalizing)
 # define PL_localpatches                        (vTHX->Ilocalpatches)
