@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (195);
+plan (197);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -707,3 +707,15 @@ fresh_perl_is('my @x;$x[0] = 1;shift @x;$x[22] = 1;$x[25] = 1;','',
   {}, 'unshifting and growing an array initializes trailing elements');
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
+
+# GH #23447 - ensure that future optimizations don't break behaviour
+{
+    my @x = "a" .. "d";
+    sub f {} 
+    my $y = @x[2, 3, f()];
+    is $y, 'd', 'Trailing empty list return in array slice in scalar context';
+
+    my @i;
+    $y = @x[2, 3, @i];
+    is $y, 'd', 'Empty array final element in array slice in scalar context';
+}
