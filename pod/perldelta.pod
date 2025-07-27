@@ -17,7 +17,7 @@ L<perl5384delta>, which describes differences between 5.38.3 and 5.38.4.
 =head2 [CVE-2025-40909] Perl threads have a working directory race condition where file operations may target unintended paths
 
 Perl thread cloning had a working directory race condition where file
-operations may target unintended paths.  Perl 5.42 will no longer chdir to each
+operations may target unintended paths.  Perl 5.38 will no longer chdir to each
 handle.
 
 This problem was discovered by Vincent Lefèvre via
