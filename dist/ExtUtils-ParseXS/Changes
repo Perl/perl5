@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.59
+  - Throw an exception when combining the length operator with a
+    typemap other than T_PV
+
 3.58 Sun Jul 20 09:10:41 PM CEST 2025
   - ExtUtils::ParseXS has been extensively restructured internally.
     Most of these changes shouldn't be visible externally, but might

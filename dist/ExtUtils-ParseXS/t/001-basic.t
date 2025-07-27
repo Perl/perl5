@@ -967,7 +967,7 @@ EOF
         |
         |int
         |foo(  a   ,  char   * b  , OUT  int  c  ,  OUTLIST int  d   ,    \
-        |      IN_OUT char * * e    =   1  + 2 ,   long length(e)   ,    \
+        |      IN_OUT char * * e    =   1  + 2 ,   long length(b)   ,    \
         |      char* f="abc"  ,     g  =   0  ,   ...     )
 EOF
 
@@ -1607,6 +1607,13 @@ EOF
             [ 1, 0, qr{\QError: length() on non-parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
+
+		[
+			'length of int is invalid',
+			['int', 'foo(int a, size_t length(a))'],
+			[ 1, 0 , qr/length\(NAME\) not supported with typemaps other than T_PV/, 'Got expected error about length' ],
+		],
+
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
