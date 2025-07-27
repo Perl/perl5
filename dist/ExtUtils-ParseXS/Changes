@@ -1,5 +1,14 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.58 Sun Jul 20 09:10:41 PM CEST 2025
+  - ExtUtils::ParseXS has been extensively restructured internally.
+    Most of these changes shouldn't be visible externally, but might
+	affect XS code which was using invalid or unsupported syntax.
+
+3.57 Fri May  2 05:40:59 PM CEST 2025
+  - Rewrite half of the internals to facilitate refcounted stack
+    later on
+
 3.51 - Tue May 9 09:32:04 2023 AEST
   - Initialize $self correctly in EU::PXS::Utilities::death()
   - C++ builds: avoid generating C<< extern "C" extern "C" >>
