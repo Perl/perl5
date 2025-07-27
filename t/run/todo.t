@@ -33,6 +33,21 @@ my $switches = "";
 }
 
 our $TODO;
+
+TODO: {
+    local $::TODO = "GH 16008";
+    my $results = fresh_perl(<<~'EOF', {} );
+        open my $h, ">", \my $x;
+        print $h "hello earthlings\n";
+        $h->truncate(6) or die $!;
+        print $x;
+        EOF
+    is($?, 0, 'No assertion failure');
+
+    is $results, 'hello ', "truncate returned the expected output";
+    unlike $results, qr/Bad file descriptor/, "truncate did not warn about bad file descriptors";
+}
+
 TODO: {
     local $TODO = "GH 16250";
     fresh_perl_is(<<~'EOF',
