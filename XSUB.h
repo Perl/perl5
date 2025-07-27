@@ -44,7 +44,7 @@ must be called prior to setup the C<MARK> variable.
 
 =for apidoc Amn|Stack_off_t|items
 Variable which is setup by C<xsubpp> to indicate the number of
-items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
+items on the stack.  See L<perlxs/"Ellipsis: variable-length parameter lists">.
 
 =for apidoc Amn|I32|ix
 Variable which is setup by C<xsubpp> to indicate which of an

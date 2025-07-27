@@ -2350,92 +2350,173 @@ which could be called from perl as:
 
 =head3 Default Parameter Values
 
-Default values for XSUB arguments can be specified by placing an
-assignment statement in the parameter list.  The default value may
-be a number, a string or the special string C<NO_INIT>.  Defaults should
-always be used on the right-most parameters only.
+    int
+    foo(int i, char *s = "abc")
 
-To allow the XSUB for rpcb_gettime() to have a default host
-value the parameters to the XSUB could be rearranged.  The
-XSUB will then call the real rpcb_gettime() function with
-the parameters in the correct order.  This XSUB can be called
-from Perl with either of the following statements:
+    int
+    bar(int i, int j = i + ')', char *s = "abc,)")
 
-    $status = rpcb_gettime($timep, $host);
+    int
+    baz(int i, char *s = NO_INIT)
 
-    $status = rpcb_gettime($timep);
+Optional parameters can be indicated by appending C<= C_expression> to the
+parameter declaration. The C expression will be evaluated if not enough
+arguments are supplied. Parameters with default values should come after
+any mandatory parameters (although this is currently not enforced by the
+XS compiler). The value can be any valid compile-time or run-time C
+expression (but see below), including the values of any parameters
+declared to its left. The special value C<NO_INIT> indicates that the
+parameter is kept uninitialised if there isn't a corresponding argument.
 
-The XSUB will look like the code which follows.  A CODE:
-block is used to call the real rpcb_gettime() function with
-the parameters in the correct order for that function.
+The XS parser's handling of default expressions is rather simplistic. It
+just wants to extract parameter declarations (including any optional
+trailing default value) from a comma-separated list, but it doesn't
+understand C syntax. It can handle commas and closing parentheses within a
+quoted string, but currently not an escaped quote such as C<'\''> or
+C<"\"">. Neither can it handle balanced parentheses such as C<int j =
+(i+1)>.
 
-    bool_t
-    rpcb_gettime(timep, host="localhost")
-        char  *host
-        time_t timep = NO_INIT
-      CODE:
-        RETVAL = rpcb_gettime(host, &timep);
-      OUTPUT:
-        timep
-        RETVAL
+Due to an implementation flaw, default value expressions are currently
+evalled in double-quoted context during parsing, in a similar fashion to
+typemap templates. So for example C<char *s = "$arg"> is expanded to
+C<char *s = "ST(0)"> or similar. This behaviour may be fixed at some
+point; in the meantime, it is best to avoid the C<$> and C<@> characters
+within default value expressions.
 
-=head3 The C<length(NAME)> Keyword
+=head3 The C<length(param_name)> pseudo-parameter
 
-If one of the input arguments to the C function is the length of a string
-argument C<NAME>, one can substitute the name of the length-argument by
-C<length(NAME)> in the XSUB declaration.  This argument must be omitted when
-the generated Perl function is called.  E.g.,
+    int
+    foo(char *s, int length(s))
+
+It is common for a C function to take a string pointer and length as two
+arguments, while in Perl, string-valued SVs combine both the string and
+length in a single value. To simplify generating the autocall code in such
+situations, the C<length(foo)> pseudo-parameter acts as the length of the
+parameter C<foo>. It doesn't consume an argument or appear in the XSUB's
+usage message, but it I<is> passed to the autocalled C function. For
+example, this XS:
 
     void
-    dump_chars(char *s, short l)
+    foo(char *s, short length(s), int t)
+
+translates to something similar to this C code:
+
+    if (items != 2)
+       croak_xs_usage(cv, "s, t");
+
     {
-        short n = 0;
-        while (n < l) {
-            printf("s[%d] = \"\\%#03o\"\n", n, (int)s[n]);
-            n++;
-        }
+        STRLEN STRLEN_length_of_s;
+        short  XSauto_length_of_s;
+        char * s = (char *)SvPV(ST(0), STRLEN_length_of_s);
+        int    t = (int)SvIV(ST(1));
+
+        XSauto_length_of_s = STRLEN_length_of_s;
+        foo(s, XSauto_length_of_s, t);
     }
 
-    MODULE = x   PACKAGE = x
+and might be called from Perl as:
 
-    void dump_chars(char *s, short length(s))
+    foo("abcd", 9999);
 
-should be called as C<dump_chars($string)>.
+The exact C code generated will vary over releases, but the important
+things to note are:
 
-This directive is supported with ANSI-type function declarations only.
+=over
 
-=head3 Variable-length Parameter Lists
+=item *
 
-XSUBs can have variable-length parameter lists by specifying an ellipsis
-C<(...)> in the parameter list.  This use of the ellipsis is similar to that
-found in ANSI C.  The programmer is able to determine the number of
-arguments passed to the XSUB by examining the C<items> variable which the
-B<xsubpp> compiler supplies for all XSUBs.  By using this mechanism one can
-create an XSUB which accepts a list of parameters of unknown length.
+The auto variable C<XSauto_length_of_foo> will be declared with the
+specified type and will be passed to any autocall function, but it won't
+appear in the usage message. This variable is available for use in C<CODE>
+blocks and similar.
 
-The I<host> parameter for the rpcb_gettime() XSUB can be
-optional so the ellipsis can be used to indicate that the
-XSUB will take a variable number of parameters.  Perl should
-be able to call this XSUB with either of the following statements.
+=item *
 
-    $status = rpcb_gettime($timep, $host);
+The auto variable C<STRLEN_length_of_s> is used in addition to allow
+conversion between the type expected by C<SvPV()> and the type declared
+for the length pseudo-parameter.
 
-    $status = rpcb_gettime($timep);
+=item *
 
-The XS code, with ellipsis, follows.
+A length parameter can appear anywhere in the signature, even before the
+string parameter of the same name; but its position in any autocall
+matches its position in the signature.
 
-    bool_t
-    rpcb_gettime(timep, ...)
-        time_t timep = NO_INIT
-      PREINIT:
-        char *host = "localhost";
+=item *
+
+Each length parameter must match another parameter of the same name. That
+parameter must be a string type (something which maps to the C<T_PV>
+typemap type).
+
+=back
+
+=head3 Ellipsis: variable-length parameter lists
+
+    int
+    foo(char *s, ...)
+
+An XSUB can have a variable-length parameter list by specifying an
+ellipsis as the last parameter, similar to C function declarations. Its
+main effect is to disable the error check for too many parameters. Any
+declared parameters will still be processed as normal, but the programmer
+will have to access any extra arguments manually, making use of the
+C<ST(n)> macro to access the nth item on the stack (counting from 0), and
+the C<items> variable, which indicates the total number of passed
+arguments, including any fixed arguments.
+
+Note that currently XS doesn't provide any mechanism to autocall
+variable-length C functions, so the ellipsis should only be used on XSUBs
+which have a body.
+
+For example, consider this Perl subroutine which returns the sum of all
+of its arguments which are within a specified range:
+
+    sub minmax_sum {
+        my $min = shift;
+        my $max = shift;
+        my $RETVAL = 0;
+        $RETVAL += $_ for grep { $min <= $_ && $_ <= $max } @_;
+        return $RETVAL;
+    }
+
+This XSUB provides equivalent functionality:
+
+    int
+    minmax_sum(int min, int max, ...)
       CODE:
-        if (items > 1)
-            host = (char *)SvPVbyte_nolen(ST(1));
-        RETVAL = rpcb_gettime(host, &timep);
+        {
+            int i = 2; /* skip the two fixed arguments */
+            RETVAL = 0;
+
+            for (; i < items; i++) {
+                int val  = (int)SvIV(ST(i));
+                if (min <= val && val <= max)
+                    RETVAL += val;
+            }
+        }
       OUTPUT:
-        timep
         RETVAL
+
+It is possible to write an XSUB which both accepts and returns a list. For
+example, this XSUB does the equivalent of the Perl C<map { $_*3 } ...>
+
+    void
+    triple(...)
+      PPCODE:
+        SP += items;
+        {
+            int i;
+            for (i = 0; i < items; i++) {
+                int val  = (int)SvIV(ST(i));
+                ST(i) = sv_2mortal(newSViv(val*3));
+            }
+        }
+
+Note that the L<PPCODE|/The PPCODE: Keyword> keyword, in comparison to
+C<CODE>, resets the local copy of the argument stack pointer, and relies
+on the coder  to place any return values on the stack. The example above
+reclaims the passed arguments by setting C<SP> back to the top of the
+stack, then replaces the items on the stack one by one.
 
 =head2 The XSUB Input Part
 
@@ -3247,7 +3328,7 @@ included in that case.
 
 A CASE: might switch via a parameter of the XSUB, via the C<ix> ALIAS:
 variable (see L<"The ALIAS: Keyword">), or maybe via the C<items> variable
-(see L<"Variable-length Parameter Lists">).  The last CASE: becomes the
+(see L<"Ellipsis: variable-length parameter lists">).  The last CASE: becomes the
 B<default> case if it is not associated with a conditional.  The following
 example shows CASE switched via C<ix> with a function C<rpcb_gettime()>
 having an alias C<x_gettime()>.  When the function is called as
