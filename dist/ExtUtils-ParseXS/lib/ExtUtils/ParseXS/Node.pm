@@ -2,7 +2,7 @@ package ExtUtils::ParseXS::Node;
 use strict;
 use warnings;
 
-our $VERSION = '3.58';
+our $VERSION = '3.59';
 
 =head1 NAME
 
