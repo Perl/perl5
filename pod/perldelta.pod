@@ -423,6 +423,19 @@ memory saving is unrealistic.
 C<sv_vcatpvfn_flags()> now substitutes the Unicode REPLACEMENT CHARACTER
 for malformed input.  Previously it used the NUL character.
 
+=item *
+
+L<perlapi/C<newSVsv_flags_NN>> is a new function for creating a new SV
+and assigning the value(s) of an existing SV to it.
+
+Historically, C<Perl_newSVsv_flags> and C<Perl_sv_mortalcopy_flags> would
+pass a new SV head and the original SV to C<Perl_sv_setsv_flags>. However,
+the latter contains many branches of no relevance to a fresh SV, so they
+now make use of the new function to streamline the process.
+
+C<Perl_newSVsv_flags> is now essentially a NULL pointer check and wrapper
+around the new function, so has been moved into F<sv_inline.h>.
+
 =back
 
 =head1 Selected Bug Fixes
