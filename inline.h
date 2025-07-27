@@ -3289,8 +3289,8 @@ Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 /*
 =for apidoc_section $utility
 
-=for apidoc        is_safe_syscall
-=for apidoc_item ||IS_SAFE_SYSCALL|
+=for apidoc         is_safe_syscall
+=for apidoc_item m||IS_SAFE_SYSCALL
 
 These are synonymous.
 
