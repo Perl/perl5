@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw(. ../lib));
 }
 
-plan( tests => 73 );
+plan( tests => 75 );
 
 @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
@@ -274,4 +274,15 @@ EOS
 {
     my $e = "1"; $e = "(1,$e)" for 1..100_000; $e = "() = $e"; eval $e;
     is $@, "", "SEGV in Perl_list";
+}
+
+# GH #23447 - ensure that future optimizations don't break behaviour
+{
+    sub f {}
+    my $y = ("a" .. "d")[2, 3, f()];
+    is $y, 'd', 'Trailing empty list return in list slice in scalar context';
+
+    my @i;
+    $y = ("a" .. "d")[2, 3, @i];
+    is $y, 'd', 'Empty array final element in list slice in scalar context';
 }
