@@ -9,8 +9,8 @@
  * GSAR 21-JUN-98
  */
 
-#ifndef __Inc__IPerl___
-#define __Inc__IPerl___
+#ifndef IPERLSYS_H
+#define IPERLSYS_H
 
 /*
  *      PerlXXX_YYY explained - DickH and DougL @ ActiveState.com
