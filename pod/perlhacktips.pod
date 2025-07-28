@@ -371,8 +371,13 @@ It's best then to:
 =item B<Don't begin a file-level symbol name with an underscore>; (I<e.g.>, don't
 use: C<_FOOBAR>)
 
-It is fine to have a symbol in a function or block like C<_ref>,
-beginning with an underscore followed by a lowercase letter.
+It is fine to have a symbol in a function or block begin with an
+underscore followed by a lowercase letter, like
+
+ {
+      int _ref;
+      ...
+ }
 
 =item B<Don't use two consecutive underscores in a symbol name>;
 (I<e.g.>, don't use C<FOO__BAR>)
@@ -623,7 +628,7 @@ Assuming one can dereference any type of pointer for any type of data
   long pony = *(long *)p;    /* BAD */
 
 Many platforms, quite rightly so, will give you a core dump instead of
-a pony if the p happens not to be correctly aligned.
+a pony if the C<p> happens not to be correctly aligned.
 
 =item *
 
