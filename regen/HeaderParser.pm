@@ -1675,8 +1675,8 @@ rearrange its terms so that each line is not longer than this.
 
 =item indent_define
 
-Should #define clauses be indented when contained a clause expression that is
-indented.
+Should #define clauses be indented when contained in a clause expression that
+is indented, default is yes: 1.
 
 =item hug_define
 
@@ -1705,7 +1705,7 @@ based object which contains the following fields:
     bless {
         cond     => [['defined(a)'],['defined(b)']],
         type     => "content",
-        sub_type => undef,
+        sub_type => "#undef",
         raw      => $raw_content_of_line,
         line     => $normalized_content_of_line,
         level    => $level,
@@ -1761,21 +1761,21 @@ it terminates.
 
 =item type
 
-This value indicates the type of the line. This may be one of the following:
-'content', 'cond', 'define', 'include' and 'error'. Several of the types
-have a sub_type.
+This value indicates the type of the line. This may either 'content' or
+'cond'.  The sub_type gives finer detail.
 
 =item sub_type
 
-This value gives more detail on the type of the line where necessary.
-Not all types have a subtype.
+This value gives more detail on the type of the line.
 
     Type    | Sub Type
     --------+----------
     content | text
-            | include
-            | define
-            | error
+            | #include
+            | #define
+            | #error
+            | #pragma
+            | #undef
     cond    | #if
             | #elif
             | #else
@@ -1784,6 +1784,9 @@ Not all types have a subtype.
 Note that there are no '#ifdef' or '#elifndef' or similar expressions. All
 expressions of that form are normalized into the '#if defined' form to
 simplify processing.
+
+For all sub_types except C<#endif>, the C<cond> array gives the conditions
+after the line is executed.
 
 =item raw
 
@@ -1821,7 +1824,8 @@ or input it cannot handle.
 
 =head2 lines_as_str
 
-This function will return a string representation of the lines it is provided.
+This function will return a string representation of the lines it is provided
+via an array of HeaderLines objects produced by parse_fh() or by group_content()
 
 =head2 group_content
 
