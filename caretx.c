@@ -21,7 +21,7 @@
 /* This file contains a single function, set_caret_X, to set the $^X
  * variable.  It's only used in perl.c, but has various OS dependencies,
  * so its been moved to its own file to reduce header pollution.
- * See RT 120314 for details.
+ * See GH #13363 for details.
  */
 
 #if defined(PERL_IS_MINIPERL) && !defined(USE_SITECUSTOMIZE)
