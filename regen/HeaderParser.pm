@@ -794,6 +794,7 @@ sub tidy_embed_fnc_entry {
         return_type => $ret,
         name        => $name,
         args        => \@args,
+        start_line_num => $line_data->{start_line_num},
     );
     $line =~ s/\s+\z/\n/;
     $line_data->{line}= $line;
@@ -1587,6 +1588,7 @@ sub EmbedLine::flags       { $_[0]->{flags} }
 sub EmbedLine::return_type { $_[0]->{return_type} }
 sub EmbedLine::name        { $_[0]->{name} }
 sub EmbedLine::args        { $_[0]->{args} }          # array ref
+sub EmbedLine::line_num    { $_[0]->{start_line_num} }
 
 1;
 
