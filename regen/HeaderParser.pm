@@ -790,10 +790,10 @@ sub tidy_embed_fnc_entry {
     ($line)= unexpand($line);
 
     $line_data->{embed}= EmbedLine->new(
-        flags       => $flags,
-        return_type => $ret,
-        name        => $name,
-        args        => \@args,
+        flags          => $flags,
+        return_type    => $ret,
+        name           => $name,
+        args           => \@args,
         start_line_num => $line_data->{start_line_num},
     );
     $line =~ s/\s+\z/\n/;

@@ -2512,13 +2512,9 @@ foreach (@{(setup_embed())[0]}) {
     my $embed= $_->{embed}
         or next;
     my $file = $_->{source};
-    my ($flags, $ret_type, $func, $args) =
-                                 @{$embed}{qw(flags return_type name args)};
-    check_and_add_proto_defn($func, $file,
-                             # embed.fnc data doesn't currently furnish the
-                             # line number
-                             undef,
-
+    my ($flags, $ret_type, $func, $args, $line_num) =
+                    @{$embed}{qw(flags return_type name args start_line_num)};
+    check_and_add_proto_defn($func, $file, $line_num,
                              $flags, $ret_type, $args,
 
                              # This is like an 'apidoc_defn' line, in that it
