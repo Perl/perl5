@@ -35,6 +35,21 @@ my $switches = "";
 our $TODO;
 
 TODO: {
+    local $::TODO = "GH 14615";
+    my $results = fresh_perl(<<~'EOF', {});
+        use B::Deparse;
+        my $deparse = B::Deparse->new();
+        my $body = $deparse->coderef2text(
+            sub { while(<<>>){ print $_ } }
+        );
+        print $body;
+        EOF
+    is($?, 0, 'No assertion failure');
+
+    like $results, qr/defined\(\$_ = <<>>\)/, 'while(<<>>) deparses as while (defined($_ = <<>>))'
+}
+
+TODO: {
     local $::TODO = "GH 16008";
     my $results = fresh_perl(<<~'EOF', {} );
         open my $h, ">", \my $x;
