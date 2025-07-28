@@ -2955,13 +2955,13 @@ last-inclusive range.
  CPAN::Unpack show any users outside the core.
 
 =for apidoc_section $warning
-=for apidoc Cdm||deprecate|U32 category|"message"
+=for apidoc dm||deprecate|U32 category|"message"
 Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
 given category with an appropriate message. The C<message> argument must
 be a C string. The string " is deprecated" will automatically be added
 to the end of the C<message>.
 
-=for apidoc Cdm||deprecate_disappears_in|U32 category|"when"|"message"
+=for apidoc dm||deprecate_disappears_in|U32 category|"when"|"message"
 Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
 given category with an appropriate message that the construct referred
 to by the message will disappear in a specific release.  The C<when> and
@@ -2971,7 +2971,7 @@ message output will be the result of the following expression C<message
 " is deprecated, and will disappear in Perl " when> which is why C<message>
 and C<when> must be literal C strings.
 
-=for apidoc Cdm||deprecate_fatal_in|U32 category|"when"|"message"
+=for apidoc dm||deprecate_fatal_in|U32 category|"when"|"message"
 Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
 given category with an appropriate message that the construct referred
 to by the message will become fatal in a specific release.  The C<when>
