@@ -4889,7 +4889,8 @@ Perl_sv_pos_u2b_flags(pTHX_ SV * const sv, STRLEN uoffset, STRLEN * const lenp, 
         assert(sv)
 
 /* PERL_CALLCONV char *
-Perl_sv_pv(pTHX_ SV *sv); */
+Perl_sv_pv(pTHX_ SV *sv)
+        __attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV char *
 Perl_sv_pvbyte(pTHX_ SV *sv)

@@ -3306,7 +3306,7 @@ Adp	|STRLEN |sv_pos_u2b_flags					\
 				|U32 flags
 Admp	|char * |sv_2pv 	|NN SV *sv				\
 				|NULLOK STRLEN *lp
-Cdmp	|char * |sv_pv		|NN SV *sv
+CRdmp	|char * |sv_pv		|NN SV *sv
 Admp	|char * |sv_2pvbyte	|NN SV *sv				\
 				|NULLOK STRLEN * const lp
 CRdmp	|char * |sv_pvbyte	|NN SV *sv
