@@ -2212,8 +2212,14 @@ immediately written again.
                                     sv_force_normal_flags(sv, 0)
 
 
-/* all these 'functions' are now just macros */
+/* all these 'functions' are now just macros
+ *
+=for apidoc sv_pv
 
+Use the C<SvPV_nolen> macro instead
+
+=cut
+*/
 #define sv_pv(sv) SvPV_nolen(sv)
 
 /*
