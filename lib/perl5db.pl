@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.82';
+$VERSION = '1.83';
 
 $header = "perl5db.pl version $VERSION";
 
