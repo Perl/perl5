@@ -4434,6 +4434,11 @@ sub _print_frame_message {
 sub DB::sub {
     my ( $al, $ret, @ret ) = "";
 
+    # keep a lexical copy, rather than relying on the global. the global
+    # variable could be overwritten if something inside this sub triggers
+    # another sub call, running DB::sub again. overloads for example.
+    my $sub = $DB::sub;
+
     # We stack the stack pointer and then increment it to protect us
     # from a situation that might unwind a whole bunch of call frames
     # at once. Localizing the stack pointer means that it will automatically
@@ -4568,6 +4573,7 @@ sub DB::sub {
 } ## end sub _sub
 
 sub lsub : lvalue {
+    my $sub = $DB::sub;
 
     # We stack the stack pointer and then increment it to protect us
     # from a situation that might unwind a whole bunch of call frames
