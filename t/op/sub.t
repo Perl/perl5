@@ -398,10 +398,7 @@ is ref($main::{rt_129916}), 'CODE', 'simple sub stored as CV in stash (main::)';
     package RT129916;
     sub foo { 42 }
 }
-{
-    local $::TODO = "disabled for now";
-    is ref($RT129916::{foo}), 'CODE', 'simple sub stored as CV in stash (non-main::)';
-}
+is ref($RT129916::{foo}), 'CODE', 'simple sub stored as CV in stash (non-main::)';
 
 # Calling xsub via ampersand syntax when @_ has holes
 SKIP: {
