@@ -1,4 +1,4 @@
-package File::stat 1.14;
+package File::stat 1.15;
 use v5.38;
 
 use warnings::register;
@@ -200,14 +200,16 @@ sub stat :prototype($) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
     return $st if defined $st;
-	my $fh;
+    return if ref $arg;
+    # ... maybe $arg is the name of a bareword handle?
+    my $fh;
     {
-		local $!;
-		no strict 'refs';
-		require Symbol;
-		$fh = \*{ Symbol::qualify( $arg, caller() )};
-		return unless defined fileno $fh;
-	}
+        local $!;
+        no strict 'refs';
+        require Symbol;
+        $fh = \*{ Symbol::qualify( $arg, caller() )};
+        return unless defined fileno $fh;
+    }
     return populate(CORE::stat $fh);
 }
 
