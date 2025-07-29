@@ -74,7 +74,7 @@ all when not under DEBUGGING, reducing the number of C<#ifdef>'s in the code.
 
 The program is responsible for maintaining the correct value for C<depth>.
 
-=for apidoc CyW ||comma_pDEPTH
+=for apidoc CmnW ||comma_pDEPTH
 This is used in the prototype declarations for functions that take a L</C<comma_aDEPTH>>
 final parameter, much like L<C<pTHX_>|perlguts/Background and MULTIPLICITY>
 is used in functions that take a thread context initial parameter.
