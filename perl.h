@@ -75,17 +75,18 @@ all when not under DEBUGGING, reducing the number of C<#ifdef>'s in the code.
 The program is responsible for maintaining the correct value for C<depth>.
 
 =for apidoc CmnW ||comma_pDEPTH
-This is used in the prototype declarations for functions that take a L</C<comma_aDEPTH>>
-final parameter, much like L<C<pTHX_>|perlguts/Background and MULTIPLICITY>
-is used in functions that take a thread context initial parameter.
+This is used in the prototype declarations for functions that take a
+L</C<comma_aDEPTH>> final parameter, much like L<C<pTHX_>|perlguts/Background
+and MULTIPLICITY> is used in functions that take a thread context initial
+parameter.
 
 =for apidoc CmnW ||debug_aDEPTH
-Same as L</C<comma_aDEPTH>> but with no leading argument. Intended for functions with
-no normal arguments, and used by L</C<comma_aDEPTH>> itself.
+Same as L</C<comma_aDEPTH>> but with no leading argument. Intended for
+functions with no normal arguments, and used by L</C<comma_aDEPTH>> itself.
 
 =for apidoc CmnW ||debug_pDEPTH
-Same as L</C<comma_pDEPTH>> but with no leading argument. Intended for functions with
-no normal arguments, and used by L</C<comma_pDEPTH>> itself.
+Same as L</C<comma_pDEPTH>> but with no leading argument. Intended for
+functions with no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 
 =cut
  */
