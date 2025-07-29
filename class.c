@@ -697,10 +697,13 @@ S_class_cleanup_definition(pTHX_ HV *stash) {
                 SvREFCNT_dec_NN(cv);
                 GvCV_set((GV*)entry, NULL);
             }
-            else if (SvTYPE(entry) == SVt_PVCV
-                     && (CvIsMETHOD((CV*)entry) || memEQs(kpv, klen, "new"))) {
-                (void)hv_delete(stash, kpv, HeUTF8(he) ? -(I32)klen : (I32)klen,
-                                G_DISCARD);
+            else if (SvROK(entry)) {
+                SV *sv = SvRV(entry);
+                if (SvTYPE(sv) == SVt_PVCV
+                         && (CvIsMETHOD((CV*)sv) || memEQs(kpv, klen, "new"))) {
+                    (void)hv_delete(stash, kpv, HeUTF8(he) ? -(I32)klen : (I32)klen,
+                                    G_DISCARD);
+                }
             }
         }
         ++PL_sub_generation;
