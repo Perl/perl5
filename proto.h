@@ -2914,7 +2914,7 @@ Perl_newHVREF(pTHX_ OP *o)
         assert(o)
 
 PERL_CALLCONV HV *
-Perl_newHVhv(pTHX_ HV *hv)
+Perl_newHVhv(pTHX_ HV *ohv)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWHVHV
 
