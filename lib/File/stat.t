@@ -191,6 +191,40 @@ SKIP:
     ok(-p($pstat), "check -p detects a pipe");
 }
 
+{
+    # GH #23507
+    {
+        package PathObj;
+        use overload
+            '""'     => sub { $_[0]->to_string },
+            fallback => 1;
+
+        sub new {
+            my $class = shift;
+            bless { path => $_[0] }, $class
+        }
+
+        sub to_string {
+            my $self = shift;
+            $self->{path}
+        }
+    }
+
+    my $good_path = PathObj->new($file);
+    my $bad_path  = PathObj->new('/ no such file');
+
+    # explicit stringification
+    isa_ok stat("$good_path"), 'File::stat', 'stat("$good_path")';
+    is stat("$bad_path"), undef, 'stat("$bad_path") fails by returning undef';
+    # implicit stringification
+    isa_ok stat($good_path), 'File::stat', 'stat($good_path)';
+    is stat($bad_path), undef, 'stat($bad_path) fails by returning undef';
+    # and for good measure, unblessed references
+    is stat(\42), undef, 'stat(\42) fails by returning undef';
+    is stat([]), undef, 'stat([]) fails by returning undef';
+    is stat({}), undef, 'stat({}) fails by returning undef';
+}
+
 # Testing pretty much anything else is unportable.
 
 done_testing;
