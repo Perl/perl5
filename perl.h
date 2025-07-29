@@ -5416,7 +5416,7 @@ EXTCONST char PL_Zero[]
 
 /*
 =for apidoc_section $numeric
-=for apidoc AmTuU|const char *|PL_hexdigit|U8 value
+=for apidoc A@T|const char *|PL_hexdigit|U8 value
 
 This array, indexed by an integer, converts that value into the character that
 represents it.  For example, if the input is 8, the return will be a string

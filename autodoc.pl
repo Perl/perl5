@@ -74,7 +74,7 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-                qr/[aA bC dD eE fF Gh iI mM nN oO pP rR sS T uU vW xX y;#?]/xx;
+            qr/[ aA bC dD eE fF Gh iI mM nN oO pP rR sS T uU vW xX y ;@#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
 my $irrelevant_flags_re = qr/[ab eE G iI P rR vX?]/xx;
@@ -537,6 +537,7 @@ sub check_and_add_proto_defn {
     }
 
     $flags .= "m" if $flags =~ /M/;
+    $flags .= "U" if $flags =~ /@/;     # No usage output for @arrays
 
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;

@@ -123,7 +123,7 @@ PERLVARI(G, C_locale_obj, locale_t, NULL)
 PERLVARI(G, watch_pvx,	char *, NULL)
 
 /*
-=for apidoc AmnU|Perl_check_t *|PL_check
+=for apidoc A@nU|Perl_check_t *|PL_check
 
 Array, indexed by opcode, of functions that will be called for the "check"
 phase of optree building during compilation of Perl code.  For most (but

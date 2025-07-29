@@ -5,14 +5,14 @@
 : This file is known to be processed by regen/embed.pl, autodoc.pl,
 : makedef.pl, Devel::PPPort, and porting/diag.t.
 :
-: This file contains entries for various functions and macros defined by perl.
-: Each entry includes the name, parameters, and various attributes about it.
-: In most functions listed here, the name is a short name, and the function's
-: real name is the short one, prefixed by either 'Perl_' (for publicly visible
-: functions) or 'S_' (for internal-to-a-file static ones).  In many instances a
-: macro is defined that is the name in this file, and which expands to call the
-: real (full) name, with any appropriate thread context paramaters, thus hiding
-: that detail from the typical code.
+: This file contains entries for various functions, macros, typedefs, and
+: arrays defined by perl.  Each entry includes the name, parameters, and
+: various attributes about it.  In most functions listed here, the name is a
+: short name, and the function's real name is the short one, prefixed by either
+: 'Perl_' (for publicly visible functions) or 'S_' (for internal-to-a-file
+: static ones).  In many instances a macro is defined that is the name in this
+: file, and which expands to call the real (full) name, with any appropriate
+: thread context paramaters, thus hiding that detail from the typical code.
 :
 : Many macros (as opposed to functions) listed here are the complete full name,
 : though we may want to start converting those to have full names.
@@ -140,27 +140,27 @@
 :   =for apidoc_item name ...
 :   =for apidoc_defn name ...
 :
-: The purpose of these lines is to furnish documentation for functions and
-: macros.  The lines tend to be placed near the source for the item they
+: The purpose of these lines is to furnish documentation for functions,
+: macros, etc.  The lines tend to be placed near the source for the item they
 : describe.  autodoc.pl is run as part of the standard build process to
 : extract this documentation and build either perlapi.pod (from the elements
 : that are flagged as A in this file), or perlintern.pod (from the other
 : elements.
 :
-: Functions need to be specified in this file, but macros may not necessarily
-: be.  The information in this file is sufficient to generate a usage line for
-: the element to be documented; otherwise that information needs to be
-: specified in the apidoc-ish lines.
+: Functions need to be specified in this file, but macros and other types of
+: elements may not necessarily be.  The information in this file is sufficient
+: to generate a usage line for the element to be documented; otherwise that
+: information needs to be specified in the apidoc-ish lines.
 :
-: 'apidoc_defn' was added to supplement, for macros, the information in this
-: file.  It is designed to be placed at the point of definition of the macro
-: it is for, so that the information can easily be checked for correctness,
-: and you know at a glance that the macro actually has documentation.  It
-: doesn't by itself create any documentation; instead the other apidoc lines
-: pull in information specified by these lines.  Many of the lines in this
-: file for macros that don't also have the 'p' flag (described below) could be
-: pulled out of here and replaced by these lines throughout the source.  It is
-: a goal to do that as convenience dictates.
+: 'apidoc_defn' was added to supplement, for non-functions, the information in
+: this file.  It is designed to be placed at the point of definition of the
+: element it is for, so that the information can easily be checked for
+: correctness, and you know at a glance that the element actually has
+: documentation.  It doesn't by itself create any documentation; instead the
+: other apidoc lines pull in information specified by these lines.  Many of the
+: lines in this file for macros that don't also have the 'p' flag (described
+: below) could be pulled out of here and replaced by these lines throughout the
+: source.  It is a goal to do that as convenience dictates.
 :
 : The other apidoc lines either have the usage data as part of the line, or
 : pull in the data from this file or apidoc_defn lines.
@@ -223,7 +223,7 @@
 :
 : The 'name' in any such line must not be the same as any in this file (i.e.,
 : no redundant definitions), and one of the flags on the apidoc lines must be
-: 'm' or 'y', indicating it is not a function.
+: 'm', 'y', or '@', indicating it is not a function.
 :
 : All but the name field of an apidoc_item line are optional, and if empty,
 : inherits from a corresponding apidoc_defn line, if one exists, or the
@@ -611,6 +611,10 @@
 :          even if it is allegedly API.
 :
 :   'y'  Typedef.  The element names a type rather than being a macro
+:
+:   '@'  This entry is for an array, as opposed to a function or macro, etc.
+:
+:          autodoc.pl automatically suppresses any usage information.
 :
 :   ';'  autodoc.pl adds a terminating semi-colon to the usage example in the
 :        documentation.
