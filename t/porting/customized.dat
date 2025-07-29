@@ -10,12 +10,6 @@ MIME::Base64 cpan/MIME-Base64/Base64.xs ad617fe2d01932c35b92defa26d40aba601a95a8
 MIME::Base64 cpan/MIME-Base64/lib/MIME/Base64.pm 18e38d197c7c83f96b24f48bef514e93908e6a82
 MIME::Base64 cpan/MIME-Base64/lib/MIME/QuotedPrint.pm 36cbb455ab57b9bbca7e86f50987c8b1df1a8122
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
-Scalar::Util cpan/Scalar-List-Utils/lib/List/Util.pm 98dbc1cb98d448bd929fe42cf0fc47da978df196
-Scalar::Util cpan/Scalar-List-Utils/lib/List/Util/XS.pm 0e2ef5dcbebb5d808edd4b7adec8f6553cdde916
-Scalar::Util cpan/Scalar-List-Utils/lib/Scalar/Util.pm dddbfb9e26de572f88598cdf06353902718eb2ec
-Scalar::Util cpan/Scalar-List-Utils/lib/Sub/Util.pm 4be8e62dea87acce5ba50d11e7246baa0bfc5be0
-Scalar::Util cpan/Scalar-List-Utils/ListUtil.xs 3d0ba62cd4222599bf00956e8b963817f3afcfe2
-Scalar::Util cpan/Scalar-List-Utils/t/exotic_names.t a62bcb9dc667d5e51cbe061705b15f202ede8351
 Win32 cpan/Win32/Win32.pm 07a777ca9c5f642f068f92895a79a096a4a54469
 Win32 cpan/Win32/Win32.xs ff7efeb6b7bfa67e22411b6e3db761c730213a52
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
