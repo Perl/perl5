@@ -196,7 +196,7 @@ enum yysymbol_kind_t
   YYSYMBOL_proto = 185,                    /* proto  */
   YYSYMBOL_subattrlist = 186,              /* subattrlist  */
   YYSYMBOL_myattrlist = 187,               /* myattrlist  */
-  YYSYMBOL_sigvarname = 188,               /* sigvarname  */
+  YYSYMBOL_sigvar = 188,                   /* sigvar  */
   YYSYMBOL_sigslurpsigil = 189,            /* sigslurpsigil  */
   YYSYMBOL_sigslurpelem = 190,             /* sigslurpelem  */
   YYSYMBOL_sigscalarelem = 191,            /* sigscalarelem  */
@@ -417,7 +417,7 @@ static const char *const yytname[] =
   "formline", "formarg", "condition", "sideff", "else", "cont", "finally",
   "mintro", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "formname",
   "startsub", "startanonsub", "startanonmethod", "startformsub", "subname",
-  "proto", "subattrlist", "myattrlist", "sigvarname", "sigslurpsigil",
+  "proto", "subattrlist", "myattrlist", "sigvar", "sigslurpsigil",
   "sigslurpelem", "sigscalarelem", "sigelem", "siglist", "optsiglist",
   "optsubsignature", "subsignature", "subsigguts", "$@20", "optsubbody",
   "subbody", "optsigsubbody", "sigsubbody", "$@21", "expr", "listexpr",
@@ -1585,7 +1585,7 @@ static const toketypes yy_type_tab[] =
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
+  toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_ival,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval,
@@ -1599,6 +1599,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * 77a59f73bcda0e12f216863101470b10051433a1712bbf7219acbd22399b8568 perly.y
+ * 50e36766e33adf09a4e7a67e33f0a36ae1ecd272526f93746f7170736720d9da perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */

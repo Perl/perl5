@@ -3104,12 +3104,12 @@ CRp	|NV	|str_to_version |NN SV *sv
 p	|void	|sub_crush_depth|NN CV *cv
 : Used in perly.y
 p	|void	|subsignature_append_positional 			\
-				|NULLOK OP *varop			\
+				|PADOFFSET padix			\
 				|OPCODE defmode 			\
 				|NULLOK OP *defexpr
 p	|void	|subsignature_append_slurpy				\
 				|I32 sigil				\
-				|NULLOK OP *varop
+				|PADOFFSET padix
 p	|OP *	|subsignature_finish
 p	|void	|subsignature_start
 Adp	|void	|suspend_compcv |NN struct suspended_compcv *buffer

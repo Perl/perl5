@@ -114,8 +114,8 @@
 %type <opval> optfieldattrlist fielddecl
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
-%type <ival>  sigslurpsigil
-%type <opval> sigvarname sigscalarelem sigslurpelem
+%type <ival>  sigslurpsigil sigvar
+%type <opval> sigscalarelem sigslurpelem
 %type <opval> sigelem siglist optsiglist subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
@@ -822,10 +822,10 @@ myattrlist:	COLONATTR THING
  */
 
 /* the '' or 'foo' part of a '$' or '@foo' etc signature variable  */
-sigvarname:     %empty
-			{ parser->in_my = 0; $$ = NULL; }
+sigvar:     %empty
+			{ parser->in_my = 0; $$ = 0; }
         |       PRIVATEREF
-                        { parser->in_my = 0; $$ = $PRIVATEREF; }
+                        { parser->in_my = 0; $$ = $PRIVATEREF->op_targ; op_free($PRIVATEREF); }
 	;
 
 sigslurpsigil:
@@ -835,16 +835,16 @@ sigslurpsigil:
                         { $$ = '%'; }
 
 /* @, %, @foo, %foo */
-sigslurpelem: sigslurpsigil sigvarname
+sigslurpelem: sigslurpsigil sigvar
                         {
-                            subsignature_append_slurpy($sigslurpsigil, $sigvarname);
+                            subsignature_append_slurpy($sigslurpsigil, $sigvar);
                             $$ = NULL;
                         }
-        |     sigslurpsigil sigvarname ASSIGNOP
+        |     sigslurpsigil sigvar ASSIGNOP
                         {
 			    yyerror("A slurpy parameter may not have a default value");
                         }
-        |     sigslurpsigil sigvarname ASSIGNOP term
+        |     sigslurpsigil sigvar ASSIGNOP term
                         {
 			    yyerror("A slurpy parameter may not have a default value");
                         }
@@ -852,19 +852,19 @@ sigslurpelem: sigslurpsigil sigvarname
 
 /* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default' */
 sigscalarelem:
-                PERLY_DOLLAR sigvarname
+                PERLY_DOLLAR sigvar
                         {
-                            subsignature_append_positional($sigvarname, 0, NULL);
+                            subsignature_append_positional($sigvar, 0, NULL);
                             $$ = NULL;
                         }
-        |       PERLY_DOLLAR sigvarname ASSIGNOP
+        |       PERLY_DOLLAR sigvar ASSIGNOP
                         {
-                            subsignature_append_positional($sigvarname, $ASSIGNOP, newOP(OP_NULL, 0));
+                            subsignature_append_positional($sigvar, $ASSIGNOP, newOP(OP_NULL, 0));
                             $$ = NULL;
                         }
-        |       PERLY_DOLLAR sigvarname ASSIGNOP term[defop]
+        |       PERLY_DOLLAR sigvar ASSIGNOP term[defop]
                         {
-                            subsignature_append_positional($sigvarname, $ASSIGNOP, $defop);
+                            subsignature_append_positional($sigvar, $ASSIGNOP, $defop);
                             $$ = NULL;
                         }
         ;
