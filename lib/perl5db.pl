@@ -4460,13 +4460,13 @@ sub DB::sub {
         # Whether or not the autoloader was running, a scalar to put the
         # sub's return value in (if needed), and an array to put the sub's
         # return value in (if needed).
-        if ($sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
+        if (!ref $sub && $sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
             print "creating new thread\n";
         }
 
         # If the last ten characters are '::AUTOLOAD', note we've traced
         # into AUTOLOAD for $sub.
-        if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
+        if ( !ref $sub && length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
             no strict 'refs';
             $al = " for $$sub" if defined $$sub;
         }
@@ -4601,13 +4601,13 @@ sub lsub : lvalue {
         # sub's return value in (if needed), and an array to put the sub's
         # return value in (if needed).
         my ( $al, $ret, @ret ) = "";
-        if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+        if ( !ref $sub && $sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
             print "creating new thread\n";
         }
 
         # If the last ten characters are C'::AUTOLOAD', note we've traced
         # into AUTOLOAD for $sub.
-        if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
+        if ( !ref $sub && length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
             $al = " for $$sub";
         }
 
