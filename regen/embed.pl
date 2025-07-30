@@ -274,7 +274,12 @@ sub generate_proto_h {
                     die_at_end "$func: $arg ($n) doesn't have a name\n";
                 }
                 my $argname = $1;
-                if (!$nocheck and defined $argtype and exists $type_asserts{$argtype}) {
+
+                if (    defined $argname
+                    and ! $nocheck
+                    and defined $argtype
+                    and exists $type_asserts{$argtype})
+                {
                     push @typed_args, [ $argtype, $argname ];
                 }
 
