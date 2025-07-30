@@ -275,6 +275,13 @@ sub generate_proto_h {
                 }
                 my $argname = $1;
 
+                if (   defined $argname
+                    && ($nn||$nz)
+                    && (! $has_mflag || $binarycompat))
+                {
+                    push @names_of_nn, $argname;
+                }
+
                 if (    defined $argname
                     and (! $has_mflag || $binarycompat)
                     and ! $nocheck
@@ -282,13 +289,6 @@ sub generate_proto_h {
                     and exists $type_asserts{$argtype})
                 {
                     push @typed_args, [ $argtype, $argname ];
-                }
-
-                if (   defined $argname
-                    && ($nn||$nz)
-                    && (! $has_mflag || $binarycompat))
-                {
-                    push @names_of_nn, $argname;
                 }
             }
             $ret .= join ", ", @$args;
