@@ -185,7 +185,7 @@ struct 'File::stat' => [
 ];
 
 sub populate {
-    return unless @_;
+    return undef unless @_;
     my $stob = new();
     @$stob = (
 	$st_dev, $st_ino, $st_mode, $st_nlink, $st_uid, $st_gid, $st_rdev,
@@ -199,8 +199,7 @@ sub lstat :prototype($) { populate(CORE::lstat(shift)) }
 sub stat :prototype($) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
-    return $st if defined $st;
-    return if ref $arg;
+    return $st if defined $st || ref $arg;
     # ... maybe $arg is the name of a bareword handle?
     my $fh;
     {
@@ -208,7 +207,7 @@ sub stat :prototype($) {
         no strict 'refs';
         require Symbol;
         $fh = \*{ Symbol::qualify( $arg, caller() )};
-        return unless defined fileno $fh;
+        return undef unless defined fileno $fh;
     }
     return populate(CORE::stat $fh);
 }

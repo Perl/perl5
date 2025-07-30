@@ -225,6 +225,18 @@ SKIP:
     is stat({}), undef, 'stat({}) fails by returning undef';
 }
 
+{
+    # list context
+
+    my @ret = stat '/ no such file';
+    is scalar(@ret), 1, 'stat returns one value in list context on failure';
+    is $ret[0], undef, 'stat returns undef on failure';
+
+    @ret = stat $file;
+    is scalar(@ret), 1, 'stat returns one value in list context on success';
+    isa_ok $ret[0], 'File::stat', 'successful stat in list context';
+}
+
 # Testing pretty much anything else is unportable.
 
 done_testing;
