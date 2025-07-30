@@ -9,7 +9,7 @@ use File::stat;
 # should be revisited
 is($INC{'Symbol.pm'}, undef, "Symbol isn't loaded yet");
 
-# ID 20011110.104 (RT #7896)
+# ID 20011110.104 (RT #7896 / GH #4572)
 $! = 0;
 is($!, '', '$! is empty');
 is(File::stat::stat('/notafile'), undef, 'invalid file should fail');
