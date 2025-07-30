@@ -179,7 +179,7 @@ SKIP: {
 }
 
 SKIP:
-{   # RT #111638
+{   # RT #111638 / GH #11992
     skip "We can't check for FIFOs", 2 unless defined &Fcntl::S_ISFIFO;
     skip "No pipes", 2 unless defined $Config{d_pipe};
     pipe my ($rh, $wh)
