@@ -3340,6 +3340,8 @@ Implements C<StashHANDLER>, which you should use instead
 CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
+    PERL_ARGS_ASSERT_GV_HANDLER;
+
     MAGIC *mg;
     AMT *amtp;
     U32 newgen;
