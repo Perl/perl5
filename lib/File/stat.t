@@ -240,7 +240,17 @@ SKIP:
 {
     # implicit $_
     $_ = $file;
-    isa_ok stat, 'File::stat', 'stat()';
+    my $st_1 = stat;
+    isa_ok $st_1, 'File::stat', 'stat()';
+
+    # reuse stat buffer
+    my $st_2 = stat \*_;
+    isa_ok $st_2, 'File::stat', 'stat(\\*_)';
+    # we can't verify directly that no actual stat() was done, but we can check
+    # that the returned device/inode match those of $file even though *_{IO}
+    # (the actual _ handle) was never opened
+    is $st_1->dev, $st_2->dev, 'stat(\\*_)->dev matches that of last stat()';
+    is $st_1->ino, $st_2->ino, 'stat(\\*_)->ino matches that of last stat()';
 }
 
 # Testing pretty much anything else is unportable.

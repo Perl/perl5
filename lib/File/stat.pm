@@ -310,10 +310,19 @@ built-in C<stat>/C<lstat> functions):
 
 =head1 BUGS
 
-As of Perl 5.8.0 after using this module you cannot use the special
-filehandle C<_> with stat() or lstat(); trying to do so leads to strange
-errors.  The workaround is to explicitly populate the object using the
-unexported and undocumented populate() function with CORE::stat():
+The built-in C<stat> and C<lstat> functions recognize the special
+filehandle C<_> (underscore) to indicate that no actual C<stat> be done;
+instead the results of the last C<stat> or C<lstat> or filetest operation
+should be returned.  This syntax does not work with File::stat, but the
+same result can be achieved by passing C<stat> a reference to the C<*_>
+typeglob:
+
+    use File::stat;
+    my $stat_obj = stat \*_;  # reuse results of last stat operation
+
+Alternatively, another workaround is to explicitly populate the object
+using the unexported and undocumented populate() function with
+CORE::stat():
 
     my $stat_obj = File::stat::populate(CORE::stat(_));
 
