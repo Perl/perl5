@@ -134,10 +134,48 @@
 :
 :   Don't spend any time trying to get your changes to this file to look nice,
 :   or, for example, for the conditionals to be in order of importance.  Any
-:   changes you make here will be resorted and reformatted according to the
-:   current rules in regen/embed.pl and regen/embed_lib.pl.  Each entry's flags
-:   will be sorted asciibetically.  (This can cause hassles if the rules
+:   changes you make here will be resorted and reformatted (by
+:   regen/tidy_embed.pl) according to its current rules.  Each entry's flags
+:   will be sorted asciibetically.  (This all can cause hassles if the rules
 :   change between when you make changes here and when you rebase.)
+:
+: AUTOMATIC PARAMETER SANITY CHECKING
+:
+:   For each function entry in this file, regen/embed.pl, generates a macro
+:   that performs parameter sanity validation.  If the function is named
+:   'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.  You
+:   should place a call to that macro in foo() before any other code.  It will
+:   automatically expand to whatever checking is currently generated for foo
+:   (often none).  These are in the form of assert() calls, so they are only
+:   activated for DEBUGGING builds.
+:
+:   You must specify what checking is needed for all pointer arguments.  If the
+:   pointer is allowed to point to NULL, prefix that argument with 'NULLOK'
+:   (following the template of the many entries in this file that have that).
+:   If it can't be NULL, use 'NN' (again many entries herein do that).
+:   The reason for this requirement is to tell the maintainers that you have
+:   considered the question about the argument, and this is the answer.
+:
+:   For a numeric argument, you may specify that it can't be 0 by using 'NZ'
+:
+:   regen/embed.pl may automatically add further checking for any argument as
+:   it deems desirable.  You can override this by specifying 'NOCHECK'
+:
+:	Currently this further checking is just for pointer parameters that
+:	point to AVs, CVs or HVs.  The check is that the SV being pointed to is
+:	of the intended type, by inspecting its SvTYPE(). For some functions
+:	this check may be inappropriate, as in rare cases the arguments passed
+:	may not be of the correct type. As already mentioned, NOCHECK
+:	suppresses this check.
+:
+:   Currently, it is optional to include an empty ARGS_ASSERT macro in your
+:   functions.  But a porting test enforces that a non-empty one is included.
+:   The call should be at the top of your function so that the sanity checks
+:   have passed before anything tries to use an argument.  When writing a new
+:   function, add the macro even if not required, and you'll never have to go
+:   back and add one later when more checks do get added
+:
+: AUTOMATIC DOCUMENTATION GENERATION
 :
 : Just below is a description of the relevant parts of the automatic
 : documentation generation system which heavily involves this file.  Below that
@@ -284,6 +322,8 @@
 :
 : porting/diag.t checks some things for consistency based on this file.
 :
+: FLAGS REFERENCE
+:
 : The remainder of these introductory comments detail all the possible flags:
 :
 :   'A'  Both long and short names are accessible fully everywhere (usually
@@ -397,21 +437,12 @@
 :        flag even on a format function is if the format would generate error:
 :        format string argument is not a string type
 :
-:   'G'  Suppress empty PERL_ARGS_ASSERT_foo macro. Normally such a macro is
-:        generated for all entries for functions 'foo' in this file. If there
-:        is a pointer argument to 'foo', it needs to be declared in this file
-:        as either NN or NULLOK, and the function definition must call its
-:        corresponding PERL_ARGS_ASSERT_foo macro (a porting test ensures this)
-:        which asserts at runtime (under DEBUGGING builds) that NN arguments
-:        are not NULL. If there aren't NN arguments, use of this macro is
-:        optional. Rarely, a function will define its own PERL_ARGS_ASSERT_foo
-:        macro, and in those cases, adding this flag to its entry in this file
-:        will suppress the normal one. It is not possible to suppress the
-:        generated macro if it isn't optional, that is, if there is at least
-:        one NN argument.
+:   'G'  Suppress empty PERL_ARGS_ASSERT_foo macro.  Normally such a macro is
+:        generated for all entries for functions 'foo' in this file.  The macro
+:        is empty unless regen/embed.pl deems that there should be assert()
+:        calls to verify the sanity of some or all of foo's arguments.
 :
-:          proto.h: PERL_ARGS_ASSERT macro is not defined unless the function
-:                   has NN arguments
+:          proto.h: An empty PERL_ARGS_ASSERT macro is not defined
 :
 :   'h'  Hide any documentation that would normally go into perlapi or
 :        perlintern. This is typically used when the documentation is actually
@@ -635,24 +666,6 @@
 :   '?'  The question mark flag is used internally by Devel::PPPort to
 :        indicate that it does not have enough information to generate a
 :        proper test case.
-:
-: In this file, pointer parameters that must not be passed NULLs should be
-: prefixed with NN.
-:
-: And, pointer parameters that may be NULL should be prefixed with NULLOK.
-: This has no effect on output yet.  It's a notation for the maintainers to
-: know "I have defined whether NULL is OK or not" rather than having neither
-: NULL or NULLOK, which is ambiguous.
-:
-: Pointer parameters that point to AVs, CVs or HVs will generate additional
-: checks in the arguments assertion macro, that check on entry to the
-: function that the SV being pointed to is of the intended type, by
-: inspecting its SvTYPE(). For some functions this check may be inappropriate
-: as in rare cases the arguments passed may not be of the correct type. To
-: skip checking on an argument type, prefix its type with NOCHECK.
-:
-: Numeric arguments may also be prefixed with NZ, which will cause the
-: appropriate asserts to be generated to validate that this is the case.
 :
 : Please keep the next line *BLANK*
 
