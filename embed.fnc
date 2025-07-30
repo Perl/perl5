@@ -1492,7 +1492,7 @@ ARdpx	|SV *	|hv_bucket_ratio|NN HV *hv
 Adp	|void	|hv_clear	|NULLOK HV *hv
 Adp	|void	|hv_clear_placeholders					\
 				|NN HV *hv
-Cp	|void * |hv_common	|NULLOK HV *hv				\
+Cp	|void * |hv_common	|NULLOK NOCHECK HV *hv			\
 				|NULLOK SV *keysv			\
 				|NULLOK const char *key 		\
 				|STRLEN klen				\
@@ -3411,7 +3411,7 @@ Adp	|void	|sv_reset	|NN const char *s			\
 				|NULLOK HV * const stash
 p	|void	|sv_resetpvn	|NULLOK const char *s			\
 				|STRLEN len				\
-				|NULLOK HV * const stash
+				|NULLOK NOCHECK HV * const stash
 Adp	|SV *	|sv_rvunweaken	|NN SV * const sv
 Adp	|SV *	|sv_rvweaken	|NN SV * const sv
 Adp	|void	|sv_set_bool	|NN SV *sv				\
@@ -6098,7 +6098,7 @@ S	|I32	|utf16_textfilter					\
 # endif
 #endif /* defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_UNIVERSAL_C)
-GS	|bool	|isa_lookup	|NULLOK HV *stash			\
+GS	|bool	|isa_lookup	|NULLOK NOCHECK HV *stash		\
 				|NULLOK SV *namesv			\
 				|NULLOK const char *name		\
 				|STRLEN len				\
