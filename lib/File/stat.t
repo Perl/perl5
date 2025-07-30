@@ -237,6 +237,12 @@ SKIP:
     isa_ok $ret[0], 'File::stat', 'successful stat in list context';
 }
 
+{
+    # implicit $_
+    $_ = $file;
+    isa_ok stat, 'File::stat', 'stat()';
+}
+
 # Testing pretty much anything else is unportable.
 
 done_testing;

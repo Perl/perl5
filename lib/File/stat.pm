@@ -194,9 +194,9 @@ sub populate {
     return $stob;
 } 
 
-sub lstat :prototype($) { populate(CORE::lstat(shift)) }
+sub lstat :prototype(_) { populate(CORE::lstat(shift)) }
 
-sub stat :prototype($) {
+sub stat :prototype(_) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
     return $st if defined $st || ref $arg;
@@ -293,17 +293,19 @@ function functions with their full qualified names.
 On the other hand, the built-ins are still available
 via the C<CORE::> pseudo-package.
 
+As of version 1.15 (provided with perl 5.44) C<stat> and C<lstat> can be
+called without arguments, in which case C<$_> is used (just like the
+built-in C<stat>/C<lstat> functions):
+
+    my $st_1 = stat;   # stat($_)
+    my $st_2 = lstat;  # lstat($_)
+
 =head1 BUGS
 
-As of Perl 5.8.0 after using this module you cannot use the implicit
-C<$_> or the special filehandle C<_> with stat() or lstat(), trying
-to do so leads into strange errors.  The workaround is for C<$_> to
-be explicit
-
-    my $stat_obj = stat $_;
-
-and for C<_> to explicitly populate the object using the unexported
-and undocumented populate() function with CORE::stat():
+As of Perl 5.8.0 after using this module you cannot use the special
+filehandle C<_> with stat() or lstat(); trying to do so leads to strange
+errors.  The workaround is to explicitly populate the object using the
+unexported and undocumented populate() function with CORE::stat():
 
     my $stat_obj = File::stat::populate(CORE::stat(_));
 
