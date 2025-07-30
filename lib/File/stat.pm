@@ -194,10 +194,11 @@ sub populate {
     return $stob;
 } 
 
-sub lstat :prototype(_) { populate(CORE::lstat(shift)) }
+sub lstat :prototype(_) ($arg) {
+    populate(CORE::lstat $arg)
+}
 
-sub stat :prototype(_) {
-    my $arg = shift;
+sub stat :prototype(_) ($arg) {
     my $st = populate(CORE::stat $arg);
     return $st if defined $st || ref $arg;
     # ... maybe $arg is the name of a bareword handle?
