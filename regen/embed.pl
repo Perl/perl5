@@ -276,6 +276,7 @@ sub generate_proto_h {
                 my $argname = $1;
 
                 if (    defined $argname
+                    and (! $has_mflag || $binarycompat)
                     and ! $nocheck
                     and defined $argtype
                     and exists $type_asserts{$argtype})
