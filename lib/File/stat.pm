@@ -288,11 +288,18 @@ variables named with a preceding C<st_> in front their method names.
 Thus, C<$stat_obj-E<gt>dev()> corresponds to $st_dev if you import
 the fields.
 
-To access this functionality without the core overrides,
-pass the C<use> an empty import list, and then access
-function functions with their full qualified names.
-On the other hand, the built-ins are still available
-via the C<CORE::> pseudo-package.
+To access this functionality without the core overrides, pass the C<use>
+an empty import list, and then access functions with their full qualified
+names:
+
+    use File::stat ();
+    my $st = File::stat::stat($file);
+
+On the other hand, the built-ins are still available via the C<CORE::>
+pseudo-package even if you let File::stat override them:
+
+    use File::stat;
+    my ($dev, $ino, $mode) = CORE::stat($file);
 
 As of version 1.15 (provided with perl 5.44) C<stat> and C<lstat> can be
 called without arguments, in which case C<$_> is used (just like the
