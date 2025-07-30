@@ -61,6 +61,8 @@ may not be usable in all circumstances.
 A numeric constant can be specified with L<perlapi/C<INT16_C>>,
 L<perlapi/C<UINTMAX_C>>, and similar.
 
+See also L<perlhacktips/"Portability problems">.
+
 =for apidoc_section $integer
 =for apidoc  Ayh ||IV
 =for apidoc_item ||I8
@@ -3004,8 +3006,32 @@ The context-free version of Perl_warner is called
 Perl_warner_nocontext, and does not take the extra argument.  Instead
 it does C<dTHX;> to get the context from thread-local storage.  We
 C<#define warner Perl_warner_nocontext> so that extensions get source
-compatibility at the expense of performance.  (Passing an arg is
-cheaper than grabbing it from thread-local storage.)
+compatibility at the expense of performance.  Passing an arg is
+much cheaper and faster than grabbing it with from the OS's thread-local
+storage API with function calls.
+
+But consider this, if there is a choice between C<Perl_croak> and
+C<Perl_croak_nocontext> which one do you pick?  Which one is
+more efficient?  Is it even possible to make the C<if(assert_failed)> test true
+and enter conditional branch with C<Perl_croak>?
+
+Maybe only from a test file.  Maybe not.  Your C<Perl_croak> branch is probably
+unreachable until you add a new bug.  So the performance of
+C<Perl_croak_nocontext> compared to C<Perl_croak>, doesn't matter.  The C<dTHX;>
+call inside the slower C<Perl_croak_nocontext>, will never execute in anyone's
+normal control flow.  If the error branch never executes, optimize what does
+execute. By removing the C<aTHX> arg, you saved 4-12 bytes space and 1-3 CPU
+assembly ops on a cold branch, by pushing 1 less variable onto the C stack
+inside the call expression invoking C<Perl_croak_nocontext>, instead of
+C<Perl_croak>. The CPU has less to jump over now.
+
+The rational of C<Perl_croak_nocontext> is better than C<Perl_croak> is only
+in the case of C<Perl_croak>, and nowhere else except for the deprecated
+C<Perl_die_nocontext> C<Perl_die> pair and 3rd case of C<Perl_warn>.
+C<Perl_warn> is debateable.
+
+It doesn't apply to C<Perl_form> C<Perl_mess> or keyword
+C<Perl_op_die(OP * op)>, which could be normal control flow.
 
 You can ignore [pad]THXx when browsing the Perl headers/sources.
 Those are strictly for use within the core.  Extensions and embedders
@@ -3032,11 +3058,12 @@ argument somehow.  The kicker is that you will need to write it in
 such a way that the extension still compiles when Perl hasn't been
 built with MULTIPLICITY enabled.
 
-There are three ways to do this.  First, the easy but inefficient way,
-which is also the default, in order to maintain source compatibility
-with extensions: whenever F<XSUB.h> is #included, it redefines the aTHX
-and aTHX_ macros to call a function that will return the context.
-Thus, something like:
+There are three ways to do this.  First, the easist way, is using Perl's legacy
+code compatibility layer, which is also the default. Production grade code
+and code intended for CPAN should never use this mode. In order to maintain
+source compatibility with very old extensions: whenever F<XSUB.h> is #included,
+it redefines the aTHX and aTHX_ macros to call a function that will return the
+context. Thus, something like:
 
         sv_setiv(sv, num);
 
@@ -3051,7 +3078,9 @@ or to this otherwise:
 
 You don't have to do anything new in your extension to get this; since
 the Perl library provides Perl_get_context(), it will all just
-work.
+work, but each XSUB will be much slower. Benchmarks have shown using the
+compatibility layer and Perl_get_context(), takes 3x more wall time in the best
+case, and 8.5x worst case.
 
 The second, more efficient way is to use the following template for
 your Foo.xs:

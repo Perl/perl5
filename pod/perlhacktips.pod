@@ -53,25 +53,133 @@ supported"> for further discussion about context.
 
 Not compiling with -DDEBUGGING
 
-The DEBUGGING define exposes more code to the compiler, therefore more
-ways for things to go wrong.  You should try it.
+The DEBUGGING define exposes more code to the compiler and turns on Perl's
+asserts, therefore more ways for things to go wrong.  A Perl built with
+the C<DEBUGGING> define will be visibly slower in the shell and every other
+subsystem.  C<DEBUGGING> is only for development of XS modules or core code,
+never production running, but its maximum error checking is crucial for
+good new code. You should try it.
 
 =item *
 
-Introducing (non-read-only) globals
+Introducing (non-read-only) globals and statics
 
-Do not introduce any modifiable globals, truly global or file static.
-They are bad form and complicate multithreading and other forms of
-concurrency.  The right way is to introduce them as new interpreter
-variables, see F<intrpvar.h> (at the very end for binary
-compatibility).
+Do not introduce any modifiable C globals, truly visible global variables
+declared with extern visible or per C file globals declared with C<static>
+visibility. They are bad form, and not memory safe with complicate multithreading
+and other forms of concurrency. XS modules have a dedicated simple API to create
+their own, Perl threading safe global variables, see
+L<perlxs/Safely Storing Static Data in XS>. But the interpreter core can't use
+that API.
 
-Introducing read-only (const) globals is okay, as long as you verify
-with e.g. C<nm libperl.a|egrep -v ' [TURtr] '> (if your C<nm> has
+The interpreter currently does not use any atomic intrinsic functions offered
+by a C compiler. Instead Perl's thread safe serialization, is done with an
+internal API with names like C<MUTEX_INIT()> and C<MUTEX_LOCK()> .
+
+Historically, atomic operations didn't exist on most CPU archs that Perl uses.
+If they existed, atomic APIs were always OS and vender specific, and never
+portable.
+
+As of 5.35.5, perl dropped support for a strict C89 compiler and moved to
+a minimum requirement of C89+some C99. See L</C99>. C11 standardized some
+atomics for the first time in the optionally implemented C<stdatomic.h>.
+Patches are welcome to add a portable atomic API, with fallbacks to
+C<MUTEX_LOCK()>.
+
+The right way to introduce a new C global variable, usually will be to add
+it as a new interpreter variable. See F<intrpvar.h>.  Since 5.10.0, adding
+or removing or changed the size of any interpreter variable, is not supported
+and undefined behavior.  Recompiling XS modules is required.
+
+There are some loopholes to this policy if you are writing unstable
+experiments.  These loopholes can never be used, in stable code, for the
+interpreter, or XS modules.  The loopholes may temporarily work, just long
+enough, to finish the experiment.  Remember, failure to get a C<SEGV>, or
+failure to get fatal C<panic:> error, doesn't mean you didn't introduce a bug,
+or corrupt a random malloc() block.
+
+Between 5.10.0, and upto 5.21.5, there was a provision, that adding 1 new
+variable at the end of F<intrpvar.h> as the very last member, was always binary
+compatible with older XS modules. This was intended only for stable
+maintenance releases. Ex, new maintenance release 5.18.1, loading an XS module
+compiled against header files from 5.18.0. Remember a newer 5.18.1 core,
+loading an XS binary compiled against 5.17.10 or 5.16.0, isn't allowed.
+
+So if cutting off current struct members in F<intrpvar.h>, didn't introduce a
+crash, you saved some time in your experiment and it was good luck.
+
+Starting with 5.21.6, stricter ABI checking was added between XS modules and
+the interp.  While the new stricter ABI check heavily increased and made very
+visible all different kinds of failure modes that end users run into, error
+message in a console, are always better than SEGVs.  Perl users aren't expect
+to know how to use C debuggers, obtain C debugging symbols, read machine code,
+and single step through optimized binaries with inaccurate variable watch
+tools in their IDE.
+
+There is a goal of one day returning a mechanism for safely adding new data
+fields to the end of the interp struct without an XS recompile, just as before
+5.21.6. But it would require new code and new metadata collection in the core.
+Along with being equally or more resistent against crashing, after borderline
+malicious damage caused by non-tech industry users, students, or developers
+that are outside their knowledge background.  Copy pasting .so/.dll files
+between random Linux systems and random build configs of Perl, along with
+users incorrectly setting their C<@INC> from the shell must be prevented.
+In rare cases, ABI check failures happened in perl without a human user
+because of CI/continuous deployment systems pushing breakage to
+users/production servers.
+
+The post 5.21.6 ABI check verifies the definition of F<intrpvar.h> as
+understood by each build of the perl interpreter binary, or the
+C<libperl> binary, against the definition of F<intrpvar.h> as understood,
+when the XS module's shared library file was compiled. The "definitions" are
+permanently burned into the binaries on both sides by the C compiler, when
+each side was compiled.
+
+The exact sanity check requires struct length of C<PerlInterpreter *> aka
+C<my_perl> to be C<sizeof(PerlInterpreter)> or C<sizeof(*my_perl)>
+identical between Core and an XS module, regardless if its a non-threaded or
+threaded build of perl.  If the C compile time byte lengths don't match at
+runtime, L<perldiag/"%s: loadable library and perl binaries are mismatched (got %s handshake key %p, needed %p)">
+error happens.
+
+For 5.21.6 and up, to avoid recompiling XS, if you want to add a new interpreter
+global variable while hacking on the interpreter, is to rename, repurpose, or
+make into union, a current variable from F<intrpvar.h> without change its size,
+alignment, and offset.
+
+Something easier, if speed doesn't matter, put your new experimental pointer or
+integer, into the former backend of C<MY_CXT_INIT>. It is an C<HV*> named
+L<perlapi/"PL_modglobal">.
+
+If speed is important, add a new pointer member to F<intrpvar.h> just once in your
+branch, recompile all your XS modules once, and always keep the private patch
+in your repo. Shrinking or growing the length of a pointer from C<Newx()>,
+doesn't trip the 5.21.6 and up interpreter global struct size check.
+
+Take a look the backend of the C<MY_CXT_INIT> API. The backend is
+2 variables, C<PL_my_cxt_list> and C<PL_my_cxt_size>. Nothing prevents
+the C<perl_construct>, C<perl_clone_using>, C<perl_destruct> group being
+changed to always take ownership of index 0 of array of C<void *>s that is
+stored at C<PL_my_cxt_list>, before the first call to C<newXS()> or PP code.
+
+Note, you could always look at the code, and see if there is an undocumented
+way to disable it. C<if(0){}> works everywhere.
+
+In perl core, introducing read-only (const) globals is okay, as long as you
+verify with e.g. C<nm libperl.a|egrep -v ' [TURtr] '> (if your C<nm> has
 BSD-style output) that the data you added really is read-only.  (If it
 is, it shouldn't show up in the output of that command.)
 
-If you want to have static strings, make them constant:
+To avoid CC linking in certain very common C C<""> strings over and over, into
+every XS module, like if there is a macro that interally has a
+C<croak("panic: corruption")>, Perl does uncontroversially export read only
+global data variables, or very common or handy read only structs from the
+interp, to CPAN modules.  These exported data, not code, resources often are
+related to warnings, or throwing exceptions.
+
+Const static strings are less efficient than double quoted string literal.
+But if you really want to have static strings, at minimum, make sure they are
+declared with constant:
 
   static const char etc[] = "...";
 
@@ -81,14 +189,61 @@ right combination of C<const>s:
     static const char * const yippee[] =
         {"hi", "ho", "silver"};
 
+C requires that C<static const char []> arrays have unique addresses in an
+equality test.  The linker is prohibited from merging and de-duplicating
+const static arrays with identical length and data content.  This is B<not> true
+for double quoted C string literals.  C string literals are efficiently de-duped
+by linkers.  If a string literal is very long, or its contents decrease
+readability of other code, and you desire an alternate token or symbol for that
+string, use a C<#define Msg "long Msg">.  2 references to C<"..."> will
+always get merged to 1 copy stored in the binary image.
+
+  static const char etc[] = "...";
+
+This will never be merge in the final binary.  In this case, there would be
+2 copies of C<"..."> at different 2 addresses, each taking 4 bytes, inside one
+C<perl.bin> or C<libperl.so> or XS binary.
+
+Sometimes this inefficiency is a feature.  Its goes as such.  Declare a
+C<static const char []> array, and place the pointer to that static array,
+into a larger global-like or malloc-ed structure, and return control.  Sometime
+later, you regain control, and you check a global-like or malloc-ed structure.
+Is the C<const char *> still the same address as your C<static const char []>
+array or not?  This can be used as tag or flag or status, if you see the same
+address or not in the future.
+
+Because of the guarenteed different address, any arbitrary core or XS code that
+overwrites the C<const char *> member, with an identical contents, C<"">
+literal, would be detected.
+
+Perl uses this method inside C<L<perlapi/"PL_sv_yes">>,
+C<L<perlapi/"PL_sv_no">>, and C<L<perlapi/"PL_sv_zero">>. These 3 set
+C<SvPVX> to exported, const char arrays, C<PL_Yes>, C<PL_No>, and C<PL_Zero>.
+The addresses of 3 const char arrays, have special meaning, and will never test
+C<==> true against the address of a string literal with the same contents.
+
 =item *
 
 Not exporting your new function
 
-Some platforms (Win32, AIX, VMS, OS/2, to name a few) require any
-function that is part of the public API (the shared Perl library) to be
-explicitly marked as exported.  See the discussion about F<embed.pl> in
-L<perlguts>.
+Most platforms (Win32, AIX, VMS, OS/2, to name a few) require any function
+or any const or read-write, process global data variable that is part of the
+public API (the shared Perl library) to be explicitly marked as exported.
+C symbols do not cross between different binary disk files on these platforms
+unless explicit exported.  If a public API macro that uses a non-public API
+function or process global variable, the non-public API C symbol has to be
+exported so the OS shared library runtime linkers can load XS modules.
+
+Start in 5.37.1, support for C<__attribute__((visibility("hidden")))> was added.
+This brought explicit export marking shared library C symbol semantics to
+almost all compilers and platforms.  This greatly helps if the compiler has LTO
+since heuristic automatic inlining of any function is possible, along with
+not static, not exported marked, unused functions being removed from final
+binaries.
+
+See the discussion about F<embed.pl> in L<perlguts>.  Export marking is done
+by editing F<embed.fnc> for functions.b For data variables, export marking,
+is through F<perl.h>, F<globvar.sym>, F<globals.c> and F<perlvars.h>.
 
 =item *
 
@@ -103,7 +258,15 @@ first place.  Perl has a long and not so glorious history of exporting
 functions that it should not have.
 
 If the function is used only inside one source code file, make it
-static.  See the discussion about F<embed.pl> in L<perlguts>.
+static.  If you want the same static to be used from only 2-3 core C<.c> files,
+and not pollute CPAN XS, or core bundled dual life XS, the core interp C<.c>
+files all have defines like C<#define PERL_IN_SCOPE_C> at the top.  Look for
+them, then place your static function in a C<.h> with correct CPP conditionals
+limiting it to 2 files.  Note, not all CCs and OSes have LTO, if your static
+is included in more than 2 files, you will have the
+C<static const char etc[] = "...";> problem again, as more and more unique
+copies at different addresses but inside the same binary start being made.
+See also the discussion about F<embed.pl> in L<perlguts>.
 
 If the function is used across several files, but intended only for
 Perl's internal use (and this should be the common case), do not export
@@ -252,7 +415,20 @@ variable length arrays
 Not supported by B<any> MSVC, and this is not going to change.
 
 Even "variable" length arrays where the variable is a constant
-expression are syntax errors under MSVC.
+expression are syntax errors under MSVC.  MSVC has steered its
+users to use C<alloca()>, which always on that platform, but perl
+doesn't use C<alloca()> for multiple reasons.
+
+Lack of portability or vendor-neutral specs. Certain Unix OSes/Compilers
+have per-thread C stacks only 8KB-32KB big, yet GBs of physical memory.
+alloca and the size of C stack in general, don't have a documented way of
+testing for OOM, and recovering from OOM to print diagnostics to STDERR.
+
+Perl 5's mortal SV API, which debut with Perl 5, is a undramatic, drop in
+replacement for VLAs and alloca. Its slightly slower (some 100s of nanoseconds
+vs 10s of ns) but mortal API offers almost unlimited virtual and physical
+memory, on all OSes, in comparison, along with a standardized way of
+detecting OOM, so perl can print to STDERR in controlled way after.
 
 =item *
 
@@ -599,6 +775,33 @@ pointers is unportable and undefined, but practically speaking it seems
 to work, but you should use the FPTR2DPTR() and DPTR2FPTR() macros.
 Sometimes you can also play games with unions.
 
+ISO C is unlikely to change this for many reasons.  C's use cases, enviroments,
+and hardware its used on, is orders of magnitude more than Perl's.  Perl only
+supports reasonable modern OSes with a GUI/TUI, on performant enough CPU archs.
+The OS must have a TUI/shell, the C implementation has C<libc>, filing system,
+paging file, processes, read/write to address C<0> crashes, 2s complement,
+1 byte (char) is 8 bits.
+
+The only current, known Perl port, where a data pointer address, and a C
+function pointer "address", quotes intentional, are not the same size is IA64.
+Which has 8 bytes long, 64 bit malloc() pointers, but 16 bytes long 128 bit
+function pointers. The 128-bit function pointers are not readable memory
+addresses.  Passing one of them to C<memcpy> will SEGV your process and
+extremely unportable and unsual.  Why does it want to inspect machine code
+anyways?  If its intentional, like in a C debugger or ELF linker, someone
+didn't first read an IA64 assembly guide.
+
+Perl and XS modules on IA64 aren't really affected by this.  On platforms where
+sizeof(data *) != sizeof(function *). The Perl interpreter will be configured,
+so that type IV is the bigger of the 2, so that means Perl's IV is a 128-bit
+integer on IA64 Perl.  Although this needs to be fact checked, perl's default
+compiler flags also bumped C<void *>, Perl's C<Size_t>/C<STRLEN>, and C's
+<size_t>, to 128 bits. Perl will not attempt to "optimize", and save memory,
+by special casing everywhere, like inside struct definitions, to using 8 byte
+ints for malloc() address and 16 bytes for vtables and C function pointers.
+So Perl and portable XS modules aren't affected by this clause in the C spec.
+
+
 =item *
 
 Assuming C<sizeof(int) == sizeof(long)>
@@ -615,6 +818,12 @@ to be I<exactly> 32 bits (they are I<at least> 32 bits), nor are they
 guaranteed to be C<int> or C<long>.  If you explicitly need 64-bit
 variables, use C<I64> and C<U64>.
 
+If you are writing CPAN code, you need to support older compilers and Perls
+without 64-bit intergers. For CPAN only you must check the HAS_QUAD define and
+guard off your C<I64> and C<U64> code if they aren't implemented on that system.
+
+See L<perlguts/"What is an E<quot>IVE<quot>?">
+
 =item *
 
 Assuming one can dereference any type of pointer for any type of data
@@ -623,7 +832,20 @@ Assuming one can dereference any type of pointer for any type of data
   long pony = *(long *)p;    /* BAD */
 
 Many platforms, quite rightly so, will give you a core dump instead of
-a pony if the p happens not to be correctly aligned.
+a pony if the p happens not to be correctly aligned.  Remember ARM and its
+RISC siblings exist.  Either use multiple C<U8>/C<char> operations, use
+C<Copy(srcp, destp, 1, long);> or C<memcpy()>, or do it the most complicated
+but still safe way, of masking, and testing the low bits, if they are aligned
+or not, and a conditional branching to one code block for aligned, and other for
+C<U8> at a time until the address aligned.
+
+To keep it simple, just use C<Copy()> or C<memcpy()>, and let the C compiler
+handle it. On all modern C compilers, if you call C<Copy()>/C<memcpy()> with
+a tiny fixed length byte count, that is a power of 2, it will always be
+inlined to 1 CPU machine code op if its safe (I.E. Intel 32/64). Some modern
+RISC CPUs like ARM, also allow unaligned memory derefs, but only with magical
+CPU opcodes explicitly labeled as unaligned-okay. A C compiler will inline
+C<memcpy()> into that opcode. You can't, because this is C.
 
 =item *
 
@@ -632,7 +854,8 @@ Lvalue casts
   (int)*p = ...;    /* BAD */
 
 Simply not portable.  Get your lvalue to be of the right type, or maybe
-use temporary variables, or dirty tricks with unions.
+use temporary variables, C<*(int*)&p = ...;>, or dirty tricks with unions.
+Remember about alignment, size, and compiling as C++.
 
 =item *
 
@@ -662,7 +885,9 @@ That the fields are in a certain order
 =item *
 
 While C guarantees the ordering specified in the struct definition,
-between different platforms the definitions might differ
+if you declared that struct definition. C and POSIX say its undefined behavior,
+if the OS vendor, must sort struct members alphabetically, or even sort them at
+all.
 
 =back
 
@@ -675,7 +900,11 @@ That the C<sizeof(struct)> or the alignments are the same everywhere
 =item *
 
 There might be padding bytes between the fields to align the fields -
-the bytes can be anything
+the bytes can be anything, including becoming a future security bug, if the
+padding bytes get serialized to a file or socket and later given to an
+untrusted party. Intel x86/x64's 80-bit, 10 byte, C<long double> has caused
+problems for Perl before, regarding the contents of byte 11 and byte 12,
+after the 10 byte data format is aligned to 12 bytes.
 
 =item *
 
@@ -791,6 +1020,31 @@ Mixing #define and #ifdef
 
 You cannot portably "stack" cpp directives.  For example in the above
 you need two separate BURGLE() #defines, one for each #ifdef branch.
+
+=item * #ifdef inside MACRO(); or my_function();
+
+    if(dispatch_error(
+  #ifdef ESHUTDOWN
+      ESHUTDOWN
+  #else
+      EINVAL
+  #endif
+    ))
+      return -1;
+    else
+      return 0;
+
+Neither is this.
+
+    SV *sv = newSViv(
+  #ifdef ESHUTDOWN
+      ESHUTDOWN
+  #else
+      EINVAL
+  #endif
+    );
+
+Or this.
 
 =item *
 
@@ -1010,6 +1264,154 @@ handle it.
 L<perlclib/Dealing with embedded perls and threads> contains a list of
 problematic functions with good advice as to how to cope with them.
 
+=over
+
+=head3 Unusual CPUs (IA64)
+
+Perl is written in the ANSI/ISO C language, and while Perl is portable, there
+are limits to Perl's portability.  Perl will compile and run only on
+real C compilers that exist for real production grade operating systems.
+Innocent bugs are okay.  Perl doesn't support being compiled with the
+DeathStation 9000 C compiler or running on the C Abstract Virtual Machine
+Operating System.  Turing tarpits, and malicious or modified "joke" C
+compilers written to break source code and prove non-compliance with the
+ISO C specification, are out of scope for the Perl project.  Perl is a FOSS,
+stable, production grade platform, for commercial business usage.  Perl isn't
+a homework assignment for Computer Science degree students in a university.
+
+Perl must support POSIX and non-POSIX OSes (Windows, VMS, EBCDIC, ex-MacOS 9,
+ex-MSDOS, ex-Symbian). Perl must support current known CPU archs, current known
+C compilers and current known OS versions. Plus it must make a best effort, to
+compile out of the box, without a C syntax/linker error, or instant SEGV, on
+future unknown version of those 4 categories.  So always think of graceful
+fallbacks at Configure time, interpreter/XS CPAN CC time, or runtime, for your
+special casing involving OS bugs, C compiler bugs, or using CPU specific CC
+specific inline intrinsics, or outright assembly code stored in a C<.s>, C<.S>,
+or C<.asm>.
+
+git-bisect is a crucial feature for Perl's core devs, so todays perl code base
+must compile on future unknown CPUs and future POSIX-like OSes. There is no
+way to guarantee it. Mistakes have been made (see F<Porting/bisect-runner.pl>,
+but once a perl.bin or libperl.so disk file was emitted by the CC, that disk
+file should be, best effort, executable and run (ABI/API compliance), for the
+rest of the lifetime of whatever permutation of CPU and OS it targeted.
+Fallbacks, performance degradations, or worst case Perl generated fatal errors
+or console warning are acceptable compared to much worse things, like SEGVs,
+OS printed console errors, or C syntax/linker printed errors. Perl devs are not
+C devs.
+
+For Win32 on x86-32, an .exe compiled in 1993 still will run in 2025, on
+Windows 11 for ARM64.  So the lifespan of a compiled binary from 1993 which
+can be perl4.bin, using various goalposts, is 15 years, or 22 years,
+or 32+ years as of 2025. Server 2008 (2008) was first release with optional
+uninstalling the i386 compatibility layer.  The last native x86-32 was
+Win 10 (2015). Win11 for ARM64 still includes the i386 emulation layer.
+The Win32-i386's ABI and C API's initial release was July 27, 1993.
+
+=head3 What is a function pointer in C?
+
+ISO C explicitly prohibits casting between function pointers and data
+pointers, and declares it unportable and undefined behavior. This doesn't
+affect perl since perl only runs on adequately modern, and reasonable OSes/CPUs.
+Perl drops support for OSes and CPUs that reach museum age and are a maintence
+burden, or lack volunteers or any known users. But ISO C, is used on
+exponentially more software/hardware enviroments, than Perl runs on, and Perl
+will never compile or execute on. No amount of patches will make it happen.
+
+C is used in disposable 16-bit 8086-186 CPUs that cost pennies, and
+life-critical real-time fault platforms used in the automotive/medical/military
+industries, and no OS, no C std lib, enviromemts like educational robot
+controllers, microwave ovens, sound cards, DSPs, railroads. Perl and Unix never
+run on those kinds of "systems" but all of them, do have C compilers. So the
+C spec must consider those groups.
+
+The C specification is very vauge about what "C function pointer" are, and its
+serialization into a byte array.  In practice, the C language allows function
+calls to be implemented "in assembly" as AJAX over a HTTP socket.
+C<size_t p = (size_t)strcpy;> could be integer C<736>, and not a readable
+memory address, and this is still compliant.
+
+On 16-bit OSes, calling a function in shared library, goes through the 16-bit
+kernel, with an insert disk UI message.  ELF/Win32 have an optional
+optimization for lazy shared library symbol resolution. In the last 2 cases,
+a data address integer and a function "address" integer are the same byte
+length. But modern Perl does run on one architecture, where data pointers and
+function pointers are not the same size.
+
+IA64's function pointers are 128-bits long. They aren't readable memory
+addresses and contain cryptographic authentication. Call it a 128-bit sized
+JSON Web Token. IA64 was designed specifically, that untrusted users, can
+execute in the same memory space, a sensitive "root" .so file that they can't
+"read" yet still call its exported C functions. Through hardware design,
+those untrusted users and their self-compiled apps, will never be able to
+maliciously steal a private SSH key stored C<static const char key[256];>
+from a sensitive .so, where untrusted users have execute permission, but don't
+have permissions to read, copy, or open FDs, for that root-owned shared lib
+disk file.
+
+All images (root process binary, and shared libraries) in an IA64 process share
+the same malloc() memory at the same addresses, share a PID, and share FDs. But
+none of image binaries, can maliciously, or UB "read" each other's machine code
+internals without that .so's permission. IA64 automatically swaps out memory
+mapped binaries between each C function call, with no performance overhead.
+
+Just like malloc() blocks are global to all image files, each image file does
+have a global variant of C<.rodata> and C<.data> if the C compiler determines
+the pointer to a global var, escaped the current .so/.bin, into malloc() or
+inter-image-file memory.  Biggest example is using C's C<&c_var> operator and
+assignment copying it to anything except a same frame C auto var.  So this
+isolation security mechanism will never affect C code. If a C program wants
+to be a C debugger, and parse and disassemble binaries, it can use C<open>
+and C<mmap>, or appropriate kernel syscalls designed for C debuggers.
+IA64's design prevents mis-using C<dlopen> and C<dlsym> for C debugger-like
+things.
+
+IA64's C stack is a linked list, not the typical byte array. C functions can't
+UB peek at its caller's C autos. SPARC has a similar feature. IA64 has hardware
+protection, against C<...> and C<= va_arg(int, args);> reading an
+unauthorized/overflowed arg.  C's C<&c_auto_var> operator causes
+C<c_auto_var> to be stored in the "other C stack" with malloc-like memory, not
+the primary linked-list C stack.  None of this will break or change anything in
+Perl, XS code, Linux/BSD, or any POSIX app. Its a good analogy is IA64 CPU's
+design, is a hardware implementation of a ECMAScript engine.  Perl has an
+alpha-quality experimental port, to run inside a HTML web brower, using LLVM's
+wasm backend and Emscripten, see L<https://github.com/haukex/webperl>.
+
+For cases like IA64 Perl just transparantly uses 128-bit integers and 128-bit
+"memory addresses" everywhere for types like IV and C<char *>(verify "char *").
+Perl doesn't try to optimize by keeping track of what is a 64 bit from malloc
+and what is a 128-bit pointer.  But consider these cautionary stories, for what
+is typically portable and what will be a future bug ticket with a SEGV report.
+
+P.S. The theoretical case, "C function pointers are really TCP/IP sockets", is
+real.  This doesn't apply at all to Win32 Perl or its CPAN XS code, but keep
+reading.
+
+On Windows, if a DLL (shared library), marks itself as any-threading or
+multi-threading, and another DLL marked as single-threaded, try to call
+each other's functions, both sides will be blocking serialized, with select()
+loops and sockets FDs, in separate OS threads, inside the same process with
+same address space.  The OS's DLL loader creates/JITs the socket FD I/O stubs
+functions on demand because an any-threaded marked DLL, also annouced it
+maybe will use a thread pool, or create a thread, and randomly call C functions
+of single-threaded DLL, at any time in the future.
+
+Any-thread flags means, that DLL uses locks internally, and can safely call
+into other multi-threaded DLLs, and multi-threaded DLLs can call into it,
+without needing zero-extra-code automatic serialization from the OS. Any-thread
+flag doesn't comment if the said DLL will or will never create a new thread
+itself, just that it doesn't need to get wrapped in automatic serialization if
+there is a risk of memory corruption from multiple OS threads.
+
+For Win32 devs, the above was simplified for readers.  "DLL loader" is a
+euphemism for the API that C<CoInitialize>, C<CoLoadLibrary>,
+C<CoGetClassObject>, and C<CoCreateInstance> are part of and describes
+Single Threaded Apartment vs Both Threaded Apartment vs Multi-Threaded
+Apartment.  Perl/CPAN XS, on Win32, only use the real "DLL loader" exported
+from kernel32.dll so STA, MTA, "function pointers are sockets" example is N/A.
+C++ XS code using MS's COM/DCOM/OLE framework, for writing C++ classes in C89,
+is very rare.
+
 =back
 
 =head2 Problematic System Interfaces
@@ -1031,7 +1433,9 @@ C<NUL>s, and so the tests pass, whereas there may well eventually arise
 real-world cases where they fail.  A lesson here is to include C<NUL>s
 in your tests.  Now it's fairly rare in most real world cases to get
 C<NUL>s, so your code may seem to work, until one day a C<NUL> comes
-along.
+along.  A scalar holding an unsanitized file path, with a C<NUL> byte
+in the middle of the Perl/SV* string, with more [printable] bytes
+after the C<NUL> byte, has resulted in security exploits.
 
 Here's an example.  It used to be a common paradigm, for decades, in
 the perl core to use S<C<strchr("list", c)>> to see if the character
@@ -1272,9 +1676,12 @@ convert it.  If we step again, we'll find ourselves there:
     1669        if (!sv)
     (gdb)
 
+This works for gdb, and also MS Visual Studio IDE debugger.
 We can now use C<Perl_sv_dump> to investigate the SV:
 
     (gdb) print Perl_sv_dump(sv)
+#Or !!!
+    (gdb) print Perl_sv_dump(my_perl,sv)
     SV = PV(0xa057cc0) at 0xa0675d0
     REFCNT = 1
     FLAGS = (POK,pPOK)
@@ -1316,7 +1723,7 @@ similar output to CPAN module L<B::Debug>.
 
 # finish this later #
 
-=head2 Using gdb to look at specific parts of a program
+=head2 Using gdb to look at specific parts of Perl code
 
 With the example above, you knew to look for C<Perl_pp_add>, but what
 if there were multiple calls to it all over the place, or you didn't
@@ -1337,6 +1744,32 @@ in a loop if you want to only break at certain iterations:
     for my $i (1..100) {
         study if $i == 50;
     }
+
+If your are running a C<make test> on core, or on an XS module, and its too
+difficult to launch perl from the C debugger, so a BP on C<study;> works.
+Instead, in C or Perl code insert this and recompile
+
+# Perl code on Windows
+    system("pause"); /* works for C code too */
+# POSIX
+    system("read -p"); /* works for C & Perl */
+
+Perl will freeze when that executes. Then find out the process ID number of
+the problem C<.t> file, start the debugger, attach the PID, pause the process
+inside the debugger (important step), switch back to the console window, and
+type any key, C<Enter> key seems to be safest, now switch back to the debugger
+window. Now you have full control of the perl process and can single step it
+from a C debugger, but you didn't have to laboriously recreate a perfect copy
+of C<%ENV> and complex temp files, from a sandwich of C<make test> ->
+C<perl harness.pl> -> C<perl tests.t> ->C <perl child.tmp.pl> ->
+C<perl subchild.tmp.pl>.
+
+Or recompiling with a software break point, and wait for C<SIGTRAP>:
+
+    __debugbreak();         /* Windows, any compiler */
+    __builtin_trap();       /* GCC any OS */
+    __builtin_debugtrap();  /* GCC's fruity competitor */
+    raise(SIGTRAP);         /* last resort */
 
 =head2 Using gdb to look at what the parser/lexer are doing
 
