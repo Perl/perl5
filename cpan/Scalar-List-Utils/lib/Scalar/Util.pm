@@ -17,7 +17,7 @@ our @EXPORT_OK = qw(
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.68_01";
+our $VERSION    = "1.70";
 $VERSION =~ tr/_//d;
 
 require List::Util; # List::Util loads the XS
@@ -34,16 +34,6 @@ if( $] >= 5.040 ) {
 
   *$_ = \&{ $builtins->{$_} } for (qw( blessed refaddr reftype weaken unweaken ));
   *isweak = \&{ $builtins->{is_weak} };  # renamed
-}
-
-# populating @EXPORT_FAIL is done in the XS code
-sub export_fail {
-  if (grep { /^isvstring$/ } @_ ) {
-    require Carp;
-    Carp::croak("Vstrings are not implemented in this version of perl");
-  }
-
-  @_;
 }
 
 # set_prototype has been moved to Sub::Util with a different interface

@@ -1852,10 +1852,10 @@ CODE:
 #ifdef SvVOK
     SvGETMAGIC(sv);
     ST(0) = boolSV(SvVOK(sv));
-    XSRETURN(1);
 #else
-    croak("vstrings are not implemented in this release of perl");
+    ST(0) = boolSV(0);
 #endif
+    XSRETURN(1);
 
 SV *
 looks_like_number(sv)
@@ -1951,8 +1951,10 @@ PREINIT:
     STRLEN namelen;
     const char* nameptr = SvPV(name, namelen);
     int utf8flag = SvUTF8(name);
+#if PERL_VERSION_LT(5, 41, 3) || PERL_VERSION_GT(5, 41, 5)
     int quotes_seen = 0;
     bool need_subst = FALSE;
+#endif
 PPCODE:
     if (!SvROK(sub) && SvGMAGICAL(sub))
         mg_get(sub);
@@ -1975,18 +1977,23 @@ PPCODE:
         if (s > nameptr && *s == ':' && s[-1] == ':') {
             end = s - 1;
             begin = ++s;
+#if PERL_VERSION_LT(5, 41, 3) || PERL_VERSION_GT(5, 41, 5)
             if (quotes_seen)
                 need_subst = TRUE;
+#endif
         }
+#if PERL_VERSION_LT(5, 41, 3) || PERL_VERSION_GT(5, 41, 5)
         else if (s > nameptr && *s != '\0' && s[-1] == '\'') {
             end = s - 1;
             begin = s;
             if (quotes_seen++)
                 need_subst = TRUE;
         }
+#endif
     }
     s--;
     if (end) {
+#if PERL_VERSION_LT(5, 41, 3) || PERL_VERSION_GT(5, 41, 5)
         SV* tmp;
         if (need_subst) {
             STRLEN length = end - nameptr + quotes_seen - (*end == '\'' ? 1 : 0);
@@ -2006,6 +2013,7 @@ PPCODE:
             stash = gv_stashpvn(left, length, GV_ADD | utf8flag);
         }
         else
+#endif
             stash = gv_stashpvn(nameptr, end - nameptr, GV_ADD | utf8flag);
         nameptr = begin;
         namelen -= begin - nameptr;
@@ -2101,20 +2109,9 @@ BOOT:
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
     GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
     SV *rmcsv;
-#if !defined(SvVOK)
-    HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
-    GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
-    AV *varav;
-    if(SvTYPE(vargv) != SVt_PVGV)
-        gv_init(vargv, su_stash, "Scalar::Util", 12, TRUE);
-    varav = GvAVn(vargv);
-#endif
     if(SvTYPE(rmcgv) != SVt_PVGV)
         gv_init(rmcgv, lu_stash, "List::Util", 10, TRUE);
     rmcsv = GvSVn(rmcgv);
-#ifndef SvVOK
-    av_push(varav, newSVpv("isvstring",9));
-#endif
 #ifdef REAL_MULTICALL
     sv_setsv(rmcsv, &PL_sv_yes);
 #else
