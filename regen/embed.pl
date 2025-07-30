@@ -362,9 +362,9 @@ sub generate_proto_h {
         $ret .= ";";
         $ret = "/* $ret */" if $has_mflag;
 
-        if ($args_assert_line || @names_of_nn) {
+        if ($args_assert_line || @names_of_nn || @typed_args) {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
-            if (@names_of_nn) {
+            if (@names_of_nn || @typed_args) {
                 $ret .= " \\\n";
 
                 my @asserts;
