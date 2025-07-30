@@ -16,12 +16,12 @@ our ( $st_dev, $st_ino, $st_mode,
 
 use Exporter 'import';
 our @EXPORT      = qw(stat lstat);
-our @fields      = qw( $st_dev	   $st_ino    $st_mode
-		       $st_nlink   $st_uid    $st_gid 
-		       $st_rdev    $st_size 
-		       $st_atime   $st_mtime  $st_ctime 
-		       $st_blksize $st_blocks
-		    );
+our @fields      = qw( $st_dev     $st_ino    $st_mode
+                       $st_nlink   $st_uid    $st_gid
+                       $st_rdev    $st_size
+                       $st_atime   $st_mtime  $st_ctime
+                       $st_blksize $st_blocks
+                    );
 our @EXPORT_OK   = ( @fields, "stat_cando" );
 our %EXPORT_TAGS = ( FIELDS => [ @fields, @EXPORT ] );
 
@@ -73,7 +73,7 @@ sub _ingroup {
 # and interpreting it later would require this module to have an XS
 # component (at which point we might as well just call Perl_cando and
 # have done with it).
-    
+
 if (grep $^O eq $_, qw/os2 MSWin32/) {
 
     # from doio.c
@@ -152,7 +152,7 @@ my %op = (
 use constant HINT_FILETEST_ACCESS => 0x00400000;
 
 # we need fallback=>1 or stringifying breaks
-use overload 
+use overload
     fallback => 1,
     -X => sub {
         my ($s, $op) = @_;
@@ -179,8 +179,8 @@ use overload
 use Class::Struct qw(struct);
 struct 'File::stat' => [
      map { $_ => '$' } qw{
-	 dev ino mode nlink uid gid rdev size
-	 atime mtime ctime blksize blocks
+         dev ino mode nlink uid gid rdev size
+         atime mtime ctime blksize blocks
      }
 ];
 
@@ -188,11 +188,11 @@ sub populate {
     return undef unless @_;
     my $stob = new();
     @$stob = (
-	$st_dev, $st_ino, $st_mode, $st_nlink, $st_uid, $st_gid, $st_rdev,
-        $st_size, $st_atime, $st_mtime, $st_ctime, $st_blksize, $st_blocks ) 
-	    = @_;
+        $st_dev, $st_ino, $st_mode, $st_nlink, $st_uid, $st_gid, $st_rdev,
+        $st_size, $st_atime, $st_mtime, $st_ctime, $st_blksize, $st_blocks )
+            = @_;
     return $stob;
-} 
+}
 
 sub lstat :prototype(_) ($arg) {
     populate(CORE::lstat $arg)
@@ -244,8 +244,8 @@ File::stat - by-name interface to Perl's built-in stat() functions
 
 =head1 DESCRIPTION
 
-This module's default exports override the core stat() 
-and lstat() functions, replacing them with versions that return 
+This module's default exports override the core stat()
+and lstat() functions, replacing them with versions that return
 "File::stat" objects.  This object has methods that
 return the similarly named structure field name from the
 L<stat(2)> function; namely,
@@ -262,7 +262,7 @@ mtime,
 ctime,
 blksize,
 and
-blocks.  
+blocks.
 
 As of version 1.02 (provided with perl 5.12) the object provides C<"-X">
 overloading, so you can call filetest operators (C<-f>, C<-x>, and so

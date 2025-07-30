@@ -154,28 +154,28 @@ for (split //, "tTB") {
 }
 
 SKIP: {
-	skip("Could not open file: $!", 2) unless $canopen;
-	isa_ok(File::stat::stat('STAT'), 'File::stat',
-	       '... should be able to find filehandle');
+    skip("Could not open file: $!", 2) unless $canopen;
+    isa_ok(File::stat::stat('STAT'), 'File::stat',
+           '... should be able to find filehandle');
 
-	package foo;
-	local *STAT = *main::STAT;
-	my $stat2 = File::stat::stat('STAT');
-	main::isa_ok($stat2, 'File::stat',
-		     '... and filehandle in another package');
-	close STAT;
+    package foo;
+    local *STAT = *main::STAT;
+    my $stat2 = File::stat::stat('STAT');
+    main::isa_ok($stat2, 'File::stat',
+             '... and filehandle in another package');
+    close STAT;
 
-#	VOS open() updates atime; ignore this error (posix-975).
-	my $stat3 = $stat2;
-	if ($^O eq 'vos') {
-		$$stat3[8] = $$stat[8];
-	}
+#   VOS open() updates atime; ignore this error (posix-975).
+    my $stat3 = $stat2;
+    if ($^O eq 'vos') {
+        $$stat3[8] = $$stat[8];
+    }
 
-	main::skip("Win32: different stat-info on filehandle", 1) if $^O eq 'MSWin32';
+    main::skip("Win32: different stat-info on filehandle", 1) if $^O eq 'MSWin32';
 
-	main::skip("OS/2: inode number is not constant on os/2", 1) if $^O eq 'os2';
+    main::skip("OS/2: inode number is not constant on os/2", 1) if $^O eq 'os2';
 
-	main::is_deeply($stat, $stat3, '... and must match normal stat');
+    main::is_deeply($stat, $stat3, '... and must match normal stat');
 }
 
 SKIP:
