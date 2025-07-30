@@ -11781,6 +11781,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 CV *
 Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 {
+    PERL_ARGS_ASSERT_NEWCONSTSUB;
     return newCONSTSUB_flags(stash, name, name ? strlen(name) : 0, 0, sv);
 }
 
@@ -11865,6 +11866,8 @@ CV *
 Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
                              U32 flags, SV *sv)
 {
+    PERL_ARGS_ASSERT_NEWCONSTSUB_FLAGS;
+
     CV* cv;
     const char *const file = CopFILE(PL_curcop);
 

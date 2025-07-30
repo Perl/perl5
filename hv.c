@@ -1836,6 +1836,8 @@ returned.
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
+    PERL_ARGS_ASSERT_NEWHVHV;
+
     HV * const hv = newHV();
     STRLEN hv_max;
 
@@ -1944,6 +1946,8 @@ added to it.  A pointer to the new hash is returned.
 HV *
 Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 {
+    PERL_ARGS_ASSERT_HV_COPY_HINTS_HV;
+
     HV * const hv = newHV();
 
     if (ohv) {
@@ -2009,6 +2013,7 @@ S_hv_free_ent_ret(pTHX_ HE *entry)
 void
 Perl_hv_free_ent(pTHX_ HV *notused, HE *entry)
 {
+    PERL_ARGS_ASSERT_HV_FREE_ENT;
     PERL_UNUSED_ARG(notused);
 
     if (!entry)
@@ -2022,6 +2027,7 @@ Perl_hv_free_ent(pTHX_ HV *notused, HE *entry)
 void
 Perl_hv_delayfree_ent(pTHX_ HV *notused, HE *entry)
 {
+    PERL_ARGS_ASSERT_HV_DELAYFREE_ENT;
     PERL_UNUSED_ARG(notused);
 
     if (!entry)
@@ -2049,6 +2055,8 @@ return.
 void
 Perl_hv_clear(pTHX_ HV *hv)
 {
+    PERL_ARGS_ASSERT_HV_CLEAR;
+
     SSize_t orig_ix;
 
     if (!hv)
@@ -2279,6 +2287,8 @@ return.
 void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
+    PERL_ARGS_ASSERT_HV_UNDEF_FLAGS;
+
     bool save;
     SSize_t orig_ix = PL_tmps_ix; /* silence compiler warning about uninitialized vars */
 

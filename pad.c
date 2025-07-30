@@ -507,6 +507,8 @@ finished its job, so it can forget the slab.
 void
 Perl_cv_forget_slab(pTHX_ CV *cv)
 {
+    PERL_ARGS_ASSERT_CV_FORGET_SLAB;
+
     bool slabbed;
     OPSLAB *slab = NULL;
 

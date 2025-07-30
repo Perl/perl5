@@ -2933,12 +2933,14 @@ Perl_sv_dump_depth(pTHX_ SV *sv, I32 depth)
 void
 Perl_av_dump(pTHX_ AV *av)
 {
+    PERL_ARGS_ASSERT_AV_DUMP;
     sv_dump_depth((SV*)av, 3);
 }
 
 void
 Perl_hv_dump(pTHX_ HV *hv)
 {
+    PERL_ARGS_ASSERT_HV_DUMP;
     sv_dump_depth((SV*)hv, 3);
 }
 
