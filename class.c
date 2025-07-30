@@ -1143,7 +1143,8 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     OP *nameop = newSVOP(OP_CONST, 0, value);
 
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    CvIsMETHOD_on(cv);
+    if (cv)
+        CvIsMETHOD_on(cv);
 }
 
 /* If '@_' is called "snail", then elements of it can be called "slugs"; i.e.
@@ -1241,7 +1242,8 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     OP *nameop = newSVOP(OP_CONST, 0, value);
 
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    CvIsMETHOD_on(cv);
+    if (cv)
+        CvIsMETHOD_on(cv);
 }
 
 static struct {
