@@ -3590,41 +3590,110 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_COND_EXPR:
             if (o->op_type == OP_COND_EXPR) {
                 OP *stub = cLOGOP->op_other;
+                OP *trueop  = OpSIBLING( cLOGOP->op_first );
+                OP *falseop = OpSIBLING(trueop);
+
                 /* Is there an empty "if" block or ternary true branch?
                    If so, optimise away the OP_STUB if safe to do so. */
                 if (stub->op_type == OP_STUB &&
                     ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
                 ) {
-                    OP *trueop = OpSIBLING( cLOGOP->op_first );
+                    if (stub == trueop) {
+                        /* This is very unlikely:
+                         *     cond_expr
+                         *         -condition-
+                         *         stub
+                         *         -else-
+                         */
+                        assert(!(stub->op_flags & OPf_KIDS));
+                        cLOGOP->op_other = stub->op_next;
+                        op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
+                        op_free(stub);
+                        break;
+                    } else if (OP_TYPE_IS(trueop, OP_SCOPE) &&
+                               (stub == cUNOPx(trueop)->op_first) ) {
+                        assert(!(stub->op_flags & OPf_KIDS));
 
-                    assert((stub == trueop ) || (OP_TYPE_IS(trueop, OP_SCOPE) &&
-                     ((stub == cUNOPx(trueop)->op_first)) && !OpSIBLING(stub))
-                    );
-                    assert(!(stub->op_flags & OPf_KIDS));
-
-                    cLOGOP->op_other = (stub->op_next == trueop) ?
-                                  stub->op_next->op_next  :
-                                  stub->op_next;
-
-                    op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
-
-                    if (stub != trueop) op_free(stub);
-                    op_free(trueop);
-                } else
+                        OP *stubsib = OpSIBLING(stub);
+                        if (!stubsib) {
+                        /*     cond_expr
+                         *         -condition-
+                         *         scope
+                         *             stub
+                         *         -else-
+                         */
+                            cLOGOP->op_other = trueop->op_next;
+                            op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
+                            op_free(stub);
+                            op_free(trueop);
+                            break;
+                        } else {
+                            /* Could be something like this:
+                             *         -condition-
+                             *         scope
+                             *             stub
+                             *             null
+                             *         -else-
+                             * But it may be more desirable (but is less
+                             * straightforward) to transform this earlier
+                             * in the compiler. Ignoring it for now,
+                             * pending further exploration. */
+                        }
+                    }
+                }
 
                 /* Is there an empty "else" block or ternary false branch?
                    If so, optimise away the OP_STUB if safe to do so. */
                 stub = o->op_next;
-                if (stub->op_type == OP_STUB &&
-                    ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
-                ) {
-                    assert(stub == OpSIBLING(OpSIBLING( cLOGOP->op_first )));
-                    assert(!(stub->op_flags & OPf_KIDS));
-                    o->op_flags |= OPf_SPECIAL; /* For B::Deparse */
-                    o->op_next = stub->op_next;
-                    op_sibling_splice(o, OpSIBLING(cLOGOP->op_first), 1, NULL);
-                    op_free(stub);
+                if ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR) {
+                    if (stub->op_type == OP_STUB && !OpSIBLING(stub) ){
+                        OP *stubsib = OpSIBLING(stub);
+                        if ((stub == falseop) && !stubsib) {
+                            /*     cond_expr
+                             *         -condition-
+                             *         - if -
+                             *         stub
+                             */
+                            assert(!(stub->op_flags & OPf_KIDS));
+                            o->op_flags |= OPf_SPECIAL; /* For B::Deparse */
+                            o->op_next = stub->op_next;
+                            op_sibling_splice(o, OpSIBLING(cLOGOP->op_first), 1, NULL);
+                            op_free(stub);
+                    } else { /* Unexpected */ }
+                } else if (OP_TYPE_IS(stub,OP_ENTER) &&
+                               OP_TYPE_IS(falseop, OP_LEAVE)) {
+                        OP *enter = stub;
+                        OP *stub = OpSIBLING(enter);
+                        if (stub && OP_TYPE_IS(stub, OP_STUB) ){
+                            assert(!(stub->op_flags & OPf_KIDS));
+                            OP *stubsib = OpSIBLING(stub);
+                            assert(stubsib);
+                            if (OP_TYPE_IS(stubsib, OP_NULL) &&
+                                !OpSIBLING(stubsib) &&
+                                !(stubsib->op_flags & OPf_KIDS) ) {
+                                    /*     cond_expr
+                                     *         -condition-
+                                     *         - if -
+                                     *         leave
+                                     *             enter
+                                     *             stub
+                                     *             null
+                                     */
+                            /* Ignoring it for now, pending further exploration.*/
+                            /*
+                                o->op_flags |= OPf_SPECIAL; // For B::Deparse
+                                o->op_next = falseop->op_next;
+                                op_sibling_splice(o, OpSIBLING(cLOGOP->op_first), 1, NULL);
+                                op_free(enter);
+                                op_free(stub);
+                                op_free(stubsib);
+                                op_free(falseop);
+                             */
+                            }
+                        }
+                    }
                 }
+
             }
             /* FALLTHROUGH */
         case OP_MAPWHILE:
