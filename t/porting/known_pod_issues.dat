@@ -255,6 +255,7 @@ Padre
 PadWalker
 Parse::Keyword
 passwd(1)
+Path::Tiny
 pclose(3)
 perl(1)
 Perl4::CoreLibs

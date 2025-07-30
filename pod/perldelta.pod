@@ -135,9 +135,29 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<File::stat> has been upgraded from version 1.14 to 1.15.
 
-XXX If there was something important to note about this change, include that here.
+=over 4
+
+=item *
+
+The overridden C<stat> and C<lstat> functions now always return a scalar value,
+even in list context. Previously a failed stat in list context would return an
+empty list; now it returns C<undef>.
+
+=item *
+
+C<stat> and C<lstat> can now be called without an argument, in which case they
+will use C<$_>, just like the built-in C<stat>/C<lstat> functions.
+
+=item *
+
+It is now safe to pass path objects (e.g. instances of L<Path::Tiny>) to
+C<stat>/C<lstat>. Previously a failed stat operation on such an object would
+die with a cryptic C<Not a GLOB reference at .../File/stat.pm line 208> error.
+[GH #23507]
+
+=back
 
 =back
 
