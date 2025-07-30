@@ -275,20 +275,17 @@ sub generate_proto_h {
                 }
                 my $argname = $1;
 
-                if (   defined $argname
-                    && ($nn||$nz)
-                    && (! $has_mflag || $binarycompat))
-                {
-                    push @names_of_nn, $argname;
-                }
+                if (defined $argname && (! $has_mflag || $binarycompat)) {
+                    if ($nn||$nz) {
+                        push @names_of_nn, $argname;
+                    }
 
-                if (    defined $argname
-                    and (! $has_mflag || $binarycompat)
-                    and ! $nocheck
-                    and defined $argtype
-                    and exists $type_asserts{$argtype})
-                {
-                    push @typed_args, [ $argtype, $argname ];
+                    if (   ! $nocheck
+                        && defined $argtype
+                        && exists $type_asserts{$argtype})
+                    {
+                        push @typed_args, [ $argtype, $argname ];
+                    }
                 }
             }
             $ret .= join ", ", @$args;
