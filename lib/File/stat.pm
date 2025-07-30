@@ -221,26 +221,26 @@ File::stat - by-name interface to Perl's built-in stat() functions
 
 =head1 SYNOPSIS
 
- use File::stat;
- my $st = stat($file) or die "No $file: $!";
- if ( ($st->mode & 0111) && ($st->nlink > 1) ) {
-     print "$file is executable with lotsa links\n";
- } 
+    use File::stat;
+    my $st = stat($file) or die "No $file: $!";
+    if ( ($st->mode & 0111) && ($st->nlink > 1) ) {
+        print "$file is executable with lotsa links\n";
+    }
 
- if ( -x $st ) {
-     print "$file is executable\n";
- }
+    if ( -x $st ) {
+        print "$file is executable\n";
+    }
 
- use Fcntl "S_IRUSR";
- if ( $st->cando(S_IRUSR, 1) ) {
-     print "My effective uid can read $file\n";
- }
+    use Fcntl "S_IRUSR";
+    if ( $st->cando(S_IRUSR, 1) ) {
+        print "My effective uid can read $file\n";
+    }
 
- use File::stat qw(:FIELDS);
- stat($file) or die "No $file: $!";
- if ( ($st_mode & 0111) && ($st_nlink > 1) ) {
-     print "$file is executable with lotsa links\n";
- } 
+    use File::stat qw(:FIELDS);
+    stat($file) or die "No $file: $!";
+    if ( ($st_mode & 0111) && ($st_nlink > 1) ) {
+        print "$file is executable with lotsa links\n";
+    }
 
 =head1 DESCRIPTION
 
@@ -248,7 +248,7 @@ This module's default exports override the core stat()
 and lstat() functions, replacing them with versions that return 
 "File::stat" objects.  This object has methods that
 return the similarly named structure field name from the
-stat(2) function; namely,
+L<stat(2)> function; namely,
 dev,
 ino,
 mode,
@@ -268,7 +268,7 @@ As of version 1.02 (provided with perl 5.12) the object provides C<"-X">
 overloading, so you can call filetest operators (C<-f>, C<-x>, and so
 on) on it. It also provides a C<< ->cando >> method, called like
 
- $st->cando( ACCESS, EFFECTIVE )
+    $st->cando( ACCESS, EFFECTIVE )
 
 where I<ACCESS> is one of C<S_IRUSR>, C<S_IWUSR> or C<S_IXUSR> from the
 L<Fcntl|Fcntl> module, and I<EFFECTIVE> indicates whether to use
@@ -353,7 +353,7 @@ do not, since the information required is not available.
 
 =head1 NOTE
 
-While this class is currently implemented using the Class::Struct
+While this class is currently implemented using the L<Class::Struct>
 module to build a struct-like class, you shouldn't rely upon this.
 
 =head1 AUTHOR
