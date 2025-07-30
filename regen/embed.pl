@@ -277,7 +277,11 @@ sub generate_proto_h {
                 if (!$nocheck and defined $argtype and exists $type_asserts{$argtype}) {
                     push @typed_args, [ $argtype, $argname ];
                 }
-                if (defined $argname && ($nn||$nz) && !($has_mflag && !$binarycompat)) {
+
+                if (   defined $argname
+                    && ($nn||$nz)
+                    && (! $has_mflag || $binarycompat))
+                {
                     push @names_of_nn, $argname;
                 }
             }
