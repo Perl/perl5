@@ -3142,6 +3142,26 @@ Perl_rpeep(pTHX_ OP *o)
             }
 
             /* Given
+                   list (in scalar context)
+                     pushmark
+                     something
+               The pushmark & list OPs are unnecessary.
+            */
+
+            {
+                OP *nn = o->op_next->op_next;
+                if (OP_TYPE_IS(nn, OP_LIST) &&
+                    ((nn->op_flags & OPf_WANT) == OPf_WANT_SCALAR) ) {
+                    if (oldop)
+                        oldop->op_next = o->op_next;
+                    o->op_next->op_next = nn->op_next;
+                    op_null(nn);
+                    op_null(o);
+                    oldop = NULL; oldoldop = NULL;
+                }
+            }
+
+            /* Given
                  5 repeat/DOLIST
                  3   ex-list
                  1     pushmark
