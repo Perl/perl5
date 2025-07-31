@@ -3125,6 +3125,23 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_PUSHMARK:
 
             /* Given
+                   pushmark
+                   null
+                   something_else
+               Take out the null wherever possible.
+            */
+            while (OP_TYPE_IS(o->op_next, OP_NULL)) {
+                OP* next = o->op_next;
+                o->op_next = next->op_next;
+                if (OpSIBLING(o) == next &&
+                    next->op_moresib &&
+                    !(next->op_flags & OPf_KIDS)) {
+                    op_sibling_splice(NULL, o, 1, NULL);
+                    op_free(next);
+                }
+            }
+
+            /* Given
                  5 repeat/DOLIST
                  3   ex-list
                  1     pushmark
