@@ -5,32 +5,29 @@
 # Additions copyright 1996 by Charles Bailey.  Permission is granted
 # to distribute the revised code under the same terms as Perl itself.
 
-package File::Copy;
+package File::Copy 2.42;
 
-use 5.035007;
-use strict;
-use warnings; no warnings 'newline';
-no warnings 'experimental::builtin';
-use builtin 'blessed';
+use v5.40;
+no warnings 'newline';
+
 use overload;
 use File::Spec;
 use Config;
+use Exporter 'import';
+
 # We want HiRes stat and utime if available
 BEGIN { eval q{ use Time::HiRes qw( stat utime ) } };
-our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
+
 sub copy;
 sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.41';
+our @EXPORT = qw(copy move);
+our @EXPORT_OK = qw(cp mv);
 
-require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(copy move);
-@EXPORT_OK = qw(cp mv);
-
-$Too_Big = 1024 * 1024 * 2;
+our $Syscopy_is_copy;
+our $Too_Big = 1024 * 1024 * 2;
 
 sub croak {
     require Carp;
@@ -327,8 +324,6 @@ unless (defined &syscopy) {
     }
 }
 
-1;
-
 __END__
 
 =head1 NAME
@@ -508,6 +503,3 @@ filesystem(s).
 
 File::Copy was written by Aaron Sherman I<E<lt>ajs@ajs.comE<gt>> in 1995,
 and updated by Charles Bailey I<E<lt>bailey@newman.upenn.eduE<gt>> in 1996.
-
-=cut
-
