@@ -526,6 +526,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (NONE,  PREDEC),
     DEBUG_TOKEN (NONE,  PREINC),
     DEBUG_TOKEN (OPVAL, PRIVATEREF),
+    DEBUG_TOKEN (OPVAL, PROTOTYPE),
     DEBUG_TOKEN (OPVAL, QWLIST),
     DEBUG_TOKEN (NONE,  REFGEN),
     DEBUG_TOKEN (OPNUM, SHIFTOP),
@@ -5617,9 +5618,7 @@ yyl_sub(pTHX_ char *s, const int key)
                key == KEY_INIT || key == KEY_END ||
                key == KEY_my || key == KEY_state ||
                key == KEY_our);
-        if (!have_name)
-            croak("Illegal declaration of anonymous subroutine");
-        else if (*s != ';' && *s != '}')
+        if (have_name && *s != ';' && *s != '}')
             croak("Illegal declaration of subroutine %" SVf, SVfARG(PL_subname));
     }
 
@@ -5627,7 +5626,7 @@ yyl_sub(pTHX_ char *s, const int key)
         NEXTVAL_NEXTTOKE.opval =
             newSVOP(OP_CONST, 0, PL_lex_stuff);
         PL_lex_stuff = NULL;
-        force_next(THING);
+        force_next(PROTOTYPE);
     }
 
     if (!have_name) {

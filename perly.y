@@ -84,7 +84,7 @@
 %token <opval> BAREWORD METHCALL0 METHCALL THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
-%token <opval> LABEL
+%token <opval> LABEL PROTOTYPE
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP BLKLSTOP
 %token <ival> POWOP MULOP ADDOP
@@ -791,7 +791,7 @@ subname	:	BAREWORD
 /* Subroutine prototype */
 proto
 	:	empty
-	|	THING
+	|	PROTOTYPE
 	;
 
 /* Optional list of subroutine attributes */
@@ -1259,14 +1259,20 @@ anonymous
 	|	KW_SUB_anon     startanonsub proto subattrlist subbody    %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($startanonsub, $proto, $subattrlist, $subbody); }
+	|	KW_SUB_anon     startanonsub proto subattrlist            %prec PERLY_PAREN_OPEN
+			{ yyerror("Illegal declaration of anonymous subroutine"); YYERROR; }
 	|	KW_SUB_anon_sig startanonsub subattrlist sigsubbody %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, $sigsubbody); }
+	|	KW_SUB_anon_sig startanonsub subattrlist             %prec PERLY_PAREN_OPEN
+			{ yyerror("Illegal declaration of anonymous subroutine"); YYERROR; }
 	|	KW_METHOD_anon startanonmethod subattrlist sigsubbody %prec PERLY_PAREN_OPEN
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($startanonmethod, NULL, $subattrlist, $sigsubbody);
 			}
+	|	KW_METHOD_anon startanonmethod subattrlist            %prec PERLY_PAREN_OPEN
+			{ yyerror("Illegal declaration of anonymous subroutine"); YYERROR; }
     ;
 
 /* Things called with "do" */
