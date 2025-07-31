@@ -1,18 +1,80 @@
 #!./perl
 
-# This file is a place for tests that fail at the time they are added here.
+# This file is a place for tests that are failing at the time they are added
+# into this file.  It exists so that anyone can contribute a test without
+# having to know about Perl's testing internal structures.
 #
-# When a ticket is filed, just follow the paradigm(s) in this file to add a
-# test that shows the failure.
+# These introductory comments include hints that may be revised from time to
+# time as we gain experience with what sorts of things people find confusing.
+# Therefore it is a good idea to check what's changed since the last time you
+# looked.
 #
-# It is expected that when new tickets are opened, some will actually be
-# duplicates of existing known bad behavior.  And since there are so many open
-# tickets, we might overlook that.  If there is a test here, we would
-# automatically discover that a fix for the newer ticket actually fixed an
-# earlier one (or ones) as well.  Thus the issue can be closed, and the final
-# disposition of the test here determined at that time.  (For example, perhaps
-# it is redundant to the test demonstrating the bug that was intentionally
-# fixed, so can be removed altogether.)
+# To add a test, create a new
+#    TODO: {
+#       local $::TODO = "GH #####";
+#       ...
+#    }
+#
+# block, like the ones already here.  We want to keep the blocks sorted by
+# GitHub issue number so that it is easier to check if there already is a test
+# for the one you are intending to add.
+#
+# This file uses the test functionality from t/test.pl.  For the most part,
+# these look like the ones that Test::More offers, 'is', 'like', and so forth,
+# along with a few extras to handle the case where the failure crashes the
+# perl interpreter.  The ones whose names start with 'fresh' require a
+# significant amount of sophistication to use correctly.  It's best to start
+# out, if possible, by avoiding issues that crash the interpreter and need
+# these.
+
+# Some domains have infrastructure which may make it easier to add a test
+# there, than to have to set up things here.  These include:
+#
+#     Domain              Test File
+#   deparsing           lib/B/Deparse.t
+#   regex matching      t/re/re_tests
+#
+# Before you add a test here, check that the ticket isn't one of these,
+# because we already have todo tests for them (in some other file).
+#
+# Git Hub issue numbers
+#     2207
+#     2208
+#     2286
+#     2931
+#     4125
+#     4261
+#     4370
+#     5959
+#     8267
+#     8945
+#     8952
+#     9010
+#     9406
+#    10750
+#    14052
+#    14630
+#    19370
+#    19661
+#    22547
+#
+# We keep a list of all the people who have contributed to the Perl 5 project.
+# If this is your first time contributing, you will need to add your name to
+# this list.  After you have changed this file with your new test and
+# committed the result, run
+#
+#   perl Porting/updateAUTHORS.pl
+#
+# This will automatically add you (if you weren't there already) to our list
+# of contributors.  If so, you will need to commit this change by doing
+# something like:
+#
+#   commit -a -m'[your name here] is now a Perl 5 author'
+#
+# Adding tests here helps in two ways.  It might show that the bug has already
+# been fixed and we just don't know it; or skimming the existing tests here
+# might show that there is an existing ticket already open, and the new ticket
+# can be marked as duplicate.
 
 BEGIN {
     chdir 't' if -d 't';
