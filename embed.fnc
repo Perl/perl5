@@ -130,6 +130,15 @@
 :         yourself, and from within it, refer to the function in its full
 :         'Perl_' form with any necessary thread context parameter.
 :
+: AUTOMATIC SORTING and FORMATTING of this file
+:
+:   Don't spend any time trying to get your changes to this file to look nice,
+:   or, for example, for the conditionals to be in order of importance.  Any
+:   changes you make here will be resorted and reformatted according to the
+:   current rules in regen/embed.pl and regen/embed_lib.pl.  Each entry's flags
+:   will be sorted asciibetically.  (This can cause hassles if the rules
+:   change between when you make changes here and when you rebase.)
+:
 : Just below is a description of the relevant parts of the automatic
 : documentation generation system which heavily involves this file.  Below that
 : is a description of all the flags used in this file.
@@ -644,8 +653,6 @@
 :
 : Numeric arguments may also be prefixed with NZ, which will cause the
 : appropriate asserts to be generated to validate that this is the case.
-:
-: Flags should be sorted asciibetically.
 :
 : Please keep the next line *BLANK*
 
