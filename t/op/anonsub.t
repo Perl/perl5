@@ -10,7 +10,7 @@ $|=1;
 
 run_multiple_progs('', \*DATA);
 
-foreach my $code ('sub;', 'sub ($) ;', '{ $x = sub }', 'sub ($) && 1') {
+foreach my $code ('sub;', 'sub ($) ;', '{ $_ = sub }', 'sub ($) && 1') {
     eval $code;
     like($@, qr/^Illegal declaration of anonymous subroutine at/,
 	 "'$code' is illegal");

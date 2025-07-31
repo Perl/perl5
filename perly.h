@@ -128,68 +128,69 @@ extern int yydebug;
     PLUGEXPR = 322,                /* PLUGEXPR  */
     PLUGSTMT = 323,                /* PLUGSTMT  */
     LABEL = 324,                   /* LABEL  */
-    LOOPEX = 325,                  /* LOOPEX  */
-    DOTDOT = 326,                  /* DOTDOT  */
-    YADAYADA = 327,                /* YADAYADA  */
-    FUNC0 = 328,                   /* FUNC0  */
-    FUNC1 = 329,                   /* FUNC1  */
-    FUNC = 330,                    /* FUNC  */
-    UNIOP = 331,                   /* UNIOP  */
-    LSTOP = 332,                   /* LSTOP  */
-    BLKLSTOP = 333,                /* BLKLSTOP  */
-    POWOP = 334,                   /* POWOP  */
-    MULOP = 335,                   /* MULOP  */
-    ADDOP = 336,                   /* ADDOP  */
-    DOLSHARP = 337,                /* DOLSHARP  */
-    HASHBRACK = 338,               /* HASHBRACK  */
-    NOAMP = 339,                   /* NOAMP  */
-    COLONATTR = 340,               /* COLONATTR  */
-    FORMLBRACK = 341,              /* FORMLBRACK  */
-    FORMRBRACK = 342,              /* FORMRBRACK  */
-    SUBLEXSTART = 343,             /* SUBLEXSTART  */
-    SUBLEXEND = 344,               /* SUBLEXEND  */
-    PHASER = 345,                  /* PHASER  */
-    PREC_LOW = 346,                /* PREC_LOW  */
-    PLUGIN_LOW_OP = 347,           /* PLUGIN_LOW_OP  */
-    OROP = 348,                    /* OROP  */
-    PLUGIN_LOGICAL_OR_LOW_OP = 349, /* PLUGIN_LOGICAL_OR_LOW_OP  */
-    ANDOP = 350,                   /* ANDOP  */
-    PLUGIN_LOGICAL_AND_LOW_OP = 351, /* PLUGIN_LOGICAL_AND_LOW_OP  */
-    NOTOP = 352,                   /* NOTOP  */
-    ASSIGNOP = 353,                /* ASSIGNOP  */
-    PLUGIN_ASSIGN_OP = 354,        /* PLUGIN_ASSIGN_OP  */
-    PERLY_QUESTION_MARK = 355,     /* PERLY_QUESTION_MARK  */
-    PERLY_COLON = 356,             /* PERLY_COLON  */
-    OROR = 357,                    /* OROR  */
-    DORDOR = 358,                  /* DORDOR  */
-    PLUGIN_LOGICAL_OR_OP = 359,    /* PLUGIN_LOGICAL_OR_OP  */
-    ANDAND = 360,                  /* ANDAND  */
-    PLUGIN_LOGICAL_AND_OP = 361,   /* PLUGIN_LOGICAL_AND_OP  */
-    BITOROP = 362,                 /* BITOROP  */
-    BITANDOP = 363,                /* BITANDOP  */
-    CHEQOP = 364,                  /* CHEQOP  */
-    NCEQOP = 365,                  /* NCEQOP  */
-    CHRELOP = 366,                 /* CHRELOP  */
-    NCRELOP = 367,                 /* NCRELOP  */
-    PLUGIN_REL_OP = 368,           /* PLUGIN_REL_OP  */
-    SHIFTOP = 369,                 /* SHIFTOP  */
-    PLUGIN_ADD_OP = 370,           /* PLUGIN_ADD_OP  */
-    PLUGIN_MUL_OP = 371,           /* PLUGIN_MUL_OP  */
-    MATCHOP = 372,                 /* MATCHOP  */
-    PERLY_EXCLAMATION_MARK = 373,  /* PERLY_EXCLAMATION_MARK  */
-    PERLY_TILDE = 374,             /* PERLY_TILDE  */
-    UMINUS = 375,                  /* UMINUS  */
-    REFGEN = 376,                  /* REFGEN  */
-    PLUGIN_POW_OP = 377,           /* PLUGIN_POW_OP  */
-    PREINC = 378,                  /* PREINC  */
-    PREDEC = 379,                  /* PREDEC  */
-    POSTINC = 380,                 /* POSTINC  */
-    POSTDEC = 381,                 /* POSTDEC  */
-    POSTJOIN = 382,                /* POSTJOIN  */
-    PLUGIN_HIGH_OP = 383,          /* PLUGIN_HIGH_OP  */
-    ARROW = 384,                   /* ARROW  */
-    PERLY_PAREN_CLOSE = 385,       /* PERLY_PAREN_CLOSE  */
-    PERLY_PAREN_OPEN = 386         /* PERLY_PAREN_OPEN  */
+    PROTOTYPE = 325,               /* PROTOTYPE  */
+    LOOPEX = 326,                  /* LOOPEX  */
+    DOTDOT = 327,                  /* DOTDOT  */
+    YADAYADA = 328,                /* YADAYADA  */
+    FUNC0 = 329,                   /* FUNC0  */
+    FUNC1 = 330,                   /* FUNC1  */
+    FUNC = 331,                    /* FUNC  */
+    UNIOP = 332,                   /* UNIOP  */
+    LSTOP = 333,                   /* LSTOP  */
+    BLKLSTOP = 334,                /* BLKLSTOP  */
+    POWOP = 335,                   /* POWOP  */
+    MULOP = 336,                   /* MULOP  */
+    ADDOP = 337,                   /* ADDOP  */
+    DOLSHARP = 338,                /* DOLSHARP  */
+    HASHBRACK = 339,               /* HASHBRACK  */
+    NOAMP = 340,                   /* NOAMP  */
+    COLONATTR = 341,               /* COLONATTR  */
+    FORMLBRACK = 342,              /* FORMLBRACK  */
+    FORMRBRACK = 343,              /* FORMRBRACK  */
+    SUBLEXSTART = 344,             /* SUBLEXSTART  */
+    SUBLEXEND = 345,               /* SUBLEXEND  */
+    PHASER = 346,                  /* PHASER  */
+    PREC_LOW = 347,                /* PREC_LOW  */
+    PLUGIN_LOW_OP = 348,           /* PLUGIN_LOW_OP  */
+    OROP = 349,                    /* OROP  */
+    PLUGIN_LOGICAL_OR_LOW_OP = 350, /* PLUGIN_LOGICAL_OR_LOW_OP  */
+    ANDOP = 351,                   /* ANDOP  */
+    PLUGIN_LOGICAL_AND_LOW_OP = 352, /* PLUGIN_LOGICAL_AND_LOW_OP  */
+    NOTOP = 353,                   /* NOTOP  */
+    ASSIGNOP = 354,                /* ASSIGNOP  */
+    PLUGIN_ASSIGN_OP = 355,        /* PLUGIN_ASSIGN_OP  */
+    PERLY_QUESTION_MARK = 356,     /* PERLY_QUESTION_MARK  */
+    PERLY_COLON = 357,             /* PERLY_COLON  */
+    OROR = 358,                    /* OROR  */
+    DORDOR = 359,                  /* DORDOR  */
+    PLUGIN_LOGICAL_OR_OP = 360,    /* PLUGIN_LOGICAL_OR_OP  */
+    ANDAND = 361,                  /* ANDAND  */
+    PLUGIN_LOGICAL_AND_OP = 362,   /* PLUGIN_LOGICAL_AND_OP  */
+    BITOROP = 363,                 /* BITOROP  */
+    BITANDOP = 364,                /* BITANDOP  */
+    CHEQOP = 365,                  /* CHEQOP  */
+    NCEQOP = 366,                  /* NCEQOP  */
+    CHRELOP = 367,                 /* CHRELOP  */
+    NCRELOP = 368,                 /* NCRELOP  */
+    PLUGIN_REL_OP = 369,           /* PLUGIN_REL_OP  */
+    SHIFTOP = 370,                 /* SHIFTOP  */
+    PLUGIN_ADD_OP = 371,           /* PLUGIN_ADD_OP  */
+    PLUGIN_MUL_OP = 372,           /* PLUGIN_MUL_OP  */
+    MATCHOP = 373,                 /* MATCHOP  */
+    PERLY_EXCLAMATION_MARK = 374,  /* PERLY_EXCLAMATION_MARK  */
+    PERLY_TILDE = 375,             /* PERLY_TILDE  */
+    UMINUS = 376,                  /* UMINUS  */
+    REFGEN = 377,                  /* REFGEN  */
+    PLUGIN_POW_OP = 378,           /* PLUGIN_POW_OP  */
+    PREINC = 379,                  /* PREINC  */
+    PREDEC = 380,                  /* PREDEC  */
+    POSTINC = 381,                 /* POSTINC  */
+    POSTDEC = 382,                 /* POSTDEC  */
+    POSTJOIN = 383,                /* POSTJOIN  */
+    PLUGIN_HIGH_OP = 384,          /* PLUGIN_HIGH_OP  */
+    ARROW = 385,                   /* ARROW  */
+    PERLY_PAREN_CLOSE = 386,       /* PERLY_PAREN_CLOSE  */
+    PERLY_PAREN_OPEN = 387         /* PERLY_PAREN_OPEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -210,6 +211,7 @@ S_is_opval_token(int type) {
     case PLUGSTMT:
     case PMFUNC:
     case PRIVATEREF:
+    case PROTOTYPE:
     case QWLIST:
     case THING:
     case UNIOPSUB:
@@ -244,6 +246,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 77a59f73bcda0e12f216863101470b10051433a1712bbf7219acbd22399b8568 perly.y
+ * c0af31db816b03f7b0aa8c3f33f53d00fc1eb497776acea4416cd6d4f45c0f8c perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */
