@@ -1,16 +1,4 @@
 #!./perl
-BEGIN {
-    chdir 't' if -d 't';
-    require './test.pl';    # for fresh_perl_is() etc
-    set_up_inc('../lib', '.', '../ext/re');
-    require './charset_tools.pl';
-    require './loc_tools.pl';
-}
-
-use Config;
-
-use strict;
-use warnings;
 
 # This file is a place for tests that fail at the time they are added here.
 #
@@ -25,6 +13,18 @@ use warnings;
 # disposition of the test here determined at that time.  (For example, perhaps
 # it is redundant to the test demonstrating the bug that was intentionally
 # fixed, so can be removed altogether.)
+
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';    # for fresh_perl_is() etc
+    set_up_inc('../lib', '.', '../ext/re');
+    require './charset_tools.pl';
+    require './loc_tools.pl';
+}
+
+use Config;
+use strict;
+use warnings;
 
 my $switches = "";
 
