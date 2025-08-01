@@ -134,8 +134,7 @@ sub generate_proto_h {
         my $has_mflag = ( $flags =~ /m/ );
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = ( $flags !~ /R/ ) && ( $flags !~ /P/ ) && !$is_malloc;
-        my @names_of_nn;
-        my @typed_args;
+        my @asserts;
         my $func;
 
         if (! $can_ignore && $retval eq 'void') {
@@ -277,7 +276,7 @@ sub generate_proto_h {
 
                 if (defined $argname && (! $has_mflag || $binarycompat)) {
                     if ($nn||$nz) {
-                        push @names_of_nn, $argname;
+                        push @asserts, $argname;
                     }
 
                     if (   ! $nocheck
@@ -287,7 +286,7 @@ sub generate_proto_h {
                         my $type_assert =
                             $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
                         $type_assert = "!$argname || $type_assert" if $nullok;
-                        push @typed_args, $type_assert;
+                        push @asserts, $type_assert;
                     }
                 }
             }
@@ -365,18 +364,13 @@ sub generate_proto_h {
         $ret .= ";";
         $ret = "/* $ret */" if $has_mflag;
 
-        if ($args_assert_line || @names_of_nn || @typed_args) {
+        if ($args_assert_line || @asserts) {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
-            if (@names_of_nn || @typed_args) {
+            if (@asserts) {
                 $ret .= " \\\n";
 
-                my @asserts;
-                foreach my $ix (0..$#names_of_nn) {
-                    push @asserts, "assert($names_of_nn[$ix])";
-                }
-
-                foreach my $type_assert (@typed_args) {
-                    push @asserts, "assert($type_assert)";
+                foreach my $assertion (@asserts) {
+                    $assertion = "assert($assertion)";
                 }
 
                 my $line = "";
