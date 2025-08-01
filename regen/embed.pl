@@ -252,13 +252,13 @@ sub generate_proto_h {
                     warn "$func: $arg needs NN or NULLOK\n";
                     ++$unflagged_pointers;
                 }
-                my $nn = ( $arg =~ s/\s*\bNN\b\s+// );
-                push( @nonnull, $n ) if $nn;
-                my $nz = ( $arg =~ s/\s*\bNZ\b\s+// );
 
-                my $nullok = ( $arg =~ s/\s*\bNULLOK\b\s+// ); # strip NULLOK with no effect
-
+                my $nn =      ( $arg =~ s/\s*\bNN\b\s+// );
+                my $nz =      ( $arg =~ s/\s*\bNZ\b\s+// );
+                my $nullok =  ( $arg =~ s/\s*\bNULLOK\b\s+// );
                 my $nocheck = ( $arg =~ s/\s*\bNOCHECK\b\s+// );
+
+                push( @nonnull, $n ) if $nn;
 
                 # Make sure each arg has at least a type and a var name.
                 # An arg of "int" is valid C, but want it to be "int foo".
