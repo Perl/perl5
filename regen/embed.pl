@@ -284,7 +284,10 @@ sub generate_proto_h {
                         && defined $argtype
                         && exists $type_asserts{$argtype})
                     {
-                        push @typed_args, [ $argtype, $argname ];
+                        my $type_assert =
+                            $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
+                        $type_assert = "!$argname || $type_assert" if $nullok;
+                        push @typed_args, $type_assert;
                     }
                 }
             }
@@ -372,12 +375,7 @@ sub generate_proto_h {
                     push @asserts, "assert($names_of_nn[$ix])";
                 }
 
-                foreach (@typed_args) {
-                    my ($argtype, $argname) = @$_;
-                    my $nullok = !grep { $_ eq $argname } @names_of_nn;
-                    my $type_assert =
-                        $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
-                    $type_assert = "!$argname || $type_assert" if $nullok;
+                foreach my $type_assert (@typed_args) {
                     push @asserts, "assert($type_assert)";
                 }
 
