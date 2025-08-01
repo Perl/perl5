@@ -2595,166 +2595,144 @@ changing global state.
 
 =head3 The INPUT: Keyword
 
-The XSUB's parameters are usually evaluated immediately after entering the
-XSUB.  The INPUT: keyword can be used to force those parameters to be
-evaluated a little later.  The INPUT: keyword can be used multiple times
-within an XSUB and can be used to list one or more input variables.  This
-keyword is used with the PREINIT: keyword.
-
-The following example shows how the input parameter C<timep> can be
-evaluated late, after a PREINIT.
-
-    bool_t
-    rpcb_gettime(host, timep)
-        char *host
-      PREINIT:
-        time_t tt;
+    void
+    foo(a, b, c, d, e, int f)
+      # implicit INPUT section
+        int   a
+      # explicit INPUT section
       INPUT:
-        time_t timep
-      CODE:
-        RETVAL = rpcb_gettime(host, &tt);
-        timep = tt;
-      OUTPUT:
-        timep
-        RETVAL
+        long  &b
+        int    c = ($type)MySvIV($arg)
+        int    d = NO_INIT
+        int    e + if (some_condition) { $var += 1 }
+      ...
 
-The next example shows each input parameter evaluated late.
+Immediately following an XSUB's declaration, there is an implicit C<INPUT>
+section, i.e. the parser behaves as if there was a literal "C<INPUT:\n">
+line injected before the first line of the body. This can be followed by
+zero or more explicit C<INPUT> sections, possibly interleaved with other
+keywords and sections such as C<PREINIT>.
 
-    bool_t
-    rpcb_gettime(host, timep)
+When XS was first created, it was modelled on the syntax of pre-ANSI C,
+which required the types of parameters to be separately specified. It was
+later updated to allow parameter types to be specified in the parameter
+list, like ANSI C. Thus there is rarely any good reason to use C<INPUT>
+sections now; but you will often encounter them in older code.
+
+Each C<INPUT> line, at a minimum, specifies the type of a parameter listed
+in the XSUB's signature, e.g.
+
+    char *s
+
+In addition, the variable name may be prefixed with C<&> to indicate that
+a pointer to the variable should be passed to any autocall function; and
+may have a postfix initialisation modifier starting with one of the three
+characters C<= + ;>.
+
+Note that if a variable name doesn't match any of the declared parameters,
+then it I<might> be treated as an auto variable declaration (depending on
+the perl version and on whether it has an initialisation override). This
+misfeature may be deprecated at some point in the future, so don't rely on
+it: use a C<PREINIT> section if necessary. These two examples are mostly
+equivalent, with the first form being preferred:
+
+    void
+    foo(int a)
       PREINIT:
-        time_t tt;
-      INPUT:
-        char *host
-      PREINIT:
-        char *h;
-      INPUT:
-        time_t timep
-      CODE:
-        h = host;
-        RETVAL = rpcb_gettime(h, &tt);
-        timep = tt;
+         short b = 1;
+
+    void
+    foo(a)
+         int a
+         short b = 1;
+
+=head4 The & variable modifier in INPUT
+
+The C<&> variable modifier has the single effect that the corresponding
+argument passed to an autocall function will have the variable name
+prefixed with C<&>. Combined with C<OUTPUT: foo>, this allows the
+I<address> of a variable to be passed to a wrapped function, which updates
+that variable's value; on return, the XSUB updates the caller's arg with
+that value. The modern equivalent of this is to declare the parameter as
+C<IN_OUT>. These two XSUBs are equivalent:
+
+    void
+    foo(IN_OUT int i)
+
+    void
+    foo(i)
+        int &i
       OUTPUT:
-        timep
-        RETVAL
+        i
 
-Since INPUT sections allow declaration of C variables which do not appear
-in the parameter list of a subroutine, this may be shortened to:
+and they both wrap a C function called foo() that takes a single C<int *>
+argument which (presumably) updates the integer pointed to. They both
+generate C code similar to this:
 
-    bool_t
-    rpcb_gettime(host, timep)
-        time_t  tt;
-        char   *host;
-        char   *h      = host;
-        time_t  timep;
-      CODE:
-        RETVAL = rpcb_gettime(h, &tt);
-        timep = tt;
-      OUTPUT:
-        timep
-        RETVAL
+    int i = (int)SvIV(ST(0));
+    foo(&i);
+    sv_setiv(ST(0), (IV)i);
 
-(We used our knowledge that input conversion for C<char *> is a "simple" one,
-thus C<host> is initialized on the declaration line, and our assignment
-C<h = host> is not performed too early.  Otherwise one would need to have the
-assignment C<h = host> in a CODE: or INIT: section.)
 
-=head4 The NO_INIT Keyword
+=head4 Altering variable initialisation in INPUT
 
-The NO_INIT keyword is used to indicate that a function
-parameter is being used only as an output value.  The B<xsubpp>
-compiler will normally generate code to read the values of
-all function parameters from the argument stack and assign
-them to C variables upon entry to the function.  NO_INIT
-will tell the compiler that some parameters will be used for
-output rather than for input and that they will be handled
-before the function terminates.
+Normally each declared parameter causes a C auto variable of the same name
+to be declared, and for code to be planted which initialises that variable
+to the value of the corresponding passed argument. The initialisation code
+is usually obtained by expanding the typemap template corresponding to
+the parameter's type. It is possible to override, augment, or skip that
+initialisation code, by appending one of the three characters C<= + ;> and
+an initialiser expression, to the C<INPUT> line.
 
-The following example shows a variation of the rpcb_gettime() function.
-This function uses the timep variable only as an output variable and does
-not care about its initial contents.
+    void
+    foo(a,b,c,d,e,f,g)
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep = NO_INIT
-      OUTPUT:
-        timep
+        # Use the standard typemap entry:
+        int a
+        # and with optional trailing colon
+        int b;
 
-=head4 Initializing Function Parameters
+        # Override the typemap entry:
+        int c = ($type)MySvIV($arg)
 
-C function parameters are normally initialized with their values from
-the argument stack (which in turn contains the parameters that were
-passed to the XSUB from Perl).  The typemaps contain the
-code segments which are used to translate the Perl values to
-the C parameters.  The programmer, however, is allowed to
-override the typemaps and supply alternate (or additional)
-initialization code.  Initialization code starts with the first
-C<=>, C<;> or C<+> on a line in the INPUT: section.  The only
-exception happens if this C<;> terminates the line, then this C<;>
-is quietly ignored.
+        # Skip the initialisation entirely:
+        int d = NO_INIT
+        int e ; NO_INIT
 
-The following code demonstrates how to supply initialization code for
-function parameters.  The initialization code is eval'ed within double
-quotes by the compiler before it is added to the output so anything
-which should be interpreted literally [mainly C<$>, C<@>, or C<\\>]
-must be protected with backslashes.  The variables C<$var>, C<$arg>,
-and C<$type> can be used as in typemaps.
+        # Add deferred initialisation code
+        # *in addition* to the standard init:
+        int f + if (some_condition) { $var += 1 }
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host  = (char *)SvPVbyte_nolen($arg);
-        time_t &timep = 0;
-     OUTPUT:
-        timep
+        # Add deferred initialisation code
+        # *instead of* the standard init:
+        int g ; if (some_condition) { $var += 1 }
 
-This should not be used to supply default values for parameters.  One
-would normally use this when a function parameter must be processed by
-another library function before it can be used.  Default parameters are
-covered in the next section.
+Any override code is passed through template expansion in the same way
+that typemap templates are, with C<$var>, C<$arg>, C<$type> etc being
+expanded. Deferred initialisation code is placed after all variable
+declarations.
 
-If the initialization begins with C<=>, then it is output in
-the declaration for the input variable, replacing the initialization
-supplied by the typemap.  If the initialization
-begins with C<;> or C<+>, then it is performed after
-all of the input variables have been declared.  In the C<;>
-case the initialization normally supplied by the typemap is not performed.
-For the C<+> case, the declaration for the variable will include the
-initialization from the typemap.
+In modern XS where C<INPUT> is not often used, some of these initialiser
+effects can be achieved in other ways:
 
-=head4 The & Unary Operator
+=over
 
-The C<&> unary operator in the INPUT: section is used to tell B<xsubpp>
-that it should convert a Perl value to/from C using the C type to the left
-of C<&>, but provide a pointer to this value when the C function is called.
+=item *
 
-This is useful to avoid a CODE: block for a C function which takes a parameter
-by reference.  Typically, the parameter should be not a pointer type (an
-C<int> or C<long> but not an C<int*> or C<long*>).
+an overridden typemap entry could be specified by using C<TYPEMAP>
+to add a template for the type of this variable;
 
-The following XSUB will generate incorrect C code.  The B<xsubpp> compiler will
-turn this into code which calls C<rpcb_gettime()> with parameters C<(char
-*host, time_t timep)>, but the real C<rpcb_gettime()> wants the C<timep>
-parameter to be of type C<time_t*> rather than C<time_t>.
+=item *
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char  *host
-        time_t timep
-      OUTPUT:
-        timep
+skipping initialisation can be achieved using the C<OUT> and C<OUTLIST>
+parameter declaration modifiers;
 
-That problem is corrected by using the C<&> operator.  The B<xsubpp> compiler
-will now turn this into code which calls C<rpcb_gettime()> correctly with
-parameters C<(char *host, time_t *timep)>.  It does this by carrying the
-C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
+=item *
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
-      OUTPUT:
-        timep
+adding deferred initialisation code may be achievable via C<PREINIT> or
+C<INIT> blocks.
+
+=back
 
 =head3 The SCOPE: Keyword
 
