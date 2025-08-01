@@ -256,14 +256,6 @@ sub generate_proto_h {
                                                             unless $has_mflag;
                 }
                 else {
-                    if (   $args_assert_line
-                        && $arg =~ /\*/
-                        && $arg !~ /\b(NN|NULLOK)\b/ )
-                    {
-                        warn "$func: $arg needs NN or NULLOK\n";
-                        ++$unflagged_pointers;
-                    }
-
                     my $nn =      ( $arg =~ s/\bNN\b// );
                     my $nz =      ( $arg =~ s/\bNZ\b// );
                     my $nullok =  ( $arg =~ s/\bNULLOK\b// );
@@ -273,6 +265,25 @@ sub generate_proto_h {
                     $arg =~ s/^\s+//;
                     $arg =~ s/\s+$//;
                     $arg =~ s/\s{2,}/ /g;
+
+                    die_at_end ":$func: $arg Use only one of NN, NULLOK, and NZ"
+                                                if 0 + $nn + $nz + $nullok > 1;
+
+                    push( @nonnull, $n ) if $nn;
+
+                    # A non-pointer shouldn't have a pointer-related modifier.
+                    # But typedefs may be pointers without our knowing it, so
+                    # we can't check for non-pointer issues.  We can only
+                    # check for the case where the argument is definitely a
+                    # pointer.
+                    if ($args_assert_line && $arg =~ /\*/) {
+                        if ($nn + $nullok == 0) {
+                            warn "$func: $arg needs NN or NULLOK\n";
+                            ++$unflagged_pointers;
+                        }
+
+                        warn "$func: $arg should not have NZ\n" if $nz;
+                    }
 
                     push( @nonnull, $n ) if $nn;
 
