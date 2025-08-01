@@ -254,7 +254,8 @@ sub generate_proto_h {
                     die_at_end 'm flag required for "literal" argument'
                                                             unless $has_mflag;
                 }
-                elsif (   $args_assert_line
+                else {
+                   if (   $args_assert_line
                        && $arg =~ /\*/
                        && $arg !~ /\b(NN|NULLOK)\b/ )
                 {
@@ -297,6 +298,7 @@ sub generate_proto_h {
                         $type_assert = "!$argname || $type_assert" if $nullok;
                         push @asserts, "assert($type_assert)";
                     }
+                }
                 }
             }
             $ret .= join ", ", @$args;
