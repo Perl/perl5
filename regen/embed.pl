@@ -242,6 +242,7 @@ sub generate_proto_h {
             my $n;
             for my $arg ( @$args ) {
                 ++$n;
+
                 if ($arg =~ / ^ " (.+) " $ /x) {    # Handle literal string
                     my $name = $1;
 
@@ -255,50 +256,50 @@ sub generate_proto_h {
                                                             unless $has_mflag;
                 }
                 else {
-                   if (   $args_assert_line
-                       && $arg =~ /\*/
-                       && $arg !~ /\b(NN|NULLOK)\b/ )
-                {
-                    warn "$func: $arg needs NN or NULLOK\n";
-                    ++$unflagged_pointers;
-                }
-
-                my $nn =      ( $arg =~ s/\s*\bNN\b\s+// );
-                my $nz =      ( $arg =~ s/\s*\bNZ\b\s+// );
-                my $nullok =  ( $arg =~ s/\s*\bNULLOK\b\s+// );
-                my $nocheck = ( $arg =~ s/\s*\bNOCHECK\b\s+// );
-
-                push( @nonnull, $n ) if $nn;
-
-                # Make sure each arg has at least a type and a var name.
-                # An arg of "int" is valid C, but want it to be "int foo".
-                my $argtype = ( $arg =~ m/^(\w+(?:\s*\*+)?)/ )[0];
-                defined $argtype and $argtype =~ s/\s+//g;
-
-                my $temp_arg = $arg;
-                $temp_arg =~ s/\*//g;
-                $temp_arg =~ s/\s*\bstruct\b\s*/ /g;
-                if ( ($temp_arg ne "...")
-                     && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
-                    die_at_end "$func: $arg ($n) doesn't have a name\n";
-                }
-                my $argname = $1;
-
-                if (defined $argname && (! $has_mflag || $binarycompat)) {
-                    if ($nn||$nz) {
-                        push @asserts, "assert($argname)";
-                    }
-
-                    if (   ! $nocheck
-                        && defined $argtype
-                        && exists $type_asserts{$argtype})
+                    if (   $args_assert_line
+                        && $arg =~ /\*/
+                        && $arg !~ /\b(NN|NULLOK)\b/ )
                     {
-                        my $type_assert =
-                            $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
-                        $type_assert = "!$argname || $type_assert" if $nullok;
-                        push @asserts, "assert($type_assert)";
+                        warn "$func: $arg needs NN or NULLOK\n";
+                        ++$unflagged_pointers;
                     }
-                }
+
+                    my $nn =      ( $arg =~ s/\s*\bNN\b\s+// );
+                    my $nz =      ( $arg =~ s/\s*\bNZ\b\s+// );
+                    my $nullok =  ( $arg =~ s/\s*\bNULLOK\b\s+// );
+                    my $nocheck = ( $arg =~ s/\s*\bNOCHECK\b\s+// );
+
+                    push( @nonnull, $n ) if $nn;
+
+                    # Make sure each arg has at least a type and a var name.
+                    # An arg of "int" is valid C, but want it to be "int foo".
+                    my $argtype = ( $arg =~ m/^(\w+(?:\s*\*+)?)/ )[0];
+                    defined $argtype and $argtype =~ s/\s+//g;
+
+                    my $temp_arg = $arg;
+                    $temp_arg =~ s/\*//g;
+                    $temp_arg =~ s/\s*\bstruct\b\s*/ /g;
+                    if ( ($temp_arg ne "...")
+                        && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
+                        die_at_end "$func: $arg ($n) doesn't have a name\n";
+                    }
+                    my $argname = $1;
+
+                    if (defined $argname && (! $has_mflag || $binarycompat)) {
+                        if ($nn||$nz) {
+                            push @asserts, "assert($argname)";
+                        }
+
+                        if (   ! $nocheck
+                            && defined $argtype
+                            && exists $type_asserts{$argtype})
+                        {
+                            my $type_assert =
+                                $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
+                            $type_assert = "!$argname || $type_assert" if $nullok;
+                            push @asserts, "assert($type_assert)";
+                        }
+                    }
                 }
             }
             $ret .= join ", ", @$args;
