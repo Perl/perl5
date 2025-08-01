@@ -371,14 +371,14 @@ sub generate_proto_h {
                 foreach my $ix (0..$#names_of_nn) {
                     push @asserts, "assert($names_of_nn[$ix])";
                 }
+
                 foreach (@typed_args) {
                     my ($argtype, $argname) = @$_;
                     my $nullok = !grep { $_ eq $argname } @names_of_nn;
                     my $type_assert =
                         $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
-                    push @asserts,
-                        $nullok ? "assert(!$argname || $type_assert)"
-                                : "assert($type_assert)";
+                    $type_assert = "!$argname || $type_assert" if $nullok;
+                    push @asserts, "assert($type_assert)";
                 }
 
                 my $line = "";
