@@ -276,7 +276,7 @@ sub generate_proto_h {
 
                 if (defined $argname && (! $has_mflag || $binarycompat)) {
                     if ($nn||$nz) {
-                        push @asserts, $argname;
+                        push @asserts, "assert($argname)";
                     }
 
                     if (   ! $nocheck
@@ -286,7 +286,7 @@ sub generate_proto_h {
                         my $type_assert =
                             $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
                         $type_assert = "!$argname || $type_assert" if $nullok;
-                        push @asserts, $type_assert;
+                        push @asserts, "assert($type_assert)";
                     }
                 }
             }
@@ -368,10 +368,6 @@ sub generate_proto_h {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
             if (@asserts) {
                 $ret .= " \\\n";
-
-                foreach my $assertion (@asserts) {
-                    $assertion = "assert($assertion)";
-                }
 
                 my $line = "";
                 while(@asserts) {
