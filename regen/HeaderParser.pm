@@ -737,39 +737,55 @@ sub lines { $_[0]->{lines} }
 sub tidy_embed_fnc_entry {
     my ($self, $line_data)= @_;
     my $line= $line_data->{line};
-    return $line if $line =~ /^\s*:/;
-    return $line unless $line_data->{type} eq "content";
-    return $line unless $line =~ /\|/;
 
-    $line =~ s/\s*\\\n/ /g;
-    $line =~ s/\s+\z//;
-    ($line)= expand($line);
+    return $line if $line =~ /^\s*:/;                    # Don't tidy comments
+    return $line unless $line_data->{type} eq "content"; # Nor #if-like
+    return $line unless $line =~ /\|/;                   # Nor non-entries
+
+    $line =~ s/\s*\\\n/ /g;     # Embedded \n to blank
+    $line =~ s/\s+\z//;         # No trailing white space
+    ($line)= expand($line);     # No tabs
+
+    # Split into fields
     my ($flags, $ret, $name, @args)= split /\s*\|\s*/, $line;
+
+    # Sort and remove duplicate flags
     my %flag_seen;
-    $flags= join "", grep !$flag_seen{$_}++, sort split //, $flags;
+    $flags = join "", grep !$flag_seen{$_}++, sort split //, $flags;
     if ($flags =~ s/^#//) {
         $flags .= "#";
     }
-    if ($flags eq "#") {
+
+    if ($flags eq "#") {    # Could be an attempt at a conditional
         die "Not allowed to use only '#' for flags"
             . "in 'embed.fnc' at line $line_data->{start_line_num}";
     }
+
     if (!$flags) {
         die "Missing flags in function definition"
             . " in 'embed.fnc' at line $line_data->{start_line_num}\n"
             . "Did you a forget a line continuation on the previous line?\n";
     }
+
+    # Normalize the return type and arguments
     for ($ret, @args) {
         s/(\w)\*/$1 */g;
         s/\*\s+(\w)/*$1/g;
         s/\*const/* const/g;
     }
+
+    # Start the output; right justify
     my $head= sprintf "%-8s|%-7s", $flags, $ret;
     $head .= sprintf "|%*s", -(31 - length($head)), $name;
+
+    # Start first argument on next line if $head already extends too far to
+    # the right
     if (@args and length($head) > 32) {
         $head .= "\\\n";
         $head .= " " x 32;
     }
+
+    # Add each argument on a separate line
     foreach my $ix (0 .. $#args) {
         my $arg= $args[$ix];
         $head .= "|$arg";
@@ -777,6 +793,7 @@ sub tidy_embed_fnc_entry {
     }
     $line= $head . "\n";
 
+    # Make all lines in this entry the same length; minimum 72
     if ($line =~ /\\\n/) {
         my @lines= split /\s*\\\n/, $line;
         my $len= length($lines[0]);
@@ -787,7 +804,8 @@ sub tidy_embed_fnc_entry {
             (map { sprintf "%*s", -$len, $_ } @lines[ 0 .. $#lines - 1 ]),
             $lines[-1]);
     }
-    ($line)= unexpand($line);
+
+    ($line)= unexpand($line);   # Back to using tabs
 
     $line_data->{embed}= EmbedLine->new(
         flags          => $flags,
@@ -796,6 +814,7 @@ sub tidy_embed_fnc_entry {
         args           => \@args,
         start_line_num => $line_data->{start_line_num},
     );
+
     $line =~ s/\s+\z/\n/;
     $line_data->{line}= $line;
     return $line;
