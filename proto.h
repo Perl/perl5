@@ -3281,6 +3281,7 @@ Perl_noperl_die(const char *pat, ...)
 
 PERL_CALLCONV void
 Perl_noshutdownhook(void);
+#define PERL_ARGS_ASSERT_NOSHUTDOWNHOOK
 
 PERL_CALLCONV int
 Perl_nothreadhook(pTHX);
