@@ -121,7 +121,8 @@ sub generate_proto_h {
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
-        my ($flags,$retval,$plain_func,$args) = @{$embed}{qw(flags return_type name args)};
+        my ($flags, $retval, $plain_func, $args, $assertions ) =
+                        @{$embed}{qw(flags return_type name args assertions)};
         if ($flags =~ / ( [^ AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
@@ -325,6 +326,9 @@ sub generate_proto_h {
         }
         $ret .= " comma_pDEPTH" if $has_depth;
         $ret .= ")";
+
+        push @asserts, @$assertions if $assertions;
+
         my @attrs;
         if ( $flags =~ /r/ ) {
             push @attrs, "__attribute__noreturn__";

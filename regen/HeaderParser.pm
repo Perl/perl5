@@ -746,6 +746,11 @@ sub tidy_embed_fnc_entry {
     $line =~ s/\s+\z//;         # No trailing white space
     ($line)= expand($line);     # No tabs
 
+    # Remove any assertions, and save them.  This must be done before the
+    # split because the assertions can contain '|'
+    $line =~ s/ \b ( assert \s* \( .* ) \z //x;
+    my $assertions = $1;
+
     # Split into fields
     my ($flags, $ret, $name, @args)= split /\s*\|\s*/, $line;
 
@@ -795,6 +800,28 @@ sub tidy_embed_fnc_entry {
         $head .= "|$arg";
         $head .= "\\\n" . (" " x 32) if $ix < $#args;
     }
+
+    my @assertions;
+    if ($assertions) {
+        # Put each assertion into a separate array element
+        @assertions = split / \s* assert \s* \( /x, $assertions;
+        shift @assertions;  # The split leaves an empty first element
+
+        # Trim each assertion, including any trailing semicolon
+        foreach my $this_assertion (@assertions) {
+            $this_assertion =~ s/ ^ \s+  //x;
+            $this_assertion =~ s/ \s+ \z //x;
+            $this_assertion =~ s/ ; \z   //x;
+
+            # Restore split delimitter
+            $this_assertion = "assert($this_assertion";
+
+            # Each assertion is on a separate line (for now, anyway)
+            $head .= "\\\n" . (" " x 32);
+            $head .= $this_assertion;
+        }
+    }
+
     $line= $head . "\n";
 
     # Make all lines in this entry the same length; minimum 72
@@ -816,6 +843,7 @@ sub tidy_embed_fnc_entry {
         return_type    => $ret,
         name           => $name,
         args           => \@args,
+        assertions     => \@assertions,
         start_line_num => $line_data->{start_line_num},
     );
 
