@@ -6049,6 +6049,12 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 # define PERL_ARGS_ASSERT_UTF8N_TO_UVUNI        \
         assert(s)
 
+PERL_CALLCONV U8 *
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+        __attribute__deprecated__;
+# define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
+        assert(d)
+
 # if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
 PERL_CALLCONV OP *
