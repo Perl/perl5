@@ -4535,11 +4535,12 @@ op	|void	|sv_add_backref |NN SV * const tsv			\
 				|NN SV * const sv
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
-EGdp	|HV *	|gv_stashsvpvn_cached					\
-				|SV *namesv				\
-				|const char *name			\
+Edp	|HV *	|gv_stashsvpvn_cached					\
+				|NULLOK SV *namesv			\
+				|NULLOK const char *name		\
 				|U32 namelen				\
-				|I32 flags
+				|I32 flags				\
+				assert(namesv || name)
 #endif
 #if defined(PERL_IN_HV_C)
 Sx	|void	|clear_placeholders					\
@@ -6118,17 +6119,19 @@ S	|I32	|utf16_textfilter					\
 # endif
 #endif /* defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_UNIVERSAL_C)
-GS	|bool	|isa_lookup	|NULLOK NOCHECK HV *stash		\
+S	|bool	|isa_lookup	|NN HV *stash				\
 				|NULLOK SV *namesv			\
 				|NULLOK const char *name		\
 				|STRLEN len				\
-				|U32 flags
-GS	|bool	|sv_derived_from_svpvn					\
-				|NULLOK SV *sv				\
+				|U32 flags				\
+				assert(namesv || name)
+S	|bool	|sv_derived_from_svpvn					\
+				|NN SV *sv				\
 				|NULLOK SV *namesv			\
 				|NULLOK const char *name		\
 				|const STRLEN len			\
-				|U32 flags
+				|U32 flags				\
+				assert(namesv || name)
 #endif
 #if defined(PERL_IN_UTF8_C)
 RS	|UV	|check_locale_boundary_crossing 			\
