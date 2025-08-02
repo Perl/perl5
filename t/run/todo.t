@@ -6,6 +6,7 @@ BEGIN {
     require './charset_tools.pl';
     require './loc_tools.pl';
 }
+
 use Config;
 
 use strict;
@@ -26,6 +27,9 @@ use warnings;
 # fixed, so can be removed altogether.)
 
 my $switches = "";
+
+my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
+
 
 {   # Fixed by acababb42be12ff2986b73c1bfa963b70bb5d54e
     "abab" =~ /(?:[^b]*(?=(b)|(a))ab)*/;
@@ -60,6 +64,7 @@ TODO: {
 }
 
 TODO: {
+    todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
     local $::TODO = 'GH 16876';
     fresh_perl('$_ = "a"; s{ x | (?{ s{}{x} }) }{}gx;',
                { stderr => 'devnull' });
@@ -67,6 +72,7 @@ TODO: {
 }
 
 TODO: {
+    todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
     local $::TODO = 'GH 16952';
     fresh_perl('s/d|(?{})!//.$&>0for$0,l..a0,0..0',
                { stderr => 'devnull' });
