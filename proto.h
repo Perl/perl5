@@ -6950,6 +6950,8 @@ Perl_sv_add_backref(pTHX_ SV * const tsv, SV * const sv)
 PERL_CALLCONV HV *
 Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
         __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED  \
+        assert(namesv || name)
 
 #endif
 #if defined(PERL_IN_HV_C)
@@ -9470,11 +9472,15 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #if defined(PERL_IN_UNIVERSAL_C)
 STATIC bool
 S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char *name, STRLEN len, U32 flags);
+# define PERL_ARGS_ASSERT_ISA_LOOKUP            \
+        assert(stash); assert(SvTYPE(stash) == SVt_PVHV); assert(namesv || name)
 
 STATIC bool
 S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char *name, const STRLEN len, U32 flags);
+# define PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN \
+        assert(sv); assert(namesv || name)
 
-#endif
+#endif /* defined(PERL_IN_UNIVERSAL_C) */
 #if defined(PERL_IN_UTF8_C)
 STATIC UV
 S__to_utf8_case(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
