@@ -749,12 +749,16 @@ sub tidy_embed_fnc_entry {
     # Split into fields
     my ($flags, $ret, $name, @args)= split /\s*\|\s*/, $line;
 
-    # Sort and remove duplicate flags
+    # Sort and remove duplicate flags.  Alpha flags are sorted first
     my %flag_seen;
-    $flags = join "", grep !$flag_seen{$_}++, sort split //, $flags;
-    if ($flags =~ s/^#//) {
-        $flags .= "#";
-    }
+    $flags = join "", grep !$flag_seen{$_}++,
+                      sort {
+                             my $a_is_word = $a =~ /\w/;
+                             my $b_is_word = $b =~ /\w/;
+                             return $a cmp $b if $a_is_word == $b_is_word;
+                             return -1 if $a_is_word;
+                             return  1;
+                           } split //, $flags;
 
     if ($flags eq "#") {    # Could be an attempt at a conditional
         die "Not allowed to use only '#' for flags"
