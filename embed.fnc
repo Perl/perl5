@@ -35,7 +35,7 @@
 :		Supported at least since perl-5.23.8, with or without ppport.h.
 :
 : Lines in this file are of the form:
-:    flags|return_type|name|arg1|arg2|...|argN
+:    flags|return_type|name|arg1|arg2|...|argN ( assert(...) )*
 :
 : 'flags' is a string of single letters.  Most of the flags are meaningful only
 : to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
@@ -45,6 +45,9 @@
 : A function taking no parameters will have no 'arg' elements.
 : A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
+:
+: The optional list of asserts is used to customize the generated
+: PERL_ARGS_ASSERT macro.  See AUTOMATIC PARAMETER SANITY CHECKING below
 :
 : Most entries here have a macro created with the entry name.  This presents
 : name space collision potentials which haven't been well thought out, but are
@@ -171,6 +174,14 @@
 :	this check may be inappropriate, as in rare cases the arguments passed
 :	may not be of the correct type. As already mentioned, NOCHECK
 :	suppresses this check.
+:
+:   You can specify your own checking beyond these by adding any number of
+:   assert() calls to any given entry after its final argument.  Whatever you
+:   specify will be added to the ARGS_ASSERT macro for the entry in the order
+:   you've specified, and after all the assertions that already have been
+:   described in this section.  When adding yours, weigh that doing it here
+:   will make it less visible to a maintainer than keeping it in the function
+:   it applies to
 :
 :   Currently, it is optional to include an empty ARGS_ASSERT macro in your
 :   functions.  But a porting test enforces that a non-empty one is included.
