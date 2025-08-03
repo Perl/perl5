@@ -754,7 +754,8 @@ ARdp	|SSize_t|av_len 	|NN AV *av
 ARdp	|AV *	|av_make	|SSize_t size				\
 				|NN SV **strp
 CRdip	|AV *	|av_new_alloc	|SSize_t size				\
-				|bool zeroflag
+				|bool zeroflag				\
+				assert(size > 0)
 p	|SV *	|av_nonelem	|NN AV *av				\
 				|SSize_t ix
 Adp	|SV *	|av_pop 	|NN AV *av

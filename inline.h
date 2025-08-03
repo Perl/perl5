@@ -191,10 +191,10 @@ initialized.
 PERL_STATIC_INLINE AV *
 Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
 {
+    PERL_ARGS_ASSERT_AV_NEW_ALLOC;
+
     AV * const av = newAV();
     SV** ary;
-    PERL_ARGS_ASSERT_AV_NEW_ALLOC;
-    assert(size > 0);
 
     Newx(ary, size, SV*); /* Newx performs the memwrap check */
     AvALLOC(av) = ary;
