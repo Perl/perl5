@@ -38,8 +38,7 @@ my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
 
 our $TODO;
 
-TODO: {
-    local $::TODO = "GH 14615";
+TODO: {     # Should be moved to  lib/B/Deparse.t
     my $results = fresh_perl(<<~'EOF', {});
         use B::Deparse;
         my $deparse = B::Deparse->new();
