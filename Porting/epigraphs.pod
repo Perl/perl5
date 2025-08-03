@@ -169,6 +169,21 @@ L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/gr
   is essential to progress; for, if you know too much, you won't try
   the thing.
 
+=head2 v5.40.3 - J. M. Roberts, "The Penguin History of Europe"
+
+L<Announced on 2025-08-03 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/08/msg270153.html>
+
+The Portuguese were already fairly familiar with oceanic waters when
+Prince Henry began to mount a series of exploratory voyages in another
+direction. [...] Henry died in 1460, but by then his countrymen were
+ready to go on south.  In 1473 they crossed the Equator and in 1487
+reached the Cape of Good Hope.  Ahead lay the Indian Ocean; Arabs had
+long traded across it and pilots were available.  Beyond it lay even
+richer sources of spices.  In 1498 Vasco da Gama picked up an Omani
+pilot on the east African coast and set off for Asia.  In May he dropped
+anchor off Calicut, on the west coast of India.  For the first time,
+Asia was in direct sea-communication with Europe.
+
 =head2 v5.40.3-RC1 - J. M. Roberts, "The Penguin History of Europe"
 
 L<Announced on 2025-07-21 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/07/msg270122.html>
@@ -357,6 +372,23 @@ counterparts across the Atlantic were busy blowing each other to pieces
 in a Civil War, they embarked on the construction of the Metropolitan
 Line knowing only one thing for certain - there was no way they were
 going to be able to run steam trains through it.
+
+=head2 v5.38.5 - J. M. Roberts, "The Penguin History of Europe"
+
+L<Announced on 2025-08-03 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/08/msg270152.html>
+
+In 1495 the first map showing [Columbus's] discoveries appeared, with
+Cuba properly marked as an island and not (as Columbus had made his crew
+swear it was) part of the Asian mainland. [...] A further important step
+followed in 1502, when an Italian in a Portuguese vessel visiting the
+coast of what is now Brazil struck southward to sail as far as the
+river Plate.  Amerigo Vespucci's second voyage demonstrated conclusively
+that a whole continent lay to the south of the first great discoveries.
+Five years later a German geographer named the new continent in his
+honour - America - and the name was later applied to the northern
+continent, too.  Not until 1726, though, was it to be demonstrated for
+certain that it was not joined to Asia in the region of the Bering
+Straits.
 
 =head2 v5.38.5-RC1 - J. M. Roberts, "The Penguin History of Europe"
 
