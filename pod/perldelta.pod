@@ -61,7 +61,7 @@ release.
 
 =head1 Acknowledgements
 
-Perl 5.38.5 represents approximately 3 months of development since Perl 5.38.4
+Perl 5.38.5 represents approximately 4 months of development since Perl 5.38.4
 and contains approximately 3,300 lines of changes across 46 files from 8
 authors.
 
