@@ -35,6 +35,20 @@ my $switches = "";
 our $TODO;
 
 TODO: {
+    local $::TODO = 'GH 15419';
+    my $results = fresh_perl(<<~'EOF', { stderr => 1 } );
+        use strict;
+        use warnings;
+        binmode *STDOUT, ":encoding(utf8)";
+        open(my $copy, '>&', STDOUT);
+        print $copy "\x{11e}\n";
+        EOF
+    is($?, 0, "No assertion failure");
+    is $results, "\x{11e}", "print returned the expected output";
+    unlike $results, qr/Wide character in print/, "print did not warn about wide characters";
+}
+
+TODO: {
     local $::TODO = "GH 16008";
     my $results = fresh_perl(<<~'EOF', {} );
         open my $h, ">", \my $x;
