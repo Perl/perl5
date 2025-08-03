@@ -18,7 +18,7 @@ use Exporter ();
 
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 BEGIN {
-    $VERSION     = '2.06';
+    $VERSION     = '2.07';
     @ISA         = 'Exporter';
     %EXPORT_TAGS = (
         ALL => [ qw{
@@ -1005,7 +1005,8 @@ sub extract_multiple (;$$$$)    # ($text, $functions_ref, $max_fields, $ignoreun
             {
                 $unkpos = pos($$textref)-1
                     unless $igunk || defined $unkpos;
-                _update_patvalid($textref, substr $$textref, $unkpos, pos($$textref)-$unkpos);
+                _update_patvalid($textref, substr $$textref, defined $unkpos ? $unkpos : 0,
+                                 pos($$textref) - (defined $unkpos ? $unkpos : 0));
             }
         }
 
@@ -2368,16 +2369,14 @@ Bug reports and suggestions can be made on the CPAN Request Tracker at
 L<https://rt.cpan.org/Public/Bug/Report.html?Queue=Text-Balanced>.
 
 Currently active requests on the CPAN Request Tracker can be viewed at
-L<https://rt.cpan.org/Public/Dist/Display.html?Status=Active;Queue=Text-Balanced>.
+L<https://rt.cpan.org/Public/Dist/Display.html?Queue=Text-Balanced>.
 
-Please test this distribution.  See CPAN Testers Reports at
+Please test this distribution.  See CPAN Testers at
 L<https://www.cpantesters.org/> for details of how to get involved.
 
-Previous test results on CPAN Testers Reports can be viewed at
-L<https://www.cpantesters.org/distro/T/Text-Balanced.html>.
-
-Please rate this distribution on CPAN Ratings at
-L<https://cpanratings.perl.org/rate/?distribution=Text-Balanced>.
+Previous test results on CPAN Testers can be viewed at
+L<https://www.cpantesters.org/distro/T/Text-Balanced.html> and
+L<https://fast2-matrix.cpantesters.org/?dist=Text-Balanced>.
 
 =head1 AVAILABILITY
 
@@ -2421,11 +2420,11 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 2.06
+Version 2.07
 
 =head1 DATE
 
-05 Jun 2022
+08 Aug 2025
 
 =head1 HISTORY
 

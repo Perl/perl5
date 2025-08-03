@@ -1140,7 +1140,7 @@ our %Modules = (
     },
 
     'Text::Balanced' => {
-        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.06.tar.gz',
+        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.07.tar.gz',
         'FILES'        => q[cpan/Text-Balanced],
     },
 
