@@ -11645,9 +11645,12 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         open_delim_str[0] =      *s;
         delim_byte_len = 1;
     }
-    else {
+    else { /* don't let delim_byte_len escape and be a volatile mem addr */
+        STRLEN delim_byte_len_tmp;
         open_delim_code = utf8_to_uv_or_die((U8*)s, (U8*)PL_bufend,
-                                            &delim_byte_len);
+                                            &delim_byte_len_tmp);
+        /* CC can safely keep delim_byte_len in a register until the end */
+        delim_byte_len = delim_byte_len_tmp;
         if (UNLIKELY(! is_grapheme((U8 *) start,
                                    (U8 *) s,
                                    (U8 *) PL_bufend,
@@ -11764,9 +11767,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     s += delim_byte_len;
     for (;;) {
         /* extend sv if need be */
-        SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
+        char * pv = SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
         /* set 'to' to the next character in the sv's string */
-        to = SvPVX(sv)+SvCUR(sv);
+        to = pv + SvCUR(sv);
 
         /* read until we run out of string, or we find the closing delimiter */
         while (s < PL_bufend) {
@@ -11784,18 +11787,22 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                  * discard those that escape the closing delimiter, just
                  * discard this one */
                 if (   !  keep_bracketed_quoted
-                    &&   (    memEQ(s + 1,  open_delim_str, delim_byte_len)
-                          ||  (   PL_multi_open == PL_multi_close
-                               && re_reparse && s[1] == '\\')
-                          ||  memEQ(s + 1, close_delim_str, delim_byte_len)))
-                {
+                    &&   ((delim_byte_len == 1
+                            ? (s[1] == open_delim_str[0]
+                                || s[1] == close_delim_str[0])
+                            : (memEQ(s + 1, open_delim_str, delim_byte_len)
+                                || memEQ(s + 1, close_delim_str, delim_byte_len)))
+                         || (PL_multi_open == PL_multi_close
+                             && re_reparse && s[1] == '\\'))) {
                     s++;
                 }
                 else /* any other escapes are simply copied straight through */
                     *to++ = *s++;
             }
             else if (   s < PL_bufend - (delim_byte_len - 1)
-                     && memEQ(s, close_delim_str, delim_byte_len)
+                     && (delim_byte_len == 1
+                        ? s[0] == close_delim_str[0]
+                        : memEQ(s, close_delim_str, delim_byte_len))
                      && --brackets <= 0)
             {
                 /* Found unescaped closing delimiter, unnested if we care about
@@ -11824,7 +11831,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                         /* No nesting if open eq close */
             else if (   PL_multi_open != PL_multi_close
                      && s < PL_bufend - (delim_byte_len - 1)
-                     && memEQ(s, open_delim_str, delim_byte_len))
+                     && (delim_byte_len == 1
+                         ? s[0] == open_delim_str[0]
+                         : memEQ(s, open_delim_str, delim_byte_len)))
             {
                 brackets++;
             }
