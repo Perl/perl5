@@ -24,8 +24,7 @@ deemed necessary by the Steering Council.
   2024-06-09  5.40.0  ✓       Graham Knop
   2025-01-18  5.40.1  ✓       Steve Hay
   2025-04-13  5.40.2  ✓       Steve Hay
-  2025-08-03  5.40.3          Steve Hay
-
+  2025-08-03  5.40.3  ✓       Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
