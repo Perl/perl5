@@ -5230,6 +5230,35 @@ EXTERN_C void PerlIO_teardown(void);
 #  define PERLIO_TERM
 #endif
 
+/* these record the best way to perform certain IO operations while
+ * atomically setting FD_CLOEXEC. On the first call, a probe is done
+ * and the result recorded for use by subsequent calls.
+ * In theory these variables aren't thread-safe, but the worst that can
+ * happen is that two threads will both do an initial probe or even less
+ * likley both ithreads will repeat the probe a couple times over the next
+ * 100 ms.
+ *
+ * If a cross platform atomic API gets added to perl.h, all reads and writes
+ * to PL_strategy need force a memory fence. Certain archs like ARM in SMP mode
+ * by design will never re-read or flush memory writes between their L2 cache
+ * central physical unless software commands the CPU core to do it.
+ *
+ * struct io_stategy {} can be reduced to a U32 with 18 bits if its known
+ * the CC guarentees (PL_strategy & 0xC == 0x8) is safe against sharding.
+ */
+
+struct io_strategy {
+    int strategy_dup;		/* doio.c */
+    int strategy_dup2;		/* doio.c */
+    int strategy_open;		/* doio.c */
+    int strategy_open3;		/* doio.c */
+    int strategy_mkstemp;	/* doio.c */
+    int strategy_socket;	/* doio.c */
+    int strategy_accept;	/* doio.c */
+    int strategy_pipe;		/* doio.c */
+    int strategy_socketpair;	/* doio.c */
+};
+
 #ifdef MYMALLOC
 #  ifdef MUTEX_INIT_CALLS_MALLOC
 #    define MALLOC_INIT					\

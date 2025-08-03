@@ -400,21 +400,20 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
  */
 PERLVARI(G, shutdownhook, shutdown_proc_t, &Perl_noshutdownhook)
 
-/* these record the best way to perform certain IO operations while
+/* This struct records the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
  * and the result recorded for use by subsequent calls.
  * In theory these variables aren't thread-safe, but the worst that can
  * happen is that two treads will both do an initial probe
+ *
+ * Boolean-like probe results for certain I/O operations and FD_CLOEXEC.
+ * Each flag has 3 states: enum CLOEXEC_EXPERIMENT (== 0), CLOEXEC_AT_OPEN,
+ * and CLOEXEC_AFTER_OPEN.
+ *
+ * doio.c is the only user of this var currently.  This variable is exported
+ * in case experimental XS code needs to perfectly replicate an IO pp_*() func.
  */
-PERLVARI(G, strategy_dup,        int, 0)	/* doio.c */
-PERLVARI(G, strategy_dup2,       int, 0)	/* doio.c */
-PERLVARI(G, strategy_open,       int, 0)	/* doio.c */
-PERLVARI(G, strategy_open3,      int, 0)	/* doio.c */
-PERLVARI(G, strategy_mkstemp,    int, 0)	/* doio.c */
-PERLVARI(G, strategy_socket,     int, 0)	/* doio.c */
-PERLVARI(G, strategy_accept,     int, 0)	/* doio.c */
-PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
-PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
+PERLVAR(G, strategy, struct io_strategy)
 
 PERLVARI(G, my_environ, char **, NULL)
 PERLVARI(G, origenviron, char **, NULL)
