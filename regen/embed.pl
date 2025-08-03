@@ -123,12 +123,12 @@ sub generate_proto_h {
 
         my ($flags, $retval, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
-        if ($flags =~ / ( [^ AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
+        if ($flags =~ / ( [^ AabCDdEefFhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
 
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /[Gm]/ );
+        my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );

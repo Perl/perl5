@@ -453,13 +453,6 @@
 :        flag even on a format function is if the format would generate error:
 :        format string argument is not a string type
 :
-:   'G'  Suppress empty PERL_ARGS_ASSERT_foo macro.  Normally such a macro is
-:        generated for all entries for functions 'foo' in this file.  The macro
-:        is empty unless regen/embed.pl deems that there should be assert()
-:        calls to verify the sanity of some or all of foo's arguments.
-:
-:          proto.h: An empty PERL_ARGS_ASSERT macro is not defined
-:
 :   'h'  Hide any documentation that would normally go into perlapi or
 :        perlintern. This is typically used when the documentation is actually
 :        in another pod. If you don't use the 'h', that documentation is
