@@ -9771,7 +9771,8 @@ Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
 PERL_STATIC_INLINE AV *
 Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_AV_NEW_ALLOC
+# define PERL_ARGS_ASSERT_AV_NEW_ALLOC          \
+        assert(size > 0)
 
 PERL_STATIC_INLINE void
 Perl_av_push_simple(pTHX_ AV *av, SV *val);
