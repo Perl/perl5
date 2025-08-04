@@ -8762,16 +8762,17 @@ S_give_perl_locale_control(pTHX_
 }
 
 STATIC void
-S_output_check_environment_warning(pTHX_ const char * const language,
+S_output_check_environment_warning(pTHX_ PerlIO * const error_log,
+                                         const char * const language,
                                          const char * const lc_all,
                                          const char * const lang)
 {
-    PerlIO_printf(Perl_error_log,
+    PerlIO_printf(error_log,
                   "perl: warning: Please check that your locale settings:\n");
 
 #  ifdef __GLIBC__
 
-    PerlIO_printf(Perl_error_log, "\tLANGUAGE = %c%s%c,\n",
+    PerlIO_printf(error_log, "\tLANGUAGE = %c%s%c,\n",
                                   language ? '"' : '(',
                                   language ? language : "unset",
                                   language ? '"' : ')');
@@ -8779,14 +8780,14 @@ S_output_check_environment_warning(pTHX_ const char * const language,
     PERL_UNUSED_ARG(language);
 #  endif
 
-    PerlIO_printf(Perl_error_log, "\tLC_ALL = %c%s%c,\n",
+    PerlIO_printf(error_log, "\tLC_ALL = %c%s%c,\n",
                                   lc_all ? '"' : '(',
                                   lc_all ? lc_all : "unset",
                                   lc_all ? '"' : ')');
 
     for_all_individual_category_indexes(i) {
         const char * value = PerlEnv_getenv(category_names[i]);
-        PerlIO_printf(Perl_error_log,
+        PerlIO_printf(error_log,
                       "\t%s = %c%s%c,\n",
                       category_names[i],
                       value ? '"' : '(',
@@ -8794,11 +8795,11 @@ S_output_check_environment_warning(pTHX_ const char * const language,
                       value ? '"' : ')');
     }
 
-    PerlIO_printf(Perl_error_log, "\tLANG = %c%s%c\n",
+    PerlIO_printf(error_log, "\tLANG = %c%s%c\n",
                                   lang ? '"' : '(',
                                   lang ? lang : "unset",
                                   lang ? '"' : ')');
-    PerlIO_printf(Perl_error_log,
+    PerlIO_printf(error_log,
                   "    are supported and installed on your system.\n");
 }
 
@@ -9211,9 +9212,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
 
         if (trial == 0 && locwarn) {
-            PerlIO_printf(Perl_error_log,
+            PerlIO * error_log = Perl_error_log;
+            PerlIO_printf(error_log,
                                   "perl: warning: Setting locale failed.\n");
-            output_check_environment_warning(language, lc_all, lang);
+            output_check_environment_warning(error_log, language, lc_all, lang);
         }
 
 #  else /* Below is ! LC_ALL */
@@ -9247,16 +9249,17 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         /* Here, this trial failed */
 
         if (dowarn) {
-            PerlIO_printf(Perl_error_log,
+            PerlIO * error_log = Perl_error_log;
+            PerlIO_printf(error_log,
                 "perl: warning: Setting locale failed for the categories:\n");
 
             for_all_individual_category_indexes(j) {
                 if (! curlocales[j]) {
-                    PerlIO_printf(Perl_error_log, "\t%s\n", category_names[j]);
+                    PerlIO_printf(error_log, "\t%s\n", category_names[j]);
                 }
             }
 
-            output_check_environment_warning(language, lc_all, lang);
+            output_check_environment_warning(error_log, language, lc_all, lang);
         }   /* end of warning on first failure */
 
 #  endif /* LC_ALL */

@@ -7102,8 +7102,9 @@ S_new_LC_ALL(pTHX_ const char *lc_all, bool force);
         assert(lc_all)
 
 STATIC void
-S_output_check_environment_warning(pTHX_ const char * const language, const char * const lc_all, const char * const lang);
-#   define PERL_ARGS_ASSERT_OUTPUT_CHECK_ENVIRONMENT_WARNING
+S_output_check_environment_warning(pTHX_ PerlIO * const error_log, const char * const language, const char * const lc_all, const char * const lang);
+#   define PERL_ARGS_ASSERT_OUTPUT_CHECK_ENVIRONMENT_WARNING \
+        assert(error_log)
 
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse_LC_ALL_STRING_action, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
