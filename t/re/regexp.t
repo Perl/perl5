@@ -5,9 +5,9 @@
 # There are five columns, separated by tabs.
 # An optional sixth column is used to give a reason, only when skipping tests
 #
-# Column 1 contains the pattern, optionally enclosed in C<''> C<::> or
-# C<//>.  Modifiers can be put after the closing delimiter.  C<''> will
-# automatically be added to any other patterns.
+# Column 1 contains the pattern, optionally enclosed in '' :: or //.
+# Modifiers can be put after the closing delimiter.  '' will automatically be
+# added to any other patterns.
 #
 # Column 2 contains the string to be matched.
 #
@@ -25,9 +25,9 @@
 #       a       test should only be run on ASCII platforms
 #       e       test should only be run on EBCDIC platforms
 #
-# Columns 4 and 5 are used only if column 3 contains C<y> or C<c>.
+# Columns 4 and 5 are used only if column 3 contains y or c.
 #
-# Column 4 contains a string, usually C<$&>.
+# Column 4 contains a string, usually $&.
 #
 # Column 5 contains the expected result of double-quote
 # interpolating that string after the match, or start of error message.
