@@ -2792,39 +2792,37 @@ shown here. Even better, just don't use it at all.
 
 =head2 The XSUB Init Part
 
-XXX TBC
-
-XXX NB: the keywords described in L<XSUB Generic Keywords> and L<Sharing
-XSUB bodies> may also appear in this part, plus C<C_ARGS> C<INTERFACE> and
-C<INTERFACE_MACRO>.
+Following an XSUB's input part, an optional init part follows. This
+consists solely of the C<INIT> keyword described below, plus the keywords
+described in L<XSUB Generic Keywords> and L<Sharing XSUB bodies>, plus the
+L<C_ARGS|/The C_ARGS: Keyword>, L<INTERFACE|/The INTERFACE: Keyword> and
+L<INTERFACE_MACRO|/The INTERFACE_MACRO: Keyword> keywords.
 
 =head3 The INIT: Keyword
 
-The INIT: keyword allows initialization to be inserted into the XSUB before
-the compiler generates the call to the C function.  Unlike the CODE: keyword
-above, this keyword does not affect the way the compiler handles RETVAL.
+The C<INIT> keyword allows arbitrary initialisation code to inserted after
+any variable declarations (and their initialisations), but before the main
+body of code. It is primarily intended for use when the main body is an
+autocall to a C function. For example these two XSUBs are equivalent:
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
+    int
+    foo(int i)
       INIT:
-        printf("# Host is %s\n", host);
-      OUTPUT:
-        timep
-
-Another use for the INIT: section is to check for preconditions before
-making a call to the C function:
-
-    long long
-    lldiv(a, b)
-        long long a
-        long long b
-      INIT:
-        if (a == 0 && b == 0)
+        if (i < 0)
             XSRETURN_UNDEF;
-        if (b == 0)
-            croak("lldiv: cannot divide by 0");
+
+    int
+    foo(int i)
+      CODE:
+        if (i < 0)
+            XSRETURN_UNDEF;
+        RETVAL = foo(i);
+      OUTPUT:
+        RETVAL
+
+Any lines following C<INIT> until the next keyword (except POD and XS
+comments) are copied out as-is to the C code file. Multiple C<INIT>
+keywords are allowed.
 
 =head2 The XSUB Code Part
 
