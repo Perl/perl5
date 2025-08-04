@@ -86,6 +86,27 @@ TODO: {
     is($?, 0, "No assertion failure");
 }
 
+TODO: {
+    local $::TODO = 'GH 18669';
+
+    my $results = fresh_perl(<<~'EOF', {});
+        my $x = { arr => undef };
+        push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ new } }, "mana");
+        print $x->{ new }[0];
+        EOF
+    is($?, 0, "No assertion failure");
+    is($results, 'mana', 'push on non-existent hash entry from ternary autovivifies array ref');
+
+    $results = fresh_perl(<<~'EOF', {});
+        my $x = { arr => undef };
+        push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ arr } }, "mana");
+        print $x->{ arr }[0];
+        EOF
+    is($?, 0, "No assertion failure");
+    is($results, 'mana', 'push on undef hash entry from ternary autovivifies array ref');
+
+}
+
 {
     fresh_perl('use re "eval";
                 my @r;
