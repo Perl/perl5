@@ -92,12 +92,6 @@ my $switches = "";
 
 my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
 
-
-{   # Fixed by acababb42be12ff2986b73c1bfa963b70bb5d54e
-    "abab" =~ /(?:[^b]*(?=(b)|(a))ab)*/;
-    is($1, undef, "GH #16894");
-}
-
 our $TODO;
 
 TODO: {
