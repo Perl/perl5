@@ -38,20 +38,6 @@ my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
 
 our $TODO;
 
-TODO: {     # Should be moved to  lib/B/Deparse.t
-    my $results = fresh_perl(<<~'EOF', {});
-        use B::Deparse;
-        my $deparse = B::Deparse->new();
-        my $body = $deparse->coderef2text(
-            sub { while(<<>>){ print $_ } }
-        );
-        print $body;
-        EOF
-    is($?, 0, 'No assertion failure');
-
-    like $results, qr/defined\(\$_ = <<>>\)/, 'while(<<>>) deparses as while (defined($_ = <<>>))'
-}
-
 TODO: {
     local $::TODO = "GH 16008";
     my $results = fresh_perl(<<~'EOF', {} );
