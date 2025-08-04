@@ -64,6 +64,12 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 16865';
+    fresh_perl('\(sort { 0 } 0, 0 .. "a")', { stderr => 'devnull' });
+    is($?, 0, "No assertion failure");
+}
+
+TODO: {
     todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
     local $::TODO = 'GH 16876';
     fresh_perl('$_ = "a"; s{ x | (?{ s{}{x} }) }{}gx;',
