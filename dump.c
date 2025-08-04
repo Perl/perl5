@@ -1126,6 +1126,8 @@ S_get_sv_from_pad(pTHX_ const OP *o, PADOFFSET po, CV *rootcv)
         return NULL;
 
     CV *cv = NULL;
+    int n;
+    OP *oproot;
 
     if (rootcv) {
         cv = rootcv;
@@ -1138,8 +1140,8 @@ S_get_sv_from_pad(pTHX_ const OP *o, PADOFFSET po, CV *rootcv)
      * stack. Limit the number of hops, in case there is some sort of
      * loop or other weirdness.
      */
-    int n = 100;
-    OP *oproot = (OP*)o;
+    n = 100;
+    oproot = (OP*)o;
     while (1) {
         if (--n <= 0)
             return NULL;
