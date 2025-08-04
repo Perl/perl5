@@ -104,6 +104,56 @@ TODO: {
     }
     is($^W, 1, '$^W value prior to localization is restored; GH 5835');
     $^W = $prev_w;
+
+}
+
+TODO: {
+    local $TODO = "[GH 8267]";
+
+    "A" =~ /(((?:A))?)+/;
+    my $first = $2;
+
+    "A" =~ /(((A))?)+/;
+    my $second = $2;
+
+    is($first, $second, "[GH 8267]");
+}
+
+TODO: {
+    local $TODO = "[GH 8859]";
+    fresh_perl_is(<<~'EOF',
+        my $mul = 2**32; my $a = 104712103; my $b = 50;
+        my $c = 449735057880383538; # For these values, $mul * $a + $b == $c. Thus $diff should be zero.
+        my $diff = $c - ($a * $mul + $b);
+        printf "%.0f %.0f %.0f %.0f", $a, $b, $c, $diff;
+        #printf "\$c $c %0.f\n", $c;
+    EOF
+    "104712103 50 449735057880383538 0", { eval $switches }, "[GH 8859]");
+}
+
+TODO: {
+    local $TODO = "[GH 10194]";
+    todo_skip 1 if is_miniperl();
+
+    fresh_perl_is(<<~'EOF',
+        use Encode;
+        use Devel::Peek;
+
+        my $line = "\xe2\x90\x0a";
+        chomp(my $str = "\xe2\x90\x0a");
+
+        Encode::_utf8_on($line);
+        Encode::_utf8_on($str);
+
+        for ($line, $str) {
+            Dump($_);
+            # Doesn't crash
+            $_ =~ /(.*)/;
+            # List context
+            () = $_ =~ /(.*)/;
+        }
+    EOF
+    "", { eval $switches }, "[GH 10194]");
 }
 
 TODO: {
