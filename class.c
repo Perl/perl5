@@ -1031,6 +1031,26 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
     PadnameREFCNT_inc(pn);
 }
 
+/* Adds a pad entry to PL_compcv to make the given field visible. This works
+ * even before the field has been properly `intro_my()`'ed and is thus usable
+ * during attributes declared on the same newly-field.
+ */
+
+#define pad_import_field(fieldpn)  S_pad_import_field(aTHX_ fieldpn)
+static PADOFFSET
+S_pad_import_field(pTHX_ PADNAME *fieldpn)
+{
+    assert(PadnameIsFIELD(fieldpn));
+
+    /* We can't just pad_findmy_pvn() because the actual field may not have been
+     * intro_my()'ed yet */
+    PADNAME *name = newPADNAMEouter(fieldpn);
+    PADOFFSET padix = pad_alloc(OP_PADSV, SVs_PADMY);
+    padnamelist_store(PL_comppad_name, padix, name);
+
+    return padix;
+}
+
 static void
 apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
 {
@@ -1073,10 +1093,9 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     if(!valid_identifier_sv(value))
         croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
 
-    PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
-
     I32 floor_ix = start_subparse(FALSE, 0);
     SAVEFREESV(PL_compcv);
+    CvIsMETHOD_on(PL_compcv);
 
     I32 save_ix = block_start(TRUE);
 
@@ -1085,24 +1104,8 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
 
-    padix = pad_add_name_pvn(PadnamePV(pn), PadnameLEN(pn), 0, NULL, NULL);
+    padix = pad_import_field(pn);
     intro_my();
-
-    OP *methstartop;
-    {
-        UNOP_AUX_item *aux;
-        aux = (UNOP_AUX_item *)PerlMemShared_malloc(
-                                sizeof(UNOP_AUX_item) * (2 + 2));
-
-        UNOP_AUX_item *ap = aux;
-        (ap++)->uv = 1;       /* fieldcount */
-        (ap++)->uv = fieldix; /* max_fieldix */
-
-        (ap++)->uv = padix;
-        (ap++)->uv = fieldix;
-
-        methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
-    }
 
     OP *argcheckop;
     {
@@ -1132,7 +1135,6 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     }
 
     OP *ops = newLISTOPn(OP_LINESEQ, 0,
-            methstartop,
             argcheckop,
             retop,
             NULL);
@@ -1178,10 +1180,9 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     if(!valid_identifier_sv(value))
         croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
 
-    PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
-
     I32 floor_ix = start_subparse(FALSE, 0);
     SAVEFREESV(PL_compcv);
+    CvIsMETHOD_on(PL_compcv);
 
     I32 save_ix = block_start(TRUE);
 
@@ -1190,24 +1191,8 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
 
-    padix = pad_add_name_pvn(PadnamePV(pn), PadnameLEN(pn), 0, NULL, NULL);
+    padix = pad_import_field(pn);
     intro_my();
-
-    OP *methstartop;
-    {
-        UNOP_AUX_item *aux;
-        aux = (UNOP_AUX_item *)PerlMemShared_malloc(
-                                sizeof(UNOP_AUX_item) * (2 + 2));
-
-        UNOP_AUX_item *ap = aux;
-        (ap++)->uv = 1;       /* fieldcount */
-        (ap++)->uv = fieldix; /* max_fieldix */
-
-        (ap++)->uv = padix;
-        (ap++)->uv = fieldix;
-
-        methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
-    }
 
     OP *argcheckop;
     {
@@ -1230,7 +1215,6 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
             newPADxVOP(OP_PADSV, 0, PADIX_SELF));
 
     OP *ops = newLISTOPn(OP_LINESEQ, 0,
-            methstartop,
             argcheckop,
             assignop,
             retop,
