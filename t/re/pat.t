@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1295;  # Update this when adding/deleting tests.
+plan tests => 1296;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2643,6 +2643,12 @@ local $SIG{__WARN__} = sub { die; };
 eval "qr/()x{/;" for 1..10;
 PROG
     }
+
+    {   # GH 16894 Fixed by acababb42be12ff2986b73c1bfa963b70bb5d54e
+        "abab" =~ /(?:[^b]*(?=(b)|(a))ab)*/;
+        is($1, undef, "GH #16894");
+    }
+
 } # End of sub run_tests
 
 1;
