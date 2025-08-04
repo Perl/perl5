@@ -39,6 +39,7 @@ my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
 our $TODO;
 
 TODO: {     # Should be moved to  lib/B/Deparse.t
+    todo_skip "Test needs B", 1 if is_miniperl();
     my $results = fresh_perl(<<~'EOF', {});
         use B::Deparse;
         my $deparse = B::Deparse->new();
