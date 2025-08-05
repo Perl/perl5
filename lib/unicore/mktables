@@ -16070,9 +16070,6 @@ sub register_file_for_name($table, $directory_ref, $file) {
         $directory_ref =\@directories;
     }
 
-    # Join all the file path components together, using slashes.
-    my $full_filename = join('/', @$directory_ref, $file);
-
     # All go in the same subdirectory of unicore, or the special
     # pseudo-directory '#'
     if ($directory_ref->[0] !~ / ^ $matches_directory | \# $ /x) {
