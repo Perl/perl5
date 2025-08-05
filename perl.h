@@ -5113,11 +5113,16 @@ Gid_t getegid (void);
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
 
-#define Perl_assert(what)	PERL_DEB2( 				\
-        ((what) ? ((void) 0) :						\
-            (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
-                        "\", line %d", STRINGIFY(what), __LINE__),	\
-             (void) 0)), ((void)0))
+#ifdef DEBUGGING
+#  define Perl_assert(what)                                                 \
+     ((what)                                                                \
+      ? ((void) 0)                                                          \
+      : (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__       \
+                        "\", line %d", STRINGIFY(what), __LINE__),          \
+         (void) 0))
+#else
+#  define Perl_assert(what)  ((void) 0)
+#endif
 
 #ifndef assert
 #  define assert(what)	Perl_assert(what)
