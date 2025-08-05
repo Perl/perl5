@@ -46,7 +46,7 @@ TODO: {
         $h->truncate(6) or die $!;
         print $x;
         EOF
-    is($?, 0, 'No assertion failure');
+    is($?, 0, 'perl exited normally');
 
     is $results, 'hello ', "truncate returned the expected output";
     unlike $results, qr/Bad file descriptor/, "truncate did not warn about bad file descriptors";
@@ -83,7 +83,7 @@ TODO: {
     local $::TODO = 'GH 16971';
     fresh_perl('split(/00|0\G/, "000")',
                { stderr => 'devnull' });
-    is($?, 0, "No assertion failure");
+    is($?, 0, "No panic");
 }
 
 TODO: {
