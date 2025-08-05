@@ -1702,6 +1702,7 @@
 #     define forget_pmop(a)                     S_forget_pmop(aTHX_ a)
 #     define gen_constant_list(a)               S_gen_constant_list(aTHX_ a)
 #     define inplace_aassign(a)                 S_inplace_aassign(aTHX_ a)
+#     define is_dup_mode                        S_is_dup_mode
 #     define is_handle_constructor              S_is_handle_constructor
 #     define is_standard_filehandle_name        S_is_standard_filehandle_name
 #     define listkids(a)                        S_listkids(aTHX_ a)

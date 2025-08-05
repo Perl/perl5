@@ -7499,6 +7499,11 @@ S_inplace_aassign(pTHX_ OP *o);
         assert(o)
 
 STATIC bool
+S_is_dup_mode(const OP *o);
+# define PERL_ARGS_ASSERT_IS_DUP_MODE           \
+        assert(o)
+
+STATIC bool
 S_is_handle_constructor(const OP *o, I32 numargs)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_IS_HANDLE_CONSTRUCTOR \

@@ -14130,11 +14130,9 @@ Perl_ck_null(pTHX_ OP *o)
     return o;
 }
 
-__attribute__nonnull__(1)
 static bool
 S_is_dup_mode(const OP *o)
 {
-    assert(o != NULL);
     if (o->op_type != OP_CONST) {
         return false;
     }
@@ -14182,7 +14180,7 @@ Perl_ck_open(pTHX_ OP *o)
              (last->op_private & OPpCONST_STRICT) &&
              (oa = OpSIBLING(first)) &&                 /* The fh. */
              (oa = OpSIBLING(oa)) &&                    /* The mode. */
-             S_is_dup_mode(oa) &&                       /* A dup open. */
+             is_dup_mode(oa) &&                         /* A dup open. */
              (last == OpSIBLING(oa))) {                 /* The bareword. */
              if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED)
                  no_bareword_filehandle(SvPVX(cSVOPx_sv(last)));

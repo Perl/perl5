@@ -5023,6 +5023,7 @@ S	|void	|forget_pmop	|NN PMOP * const o
 S	|void	|gen_constant_list					\
 				|NULLOK OP *o
 S	|void	|inplace_aassign|NN OP *o
+ST	|bool	|is_dup_mode	|NN const OP *o
 RST	|bool	|is_handle_constructor					\
 				|NN const OP *o 			\
 				|I32 numargs
