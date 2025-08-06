@@ -16072,9 +16072,18 @@ sub register_file_for_name($table, $directory_ref, $file) {
 
     # All go in the same subdirectory of unicore, or the special
     # pseudo-directory '#'
-    if ($directory_ref->[0] !~ / ^ $matches_directory | \# $ /x) {
+    my $sub_directory;
+    if ($directory_ref->[0] eq '#') {
+        Carp::my_carp("Pseudo-directory '#' should be only directory "
+                .  join('/', @{$directory_ref}, $file))
+                                                    if $directory_ref->@* > 1;
+        $sub_directory = '#';
+    }
+    else {
         Carp::my_carp("Unexpected directory in "
-                .  join('/', @{$directory_ref}, $file));
+                .  join('/', @{$directory_ref}, $file))
+                                if $directory_ref->[0] ne $matches_directory;
+        $sub_directory = join '/', $directory_ref->@[1 .. $#$directory_ref];
     }
 
     # For this table and all its equivalents ...
@@ -16086,7 +16095,7 @@ sub register_file_for_name($table, $directory_ref, $file) {
         # No swash means don't do the rest of this.
         next if $table->isa('Map_Table') && $table->fate != $ORDINARY;
 
-        my $sub_filename = join('/', $directory_ref->[1, -1], $file);
+        my $sub_filename = "$sub_directory/$file";
 
         my $property = $table->property;
         my $property_name = ($property == $perl)
