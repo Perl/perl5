@@ -5113,6 +5113,10 @@ Gid_t getegid (void);
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
 
+#ifndef assert
+#  define assert(what)  Perl_assert(what)
+#endif
+
 #ifdef DEBUGGING
 #  define Perl_assert(what)                                                 \
         ((what)                                                             \
@@ -5125,9 +5129,6 @@ Gid_t getegid (void);
 #  define Perl_assert(what)  ((void) 0)
 #endif
 
-#ifndef assert
-#  define assert(what)	Perl_assert(what)
-#endif
 #ifdef DEBUGGING
 #  define assert_(what)	assert(what),
 #else
