@@ -16519,17 +16519,15 @@ Perl_subsignature_start(pTHX)
 }
 
 /* Appends another positional scalar parameter to the accumulated set of
- * subroutine params. `varop` may be NULL, but if not it must be an OP_ARGELEM
- * whose op_targ refers to an already-declared pad lexical. That lexical must
- * be a scalar. It is not necessary to set the argument index in the op_aux
- * field; that will be filled in by this function.
+ * subroutine params. `padix` may be zero, but if not it must be the pad
+ * index of a scalar pad lexical to store the incoming argument value into.
  * If `defexpr` is not NULL, it gives a defaulting expression to be evaluated
  * if required, according to `defmode` - one of zero, `OP_DORASSIGN` or
  * `OP_ORASSIGN`.
  */
 
 void
-Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr)
+Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *defexpr)
 {
     PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_POSITIONAL;
     assert(PL_parser);
@@ -16541,13 +16539,13 @@ Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr
 
     UV argix = signature->elems;
 
-    if(varop) {
-        assert(varop->op_type == OP_ARGELEM);
-        assert((varop->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV);
-        assert(varop->op_targ);
-        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[varop->op_targ])[0] == '$');
+    OP *varop = NULL;
+    if(padix) {
+        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[padix])[0] == '$');
 
-        /* Now fill in the argix */
+        varop = newUNOP_AUX(OP_ARGELEM, 0, NULL, NULL);
+        varop->op_private |= OPpARGELEM_SV;
+        varop->op_targ = padix;
         cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
     }
 
@@ -16604,14 +16602,13 @@ Perl_subsignature_append_positional(pTHX_ OP *varop, OPCODE defmode, OP *defexpr
 }
 
 /* Appends a final slurpy parameter to the accumulated set of subroutine
- * params. `varop` may be NULL, but if not it must be an OP_ARGELEM whose
- * op_targ refers to an already-declared pad lexical. That lexical must match
- * the `sigil` parameter. It is not necessary to set the argument index in the
- * op_aux field; that will be filled in by this function.
+ * params. `padix` may be zero, but if not it must be the pad index of an
+ * array or hash lexical to store the remaining argument values into. Its
+ * sigil must match the `sigil` parameter.
  */
 
 void
-Perl_subsignature_append_slurpy(pTHX_ I32 sigil, OP *varop)
+Perl_subsignature_append_slurpy(pTHX_ I32 sigil, PADOFFSET padix)
 {
     PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_SLURPY;
     assert(PL_parser);
@@ -16624,21 +16621,19 @@ Perl_subsignature_append_slurpy(pTHX_ I32 sigil, OP *varop)
 
     UV argix = signature->elems;
 
-    if(varop) {
-        assert(varop->op_type == OP_ARGELEM);
-        assert((varop->op_private & OPpARGELEM_MASK) ==
-                ((sigil == '@') ? OPpARGELEM_AV : OPpARGELEM_HV));
-        assert(varop->op_targ);
-        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[varop->op_targ])[0] == sigil);
-
-        /* Now fill in the argix */
-        cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
-    }
-
     signature->slurpy = (char)sigil;
 
-    if(varop) {
-        /* TODO: assert() the sigil of the pad variable matches */
+    if(padix) {
+        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[padix])[0] == sigil);
+
+        OP *varop = newUNOP_AUX(OP_ARGELEM, 0, NULL, NULL);
+        if(sigil == '@')
+            varop->op_private |= OPpARGELEM_AV;
+        if(sigil == '%')
+            varop->op_private |= OPpARGELEM_HV;
+        varop->op_targ = padix;
+        cUNOP_AUXx(varop)->op_aux = INT2PTR(UNOP_AUX_item *, argix);
+
         signature->elemops = op_append_list(OP_LINESEQ, signature->elemops,
                 newSTATEOP(0, NULL, varop));
     }

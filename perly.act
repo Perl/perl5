@@ -933,15 +933,15 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 119: /* sigvarname: %empty  */
+  case 119: /* sigvar: %empty  */
 #line 826 "perly.y"
-                        { parser->in_my = 0; (yyval.opval) = NULL; }
+                        { parser->in_my = 0; (yyval.ival) = 0; }
 
     break;
 
-  case 120: /* sigvarname: PRIVATEREF  */
+  case 120: /* sigvar: PRIVATEREF  */
 #line 828 "perly.y"
-                        { parser->in_my = 0; (yyval.opval) = (ps[0].val.opval); }
+                        { parser->in_my = 0; (yyval.ival) = (ps[0].val.opval)->op_targ; op_free((ps[0].val.opval)); }
 
     break;
 
@@ -957,16 +957,16 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 123: /* sigslurpelem: sigslurpsigil sigvarname  */
+  case 123: /* sigslurpelem: sigslurpsigil sigvar  */
 #line 839 "perly.y"
                         {
-                            subsignature_append_slurpy((ps[-1].val.ival), (ps[0].val.opval));
+                            subsignature_append_slurpy((ps[-1].val.ival), (ps[0].val.ival));
                             (yyval.opval) = NULL;
                         }
 
     break;
 
-  case 124: /* sigslurpelem: sigslurpsigil sigvarname ASSIGNOP  */
+  case 124: /* sigslurpelem: sigslurpsigil sigvar ASSIGNOP  */
 #line 844 "perly.y"
                         {
 			    yyerror("A slurpy parameter may not have a default value");
@@ -974,7 +974,7 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 125: /* sigslurpelem: sigslurpsigil sigvarname ASSIGNOP term  */
+  case 125: /* sigslurpelem: sigslurpsigil sigvar ASSIGNOP term  */
 #line 848 "perly.y"
                         {
 			    yyerror("A slurpy parameter may not have a default value");
@@ -982,28 +982,28 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 126: /* sigscalarelem: PERLY_DOLLAR sigvarname  */
+  case 126: /* sigscalarelem: PERLY_DOLLAR sigvar  */
 #line 856 "perly.y"
                         {
-                            subsignature_append_positional((ps[0].val.opval), 0, NULL);
+                            subsignature_append_positional((ps[0].val.ival), 0, NULL);
                             (yyval.opval) = NULL;
                         }
 
     break;
 
-  case 127: /* sigscalarelem: PERLY_DOLLAR sigvarname ASSIGNOP  */
+  case 127: /* sigscalarelem: PERLY_DOLLAR sigvar ASSIGNOP  */
 #line 861 "perly.y"
                         {
-                            subsignature_append_positional((ps[-1].val.opval), (ps[0].val.ival), newOP(OP_NULL, 0));
+                            subsignature_append_positional((ps[-1].val.ival), (ps[0].val.ival), newOP(OP_NULL, 0));
                             (yyval.opval) = NULL;
                         }
 
     break;
 
-  case 128: /* sigscalarelem: PERLY_DOLLAR sigvarname ASSIGNOP term  */
+  case 128: /* sigscalarelem: PERLY_DOLLAR sigvar ASSIGNOP term  */
 #line 866 "perly.y"
                         {
-                            subsignature_append_positional((ps[-2].val.opval), (ps[-1].val.ival), (ps[0].val.opval));
+                            subsignature_append_positional((ps[-2].val.ival), (ps[-1].val.ival), (ps[0].val.opval));
                             (yyval.opval) = NULL;
                         }
 
@@ -2303,6 +2303,6 @@ case 2: /* @1: %empty  */
     
 
 /* Generated from:
- * c0af31db816b03f7b0aa8c3f33f53d00fc1eb497776acea4416cd6d4f45c0f8c perly.y
+ * a66533df84b2ea4db3ab085ffee3685d0e63a6946a65e9ce91b2621b7bd4e01e perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */
