@@ -5117,7 +5117,9 @@ Gid_t getegid (void);
 #  define assert(what)  Perl_assert(what)
 #endif
 
-#ifdef DEBUGGING
+#if   defined DEBUGGING                     \
+ && ! defined(__COVERITY__)                 \
+ && ! defined(PERL_SMALL_MACRO_BUFFER)
 #  define Perl_assert(what)                                                 \
         ((what)                                                             \
          ? ((void) 0)                                                       \
