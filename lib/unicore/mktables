@@ -16080,8 +16080,7 @@ sub register_file_for_name($table, $directory_ref, $file) {
     # For this table and all its equivalents ...
     foreach my $table ($table, $table->equivalents) {
 
-        # Associate it with its file internally.  Don't include the
-        # $matches_directory first component
+        # Associate it with its file internally.
         $table->set_file_path(@$directory_ref, $file);
 
         # No swash means don't do the rest of this.
