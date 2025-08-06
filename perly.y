@@ -115,7 +115,7 @@
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil sigvar
-%type <opval> sigscalarelem sigslurpelem
+%type <opval> sigscalarelem optsigscalardefault sigslurpelem
 %type <opval> sigelem siglist optsiglist subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
@@ -857,16 +857,17 @@ sigscalarelem:
                             subsignature_append_positional($sigvar, 0, NULL);
                             $$ = NULL;
                         }
-        |       PERLY_DOLLAR sigvar ASSIGNOP
+        |       PERLY_DOLLAR sigvar ASSIGNOP optsigscalardefault
                         {
-                            subsignature_append_positional($sigvar, $ASSIGNOP, newOP(OP_NULL, 0));
+                            subsignature_append_positional($sigvar, $ASSIGNOP, $optsigscalardefault);
                             $$ = NULL;
                         }
-        |       PERLY_DOLLAR sigvar ASSIGNOP term[defop]
-                        {
-                            subsignature_append_positional($sigvar, $ASSIGNOP, $defop);
-                            $$ = NULL;
-                        }
+        ;
+
+optsigscalardefault:
+                %empty
+                        { $$ = newOP(OP_NULL, 0); }
+        |       term
         ;
 
 
