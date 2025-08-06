@@ -5119,8 +5119,6 @@ Gid_t getegid (void);
                         "\", line %d", STRINGIFY(what), __LINE__),	\
              (void) 0)), ((void)0))
 
-/* assert() gets defined if DEBUGGING.
- * If no DEBUGGING, the <assert.h> has not been included. */
 #ifndef assert
 #  define assert(what)	Perl_assert(what)
 #endif
