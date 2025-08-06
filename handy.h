@@ -349,28 +349,6 @@ don't, so that you can portably take advantage of this C99 feature.
 #define nBIT_UMAX(n)  nBIT_MASK(n)
 
 /*
-=for apidoc_section $directives
-=for apidoc Am||__ASSERT_|bool expr
-
-This is a helper macro to avoid preprocessor issues, replaced by nothing
-unless under DEBUGGING, where it expands to an assert of its argument,
-followed by a comma (hence the comma operator).  If we just used a straight
-assert(), we would get a comma with nothing before it when not DEBUGGING.
-
-=cut
-
-We also use empty definition under Coverity since the __ASSERT_
-checks often check for things that Really Cannot Happen, and Coverity
-detects that and gets all excited. */
-
-#if   defined(DEBUGGING) && !defined(__COVERITY__)                        \
- && ! defined(PERL_SMALL_MACRO_BUFFER)
-#   define __ASSERT_(statement)  assert(statement),
-#else
-#   define __ASSERT_(statement)
-#endif
-
-/*
 =for apidoc_section $SV
 
 =for apidoc Ama|SV*|newSVpvs|"literal string"
