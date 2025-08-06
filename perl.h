@@ -5115,11 +5115,12 @@ Gid_t getegid (void);
 
 #ifdef DEBUGGING
 #  define Perl_assert(what)                                                 \
-     ((what)                                                                \
-      ? ((void) 0)                                                          \
-      : (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__       \
-                        "\", line %d", STRINGIFY(what), __LINE__),          \
-         (void) 0))
+        ((what)                                                             \
+         ? ((void) 0)                                                       \
+         : (Perl_croak_nocontext("Assertion %s failed:"                     \
+                                 " file \"" __FILE__ "\", line %d",         \
+                                 STRINGIFY(what),  __LINE__),               \
+            (void) 0))
 #else
 #  define Perl_assert(what)  ((void) 0)
 #endif
