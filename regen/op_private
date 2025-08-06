@@ -930,7 +930,8 @@ addbits('helemexistsor',
 );
 
 addbits('methstart',
-    7 => qw(OPpINITFIELDS INITFIELDS),
+    7 => qw(OPpINITFIELDS  INITFIELDS),
+    6 => qw(OPpSELF_IN_PAD SELF_IN_PAD), # $self has already been set up in pad
 );
 
 addbits('initfield',
