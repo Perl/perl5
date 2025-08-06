@@ -2826,40 +2826,145 @@ keywords are allowed.
 
 =head2 The XSUB Code Part
 
-XXX TBC
+Following an XSUB's optional init part, an optional code part follows. This
+consists mainly of the C<CODE> or C<PPCODE> keywords, which provide the
+code block for the main body of the XSUB. These two keywords are similar,
+except that C<PPCODE> can be thought of as acting at a lower level; it
+resets the stack pointer to the base of the stack frame and then relies on
+the programmer to push any return values; whereas C<CODE> will (with
+prompting) automatically generate code to return the value of C<RETVAL>.
 
-XXX NB: the keywords described in L<XSUB Generic Keywords> and L<Sharing
-XSUB bodies> may also appear in this part.
+There is also a rarely-used C<NOT_IMPLEMENTED_YET> keyword which generates
+a body which croaks.
+
+Only one of these keywords may appear in this part, and at most once; and
+no other keywords are recognised in this part (although such keywords
+could be instead be processed in the tail or head of the preceding and
+following init and output parts).
+
+In the absence of any of those three keywords, the XS compiler will
+generate an autocall: a call to the C function of the same name as the
+XSUB.
 
 =head3 Auto-calling a C function
 
-XXX TBC
+In the absence of any explicit main body code via C<CODE> or C<PPCODE>,
+the XS parser will generate a body for you automatically (this is referred
+to as C<autocall> in this document). In its most basic form, the parser
+assumes that the XSUB will be a simple wrapper for a C function of the
+same name, with the same parameters and return type as the XSUB. So for
+example, these two XSUB definitions are equivalent, but the first is an
+autocall with less boilerplate needed:
+
+    int
+    foo(char *s, short flags)
+
+    int
+    foo(char *s, short flags)
+      CODE:
+        RETVAL = foo(s, flags);
+      OUTPUT:
+        RETVAL
+
+Note that the XSUB C function and the wrapped C function are two
+different entities; the first will have a name like C<XS_Foo__Bar_foo>;
+when Perl code calls the 'Perl' function C<Foo::Bar::foo()>, behind the
+scenes the Perl interpreter calls C<XS_Foo__Bar_foo()>, which extracts the
+string and short int values from the two passed argument SVs, calls
+C<foo()>, then stuffs its return value into an SV and returns that to the
+Perl caller.
+
+The two basic types of generated autocall code are:
+
+    foo(a, b, c);
+
+    RETVAL = foo(a, b, c);
+
+depending on whether the XSUB is declared C<void> or not. The variables
+passed to the function are usually just the names of the XSUB's
+parameters, in the same order. Parameters with default values are
+included, while ellipses are ignored. So for example
+
+    int
+    foo(int a, int b = 0, ...)
+
+generates this autocall code:
+
+    RETVAL = foo(a, b);
+
+There are various keywords which can be used to modify the basic behaviour
+of an autocall.
+
+=over
+
+=item *
+
+The L<PREFIX|/The MODULE Declaration> keyword, which allows wrapped C functions
+which share a common prefix in their names to be mapped to perl functions
+whose names don't have that prefix.
+
+=item *
+
+The
+L<OUT|/"Updating and returning parameter values: the IN_OUT etc keywords">
+etc parameter modifiers, which cause that parameter to be passed to the
+autocalled function with a C<&> prefix, on the assumption that the
+wrapped function expects a pointer and will update the location pointed
+to.
+
+=item *
+
+The L<length(param_name)|/"The C<length(param_name)> pseudo-parameter">
+pseudo-parameter, which allows the length of another parameter to be
+passed as a separate argument to the wrapped function, even though it
+isn't a parameter of the Perl function.
+
+=item *
+
+The L<C_ARGS|/"The C_ARGS: Keyword"> keyword, which allows the arguments
+passed to the  wrapped function to be completely overridden: handy when
+arguments need to be skipped or reordered compared with the perl
+function.
+
+=item *
+
+The L<INIT|/"The INIT: Keyword"> keyword, which allows code to be added
+directly before the autocall.
+
+=item *
+
+The L<POSTCALL|/"The POSTCALL: Keyword"> keyword, which allows code to be
+added directly after the autocall.
+
+=item *
+
+Support for L<C++|/"Using XS With C++"> XSUBs, which can (among other
+things) modify the autocall into a C++ method call, e.g.
+C<< THIS->foo(s,flags) >>.
+
+=back
+
 
 =head4 The C_ARGS: Keyword
 
-The C_ARGS: keyword allows creating of XSUBS which have different
-calling sequence from Perl than from C, without a need to write
-CODE: or PPCODE: section.  The contents of the C_ARGS: paragraph is
-put as the argument to the called C function without any change.
+    void foo1(int a, int b, int c)
+      C_ARGS: b, a
 
-For example, suppose that a C function is declared as
+    void foo2(int a, int b)
+      C_ARGS: a < 0 ? 0 : a,
+              b,
+              0
 
-    symbolic nth_derivative(int n, symbolic function, int flags);
+Normally the arguments for an autocall are generated automatically, based
+on the XSUB's parameter declarations. The C<C_ARGS> keyword allows you to
+override this and manually specify the text that will be placed between
+the parentheses in the autocall. This is useful when the ordering and
+nature of parameters varies between Perl and C, without a need to write a
+C<CODE> or C<PPCODE> section.
 
-and that the default flags are kept in a global C variable
-C<default_flags>.  Suppose that you want to create an interface which
-is called as
-
-    $second_deriv = $function->nth_derivative(2);
-
-To do this, declare the XSUB as
-
-    symbolic
-    nth_derivative(function, n)
-        symbolic  function
-        int       n
-      C_ARGS:
-        n, function, default_flags
+The C<C_ARGS> section consists of all lines of text until the next keyword
+or to the end of the XSUB, and is used without modification (except that
+any POD or XS comments will be stripped).
 
 =head3 The CODE: Keyword
 
