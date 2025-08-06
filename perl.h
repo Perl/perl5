@@ -5125,13 +5125,9 @@ Gid_t getegid (void);
                                  " file \"" __FILE__ "\", line %" LINE_Tf,  \
                                  STRINGIFY(what), (line_t) __LINE__),       \
             (void) 0))
+#  define assert_(what)         assert(what),
 #else
 #  define Perl_assert(what)  ((void) 0)
-#endif
-
-#ifdef DEBUGGING
-#  define assert_(what)	assert(what),
-#else
 #  define assert_(what)
 #endif
 
