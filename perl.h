@@ -5118,8 +5118,8 @@ Gid_t getegid (void);
         ((what)                                                             \
          ? ((void) 0)                                                       \
          : (Perl_croak_nocontext("Assertion %s failed:"                     \
-                                 " file \"" __FILE__ "\", line %d",         \
-                                 STRINGIFY(what),  __LINE__),               \
+                                 " file \"" __FILE__ "\", line %" LINE_Tf,  \
+                                 STRINGIFY(what), (line_t) __LINE__),       \
             (void) 0))
 #else
 #  define Perl_assert(what)  ((void) 0)
