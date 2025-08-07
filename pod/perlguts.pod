@@ -3290,11 +3290,13 @@ messages where the string is assumed to be a class name.
 
 =for apidoc Amnh||HvNAMEf
 =for apidoc Amnh||HvNAMEf_QUOTEDPREFIX
+=for apidoc Amh||HvNAMEfARG|HV *hv
 
 C<HvNAMEf> and C<HvNAMEf_QUOTEDPREFIX> are similar to C<SVf> except they
-extract the string, length and utf8 flags from the argument using the
-C<HvNAME()>, C<HvNAMELEN()>, C<HvNAMEUTF8()> macros. This is intended
-for stringifying a class name directly from an stash HV.
+extract the string, length and utf8 flags from the argument given to
+C<HvNAMEfARG()> using the C<HvNAME()>, C<HvNAMELEN()>, C<HvNAMEUTF8()>
+macros. This is intended for stringifying a class name directly from an
+stash HV.
 
 =head2 Formatted Printing of Strings
 
