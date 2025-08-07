@@ -9982,8 +9982,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             RExC_utf8 = true;
                         }
                         /* diag_listed_as: Can't find Unicode property definition "%s" in regex; marked by <-- HERE in m/%s/ */
-                        vFAIL2utf8f("%" UTF8f, UTF8fARG(SvUTF8(msg),
-                                    SvCUR(msg), SvPVX(msg)));
+                        vFAIL2utf8f("%" SVf, SVfARG(msg));
                     }
 
                     assert(prop_definition || strings);
@@ -12529,8 +12528,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
                     if (SvCUR(msg)) {
                         assert(prop_definition == NULL);
 
-                        croak("%" UTF8f,
-                                UTF8fARG(SvUTF8(msg), SvCUR(msg), SvPVX(msg)));
+                        croak_sv(msg);
                     }
 
                     if (invlist) {
