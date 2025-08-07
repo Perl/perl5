@@ -14567,11 +14567,8 @@ S_get_fq_name(pTHX_
         const HV * pkg = (IN_PERL_COMPILETIME)
                          ? PL_curstash
                          : CopSTASH(PL_curcop);
-        const char* pkgname = HvNAME(pkg);
 
-        sv_catpvf(fq_name, "%" UTF8f,
-                      UTF8fARG(is_utf8, strlen(pkgname), pkgname));
-        sv_catpvs(fq_name, "::");
+        sv_catpvf(fq_name, "%" HvNAMEf "::", HvNAMEfARG(pkg));
     }
 
     sv_catpvf(fq_name, "%" UTF8f,
