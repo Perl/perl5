@@ -3758,7 +3758,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, const char * const strbeg,
         assert(rx); assert(strbeg); assert(strpos); assert(strend)
 
 PERL_CALLCONV SV *
-Perl_re_intuit_string(pTHX_ REGEXP  * const r);
+Perl_re_intuit_string(pTHX_ REGEXP * const r);
 #define PERL_ARGS_ASSERT_RE_INTUIT_STRING       \
         assert(r)
 
