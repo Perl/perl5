@@ -423,6 +423,19 @@ memory saving is unrealistic.
 C<sv_vcatpvfn_flags()> now substitutes the Unicode REPLACEMENT CHARACTER
 for malformed input.  Previously it used the NUL character.
 
+=item *
+
+For core Perl maintainers, the syntax of F<embed.fnc> has been extended.
+Every function, C<foo()>, named in this file has generated for it a
+macro named C<PERL_ARGS_ASSERT_FOO>.  The macro expands to C<assert()>
+calls that do basic sanity checking for each argument to C<foo()> that
+we currently deem as being appropriate to have such checking.  (That
+means that many arguments are not checked, and that the generated macro
+may currently expand to nothing.)  With this release, you can add
+C<assert()> statements yourself to F<embed.fnc> that will be
+incorporated into the generated macro, beyond the system-generated ones.
+Comments and examples in F<embed.fnc> give details.
+
 =back
 
 =head1 Selected Bug Fixes
