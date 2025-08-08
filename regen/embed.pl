@@ -264,10 +264,15 @@ sub generate_proto_h {
                         ++$unflagged_pointers;
                     }
 
-                    my $nn =      ( $arg =~ s/\s*\bNN\b\s+// );
-                    my $nz =      ( $arg =~ s/\s*\bNZ\b\s+// );
-                    my $nullok =  ( $arg =~ s/\s*\bNULLOK\b\s+// );
-                    my $nocheck = ( $arg =~ s/\s*\bNOCHECK\b\s+// );
+                    my $nn =      ( $arg =~ s/\bNN\b// );
+                    my $nz =      ( $arg =~ s/\bNZ\b// );
+                    my $nullok =  ( $arg =~ s/\bNULLOK\b// );
+                    my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
+
+                    # Trim $arg and remove multiple blanks
+                    $arg =~ s/^\s+//;
+                    $arg =~ s/\s+$//;
+                    $arg =~ s/\s{2,}/ /g;
 
                     push( @nonnull, $n ) if $nn;
 
