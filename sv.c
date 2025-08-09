@@ -1425,11 +1425,15 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 #ifndef PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC
 
         /* Don't round up on the first allocation, as odds are pretty good that
-         * the initial request is accurate as to what is really needed */
+         * the initial request is accurate as to what is really needed.
+         * However, do reflect our best understanding of the allocation size
+         * likely to result, so that SvLEN is as accurate as possible. */
         if (SvLEN(sv)) {
             STRLEN rounded = PERL_STRLEN_ROUNDUP(newlen);
             if (rounded > newlen)
                 newlen = rounded;
+        } else {
+            newlen = expected_size(newlen);
         }
 #endif
         if (SvLEN(sv) && s) {
