@@ -1238,6 +1238,8 @@ sub deparse_argops {
         # skip trailing nextstate
         last if $$o == $$last;
 
+        next if $cv->CvFLAGS & CVf_IsMETHOD and $o->name eq "methstart";
+
         # OP_NEXTSTATE
         return unless $o->name =~ /^(next|db)state$/;
         return if $o->label;
@@ -1294,6 +1296,13 @@ sub deparse_argops {
             return;
         }
 
+    }
+
+    if ($cv->CvFLAGS & CVf_IsMETHOD) {
+        # Remove the implied `$self` argument
+        warn "Expected first signature argument to be named \$self"
+            unless @sig and $sig[0] eq '$self';
+        shift @sig;
     }
 
     while (++$last_ix < $params) {
@@ -1360,10 +1369,6 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
         # stub sub may have single op rather than list of ops
         my $is_list = ($lineseq->name eq "lineseq");
         my $firstop = $is_list ? $lineseq->first : $lineseq;
-
-        if ($is_method and $firstop->name eq "methstart") {
-            $firstop = $firstop->sibling;
-        }
 
         # Try to deparse first subtree as a signature if possible.
         # Top of signature subtree has an ex-argcheck as a placeholder

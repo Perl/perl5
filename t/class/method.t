@@ -21,7 +21,7 @@ no warnings 'experimental::class';
     is($obj->retself, $obj, '$self inside method');
 }
 
-# methods have signatures; signatures do not capture $self
+# methods have signatures
 {
     # Turn off the 'signatures' feature to prove that 'method' is always
     # signatured even without it
@@ -34,6 +34,11 @@ no warnings 'experimental::class';
     my $obj = Testcase2->new;
     is($obj->retfirst,      123, 'method signature params work');
     is($obj->retfirst(456), 456, 'method signature params skip $self');
+
+    # argument counts take account of implicit $self
+    my $e = eval { $obj->retfirst(1, 2) } ? undef : $@;
+    like($e, qr/^Too many arguments for subroutine 'Testcase2::retfirst' \(got 3; expected at most 2\) /,
+        'method signature fails with too many arguments');
 }
 
 # methods can still capture regular package lexicals

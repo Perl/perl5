@@ -16516,6 +16516,18 @@ Perl_subsignature_start(pTHX)
 
     SAVEVPTR(PL_parser->signature);
     PL_parser->signature = signature;
+
+    /* TODO: This should ideally be performed by some sort of "magic" or
+     * "hook" mechanism on PL_compcv that class.c installed, thus decoupling
+     * this otherwise tightly-coupled mechanism here
+     */
+    if(CvIsMETHOD(PL_compcv)) {
+        assert(PadnamelistMAX(PL_comppad_name) >= 1);
+        /* PADIX_SELF == 1 */
+        assert(PadnamePV(PadnamelistARRAY(PL_comppad_name)[1])[0] == '$');
+        subsignature_append_positional(1, 0, NULL);
+        subsignature_append_fence_op(newUNOP_AUX(OP_METHSTART, OPpSELF_IN_PAD << 8, NULL, NULL));
+    }
 }
 
 /* Appends another arbitrary optree into the accumulated set of signature-

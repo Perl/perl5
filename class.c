@@ -953,6 +953,25 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
     CvIsMETHOD_on(cv);
 }
 
+#define find_op_methstart(o)  S_find_op_methstart(aTHX_ o)
+static OP *
+S_find_op_methstart(pTHX_ OP *o)
+{
+    if(o->op_type == OP_METHSTART)
+        return o;
+
+    if(!(o->op_flags & OPf_KIDS))
+        return NULL;
+
+    for(OP *kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
+        OP *methstart = find_op_methstart(kid);
+        if(methstart)
+            return methstart;
+    }
+
+    return NULL;
+}
+
 OP *
 Perl_class_wrap_method_body(pTHX_ OP *o)
 {
@@ -1010,7 +1029,18 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
     if(o->op_type != OP_LINESEQ)
         o = newLISTOP(OP_LINESEQ, 0, o, NULL);
 
-    op_sibling_splice(o, NULL, 0, newUNOP_AUX(OP_METHSTART, 0, NULL, aux));
+    if(CvSIGNATURE(PL_compcv)) {
+        /* A signatured method has already injected the OP_METHSTART; we just
+         * have to find it and attach the aux structure to it
+         */
+        OP *methstartop = find_op_methstart(o);
+        assert(methstartop);
+        assert(!cUNOP_AUXx(methstartop)->op_aux);
+
+        cUNOP_AUXx(methstartop)->op_aux = aux;
+    }
+    else
+        op_sibling_splice(o, NULL, 0, newUNOP_AUX(OP_METHSTART, 0, NULL, aux));
 
     return o;
 }
@@ -1108,12 +1138,13 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
 
     I32 save_ix = block_start(TRUE);
 
-    subsignature_start();
-
     PADOFFSET padix;
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    subsignature_start();
+    CvSIGNATURE_on(PL_compcv);
 
     OP *sigop = subsignature_finish();
 
@@ -1175,12 +1206,13 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
 
     I32 save_ix = block_start(TRUE);
 
-    subsignature_start();
-
     PADOFFSET padix;
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    subsignature_start();
+    CvSIGNATURE_on(PL_compcv);
 
     /* param pad variable doesn't technically need a name, so don't bother as
      * reusing the field name will provoke a warning */

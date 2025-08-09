@@ -37,6 +37,17 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Reported argument counts in C<method> signatures now account for C<$self>
+
+In previous versions of Perl, the exception message thrown by a C<method>
+subroutine with a signature when it does not receive an appropriate number of
+arguments to match its declared parameters failed to account for the implied
+C<$self> parameter, causing the numbers in the message to be 1 fewer than
+intended.
+
+This has now been fixed, so messages report the correct number of arguments
+including the object invocant.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
