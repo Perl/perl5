@@ -247,13 +247,13 @@ S_invlist_trim(SV* invlist)
 
     /* But don't free up the space needed for the 0 UV that is always at the
      * beginning of the list, nor the trailing NUL */
-    const UV min_size = TO_INTERNAL_SIZE(1) + 1;
+    const UV min_size = TO_INTERNAL_SIZE(1) + 1; /* XXX 64bit UVs malloc()s on 32b CPU ? */
 
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
     assert(is_invlist(invlist));
 
-    SvPV_renew(invlist, MAX(min_size, SvCUR(invlist) + 1));
+    SvPV_renew(invlist, MAX(min_size, SvCUR(invlist) + 1)); /* XXX bug ??? */
 }
 
 PERL_STATIC_INLINE void
