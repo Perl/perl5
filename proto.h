@@ -5344,13 +5344,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv);
 #define PERL_ARGS_ASSERT_UPG_VERSION            \
         assert(ver)
 
-#define PERL_ARGS_ASSERT_UTF16_TO_UTF8          \
-        assert(p); assert(d); assert(newlen)
-
 #define PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE     \
-        assert(p); assert(d); assert(newlen)
-
-#define PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED \
         assert(p); assert(d); assert(newlen)
 
 /* PERL_CALLCONV U8 *
@@ -6129,12 +6123,12 @@ Perl_skipspace_flags(pTHX_ char *s, U32 flags)
         __attribute__warn_unused_result__;
 PERL_CALLCONV MAGIC *
 Perl_sv_magicext_mglob(pTHX_ SV *sv);
-PERL_CALLCONV U8 *
-Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen);
+/* PERL_CALLCONV U8 *
+Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 PERL_CALLCONV U8 *
 Perl_utf16_to_utf8_base(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen, const bool high, const bool low);
-PERL_CALLCONV U8 *
-Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen);
+/* PERL_CALLCONV U8 *
+Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 PERL_CALLCONV U8 *
 Perl_utf8_to_utf16_base(pTHX_ U8 *s, U8 *d, Size_t bytelen, Size_t *newlen, const bool high, const bool low);
 PERL_CALLCONV bool

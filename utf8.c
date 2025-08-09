@@ -3449,22 +3449,6 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
     return d;
 }
 
-U8*
-Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
-{
-    PERL_ARGS_ASSERT_UTF16_TO_UTF8;
-
-    return utf16_to_utf8(p, d, bytelen, newlen);
-}
-
-U8*
-Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
-{
-    PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED;
-
-    return utf16_to_utf8_reversed(p, d, bytelen, newlen);
-}
-
 /*
  * Convert UTF-8 to native UTF-16. Called via the macros utf8_to_utf16() for
  * big-endian and utf8_to_utf16_reversed() for little-endian,

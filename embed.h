@@ -285,6 +285,8 @@
 #     undef invlist_intersection_
 #     undef invlist_subtract_
 #     undef invlist_union_
+#     undef utf16_to_utf8
+#     undef utf16_to_utf8_reversed
 #   endif
 # endif /* !defined(PERL_CORE) */
 #else /* if !defined(PERL_DO_UNDEFS) */
@@ -2615,6 +2617,10 @@
 #   define Perl_whichsig(mTHX,a)                whichsig(a)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
+#   if defined(PERL_CORE) || defined(PERL_EXT)
+#     define Perl_utf16_to_utf8(mTHX,a,b,c,d)   utf16_to_utf8(a,b,c,d)
+#     define Perl_utf16_to_utf8_reversed(mTHX,a,b,c,d) utf16_to_utf8_reversed(a,b,c,d)
+#   endif
 #   if defined(PERL_DONT_CREATE_GVSV)
 #     define Perl_gv_SVadd(mTHX,a)              gv_SVadd(a)
 #   endif
@@ -2713,6 +2719,10 @@
 #   define Perl_uvchr_to_utf8_flags_msgs        uvchr_to_utf8_flags_msgs
 #   define Perl_uvoffuni_to_utf8_flags          uvoffuni_to_utf8_flags
 #   define Perl_whichsig                        whichsig
+#   if defined(PERL_CORE) || defined(PERL_EXT)
+#     define Perl_utf16_to_utf8                 utf16_to_utf8
+#     define Perl_utf16_to_utf8_reversed        utf16_to_utf8_reversed
+#   endif
 #   if defined(PERL_DONT_CREATE_GVSV)
 #     define Perl_gv_SVadd                      gv_SVadd
 #   endif
