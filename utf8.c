@@ -1246,12 +1246,14 @@ C<utf8n_to_uvchr> is more like an extension of C<utf8_to_uvchr_buf>, but
 with fewer quirks, and a different method of specifying the bytes in C<s> it is
 allowed to examine.  It has a C<curlen> parameter instead of an C<e> parameter,
 so the furthest byte in C<s> it can look at is S<C<s + curlen - 1>>.  Its
-return value is, like C<utf8_to_uvchr_buf>, ambiguous with respect to the NUL
-and REPLACEMENT characters, but the value of C<*retlen> can be relied on
-(except with the C<UTF8_CHECK_ONLY> flag described below) to know where the
-next possible character along C<s> starts, removing that quirk.  Hence, you
-always should use C<*retlen> to determine where the next character in C<s>
-starts.
+failure return value is not dependent on if warnings are enabled or not.  It is
+always 0 upon failure.  But like C<utf8_to_uvchr_buf>, 0 could also be the
+return for a successful translation of an input C<NUL> character.  Use the same
+method given above for disambiguating this.  Unlike C<utf8_to_uvchr_buf>,
+C<*retlen> can be relied on (except with the C<UTF8_CHECK_ONLY> flag described
+below) to know where the next possible character along C<s> starts, removing
+that quirk.  Hence, you always should use C<*retlen> to determine where the
+next character in C<s> starts.
 
 These functions have an additional parameter, C<flags>, besides the ones in
 C<utf8_to_uv> and C<utf8_to_uvchr_buf>, which can be used to broaden or
