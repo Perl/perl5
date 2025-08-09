@@ -1817,49 +1817,172 @@ through C<0x10FFFF>.)
 
 =head2 Security Implications of Unicode
 
-First, read
-L<Unicode Security Considerations|https://www.unicode.org/reports/tr36>.
+The security implications of Unicode are quite complicated, as you might
+expect from it trying to handle all the world's scripts.  An
+introduction is in
+L<Unicode Security Methods|https://www.unicode.org/reports/tr39>.
 
-Also, note the following:
+Here are a few examples of pitfalls
 
 =over 4
 
-=item *
+=item Confusables
 
-Malformed UTF-8
+Many characters in Unicode look similar enough to other characters that
+they could be easily confused with each other.  This is true even within
+the same script, for example English, where the digit C<0> and a capital
+letter C<O> may look like each other.  But people who use that script
+know to look out for that.
 
-UTF-8 is very structured, so many combinations of bytes are invalid.  In
-the past, Perl tried to soldier on and make some sense of invalid
-combinations, but this can lead to security holes, so now, if the Perl
-core needs to process an invalid combination, it will either raise a
-fatal error, or will replace those bytes by the sequence that forms the
-Unicode REPLACEMENT CHARACTER, for which purpose Unicode created it.
+In Unicode, a digit in one script may be confusable with a digit having
+a different numeric value in another.  A malicious website could use
+this to make it appear that the price of something is less than what
+you actually get charged for.  (You can use L<perlre/Script Runs> to
+make sure such digits are not being inter-mixed.)
 
-Every code point can be represented by more than one possible
-syntactically valid UTF-8 sequence.  Early on, both Unicode and Perl
-considered any of these to be valid, but now, all sequences longer
-than the shortest possible one are considered to be malformed.
+This is a general problem with internet addresses.  The people who give out
+domain names need to be careful to not give out ones that spoof other ones
+(examples in L<perlre/Script Runs>).
+
+And computer program identifier names can be such that they look like
+something they're not, and hence could fool a code reviewer, for
+example.  Script runs on the individual identifiers can catch many of
+these, but not all.  All the letters in the ASCII word C<scope> have
+look-alikes in Cyrillic, though those do not form a real word.  Using
+those Cyrillic letters in that order would almost certainly be an
+attempt at spoofing.
+
+=item Malformed text
+X<REPLACEMENT CHARACTER>
+
+Successful attacks have been made against websites and databases by
+passing strings to them that aren't actually legal; the receiver
+fails to realize this; and performs an action it otherwise wouldn't,
+based on what it thinks the input meant.  Such strings are said to be
+"malformed" or "illformed".
+
+Vast sums of money have been lost to such attacks.  It became important
+to not fall for them, which involves detecting malformed text and taking
+appropriate action (or inaction).
+
+The Unicode REPLACEMENT CHARACTER (U+FFFD) is crucial to detecting and
+handling these.  It has no purpose other than to indicate it is a
+substitute for something else.  It is generally displayed as a white
+question mark on a dark background that is shaped like a diamond (a
+rectangle rotated 45 degrees).
+
+When a malformed string is encountered, the code processing it should
+substitute the REPLACEMENT CHARACTER for it.  There are now strict rules
+as to what parts get replaced.  You should never try to infer what the
+replaced part was meant to be.  To do so could be falling into an
+attacker's trap.
+
+Many of the attack vectors were not originally envisioned by Unicode's
+creators, nor by its implementers, such as Perl.  Rules about what were
+acceptable strings were originally laxer, tightened as the school of hard
+knocks dictated.
+
+Unfortunately, the Perl interpreter's methods of working with Unicode
+strings were developed when we too were naive about the possibility of
+attacks.  Because of concerns about breaking existing code and continued
+naivety about the consequences, there has been resistance to changing
+it, and so our implementation has lagged behind Unicode's requirements
+and recommendations.  But, over the years, various improvements have
+been added to minimize the issues.
+
+Therefore, it is important to use the latest version of the Perl
+interpreter when working with Unicode.  Not unil Perl v5.44 is it fully
+hardened against known attack vectors.  And who knows what new ideas
+clever atackers may come up with in the future that we will have to
+change to counter.  (Although no new ones have become known recently
+that the Unicode Standard wasn't prepared for.)  And CPAN modules can
+easily lag behind the interpreter itself.
+
+Note that finding a REPLACEMENT CHARACTER in your string doesn't
+necessarily mean there is an attack.  It is a perfectly legal input
+character, for whatever reason.
+
+One of those reasons is when there is an encoding for which there are
+Unicode equivalents for most, but not all characters in it.  You just
+use the REPLACEMENT CHARACTER for the missing ones.  As long as most of
+the text is translatable, the results could be intelligible to a human
+reader.
+
+This, in fact, was one of the main reasons (besides malformation
+substitution) for the creation of the REPLACEMENT CHARACTER in the very
+first version of the Unicode Standard (often abbreviated TUS).  Back
+then, many characters were missing that have since been added (the first
+release had 40,000 characters; Unicode 16.0 has nearly 300K).
+
+And, transmission errors where bits get dropped or disk sector failures
+can also cause malformations.  The REPLACEMENT CHARACTER gets
+substituted, and the results may be legible to a human as long as the
+error rate is low enough.
+
+Now that Unicode is far more complete, and the odds of finding a
+character that Unicode doesn't know about are far lower, the primary use
+of the REPLACEMENT CHARACTER is to substitute for malformations in
+strings.
+
+When you are programming in pure Perl, you end up relying on the
+underlying interpreter and modules to handle these kinds of nuances.
+You are responsible, however, for knowing the encoding(s) needed for
+your program to interact with the outside world.  For example, a common
+encoding for files is UTF-8.  You could use the following to read one:
+
+ use PerlIO::encoding;
+ my $path = "path-to-UTF-8-file";
+ open my $fh, "<:encoding(UTF-8)", $path
+                                     or die "Couldn't open $path: $!";
+
+This, behind-the-scenes, uses the L<Encode> module to translate the
+contents of C<$path> to something Perl can understand.  L<C<Encode>>
+knows how to handle a wide variety of encodings.  Use this paradigm as
+well to output to a file;
+
+ use PerlIO::encoding;
+ my $out_path = "path-to-UTF-8-file";
+ open my $fh, ">:encoding(UTF-8)", $out_path
+                                 or die "Couldn't open $out_path: $!";
+
+(You can also use L<perlfunc/C<binmode>> to change the encoding of an
+already-open file.)
+
+(There are fewer options to specifying the encoding of arguments passed
+to your Perl program or to interact with environment variables.  See
+L<perlrun/PERL_UNICODE>.)
+
+Skip to the end of this item unless you are writing in XS.
+
+When writing in XS, and manipulating Unicode strings, you need to know
+more about the internals.  L<perlapi/Unicode Support> lists the
+available API elements for working with it.  UTF-8 is how Unicode
+strings are currently stored internally by the interpreter.  You B<need>
+to be using functions in the C<utf8_to_uv> family when parsing a string
+encoded in UTF-8.  This avoids the pitfalls of earlier API functions,
+whose names contained C<to_uvchr> instead of plain C<to_uv>.  
+
+=item Illegal code points
 
 Unicode considers many code points to be illegal, or to be avoided.
-Perl generally accepts them, once they have passed through any input
+Perl generally accepts them anyway, once they have passed through any input
 filters that may try to exclude them.  These have been discussed above
 (see "Surrogates" under UTF-16 in L</Unicode Encodings>,
 L</Noncharacter code points>, and L</Beyond Unicode code points>).
 
-=item *
+If you are writing in XS, the L<perlapi/utf8_to_uv> family of functions
+has ones that can exclude common varieties of these.  In particular,
+C<strict_utf8_to_uv>, excludes all but the most restrictive set defined
+by TUS.
+
+=back
+
+=head2 Regular Expressions
 
 Regular expression pattern matching may surprise you if you're not
 accustomed to Unicode.  Starting in Perl 5.14, several pattern
 modifiers are available to control this, called the character set
 modifiers.  Details are given in L<perlre/Character set modifiers>.
-
-=back
-
-As discussed elsewhere, Perl has one foot (two hooves?) planted in
-each of two worlds: the old world of ASCII and single-byte locales, and
-the new world of Unicode, upgrading when necessary.
-If your legacy code does not explicitly use Unicode, no automatic
-switch-over to Unicode should happen.
 
 =head2 Unicode in Perl on EBCDIC
 
