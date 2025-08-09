@@ -2968,97 +2968,203 @@ any POD or XS comments will be stripped).
 
 =head3 The CODE: Keyword
 
-This keyword is used in more complicated XSUBs which require
-special handling for the C function.  The RETVAL variable is
-still declared, but it will not be returned unless it is specified
-in the OUTPUT: section.
-
-The following XSUB is for a C function which requires special handling of
-its parameters.  The Perl usage is given first.
-
-    $status = rpcb_gettime("localhost", $timep);
-
-The XSUB follows.
-
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t  timep
+    int
+    abs_double(int i)
       CODE:
-         RETVAL = rpcb_gettime(host, &timep);
+        if (i < 0)
+            i = -i;
+        RETVAL = i * 2;
       OUTPUT:
-         timep
-         RETVAL
+        RETVAL
+
+The C<CODE> keyword is the usual mechanism for providing your own code as
+the main body of the XSUB. It is typically used when the XSUB, rather than
+wrapping a library function, is providing general functionality which can
+be more easily or efficiently implemented in C than in Perl.
+Alternatively, it can still be used to wrap a library function for cases
+which are too complex for autocall to handle.
+
+Note that on entry to the C<CODE> block of code, the values of any passed
+arguments will have been assigned to auto variables, but the original SVs
+will still be on the stack and accessible via C<ST(i)> if necessary.
+
+Similarly to autocall XSUBs, a C<RETVAL> variable is declared if the
+return value of the XSUB is not C<void>. Unlike autocall, you have to
+explicitly tell the XS compiler to generate code to return the value of
+C<RETVAL>, by using the The L<OUTPUT|/"The OUTPUT: Keyword"> keyword.
+(Requiring this was probably a bad design decision, but we're stuck with
+it now.) Newer XS parsers will warn if C<RETVAL> is seen in the C<CODE>
+section without a corresponding C<OUTPUT> section.
+
+A C<CODE> XSUB will typically return just the C<RETVAL> value (or possibly
+more items with the C<OUTLIST> parameter modifiers). To take complete
+control over returning values, you can use the C<PPCODE> keyword instead.
+Note that it is possible for a C<CODE> section to do this too, by doing its
+own stack manipulation and then doing an C<XSRETURN(n)> to return directly
+while indicating that there are C<n> items on the stack. This bypasses the
+normal C<XSRETURN(1)> etc that the XS parser will have planted after the
+C<CODE> lines. But it is usually cleaner to use C<PPCODE> instead.
+
+Any lines following C<CODE> until the next keyword (except POD and XS
+comments) are copied out as-is to the C code file. Multiple C<CODE>
+keywords are not allowed.
 
 =head3 The PPCODE: Keyword
 
-The PPCODE: keyword is an alternate form of the CODE: keyword and is used
-to tell the B<xsubpp> compiler that the programmer is supplying the code to
-control the argument stack for the XSUBs return values.  Occasionally one
-will want an XSUB to return a list of values rather than a single value.
-In these cases one must use PPCODE: and then explicitly push the list of
-values on the stack.  The PPCODE: and CODE: keywords should not be used
-together within the same XSUB.
-
-The actual difference between PPCODE: and CODE: sections is in the
-initialization of C<SP> macro (which stands for the I<current> Perl
-stack pointer), and in the handling of data on the stack when returning
-from an XSUB.  In CODE: sections SP preserves the value which was on
-entry to the XSUB: SP is on the function pointer (which follows the
-last parameter).  In PPCODE: sections SP is moved backward to the
-beginning of the parameter list, which allows C<PUSH*()> macros
-to place output values in the place Perl expects them to be when
-the XSUB returns back to Perl.
-
-The generated trailer for a CODE: section ensures that the number of return
-values Perl will see is either 0 or 1 (depending on the C<void>ness of the
-return value of the C function, and heuristics to work around CODE
-setting C<ST(0)> on a C<void> XSUB.  The trailer generated for a PPCODE: section
-is based on the number of return values and on the number of times
-C<SP> was updated by C<[X]PUSH*()> macros.
-
-Note that macros C<ST(i)>, C<XST_m*()> and C<XSRETURN*()> work equally
-well in CODE: sections and PPCODE: sections.
-
-The following XSUB will call the C rpcb_gettime() function
-and will return its two output values, timep and status, to
-Perl as a single list.
+    # XS equivalent of: sub one_to_n { my $n = $_[0]; 1..$n }
 
     void
-    rpcb_gettime(host)
-        char *host
-      PREINIT:
-        time_t  timep;
-        bool_t  status;
+    one_to_n(int n)
       PPCODE:
-        status = rpcb_gettime(host, &timep);
-        EXTEND(SP, 2);
-        PUSHs(sv_2mortal(newSViv(status)));
-        PUSHs(sv_2mortal(newSViv(timep)));
+        {
+            int i;
+            if (n < 1)
+                Perl_croak_nocontext(
+                    "one_to_n(): argument %d must be >= 1", n);
+            EXTEND(SP, n);
+            for (i = 1; i <= n; i++)
+                mPUSHi(i);
+        }
 
-Notice that the programmer must supply the C code necessary
-to have the real rpcb_gettime() function called and to have
-the return values properly placed on the argument stack.
+The C<PPCODE> keyword is similar to the C<CODE> keyword, except that on
+entry it resets the stack pointer to the base of the current stack frame,
+and it doesn't generate any code to return C<RETVAL> or similar: pushing
+return values onto the stack is left to the programmer. In this way it can
+be viewed as a lower-level alternative to C<CODE>, when you want to take
+full control of manipulating the argument stack. The "PP" in its name
+stands for "PUSH/PULL", reflecting the low-level stack manipulation.
+C<PPCODE> is typically used when you want to return several values or even
+an arbitrary list, compared with C<CODE>, which normally returns just the
+value of C<RETVAL>.
 
-The C<void> return type for this function tells the B<xsubpp> compiler that
-the RETVAL variable is not needed or used and that it should not be created.
-In most scenarios the void return type should be used with the PPCODE:
-directive.
+The C<PPCODE> keyword must be the last keyword in the XSUB. Any lines
+following C<PPCODE> until the end of the XSUB (except POD and XS comments)
+are copied out as-is to the C code file. Multiple C<PPCODE> keywords are
+not allowed.
 
-The EXTEND() macro is used to make room on the argument
-stack for 2 return values.  The PPCODE: directive causes the
-B<xsubpp> compiler to create a stack pointer available as C<SP>, and it
-is this pointer which is being used in the EXTEND() macro.
-The values are then pushed onto the stack with the PUSHs()
-macro.
+Typically you declare a C<PPCODE> XSUB with a return type of C<void>; any
+other return type will cause a C<RETVAL> auto variable of that type to be
+declared, which will be otherwise unused.
 
-Now the rpcb_gettime() function can be used from Perl with
-the following statement.
+On entry to the C<PPCODE> block of code, the values of any declared
+parameters arguments will have already been assigned to auto variables,
+but the original SVs will still be on the stack and initially accessible
+via C<ST(i)> if necessary. But the default assumption for a C<PPCODE>
+block is that you have already finished processing any supplied arguments,
+and that you want to push a number of return values onto the stack. The
+simple C<one_to_n()> example shown above is based on that assumption. But
+more complex strategies are possible.
 
-    ($status, $timep) = rpcb_gettime("localhost");
+There are basically two ways to access and manipulate the stack in a
+C<PPCODE> block. First, by using the C<ST(i)> macro, to get, modify, or
+replace the I<i>th item in the current stack frame, and secondly to push
+(usually temporary) return values onto the stack. The first uses the
+hidden C<ax> variable, which is set on entry to the XSUB, and is the index
+of the base of the current stack frame. This remains unchanged throughout
+execution of the XSUB. The second approach uses the local stack pointer,
+C<SP> (more on that below), which on entry to the C<PPCODE> block points
+to the base of the stack frame. Macros like C<mPUSHi()> store a temporary
+SV at that location, then increment C<SP>. On return from a C<PPCODE>
+XSUB, the current value of C<SP> is used to indicate to the caller how
+many values are being returned.
 
-When handling output parameters with a PPCODE section, be sure to handle
-'set' magic properly.  See L<perlguts> for details about 'set' magic.
+In general these two ways of accessing the stack should not be mixed, or
+confusion is likely to arise. The PUSH strategy is most useful when you
+have no further use for the passed arguments, and just want to generate
+and return a list of values, as in the C<one_to_n()> example above. The
+C<ST(i)> strategy is better when you still need to access the passed
+arguments. In the example below,
+
+    # XS equivalent of: sub triple { map { $_ * 3} @_ }
+
+    void
+    triple(...)
+      PPCODE:
+        SP += items;
+        {
+            int i;
+            for (i = 0; i < items; i++) {
+                int val  = (int)SvIV(ST(i));
+                ST(i) = sv_2mortal(newSViv(val*3));
+            }
+        }
+
+C<SP> is first incremented to reclaim the passed arguments which are still
+on the stack; then one by one, each passed argument is retrieved, and then
+each stack slot is replaced with a new mortal value. When the loop is
+finished, the current stack frame contains a list of mortals, which is
+then returned to the caller, with C<SP> indicating how many items are
+returned.
+
+Before pushing return values onto the stack (or storing values at C<ST(i)>
+locations higher than the number of passed arguments), it is necessary to
+ensure there is sufficient space on the stack. This can be achieved either
+through the C<EXTEND(SP, n)> macro as shown in the C<one_to_n()> example
+above, or by using the 'X' variants of the push macros, such as
+C<mXPUSHi()>, which can be used to check and extend the stack by one each
+time. Doing a single C<EXTEND> in advance is more efficient. C<EXTEND>
+will ensure that there is at least enough space on the stack for n further
+items to be pushed.
+
+If using the PUSH strategy, it is useful to understand in more detail how
+pushing and the local stack pointer, C<SP> are implemented. The generated
+C file will have access to (among others) the following macro definitions
+or similar:
+
+    #define dSP       SV **sp = PL_stack_sp
+    #define SP        sp
+    #define PUSHs(s)  *++sp = (s)
+    #define mPUSHi(i) sv_setiv(PUSHs(sv_newmortal()), (IV)(i))
+    #define PUTBACK   PL_stack_sp = sp
+    #define SPAGAIN   sp = PL_stack_sp
+    #define dXSARGS   dSP; ....
+
+The global (or per-interpreter) variable C<PL_stack_sp> is a pointer to
+the current top-most entry on the stack, equal initially to
+C<&ST(items-1)>. On entry to the XSUB, the C<dXSARGS> at its top will
+cause the C<sp> variable to be declared and initialised. This becomes a
+I<local> copy of the argument stack pointer. The standard stack
+manipulation macros such as C<PUSHs> all use this local copy.
+
+The XS parser will usually emit two lines of C code similar to these
+around the PP code block lines:
+
+    SP -= items;
+    ... PP lines ...
+    PUTBACK; return;
+
+This has the effect of resetting the local copy of the stack pointer (but
+I<not> the stack pointer itself) back to the base of the current stack
+frame, discarding any passed arguments. The original arguments are still
+on the stack. C<PUSHs()> etc will, starting at the base of the stack
+frame, progressively overwrite any original arguments. Finally, the
+C<PUTBACK> sets the real stack pointer to the copy, making the changes
+permanent, and also allowing the caller to determine how many arguments
+were returned.
+
+Any functions called from the XSUB will only see the value of
+C<PL_stack_sp> and not C<SP>. So when calling out to a function which
+manipulates the stack, you may need to resynchronise the two; for example:
+
+    PUTBACK;
+    push_contents_of_array(av);
+    SPAGAIN;
+
+The C<EXTEND(SP,n)> and C<mXPUSHfoo()> macros will update both
+C<PL_stack_sp> and C<SP> if the extending causes the stack to be
+reallocated.
+
+Note that there are several C<mPUSHfoo()> macros, which generally create a
+temporary SV, set its value to the argument, and push it onto the stack.
+These are:
+
+    mPUSHs(sv)         mortalise and push an SV
+    mPUSHi(iv)         create+push mortal and set to the integer val
+    mPUSHu(uv)         create+push mortal and set to the unsigned val
+    mPUSHn(n)          create+push mortal and set to the num (float) val
+    mPUSHp(str, len)   create+push mortal and set to the string+length
+    mPUSHpvs("string") create+push mortal and set to the literal string
+                         (perl 5.38.0 onwards)
 
 =head3 NOT_IMPLEMENTED_YET
 
