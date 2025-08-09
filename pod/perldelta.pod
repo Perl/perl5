@@ -418,6 +418,11 @@ It also now uses C<Perl_expected_size>, compared against the current
 buffer size, and does not try to do a reallocation if the requested
 memory saving is unrealistic.
 
+=item *
+
+C<sv_vcatpvfn_flags()> now substitutes the Unicode REPLACEMENT CHARACTER
+for malformed input.  Previously it used the NUL character.
+
 =back
 
 =head1 Selected Bug Fixes
