@@ -5582,7 +5582,7 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
             flags |= OPf_SPECIAL;
     }
     if (type == OP_STRINGIFY && OP_TYPE_IS(o, OP_CONST) &&
-        !(flags & OPf_FOLDED) && SvIsCOW(cSVOPx_sv(o)) ){
+        !(flags & OPf_FOLDED) ) {
         assert(!OpSIBLING(o));
         /* Don't wrap a single CONST in a list, process that list,
          * then constant fold the list back to the starting OP.
