@@ -253,12 +253,14 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
     if (*s >= end) {
         goto croak;
     }
-    val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
-                         ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-    if (retlen == (STRLEN) -1)
+    if (! utf8_to_uv_flags((U8 *) *s, (U8 *) end, &val, &retlen,
+                           ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY))
+    {
       croak:
         croak("Malformed UTF-8 string in '%c' format in unpack",
                    (int) TYPE_NO_MODIFIERS(datumtype));
+    }
+
     if (val >= 0x100) {
         ck_warner(packWARN(WARN_UNPACK),
                   "Character in '%c' format wrapped in unpack",
