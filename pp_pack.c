@@ -281,7 +281,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
     UV val;
     STRLEN retlen;
     const char *from = *s;
-    int bad = 0;
+    bool bad = false;
     const U32 flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
     const bool needs_swap = NEEDS_SWAP(datumtype);
 
@@ -297,7 +297,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
                             NULL, &this_msgs))
         {
             if (val >= 0x100) {
-                bad |= 2;
+                bad = true;
                 val = (U8) val;
             }
         }
@@ -343,12 +343,13 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
         Safefree(msgs);
     }
 
-    if ((bad & 2))
+    if (bad) {
         ck_warner(packWARN(datumtype & TYPE_IS_PACK ?
                             WARN_PACK : WARN_UNPACK),
                   "Character(s) in '%c' format wrapped in %s",
                   (int) TYPE_NO_MODIFIERS(datumtype),
                   datumtype & TYPE_IS_PACK ? "pack" : "unpack");
+    }
 
     *s = from;
     return TRUE;
