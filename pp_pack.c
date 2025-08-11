@@ -1239,10 +1239,21 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                 int aint;
                 if (utf8) {
                     STRLEN retlen;
-                    aint = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
-                                 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-                    if (retlen == (STRLEN) -1)
+                    UV auv;
+                    if (! utf8_to_uv_flags((U8 *) s, (U8 *) strend,
+                                           &auv, &retlen,
+                                           (ckWARN(WARN_UTF8))
+                                            ? 0
+                                            : UTF8_ALLOW_ANY))
+                    {
                         croak("Malformed UTF-8 string in unpack");
+                    }
+
+                    aint = auv;
+                    if ( (UV) aint != auv) {
+                        croak("Malformed UTF-8 string in unpack");
+                    }
+
                     s += retlen;
                 }
                 else {
