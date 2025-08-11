@@ -287,22 +287,25 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
     if (UNLIKELY(needs_swap))
         buf += buf_len;
 
-    for (;buf_len > 0; buf_len--) {
+    for (; buf_len > 0; buf_len--) {
         if (from >= end) return FALSE;
         val = utf8n_to_uvchr((U8 *) from, end-from, &retlen, flags);
         if (retlen == (STRLEN) -1) {
             from += UTF8_SAFE_SKIP(from, end);
             bad |= 1;
         } else from += retlen;
-        if (val >= 0x100) {
-            bad |= 2;
-            val = (U8) val;
-        }
+
+            if (val >= 0x100) {
+                bad |= 2;
+                val = (U8) val;
+            }
+
         if (UNLIKELY(needs_swap))
             *(U8 *)--buf = (U8)val;
         else
             *(U8 *)buf++ = (U8)val;
     }
+
     /* We have enough characters for the buffer. Did we have problems ? */
     if (bad) {
         if (bad & 1) {
@@ -315,13 +318,15 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
             }
             if (from > end) from = end;
         }
-        if ((bad & 2))
-            ck_warner(packWARN(datumtype & TYPE_IS_PACK ?
-                               WARN_PACK : WARN_UNPACK),
-                      "Character(s) in '%c' format wrapped in %s",
-                      (int) TYPE_NO_MODIFIERS(datumtype),
-                      datumtype & TYPE_IS_PACK ? "pack" : "unpack");
+
+    if ((bad & 2))
+        ck_warner(packWARN(datumtype & TYPE_IS_PACK ?
+                            WARN_PACK : WARN_UNPACK),
+                  "Character(s) in '%c' format wrapped in %s",
+                  (int) TYPE_NO_MODIFIERS(datumtype),
+                  datumtype & TYPE_IS_PACK ? "pack" : "unpack");
     }
+
     *s = from;
     return TRUE;
 }
@@ -1230,17 +1235,17 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
         case 'c':
             while (len-- > 0 && s < strend) {
                 int aint;
-                if (utf8)
-                  {
+                if (utf8) {
                     STRLEN retlen;
                     aint = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
                                  ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
                     if (retlen == (STRLEN) -1)
                         croak("Malformed UTF-8 string in unpack");
                     s += retlen;
-                  }
-                else
-                  aint = *(U8 *)(s)++;
+                }
+                else {
+                    aint = *(U8 *)(s)++;
+                }
                 if (aint >= 128 && datumtype != 'C')	/* fake up signed chars */
                     aint -= 256;
                 if (!checksum)
@@ -1310,11 +1315,16 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                         break;
                     len = UTF8SKIP(result);
                     if (!S_utf8_to_bytes(aTHX_ &ptr, strend,
-                                      (char *) &result[1], len-1, 'U')) break;
+                                         (char *) &result[1], len - 1, 'U'))
+                    {
+                        break;
+                    }
+
                     auv = utf8n_to_uvchr(result, len, &retlen,
                                          UTF8_ALLOW_DEFAULT);
                     s = ptr;
-                } else {
+                }
+                else {
                     auv = utf8n_to_uvchr((U8*)s, strend - s, &retlen,
                                          UTF8_ALLOW_DEFAULT);
                     if (retlen == (STRLEN) -1)
