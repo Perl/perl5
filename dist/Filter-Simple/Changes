@@ -52,12 +52,12 @@ Revision history for Perl extension Filter::Simple
 
 	- Added automatic preservation of existing &import subroutines
 
-	- Added automatic preservation of Exporter semantics 
+	- Added automatic preservation of Exporter semantics
 
 
 0.76	Fri Nov 16 15:08:42 2001
 
-	- Modified call to explicit &import so as to be invoked in original 
+	- Modified call to explicit &import so as to be invoked in original
 	  call context
 
 
@@ -90,7 +90,7 @@ Revision history for Perl extension Filter::Simple
     - Added Sarathy's patch for \r\n newlinery (thanks Jarkko)
 
     - Added recognition of comments as whitespace (thanks Jeff)
-    
+
     - Added @components variable (thanks Dean)
 
     - Fixed handling of vars in FILTER_ONLY code=>... (thanks Lasse)
@@ -99,16 +99,16 @@ Revision history for Perl extension Filter::Simple
 
     - Added INSTALLDIRS=>core to Makefile.PL
 
-    
+
 0.82    Mon Jun 27 02:31:06 GMT 2005
-    
+
     - Fixed INSTALLDIRS=>perl in Makefile.PL (thanks all)
 
     - Fixed other problems caused by de-schwernification
 
 
 0.83    Sat Oct 18 18:51:51 CET 2008
-    
+
     - Updated contact details: Maintained by the Perl5-Porters.
     - Some tiny distribution fixes.
 
@@ -155,4 +155,14 @@ Revision history for Perl extension Filter::Simple
         no MyFilter;
       In this case it should simply not filter anything.
 
+0.95    Nov 11 2017
 
+    - Modernize syntax: 'use vars' -> 'our'
+
+0.96    Nov 25 2019
+
+    -  Fix for GH #17122 and sanity check for executable_no_comments
+
+0.97    Mon Aug 11 05:35:34 PM EDT 2025
+
+    - Correct ambiguous double assignment to INSTALLDIRS in Makefile.PL
