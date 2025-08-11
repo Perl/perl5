@@ -282,8 +282,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
     STRLEN retlen;
     const char *from = *s;
     int bad = 0;
-    const U32 flags = ckWARN(WARN_UTF8) ?
-        UTF8_CHECK_ONLY : (UTF8_CHECK_ONLY | UTF8_ALLOW_ANY);
+    const U32 flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
     const bool needs_swap = NEEDS_SWAP(datumtype);
 
     if (UNLIKELY(needs_swap))
@@ -291,16 +290,17 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
 
     for (; buf_len > 0; buf_len--) {
         if (from >= end) return FALSE;
-        val = utf8n_to_uvchr((U8 *) from, end-from, &retlen, flags);
-        if (retlen == (STRLEN) -1) {
-            from += UTF8_SAFE_SKIP(from, end);
+        if (! utf8_to_uv_flags((U8 *) from, (U8 *) end, &val, &retlen, flags))
+        {
             bad |= 1;
-        } else from += retlen;
+        }
 
             if (val >= 0x100) {
                 bad |= 2;
                 val = (U8) val;
             }
+
+        from += retlen;
 
         if (UNLIKELY(needs_swap))
             *(U8 *)--buf = (U8)val;
