@@ -288,19 +288,31 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
     if (UNLIKELY(needs_swap))
         buf += buf_len;
 
+    AV * msgs = NULL;
     for (; buf_len > 0; buf_len--) {
         if (from >= end) return FALSE;
-        if (! utf8_to_uv_flags((U8 *) from, (U8 *) end, &val, &retlen, flags))
-        {
-            bad |= 1;
-        }
 
+        AV * this_msgs = NULL;
+        if (utf8_to_uv_msgs((U8 *) from, (U8 *) end, &val, &retlen, flags,
+                            NULL, &this_msgs))
+        {
             if (val >= 0x100) {
                 bad |= 2;
                 val = (U8) val;
             }
+        }
 
         from += retlen;
+
+        /* Add any messages from this conversion to the list for later output
+         * */
+        if (this_msgs) {
+            while (av_count(this_msgs) > 0) {
+                av_push(msgs, av_shift(this_msgs));
+            }
+
+            Safefree(this_msgs);
+        }
 
         if (UNLIKELY(needs_swap))
             *(U8 *)--buf = (U8)val;
@@ -309,17 +321,27 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
     }
 
     /* We have enough characters for the buffer. Did we have problems ? */
-    if (bad) {
-        if (bad & 1) {
-            /* Rewalk the string fragment while warning */
-            const char *ptr;
-            const U32 flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
-            for (ptr = *s; ptr < from; ptr += UTF8SKIP(ptr)) {
-                if (ptr >= end) break;
-                utf8n_to_uvchr((U8 *) ptr, end-ptr, &retlen, flags);
+    if (msgs) {
+        while (av_count(msgs) > 0) {
+            HV * msg_hash = (HV *) av_shift(msgs);
+            SV ** packed_categories_p = hv_fetchs(msg_hash, "warn_categories", 0);
+            if (packed_categories_p == NULL) {
+                continue;
             }
-            if (from > end) from = end;
+
+            UV packed_categories = SvUV(*packed_categories_p);
+            if (packed_categories == 0) {
+                continue;
+            }
+
+            SV ** warn_text_p = hv_fetchs(msg_hash, "text", 0);
+            if (warn_text_p) {
+                warner(packed_categories, "%s", SvPV_nolen(*warn_text_p));
+            }
         }
+
+        Safefree(msgs);
+    }
 
     if ((bad & 2))
         ck_warner(packWARN(datumtype & TYPE_IS_PACK ?
@@ -327,7 +349,6 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
                   "Character(s) in '%c' format wrapped in %s",
                   (int) TYPE_NO_MODIFIERS(datumtype),
                   datumtype & TYPE_IS_PACK ? "pack" : "unpack");
-    }
 
     *s = from;
     return TRUE;
