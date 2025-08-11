@@ -1322,8 +1322,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                         break;
                     }
 
-                    auv = utf8n_to_uvchr(result, len, &retlen,
-                                         UTF8_ALLOW_DEFAULT);
+                    auv = utf8_to_uv_or_die(result, result + len, &retlen);
                     s = ptr;
                 }
                 else {
