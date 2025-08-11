@@ -1326,10 +1326,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     s = ptr;
                 }
                 else {
-                    auv = utf8n_to_uvchr((U8*)s, strend - s, &retlen,
-                                         UTF8_ALLOW_DEFAULT);
-                    if (retlen == (STRLEN) -1)
-                        croak("Malformed UTF-8 string in unpack");
+                    (void) utf8_to_uv((U8 *) s, (U8 *) strend, &auv, &retlen);
                     s += retlen;
                 }
                 if (!checksum)
