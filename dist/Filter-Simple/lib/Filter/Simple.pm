@@ -2,7 +2,7 @@ package Filter::Simple;
 
 use Text::Balanced ':ALL';
 
-our $VERSION = '0.96';
+our $VERSION = '0.97';
 
 use Filter::Util::Call;
 use Carp;

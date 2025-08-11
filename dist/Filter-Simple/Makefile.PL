@@ -4,7 +4,6 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'          => 'Filter::Simple',
     'VERSION_FROM'  => 'lib/Filter/Simple.pm',
-    'INSTALLDIRS'   => 'perl',
     'LICENSE'       => 'perl_5',
     'INSTALLDIRS'   => ( $] < 5.011 ? 'perl' : 'site' ),
     'ABSTRACT_FROM' => 'lib/Filter/Simple.pm',
