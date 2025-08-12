@@ -378,15 +378,94 @@ static const MGVTBL sharedsv_userlock_vtbl = {
    the shared thing.
  */
 
-extern const MGVTBL sharedsv_scalar_vtbl;   /* Scalars have this vtable */
-extern const MGVTBL sharedsv_array_vtbl;     /* Hashes and arrays have this
-                                            - like 'tie' */
-extern const MGVTBL sharedsv_elem_vtbl;      /* Elements of hashes and arrays have
-                                          this _AS WELL AS_ the scalar magic:
+static int
+sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_scalar_mg_set(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_scalar_mg_free(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_scalar_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
+#ifdef MGf_LOCAL
+static int
+sharedsv_scalar_mg_local(pTHX_ SV* nsv, MAGIC *mg);
+#endif
+
+static U32
+sharedsv_array_mg_FETCHSIZE(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_array_mg_free(pTHX_ SV *sv, MAGIC *mg);
+#if PERL_VERSION_GE(5,11,0)
+static int
+sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
+                       SV *nsv, const char *name, I32 namlen);
+#else
+static int
+sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
+                       SV *nsv, const char *name, int namlen);
+#endif
+static int
+sharedsv_array_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
+
+static int
+sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg);
+static int
+sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
+
+/* Scalars have this vtable */
+static const MGVTBL
+sharedsv_scalar_vtbl = {
+    sharedsv_scalar_mg_get,     /* get */
+    sharedsv_scalar_mg_set,     /* set */
+    0,                          /* len */
+    0,                          /* clear */
+    sharedsv_scalar_mg_free,    /* free */
+    0,                          /* copy */
+    sharedsv_scalar_mg_dup,     /* dup */
+#ifdef MGf_LOCAL
+    sharedsv_scalar_mg_local,   /* local */
+#endif
+};
+
+/* Hashes and arrays have this - like 'tie' */
+static const MGVTBL
+sharedsv_array_vtbl = {
+    0,                          /* get */
+    0,                          /* set */
+    sharedsv_array_mg_FETCHSIZE,/* len */
+    sharedsv_array_mg_CLEAR,    /* clear */
+    sharedsv_array_mg_free,     /* free */
+    sharedsv_array_mg_copy,     /* copy */
+    sharedsv_array_mg_dup,      /* dup */
+#ifdef MGf_LOCAL
+    0,                          /* local */
+#endif
+};
+
+/* Elements of hashes and arrays have
+   this _AS WELL AS_ the scalar magic:
    The sharedsv_elem_vtbl associates the element with the array/hash and
    the sharedsv_scalar_vtbl associates it with the value
  */
-
+static const MGVTBL
+sharedsv_elem_vtbl = {
+    sharedsv_elem_mg_FETCH,     /* get */
+    sharedsv_elem_mg_STORE,     /* set */
+    0,                          /* len */
+    sharedsv_elem_mg_DELETE,    /* clear */
+    0,                          /* free */
+    0,                          /* copy */
+    sharedsv_elem_mg_dup,       /* dup */
+#ifdef MGf_LOCAL
+    0,                          /* local */
+#endif
+};
 
 /* Get shared aggregate SV pointed to by threads::shared::tie magic object */
 
@@ -932,19 +1011,6 @@ sharedsv_scalar_mg_local(pTHX_ SV* nsv, MAGIC *mg)
 }
 #endif
 
-const MGVTBL sharedsv_scalar_vtbl = {
-    sharedsv_scalar_mg_get,     /* get */
-    sharedsv_scalar_mg_set,     /* set */
-    0,                          /* len */
-    0,                          /* clear */
-    sharedsv_scalar_mg_free,    /* free */
-    0,                          /* copy */
-    sharedsv_scalar_mg_dup,     /* dup */
-#ifdef MGf_LOCAL
-    sharedsv_scalar_mg_local,   /* local */
-#endif
-};
-
 /* ------------ PERL_MAGIC_tiedelem(p) functions -------------- */
 
 /* Get magic for PERL_MAGIC_tiedelem(p) */
@@ -1093,19 +1159,6 @@ sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-const MGVTBL sharedsv_elem_vtbl = {
-    sharedsv_elem_mg_FETCH,     /* get */
-    sharedsv_elem_mg_STORE,     /* set */
-    0,                          /* len */
-    sharedsv_elem_mg_DELETE,    /* clear */
-    0,                          /* free */
-    0,                          /* copy */
-    sharedsv_elem_mg_dup,       /* dup */
-#ifdef MGf_LOCAL
-    0,                          /* local */
-#endif
-};
-
 /* ------------ PERL_MAGIC_tied(P) functions -------------- */
 
 /* Len magic for PERL_MAGIC_tied(P) */
@@ -1206,19 +1259,6 @@ sharedsv_array_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     assert(mg->mg_flags & MGf_DUP);
     return (0);
 }
-
-const MGVTBL sharedsv_array_vtbl = {
-    0,                          /* get */
-    0,                          /* set */
-    sharedsv_array_mg_FETCHSIZE,/* len */
-    sharedsv_array_mg_CLEAR,    /* clear */
-    sharedsv_array_mg_free,     /* free */
-    sharedsv_array_mg_copy,     /* copy */
-    sharedsv_array_mg_dup,      /* dup */
-#ifdef MGf_LOCAL
-    0,                          /* local */
-#endif
-};
 
 
 /* Recursive locks on a sharedsv.
