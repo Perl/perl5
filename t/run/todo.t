@@ -101,6 +101,18 @@ my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
 our $TODO;
 
 TODO: {
+    local $::TODO = 'GH 5835';
+    my $prev_w = $^W;
+    $^W = 1;
+    {
+        local $^W = $^W;
+        is($^W, '1', 'local $^W assignment to self ok');
+    }
+    is($^W, 1, '$^W value prior to localization is restored');
+    $^W = $prev_w;
+}
+
+TODO: {
     local $::TODO = "GH 16008";
     my $results = fresh_perl(<<~'EOF', {} );
         open my $h, ">", \my $x;
