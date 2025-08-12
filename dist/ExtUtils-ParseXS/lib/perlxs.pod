@@ -3166,9 +3166,20 @@ These are:
     mPUSHpvs("string") create+push mortal and set to the literal string
                          (perl 5.38.0 onwards)
 
-=head3 NOT_IMPLEMENTED_YET
+=head3 The NOT_IMPLEMENTED_YET: Keyword
 
-XXX TBC
+    void
+    foo(int a)
+        NOT_IMPLEMENTED_YET:
+
+This keyword, as a fourth alternative to C<CODE>, C<PPCODE> and autocall,
+generates a main body for the XSUB consisting solely of the C code:
+
+    Perl_croak(aTHX_ "Foo::Bar::foo: not implemented yet");
+
+The current implementation is quite buggy in terms of parsing and where
+the keyword can appear within an XSUB, so it's generally better to avoid
+it. It is documented here for completeness.
 
 =head2 The XSUB Output Part
 
