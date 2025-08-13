@@ -3334,18 +3334,31 @@ values are returned.
 
 =head2 The XSUB Cleanup Part
 
-XXX TBC
+Following an XSUB's output part, where code will have been planted to
+return the value of C<RETVAL> and C<OUT>/C<OUTLIST> parameters, it's
+possible to inject some final clean-up code by using the C<CLEANUP>
+keyword.
 
-XXX NB: the keywords described in L<XSUB Generic Keywords> and L<Sharing
+Note that the keywords described in L<XSUB Generic Keywords> and L<Sharing
 XSUB bodies> may also appear in this part.
 
 =head3 The CLEANUP: Keyword
 
-This keyword can be used when an XSUB requires special cleanup procedures
-before it terminates.  When the CLEANUP: keyword is used it must follow
-any CODE:, or OUTPUT: blocks which are present in the XSUB.  The code
-specified for the cleanup block will be added as the last statements in
-the XSUB.
+    char *
+    foo(int a)
+      CODE:
+        RETVAL = get_foo(a);
+      OUTPUT:
+        RETVAL
+      CLEANUP:
+        free(RETVAL); /* assuming get_foo() returns a malloced buffer */
+
+The C<CLEANUP> keyword allows a block of code to be inserted directly
+after any output code which has been generated automatically or via the
+C<OUTPUT> keyword. It can be used when an XSUB requires special clean-up
+procedures before it terminates. The code specified for the clean-up block
+will be added as the last statements in the XSUB before the final
+C<XSRETURN(1);> or similar.
 
 =head2 XSUB Generic Keywords
 
