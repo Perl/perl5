@@ -143,6 +143,12 @@ sub generate_proto_h {
             warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
         }
 
+        my $has_E_or_X = $flags =~ /[EX]/;
+        if ($has_E_or_X + ($flags =~ tr/AC//) > 1) {
+            die_at_end "$plain_func: A, C, and either E or X flags are"
+                     . " mutually exclusive";
+        }
+
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                                     if $flags =~ tr/Sp// > 1;
         if ($has_mflag) {

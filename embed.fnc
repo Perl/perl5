@@ -2074,7 +2074,7 @@ Cp	|const char *|moreswitches					\
 Adp	|void	|mortal_destructor_sv					\
 				|NN SV *coderef 			\
 				|NULLOK SV *args
-CRTXip	|char * |mortal_getenv	|NN const char *str
+CRTip	|char * |mortal_getenv	|NN const char *str
 Cdp	|void	|mortal_svfunc_x|SVFUNC_t f				\
 				|NULLOK SV *p
 Adop	|const struct mro_alg *|mro_get_from_name			\
