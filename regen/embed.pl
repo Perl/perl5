@@ -537,14 +537,15 @@ sub embed_h {
         my $level= $_->{level};
         my $embed= $_->{embed} or next;
         my ($flags,$retval,$func,$args) = @{$embed}{qw(flags return_type name args)};
+        my $full_name = full_name($func, $flags);
+        next if $full_name eq $func;    # Don't output a no-op.
+
         my $ret = "";
         my $ind= $level ? " " : "";
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
         if ($flags =~ /m/ && $flags =~ /p/) {
-            my $full_name = full_name($func, $flags);
-            next if $full_name eq $func;    # Don't output a no-op.
 
             # Yields
             #   #define Perl_func  func
@@ -585,8 +586,6 @@ sub embed_h {
         elsif ($flags !~ /[omM]/) {
             my $argc = scalar @$args;
             if ($flags =~ /[T]/) {
-                my $full_name = full_name($func, $flags);
-                next if $full_name eq $func;    # Don't output a no-op.
                 $ret = indent_define($func, $full_name, $ind);
             }
             else {
