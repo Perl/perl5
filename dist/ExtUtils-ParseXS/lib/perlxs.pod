@@ -3183,74 +3183,154 @@ it. It is documented here for completeness.
 
 =head2 The XSUB Output Part
 
-XXX TBC
+Following an XSUB's code part, any results may be post-processed and
+returned. Two keywords in particular support this: L<POSTCALL|/The
+POSTCALL: Keyword>,  which allows for a block of code to be added after
+any autocall in order to post-process return values from the call, and
+L<OUTPUT|/The OUTPUT: Keyword>, which tells the parser to generate code to
+return the value of C<RETVAL> or to update the values of one or more
+passed arguments.
 
-XXX NB: the keywords described in L<XSUB Generic Keywords> and L<Sharing
+These two optional keywords should each only be used once at most, and in
+that order; but due to a parsing bug (kept for backwards compatibility),
+they can appear in either order any number of times. But don't do that.
+
+Note that the keywords described in L<XSUB Generic Keywords> and L<Sharing
 XSUB bodies> may also appear in this part.
 
 =head3 The POSTCALL: Keyword
 
-This keyword can be used when an XSUB requires special procedures
-executed after the C subroutine call is performed.  When the POSTCALL:
-keyword is used it must precede OUTPUT: and CLEANUP: blocks which are
-present in the XSUB.
+The C<POSTCALL> keyword allows a block of code to be inserted directly after
+any autocall or C<CODE>/C<PPCODE> code block (although it's really only of
+use with autocall). It's typically used for cleaning up the return value
+from the autocall. For example these two XSUBs are equivalent:
 
-See an example in L<"An XSUB Declaration">.
+    int
+    foo(int a)
+       POSTCALL:
+         if (RETVAL < 0)
+            RETVAL = 0
 
-The POSTCALL: block does not make a lot of sense when the C subroutine
-call is supplied by user by providing either CODE: or PPCODE: section.
-
+    int
+    foo(int a)
+       CODE:
+         RETVAL = foo(a);
+         if (RETVAL < 0)
+            RETVAL = 0
+      OUTPUT:
+        RETVAL
 
 =head3 The OUTPUT: Keyword
 
-The OUTPUT: keyword indicates that certain function parameters should be
-updated (new values made visible to Perl) when the XSUB terminates or that
-certain values should be returned to the calling Perl function.  For
-simple functions which have no CODE: or PPCODE: section,
-such as the sin() function above, the RETVAL variable is
-automatically designated as an output value.  For more complex functions
-the B<xsubpp> compiler will need help to determine which variables are output
-variables.
+    # Common usage:
 
-This keyword will normally be used to complement the CODE: keyword.
-The RETVAL variable is not recognized as an output variable when the
-CODE: keyword is present.  The OUTPUT: keyword is used in this
-situation to tell the compiler that RETVAL really is an output
-variable.
+    OUTPUT:
+      RETVAL
 
-The OUTPUT: keyword can also be used to indicate that function parameters
-are output variables.  This may be necessary when a parameter has been
-modified within the function and the programmer would like the update to
-be seen by Perl.
+    # Rare usage:
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
+    OUTPUT:
+      arg0
+      SETMAGIC: DISABLE
+      arg1
+      SETMAGIC: ENABLE
+      arg2 sv_setfoo(ST[2], arg2)
+
+
+The C<OUTPUT> keyword can be used to indicate that the value of RETVAL
+should be returned to the caller on the stack, and/or that the values of
+certain passed Perl arguments should be updated with the current values of
+the corresponding parameter variables. Each non-blank line of the
+C<OUTPUT> block should contain the name of one variable, with optional
+setting code, or a C<SETMAGIC:> keyword with a value of C<ENABLE> or
+C<DISABLE>.
+
+The common usage is to list just the C<RETVAL> variable:
+
+    int
+    foo()
+    CODE:
+        RETVAL = ...;
+    OUTPUT:
+      RETVAL
+
+It is needed for XSUBs containing a C<CODE> block to tell the XS compiler
+to generate C code which will return the value of C<RETVAL> to the caller.
+For autocall XSUBs, this is done automatically without the need for the
+C<OUTPUT> keyword.
+
+The second usage of C<OUTPUT> is to specify parameters to be updated; this
+usage has been almost completely replaced by using the
+L<OUT|/"Updating and returning parameter values: the IN_OUT etc keywords">
+parameter modifier. For example these two XSUBs have identical behaviours,
+but the second is the preferred form:
+
+    int
+    foo1(a)
+       INPUT:
+         int &a
+       OUTPUT:
+         a
+
+    int
+    foo2(IN_OUT int a)
+
+They both cause output C code  similar to this to be planted (with the
+first part derived from a typemap):
+
+    sv_setiv(ST(0), (IV)a);
+    SvSETMAGIC(ST(0));
+
+which updates the value of the passed SV with the current value of C<a>,
+and then calls the SV's I<set> magic, if any: which will, for example,
+cause a tied variable to have its C<STORE()> method called.
+
+You can skip the planting of the C<SvSETMAGIC()> magic call with
+C<SETMAGIC: DISABLE>; in the example at the start of this section, C<arg0>
+and C<arg2> will have set magic, while C<arg1> won't. The C<SETMAGIC>
+setting remains in force until another C<SETMAGIC>, or notionally until
+the end of the current C<OUTPUT> block. In fact the current setting will
+carry over into any further C<OUTPUT> declarations within in the same
+XSUB, or since Perl 5.40.0, only into any declarations within the same
+case C<CASE> branch.
+
+The current setting of C<SETMAGIC> is ignored for C<RETVAL>, which is
+usually setting the value of a fresh temporary SV which won't have any
+attached magic anyway.
+
+Finally, it is possible to override the typemap entry used to set the
+value of the temporary SV or passed argument from the C<RETVAL> or other
+variables. Normally, in an XSUB like:
+
+    int
+    foo(int abc)
       OUTPUT:
-        timep
+        abc
 
-The OUTPUT: keyword will also allow an output parameter to
-be mapped to a matching piece of code rather than to a
-typemap.
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
+the C<int> type (via a two-stage lookup in the system typemap) will yield
+this output typemap entry:
+
+    sv_setiv($arg, (IV)$var);
+
+which, after variable expansion, may yield
+
+    sv_setiv(ST(0), (IV)abc);
+
+or similar. This can be overridden; for example
+
+    int
+    foo(int abc)
       OUTPUT:
-        timep sv_setnv(ST(1), (double)timep);
+        abc   my_setiv(ST(0), (IV)abc);
 
-B<xsubpp> emits an automatic C<SvSETMAGIC()> for all parameters in the
-OUTPUT section of the XSUB, except RETVAL.  This is the usually desired
-behavior, as it takes care of properly invoking 'set' magic on output
-parameters (needed for hash or array element parameters that must be
-created if they didn't exist).  If for some reason, this behavior is
-not desired, the OUTPUT section may contain a C<SETMAGIC: DISABLE> line
-to disable it for the remainder of the parameters in the OUTPUT section.
-Likewise, C<SETMAGIC: ENABLE> can be used to reenable it for the
-remainder of the OUTPUT section.  See L<perlguts> for more details
-about 'set' magic.
+But importantly, unlike the similar syntax in C<INPUT> lines, the override
+text is I<not> variable expanded. It is thus tricky to ensure that the
+right arguments are used (such as C<ST(0)>). Basically this feature has a
+design flaw and should probably be avoided. Since 5.16.0 it's been
+possible to have locally defined typemaps using the L<TYPEMAP|/The
+TYPEMAP: Keyword> keyword which is probably a better way to modify how
+values are returned.
 
 =head2 The XSUB Cleanup Part
 
