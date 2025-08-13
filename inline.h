@@ -1333,6 +1333,7 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UV;
 
     const UV expectlen = UTF8SKIP(s);
+    ASSUME(inRANGE(expectlen, 1, UTF8_MAXBYTES));
     const U8* send = s + expectlen;
     UV uv = *s;
 
@@ -3213,6 +3214,7 @@ Perl_utf8_to_uv_msgs(const U8 * const s0,
         if (LIKELY(state == 0)) {
             if (advance_p) {
                 *advance_p = s - s0 + 1;
+                ASSUME(*advance_p <= UTF8_MAXBYTES);
             }
 
             *cp_p = UNI_TO_NATIVE(uv);
@@ -3221,7 +3223,10 @@ Perl_utf8_to_uv_msgs(const U8 * const s0,
     }
 
     /* Here is potentially problematic.  Use the full mechanism */
-    return utf8_to_uv_msgs_helper_(s0, e, cp_p, advance_p, flags, errors, msgs);
+    bool success = utf8_to_uv_msgs_helper_(s0, e, cp_p, advance_p,
+                                           flags, errors, msgs);
+    ASSUME(advance_p == NULL || inRANGE(*advance_p, 1, UTF8_MAXBYTES));
+    return success;
 }
 
 PERL_STATIC_INLINE UV
@@ -3231,6 +3236,7 @@ Perl_utf8_to_uv_or_die(const U8 *s, const U8 *e, STRLEN *advance_p)
 
     UV cp;
     (void) utf8_to_uv_flags(s, e, &cp, advance_p, UTF8_DIE_IF_MALFORMED);
+    ASSUME(advance_p == NULL || inRANGE(*advance_p, 1, UTF8_MAXBYTES));
     return cp;
 }
 
