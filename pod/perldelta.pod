@@ -460,6 +460,13 @@ C<assert()> statements yourself to F<embed.fnc> that will be
 incorporated into the generated macro, beyond the system-generated ones.
 Comments and examples in F<embed.fnc> give details.
 
+=item *
+
+A new function C<valid_utf8_to_uv> has been added.  This is synonymous
+with C<valid_utf8_to_uvchr>; its reason for existence is to have
+consistent spelling with the names of the other functions that translate
+from UTF-8, so you don't have to remember a different spelling.
+
 =back
 
 =head1 Selected Bug Fixes
