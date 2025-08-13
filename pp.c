@@ -901,7 +901,7 @@ PP(pp_schop)
 
     const size_t count = do_chomp(TARG, *PL_stack_sp, chomping);
     if (chomping)
-        sv_setiv(TARG, count);
+        sv_setiv(TARG, (IV)count);
     SvSETMAGIC(TARG);
     rpp_replace_1_1_NN(TARG);
     return NORMAL;
