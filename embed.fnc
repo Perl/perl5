@@ -1312,7 +1312,7 @@ ERXp	|SV *	|get_prop_definition					\
 ERTXp	|const char * const *|get_prop_values				\
 				|const int table_index
 : Used by SvRX and SvRXOK
-EXopx	|REGEXP *|get_re_arg	|NULLOK SV *sv
+Xopx	|REGEXP *|get_re_arg	|NULLOK SV *sv
 AOdp	|SV *	|get_sv 	|NN const char *name			\
 				|I32 flags
 CRipx	|MGVTBL *|get_vtbl	|int vtbl_id
@@ -3694,9 +3694,9 @@ Cp	|UV	|_to_utf8_upper_flags					\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 
-EXop	|bool	|try_amagic_bin |int method				\
+Xop	|bool	|try_amagic_bin |int method				\
 				|int flags
-EXop	|bool	|try_amagic_un	|int method				\
+Xop	|bool	|try_amagic_un	|int method				\
 				|int flags
 ARTdp	|char * |uiv_2buf	|NN char * const buf			\
 				|const IV iv				\
@@ -6303,7 +6303,7 @@ EXopx	|OP *	|pp_wrap	|NN Perl_ppaddr_t real_pp_fn		\
 				|I32 nargs				\
 				|int nlists
 Cpx	|int	|runops_wrap
-EXopx	|void	|xs_wrap	|NN XSUBADDR_t xsub			\
+Copx	|void	|xs_wrap	|NN XSUBADDR_t xsub			\
 				|NN CV *cv
 #endif
 #if defined(PERL_USE_3ARG_SIGHANDLER)

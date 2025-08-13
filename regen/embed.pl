@@ -136,6 +136,7 @@ sub generate_proto_h {
         my $has_mflag = ( $flags =~ /m/ );
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
+        my $extensions_only = ( $flags =~ /E/ );
         my @asserts;
         my $func;
 
@@ -402,6 +403,17 @@ sub generate_proto_h {
         $ret .= ";";
         $ret = "/* $ret */" if $has_mflag;
 
+        # Hide the prototype from non-authorized code.  This acts kind of like
+        # __attribute__visibility__("hidden") for cases where that can't be
+        # used.
+        $ret = "#${ind}if defined(PERL_CORE) || defined(PERL_EXT)\n"
+             . $ret
+             . " \n#${ind}endif"
+          if $extensions_only;
+
+        # We don't hide the ARGS_ASSERT macro; having that defined does no
+        # harm, and otherwise some inline functions that are looking for it
+        # would fail to compile.
         if ($args_assert_line || @asserts) {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
             if (@asserts) {
