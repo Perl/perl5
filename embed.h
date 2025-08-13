@@ -841,7 +841,8 @@
 # define valid_identifier_pve(a,b,c)            Perl_valid_identifier_pve(aTHX_ a,b,c)
 # define valid_identifier_pvn(a,b,c)            Perl_valid_identifier_pvn(aTHX_ a,b,c)
 # define valid_identifier_sv(a)                 Perl_valid_identifier_sv(aTHX_ a)
-# define valid_utf8_to_uvchr                    Perl_valid_utf8_to_uvchr
+# define valid_utf8_to_uv                       Perl_valid_utf8_to_uv
+# define Perl_valid_utf8_to_uvchr               valid_utf8_to_uvchr
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
 # define vcroak(a,b)                            Perl_vcroak(aTHX_ a,b)
 # define vdeb(a,b)                              Perl_vdeb(aTHX_ a,b)

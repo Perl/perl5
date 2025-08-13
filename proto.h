@@ -5428,6 +5428,10 @@ PERL_CALLCONV bool
 Perl_valid_identifier_sv(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_VALID_IDENTIFIER_SV
 
+/* PERL_CALLCONV UV
+Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
+        __attribute__warn_unused_result__; */
+
 #define PERL_ARGS_ASSERT_VALIDATE_PROTO         \
         assert(name)
 
@@ -10298,9 +10302,9 @@ Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
         assert(d)
 
 PERL_STATIC_INLINE UV
-Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
+Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR   \
+# define PERL_ARGS_ASSERT_VALID_UTF8_TO_UV      \
         assert(s)
 
 PERL_STATIC_INLINE void
