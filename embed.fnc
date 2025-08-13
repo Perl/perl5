@@ -42,7 +42,11 @@
 : comments here mostly don't include how Devel::PPPort or diag.t use them:
 : All the possible flags and their meanings are given below.
 :
-: A function taking no parameters will have no 'arg' elements.
+: A function taking no parameters will have no 'arg' elements.  Currently
+: arguments that are function pointers are unlikely to be parsed properly here
+: (patches welcome!); you can work around this by creating a typedef for the
+: function pointer, in an appropriate header file and using that here.
+:
 : A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
 :
@@ -111,6 +115,8 @@
 :         public use by themselves.  The documentation for these is placed in
 :         perlintern.  If no documentation exists, that fact is also noted in
 :         perlintern.
+:
+:	  Use the 'X' flag instead to suppress the short name outside the core
 :
 :         These require one of the /[iIpS]/ flags to give callers a name to use
 :         that won't possibly collide with their own
