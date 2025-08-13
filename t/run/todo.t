@@ -102,7 +102,7 @@ TODO: {
         local $^W = $^W;
         is($^W, '1', 'local $^W assignment to self ok');
     }
-    is($^W, 1, '$^W value prior to localization is restored');
+    is($^W, 1, '$^W value prior to localization is restored; GH 5835');
     $^W = $prev_w;
 }
 
@@ -114,10 +114,11 @@ TODO: {
         $h->truncate(6) or die $!;
         print $x;
         EOF
-    is($?, 0, 'perl exited normally');
+    is($?, 0, 'perl exited normally; [GH 16008]');
 
-    is $results, 'hello ', "truncate returned the expected output";
-    unlike $results, qr/Bad file descriptor/, "truncate did not warn about bad file descriptors";
+    is $results, 'hello ', "truncate returned the expected output; [GH 16008]";
+    unlike $results, qr/Bad file descriptor/,
+           "truncate did not warn about bad file descriptors [GH 16008]";
 }
 
 TODO: {
@@ -128,13 +129,13 @@ TODO: {
         "abcde5678" =~ / b .* (*plb:(*plb:(.{4}))? (.{5}) ) .$ /x;
         print $1 // "undef", ":", $2 // "undef", "\n";
         EOF
-    "undef:de567\nundef:de567", { eval $switches }, "");
+    "undef:de567\nundef:de567", { eval $switches }, "GH 16250");
 }
 
 TODO: {
     local $::TODO = 'GH 16865';
     fresh_perl('\(sort { 0 } 0, 0 .. "a")', { stderr => 'devnull' });
-    is($?, 0, "No assertion failure");
+    is($?, 0, "No assertion failure; GH 16865");
 }
 
 TODO: {
@@ -142,7 +143,7 @@ TODO: {
     local $::TODO = 'GH 16876';
     fresh_perl('$_ = "a"; s{ x | (?{ s{}{x} }) }{}gx;',
                { stderr => 'devnull' });
-    is($?, 0, "No assertion failure");
+    is($?, 0, "No assertion failure; GH 16876");
 }
 
 TODO: {
@@ -150,14 +151,14 @@ TODO: {
     local $::TODO = 'GH 16952';
     fresh_perl('s/d|(?{})!//.$&>0for$0,l..a0,0..0',
                { stderr => 'devnull' });
-    is($?, 0, "No assertion failure");
+    is($?, 0, "No assertion failure; GH 16952");
 }
 
 TODO: {
     local $::TODO = 'GH 16971';
     fresh_perl('split(/00|0\G/, "000")',
                { stderr => 'devnull' });
-    is($?, 0, "No panic");
+    is($?, 0, "No panic; GH 16971");
 }
 
 TODO: {
@@ -168,16 +169,16 @@ TODO: {
         push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ new } }, "mana");
         print $x->{ new }[0];
         EOF
-    is($?, 0, "No assertion failure");
-    is($results, 'mana', 'push on non-existent hash entry from ternary autovivifies array ref');
+    is($?, 0, "No assertion failure; GH 18669");
+    is($results, 'mana', 'push on non-existent hash entry from ternary autovivifies array ref; GH 18669');
 
     $results = fresh_perl(<<~'EOF', {});
         my $x = { arr => undef };
         push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ arr } }, "mana");
         print $x->{ arr }[0];
         EOF
-    is($?, 0, "No assertion failure");
-    is($results, 'mana', 'push on undef hash entry from ternary autovivifies array ref');
+    is($?, 0, "No assertion failure; GH 18669");
+    is($results, 'mana', 'push on undef hash entry from ternary autovivifies array ref; GH 18669');
 
 }
 
