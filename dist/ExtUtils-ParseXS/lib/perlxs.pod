@@ -3362,39 +3362,47 @@ C<XSRETURN(1);> or similar.
 
 =head2 XSUB Generic Keywords
 
-XXX TBC
+There are a few per-XSUB keywords which can appear anywhere within the
+body of an XSUB. This is because they affect how the XSUB is registered
+with the Perl interpreter, rather than affecting how the C code of the
+XSUB itself is generated. These are described in the following
+subsections. In addition there are a few more generic keywords which are
+described later under L<Sharing XSUB bodies>.
 
-These keywords can appear anywhere within the body of an XSUB.
+On aesthetic grounds, it is best to use these keywords near the start of
+the XSUB.
 
 =head3 The PROTOTYPE: Keyword
 
-This keyword is similar to the PROTOTYPES: keyword above but can be used to
-force B<xsubpp> to use a specific prototype for the XSUB.  This keyword
-overrides all other prototype options and keywords but affects only the
-current XSUB.  Consult L<perlsub/Prototypes> for information about Perl
-prototypes.
+    int
+    foo1(int a, int b = 0)
+      # this XSUB gets an auto-generated '$;$' prototype
+      PROTOTYPE: ENABLE
 
-    bool_t
-    rpcb_gettime(timep, ...)
-        time_t timep = NO_INIT
-      PROTOTYPE: $;$
-      PREINIT:
-        char *host = "localhost";
-      CODE:
-        if (items > 1)
-            host = (char *)SvPVbyte_nolen(ST(1));
-        RETVAL = rpcb_gettime(host, &timep);
-      OUTPUT:
-        timep
-        RETVAL
+    int
+    foo2(int a, int b)
+      # this XSUB doesn't get a prototype
+      PROTOTYPE: DISABLE
 
-If the prototypes are enabled, you can disable it locally for a given
-XSUB as in the following example:
+    int
+    foo3(SV* a, int b)
+      # this XSUB gets the specified prototype:
+      PROTOTYPE: \@$
 
-    void
-    rpcb_gettime_noproto()
-        PROTOTYPE: DISABLE
-    ...
+    int
+    foo4(int a, int b)
+      # this XSUB gets a blank () prototype
+      PROTOTYPE:
+
+While the file-scoped C<PROTOTYPES> keyword turns automatic prototype
+generation on or off for all subsequent XSUBs, the per-XSUB C<PROTOTYPE>
+keyword overrides the setting for just the current XSUB. See the
+L<PROTOTYPES|/The PROTOTYPES: Keyword> section for details of what a
+prototype is, and why you rarely need one.
+
+This keyword's value can be either one of C<ENABLE>/C<DISABLE> to turn on
+or off automatic prototype generation, or it can specify an explicit
+prototype string, including the empty prototype.
 
 =head3 The OVERLOAD: Keyword
 
