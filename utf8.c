@@ -2568,6 +2568,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
     if (advance_p) {
         *advance_p = curlen;
+        ASSUME(inRANGE(*advance_p, 1, UTF8_MAXBYTES));
     }
 
     *cp_p = UNI_TO_NATIVE(uv);
