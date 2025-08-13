@@ -522,7 +522,11 @@ sub multon {
 }
 
 sub embed_h {
-    my ($em, $guard, $funcs) = @_;
+    my (
+        $em,    # file handle
+        $guard, # ifdef text
+        $funcs  # functions to go into this text
+       ) = @_;
 
     my $lines;
     foreach (@$funcs) {
