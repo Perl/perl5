@@ -3358,7 +3358,7 @@ CRdmp	|char * |sv_2pvbyte_nolen					\
 Adp	|char * |sv_2pv_flags	|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
-Cip	|char * |SvPV_helper	|NN SV * const sv				\
+CIp	|char * |SvPV_helper	|NN SV * const sv				\
 				|NN STRLEN * const lp				\
 				|const U32 flags				\
 				|const PL_SvPVtype type 			\
