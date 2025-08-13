@@ -3374,6 +3374,13 @@ CRdmp	|char * |sv_2pvbyte_nolen					\
 Adp	|char * |sv_2pv_flags	|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
+Cip	|char * |SvPV_helper	|NN SV * const sv				\
+				|NN STRLEN * const lp				\
+				|const U32 flags				\
+				|const PL_SvPVtype type 			\
+				|NN Perl_SvPV_helper_non_trivial_t  non_trivial \
+				|const bool or_null				\
+				|const U32 return_flags
 Cdmp	|char * |sv_pvn_force	|NN SV *sv				\
 				|NULLOK STRLEN *lp
 Adp	|char * |sv_pvn_force_flags					\

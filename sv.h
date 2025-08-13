@@ -1958,16 +1958,8 @@ typedef enum {
     SvPVbyte_pure_type_
 } PL_SvPVtype;
 
-START_EXTERN_C
-
-/* When this code was written, embed.fnc could not handle function pointer
- * parameters; perhaps it still can't */
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE char*
-Perl_SvPV_helper(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags, const PL_SvPVtype type, char * (*non_trivial)(pTHX_ SV *, STRLEN * const, const U32), const bool or_null, const U32 return_flags);
-#endif
-
-END_EXTERN_C
+typedef char * (*Perl_SvPV_helper_non_trivial_t)(pTHX_ SV *, STRLEN * const,
+                                                       const U32);
 
 /* This test is "is there a cached PV that we can use directly?"
  * We can if
