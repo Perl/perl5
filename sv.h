@@ -549,7 +549,7 @@ These guys don't need the curly blocks
 
 #define xpv_len	xpv_len_u.xpvlenu_len
 
-union _xnvu {
+union xnvu_ {
     NV	    xnv_nv;		/* numeric value, if any */
     HV *    xgv_stash;
     line_t  xnv_lines;           /* used internally by S_scan_subst() */
@@ -590,20 +590,20 @@ struct xpvuv {
 struct xpvnv {
     _XPV_HEAD;
     union xivu_ xiv_u;
-    union _xnvu xnv_u;
+    union xnvu_ xnv_u;
 };
 
 /* This structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
     _XPV_HEAD;
     union xivu_ xiv_u;
-    union _xnvu xnv_u;
+    union xnvu_ xnv_u;
 };
 
 struct xpvlv {
     _XPV_HEAD;
     union xivu_ xiv_u;
-    union _xnvu xnv_u;
+    union xnvu_ xnv_u;
     union {
         STRLEN	xlvu_targoff;
         SSize_t xlvu_stargoff;
@@ -635,7 +635,7 @@ struct xpvinvlist {
 struct xpvgv {
     _XPV_HEAD;
     union xivu_ xiv_u;
-    union _xnvu xnv_u;
+    union xnvu_ xnv_u;
 };
 
 typedef U32 cv_flags_t;
