@@ -1311,7 +1311,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     }
                     else {
                         STRLEN len;
-                        _toFOLD_utf8_flags(s, s_end, d, &len, FOLD_FLAGS_FULL);
+                        toFOLD_utf8_flags_(s, s_end, d, &len, FOLD_FLAGS_FULL);
                         d += len;
                     }
                     s += s_len;
