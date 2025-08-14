@@ -749,8 +749,8 @@ and check for NULL.
 #  define ReREFCNT_dec(re)						\
     ({									\
         /* This is here to generate a casting warning if incorrect.  */	\
-        REGEXP *const _rerefcnt_dec = (re);				\
-        SvREFCNT_dec(_rerefcnt_dec);					\
+        REGEXP *const rerefcnt_dec_ = (re);				\
+        SvREFCNT_dec(rerefcnt_dec_);					\
     })
 #else
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
