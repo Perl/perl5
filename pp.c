@@ -4151,9 +4151,9 @@ PP_wrapped(pp_ucfirst, 1, 0)
 
         if (op_type == OP_UCFIRST) {
 #ifdef USE_LOCALE_CTYPE
-            _toTITLE_utf8_flags(s, s +slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+            toTITLE_utf8_flags_(s, s +slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-            _toTITLE_utf8_flags(s, s +slen, tmpbuf, &tculen, 0);
+            toTITLE_utf8_flags_(s, s +slen, tmpbuf, &tculen, 0);
 #endif
         }
         else {
