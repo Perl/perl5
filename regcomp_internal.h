@@ -875,7 +875,7 @@ static const scan_data_t zero_scan_data = {
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define _FAIL(code) STMT_START {                                        \
+#define FAIL_(code) STMT_START {                                        \
     const char *ellipses = "";                                          \
     IV len = RExC_precomp_end - RExC_precomp;                           \
                                                                         \
@@ -887,15 +887,15 @@ static const scan_data_t zero_scan_data = {
     code;                                                               \
 } STMT_END
 
-#define FAIL(msg) _FAIL(                            \
+#define FAIL(msg) FAIL_(                            \
     croak("%s in regex m/%" UTF8f "%s/",         \
             msg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
-#define FAIL2(msg,arg) _FAIL(                       \
+#define FAIL2(msg,arg) FAIL_(                       \
     croak(msg " in regex m/%" UTF8f "%s/",       \
             arg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
-#define FAIL3(msg,arg1,arg2) _FAIL(                         \
+#define FAIL3(msg,arg1,arg2) FAIL_(                         \
     croak(msg " in regex m/%" UTF8f "%s/",                  \
      arg1, arg2, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
