@@ -211,9 +211,9 @@ typedef struct hek HEK;
     U32		sv_flags	/* what we are */
 
 #if NVSIZE <= IVSIZE
-#  define _NV_BODYLESS_UNION NV svu_nv;
+#  define NV_BODYLESS_UNION_ NV svu_nv;
 #else
-#  define _NV_BODYLESS_UNION
+#  define NV_BODYLESS_UNION_
 #endif
 
 #define _SV_HEAD_UNION \
@@ -221,7 +221,7 @@ typedef struct hek HEK;
         char*   svu_pv;		/* pointer to malloced string */	\
         IV      svu_iv;			\
         UV      svu_uv;			\
-        _NV_BODYLESS_UNION		\
+        NV_BODYLESS_UNION_		\
         SV*     svu_rv;		/* pointer to another SV */		\
         SV**    svu_array;		\
         HE**	svu_hash;		\
