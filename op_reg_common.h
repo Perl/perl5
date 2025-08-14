@@ -97,7 +97,7 @@ get_regex_charset(const U32 flags)
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
-#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+12)
+#define RXf_PMf_SHIFT_NEXT_ (RXf_PMf_STD_PMMOD_SHIFT+12)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */

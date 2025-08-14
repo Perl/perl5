@@ -484,7 +484,7 @@ and check for NULL.
 
 /* Currently the regex flags occupy a single 32-bit word.  Not all bits are
  * currently used.  The lower bits are shared with their corresponding PMf flag
- * bits, up to but not including _RXf_PMf_SHIFT_NEXT.  The unused bits
+ * bits, up to but not including RXf_PMf_SHIFT_NEXT_.  The unused bits
  * immediately follow; finally the used RXf-only (unshared) bits, so that the
  * highest bit in the word is used.  This gathers all the unused bits as a pool
  * in the middle, like so: 11111111111111110000001111111111
@@ -495,7 +495,7 @@ and check for NULL.
  * breaking binary compatibility.
  *
  * To add shared bits, do so in op_reg_common.h.  This should change
- * _RXf_PMf_SHIFT_NEXT so that things won't compile.  Then come to regexp.h and
+ * RXf_PMf_SHIFT_NEXT_ so that things won't compile.  Then come to regexp.h and
  * op.h and adjust the constant adders in the definitions of RXf_BASE_SHIFT and
  * Pmf_BASE_SHIFT down by the number of shared bits you added.  That's it.
  * Things should be binary compatible.  But if either of these gets to having
@@ -515,7 +515,7 @@ and check for NULL.
  * For the regexp bits, PL_reg_extflags_name[] in regnodes.h has a comment
  * giving which bits are used/unused */
 
-#  define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 2)
+#  define RXf_BASE_SHIFT (RXf_PMf_SHIFT_NEXT_ + 2)
 
 /* What we have seen */
 #  define RXf_NO_INPLACE_SUBST  (1U<<(RXf_BASE_SHIFT+2))
