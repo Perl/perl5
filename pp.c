@@ -4271,7 +4271,7 @@ PP_wrapped(pp_ucfirst, 1, 0)
       do_uni_rules:
 #endif
 
-            title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
+            title_ord = to_upper_title_latin1_(*s, tmpbuf, &tculen, 's');
             if (tculen > 1) {
                 assert(tculen == 2);
 
@@ -4735,7 +4735,7 @@ PP_wrapped(pp_uc, 1, 0)
                                 *d++ = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
                             }
                             else {
-                                (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                                (void) to_upper_title_latin1_(*s, d, &len, 'S');
                                 d += len;
                             }
                         }
@@ -4743,7 +4743,7 @@ PP_wrapped(pp_uc, 1, 0)
                     else
 #endif
                         for (; s < send; s++) {
-                            (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                            (void) to_upper_title_latin1_(*s, d, &len, 'S');
                             d += len;
                         }
 

@@ -1579,7 +1579,7 @@
 #     define lossless_NV_to_IV                  S_lossless_NV_to_IV
 #   endif
 #   if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
-#     define _to_upper_title_latin1(a,b,c,d)    Perl__to_upper_title_latin1(aTHX_ a,b,c,d)
+#     define to_upper_title_latin1_(a,b,c,d)    Perl_to_upper_title_latin1_(aTHX_ a,b,c,d)
 #   endif
 #   if defined(PERL_IN_PP_CTL_C)
 #     define check_type_and_open(a)             S_check_type_and_open(aTHX_ a)

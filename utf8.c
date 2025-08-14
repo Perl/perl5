@@ -3555,9 +3555,11 @@ Perl__is_uni_perl_idstart(pTHX_ UV c)
 }
 
 UV
-Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
+Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8* p, STRLEN *lenp,
                                   const char S_or_s)
 {
+    PERL_ARGS_ASSERT_TO_UPPER_TITLE_LATIN1_;
+
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to UTF-8.  The only difference between upper
      * and title case in this range is that LATIN_SMALL_LETTER_SHARP_S is
@@ -3565,8 +3567,6 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
      * 'S_or_s' to avoid a test */
 
     UV converted = toUPPER_LATIN1_MOD(c);
-
-    PERL_ARGS_ASSERT__TO_UPPER_TITLE_LATIN1;
 
     assert(S_or_s == 'S' || S_or_s == 's');
 
@@ -3689,7 +3689,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
     if (c < 256) {
-        return _to_upper_title_latin1((U8) c, p, lenp, 'S');
+        return to_upper_title_latin1_((U8) c, p, lenp, 'S');
     }
 
     return CALL_UPPER_CASE(c, NULL, p, lenp);
@@ -3701,7 +3701,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
     if (c < 256) {
-        return _to_upper_title_latin1((U8) c, p, lenp, 's');
+        return to_upper_title_latin1_((U8) c, p, lenp, 's');
     }
 
     return CALL_TITLE_CASE(c, NULL, p, lenp);
@@ -4429,7 +4429,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
 
     /* ~0 makes anything non-zero in 'flags' mean we are using locale rules */
     /* 2nd char of uc(U+DF) is 'S' */
-    CASE_CHANGE_BODY_START(~0, toupper, _to_upper_title_latin1, 'S',
+    CASE_CHANGE_BODY_START(~0, toupper, to_upper_title_latin1_, 'S',
                                                                     turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_UPPER_CASE);
 }
@@ -4452,7 +4452,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
 
     /* 2nd char of ucfirst(U+DF) is 's' */
-    CASE_CHANGE_BODY_START(~0, toupper, _to_upper_title_latin1, 's',
+    CASE_CHANGE_BODY_START(~0, toupper, to_upper_title_latin1_, 's',
                                                                     turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_TITLE_CASE);
 }
