@@ -6216,7 +6216,7 @@ Perl_is_grapheme(pTHX_ const U8 *strbeg, const U8 *s, const U8 *strend, const UV
 # if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
      defined(PERL_IN_UTF8_C)
 PERL_CALLCONV UV
-Perl__to_fold_latin1(const U8 c, U8 *p, STRLEN *lenp, const unsigned int flags);
+Perl_to_fold_latin1_(const U8 c, U8 *p, STRLEN *lenp, const unsigned int flags);
 # endif
 # if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
 STATIC U8
@@ -8652,7 +8652,7 @@ Perl_populate_invlist_from_bitmap(pTHX_ const U8 *bitmap, const Size_t bitmap_le
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_UTF8_C)
-# define PERL_ARGS_ASSERT__TO_FOLD_LATIN1       \
+# define PERL_ARGS_ASSERT_TO_FOLD_LATIN1_       \
         assert(p); assert(lenp)
 
 #endif

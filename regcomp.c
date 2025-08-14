@@ -9323,7 +9323,7 @@ Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** i
             else {
                 U8 dummy_fold[UTF8_MAXBYTES_CASE+1];
                 Size_t dummy_len;
-                folded_cp = _to_fold_latin1(cp, dummy_fold, &dummy_len, 0);
+                folded_cp = to_fold_latin1_(cp, dummy_fold, &dummy_len, 0);
             }
 
             if (folded_cp > 255) {
