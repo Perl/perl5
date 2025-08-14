@@ -233,7 +233,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     
     for ( ; pv < end ; pv += readsize ) {
         const UV u = (isuni)  /* Here known to be valid; checked just above */
-                     ? utf8_to_uv_or_die((U8*)pv, (U8*) end, &readsize)
+                     ? valid_utf8_to_uv( (U8*) pv, &readsize)
                      : (U8) *pv;
         const U8 c = (U8)u;
         const char *source_buf = octbuf;
