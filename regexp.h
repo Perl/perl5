@@ -741,10 +741,10 @@ and check for NULL.
 #  define ReREFCNT_inc(re)						\
     ({									\
         /* This is here to generate a casting warning if incorrect.  */	\
-        REGEXP *const _rerefcnt_inc = (re);				\
-        assert(SvTYPE(_rerefcnt_inc) == SVt_REGEXP);			\
-        SvREFCNT_inc(_rerefcnt_inc);					\
-        _rerefcnt_inc;							\
+        REGEXP *const rerefcnt_inc_ = (re);				\
+        assert(SvTYPE(rerefcnt_inc_) == SVt_REGEXP);			\
+        SvREFCNT_inc(rerefcnt_inc_);					\
+        rerefcnt_inc_;							\
     })
 #  define ReREFCNT_dec(re)						\
     ({									\
