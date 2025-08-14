@@ -304,10 +304,10 @@ casts it to a pointer of that C<type>.
 
 # define save_freeop(op)                    \
 STMT_START {                                 \
-      OP * const _o = (OP *)(op);             \
-      assert(!_o->op_savefree);               \
-      _o->op_savefree = 1;                     \
-      save_pushptr((void *)(_o), SAVEt_FREEOP); \
+      OP * const o_ = (OP *)(op);             \
+      assert(!o_->op_savefree);               \
+      o_->op_savefree = 1;                     \
+      save_pushptr((void *)(o_), SAVEt_FREEOP); \
     } STMT_END
 #define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
 
