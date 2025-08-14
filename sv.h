@@ -205,7 +205,7 @@ typedef struct hek HEK;
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
 /* start with 2 sv-head building blocks */
-#define _SV_HEAD(ptrtype) \
+#define SV_HEAD_(ptrtype) \
     ptrtype	sv_any;		/* pointer to body */	\
     U32		sv_refcnt;	/* how many references to us */	\
     U32		sv_flags	/* what we are */
@@ -243,51 +243,51 @@ typedef struct hek HEK;
 #endif
 
 struct STRUCT_SV {		/* struct sv { */
-    _SV_HEAD(void*);
+    SV_HEAD_(void*);
     SV_HEAD_UNION_;
 };
 
 struct gv {
-    _SV_HEAD(XPVGV*);		/* pointer to xpvgv body */
+    SV_HEAD_(XPVGV*);		/* pointer to xpvgv body */
     SV_HEAD_UNION_;
 };
 
 struct cv {
-    _SV_HEAD(XPVCV*);		/* pointer to xpvcv body */
+    SV_HEAD_(XPVCV*);		/* pointer to xpvcv body */
     SV_HEAD_UNION_;
 };
 
 struct av {
-    _SV_HEAD(XPVAV*);		/* pointer to xpvav body */
+    SV_HEAD_(XPVAV*);		/* pointer to xpvav body */
     SV_HEAD_UNION_;
 };
 
 struct hv {
-    _SV_HEAD(XPVHV*);		/* pointer to xpvhv body */
+    SV_HEAD_(XPVHV*);		/* pointer to xpvhv body */
     SV_HEAD_UNION_;
 };
 
 struct io {
-    _SV_HEAD(XPVIO*);		/* pointer to xpvio body */
+    SV_HEAD_(XPVIO*);		/* pointer to xpvio body */
     SV_HEAD_UNION_;
 };
 
 struct p5rx {
-    _SV_HEAD(struct regexp*);	/* pointer to regexp body */
+    SV_HEAD_(struct regexp*);	/* pointer to regexp body */
     SV_HEAD_UNION_;
 };
 
 struct invlist {
-    _SV_HEAD(XINVLIST*);       /* pointer to xpvinvlist body */
+    SV_HEAD_(XINVLIST*);       /* pointer to xpvinvlist body */
     SV_HEAD_UNION_;
 };
 
 struct object {
-    _SV_HEAD(XPVOBJ*);          /* pointer to xobject body */
+    SV_HEAD_(XPVOBJ*);          /* pointer to xobject body */
     SV_HEAD_UNION_;
 };
 
-#undef _SV_HEAD
+#undef SV_HEAD_
 #undef SV_HEAD_UNION_		/* ensure no pollution */
 
 /*
