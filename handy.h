@@ -2249,13 +2249,13 @@ END_EXTERN_C
  * bunch of code in toke.c assumes that this is true, so the assertion allows
  * for that */
 #ifdef PERL_IN_TOKE_C
-#  define _utf8_safe_assert(p,e) ((e) > (p) || ((e) == (p) && *(p) == '\0'))
+#  define utf8_safe_assert_(p,e) ((e) > (p) || ((e) == (p) && *(p) == '\0'))
 #else
-#  define _utf8_safe_assert(p,e) ((e) > (p))
+#  define utf8_safe_assert_(p,e) ((e) > (p))
 #endif
 
 #define generic_utf8_safe_(classnum, p, e, above_latin1)                    \
-    ((! _utf8_safe_assert(p, e))                                            \
+    ((! utf8_safe_assert_(p, e))                                            \
       ? (force_out_malformed_utf8_message_((U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0)\
       : (UTF8_IS_INVARIANT(*(p)))                                           \
           ? generic_isCC_(*(p), classnum)                                   \
@@ -2286,7 +2286,7 @@ END_EXTERN_C
  * class is TRUE for.  Hence it can skip the tests for this range.
  * 'above_latin1' should include its arguments */
 #define generic_utf8_safe_no_upper_latin1_(classnum, p, e, above_latin1)    \
-         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (__ASSERT_(utf8_safe_assert_(p, e))                                \
          (isASCII(*(p)))                                                    \
           ? generic_isCC_(*(p), classnum)                                   \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p)))                             \
@@ -2319,7 +2319,7 @@ END_EXTERN_C
 #define isASCII_utf8_safe(p, e)                                             \
     /* Because ASCII is invariant under utf8, the non-utf8 macro            \
     * works */                                                              \
-    (__ASSERT_(_utf8_safe_assert(p, e)) isASCII(*(p)))
+    (assert_(utf8_safe_assert_(p, e)) isASCII(*(p)))
 #define isBLANK_utf8_safe(p, e)                                             \
         generic_non_invlist_utf8_safe_(CC_BLANK_, is_HORIZWS_high, p, e)
 
@@ -2327,7 +2327,7 @@ END_EXTERN_C
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
      * more efficient macro instead of the more general one */
 #   define isCNTRL_utf8_safe(p, e)                                          \
-                    (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p)))
+                    (assert_(utf8_safe_assert_(p, e)) isCNTRL_L1(*(p)))
 #else
 #   define isCNTRL_utf8_safe(p, e)  generic_utf8_safe_(CC_CNTRL_, p, e, 0)
 #endif
@@ -2406,7 +2406,7 @@ END_EXTERN_C
  * point in 'p' is within the 0-255 range, it uses locale rules from the
  * passed-in 'macro' parameter */
 #define generic_LC_utf8_safe_(macro, p, e, above_latin1)                    \
-         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (assert_(utf8_safe_assert_(p, e))                                \
          (UTF8_IS_INVARIANT(*(p)))                                          \
           ? macro(*(p))                                                     \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
@@ -2436,7 +2436,7 @@ END_EXTERN_C
 #define isALPHA_LC_utf8_safe(p, e)                                          \
             generic_LC_invlist_utf8_safe_(isALPHA_LC, CC_ALPHA_, p, e)
 #define isASCII_LC_utf8_safe(p, e)                                          \
-                    (__ASSERT_(_utf8_safe_assert(p, e)) isASCII_LC(*(p)))
+                    (assert_(utf8_safe_assert_(p, e)) isASCII_LC(*(p)))
 #define isBLANK_LC_utf8_safe(p, e)                                          \
         generic_LC_non_invlist_utf8_safe_(isBLANK_LC, is_HORIZWS_high, p, e)
 #define isCNTRL_LC_utf8_safe(p, e)                                          \
