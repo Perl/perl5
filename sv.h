@@ -540,7 +540,7 @@ These guys don't need the curly blocks
 
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
-    union _xmgu	xmg_u;							\
+    union xmgu_	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
         STRLEN	xpvlenu_len; 	/* allocated size */			\
@@ -564,7 +564,7 @@ union xivu_ {
 
 };
 
-union _xmgu {
+union xmgu_ {
     MAGIC*  xmg_magic;		/* linked list of magicalness */
     STRLEN  xmg_hash_index;	/* used while freeing hash entries */
 };
@@ -720,7 +720,7 @@ struct xpvio {
 
 struct xobject {
     HV*         xmg_stash;
-    union _xmgu xmg_u;
+    union xmgu_ xmg_u;
     SSize_t     xobject_maxfield;
     SSize_t     xobject_iter_sv_at; /* this is only used by Perl_sv_clear() */
     SV**        xobject_fields;
