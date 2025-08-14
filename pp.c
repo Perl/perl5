@@ -4597,7 +4597,7 @@ PP_wrapped(pp_uc, 1, 0)
             STRLEN ulen;
             UV uv;
             if (UNLIKELY(in_iota_subscript)) {
-                UV cp = utf8_to_uv_or_die(s, send, NULL);
+                UV cp = utf8_to_uv_or_die(s, send, &u);
 
                 if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
 
@@ -4607,11 +4607,13 @@ PP_wrapped(pp_uc, 1, 0)
                     in_iota_subscript = FALSE;
                 }
             }
+            else {
+                u = UTF8SKIP(s);
+            }
 
             /* Then handle the current character.  Get the changed case value
              * and copy it to the output buffer */
 
-            u = UTF8SKIP(s);
 #ifdef USE_LOCALE_CTYPE
             uv = _toUPPER_utf8_flags(s, send, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 #else
