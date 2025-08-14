@@ -6468,9 +6468,9 @@ PP(pp_break)
 }
 
 static void
-_invoke_defer_block(pTHX_ U8 type, void *_arg)
+_invoke_defer_block(pTHX_ U8 type, void * arg_)
 {
-    OP *start = (OP *)_arg;
+    OP *start = (OP *) arg_;
 #ifdef DEBUGGING
     I32 was_cxstack_ix = cxstack_ix;
 #endif
@@ -6541,15 +6541,15 @@ redo_body:
 }
 
 static void
-invoke_defer_block(pTHX_ void *_arg)
+invoke_defer_block(pTHX_ void * arg_)
 {
-    _invoke_defer_block(aTHX_ CXt_DEFER, _arg);
+    _invoke_defer_block(aTHX_ CXt_DEFER, arg_);
 }
 
 static void
-invoke_finally_block(pTHX_ void *_arg)
+invoke_finally_block(pTHX_ void * arg_)
 {
-    _invoke_defer_block(aTHX_ CXt_DEFER|CXp_FINALLY, _arg);
+    _invoke_defer_block(aTHX_ CXt_DEFER|CXp_FINALLY, arg_);
 }
 
 PP(pp_pushdefer)
