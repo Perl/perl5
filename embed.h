@@ -1722,7 +1722,6 @@
 #     define sv_derived_from_svpvn(a,b,c,d,e)   S_sv_derived_from_svpvn(aTHX_ a,b,c,d,e)
 #   endif
 #   if defined(PERL_IN_UTF8_C)
-#     define _to_utf8_case(a,b,c,d,e,f,g,h,i)   S__to_utf8_case(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define check_locale_boundary_crossing(a,b,c,d) S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #     define does_utf8_overflow                 S_does_utf8_overflow
 #     define isFF_overlong                      S_isFF_overlong
@@ -1730,6 +1729,7 @@
 #     define new_msg_hv(a,b,c)                  S_new_msg_hv(aTHX_ a,b,c)
 #     define to_case_cp_list(a,b,c,d,e,f,g,h)   S_to_case_cp_list(aTHX_ a,b,c,d,e,f,g,h)
 #     define to_lower_latin1                    S_to_lower_latin1
+#     define to_utf8_case_(a,b,c,d,e,f,g,h,i)   S_to_utf8_case_(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define turkic_fc(a,b,c,d)                 S_turkic_fc(aTHX_ a,b,c,d)
 #     define turkic_lc(a,b,c,d)                 S_turkic_lc(aTHX_ a,b,c,d)
 #     define turkic_uc(a,b,c,d)                 S_turkic_uc(aTHX_ a,b,c,d)

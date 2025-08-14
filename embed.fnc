@@ -6183,7 +6183,7 @@ RST	|U8	|to_lower_latin1|const U8 c				\
 				|NULLOK U8 *p				\
 				|NULLOK STRLEN *lenp			\
 				|const char dummy
-S	|UV	|_to_utf8_case	|const UV original				\
+S	|UV	|to_utf8_case_	|const UV original				\
 				|NULLOK const U8 *p				\
 				|NN U8 *ustrp					\
 				|NN STRLEN *lenp				\
