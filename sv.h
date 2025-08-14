@@ -1596,16 +1596,16 @@ L</C<SV_CHECK_THINKFIRST_COW_DROP>> before calling this.
  * is no smaller than the expected minimim allocation and that the given
  * size is rounded up to the closest PTRSIZE boundary. Depending on
  * per-malloc implementation, it might return the exact size that would
- * be allocated for the specified _lEnGtH. If the return value from
+ * be allocated for the specified lEnGtH_. If the return value from
  * `expected_size` is not smaller than the current buffer allocation,
  * there is no point in calling SvPV_renew.
 */
 
 #define SvPV_shrink_to_cur(sv) STMT_START {                       \
-                   const STRLEN _lEnGtH = SvCUR(sv) + 2;          \
-                   const STRLEN _eXpEcT = expected_size(_lEnGtH); \
-                   if (SvLEN(sv) > _eXpEcT)                       \
-                       SvPV_renew(sv, _eXpEcT);                   \
+                   const STRLEN lEnGtH_ = SvCUR(sv) + 2;          \
+                   const STRLEN eXpEcT_ = expected_size(lEnGtH_); \
+                   if (SvLEN(sv) > eXpEcT_)                       \
+                       SvPV_renew(sv, eXpEcT_);                   \
                  } STMT_END
 
 /*
