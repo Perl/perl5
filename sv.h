@@ -1441,9 +1441,9 @@ object type. Exposed to perl code via Internals::SvREADONLY().
             &(((XPVMG*) MUTABLE_PTR(SvANY(svmagic_)))->xmg_u.xmg_magic); \
           }))
 #    define SvSTASH(sv)							\
-        (*({ const SV *const _svstash = (const SV *)(sv);		\
-            assert(SvTYPE(_svstash) >= SVt_PVMG);			\
-            &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
+        (*({ const SV *const svstash_ = (const SV *)(sv);		\
+            assert(SvTYPE(svstash_) >= SVt_PVMG);			\
+            &(((XPVMG*) MUTABLE_PTR(SvANY(svstash_)))->xmg_stash);	\
           }))
 #  else     /* Below is not DEBUGGING or can't use brace groups */
 #    define SvPVX(sv) ((sv)->sv_u.svu_pv)
