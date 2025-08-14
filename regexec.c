@@ -2203,7 +2203,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
  * inversion map, and a code point, and returns the code point's value
  * according to the two arrays.  It assumes that all code points have a value.
  * This is used as the base macro for macros for particular properties */
-#define _generic_GET_BREAK_VAL_CP(invlist, invmap, cp)              \
+#define generic_GET_BREAK_VAL_CP_(invlist, invmap, cp)              \
         generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp)
 
 /* Same as above, but takes begin, end ptrs to a UTF-8 encoded string instead
@@ -2217,7 +2217,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 
 /* Returns the GCB value for the input code point */
 #define getGCB_VAL_CP(cp)                                                      \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_GCB_invlist,                            \
                                     _Perl_GCB_invmap,                          \
                                     (cp))
@@ -2229,7 +2229,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 
 /* Returns the LB value for the input code point */
 #define getLB_VAL_CP(cp)                                                       \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_LB_invlist,                             \
                                     _Perl_LB_invmap,                           \
                                     (cp))
@@ -2242,7 +2242,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 
 /* Returns the SB value for the input code point */
 #define getSB_VAL_CP(cp)                                                       \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_SB_invlist,                             \
                                     _Perl_SB_invmap,                           \
                                     (cp))
@@ -2254,7 +2254,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 
 /* Returns the WB value for the input code point */
 #define getWB_VAL_CP(cp)                                                       \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_WB_invlist,                             \
                                     _Perl_WB_invmap,                           \
                                     (cp))
