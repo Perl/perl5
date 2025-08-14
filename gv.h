@@ -67,10 +67,10 @@ the need to cast the result to the appropriate type.
             &(GvXPVGV(gvstash_)->xnv_u.xgv_stash);			\
          }))
 #  define GvNAME_HEK(gv)						\
-    (*({ GV * const _gvname_hek = (GV *) (gv);				\
-           assert(isGV_with_GP(_gvname_hek));				\
-           assert(SvTYPE(_gvname_hek) == SVt_PVGV || SvTYPE(_gvname_hek) >= SVt_PVLV); \
-           &(GvXPVGV(_gvname_hek)->xiv_u.xivu_namehek);			\
+    (*({ GV * const gvname_hek_ = (GV *) (gv);				\
+           assert(isGV_with_GP(gvname_hek_));				\
+           assert(SvTYPE(gvname_hek_) == SVt_PVGV || SvTYPE(gvname_hek_) >= SVt_PVLV); \
+           &(GvXPVGV(gvname_hek_)->xiv_u.xivu_namehek);			\
          }))
 #  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
 #  define GvNAMELEN_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
