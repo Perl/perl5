@@ -2708,13 +2708,13 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
  */
 
 
-#  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
+#  define MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) \
     (  sizeof(MEM_SIZE) < sizeof(n) \
     || sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
 
 /* This is written in a slightly odd way to avoid various spurious
  * compiler warnings. We *want* to write the expression as
- *    _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) && (n > C)
+ *    MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) && (n > C)
  * (for some compile-time constant C), but even when the LHS
  * constant-folds to false at compile-time, g++ insists on emitting
  * warnings about the RHS (e.g. "comparison is always false"), so instead
@@ -2730,7 +2730,7 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
  */
 
 #  define _MEM_WRAP_WILL_WRAP(n,t) \
-      ((_MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) ? (MEM_SIZE)(n) : \
+      ((MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) ? (MEM_SIZE)(n) : \
             MEM_SIZE_MAX/sizeof(t)) > MEM_SIZE_MAX/sizeof(t))
 
 #  define MEM_WRAP_CHECK(n,t) \
