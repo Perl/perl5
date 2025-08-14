@@ -46,15 +46,15 @@ the need to cast the result to the appropriate type.
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS) && !defined(__INTEL_COMPILER)
 #  define GvGP(gv)							\
-        ((GP *)(*({GV *const _gvgp = (GV *) (gv);				\
-            assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
-            assert(isGV_with_GP(_gvgp));				\
-            &((_gvgp)->sv_u.svu_gp);})))
+        ((GP *)(*({GV *const gvgp_ = (GV *) (gv);				\
+            assert(SvTYPE(gvgp_) == SVt_PVGV || SvTYPE(gvgp_) == SVt_PVLV); \
+            assert(isGV_with_GP(gvgp_));				\
+            &((gvgp_)->sv_u.svu_gp);})))
 #  define GvGP_set(gv,gp)						\
-        {GV *const _gvgp = (GV *) (gv);				\
-            assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
-            assert(isGV_with_GP(_gvgp));				\
-            (_gvgp)->sv_u.svu_gp = (gp); }
+        {GV *const gvgp_ = (GV *) (gv);				\
+            assert(SvTYPE(gvgp_) == SVt_PVGV || SvTYPE(gvgp_) == SVt_PVLV); \
+            assert(isGV_with_GP(gvgp_));				\
+            (gvgp_)->sv_u.svu_gp = (gp); }
 #  define GvFLAGS(gv)							\
         (*({GV *const _gvflags = (GV *) (gv);				\
             assert(SvTYPE(_gvflags) == SVt_PVGV || SvTYPE(_gvflags) == SVt_PVLV); \
