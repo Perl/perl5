@@ -1341,6 +1341,7 @@
 #     define deb_curcv(a)                       S_deb_curcv(aTHX_ a)
 #     define debprof(a)                         S_debprof(aTHX_ a)
 #     define pm_description(a)                  S_pm_description(aTHX_ a)
+#     define pv_display_flags(a,b,c,d,e,f)      S_pv_display_flags(aTHX_ a,b,c,d,e,f)
 #     define sequence_num(a)                    S_sequence_num(aTHX_ a)
 #   endif
 #   if defined(PERL_IN_GV_C)

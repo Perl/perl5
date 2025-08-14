@@ -6924,6 +6924,11 @@ S_pm_description(pTHX_ const PMOP *pm);
 # define PERL_ARGS_ASSERT_PM_DESCRIPTION        \
         assert(pm)
 
+STATIC char *
+S_pv_display_flags(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim, I32 pretty_flags);
+# define PERL_ARGS_ASSERT_PV_DISPLAY_FLAGS      \
+        assert(dsv); assert(pv)
+
 STATIC UV
 S_sequence_num(pTHX_ const OP *o);
 # define PERL_ARGS_ASSERT_SEQUENCE_NUM
