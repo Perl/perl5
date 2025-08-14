@@ -1757,7 +1757,7 @@ ATdip	|bool	|is_utf8_fixed_width_buf_loclen_flags			\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
-CRp	|bool	|_is_utf8_FOO	|const U8 classnum			\
+CRp	|bool	|is_utf8_FOO_	|const U8 classnum			\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
 ARTdip	|bool	|is_utf8_invariant_string_loc				\

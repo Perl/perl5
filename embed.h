@@ -116,7 +116,6 @@
 # define SvTRUE_nomg(a)                         Perl_SvTRUE_nomg(aTHX_ a)
 # define SvUV(a)                                Perl_SvUV(aTHX_ a)
 # define SvUV_nomg(a)                           Perl_SvUV_nomg(aTHX_ a)
-# define _is_utf8_FOO(a,b,c)                    Perl__is_utf8_FOO(aTHX_ a,b,c)
 # define amagic_call(a,b,c,d)                   Perl_amagic_call(aTHX_ a,b,c,d)
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
@@ -327,6 +326,7 @@
 # define is_uni_perl_idcont_(a)                 Perl_is_uni_perl_idcont_(aTHX_ a)
 # define is_uni_perl_idstart_(a)                Perl_is_uni_perl_idstart_(aTHX_ a)
 # define is_utf8_FF_helper_                     Perl_is_utf8_FF_helper_
+# define is_utf8_FOO_(a,b,c)                    Perl_is_utf8_FOO_(aTHX_ a,b,c)
 # define Perl_is_utf8_char_buf                  is_utf8_char_buf
 # define is_utf8_char_helper_                   Perl_is_utf8_char_helper_
 # define Perl_is_utf8_fixed_width_buf_flags     is_utf8_fixed_width_buf_flags

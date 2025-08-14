@@ -88,12 +88,6 @@ Perl_Slab_Free(pTHX_ void *op);
 /* PERL_CALLCONV void
 Perl_SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
 
-PERL_CALLCONV bool
-Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_FOO           \
-        assert(p); assert(e)
-
 PERL_CALLCONV_NO_RET void
 Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
         __attribute__noreturn__
@@ -1855,6 +1849,12 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e, const bool requ
         __attribute__pure__;
 #define PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_     \
         assert(s0); assert(e)
+
+PERL_CALLCONV bool
+Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_FOO_           \
+        assert(p); assert(e)
 
 /* PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end); */

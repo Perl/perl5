@@ -2279,7 +2279,7 @@ END_EXTERN_C
 /* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
 #define generic_invlist_utf8_safe_(classnum, p, e)                          \
-            generic_utf8_safe_(classnum, p, e, _is_utf8_FOO(classnum, p, e))
+            generic_utf8_safe_(classnum, p, e, is_utf8_FOO_(classnum, p, e))
 
 /* Like the above, but should be used only when it is known that there are no
  * characters in the upper-Latin1 range (128-255 on ASCII platforms) which the
@@ -2334,7 +2334,7 @@ END_EXTERN_C
 
 #define isDIGIT_utf8_safe(p, e)                                             \
             generic_utf8_safe_no_upper_latin1_(CC_DIGIT_, p, e,             \
-                                            _is_utf8_FOO(CC_DIGIT_, p, e))
+                                            is_utf8_FOO_(CC_DIGIT_, p, e))
 #define isGRAPH_utf8_safe(p, e)    generic_invlist_utf8_safe_(CC_GRAPH_, p, e)
 #define isIDCONT_utf8_safe(p, e)   generic_func_utf8_safe_(CC_WORDCHAR_,    \
                                                  is_utf8_perl_idcont_, p, e)
@@ -2418,7 +2418,7 @@ END_EXTERN_C
 
 #define generic_LC_invlist_utf8_safe_(macro, classnum, p, e)                  \
             generic_LC_utf8_safe_(macro, p, e,                              \
-                                            _is_utf8_FOO(classnum, p, e))
+                                            is_utf8_FOO_(classnum, p, e))
 
 #define generic_LC_func_utf8_safe_(macro, above_latin1, p, e)               \
             generic_LC_utf8_safe_(macro, p, e, above_latin1(p, e))

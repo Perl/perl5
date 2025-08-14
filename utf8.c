@@ -3906,9 +3906,9 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
             _invlist_contains_cp(invlist, utf8_to_uv_or_die(p, e, NULL))
 
 bool
-Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
+Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
-    PERL_ARGS_ASSERT__IS_UTF8_FOO;
+    PERL_ARGS_ASSERT_IS_UTF8_FOO_;
 
     return IS_UTF8_IN_INVLIST(p, e, PL_XPosix_ptrs[classnum]);
 }
