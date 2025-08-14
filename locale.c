@@ -4779,7 +4779,7 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
                            " index=%u(%s), string=%s, known_utf8=%d\n",
                            locale, cat_index, category_names[cat_index],
                            ((string)
-                            ?  _byte_dump_string((U8 *) string,
+                            ?  byte_dump_string_((U8 *) string,
                                                  strlen(string),
                                                  0)
                             : "nil"),
@@ -5088,7 +5088,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
                          "Copying '%s' to 0x%p\n",
                          ((is_strict_utf8_string((U8 *) string, 0))
                           ? string
-                          :_byte_dump_string((U8 *) string, strlen(string), 0)),
+                          :byte_dump_string_((U8 *) string, strlen(string), 0)),
                           *buf));
 
 #    ifdef USE_LOCALE_CTYPE
@@ -6695,7 +6695,7 @@ S_langinfo_sv_i(pTHX_
                 locale_panic_(form(
                                         "Can't find separator in ALT_DIGITS"
                                         " representation '%s' for locale '%s'",
-                                        _byte_dump_string((U8 *) retval,
+                                        byte_dump_string_((U8 *) retval,
                                                           total_len, 0),
                                         locale));
             }
@@ -8683,7 +8683,7 @@ S_strftime8(pTHX_ const char * fmt,
                           fmt,
                           ((is_strict_utf8_string((U8 *) SvPVX(sv), 0))
                            ? SvPVX(sv)
-                           :_byte_dump_string((U8 *) SvPVX(sv), SvCUR(sv) ,0)),
+                           :byte_dump_string_((U8 *) SvPVX(sv), SvCUR(sv) ,0)),
                           *result_utf8ness));
     Safefree(free_me);
     return true;
@@ -10178,7 +10178,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                        "strxfrm failed for LC_COLLATE=%s; errno=%d, input=%s\n",
                        PL_collation_name, errno,
-                       _byte_dump_string((U8 *) s, len, 0)));
+                       byte_dump_string_((U8 *) s, len, 0)));
                 goto bad;
             }
 
@@ -10340,7 +10340,7 @@ S_print_collxfrm_input_and_return(pTHX_
                    ? "(null)"
                    : ((xlen == 0)
                       ? "(empty)"
-                      : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN,
+                      : byte_dump_string_((U8 *) xbuf + COLLXFRM_HDR_LEN,
                                           xlen, 0))),
                   xlen);
 }
