@@ -1652,11 +1652,11 @@ only be used as part of a larger operation
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define BmUSEFUL(sv)							\
-        (*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
-            assert(SvTYPE(_bmuseful) >= SVt_PVIV);			\
-            assert(SvVALID(_bmuseful));					\
-            assert(!SvIOK(_bmuseful));					\
-            &(((XPVIV*) SvANY(_bmuseful))->xiv_u.xivu_iv);              \
+        (*({ SV *const bmuseful_ = MUTABLE_SV(sv);			\
+            assert(SvTYPE(bmuseful_) >= SVt_PVIV);			\
+            assert(SvVALID(bmuseful_));					\
+            assert(!SvIOK(bmuseful_));					\
+            &(((XPVIV*) SvANY(bmuseful_))->xiv_u.xivu_iv);              \
          }))
 #else
 #  define BmUSEFUL(sv)          ((XPVIV*) SvANY(sv))->xiv_u.xivu_iv
