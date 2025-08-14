@@ -2685,8 +2685,8 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
             {								\
                 /* Validate the preceding buffer's sentinels to		\
                    verify that no-one is using it.  */			\
-                const U8 *const _bonk = (U8*)SvPVX_const(sv) - (offset);\
-                while (crash_ > _bonk) {				\
+                const U8 *const bonk_ = (U8*)SvPVX_const(sv) - (offset);\
+                while (crash_ > bonk_) {				\
                     --crash_;						\
                     assert (*crash_ == (U8)PTR2UV(crash_));		\
                 }							\
