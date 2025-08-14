@@ -2676,19 +2676,19 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #  define SvOOK_offset(sv, offset) STMT_START {				\
         STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
         if (SvOOK(sv)) {						\
-            const U8 *_crash = (U8*)SvPVX_const(sv);			\
-            (offset) = *--_crash;					\
+            const U8 *crash_ = (U8*)SvPVX_const(sv);			\
+            (offset) = *--crash_;					\
             if (!(offset)) {						\
-                _crash -= sizeof(STRLEN);				\
-                Copy(_crash, (U8 *)&(offset), sizeof(STRLEN), U8);	\
+                crash_ -= sizeof(STRLEN);				\
+                Copy(crash_, (U8 *)&(offset), sizeof(STRLEN), U8);	\
             }								\
             {								\
                 /* Validate the preceding buffer's sentinels to		\
                    verify that no-one is using it.  */			\
                 const U8 *const _bonk = (U8*)SvPVX_const(sv) - (offset);\
-                while (_crash > _bonk) {				\
-                    --_crash;						\
-                    assert (*_crash == (U8)PTR2UV(_crash));		\
+                while (crash_ > _bonk) {				\
+                    --crash_;						\
+                    assert (*crash_ == (U8)PTR2UV(crash_));		\
                 }							\
             }								\
         } else {							\
