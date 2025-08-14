@@ -4460,6 +4460,13 @@ ERXp	|const char *|form_cp_too_large_msg				\
 S	|CV *	|deb_curcv	|I32 ix
 Sd	|void	|debprof	|NN const OP *o
 S	|SV *	|pm_description |NN const PMOP *pm
+S	|char * |pv_display_flags					\
+				|NN SV *dsv				\
+				|NN const char *pv			\
+				|STRLEN cur				\
+				|STRLEN len				\
+				|STRLEN pvlim				\
+				|I32 pretty_flags
 S	|UV	|sequence_num	|NULLOK const OP *o
 #endif
 #if defined(PERL_IN_DUMP_C)  || defined(PERL_IN_HV_C) || \
