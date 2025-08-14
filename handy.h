@@ -2693,7 +2693,7 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 #define MEM_SIZE_MAX ((MEM_SIZE)-1)
 
-#define _PERL_STRLEN_ROUNDUP_UNCHECKED(n) (((n) - 1 + PERL_STRLEN_ROUNDUP_QUANTUM) & ~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM - 1))
+#define PERL_STRLEN_ROUNDUP_UNCHECKED_(n) (((n) - 1 + PERL_STRLEN_ROUNDUP_QUANTUM) & ~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM - 1))
 
 #ifdef PERL_MALLOC_WRAP
 
@@ -2748,7 +2748,7 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 #  define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
-#  define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
+#  define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), PERL_STRLEN_ROUNDUP_UNCHECKED_(n))
 #else
 
 #  define MEM_WRAP_CHECK(n,t)
@@ -2756,7 +2756,7 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 #  define MEM_WRAP_CHECK_s(n,t,a)
 #  define MEM_WRAP_CHECK_(n,t)
 
-#  define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
+#  define PERL_STRLEN_ROUNDUP(n) PERL_STRLEN_ROUNDUP_UNCHECKED_(n)
 
 #endif
 
