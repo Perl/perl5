@@ -6848,7 +6848,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             UV folded;
 
                           fold_anyway:
-                            folded = _to_uni_fold_flags(
+                            folded = to_uni_fold_flags_(
                                     ender,
                                     (U8 *) s,  /* We have allocated extra space
                                                   in 's' so can't run off the
@@ -7262,7 +7262,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     Size_t added_len;
 
                     /* Append the fold of ender */
-                    (void) _to_uni_fold_flags(
+                    (void) to_uni_fold_flags_(
                         ender,
                         (U8 *) e,
                         &added_len,
@@ -10508,7 +10508,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 U8 foldbuf[UTF8_MAXBYTES_CASE+1];
                 STRLEN foldlen;
 
-                UV folded = _to_uni_fold_flags(
+                UV folded = to_uni_fold_flags_(
                                 value,
                                 foldbuf,
                                 &foldlen,
@@ -10929,7 +10929,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * rules hard-coded for it.  First, get its fold.  This is
                      * the simple fold, as the multi-character folds have been
                      * handled earlier and separated out */
-                    folded = _to_uni_fold_flags(j, foldbuf, &foldlen,
+                    folded = to_uni_fold_flags_(j, foldbuf, &foldlen,
                                                         (ASCII_FOLD_RESTRICTED)
                                                         ? FOLD_FLAGS_NOMIX_ASCII
                                                         : 0);
@@ -11687,7 +11687,7 @@ S_optimize_regclass(pTHX_
 
                 Size_t foldlen;
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
-                UV folded = _to_uni_fold_flags(lowest_cp, foldbuf, &foldlen, 0);
+                UV folded = to_uni_fold_flags_(lowest_cp, foldbuf, &foldlen, 0);
                 U32 first_fold;
                 const U32 * remaining_folds;
                 Size_t folds_to_this_cp_count = _inverse_folds(
@@ -11811,7 +11811,7 @@ S_optimize_regclass(pTHX_
 
                 /* This is a kludge to the special casing issues with this
                  * ligature under /aa.  FB05 should fold to FB06, but the call
-                 * above to _to_uni_fold_flags() didn't find this, as it didn't
+                 * above to to_uni_fold_flags_() didn't find this, as it didn't
                  * use the /aa restriction in order to not miss other folds
                  * that would be affected.  This is the only instance likely to
                  * ever be a problem in all of Unicode.  So special case it. */
