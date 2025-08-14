@@ -9572,12 +9572,6 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char *name, const STRLEN
 #endif /* defined(PERL_IN_UNIVERSAL_C) */
 #if defined(PERL_IN_UTF8_C)
 STATIC UV
-S__to_utf8_case(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
-# define PERL_ARGS_ASSERT__TO_UTF8_CASE         \
-        assert(ustrp); assert(lenp); assert(invlist); assert(invmap); \
-        assert(normal)
-
-STATIC UV
 S_check_locale_boundary_crossing(pTHX_ const U8 * const p, const UV result, U8 * const ustrp, STRLEN *lenp)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_CHECK_LOCALE_BOUNDARY_CROSSING \
@@ -9598,6 +9592,12 @@ STATIC U8
 S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp, const char dummy)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_TO_LOWER_LATIN1
+
+STATIC UV
+S_to_utf8_case_(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
+# define PERL_ARGS_ASSERT_TO_UTF8_CASE_         \
+        assert(ustrp); assert(lenp); assert(invlist); assert(invmap); \
+        assert(normal)
 
 STATIC UV
 S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e, U8 *ustrp, STRLEN *lenp);

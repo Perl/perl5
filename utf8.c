@@ -3641,19 +3641,19 @@ Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8* p, STRLEN *lenp,
  * The functions return the ordinal of the first character in the string of
  * 'd' */
 #define CALL_UPPER_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, PL_utf8_toupper,              \
+                to_utf8_case_(uv, s, d, lenp, PL_utf8_toupper,              \
                                               Uppercase_Mapping_invmap,     \
                                               UC_AUX_TABLE_ptrs,            \
                                               UC_AUX_TABLE_lengths,         \
                                               "uppercase")
 #define CALL_TITLE_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, PL_utf8_totitle,              \
+                to_utf8_case_(uv, s, d, lenp, PL_utf8_totitle,              \
                                               Titlecase_Mapping_invmap,     \
                                               TC_AUX_TABLE_ptrs,            \
                                               TC_AUX_TABLE_lengths,         \
                                               "titlecase")
 #define CALL_LOWER_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, PL_utf8_tolower,              \
+                to_utf8_case_(uv, s, d, lenp, PL_utf8_tolower,              \
                                               Lowercase_Mapping_invmap,     \
                                               LC_AUX_TABLE_ptrs,            \
                                               LC_AUX_TABLE_lengths,         \
@@ -3665,12 +3665,12 @@ Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8* p, STRLEN *lenp,
  * folding); otherwise, when zero, this implies a simple case fold */
 #define CALL_FOLD_CASE(uv, s, d, lenp, specials)                            \
         (specials)                                                          \
-        ?  _to_utf8_case(uv, s, d, lenp, PL_utf8_tofold,                    \
+        ?  to_utf8_case_(uv, s, d, lenp, PL_utf8_tofold,                    \
                                           Case_Folding_invmap,              \
                                           CF_AUX_TABLE_ptrs,                \
                                           CF_AUX_TABLE_lengths,             \
                                           "foldcase")                       \
-        : _to_utf8_case(uv, s, d, lenp, PL_utf8_tosimplefold,               \
+        : to_utf8_case_(uv, s, d, lenp, PL_utf8_tosimplefold,               \
                                          Simple_Case_Folding_invmap,        \
                                          NULL, NULL,                        \
                                          "foldcase")
@@ -4027,7 +4027,7 @@ S_to_case_cp_list(pTHX_
 }
 
 STATIC UV
-S__to_utf8_case(pTHX_ const UV original, const U8 *p,
+S_to_utf8_case_(pTHX_ const UV original, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
                       SV *invlist, const I32 * const invmap,
                       const U32 * const * const aux_tables,
@@ -4056,7 +4056,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
                                aux_tables, aux_table_lengths,
                                normal);
 
-    PERL_ARGS_ASSERT__TO_UTF8_CASE;
+    PERL_ARGS_ASSERT_TO_UTF8_CASE_;
 
     /* If the code point maps to itself and we already have its representation,
      * copy it instead of recalculating */
