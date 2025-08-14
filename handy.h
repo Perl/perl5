@@ -2729,21 +2729,21 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
  * for X and hope that nothing else whines.
  */
 
-#  define _MEM_WRAP_WILL_WRAP(n,t) \
+#  define MEM_WRAP_WILL_WRAP_(n,t) \
       ((MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) ? (MEM_SIZE)(n) : \
             MEM_SIZE_MAX/sizeof(t)) > MEM_SIZE_MAX/sizeof(t))
 
 #  define MEM_WRAP_CHECK(n,t) \
-        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        (void)(UNLIKELY(MEM_WRAP_WILL_WRAP_(n,t)) \
         && (croak_memory_wrap(),0))
 
 #  define MEM_WRAP_CHECK_1(n,t,a) \
-        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        (void)(UNLIKELY(MEM_WRAP_WILL_WRAP_(n,t)) \
         && (Perl_croak_nocontext("%s",(a)),0))
 
 /* "a" arg must be a string literal */
 #  define MEM_WRAP_CHECK_s(n,t,a) \
-        (   (void) (UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))          \
+        (   (void) (UNLIKELY(MEM_WRAP_WILL_WRAP_(n,t))          \
          && (Perl_croak_nocontext(ASSERT_IS_LITERAL(a)), 0)))
 
 #  define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
