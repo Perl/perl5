@@ -4441,15 +4441,15 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
  */
 
 UV
-Perl__to_utf8_title_flags(pTHX_ const U8 *p,
+Perl_to_utf8_title_flags_(pTHX_ const U8 *p,
                                 const U8 *e,
                                 U8* ustrp,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_TITLE_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
+    UV result;
 
     /* 2nd char of ucfirst(U+DF) is 's' */
     CASE_CHANGE_BODY_START(~0, toupper, to_upper_title_latin1_, 's',
