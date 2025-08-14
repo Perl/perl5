@@ -61,10 +61,10 @@ the need to cast the result to the appropriate type.
             assert(isGV_with_GP(gvflags_));				\
             &(GvXPVGV(gvflags_)->xpv_cur);}))
 #  define GvSTASH(gv)							\
-        (*({ GV * const _gvstash = (GV *) (gv);				\
-            assert(isGV_with_GP(_gvstash));				\
-            assert(SvTYPE(_gvstash) == SVt_PVGV || SvTYPE(_gvstash) >= SVt_PVLV); \
-            &(GvXPVGV(_gvstash)->xnv_u.xgv_stash);			\
+        (*({ GV * const gvstash_ = (GV *) (gv);				\
+            assert(isGV_with_GP(gvstash_));				\
+            assert(SvTYPE(gvstash_) == SVt_PVGV || SvTYPE(gvstash_) >= SVt_PVLV); \
+            &(GvXPVGV(gvstash_)->xnv_u.xgv_stash);			\
          }))
 #  define GvNAME_HEK(gv)						\
     (*({ GV * const _gvname_hek = (GV *) (gv);				\
