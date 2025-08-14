@@ -5109,25 +5109,69 @@ Gid_t getegid (void);
     Perl_deb(aTHX_ "%s scope %ld (savestack=%ld) at %s:%d\n",	\
                     where, (long)PL_scopestack_ix, (long)PL_savestack_ix, \
                     __FILE__, __LINE__));
+/*
+=for apidoc_section $directives
+=for apidoc    Am|void|assert_|bool expr
+=for apidoc_item |    |__ASSERT_
+
+These are synonymous, used to wrap the libc C<assert()> call in comma
+expressions in macro expansions, but you probably don't want to use them nor
+plain C<assert>; read on.
+
+In DEBUGGING builds, each expands to an assert of its argument, followed by
+a comma.  (That is what the trailing underscore signifies.)
+
+In non-DEBUGGING builds, each expands to nothing.
+
+They thus can be used to string together a bunch of asserts in a comma
+expression that is syntactically valid in either type of build.
+
+NOTE, however, use of these (and plain C<assert()>) is discouraged in a macro.
+This is because their usual use is to validate some of the arguments to that
+macro.  That will likely lead to the evaluation of those arguments more than
+once during the macro expansion.  If such an argument is an expression with
+side effects, the behavior of the macro will differ between DEBUGGING and
+non-DEBUGGING builds.
+
+And, they are necessary only on platforms where the libc C<assert()> expands to
+nothing when not in a DEBUGGING build.  There should be no such platforms now
+in existence, as the C89 standard forbids that, and Perl requires at least C99.
+So, you can just use plain C<assert>, and say  S<C<assert(...), assert(...),>>
+and everything will compile (and will work if none of the arguments to the
+asserts is an expression with side effects).
+
+These macros are retained for backward compatibility.
+
+Do NOT use C<__ASSERT_>.  A name with two leading underscores followed by a
+capital letter is reserved for the use of the compiler and libc in some
+contexts in C, and in all contexts in C++.
+
+=cut
+*/
 
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
 
-#define Perl_assert(what)	PERL_DEB2( 				\
-        ((what) ? ((void) 0) :						\
-            (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
-                        "\", line %d", STRINGIFY(what), __LINE__),	\
-             (void) 0)), ((void)0))
-
-/* assert() gets defined if DEBUGGING.
- * If no DEBUGGING, the <assert.h> has not been included. */
 #ifndef assert
-#  define assert(what)	Perl_assert(what)
+#  define assert(what)  Perl_assert(what)
 #endif
-#ifdef DEBUGGING
-#  define assert_(what)	assert(what),
+
+#if   defined DEBUGGING                     \
+ && ! defined(__COVERITY__)                 \
+ && ! defined(PERL_SMALL_MACRO_BUFFER)
+#  define Perl_assert(what)                                                 \
+        ((what)                                                             \
+         ? ((void) 0)                                                       \
+         : (Perl_croak_nocontext("Assertion %s failed:"                     \
+                                 " file \"" __FILE__ "\", line %" LINE_Tf,  \
+                                 STRINGIFY(what), (line_t) __LINE__),       \
+            (void) 0))
+#  define assert_(what)         assert(what),
+#  define __ASSERT_(statement)  assert(statement),
 #else
+#  define Perl_assert(what)  ((void) 0)
 #  define assert_(what)
+#  define __ASSERT_(statement)
 #endif
 
 struct ufuncs {
