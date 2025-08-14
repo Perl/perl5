@@ -3684,7 +3684,7 @@ Cp	|UV	|to_utf8_lower_flags_					\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
-Cp	|UV	|_to_utf8_title_flags					\
+Cp	|UV	|to_utf8_title_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\
