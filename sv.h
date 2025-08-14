@@ -1414,10 +1414,10 @@ object type. Exposed to perl code via Internals::SvREADONLY().
             &(((XPVUV*) MUTABLE_PTR(SvANY(svuvx_)))->xuv_uv);		\
          }))
 #    define SvNVX(sv)							\
-        (*({ const SV *const _svnvx = (const SV *)(sv);			\
-            assert(PL_valid_types_NVX[SvTYPE(_svnvx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svnvx));				\
-            &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
+        (*({ const SV *const svnvx_ = (const SV *)(sv);			\
+            assert(PL_valid_types_NVX[SvTYPE(svnvx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svnvx_));				\
+            &(((XPVNV*) MUTABLE_PTR(SvANY(svnvx_)))->xnv_u.xnv_nv);	\
          }))
 #    define SvRV(sv)							\
         (*({ SV *const svrv_ = MUTABLE_SV(sv);				\
