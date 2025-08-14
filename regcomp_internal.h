@@ -962,7 +962,7 @@ static const scan_data_t zero_scan_data = {
     } STMT_END
 
 /* 'warns' is the output of the packWARNx macro used in 'code' */
-#define _WARN_HELPER(loc, warns, code)                                  \
+#define WARN_HELPER_(loc, warns, code)                                  \
     STMT_START {                                                        \
         if (! RExC_copy_start_in_constructed) {                         \
             croak("panic! %s: %d: Tried to warn when none"              \
@@ -977,7 +977,7 @@ static const scan_data_t zero_scan_data = {
 
 /* m is not necessarily a "literal string", in this macro */
 #define warn_non_literal_string(loc, packed_warn, m)                    \
-    _WARN_HELPER(loc, packed_warn,                                      \
+    WARN_HELPER_(loc, packed_warn,                                      \
                       Perl_warner(aTHX_ packed_warn,                    \
                                        "%s" REPORT_LOCATION,            \
                                   m, REPORT_LOCATION_ARGS(loc)))
@@ -992,84 +992,84 @@ static const scan_data_t zero_scan_data = {
                 my_strlcpy(format, m, format_size);                         \
                 my_strlcat(format, REPORT_LOCATION, format_size);           \
                 SAVEFREEPV(format);                                         \
-                _WARN_HELPER(loc, packwarn,                                 \
+                WARN_HELPER_(loc, packwarn,                                 \
                       Perl_ck_warner(aTHX_ packwarn,                        \
                                         format,                             \
                                         a1, REPORT_LOCATION_ARGS(loc)));    \
     } STMT_END
 
 #define ckWARNreg(loc,m)                                                \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                            \
                       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
                                           m REPORT_LOCATION,            \
                                           REPORT_LOCATION_ARGS(loc)))
 
 #define vWARN(loc, m)                                                   \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                            \
                       Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        m REPORT_LOCATION,               \
                                        REPORT_LOCATION_ARGS(loc)))      \
 
 #define vWARN_dep(loc,category,m)                                           \
-    _WARN_HELPER(loc, packWARN(category),                                   \
+    WARN_HELPER_(loc, packWARN(category),                                   \
                       Perl_warner(aTHX_ packWARN(category),                 \
                                        m REPORT_LOCATION,                   \
                                        REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARNdep(loc,category,m)                                           \
-    _WARN_HELPER(loc, packWARN(category),                                   \
+    WARN_HELPER_(loc, packWARN(category),                                   \
                       Perl_ck_warner_d(aTHX_ packWARN(category),            \
                                             m REPORT_LOCATION,              \
                                             REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARNregdep(loc,category,m)                                        \
-    _WARN_HELPER(loc, packWARN2(category, WARN_REGEXP),                     \
+    WARN_HELPER_(loc, packWARN2(category, WARN_REGEXP),                     \
                       Perl_ck_warner_d(aTHX_ packWARN2(category,            \
                                                       WARN_REGEXP),         \
                                              m REPORT_LOCATION,             \
                                              REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARN2reg_d(loc,m, a1)                                             \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                                \
                       Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),         \
                                             m REPORT_LOCATION,              \
                                             a1, REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARN2reg(loc, m, a1)                                              \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                                \
                       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),           \
                                           m REPORT_LOCATION,                \
                                           a1, REPORT_LOCATION_ARGS(loc)))
 
 #define vWARN3(loc, m, a1, a2)                                              \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                                \
                       Perl_warner(aTHX_ packWARN(WARN_REGEXP),              \
                                        m REPORT_LOCATION,                   \
                                        a1, a2, REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARN3reg(loc, m, a1, a2)                                          \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                                \
                       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),           \
                                           m REPORT_LOCATION,                \
                                           a1, a2,                           \
                                           REPORT_LOCATION_ARGS(loc)))
 
 #define vWARN4(loc, m, a1, a2, a3)                                      \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                            \
                       Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        m REPORT_LOCATION,               \
                                        a1, a2, a3,                      \
                                        REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARN4reg(loc, m, a1, a2, a3)                                  \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                            \
                       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
                                           m REPORT_LOCATION,            \
                                           a1, a2, a3,                   \
                                           REPORT_LOCATION_ARGS(loc)))
 
 #define vWARN5(loc, m, a1, a2, a3, a4)                                  \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
+    WARN_HELPER_(loc, packWARN(WARN_REGEXP),                            \
                       Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
                                        m REPORT_LOCATION,               \
                                        a1, a2, a3, a4,                  \
@@ -1079,7 +1079,7 @@ static const scan_data_t zero_scan_data = {
     STMT_START {                                                        \
         if (! RExC_warned_ ## class) { /* warn once per compilation */  \
             RExC_warned_ ## class = 1;                                  \
-            _WARN_HELPER(loc, packWARN(class),                          \
+            WARN_HELPER_(loc, packWARN(class),                          \
                       Perl_ck_warner_d(aTHX_ packWARN(class),           \
                                             m REPORT_LOCATION,          \
                                             REPORT_LOCATION_ARGS(loc)));\
@@ -1090,7 +1090,7 @@ static const scan_data_t zero_scan_data = {
     STMT_START {                                                        \
         if (! RExC_warned_ ## class) { /* warn once per compilation */  \
             RExC_warned_ ## class = 1;                                  \
-            _WARN_HELPER(loc, packWARN(class),                          \
+            WARN_HELPER_(loc, packWARN(class),                          \
                       Perl_ck_warner_d(aTHX_ packWARN(class),           \
                                        m REPORT_LOCATION,               \
                                        arg, REPORT_LOCATION_ARGS(loc)));\

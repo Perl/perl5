@@ -2562,7 +2562,7 @@ Perl_study_chunk(pTHX_
                     && maxcount <= REG_INFTY/3) /* Complement check for big
                                                    count */
                 {
-                    _WARN_HELPER(RExC_precomp_end, packWARN(WARN_REGEXP),
+                    WARN_HELPER_(RExC_precomp_end, packWARN(WARN_REGEXP),
                         Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
                             "Quantifier unexpected on zero-length expression "
                             "in regex m/%" UTF8f "/",
