@@ -121,11 +121,6 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
 #define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART  \
         assert(p); assert(e)
 
-PERL_CALLCONV UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
-#define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS   \
-        assert(p); assert(ustrp)
-
 PERL_CALLCONV_NO_RET void
 Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
         __attribute__noreturn__
@@ -5295,6 +5290,11 @@ Perl_to_utf8_lower_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *len
 PERL_CALLCONV UV
 Perl_to_utf8_title_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
 #define PERL_ARGS_ASSERT_TO_UTF8_TITLE_FLAGS_   \
+        assert(p); assert(ustrp)
+
+PERL_CALLCONV UV
+Perl_to_utf8_upper_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
+#define PERL_ARGS_ASSERT_TO_UTF8_UPPER_FLAGS_   \
         assert(p); assert(ustrp)
 
 PERL_CALLCONV bool

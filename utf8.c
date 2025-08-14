@@ -4417,15 +4417,15 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
  *         be used. */
 
 UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
+Perl_to_utf8_upper_flags_(pTHX_ const U8 *p,
                                 const U8 *e,
                                 U8* ustrp,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_UPPER_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
+    UV result;
 
     /* ~0 makes anything non-zero in 'flags' mean we are using locale rules */
     /* 2nd char of uc(U+DF) is 'S' */
