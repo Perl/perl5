@@ -2192,10 +2192,10 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
   assert(cp_out >= 0);
   return cp_out;
 }
-#  define _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp) \
+#  define generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp) \
         invmap[S_get_break_val_cp_checked(invlist, cp)]
 #else
-#  define _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp) \
+#  define generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp) \
         invmap[_invlist_search(invlist, cp)]
 #endif
 
@@ -2204,7 +2204,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
  * according to the two arrays.  It assumes that all code points have a value.
  * This is used as the base macro for macros for particular properties */
 #define _generic_GET_BREAK_VAL_CP(invlist, invmap, cp)              \
-        _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp)
+        generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp)
 
 /* Same as above, but takes begin, end ptrs to a UTF-8 encoded string instead
  * of a code point, returning the value for the first code point in the string.
