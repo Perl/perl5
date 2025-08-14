@@ -317,9 +317,9 @@ struct pmop {
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
 #define PM_SETRE(o,r)	STMT_START {					\
-                            REGEXP *const _pm_setre = (r);		\
-                            assert(_pm_setre);				\
-                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
+                            REGEXP *const pm_setre_ = (r);		\
+                            assert(pm_setre_);				\
+                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(pm_setre_); \
                         } STMT_END
 #else
 #define PM_GETRE_raw(o) ((o)->op_pmregexp)
