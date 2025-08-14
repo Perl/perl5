@@ -203,7 +203,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 
             /* ... plus all the things that fold to it, which are found in
              * PL_utf8_foldclosures */
-            folds_count = _inverse_folds(fc, &first_fold,
+            folds_count = inverse_folds_(fc, &first_fold,
                                                 &remaining_folds);
             for (k = 0; k < folds_count; k++) {
                 UV c = (k == 0) ? first_fold : remaining_folds[k-1];

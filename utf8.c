@@ -4085,7 +4085,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
 }
 
 Size_t
-Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
+Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
                           const U32 ** remaining_folds_to)
 {
     /* Returns the count of the number of code points that fold to the input
@@ -4116,7 +4116,7 @@ Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
     SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
     I32 base = _Perl_IVCF_invmap[index];
 
-    PERL_ARGS_ASSERT__INVERSE_FOLDS;
+    PERL_ARGS_ASSERT_INVERSE_FOLDS_;
 
     if (base == 0) {            /* No fold */
         *first_folds_to = 0;
