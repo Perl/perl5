@@ -1501,7 +1501,7 @@ is scalar(t145()), undef;
         "$a:$b";
     }
     {
-        local $::TODO = q{can't handle commonaility};
+        local $::TODO = q{can't handle commonality};
         is t162x(), "y:x", 'handle commonality in scalar parms';
     }
 }
