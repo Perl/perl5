@@ -1402,10 +1402,10 @@ object type. Exposed to perl code via Internals::SvREADONLY().
          }))
 #   endif
 #    define SvIVX(sv)							\
-        (*({ const SV *const _svivx = (const SV *)(sv);			\
-            assert(PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svivx));				\
-            &(((XPVIV*) MUTABLE_PTR(SvANY(_svivx)))->xiv_iv);		\
+        (*({ const SV *const svivx_ = (const SV *)(sv);			\
+            assert(PL_valid_types_IVX[SvTYPE(svivx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svivx_));				\
+            &(((XPVIV*) MUTABLE_PTR(SvANY(svivx_)))->xiv_iv);		\
          }))
 #    define SvUVX(sv)							\
         (*({ const SV *const _svuvx = (const SV *)(sv);			\
