@@ -4546,10 +4546,10 @@ PP_wrapped(pp_uc, 1, 0)
              * and copy it to the output buffer */
 
 #ifdef USE_LOCALE_CTYPE
-            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len,
+            uv = toUPPER_utf8_flags_(s, send, tmpbuf, &upper_len,
                                      IN_LC_RUNTIME(LC_CTYPE));
 #else
-            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len, 0);
+            uv = toUPPER_utf8_flags_(s, send, tmpbuf, &upper_len, 0);
 #endif
             if (   UNLIKELY(uv == GREEK_CAPITAL_LETTER_IOTA)
                 && memBEGINs(s, this_len, COMBINING_GREEK_YPOGEGRAMMENI_UTF8))

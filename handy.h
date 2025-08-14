@@ -2376,12 +2376,12 @@ END_EXTERN_C
 #define toFOLD_utf8_flags_(p,e,s,l,f)  to_utf8_fold_flags_(p,e,s,l,f)
 #define toLOWER_utf8_flags_(p,e,s,l,f) to_utf8_lower_flags_(p,e,s,l,f)
 #define toTITLE_utf8_flags_(p,e,s,l,f) to_utf8_title_flags_(p,e,s,l,f)
-#define _toUPPER_utf8_flags(p,e,s,l,f) to_utf8_upper_flags_(p,e,s,l,f)
+#define toUPPER_utf8_flags_(p,e,s,l,f) to_utf8_upper_flags_(p,e,s,l,f)
 
 #define toFOLD_utf8_safe(p,e,s,l)   toFOLD_utf8_flags_(p,e,s,l, FOLD_FLAGS_FULL)
 #define toLOWER_utf8_safe(p,e,s,l)  toLOWER_utf8_flags_(p,e,s,l, 0)
 #define toTITLE_utf8_safe(p,e,s,l)  toTITLE_utf8_flags_(p,e,s,l, 0)
-#define toUPPER_utf8_safe(p,e,s,l)  _toUPPER_utf8_flags(p,e,s,l, 0)
+#define toUPPER_utf8_safe(p,e,s,l)  toUPPER_utf8_flags_(p,e,s,l, 0)
 
 #define isALPHA_LC_utf8(p, e)         isALPHA_LC_utf8_safe(p, e)
 #define isALPHANUMERIC_LC_utf8(p, e)  isALPHANUMERIC_LC_utf8_safe(p, e)
