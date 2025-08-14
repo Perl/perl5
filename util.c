@@ -4959,10 +4959,10 @@ Perl_debug_hash_seed(pTHX_ bool via_debug_h)
 
 # ifdef DEBUG_LEAKING_SCALARS
 #   define SV_LOG_SERIAL_FMT	    " [%lu]"
-#   define _SV_LOG_SERIAL_ARG(sv)   , (unsigned long) (sv)->sv_debug_serial
+#   define SV_LOG_SERIAL_ARG_(sv)   , (unsigned long) (sv)->sv_debug_serial
 # else
 #   define SV_LOG_SERIAL_FMT
-#   define _SV_LOG_SERIAL_ARG(sv)
+#   define SV_LOG_SERIAL_ARG_(sv)
 # endif
 
 static void
@@ -5049,7 +5049,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
                         "%s_SV: %s:%d:%s: %" UVxf SV_LOG_SERIAL_FMT "\n",
                         mlt == MLT_NEW_SV ? "new" : "del",
                         filename, linenumber, funcname,
-                        PTR2UV(sv) _SV_LOG_SERIAL_ARG(sv));
+                        PTR2UV(sv) SV_LOG_SERIAL_ARG_(sv));
                 break;
             default:
                 len = 0;
