@@ -249,8 +249,8 @@ Returns the value slot (type C<SV*>)
 stored in the hash entry.  Can be assigned
 to.
 
-  SV *foo= HeVAL(hv);
-  HeVAL(hv)= sv;
+  SV *foo= HeVAL(he);
+  HeVAL(he)= sv;
 
 
 =for apidoc Am|U32|HeHASH|HE* he
