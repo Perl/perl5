@@ -1195,11 +1195,11 @@ struct reg_trie_trans_ {
 };
 
 /* a transition list element for the list based representation */
-struct _reg_trie_trans_list_elem {
+struct reg_trie_trans_list_elem_ {
     U16 forid;
     U32 newstate;
 };
-typedef struct _reg_trie_trans_list_elem reg_trie_trans_le;
+typedef struct reg_trie_trans_list_elem_ reg_trie_trans_le;
 
 /* a state for compressed nodes. base is an offset
   into an array of reg_trie_trans array. If wordnum is
