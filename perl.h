@@ -4574,7 +4574,7 @@ typedef struct regnode_charclass_posixl regnode_charclass_posixl;
 
 typedef struct regnode_ssc regnode_ssc;
 typedef struct RExC_state_t RExC_state_t;
-struct _reg_trie_data;
+struct reg_trie_data_;
 typedef struct scan_data_t scan_data_t;
 
 #endif
