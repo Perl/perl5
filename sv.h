@@ -1384,21 +1384,21 @@ object type. Exposed to perl code via Internals::SvREADONLY().
          }))
 #   ifdef PERL_CORE
 #    define SvCUR(sv)							\
-        ({ const SV *const _svcur = (const SV *)(sv);			\
-            assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svcur));				\
-            assert(!(SvTYPE(_svcur) == SVt_PVIO				\
-                     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-            (((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+        ({ const SV *const svcur_ = (const SV *)(sv);			\
+            assert(PL_valid_types_PVX[SvTYPE(svcur_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svcur_));				\
+            assert(!(SvTYPE(svcur_) == SVt_PVIO				\
+                     && !(IoFLAGS(svcur_) & IOf_FAKE_DIRP)));		\
+            (((XPV*) MUTABLE_PTR(SvANY(svcur_)))->xpv_cur);		\
          })
 #   else
 #    define SvCUR(sv)							\
-        (*({ const SV *const _svcur = (const SV *)(sv);			\
-            assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svcur));				\
-            assert(!(SvTYPE(_svcur) == SVt_PVIO				\
-                     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-            &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+        (*({ const SV *const svcur_ = (const SV *)(sv);			\
+            assert(PL_valid_types_PVX[SvTYPE(svcur_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svcur_));				\
+            assert(!(SvTYPE(svcur_) == SVt_PVIO				\
+                     && !(IoFLAGS(svcur_) & IOf_FAKE_DIRP)));		\
+            &(((XPV*) MUTABLE_PTR(SvANY(svcur_)))->xpv_cur);		\
          }))
 #   endif
 #    define SvIVX(sv)							\
