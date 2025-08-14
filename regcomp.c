@@ -9330,7 +9330,7 @@ Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** i
                 *invlist = add_cp_to_invlist(*invlist, folded_cp);
             }
 
-            folds_count = _inverse_folds(folded_cp, &first_fold,
+            folds_count = inverse_folds_(folded_cp, &first_fold,
                                                     &remaining_folds);
             if (folds_count == 0) {
 
@@ -10937,7 +10937,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     /* Single character fold of above Latin1.  Add everything
                      * in its fold closure to the list that this node should
                      * match. */
-                    folds_count = _inverse_folds(folded, &first_fold,
+                    folds_count = inverse_folds_(folded, &first_fold,
                                                     &remaining_folds);
                     for (k = 0; k <= folds_count; k++) {
                         UV c = (k == 0)     /* First time through use itself */
@@ -11690,7 +11690,7 @@ S_optimize_regclass(pTHX_
                 UV folded = to_uni_fold_flags_(lowest_cp, foldbuf, &foldlen, 0);
                 U32 first_fold;
                 const U32 * remaining_folds;
-                Size_t folds_to_this_cp_count = _inverse_folds(
+                Size_t folds_to_this_cp_count = inverse_folds_(
                                                             folded,
                                                             &first_fold,
                                                             &remaining_folds);

@@ -4989,7 +4989,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
           redo_multi:
             /* Look up what code points (besides itself) fold to 'folded';
              * e.g., [ 'K', KELVIN_SIGN ] both fold to 'k'. */
-            folds_to_count = _inverse_folds(folded, &first_fold_from,
+            folds_to_count = inverse_folds_(folded, &first_fold_from,
                                                        &remaining_fold_froms);
         }
 

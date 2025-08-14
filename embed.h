@@ -1798,7 +1798,6 @@
 #   endif
 # endif /* defined(PERL_CORE) */
 # if defined(PERL_CORE) || defined(PERL_EXT)
-#   define _inverse_folds(a,b,c)                Perl__inverse_folds(aTHX_ a,b,c)
 #   define append_utf8_from_native_byte         Perl_append_utf8_from_native_byte
 #   define av_reify(a)                          Perl_av_reify(aTHX_ a)
 #   define byte_dump_string_(a,b,c)             Perl_byte_dump_string_(aTHX_ a,b,c)
@@ -1811,6 +1810,7 @@
 #   define get_deprecated_property_msg          Perl_get_deprecated_property_msg
 #   define get_prop_definition(a)               Perl_get_prop_definition(aTHX_ a)
 #   define get_prop_values                      Perl_get_prop_values
+#   define inverse_folds_(a,b,c)                Perl_inverse_folds_(aTHX_ a,b,c)
 #   define load_charnames(a,b,c,d)              Perl_load_charnames(aTHX_ a,b,c,d)
 #   define mbtowc_(a,b,c)                       Perl_mbtowc_(aTHX_ a,b,c)
 #   define mg_find_mglob(a)                     Perl_mg_find_mglob(aTHX_ a)

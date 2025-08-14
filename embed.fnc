@@ -1665,7 +1665,7 @@ p	|void	|init_uniprops
 APRTdmp |char * |instr		|NN const char *big			\
 				|NN const char *little
 Adp	|U32	|intro_my
-ERXp	|Size_t |_inverse_folds |const UV cp				\
+ERXp	|Size_t |inverse_folds_ |const UV cp				\
 				|NN U32 *first_folds_to 		\
 				|NN const U32 **remaining_folds_to
 : Used in perly.y

@@ -88,9 +88,6 @@ Perl_Slab_Free(pTHX_ void *op);
 /* PERL_CALLCONV void
 Perl_SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
 
-#define PERL_ARGS_ASSERT__INVERSE_FOLDS         \
-        assert(first_folds_to); assert(remaining_folds_to)
-
 PERL_CALLCONV bool
 Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
         __attribute__warn_unused_result__;
@@ -1839,6 +1836,9 @@ Perl_instr(const char *big, const char *little)
 PERL_CALLCONV U32
 Perl_intro_my(pTHX);
 #define PERL_ARGS_ASSERT_INTRO_MY
+
+#define PERL_ARGS_ASSERT_INVERSE_FOLDS_         \
+        assert(first_folds_to); assert(remaining_folds_to)
 
 PERL_CALLCONV OP *
 Perl_invert(pTHX_ OP *cmd)
@@ -6039,9 +6039,6 @@ S_should_warn_nl(const char *pv)
 # endif
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
-PERL_CALLCONV Size_t
-Perl__inverse_folds(pTHX_ const UV cp, U32 *first_folds_to, const U32 **remaining_folds_to)
-        __attribute__warn_unused_result__;
 PERL_CALLCONV void
 Perl_av_reify(pTHX_ AV *av);
 PERL_CALLCONV const char *
@@ -6076,6 +6073,9 @@ Perl_get_prop_definition(pTHX_ const int table_index)
         __attribute__warn_unused_result__;
 PERL_CALLCONV const char * const *
 Perl_get_prop_values(const int table_index)
+        __attribute__warn_unused_result__;
+PERL_CALLCONV Size_t
+Perl_inverse_folds_(pTHX_ const UV cp, U32 *first_folds_to, const U32 **remaining_folds_to)
         __attribute__warn_unused_result__;
 PERL_CALLCONV HV *
 Perl_load_charnames(pTHX_ SV *char_name, const char *context, const STRLEN context_len, const char **error_msg)
