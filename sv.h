@@ -1420,20 +1420,20 @@ object type. Exposed to perl code via Internals::SvREADONLY().
             &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
          }))
 #    define SvRV(sv)							\
-        (*({ SV *const _svrv = MUTABLE_SV(sv);				\
-            assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svrv));				\
-            assert(!(SvTYPE(_svrv) == SVt_PVIO				\
-                     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
-            &((_svrv)->sv_u.svu_rv);					\
+        (*({ SV *const svrv_ = MUTABLE_SV(sv);				\
+            assert(PL_valid_types_RV[SvTYPE(svrv_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svrv_));				\
+            assert(!(SvTYPE(svrv_) == SVt_PVIO				\
+                     && !(IoFLAGS(svrv_) & IOf_FAKE_DIRP)));		\
+            &((svrv_)->sv_u.svu_rv);					\
          }))
 #    define SvRV_const(sv)						\
-        ({ const SV *const _svrv = (const SV *)(sv);			\
-            assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svrv));				\
-            assert(!(SvTYPE(_svrv) == SVt_PVIO				\
-                     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
-            (_svrv)->sv_u.svu_rv;					\
+        ({ const SV *const svrv_ = (const SV *)(sv);			\
+            assert(PL_valid_types_RV[SvTYPE(svrv_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svrv_));				\
+            assert(!(SvTYPE(svrv_) == SVt_PVIO				\
+                     && !(IoFLAGS(svrv_) & IOf_FAKE_DIRP)));		\
+            (svrv_)->sv_u.svu_rv;					\
          })
 #    define SvMAGIC(sv)							\
         (*({ const SV *const _svmagic = (const SV *)(sv);		\
