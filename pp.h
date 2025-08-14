@@ -423,7 +423,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                         } STMT_END
 #else
 
-/* _EXTEND_NEEDS_GROW(p,n): private helper macro for EXTEND().
+/* EXTEND_NEEDS_GROW_(p,n): private helper macro for EXTEND().
  * Tests to see whether n is too big and we need to grow the stack. Be
  * very careful if modifying this. There are many ways to get things wrong
  * (wrapping, truncating etc) that could cause a false negative and cause
@@ -439,7 +439,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * this just gives a safe false positive
  */
 
-#  define _EXTEND_NEEDS_GROW(p,n) ((n) < 0 || PL_stack_max - (p) < (n))
+#  define EXTEND_NEEDS_GROW_(p,n) ((n) < 0 || PL_stack_max - (p) < (n))
 
 
 /* EXTEND_SKIP(): used for where you would normally call EXTEND(), but
@@ -452,13 +452,13 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #  define EXTEND_SKIP(p, n) STMT_START {                                \
                                 EXTEND_HWM_SET(p, n);                   \
-                                assert(!_EXTEND_NEEDS_GROW(p,n));       \
+                                assert(!EXTEND_NEEDS_GROW_(p,n));       \
                             } STMT_END
 
 
 #  define EXTEND(p,n)   STMT_START {                                    \
                          EXTEND_HWM_SET(p, n);                          \
-                         if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
+                         if (UNLIKELY(EXTEND_NEEDS_GROW_(p,n))) {       \
                            sp = stack_grow(sp,p,EXTEND_SAFE_N_(n));     \
                            PERL_UNUSED_VAR(sp);                         \
                          }                                              \
@@ -466,7 +466,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 /* Same thing, but update mark register too. */
 #  define MEXTEND(p,n)  STMT_START {                                    \
                          EXTEND_HWM_SET(p, n);                          \
-                         if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
+                         if (UNLIKELY(EXTEND_NEEDS_GROW_(p,n))) {       \
                            const SSize_t markoff = mark - PL_stack_base;\
                            sp = stack_grow(sp,p,EXTEND_SAFE_N_(n));     \
                            mark = PL_stack_base + markoff;              \
