@@ -3747,7 +3747,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
+Perl_to_fold_latin1_(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 {
     /* Corresponds to to_lower_latin1(); <flags> bits meanings:
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
@@ -3758,7 +3758,7 @@ Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 
     UV converted;
 
-    PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
+    PERL_ARGS_ASSERT_TO_FOLD_LATIN1_;
 
     assert (! (flags & FOLD_FLAGS_LOCALE));
 
@@ -3833,7 +3833,7 @@ Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     }
 
     if (c < 256) {
-        return _to_fold_latin1((U8) c, p, lenp,
+        return to_fold_latin1_((U8) c, p, lenp,
                             flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
     }
 
@@ -4504,7 +4504,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
 
     assert(p != ustrp); /* Otherwise overwrites */
 
-    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, tolower, _to_fold_latin1,
+    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, tolower, to_fold_latin1_,
                  ((flags) & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII)),
                                                                     turkic_fc);
 

@@ -5602,7 +5602,7 @@ ERp	|bool	|is_grapheme	|NN const U8 *strbeg			\
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_UTF8_C)
-ETXp	|UV	|_to_fold_latin1|const U8 c				\
+ETXp	|UV	|to_fold_latin1_|const U8 c				\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\
 				|const unsigned int flags

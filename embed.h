@@ -1992,7 +1992,7 @@
 #   endif
 #   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
        defined(PERL_IN_UTF8_C)
-#     define _to_fold_latin1                    Perl__to_fold_latin1
+#     define to_fold_latin1_                    Perl_to_fold_latin1_
 #   endif
 #   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #     define regcurly                           Perl_regcurly

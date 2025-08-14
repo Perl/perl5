@@ -1853,7 +1853,7 @@ STMT_START {                                                                \
             len = 0;                                                        \
         } else {                                                            \
             len = 1;                                                        \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);     \
+            uvc = to_fold_latin1_( (U8) *uc, foldbuf, &foldlen, flags);     \
             skiplen = UVCHR_SKIP( uvc );                                    \
             foldlen -= skiplen;                                             \
             uscan = foldbuf + skiplen;                                      \
