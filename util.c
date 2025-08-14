@@ -5999,12 +5999,12 @@ Perl_get_re_arg(pTHX_ SV *sv) {
 #define FREEBSD_DRAND48_MULT_2   (0x0005)
 #define FREEBSD_DRAND48_ADD      (0x000b)
 
-const unsigned short _rand48_mult[3] = {
+const unsigned short rand48_mult_[3] = {
                 FREEBSD_DRAND48_MULT_0,
                 FREEBSD_DRAND48_MULT_1,
                 FREEBSD_DRAND48_MULT_2
 };
-const unsigned short _rand48_add = FREEBSD_DRAND48_ADD;
+const unsigned short rand48_add_ = FREEBSD_DRAND48_ADD;
 
 #endif
 
@@ -6037,17 +6037,17 @@ Perl_drand48_r(perl_drand48_t *random_state)
     U32 accu;
     U16 temp[2];
 
-    accu = (U32) _rand48_mult[0] * (U32) random_state->seed[0]
-         + (U32) _rand48_add;
+    accu = (U32) rand48_mult_[0] * (U32) random_state->seed[0]
+         + (U32) rand48_add_;
     temp[0] = (U16) accu;        /* lower 16 bits */
     accu >>= sizeof(U16) * 8;
-    accu += (U32) _rand48_mult[0] * (U32) random_state->seed[1]
-          + (U32) _rand48_mult[1] * (U32) random_state->seed[0];
+    accu += (U32) rand48_mult_[0] * (U32) random_state->seed[1]
+          + (U32) rand48_mult_[1] * (U32) random_state->seed[0];
     temp[1] = (U16) accu;        /* middle 16 bits */
     accu >>= sizeof(U16) * 8;
-    accu += _rand48_mult[0] * random_state->seed[2]
-          + _rand48_mult[1] * random_state->seed[1]
-          + _rand48_mult[2] * random_state->seed[0];
+    accu += rand48_mult_[0] * random_state->seed[2]
+          + rand48_mult_[1] * random_state->seed[1]
+          + rand48_mult_[2] * random_state->seed[0];
     random_state->seed[0] = temp[0];
     random_state->seed[1] = temp[1];
     random_state->seed[2] = (U16) accu;
