@@ -1231,7 +1231,7 @@ typedef struct reg_trie_trans_    reg_trie_trans;
 
 /* anything in here that needs to be freed later
    should be dealt with in pregfree.
-   refcount is first in both this and _reg_ac_data to allow a space
+   refcount is first in both this and reg_ac_data_ to allow a space
    optimisation in Perl_regdupe.  */
 struct reg_trie_data_ {
     U32             refcount;        /* number of times this trie is referenced */
@@ -1278,13 +1278,13 @@ typedef struct reg_trie_data_ reg_trie_data;
 
 /* refcount is first in both this and reg_trie_data_ to allow a space
    optimisation in Perl_regdupe.  */
-struct _reg_ac_data {
+struct reg_ac_data_ {
     U32              refcount;
     U32              trie;
     U32              *fail;
     reg_trie_state   *states;
 };
-typedef struct _reg_ac_data reg_ac_data;
+typedef struct reg_ac_data_ reg_ac_data;
 
 /* ANY_BIT doesn't use the structure, so we can borrow it here.
    This is simpler than refactoring all of it as wed end up with
