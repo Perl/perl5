@@ -1206,7 +1206,7 @@ typedef struct reg_trie_trans_list_elem_ reg_trie_trans_le;
   nonzero the state is accepting. if base is zero then
   the state has no children (and will be accepting)
 */
-struct _reg_trie_state {
+struct reg_trie_state_ {
   U16 wordnum;
   union {
     U32                base;
@@ -1225,7 +1225,7 @@ typedef struct {
 } reg_trie_wordinfo;
 
 
-typedef struct _reg_trie_state    reg_trie_state;
+typedef struct reg_trie_state_    reg_trie_state;
 typedef struct reg_trie_trans_    reg_trie_trans;
 
 
