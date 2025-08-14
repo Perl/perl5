@@ -1189,7 +1189,7 @@ struct reg_data {
    field.  the next field determines which state
    is to be transitioned to if any.
 */
-struct _reg_trie_trans {
+struct reg_trie_trans_ {
   U32 next;
   U32 check;
 };
@@ -1226,7 +1226,7 @@ typedef struct {
 
 
 typedef struct _reg_trie_state    reg_trie_state;
-typedef struct _reg_trie_trans    reg_trie_trans;
+typedef struct reg_trie_trans_    reg_trie_trans;
 
 
 /* anything in here that needs to be freed later
