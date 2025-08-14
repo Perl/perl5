@@ -1436,9 +1436,9 @@ object type. Exposed to perl code via Internals::SvREADONLY().
             (svrv_)->sv_u.svu_rv;					\
          })
 #    define SvMAGIC(sv)							\
-        (*({ const SV *const _svmagic = (const SV *)(sv);		\
-            assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
-            &(((XPVMG*) MUTABLE_PTR(SvANY(_svmagic)))->xmg_u.xmg_magic); \
+        (*({ const SV *const svmagic_ = (const SV *)(sv);		\
+            assert(SvTYPE(svmagic_) >= SVt_PVMG);			\
+            &(((XPVMG*) MUTABLE_PTR(SvANY(svmagic_)))->xmg_u.xmg_magic); \
           }))
 #    define SvSTASH(sv)							\
         (*({ const SV *const _svstash = (const SV *)(sv);		\
