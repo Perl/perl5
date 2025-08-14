@@ -946,7 +946,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         if (op == ANYOFHs) {
             sv_catpvf(sv, " (Leading UTF-8 bytes = %s", 
-                _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, 
+                byte_dump_string_((U8 *) ((struct regnode_anyofhs *) o)->string,
                 FLAGS(o), 1));
         }
         else if (REGNODE_TYPE(op) != ANYOF) {

@@ -88,8 +88,6 @@ Perl_Slab_Free(pTHX_ void *op);
 /* PERL_CALLCONV void
 Perl_SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
 
-#define PERL_ARGS_ASSERT__BYTE_DUMP_STRING
-
 #define PERL_ARGS_ASSERT__INVERSE_FOLDS         \
         assert(first_folds_to); assert(remaining_folds_to)
 
@@ -387,6 +385,8 @@ Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_BUILD_INFIX_PLUGIN     \
         assert(lhs); assert(rhs); assert(tokendata)
+
+#define PERL_ARGS_ASSERT_BYTE_DUMP_STRING_
 
 PERL_CALLCONV int
 Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen);
@@ -6039,13 +6039,13 @@ S_should_warn_nl(const char *pv)
 # endif
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
-PERL_CALLCONV const char *
-Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
 PERL_CALLCONV Size_t
 Perl__inverse_folds(pTHX_ const UV cp, U32 *first_folds_to, const U32 **remaining_folds_to)
         __attribute__warn_unused_result__;
 PERL_CALLCONV void
 Perl_av_reify(pTHX_ AV *av);
+PERL_CALLCONV const char *
+Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const bool format);
 PERL_CALLCONV const char *
 Perl_cntrl_to_mnemonic(const U8 c)
         __attribute__warn_unused_result__;

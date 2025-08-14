@@ -1798,10 +1798,10 @@
 #   endif
 # endif /* defined(PERL_CORE) */
 # if defined(PERL_CORE) || defined(PERL_EXT)
-#   define _byte_dump_string(a,b,c)             Perl__byte_dump_string(aTHX_ a,b,c)
 #   define _inverse_folds(a,b,c)                Perl__inverse_folds(aTHX_ a,b,c)
 #   define append_utf8_from_native_byte         Perl_append_utf8_from_native_byte
 #   define av_reify(a)                          Perl_av_reify(aTHX_ a)
+#   define byte_dump_string_(a,b,c)             Perl_byte_dump_string_(aTHX_ a,b,c)
 #   define cntrl_to_mnemonic                    Perl_cntrl_to_mnemonic
 #   define current_re_engine()                  Perl_current_re_engine(aTHX)
 #   define cv_ckproto_len_flags(a,b,c,d,e)      Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
