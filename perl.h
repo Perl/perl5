@@ -4935,8 +4935,8 @@ Gid_t getegid (void);
 #  define DEBUG_Lv_TEST DEBUG_Lv_TEST_
 #  define DEBUG_yv_TEST DEBUG_yv_TEST_
 
-#  define PERL_DEB(a)                  a
-#  define PERL_DEB2(a,b)               a
+#  define PERL_IF_DEBUGGING(a)         a
+#  define PERL_IF_DEBUGGING_ELSE(a,b)  a
 #  define PERL_DEBUG(a) if (PL_debug)  a
 #  define DEBUG_p(a) if (DEBUG_p_TEST) a
 #  define DEBUG_s(a) if (DEBUG_s_TEST) a
@@ -5066,8 +5066,8 @@ Gid_t getegid (void);
 #  define DEBUG_Lv_TEST (0)
 #  define DEBUG_yv_TEST (0)
 
-#  define PERL_DEB(a)
-#  define PERL_DEB2(a,b)               b
+#  define PERL_IF_DEBUGGING(a)
+#  define PERL_IF_DEBUGGING_ELSE(a,b)   b
 #  define PERL_DEBUG(a)
 #  define DEBUG_p(a)
 #  define DEBUG_s(a)
@@ -5104,6 +5104,90 @@ Gid_t getegid (void);
 #endif /* DEBUGGING */
 
 
+/*
+=for apidoc_section $debugging
+=for apidoc mu||PERL_IF_DEBUGGING|code
+
+A macro which is executed only when DEBUGGING is enabled. 
+Functionally identical to
+
+ #ifdef DEBUGGING
+   code
+ #endif
+
+but prettier. This macro is useful for declaring variables that are
+only used on DEBUGGING builds. Note that what this macro does is
+determined at compile time, if you want a run time equivalent then
+use C<PERL_DEBUG()> instead.
+
+=for apidoc mu||PERL_IF_DEBUGGING_ELSE|code_debugging|code_nondebugging
+
+A macro way of expressing different code that should be compiled
+depending on whether DEBUGGING is enabled. Functionally identical
+to
+
+ #ifdef DEBUGGING
+   code_debugging
+ #else
+   code_nondebugging
+ #end
+
+but prettier.
+
+=for apidoc mu||PERL_DEBUG|code
+A macro way of expressing code that will only be executed when the run
+time internal variable PL_debug is non-zero.
+
+=for apidoc mu||DEBUG_A|code
+=for apidoc_item mu||DEBUG_B|code
+=for apidoc_item mu||DEBUG_C|code
+=for apidoc_item mu||DEBUG_c|code
+=for apidoc_item mu||DEBUG_D|code
+=for apidoc_item mu||DEBUG_f|code
+=for apidoc_item mu||DEBUG_i|code
+=for apidoc_item mu||DEBUG_L|code
+=for apidoc_item mu||DEBUG_l|code
+=for apidoc_item mu||DEBUG_Lv|code
+=for apidoc_item mu||DEBUG_m|code
+=for apidoc_item mu||DEBUG_o|code
+=for apidoc_item mu||DEBUG_P|code
+=for apidoc_item mu||DEBUG_p|code
+=for apidoc_item mu||DEBUG_Pv|code
+=for apidoc_item mu||DEBUG_q|code
+=for apidoc_item mu||DEBUG_R|code
+=for apidoc_item mu||DEBUG_r|code
+=for apidoc_item mu||DEBUG_S|code
+=for apidoc_item mu||DEBUG_s|code
+=for apidoc_item mu||DEBUG_T|code
+=for apidoc_item mu||DEBUG_t|code
+=for apidoc_item mu||DEBUG_U|code
+=for apidoc_item mu||DEBUG_u|code
+=for apidoc_item mu||DEBUG_Uv|code
+=for apidoc_item mu||DEBUG_V|code
+=for apidoc_item mu||DEBUG_X|code
+=for apidoc_item mu||DEBUG_x|code
+=for apidoc_item mu||DEBUG_Xv|code
+=for apidoc_item mu||DEBUG_y|code
+=for apidoc_item mu||DEBUG_yv|code
+
+These are debugging macros similar to PERL_DEBUG() but which test
+which flags in PL_debug have been set. Each letter corresponds to
+a mode exposed by the -D option to perl. These macros only execute
+when DEBUGGING is enabled, and when the appropriate debug mode 
+has been enabled on the command line. 
+
+See L<perlrun> for details on the meaning of the different 
+switches.
+
+=cut
+*/
+
+/* these are for backwards compatibility, just in case anything out
+ * in the wild (eg CPAN) is using them. */
+#define PERL_DEB(a)     PERL_IF_DEBUGGING(a)
+#define PERL_DEB2(a,b)  PERL_IF_DEBUGGING_ELSE(a,b)
+
+
 #define DEBUG_SCOPE(where) \
     DEBUG_l( \
     Perl_deb(aTHX_ "%s scope %ld (savestack=%ld) at %s:%d\n",	\
@@ -5113,7 +5197,7 @@ Gid_t getegid (void);
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
 
-#define Perl_assert(what)	PERL_DEB2( 				\
+#define Perl_assert(what)       PERL_IF_DEBUGGING_ELSE(                                 \
         ((what) ? ((void) 0) :						\
             (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
                         "\", line %d", STRINGIFY(what), __LINE__),	\

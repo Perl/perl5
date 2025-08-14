@@ -3491,7 +3491,7 @@ win32_tmpfd_mode(int mode)
             if (fh != INVALID_HANDLE_VALUE) {
                 int fd = win32_open_osfhandle((intptr_t)fh, mode);
                 if (fd >= 0) {
-                    PERL_DEB(dTHX;)
+                    PERL_IF_DEBUGGING(dTHX;)
                     DEBUG_p(PerlIO_printf(Perl_debug_log,
                                           "Created tmpfile=%s\n",filename));
                     return fd;
@@ -4192,7 +4192,7 @@ win32_chmod(const char *path, int mode)
 static char *
 create_command_line(char *cname, STRLEN clen, const char * const *args)
 {
-    PERL_DEB(dTHX;)
+    PERL_IF_DEBUGGING(dTHX;)
     int index;
     char *cmd, *ptr;
     const char *arg;
