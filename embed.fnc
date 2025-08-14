@@ -1719,7 +1719,7 @@ ATdip	|bool	|is_strict_utf8_string_loclen				\
 				|STRLEN len				\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el
-CRp	|bool	|_is_uni_FOO	|const U8 classnum			\
+CRp	|bool	|is_uni_FOO_	|const U8 classnum			\
 				|const UV c
 CRp	|bool	|is_uni_perl_idcont_					\
 				|UV c

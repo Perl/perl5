@@ -3537,7 +3537,7 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 }
 
 bool
-Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
+Perl_is_uni_FOO_(pTHX_ const U8 classnum, const UV c)
 {
     return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
 }

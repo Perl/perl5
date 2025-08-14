@@ -2140,7 +2140,7 @@ END_EXTERN_C
                                              : above_latin1(c))
 #define generic_invlist_uvchr_(classnum, c) ((c) < 256                      \
                                              ? generic_isCC_(c, classnum)   \
-                                             : _is_uni_FOO(classnum, c))
+                                             : is_uni_FOO_(classnum, c))
 #define isALPHA_uvchr(c)      generic_invlist_uvchr_(CC_ALPHA_, c)
 #define isALPHANUMERIC_uvchr(c) generic_invlist_uvchr_(CC_ALPHANUMERIC_, c)
 #define isASCII_uvchr(c)      isASCII(c)
@@ -2202,7 +2202,7 @@ END_EXTERN_C
 #define generic_LC_uvchr_(latin1, above_latin1, c)                            \
                                     (c < 256 ? latin1(c) : above_latin1(c))
 #define generic_LC_invlist_uvchr_(latin1, classnum, c)                        \
-                            (c < 256 ? latin1(c) : _is_uni_FOO(classnum, c))
+                            (c < 256 ? latin1(c) : is_uni_FOO_(classnum, c))
 
 #define isALPHA_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHA_LC, CC_ALPHA_, c)
 #define isALPHANUMERIC_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHANUMERIC_LC, \
