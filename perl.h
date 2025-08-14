@@ -4551,7 +4551,7 @@ struct Perl_OpDumpContext;
 #define my_lstat() my_lstat_flags(SV_GMAGIC)
 
 /* defined in sv.c, but also used in [ach]v.c */
-#undef _XPV_HEAD
+#undef XPV_HEAD_
 #undef _XPVMG_HEAD
 #undef XPVCV_COMMON_
 
