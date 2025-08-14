@@ -85,7 +85,7 @@ get_regex_charset(const U32 flags)
 
 #define RXf_PMf_STRICT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+10))
 
-#define _RXf_PMf_SHIFT_COMPILETIME (RXf_PMf_STD_PMMOD_SHIFT+11)
+#define RXf_PMf_SHIFT_COMPILETIME_ (RXf_PMf_STD_PMMOD_SHIFT+11)
 
 
 /*
@@ -149,7 +149,7 @@ get_regex_charset(const U32 flags)
  *  directly in the #define because doing so confuses regcomp.pl.
  *  (2**n - 1) is n 1 bits, so the below gets the contiguous bits between the
  *  beginning and ending shifts */
-#if RXf_PMf_COMPILETIME != ((nBIT_MASK(_RXf_PMf_SHIFT_COMPILETIME)) \
+#if RXf_PMf_COMPILETIME != ((nBIT_MASK(RXf_PMf_SHIFT_COMPILETIME_)) \
                         & (~(nBIT_MASK( RXf_PMf_STD_PMMOD_SHIFT))))
 #   error RXf_PMf_COMPILETIME is invalid
 #endif
