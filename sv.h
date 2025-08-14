@@ -1408,10 +1408,10 @@ object type. Exposed to perl code via Internals::SvREADONLY().
             &(((XPVIV*) MUTABLE_PTR(SvANY(svivx_)))->xiv_iv);		\
          }))
 #    define SvUVX(sv)							\
-        (*({ const SV *const _svuvx = (const SV *)(sv);			\
-            assert(PL_valid_types_IVX[SvTYPE(_svuvx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svuvx));				\
-            &(((XPVUV*) MUTABLE_PTR(SvANY(_svuvx)))->xuv_uv);		\
+        (*({ const SV *const svuvx_ = (const SV *)(sv);			\
+            assert(PL_valid_types_IVX[SvTYPE(svuvx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svuvx_));				\
+            &(((XPVUV*) MUTABLE_PTR(SvANY(svuvx_)))->xuv_uv);		\
          }))
 #    define SvNVX(sv)							\
         (*({ const SV *const _svnvx = (const SV *)(sv);			\
