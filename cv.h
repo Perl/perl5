@@ -11,7 +11,7 @@
 /* This structure must match the beginning of XPVFM in sv.h  */
 
 struct xpvcv {
-    _XPV_HEAD;
+    XPV_HEAD_;
     XPVCV_COMMON_;
 };
 

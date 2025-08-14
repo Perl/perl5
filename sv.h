@@ -538,7 +538,7 @@ These guys don't need the curly blocks
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
 
-#define _XPV_HEAD							\
+#define XPV_HEAD_							\
     HV*		xmg_stash;	/* class package */			\
     union xmgu_	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
@@ -570,38 +570,38 @@ union xmgu_ {
 };
 
 struct xpv {
-    _XPV_HEAD;
+    XPV_HEAD_;
 };
 
 struct xpviv {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xiv_u;
 };
 
 #define xiv_iv xiv_u.xivu_iv
 
 struct xpvuv {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xuv_u;
 };
 
 #define xuv_uv xuv_u.xivu_uv
 
 struct xpvnv {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xiv_u;
     union xnvu_ xnv_u;
 };
 
 /* This structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xiv_u;
     union xnvu_ xnv_u;
 };
 
 struct xpvlv {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xiv_u;
     union xnvu_ xnv_u;
     union {
@@ -619,7 +619,7 @@ struct xpvlv {
 #define xlv_targoff xlv_targoff_u.xlvu_targoff
 
 struct xpvinvlist {
-    _XPV_HEAD;
+    XPV_HEAD_;
     IV          prev_index;     /* caches result of previous invlist_search() */
     STRLEN	iterator;       /* Stores where we are in iterating */
     bool	is_offset;	/* The data structure for all inversion lists
@@ -633,7 +633,7 @@ struct xpvinvlist {
 /* This structure works in 2 ways - regular scalar, or GV with GP */
 
 struct xpvgv {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xiv_u;
     union xnvu_ xnv_u;
 };
@@ -669,13 +669,13 @@ typedef U32 cv_flags_t;
 /* This structure must match XPVCV in cv.h */
 
 struct xpvfm {
-    _XPV_HEAD;
+    XPV_HEAD_;
     XPVCV_COMMON_;
 };
 
 
 struct xpvio {
-    _XPV_HEAD;
+    XPV_HEAD_;
     union xivu_ xiv_u;
     /* ifp and ofp are normally the same, but sockets need separate streams */
     PerlIO *	xio_ofp;

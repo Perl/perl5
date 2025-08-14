@@ -139,7 +139,7 @@ typedef struct regexp {
     /*----------------------------------------------------------------------
      * Fields required for compatibility with SV types
      */
-    _XPV_HEAD;
+    XPV_HEAD_;
 
     /*----------------------------------------------------------------------
      * Operational fields
