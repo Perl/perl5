@@ -5138,7 +5138,7 @@ PP_wrapped(pp_fc, 1, 0)
             const STRLEN this_len = UTF8SKIP(s);
             STRLEN ulen;
 
-            _toFOLD_utf8_flags(s, send, tmpbuf, &ulen, flags);
+            toFOLD_utf8_flags_(s, send, tmpbuf, &ulen, flags);
 
             if (ulen > this_len && (SvLEN(dest) < (min += ulen - this_len))) {
                 const UV o = d - (U8*)SvPVX_const(dest);
