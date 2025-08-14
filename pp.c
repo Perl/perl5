@@ -5242,7 +5242,7 @@ PP_wrapped(pp_fc, 1, 0)
 
                     for (; s < send; s++) {
                         STRLEN ulen;
-                        _to_uni_fold_flags(*s, d, &ulen, flags);
+                        to_uni_fold_flags_(*s, d, &ulen, flags);
                         d += ulen;
                     }
                     break;

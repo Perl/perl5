@@ -3657,7 +3657,7 @@ Xiop	|Stack_off_t|TOPMARK
 Cmp	|UV	|to_uni_fold	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
-Cp	|UV	|_to_uni_fold_flags					\
+Cp	|UV	|to_uni_fold_flags_					\
 				|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\

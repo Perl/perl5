@@ -3807,7 +3807,7 @@ Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 }
 
 UV
-Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
+Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 {
 
     /* Not currently externally documented, and subject to change
@@ -3818,7 +3818,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      */
 
-    PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
+    PERL_ARGS_ASSERT_TO_UNI_FOLD_FLAGS_;
 
     if (flags & FOLD_FLAGS_LOCALE) {
         /* Treat a non-Turkic UTF-8 locale as not being in locale at all,
@@ -5069,7 +5069,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                     _toFOLD_utf8_flags(p1, e1, foldbuf1, &n1, flags_for_folder);
                 }
                 else {  /* Not UTF-8, get UTF-8 fold */
-                    _to_uni_fold_flags(*p1, foldbuf1, &n1, flags_for_folder);
+                    to_uni_fold_flags_(*p1, foldbuf1, &n1, flags_for_folder);
                 }
                 f1 = foldbuf1;
             }
@@ -5107,7 +5107,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                     _toFOLD_utf8_flags(p2, e2, foldbuf2, &n2, flags_for_folder);
                 }
                 else {
-                    _to_uni_fold_flags(*p2, foldbuf2, &n2, flags_for_folder);
+                    to_uni_fold_flags_(*p2, foldbuf2, &n2, flags_for_folder);
                 }
                 f2 = foldbuf2;
             }

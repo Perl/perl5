@@ -4782,7 +4782,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                      * pattern to be folded, which the input isn't required to
                      * be in this case.  So, just fold the single character,
                      * and the result will be in the expected form. */
-                    _to_uni_fold_flags(multi_fold_from, mod_pat, &pat_len,
+                    to_uni_fold_flags_(multi_fold_from, mod_pat, &pat_len,
                                        FOLD_FLAGS_FULL);
                     pat = mod_pat;
                 }
@@ -4841,7 +4841,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
         {
             /* We may have to canonicalize a multi-char fold, as in the UTF-8
              * case */
-            _to_uni_fold_flags(multi_fold_from, mod_pat, &pat_len,
+            to_uni_fold_flags_(multi_fold_from, mod_pat, &pat_len,
                                FOLD_FLAGS_FULL);
             pat = mod_pat;
         }
