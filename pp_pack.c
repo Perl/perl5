@@ -449,7 +449,7 @@ STMT_START {							            \
     str += retlen;						            \
 } STMT_END
 
-static const char *_action( const tempsym_t* symptr )
+static const char *action_( const tempsym_t* symptr )
 {
     return (const char *)(( symptr->flags & FLAG_PACK ) ? "pack" : "unpack");
 }
@@ -468,7 +468,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
         switch (symptr->howlen) {
           case e_star:
             croak("Within []-length '*' not allowed in %s",
-                        _action( symptr ) );
+                        action_( symptr ) );
 
           default:
             /* e_no_len and e_number */
@@ -485,7 +485,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
                 /* diag_listed_as: Invalid type '%s' in %s */
                 croak("Invalid type '%c' in %s",
                            (int)TYPE_NO_MODIFIERS(symptr->code),
-                           _action( symptr ) );
+                           action_( symptr ) );
             case '.' | TYPE_IS_SHRIEKING:
             case '@' | TYPE_IS_SHRIEKING:
             case '@':
@@ -496,7 +496,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
             case 'u':
                 croak("Within []-length '%c' not allowed in %s",
                            (int) TYPE_NO_MODIFIERS(symptr->code),
-                           _action( symptr ) );
+                           action_( symptr ) );
             case '%':
                 size = 0;
                 break;
@@ -523,7 +523,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
             case 'X':
                 size = -1;
                 if (total < len)
-                    croak("'X' outside of string in %s", _action( symptr ) );
+                    croak("'X' outside of string in %s", action_( symptr ) );
                 break;
             case 'x' | TYPE_IS_SHRIEKING:
                 if (!len)		/* Avoid division by 0 */
@@ -650,7 +650,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
           symptr->flags |= FLAG_COMMA;
           /* diag_listed_as: Invalid type '%s' in %s */
           warner(packWARN(WARN_UNPACK),
-                 "Invalid type ',' in %s", _action( symptr ) );
+                 "Invalid type ',' in %s", action_( symptr ) );
         }
         continue;
       }
@@ -659,12 +659,12 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
       if (code == '(') {
         if( isDIGIT(*patptr) || *patptr == '*' || *patptr == '[' )
           croak("()-group starts with a count in %s",
-                        _action( symptr ) );
+                        action_( symptr ) );
         symptr->grpbeg = patptr;
         patptr = 1 + ( symptr->grpend = group_end(patptr, patend, ')') );
         if( symptr->level >= MAX_SUB_TEMPLATE_LEVEL )
           croak("Too deeply nested ()-groups in %s",
-                        _action( symptr ) );
+                        action_( symptr ) );
       }
 
       /* look for group modifiers to inherit */
@@ -701,21 +701,21 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
 
         if (!strchr(allowed, TYPE_NO_MODIFIERS(code)))
           croak("'%c' allowed only after types %s in %s", *patptr,
-                        allowed, _action( symptr ) );
+                        allowed, action_( symptr ) );
 
         if (TYPE_ENDIANNESS(code | modifier) == TYPE_ENDIANNESS_MASK)
           croak("Can't use both '<' and '>' after type '%c' in %s",
-                     (int) TYPE_NO_MODIFIERS(code), _action( symptr ) );
+                     (int) TYPE_NO_MODIFIERS(code), action_( symptr ) );
         else if (TYPE_ENDIANNESS(code | modifier | inherited_modifiers) ==
                  TYPE_ENDIANNESS_MASK)
           croak("Can't use '%c' in a group with different byte-order in %s",
-                     *patptr, _action( symptr ) );
+                     *patptr, action_( symptr ) );
 
         if ((code & modifier)) {
             ck_warner(packWARN(WARN_UNPACK),
                       "Duplicate modifier '%c' after '%c' in %s",
                       *patptr, (int) TYPE_NO_MODIFIERS(code),
-                      _action( symptr ) );
+                      action_( symptr ) );
         }
 
         code |= modifier;
@@ -744,7 +744,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
             lenptr = get_num( lenptr, &symptr->length );
             if( *lenptr != ']' )
               croak("Malformed integer in [] in %s",
-                            _action( symptr ) );
+                            action_( symptr ) );
           } else {
             tempsym_t savsym = *symptr;
             symptr->patend = patptr-1;
@@ -774,7 +774,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
               if (patptr < patend &&
                   (isDIGIT(*patptr) || *patptr == '*' || *patptr == '['))
                 croak("'/' does not take a repeat count in %s",
-                            _action( symptr ) );
+                            action_( symptr ) );
             }
             break;
           }
