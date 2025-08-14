@@ -228,10 +228,10 @@ typedef struct hek HEK;
         GP*	svu_gp;			\
         PerlIO *svu_fp;			\
     }	sv_u				\
-    _SV_HEAD_DEBUG
+    SV_HEAD_DEBUG_
 
 #ifdef DEBUG_LEAKING_SCALARS
-#define _SV_HEAD_DEBUG ;\
+#define SV_HEAD_DEBUG_ ;\
     PERL_BITFIELD32 sv_debug_optype:9;	/* the type of OP that allocated us */ \
     PERL_BITFIELD32 sv_debug_inpad:1;	/* was allocated in a pad for an OP */ \
     PERL_BITFIELD32 sv_debug_line:16;	/* the line where we were allocated */ \
@@ -239,7 +239,7 @@ typedef struct hek HEK;
     char *	    sv_debug_file;	/* the file where we were allocated */ \
     SV *	    sv_debug_parent	/* what we were cloned from (ithreads)*/
 #else
-#define _SV_HEAD_DEBUG
+#define SV_HEAD_DEBUG_
 #endif
 
 struct STRUCT_SV {		/* struct sv { */
