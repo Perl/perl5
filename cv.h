@@ -12,7 +12,7 @@
 
 struct xpvcv {
     _XPV_HEAD;
-    _XPVCV_COMMON;
+    XPVCV_COMMON_;
 };
 
 /*
