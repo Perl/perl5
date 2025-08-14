@@ -5366,18 +5366,18 @@ Ep	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state		\
 				|U32 depth				\
 				|bool was_mutate_ok
 # if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
-ES	|void	|dump_trie	|NN const struct _reg_trie_data *trie	\
+ES	|void	|dump_trie	|NN const struct reg_trie_data_ *trie	\
 				|NULLOK HV *widecharmap 		\
 				|NN AV *revcharmap			\
 				|U32 depth
 ES	|void	|dump_trie_interim_list 				\
-				|NN const struct _reg_trie_data *trie	\
+				|NN const struct reg_trie_data_ *trie	\
 				|NULLOK HV *widecharmap 		\
 				|NN AV *revcharmap			\
 				|U32 next_alloc 			\
 				|U32 depth
 ES	|void	|dump_trie_interim_table				\
-				|NN const struct _reg_trie_data *trie	\
+				|NN const struct reg_trie_data_ *trie	\
 				|NULLOK HV *widecharmap 		\
 				|NN AV *revcharmap			\
 				|U32 next_alloc 			\
