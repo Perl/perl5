@@ -640,7 +640,7 @@ struct xpvgv {
 
 typedef U32 cv_flags_t;
 
-#define _XPVCV_COMMON								\
+#define XPVCV_COMMON_								\
     HV *	xcv_stash;							\
     union {									\
         OP *	xcv_start;							\
@@ -670,7 +670,7 @@ typedef U32 cv_flags_t;
 
 struct xpvfm {
     _XPV_HEAD;
-    _XPVCV_COMMON;
+    XPVCV_COMMON_;
 };
 
 

@@ -4553,7 +4553,7 @@ struct Perl_OpDumpContext;
 /* defined in sv.c, but also used in [ach]v.c */
 #undef _XPV_HEAD
 #undef _XPVMG_HEAD
-#undef _XPVCV_COMMON
+#undef XPVCV_COMMON_
 
 #include "parser.h"
 
