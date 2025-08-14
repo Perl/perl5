@@ -7828,11 +7828,11 @@ cannot have changed since the precalculation.
 
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in)                             \
         STMT_START {                                                        \
-            bool _in_lc_numeric = (in);                                     \
+            bool in_lc_numeric_ = (in);                                     \
             LC_NUMERIC_LOCK(                                                \
-                    (   (  _in_lc_numeric && NOT_IN_NUMERIC_UNDERLYING_)    \
-                     || (! _in_lc_numeric && NOT_IN_NUMERIC_STANDARD_)));   \
-            if (_in_lc_numeric) {                                           \
+                    (   (  in_lc_numeric_ && NOT_IN_NUMERIC_UNDERLYING_)    \
+                     || (! in_lc_numeric_ && NOT_IN_NUMERIC_STANDARD_)));   \
+            if (in_lc_numeric_) {                                           \
                 if (NOT_IN_NUMERIC_UNDERLYING_) {                           \
                     Perl_set_numeric_underlying(aTHX_ __FILE__, __LINE__);  \
                     restore_LC_NUMERIC_function_                            \
