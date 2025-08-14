@@ -1375,12 +1375,12 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-        (*({ SV *const _svpvx = MUTABLE_SV(sv);				\
-            assert(PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svpvx));				\
-            assert(!(SvTYPE(_svpvx) == SVt_PVIO				\
-                     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
-            &((_svpvx)->sv_u.svu_pv);					\
+        (*({ SV *const svpvx_ = MUTABLE_SV(sv);				\
+            assert(PL_valid_types_PVX[SvTYPE(svpvx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svpvx_));				\
+            assert(!(SvTYPE(svpvx_) == SVt_PVIO				\
+                     && !(IoFLAGS(svpvx_) & IOf_FAKE_DIRP)));		\
+            &((svpvx_)->sv_u.svu_pv);					\
          }))
 #   ifdef PERL_CORE
 #    define SvCUR(sv)							\
