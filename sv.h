@@ -556,7 +556,7 @@ union _xnvu {
     bool    xnv_bm_tail;        /* an SvVALID (BM) SV has an implicit "\n" */
 };
 
-union _xivu {
+union xivu_ {
     IV	    xivu_iv;		/* integer value */
     UV	    xivu_uv;
     HEK *   xivu_namehek;	/* xpvlv, xpvgv: GvNAME */
@@ -575,34 +575,34 @@ struct xpv {
 
 struct xpviv {
     _XPV_HEAD;
-    union _xivu xiv_u;
+    union xivu_ xiv_u;
 };
 
 #define xiv_iv xiv_u.xivu_iv
 
 struct xpvuv {
     _XPV_HEAD;
-    union _xivu xuv_u;
+    union xivu_ xuv_u;
 };
 
 #define xuv_uv xuv_u.xivu_uv
 
 struct xpvnv {
     _XPV_HEAD;
-    union _xivu xiv_u;
+    union xivu_ xiv_u;
     union _xnvu xnv_u;
 };
 
 /* This structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
     _XPV_HEAD;
-    union _xivu xiv_u;
+    union xivu_ xiv_u;
     union _xnvu xnv_u;
 };
 
 struct xpvlv {
     _XPV_HEAD;
-    union _xivu xiv_u;
+    union xivu_ xiv_u;
     union _xnvu xnv_u;
     union {
         STRLEN	xlvu_targoff;
@@ -634,7 +634,7 @@ struct xpvinvlist {
 
 struct xpvgv {
     _XPV_HEAD;
-    union _xivu xiv_u;
+    union xivu_ xiv_u;
     union _xnvu xnv_u;
 };
 
@@ -676,7 +676,7 @@ struct xpvfm {
 
 struct xpvio {
     _XPV_HEAD;
-    union _xivu xiv_u;
+    union xivu_ xiv_u;
     /* ifp and ofp are normally the same, but sockets need separate streams */
     PerlIO *	xio_ofp;
     /* Cray addresses everything by word boundaries (64 bits) and
