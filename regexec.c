@@ -2210,7 +2210,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
  * of a code point, returning the value for the first code point in the string.
  * And it takes the particular macro name that finds the desired value given a
  * code point.  Merely convert the UTF-8 to code point and call the cp macro */
-#define _generic_GET_BREAK_VAL_UTF8(cp_macro, pos, strend)                     \
+#define generic_GET_BREAK_VAL_UTF8_(cp_macro, pos, strend)                     \
              (__ASSERT_(pos < strend)                                          \
                  /* Note assumes is valid UTF-8 */                             \
              (cp_macro(utf8_to_uv_or_die((pos), (strend), NULL))))
@@ -2225,7 +2225,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the GCB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getGCB_VAL_UTF8(pos, strend)                                           \
-    _generic_GET_BREAK_VAL_UTF8(getGCB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getGCB_VAL_CP, pos, strend)
 
 /* Returns the LB value for the input code point */
 #define getLB_VAL_CP(cp)                                                       \
@@ -2237,7 +2237,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the LB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getLB_VAL_UTF8(pos, strend)                                            \
-    _generic_GET_BREAK_VAL_UTF8(getLB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getLB_VAL_CP, pos, strend)
 
 
 /* Returns the SB value for the input code point */
@@ -2250,7 +2250,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the SB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getSB_VAL_UTF8(pos, strend)                                            \
-    _generic_GET_BREAK_VAL_UTF8(getSB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getSB_VAL_CP, pos, strend)
 
 /* Returns the WB value for the input code point */
 #define getWB_VAL_CP(cp)                                                       \
@@ -2262,7 +2262,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the WB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getWB_VAL_UTF8(pos, strend)                                            \
-    _generic_GET_BREAK_VAL_UTF8(getWB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getWB_VAL_CP, pos, strend)
 
 /* We know what class REx starts with.  Try to find this position... */
 /* if reginfo->intuit, its a dryrun */
