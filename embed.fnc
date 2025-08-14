@@ -5138,7 +5138,7 @@ ETi	|const char *|get_regex_charset_name				\
 				|NN STRLEN * const lenp
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
-p	|UV	|_to_upper_title_latin1 				\
+p	|UV	|to_upper_title_latin1_ 				\
 				|const U8 c				\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\

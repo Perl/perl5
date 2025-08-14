@@ -7886,9 +7886,9 @@ Perl_softref2xv(pTHX_ SV * const sv, const char * const what, const svtype type)
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV UV
-Perl__to_upper_title_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s)
+Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s)
         __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT__TO_UPPER_TITLE_LATIN1 \
+# define PERL_ARGS_ASSERT_TO_UPPER_TITLE_LATIN1_ \
         assert(p); assert(lenp)
 
 #endif
