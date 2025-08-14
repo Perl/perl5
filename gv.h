@@ -56,10 +56,10 @@ the need to cast the result to the appropriate type.
             assert(isGV_with_GP(gvgp_));				\
             (gvgp_)->sv_u.svu_gp = (gp); }
 #  define GvFLAGS(gv)							\
-        (*({GV *const _gvflags = (GV *) (gv);				\
-            assert(SvTYPE(_gvflags) == SVt_PVGV || SvTYPE(_gvflags) == SVt_PVLV); \
-            assert(isGV_with_GP(_gvflags));				\
-            &(GvXPVGV(_gvflags)->xpv_cur);}))
+        (*({GV *const gvflags_ = (GV *) (gv);				\
+            assert(SvTYPE(gvflags_) == SVt_PVGV || SvTYPE(gvflags_) == SVt_PVLV); \
+            assert(isGV_with_GP(gvflags_));				\
+            &(GvXPVGV(gvflags_)->xpv_cur);}))
 #  define GvSTASH(gv)							\
         (*({ GV * const _gvstash = (GV *) (gv);				\
             assert(isGV_with_GP(_gvstash));				\
