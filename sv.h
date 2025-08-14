@@ -216,7 +216,7 @@ typedef struct hek HEK;
 #  define NV_BODYLESS_UNION_
 #endif
 
-#define _SV_HEAD_UNION \
+#define SV_HEAD_UNION_ \
     union {				\
         char*   svu_pv;		/* pointer to malloced string */	\
         IV      svu_iv;			\
@@ -244,51 +244,51 @@ typedef struct hek HEK;
 
 struct STRUCT_SV {		/* struct sv { */
     _SV_HEAD(void*);
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct gv {
     _SV_HEAD(XPVGV*);		/* pointer to xpvgv body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct cv {
     _SV_HEAD(XPVCV*);		/* pointer to xpvcv body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct av {
     _SV_HEAD(XPVAV*);		/* pointer to xpvav body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct hv {
     _SV_HEAD(XPVHV*);		/* pointer to xpvhv body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct io {
     _SV_HEAD(XPVIO*);		/* pointer to xpvio body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct p5rx {
     _SV_HEAD(struct regexp*);	/* pointer to regexp body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct invlist {
     _SV_HEAD(XINVLIST*);       /* pointer to xpvinvlist body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 struct object {
     _SV_HEAD(XPVOBJ*);          /* pointer to xobject body */
-    _SV_HEAD_UNION;
+    SV_HEAD_UNION_;
 };
 
 #undef _SV_HEAD
-#undef _SV_HEAD_UNION		/* ensure no pollution */
+#undef SV_HEAD_UNION_		/* ensure no pollution */
 
 /*
 =for apidoc_section $SV
