@@ -1321,15 +1321,15 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
-                            assert(SvTYPE(_svtail) != SVt_PVAV);	\
-                            assert(SvTYPE(_svtail) != SVt_PVHV);	\
-                            assert(!(SvFLAGS(_svtail) & (SVf_NOK|SVp_NOK))); \
-                            assert(SvVALID(_svtail));                        \
-                            ((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail;     \
+#  define SvTAIL(sv)	({ const SV *const svtail_ = (const SV *)(sv);	\
+                            assert(SvTYPE(svtail_) != SVt_PVAV);	\
+                            assert(SvTYPE(svtail_) != SVt_PVHV);	\
+                            assert(!(SvFLAGS(svtail_) & (SVf_NOK|SVp_NOK))); \
+                            assert(SvVALID(svtail_));                        \
+                            ((XPVNV*)SvANY(svtail_))->xnv_u.xnv_bm_tail;     \
                         })
 #else
-#  define SvTAIL(_svtail)  (((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail)
+#  define SvTAIL(svtail_)  (((XPVNV*)SvANY(svtail_))->xnv_u.xnv_bm_tail)
 #endif
 
 /* Does the SV have a Boyer-Moore table attached as magic?
