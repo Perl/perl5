@@ -6468,7 +6468,7 @@ PP(pp_break)
 }
 
 static void
-_invoke_defer_block(pTHX_ U8 type, void * arg_)
+invoke_defer_block_(pTHX_ U8 type, void * arg_)
 {
     OP *start = (OP *) arg_;
 #ifdef DEBUGGING
@@ -6543,13 +6543,13 @@ redo_body:
 static void
 invoke_defer_block(pTHX_ void * arg_)
 {
-    _invoke_defer_block(aTHX_ CXt_DEFER, arg_);
+    invoke_defer_block_(aTHX_ CXt_DEFER, arg_);
 }
 
 static void
 invoke_finally_block(pTHX_ void * arg_)
 {
-    _invoke_defer_block(aTHX_ CXt_DEFER|CXp_FINALLY, arg_);
+    invoke_defer_block_(aTHX_ CXt_DEFER|CXp_FINALLY, arg_);
 }
 
 PP(pp_pushdefer)
