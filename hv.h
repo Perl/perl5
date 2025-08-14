@@ -159,14 +159,14 @@ struct xpvhv_aux {
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
     HV*		xmg_stash;	/* class package */
-    union _xmgu	xmg_u;
+    union xmgu_	xmg_u;
     STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
 };
 
 struct xpvhv_with_aux {
     HV         *xmg_stash;      /* class package */
-    union _xmgu xmg_u;
+    union xmgu_ xmg_u;
     STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
     struct xpvhv_aux xhv_aux;
