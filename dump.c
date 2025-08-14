@@ -94,7 +94,7 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
                               PERL_PV_ESCAPE_NONASCII | PERL_PV_ESCAPE_DWIM \
                               | ((utf8) ? PERL_PV_ESCAPE_UNI : 0) )
 
-#define _pv_display_for_dump(dsv, pv, cur, len, pvlim) \
+#define pv_display_for_dump(dsv, pv, cur, len, pvlim) \
     pv_display_flags(dsv, pv, cur, len, pvlim, PERL_PV_ESCAPE_DWIM_ALL_HEX)
 
 /*
@@ -2438,7 +2438,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                    PTR2UV(ptr));
             if (SvOOK(sv)) {
                 PerlIO_printf(file, "( %s . ) ",
-                              _pv_display_for_dump(d, ptr - delta, delta, 0,
+                              pv_display_for_dump(d, ptr - delta, delta, 0,
                                          pvlim));
             }
             if (type == SVt_INVLIST) {
@@ -2447,7 +2447,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 _invlist_dump(file, level, "    ", sv);
             }
             else {
-                PerlIO_printf(file, "%s", _pv_display_for_dump(d, ptr, SvCUR(sv),
+                PerlIO_printf(file, "%s", pv_display_for_dump(d, ptr, SvCUR(sv),
                                                      re ? 0 : SvLEN(sv),
                                                      pvlim));
                 if (SvUTF8(sv)) /* the 6?  \x{....} */
@@ -2749,7 +2749,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                         keypv = SvPV_const(keysv, len);
                         elt = HeVAL(he);
 
-                        Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", _pv_display_for_dump(d, keypv, len, 0, pvlim));
+                        Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display_for_dump(d, keypv, len, 0, pvlim));
                         if (SvUTF8(keysv))
                             PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
                         if (HvEITER_get(hv) == he)
