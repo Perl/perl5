@@ -120,7 +120,6 @@
 # define _is_uni_perl_idcont(a)                 Perl__is_uni_perl_idcont(aTHX_ a)
 # define _is_utf8_FOO(a,b,c)                    Perl__is_utf8_FOO(aTHX_ a,b,c)
 # define _is_utf8_perl_idcont(a,b)              Perl__is_utf8_perl_idcont(aTHX_ a,b)
-# define _is_utf8_perl_idstart(a,b)             Perl__is_utf8_perl_idstart(aTHX_ a,b)
 # define amagic_call(a,b,c,d)                   Perl_amagic_call(aTHX_ a,b,c,d)
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
@@ -335,6 +334,7 @@
 # define Perl_is_utf8_fixed_width_buf_loc_flags is_utf8_fixed_width_buf_loc_flags
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
+# define is_utf8_perl_idstart_(a,b)             Perl_is_utf8_perl_idstart_(aTHX_ a,b)
 # define Perl_is_utf8_string                    is_utf8_string
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
 # define Perl_is_utf8_string_loc                is_utf8_string_loc

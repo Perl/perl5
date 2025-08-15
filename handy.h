@@ -2347,7 +2347,7 @@ END_EXTERN_C
  * modern Unicode definition */
 #define isIDFIRST_utf8_safe(p, e)                                           \
     generic_func_utf8_safe_(CC_IDFIRST_,                                    \
-                            _is_utf8_perl_idstart, (U8 *) (p), (U8 *) (e))
+                            is_utf8_perl_idstart_, (U8 *) (p), (U8 *) (e))
 
 #define isLOWER_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_LOWER_, p, e)
 #define isPRINT_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_PRINT_, p, e)
@@ -2450,7 +2450,7 @@ END_EXTERN_C
                                                 _is_utf8_perl_idcont, p, e)
 #define isIDFIRST_LC_utf8_safe(p, e)                                        \
             generic_LC_func_utf8_safe_(isIDFIRST_LC,                        \
-                                               _is_utf8_perl_idstart, p, e)
+                                               is_utf8_perl_idstart_, p, e)
 #define isLOWER_LC_utf8_safe(p, e)                                          \
             generic_LC_invlist_utf8_safe_(isLOWER_LC, CC_LOWER_, p, e)
 #define isPRINT_LC_utf8_safe(p, e)                                          \
