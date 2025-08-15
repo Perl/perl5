@@ -1350,11 +1350,11 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
 #  define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
 #  define SvNVX(sv) (-0.0 + ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv)
-#  define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
-#  define SvRV_const(sv) (0 + (sv)->sv_u.svu_rv)
+#  define SvRV_const(sv) ((SV *)(sv)->sv_u.svu_rv)
+#  define SvRV(sv) SvRV_const(sv)
 /* Don't test the core XS code yet.  */
 #  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
-#    define SvPVX(sv) (0 + (assert_(!SvREADONLY(sv)) (sv)->sv_u.svu_pv))
+#    define SvPVX(sv) (assert_(!SvREADONLY(sv)) (char *)(sv)->sv_u.svu_pv)
 #  else
 #  define SvPVX(sv) SvPVX_mutable(sv)
 #  endif
@@ -1362,8 +1362,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-#  define SvMAGIC(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
-#  define SvSTASH(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
+#  define SvMAGIC(sv)	(assert_(SvTYPE(sv) >= SVt_PVMG) (MAGIC *)((XPVMG *)SvANY(sv))->xmg_u.xmg_magic)
+#  define SvSTASH(sv)	(assert_(SvTYPE(sv) >= SVt_PVMG) (HV *)((XPVMG *)SvANY(sv))->xmg_stash)
 #else   /* Below is not PERL_DEBUG_COW */
 # ifdef PERL_CORE
 #  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
@@ -1452,7 +1452,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv
 #    define SvRV(sv) ((sv)->sv_u.svu_rv)
-#    define SvRV_const(sv) (0 + (sv)->sv_u.svu_rv)
+#    define SvRV_const(sv) ((SV *)(sv)->sv_u.svu_rv)
 #    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
