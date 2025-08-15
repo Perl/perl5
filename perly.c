@@ -220,9 +220,12 @@ do {					\
  * parse stack, thus avoiding leaks if we die  */
 
 static void
-S_clear_yystack(pTHX_  const yy_parser *parser)
+S_clear_yystack(pTHX_ void *arg)
 {
-    yy_stack_frame *ps     = parser->ps;
+    /* arg must be void * for this function to be compatible with
+       SAVEDESTRUCTOR_X/any_dxptr */
+    const yy_parser *parser = (const yy_parser *)arg;
+    yy_stack_frame *ps      = parser->ps;
     int i = 0;
 
     if (!parser->stack)
