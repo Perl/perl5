@@ -2374,12 +2374,12 @@ END_EXTERN_C
 
 /* For internal core use only, subject to change */
 #define toFOLD_utf8_flags_(p,e,s,l,f)  to_utf8_fold_flags_(p,e,s,l,f)
-#define _toLOWER_utf8_flags(p,e,s,l,f) to_utf8_lower_flags_(p,e,s,l,f)
+#define toLOWER_utf8_flags_(p,e,s,l,f) to_utf8_lower_flags_(p,e,s,l,f)
 #define _toTITLE_utf8_flags(p,e,s,l,f) to_utf8_title_flags_(p,e,s,l,f)
 #define _toUPPER_utf8_flags(p,e,s,l,f) to_utf8_upper_flags_(p,e,s,l,f)
 
 #define toFOLD_utf8_safe(p,e,s,l)   toFOLD_utf8_flags_(p,e,s,l, FOLD_FLAGS_FULL)
-#define toLOWER_utf8_safe(p,e,s,l)  _toLOWER_utf8_flags(p,e,s,l, 0)
+#define toLOWER_utf8_safe(p,e,s,l)  toLOWER_utf8_flags_(p,e,s,l, 0)
 #define toTITLE_utf8_safe(p,e,s,l)  _toTITLE_utf8_flags(p,e,s,l, 0)
 #define toUPPER_utf8_safe(p,e,s,l)  _toUPPER_utf8_flags(p,e,s,l, 0)
 
