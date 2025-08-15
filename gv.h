@@ -76,7 +76,7 @@ the need to cast the result to the appropriate type.
 #  define GvNAMELEN_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
 #  define GvNAMEUTF8(gv)	({ assert(GvNAME_HEK(gv)); HEK_UTF8(GvNAME_HEK(gv)); })
 #else
-#  define GvGP(gv)	(0+(gv)->sv_u.svu_gp)
+#  define GvGP(gv)              ((GP *)(gv)->sv_u.svu_gp)
 #  define GvGP_set(gv,gp)	((gv)->sv_u.svu_gp = (gp))
 #  define GvFLAGS(gv)	(GvXPVGV(gv)->xpv_cur)
 #  define GvSTASH(gv)	(GvXPVGV(gv)->xnv_u.xgv_stash)
