@@ -3678,7 +3678,7 @@ Cp	|UV	|to_utf8_fold_flags_					\
 				|NULLOK STRLEN *lenp			\
 				|U8 flags
 
-Cp	|UV	|_to_utf8_lower_flags					\
+Cp	|UV	|to_utf8_lower_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\

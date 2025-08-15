@@ -4463,15 +4463,15 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
  */
 
 UV
-Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
+Perl_to_utf8_lower_flags_(pTHX_ const U8 *p,
                                 const U8 *e,
                                 U8* ustrp,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_LOWER_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
+    UV result;
 
     CASE_CHANGE_BODY_START(~0, tolower, to_lower_latin1, 0 /* 0 is dummy */,
                                                                     turkic_lc);
