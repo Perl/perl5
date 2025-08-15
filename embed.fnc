@@ -1764,7 +1764,7 @@ ARTdip	|bool	|is_utf8_invariant_string_loc				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep
-CRp	|bool	|_is_utf8_perl_idcont					\
+CRp	|bool	|is_utf8_perl_idcont_					\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
 CRp	|bool	|is_utf8_perl_idstart_					\

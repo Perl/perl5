@@ -2337,7 +2337,7 @@ END_EXTERN_C
                                             _is_utf8_FOO(CC_DIGIT_, p, e))
 #define isGRAPH_utf8_safe(p, e)    generic_invlist_utf8_safe_(CC_GRAPH_, p, e)
 #define isIDCONT_utf8_safe(p, e)   generic_func_utf8_safe_(CC_WORDCHAR_,    \
-                                                 _is_utf8_perl_idcont, p, e)
+                                                 is_utf8_perl_idcont_, p, e)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -2447,7 +2447,7 @@ END_EXTERN_C
             generic_LC_invlist_utf8_safe_(isGRAPH_LC, CC_GRAPH_, p, e)
 #define isIDCONT_LC_utf8_safe(p, e)                                         \
             generic_LC_func_utf8_safe_(isIDCONT_LC,                         \
-                                                _is_utf8_perl_idcont, p, e)
+                                                is_utf8_perl_idcont_, p, e)
 #define isIDFIRST_LC_utf8_safe(p, e)                                        \
             generic_LC_func_utf8_safe_(isIDFIRST_LC,                        \
                                                is_utf8_perl_idstart_, p, e)
