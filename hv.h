@@ -208,7 +208,10 @@ See C<L</SvSTASH>>, C<L</CvSTASH>>.
 =for apidoc Am|STRLEN|HvNAMELEN|HV *stash
 Returns the length of the stash's name.
 
+=cut
+
 Disfavored forms of HvNAME and HvNAMELEN; suppress mention of them
+
 =for apidoc Cmh|char*|HvNAME_get|HV* stash
 =for apidoc Amh|I32|HvNAMELEN_get|HV* stash
 
