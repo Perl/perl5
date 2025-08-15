@@ -2149,7 +2149,7 @@ END_EXTERN_C
 #define isDIGIT_uvchr(c)      generic_invlist_uvchr_(CC_DIGIT_, c)
 #define isGRAPH_uvchr(c)      generic_invlist_uvchr_(CC_GRAPH_, c)
 #define isIDCONT_uvchr(c)                                                   \
-                    generic_uvchr_(CC_WORDCHAR_, _is_uni_perl_idcont, c)
+                    generic_uvchr_(CC_WORDCHAR_, is_uni_perl_idcont_, c)
 #define isIDFIRST_uvchr(c)                                                  \
                     generic_uvchr_(CC_IDFIRST_, is_uni_perl_idstart_, c)
 #define isLOWER_uvchr(c)      generic_invlist_uvchr_(CC_LOWER_, c)
@@ -2214,7 +2214,7 @@ END_EXTERN_C
 #define isDIGIT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isDIGIT_LC, CC_DIGIT_, c)
 #define isGRAPH_LC_uvchr(c)  generic_LC_invlist_uvchr_(isGRAPH_LC, CC_GRAPH_, c)
 #define isIDCONT_LC_uvchr(c) generic_LC_uvchr_(isIDCONT_LC,                   \
-                                                  _is_uni_perl_idcont, c)
+                                                  is_uni_perl_idcont_, c)
 #define isIDFIRST_LC_uvchr(c) generic_LC_uvchr_(isIDFIRST_LC,                 \
                                                   is_uni_perl_idstart_, c)
 #define isLOWER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isLOWER_LC, CC_LOWER_, c)
