@@ -52,7 +52,7 @@ sub full_name ($$) { # Returns the function name with potentially the
     if ($flags =~ /[ps]/) {
 
         # An all uppercase macro name gets an uppercase prefix.
-        return ($flags =~ /m/ && $flags =~ /p/ && $func !~ /[[:lower:]]/)
+        return (($flags =~ tr/mp// > 1) && $func !~ /[[:lower:]]/)
                ? "PERL_$func"
                : "Perl_$func";
     }
@@ -135,7 +135,7 @@ sub generate_proto_h {
         my $binarycompat = ( $flags =~ /b/ );
         my $has_mflag = ( $flags =~ /m/ );
         my $is_malloc = ( $flags =~ /a/ );
-        my $can_ignore = ( $flags !~ /R/ ) && ( $flags !~ /P/ ) && !$is_malloc;
+        my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my @asserts;
         my $func;
 
@@ -144,7 +144,7 @@ sub generate_proto_h {
         }
 
         die_at_end "$plain_func: S and p flags are mutually exclusive"
-                                            if $flags =~ /S/ && $flags =~ /p/;
+                                                    if $flags =~ tr/Sp// > 1;
         if ($has_mflag) {
             if ($flags =~ /S/) {
                 die_at_end "$plain_func: m and S flags are mutually exclusive";
@@ -229,7 +229,7 @@ sub generate_proto_h {
         die_at_end "For '$plain_func', b flag without M flag requires D flag"
                             if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
         die_at_end "For '$plain_func', I and i flags are mutually exclusive"
-                                            if $flags =~ /I/ && $flags =~ /i/;
+                                            if $flags =~ tr/Ii// > 1;
 
         $ret = "";
         $ret .= "$retval\n";
@@ -545,7 +545,7 @@ sub embed_h {
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
-        if ($flags =~ /m/ && $flags =~ /p/) {
+        if ($flags =~ tr/mp// > 1) {    # Has both m and p
 
             # Yields
             #   #define Perl_func  func
