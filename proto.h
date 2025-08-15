@@ -122,11 +122,6 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
         assert(p); assert(e)
 
 PERL_CALLCONV UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, U8 flags);
-#define PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS    \
-        assert(p); assert(ustrp)
-
-PERL_CALLCONV UV
 Perl__to_utf8_lower_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
 #define PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS   \
         assert(p); assert(ustrp)
@@ -5296,6 +5291,11 @@ PERL_CALLCONV UV
 Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_TO_UNI_UPPER           \
         assert(p); assert(lenp)
+
+PERL_CALLCONV UV
+Perl_to_utf8_fold_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, U8 flags);
+#define PERL_ARGS_ASSERT_TO_UTF8_FOLD_FLAGS_    \
+        assert(p); assert(ustrp)
 
 PERL_CALLCONV bool
 Perl_try_amagic_bin(pTHX_ int method, int flags);
