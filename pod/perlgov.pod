@@ -494,9 +494,9 @@ how the membership has changed over time.
 
 =item * Aristotle Pagaltzis
 
-=item * Graham Knop
+=item * Leon Timmermans
 
-=item * Philippe Bruhat
+=item * Paul Evans
 
 =back
 
