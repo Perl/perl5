@@ -3922,9 +3922,9 @@ Perl_is_utf8_perl_idstart_(pTHX_ const U8 *p, const U8 * const e)
 }
 
 bool
-Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
+Perl_is_utf8_perl_idcont_(pTHX_ const U8 *p, const U8 * const e)
 {
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
+    PERL_ARGS_ASSERT_IS_UTF8_PERL_IDCONT_;
 
     return IS_UTF8_IN_INVLIST(p, e, PL_utf8_perl_idcont);
 }
