@@ -4827,7 +4827,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                     utf8_pat = false;
                 }
                 else {  /* Code point above 255, or needs special handling */
-                    _to_utf8_fold_flags(pat, pat + pat_len,
+                    to_utf8_fold_flags_(pat, pat + pat_len,
                                         mod_pat, &pat_len,
                                         FOLD_FLAGS_FULL|FOLD_FLAGS_LOCALE);
                     pat = mod_pat;

@@ -2373,7 +2373,7 @@ END_EXTERN_C
 #define toUPPER_utf8(p,e,s,l)	toUPPER_utf8_safe(p,e,s,l)
 
 /* For internal core use only, subject to change */
-#define toFOLD_utf8_flags_(p,e,s,l,f)  _to_utf8_fold_flags (p,e,s,l,f)
+#define toFOLD_utf8_flags_(p,e,s,l,f)  to_utf8_fold_flags_(p,e,s,l,f)
 #define _toLOWER_utf8_flags(p,e,s,l,f) _to_utf8_lower_flags(p,e,s,l,f)
 #define _toTITLE_utf8_flags(p,e,s,l,f) _to_utf8_title_flags(p,e,s,l,f)
 #define _toUPPER_utf8_flags(p,e,s,l,f) _to_utf8_upper_flags(p,e,s,l,f)

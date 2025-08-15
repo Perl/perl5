@@ -4489,15 +4489,15 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
  */
 
 UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
+Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
                                const U8 *e,
                                U8* ustrp,
                                STRLEN *lenp,
                                U8 flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_FOLD_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
+    UV result;
 
     /* These are mutually exclusive */
     assert (! ((flags & FOLD_FLAGS_LOCALE) && (flags & FOLD_FLAGS_NOMIX_ASCII)));

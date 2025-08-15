@@ -3671,7 +3671,7 @@ Cp	|UV	|to_uni_title	|UV c					\
 Cp	|UV	|to_uni_upper	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
-Cp	|UV	|_to_utf8_fold_flags					\
+Cp	|UV	|to_utf8_fold_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\

@@ -7156,7 +7156,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (UTF) {
                             Size_t added_len;
 
-                            (void) _to_utf8_fold_flags((U8 *) redo_p,
+                            (void) to_utf8_fold_flags_((U8 *) redo_p,
                                                        (U8 *) RExC_end,
                                                        (U8 *) redo_e,
                                                        &added_len,
@@ -7305,7 +7305,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                              * 'e' (having deliberately reserved enough space
                              * for this eventuality) and drop down to check if
                              * the three actually do form a folded sequence */
-                            (void) _to_utf8_fold_flags(
+                            (void) to_utf8_fold_flags_(
                                 (U8 *) p, (U8 *) RExC_end,
                                 (U8 *) e,
                                 &added_len,
