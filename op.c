@@ -766,6 +766,8 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     const bool is_our = (PL_parser->in_my == KEY_our);
 
     PERL_ARGS_ASSERT_ALLOCMY;
+    assert(len >= 2);
+    assert(name[0] && name[1]);
 
     if (flags & ~SVf_UTF8)
         croak("panic: allocmy illegal flag bits 0x%" UVxf,
