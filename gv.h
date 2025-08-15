@@ -272,6 +272,27 @@ Return the CV from the GV.
 #define GV_ADDMG	0x400	/* add if magical */
 #define GV_NO_SVGMAGIC	0x800	/* Skip get-magic on an SV argument;
                                    used only by gv_fetchsv(_nomg) */
+#define GVCf_ISRC 0x2000
+#define GVCf_ISSV GVCf_ISRC
+#define GVCf_ISPV 0x0
+#define GVCf_ISHEKORPVN 0x4000
+#define GVCf_ISHEK (GVCf_ISHEKORPVN|GVCf_ISRC)
+#define GVCf_HASVA_LEN GVCf_ISHEKORPVN
+
+#define GV_CACHE_ISPV(_f) (((_f) & GVCf_ISRC)==0)
+#define GV_CACHE_HASVA_LEN(_f)  (((_f)&(GVCf_ISHEKORPVN|GVCf_ISRC)) == (GVCf_ISHEKORPVN))
+#define GV_CACHE_ISRC(_f) ((_f)&GVCf_ISRC) //0x2000 //sv #50 pv[|n|s] #184
+#define GV_CACHE_ISSV(_f) (((_f)&(GVCf_ISHEKORPVN|GVCf_ISRC)) == GVCf_ISRC) //0x2000 //sv #50 pv[|n|s] #184
+/* core .xs's sv 9, pvn 15, pv 47, pvs 4
+   core .c's sv 19, pvn 14, pv 3, pvs 4 */
+#define GV_CACHE_ISHEK(_f) (((_f)&GVCf_ISHEK) == GVCf_ISHEK)
+#define GV_CACHE_INL_LEN_MASK 0x00FF0000
+#define GV_CACHE_INL_LEN_MAX 0xFF
+#define GV_CACHE_GET_INL_LEN(_f) ((U8)((_f)>>16))
+#define GV_CACHE_FITS_INL_LEN(_f) ((_f) <= GV_CACHE_INL_LEN_MAX)
+#define GV_CACHE_PACK_INL_LEN(_f) ((U32)(((U32)((U8)(_f))) << 16))
+#define GV_CACHE_VA_ARGS_MASK (GVCf_ISRC|GVCf_ISHEKORPVN|GV_CACHE_INL_LEN_MASK)
+
 #define GV_CACHE_ONLY	0x1000  /* return stash only if found in cache;
                                    used only in flags parameter to gv_stash* family */
 
@@ -287,6 +308,7 @@ Return the CV from the GV.
         as a flag to various gv_* functions, so ensure it lies
         outside this range.
 */
+#define GV_UTF8fprvt        SVf_UTF8 /* 0x20000000 */  /* SvPV is UTF-8 encoded */
 
 #define GV_NOADD_MASK \
   (SVf_UTF8|GV_NOADD_NOINIT|GV_NOEXPAND|GV_NOTQUAL|GV_ADDMG|GV_NO_SVGMAGIC)

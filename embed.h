@@ -289,6 +289,7 @@
 # define gv_init_pvn(a,b,c,d,e)                 Perl_gv_init_pvn(aTHX_ a,b,c,d,e)
 # define gv_init_sv(a,b,c,d)                    Perl_gv_init_sv(aTHX_ a,b,c,d)
 # define gv_name_set(a,b,c,d)                   Perl_gv_name_set(aTHX_ a,b,c,d)
+# define gv_stashhek(a,b)                       Perl_gv_stashhek(aTHX_ a,b)
 # define gv_stashpv(a,b)                        Perl_gv_stashpv(aTHX_ a,b)
 # define gv_stashpvn(a,b,c)                     Perl_gv_stashpvn(aTHX_ a,b,c)
 # define gv_stashsv(a,b)                        Perl_gv_stashsv(aTHX_ a,b)
@@ -1016,6 +1017,7 @@
 #   define get_opargs()                         Perl_get_opargs(aTHX)
 #   define gv_override(a,b)                     Perl_gv_override(aTHX_ a,b)
 #   define gv_setref(a,b)                       Perl_gv_setref(aTHX_ a,b)
+#   define gv_stashpvs_p(a,b)                   Perl_gv_stashpvs_p(aTHX_ a,b)
 #   define gv_try_downgrade(a)                  Perl_gv_try_downgrade(aTHX_ a)
 #   define hv_ename_add(a,b,c,d)                Perl_hv_ename_add(aTHX_ a,b,c,d)
 #   define hv_ename_delete(a,b,c,d)             Perl_hv_ename_delete(aTHX_ a,b,c,d)
@@ -1888,6 +1890,7 @@
 #   endif
 #   if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 #     define gv_stashsvpvn_cached(a,b,c,d)      Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
+#     define gv_stashsvpvn_cached_p(a,...)      Perl_gv_stashsvpvn_cached_p(aTHX_ a,__VA_ARGS__)
 #   endif
 #   if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 #     define get_invlist_iter_addr              S_get_invlist_iter_addr

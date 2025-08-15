@@ -433,8 +433,12 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 =for apidoc_defn Am|HV*|gv_stashpvs|"name"|I32 create
 =cut
 */
-#define gv_stashpvs(str, create) \
-    Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
+
+#define gv_stashpvs(str, create) Perl_gv_stashpvs_p(aTHX_ \
+    ((create) | ( GV_CACHE_FITS_INL_LEN(sizeof(str)-1) \
+              ? GV_CACHE_PACK_INL_LEN(sizeof(str)-1) \
+              : (Perl_croak_nocontext("panic: gv_stashpvs overflow"), \
+              GV_CACHE_INL_LEN_MAX))), ASSERT_IS_LITERAL(str))
 
 
 /*
