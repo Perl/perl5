@@ -94,11 +94,6 @@ Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 #define PERL_ARGS_ASSERT__IS_UNI_FOO
 
 PERL_CALLCONV bool
-Perl__is_uni_perl_idcont(pTHX_ UV c)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UNI_PERL_IDCONT
-
-PERL_CALLCONV bool
 Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UTF8_FOO           \
@@ -1849,6 +1844,11 @@ Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
 
 /* PERL_CALLCONV bool
 Perl_is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
+
+PERL_CALLCONV bool
+Perl_is_uni_perl_idcont_(pTHX_ UV c)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UNI_PERL_IDCONT_
 
 PERL_CALLCONV bool
 Perl_is_uni_perl_idstart_(pTHX_ UV c)

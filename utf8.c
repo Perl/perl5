@@ -3543,7 +3543,7 @@ Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 }
 
 bool
-Perl__is_uni_perl_idcont(pTHX_ UV c)
+Perl_is_uni_perl_idcont_(pTHX_ UV c)
 {
     return _invlist_contains_cp(PL_utf8_perl_idcont, c);
 }
