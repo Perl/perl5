@@ -1356,11 +1356,11 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
 
 static int store_ref(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_array(pTHX_ stcxt_t *cxt, AV *av);
-static int store_hash(pTHX_ stcxt_t *cxt, HV *hv);
+static int store_array(pTHX_ stcxt_t *cxt, SV *av);
+static int store_hash(pTHX_ stcxt_t *cxt, SV *hv);
 static int store_tied(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_code(pTHX_ stcxt_t *cxt, CV *cv);
+static int store_code(pTHX_ stcxt_t *cxt, SV *cv);
 static int store_regexp(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_other(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_blessed(pTHX_ stcxt_t *cxt, SV *sv, int type, HV *pkg);
@@ -1368,15 +1368,15 @@ static int store_blessed(pTHX_ stcxt_t *cxt, SV *sv, int type, HV *pkg);
 typedef int (*sv_store_t)(pTHX_ stcxt_t *cxt, SV *sv);
 
 static const sv_store_t sv_store[] = {
-    (sv_store_t)store_ref,      /* svis_REF */
-    (sv_store_t)store_scalar,   /* svis_SCALAR */
-    (sv_store_t)store_array,    /* svis_ARRAY */
-    (sv_store_t)store_hash,     /* svis_HASH */
-    (sv_store_t)store_tied,     /* svis_TIED */
-    (sv_store_t)store_tied_item,/* svis_TIED_ITEM */
-    (sv_store_t)store_code,     /* svis_CODE */
-    (sv_store_t)store_regexp,   /* svis_REGEXP */
-    (sv_store_t)store_other,    /* svis_OTHER */
+    store_ref,      /* svis_REF */
+    store_scalar,   /* svis_SCALAR */
+    store_array,    /* svis_ARRAY */
+    store_hash,     /* svis_HASH */
+    store_tied,     /* svis_TIED */
+    store_tied_item,/* svis_TIED_ITEM */
+    store_code,     /* svis_CODE */
+    store_regexp,   /* svis_REGEXP */
+    store_other,    /* svis_OTHER */
 };
 
 #define SV_STORE(x)     (*sv_store[x])
@@ -2634,8 +2634,9 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
  * Layout is SX_ARRAY <size> followed by each item, in increasing index order.
  * Each item is stored as <object>.
  */
-static int store_array(pTHX_ stcxt_t *cxt, AV *av)
+static int store_array(pTHX_ stcxt_t *cxt, SV *xsv)
 {
+    AV *av = (AV *)xsv;
     SV **sav;
     UV len = av_len(av) + 1;
     UV i;
@@ -2760,8 +2761,9 @@ sortcmp(const void *a, const void *b)
  * Currently the only hash flag is "restricted"
  * Key flags are as for hv.h
  */
-static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
+static int store_hash(pTHX_ stcxt_t *cxt, SV *xsv)
 {
+    HV *hv = (HV *)xsv;
     dVAR;
     UV len = (UV)HvTOTALKEYS(hv);
     Size_t i;
@@ -3205,8 +3207,9 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
  * Layout is SX_CODE <length> followed by a scalar containing the perl
  * source code of the code reference.
  */
-static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
+static int store_code(pTHX_ stcxt_t *cxt, SV *xsv)
 {
+    CV *cv = (CV *)xsv;
     dSP;
     STRLEN len;
     STRLEN count, reallen;
