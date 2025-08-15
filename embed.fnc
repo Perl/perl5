@@ -35,7 +35,7 @@
 :		Supported at least since perl-5.23.8, with or without ppport.h.
 :
 : Lines in this file are of the form:
-:    flags|return_type|name|arg1|arg2|...|argN
+:    flags|return_type|name|arg1|arg2|...|argN ( assert(...) )*
 :
 : 'flags' is a string of single letters.  Most of the flags are meaningful only
 : to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
@@ -45,6 +45,9 @@
 : A function taking no parameters will have no 'arg' elements.
 : A line may be continued onto the next by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
+:
+: The optional list of asserts is used to customize the generated
+: PERL_ARGS_ASSERT macro.  See AUTOMATIC PARAMETER SANITY CHECKING below
 :
 : Most entries here have a macro created with the entry name.  This presents
 : name space collision potentials which haven't been well thought out, but are
@@ -171,6 +174,14 @@
 :	this check may be inappropriate, as in rare cases the arguments passed
 :	may not be of the correct type. As already mentioned, NOCHECK
 :	suppresses this check.
+:
+:   You can specify your own checking beyond these by adding any number of
+:   assert() calls to any given entry after its final argument.  Whatever you
+:   specify will be added to the ARGS_ASSERT macro for the entry in the order
+:   you've specified, and after all the assertions that already have been
+:   described in this section.  When adding yours, weigh that doing it here
+:   will make it less visible to a maintainer than keeping it in the function
+:   it applies to
 :
 :   Currently, it is optional to include an empty ARGS_ASSERT macro in your
 :   functions.  But a porting test enforces that a non-empty one is included.
@@ -441,13 +452,6 @@
 :        considering if they are format functions or not. A reason to use this
 :        flag even on a format function is if the format would generate error:
 :        format string argument is not a string type
-:
-:   'G'  Suppress empty PERL_ARGS_ASSERT_foo macro.  Normally such a macro is
-:        generated for all entries for functions 'foo' in this file.  The macro
-:        is empty unless regen/embed.pl deems that there should be assert()
-:        calls to verify the sanity of some or all of foo's arguments.
-:
-:          proto.h: An empty PERL_ARGS_ASSERT macro is not defined
 :
 :   'h'  Hide any documentation that would normally go into perlapi or
 :        perlintern. This is typically used when the documentation is actually
@@ -750,7 +754,8 @@ ARdp	|SSize_t|av_len 	|NN AV *av
 ARdp	|AV *	|av_make	|SSize_t size				\
 				|NN SV **strp
 CRdip	|AV *	|av_new_alloc	|SSize_t size				\
-				|bool zeroflag
+				|bool zeroflag				\
+				assert(size > 0)
 p	|SV *	|av_nonelem	|NN AV *av				\
 				|SSize_t ix
 Adp	|SV *	|av_pop 	|NN AV *av
@@ -2410,7 +2415,7 @@ p	|void	|no_bareword_filehandle 				\
 				|NN const char *fhname
 Tefprv	|void	|noperl_die	|NN const char *pat			\
 				|...
-CGTdp	|void	|noshutdownhook
+CTdp	|void	|noshutdownhook
 Adp	|int	|nothreadhook
 p	|void	|notify_parser_that_encoding_changed
 : Used in perly.y
@@ -4526,11 +4531,12 @@ op	|void	|sv_add_backref |NN SV * const tsv			\
 				|NN SV * const sv
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
-EGdp	|HV *	|gv_stashsvpvn_cached					\
-				|SV *namesv				\
-				|const char *name			\
+Edp	|HV *	|gv_stashsvpvn_cached					\
+				|NULLOK SV *namesv			\
+				|NULLOK const char *name		\
 				|U32 namelen				\
-				|I32 flags
+				|I32 flags				\
+				assert(namesv || name)
 #endif
 #if defined(PERL_IN_HV_C)
 Sx	|void	|clear_placeholders					\
@@ -6109,17 +6115,19 @@ S	|I32	|utf16_textfilter					\
 # endif
 #endif /* defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_UNIVERSAL_C)
-GS	|bool	|isa_lookup	|NULLOK NOCHECK HV *stash		\
+S	|bool	|isa_lookup	|NN HV *stash				\
 				|NULLOK SV *namesv			\
 				|NULLOK const char *name		\
 				|STRLEN len				\
-				|U32 flags
-GS	|bool	|sv_derived_from_svpvn					\
-				|NULLOK SV *sv				\
+				|U32 flags				\
+				assert(namesv || name)
+S	|bool	|sv_derived_from_svpvn					\
+				|NN SV *sv				\
 				|NULLOK SV *namesv			\
 				|NULLOK const char *name		\
 				|const STRLEN len			\
-				|U32 flags
+				|U32 flags				\
+				assert(namesv || name)
 #endif
 #if defined(PERL_IN_UTF8_C)
 RS	|UV	|check_locale_boundary_crossing 			\

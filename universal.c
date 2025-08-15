@@ -39,19 +39,14 @@
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
  */
 
-#define PERL_ARGS_ASSERT_ISA_LOOKUP \
-    assert(stash); \
-    assert(namesv || name)
-
-
 STATIC bool
 S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 flags)
 {
+    PERL_ARGS_ASSERT_ISA_LOOKUP;
+
     const struct mro_meta *const meta = HvMROMETA(stash);
     HV *isa = meta->isa;
     const HV *our_stash;
-
-    PERL_ARGS_ASSERT_ISA_LOOKUP;
 
     if (!isa) {
         (void)mro_get_linear_isa(stash);
@@ -82,10 +77,6 @@ S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 fla
 
     return FALSE;
 }
-
-#define PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN \
-    assert(sv); \
-    assert(namesv || name)
 
 STATIC bool
 S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags)

@@ -1691,16 +1691,13 @@ reasons.
 =cut
 */
 
-#define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED \
-    assert(namesv || name)
-
 HV*
 Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
 {
+    PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED;
+
     HV* stash;
     HE* he;
-
-    PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED;
 
     he = (HE *)hv_common(
         PL_stashcache, namesv, name, namelen,

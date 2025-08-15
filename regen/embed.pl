@@ -121,13 +121,14 @@ sub generate_proto_h {
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
-        my ($flags,$retval,$plain_func,$args) = @{$embed}{qw(flags return_type name args)};
-        if ($flags =~ / ( [^ AabCDdEefFGhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
+        my ($flags, $retval, $plain_func, $args, $assertions ) =
+                        @{$embed}{qw(flags return_type name args assertions)};
+        if ($flags =~ / ( [^ AabCDdEefFhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
 
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /[Gm]/ );
+        my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
@@ -242,6 +243,7 @@ sub generate_proto_h {
             my $n;
             for my $arg ( @$args ) {
                 ++$n;
+
                 if ($arg =~ / ^ " (.+) " $ /x) {    # Handle literal string
                     my $name = $1;
 
@@ -254,48 +256,66 @@ sub generate_proto_h {
                     die_at_end 'm flag required for "literal" argument'
                                                             unless $has_mflag;
                 }
-                elsif (   $args_assert_line
-                       && $arg =~ /\*/
-                       && $arg !~ /\b(NN|NULLOK)\b/ )
-                {
-                    warn "$func: $arg needs NN or NULLOK\n";
-                    ++$unflagged_pointers;
-                }
+                else {
+                    my $nn =      ( $arg =~ s/\bNN\b// );
+                    my $nz =      ( $arg =~ s/\bNZ\b// );
+                    my $nullok =  ( $arg =~ s/\bNULLOK\b// );
+                    my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
 
-                my $nn =      ( $arg =~ s/\s*\bNN\b\s+// );
-                my $nz =      ( $arg =~ s/\s*\bNZ\b\s+// );
-                my $nullok =  ( $arg =~ s/\s*\bNULLOK\b\s+// );
-                my $nocheck = ( $arg =~ s/\s*\bNOCHECK\b\s+// );
+                    # Trim $arg and remove multiple blanks
+                    $arg =~ s/^\s+//;
+                    $arg =~ s/\s+$//;
+                    $arg =~ s/\s{2,}/ /g;
 
-                push( @nonnull, $n ) if $nn;
+                    die_at_end ":$func: $arg Use only one of NN, NULLOK, and NZ"
+                                                if 0 + $nn + $nz + $nullok > 1;
 
-                # Make sure each arg has at least a type and a var name.
-                # An arg of "int" is valid C, but want it to be "int foo".
-                my $argtype = ( $arg =~ m/^(\w+(?:\s*\*+)?)/ )[0];
-                defined $argtype and $argtype =~ s/\s+//g;
+                    push( @nonnull, $n ) if $nn;
 
-                my $temp_arg = $arg;
-                $temp_arg =~ s/\*//g;
-                $temp_arg =~ s/\s*\bstruct\b\s*/ /g;
-                if ( ($temp_arg ne "...")
-                     && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
-                    die_at_end "$func: $arg ($n) doesn't have a name\n";
-                }
-                my $argname = $1;
+                    # A non-pointer shouldn't have a pointer-related modifier.
+                    # But typedefs may be pointers without our knowing it, so
+                    # we can't check for non-pointer issues.  We can only
+                    # check for the case where the argument is definitely a
+                    # pointer.
+                    if ($args_assert_line && $arg =~ /\*/) {
+                        if ($nn + $nullok == 0) {
+                            warn "$func: $arg needs NN or NULLOK\n";
+                            ++$unflagged_pointers;
+                        }
 
-                if (defined $argname && (! $has_mflag || $binarycompat)) {
-                    if ($nn||$nz) {
-                        push @asserts, "assert($argname)";
+                        warn "$func: $arg should not have NZ\n" if $nz;
                     }
 
-                    if (   ! $nocheck
-                        && defined $argtype
-                        && exists $type_asserts{$argtype})
-                    {
-                        my $type_assert =
-                            $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
-                        $type_assert = "!$argname || $type_assert" if $nullok;
-                        push @asserts, "assert($type_assert)";
+                    push( @nonnull, $n ) if $nn;
+
+                    # Make sure each arg has at least a type and a var name.
+                    # An arg of "int" is valid C, but want it to be "int foo".
+                    my $argtype = ( $arg =~ m/^(\w+(?:\s*\*+)?)/ )[0];
+                    defined $argtype and $argtype =~ s/\s+//g;
+
+                    my $temp_arg = $arg;
+                    $temp_arg =~ s/\*//g;
+                    $temp_arg =~ s/\s*\bstruct\b\s*/ /g;
+                    if ( ($temp_arg ne "...")
+                        && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
+                        die_at_end "$func: $arg ($n) doesn't have a name\n";
+                    }
+                    my $argname = $1;
+
+                    if (defined $argname && (! $has_mflag || $binarycompat)) {
+                        if ($nn||$nz) {
+                            push @asserts, "assert($argname)";
+                        }
+
+                        if (   ! $nocheck
+                            && defined $argtype
+                            && exists $type_asserts{$argtype})
+                        {
+                            my $type_assert =
+                                $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
+                            $type_assert = "!$argname || $type_assert" if $nullok;
+                            push @asserts, "assert($type_assert)";
+                        }
                     }
                 }
             }
@@ -306,6 +326,9 @@ sub generate_proto_h {
         }
         $ret .= " comma_pDEPTH" if $has_depth;
         $ret .= ")";
+
+        push @asserts, @$assertions if $assertions;
+
         my @attrs;
         if ( $flags =~ /r/ ) {
             push @attrs, "__attribute__noreturn__";

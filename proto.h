@@ -3281,6 +3281,7 @@ Perl_noperl_die(const char *pat, ...)
 
 PERL_CALLCONV void
 Perl_noshutdownhook(void);
+#define PERL_ARGS_ASSERT_NOSHUTDOWNHOOK
 
 PERL_CALLCONV int
 Perl_nothreadhook(pTHX);
@@ -3758,7 +3759,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, const char * const strbeg,
         assert(rx); assert(strbeg); assert(strpos); assert(strend)
 
 PERL_CALLCONV SV *
-Perl_re_intuit_string(pTHX_ REGEXP  * const r);
+Perl_re_intuit_string(pTHX_ REGEXP * const r);
 #define PERL_ARGS_ASSERT_RE_INTUIT_STRING       \
         assert(r)
 
@@ -6950,6 +6951,8 @@ Perl_sv_add_backref(pTHX_ SV * const tsv, SV * const sv)
 PERL_CALLCONV HV *
 Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
         __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_GV_STASHSVPVN_CACHED  \
+        assert(namesv || name)
 
 #endif
 #if defined(PERL_IN_HV_C)
@@ -9470,11 +9473,15 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #if defined(PERL_IN_UNIVERSAL_C)
 STATIC bool
 S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char *name, STRLEN len, U32 flags);
+# define PERL_ARGS_ASSERT_ISA_LOOKUP            \
+        assert(stash); assert(SvTYPE(stash) == SVt_PVHV); assert(namesv || name)
 
 STATIC bool
 S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char *name, const STRLEN len, U32 flags);
+# define PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN \
+        assert(sv); assert(namesv || name)
 
-#endif
+#endif /* defined(PERL_IN_UNIVERSAL_C) */
 #if defined(PERL_IN_UTF8_C)
 STATIC UV
 S__to_utf8_case(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
@@ -9764,7 +9771,8 @@ Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
 PERL_STATIC_INLINE AV *
 Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
         __attribute__warn_unused_result__;
-# define PERL_ARGS_ASSERT_AV_NEW_ALLOC
+# define PERL_ARGS_ASSERT_AV_NEW_ALLOC          \
+        assert(size > 0)
 
 PERL_STATIC_INLINE void
 Perl_av_push_simple(pTHX_ AV *av, SV *val);
