@@ -770,11 +770,10 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     assert(name[0] && name[1]);
 
     if (flags & ~SVf_UTF8)
-        croak("panic: allocmy illegal flag bits 0x%" UVxf,
-                   (UV)flags);
+        croak("panic: allocmy illegal flag bits 0x%" U32xf, flags);
 
     is_idfirst = flags & SVf_UTF8
-        ? isIDFIRST_utf8_safe((U8*)name + 1, name + len)
+        ? isIDFIRST_utf8_safe(name + 1, name + len)
         : isIDFIRST_A(name[1]);
 
     /* $_, @_, etc. */
@@ -804,11 +803,11 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     /* allocate a spare slot and store the name in that slot */
 
     U32 addflags = 0;
-    if(is_our)
+    if (is_our)
         addflags |= padadd_OUR;
-    else if(PL_parser->in_my == KEY_state)
+    else if (PL_parser->in_my == KEY_state)
         addflags |= padadd_STATE;
-    else if(PL_parser->in_my == KEY_field)
+    else if (PL_parser->in_my == KEY_field)
         addflags |= padadd_FIELD;
 
     off = pad_add_name_pvn(name, len, addflags,
@@ -821,7 +820,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
                         : NULL
                     )
     );
-    /* anon sub prototypes contains state vars should always be cloned,
+    /* anon sub prototypes containing state vars should always be cloned,
      * otherwise the state var would be shared between anon subs */
 
     if (PL_parser->in_my == KEY_state && CvANON(PL_compcv))
