@@ -1723,7 +1723,7 @@ CRp	|bool	|_is_uni_FOO	|const U8 classnum			\
 				|const UV c
 CRp	|bool	|_is_uni_perl_idcont					\
 				|UV c
-CRp	|bool	|_is_uni_perl_idstart					\
+CRp	|bool	|is_uni_perl_idstart_					\
 				|UV c
 ARTdip	|Size_t |isUTF8_CHAR	|NN const U8 * const s0 		\
 				|NN const U8 * const e

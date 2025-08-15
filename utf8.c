@@ -3549,7 +3549,7 @@ Perl__is_uni_perl_idcont(pTHX_ UV c)
 }
 
 bool
-Perl__is_uni_perl_idstart(pTHX_ UV c)
+Perl_is_uni_perl_idstart_(pTHX_ UV c)
 {
     return _invlist_contains_cp(PL_utf8_perl_idstart, c);
 }

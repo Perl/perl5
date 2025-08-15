@@ -2151,7 +2151,7 @@ END_EXTERN_C
 #define isIDCONT_uvchr(c)                                                   \
                     generic_uvchr_(CC_WORDCHAR_, _is_uni_perl_idcont, c)
 #define isIDFIRST_uvchr(c)                                                  \
-                    generic_uvchr_(CC_IDFIRST_, _is_uni_perl_idstart, c)
+                    generic_uvchr_(CC_IDFIRST_, is_uni_perl_idstart_, c)
 #define isLOWER_uvchr(c)      generic_invlist_uvchr_(CC_LOWER_, c)
 #define isPRINT_uvchr(c)      generic_invlist_uvchr_(CC_PRINT_, c)
 
@@ -2216,7 +2216,7 @@ END_EXTERN_C
 #define isIDCONT_LC_uvchr(c) generic_LC_uvchr_(isIDCONT_LC,                   \
                                                   _is_uni_perl_idcont, c)
 #define isIDFIRST_LC_uvchr(c) generic_LC_uvchr_(isIDFIRST_LC,                 \
-                                                  _is_uni_perl_idstart, c)
+                                                  is_uni_perl_idstart_, c)
 #define isLOWER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isLOWER_LC, CC_LOWER_, c)
 #define isPRINT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isPRINT_LC, CC_PRINT_, c)
 #define isPSXSPC_LC_uvchr(c)  isSPACE_LC_uvchr(c)

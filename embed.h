@@ -118,7 +118,6 @@
 # define SvUV_nomg(a)                           Perl_SvUV_nomg(aTHX_ a)
 # define _is_uni_FOO(a,b)                       Perl__is_uni_FOO(aTHX_ a,b)
 # define _is_uni_perl_idcont(a)                 Perl__is_uni_perl_idcont(aTHX_ a)
-# define _is_uni_perl_idstart(a)                Perl__is_uni_perl_idstart(aTHX_ a)
 # define _is_utf8_FOO(a,b,c)                    Perl__is_utf8_FOO(aTHX_ a,b,c)
 # define _is_utf8_perl_idcont(a,b)              Perl__is_utf8_perl_idcont(aTHX_ a,b)
 # define _is_utf8_perl_idstart(a,b)             Perl__is_utf8_perl_idstart(aTHX_ a,b)
@@ -328,6 +327,7 @@
 # define Perl_is_strict_utf8_string             is_strict_utf8_string
 # define Perl_is_strict_utf8_string_loc         is_strict_utf8_string_loc
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen
+# define is_uni_perl_idstart_(a)                Perl_is_uni_perl_idstart_(aTHX_ a)
 # define is_utf8_FF_helper_                     Perl_is_utf8_FF_helper_
 # define Perl_is_utf8_char_buf                  is_utf8_char_buf
 # define is_utf8_char_helper_                   Perl_is_utf8_char_helper_
