@@ -4160,7 +4160,7 @@ PP_wrapped(pp_ucfirst, 1, 0)
 
 #ifdef USE_LOCALE_CTYPE
 
-            _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+            toLOWER_utf8_flags_(s, s + slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 
             /* In turkic locales, lower casing an 'I' normally yields U+0131,
              * LATIN SMALL LETTER DOTLESS I, but not if the grapheme also
@@ -4192,7 +4192,7 @@ PP_wrapped(pp_ucfirst, 1, 0)
 #else
             PERL_UNUSED_VAR(remove_dot_above);
 
-            _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, 0);
+            toLOWER_utf8_flags_(s, s + slen, tmpbuf, &tculen, 0);
 #endif
 
         }
@@ -4874,7 +4874,7 @@ PP_wrapped(pp_lc, 1, 0)
 
 #ifdef USE_LOCALE_CTYPE
 
-            _toLOWER_utf8_flags(s, send, tmpbuf, &lower_len,
+            toLOWER_utf8_flags_(s, send, tmpbuf, &lower_len,
                                 IN_LC_RUNTIME(LC_CTYPE));
 
             /* If we are in a Turkic locale, we have to do more work.  As noted
@@ -4884,7 +4884,7 @@ PP_wrapped(pp_lc, 1, 0)
              * and set a flag if the DOT is there.  Then each time through the
              * loop, we have to see if we need to remove the next DOT above,
              * and if so, do it.  We know that there is a DOT because
-             * _toLOWER_utf8_flags() wouldn't have returned 'i' unless there
+             * toLOWER_utf8_flags_() wouldn't have returned 'i' unless there
              * was one in a proper position. */
             if (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                 && IN_LC_RUNTIME(LC_CTYPE))
@@ -4904,7 +4904,7 @@ PP_wrapped(pp_lc, 1, 0)
 #else
             PERL_UNUSED_VAR(remove_dot_above);
 
-            _toLOWER_utf8_flags(s, send, tmpbuf, &lower_len, 0);
+            toLOWER_utf8_flags_(s, send, tmpbuf, &lower_len, 0);
 #endif
 
             /* Here is where we would do context-sensitive actions for the
