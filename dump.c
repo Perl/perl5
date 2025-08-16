@@ -95,7 +95,7 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
                               | ((utf8) ? PERL_PV_ESCAPE_UNI : 0) )
 
 #define _pv_display_for_dump(dsv, pv, cur, len, pvlim) \
-    _pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, PERL_PV_ESCAPE_DWIM_ALL_HEX)
+    pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, PERL_PV_ESCAPE_DWIM_ALL_HEX)
 
 /*
 =for apidoc pv_escape
@@ -417,7 +417,7 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
 }
 
 STATIC char *
-_pv_display_flags(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim, I32 pretty_flags)
+pv_display_flags(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim, I32 pretty_flags)
 {
     PERL_ARGS_ASSERT_PV_DISPLAY;
 
@@ -445,7 +445,7 @@ Note that the final string may be up to 7 chars longer than pvlim.
 char *
 Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
-    return _pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, 0);
+    return pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, 0);
 }
 
 /*
