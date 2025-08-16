@@ -212,8 +212,9 @@ recursive_lock_destroy(pTHX_ recursive_lock_t *lock)
 }
 
 static void
-recursive_lock_release(pTHX_ recursive_lock_t *lock)
+recursive_lock_release(pTHX_ void *ptr)
 {
+    recursive_lock_t *lock = (recursive_lock_t *)ptr;
     MUTEX_LOCK(&lock->mutex);
     if (lock->owner == aTHX) {
         if (--lock->locks == 0) {
