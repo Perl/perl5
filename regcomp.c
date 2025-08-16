@@ -485,8 +485,9 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 }
 
 static void
-S_free_codeblocks(pTHX_ struct reg_code_blocks *cbs)
+S_free_codeblocks(pTHX_ void *ptr)
 {
+    struct reg_code_blocks *cbs = (struct reg_code_blocks *)ptr;
     int n;
 
     if (--cbs->refcnt > 0)
