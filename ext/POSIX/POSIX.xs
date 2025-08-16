@@ -1629,16 +1629,17 @@ not_here(const char *s)
 #include "const-c.inc"
 
 static void
-restore_sigmask(pTHX_ SV *osset_sv)
+restore_sigmask(pTHX_ void *ptr)
 {
-     /* Fortunately, restoring the signal mask can't fail, because
-      * there's nothing we can do about it if it does -- we're not
-      * supposed to return -1 from sigaction unless the disposition
-      * was unaffected.
-      */
+    /* Fortunately, restoring the signal mask can't fail, because
+     * there's nothing we can do about it if it does -- we're not
+     * supposed to return -1 from sigaction unless the disposition
+     * was unaffected.
+     */
 #if !(defined(__amigaos4__) && defined(__NEWLIB__))
-     sigset_t *ossetp = (sigset_t *) SvPV_nolen( osset_sv );
-     (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
+    SV *osset_sv = (SV *)ptr;
+    sigset_t *ossetp = (sigset_t *) SvPV_nolen( osset_sv );
+    (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 #endif
 }
 
