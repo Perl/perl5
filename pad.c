@@ -2963,6 +2963,12 @@ Perl_suspend_compcv(pTHX_ struct suspended_compcv *buffer)
     buffer->pad_reset_pending = PL_pad_reset_pending;
 }
 
+/* interface compatible with SAVEDESTRUCTOR_X */
+static void
+S_suspend_compcv_destruct(pTHX_ void *p) {
+    suspend_compcv((struct suspended_compcv *)p);
+}
+
 /*
 =for apidoc resume_compcv_final
 
@@ -3001,7 +3007,7 @@ Perl_resume_compcv(pTHX_ struct suspended_compcv *buffer, bool save)
     SAVEBOOL(PL_pad_reset_pending); PL_pad_reset_pending = buffer->pad_reset_pending;
 
     if(save)
-        SAVEDESTRUCTOR_X(&Perl_suspend_compcv, buffer);
+        SAVEDESTRUCTOR_X(S_suspend_compcv_destruct, buffer);
 }
 
 /*
