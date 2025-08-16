@@ -8745,7 +8745,7 @@ S_ssc_union(pTHX_ regnode_ssc *ssc, SV * const invlist, const bool invert_2nd);
         assert(ssc); assert(invlist)
 
 STATIC void
-S_unwind_scan_frames(pTHX_ const void *p);
+S_unwind_scan_frames(pTHX_ void *p);
 # define PERL_ARGS_ASSERT_UNWIND_SCAN_FRAMES    \
         assert(p)
 

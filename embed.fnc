@@ -5679,7 +5679,7 @@ ES	|void	|ssc_union	|NN regnode_ssc *ssc			\
 				|NN SV * const invlist			\
 				|const bool invert_2nd
 ES	|void	|unwind_scan_frames					\
-				|NN const void *p
+				|NN void *p
 #endif /* defined(PERL_IN_REGCOMP_STUDY_C) */
 #if defined(PERL_IN_REGEXEC_C)
 ERS	|LB_enum|advance_one_LB |NN U8 **curpos 			\
