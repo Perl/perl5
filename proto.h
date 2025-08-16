@@ -2207,7 +2207,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         assert(sv); assert(mg)
 
 PERL_CALLCONV int
-Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
+Perl_magic_getarylen(pTHX_ SV *sv, MAGIC *mg)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MAGIC_GETARYLEN        \
         assert(sv); assert(mg)
