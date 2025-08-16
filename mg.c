@@ -1472,8 +1472,9 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 
 #ifdef HAS_SIGPROCMASK
 static void
-restore_sigmask(pTHX_ SV *save_sv)
+restore_sigmask(pTHX_ void *ptr)
 {
+    SV *save_sv = (SV *)ptr;
     const sigset_t * const ossetp = (const sigset_t *) SvPV_nolen_const( save_sv );
     (void)sigprocmask(SIG_SETMASK, ossetp, NULL);
 }
