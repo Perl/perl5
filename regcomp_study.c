@@ -25,7 +25,7 @@
 
 
 STATIC void
-S_unwind_scan_frames(pTHX_ const void *p)
+S_unwind_scan_frames(pTHX_ void *p)
 {
     PERL_ARGS_ASSERT_UNWIND_SCAN_FRAMES;
     scan_frame *f= (scan_frame *)p;
