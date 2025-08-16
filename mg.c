@@ -2364,7 +2364,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
-Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
+Perl_magic_getarylen(pTHX_ SV *sv, MAGIC *mg)
 {
     AV * const obj = MUTABLE_AV(mg->mg_obj);
 

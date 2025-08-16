@@ -1909,7 +1909,7 @@ p	|int	|magic_freeutf8 |NN SV *sv				\
 p	|int	|magic_get	|NN SV *sv				\
 				|NN MAGIC *mg
 p	|int	|magic_getarylen|NN SV *sv				\
-				|NN const MAGIC *mg
+				|NN MAGIC *mg
 p	|int	|magic_getdebugvar					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
