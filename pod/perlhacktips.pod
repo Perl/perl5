@@ -1585,10 +1585,9 @@ C<ASAN_OPTIONS=detect_leaks=1>.
 To build perl with AddressSanitizer, your Configure invocation should
 look like:
 
-    sh Configure -des -Dcc=clang \
-       -Accflags=-fsanitize=address -Aldflags=-fsanitize=address \
-       -Alddlflags=-shared\ -fsanitize=address \
-       -fsanitize-blacklist=`pwd`/asan_ignore
+  sh Configure -des -Dcc=clang \
+   -Accflags="-fsanitize=address -fsanitize-ignorelist=$PWD/asan_ignore" \
+   -Aldflags="-fsanitize=address" -Alddlflags="-shared -fsanitize=address"
 
 where these arguments mean:
 
@@ -1599,26 +1598,24 @@ where these arguments mean:
 This should be replaced by the full path to your clang executable if it
 is not in your path.
 
-=item * -Accflags=-fsanitize=address
+=item * -Accflags="-fsanitize=address -fsanitize-ignorelist=$PWD/asan_ignore"
 
 Compile perl and extensions sources with AddressSanitizer.
 
-=item * -Aldflags=-fsanitize=address
+AddressSanitizer will ignore functions listed in the F<asan_ignore>
+file.  (This file should contain a short explanation of why each of the
+functions is listed.)
+
+=item * -Aldflags="-fsanitize=address"
 
 Link the perl executable with AddressSanitizer.
 
-=item * -Alddlflags=-shared\ -fsanitize=address
+=item * -Alddlflags="-shared -fsanitize=address"
 
 Link dynamic extensions with AddressSanitizer.  You must manually
 specify C<-shared> because using C<-Alddlflags=-shared> will prevent
 Configure from setting a default value for C<lddlflags>, which usually
 contains C<-shared> (at least on Linux).
-
-=item * -fsanitize-blacklist=`pwd`/asan_ignore
-
-AddressSanitizer will ignore functions listed in the C<asan_ignore>
-file.  (This file should contain a short explanation of why each of the
-functions is listed.)
 
 =back
 
