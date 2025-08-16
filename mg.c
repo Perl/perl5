@@ -3824,7 +3824,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
 
 
 static void
-S_restore_magic(pTHX_ const void *p)
+S_restore_magic(pTHX_ void *p)
 {
     MGS* const mgs = SSPTR(PTR2IV(p), MGS*);
     SV* const sv = mgs->mgs_sv;
@@ -3881,7 +3881,7 @@ S_restore_magic(pTHX_ const void *p)
  * skipped over. */
 
 static void
-S_unwind_handler_stack(pTHX_ const void *p)
+S_unwind_handler_stack(pTHX_ void *p)
 {
     PERL_UNUSED_ARG(p);
 

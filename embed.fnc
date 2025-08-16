@@ -4825,13 +4825,13 @@ S	|SV *	|magic_methcall1|NN SV *sv				\
 S	|int	|magic_methpack |NN SV *sv				\
 				|NN const MAGIC *mg			\
 				|NN SV *meth
-S	|void	|restore_magic	|NULLOK const void *p
+S	|void	|restore_magic	|NULLOK void *p
 S	|void	|save_magic_flags					\
 				|SSize_t mgs_ix 			\
 				|NN SV *sv				\
 				|U32 flags
 S	|void	|unwind_handler_stack					\
-				|NULLOK const void *p
+				|NULLOK void *p
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 Tp	|bool	|translate_substr_offsets				\
