@@ -1597,8 +1597,8 @@ XSPP_wrapped(my_pp_anonlist, 0, 1)
 #include "const-c.inc"
 
 void
-destruct_test(pTHX_ void *p) {
-    warn("In destruct_test: %" SVf "\n", (SV*)p);
+destruct_test(pTHX_ SV *p) {
+    warn("In destruct_test: %" SVf "\n", p);
 }
 
 #if defined(USE_ITHREADS) && !defined(WIN32)
