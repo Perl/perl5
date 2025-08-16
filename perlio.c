@@ -2872,7 +2872,7 @@ typedef struct {
 } PerlIOUnix;
 
 static void
-S_lockcnt_dec(pTHX_ const void* f)
+S_lockcnt_dec(pTHX_ void* f)
 {
 #ifndef PERL_IMPLICIT_SYS
     PERL_UNUSED_CONTEXT;
