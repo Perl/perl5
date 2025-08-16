@@ -1981,6 +1981,9 @@ return a single SV whose value is set to C<RETVAL>'s value at the time of
 return. In addition, a non-void autocall XSUB will call the underlying C
 library function and assign its return value to C<RETVAL>.
 
+In addition the return type can be a Perl package name; see
+L</Fully-qualified type names and Perl objects> for details.
+
 If the return type is prefixed with the C<NO_OUTPUT> keyword, then the
 C<RETVAL> variable is still declared, but code to return its value is
 suppressed. It is typically useful when making an autocall function
@@ -2086,6 +2089,7 @@ signature.
 Some examples of valid XSUB parameter declarations:
 
     char *foo             # parameter with type
+    Foo::Bar foo          # parameter with Perl package type
     char *foo = "abc"     # default value
     char *foo = NO_INIT   # doesn't complain if arg missing
     OUT char *foo         # caller's arg gets updated
@@ -2132,6 +2136,32 @@ in a C<CODE> block or similar. Their values aren't normally returned.
 
 There are several variations on this basic pattern, which are explained in
 the following subsections.
+
+=head3 Fully-qualified type names and Perl objects
+
+    Foo::Bar
+    foo(Foo::Bar self, ...)
+
+Normally the type of an XUB's parameter or return value is a valid C type,
+such as C<"char *">. However you can also use Perl package names. When a
+type name includes a colon, it undergoes some extra processing; in
+particular, the actual type as emitted into the C file is transformed
+using C<s/:/_/g> (unless F<xsubpp> has been invoked with C<-hiertype>), so
+that a legal C type is present. The complete effects for a type of
+C<Foo::Bar> are as follows.
+
+The type string C<Foo::Bar> is looked up in the typemap I<as-is> to find
+the logical XS type; then the C<INPUT> and C<OUTPUT> typemap templates are
+expanded with the C<$ntype> variable set to C<"Foo::Bar"> and the C<$type>
+variable set to C<"Foo__Bar">. The declaration of the corresponding auto
+variables uses the modified type string, so the example above might
+result in these declarations in the C code:
+
+    Foo__Bar  RETVAL;
+    Foo__Bar  self   = ...;
+
+With the appropriate XS typemap entries and C typedefs, this can be used
+to assist in declaring XSUBs which are passed and return Perl objects.
 
 =head3 XSUB Parameter Placeholders
 
