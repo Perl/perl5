@@ -2867,6 +2867,11 @@ enum mem_log_type {
         MEM_WRAP_CHECK_(n,t) \
         perl_assert_ptr(d), \
         perl_assert_ptr(s), \
+        assert_( \
+            PTR2UV((char *)(d) + (n) * sizeof (t)) <= PTR2UV((const char *)(s)) \
+            || \
+            PTR2UV((const char *)(s) + (n) * sizeof (t)) <= PTR2UV((char *)(d)) \
+        ) \
         memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)) \
     )
 #define ZeroD(d,n,t)	\
