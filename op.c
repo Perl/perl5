@@ -6684,7 +6684,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     for (pass2 = 0; pass2 < 2; pass2++) {
         if (pass2) {
 
-            DEBUG_yv(PerlIO_printf(Perl_debug_log, "After pass1: \n");
+            DEBUG_y(PerlIO_printf(Perl_debug_log, "After pass1: \n");
                      invmap_dump(t_invlist, r_map));
 
             /* In the second pass, we start with a single range */
@@ -6817,7 +6817,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     r_range_count = t_range_count;
 
 #ifdef DEBUGGING
-                    if (DEBUG_y_TEST && ! del) {
+                    if (DEBUG_yv_TEST && ! del) {
                         PerlIO_printf(Perl_debug_log,
                                           "final_map = %" UVXf "\n", final_map);
                     }
