@@ -4969,6 +4969,12 @@ S	|OP *	|too_many_arguments_pv					\
 				|NN const char *name			\
 				|U32 flags
 S	|OP *	|voidnonfinal	|NULLOK OP *o
+# if defined(DEBUGGING)
+S	|const char *|get_displayable_tr_operand			\
+				|NN const U8 *s 			\
+				|STRLEN len				\
+				|bool is_utf8
+# endif
 #endif /* defined(PERL_IN_OP_C) */
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C)
 Ti	|bool	|PadnameIN_SCOPE|NN const PADNAME * const pn		\

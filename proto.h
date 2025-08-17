@@ -7556,6 +7556,13 @@ STATIC OP *
 S_voidnonfinal(pTHX_ OP *o);
 # define PERL_ARGS_ASSERT_VOIDNONFINAL
 
+# if defined(DEBUGGING)
+STATIC const char *
+S_get_displayable_tr_operand(pTHX_ const U8 *s, STRLEN len, bool is_utf8);
+#   define PERL_ARGS_ASSERT_GET_DISPLAYABLE_TR_OPERAND \
+        assert(s)
+
+# endif
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE bool
 S_is_standard_filehandle_name(const char *fhname);
