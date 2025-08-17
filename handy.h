@@ -2850,9 +2850,9 @@ enum mem_log_type {
 #define perl_assert_ptr(p) assert( ((void*)(p)) != 0 )
 
 
-#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), (void)memzero((char*)(d), (n) * sizeof(t)))
+#define Move(s,d,n,t)	((void)MoveD(s, d, n, t))
+#define Copy(s,d,n,t)	((void)CopyD(s, d, n, t))
+#define Zero(d,n,t)	((void)ZeroD(d, n, t))
 
 /* Like above, but returns a pointer to 'd' */
 #define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
