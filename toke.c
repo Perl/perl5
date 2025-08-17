@@ -4591,10 +4591,7 @@ S_intuit_more(pTHX_ char *s, char *e,
      * written, and regcurly never required a comma, as in {0}.  Probably it is
      * ok as-is */
     if (s[0] == '{') {
-        if (regcurly(s, e, NULL)) {
-            return FALSE;
-        }
-        return TRUE;
+        return ! regcurly(s, e, NULL);
     }
 
     /* Here is '[': maybe we have a character class.  Examine the guts */
