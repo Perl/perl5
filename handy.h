@@ -2855,9 +2855,26 @@ enum mem_log_type {
 #define Zero(d,n,t)	((void)ZeroD(d, n, t))
 
 /* Like above, but returns a pointer to 'd' */
-#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)))
+#define MoveD(s,d,n,t)	\
+    ( \
+        MEM_WRAP_CHECK_(n,t) \
+        perl_assert_ptr(d), \
+        perl_assert_ptr(s), \
+        memmove((char*)(d),(const char*)(s), (n) * sizeof(t)) \
+    )
+#define CopyD(s,d,n,t)	\
+    ( \
+        MEM_WRAP_CHECK_(n,t) \
+        perl_assert_ptr(d), \
+        perl_assert_ptr(s), \
+        memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)) \
+    )
+#define ZeroD(d,n,t)	\
+    ( \
+        MEM_WRAP_CHECK_(n,t) \
+        perl_assert_ptr(d), \
+        memzero((char*)(d), (n) * sizeof(t)) \
+    )
 
 #define NewCopy(s,d,n,t) STMT_START {   \
     Newx(d,n,t);                        \
