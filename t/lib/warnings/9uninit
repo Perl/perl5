@@ -2303,3 +2303,12 @@ Use of uninitialized value shift(@ARGV) in lc at - line 26.
 Use of uninitialized value shift() in lc at - line 27.
 Use of uninitialized value pop(@ARGV) in lc at - line 28.
 Use of uninitialized value pop() in lc at - line 29.
+########
+# GH #19273
+use warnings 'uninitialized';
+my $x = 'fine';
+$_ = builtin::refaddr($x) == 1;
+$_ = builtin::reftype($x) eq '';
+EXPECT
+Use of uninitialized value in numeric eq (==) at - line 4.
+Use of uninitialized value in string eq at - line 5.
