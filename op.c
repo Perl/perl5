@@ -6179,6 +6179,25 @@ Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
     }
 }
 
+#ifdef DEBUGGING
+
+static const char *
+S_get_displayable_tr_operand(pTHX_ const U8 * s, STRLEN len, bool is_utf8)
+{
+    SV * output = sv_2mortal(newSVpvs(""));
+    if (is_utf8) {
+        return pv_uni_display(output, s, len, 1000, UNI_DISPLAY_TR_);
+    }
+    else {
+        return pv_pretty(output, (const char *) s, len, 256, NULL, NULL,
+                         ( PERL_PV_ESCAPE_NONASCII
+                          |PERL_PV_PRETTY_LTGT
+                          |PERL_PV_PRETTY_ELLIPSES));
+    }
+}
+
+#endif
+
 /* Given an OP_TRANS / OP_TRANSR op o, plus OP_CONST ops expr and repl
  * containing the search and replacement strings, assemble into
  * a translation table attached as o->op_pv.
@@ -6528,6 +6547,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     PL_hints |= HINT_BLOCK_SCOPE;
 
+    DEBUG_y(PerlIO_printf(Perl_debug_log,
+                          "%s: %d: Compiling tr/*t/*r/; /c=%d; /d=%d; /s=%d\n"
+                          "*t is '%s'\n*r is '%s'\n",
+                          __FILE__, __LINE__, complement, del, squash,
+                          get_displayable_tr_operand(t0, tlen, tstr_utf8),
+                          get_displayable_tr_operand(r0, rlen, rstr_utf8)));
+
     /* If /c, the search list is sorted and complemented.  This is now done by
      * creating an inversion list from it, and then trivially inverting that.
      * The previous implementation used qsort, but creating the list
@@ -6608,6 +6634,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         t0 = t = (U8*)SvPV_const(inverted_tstr, temp_len);
         tend = t0 + temp_len;
         tstr_utf8 = TRUE;
+
+        DEBUG_y(PerlIO_printf(Perl_debug_log,
+                         "%s: %d: *t after complementing=\n%s\n",
+                         __FILE__, __LINE__,
+                         get_displayable_tr_operand(t0, temp_len, tstr_utf8)));
 
         SvREFCNT_dec_NN(inverted_tlist);
     }
@@ -6788,7 +6819,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 #ifdef DEBUGGING
                     if (DEBUG_y_TEST && ! del) {
                         PerlIO_printf(Perl_debug_log,
-                                          "final_map =%" UVXf "\n", final_map);
+                                          "final_map = %" UVXf "\n", final_map);
                     }
 #endif
                 }
@@ -6904,9 +6935,25 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * has been set up so that all members in it will be of the same
              * ilk) */
             if (r_map[i] == TR_UNLISTED) {
-                DEBUG_yv(PerlIO_printf(Perl_debug_log,
-                    "Processing %" UVxf "-%" UVxf " => %" UVxf "-%" UVxf "\n",
-                    t_cp, t_cp_end, r_cp, r_cp_end));
+
+#ifdef DEBUGGING
+                if (DEBUG_yv_TEST) {
+                    PerlIO_printf(Perl_debug_log,
+                                  "Processing %" UVxf "-%" UVxf " => ",
+                                  t_cp, t_cp_end);
+                    if (r_cp == r_cp_end && r_cp == TR_UNLISTED) {
+                        PerlIO_printf(Perl_debug_log, "TR_UNLISTED\n");
+                    }
+                    else if (r_cp == r_cp_end && r_cp == TR_SPECIAL_HANDLING) {
+                        PerlIO_printf(Perl_debug_log, "TR_SPECIAL_HANDLING\n");
+                    }
+                    else {
+                        PerlIO_printf(Perl_debug_log,
+                                      "%" UVxf "-%" UVxf "\n",
+                                      r_cp, r_cp_end);
+                    }
+                }
+#endif
 
                 /* This is the first definition for this chunk, hence is valid
                  * and needs to be processed.  Here and in the comments below,
@@ -7418,7 +7465,16 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                                 : (short) TR_R_EMPTY;
 #ifdef DEBUGGING
         if (DEBUG_y_TEST) {
-            PerlIO_printf(Perl_debug_log,"%s: %d\n", __FILE__, __LINE__);
+            PerlIO_printf(Perl_debug_log,
+                "\n%s: %d: Final generated translation table:\n    %"
+                IVdf " means this char not involved in this transliteration\n",
+                __FILE__, __LINE__, TR_UNLISTED);
+            if (del) {
+                PerlIO_printf(Perl_debug_log,
+                              "    %" IVdf " means delete this char\n",
+                              TR_SPECIAL_HANDLING);
+            }
+
             for (i = 0; i < tbl->size; i++) {
                 if (tbl->map[i] < 0) {
                     PerlIO_printf(Perl_debug_log," %02x=>%d",
@@ -7432,8 +7488,32 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     PerlIO_printf(Perl_debug_log,"\n");
                 }
             }
-            PerlIO_printf(Perl_debug_log,"Final map 0x%x=>%02x\n",
-                                    (unsigned) tbl->size, tbl->map[tbl->size]);
+
+            PerlIO_printf(Perl_debug_log,
+                         "The next (and final) byte ");
+            if ((UV) tbl->map[tbl->size] == TR_UNLISTED) {
+                PerlIO_printf(Perl_debug_log,
+                              " indicates no other characters are involved in"
+                              " the transliteration\n");
+            }
+            else if ((UV) tbl->map[tbl->size] == TR_SPECIAL_HANDLING) {
+                if (! del) {
+                    const int size = tbl->size;
+                    croak("panic: Unexpected value %x in [%d]",
+                          tbl->map[size], size);
+                }
+                else {
+                    PerlIO_printf(Perl_debug_log,
+                                  "indicates that all code points above"
+                                  " 0xFF are to be deleted\n");
+                }
+            }
+            else if ((UV) tbl->map[tbl->size] == TR_R_EMPTY) {
+                PerlIO_printf(Perl_debug_log, "is unused\n");
+            }
+            else {
+                PerlIO_printf(Perl_debug_log, "%x UNUSED\n", tbl->map[256]);
+            }
         };
 #endif
 

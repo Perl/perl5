@@ -1520,6 +1520,9 @@
 #     define too_few_arguments_pv(a,b,c)        S_too_few_arguments_pv(aTHX_ a,b,c)
 #     define too_many_arguments_pv(a,b,c)       S_too_many_arguments_pv(aTHX_ a,b,c)
 #     define voidnonfinal(a)                    S_voidnonfinal(aTHX_ a)
+#     if defined(DEBUGGING)
+#       define get_displayable_tr_operand(a,b,c) S_get_displayable_tr_operand(aTHX_ a,b,c)
+#     endif
 #   endif /* defined(PERL_IN_OP_C) */
 #   if defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C)
 #     define PadnameIN_SCOPE                    S_PadnameIN_SCOPE
