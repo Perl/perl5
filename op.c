@@ -6653,8 +6653,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     for (pass2 = 0; pass2 < 2; pass2++) {
         if (pass2) {
 
-            DEBUG_yv(PerlIO_printf(Perl_debug_log, "After pass1: \n"));
-            DEBUG_yv(invmap_dump(t_invlist, r_map));
+            DEBUG_yv(PerlIO_printf(Perl_debug_log, "After pass1: \n");
+                     invmap_dump(t_invlist, r_map));
 
             /* In the second pass, we start with a single range */
             t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
@@ -7211,8 +7211,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
                     DEBUG_yv(PerlIO_printf(Perl_debug_log,
                                         "Before fixing up: len=%d, i=%d\n",
-                                        (int) len, (int) i));
-                    DEBUG_yv(invmap_dump(t_invlist, r_map));
+                                        (int) len, (int) i);
+                             invmap_dump(t_invlist, r_map));
 
                     invlist_extend(t_invlist, len + 2);
                     t_array = invlist_array(t_invlist);
@@ -7234,10 +7234,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     r_map[i+2] = TR_UNLISTED;
                 }
                 DEBUG_yv(PerlIO_printf(Perl_debug_log,
-                          "After iteration: span=%" UVuf ", t_range_count=%"
-                          UVuf " r_range_count=%" UVuf "\n",
-                          span, t_range_count, r_range_count));
-                DEBUG_yv(invmap_dump(t_invlist, r_map));
+                                       "After iteration: span=%" UVuf
+                                       ", t_range_count=%" UVuf
+                                       " r_range_count=%" UVuf "\n",
+                                       span, t_range_count, r_range_count);
+                          invmap_dump(t_invlist, r_map));
             } /* End of this chunk needs to be processed */
 
             /* Done with this chunk. */
@@ -7266,8 +7267,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     SvREFCNT_dec(inverted_tstr);
 
-    DEBUG_y(PerlIO_printf(Perl_debug_log, "After everything: \n"));
-    DEBUG_y(invmap_dump(t_invlist, r_map));
+    DEBUG_y(PerlIO_printf(Perl_debug_log, "After everything: \n");
+            invmap_dump(t_invlist, r_map));
 
     /* We now have normalized the input into an inversion map.
      *
