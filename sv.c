@@ -17532,6 +17532,8 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_SYSOPEN:
     case OP_SYSSEEK:
     case OP_SPLICE: /* scalar splice(@x, $i, 0) ==> undef */
+    case OP_REFADDR:
+    case OP_REFTYPE:
         match = 1;
         goto do_op;
 
