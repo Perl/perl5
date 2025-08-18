@@ -2765,9 +2765,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                  PTR2UV(CvSTART(sv)));
                 else
                     Perl_dump_indent(aTHX_ level, file,
-                                 "  START = 0x%" UVxf " ===> %" IVdf "\n",
+                                 "  START = 0x%" UVxf " ===> %" UVuf "\n",
                                  PTR2UV(CvSTART(sv)),
-                                 (IV)sequence_num(CvSTART(sv)));
+                                 sequence_num(CvSTART(sv)));
             }
             Perl_dump_indent(aTHX_ level, file, "  ROOT = 0x%" UVxf "\n",
                              PTR2UV(CvROOT(sv)));
