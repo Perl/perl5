@@ -6855,7 +6855,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     const int filter_has_file = IoLINES(datasv);
     SV * const filter_state = MUTABLE_SV(IoTOP_GV(datasv));
     SV * const filter_sub = MUTABLE_SV(IoBOTTOM_GV(datasv));
-    int status = 0;
+    I32 status = 0;
     SV *upstream;
     STRLEN got_len;
     char *got_p = NULL;
