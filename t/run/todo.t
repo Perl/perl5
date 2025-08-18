@@ -26,7 +26,20 @@
 # significant amount of sophistication to use correctly.  It's best to start
 # out, if possible, by avoiding issues that crash the interpreter and need
 # these.
-
+#
+# Each test name should include the GH number.  While still todo, the software
+# displays the number, but after they're fixed, we will move them to a
+# permanent position in an appropriate test file, and the ticket number would
+# get lost.  You could do something like the following:
+#    TODO: {
+#       local $::TODO = "GH #####";
+#       is($got1, $expected1, "your text1 here: GH ####");
+#       is($got2, $expected2, 'your text2 here: GH ####');
+#       ...
+#    }
+#
+# or something else to get the number in the testname.
+#
 # Some domains have infrastructure which may make it easier to add a test
 # there, than to have to set up things here.  These include:
 #
