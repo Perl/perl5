@@ -5123,7 +5123,7 @@ PP_wrapped(pp_sleep, MAXARG, 0)
     if (MAXARG < 1 || (!TOPs && !POPs))
         PerlProc_pause();
     else {
-        const I32 duration = POPi;
+        const IV duration = POPi;
         if (duration < 0) {
           /* diag_listed_as: %s() with negative argument */
           ck_warner_d(packWARN(WARN_MISC),
