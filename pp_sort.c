@@ -1167,7 +1167,6 @@ static I32
 S_sortcv(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
-    I32 result;
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
     SV *olda, *oldb;
@@ -1191,7 +1190,11 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     /* entry zero of a stack is always PL_sv_undef, which
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
-    result = SvIV(*PL_stack_sp);
+    const IV iv = SvIV(*PL_stack_sp);
+    const I32 result =
+        iv > 0 ? 1 :
+        iv < 0 ? -1 :
+        0;
     rpp_popfree_to_NN(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
@@ -1206,7 +1209,6 @@ static I32
 S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
-    I32 result;
     AV * const av = GvAV(PL_defgv);
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
@@ -1256,7 +1258,11 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     /* entry zero of a stack is always PL_sv_undef, which
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
-    result = SvIV(*PL_stack_sp);
+    const IV iv = SvIV(*PL_stack_sp);
+    const I32 result =
+        iv > 0 ? 1 :
+        iv < 0 ? -1 :
+        0;
     rpp_popfree_to_NN(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
@@ -1273,7 +1279,6 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
-    I32 result;
     PMOP * const pm = PL_curpm;
 
     PERL_ARGS_ASSERT_SORTCV_XSUB;
@@ -1291,7 +1296,11 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     /* entry zero of a stack is always PL_sv_undef, which
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
-    result = SvIV(*PL_stack_sp);
+    const IV iv = SvIV(*PL_stack_sp);
+    const I32 result =
+        iv > 0 ? 1 :
+        iv < 0 ? -1 :
+        0;
     rpp_popfree_to_NN(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
