@@ -6636,10 +6636,11 @@ PP_wrapped(pp_reverse, 0, 1)
                         continue;
                     }
                     else {
-                        if (!utf8_to_uvchr_buf(s, send, 0))
+                        Size_t advance = isUTF8_CHAR(s, send);
+                        if (advance == 0)
                             break;
                         up = (char*)s;
-                        s += UTF8SKIP(s);
+                        s += advance;
                         down = (char*)(s - 1);
                         /* reverse this character */
                         while (down > up) {
