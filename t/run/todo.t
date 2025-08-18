@@ -138,6 +138,38 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 16364';
+
+    my @arr;
+    my sub foo {
+        unshift @arr, 7;
+        $_[0] = 3;
+    }
+
+    @arr = ();
+    $arr[1] = 1;
+    foo($arr[0]);
+    is($arr[1], 3,
+       'Array element within array range created at correct index from subroutine @_ alias; GH 16364');
+
+    @arr = ();
+    $arr[1] = 1;
+    foo($arr[5]);
+    is($arr[6], 3,
+       'Array element outside array range created at correct index from subroutine @_ alias; GH 16364');
+
+    @arr = ();
+    $arr[1] = 1;
+    foreach (@arr) {
+        unshift @arr, 7;
+        $_ = 3;
+        last;
+    }
+    is($arr[1], 3, 'Array element created at correct index from foreach $_ alias; GH 16364');
+
+}
+
+TODO: {
     local $::TODO = 'GH 16865';
     fresh_perl('\(sort { 0 } 0, 0 .. "a")', { stderr => 'devnull' });
     is($?, 0, "No assertion failure");
