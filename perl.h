@@ -1700,8 +1700,15 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
  * multiple of PTRSIZE, for a minimum of PERL_STRLEN_NEW_MIN. This is
  * not entirely useless, just not terribly accurate.
  */
-#define expected_size(n) ( ((n) > PERL_STRLEN_NEW_MIN)               \
-                            ? (((n) + PTRSIZE - 1) & ~(PTRSIZE - 1)) \
+#define expected_size(n) ( ((n) > PERL_STRLEN_NEW_MIN)                                     \
+                            ? (                                                            \
+                                (void)(                                                    \
+                                    (MEM_SIZE)(n) > MEM_SIZE_MAX - (PTRSIZE - 1)           \
+                                        ? (croak_memory_wrap(), 0)                         \
+                                        : 0                                                \
+                                ),                                                         \
+                                ((MEM_SIZE)(n) + (PTRSIZE - 1)) & ~(MEM_SIZE)(PTRSIZE - 1) \
+                            )                                                              \
                             : PERL_STRLEN_NEW_MIN )
 
 /* This use of offsetof() requires /Zc:offsetof- for VS2017 (and presumably
