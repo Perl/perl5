@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('.', '../lib');
 }
 
-plan (197);
+plan (198);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -718,4 +718,19 @@ fresh_perl_is('my @x;$x[0] = 1;shift @x;$x[22] = 1;$x[25] = 1;','',
     my @i;
     $y = @x[2, 3, @i];
     is $y, 'd', 'Empty array final element in array slice in scalar context';
+}
+
+#GH #16364
+{
+    my @arr;
+    my sub foo {
+        unshift @arr, 7;
+        $_[0] = 3;
+    }
+
+    @arr = ();
+    $arr[1] = 1;
+    foo($arr[0]);
+    is($arr[1], 3,
+       'Array element within array range created at correct index from subroutine @_ alias; GH 16364');
 }
