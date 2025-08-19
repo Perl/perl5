@@ -3646,7 +3646,32 @@ or C<INTERFACE>; in this case, the attributes are just silently ignored.
 
 =head2 Sharing XSUB bodies
 
-XXX TBC
+Sometimes you want to write several XSUBs which are very similar: they
+all have the same signature, have the same generated code to convert
+arguments and return values between Perl and C, and may only differ in a
+few lines in the main body or in which C library function they wrap. It is
+in fact possible to share the same XSUB function among multiple Perl CVs.
+For example, C<&Foo::Bar::add> and C<&Foo::Bar::subtract> could be two
+separate CVs in the Perl namespace which both point to the same XSUB,
+C<XS_Foo__Bar__add()> say. But each CV holds some sort of unique
+identifier which can be accessed by the XSUB so that it can determine
+whether it should behave as C<add> or C<subtract>.
+
+Both the C<ALIAS> and C<INTERFACE> keywords (described below) allow
+multiple CVs to share the same XSUB. The difference between them is that
+C<ALIAS> is intended for when you supply the main body of the XSUB
+yourself (e.g. using C<CODE>): it sets an integer variable, C<ix> (derived
+from the passed CV), which you can use in a C<switch()> statement or
+similar. Conversely, C<INTERFACE> is intended for use with autocall;
+information stored in the CV indicates which C library function should be
+autocalled.
+
+Finally, there is the C<CASE> keyword,  which allows the whole body of an
+XSUB (not just the C<CODE> part) to have alternate cases. It can be
+thought of as a C<switch()> analogue which works at the top-most XS level
+rather than at the C level. The value the C<CASE> acts on could be
+C<items> for example, or it could be used in conjunction with the C<ALIAS>
+keyword and switch on the value of C<ix>.
 
 =head3 The ALIAS: Keyword
 
