@@ -469,18 +469,20 @@ cmp_ok  0x3ffffffffffffffe % -0xc000000000000000, '==', -0x8000000000000002, 'mo
 cmp_ok  0x3fffffffffffffff % -0xc000000000000000, '==', -0x8000000000000001, 'modulo is (IV_MIN-1)';
 cmp_ok  0x4000000000000000 % -0xc000000000000000, '==', -0x8000000000000000, 'modulo is IV_MIN';
 
-# Arithmetic close to IV overflow
+# Arithmetic close to IV overflow [GH 23503]
 
 # These had been handled in generic (slower) code, but now in fast path
-# (as "simple common case").  Either way, these tests should pass.
+# (as "simple common case") after [GH 23503].
+# Either way, these tests should pass.
 $q = 9223372036854775800;
 cmp_ok 5 + $q, '==', 9223372036854775805, "5 + $q";
 cmp_ok $q - -5, '==', 9223372036854775805, "$q - -5";
 $q = 1111111111111111111;
 cmp_ok $q * 5, '==', 5555555555555555555, "$q * 5";
 
-# IV <op> IV -> UV/NV promotion
+# IV <op> IV -> UV/NV promotion [GH 23503]
 
+# These tests should pass invariably before and after [GH 23503].
 $q = 7777777777777777777;
 $r = 2222222222222222223;
 # Note 10000000000000000000 can be represented accurately in both
