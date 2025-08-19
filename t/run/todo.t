@@ -206,12 +206,6 @@ TODO: {
 
     @arr = ();
     $arr[1] = 1;
-    foo($arr[0]);
-    is($arr[1], 3,
-       'Array element within array range created at correct index from subroutine @_ alias; GH 16364');
-
-    @arr = ();
-    $arr[1] = 1;
     foo($arr[5]);
     is($arr[6], 3,
        'Array element outside array range created at correct index from subroutine @_ alias; GH 16364');
