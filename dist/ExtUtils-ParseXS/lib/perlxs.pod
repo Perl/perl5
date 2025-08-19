@@ -3675,69 +3675,78 @@ keyword and switch on the value of C<ix>.
 
 =head3 The ALIAS: Keyword
 
-XXX this keyword can appear anywhere within the body of an XSUB.
-
-The ALIAS: keyword allows an XSUB to have two or more unique Perl names
-and to know which of those names was used when it was invoked.  The Perl
-names may be fully-qualified with package names.  Each alias is given an
-index.  The compiler will setup a variable called C<ix> which contain the
-index of the alias which was used.  When the XSUB is called with its
-declared name C<ix> will be 0.
-
-The following example will create aliases C<FOO::gettime()> and
-C<BAR::getit()> for this function.
-
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
+    int add(int x, int y)
       ALIAS:
-        FOO::gettime = 1
-        BAR::getit   = 2
-      INIT:
-        printf("# ix = %d\n", ix);
-      OUTPUT:
-        timep
+        # implicit: add = 0
+        subtract = 1
+        multiply = 2  divide = 3
+      CODE:
+        switch (ix) { ... }
 
-A warning will be produced when you create more than one alias to the same
-value. This may be worked around in a backwards compatible way by creating
-multiple defines which resolve to the same value, or with a modern version
-of ExtUtils::ParseXS you can use a symbolic alias, which are denoted with
-a C<< => >> instead of a C<< = >>. For instance you could change the above
-so that the alias section looked like this:
+Note that this keyword can appear anywhere within the body of an XSUB.
+
+The C<ALIAS> keyword allows a single XSUB to have two or more Perl names
+and to know which of those names was used when it was invoked. Each alias
+is given an integer index value, with the main name of the XSUB being
+index 0. This index is accessible via the variable C<ix> which is
+initialised based on which CV (i.e. which Perl subroutine) was called.
+
+Note that an XSUB may be shared by multiple CVs, and each CV may have
+multiple names. Given the C<add> XSUB definition above, and given this
+Perl code:
+
+    use Foo::Bar;
+    BEGIN { *addition = *add }
+
+Then in the C<Foo::Bar> namespace, the entries C<add> and C<addition>
+point to the same CV, which has index 0 stored in it; while C<subtract>
+points to a second CV with index 1, and so on. All four CVs point to the
+same C function, C<XS_Foo__Bar__add()>.
+
+The alias name can be either a simple function name or can include a
+package name. The alias value to the right of the C<=> may be either a
+literal positive integer or a word (which is expected to be a CPP define).
+
+The rest of the line following the C<ALIAS> keyword, plus any further
+lines until the next keyword, are assumed to contain zero or more alias
+name and value pairs.
+
+A warning will be produced if you create more than one alias to the same
+index value. If you want multiple aliases with the same value, then a
+backwards-compatible way of achieving this is via separate CPP defines to
+the same value, e.g.
+
+    #define DIVIDE   3
+    #define DIVISION 3
 
     ALIAS:
-      FOO::gettime =  1
-      BAR::getit   =  2
-      BAZ::gettime => FOO::gettime
+      divide   = DIVIDE
+      division = DIVISION
 
-this would have the same effect as this:
+Since Perl 5.38.0 or C<ExtUtils::ParseXS> 3.51, alias values may refer to
+other alias names (or to the main function name) by using C<< => >> rather
+than the C<=> symbol:
 
     ALIAS:
-      FOO::gettime = 1
-      BAR::getit   = 2
-      BAZ::gettime = 1
+      divide   =  3
+      division => divide
 
-except that the latter will produce warnings during the build process. A
-mechanism that would work in a backwards compatible way with older
-versions of our tool chain would be to do this:
+Both alias names and C<< => >> values may be fully-qualified:
 
-    #define FOO_GETTIME 1
-    #define BAR_GETIT   2
-    #define BAZ_GETTIME 1
+    ALIAS:
+      red         =  1
+      COLOR::red  => red
+      COLOUR::red => COLOR::red
 
-    bool_t
-    rpcb_gettime(host, timep)
-        char   *host
-        time_t &timep
-      ALIAS:
-        FOO::gettime = FOO_GETTIME
-        BAR::getit   = BAR_GETIT
-        BAZ::gettime = BAZ_GETTIME
-      INIT:
-        printf("# ix = %d\n", ix);
-      OUTPUT:
-        timep
+Note that any L<PREFIX|/The MODULE Declaration> is applied to the main
+name of the XSUB, but not to any aliases.
+
+See L</T_PTROBJ and opaque handles> for a fully-worked example using
+aliases.
+
+See L<INTERFACE|/The INTERFACE: Keyword> below for an alternative to
+C<ALIAS> which is more suited for autocall. Note that C<ALIAS> should not
+be used together with either of C<INTERFACE> or C<ATTRS>.
 
 =head3 The INTERFACE: Keyword
 
