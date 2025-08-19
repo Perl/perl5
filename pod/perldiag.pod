@@ -5228,6 +5228,12 @@ was string.
 
 (P) The compiler attempted to do a goto, or something weird like that.
 
+=item panic! %s: %d: Tried to warn when none expected at '%s'
+
+(P) The regex engine tried to emit a warning for a temporary regex that it
+generated internally. This should never happen because any regex thus generated
+should be correct and free of warnings.
+
 =item panic: unexpected constant lvalue entersub entry via type/targ %d:%d
 
 (P) When compiling a subroutine call in lvalue context, Perl failed an
