@@ -8484,7 +8484,7 @@ However, this:
 uses empty string matches as separators; thus, the empty string
 may be used to split EXPR into a list of its component characters.
 
-As a special case for C<split>PATTERNE<sol>,EXPR,LIMIT>,
+As a special case for C<split>,
 the empty pattern given in
 L<match operator|perlop/"m/PATTERN/msixpodualngc"> syntax (C<//>)
 specifically matches the empty string, which is contrary to its usual
@@ -8499,7 +8499,7 @@ C<E<sol>m> and any of the other pattern modifiers valid for C<qr>
 specified explicitly.
 
 As another special case,
-C<split>PATTERNE<sol>,EXPR,LIMIT> emulates the default
+C<split> emulates the default
 behavior of the
 command line tool B<awk> when the PATTERN is either omitted or a
 string composed of a single space character (such as S<C<' '>> or
