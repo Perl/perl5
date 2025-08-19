@@ -108,6 +108,29 @@ my $is_debugging_build = $Config{cppflags} =~ /-DDEBUGGING/;
 our $TODO;
 
 TODO: {
+    local $::TODO = 'GH 1420';
+
+    my $data = <<~"HERE";
+        AMAZING BUT TRUE ...
+
+        There is so much sand in Northern Africa that if it were spread out it
+        would completely cover the Sahara Desert.
+        HERE
+
+    my $fh = do {
+        local *FH;
+        open(FH, '<', \$data);
+        *FH{IO};
+    };
+    0 while <$fh>;
+    my $lc = $.;
+    close($fh);
+
+    is($lc, 4, 'Correct line count reported from $. when reading from *FH{IO}; GH 1420');
+
+}
+
+TODO: {
     local $::TODO = 'GH 5835';
     my $prev_w = $^W;
     $^W = 1;
