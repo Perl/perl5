@@ -12,7 +12,7 @@ use TestInit qw(T); # T is chdir to the top level
 use warnings;
 use strict;
 use Config;
-use Data::Dumper;
+#use Data::Dumper;
 require './t/test.pl';
 
 if ( $Config{usecrosscompile} ) {
@@ -56,9 +56,9 @@ push @functions, 'Perl_mess';
 @functions = sort { length($b) <=> length($a) || $a cmp $b } @functions;
 push @functions, 'PERL_DIAG_(?<wrapper>\w+)';
 
-my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
+my $regcomp_func_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
 my $regcomp_re =
-   "(?<routine>ckWARN(?:\\d+)?reg\\w*|vWARN\\d+|$regcomp_fail_re)";
+   "(?<routine>ckWARN(?:\\d+)?reg\\w*|vWARN\\d+|$regcomp_func_re)";
 my $function_re = join '|', @functions;
 my $source_msg_re =
    "(?<routine>\\bDIE\\b|$function_re)";
@@ -69,7 +69,7 @@ my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     (?:(?<category>WARN_DEPRECATED__\w+)\s*,(?:\s*(?<version_string>"[^"]+")\s*,)?)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
-   $regcomp_fail_re = qr/$regcomp_fail_re\([^"]*$text_re/;
+my $regcomp_fail_re = qr/$regcomp_func_re\([^"]*$text_re/;
 my $regcomp_call_re = qr/$regcomp_re.*?$text_re/;
 
 my %entries;
@@ -332,20 +332,36 @@ sub check_file {
         }
       }
     }
-    next if /^#/;
+    if (/^#/) {
+      if (/^#\h*define\h+$regcomp_func_re/) {
+        # skip over entire definition of (v)FAIL macro
+        while (defined && m!\\$!) {
+          $_ = <$codefh>;
+        }
+      }
+      next;
+    }
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
-    if (m/(?!^)\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\((?<tail>(?:[^()]+|\([^()]+\))+\))?/
+    if (m/(?!^)\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\((?<tail>(?:[^()]|\([^()]*\))*\))?/
         and !$+{tail}
     ) {
       while (not m/\);\s*$/) {
-        my $nextline = <$codefh>;
+        my $nextchar = getc $codefh;
         # Means we fell off the end of the file.  Not terribly surprising;
         # this code tries to merge a lot of things that aren't regular C
         # code (preprocessor stuff, long comments).  That's OK; we don't
         # need those anyway.
-        last if not defined $nextline;
+        last if not defined $nextchar;
+
+        # If the next line is a preprocessor directive (starts with '#'), we
+        # stop without consuming it and let the next iteration of the outer
+        # loop handle it.
+        $codefh->ungetc(ord $nextchar);
+        last if $nextchar eq '#';
+
+        my $nextline = readline $codefh;
         chomp $nextline;
         $nextline =~ s/^\s+//;
         $_ =~ s/\\$//;
@@ -475,12 +491,12 @@ sub check_file {
 
     next if $name=~/\[TESTING\]/; # ignore these as they are works in progress
 
-    check_message(standardize($name),$codefn,$severity,$categories);
+    check_message(standardize($name),$codefn,$first_line,$severity,$categories);
   }
 }
 
 sub check_message {
-    my($name,$codefn,$severity,$categories,$partial) = @_;
+    my($name,$codefn,$lineno,$severity,$categories,$partial) = @_;
     my $key = $name =~ y/\n/ /r;
     my $ret;
 
@@ -511,7 +527,7 @@ sub check_message {
           # There is no listing, but it is in the list of exceptions.  TODO FAIL.
           fail($key);
           diag(
-            "    Message '$name'\n    from $codefn line $. is not listed in $pod\n".
+            "    Message '$name'\n    from $codefn line $lineno is not listed in $pod\n".
             "    (but it wasn't documented in 5.10 either, so marking it TODO)."
           );
         }
@@ -538,7 +554,7 @@ sub check_message {
         like($entries{$key}{severity}, $qr,
           ($severity =~ /\[/
             ? "severity is one of $severity"
-            : "severity is $severity") . " for '$name' at $codefn line $.$pod_line")
+            : "severity is $severity") . " for '$name' at $codefn line $lineno$pod_line")
         or do {
             if ($severity=~/D/ and $entries{$key}{severity}=~/W/) {
                 diag("You should change W to D if this is a deprecation");
@@ -547,7 +563,7 @@ sub check_message {
 
         is($entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
-             . " for '$name' at $codefn line $.$pod_line");
+             . " for '$name' at $codefn line $lineno$pod_line");
       }
     } elsif ($partial) {
       # noop
@@ -555,7 +571,7 @@ sub check_message {
       my $ok;
       if ($name =~ /\n/) {
         $ok = 1;
-        check_message($_,$codefn,$severity,$categories,1) or $ok = 0, last
+        check_message($_,$codefn,$lineno,$severity,$categories,1) or $ok = 0, last
           for split /\n/, $name;
       }
       if ($ok) {
@@ -571,7 +587,7 @@ sub check_message {
         # No listing found, and no excuse either.
         # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
         fail($name);
-        diag("    Message '$name'\n    from $codefn line $. is not listed in $pod");
+        diag("    Message '$name'\n    from $codefn line $lineno is not listed in $pod");
       }
       # seen it, so only fail once for this message
       $entries{$name}{seen}++;
