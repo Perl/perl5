@@ -27,6 +27,9 @@
 // #define _USE_BUDDY_BLOCKS
 
 // #define _DEBUG_MEM
+
+static void * do_crt_invalid_parameter(void);
+
 #ifdef _DEBUG_MEM
 #define ASSERT(f) if(!(f)) DebugBreak();
 
@@ -98,6 +101,14 @@ inline void MEMODSlx(char *str, long x)
  */
 
 #ifdef _USE_LINKED_LIST
+
+#  if defined(__GNUC__)
+#    define VMEM_FORCE_NOINLINE __attribute__((__noinline__))
+#  elif defined(_MSC_VER)
+#    define VMEM_FORCE_NOINLINE __declspec(noinline)
+#  else
+#    error "Unknown C compiler family type"
+#endif
 class VMemNL; /* NL = no locks */
 class VMem;
 
@@ -140,6 +151,7 @@ public:
     void* Malloc(size_t size);
     void* Realloc(void* pMem, size_t size);
     void Free(void* pMem);
+    void* Calloc(size_t num, size_t size);
     void GetLock(void);
     void FreeLock(void);
     int IsLocked(void);
@@ -151,15 +163,26 @@ public:
         return TRUE;
     };
 
+#ifdef _USE_LINKED_LIST
+    VMEM_FORCE_NOINLINE void* DispatchWrongPool(PMEMORY_BLOCK_HEADER ptr);
+ /* Retval is NULL. Encourages CC to see a better ABI match, and maybe do
+    a tailcall in ::Realloc(), which would be the same as a real __noreturn
+    decl or ~0-4 CPU ops bigger. */
+#endif
+
 protected:
 #ifdef _USE_LINKED_LIST
+    /* prep work that can be done outside of the CS lock */
+    void PrepLinkBlock(PMEMORY_BLOCK_HEADER ptr)
+    {   /* these 2 of 3 ptrs are psuedo-const addrs into our VMem* obj */
+        ptr->pPrev = &m_Dummy; /* LL termination sentinal */
+        ptr->u.owner_nl = this;
+    }
     void LinkBlock(PMEMORY_BLOCK_HEADER ptr)
     {
         PMEMORY_BLOCK_HEADER next = m_Dummy.pNext;
         m_Dummy.pNext = ptr;
-        ptr->pPrev = &m_Dummy;
         ptr->pNext = next;
-        ptr->u.owner_nl = this;
         next->pPrev = ptr;
     }
     void UnlinkBlock(PMEMORY_BLOCK_HEADER ptr)
@@ -182,6 +205,9 @@ protected:
     CRITICAL_SECTION	m_cs;		// access lock
 #endif
     volatile long m_lRefCount;	// number of current users
+#ifdef _USE_LINKED_LIST
+    VMEM_FORCE_NOINLINE void* DispatchWrongPool(PMEMORY_BLOCK_HEADER ptr);
+#endif
 
 public:
     VMem();
@@ -190,6 +216,7 @@ public:
     void* Malloc(size_t size);
     void* Realloc(void* pMem, size_t size);
     void Free(void* pMem);
+    void* Calloc(size_t num, size_t size);
     void GetLock(void);
     void FreeLock(void);
     inline int IsLocked(void);
@@ -200,6 +227,9 @@ public:
 VMemNL::VMemNL(void)
 {
 #ifdef _USE_LINKED_LIST
+/* addr &m_Dummy happens to be (void*)&m_Dummy == (void*)(VMem*)this
+   the offset of member m_Dummy inside struct VMem {} is 0x00, and therefore
+   no U8 offset byte is present in machine code. */
     m_Dummy.pNext = m_Dummy.pPrev =  &m_Dummy;
     m_Dummy.u.owner_nl = this;
 #endif
@@ -208,10 +238,10 @@ VMemNL::VMemNL(void)
 
 VMem::VMem(void)
 {
+    m_lRefCount =  1;
 #ifdef _USE_LINKED_LIST
     InitializeCriticalSection(&m_cs);
 #endif _USE_LINKED_LIST
-    m_lRefCount =  1;
     return;
 }
 
@@ -252,8 +282,9 @@ void* VMemNL::Malloc(size_t size)
 
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)malloc(size+sizeof(MEMORY_BLOCK_HEADER));
     if (!ptr) {
-        return NULL;
+        return ptr; /* NULL */
     }
+    PrepLinkBlock(ptr);
     GetLock();
     LinkBlock(ptr);
     FreeLock();
@@ -282,6 +313,7 @@ void* VMemNL::Realloc(void* pMem, size_t size)
         FreeLock();
         return NULL;
     }
+    PrepLinkBlock(ptr);
     LinkBlock(ptr);
     FreeLock();
 
@@ -297,16 +329,7 @@ void VMemNL::Free(void* pMem)
     if (pMem) {
         PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
         if (ptr->u.owner_nl != this) {
-            if (ptr->u.owner_nl) {
-#if 1
-                int *nowhere = NULL;
-                Perl_warn_nocontext("Free to wrong pool %p not %p",this,ptr->u.owner_nl);
-                *nowhere = 0; /* this segfault is deliberate, 
-                                 so you can see the stack trace */
-#else
-                ptr->u.owner_nl->Free(pMem);
-#endif
-            }
+            DispatchWrongPool(ptr);
             return;
         }
         GetLock();
@@ -330,6 +353,47 @@ Win32 fixes-vmem.h hack to handle free-by-wrong-thread after eval "".
     free(pMem);
 #endif
 }
+
+void* VMemNL::Calloc(size_t num, size_t size)
+{
+#ifdef _USE_LINKED_LIST
+    PMEMORY_BLOCK_HEADER ptr;
+    size_t totalsize = num * size;
+    if (totalsize == 0) /* UCRT converts 0*0 to 1, and passed 1 to HeapAlloc */
+        ptr = (PMEMORY_BLOCK_HEADER)calloc(1, sizeof(MEMORY_BLOCK_HEADER));
+    else if (!((((size_t)0)-(0x20+sizeof(MEMORY_BLOCK_HEADER))) / num >= size))
+        return do_crt_invalid_parameter();
+    else
+        ptr = (PMEMORY_BLOCK_HEADER)calloc(1,totalsize+sizeof(MEMORY_BLOCK_HEADER));
+    if (ptr == NULL)
+        return ptr;
+    PrepLinkBlock(ptr);
+    GetLock();
+    LinkBlock(ptr);
+    FreeLock();
+    return (ptr+1);
+#else
+    return calloc(num, size);
+#endif
+}
+
+#ifdef _USE_LINKED_LIST
+void* VMemNL::DispatchWrongPool(PMEMORY_BLOCK_HEADER ptr)
+{
+            if (ptr->u.owner_nl) {
+#if 1
+                int *nowhere = NULL;
+                Perl_warn_nocontext("Free to wrong pool %p not %p",this,ptr->u.owner_nl);
+                *nowhere = 0; /* this segfault is deliberate, 
+                                 so you can see the stack trace */
+#else
+                void *pMem = (ptr+1); /* recreate the ptr interp was using */
+                ptr->u.owner_nl->Free(pMem);
+#endif
+            }
+            return NULL;
+}
+#endif /*_USE_LINKED_LIST*/
 
 #endif
 
@@ -556,6 +620,7 @@ public:
     void* Malloc(size_t size);
     void* Realloc(void* pMem, size_t size);
     void Free(void* pMem);
+    void* Calloc(size_t num, size_t size);
     void GetLock(void);
     void FreeLock(void);
     inline int IsLocked(void);
@@ -733,6 +798,26 @@ void VMem::Init(void)
 
     m_nHeaps = 0;
     m_lAllocSize = lAllocStart;
+}
+
+void* Calloc(size_t num, size_t size)
+{
+    void * ptr;
+    size_t totalsize = num * size;
+    if (totalsize == 0) {       /* UCRT converts 0*0 to 1 */
+        char * pv = Malloc(1);  /* and passes 1 to HeapAlloc */
+        if (pv)
+            pv[0] = 0xFE; /* don't '\0' it, instead poison it (WinPerl invented) */
+        ptr = (void*)pv; /* ask for 0 bytes? you get 0 bytes! no '\0' for you */
+    } /* this overflow check is supposedly the same one a real MS CRT uses */
+    else if (!(( ((size_t)0) - 0x20) / num >= size))
+        return do_crt_invalid_parameter();
+    else {
+        ptr = Malloc(totalsize);
+        if (ptr)
+            ptr = memset(ptr, 0, totalsize);
+    }
+    return ptr;
 }
 
 void* VMem::Malloc(size_t size)
@@ -1397,6 +1482,72 @@ void VMem::WalkHeap(int complete)
 #endif	/* _DEBUG_MEM */
 
 #endif	/* _USE_MSVCRT_MEM_ALLOC */
+
+
+#ifndef STATUS_DLL_NOT_FOUND
+#  define STATUS_DLL_NOT_FOUND 0xC0000135
+#endif
+
+#ifndef STATUS_PROCEDURE_NOT_FOUND
+#  define STATUS_PROCEDURE_NOT_FOUND 0xC000007A
+#endif
+
+typedef void(__cdecl * inv_arg_t)(void);
+typedef void(__cdecl * inv_arg_noinfo_t)(void);
+
+/* Emulate CRT's UI behavior upon failure. In real world testing on various
+   MS CRT versions & ages _invalid_parameter() and _invalid_parameter_noinfo()
+   are no_return'es/SEGV'es but maybe the very rare "checked" or debug MS CRTs
+   allow resuming execution. */
+
+static void *
+do_crt_invalid_parameter(void)
+{
+    static inv_arg_t g_inv_arg = NULL;
+    static inv_arg_noinfo_t g_inv_arg_noinfo = NULL;
+    inv_arg_t inv_arg;
+
+    errno = ENOMEM;
+    inv_arg = g_inv_arg;
+    if (!inv_arg) {
+        inv_arg_noinfo_t inv_arg_noinfo = g_inv_arg_noinfo;
+        if (!inv_arg_noinfo) {
+            char ** ppv = _sys_errlist; /* get a ptr into the CRT's .rdata */
+            HMODULE h;
+            BOOL r = GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCSTR)ppv, &h);
+            if (r) {
+                inv_arg = (inv_arg_t)GetProcAddress(h, "_invalid_parameter");
+                if (!inv_arg) {
+                    inv_arg_noinfo =
+                        (inv_arg_noinfo_t)GetProcAddress(h, "_invalid_parameter_noinfo");
+                    if (!inv_arg_noinfo) {
+                        /* 0 = continuable, 0 = no args array ptr in arg 4 */
+                        RaiseException(STATUS_PROCEDURE_NOT_FOUND, 0, 0, NULL);
+                    }
+                    else {
+                        g_inv_arg_noinfo = inv_arg_noinfo;
+                        goto do_inv_arg_noinfo;
+                    }
+                }
+                else {
+                    g_inv_arg = inv_arg;
+                    goto do_inv_arg;
+                }
+            }
+            else /* throw a SEGV-style GUI popup, crash code says its not a SEGV */
+                RaiseException(STATUS_DLL_NOT_FOUND, 0, 0, NULL);
+        }
+        else {
+            do_inv_arg_noinfo:
+            inv_arg_noinfo();
+        }
+    }
+    else {
+        do_inv_arg:
+        inv_arg();
+    }
+    return NULL;
+}
 
 #define ___VMEM_H_INC___
 

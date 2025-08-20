@@ -66,14 +66,7 @@ public:
     inline void* Malloc(size_t size) { return m_VMem.Malloc(size); };
     inline void* Realloc(void* ptr, size_t size) { return m_VMem.Realloc(ptr, size); };
     inline void Free(void* ptr) { m_VMem.Free(ptr); };
-    inline void* Calloc(size_t num, size_t size)
-    {
-        size_t count = num*size;
-        void* lpVoid = Malloc(count);
-        if (lpVoid)
-            lpVoid = memset(lpVoid, 0, count);
-        return lpVoid;
-    };
+    inline void* Calloc(size_t num, size_t size) { return m_VMem.Calloc(num, size); }
     inline void GetLock(void) { m_VMem.GetLock(); };
     inline void FreeLock(void) { m_VMem.FreeLock(); };
     inline int IsLocked(void) { return m_VMem.IsLocked(); };
@@ -107,11 +100,11 @@ public:
     };
     inline void* CallocShared(size_t num, size_t size)
     {
-        size_t count = num*size;
-        void* lpVoid = MallocShared(count);
-        if (lpVoid)
-            lpVoid = memset(lpVoid, 0, count);
-        return lpVoid;
+        void *result;
+        GetLockShared();
+        result = m_pVMemShared->Calloc(num, size);
+        FreeLockShared();
+        return result;
     };
 
 /* IPerlMemParse */
@@ -124,14 +117,7 @@ public:
     inline void* MallocParse(size_t size) { return m_pVMemParse->Malloc(size); };
     inline void* ReallocParse(void* ptr, size_t size) { return m_pVMemParse->Realloc(ptr, size); };
     inline void FreeParse(void* ptr) { m_pVMemParse->Free(ptr); };
-    inline void* CallocParse(size_t num, size_t size)
-    {
-        size_t count = num*size;
-        void* lpVoid = MallocParse(count);
-        if (lpVoid)
-            lpVoid = memset(lpVoid, 0, count);
-        return lpVoid;
-    };
+    inline void* CallocParse(size_t num, size_t size){ return m_pVMemParse->Calloc(num, size); };
 
 /* IPerlEnv */
     char *Getenv(const char *varname);
@@ -190,6 +176,18 @@ public:
 
 public:
 
+    inline char* MapPathA(const char *pInName) { return m_vDir.MapPathA(pInName); };
+    inline WCHAR* MapPathW(const WCHAR *pInName) { return m_vDir.MapPathW(pInName); };
+    inline operator VDir* () { return GetDir(); };
+
+protected:
+
+    VMemNL  m_VMem; /* make this 1st member of CPerlHost* struct, highest use */
+    VMem*   m_pVMemShared;
+    VMem*   m_pVMemParse;
+
+public:
+
     const struct IPerlMem*	    m_pHostperlMem;
     const struct IPerlMem*	    m_pHostperlMemShared;
     const struct IPerlMem*	    m_pHostperlMemParse;
@@ -200,14 +198,7 @@ public:
     const struct IPerlSock*	    m_pHostperlSock;
     const struct IPerlProc*	    m_pHostperlProc;
 
-    inline char* MapPathA(const char *pInName) { return m_vDir.MapPathA(pInName); };
-    inline WCHAR* MapPathW(const WCHAR *pInName) { return m_vDir.MapPathW(pInName); };
-    inline operator VDir* () { return GetDir(); };
 protected:
-    VMemNL  m_VMem;
-    VMem*   m_pVMemShared;
-    VMem*   m_pVMemParse;
-
     LPSTR*  m_lppEnvList;
     DWORD   m_dwEnvCount;
     BOOL    m_bTopLevel;	// is this a toplevel host?

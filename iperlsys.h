@@ -800,6 +800,12 @@ struct IPerlLIOInfo
     Interface for perl memory allocation
 */
 
+/* let CPAN conditionally know if these brand new macros are available:
+        PerlMem_calloc PerlMemShared_calloc PerlMemParse_calloc
+   note, we must always define this macro, regardless if the build config
+   is using these vtables, or this file NOOPs itself to the OS's libc */
+#define PERL_IMPLICIT_SYS_HAS_CALLOC 1
+
 #if defined(PERL_IMPLICIT_SYS)
 
 /* IPerlMem             */
