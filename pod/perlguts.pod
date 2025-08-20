@@ -3582,7 +3582,7 @@ for putting a UV into UTF-8:
 
     if (!UVCHR_IS_INVARIANT(uv))
         /* Must treat this as UTF8 */
-        utf8 = uvchr_to_utf8(utf8, uv);
+        utf8 = uv_to_utf8(utf8, uv);
     else
         /* OK to treat this character as a byte */
         *utf8++ = uv;
@@ -3801,7 +3801,7 @@ unless C<UTF8_IS_INVARIANT(*s)> in which case you can use C<*s>.
 =item *
 
 When writing a character UV to a UTF-8 string, B<always> use
-C<uvchr_to_utf8>, unless C<UVCHR_IS_INVARIANT(uv))> in which case
+C<uv_to_utf8>, unless C<UVCHR_IS_INVARIANT(uv))> in which case
 you can use C<*s = uv>.
 
 =item *
