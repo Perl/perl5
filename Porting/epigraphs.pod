@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.2 - David Weber, "On Basilisk Station"
+
+L<Announced on 2025-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/08/msg270238.html>
+
+  "The bigger the lie, apparently, the more likely the uninformed were to
+  accept it, simply because they couldn't believe any government would tell
+  such an absurd story unless it were true."
+
 =head2 v5.43.1 - Ed Conway, "Material World"
 
 L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2025/07/msg270117.html>
