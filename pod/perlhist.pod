@@ -823,10 +823,11 @@ the strings?).
             5.42.0-RC2   2025-Jun-27
             5.42.0-RC3   2025-Jul-01
 
- Philippe  5.42.0        2025-Jul-03
+ Philippe   5.42.0       2025-Jul-03
 
  Philippe   5.43.0       2025-Jul-03     The 5.43 development track
  Richard L  5.43.1       2025-Jul-20
+ Ether      5.43.2       2025-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
