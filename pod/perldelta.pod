@@ -500,6 +500,11 @@ and
 
 These have been fixed.  [GH #23405]
 
+=item *
+
+Several error conditions in the C<pack> and C<unpack> operations were
+not detected and now are.
+
 =back
 
 =head1 Known Problems
