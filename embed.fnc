@@ -875,10 +875,10 @@ Adp	|OP *	|ck_entersub_args_proto_or_list 			\
 
 CPop	|bool	|ckwarn 	|U32 w
 CPop	|bool	|ckwarn_d	|U32 w
-Adfpv	|void	|ck_warner	|U32 err				\
+Adfp	|void	|ck_warner	|U32 err				\
 				|NN const char *pat			\
 				|...
-Adfpv	|void	|ck_warner_d	|U32 err				\
+Adfp	|void	|ck_warner_d	|U32 err				\
 				|NN const char *pat			\
 				|...
 
@@ -928,7 +928,7 @@ px	|void	|create_eval_scope					\
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Adfprv	|void	|croak		|NULLOK const char *pat 		\
 				|...
-Tfprv	|void	|croak_caller	|NULLOK const char *pat 		\
+Tfpr	|void	|croak_caller	|NULLOK const char *pat 		\
 				|...
 CTrs	|void	|croak_memory_wrap
 Tpr	|void	|croak_no_mem
@@ -1179,7 +1179,7 @@ Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Adhp	|void	|dump_eval
 Adp	|void	|dump_form	|NN const GV *gv
-Cfpv	|void	|dump_indent	|I32 level				\
+Cfp	|void	|dump_indent	|I32 level				\
 				|NN PerlIO *file			\
 				|NN const char *pat			\
 				|...
@@ -1210,7 +1210,7 @@ ATdmp	|bool	|extended_utf8_to_uv					\
 				|NN const U8 * const e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
-Adfpv	|void	|fatal_warner	|U32 err				\
+Adfp	|void	|fatal_warner	|U32 err				\
 				|NN const char *pat			\
 				|...
 Adp	|void	|fbm_compile	|NN SV *sv				\
@@ -1942,7 +1942,7 @@ p	|int	|magic_getvec	|NN SV *sv				\
 p	|int	|magic_killbackrefs					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
-Fdopv	|SV *	|magic_methcall |NN SV *sv				\
+Fdop	|SV *	|magic_methcall |NN SV *sv				\
 				|NN const MAGIC *mg			\
 				|NN SV *meth				\
 				|U32 flags				\
@@ -2141,7 +2141,7 @@ Cdp	|PerlIO *|my_popen_list |NN const char *mode			\
 Adp	|void	|my_setenv	|NULLOK const char *nam 		\
 				|NULLOK const char *val
 
-AMTdfpv |int	|my_snprintf	|NN char *buffer			\
+AMTdfp	|int	|my_snprintf	|NN char *buffer			\
 				|const Size_t len			\
 				|NN const char *format			\
 				|...
@@ -2422,7 +2422,7 @@ AMPTdp	|char * |ninstr 	|NN const char *big			\
 
 p	|void	|no_bareword_filehandle 				\
 				|NN const char *fhname
-Tefprv	|void	|noperl_die	|NN const char *pat			\
+Tefpr	|void	|noperl_die	|NN const char *pat			\
 				|...
 CTdp	|void	|noshutdownhook
 Adp	|int	|nothreadhook
@@ -2623,7 +2623,7 @@ Cdp	|void	|pop_scope
 Cipx	|void	|pop_stackinfo
 
 : Used in perl.c and toke.c
-Fopv	|void	|populate_isa	|NN const char *name			\
+Fop	|void	|populate_isa	|NN const char *name			\
 				|STRLEN len				\
 				|...
 Adhp	|REGEXP *|pregcomp	|NN SV * const pattern			\
@@ -2694,7 +2694,7 @@ Adp	|REGEXP *|re_compile	|NN SV * const pattern			\
 				|U32 orig_rx_flags
 Cp	|void	|reentrant_free
 Cp	|void	|reentrant_init
-CFTpv	|void * |reentrant_retry|NN const char *f			\
+CFTp	|void * |reentrant_retry|NN const char *f			\
 				|...
 
 Cp	|void	|reentrant_size
@@ -3645,7 +3645,7 @@ Cdp	|void	|taint_env
 Cdp	|void	|taint_proper	|NULLOK const char *f			\
 				|NN const char * const s
 
-Fpv	|OP *	|tied_method	|NN SV *methname			\
+Fp	|OP *	|tied_method	|NN SV *methname			\
 				|NN SV **mark				\
 				|NN SV * const sv			\
 				|NN const MAGIC * const mg		\
@@ -3980,7 +3980,7 @@ Adp	|void	|wrap_op_checker|Optype opcode				\
 p	|void	|write_to_stderr|NN SV *msv
 Xp	|void	|xs_boot_epilog |const SSize_t ax
 
-FTXopv	|Stack_off_t|xs_handshake					\
+FTXop	|Stack_off_t|xs_handshake					\
 				|const U32 key				\
 				|NN void *v_my_perl			\
 				|NN const char *file			\
@@ -5491,7 +5491,7 @@ ES	|SV *	|parse_uniprop_string					\
 				|NN bool *user_defined_ptr		\
 				|NN SV *msg				\
 				|const STRLEN level
-Sfrv	|void	|re_croak	|bool utf8				\
+Sfr	|void	|re_croak	|bool utf8				\
 				|NN const char *pat			\
 				|...
 ES	|regnode_offset|reg	|NN RExC_state_t *pRExC_state		\
@@ -5840,7 +5840,7 @@ ES	|void	|dump_exec_pos	|NN const char *locinput		\
 				|const bool do_utf8			\
 				|const U32 depth
 
-EFpv	|int	|re_exec_indentf|NN const char *fmt			\
+EFp	|int	|re_exec_indentf|NN const char *fmt			\
 				|U32 depth				\
 				|...
 # endif
@@ -5883,10 +5883,10 @@ Ep	|void	|regprop	|NULLOK const regexp *prog		\
 				|NN const regnode *o			\
 				|NULLOK const regmatch_info *reginfo	\
 				|NULLOK const RExC_state_t *pRExC_state
-EFpv	|int	|re_indentf	|NN const char *fmt			\
+EFp	|int	|re_indentf	|NN const char *fmt			\
 				|U32 depth				\
 				|...
-Efpv	|int	|re_printf	|NN const char *fmt			\
+Efp	|int	|re_printf	|NN const char *fmt			\
 				|...
 # endif
 # if defined(PERL_EXT_RE_BUILD)

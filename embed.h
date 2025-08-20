@@ -177,6 +177,8 @@
 # define ck_entersub_args_list(a)               Perl_ck_entersub_args_list(aTHX_ a)
 # define ck_entersub_args_proto(a,b,c)          Perl_ck_entersub_args_proto(aTHX_ a,b,c)
 # define ck_entersub_args_proto_or_list(a,b,c)  Perl_ck_entersub_args_proto_or_list(aTHX_ a,b,c)
+# define ck_warner(a,...)                       Perl_ck_warner(aTHX_ a,__VA_ARGS__)
+# define ck_warner_d(a,...)                     Perl_ck_warner_d(aTHX_ a,__VA_ARGS__)
 # define clear_defarray(a,b)                    Perl_clear_defarray(aTHX_ a,b)
 # define clear_defarray_simple(a)               Perl_clear_defarray_simple(aTHX_ a)
 # define cop_fetch_label(a,b,c)                 Perl_cop_fetch_label(aTHX_ a,b,c)
@@ -222,12 +224,14 @@
 # define dump_all()                             Perl_dump_all(aTHX)
 # define dump_eval()                            Perl_dump_eval(aTHX)
 # define dump_form(a)                           Perl_dump_form(aTHX_ a)
+# define dump_indent(a,b,...)                   Perl_dump_indent(aTHX_ a,b,__VA_ARGS__)
 # define dump_packsubs(a)                       Perl_dump_packsubs(aTHX_ a)
 # define dump_sub(a)                            Perl_dump_sub(aTHX_ a)
 # define dump_vindent(a,b,c,d)                  Perl_dump_vindent(aTHX_ a,b,c,d)
 # define eval_pv(a,b)                           Perl_eval_pv(aTHX_ a,b)
 # define eval_sv(a,b)                           Perl_eval_sv(aTHX_ a,b)
 # define Perl_extended_utf8_to_uv               extended_utf8_to_uv
+# define fatal_warner(a,...)                    Perl_fatal_warner(aTHX_ a,__VA_ARGS__)
 # define fbm_compile(a,b)                       Perl_fbm_compile(aTHX_ a,b)
 # define fbm_instr(a,b,c,d)                     Perl_fbm_instr(aTHX_ a,b,c,d)
 # define filter_add(a,b)                        Perl_filter_add(aTHX_ a,b)
@@ -909,13 +913,9 @@
 # endif /* defined(MULTIPLICITY) */
 # if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
       defined(PERL_WANT_VARARGS)
-#   define ck_warner(a,...)                     Perl_ck_warner(aTHX_ a,__VA_ARGS__)
-#   define ck_warner_d(a,...)                   Perl_ck_warner_d(aTHX_ a,__VA_ARGS__)
 #   define croak(...)                           Perl_croak(aTHX_ __VA_ARGS__)
 #   define deb(...)                             Perl_deb(aTHX_ __VA_ARGS__)
 #   define die(...)                             Perl_die(aTHX_ __VA_ARGS__)
-#   define dump_indent(a,b,...)                 Perl_dump_indent(aTHX_ a,b,__VA_ARGS__)
-#   define fatal_warner(a,...)                  Perl_fatal_warner(aTHX_ a,__VA_ARGS__)
 #   define form(...)                            Perl_form(aTHX_ __VA_ARGS__)
 #   define load_module(a,b,...)                 Perl_load_module(aTHX_ a,b,__VA_ARGS__)
 #   define mess(...)                            Perl_mess(aTHX_ __VA_ARGS__)
@@ -1178,6 +1178,7 @@
 #   define sv_pvutf8n_force_wrapper(a,b,c)      Perl_sv_pvutf8n_force_wrapper(aTHX_ a,b,c)
 #   define sv_resetpvn(a,b,c)                   Perl_sv_resetpvn(aTHX_ a,b,c)
 #   define sv_sethek(a,b)                       Perl_sv_sethek(aTHX_ a,b)
+#   define tied_method(a,b,c,d,e,...)           Perl_tied_method(aTHX_ a,b,c,d,e,__VA_ARGS__)
 #   define tmps_grow_p(a)                       Perl_tmps_grow_p(aTHX_ a)
 #   define utilize(a,b,c,d,e)                   Perl_utilize(aTHX_ a,b,c,d,e)
 #   define vivify_ref(a,b)                      Perl_vivify_ref(aTHX_ a,b)
@@ -1233,13 +1234,6 @@
 #     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
 #   else
 #     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
-#   endif
-#   if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
-        defined(PERL_WANT_VARARGS)
-#     define tied_method(a,b,c,d,e,...)         Perl_tied_method(aTHX_ a,b,c,d,e,__VA_ARGS__)
-#     if defined(PERL_IN_REGCOMP_C)
-#       define re_croak(a,...)                  S_re_croak(aTHX_ a,__VA_ARGS__)
-#     endif
 #   endif
 #   if defined(PERL_DEBUG_READONLY_COW)
 #     define sv_buf_to_ro(a)                    Perl_sv_buf_to_ro(aTHX_ a)
@@ -1666,6 +1660,9 @@
 #       define dooneliner(a,b)                  S_dooneliner(aTHX_ a,b)
 #     endif
 #   endif
+#   if defined(PERL_IN_REGCOMP_C)
+#     define re_croak(a,...)                    S_re_croak(aTHX_ a,__VA_ARGS__)
+#   endif
 #   if defined(PERL_IN_REGCOMP_INVLIST_C) && !defined(PERL_EXT_RE_BUILD)
 #     define initialize_invlist_guts(a,b)       S_initialize_invlist_guts(aTHX_ a,b)
 #   endif
@@ -2073,10 +2070,7 @@
 #     if defined(DEBUGGING)
 #       define debug_start_match(a,b,c,d,e)     S_debug_start_match(aTHX_ a,b,c,d,e)
 #       define dump_exec_pos(a,b,c,d,e,f,g)     S_dump_exec_pos(aTHX_ a,b,c,d,e,f,g)
-#       if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
-            defined(PERL_WANT_VARARGS)
-#         define re_exec_indentf(a,...)         Perl_re_exec_indentf(aTHX_ a,__VA_ARGS__)
-#       endif
+#       define re_exec_indentf(a,...)           Perl_re_exec_indentf(aTHX_ a,__VA_ARGS__)
 #     endif
 #   endif /* defined(PERL_IN_REGEXEC_C) */
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
@@ -2114,14 +2108,10 @@
 #     define debug_show_study_flags(a,b,c)      Perl_debug_show_study_flags(aTHX_ a,b,c)
 #     define debug_studydata(a,b,c,d,e,f,g)     Perl_debug_studydata(aTHX_ a,b,c,d,e,f,g)
 #     define dumpuntil(a,b,c,d,e,f,g,h)         Perl_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
+#     define re_indentf(a,...)                  Perl_re_indentf(aTHX_ a,__VA_ARGS__)
+#     define re_printf(...)                     Perl_re_printf(aTHX_ __VA_ARGS__)
 #     define regprop(a,b,c,d,e)                 Perl_regprop(aTHX_ a,b,c,d,e)
-#     if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
-          defined(PERL_WANT_VARARGS)
-#       define re_indentf(a,...)                Perl_re_indentf(aTHX_ a,__VA_ARGS__)
-#       define re_printf(...)                   Perl_re_printf(aTHX_ __VA_ARGS__)
-#     endif
-#   endif /*   defined(DEBUGGING) &&
-             ( defined(PERL_CORE) || defined(PERL_EXT) ) */
+#   endif
 #   if defined(PERL_EXT_RE_BUILD)
 #     if defined(PERL_CORE) || defined(PERL_EXT)
 #       define get_re_gclass_aux_data(a,b,c,d,e,f) Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
