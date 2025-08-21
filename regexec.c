@@ -4939,7 +4939,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
          * case.  We set 'multi_fold_from' to the single folded-from character,
          * which is handled in an extra iteration below */
         if (utf8_pat) {
-            folded = valid_utf8_to_uvchr(pat, NULL);
+            folded = valid_utf8_to_uv(pat, NULL);
             multi_fold_from
                           = what_MULTI_CHAR_FOLD_utf8_safe(pat, pat + pat_len);
         }
@@ -11836,7 +11836,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         /* Here, isn't an ASCII digit.  Find the code point of the character */
         if (! UTF8_IS_INVARIANT(*s)) {
             Size_t len;
-            cp = valid_utf8_to_uvchr((U8 *) s, &len);
+            cp = valid_utf8_to_uv((U8 *) s, &len);
             s += len;
         }
         else {

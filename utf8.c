@@ -4198,7 +4198,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
   bad_crossing:
 
     /* Failed, have to return the original */
-    original = valid_utf8_to_uvchr(p, lenp);
+    original = valid_utf8_to_uv(p, lenp);
 
     /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
     ck_warner(packWARN(WARN_LOCALE),
@@ -4575,7 +4575,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
             while (s < send) {
                 if (isASCII(*s)) {
                     /* Crossed, have to return the original */
-                    original = valid_utf8_to_uvchr(p, lenp);
+                    original = valid_utf8_to_uv(p, lenp);
 
                     /* But in these instances, there is an alternative we can
                      * return that is valid */

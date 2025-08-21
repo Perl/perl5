@@ -1765,7 +1765,7 @@ test_valid_utf8_to_uvchr(s)
          */
         RETVAL = newAV_mortal();
 
-        ret = valid_utf8_to_uvchr((U8*) SvPV_nolen(s), &retlen);
+        ret = valid_utf8_to_uv((U8*) SvPV_nolen(s), &retlen);
 
         /* Returns the return value in [0]; <retlen> in [1] */
         av_push_simple(RETVAL, newSVuv(ret));

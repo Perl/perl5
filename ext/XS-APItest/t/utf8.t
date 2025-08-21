@@ -883,12 +883,12 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     $ret_ref = test_valid_utf8_to_uvchr($bytes);
     is($ret_ref->[0], $n,
-                   "Verify valid_utf8_to_uvchr($display_bytes) returns $hex_n");
+                   "Verify valid_utf8_to_uv($display_bytes) returns $hex_n");
     is($ret_ref->[1], $len,
-       "Verify valid_utf8_to_uvchr() for $hex_n returns expected length: $len");
+       "Verify valid_utf8_to_uv() for $hex_n returns expected length: $len");
 
     is(scalar @warnings, 0,
-               "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings")
+               "Verify valid_utf8_to_uv() for $hex_n generated no warnings")
       or output_warnings(@warnings);
 
     # Similarly for uvchr_to_utf8

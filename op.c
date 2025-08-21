@@ -6555,7 +6555,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                 Size_t t_char_len;
 
                 /* Get the first character */
-                t_cp = valid_utf8_to_uvchr(t, &t_char_len);
+                t_cp = valid_utf8_to_uv(t, &t_char_len);
                 t += t_char_len;
 
                 /* If the next byte indicates that this wasn't the first
@@ -6566,7 +6566,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                 else { /* Otherwise, ignore the indicator byte, and get the
                           final element, and add the whole range */
                     t++;
-                    t_cp_end = valid_utf8_to_uvchr(t, &t_char_len);
+                    t_cp_end = valid_utf8_to_uv(t, &t_char_len);
                     t += t_char_len;
 
                     inverted_tlist = _add_range_to_invlist(inverted_tlist,
@@ -6746,7 +6746,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      * next code point is the next UTF-8 char in the input.  We
                      * know the input is valid, because the toker constructed
                      * it */
-                    t_cp = CP_ADJUST(valid_utf8_to_uvchr(t, &t_char_len));
+                    t_cp = CP_ADJUST(valid_utf8_to_uv(t, &t_char_len));
                     t += t_char_len;
 
                     /* UTF-8 strings (only) have been parsed in toke.c to have
@@ -6758,7 +6758,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                         && ! FORCE_RANGE_LEN_1(t_cp))
                     {
                         t++;
-                        t_range_count = valid_utf8_to_uvchr(t, &t_char_len)
+                        t_range_count = valid_utf8_to_uv(t, &t_char_len)
                                       - t_cp + 1;
                         t += t_char_len;
                     }
@@ -6801,13 +6801,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     else {
                         Size_t r_char_len;
 
-                        r_cp = CP_ADJUST(valid_utf8_to_uvchr(r, &r_char_len));
+                        r_cp = CP_ADJUST(valid_utf8_to_uv(r, &r_char_len));
                         r += r_char_len;
                         if (   r < rend && *r == RANGE_INDICATOR
                             && ! FORCE_RANGE_LEN_1(r_cp))
                         {
                             r++;
-                            r_range_count = valid_utf8_to_uvchr(r,
+                            r_range_count = valid_utf8_to_uv(r,
                                                     &r_char_len) - r_cp + 1;
                             r += r_char_len;
                         }
