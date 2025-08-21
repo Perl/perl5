@@ -4533,8 +4533,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
  *
  * Implements the concatenation operator.
  *
- * On success, returns the offset at which any next node should be placed into
- * the regex engine program being compiled.
+ * On success, creates a branch node, and returns the position any next node
+ * should be placed into the regex engine program being compiled.
  *
  * Returns 0 otherwise, setting flagp to RESTART_PARSE if the parse needs
  * to be restarted, or'd with NEED_UTF8 if the pattern needs to be upgraded to
