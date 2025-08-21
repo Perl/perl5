@@ -5826,7 +5826,7 @@ yyl_qw(pTHX_ char *s, STRLEN len)
             if (len) {
                 SV *sv;
                 const char *b = d;
-                if (!warned_comma || !warned_comment) {
+                if (!warned_comma || !warned_comment || !warned_escape) {
                     for (; !isSPACE(*d) && len; --len, ++d) {
                         if (!warned_comma && *d == ',') {
                             warner(packWARN(WARN_QW),
@@ -5838,10 +5838,15 @@ yyl_qw(pTHX_ char *s, STRLEN len)
                                    "Possible attempt to put comments in qw() list");
                             ++warned_comment;
                         }
-                        else if (!warned_escape && *d == '\\' && len > 1 && isSPACE(*(d+1)) ) {
-                            warner(packWARN(WARN_QW),
-                                   "Possible attempt to escape whitespace in qw() list");
-                            ++warned_escape;
+                        else if (!warned_escape && *d == '\\' && len > 1) {
+                            if (*(d+1) == '\\') {
+                                --len, ++d;
+                            }
+                            else if (isSPACE(*(d+1))) {
+                                warner(packWARN(WARN_QW),
+                                       "Possible attempt to escape whitespace in qw() list");
+                                ++warned_escape;
+                            }
                         }
                     }
                 }
