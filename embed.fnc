@@ -3890,7 +3890,7 @@ Admp	|U8 *	|uv_to_utf8_msgs|NN U8 *d				\
 				|UV uv					\
 				|UV flags				\
 				|NULLOK HV **msgs
-CDbp	|U8 *	|uvuni_to_utf8	|NN U8 *d				\
+ADbdp	|U8 *	|uvuni_to_utf8	|NN U8 *d				\
 				|UV uv
 EXdpx	|bool	|validate_proto |NN SV *name				\
 				|NULLOK SV *proto			\
