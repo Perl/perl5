@@ -375,6 +375,39 @@ EXPECT
 Possible attempt to escape whitespace in qw() list at - line 3.
 ########
 # toke.c
+use warnings 'qw';
+@a = qw( foo bar \ baz );
+EXPECT
+Possible attempt to escape whitespace in qw() list at - line 3.
+########
+# toke.c
+use warnings 'qw';
+@a = qw(\ );
+EXPECT
+Possible attempt to escape whitespace in qw() list at - line 3.
+########
+# toke.c
+use warnings 'qw';
+@a = qw(\\\ )
+EXPECT
+Possible attempt to escape whitespace in qw() list at - line 3.
+########
+# toke.c
+use warnings 'qw';
+@a = qw(\\ );
+EXPECT
+########
+# toke.c
+use warnings 'qw';
+@a = qw( \\ );
+EXPECT
+########
+# toke.c
+use warnings 'qw';
+@a = qw( foo bar \\ baz );
+EXPECT
+########
+# toke.c
 use warnings 'syntax' ;
 print ("");
 print ("") and $x = 1;
