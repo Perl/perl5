@@ -3325,8 +3325,8 @@ S_scan_const(pTHX_ char *start)
                     /* We know the utf8 is valid, because we just constructed
                      * it ourselves in previous loop iterations */
                     min_ptr = (char*) utf8_hop( (U8*) max_ptr, -1);
-                    range_min = valid_utf8_to_uvchr( (U8*) min_ptr, NULL);
-                    range_max = valid_utf8_to_uvchr( (U8*) max_ptr, NULL);
+                    range_min = valid_utf8_to_uv( (U8*) min_ptr, NULL);
+                    range_max = valid_utf8_to_uv( (U8*) max_ptr, NULL);
 
                     /* This compensates for not all code setting
                      * 'has_above_latin1', so that we don't skip stuff that
@@ -11712,7 +11712,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         }
 
         close_delim_code = (UTF)
-                           ? valid_utf8_to_uvchr((U8 *) close_delim_str, NULL)
+                           ? valid_utf8_to_uv((U8 *) close_delim_str, NULL)
                            : * (U8 *) close_delim_str;
     }
     else {  /* Here, the delimiter isn't paired, hence the close is the same as

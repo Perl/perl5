@@ -414,7 +414,7 @@ is the recommended Unicode-aware way of saying
     if ( UTF ) {                                                              \
         /* if it is UTF then it is either already folded, or does not need    \
          * folding */                                                         \
-        uvc = valid_utf8_to_uvchr( (const U8*) uc, &len);                     \
+        uvc = valid_utf8_to_uv( (const U8*) uc, &len);                     \
     }                                                                         \
     else if (folder == PL_fold_latin1) {                                      \
         /* This folder implies Unicode rules, which in the range expressible  \

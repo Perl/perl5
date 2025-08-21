@@ -5294,7 +5294,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
             /* Convert from string to numeric code point */
             *code_point_p = (SvUTF8(value_sv))
-                            ? valid_utf8_to_uvchr(value, NULL)
+                            ? valid_utf8_to_uv(value, NULL)
                             : *value;
 
             /* Have parsed this entire single code point \N{...}.  *cp_count
@@ -15045,7 +15045,7 @@ S_parse_uniprop_string(pTHX_
                 goto failed;
             }
 
-            cp = valid_utf8_to_uvchr((U8 *) SvPVX(character), &character_len);
+            cp = valid_utf8_to_uv((U8 *) SvPVX(character), &character_len);
             if (character_len == SvCUR(character)) {
                 prop_definition = add_cp_to_invlist(NULL, cp);
             }
@@ -15068,7 +15068,7 @@ S_parse_uniprop_string(pTHX_
                 av_push_simple(this_string, newSVuv(cp));
 
                 do {
-                    cp = valid_utf8_to_uvchr((U8 *) remaining, &character_len);
+                    cp = valid_utf8_to_uv((U8 *) remaining, &character_len);
                     av_push_simple(this_string, newSVuv(cp));
                     remaining += character_len;
                 } while (remaining < SvEND(character));
