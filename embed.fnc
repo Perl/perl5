@@ -3906,10 +3906,7 @@ Adp	|bool	|valid_identifier_pvn					\
 				|U32 flags
 Adp	|bool	|valid_identifier_sv					\
 				|NULLOK SV *sv
-CRTdip	|UV	|valid_utf8_to_uv					\
-				|NN const U8 *s 			\
-				|NULLOK STRLEN *retlen
-CRTdmp	|UV	|valid_utf8_to_uvchr					\
+CRTdip	|UV	|valid_utf8_to_uvchr					\
 				|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 Adp	|int	|vcmp		|NN SV *lhv				\

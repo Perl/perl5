@@ -191,7 +191,6 @@ For details, see the description for L<perlapi/uv_to_utf8_flags>.
 #define c9strict_utf8_to_uv(s, e, cp_p, advance_p)                      \
         utf8_to_uv_flags(   s, e, cp_p, advance_p,                      \
                                  UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
-#define valid_utf8_to_uvchr(s, advance_p)  valid_utf8_to_uv(s, advance_p)
 
 #define utf16_to_utf8(p, d, bytelen, newlen)                                \
                             utf16_to_utf8_base(p, d, bytelen, newlen, 0, 1)

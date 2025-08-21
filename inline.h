@@ -1306,35 +1306,24 @@ Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp)
 }
 
 /*
-=for apidoc      valid_utf8_to_uv
-=for apidoc_item valid_utf8_to_uvchr
-
-These are synonymous.
-
-These are like C<L<perlapi/utf8_to_uv>>, but should only be called when it is
+=for apidoc valid_utf8_to_uvchr
+Like C<L<perlapi/utf8_to_uv>>, but should only be called when it is
 known that the next character in the input UTF-8 string C<s> is well-formed
 (I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
 points, and non-Unicode code points are allowed.
-
-The only use for these is that they should run slightly faster than
-C<utf8_to_uv> because no error checking is done.
-
-The C<_uv> form is slightly preferred so as to have a consistent spelling with
-the other C<_uv> forms that are definitely preferred over the older and
-problematic C<_uvchr> forms.
 
 =cut
 
  */
 
 PERL_STATIC_INLINE UV
-Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
+Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 {
-    PERL_ARGS_ASSERT_VALID_UTF8_TO_UV;
-
     const UV expectlen = UTF8SKIP(s);
     const U8* send = s + expectlen;
     UV uv = *s;
+
+    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
 
     if (retlen) {
         *retlen = expectlen;
