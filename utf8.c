@@ -123,19 +123,19 @@ const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
 =for apidoc_item uvchr_to_utf8_flags_msgs
 
 These functions are identical.  THEY SHOULD BE USED IN ONLY VERY SPECIALIZED
-CIRCUMSTANCES.
+CIRCUMSTANCES.  The C<uv_to_utf8_msgs> spelling is preferred in new code.
 
-Most code should use C<L</uv_to_utf8_flags>()> rather than call this directly.
+Most code should use C<L</uv_to_utf8_flags>()> rather than call these directly.
 
-This function is for code that wants any warning and/or error messages to be
+These functions are for code that wants any warning and/or error messages to be
 returned to the caller rather than be displayed.  Any message that would have
 been displayed if all lexical warnings are enabled will instead be returned.
 
-It is just like C<L</uvchr_to_utf8_flags>> but it takes an extra parameter
-placed after all the others, C<msgs>.  If this parameter is 0, this function
-behaves identically to C<L</uvchr_to_utf8_flags>>.  Otherwise, C<msgs> should
-be a pointer to an C<HV *> variable, in which this function creates a new HV to
-contain any appropriate message.  The hash has three key-value pairs, as
+They are just like C<L</uv_to_utf8_flags>> but take an extra parameter
+placed after all the others, C<msgs>.  If this parameter is 0, the functions
+behave identically to C<L</uv_to_utf8_flags>>.  Otherwise, C<msgs> should
+be a pointer to an C<HV *> variable, in which these functions create a new HV
+to contain any appropriate message.  The hash has three key-value pairs, as
 follows:
 
 =over 4
@@ -169,7 +169,7 @@ The possibilities are:
 =back
 
 It's important to note that specifying this parameter as non-null will cause
-any warning this function would otherwise generate to be suppressed, and
+any warning the functions would otherwise generate to be suppressed, and
 instead be placed in C<*msgs>.  The caller can check the lexical warnings state
 (or not) when choosing what to do with the returned message.
 
