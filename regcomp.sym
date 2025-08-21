@@ -236,7 +236,7 @@ SRCLOSE     SRCLOSE,    none      ; Close preceding SROPEN
 REF         REF,        num 2 V   ; Match some already matched string
 REFF        REF,        num 2 V   ; Match already matched string, using /di rules.
 REFFL       REF,        num 2 V   ; Match already matched string, using /li rules.
-# N?REFF[AU] could have been implemented using the FLAGS field of the
+# REFF[AU]N? could have been implemented using the FLAGS field of the
 # regnode, but by having a separate node type, we can use the existing switch
 # statement to avoid some tests
 REFFU       REF,        num 2 V   ; Match already matched string, using /ui.
