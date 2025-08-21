@@ -245,6 +245,16 @@ TODO: {
 }
 
 TODO: {
+    todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
+    local $::TODO = 'GH 16522';
+    fresh_perl(<<~'HERE', { stderr => 'devnull' });
+        END { exit 0 } # Consider compilation errors a success
+        0/v$0sprintf$0$0
+        HERE
+    is($?, 0, 'No assertion failure; GH 16522');
+}
+
+TODO: {
     local $::TODO = 'GH 16865';
     fresh_perl('\(sort { 0 } 0, 0 .. "a")', { stderr => 'devnull' });
     is($?, 0, "No assertion failure; GH 16865");
