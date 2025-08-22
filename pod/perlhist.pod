@@ -1266,6 +1266,8 @@ the Perl source distribution for somewhat more selected releases.
  win32       1313     65      1326     65      1331     65
  x2p            -      -         -      -         -      -
 
+ ======================================================================
+
                   5.32.0           5.34.0           5.36.0
 
  Configure    588      1       592      1       603      1
@@ -1283,6 +1285,8 @@ the Perl source distribution for somewhat more selected releases.
  vms          527     12       549     12       545     12
  vos           12      7        12      7         8      7
  win32       1011     47      1001     46       966     45
+
+ ======================================================================
 
                   5.38.0
 
