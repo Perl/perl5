@@ -1019,6 +1019,7 @@ nanosleep(nsec)
 
 NV
 sleep(...)
+PROTOTYPE: ;$
     PREINIT:
         struct timeval Ta, Tb;
     CODE:

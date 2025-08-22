@@ -1,12 +1,18 @@
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 BEGIN { push @INC, '.' }
 use t::Watchdog;
 
 BEGIN { require_ok "Time::HiRes"; }
 
 use Config;
+
+SKIP: {
+    skip "no hi-res sleep", 1 unless defined &Time::HiRes::sleep;
+    is prototype(\&Time::HiRes::sleep), prototype('CORE::sleep'),
+        "Time::HiRes::sleep's prototype matches CORE::sleep's";
+}
 
 my $xdefine = '';
 if (open(XDEFINE, "<", "xdefine")) {
@@ -35,5 +41,3 @@ SKIP: {
     printf("# sleep...%s\n", Time::HiRes::tv_interval($r));
     ok 1;
 }
-
-1;
