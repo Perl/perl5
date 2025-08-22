@@ -315,15 +315,17 @@
 : like 'int' or 'char', and 'cast' by perhaps 'struct foo'.
 :
 : The complete list of conventions is:
-:  block    the argument is a C brace-enclosed block
-:  cast     the argument names a type which the macro casts to
-:  number   the argument is a C numeric constant, like 3
-:  SP       the argument is the stack pointer, SP
-:  "string" the argument is a literal C double-quoted string; what's important
-:	    here are the quotes; for clarity, you can say whatever you want
-:	    inside them
-:  token    the argument is a generic C preprocessor token, like abc
-:  type     the argument names a type
+:  block      the argument is a C brace-enclosed block
+:  cast       the argument names a type which the macro casts to
+:  const_expr the argument is an expression whose result is known at compile
+:	      time
+:  number     the argument is a C numeric constant, like 3
+:  SP         the argument is the stack pointer, SP
+:  "string"   the argument is a literal C double-quoted string; what's important
+:	      here are the quotes; for clarity, you can say whatever you want
+:	      inside them
+:  token      the argument is a generic C preprocessor token, like abc
+:  type       the argument names a type
 :
 : Unlike other arguments, none of these is of the form 'int name'.  There is no
 : 'name'.
