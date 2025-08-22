@@ -262,6 +262,16 @@ TODO: {
 
 TODO: {
     todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
+    local $::TODO = 'GH 16869';
+    fresh_perl(<<~'HERE', {});
+        my $glob = ("0" x 4094) . "?";
+        glob $glob;
+        HERE
+    is($?, 0, 'No assertion failure; GH 16869');
+}
+
+TODO: {
+    todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
     local $::TODO = 'GH 16876';
     fresh_perl('$_ = "a"; s{ x | (?{ s{}{x} }) }{}gx;',
                { stderr => 'devnull' });
