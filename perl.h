@@ -4252,6 +4252,7 @@ hint to the compiler that this condition is likely to be false.
 
 /*
 =for apidoc   Am||STATIC_ASSERT_DECL|const_expr
+=for apidoc_item  STATIC_ASSERT_EXPR
 =for apidoc_item  STATIC_ASSERT_STMT
 
 These are like assert(), but for compile time invariants. That is, their
@@ -4269,9 +4270,22 @@ function.
 C<STATIC_ASSERT_DECL> expands to a declaration and is suitable for use inside a
 function or at file scope (outside of any function).
 
-=cut
+C<STATIC_ASSERT_EXPR> expands to an expression and is suitable anywhere an
+expression is usable.  It has some limitations compared to the other two when
+used on a platform without L</C<PERL_USE_GCC_BRACE_GROUPS>>.  On those
+platforms it expands to an ASSUME().  When called with a compile-time
+expression, the compiler should optimize out the expression, so that the use of
+this is "free", but constness is not enforced.  On non-DEBUGGING builds, this
+will expand to a no-op, so again it is "free", but no checking is done.
 
+Thus code that uses this macro can be ported to all platforms without needing
+to change, and it will work as well as is possible on that platform.
+Presumably it will get compiled at some point before release on a platform
+where it has parity with the other two forms.
+
+=cut
 */
+
 #if (! defined(__IBMC__) || __IBMC__ >= 1210)                               \
  && ((   defined(static_assert) && (   defined(_ISOC11_SOURCE)              \
                                     || (__STDC_VERSION__ - 0) >= 201101L))  \
@@ -4334,6 +4348,12 @@ function or at file scope (outside of any function).
 */
 #define STATIC_ASSERT_STMT(COND)                                            \
                         STMT_START { STATIC_ASSERT_DECL(COND); } STMT_END
+
+#ifdef PERL_USE_GCC_BRACE_GROUPS
+#  define STATIC_ASSERT_EXPR(COND) ({ STATIC_ASSERT_DECL(COND); })
+#else
+#  define STATIC_ASSERT_EXPR(COND)  ASSUME(COND)
+#endif
 
 #ifndef __has_builtin
 #  define __has_builtin(x) 0 /* not a clang style compiler */
