@@ -4309,18 +4309,31 @@ function or at file scope (outside of any function).
  * We use a bit-field instead of an array because gcc accepts
         typedef char x[n]
    where n is not a compile-time constant.  We want to enforce constantness.
-*/
-#  define STATIC_ASSERT_2(COND, SUFFIX) \
-    typedef struct { \
-        unsigned int _static_assertion_failed_##SUFFIX : (COND) ? 1 : -1; \
-    } _static_assertion_failed_##SUFFIX PERL_UNUSED_DECL
-#  define STATIC_ASSERT_1(COND, SUFFIX) STATIC_ASSERT_2(COND, SUFFIX)
-#  define STATIC_ASSERT_DECL(COND)    STATIC_ASSERT_1(COND, __LINE__)
+ *
+ * We need the FOOL macros to get proper cpp parameter concatanation. */
+#  define STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_2_(line)                       \
+                                 static_assertion_failed_##line
+#  define STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_(line)                         \
+                                STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_2_(line)
+    /* Return the struct and element name */
+#  define STATIC_ASSERT_STRUCT_NAME_                                        \
+                            STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_(__LINE__)
+
+    /* Return the struct body */
+#  define STATIC_ASSERT_STRUCT_BODY_(COND, NAME)                            \
+                              struct { unsigned NAME : (COND) ? 1 : -1; }
+
+#  define STATIC_ASSERT_DECL(COND)                                          \
+     typedef STATIC_ASSERT_STRUCT_BODY_(COND, STATIC_ASSERT_STRUCT_NAME_)   \
+                    STATIC_ASSERT_STRUCT_NAME_ PERL_UNUSED_DECL
+
 #endif
+
 /* We need this wrapper even in C11 because 'case X: static_assert(...);' is an
    error (static_assert is a declaration, and only statements can have labels).
 */
-#define STATIC_ASSERT_STMT(COND)      STMT_START { STATIC_ASSERT_DECL(COND); } STMT_END
+#define STATIC_ASSERT_STMT(COND)                                            \
+                        STMT_START { STATIC_ASSERT_DECL(COND); } STMT_END
 
 #ifndef __has_builtin
 #  define __has_builtin(x) 0 /* not a clang style compiler */
