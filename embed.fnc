@@ -326,7 +326,7 @@
 :  type     the argument names a type
 :
 : Unlike other arguments, none of these is of the form 'int name'.  There is no
-: name.
+: 'name'.
 :
 : If any argument or return value is not one of the above, and isn't legal C
 : language, the entry still can be specified, using the 'u' flag.
