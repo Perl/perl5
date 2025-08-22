@@ -4282,9 +4282,33 @@ function or at file scope (outside of any function).
 */
 #  define STATIC_ASSERT_DECL(COND) static_assert(COND, #COND)
 #else
-/* We use a bit-field instead of an array because gcc accepts
-   'typedef char x[n]' where n is not a compile-time constant.
-   We want to enforce constantness.
+
+/* This generates a struct with a bit field like so:
+ *
+ *      struct { unsigned int name#: size; } name#
+ *
+ * 'name#' is the name followed by the line number this is used on.  The
+ * name is 'static_assertion_failed_', so that a typical name would be
+ *
+ *      static_assertion_failed_123
+ *
+ * The first name# will show up in the compiler's error message, clueing in the
+ * reader as to the problem and where.  The second one makes sure that the
+ * struct name is unique to the compilation unit.
+ *
+ * 'size' is expressed as a ternary: '((cond) ? 1 : -1)'
+ *
+ * If 'cond' is true the size is 1, which is legal; if false, the size is -1.
+ * It is illegal to have a negatively-sized bit field, so the compilation will
+ * abort iff 'cond' is false, giving an appropriate error message.
+ *
+ * The basic struct is used in different ways depending on whether the
+ * application is for a declaration (typedef struct), or statement
+ * (STMT_START { struct } STMT_END).
+ *
+ * We use a bit-field instead of an array because gcc accepts
+        typedef char x[n]
+   where n is not a compile-time constant.  We want to enforce constantness.
 */
 #  define STATIC_ASSERT_2(COND, SUFFIX) \
     typedef struct { \
