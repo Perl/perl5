@@ -235,7 +235,7 @@ made:
 
 =item *
 
-Karl Williamson gave a talk at PTS 2025 asking people to contribute
+Karl Williamson gave a talk at TPRC 2025 asking people to contribute
 tests to find old issues that are no longer a problem, and todo tests
 to reflect reproduction cases for known outstanding bugs.
 (L<video link|https://www.youtube.com/watch?v=CwX4Xsf5y5E>)
