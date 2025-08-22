@@ -1,10 +1,16 @@
 use strict;
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 BEGIN { push @INC, '.' }
 use t::Watchdog;
 
 BEGIN { require_ok "Time::HiRes"; }
+
+SKIP: {
+    skip "no hi-res time", 1 unless defined &Time::HiRes::time;
+    is prototype(\&Time::HiRes::time), prototype('CORE::time'),
+        "Time::HiRes::time's prototype matches CORE::time's";
+}
 
 SKIP: {
     skip "no gettimeofday", 1 unless &Time::HiRes::d_gettimeofday;
@@ -20,5 +26,3 @@ SKIP: {
         or print("# Time::HiRes::time() not close to CORE::time()\n");
     printf("# s = $s, n = $n, s/n = %s\n", abs($s)/$n);
 }
-
-1;
