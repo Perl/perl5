@@ -4250,17 +4250,27 @@ hint to the compiler that this condition is likely to be false.
 /* placeholder */
 #endif
 
-/* STATIC_ASSERT_DECL/STATIC_ASSERT_STMT are like assert(), but for compile
-   time invariants. That is, their argument must be a constant expression that
-   can be verified by the compiler. This expression can contain anything that's
-   known to the compiler, e.g. #define constants, enums, or sizeof (...). If
-   the expression evaluates to 0, compilation fails.
-   Because they generate no runtime code (i.e.  their use is "free"), they're
-   always active, even under non-DEBUGGING builds.
-   STATIC_ASSERT_DECL expands to a declaration and is suitable for use at
-   file scope (outside of any function).
-   STATIC_ASSERT_STMT expands to a statement and is suitable for use inside a
-   function.
+/*
+=for apidoc   Am||STATIC_ASSERT_DECL|const_expr
+=for apidoc_item  STATIC_ASSERT_STMT
+
+These are like assert(), but for compile time invariants. That is, their
+argument must be a constant expression that can be verified by the compiler.
+This expression can contain anything that's known to the compiler, e.g. #define
+constants, enums, or sizeof (...). If the expression evaluates to 0,
+compilation fails.
+
+Because they generate no runtime code (i.e.  their use is "free"), they're
+always active, even under non-DEBUGGING builds.
+
+C<STATIC_ASSERT_STMT> expands to a statement and is suitable for use inside a
+function.
+
+C<STATIC_ASSERT_DECL> expands to a declaration and is suitable for use inside a
+function or at file scope (outside of any function).
+
+=cut
+
 */
 #if (! defined(__IBMC__) || __IBMC__ >= 1210)                               \
  && ((   defined(static_assert) && (   defined(_ISOC11_SOURCE)              \
