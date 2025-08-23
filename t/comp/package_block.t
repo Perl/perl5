@@ -81,12 +81,7 @@ eval q{
     }
     $main::result .= "j(".__PACKAGE__."/".eval("__PACKAGE__").")";
 };
-print $main::result eq
-	"a(main/main)d(Foo/Foo)g(main/main)i(Bar/Bar)j(main/main)" ?
-    "ok 6\n" : "not ok 6\n";
-print $main::warning =~ /\A
-	Use\ of\ "goto"\ [^\n]*\ line\ 3\.\n
-	Use\ of\ "goto"\ [^\n]*\ line\ 15\.\n
-    \z/x ? "ok 7\n" : "not ok 7\n";
+print $main::result eq "a(main/main)" ?  "ok 6\n" : "not ok 6\n";
+print $main::warning eq '' ? "ok 7\n" : "not ok 7\n";
 
 1;
