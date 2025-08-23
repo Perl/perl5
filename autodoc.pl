@@ -7,6 +7,7 @@ use Text::Tabs;
 #
 #    pod/perlintern.pod
 #    pod/perlapi.pod
+# h flag means no details.
 
 my $api = "pod/perlapi.pod";
 my $intern = "pod/perlintern.pod";
@@ -2701,7 +2702,7 @@ for my $which (\%api, \%intern) {
         next if $which == \%intern && $element->{flags} =~ /A/;
 
         if ($element->{docs_found}) {
-            warn "'$name' missing 'd' flag"
+            warn "'$name' missing 'd' flag "
                . where_from_string($element->{file}, $element->{line_num})
                                                if ! $element->{docs_expected};
         }
