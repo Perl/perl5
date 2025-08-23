@@ -47,10 +47,10 @@ SKIP: {
 
     eval "last Ｅ";
     like $@, qr/Label not found for "last Ｅ" at/u, "last's error is UTF-8 clean";
-    
+
     eval "redo Ｅ";
     like $@, qr/Label not found for "redo Ｅ" at/u, "redo's error is UTF-8 clean";
-    
+
     eval "next Ｅ";
     like $@, qr/Label not found for "next Ｅ" at/u, "next's error is UTF-8 clean";
 }
@@ -75,12 +75,17 @@ like $@, qr/Unrecognized character/, "redo to downgradeable labels";
 is $d, 0, "Latin-1 labels are reachable";
 
 {
-    no warnings;
-    goto ここ;
-    
-    if (undef) {
-        ここ: {
-            pass("goto UTF-8 LABEL works.");
+    local $@;
+    eval {
+        goto ここ;
+
+        if (undef) {
+            ここ: {
+               my $x = "jump goto UTF-8 LABEL no longer works";
+            }
         }
-    }
+    };
+    like($@,
+        qr/Use of goto to jump into a construct is no longer permitted/,
+        "Got expected error message");
 }
