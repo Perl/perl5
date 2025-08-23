@@ -66,5 +66,3 @@ print("# at end, i=$i\n");
 is($virt, 0, "time left should be zero");
 
 $SIG{VTALRM} = 'DEFAULT';
-
-1;

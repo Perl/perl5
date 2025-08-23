@@ -11,9 +11,9 @@ use Config;
 my $limit = 0.25; # 25% is acceptable slosh for testing timers
 
 my $xdefine = '';
-if (open(XDEFINE, "<", "xdefine")) {
-    chomp($xdefine = <XDEFINE> || "");
-    close(XDEFINE);
+if (open(my $fh, "<", "xdefine")) {
+    chomp($xdefine = <$fh> || "");
+    close($fh);
 }
 
 my $can_subsecond_alarm =
@@ -224,5 +224,3 @@ SKIP: {
         ok $got == 0 or print("# $got\n");
     }
 }
-
-1;

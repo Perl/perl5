@@ -22,9 +22,9 @@ my @mtime;
 for (1..5) {
     note "cycle $_";
     Time::HiRes::sleep(rand(0.1) + 0.1);
-    open(X, '>', $$);
-    print X $$;
-    close(X);
+    open(my $fh, '>', $$);
+    print $fh $$;
+    close($fh);
     my($a, $stat, $b) = ("a", [Time::HiRes::stat($$)], "b");
     is $a, "a", "stat stack discipline";
     is $b, "b", "stat stack discipline";
@@ -43,9 +43,9 @@ for (1..5) {
         }
         is_deeply $lstat, $stat, "write: stat and lstat returned same values";
         Time::HiRes::sleep(rand(0.1) + 0.1);
-        open(X, '<', $$);
-        <X>;
-        close(X);
+        open(my $fh, '<', $$);
+        <$fh>;
+        close($fh);
         $stat = [Time::HiRes::stat($$)];
         push @atime, $stat->[8];
         $lstat = [Time::HiRes::lstat($$)];
@@ -88,9 +88,9 @@ SKIP: {
 my $targetname = "tgt$$";
 my $linkname = "link$$";
 SKIP: {
-    open(X, '>', $targetname);
-    print X $$;
-    close(X);
+    open(my $fh, '>', $targetname);
+    print $fh $$;
+    close($fh);
     eval { symlink $targetname, $linkname or die "can't symlink: $!"; };
     skip "can't symlink", 7 if $@ ne "";
     note "compare Time::HiRes::stat with ::lstat";
@@ -111,5 +111,3 @@ SKIP: {
 }
 1 while unlink $linkname;
 1 while unlink $targetname;
-
-1;

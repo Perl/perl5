@@ -30,5 +30,3 @@ ok $f - $two[0] < 2 or print("# $f - $two[0] >= 2\n");
 my $r = [Time::HiRes::gettimeofday()];
 my $g = Time::HiRes::tv_interval $r;
 ok $g < 2 or print("# $g\n");
-
-1;
