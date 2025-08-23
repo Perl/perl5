@@ -324,4 +324,19 @@ TODO: {
 
 }
 
+TODO: {
+    todo_skip 1 if is_miniperl();
+    local $::TODO = 'GH 22168';
+    fresh_perl_is(
+        <<~'HERE',
+            use Scalar::Util qw(tainted);
+            my $in = <STDIN>;
+            print tainted(chr $in);
+            HERE
+        '1',
+        { stdin => '36', switches => [ '-t' ] },
+        'chr() does not lose tainting; GH 22168'
+    );
+}
+
 done_testing();
