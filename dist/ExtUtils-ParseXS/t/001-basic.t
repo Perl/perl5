@@ -4828,6 +4828,24 @@ EOF
             [ 0, 0, qr{\bXSFUNCTION\(\)},
                    "got XSFUNCTION call" ],
         ],
+        [
+            'INTERFACE with perl package name',
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOTM
+                |X::Y T_IV
+                |EOTM
+                |
+                |X::Y
+                |foo()
+                |    INTERFACE: f1
+EOF
+            [ 0, 0, qr{\b\QdXSFUNCTION(X__Y)},
+                   "got XSFUNCTION declaration" ],
+            [ 0, 0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(X__Y,cv,XSANY.any_dptr);},
+                   "got XSFUNCTION assign" ],
+            [ 0, 0, qr{\bXSFUNCTION\(\)},
+                   "got XSFUNCTION call" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

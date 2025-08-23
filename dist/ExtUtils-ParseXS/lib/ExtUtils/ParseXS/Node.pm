@@ -593,9 +593,14 @@ EOF
         |    dXSI32;
 EOF
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
-        |    dXSFUNCTION($self->{decl}{return_type}{type});
+    if ($self->{seen_INTERFACE}) {
+        my $type = $self->{decl}{return_type}{type};
+        $type =~ tr/:/_/
+            unless $pxs->{config_RetainCplusplusHierarchicalTypes};
+        print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
+            |    dXSFUNCTION($type);
 EOF
+    }
 
 
     {
@@ -3724,8 +3729,11 @@ sub as_code {
     my $macro = $xsub->{interface_macro};
     $macro = 'XSINTERFACE_FUNC' unless defined $macro;
 
+    my $type = $xsub->{decl}{return_type}{type};
+    $type =~ tr/:/_/
+        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
     print <<"EOF";
-    XSFUNCTION = $macro($xsub->{decl}{return_type}{type},cv,XSANY.any_dptr);
+    XSFUNCTION = $macro($type,cv,XSANY.any_dptr);
 EOF
 }
 
