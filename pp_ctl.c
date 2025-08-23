@@ -3652,9 +3652,7 @@ PP(pp_goto)
                     ? 2
                     : 1;
             if (enterops[i])
-                deprecate_fatal_in(WARN_DEPRECATED__GOTO_CONSTRUCT,
-                        "5.42",
-                        "Use of \"goto\" to jump into a construct");
+                croak("Use of goto to jump into a construct is no longer permitted");
         }
 
         /* pop unwanted frames */
