@@ -492,7 +492,7 @@ sub DEBUG_TIME() {
     };
 }
 
-is($deprecated, 0, 'no warning was emmitted');
+is($deprecated, 0, 'no warning was emitted');
 
 # deep recursion with gotos eventually caused a stack reallocation
 # which messed up buggy internals that didn't expect the stack to move
