@@ -109,5 +109,3 @@ for my $n (100_000, 1_100_000, 2_200_000, 4_300_000) {
     my $got2 = Time::HiRes::ualarm(0);
     ok $got2 == 0 or print("# $got2\n");
 }
-
-1;

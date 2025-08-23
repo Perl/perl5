@@ -75,5 +75,3 @@ SKIP: {
         ok $a < $limit or print("# $msg\n");
     }
 }
-
-1;

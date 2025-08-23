@@ -15,9 +15,9 @@ SKIP: {
 }
 
 my $xdefine = '';
-if (open(XDEFINE, "<", "xdefine")) {
-    chomp($xdefine = <XDEFINE> || "");
-    close(XDEFINE);
+if (open(my $fh, "<", "xdefine")) {
+    chomp($xdefine = <$fh> || "");
+    close($fh);
 }
 
 my $can_subsecond_alarm =

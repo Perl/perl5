@@ -248,5 +248,3 @@ print "# negative mtime dies;\n";
 };
 
 done_testing();
-
-1;

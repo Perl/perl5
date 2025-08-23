@@ -34,5 +34,3 @@ SKIP: {
     skip "flapping test - more than 0.9 sec could be necessary...", 1 if $ENV{CI};
     cmp_ok $d, '<', 0.9 or diag("# slept $d secs $f to $f2\n");
 }
-
-1;
