@@ -580,7 +580,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define mXPUSHi(i)	STMT_START { EXTEND(sp,1); mPUSHi(i); } STMT_END
 #define mXPUSHu(u)	STMT_START { EXTEND(sp,1); mPUSHu(u); } STMT_END
 
-#define SETs(s)		(*sp = s)
+#define SETs(s)		(STATIC_ASSERT_EXPR(sizeof(*sp) == sizeof(s)), *sp = s)
 #define SETTARG		STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
 #define SETp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); SETTARG; } STMT_END
 #define SETn(n)		STMT_START { TARGn(n,1); SETs(TARG); } STMT_END
