@@ -4208,8 +4208,14 @@ sub generate_proto_h {
                     my $argname = $1;
 
                     if (defined $argname && (! $has_mflag || $binarycompat)) {
-                        if ($nn||$nz) {
+                        if ($nn || $nz) {
                             push @asserts, "assert($argname)";
+                            if ($nn) {
+                                my $string_n = $n;
+                                $string_n = "pTHX_$string_n" if $has_context;
+                                push @attrs,
+                                     "Perl_attribute_nonnull_($string_n)";
+                            }
                         }
 
                         if (   ! $nocheck
@@ -4448,11 +4454,12 @@ sub generate_proto_h {
             die_at_end "$plain_func: Function with '...' arguments must have"
                      . " f or F flag";
         }
+
         if ( @attrs ) {
-            $ret .= "\n";
-            $ret .= join( "\n", map { (" " x 8) . $_ } @attrs );
+            $ret .= "\n"
+                 .  join( "\n", map { (" " x 8) . $_ } @attrs);
         }
-        $ret .= ";";
+        $ret .= ';';
         $ret = "/* $ret */" if $has_mflag;
 
         # Hide the prototype from non-authorized code.  This acts kind of like
@@ -4509,6 +4516,12 @@ sub generate_proto_h {
     my $fh = open_print_header("proto.h");
 
     print $fh <<~"EOF";
+        #ifdef DEBUGGING    /* See GH #23641 */
+        #  define Perl_attribute_nonnull_(which)
+        #else
+        #  define Perl_attribute_nonnull_(which)  __attribute__nonnull__(which)
+        #endif
+
         START_EXTERN_C
         $clean
         #ifdef PERL_CORE
