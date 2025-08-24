@@ -1043,6 +1043,7 @@ without the need for parentheses.
 X<||> X<operator, logical, or>
 X<^^> X<operator, logical, xor>
 X<//> X<operator, logical, defined-or>
+X<//> X<operator, logical, dor>
 
 Binary C<"||"> performs a short-circuit logical OR operation.  That is,
 if the left operand is true, the right operand is not even evaluated.
