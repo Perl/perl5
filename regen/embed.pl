@@ -245,7 +245,7 @@ sub generate_proto_h {
             $ret .= @$args ? "pTHX_ " : "pTHX";
         }
         if (@$args) {
-            die_at_end "n flag is contradicted by having arguments"
+            die_at_end "$plain_func: n flag is contradicted by having arguments"
                                                                 if $flags =~ /n/;
             my $n;
             for my $arg ( @$args ) {
