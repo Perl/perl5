@@ -4256,9 +4256,8 @@ and C<CXt_NULL> which represent a basic scope (as pushed by C<pp_enter>)
 and a sort block. The type determines which part of the context union are
 valid.
 
-=for apidoc  Cyh ||cx_type
-
-=for apidoc  Cmnh||CXt_BLOCK
+=for apidoc Cmnh ||cx_type
+=for apidoc_item ||CXt_BLOCK
 =for apidoc_item ||CXt_EVAL
 =for apidoc_item ||CXt_FORMAT
 =for apidoc_item ||CXt_GIVEN
