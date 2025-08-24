@@ -131,6 +131,19 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 2027';
+    my sub new {
+        my ($class, $code) = @_;
+        return bless $code => $class;
+    }
+    my @codes;
+    for my $i (1 .. 2) {
+        push @codes, new('main', sub {});
+    }
+    isnt($codes[0], $codes[1], 'The same subroutine reference is not re-used when blessed; GH 2027');
+}
+
+TODO: {
     local $::TODO = 'GH 5835';
     my $prev_w = $^W;
     $^W = 1;
