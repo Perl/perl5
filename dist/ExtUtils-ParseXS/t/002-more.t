@@ -9,7 +9,7 @@ use ExtUtils::CBuilder;
 use attributes;
 use overload;
 
-plan tests => 33;
+plan tests => 35;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -47,7 +47,7 @@ SKIP: {
 }
 
 SKIP: {
-  skip "no dynamic loading", 29
+  skip "no dynamic loading", 31
     if !$b->have_compiler || !$Config{usedl};
   my $module = 'XSMore';
   $lib_file = $b->link( objects => $obj_file, module_name => $module );
@@ -112,6 +112,9 @@ SKIP: {
   is XSMore::typemaptest2(), 42, 'Simple embedded typemap works with funny end marker';
   is XSMore::typemaptest3(12, 13, 14), 12, 'Simple embedded typemap works for input, too';
   is XSMore::typemaptest6(5), 5, '<<END; (with semicolon) matches delimiter "END"';
+
+  is XSMore::myadd1(5,7),     12, 'INTERFACE: myadd1';
+  is XSMore::myadd2(5,99,13), 18, 'INTERFACE: myadd2, C_ARGS';
 
   # Win32 needs to close the DLL before it can unlink it, but unfortunately
   # dl_unload_file was missing on Win32 prior to perl change #24679!
