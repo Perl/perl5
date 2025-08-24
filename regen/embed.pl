@@ -260,8 +260,8 @@ sub generate_proto_h {
                     $name =~ s/\W/_/ag;
 
                     $arg = "const char * const $name";
-                    die_at_end 'm flag required for "literal" argument'
-                                                            unless $has_mflag;
+                    die_at_end "$plain_func: func: m flag required for"
+                             . '"literal" argument' unless $has_mflag;
                 }
                 else {
                     my $nn =      ( $arg =~ s/\bNN\b// );
