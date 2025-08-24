@@ -7971,14 +7971,24 @@ and their use is legal.
 
 =item Use of uninitialized value%s
 
-(W uninitialized) An undefined value was used as if it were already
-defined.  It was interpreted as a "" or a 0, but maybe it was a mistake.
-To suppress this warning assign a defined value to your variables.
+(W uninitialized) An undefined value was used in a context where the
+value has meaning, for example as a number, string or reference. It was
+interpreted as an empty string or zero.
+
+If you didn't expect this value to be undefined, you can initialise the
+value before using it. If you expected the value could be undefined and
+want to suppress this particular instance of the warning, you can use the
+L<C<E<sol>E<sol>>|perlop/C-style Logical Or, Xor, and Defined Or>
+(defined-or) operator to provide an alternative that takes effect only
+when the value is undefined.
+
+Otherwise if you don't care about undefined values you can disable this
+warning.
 
 To help you figure out what was undefined, perl will try to tell you
 the name of the variable (if any) that was undefined.  In some cases
 it cannot do this, so it also tells you what operation you used the
-undefined value in.  Note, however, that perl optimizes your program
+undefined value in.  Note, however, that perl optimizes your program,
 and the operation displayed in the warning may not necessarily appear
 literally in your program.  For example, C<"that $foo"> is usually
 optimized into C<"that " . $foo>, and the warning will refer to the
