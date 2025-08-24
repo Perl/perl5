@@ -4023,6 +4023,7 @@ sub generate_proto_h {
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my $extensions_only = ( $flags =~ /E/ );
         my @asserts;
+        my @attrs;
         my $func;
 
         if (! $can_ignore && $retval eq 'void') {
@@ -4386,7 +4387,6 @@ sub generate_proto_h {
 
         push @asserts, @$assertions if $assertions;
 
-        my @attrs;
         if ( $flags =~ /r/ ) {
             push @attrs, "__attribute__noreturn__";
         }
