@@ -7889,17 +7889,17 @@ PP(pp_argcheck)
 PP(pp_multiparam)
 {
     struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUX->op_aux;
-    UV nparams = aux->n_positional;
+    size_t nparams = aux->n_positional;
     char slurpy = aux->slurpy;
     PADOFFSET *param_padix = aux->param_padix;
     AV  *defav = GvAV(PL_defgv); /* @_ */
 
     assert(!SvMAGICAL(defav));
-    UV argc = (UV)(AvFILLp(defav) + 1);
+    size_t argc = (AvFILLp(defav) + 1);
 
     S_check_argc(aTHX_ argc, nparams, nparams - aux->min_args, slurpy);
 
-    UV parami;
+    size_t parami;
     for(parami = 0; parami < nparams; parami++) {
         PADOFFSET padix = param_padix[parami];
         if(!padix) {
@@ -7949,7 +7949,7 @@ PP(pp_multiparam)
 
         av_extend(av, argc);
 
-        IV avidx = 0;
+        size_t avidx = 0;
         for(; argc; parami++, argc--) {
             SV **valp = av_fetch(defav, parami, FALSE);
             SV *val = valp ? *valp : &PL_sv_undef;

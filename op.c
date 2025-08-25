@@ -16562,7 +16562,7 @@ Perl_rcpv_copy(pTHX_ char *pv) {
 /* Subroutine signature parsing */
 
 struct yy_parser_signature_param {
-    UV         argix;        /* positional index of the param */
+    size_t     argix;        /* positional index of the param */
     PADOFFSET  padix;        /* pad index of the var holding the param */
     OP        *defcop;
     OPCODE     defmode;
@@ -16595,7 +16595,7 @@ destroy_subsignature_context(pTHX_ void *p)
     yy_parser_signature *signature = (yy_parser_signature *)p;
 
     if(signature->params) {
-        for(UV parami = 0; parami < signature->nparams; parami++) {
+        for(size_t parami = 0; parami < signature->nparams; parami++) {
             struct yy_parser_signature_param *param = signature->params + parami;
 
             if(param->defcop)
@@ -16830,7 +16830,7 @@ Perl_subsignature_finish(pTHX)
     sigops = op_append_elem(OP_LINESEQ, sigops,
             newSTATEOP(0, NULL, NULL));
 
-    UV end_argix = signature->next_argix;
+    size_t end_argix = signature->next_argix;
 
     struct op_multiparam_aux *aux = (struct op_multiparam_aux *)PerlMemShared_malloc(
             sizeof(struct op_multiparam_aux) + (end_argix * sizeof(PADOFFSET)));
@@ -16861,12 +16861,12 @@ Perl_subsignature_finish(pTHX)
     }
 
     struct yy_parser_signature_param *params = signature->params;
-    UV max_argix = 0;
+    size_t max_argix = 0;
 
-    for(UV parami = 0; parami < signature->nparams; parami++) {
+    for(size_t parami = 0; parami < signature->nparams; parami++) {
         struct yy_parser_signature_param *param = params + parami;
 
-        UV argix        = param->argix;
+        size_t argix    = param->argix;
         PADOFFSET padix = param->padix;
 
         while(max_argix < argix) {
