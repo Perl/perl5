@@ -1786,13 +1786,13 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
     case OP_MULTIPARAM:
     {
         struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUXo->op_aux;
-        UV min_args = aux->min_args;
-        UV n_positional = aux->n_positional;
+        size_t min_args = aux->min_args;
+        size_t n_positional = aux->n_positional;
         if(n_positional > min_args)
-            S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %" UVuf " .. %" UVuf "\n",
+            S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %zu .. %zu\n",
                     min_args, n_positional);
         else
-            S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %" UVuf "\n",
+            S_opdump_indent(aTHX_ o, level, bar, file, "ARGS = %zu\n",
                     min_args);
 
         for(Size_t i = 0; i < n_positional; i++) {

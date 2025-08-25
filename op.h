@@ -1192,8 +1192,8 @@ struct op_argcheck_aux {
 /* for OP_MULTIPARAM */
 
 struct op_multiparam_aux {
-    UV    min_args;     /* = the number of mandatory scalar parameters */
-    UV    n_positional; /* = the number of mandatory + optional scalar parameters, not counting a final slurpy */
+    size_t min_args;     /* = the number of mandatory scalar parameters */
+    size_t n_positional; /* = the number of mandatory + optional scalar parameters, not counting a final slurpy */
     char  slurpy;
     PADOFFSET *param_padix; /* points at storage allocated along with the struct itself, immediately following */
     PADOFFSET slurpy_padix;

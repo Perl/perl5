@@ -1204,14 +1204,14 @@ static OP *THX_parse_keyword_subsignature(pTHX)
                 struct op_multiparam_aux *p =
                     (struct op_multiparam_aux *)(cUNOP_AUXx(kid)->op_aux);
                 PADNAMELIST *names = PadlistNAMES(CvPADLIST(find_runcv(0)));
-                SV *retsv = newSVpvf("multiparam:%" UVuf "..%" UVuf ":%c",
+                SV *retsv = newSVpvf("multiparam:%zu..%zu:%c",
                         p->min_args, p->n_positional, p->slurpy ? p->slurpy : '-');
-                for (UV paramidx = 0; paramidx < p->n_positional; paramidx++) {
+                for (size_t paramidx = 0; paramidx < p->n_positional; paramidx++) {
                     char *namepv = PadnamePV(padnamelist_fetch(names, p->param_padix[paramidx]));
                     if(namepv)
-                        sv_catpvf(retsv, ":%s=%" UVf, namepv, paramidx);
+                        sv_catpvf(retsv, ":%s=%zu", namepv, paramidx);
                     else
-                        sv_catpvf(retsv, ":(anon)=%" UVf, paramidx);
+                        sv_catpvf(retsv, ":(anon)=%zu", paramidx);
                     if(paramidx >= p->min_args)
                         sv_catpvs(retsv, "?");
                 }
