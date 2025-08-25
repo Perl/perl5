@@ -1235,7 +1235,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 
 #  ifdef PERL_LC_ALL_USES_NAME_VALUE_PAIRS
 
-    const char separator[] = ";";
+    const char * const separator = ";";
     const Size_t separator_len = 1;
     const bool single_component = (strchr(string, ';') == NULL);
 
@@ -5277,7 +5277,7 @@ S_my_localeconv(pTHX_ const int item)
 #define LCONV_MONETARY_ENTRY(name) LCONV_ENTRY(name)
 
     /* There are just a few fields for NUMERIC strings */
-    const lconv_offset_t lconv_numeric_strings[] = {
+    static const lconv_offset_t lconv_numeric_strings[] = {
 #ifndef NO_LOCALECONV_GROUPING
         LCONV_NUMERIC_ENTRY(grouping),
 # endif
@@ -5301,7 +5301,7 @@ S_my_localeconv(pTHX_ const int item)
         &lconv_numeric_strings[(C_ARRAY_LENGTH(lconv_numeric_strings) - 2)]
 
     /* And the MONETARY string fields */
-    const lconv_offset_t lconv_monetary_strings[] = {
+    static const lconv_offset_t lconv_monetary_strings[] = {
         LCONV_MONETARY_ENTRY(int_curr_symbol),
         LCONV_MONETARY_ENTRY(mon_decimal_point),
 #ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
@@ -5322,7 +5322,7 @@ S_my_localeconv(pTHX_ const int item)
       &lconv_monetary_strings[(C_ARRAY_LENGTH(lconv_monetary_strings) - 2)]
 
     /* Finally there are integer fields, all are for monetary purposes */
-    const lconv_offset_t lconv_integers[] = {
+    static const lconv_offset_t lconv_integers[] = {
         LCONV_ENTRY(int_frac_digits),
         LCONV_ENTRY(frac_digits),
         LCONV_ENTRY(p_sep_by_space),
@@ -5432,7 +5432,7 @@ S_my_localeconv(pTHX_ const int item)
      * the data structure could do double duty.  However, both this and
      * RADIXCHAR would need to be in the final position of the same full
      * structure; an impossibility.  So make this into a separate structure */
-    const lconv_offset_t  thousands_sep_string[] = {
+    static const lconv_offset_t thousands_sep_string[] = {
         LCONV_NUMERIC_ENTRY(thousands_sep),
         {NULL, 0}
     };
@@ -7684,10 +7684,10 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
          * holds what field in the 'struct tm' to applies to the corresponding
          * format */
         int year, min, sec;
-      const char  * fmts[] = {"%Oy", "%OM", "%OS", "%Od", "%OH", "%Om", "%Ow" };
-      const Size_t maxes[] = {  99,    59,    59,    31,    23,    11,    6   };
-      const int  offsets[] = {   0,     0,     0,     1,     0,     1,    0   };
-      int         * vars[] = {&year,  &min,  &sec,  &mday, &hour, &mon, &mday };
+        static const char  * const fmts[] = {"%Oy", "%OM", "%OS", "%Od", "%OH", "%Om", "%Ow" };
+        static const Size_t const maxes[] = {  99,    59,    59,    31,    23,    11,    6   };
+        static const int  const offsets[] = {   0,     0,     0,     1,     0,     1,    0   };
+        int                      * vars[] = {&year,  &min,  &sec,  &mday, &hour, &mon, &mday };
         Size_t j = 0;   /* Current index into the above tables */
 
         orig_TIME_locale = toggle_locale_c_unless_locking(LC_TIME, locale);
@@ -7965,7 +7965,7 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
     utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
 
     /* List of strings to look at */
-    const int trials[] = {
+    static const int trials[] = {
 
 #  if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 
@@ -9530,7 +9530,7 @@ S_compute_collxfrm_coefficients(pTHX)
      * digits tend to have fewer levels, and some punctuation has more, but
      * those are relatively sparse in text, and khw believes this gives a
      * reasonable result, but it could be changed if experience so dictates. */
-    const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
+    const char * const longer = "ABCDEFGHIJKLMnopqrstuvwxyz";
     char * x_longer;        /* Transformed 'longer' */
     Size_t x_len_longer;    /* Length of 'x_longer' */
 
@@ -9555,7 +9555,7 @@ S_compute_collxfrm_coefficients(pTHX)
 
     /* Find out how long the transformation really is */
     x_longer = mem_collxfrm_(longer,
-                             sizeof(longer) - 1,
+                             strlen(longer),
                              &x_len_longer,
 
                              /* We avoid converting to UTF-8 in the called
@@ -9572,7 +9572,7 @@ S_compute_collxfrm_coefficients(pTHX)
      * first character.  This minimizes the chances of being swayed by outliers
      * */
     x_shorter = mem_collxfrm_(longer + 1,
-                              sizeof(longer) - 2,
+                              strlen(longer) - 1,
                               &x_len_shorter,
                               PL_in_utf8_COLLATE_locale);
     Safefree(x_shorter);
@@ -9616,7 +9616,7 @@ S_compute_collxfrm_coefficients(pTHX)
     /*     mx + b = len
      * so:      b = len - mx
      * but in case something has gone wrong, make sure it is non-negative */
-    base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
+    base = x_len_longer - PL_collxfrm_mult * strlen(longer);
     if (base < 0) {
         base = 0;
     }

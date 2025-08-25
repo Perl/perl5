@@ -3484,9 +3484,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             bool is_logical = 0, is_optimistic = 0;
             const char * const seqstart = RExC_parse;
             const char * endptr;
-            const char non_existent_group_msg[]
+            const char * const non_existent_group_msg
                                             = "Reference to nonexistent group";
-            const char impossible_group[] = "Invalid reference to group";
+            const char * const impossible_group = "Invalid reference to group";
 
             if (has_intervening_patws) {
                 RExC_parse_inc_by(1);
@@ -4476,7 +4476,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     {
         const char *p;
          /* Even/odd or x = don't care: 010101x10x */
-        static const char parens[] = "=!aA<,>Bbt";
+        const char * const parens = "=!aA<,>Bbt";
          /* flag below is set to 0 up through 'A'; 1 for larger */
 
         if (paren && (p = strchr(parens, paren))) {
@@ -8350,7 +8350,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
          * was, but there was a typo.  We tease these apart by doing fuzzy
          * matching on the name */
         if (class_number == OOB_NAMEDCLASS && found_problem) {
-            const UV posix_names[][6] = {
+            static const UV posix_names[][6] = {
                                                 { 'a', 'l', 'n', 'u', 'm' },
                                                 { 'a', 'l', 'p', 'h', 'a' },
                                                 { 'a', 's', 'c', 'i', 'i' },
@@ -8368,7 +8368,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                                             };
             /* The names of the above all have added NULs to make them the same
              * size, so we need to also have the real lengths */
-            const UV posix_name_lengths[] = {
+            static const UV posix_name_lengths[] = {
                                                 sizeof("alnum") - 1,
                                                 sizeof("alpha") - 1,
                                                 sizeof("ascii") - 1,
@@ -14247,7 +14247,7 @@ S_handle_user_defined_property(pTHX_
 
     const char * s0 = string;   /* Points to first byte in the current line
                                    being parsed in 'string' */
-    const char overflow_msg[] = "Code point too large in \"";
+    const char * const overflow_msg = "Code point too large in \"";
     SV* running_definition = NULL;
 
     PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY;
@@ -15332,7 +15332,7 @@ S_parse_uniprop_string(pTHX_
             /* Drop down to look up in the official properties */
         }
         else {
-            const char insecure[] = "Insecure user-defined property";
+            const char * const insecure = "Insecure user-defined property";
 
             /* Here, there is a sub by the correct name.  Normally we call it
              * to get the property definition */
@@ -15357,7 +15357,7 @@ S_parse_uniprop_string(pTHX_
              * error instead */
             if (TAINT_get) {
                 if (SvCUR(msg) > 0) sv_catpvs(msg, "; ");
-                sv_catpvn(msg, insecure, sizeof(insecure) - 1);
+                sv_catpvn(msg, insecure, strlen(insecure));
                 goto append_name_to_msg;
             }
 
@@ -15545,7 +15545,7 @@ S_parse_uniprop_string(pTHX_
                 }
                 if (TAINT_get) {
                     if (SvTRUE(error)) sv_catpvs(msg, "; ");
-                    sv_catpvn(msg, insecure, sizeof(insecure) - 1);
+                    sv_catpvn(msg, insecure, strlen(insecure));
                 }
 
                 if (name_len > 0) {
@@ -16033,8 +16033,8 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     const char * must;          /* The PV of 'must' */
     STRLEN must_len;            /* And its length */
     SV * syllable_name = NULL;  /* For Hangul syllables */
-    const char hangul_prefix[] = "HANGUL SYLLABLE ";
-    const STRLEN hangul_prefix_len = sizeof(hangul_prefix) - 1;
+    const char * const hangul_prefix = "HANGUL SYLLABLE ";
+    const STRLEN hangul_prefix_len = strlen(hangul_prefix);
 
     /* By inspection, there are a maximum of 7 bytes in the suffix of a hangul
      * syllable name, and these are immutable and guaranteed by the Unicode
@@ -16267,20 +16267,20 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
         /* These constants, names, values, and algorithm are adapted from the
          * Unicode standard, version 5.1, section 3.12, and should never
          * change. */
-        const char * JamoL[] = {
+        static const char * const JamoL[] = {
             "G", "GG", "N", "D", "DD", "R", "M", "B", "BB",
             "S", "SS", "", "J", "JJ", "C", "K", "T", "P", "H"
         };
         const int LCount = C_ARRAY_LENGTH(JamoL);
 
-        const char * JamoV[] = {
+        static const char * const JamoV[] = {
             "A", "AE", "YA", "YAE", "EO", "E", "YEO", "YE", "O", "WA",
             "WAE", "OE", "YO", "U", "WEO", "WE", "WI", "YU", "EU", "YI",
             "I"
         };
         const int VCount = C_ARRAY_LENGTH(JamoV);
 
-        const char * JamoT[] = {
+        static const char * const JamoT[] = {
             "", "G", "GG", "GS", "N", "NJ", "NH", "D", "L",
             "LG", "LM", "LB", "LS", "LT", "LP", "LH", "M", "B",
             "BS", "S", "SS", "NG", "J", "C", "K", "T", "P", "H"
@@ -16415,7 +16415,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     /* If we ever were to accept aliases for, say private use names, we would
      * need to do something fancier to find empty names.  The code below works
      * (at the time it was written), and is slower than the above */
-    const char empties_pat[] = "^.";
+    const char * const empties_pat = "^.";
     if (strNE(name, empties_pat)) {
         SV * empty = newSVpvs("");
         if (execute_wildcard(subpattern_re,
