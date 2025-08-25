@@ -4093,9 +4093,9 @@ S_scan_const(pTHX_ char *start)
                     if (PL_lex_inpat) {
 
                         if (! len) { /* The name resolved to an empty string */
-                            const char empty_N[] = "\\N{_}";
-                            Copy(empty_N, d, sizeof(empty_N) - 1, char);
-                            d += sizeof(empty_N) - 1;
+                            const char * const empty_N = "\\N{_}";
+                            Copy(empty_N, d, strlen(empty_N), char);
+                            d += strlen(empty_N);
                         }
                         else {
                             /* In order to not lose information for the regex
@@ -4113,9 +4113,8 @@ S_scan_const(pTHX_ char *start)
                                  * through the string.  Each character takes up
                                  * 2 hex digits plus either a trailing dot or
                                  * the "}" */
-                                const char initial_text[] = "\\N{U+";
-                                const STRLEN initial_len = sizeof(initial_text)
-                                                           - 1;
+                                const char * const initial_text = "\\N{U+";
+                                const STRLEN initial_len = strlen(initial_text);
                                 d = off + SvGROW(sv, off
                                                     + 3 * len
 

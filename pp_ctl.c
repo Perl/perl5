@@ -4699,9 +4699,9 @@ S_require_file(pTHX_ SV *sv)
                  * of checks here at runtime.
                  */
                 const STRLEN package_len = len - 3;
-                const char slashdot[2] = {'/', '.'};
+                static const char slashdot[2] = {'/', '.'};
 #ifdef DOSISH
-                const char backslashdot[2] = {'\\', '.'};
+                static const char backslashdot[2] = {'\\', '.'};
 #endif
 
                 /* Disallow *purported* barewords that map to absolute

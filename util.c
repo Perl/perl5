@@ -6195,11 +6195,11 @@ static void atos_update(atos_context* ctx,
     if (ctx->unavail)
         return;
     if (ctx->tool == NULL) {
-        const char* tools[] = {
+        static const char* const tools[] = {
             "/usr/bin/xcrun",
             "/usr/bin/atos"
         };
-        const char* formats[] = {
+        static const char* const formats[] = {
             "/usr/bin/xcrun atos -o '%s' -l %08x %08x 2>&1",
             "/usr/bin/atos -d -o '%s' -l %08x %08x 2>&1"
         };

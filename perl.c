@@ -5172,7 +5172,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
             SV *subdir = newSVsv(libdir);
 #ifdef PERL_INC_VERSION_LIST
             /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
-            const char * const incverlist[] = { PERL_INC_VERSION_LIST };
+            static const char * const incverlist[] = { PERL_INC_VERSION_LIST };
             const char * const *incver;
 #endif
 
