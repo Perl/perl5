@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 
-plan 156;
+plan 158;
 
 # -------------------- our -------------------- #
 
@@ -114,6 +114,24 @@ our sub foo;
 0 if sub { eval "" if 0; \&foo if 0; };
 print "ok";
 PROG
+
+# https://github.com/Perl/perl5/issues/15545
+fresh_perl(<<'PROG', {});
+our sub speak {}
+my sub meow {
+    speak();
+}
+PROG
+is $?, 0, 'referencing our sub from closure sub does not crash; GH 15545';
+fresh_perl(<<'PROG', {});
+our sub speak {}
+package Cat {
+    my sub meow {
+        speak();
+    }
+}
+PROG
+is $?, 0, 'referencing our sub from closure sub in seperate package does not crash; GH 15545';
 
 # -------------------- state -------------------- #
 
