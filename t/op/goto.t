@@ -74,7 +74,6 @@ sub bar {
 }
 
 &bar;
-exit;
 
 FINALE:
 is(curr_test(), 20, 'FINALE');
