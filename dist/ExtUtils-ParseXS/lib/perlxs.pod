@@ -3750,84 +3750,119 @@ be used together with either of C<INTERFACE> or C<ATTRS>.
 
 =head3 The INTERFACE: Keyword
 
-XXX this keyword can appear anywhere within the init part of an XSUB.
+    MODULE = Foo::Bar PACKAGE = Foo::Bar PREFIX = foobar_
 
-This keyword declares the current XSUB as a keeper of the given
-calling signature.  If some text follows this keyword, it is
-considered as a list of functions which have this signature, and
-should be attached to the current XSUB.
+    int
+    arith(int a, int b)
+        INTERFACE: foobar_add    foobar_subtract
+                   foobar_divide foobar_multiply
 
-For example, if you have 4 C functions multiply(), divide(), add(),
-subtract() all having the signature:
+This keyword can appear anywhere within the L<initialisation part|/The
+XSUB Init Part> of an XSUB.
 
-    symbolic f(symbolic, symbolic);
+This keyword provides similar functionality to C<ALIAS>, but is intended
+for XSUBs which use autocall. It allows a single XSUB to have multiple
+names in the Perl namespace which, when invoked, will call the correct
+wrapped C library function.
 
-you can make them all to use the same XSUB using this:
+In the example above there is a single C XSUB function created (called
+C<XS_Foo__Bar_arith>), plus four CVs in the Perl namespace called
+C<Foo::Bar::add> etc. Calling C<Foo::Bar::add()> from Perl invokes
+C<XS_Foo__Bar_arith()> with some indication of which C function to call,
+which is then autocalled. C<ALIAS> achieves this by storing an index value
+in each CV and making it available via the C<ix> variable, while
+C<INTERFACE> currently achieves this by storing a C function pointer in
+each CV. So the C<Foo::Bar::add()> CV holds a pointer to the
+C<foobar_add()> C function. The action of the XSUB is to extract the
+parameter values from the passed arguments and the function pointer from
+the CV, then call the underlying C function.
 
-    symbolic
-    interface_s_ss(arg1, arg2)
-        symbolic arg1
-        symbolic arg2
-      INTERFACE:
-        multiply divide
-        add subtract
+Note that storing a function pointer in the CV is an implementation detail
+which could change in the future. See L</The INTERFACE_MACRO: Keyword> for
+details of how to customise the setting and retrieving of this value in
+the CV.
 
-(This is the complete XSUB code for 4 Perl functions!)  Four generated
-Perl function share names with corresponding C functions.
+The rest of the line following the C<INTERFACE> keyword, plus any further
+lines until the next keyword, are assumed to contain zero or more
+interface names, separated by white space (or commas).
 
-The advantage of this approach comparing to ALIAS: keyword is that there
-is no need to code a switch statement, each Perl function (which shares
-the same XSUB) knows which C function it should call.  Additionally, one
-can attach an extra function remainder() at runtime by using
+An interface name is always used as-is for the name of the wrapped C
+function. If the name contains a package separator, then it will be
+used as-is to generate the Perl name; otherwise any prefix is stripped and
+the current package name is prepended. The following shows how a few such
+interface names would be processed (assuming the current PACKAGE and
+PREFIX are C<Foo::bar> and C<foobar_>):
 
-    CV *mycv = newXSproto("Symbolic::remainder",
-                          XS_Symbolic_interface_s_ss, __FILE__, "$$");
-    XSINTERFACE_FUNC_SET(mycv, remainder);
+    Interface name     Perl function name   C function name
+    --------------     ------------------   ----------------
+    abc                Foo::Bar::abc        abc
+    foobar_abc         Foo::Bar::abc        foobar_abc
+    X::Y::foobar_def   X::Y::foobar_def     X::Y::foobar_def
 
-say, from another XSUB.  (This example supposes that there was no
-INTERFACE_MACRO: section, otherwise one needs to use something else instead of
-C<XSINTERFACE_FUNC_SET>, see the next section.)
+Unlike C<ALIAS>, the XSUB name is used only as the name of the generated C
+function; in the example above, it doesn't cause a Perl function called
+C<arith()> to be created.
 
-=head3 The INTERFACE_MACRO: Keyword
+See L</T_PTROBJ and opaque handles> for a complete example using
+C<INTERFACE> with the C<T_PTROBJ> typemap. But note that before Perl
+5.44.0 (F<ExtUtils::ParseXS> 3.60), C<INTERFACE> would not work properly
+on XSUBs used with Perlish return types (as used by C<T_PTROBJ>), such as
 
-XXX this keyword can appear anywhere within the input and init parts of an
-XSUB.
+    Foo::Bar
+    foo(...)
+        ....
 
-This keyword allows one to define an INTERFACE using a different way
-to extract a function pointer from an XSUB.  The text which follows
-this keyword should give the name of macros which would extract/set a
-function pointer.  The extractor macro is given return type, C<CV*>,
-and C<XSANY.any_dptr> for this C<CV*>.  The setter macro is given cv,
-and the function pointer.
+This has mostly been fixed in 5.44.0 onwards, but may generate invalid C
+code (in particular, invalid function pointer casts) for XSUBs having a
+C<C_ARGS> keyword, unless the value of C<C_ARGS> is a simple list of
+parameter names.
 
-The default value is C<XSINTERFACE_FUNC> and C<XSINTERFACE_FUNC_SET>.
-An INTERFACE keyword with an empty list of functions can be omitted if
-INTERFACE_MACRO keyword is used.
+Note that C<INTERFACE> should not be used together with either of C<ALIAS>
+or C<ATTRS>.
 
-Suppose that in the previous example functions pointers for
-multiply(), divide(), add(), subtract() are kept in a global C array
-C<fp[]> with offsets being C<multiply_off>, C<divide_off>, C<add_off>,
-C<subtract_off>.  Then one can use
+=head4 The INTERFACE_MACRO: Keyword
 
-    #define XSINTERFACE_FUNC_BYOFFSET(ret, cv, f) \
-        ((XSINTERFACE_CVT_ANON(ret))fp[CvXSUBANY(cv).any_i32])
-    #define XSINTERFACE_FUNC_BYOFFSET_set(cv, f) \
+    int
+    arith(int a, int b)
+        INTERFACE:       add subtract divide multiply
+        INTERFACE_MACRO: MY_FUNC_GET
+                         MY_FUNC_SET
+
+Note that this keyword is deprecated since it assumes a particular
+implementation for the C<INTERFACE> keyword, which might change in future.
+
+This keyword can appear anywhere within the L<input|/The XSUB Input Part>
+or L<initialisation|/The XSUB Init Part> parts of an XSUB.
+
+By default, the C code generated by the C<INTERFACE> keyword plants calls
+to two macros, C<XSINTERFACE_FUNC_SET> and C<XSINTERFACE_FUNC>, which are
+used respectively to set (at boot time) a field in the CV to the address
+of the C function pointer to use, and to retrieve (at run time) that value
+from the CV.
+
+The C<INTERFACE_MACRO> macro allows you to override the names of the two
+macros to be used for this purpose. The rest of the line following the
+C<INTERFACE_MACRO> keyword, plus any further lines until the next keyword,
+should contain (in total) two words which are taken to be macro names.
+
+The get macro takes three parameters: the return type of the function, the
+CV which holds the function's pointer value, and the field within the CV
+which has the pointer value. It should return a C function pointer. The
+setter macro has two parameters: the CV, and the function pointer.
+
+Suppose that in the example above, pointers to the C<multiply()>,
+C<divide()>, C<add()> and C<subtract()> functions are kept in a global C
+array called C<arith_ptrs[]> with offsets specified by the enum values
+C<multiply_off>, C<divide_off>, C<add_off> and C<subtract_off>. Then one
+could use:
+
+    #define MY_FUNC_GET(ret, cv, f) \
+        ((XSINTERFACE_CVT_ANON(ret))arith_ptrs[CvXSUBANY(cv).any_i32])
+    #define MY_FUNC_SET(cv, f) \
         CvXSUBANY(cv).any_i32 = CAT2(f, _off)
 
-in C section,
-
-    symbolic
-    interface_s_ss(arg1, arg2)
-        symbolic  arg1
-        symbolic  arg2
-      INTERFACE_MACRO:
-        XSINTERFACE_FUNC_BYOFFSET
-        XSINTERFACE_FUNC_BYOFFSET_set
-      INTERFACE:
-        multiply divide
-        add subtract
-
-in XSUB section.
+to store an array index in the CV, rather than storing the actual function
+pointer.
 
 =head3 The CASE: Keyword
 
@@ -4005,7 +4040,20 @@ C<mynum_destroy()>, while C<val()> returns the integer value of the
 object.
 
 Finally, four binary functions are defined, sharing the same XSUB body via
-aliases.
+aliases. As an alternative, the code for the main XSUB could simplified
+using the L<INTERFACE|/The INTERFACE: Keyword> keyword rather than
+using aliasing:
+
+    My::Num
+    arithmetic_interface(My::Num x, My::Num y)
+        INTERFACE:
+            mynum_add
+            mynum_subtract
+            mynum_multiply
+            mynum_divide
+
+but note that C<INTERFACE> only supports Perlish return types such
+as C<My::Num> from Perl 5.44.0 (F<ExtUtils::ParseXS> 3.60) onwards.
 
 This XS module might be accessed from Perl using code like this:
 
