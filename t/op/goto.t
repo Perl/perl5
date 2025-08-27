@@ -74,6 +74,8 @@ sub bar {
 }
 
 &bar;
+fail('goto bypass');
+exit;
 
 FINALE:
 is(curr_test(), 20, 'FINALE');
