@@ -3410,7 +3410,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     char *xfailed = NULL;
     char tmpbuf[MAXPATHLEN];
     char *s;
-    I32 len = 0;
+    size_t len = 0;
     int retval;
     char *bufend;
 #if defined(DOSISH) && !defined(OS2)
@@ -3550,13 +3550,26 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
             if (len < sizeof tmpbuf)
                 tmpbuf[len] = '\0';
 #  else
-            s = delimcpy_no_escape(tmpbuf, tmpbuf + sizeof tmpbuf, s, bufend,
-                                   ':', &len);
+            {
+                I32 n;
+                s = delimcpy_no_escape(tmpbuf, tmpbuf + sizeof tmpbuf, s,
+                                       bufend, ':', &n);
+                assert(n >= 0);
+                len = n;
+            }
 #  endif
             if (s < bufend)
                 s++;
-            if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
-                continue;	/* don't search dir with too-long name */
+            {
+                const size_t
+                    available_len = sizeof tmpbuf - MAX_EXT_LEN - 1,
+                    scriptname_len = strlen(scriptname);
+                if (
+                    scriptname_len >= available_len ||
+                    len >= available_len - scriptname_len
+                )
+                    continue;   /* don't search dir with too-long name */
+            }
             if (len
 #  ifdef DOSISH
                 && tmpbuf[len - 1] != '/'
