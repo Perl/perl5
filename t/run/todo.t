@@ -338,6 +338,20 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 19378';
+    fresh_perl_like(
+        <<~'HERE',
+            sub () { !0 };
+            for (!0) { $_++ };
+            HERE
+        qr/Modification of a read-only value/,
+        {},
+        "'sub () { !0 }' does not prevent 'Modification of a read-only value' error; GH 19378"
+    );
+    isnt($?, 0, 'Compilation fails; GH 19378');
+}
+
+TODO: {
     todo_skip 1 if is_miniperl();
     local $::TODO = 'GH 22168';
     fresh_perl_is(
