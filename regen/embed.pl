@@ -28,6 +28,33 @@ BEGIN {
     require './regen/embed_lib.pl';
 }
 
+# This program has historically generated compatibility macros for a few
+# functions of the form Perl_FOO(pTHX_ ...).  Those macros would be named
+# FOO(...), and would expand outside the core to Perl_FOO_nocontext(...)
+# instead of the expected value.  This was done so XS code that didn't do a
+# PERL_GET_CONTEXT would continue to work unchanged after threading was
+# introduced.  Any new API functions that came along would require an aTHX_
+# parameter; this was just to avoid breaking existing source.  Hence no new
+# functions need be added to the list of such macros.  This is the list.
+# All have varargs.
+my @have_compatibility_macros = qw(
+                                    croak
+                                    deb
+                                    die
+                                    form
+                                    load_module
+                                    mess
+                                    newSVpvf
+                                    sv_catpvf
+                                    sv_catpvf_mg
+                                    sv_setpvf
+                                    sv_setpvf_mg
+                                    warn
+                                    warner
+                                  );
+my %has_compat_macro;
+$has_compat_macro{$_} = 1 for @have_compatibility_macros;
+
 my $unflagged_pointers;
 my @az = ('a'..'z');
 
@@ -123,7 +150,7 @@ sub generate_proto_h {
 
         my ($flags, $retval, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
-        if ($flags =~ / ( [^ AabCDdEefFhIiMmNnOoPpRrSsTUuvWXx;] ) /xx) {
+        if ($flags =~ / ( [^ AabCDdEefFhIiMmNnOoPpRrSsTUuWXx;] ) /xx) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
 
@@ -637,7 +664,7 @@ sub embed_h {
                     }
                 }
                 $ret .= ")\n";
-                if($use_va_list and $flags =~ /v/) {
+                if($has_compat_macro{$func}) {
                     # Make older ones available only when !MULTIPLICITY or PERL_CORE or PERL_WANT_VARARGS
                     # These should not be done uncondtionally because existing
                     # code might call e.g. warn() without aTHX in scope.
@@ -718,22 +745,6 @@ sub generate_embed_h {
         print $em add_indent($ret,"$func($alist)\n");
     }
 
-    my @nocontext;
-    {
-        my (%has_va, %has_nocontext);
-        foreach (@$all) {
-            my $embed= $_->{embed}
-                or next;
-            ++$has_va{$embed->{name}} if @{$embed->{args}} and $embed->{args}[-1] =~ /\.\.\./;
-            ++$has_nocontext{$1} if $embed->{name} =~ /(.*)_nocontext/;
-        }
-
-        @nocontext = sort grep {
-            $has_nocontext{$_}
-                && !/printf/ # Not clear to me why these are skipped but they are.
-        } keys %has_va;
-    }
-
     print $em <<~'END';
 
     /* Before C99, macros could not wrap varargs functions. This
@@ -743,7 +754,7 @@ sub generate_embed_h {
     #if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && !defined(PERL_WANT_VARARGS)
     END
 
-    foreach (@nocontext) {
+    foreach (@have_compatibility_macros) {
         print $em indent_define($_, "Perl_${_}_nocontext", "  ");
     }
 
@@ -756,7 +767,7 @@ sub generate_embed_h {
     /* undefined symbols, point them back at the usual ones */
     END
 
-    foreach (@nocontext) {
+    foreach (@have_compatibility_macros) {
         print $em indent_define("Perl_${_}_nocontext", "Perl_$_", "  ");
     }
 
