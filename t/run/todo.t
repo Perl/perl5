@@ -352,4 +352,31 @@ TODO: {
     );
 }
 
+TODO: {
+    todo_skip 2 if is_miniperl();
+    local $::TODO = 'GH 22192';
+    fresh_perl_is(
+        <<~'HERE',
+            use Scalar::Util qw(tainted);
+            my $y = <STDIN>;
+            vec( my $x = "", 0, 8 ) = $y;
+            print tainted($x);
+            HERE
+        '1',
+        { stdin => '123', switches => [ '-t' ] },
+        'lvalue vec() propagates tainting on empty string; GH 22192'
+    );
+    fresh_perl_is(
+        <<~'HERE',
+            use Scalar::Util qw(tainted);
+            my $y = <STDIN>;
+            vec( my $x = "X", 0, 8 ) = $y;
+            print tainted($x);
+            HERE
+        '1',
+        { stdin => '123', switches => [ '-t' ] },
+        'lvalue vec() propagates tainting on non-empty string; GH 22192'
+    );
+}
+
 done_testing();
