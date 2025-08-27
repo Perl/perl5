@@ -639,12 +639,6 @@
 :
 :   'U'  autodoc.pl will not output a usage example
 :
-:   'v'  Guard the macro by !MULTIPLICITY || PERL_CORE if it uses __VA_ARGS__.
-:        This flag exists for backward-compatibility to ensure that code does
-:        not break when calling older functions without an aTHX in scope. It
-:        should not be added to newly-added functions as they will have no such
-:        compatibility issues.
-:
 :   'W'  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH
 :        argument to the function calls. This means that under DEBUGGING a
 :        depth argument is added to the functions, which is used for example by
@@ -928,7 +922,7 @@ px	|void	|create_eval_scope					\
 				|NN SV **sp				\
 				|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
-Adfprv	|void	|croak		|NULLOK const char *pat 		\
+Adfpr	|void	|croak		|NULLOK const char *pat 		\
 				|...
 Tfpr	|void	|croak_caller	|NULLOK const char *pat 		\
 				|...
@@ -1007,7 +1001,7 @@ p	|void	|cv_undef_flags |NN CV *cv				\
 Cp	|void	|cx_dump	|NN PERL_CONTEXT *cx
 : Used by CXINC, which appears to be in widespread use
 CRp	|I32	|cxinc
-Adfpv	|void	|deb		|NN const char *pat			\
+Adfp	|void	|deb		|NN const char *pat			\
 				|...
 Cdp	|I32	|debop		|NN const OP *o
 Cdp	|void	|debprofdump
@@ -1035,7 +1029,7 @@ ETXdp	|char * |delimcpy_no_escape					\
 				|const int delim			\
 				|NN I32 *retlen
 Cp	|void	|despatch_signals
-Adfprv	|OP *	|die		|NULLOK const char *pat 		\
+Adfpr	|OP *	|die		|NULLOK const char *pat 		\
 				|...
 Adpr	|OP *	|die_sv 	|NN SV *baseex
 : Used in util.c
@@ -1276,7 +1270,7 @@ Cp	|void	|force_out_malformed_utf8_message_			\
 				|NN const U8 * const e			\
 				|U32 flags				\
 				|const bool die_here
-Adfpv	|char * |form		|NN const char *pat			\
+Adfp	|char * |form		|NN const char *pat			\
 				|...
 : Only used in perl.c
 p	|void	|free_tied_hv_pool
@@ -1853,7 +1847,7 @@ ERXp	|HV *	|load_charnames |NN SV *char_name			\
 				|const STRLEN context_len		\
 				|NN const char **error_msg
 MTbp	|void	|load_mathoms
-AFdpv	|void	|load_module	|U32 flags				\
+AFdp	|void	|load_module	|U32 flags				\
 				|NN SV *name				\
 				|NULLOK SV *ver 			\
 				|...
@@ -2032,7 +2026,7 @@ Cp	|Stack_off_t *|markstack_grow
 EXp	|int	|mbtowc_	|NULLOK const wchar_t *pwc		\
 				|NULLOK const char *s			\
 				|const Size_t len
-Adfpv	|SV *	|mess		|NN const char *pat			\
+Adfp	|SV *	|mess		|NN const char *pat			\
 				|...
 Adp	|SV *	|mess_sv	|NN SV *basemsg 			\
 				|bool consume
@@ -2343,7 +2337,7 @@ ARdp	|OP *	|newSVOP	|I32 type				\
 				|NN SV *sv
 ARdp	|SV *	|newSVpv	|NULLOK const char * const s		\
 				|const STRLEN len
-ARdfpv	|SV *	|newSVpvf	|NN const char * const pat		\
+ARdfp	|SV *	|newSVpvf	|NN const char * const pat		\
 				|...
 ARdp	|SV *	|newSVpvn	|NULLOK const char * const s		\
 				|const STRLEN len
@@ -3156,13 +3150,13 @@ Adp	|bool	|sv_cat_decode	|NN SV *dsv				\
 				|int tlen
 Adp	|void	|sv_catpv	|NN SV * const dsv			\
 				|NULLOK const char *sstr
-Adfpv	|void	|sv_catpvf	|NN SV * const sv			\
+Adfp	|void	|sv_catpvf	|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
 Adp	|void	|sv_catpv_flags |NN SV * const dsv			\
 				|NN const char *sstr			\
 				|const I32 flags
-Adfpv	|void	|sv_catpvf_mg	|NN SV * const sv			\
+Adfp	|void	|sv_catpvf_mg	|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
 Adp	|void	|sv_catpv_mg	|NN SV * const dsv			\
@@ -3465,10 +3459,10 @@ Adp	|char  *|sv_setpv_bufsize					\
 				|NN SV * const sv			\
 				|const STRLEN cur			\
 				|const STRLEN len
-Adfpv	|void	|sv_setpvf	|NN SV * const sv			\
+Adfp	|void	|sv_setpvf	|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
-Adfpv	|void	|sv_setpvf_mg	|NN SV * const sv			\
+Adfp	|void	|sv_setpvf_mg	|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
 Cipx	|char  *|sv_setpv_freshbuf					\
@@ -3961,9 +3955,9 @@ Adp	|void	|vwarner	|U32 err				\
 p	|I32	|wait4pid	|Pid_t pid				\
 				|NN int *statusp			\
 				|int flags
-Adfpv	|void	|warn		|NN const char *pat			\
+Adfp	|void	|warn		|NN const char *pat			\
 				|...
-Adfpv	|void	|warner 	|U32 err				\
+Adfp	|void	|warner 	|U32 err				\
 				|NN const char *pat			\
 				|...
 Adp	|void	|warn_sv	|NN SV *baseex
@@ -4128,47 +4122,47 @@ pr	|int	|magic_regdatum_set					\
 				|NN MAGIC *mg
 #endif
 #if defined(MULTIPLICITY)
-ATdfprv |void	|croak_nocontext|NULLOK const char *pat 		\
+ATdfpr	|void	|croak_nocontext|NULLOK const char *pat 		\
 				|...
-ATdfpv	|void	|deb_nocontext	|NN const char *pat			\
+ATdfp	|void	|deb_nocontext	|NN const char *pat			\
 				|...
-ATdfprv |OP *	|die_nocontext	|NULLOK const char *pat 		\
+ATdfpr	|OP *	|die_nocontext	|NULLOK const char *pat 		\
 				|...
-ATdfpv	|char * |form_nocontext |NN const char *pat			\
+ATdfp	|char * |form_nocontext |NN const char *pat			\
 				|...
-AFTdpv	|void	|load_module_nocontext					\
+AFTdp	|void	|load_module_nocontext					\
 				|U32 flags				\
 				|NN SV *name				\
 				|NULLOK SV *ver 			\
 				|...
-ATdfpv	|SV *	|mess_nocontext |NN const char *pat			\
+ATdfp	|SV *	|mess_nocontext |NN const char *pat			\
 				|...
 Cdop	|void * |my_cxt_init	|NN int *indexp 			\
 				|size_t size
-ATdfpv	|SV *	|newSVpvf_nocontext					\
+ATdfp	|SV *	|newSVpvf_nocontext					\
 				|NN const char * const pat		\
 				|...
-ATdfpv	|void	|sv_catpvf_mg_nocontext 				\
+ATdfp	|void	|sv_catpvf_mg_nocontext 				\
 				|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
-ATdfpv	|void	|sv_catpvf_nocontext					\
+ATdfp	|void	|sv_catpvf_nocontext					\
 				|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
-ATdfpv	|void	|sv_setpvf_mg_nocontext 				\
+ATdfp	|void	|sv_setpvf_mg_nocontext 				\
 				|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
-ATdfpv	|void	|sv_setpvf_nocontext					\
+ATdfp	|void	|sv_setpvf_nocontext					\
 				|NN SV * const sv			\
 				|NN const char * const pat		\
 				|...
-ATdfpv	|void	|warner_nocontext					\
+ATdfp	|void	|warner_nocontext					\
 				|U32 err				\
 				|NN const char *pat			\
 				|...
-ATdfpv	|void	|warn_nocontext |NN const char *pat			\
+ATdfp	|void	|warn_nocontext |NN const char *pat			\
 				|...
 #endif /* defined(MULTIPLICITY) */
 #if defined(MYMALLOC)
