@@ -2534,9 +2534,9 @@ expression is used instead.  See L<perlre> for further explanation on these.
 Options are as with C<m//> with the addition of the following replacement
 specific options:
 
-    e   Evaluate the right side as an expression.
-    ee  Evaluate the right side as a string then eval the
-        result.
+    e   Evaluate the right side as a block of code.
+    ee  Evaluate the right side as a block of code, then eval()
+        the resulting string.
     r   Return substitution and leave the original string
         untouched.
 
@@ -2548,10 +2548,16 @@ as normal delimiters; the replacement text is not evaluated as a command.
 If the I<PATTERN> is delimited by bracketing quotes, the I<REPLACEMENT> has
 its own pair of quotes, which may or may not be bracketing quotes, for example,
 C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
-replacement portion to be treated as a full-fledged Perl expression
+replacement portion to be treated as a full-fledged block of Perl code
 and evaluated right then and there.  It is, however, syntax checked at
-compile-time.  A second C<e> modifier will cause the replacement portion
-to be C<eval>ed before being run as a Perl expression.
+compile-time.  A second C<e> modifier will cause the result of the block of code
+to be C<eval>ed.
+
+That is, C<s/FOO/BAR/e> will compute the replacement string at match time as if
+it had been written as C<do { BAR }> (see L<perlfunc/do BLOCK>).  Each
+additional C<e> modifier wraps a call to C<eval> around the result:
+C<s/FOO/BAR/ee> will compute the replacement string like C<eval(do { BAR })>,
+C<s/FOO/BAR/eee> like C<eval(eval(do { BAR }))>, etc.
 
 Examples:
 
@@ -2602,6 +2608,9 @@ Examples:
     # (including lexicals) in $_ : First $1 is interpolated
     # to the variable name, and then evaluated
     s/(\$\w+)/$1/eeg;
+
+    # Same as above, but perhaps clearer
+    s/(\$\w+)/eval($1)/eg;
 
     # Delete (most) C comments.
     $program =~ s {
