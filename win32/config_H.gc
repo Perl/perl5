@@ -3801,6 +3801,12 @@
  */
 #define	I_STDBOOL		/**/
 
+/* I_STDCKDINT:
+ *	This symbol, if defined, indicates that <stdckdint.h> exists and
+ *	can be included.
+ */
+/*#define	I_STDCKDINT		/ **/
+
 /* I_STDINT:
  *	This symbol, if defined, indicates that <stdint.h> exists and
  *	should be included.

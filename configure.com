@@ -3667,6 +3667,12 @@ $   d_fd_set="define"
 $   echo4 "Well, your system knows about the normal fd_set typedef..."
 $ ENDIF
 $!
+$! Check for stdckdint.h
+$!
+$ tmp = "stdckdint.h"
+$ GOSUB inhdr
+$ i_stdckdint = tmp
+$!
 $! Check for stdint.h
 $!
 $ tmp = "stdint.h"
@@ -6550,6 +6556,7 @@ $   WC "i_stdbool='define'"
 $ ELSE
 $   WC "i_stdbool='undef'"
 $ ENDIF
+$ WC "i_stdckdint='" + i_stdckdint + "'"
 $ WC "i_stdint='" + i_stdint + "'"
 $ WC "i_stdlib='define'"
 $ WC "i_sunmath='undef'"
