@@ -5046,6 +5046,10 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             SvNV_set(dsv, SvNVX(ssv));
             break;
         case SVf_ROK:  /* [ 3% ]*/
+            /* Another corner case here. SVf_IVisUV and SVprv_WEAKREF
+             * have the same underlying value. We do not want to
+             * propagate the latter. */
+             SvFLAGS(dsv) &= ~SVprv_WEAKREF;
             SvRV_set(dsv, SvREFCNT_inc(SvRV(ssv)));
             return dsv;
         default:  /* [ 2% ]*/

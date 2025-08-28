@@ -10,7 +10,7 @@ BEGIN {
 # Tests the new documented mechanism for determining the original type
 # of an SV.
 
-plan tests => 16;
+plan tests => 22;
 use strict;
 use B qw(svref_2object SVf_IOK SVf_NOK SVf_POK);
 
@@ -83,3 +83,33 @@ is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_POK, "correct base flags on PV");
 $y = $x + 10;
 
 is($xobj->FLAGS & (SVf_IOK | SVf_POK), (SVf_IOK | SVf_POK), "POK still set on PV used as number");
+
+
+# GH #23637, GH #23646 - newSVsv_flags_NN erroneously copied WEAKREF in *some* code paths
+
+my $ref = [];
+my ($wref, $cref);
+
+# Weakened reference SV is an SVt_IV
+$wref = $ref;
+builtin::weaken($wref);
+ok(builtin::is_weak($wref), 'a weakened SVt_IV ref has WEAKREF set');
+$cref = [ $wref ];
+ok(!builtin::is_weak( $cref->[0] ), 'SVt_IV copies do NOT have WEAKREF set');
+
+# Weakened reference SV is an SVt_PV
+$wref = 'blip';
+$wref = $ref;
+builtin::weaken($wref);
+ok(builtin::is_weak($wref), 'a weakened SVt_PV ref has WEAKREF set');
+$cref = [ $wref ];
+ok(!builtin::is_weak( $cref->[0] ), 'SVt_PV copies do NOT have WEAKREF set');
+
+# Weakened reference SV is an SVt_PVIV
+$wref = 1;
+$wref = $ref;
+builtin::weaken($wref);
+ok(builtin::is_weak($wref), 'a weakened SVt_PVIV ref has WEAKREF set');
+$cref = [ $wref ];
+ok(!builtin::is_weak( $cref->[0] ), 'SVt_PVIV copies do NOT have WEAKREF set');
+
