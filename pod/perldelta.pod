@@ -275,6 +275,10 @@ L</Platform Support> section, instead.
 
 =item *
 
+C23 F<< <stdckdint.h> >> and associated macros are now used if available.
+
+=item *
+
 XXX
 
 =back

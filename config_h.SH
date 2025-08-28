@@ -3842,6 +3842,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_stdbool	I_STDBOOL		/**/
 
+/* I_STDCKDINT:
+ *	This symbol, if defined, indicates that <stdckdint.h> exists and
+ *	can be included.
+ */
+#$i_stdckdint	I_STDCKDINT		/**/
+
 /* I_STDINT:
  *	This symbol, if defined, indicates that <stdint.h> exists and
  *	should be included.

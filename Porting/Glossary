@@ -3722,6 +3722,11 @@ i_stdbool (i_stdbool.U):
 	indicates to the C program that <stdbool.h> exists and should
 	be included.
 
+i_stdckdint (i_stdckdint.U):
+	This variable conditionally defines the I_STDCKDINT symbol, which
+	indicates to the C program that <stdckdint.h> exists and should
+	be included.
+
 i_stdint (i_stdint.U):
 	This variable conditionally defines the I_STDINT symbol, which
 	indicates to the C program that <stdint.h> exists and should

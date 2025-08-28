@@ -3456,8 +3456,11 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 #    define IV_MUL_OVERFLOW_IS_EXPENSIVE (IVSIZE > PTRSIZE)
 #  endif
 
+#  ifdef I_STDCKDINT
+#    include <stdckdint.h>
+#  endif
+
 #  if defined(I_STDCKDINT) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
-/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
 #    define S_iv_add_may_overflow(il, ir, result) ckd_add(result, il, ir)
 #  elif defined(HAS_BUILTIN_ADD_OVERFLOW) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
 #    define S_iv_add_may_overflow __builtin_add_overflow
@@ -3485,7 +3488,6 @@ S_iv_add_may_overflow (IV il, IV ir, IV *const result)
  */
 
 #  if defined(I_STDCKDINT)
-/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
 #    define S_uv_add_overflow(auv, buv, result) ckd_add(result, auv, buv)
 #  elif defined(HAS_BUILTIN_ADD_OVERFLOW)
 #    define S_uv_add_overflow __builtin_add_overflow
@@ -3502,7 +3504,6 @@ S_uv_add_overflow (UV auv, UV buv, UV *const result)
 #  endif
 
 #  if defined(I_STDCKDINT) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
-/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
 #    define S_iv_sub_may_overflow(il, ir, result) ckd_sub(result, il, ir)
 #  elif defined(HAS_BUILTIN_SUB_OVERFLOW) && !IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
 #    define S_iv_sub_may_overflow __builtin_sub_overflow
@@ -3524,7 +3525,6 @@ S_iv_sub_may_overflow (IV il, IV ir, IV *const result)
 #  endif
 
 #  if defined(I_STDCKDINT)
-/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
 #    define S_uv_sub_overflow(auv, buv, result) ckd_sub(result, auv, buv)
 #  elif defined(HAS_BUILTIN_SUB_OVERFLOW)
 #    define S_uv_sub_overflow __builtin_sub_overflow
@@ -3537,7 +3537,6 @@ S_uv_sub_overflow (UV auv, UV buv, UV *const result)
 #  endif
 
 #  if defined(I_STDCKDINT) && !IV_MUL_OVERFLOW_IS_EXPENSIVE
-/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
 #    define S_iv_mul_may_overflow(il, ir, result) ckd_mul(result, il, ir)
 #  elif defined(HAS_BUILTIN_MUL_OVERFLOW) && !IV_MUL_OVERFLOW_IS_EXPENSIVE
 #    define S_iv_mul_may_overflow __builtin_mul_overflow
@@ -3565,7 +3564,6 @@ S_iv_mul_may_overflow (IV il, IV ir, IV *const result)
 #  endif
 
 #  if defined(I_STDCKDINT)
-/* XXX Preparation for upcoming C23, but I_STDCKDINT is not yet tested */
 #    define S_uv_mul_overflow(auv, buv, result) ckd_mul(result, auv, buv)
 #  elif defined(HAS_BUILTIN_MUL_OVERFLOW)
 #    define S_uv_mul_overflow   __builtin_mul_overflow

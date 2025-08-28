@@ -1052,6 +1052,7 @@ i_quadmath=''
 i_shadow=''
 i_socks=''
 i_stdbool=''
+i_stdckdint=''
 i_stdint=''
 i_stdlib=''
 i_sunmath=''
@@ -24226,6 +24227,10 @@ $rm_try
 set i_stdbool
 eval $setvar
 
+: see if C23 stdckdint is available
+set stdckdint.h i_stdckdint
+eval $inhdr
+
 : see if stdint is available
 set stdint.h i_stdint
 eval $inhdr
@@ -25636,6 +25641,7 @@ i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
 i_socks='$i_socks'
 i_stdbool='$i_stdbool'
+i_stdckdint='$i_stdckdint'
 i_stdint='$i_stdint'
 i_stdlib='$i_stdlib'
 i_sunmath='$i_sunmath'
