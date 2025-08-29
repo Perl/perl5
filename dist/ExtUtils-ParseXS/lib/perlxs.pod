@@ -3866,50 +3866,96 @@ pointer.
 
 =head3 The CASE: Keyword
 
-The CASE: keyword allows an XSUB to have multiple distinct parts with each
-part acting as a virtual XSUB.  CASE: is greedy and if it is used then all
-other XS keywords must be contained within a CASE:.  This means nothing may
-precede the first CASE: in the XSUB and anything following the last CASE: is
-included in that case.
+    int
+    foo(int a, int b = NO_INIT, int c = NO_INIT)
+        CASE: items == 1
+            C_ARGS: 0, a
+        CASE: items == 2
+            C_ARGS: b, a
+        CASE:
+            CODE:
+                RETVAL = b > c ? foo(b, a) : bar(b, a);
+            OUTPUT:
+                RETVAL
 
-A CASE: might switch via a parameter of the XSUB, via the C<ix> ALIAS:
-variable (see L<"The ALIAS: Keyword">), or maybe via the C<items> variable
-(see L<"Ellipsis: variable-length parameter lists">).  The last CASE: becomes the
-B<default> case if it is not associated with a conditional.  The following
-example shows CASE switched via C<ix> with a function C<rpcb_gettime()>
-having an alias C<x_gettime()>.  When the function is called as
-C<rpcb_gettime()> its parameters are the usual C<(char *host, time_t *timep)>,
-but when the function is called as C<x_gettime()> its parameters are
-reversed, C<(time_t *timep, char *host)>.
 
-    long
-    rpcb_gettime(a, b)
-      CASE: ix == 1
-          ALIAS:
-            x_gettime = 1
-          INPUT:
-            # 'a' is timep, 'b' is host
-            char *b
-            time_t a = NO_INIT
-          CODE:
-            RETVAL = rpcb_gettime(b, &a);
-          OUTPUT:
-            a
-            RETVAL
-      CASE:
-            # 'a' is host, 'b' is timep
-            char *a
-            time_t &b = NO_INIT
-          OUTPUT:
-            b
-            RETVAL
+The C<CASE> keyword allows an XSUB to effectively have multiple bodies,
+but with only a single Perl name (unlike C<ALIAS>, which has multiple
+names). Which body is run depends on which CASE expression is the first to
+evaluate to true. Unlike C's C<case> keyword, execution doesn't fall
+though to the next branch, so there is no XS equivalent of the C<break>
+keyword. The expression for the last CASE is optional, and if not present,
+acts as a default branch.
 
-That function can be called with either of the following statements.  Note
-the different argument lists.
+The example above translates to approximately this C code:
 
-    $status = rpcb_gettime($host, $timep);
+    if (items < 1 || items > 3) { croak("..."); }
 
-    $status = x_gettime($timep, $host);
+    if (items == 1) {
+        int RETVAL;
+        int a = (int)SvIV(ST(0)); int b = /* etc */
+        RETVAL = foo(0, a);
+        /* ... return RETVAL as ST(0) ... */
+    }
+    else if (items == 2) {
+        int RETVAL;
+        int a = (int)SvIV(ST(0)); int b = /* etc */
+        RETVAL = foo(b, a);
+        /* ... return RETVAL as ST(0) ... */
+    }
+    else {
+        int RETVAL;
+        int a = (int)SvIV(ST(0)); int b = /* etc */
+        RETVAL = b > c ? foo(b, a) : bar(b, a);
+        /* ... return RETVAL as ST(0) ... */
+    }
+
+    XSRETURN(1);
+
+Each C<CASE> keyword precedes an entire normal XSUB body, including all
+keywords from C<PREINIT> to C<CLEANUP>. Generic XSUB keywords can be
+placed within any C<CASE> body. The code generated for each C<if>/C<else>
+branch includes nearly all the code that would usually be generated for a
+complete XSUB body, including argument processing and return value
+stack processing.
+
+Note that the CASE expressions are outside of the scope of any parameter
+variable declarations, so those values can't be used. Typical values which
+I<are> in scope and might be used are the C<items> variable which
+indicates how many arguments were passed (see L<"Ellipsis: variable-length
+parameter lists">) and, in the presence of C<ALIAS>, the C<ix> variable.
+
+Here's another example, this time in conjunction with C<ALIAS> to wrap the
+same C function as two separate Perl functions, the second of which
+(perhaps for backwards compatibility reasons) takes its arguments in the
+reverse order. This is a somewhat contrived example, but
+demonstrates how the C<ALIAS> keyword must be within one of the C<CASE>
+branches (it doesn't matter which), as C<CASE> must always appear in the
+outermost scope of the XSUB's body:
+
+    int
+    foo(int a, int b)
+        CASE: ix == 0
+        CASE: ix == 1
+            ALIAS: foo_rev = 1
+            C_ARGS: b, a
+
+Note that using old-style parameter declarations in conjunction with
+C<INPUT> allows the types of the parameters to vary between branches:
+
+    int
+    foo(a, int b = 0)
+        CASE: items == 1
+            INPUT:
+                short a
+        CASE: items == 2
+            INPUT:
+                long a
+
+In practice, C<CASE> produces bloated code with all the argument and
+return value processing duplicated within each branch, is not often all
+that useful, and can often be better written just by using a C<switch>
+statement within a C<CODE> block.
 
 =head2 Using Typemaps
 
