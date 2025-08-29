@@ -6348,6 +6348,7 @@ t/op/getppid.t				See if getppid works
 t/op/glob.t				See if <*> works
 t/op/gmagic.t				See if GMAGIC works
 t/op/goto.t				See if goto works
+t/op/goto-sub.t				See if goto &NAME works
 t/op/goto_xs.t				See if "goto &sub" works on XSUBs
 t/op/grent.t				See if getgr*() functions work
 t/op/grep.t				See if grep() and map() work
