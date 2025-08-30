@@ -206,6 +206,29 @@ TODO: {
 }
 
 TODO: {
+    my $is_rc_stack = "$Config{cc} $Config{ccflags} $Config{optimize}" =~ /-DPERL_RC_STACK\b/;
+    local $::TODO = $is_rc_stack ? undef : "GH 13307";
+
+    my $results = fresh_perl(<<~'EOF', {});
+        my $iter;
+        my %llll;
+        sub bbbb { }
+        sub aaaa {
+            \@_ if $iter & 1;
+            bbbb($_[1]) if $iter & 2;
+            delete $llll{p};
+            print $_[0] // "undef", "\n";
+        }
+        for(0..3) {
+            $iter = $_;
+            %llll = (p => "oooo");
+            aaaa($llll{p}, undef);
+        }
+    EOF
+    is($results, "oooo\noooo\noooo\noooo", 'Hashref element reference in @_ disappeared; GH 13307');
+}
+
+TODO: {
     local $::TODO = "GH 16008";
     my $results = fresh_perl(<<~'EOF', {} );
         open my $h, ">", \my $x;
