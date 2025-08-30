@@ -3959,7 +3959,173 @@ statement within a C<CODE> block.
 
 =head2 Using Typemaps
 
-XXX TBC
+This section describes the basic facts about using typemaps. For full
+information on creating your own typemaps plus a comprehensive list of
+what standard typemaps are available, see the L<perlxstypemap> document.
+
+Typemaps are sets of rules which map C types such as C<int> to logical XS
+types such as C<T_IV>, and from there to C<INPUT> and C<OUTPUT> templates
+such as C<$var = ($type)SvIV($arg)> and C<sv_setiv($arg, (IV)$var)> which,
+after variable expansion, generate C code to convert back and forth
+between Perl arguments and C auto variables.
+
+There is a standard system typemap file bundled with Perl for common C and
+Perl types, but in addition, you can add your own typemap file. From Perl
+5.16.0 onwards you can also include extra typemap declarations in-line
+within the XS file.
+
+=head3 Locations and ordering of typemap processing
+
+Typemap definitions are processed in order, with more recent entries
+overriding any earlier ones. Definitions are read in first from files and
+then from L<TYPEMAP|/The TYPEMAP: Keyword> sections in the XS file.
+
+When considering how files are located and read in, note that the XS
+parser will initially change directory to the directory containing the
+F<Foo.xs> file that is about to be processed, which will affect any
+subsequent relative paths. Then any typemap files are located and read in.
+The files come from two sources: standard and explicit.
+
+Standard typemap files are always called C<typemap> and are searched for
+in a standard set of locations (relative to C<@INC> and to the current
+directory), and any matched files are read in. These paths are, in order
+of processing:
+
+    "$_/ExtUtils/typemap" for reverse @INC
+
+    ../../../../lib/ExtUtils/typemap
+    ../../../../typemap
+    ../../../lib/ExtUtils/typemap
+    ../../../typemap
+    ../../lib/ExtUtils/typemap
+    ../../typemap
+    ../lib/ExtUtils/typemap
+    ../typemap
+    typemap
+
+Note that searching C<@INC> in reverse order means that typemap files
+found earlier in C<@INC> are processed later, and thus have higher
+priority.
+
+Explicit typemap files are specified either via C<xsubpp -typemap foo ...>
+command line switches, or programmatically by an array passed as:
+
+    ExtUtils::ParseXS::process_file(..., typemap => ['foo',...]);
+
+These files are read in order, and the parser dies if any explicitly
+listed file is not found.
+
+Prior to Perl 5.10.0 and Perl 5.8.9, C<@INC> wasn't searched, and standard
+files were searched for and processed I<before> any explicit ones. From
+Perl 5.10.0 onwards, standard files were processed I<after> any explicit
+ones. From Perl 5.44.0 (F<ExtUtils::ParseXS> 3.60) onwards, explicit files
+are again processed last, and thus take priority over standard files.
+In Perl 5.16.0 onwards, C<TYPEMAP> sections are then processed in order
+after all files have been processed.
+
+Note also that F<ExtUtils::MakeMaker> usually invokes F<xsubpp> with two
+C<-typemap> arguments: the first being the system typemap and the second
+being the module's typemap file, if any. This compensates for older Perls
+not searching C<@INC>.
+
+For a typical distribution, all this complication usually results in the
+typemap file bundled with Perl being read in first, then the typemap file
+included with the distribution adding to (and overriding) any standard
+definitions, then any C<TYPEMAP:> entries in the XS file overriding
+everything.
+
+=head3 Reusing, redefining and adding typemap entries
+
+Both typemap files and C<TYPEMAP> blocks can have up to three sections:
+C<TYPEMAP> (which is implicit at the start of the file or block) and
+C<INPUT> and C<OUTPUT>. There is no requirement for all three sections to
+be present. Whatever I<is> present is added to the global state for that
+section, either adding a new entry or redefining an existing entry.
+
+Probably the simplest use of an additional typemap entry is to map a new C
+type to an I<existing> XS type; for example, given this C type:
+
+    typedef enum { red, green, blue } colors;
+
+then adding the following C-to-XS type-mapping entry to the typemap would
+be sufficient if you just want to treat such enums as simple integers when
+used as parameter and return types:
+
+    colors T_IV
+
+Or you could override just an existing INPUT or OUTPUT template; for
+example:
+
+    OUTPUT
+    T_IV
+        my_sv_setiv($arg, (IV)$var);
+
+For a completely novel type you might want to add an entry to all three
+sections:
+
+    foo   T_FOO
+
+    INPUT
+    T_FOO
+            $var = ($type)get_foo_from_sv($arg);
+
+    OUTPUT
+    T_FOO
+            set_sv_to_foo($arg, $var);
+
+=head3 Common typemaps
+
+This section gives an overview of what common typemap entries are
+available for use. See the L<perlxstypemap> document for a complete list,
+or examine the F<typemap> file which is bundled with the Perl
+distribution. Also, see L</T_PTROBJ and opaque handles> for a detailed
+dive into one particular typemap which is particularly useful for mapping
+between Perl objects and C handles. See L</Returning Values from an XSUB>
+for a general discussion about returning one or more values from an XSUB,
+where typemaps can sometimes be of use (and sometimes aren't).
+
+Standard signed C int types such as C<int>, C<long> and C<short>, are all
+mapped to to the C<T_IV> XS type. Integer-like Perl types such C<IV> and
+C<I32> are also mapped to this. If a parameter is declared as something
+mapping to C<T_IV>, then the C<IV> value of the passed SV will be
+extracted (perhaps first converting a string value like C<"123"> to an
+IV), then that value will be cast to the final C type, with the usual C
+rules for casting between integer types. Conversely, when returning a
+value, the C value is first cast to C<IV>, then the SV is set to that
+IV value.
+
+Similarly, common C and Perl unsigned types map to C<T_UV>, and values
+are converted back and forth via C<(UV)> casts. A few unsigned types such
+as C<I16> and C<U32> are instead mapped to C<T_U_SHORT> and C<T_U_LONG> XS
+types, but these have the same effect as C<T_UV>.
+
+The C<unsigned char> type is treated similarly to other C<T_UV> types, but
+C<char> is treated as a string rather than an integer. A C<char> parameter
+will treat its passed argument as a string and set the auto variable to
+the first I<byte> of that string (which may produce weird results with
+UTF-8 strings). Returning a C<char> value will return a one-character
+string to the Perl caller.
+
+The C<char *> type and its common variants are mapped to C<T_PV>. Passed
+parameters will (via C<SvPV()> or similar) return a string buffer
+representing that SV. This buffer may be part of the SV if that SV has a
+string value (or if it can be converted to a string value), or it may be a
+temporary buffer otherwise. For example, an SV holding a reference to an
+array might return a temporary string buffer with the value
+C<"ARRAY(0x12345678)">. When an XSUB has a return type which maps to
+C<T_PV>, the temporary SV which is to be returned gets assigned the
+current value of C<RETVAL>, with the string's length being determined by
+C<strlen()> or its equivalent.
+
+See L</Unicode and UTF-8> for the difficulties associated with handling
+UTF-8 strings.
+
+The C<float>, C<double> and C<NV> types map to C<T_FLOAT>, C<T_DOUBLE> and
+C<T_NV> XS types, which all operate by converting to and from an SV via
+C<sv_setnv()> and C<SvNV(sv)> with suitable casting.
+
+The C<SV*> type maps to C<T_SV>, which basically does no processing and
+allows you to access the actual passed SV argument.
 
 =head3 T_PTROBJ and opaque handles
 
