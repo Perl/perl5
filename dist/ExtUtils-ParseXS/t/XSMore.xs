@@ -78,6 +78,15 @@ len(const char* const s, int const l){
 	return l;
 }
 
+STATIC int
+myadd1(int a, int b)
+{ return a + b; }
+
+STATIC int
+myadd2(int a, int b)
+{ return a + b; }
+
+
 MODULE = XSMore         PACKAGE = XSMore
 
 =for testing
@@ -243,6 +252,15 @@ outlist_int(const char *a, const char *b, OUTLIST char *c)
 
 int
 len(char* s, int length(s))
+
+int
+interface1(int a, int b)
+    INTERFACE: myadd1
+
+int
+interface2(int a, int b, int c)
+    INTERFACE: myadd2
+    C_ARGS: a, c
 
 INCLUDE_COMMAND: $^X -Ilib -It/lib -MIncludeTester -e IncludeTester::print_xs
 

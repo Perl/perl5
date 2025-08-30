@@ -2,7 +2,7 @@ package ExtUtils::ParseXS::Node;
 use strict;
 use warnings;
 
-our $VERSION = '3.59';
+our $VERSION = '3.60';
 
 =head1 NAME
 
@@ -593,9 +593,14 @@ EOF
         |    dXSI32;
 EOF
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
-        |    dXSFUNCTION($self->{decl}{return_type}{type});
+    if ($self->{seen_INTERFACE}) {
+        my $type = $self->{decl}{return_type}{type};
+        $type =~ tr/:/_/
+            unless $pxs->{config_RetainCplusplusHierarchicalTypes};
+        print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
+            |    dXSFUNCTION($type);
 EOF
+    }
 
 
     {
@@ -2564,14 +2569,18 @@ sub usage_string {
 
 # $self->C_func_signature():
 #
-# return a string containing the arguments to pass to an autocall C
-# function, e.g. 'a, &b, c'.
+# return two arrays
+# the first contains the arguments to pass to an autocall C
+# function, e.g. ['a', '&b', 'c'];
+# the second contains the types of those args, for use in declaring
+# a function pointer type, e.g. ['int', 'char*', 'long'].
 
 sub C_func_signature {
     my __PACKAGE__       $self = shift;
     my ExtUtils::ParseXS $pxs  = shift;
 
     my @args;
+    my @types;
     for my $param (@{$self->{kids}}) {
         next if    $param->{is_synthetic} # THIS/CLASS/RETVAL
                    # if a synthetic RETVAL has acquired an arg_num, then
@@ -2581,6 +2590,7 @@ sub C_func_signature {
 
         if ($param->{is_length}) {
             push @args, "XSauto_length_of_$param->{len_name}";
+            push @types, $param->{type};
             next;
         }
 
@@ -2601,9 +2611,11 @@ sub C_func_signature {
         my $a = $param->{var};
         $a = "&$a" if $param->{is_addr} or $io =~ /OUT/;
         push @args, $a;
+        my $t = $param->{type};
+        push @types, defined $t ? $t : 'void*';
     }
 
-    return join(", ", @args);
+    return \@args, \@types;
 }
 
 
@@ -3320,7 +3332,8 @@ package ExtUtils::ParseXS::Node::autocall;
 # name
 
 BEGIN { $build_subclass->(
-    'args', # Str: text to use for auto function call arguments
+    'args',  # Str: text to use for auto function call arguments
+    'types', # Str: text to use for auto function type declaration
 )};
 
 
@@ -3335,10 +3348,35 @@ sub parse {
     $xbody->{seen_autocall} = 1;
 
     my $ioparams  = $xbody->{ioparams};
-    my $args = $ioparams->{auto_function_sig_override}; # C_ARGS
-    $args = $ioparams->C_func_signature($pxs)
-        unless defined $args;
-    $self->{args} = $args;
+    my ($args, $types);
+    $args = $ioparams->{auto_function_sig_override}; # C_ARGS
+    if (defined $args) {
+        # Try to determine the C_ARGS types; for example, with
+        #
+        #    foo(short s, int i, long l)
+        #      C_ARGS: s, l
+        #
+        # set $types to ['short', 'long']. May give the wrong results if
+        # C_ARGS isn't just a simple list of parameter names
+        for my $var (split /,/, $args) {
+            $var =~ s/^\s+//;
+            $var =~ s/\s+$//;
+            my $param = $ioparams->{names}{$var};
+            # 'void*' is a desperate guess if no such parameter
+            push @$types, ($param && defined $param->{type})
+                            ? $param->{type} : 'void*';
+        }
+        $self->{args}  = $args;
+    }
+    else {
+        ($args, $types) = $ioparams->C_func_signature($pxs);
+        $self->{args}  = join ', ', @$args;
+    }
+
+    unless ($pxs->{config_RetainCplusplusHierarchicalTypes}) {
+        s/:/_/g for @$types;
+    }
+    $self->{types} = join ', ', @$types;
 
     1;
 }
@@ -3370,7 +3408,8 @@ sub as_code {
 
         print "\n\t";
 
-        if ($xsub->{decl}{return_type}{type} ne "void") {
+        my $ret_type = $xsub->{decl}{return_type}{type};
+        if ($ret_type ne "void") {
             print "RETVAL = ";
         }
 
@@ -3399,9 +3438,13 @@ sub as_code {
         $name =~ s/^\Q$strip//
             if defined $strip;
 
-        $name = 'XSFUNCTION'
-            if    $xsub->{seen_INTERFACE}
-               or $xsub->{seen_INTERFACE_MACRO};
+        if (   $xsub->{seen_INTERFACE}
+            or $xsub->{seen_INTERFACE_MACRO})
+        {
+            $ret_type =~ s/:/_/g
+                unless $pxs->{config_RetainCplusplusHierarchicalTypes};
+            $name = "(($ret_type (*)($self->{types}))(XSFUNCTION))";
+        }
 
         print "$name($self->{args});\n";
 
@@ -3724,8 +3767,11 @@ sub as_code {
     my $macro = $xsub->{interface_macro};
     $macro = 'XSINTERFACE_FUNC' unless defined $macro;
 
+    my $type = $xsub->{decl}{return_type}{type};
+    $type =~ tr/:/_/
+        unless $pxs->{config_RetainCplusplusHierarchicalTypes};
     print <<"EOF";
-    XSFUNCTION = $macro($xsub->{decl}{return_type}{type},cv,XSANY.any_dptr);
+    XSFUNCTION = $macro($type,cv,XSANY.any_dptr);
 EOF
 }
 
