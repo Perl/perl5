@@ -11564,6 +11564,11 @@ S_scan_inputsymbol(pTHX_ char *start)
     return s;
 }
 
+/* In the function below, it's quite likely that the calls to memEQ() will have
+ * 'len' == 1.  So create a new macro that adds a conditional to skip the libc
+ * call. */
+#define memEQ_1(a, b, len)                                                  \
+   ((*(a) == *(b)) && ((LIKELY((len) <= 1) || memEQ((a)+1, (b)+1, (len)-1))))
 
 /* scan_str
    takes:
@@ -11616,7 +11621,6 @@ S_scan_inputsymbol(pTHX_ char *start)
    For convenience, the terminating delimiter character is stuffed into
    SvIVX of the SV.
 */
-
 char *
 Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re_reparse,
                  char **delimp
@@ -11796,10 +11800,10 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                  * discard those that escape the closing delimiter, just
                  * discard this one */
                 if (   !  keep_bracketed_quoted
-                    &&   (    memEQ(s + 1,  open_delim_str, delim_byte_len)
+                    &&   (    memEQ_1(s + 1,  open_delim_str, delim_byte_len)
                           ||  (   PL_multi_open == PL_multi_close
                                && re_reparse && s[1] == '\\')
-                          ||  memEQ(s + 1, close_delim_str, delim_byte_len)))
+                          ||  memEQ_1(s + 1, close_delim_str, delim_byte_len)))
                 {
                     s++;
                 }
@@ -11807,7 +11811,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                     *to++ = *s++;
             }
             else if (   s < PL_bufend - (delim_byte_len - 1)
-                     && memEQ(s, close_delim_str, delim_byte_len)
+                     && memEQ_1(s, close_delim_str, delim_byte_len)
                      && --brackets <= 0)
             {
                 /* Found unescaped closing delimiter, unnested if we care about
@@ -11836,7 +11840,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                         /* No nesting if open eq close */
             else if (   PL_multi_open != PL_multi_close
                      && s < PL_bufend - (delim_byte_len - 1)
-                     && memEQ(s, open_delim_str, delim_byte_len))
+                     && memEQ_1(s, open_delim_str, delim_byte_len))
             {
                 brackets++;
             }
