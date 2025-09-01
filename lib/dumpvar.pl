@@ -482,7 +482,8 @@ sub main::dumpvar {
     local $TotalStrings = 0;
     local $Strings = 0;
     local $CompleteTotal = 0;
-    while (($key,$val) = each(%stab)) {
+    for my $key (keys %stab) {
+        my $val = $stab{$key};
         return if $DB::signal;
         next if @vars && !grep( matchvar($key, $_), @vars );
         if ($usageOnly) {

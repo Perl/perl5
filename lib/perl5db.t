@@ -3662,6 +3662,46 @@ EOS
     $wrapper->contents_like(qr/print "2\\n"/, "break immediately after defining problem");
 }
 
+{
+    # gh #23663 (variant 1)
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 4',
+                'X',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-23663',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/Use of each\(\) on hash after insertion without resetting hash iterator results in undefined behavior/,
+        q/gh-23663: 'X' command does not warn about undefined behavior/,
+       );
+
+    # gh #23663 (variant 2)
+    $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 4',
+                'v main',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-23663',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/Use of each\(\) on hash after insertion without resetting hash iterator results in undefined behavior/,
+        q/gh-23663: 'V main' command does not warn about undefined behavior/,
+       );
+}
+
 done_testing();
 
 END {
