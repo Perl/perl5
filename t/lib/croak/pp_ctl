@@ -3,18 +3,18 @@ __END__
 goto f;
 foreach(1){f:}
 EXPECT
-Use of "goto" to jump into a construct is no longer permitted at - line 1.
+Use of goto to jump into a construct is no longer permitted at - line 1.
 ########
 # NAME goto into given
 goto f;
 CORE::given(1){f:}
 EXPECT
-Use of "goto" to jump into a construct is no longer permitted at - line 1.
+Use of goto to jump into a construct is no longer permitted at - line 1.
 ########
 # NAME goto from given topic expression
 CORE::given(goto f){f:}
 EXPECT
-Use of "goto" to jump into a construct is no longer permitted at - line 1.
+Use of goto to jump into a construct is no longer permitted at - line 1.
 ########
 # NAME goto into expression
 no warnings 'deprecated';

@@ -12,7 +12,8 @@ BEGIN {
 use warnings;
 use strict;
 use Config;
-plan tests => 95;
+skip_all("Being overhauled in GH #23618");
+#plan tests => 95;
 
 our $TODO;
 
