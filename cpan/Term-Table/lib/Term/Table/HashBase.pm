@@ -2,7 +2,7 @@ package Term::Table::HashBase;
 use strict;
 use warnings;
 
-our $VERSION = '0.024';
+our $VERSION = '0.025';
 
 #################################################################
 #                                                               #
@@ -31,7 +31,7 @@ require Carp;
 }
 
 BEGIN {
-    # these are not strictly equivalent, but for out use we don't care
+    # these are not strictly equivalent, but for our use we don't care
     # about order
     *_isa = ($] >= 5.010 && require mro) ? \&mro::get_linear_isa : sub {
         no strict 'refs';

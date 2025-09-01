@@ -2,7 +2,7 @@ package Term::Table::LineBreak;
 use strict;
 use warnings;
 
-our $VERSION = '0.024';
+our $VERSION = '0.025';
 
 use Carp qw/croak/;
 use Scalar::Util qw/blessed/;

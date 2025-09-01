@@ -3,7 +3,12 @@ use warnings;
 
 BEGIN {
     if (eval { require Test2::Tools::Tiny; Test2::Tools::Tiny->VERSION(1.302097); 1 }) {
-        print STDERR "# Using Test2::Tools::Tiny " . Test2::Tools::Tiny->VERSION . "\n";
+        if (!$ENV{PERL_CORE}) {
+            print STDERR "# Using Test2::Tools::Tiny " . Test2::Tools::Tiny->VERSION . "\n";
+        }
+        else {
+            print "# Using Test2::Tools::Tiny\n";
+        }
         Test2::Tools::Tiny->import;
     }
     elsif (eval { require Test::More; Test::More->can('done_testing') ? 1 : 0 }) {
