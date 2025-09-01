@@ -486,9 +486,14 @@ sub main::dumpvar {
         return if $DB::signal;
         next if @vars && !grep( matchvar($key, $_), @vars );
         if ($usageOnly) {
+#            globUsage(\$val, $key)
+#                if ($package ne 'dumpvar' or $key ne 'stab')
+#                    and ref(\$val) eq 'GLOB';
             globUsage(\$val, $key)
-                if ($package ne 'dumpvar' or $key ne 'stab')
-                    and ref(\$val) eq 'GLOB';
+                if (
+                    ($package ne 'dumpvar' or $key ne 'stab')
+                    and
+                (ref(\$val) eq 'GLOB') );
         }
         else {
             dumpglob(0,$key, $val, 0, $m);
