@@ -2872,9 +2872,10 @@ sub lookup_input_typemap {
 
         my $typemaps = $pxs->{typemaps_object};
 
-        # Normalised type ('Foo *' becomes 'FooPtr): one of the valid vars
-        # which can appear within a typemap template.
+        # Normalised type ('struct Foo *' becomes 'struct_FooPtr' etc):
+        # one of the valid vars which can appear within a typemap template.
         (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+        $ntype =~ s/\s+/_/g;
 
         # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
         # where it's the type of each array element. But it's also passed to
@@ -3077,9 +3078,10 @@ sub lookup_output_typemap {
         return;
     }
 
-    # $ntype: normalised type ('Foo *' becomes 'FooPtr' etc): one of the
-    # valid vars which can appear within a typemap template.
+    # $ntype: normalised type ('struct Foo *' becomes 'struct_FooPtr' etc):
+    # one of the valid vars which can appear within a typemap template.
     (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+    $ntype =~ s/\s+/_/g;
     $ntype =~ s/\(\)//g;
 
     # $subtype is really just for the T_ARRAY / DO_ARRAY_ELEM code below,
