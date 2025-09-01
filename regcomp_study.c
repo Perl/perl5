@@ -203,7 +203,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 
             /* ... plus all the things that fold to it, which are found in
              * PL_utf8_foldclosures */
-            folds_count = _inverse_folds(fc, &first_fold,
+            folds_count = inverse_folds_(fc, &first_fold,
                                                 &remaining_folds);
             for (k = 0; k < folds_count; k++) {
                 UV c = (k == 0) ? first_fold : remaining_folds[k-1];
@@ -1311,7 +1311,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     }
                     else {
                         STRLEN len;
-                        _toFOLD_utf8_flags(s, s_end, d, &len, FOLD_FLAGS_FULL);
+                        toFOLD_utf8_flags_(s, s_end, d, &len, FOLD_FLAGS_FULL);
                         d += len;
                     }
                     s += s_len;
@@ -2562,7 +2562,7 @@ Perl_study_chunk(pTHX_
                     && maxcount <= REG_INFTY/3) /* Complement check for big
                                                    count */
                 {
-                    _WARN_HELPER(RExC_precomp_end, packWARN(WARN_REGEXP),
+                    WARN_HELPER_(RExC_precomp_end, packWARN(WARN_REGEXP),
                         Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
                             "Quantifier unexpected on zero-length expression "
                             "in regex m/%" UTF8f "/",

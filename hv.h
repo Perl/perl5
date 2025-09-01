@@ -107,7 +107,7 @@ struct mro_meta {
    Don't access this directly.
 */
 
-union _xhvnameu {
+union xhvnameu_ {
     HEK *xhvnameu_name;		/* When xhv_name_count is 0 */
     HEK **xhvnameu_names;	/* When xhv_name_count is non-0 */
 };
@@ -116,7 +116,7 @@ union _xhvnameu {
 struct suspended_compcv;
 
 struct xpvhv_aux {
-    union _xhvnameu xhv_name_u;	/* name, if a symbol table */
+    union xhvnameu_ xhv_name_u;	/* name, if a symbol table */
     AV		*xhv_backreferences; /* back references for weak references */
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
@@ -159,14 +159,14 @@ struct xpvhv_aux {
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
     HV*		xmg_stash;	/* class package */
-    union _xmgu	xmg_u;
+    union xmgu_	xmg_u;
     STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
 };
 
 struct xpvhv_with_aux {
     HV         *xmg_stash;      /* class package */
-    union _xmgu xmg_u;
+    union xmgu_ xmg_u;
     STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
     struct xpvhv_aux xhv_aux;

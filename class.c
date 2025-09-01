@@ -345,9 +345,9 @@ PP(pp_methstart)
 }
 
 static void
-invoke_class_seal(pTHX_ void *_arg)
+invoke_class_seal(pTHX_ void *arg_)
 {
-    class_seal_stash((HV *)_arg);
+    class_seal_stash((HV *)arg_);
 }
 
 void

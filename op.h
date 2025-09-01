@@ -317,9 +317,9 @@ struct pmop {
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
 #define PM_SETRE(o,r)	STMT_START {					\
-                            REGEXP *const _pm_setre = (r);		\
-                            assert(_pm_setre);				\
-                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
+                            REGEXP *const pm_setre_ = (r);		\
+                            assert(pm_setre_);				\
+                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(pm_setre_); \
                         } STMT_END
 #else
 #define PM_GETRE_raw(o) ((o)->op_pmregexp)
@@ -330,7 +330,7 @@ struct pmop {
 
 /* Currently these PMf flags occupy a single 32-bit word.  Not all bits are
  * currently used.  The lower bits are shared with their corresponding RXf flag
- * bits, up to but not including _RXf_PMf_SHIFT_NEXT.  The unused bits
+ * bits, up to but not including RXf_PMf_SHIFT_NEXT_.  The unused bits
  * immediately follow; finally the used Pmf-only (unshared) bits, so that the
  * highest bit in the word is used.  This gathers all the unused bits as a pool
  * in the middle, like so: 11111111111111110000001111111111
@@ -341,7 +341,7 @@ struct pmop {
  * breaking binary compatibility.
  *
  * To add shared bits, do so in op_reg_common.h.  This should change
- * _RXf_PMf_SHIFT_NEXT so that things won't compile.  Then come to regexp.h and
+ * RXf_PMf_SHIFT_NEXT_ so that things won't compile.  Then come to regexp.h and
  * op.h and adjust the constant adders in the definitions of PMf_BASE_SHIFT and
  * Pmf_BASE_SHIFT down by the number of shared bits you added.  That's it.
  * Things should be binary compatible.  But if either of these gets to having
@@ -358,7 +358,7 @@ struct pmop {
  * allocate off the low end until you get to PMf_BASE_SHIFT+0.  If that isn't
  * enough, move PMf_BASE_SHIFT down (if possible) and add the new bit at the
  * other end instead; this preserves binary compatibility. */
-#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
+#define PMf_BASE_SHIFT (RXf_PMf_SHIFT_NEXT_+2)
 
 /* Set by the parser if it discovers an error, so the regex shouldn't be
  * compiled */

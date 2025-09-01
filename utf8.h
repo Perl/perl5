@@ -202,7 +202,7 @@ For details, see the description for L<perlapi/uv_to_utf8_flags>.
 #define utf8_to_utf16_reversed(p, d, bytelen, newlen)                       \
                             utf8_to_utf16_base(p, d, bytelen, newlen, 1, 0)
 
-#define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
+#define to_uni_fold(c, p, lenp) to_uni_fold_flags_(c, p, lenp, FOLD_FLAGS_FULL)
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
                     foldEQ_utf8_flags(s1, pe1, l1, u1, s2, pe2, l2, u2, 0)

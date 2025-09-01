@@ -4151,16 +4151,16 @@ PP_wrapped(pp_ucfirst, 1, 0)
 
         if (op_type == OP_UCFIRST) {
 #ifdef USE_LOCALE_CTYPE
-            _toTITLE_utf8_flags(s, s +slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+            toTITLE_utf8_flags_(s, s +slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-            _toTITLE_utf8_flags(s, s +slen, tmpbuf, &tculen, 0);
+            toTITLE_utf8_flags_(s, s +slen, tmpbuf, &tculen, 0);
 #endif
         }
         else {
 
 #ifdef USE_LOCALE_CTYPE
 
-            _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+            toLOWER_utf8_flags_(s, s + slen, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 
             /* In turkic locales, lower casing an 'I' normally yields U+0131,
              * LATIN SMALL LETTER DOTLESS I, but not if the grapheme also
@@ -4192,7 +4192,7 @@ PP_wrapped(pp_ucfirst, 1, 0)
 #else
             PERL_UNUSED_VAR(remove_dot_above);
 
-            _toLOWER_utf8_flags(s, s + slen, tmpbuf, &tculen, 0);
+            toLOWER_utf8_flags_(s, s + slen, tmpbuf, &tculen, 0);
 #endif
 
         }
@@ -4271,7 +4271,7 @@ PP_wrapped(pp_ucfirst, 1, 0)
       do_uni_rules:
 #endif
 
-            title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
+            title_ord = to_upper_title_latin1_(*s, tmpbuf, &tculen, 's');
             if (tculen > 1) {
                 assert(tculen == 2);
 
@@ -4546,10 +4546,10 @@ PP_wrapped(pp_uc, 1, 0)
              * and copy it to the output buffer */
 
 #ifdef USE_LOCALE_CTYPE
-            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len,
+            uv = toUPPER_utf8_flags_(s, send, tmpbuf, &upper_len,
                                      IN_LC_RUNTIME(LC_CTYPE));
 #else
-            uv = _toUPPER_utf8_flags(s, send, tmpbuf, &upper_len, 0);
+            uv = toUPPER_utf8_flags_(s, send, tmpbuf, &upper_len, 0);
 #endif
             if (   UNLIKELY(uv == GREEK_CAPITAL_LETTER_IOTA)
                 && memBEGINs(s, this_len, COMBINING_GREEK_YPOGEGRAMMENI_UTF8))
@@ -4735,7 +4735,7 @@ PP_wrapped(pp_uc, 1, 0)
                                 *d++ = UTF8_TWO_BYTE_LO(LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
                             }
                             else {
-                                (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                                (void) to_upper_title_latin1_(*s, d, &len, 'S');
                                 d += len;
                             }
                         }
@@ -4743,7 +4743,7 @@ PP_wrapped(pp_uc, 1, 0)
                     else
 #endif
                         for (; s < send; s++) {
-                            (void) _to_upper_title_latin1(*s, d, &len, 'S');
+                            (void) to_upper_title_latin1_(*s, d, &len, 'S');
                             d += len;
                         }
 
@@ -4874,7 +4874,7 @@ PP_wrapped(pp_lc, 1, 0)
 
 #ifdef USE_LOCALE_CTYPE
 
-            _toLOWER_utf8_flags(s, send, tmpbuf, &lower_len,
+            toLOWER_utf8_flags_(s, send, tmpbuf, &lower_len,
                                 IN_LC_RUNTIME(LC_CTYPE));
 
             /* If we are in a Turkic locale, we have to do more work.  As noted
@@ -4884,7 +4884,7 @@ PP_wrapped(pp_lc, 1, 0)
              * and set a flag if the DOT is there.  Then each time through the
              * loop, we have to see if we need to remove the next DOT above,
              * and if so, do it.  We know that there is a DOT because
-             * _toLOWER_utf8_flags() wouldn't have returned 'i' unless there
+             * toLOWER_utf8_flags_() wouldn't have returned 'i' unless there
              * was one in a proper position. */
             if (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                 && IN_LC_RUNTIME(LC_CTYPE))
@@ -4904,7 +4904,7 @@ PP_wrapped(pp_lc, 1, 0)
 #else
             PERL_UNUSED_VAR(remove_dot_above);
 
-            _toLOWER_utf8_flags(s, send, tmpbuf, &lower_len, 0);
+            toLOWER_utf8_flags_(s, send, tmpbuf, &lower_len, 0);
 #endif
 
             /* Here is where we would do context-sensitive actions for the
@@ -5138,7 +5138,7 @@ PP_wrapped(pp_fc, 1, 0)
             const STRLEN this_len = UTF8SKIP(s);
             STRLEN ulen;
 
-            _toFOLD_utf8_flags(s, send, tmpbuf, &ulen, flags);
+            toFOLD_utf8_flags_(s, send, tmpbuf, &ulen, flags);
 
             if (ulen > this_len && (SvLEN(dest) < (min += ulen - this_len))) {
                 const UV o = d - (U8*)SvPVX_const(dest);
@@ -5242,7 +5242,7 @@ PP_wrapped(pp_fc, 1, 0)
 
                     for (; s < send; s++) {
                         STRLEN ulen;
-                        _to_uni_fold_flags(*s, d, &ulen, flags);
+                        to_uni_fold_flags_(*s, d, &ulen, flags);
                         d += ulen;
                     }
                     break;

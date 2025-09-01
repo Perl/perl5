@@ -48,7 +48,7 @@
 */
 
 STATIC void
-S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
+S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
             AV *revcharmap, U32 depth)
 {
     U32 state;
@@ -142,7 +142,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
   Used for debugging make_trie().
 */
 STATIC void
-S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
+S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
                          HV *widecharmap, AV *revcharmap, U32 next_alloc,
                          U32 depth)
 {
@@ -202,7 +202,7 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
   Used for debugging make_trie().
 */
 STATIC void
-S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
+S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
                           HV *widecharmap, AV *revcharmap, U32 next_alloc,
                           U32 depth)
 {

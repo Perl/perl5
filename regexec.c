@@ -1828,7 +1828,7 @@ STMT_START {                                                                \
             uscan += len;                                                   \
             len = 0;                                                        \
         } else {                                                            \
-            uvc = _toFOLD_utf8_flags( (const U8*) uc, uc_end, foldbuf,      \
+            uvc = toFOLD_utf8_flags_( (const U8*) uc, uc_end, foldbuf,      \
                                                           &foldlen, flags); \
             len = UTF8_SAFE_SKIP(uc, uc_end);                               \
             skiplen = UVCHR_SKIP( uvc );                                    \
@@ -1853,7 +1853,7 @@ STMT_START {                                                                \
             len = 0;                                                        \
         } else {                                                            \
             len = 1;                                                        \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);     \
+            uvc = to_fold_latin1_( (U8) *uc, foldbuf, &foldlen, flags);     \
             skiplen = UVCHR_SKIP( uvc );                                    \
             foldlen -= skiplen;                                             \
             uscan = foldbuf + skiplen;                                      \
@@ -2192,10 +2192,10 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
   assert(cp_out >= 0);
   return cp_out;
 }
-#  define _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp) \
+#  define generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp) \
         invmap[S_get_break_val_cp_checked(invlist, cp)]
 #else
-#  define _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp) \
+#  define generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp) \
         invmap[_invlist_search(invlist, cp)]
 #endif
 
@@ -2203,21 +2203,21 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
  * inversion map, and a code point, and returns the code point's value
  * according to the two arrays.  It assumes that all code points have a value.
  * This is used as the base macro for macros for particular properties */
-#define _generic_GET_BREAK_VAL_CP(invlist, invmap, cp)              \
-        _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp)
+#define generic_GET_BREAK_VAL_CP_(invlist, invmap, cp)              \
+        generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp)
 
 /* Same as above, but takes begin, end ptrs to a UTF-8 encoded string instead
  * of a code point, returning the value for the first code point in the string.
  * And it takes the particular macro name that finds the desired value given a
  * code point.  Merely convert the UTF-8 to code point and call the cp macro */
-#define _generic_GET_BREAK_VAL_UTF8(cp_macro, pos, strend)                     \
+#define generic_GET_BREAK_VAL_UTF8_(cp_macro, pos, strend)                     \
              (__ASSERT_(pos < strend)                                          \
                  /* Note assumes is valid UTF-8 */                             \
              (cp_macro(utf8_to_uv_or_die((pos), (strend), NULL))))
 
 /* Returns the GCB value for the input code point */
 #define getGCB_VAL_CP(cp)                                                      \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_GCB_invlist,                            \
                                     _Perl_GCB_invmap,                          \
                                     (cp))
@@ -2225,11 +2225,11 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the GCB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getGCB_VAL_UTF8(pos, strend)                                           \
-    _generic_GET_BREAK_VAL_UTF8(getGCB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getGCB_VAL_CP, pos, strend)
 
 /* Returns the LB value for the input code point */
 #define getLB_VAL_CP(cp)                                                       \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_LB_invlist,                             \
                                     _Perl_LB_invmap,                           \
                                     (cp))
@@ -2237,12 +2237,12 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the LB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getLB_VAL_UTF8(pos, strend)                                            \
-    _generic_GET_BREAK_VAL_UTF8(getLB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getLB_VAL_CP, pos, strend)
 
 
 /* Returns the SB value for the input code point */
 #define getSB_VAL_CP(cp)                                                       \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_SB_invlist,                             \
                                     _Perl_SB_invmap,                           \
                                     (cp))
@@ -2250,11 +2250,11 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the SB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getSB_VAL_UTF8(pos, strend)                                            \
-    _generic_GET_BREAK_VAL_UTF8(getSB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getSB_VAL_CP, pos, strend)
 
 /* Returns the WB value for the input code point */
 #define getWB_VAL_CP(cp)                                                       \
-          _generic_GET_BREAK_VAL_CP(                                           \
+          generic_GET_BREAK_VAL_CP_(                                           \
                                     PL_WB_invlist,                             \
                                     _Perl_WB_invmap,                           \
                                     (cp))
@@ -2262,7 +2262,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
 /* Returns the WB value for the first code point in the UTF-8 encoded string
  * bounded by pos and strend */
 #define getWB_VAL_UTF8(pos, strend)                                            \
-    _generic_GET_BREAK_VAL_UTF8(getWB_VAL_CP, pos, strend)
+    generic_GET_BREAK_VAL_UTF8_(getWB_VAL_CP, pos, strend)
 
 /* We know what class REx starts with.  Try to find this position... */
 /* if reginfo->intuit, its a dryrun */
@@ -4782,7 +4782,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                      * pattern to be folded, which the input isn't required to
                      * be in this case.  So, just fold the single character,
                      * and the result will be in the expected form. */
-                    _to_uni_fold_flags(multi_fold_from, mod_pat, &pat_len,
+                    to_uni_fold_flags_(multi_fold_from, mod_pat, &pat_len,
                                        FOLD_FLAGS_FULL);
                     pat = mod_pat;
                 }
@@ -4827,7 +4827,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                     utf8_pat = false;
                 }
                 else {  /* Code point above 255, or needs special handling */
-                    _to_utf8_fold_flags(pat, pat + pat_len,
+                    to_utf8_fold_flags_(pat, pat + pat_len,
                                         mod_pat, &pat_len,
                                         FOLD_FLAGS_FULL|FOLD_FLAGS_LOCALE);
                     pat = mod_pat;
@@ -4841,7 +4841,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
         {
             /* We may have to canonicalize a multi-char fold, as in the UTF-8
              * case */
-            _to_uni_fold_flags(multi_fold_from, mod_pat, &pat_len,
+            to_uni_fold_flags_(multi_fold_from, mod_pat, &pat_len,
                                FOLD_FLAGS_FULL);
             pat = mod_pat;
         }
@@ -4989,7 +4989,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
           redo_multi:
             /* Look up what code points (besides itself) fold to 'folded';
              * e.g., [ 'K', KELVIN_SIGN ] both fold to 'k'. */
-            folds_to_count = _inverse_folds(folded, &first_fold_from,
+            folds_to_count = inverse_folds_(folded, &first_fold_from,
                                                        &remaining_fold_froms);
         }
 

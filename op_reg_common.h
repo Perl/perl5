@@ -51,8 +51,8 @@ typedef enum {
     REGEX_ASCII_MORE_RESTRICTED_CHARSET
 } regex_charset;
 
-#define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+7)
-#define RXf_PMf_CHARSET (7U << (_RXf_PMf_CHARSET_SHIFT)) /* 3 bits */
+#define RXf_PMf_CHARSET_SHIFT_ ((RXf_PMf_STD_PMMOD_SHIFT)+7)
+#define RXf_PMf_CHARSET (7U << (RXf_PMf_CHARSET_SHIFT_)) /* 3 bits */
 
 /* Manually decorate these functions here with gcc-style attributes just to
  * avoid making the regex_charset typedef global, which it would need to be for
@@ -68,7 +68,7 @@ set_regex_charset(U32 * const flags, const regex_charset cs)
      * the above enum */
 
     *flags &= ~RXf_PMf_CHARSET;
-    *flags |= (cs << _RXf_PMf_CHARSET_SHIFT);
+    *flags |= (cs << RXf_PMf_CHARSET_SHIFT_);
 }
 
 PERL_STATIC_INLINE regex_charset
@@ -80,12 +80,12 @@ get_regex_charset(const U32 flags)
 {
     /* Returns the enum corresponding to the character set in 'flags' */
 
-    return (regex_charset) ((flags & RXf_PMf_CHARSET) >> _RXf_PMf_CHARSET_SHIFT);
+    return (regex_charset) ((flags & RXf_PMf_CHARSET) >> RXf_PMf_CHARSET_SHIFT_);
 }
 
 #define RXf_PMf_STRICT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+10))
 
-#define _RXf_PMf_SHIFT_COMPILETIME (RXf_PMf_STD_PMMOD_SHIFT+11)
+#define RXf_PMf_SHIFT_COMPILETIME_ (RXf_PMf_STD_PMMOD_SHIFT+11)
 
 
 /*
@@ -97,7 +97,7 @@ get_regex_charset(const U32 flags)
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
-#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+12)
+#define RXf_PMf_SHIFT_NEXT_ (RXf_PMf_STD_PMMOD_SHIFT+12)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */
@@ -149,7 +149,7 @@ get_regex_charset(const U32 flags)
  *  directly in the #define because doing so confuses regcomp.pl.
  *  (2**n - 1) is n 1 bits, so the below gets the contiguous bits between the
  *  beginning and ending shifts */
-#if RXf_PMf_COMPILETIME != ((nBIT_MASK(_RXf_PMf_SHIFT_COMPILETIME)) \
+#if RXf_PMf_COMPILETIME != ((nBIT_MASK(RXf_PMf_SHIFT_COMPILETIME_)) \
                         & (~(nBIT_MASK( RXf_PMf_STD_PMMOD_SHIFT))))
 #   error RXf_PMf_COMPILETIME is invalid
 #endif

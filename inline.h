@@ -407,7 +407,7 @@ Perl_rpp_extend(pTHX_ SSize_t n)
 
     EXTEND_HWM_SET(PL_stack_sp, n);
 #ifndef STRESS_REALLOC
-    if (UNLIKELY(_EXTEND_NEEDS_GROW(PL_stack_sp, n)))
+    if (UNLIKELY(EXTEND_NEEDS_GROW_(PL_stack_sp, n)))
 #endif
     {
         (void)stack_grow(PL_stack_sp, PL_stack_sp, n);

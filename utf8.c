@@ -885,7 +885,7 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
 }
 
 const char *
-Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format)
+Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const bool format)
 {
     /* Returns a mortalized C string that is a displayable copy of the 'len'
      * bytes starting at 'start'.  'format' gives how to display each byte.
@@ -905,7 +905,7 @@ Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const boo
     char * output;
     char * d;
 
-    PERL_ARGS_ASSERT__BYTE_DUMP_STRING;
+    PERL_ARGS_ASSERT_BYTE_DUMP_STRING_;
 
     Newx(output, output_len, char);
     SAVEFREEPV(output);
@@ -985,7 +985,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
     return form("%s: %s (unexpected non-continuation byte 0x%02x,"
                            " %s after start byte 0x%02x; need %d bytes, got %d)",
                            malformed_text,
-                           _byte_dump_string(s, x - s, 0),
+                           byte_dump_string_(s, x - s, 0),
                            *(s + non_cont_byte_pos),
                            where,
                            *s,
@@ -2249,7 +2249,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
                                 malformed_text,
-                                _byte_dump_string(s0, 1, 0),
+                                byte_dump_string_(s0, 1, 0),
                                 *s0);
                 break;
 
@@ -2258,7 +2258,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 message = form(
                              "%s: %s (too short; %d byte%s available, need %d)",
                              malformed_text,
-                             _byte_dump_string(s0, avail_len, 0),
+                             byte_dump_string_(s0, avail_len, 0),
                              (int)avail_len,
                              avail_len == 1 ? "" : "s", /* Pluralize */
                              (int)expectlen);
@@ -2296,8 +2296,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                             " \"%s\" is overlong which can and should be"
                             " represented with a different, shorter sequence)",
                             malformed_text,
-                            _byte_dump_string(s0, send - s0, 0),
-                            _byte_dump_string(s0, curlen, 0));
+                            byte_dump_string_(s0, send - s0, 0),
+                            byte_dump_string_(s0, curlen, 0));
                 }
                 else {
                     U8 tmpbuf[UTF8_MAXBYTES+1];
@@ -2317,8 +2317,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                 "%s: %s (overlong; instead use %s to represent"
                                 " %s%0*" UVXf ")",
                                 malformed_text,
-                                _byte_dump_string(s0, avail_len, 0),
-                                _byte_dump_string(tmpbuf, e - tmpbuf, 0),
+                                byte_dump_string_(s0, avail_len, 0),
+                                byte_dump_string_(tmpbuf, e - tmpbuf, 0),
                                 preface,
                                 ((input_uv < 256) ? 2 : 4), /* Field width of 2
                                                                for small code
@@ -2366,7 +2366,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     message = Perl_form(aTHX_
                                    "UTF-16 surrogate (any UTF-8 sequence that"
                                    " starts with \"%s\" is for a surrogate)",
-                                   _byte_dump_string(s0, curlen, 0));
+                                   byte_dump_string_(s0, curlen, 0));
                 }
                 else {
                     message = Perl_form(aTHX_ surrogate_cp_format, input_uv);
@@ -2456,7 +2456,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 if (overflows) {
                     message = Perl_form(aTHX_ "%s: %s (overflows)",
                                               malformed_text,
-                                              _byte_dump_string(s0, curlen, 0));
+                                              byte_dump_string_(s0, curlen, 0));
                 }
                 else if (   (orig_problems & UTF8_GOT_TOO_SHORT)
                          || (     UTF8_IS_PERL_EXTENDED(s0)
@@ -2467,14 +2467,14 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                         "Any UTF-8 sequence that starts with"
                                         " \"%s\" is a Perl extension, and so"
                                         " is not portable",
-                                        _byte_dump_string(s0, curlen, 0));
+                                        byte_dump_string_(s0, curlen, 0));
                     }
                     else {
                         message = Perl_form(aTHX_
                                         "Any UTF-8 sequence that starts with"
                                         " \"%s\" is for a non-Unicode code"
                                         " point, may not be portable",
-                                        _byte_dump_string(s0, curlen, 0));
+                                        byte_dump_string_(s0, curlen, 0));
                     }
                 }
                 else if (is_extended) {
@@ -3537,27 +3537,29 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 }
 
 bool
-Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
+Perl_is_uni_FOO_(pTHX_ const U8 classnum, const UV c)
 {
     return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
 }
 
 bool
-Perl__is_uni_perl_idcont(pTHX_ UV c)
+Perl_is_uni_perl_idcont_(pTHX_ UV c)
 {
     return _invlist_contains_cp(PL_utf8_perl_idcont, c);
 }
 
 bool
-Perl__is_uni_perl_idstart(pTHX_ UV c)
+Perl_is_uni_perl_idstart_(pTHX_ UV c)
 {
     return _invlist_contains_cp(PL_utf8_perl_idstart, c);
 }
 
 UV
-Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
+Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8* p, STRLEN *lenp,
                                   const char S_or_s)
 {
+    PERL_ARGS_ASSERT_TO_UPPER_TITLE_LATIN1_;
+
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to UTF-8.  The only difference between upper
      * and title case in this range is that LATIN_SMALL_LETTER_SHARP_S is
@@ -3565,8 +3567,6 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
      * 'S_or_s' to avoid a test */
 
     UV converted = toUPPER_LATIN1_MOD(c);
-
-    PERL_ARGS_ASSERT__TO_UPPER_TITLE_LATIN1;
 
     assert(S_or_s == 'S' || S_or_s == 's');
 
@@ -3641,19 +3641,19 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
  * The functions return the ordinal of the first character in the string of
  * 'd' */
 #define CALL_UPPER_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, PL_utf8_toupper,              \
+                to_utf8_case_(uv, s, d, lenp, PL_utf8_toupper,              \
                                               Uppercase_Mapping_invmap,     \
                                               UC_AUX_TABLE_ptrs,            \
                                               UC_AUX_TABLE_lengths,         \
                                               "uppercase")
 #define CALL_TITLE_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, PL_utf8_totitle,              \
+                to_utf8_case_(uv, s, d, lenp, PL_utf8_totitle,              \
                                               Titlecase_Mapping_invmap,     \
                                               TC_AUX_TABLE_ptrs,            \
                                               TC_AUX_TABLE_lengths,         \
                                               "titlecase")
 #define CALL_LOWER_CASE(uv, s, d, lenp)                                     \
-                _to_utf8_case(uv, s, d, lenp, PL_utf8_tolower,              \
+                to_utf8_case_(uv, s, d, lenp, PL_utf8_tolower,              \
                                               Lowercase_Mapping_invmap,     \
                                               LC_AUX_TABLE_ptrs,            \
                                               LC_AUX_TABLE_lengths,         \
@@ -3665,12 +3665,12 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
  * folding); otherwise, when zero, this implies a simple case fold */
 #define CALL_FOLD_CASE(uv, s, d, lenp, specials)                            \
         (specials)                                                          \
-        ?  _to_utf8_case(uv, s, d, lenp, PL_utf8_tofold,                    \
+        ?  to_utf8_case_(uv, s, d, lenp, PL_utf8_tofold,                    \
                                           Case_Folding_invmap,              \
                                           CF_AUX_TABLE_ptrs,                \
                                           CF_AUX_TABLE_lengths,             \
                                           "foldcase")                       \
-        : _to_utf8_case(uv, s, d, lenp, PL_utf8_tosimplefold,               \
+        : to_utf8_case_(uv, s, d, lenp, PL_utf8_tosimplefold,               \
                                          Simple_Case_Folding_invmap,        \
                                          NULL, NULL,                        \
                                          "foldcase")
@@ -3689,7 +3689,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
     if (c < 256) {
-        return _to_upper_title_latin1((U8) c, p, lenp, 'S');
+        return to_upper_title_latin1_((U8) c, p, lenp, 'S');
     }
 
     return CALL_UPPER_CASE(c, NULL, p, lenp);
@@ -3701,7 +3701,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
     if (c < 256) {
-        return _to_upper_title_latin1((U8) c, p, lenp, 's');
+        return to_upper_title_latin1_((U8) c, p, lenp, 's');
     }
 
     return CALL_TITLE_CASE(c, NULL, p, lenp);
@@ -3747,7 +3747,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
+Perl_to_fold_latin1_(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 {
     /* Corresponds to to_lower_latin1(); <flags> bits meanings:
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
@@ -3758,7 +3758,7 @@ Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 
     UV converted;
 
-    PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
+    PERL_ARGS_ASSERT_TO_FOLD_LATIN1_;
 
     assert (! (flags & FOLD_FLAGS_LOCALE));
 
@@ -3807,7 +3807,7 @@ Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 }
 
 UV
-Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
+Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 {
 
     /* Not currently externally documented, and subject to change
@@ -3818,7 +3818,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      */
 
-    PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
+    PERL_ARGS_ASSERT_TO_UNI_FOLD_FLAGS_;
 
     if (flags & FOLD_FLAGS_LOCALE) {
         /* Treat a non-Turkic UTF-8 locale as not being in locale at all,
@@ -3833,7 +3833,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     }
 
     if (c < 256) {
-        return _to_fold_latin1((U8) c, p, lenp,
+        return to_fold_latin1_((U8) c, p, lenp,
                             flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
     }
 
@@ -3841,13 +3841,13 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     if ( ! (flags & (FOLD_FLAGS_LOCALE|FOLD_FLAGS_NOMIX_ASCII))) {
         return CALL_FOLD_CASE(c, NULL, p, lenp, flags & FOLD_FLAGS_FULL);
     }
-    else {  /* Otherwise, _toFOLD_utf8_flags has the intelligence to deal with
+    else {  /* Otherwise, toFOLD_utf8_flags_ has the intelligence to deal with
                the special flags. */
         U8 utf8_c[UTF8_MAXBYTES + 1];
 
       needs_full_generality:
         uv_to_utf8(utf8_c, c);
-        return _toFOLD_utf8_flags(utf8_c, utf8_c + C_ARRAY_LENGTH(utf8_c),
+        return toFOLD_utf8_flags_(utf8_c, utf8_c + C_ARRAY_LENGTH(utf8_c),
                                   p, lenp, flags);
     }
 }
@@ -3906,25 +3906,25 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
             _invlist_contains_cp(invlist, utf8_to_uv_or_die(p, e, NULL))
 
 bool
-Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
+Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
-    PERL_ARGS_ASSERT__IS_UTF8_FOO;
+    PERL_ARGS_ASSERT_IS_UTF8_FOO_;
 
     return IS_UTF8_IN_INVLIST(p, e, PL_XPosix_ptrs[classnum]);
 }
 
 bool
-Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
+Perl_is_utf8_perl_idstart_(pTHX_ const U8 *p, const U8 * const e)
 {
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
+    PERL_ARGS_ASSERT_IS_UTF8_PERL_IDSTART_;
 
     return IS_UTF8_IN_INVLIST(p, e, PL_utf8_perl_idstart);
 }
 
 bool
-Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
+Perl_is_utf8_perl_idcont_(pTHX_ const U8 *p, const U8 * const e)
 {
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
+    PERL_ARGS_ASSERT_IS_UTF8_PERL_IDCONT_;
 
     return IS_UTF8_IN_INVLIST(p, e, PL_utf8_perl_idcont);
 }
@@ -4027,7 +4027,7 @@ S_to_case_cp_list(pTHX_
 }
 
 STATIC UV
-S__to_utf8_case(pTHX_ const UV original, const U8 *p,
+S_to_utf8_case_(pTHX_ const UV original, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
                       SV *invlist, const I32 * const invmap,
                       const U32 * const * const aux_tables,
@@ -4056,7 +4056,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
                                aux_tables, aux_table_lengths,
                                normal);
 
-    PERL_ARGS_ASSERT__TO_UTF8_CASE;
+    PERL_ARGS_ASSERT_TO_UTF8_CASE_;
 
     /* If the code point maps to itself and we already have its representation,
      * copy it instead of recalculating */
@@ -4085,7 +4085,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
 }
 
 Size_t
-Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
+Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
                           const U32 ** remaining_folds_to)
 {
     /* Returns the count of the number of code points that fold to the input
@@ -4116,7 +4116,7 @@ Perl__inverse_folds(pTHX_ const UV cp, U32 * first_folds_to,
     SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
     I32 base = _Perl_IVCF_invmap[index];
 
-    PERL_ARGS_ASSERT__INVERSE_FOLDS;
+    PERL_ARGS_ASSERT_INVERSE_FOLDS_;
 
     if (base == 0) {            /* No fold */
         *first_folds_to = 0;
@@ -4417,19 +4417,19 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
  *         be used. */
 
 UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
+Perl_to_utf8_upper_flags_(pTHX_ const U8 *p,
                                 const U8 *e,
                                 U8* ustrp,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_UPPER_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
+    UV result;
 
     /* ~0 makes anything non-zero in 'flags' mean we are using locale rules */
     /* 2nd char of uc(U+DF) is 'S' */
-    CASE_CHANGE_BODY_START(~0, toupper, _to_upper_title_latin1, 'S',
+    CASE_CHANGE_BODY_START(~0, toupper, to_upper_title_latin1_, 'S',
                                                                     turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_UPPER_CASE);
 }
@@ -4441,18 +4441,18 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
  */
 
 UV
-Perl__to_utf8_title_flags(pTHX_ const U8 *p,
+Perl_to_utf8_title_flags_(pTHX_ const U8 *p,
                                 const U8 *e,
                                 U8* ustrp,
                                 STRLEN *lenp,
                                 bool flags)
 {
+    PERL_ARGS_ASSERT_TO_UTF8_TITLE_FLAGS_;
+
     UV result;
 
-    PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
-
     /* 2nd char of ucfirst(U+DF) is 's' */
-    CASE_CHANGE_BODY_START(~0, toupper, _to_upper_title_latin1, 's',
+    CASE_CHANGE_BODY_START(~0, toupper, to_upper_title_latin1_, 's',
                                                                     turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_TITLE_CASE);
 }
@@ -4463,15 +4463,15 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
  */
 
 UV
-Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
+Perl_to_utf8_lower_flags_(pTHX_ const U8 *p,
                                 const U8 *e,
                                 U8* ustrp,
                                 STRLEN *lenp,
                                 bool flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_LOWER_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
+    UV result;
 
     CASE_CHANGE_BODY_START(~0, tolower, to_lower_latin1, 0 /* 0 is dummy */,
                                                                     turkic_lc);
@@ -4489,22 +4489,22 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
  */
 
 UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
+Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
                                const U8 *e,
                                U8* ustrp,
                                STRLEN *lenp,
                                U8 flags)
 {
-    UV result;
+    PERL_ARGS_ASSERT_TO_UTF8_FOLD_FLAGS_;
 
-    PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
+    UV result;
 
     /* These are mutually exclusive */
     assert (! ((flags & FOLD_FLAGS_LOCALE) && (flags & FOLD_FLAGS_NOMIX_ASCII)));
 
     assert(p != ustrp); /* Otherwise overwrites */
 
-    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, tolower, _to_fold_latin1,
+    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, tolower, to_fold_latin1_,
                  ((flags) & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII)),
                                                                     turkic_fc);
 
@@ -5066,10 +5066,10 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                     *foldbuf1 = toFOLD(*p1);
                 }
                 else if (u1) {
-                    _toFOLD_utf8_flags(p1, e1, foldbuf1, &n1, flags_for_folder);
+                    toFOLD_utf8_flags_(p1, e1, foldbuf1, &n1, flags_for_folder);
                 }
                 else {  /* Not UTF-8, get UTF-8 fold */
-                    _to_uni_fold_flags(*p1, foldbuf1, &n1, flags_for_folder);
+                    to_uni_fold_flags_(*p1, foldbuf1, &n1, flags_for_folder);
                 }
                 f1 = foldbuf1;
             }
@@ -5104,10 +5104,10 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                     *foldbuf2 = toFOLD(*p2);
                 }
                 else if (u2) {
-                    _toFOLD_utf8_flags(p2, e2, foldbuf2, &n2, flags_for_folder);
+                    toFOLD_utf8_flags_(p2, e2, foldbuf2, &n2, flags_for_folder);
                 }
                 else {
-                    _to_uni_fold_flags(*p2, foldbuf2, &n2, flags_for_folder);
+                    to_uni_fold_flags_(*p2, foldbuf2, &n2, flags_for_folder);
                 }
                 f2 = foldbuf2;
             }

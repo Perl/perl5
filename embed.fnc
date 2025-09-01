@@ -806,7 +806,7 @@ p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\
 				|NN void *tokendata
-EXp	|const char *|_byte_dump_string 				\
+EXp	|const char *|byte_dump_string_ 				\
 				|NULLOK const U8 * const start		\
 				|const STRLEN len			\
 				|const bool format
@@ -1665,7 +1665,7 @@ p	|void	|init_uniprops
 APRTdmp |char * |instr		|NN const char *big			\
 				|NN const char *little
 Adp	|U32	|intro_my
-ERXp	|Size_t |_inverse_folds |const UV cp				\
+ERXp	|Size_t |inverse_folds_ |const UV cp				\
 				|NN U32 *first_folds_to 		\
 				|NN const U32 **remaining_folds_to
 : Used in perly.y
@@ -1719,11 +1719,11 @@ ATdip	|bool	|is_strict_utf8_string_loclen				\
 				|STRLEN len				\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el
-CRp	|bool	|_is_uni_FOO	|const U8 classnum			\
+CRp	|bool	|is_uni_FOO_	|const U8 classnum			\
 				|const UV c
-CRp	|bool	|_is_uni_perl_idcont					\
+CRp	|bool	|is_uni_perl_idcont_					\
 				|UV c
-CRp	|bool	|_is_uni_perl_idstart					\
+CRp	|bool	|is_uni_perl_idstart_					\
 				|UV c
 ARTdip	|Size_t |isUTF8_CHAR	|NN const U8 * const s0 		\
 				|NN const U8 * const e
@@ -1757,17 +1757,17 @@ ATdip	|bool	|is_utf8_fixed_width_buf_loclen_flags			\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
-CRp	|bool	|_is_utf8_FOO	|const U8 classnum			\
+CRp	|bool	|is_utf8_FOO_	|const U8 classnum			\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
 ARTdip	|bool	|is_utf8_invariant_string_loc				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep
-CRp	|bool	|_is_utf8_perl_idcont					\
+CRp	|bool	|is_utf8_perl_idcont_					\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
-CRp	|bool	|_is_utf8_perl_idstart					\
+CRp	|bool	|is_utf8_perl_idstart_					\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
 ARTdmp	|bool	|is_utf8_string |NN const U8 *s 			\
@@ -3657,7 +3657,7 @@ Xiop	|Stack_off_t|TOPMARK
 Cmp	|UV	|to_uni_fold	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
-Cp	|UV	|_to_uni_fold_flags					\
+Cp	|UV	|to_uni_fold_flags_					\
 				|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\
@@ -3671,26 +3671,26 @@ Cp	|UV	|to_uni_title	|UV c					\
 Cp	|UV	|to_uni_upper	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
-Cp	|UV	|_to_utf8_fold_flags					\
+Cp	|UV	|to_utf8_fold_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|U8 flags
 
-Cp	|UV	|_to_utf8_lower_flags					\
+Cp	|UV	|to_utf8_lower_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
-Cp	|UV	|_to_utf8_title_flags					\
+Cp	|UV	|to_utf8_title_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
-Cp	|UV	|_to_utf8_upper_flags					\
+Cp	|UV	|to_utf8_upper_flags_					\
 				|NN const U8 *p 			\
 				|NULLOK const U8 *e			\
 				|NN U8 *ustrp				\
@@ -5138,7 +5138,7 @@ ETi	|const char *|get_regex_charset_name				\
 				|NN STRLEN * const lenp
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
-p	|UV	|_to_upper_title_latin1 				\
+p	|UV	|to_upper_title_latin1_ 				\
 				|const U8 c				\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\
@@ -5366,18 +5366,18 @@ Ep	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state		\
 				|U32 depth				\
 				|bool was_mutate_ok
 # if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
-ES	|void	|dump_trie	|NN const struct _reg_trie_data *trie	\
+ES	|void	|dump_trie	|NN const struct reg_trie_data_ *trie	\
 				|NULLOK HV *widecharmap 		\
 				|NN AV *revcharmap			\
 				|U32 depth
 ES	|void	|dump_trie_interim_list 				\
-				|NN const struct _reg_trie_data *trie	\
+				|NN const struct reg_trie_data_ *trie	\
 				|NULLOK HV *widecharmap 		\
 				|NN AV *revcharmap			\
 				|U32 next_alloc 			\
 				|U32 depth
 ES	|void	|dump_trie_interim_table				\
-				|NN const struct _reg_trie_data *trie	\
+				|NN const struct reg_trie_data_ *trie	\
 				|NULLOK HV *widecharmap 		\
 				|NN AV *revcharmap			\
 				|U32 next_alloc 			\
@@ -5602,7 +5602,7 @@ ERp	|bool	|is_grapheme	|NN const U8 *strbeg			\
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_UTF8_C)
-ETXp	|UV	|_to_fold_latin1|const U8 c				\
+ETXp	|UV	|to_fold_latin1_|const U8 c				\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\
 				|const unsigned int flags
@@ -6183,7 +6183,7 @@ RST	|U8	|to_lower_latin1|const U8 c				\
 				|NULLOK U8 *p				\
 				|NULLOK STRLEN *lenp			\
 				|const char dummy
-S	|UV	|_to_utf8_case	|const UV original				\
+S	|UV	|to_utf8_case_	|const UV original				\
 				|NULLOK const U8 *p				\
 				|NN U8 *ustrp					\
 				|NN STRLEN *lenp				\

@@ -12025,8 +12025,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
        /* Work around breakage in OTS$CVT_FLOAT_T_X */
 #    define VCATPVFN_NV_TO_FV(nv,fv)                    \
             STMT_START {                                \
-                double _dv = nv;                        \
-                fv = Perl_isnan(_dv) ? LDBL_QNAN : _dv; \
+                double dv_ = nv;                        \
+                fv = Perl_isnan(_dv) ? LDBL_QNAN : dv_; \
             } STMT_END
 #  else
 #    define VCATPVFN_NV_TO_FV(nv,fv) (fv)=(nv)

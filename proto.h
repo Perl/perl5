@@ -88,69 +88,6 @@ Perl_Slab_Free(pTHX_ void *op);
 /* PERL_CALLCONV void
 Perl_SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
 
-#define PERL_ARGS_ASSERT__BYTE_DUMP_STRING
-
-#define PERL_ARGS_ASSERT__INVERSE_FOLDS         \
-        assert(first_folds_to); assert(remaining_folds_to)
-
-PERL_CALLCONV bool
-Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UNI_FOO
-
-PERL_CALLCONV bool
-Perl__is_uni_perl_idcont(pTHX_ UV c)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UNI_PERL_IDCONT
-
-PERL_CALLCONV bool
-Perl__is_uni_perl_idstart(pTHX_ UV c)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UNI_PERL_IDSTART
-
-PERL_CALLCONV bool
-Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_FOO           \
-        assert(p); assert(e)
-
-PERL_CALLCONV bool
-Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT   \
-        assert(p); assert(e)
-
-PERL_CALLCONV bool
-Perl__is_utf8_perl_idstart(pTHX_ const U8 *p, const U8 * const e)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART  \
-        assert(p); assert(e)
-
-PERL_CALLCONV UV
-Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, U8 flags);
-#define PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS     \
-        assert(p); assert(lenp)
-
-PERL_CALLCONV UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, U8 flags);
-#define PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS    \
-        assert(p); assert(ustrp)
-
-PERL_CALLCONV UV
-Perl__to_utf8_lower_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
-#define PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS   \
-        assert(p); assert(ustrp)
-
-PERL_CALLCONV UV
-Perl__to_utf8_title_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
-#define PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS   \
-        assert(p); assert(ustrp)
-
-PERL_CALLCONV UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
-#define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS   \
-        assert(p); assert(ustrp)
-
 PERL_CALLCONV_NO_RET void
 Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
         __attribute__noreturn__
@@ -387,6 +324,8 @@ Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_BUILD_INFIX_PLUGIN     \
         assert(lhs); assert(rhs); assert(tokendata)
+
+#define PERL_ARGS_ASSERT_BYTE_DUMP_STRING_
 
 PERL_CALLCONV int
 Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen);
@@ -1845,6 +1784,9 @@ PERL_CALLCONV U32
 Perl_intro_my(pTHX);
 #define PERL_ARGS_ASSERT_INTRO_MY
 
+#define PERL_ARGS_ASSERT_INVERSE_FOLDS_         \
+        assert(first_folds_to); assert(remaining_folds_to)
+
 PERL_CALLCONV OP *
 Perl_invert(pTHX_ OP *cmd)
         __attribute__warn_unused_result__
@@ -1886,12 +1828,33 @@ Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
 /* PERL_CALLCONV bool
 Perl_is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
 
+PERL_CALLCONV bool
+Perl_is_uni_FOO_(pTHX_ const U8 classnum, const UV c)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UNI_FOO_
+
+PERL_CALLCONV bool
+Perl_is_uni_perl_idcont_(pTHX_ UV c)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UNI_PERL_IDCONT_
+
+PERL_CALLCONV bool
+Perl_is_uni_perl_idstart_(pTHX_ UV c)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UNI_PERL_IDSTART_
+
 PERL_CALLCONV Size_t
 Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e, const bool require_partial)
         __attribute__warn_unused_result__
         __attribute__pure__;
 #define PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_     \
         assert(s0); assert(e)
+
+PERL_CALLCONV bool
+Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_FOO_           \
+        assert(p); assert(e)
 
 /* PERL_CALLCONV STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end); */
@@ -1908,6 +1871,18 @@ Perl_is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 fla
 
 /* PERL_CALLCONV bool
 Perl_is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
+
+PERL_CALLCONV bool
+Perl_is_utf8_perl_idcont_(pTHX_ const U8 *p, const U8 * const e)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_PERL_IDCONT_   \
+        assert(p); assert(e)
+
+PERL_CALLCONV bool
+Perl_is_utf8_perl_idstart_(pTHX_ const U8 *p, const U8 * const e)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_UTF8_PERL_IDSTART_  \
+        assert(p); assert(e)
 
 /* PERL_CALLCONV bool
 Perl_is_utf8_string(const U8 *s, STRLEN len)
@@ -5283,6 +5258,11 @@ Perl_tmps_grow_p(pTHX_ SSize_t ix);
 Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp); */
 
 PERL_CALLCONV UV
+Perl_to_uni_fold_flags_(pTHX_ UV c, U8 *p, STRLEN *lenp, U8 flags);
+#define PERL_ARGS_ASSERT_TO_UNI_FOLD_FLAGS_     \
+        assert(p); assert(lenp)
+
+PERL_CALLCONV UV
 Perl_to_uni_lower(pTHX_ UV c, U8 *p, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_TO_UNI_LOWER           \
         assert(p); assert(lenp)
@@ -5296,6 +5276,26 @@ PERL_CALLCONV UV
 Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_TO_UNI_UPPER           \
         assert(p); assert(lenp)
+
+PERL_CALLCONV UV
+Perl_to_utf8_fold_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, U8 flags);
+#define PERL_ARGS_ASSERT_TO_UTF8_FOLD_FLAGS_    \
+        assert(p); assert(ustrp)
+
+PERL_CALLCONV UV
+Perl_to_utf8_lower_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
+#define PERL_ARGS_ASSERT_TO_UTF8_LOWER_FLAGS_   \
+        assert(p); assert(ustrp)
+
+PERL_CALLCONV UV
+Perl_to_utf8_title_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
+#define PERL_ARGS_ASSERT_TO_UTF8_TITLE_FLAGS_   \
+        assert(p); assert(ustrp)
+
+PERL_CALLCONV UV
+Perl_to_utf8_upper_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
+#define PERL_ARGS_ASSERT_TO_UTF8_UPPER_FLAGS_   \
+        assert(p); assert(ustrp)
 
 PERL_CALLCONV bool
 Perl_try_amagic_bin(pTHX_ int method, int flags);
@@ -6039,13 +6039,10 @@ S_should_warn_nl(const char *pv)
 # endif
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
-PERL_CALLCONV const char *
-Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
-PERL_CALLCONV Size_t
-Perl__inverse_folds(pTHX_ const UV cp, U32 *first_folds_to, const U32 **remaining_folds_to)
-        __attribute__warn_unused_result__;
 PERL_CALLCONV void
 Perl_av_reify(pTHX_ AV *av);
+PERL_CALLCONV const char *
+Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const bool format);
 PERL_CALLCONV const char *
 Perl_cntrl_to_mnemonic(const U8 c)
         __attribute__warn_unused_result__;
@@ -6076,6 +6073,9 @@ Perl_get_prop_definition(pTHX_ const int table_index)
         __attribute__warn_unused_result__;
 PERL_CALLCONV const char * const *
 Perl_get_prop_values(const int table_index)
+        __attribute__warn_unused_result__;
+PERL_CALLCONV Size_t
+Perl_inverse_folds_(pTHX_ const UV cp, U32 *first_folds_to, const U32 **remaining_folds_to)
         __attribute__warn_unused_result__;
 PERL_CALLCONV HV *
 Perl_load_charnames(pTHX_ SV *char_name, const char *context, const STRLEN context_len, const char **error_msg)
@@ -6216,7 +6216,7 @@ Perl_is_grapheme(pTHX_ const U8 *strbeg, const U8 *s, const U8 *strend, const UV
 # if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
      defined(PERL_IN_UTF8_C)
 PERL_CALLCONV UV
-Perl__to_fold_latin1(const U8 c, U8 *p, STRLEN *lenp, const unsigned int flags);
+Perl_to_fold_latin1_(const U8 c, U8 *p, STRLEN *lenp, const unsigned int flags);
 # endif
 # if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
 STATIC U8
@@ -7886,9 +7886,9 @@ Perl_softref2xv(pTHX_ SV * const sv, const char * const what, const svtype type)
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV UV
-Perl__to_upper_title_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s)
+Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s)
         __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT__TO_UPPER_TITLE_LATIN1 \
+# define PERL_ARGS_ASSERT_TO_UPPER_TITLE_LATIN1_ \
         assert(p); assert(lenp)
 
 #endif
@@ -8322,11 +8322,11 @@ Perl_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minl
         __attribute__visibility__("hidden");
 #   if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
 STATIC void
-S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, AV *revcharmap, U32 depth);
+S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap, AV *revcharmap, U32 depth);
 STATIC void
-S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, AV *revcharmap, U32 next_alloc, U32 depth);
+S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap, AV *revcharmap, U32 next_alloc, U32 depth);
 STATIC void
-S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, AV *revcharmap, U32 next_alloc, U32 depth);
+S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap, AV *revcharmap, U32 next_alloc, U32 depth);
 #   endif
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
@@ -8652,7 +8652,7 @@ Perl_populate_invlist_from_bitmap(pTHX_ const U8 *bitmap, const Size_t bitmap_le
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_UTF8_C)
-# define PERL_ARGS_ASSERT__TO_FOLD_LATIN1       \
+# define PERL_ARGS_ASSERT_TO_FOLD_LATIN1_       \
         assert(p); assert(lenp)
 
 #endif
@@ -9572,12 +9572,6 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char *name, const STRLEN
 #endif /* defined(PERL_IN_UNIVERSAL_C) */
 #if defined(PERL_IN_UTF8_C)
 STATIC UV
-S__to_utf8_case(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
-# define PERL_ARGS_ASSERT__TO_UTF8_CASE         \
-        assert(ustrp); assert(lenp); assert(invlist); assert(invmap); \
-        assert(normal)
-
-STATIC UV
 S_check_locale_boundary_crossing(pTHX_ const U8 * const p, const UV result, U8 * const ustrp, STRLEN *lenp)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_CHECK_LOCALE_BOUNDARY_CROSSING \
@@ -9598,6 +9592,12 @@ STATIC U8
 S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp, const char dummy)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_TO_LOWER_LATIN1
+
+STATIC UV
+S_to_utf8_case_(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
+# define PERL_ARGS_ASSERT_TO_UTF8_CASE_         \
+        assert(ustrp); assert(lenp); assert(invlist); assert(invmap); \
+        assert(normal)
 
 STATIC UV
 S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e, U8 *ustrp, STRLEN *lenp);

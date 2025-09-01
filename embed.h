@@ -116,17 +116,6 @@
 # define SvTRUE_nomg(a)                         Perl_SvTRUE_nomg(aTHX_ a)
 # define SvUV(a)                                Perl_SvUV(aTHX_ a)
 # define SvUV_nomg(a)                           Perl_SvUV_nomg(aTHX_ a)
-# define _is_uni_FOO(a,b)                       Perl__is_uni_FOO(aTHX_ a,b)
-# define _is_uni_perl_idcont(a)                 Perl__is_uni_perl_idcont(aTHX_ a)
-# define _is_uni_perl_idstart(a)                Perl__is_uni_perl_idstart(aTHX_ a)
-# define _is_utf8_FOO(a,b,c)                    Perl__is_utf8_FOO(aTHX_ a,b,c)
-# define _is_utf8_perl_idcont(a,b)              Perl__is_utf8_perl_idcont(aTHX_ a,b)
-# define _is_utf8_perl_idstart(a,b)             Perl__is_utf8_perl_idstart(aTHX_ a,b)
-# define _to_uni_fold_flags(a,b,c,d)            Perl__to_uni_fold_flags(aTHX_ a,b,c,d)
-# define _to_utf8_fold_flags(a,b,c,d,e)         Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e)
-# define _to_utf8_lower_flags(a,b,c,d,e)        Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e)
-# define _to_utf8_title_flags(a,b,c,d,e)        Perl__to_utf8_title_flags(aTHX_ a,b,c,d,e)
-# define _to_utf8_upper_flags(a,b,c,d,e)        Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e)
 # define amagic_call(a,b,c,d)                   Perl_amagic_call(aTHX_ a,b,c,d)
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
@@ -333,13 +322,19 @@
 # define Perl_is_strict_utf8_string             is_strict_utf8_string
 # define Perl_is_strict_utf8_string_loc         is_strict_utf8_string_loc
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen
+# define is_uni_FOO_(a,b)                       Perl_is_uni_FOO_(aTHX_ a,b)
+# define is_uni_perl_idcont_(a)                 Perl_is_uni_perl_idcont_(aTHX_ a)
+# define is_uni_perl_idstart_(a)                Perl_is_uni_perl_idstart_(aTHX_ a)
 # define is_utf8_FF_helper_                     Perl_is_utf8_FF_helper_
+# define is_utf8_FOO_(a,b,c)                    Perl_is_utf8_FOO_(aTHX_ a,b,c)
 # define Perl_is_utf8_char_buf                  is_utf8_char_buf
 # define is_utf8_char_helper_                   Perl_is_utf8_char_helper_
 # define Perl_is_utf8_fixed_width_buf_flags     is_utf8_fixed_width_buf_flags
 # define Perl_is_utf8_fixed_width_buf_loc_flags is_utf8_fixed_width_buf_loc_flags
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
+# define is_utf8_perl_idcont_(a,b)              Perl_is_utf8_perl_idcont_(aTHX_ a,b)
+# define is_utf8_perl_idstart_(a,b)             Perl_is_utf8_perl_idstart_(aTHX_ a,b)
 # define Perl_is_utf8_string                    is_utf8_string
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
 # define Perl_is_utf8_string_loc                is_utf8_string_loc
@@ -809,9 +804,14 @@
 # define sync_locale()                          Perl_sync_locale(aTHX)
 # define taint_env()                            Perl_taint_env(aTHX)
 # define taint_proper(a,b)                      Perl_taint_proper(aTHX_ a,b)
+# define to_uni_fold_flags_(a,b,c,d)            Perl_to_uni_fold_flags_(aTHX_ a,b,c,d)
 # define to_uni_lower(a,b,c)                    Perl_to_uni_lower(aTHX_ a,b,c)
 # define to_uni_title(a,b,c)                    Perl_to_uni_title(aTHX_ a,b,c)
 # define to_uni_upper(a,b,c)                    Perl_to_uni_upper(aTHX_ a,b,c)
+# define to_utf8_fold_flags_(a,b,c,d,e)         Perl_to_utf8_fold_flags_(aTHX_ a,b,c,d,e)
+# define to_utf8_lower_flags_(a,b,c,d,e)        Perl_to_utf8_lower_flags_(aTHX_ a,b,c,d,e)
+# define to_utf8_title_flags_(a,b,c,d,e)        Perl_to_utf8_title_flags_(aTHX_ a,b,c,d,e)
+# define to_utf8_upper_flags_(a,b,c,d,e)        Perl_to_utf8_upper_flags_(aTHX_ a,b,c,d,e)
 # define uiv_2buf                               Perl_uiv_2buf
 # define unpackstring(a,b,c,d,e)                Perl_unpackstring(aTHX_ a,b,c,d,e)
 # define unshare_hek(a)                         Perl_unshare_hek(aTHX_ a)
@@ -1579,7 +1579,7 @@
 #     define lossless_NV_to_IV                  S_lossless_NV_to_IV
 #   endif
 #   if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
-#     define _to_upper_title_latin1(a,b,c,d)    Perl__to_upper_title_latin1(aTHX_ a,b,c,d)
+#     define to_upper_title_latin1_(a,b,c,d)    Perl_to_upper_title_latin1_(aTHX_ a,b,c,d)
 #   endif
 #   if defined(PERL_IN_PP_CTL_C)
 #     define check_type_and_open(a)             S_check_type_and_open(aTHX_ a)
@@ -1722,7 +1722,6 @@
 #     define sv_derived_from_svpvn(a,b,c,d,e)   S_sv_derived_from_svpvn(aTHX_ a,b,c,d,e)
 #   endif
 #   if defined(PERL_IN_UTF8_C)
-#     define _to_utf8_case(a,b,c,d,e,f,g,h,i)   S__to_utf8_case(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define check_locale_boundary_crossing(a,b,c,d) S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #     define does_utf8_overflow                 S_does_utf8_overflow
 #     define isFF_overlong                      S_isFF_overlong
@@ -1730,6 +1729,7 @@
 #     define new_msg_hv(a,b,c)                  S_new_msg_hv(aTHX_ a,b,c)
 #     define to_case_cp_list(a,b,c,d,e,f,g,h)   S_to_case_cp_list(aTHX_ a,b,c,d,e,f,g,h)
 #     define to_lower_latin1                    S_to_lower_latin1
+#     define to_utf8_case_(a,b,c,d,e,f,g,h,i)   S_to_utf8_case_(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define turkic_fc(a,b,c,d)                 S_turkic_fc(aTHX_ a,b,c,d)
 #     define turkic_lc(a,b,c,d)                 S_turkic_lc(aTHX_ a,b,c,d)
 #     define turkic_uc(a,b,c,d)                 S_turkic_uc(aTHX_ a,b,c,d)
@@ -1798,10 +1798,9 @@
 #   endif
 # endif /* defined(PERL_CORE) */
 # if defined(PERL_CORE) || defined(PERL_EXT)
-#   define _byte_dump_string(a,b,c)             Perl__byte_dump_string(aTHX_ a,b,c)
-#   define _inverse_folds(a,b,c)                Perl__inverse_folds(aTHX_ a,b,c)
 #   define append_utf8_from_native_byte         Perl_append_utf8_from_native_byte
 #   define av_reify(a)                          Perl_av_reify(aTHX_ a)
+#   define byte_dump_string_(a,b,c)             Perl_byte_dump_string_(aTHX_ a,b,c)
 #   define cntrl_to_mnemonic                    Perl_cntrl_to_mnemonic
 #   define current_re_engine()                  Perl_current_re_engine(aTHX)
 #   define cv_ckproto_len_flags(a,b,c,d,e)      Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
@@ -1811,6 +1810,7 @@
 #   define get_deprecated_property_msg          Perl_get_deprecated_property_msg
 #   define get_prop_definition(a)               Perl_get_prop_definition(aTHX_ a)
 #   define get_prop_values                      Perl_get_prop_values
+#   define inverse_folds_(a,b,c)                Perl_inverse_folds_(aTHX_ a,b,c)
 #   define load_charnames(a,b,c,d)              Perl_load_charnames(aTHX_ a,b,c,d)
 #   define mbtowc_(a,b,c)                       Perl_mbtowc_(aTHX_ a,b,c)
 #   define mg_find_mglob(a)                     Perl_mg_find_mglob(aTHX_ a)
@@ -1992,7 +1992,7 @@
 #   endif
 #   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
        defined(PERL_IN_UTF8_C)
-#     define _to_fold_latin1                    Perl__to_fold_latin1
+#     define to_fold_latin1_                    Perl_to_fold_latin1_
 #   endif
 #   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #     define regcurly                           Perl_regcurly

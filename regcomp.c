@@ -6848,7 +6848,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             UV folded;
 
                           fold_anyway:
-                            folded = _to_uni_fold_flags(
+                            folded = to_uni_fold_flags_(
                                     ender,
                                     (U8 *) s,  /* We have allocated extra space
                                                   in 's' so can't run off the
@@ -7156,7 +7156,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (UTF) {
                             Size_t added_len;
 
-                            (void) _to_utf8_fold_flags((U8 *) redo_p,
+                            (void) to_utf8_fold_flags_((U8 *) redo_p,
                                                        (U8 *) RExC_end,
                                                        (U8 *) redo_e,
                                                        &added_len,
@@ -7262,7 +7262,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     Size_t added_len;
 
                     /* Append the fold of ender */
-                    (void) _to_uni_fold_flags(
+                    (void) to_uni_fold_flags_(
                         ender,
                         (U8 *) e,
                         &added_len,
@@ -7305,7 +7305,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                              * 'e' (having deliberately reserved enough space
                              * for this eventuality) and drop down to check if
                              * the three actually do form a folded sequence */
-                            (void) _to_utf8_fold_flags(
+                            (void) to_utf8_fold_flags_(
                                 (U8 *) p, (U8 *) RExC_end,
                                 (U8 *) e,
                                 &added_len,
@@ -9323,14 +9323,14 @@ Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** i
             else {
                 U8 dummy_fold[UTF8_MAXBYTES_CASE+1];
                 Size_t dummy_len;
-                folded_cp = _to_fold_latin1(cp, dummy_fold, &dummy_len, 0);
+                folded_cp = to_fold_latin1_(cp, dummy_fold, &dummy_len, 0);
             }
 
             if (folded_cp > 255) {
                 *invlist = add_cp_to_invlist(*invlist, folded_cp);
             }
 
-            folds_count = _inverse_folds(folded_cp, &first_fold,
+            folds_count = inverse_folds_(folded_cp, &first_fold,
                                                     &remaining_folds);
             if (folds_count == 0) {
 
@@ -10508,7 +10508,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 U8 foldbuf[UTF8_MAXBYTES_CASE+1];
                 STRLEN foldlen;
 
-                UV folded = _to_uni_fold_flags(
+                UV folded = to_uni_fold_flags_(
                                 value,
                                 foldbuf,
                                 &foldlen,
@@ -10929,7 +10929,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * rules hard-coded for it.  First, get its fold.  This is
                      * the simple fold, as the multi-character folds have been
                      * handled earlier and separated out */
-                    folded = _to_uni_fold_flags(j, foldbuf, &foldlen,
+                    folded = to_uni_fold_flags_(j, foldbuf, &foldlen,
                                                         (ASCII_FOLD_RESTRICTED)
                                                         ? FOLD_FLAGS_NOMIX_ASCII
                                                         : 0);
@@ -10937,7 +10937,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     /* Single character fold of above Latin1.  Add everything
                      * in its fold closure to the list that this node should
                      * match. */
-                    folds_count = _inverse_folds(folded, &first_fold,
+                    folds_count = inverse_folds_(folded, &first_fold,
                                                     &remaining_folds);
                     for (k = 0; k <= folds_count; k++) {
                         UV c = (k == 0)     /* First time through use itself */
@@ -11687,10 +11687,10 @@ S_optimize_regclass(pTHX_
 
                 Size_t foldlen;
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
-                UV folded = _to_uni_fold_flags(lowest_cp, foldbuf, &foldlen, 0);
+                UV folded = to_uni_fold_flags_(lowest_cp, foldbuf, &foldlen, 0);
                 U32 first_fold;
                 const U32 * remaining_folds;
-                Size_t folds_to_this_cp_count = _inverse_folds(
+                Size_t folds_to_this_cp_count = inverse_folds_(
                                                             folded,
                                                             &first_fold,
                                                             &remaining_folds);
@@ -11811,7 +11811,7 @@ S_optimize_regclass(pTHX_
 
                 /* This is a kludge to the special casing issues with this
                  * ligature under /aa.  FB05 should fold to FB06, but the call
-                 * above to _to_uni_fold_flags() didn't find this, as it didn't
+                 * above to to_uni_fold_flags_() didn't find this, as it didn't
                  * use the /aa restriction in order to not miss other folds
                  * that would be affected.  This is the only instance likely to
                  * ever be a problem in all of Unicode.  So special case it. */

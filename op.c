@@ -6569,7 +6569,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         DEBUG_y(PerlIO_printf(Perl_debug_log,
                     "%s: %d: tstr before inversion=\n%s\n",
-                    __FILE__, __LINE__, _byte_dump_string(t, tend - t, 0)));
+                    __FILE__, __LINE__, byte_dump_string_(t, tend - t, 0)));
 
         while (t < tend) {
 
@@ -6732,9 +6732,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         t_range_count = r_range_count = 0;
 
         DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d:\ntstr=%s\n",
-                    __FILE__, __LINE__, _byte_dump_string(t, tend - t, 0)));
+                    __FILE__, __LINE__, byte_dump_string_(t, tend - t, 0)));
         DEBUG_y(PerlIO_printf(Perl_debug_log, "rstr=%s\n",
-                                        _byte_dump_string(r, rend - r, 0)));
+                                        byte_dump_string_(r, rend - r, 0)));
         DEBUG_y(PerlIO_printf(Perl_debug_log, "/c=%d; /s=%d; /d=%d\n"
                                               " At the beginning of pass %u\n",
                                               complement, squash, del,

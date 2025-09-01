@@ -205,33 +205,33 @@ typedef struct hek HEK;
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
 /* start with 2 sv-head building blocks */
-#define _SV_HEAD(ptrtype) \
+#define SV_HEAD_(ptrtype) \
     ptrtype	sv_any;		/* pointer to body */	\
     U32		sv_refcnt;	/* how many references to us */	\
     U32		sv_flags	/* what we are */
 
 #if NVSIZE <= IVSIZE
-#  define _NV_BODYLESS_UNION NV svu_nv;
+#  define NV_BODYLESS_UNION_ NV svu_nv;
 #else
-#  define _NV_BODYLESS_UNION
+#  define NV_BODYLESS_UNION_
 #endif
 
-#define _SV_HEAD_UNION \
+#define SV_HEAD_UNION_ \
     union {				\
         char*   svu_pv;		/* pointer to malloced string */	\
         IV      svu_iv;			\
         UV      svu_uv;			\
-        _NV_BODYLESS_UNION		\
+        NV_BODYLESS_UNION_		\
         SV*     svu_rv;		/* pointer to another SV */		\
         SV**    svu_array;		\
         HE**	svu_hash;		\
         GP*	svu_gp;			\
         PerlIO *svu_fp;			\
     }	sv_u				\
-    _SV_HEAD_DEBUG
+    SV_HEAD_DEBUG_
 
 #ifdef DEBUG_LEAKING_SCALARS
-#define _SV_HEAD_DEBUG ;\
+#define SV_HEAD_DEBUG_ ;\
     PERL_BITFIELD32 sv_debug_optype:9;	/* the type of OP that allocated us */ \
     PERL_BITFIELD32 sv_debug_inpad:1;	/* was allocated in a pad for an OP */ \
     PERL_BITFIELD32 sv_debug_line:16;	/* the line where we were allocated */ \
@@ -239,56 +239,56 @@ typedef struct hek HEK;
     char *	    sv_debug_file;	/* the file where we were allocated */ \
     SV *	    sv_debug_parent	/* what we were cloned from (ithreads)*/
 #else
-#define _SV_HEAD_DEBUG
+#define SV_HEAD_DEBUG_
 #endif
 
 struct STRUCT_SV {		/* struct sv { */
-    _SV_HEAD(void*);
-    _SV_HEAD_UNION;
+    SV_HEAD_(void*);
+    SV_HEAD_UNION_;
 };
 
 struct gv {
-    _SV_HEAD(XPVGV*);		/* pointer to xpvgv body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XPVGV*);		/* pointer to xpvgv body */
+    SV_HEAD_UNION_;
 };
 
 struct cv {
-    _SV_HEAD(XPVCV*);		/* pointer to xpvcv body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XPVCV*);		/* pointer to xpvcv body */
+    SV_HEAD_UNION_;
 };
 
 struct av {
-    _SV_HEAD(XPVAV*);		/* pointer to xpvav body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XPVAV*);		/* pointer to xpvav body */
+    SV_HEAD_UNION_;
 };
 
 struct hv {
-    _SV_HEAD(XPVHV*);		/* pointer to xpvhv body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XPVHV*);		/* pointer to xpvhv body */
+    SV_HEAD_UNION_;
 };
 
 struct io {
-    _SV_HEAD(XPVIO*);		/* pointer to xpvio body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XPVIO*);		/* pointer to xpvio body */
+    SV_HEAD_UNION_;
 };
 
 struct p5rx {
-    _SV_HEAD(struct regexp*);	/* pointer to regexp body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(struct regexp*);	/* pointer to regexp body */
+    SV_HEAD_UNION_;
 };
 
 struct invlist {
-    _SV_HEAD(XINVLIST*);       /* pointer to xpvinvlist body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XINVLIST*);       /* pointer to xpvinvlist body */
+    SV_HEAD_UNION_;
 };
 
 struct object {
-    _SV_HEAD(XPVOBJ*);          /* pointer to xobject body */
-    _SV_HEAD_UNION;
+    SV_HEAD_(XPVOBJ*);          /* pointer to xobject body */
+    SV_HEAD_UNION_;
 };
 
-#undef _SV_HEAD
-#undef _SV_HEAD_UNION		/* ensure no pollution */
+#undef SV_HEAD_
+#undef SV_HEAD_UNION_		/* ensure no pollution */
 
 /*
 =for apidoc_section $SV
@@ -538,9 +538,9 @@ These guys don't need the curly blocks
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
 
-#define _XPV_HEAD							\
+#define XPV_HEAD_							\
     HV*		xmg_stash;	/* class package */			\
-    union _xmgu	xmg_u;							\
+    union xmgu_	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
         STRLEN	xpvlenu_len; 	/* allocated size */			\
@@ -549,14 +549,14 @@ These guys don't need the curly blocks
 
 #define xpv_len	xpv_len_u.xpvlenu_len
 
-union _xnvu {
+union xnvu_ {
     NV	    xnv_nv;		/* numeric value, if any */
     HV *    xgv_stash;
     line_t  xnv_lines;           /* used internally by S_scan_subst() */
     bool    xnv_bm_tail;        /* an SvVALID (BM) SV has an implicit "\n" */
 };
 
-union _xivu {
+union xivu_ {
     IV	    xivu_iv;		/* integer value */
     UV	    xivu_uv;
     HEK *   xivu_namehek;	/* xpvlv, xpvgv: GvNAME */
@@ -564,46 +564,46 @@ union _xivu {
 
 };
 
-union _xmgu {
+union xmgu_ {
     MAGIC*  xmg_magic;		/* linked list of magicalness */
     STRLEN  xmg_hash_index;	/* used while freeing hash entries */
 };
 
 struct xpv {
-    _XPV_HEAD;
+    XPV_HEAD_;
 };
 
 struct xpviv {
-    _XPV_HEAD;
-    union _xivu xiv_u;
+    XPV_HEAD_;
+    union xivu_ xiv_u;
 };
 
 #define xiv_iv xiv_u.xivu_iv
 
 struct xpvuv {
-    _XPV_HEAD;
-    union _xivu xuv_u;
+    XPV_HEAD_;
+    union xivu_ xuv_u;
 };
 
 #define xuv_uv xuv_u.xivu_uv
 
 struct xpvnv {
-    _XPV_HEAD;
-    union _xivu xiv_u;
-    union _xnvu xnv_u;
+    XPV_HEAD_;
+    union xivu_ xiv_u;
+    union xnvu_ xnv_u;
 };
 
 /* This structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
-    _XPV_HEAD;
-    union _xivu xiv_u;
-    union _xnvu xnv_u;
+    XPV_HEAD_;
+    union xivu_ xiv_u;
+    union xnvu_ xnv_u;
 };
 
 struct xpvlv {
-    _XPV_HEAD;
-    union _xivu xiv_u;
-    union _xnvu xnv_u;
+    XPV_HEAD_;
+    union xivu_ xiv_u;
+    union xnvu_ xnv_u;
     union {
         STRLEN	xlvu_targoff;
         SSize_t xlvu_stargoff;
@@ -619,7 +619,7 @@ struct xpvlv {
 #define xlv_targoff xlv_targoff_u.xlvu_targoff
 
 struct xpvinvlist {
-    _XPV_HEAD;
+    XPV_HEAD_;
     IV          prev_index;     /* caches result of previous invlist_search() */
     STRLEN	iterator;       /* Stores where we are in iterating */
     bool	is_offset;	/* The data structure for all inversion lists
@@ -633,14 +633,14 @@ struct xpvinvlist {
 /* This structure works in 2 ways - regular scalar, or GV with GP */
 
 struct xpvgv {
-    _XPV_HEAD;
-    union _xivu xiv_u;
-    union _xnvu xnv_u;
+    XPV_HEAD_;
+    union xivu_ xiv_u;
+    union xnvu_ xnv_u;
 };
 
 typedef U32 cv_flags_t;
 
-#define _XPVCV_COMMON								\
+#define XPVCV_COMMON_								\
     HV *	xcv_stash;							\
     union {									\
         OP *	xcv_start;							\
@@ -669,14 +669,14 @@ typedef U32 cv_flags_t;
 /* This structure must match XPVCV in cv.h */
 
 struct xpvfm {
-    _XPV_HEAD;
-    _XPVCV_COMMON;
+    XPV_HEAD_;
+    XPVCV_COMMON_;
 };
 
 
 struct xpvio {
-    _XPV_HEAD;
-    union _xivu xiv_u;
+    XPV_HEAD_;
+    union xivu_ xiv_u;
     /* ifp and ofp are normally the same, but sockets need separate streams */
     PerlIO *	xio_ofp;
     /* Cray addresses everything by word boundaries (64 bits) and
@@ -720,7 +720,7 @@ struct xpvio {
 
 struct xobject {
     HV*         xmg_stash;
-    union _xmgu xmg_u;
+    union xmgu_ xmg_u;
     SSize_t     xobject_maxfield;
     SSize_t     xobject_iter_sv_at; /* this is only used by Perl_sv_clear() */
     SV**        xobject_fields;
@@ -1321,25 +1321,25 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
-                            assert(SvTYPE(_svtail) != SVt_PVAV);	\
-                            assert(SvTYPE(_svtail) != SVt_PVHV);	\
-                            assert(!(SvFLAGS(_svtail) & (SVf_NOK|SVp_NOK))); \
-                            assert(SvVALID(_svtail));                        \
-                            ((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail;     \
+#  define SvTAIL(sv)	({ const SV *const svtail_ = (const SV *)(sv);	\
+                            assert(SvTYPE(svtail_) != SVt_PVAV);	\
+                            assert(SvTYPE(svtail_) != SVt_PVHV);	\
+                            assert(!(SvFLAGS(svtail_) & (SVf_NOK|SVp_NOK))); \
+                            assert(SvVALID(svtail_));                        \
+                            ((XPVNV*)SvANY(svtail_))->xnv_u.xnv_bm_tail;     \
                         })
 #else
-#  define SvTAIL(_svtail)  (((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail)
+#  define SvTAIL(svtail_)  (((XPVNV*)SvANY(svtail_))->xnv_u.xnv_bm_tail)
 #endif
 
 /* Does the SV have a Boyer-Moore table attached as magic?
  * 'VALID' is a poor name, but is kept for historical reasons.  */
-#define SvVALID(_svvalid) (                                  \
-               SvPOKp(_svvalid)                              \
-            && SvSMAGICAL(_svvalid)                          \
-            && SvMAGIC(_svvalid)                             \
-            && (SvMAGIC(_svvalid)->mg_type == PERL_MAGIC_bm  \
-                || mg_find(_svvalid, PERL_MAGIC_bm))         \
+#define SvVALID(svvalid_) (                                  \
+               SvPOKp(svvalid_)                              \
+            && SvSMAGICAL(svvalid_)                          \
+            && SvMAGIC(svvalid_)                             \
+            && (SvMAGIC(svvalid_)->mg_type == PERL_MAGIC_bm  \
+                || mg_find(svvalid_, PERL_MAGIC_bm))         \
         )
 
 #define SvRVx(sv) SvRV(sv)
@@ -1375,75 +1375,75 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-        (*({ SV *const _svpvx = MUTABLE_SV(sv);				\
-            assert(PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svpvx));				\
-            assert(!(SvTYPE(_svpvx) == SVt_PVIO				\
-                     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
-            &((_svpvx)->sv_u.svu_pv);					\
+        (*({ SV *const svpvx_ = MUTABLE_SV(sv);				\
+            assert(PL_valid_types_PVX[SvTYPE(svpvx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svpvx_));				\
+            assert(!(SvTYPE(svpvx_) == SVt_PVIO				\
+                     && !(IoFLAGS(svpvx_) & IOf_FAKE_DIRP)));		\
+            &((svpvx_)->sv_u.svu_pv);					\
          }))
 #   ifdef PERL_CORE
 #    define SvCUR(sv)							\
-        ({ const SV *const _svcur = (const SV *)(sv);			\
-            assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svcur));				\
-            assert(!(SvTYPE(_svcur) == SVt_PVIO				\
-                     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-            (((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+        ({ const SV *const svcur_ = (const SV *)(sv);			\
+            assert(PL_valid_types_PVX[SvTYPE(svcur_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svcur_));				\
+            assert(!(SvTYPE(svcur_) == SVt_PVIO				\
+                     && !(IoFLAGS(svcur_) & IOf_FAKE_DIRP)));		\
+            (((XPV*) MUTABLE_PTR(SvANY(svcur_)))->xpv_cur);		\
          })
 #   else
 #    define SvCUR(sv)							\
-        (*({ const SV *const _svcur = (const SV *)(sv);			\
-            assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svcur));				\
-            assert(!(SvTYPE(_svcur) == SVt_PVIO				\
-                     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-            &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+        (*({ const SV *const svcur_ = (const SV *)(sv);			\
+            assert(PL_valid_types_PVX[SvTYPE(svcur_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svcur_));				\
+            assert(!(SvTYPE(svcur_) == SVt_PVIO				\
+                     && !(IoFLAGS(svcur_) & IOf_FAKE_DIRP)));		\
+            &(((XPV*) MUTABLE_PTR(SvANY(svcur_)))->xpv_cur);		\
          }))
 #   endif
 #    define SvIVX(sv)							\
-        (*({ const SV *const _svivx = (const SV *)(sv);			\
-            assert(PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svivx));				\
-            &(((XPVIV*) MUTABLE_PTR(SvANY(_svivx)))->xiv_iv);		\
+        (*({ const SV *const svivx_ = (const SV *)(sv);			\
+            assert(PL_valid_types_IVX[SvTYPE(svivx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svivx_));				\
+            &(((XPVIV*) MUTABLE_PTR(SvANY(svivx_)))->xiv_iv);		\
          }))
 #    define SvUVX(sv)							\
-        (*({ const SV *const _svuvx = (const SV *)(sv);			\
-            assert(PL_valid_types_IVX[SvTYPE(_svuvx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svuvx));				\
-            &(((XPVUV*) MUTABLE_PTR(SvANY(_svuvx)))->xuv_uv);		\
+        (*({ const SV *const svuvx_ = (const SV *)(sv);			\
+            assert(PL_valid_types_IVX[SvTYPE(svuvx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svuvx_));				\
+            &(((XPVUV*) MUTABLE_PTR(SvANY(svuvx_)))->xuv_uv);		\
          }))
 #    define SvNVX(sv)							\
-        (*({ const SV *const _svnvx = (const SV *)(sv);			\
-            assert(PL_valid_types_NVX[SvTYPE(_svnvx) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svnvx));				\
-            &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
+        (*({ const SV *const svnvx_ = (const SV *)(sv);			\
+            assert(PL_valid_types_NVX[SvTYPE(svnvx_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svnvx_));				\
+            &(((XPVNV*) MUTABLE_PTR(SvANY(svnvx_)))->xnv_u.xnv_nv);	\
          }))
 #    define SvRV(sv)							\
-        (*({ SV *const _svrv = MUTABLE_SV(sv);				\
-            assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svrv));				\
-            assert(!(SvTYPE(_svrv) == SVt_PVIO				\
-                     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
-            &((_svrv)->sv_u.svu_rv);					\
+        (*({ SV *const svrv_ = MUTABLE_SV(sv);				\
+            assert(PL_valid_types_RV[SvTYPE(svrv_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svrv_));				\
+            assert(!(SvTYPE(svrv_) == SVt_PVIO				\
+                     && !(IoFLAGS(svrv_) & IOf_FAKE_DIRP)));		\
+            &((svrv_)->sv_u.svu_rv);					\
          }))
 #    define SvRV_const(sv)						\
-        ({ const SV *const _svrv = (const SV *)(sv);			\
-            assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
-            assert(!isGV_with_GP(_svrv));				\
-            assert(!(SvTYPE(_svrv) == SVt_PVIO				\
-                     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
-            (_svrv)->sv_u.svu_rv;					\
+        ({ const SV *const svrv_ = (const SV *)(sv);			\
+            assert(PL_valid_types_RV[SvTYPE(svrv_) & SVt_MASK]);	\
+            assert(!isGV_with_GP(svrv_));				\
+            assert(!(SvTYPE(svrv_) == SVt_PVIO				\
+                     && !(IoFLAGS(svrv_) & IOf_FAKE_DIRP)));		\
+            (svrv_)->sv_u.svu_rv;					\
          })
 #    define SvMAGIC(sv)							\
-        (*({ const SV *const _svmagic = (const SV *)(sv);		\
-            assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
-            &(((XPVMG*) MUTABLE_PTR(SvANY(_svmagic)))->xmg_u.xmg_magic); \
+        (*({ const SV *const svmagic_ = (const SV *)(sv);		\
+            assert(SvTYPE(svmagic_) >= SVt_PVMG);			\
+            &(((XPVMG*) MUTABLE_PTR(SvANY(svmagic_)))->xmg_u.xmg_magic); \
           }))
 #    define SvSTASH(sv)							\
-        (*({ const SV *const _svstash = (const SV *)(sv);		\
-            assert(SvTYPE(_svstash) >= SVt_PVMG);			\
-            &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
+        (*({ const SV *const svstash_ = (const SV *)(sv);		\
+            assert(SvTYPE(svstash_) >= SVt_PVMG);			\
+            &(((XPVMG*) MUTABLE_PTR(SvANY(svstash_)))->xmg_stash);	\
           }))
 #  else     /* Below is not DEBUGGING or can't use brace groups */
 #    define SvPVX(sv) ((sv)->sv_u.svu_pv)
@@ -1596,16 +1596,16 @@ L</C<SV_CHECK_THINKFIRST_COW_DROP>> before calling this.
  * is no smaller than the expected minimim allocation and that the given
  * size is rounded up to the closest PTRSIZE boundary. Depending on
  * per-malloc implementation, it might return the exact size that would
- * be allocated for the specified _lEnGtH. If the return value from
+ * be allocated for the specified lEnGtH_. If the return value from
  * `expected_size` is not smaller than the current buffer allocation,
  * there is no point in calling SvPV_renew.
 */
 
 #define SvPV_shrink_to_cur(sv) STMT_START {                       \
-                   const STRLEN _lEnGtH = SvCUR(sv) + 2;          \
-                   const STRLEN _eXpEcT = expected_size(_lEnGtH); \
-                   if (SvLEN(sv) > _eXpEcT)                       \
-                       SvPV_renew(sv, _eXpEcT);                   \
+                   const STRLEN lEnGtH_ = SvCUR(sv) + 2;          \
+                   const STRLEN eXpEcT_ = expected_size(lEnGtH_); \
+                   if (SvLEN(sv) > eXpEcT_)                       \
+                       SvPV_renew(sv, eXpEcT_);                   \
                  } STMT_END
 
 /*
@@ -1652,11 +1652,11 @@ only be used as part of a larger operation
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define BmUSEFUL(sv)							\
-        (*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
-            assert(SvTYPE(_bmuseful) >= SVt_PVIV);			\
-            assert(SvVALID(_bmuseful));					\
-            assert(!SvIOK(_bmuseful));					\
-            &(((XPVIV*) SvANY(_bmuseful))->xiv_u.xivu_iv);              \
+        (*({ SV *const bmuseful_ = MUTABLE_SV(sv);			\
+            assert(SvTYPE(bmuseful_) >= SVt_PVIV);			\
+            assert(SvVALID(bmuseful_));					\
+            assert(!SvIOK(bmuseful_));					\
+            &(((XPVIV*) SvANY(bmuseful_))->xiv_u.xivu_iv);              \
          }))
 #else
 #  define BmUSEFUL(sv)          ((XPVIV*) SvANY(sv))->xiv_u.xivu_iv
@@ -2676,19 +2676,19 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #  define SvOOK_offset(sv, offset) STMT_START {				\
         STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
         if (SvOOK(sv)) {						\
-            const U8 *_crash = (U8*)SvPVX_const(sv);			\
-            (offset) = *--_crash;					\
+            const U8 *crash_ = (U8*)SvPVX_const(sv);			\
+            (offset) = *--crash_;					\
             if (!(offset)) {						\
-                _crash -= sizeof(STRLEN);				\
-                Copy(_crash, (U8 *)&(offset), sizeof(STRLEN), U8);	\
+                crash_ -= sizeof(STRLEN);				\
+                Copy(crash_, (U8 *)&(offset), sizeof(STRLEN), U8);	\
             }								\
             {								\
                 /* Validate the preceding buffer's sentinels to		\
                    verify that no-one is using it.  */			\
-                const U8 *const _bonk = (U8*)SvPVX_const(sv) - (offset);\
-                while (_crash > _bonk) {				\
-                    --_crash;						\
-                    assert (*_crash == (U8)PTR2UV(_crash));		\
+                const U8 *const bonk_ = (U8*)SvPVX_const(sv) - (offset);\
+                while (crash_ > bonk_) {				\
+                    --crash_;						\
+                    assert (*crash_ == (U8)PTR2UV(crash_));		\
                 }							\
             }								\
         } else {							\

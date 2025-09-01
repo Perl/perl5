@@ -2140,7 +2140,7 @@ END_EXTERN_C
                                              : above_latin1(c))
 #define generic_invlist_uvchr_(classnum, c) ((c) < 256                      \
                                              ? generic_isCC_(c, classnum)   \
-                                             : _is_uni_FOO(classnum, c))
+                                             : is_uni_FOO_(classnum, c))
 #define isALPHA_uvchr(c)      generic_invlist_uvchr_(CC_ALPHA_, c)
 #define isALPHANUMERIC_uvchr(c) generic_invlist_uvchr_(CC_ALPHANUMERIC_, c)
 #define isASCII_uvchr(c)      isASCII(c)
@@ -2149,9 +2149,9 @@ END_EXTERN_C
 #define isDIGIT_uvchr(c)      generic_invlist_uvchr_(CC_DIGIT_, c)
 #define isGRAPH_uvchr(c)      generic_invlist_uvchr_(CC_GRAPH_, c)
 #define isIDCONT_uvchr(c)                                                   \
-                    generic_uvchr_(CC_WORDCHAR_, _is_uni_perl_idcont, c)
+                    generic_uvchr_(CC_WORDCHAR_, is_uni_perl_idcont_, c)
 #define isIDFIRST_uvchr(c)                                                  \
-                    generic_uvchr_(CC_IDFIRST_, _is_uni_perl_idstart, c)
+                    generic_uvchr_(CC_IDFIRST_, is_uni_perl_idstart_, c)
 #define isLOWER_uvchr(c)      generic_invlist_uvchr_(CC_LOWER_, c)
 #define isPRINT_uvchr(c)      generic_invlist_uvchr_(CC_PRINT_, c)
 
@@ -2202,7 +2202,7 @@ END_EXTERN_C
 #define generic_LC_uvchr_(latin1, above_latin1, c)                            \
                                     (c < 256 ? latin1(c) : above_latin1(c))
 #define generic_LC_invlist_uvchr_(latin1, classnum, c)                        \
-                            (c < 256 ? latin1(c) : _is_uni_FOO(classnum, c))
+                            (c < 256 ? latin1(c) : is_uni_FOO_(classnum, c))
 
 #define isALPHA_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHA_LC, CC_ALPHA_, c)
 #define isALPHANUMERIC_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHANUMERIC_LC, \
@@ -2214,9 +2214,9 @@ END_EXTERN_C
 #define isDIGIT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isDIGIT_LC, CC_DIGIT_, c)
 #define isGRAPH_LC_uvchr(c)  generic_LC_invlist_uvchr_(isGRAPH_LC, CC_GRAPH_, c)
 #define isIDCONT_LC_uvchr(c) generic_LC_uvchr_(isIDCONT_LC,                   \
-                                                  _is_uni_perl_idcont, c)
+                                                  is_uni_perl_idcont_, c)
 #define isIDFIRST_LC_uvchr(c) generic_LC_uvchr_(isIDFIRST_LC,                 \
-                                                  _is_uni_perl_idstart, c)
+                                                  is_uni_perl_idstart_, c)
 #define isLOWER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isLOWER_LC, CC_LOWER_, c)
 #define isPRINT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isPRINT_LC, CC_PRINT_, c)
 #define isPSXSPC_LC_uvchr(c)  isSPACE_LC_uvchr(c)
@@ -2249,13 +2249,13 @@ END_EXTERN_C
  * bunch of code in toke.c assumes that this is true, so the assertion allows
  * for that */
 #ifdef PERL_IN_TOKE_C
-#  define _utf8_safe_assert(p,e) ((e) > (p) || ((e) == (p) && *(p) == '\0'))
+#  define utf8_safe_assert_(p,e) ((e) > (p) || ((e) == (p) && *(p) == '\0'))
 #else
-#  define _utf8_safe_assert(p,e) ((e) > (p))
+#  define utf8_safe_assert_(p,e) ((e) > (p))
 #endif
 
 #define generic_utf8_safe_(classnum, p, e, above_latin1)                    \
-    ((! _utf8_safe_assert(p, e))                                            \
+    ((! utf8_safe_assert_(p, e))                                            \
       ? (force_out_malformed_utf8_message_((U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0)\
       : (UTF8_IS_INVARIANT(*(p)))                                           \
           ? generic_isCC_(*(p), classnum)                                   \
@@ -2279,14 +2279,14 @@ END_EXTERN_C
 /* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
 #define generic_invlist_utf8_safe_(classnum, p, e)                          \
-            generic_utf8_safe_(classnum, p, e, _is_utf8_FOO(classnum, p, e))
+            generic_utf8_safe_(classnum, p, e, is_utf8_FOO_(classnum, p, e))
 
 /* Like the above, but should be used only when it is known that there are no
  * characters in the upper-Latin1 range (128-255 on ASCII platforms) which the
  * class is TRUE for.  Hence it can skip the tests for this range.
  * 'above_latin1' should include its arguments */
 #define generic_utf8_safe_no_upper_latin1_(classnum, p, e, above_latin1)    \
-         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (__ASSERT_(utf8_safe_assert_(p, e))                                \
          (isASCII(*(p)))                                                    \
           ? generic_isCC_(*(p), classnum)                                   \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p)))                             \
@@ -2319,7 +2319,7 @@ END_EXTERN_C
 #define isASCII_utf8_safe(p, e)                                             \
     /* Because ASCII is invariant under utf8, the non-utf8 macro            \
     * works */                                                              \
-    (__ASSERT_(_utf8_safe_assert(p, e)) isASCII(*(p)))
+    (assert_(utf8_safe_assert_(p, e)) isASCII(*(p)))
 #define isBLANK_utf8_safe(p, e)                                             \
         generic_non_invlist_utf8_safe_(CC_BLANK_, is_HORIZWS_high, p, e)
 
@@ -2327,17 +2327,17 @@ END_EXTERN_C
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
      * more efficient macro instead of the more general one */
 #   define isCNTRL_utf8_safe(p, e)                                          \
-                    (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p)))
+                    (assert_(utf8_safe_assert_(p, e)) isCNTRL_L1(*(p)))
 #else
 #   define isCNTRL_utf8_safe(p, e)  generic_utf8_safe_(CC_CNTRL_, p, e, 0)
 #endif
 
 #define isDIGIT_utf8_safe(p, e)                                             \
             generic_utf8_safe_no_upper_latin1_(CC_DIGIT_, p, e,             \
-                                            _is_utf8_FOO(CC_DIGIT_, p, e))
+                                            is_utf8_FOO_(CC_DIGIT_, p, e))
 #define isGRAPH_utf8_safe(p, e)    generic_invlist_utf8_safe_(CC_GRAPH_, p, e)
 #define isIDCONT_utf8_safe(p, e)   generic_func_utf8_safe_(CC_WORDCHAR_,    \
-                                                 _is_utf8_perl_idcont, p, e)
+                                                 is_utf8_perl_idcont_, p, e)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -2347,7 +2347,7 @@ END_EXTERN_C
  * modern Unicode definition */
 #define isIDFIRST_utf8_safe(p, e)                                           \
     generic_func_utf8_safe_(CC_IDFIRST_,                                    \
-                            _is_utf8_perl_idstart, (U8 *) (p), (U8 *) (e))
+                            is_utf8_perl_idstart_, (U8 *) (p), (U8 *) (e))
 
 #define isLOWER_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_LOWER_, p, e)
 #define isPRINT_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_PRINT_, p, e)
@@ -2373,15 +2373,15 @@ END_EXTERN_C
 #define toUPPER_utf8(p,e,s,l)	toUPPER_utf8_safe(p,e,s,l)
 
 /* For internal core use only, subject to change */
-#define _toFOLD_utf8_flags(p,e,s,l,f)  _to_utf8_fold_flags (p,e,s,l,f)
-#define _toLOWER_utf8_flags(p,e,s,l,f) _to_utf8_lower_flags(p,e,s,l,f)
-#define _toTITLE_utf8_flags(p,e,s,l,f) _to_utf8_title_flags(p,e,s,l,f)
-#define _toUPPER_utf8_flags(p,e,s,l,f) _to_utf8_upper_flags(p,e,s,l,f)
+#define toFOLD_utf8_flags_(p,e,s,l,f)  to_utf8_fold_flags_(p,e,s,l,f)
+#define toLOWER_utf8_flags_(p,e,s,l,f) to_utf8_lower_flags_(p,e,s,l,f)
+#define toTITLE_utf8_flags_(p,e,s,l,f) to_utf8_title_flags_(p,e,s,l,f)
+#define toUPPER_utf8_flags_(p,e,s,l,f) to_utf8_upper_flags_(p,e,s,l,f)
 
-#define toFOLD_utf8_safe(p,e,s,l)   _toFOLD_utf8_flags(p,e,s,l, FOLD_FLAGS_FULL)
-#define toLOWER_utf8_safe(p,e,s,l)  _toLOWER_utf8_flags(p,e,s,l, 0)
-#define toTITLE_utf8_safe(p,e,s,l)  _toTITLE_utf8_flags(p,e,s,l, 0)
-#define toUPPER_utf8_safe(p,e,s,l)  _toUPPER_utf8_flags(p,e,s,l, 0)
+#define toFOLD_utf8_safe(p,e,s,l)   toFOLD_utf8_flags_(p,e,s,l, FOLD_FLAGS_FULL)
+#define toLOWER_utf8_safe(p,e,s,l)  toLOWER_utf8_flags_(p,e,s,l, 0)
+#define toTITLE_utf8_safe(p,e,s,l)  toTITLE_utf8_flags_(p,e,s,l, 0)
+#define toUPPER_utf8_safe(p,e,s,l)  toUPPER_utf8_flags_(p,e,s,l, 0)
 
 #define isALPHA_LC_utf8(p, e)         isALPHA_LC_utf8_safe(p, e)
 #define isALPHANUMERIC_LC_utf8(p, e)  isALPHANUMERIC_LC_utf8_safe(p, e)
@@ -2406,7 +2406,7 @@ END_EXTERN_C
  * point in 'p' is within the 0-255 range, it uses locale rules from the
  * passed-in 'macro' parameter */
 #define generic_LC_utf8_safe_(macro, p, e, above_latin1)                    \
-         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (assert_(utf8_safe_assert_(p, e))                                \
          (UTF8_IS_INVARIANT(*(p)))                                          \
           ? macro(*(p))                                                     \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
@@ -2418,7 +2418,7 @@ END_EXTERN_C
 
 #define generic_LC_invlist_utf8_safe_(macro, classnum, p, e)                  \
             generic_LC_utf8_safe_(macro, p, e,                              \
-                                            _is_utf8_FOO(classnum, p, e))
+                                            is_utf8_FOO_(classnum, p, e))
 
 #define generic_LC_func_utf8_safe_(macro, above_latin1, p, e)               \
             generic_LC_utf8_safe_(macro, p, e, above_latin1(p, e))
@@ -2436,7 +2436,7 @@ END_EXTERN_C
 #define isALPHA_LC_utf8_safe(p, e)                                          \
             generic_LC_invlist_utf8_safe_(isALPHA_LC, CC_ALPHA_, p, e)
 #define isASCII_LC_utf8_safe(p, e)                                          \
-                    (__ASSERT_(_utf8_safe_assert(p, e)) isASCII_LC(*(p)))
+                    (assert_(utf8_safe_assert_(p, e)) isASCII_LC(*(p)))
 #define isBLANK_LC_utf8_safe(p, e)                                          \
         generic_LC_non_invlist_utf8_safe_(isBLANK_LC, is_HORIZWS_high, p, e)
 #define isCNTRL_LC_utf8_safe(p, e)                                          \
@@ -2447,10 +2447,10 @@ END_EXTERN_C
             generic_LC_invlist_utf8_safe_(isGRAPH_LC, CC_GRAPH_, p, e)
 #define isIDCONT_LC_utf8_safe(p, e)                                         \
             generic_LC_func_utf8_safe_(isIDCONT_LC,                         \
-                                                _is_utf8_perl_idcont, p, e)
+                                                is_utf8_perl_idcont_, p, e)
 #define isIDFIRST_LC_utf8_safe(p, e)                                        \
             generic_LC_func_utf8_safe_(isIDFIRST_LC,                        \
-                                               _is_utf8_perl_idstart, p, e)
+                                               is_utf8_perl_idstart_, p, e)
 #define isLOWER_LC_utf8_safe(p, e)                                          \
             generic_LC_invlist_utf8_safe_(isLOWER_LC, CC_LOWER_, p, e)
 #define isPRINT_LC_utf8_safe(p, e)                                          \
@@ -2693,7 +2693,7 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 #define MEM_SIZE_MAX ((MEM_SIZE)-1)
 
-#define _PERL_STRLEN_ROUNDUP_UNCHECKED(n) (((n) - 1 + PERL_STRLEN_ROUNDUP_QUANTUM) & ~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM - 1))
+#define PERL_STRLEN_ROUNDUP_UNCHECKED_(n) (((n) - 1 + PERL_STRLEN_ROUNDUP_QUANTUM) & ~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM - 1))
 
 #ifdef PERL_MALLOC_WRAP
 
@@ -2708,13 +2708,13 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
  */
 
 
-#  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
+#  define MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) \
     (  sizeof(MEM_SIZE) < sizeof(n) \
     || sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
 
 /* This is written in a slightly odd way to avoid various spurious
  * compiler warnings. We *want* to write the expression as
- *    _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) && (n > C)
+ *    MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) && (n > C)
  * (for some compile-time constant C), but even when the LHS
  * constant-folds to false at compile-time, g++ insists on emitting
  * warnings about the RHS (e.g. "comparison is always false"), so instead
@@ -2729,26 +2729,26 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
  * for X and hope that nothing else whines.
  */
 
-#  define _MEM_WRAP_WILL_WRAP(n,t) \
-      ((_MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) ? (MEM_SIZE)(n) : \
+#  define MEM_WRAP_WILL_WRAP_(n,t) \
+      ((MEM_WRAP_NEEDS_RUNTIME_CHECK_(n,t) ? (MEM_SIZE)(n) : \
             MEM_SIZE_MAX/sizeof(t)) > MEM_SIZE_MAX/sizeof(t))
 
 #  define MEM_WRAP_CHECK(n,t) \
-        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        (void)(UNLIKELY(MEM_WRAP_WILL_WRAP_(n,t)) \
         && (croak_memory_wrap(),0))
 
 #  define MEM_WRAP_CHECK_1(n,t,a) \
-        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        (void)(UNLIKELY(MEM_WRAP_WILL_WRAP_(n,t)) \
         && (Perl_croak_nocontext("%s",(a)),0))
 
 /* "a" arg must be a string literal */
 #  define MEM_WRAP_CHECK_s(n,t,a) \
-        (   (void) (UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))          \
+        (   (void) (UNLIKELY(MEM_WRAP_WILL_WRAP_(n,t))          \
          && (Perl_croak_nocontext(ASSERT_IS_LITERAL(a)), 0)))
 
 #  define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
-#  define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
+#  define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), PERL_STRLEN_ROUNDUP_UNCHECKED_(n))
 #else
 
 #  define MEM_WRAP_CHECK(n,t)
@@ -2756,7 +2756,7 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 #  define MEM_WRAP_CHECK_s(n,t,a)
 #  define MEM_WRAP_CHECK_(n,t)
 
-#  define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
+#  define PERL_STRLEN_ROUNDUP(n) PERL_STRLEN_ROUNDUP_UNCHECKED_(n)
 
 #endif
 
