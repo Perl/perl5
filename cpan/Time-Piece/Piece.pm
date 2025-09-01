@@ -19,18 +19,20 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.36';
+our $VERSION = '1.3701';
 
 XSLoader::load( 'Time::Piece', $VERSION );
 
 my $DATE_SEP = '-';
 my $TIME_SEP = ':';
+my $DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z';
 my @MON_LIST = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 my @FULLMON_LIST = qw(January February March April May June July
                       August September October November December);
 my @DAY_LIST = qw(Sun Mon Tue Wed Thu Fri Sat);
 my @FULLDAY_LIST = qw(Sunday Monday Tuesday Wednesday Thursday Friday Saturday);
 my $IS_WIN32 = ($^O =~ /Win32/);
+my $IS_LINUX = ($^O =~ /linux/i);
 
 my $LOCALE;
 
@@ -296,7 +298,12 @@ sub yday {
 
 sub isdst {
     my $time = shift;
-    $time->[c_isdst];
+    return 0 unless $time->[c_islocal];
+    # Calculate dst based on current TZ
+    if ( $time->[c_isdst] == -1 ) {
+        $time->[c_isdst] = ( CORE::localtime( $time->epoch ) )[-1];
+    }
+    return $time->[c_isdst];
 }
 
 *daylight_savings = \&isdst;
@@ -484,8 +491,9 @@ my $strftime_trans_map = {
         return $format;
     },
     'e' => sub {
-        my ( $format ) = @_;
-        $format =~ s/%e/%d/ if $IS_WIN32;
+        my ( $format, $time ) = @_;
+        my $day = sprintf( "%2d", $time->[c_mday] );
+        $format =~ s/%e/$day/ if $IS_WIN32;
         return $format;
     },
     'D' => sub {
@@ -496,6 +504,26 @@ my $strftime_trans_map = {
     'F' => sub {
         my ( $format ) = @_;
         $format =~ s/%F/%Y-%m-%d/;
+        return $format;
+    },
+    'k' => sub {
+        my ( $format, $time ) = @_;
+        my $hr = sprintf( "%2d", $time->[c_hour] );
+        $format =~ s/%k/$hr/;
+        return $format;
+    },
+    'l' => sub {
+        my ( $format, $time ) = @_;
+        my $hr = $time->[c_hour] > 12 ? $time->[c_hour] - 12 : $time->[c_hour];
+        $hr = 12 unless $hr;
+        $hr = sprintf( "%2d", $hr );
+        $format =~ s/%l/$hr/;
+        return $format;
+    },
+    'P' => sub {
+        my ( $format ) = @_;
+        # %P seems to be linux only
+        $format =~ s/%P/%p/ unless $IS_LINUX;
         return $format;
     },
     'r' => sub {
@@ -566,7 +594,7 @@ my $strftime_trans_map = {
 
 sub strftime {
     my $time = shift;
-    my $format = @_ ? shift(@_) : '%a, %d %b %Y %H:%M:%S %Z';
+    my $format = @_ ? shift(@_) : $DATE_FORMAT;
     $format = _translate_format($format, $strftime_trans_map, $time);
 
     return $format unless $format =~ /%/; #if translate removes everything
@@ -575,15 +603,74 @@ sub strftime {
 }
 
 sub strptime {
-    my $time = shift;
+    my $time   = shift;
     my $string = shift;
-    my $format = @_ ? shift(@_) : "%a, %d %b %Y %H:%M:%S %Z";
-    my $islocal = (ref($time) ? $time->[c_islocal] : 0);
-    my $locales = $LOCALE || &Time::Piece::_default_locale();
+    my $format;
+    my $opts;
 
-    my @vals = _strptime($string, $format, $islocal, $locales);
-#    warn(sprintf("got vals: %d-%d-%d %d:%d:%d\n", reverse(@vals[c_sec..c_year])));
-    return scalar $time->_mktime(\@vals, $islocal);
+    if ( @_ >= 2 && blessed( $_[1] ) && $_[1]->isa('Time::Piece') ) {
+        # $string, $format, $time_piece_object
+        $format = shift;
+        $opts   = { defaults => shift };
+    } elsif ( @_ && blessed( $_[0] ) && $_[0]->isa('Time::Piece') ) {
+        # $string, $time_piece_object
+        $opts   = { defaults => shift };
+        $format = $DATE_FORMAT;
+    } elsif ( @_ >= 2 && ref( $_[1] ) eq 'HASH' ) {
+        # $string, $format, {options => ...}
+        $format = shift;
+        $opts   = shift;
+    } elsif ( @_ && ref( $_[0] ) eq 'HASH' ) {
+        # $string, {options => ...}
+        $opts   = shift;
+        $format = @_ ? shift : $DATE_FORMAT;
+    } else {
+        $format = @_ ? shift : $DATE_FORMAT;
+    }
+
+    my $islocal  = ( ref($time) ? $time->[c_islocal] : 0 );
+    my $locales  = $LOCALE || &Time::Piece::_default_locale();
+    my $defaults = [];
+
+    if ($opts) {
+        # Validate and process defaults if provided
+        if ( exists $opts->{defaults} ) {
+            if ( ref( $opts->{defaults} ) eq 'ARRAY' ) {
+                $defaults = $opts->{defaults};
+                unless ( @{ $opts->{defaults} } >= 8 ) {
+                    croak("defaults array must have at least 8 elements!");
+                }
+            } elsif ( ref( $opts->{defaults} ) eq 'HASH' ) {
+
+                ( exists $opts->{defaults}{$_} )
+                  ? push( @{$defaults}, $opts->{defaults}{$_} )
+                  : push( @{$defaults}, undef )
+                  for qw/sec min hour mday mon year wday yday/;
+
+                if ( defined $defaults->[c_year]
+                    && $defaults->[c_year] >= 1000 ) {
+                    $defaults->[c_year] -= 1900;
+                }
+
+            } elsif ( blessed( $opts->{defaults} )
+                && $opts->{defaults}->isa('Time::Piece') ) {
+                # Extract time components from Time::Piece object
+                $defaults = [ @{ $opts->{defaults} }[ c_sec .. c_yday ] ];
+                $islocal  = $opts->{defaults}[c_islocal];
+            } else {
+                croak("defaults must be an array reference, hash reference, or Time::Piece object");
+            }
+        }
+
+        # Check for forced islocal
+        if ( exists $opts->{islocal} && $opts->{islocal} ) {
+            $islocal = 1;
+        }
+    }
+
+    my @vals = _strptime( $string, $format, $islocal, $locales, $defaults );
+
+    return scalar $time->_mktime( \@vals, $islocal );
 }
 
 sub day_list {
@@ -766,7 +853,8 @@ my $_format_cache = {};
 #accordance with the logic from the translation map subroutines
 sub _translate_format {
     my ( $format, $trans_map, $time ) = @_;
-    my $can_cache = ($format !~ /%([sVzZ])/) ? 1 : 0;
+    my $bad_flags = $IS_WIN32 ? qr/%([eklsVzZ])/ : qr/%([klszZ])/;
+    my $can_cache = ($format !~ $bad_flags) ? 1 : 0;
 
     if ( $can_cache && exists $_format_cache->{$format} ){
         return $_format_cache->{$format};
@@ -813,8 +901,14 @@ sub use_locale {
         $locales->{AM} = '';
     }
 
-    $locales->{pm} = lc $locales->{PM};
-    $locales->{am} = lc $locales->{AM};
+    if (   !$locales->{pm}
+        || !$locales->{am}
+        || ( $locales->{pm} eq $locales->{am} ) )
+    {
+        $locales->{pm} = lc $locales->{PM};
+        $locales->{am} = lc $locales->{AM};
+    }
+
     #should probably figure out how to get a
     #region specific format for %c someday
     $locales->{c_fmt} = '';
@@ -979,7 +1073,7 @@ methods.
 
 =head2 Local Locales
 
-Both wdayname (day) and monname (month) allow passing in a list to use
+Both C<wdayname> (day) and C<monname> (month) allow passing in a list to use
 to index the name of the days against. This can be useful if you need
 to implement some form of localisation without actually installing or
 using locales. Note that this is a global override and will affect
@@ -1059,12 +1153,13 @@ Date comparisons are also possible, using the full suite of "<", ">",
 
 =head2 Date Parsing
 
-Time::Piece has a built-in strptime() function (from FreeBSD), allowing
-you incredibly flexible date parsing routines. For example:
+Time::Piece provides flexible date parsing via the built-in strptime() function (from FreeBSD).
+
+=head3 Basic Usage
 
   my $t = Time::Piece->strptime("Sunday 3rd Nov, 1943",
                                 "%A %drd %b, %Y");
-  
+
   print $t->strftime("%a, %d %b %Y");
 
 Outputs:
@@ -1073,8 +1168,72 @@ Outputs:
 
 (see, it's even smart enough to fix my obvious date bug)
 
-For more information see "man strptime", which should be on all unix
-systems.
+=head3 Default Values for Partial Dates
+
+When parsing incomplete date strings, you can provide defaults for missing components:
+
+=head4 Supported Default Types
+
+B<1. Array Reference> - Standard time components (sec, min, hour, mday, mon, year, wday, yday) (see C<perldoc -f localtime>):
+
+  my @defaults = localtime();
+  my $t = Time::Piece->strptime("15 Mar", "%d %b",
+                                { defaults => \@defaults });
+
+B<2. Hash Reference> - Specify only needed components:
+
+  my $t = Time::Piece->strptime("15 Mar", "%d %b",
+                                { defaults => {
+                                    year => 2023,  # Years >= 1000: actual year
+                                    hour => 14,    # Years < 1000: offset from 1900
+                                    min  => 30
+                                } });
+
+Valid keys: C<sec>, C<min>, C<hour>, C<mday>, C<mon>, C<year>, C<wday>, C<yday>, C<isdst>
+
+B<Note:> C<year> in this context doesn't have to be an offset from 1900
+
+B<3. Time::Piece Object> - Copies all components including C<c_islocal>:
+
+  my $base = localtime();
+
+  my $t1 = Time::Piece->strptime("15 Mar", "%d %b",
+                                 { defaults => $base });
+
+  # Shorthand (equivalent)
+  my $t2 = Time::Piece->strptime("15 Mar", "%d %b", $base);
+
+=head4 Format String Defaults
+
+When omitted, format defaults to C<"%a, %d %b %Y %H:%M:%S %Z">:
+
+  # These are equivalent:
+  my $t1 = Time::Piece->strptime($string);
+  my $t2 = Time::Piece->strptime($string, "%a, %d %b %Y %H:%M:%S %Z");
+
+=head3 Timezone Behavior
+
+The returned object's timezone (C<c_islocal>) depends on the calling context:
+
+B<Default: GMT/UTC> (c_islocal = 0)
+
+  Time::Piece->strptime($string, $format)  # Class method returns GMT
+
+B<Local Time> (c_islocal = 1) via:
+
+  # Instance method on localtime object
+  localtime()->strptime($string, $format)
+
+  # Explicit islocal option
+  Time::Piece->strptime($string, $format, { islocal => 1 })
+
+  # Inherited from Time::Piece defaults
+  my $tp_obj = localtime();
+  Time::Piece->strptime($string, $format, $tp_obj)
+
+B<Note:> Parsed values always override defaults. Only missing components use default values.
+
+For more information see "man strptime" on unix systems.
 
 Alternatively look here: L<http://www.unix.com/man-page/FreeBSD/3/strftime/>
 
@@ -1104,22 +1263,6 @@ While:
 Returns
 
     ( 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' )
-
-=head2 YYYY-MM-DDThh:mm:ss
-
-The ISO 8601 standard defines the date format to be YYYY-MM-DD, and
-the time format to be hh:mm:ss (24 hour clock), and if combined, they
-should be concatenated with date first and with a capital 'T' in front
-of the time.
-
-=head2 Week Number
-
-The I<week number> may be an unknown concept to some readers.  The ISO
-8601 standard defines that weeks begin on a Monday and week 1 of the
-year is the week that includes both January 4th and the first Thursday
-of the year.  In other words, if the first Monday of January is the
-2nd, 3rd, or 4th, the preceding days of the January are part of the
-last week of the preceding year.  Week numbers range from 1 to 53.
 
 =head2 Global Overriding
 

@@ -1,7 +1,7 @@
 package Time::Seconds;
 use strict;
 
-our $VERSION = '1.36';
+our $VERSION = '1.3701';
 
 use Exporter 5.57 'import';
 

@@ -3180,6 +3180,7 @@ cpan/Time-Piece/t/07arith.t			Test for Time::Piece
 cpan/Time-Piece/t/08truncate.t			Test file related to Time::Piece
 cpan/Time-Piece/t/09locales.t			Test file related to Time::Piece
 cpan/Time-Piece/t/10overload.t			Test file related to Time::Piece
+cpan/Time-Piece/t/11strptime_defaults.t		Time-Piece
 cpan/Time-Piece/t/99legacy.t			Test file related to Time::Piece
 cpan/Time-Piece/t/lib/Time/Piece/Twin.pm	Module related to Time::Piece
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
