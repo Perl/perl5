@@ -11568,7 +11568,8 @@ S_scan_inputsymbol(pTHX_ char *start)
  * 'len' == 1.  So create a new macro that adds a conditional to skip the libc
  * call. */
 #define memEQ_1(a, b, len)                                                  \
-   ((*(a) == *(b)) && ((LIKELY((len) <= 1) || memEQ((a)+1, (b)+1, (len)-1))))
+   (assert(len >= 1), (*(a) == *(b)) && (   (LIKELY((len) <= 1)             \
+                                         || memEQ((a)+1, (b)+1, (len)-1))))
 
 /* scan_str
    takes:
