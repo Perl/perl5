@@ -11751,9 +11751,11 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     s += delim_byte_len;
     for (;;) {
         /* extend sv if need be */
-        SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
+
+        STRLEN sv_len = SvCUR(sv);
+        char * pv = SvGROW(sv, sv_len + (PL_bufend - s) + 1);
         /* set 'to' to the next character in the sv's string */
-        to = SvPVX(sv)+SvCUR(sv);
+        to = pv + sv_len;
 
         /* read until we run out of string, or we find the closing delimiter */
         while (s < PL_bufend) {
