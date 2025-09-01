@@ -477,26 +477,27 @@ sub main::dumpvar {
     $package .= "::" unless $package =~ /::$/;
     *stab = *{"main::"};
     while ($package =~ /(\w+?::)/g){
-      *stab = $ {stab}{$1};
+        *stab = $ {stab}{$1};
     }
     local $TotalStrings = 0;
     local $Strings = 0;
     local $CompleteTotal = 0;
     while (($key,$val) = each(%stab)) {
-      return if $DB::signal;
-      next if @vars && !grep( matchvar($key, $_), @vars );
-      if ($usageOnly) {
-	globUsage(\$val, $key)
-	  if ($package ne 'dumpvar' or $key ne 'stab')
-	     and ref(\$val) eq 'GLOB';
-      } else {
-       dumpglob(0,$key, $val, 0, $m);
-      }
+        return if $DB::signal;
+        next if @vars && !grep( matchvar($key, $_), @vars );
+        if ($usageOnly) {
+            globUsage(\$val, $key)
+                if ($package ne 'dumpvar' or $key ne 'stab')
+                    and ref(\$val) eq 'GLOB';
+        }
+        else {
+            dumpglob(0,$key, $val, 0, $m);
+        }
     }
     if ($usageOnly) {
-      print "String space: $TotalStrings bytes in $Strings strings.\n";
-      $CompleteTotal += $TotalStrings;
-      print "Grand total = $CompleteTotal bytes (1 level deep) + overhead.\n";
+        print "String space: $TotalStrings bytes in $Strings strings.\n";
+        $CompleteTotal += $TotalStrings;
+        print "Grand total = $CompleteTotal bytes (1 level deep) + overhead.\n";
     }
 }
 
