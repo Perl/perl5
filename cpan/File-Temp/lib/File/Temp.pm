@@ -1,7 +1,7 @@
 package File::Temp; # git description: v0.2310-3-gc7148fe
 # ABSTRACT: return name and handle of a temporary file safely
 
-our $VERSION = '0.2311';
+our $VERSION = '0.2311_01';
 
 #pod =begin :__INTERNALS
 #pod
@@ -1706,8 +1706,8 @@ sub tempdir  {
   # Create the directory
   my $tempdir;
   my $suffixlen = 0;
-  if ($^O eq 'VMS') {           # dir names can end in delimiters
-    $template =~ m/([\.\]:>]+)$/;
+  if ($^O eq 'VMS'
+      && ($template =~ m/([\.\]:>]+)$/)) { # dir specs can end in delimiters
     $suffixlen = length($1);
   }
   if ( ($^O eq 'MacOS') && (substr($template, -1) eq ':') ) {

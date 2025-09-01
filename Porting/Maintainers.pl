@@ -558,6 +558,9 @@ our %Modules = (
             qr[^t/00-report-prereqs],
             qr{^xt},
         ],
+        'CUSTOMIZED' => [
+            qw( lib/File/Temp.pm )
+        ],
     },
 
     'Filter::Simple' => {
