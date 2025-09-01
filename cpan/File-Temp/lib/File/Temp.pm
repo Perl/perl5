@@ -1,7 +1,7 @@
-package File::Temp; # git description: v0.2310-3-gc7148fe
+package File::Temp; # git description: v0.2311-9-gca0cdb7
 # ABSTRACT: return name and handle of a temporary file safely
 
-our $VERSION = '0.2311_01';
+our $VERSION = '0.2312';
 
 #pod =begin :__INTERNALS
 #pod
@@ -658,7 +658,6 @@ sub _force_writable {
 #Args:  directory path to check
 #       Optionally: reference to scalar to contain error message
 # Returns true if the path is safe and false otherwise.
-# Returns undef if can not even run stat() on the path
 
 # This routine based on version written by Tom Christiansen
 
@@ -1707,7 +1706,7 @@ sub tempdir  {
   my $tempdir;
   my $suffixlen = 0;
   if ($^O eq 'VMS'
-      && ($template =~ m/([\.\]:>]+)$/)) { # dir specs can end in delimiters
+      && ($template =~ m/([\.\]:>]+)$/)) {  # dir specs can end in delimiters
     $suffixlen = length($1);
   }
   if ( ($^O eq 'MacOS') && (substr($template, -1) eq ':') ) {
@@ -2596,7 +2595,7 @@ sub unlink1 {
 package ## hide from PAUSE
   File::Temp::Dir;
 
-our $VERSION = '0.2311';
+our $VERSION = '0.2312';
 
 use File::Path qw/ rmtree /;
 use strict;
@@ -2663,7 +2662,7 @@ File::Temp - return name and handle of a temporary file safely
 
 =head1 VERSION
 
-version 0.2311
+version 0.2312
 
 =head1 SYNOPSIS
 
@@ -3610,7 +3609,7 @@ different implementations of temporary file handling.
 See L<File::Tempdir> for an alternative object-oriented wrapper for
 the C<tempdir> function.
 
-=for Pod::Coverage STRINGIFY NUMIFY top_system_uid
+=for Pod::Coverage STRINGIFY NUMIFY top_system_uid MAX_TRIES MINX TEMPXXX
 
 =head1 SUPPORT
 
@@ -3629,13 +3628,9 @@ Tim Jenness <tjenness@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Tim Jenness Karen Etheridge David Golden Slaven Rezic mohawk2 Roy Ivy III Peter Rabbitson Olivier Mengué John Acklam Gim Yee Nicolas R Brian Mowrey Dagfinn Ilmari Mannsåker Steinbrunner Ed Avis Guillem Jover James E. Keenan Kevin Ryde Ben Tilly
+=for stopwords Karen Etheridge David Golden Slaven Rezic mohawk2 Roy Ivy III Craig A. Berry Olivier Mengué Peter Rabbitson Ben Tilly Brian Mowrey Dagfinn Ilmari Mannsåker Steinbrunner Ed Avis Guillem Jover James E. Keenan Kevin Ryde mauke Nicolas R John Acklam Tim Gim Yee
 
 =over 4
-
-=item *
-
-Tim Jenness <t.jenness@jach.hawaii.edu>
 
 =item *
 
@@ -3659,7 +3654,7 @@ Roy Ivy III <rivy.dev@gmail.com>
 
 =item *
 
-Peter Rabbitson <ribasushi@cpan.org>
+Craig A. Berry <craigberry@mac.com>
 
 =item *
 
@@ -3667,15 +3662,11 @@ Olivier Mengué <dolmen@cpan.org>
 
 =item *
 
-Peter John Acklam <pjacklam@online.no>
+Peter Rabbitson <ribasushi@cpan.org>
 
 =item *
 
-Tim Gim Yee <tim.gim.yee@gmail.com>
-
-=item *
-
-Nicolas R <atoomic@cpan.org>
+Ben Tilly <btilly@gmail.com>
 
 =item *
 
@@ -3707,13 +3698,25 @@ Kevin Ryde <user42@zip.com.au>
 
 =item *
 
-Ben Tilly <btilly@gmail.com>
+mauke <lukasmai.403@gmail.com>
+
+=item *
+
+Nicolas R <atoomic@cpan.org>
+
+=item *
+
+Peter John Acklam <pjacklam@online.no>
+
+=item *
+
+Tim Gim Yee <tim.gim.yee@gmail.com>
 
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2020 by Tim Jenness and the UK Particle Physics and Astronomy Research Council.
+This software is copyright (c) 2025 by Tim Jenness and the UK Particle Physics and Astronomy Research Council.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

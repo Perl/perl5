@@ -548,7 +548,8 @@ our %Modules = (
     },
 
     'File::Temp' => {
-        'DISTRIBUTION' => 'ETHER/File-Temp-0.2311.tar.gz',
+        'DISTRIBUTION' => 'ETHER/File-Temp-0.2312.tar.gz',
+        'SYNCINFO'     => 'ether on Mon Sep  1 13:49:39 2025',
         'FILES'        => q[cpan/File-Temp],
         'EXCLUDED'     => [
             qw( README.mkdn
@@ -557,9 +558,6 @@ our %Modules = (
                 ),
             qr[^t/00-report-prereqs],
             qr{^xt},
-        ],
-        'CUSTOMIZED' => [
-            qw( lib/File/Temp.pm )
         ],
     },
 
