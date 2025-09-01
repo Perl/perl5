@@ -355,7 +355,9 @@ If you've checked that the CUSTOMIZED versions are still correct, you can
 proceed now. Otherwise, you should abort and investigate the situation. If
 the blead customizations are no longer needed, delete the CUSTOMIZED entry
 for $module in Porting/Maintainers.pl (and you'll also need to regenerate
-t/porting/customized.dat in that case; see t/porting/customized.t).
+t/porting/customized.dat in that case, via:
+(cd t; ./perl -I../lib porting/customized.t --regen);
+see also t/porting/customized.t).
 
 EOF
     if ($yes_to_all and !$force) {
