@@ -383,6 +383,17 @@ now make use of the new function to streamline the process.
 C<Perl_newSVsv_flags> is now essentially a NULL pointer check and wrapper
 around the new function, so has been moved into F<sv_inline.h>.
 
+=item *
+
+L<perlapi/C<STATIC_ASSERT_DECL>> and C<STATIC_ASSERT_STMT> are like
+C<assert()>, but are evaluated at compile time.  That means their
+argument must be a constant expression that can be verified by the
+compiler, and so they effectively have no cost, not appearing in the
+code that gets executed.  These were added in v5.28, but not until now
+have we opened their use up to XS writers.  At the same time, a new
+variant has been added, C<STATIC_ASSERT_EXPR> which is suitable for use
+in an expression, such as a comma expression in a C macro.
+
 =back
 
 =head1 Selected Bug Fixes
