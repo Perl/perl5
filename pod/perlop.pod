@@ -1089,7 +1089,7 @@ cannot).  This is very useful for
 providing default values for variables.  If you actually want to test if
 at least one of C<$x> and C<$y> is defined, use S<C<defined($x // $y)>>.
 
-The C<||>, C<^^> and C<//> operators return the last value evaluated
+The C<||> and C<//> operators return the last value evaluated
 (unlike C's C<||> which returns 0 or 1).  Thus, a reasonably
 portable way to find out the home directory might be:
 
