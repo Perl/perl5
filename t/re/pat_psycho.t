@@ -35,6 +35,8 @@ plan tests => 15;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
+watchdog(0);
+
 #
 # Tests start here.
 #

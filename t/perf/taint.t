@@ -61,4 +61,6 @@ my $taint = substr($ENV{PATH}, 0, 0); # and empty tainted string
     pass("RT #130584 pos on tainted utf8 string");
 }
 
+watchdog(0);
+
 1;

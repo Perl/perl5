@@ -42,4 +42,6 @@ SKIP: {
     pass("COW 1Mb strings");
 }
 
+watchdog(0);
+
 1;

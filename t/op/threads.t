@@ -149,6 +149,7 @@ watchdog(180, "process");
     $_->join for @t;
     ok(1, '[perl #45053]');
 }
+watchdog(0);
 
 sub matchit {
     is (ref $_[1], "Regexp");

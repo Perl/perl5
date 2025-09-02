@@ -73,3 +73,5 @@ foreach my $dupe (@duplicate_signals) {
     is( $SIG{$canonical_name}, undef, "The signal $canonical_name is cleared after local goes out of scope." );
 }
 
+watchdog(0);
+

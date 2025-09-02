@@ -161,6 +161,8 @@ PROG
     like("!\xdf", eval 'qr/\pp(?aai)\xdf/',
          'Compiling qr/\pp(?aai)\xdf/ doesn\'t loop');
 
+    watchdog(0);
+
 } # End of sub run_tests
 
 1;

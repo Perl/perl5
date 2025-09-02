@@ -167,3 +167,5 @@ like $@, qr/No such hook: __DIE__\\0whoops at/;
     is($int_called, 1);
     is($@, "died");
 }
+
+watchdog(0);
