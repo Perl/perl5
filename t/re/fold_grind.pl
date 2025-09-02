@@ -1101,6 +1101,7 @@ foreach my $test (sort { numerically } keys %{$tests_ref}) {
 }
 }
 
+watchdog(0);
 plan($count);
 
 1

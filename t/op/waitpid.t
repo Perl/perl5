@@ -35,5 +35,6 @@ watchdog(10);
 
     pass("didn't block on waitpid(0, ...)");
 }
+watchdog(0);
 
 done_testing();

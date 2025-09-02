@@ -26,6 +26,8 @@ for my $t (1 .. 3) {
     })->join;
 }
 
+watchdog(0);
+
 print "all is well\n";
 ----
 all is well

@@ -882,6 +882,7 @@ fresh_perl_is( '$_="abcdefg123456"; s/(?<=...\G)?(\d)/($1)/; print' => 'abcdefg(
     ::is($fc, 1, '$tied_ref =~ s/non-utf8/utf8/ fetch count');
     ::like("$s", qr/^\x{101}AR\(0x.*\)\z/,
            '$tied_ref =~ s/non-utf8/utf8/ result');
+    ::watchdog(0);
 }
 
 # RT #97954

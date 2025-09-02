@@ -24,4 +24,6 @@ for(1..100) {
 }
 PERL
 
+watchdog(0);
+
 done_testing();

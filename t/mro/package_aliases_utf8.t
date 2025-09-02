@@ -368,6 +368,7 @@ watchdog 3;
 *ᕘ:: = \%::;
 *Aᶜme::Mῌ::Aᶜme:: = \*Aᶜme::; # indirect self-reference
 pass("mro_package_moved and self-referential packages");
+watchdog 0;
 
 # Deleting a glob whose name does not indicate its location in the symbol
 # table but which nonetheless *is* in the symbol table.
