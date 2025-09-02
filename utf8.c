@@ -4275,13 +4275,14 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
             /* For the dot above to modify the 'I', it must be part of a
              * combining sequence immediately following the 'I', and no other
              * modifier with a ccc of 230 may intervene */
-            cp = utf8_to_uv_or_die(p, e, NULL);
+            Size_t advance;
+            cp = utf8_to_uv_or_die(p, e, &advance);
             if (! _invlist_contains_cp(PL_CCC_non0_non230, cp)) {
                 break;
             }
 
             /* Here the combining sequence continues */
-            p += UTF8SKIP(p);
+            p += advance;
         }
     }
 
