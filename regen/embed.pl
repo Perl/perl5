@@ -4500,14 +4500,15 @@ sub generate_proto_h {
     my $clean= normalize_group_content($proto_buffer);
 
     my $fh = open_print_header("proto.h");
+
     print $fh <<~"EOF";
-    START_EXTERN_C
-    $clean
-    #ifdef PERL_CORE
-    #  include "pp_proto.h"
-    #endif
-    END_EXTERN_C
-    EOF
+        START_EXTERN_C
+        $clean
+        #ifdef PERL_CORE
+        #  include "pp_proto.h"
+        #endif
+        END_EXTERN_C
+        EOF
 
     read_only_bottom_close_and_rename($fh) if ! $error_count;
 }
