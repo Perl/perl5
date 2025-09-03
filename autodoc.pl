@@ -2681,7 +2681,7 @@ for my $which_pod (keys %docs) {
                 # how this item is displayed.
                 if ($element->{flags}) {
                     $element->{flags} .=
-                                       $leader->{flags} =~ s/$item_flags_re//r;
+                                    $leader->{flags} =~ s/$item_flags_re//gr;
                 }
                 else {
                     $element->{flags} = $leader->{flags};
