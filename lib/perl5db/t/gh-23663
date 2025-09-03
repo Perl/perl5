@@ -1,4 +1,0 @@
-# Issue:        https://github.com/Perl/perl5/issues/23663
-# Pull Request: https://github.com/Perl/perl5/issues/23669
-
-my $foo = "bar";

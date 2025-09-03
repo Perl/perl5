@@ -3673,7 +3673,7 @@ EOS
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/gh-23663',
+            prog => \1,
         }
     );
 
@@ -3692,7 +3692,7 @@ EOS
                 'c',
                 'q',
             ],
-            prog => '../lib/perl5db/t/gh-23663',
+            prog => \1,
         }
     );
 
