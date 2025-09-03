@@ -488,9 +488,9 @@ struct regnode_ssc {
 #define FLAGS(p)        ((p)->head.data.u_8.flags) /* Caution: Doesn't apply to all      \
                                            regnode types.  For some, it's the \
                                            character set of the regnode */
-#define STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
+#define STR_LENs(p)	(assert(OP(p) != LEXACT && OP(p) != LEXACT_REQ8),   \
                                     STR_LEN_U8((struct regnode_string *)p))
-#define STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
+#define STRINGs(p)	(assert(OP(p) != LEXACT && OP(p) != LEXACT_REQ8),   \
                                     ((struct regnode_string *)p)->string)
 #define OPERANDs(p)	STRINGs(p)
 
@@ -510,9 +510,9 @@ struct regnode_ssc {
  * node to be an ARG2L, using the second 32 bit field for the length, and not
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
-#define STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
+#define STR_LENl(p)	(assert(OP(p) == LEXACT || OP(p) == LEXACT_REQ8),   \
                                     (((struct regnode_lstring *)p)->str_len_u32))
-#define STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
+#define STRINGl(p)	(assert(OP(p) == LEXACT || OP(p) == LEXACT_REQ8),   \
                                     (((struct regnode_lstring *)p)->string))
 #define OPERANDl(p)	STRINGl(p)
 

@@ -245,8 +245,8 @@ returning NULL if not found.  The terminating NUL bytes are not compared.
 
 #ifdef HAS_MEMMEM
 #   define ninstr(big, bigend, little, lend)                                \
-            (__ASSERT_(bigend >= big)                                       \
-             __ASSERT_(lend >= little)                                      \
+            (assert(bigend >= big),                                         \
+             assert(lend >= little),                                        \
              (char *) memmem((big), (bigend) - (big),                       \
                              (little), (lend) - (little)))
 #else

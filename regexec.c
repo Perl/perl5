@@ -2211,7 +2211,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
  * And it takes the particular macro name that finds the desired value given a
  * code point.  Merely convert the UTF-8 to code point and call the cp macro */
 #define generic_GET_BREAK_VAL_UTF8_(cp_macro, pos, strend)                     \
-             (__ASSERT_(pos < strend)                                          \
+             (assert(pos < strend),                                            \
                  /* Note assumes is valid UTF-8 */                             \
              (cp_macro(utf8_to_uv_or_die((pos), (strend), NULL))))
 

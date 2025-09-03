@@ -310,8 +310,8 @@ adding no time nor space requirements to the implementation.
 =cut
 */
 
-#define NATIVE_TO_LATIN1(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
-#define LATIN1_TO_NATIVE(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define NATIVE_TO_LATIN1(ch)  (assert(FITS_IN_8_BITS(ch)), ((U8) (ch)))
+#define LATIN1_TO_NATIVE(ch)  (assert(FITS_IN_8_BITS(ch)), ((U8) (ch)))
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -319,8 +319,8 @@ adding no time nor space requirements to the implementation.
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
-#define NATIVE_UTF8_TO_I8(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
-#define I8_TO_NATIVE_UTF8(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define NATIVE_UTF8_TO_I8(ch)  (assert(FITS_IN_8_BITS(ch)), ((U8) (ch)))
+#define I8_TO_NATIVE_UTF8(ch)  (assert(FITS_IN_8_BITS(ch)), ((U8) (ch)))
 
 #define UNI_TO_NATIVE(ch)        ((UV) ASSERT_NOT_PTR(ch))
 #define NATIVE_TO_UNI(ch)        ((UV) ASSERT_NOT_PTR(ch))
@@ -443,7 +443,7 @@ are in the character. */
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof? */
-#define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+#define UTF8_IS_CONTINUATION(c)     (assert(FITS_IN_8_BITS(c)),             \
             (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)             \
                                                 == UTF_CONTINUATION_MARK)))
 
@@ -636,8 +636,8 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  *
  * Note that on EBCDIC platforms, this is actually the I8 */
 #define UTF_START_BYTE(uv, bits)                                            \
-           (__ASSERT_((uv) >> ((bits) - 1)) /* At least 'bits' */           \
-            __ASSERT_(((uv) & ~nBIT_MASK(bits)) == 0) /* No extra bits */   \
+           (assert((uv) >> ((bits) - 1)), /* At least 'bits' */             \
+            assert(((uv) & ~nBIT_MASK(bits)) == 0), /* No extra bits */     \
               UTF_START_MARK(UNISKIP_BY_MSB_((bits) - 1))                   \
             | ((uv) >> (((bits) / UTF_CONTINUATION_BYTE_INFO_BITS)          \
                                 * UTF_CONTINUATION_BYTE_INFO_BITS)))
@@ -652,8 +652,8 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  *
  * Note that on EBCDIC platforms, this is actually the I8 */
 #define UTF_FIRST_CONT_BYTE(uv, bits)                                       \
-   (__ASSERT_((uv) >> ((bits) - 1)) /* At least 'bits' */                   \
-    __ASSERT_(((uv) & ~nBIT_MASK(bits)) == 0) /* No extra bits */           \
+   (assert((uv) >> ((bits) - 1)), /* At least 'bits' */                     \
+    assert(((uv) & ~nBIT_MASK(bits)) == 0), /* No extra bits */             \
        UTF_CONTINUATION_MARK                                                \
     | (   UTF_CONTINUATION_MASK                                             \
        & ((uv) >> ((((bits) / UTF_CONTINUATION_BYTE_INFO_BITS) - 1)         \
@@ -667,7 +667,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * C0-C4 I8 start bytes on EBCDIC ones.  On EBCDIC E0 can't start a
  * non-overlong sequence, so we define a base macro and for those platforms,
  * extend it to also exclude E0 */
-#define UTF8_IS_START_base(c)    (__ASSERT_(FITS_IN_8_BITS(c))              \
+#define UTF8_IS_START_base(c)    (assert(FITS_IN_8_BITS(c)),                \
                              (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE))
 #ifdef EBCDIC
 #  define UTF8_IS_START(c)                                                  \
@@ -680,13 +680,13 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
  * represent a code point > 255? */
-#define UTF8_IS_ABOVE_LATIN1(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+#define UTF8_IS_ABOVE_LATIN1(c)     (assert(FITS_IN_8_BITS(c)),             \
                         (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE))
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed. */
-#define UTF8_IS_DOWNGRADEABLE_START(c)  (__ASSERT_(FITS_IN_8_BITS(c))       \
+#define UTF8_IS_DOWNGRADEABLE_START(c)  (assert(FITS_IN_8_BITS(c)),         \
                 inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(c),                   \
                         UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
 
@@ -753,7 +753,7 @@ uppercase/lowercase/titlecase/fold into.
  * that this is asymmetric on EBCDIC platforms, in that the 'new' parameter is
  * the UTF-EBCDIC byte, whereas the 'old' parameter is a Unicode (not EBCDIC)
  * code point in process of being generated */
-#define UTF8_ACCUMULATE(old, new) (__ASSERT_(FITS_IN_8_BITS(new))              \
+#define UTF8_ACCUMULATE(old, new) (assert(FITS_IN_8_BITS(new)),                \
                                    ((old) << UTF_ACCUMULATION_SHIFT)           \
                                    | ((NATIVE_UTF8_TO_I8(new))                 \
                                        & UTF_CONTINUATION_MASK))
@@ -777,8 +777,8 @@ uppercase/lowercase/titlecase/fold into.
  *  LO: continuation.
  * */
 #define EIGHT_BIT_UTF8_TO_NATIVE(HI, LO)                                        \
-    ( __ASSERT_(UTF8_IS_DOWNGRADEABLE_START(HI))                                \
-      __ASSERT_(UTF8_IS_CONTINUATION(LO))                                       \
+    ( assert(UTF8_IS_DOWNGRADEABLE_START(HI)),                                  \
+      assert(UTF8_IS_CONTINUATION(LO)),                                         \
      LATIN1_TO_NATIVE(UTF8_ACCUMULATE((                                         \
                             NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), (LO))))
 
@@ -788,11 +788,11 @@ uppercase/lowercase/titlecase/fold into.
  * Note that the result can be larger than 255 if the input character is not
  * downgradable */
 #define TWO_BYTE_UTF8_TO_NATIVE(HI, LO) \
-    (__ASSERT_(FITS_IN_8_BITS(HI))                                              \
-     __ASSERT_(FITS_IN_8_BITS(LO))                                              \
-     __ASSERT_(PL_utf8skip[(U8) HI] == 2)                                            \
-     __ASSERT_(UTF8_IS_CONTINUATION(LO))                                        \
-     UNI_TO_NATIVE(UTF8_ACCUMULATE((NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), \
+    (assert(FITS_IN_8_BITS(HI)),                                              \
+     assert(FITS_IN_8_BITS(LO)),                                              \
+     assert(PL_utf8skip[(U8) HI] == 2),                                       \
+     assert(UTF8_IS_CONTINUATION(LO)),                                        \
+     UNI_TO_NATIVE(UTF8_ACCUMULATE((NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)),\
                                    (LO))))
 
 /* Should never be used, and be deprecated */
@@ -847,7 +847,7 @@ C<L</UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 #define UTF8_SKIP(s) UTF8SKIP(s)
 #define UTF8_CHK_SKIP(s)                                                       \
      (UNLIKELY(s[0] == '\0') ? 1 : my_strnlen((const char *) (s), UTF8SKIP(s)))
-#define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                \
+#define UTF8_SAFE_SKIP(s, e)  (assert((e) >= (s)),                  \
                               UNLIKELY(((e) - (s)) <= 0)            \
                                ? 0                                  \
                                : MIN(((e) - (s)), UTF8_SKIP(s)))
@@ -883,7 +883,7 @@ implementation of the latter. */
 
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT. */
-#define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
+#define UTF8_IS_CONTINUED(c)  (assert(FITS_IN_8_BITS(c)),                 \
                                (! UTF8_IS_INVARIANT(c)))
 
 /* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
@@ -895,11 +895,11 @@ implementation of the latter. */
  * (which works for code points up through 0xFF) or NATIVE_TO_UNI which works
  * for any code point */
 #define __BASE_TWO_BYTE_HI(c, translate_function)                               \
-           (__ASSERT_(! UVCHR_IS_INVARIANT(c))                                  \
+           (assert(! UVCHR_IS_INVARIANT(c)),                                    \
             I8_TO_NATIVE_UTF8((translate_function(c) >> UTF_ACCUMULATION_SHIFT) \
                               | UTF_START_MARK(2)))
 #define __BASE_TWO_BYTE_LO(c, translate_function)                               \
-             (__ASSERT_(! UVCHR_IS_INVARIANT(c))                                \
+             (assert(! UVCHR_IS_INVARIANT(c)),                                  \
               I8_TO_NATIVE_UTF8((translate_function(c) & UTF_CONTINUATION_MASK) \
                                  | UTF_CONTINUATION_MARK))
 
@@ -911,9 +911,9 @@ implementation of the latter. */
 
 /* The next two macros are used when the source should be a single byte
  * character; checked for under DEBUGGING */
-#define UTF8_EIGHT_BIT_HI(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
+#define UTF8_EIGHT_BIT_HI(c) (assert(FITS_IN_8_BITS(c)),                    \
                              ( __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
-#define UTF8_EIGHT_BIT_LO(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
+#define UTF8_EIGHT_BIT_LO(c) (assert(FITS_IN_8_BITS(c)),                    \
                              (__BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
 
 /* These final two macros in the series are used when the source can be any
@@ -923,12 +923,12 @@ implementation of the latter. */
  * MAX_UTF8_TWO_BYTE should be exactly all one bits in the lower few
  * places, so the ~ works */
 #define UTF8_TWO_BYTE_HI(c)                                                    \
-       (__ASSERT_((sizeof(c) ==  1)                                            \
-                  || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
+       (assert((sizeof(c) ==  1)                                               \
+                  || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE)),             \
         (__BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
 #define UTF8_TWO_BYTE_LO(c)                                                    \
-       (__ASSERT_((sizeof(c) ==  1)                                            \
-                  || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
+       (assert((sizeof(c) ==  1)                                               \
+                  || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE)),             \
         (__BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
