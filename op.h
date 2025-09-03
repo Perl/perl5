@@ -64,12 +64,14 @@ typedef PERL_BITFIELD16 Optype;
     U8		op_private;
 #endif
 
+#define o1_     PERL_UNIQUE_NAME(o)
+#define type1_  PERL_UNIQUE_NAME(type)
 #define OpTYPE_set(o,type)                      \
     STMT_START {                                \
-        OP *o_ = (OP *)o;                       \
-        OPCODE type_ = type;                    \
-        o_->op_type = type_;                    \
-        o_->op_ppaddr = PL_ppaddr[type_];       \
+        OP *o1_ = (OP *)o;                      \
+        OPCODE type1_ = type;                   \
+        o1_->op_type = type1_;                  \
+        o1_->op_ppaddr = PL_ppaddr[type1_];     \
     } STMT_END
 
 /* If op_type:9 is changed to :10, also change cx_pusheval()
