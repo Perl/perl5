@@ -412,6 +412,16 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item * C<parse_subsignature()> can now handle empty subroutine signatures
+
+Previously, calling the C<parse_subsignature()> API function with an empty
+signature would cause a "Syntax error" failure, requiring code which calls it
+to detect the special case and take appropriate steps.  This is now fixed,
+returning the same optree that the parser would yield for a regular empty
+signature during normal parse time.
+
+[GH#17689]
+
 =back
 
 =head1 Known Problems

@@ -13922,6 +13922,18 @@ Perl_parse_subsignature(pTHX_ U32 flags)
 {
     if (flags)
         croak("Parsing code internal error (%s)", "parse_subsignature");
+    /* sub signatures might be empty, but perly.y can't cope with the
+     * ambiguity of an empty construction. We'll detect it manually and do
+     * something suitable in that case. */
+    lex_read_space(0);
+    if (lex_peek_unichar(0) == ')') {
+        /* pretend we saw an empty signature and do the same steps perly.y
+         * would have performed. */
+        subsignature_start();
+        OP *sigops = subsignature_finish();
+        CvSIGNATURE_on(PL_compcv);
+        return sigops;
+    }
     return parse_recdescent_for_op(GRAMSUBSIGNATURE, LEX_FAKEEOF_NONEXPR);
 }
 
