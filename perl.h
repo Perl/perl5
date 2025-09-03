@@ -4208,6 +4208,14 @@ Obsolete form of C<UVuf>, which you should convert to instead use
 #  define UVf UVuf
 #endif
 
+/* Use this like:
+ *  #define sv1_ PERL_UNIQUE_NAME(sv)
+ * and it will expand to something very likely unique to your file, beginning
+ * with 'PL_' which means there should be no name collision with the caller.
+ * an underscore.  If two 'sv1_' are attempted to be defined, a compiler
+ * warning will get raised, so you can change one of them. */
+#define PERL_UNIQUE_NAME(name)  CAT2(PL_, CAT2(name, __LINE__))
+
 #if !defined(DEBUGGING) && !defined(NDEBUG)
 #  define NDEBUG 1
 #endif
@@ -4323,15 +4331,9 @@ where it has parity with the other two forms.
  * We use a bit-field instead of an array because gcc accepts
         typedef char x[n]
    where n is not a compile-time constant.  We want to enforce constantness.
- *
- * We need the FOOL macros to get proper cpp parameter concatanation. */
-#  define STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_2_(line)                       \
-                                 static_assertion_failed_##line
-#  define STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_(line)                         \
-                                STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_2_(line)
+ */
     /* Return the struct and element name */
-#  define STATIC_ASSERT_STRUCT_NAME_                                        \
-                            STATIC_ASSERT_STRUCT_NAME_FOOL_CPP_(__LINE__)
+#  define STATIC_ASSERT_STRUCT_NAME_ PERL_UNIQUE_NAME(static_assertion_failed_)
 
     /* Return the struct body */
 #  define STATIC_ASSERT_STRUCT_BODY_(COND, NAME)                            \
