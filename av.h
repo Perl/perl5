@@ -122,7 +122,7 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
  *      SvGETMAGIC(av); IV x = av_tindex_nomg(av);
  */
 #   define av_top_index_skip_len_mg(av)                                     \
-                            (__ASSERT_(SvTYPE(av) == SVt_PVAV) AvFILLp(av))
+                            (assert(SvTYPE(av) == SVt_PVAV), AvFILLp(av))
 #   define av_tindex_skip_len_mg(av)  av_top_index_skip_len_mg(av)
 
 #define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"

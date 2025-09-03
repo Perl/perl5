@@ -2776,11 +2776,11 @@ S_bool_setlocale_2008_i(pTHX_
  * calculate_LC_ALL_string() for that. */
 #ifdef USE_LOCALE_NUMERIC
 #  define query_nominal_locale_i(i)                                         \
-      (__ASSERT_(i != LC_ALL_INDEX_)                                        \
+      (assert(i != LC_ALL_INDEX_),                                          \
        ((i == LC_NUMERIC_INDEX_) ? PL_numeric_name : querylocale_i(i)))
 #elif defined(USE_LOCALE)
 #  define query_nominal_locale_i(i)                                         \
-      (__ASSERT_(i != LC_ALL_INDEX_) querylocale_i(i))
+      (assert(i != LC_ALL_INDEX_), querylocale_i(i))
 #else
 #  define query_nominal_locale_i(i)  "C"
 #endif

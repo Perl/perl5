@@ -1414,7 +1414,7 @@ or casts
  *
  * NOT suitable for void*
  */
-#define ASSERT_IS_PTR(x) (__ASSERT_(sizeof(*(x))) (x))
+#define ASSERT_IS_PTR(x) (assert(sizeof(*(x))), (x))
 
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
@@ -1439,8 +1439,8 @@ or casts
  * needed.  (The NV casts stop any warnings about comparison always being true
  * if called with an unsigned.  The cast preserves the sign, which is all we
  * care about.) */
-#define withinCOUNT(c, l, n)  (__ASSERT_((NV) (l) >= 0)                 \
-                               __ASSERT_((NV) (n) >= 0)                 \
+#define withinCOUNT(c, l, n)  (assert((NV) (l) >= 0),                   \
+                               assert((NV) (n) >= 0),                   \
                                withinCOUNT_KNOWN_VALID_((c), (l), (n)))
 
 /* For internal use only, this can be used in places where it is known that the
@@ -1455,11 +1455,11 @@ or casts
 /* Returns true if c is in the range l..u, where 'l' is non-negative
  * Written this way so that after optimization, only one conditional test is
  * needed. */
-#define inRANGE(c, l, u) (__ASSERT_((NV) (l) >= 0) __ASSERT_((u) >= (l))    \
+#define inRANGE(c, l, u) (assert((NV) (l) >= 0), assert((u) >= (l)),        \
    (  (sizeof(c) == sizeof(U8))  ? inRANGE_helper_(U8, (c), (l), ((u)))     \
     : (sizeof(c) == sizeof(U16)) ? inRANGE_helper_(U16,(c), (l), ((u)))     \
     : (sizeof(c) == sizeof(U32)) ? inRANGE_helper_(U32,(c), (l), ((u)))     \
-             : (__ASSERT_(sizeof(c) == sizeof(WIDEST_UTYPE))                \
+             : (assert(sizeof(c) == sizeof(WIDEST_UTYPE)),                  \
                           inRANGE_helper_(WIDEST_UTYPE,(c), (l), ((u))))))
 
 /* For internal use, this is used by machine-generated code which generates
@@ -2098,7 +2098,7 @@ END_EXTERN_C
            : ((UNLIKELY(((U8) (c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
               ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS                       \
               : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)          \
-                ? (__ASSERT_(0) (c)) /* Fail on Sharp S in DEBUGGING */     \
+                ? (assert(0), (c)) /* Fail on Sharp S in DEBUGGING */       \
                 : PL_mod_latin1_uc[ (U8) (c) ]))))))
 
 /* In this macro, note that the result can be larger than a byte in a UTF-8
@@ -2110,8 +2110,8 @@ END_EXTERN_C
 #  define toFOLD_LC(c)                                                      \
                 ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)      \
                  ? GREEK_SMALL_LETTER_MU                                    \
-                 : (__ASSERT_(   ! IN_UTF8_CTYPE_LOCALE                     \
-                              || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S)) \
+                 : (assert(   ! IN_UTF8_CTYPE_LOCALE                        \
+                           || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S)),   \
                     toLOWER_LC(c)))
 #endif
 
@@ -2286,7 +2286,7 @@ END_EXTERN_C
  * class is TRUE for.  Hence it can skip the tests for this range.
  * 'above_latin1' should include its arguments */
 #define generic_utf8_safe_no_upper_latin1_(classnum, p, e, above_latin1)    \
-         (__ASSERT_(utf8_safe_assert_(p, e))                                \
+         (assert(utf8_safe_assert_(p, e)),                                  \
          (isASCII(*(p)))                                                    \
           ? generic_isCC_(*(p), classnum)                                   \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p)))                             \
@@ -2504,9 +2504,9 @@ END_EXTERN_C
  * The conversion works both ways, so toCTRL('D') is 4, and toCTRL(4) is D,
  * etc. */
 #ifndef EBCDIC
-#  define toCTRL(c)    (__ASSERT_(FITS_IN_8_BITS(c)) toUPPER(((U8)(c))) ^ 64)
+#  define toCTRL(c)    (assert(FITS_IN_8_BITS(c)), toUPPER(((U8)(c))) ^ 64)
 #else
-#  define toCTRL(c)   (__ASSERT_(FITS_IN_8_BITS(c))                     \
+#  define toCTRL(c)   (assert(FITS_IN_8_BITS(c)),                       \
                       ((isPRINT_A(c))                                   \
                        ? (UNLIKELY((c) == '?')                          \
                          ? QUESTION_MARK_CTRL                           \
@@ -2550,7 +2550,7 @@ typedef U32 line_t;
  * position, and then to the eights position.  Both are added together to form
  * 0 if the input is '0'-'9' and to form 9 if alpha.  This is added to the
  * final four bits of the input to form the correct value. */
-#define XDIGIT_VALUE(c) (__ASSERT_(isXDIGIT(c))                             \
+#define XDIGIT_VALUE(c) (assert(isXDIGIT(c)),                               \
            ((NATIVE_TO_LATIN1(c) >> 6) & 1)  /* 1 if alpha; 0 if not */     \
          + ((NATIVE_TO_LATIN1(c) >> 3) & 8)  /* 8 if alpha; 0 if not */     \
          + ((c) & 0xF))   /* 0-9 if input valid hex digit */
@@ -2561,7 +2561,7 @@ typedef U32 line_t;
 /* Converts a character known to represent an octal digit (0-7) to its numeric
  * value.  The input is validated only by an assert() in DEBUGGING builds.  In
  * both ASCII and EBCDIC the last 3 bits of the octal digits range from 0-7. */
-#define OCTAL_VALUE(c) (__ASSERT_(isOCTAL(c)) (7 & (c)))
+#define OCTAL_VALUE(c) (assert(isOCTAL(c)), (7 & (c)))
 
 /* Efficiently returns a boolean as to if two native characters are equivalent
  * case-insensitively.  At least one of the characters must be one of [A-Za-z];
@@ -2578,7 +2578,7 @@ typedef U32 line_t;
  * just a single 0, in the bit position where the upper- and lowercase differ.
  * */
 #define isALPHA_FOLD_EQ(c1, c2)                                         \
-                      (__ASSERT_(isALPHA_A(c1) || isALPHA_A(c2))        \
+                      (assert(isALPHA_A(c1) || isALPHA_A(c2)),          \
                       ((c1) & ~('A' ^ 'a')) ==  ((c2) & ~('A' ^ 'a')))
 #define isALPHA_FOLD_NE(c1, c2) (! isALPHA_FOLD_EQ((c1), (c2)))
 
