@@ -5178,8 +5178,8 @@ Gid_t getegid (void);
                     __FILE__, __LINE__));
 /*
 =for apidoc_section $directives
-=for apidoc    Am|void|assert_|bool expr
-=for apidoc_item |    |__ASSERT_
+=for apidoc     ATmp|void|assert_|bool expr
+=for apidoc_item  Tm|    |__ASSERT_
 
 These are synonymous, used to wrap the libc C<assert()> call in comma
 expressions in macro expansions, but you probably don't want to use them nor
@@ -5233,13 +5233,13 @@ contexts in C, and in all contexts in C++.
                                  " file \"" __FILE__ "\", line %" LINE_Tf,  \
                                  STRINGIFY(what), (line_t) __LINE__),       \
             (void) 0))
-#  define assert_(what)         assert(what),
-#  define __ASSERT_(statement)  assert(statement),
+#  define Perl_assert_(what)    assert(what),
 #else
 #  define Perl_assert(what)  ((void) 0)
-#  define assert_(what)
-#  define __ASSERT_(statement)
+#  define Perl_assert_(what)
 #endif
+#define assert_(what)         Perl_assert_(what)
+#define __ASSERT_(statement)  Perl_assert_(statement)
 
 struct ufuncs {
     I32 (*uf_val)(pTHX_ IV, SV*);
