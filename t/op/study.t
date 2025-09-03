@@ -158,5 +158,3 @@ TODO: {
     push @got, $_ foreach $a =~ /[^x]d(?{$a .= ''})[^x]d/g;
     is("@got", 'ydyd ydyd', '#92696 $a .= \'\' inside (?{}), $a studied');
 }
-
-watchdog(0);

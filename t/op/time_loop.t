@@ -14,5 +14,3 @@ watchdog(2);
 local $SIG{__WARN__} = sub {};
 is gmtime(2**69),    undef;
 is localtime(2**69), undef;
-
-watchdog(0);

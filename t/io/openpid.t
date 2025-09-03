@@ -101,5 +101,3 @@ next_test();
 print "# waiting for process $pid4 to exit\n";
 $reap_pid = waitpid $pid4, 0;
 is( $reap_pid, $pid4, 'fourth process reaped' );
-
-watchdog(0);

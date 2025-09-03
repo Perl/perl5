@@ -248,5 +248,3 @@ SKIP: {
     is scalar gmtime("NaN"), undef, '[perl #123495] gmtime(NaN)';
     is scalar localtime("NaN"), undef, 'localtime(NaN)';
 }
-
-watchdog(0);

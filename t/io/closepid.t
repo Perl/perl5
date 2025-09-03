@@ -42,5 +42,3 @@ SKIP:
     kill $killsig, $pid;
     open STDIN, "<&", $savein;
 }
-
-watchdog(0);
