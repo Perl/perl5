@@ -1221,11 +1221,6 @@ static OP *THX_parse_keyword_subsignature(pTHX)
                 retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0, retsv));
                 break;
             }
-            case OP_PARAMTEST:
-                break;
-            default:
-                fprintf(stderr, "TODO: examine kid %p (optype=%s)\n", kid, PL_op_name[kid->op_type]);
-                break;
         }
     }
 
