@@ -4453,7 +4453,7 @@ sub generate_proto_h {
         # used.
         $ret = "#${ind}if defined(PERL_CORE) || defined(PERL_EXT)\n"
              . $ret
-             . " \n#${ind}endif"
+             . "\n#${ind}endif"
           if $extensions_only;
 
         # We don't hide the ARGS_ASSERT macro; having that defined does no
