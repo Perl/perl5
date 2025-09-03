@@ -3688,7 +3688,7 @@ EOS
             cmds =>
             [
                 'b 4',
-                'v main',
+                'V main',
                 'c',
                 'q',
             ],
