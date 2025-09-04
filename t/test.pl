@@ -1,7 +1,6 @@
 #
 # t/test.pl - most of Test::More functionality without the fuss
 
-
 # NOTE:
 #
 # Do not rely on features found only in more modern Perls here, as some CPAN
@@ -18,6 +17,10 @@
 #
 # In this file, we use the latter "Baby Perl" approach, and increment
 # will be worked over by t/op/inc.t
+
+# This file sets for its caller $::IS_ASCII and $::IS_EBCDIC appropriately;
+# and $::devnull to be the string to use to specify /dev/null on this
+# platform.
 
 $| = 1;
 our $Level = 1;
@@ -697,6 +700,9 @@ my $is_mswin    = $^O eq 'MSWin32';
 my $is_vms      = $^O eq 'VMS';
 my $is_cygwin   = $^O eq 'cygwin';
 
+# /dev/null appears to be surprisingly portable.
+$::devnull = ($is_mswin ? 'nul' : '/dev/null');
+
 sub _quote_args {
     my ($runperl, $args) = @_;
 
@@ -798,14 +804,13 @@ sub _create_runperl { # Create the string to qx in runperl().
         # needing a pipeline, so that the fork tests have a sane environment
         # without these surprises.
 
-        # /dev/null appears to be surprisingly portable.
-        $runperl = $runperl . ($is_mswin ? ' <nul' : ' </dev/null');
+        $runperl = "$runperl <$::devnull";
     }
     if (defined $args{args}) {
 	$runperl = _quote_args($runperl, $args{args});
     }
     if (exists $args{stderr} && $args{stderr} eq 'devnull') {
-        $runperl = $runperl . ($is_mswin ? ' 2>nul' : ' 2>/dev/null');
+        $runperl = "$runperl 2>$::devnull";
     }
     elsif ($args{stderr}) {
         $runperl = $runperl . ' 2>&1';
