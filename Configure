@@ -4817,6 +4817,7 @@ else
 fi
 chmod 755 cppstdin
 wrapper=`pwd`/cppstdin
+cppstdin=$wrapper
 ok='false'
 cd UU
 
@@ -4826,7 +4827,7 @@ if $test "X$cppstdin" != "X" && \
 then
 	echo "You used to use $cppstdin $cppminus so we'll use that again."
 	case "$cpprun" in
-	'') echo "But let's see if we can live without a wrapper..." ;;
+	'') ok=true;;
 	*)
 		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
 			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
