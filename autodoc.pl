@@ -75,10 +75,10 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-            qr/[ aA bC dD eE fF Gh iI mM nN oO pP rR sS T uU vW xX y ;@#? ] /xx;
+            qr/[ aA bC dD eE fF h iI mM nN oO pP rR sS T uU vW xX y ;@#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
-my $irrelevant_flags_re = qr/[ab eE G iI P rR vX?]/xx;
+my $irrelevant_flags_re = qr/[ab eE iI P rR vX?]/xx;
 
 # Only certain flags dealing with what gets displayed, are acceptable for
 # apidoc_item
