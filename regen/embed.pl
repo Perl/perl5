@@ -41,7 +41,6 @@ BEGIN {
 # N.B. If you change this list, update the copy in autodoc.pl.  This is likely
 # to never happen, so not worth coding automatic synchronization.
 my @have_compatibility_macros = qw(
-                                    croak
                                     deb
                                     die
                                     form

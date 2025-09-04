@@ -29,7 +29,6 @@
 
 #if !defined(MULTIPLICITY)
 /* undefined symbols, point them back at the usual ones */
-# define Perl_croak_nocontext                   Perl_croak
 # define Perl_deb_nocontext                     Perl_deb
 # define Perl_die_nocontext                     Perl_die
 # define Perl_form_nocontext                    Perl_form
@@ -78,7 +77,6 @@
 
 #   if  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && \
        !defined(PERL_WANT_VARARGS)
-#     define croak                              Perl_croak_nocontext
 #     define deb                                Perl_deb_nocontext
 #     define die                                Perl_die_nocontext
 #     define form                               Perl_form_nocontext
@@ -914,7 +912,6 @@
 # endif /* defined(MULTIPLICITY) */
 # if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
       defined(PERL_WANT_VARARGS)
-#   define croak(...)                           Perl_croak(aTHX_ __VA_ARGS__)
 #   define deb(...)                             Perl_deb(aTHX_ __VA_ARGS__)
 #   define die(...)                             Perl_die(aTHX_ __VA_ARGS__)
 #   define form(...)                            Perl_form(aTHX_ __VA_ARGS__)

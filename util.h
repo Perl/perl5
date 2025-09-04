@@ -11,6 +11,15 @@
 #ifndef PERL_UTIL_H_
 #define PERL_UTIL_H_
 
+/*  Calling Perl_croak_nocontext instead of plain Perl_croak is one less
+ *  argument to pass under threads, so each instance takes up fewer bytes (but
+ *  the nocontext function has to derive the thread context itself, taking more
+ *  time).  We trade time for less space here, because time is rarely a
+ *  critical resource when you are about to throw an exception. */
+#define croak(...)  Perl_croak_nocontext(__VA_ARGS__)
+#ifndef MULTIPLICITY
+#  define Perl_croak_nocontext  Perl_croak
+#endif
 
 #ifdef VMS
 #  define PERL_FILE_IS_ABSOLUTE(f) \
