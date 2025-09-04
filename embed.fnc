@@ -922,7 +922,7 @@ px	|void	|create_eval_scope					\
 				|NN SV **sp				\
 				|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
-Adfpr	|void	|croak		|NULLOK const char *pat 		\
+AMdfpr	|void	|croak		|NULLOK const char *pat 		\
 				|...
 Tfpr	|void	|croak_caller	|NULLOK const char *pat 		\
 				|...

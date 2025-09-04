@@ -86,7 +86,6 @@ my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
 
 # This is a copy of the list in regen/embed.pl.
 my @have_compatibility_macros = qw(
-                                    croak
                                     deb
                                     die
                                     form
