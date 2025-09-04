@@ -352,6 +352,16 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 20491';
+    use experimental 'defer';
+    my $deferred = 0;
+    do {
+        defer { $deferred = 1 };
+    };
+    is($deferred, 1, 'defer in single-expression do block runs when exiting block; GH 20491');
+}
+
+TODO: {
     todo_skip 1 if is_miniperl();
     local $::TODO = 'GH 22168';
     fresh_perl_is(
