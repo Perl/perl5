@@ -84,6 +84,25 @@ my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
 # apidoc_item
 my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
 
+# This is a copy of the list in regen/embed.pl.
+my @have_compatibility_macros = qw(
+                                    croak
+                                    deb
+                                    die
+                                    form
+                                    load_module
+                                    mess
+                                    newSVpvf
+                                    sv_catpvf
+                                    sv_catpvf_mg
+                                    sv_setpvf
+                                    sv_setpvf_mg
+                                    warn
+                                    warner
+                                  );
+my %has_compat_macro;
+$has_compat_macro{$_} = 1 for @have_compatibility_macros;
+
 use constant {
               NOT_APIDOC         => -1,
               ILLEGAL_APIDOC     =>  0,  # Must be 0 so evaluates to 'false'
@@ -1648,6 +1667,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     my @deprecated;
     my @experimental;
     my @xrefs;
+    my @compat_macros;
 
     for (my $i = 0; $i < @items; $i++) {
         last if $docref->{'xref_only'}; # Place holder
@@ -1664,6 +1684,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
             push @experimental, "C<$name>" if $item->{flags} =~ /x/;
+            push @compat_macros, $name if $has_compat_macro{$name};
         }
 
         # While we're going though the items, construct a nice list of where
@@ -1887,7 +1908,8 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 #      expect both the thread context and the format to be the
                 #      first parameter to the function; and only one can be in
                 #      that position.
-                my $cant_use_short_name = (   $flags =~ /f/
+                my $cant_use_short_name = ( ! $has_compat_macro{$name}
+                                           && $flags =~ /f/
                                            && $flags !~ /T/
                                            && $name !~ /strftime/);
 
@@ -2176,6 +2198,18 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 push @usage, "\n";
             }
         }
+    }
+
+    for my $compat (@compat_macros) {
+        print $fh <<~"EOT";
+
+            Note: When called from XS code, $compat(...) expands to
+            C<Perl_${compat}_no_context(...)> unless C<PERL_WANT_VARARGS> has
+            been C<#defined>, in which case it expands to
+            C<Perl_$compat(aTHX_ ...)>.  When called from the perl core,
+            it assumes C<aTHX> is available, so expands to
+            C<Perl_$compat(aTHX_ ...)>
+            EOT
     }
 
     if (grep { /\S/ } @usage) {
