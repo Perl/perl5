@@ -103,7 +103,7 @@ use warnings;
 
 my $switches = "";
 
-my $is_debugging_build = $Config{config_args} =~ /\bDDEBUGGING\b/;
+my $is_debugging_build = $Config{config_args} =~ /\bDDEBUGGING\b(*nla:=none)/;
 
 our $TODO;
 
