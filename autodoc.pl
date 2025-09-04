@@ -1895,29 +1895,17 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 }
 
                 # If only the Perl_foo form is to be displayed, change the
-                # name of this item to be that.  This happens for either of
-                # two reasons:
-                #   1) The flags say we want "Perl_", but also to not create
-                #      an entry in embed.h to #define a short name for it.
+                # name of this item to be that.  This happens when the flags
+                # say we want "Perl_", but also to not create an entry in
+                # embed.h to #define a short name for it.
                 my $needs_Perl_entry = (   $flags =~ /p/
                                         && $flags =~ /o/
                                         && $flags !~ /M/);
 
-                #   2) The function takes a format string and a thread context
-                #      parameter.  We can't cope with that because our macros
-                #      expect both the thread context and the format to be the
-                #      first parameter to the function; and only one can be in
-                #      that position.
-                my $cant_use_short_name = ( ! $has_compat_macro{$name}
-                                           && $flags =~ /f/
-                                           && $flags !~ /T/
-                                           && $name !~ /strftime/);
-
                 # We also create a 'Perl_foo' entry if $additional_long_form
                 # is set, as that explicitly indicates we want one
                 if (   $additional_long_form
-                    || $needs_Perl_entry
-                    || $cant_use_short_name)
+                    || $needs_Perl_entry)
                 {
                     # An all uppercase macro name gets an uppercase prefix.
                     my $perl = ($flags =~ /m/ && $name !~ /[[:lower:]]/)
