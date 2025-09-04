@@ -412,7 +412,8 @@ EOP
     # work (like if the system doesn't have a ps(1) for whatever
     # reason) just bail out gracefully.
     my $maybe_ps = sub {
-        my ($cmd) = @_;
+        my ($cmd) = @_ ;
+        $cmd .= " 2>$::devnull";
         local ($?, $!);
 
         no warnings;
