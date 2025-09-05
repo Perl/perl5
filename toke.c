@@ -4813,8 +4813,11 @@ S_intuit_more(pTHX_ char *s, char *e,
 
 
           case '\\':
-            if (s[1]) {
-                if (memCHRs("wds]", s[1])) {
+            if (s[1] == '\0') {
+                /* \ followed by NUL strongly indicates character class */
+                weight += 100;
+            }
+            else if (memCHRs("wds]", s[1])) {
                     weight += 100;  /* \w \d \s => strongly charclass */
                     /* khw: \] can't happen, as any ']' is beyond our search.
                      * Why not \W \D \S \h \v, etc as well?  Should they have
@@ -4868,9 +4871,6 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * purposes of the 'seen' array.  Whatever is matched by these
                  * backslashed sequences should not be added to 'seen'.  That
                  * includes the backslash. */
-            }
-            else /* \ followed by NUL strongly indicates character class */
-                weight += 100;
             break;
 
           case '-':
