@@ -72,9 +72,10 @@ as C<Not in [].>
  \d                Match any digit character.
  \D                Match any character that isn't a digit.
  \e                Escape character.
- \E                Turn off \Q, \L and \U processing.  Not in [].
+ \E                Turn off \Q, \L and \U processing.  Not in [] unless
+                   is terminating one of those also in the [].
  \f                Form feed.
- \F                Foldcase till \E.  Not in [].
+ \F                Foldcase till \E.
  \g{}, \g1         Named, absolute or relative backreference.
                    Not in [].
  \G                Pos assertion.  Not in [].
@@ -82,8 +83,8 @@ as C<Not in [].>
  \H                Match any character that isn't horizontal whitespace.
  \k{}, \k<>, \k''  Named backreference.  Not in [].
  \K                Keep the stuff left of \K.  Not in [].
- \l                Lowercase next character.  Not in [].
- \L                Lowercase till \E.  Not in [].
+ \l                Lowercase next character.
+ \L                Lowercase till \E.
  \n                (Logical) newline character.
  \N                Match any character but newline.  Not in [].
  \N{}              Named or numbered (Unicode) character or sequence.
@@ -91,14 +92,15 @@ as C<Not in [].>
  \p{}, \pP         Match any character with the given Unicode property.
  \P{}, \PP         Match any character without the given property.
  \Q                Quote (disable) pattern metacharacters till \E.
-                   (Also called "escape".)  Not in [].
+                   (Also called "escape".)  Not in [] unless there's a
+                   terminating \E before the ']';
  \r                Return character.
  \R                Generic new line.  Not in [].
  \s                Match any whitespace character.
  \S                Match any character that isn't a whitespace.
  \t                Tab character.
- \u                Titlecase next character.  Not in [].
- \U                Uppercase till \E.  Not in [].
+ \u                Titlecase next character.
+ \U                Uppercase till \E.
  \v                Match any vertical whitespace character.
  \V                Match any character that isn't vertical whitespace
  \w                Match any word character.

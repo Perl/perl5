@@ -2172,6 +2172,39 @@ ABCF|BCDE|C(G)	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 ABCF|BCDE|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 
+# The next few tests are of constructs thought not to work in [].  But they
+# (perhaps accidentally) do, and were documented as such in GH 23688.  The ones
+# that failed regex_sets_compat.t were marked to skip there, without any
+# investigation.  Presumably its a result of limitations in the code that
+# translates these to set notation, and isn't worth fixing.
+/[\lAB]c/	ac	yS	$&	ac	-	\l works in []
+/[\lAB]c/	Bc	y	$&	Bc	-	\l works in []
+
+/[\uab]c/	Ac	yS	$&	Ac	-	\u works in []
+/[\uab]c/	bc	y	$&	bc	-	\u works in []
+
+/[\LA\EB]c/	ac	y	$&	ac	-	\L...\E works in []
+/[\LA\EB]c/	Bc	y	$&	Bc	-	\L...\E works in []
+
+/[\Ua\EB]c/	Ac	y	$&	Ac	-	\L...\E works in []
+/[\Ua\EB]c/	Bc	y	$&	Bc	-	\L...\E works in []
+
+/[\FA\EB]c/	ac	y	$&	ac	-	\L...\E works in []
+/[\FA\EB]c/	Bc	y	$&	Bc	-	\L...\E works in []
+
+/[a\Q]\E]c/	ac	yS	$&	ac	-	\Q...\E works in []
+/[a\Q]\E]c/	]c	yS	$&	]c	-	\Q...\E works in []
+
+/[a\Q]]\Ec/	]c	cS	-	Unmatched [	-	\Q...\E can't straddle []
+/[\LA]B\Ec/	abc	y	$&	abc	-	Straddling [ \L ] \E works
+/[\FA]B\Ec/	abc	y	$&	abc	-	Straddling [ \F ] \E works
+/[\Ua]B\Ec/	ABc	y	$&	ABc	-	Straddling [ \U ] \E works
+
+/[A\EB]c/	Bc	c	-	Useless use of \\E	-	\E in [] needs prior \[FLUQ]
+/\L[A]B\Ec/	abc	y	$&	abc	-	Straddling \L [ \E ] works
+/\F[A]B\Ec/	abc	y	$&	abc	-	Straddling \F [ \E ] works
+/\U[a]B\Ec/	ABc	y	$&	ABc	-	Straddling \U [ \E ] works
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
