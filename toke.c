@@ -9926,29 +9926,28 @@ Perl_yylex(pTHX)
         return yyl_sigvar(aTHX_ s);
     }
 
-    {
-        /* yyl_try() and its callees might consult PL_parser->saw_infix_sigil.
-           On its return, we then need to set it to indicate whether the token
-           we just encountered was an infix operator that (if we hadn't been
-           expecting an operator) have been a sigil.
-        */
-        bool expected_operator = (PL_expect == XOPERATOR);
-        int ret = yyl_try(aTHX_ s);
-        switch (pl_yylval.ival) {
-        case OP_BIT_AND:
-        case OP_MODULO:
-        case OP_MULTIPLY:
-        case OP_NBIT_AND:
-            if (expected_operator) {
-                PL_parser->saw_infix_sigil = 1;
-                break;
-            }
-            /* FALLTHROUGH */
-        default:
-            PL_parser->saw_infix_sigil = 0;
+    /* yyl_try() and its callees might consult PL_parser->saw_infix_sigil.
+       On its return, we then need to set it to indicate whether the token we
+       just encountered was an infix operator that (if we hadn't been expecting
+       an operator) have been a sigil.
+    */
+    bool expected_operator = (PL_expect == XOPERATOR);
+    int ret = yyl_try(aTHX_ s);
+    switch (pl_yylval.ival) {
+      case OP_BIT_AND:
+      case OP_MODULO:
+      case OP_MULTIPLY:
+      case OP_NBIT_AND:
+        if (expected_operator) {
+            PL_parser->saw_infix_sigil = 1;
+            break;
         }
-        return ret;
+        /* FALLTHROUGH */
+      default:
+        PL_parser->saw_infix_sigil = 0;
     }
+
+    return ret;
 }
 
 
