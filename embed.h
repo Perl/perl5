@@ -358,6 +358,7 @@
 # define lex_stuff_pvn(a,b,c)                   Perl_lex_stuff_pvn(aTHX_ a,b,c)
 # define lex_stuff_sv(a,b)                      Perl_lex_stuff_sv(aTHX_ a,b)
 # define lex_unstuff(a)                         Perl_lex_unstuff(aTHX_ a)
+# define long_valid_utf8_to_uv                  Perl_long_valid_utf8_to_uv
 # define looks_like_number(a)                   Perl_looks_like_number(aTHX_ a)
 # define lsbit_pos32                            Perl_lsbit_pos32
 # define magic_dump(a)                          Perl_magic_dump(aTHX_ a)

@@ -1858,6 +1858,9 @@ CTopr	|void	|locale_panic	|NN const char *msg				\
 : Used in perly.y
 p	|OP *	|localize	|NN OP *o				\
 				|I32 lex
+CTp	|UV	|long_valid_utf8_to_uv					\
+				|NN const U8 * const s			\
+				|NN const U8 * const e
 ARdp	|I32	|looks_like_number					\
 				|NN SV * const sv
 CRTip	|unsigned|lsbit_pos32	|U32 word
