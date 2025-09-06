@@ -2022,6 +2022,11 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 #define PERL_ARGS_ASSERT_LOCALIZE               \
         assert(o)
 
+PERL_CALLCONV UV
+Perl_long_valid_utf8_to_uv(const U8 * const s, const U8 * const e);
+#define PERL_ARGS_ASSERT_LONG_VALID_UTF8_TO_UV  \
+        assert(s); assert(e)
+
 PERL_CALLCONV I32
 Perl_looks_like_number(pTHX_ SV * const sv)
         __attribute__warn_unused_result__;

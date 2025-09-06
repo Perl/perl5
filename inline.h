@@ -1334,31 +1334,99 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
 
     const UV expectlen = UTF8SKIP(s);
     ASSUME(inRANGE(expectlen, 1, UTF8_MAXBYTES));
-    const U8* send = s + expectlen;
-    UV uv = *s;
+    UV uv = 0;
+
+    /* Note that this is branchless except for the switch() jump table, and
+     * checking that the caller wants a *retlen returned.
+     *
+     * There is wasted effort for length 1 inputs of initializing 'uv' to 0 
+     * and calculating 'full_shift' (unless the compiler optimizes that out).
+     * Benchmarks indicate this is acceptable.
+     * See GH #23690 */
+
+    /* Consider a 4-byte UTF-8-encoded charater.  On ASCII platforms it looks
+     * like:
+     * 1st Byte   2nd Byte   3rd Byte   4th Byte
+     * 1111 0ddd  10cc cccc  10bb bbbb  10aa aaaa
+     *
+     * And the code point it represents is dddccccccbbbbbbbbaaaaaa
+     * Each continuation byte contributes its lower 6 bits to the total.  For
+     * generality call that number 'L'.
+     *
+     * You get that code point by masking off the top bits of each byte, then
+     * or'ing together:
+     * the start byte shifted left by 3*L bits,
+     * with  byte [1] shifted left by 2*L bits
+     * with  byte [2] shifted left by 1*L bits
+     * with  byte [3] shifted left by 0*L bits
+     *
+     * The order is immaterial, so we can rewrite that as
+     * 'or' together byte [3] shifted left by 0*L bits
+     *          with byte [2] shifted left by 1*L bits
+     *          with byte [1] shifted left by 2*L bits
+     *          with byte [0] shifted left by 3*L bits,
+     *
+     * All share the paradigm that for byte n you mask off the top bits and
+     * shift the remainder left by (4 - 1 - n) * L bits.  So we get
+     *      (s[n] & mask) << (4 - 1 - n) * L
+     * For a three-byte character it would be
+     *      (s[n] & mask) << (3 - 1 - n) * L
+     * and generally
+     *      (s[n] & mask) << (expectlen - 1 - n) * L
+     * which can be rewritten
+     *      (s[n] & mask) << (expectlen - 1) * L - nL
+     * Calculate the term once that isn't compile-time constant and is the same
+     * for all n */
+    U8 full_shift = (expectlen - 1) * UTF_ACCUMULATION_SHIFT;
+
+    /* Then create a macro that does the full calculation given n.  For EBCDIC,
+     * we need to transform s[n] to I8 */
+#define PERL_VALID_UTF8_NEXT_ACCUMULATION(n)         \
+    (( (UV) (   NATIVE_UTF8_TO_I8( s[n] ) & UTF_CONTINUATION_MASK))         \
+             << (full_shift - (n) * UTF_ACCUMULATION_SHIFT))
+
+    switch (expectlen) {
+      default:
+        uv = long_valid_utf8_to_uv(s, s + expectlen);
+        break;
+
+#if 0   /* See GH #23690 */
+      /* These cases give the correct results, but the extra memory used lowers
+       * the chances of the compiler actually inlining this, and we only care
+       * about performance for Unicode code points, all of which can be
+       * expressed with 4 bytes (5 on EBCDIC).  Experiements with clang showed
+       * no difference between 4,5,6, but a huge drop off with 7. */
+      case 7: uv |= PERL_VALID_UTF8_NEXT_ACCUMULATION(6);
+              /* FALLTHROUGH */
+      case 6: uv |= PERL_VALID_UTF8_NEXT_ACCUMULATION(5);
+              /* FALLTHROUGH */
+#endif
+      case 5: uv |= PERL_VALID_UTF8_NEXT_ACCUMULATION(4);
+              /* FALLTHROUGH */
+      case 4:
+        uv |= PERL_VALID_UTF8_NEXT_ACCUMULATION(3);
+              /* FALLTHROUGH */
+      case 3:
+        uv |= PERL_VALID_UTF8_NEXT_ACCUMULATION(2);
+              /* FALLTHROUGH */
+      case 2:
+        uv |= PERL_VALID_UTF8_NEXT_ACCUMULATION(1);
+
+        uv = UNI_TO_NATIVE(uv | (  ((UV)(  NATIVE_UTF8_TO_I8(s[0])
+                                         & UTF_START_MASK(expectlen))
+                                 << full_shift)));
+        break;
+
+      case 1:
+        uv = s[0];
+        break;
+    }
 
     if (retlen) {
         *retlen = expectlen;
     }
 
-    /* An invariant is trivially returned */
-    if (expectlen == 1) {
-        return uv;
-    }
-
-    /* Remove the leading bits that indicate the number of bytes, leaving just
-     * the bits that are part of the value */
-    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
-
-    /* Now, loop through the remaining bytes, accumulating each into the
-     * working total as we go.  (I khw tried unrolling the loop for up to 4
-     * bytes, but there was no performance improvement) */
-    for (++s; s < send; s++) {
-        uv = UTF8_ACCUMULATE(uv, *s);
-    }
-
-    return UNI_TO_NATIVE(uv);
-
+    return uv;
 }
 
 /* This looks like 0x010101... */

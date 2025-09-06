@@ -37,6 +37,21 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
+UV
+Perl_long_valid_utf8_to_uv(const U8 * const s, const U8 * const e)
+{
+    PERL_ARGS_ASSERT_LONG_VALID_UTF8_TO_UV;
+
+    /* This exists entirely to make the inlined 'valid_utf8_to_uv' smaller, to
+     * increase its chances of actually getting inlined.  For the code points
+     * it doesn't handle, it calls utf8_to_uv_or_die(), which is also inlined.
+     * So the compiler would try to inline both, getting a too-large-to-inline
+     * result.  So this non-inlined routine acts as an intermediary, to avoid
+     * that */
+
+    return utf8_to_uv_or_die(s, e, NULL);
+}
+
 /*
 These are various utility functions for manipulating UTF8-encoded
 strings.  For the uninitiated, this is a method of representing arbitrary
