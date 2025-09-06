@@ -3144,7 +3144,9 @@ PP(pp_aassign)
         case SVt_PVHV: {				/* normal hash */
 
             SV **svp;
+#ifndef PERL_RC_STACK
             SSize_t i;
+#endif
             SSize_t nelems = lastrelem - relem + 1;
             HV *hash = MUTABLE_HV(lsv);
 
@@ -3323,7 +3325,12 @@ PP(pp_aassign)
                 SV **svp;
                 SV **topelem = relem;
 
-                for (i = 0, svp = relem; svp <= lastrelem; i++, svp++) {
+#ifdef PERL_RC_STACK
+                for (svp = relem; svp <= lastrelem; svp++)
+#else
+                for (i = 0, svp = relem; svp <= lastrelem; i++, svp++)
+#endif
+                {
                     SV *key = *svp++;
                     SV *val = *svp;
                     /* remove duplicates from list we return */
@@ -3368,7 +3375,12 @@ PP(pp_aassign)
             }
             else {
                 SV **svp;
-                for (i = 0, svp = relem; svp <= lastrelem; i++, svp++) {
+#ifdef PERL_RC_STACK
+                for (svp = relem; svp <= lastrelem; svp++)
+#else
+                for (i = 0, svp = relem; svp <= lastrelem; i++, svp++)
+#endif
+                {
                     SV *key = *svp++;
                     SV *val = *svp;
 #ifdef PERL_RC_STACK
