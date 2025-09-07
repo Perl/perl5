@@ -226,18 +226,21 @@ sub valid_proto_string {
 
 =item * Purpose
 
-Process all typemap files.
+Process all typemap files. Reads in any typemap files specified explicitly
+with C<-typemap> switches or similar, plus any typemap files found in
+standard locations relative to C<@INC> and the current directory.
 
 =item * Arguments
 
   my $typemaps_object = process_typemaps( $args{typemap}, $pwd );
 
-List of two elements:  C<typemap> element from C<%args>; current working
-directory.
+The first argument is the C<typemap> element from C<%args>; the second is
+the current working directory (which is only needed for error messages).
 
 =item * Return Value
 
-Upon success, returns an L<ExtUtils::Typemaps> object.
+Upon success, returns an L<ExtUtils::Typemaps> object which contains the
+accumulated results of all processed typemap files.
 
 =back
 
