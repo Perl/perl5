@@ -110,23 +110,27 @@ A list of F<typemap> pathnames.
 sub standard_typemap_locations {
   my $include_ref = shift;
 
-  my @tm = qw(typemap);
+  my @tm;
+
+  # See function description above for why 'reverse' is used here.
+  foreach my $dir (reverse @{$include_ref}) {
+    my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
+    push @tm, $file;
+  }
 
   my $updir = File::Spec->updir();
   foreach my $dir (
-      File::Spec->catdir(($updir) x 1),
-      File::Spec->catdir(($updir) x 2),
-      File::Spec->catdir(($updir) x 3),
       File::Spec->catdir(($updir) x 4),
+      File::Spec->catdir(($updir) x 3),
+      File::Spec->catdir(($updir) x 2),
+      File::Spec->catdir(($updir) x 1),
   ) {
-    unshift @tm, File::Spec->catfile($dir, 'typemap');
-    unshift @tm, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
+    push @tm, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
+    push @tm, File::Spec->catfile($dir, 'typemap');
   }
 
-  foreach my $dir (@{ $include_ref}) {
-    my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
-    unshift @tm, $file;
-  }
+  push @tm, 'typemap';
+
   return @tm;
 }
 
