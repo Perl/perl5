@@ -107,14 +107,10 @@ A list of F<typemap> pathnames.
 
 =cut
 
-SCOPE: {
-  my @tm_template;
-
   sub standard_typemap_locations {
     my $include_ref = shift;
 
-    if (not @tm_template) {
-      @tm_template = qw(typemap);
+      my @tm = qw(typemap);
 
       my $updir = File::Spec->updir();
       foreach my $dir (
@@ -123,19 +119,16 @@ SCOPE: {
           File::Spec->catdir(($updir) x 3),
           File::Spec->catdir(($updir) x 4),
       ) {
-        unshift @tm_template, File::Spec->catfile($dir, 'typemap');
-        unshift @tm_template, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
+        unshift @tm, File::Spec->catfile($dir, 'typemap');
+        unshift @tm, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
       }
-    }
 
-    my @tm = @tm_template;
     foreach my $dir (@{ $include_ref}) {
       my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
       unshift @tm, $file;
     }
     return @tm;
   }
-} # end SCOPE
 
 =head2 C<trim_whitespace()>
 
