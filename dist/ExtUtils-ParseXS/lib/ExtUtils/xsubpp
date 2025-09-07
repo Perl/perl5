@@ -79,8 +79,6 @@ The compiler will search for typemap files called I<typemap>. It will use
 the following search path to find typemaps and apply them in that order,
 so later typemaps take precedence:
 
-    any files specifed by -typemap
-
     map("$_/ExtUtils/typemap", reverse @INC),
 
     ../../../../lib/ExtUtils/typemap
@@ -92,6 +90,8 @@ so later typemaps take precedence:
     ../lib/ExtUtils/typemap
     ../typemap
     typemap
+
+    any files specifed by -typemap
 
 =head1 OPTIONS
 
@@ -112,7 +112,8 @@ Adds exception handling stubs to the C code.
 
 Indicates that a user-supplied typemap should be applied in additon to any
 files found in the standard search path. This option may be used multiple
-times, with the last typemap having the highest precedence.
+times, with the last typemap having the highest precedence, and all such
+files processed after ones found in the standard path.
 
 =item B<-output filename>
 

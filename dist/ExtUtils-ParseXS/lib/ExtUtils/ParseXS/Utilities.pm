@@ -249,13 +249,13 @@ accumulated results of all processed typemap files.
 sub process_typemaps {
   my ($tmap, $pwd) = @_;
 
-  my @tm = ref $tmap ? @{$tmap} : ($tmap);
+  my @tm = standard_typemap_locations( \@INC );
 
-  foreach my $typemap (@tm) {
+  my @explicit = ref $tmap ? @{$tmap} : ($tmap);
+  foreach my $typemap (@explicit) {
     die "Can't find $typemap in $pwd\n" unless -r $typemap;
   }
-
-  push @tm, standard_typemap_locations( \@INC );
+  push @tm, @explicit;
 
   require ExtUtils::Typemaps;
   my $typemap = ExtUtils::Typemaps->new;

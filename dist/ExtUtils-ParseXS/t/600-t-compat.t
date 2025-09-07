@@ -97,16 +97,20 @@ foreach my $test (@tests) {
 # typemap-parsing/handling code in ExtUtils::ParseXS looked like. For
 # bug-compatibility, we want to produce the same data structures as that
 # code as much as possible.
+# Except in 2025 the ordering was changed so that local files via -typemap
+# are now processed afterwards; the order has been changed here to reflect
+# that change.
 sub _process_typemaps {
   my ($tmap, $pwd) = @_;
 
-  my @tm = ref $tmap ? @{$tmap} : ($tmap);
+  my @tm = standard_typemap_locations( \@INC );
 
-  foreach my $typemap (@tm) {
+  my @explicit = ref $tmap ? @{$tmap} : ($tmap);
+  foreach my $typemap (@explicit) {
     die "Can't find $typemap in $pwd\n" unless -r $typemap;
   }
+  push @tm, @explicit;
 
-  push @tm, standard_typemap_locations( \@INC );
 
   my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref)
     = ( {}, {}, {}, {} );
