@@ -8183,10 +8183,11 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                 p++;
             }
             else {
+                Size_t advance;
                 input_text[name_len++] = utf8_to_uv_or_die((const U8 *) p,
                                                            (const U8 *) e,
-                                                           NULL);
-                p+= UTF8SKIP(p);
+                                                           &advance);
+                p += advance;
             }
 
             /* The declaration of 'input_text' is how long we allow a potential
