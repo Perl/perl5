@@ -64,60 +64,44 @@ They are documented here for the benefit of future maintainers of this module.
 
 =item * Purpose
 
-Provide a list of filepaths where F<typemap> files may be found.  The
-filepaths -- relative paths to files (not just directory paths) -- appear in this list in lowest-to-highest priority.
+Returns a standard list of filepaths where F<typemap> files may be found.
+This will typically be something like:
 
-The highest priority is to look in the current directory.  
+        map("$_/ExtUtils/typemap", reverse @INC),
+        qw(
+            ../../../../lib/ExtUtils/typemap
+            ../../../../typemap
+            ../../../lib/ExtUtils/typemap
+            ../../../typemap
+            ../../lib/ExtUtils/typemap
+            ../../typemap
+            ../lib/ExtUtils/typemap
+            ../typemap
+            typemap
+        )
 
-  'typemap'
+but the style of the pathnames may vary with OS. Note that the value to
+use for C<@INC> is passed as an array reference, and can be something
+other than C<@INC> itself.
 
-The second and third highest priorities are to look in the parent of the
-current directory and a directory called F<lib/ExtUtils> underneath the parent
-directory.
+Pathnames are returned in the order they are expected to be processed;
+this means that later files will update or override entries found in
+earlier files. So in particular, F<typemap> in the current directory has
+highest priority. C<@INC> is searched in reverse order so that earlier
+entries in C<@INC> are processed later and so have higher priority.
 
-  '../typemap',
-  '../lib/ExtUtils/typemap',
-
-The fourth through ninth highest priorities are to look in the corresponding
-grandparent, great-grandparent and great-great-grandparent directories.
-
-  '../../typemap',
-  '../../lib/ExtUtils/typemap',
-  '../../../typemap',
-  '../../../lib/ExtUtils/typemap',
-  '../../../../typemap',
-  '../../../../lib/ExtUtils/typemap',
-
-The tenth and subsequent priorities are to look in directories named
-F<ExtUtils> which are subdirectories of directories found in C<@INC> --
-I<provided> a file named F<typemap> actually exists in such a directory.
-Example:
-
-  '/usr/local/lib/perl5/5.10.1/ExtUtils/typemap',
-
-However, these filepaths appear in the list returned by
-C<standard_typemap_locations()> in reverse order, I<i.e.>, lowest-to-highest.
-
-  '/usr/local/lib/perl5/5.10.1/ExtUtils/typemap',
-  '../../../../lib/ExtUtils/typemap',
-  '../../../../typemap',
-  '../../../lib/ExtUtils/typemap',
-  '../../../typemap',
-  '../../lib/ExtUtils/typemap',
-  '../../typemap',
-  '../lib/ExtUtils/typemap',
-  '../typemap',
-  'typemap'
+The values of C<-typemap> switches are not used here; they should be added
+by the caller to the list of pathnames returned by this function.
 
 =item * Arguments
 
-  my @stl = standard_typemap_locations( \@INC );
+  my @stl = standard_typemap_locations(\@INC);
 
-Reference to C<@INC>.
+A single argument: a reference to an array to use as if it were C<@INC>.
 
 =item * Return Value
 
-Array holding list of directories to be searched for F<typemap> files.
+A list of F<typemap> pathnames.
 
 =back
 
