@@ -86,13 +86,13 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
             if (c < 0x100 && (ch = tbl->map[c]) >= 0) {
                 matches++;
                 d = uv_to_utf8(d, (UV)ch);
-                s += ulen;
             }
             else { /* No match -> copy */
                 Move(s, d, ulen, U8);
                 d += ulen;
-                s += ulen;
             }
+
+            s += ulen;
         }
         if (grows) {
             sv_setpvn(sv, (char*)dstart, d - dstart);
