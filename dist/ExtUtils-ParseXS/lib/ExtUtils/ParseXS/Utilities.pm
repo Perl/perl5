@@ -147,7 +147,7 @@ SCOPE: {
     my @tm = @tm_template;
     foreach my $dir (@{ $include_ref}) {
       my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
-      unshift @tm, $file if -e $file;
+      unshift @tm, $file;
     }
     return @tm;
   }

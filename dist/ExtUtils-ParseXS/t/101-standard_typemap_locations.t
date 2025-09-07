@@ -17,17 +17,8 @@ use ExtUtils::ParseXS::Utilities qw(
         1
         unless @stl > 9;
 
-        # We check only as many location entries from the start of the array
-        # (where the @INC-related entries are) as there are entries from @INC.
-        # We manage to do that by stopping when we find the "updir" related
-        # entries, which we assume is never contained in a default @INC entry.
-        my $updir = File::Spec->updir;
+        # Check that at least one typemap file can be found under @INC
         my $max = $#INC;
-        $max = $#stl if $#stl < $max;
-        foreach my $i (0.. $max) {
-          $max = $i, last if $stl[$i] =~ /\Q$updir\E/;
-        }
-
         ok(
             ( 0 < (grep -f $_, @stl[0..$max]) ),
             "At least one typemap file exists underneath \@INC directories"
@@ -39,6 +30,7 @@ use ExtUtils::ParseXS::Utilities qw(
     my @fake_INC = qw(a/b/c  d/e/f  /g/h/i);
     my @expected =
         (
+            map("$_/ExtUtils/typemap", reverse @fake_INC),
             qw(
                 ../../../../lib/ExtUtils/typemap
                 ../../../../typemap
