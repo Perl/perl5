@@ -3552,9 +3552,8 @@ how long the first character in it is with the C<UTF8SKIP> macro:
     len = UTF8SKIP(utf); /* len is 3 here */
 
 Another way to skip over characters in a UTF-8 string is to use
-C<utf8_hop>, which takes a string and a number of characters to skip
-over.  You're on your own about bounds checking, though, so don't use it
-lightly.
+L<perlapi/C<utf8_hop_safe>>, which takes a string and a number of
+characters to skip over.
 
 All bytes in a multi-byte UTF-8 character will have the high bit set,
 so you can test if you need to do something special with this
