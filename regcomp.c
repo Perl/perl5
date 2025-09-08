@@ -2522,19 +2522,16 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
     PERL_ARGS_ASSERT_REG_SCAN_NAME;
 
     assert (RExC_parse <= RExC_end);
+    Size_t advance;
     if (RExC_parse == RExC_end) NOOP;
-    else if (isIDFIRST_lazy_if_safe(RExC_parse, RExC_end, UTF)) {
+    else if ((advance = isIDFIRST_lazy_if_safe(RExC_parse, RExC_end, UTF))) {
          /* Note that the code here assumes well-formed UTF-8.  Skip IDFIRST by
           * using do...while */
-        if (UTF)
             do {
-                RExC_parse_inc_utf8();
+                RExC_parse_advance(advance);
             } while (   RExC_parse < RExC_end
-                     && isWORDCHAR_utf8_safe((U8*)RExC_parse, (U8*) RExC_end));
-        else
-            do {
-                RExC_parse_inc_by(1);
-            } while (RExC_parse < RExC_end && isWORDCHAR(*RExC_parse));
+                     && (advance = isWORDCHAR_utf8_safe( (U8 *) RExC_parse,
+                                                         (U8 *) RExC_end)));
     } else {
         RExC_parse_inc_by(1); /* so the <- from the vFAIL is after the offending
                          character */

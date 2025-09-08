@@ -279,6 +279,14 @@ struct RExC_state_t {
  * output during the parse process.
  */
 
+/* RExC_parse_advance(count)
+ *
+ * Increment RExC_parse to point at the next codepoint, when we *know* that the
+ * correct byte count is in the passed parameter */
+#define RExC_parse_advance(count) STMT_START {          \
+    RExC_parse += count;                                \
+} STMT_END
+
 /* RExC_parse_incf(flag)
  *
  * Increment RExC_parse to point at the next codepoint, while doing
