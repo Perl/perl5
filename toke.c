@@ -730,7 +730,7 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
             const char *t= oldbp;
             assert(s >= oldbp);
             while (t < s && isSPACE(*t)) {
-                t += UTF ? UTF8SKIP(t) : 1;
+                t++;
             }
 
             sv_catpvf(message,
@@ -5390,7 +5390,7 @@ yyl_dollar(pTHX_ char *s)
 
                     while ( t < PL_bufend ) {
                         if (isSPACE(*t)) {
-                            do { t += UTF ? UTF8SKIP(t) : 1; } while (t < PL_bufend && isSPACE(*t));
+                            do { t++; } while (t < PL_bufend && isSPACE(*t));
                             /* consumed one or more space chars */
                         } else if (*t == '$' || *t == '@') {
                             /* could be more than one '$' like $$ref or @$ref */
