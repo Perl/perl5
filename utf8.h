@@ -946,6 +946,10 @@ implementation of the latter. */
                    ((IN_BYTES || !UTF)                                      \
                      ? isIDFIRST(*(p))                                      \
                      : isIDFIRST_utf8_safe(p, e))
+#define isIDCONT_lazy_if_safe(p, e, UTF)                                    \
+                   ((IN_BYTES || !UTF)                                      \
+                     ? isIDCONT(*(p))                                       \
+                     : isIDCONT_utf8_safe(p, e))
 #define isWORDCHAR_lazy_if_safe(p, e, UTF)                                  \
                    ((IN_BYTES || !UTF)                                      \
                      ? isWORDCHAR(*(p))                                     \
