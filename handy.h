@@ -1595,8 +1595,8 @@ END_EXTERN_C
 
     /* For internal core Perl use only: the base macro for defining macros like
      * isALPHA */
-#   define generic_isCC_(c, classnum) cBOOL(FITS_IN_8_BITS(c)    \
-                && (PL_charclass[(U8) (c)] & CC_mask_(classnum)))
+#   define generic_isCC_(c, classnum)                                       \
+       (FITS_IN_8_BITS(c) && (PL_charclass[(U8) (c)] & CC_mask_(classnum)))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
      * ASCII. */
