@@ -1753,17 +1753,17 @@ ATdip	|bool	|is_utf8_fixed_width_buf_loclen_flags			\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
-CRp	|bool	|is_utf8_FOO_	|const U8 classnum			\
+CRp	|Size_t |is_utf8_FOO_	|const U8 classnum			\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
 ARTdip	|bool	|is_utf8_invariant_string_loc				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep
-CRp	|bool	|is_utf8_perl_idcont_					\
+CRp	|Size_t |is_utf8_perl_idcont_					\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
-CRp	|bool	|is_utf8_perl_idstart_					\
+CRp	|Size_t |is_utf8_perl_idstart_					\
 				|NN const U8 *p 			\
 				|NN const U8 * const e
 ARTdmp	|bool	|is_utf8_string |NN const U8 *s 			\

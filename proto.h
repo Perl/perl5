@@ -1850,7 +1850,7 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e, const bool requ
 #define PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_     \
         assert(s0); assert(e)
 
-PERL_CALLCONV bool
+PERL_CALLCONV Size_t
 Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_FOO_           \
@@ -1872,13 +1872,13 @@ Perl_is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 fla
 /* PERL_CALLCONV bool
 Perl_is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
 
-PERL_CALLCONV bool
+PERL_CALLCONV Size_t
 Perl_is_utf8_perl_idcont_(pTHX_ const U8 *p, const U8 * const e)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_PERL_IDCONT_   \
         assert(p); assert(e)
 
-PERL_CALLCONV bool
+PERL_CALLCONV Size_t
 Perl_is_utf8_perl_idstart_(pTHX_ const U8 *p, const U8 * const e)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_PERL_IDSTART_  \
