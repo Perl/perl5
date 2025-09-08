@@ -250,7 +250,7 @@ scope has the given name. C<name> must be a literal string.
         CopFILE_debug((c),"SAVECOPFILE_FREE",0);   \
     } STMT_END
 #else
-#  /* XXX not refcounted */
+  /* XXX not refcounted */
 #  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))
 #  define SAVECOPFILE(c)	SAVESPTR(CopFILEGV(c))
 #  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
