@@ -2266,7 +2266,7 @@ END_EXTERN_C
                 : (force_out_malformed_utf8_message_(                       \
                                         (U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0))  \
              : above_latin1))
-/* Like the above, but calls 'above_latin1(p)' to get the utf8 value.
+/* Like the above, but calls 'above_latin1(p, e)' to get the utf8 value.
  * 'above_latin1' can be a macro */
 #define generic_func_utf8_safe_(classnum, above_latin1, p, e)               \
                     generic_utf8_safe_(classnum, p, e, above_latin1(p, e))
