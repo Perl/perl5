@@ -10461,6 +10461,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     switch (with_t_UTF8ness(OP(p), utf8_target)) {
         SV * anyofh_list;
+        Size_t advance;
 
       case REG_ANY_t8:
         while (scan < this_eol && hardcount < max && *scan != '\n') {
@@ -10746,9 +10747,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && _invlist_contains_cp(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
-                                                         NULL)))
+                                                         &advance)))
         {
-            scan += UTF8SKIP(scan);
+            scan += advance;
             hardcount++;
         }
         break;
@@ -10762,9 +10763,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && _invlist_contains_cp(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
-                                                         NULL)))
+                                                         &advance)))
         {
-            scan += UTF8SKIP(scan);
+            scan += advance;
             hardcount++;
         }
         break;
@@ -10792,9 +10793,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && _invlist_contains_cp(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
-                                                         NULL)))
+                                                         &advance)))
         {
-            scan += UTF8SKIP(scan);
+            scan += advance;
             hardcount++;
         }
         break;
@@ -10807,9 +10808,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && _invlist_contains_cp(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
-                                                         NULL)))
+                                                         &advance)))
         {
-            scan += UTF8SKIP(scan);
+            scan += advance;
             hardcount++;
         }
         break;
@@ -10820,10 +10821,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
                && withinCOUNT(utf8_to_uv_or_die((U8 *) scan,
                                                 (U8 *) this_eol,
-                                                NULL),
+                                                &advance),
                               ANYOFRbase(p), ANYOFRdelta(p)))
         {
-            scan += UTF8SKIP(scan);
+            scan += advance;
             hardcount++;
         }
         break;
@@ -10844,10 +10845,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                && (U8) *scan == ANYOF_FLAGS(p)
                && withinCOUNT(utf8_to_uv_or_die((U8 *) scan,
                                                 (U8 *) this_eol,
-                                                NULL),
+                                                &advance),
                               ANYOFRbase(p), ANYOFRdelta(p)))
         {
-            scan += UTF8SKIP(scan);
+            scan += advance;
             hardcount++;
         }
         break;
