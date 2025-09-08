@@ -157,6 +157,7 @@ scope has the given name. C<name> must be a literal string.
         if (PL_savestack_ix > old) leave_scope(old); \
     } STMT_END
 
+/* N.B. These are documented in pad.h */
 #define SAVEI8(i)                   save_I8((I8*)&(i))
 #define SAVEI16(i)                  save_I16((I16*)&(i))
 #define SAVEI32(i)                  save_I32((I32*)&(i))
