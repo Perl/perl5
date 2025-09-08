@@ -1181,7 +1181,7 @@ static OP *THX_parse_keyword_subsignature(pTHX)
                 seen_nextstate++;
                 retop = op_append_list(OP_LIST, retop, newSVOP(OP_CONST, 0,
                     /* newSVpvf("nextstate:%s:%d", CopFILE(cCOPx(kid)), cCOPx(kid)->cop_line))); */
-                    newSVpvf("nextstate:%u", (unsigned int)cCOPx(kid)->cop_line)));
+                    newSVpvf("nextstate:%" LINE_Tf, CopLINE(cCOPx(kid)))));
                 break;
             case OP_ARGCHECK: {
                 struct op_argcheck_aux *p =
