@@ -445,8 +445,9 @@ static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgvers
     if(SvUTF8(value))
         SvUTF8_on(pkgname);
 
-    while(*p && isSPACE_utf8_safe(p, end))
-        p += UTF8SKIP(p);
+    Size_t advance;
+    while(*p && (advance = isSPACE_utf8_safe(p, end)))
+        p += advance;
 
     if(*p) {
         /* scan_version() gets upset about trailing content. We need to extract
@@ -463,8 +464,8 @@ static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgvers
         scan_version(SvPVX(tmpsv), pkgversion, FALSE);
     }
 
-    while(*p && isSPACE_utf8_safe(p, end))
-        p += UTF8SKIP(p);
+    while(*p && (advance = isSPACE_utf8_safe(p, end)))
+        p += advance;
 
     return p;
 }
