@@ -5192,11 +5192,17 @@ S_require_file(pTHX_ SV *sv)
                          S_parse_ident */
                         c = name;
                         while (c < e) {
-                            if (utf8 && isIDFIRST_utf8_safe(c, e)) {
-                                c += UTF8SKIP(c);
-                                while (c < e && isIDCONT_utf8_safe(
-                                            (const U8*) c, (const U8*) e))
-                                    c += UTF8SKIP(c);
+                            Size_t advance;
+
+                            if (utf8 && (advance = isIDFIRST_utf8_safe(c, e)))
+                            {
+                                c += advance;
+                                while (   c < e
+                                       && (advance = isIDCONT_utf8_safe(
+                                                (const U8*) c, (const U8*) e)))
+                                {
+                                    c += advance;
+                                }
                             }
                             else if (isWORDCHAR_A(*c)) {
                                 while (c < e && isWORDCHAR_A(*c))
