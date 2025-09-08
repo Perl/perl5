@@ -911,7 +911,7 @@ Exactly like C<XopENTRY(XopENTRY(Perl_custom_op_xop(aTHX_ o), which)> but more
 efficient.  The C<which> parameter is identical to L</XopENTRY>.
 
 =for apidoc Amu|void|XopENTRY_set|XOP *xop|token which|value
-Set a member of the XOP structure.  C<which> is a cpp token
+Set a member of the XOP structure to C<value>.  C<which> is a cpp token
 indicating which entry to set.  See L<perlguts/"Custom Operators">
 for details about the available members and how
 they are used.  This macro evaluates its argument
