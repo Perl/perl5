@@ -2701,7 +2701,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
     if (   full_len != 0
-           && isIDFIRST_lazy_if_safe(name, name + full_len, is_utf8)) {
+        && isIDFIRST_lazy_if_safe(name, name + full_len, is_utf8))
+    {
         if (ckWARN(WARN_ONCE)) {
             if (ckDEAD(WARN_ONCE))
                 GvONCE_FATAL_on(gv);
