@@ -733,7 +733,7 @@ sub parse_fh {
 sub lines { $_[0]->{lines} }
 
 # assuming a line looks like an embed.fnc entry parse it
-# and normalize it, and create and EmbedLine object from it.
+# and normalize it, and create an EmbedLine object from it.
 sub tidy_embed_fnc_entry {
     my ($self, $line_data)= @_;
     my $line= $line_data->{line};
@@ -1272,7 +1272,7 @@ sub _flatten_cond {
 # into the tree, and want to find the best path for
 # ["E","D","C","B","A"] we should return: ["A","B","C"],["E","D"],
 #
-# This used to reduce the number of conditions in the grouped content,
+# This is used to reduce the number of conditions in the grouped content,
 # and is especially helpful with dealing with DEBUGGING related
 # functionality. It is coupled with careful control over the order
 # that we add paths and conditions to the tree.
@@ -1888,7 +1888,7 @@ file.
 Each content line will be grouped into a structure of nested if/else blocks
 (elif will produce a new nested block) such that the content under the control
 of a given set of normalized condition clauses are grouped together in the order
-the occurred in the file, such that each combined conditional clause is output
+they occurred in the file, such that each combined conditional clause is output
 only once.
 
 This means a file like this:
@@ -1944,7 +1944,7 @@ argument, and C<post_process_grouped_content> will be called with an
 array of line hashes for the content in that group, so that the array may be
 modified or sorted.  Callbacks called from inside of C<group_content()>
 (that is C<post_process_content> and C<post_process_grouped_content> will be
-called with an additional argument containing and array specifying the actual
+called with an additional argument containing an array specifying the actual
 conditional "path" to the content  (which may differ somewhat from the data in
 a lines "cond" property).
 
