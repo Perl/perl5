@@ -3900,16 +3900,21 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
 }
 #endif
 
-/* returns a boolean giving whether or not the UTF8-encoded character that
- * starts at <p>, and extending no further than <e - 1> is in the inversion
- * list <invlist>. */
-STATIC bool
+/* returns the number of bytes comprising the UTF8-encoded character that
+ * starts at <p>, and extending no further than <e - 1> if it is in the
+ * inversion list <invlist>; or 0 if it isn't */
+STATIC Size_t
 S_is_utf8_in_invlist(pTHX_ const U8 * p, const U8 * e, SV * const invlist)
 {
-    return _invlist_contains_cp(invlist, utf8_to_uv_or_die(p, e, NULL));
+    Size_t advance;
+    if (_invlist_contains_cp(invlist, utf8_to_uv_or_die(p, e, &advance))) {
+        return advance;
+    }
+
+    return 0;
 }
 
-bool
+Size_t
 Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT_IS_UTF8_FOO_;
@@ -3917,7 +3922,7 @@ Perl_is_utf8_FOO_(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
     return S_is_utf8_in_invlist(aTHX_ p, e, PL_XPosix_ptrs[classnum]);
 }
 
-bool
+Size_t
 Perl_is_utf8_perl_idstart_(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT_IS_UTF8_PERL_IDSTART_;
@@ -3925,7 +3930,7 @@ Perl_is_utf8_perl_idstart_(pTHX_ const U8 *p, const U8 * const e)
     return S_is_utf8_in_invlist(aTHX_ p, e, PL_utf8_perl_idstart);
 }
 
-bool
+Size_t
 Perl_is_utf8_perl_idcont_(pTHX_ const U8 *p, const U8 * const e)
 {
     PERL_ARGS_ASSERT_IS_UTF8_PERL_IDCONT_;
