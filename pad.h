@@ -178,7 +178,7 @@ typedef enum {
  * indirectly affect pads. */
 
 /*
-=for apidoc m|void|SAVEPADSV	|PADOFFSET po
+=for apidoc m|void|SAVEPADSVANDMORTALIZE|PADOFFSET po
 Save a pad slot (used to restore after an iteration)
 
 =cut
