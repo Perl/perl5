@@ -944,9 +944,16 @@ S_get_displayable_string(pTHX_
     SAVEFREEPV(ret);
 
     while (t < e) {
-        UV cp = (is_utf8)
-                ?  utf8_to_uv_or_die((const U8 *) t, (const U8 *) e, NULL)
-                : * (U8 *) t;
+        UV cp;
+        Size_t advance;
+        if (is_utf8) {
+            cp = utf8_to_uv_or_die((const U8 *) t, (const U8 *) e, &advance);
+        }
+        else {
+            cp = *t;
+            advance = 1;
+        }
+
         if (isPRINT(cp)) {
             if (! prev_was_printable) {
                 my_strlcat(ret, " ", size);
@@ -966,7 +973,7 @@ S_get_displayable_string(pTHX_
             my_strlcat(ret, form("%02" UVXf, cp), size);
             prev_was_printable = FALSE;
         }
-        t += (is_utf8) ? UTF8SKIP(t) : 1;
+        t += advance;
         first_time = FALSE;
     }
 
