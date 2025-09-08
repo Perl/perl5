@@ -2263,8 +2263,10 @@ END_EXTERN_C
           : (UTF8_IS_ABOVE_LATIN1_START(*(p))                               \
              ? above_latin1                                                 \
              : ((LIKELY((e) - (p) > 1 && UTF8_IS_CONTINUATION(*((p)+1))))   \
-                ? generic_isCC_(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1 )),  \
-                                classnum)                                   \
+                  /* Multiply by 2 to return byte length of matched         \
+                   * character */                                           \
+                ? 2 * generic_isCC_(EIGHT_BIT_UTF8_TO_NATIVE(*(p),*((p)+1)),\
+                                    classnum)                               \
                 : (force_out_malformed_utf8_message_((U8 *) (p), (U8 *) (e),\
                                                      0, MALFORMED_UTF8_DIE),\
                    0))))
