@@ -2088,8 +2088,10 @@ S_check_uni(pTHX)
     while (isSPACE(*PL_last_uni))
         PL_last_uni++;
     s = PL_last_uni;
-    while (isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF) || *s == '-')
-        s += UTF ? UTF8SKIP(s) : 1;
+    Size_t advance;
+    while (   (advance = isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF))
+           || (advance = (*s == '-')))
+        s += advance;
     if (s < PL_bufptr && memchr(s, '(', PL_bufptr - s))
         return;
 
@@ -5193,10 +5195,11 @@ S_check_scalar_slice(pTHX_ char *s)
     {
         return;
     }
-    while (    isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF)
-           || (*s && memCHRs(" \t$#+-'\"", *s)))
+    Size_t advance;
+    while (   (advance = isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF))
+           || (advance = (*s && memCHRs(" \t$#+-'\"", *s))))
     {
-        s += UTF ? UTF8SKIP(s) : 1;
+        s += advance;
     }
     if (*s == '}' || *s == ']')
         pl_yylval.ival = OPpSLICEWARNING;
@@ -5402,8 +5405,11 @@ yyl_dollar(pTHX_ char *s)
                             while (t < PL_bufend && *t == ' ') t++;
 
                             /* strip off the name of the var */
-                            while (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
-                                t += UTF ? UTF8SKIP(t) : 1;
+                            Size_t advance;
+                            while ((advance = (isWORDCHAR_lazy_if_safe(t,
+                                                                    PL_bufend,
+                                                                    UTF))))
+                                t += advance;
                             /* consumed a varname */
                         } else if (isDIGIT(*t)) {
                             /* deal with hex constants like 0x11 */
@@ -6407,6 +6413,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
              * GSAR 97-07-21
              */
             t = s;
+            Size_t advance;
             if (*s == '\'' || *s == '"' || *s == '`') {
                 /* common case: get past first string, handling escapes */
                 for (t++; t < PL_bufend && *t != *s;)
@@ -6455,20 +6462,24 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                     }
                     t++;
                 }
-                else
+                else {
                     /* skip plain q word */
-                    while (   t < PL_bufend
-                           && isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
+                    while (   t < PL_bufend 
+                           && (advance = isWORDCHAR_lazy_if_safe(t,
+                                                                 PL_bufend,
+                                                                 UTF)))
                     {
-                        t += UTF ? UTF8SKIP(t) : 1;
+                        t += advance;
                     }
+                }
             }
-            else if (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF)) {
-                t += UTF ? UTF8SKIP(t) : 1;
+            else if ((advance = isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))) {
+                t += advance;
                 while (   t < PL_bufend
-                       && isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF))
+                       && (advance = isWORDCHAR_lazy_if_safe(t, PL_bufend,
+                                                             UTF)))
                 {
-                    t += UTF ? UTF8SKIP(t) : 1;
+                    t += advance;
                 }
             }
             while (t < PL_bufend && isSPACE(*t))
@@ -10125,11 +10136,12 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
         s++;
     while (s < PL_bufend && isSPACE(*s))
         s++;
-    if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+    Size_t advance;
+    if ((advance = isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))) {
         const char * const w = s;
-        s += UTF ? UTF8SKIP(s) : 1;
-        while (isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF))
-            s += UTF ? UTF8SKIP(s) : 1;
+        s += advance;
+        while ((advance = isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF)))
+            s += advance;
         while (s < PL_bufend && isSPACE(*s))
             s++;
         if (*s == ',') {
@@ -10281,15 +10293,18 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
     while (*s < PL_bufend) {
         if (*d >= e)
             croak("%s", ident_too_long);
-        if (is_utf8 && isIDFIRST_utf8_safe(*s, PL_bufend)) {
+        Size_t advance;
+        if (is_utf8 && (advance = isIDFIRST_utf8_safe(*s, PL_bufend))) {
              /* The UTF-8 case must come first, otherwise things
              * like c\N{COMBINING TILDE} would start failing, as the
              * isWORDCHAR_A case below would gobble the 'c' up.
              */
 
-            char *t = *s + UTF8SKIP(*s);
-            while (isIDCONT_utf8_safe((const U8*) t, (const U8*) PL_bufend)) {
-                t += UTF8SKIP(t);
+            char *t = *s + advance;
+            while ((advance = isIDCONT_utf8_safe((const U8*) t,
+                                                 (const U8*) PL_bufend)))
+            {
+                t += advance;
             }
             if (*d + (t - *s) > e)
                 croak("%s", ident_too_long);
@@ -10496,11 +10511,12 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             /* note we have to check for a normal identifier first,
              * as it handles utf8 symbols, and only after that has
              * been ruled out can we look at the caret words */
-            if (isIDFIRST_lazy_if_safe(d, e, is_utf8) ) {
+            Size_t advance;
+            if ((advance = isIDFIRST_lazy_if_safe(d, e, is_utf8) )) {
                 /* if it starts as a valid identifier, assume that it is one.
                    (the later check for } being at the expected point will trap
                    cases where this doesn't pan out.)  */
-                d += is_utf8 ? UTF8SKIP(d) : 1;
+                d += advance;
                 parse_ident(&s, &d, e, 1, is_utf8, TRUE);
                 *d = '\0';
             }
@@ -10998,8 +11014,9 @@ S_scan_heredoc(pTHX_ char *s)
 
         peek = s;
 
-        while (isWORDCHAR_lazy_if_safe(peek, PL_bufend, UTF)) {
-            peek += UTF ? UTF8SKIP(peek) : 1;
+        Size_t advance;
+        while ((advance = isWORDCHAR_lazy_if_safe(peek, PL_bufend, UTF))) {
+            peek += advance;
         }
 
         len = (peek - s >= e - d) ? (e - d) : (peek - s);
@@ -11442,9 +11459,13 @@ S_scan_inputsymbol(pTHX_ char *start)
     if (*d == '$' && d[1]) d++;
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
-    while (isWORDCHAR_lazy_if_safe(d, e, UTF) || *d == ':'
-           || (*d == '\'' && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED)) {
-        d += UTF ? UTF8SKIP(d) : 1;
+    Size_t advance;
+    while (   (advance = isWORDCHAR_lazy_if_safe(d, e, UTF))
+           || (advance = (   *d == ':'
+                          || (   *d == '\''
+                              && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED))))
+    {
+        d += advance;
     }
 
     /* If we've tried to read what we allow filehandles to look like, and
