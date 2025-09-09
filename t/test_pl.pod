@@ -1,0 +1,884 @@
+=encoding utf8
+
+=head1 NAME
+
+test_pl.pod - documentation for t/test.pl
+
+=head1 SYNOPSIS
+
+    BEGIN {
+        chdir 't' if -d 't';
+        require './test.pl';
+        set_up_inc(qw '../lib ...');
+    }
+
+    # either:
+    plan tests => $test_count;
+    ... tests ...
+
+    # or
+    ... tests ...
+    done_testing();
+
+    # roughly Test::More compatible
+    # you can omit $name but you really shouldn't
+    # tests
+    ok($ok, $name);
+    is($got, $expected, $name);
+    isnt($got, $unexpected, $name);
+    cmp_ok($got, $op, $expected, $name);
+    like($got, $expected, $name);
+    unlike($got, $expected, $name);
+    pass($name);
+    fail($name);
+    can_ok($object, @methods);
+    new_ok($class, \@args, $obj_name);
+    isa_ok($object, $class, $obj_name);
+    require_ok($module); # eg "Time::HiRes" not "Time/Hires.pm"
+    use_ok($module)      # eg "Time::HiRes" not "Time/Hires.pm"
+    local $::TODO = "todo reason";
+
+    # test utilities
+    skip($reason, $count); # $count is 1 if omitted
+    diag(@messages);
+    note(@messages);
+    BAIL_OUT($reason);
+
+    # test extensions over Test::More
+    # you can omit $name but you really shouldn't
+    within($got, $expected, $range, $name);
+    refcount_is($got, $expected, $name);
+
+    object_ok($obj, $isa, $obj_name);
+    class_ok($class, $isa, $class_name);
+
+    warnings_like($subref, \@expect_qr, $name);
+    warning_is($subref, $expect, $name);
+    warning_like($subref, $expect_qr, $name);
+
+    fresh_perl_is($code, $expected, \%runperl_args, $name);
+    fresh_perl_like($code, $expected, \%runperl_args, $name);
+
+    # test tools
+    my $test_num = curr_test();
+    curr_test($new_test_num);
+    todo_skip($reason, $count);
+
+    # often used from BEGIN
+    skip_if_miniperl($reason, $count);
+    skip_all_without_dynamic_extension($extension); # eg "Time::HiRes"
+    skip_all(@messages);
+    skip_all_if_miniperl(@messages);
+    skip_all_without_perlio();
+    skip_all_without_config(@config_keys);
+    skip_all_without_unicode_tables();
+    find_git_or_skip("all");
+    find_git_or_skip($count);
+
+    # test directory runners (like t/lib/croak.t, lib/warnings.t)
+    my ($count, @test_progs) = setup_multiple_progs(@files);
+    run_multiple_progs('', $fh);
+    run_multiple_progs($up, @test_progs);
+
+    # utilities
+    my $output = runperl(%runperl_args);
+    my $output = run_perl(%runperl_args); # purely an alias
+
+    my ($stdout, $stderr) =
+        runperl_and_capture(\%myenv_changes, \@run_me);
+
+    my @warnings = capture_warnings($subref); # may allow args
+
+=for comment not really usable
+    my $clean = untaint_path($1); # $dirty shouldn't be tainted
+
+    watchdog($timeout, $type); # zero timeout clears the watchdog
+
+    my $perl_exe = which_perl();
+
+    my $count = unlink_all(@filenames); # return value normally ignored
+
+    my $tmpfile = tempfile();
+    register_tempfile(@filenames);
+    unlink_tempfiles(); # done by END, but you can cleanup earlier too
+
+    my $output = fresh_perl($code, \%runperl_args);
+
+    my @pretty = display(@data);
+    my $pretty_re = display_rx($str);
+
+    if (eq_array(\@one, \@two)) {
+        ...
+    }
+    if (eq_hash(\%one, \%two)) {
+        ...
+    }
+
+    unless (is_miniperl()) {
+        ...
+    }
+    if (is_linux_container()) {
+        ...
+    }
+
+    # detected configuration
+    $::IS_ASCII   # if an ASCII-ish system, ie. ord("A") == 65
+    $::IS_EBCDIC  # if an EDCDIC-ish system, ie. ord("A") == 193
+    # path to a device that reads nothing and discards writes
+    # "/dev/null" or "nul"
+    $::devnull
+
+=head1 DESCRIPTION
+
+F<t/test.pl> provides much of L<Test::More>, and more, but tries not
+to exercise too much of the interpreter.
+
+Some parts do work differently.
+
+=head1 Test::More differences
+
+Since F<test.pl> is loaded with C<require> instead of C<use> you need
+to call plan(), or the skip_all() function instead of specifying that
+on the C<use> line.
+
+Instead of:
+
+    use Test::More plan => 20;
+
+you need something like:
+
+    BEGIN {
+        chdir 't' if -d 't';
+        require './test.pl';
+        set_up_inc( '../lib' );
+    }
+    plan tests => 20;
+
+or you can skip the plan and use done_testing().
+
+There is no support for subtests.
+
+The following Test::More functions are provided and they are generally
+Test::More compatible:
+
+=over
+
+=item ok($ok, $name)
+
+=item is($got, $expected, $name)
+
+=item isnt($got, $unexpected, $name)
+
+=item cmp_ok($got, $op, $expected, $name)
+
+=item like($got, $expected, $name)
+
+=item unlike($got, $expected, $name)
+
+=item pass($name)
+
+=item fail($name)
+
+=item can_ok($object, @methods)
+
+=item $obj = new_ok($class, \@args, $obj_name)
+
+=item isa_ok($object, $class, $obj_name)
+
+=item require_ok($module)
+
+=item use_ok($module)
+
+=item skip($reason, $count)
+
+=item diag(@messages)
+
+=item note(@messages)
+
+=item BAIL_OUT($reason)
+
+=item done_testing()
+
+=back
+
+=head1 Extended test functions
+
+These perform some sort of test, in some cases results for multiple
+tests are produced:
+
+=over
+
+=item within($got, $expected, $range, $name)
+
+Check C<$got> is within a numeric range.
+
+Fails if any of C<$got>, C<$expected> or C<$range> is non-numeric.
+
+If C<$range> is zero, succeeds if C<< $got == $range >>.
+
+If C<$expected> is zero, succeeds if C<< -$range <= $got <= $range >>.
+
+Otherwise succeeds if C<< abs($got - $expected)/$expected < $range >>.
+
+    my $pi = 3.14159265;
+    within(sin($pi/6), 0.5, 0.0001, "sin(PI/6) is sane");
+    within(cos($pi), 0, 0.0001, "cos(PI) is sane");
+
+=item refcount_is($got, $expected, $name)
+
+Succeed if the reference count of C<$got> is C<$expected>.
+
+    my $x = 1;
+    refcount_is(\$x, 1, "only one reference");
+    my $ref = \$x;
+    refcount_is(\$x, 2, "two references");
+
+=item object_ok($obj, $isa, $obj_name)
+
+Succeeds if C<$obj> is a reference and C<isa> C<$isa>.
+
+    object_ok(*STDERR{IO}, "IO::Handle", "check STDERR is IO");
+
+=item class_ok($class, $isa, $class_name)
+
+Succeeds if C<$class> is not a reference and C<isa> C<$isa>.
+
+    use IO::File;
+    class_ok("IO::File", "IO::Handle", "Check IO::File is a class");
+
+=item warnings_like($subref, \@expect_qr, $name)
+
+Captures warnings while running C<&$subref> and succeeds if the
+warning text from each warning matches the regular expressions in
+C<@expect_qr> in sequence.
+
+    warnings_like(sub { my $x; $x+1 }, [ qr/Undefined value/ ],
+                  "undefined value in addition");
+
+Produces C< 1 + scalar(@expect_qr) > test results, one for the count
+of warnings, and one for each warning checked.
+
+=item warning_is($subref, $expect, $name)
+
+Captures warnings while running C<&$subref> and succeeds if either:
+
+=over
+
+=item *
+
+there is only one warning captured and it is precisely C<$expect>.
+
+=item *
+
+there were no warnings and C<$expect> is not defined.
+
+=back
+
+    warning_is(sub {
+#line 1 "fake.pl"
+    my $x; $x+1
+}, "Use of uninitialized value $x in addition (+) at fake.t line 1.");
+
+=item warning_like($subref, $expect_qr, $name)
+
+Captures warnings while running C<&$subref> and succeeds if the
+warning text matches the regular expression object C<$expect_qr>.
+
+    warning_like(sub { my $x; $x+1 },
+                 qr/^Use of uninitialized value \$x in addition/,
+                 "undefined value in addition");
+
+=item fresh_perl_is($code, $expected, \%runperl_args, $name)
+
+=item fresh_perl_like($code, $expect_qr, \%runperl_args, $name)
+
+Run the C<$code> in a new perl process and capture the output.
+
+fresh_perl_is() succeeds if the output is precisely C<$expect>.
+
+fresh_perl_like() succeeds if the output matches the regular
+expression C<$expect_qr>.
+
+See L</Runperl Arguments> for the details of C<%runperl_args>.
+
+This uses fresh_perl() under the hood, see that for some other
+differences from raw runperl().
+
+    fresh_perl_is(<<~'CODE', "Hello\n", {}, "test print");
+    print "Hello\n";
+    CODE
+
+    fresh_perl_like(<<~'CODE', qr/^Hello at/, {}, "test print like");
+    die "Hello";
+    CODE
+
+=item setup_multiple_progs(@files)
+
+Scan the given files for tests to be run by run_multiple_progs().
+This is currently only used by F<t/lib/common.pl> which itself is used
+by most tests that use run_multiple_progs() on other files.
+
+Test files parsed by setup_multiple_progs() ignore any lines until a
+C<__END__> line is found.
+
+So in general, just use F<t/lib/common.pl>, see F<t/lib/croak.t> and
+F<lib/warnings.t> for examples.
+
+    ($count, @test_progs) = setup_multiple_progs(@files)
+
+=item run_multiple_progs('', $fh)
+
+Read and parse tests from C<$fh>, which is typically C<\*DATA>, and
+run them per C< run_multiple_progs($up, @test_progs) >.
+
+    run_multiple_progs('', \*DATA);
+    ...
+    __END__
+    # NAME first multi test
+    print "One\n";
+    EXPECT
+    One
+    ########
+    # NAME second multi test
+    die "Two";
+    EXPECT
+    OPTIONS fatal
+    Two at - line 1.
+
+=item run_multiple_progs($up, @test_progs)
+
+Run each of the test programs, testing whether the output, and
+optionally the exit value, matches the expected output.
+
+See L</run_multiple_progs() tests> for the details of the format of
+each test.
+
+The tests here should already be parsed into separate tests, ie. they
+do not contain the C<########> separators.
+
+This form is typically only used directly by F<t/lib/common.pl> and
+indirectly by the users of that file, as with F<t/lib/croak.t> and
+F<lib/warnings.t> and you should probably do the same.
+
+=back
+
+These functions are test utilties - they don't test anything but
+either skip on some condition useful when testing perl itself, or
+interact with the test engine at a low level:
+
+=over
+
+=item my $test_num = curr_test();
+
+=item curr_test($new_test_num);
+
+Return or set the current test number.
+
+This can be used when dealing with forked processes to ensure child
+and parent test numbers are sequential.  See F<t/io/socket.t> for an
+example.
+
+=item todo_skip($reason, $count);
+
+Skip and TODO tests.
+
+=item skip_if_miniperl($reason, $count);
+
+Skip some tests if F<miniperl> is running the tests, as with
+C<minitest>.
+
+=item skip_all_without_dynamic_extension($extension); # eg "Time::HiRes"
+
+Skip all tests if the test is being run by F<miniperl> or if the given
+module hasn't been configured to be built.
+
+=item skip_all(@messages);
+
+Skip all tests.  Also available via plan() as with Test::More.
+
+=item skip_all_if_miniperl(@messages);
+
+Skip all tests if the test is being run by F<miniperl>.
+
+=item skip_all_without_perlio();
+
+Skip all tests if perl was built without C<perlio>, which should no
+longer be possible.
+
+=item skip_all_without_config(@config_keys)
+
+Skip all tests if any of the supplied C<%Config> keys is false.
+
+Typically used for testing C<use> or C<d_> prefix keys:
+
+   skip_all_without_config("d_fork");
+   skip_all_without_config("usethreads");
+   skip_all_without_config(qw(d_pipe d_fork d_waitpid d_getppid));
+
+=item skip_all_without_unicode_tables();
+
+Skip all tests if the unicode tables, used for unicode character
+classification, haven't been built yet.
+
+=item find_git_or_skip("all");
+
+=item find_git_or_skip($count);
+
+Look for the git directory for the perl being tested, if not found,
+either skip all tests if called with C<"all">, or skip C<$count> tests.
+
+Ensures that the git directory is a clone or fork of the Perl 5
+Porters git repository rather than some other repository, such as the
+Debian repository.
+
+Generally used by porting tests to ensure we're working from a git
+clone of the master Perl repository.
+
+=back
+
+=head1 Utility functions
+
+=over
+
+=item runperl(%runperl_args)
+=item run_perl(%runperl_args)
+
+Run a new perl process with the C<prog>, C<progs> or C<progfile>
+specified in C<%runperl_args>, captures the output and returns that.
+
+See L</Runperl Arguments> below for the many possible arguments.
+
+    my $out = runperl(prog => "print qq(Hello\n)");
+    is($out, "Hello\n", "runperl");  
+
+=item runperl_and_capture(\%myenv_changes, \@run_me)
+
+Run a new perl process with the given arguments and capture standard
+output and standard error separately:
+
+    my ($stdout, $stderr) =
+        runperl_and_capture($env, [ '-e', 'print $^O' ]);
+
+This uses fork(), if fork fails it will return an empty standard
+output and stanadard error will contain an error message.
+
+Despite the name this does not use runperl().
+
+=item capture_warnings($subref)
+
+Runs the given code reference with C<$SIG{__WARN__}> hooked to capture
+any warnings, and returns those warnings as a list:
+
+    my @warnings = capture_warnings(sub { my $x; $x+1 });
+    is(@warnings, 1, "captured one warning");
+    like($warnings[0],
+         qr/^Use of uninitialized value \$x in addition/,
+         "check undefined value in addition warning");
+
+=item untaint_path($1)
+
+Remote any empty, C<.>, non-existent, or writable by other/all entries
+from the supplied path and return the result:
+
+    $ENV{PATH} =~ /(.*)/s;
+    my $clean = untaint_path($1);
+
+Note: currently only used by F<test.pl> itself.
+
+=item watchdog($timeout);
+
+=item watchdog($timeout, $method);
+
+Start a watchdog timer for C<$timeout> seconds.  If C<$timeout> is
+zero then disables any existing watchdog timer.
+
+The timeout may be scaled by setting C<PERL_TEST_TIME_OUT_FACTOR> or
+C<PERL_TEST_TIMEOUT_FACTOR> in the environment.  If C<PERL_VALGRIND>
+is set the scale factor has a minimum of 10.
+
+The method used to kill on timeout can be selected by C<$method> which
+can be:
+
+=over
+
+=item *
+
+empty or omitted - a method is selected automatically.
+
+=item *
+
+C<process> - fork() or system(1, ...) a process that will kill the
+current process after the timeout expires.
+
+=item *
+
+C<alarm> - alarm() is used to schedule a signal and a handler is
+installed to kill the current process.
+
+=back
+
+Automatic selection:
+
+=over
+
+=item 1.
+
+If the C<threads> module is loaded, create a thread which will exit
+the process after the timeout expires.
+
+=item 2.
+
+Try the C<process> method, if that fails, try to use a thread as
+above.
+
+=item 3.
+
+Use the C<alarm> method.
+
+=back
+
+If none of these work no watchdog is set.
+
+    watchdog(10); # top of file
+    ...
+    watchdog(0); # one anything that might lockup is done
+
+=item which_perl()
+
+Return the path to the perl used to invoke the test script.
+
+    my $perl_exe = which_perl();
+
+=item unlink_all(@filenames)
+
+Unlink all (including all versions on VMS) of the given files.
+
+    my $count = unlink_all(@filenames);
+
+This returns the count of successful unlinks, but this is usually
+ignored.
+
+=item tempfile()
+
+Returns the name of a new temporary file.  The file is not created and
+the returned name does not include a directory.
+
+    my $tmpfile = tempfile();
+
+The file is registered for deletion by unlink_tempfiles().
+
+=item register_tempfile(@filenames)
+
+Register a list of files to be deleted by the next call to
+unlink_tempfiles(), which is also called at C<END> time.
+
+=item unlink_tempfiles()
+
+Unlink any registered temporary files.  This is also called by END,
+but you can cleanup earlier too.
+
+=item fresh_perl($code, \%runperl_args)
+
+Write the given code to a file, run it via runperl() and return the
+captured output.
+
+    my $output = fresh_perl($code, \%runperl_args);
+
+If you don't otherwise specify it fresh_perl() will set C<stderr> to 1
+in C<%runperl_args> so standard error output will also be included.
+
+fresh_perl() accepts the following extra arguments in
+C<%runperl_arguments>:
+
+=over
+
+=item *
+
+C<wide_chars> - the test code is written to the file as UTF-8.
+
+=item *
+
+C<rtrim_result> - if non-zero any whitespace is trimmed from the end
+of all lines in the output.  eg. C<"abc \ndef\t\n"> would be returned
+as C<"abc\ndef\n">.
+
+=back
+
+All trailing empty lines are trimmed from the output.
+
+The filename of the file the code is written to is replaced with C<->
+in the output.
+
+C<syntax error> and C<parse error> are case insensitively replaced with
+C<syntax error> in the output.
+
+=item display(@data)
+
+Returns the contents of C<@data> with non-ASCII or non-printable
+characters in each string replaced with an escape sequence.
+
+    my @pretty = display(@data);
+
+=item display_rx($str)
+
+Returns the contents of C<$str> escaped in a similar fashion to the
+regex debugger.
+
+    my $pretty_re = display_rx($str);
+
+=item eq_array(\@one, \@two)
+
+Returns if the contents of the two arrays compare equally as strings.
+This is not a deep compare.
+
+    if (eq_array(\@one, \@two)) {
+        ...
+    }
+
+=item eq_hash(\%one, \%two)
+
+Returns if the contents of the two hashs compare equally as string.  This is not a deep compare.
+
+    if (eq_hash(\%one, \%two)) {
+        ...
+    }
+
+=item is_miniperl()
+
+Returns true if the test script is being run by C<miniperl>.
+
+    unless (is_miniperl()) {
+        ...
+    }
+
+=item is_linux_container()
+
+Returns true if the test appears to be running in a container.
+
+    if (is_linux_container()) {
+        ...
+    }
+
+=back
+
+There are also some variables which detect useful configuration:
+
+=over
+
+=item C<$::IS_ASCII>
+
+=item C<$::IS_EBCDIC>
+
+True if the system is ASCII or EBCDIC respectively.
+
+=item C<$::devnull>
+
+The name of the system F</dev/null> equivalent.
+
+=back
+
+There's also:
+
+=over
+
+=item C<$::FATAL>
+
+Controls the default fatality for L</run_multiple_progs() tests>.
+
+=back
+
+=head1 Runperl Arguments
+
+runperl(), fresh_perl(), fresh_perl_is() and fresh_perl_like() accept
+a common set of parameters that are eventually processed by runperl,
+these are:
+
+=over
+
+=item *
+
+C<prog> - the code to run as a single string.  This is split on new
+lines and procssed internally like C<progs>.  ie.
+
+   prog => $str
+
+is processed like:
+
+   progs => [ split /\n/, $str ]
+
+=item *
+
+C<progs> - an array reference of code fragments to pass to the new
+perl as C<-e> arguments.
+
+=item *
+
+C<progfile> - the name of a file containing perl code to be run by the
+new perl.
+
+=item *
+
+C<switches> - if present, an array reference of extra switches to
+supply before or instead of C<progs> or C<progfile>.
+
+=item *
+
+C<nolib> - if true, suppress the C<"-I../lib" "-I."> runperl()
+normally adds before the other arguments.
+
+=item *
+
+C<stdin> - if true, this is fed to standard input of the new perl
+process via a pipe.
+
+It set but not true, the process standard input reads from the
+platform F</dev/null> equivalent.
+
+=item *
+
+C<args> - an arrayref of extra arguments supplied after the switches
+and program.
+
+=item *
+
+C<stderr> - if equal to C<devnull>, standard error is redirected to
+the system F</dev/null> equivalent.
+
+Otherwise if true, standard error is captured along with standard
+output.
+
+Note: fresh_perl() sets this to true if not otherwise provided.
+
+=item *
+
+C<verbose> - if true the generated command-line is written to stderr
+before it is executed.
+
+=back
+
+fresh_perl(), fresh_perl_is() and fresh_perl_like() also accept
+C<wide_chars> and C<rtrim_result>, see L</fresh_perl($code,
+\%runperl_args)> for details.
+
+C<PERL_RUNPERL_DEBUG>
+
+=head1 run_multiple_progs() tests
+
+    # NAME my test name
+    print "Ok\n";
+    EXPECT
+    Ok
+    ########
+    die "Time to die";
+    EXPECT
+    OPTIONS fatal
+    Time to die at - line 1.
+
+Test files parsed by setup_multiple_progs() ignore any lines until a
+C<__END__> line is found.  This includes any test file based on
+F<t/lib/common.pl>.
+
+Tests are separated by lines containing exactly eight C<#>.
+
+A test (both code and expected result) can contain text matching
+C</[<=>]CONFLICT/> which is replaced by the C<< <=> >> repeated seven
+times.  This is used to test perl's conflict marker detection without
+invoking git's complaints about it.
+
+Each test contains test code, followed by a line containing exactly
+C<EXPECT> followed by the expected output.
+
+The test code can contain a variety of control lines:
+
+=over
+
+=item *
+
+C< # NAME >I<name of the test>
+
+Specifies the name of the test, like the second argument to ok().
+
+=item *
+
+C< # NOTE >I<ignored>
+
+Completely ignored.
+
+=item *
+
+C< # SKIP ? >I<expression>
+
+=item *
+
+C< # TODO ? >I<expression>
+
+Conditionally TODO or skip() the test.  If I<expression> evaluates to
+a true value the result is used at the TODO or SKIP message, otherwise
+the test is not skipped or TODOed.
+
+=item *
+
+C< # SKIP > I<message>
+
+=item *
+
+C< # TODO > I<message>
+
+SKIP or TODO the test with the given message.
+
+=back
+
+You can specify extra input files for the test, most typically to
+define extra codee to be loaded by C<require>.
+
+=over
+
+C<--FILE--> I<filename1>
+
+... content for filename1
+
+C<--FILE--> I<filename2>
+
+... content for filename2
+
+C<--FILE-->
+
+... content for the program
+
+=back
+
+If this found all but the first entry are written to their given
+filenames, and the last entry is the program supplied to fresh_perl().
+
+The expected result may include an C<OPTION> or C<OPTIONS> line which
+contains a space separated list of options:
+
+=over
+
+=item *
+
+C<regex> - the expected result lines are regular expressions which are
+matched against the actual output.
+
+=item *
+
+C<random> - the actual output lines may appear in a different order to
+the expected output.
+
+=item *
+
+C<fatal> - the program is expected to exit with a non-zero value.
+This can be enabled by default by setting C<$::FATAL> to a true value.
+
+=item *
+
+C<nonfatal> - the program is no expected to exit with a non-zero
+value, the default.  This can be used to override C<$::FATAL> being a
+true value.
+
+=back
+
+If the results started with a line containing only C<SKIPPED> then the
+test is treated as successful.
+
+=cut
