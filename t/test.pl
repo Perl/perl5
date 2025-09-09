@@ -17,6 +17,8 @@
 #
 # In this file, we use the latter "Baby Perl" approach, and increment
 # will be worked over by t/op/inc.t
+#
+# see t/test_pl.pod for documentation
 
 # This file sets for its caller $::IS_ASCII and $::IS_EBCDIC appropriately;
 # and $::devnull to be the string to use to specify /dev/null on this
