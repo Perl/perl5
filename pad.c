@@ -965,9 +965,9 @@ enclosed in double quotes.
 In plain C<pad_findmy_pv>, the variable name is a C language NUL-terminated
 string.
 
-In C<pad_findmy_pvn>, C<len> gives the length of the variable name in bytes,
+In C<pad_findmy_pvn>, C<namelen> gives the length of the variable name in bytes,
 so it may contain embedded-NUL characters.  The caller must make sure C<namepv>
-contains at least C<len> bytes.
+contains at least C<namelen> bytes.
 
 In C<pad_findmy_sv>, the variable name is taken from the SV parameter using
 C<L</SvPVutf8>()>.
