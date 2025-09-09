@@ -4690,7 +4690,7 @@ S_intuit_more(pTHX_ char *s, char *e,
     }
 
     /* Unsigned version of current character */
-    unsigned char un_char = 0;
+    U8 un_char = 0;
 
     /* Keep track of how many multiple occurrences of the same character there
      * are */
@@ -4707,8 +4707,9 @@ S_intuit_more(pTHX_ char *s, char *e,
      * in UTF-8. */
     bool first_time = true;
     for (; s < send; s++, first_time = false) {
-        unsigned char prev_un_char = un_char;
-        un_char = (unsigned char) s[0];
+
+        U8 prev_un_char = un_char;
+        un_char = (U8) s[0];
         switch (s[0]) {
           case '@':
           case '&':
@@ -7323,7 +7324,7 @@ yyl_croak_unrecognised(pTHX_ char *s)
                            10, UNI_DISPLAY_ISPRINT);
     }
     else {
-        c = form("\\x%02X", (unsigned char)*s);
+        c = form("\\x%02X", (U8)*s);
     }
 
     if (s >= PL_linestart) {
