@@ -2499,7 +2499,7 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => '19a',
                                            },
-        LB_various_then_HY_or_U2010_v_AL => {
+        LB_various_then_HY_or_HH_v_AL => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => '20a',
@@ -2799,10 +2799,10 @@ sub output_LB_table() {
 
     # LB20a Do not break after a word-initial hyphen.
     #   ( sot | BK | CR | LF | NL | SP | ZW | CB | GL )
-    #   ( HY | [\x{2010} ] )
+    #   ( HY | HH )
     # × AL
-    $dfa = 'LB_various_then_HY_or_U2010_v_AL';
-    add_lb_dfa($_, 'AL', $dfa, '20a') for qw(HY U2010);
+    $dfa = 'LB_various_then_HY_or_HH_v_AL';
+    add_lb_dfa($_, 'AL', $dfa, '20a') for qw(HY HH);
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
     # spaces, small kana, and other non-starters, or after acute accents.
@@ -3309,7 +3309,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
 
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,ExtPict_XX,Glue_After_Zwj,InCB_Consonant,InCB_Consonant_XX,InCB_Extend,InCB_Extend_EX,InCB_Linker,InCB_Linker_EX,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ
 
-                    _Perl_LB,EDGE,Aksara,Aksara_Prebase,Aksara_Start,AK,AP,Close_Parenthesis,Cn_ExtPict_ExtPict_ID,Contingent_Break,Dotted_Circle,Dotted_Circle_AL,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Pf_QU,Pi_QU,Regional_Indicator,U2010,VF,VI,Virama,Virama_Final,Word_Joiner,ZWJ
+                    _Perl_LB,EDGE,Aksara,Aksara_Prebase,Aksara_Start,AK,AP,Close_Parenthesis,Cn_ExtPict_ExtPict_ID,Contingent_Break,Dotted_Circle,Dotted_Circle_AL,East_Asian_CP,East_Asian_OP,E_Base,E_Modifier,H2,H3,Hebrew_Letter,JL,JT,JV,Next_Line,Pf_QU,Pi_QU,Regional_Indicator,HH,VF,VI,Virama,Virama_Final,Word_Joiner,ZWJ
 
                     _Perl_SB,EDGE,CR,Extend,LF,SContinue
 

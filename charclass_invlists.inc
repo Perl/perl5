@@ -42518,28 +42518,28 @@ typedef enum {
 	LB_Glue = 38,
 	LB_H2 = 39,
 	LB_H3 = 40,
-	LB_Hebrew_Letter = 41,
-	LB_Hyphen = 42,
-	LB_Ideographic = 43,
-	LB_Inseparable = 44,
-	LB_Infix_Numeric = 45,
-	LB_JL = 46,
-	LB_JT = 47,
-	LB_JV = 48,
-	LB_Line_Feed = 49,
-	LB_Next_Line = 50,
-	LB_Nonstarter = 51,
-	LB_Numeric = 52,
-	LB_Open_Punctuation = 53,
-	LB_Pf_QU = 54,
-	LB_Pi_QU = 55,
-	LB_Postfix_Numeric = 56,
-	LB_Prefix_Numeric = 57,
-	LB_Quotation = 58,
-	LB_Regional_Indicator = 59,
-	LB_Space = 60,
-	LB_Break_Symbols = 61,
-	LB_U2010_BA = 62,
+	LB_HH_BA = 41,
+	LB_Hebrew_Letter = 42,
+	LB_Hyphen = 43,
+	LB_Ideographic = 44,
+	LB_Inseparable = 45,
+	LB_Infix_Numeric = 46,
+	LB_JL = 47,
+	LB_JT = 48,
+	LB_JV = 49,
+	LB_Line_Feed = 50,
+	LB_Next_Line = 51,
+	LB_Nonstarter = 52,
+	LB_Numeric = 53,
+	LB_Open_Punctuation = 54,
+	LB_Pf_QU = 55,
+	LB_Pi_QU = 56,
+	LB_Postfix_Numeric = 57,
+	LB_Prefix_Numeric = 58,
+	LB_Quotation = 59,
+	LB_Regional_Indicator = 60,
+	LB_Space = 61,
+	LB_Break_Symbols = 62,
 	LB_Virama_Final = 63,
 	LB_Virama = 64,
 	LB_Word_Joiner = 65,
@@ -42551,7 +42551,7 @@ typedef enum {
 	LB_Dotted_Circle = 69,
 	LB_East_Asian_CP = 69,
 	LB_East_Asian_OP = 69,
-	LB_U2010 = 69,
+	LB_HH = 69,
 	LB_VF = 69,
 	LB_VI = 69
 } LB_enum;
@@ -43106,7 +43106,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for ASCII/Latin1 */
 	LB_Combining_Mark,
 	LB_ZWJ,
 	LB_Combining_Mark,
-	LB_U2010_BA,
+	LB_HH_BA,
 	LB_Glue,
 	LB_Break_After,
 	LB_Break_Both,
@@ -48378,28 +48378,28 @@ typedef enum {
 	LB_Glue = 38,
 	LB_H2 = 39,
 	LB_H3 = 40,
-	LB_Hebrew_Letter = 41,
-	LB_Hyphen = 42,
-	LB_Ideographic = 43,
-	LB_Inseparable = 44,
-	LB_Infix_Numeric = 45,
-	LB_JL = 46,
-	LB_JT = 47,
-	LB_JV = 48,
-	LB_Line_Feed = 49,
-	LB_Next_Line = 50,
-	LB_Nonstarter = 51,
-	LB_Numeric = 52,
-	LB_Open_Punctuation = 53,
-	LB_Pf_QU = 54,
-	LB_Pi_QU = 55,
-	LB_Postfix_Numeric = 56,
-	LB_Prefix_Numeric = 57,
-	LB_Quotation = 58,
-	LB_Regional_Indicator = 59,
-	LB_Space = 60,
-	LB_Break_Symbols = 61,
-	LB_U2010_BA = 62,
+	LB_HH_BA = 41,
+	LB_Hebrew_Letter = 42,
+	LB_Hyphen = 43,
+	LB_Ideographic = 44,
+	LB_Inseparable = 45,
+	LB_Infix_Numeric = 46,
+	LB_JL = 47,
+	LB_JT = 48,
+	LB_JV = 49,
+	LB_Line_Feed = 50,
+	LB_Next_Line = 51,
+	LB_Nonstarter = 52,
+	LB_Numeric = 53,
+	LB_Open_Punctuation = 54,
+	LB_Pf_QU = 55,
+	LB_Pi_QU = 56,
+	LB_Postfix_Numeric = 57,
+	LB_Prefix_Numeric = 58,
+	LB_Quotation = 59,
+	LB_Regional_Indicator = 60,
+	LB_Space = 61,
+	LB_Break_Symbols = 62,
 	LB_Virama_Final = 63,
 	LB_Virama = 64,
 	LB_Word_Joiner = 65,
@@ -48411,7 +48411,7 @@ typedef enum {
 	LB_Dotted_Circle = 69,
 	LB_East_Asian_CP = 69,
 	LB_East_Asian_OP = 69,
-	LB_U2010 = 69,
+	LB_HH = 69,
 	LB_VF = 69,
 	LB_VI = 69
 } LB_enum;
@@ -48980,7 +48980,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for EBCDIC 1047 */
 	LB_Combining_Mark,
 	LB_ZWJ,
 	LB_Combining_Mark,
-	LB_U2010_BA,
+	LB_HH_BA,
 	LB_Glue,
 	LB_Break_After,
 	LB_Break_Both,
@@ -54252,28 +54252,28 @@ typedef enum {
 	LB_Glue = 38,
 	LB_H2 = 39,
 	LB_H3 = 40,
-	LB_Hebrew_Letter = 41,
-	LB_Hyphen = 42,
-	LB_Ideographic = 43,
-	LB_Inseparable = 44,
-	LB_Infix_Numeric = 45,
-	LB_JL = 46,
-	LB_JT = 47,
-	LB_JV = 48,
-	LB_Line_Feed = 49,
-	LB_Next_Line = 50,
-	LB_Nonstarter = 51,
-	LB_Numeric = 52,
-	LB_Open_Punctuation = 53,
-	LB_Pf_QU = 54,
-	LB_Pi_QU = 55,
-	LB_Postfix_Numeric = 56,
-	LB_Prefix_Numeric = 57,
-	LB_Quotation = 58,
-	LB_Regional_Indicator = 59,
-	LB_Space = 60,
-	LB_Break_Symbols = 61,
-	LB_U2010_BA = 62,
+	LB_HH_BA = 41,
+	LB_Hebrew_Letter = 42,
+	LB_Hyphen = 43,
+	LB_Ideographic = 44,
+	LB_Inseparable = 45,
+	LB_Infix_Numeric = 46,
+	LB_JL = 47,
+	LB_JT = 48,
+	LB_JV = 49,
+	LB_Line_Feed = 50,
+	LB_Next_Line = 51,
+	LB_Nonstarter = 52,
+	LB_Numeric = 53,
+	LB_Open_Punctuation = 54,
+	LB_Pf_QU = 55,
+	LB_Pi_QU = 56,
+	LB_Postfix_Numeric = 57,
+	LB_Prefix_Numeric = 58,
+	LB_Quotation = 59,
+	LB_Regional_Indicator = 60,
+	LB_Space = 61,
+	LB_Break_Symbols = 62,
 	LB_Virama_Final = 63,
 	LB_Virama = 64,
 	LB_Word_Joiner = 65,
@@ -54285,7 +54285,7 @@ typedef enum {
 	LB_Dotted_Circle = 69,
 	LB_East_Asian_CP = 69,
 	LB_East_Asian_OP = 69,
-	LB_U2010 = 69,
+	LB_HH = 69,
 	LB_VF = 69,
 	LB_VI = 69
 } LB_enum;
@@ -54854,7 +54854,7 @@ static const LB_enum _Perl_LB_invmap[] = {  /* for EBCDIC 037 */
 	LB_Combining_Mark,
 	LB_ZWJ,
 	LB_Combining_Mark,
-	LB_U2010_BA,
+	LB_HH_BA,
 	LB_Glue,
 	LB_Break_After,
 	LB_Break_Both,
@@ -458296,13 +458296,13 @@ static const U8 GCB_dfa_table[] = {
 #define isLB_Aksara_Start(x) (x == 3)
 #define isLB_Alphabetic(x) (isLB_scratch = (x), isLB_scratch == 0 || isLB_scratch == 15 || isLB_scratch == 16 || isLB_scratch == 33)
 #define isLB_B2(x) (x == 4)
-#define isLB_BA(x) (isLB_scratch = (x), isLB_scratch == 5 || isLB_scratch == 17 || isLB_scratch == 62)
+#define isLB_BA(x) (isLB_scratch = (x), isLB_scratch == 5 || isLB_scratch == 17 || isLB_scratch == 41)
 #define isLB_BB(x) (x == 6)
 #define isLB_BK(x) (x == 7)
-#define isLB_Break_After(x) (isLB_scratch = (x), isLB_scratch == 5 || isLB_scratch == 17 || isLB_scratch == 62)
+#define isLB_Break_After(x) (isLB_scratch = (x), isLB_scratch == 5 || isLB_scratch == 17 || isLB_scratch == 41)
 #define isLB_Break_Before(x) (x == 6)
 #define isLB_Break_Both(x) (x == 4)
-#define isLB_Break_Symbols(x) (x == 61)
+#define isLB_Break_Symbols(x) (x == 62)
 #define isLB_CB(x) (x == 8)
 #define isLB_CEE(x) (x == 9)
 #define isLB_CEF(x) (x == 10)
@@ -458321,7 +458321,7 @@ static const U8 GCB_dfa_table[] = {
 #define isLB_DCA(x) (x == 15)
 #define isLB_Dotted_Circle(x) (x == 15)
 #define isLB_Dotted_Circle_AL(x) (x == 15)
-#define isLB_EA(x) (isLB_scratch = (x), isLB_scratch == 16 || isLB_scratch == 17 || isLB_scratch == 18 || isLB_scratch == 19 || isLB_scratch == 20 || isLB_scratch == 21 || isLB_scratch == 22 || isLB_scratch == 23 || isLB_scratch == 24 || isLB_scratch == 25 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 28 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 32 || isLB_scratch == 39 || isLB_scratch == 40 || isLB_scratch == 46)
+#define isLB_EA(x) (isLB_scratch = (x), isLB_scratch == 16 || isLB_scratch == 17 || isLB_scratch == 18 || isLB_scratch == 19 || isLB_scratch == 20 || isLB_scratch == 21 || isLB_scratch == 22 || isLB_scratch == 23 || isLB_scratch == 24 || isLB_scratch == 25 || isLB_scratch == 26 || isLB_scratch == 27 || isLB_scratch == 28 || isLB_scratch == 30 || isLB_scratch == 31 || isLB_scratch == 32 || isLB_scratch == 39 || isLB_scratch == 40 || isLB_scratch == 47)
 #define isLB_EAA(x) (x == 16)
 #define isLB_EAB(x) (x == 17)
 #define isLB_EAC(x) (x == 18)
@@ -458375,50 +458375,50 @@ static const U8 GCB_dfa_table[] = {
 #define isLB_Glue(x) (isLB_scratch = (x), isLB_scratch == 20 || isLB_scratch == 38)
 #define isLB_H2(x) (x == 39)
 #define isLB_H3(x) (x == 40)
-#define isLB_HL(x) (x == 41)
-#define isLB_HY(x) (x == 42)
-#define isLB_Hebrew_Letter(x) (x == 41)
-#define isLB_Hyphen(x) (x == 42)
-#define isLB_ID(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 35 || isLB_scratch == 43)
-#define isLB_IN(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 44)
-#define isLB_IS(x) (x == 45)
-#define isLB_Ideographic(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 35 || isLB_scratch == 43)
-#define isLB_Infix_Numeric(x) (x == 45)
-#define isLB_Inseparable(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 44)
-#define isLB_JL(x) (x == 46)
-#define isLB_JT(x) (x == 47)
-#define isLB_JV(x) (x == 48)
-#define isLB_LF(x) (x == 49)
-#define isLB_Line_Feed(x) (x == 49)
+#define isLB_HH(x) (x == 41)
+#define isLB_HHB(x) (x == 41)
+#define isLB_HH_BA(x) (x == 41)
+#define isLB_HL(x) (x == 42)
+#define isLB_HY(x) (x == 43)
+#define isLB_Hebrew_Letter(x) (x == 42)
+#define isLB_Hyphen(x) (x == 43)
+#define isLB_ID(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 35 || isLB_scratch == 44)
+#define isLB_IN(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 45)
+#define isLB_IS(x) (x == 46)
+#define isLB_Ideographic(x) (isLB_scratch = (x), isLB_scratch == 21 || isLB_scratch == 35 || isLB_scratch == 44)
+#define isLB_Infix_Numeric(x) (x == 46)
+#define isLB_Inseparable(x) (isLB_scratch = (x), isLB_scratch == 23 || isLB_scratch == 45)
+#define isLB_JL(x) (x == 47)
+#define isLB_JT(x) (x == 48)
+#define isLB_JV(x) (x == 49)
+#define isLB_LF(x) (x == 50)
+#define isLB_Line_Feed(x) (x == 50)
 #define isLB_Mandatory_Break(x) (x == 7)
-#define isLB_NL(x) (x == 50)
-#define isLB_NS(x) (isLB_scratch = (x), isLB_scratch == 27 || isLB_scratch == 36 || isLB_scratch == 51)
-#define isLB_NU(x) (x == 52)
-#define isLB_Next_Line(x) (x == 50)
-#define isLB_Nonstarter(x) (isLB_scratch = (x), isLB_scratch == 27 || isLB_scratch == 36 || isLB_scratch == 51)
-#define isLB_Numeric(x) (x == 52)
-#define isLB_OP(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 53)
-#define isLB_Open_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 53)
-#define isLB_PO(x) (isLB_scratch = (x), isLB_scratch == 25 || isLB_scratch == 56)
-#define isLB_PR(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 57)
-#define isLB_Pf(x) (x == 54)
-#define isLB_PfQ(x) (x == 54)
-#define isLB_Pf_QU(x) (x == 54)
-#define isLB_Pi(x) (x == 55)
-#define isLB_PiQ(x) (x == 55)
-#define isLB_Pi_QU(x) (x == 55)
-#define isLB_Postfix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 25 || isLB_scratch == 56)
-#define isLB_Prefix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 57)
-#define isLB_QU(x) (isLB_scratch = (x), isLB_scratch == 54 || isLB_scratch == 55 || isLB_scratch == 58)
-#define isLB_Quotation(x) (isLB_scratch = (x), isLB_scratch == 54 || isLB_scratch == 55 || isLB_scratch == 58)
-#define isLB_RI(x) (x == 59)
-#define isLB_Regional_Indicator(x) (x == 59)
-#define isLB_SP(x) (x == 60)
-#define isLB_SY(x) (x == 61)
-#define isLB_Space(x) (x == 60)
-#define isLB_U2010(x) (x == 62)
-#define isLB_U2010_BA(x) (x == 62)
-#define isLB_UBA(x) (x == 62)
+#define isLB_NL(x) (x == 51)
+#define isLB_NS(x) (isLB_scratch = (x), isLB_scratch == 27 || isLB_scratch == 36 || isLB_scratch == 52)
+#define isLB_NU(x) (x == 53)
+#define isLB_Next_Line(x) (x == 51)
+#define isLB_Nonstarter(x) (isLB_scratch = (x), isLB_scratch == 27 || isLB_scratch == 36 || isLB_scratch == 52)
+#define isLB_Numeric(x) (x == 53)
+#define isLB_OP(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 54)
+#define isLB_Open_Punctuation(x) (isLB_scratch = (x), isLB_scratch == 24 || isLB_scratch == 54)
+#define isLB_PO(x) (isLB_scratch = (x), isLB_scratch == 25 || isLB_scratch == 57)
+#define isLB_PR(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 58)
+#define isLB_Pf(x) (x == 55)
+#define isLB_PfQ(x) (x == 55)
+#define isLB_Pf_QU(x) (x == 55)
+#define isLB_Pi(x) (x == 56)
+#define isLB_PiQ(x) (x == 56)
+#define isLB_Pi_QU(x) (x == 56)
+#define isLB_Postfix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 25 || isLB_scratch == 57)
+#define isLB_Prefix_Numeric(x) (isLB_scratch = (x), isLB_scratch == 26 || isLB_scratch == 58)
+#define isLB_QU(x) (isLB_scratch = (x), isLB_scratch == 55 || isLB_scratch == 56 || isLB_scratch == 59)
+#define isLB_Quotation(x) (isLB_scratch = (x), isLB_scratch == 55 || isLB_scratch == 56 || isLB_scratch == 59)
+#define isLB_RI(x) (x == 60)
+#define isLB_Regional_Indicator(x) (x == 60)
+#define isLB_SP(x) (x == 61)
+#define isLB_SY(x) (x == 62)
+#define isLB_Space(x) (x == 61)
 #define isLB_VF(x) (x == 63)
 #define isLB_VI(x) (x == 64)
 #define isLB_Virama(x) (x == 64)
@@ -458448,7 +458448,7 @@ static const U8 GCB_dfa_table[] = {
 #define LB_B2_then_SP_v_B2                            10
 #define LB_any_v_QU_then_nonEA_or_eot                 11
 #define LB_nonEA_or_sot_then_QU_v_any                 12
-#define LB_various_then_HY_or_U2010_v_AL              13
+#define LB_various_then_HY_or_HH_v_AL                 13
 #define LB_HL_then_HY_or_BA_sans_EA_v_nonHL           14
 #define LB_NU_then_SY_or_IS_then_CL_or_CP_v_PO_or_PR  15
 #define LB_PO_or_PR_v_OP_then_IS_then_NU              16
@@ -458462,148 +458462,148 @@ static const U8 LB_table[70][70] = {
    /* The comment rows give Unicode's rule number that applies to the cell immediately above it, except it is left blank for cells populated by the table's default rule.  ^ and $ stand for their respective edges; 'CEE' stands for
     * 'Cn_ExtPict_ExtPict_AL'; 'CEF' stands for 'Cn_ExtPict_ExtPict_ID'; 'DCA' stands for 'Dotted_Circle_AL'; 'EAA' stands for 'EA_AL'; 'EAB' stands for 'EA_BA'; 'EAC' stands for 'EA_CL'; 'EAE' stands for 'EA_EB'; 'EAG' stands for 'EA_GL'; 'EAI'
     * stands for 'EA_ID'; 'EAM' stands for 'EA_CM'; 'EAN' stands for 'EA_IN'; 'EAO' stands for 'EA_OP'; 'EAP' stands for 'EA_PO'; 'EAR' stands for 'EA_PR'; 'EAS' stands for 'EA_NS'; 'EAX' stands for 'EA_EX'; 'EEA' stands for 'EA_ExtPict_AL';
-    * 'EEI' stands for 'EA_ExtPict_ID'; 'EPA' stands for 'ExtPict_AL'; 'EPE' stands for 'ExtPict_EX'; 'EPI' stands for 'ExtPict_ID'; 'EPN' stands for 'ExtPict_NS'; 'PfQ' stands for 'Pf_QU'; 'PiQ' stands for 'Pi_QU'; 'UBA' stands for 'U2010_BA';
-    * u stands for "unused in this Unicode release" (and the data in its row and column are garbage).  See perluniprops for the rest */
-/*       AL AK AP AS B2 BA BB BK CB CEE CEF CL CM CP CR DCA EAA EAB EAC EAE EAG EAI EAM EAN EAO EAP EAR EAS EAX EB EEA EEI EM EPA EPE EPI EPN EX GL H2 H3 HL HY ID IN IS JL JT JV LF NL NS NU OP PfQ PiQ PO PR QU RI SP SY UBA VF VI WJ ZW ZWJ $ u */
-/* AL*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/* AK*/ { 1, 5, 1, 5, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  5,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//          28    28    21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21 28 28 11  7   9 3
-/* AP*/ { 1, 0, 1, 0, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//          28    28    21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* AS*/ { 1, 5, 1, 5, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  5,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//          28    28    21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21 28 28 11  7   9 3
-/* B2*/ { 1, 1, 1, 1, 0, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                   17 21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* BA*/ {14,14,14,14,14, 0,14, 0, 1, 14, 14, 0, 0, 0, 0, 14, 14,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,14, 14, 14,14, 14,  0, 14,  0, 0,14,14,14, 1, 0,14, 0, 0,14,14,14, 0, 0, 0,14,14,  0,  0,14,14, 0,14, 0, 0,  0,14,14, 0, 0,  0,1,0 },
-//       21 21 21 21 21 21 21  6 20 21a 21a 13  9 13  6 21a 21a  21  13 21a 21a 21a   9  22 21a 21a 21a  21  13 21 21a 21a 21 21a  13 21a  21 13 21 21 21    21 21 22 15 21 21 21  6  6 21 21 21  19 19a 21 21 19 21  7 13  21 21 21 11  7   9 3
-/* BB*/ { 0, 0, 0, 0, 0, 0, 0, 0, 1,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       21 21 21 21 21 21 21  6 20  21  21 13  9 13  6  21  21  21  13  21 12a  21   9  21  21  21  21  21  13 21  21  21 21  21  13  21  21 13 12 21 21 21 21 21 21 15 21 21 21  6  6 21 21 21  19 19a 21 21 19 21  7 13  21 21 21 11  7   9 3
-/* BK*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,1,0 },
-//        4  4  4  4  4  4  4  4  4   4   4  4  4  4  4   4   4   4   4   4   4   4   4   4   4   4   4   4   4  4   4   4  4   4   4   4   4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4   4   4  4  4  4  4  4  4   4  4  4  4  4   4 3
-/* CB*/ { 1, 1, 1, 1, 1, 1, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  1,  0,  1,  0,  1,  0,  1,  1,  1,  1,  1,  0, 1,  1,  1, 1,  1,  0,  1,  1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  1, 1, 1, 0, 0,  0,1,0 },
-//       20 20 20 20 20 20 20  6 20  20  20 13  9 13  6  20  20  20  13  20 12a  20   9  20  20  20  20  20  13 20  20  20 20  20  13  20  20 13 12 20 20 20 20 20 20 15 20 20 20  6  6 20 20 20  19 19a 20 20 19 20  7 13  20 20 20 11  7   9 3
-/*CEE*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 0,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28     30  28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/*CEF*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13            30      13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/* CL*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0,17,17, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      25  25  16  13                    13      16 13 12          21    22 15           6  6 16        19 19a 25 25 19     7 13  21       11  7   9 3
-/* CM*/ {11,11,11,11,11, 8,11, 0,11, 11, 11, 8, 8, 8, 0, 11, 11,  8,  8, 11,  8, 11,  8,  8, 11, 11, 11,  8,  8,11, 11, 11,11, 11,  8, 11,  8, 8, 8,11,11,11, 8,11, 8, 8,11,11,11, 0, 0, 8,11,11,  8,  8,11,11, 8,11, 0, 8,  8,11,11, 8, 0,  8,1,0 },
-//        9  9  9  9  9  9  9  6  9   9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9  9  9  9  9  9  9  9  9  6  6  9  9  9   9   9  9  9  9  9  7  9   9  9  9  9  7   9 3
-/* CP*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,  0,  0,17,17, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       30             21     6 20  30     13  9 13  6  30  30  21  13     12a       9  22      25  25  16  13     30         30  13      16 13 12       30 21    22 15           6  6 16 30     19 19a 25 25 19     7 13  21       11  7   9 3
-/* CR*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,1,0 },
-//        5  5  5  5  5  5  5  5  5   5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5   5  5  5  5  5   5 3
-/*DCA*/ { 0, 5, 1, 5, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       28 28    28    21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21 28 28 11  7   9 3
-/*EAA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0, 29, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/*EAB*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  1,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13               9  22              21  13                    13      21 13             21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/*EAC*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29,17,17, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      25  25  16  13                    13      16 13 12          21    22 15           6  6 16        19 19a 25 25 19     7 13  21       11  7   9 3
-/*EAE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13            30      13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/*EAG*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       12 12 12 12 12 12 12  6 12  12  12 12  9 12  6  12  12  12  12  12  12  12   9  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12 12 12 12 12 12 12 12 12  6  6 12 12 12  12  12 12 12 12 12  7 12  12 12 12 11  7   9 3
-/*EAI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/*EAM*/ {11,11,11,11,11, 8,11, 0,11, 11, 11, 8, 8, 8, 0, 11, 11,  8,  8, 11,  8, 11,  8,  8, 11, 11, 11,  8,  8,11, 11, 11,11, 11,  8, 11,  8, 8, 8,11,11,11, 8,11, 8, 8,11,11,11, 0, 0, 8,11,11,  8, 38,11,11, 8,11, 0, 8,  8,11,11, 8, 0,  8,1,0 },
-//        9  9  9  9  9  9  9  6  9   9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9  9  9  9  9  9  9  9  9  6  6  9  9  9   9   9  9  9  9  9  7  9   9  9  9  9  7   9 3
-/*EAN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/*EAO*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       14 14 14 14 14 14 14  6 14  14  14 13  9 13  6  14  14  14  13  14 12a  14   9  14  14  14  14  14  13 14  14  14 14  14  13  14  14 13 12 14 14 14 14 14 14 14 14 14 14  6  6 14 14 14  14  14 14 14 14 14  7 13  14 14 14 11  7   9 3
-/*EAP*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0, 23,  1,  1,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,23,  0, 29, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       24             21     6 20  24     13  9 13  6  24  24  21  13     12a       9  22  25          21  13     24         24  13      21 13 12       24 21    22 15           6  6 21 24 25  19 19a       19     7 13  21       11  7   9 3
-/*EAR*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 23,  1,  1,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,23,  0, 29, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       24             21     6 20  24 23a 13  9 13  6  24  24  21  13 23a 12a 23a   9  22  25          21  13 23  24 23a 23  24  13 23a  21 13 12 27 27 24 21 23 22 15 27 27 27  6  6 21 24 25  19 19a       19     7 13  21       11  7   9 3
-/*EAS*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/*EAX*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* EB*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13            30      13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/*EEA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0, 29, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/*EEI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/* EM*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/*EPA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/*EPE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/*EPI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/*EPN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* EX*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* GL*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       12 12 12 12 12 12 12  6 12  12  12 12  9 12  6  12  12  12  12  12  12  12   9  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12 12 12 12 12 12 12 12 12  6  6 12 12 12  12  12 12 12 12 12  7 12  12 12 12 11  7   9 3
-/* H2*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12          21    22 15    26 26  6  6 21        19 19a 27    19     7 13  21       11  7   9 3
-/* H3*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12          21    22 15    26     6  6 21        19 19a 27    19     7 13  21       11  7   9 3
-/* HL*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12       28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/* HY*/ {43,14,14,14,14, 0,14, 0, 1, 43, 14, 0, 0, 0, 0, 43, 43,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,14, 43, 14,14, 43,  0, 14,  0, 0,14,14,14, 1, 0,14, 0, 0,14,14,14, 0, 0, 0, 0,14,  0,  0,14,14, 0,14, 0, 0,  0,14,14, 0, 0,  0,1,0 },
-//       20 21 21 21 21 21 21  6 20 20a 21a 13  9 13  6 20a 20a  21  13 21a 21a 21a   9  22 21a 21a 21a  21  13 21 20a 21a 21 20a  13 21a  21 13 21 21 21    21 21 22 15 21 21 21  6  6 21 24 21  19 19a 21 21 19 21  7 13  21 21 21 11  7   9 3
-/* ID*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12          21    22 15           6  6 21        19 19a 23    19     7 13  21       11  7   9 3
-/* IN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* IS*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,  0,  0,17,17, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       29             21     6 20  29     13  9 13  6  29  29  21  13     12a       9  22      25  25  21  13     29         29  13      21 13 12       29 21    22 15           6  6 21 24     19 19a 25 25 19     7 13  21       11  7   9 3
-/* JL*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12 26 26    21    22 15 26    26  6  6 21        19 19a 27    19     7 13  21       11  7   9 3
-/* JT*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12          21    22 15    26     6  6 21        19 19a 27    19     7 13  21       11  7   9 3
-/* JV*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12          21    22 15    26 26  6  6 21        19 19a 27    19     7 13  21       11  7   9 3
-/* LF*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,1,0 },
-//        5  5  5  5  5  5  5  5  5   5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5   5  5  5  5  5   5 3
-/* NL*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1,1,0 },
-//        5  5  5  5  5  5  5  5  5   5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5   5  5  5  5  5   5 3
-/* NS*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* NU*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       23             21     6 20  23     13  9 13  6  23  23  21  13     12a       9  22      24  24  21  13     23         23  13      21 13 12       23 21    22 15           6  6 21 24 30  19 19a 24 24 19     7 13  21       11  7   9 3
-/* OP*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       14 14 14 14 14 14 14  6 14  14  14 13  9 13  6  14  14  14  13  14 12a  14   9  14  14  14  14  14  13 14  14  14 14  14  13  14  14 13 12 14 14 14 14 14 14 14 14 14 14  6  6 14 14 14  14  14 14 14 14 14  7 13  14 14 14 11  7   9 3
-/*PfQ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0, 32,  0,  0, 32,  0, 32,  0,  0, 32, 32, 32,  0,  0, 0, 32, 32,32,  0,  0,  0,  0, 0, 0,32,32, 0, 0, 0, 0, 0,32, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       19 19 19 19 19 19 19  6 19 19a 19a 13  9 13  6 19a 19a  21  13 19a 12a 19a   9  22 19a 19a 19a  21  13 19 19a 19a 19 19a  13 19a 19a 13 12 19 19 19 19 19 19 15 19 19 19  6  6 19 19 19  19 19a 19 19 19 19  7 13 19a 19 19 11  7   9 3
-/*PiQ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       19 19 19 19 19 19 19  6 19  19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 15 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13  19 19 19 11  7   9 3
-/* PO*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0, 23,  1,  1,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,23,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       24             21     6 20  24     13  9 13  6  24  24  21  13     12a       9  22  25          21  13     24         24  13      21 13 12       24 21    22 15           6  6 21 24 25  19 19a       19     7 13  21       11  7   9 3
-/* PR*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 23,  1,  1,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,23,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//       24             21     6 20  24 23a 13  9 13  6  24  24  21  13 23a 12a 23a   9  22  25          21  13 23  24 23a 23  24  13 23a  21 13 12 27 27 24 21 23 22 15 27 27 27  6  6 21 24 25  19 19a       19     7 13  21       11  7   9 3
-/* QU*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       19 19 19 19 19 19 19  6 19  19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  19  13 19  19  19 19  19  13  19  19 13 12 19 19 19 19 19 19 15 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13  19 19 19 11  7   9 3
-/* RI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0,35, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19 30  7 13  21       11  7   9 3
-/* SP*/ {48,48,48,48,55,48,48, 0,48, 48, 48,26,48,26, 0, 48, 48, 48, 26, 48, 48, 48, 48, 48, 48, 48, 48, 64, 26,48, 48, 48,48, 48, 26, 48, 64,26,48,48,48,48,48,48,48,73,48,48,48, 0, 0,64,48,48, 82, 48,48,48,48,48, 0,26, 48,48,48,26, 0, 48,1,0 },
-//        8  8  8  8  8  8  8  6  8   8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8   8   8  8  8  8  8  7  8   8  8  8  8  7   8 3
-/* SY*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,20, 1,  0,  0,17,17, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22      25  25  21  13                    13      21 13 12       21 21    22 15           6  6 21 25     19 19a 25 25 19     7 13  21       11  7   9 3
-/*UBA*/ {43,14,14,14,14, 0,14, 0, 1, 43, 14, 0, 0, 0, 0, 43, 43,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,14, 43, 14,14, 43,  0, 14,  0, 0,14,14,14, 1, 0,14, 0, 0,14,14,14, 0, 0, 0,14,14,  0,  0,14,14, 0,14, 0, 0,  0,14,14, 0, 0,  0,1,0 },
-//       20 21 21 21 21 21 21  6 20 20a 21a 13  9 13  6 20a 20a  21  13 21a 21a 21a   9  22 21a 21a 21a  21  13 21 20a 21a 21 20a  13 21a  21 13 21 21 21    21 21 22 15 21 21 21  6  6 21 21 21  19 19a 21 21 19 21  7 13  21 21 21 11  7   9 3
-/* VF*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* VI*/ { 1, 2, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  2,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0,  0, 1, 1, 0, 0,  0,1,0 },
-//          28          21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12          21    22 15           6  6 21        19 19a       19     7 13  21       11  7   9 3
-/* WJ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       11 11 11 11 11 11 11  6 11  11  11 11  9 11  6  11  11  11  11  11  11  11   9  11  11  11  11  11  11 11  11  11 11  11  11  11  11 11 11 11 11 11 11 11 11 11 11 11 11  6  6 11 11 11  11  11 11 11 11 11  7 11  11 11 11 11  7   9 3
-/* ZW*/ { 1, 1, 1, 1, 1, 1, 1, 0, 1,  1,  1, 1, 1, 1, 0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1,  1,  1, 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 0,  1,1,0 },
-//        8  8  8  8  8  8  8  6  8   8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8  8  8  8  8  8  8  8  8  6  6  8  8  8   8   8  8  8  8  8  7  8   8  8  8  8  7   8 3
-/*ZWJ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,1,0 },
-//       8a 8a 8a 8a 8a 8a 8a  6 8a  8a  8a 8a 8a 8a  6  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a 8a  8a  8a 8a  8a  8a  8a  8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a 8a  6  6 8a 8a 8a  8a  8a 8a 8a 8a 8a  7 8a  8a 8a 8a 8a  7  8a 3
-/* ^ */ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,0,0 },
-//        2  2  2  2  2  2  2  2  2   2   2  2  2  2  2   2   2   2   2   2   2   2   2   2   2   2   2   2   2  2   2   2  2   2   2   2   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2   2   2  2  2  2  2  2  2   2  2  2  2  2   2 2
-/* u */ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0,0,0 }
+    * 'EEI' stands for 'EA_ExtPict_ID'; 'EPA' stands for 'ExtPict_AL'; 'EPE' stands for 'ExtPict_EX'; 'EPI' stands for 'ExtPict_ID'; 'EPN' stands for 'ExtPict_NS'; 'HHB' stands for 'HH_BA'; 'PfQ' stands for 'Pf_QU'; 'PiQ' stands for 'Pi_QU'; u
+    * stands for "unused in this Unicode release" (and the data in its row and column are garbage).  See perluniprops for the rest */
+/*       AL AK AP AS B2 BA BB BK CB CEE CEF CL CM CP CR DCA EAA EAB EAC EAE EAG EAI EAM EAN EAO EAP EAR EAS EAX EB EEA EEI EM EPA EPE EPI EPN EX GL H2 H3 HHB HL HY ID IN IS JL JT JV LF NL NS NU OP PfQ PiQ PO PR QU RI SP SY VF VI WJ ZW ZWJ $ u */
+/* AL*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13       11  7   9 3
+/* AK*/ { 1, 5, 1, 5, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  5,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//          28    28    21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13 28 28 11  7   9 3
+/* AP*/ { 1, 0, 1, 0, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  0,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//          28    28    21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* AS*/ { 1, 5, 1, 5, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  5,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//          28    28    21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13 28 28 11  7   9 3
+/* B2*/ { 1, 1, 1, 1, 0, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                   17 21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* BA*/ {14,14,14,14,14, 0,14, 0, 1, 14, 14, 0, 0, 0, 0, 14, 14,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,14, 14, 14,14, 14,  0, 14,  0, 0,14,14,14,  0, 1, 0,14, 0, 0,14,14,14, 0, 0, 0,14,14,  0,  0,14,14, 0,14, 0, 0,14,14, 0, 0,  0,1,0 },
+//       21 21 21 21 21 21 21  6 20 21a 21a 13  9 13  6 21a 21a  21  13 21a 21a 21a   9  22 21a 21a 21a  21  13 21 21a 21a 21 21a  13 21a  21 13 21 21 21  21    21 21 22 15 21 21 21  6  6 21 21 21  19 19a 21 21 19 21  7 13 21 21 11  7   9 3
+/* BB*/ { 0, 0, 0, 0, 0, 0, 0, 0, 1,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       21 21 21 21 21 21 21  6 20  21  21 13  9 13  6  21  21  21  13  21 12a  21   9  21  21  21  21  21  13 21  21  21 21  21  13  21  21 13 12 21 21  21 21 21 21 21 15 21 21 21  6  6 21 21 21  19 19a 21 21 19 21  7 13 21 21 11  7   9 3
+/* BK*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        4  4  4  4  4  4  4  4  4   4   4  4  4  4  4   4   4   4   4   4   4   4   4   4   4   4   4   4   4  4   4   4  4   4   4   4   4  4  4  4  4   4  4  4  4  4  4  4  4  4  4  4  4  4  4   4   4  4  4  4  4  4  4  4  4  4  4   4 3
+/* CB*/ { 1, 1, 1, 1, 1, 1, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  1,  0,  1,  0,  1,  0,  1,  1,  1,  1,  1,  0, 1,  1,  1, 1,  1,  0,  1,  1, 0, 0, 1, 1,  1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       20 20 20 20 20 20 20  6 20  20  20 13  9 13  6  20  20  20  13  20 12a  20   9  20  20  20  20  20  13 20  20  20 20  20  13  20  20 13 12 20 20  20 20 20 20 20 15 20 20 20  6  6 20 20 20  19 19a 20 20 19 20  7 13 20 20 11  7   9 3
+/*CEE*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 0,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28     30  28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13       11  7   9 3
+/*CEF*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13            30      13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/* CL*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      25  25  16  13                    13      16 13 12        21    21    22 15           6  6 16        19 19a 25 25 19     7 13       11  7   9 3
+/* CM*/ {11,11,11,11,11, 8,11, 0,11, 11, 11, 8, 8, 8, 0, 11, 11,  8,  8, 11,  8, 11,  8,  8, 11, 11, 11,  8,  8,11, 11, 11,11, 11,  8, 11,  8, 8, 8,11,11,  8,11, 8,11, 8, 8,11,11,11, 0, 0, 8,11,11,  8,  8,11,11, 8,11, 0, 8,11,11, 8, 0,  8,1,0 },
+//        9  9  9  9  9  9  9  6  9   9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9   9  9  9  9  9  9  9  9  9  6  6  9  9  9   9   9  9  9  9  9  7  9  9  9  9  7   9 3
+/* CP*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       30             21     6 20  30     13  9 13  6  30  30  21  13     12a       9  22      25  25  16  13     30         30  13      16 13 12        21 30 21    22 15           6  6 16 30     19 19a 25 25 19     7 13       11  7   9 3
+/* CR*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        5  5  5  5  5  5  5  5  5   5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5   5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5  5  5  5  5   5 3
+/*DCA*/ { 0, 5, 1, 5, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       28 28    28    21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13 28 28 11  7   9 3
+/*EAA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0, 29, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13       11  7   9 3
+/*EAB*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  1,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 1, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13               9  22              21  13                    13      21 13           21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/*EAC*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      25  25  16  13                    13      16 13 12        21    21    22 15           6  6 16        19 19a 25 25 19     7 13       11  7   9 3
+/*EAE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13            30      13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/*EAG*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       12 12 12 12 12 12 12  6 12  12  12 12  9 12  6  12  12  12  12  12  12  12   9  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12  12 12 12 12 12 12 12 12 12  6  6 12 12 12  12  12 12 12 12 12  7 12 12 12 11  7   9 3
+/*EAI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/*EAM*/ {11,11,11,11,11, 8,11, 0,11, 11, 11, 8, 8, 8, 0, 11, 11,  8,  8, 11,  8, 11,  8,  8, 11, 11, 11,  8,  8,11, 11, 11,11, 11,  8, 11,  8, 8, 8,11,11,  8,11, 8,11, 8, 8,11,11,11, 0, 0, 8,11,11,  8, 38,11,11, 8,11, 0, 8,11,11, 8, 0,  8,1,0 },
+//        9  9  9  9  9  9  9  6  9   9   9  9  9  9  6   9   9   9   9   9   9   9   9   9   9   9   9   9   9  9   9   9  9   9   9   9   9  9  9  9  9   9  9  9  9  9  9  9  9  9  6  6  9  9  9   9   9  9  9  9  9  7  9  9  9  9  7   9 3
+/*EAN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/*EAO*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       14 14 14 14 14 14 14  6 14  14  14 13  9 13  6  14  14  14  13  14 12a  14   9  14  14  14  14  14  13 14  14  14 14  14  13  14  14 13 12 14 14  14 14 14 14 14 14 14 14 14  6  6 14 14 14  14  14 14 14 14 14  7 13 14 14 11  7   9 3
+/*EAP*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0, 23,  1,  1,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,23,  0, 29, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20  24     13  9 13  6  24  24  21  13     12a       9  22  25          21  13     24         24  13      21 13 12        21 24 21    22 15           6  6 21 24 25  19 19a       19     7 13       11  7   9 3
+/*EAR*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 23,  1,  1,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,23,  0, 29, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20  24 23a 13  9 13  6  24  24  21  13 23a 12a 23a   9  22  25          21  13 23  24 23a 23  24  13 23a  21 13 12 27 27  21 24 21 23 22 15 27 27 27  6  6 21 24 25  19 19a       19     7 13       11  7   9 3
+/*EAS*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/*EAX*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* EB*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 0,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13            30      13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/*EEA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0, 29, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13       11  7   9 3
+/*EEI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/* EM*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/*EPA*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13       11  7   9 3
+/*EPE*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/*EPI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/*EPN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* EX*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* GL*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       12 12 12 12 12 12 12  6 12  12  12 12  9 12  6  12  12  12  12  12  12  12   9  12  12  12  12  12  12 12  12  12 12  12  12  12  12 12 12 12 12  12 12 12 12 12 12 12 12 12  6  6 12 12 12  12  12 12 12 12 12  7 12 12 12 11  7   9 3
+/* H2*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12        21    21    22 15    26 26  6  6 21        19 19a 27    19     7 13       11  7   9 3
+/* H3*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12        21    21    22 15    26     6  6 21        19 19a 27    19     7 13       11  7   9 3
+/*HHB*/ {43,14,14,14,14, 0,14, 0, 1, 43, 14, 0, 0, 0, 0, 43, 43,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,14, 43, 14,14, 43,  0, 14,  0, 0,14,14,14,  0, 1, 0,14, 0, 0,14,14,14, 0, 0, 0,14,14,  0,  0,14,14, 0,14, 0, 0,14,14, 0, 0,  0,1,0 },
+//       20 21 21 21 21 21 21  6 20 20a 21a 13  9 13  6 20a 20a  21  13 21a 21a 21a   9  22 21a 21a 21a  21  13 21 20a 21a 21 20a  13 21a  21 13 21 21 21  21    21 21 22 15 21 21 21  6  6 21 21 21  19 19a 21 21 19 21  7 13 21 21 11  7   9 3
+/* HL*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       28             21     6 20  28     13  9 13  6  28  28  21  13     12a       9  22      24  24  21  13     28         28  13      21 13 12        21 28 21    22 15           6  6 21 23 30  19 19a 24 24 19     7 13       11  7   9 3
+/* HY*/ {43,14,14,14,14, 0,14, 0, 1, 43, 14, 0, 0, 0, 0, 43, 43,  0,  0, 14, 14, 14,  0,  0, 14, 14, 14,  0,  0,14, 43, 14,14, 43,  0, 14,  0, 0,14,14,14,  0, 1, 0,14, 0, 0,14,14,14, 0, 0, 0, 0,14,  0,  0,14,14, 0,14, 0, 0,14,14, 0, 0,  0,1,0 },
+//       20 21 21 21 21 21 21  6 20 20a 21a 13  9 13  6 20a 20a  21  13 21a 21a 21a   9  22 21a 21a 21a  21  13 21 20a 21a 21 20a  13 21a  21 13 21 21 21  21    21 21 22 15 21 21 21  6  6 21 24 21  19 19a 21 21 19 21  7 13 21 21 11  7   9 3
+/* ID*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22     23a      21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a 23    19     7 13       11  7   9 3
+/* IN*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* IS*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       29             21     6 20  29     13  9 13  6  29  29  21  13     12a       9  22      25  25  21  13     29         29  13      21 13 12        21 29 21    22 15           6  6 21 24     19 19a 25 25 19     7 13       11  7   9 3
+/* JL*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 0, 0,  0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1,  0, 29, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12 26 26  21    21    22 15 26    26  6  6 21        19 19a 27    19     7 13       11  7   9 3
+/* JT*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12        21    21    22 15    26     6  6 21        19 19a 27    19     7 13       11  7   9 3
+/* JV*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  0,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,  0,  0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      27      21  13                    13      21 13 12        21    21    22 15    26 26  6  6 21        19 19a 27    19     7 13       11  7   9 3
+/* LF*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        5  5  5  5  5  5  5  5  5   5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5   5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5  5  5  5  5   5 3
+/* NL*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,1,0 },
+//        5  5  5  5  5  5  5  5  5   5   5  5  5  5  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5  5   5   5  5   5   5   5   5  5  5  5  5   5  5  5  5  5  5  5  5  5  5  5  5  5  5   5   5  5  5  5  5  5  5  5  5  5  5   5 3
+/* NS*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* NU*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  1,  0,  0,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       23             21     6 20  23     13  9 13  6  23  23  21  13     12a       9  22      24  24  21  13     23         23  13      21 13 12        21 23 21    22 15           6  6 21 24 30  19 19a 24 24 19     7 13       11  7   9 3
+/* OP*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       14 14 14 14 14 14 14  6 14  14  14 13  9 13  6  14  14  14  13  14 12a  14   9  14  14  14  14  14  13 14  14  14 14  14  13  14  14 13 12 14 14  14 14 14 14 14 14 14 14 14  6  6 14 14 14  14  14 14 14 14 14  7 13 14 14 11  7   9 3
+/*PfQ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0, 32,  0,  0, 32,  0, 32,  0,  0, 32, 32, 32,  0,  0, 0, 32, 32,32,  0,  0,  0,  0, 0, 0,32,32,  0, 0, 0, 0, 0, 0,32, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       19 19 19 19 19 19 19  6 19 19a 19a 13  9 13  6 19a 19a  21  13 19a 12a 19a   9  22 19a 19a 19a  21  13 19 19a 19a 19 19a  13 19a 19a 13 12 19 19 19a 19 19 19 19 15 19 19 19  6  6 19 19 19  19 19a 19 19 19 19  7 13 19 19 11  7   9 3
+/*PiQ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       19 19 19 19 19 19 19  6 19  19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  19  13 19  19  19 19  19  13  19  19 13 12 19 19  19 19 19 19 19 15 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13 19 19 11  7   9 3
+/* PO*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  1, 0, 0, 0, 0,  0,  0,  0,  0,  1,  0,  1,  0,  0, 23,  1,  1,  0,  0, 1,  0,  1, 1,  0,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,23,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20  24     13  9 13  6  24  24  21  13     12a       9  22  25          21  13     24         24  13      21 13 12        21 24 21    22 15           6  6 21 24 25  19 19a       19     7 13       11  7   9 3
+/* PR*/ { 0, 1, 1, 1, 1, 0, 1, 0, 1,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 23,  1,  1,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,23,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//       24             21     6 20  24 23a 13  9 13  6  24  24  21  13 23a 12a 23a   9  22  25          21  13 23  24 23a 23  24  13 23a  21 13 12 27 27  21 24 21 23 22 15 27 27 27  6  6 21 24 25  19 19a       19     7 13       11  7   9 3
+/* QU*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       19 19 19 19 19 19 19  6 19  19  19 13  9 13  6  19  19  19  13  19 12a  19   9  19  19  19  19  19  13 19  19  19 19  19  13  19  19 13 12 19 19  19 19 19 19 19 15 19 19 19  6  6 19 19 19  19  19 19 19 19 19  7 13 19 19 11  7   9 3
+/* RI*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0,35, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19 30  7 13       11  7   9 3
+/* SP*/ {48,48,48,48,55,48,48, 0,48, 48, 48,26,48,26, 0, 48, 48, 48, 26, 48, 48, 48, 48, 48, 48, 48, 48, 64, 26,48, 48, 48,48, 48, 26, 48, 64,26,48,48,48, 48,48,48,48,48,73,48,48,48, 0, 0,64,48,48, 82, 48,48,48,48,48, 0,26,48,48,26, 0, 48,1,0 },
+//        8  8  8  8  8  8  8  6  8   8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8   8  8  8  8  8  8  8  8  8  6  6  8  8  8   8   8  8  8  8  8  7  8  8  8  8  7   8 3
+/* SY*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1, 17, 17,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0,20, 1,  0,  0,17,17, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22      25  25  21  13                    13      21 13 12        21 21 21    22 15           6  6 21 25     19 19a 25 25 19     7 13       11  7   9 3
+/* VF*/ { 1, 1, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  1,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//                      21     6 20         13  9 13  6          21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* VI*/ { 1, 2, 1, 1, 1, 0, 1, 0, 1,  1,  1, 0, 0, 0, 0,  2,  1,  0,  0,  1,  0,  1,  0,  0,  1,  1,  1,  0,  0, 1,  1,  1, 1,  1,  0,  1,  0, 0, 0, 1, 1,  0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1,  0,  0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0,  0,1,0 },
+//          28          21     6 20         13  9 13  6 28a      21  13     12a       9  22              21  13                    13      21 13 12        21    21    22 15           6  6 21        19 19a       19     7 13       11  7   9 3
+/* WJ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       11 11 11 11 11 11 11  6 11  11  11 11  9 11  6  11  11  11  11  11  11  11   9  11  11  11  11  11  11 11  11  11 11  11  11  11  11 11 11 11 11  11 11 11 11 11 11 11 11 11  6  6 11 11 11  11  11 11 11 11 11  7 11 11 11 11  7   9 3
+/* ZW*/ { 1, 1, 1, 1, 1, 1, 1, 0, 1,  1,  1, 1, 1, 1, 0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 1,  1,  1, 1,  1,  1,  1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1,  1,  1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0,  1,1,0 },
+//        8  8  8  8  8  8  8  6  8   8   8  8  8  8  6   8   8   8   8   8   8   8   8   8   8   8   8   8   8  8   8   8  8   8   8   8   8  8  8  8  8   8  8  8  8  8  8  8  8  8  6  6  8  8  8   8   8  8  8  8  8  7  8  8  8  8  7   8 3
+/*ZWJ*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,1,0 },
+//       8a 8a 8a 8a 8a 8a 8a  6 8a  8a  8a 8a 8a 8a  6  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a  8a 8a  8a  8a 8a  8a  8a  8a  8a 8a 8a 8a 8a  8a 8a 8a 8a 8a 8a 8a 8a 8a  6  6 8a 8a 8a  8a  8a 8a 8a 8a 8a  7 8a 8a 8a 8a  7  8a 3
+/* ^ */ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,0,0 },
+//        2  2  2  2  2  2  2  2  2   2   2  2  2  2  2   2   2   2   2   2   2   2   2   2   2   2   2   2   2  2   2   2  2   2   2   2   2  2  2  2  2   2  2  2  2  2  2  2  2  2  2  2  2  2  2   2   2  2  2  2  2  2  2  2  2  2  2   2 2
+/* u */ { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0, 0,  0,  0,  0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,0,0 }
 };
 
 
@@ -458652,7 +458652,7 @@ static const U8 LB_dfa_table[] = {
     11,	/* 	else try LB_any_v_QU_then_nonEA_or_eot (Rule LB19a) */
     0,	/*	if matches, return 0 */
     1,	/*	else return 1  (Rule LB31) */
-    13,	/* [43] LB_various_then_HY_or_U2010_v_AL (Rule LB20a) */
+    13,	/* [43] LB_various_then_HY_or_HH_v_AL (Rule LB20a) */
     0,	/*	if matches, return 0 */
     14,	/* 	else try LB_HL_then_HY_or_BA_sans_EA_v_nonHL (Rule LB21a) */
     0,	/*	if matches, return 0 */
@@ -458885,7 +458885,6 @@ static const U8 WB_dfa_table[] = {
  * e97e4259d0d20fab150b9c7b4b28abfae5cd78ca97e7f4ac6ed20d685d5f4a7c lib/unicore/LineBreak.txt
  * 9953f0fcebf5ea8091c5c581e4df0e43f20d2533c84ccca7987a9bb819a896a8 lib/unicore/NameAliases.txt
  * 4ff660cb922480cd5aab9a689b1a6905d0a54575baf9967d0f1e00ac866f04dd lib/unicore/NamedSequences.txt
- * d811971453e7075e1ad56fb1b301eece5aa80757b81f6156e74a1bfb3ae5ceb1 lib/unicore/NormTest.txt
  * 53d614508e2a0b2305a8aa21cd60d993de9326cdf65993660dfcce4503548583 lib/unicore/PropList.txt
  * 440fd3e5460b9bfe31da67b6f923992e1989d31fe2ed91e091c4b8f8e2620bf9 lib/unicore/PropValueAliases.txt
  * 33a9f2266ad6b8e8de05c0ea3dfac411ac62cf8839ff1c94057471e4c5f6a2b3 lib/unicore/PropertyAliases.txt
@@ -458914,9 +458913,9 @@ static const U8 WB_dfa_table[] = {
  * 4be1c18e7b121d951018065b453bb05083f624c8f905ce8be7c0f354c9097c95 lib/unicore/extracted/DLineBreak.txt
  * 786833e0a3f5ec0c0cd0940e4c15f730f3a92163f354ecd7dede28a70c0fa892 lib/unicore/extracted/DNumType.txt
  * 00b43cc5c9b86a834f82389c4537f103e652821387daa556f0bd220f6c23007e lib/unicore/extracted/DNumValues.txt
- * 1c7436cfa4a07f19f29fe0e499b49bcf6662be766b18f1a97cce9693703c4ca5 lib/unicore/mktables
+ * 5ce9c6296c80a4ccd654a8e8fed6a028b5ad95050afb821a819f98dd77a11c22 lib/unicore/mktables
  * 63f771c327e92574fbd77919586079c38f669058a5e6b67ccec385ef8fcde882 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
- * 6f140fe16685fe5d0e81e2984af81342aff5eaba309991002eaca94d032b2ecc regen/mk_invlists.pl
+ * ec2bea650f1338fcd1f2f5b0e589f89e653c180b3994468788fd343a2869ced7 regen/mk_invlists.pl
  * ex: set ro ft=c: */
