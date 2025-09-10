@@ -1,6 +1,6 @@
-# DerivedJoiningGroup-16.0.0.txt
-# Date: 2024-07-30, 21:15:55 GMT
-# © 2024 Unicode®, Inc.
+# DerivedJoiningGroup-17.0.0.txt
+# Date: 2025-01-27, 18:09:13 GMT
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -231,8 +231,9 @@
 06B9..06BC    ; Noon # Lo   [4] ARABIC LETTER NOON WITH DOT BELOW..ARABIC LETTER NOON WITH RING
 0767..0769    ; Noon # Lo   [3] ARABIC LETTER NOON WITH TWO DOTS BELOW..ARABIC LETTER NOON WITH SMALL V
 0889          ; Noon # Lo       ARABIC LETTER NOON WITH INVERTED SMALL V
+088F          ; Noon # Lo       ARABIC LETTER NOON WITH RING ABOVE
 
-# Total code points: 9
+# Total code points: 10
 
 # ================================================
 
@@ -384,8 +385,9 @@
 0777          ; Yeh # Lo       ARABIC LETTER FARSI YEH WITH EXTENDED ARABIC-INDIC DIGIT FOUR BELOW
 08A8..08A9    ; Yeh # Lo   [2] ARABIC LETTER YEH WITH TWO DOTS BELOW AND HAMZA ABOVE..ARABIC LETTER YEH WITH TWO DOTS BELOW AND DOT ABOVE
 08BA          ; Yeh # Lo       ARABIC LETTER YEH WITH TWO DOTS BELOW AND SMALL NOON ABOVE
+10EC7         ; Yeh # Lo       ARABIC LETTER YEH WITH FOUR DOTS BELOW
 
-# Total code points: 10
+# Total code points: 11
 
 # ================================================
 
@@ -747,6 +749,12 @@
 # ================================================
 
 0620          ; Kashmiri_Yeh # Lo       ARABIC LETTER KASHMIRI YEH
+
+# Total code points: 1
+
+# ================================================
+
+10EC6         ; Thin_Noon # Lo       ARABIC LETTER THIN NOON
 
 # Total code points: 1
 

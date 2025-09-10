@@ -47,7 +47,7 @@ bytes.
 =cut
 */
 
-#define UNICODE_MAJOR_VERSION   16
+#define UNICODE_MAJOR_VERSION   17
 #define UNICODE_DOT_VERSION     0
 #define UNICODE_DOT_DOT_VERSION 0
 
@@ -249,7 +249,7 @@ bytes.
 
 /* The number of code points not matching \pC */
 #ifdef PERL_IN_REGCOMP_ANY
-#  define NON_OTHER_COUNT  154828
+#  define NON_OTHER_COUNT  159631
 #endif
 
 /* The highest code point that has any type of case change */

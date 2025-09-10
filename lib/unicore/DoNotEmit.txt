@@ -1,6 +1,6 @@
-# DoNotEmit-16.0.0.txt
-# Date: 2024-07-30, 19:30:00 GMT
-# © 2024 Unicode®, Inc.
+# DoNotEmit-17.0.0.txt
+# Date: 2025-08-14
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -38,6 +38,19 @@
 # to U+03A9 GREEK CAPITAL LETTER OMEGA is not explicitly listed, since it is
 # expected that conforming Unicode processes would discover the relation
 # between the two characters.
+#
+# Sequences for Egyptian Hieroglyphs are not listed here. See
+# the kEH_AltSeq property in UAX #57 for that information.
+#
+# CJK compatibility ideographs are not listed here either. Most of the CJK
+# compatibility ideographs are canonically equivalent to a CJK unified
+# ideograph, which means that distinctions between compatibility ideographs
+# and the unified ideographs that they are canonically equivalent to would
+# be lost in normalization. The preferred form for applications that intend
+# to keep such distinctions is using a standardized variation sequence
+# instead of a CJK compatibility ideograph. For a comprehensive list of
+# these standardized variation sequences, see the section "CJK
+# compatibility ideographs" in StandardizedVariants.txt.
 #
 # Note that some sequences could be considered recursive, in the way that
 # the preferred sequence to use may be a subsequence of the "Do Not Emit"
@@ -80,6 +93,8 @@
 # Dotless_Form:
 #    Dotless forms of lowercase Latin i and j followed by a
 #    combining dot above.
+# Arabic_Tashkil:
+#    Arabic tashkil combinations that should be avoided.
 # Hamza_Form:
 #    Sequences containing Arabic hamza above, which should be avoided.
 # Precomposed_Form:
@@ -92,7 +107,7 @@
 #    Miscellaneous characters and sequences discouraged in the
 #    Unicode Standard.
 # Preferred_Spelling:
-#    Miscellaneous characters and sequeences for which the Unicode Standard
+#    Miscellaneous characters and sequences for which the Unicode Standard
 #    specifies a preferred spelling.
 
 # ================================================
@@ -124,8 +139,6 @@
 0905 0957; 0977; Indic_Vowel_Letter # DEVANAGARI LETTER A, DEVANAGARI VOWEL SIGN UUE; DEVANAGARI LETTER UUE
 
 # Devanagari, from Table 12-2
-# Review Note: Some experts have recommended removing these, while
-# others prefer keeping them. They may also be procedurally generated.
 0916 094D 093E; 0916; Indic_Atomic_Consonant # DEVANAGARI LETTER KHA, DEVANAGARI SIGN VIRAMA, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER KHA
 0916 094D 200D 093E; 0916; Indic_Atomic_Consonant # DEVANAGARI LETTER KHA, DEVANAGARI SIGN VIRAMA, ZERO WIDTH JOINER, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER KHA
 0917 094D 093E; 0917; Indic_Atomic_Consonant # DEVANAGARI LETTER GA, DEVANAGARI SIGN VIRAMA, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER GA
@@ -204,8 +217,6 @@
 097F 094D 200D 093E; 097F; Indic_Atomic_Consonant # DEVANAGARI LETTER BBA, DEVANAGARI SIGN VIRAMA, ZERO WIDTH JOINER, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER BBA
 
 # Devanagari, from Table 12-3
-# Review Note: Some experts have recommended removing these, while
-# others prefer keeping them. They may also be procedurally generated.
 # Note: This list may be incomplete.
 0915 094D 091A 094D 093E; 0915 094D 091A; Indic_Consonant_Conjunct # DEVANAGARI LETTER KA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER CA, DEVANAGARI SIGN VIRAMA, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER KA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER CA
 0915 094D 091A 094D 200D 093E; 0915 094D 091A; Indic_Consonant_Conjunct # DEVANAGARI LETTER KA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER CA, DEVANAGARI SIGN VIRAMA, ZERO WIDTH JOINER, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER KA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER CA
@@ -216,7 +227,7 @@
 0928 094D 0924 094D 093E; 0928 094D 0924; Indic_Consonant_Conjunct # DEVANAGARI LETTER NA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER TA, DEVANAGARI SIGN VIRAMA, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER NA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER TA
 0928 094D 0924 094D 200D 093E; 0928 094D 0924; Indic_Consonant_Conjunct # DEVANAGARI LETTER NA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER TA, DEVANAGARI SIGN VIRAMA, ZERO WIDTH JOINER, DEVANAGARI VOWEL SIGN AA; DEVANAGARI LETTER NA, DEVANAGARI SIGN VIRAMA, DEVANAGARI LETTER TA
 
-# Bengali, from Table 12-11
+# Bengali (Bangla), from Table 12-11
 0985 09BE; 0986; Indic_Vowel_Letter # BENGALI LETTER A, BENGALI VOWEL SIGN AA; BENGALI LETTER AA
 098B 09C3; 09E0; Indic_Vowel_Letter # BENGALI LETTER VOCALIC R, BENGALI VOWEL SIGN VOCALIC R; BENGALI LETTER VOCALIC RR
 098C 09E2; 09E1; Indic_Vowel_Letter # BENGALI LETTER VOCALIC L, BENGALI VOWEL SIGN VOCALIC L; BENGALI LETTER VOCALIC LL
@@ -244,27 +255,27 @@
 0A85 0ABE 0AC8; 0A94; Indic_Vowel_Letter # GUJARATI LETTER A, GUJARATI VOWEL SIGN AA, GUJARATI VOWEL SIGN AI; GUJARATI LETTER AU
 0AC5 0ABE; 0AC9; Indic_Vowel_Letter # GUJARATI VOWEL SIGN CANDRA E, GUJARATI VOWEL SIGN AA; GUJARATI VOWEL SIGN CANDRA O
 
-# Oriya, from Table 12-22
+# Oriya (Odia), from Table 12-22
 0B05 0B3E; 0B06; Indic_Vowel_Letter # ORIYA LETTER A, ORIYA VOWEL SIGN AA; ORIYA LETTER AA
 0B0F 0B57; 0B10; Indic_Vowel_Letter # ORIYA LETTER E, ORIYA AU LENGTH MARK; ORIYA LETTER AI
 0B13 0B57; 0B14; Indic_Vowel_Letter # ORIYA LETTER O, ORIYA AU LENGTH MARK; ORIYA LETTER AU
 
-# Tamil, from Table 12-26
+# Tamil, from Table 12-27
 0B85 0BC2; 0B86; Indic_Vowel_Letter # TAMIL LETTER A, TAMIL VOWEL SIGN UU; TAMIL LETTER AA
 
-# Telugu, from Table 12-30
+# Telugu, from Table 12-31
 0C12 0C55; 0C13; Indic_Vowel_Letter # TELUGU LETTER O, TELUGU LENGTH MARK; TELUGU LETTER OO
 0C12 0C4C; 0C14; Indic_Vowel_Letter # TELUGU LETTER O, TELUGU VOWEL SIGN AU; TELUGU LETTER AU
 0C3F 0C55; 0C40; Indic_Vowel_Letter # TELUGU VOWEL SIGN I, TELUGU LENGTH MARK; TELUGU VOWEL SIGN II
 0C46 0C55; 0C47; Indic_Vowel_Letter # TELUGU VOWEL SIGN E, TELUGU LENGTH MARK; TELUGU VOWEL SIGN EE
 0C4A 0C55; 0C4B; Indic_Vowel_Letter # TELUGU VOWEL SIGN O, TELUGU LENGTH MARK; TELUGU VOWEL SIGN OO
 
-# Kannada, from Table 12-31
+# Kannada, from Table 12-32
 0C89 0CBE; 0C8A; Indic_Vowel_Letter # KANNADA LETTER U, KANNADA VOWEL SIGN AA; KANNADA LETTER UU
 0C92 0CCC; 0C94; Indic_Vowel_Letter # KANNADA LETTER O, KANNADA VOWEL SIGN AU; KANNADA LETTER AU
 0C8B 0CBE; 0CE0; Indic_Vowel_Letter # KANNADA LETTER VOCALIC R, KANNADA VOWEL SIGN AA; KANNADA LETTER VOCALIC RR
 
-# Malayalam, from Table 12-32
+# Malayalam, from Table 12-34
 0D07 0D57; 0D08; Indic_Vowel_Letter # MALAYALAM LETTER I, MALAYALAM AU LENGTH MARK; MALAYALAM LETTER II
 0D09 0D57; 0D0A; Indic_Vowel_Letter # MALAYALAM LETTER U, MALAYALAM AU LENGTH MARK; MALAYALAM LETTER UU
 0D0E 0D46; 0D10; Indic_Vowel_Letter # MALAYALAM LETTER E, MALAYALAM VOWEL SIGN E; MALAYALAM LETTER AI
@@ -287,13 +298,17 @@
 1100B 1103E; 1100C; Indic_Vowel_Letter # BRAHMI LETTER VOCALIC R, BRAHMI VOWEL SIGN VOCALIC R; BRAHMI LETTER VOCALIC RR
 1100F 11042; 11010; Indic_Vowel_Letter # BRAHMI LETTER E, BRAHMI VOWEL SIGN E; BRAHMI LETTER AI
 
-# Takri, from Table 15-1
+# Sharada, from Table 15-1
+1118D 111BC; 1118E; Indic_Vowel_Letter # SHARADA LETTER E, SHARADA VOWEL SIGN E; SHARADA LETTER AI
+111C4; 1118F 11180; Discouraged # SHARADA OM; SHARADA LETTER O, SHARADA SIGN CANDRABINDU
+
+# Takri, from Table 15-2
 11680 116AD; 11681; Indic_Vowel_Letter # TAKRI LETTER A, TAKRI VOWEL SIGN AA; TAKRI LETTER AA
 11686 116B2; 11687; Indic_Vowel_Letter # TAKRI LETTER E, TAKRI VOWEL SIGN E; TAKRI LETTER AI
 11680 116B4; 11688; Indic_Vowel_Letter # TAKRI LETTER A, TAKRI VOWEL SIGN O; TAKRI LETTER O
 11680 116B5; 11689; Indic_Vowel_Letter # TAKRI LETTER A, TAKRI VOWEL SIGN AU; TAKRI LETTER AU
 
-# Khojki, from Table 15-3
+# Khojki, from Table 15-4
 11200 1122C; 11201; Indic_Vowel_Letter # KHOJKI LETTER A, KHOJKI VOWEL SIGN AA; KHOJKI LETTER AA
 11240 1122E; 11202; Indic_Vowel_Letter # KHOJKI LETTER SHORT I, KHOJKI VOWEL SIGN II; KHOJKI LETTER I
 11206 1122C; 11203; Indic_Vowel_Letter # KHOJKI LETTER O, KHOJKI VOWEL SIGN AA; KHOJKI LETTER U
@@ -303,21 +318,21 @@
 1122C 11230; 11232; Indic_Vowel_Letter # KHOJKI VOWEL SIGN AA, KHOJKI VOWEL SIGN E; KHOJKI VOWEL SIGN O
 1122C 11231; 11233; Indic_Vowel_Letter # KHOJKI VOWEL SIGN AA, KHOJKI VOWEL SIGN AI; KHOJKI VOWEL SIGN AU
 
-# Khudawadi, from Table 15-4
+# Khudawadi, from Table 15-5
 112B0 112E0; 112B1; Indic_Vowel_Letter # KHUDAWADI LETTER A, KHUDAWADI VOWEL SIGN AA; KHUDAWADI LETTER AA
 112B0 112E5; 112B6; Indic_Vowel_Letter # KHUDAWADI LETTER A, KHUDAWADI VOWEL SIGN E; KHUDAWADI LETTER E
 112B0 112E6; 112B7; Indic_Vowel_Letter # KHUDAWADI LETTER A, KHUDAWADI VOWEL SIGN AI; KHUDAWADI LETTER AI
 112B0 112E7; 112B8; Indic_Vowel_Letter # KHUDAWADI LETTER A, KHUDAWADI VOWEL SIGN O; KHUDAWADI LETTER O
 112B0 112E8; 112B9; Indic_Vowel_Letter # KHUDAWADI LETTER A, KHUDAWADI VOWEL SIGN AU; KHUDAWADI LETTER AU
 
-# Tirhuta, from Table 15-6
+# Tirhuta, from Table 15-7
 11481 114B0; 11482; Indic_Vowel_Letter # TIRHUTA LETTER A, TIRHUTA VOWEL SIGN AA; TIRHUTA LETTER AA
 114AA 114B5; 11489; Indic_Vowel_Letter # TIRHUTA LETTER LA, TIRHUTA VOWEL SIGN VOCALIC R; TIRHUTA LETTER VOCALIC L
 114AA 114B6; 1148A; Indic_Vowel_Letter # TIRHUTA LETTER LA, TIRHUTA VOWEL SIGN VOCALIC RR; TIRHUTA LETTER VOCALIC LL
 1148B 114BA; 1148C; Indic_Vowel_Letter # TIRHUTA LETTER E, TIRHUTA VOWEL SIGN SHORT E; TIRHUTA LETTER AI
 1148D 114BA; 1148E; Indic_Vowel_Letter # TIRHUTA LETTER O, TIRHUTA VOWEL SIGN SHORT E; TIRHUTA LETTER AU
 
-# Modi, from Table 15-7
+# Modi, from Table 15-8
 11600 11639; 1160A; Indic_Vowel_Letter # MODI LETTER A, MODI VOWEL SIGN E; MODI LETTER E
 11600 1163A; 1160B; Indic_Vowel_Letter # MODI LETTER A, MODI VOWEL SIGN AI; MODI LETTER AI
 11601 11639; 1160C; Indic_Vowel_Letter # MODI LETTER AA, MODI VOWEL SIGN E; MODI LETTER O
@@ -327,7 +342,7 @@
 # Deprecated characters and other discouraged characters and sequences
 # ================================================
 
-# Latin, from text of Section 7.1, the NamesList, and the uppercase mapping
+# Latin, from text in the "Latin" section of the core specification, the NamesList, and the uppercase mapping
 0140; 006C 00B7; Preferred_Spelling # LATIN SMALL LETTER L WITH MIDDLE DOT; LATIN SMALL LETTER L, MIDDLE DOT
 0149; 2019 006E; Deprecated # LATIN SMALL LETTER N PRECEDED BY APOSTROPHE; RIGHT SINGLE QUOTATION MARK, LATIN SMALL LETTER N
 0131 0307; 0069 0307; Dotless_Form # LATIN SMALL LETTER DOTLESS I, COMBINING DOT ABOVE; LATIN SMALL LETTER I, COMBINING DOT ABOVE
@@ -427,19 +442,21 @@
 107A6 0322; 107A7; Precomposed_Form # MODIFIER LETTER SMALL TURNED R WITH LONG LEG, COMBINING RETROFLEX HOOK BELOW; MODIFIER LETTER SMALL TURNED R WITH LONG LEG AND RETROFLEX HOOK
 107AC 0322; 107AD; Precomposed_Form # MODIFIER LETTER SMALL TS DIGRAPH, COMBINING RETROFLEX HOOK BELOW; MODIFIER LETTER SMALL TS DIGRAPH WITH RETROFLEX HOOK
 
-# Arabic, from text of Section 9.2 and the NamesList
+# Arabic, from text in the "Arabic" section of the core specification, and the NamesList
 0649 0654; 0626; Hamza_Form # ARABIC LETTER ALEF MAKSURA, ARABIC HAMZA ABOVE; ARABIC LETTER YEH WITH HAMZA ABOVE
+064E 064E; 064B; Arabic_Tashkil # ARABIC FATHA, ARABIC FATHA; ARABIC FATHATAN
+0650 0650; 064D; Arabic_Tashkil # ARABIC KASRA, ARABIC KASRA; ARABIC KASRATAN
 0673; 0627 065F; Deprecated # ARABIC LETTER ALEF WITH WAVY HAMZA BELOW; ARABIC LETTER ALEF, ARABIC WAVY HAMZA BELOW
 0675; 0674 0627; Preferred_Spelling # ARABIC LETTER HIGH HAMZA ALEF; ARABIC LETTER HIGH HAMZA, ARABIC LETTER ALEF
 0676; 0674 0648; Preferred_Spelling # ARABIC LETTER HIGH HAMZA WAW; ARABIC LETTER HIGH HAMZA, ARABIC LETTER WAW
 0677; 0674 06C7; Preferred_Spelling # ARABIC LETTER U WITH HAMZA ABOVE; ARABIC LETTER HIGH HAMZA, ARABIC LETTER U
 0678; 0674 0649; Preferred_Spelling # ARABIC LETTER HIGH HAMZA YEH; ARABIC LETTER HIGH HAMZA, ARABIC LETTER ALEF MAKSURA
 
-# Devanagari, from Section 12.1 and the NamesList
+# Devanagari, from the "Devanagari" section of the core specification, and the NamesList
 0953; 0300; Discouraged # DEVANAGARI GRAVE ACCENT; COMBINING GRAVE ACCENT
 0954; 0301; Discouraged # DEVANAGARI ACUTE ACCENT; COMBINING ACUTE ACCENT
 
-# Bengali, from Section 12.2
+# Bengali (Bangla), from the "Bengali (Bangla)" section of the core specification
 09A4 09CD 200D; 09CE; Bengali_Khanda_Ta # BENGALI LETTER TA, BENGALI SIGN VIRAMA, ZERO WIDTH JOINER; BENGALI LETTER KHANDA TA
 
 # Gujarati, from the NamesList
@@ -448,25 +465,21 @@
 # Tamil ligature shri
 0BB8 0BCD 0BB0 0BC0; 0BB6 0BCD 0BB0 0BC0; Tamil_Shrii # TAMIL LETTER SA, TAMIL SIGN VIRAMA, TAMIL LETTER RA, TAMIL VOWEL SIGN II; TAMIL LETTER SHA, TAMIL SIGN VIRAMA, TAMIL LETTER RA, TAMIL VOWEL SIGN II
 
-# Malayalam Chillus, from Table 12-40
+# Malayalam Chillus, from Table 12-42
 0D23 0D4D 200D; 0D7A; Malayalam_Chillu # MALAYALAM LETTER NNA, MALAYALAM SIGN VIRAMA, ZERO WIDTH JOINER; MALAYALAM LETTER CHILLU NN
 0D28 0D4D 200D; 0D7B; Malayalam_Chillu # MALAYALAM LETTER NA, MALAYALAM SIGN VIRAMA, ZERO WIDTH JOINER; MALAYALAM LETTER CHILLU N
 0D30 0D4D 200D; 0D7C; Malayalam_Chillu # MALAYALAM LETTER RA, MALAYALAM SIGN VIRAMA, ZERO WIDTH JOINER; MALAYALAM LETTER CHILLU RR
 0D32 0D4D 200D; 0D7D; Malayalam_Chillu # MALAYALAM LETTER LA, MALAYALAM SIGN VIRAMA, ZERO WIDTH JOINER; MALAYALAM LETTER CHILLU L
 0D33 0D4D 200D; 0D7E; Malayalam_Chillu # MALAYALAM LETTER LLA, MALAYALAM SIGN VIRAMA, ZERO WIDTH JOINER; MALAYALAM LETTER CHILLU LL
 
-# Tibetan, from text of Section 13.4, the NamesList, and the decompositions
+# Tibetan, from text in the "Tibetan" section of the core specification, the NamesList, and the decompositions
 0F77; 0FB2 0F71 0F80; Deprecated # TIBETAN VOWEL SIGN VOCALIC RR; TIBETAN SUBJOINED LETTER RA, TIBETAN VOWEL SIGN AA, TIBETAN VOWEL SIGN REVERSED I
 0F79; 0FB3 0F71 0F80; Deprecated # TIBETAN VOWEL SIGN VOCALIC LL; TIBETAN SUBJOINED LETTER LA, TIBETAN VOWEL SIGN AA, TIBETAN VOWEL SIGN REVERSED I
 
-# Khmer, from text of Section 16.4 and the NamesList
+# Khmer, from text in the "Khmer" section of the core specification, and the NamesList
 17A3; 17A2; Deprecated # KHMER INDEPENDENT VOWEL QAQ; KHMER LETTER QA
 17A4; 17A2 17B6; Deprecated # KHMER INDEPENDENT VOWEL QAA; KHMER LETTER QA, KHMER VOWEL SIGN AA
 17D8; 17D4 179B 17D4; Discouraged # KHMER SIGN BEYYAL; KHMER SIGN KHAN, KHMER LETTER LO, KHMER SIGN KHAN
 17E8 17D3; 19E0; Discouraged # KHMER DIGIT EIGHT, KHMER SIGN BATHAMASAT; KHMER SYMBOL PATHAMASAT
-
-# Sharada, from the NamesList, and glyph shape of U+1118E
-1118D 111BC; 1118E; Indic_Vowel_Letter # SHARADA LETTER E, SHARADA VOWEL SIGN E; SHARADA LETTER AI
-111C4; 1118F 11180; Discouraged # SHARADA OM; SHARADA LETTER O, SHARADA SIGN CANDRABINDU
 
 # EOF

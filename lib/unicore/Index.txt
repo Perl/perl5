@@ -529,6 +529,7 @@ BENGALI ISSHAR	09FA
 BENGALI RUPEE MARK	09F2
 BENGALI RUPEE SIGN	09F3
 BENZENE RING	232C
+Beria Erfe	16EA0
 bernoulli function	212C
 BET SYMBOL	2136
 BETA SYMBOL, GREEK	03D0
@@ -957,6 +958,7 @@ CJK Unified Ideographs Extension F	2CEB0
 CJK Unified Ideographs Extension G	30000
 CJK Unified Ideographs Extension H	31350
 CJK Unified Ideographs Extension I	2EBF0
+CJK Unified Ideographs Extension J	323B0
 CLAPPING HANDS SIGN	1F44F
 claudian antisigma	2183
 claudian digamma inversum	2132
@@ -2236,6 +2238,7 @@ General Scripts Area	0000
 General Scripts Area, Supplementary	10000
 generalized intersection	22C2
 generalized union	22C3
+Geomantic Figures	1CEE0
 GEOMETRIC PROPORTION	223A
 Geometric Shapes	1F532
 Geometric Shapes	25A0
@@ -3515,6 +3518,7 @@ MINUS-OR-PLUS SIGN	2213
 minutes	2032
 MINY	29FF
 Miscellaneous Symbols	2600
+Miscellaneous Symbols	1CEC0
 Miscellaneous Symbols	1F940
 Mkhedruli, Georgian	10D0
 mmsp	205F
@@ -3909,6 +3913,7 @@ OR, CURLY LOGICAL	22CE
 OR, DOUBLE LOGICAL	2A54
 OR, LOGICAL	2228
 OR, N-ARY LOGICAL	22C1
+ORCA	1FACD
 order	2134
 Order Relation Precedence Signs	227A
 Order Relation Precedence Signs	22DE
@@ -4612,6 +4617,7 @@ ring, armenian modifier letter right half	055A
 RING, BENZENE	232C
 RING, MODIFIER LETTER CENTRED LEFT HALF	02D3
 RING, MODIFIER LETTER LEFT HALF	02BF
+RIYAL SIGN, SAUDI	20C1
 RJES SU NGA RO, TIBETAN SIGN	0F7E
 rle	202B
 rlm	200F
@@ -4806,6 +4812,7 @@ SHAMROCK	2618
 shamrock	2663
 Shapes, Geometric	25A0
 Sharada	11180
+Sharada Supplement	11B60
 SHARP S, LATIN SMALL LETTER	00DF
 SHARP SIGN, MUSIC	266F
 Shavian	10450
@@ -4839,6 +4846,7 @@ shy	00AD
 SIBE SYLLABLE BOUNDARY MARKER, MONGOLIAN	1807
 Siddham	11580
 Sidelining Emphasis Marks	FE45
+Sidetic	10940
 SIDEWAYS DIAERESIZED U, LATIN SMALL LETTER	1D1E
 SIDEWAYS O WITH STROKE, LATIN SMALL LETTER	1D13
 SIDEWAYS O, LATIN SMALL LETTER	1D11
@@ -5291,6 +5299,7 @@ Symbols, Mathematical Alphanumeric	1D400
 Symbols, Mathematical Digits	1D7CE
 Symbols, Metrical	23D1
 Symbols, Miscellaneous	2600
+Symbols, Miscellaneous	1CEC0
 Symbols, Miscellaneous	1F940
 Symbols, Money	1F4B0
 Symbols, Monospace Mathematical	1D670
@@ -5424,6 +5433,7 @@ Tai Lue, New	1980
 Tai Tham	1A20
 Tai Viet	AA80
 Tai Xuan Jing Symbols	1D300
+Tai Yo	1E6C0
 Tails, Fish	297C
 tainome japanese bullet	25C9
 TAKE, PRESCRIPTION	211E
@@ -5457,6 +5467,7 @@ tamil varudam	0BF5
 TAMIL YEAR SIGN	0BF5
 Tangut	17000
 Tangut Components	18800
+Tangut Components Supplement	18D80
 Tangut Supplement	18D00
 TAPE DRIVE	2707
 TAPER, CONICAL	2332
@@ -5604,6 +5615,7 @@ TIRONIAN SIGN ET	204A
 TITLO LEFT HALF, COMBINING CYRILLIC	FE2E
 Todhri	105C0
 TODO SOFT HYPHEN, MONGOLIAN	1806
+Tolong Siki	11DB0
 Tone Letters	02E5
 Tone Letters, Modifier	A700
 TONE MARK, COMBINING ACUTE	0341
@@ -5665,6 +5677,7 @@ TRIPLE PRIME	2034
 TRIPLE PRIME, REVERSED	2037
 TRIPLE TILDE	224B
 TRIPLE UNDERDOT, COMBINING	20E8
+TROMBONE	1FA8A
 TRUCK, BLACK	26DF
 TRUE	22A8
 TSHEG BSTAR, TIBETAN MARK DELIMITER	0F0C
@@ -5789,6 +5802,12 @@ Unified Ideographs Extension A, CJK	3400
 Unified Ideographs Extension B, CJK	20000
 Unified Ideographs Extension C, CJK	2A700
 Unified Ideographs Extension D, CJK	2B740
+Unified Ideographs Extension E, CJK	2B820
+Unified Ideographs Extension F, CJK	2CEB0
+Unified Ideographs Extension G, CJK	30000
+Unified Ideographs Extension H, CJK	31350
+Unified Ideographs Extension I, CJK	2EBF0
+Unified Ideographs Extension J, CJK	323B0
 Unified Ideographs, CJK	4E00
 UNION	222A
 UNION, DOUBLE	22D3

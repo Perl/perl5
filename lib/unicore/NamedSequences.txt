@@ -1,6 +1,6 @@
-# NamedSequences-16.0.0.txt
-# Date: 2024-02-02
-# © 2024 Unicode®, Inc.
+# NamedSequences-17.0.0.txt
+# Date: 2025-07-30
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -98,7 +98,7 @@ LATIN SMALL LETTER E WITH CIRCUMFLEX AND MACRON;00EA 0304
 LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND CARON;00CA 030C
 LATIN SMALL LETTER E WITH CIRCUMFLEX AND CARON;00EA 030C
 
-# Subset 4: Prominent use cases pulled from examples 
+# Subset 4: Prominent use cases pulled from examples
 # for Lithuanian and Tagalog in
 # Unicode 4.0 and early drafts of UAX #34. (2 total)
 
@@ -209,8 +209,8 @@ BENGALI LETTER KHINYA;0995 09CD 09B7
 # Provisional 2008-02-08, Approved 2009-08-14
 #
 # A visual display of the Tamil named character sequences is available
-# in the documentation for the Unicode Standard. See Section 12.6, Tamil in
-# https://www.unicode.org/versions/latest/
+# in the documentation for the Unicode Standard.
+# See the "Tamil" section in the core specification.
 
 TAMIL CONSONANT K;  0B95 0BCD
 TAMIL CONSONANT NG; 0B99 0BCD

@@ -1,6 +1,6 @@
-# EmojiSources-16.0.0.txt
-# Date: 2024-02-02
-# © 2024 Unicode®, Inc.
+# EmojiSources-17.0.0.txt
+# Date: 2025-08-01
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -14,7 +14,7 @@
 # mappings to similar but not equivalent symbols in either mapping direction.
 #
 # Created for Unicode 6.0 by Markus Scherer.
-# Updated for subsequent versions by Ken Whistler (no changes to mappings).
+# No mappings have been changed or added since then. No mapping changes or additions are anticipated.
 #
 # Format: Semicolon-delimited file with a fixed number of fields.
 # Note that the format, including the number of fields, may change in the future.

@@ -870,6 +870,11 @@ push @tables_that_may_be_empty, 'Grapheme_Cluster_Break=Prepend'
                                                     if $v_version ge v6.1.0;
 push @tables_that_may_be_empty, 'Canonical_Combining_Class=CCC133'
                                                     if $v_version ge v6.2.0;
+if ($v_version ge v17.0.0) {
+    push @tables_that_may_be_empty, qw(kMandarin
+                                       kTotalStrokes
+                                       kUnihanCore2020);
+}
 
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
@@ -13402,6 +13407,10 @@ sub setup_Unikemet{
                       FVal => $STRING,
                       Func => $STRING,
                       UniK => $STRING,
+                      AltSeq => {
+                                  type => $STRING,
+                                  default => '<code point>'
+                                },
                      );
     for my $property (keys %properties) {
         my $type = $properties{$property};

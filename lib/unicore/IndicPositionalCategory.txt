@@ -1,6 +1,6 @@
-# IndicPositionalCategory-16.0.0.txt
-# Date: 2024-04-30, 21:48:21 GMT
-# © 2024 Unicode®, Inc.
+# IndicPositionalCategory-17.0.0.txt
+# Date: 2025-07-29, 13:35:52 GMT
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -127,9 +127,9 @@
 # Property: Indic_Positional_Category
 #
 #  All code points not explicitly listed for Indic_Positional_Category
-#  have the value NA (not applicable).
+#  have the value Not_Applicable (NA).
 #
-# @missing: 0000..10FFFF; NA
+# @missing: 0000..10FFFF; Not_Applicable
 
 # ------------------------------------------------
 
@@ -297,6 +297,9 @@ ABEC          ; Right # Mc       MEETEI MAYEK LUM IYEK
 11A39         ; Right # Mc       ZANABAZAR SQUARE SIGN VISARGA
 11A57..11A58  ; Right # Mc   [2] SOYOMBO VOWEL SIGN AI..SOYOMBO VOWEL SIGN AU
 11A97         ; Right # Mc       SOYOMBO SIGN VISARGA
+11B61         ; Right # Mc       SHARADA VOWEL SIGN OOE
+11B65         ; Right # Mc       SHARADA VOWEL SIGN SHORT O
+11B67         ; Right # Mc       SHARADA VOWEL SIGN CANDRA O
 11C2F         ; Right # Mc       BHAIKSUKI VOWEL SIGN AA
 11C3E         ; Right # Mc       BHAIKSUKI SIGN VISARGA
 11CA9         ; Right # Mc       MARCHEN SUBJOINED LETTER YA
@@ -588,12 +591,14 @@ ABE5          ; Top # Mn       MEETEI MAYEK VOWEL SIGN ANAP
 11A01         ; Top # Mn       ZANABAZAR SQUARE VOWEL SIGN I
 11A04..11A09  ; Top # Mn   [6] ZANABAZAR SQUARE VOWEL SIGN E..ZANABAZAR SQUARE VOWEL SIGN REVERSED I
 11A35..11A38  ; Top # Mn   [4] ZANABAZAR SQUARE SIGN CANDRABINDU..ZANABAZAR SQUARE SIGN ANUSVARA
-11A3A         ; Top # Lo       ZANABAZAR SQUARE CLUSTER-INITIAL LETTER RA
 11A51         ; Top # Mn       SOYOMBO VOWEL SIGN I
 11A54..11A56  ; Top # Mn   [3] SOYOMBO VOWEL SIGN E..SOYOMBO VOWEL SIGN OE
 11A84..11A89  ; Top # Lo   [6] SOYOMBO SIGN JIHVAMULIYA..SOYOMBO CLUSTER-INITIAL LETTER SA
 11A96         ; Top # Mn       SOYOMBO SIGN ANUSVARA
 11A98         ; Top # Mn       SOYOMBO GEMINATION MARK
+11B60         ; Top # Mn       SHARADA VOWEL SIGN OE
+11B64         ; Top # Mn       SHARADA VOWEL SIGN SHORT E
+11B66         ; Top # Mn       SHARADA VOWEL SIGN CANDRA E
 11C30..11C31  ; Top # Mn   [2] BHAIKSUKI VOWEL SIGN I..BHAIKSUKI VOWEL SIGN II
 11C38..11C3D  ; Top # Mn   [6] BHAIKSUKI VOWEL SIGN E..BHAIKSUKI SIGN ANUSVARA
 11CB3         ; Top # Mn       MARCHEN VOWEL SIGN E
@@ -755,6 +760,7 @@ ABED          ; Bottom # Mn       MEETEI MAYEK APUN IYEK
 11A52..11A53  ; Bottom # Mn   [2] SOYOMBO VOWEL SIGN UE..SOYOMBO VOWEL SIGN U
 11A59..11A5B  ; Bottom # Mn   [3] SOYOMBO VOWEL SIGN VOCALIC R..SOYOMBO VOWEL LENGTH MARK
 11A8A..11A95  ; Bottom # Mn  [12] SOYOMBO FINAL CONSONANT SIGN G..SOYOMBO FINAL CONSONANT SIGN -A
+11B62..11B63  ; Bottom # Mn   [2] SHARADA VOWEL SIGN UE..SHARADA VOWEL SIGN UUE
 11C32..11C36  ; Bottom # Mn   [5] BHAIKSUKI VOWEL SIGN U..BHAIKSUKI VOWEL SIGN VOCALIC L
 11C3F         ; Bottom # Mn       BHAIKSUKI SIGN VIRAMA
 11C92..11CA7  ; Bottom # Mn  [22] MARCHEN SUBJOINED LETTER KA..MARCHEN SUBJOINED LETTER ZA
