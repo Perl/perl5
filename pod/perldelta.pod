@@ -141,6 +141,14 @@ means it now requires a scalar argument, not a list, just like C<CORE::sleep>:
     # Evaluates @t in scalar context (giving the number of elements)
     # and sleeps for one second. It used to sleep for 42 seconds.
 
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.59 to 3.60. This
+release changes the ordering of the processing of typemap files which have
+been specified via C<xsubpp -typemap> arguments so that (as was the case
+prior to Perl 5.10.0) these files are applied last rather than first, and
+thus take priority over any system typemap files.
+
 =back
 
 =head2 Removed Modules and Pragmata

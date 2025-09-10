@@ -67,18 +67,31 @@ B<xsubpp> [B<-v>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversionche
 This compiler is typically run by the makefiles created by L<ExtUtils::MakeMaker>
 or by L<Module::Build> or other Perl module build tools.
 
+I<xsubpp> is just a thin wrapper over C<ExtUtils::ParseXS>.
+
 I<xsubpp> will compile XS code into C code by embedding the constructs
 necessary to let C functions manipulate Perl values and creates the glue
 necessary to let Perl access those functions.  The compiler uses typemaps to
-determine how to map C function parameters and variables to Perl values.
+determine how to map C function parameters and variables to Perl values
+and vice versa.
 
-The compiler will search for typemap files called I<typemap>.  It will use
-the following search path to find default typemaps, with the rightmost
-typemap taking precedence.
+The compiler will search for typemap files called I<typemap>. It will use
+the following search path to find typemaps and apply them in that order,
+so later typemaps take precedence:
 
-	../../../typemap:../../typemap:../typemap:typemap
+    map("$_/ExtUtils/typemap", reverse @INC),
 
-It will also use a default typemap installed as C<ExtUtils::typemap>.
+    ../../../../lib/ExtUtils/typemap
+    ../../../../typemap
+    ../../../lib/ExtUtils/typemap
+    ../../../typemap
+    ../../lib/ExtUtils/typemap
+    ../../typemap
+    ../lib/ExtUtils/typemap
+    ../typemap
+    typemap
+
+    any files specifed by -typemap
 
 =head1 OPTIONS
 
@@ -97,9 +110,10 @@ Adds exception handling stubs to the C code.
 
 =item B<-typemap typemap>
 
-Indicates that a user-supplied typemap should take precedence over the
-default typemaps.  This option may be used multiple times, with the last
-typemap having the highest precedence.
+Indicates that a user-supplied typemap should be applied in additon to any
+files found in the standard search path. This option may be used multiple
+times, with the last typemap having the highest precedence, and all such
+files processed after ones found in the standard path.
 
 =item B<-output filename>
 

@@ -74,7 +74,6 @@ BEGIN {
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 use ExtUtils::ParseXS::Utilities qw(
-  standard_typemap_locations
   trim_whitespace
   C_string
   valid_proto_string

@@ -4,7 +4,8 @@ use warnings;
 use Carp;
 use Cwd qw(cwd);
 use File::Temp qw( tempdir );
-use Test::More tests =>  2;
+use File::Spec;
+use Test::More tests =>  6;
 use ExtUtils::ParseXS::Utilities qw(
   process_typemaps
 );
@@ -41,3 +42,19 @@ my $startdir  = cwd();
     chdir $startdir;
 }
 
+# Confirm that explicit typemaps via -typemap etc override standard
+# entries.
+
+{
+    my $tm_obj = process_typemaps(
+        [ File::Spec->catfile("t", "data", "conflicting.typemap") ], '.');
+    ok($tm_obj, "got typemap object");
+
+    my $tm_entry = $tm_obj->get_typemap(ctype => 'double');
+    ok($tm_entry, "got typemap entry object");
+
+    my $xs = $tm_entry->xstype;
+    ok($xs, "got typemap XS type");
+    # should be overridden from T_NV
+    is($xs, "T_DIFFERENT", "got typemap XS type");
+}
