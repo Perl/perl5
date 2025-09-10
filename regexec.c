@@ -5605,10 +5605,10 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CP(prev);
             break;
 
-          case LB_various_then_HY_or_U2010_v_AL:
+          case LB_various_then_HY_or_HH_v_AL:
             /* LB20a Do not break after a word-initial hyphen.
              *   ( sot | BK | CR | LF | NL | SP | ZW | CB | GL )
-             *   ( HY | [\x{2010} ] )
+             *   ( HY | HH ] )
              * × AL */
             prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
                                                  utf8_target);

@@ -15642,8 +15642,10 @@ END
                          };
     }
 
-    if ($v_version ge 16.0.0) {
-        push @lb_splits, { name => 'U2010',
+    # Version 17.0 formalized this split into HH, and added other code points
+    # to it
+    if ($v_version eq 16.0.0) {
+        push @lb_splits, { name => 'HH',
                            ranges => Range_List->new(Initialize
                                   => Range->new(0x2010, 0x2010))
                          };
