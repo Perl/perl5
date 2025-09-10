@@ -12834,7 +12834,7 @@ cjkIRG_KSource; kIRG_KSource
 cjkIRG_TSource; kIRG_TSource
 cjkIRG_VSource; kIRG_VSource
 END
-        push @cjk_property_values, split "\n", <<'END';
+            push @cjk_property_values, split "\n", <<'END';
 # @missing: 0000..10FFFF; cjkIRG_GSource; <none>
 # @missing: 0000..10FFFF; cjkIRG_JSource; <none>
 # @missing: 0000..10FFFF; cjkIRG_KSource; <none>
