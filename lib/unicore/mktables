@@ -1269,6 +1269,9 @@ my $A_bold_stabilized = "An 'B<$STABILIZED>'";
 my $OBSOLETE = 'O';
 my $a_bold_obsolete = "an 'B<$OBSOLETE>'";
 my $A_bold_obsolete = "An 'B<$OBSOLETE>'";
+my $PROVISIONAL = '?';
+my $a_bold_provisional = "a 'B<$PROVISIONAL>'";
+my $A_bold_provisional = "A 'B<$PROVISIONAL>'";
 
 # Aliases can also have an extra status:
 my $INTERNAL_ALIAS = 'P';
@@ -1278,6 +1281,7 @@ my %status_past_participles = (
     $STABILIZED => 'stabilized',
     $OBSOLETE => 'obsolete',
     $DEPRECATED => 'deprecated',
+    $PROVISIONAL => 'provisional',
     $INTERNAL_ALIAS => 'reserved for Perl core internal use only',
 );
 
@@ -13411,6 +13415,7 @@ sub setup_Unikemet{
         Property->new("kEH_$property",
                       Default_Map => $default,
                       Type => $type,
+                      Status => $PROVISIONAL,
                      );
     }
 
@@ -17533,6 +17538,10 @@ by this property.
 
 =item B<$DISCOURAGED> means use of this form is discouraged, and may not be
 stable.
+
+=item B<$PROVISIONAL> means this property is considered provisional by
+Unicode, and may be changed or removed in some future version of the Unicode
+Standard.
 
 =back
 
