@@ -1,6 +1,6 @@
-# CJKRadicals-16.0.0.txt
-# Date: 2024-02-02
-# © 2024 Unicode®, Inc.
+# CJKRadicals-17.0.0.txt
+# Date: 2025-05-07
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -22,8 +22,8 @@
 # the Kangxi Radicals block or the CJK Radicals Supplement block.
 # The third field is the CJK unified ideograph.
 #
-# CJK radical numbers match the regular expression [1-9][0-9]{0,2}\'{0,2}
-# and in particular they can end with one or two U+0027 ' APOSTROPHE characters.
+# CJK radical numbers match the regular expression [1-9][0-9]{0,2}\'{0,3}
+# and in particular they can end with one, two, or three U+0027 ' APOSTROPHE characters.
 #
 # For more information, see UAX #38: Unicode Han Database (Unihan),
 # at https://www.unicode.org/reports/tr38/

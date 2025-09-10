@@ -1,6 +1,6 @@
-# DerivedDecompositionType-16.0.0.txt
-# Date: 2024-04-30, 21:48:17 GMT
-# © 2024 Unicode®, Inc.
+# DerivedDecompositionType-17.0.0.txt
+# Date: 2025-01-27, 18:09:12 GMT
+# © 2025 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -873,7 +873,7 @@ FEFB          ; Isolated # Lo       ARABIC LIGATURE LAM WITH ALEF ISOLATED FORM
 3196..319F    ; Super # So  [10] IDEOGRAPHIC ANNOTATION TOP MARK..IDEOGRAPHIC ANNOTATION MAN MARK
 A69C..A69D    ; Super # Lm   [2] MODIFIER LETTER CYRILLIC HARD SIGN..MODIFIER LETTER CYRILLIC SOFT SIGN
 A770          ; Super # Lm       MODIFIER LETTER US
-A7F2..A7F4    ; Super # Lm   [3] MODIFIER LETTER CAPITAL C..MODIFIER LETTER CAPITAL Q
+A7F1..A7F4    ; Super # Lm   [4] MODIFIER LETTER CAPITAL S..MODIFIER LETTER CAPITAL Q
 A7F8..A7F9    ; Super # Lm   [2] MODIFIER LETTER CAPITAL H WITH STROKE..MODIFIER LETTER SMALL LIGATURE OE
 AB5C..AB5F    ; Super # Lm   [4] MODIFIER LETTER SMALL HENG..MODIFIER LETTER SMALL U WITH LEFT HOOK
 AB69          ; Super # Lm       MODIFIER LETTER SMALL TURNED W
@@ -884,7 +884,7 @@ AB69          ; Super # Lm       MODIFIER LETTER SMALL TURNED W
 1E06B..1E06D  ; Super # Lm   [3] MODIFIER LETTER CYRILLIC SMALL ES WITH DESCENDER..MODIFIER LETTER CYRILLIC SMALL STRAIGHT U WITH STROKE
 1F16A..1F16C  ; Super # So   [3] RAISED MC SIGN..RAISED MR SIGN
 
-# Total code points: 249
+# Total code points: 250
 
 # ================================================
 

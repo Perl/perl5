@@ -19,7 +19,7 @@ use Test::More;
 
 use Unicode::UCD qw(charinfo charprop charprops_all);
 
-my $expected_version = '16.0.0';
+my $expected_version = '17.0.0';
 my $current_version = Unicode::UCD::UnicodeVersion;
 my $v_unicode_version = pack "C*", split /\./, $current_version;
 my $unknown_script = ($v_unicode_version lt v5.0.0)
@@ -786,7 +786,7 @@ SKIP:
         skip("Latin range count will be wrong when using older Unicode release",
              2) if $current_version lt $expected_version;
         my $n1 = @$r1;
-        is($n1, 39, "number of ranges in Latin script (Unicode $expected_version)") if $::IS_ASCII;
+        is($n1, 36, "number of ranges in Latin script (Unicode $expected_version)") if $::IS_ASCII;
         shift @$r1 while @$r1;
         my $r2 = charscript('Latin');
         is(@$r2, $n1, "modifying results should not mess up internal caches");
@@ -888,9 +888,13 @@ if ($v_unicode_version ge v5.2.0) {
 }
 if ($v_unicode_version gt v3.2.0) { # Is missing from non-Unihan files before
                                     # this
-    # Extrapolating from Unicode documentation, they moved away here from
-    # Taiwanese/Japanese usage in favor of mainland China usage.
-    my $value = ($v_unicode_version lt v15.1.0) ? 1000000000000 : 1000000;
+    # Extrapolating from Unicode documentation, they moved for two versions
+    # away here from Taiwanese/Japanese usage in favor of mainland China
+    # usage.
+    my $value = (   $v_unicode_version lt v17.0.0
+                 && $v_unicode_version ge v15.1.0)
+                ? 1000000
+                : 1000000000000;
     is(num("\N{U+5146}"), $value, 'Verify num("\N{U+5146}") == ' . $value);
 }
 
