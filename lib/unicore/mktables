@@ -13394,17 +13394,30 @@ sub setup_Unikemet{
 
     # These are provisional properties, so aren't in PropAliases.txt
     my %properties = (
-                      Core => $ENUM,
+                      Core => { type => $ENUM, default => 'N' },
                       FVal => $STRING,
                       Func => $STRING,
-                      UniK => $ENUM,
+                      UniK => $STRING,
                      );
     for my $property (keys %properties) {
+        my $type = $properties{$property};
+        my $default = "";
+
+        if (ref $type) {
+            $default = $type->{default};
+            $type = $type->{type};
+        }
+
         Property->new("kEH_$property",
-                      Default_Map => "",
-                      Type => $STRING,,
+                      Default_Map => $default,
+                      Type => $type,
                      );
     }
+
+
+    my $keH_Core = property_ref('kEH_Core');
+    $keH_Core->add_match_table('C');
+    $keH_Core->add_match_table('L');
 }
 
 sub filter_Unikemet_line {
