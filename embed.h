@@ -33,6 +33,8 @@
 #   undef isIDCONT_lazy_if_safe
 #   undef new_XPV
 #   undef new_XPVIV
+#   undef pTHX_10
+#   undef pTHX_11
 #   undef SHY_NATIVE
 #   undef sv_2num
 #   undef SvRVx
