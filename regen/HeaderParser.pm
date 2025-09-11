@@ -1012,7 +1012,7 @@ sub _wrap_and_line_up_cond {
     if ($rest =~ s!(\s*/\*.*?\*/)\s*\z!! || $rest =~ s!(\s*\*/\s*)\z!!) {
         $rest_tail= $1;
     }
-    if ($rest) {
+    if ($rest ne "") {
         $rest= $self->tidy_cond($rest);
         $rest= $rest_head . $rest . $rest_tail;
     }
