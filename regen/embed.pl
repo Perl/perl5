@@ -4448,6 +4448,8 @@ sub generate_proto_h {
                      . " f or F flag";
         }
 
+        unshift @attrs, "Perl_attribute_nonnull_aTHX_" if $has_context;
+
         if ( @attrs ) {
             $ret .= "\n"
                  .  join( "\n", map { (" " x 8) . $_ } @attrs);
@@ -4513,6 +4515,12 @@ sub generate_proto_h {
         #  define Perl_attribute_nonnull_(which)
         #else
         #  define Perl_attribute_nonnull_(which)  __attribute__nonnull__(which)
+        #endif
+
+        #if defined(MULTIPLICITY)
+        #  define Perl_attribute_nonnull_aTHX_ __attribute__nonnull__(1)
+        #else
+        #  define Perl_attribute_nonnull_aTHX_
         #endif
 
         START_EXTERN_C
