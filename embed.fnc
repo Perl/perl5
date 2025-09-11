@@ -3371,7 +3371,7 @@ Adp	|char * |sv_2pv_flags	|NN SV * const sv			\
 				|NULLOK STRLEN * const lp		\
 				|const U32 flags
 CIp	|char * |SvPV_helper	|NN SV * const sv				\
-				|NN STRLEN * const lp				\
+				|NULLOK STRLEN * const lp			\
 				|const U32 flags				\
 				|const PL_SvPVtype type 			\
 				|NN Perl_SvPV_helper_non_trivial_t  non_trivial \
