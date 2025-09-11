@@ -9785,7 +9785,7 @@ PERL_STATIC_FORCE_INLINE char *
 Perl_SvPV_helper(pTHX_ SV * const sv, STRLEN * const lp, const U32 flags, const PL_SvPVtype type, Perl_SvPV_helper_non_trivial_t non_trivial, const bool or_null, const U32 return_flags)
         __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_SVPV_HELPER           \
-        assert(sv); assert(lp); assert(non_trivial)
+        assert(sv); assert(non_trivial)
 
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec(pTHX_ SV *sv);
