@@ -385,6 +385,16 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 21827';
+    my $test = 18446744073709550592;
+    warnings_like(
+        sub { localtime $test },
+        [ (qr/localtime\($test\)/) x 2 ],
+        'localtime() warning reports correct value when given too large of a number; GH 21827'
+    );
+}
+
+TODO: {
     todo_skip 1 if is_miniperl();
     local $::TODO = 'GH 22168';
     fresh_perl_is(
