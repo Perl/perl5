@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.87;
+package B::Deparse 1.88;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -1066,6 +1066,16 @@ sub ambient_pragmas {
     $self->{'ambient_warnings'} = $warning_bits;
     $self->{'ambient_hints'} = $hint_bits;
     $self->{'ambient_hinthash'} = $hinthash;
+}
+
+sub ambient_pragmas_from_caller {
+    my $self = shift;
+    my ($hint_bits, $warning_bits, $hinthash) = (caller(0))[8, 9, 10];
+    $self->ambient_pragmas(
+        hint_bits    => $hint_bits,
+        warning_bits => $warning_bits,
+        '%^H'        => $hinthash,
+    );
 }
 
 # This method is the inner loop, so try to keep it simple
@@ -7393,7 +7403,8 @@ They exist principally so that you can write code like:
     ); }
 
 which specifies that the ambient pragmas are exactly those which
-are in scope at the point of calling.
+are in scope at the point of calling.  However, see also
+L</ambient_pragmas_from_caller>.
 
 =item %^H
 
@@ -7401,6 +7412,16 @@ This parameter is used to specify the ambient pragmas which are
 stored in the special hash %^H.
 
 =back
+
+=head2 ambient_pragmas_from_caller
+
+    $deparse->ambient_pragmas_from_caller()
+
+A convenient shortcut for setting the hints and warnings ambient pragmas to
+those of the immediately calling code.  This uses the
+L<caller|perlfunc/caller> function to determine the hints and warnings bits in
+effect at the callsite to this method, and sets those as the ambient settings
+for the deparser.
 
 =head2 coderef2text
 
