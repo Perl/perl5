@@ -67,15 +67,7 @@ while (<DATA>) {
 
     my $code = "$meta{context};\n" . <<'EOC' . "sub {$input\n}";
 # Tell B::Deparse about our ambient pragmas
-my ($hint_bits, $warning_bits, $hinthash);
-BEGIN {
-    ($hint_bits, $warning_bits, $hinthash) = ($^H, ${^WARNING_BITS}, \%^H);
-}
-$deparse->ambient_pragmas (
-    hint_bits    => $hint_bits,
-    warning_bits => $warning_bits,
-    '%^H'        => $hinthash,
-);
+$deparse->ambient_pragmas_from_caller;
 EOC
     my $coderef = eval $code;
 
@@ -103,17 +95,7 @@ EOC
 }
 
 # Reset the ambient pragmas
-{
-    my ($b, $w, $h);
-    BEGIN {
-        ($b, $w, $h) = ($^H, ${^WARNING_BITS}, \%^H);
-    }
-    $deparse->ambient_pragmas (
-        hint_bits    => $b,
-        warning_bits => $w,
-        '%^H'        => $h,
-    );
-}
+$deparse->ambient_pragmas_from_caller;
 
 use constant 'c', 'stuff';
 is((eval "sub ".$deparse->coderef2text(\&c))->(), 'stuff',
