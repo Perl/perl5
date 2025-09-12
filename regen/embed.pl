@@ -42,7 +42,6 @@ BEGIN {
 # to never happen, so not worth coding automatic synchronization.
 my @have_compatibility_macros = qw(
                                     deb
-                                    die
                                     form
                                     load_module
                                     mess

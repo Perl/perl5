@@ -30,7 +30,6 @@
 #if !defined(MULTIPLICITY)
 /* undefined symbols, point them back at the usual ones */
 # define Perl_deb_nocontext                     Perl_deb
-# define Perl_die_nocontext                     Perl_die
 # define Perl_form_nocontext                    Perl_form
 # define Perl_load_module_nocontext             Perl_load_module
 # define Perl_mess_nocontext                    Perl_mess
@@ -78,7 +77,6 @@
 #   if  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && \
        !defined(PERL_WANT_VARARGS)
 #     define deb                                Perl_deb_nocontext
-#     define die                                Perl_die_nocontext
 #     define form                               Perl_form_nocontext
 #     define load_module                        Perl_load_module_nocontext
 #     define mess                               Perl_mess_nocontext
@@ -914,7 +912,6 @@
 # if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
       defined(PERL_WANT_VARARGS)
 #   define deb(...)                             Perl_deb(aTHX_ __VA_ARGS__)
-#   define die(...)                             Perl_die(aTHX_ __VA_ARGS__)
 #   define form(...)                            Perl_form(aTHX_ __VA_ARGS__)
 #   define load_module(a,b,...)                 Perl_load_module(aTHX_ a,b,__VA_ARGS__)
 #   define mess(...)                            Perl_mess(aTHX_ __VA_ARGS__)
