@@ -6039,13 +6039,8 @@ typedef enum {
    special and there is no need for HINT_PRIVATE_MASK for COPs.
 
     NOTE: The typical module using these has the bit value hard-coded, so don't
-    blindly change the values of these.
+    blindly change the values of these. */
 
-   If we run out of bits, the 2 locale ones could be combined.  The PARTIAL one
-   is for "use locale 'FOO'" which excludes some categories.  It requires going
-   to %^H to find out which are in and which are out.  This could be extended
-   for the normal case of a plain HINT_LOCALE, so that %^H would be used for
-   any locale form. */
 #define HINT_INTEGER		0x00000001 /* integer pragma */
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */
