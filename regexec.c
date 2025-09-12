@@ -5481,8 +5481,11 @@ S_isLB(pTHX_ LB_enum before,
              * the base character of the combining sequence they are part of
              * breaks with that character.  Backup to find that that base
              * character */
-            prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
-                                                 utf8_target);
+            while (   isLB_CM(prev)
+                   || isLB_ZWJ(prev))
+            {
+                prev = backup_one_LB(strbeg, &prev_pos, utf8_target);
+            }
 
             /* Here, 'prev' is the base character.  If the CM/ZWJ attaches to
              * it, then it inherits the behavior of 'prev'.  If it
@@ -5503,8 +5506,7 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CM(prev)
                    || isLB_ZWJ(prev))
             {
-                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
-                                                      &prev_pos, utf8_target);
+                prev = backup_one_LB(strbeg, &prev_pos, utf8_target);
             }
 
             matched = isLB_OP(prev);
@@ -5517,8 +5519,7 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CM(prev)
                    || isLB_ZWJ(prev))
             {
-                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
-                                                      &prev_pos, utf8_target);
+                prev = backup_one_LB(strbeg, &prev_pos, utf8_target);
             }
 
             matched = isLB_QU(prev);
@@ -5597,8 +5598,7 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CM(prev)
                    || isLB_ZWJ(prev))
             {
-                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
-                                                      &prev_pos, utf8_target);
+                prev = backup_one_LB(strbeg, &prev_pos, utf8_target);
             }
 
             matched = isLB_CL(prev)
@@ -5631,8 +5631,7 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CM(prev)
                    || isLB_ZWJ(prev))
             {
-                prev = backup_one_LB_but_over_CM_ZWJ(strbeg,
-                                                     &prev_pos, utf8_target);
+                prev = backup_one_LB(strbeg, &prev_pos, utf8_target);
             }
 
             matched = isLB_B2(prev);
@@ -5780,6 +5779,7 @@ S_backup_one_LB_(pTHX_ const U8 * const strbeg,
     PERL_ARGS_ASSERT_BACKUP_ONE_LB_;
 
     LB_enum isLB_scratch;   /* Used by generated isLB_foo() macros */
+    bool skipped_combining = false;
 
     if (*curpos < strbeg) {
         return LB_EDGE;
@@ -5810,7 +5810,9 @@ S_backup_one_LB_(pTHX_ const U8 * const strbeg,
                 *curpos = (U8 *) strbeg;
                 return LB_EDGE;
             }
-        } while (skip_CM_ZWJ && (isLB_CM(lb) || isLB_ZWJ(lb)));
+        } while (   skip_CM_ZWJ
+                 && (isLB_CM(lb) || isLB_ZWJ(lb))
+                 && (skipped_combining = true));
     }
     else {
         do {
@@ -5820,7 +5822,17 @@ S_backup_one_LB_(pTHX_ const U8 * const strbeg,
             }
             (*curpos)--;
             lb = getLB_VAL_CP(*(*curpos - 1));
-        } while (skip_CM_ZWJ && (isLB_CM(lb) || isLB_ZWJ(lb)));
+        } while (   skip_CM_ZWJ
+                 && (isLB_CM(lb) || isLB_ZWJ(lb))
+                 && (skipped_combining = true));
+    }
+
+    /* Rule LB10 says that combining marks (including ZWJ) do not attach to
+     * certain preceding character, such as SPACE.  And that in those
+     * circumstanceds, the mark is to be treated as if it were instead an
+     * alphabetic. */
+    if (skipped_combining && ! LB_CM_ATTACHES_TO(lb)) {
+        lb = LB_Alphabetic;
     }
 
     return lb;
