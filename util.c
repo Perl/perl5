@@ -1779,21 +1779,6 @@ Perl_die_sv(pTHX_ SV *baseex)
 }
 MSVC_DIAG_RESTORE
 
-/*
-=for apidoc      die
-=for apidoc_item die_nocontext
-
-These behave the same as L</croak>, except for the return type.
-They should be used only where the C<OP *> return type is required.
-They never actually return.
-
-The reasons for the existence of C<die_nocontext> are no longer applicable.
-die() can now be used in all circumstances.  C<Perl_die_nocontext> might be
-useful when compiling with C<PERL_NO_SHORT_NAMES>.
-
-=cut
-*/
-
 #if defined(MULTIPLICITY)
 
 /* silence __declspec(noreturn) warnings */
@@ -1891,8 +1876,10 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 }
 
 /*
-=for apidoc croak
+=for apidoc      croak
+=for apidoc_item die
 =for apidoc_item croak_nocontext
+=for apidoc_item die_nocontext
 
 These are XS interfaces to Perl's C<die> function.
 
@@ -1912,9 +1899,15 @@ error message from arguments.  If you want to throw a non-string object,
 or build an error message in an SV yourself, it is preferable to use
 the C<L</croak_sv>> function, which does not involve clobbering C<ERRSV>.
 
-The reasons for the existence of C<croak_nocontext> are no longer applicable.
-croak() can now be used in all circumstances.  C<Perl_croak_nocontext> might be
-useful when compiling with C<PERL_NO_SHORT_NAMES>.
+The difference between the C<croak> forms and the C<die> forms is only the
+return type of the functions.  The C<croak> forms return C<void>; the C<die>
+ones are listed as returning (confusingly) an S<C<OP *>>, even though they
+never actually return.  The C<die> forms should only be used when that return
+type is required.
+
+When called from outside the perl core, plain C<croak> and C<die> have always
+been the same as C<croak_nocontext> and C<die_no_context>, respectively.  That
+is now true even when called from within core.
 
 =cut
 */
