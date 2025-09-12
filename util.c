@@ -1787,9 +1787,9 @@ These behave the same as L</croak>, except for the return type.
 They should be used only where the C<OP *> return type is required.
 They never actually return.
 
-The two forms differ only in that C<die_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+The reasons for the existence of C<die_nocontext> are no longer applicable.
+die() can now be used in all circumstances.  C<Perl_die_nocontext> might be
+useful when compiling with C<PERL_NO_SHORT_NAMES>.
 
 =cut
 */
