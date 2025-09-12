@@ -5605,11 +5605,11 @@ S_isLB(pTHX_ LB_enum before,
                    || isLB_CP(prev);
             break;
 
-          case LB_various_then_HY_or_HH_v_AL:
+          case LB_various_then_HY_or_HH_v_AL_or_HL:
             /* LB20a Do not break after a word-initial hyphen.
              *   ( sot | BK | CR | LF | NL | SP | ZW | CB | GL )
              *   ( HY | HH ] )
-             * × AL */
+             * × AL | HL */
             prev = backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
                                                  utf8_target);
             matched = (   isLB_EDGE(prev)
@@ -5637,9 +5637,10 @@ S_isLB(pTHX_ LB_enum before,
             matched = isLB_B2(prev);
             break;
 
-          case LB_HL_then_HY_or_BA_sans_EA_v_nonHL:
-            /* LB21a Don't break after Hebrew + HY.
-             *       HL (HY | [ BA - $EastAsian ]) × [^HL] */
+          case LB_HL_then_HY_or_HH_v_nonHL:
+            /* LB21a Do not break after the hyphen in Hebrew + Hyphen +
+             * non-Hebrew.
+             *       HL (HY | HH ) × [^HL] */
             matched = isLB_HL(backup_one_LB_but_over_CM_ZWJ(strbeg, &prev_pos,
                                                             utf8_target));
             break;
