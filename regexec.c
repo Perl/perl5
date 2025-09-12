@@ -5276,16 +5276,16 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
              *   This translates to, we can have any number of Linker and
              *   Extend characters in a row, immediately preceded by a
              *   Consonant, as long as there is at least one Linker. */
-            Size_t linker_count;
-            linker_count = isGCB_InCB_Linker(prev);
-            do {
-                prev = backup_one_GCB(strbeg, &prev_pos, utf8_target);
+            bool has_linker;
+            has_linker = false;
+            while (isGCB_InCB_Linker(prev) || isGCB_InCB_Extend(prev)) {
                 if (isGCB_InCB_Linker(prev)) {
-                    linker_count++;
+                    has_linker = true;
                 }
-            } while (isGCB_InCB_Linker(prev) || isGCB_InCB_Extend(prev));
+                prev = backup_one_GCB(strbeg, &prev_pos, utf8_target);
+            }
 
-            matched = linker_count > 0 && isGCB_InCB_Consonant(prev);
+            matched = has_linker && isGCB_InCB_Consonant(prev);
             break;
 
           case GCB_various_then_RI_v_RI: ;
