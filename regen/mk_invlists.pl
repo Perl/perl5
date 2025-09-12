@@ -2499,12 +2499,12 @@ sub output_LB_table() {
                                              match_return => 'LB_NOBREAK',
                                              rule => '19a',
                                            },
-        LB_various_then_HY_or_HH_v_AL => {
+        LB_various_then_HY_or_HH_v_AL_or_HL  => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => '20a',
                                            },
-        LB_HL_then_HY_or_BA_sans_EA_v_nonHL => {
+        LB_HL_then_HY_or_HH_v_nonHL => {
                                              enum => $lb_enum++,
                                              match_return => 'LB_NOBREAK',
                                              rule => '21a',
@@ -2693,7 +2693,7 @@ sub output_LB_table() {
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
     # [^SP BA HY] × GL
-    set_lb_nobreak([ qw(^ SP BA HY) ], 'GL', '12a');
+    set_lb_nobreak([ qw(^ SP BA HY HH) ], 'GL', '12a');
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
@@ -2800,25 +2800,28 @@ sub output_LB_table() {
     # LB20a Do not break after a word-initial hyphen.
     #   ( sot | BK | CR | LF | NL | SP | ZW | CB | GL )
     #   ( HY | HH )
-    # × AL
-    $dfa = 'LB_various_then_HY_or_HH_v_AL';
-    add_lb_dfa($_, 'AL', $dfa, '20a') for qw(HY HH);
+    # × ( AL | HL )
+    $dfa = 'LB_various_then_HY_or_HH_v_AL_or_HL';
+    for $lhs (qw(HY HH)) {
+        add_lb_dfa($lhs, $_, $dfa, '20a') for qw(AL HL);
+    }
 
     # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
     # spaces, small kana, and other non-starters, or after acute accents.
     # × BA
+    # × HH
     # × HY
     # × NS
     $rule = 21;
-    set_lb_nobreak('*', $_, $rule) for qw(BA HY NS);
+    set_lb_nobreak('*', $_, $rule) for qw(BA HH HY NS);
     # BB ×
     set_lb_nobreak('BB', '*', $rule);
 
-    # LB21a Don't break after Hebrew + HY.
-    # HL (HY | [ BA - $EastAsian ]) × [^HL]
+    # LB21a Don't break after the hyphen in Hebrew + Hyphen + non-Hebrew.
+    # HL (HY | HH) × [^HL]
     $rule = '21a';
-    $dfa = 'LB_HL_then_HY_or_BA_sans_EA_v_nonHL';
-    add_lb_dfa($_, [ qw(^ HL) ], $dfa, $rule) for qw(HY BA_sans_EA);
+    $dfa = 'LB_HL_then_HY_or_HH_v_nonHL';
+    add_lb_dfa($_, [ qw(^ HL) ], $dfa, $rule) for qw(HY HH);
 
     # LB21b Don’t break between Solidus and Hebrew letters.
     # SY × HL
