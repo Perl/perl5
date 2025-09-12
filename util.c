@@ -1757,16 +1757,6 @@ Perl_invoke_exception_hook(pTHX_ SV *ex, bool warn)
     return FALSE;
 }
 
-/*
-=for apidoc die_sv
-
-This behaves the same as L</croak_sv>, except for the return type.
-It should be used only where the C<OP *> return type is required.
-The function never actually returns.
-
-=cut
-*/
-
 /* silence __declspec(noreturn) warnings */
 MSVC_DIAG_IGNORE(4646 4645)
 OP *
@@ -1812,27 +1802,6 @@ Perl_die(pTHX_ const char* pat, ...)
 }
 MSVC_DIAG_RESTORE
 
-/*
-=for apidoc croak_sv
-
-This is an XS interface to Perl's C<die> function.
-
-C<baseex> is the error message or object.  If it is a reference, it
-will be used as-is.  Otherwise it is used as a string, and if it does
-not end with a newline then it will be extended with some indication of
-the current location in the code, as described for L</mess_sv>.
-
-The error message or object will be used as an exception, by default
-returning control to the nearest enclosing C<eval>, but subject to
-modification by a C<$SIG{__DIE__}> handler.  In any case, the C<croak_sv>
-function never returns normally.
-
-To die with a simple string message, the L</croak> function may be
-more convenient.
-
-=cut
-*/
-
 void
 Perl_croak_sv(pTHX_ SV *baseex)
 {
@@ -1841,31 +1810,6 @@ Perl_croak_sv(pTHX_ SV *baseex)
     invoke_exception_hook(ex, FALSE);
     die_unwind(ex);
 }
-
-/*
-=for apidoc vcroak
-
-This is an XS interface to Perl's C<die> function.
-
-C<pat> and C<args> are a sprintf-style format pattern and encapsulated
-argument list.  These are used to generate a string message.  If the
-message does not end with a newline, then it will be extended with
-some indication of the current location in the code, as described for
-L</mess_sv>.
-
-The error message will be used as an exception, by default
-returning control to the nearest enclosing C<eval>, but subject to
-modification by a C<$SIG{__DIE__}> handler.  In any case, the C<croak>
-function never returns normally.
-
-For historical reasons, if C<pat> is null then the contents of C<ERRSV>
-(C<$@>) will be used as an error message or object instead of building an
-error message from arguments.  If you want to throw a non-string object,
-or build an error message in an SV yourself, it is preferable to use
-the L</croak_sv> function, which does not involve clobbering C<ERRSV>.
-
-=cut
-*/
 
 void
 Perl_vcroak(pTHX_ const char* pat, va_list *args)
@@ -1877,27 +1821,39 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 
 /*
 =for apidoc      croak
+=for apidoc_item croak_sv
+=for apidoc_item vcroak
 =for apidoc_item die
+=for apidoc_item die_sv
 =for apidoc_item croak_nocontext
 =for apidoc_item die_nocontext
 
 These are XS interfaces to Perl's C<die> function.
 
-They take a sprintf-style format pattern and argument list, which are used to
-generate a string message.  If the message does not end with a newline, then it
-will be extended with some indication of the current location in the code, as
-described for C<L</mess_sv>>.
+The arguments are used to generate a string message.  If the message does not
+end with a newline, it will be extended with some indication of the current
+location in the code, as described for C<L</mess_sv>>.
 
-The error message will be used as an exception, by default
-returning control to the nearest enclosing C<eval>, but subject to
-modification by a C<$SIG{__DIE__}> handler.  In any case, these croak
-functions never return normally.
+The error message will be used as an exception, by default returning control to
+the nearest enclosing C<eval>, but subject to modification by a
+C<$SIG{__DIE__}> handler.  In any case, none of these functions ever actually
+return normally.
 
-For historical reasons, if C<pat> is null then the contents of C<ERRSV>
-(C<$@>) will be used as an error message or object instead of building an
-error message from arguments.  If you want to throw a non-string object,
-or build an error message in an SV yourself, it is preferable to use
-the C<L</croak_sv>> function, which does not involve clobbering C<ERRSV>.
+In C<croak_sv> and C<die_sv>, C<baseex> is the error message or object.  If it
+is a reference, it will be used as-is.  Otherwise it is used as a string.
+
+To die with a simple string message, one of the other forms may be more
+convenient.  These take a sprintf-style format pattern, with arguments, to
+generate the message.
+
+The arguments to C<vcroak> are specified as a C<va_list>.  The arguments to the
+remaining forms are specified as a sprintf-style list of arguments.
+
+In the non-C<_sv> forms, for historical reasons, if C<pat> is null then the
+contents of C<L</ERRSV>> (C<$@>) will be used as an error message or object
+instead of building an error message from arguments.  Use the C<_sv> forms
+instead if you want to throw a non-string object, or build an error message in
+an SV yourself; these do not involve clobbering C<ERRSV>.
 
 The difference between the C<croak> forms and the C<die> forms is only the
 return type of the functions.  The C<croak> forms return C<void>; the C<die>
