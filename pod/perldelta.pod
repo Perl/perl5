@@ -363,6 +363,12 @@ well.
 
 =item *
 
+Simple individual OPs or LISTs rendered redundant by the application of scalar
+or void context during compilation are now more likely to be spliced out of
+the compiling optree and freed. [GH #23890]
+
+=item *
+
 XXX
 
 =back

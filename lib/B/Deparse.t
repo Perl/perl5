@@ -122,7 +122,7 @@ BEGIN { $/ = "\n"; $\ = "\n"; }
 LINE: while (defined($_ = readline ARGV)) {
     chomp $_;
     our(@F) = split(' ', $_, 0);
-    '???';
+    ();
 }
 EOF
 $b =~ s/our\\\(\\\@F\\\)/our[( ]\@F\\)?/; # accept both our @F and our(@F)
@@ -683,7 +683,6 @@ tr/\x{345}/\x{370}/;
 # Constants in a block
 # CONTEXT no warnings;
 {
-    '???';
     2;
 }
 ####
@@ -692,7 +691,6 @@ tr/\x{345}/\x{370}/;
 (1,2,3);
 0;
 >>>>
-'???', '???', '???';
 0;
 ####
 # Lexical and simple arithmetic
@@ -1271,7 +1269,6 @@ if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
 >>>>
 x();
 x();
-'???';
 x();
 x();
 x();
@@ -1294,11 +1291,9 @@ do {
 do {
     x()
 };
-'???';
 do {
     t()
 };
-'???';
 !1;
 ####
 # TODO constant deparsing has been backed out for 5.12

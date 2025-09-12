@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.88;
+package B::Deparse 1.89;
 use strict;
 use builtin qw( true false );
 use Carp;
@@ -2418,6 +2418,16 @@ sub pp_nextstate {
     }
 
     push @text, $op->label . ": " if $op->label;
+
+    my $text = join("", @text);
+
+    if ($text eq '' && class($op->sibling) ne 'NULL'
+        && $op->sibling->name eq 'unstack' &&
+        ($op->flags & OPf_WANT_VOID)) {
+        # An OP in void context was optimized away.
+        # Substitute in an empty list for deparsing.
+        return "()";
+    }
 
     return join("", @text);
 }

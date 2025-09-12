@@ -2047,7 +2047,8 @@ Perl_scalar(pTHX_ OP *o)
             kid = cLISTOPo->op_first;
             scalar(kid);
             kid = OpSIBLING(kid);
-        do_kids:
+        do_kids: {
+            OP * prev_kid = NULL;
             while (kid) {
                 OP *sib = OpSIBLING(kid);
                 /* Apply void context to all kids except the last, which
@@ -2069,15 +2070,68 @@ Perl_scalar(pTHX_ OP *o)
                         )
                 )
                 {
+
+                    if (OP_TYPE_IS(o, OP_LIST) && !op_parent(o)) {
+                        /* Is the list now just an obvious scalar pushop?
+                         *     <@> list sKP ->6
+                         *         <0> pushmark v ->4
+                         *         <$> const(IV 3) s ->5
+                         */
+                        OP* first = cLISTOPo->op_first;
+                        assert(OP_TYPE_IS(first, OP_PUSHMARK));
+                        OP* sib1 = OpSIBLING(first);
+                        assert(sib1);
+                        OP* sib2 = OpSIBLING(sib1);
+                        if (!sib2) {
+                            if (
+                                PL_opargs[sib1->op_type] & OA_RETSCALAR
+                            ){
+                                assert(sib1->op_next == sib1);
+                                /* Yup. The PUSHMARK and LIST are redundant.
+                                 * They can be stripped out. */
+                                op_sibling_splice(o,first,1,NULL);
+                                op_free(o);
+                                return sib1;
+                            }
+                        }
+                    }
+
                     /* tail call optimise calling scalar() on the last kid */
+                    assert(kid);
                     next_kid = kid;
                     goto do_next;
                 }
                 else if (kid->op_type == OP_LEAVEWHEN)
                     scalar(kid);
-                else
+                else {
                     scalarvoid(kid);
+
+                    if (OP_TYPE_IS(kid, OP_NULL) && !(kid->op_flags & OPf_KIDS)
+                        && prev_kid
+                      ) {
+                        /* This OP is now defunct. Strip it out. */
+                        if (kid->op_next == kid || kid->op_next == sib) {
+                            if (prev_kid->op_next == kid)
+                                prev_kid->op_next = kid->op_next;
+
+                            prev_kid->op_sibparent = kid->op_sibparent;
+                            op_free(kid); kid = NULL;
+
+                            /* A NEXTSTATE with no sibling OPs is redundant
+                             * if another NEXTSTATE follows it. Null it out
+                             * rather than removing it, in case anything needs
+                             * to probe it for file/line/hints info. */
+                            if (OP_TYPE_IS(prev_kid, OP_NEXTSTATE) && sib
+                                && OP_TYPE_IS(sib, OP_NEXTSTATE)) {
+                                op_null(prev_kid);
+                            }
+                        }
+                    }
+                }
+                if (kid)
+                    prev_kid = kid;
                 kid = sib;
+            }
             }
             NOT_REACHED; /* NOTREACHED */
             break;
@@ -2523,8 +2577,40 @@ Perl_scalarvoid(pTHX_ OP *arg)
          * siblings and so on
          */
         while (!next_kid) {
-            if (o == arg)
+            if (o == arg) {
+                /* at top; no parents/siblings to try */
+
+                if (OP_TYPE_IS(o, OP_NULL) && o->op_targ == OP_LIST) {
+                    /* Remove any LIST KIDS that are wholly defunct */
+                    OP *kid = cLISTOPo->op_first;
+                    OP *prev_kid = NULL;
+                    for (; kid; ) {
+                        if (OP_TYPE_IS(kid, OP_NULL) && !(kid->op_flags & OPf_KIDS)
+                            && kid->op_targ != OP_NEXTSTATE
+                            && kid->op_targ != OP_DBSTATE
+                            && kid->op_targ != OP_PUSHMARK
+                        ) {
+                            /* This OP_NULL kid can serve no runtime purpose.
+                             * Splice it out and free its slab slot for reuse. */
+                            OP *sib = OpSIBLING(kid);
+                            if (prev_kid) {
+                                assert(prev_kid->op_next != kid);
+                                op_sibling_splice(o,prev_kid,1,NULL);
+                                op_free(kid);
+                            } else {
+                                assert(op_parent(kid)->op_next != kid);
+                                op_sibling_splice(o,NULL,1,NULL);
+                                op_free(kid);
+                            }
+                            kid = sib;
+                        } else {
+                            prev_kid = kid;
+                            kid = OpSIBLING(kid);
+                        }
+                    }
+                }
                 return arg; /* at top; no parents/siblings to try */
+            }
             if (OpHAS_SIBLING(o))
                 next_kid = o->op_sibparent;
             else
@@ -2705,19 +2791,44 @@ S_voidnonfinal(pTHX_ OP *o)
             type == OP_LEAVE || type == OP_LEAVETRY)
         {
             OP *kid = cLISTOPo->op_first, *sib;
+            OP *prev_kid = NULL;
             if(type == OP_LEAVE) {
                 /* Don't put the OP_ENTER in void context */
                 assert(kid->op_type == OP_ENTER);
+                prev_kid = kid;
                 kid = OpSIBLING(kid);
             }
+
             for (; kid; kid = sib) {
                 if ((sib = OpSIBLING(kid))
                  && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
                     || (  sib->op_targ != OP_NEXTSTATE
                        && sib->op_targ != OP_DBSTATE  )))
                 {
+                /* Note: if kid is an OP_NEXTSTATE, it will be nulled-out,
+                   but it cannot be spliced out as things stand, because
+                   Perl_leaveeval() depends on it being there. */
                     scalarvoid(kid);
+
+                    if (OP_TYPE_IS(kid, OP_NULL) &&
+                       !(kid->op_flags & OPf_KIDS) &&
+                       /* Perl_leaveeval needs an ex-nextstate for its
+                          feature state information */
+                       kid->op_targ != OP_NEXTSTATE &&
+                       kid->op_targ != OP_DBSTATE
+                    ){
+                        /* This kid is no longer needed. */
+                        if (prev_kid) {
+                            assert(prev_kid->op_next != kid);
+                            op_sibling_splice(o,prev_kid,1,NULL);
+                        } else {
+                            assert(op_parent(kid)->op_next != kid);
+                            op_sibling_splice(o,NULL,1,NULL);
+                        }
+                        op_free(kid);
+                    }
                 }
+                prev_kid = kid;
             }
             PL_curcop = &PL_compiling;
         }
