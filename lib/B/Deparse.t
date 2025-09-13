@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 53; # not counting those in the __DATA__ section
+my $tests = 55; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -566,6 +566,29 @@ EOF
     qr/ +method m \(\) \{\n +\$x\+\+;\n +\}/,
     "feature class method deparses as method";
 
+# GH#23699
+{
+    my $signatured_sub = do {
+        use feature qw( signatures );
+        sub ($x, $y) { return $x + $y; }
+    };
+
+    {
+        use feature qw( signatures );
+        $deparse->ambient_pragmas_from_caller;
+        my $deparsed = $deparse->coderef2text( $signatured_sub );
+        like $deparsed, qr/^\(\$x, \$y\) \{/,
+            'Deparsed signatured sub under  use feature qw( signatures )';
+    }
+
+    {
+        use v5.36;
+        $deparse->ambient_pragmas_from_caller;
+        my $deparsed = $deparse->coderef2text( $signatured_sub );
+        like $deparsed, qr/^\(\$x, \$y\) \{/,
+            'Deparsed signatured sub under  use v5.36';
+    }
+}
 
 done_testing($tests);
 
