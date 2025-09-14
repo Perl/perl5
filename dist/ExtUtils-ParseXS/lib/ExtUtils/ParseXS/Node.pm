@@ -1412,9 +1412,7 @@ sub lookup_input_typemap {
         # as a pseudo-parameter, then override the normal typedef - which
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
-        if ($self->{has_length}) {
-            die "length(NAME) not supported with typemaps other than T_PV"
-                if $xstype ne 'T_PV';
+        if ($xstype eq 'T_PV' and $self->{has_length}) {
             die "default value not supported with length(NAME) supplied"
                 if defined $default;
             return "($type)SvPV($arg, STRLEN_length_of_$var);",
