@@ -4495,7 +4495,14 @@ S_intuit_more(pTHX_ char *s, char *e)
      * 'scariness', and lack of comments.  khw has gone through and done some
      * cleanup, while finding various instances of problematic behavior.
      * Rather than change this base-level function immediately, khw has added
-     * commentary to those areas. */
+     * commentary to those areas. 
+     *
+     * khw: $0 in square brackets is never going to mean the expansion of $0.
+     * How could that help in calculating a subscript?  And one would never
+     * want to match any one of the characters in this call to the program.
+     * No, $0 is going to want to mean this a charclass that matches dollar
+     * and digit0.  But, code outside this function chooses the value of the
+     * variable $0.  I think this should be special cased. */
 
     /* If recursed within brackets, there is more to the expression */
     if (PL_lex_brackets)
@@ -4546,19 +4553,47 @@ S_intuit_more(pTHX_ char *s, char *e)
     /* Here is '[': maybe we have a character class.  Examine the guts */
     s++;
 
-    /* '^' implies a character class; An empty '[]' isn't legal, but it does
-     * mean there isn't more to come */
+    /* '^' implies a character class; An empty '[]' isn't legal, and it means
+     * there isn't more to come */
     if (s[0] == ']' || s[0] == '^')
         return FALSE;
 
-    /* Find matching ']'.  khw: This means any s[1] below is guaranteed to
-     * exist */
+    /* khw: If the context of this call is $foo[...], we may be able to avoid
+     * the heuristics below.  The possibilities are:
+     *  strict    @foo    $foo
+     *   vars?   exists   exists
+     *    y         n       n      This is an error; return false now
+     *    y         n       y      must be a a charclass
+     *    y         y       n      must be a a subscript
+     *    y         y       y      ambiguous; do heuristics below
+     *    n         n       n      ambiguous; do heuristics below
+     *    n         n       y      ambiguous; do heuristics below, but I
+     *                             wonder if the initial bias should be a
+     *                             little towards charclass
+     *    n         y       n      ambiguous; do heuristics below, but I
+     *                             wonder if the initial bias should be a
+     *                             little towards subscript
+     *    n         y       y      ambiguous; do heuristics below
+     */
+
+    /* Find matching ']'.  khw: Actually it finds the next ']' and assumes it
+     * matches the '['.  In order to account for the possibility of the ']'
+     * being inside the scope of \Q or preceded by an even number of
+     * backslashes, this should be rewritten */
     const char * const send = (char *) memchr(s, ']', e - s);
     if (! send)		/* has to be an expression */
         return TRUE;
 
+    /* Below here, the heuristics start.  One idea from alh is, given 'use
+     * 5.43.x', that for all digits, that if we have to resort to heuristics,
+     * we instead raise an error with an explanation of how to make it
+     * unambiguous: ${foo}[123] */
+
     /* If the construct consists entirely of one or two digits, call it a
-     * subscript. */
+     * subscript.
+     *
+     * khw: No one writes 03 to mean 3.  Any string of digits beginning with
+     * '0' is likely to be a charclass, including length 2 ones. */
     if (isDIGIT(s[0]) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
         return TRUE;
     }
@@ -4593,6 +4628,13 @@ S_intuit_more(pTHX_ char *s, char *e)
     Zero(seen, 256, char);
 
     /* Examine each character in the construct */
+    /* That this knows nothing of UTF-8 can lead to opposite results if the
+     * text is encoded in UTF-8 or not; another relic of the Unicode Bug.
+     * Suppose a string consists of various un-repeated code points between
+     * 0x128 and 0x255.  When encoded in UTF-8 their start bytes will all be
+     * \xC2 or \xC3.  The heuristics below will count those as repeated bytes,
+     * and thus lean more towards this being a character class than when not
+     * in UTF-8. */
     bool first_time = true;
     for (; s < send; s++, first_time = false) {
         unsigned char prev_un_char = un_char;
@@ -4608,21 +4650,73 @@ S_intuit_more(pTHX_ char *s, char *e)
 
             /* Following one of these characters, we look to see if there is an
              * identifier already found in the program by that name.  If so,
-             * strongly suspect this isn't a character class */
+             * strongly suspect this isn't a character class
+             *
+             * khw:  But under 'strict' if the identifier doesn't exist, it
+             * has to be a charclass
+             *
+             * khw: [...$0...] is never going to mean the name of the program;
+             * it's always going to be a charclass.  $1 could mean either, but
+             * as the number increases, the more likely to be a charclass, as
+             * the chance of there being a pattern with that many capture
+             * groups goes rapidly down.
+             *
+             * khw: Using \w here misses the possibility of lots of other
+             * syntaxes of variables, like $::foo or ${foo}, that scan_ident
+             * looks for.
+             *
+             */
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
                 Size_t len;
+
+                /* khw: where did the magic number 4 come from?.  This buffer
+                 * was 4 times as large as tokenbuf in 1997, and had not
+                 * changed since the code was first added */
                 char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 ];
+
+                /* khw: scan_ident shouldn't be used as-is.  It has side
+                 * effects and can end up calling this function recursively.
+                 *
+                 * khw: If what follows can't be an identifier, say it is too
+                 * long or is $001, then it must be a charclass */
                 scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), FALSE);
                 len = strlen(tmpbuf);
+
+                /* khw: This only looks at global variables; lexicals came
+                 * later, and this hasn't been updated.  Ouch!! */
                 if (   len > 1
                     && gv_fetchpvn_flags(tmpbuf,
                                          len,
                                          UTF ? SVf_UTF8 : 0,
                                          SVt_PV))
+                {
                     weight -= 100;
-                else    /* Not a multi-char identifier already known in the
-                           program; is somewhat likely to be a subscript */
+
+                    /* khw: Below we keep track of repeated characters;  People
+                     * rarely say qr/[aba]/, as the second a is pointless.
+                     * (Some do it though as a mnemonic that is meaningful to
+                     * them.)  But generally, repeated characters make things
+                     * more likely to be a charclass.  But here, this an
+                     * identifier so likely a subscript.  Its spelling should
+                     * be irrelevant to the repeated characters test.  So, we
+                     * should advance past it.  Suppose it is a hash element,
+                     * like $subscripts{$which}.  We should advance past the
+                     * braces and key */
+                }
+                else {
+                    /* Not a multi-char identifier already known in the
+                     * program; is somewhat likely to be a subscript.
+                     *
+                     * khw: Our test suite contains several constructs like
+                     * [$A-Z].  Excluding length 1 identifiers in the
+                     * conditional above means such are much less likely to be
+                     * mistaken for subscripts.  I would argue that if the next
+                     * character is a '-' followed by an alpha, that would make
+                     * it much more likely to be a charclass.  It would only
+                     * make sense to be an expression if that alpha string is a
+                     * bareword with meaning; something like [$A-ord] */
                     weight -= 10;
+                }
             }
             else if (   s[0] == '$'
                      && s[1]
@@ -4639,13 +4733,51 @@ S_intuit_more(pTHX_ char *s, char *e)
             }
             break;
 
+          /* khw:  [:blank:] strongly indicates a charclass */
+          /* khw: Z-A definitely subscript
+           *      Z-Z likely subscript
+           *      "x - z" with blanks very likely subscript
+           *      \N without { must be subscript
+           *      \R must be subscript
+           *      \? must be subscript for things like \d, but not \a.
+           */
+
+
           case '\\':
             if (s[1]) {
-                if (memCHRs("wds]", s[1]))
+                if (memCHRs("wds]", s[1])) {
                     weight += 100;  /* \w \d \s => strongly charclass */
-                    /* khw: Why not \W \D \S \h \v, etc as well? */
-                else if (seen[(U8)'\''] || seen[(U8)'"'])
-                    weight += 1;    /* \' => mildly charclass */
+                    /* khw: \] can't happen, as any ']' is beyond our search.
+                     * Why not \W \D \S \h \v, etc as well?  Should they have
+                     * the same weights as \w \d \s or should all or some be
+                     * in the 'abcfnrtvx' below? */
+                } else if (seen[(U8)'\''] || seen[(U8)'"']) {
+                    weight += 1;
+                    /* khw: This is problematic.  Enough so, that I misread
+                     * it, and added a wrong comment about what it does in
+                     * 57ae1f3a8e669082e3d5ec6a8cdffbdc39d87bee.  Note that it
+                     * doesn't look at the current character.  What it
+                     * actually does is: if any quote has been seen in the
+                     * parse, don't do the rest of the else's below, but for
+                     * every subsequent backslashed character encountered
+                     * (except \0 \w \s \d), increment the weight to lean a
+                     * bit more towards being a charclass.  That means that
+                     * every backslash sequence following the first occurrence
+                     * of a quote increments the weight regardless of what the
+                     * sequence is.  Again, \0 \w \d and \s are not controlled
+                     * by this else, so they change the weight by a lot more.
+                     * But what makes them so special that they aren't subject
+                     * to this.  Any why does having a quote change the
+                     * behavior from then on.  And why only backslashed
+                     * sequences get this treatment?  This code has been
+                     * unchanged since this function was added in 1993.  I
+                     * don't get it.  Instead, it does seem to me that it is
+                     * especially unlikely to repeat a quote in a charclass,
+                     * but that having just a single quote is indicative of a
+                     * charclass, and having pairs of quotes is indicative of
+                     * a subscript.  Similarly for things that could indicate
+                     * nesting of braces or parens. */
+                }
                 else if (memCHRs("abcfnrtvx", s[1]))
                     weight += 40;   /* \n, etc => charclass */
                     /* khw: Why not \e etc as well? */
@@ -4654,6 +4786,19 @@ S_intuit_more(pTHX_ char *s, char *e)
                     while (s[1] && isDIGIT(s[1]))
                         s++;
                 }
+
+                /* khw: There are lots more possible escape sequences.  Some,
+                 * like \A,\z have no special meaning to charclasses, so might
+                 * indicate a subscript, but I don't know what they would be
+                 * doing there either.  Some have been added to the language
+                 * after this code was written, but no one thought to, or
+                 * could wade through this function, to add them.  Things like
+                 * \p{} for properties, \N and \N{}, for example.
+                 *
+                 * It's problematic that \a is treated as plain 'a' for
+                 * purposes of the 'seen' array.  Whatever is matched by these
+                 * backslashed sequences should not be added to 'seen'.  That
+                 * includes the backslash. */
             }
             else /* \ followed by NUL strongly indicates character class */
                 weight += 100;
@@ -4699,7 +4844,25 @@ S_intuit_more(pTHX_ char *s, char *e)
                 && isALPHA(s[1]))
             {
                 /* Here it's \W (that isn't [$@&] ) followed immediately by two
-                 * alphas in a row.  Accumulate all the consecutive alphas */
+                 * alphas in a row.  Accumulate all the consecutive alphas.
+                 *
+                 * khw: The code below was changed in 2015 by
+                 * 56f81afc0f2d331537f38e6f12b86a850187cb8a to solve a
+                 * buffer overrun.  Prior to that commit, the code copied all
+                 * the consecutive alphas to a temporary.  The problem was
+                 * that temporary's size could be exceeded, and the temporary
+                 * wasn't even needed (at least by 2015).  The called
+                 * keyword() function doesn't need a copy.  It takes a pointer
+                 * to the first character and a length, hence it can operate
+                 * on the original source text.  It is intended to catch cases
+                 * like $a[ord].  If it does match a keyword, we don't want
+                 * the spelling of that keyword to affect the seen[] array.
+                 * But if it isn't a keyword we do want to fall back to the
+                 * normal behavior.  And the 2015 commit removed that.  It
+                 * absorbs every bareword regardless, defeating the intent of
+                 * the algorithm implementing the heuristics.  That not many
+                 * bugs have surfaced since indicates this whole thing doesn't
+                 * get applied very much */
                 char *d = s;
                 while (isALPHA(s[0]))
                     s++;
@@ -4709,7 +4872,12 @@ S_intuit_more(pTHX_ char *s, char *e)
                 if (keyword(d, s - d, 0))
                     weight -= 150;
 
-                /* khw: Should those alphas be marked as seen? */
+                /* khw: Barewords could also be subroutine calls, and these
+                 * would also indicate a subscript.  Like [green] where
+                 * 'green' has been declared, for example, in 'use constant'
+                 * Or maybe it should just call intuit_method() which checks
+                 * for keyword, subs, and methods.
+                 * */
             }
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
@@ -4724,23 +4892,36 @@ S_intuit_more(pTHX_ char *s, char *e)
             /* But repeating a character inside a character class does nothing,
              * like [aba], so less likely that someone makes such a class, more
              * likely that it is a subscript; the more repeats, the less
-             * likely. */
+             * likely.
+             *
+             * khw: I think this changes the weight too rapidly.  Each time
+             * through the loop compounds the previous times.  Instead, it
+             * would be better to have a separate loop after all the rest that
+             * changes the weight once based on how many times each character
+             * gets repeated */
             weight -= seen[un_char];
             break;
         }   /* End of switch */
 
         /* khw: 'seen' is declared as a char.  This ++ can cause it to wrap.
          * This gives different results with compilers for which a plain 'char'
-         * is actually unsigned, versus those where it is signed.  I believe it
-         * is undefined behavior to wrap a 'signed'.  I think it should be
-         * instead declared an unsigned int to make the chances of wrapping
-         * essentially zero.
+         * is actually unsigned, versus those where it is signed.  The C99
+         * standard allows a compiler to raise a signal when a 'signed' char
+         * is incremented outside its permissible range.  I think 'seen'
+         * should be instead declared an unsigned, and a conditional added
+         * to prevent wrapping.
          *
          * And I believe that extra backslashes are different from other
-         * repeated characters. */
+         * repeated characters.  There may be others, like I have mentioned
+         * quotes and paired delimiters  */
         seen[un_char]++;
     }   /* End of loop through each character of the construct */
 
+    /* khw: People on #irc have suggested things that I think boil down to:
+     * under 'use 5.43.x', output a warning like existing warnings for
+     * similar situations "Ambiguous use of [], resolved as ..."  Perhaps
+     * suppress the message if all (or maybe almost all) the evidence points
+     * to the same outcome.  This would involve two weight variables */
     if (weight >= 0)	/* probably a character class */
         return FALSE;
 
