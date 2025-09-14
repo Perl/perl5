@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.60
+  - Fix INTERFACE for C23
+  - support perl package names in INTERFACE
+  - Cleanup typemap file-finding code and change priority
+  - Revert throwing an exception when combining the length operator
+    with a typemap other than T_PV
+
 3.59
   - Throw an exception when combining the length operator with a
     typemap other than T_PV
