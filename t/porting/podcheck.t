@@ -1817,6 +1817,9 @@ else { # No input files -- go find all the possibilities.
 
     # Add ourselves to the test
     push @files, "t/porting/podcheck.t";
+
+    # and the test.pl documentation
+    push @files, "t/test_pl.pod";
 }
 
 # Now we know how many tests there will be.
