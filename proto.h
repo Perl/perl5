@@ -8495,7 +8495,7 @@ S_re_croak(pTHX_ bool utf8, const char *pat, ...)
         assert(pRExC_state); assert(arg)
 
 # define PERL_ARGS_ASSERT_REGTAIL               \
-        assert(pRExC_state); assert(p); assert(val)
+        assert(pRExC_state)
 
 # define PERL_ARGS_ASSERT_SET_REGEX_PV          \
         assert(pRExC_state); assert(Rx)

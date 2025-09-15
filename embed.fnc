@@ -5555,8 +5555,8 @@ ES	|SV *	|reg_scan_name	|NN RExC_state_t *pRExC_state		\
 ETi	|char * |reg_skipcomment|NN RExC_state_t *pRExC_state		\
 				|NN char *p
 ERS	|bool	|regtail	|NN RExC_state_t *pRExC_state		\
-				|NN const regnode_offset p		\
-				|NN const regnode_offset val		\
+				|const regnode_offset p 		\
+				|const regnode_offset val		\
 				|const U32 depth
 ES	|void	|set_regex_pv	|NN RExC_state_t *pRExC_state		\
 				|NN REGEXP *Rx
