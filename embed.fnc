@@ -4541,7 +4541,7 @@ S	|bool	|parse_gv_stash_name					\
 				|const U32 is_utf8			\
 				|const I32 add
 S	|void	|require_tie_mod|NN GV *gv				\
-				|NN const char varname			\
+				|const char varname			\
 				|NN const char *name			\
 				|STRLEN len				\
 				|const U32 flags
