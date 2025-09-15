@@ -7009,9 +7009,9 @@ B<perl> B<-MO=Deparse>[B<,-d>][B<,-f>I<FILE>][B<,-p>][B<,-q>][B<,-l>]
 
 =head1 DESCRIPTION
 
-B::Deparse is a backend module for the Perl compiler that generates
+C<B::Deparse> is a backend module for the Perl compiler that generates
 perl source code, based on the internal compiled structure that perl
-itself creates after parsing a program.  The output of B::Deparse won't
+itself creates after parsing a program.  The output of C<B::Deparse> won't
 be exactly the same as the original source, since perl doesn't keep
 track of comments or whitespace, and there isn't a one-to-one
 correspondence between perl's syntactical constructions and their
@@ -7020,34 +7020,34 @@ option, the output also includes parentheses even when they are not
 required by precedence, which can make it easy to see if perl is
 parsing your expressions the way you intended.
 
-While B::Deparse goes to some lengths to try to figure out what your
+While C<B::Deparse> goes to some lengths to try to figure out what your
 original program was doing, some parts of the language can still trip
 it up; it still fails even on some parts of Perl's own test suite.  If
 you encounter a failure other than the most common ones described in
-the BUGS section below, you can help contribute to B::Deparse's
+the BUGS section below, you can help contribute to C<B::Deparse>'s
 ongoing development by submitting a bug report with a small
 example.
 
 =head1 OPTIONS
 
 As with all compiler backend options, these must follow directly after
-the '-MO=Deparse', separated by a comma but not any white space.
+the C<-MO=Deparse>, separated by a comma but not any white space.
 
 =over 4
 
 =item B<-d>
 
-Output data values (when they appear as constants) using Data::Dumper.
-Without this option, B::Deparse will use some simple routines of its
-own for the same purpose.  Currently, Data::Dumper is better for some
+Output data values (when they appear as constants) using L<Data::Dumper>.
+Without this option, C<B::Deparse> will use some simple routines of its
+own for the same purpose.  Currently, L<Data::Dumper> is better for some
 kinds of data (such as complex structures with sharing and
 self-reference) while the built-in routines are better for others
 (such as odd floating-point values).
 
 =item B<-f>I<FILE>
 
-Normally, B::Deparse deparses the main code of a program, and all the subs
-defined in the same file.  To include subs defined in
+Normally, C<B::Deparse> deparses the main code of a program, and all the
+subs defined in the same file.  To include subs defined in
 other files, pass the B<-f> option with the filename.
 You can pass the B<-f> option several times, to
 include more than one secondary file.  (Most of the time you don't want to
@@ -7056,12 +7056,12 @@ defined in the scope of a B<#line> directive with two parameters.
 
 =item B<-l>
 
-Add '#line' declarations to the output based on the line and file
+Add C<#line> declarations to the output based on the line and file
 locations of the original code.
 
 =item B<-p>
 
-Print extra parentheses.  Without this option, B::Deparse includes
+Print extra parentheses.  Without this option, C<B::Deparse> includes
 parentheses in its output only when they are needed, based on the
 structure of your program.  With B<-p>, it uses parentheses (almost)
 whenever they would be legal.  This can be useful if you are used to
@@ -7101,8 +7101,8 @@ making clear how the parameters are actually passed to C<foo>.
 =item B<-q>
 
 Expand double-quoted strings into the corresponding combinations of
-concatenation, uc, ucfirst, lc, lcfirst, quotemeta, and join.  For
-instance, print
+concatenation, C<uc>, C<ucfirst>, C<lc>, C<lcfirst>, C<quotemeta>, and
+C<join>.  For instance, print
 
     print "Hello, $world, @ladies, \u$gentlemen\E, \u\L$me!";
 
@@ -7113,13 +7113,13 @@ as
 
 Note that the expanded form represents the way perl handles such
 constructions internally -- this option actually turns off the reverse
-translation that B::Deparse usually does.  On the other hand, note that
+translation that C<B::Deparse> usually does.  On the other hand, note that
 C<$x = "$y"> is not the same as C<$x = $y>: the former makes the value
-of $y into a string before doing the assignment.
+of C<$y> into a string before doing the assignment.
 
 =item B<-s>I<LETTERS>
 
-Tweak the style of B::Deparse's output.  The letters should follow
+Tweak the style of C<B::Deparse>'s output.  The letters should follow
 directly after the 's', with no space or punctuation.  The following
 options are available:
 
@@ -7169,7 +7169,7 @@ conventional values include 0, 1, 42, '', 'foo', and
 'Useless use of constant omitted' (which may need to be
 B<-sv"'Useless use of constant omitted'.">
 or something similar depending on your shell).  The default is '???'.
-If you're using B::Deparse on a module or other file that's require'd,
+If you're using C<B::Deparse> on a module or other file that's C<require>'d,
 you shouldn't use a value that evaluates to false, since the customary
 true constant at the end of a module will be in void context when the
 file is compiled as a main program.
@@ -7181,7 +7181,7 @@ file is compiled as a main program.
 Expand conventional syntax constructions into equivalent ones that expose
 their internal operation.  I<LEVEL> should be a digit, with higher values
 meaning more expansion.  As with B<-q>, this actually involves turning off
-special cases in B::Deparse's normal operations.
+special cases in C<B::Deparse>'s normal operations.
 
 If I<LEVEL> is at least 3, C<for> loops will be translated into equivalent
 while loops with continue blocks; for instance
@@ -7238,7 +7238,7 @@ turns into
     $nice ? do { print 'hi' } : do { print 'bye' };
 
 Long sequences of elsifs will turn into nested ternary operators, which
-B::Deparse doesn't know how to indent nicely.
+C<B::Deparse> doesn't know how to indent nicely.
 
 =back
 
@@ -7253,7 +7253,7 @@ B::Deparse doesn't know how to indent nicely.
 
 =head2 Description
 
-B::Deparse can also be used on a sub-by-sub basis from other perl
+C<B::Deparse> can also be used on a sub-by-sub basis from other perl
 programs.
 
 =head2 new
@@ -7304,15 +7304,16 @@ use re;
 
 =back
 
-Ordinarily, if you use B::Deparse on a subroutine which has
+Ordinarily, if you use C<B::Deparse> on a subroutine which has
 been compiled in the presence of one or more of these pragmas,
 the output will include statements to turn on the appropriate
-directives.  So if you then compile the code returned by coderef2text,
-it will behave the same way as the subroutine which you deparsed.
+directives.  So if you then compile the code returned by
+L</coderef2text>, it will behave the same way as the subroutine
+which you deparsed.
 
 However, you may know that you intend to use the results in a
 particular context, where some pragmas are already in scope.  In
-this case, you use the B<ambient_pragmas> method to describe the
+this case, you use the L</ambient_pragmas> method to describe the
 assumptions you wish to make.
 
 Not all of the options currently have any useful effect.  See
@@ -7332,7 +7333,7 @@ expect.
 
 =item $[
 
-Takes a number, the value of the array base $[.
+Takes a number, the value of the array base C<$[>.
 Obsolete: cannot be non-zero.
 
 =item bytes
@@ -7379,7 +7380,7 @@ See L<warnings> for more information about lexical warnings.
 =item warning_bits
 
 These two parameters are used to specify the ambient pragmas in
-the format used by the special variables $^H and ${^WARNING_BITS}.
+the format used by the special variables C<$^H> and C<${^WARNING_BITS}>.
 
 They exist principally so that you can write code like:
 
@@ -7426,7 +7427,7 @@ C<use strict>, C<use bytes>, C<use integer>
 and C<use feature>.
 
 Excepting those listed above, we're currently unable to guarantee that
-B::Deparse will produce a pragma at the correct point in the program.
+C<B::Deparse> will produce a pragma at the correct point in the program.
 (Specifically, pragmas at the beginning of a block often appear right
 before the start of the block instead.)
 Since the effects of pragmas are often lexically scoped, this can mean
@@ -7436,7 +7437,7 @@ than in the input file.
 =item *
 
 In fact, the above is a specific instance of a more general problem:
-we can't guarantee to produce BEGIN blocks or C<use> declarations in
+we can't guarantee to produce C<BEGIN> blocks or C<use> declarations in
 exactly the right place.  So if you use a module which affects compilation
 (such as by over-riding keywords, overloading constants or whatever)
 then the output code might not work as intended.
@@ -7444,8 +7445,8 @@ then the output code might not work as intended.
 =item *
 
 Some constants don't print correctly either with or without B<-d>.
-For instance, neither B::Deparse nor Data::Dumper know how to print
-dual-valued scalars correctly, as in:
+For instance, neither C<B::Deparse> nor L<Data::Dumper> know how to
+print dual-valued scalars correctly, as in:
 
     use constant E2BIG => ($!=7); $y = E2BIG; print $y, 0+$y;
 
@@ -7475,7 +7476,7 @@ which is not, consequently, deparsed correctly.
 =item *
 
 Lexical (my) variables declared in scopes external to a subroutine
-appear in coderef2text output text as package variables.  This is a tricky
+appear in L</coderef2text> output text as package variables.  This is a tricky
 problem, as perl has no native facility for referring to a lexical variable
 defined within a different scope, although L<PadWalker> is a good start.
 
