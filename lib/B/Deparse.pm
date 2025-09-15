@@ -9,6 +9,7 @@
 
 package B::Deparse 1.88;
 use strict;
+use builtin qw( true false );
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
@@ -1192,11 +1193,14 @@ sub pad_subs {
 
 
 # deparse_multiparam(): deparse, if possible, a sequence of ops into a
-# subroutine signature. If possible, returns a string representing the
-# signature syntax, minus the surrounding parentheses.
+# subroutine signature. If possible, returns either:
+#   (if $use_feature_sig is true): a string representing the signature syntax,
+#     minus the surrounding parentheses.
+#   (if $use_feature_sig is false): a string of perl code that approximates
+#     the behaviour of the signature.
 
 sub deparse_multiparam {
-    my ($self, $topop, $cv) = @_;
+    my ($self, $topop, $cv, $use_feature_sig) = @_;
 
     $topop = $topop->first;
     return unless $$topop and $topop->name eq 'lineseq';
@@ -1223,15 +1227,19 @@ sub deparse_multiparam {
     my @param_padix = splice @rest, 0, $nparams, ();
     my ($slurpy_padix) = @rest;
 
-    my @sig;
+    my @param_padname    = map { $_ ? $self->padname($_) : '$' } @param_padix;
+    my ($slurpy_padname) = map { $_ ? $self->padname($_) : $slurpy } $slurpy_padix;
+
     my %parami_for_padix;
 
     # Initial scalars
     foreach my $parami ( 0 .. $max_args-1 ) {
         my $padix = $param_padix[$parami];
-        $sig[$parami] = $self->padname($padix) || '$';
         $parami_for_padix{$padix} = $parami;
     }
+
+    my @param_defmode;
+    my @param_defexpr;
 
     $o = $o->sibling;
     for (; $o and !null $o; $o = $o->sibling) {
@@ -1244,23 +1252,17 @@ sub deparse_multiparam {
 
             my $parami = $parami_for_padix{$ofirst->targ};
 
-            my $assign = "=";
-            $assign = "//=" if $ofirst->private == OPpPARAM_IF_UNDEF;
-            $assign = "||=" if $ofirst->private == OPpPARAM_IF_FALSE;
-
-            length $sig[$parami] > 1 ?
-                ( $sig[$parami] .= ' ' ) :
-                ( $sig[$parami] = '$' ); # intentionally no trailing space
+            my $defmode = "=";
+            $defmode = "//=" if $ofirst->private == OPpPARAM_IF_UNDEF;
+            $defmode = "||=" if $ofirst->private == OPpPARAM_IF_FALSE;
+            $param_defmode[$parami] = $defmode;
 
             my $defop = $ofirst->first->first;
-            if ($defop->name eq "stub") {
-                $sig[$parami] .= "$assign";
-            }
-            else {
-                my $def = $self->deparse($defop, 7);
-                $def = "($def)" if $defop->flags & OPf_PARENS;
+            if ($defop->name ne "stub") {
+                my $expr = $self->deparse($defop, 7);
+                $expr = "($expr)" if $defop->flags & OPf_PARENS;
 
-                $sig[$parami] .= "$assign $def";
+                $param_defexpr[$parami] = $expr;
             }
         }
     }
@@ -1268,15 +1270,101 @@ sub deparse_multiparam {
     if ($cv->CvFLAGS & CVf_IsMETHOD) {
         # Remove the implied `$self` argument
         warn "Expected first signature argument to be named \$self"
-            unless @sig and $sig[0] eq '$self';
-        shift @sig;
+            unless @param_padname and $param_padname[0] eq '$self';
+
+        shift @param_padix;
+        shift @param_padname;
+        shift @param_defmode;
+        shift @param_defexpr;
+    }
+
+    if ($use_feature_sig) {
+        my @sig;
+
+        foreach my $parami ( 0 .. $#param_padix ) {
+            my $param_sig = $param_padname[$parami];
+            if ($param_defmode[$parami]) {
+                length $param_sig > 1 ?
+                    ( $param_sig .= ' ' ) :
+                    ( $param_sig = '$' ); # intentionally no trailing space
+
+                $param_sig .= $param_defmode[$parami];
+
+                my $defexpr = $param_defexpr[$parami];
+                $param_sig .= " $defexpr" if defined $defexpr;
+            }
+
+            push @sig, $param_sig;
+        }
+
+        push @sig, $slurpy_padname if $slurpy;
+
+        return join(", ", @sig);
+    }
+
+    # Approximate the behaviour using plain perl code
+    my $code = "";
+
+    $code .= <<"EOF" if !$slurpy_padix;
+die sprintf("Too many arguments for subroutine at %s line %d.\\n", (caller)[1, 2]) unless \@_ <= $nparams;
+EOF
+
+    $code .= <<"EOF" if $min_args > 0;
+die sprintf("Too few arguments for subroutine at %s line %d.\\n", (caller)[1, 2]) unless \@_ >= $min_args;
+EOF
+
+    $code .= <<EOF if $slurpy and $slurpy eq '%';
+die sprintf("Odd name/value argument for subroutine at %s line %d.\\n", (caller)[1, 2]) if \@_ > $nparams && ((\@_ - $nparams) & 1);
+EOF
+
+    foreach my $parami ( 0 .. $#param_padix ) {
+        my $argix = $parami;
+
+        my $stmt = "my $param_padname[$parami] = ";
+
+        if (my $defmode = $param_defmode[$parami]) {
+            my $defexpr = $param_defexpr[$parami];
+            # Optional parameter
+
+            if (length $param_padname[$parami] > 1) {
+                # Named optional param
+                if ($defmode eq "=") {
+                    $stmt .= "\@_ > $argix ? \$_[$argix] : $defexpr";
+                }
+                else {
+                    $defmode =~ s/=\z//;
+                    $stmt .= "\$_[$argix] $defmode $defexpr";
+                }
+            }
+            else {
+                # Anonymous optional param. This does not create or assign a
+                # variable but we still evaluate the defaulting expression for
+                # side-effects
+                my $cond = ( $defmode eq "//=" ) ? "defined \$_[$argix]" :
+                           ( $defmode eq "||=" ) ? "\$_[$argix]" :
+                                                   "\@_ > $argix";
+                $stmt = "$defexpr unless $cond";
+            }
+        }
+        else {
+            # Mandatory parameter
+
+            # Anonymous mandatory params can be entirely ignored. Their pad
+            # index will be zero.
+            $param_padix[$parami] or next;
+
+            $stmt .= "\$_[$argix]";
+        }
+
+        $code .= "$stmt;\n";
     }
 
     if ($slurpy) {
-        push @sig, $slurpy_padix ? $self->padname($slurpy_padix) : $slurpy;
+        $code .= "my $slurpy_padname = \@_[$nparams..\$#_];\n";
     }
 
-    return join(", ", @sig);
+    $code =~ s/;\n\z//;
+    return $code;
 }
 
 # deparse_argops(): deparse, if possible, a sequence of argcheck + argelem
@@ -1434,10 +1522,10 @@ Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
 
-    my $has_sig = $self->feature_enabled('signatures');
+    my $use_feature_sig = $self->feature_enabled('signatures');
     if ($cv->FLAGS & SVf_POK) {
 	my $myproto = $cv->PV;
-	if ($has_sig) {
+	if ($use_feature_sig) {
             push @attrs, "prototype($myproto)";
         }
         else {
@@ -1457,7 +1545,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local($self->{'curcvlex'});
     local(@$self{qw'curstash warnings hints hinthash'})
 		= @$self{qw'curstash warnings hints hinthash'};
-    my $body;
+    my $body = "";
     my $root = $cv->ROOT;
     local $B::overlay = {};
     if (not null $root) {
@@ -1471,16 +1559,21 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 
         # Try to deparse first subtree as a signature if possible.
         # Top of signature subtree has an ex-argcheck as a placeholder
-        if (    $has_sig
-            and $$firstop
-            and $firstop->name eq 'null'
-            and $firstop->targ == OP_ARGCHECK
-        ) {
-            my ($mysig) = $self->deparse_multiparam($firstop, $cv) //
-                          $self->deparse_argops($firstop, $cv);
-            if (defined $mysig) {
-                $sig = $mysig;
-                $firstop = $is_list ? $firstop->sibling : undef;
+        if ($$firstop and $firstop->name eq 'null' and $firstop->targ == OP_ARGCHECK) {
+            if ($use_feature_sig) {
+                my ($mysig) = $self->deparse_multiparam($firstop, $cv, true) //
+                              $self->deparse_argops($firstop, $cv);
+                if (defined $mysig) {
+                    $sig = $mysig;
+                    $firstop = $is_list ? $firstop->sibling : undef;
+                }
+            }
+            else {
+                my $prelude = $self->deparse_multiparam($firstop, $cv, false);
+                if (defined $prelude) {
+                    $body .= $prelude;
+                    $firstop = $is_list ? $firstop->sibling : undef;
+                }
             }
         }
 
@@ -1489,8 +1582,8 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	    for (my $o = $firstop; $$o; $o=$o->sibling) {
 		push @ops, $o;
 	    }
-	    $body = $self->lineseq(undef, 0, @ops).";";
-            if (!$has_sig and $ops[-1]->name =~ /^(next|db)state$/) {
+	    $body .= $self->lineseq(undef, 0, @ops).";";
+            if (!$use_feature_sig and $ops[-1]->name =~ /^(next|db)state$/) {
                 # this handles void context in
                 #   use feature signatures; sub ($=1) {}
                 $body .= "\n()";
@@ -1502,10 +1595,10 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	    }
 	}
 	elsif ($firstop) {
-	    $body = $self->deparse($root->first, 0);
+	    $body .= $self->deparse($root->first, 0);
 	}
         else {
-            $body = ';'; # stub sub
+            $body .= ';'; # stub sub
         }
 
         my $l = '';
@@ -6977,6 +7070,11 @@ sub pp_argdefelem {
 }
 
 
+sub pp_multiparam {
+    die "Unable to handle PP_MULTIPARAM outside of a regular subroutine signature position";
+}
+
+
 sub pp_pushdefer {
     my $self = shift;
     my($op, $cx) = @_;
@@ -7435,6 +7533,31 @@ this method doesn't return a complete subroutine definition -- if you
 want to eval the result, you should prepend "sub subname ", or "sub "
 for an anonymous function constructor.  Unless the sub was defined in
 the main:: package, the code will include a package declaration.
+
+Normally, C<B::Deparse> will emit code that includes the L<feature> pragma
+if required to enable features that are used in the fragment that follows.
+However, as L</coderef2text> emits only the body of a subroutine and expects
+the caller to prepend the C<sub> and optional name onto the beginning of it,
+it will not have the opportunity to emit a C<use feature 'signatures'> if the
+subroutine uses a signature, and the signatures feature is not enabled in the
+ambient pragmas.
+
+In the particular situation of a subroutine that uses the C<signatures>
+feature to parse its arguments being passed to L</coderef2text> when the
+feature is B<not> enabled in L</ambient_pragmas>, C<B::Deparse> will attempt
+to emit pure-perl code that emulates the behaviour of the signature as closely
+as possible.  This is performed on a B<best-effort> basis.  It is not
+guaranteed to perfectly capture the semantics of the signature's behaviour,
+only to offer a human-readable suggestion as to what it might do.
+Furthermore, it is not guaranteed to be able to reproduce every possible
+behaviour of signatures in future versions of Perl.  It may be that a future
+version introduces a behaviour that does not have a tidy way to express it in
+this pure-perl emulation code without using the C<signatures> feature.
+
+If this is of importance to you, make sure to use the L</ambient_pragmas> or
+L</ambient_pragmas_from_caller> method to enable the C<signatures> feature,
+ensuring that C<B::Deparse> will use it to deparse subroutines that use
+signatures.
 
 =head1 BUGS
 
