@@ -6990,7 +6990,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name, STRLEN *len,
 STATIC void
 S_require_tie_mod(pTHX_ GV *gv, const char varname, const char *name, STRLEN len, const U32 flags);
 # define PERL_ARGS_ASSERT_REQUIRE_TIE_MOD       \
-        assert(gv); assert(varname); assert(name)
+        assert(gv); assert(name)
 
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE GV *
