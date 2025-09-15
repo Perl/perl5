@@ -13,7 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 
-my $tests = 55; # not counting those in the __DATA__ section
+my $tests = 72; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -574,6 +574,14 @@ EOF
     };
 
     {
+        no feature qw( signatures );
+        $deparse->ambient_pragmas_from_caller;
+        my $deparsed = $deparse->coderef2text( $signatured_sub );
+        unlike $deparsed, qr/^\(\$x, \$y\) \{/,
+            'Deparsed signatured sub under  no feature qw( signatures )';
+    }
+
+    {
         use feature qw( signatures );
         $deparse->ambient_pragmas_from_caller;
         my $deparsed = $deparse->coderef2text( $signatured_sub );
@@ -588,6 +596,77 @@ EOF
         like $deparsed, qr/^\(\$x, \$y\) \{/,
             'Deparsed signatured sub under  use v5.36';
     }
+}
+
+{
+    # Ability to deparse various kinds of signature into non-feature signatures
+    # context
+    no feature qw( signatures );
+    $deparse->ambient_pragmas_from_caller;
+
+    use feature qw( signatures );
+    my $deparsed;
+
+    # These tests are all somewhat fragile as they depend on the exact
+    # pure-perl transliteration of OP_MULTIPARAM, as performed by B/Deparse.pm
+
+    $deparsed = $deparse->coderef2text( sub () { } );
+    like $deparsed,
+        qr/die .*Too many arguments for subroutine at.* unless \@_ <= 0/m,
+        'Deparsed signature empty max bounds';
+
+    $deparsed = $deparse->coderef2text( sub ($x, $y) { } );
+    like $deparsed,
+        qr/die .*Too many arguments for subroutine at.* unless \@_ <= 2/m,
+        'Deparsed signature two-args max bounds';
+    like $deparsed,
+        qr/die .*Too few arguments for subroutine at.* unless \@_ >= 2/m,
+        'Deparsed signature two-args min bounds';
+    like $deparsed,
+        qr/my \$x = \$_\[0];/m,
+        'Deparsed signature two-args arg 0';
+    like $deparsed,
+        qr/my \$y = \$_\[1];/m,
+        'Deparsed signature two-args arg 1';
+
+    $deparsed = $deparse->coderef2text( sub ($one = 1, $two //= 2, $three ||= 3) { } );
+    like $deparsed,
+        qr/my \$one = \@_ > 0 \? \$_\[0] : 1;/m,
+        'Deparsed signature with defaults arg 0';
+    like $deparsed,
+        qr/my \$two = \$_\[1] \/\/ 2;/m,
+        'Deparsed signature with defaults arg 1';
+    like $deparsed,
+        qr/my \$three = \$_\[2] \|\| 3;/m,
+        'Deparsed signature with defaults arg 2';
+
+    $deparsed = $deparse->coderef2text( sub ($, $ = IFMISSING(), $ //= IFUNDEF(), $ ||= IFFALSE()) { } );
+    unlike $deparsed,
+        qr/\$_\[0];/m,
+        'Deparsed signature anon args 0';
+    like $deparsed,
+        qr/IFMISSING\(\) unless \@_ > 1;/m,
+        'Deparsed signature anon args 1';
+    like $deparsed,
+        qr/IFUNDEF\(\) unless defined \$_\[2];/m,
+        'Deparsed signature anon args 2';
+    like $deparsed,
+        qr/IFFALSE\(\) unless \$_\[3];/m,
+        'Deparsed signature anon args 3';
+
+    $deparsed = $deparse->coderef2text( sub ($z, @rest) { } );
+    unlike $deparsed,
+        qr/die .*Too many arguments for subroutine at.*/m,
+        'Deparsed signature with slurpy has no max bounds';
+    like $deparsed,
+        qr/die .*Too few arguments for subroutine at.* unless \@_ >= 1/m,
+        'Deparsed signature with slurpy min bounds';
+    like $deparsed,
+        qr/my \$z = \$_\[0];/m,
+        'Deparsed signature with slurpy arg 0';
+    like $deparsed,
+        qr/my \@rest = \@_\[1..\$#_];/m,
+        'Deparsed signature with slurpy slurpy';
 }
 
 done_testing($tests);
