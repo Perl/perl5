@@ -1,27 +1,22 @@
-package overloading;
-use warnings;
+package overloading 0.03;
 
-our $VERSION = '0.02';
+use v5.40;
 
 my $HINT_NO_AMAGIC = 0x01000000; # see perl.h
 
-require 5.010001;
-
-sub _ops_to_nums {
+my sub ops_to_nums (@ops) {
     require overload::numbers;
 
     map { exists $overload::numbers::names{"($_"}
 	? $overload::numbers::names{"($_"}
 	: do { require Carp; Carp::croak("'$_' is not a valid overload") }
-    } @_;
+    } @ops;
 }
 
-sub import {
-    my ( $class, @ops ) = @_;
-
+sub import ($, @ops) {
     if ( @ops ) {
 	if ( $^H{overloading} ) {
-	    vec($^H{overloading} , $_, 1) = 0 for _ops_to_nums(@ops);
+	    vec($^H{overloading} , $_, 1) = 0 for ops_to_nums(@ops);
 	}
 
 	if ( $^H{overloading} !~ /[^\0]/ ) {
@@ -34,12 +29,10 @@ sub import {
     }
 }
 
-sub unimport {
-    my ( $class, @ops ) = @_;
-
+sub unimport ($, @ops) {
     if ( exists $^H{overloading} or not $^H & $HINT_NO_AMAGIC ) {
 	if ( @ops ) {
-	    vec($^H{overloading} ||= '', $_, 1) = 1 for _ops_to_nums(@ops);
+	    vec($^H{overloading} ||= '', $_, 1) = 1 for ops_to_nums(@ops);
 	} else {
 	    delete $^H{overloading};
 	}
@@ -48,7 +41,6 @@ sub unimport {
     $^H |= $HINT_NO_AMAGIC;
 }
 
-1;
 __END__
 
 =head1 NAME
