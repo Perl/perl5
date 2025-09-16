@@ -10,11 +10,11 @@ package B::Concise;
 # -MO=Concise counts as use #1.
 
 use strict; # use #2
-use warnings; # uses #3 and #4, since warnings uses Carp
+use warnings; # use #3
 
-use Exporter 'import'; # use #5
+use Exporter 'import'; # uses #4-6, since Exporter does use strict, no strict
 
-our $VERSION   = "1.007";
+our $VERSION   = "1.008";
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
 		     add_style walk_output compile reset_sequence );
@@ -24,7 +24,8 @@ our %EXPORT_TAGS =
       cb	=> [qw( add_callback )],
       mech	=> [qw( concise_subref concise_cv concise_main )],  );
 
-# use #6
+# uses #7-10, since B->import loads Exporter::Heavy which does use strict,
+# no strict, no warnings.
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS OPf_SPECIAL
          OPf_STACKED
@@ -113,7 +114,7 @@ sub add_callback {
 
 # output handle, used with all Concise-output printing
 our $walkHandle;	# public for your convenience
-BEGIN { $walkHandle = \*STDOUT }
+BEGIN { $walkHandle = \*STDOUT } # use #11
 
 sub walk_output { # updates $walkHandle
     my $handle = shift;
@@ -179,7 +180,7 @@ sub concise_cv_obj {
 	return;
     }
     if (class($cv->START) eq "NULL") {
-	no strict 'refs';
+	no strict 'refs'; # use #12
 	if (ref $name eq 'CODE') {
 	    print $walkHandle "coderef $name has no START\n";
 	}
@@ -229,7 +230,7 @@ sub concise_specials {
     my($name, $order, @cv_s) = @_;
     my $i = 1;
     if ($name eq "BEGIN") {
-	splice(@cv_s, 0, 8); # skip 7 BEGIN blocks in this file. NOW 8 ??
+	splice(@cv_s, 0, 16); # skip 16 BEGIN blocks from this file
     } elsif ($name eq "CHECK") {
 	pop @cv_s; # skip the CHECK block that calls us
     }
@@ -301,7 +302,7 @@ sub compileOpts {
 	}
 	elsif ($o =~ /^-stash=(.*)/) {
 	    my $pkg = $1;
-	    no strict 'refs';
+	    no strict 'refs'; # use #13
 	    if (! %{$pkg.'::'}) {
 		eval "require $pkg";
 	    } else {
@@ -366,7 +367,7 @@ sub compile {
 		    next;
 		} else {
 		    $objname = "main::" . $objname unless $objname =~ /::/;
-		    no strict 'refs';
+		    no strict 'refs'; # use #14
 		    my $glob = \*$objname;
 		    unless (*$glob{CODE} || *$glob{FORMAT}) {
 			print $walkHandle "$objname:\n" if $banner;
@@ -386,7 +387,7 @@ sub compile {
 	    }
 	}
 	for my $pkg (@render_packs) {
-	    no strict 'refs';
+	    no strict 'refs'; # use #15
 	    concise_stashref($order, \%{$pkg.'::'});
 	}
 
@@ -406,7 +407,7 @@ my %opclass = ('OP' => "0", 'UNOP' => "1", 'BINOP' => "2", 'LOGOP' => "|",
 	       'PVOP' => '"', 'LOOP' => "{", 'COP' => ";", 'PADOP' => "#",
 	       'METHOP' => '.', UNOP_AUX => '+');
 
-no warnings 'qw'; # "Possible attempt to put comments..."; use #7
+no warnings 'qw'; # "Possible attempt to put comments..."; use #16
 my @linenoise =
   qw'#  () sc (  @? 1  $* gv *{ m$ m@ m% m? p/ *$ $  $# & a& pt \\ s\\ rf bl
      `  *? <> ?? ?/ r/ c/ // qr s/ /c y/ =  @= C  sC Cp sp df un BM po +1 +I
