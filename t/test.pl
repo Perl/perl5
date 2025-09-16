@@ -38,6 +38,7 @@ $::IS_EBCDIC = ord 'A' == 193;
 our $TODO = 0;
 our $NO_ENDING = 0;
 our $Tests_Are_Passing = 1;
+our @watchdog_threads_;
 
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
@@ -1834,8 +1835,7 @@ sub warning_like {
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
 { # Closure
-    my $watchdog;
-    my $watchdog_thread;
+    my $cancel_string;
 
 sub watchdog ($;$)
 {
@@ -1844,28 +1844,17 @@ sub watchdog ($;$)
     # If cancelling, use the state variables to know which method was used to
     # create the watchdog.
     if ($timeout == 0) {
-        if ($watchdog_thread) {
-            $watchdog_thread->kill('KILL');
-            undef $watchdog_thread;
-        }
-        elsif ($watchdog) {
-            kill('KILL', $watchdog);
-            undef $watchdog;
-        }
-        else {
-            alarm(0);
-        }
-
+        eval $cancel_string if defined $cancel_string;
         return;
     }
-
-    # Make sure these aren't defined.
-    undef $watchdog;
-    undef $watchdog_thread;
 
     my $method = shift || "";
 
     my $timeout_msg = 'Test process timed out - terminating';
+
+    # Common to all cancellation types; HERE gets replaced below by the
+    # individual code
+    $cancel_string = 'local $! = 0; local $? = 0; HERE; undef $cancel_string';
 
     # Accept either spelling
     my $timeout_factor = $ENV{PERL_TEST_TIME_OUT_FACTOR}
@@ -1894,6 +1883,8 @@ sub watchdog ($;$)
         || (defined $ENV{PERL_SIGNALS} && $ENV{PERL_SIGNALS} eq "unsafe")
         || $method eq "process")
     {
+        my $watchdog;
+
         # On Windows and VMS, try launching a watchdog process
         #   using system(1, ...) (see perlport.pod).  system() returns
         #   immediately on these platforms with effectively a pid of the new
@@ -1911,7 +1902,6 @@ sub watchdog ($;$)
             return if ($pid_to_kill <= 0);
 
             # Launch watchdog process
-            undef $watchdog;
             eval {
                 local $SIG{'__WARN__'} = sub {
                     _diag("Watchdog warning: $_[0]");
@@ -1954,20 +1944,19 @@ sub watchdog ($;$)
 
             # Add END block to parent to terminate and clean up watchdog
             # process
-            eval("END { local \$! = 0; local \$? = 0;
-                        wait() if kill('KILL', $watchdog); };");
+            $cancel_string =~ s/HERE/wait() if kill('KILL', $watchdog)/;
+            eval("END { $cancel_string };");
             return;
         }
 
         # Try using fork() to generate a watchdog process
-        undef $watchdog;
         eval { $watchdog = fork() };
         if (defined($watchdog)) {
             if ($watchdog) {   # Parent process
                 # Add END block to parent to terminate and clean up watchdog
                 # process
-                eval "END { local \$! = 0; local \$? = 0;
-                            wait() if kill('KILL', $watchdog); };";
+                $cancel_string =~ s/HERE/wait() if kill('KILL', $watchdog)/;
+                eval("END { $cancel_string };");
                 return;
             }
 
@@ -2005,7 +1994,9 @@ sub watchdog ($;$)
     # Use a watchdog thread because either 'threads' is loaded, or fork()
     # failed
     if (eval {require threads; 1}) {
-        $watchdog_thread = 'threads'->create(sub {
+
+        # Use an array so can handle multiple timers
+        push @watchdog_threads_, 'threads'->create(sub {
                 # Load POSIX if available
                 eval { require POSIX; };
 
@@ -2029,12 +2020,16 @@ sub watchdog ($;$)
                 kill($sig, $pid_to_kill);
         });
 
+        #my $index = scalar @watchd
+        $cancel_string =~ s/HERE/\$watchdog_threads_[$#watchdog_threads_]->kill('KILL')/;
+        eval "END { $cancel_string }";
+
         # Don't proceed until the watchdog has set up its signal handler.
         # (Otherwise there is a possibility that we will exit with threads
         # running.)  The watchdog tells us that the handler is set by
         # detaching itself.  (The 'is_running()' is a fail-safe.)
-        while (     $watchdog_thread->is_running()
-               && ! $watchdog_thread->is_detached())
+        while (     $watchdog_threads_[-1]->is_running()
+               && ! $watchdog_threads_[-1]->is_detached())
         {
             'threads'->yield();
         }
@@ -2057,6 +2052,9 @@ WATCHDOG_VIA_ALARM:
             my $sig = $is_vms ? 'TERM' : 'KILL';
             kill($sig, $pid_to_kill);
         };
+
+        $cancel_string =~ s/HERE/alarm(0)/;
+        eval "END { $cancel_string }";
     }
 }
 } # End closure
