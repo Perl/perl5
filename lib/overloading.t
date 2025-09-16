@@ -1,13 +1,10 @@
 #./perl
 
+use v5.40;
+
 use Test::More;
 
-no warnings 'experimental::builtin';
-use builtin qw(refaddr);
-
-{
-    package Stringifies;
-
+package Stringifies {
     use overload (
 	fallback => 1,
 	'""' => sub { "foo" },
