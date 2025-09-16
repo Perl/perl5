@@ -1846,19 +1846,19 @@ sub watchdog ($;$)
     # If cancelling, use the state variables to know which method was used to
     # create the watchdog.
     if ($timeout == 0) {
-        if ($watchdog_thread) {
-            $watchdog_thread->kill('KILL');
-            undef $watchdog_thread;
-        }
-        elsif ($watchdog) {
-            kill('KILL', $watchdog);
-            undef $watchdog;
-        }
-        else {
-            alarm(0);
-        }
+    if ($watchdog_thread) {
+        $watchdog_thread->kill('KILL');
+        undef $watchdog_thread;
+    }
+    elsif ($watchdog) {
+        kill('KILL', $watchdog);
+        undef $watchdog;
+    }
+    else {
+        alarm(0);
+    }
 
-        return;
+    return;
     }
 
     # Make sure these aren't defined.
@@ -1890,8 +1890,7 @@ sub watchdog ($;$)
     # shut up use only once warning
     my $threads_on = $threads::threads && $threads::threads;
 
-    # Don't use a watchdog process if 'threads' is loaded -
-    #   use a watchdog thread instead
+    # Use a watchdog process unless 'threads' is loaded
     if (!$threads_on || $method eq "process") {
 
         # On Windows and VMS, try launching a watchdog process
@@ -1914,9 +1913,9 @@ sub watchdog ($;$)
             undef $watchdog;
             eval {
                 local $SIG{'__WARN__'} = sub {
-                    _diag("Watchdog warning: $_[0]");
-                };
-                my $sig = $is_vms ? 'TERM' : 'KILL';
+                                             _diag("Watchdog warning: $_[0]");
+                                             };
+                my $sig = ($is_vms) ? 'TERM' : 'KILL';
                 my $prog = "sleep($timeout);" .
                            "warn qq/# $timeout_msg" . '\n/;' .
                            "kill(q/$sig/, $pid_to_kill);";
@@ -1952,8 +1951,8 @@ sub watchdog ($;$)
                 return;
             }
 
-            # Add END block to parent to terminate and
-            #   clean up watchdog process
+            # Add END block to parent to terminate and clean up watchdog
+            # process
             eval("END { local \$! = 0; local \$? = 0;
                         wait() if kill('KILL', $watchdog); };");
             return;
@@ -1964,8 +1963,8 @@ sub watchdog ($;$)
         eval { $watchdog = fork() };
         if (defined($watchdog)) {
             if ($watchdog) {   # Parent process
-                # Add END block to parent to terminate and
-                #   clean up watchdog process
+                # Add END block to parent to terminate and clean up watchdog
+                # process
                 eval "END { local \$! = 0; local \$? = 0;
                             wait() if kill('KILL', $watchdog); };";
                 return;
@@ -2002,8 +2001,8 @@ sub watchdog ($;$)
         # fork() failed - fall through and try using a thread
     }
 
-    # Use a watchdog thread because either 'threads' is loaded,
-    #   or fork() failed
+    # Use a watchdog thread because either 'threads' is loaded, or fork()
+    # failed
     if (eval {require threads; 1}) {
         $watchdog_thread = 'threads'->create(sub {
                 # Load POSIX if available
@@ -2042,7 +2041,7 @@ sub watchdog ($;$)
         return;
     }
 
-    # If everything above fails, then just use an alarm timeout
+    # If everything above fails, then just use an alarm timeout.
 WATCHDOG_VIA_ALARM:
     if (eval { alarm($timeout); 1; }) {
         # Load POSIX if available
@@ -2050,12 +2049,12 @@ WATCHDOG_VIA_ALARM:
 
         # Alarm handler will do the actual 'killing'
         $SIG{'ALRM'} = sub {
-            select(STDERR); $| = 1;
-            _diag($timeout_msg);
-            POSIX::_exit(1) if (defined(&POSIX::_exit));
-            my $sig = $is_vms ? 'TERM' : 'KILL';
-            kill($sig, $pid_to_kill);
-        };
+                             select(STDERR); $| = 1;
+                             _diag($timeout_msg);
+                             POSIX::_exit(1) if (defined(&POSIX::_exit));
+                             my $sig = ($is_vms) ? 'TERM' : 'KILL';
+                             kill($sig, $pid_to_kill);
+                           };
     }
 }
 } # End closure
