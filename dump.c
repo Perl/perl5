@@ -984,18 +984,19 @@ S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm,
     S_opdump_indent(aTHX_ (OP*)pm, level, bar, file,
                     "PMOFFSET = %" IVdf "\n", (IV)pm->op_pmoffset);
 #endif
+    REGEXP * re = PM_GETRE(pm);
     S_opdump_indent(aTHX_ (OP*)pm, level, bar, file,
-                    "REGEX = 0x%" UVxf "\n", PTR2UV(PM_GETRE(pm)));
+                    "REGEX = 0x%" UVxf "\n", PTR2UV(re));
 
-    if (PM_GETRE(pm)) {
+    if (re) {
         char ch = (pm->op_pmflags & PMf_ONCE) ? '?' : '/';
         S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_PRE %c%.*s%c\n",
-             ch,(int)RX_PRELEN(PM_GETRE(pm)), RX_PRECOMP(PM_GETRE(pm)), ch);
+             ch,(int)RX_PRELEN(re), RX_PRECOMP(re), ch);
     }
     else
         S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_PRE (RUNTIME)\n");
 
-    if (pm->op_pmflags || PM_GETRE(pm)) {
+    if (pm->op_pmflags || re) {
         SV * const tmpsv = pm_description(pm);
         S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMFLAGS = (%s)\n",
                         SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
