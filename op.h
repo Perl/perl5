@@ -304,12 +304,12 @@ struct pmop {
  * processing or asserts */
 #ifdef USE_ITHREADS
 #define PM_GETRE_raw(o)	(REGEXP*)(PL_regex_pad[(o)->op_pmoffset])
-#define PM_GETRE(o)	(SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
-                         ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
+#define PM_GETRE(o)	(SvTYPE(PM_GETRE_raw(o)) == SVt_REGEXP      \
+                         ? PM_GETRE_raw(o) : NULL)
 
-#define PM_SETRE_raw(o,r)	STMT_START {					\
-                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(r); \
-                        } STMT_END
+#define PM_SETRE_raw(o,r)  STMT_START {					     \
+                              PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(r);\
+                           } STMT_END
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
 /* With first class regexps not via a reference one needs to assign
@@ -321,13 +321,13 @@ struct pmop {
 #define PM_SETRE(o,r)	STMT_START {					\
                             REGEXP *const pm_setre_ = (r);		\
                             assert(pm_setre_);				\
-                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(pm_setre_); \
+                            PM_SETRE_raw(o, pm_setre_);                 \
                         } STMT_END
 #else
 #define PM_GETRE_raw(o) ((o)->op_pmregexp)
-#define PM_GETRE(o)     ((o)->op_pmregexp)
+#define PM_GETRE(o)     PM_GETRE_raw(o)
 #define PM_SETRE_raw(o,r) ((o)->op_pmregexp = (r))
-#define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
+#define PM_SETRE(o,r)   PM_SETRE_raw(o,r)
 #endif
 
 /* Currently these PMf flags occupy a single 32-bit word.  Not all bits are
