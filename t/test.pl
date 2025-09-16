@@ -1890,9 +1890,12 @@ sub watchdog ($;$)
     # shut up use only once warning
     my $threads_on = $threads::threads && $threads::threads;
 
-    # Use a watchdog process unless 'threads' is loaded
-    if (!$threads_on || $method eq "process") {
-
+    # Use a watchdog process unless 'threads' is loaded and is killable by a
+    # signal
+    if (   ! $threads_on
+        || (defined $ENV{PERL_SIGNALS} && $ENV{PERL_SIGNALS} eq "unsafe")
+        || $method eq "process")
+    {
         # On Windows and VMS, try launching a watchdog process
         #   using system(1, ...) (see perlport.pod).  system() returns
         #   immediately on these platforms with effectively a pid of the new
