@@ -413,24 +413,31 @@ the octets.
 =for apidoc_item|COPHH *|cophh_delete_pvs|COPHH *cophh|           "key"                      |U32 flags
 =for apidoc_item|COPHH *|cophh_delete_sv |COPHH *cophh|        SV *key              |U32 hash|U32 flags
 
-These delete a key and its associated value from the cop hints hash C<cophh>,
-and return the modified hash.  The returned hash pointer is in general
-not the same as the hash pointer that was passed in.  The input hash is
-consumed by the function, and the pointer to it must not be subsequently
-used.  Use L</cophh_copy> if you need both hashes.
+These each delete a key and its associated value from the cop hints hash
+C<cophh>, and return a pointer to the modified structure.  The returned pointer
+is in general not the same as the pointer that was passed in.  The input
+C<cophh> is consumed by the function, and the pointer to it must not be
+subsequently used.
 
-The forms differ in how the key is specified.  In all forms, the key is pointed
-to by C<key>.
-In the plain C<pv> form, the key is a C language NUL-terminated string.
-In the C<pvs> form, the key is a C language string literal.
-In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
-the string, which hence, may contain embedded-NUL characters.
-In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
-using C<L</SvPV_const>>.
+Use L</cophh_copy> first if you need both structures.
+
+The forms differ only in how the key is specified.
+
+In C<cophh_delete_pv>, C<key> is a C language NUL-terminated string.
+
+In C<cophh_delete_pvs>, C<key> is a C language string literal, enclosed in
+double quotes.
+
+In C<cophh_delete_pvn>, C<key> points to the first byte of the string
+specifying the key, and an additional parameter, C<keylen>, specifies its
+length in bytes.  Hence, C<key> may contain embedded-NUL characters.
+
+In C<cophh_delete_sv>, C<*key> is an SV, and the key is the PV extracted from
+that.  using C<L</SvPV_const>>.
 
 C<hash> is a precomputed hash of the key string, or zero if it has not been
-precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
-automatically at compile time.
+precomputed.  This parameter is omitted from C<cophh_delete_pvs>, which behaves
+as if zero had been specified.
 
 The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
 It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
