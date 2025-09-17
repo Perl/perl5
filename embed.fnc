@@ -2224,7 +2224,7 @@ ARdp	|OP *	|newCVREF	|I32 flags				\
 ARdpx	|OP *	|newDEFEROP	|I32 flags				\
 				|NN OP *block
 ARdp	|OP *	|newDEFSVOP
-Cp	|void	|newFORM	|I32 floor				\
+Cdp	|void	|newFORM	|I32 floor				\
 				|NULLOK OP *o				\
 				|NULLOK OP *block
 ARdp	|OP *	|newFOROP	|I32 flags				\
