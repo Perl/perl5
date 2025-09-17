@@ -656,15 +656,6 @@ struct refcounted_he {
 #define refcounted_he_fetch_pvs(chain, key, flags) \
     Perl_refcounted_he_fetch_pvn(aTHX_ chain, STR_WITH_LEN(key), 0, flags)
 
-/*
-=for apidoc m|struct refcounted_he *|refcounted_he_new_pvs|struct refcounted_he *parent|"key"|SV *value|U32 flags
-
-Like L</refcounted_he_new_pvn>, but takes a literal string
-instead of a string/length pair, and no precomputed hash.
-
-=cut
-*/
-
 #define refcounted_he_new_pvs(parent, key, value, flags) \
     Perl_refcounted_he_new_pvn(aTHX_ parent, STR_WITH_LEN(key), 0, value, flags)
 
