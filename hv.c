@@ -3694,15 +3694,35 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 }
 
 /*
-=for apidoc refcounted_he_fetch_pvn
+=for apidoc      refcounted_he_fetch_pv
+=for apidoc_item refcounted_he_fetch_pvn
+=for apidoc_item m||refcounted_he_fetch_pvs
+=for apidoc_item refcounted_he_fetch_sv
 
-Search along a C<refcounted_he> chain for an entry with the key specified
-by C<keypv> and C<keylen>.  If C<flags> has the C<REFCOUNTED_HE_KEY_UTF8>
-bit set, the key octets are interpreted as UTF-8, otherwise they
-are interpreted as Latin-1.  C<hash> is a precomputed hash of the key
-string, or zero if it has not been precomputed.  Returns a mortal scalar
-representing the value associated with the key, or C<&PL_sv_placeholder>
-if there is no value associated with the key.
+These each search along a C<refcounted_he> C<chain> for an entry with the
+specified key.  The return depends on the C<REFCOUNTED_HE_EXISTS> bit in
+C<flags>.  If unset, a mortal scalar representing the value associated with
+the key is returned, or C<&PL_sv_placeholder> if there is no value associated
+with the key.  If set, and there is such a value C<&PL_yes> is returned; if no
+such value, NULL is returned.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed
+
+The forms differ only in how the key is specified.
+
+In C<refcounted_he_fetch_pv>, C<key> specifies the key as a C language
+NUL-terminated string.
+
+In C<refcounted_he_fetch_pvs>, the key is a C language string literal, enclosed
+in double quotes.
+
+In C<refcounted_he_fetch_pvn>, C<key> points to the first byte of the string
+specifying the key, and an additional parameter, C<keylen>, specifies its
+length in bytes.  Hence, C<key> may contain embedded-NUL characters.
+
+In C<refcounted_he_fetch_sv>, C<*key> is an SV, and the key is the PV
+extracted from that using L<perlapi/C<SvPV_const>>.
 
 =cut
 */
@@ -3758,15 +3778,6 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
     return flags & REFCOUNTED_HE_EXISTS ? NULL : &PL_sv_placeholder;
 }
 
-/*
-=for apidoc refcounted_he_fetch_pv
-
-Like L</refcounted_he_fetch_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
-
 SV *
 Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain,
                          const char *key, U32 hash, U32 flags)
@@ -3774,15 +3785,6 @@ Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain,
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PV;
     return refcounted_he_fetch_pvn(chain, key, strlen(key), hash, flags);
 }
-
-/*
-=for apidoc refcounted_he_fetch_sv
-
-Like L</refcounted_he_fetch_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 SV *
 Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
