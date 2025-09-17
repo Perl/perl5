@@ -4628,40 +4628,64 @@ Perl_padnamelist_refcnt_inc(PADNAMELIST *pnl)
 =for apidoc_item savesharedpvs
 =for apidoc_item savesharedsvpv
 
-Perl's version of C<strdup()> (or C<strndup()> would be if it existed).
-
 These each return a pointer to a newly allocated string which is a duplicate of
-the input string.
+the one given by the input argument.  Effectively, they implement the C library
+L<C<strdup(3)>>.
 
-The forms differ in how the string to be copied is specified, and where the new
-memory is allocated from.
+The forms differ in three main ways:
+
+=over
+
+=item 1.
+
+Whether or not the newly allocated memory is in an area that is sharable
+between threads (the forms with C<shared> in their names) or if it is in an
+area exclusive to the calling thread (the other forms).
+
+=item 2.
+
+How the string to be copied is specified.
+
+In the C<savepv> and C<savesharedpv> forms, the source string is a C language
+NUL-terminated string, or C<NULL>.  If C<NULL>, no allocation is done, and
+the functions return NULL.
+
+In the C<savepvn> and C<savesharedpvn> forms, C<pv> (if not NULL) points to the
+first byte of the string to duplicate, and an additional parameter, C<len>,
+specifies the number of bytes to copy.  Hence, C<pv> may contain embedded-NUL
+characters.  It is illegal for C<pv> to be NULL when calling C<savesharedpvn>
+(asserted against in DEBUGGING builds).  If it is NULL in C<savepvn>, C<len>
+bytes of zeroed memory are allocated.
+
+In the C<savepvs> and C<savesharedpvs> forms, the string must be a C literal
+string, enclosed in double quotes.
+
+In the C<savesvpv> and C<savesharedsvpv> forms, the string to duplicate is
+extracted from C<sv> using L</C<SvPV_const>>.  C<sv> must not be NULL.
+
+=item 3.
+
+Memory deallocation
 
 To prevent memory leaks, the memory allocated for the new string needs to be
-freed when no longer needed.  This can be done with the C<L</Safefree>>
-function, or L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
+freed when no longer needed.  
 
-The forms whose names contain C<shared> differ from the corresponding form
-without that in its name, only in that the memory in the former comes from
-memory shared between threads.  This is needed, because on some platforms,
-Windows for example, all allocated memory owned by a thread is deallocated when
-that thread ends.  So if you need that not to happen, you need to use the
-shared memory forms.
+=over
 
-The string to copy in C<savepvs> is a C language string literal surrounded by
-double quotes.
+=item C<non-shared> forms
 
-The string to copy in the forms whose name contains C<svpv> comes from the PV
-in the SV argument C<sv>, using C<SvPV()>
+Use the C<L</Safefree>> function, or L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
+However, BE AWARE, this can happen automatically on some platforms, such as
+Windows, when the thread that allocated it ends.  So if you need that not to
+happen, you need to use a C<shared> form.
 
-The string to copy in the remaining forms comes from the C<pv> argument.
+=item C<shared> forms
 
-In the case of C<savepv>, the size of the string is determined by C<strlen()>,
-which means it may not contain embedded C<NUL> characters, and must have a
-trailing C<NUL>.
+Use the C<PerlMemShared_free> function.
 
-In the case of C<savepvn>, C<len> gives the length of C<pv>, hence it may
-contain embedded C<NUL> characters.  The copy will be guaranteed to have a
-trailing NUL added if not already present.
+=back
+
+=back
 
 =cut
 */
