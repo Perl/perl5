@@ -3805,26 +3805,33 @@ Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
 }
 
 /*
-=for apidoc refcounted_he_new_pvn
+=for apidoc         refcounted_he_new_pv
+=for apidoc_item    refcounted_he_new_pvn
+=for apidoc_item m||refcounted_he_new_pvs
+=for apidoc_item    refcounted_he_new_sv
 
-Creates a new C<refcounted_he>.  This consists of a single key/value
-pair and a reference to an existing C<refcounted_he> chain (which may
-be empty), and thus forms a longer chain.  When using the longer chain,
-the new key/value pair takes precedence over any entry for the same key
-further along the chain.
+These each create a new C<refcounted_he>.  This consists of a single key/value
+pair and a reference to an existing C<refcounted_he> chain (which may be
+empty), thus forming a longer chain.  When using the longer chain, the new
+key/value pair takes precedence over any entry for the same key further along
+the chain.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed.  C<refcounted_he_new_pvs> doesn't have a C<hash> parameter, as
+that is determinable at compile time.
+
+The forms otherwise differ only in how the key is specified.
 
 The new key is specified by C<keypv> and C<keylen>.  If C<flags> has
 the C<REFCOUNTED_HE_KEY_UTF8> bit set, the key octets are interpreted
-as UTF-8, otherwise they are interpreted as Latin-1.  C<hash> is
-a precomputed hash of the key string, or zero if it has not been
-precomputed.
+as UTF-8, otherwise they are interpreted as Latin-1.
 
 C<value> is the scalar value to store for this key.  C<value> is copied
 by this function, which thus does not take ownership of any reference
 to it, and later changes to the scalar will not be reflected in the
 value visible in the C<refcounted_he>.  Complex types of scalar will not
 be stored with referential integrity, but will be coerced to strings.
-C<value> may be either null or C<&PL_sv_placeholder> to indicate that no
+C<value> may be either NULL or C<&PL_sv_placeholder> to indicate that no
 value is to be associated with the key; this, as with any non-null value,
 takes precedence over the existence of a value for the key further along
 the chain.
@@ -3922,15 +3929,6 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     return he;
 }
 
-/*
-=for apidoc refcounted_he_new_pv
-
-Like L</refcounted_he_new_pvn>, but takes a nul-terminated string instead
-of a string/length pair.
-
-=cut
-*/
-
 struct refcounted_he *
 Perl_refcounted_he_new_pv(pTHX_ struct refcounted_he *parent,
         const char *key, U32 hash, SV *value, U32 flags)
@@ -3938,15 +3936,6 @@ Perl_refcounted_he_new_pv(pTHX_ struct refcounted_he *parent,
     PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PV;
     return refcounted_he_new_pvn(parent, key, strlen(key), hash, value, flags);
 }
-
-/*
-=for apidoc refcounted_he_new_sv
-
-Like L</refcounted_he_new_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 struct refcounted_he *
 Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent,
