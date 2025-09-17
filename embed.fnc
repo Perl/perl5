@@ -3014,7 +3014,7 @@ Cdp	|void	|save_set_svflags					\
 Aadp	|char * |savesharedpv	|NULLOK const char *pv
 
 : NULLOK only to suppress a compiler warning
-Aadp	|char * |savesharedpvn	|NULLOK const char * const pv		\
+Aadp	|char * |savesharedpvn	|NN const char * const pv		\
 				|const STRLEN len
 Cdp	|void	|save_shared_pvref					\
 				|NN char **str
