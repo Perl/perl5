@@ -3137,10 +3137,18 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 }
 
 /*
-=for apidoc hv_iterkey
+=for apidoc      hv_iterkey
+=for apidoc_item hv_iterkeysv
 
-Returns the key from the current position of the hash iterator.  See
+These each return the key from the current position of the hash iterator.  See
 C<L</hv_iterinit>>.
+
+They differ in the form of the return value.
+
+C<hv_iterkey> returns a C language NUL-terminated string.
+
+C<hv_iterkeysv> returns a mortal SV* containing a copy of the key.
+Note that this is unlike L</C<hv_iterval>> whose return isn't mortalized
 
 =cut
 */
@@ -3161,17 +3169,6 @@ Perl_hv_iterkey(pTHX_ HE *entry, I32 *retlen)
         return HeKEY(entry);
     }
 }
-
-/* unlike hv_iterval(), this always returns a mortal copy of the key */
-/*
-=for apidoc hv_iterkeysv
-
-Returns the key as an C<SV*> from the current position of the hash
-iterator.  The return value will always be a mortal copy of the key.  Also
-see C<L</hv_iterinit>>.
-
-=cut
-*/
 
 SV *
 Perl_hv_iterkeysv(pTHX_ HE *entry)
