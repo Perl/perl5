@@ -3329,6 +3329,8 @@ Return TRUE if the name is safe.
 C<what> and C<op_name> are used in any warning.
 
 =cut
+
+Allows one ending \0
 */
 
 PERL_STATIC_INLINE bool
