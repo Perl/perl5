@@ -12235,6 +12235,14 @@ Perl_newSTUB(pTHX_ GV *gv, bool fake)
     return cv;
 }
 
+/*
+=for apidoc newFORM
+
+Constructs, checks, and returns a format op.
+
+=cut
+*/
+
 void
 Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 {
