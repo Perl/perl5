@@ -374,9 +374,6 @@ my @unresolved_visibility_overrides = qw(
     CopFILE_setn_x
     CopFILE_set_x
     COPHH_EXISTS
-    cophh_exists_pv
-    cophh_exists_pvs
-    cophh_exists_sv
     CopHINTHASH_get
     CopHINTHASH_set
     CopHINTS_get
