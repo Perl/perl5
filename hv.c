@@ -2926,25 +2926,26 @@ Perl_hv_kill_backrefs(pTHX_ HV *hv) {
 hv_iternext is implemented as a macro in hv.h
 
 =for apidoc      hv_iternext
+=for apidoc_item hv_iternext_flags
 =for apidoc_flag HV_ITERNEXT_WANTPLACEHOLDERS
 
-Returns entries from a hash iterator.  See C<L</hv_iterinit>>.
+These each return entries from a hash iterator.  See C<L</hv_iterinit>>.
 
 You may call C<hv_delete> or C<hv_delete_ent> on the hash entry that the
 iterator currently points to, without losing your place or invalidating your
 iterator.  Note that in this case the current entry is deleted from the hash
 with your iterator holding the last reference to it.  Your iterator is flagged
 to free the entry on the next call to C<hv_iternext>, so you must not discard
-your iterator immediately else the entry will leak - call C<hv_iternext> to
+your iterator immediately, else the entry will leak - call C<hv_iternext> to
 trigger the resource deallocation.
 
-=for apidoc hv_iternext_flags
+C<hv_iternext_flags> has an extra C<flags> parameter, which will normally be zero.
+If so, it behaves identically to C<hv_iternext>.
 
-Returns entries from a hash iterator.  See C<L</hv_iterinit>> and
-C<L</hv_iternext>>.
-The C<flags> value will normally be zero; if C<HV_ITERNEXT_WANTPLACEHOLDERS> is
-set the placeholders keys (for restricted hashes) will be returned in addition
-to normal keys.  By default placeholders are automatically skipped over.
+But if the C<HV_ITERNEXT_WANTPLACEHOLDERS> bit is set, the placeholders keys
+(for restricted hashes) will be returned in addition to normal keys.  By
+default placeholders are automatically skipped over.
+
 Currently a placeholder is implemented with a value that is
 C<&PL_sv_placeholder>.  Note that the implementation of placeholders and
 restricted hashes may change, and the implementation currently is
