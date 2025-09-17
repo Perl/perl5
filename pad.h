@@ -529,15 +529,6 @@ Clone the state variables associated with running and compiling pads.
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;	\
     PL_cop_seqmax		= proto_perl->Icop_seqmax;
 
-/*
-=for apidoc Am|PADOFFSET|pad_add_name_pvs|"name"|U32 flags|HV *typestash|HV *ourstash
-
-Exactly like L</pad_add_name_pvn>, but takes a literal string
-instead of a string/length pair.
-
-=cut
-*/
-
 #define pad_add_name_pvs(name,flags,typestash,ourstash) \
     Perl_pad_add_name_pvn(aTHX_ STR_WITH_LEN(name), flags, typestash, ourstash)
 
