@@ -537,10 +537,29 @@ S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 }
 
 /*
-=for apidoc sortsv_flags
 
-In-place sort an array of SV pointers with the given comparison routine,
-with various SORTf_* flag options.
+=for apidoc      sortsv
+=for apidoc_item sortsv_flags
+
+These functions are currently identical; they perform an in-place mergesort of
+an array of SV pointers C<base> (length C<nmemb>) with the given comparison
+routine, C<cmp>, which should be declared as C<SVCOMPARE_t>.  It will be
+called as
+
+ ret = cmp(aTHX_ sv_a, sv_b)
+ if (ret < 0) {
+    // sv_a is first
+ }
+ else if (ret > 0) {
+    // sv_b is first
+ }
+ else {
+    // they compare equal
+ }
+
+C<flags> is currently ignored in C<sortsv_flags>.
+
+=for apidoc Ayh ||SVCOMPARE_t
 
 =cut
 */
@@ -661,18 +680,6 @@ sortsv_cmp_locale_desc(pTHX_ gptr *base, size_t nmemb, U32 flags)
 }
 
 #endif
-
-/*
-
-=for apidoc sortsv
-
-In-place sort an array of SV pointers with the given comparison routine.
-
-Currently this always uses mergesort.  See C<L</sortsv_flags>> for a more
-flexible routine.
-
-=cut
-*/
 
 void
 Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
