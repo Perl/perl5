@@ -387,11 +387,14 @@ TODO: {
 TODO: {
     local $::TODO = 'GH 21827';
     my $test = 18446744073709550592;
-    warnings_like(
-        sub { localtime $test },
-        [ (qr/localtime\($test\)/) x 2 ],
-        'localtime() warning reports correct value when given too large of a number; GH 21827'
-    );
+    my @warnings = capture_warnings(sub { localtime $test });
+    {
+        local $::TODO = 0;
+        is(scalar @warnings, 2, 'Correct number of warnings captured; GH 21827');
+    }
+    for my $w (@warnings) {
+        like($w, qr/localtime\($test\)/, 'localtime() warnings reports correct value when given too large of a number; GH 21827');
+    }
 }
 
 TODO: {
