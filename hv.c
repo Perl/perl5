@@ -3186,8 +3186,9 @@ Perl_hv_iterkeysv(pTHX_ HE *entry)
 /*
 =for apidoc hv_iterval
 
-Returns the value from the current position of the hash iterator.  See
-C<L</hv_iterkey>>.
+Returns the value from the current position of the hash iterator.
+
+Note that the return value isn't mortalized, unlike C<L</hv_iterkey>>.
 
 =cut
 */
