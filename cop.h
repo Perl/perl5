@@ -255,29 +255,40 @@ UTF-8ness of the octets.
                                       (flags & COPHH_KEY_UTF8))
 
 /*
-=for apidoc Amx|bool|cophh_exists_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
+=for apidoc  Amx|bool|cophh_exists_pv |const COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc_item|bool|cophh_exists_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
+=for apidoc_item|bool|cophh_exists_pvs|const COPHH *cophh|           "key"                      |U32 flags
+=for apidoc_item|bool|cophh_exists_sv |const COPHH *cophh|        SV *key              |U32 hash|U32 flags
 
-These look up the hint entry in the cop C<cop> with the key specified by
-C<key> (and C<keylen> in the C<pvn> form), returning true if a value exists,
-and false otherwise.
+These each look up the entry in the cop hints hash C<cophh> with the specified
+key, returning true if a value exists, and false otherwise.
 
-The forms differ in how the key is specified.
-In the plain C<pv> form, the key is a C language NUL-terminated string.
-In the C<pvs> form, the key is a C language string literal.
-In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
-the string, which hence, may contain embedded-NUL characters.
-In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
-using C<L</SvPV_const>>.
+You should probably be instead using the wrappers for these functions that take
+a C<COP*>, see L</cop_hints_exists_pv>.
+
+The forms here differ only in how the key is specified.
+
+In C<cophh_exists_pv>, C<key> is a C language NUL-terminated string.
+
+In C<cophh_exists_pvs>, C<key> is a C language string literal, enclosed in
+double quotes.
+
+In C<cophh_exists_pvn>, C<key> points to the first byte of the string
+specifying the key, and an additional parameter, C<keylen>, specifies its
+length in bytes.  Hence, C<key> may contain embedded-NUL characters.
+
+In C<cophh_exists_sv>, C<*key> is an SV, and the key is the PV extracted from
+that.  using C<L</SvPV_const>>.
 
 C<hash> is a precomputed hash of the key string, or zero if it has not been
-precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
-automatically at compile time.
+precomputed.  This parameter is omitted from C<cophh_exists_pvs>, which behaves
+as if zero had been specified.
 
 The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
-It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
-whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
-cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
-the octets.
+It is illegal to set this in C<cophh_exists_sv>.  In the C<pv*> forms, it
+specifies whether the key octets are interpreted as UTF-8 (if set) or as
+Latin-1 (if cleared).  The C<sv> form uses the underlying SV to determine the
+UTF-8ness of the octets.
 
 =cut
 */
