@@ -4162,7 +4162,8 @@ PERL_CALLCONV char *
 Perl_savesharedpvn(pTHX_ const char * const pv, const STRLEN len)
         __attribute__malloc__
         __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVESHAREDPVN
+#define PERL_ARGS_ASSERT_SAVESHAREDPVN          \
+        assert(pv)
 
 PERL_CALLCONV void
 Perl_savestack_grow(pTHX);

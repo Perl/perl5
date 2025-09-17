@@ -1359,10 +1359,10 @@ Perl_savesharedpv(pTHX_ const char *pv)
 char *
 Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {
-    char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
-
+    PERL_ARGS_ASSERT_SAVESHAREDPVN;
     PERL_UNUSED_CONTEXT;
-    /* PERL_ARGS_ASSERT_SAVESHAREDPVN; */
+
+    char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
 
     if (!newaddr) {
         croak_no_mem_ext(STR_WITH_LEN("util:savesharedpvn"));
