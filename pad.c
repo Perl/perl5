@@ -587,36 +587,39 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 /*
 =for apidoc      pad_add_name_pv
 =for apidoc_item pad_add_name_pvn
+=for apidoc_item m||pad_add_name_pvs
 =for apidoc_item pad_add_name_sv
 
-These each allocate a place in the currently-compiling pad for a named lexical
-variable.  They store the name and other metadata in the name part of the
-pad, and make preparations to manage the variable's lexical scoping.
-They return the offset of the allocated pad slot.
+These each allocate a place in the currently compiling pad for a named lexical
+variable.  They store the name and other metadata in the name part of the pad,
+and make preparations to manage the variable's lexical scoping, returning the
+the offset of the allocated pad slot.
 
 They differ only in how the input variable's name is specified.
+But in all forms, the variable name must include the leading sigil.
+
+In C<pad_add_name_pvs>, the name is a C language string literal, which must be encoded in UTF-8.
+
+In C<pad_add_name_pv>, the input name is a NUL-terminated string, which must be
+encoded in UTF-8.
+
+In C<pad_add_name_pvn>, C<namepv> points to the first byte of the name (which
+better be the sigil), and an additional parameter, C<namelen>, specifies its
+length in bytes.  Again, it must be encoded in UTF-8.
+
+In C<pad_add_name_sv>, C<name> is an SV, and the actual name is its PV,
+extracted using L</C<SvPVutf8>>.
 
 If C<typestash> is non-null, the name is for a typed lexical, and this
 identifies the type.  If C<ourstash> is non-null, it's a lexical reference
-to a package variable, and this identifies the package.  The following
-flags can be OR'ed together:
+to a package variable, and this identifies the package.
+
+The following flags can be OR'ed together:
 
  padadd_OUR          redundantly specifies if it's a package var
  padadd_STATE        variable will retain value persistently
  padadd_NO_DUP_CHECK skip check for lexical shadowing
  padadd_FIELD        specifies that the lexical is a field for a class
-
-In all forms, the variable name must include the leading sigil.
-
-In C<pad_add_name_sv>, the input name is taken from the SV parameter using
-C<L</SvPVutf8>()>.
-
-In C<pad_add_name_pv>, the input name is a NUL-terminated string, which must be
-encoded in UTF-8.
-
-In C<pad_add_name_pvn>, C<namelen> gives the length of the input name in bytes,
-which means it may contain embedded NUL characters.  Again, it must be encoded
-in UTF-8.
 
 =cut
 */
