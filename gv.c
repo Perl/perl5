@@ -2573,8 +2573,7 @@ for being a qualified one.
 In C<gv_fetchpv>, C<nambeg> is a C string, NUL-terminated with no intermediate
 NULs.
 
-In C<gv_fetchpvs>, C<name> is a literal C string, hence is enclosed in
-double quotes.
+In C<gv_fetchpvs>, C<name> is a literal C string, enclosed in double quotes.
 
 C<gv_fetchpvn> and C<gv_fetchpvn_flags> are identical.  In these, <nambeg> is
 a Perl string whose byte length is given by C<full_len>, and may contain
