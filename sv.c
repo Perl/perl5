@@ -8603,36 +8603,40 @@ S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache,
 
 /*
 =for apidoc      sv_eq
-=for apidoc_item sv_streq
 =for apidoc_item sv_eq_flags
+=for apidoc_item sv_streq
 =for apidoc_item sv_streq_flags
 =for apidoc_flag SV_SKIP_OVERLOAD
+=for apidoc_flag SV_GMAGIC
 
-These each return a boolean indicating if the strings in the two SV arguments
-are identical, coercing them to strings if necessary, basically behaving like
-the Perl code S<C<$sv1 eq $sv2>>.
+These each return a boolean indicating if the strings in the two SVs are
+equal, coercing the SV arguments to strings if necessary.  If
+S<C<'use bytes'>> is in effect, the comparison is byte-by-byte; otherwise
+character-by-character.
 
-A NULL SV is treated as C<undef>.
+C<sv_eq> and C<sv_streq> always perform 'get' magic; they effectively
+behave like the Perl code S<C<$sv1 eq $sv2>>.  The other two forms only
+perform 'get' magic only when the C<flags> parameter has the C<SV_GMAGIC> bit
+set.
 
-The comparison is character-by-character, based on the UTF8ness of each SV,
-unless S<C<use bytes>> is in effect, in which case the comparison is
-byte-by-byte.
+The differences between the C<streq> forms and the plain C<eq> forms are:
 
-C<sv_eq> and C<sv_streq> always perform 'get' magic.
-C<sv_eq_flags> and C<sv_streq_flags> perform 'get' magic only if C<flags> has
-the C<SV_GMAGIC> bit set.
+=over 4
 
-C<sv_eq> and C<sv_eq_flags> do not check for overloading, always using regular
-string comparison.
+=item overloading
 
-C<sv_streq> always checks for, and if present, handles C<eq> overloading.  If
-not present, regular string comparison is used instead.
+The plain C<eq> forms do not handle overloading; the C<streq> forms check for
+and handle C<eq> overloading, unless the call is to C<sv_streq_flags> with the
+C<SV_SKIP_OVERLOAD> bit set in C<flags>.  If such overloading does not exist
+or the flag is set, then regular string comparison will be used instead, just
+as in the plain C<eq> forms.
 
-C<sv_streq_flags> normally checks for, and if present, handles C<eq>
-overloading, but setting the C<SV_SKIP_OVERLOAD> bit set in C<flags> causes it
-to use regular string comparison.
+=item treatment of a NULL SV parameter
 
-Otherwise, the functions behave identically.
+The plain C<eq> forms treat each NULL SV parameter as a zero length string;
+the C<streq> forms treat them as C<undef>
+
+=back
 
 =cut
 */
