@@ -513,9 +513,9 @@ S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 PERL_STATIC_INLINE int
 S_isFF_overlong(const U8 * const s, const STRLEN len)
 {
-    /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
-     * 'e' - 1 is an overlong beginning with \xFF.  It returns a positive
-     * number if it is; 0 if it isn't, and -1 if there isn't enough
+    /* Returns an int indicating whether or not the UTF-8 sequence of 'len'
+     * bytes starting at 's' is an overlong beginning with \xFF.  It returns a
+     * positive number if it is; 0 if it isn't, and -1 if there isn't enough
      * information to tell.  This last return value can happen if the sequence
      * is incomplete, missing some trailing bytes that would form a complete
      * character.  If there are enough bytes to make a definitive decision,
