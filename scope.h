@@ -163,7 +163,6 @@ scope has the given name. C<name> must be a literal string.
 #define SAVEI32(i)                  save_I32((I32*)&(i))
 #define SAVEINT(i)                  save_int((int*)&(i))
 #define SAVEIV(i)                   save_iv((IV*)&(i))
-#define SAVELONG(l)                 save_long((long*)&(l))
 #define SAVESTRLEN(l)               Perl_save_strlen(aTHX_ (STRLEN*)&(l))
 #define SAVEBOOL(b)                 save_bool(&(b))
 #define SAVESPTR(s)                 save_sptr((SV**)&(s))
