@@ -138,7 +138,7 @@ Note that there are both real and fake AVs; see the beginning of this file and
 =for apidoc_item newAV_alloc_xz
 
 These all create a new AV, setting the reference count to 1.  If you also know
-the initial elements of the array with, see L</C<av_make>>.
+the initial elements of the array, see L</C<av_make>>.
 
 As background, an array consists of three things:
 
