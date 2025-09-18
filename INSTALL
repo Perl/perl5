@@ -55,17 +55,46 @@ For information on what's new in this release, see the
 F<pod/perldelta.pod> file.  For more information about how to find more
 specific detail about changes, see the Changes file.
 
-=head1 DESCRIPTION
+=begin comment
+
+=head1 FORMAT OF THIS DOCUMENT
 
 This document is written in pod format as an easy way to indicate its
-structure.  The pod format is described in F<pod/perlpod.pod>, but you can
-read it as is with any pager or editor.  Headings and items are marked
-by lines beginning with '='.  The other mark-up used is
+structure.  On many systems, you can just type
 
-    B<text>     embolden text, used for switches, programs or commands
-    C<code>	literal code
-    L<name>     A link (cross reference) to name
+ perldoc INSTALL
+
+and get a nicely formatted version.  But if not, you can read it as is with any
+pager or editor.  If you are doing that, here are a few hints.  Lines that have
+an "=" in column 1 are commands to perldoc.  You've already seen lines like
+
+ =head1 NAME
+
+This makes a top level heading containing the word "NAME".  "=head2" would make
+a secondary-level heading, and so forth.  Other commands are
+
+ =over      increase indentation
+ =back      decrease indentation
+ =item      introduces an item in a list
+ =for       ignore these lines; they are directives to help various
+            tools, such as creating documentation cross referencing
+ =begin comment  ignore this line
+ =end comment    ignore this line
+
+The styling of text is changed by these in-line mark-up commands
+
+    B<text>     embolden "text", used for switches, programs or commands
+    C<code>     literal code
+    L<name>     A link (cross reference) to name; you may have to squint
+                hard to make out the name from other stuff
     F<file>     A filename
+    S<text>     "text" is output all on the same line
+
+More detail on pod format is given in F<pod/perlpod.pod>.
+
+=end comment
+
+=head1 DESCRIPTION
 
 Although most of the defaults are probably fine for most users,
 you should probably at least skim through this document before
