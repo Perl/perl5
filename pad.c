@@ -941,15 +941,15 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
     }
 }
 
-
 /*
 =for apidoc      pad_findmy_pv
 =for apidoc_item pad_findmy_pvn
 =for apidoc_item pad_findmy_pvs
 =for apidoc_item pad_findmy_sv
 
-Given the name of a lexical variable, including its leading sigil, find its
-position in the currently-compiling pad.
+Given the name of a lexical variable, including its leading sigil, these find
+its position in the currently compiling pad, returning that offset, or
+C<NOT_IN_PAD> if no such lexical is in scope.
 
 If it is not in the current pad but appears in the pad of any lexically
 enclosing scope, then a pseudo-entry for it is added in the current pad.
@@ -965,9 +965,10 @@ enclosed in double quotes.
 In plain C<pad_findmy_pv>, the variable name is a C language NUL-terminated
 string.
 
-In C<pad_findmy_pvn>, C<namelen> gives the length of the variable name in bytes,
-so it may contain embedded-NUL characters.  The caller must make sure C<namepv>
-contains at least C<namelen> bytes.
+In C<pad_findmy_pvn>, C<namepv> points to the first byte of the name (which
+better be its sigil), and an additional parameter, C<namelen>, specifies its
+length in bytes.  Hence, C<namepv> may contain embedded-NUL characters.  The
+caller must make sure C<namepv> contains at least C<namelen> bytes.
 
 In C<pad_findmy_sv>, the variable name is taken from the SV parameter using
 C<L</SvPVutf8>()>.
