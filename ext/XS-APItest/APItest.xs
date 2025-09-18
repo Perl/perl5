@@ -1,3 +1,7 @@
+/*
+ * ex: set ts=8 sts=4 sw=4 et:
+ */
+
 #define PERL_IN_XS_APITEST
 
 /* We want to be able to test things that aren't API yet. */
