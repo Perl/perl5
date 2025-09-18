@@ -663,7 +663,7 @@
 :
 :   'y'  Typedef.  The element names a type rather than being a macro
 :
-:   '@'  This entry is for an array, as opposed to a function or macro, etc.
+:   '@'  The element names an array rather than being a macro or function.
 :
 :          autodoc.pl automatically suppresses any usage information.
 :
