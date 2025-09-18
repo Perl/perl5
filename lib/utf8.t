@@ -557,8 +557,8 @@ SKIP: {
 
 {
     fresh_perl_like ('use utf8; utf8::moo()',
-		     qr/Undefined subroutine utf8::moo/, {stderr=>1},
-		    "Check Carp is loaded for AUTOLOADing errors")
+		     qr/Undefined subroutine &utf8::moo/, {stderr=>1},
+		    "Check undefined subroutines error")
 }
 
 {
