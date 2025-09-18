@@ -3884,6 +3884,25 @@ test_coplabel()
         if (len != 4) croak("fail # cop_fetch_label len");
         if (!utf8) croak("fail # cop_fetch_label utf8");
 
+void
+test_cop_warnings(bool already_on)
+    PREINIT:
+        COP *cop = PL_curcop;
+    CODE:
+        if(cop_has_warning(cop, WARN_UNINITIALIZED) ^ already_on)
+            croak("fail # cop_has_warning initial state");
+
+        /* This code modfies PL_curcop which is normally quite rude, but we'll
+         * allow it during the test run.
+         */
+        cop_enable_warning(cop, WARN_UNINITIALIZED);
+        if (!cop_has_warning(cop, WARN_UNINITIALIZED))
+            croak("fail # cop_enable_warning did not enable");
+
+        cop_disable_warning(cop, WARN_UNINITIALIZED);
+        if (cop_has_warning(cop, WARN_UNINITIALIZED))
+            croak("fail # cop_disable_warning did not disable");
+
 
 HV *
 example_cophh_2hv()

@@ -495,9 +495,24 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 
 #define PERL_ARGS_ASSERT_CNTRL_TO_MNEMONIC
 
+PERL_CALLCONV void
+Perl_cop_disable_warning(pTHX_ COP *cop, int warn_bit);
+#define PERL_ARGS_ASSERT_COP_DISABLE_WARNING    \
+        assert(cop)
+
+PERL_CALLCONV void
+Perl_cop_enable_warning(pTHX_ COP *cop, int warn_bit);
+#define PERL_ARGS_ASSERT_COP_ENABLE_WARNING     \
+        assert(cop)
+
 PERL_CALLCONV const char *
 Perl_cop_fetch_label(pTHX_ COP * const cop, STRLEN *len, U32 *flags);
 #define PERL_ARGS_ASSERT_COP_FETCH_LABEL        \
+        assert(cop)
+
+PERL_CALLCONV bool
+Perl_cop_has_warning(pTHX_ const COP *cop, int warn_bit);
+#define PERL_ARGS_ASSERT_COP_HAS_WARNING        \
         assert(cop)
 
 PERL_CALLCONV void
