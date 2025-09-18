@@ -9070,6 +9070,105 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 }
 
 /*
+=for apidoc cop_has_warning
+
+Returns true if the set of warnings bits contained by (or implied by) the
+COP contains the given warning, as specified by one of the C<WARN_...>
+constants from F<warnings.h>.
+
+=cut
+*/
+
+bool
+Perl_cop_has_warning(pTHX_ const COP *cop, int warn_bit)
+{
+    PERL_ARGS_ASSERT_COP_HAS_WARNING;
+
+    const char *warning_bits = cop->cop_warnings;
+    if(warning_bits == pWARN_STD)
+        return (PL_dowarn & G_WARN_ON) ? true : PerlWarnIsSet_(WARN_DEFAULTstring, 2*warn_bit);
+    else if(warning_bits == pWARN_ALL)
+        return true;
+    else if(warning_bits == pWARN_NONE)
+        return false;
+    else
+        return isWARN_on(cop->cop_warnings, (STRLEN)warn_bit);
+}
+
+#define cop_inplace_expand_warning_bitmask(cop)  S_cop_inplace_expand_warning_bitmask(aTHX_ cop)
+STATIC void
+S_cop_inplace_expand_warning_bitmask(pTHX_ COP *cop)
+{
+    const char *warning_bits = cop->cop_warnings;
+
+    if(warning_bits == pWARN_STD)
+        warning_bits = (PL_dowarn & G_WARN_ON) ? WARN_ALLstring : WARN_DEFAULTstring;
+    else if(warning_bits == pWARN_ALL)
+        warning_bits = WARN_ALLstring;
+    else if(warning_bits == pWARN_NONE)
+        warning_bits = WARN_NONEstring;
+
+    /* Must allocate the new one before we throw the old buffer away */
+    char *new_warnings = Perl_new_warnings_bitfield(aTHX_ NULL, warning_bits, WARNsize);
+    free_and_set_cop_warnings(cop, new_warnings);
+}
+
+/*
+=for apidoc cop_enable_warning
+
+Ensures that the set of warning bits contained by the COP includes the given
+warning, as specified by one of the C<WARN_...> constants from F<warnings.h>.
+
+If the COP already includes the warning, no modification is made.  Otherwise,
+the stored warning bitmask is cloned, and the given warning bit is enabled
+within it.  The COP is modified in-place, and therefore this function is
+intended only for use during compiletime when the optree is being constructed.
+
+=cut
+*/
+
+void
+Perl_cop_enable_warning(pTHX_ COP *cop, int warn_bit)
+{
+    PERL_ARGS_ASSERT_COP_ENABLE_WARNING;
+
+    if(cop_has_warning(cop, warn_bit))
+        return;
+
+    cop_inplace_expand_warning_bitmask(cop);
+
+    cop->cop_warnings[Perl_Warn_Off_(2 * warn_bit)] |= Perl_Warn_Bit_(2 * warn_bit);
+}
+
+/*
+=for apidoc cop_disable_warning
+
+Ensures that the set of warning bits contained by the COP does not include the
+given warning, as specified by one of the C<WARN_...> constants from
+F<warnings.h>.
+
+If the COP does not include the warning, no modification is made.  Otherwise,
+the stored warning bitmask is cloned, and the given warning bit is disabled
+within it.  The COP is modified in-place, and therefore this function is
+intended only for use during compiletime when the optree is being constructed.
+
+=cut
+*/
+
+void
+Perl_cop_disable_warning(pTHX_ COP *cop, int warn_bit)
+{
+    PERL_ARGS_ASSERT_COP_DISABLE_WARNING;
+
+    if(!cop_has_warning(cop, warn_bit))
+        return;
+
+    cop_inplace_expand_warning_bitmask(cop);
+
+    cop->cop_warnings[Perl_Warn_Off_(2 * warn_bit)] &= ~Perl_Warn_Bit_(2 * warn_bit);
+}
+
+/*
 =for apidoc newLOGOP
 
 Constructs, checks, and returns a logical (flow control) op.  C<type>

@@ -167,7 +167,10 @@
 # define ck_warner_d(a,...)                     Perl_ck_warner_d(aTHX_ a,__VA_ARGS__)
 # define clear_defarray(a,b)                    Perl_clear_defarray(aTHX_ a,b)
 # define clear_defarray_simple(a)               Perl_clear_defarray_simple(aTHX_ a)
+# define cop_disable_warning(a,b)               Perl_cop_disable_warning(aTHX_ a,b)
+# define cop_enable_warning(a,b)                Perl_cop_enable_warning(aTHX_ a,b)
 # define cop_fetch_label(a,b,c)                 Perl_cop_fetch_label(aTHX_ a,b,c)
+# define cop_has_warning(a,b)                   Perl_cop_has_warning(aTHX_ a,b)
 # define cop_store_label(a,b,c,d)               Perl_cop_store_label(aTHX_ a,b,c,d)
 # define croak_memory_wrap                      Perl_croak_memory_wrap
 # define croak_no_modify                        Perl_croak_no_modify

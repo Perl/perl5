@@ -898,10 +898,18 @@ Rp	|OP *	|cmpchain_start |I32 type				\
 				|NULLOK OP *right
 ERTXp	|const char *|cntrl_to_mnemonic 				\
 				|const U8 c
+Adp	|void	|cop_disable_warning					\
+				|NN COP *cop				\
+				|int warn_bit
+Adp	|void	|cop_enable_warning					\
+				|NN COP *cop				\
+				|int warn_bit
 Adpx	|const char *|cop_fetch_label					\
 				|NN COP * const cop			\
 				|NULLOK STRLEN *len			\
 				|NULLOK U32 *flags
+Adp	|bool	|cop_has_warning|NN const COP *cop			\
+				|int warn_bit
 : Only used  in op.c and the perl compiler
 Adpx	|void	|cop_store_label|NN COP * const cop			\
 				|NN const char *label			\
