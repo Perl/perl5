@@ -18,6 +18,7 @@ my ($attrs, $ret) = ("", "");
 sub Q::MODIFY_CODE_ATTRIBUTES { my ($name, $ref, @attrs) = @_; $attrs = "@attrs";return;}
 $SIG{__WARN__} = sub { push @warnings, shift;};
 
+@warnings = ();
 $ret = eval 'package Q; sub A(bar) : prototype(bad) : dummy1 {} prototype \&A;';
 is $ret, "bad", "Prototype is set to \"bad\"";
 is $attrs, "dummy1", "MODIFY_CODE_ATTRIBUTES called, but not for prototype(..)";
@@ -27,20 +28,24 @@ like shift @warnings, qr/Illegal character in prototype for Q::A : bad/,
     "Second warning is bad prototype - bad";
 like shift @warnings, qr/Prototype \'bar\' overridden by attribute \'prototype\(bad\)\' in Q::A/,
     "Third warning is Prototype overridden";
-is @warnings, 0, "No more warnings";
+is @warnings, 0, "No more warnings"
+    or diag "Next warning: $warnings[0]";
 
 # The override warning should not be hidden by no warnings (similar to prototype changed warnings)
 {
     no warnings 'illegalproto';
+    @warnings = ();
     $ret = eval 'package Q; sub B(bar) : prototype(bad) dummy2 {4} prototype \&B;';
     is $ret, "bad", "Prototype is set to \"bad\"";
     is $attrs, "dummy2", "MODIFY_CODE_ATTRIBUTES called, but not for prototype(..)";
     like shift @warnings, qr/Prototype \'bar\' overridden by attribute \'prototype\(bad\)\' in Q::B/,
         "First warning is Prototype overridden";
-    is @warnings, 0, "No more warnings";
+    is @warnings, 0, "No more warnings"
+        or diag "Next warning: $warnings[0]";
 }
 
 # Redeclaring a sub with a prototype attribute ignores it
+@warnings = ();
 $ret = eval 'package Q; sub B(ignored) : prototype(baz) : dummy3; prototype \&B;';
 is $ret, "bad", "Declaring with prototype(..) after definition doesn't change the prototype";
 is $attrs, "dummy3", "MODIFY_CODE_ATTRIBUTES called, but not for prototype(..)";
@@ -52,9 +57,11 @@ like shift @warnings, qr/Prototype \'ignored\' overridden by attribute \'prototy
     "Shifting off Prototype overridden warning";
 like shift @warnings, qr/Prototype mismatch: sub Q::B \(bad\) vs \(baz\)/,
     "Attempting to redeclare triggers prototype mismatch warning against first prototype";
-is @warnings, 0, "No more warnings";
+is @warnings, 0, "No more warnings"
+    or diag "Next warning: $warnings[0]";
 
 # Confirm redifining with a prototype attribute takes it
+@warnings = ();
 $ret = eval 'package Q; sub B(ignored) : prototype(baz) dummy4 {5}; prototype \&B;';
 is $ret, "baz", "Redefining with prototype(..) changes the prototype";
 is $attrs, "dummy4", "MODIFY_CODE_ATTRIBUTES called, but not for prototype(..)";
@@ -69,29 +76,36 @@ like shift @warnings, qr/Prototype mismatch: sub Q::B \(bad\) vs \(baz\)/,
     "Attempting to redeclare triggers prototype mismatch warning";
 like shift @warnings, qr/Subroutine B redefined/,
     "Only other warning is subroutine redefinition";
-is @warnings, 0, "No more warnings";
+is @warnings, 0, "No more warnings"
+    or diag "Next warning: $warnings[0]";
 
 # Multiple prototype declarations only takes the last one
+@warnings = ();
 $ret = eval 'package Q; sub dummy6 : prototype($$) : prototype($$$) {}; prototype \&dummy6;';
 is $ret, "\$\$\$", "Last prototype declared wins";
 like shift @warnings, qr/Attribute prototype\(\$\$\$\) discards earlier prototype attribute in same sub/,
     "Multiple prototype declarations warns";
-is @warnings, 0, "No more warnings";
+is @warnings, 0, "No more warnings"
+    or diag "Next warning: $warnings[0]";
 
 # Use attributes
+@warnings = ();
 eval 'package Q; use attributes __PACKAGE__, \&B, "prototype(new)";';
 $ret = prototype \&Q::B;
 is $ret, "new", "use attributes also sets the prototype";
 like shift @warnings, qr/Prototype mismatch: sub Q::B \(baz\) vs \(new\)/,
     "Prototype mismatch warning triggered";
-is @warnings, 0, "No more warnings";
+is @warnings, 0, "No more warnings"
+    or diag "Next warning: $warnings[0]";
 
+@warnings = ();
 eval 'package Q; use attributes __PACKAGE__, \&B, "prototype(\$\$~";';
 $ret = prototype \&Q::B;
 is $ret, "new", "A malformed prototype doesn't reset it";
 like $@, qr/Unterminated attribute parameter in attribute list/, "Malformed prototype croaked";
 is @warnings, 0, "Malformed prototype isn't just a warning";
 
+@warnings = ();
 eval 'use attributes __PACKAGE__, \&foo, "prototype($$\x{100}";';
 $ret = prototype \&Q::B;
 is $ret, "new", "A malformed prototype doesn't reset it";
@@ -114,7 +128,8 @@ is @warnings, 0, "Malformed prototype isn't just a warning";
         "(anon) baz triggers illegal proto warnings";
     like shift @warnings, qr/Prototype \'bar\' overridden by attribute \'prototype\(baz\)\' in Q::__ANON__/,
         "(anon) overridden warning triggered in anonymous sub";
-    is @warnings, 0, "No more warnings";
+    is @warnings, 0, "No more warnings"
+        or diag "Next warning: $warnings[0]";
 }
 
 # Testing lexical subs
@@ -129,7 +144,8 @@ is @warnings, 0, "Malformed prototype isn't just a warning";
         "(lexical) baz triggers illegal proto warnings";
     like shift @warnings, qr/Prototype \'bar\' overridden by attribute \'prototype\(baz\)\' in lexsub1/,
         "(lexical) overridden warning triggered in anonymous sub";
-    is @warnings, 0, "No more warnings";
+    is @warnings, 0, "No more warnings"
+        or diag "Next warning: $warnings[0]";
 }
 
 # ex: set ts=8 sts=4 sw=4 et:
