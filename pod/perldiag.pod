@@ -5501,8 +5501,8 @@ You probably wrote something like this:
         another
     );
 
-expecting to get a two elements list containing the strings C<'a string'>
-and C<'another'>.  Instead the list will hold four elements: C<'a\'>
+expecting to get a two element list containing the strings C<'a string'>
+and C<'another'>.  Instead the list will hold three elements: C<'a\'>
 (with a literal backslash), C<'string'> and C<'another'>.
 
 If you really want whitespace in your strings, build your list the
