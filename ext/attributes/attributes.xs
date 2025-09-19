@@ -252,29 +252,6 @@ usage:
 
     SvSETMAGIC(TARG);
     XSRETURN(1);
-
-void
-reftype(...)
-  PROTOTYPE: $
-  PREINIT:
-    SV *rv, *sv;
-    dXSTARG;
-  PPCODE:
-    if (items != 1) {
-usage:
-	croak_xs_usage(cv, "$reference");
-    }
-
-    rv = ST(0);
-    ST(0) = TARG;
-    SvGETMAGIC(rv);
-    if (!(SvOK(rv) && SvROK(rv)))
-	goto usage;
-    sv = SvRV(rv);
-    sv_setpv(TARG, sv_reftype(sv, 0));
-    SvSETMAGIC(TARG);
-
-    XSRETURN(1);
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

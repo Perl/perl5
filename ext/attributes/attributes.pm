@@ -1,12 +1,14 @@
-package attributes;
+package attributes 0.37;
 
-our $VERSION = 0.36;
+use v5.40;
 
-@EXPORT_OK = qw(get reftype);
-@EXPORT = ();
-%EXPORT_TAGS = (ALL => [@EXPORT, @EXPORT_OK]);
+our @EXPORT_OK = qw(get reftype);
+our @EXPORT = ();
+our %EXPORT_TAGS = (ALL => [@EXPORT, @EXPORT_OK]);
 
-use strict;
+# Older versions of this module provided a `reftype` in attributes.xs, and
+# there may exist code out there that relies on being able to find it.
+*reftype = \&builtin::reftype;
 
 sub croak {
     require Carp;
@@ -28,27 +30,24 @@ my %msg = (
     const  => 'Useless use of attribute "const"',
 );
 
-sub _modify_attrs_and_deprecate {
-    my $svtype = shift;
+my sub modify_attrs_and_deprecate ($svtype, @args) {
     # After we've removed a deprecated attribute from the XS code, we need to
     # remove it here, else it ends up in @badattrs. (If we do the deprecation in
     # XS, we can't control the warning based on *our* caller's lexical settings,
     # and the warned line is in this package)
     grep {
 	$deprecated{$svtype} && /$deprecated{$svtype}/ ? do {
-	    require warnings;
 	    warnings::warnif('deprecated', "Attribute \"$1\" is deprecated, " .
                                            "and will disappear in Perl 5.28");
 	    0;
 	} : $svtype eq 'CODE' && exists $msg{$_} ? do {
-	    require warnings;
 	    warnings::warnif(
 		'misc',
 		 $msg{$_}
 	    );
 	    0;
 	} : 1
-    } _modify_attrs(@_);
+    } _modify_attrs(@args);
 }
 
 sub import {
@@ -64,7 +63,7 @@ sub import {
 	if defined $home_stash && $home_stash ne '';
     my @badattrs;
     if ($pkgmeth) {
-	my @pkgattrs = _modify_attrs_and_deprecate($svtype, $svref, @attrs);
+	my @pkgattrs = modify_attrs_and_deprecate($svtype, $svref, @attrs);
 	@badattrs = $pkgmeth->($home_stash, $svref, @pkgattrs);
 	if (!@badattrs && @pkgattrs) {
             require warnings;
@@ -82,7 +81,7 @@ sub import {
 	}
     }
     else {
-	@badattrs = _modify_attrs_and_deprecate($svtype, $svref, @attrs);
+	@badattrs = modify_attrs_and_deprecate($svtype, $svref, @attrs);
     }
     if (@badattrs) {
 	croak "Invalid $svtype attribute" .
@@ -92,13 +91,11 @@ sub import {
     }
 }
 
-sub get ($) {
-    @_ == 1  && ref $_[0] or
+sub get :prototype($) ($svref) {
+    ref $svref or
 	croak 'Usage: '.__PACKAGE__.'::get $ref';
-    my $svref = shift;
     my $svtype = uc reftype($svref);
-    my $stash = _guess_stash($svref);
-    $stash = caller unless defined $stash;
+    my $stash = _guess_stash($svref) // scalar caller;
     my $pkgmeth;
     $pkgmeth = UNIVERSAL::can($stash, "FETCH_${svtype}_ATTRIBUTES")
 	if defined $stash && $stash ne '';
@@ -113,7 +110,6 @@ sub require_version { goto &UNIVERSAL::VERSION }
 require XSLoader;
 XSLoader::load();
 
-1;
 __END__
 #The POD goes here
 
@@ -295,9 +291,11 @@ Otherwise, only L<built-in attributes|"Built-in Attributes"> will be returned.
 
 =item reftype
 
-This routine expects a single parameter--a reference to a subroutine or
-variable.  It returns the built-in type of the referenced variable,
-ignoring any package into which it might have been blessed.
+This is an alias to L<builtin::reftype|builtin/reftype>.  It is maintained
+here for backward compatibility for any code that expected to be able to call
+it from this module.  Newly-written code should use the function from the
+L<builtin> module directly.
+
 This can be useful for determining the I<type> value which forms part of
 the method names described in L<"Package-specific Attribute Handling"> below.
 
