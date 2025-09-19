@@ -1,16 +1,13 @@
-package utf8;
+package utf8 1.29;
 
 # This file only defines the import/unimport subs, the rest are implemented by
 # always-present functions in the perl interpreter itself.
 # See also `universal.c` in the perl source
 
-use strict;
-use warnings;
+use v5.40;
 
 our $utf8_hint_bits  = 0x00800000;
 our $ascii_hint_bits = 0x00000010;  # Turned off when utf8 turned on
-
-our $VERSION = '1.28';
 
 sub import {
     $^H |= $utf8_hint_bits;
@@ -21,7 +18,6 @@ sub unimport {
     $^H &= ~$utf8_hint_bits;
 }
 
-1;
 __END__
 
 =head1 NAME
