@@ -73,12 +73,18 @@ while(<$kh>) {
 
       inlinable_ok($word, $args_for{$word} || join ",", map "\$$_", 1..$numargs);
 
-      next if $word eq "__CLASS__";
-
       # High-precedence tests
       my $hpcode;
       if (!$proto && defined $proto) { # nullary
-         $hpcode = "sub { () = my$word + 1 }";
+         if ($word eq '__CLASS__') {
+           $hpcode = <<~_EOT_;
+             use feature 'class';
+             no warnings 'experimental::class';
+             class TmpClassA { method { () = ::my$word + 1 } }
+             _EOT_
+         } else {
+           $hpcode = "sub { () = my$word + 1 }";
+         }
       }
       elsif ($proto =~ /^;?$protochar\z/) { # unary
          $hpcode = "sub { () = my$word "
@@ -91,7 +97,7 @@ while(<$kh>) {
          # ‘(eval 21)’ vs ‘(eval 22)’.
          no warnings 'numeric';
          my $core = op_list(eval $hpcode =~ s/my/CORE::/r or die);
-         my $my   = op_list(eval $hpcode or die);
+         my $my   = op_list(eval $hpcode =~ s/TmpClassA/TmpClassB/r or die);
          is $my, $core, "precedence of CORE::$word without parens";
       }
 
@@ -104,7 +110,7 @@ while(<$kh>) {
 
       $tests ++;
       my $code =
-         "sub { () = (my$word("
+         "() = (my$word("
              . (
                 $args_for{$word}
                  ? $args_for{$word}.',$7'
@@ -114,7 +120,17 @@ while(<$kh>) {
                        : 0
                    )
                )
-       . "))}";
+       . "))";
+      if ($word eq '__CLASS__') {
+         $code =~ s/\b(my$word)\b/::$1/g;
+         $code = <<~_EOT_;
+           use feature 'class';
+           no warnings 'experimental::class';
+           class TmpClassX { method { $code } }
+           _EOT_
+      } else {
+         $code = "sub { $code }";
+      }
       eval $code;
       my $desc = $desc{$word} || $word;
       like $@, qr/^Too many arguments for $desc/,

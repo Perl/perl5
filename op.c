@@ -16067,7 +16067,9 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 This function assigns the prototype of the named core function to C<sv>, or
 to a new mortal SV if C<sv> is C<NULL>.  It returns the modified C<sv>, or
 C<NULL> if the core function has no prototype.  C<code> is a code as returned
-by C<keyword()>.  It must not be equal to 0.
+by C<keyword()>.  It must not be equal to 0.  C<opnum> should be either C<NULL>
+or the address of a variable that will be set to the op number corresponding to
+C<name>, if any.
 
 =cut
 */
@@ -16106,13 +16108,14 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_values:  retsetpvs("\\[%@]", OP_VALUES);
     case KEY_each:    retsetpvs("\\[%@]", OP_EACH);
     case KEY_pos:     retsetpvs(";\\[$*]", OP_POS);
-    case KEY___CLASS__:
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
+        /* special case:
+           0 means "no actual op, but can be emulated using caller()"
+        */
         retsetpvs("", 0);
-    case KEY_evalbytes:
-        name = "entereval"; break;
-    case KEY_readpipe:
-        name = "backtick";
+    case KEY_evalbytes: name = "entereval"; break;
+    case KEY_readpipe:  name = "backtick"; break;
+    case KEY___CLASS__: name = "classname"; break;
     }
 
 #undef retsetpvs
@@ -16179,14 +16182,26 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
     PERL_ARGS_ASSERT_CORESUB_OP;
 
     switch(opnum) {
-    case 0:
-        return op_append_elem(OP_LINESEQ,
-                       argop,
-                       newSLICEOP(0,
-                                  newSVOP(OP_CONST, 0, newSViv(-code % 3)),
-                                  newOP(OP_CALLER,0)
-                       )
-               );
+    case 0: {
+        IV caller_index = IV_MAX;
+        switch (-code) {
+            case KEY___PACKAGE__: caller_index = 0; break;
+            case KEY___FILE__:    caller_index = 1; break;
+            case KEY___LINE__:    caller_index = 2; break;
+        }
+        assert(caller_index < IV_MAX);
+
+        return op_append_elem(
+            OP_LINESEQ,
+            argop,
+            newSLICEOP(
+                0,
+                newSVOP(OP_CONST, 0, newSViv(caller_index)),
+                newOP(OP_CALLER, 0)
+            )
+        );
+    }
+
     case OP_EACH:
     case OP_KEYS:
     case OP_VALUES:
