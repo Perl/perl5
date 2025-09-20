@@ -6964,7 +6964,7 @@ EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
  *        Continuation bytes BE and BF are illegal (non-characters); the other
  *        continuations transition to N0.
  * 1      Reject.  All transitions not mentioned above (except the single
- *        byte ones (as they are always legal) are to this state.
+ *        byte ones (as they are always legal)) are to this state.
  */
 
 #      undef N0
