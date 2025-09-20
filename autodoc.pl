@@ -2311,7 +2311,8 @@ sub output ($destpod) {  # Output a complete pod file
             delete $section_info->{X_tags};
         }
 
-        if ($podname eq $api) {
+        my $has_entries = $section_info && keys $section_info->%*;
+        if ($has_entries) {
             print $fh "\n", $valid_sections{$section_name}{header}, "\n"
                  if defined $valid_sections{$section_name}{header};
 
@@ -2323,7 +2324,7 @@ sub output ($destpod) {  # Output a complete pod file
             }
         }
 
-        if (! $section_info || ! keys $section_info->%*) {
+        if (! $has_entries) {
             my $pod_type = ($podname eq $api) ? "public" : "internal";
             print $fh "\nThere are currently no $pod_type API items in ",
                       $section_name, "\n";
