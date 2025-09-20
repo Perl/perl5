@@ -5552,8 +5552,8 @@ EXTCONST int         PL_sig_num[];
  * fold, so that 'a' maps to 'A' and 'A' maps to 'a', ignoring more complicated
  * folds such as outside the range or to multiple characters. */
 
-#ifdef DOINIT
-#  ifndef EBCDIC
+#ifndef EBCDIC
+#  ifdef DOINIT
 
 /* The EBCDIC fold table depends on the code page, and hence is found in
  * ebcdic_tables.h */
@@ -5717,15 +5717,13 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
         240-32,	241-32,	242-32,	243-32,	244-32,	245-32,	246-32,	247,
         248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,	255
 };
-#  endif  /* !EBCDIC, but still in DOINIT */
-#else	/* ! DOINIT */
-#  ifndef EBCDIC
+#  else	/* ! DOINIT */
 EXTCONST unsigned char PL_fold[];
 EXTCONST unsigned char PL_fold_latin1[];
 EXTCONST unsigned char PL_mod_latin1_uc[];
 EXTCONST unsigned char PL_latin1_lc[];
-#   endif
-#endif
+#  endif
+#endif /* ! EBCDIC */
 
 /* Although only used for debugging, these constants must be available in
  * non-debugging builds too, since they're used in ext/re/re_exec.c,
