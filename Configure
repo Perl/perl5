@@ -24228,8 +24228,41 @@ set i_stdbool
 eval $setvar
 
 : see if C23 stdckdint is available
-set stdckdint.h i_stdckdint
-eval $inhdr
+: we want a real compile instead of Inhdr because some FreeBSD systems
+: have stdckdint.h, but it is not compatible with C++.
+case "$i_stdckdint" in
+'')
+    echo " "
+    $cat >try.c <<EOCP
+#include <stdio.h>
+#include <stdckdint.h>
+int func(long *resultptr, long a, long b)
+{
+    return (ckd_add(resultptr, a, b) ||
+	    ckd_sub(resultptr, a, b) ||
+	    ckd_mul(resultptr, a, b)) ? 1 : 0;
+}
+int main(int argc, char **argv)
+{
+    long result;
+    return func(&result, 42L, 53L);
+}
+EOCP
+    set try
+    if eval $compile; then
+	echo "<stdckdint.h> found." >&4
+	val="$define"
+    else
+	echo "<stdckdint.h> NOT found." >&4
+	val="$undef"
+    fi ;;
+*)
+    val="$i_stdckdint" ;;
+esac
+
+$rm_try
+set i_stdckdint
+eval $setvar
 
 : see if stdint is available
 set stdint.h i_stdint
