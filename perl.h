@@ -5553,12 +5553,11 @@ EXTCONST int         PL_sig_num[];
  * folds such as outside the range or to multiple characters. */
 
 #ifndef EBCDIC
-#  ifdef DOINIT
 
 /* The EBCDIC fold table depends on the code page, and hence is found in
  * ebcdic_tables.h */
 
-EXTCONST  unsigned char PL_fold[] = {
+EXTCONST  unsigned char PL_fold[]  INIT({
         0,	1,	2,	3,	4,	5,	6,	7,
         8,	9,	10,	11,	12,	13,	14,	15,
         16,	17,	18,	19,	20,	21,	22,	23,
@@ -5591,9 +5590,9 @@ EXTCONST  unsigned char PL_fold[] = {
         232,	233,	234,	235,	236,	237,	238,	239,
         240,	241,	242,	243,	244,	245,	246,	247,
         248,	249,	250,	251,	252,	253,	254,	255
-};
+});
 
-EXTCONST  unsigned char PL_fold_latin1[] = {
+EXTCONST  unsigned char PL_fold_latin1[]  INIT ({
     /* Full latin1 complement folding, except for three problematic code points:
      *	Micro sign (181 = 0xB5) and y with diaeresis (255 = 0xFF) have their
      *	fold complements outside the Latin1 range, so can't match something
@@ -5635,11 +5634,11 @@ EXTCONST  unsigned char PL_fold_latin1[] = {
         240-32,	241-32,	242-32,	243-32,	244-32,	245-32,	246-32,	247,
         248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,
         255 /* y with diaeresis */
-};
+});
 
 /* If these tables are accessed through ebcdic, the access will be converted to
  * latin1 first */
-EXTCONST  unsigned char PL_latin1_lc[] = {  /* lowercasing */
+EXTCONST  unsigned char PL_latin1_lc[]  INIT({  /* lowercasing */
         0,	1,	2,	3,	4,	5,	6,	7,
         8,	9,	10,	11,	12,	13,	14,	15,
         16,	17,	18,	19,	20,	21,	22,	23,
@@ -5672,7 +5671,9 @@ EXTCONST  unsigned char PL_latin1_lc[] = {  /* lowercasing */
         232,	233,	234,	235,	236,	237,	238,	239,
         240,	241,	242,	243,	244,	245,	246,	247,
         248,	249,	250,	251,	252,	253,	254,	255
-};
+});
+
+#  ifdef DOINIT
 
 /* upper and title case of latin1 characters, modified so that the three tricky
  * ones are mapped to 255 (which is one of the three) */
@@ -5718,10 +5719,7 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
         248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,	255
 };
 #  else	/* ! DOINIT */
-EXTCONST unsigned char PL_fold[];
-EXTCONST unsigned char PL_fold_latin1[];
 EXTCONST unsigned char PL_mod_latin1_uc[];
-EXTCONST unsigned char PL_latin1_lc[];
 #  endif
 #endif /* ! EBCDIC */
 
