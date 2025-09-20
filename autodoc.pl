@@ -198,6 +198,7 @@ my $filesystem_scn = 'Filesystem configuration values';
 my $filters_scn = 'Source Filters';
 my $floating_scn = 'Floating point';
 my $genconfig_scn = 'General Configuration';
+my $global_definitions_scn = 'Declaration and Initialization of Globals';
 my $globals_scn = 'Global Variables';
 my $GV_scn = 'GV Handling and Stashes';
 my $hook_scn = 'Hook manipulation';
@@ -373,6 +374,49 @@ my %valid_sections = (
             =back
             EOT
       },
+    $global_definitions_scn => {
+        header => <<~'EOT',
+            Global variables are defined and initialized in one place, but
+            referred to from multiple files.  They need to be defined and any
+            initialization done in that one place, but extern declarations
+            made for them in each file that may refer to them.  Note that
+            there is no harm in declaring a global and not using it.
+
+            Perl has a mechanism that allows both purposes to be served while
+            minimizing code duplication.  F<EXTERN.h> and F<INTERN.h> define
+            the same relatively few macros, but their definitions are
+            different.  In F<EXTERN.h>, the macros expand to
+            declarations of the globals as external to the file.  In
+            F<INTERN.h> they actually cause the space to be allocated and
+            possibly initialized.
+
+            Most files will follow this paradigm:
+
+                #include "EXTERN.h"
+                ...
+                #include "perl.h">
+
+            This causes every global symbol that is referred to in F<perl.h>
+            and every file it includes (which is nearly every top level Perl
+            header file) to be declared as external.
+
+            The very few files that define globals will instead do
+
+                #include "INTERN.h"
+                ...
+                #include "perl.h">
+                include the file
+
+            It doesn't work for a file to both define some globals and refer
+            to others as externs.  That is, you can only include one of
+            F<INTERN.h> and F<EXTERN.h>.
+
+            This section documents the macros that are defined in these two
+            header files.  F<perl.h> has many uses of them that can serve as
+            paradigms for you.
+            EOT
+        may_be_empty_in_perlapi => 1,
+      },
     $globals_scn => {},
     $GV_scn => {},
     $hook_scn => {},
@@ -475,6 +519,7 @@ my %initial_file_section = (
                             'gv.c' => $GV_scn,
                             'gv.h' => $GV_scn,
                             'hv.h' => $HV_scn,
+                            'INTERN.h' => $global_definitions_scn,
                             'locale.c' => $locale_scn,
                             'malloc.c' => $memory_scn,
                             'numeric.c' => $numeric_scn,

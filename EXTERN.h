@@ -8,13 +8,8 @@
  *
  */
 
-/*
- * EXT:  designates a global var which is defined in perl.h
- *
- * dEXT: designates a global var which is defined in another
- *       file, so we can't count on finding it in perl.h
- *       (this practice should be avoided).
- */
+/* These are documented in INTERN.h */
+
 #undef EXT
 #undef dEXT
 #undef EXTCONST
