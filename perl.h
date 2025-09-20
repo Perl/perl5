@@ -6307,13 +6307,12 @@ EXTCONST runops_proc_t PL_runops_dbg
 
 #include "mg_vtable.h"
 
+EXTCONST U8 PL_magic_data[256]
 #ifdef DOINIT
-EXTCONST U8 PL_magic_data[256] =
+=
 #  include "mg_data.h"
-;
-#else
-EXTCONST U8 PL_magic_data[256];
 #endif
+;
 
                         /* NL IV NV PV INV PI PN MG RX GV LV AV HV CV FM IO OBJ */
 EXTCONST bool
