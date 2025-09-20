@@ -1858,7 +1858,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             my $has_args = $flags !~ /n/;
             if (! $has_args) {
-                warn "$name: n flag without m"
+                warn "$name: n flag without m "
                    . where_from_string($item->{file}, $item->{line_num})
                                                         unless $flags =~ /m/;
 
