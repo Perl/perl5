@@ -5879,19 +5879,16 @@ enum perl_phase {
     PERL_PHASE_DESTRUCT		= 6
 };
 
-#ifdef DOINIT
-EXTCONST char *const PL_phase_names[] = {
-    "CONSTRUCT",
-    "START",
-    "CHECK",
-    "INIT",
-    "RUN",
-    "END",
-    "DESTRUCT"
-};
-#else
-EXTCONST char *const PL_phase_names[];
-#endif
+EXTCONST char *const PL_phase_names[]  INIT( {
+                                                "CONSTRUCT",
+                                                "START",
+                                                "CHECK",
+                                                "INIT",
+                                                "RUN",
+                                                "END",
+                                                "DESTRUCT"
+                                             }
+                                           );
 
 /*
 =for apidoc_section $utility
