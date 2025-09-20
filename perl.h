@@ -5725,26 +5725,23 @@ EXTCONST unsigned char PL_mod_latin1_uc[];
 /* Although only used for debugging, these constants must be available in
  * non-debugging builds too, since they're used in ext/re/re_exec.c,
  * which has DEBUGGING enabled always */
-#ifdef DOINIT
-EXTCONST char* const PL_block_type[] = {
-        "NULL",
-        "WHEN",
-        "BLOCK",
-        "GIVEN",
-        "LOOP_ARY",
-        "LOOP_LAZYSV",
-        "LOOP_LAZYIV",
-        "LOOP_LIST",
-        "LOOP_PLAIN",
-        "SUB",
-        "FORMAT",
-        "EVAL",
-        "SUBST",
-        "DEFER"
-};
-#else
-EXTCONST char* PL_block_type[];
-#endif
+EXTCONST char* const PL_block_type[]  INIT({
+                                                "NULL",
+                                                "WHEN",
+                                                "BLOCK",
+                                                "GIVEN",
+                                                "LOOP_ARY",
+                                                "LOOP_LAZYSV",
+                                                "LOOP_LAZYIV",
+                                                "LOOP_LIST",
+                                                "LOOP_PLAIN",
+                                                "SUB",
+                                                "FORMAT",
+                                                "EVAL",
+                                                "SUBST",
+                                                "DEFER"
+                                          }
+                                         );
 
 /* These are all the compile time options that affect binary compatibility.
    Other compile time options that are binary compatible are in perl.c
