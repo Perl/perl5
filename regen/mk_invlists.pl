@@ -348,13 +348,7 @@ sub start_charset_pound_if ($charset, $indent_level=undef) {
             $in_doinit = 1;
             print $fh <<EOF;
 
-#    ifndef DOINIT
-
-EXTCONST $declaration;
-
-#    else
-
-EXTCONST $declaration = {$comment
+EXTCONST $declaration  INIT( {$comment
 EOF
         }
     }
@@ -363,11 +357,12 @@ EOF
 
         # Close out a table started by output_table_header()
 
-        print $fh "};\n";
+        print $fh "}";
         if ($in_doinit) {
-            print $fh "\n#    endif  /* DOINIT */\n\n";
+            print $fh ")";
             $in_doinit = 0;
         }
+        print $fh ";\n";
     }
 } # End closure
 
