@@ -5539,14 +5539,13 @@ EXTCONST char PL_uudmap[256] =
 EXTCONST char PL_bitcount[256] =
 #  include "bitcount.h"
 ;
-EXTCONST char* const PL_sig_name[] = { SIG_NAME };
-EXTCONST int         PL_sig_num[]  = { SIG_NUM };
 #else
 EXTCONST char PL_uudmap[256];
 EXTCONST char PL_bitcount[256];
-EXTCONST char* const PL_sig_name[];
-EXTCONST int         PL_sig_num[];
 #endif
+
+EXTCONST char* const PL_sig_name[]  INIT( { SIG_NAME } );
+EXTCONST int         PL_sig_num[]   INIT( { SIG_NUM } );
 
 /* fast conversion and case folding tables.  The folding tables complement the
  * fold, so that 'a' maps to 'A' and 'A' maps to 'a', ignoring more complicated
