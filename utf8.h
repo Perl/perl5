@@ -235,10 +235,7 @@ For details, see the description for L<perlapi/uv_to_utf8_flags>.
 
 START_EXTERN_C
 
-#  ifndef DOINIT
-EXTCONST unsigned char PL_utf8skip[];
-#  else
-EXTCONST unsigned char PL_utf8skip[] = {
+EXTCONST unsigned char PL_utf8skip[] INIT( {
 /* 0x00 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
 /* 0x10 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
 /* 0x20 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
@@ -260,8 +257,7 @@ EXTCONST unsigned char PL_utf8skip[] = {
 /* 0xFE */                             7,
            /* More extended, Up to 72 bits (64-bit + reserved) */
 /* 0xFF */                               ASCII_PLATFORM_UTF8_MAXBYTES
-};
-#  endif
+});
 
 END_EXTERN_C
 
