@@ -59,17 +59,11 @@ sub output_table_start($$$;$) {
     # Anything locale related will be written on
     my $const = ($name !~ /locale/i) ? 'CONST' : "";
 
-    my $declaration = "EXT$const $TYPE $name\[$size\]";
-    print $out_fh <<EOF;
-#  ifndef DOINIT
-    $declaration;
-#  else
-    $declaration = {
-EOF
+    print $out_fh "EXT$const $TYPE $name\[$size\]  INIT({\n"
 }
 
 sub output_table_end($) {
-    print $out_fh "};\n#  endif\n\n";
+    print $out_fh "});\n\n";
 }
 
 sub output_table ($$;$) {
