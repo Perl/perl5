@@ -572,6 +572,7 @@ sub check_and_add_proto_defn {
 
     $flags .= "m" if $flags =~ /M/;
     $flags .= "U" if $flags =~ /@/;     # No usage output for @arrays
+    $flags .= "n" if $flags =~ /#/;    # No threads, arguments for #ifdef
 
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
@@ -1858,9 +1859,9 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             my $has_args = $flags !~ /n/;
             if (! $has_args) {
-                warn "$name: n flag without m "
+                warn "$name: n flag without [m#] "
                    . where_from_string($item->{file}, $item->{line_num})
-                                                        unless $flags =~ /m/;
+                                                        unless $flags =~ /[m#]/;
 
                 if ($item->{args} && $item->{args}->@*) {
                     warn "$name: n flag but apparently has args"
