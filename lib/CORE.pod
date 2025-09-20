@@ -32,9 +32,7 @@ CORE package, but is part of Perl's syntax.
 
 For many Perl functions, the CORE package contains real subroutines.  This
 feature is new in Perl 5.16.  You can take references to these and make
-aliases.  However, some can only be called as barewords; i.e., you cannot
-use ampersand syntax (C<&foo>) or call them through references.  See the
-C<shove> example above.  These subroutines exist for all keywords except the following:
+aliases.  These subroutines exist for all keywords except the following:
 
 C<__DATA__>, C<__END__>, C<and>, C<cmp>, C<default>, C<do>, C<dump>,
 C<else>, C<elsif>, C<eq>, C<eval>, C<for>, C<foreach>, C<format>, C<ge>,
@@ -44,13 +42,15 @@ C<print>, C<printf>, C<q>, C<qq>, C<qr>, C<qw>, C<qx>, C<redo>, C<require>,
 C<return>, C<s>, C<say>, C<sort>, C<state>, C<sub>, C<tr>, C<unless>,
 C<until>, C<use>, C<when>, C<while>, C<x>, C<xor>, C<y>
 
-Calling with
-ampersand syntax and through references does not work for the following
-functions, as they have special syntax that cannot always be translated
-into a simple list (e.g., C<eof> vs C<eof()>):
+However, some CORE subroutines can only be aliased and called as barewords;
+i.e., you cannot use ampersand syntax (C<&foo>) or call them through
+references.  See the C<shove> example above.  These are:
 
-C<chomp>, C<chop>, C<defined>, C<delete>, C<eof>, C<exec>,
+C<__CLASS__>, C<chomp>, C<chop>, C<defined>, C<delete>, C<eof>, C<exec>,
 C<exists>, C<lstat>, C<split>, C<stat>, C<system>, C<truncate>, C<unlink>
+
+This is because they have special syntax that cannot always be translated
+into a simple list (e.g., C<eof> vs C<eof()>) or other special behavior.
 
 =head1 OVERRIDING CORE FUNCTIONS
 
