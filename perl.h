@@ -6554,10 +6554,9 @@ SOFTWARE.
 
 */
 
-#  ifdef DOINIT
-#    if 0       /* This is the original table given in
+#  if 0       /* This is the original table given in
                    https://bjoern.hoehrmann.de/utf-8/decoder/dfa/ */
-static U8 utf8d_C9[] = {
+static U8 utf8d_C9[]  INIT( {
   /* The first part of the table maps bytes to character classes that
    * to reduce the size of the transition table and create bitmasks. */
    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /*-1F*/
@@ -6576,9 +6575,10 @@ static U8 utf8d_C9[] = {
   12,12,12,12,12,12,12,24,12,12,12,12, 12,24,12,12,12,12,12,12,12,24,12,12,
   12,12,12,12,12,12,12,36,12,36,12,12, 12,36,12,12,12,12,12,36,12,36,12,12,
   12,36,12,12,12,12,12,12,12,12,12,12
-};
+});
 
-#    endif
+#  endif
+#  ifdef DOINIT
 
 /* This is a version of the above table customized for Perl that doesn't
  * exclude surrogates and accepts start bytes up through FD (FE on 64-bit
