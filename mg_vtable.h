@@ -103,8 +103,7 @@ enum {		/* pass one of these to get_vtbl */
     magic_vtable_max
 };
 
-#ifdef DOINIT
-EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
+EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] INIT( {
     "arylen",
     "arylen_p",
     "backref",
@@ -141,10 +140,7 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     "utf8",
     "uvar",
     "vec"
-};
-#else
-EXTCONST char * const PL_magic_vtable_names[magic_vtable_max];
-#endif
+});
 
 /* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
  * pointer to data, whereas we're assigning pointers to functions, which are
