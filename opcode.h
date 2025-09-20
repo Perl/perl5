@@ -2473,25 +2473,12 @@ END_EXTERN_C
 #define OPpCONST_TOKEN_PACKAGE  0xc0
 START_EXTERN_C
 
-#ifndef DOINIT
-
-/* data about the flags in op_private */
-
-EXTCONST I16  PL_op_private_bitdef_ix[];
-EXTCONST U16  PL_op_private_bitdefs[];
-EXTCONST char PL_op_private_labels[];
-EXTCONST I16  PL_op_private_bitfields[];
-EXTCONST U8   PL_op_private_valid[];
-
-#else
-
-
 /* PL_op_private_labels[]: the short descriptions of private flags.
  * All labels are concatenated into a single char array
  * (separated by \0's) for compactness.
  */
 
-EXTCONST char PL_op_private_labels[] = {
+EXTCONST char PL_op_private_labels[] INIT( {
     '$','M','O','D','\0',
     '+','1','\0',
     '-','\0',
@@ -2606,7 +2593,7 @@ EXTCONST char PL_op_private_labels[] = {
     'o','f','f','s','e','t','\0',
     'r','a','n','g','e','\0',
 
-};
+});
 
 
 
@@ -2620,7 +2607,7 @@ EXTCONST char PL_op_private_labels[] = {
  *    -1
  */
 
-EXTCONST I16 PL_op_private_bitfields[] = {
+EXTCONST I16 PL_op_private_bitfields[] INIT( {
     0, 8, -1,
     0, 8, -1,
     0, 727, 1, 554, 2, 71, 3, 298, -1,
@@ -2634,13 +2621,13 @@ EXTCONST I16 PL_op_private_bitfields[] = {
     4, -1, 0, 706, 1, 39, 2, 324, 3, 131, -1,
     6, 721, 1, 463, 2, 246, 3, 596, -1,
 
-};
+});
 
 
 /* PL_op_private_bitdef_ix[]: map an op number to a starting position
  * in PL_op_private_bitdefs.  If -1, the op has no bits defined */
 
-EXTCONST I16  PL_op_private_bitdef_ix[] = {
+EXTCONST I16  PL_op_private_bitdef_ix[]  INIT( {
       -1, /* null */
       -1, /* stub */
        0, /* scalar */
@@ -3071,7 +3058,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      194, /* paramtest */
        0, /* paramstore */
 
-};
+});
 
 
 
@@ -3087,7 +3074,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  *              into PL_op_private_bitfields[] (for a bit field)
  */
 
-EXTCONST U16  PL_op_private_bitdefs[] = {
+EXTCONST U16  PL_op_private_bitdefs[] INIT( {
     0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, anywhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted, multiparam, paramstore */
     0x3cfc, 0x54f9, /* pushmark */
     0x00bd, /* wantarray, runcv */
@@ -3172,13 +3159,13 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x301c, 0x4fd8, 0x0003, /* methstart */
     0x3308, 0x3164, 0x0003, /* initfield */
 
-};
+});
 
 
 /* PL_op_private_valid: for each op, indexed by op_type, indicate which
  * flags bits in op_private are legal */
 
-EXTCONST U8 PL_op_private_valid[] = {
+EXTCONST U8 PL_op_private_valid[] INIT( {
     /* NULL       */ (0xff),
     /* STUB       */ (0),
     /* SCALAR     */ (OPpARG1_MASK),
@@ -3609,9 +3596,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* PARAMTEST  */ (OPpARG1_MASK|OPpPARAM_IF_FALSE|OPpPARAM_IF_UNDEF),
     /* PARAMSTORE */ (OPpARG1_MASK),
 
-};
-
-#endif /* !DOINIT */
+});
 
 END_EXTERN_C
 
