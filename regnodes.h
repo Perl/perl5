@@ -1592,10 +1592,7 @@ typedef struct regnode                           tregnode_WHILEM;
 
 /* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST char * PL_regnode_name[];
-#else
-EXTCONST char * const PL_regnode_name[] = {
+EXTCONST char * const PL_regnode_name[]  INIT( {
 	"END",                   	/* 0000 */
 	"SUCCEED",               	/* 0x01 */
 	"SBOL",                  	/* 0x02 */
@@ -1751,16 +1748,12 @@ EXTCONST char * const PL_regnode_name[] = {
 	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
 	"REF_next",              	/* REGNODE_MAX +0x29 */
 	"REF_next_fail",         	/* REGNODE_MAX +0x2a */
-};
-#endif /* DOINIT */
+});
 
 
 /* PL_regnode_info[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST struct regnode_meta PL_regnode_info[];
-#else
-EXTCONST struct regnode_meta PL_regnode_info[] = {
+EXTCONST struct regnode_meta PL_regnode_info[]  INIT( {
     {
         /* #0 op END */
         .type = END,
@@ -2839,15 +2832,11 @@ EXTCONST struct regnode_meta PL_regnode_info[] = {
         .arg_len_varies = 0,
         .off_by_arg = 0
     }
-};
-#endif /* DOINIT */
+});
 
 /* PL_reg_extflags_name[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST char * PL_reg_extflags_name[];
-#else
-EXTCONST char * const PL_reg_extflags_name[] = {
+EXTCONST char * const PL_reg_extflags_name[] INIT( {
 	/* Bits in extflags defined: 11111111111111110000111111111111 */
 	"MULTILINE",        /* 0x00000001 */
 	"SINGLELINE",       /* 0x00000002 */
@@ -2881,8 +2870,7 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"SKIPWHITE",        /* 0x20000000 */
 	"WHITE",            /* 0x40000000 */
 	"NULL",             /* 0x80000000 */
-};
-#endif /* DOINIT */
+});
 
 #ifdef DEBUGGING
 #  define REG_EXTFLAGS_NAME_SIZE 32
@@ -2890,10 +2878,7 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 
 /* PL_reg_intflags_name[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST char * PL_reg_intflags_name[];
-#else
-EXTCONST char * const PL_reg_intflags_name[] = {
+EXTCONST char * const PL_reg_intflags_name[]  INIT( {
 	"SKIP",                       /* (1<< 0) - 0x00000001 - PREGf_SKIP */
 	"IMPLICIT",                   /* (1<< 1) - 0x00000002 - PREGf_IMPLICIT -  Converted .* to ^.*  */
 	"NAUGHTY",                    /* (1<< 2) - 0x00000004 - PREGf_NAUGHTY -  how exponential is this pattern?  */
@@ -2909,8 +2894,7 @@ EXTCONST char * const PL_reg_intflags_name[] = {
 	"ANCH_GPOS",                  /* (1<<12) - 0x00001000 - PREGf_ANCH_GPOS */
 	"RECURSE_SEEN",               /* (1<<13) - 0x00002000 - PREGf_RECURSE_SEEN */
 	"PESSIMIZE_SEEN",             /* (1<<14) - 0x00004000 - PREGf_PESSIMIZE_SEEN */
-};
-#endif /* DOINIT */
+});
 
 #ifdef DEBUGGING
 #  define REG_INTFLAGS_NAME_SIZE 15
@@ -2919,47 +2903,25 @@ EXTCONST char * const PL_reg_intflags_name[] = {
 /* The following have no fixed length. U8 so we can do strchr() on it. */
 #define REGNODE_VARIES(node) (PL_varies_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
-#ifndef DOINIT
-EXTCONST U8 PL_varies[] __attribute__deprecated__;
-#else
-EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
-    CLUMP, BRANCH, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM, REF,
+EXTCONST U8 PL_varies[] __attribute__deprecated__
+INIT({ CLUMP, BRANCH, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM, REF,
     REFF, REFFL, REFFU, REFFA, REFN, REFFN, REFFLN, REFFUN, REFFAN,
     BRANCHJ, SUSPEND, IFTHEN,
-    0
-};
-#endif /* DOINIT */
+    0 });
 
-#ifndef DOINIT
-EXTCONST U8 PL_varies_bitmask[];
-#else
-EXTCONST U8 PL_varies_bitmask[] = {
-    0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x00, 0xC0, 0x1F, 0xFE, 0x97, 0x01, 0x00, 0x00
-};
-#endif /* DOINIT */
+EXTCONST U8 PL_varies_bitmask[] INIT({ 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x00, 0xC0, 0x1F, 0xFE, 0x97, 0x01, 0x00, 0x00 });
 
 /* The following always have a length of 1. U8 we can do strchr() on it. */
 /* (Note that length 1 means "one character" under UTF8, not "one octet".) */
 #define REGNODE_SIMPLE(node) (PL_simple_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
-#ifndef DOINIT
-EXTCONST U8 PL_simple[] __attribute__deprecated__;
-#else
-EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
-    REG_ANY, SANY, ANYOF, ANYOFD, ANYOFL, ANYOFPOSIXL, ANYOFH, ANYOFHb,
+EXTCONST U8 PL_simple[] __attribute__deprecated__
+INIT({ REG_ANY, SANY, ANYOF, ANYOFD, ANYOFL, ANYOFPOSIXL, ANYOFH, ANYOFHb,
     ANYOFHr, ANYOFHs, ANYOFR, ANYOFRb, ANYOFHbbm, ANYOFM, NANYOFM, POSIXD,
     POSIXL, POSIXU, POSIXA, NPOSIXD, NPOSIXL, NPOSIXU, NPOSIXA, REGEX_SET,
-    0
-};
-#endif /* DOINIT */
+    0 });
 
-#ifndef DOINIT
-EXTCONST U8 PL_simple_bitmask[];
-#else
-EXTCONST U8 PL_simple_bitmask[] = {
-    0x00, 0x00, 0xFF, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80
-};
-#endif /* DOINIT */
+EXTCONST U8 PL_simple_bitmask[] INIT({ 0x00, 0x00, 0xFF, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80 });
 
 /* Is 'op', known to be of type EXACT, folding? */
 #define isEXACTFish(op) (assert(REGNODE_TYPE(op) == EXACT), (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
@@ -2967,13 +2929,8 @@ EXTCONST U8 PL_simple_bitmask[] = {
 /* Do only UTF-8 target strings match 'op', known to be of type EXACT? */
 #define isEXACT_REQ8(op) (assert(REGNODE_TYPE(op) == EXACT), (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
 
-#ifndef DOINIT
-EXTCONST U32 PL_EXACTFish_bitmask;
-EXTCONST U32 PL_EXACT_REQ8_bitmask;
-#else
-EXTCONST U32 PL_EXACTFish_bitmask = 0x33F8;
-EXTCONST U32 PL_EXACT_REQ8_bitmask = 0x1E00;
-#endif /* DOINIT */
+EXTCONST U32 PL_EXACTFish_bitmask INIT(0x33F8);
+EXTCONST U32 PL_EXACT_REQ8_bitmask INIT(0x1E00);
 
 #endif /* defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
 
