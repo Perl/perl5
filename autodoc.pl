@@ -2297,10 +2297,14 @@ sub output ($destpod) {  # Output a complete pod file
     for my $section_name (sort dictionary_order keys %valid_sections) {
         my $section_info = $dochash->{$section_name};
 
-        # We allow empty sections in perlintern.
-        if (! $section_info && $podname eq $api) {
-            warn "Empty section '$section_name' for $podname; skipped";
-            next;
+        if (! $section_info) {
+            # We always allow empty sections in perlintern.
+            if (   $podname eq $api
+                && ! $valid_sections{$section_name}{may_be_empty_in_perlapi})
+            {
+                warn "Empty section '$section_name' for $podname; skipped";
+                next;
+            }
         }
 
         print $fh "\n=head1 $section_name\n";
