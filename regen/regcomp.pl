@@ -256,21 +256,10 @@ sub process_flags {
     return $comment . <<"EOP";
 #define REGNODE_\U$varname\E(node) (PL_${varname}_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
-#ifndef DOINIT
-EXTCONST U8 PL_${varname}\[] __attribute__deprecated__;
-#else
-EXTCONST U8 PL_${varname}\[] __attribute__deprecated__ = {
-    $out_string
-};
-#endif /* DOINIT */
+EXTCONST U8 PL_${varname}\[] __attribute__deprecated__
+INIT({ $out_string });
 
-#ifndef DOINIT
-EXTCONST U8 PL_${varname}_bitmask[];
-#else
-EXTCONST U8 PL_${varname}_bitmask[] = {
-    $out_mask
-};
-#endif /* DOINIT */
+EXTCONST U8 PL_${varname}_bitmask[] INIT({ $out_mask });
 EOP
 }
 
@@ -307,13 +296,8 @@ sub print_process_EXACTish {
 /* Do only UTF-8 target strings match 'op', known to be of type EXACT? */
 #define isEXACT_REQ8(op) (assert(REGNODE_TYPE(op) == EXACT), (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
 
-#ifndef DOINIT
-EXTCONST U32 PL_EXACTFish_bitmask;
-EXTCONST U32 PL_EXACT_REQ8_bitmask;
-#else
-EXTCONST U32 PL_EXACTFish_bitmask = 0x$exactf;
-EXTCONST U32 PL_EXACT_REQ8_bitmask = 0x$req8;
-#endif /* DOINIT */
+EXTCONST U32 PL_EXACTFish_bitmask INIT(0x$exactf);
+EXTCONST U32 PL_EXACT_REQ8_bitmask INIT(0x$req8);
 EOP
 }
 
@@ -528,10 +512,7 @@ sub print_regnode_info {
 
 /* PL_regnode_info[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST struct regnode_meta PL_regnode_info[];
-#else
-EXTCONST struct regnode_meta PL_regnode_info[] = {
+EXTCONST struct regnode_meta PL_regnode_info[]  INIT( {
 EOP
     my @fields= qw(type arg_len arg_len_varies off_by_arg);
     foreach my $node_idx (0..$#all) {
@@ -560,8 +541,7 @@ EOP
     }
 
     print $out <<EOP;
-};
-#endif /* DOINIT */
+});
 
 EOP
 }
@@ -573,10 +553,7 @@ sub print_regnode_name {
 
 /* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST char * PL_regnode_name[];
-#else
-EXTCONST char * const PL_regnode_name[] = {
+EXTCONST char * const PL_regnode_name[]  INIT( {
 EOP
 
     my $ofs= 0;
@@ -592,8 +569,7 @@ EOP
     }
 
     print $out <<EOP;
-};
-#endif /* DOINIT */
+});
 
 EOP
 }
@@ -603,10 +579,7 @@ sub print_reg_extflags_name {
     print $out <<EOP;
 /* PL_reg_extflags_name[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST char * PL_reg_extflags_name[];
-#else
-EXTCONST char * const PL_reg_extflags_name[] = {
+EXTCONST char * const PL_reg_extflags_name[] INIT( {
 EOP
 
     my %rxfv;
@@ -698,8 +671,7 @@ EOP
     }
 
     print $out <<EOP;
-};
-#endif /* DOINIT */
+});
 
 #ifdef DEBUGGING
 #  define REG_EXTFLAGS_NAME_SIZE $REG_EXTFLAGS_NAME_SIZE
@@ -714,10 +686,7 @@ sub print_reg_intflags_name {
 
 /* PL_reg_intflags_name[] - Opcode/state names in string form, for debugging */
 
-#ifndef DOINIT
-EXTCONST char * PL_reg_intflags_name[];
-#else
-EXTCONST char * const PL_reg_intflags_name[] = {
+EXTCONST char * const PL_reg_intflags_name[]  INIT( {
 EOP
 
     my %rxfv;
@@ -770,8 +739,7 @@ EOP
     }
 
     print $out <<EOP;
-};
-#endif /* DOINIT */
+});
 
 EOP
     print $out <<EOQ;
