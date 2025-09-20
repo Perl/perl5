@@ -638,6 +638,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_until: case KEY_use  : case KEY_when     : case KEY_while :
     case KEY_x    : case KEY_xor  : case KEY_y        :
         return NULL;
+    case KEY___CLASS__:
     case KEY_chomp: case KEY_chop: case KEY_defined: case KEY_delete:
     case KEY_eof  : case KEY_exec: case KEY_exists :
     case KEY_lstat:
