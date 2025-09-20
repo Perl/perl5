@@ -428,6 +428,27 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item * C<&CORE::__CLASS__> no longer returns invalid results
+
+C<CORE::__CLASS__> would work as expected when used as a bareword or aliased:
+
+    use feature qw(class);
+    class Foo {
+        BEGIN { *cls = \&CORE::__CLASS__; }
+        method bar() {
+            my $class1 = CORE::__CLASS__;  # ok
+            my $class2 = cls;              # ok
+        }
+    }
+
+But when called with an ampersand (C<&CORE::__CLASS__()>) or through a
+reference (C<< my $ref = \&CORE::__CLASS__; $ref->() >>), it would return
+unrelated strings. These runtime calls have been fixed to throw an error of the
+form C<&CORE::__CLASS__ cannot be called directly> instead of silently
+returning incorrect results.
+
+[GH #23737]
+
 =item * C<parse_subsignature()> can now handle empty subroutine signatures
 
 Previously, calling the C<parse_subsignature()> API function with an empty
