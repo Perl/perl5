@@ -480,13 +480,9 @@ enum {		/* pass one of these to get_vtbl */
     $want
 };
 
-#ifdef DOINIT
-EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
+EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] INIT( {
     "$names"
-};
-#else
-EXTCONST char * const PL_magic_vtable_names[magic_vtable_max];
-#endif
+});
 
 EOH
 }
