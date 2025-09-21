@@ -9422,9 +9422,9 @@ S_incline(pTHX_ const char *s, const char *end);
         assert(s); assert(end)
 
 STATIC int
-S_intuit_method(pTHX_ char *s, SV *ioname, CV *cv);
+S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv);
 # define PERL_ARGS_ASSERT_INTUIT_METHOD         \
-        assert(s)
+        assert(start)
 
 STATIC int
 S_intuit_more(pTHX_ char *s, char *e);

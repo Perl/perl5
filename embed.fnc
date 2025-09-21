@@ -6078,7 +6078,7 @@ RS	|SV *	|get_and_check_backslash_N_name_wrapper 		\
 				|NN const char * const e
 S	|void	|incline	|NN const char *s			\
 				|NN const char *end
-S	|int	|intuit_method	|NN char *s				\
+S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK SV *ioname			\
 				|NULLOK NOCHECK CV *cv
 S	|int	|intuit_more	|NN char *s				\

@@ -4774,6 +4774,11 @@ S_intuit_more(pTHX_ char *s, char *e)
 STATIC int
 S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 {
+    PERL_ARGS_ASSERT_INTUIT_METHOD;
+
+    if (!FEATURE_INDIRECT_IS_ENABLED)
+        return 0;
+
     char *s = start + (*start == '$');
     char tmpbuf[sizeof PL_tokenbuf];
     STRLEN len;
@@ -4784,11 +4789,6 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
            blown PVGVs with attached PVCV.  */
     GV * const gv =
         ioname ? gv_fetchsv(ioname, GV_NOADD_NOINIT, SVt_PVCV) : NULL;
-
-    PERL_ARGS_ASSERT_INTUIT_METHOD;
-
-    if (!FEATURE_INDIRECT_IS_ENABLED)
-        return 0;
 
     if (gv && SvTYPE(gv) == SVt_PVGV && GvIO(gv))
             return 0;
