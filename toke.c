@@ -6464,7 +6464,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                 }
                 else {
                     /* skip plain q word */
-                    while (   t < PL_bufend 
+                    while (   t < PL_bufend
                            && (advance = isWORDCHAR_lazy_if_safe(t,
                                                                  PL_bufend,
                                                                  UTF)))
