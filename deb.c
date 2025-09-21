@@ -57,7 +57,7 @@ C<deb> and C<deb_nocontext> differ only in that C<deb_nocontext> does not take
 a thread context (C<aTHX>) parameter, so is used in situations where the caller
 doesn't already have the thread context.
 
-C<vdeb> is the same as C<deb> except C<args> are an encapsulated argument list.
+C<vdeb> is the same as C<deb> except C<args> is a pointer to a C<va_list>.
 
 =cut
 */

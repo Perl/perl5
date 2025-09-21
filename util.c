@@ -1439,8 +1439,8 @@ not take a thread context (C<aTHX>) parameter, so is used in situations where
 the caller doesn't already have the thread context (and can be called without
 the C<Perl_> prefix.
 
-C<vform> is the same as C<form> except the arguments are an encapsulated
-argument list.  It does need a thread context parameter, but that is supplied
+C<vform> is the same as C<form> except the arguments are a C<va_list>.
+It does need a thread context parameter, but that is supplied
 automatically when called without the C<Perl_> prefix.
 
 =cut
@@ -1481,8 +1481,8 @@ C<mess> and C<mess_nocontext> differ only in that C<mess_nocontext> does
 not take a thread context (C<aTHX>) parameter, so is used in situations where
 the caller doesn't already have the thread context.
 
-C<vmess> is the same as C<mess> except the arguments are an encapsulated
-argument list.  It needs a thread context parameter only when called with the
+C<vmess> is the same as C<mess> except the arguments are a <va_list>.
+It needs a thread context parameter only when called with the
 C<Perl_> prefix.
 
 Normally, the resulting message is returned in a new mortal SV.

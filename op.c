@@ -8504,7 +8504,7 @@ So use the latter when you get a compilation error about C<pTHX>.
 =for apidoc Amnh||PERL_LOADMOD_IMPORT_OPS
 
 =for apidoc vload_module
-Like C<L</load_module>> but the arguments are an encapsulated argument list.
+Like C<L</load_module>> but the arguments are a C<va_list>.
 
 =cut */
 

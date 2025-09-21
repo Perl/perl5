@@ -10439,7 +10439,7 @@ so is used in situations where the caller doesn't already have the thread
 context.
 
 =for apidoc vnewSVpvf
-Like C<L</newSVpvf>> but the arguments are an encapsulated argument list.
+Like C<L</newSVpvf>> but the arguments are a C<va_list>.
 
 =cut
 */
@@ -11600,7 +11600,7 @@ eventually calling it.  It does not handle magic; the forms whose name contains
 C<_mg> additionally handle 'set' magic after calling it.
 
 It has two sets of argument lists, only one of which is used in any given call.
-The first set, C<args>, is an encapsulated argument list of pointers to C
+The first set, C<args>, is a pointer to a C<va_list> of pointers to C
 strings.  If it is NULL, the other list, C<svargs>, is used; it is an array
 of pointers to SV's.  C<sv_count> gives how many there are in the list.
 
@@ -11633,7 +11633,7 @@ The forms whose name contains C<_no_context> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
 doesn't already have the thread context.
 
-The forms whose name contains C<vset> use an encapsulated argument list, the
+The forms whose name contains C<vset> use a C<va_list>, the
 other forms use C<sprintf>-style arguments.
 
 There are no other differences between the forms.
@@ -11749,7 +11749,7 @@ C<sv_vcatpvfn_flags> is the most general, and all the other forms are
 implemented by eventually calling it.
 
 It has two sets of argument lists, only one of which is used in any given call.
-The first set, C<args>, is an encapsulated argument list of pointers to C
+The first set, C<args>, is a pointer to a C<va_list> of pointers to C
 strings.  If it is NULL, the other list, C<svargs>, is used; it is an array
 of pointers to SV's.  C<sv_count> gives how many there are in the list.
 
@@ -11792,7 +11792,7 @@ The forms whose name contains C<_no_context> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
 doesn't already have the thread context.
 
-The forms whose name contains C<vcat> use an encapsulated argument list, the
+The forms whose name contains C<vcat> use a C<va_list>, the
 other forms use C<sprintf>-style arguments.
 
 There are no other differences between the forms.
