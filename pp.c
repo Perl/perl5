@@ -901,7 +901,7 @@ PP(pp_schop)
 
     const size_t count = do_chomp(TARG, *PL_stack_sp, chomping);
     if (chomping)
-        sv_setiv(TARG, (IV)count);
+        sv_setuv(TARG, count);
     SvSETMAGIC(TARG);
     rpp_replace_1_1_NN(TARG);
     return NORMAL;
@@ -919,7 +919,7 @@ PP_wrapped(pp_chop, 0, 1)
     while (MARK < SP)
         count += do_chomp(TARG, *++MARK, chomping);
     if (chomping)
-        sv_setiv(TARG, count);
+        sv_setuv(TARG, count);
     SP = ORIGMARK;
     XPUSHTARG;
     RETURN;
