@@ -434,6 +434,12 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item * INTERFACE keyword in XS
+
+Fixed a couple of issues with the INTERFACE keyword in XS.
+
+[GH #23640]
+
 =item * C<&CORE::__CLASS__> no longer returns invalid results
 
 C<CORE::__CLASS__> would work as expected when used as a bareword or aliased:
