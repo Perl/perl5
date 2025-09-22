@@ -118,21 +118,21 @@ read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 __END__
 
  NULL
--__FILE__
--__LINE__
--__PACKAGE__
 -__CLASS__
 +__DATA__
 +__END__
+-__FILE__
+-__LINE__
+-__PACKAGE__
 -__SUB__
 +ADJUST
 +AUTOLOAD
 +BEGIN
-+UNITCHECK
++CHECK
 +DESTROY
 +END
 +INIT
-+CHECK
++UNITCHECK
 -abs
 -accept
 -alarm
@@ -358,8 +358,8 @@ __END__
 -time
 -times
 +tr
-+try
 -truncate
++try
 -uc
 -ucfirst
 -umask
