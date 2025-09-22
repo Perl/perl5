@@ -2490,6 +2490,9 @@ Perl_scalarvoid(pTHX_ OP *arg)
                            "anonymous hash ({})" :
                            "anonymous array ([])";
             break;
+        case OP_STUB:
+            op_null(o);
+            break;
         }
 
         if (useless_sv) {

@@ -637,20 +637,18 @@ checkOptree ( name	=> 'if ($a || $b) { } return 1',
 # 3  <|> or(other->4) sK/1
 # 4      <#> gvsv[*b] s
 # 5      <|> and(other->6) vK/1
-# 6  <0> stub v
-# 7  <;> nextstate(main 997 (eval 15):1) v
-# 8  <$> const[IV 1] s
-# 9  <1> leavesub[1 ref] K/REFC,1
+# 6  <;> nextstate(main 997 (eval 15):1) v
+# 7  <$> const[IV 1] s
+# 8  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 997 (eval 15):1) v
 # 2  <$> gvsv(*a) s
 # 3  <|> or(other->4) sK/1
 # 4      <$> gvsv(*b) s
 # 5      <|> and(other->6) vK/1
-# 6  <0> stub v
-# 7  <;> nextstate(main 3 (eval 3):1) v
-# 8  <$> const(IV 1) s
-# 9  <1> leavesub[1 ref] K/REFC,1
+# 6  <;> nextstate(main 3 (eval 3):1) v
+# 7  <$> const(IV 1) s
+# 8  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 pass("rpeep - unless ($a && $b)");
@@ -664,20 +662,18 @@ checkOptree ( name	=> 'unless ($a && $b) { } return 1',
 # 3  <|> and(other->4) sK/1
 # 4      <#> gvsv[*b] s
 # 5      <|> or(other->6) vK/1
-# 6  <0> stub v
-# 7  <;> nextstate(main 997 (eval 15):1) v
-# 8  <$> const[IV 1] s
-# 9  <1> leavesub[1 ref] K/REFC,1
+# 6  <;> nextstate(main 997 (eval 15):1) v
+# 7  <$> const[IV 1] s
+# 8  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 997 (eval 15):1) v
 # 2  <$> gvsv(*a) s
 # 3  <|> and(other->4) sK/1
 # 4      <$> gvsv(*b) s
 # 5      <|> or(other->6) vK/1
-# 6  <0> stub v
-# 7  <;> nextstate(main 3 (eval 3):1) v
-# 8  <$> const(IV 1) s
-# 9  <1> leavesub[1 ref] K/REFC,1
+# 6  <;> nextstate(main 3 (eval 3):1) v
+# 7  <$> const(IV 1) s
+# 8  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 pass("rpeep - my $a; my @b; my %c; print 'f'");
