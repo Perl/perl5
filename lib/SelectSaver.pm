@@ -1,6 +1,18 @@
-package SelectSaver;
+package SelectSaver 1.03;
 
-our $VERSION = '1.02';
+use v5.40;
+
+use Symbol 'qualify';
+
+sub new ($class, $filehandle = undef) {
+    my $fh = select;
+    select qualify $filehandle, caller if defined $filehandle;
+    return bless \$fh, $class;
+}
+
+sub DESTROY ($self) { select $$self }
+
+__END__
 
 =head1 NAME
 
@@ -31,24 +43,3 @@ file handle remains unchanged.
 
 When a C<SelectSaver> is destroyed, it re-selects the file handle
 that was selected when it was created.
-
-=cut
-
-require 5.000;
-use Carp;
-use Symbol;
-
-sub new {
-    @_ >= 1 && @_ <= 2 or croak 'usage: SelectSaver->new( [FILEHANDLE] )';
-    my $fh = select;
-    my $self = bless \$fh, $_[0];
-    select qualify($_[1], caller) if @_ > 1;
-    $self;
-}
-
-sub DESTROY {
-    my $self = $_[0];
-    select $$self;
-}
-
-1;
