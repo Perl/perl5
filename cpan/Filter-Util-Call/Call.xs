@@ -3,7 +3,7 @@
  * 
  * Author   : Reini Urban
  * Date     : Di 16. Aug 7:59:10 CEST 2022
- * Version  : 1.64
+ * Version  : 1.65
  *
  *    Copyright (c) 1995-2011 Paul Marquess. All rights reserved.
  *    Copyright (c) 2011-2014, 2018 Reini Urban. All rights reserved.

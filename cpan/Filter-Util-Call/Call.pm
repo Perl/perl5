@@ -18,7 +18,7 @@ use warnings;
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw( filter_add filter_del filter_read filter_read_exact) ;
-our $VERSION = "1.64" ;
+our $VERSION = "1.65" ;
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -289,16 +289,16 @@ The function, C<filter_del>, is used to disable the current filter. It
 does not affect the running of the filter. All it does is tell Perl not
 to call filter any more.
 
-See L<Example 4: Using filter_del> for details.
+See L</Example 4: Using filter_del> for details.
 
 =item I<real_import>
 
-Internal function which adds the filter, based on the L<filter_add>
+Internal function which adds the filter, based on the L</filter_add()>
 argument type.
 
 =item I<unimport()>
 
-May be used to disable a filter, but is rarely needed. See L<filter_del>.
+May be used to disable a filter, but is rarely needed. See L</filter_del>.
 
 =back
 
@@ -313,7 +313,7 @@ filtering code in a textual line-level only.
 
 The content from the __DATA__ block is not filtered.
 This is a serious limitation, e.g. for the L<Switch> module.
-See L<http://search.cpan.org/perldoc?Switch#LIMITATIONS> for more.
+See L<Switch/LIMITATIONS> for more.
 
 =item Max. codesize limited to 32-bit
 

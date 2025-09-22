@@ -570,7 +570,8 @@ our %Modules = (
     },
 
     'Filter::Util::Call' => {
-        'DISTRIBUTION' => 'RURBAN/Filter-1.64.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Filter-1.65.tar.gz',
+        'SYNCINFO'     => 'tib on Mon Sep 22 08:36:59 2025',
         'FILES'        => q[cpan/Filter-Util-Call
                  pod/perlfilter.pod
                 ],
