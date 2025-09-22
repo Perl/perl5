@@ -1947,11 +1947,12 @@ sub watchdog ($;$)
                     $watchdog = system(1, $cmd);
                 }
             };
-            if ($@ || ($watchdog <= 0)) {
-                _diag('Failed to start watchdog');
-                _diag($@) if $@;
+
+            if ($@ || $watchdog <= 0) {
+                $@ = "\n$@" if $@;
+                _diag("Failed to start watchdog$@\nTrying alternate method");
                 undef($watchdog);
-                return;
+                goto WATCHDOG_VIA_ALARM;
             }
 
             # Add END block to parent to terminate and clean up watchdog
