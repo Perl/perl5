@@ -22,7 +22,7 @@ use Time::HiRes;
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
 @EXPORT_OK = qw(wakeonlan);
-$VERSION = "2.76";
+$VERSION = "2.77";
 
 # Globals
 
@@ -227,13 +227,18 @@ sub new
   }
   elsif ($self->{proto} eq "icmp")
   {
-    croak("icmp ping requires root privilege") if !_isroot();
+    croak("icmp ping requires root privilege") if !_isroot() and $^O ne "linux";
     $self->{proto_num} = eval { (getprotobyname('icmp'))[2] } ||
       croak("Can't get icmp protocol by name");
     $self->{pid} = $$ & 0xffff;           # Save lower 16 bits of pid
     $self->{fh} = FileHandle->new();
-    socket($self->{fh}, PF_INET, SOCK_RAW, $self->{proto_num}) ||
-      croak("icmp socket error - $!");
+    if ($^O eq "linux" and !_isroot()) {
+      socket($self->{fh}, PF_INET, SOCK_DGRAM, $self->{proto_num}) ||
+          croak("icmp socket error - $!");
+    } else {
+      socket($self->{fh}, PF_INET, SOCK_RAW, $self->{proto_num}) ||
+          croak("icmp socket error - $!");
+    }
     $self->_setopts();
     if ($self->{'ttl'}) {
       setsockopt($self->{fh}, IPPROTO_IP, IP_TTL, pack("I*", $self->{'ttl'}))
@@ -250,8 +255,13 @@ sub new
       croak("Can't get ipv6-icmp protocol by name"); # 58
     $self->{pid} = $$ & 0xffff;           # Save lower 16 bits of pid
     $self->{fh} = FileHandle->new();
-    socket($self->{fh}, $AF_INET6, SOCK_RAW, $self->{proto_num}) ||
-      croak("icmp socket error - $!");
+    if ($^O eq 'linux' and !_isroot()) {
+      socket($self->{fh}, $AF_INET6, SOCK_DGRAM, $self->{proto_num}) ||
+          croak("icmp socket error - $!");
+    } else {
+      socket($self->{fh}, $AF_INET6, SOCK_RAW, $self->{proto_num}) ||
+          croak("icmp socket error - $!");
+    }
     $self->_setopts();
     if ($self->{'gateway'}) {
       my $g = $self->{gateway};
@@ -715,8 +725,13 @@ sub ping_icmp
   $timeout = $self->{timeout} if !defined $timeout and $self->{timeout};
   $timestamp_msg = $self->{message_type} && $self->{message_type} eq 'timestamp' ? 1 : 0;
 
-  socket($self->{fh}, $ip->{family}, SOCK_RAW, $self->{proto_num}) ||
-    croak("icmp socket error - $!");
+  if ($^O eq 'linux' and !_isroot()) {
+      socket($self->{fh}, $ip->{family}, SOCK_DGRAM, $self->{proto_num}) ||
+          croak("icmp socket error - $!");
+  } else {
+      socket($self->{fh}, $ip->{family}, SOCK_RAW, $self->{proto_num}) ||
+          croak("icmp socket error - $!");
+  }
 
   if (defined $self->{local_addr} &&
       !CORE::bind($self->{fh}, _pack_sockaddr_in(0, $self->{local_addr}))) {
@@ -2366,11 +2381,13 @@ enabled.
 X<ping_icmp>
 
 The L</ping> method used with the icmp protocol.
+Under Linux under a non-root account this uses now SOCK_DGRAM.
 
 =item $p->ping_icmpv6([$host, $timeout, $family])
 X<ping_icmpv6>
 
 The L</ping> method used with the icmpv6 protocol.
+Under Linux under a non-root account this uses now SOCK_DGRAM.
 
 =item $p->ping_stream([$host, $timeout, $family])
 X<ping_stream>

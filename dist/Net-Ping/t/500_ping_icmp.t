@@ -19,13 +19,14 @@ BEGIN {
 }
 
 my $is_devel = $ENV{PERL_CORE} || -d ".git" ? 1 : 0;
+$ENV{TEST_PING_HOST} = "127.0.0.1" if $ENV{NO_NETWORK_TESTING};
 # Note this rawsocket test code is considered anti-social in p5p and was removed in
 # their variant.
-# See http://nntp.perl.org/group/perl.perl5.porters/240707
+# See https://www.nntp.perl.org/group/perl.perl5.porters/2016/11/msg240707.html
 # Problem is that ping_icmp needs root perms, and previous bugs were
 # never caught. So I rather execute it via sudo in the core test suite
 # and on devel CPAN dirs, than not at all and risk further bitrot of this API.
-if ( 0 && !Net::Ping::_isroot()) { # disable in blead via 7bfdd8260c
+if (!Net::Ping::_isroot()) {
     my $file = __FILE__;
     my $lib = $ENV{PERL_CORE} ? '-I../../lib' : '-Mblib';
     if ($is_devel and $Config{ccflags} =~ /fsanitize=address/ and $^O eq 'linux') {
@@ -54,7 +55,7 @@ if ( 0 && !Net::Ping::_isroot()) { # disable in blead via 7bfdd8260c
 
 SKIP: {
   skip "icmp ping requires root privileges.", 2
-    if !Net::Ping::_isroot() or $^O eq 'MSWin32';
+    if ($^O ne 'Linux' and !Net::Ping::_isroot()) or $^O eq 'MSWin32';
   my $p = new Net::Ping "icmp";
   is($p->message_type(), 'echo', "default icmp message type is 'echo'");
   # message_type fails on wrong message type
