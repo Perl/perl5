@@ -14,21 +14,21 @@
  */
 
 #define KEY_NULL		0
-#define KEY___FILE__		1
-#define KEY___LINE__		2
-#define KEY___PACKAGE__		3
-#define KEY___CLASS__		4
-#define KEY___DATA__		5
-#define KEY___END__		6
+#define KEY___CLASS__		1
+#define KEY___DATA__		2
+#define KEY___END__		3
+#define KEY___FILE__		4
+#define KEY___LINE__		5
+#define KEY___PACKAGE__		6
 #define KEY___SUB__		7
 #define KEY_ADJUST		8
 #define KEY_AUTOLOAD		9
 #define KEY_BEGIN		10
-#define KEY_UNITCHECK		11
+#define KEY_CHECK		11
 #define KEY_DESTROY		12
 #define KEY_END			13
 #define KEY_INIT		14
-#define KEY_CHECK		15
+#define KEY_UNITCHECK		15
 #define KEY_abs			16
 #define KEY_accept		17
 #define KEY_alarm		18
@@ -254,8 +254,8 @@
 #define KEY_time		238
 #define KEY_times		239
 #define KEY_tr			240
-#define KEY_try			241
-#define KEY_truncate		242
+#define KEY_truncate		241
+#define KEY_try			242
 #define KEY_uc			243
 #define KEY_ucfirst		244
 #define KEY_umask		245
@@ -282,5 +282,5 @@
 #define KEY_y			266
 
 /* Generated from:
- * f3a6d8313b10fef95e923ecd5b3f9ff0de0d5374103500ec010f8746e7ab556a regen/keywords.pl
+ * bdfd5529dba8257e060f7e4ed712f683cd6a533285abf8ce7ee78c4d0677ff38 regen/keywords.pl
  * ex: set ro ft=c: */
