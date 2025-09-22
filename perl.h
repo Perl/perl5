@@ -1425,51 +1425,6 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
-/* Macros for correct constant construction.  These are in C99 <stdint.h>
- * (so they will not be available in strict C89 mode), but they are nice, so
- * let's define them if necessary. */
-
-/*
-=for apidoc_section $integer
-=for apidoc    Am|I16|INT16_C|number
-=for apidoc_item |I32|INT32_C|number
-=for apidoc_item |I64|INT64_C|number
-
-Returns a token the C compiler recognizes for the constant C<number> of the
-corresponding integer type on the machine.
-
-If the machine does not have a 64-bit type, C<INT64_C> is undefined.
-Use C<L</INTMAX_C>> to get the largest type available on the platform.
-
-=for apidoc    Am|U16|UINT16_C|number
-=for apidoc_item |U32|UINT32_C|number
-=for apidoc_item |U64|UINT64_C|number
-
-Returns a token the C compiler recognizes for the constant C<number> of the
-corresponding unsigned integer type on the machine.
-
-If the machine does not have a 64-bit type, C<UINT64_C> is undefined.
-Use C<L</UINTMAX_C>> to get the largest type available on the platform.
-
-
-=cut
-*/
-#ifndef UINT16_C
-#  if INTSIZE >= 2
-#    define UINT16_C(x) ((U16_TYPE)x##U)
-#  else
-#    define UINT16_C(x) ((U16_TYPE)x##UL)
-#  endif
-#endif
-
-#ifndef UINT32_C
-#  if INTSIZE >= 4
-#    define UINT32_C(x) ((U32_TYPE)x##U)
-#  else
-#    define UINT32_C(x) ((U32_TYPE)x##UL)
-#  endif
-#endif
-
 #ifdef I_STDINT
     typedef intmax_t  PERL_INTMAX_T;
     typedef uintmax_t PERL_UINTMAX_T;
@@ -1481,43 +1436,6 @@ Use C<L</UINTMAX_C>> to get the largest type available on the platform.
  * removing the undef. */
 
 #if defined(QUADKIND)
-#  undef PeRl_INT64_C
-#  undef PeRl_UINT64_C
-/* Prefer the native integer types (int and long) over long long
- * (which is not C89) and Win32-specific __int64. */
-#  if QUADKIND == QUAD_IS_INT && INTSIZE == 8
-#    define PeRl_INT64_C(c)	(c)
-#    define PeRl_UINT64_C(c)	CAT2(c,U)
-#  endif
-#  if QUADKIND == QUAD_IS_LONG && LONGSIZE == 8
-#    define PeRl_INT64_C(c)	CAT2(c,L)
-#    define PeRl_UINT64_C(c)	CAT2(c,UL)
-#  endif
-#  if QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LONG_LONG)
-#    define PeRl_INT64_C(c)	CAT2(c,LL)
-#    define PeRl_UINT64_C(c)	CAT2(c,ULL)
-#  endif
-#  if QUADKIND == QUAD_IS___INT64
-#    define PeRl_INT64_C(c)	CAT2(c,I64)
-#    define PeRl_UINT64_C(c)	CAT2(c,UI64)
-#  endif
-#  ifndef PeRl_INT64_C
-#    define PeRl_INT64_C(c)	((I64)(c)) /* last resort */
-#    define PeRl_UINT64_C(c)	((U64TYPE)(c))
-#  endif
-/* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
- * not fly with C89-pedantic gcc, so let's undefine them first so that
- * we can redefine them with our native integer preferring versions. */
-#  if defined(PERL_DARWIN) && defined(PERL_GCC_PEDANTIC)
-#    undef INT64_C
-#    undef UINT64_C
-#  endif
-#  ifndef INT64_C
-#    define INT64_C(c) PeRl_INT64_C(c)
-#  endif
-#  ifndef UINT64_C
-#    define UINT64_C(c) PeRl_UINT64_C(c)
-#  endif
 
 /*
 =for apidoc_section $integer
@@ -1528,8 +1446,6 @@ long>s, C<INTMAX_C(-1)> would yield
 
  -1LL
 
-See also, for example, C<L</INT32_C>>.
-
 Use L</IV> to declare variables of the maximum usable size on this platform.
 
 =for apidoc Am||UINTMAX_C|number
@@ -1538,8 +1454,6 @@ widest unsigned integer type on the machine.  For example, if the machine has
 C<long>s, C<UINTMAX_C(1)> would yield
 
  1UL
-
-See also, for example, C<L</UINT32_C>>.
 
 Use L</UV> to declare variables of the maximum usable size on this platform.
 

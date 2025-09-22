@@ -58,7 +58,7 @@ be undefined.  Use IV and UV to declare the largest practicable, and
 C<L<perlapi/WIDEST_UTYPE>> for the absolute maximum unsigned, but which
 may not be usable in all circumstances.
 
-A numeric constant can be specified with L<perlapi/C<INT16_C>>,
+A numeric constant can be specified with the C99 macros like C<INT16_C>,
 L<perlapi/C<UINTMAX_C>>, and similar.
 
 =for apidoc_section $integer
