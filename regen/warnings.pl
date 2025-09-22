@@ -461,6 +461,8 @@ sub main {
     print $warn_h tab(6, '#define WARNsize'),   " $warn_size\n" ;
     print $warn_h tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
     print $warn_h tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
+    print $warn_h tab(6, '#define WARN_DEFAULTstring'), ' "',
+                        mkHex($warn_size, map $_ * 2, @DEFAULTS), "\"\n";
 
     print $warn_h warnings_h_boilerplate_2();
 
