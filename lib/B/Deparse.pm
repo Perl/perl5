@@ -275,7 +275,7 @@ BEGIN {
 #  - indent() removes semicolons wherever it sees \cK.
 
 
-BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
+BEGIN { for (qw[ const stringify rv2sv list glob pushmark null stub aelem
 		 kvaslice kvhslice padsv argcheck
                  nextstate dbstate rv2av rv2hv helem pushdefer leavetrycatch
                  custom ]) {
@@ -921,7 +921,8 @@ sub compile {
 	    my $kid;
 	    if ( $root->name eq 'leave'
 	     and ($kid = $root->first)->name eq 'enter'
-	     and !null($kid = $kid->sibling) and $kid->name eq 'stub'
+	     and !null($kid = $kid->sibling) and ($kid->name eq 'stub'
+             or $kid->name eq 'null' and $kid->targ == OP_STUB)
 	     and !null($kid = $kid->sibling) and $kid->name eq 'null'
 	     and class($kid) eq 'COP' and null $kid->sibling )
 	    {
@@ -1918,7 +1919,6 @@ sub lineseq {
 	if defined($self->{'limit_seq'})
 	&& (!defined($limit_seq) || $self->{'limit_seq'} < $limit_seq);
     local $self->{'limit_seq'} = $limit_seq;
-
     $self->walk_lineseq($root, \@ops,
 		       sub { push @exprs, $_[0]} );
 
@@ -1935,6 +1935,7 @@ sub scopeop {
     my($real_block, $self, $op, $cx) = @_;
     my $kid;
     my @kids;
+    my $leadingstub = '';
 
     local(@$self{qw'curstash warnings hints hinthash'})
 		= @$self{qw'curstash warnings hints hinthash'} if $real_block;
@@ -1965,6 +1966,10 @@ sub scopeop {
         }
     } else {
 	$kid = $op->first;
+        if ($kid->name eq "null" && $kid->targ == OP_STUB) {
+            $leadingstub = "();";
+            $kid = $kid->sibling;
+        }
     }
     for (; !null($kid); $kid = $kid->sibling) {
 	push @kids, $kid;
@@ -1977,7 +1982,10 @@ sub scopeop {
 		 . " {\n\t$body\n\b}";
     } else {
 	my $lineseq = $self->lineseq($op, $cx, @kids);
-	return (length ($lineseq) ? "$lineseq;" : "");
+	return (length ($lineseq) ? "$lineseq;"
+                                  : $leadingstub
+                                      ? $leadingstub
+                                      : "");
     }
 }
 
@@ -4526,6 +4534,8 @@ sub pp_null {
     if ($op->targ == OP_LIST) {
         my $my_attr = maybe_var_attr($self, $op, $cx);
         return $my_attr if defined $my_attr;
+    } elsif ($op->targ == OP_STUB) {
+        return "()";
     }
 
     if (class($op) eq "OP") {
