@@ -4143,12 +4143,13 @@ Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
      * constructed with this size (to save space and memory), and we return
      * pointers, so they must be this size */
 
-    /* 'index' is guaranteed to be non-negative, as this is an inversion map
-     * that covers all possible inputs.  See [perl #133365] */
-    SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
-    I32 base = _Perl_IVCF_invmap[index];
-
     PERL_ARGS_ASSERT_INVERSE_FOLDS_;
+
+    /* 'index' is guaranteed to be non-negative, as this is an inversion map
+     * that covers all possible inputs.  See [GH #16624] */
+    SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
+    assert(index >= 0);
+    I32 base = _Perl_IVCF_invmap[index];
 
     if (base == 0) {            /* No fold */
         *first_folds_to = 0;
