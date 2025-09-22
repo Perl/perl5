@@ -129,6 +129,72 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
+L<B> has been upgraded from version 1.89 to 1.90.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.007 to 1.009. It now correctly
+omits all its internal BEGIN blocks when asked to report BEGIN blocks in a
+caller's code. Previously it only omitted some of them.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.86 to 1.87.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.59 to 3.60. This
+release changes the ordering of the processing of typemap files which have
+been specified via C<xsubpp -typemap> arguments so that (as was the case
+prior to Perl 5.10.0) these files are applied last rather than first, and
+thus take priority over any system typemap files.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.59 to 3.60.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.42 to 2.43.
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.2311 to 0.2312.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.64 to 1.65.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20250820 to 5.20250923.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.76 to 2.77.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.69 to 1.70.
+
+=item *
+
+L<overloading> has been upgraded from version 0.02 to 0.03.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.20 to 0.21.
+
+=item *
+
+L<Storable> has been upgraded from version 3.38 to 3.39.
+
+=item *
+
+L<Term::Table> has been upgraded from version 0.024 to 0.025.
+
+=item *
+
 L<Time::HiRes> has been upgraded from version 1.9778 to 1.9779.
 
 The subsecond-resolution C<sleep> function provided by L<Time::HiRes> now has
@@ -147,17 +213,15 @@ means it now requires a scalar argument, not a list, just like C<CORE::sleep>:
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 3.59 to 3.60. This
-release changes the ordering of the processing of typemap files which have
-been specified via C<xsubpp -typemap> arguments so that (as was the case
-prior to Perl 5.10.0) these files are applied last rather than first, and
-thus take priority over any system typemap files.
+L<Time::Piece> has been upgraded from version 1.36 to 1.3701.
 
 =item *
 
-L<B::Concise> has been upgraded from version 1.007 to 1.008. It now correctly
-omits all its internal BEGIN blocks when asked to report BEGIN blocks in a
-caller's code. Previously it only omitted some of them.
+L<utf8> has been upgraded from version 1.27 to 1.29.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.44 to 1.46.
 
 =back
 
