@@ -249,7 +249,30 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Certain diagnostics about byte sequences that are supposed to comprise a
+UTF-8 encoded character, but that are invalid in some way, now don't
+include bytes irrelevant to that determination.  An example is
+
+=over
+
+=item old message
+
+Malformed UTF-8 character: C<\xc1\x27> (any UTF-8 sequence that starts with
+C<\xc1> is overlong which can and should be represented with a different,
+shorter sequence)
+
+=item new message
+
+Malformed UTF-8 character: C<\xc1> (any UTF-8 sequence that starts with
+C<\xc1> is overlong which can and should be represented with a different,
+shorter sequence)
+
+=back
+
+In this case the C<\xc1> is all that is needed to make the sequence
+invalid.  Whatever comes after it is irrelevant (in this case, C<\x27>),
+and including it in the message might lead the reader to think that it
+somehow does matter.
 
 =back
 
