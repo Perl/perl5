@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.3 - Doc Brown, "Back to the Future"
+
+L<Announced on 2025-09-23 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/09/msg270333.html>
+
+  Where we're going, we don't need roads.
+
 =head2 v5.43.2 - David Weber, "On Basilisk Station"
 
 L<Announced on 2025-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2025/08/msg270238.html>
