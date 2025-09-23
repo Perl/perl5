@@ -427,6 +427,7 @@ barestmt:	PLUGSTMT
 			          break;
 			  }
 			  $$ = NULL;
+			  parser->parsed_sub = 1;
 			}
 	|	KW_PACKAGE BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
 		    /* version and package appear in the reverse order to what may be

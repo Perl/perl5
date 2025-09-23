@@ -6007,6 +6007,7 @@ t/class/accessor.t			See if accessor methods work
 t/class/class.t				See if class declarations work
 t/class/construct.t			See if class constructors work
 t/class/destruct.t			See if class destruction works
+t/class/EndsWithADJUST.pm		Helper module for test for GH#23758 in t/class/phasers.t
 t/class/field.t				See if class field declarations work
 t/class/gh22169.t			Test defining a class that previously failed to define
 t/class/gh23511.t			Test defining a reader after a strict 'vars' violation

@@ -39,4 +39,19 @@ no warnings 'experimental::class';
     is($self_in_ADJUST, $obj, '$self is set correctly inside ADJUST blocks');
 }
 
+# Ending a module file on an `ADJUST` phaser block does not upset
+# `feature 'module_true'`
+# [GH#23758]
+{
+    my $ok = eval {
+        local @INC = @INC;
+        unshift @INC, "class";
+        require EndsWithADJUST;
+        1;
+    };
+    my $e = $@;
+    ok($ok, 'require EndsWithADJUST does not fail') or
+        diag("Error was: $e");
+}
+
 done_testing;
