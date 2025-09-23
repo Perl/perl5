@@ -84,22 +84,17 @@ my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
 # apidoc_item
 my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
 
-# This is a copy of the list in regen/embed.pl.
-my @have_compatibility_macros = qw(
-                                    deb
-                                    form
-                                    load_module
-                                    mess
-                                    newSVpvf
-                                    sv_catpvf
-                                    sv_catpvf_mg
-                                    sv_setpvf
-                                    sv_setpvf_mg
-                                    warn
-                                    warner
-                                  );
-my %has_compat_macro;
-$has_compat_macro{$_} = 1 for @have_compatibility_macros;
+# Certain functions have plain and no_context versions, and meet the criteria
+# stated here.  Each of their pods has been modified to have a marker line
+# which this program replaces by this wording.  This way we can tweak the
+# wording in one place, and still have it placed in the individual pod entries
+# where it makes the most sense.
+my $PLAIN_vs_NOCONTEXT_wording = <<~EOT;
+    C<WHICH> and C<WHICH_nocontext> behave identically when called from outside
+    the perl core unless C<PERL_WANT_VARARGS> has been explicitly #defined.
+    When it has, or when called from inside the core, they differ only in that
+    C<WHICH> requires the thread context (C<aTHX>) to be available.
+    EOT
 
 use constant {
               NOT_APIDOC         => -1,
@@ -1665,7 +1660,6 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     my @deprecated;
     my @experimental;
     my @xrefs;
-    my @compat_macros;
 
     for (my $i = 0; $i < @items; $i++) {
         last if $docref->{'xref_only'}; # Place holder
@@ -1682,7 +1676,6 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
             push @experimental, "C<$name>" if $item->{flags} =~ /x/;
-            push @compat_macros, $name if $has_compat_macro{$name};
         }
 
         # While we're going though the items, construct a nice list of where
@@ -1780,6 +1773,13 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     }
 
     chomp $pod;     # Make sure prints pod with a single trailing \n
+
+    # Replace this marker line in the pod with what we say it should expand
+    # to.
+    $pod =~ s{ \b __PLAIN_vs_NOCONTEXT_wording__ \( (\w+) \) }{
+        my $this = $1;
+        $PLAIN_vs_NOCONTEXT_wording =~ s/WHICH/$this/gr
+    }xeg;
     print $fh "\n", $pod, "\n";
 
     # Accumulate the usage section of the entry into this array.  Output below
@@ -2184,18 +2184,6 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 push @usage, "\n";
             }
         }
-    }
-
-    for my $compat (@compat_macros) {
-        print $fh <<~"EOT";
-
-            Note: When called from XS code, $compat(...) expands to
-            C<Perl_${compat}_no_context(...)> unless C<PERL_WANT_VARARGS> has
-            been C<#defined>, in which case it expands to
-            C<Perl_$compat(aTHX_ ...)>.  When called from the perl core,
-            it assumes C<aTHX> is available, so expands to
-            C<Perl_$compat(aTHX_ ...)>
-            EOT
     }
 
     if (grep { /\S/ } @usage) {

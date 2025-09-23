@@ -1434,10 +1434,7 @@ This is contrary to the incorrect previous documentation of these that claimed
 that the return was a single per-thread buffer.  That was (and is) actually
 true only when these are called during global destruction.
 
-C<form> and C<form_nocontext> differ only in that C<form_nocontext> does
-not take a thread context (C<aTHX>) parameter, so is used in situations where
-the caller doesn't already have the thread context (and can be called without
-the C<Perl_> prefix.
+__PLAIN_vs_NOCONTEXT_wording__(form)
 
 C<vform> is the same as C<form> except the arguments are a C<va_list>.
 It does need a thread context parameter, but that is supplied
@@ -1477,9 +1474,7 @@ used to generate a string message.  If the message does not end with a newline,
 then it will be extended with some indication of the current location in the
 code, as described for C<L</mess_sv>>.
 
-C<mess> and C<mess_nocontext> differ only in that C<mess_nocontext> does
-not take a thread context (C<aTHX>) parameter, so is used in situations where
-the caller doesn't already have the thread context.
+__PLAIN_vs_NOCONTEXT_wording__(mess)
 
 C<vmess> is the same as C<mess> except the arguments are a <va_list>.
 It needs a thread context parameter only when called with the
@@ -2018,9 +2013,7 @@ but this is subject to modification by a C<$SIG{__WARN__}> handler.
 
 Unlike with C<L</croak>>, C<pat> is not permitted to be null.
 
-The two forms differ only in that C<warn_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+__PLAIN_vs_NOCONTEXT_wording__(warn)
 
 =cut
 */
@@ -2069,9 +2062,7 @@ but this is subject to modification by a C<$SIG{__WARN__}> handler.
 
 C<pat> is not permitted to be null.
 
-The two forms differ only in that C<warner_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+__PLAIN_vs_NOCONTEXT_wording__(warner)
 
 These functions differ from the similarly named C<L</warn>> functions, in that
 the latter are for XS code to unconditionally display a warning, whereas these

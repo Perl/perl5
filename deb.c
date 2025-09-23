@@ -53,9 +53,7 @@ the script causing the call, and the line number within that file.
 If the C<v> (verbose) debugging option is in effect, the process id is also
 printed.
 
-C<deb> and C<deb_nocontext> differ only in that C<deb_nocontext> does not take
-a thread context (C<aTHX>) parameter, so is used in situations where the caller
-doesn't already have the thread context.
+__PLAIN_vs_NOCONTEXT_wording__(deb)
 
 C<vdeb> is the same as C<deb> except C<args> is a pointer to a C<va_list>.
 
