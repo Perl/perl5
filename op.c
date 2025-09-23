@@ -17078,6 +17078,28 @@ Perl_subsignature_finish(pTHX)
     return ret;
 }
 
+U32
+Perl_apply_opflags(pTHX_ U32 opcode, char *flagstr)
+{
+    U16 opcode_base = opcode & 0xFFFF;
+    U8 priv = (opcode_base >> 16) & 0xFF;
+
+    for(char flag; (flag = *flagstr); flagstr++) {
+        switch(opcode_base) {
+            case OP_SEQ:
+            case OP_EQ:
+                switch(flag) {
+                    case 'u':
+                        priv |= OPpEQ_UNDEF;
+                        continue;
+                }
+        }
+        croak("Unrecognized flag '%c' for %s", flag, PL_op_desc[opcode_base]);
+    }
+
+    return opcode_base | (priv << 16);
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

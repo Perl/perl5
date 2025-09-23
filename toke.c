@@ -256,7 +256,7 @@ static const char* const lex_state_names[] = {
 #define Aop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)ADDOP))
 #define AopNOASSIGN(f) return (pl_yylval.ival=f, PL_bufptr=s, REPORT((int)ADDOP))
 #define Mop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)MULOP))
-#define ChEop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)CHEQOP))
+#define ChEop(f) return (pl_yylval.ival=f, PL_expect=XOPFLAGSTERM, PL_bufptr=s, REPORT((int)CHEQOP))
 #define NCEop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)NCEQOP))
 #define ChRop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)CHRELOP))
 #define NCRop(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)NCRELOP))
@@ -5170,7 +5170,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     static const char* const exp_name[] =
         { "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
           "ATTRTERM", "TERMBLOCK", "XBLOCKTERM", "POSTDEREF",
-          "SIGVAR", "TERMORDORDOR"
+          "SIGVAR", "TERMORDORDOR", "XOPFLAGSTERM"
         };
 #endif
 
@@ -6250,6 +6250,26 @@ yyl_colon(pTHX_ char *s)
             force_next(THING);
         }
         TOKEN(COLONATTR);
+
+    case XOPFLAGSTERM:
+        {
+            s = skipspace(s);
+
+            /* We don't know what the operator is to which these flags are
+             * being applied. We'll just accept any sequence of lower- or
+             * upper-case letters and let apply_opflags() complain if any are
+             * bad.
+             */
+            char *flags = s;
+            while (isALPHA(*s))
+                s++;
+
+            SV *flagsbuf = newSV_type(SVt_PV);
+            sv_setpvn_fresh(flagsbuf, flags, s - flags);
+
+            pl_yylval.svval = flagsbuf;
+            OPERATOR(OPFLAGS);
+        }
     }
 
     if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING) {
@@ -6327,6 +6347,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
     switch (PL_expect) {
     case XTERM:
     case XTERMORDORDOR:
+    case XOPFLAGSTERM:
         PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
         PL_lex_allbrackets++;
         OPERATOR(HASHBRACK);
@@ -9581,7 +9602,8 @@ yyl_try(pTHX_ char *s)
             /* avoid v123abc() or $h{v1}, allow C<print v10;> */
             if (!isALPHA(*start) && (PL_expect == XTERM
                         || PL_expect == XREF || PL_expect == XSTATE
-                        || PL_expect == XTERMORDORDOR)) {
+                        || PL_expect == XTERMORDORDOR
+                        || PL_expect == XOPFLAGSTERM)) {
                 GV *const gv = gv_fetchpvn_flags(s, start - s,
                                                     UTF ? SVf_UTF8 : 0, SVt_PVCV);
                 if (!gv) {

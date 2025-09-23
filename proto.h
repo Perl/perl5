@@ -144,6 +144,10 @@ Perl_apply_builtin_cv_attributes(pTHX_ CV *cv, OP *attrlist);
 #define PERL_ARGS_ASSERT_APPLY_BUILTIN_CV_ATTRIBUTES \
         assert(cv); assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
+PERL_CALLCONV U32
+Perl_apply_opflags(pTHX_ U32 optype, char *flagstr);
+#define PERL_ARGS_ASSERT_APPLY_OPFLAGS
+
 PERL_CALLCONV void
 Perl_atfork_child(void);
 #define PERL_ARGS_ASSERT_ATFORK_CHILD

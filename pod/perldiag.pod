@@ -7466,6 +7466,15 @@ whereabouts in the regular expression the escape was discovered.
 (F) You attempted to add a named attribute to a C<field> definition, but
 perl does not recognise the name of the requested attribute.
 
+=item Unrecognized flag '%c' for %s
+
+(F) You attempted to use an operator flag on an operator (by using the
+C<OP:FLAG> notation), but the particular operator does not recognise that
+particular flag.
+
+If this is unexpected, it could be a stray colon confusing the parser into
+thinking that the following bareword is a set of operator flags.
+
 =item Unrecognised parameters for "%s" constructor: %s
 
 (F) You called new on a class but supplied a parameter name that

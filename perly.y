@@ -41,6 +41,7 @@
     void *pval;
     OP *opval;
     GV *gvval;
+    SV *svval;
 }
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
@@ -92,6 +93,7 @@
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
 %token <ival> SUBLEXSTART SUBLEXEND
 %token <ival> PHASER
+%token <svval> OPFLAGS
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startanonmethod startformsub
@@ -113,6 +115,7 @@
 %type <pval>  fieldvar /* pval is PADNAME */
 %type <opval> optfieldattrlist fielddecl
 %type <opval> termbinop termunop anonymous termdo
+%type <svval> optopflags
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil sigvar
 %type <opval> sigscalarelem optsigscalardefault sigslurpelem
@@ -1209,10 +1212,25 @@ termeqop:	eqopchain %prec PREC_LOW
 			{ yyerror("syntax error"); YYERROR; }
 	;
 
-eqopchain:	term[lhs] CHEQOP term[rhs]
-			{ $$ = cmpchain_start($CHEQOP, $lhs, $rhs); }
-	|	eqopchain[lhs] CHEQOP term[rhs]
-			{ $$ = cmpchain_extend($CHEQOP, $lhs, $rhs); }
+optopflags:	%empty
+	  		{ $$ = NULL; }
+	|	OPFLAGS
+	;
+
+eqopchain:	term[lhs] CHEQOP optopflags term[rhs]
+			{ U32 opcode = $CHEQOP;
+			  if($optopflags) {
+			    SAVEFREESV($optopflags);
+			    opcode = apply_opflags(opcode, SvPV_nolen($optopflags));
+			  }
+			  $$ = cmpchain_start(opcode, $lhs, $rhs); }
+	|	eqopchain[lhs] CHEQOP optopflags term[rhs]
+			{ U32 opcode = $CHEQOP;
+			  if($optopflags) {
+			    SAVEFREESV($optopflags);
+			    opcode = apply_opflags(opcode, SvPV_nolen($optopflags));
+			  }
+			  $$ = cmpchain_extend(opcode, $lhs, $rhs); }
 	;
 
 /* Unary operators and terms */

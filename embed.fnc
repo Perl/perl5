@@ -717,6 +717,8 @@ Apx	|void	|apply_attrs_string					\
 Adp	|OP *	|apply_builtin_cv_attributes				\
 				|NN CV *cv				\
 				|NULLOK OP *attrlist
+Xp	|U32	|apply_opflags	|U32 optype				\
+				|NULLOK char *flagstr
 CTp	|void	|atfork_child
 CTp	|void	|atfork_lock
 CTp	|void	|atfork_unlock

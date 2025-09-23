@@ -954,6 +954,7 @@
 #   define amagic_applies(a,b,c)                Perl_amagic_applies(aTHX_ a,b,c)
 #   define amagic_is_enabled(a)                 Perl_amagic_is_enabled(aTHX_ a)
 #   define apply(a,b,c)                         Perl_apply(aTHX_ a,b,c)
+#   define apply_opflags(a,b)                   Perl_apply_opflags(aTHX_ a,b)
 #   define av_extend_guts(a,b,c,d,e)            Perl_av_extend_guts(aTHX_ a,b,c,d,e)
 #   define av_nonelem(a,b)                      Perl_av_nonelem(aTHX_ a,b)
 #   define av_remove_offset(a)                  Perl_av_remove_offset(aTHX_ a)
