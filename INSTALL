@@ -17,7 +17,7 @@ subreleases (like 5.40.x and 5.42.x) are stable maintenance releases and
 odd-numbered subreleases (like 5.41.x and 5.43.x) are unstable
 development releases.  Development releases should not be used in
 production environments.  Fixes and new features are first carefully
-tested in development releases and only if they prove themselves to be
+tested in development releases, and only if they prove themselves to be
 worthy will they be migrated to the maintenance releases.
 
 The basic steps to build and install perl 5 on a Unix system with all
@@ -53,7 +53,7 @@ L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
 F<pod/perldelta.pod> file.  For more information about how to find more
-specific detail about changes, see the Changes file.
+specific detail about changes, see the F<Changes> file.
 
 =begin comment
 
@@ -191,13 +191,13 @@ almost always okay.  It is normal for some things to be "NOT found",
 since Configure often searches for many different ways of performing
 the same function.
 
-At any Configure prompt, you can type  &-d  and Configure will use the
+At any Configure prompt, you can type C<&-d>  and Configure will use the
 defaults from then on.
 
 After it runs, Configure will perform variable substitution on all the
-*.SH files and offer to run make depend.
+*.SH files and offer to run S<C<make depend>>.
 
-The results of a Configure run are stored in the config.sh and Policy.sh
+The results of a Configure run are stored in the F<config.sh> and F<Policy.sh>
 files.
 
 =head2 Common Configure options
@@ -300,9 +300,10 @@ obvious and convenient place.
 =item Building a development release
 
 For development releases (odd subreleases, like 5.9.x) if you want to
-use Configure -d, you will also need to supply -Dusedevel to Configure,
+use S<C<Configure -d>>, you will also need to supply C<-Dusedevel> to
+Configure,
 because the default answer to the question "do you really want to
-Configure a development version?" is "no".  The -Dusedevel skips that
+Configure a development version?" is "no".  The C<-Dusedevel> skips that
 sanity check.
 
 =back
@@ -317,7 +318,7 @@ output, you can run
 For most users, most of the Configure defaults are fine, or can easily
 be set on the Configure command line.  However, if Configure doesn't
 have an option to do what you want, you can change Configure variables
-after the platform hints have been run by using Configure's -A switch.
+after the platform hints have been run by using Configure's C<-A> switch.
 For example, here's how to add a couple of extra flags to C compiler
 invocations:
 
@@ -325,7 +326,7 @@ invocations:
 
 To clarify, those ccflags values are not Configure options; if passed to
 Configure directly, they won't do anything useful (they will define a
-variable in config.sh, but without taking any action based upon it).
+variable in F<config.sh>, but without taking any action based upon it).
 But when passed to the compiler, those flags will activate #ifdefd code.
 
 For more help on Configure switches, run
@@ -365,7 +366,8 @@ This buffer starts small, but it will keep growing until the result
 fits.  To get a fixed upper limit, you should compile Perl with
 PERL_REENTRANT_MAXSIZE defined to be the number of bytes you want.  One
 way to do this is to run Configure with
-C<-Accflags=-DPERL_REENTRANT_MAXSIZE=65536>.
+
+ -Accflags=-DPERL_REENTRANT_MAXSIZE=65536
 
 =head3 Large file support
 
@@ -374,7 +376,7 @@ Since Perl 5.6.0, Perl has supported large files (files larger than
 support is on by default.
 
 This is both good and bad. It is good in that you can use large files,
-seek(), stat(), and -s them.  It is bad in that if you are interfacing
+seek(), stat(), and C<-s> them.  It is bad in that if you are interfacing
 Perl using some extension, the components you are connecting to must also
 be large file aware: if Perl thinks files can be large but the other
 parts of the software puzzle do not understand the concept, bad things
@@ -396,8 +398,8 @@ them with compiler flags and/or C<long long> or C<int64_t>,
 you can build a perl that uses 64 bits.
 
 There are actually two modes of 64-bitness: the first one is achieved
-using Configure -Duse64bitint and the second one using Configure
--Duse64bitall.  The difference is that the first one is minimal and
+using S<C<Configure -Duse64bitint>> and the second one using S<C<Configure
+-Duse64bitall>>.  The difference is that the first one is minimal and
 the second one maximal.  The first works in more places than the second.
 
 The C<use64bitint> option does only as much as is required to get
@@ -410,22 +412,22 @@ you will be able to have 64 bit-wide scalar values.
 
 The C<use64bitall> option goes all the way by attempting to switch
 integers (if it can), longs (and pointers) to being 64-bit.  This may
-create an even more binary incompatible Perl than -Duse64bitint: the
+create an even more binary incompatible Perl than C<-Duse64bitint>: the
 resulting executable may not run at all in a 32-bit box, or you may
 have to reboot/reconfigure/rebuild your operating system to be 64-bit
 aware.
 
-Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
+Natively 64-bit systems need neither C<-Duse64bitint> nor C<-Duse64bitall>.
 On these systems, it might be the default compilation mode, and there
 is currently no guarantee that passing no use64bitall option to the
-Configure process will build a 32bit perl. Implementing -Duse32bit*
+Configure process will build a 32bit perl. Implementing C<-Duse32bit*>
 options is planned for a future release of perl.
 
 =head3 Long doubles
 
 In some systems you may be able to use long doubles to enhance the
 range and precision of your double precision floating point numbers
-(that is, Perl's numbers).  Use Configure -Duselongdouble to enable
+(that is, Perl's numbers).  Use S<C<Configure -Duselongdouble>> to enable
 this support (if it is available).
 
 Note that the exact format and range of long doubles varies:
@@ -434,7 +436,7 @@ but there are others, with different mantissa and exponent ranges.
 
 =head3 "more bits"
 
-You can "Configure -Dusemorebits" to turn on both the 64-bit support
+You can S<C<Configure -Dusemorebits>> to turn on both the 64-bit support
 and the long double support.
 
 =head3 quadmath
@@ -445,7 +447,7 @@ called quadmath, which implements the IEEE 754 quadruple precision
 works at least on x86 and ia64 platforms.  It may be part of your gcc
 installation, or you may need to install it separately.
 
-With "Configure -Dusequadmath" you can try enabling its use, but note
+With S<C<Configure -Dusequadmath>> you can try enabling its use, but note
 the compiler dependency, you may need to also add "-Dcc=...".
 At C level the type is called C<__float128> (note, not "long double"),
 but Perl source knows it as NV.  (This is not "long doubles".)
@@ -587,7 +589,7 @@ seed with the define C<NO_HASH_SEED> by providing to Configure
 
 =for apidoc Amnh||NO_HASH_SEED
 
-Note that if you do this you should modify the code in hv_func.h to specify
+Note that if you do this you should modify the code in F<hv_func.h> to specify
 your own key. In the future this define may be renamed and replaced with one
 that requires you to specify the key to use.
 
@@ -652,7 +654,7 @@ C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> instead.
 Perl can be configured to be 'socksified', that is, to use the SOCKS
 TCP/IP proxy protocol library.  SOCKS is used to give applications
 access to transport layer network proxies.  Perl supports only SOCKS
-Version 5.  The corresponding Configure option is -Dusesocks.
+Version 5.  The corresponding Configure option is C<-Dusesocks>.
 You can find more about SOCKS from wikipedia at
 L<https://en.wikipedia.org/wiki/SOCKS>.
 
@@ -661,36 +663,36 @@ L<https://en.wikipedia.org/wiki/SOCKS>.
 By default, Configure will compile perl to use dynamic loading.
 If you want to force perl to be compiled completely
 statically, you can either choose this when Configure prompts you or
-you can use the Configure command line option -Uusedl.
+you can use the Configure command line option C<-Uusedl>.
 With this option, you won't be able to use any new extension
 (XS) module without recompiling perl itself.
 
 =head3 Building a shared Perl library
 
 Currently, for most systems, the main perl executable is built by
-linking the "perl library" libperl.a with perlmain.o, your static
-extensions, and various extra libraries, such as -lm.
+linking the "perl library" F<libperl.a> with F<perlmain.o>, your static
+extensions, and various extra libraries, such as C<-lm>.
 
 On systems that support dynamic loading, it may be possible to
-replace libperl.a with a shared libperl.so.  If you anticipate building
+replace F<libperl.a> with a shared F<libperl.so>.  If you anticipate building
 several different perl binaries (e.g. by embedding libperl into
 different programs, or by using the optional compiler extension), then
-you might wish to build a shared libperl.so so that all your binaries
+you might wish to build a shared F<libperl.so> so that all your binaries
 can share the same library.
 
 The disadvantages are that there may be a significant performance
-penalty associated with the shared libperl.so, and that the overall
+penalty associated with the shared F<libperl.so>, and that the overall
 mechanism is still rather fragile with respect to different versions
 and upgrades.
 
 In terms of performance, on my test system (Solaris 2.5_x86) the perl
-test suite took roughly 15% longer to run with the shared libperl.so.
+test suite took roughly 15% longer to run with the shared F<libperl.so>.
 Your system and typical applications may well give quite different
 results.
 
 The default name for the shared library is typically something like
-libperl.so.5.8.8 (for Perl 5.8.8), or libperl.so.588, or simply
-libperl.so.  Configure tries to guess a sensible naming convention
+F<libperl.so.5.8.8> (for Perl 5.8.8), or F<libperl.so.588>, or simply
+F<libperl.so>.  Configure tries to guess a sensible naming convention
 based on your C library name.  Since the library gets installed in a
 version-specific architecture-dependent directory, the exact name
 isn't very important anyway, as long as your linker is happy.
@@ -704,7 +706,7 @@ library search (LD_LIBRARY_PATH in most systems, DYLD_LIBRARY_PATH for
 Darwin, LD_LIBRARY_PATH/SHLIB_PATH
 for HP-UX, LIBPATH for AIX and z/OS, PATH for Cygwin) must be set up to include
 the Perl build directory because that's where the shared libperl will
-be created.  Configure arranges makefile to have the correct shared
+be created.  Configure arranges F<makefile> to have the correct shared
 library search settings.  You can find the name of the environment
 variable Perl thinks works in your your system by
 
@@ -713,7 +715,7 @@ variable Perl thinks works in your your system by
 However, there are some special cases where manually setting the
 shared library path might be required.  For example, if you want to run
 something like the following with the newly-built but not-yet-installed
-./perl:
+F<./perl>:
 
         ./perl -I. -MTestInit t/misc/failing_test.t
 
@@ -731,23 +733,23 @@ for Bourne-style shells, or
    setenv LD_LIBRARY_PATH `pwd`
 
 for Csh-style shells.  (This procedure may also be needed if for some
-unexpected reason Configure fails to set up makefile correctly.) (And
+unexpected reason Configure fails to set up F<makefile> correctly.) (And
 again, it may be something other than LD_LIBRARY_PATH for you, see above.)
 
 You can often recognize failures to build/use a shared libperl from error
-messages complaining about a missing libperl.so (or libperl.sl in HP-UX),
+messages complaining about a missing F<libperl.so> (or F<libperl.sl> in HP-UX),
 for example:
 
-    18126:./miniperl: /sbin/loader: Fatal Error: cannot map libperl.so
+    18126:./miniperl: /sbin/loader: Fatal Error: cannot map F<libperl.so>
 
 There is also a potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
-with and without -DDEBUGGING).  For example, suppose you build and
+with and without C<-DDEBUGGING>).  For example, suppose you build and
 install a standard Perl 5.10.0 with a shared library.  Then, suppose you
-try to build Perl 5.10.0 with -DDEBUGGING enabled, but everything else
+try to build Perl 5.10.0 with C<-DDEBUGGING> enabled, but everything else
 the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
-libperl.so.8 rather with the installed libperl.so.8?  The answer is
+F<libperl.so.8> rather with the installed F<libperl.so.8>?  The answer is
 that you might not be able to.  The installation directory is encoded
 in the perl binary with the LD_RUN_PATH environment variable (or
 equivalent ld command-line option).  On Solaris, you can override that
@@ -761,8 +763,8 @@ with a shared library if $archlib/CORE/$libperl already exists from a
 previous build.
 
 A good workaround is to specify a different directory for the
-architecture-dependent library for your -DDEBUGGING version of perl.
-You can do this by changing all the *archlib* variables in config.sh to
+architecture-dependent library for your C<-DDEBUGGING> version of perl.
+You can do this by changing all the *archlib* variables in F<config.sh> to
 point to your new architecture-dependent library.
 
 =head3 External glob
@@ -816,7 +818,7 @@ variables are in the file Porting/Glossary.
 $prefixexp is generated from $prefix, with ~ expansion done to convert
 home directories into absolute paths. Similarly for the other variables
 listed. As file system calls do not do this, you should always reference
-the ...exp variables, to support users who build perl in their home
+the C<...exp> variables, to support users who build perl in their home
 directory.
 
 Actually, Configure recognizes the SVR3-style
@@ -948,7 +950,7 @@ touching the perl distribution proper.  And, like otherlib dirs,
 version and architecture specific subdirectories are also searched, if
 present, at run time.  Of course, you can still search other @INC
 directories ahead of those in APPLLIB_EXP by using any of the standard
-run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
+run-time methods: C<$PERLLIB>, C<$PERL5LIB>, -I, use lib, etc.
 
 =item default_inc_excludes_dot
 
@@ -975,7 +977,7 @@ entries to @INC.
 
 By default, man pages will be installed in $man1dir and $man3dir, which
 are normally /usr/local/man/man1 and /usr/local/man/man3.  If you
-want to use a .3pm suffix for perl man pages, you can do that with
+want to use a C<.3pm> suffix for perl man pages, you can do that with
 
     sh Configure -Dman3ext=3pm
 
@@ -1052,7 +1054,7 @@ If you need to install perl on many identical systems, it is convenient
 to compile it once and create an archive that can be installed on
 multiple systems.  Suppose, for example, that you want to create an
 archive that can be installed in /opt/perl.  One way to do that is by
-using the DESTDIR variable during C<make install>.  The DESTDIR is
+using the C<DESTDIR> variable during C<make install>.  The DESTDIR is
 automatically prepended to all the installation paths.  Thus you
 simply do:
 
@@ -1082,15 +1084,15 @@ install is done to the original configured prefix.
 
 This option is not compatible with the building of a shared libperl
 ("-Duseshrplib"), because in that case perl is linked with an hard-coded
-rpath that points at the libperl.so, that cannot be relocated.
+rpath that points at the F<libperl.so>, that cannot be relocated.
 
 =head2 Site-wide Policy settings
 
 After Configure runs, it stores a number of common site-wide "policy"
-answers (such as installation directories) in the Policy.sh file.
+answers (such as installation directories) in the F<Policy.sh> file.
 If you want to build perl on another system using the same policy
-defaults, simply copy the Policy.sh file to the new system's perl build
-directory, and Configure will use it. This will work even if Policy.sh was
+defaults, simply copy the F<Policy.sh> file to the new system's perl build
+directory, and Configure will use it. This will work even if F<Policy.sh> was
 generated for another version of Perl, or on a system with a
 different architecture and/or operating system. However, in such cases,
 you should review the contents of the file before using it: for
@@ -1104,9 +1106,9 @@ answers, you should
 
 to ensure that Configure doesn't re-use them.
 
-Further information is in the Policy_sh.SH file itself.
+Further information is in the F<Policy_sh.SH> file itself.
 
-If the generated Policy.sh file is unsuitable, you may freely edit it
+If the generated F<Policy.sh> file is unsuitable, you may freely edit it
 to contain any valid shell commands.  It will be run just after the
 platform-specific hints files.
 
@@ -1131,7 +1133,7 @@ directories separately, eg.
        sh Configure -Dinc_version_list="5.16.0/x86_64-linux 5.16.0" ...
 
 When using the newer perl, you can add these paths again in the
-PERL5LIB environment variable or with perl's -I runtime option.
+C<PERL5LIB> environment variable or with perl's -I runtime option.
 
 =head2 Building Perl outside of the source directory
 
@@ -1160,20 +1162,20 @@ as usual, and Perl will be built in /tmp/perl/build/directory.
 You can run perl scripts under the perl debugger at any time with
 B<perl -d your_script>.  If, however, you want to debug perl itself,
 you probably want to have support for perl internal debugging code
-(activated by adding -DDEBUGGING to ccflags), and/or support for the
-system debugger by adding -g to the optimisation flags.
+(activated by adding C<-DDEBUGGING> to ccflags), and/or support for the
+system debugger by adding C<-g> to the optimisation flags.
 
 A perl compiled with the DEBUGGING C preprocessor macro will support the
 C<-D> perl command-line switch, have assertions enabled, and have many
 extra checks compiled into the code; but will execute much more slowly
 (typically 2-3x) and the binary will be much larger (typically 2-3x).
 
-As a convenience, debugging code (-DDEBUGGING) and debugging symbols (-g)
+As a convenience, debugging code (C<-DDEBUGGING>) and debugging symbols (-g)
 can be enabled jointly or separately using a Configure switch, also
-(somewhat confusingly) named -DDEBUGGING.  For a more eye appealing call,
--DEBUGGING is defined to be an alias for -DDEBUGGING. For both, the -U
+(somewhat confusingly) named C<-DDEBUGGING>.  For a more eye appealing call,
+-DEBUGGING is defined to be an alias for C<-DDEBUGGING>. For both, the -U
 calls are also supported, in order to be able to overrule the hints or
-Policy.sh settings.
+F<Policy.sh> settings.
 
 Here are the DEBUGGING modes:
 
@@ -1185,38 +1187,38 @@ Here are the DEBUGGING modes:
 
 =item Configure -DEBUGGING=both
 
-Sets both -DDEBUGGING in the ccflags, and adds -g to optimize.
+Sets both C<-DDEBUGGING> in the ccflags, and adds C<-g> to optimize.
 
-You can actually specify -g and -DDEBUGGING independently (see below),
+You can actually specify C<-g> and C<-DDEBUGGING> independently (see below),
 but usually it's convenient to have both.
 
 =item Configure -DEBUGGING=-g
 
 =item Configure -Doptimize=-g
 
-Adds -g to optimize, but does not set -DDEBUGGING.
+Adds C<-g> to optimize, but does not set C<-DDEBUGGING>.
 
-(Note:  Your system may actually require something like cc -g2.
+(Note:  Your system may actually require something like S<C<cc -g2>>.
 Check your man pages for cc(1) and also any hint file for your system.)
 
 =item Configure -DEBUGGING=none
 
 =item Configure -UDEBUGGING
 
-Removes -g from optimize, and -DDEBUGGING from ccflags.
+Removes C<-g> from optimize, and C<-DDEBUGGING> from ccflags.
 
 =back
 
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L</Building a shared Perl library>.
 
-Note that a perl built with -DDEBUGGING will be much bigger and will run
+Note that a perl built with C<-DDEBUGGING> will be much bigger and will run
 much, much more slowly than a standard perl.
 
 =head2 DTrace support
 
 On platforms where DTrace is available, it may be enabled by
-using the -Dusedtrace option to Configure. DTrace probes are available
+using the C<-Dusedtrace> option to Configure. DTrace probes are available
 for subroutine entry (sub-entry) and subroutine exit (sub-exit). Here's a
 simple D script that uses them:
 
@@ -1236,7 +1238,7 @@ to be supported.  For example, Configure will offer to build GDBM_File
 only if it is able to find the gdbm library.
 
 To disable certain extensions so that they are not built, use the
--Dnoextensions=... and -Donlyextensions=... options.  They both accept
+C<-Dnoextensions=>... and C<-Donlyextensions=>... options.  They both accept
 a space-separated list of extensions, such as C<IPC/SysV>. The extensions
 listed in
 C<noextensions> are removed from the list of extensions to build, while
@@ -1257,11 +1259,11 @@ has been installed.  However, if you wish to have those additional
 extensions statically linked into the perl binary, then this offers a
 convenient way to do that in one step.  (It is not necessary, however;
 you can build and install extensions just fine even if you don't have
-dynamic loading.  See lib/ExtUtils/MakeMaker.pm for more details.)
+dynamic loading.  See F<lib/ExtUtils/MakeMaker.pm> for more details.)
 Another way of specifying extra modules is described in
 L<"Adding extra modules to the build"> below.
 
-If you re-use an old config.sh but change your system (e.g. by
+If you re-use an old F<config.sh> but change your system (e.g. by
 adding libgdbm) Configure will still offer your old choices of extensions
 for the default answer, but it will also point out the discrepancy to
 you.
@@ -1276,10 +1278,10 @@ to be specified explicitly (see L</Threads>).
 
 Those libraries are not distributed with perl. If your header (.h) files
 for those libraries are not in a directory normally searched by your C
-compiler, then you will need to include the appropriate -I/your/directory
+compiler, then you will need to include the appropriate C<-I/>I<your/directory>
 option when prompted by Configure.  If your libraries are not in a
 directory normally searched by your C compiler and linker, then you will
-need to include the appropriate -L/your/directory option when prompted
+need to include the appropriate C<-L/>I<your/directory> option when prompted
 by Configure. See the examples below.
 
 =head3 Examples
@@ -1289,15 +1291,15 @@ by Configure. See the examples below.
 =item gdbm in /usr/local
 
 Suppose you have gdbm and want Configure to find it and build the
-GDBM_File extension.  This example assumes you have gdbm.h
-installed in /usr/local/include/gdbm.h and libgdbm.a installed in
-/usr/local/lib/libgdbm.a.  Configure should figure all the
+GDBM_File extension.  This example assumes you have F<gdbm.h>
+installed in F</usr/local/include/gdbm.h> and F<libgdbm.a> installed in
+F</usr/local/lib/libgdbm.a>.  Configure should figure all the
 necessary steps out automatically.
 
 Specifically, when Configure prompts you for flags for
-your C compiler, you should include -I/usr/local/include, if it's
+your C compiler, you should include C<-I/usr/local/include>, if it's
 not here yet. Similarly, when Configure prompts you for linker flags,
-you should include -L/usr/local/lib.
+you should include C<-L/usr/local/lib>.
 
 If you are using dynamic loading, then when Configure prompts you for
 linker flags for dynamic loading, you should again include
@@ -1311,11 +1313,11 @@ you have gdbm installed in any of (/usr/local, /opt/local, /usr/gnu,
 
 The version of BerkeleyDB distributed by Oracle installs in a
 version-specific directory by default, typically something like
-/usr/local/BerkeleyDB.4.7.  To have Configure find that, you need to add
--I/usr/local/BerkeleyDB.4.7/include to cc flags, as in the previous
+F</usr/local/BerkeleyDB.4.7>.  To have Configure find that, you need to add
+C<-I/usr/local/BerkeleyDB.4.7/include> to cc flags, as in the previous
 example, and you will also have to take extra steps to help Configure
-find -ldb.  Specifically, when Configure prompts you for library
-directories, add /usr/local/BerkeleyDB.4.7/lib to the list.  Also, you
+find C<-ldb>.  Specifically, when Configure prompts you for library
+directories, add C</usr/local/BerkeleyDB.4.7/lib> to the list.  Also, you
 will need to add appropriate linker flags to tell the runtime linker
 where to find the BerkeleyDB shared libraries.
 
@@ -1329,13 +1331,13 @@ line):
     -Aldflags='-R/usr/local/BerkeleyDB.4.7/lib'
 
 locincpth is a space-separated list of include directories to search.
-Configure will automatically add the appropriate -I directives.
+Configure will automatically add the appropriate C<-I> directives.
 
 loclibpth is a space-separated list of library directories to search.
-Configure will automatically add the appropriate -L directives.
+Configure will automatically add the appropriate C<-L> directives.
 
 The addition to ldflags is so that the dynamic linker knows where to find
-the BerkeleyDB libraries.  For Linux and Solaris, the -R option does that.
+the BerkeleyDB libraries.  For Linux and Solaris, the C<-R> option does that.
 Other systems may use different flags.  Use the appropriate flag for your
 system.
 
@@ -1356,11 +1358,11 @@ ExtUtils::MakeMaker, and other extensions, will use it.
 =head2 GNU-style configure
 
 If you prefer the GNU-style configure command line interface, you can
-use the supplied configure.gnu command, e.g.
+use the supplied F<configure.gnu> command, e.g.
 
     CC=gcc ./configure.gnu
 
-The configure.gnu script emulates a few of the more common configure
+The F<configure.gnu> script emulates a few of the more common configure
 options.  Try
 
     ./configure.gnu --help
@@ -1374,7 +1376,7 @@ build a threaded perl with:
 
         CC=gcc ./configure.gnu -Dusethreads
 
-(The file is called configure.gnu to avoid problems on systems
+(The file is called F<configure.gnu> to avoid problems on systems
 that would not distinguish the files "Configure" and "configure".)
 
 =head2 Malloc Issues
@@ -1407,7 +1409,7 @@ systems), Configure chooses to use the system's malloc by default.
 See the appropriate file in the F<hints/> directory to see how the
 default is set.
 
-=item -DPERL_POLLUTE_MALLOC
+=item C<-DPERL_POLLUTE_MALLOC>
 
 =for apidoc Amnh||PERL_POLLUTE_MALLOC
 
@@ -1428,7 +1430,7 @@ from the linker for malloc et al.  In such cases, the system probably
 does not allow its malloc functions to be fully replaced with custom
 versions.
 
-=item -DPERL_DEBUGGING_MSTATS
+=item C<-DPERL_DEBUGGING_MSTATS>
 
 =for apidoc Amnh||PERL_DEBUGGING_MSTATS
 
@@ -1457,7 +1459,7 @@ guesses.
 
 All the installation questions have been moved to the top, so you don't
 have to wait for them.  Once you've handled them (and your C compiler and
-flags) you can type  &-d  at the next Configure prompt and Configure
+flags) you can type  C<&-d>  at the next Configure prompt and Configure
 will use the defaults from then on.
 
 If you find yourself trying obscure command line incantations and
@@ -1498,9 +1500,9 @@ not to, you should accept its offer.
 
 Several of the hint files contain additional important information.
 If you have any problems, it is a good idea to read the relevant hint
-file for further information.  See hints/solaris_2.sh for an extensive
+file for further information.  See F<hints/solaris_2.sh> for an extensive
 example.  More information about writing good hints is in the
-hints/README.hints file, which also explains hint files known as
+F<hints/README.hints> file, which also explains hint files known as
 callback-units.
 
 Note that any hint file is read before any Policy file, meaning that
@@ -1508,14 +1510,14 @@ Policy overrides hints -- see L</Site-wide Policy settings>.
 
 =item WHOA THERE!!!
 
-If you are re-using an old config.sh, it's possible that Configure
+If you are re-using an old F<config.sh>, it's possible that Configure
 detects different values from the ones specified in this file.  You will
 almost always want to keep the previous value, unless you have changed
 something on your system.
 
-For example, suppose you have added libgdbm.a to your system
+For example, suppose you have added F<libgdbm.a> to your system
 and you decide to reconfigure perl to use GDBM_File.  When you run
-Configure again, you will need to add -lgdbm to the list of libraries.
+Configure again, you will need to add C<-lgdbm> to the list of libraries.
 Now, Configure will find your gdbm include file and library and will
 issue a message:
 
@@ -1530,12 +1532,12 @@ the list of dynamic extensions to build.)
 =item Changing Compilers
 
 If you change compilers or make other significant changes, you should
-probably not re-use your old config.sh.  Simply remove it or
+probably not re-use your old F<config.sh>.  Simply remove it or
 rename it, then rerun Configure with the options you want to use.
 
-=item Propagating your changes to config.sh
+=item Propagating your changes to F<config.sh>
 
-If you make any changes to config.sh, you should propagate
+If you make any changes to F<config.sh>, you should propagate
 them to all the .SH files by running
 
     sh Configure -S
@@ -1545,35 +1547,35 @@ You will then have to rebuild by running
     make depend
     make
 
-=item config.over and config.arch
+=F<item config.>over and F<config.arch>
 
-You can also supply a shell script config.over to override
+You can also supply a shell script F<config.over> to override
 Configure's guesses.  It will get loaded up at the very end, just
-before config.sh is created.  You have to be careful with this,
+before F<config.sh> is created.  You have to be careful with this,
 however, as Configure does no checking that your changes make sense.
 This file is usually good for site-specific customizations.
 
 There is also another file that, if it exists, is loaded before the
-config.over, called config.arch.  This file is intended to be per
+F<config.over>, called F<config.arch>.  This file is intended to be per
 architecture, not per site, and usually it's the architecture-specific
-hints file that creates the config.arch.
+hints file that creates the F<config.arch>.
 
-=item config.h
+=item F<config.h>
 
-Many of the system dependencies are contained in config.h.
-Configure builds config.h by running the config_h.SH script.
-The values for the variables are taken from config.sh.
+Many of the system dependencies are contained in F<config.h>.
+Configure builds F<config.h> by running the F<config_h.SH> script.
+The values for the variables are taken from F<config.sh>.
 
-If there are any problems, you can edit config.h directly.  Beware,
+If there are any problems, you can edit F<config.h> directly.  Beware,
 though, that the next time you run Configure, your changes will be
 lost.
 
 =item cflags
 
 If you have any additional changes to make to the C compiler command
-line, they can be made in cflags.SH.  For instance, to turn off the
-optimizer on toke.c, find the switch structure marked 'or customize here',
-and add a line for toke.c ahead of the catch-all *) so that it now reads:
+line, they can be made in F<cflags.SH>.  For instance, to turn off the
+optimizer on F<toke.c>, find the switch structure marked 'or customize here',
+and add a line for F<toke.c> ahead of the catch-all *) so that it now reads:
 
     : or customize here
 
@@ -1582,12 +1584,12 @@ and add a line for toke.c ahead of the catch-all *) so that it now reads:
     *) ;;
 
 You should not edit the generated file cflags directly, as your changes
-will be lost the next time you run Configure, or if you edit config.sh.
+will be lost the next time you run Configure, or if you edit F<config.sh>.
 
 To explore various ways of changing ccflags from within a hint file,
-see the file hints/README.hints.
+see the file hints/F<README.hints>.
 
-To change the C flags for all the files, edit config.sh and change either
+To change the C flags for all the files, edit F<config.sh> and change either
 $ccflags or $optimize, and then re-run
 
     sh Configure -S
@@ -1596,8 +1598,8 @@ $ccflags or $optimize, and then re-run
 =item No sh
 
 If you don't have sh, you'll have to copy the sample file
-Porting/config.sh to config.sh and edit your config.sh to reflect your
-system's peculiarities.  See Porting/pumpkin.pod for more information.
+F<Porting/config.sh> to F<config.sh> and edit your F<config.sh> to reflect your
+system's peculiarities.  See F<Porting/pumpkin.pod> for more information.
 You'll probably also have to extensively modify the extension building
 mechanism.
 
@@ -1605,7 +1607,7 @@ mechanism.
 
 Specific information for the OS/2, Plan 9, VMS and Win32 ports is in the
 corresponding README files and subdirectories.  Additional information,
-including a glossary of all those config.sh variables, is in the Porting
+including a glossary of all those F<config.sh> variables, is in the Porting
 subdirectory.  Porting/Glossary should especially come in handy.
 
 Ports for other systems may also be available.  You should check out
@@ -1614,7 +1616,7 @@ various other operating systems.
 
 If you plan to port Perl to a new architecture, study carefully the
 section titled "Philosophical Issues in Patching and Porting Perl"
-in the file Porting/pumpkin.pod and the file pod/perlgit.pod.
+in the file F<Porting/pumpkin.pod> and the file F<pod/perlgit.pod>.
 Study also how other non-UNIX ports have solved problems.
 
 =back
@@ -1622,7 +1624,7 @@ Study also how other non-UNIX ports have solved problems.
 =head2 Adding extra modules to the build
 
 You can specify extra modules or module bundles to be fetched from the
-CPAN and installed as part of the Perl build.  Either use the -Dextras=...
+CPAN and installed as part of the Perl build.  Either use the C<-Dextras=>...
 command line parameter to Configure, for example like this:
 
     Configure -Dextras="Bundle::LWP DBI"
@@ -1653,12 +1655,12 @@ changes in privileges, such as B<sudo>.
 
 =head1 make depend
 
-This will look for all the includes.  The output is stored in makefile.
-The only difference between Makefile and makefile is the dependencies at
-the bottom of makefile.  If you have to make any changes, you should edit
-makefile, not Makefile, since the Unix make command reads makefile first.
+This will look for all the includes.  The output is stored in F<makefile>.
+The only difference between F<Makefile> and F<makefile> is the dependencies at
+the bottom of F<makefile>.  If you have to make any changes, you should edit
+F<makefile>, not F<Makefile>, since the Unix make command reads F<makefile> first.
 (On non-Unix systems, the output may be stored in a different file.
-Check the value of $firstmakefile in your config.sh if in doubt.)
+Check the value of C<$firstmakefile> in your F<config.sh> if in doubt.)
 
 Configure will offer to do this step for you, so it isn't listed
 explicitly above.
@@ -1703,10 +1705,10 @@ to test your version of miniperl.
 
 If you have any locale-related environment variables set, try unsetting
 them.  I have some reports that some versions of IRIX hang while
-running B<./miniperl configpm> with locales other than the C locale.
+running C<./miniperl configpm> with locales other than the C locale.
 See the discussion under L<"make test"> below about locales and the
 whole L<perllocale/"LOCALE PROBLEMS"> section in the file
-pod/perllocale.pod.  The latter is especially useful if you see something
+F<pod/perllocale.pod>.  The latter is especially useful if you see something
 like this
 
     perl: warning: Setting locale failed.
@@ -1735,7 +1737,7 @@ retesting with the various PERL variables unset.
 If you run into dynamic loading problems, check your setting of
 the LD_LIBRARY_PATH environment variable (or on some systems the equivalent
 with a different name, see L</Building a shared Perl library>).  If you're
-creating a static Perl library (libperl.a rather than libperl.so) it should
+creating a static Perl library (F<libperl.a> rather than F<libperl.so>) it should
 build fine with LD_LIBRARY_PATH unset, though that may depend on details of
 your local setup.
 
@@ -1749,13 +1751,13 @@ with
 
 or by answering the nm extraction question interactively.
 If you have previously run Configure, you should not reuse your old
-config.sh.
+F<config.sh>.
 
 =item umask not found
 
 If the build processes encounters errors relating to umask(), the problem
 is probably that Configure couldn't find your umask() system call.
-Check your config.sh.  You should have d_umask='define'.  If you don't,
+Check your F<config.sh>.  You should have d_umask='define'.  If you don't,
 this is probably the L<"nm extraction"> problem discussed above.  Also,
 try reading the hints file for your system for further information.
 
@@ -1770,8 +1772,8 @@ on L<"nm extraction">.
 
 If you receive unresolved symbol errors during Perl build and/or test
 referring to __inet_* symbols, check to see whether BIND 8.1 is
-installed.  It installs a /usr/local/include/arpa/inet.h that refers to
-these symbols.  Versions of BIND later than 8.1 do not install inet.h
+installed.  It installs a F</usr/local/include/arpa/inet.h> that refers to
+these symbols.  Versions of BIND later than 8.1 do not install F<inet.h>
 in that location and avoid the errors.  You should probably update to a
 newer version of BIND (and remove the files the old one left behind).
 If you can't, you can either link with the updated resolver library
@@ -1784,10 +1786,10 @@ On a related note, if you see a bunch of complaints like the above about
 reentrant functions -- specifically networking-related ones -- being
 present but without prototypes available, check to see if BIND 8.1 (or
 possibly other BIND 8 versions) is (or has been) installed. They install
-header files such as netdb.h into places such as /usr/local/include (or
+header files such as F<netdb.h> into places such as /usr/local/include (or
 into another directory as specified at build/install time), at least
 optionally.  Remove them or put them in someplace that isn't in the C
-preprocessor's header file include search path (determined by -I options
+preprocessor's header file include search path (determined by C<-I> options
 plus defaults, normally /usr/include).
 
 =item #error "No DATAMODEL_NATIVE specified"
@@ -1801,7 +1803,7 @@ update your gcc installation.
 =item Optimizer
 
 If you can't compile successfully, try turning off your compiler's
-optimizer.  Edit config.sh and change the line
+optimizer.  Edit F<config.sh> and change the line
 
     optimize='-O'
 
@@ -1809,19 +1811,19 @@ to
 
     optimize=' '
 
-then propagate your changes with B<sh Configure -S> and rebuild
+then propagate your changes with S<C<sh Configure -S>> and rebuild
 with B<make depend; make>.
 
 =item Missing functions and Undefined symbols
 
 If the build of miniperl fails with a long list of missing functions or
-undefined symbols, check the libs variable in the config.sh file.  It
+undefined symbols, check the libs variable in the F<config.sh> file.  It
 should look something like
 
     libs='-lsocket -lnsl -ldl -lm -lc'
 
 The exact libraries will vary from system to system, but you typically
-need to include at least the math library -lm.  Normally, Configure
+need to include at least the math library C<-lm>.  Normally, Configure
 will suggest the correct defaults.  If the libs variable is empty, you
 need to start all over again.  Run
 
@@ -1831,9 +1833,9 @@ and start from the very beginning.  This time, unless you are sure of
 what you are doing, accept the default list of libraries suggested by
 Configure.
 
-If the libs variable is missing -lm, there is a chance that libm.so.1
-is available, but the required (symbolic) link to libm.so is missing.
-(same could be the case for other libraries like libcrypt.so).  You
+If the libs variable is missing C<-lm>, there is a chance that F<libm.so.1>
+is available, but the required (symbolic) link to F<libm.so> is missing.
+(same could be the case for other libraries like F<libcrypt.so>).  You
 should check your installation for packages that create that link, and
 if no package is installed that supplies that link or you cannot install
 them, make the symbolic link yourself e.g.:
@@ -1854,16 +1856,16 @@ If you still have missing routines or undefined symbols, you probably
 need to add some library or other, make a symbolic link like described
 above, or you need to undefine some feature that Configure thought was
 there but is defective or incomplete.  If you used a hint file, see if
-it has any relevant advice.  You can also look through config.h
+it has any relevant advice.  You can also look through F<config.h>
 for likely suspects.
 
-=item toke.c
+=item F<toke.c>
 
 Some compilers will not compile or optimize the larger files (such as
-toke.c) without some extra switches to use larger jump offsets or
+F<toke.c>) without some extra switches to use larger jump offsets or
 allocate larger internal tables.  You can customize the switches for
-each file in cflags.SH.  It's okay to insert rules for specific files
-into makefile since a default rule only takes effect in the absence of a
+each file in F<cflags.SH>.  It's okay to insert rules for specific files
+into F<makefile> since a default rule only takes effect in the absence of a
 specific rule.
 
 =item Missing dbmclose
@@ -1896,7 +1898,7 @@ error, as the header file is broken. There are two ways to deal with this
 If you see such a message during the building of an extension, but
 the extension passes its tests anyway (see L<"make test"> below),
 then don't worry about the warning message.  The extension
-Makefile.PL goes looking for various libraries needed on various
+F<Makefile.PL> goes looking for various libraries needed on various
 systems; few systems will need all the possible libraries listed.
 Most users will see warnings for the ones they don't have.  The
 phrase 'mostly harmless' is intended to reassure you that nothing
@@ -1909,7 +1911,7 @@ message
 
 then it's likely you're going to run into trouble somewhere along
 the line, since it's hard to see how you can use the GDBM_File
-extension without the -lgdbm library.
+extension without the C<-lgdbm> library.
 
 It is true that, in principle, Configure could have figured all of
 this out, but Configure and the extension building process are not
@@ -1953,7 +1955,7 @@ may lead into linking problems.  Either recompile your GNU binutils
 under your current operating system release, or modify your PATH not
 to include the GNU utils before running Configure, or specify the
 vendor-supplied utilities explicitly to Configure, for example by
-Configure -Dar=/bin/ar.
+S<C<Configure -Dar=/bin/ar>>.
 
 =item THIS PACKAGE SEEMS TO BE INCOMPLETE
 
@@ -1989,8 +1991,8 @@ configured in the kernel.  Perl tries to detect this, though, and
 you will get a message telling you what to do.
 
 Building Perl on a system that has also BIND (headers and libraries)
-installed may run into troubles because BIND installs its own netdb.h
-and socket.h, which may not agree with the operating system's ideas of
+installed may run into troubles because BIND installs its own F<netdb.h>
+and F<socket.h>, which may not agree with the operating system's ideas of
 the same files.  Similarly, including -lbind may conflict with libc's
 view of the world.  You may have to tweak -Dlocincpth and -Dloclibpth
 to avoid the BIND.
@@ -2023,16 +2025,16 @@ the particular platforms:
 
 =item Android
 
-L<"Cross-compilation" in README.android or
+L<"Cross-compilation" in F<README.android> or
 perlandroid|perlandroid/Cross-compilation>
 
 =item Blackberry
 
-L<"Cross-compilation" in README.qnx or perlqnx|perlqnx/Cross-compilation>
+L<"Cross-compilation" in F<README.qnx> or perlqnx|perlqnx/Cross-compilation>
 
 =item Solaris
 
-L<"CROSS-COMPILATION" in README.solaris or
+L<"CROSS-COMPILATION" in F<README.solaris> or
 perlsolaris|perlsolaris/CROSS-COMPILATION>
 
 =item Linux
@@ -2057,7 +2059,7 @@ The more common one requires some way of transferring and running
 executables in the target system, such as an ssh connection; this is the
 C<./Configure -Dusecrosscompile -Dtargethost=...> route.  The second
 method doesn't need access to the target system, but requires you to
-provide a config.sh, and a canned Makefile; the rest of this section
+provide a F<config.sh>, and a canned F<Makefile>; the rest of this section
 describes the former.
 
 This cross-compilation setup of Configure has successfully been used in
@@ -2208,7 +2210,7 @@ a few tty tests will be skipped.
 
 =head2 What if make test doesn't work?
 
-If make test bombs out, just cd to the t directory and run ./TEST
+If make test bombs out, just cd to the t directory and run F<./TEST>
 by hand to see if it makes any difference.
 
 One way to get more detailed information about failed tests and
@@ -2284,7 +2286,7 @@ different.
 =item Out of memory
 
 On some systems, particularly those with smaller amounts of RAM, some
-of the tests in t/op/pat.t may fail with an "Out of memory" message.
+of the tests in F<t/op/pat.t> may fail with an "Out of memory" message.
 For example, on my SparcStation IPC with 12 MB of RAM, in perl5.5.670,
 test 85 will fail if run under either t/TEST or t/harness.
 
@@ -2297,11 +2299,11 @@ test, it does not necessarily mean you have a broken perl.  This test
 tries to exercise the regular expression subsystem quite thoroughly,
 and may well be far more demanding than your normal usage.
 
-=item libgcc_s.so.1: cannot open shared object file
+=item F<libgcc_s.so.1>: cannot open shared object file
 
 This message has been reported on gcc-3.2.3 and earlier installed with
 a non-standard prefix.  Setting the LD_LIBRARY_PATH environment variable
-(or equivalent) to include gcc's lib/ directory with the libgcc_s.so.1
+(or equivalent) to include gcc's lib/ directory with the F<libgcc_s.so.1>
 shared library should fix the problem.
 
 =item Failures from lib/File/Temp/t/security saying "system possibly insecure"
@@ -2520,7 +2522,7 @@ Some sites may wish to make perl documentation available in HTML
 format.  The installhtml utility can be used to convert pod
 documentation into linked HTML files and install them.
 
-Currently, the supplied ./installhtml script does not make use of the
+Currently, the supplied F<./installhtml> script does not make use of the
 html Configure variables.  This should be fixed in a future release.
 
 The following command-line is an example of one used to convert
@@ -2564,23 +2566,23 @@ or
     make realclean
 
 The only difference between the two is that make distclean also removes
-your old config.sh and Policy.sh files.  (A plain 'make clean' is now
+your old F<config.sh> and F<Policy.sh> files.  (A plain 'make clean' is now
 equivalent to 'make realclean'.)
 
 If you are upgrading from a previous version of perl, or if you
 change systems or compilers or make other significant changes, or if
 you are experiencing difficulties building perl, you should not reuse
-your old config.sh.
+your old F<config.sh>.
 
-If your reason to reuse your old config.sh is to save your particular
+If your reason to reuse your old F<config.sh> is to save your particular
 installation choices, then you can probably achieve the same effect by
-using the Policy.sh file.  See the section on L<"Site-wide Policy
+using the F<Policy.sh> file.  See the section on L<"Site-wide Policy
 settings"> above.
 
 =head1 Reporting Problems
 
 Please report problems to the GitHub issue tracker at
-https://github.com/Perl/perl5/issues, which will ask for the
+L<https://github.com/Perl/perl5/issues>, which will ask for the
 appropriate summary configuration information about your perl, which
 may help us track down problems far more quickly.  But first you should
 read the advice in this file, carefully re-read the error message and
@@ -2594,11 +2596,11 @@ without installing perl, then you can run it by hand from this source
 directory with C<./perl -V>.
 
 If the build fails too early to run perl, then please
-B<run> the C<./myconfig> shell script, and include its output along
+B<run> the F<./myconfig> shell script, and include its output along
 with an accurate description of your problem.
 
-If Configure itself fails, and does not generate a config.sh file
-(needed to run C<./myconfig>), then please open an issue with the
+If Configure itself fails, and does not generate a F<config.sh> file
+(needed to run F<./myconfig>), then please open an issue with the
 description of how Configure fails along with details of your system
 -- for example the output from running C<uname -a>.
 
@@ -2609,7 +2611,7 @@ the important technical details of the problem you have encountered,
 not whether your grammar and spelling is flawless.
 
 Trim out unnecessary information.  Do not include large files (such as
-config.sh or a complete Configure or make log) unless absolutely
+F<config.sh> or a complete Configure or make log) unless absolutely
 necessary.  Do not include a complete transcript of your build
 session.  Just include the failing commands, the relevant error
 messages, and whatever preceding commands are necessary to give the
@@ -2726,9 +2728,9 @@ used with 5.43.4.  If you find you do need to rebuild an extension with
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
-See your installed copy of the perllocal.pod file for a (possibly
+See your installed copy of the F<perllocal.pod> file for a (possibly
 incomplete) list of locally installed modules.  Note that you want
-perllocal.pod, not perllocale.pod, for installed module information.
+F<perllocal.pod>, not F<perllocale.pod>, for installed module information.
 
 =head1 Minimizing the Perl installation
 
@@ -2890,8 +2892,8 @@ perl will ignore the C<PERL_RAND_SEED> environment variable.
 
 Read the manual entries before running perl.  The main documentation
 is in the F<pod/> subdirectory and should have been installed during the
-build process.  Type B<man perl> to get started.  Alternatively, you
-can type B<perldoc perl> to use the supplied perldoc script.  This is
+build process.  Type C<man perl> to get started.  Alternatively, you
+can type C<perldoc perl> to use the supplied perldoc script.  This is
 sometimes useful for finding things in the library modules.
 
 =head1 AUTHOR
