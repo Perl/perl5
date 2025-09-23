@@ -10428,15 +10428,12 @@ Perl_newSVpvf_nocontext(const char *const pat, ...)
 #endif
 
 /*
-=for apidoc newSVpvf
+=for apidoc      newSVpvf
+=for apidoc_item newSVpvf_nocontext
 
-Creates a new SV and initializes it with the string formatted like
+These each create a new SV and initialize it with the string formatted like
 C<sv_catpvf>.
 
-=for apidoc newSVpvf_nocontext
-Like C<L</newSVpvf>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
 
 =for apidoc vnewSVpvf
 Like C<L</newSVpvf>> but the arguments are a C<va_list>.
