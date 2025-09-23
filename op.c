@@ -4399,6 +4399,9 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
     BINOP *bop;
     OP *op;
 
+    U8 priv = 2 | (type >> 16);
+    type &= 0xFFFF;
+
     if (!left)
         left = newOP(OP_NULL, 0);
     else
@@ -4412,7 +4415,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
     ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP);
     OpTYPE_set(op, type);
     cBINOPx(op)->op_flags = OPf_KIDS;
-    cBINOPx(op)->op_private = 2;
+    cBINOPx(op)->op_private = priv;
     cBINOPx(op)->op_first = left;
     cBINOPx(op)->op_last = right;
     OpMORESIB_set(left, right);
@@ -4425,6 +4428,9 @@ Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
 {
     BINOP *bop;
     OP *op;
+
+    U8 priv = 2 | (type >> 16);
+    type &= 0xFFFF;
 
     PERL_ARGS_ASSERT_CMPCHAIN_EXTEND;
     if (!right)
@@ -4445,7 +4451,7 @@ Perl_cmpchain_extend(pTHX_ I32 type, OP *ch, OP *right)
         cright = cBINOPx(ch)->op_last;
         cBINOPx(ch)->op_first = NULL;
         cBINOPx(ch)->op_last = NULL;
-        cBINOPx(ch)->op_private = 0;
+        cBINOPx(ch)->op_private = priv;
         cBINOPx(ch)->op_flags = 0;
         cUNOPx(nch)->op_first = cright;
         OpMORESIB_set(cright, ch);

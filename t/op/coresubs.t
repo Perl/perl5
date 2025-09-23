@@ -18,8 +18,8 @@ use B;
 
 my %unsupported = map +($_=>1), qw (
  __DATA__ __END__ ADJUST AUTOLOAD BEGIN UNITCHECK CORE DESTROY END INIT CHECK
-  all and any catch class cmp default defer do dump else elsif eq eval field
-  finally for foreach format ge given goto grep gt if isa last le local
+  all and any catch class cmp default defer do dump else elsif eq equ eval
+  field finally for foreach format ge given goto grep gt if isa last le local
   lt m map method my ne next no or our package print printf q qq qr qw qx
   redo require return s say sort state sub tr try unless until use
   when while x xor y

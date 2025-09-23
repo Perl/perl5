@@ -8155,6 +8155,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
             return REPORT(0);
         ChEop(OP_SEQ);
 
+    case KEY_equ:
+        /* TODO: feature guard? */
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+            return REPORT(0);
+        ChEop(OP_SEQ | (OPpEQ_UNDEF << 16));
+
     case KEY_exists:
         UNI(OP_EXISTS);
 

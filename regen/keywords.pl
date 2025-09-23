@@ -181,6 +181,7 @@ __END__
 -endservent
 -eof
 -eq
+-equ
 +eval
 -evalbytes
 -exec

@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.87;
+package B::Deparse 1.88;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -17,6 +17,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpCONST_BARE OPpEMPTYAVHV_IS_HV
          OPpCONST_TOKEN_MASK
          OPpCONST_TOKEN_LINE OPpCONST_TOKEN_FILE OPpCONST_TOKEN_PACKAGE
+         OPpEQ_UNDEF
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
@@ -3271,7 +3272,7 @@ sub pp_i_ge { binop(@_, ">=", 15) }
 sub pp_i_le { binop(@_, "<=", 15) }
 sub pp_i_ncmp { maybe_targmy(@_, \&binop, "<=>", 14) }
 
-sub pp_seq { binop(@_, "eq", 14) }
+sub pp_seq { my $priv = $_[1]->private; binop(@_, $priv & OPpEQ_UNDEF ? "equ" : "eq", 14) }
 sub pp_sne { binop(@_, "ne", 14) }
 sub pp_slt { binop(@_, "lt", 15) }
 sub pp_sgt { binop(@_, "gt", 15) }

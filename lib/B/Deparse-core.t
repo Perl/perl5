@@ -508,6 +508,7 @@ endpwent         0     -
 endservent       0     -
 eof              01    - # also tested specially
 eq               B     -
+equ              B     -
 eval             01    $+
 evalbytes        01    $
 exec             @     p1 # also tested specially

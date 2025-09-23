@@ -2382,6 +2382,15 @@ PP(pp_seq)
     SV *right = PL_stack_sp[0];
     SV *left  = PL_stack_sp[-1];
 
+    if(UNLIKELY(PL_op->op_private & OPpEQ_UNDEF)) {
+        bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+        if(lundef || rundef) {
+            rpp_replace_2_IMM_NN(boolSV(lundef && rundef));
+            return NORMAL;
+        }
+    }
+
     rpp_replace_2_IMM_NN(boolSV(sv_eq_flags(left, right, 0)));;
     return NORMAL;
 }
