@@ -6273,8 +6273,8 @@ S_isWB(pTHX_ WB_enum previous,
         /* Here 'matched' is true if the DFA matched the input.  If so,
          * [index+1] contains the value to return */
         if (matched) {
-            assert(index+1 < C_ARRAY_LENGTH(WB_dfa_table));
-            return WB_dfa_table[index+1];
+            assert(index+1u < C_ARRAY_LENGTH(WB_dfa_table));
+            return WB_dfa_table[index+1u];
         }
 
         /* Here, it didn't match.  In [index+2] is stored the index into the
