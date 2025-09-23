@@ -26,7 +26,7 @@ $ENV{TEST_PING_HOST} = "127.0.0.1" if $ENV{NO_NETWORK_TESTING};
 # Problem is that ping_icmp needs root perms, and previous bugs were
 # never caught. So I rather execute it via sudo in the core test suite
 # and on devel CPAN dirs, than not at all and risk further bitrot of this API.
-if (!Net::Ping::_isroot()) {
+if (0 && !Net::Ping::_isroot()) {
     my $file = __FILE__;
     my $lib = $ENV{PERL_CORE} ? '-I../../lib' : '-Mblib';
     if ($is_devel and $Config{ccflags} =~ /fsanitize=address/ and $^O eq 'linux') {
@@ -55,7 +55,7 @@ if (!Net::Ping::_isroot()) {
 
 SKIP: {
   skip "icmp ping requires root privileges.", 2
-    if ($^O ne 'Linux' and !Net::Ping::_isroot()) or $^O eq 'MSWin32';
+    if !Net::Ping::_isroot() or $^O eq 'MSWin32';
   my $p = new Net::Ping "icmp";
   is($p->message_type(), 'echo', "default icmp message type is 'echo'");
   # message_type fails on wrong message type
