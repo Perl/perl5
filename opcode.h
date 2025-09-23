@@ -2725,7 +2725,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       13, /* i_ge */
      105, /* eq */
       13, /* i_eq */
-      13, /* ne */
+     105, /* ne */
       13, /* i_ne */
       13, /* ncmp */
       13, /* i_ncmp */
@@ -2734,7 +2734,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       13, /* sle */
       13, /* sge */
      105, /* seq */
-      13, /* sne */
+     105, /* sne */
       13, /* scmp */
      107, /* bit_and */
      107, /* bit_xor */
@@ -3096,7 +3096,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x077e, 0x0554, 0x1b70, 0x55ac, 0x5148, 0x4225, /* const */
     0x3cfc, 0x47f9, /* gvsv */
     0x19d5, /* gv */
-    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, sne, scmp, smartmatch, lslice, xor, isa */
+    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, i_eq, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, scmp, smartmatch, lslice, xor, isa */
     0x3cfc, 0x54f8, 0x04f7, /* padsv */
     0x3cfc, 0x54f8, 0x0003, /* padsv_store, lvavref */
     0x3cfc, 0x54f8, 0x06d4, 0x3dec, 0x52c9, /* padav */
@@ -3121,7 +3121,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x3cfc, 0x0338, 0x1e34, 0x5950, 0x568c, 0x0003, /* multiconcat */
     0x5950, 0x02af, /* stringify, atan2, rand, srand, crypt, push, unshift, flock, chown, unlink, chmod, utime, rename, link, symlink, mkdir, waitpid, system, exec, kill, getpgrp, setpgrp, getpriority, setpriority, sleep */
     0x5950, 0x5ce9, /* left_shift, right_shift, nbit_and, nbit_xor, nbit_or, ncomplement */
-    0x5bbc, 0x0067, /* eq, seq */
+    0x5bbc, 0x0067, /* eq, ne, seq, sne */
     0x5ce9, /* bit_and, bit_xor, bit_or, sbit_and, sbit_xor, sbit_or, complement */
     0x06d4, 0x5950, 0x0003, /* length */
     0x4d30, 0x3dec, 0x024b, /* substr */
@@ -3264,7 +3264,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* I_GE       */ (OPpARG2_MASK),
     /* EQ         */ (OPpARG2_MASK|OPpEQ_UNDEF),
     /* I_EQ       */ (OPpARG2_MASK),
-    /* NE         */ (OPpARG2_MASK),
+    /* NE         */ (OPpARG2_MASK|OPpEQ_UNDEF),
     /* I_NE       */ (OPpARG2_MASK),
     /* NCMP       */ (OPpARG2_MASK),
     /* I_NCMP     */ (OPpARG2_MASK),
@@ -3273,7 +3273,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* SLE        */ (OPpARG2_MASK),
     /* SGE        */ (OPpARG2_MASK),
     /* SEQ        */ (OPpARG2_MASK|OPpEQ_UNDEF),
-    /* SNE        */ (OPpARG2_MASK),
+    /* SNE        */ (OPpARG2_MASK|OPpEQ_UNDEF),
     /* SCMP       */ (OPpARG2_MASK),
     /* BIT_AND    */ (OPpUSEINT),
     /* BIT_XOR    */ (OPpUSEINT),

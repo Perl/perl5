@@ -922,7 +922,7 @@ addbits('emptyavhv',
 
 addbits($_,
     7 => qw(OPpEQ_UNDEF UNDEF),
-) for qw( eq seq );
+) for qw( eq ne seq sne );
 
 addbits('argdefelem',
     7 => qw(OPpARG_IF_UNDEF  IF_UNDEF),

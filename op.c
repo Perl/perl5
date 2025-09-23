@@ -17086,8 +17086,10 @@ Perl_apply_opflags(pTHX_ U32 opcode, char *flagstr)
 
     for(char flag; (flag = *flagstr); flagstr++) {
         switch(opcode_base) {
-            case OP_SEQ:
-            case OP_EQ:
+            case OP_SEQ: /* eq */
+            case OP_SNE: /* ne */
+            case OP_EQ:  /* == */
+            case OP_NE:  /* != */
                 switch(flag) {
                     case 'u':
                         priv |= OPpEQ_UNDEF;

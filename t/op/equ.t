@@ -60,6 +60,11 @@ ok(not(123 ==:u 456), '==:u on different values');
     is($warnings, 0, 'no warnings were produced by use of undef');
 }
 
+foreach (["abc", "abc"], ["abc", "def"], ["", undef], [undef, undef]) {
+    my ($left, $right) = @$_;
+    is(not($left ne:u $right), ($left eq:u $right), 'ne:u is a synonym for not(eq:u)');
+}
+
 # ==:u treats undef as distinct, equal to itself, with no warnings
 {
     my $warnings = 0;
@@ -69,6 +74,11 @@ ok(not(123 ==:u 456), '==:u on different values');
     ok(not(undef ==:u 0), 'eq:u on undef/zero');
 
     is($warnings, 0, 'no warnings were produced by use of undef');
+}
+
+foreach ([123, 123], [123, 456], [0, undef], [undef, undef]) {
+    my ($left, $right) = @$_;
+    is(not($left !=:u $right), ($left ==:u $right), '!=:u is a synonym for not(==:u)');
 }
 
 # performs GETMAGIC
