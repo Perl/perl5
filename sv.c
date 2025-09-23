@@ -10434,6 +10434,7 @@ Perl_newSVpvf_nocontext(const char *const pat, ...)
 These each create a new SV and initialize it with the string formatted like
 C<sv_catpvf>.
 
+__PLAIN_vs_NOCONTEXT_wording__(newSVpvf)
 
 =for apidoc vnewSVpvf
 Like C<L</newSVpvf>> but the arguments are a C<va_list>.
@@ -11626,9 +11627,9 @@ to be the same UTF8ness as the destination C<sv>, though certain Perl
 extensions to the standard set of %formats can override this  (see
 L<perlguts/Formatted Printing of Strings> and adjacent sections).
 
-The forms whose name contains C<_no_context> do not take a thread
-context (C<aTHX>) parameter, so are used in situations where the caller
-doesn't already have the thread context.
+__PLAIN_vs_NOCONTEXT_wording__(sv_setpvf)
+
+__PLAIN_vs_NOCONTEXT_wording__(sv_setpvf_mg)
 
 The forms whose name contains C<vset> use a C<va_list>, the
 other forms use C<sprintf>-style arguments.
@@ -11785,9 +11786,9 @@ to be the same UTF8ness as the destination C<sv>, though certain Perl
 extensions to the standard set of %formats can override this  (see
 L<perlguts/Formatted Printing of Strings> and adjacent sections).
 
-The forms whose name contains C<_no_context> do not take a thread
-context (C<aTHX>) parameter, so are used in situations where the caller
-doesn't already have the thread context.
+__PLAIN_vs_NOCONTEXT_wording__(sv_catpvf)
+
+__PLAIN_vs_NOCONTEXT_wording__(sv_catpvf_mg)
 
 The forms whose name contains C<vcat> use a C<va_list>, the
 other forms use C<sprintf>-style arguments.

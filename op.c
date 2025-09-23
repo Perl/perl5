@@ -8495,9 +8495,7 @@ decremented. In addition, the C<name> argument is modified.
 If C<PERL_LOADMOD_DENY> is set, the module is loaded as if with C<no> rather
 than C<use>.
 
-C<load_module> and C<load_module_nocontext> have the same apparent signature,
-but the former hides the fact that it is accessing a thread context parameter.
-So use the latter when you get a compilation error about C<pTHX>.
+__PLAIN_vs_NOCONTEXT_wording__(load_module)
 
 =for apidoc Amnh||PERL_LOADMOD_DENY
 =for apidoc Amnh||PERL_LOADMOD_NOIMPORT
