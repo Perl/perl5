@@ -920,9 +920,9 @@ addbits('emptyavhv',
   # 4       OPpTARGET_MY
 );
 
-addbits('seq',
+addbits($_,
     7 => qw(OPpEQ_UNDEF UNDEF),
-);
+) for qw( eq seq );
 
 addbits('argdefelem',
     7 => qw(OPpARG_IF_UNDEF  IF_UNDEF),
