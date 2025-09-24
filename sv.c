@@ -10430,14 +10430,15 @@ Perl_newSVpvf_nocontext(const char *const pat, ...)
 /*
 =for apidoc      newSVpvf
 =for apidoc_item newSVpvf_nocontext
+=for apidoc_item vnewSVpvf
 
 These each create a new SV and initialize it with the string formatted like
 C<sv_catpvf>.
 
 __PLAIN_vs_NOCONTEXT_wording__(newSVpvf)
 
-=for apidoc vnewSVpvf
-Like C<L</newSVpvf>> but the arguments are a C<va_list>.
+The arguments to C<vnewSVpvf> are specified as a C<va_list>.  The arguments to
+the remaining forms are specified as a sprintf-style list of arguments.
 
 =cut
 */
