@@ -2208,6 +2208,8 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_IsMETHOD,         "IsMETHOD,"},
     {CVf_XS_RCSTACK,       "XS_RCSTACK,"},
     {CVf_EVAL_COMPILED,    "EVAL_COMPILED,"},
+    {CVf_IsCLASS_FASTREADER,    "CLASS_FASTREADER,"},
+    {CVf_IsCLASS_FASTWRITER,    "CLASS_FASTWRITER,"},
 };
 
 const struct flag_to_name hv_flags_names[] = {
@@ -2908,6 +2910,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         if (CvOUTSIDE(sv)
          && (nest < maxnest && (CvCLONE(sv) || CvCLONED(sv))))
             do_sv_dump(level+1, file, MUTABLE_SV(CvOUTSIDE(sv)), nest+1, maxnest, dumpops, pvlim);
+        if (!CvISXSUB(sv) && (CvIsCLASS_FASTREADER(sv) || CvIsCLASS_FASTWRITER(sv))) {
+            Perl_dump_indent(aTHX_ level, file, "  CLASS PADIX = %"
+                                          IVdf "\n", (IV)CvCLASS_PADIX(sv));
+        }
         break;
 
     case SVt_PVGV:

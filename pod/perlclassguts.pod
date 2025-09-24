@@ -402,8 +402,54 @@ opcode also relies on this fact.
 In similar fashion, during the C<xhv_class_initfields_cv> the next pad slot is
 relied on to store the constructor parameters HV, at pad index 2.
 
+=head1 CV FLAGS AND THE PP_ENTERSUB ESCAPE HATCH
+
+=head2 CvFLAGS for fast accessors, fixups, and bypassing the CV entirely
+
+Initially added for experimental fast versions of simple :reader and :writer
+accessors, C<pp_entersub> performs an early check to see if CvFLAGS reserved
+for the class feature are set. If so, this indicates possibilities such as:
+
+=over 4
+
+=item *
+
+Entering the CV is unnecessary, the activity can be performed more efficiently
+via a C function without executing OPs within the CV. (The more efficent C code
+could still call CVs itself.) This means that C<pp_leavesub> will not be called
+and the C function is entirely responsible for fixing up the stack.
+
+It is currently unspecified whether the CV's optree is able to perform the same
+actions if the escape hatch is not used, or whether it contains just a stub
+optree - perhaps warning or croaking, as appropriate.
+
+=item *
+
+Some activity is required prior to entering the CV's optree.
+
+=back
+
+=head2 The escape hatch
+
+If any of the relevant flags is set, C<pp_entersub> calls a helper function to
+determine and perform the required activity. This function must return I<true>
+to indicate to C<pp_entersub> that it should immediately C<return NORMAL;>, or
+I<false> to indicate that C<pp_entersub> should continue execution as usual
+from that point.
+
+This currently looks like:
+
+    /* Some CVs associated with the class feature might shortcut a full
+     * method call. They are entirely responsible for correctly adjusting
+     * the stack in place of entersub/leavesub.*/
+    if (CvIsCLASS_FASTMETHOD(cv) && S_featureclass_escapehatch(cv)) {
+        return NORMAL;
+    }
+
 =head1 AUTHORS
 
 Paul Evans
+
+Additional contributions by Richard Leach.
 
 =cut

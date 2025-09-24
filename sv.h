@@ -650,10 +650,10 @@ typedef U32 cv_flags_t;
         OP *	xcv_root;							\
         void	(*xcv_xsub) (pTHX_ CV*);					\
     }		xcv_root_u;							\
-    union {								\
-        GV *	xcv_gv;							\
-        HEK *	xcv_hek;						\
-    }		xcv_gv_u;						\
+    union {								        \
+        GV *	xcv_gv;							        \
+        HEK *	xcv_hek;						        \
+    }		xcv_gv_u;						        \
     char *	xcv_file;							\
     union {									\
         PADLIST *	xcv_padlist;						\
@@ -663,8 +663,9 @@ typedef U32 cv_flags_t;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
                                   * compilation) in the lexically enclosing	\
                                   * sub */					\
-    cv_flags_t	xcv_flags;						\
-    I32	xcv_depth	/* >= 2 indicates recursive call */
+    cv_flags_t	xcv_flags;						        \
+    I32	xcv_depth;	          /* >= 2 indicates recursive call */           \
+    U32 xcv_class_fieldix /* Used by feature class */
 
 /* This structure must match XPVCV in cv.h */
 
