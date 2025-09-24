@@ -9,8 +9,8 @@
 
 /* Package name      : perl5
  * Source directory  : 
- * Configuration time: Thu Aug  3 07:27:03 2023
- * Configured by     : khw
+ * Configuration time: Wed Sep 24 12:01:52 2025
+ * Configured by     : tony
  * Target system     : 
  */
 
@@ -106,6 +106,12 @@
  *	the fcntl() function exists.
  */
 /*#define HAS_FCNTL		/ **/
+
+/* HAS_FDOPENDIR:
+ * This symbol, if defined, indicates that the fdopendir routine is
+ * available to open a directory descriptor.
+ */
+/*#define HAS_FDOPENDIR		/ **/
 
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
@@ -1369,7 +1375,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "MSWin32"		/**/
-#define OSVERS "10.0.22621.1992"		/**/
+#define OSVERS "10.0.19045.6332"		/**/
 
 /* CAT2:
  *	This macro concatenates 2 tokens together.
@@ -2289,7 +2295,7 @@
  *	This symbol, if defined, indicates that the acosh routine is
  *	available to do the inverse hyperbolic cosine function.
  */
-/*#define HAS_ACOSH		/ **/
+#define HAS_ACOSH		/**/
 
 /* HAS_AINTL:
  *	This symbol, if defined, indicates that the aintl routine is
@@ -2301,13 +2307,13 @@
  *	This symbol, if defined, indicates that the asinh routine is
  *	available to do the inverse hyperbolic sine function.
  */
-/*#define HAS_ASINH		/ **/
+#define HAS_ASINH		/**/
 
 /* HAS_ATANH:
  *	This symbol, if defined, indicates that the atanh routine is
  *	available to do the inverse hyperbolic tangent function.
  */
-/*#define HAS_ATANH		/ **/
+#define HAS_ATANH		/**/
 
 /* HAS_NON_INT_BITFIELDS:
  *	This symbol, if defined, indicates that the C compiler accepts, without
@@ -2381,13 +2387,13 @@
  *	This symbol, if defined, indicates that the copysign routine is
  *	available to do the copysign function.
  */
-/*#define HAS_COPYSIGN		/ **/
+#define HAS_COPYSIGN		/**/
 
 /* HAS_COPYSIGNL:
  *	This symbol, if defined, indicates that the copysignl routine is
  *	available.  If aintl is also present we can emulate modfl.
  */
-/*#define HAS_COPYSIGNL		/ **/
+#define HAS_COPYSIGNL		/**/
 
 /* USE_CPLUSPLUS:
  *	This symbol, if defined, indicates that a C++ compiler was
@@ -2445,7 +2451,7 @@
  *	This symbol, if defined, indicates that the exp2 routine is
  *	available to do the 2**x function.
  */
-/*#define HAS_EXP2		/ **/
+#define HAS_EXP2		/**/
 
 /* HAS_EXPM1:
  *	This symbol, if defined, indicates that the expm1 routine is
@@ -2827,7 +2833,7 @@
  *	This symbol, if defined, indicates that the isfinite routine is
  *	available to check whether a double is finite (non-infinity non-NaN).
  */
-#define HAS_ISFINITE		/ **/
+#define HAS_ISFINITE		/**/
 
 /* HAS_ISFINITEL:
  *	This symbol, if defined, indicates that the isfinitel routine is
@@ -3307,7 +3313,7 @@
  *	in perl.  Users should call Perl_signbit(), which will be #defined to
  *	the system's signbit() function or macro if this symbol is defined.
  */
-/*#define HAS_SIGNBIT		/ **/
+#define HAS_SIGNBIT		/**/
 
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
@@ -3488,7 +3494,7 @@
  *	This symbol, if defined, indicates that the tgamma routine is
  *	available to do the gamma function. See also HAS_LGAMMA.
  */
-/*#define HAS_TGAMMA		/ **/
+#define HAS_TGAMMA		/**/
 
 /* HAS_CTIME64:
  *	This symbol, if defined, indicates that the ctime64 () routine is
