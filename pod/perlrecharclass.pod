@@ -528,7 +528,7 @@ place before the bracketed class is parsed:
 
  $, = "\t| ";
  $x =~ m'[$,]';        # single-quotish: matches '$' or ','
- $x =~ q{[$,]}'        # same
+ $x =~ q{[$,]};        # same
  $x =~ m/[$,]/;        # double-quotish: Because we made an
                        #   assignment to $, above, this now
                        #   matches "\t", "|", or " "
