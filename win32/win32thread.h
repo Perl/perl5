@@ -21,6 +21,10 @@ typedef CRITICAL_SECTION perl_mutex;
 
 #else
 
+/* This backend is unused since
+   commit d55594aef6 - Gurusamy Sarathy - 11/9/1997 7:57:53 PM
+   Initial (untested) merge of all non-ansi changes on ansiperl branch */
+
 typedef HANDLE perl_mutex;
 #  define MUTEX_INIT(m) \
     STMT_START {						\
@@ -46,7 +50,7 @@ typedef HANDLE perl_mutex;
             Perl_croak_nocontext("panic: MUTEX_DESTROY");	\
     } STMT_END
 
-#endif
+#endif /* DONT_USE_CRITICAL_SECTION */
 
 /* These macros assume that the mutex associated with the condition
  * will always be held before COND_{SIGNAL,BROADCAST,WAIT,DESTROY},
@@ -57,21 +61,21 @@ typedef HANDLE perl_mutex;
         (c)->waiters = 0;					\
         (c)->sem = Win_CreateSemaphore(NULL,0,LONG_MAX,NULL);	\
         if ((c)->sem == NULL)					\
-            Perl_croak_nocontext("panic: COND_INIT (%ld)",GetLastError());	\
+            Perl_die_cwait();	\
     } STMT_END
 
 #define COND_SIGNAL(c) \
     STMT_START {						\
         if ((c)->waiters > 0 &&					\
             ReleaseSemaphore((c)->sem,1,NULL) == 0)		\
-            Perl_croak_nocontext("panic: COND_SIGNAL (%ld)",GetLastError());	\
+            Perl_die_csig();	\
     } STMT_END
 
 #define COND_BROADCAST(c) \
     STMT_START {						\
         if ((c)->waiters > 0 &&					\
             ReleaseSemaphore((c)->sem,(c)->waiters,NULL) == 0)	\
-            Perl_croak_nocontext("panic: COND_BROADCAST (%ld)",GetLastError());\
+            Perl_die_cbrod();\
     } STMT_END
 
 #define COND_WAIT(c, m) \
@@ -82,7 +86,7 @@ typedef HANDLE perl_mutex;
          * COND_BROADCAST() on another thread will have seen the\
          * right number of waiters (i.e. including this one) */	\
         if (WaitForSingleObject((c)->sem,INFINITE)==WAIT_FAILED)\
-            Perl_croak_nocontext("panic: COND_WAIT (%ld)",GetLastError());	\
+            Perl_die_cwait();	\
         /* XXX there may be an inconsequential race here */	\
         MUTEX_LOCK(m);						\
         (c)->waiters--;						\

@@ -1947,6 +1947,47 @@ Perl_croak_popstack(void)
     my_exit(1);
 }
 
+
+/* Helpers for COND_BROADCAST(c), COND_SIGNAL(c), and COND_WAIT(c) macros
+   which are long and verbose, and get embedded directly in their callers
+   and have dozens of callsites inside libperl and certain categories of
+   CPAN XS modules. The other COND_*() macros are very unlikely to ever
+   be used outside of libperl's perl_construct()/perl_destruct().
+
+   The pthreads variants of COND_BROADCAST/COND_SIGNAL/COND_WAIT currently
+   have assert() style error strings that are too big to factor out. */
+
+#ifdef WIN32
+
+STATIC void
+Perl_die_w32err(const char *context)
+{
+    DWORD e = GetLastError();
+    Perl_croak_nocontext("panic: %s (%ld)", context, e);
+}
+
+/* These 3 helpers prevent the same const C string literals appearing in many
+   .dll files over and over. */
+void
+Perl_die_cbrod(void)
+{
+    Perl_die_w32err("COND_BROADCAST");
+}
+
+void
+Perl_die_cwait(void)
+{
+    Perl_die_w32err("COND_WAIT");
+}
+
+void
+Perl_die_csig(void)
+{
+    Perl_die_w32err("COND_SIGNAL");
+}
+
+#endif
+
 /*
 =for apidoc warn_sv
 
