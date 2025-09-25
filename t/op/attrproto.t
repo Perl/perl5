@@ -11,7 +11,7 @@ BEGIN {
 }
 use warnings;
 
-plan tests => 48;
+plan tests => 52;
 
 my @warnings;
 my ($attrs, $ret) = ("", "");
@@ -90,7 +90,7 @@ is @warnings, 0, "No more warnings"
 
 # Use attributes
 @warnings = ();
-eval 'package Q; use attributes __PACKAGE__, \&B, "prototype(new)";';
+eval 'package Q; no warnings "illegalproto"; use attributes __PACKAGE__, \&B, "prototype(new)";';
 $ret = prototype \&Q::B;
 is $ret, "new", "use attributes also sets the prototype";
 like shift @warnings, qr/Prototype mismatch: sub Q::B \(baz\) vs \(new\)/,
@@ -104,6 +104,18 @@ $ret = prototype \&Q::B;
 is $ret, "new", "A malformed prototype doesn't reset it";
 like $@, qr/Unterminated attribute parameter in attribute list/, "Malformed prototype croaked";
 is @warnings, 0, "Malformed prototype isn't just a warning";
+
+# Respects `use warnings 'illegalproto'` of the right caller
+@warnings = ();
+eval 'package Q; use warnings; sub C {}  use attributes __PACKAGE__, \&C, "prototype(bad)";';
+$ret = prototype \&Q::C;
+is $ret, "bad", "illegal prototype is still set via use attributes";
+like shift @warnings, qr/^Illegal character in prototype for \*Q::C : bad at /,
+    "Illegal prototype warning triggered";
+like shift @warnings, qr/^Prototype mismatch: sub Q::C: none vs \(bad\) at /,
+    "Prototype mismatch warning triggered";
+is @warnings, 0, "No more warnings" or
+    diag "More warning: $warnings[0]";
 
 @warnings = ();
 eval 'use attributes __PACKAGE__, \&foo, "prototype($$\x{100}";';
