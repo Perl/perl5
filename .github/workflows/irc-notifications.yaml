@@ -94,11 +94,13 @@ jobs:
           echo "SUMUP: $SUMUP"
 
       - name: irc push
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'push' && github.ref != 'refs/heads/blead'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_noise }}
           nickname: Commit
           message: |-
@@ -107,11 +109,13 @@ jobs:
             ${{ github.event.compare }}
 
       - name: irc push to blead
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/blead'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_noise }}
           nickname: inBlead
           message: |-
@@ -156,55 +160,65 @@ jobs:
           echo "TITLE: $TITLE"
 
       - name: irc opened pull request
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
             ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} opened PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc reopened pull request
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'pull_request' && github.event.action == 'reopened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
             ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} reopened PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc merged pull request
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
             ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} merged PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc closed pull request
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message: |-
             ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} closed PR #${{ github.event.pull_request.number }}: ${{ env.TITLE }} - ${{ github.event.pull_request.html_url }}
 
       - name: irc synchronize pull request
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'pull_request' && github.event.action == 'synchronize'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_noise }}
           nickname: Pull-Request
           message: |-
@@ -213,33 +227,39 @@ jobs:
             ${{ github.event.pull_request.html_url }}
 
       - name: irc opened issue
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'issues' && github.event.action == 'opened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: GH-Issue
           message: |-
             ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} opened issue #${{ github.event.issue.number }}: ${{ env.TITLE }} - ${{ github.event.issue.html_url }}
 
       - name: irc reopened issue
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'issues' && github.event.action == 'reopened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: GH-Issue
           message: |-
             ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} reopened issue #${{ github.event.issue.number }}: ${{ env.TITLE }} - ${{ github.event.issue.html_url }}
 
       - name: irc closed issue
-        uses: rectalogic/notify-irc@v2
+        uses: mauke/notify-irc@v1
         if: github.event_name == 'issues' && github.event.action == 'closed'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
+          tls: true
+          join: true
           channel: ${{ env.channel_p5p }}
           nickname: GH-Issue
           message: |-
