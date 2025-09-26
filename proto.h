@@ -4247,7 +4247,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char * const e, SV *sv);
         assert(s); assert(e); assert(sv)
 
 #define PERL_ARGS_ASSERT_SCAN_WORD              \
-        assert(s); assert(dest); assert(slp)
+        assert(s); assert(dest); assert(dest_end); assert(slp)
 
 PERL_CALLCONV U32
 Perl_seed(pTHX);
@@ -6139,7 +6139,7 @@ PERL_CALLCONV char *
 Perl_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse, char **delimp)
         __attribute__warn_unused_result__;
 PERL_CALLCONV char *
-Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
+Perl_scan_word(pTHX_ char *s, char *dest, char *dest_end, int allow_package, STRLEN *slp);
 PERL_CALLCONV char *
 Perl_skipspace_flags(pTHX_ char *s, U32 flags)
         __attribute__warn_unused_result__;
