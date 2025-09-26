@@ -4681,7 +4681,8 @@ Perl_padname_refcnt_inc(PADNAME *pn)
 PERL_STATIC_INLINE PADNAMELIST *
 Perl_padnamelist_refcnt_inc(PADNAMELIST *pnl)
 {
-    PadnamelistREFCNT(pnl)++;
+    if (pnl)
+        PadnamelistREFCNT(pnl)++;
     return pnl;
 }
 

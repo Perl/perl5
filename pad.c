@@ -1295,6 +1295,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
         return NOT_IN_PAD;
 
     if (PadnameIsFIELD(*out_name)) {
+        assert(PadnameFIELDINFO(*out_name));
         HV *fieldstash = PadnameFIELDINFO(*out_name)->fieldstash;
 
         /* fields are only visible to the class that declared them */
@@ -2746,6 +2747,9 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 {
     PERL_ARGS_ASSERT_PADNAMELIST_DUP;
 
+    if (!srcpad)
+        return NULL;
+
     SSize_t max = PadnamelistMAX(srcpad);
 
     /* look for it in the table first */
@@ -2826,6 +2830,7 @@ Perl_newPADNAMEouter(PADNAME *outer)
     PadnameREFCNT_inc(PADNAME_FROM_PV(PadnamePV(outer)));
     PadnameFLAGS(pn) = PADNAMEf_OUTER;
     if(PadnameIsFIELD(outer)) {
+        assert(PadnameFIELDINFO(outer));
         PadnameFIELDINFO(pn) = PadnameFIELDINFO(outer);
         PadnameFIELDINFO(pn)->refcount++;
         PadnameFLAGS(pn) |= PADNAMEf_FIELD;
@@ -2848,6 +2853,7 @@ Perl_padname_free(pTHX_ PADNAME *pn)
         if (PadnameOUTER(pn))
             PadnameREFCNT_dec(PADNAME_FROM_PV(PadnamePV(pn)));
         if (PadnameIsFIELD(pn)) {
+            assert(PadnameFIELDINFO(pn));
             struct padname_fieldinfo *info = PadnameFIELDINFO(pn);
             if(!--info->refcount) {
                 SvREFCNT_dec(info->fieldstash);
@@ -2899,18 +2905,27 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
     PadnameTYPE   (dst) = (HV *)sv_dup_inc((SV *)PadnameTYPE(src), param);
     PadnameOURSTASH(dst) = (HV *)sv_dup_inc((SV *)PadnameOURSTASH(src),
                                             param);
-    if(PadnameIsFIELD(src) && !PadnameOUTER(src)) {
+    if(PadnameIsFIELD(src)) {
+        assert(PadnameFIELDINFO(src));
         struct padname_fieldinfo *sinfo = PadnameFIELDINFO(src);
-        struct padname_fieldinfo *dinfo;
-        Newxz(dinfo, 1, struct padname_fieldinfo);
+        struct padname_fieldinfo *dinfo = (struct padname_fieldinfo *)ptr_table_fetch(PL_ptr_table, src);
+        if (dinfo)
+            PadnameFIELDINFO(dst) = dinfo;
+        else {
+            Newxz(dinfo, 1, struct padname_fieldinfo);
+            PadnameFIELDINFO(dst) = dinfo;
+            ptr_table_store(PL_ptr_table, sinfo, dinfo);
 
-        dinfo->refcount   = 1;
-        dinfo->fieldix    = sinfo->fieldix;
-        dinfo->fieldstash = hv_dup_inc(sinfo->fieldstash, param);
-        dinfo->paramname  = sv_dup_inc(sinfo->paramname, param);
-
-        PadnameFIELDINFO(dst) = dinfo;
+            /* We must have set PadnameFIELDINFO(dst) before we recurse into
+             * fieldstash in case it points back here */
+            dinfo->refcount   = 1;
+            dinfo->fieldix    = sinfo->fieldix;
+            dinfo->fieldstash = hv_dup_inc(sinfo->fieldstash, param);
+            dinfo->paramname  = sv_dup_inc(sinfo->paramname, param);
+        }
+        assert(PadnameFIELDINFO(dst));
     }
+
     dst->xpadn_low  = src->xpadn_low;
     dst->xpadn_high = src->xpadn_high;
     dst->xpadn_gen  = src->xpadn_gen;

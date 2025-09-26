@@ -6425,7 +6425,7 @@ Rdp	|PADLIST *|padlist_dup	|NN PADLIST *srcpad			\
 Rdp	|PADNAME *|padname_dup	|NN PADNAME *src			\
 				|NN CLONE_PARAMS *param
 Rdp	|PADNAMELIST *|padnamelist_dup					\
-				|NN PADNAMELIST *srcpad 		\
+				|NULLOK PADNAMELIST *srcpad		\
 				|NN CLONE_PARAMS *param
 Cp	|yy_parser *|parser_dup |NULLOK const yy_parser * const proto	\
 				|NN CLONE_PARAMS * const param

@@ -10848,7 +10848,7 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
         __attribute__warn_unused_result__
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_PADNAMELIST_DUP       \
-        assert(srcpad); assert(param)
+        assert(param)
 
 PERL_CALLCONV yy_parser *
 Perl_parser_dup(pTHX_ const yy_parser * const proto, CLONE_PARAMS * const param);

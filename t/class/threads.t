@@ -21,6 +21,10 @@ class Testcase1 {
     method x { return $x }
 }
 
+class WithNoFields {
+    # a class with no fields, in order to test [GH23771]
+}
+
 {
     my $ret = threads->create(sub {
         pass("Created dummy thread");
