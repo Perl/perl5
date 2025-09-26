@@ -577,7 +577,10 @@ blead release, so you may find nothing to do here.
 
 =head3 Update AUTHORS
 
-The AUTHORS file can be updated by running F<Porting/updateAUTHORS.pl>.
+The AUTHORS file can be updated by running:
+
+ $ perl Porting/updateAUTHORS.pl
+
 This shouldn't really be necessary anymore, and in theory nothing should
 change as our CI should not pass if a commit would result in AUTHORS
 needing to change, but do it anyway to be sure. Make sure all your changes
@@ -1170,7 +1173,7 @@ Test L<perlbug> with the following:
  Action (Send/Display/Edit/Subject/Save to File): f
  Name of file to save message in [perlbug.rep]:
 
-and carefully examine the output (in F<perlbug.rep]>), especially
+Then carefully examine the output (in F<perlbug.rep]>), especially
 the "Locally applied patches" section.
 
 =for checklist skip BLEAD-POINT
@@ -1347,7 +1350,8 @@ Confirm that you have a clean checkout with no local changes.
 =item *
 
 Run:
- perl Porting/new-perldelta.pl
+
+ $ perl Porting/new-perldelta.pl
 
 =item *
 
@@ -1355,13 +1359,24 @@ Run the C<git add> commands it outputs to add new and modified files.
 
 =item *
 
-Verify that the build still works, by running C<./Configure> and
-C<make test_porting>. (On Win32 use the appropriate make utility).
+Verify that the build still works, by running:
+
+ $ ./Configure
+ $ make test_porting
+
+(On Win32 use the appropriate make utility).
 
 =item *
 
-If F<t/porting/podcheck.t> spots errors in the new F<pod/perldelta.pod>,
-run C<./perl -MTestInit t/porting/podcheck.t | less> for more detail.
+Run:
+
+ $ ./perl t/porting/podcheck.t
+
+If it spots errors in the new F<pod/perldelta.pod>, run:
+
+ $ ./perl -MTestInit t/porting/podcheck.t | less
+
+It will give you more details.
 Skip to the end of its test output to see the options it offers you.
 
 =item *
@@ -1380,8 +1395,6 @@ previous version bump.
 
 =head3 Bump the feature bundles
 
-I<You MUST SKIP this step for RC and MAINT>
-
 If this was a BLEAD-FINAL release (i.e. the first release of a new maint
 series, 5.x.0 where x is even), then bump the version in the blead branch
 in git, e.g. 5.12.0 to 5.13.0.
@@ -1393,7 +1406,11 @@ marker); e.g.
       "5.14" => [qw(switch say state unicode_strings)],
  +    "5.15" => [qw(switch say state unicode_strings)],
 
-Run F<regen/feature.pl> to propagate the changes to F<lib/feature.pm>.
+Run:
+
+ $ ./perl regen/feature.pl
+
+It will propagate the changes to F<lib/feature.pm>.
 
 After bumping the version, follow the section L</"Update INSTALL"> to
 ensure all version number references are correct.
@@ -1449,8 +1466,7 @@ Commit your changes:
 
  $ git status
  $ git diff
- B<review the delta carefully>
-
+ # Review the delta carefully
  $ git commit -a -m 'Bump the perl version in various places for 5.X.Y'
 
 At this point you may want to compare the commit with a previous bump to
