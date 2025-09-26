@@ -3072,7 +3072,7 @@ Adp	|char * |scan_vstring	|NN const char *s			\
 				|NN SV *sv
 EXpx	|char * |scan_word	|NN char *s				\
 				|NN char *dest				\
-				|STRLEN destlen 			\
+				|NN char *dest_end			\
 				|int allow_package			\
 				|NN STRLEN *slp
 Cp	|U32	|seed
