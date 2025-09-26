@@ -980,9 +980,9 @@ Then delete the temporary installation.
 
 =head3 Create the release tag
 
-Create the I<annotated> tag identifying this release (e.g.):
+Create the I<annotated> tag identifying this release:
 
- $ git tag v5.21.4 -m 'Perl 5.21.4'
+ $ git tag v5.X.Y -m 'Perl 5.X.Y'
 
 It is B<VERY> important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
