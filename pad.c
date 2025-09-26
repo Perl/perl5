@@ -2744,13 +2744,12 @@ Duplicates a pad name list.
 PADNAMELIST *
 Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 {
-    PADNAMELIST *dstpad;
-    SSize_t max = PadnamelistMAX(srcpad);
-
     PERL_ARGS_ASSERT_PADNAMELIST_DUP;
 
+    SSize_t max = PadnamelistMAX(srcpad);
+
     /* look for it in the table first */
-    dstpad = (PADNAMELIST *)ptr_table_fetch(PL_ptr_table, srcpad);
+    PADNAMELIST *dstpad = (PADNAMELIST *)ptr_table_fetch(PL_ptr_table, srcpad);
     if (dstpad)
         return dstpad;
 
