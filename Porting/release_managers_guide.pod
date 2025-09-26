@@ -929,8 +929,6 @@ Be sure to commit your changes:
 
 =head3 Update patchlevel.h
 
-I<You MUST SKIP this step for a BLEAD-POINT release>
-
 Update F<patchlevel.h> to add a C<-RC1>-or-whatever string; or, if this is
 a final release, remove it. For example:
 
@@ -1241,8 +1239,6 @@ which may be faster.
 
 =head3 Wait for indexing
 
-I<You MUST SKIP this step for RC and BLEAD-POINT>
-
 Wait until you receive notification emails from the PAUSE indexer
 confirming that your uploads have been received.  IMPORTANT -- you will
 probably get an email that indexing has failed, due to module permissions.
@@ -1251,8 +1247,6 @@ This is considered normal.
 =for checklist skip BLEAD-POINT
 
 =head3 Disarm patchlevel.h
-
-I<You MUST SKIP this step for BLEAD-POINT release>
 
 Disarm the F<patchlevel.h> change; for example,
 
@@ -1320,15 +1314,11 @@ release, update F<docs/shared/tpl/stats.html>.
 
 =head3 Release schedule
 
-I<You MUST SKIP this step for RC>
-
 Tick the entry for your release in F<Porting/release_schedule.pod>.
 
 =for checklist skip RC
 
 =head3 Module::CoreList nagging
-
-I<You MUST SKIP this step for RC>
 
 Remind the current maintainer of C<Module::CoreList> to push a new release
 to CPAN.
@@ -1336,8 +1326,6 @@ to CPAN.
 =for checklist skip RC
 
 =head3 New perldelta
-
-I<You MUST SKIP this step for RC>
 
 Create a new perldelta.
 
@@ -1524,8 +1512,6 @@ Finally, push any commits done above.
 
 =head3 Create maint branch
 
-I<You MUST SKIP this step for RC, BLEAD-POINT, MAINT>
-
 If this was a BLEAD-FINAL release (i.e. the first release of a new maint
 series, 5.x.0 where x is even), then create a new maint branch based on
 the commit tagged as the current release.
@@ -1538,8 +1524,6 @@ Assuming you're using git 1.7.x or newer:
 =for checklist skip BLEAD-POINT RC
 
 =head3 Copy perldelta.pod to blead
-
-I<You MUST SKIP this step for RC, BLEAD-POINT>
 
 Copy the perldelta.pod for this release into blead; for example:
 
