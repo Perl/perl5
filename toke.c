@@ -1908,7 +1908,7 @@ S_incline(pTHX_ const char *s, const char *end)
     while (SPACE_OR_TAB(*s))
         s++;
     if (memBEGINs(s, (STRLEN) (end - s), "line"))
-        s += sizeof("line") - 1;
+        s += STRLENs("line");
     else
         return;
     if (SPACE_OR_TAB(*s))
@@ -1961,7 +1961,7 @@ S_incline(pTHX_ const char *s, const char *end)
                 char *tmpbuf2;
                 GV *gv2;
 
-                if (tmplen2 + 2 <= sizeof smallbuf)
+                if (tmplen2 + 2 <= C_ARRAY_LENGTH(smallbuf))
                     tmpbuf2 = smallbuf;
                 else
                     Newx(tmpbuf2, tmplen2 + 2, char);
@@ -2284,8 +2284,8 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
           char *s2 = PL_tokenbuf;
           STRLEN len2 = len;
           if (allow_pack && memBEGINPs(s2, len, "CORE::")) {
-            s2 += sizeof("CORE::") - 1;
-            len2 -= sizeof("CORE::") - 1;
+            s2 += STRLENs("CORE::");
+            len2 -= STRLENs("CORE::");
           }
           if (keyword(s2, len2, 0))
             return start;
@@ -4134,7 +4134,7 @@ S_scan_const(pTHX_ char *start)
                                     char hex_string[4];
                                     int len =
                                         my_snprintf(hex_string,
-                                                  sizeof(hex_string),
+                                                  C_ARRAY_LENGTH(hex_string),
                                                   "%02X.",
 
                                                   /* The regex compiler is
@@ -4142,7 +4142,7 @@ S_scan_const(pTHX_ char *start)
                                                    * native */
                                                   NATIVE_TO_LATIN1(*str));
                                     PERL_MY_SNPRINTF_POST_GUARD(len,
-                                                           sizeof(hex_string));
+                                                   C_ARRAY_LENGTH(hex_string));
                                     Copy(hex_string, d, 3, char);
                                     d += 3;
                                     str++;
@@ -4169,7 +4169,8 @@ S_scan_const(pTHX_ char *start)
                                 /* Convert first code point to Unicode hex,
                                  * including the boiler plate before it. */
                                 output_length =
-                                    my_snprintf(hex_string, sizeof(hex_string),
+                                    my_snprintf(hex_string,
+                                             C_ARRAY_LENGTH(hex_string),
                                              "\\N{U+%X",
                                              (unsigned int) NATIVE_TO_UNI(uv));
 
@@ -4192,7 +4193,7 @@ S_scan_const(pTHX_ char *start)
                                                          &char_length);
                                     output_length =
                                         my_snprintf(hex_string,
-                                             sizeof(hex_string),
+                                             C_ARRAY_LENGTH(hex_string),
                                              ".%X",
                                              (unsigned int) NATIVE_TO_UNI(uv));
 
@@ -4616,7 +4617,7 @@ S_intuit_more(pTHX_ char *s, char *e)
              * strongly suspect this isn't a character class */
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
                 int len;
-                char tmpbuf[sizeof PL_tokenbuf * 4];
+                char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 ];
                 scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), FALSE);
                 len = (int)strlen(tmpbuf);
                 if (   len > 1
@@ -4782,7 +4783,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
         return 0;
 
     char *s = start + (*start == '$');
-    char tmpbuf[sizeof PL_tokenbuf];
+    char tmpbuf[C_ARRAY_LENGTH(PL_tokenbuf)];
     STRLEN len;
     GV* indirgv;
         /* Mustn't actually add anything to a symbol table.
@@ -5261,7 +5262,7 @@ yyl_sigvar(pTHX_ char *s)
             char *dest = PL_tokenbuf + 1;
             /* read var name, including sigil, into PL_tokenbuf */
             PL_tokenbuf[0] = sigil;
-            parse_ident(&s, &dest, dest + sizeof(PL_tokenbuf) - 1,
+            parse_ident(&s, &dest, C_ARRAY_END(PL_tokenbuf),
                 0, cBOOL(UTF), FALSE);
             *dest = '\0';
             assert(PL_tokenbuf[1]); /* we have a variable name */
@@ -5449,7 +5450,7 @@ yyl_dollar(pTHX_ char *s)
                 && (t = (char *) memchr(s, '}', PL_bufend - s))
                 && (t = (char *) memchr(t, '=', PL_bufend - t)))
             {
-                char tmpbuf[sizeof PL_tokenbuf];
+                char tmpbuf[C_ARRAY_LENGTH(PL_tokenbuf)];
                 do {
                     t++;
                 } while (isSPACE(*t));
@@ -5485,7 +5486,7 @@ yyl_dollar(pTHX_ char *s)
             PL_expect = XTERM;		/* e.g. print $fh &sub */
         }
         else if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-            char tmpbuf[sizeof PL_tokenbuf];
+            char tmpbuf[C_ARRAY_LENGTH(PL_tokenbuf)];
             int t2;
             STRLEN len;
             scan_word(s, tmpbuf, C_ARRAY_END(tmpbuf), TRUE, &len);
@@ -7086,7 +7087,7 @@ yyl_require(pTHX_ char *s, I32 orig_keyword)
         *PL_tokenbuf = '\0';
         s = force_word(s,BAREWORD,TRUE,TRUE);
         if (isIDFIRST_lazy_if_safe(PL_tokenbuf,
-                                   PL_tokenbuf + sizeof(PL_tokenbuf),
+                                   C_ARRAY_END(PL_tokenbuf),
                                    UTF))
         {
             gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
@@ -7268,8 +7269,9 @@ yyl_my(pTHX_ char *s, I32 my)
             char tmpbuf[1024];
             int i;
             PL_bufptr = s;
-            i = my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
-            PERL_MY_SNPRINTF_POST_GUARD(i, sizeof(tmpbuf));
+            i = my_snprintf(tmpbuf, C_ARRAY_LENGTH(tmpbuf),
+                            "No such class %.1000s", PL_tokenbuf);
+            PERL_MY_SNPRINTF_POST_GUARD(i, C_ARRAY_LENGTH(tmpbuf));
             yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
         }
     }
@@ -7404,8 +7406,8 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
 #ifdef ALTERNATE_SHEBANG
             else {
                 static char const as[] = ALTERNATE_SHEBANG;
-                if (*s == as[0] && strnEQ(s, as, sizeof(as) - 1))
-                    d = s + (sizeof(as) - 1);
+                if (*s == as[0] && strnEQ(s, as, C_ARRAY_LENGTH(as) - 1))
+                    d = s + (C_ARRAY_LENGTH(as) - 1);
             }
 #endif /* ALTERNATE_SHEBANG */
         }
@@ -9082,7 +9084,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
 
     /* Check for lexical sub */
     if (PL_expect != XOPERATOR) {
-        char tmpbuf[sizeof PL_tokenbuf + 1];
+        char tmpbuf[C_ARRAY_LENGTH(PL_tokenbuf) + 1];
         *tmpbuf = '&';
         Copy(PL_tokenbuf, tmpbuf+1, len, char);
         c.off = pad_findmy_pvn(tmpbuf, len+1, 0);
@@ -9155,7 +9157,7 @@ yyl_try(pTHX_ char *s)
         STRLEN len;
 
         /* Copy the longest sequence of isPLUGINFIX() chars into PL_tokenbuf */
-        while(s_end < PL_bufend && d < PL_tokenbuf+sizeof(PL_tokenbuf)-1 && isPLUGINFIX(*s_end))
+        while(s_end < PL_bufend && d < C_ARRAY_END(PL_tokenbuf)-1 && isPLUGINFIX(*s_end))
             *d++ = *s_end++;
         *d = '\0';
 
@@ -10993,7 +10995,7 @@ S_scan_heredoc(pTHX_ char *s)
 
     s += 2;
     d = PL_tokenbuf + 1;
-    e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
+    e = C_ARRAY_END(PL_tokenbuf);
     *PL_tokenbuf = '\n';
     peek = s;
 
@@ -11037,7 +11039,7 @@ S_scan_heredoc(pTHX_ char *s)
         d += len;
     }
 
-    if (d >= PL_tokenbuf + sizeof PL_tokenbuf - 1)
+    if (d >= C_ARRAY_END(PL_tokenbuf) - 1)
         croak("Delimiter for here document is too long");
 
     *d++ = '\n';
@@ -11404,7 +11406,7 @@ S_scan_heredoc(pTHX_ char *s)
         Safefree(indent);
     SvREFCNT_dec(tmpstr);
     CopLINE_set(PL_curcop, origline);
-    missingterm(PL_tokenbuf + 1, sizeof(PL_tokenbuf) - 1);
+    missingterm(PL_tokenbuf + 1, C_ARRAY_LENGTH(PL_tokenbuf) - 1);
 }
 
 
@@ -11434,7 +11436,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     I32 len;
     bool nomagicopen = FALSE;
     char *d = PL_tokenbuf;					/* start of temp holding space */
-    const char * const e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
+    const char * const e = C_ARRAY_END(PL_tokenbuf);	/* end of temp holding space */
 
     PERL_ARGS_ASSERT_SCAN_INPUTSYMBOL;
 
@@ -11454,7 +11456,7 @@ S_scan_inputsymbol(pTHX_ char *start)
        or if it didn't end, or if we see a newline
     */
 
-    if (len >= (I32)sizeof PL_tokenbuf)
+    if (len >= (I32) C_ARRAY_LENGTH(PL_tokenbuf))
         croak("Excessively long <> operator");
     if (s >= end)
         croak("Unterminated <> operator");
@@ -12394,7 +12396,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     case '6': case '7': case '8': case '9': case '.':
       decimal:
         d = PL_tokenbuf;
-        e = PL_tokenbuf + sizeof PL_tokenbuf - 6; /* room for various punctuation */
+        e = C_ARRAY_END(PL_tokenbuf) - 6; /* room for various punctuation */
         floatit = FALSE;
         if (hexfp) {
             floatit = TRUE;
@@ -13095,7 +13097,7 @@ S_swallow_bom(pTHX_ U8 *s)
 #ifdef DEBUGGING
             if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
 #endif
-            s += sizeof(BOM_UTF8) - 1;                     /* UTF-8 */
+            s += C_ARRAY_LENGTH(BOM_UTF8) - 1;              /* UTF-8 */
         }
         break;
     }
