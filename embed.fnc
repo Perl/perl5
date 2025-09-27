@@ -1939,8 +1939,8 @@ CTopr	|void	|locale_panic	|NN const char *msg				\
 p	|OP *	|localize	|NN OP *o				\
 				|I32 lex
 CTp	|UV	|long_valid_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e
+				|SPTR const U8 * const s		\
+				|EPTR const U8 * const e
 ARdp	|I32	|looks_like_number					\
 				|NN SV * const sv
 CRTip	|unsigned|lsbit_pos32	|U32 word
@@ -5298,8 +5298,8 @@ ST	|char	|first_symbol	|NN const char *pat			\
 				|NN const char *patend
 RS	|const char *|get_num	|NN const char *patptr			\
 				|NN SSize_t *lenptr
-S	|const char *|group_end |NN const char *patptr			\
-				|NN const char *patend			\
+S	|const char *|group_end |SPTR const char *patptr		\
+				|EPTR const char *patend		\
 				|char ender
 RS	|SV *	|is_an_int	|NN const char *s			\
 				|STRLEN l

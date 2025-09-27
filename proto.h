@@ -2035,7 +2035,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 PERL_CALLCONV UV
 Perl_long_valid_utf8_to_uv(const U8 * const s, const U8 * const e);
 #define PERL_ARGS_ASSERT_LONG_VALID_UTF8_TO_UV  \
-        assert(s); assert(e)
+        assert(s); assert(e); assert(s < e)
 
 PERL_CALLCONV I32
 Perl_looks_like_number(pTHX_ SV * const sv)
@@ -8083,7 +8083,7 @@ S_get_num(pTHX_ const char *patptr, SSize_t *lenptr)
 STATIC const char *
 S_group_end(pTHX_ const char *patptr, const char *patend, char ender);
 # define PERL_ARGS_ASSERT_GROUP_END             \
-        assert(patptr); assert(patend)
+        assert(patptr); assert(patend); assert(patptr < patend)
 
 STATIC SV *
 S_is_an_int(pTHX_ const char *s, STRLEN l)
