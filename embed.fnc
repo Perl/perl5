@@ -2708,9 +2708,9 @@ Fop	|void	|populate_isa	|NN const char *name			\
 Adhp	|REGEXP *|pregcomp	|NN SV * const pattern			\
 				|const U32 flags
 Adhp	|I32	|pregexec	|NN REGEXP * const prog 		\
-				|NN char *stringarg			\
-				|NN char *strend			\
-				|NN char *strbeg			\
+				|MPTR char *stringarg			\
+				|EPTR char *strend			\
+				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *screamer			\
 				|U32 nosave
@@ -2821,9 +2821,9 @@ Xdp	|struct refcounted_he *|refcounted_he_new_sv			\
 				|U32 flags
 Cp	|void	|regdump	|NN const regexp *r
 Cp	|I32	|regexec_flags	|NN REGEXP * const rx			\
-				|NN char *stringarg			\
+				|MPTR char *stringarg			\
 				|NN char *strend			\
-				|NN char *strbeg			\
+				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *sv				\
 				|NULLOK void *data			\
@@ -2889,8 +2889,8 @@ EXp	|REGEXP *|reg_temp_copy |NULLOK REGEXP *dsv			\
 				|NN REGEXP *ssv
 Cp	|char * |re_intuit_start|NN REGEXP * const rx			\
 				|NULLOK SV *sv				\
-				|NN const char * const strbeg		\
-				|NN char *strpos			\
+				|SPTR const char * const strbeg 	\
+				|MPTR char *strpos			\
 				|NN char *strend			\
 				|const U32 flags			\
 				|NULLOK re_scream_pos_data *data
@@ -3808,13 +3808,13 @@ ARdip	|IV	|utf8_distance	|NN const U8 *a 			\
 				|NN const U8 *b
 ARTdip	|U8 *	|utf8_hop	|NN const U8 *s 			\
 				|SSize_t off
-ARTdmp	|U8 *	|utf8_hop_back	|NN const U8 *s 			\
+ARTdmp	|U8 *	|utf8_hop_back	|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start
+				|SPTR const U8 * const start
 ARTdip	|U8 *	|utf8_hop_back_overshoot				\
-				|NN const U8 *s 			\
+				|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start		\
+				|SPTR const U8 * const start		\
 				|NULLOK SSize_t *remaining
 ARTdmp	|U8 *	|utf8_hop_forward					\
 				|NN const U8 *s 			\
@@ -3826,14 +3826,14 @@ ARTdip	|U8 *	|utf8_hop_forward_overshoot				\
 				|NN const U8 * const end		\
 				|NULLOK SSize_t *remaining
 ARTdip	|U8 *	|utf8_hop_overshoot					\
-				|NN const U8 *s 			\
+				|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start		\
+				|SPTR const U8 * const start		\
 				|NN const U8 * const end		\
 				|NULLOK SSize_t *remaining
-ARTdmp	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
+ARTdmp	|U8 *	|utf8_hop_safe	|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start		\
+				|SPTR const U8 * const start		\
 				|NN const U8 * const end
 ARdp	|STRLEN |utf8_length	|NN const U8 *s0			\
 				|NN const U8 *e
@@ -4617,9 +4617,9 @@ S	|void	|maybe_multimagic_gv					\
 S	|bool	|parse_gv_stash_name					\
 				|NN HV **stash				\
 				|NN GV **gv				\
-				|NN const char **name			\
+				|MPTR const char **name 		\
 				|NN STRLEN *len 			\
-				|NN const char *nambeg			\
+				|SPTR const char *nambeg		\
 				|STRLEN full_len			\
 				|const U32 is_utf8			\
 				|const I32 add
@@ -5321,8 +5321,8 @@ S	|SV **	|pack_rec	|NN SV *cat				\
 RS	|char * |sv_exp_grow	|NN SV *sv				\
 				|STRLEN needed
 S	|SSize_t|unpack_rec	|NN struct tempsym *symptr		\
-				|NN const char *s			\
-				|NN const char *strbeg			\
+				|MPTR const char *s			\
+				|SPTR const char *strbeg		\
 				|NN const char *strend			\
 				|NULLOK const char **new_s
 #endif /* defined(PERL_IN_PP_PACK_C) */
@@ -5494,9 +5494,9 @@ ERST	|int	|edit_distance	|NN const UV *src			\
 				|const SSize_t maxDistance
 ES	|I32	|execute_wildcard					\
 				|NN REGEXP * const prog 		\
-				|NN char *stringarg			\
+				|MPTR char *stringarg			\
 				|NN char *strend			\
-				|NN char *strbeg			\
+				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *screamer			\
 				|U32 nosave
@@ -5681,9 +5681,9 @@ Ep	|void	|populate_invlist_from_bitmap				\
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_TOKE_C)
-ERp	|bool	|is_grapheme	|NN const U8 *strbeg			\
-				|NN const U8 *s 			\
-				|NN const U8 *strend			\
+ERp	|bool	|is_grapheme	|SPTR const U8 *strbeg			\
+				|MPTR const U8 *s			\
+				|EPTR const U8 *strend			\
 				|const UV cp
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
@@ -5793,30 +5793,30 @@ ES	|void	|unwind_scan_frames					\
 				|NN void *p
 #endif /* defined(PERL_IN_REGCOMP_STUDY_C) */
 #if defined(PERL_IN_REGEXEC_C)
-ERS	|LB_enum|advance_one_LB |NN U8 **curpos 			\
-				|NN const U8 * const strend		\
+ERS	|LB_enum|advance_one_LB |MPTR U8 **curpos			\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
-ERS	|SB_enum|advance_one_SB |NN U8 **curpos 			\
-				|NN const U8 * const strend		\
+ERS	|SB_enum|advance_one_SB |MPTR U8 **curpos			\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
-ERS	|WB_enum|advance_one_WB_|NN U8 **curpos 			\
-				|NN const U8 * const strend		\
+ERS	|WB_enum|advance_one_WB_|MPTR U8 **curpos			\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target 		\
 				|const bool skip_Extend_Format
-ERS	|GCB_enum|backup_one_GCB|NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+ERS	|GCB_enum|backup_one_GCB|SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target
-ERS	|LB_enum|backup_one_LB_ |NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+ERS	|LB_enum|backup_one_LB_ |SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target 		\
 				|bool skip_CM_ZWJ
-ERS	|SB_enum|backup_one_SB	|NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+ERS	|SB_enum|backup_one_SB	|SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target
 ERS	|WB_enum|backup_one_WB_but_over_Extend_FO			\
 				|NN WB_enum *previous			\
-				|NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+				|SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target
 EWi	|void	|capture_clear	|NN regexp *rex 			\
 				|U16 from_ix				\
@@ -5851,27 +5851,27 @@ ERS	|bool	|isFOO_utf8_lc	|const U8 classnum			\
 				|EPTR const U8 *e
 ERS	|bool	|isGCB		|const GCB_enum before			\
 				|const GCB_enum after			\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
 				|const bool utf8_target
 ERS	|bool	|isLB		|LB_enum before 			\
 				|LB_enum after				\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
-				|NN const U8 * const strend		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
 ERS	|bool	|isSB		|SB_enum before 			\
 				|SB_enum after				\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
-				|NN const U8 * const strend		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
 ERS	|bool	|isWB		|WB_enum previous			\
 				|WB_enum before 			\
 				|WB_enum after				\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
-				|NN const U8 * const strend		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
 ERST	|I32	|reg_check_named_buff_matched				\
 				|NN const regexp *rex			\
@@ -6050,8 +6050,8 @@ S	|const char *|sv_display|NN SV * const sv			\
 				|STRLEN tmpbuf_size
 S	|bool	|sv_2iuv_common |NN SV * const sv
 S	|STRLEN |sv_pos_b2u_midway					\
-				|NN const U8 * const s			\
-				|NN const U8 * const target		\
+				|SPTR const U8 * const s		\
+				|MPTR const U8 * const target		\
 				|NN const U8 *end			\
 				|STRLEN endu
 S	|STRLEN |sv_pos_u2b_cached					\
