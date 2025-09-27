@@ -321,8 +321,6 @@ sub generate_proto_h {
                         warn "$func: $arg should not have NZ\n" if $nz;
                     }
 
-                    push( @nonnull, $n ) if $nn;
-
                     # Make sure each arg has at least a type and a var name.
                     # An arg of "int" is valid C, but want it to be "int foo".
                     my $argtype = ( $arg =~ m/^(\w+(?:\s*\*+)?)/ )[0];
