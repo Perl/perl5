@@ -182,11 +182,13 @@ sub generate_proto_h {
                                                     if $flags =~ tr/Sp// > 1;
         if ($has_mflag) {
             if ($flags =~ /S/) {
-                die_at_end "$plain_func: m and S flags are mutually exclusive";
+                die_at_end
+                          "$plain_func: m and S flags are mutually exclusive";
             }
         }
         else {
-            die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
+            die_at_end "$plain_func: u flag only usable with m"
+                                                            if $flags =~ /u/;
         }
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
@@ -194,7 +196,8 @@ sub generate_proto_h {
         if (@extra_static_flags) {
             my $flags_str = join ", ", $static_flag, @extra_static_flags;
             $flags_str =~ s/, (\w)\z/ and $1/;
-            die_at_end "$plain_func: flags $flags_str are mutually exclusive\n";
+            die_at_end
+                     "$plain_func: flags $flags_str are mutually exclusive\n";
         }
 
         my $static_inline = 0;
@@ -217,7 +220,8 @@ sub generate_proto_h {
                 }->{$static_flag};
             }
             $retval = "$type $retval";
-            die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
+            die_at_end "Don't declare static function '$plain_func' pure"
+                                                             if $flags =~ /P/;
             $static_inline = $type =~ /^PERL_STATIC(?:_FORCE)?_INLINE/;
         }
         else {
@@ -243,26 +247,26 @@ sub generate_proto_h {
                                             if $flags =~ /M/ && $flags !~ /p/;
         my $C_required_flags = '[pIimbs]';
         die_at_end
-            "For '$plain_func', C flag requires one of $C_required_flags] flags"
-                                                if $flags =~ /C/
-                                                && ($flags !~ /$C_required_flags/
+          "For '$plain_func', C flag requires one of $C_required_flags] flags"
+                                             if $flags =~ /C/
+                                             && ($flags !~ /$C_required_flags/
 
-                                                   # Notwithstanding the
-                                                   # above, if the name won't
-                                                   # clash with a user name,
-                                                   # it's ok.
-                                                && $plain_func !~ /^[Pp]erl/);
+                                                # Notwithstanding the
+                                                # above, if the name won't
+                                                # clash with a user name,
+                                                # it's ok.
+                                             && $plain_func !~ /^[Pp]erl/);
 
         die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
-                                            if $flags =~ /X/ && $flags !~ /[Iip]/;
+                                        if $flags =~ /X/ && $flags !~ /[Iip]/;
         die_at_end "For '$plain_func', X and m flags are mutually exclusive"
                                             if $flags =~ /X/ && $has_mflag;
         die_at_end "For '$plain_func', [Ii] with [ACX] requires p flag"
-                        if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
+                    if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
         die_at_end "For '$plain_func', b and m flags are mutually exclusive"
                  . " (try M flag)" if $flags =~ /b/ && $has_mflag;
         die_at_end "For '$plain_func', b flag without M flag requires D flag"
-                            if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
+                        if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
         die_at_end "For '$plain_func', I and i flags are mutually exclusive"
                                             if $flags =~ tr/Ii// > 1;
 
@@ -273,8 +277,9 @@ sub generate_proto_h {
             $ret .= @$args ? "pTHX_ " : "pTHX";
         }
         if (@$args) {
-            die_at_end "$plain_func: n flag is contradicted by having arguments"
-                                                                if $flags =~ /n/;
+            die_at_end
+                    "$plain_func: n flag is contradicted by having arguments"
+                                                            if $flags =~ /n/;
             my $n;
             for my $arg ( @$args ) {
                 ++$n;
@@ -302,8 +307,11 @@ sub generate_proto_h {
                     $arg =~ s/\s+$//;
                     $arg =~ s/\s{2,}/ /g;
 
-                    die_at_end ":$func: $arg Use only one of NN, NULLOK, and NZ"
-                                                if 0 + $nn + $nz + $nullok > 1;
+                    # Note that we don't care if you say e.g., 'NN' multiple
+                    # times
+                    die_at_end
+                           ":$func: $arg Use only one of NN, NULLOK, and NZ"
+                                               if 0 + $nn + $nz + $nullok > 1;
 
                     push( @nonnull, $n ) if $nn;
 
@@ -345,13 +353,15 @@ sub generate_proto_h {
                             && exists $type_asserts{$argtype})
                         {
                             my $type_assert =
-                                $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
-                            $type_assert = "!$argname || $type_assert" if $nullok;
+                             $type_asserts{$argtype} =~ s/__arg__/$argname/gr;
+                            $type_assert = "!$argname || $type_assert"
+                                                                   if $nullok;
                             push @asserts, "assert($type_assert)";
                         }
                     }
-                }
-            }
+                }   # End of this argument
+            }   # End of loop through all arguments
+
             $ret .= join ", ", @$args;
         }
         else {
@@ -403,7 +413,8 @@ sub generate_proto_h {
                 $argc = 0;
                 my @fmts = grep $args->[$_] =~ /\b(f|pat|fmt)$/, 0..$#$args;
                 if (@fmts != 1) {
-                    die "embed.pl: '$plain_func': can't determine pattern arg\n";
+                    die
+                    "embed.pl: '$plain_func': can't determine pattern arg\n";
                 }
                 $pat = $fmts[0] + 1;
             }
@@ -411,7 +422,8 @@ sub generate_proto_h {
                                 ? '__attribute__format__'
                                 : '__attribute__format__null_ok__';
             if ($plain_func =~ /strftime/) {
-                push @attrs, sprintf "%s(__strftime__,%s1,0)", $macro, $prefix;
+                push @attrs, sprintf "%s(__strftime__,%s1,0)",
+                                     $macro, $prefix;
             }
             else {
                 push @attrs, sprintf "%s(__printf__,%s%d,%s)", $macro,
@@ -504,7 +516,8 @@ sub generate_proto_h {
             # re-align defines so that the definitions line up at the 48th col
             # as much as possible.
             if ($line_data->{sub_type} eq "#define") {
-                $line_data->{line}=~s/^(\s*#\s*define\s+\S+?(?:\([^()]*\))?\s)(\s*)(\S+)/
+                $line_data->{line} =~
+                        s/^(\s*#\s*define\s+\S+?(?:\([^()]*\))?\s)(\s*)(\S+)/
                     sprintf "%-48s%s", $1, $3/e;
             }
         };
@@ -580,7 +593,8 @@ sub embed_h {
         }
         my $level= $_->{level};
         my $embed= $_->{embed} or next;
-        my ($flags,$retval,$func,$args) = @{$embed}{qw(flags return_type name args)};
+        my ($flags,$retval,$func,$args) =
+                                   @{$embed}{qw(flags return_type name args)};
         my $full_name = full_name($func, $flags);
         next if $full_name eq $func;    # Don't output a no-op.
 
@@ -636,10 +650,11 @@ sub embed_h {
                 my $use_va_list = $argc && $args->[-1] =~ /\.\.\./;
 
                 if($use_va_list) {
-                    # CPP has trouble with empty __VA_ARGS__ and comma joining,
-                    # so we'll have to eat an extra params here.
+                    # CPP has trouble with empty __VA_ARGS__ and comma
+                    # joining, so we'll have to eat an extra params here.
                     if($argc < 2) {
-                        die "Cannot use ... as the only parameter to a macro ($func)\n";
+                        die "Cannot use ... as the only parameter to a macro"
+                          . " ($func)\n";
                     }
                     $argc -= 2;
                 }
@@ -664,15 +679,19 @@ sub embed_h {
                 }
                 $ret .= ")\n";
                 if($has_compat_macro{$func}) {
-                    # Make older ones available only when !MULTIPLICITY or PERL_CORE or PERL_WANT_VARARGS
-                    # These should not be done uncondtionally because existing
-                    # code might call e.g. warn() without aTHX in scope.
-                    $ret = "#${ind}if !defined(MULTIPLICITY) || defined(PERL_CORE) || defined(PERL_WANT_VARARGS)\n" .
-                           $ret .
-                           "#${ind}endif\n";
+                    # Make older ones available only when !MULTIPLICITY or
+                    # PERL_CORE or PERL_WANT_VARARGS These should not be done
+                    # uncondtionally because existing code might call e.g.
+                    # warn() without aTHX in scope.
+                    $ret = "#${ind}if !defined(MULTIPLICITY)"
+                         . " || defined(PERL_CORE)"
+                         . " || defined(PERL_WANT_VARARGS)\n"
+                         . $ret
+                         . "#${ind}endif\n";
                 }
             }
-            $ret = "#${ind}ifndef NO_MATHOMS\n$ret#${ind}endif\n" if $flags =~ /b/;
+            $ret = "#${ind}ifndef NO_MATHOMS\n$ret#${ind}endif\n"
+                                                             if $flags =~ /b/;
         }
         $lines .= $ret;
     }
@@ -720,7 +739,7 @@ sub generate_embed_h {
      * disable them.
      */
     #  define sv_setptrobj(rv,ptr,name) sv_setref_iv(rv,name,PTR2IV(ptr))
-    #  define sv_setptrref(rv,ptr)              sv_setref_iv(rv,NULL,PTR2IV(ptr))
+    #  define sv_setptrref(rv,ptr)      sv_setref_iv(rv,NULL,PTR2IV(ptr))
     #endif
 
     #if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT)
@@ -736,7 +755,8 @@ sub generate_embed_h {
 
     foreach (@$all) {
         my $embed= $_->{embed} or next;
-        my ($flags, $retval, $func, $args) = @{$embed}{qw(flags return_type name args)};
+        my ($flags, $retval, $func, $args) =
+                                @{$embed}{qw(flags return_type name args)};
         next unless $flags =~ /O/;
 
         my $alist = join ",", @az[0..$#$args];
@@ -750,7 +770,9 @@ sub generate_embed_h {
        provides a set of compatibility functions that don't take an
        extra argument but grab the context pointer using the macro dTHX.
      */
-    #if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && !defined(PERL_WANT_VARARGS)
+    #if defined(MULTIPLICITY)           \
+     && !defined(PERL_NO_SHORT_NAMES)   \
+     && !defined(PERL_WANT_VARARGS)
     END
 
     foreach (@have_compatibility_macros) {
@@ -811,7 +833,8 @@ sub generate_embedvar_h {
 sub update_headers {
     my ($all, $api, $ext, $core) = setup_embed(); # see regen/embed_lib.pl
     generate_proto_h($all);
-    die_at_end "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
+    die_at_end "$unflagged_pointers pointer arguments to clean up\n"
+                                                       if $unflagged_pointers;
     generate_embed_h($all, $api, $ext, $core);
     generate_embedvar_h();
     die "$error_count errors found" if $error_count;
