@@ -2963,7 +2963,6 @@ Perl_utf8_hop_back_overshoot(const U8 *s, SSize_t off,
                              const U8 * const start, SSize_t *remaining)
 {
     PERL_ARGS_ASSERT_UTF8_HOP_BACK_OVERSHOOT;
-    assert(start <= s);
     assert(off <= 0);
 
     /* Note: if we know that the input is well-formed, we can do per-word
@@ -3031,7 +3030,7 @@ Perl_utf8_hop_overshoot(const U8 *s, SSize_t off,
 {
     PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT;
 
-    assert(start <= s && s <= end);
+    assert(s <= end);
 
     if (off >= 0) {
         return utf8_hop_forward_overshoot(s, off, end, remaining);
