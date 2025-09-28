@@ -301,48 +301,73 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   # RT #70934
   # check both the specific case in the ticket, and a few other paths into
   # S_scan_ident()
-  # simplify long ids
-  my $x100 = "x" x 256;
-  my $xFE = "x" x 254;
-  my $xFD = "x" x 253;
-  my $xFC = "x" x 252;
-  my $xFB = "x" x 251;
+  # The upper length limit for a token is 255 characters.  But some Unicode
+  # characters in UTF-8 take 4 (and even 5 on EBCDIC) bytes each.  Create a
+  # close to maximum length identifier in $plus1.   (The reason it is done
+  # this way is to use the 5-byte code points in EBCDIC, but no such character
+  # as of Unicode 17.0 is an identifier start character; when they start
+  # assigning U+40000 is when there would be a 5-byte EBCDIC IDStart
+  # character.)
+  my $continuation = "\x{E0100}";
+  my $plus1 = "\x{104B0}" . ($continuation x (255 - 1));
 
-  eval qq[ \$#$xFB ];
-  is($@, "", "251 character \$# sigil ident ok");
-  eval qq[ \$#$xFC ];
+  # Here $plus1 has been populated with a 4-byte Identifier Start character,
+  # and 254 continuation characters, each containing the most possible bytes
+  # available on this platform.  This leaves space for a 256th character
+  # containing that maximum number of bytes.  Instead of using that, we fill
+  # it to the brim with single-byte characters that we can chop off for the
+  # tests below.  We need to calculate in byte lengths.
+  my $continuation_as_bytes = $continuation;
+  utf8::encode($continuation_as_bytes);
+  my $continuation_length = length $continuation_as_bytes;
+
+  my $plus1_as_bytes = $plus1;
+  utf8::encode($plus1_as_bytes);
+  my $plus1_length = length $plus1_as_bytes;
+
+  my $capacity = 256 * $continuation_length;
+  my $fill = $capacity - $plus1_length;
+
+  $plus1 .= 'x' x $fill;
+  my $minus1 = substr $plus1, 0, -2;
+  my $minus2 = substr $minus1, 0, -1;
+  my $minus3 = substr $minus2, 0, -1;
+  my $minus4 = substr $minus3, 0, -1;
+
+  eval qq[ \$#$minus4 ];
+  is($@, "", "minus4 character \$# sigil ident ok");
+  eval qq[ \$#$minus3 ];
   like($@, qr/Identifier too long/, "too long id in \$# sigil ctx");
 
-  eval qq[ \$$xFB ];
-  is($@, "", "251 character \$ sigil ident ok");
-  eval qq[ \$$xFC ];
+  eval qq[ \$$minus4 ];
+  is($@, "", "minus4 character \$ sigil ident ok");
+  eval qq[ \$$minus3 ];
   like($@, qr/Identifier too long/, "too long id in \$ sigil ctx");
 
-  eval qq[ %$xFB ];
-  is($@, "", "251 character % sigil ident ok");
-  eval qq[ %$xFC ];
+  eval qq[ %$minus4 ];
+  is($@, "", "minus4 character % sigil ident ok");
+  eval qq[ %$minus3 ];
   like($@, qr/Identifier too long/, "too long id in % sigil ctx");
 
-  eval qq[ \\&$xFB ]; # take a ref since I don't want to call it
-  is($@, "", "251 character & sigil ident ok");
-  eval qq[ \\&$xFC ];
+  eval qq[ \\&$minus4 ]; # take a ref since I don't want to call it
+  is($@, "", "minus4 character & sigil ident ok");
+  eval qq[ \\&$minus3 ];
   like($@, qr/Identifier too long/, "too long id in & sigil ctx");
 
-  eval qq[ *$xFC ];
-  is($@, "", "252 character glob ident ok");
-  eval qq[ *$xFD ];
+  eval qq[ *$minus3 ];
+  is($@, "", "minus3 character glob ident ok");
+  eval qq[ *$minus2 ];
   like($@, qr/Identifier too long/, "too long id in glob ctx");
 
-  eval qq[ for $xFC ];
+  eval qq[ for $minus3 ];
   like($@, qr/^Missing \$ on loop variable /,
-       "252 char id ok, but a different error");
-  eval qq[ for $xFD; ];
+       "minus3 char id ok, but a different error");
+  eval qq[ for $minus2; ];
   like($@, qr/^Missing \$ on loop variable /, "too long id in for ctx");
 
   # the specific case from the ticket
   # however the parsing code in yyl_foreach has now changed
-  my $x = "x" x 257;
-  eval qq[ for $x ];
+  eval qq[ for $plus1 ];
   like($@, qr/^Missing \$ on loop variable /, "too long id ticket case");
 
   # as PL_tokenbuf is now PL_parser->tokenbuf, the "buffer overflow" that was
@@ -354,8 +379,7 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   # the buggy change to the calculation of the variable `e` in scan_word()
   # instead.
 
-  my $x = "x" x 260;
-  eval qq[ for my $x \$foo ];
+  eval qq[ for my $plus1 \$foo ];
   like($@, qr/at \(eval \d+\) line 1[,.]/, "line number is reported correctly");
 }
 
@@ -509,12 +533,27 @@ BEGIN{ ${"_<".__FILE__} = \1 }
 is __FILE__, $file,
     'no __FILE__ corruption when setting CopFILESV to a ref';
 
-eval 'Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
-    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
-    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
-    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
-    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
-    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+eval 'Ffffooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+
 like $@, "^Identifier too long at ", 'ident buffer overflow';
 
 eval 'for my a1b $i (1) {}';
