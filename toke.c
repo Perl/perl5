@@ -4617,7 +4617,7 @@ S_intuit_more(pTHX_ char *s, char *e)
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
                 int len;
                 char tmpbuf[sizeof PL_tokenbuf * 4];
-                scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
+                scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), FALSE);
                 len = (int)strlen(tmpbuf);
                 if (   len > 1
                     && gv_fetchpvn_flags(tmpbuf,
@@ -5364,8 +5364,8 @@ yyl_dollar(pTHX_ char *s)
             || memCHRs("{$:+-@", s[2])))
     {
         PL_tokenbuf[0] = '@';
-        s = scan_ident(s + 1, PL_tokenbuf + 1,
-                       sizeof PL_tokenbuf - 1, FALSE);
+        s = scan_ident(s + 1, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf),
+                       FALSE);
         S_warn_expect_operator(aTHX_ "Array length", s, POP_OLDBUFPTR);
         if (!PL_tokenbuf[1])
             PREREF(DOLSHARP);
@@ -5375,7 +5375,7 @@ yyl_dollar(pTHX_ char *s)
     }
 
     PL_tokenbuf[0] = '$';
-    s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), FALSE);
     S_warn_expect_operator(aTHX_ "Scalar", s, POP_OLDBUFPTR);
     if (!PL_tokenbuf[1]) {
         if (s == PL_bufend)
@@ -6038,7 +6038,7 @@ yyl_star(pTHX_ char *s)
         POSTDEREF(PERLY_STAR);
 
     if (PL_expect != XOPERATOR) {
-        s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+        s = scan_ident(s, PL_tokenbuf, C_ARRAY_END(PL_tokenbuf), TRUE);
         PL_expect = XOPERATOR;
         force_ident(PL_tokenbuf, PERLY_STAR);
         if (!*PL_tokenbuf)
@@ -6086,7 +6086,7 @@ yyl_percent(pTHX_ char *s)
         POSTDEREF(PERLY_PERCENT_SIGN);
 
     PL_tokenbuf[0] = '%';
-    s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), FALSE);
     pl_yylval.ival = 0;
     if (!PL_tokenbuf[1]) {
         PREREF(PERLY_PERCENT_SIGN);
@@ -6623,7 +6623,7 @@ yyl_ampersand(pTHX_ char *s)
     }
 
     PL_tokenbuf[0] = '&';
-    s = scan_ident(s - 1, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, TRUE);
+    s = scan_ident(s - 1, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), TRUE);
     pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
 
     if (PL_tokenbuf[1])
@@ -6708,7 +6708,7 @@ yyl_snail(pTHX_ char *s)
     if (PL_expect == XPOSTDEREF)
         POSTDEREF(PERLY_SNAIL);
     PL_tokenbuf[0] = '@';
-    s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), FALSE);
     S_warn_expect_operator(aTHX_ "Array", s, POP_OLDBUFPTR);
     pl_yylval.ival = 0;
     if (!PL_tokenbuf[1]) {
@@ -10376,13 +10376,13 @@ Perl_scan_word(pTHX_ char *s, char *dest, char * dest_end, int allow_package, ST
  * specific variable name.
  */
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 ck_uni)
 {
     I32 herelines = PL_parser->herelines;
     SSize_t bracket = -1;
     char funny = *s++;
     char *d = dest;
-    char * const e = d + destlen - 3;    /* two-character token, ending NUL */
+    char * const e = dest_end - 3;    /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
     line_t orig_copline = 0, tmp_copline = 0;
 
