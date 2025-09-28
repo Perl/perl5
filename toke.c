@@ -10470,6 +10470,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
                     bool is_utf8, bool check_dollar)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT;
+    assert(*s <= PL_bufend);
 
     while (*s < PL_bufend) {
         if (*d >= e)
