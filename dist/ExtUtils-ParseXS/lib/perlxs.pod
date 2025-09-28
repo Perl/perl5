@@ -4289,112 +4289,250 @@ entry will be used instead.
 
 =head2 Using XS With C++
 
-If an XSUB name contains C<::>, it is considered to be a C++ method.
-The generated Perl function will assume that
-its first argument is an object pointer.  The object pointer
-will be stored in a variable called THIS.  The object should
-have been created by C++ with the new() function and should
-be blessed by Perl with the sv_setref_pv() macro.  The
-blessing of the object by Perl can be handled by a typemap.  An example
-typemap is shown at the end of this section.
+    MODULE = Foo::Bar PACKAGE = Foo::Bar
 
-If the return type of the XSUB includes C<static>, the method is considered
-to be a static method.  It will call the C++
-function using the class::method() syntax.  If the method is not static
-the function will be called using the THIS-E<gt>method() syntax.
+    # Class methods
 
-The next examples will use the following C++ class.
+    int
+    X::Y::new(int i)
 
-    class color {
+    static int
+    X::Y::foo(int i)
+
+    # Object methods
+
+    int
+    X::Y::bar(int i)
+
+    int
+    X::Y::bar2(int i) const
+
+    void
+    X::Y::DESTROY()
+
+    # C-linkage function
+
+    extern "C" int
+    baz(int i)
+
+XS provides limited support for generating C++ (as opposed to C) output
+files. Any XSUB whose name includes C<::> is treated as a C++ method. This
+triggers two main changes in the way the XSUB's code is generated:
+
+=over
+
+=item *
+
+An implicit first argument is added. For class methods, this will be
+called C<CLASS> and will be of type C<char *>. For object methods, it will
+be called C<THIS> and be of type C<X::Y *> (where C<X::Y::> is the prefix
+of the XSUB's name). XSUBs are treated as class methods if their name is
+C<new> or their return type has the C<static> prefix.
+
+=item *
+
+Any autocall will generate an appropriate C++ method call rather then a C
+function call. In particular, based on the examples above:
+
+    new:             RETVAL = new X::Y(i);
+    static foo:      RETVAL = X::Y::foo(i);
+    bar (and bar2):  RETVAL = THIS->bar(i);
+    DESTROY:         delete THIS;
+
+=item *
+
+In addition, if the XSUB declaration has a trailing C<const>, then the
+type of C<THIS> will be declared as C<const X::Y *>.
+
+=back
+
+This is mostly just syntactic sugar. The C<bar> XSUB declaration above
+could be written longhand as:
+
+    int
+    bar(X::Y* THIS, int i)
+        CODE:
+            RETVAL = THIS->foo(i);
+        OUTPUT:
+            RETVAL
+
+Note that the type of C<THIS> (and, since Perl 5.42, C<CLASS>) can be
+overridden with a line in an C<INPUT> section:
+
+    int
+    X::Y::bar(int i)
+        X::Y::Z *THIS
+
+Finally, a plain C XSUB declaration can be prefixed with C<extern "C"> to
+give that XSUB C linkage.
+
+Some of the methods above might be called from Perl using code like this:
+
+    {
+        my $obj = Foo::Bar->new(1);
+        $obj->bar(2);
+        # implicit $obj->DESTROY();
+    }
+
+This example uses C<Foo::Bar> rather than C<X::Y> to emphasise that the
+name of the C++ class needn't follow the Perl package name.
+
+The call to C<new()> will pass the string C<"Foo::Bar"> as the first
+argument, which can be used to allow multiple Perl classes to share the
+same C<new()> method. In the simple worked example below, the package name
+is hard-coded and that parameter is unused. The C<new()> method is
+expected to return a Perl object which in some way has a pointer to the
+underlying C++ object embedded within it. This is similar to the
+L</T_PTROBJ and opaque handles> example of wrapping a C library which
+uses a handle, although with a subtle difference, as explained below.
+
+Calling C<bar()> passes this Perl object as the first argument, which the
+typemap will use to extract the C++ object pointer and assign to the
+C<THIS> auto variable.
+
+=head3 A complete C++ example
+
+First, you need to tell MakeMaker or similar that the generated file
+should be compiled using a C++ compiler. For basic experimentation you may
+be able to get by with just adding these two lines to the
+C<WriteMakefile()> method call in F<Makefile.PL>:
+
+    CC => 'c++',
+    LD => '$(CC)',
+
+but for portability in production use, you may want to use something like
+L<ExtUtils::CppGuess> to automatically generate the correct options for
+L<ExtUtils::MakeMaker> or L<Module::Build> based on which C++ compiler
+is available.
+
+Then create a C<.xs> file like this:
+
+    #define PERL_NO_GET_CONTEXT
+
+    #include "EXTERN.h"
+    #include "perl.h"
+    #include "XSUB.h"
+    #include "ppport.h"
+
+    namespace Paint {
+        class color {
+            int c_R;
+            int c_G;
+            int c_B;
         public:
-        color();
-        ~color();
-        int blue();
-        void set_blue(int);
+            color(int r, int g, int b) { c_R = r; c_G = g; c_B = b; }
+            ~color()                   { printf("destructor called\n"); }
+            int blue()                 { return c_B; }
+            void set_blue(int b)       { c_B = b; };
+            // and similar for red, green
+        };
+    }
 
-        private:
-        int c_blue;
-    };
+    typedef Paint::color Paint__color;
 
-The XSUBs for the blue() and set_blue() methods are defined with the class
-name but the parameter for the object (THIS, or "self") is implicit and is
-not listed.
+    MODULE = Foo::Bar PACKAGE = Foo::Bar
 
-    int
-    color::blue()
+    PROTOTYPES: DISABLE
 
-    void
-    color::set_blue(val)
-        int val
-
-Both Perl functions will expect an object as the first parameter.  In the
-generated C++ code the object is called C<THIS>, and the method call will
-be performed on this object.  So in the C++ code the blue() and set_blue()
-methods will be called as this:
-
-    RETVAL = THIS->blue();
-
-    THIS->set_blue(val);
-
-You could also write a single get/set method using an optional argument:
-
-    int
-    color::blue(val = NO_INIT)
-        int val
-      PROTOTYPE $;$
-      CODE:
-        if (items > 1)
-            THIS->set_blue(val);
-        RETVAL = THIS->blue();
-      OUTPUT:
-        RETVAL
-
-If the function's name is B<DESTROY> then the C++ C<delete> function will be
-called and C<THIS> will be given as its parameter.  The generated C++ code for
-
-    void
-    color::DESTROY()
-
-will look like this:
-
-    color *THIS = ...;  // Initialized as in typemap
-
-    delete THIS;
-
-If the function's name is B<new> then the C++ C<new> function will be called
-to create a dynamic C++ object.  The XSUB will expect the class name, which
-will be kept in a variable called C<CLASS>, to be given as the first
-argument.
-
-    color *
-    color::new()
-
-The generated C++ code will call C<new>.
-
-    RETVAL = new color();
-
-The following is an example of a typemap that could be used for this C++
-example.
-
-    TYPEMAP
-    color * O_OBJECT
-
-    OUTPUT
-    # The Perl object is blessed into 'CLASS', which should be a
-    # char* having the name of the package for the blessing.
-    O_OBJECT
-        sv_setref_pv($arg, CLASS, (void*)$var);
+    TYPEMAP: <<EOF
+    Paint::color * T_PKG_OBJ
 
     INPUT
-    O_OBJECT
-        if (sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG))
-            $var = ($type)SvIV((SV*)SvRV($arg));
-        else {
-            warn(\"${Package}::$func_name() -- \"
-                \"$var is not a blessed SV reference\");
-            XSRETURN_UNDEF;
-        }
+    T_PKG_OBJ
+            SvGETMAGIC($arg);
+            if (SvROK($arg) && sv_derived_from($arg, "$Package")) {
+                IV tmp = SvIV((SV*)SvRV($arg));
+                $var = INT2PTR($type,tmp);
+            }
+            else {
+                    const char* refstr = SvROK($arg)
+                        ? "" : SvOK($arg) ? "scalar " : "undef";
+                Perl_croak_nocontext(
+                    "%s: Expected %s to be of type %s; got %s%"
+                    SVf " instead",
+                            ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq["$pname"]},
+                            "$var", "$Package",
+                            refstr, $arg
+                    );
+            }
 
+    T_PKG_REF
+            SvGETMAGIC($arg);
+            if (SvROK($arg)) {
+                IV tmp = SvIV((SV*)SvRV($arg));
+                $var = INT2PTR($type,tmp);
+            }
+            else
+                Perl_croak_nocontext("%s: %s is not a reference",
+                            ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq["$pname"]},
+                            "$var")
+
+    OUTPUT
+    T_PKG_OBJ
+            sv_setref_pv($arg, "$Package", (void*)$var);
+
+    EOF
+
+    Paint::color *
+    Paint::color::new(int r, int g, int b)
+
+    int
+    Paint::color::blue()
+
+    void
+    Paint::color::set_blue(int b)
+
+    void
+    Paint::color::DESTROY()
+
+In the C part of the XS file (or this case, the C++ part), a trivial
+example C++ class is defined. This would more typically be a pre-existing
+library with just the appropriate C<#include>. The example includes a
+namespace to make it clearer when something is a namespace, class name or
+Perl package. The Perl package is called C<Foo::Bar> rather than
+C<Paint::color> to again distinguish it. You could however call the Perl
+package C<Paint::color> if you desired.
+
+A single typedef follows to allow for XS-mangled class names, as explained
+in L</Fully-qualified type names and Perl objects>.
+
+Then the C<MODULE> line starts the XS part of the file.
+
+Then there follows a full definition of a new typemap called C<T_PKG_OBJ>.
+This is actually a direct copy of the C<T_PTROBJ> typemap found in the
+system typemap file, except that all occurrences of C<$ntype> have been
+replaced with C<$Package>. It serves the same basic purpose as
+C<T_PTROBJ>: embedding a pointer within a new blessed Perl object,
+and later, retrieving that pointer from the object. The difference is in
+terms of what package the object is blessed into. C<T_PTROBJ> expects the
+type name (C<Paint::color>) to already be a pointer type, but with a C++
+XSUB, the implicit C<THIS> argument is automatically declared to be of
+type C<Paint::color *> (so C<Paint::color> itself isn't necessarily a
+pointer type). In addition, when the Perl and C++ class names differ we
+want the object to be blessed using the Perl package name, not the C++
+class name. In this example, the actual values of the two variables when
+the typemap template is being evalled, are:
+
+        $ntype   = "Paint::colorPtr";
+        $Package = "Foo::Bar";
+
+The typemap also includes an INPUT definition for C<T_PKG_REF>, which is
+an I<exact> copy of C<T_PTRREF>. This is needed because, as an
+optimisation, the XS parser automatically renames an INPUT typemap using
+C<s/OBJ$/REF/> if the name of the XSUB is C<DESTROY>, on the grounds that
+it's not necessary to to check that the object is the right class.
+
+Finally the XS file includes a few XSUBs which are wrappers around the
+class's methods.
+
+This class might be used like this:
+
+    use Foo::Bar;
+
+    my $color = Foo::Bar->new(0x10, 0x20, 0xff);
+    printf "blue=%d\n", $color->blue();   # prints 255
+    $color->set_blue(0x80);
+    printf "blue=%d\n", $color->blue();   # prints 128
 
 =head2 Safely Storing Static Data in XS
 
