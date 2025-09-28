@@ -6073,7 +6073,7 @@ S	|bool	|sv_2iuv_common |NN SV * const sv
 S	|STRLEN |sv_pos_b2u_midway					\
 				|SPTR const U8 * const s		\
 				|MPTR const U8 * const target		\
-				|NN const U8 *end			\
+				|EPTRge const U8 *end			\
 				|STRLEN endu
 S	|STRLEN |sv_pos_u2b_cached					\
 				|NN SV * const sv			\
