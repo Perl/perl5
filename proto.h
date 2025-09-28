@@ -10496,7 +10496,7 @@ PERL_STATIC_INLINE Size_t
 S_variant_under_utf8_count(const U8 * const s, const U8 * const e)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT \
-        assert(s); assert(e)
+        assert(s); assert(e); assert(s <= e)
 
 #   if !defined(HAS_MEMRCHR)
 PERL_STATIC_INLINE void *
