@@ -4312,8 +4312,8 @@ Ei	|STRLEN |sv_or_pv_pos_u2b					\
 				|STRLEN pos				\
 				|NULLOK STRLEN *lenp
 ERTdi	|Size_t |variant_under_utf8_count				\
-				|NN const U8 * const s			\
-				|NN const U8 * const e
+				|SPTR const U8 * const s		\
+				|EPTRge const U8 * const e
 # if !defined(HAS_MEMRCHR)
 ETei	|void * |my_memrchr	|NN const char *s			\
 				|const char c				\
