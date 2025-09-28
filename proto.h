@@ -9224,7 +9224,8 @@ S_sv_display(pTHX_ SV * const sv, char *tmpbuf, STRLEN tmpbuf_size);
 STATIC STRLEN
 S_sv_pos_b2u_midway(pTHX_ const U8 * const s, const U8 * const target, const U8 *end, STRLEN endu);
 # define PERL_ARGS_ASSERT_SV_POS_B2U_MIDWAY     \
-        assert(s); assert(target); assert(end); assert(s <= target)
+        assert(s); assert(target); assert(end); assert(s <= target); \
+        assert(target <= end)
 
 STATIC STRLEN
 S_sv_pos_u2b_cached(pTHX_ SV * const sv, MAGIC ** const mgp, const U8 * const start, const U8 * const send, STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0);
