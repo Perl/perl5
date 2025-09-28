@@ -5316,8 +5316,8 @@ IR	|bool	|should_we_output_Debug_r				\
 #if defined(PERL_IN_PP_PACK_C)
 S	|int	|div128 	|NN SV *pnum				\
 				|NN bool *done
-ST	|char	|first_symbol	|NN const char *pat			\
-				|NN const char *patend
+ST	|char	|first_symbol	|SPTR const char *pat			\
+				|EPTRge const char *patend
 RS	|const char *|get_num	|NN const char *patptr			\
 				|NN SSize_t *lenptr
 S	|const char *|group_end |SPTR const char *patptr		\
@@ -5333,8 +5333,8 @@ RST	|char * |my_bytes_to_utf8					\
 				|STRLEN len				\
 				|NN char *dest				\
 				|const bool needs_swap
-ST	|bool	|need_utf8	|NN const char *pat			\
-				|NN const char *patend
+ST	|bool	|need_utf8	|SPTR const char *pat			\
+				|EPTRge const char *patend
 S	|bool	|next_symbol	|NN struct tempsym *symptr
 S	|SV **	|pack_rec	|NN SV *cat				\
 				|NN struct tempsym *symptr		\

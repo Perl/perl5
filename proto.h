@@ -8040,7 +8040,7 @@ S_div128(pTHX_ SV *pnum, bool *done);
 STATIC char
 S_first_symbol(const char *pat, const char *patend);
 # define PERL_ARGS_ASSERT_FIRST_SYMBOL          \
-        assert(pat); assert(patend)
+        assert(pat); assert(patend); assert(pat <= patend)
 
 STATIC const char *
 S_get_num(pTHX_ const char *patptr, SSize_t *lenptr)
@@ -8078,7 +8078,7 @@ S_my_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swa
 STATIC bool
 S_need_utf8(const char *pat, const char *patend);
 # define PERL_ARGS_ASSERT_NEED_UTF8             \
-        assert(pat); assert(patend)
+        assert(pat); assert(patend); assert(pat <= patend)
 
 STATIC bool
 S_next_symbol(pTHX_ struct tempsym *symptr);
