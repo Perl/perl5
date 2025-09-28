@@ -5296,22 +5296,22 @@ Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp);
 PERL_CALLCONV UV
 Perl_to_utf8_fold_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, U8 flags);
 #define PERL_ARGS_ASSERT_TO_UTF8_FOLD_FLAGS_    \
-        assert(p); assert(ustrp)
+        assert(p); assert(e); assert(ustrp)
 
 PERL_CALLCONV UV
 Perl_to_utf8_lower_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
 #define PERL_ARGS_ASSERT_TO_UTF8_LOWER_FLAGS_   \
-        assert(p); assert(ustrp)
+        assert(p); assert(e); assert(ustrp)
 
 PERL_CALLCONV UV
 Perl_to_utf8_title_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
 #define PERL_ARGS_ASSERT_TO_UTF8_TITLE_FLAGS_   \
-        assert(p); assert(ustrp)
+        assert(p); assert(e); assert(ustrp)
 
 PERL_CALLCONV UV
 Perl_to_utf8_upper_flags_(pTHX_ const U8 *p, const U8 *e, U8 *ustrp, STRLEN *lenp, bool flags);
 #define PERL_ARGS_ASSERT_TO_UTF8_UPPER_FLAGS_   \
-        assert(p); assert(ustrp)
+        assert(p); assert(e); assert(ustrp)
 
 PERL_CALLCONV bool
 Perl_try_amagic_bin(pTHX_ int method, int flags);

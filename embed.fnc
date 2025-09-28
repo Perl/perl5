@@ -3687,26 +3687,26 @@ Cp	|UV	|to_uni_upper	|UV c					\
 				|NN STRLEN *lenp
 Cp	|UV	|to_utf8_fold_flags_					\
 				|NN const U8 *p 			\
-				|NULLOK const U8 *e			\
+				|NN const U8 *e 			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|U8 flags
 
 Cp	|UV	|to_utf8_lower_flags_					\
 				|NN const U8 *p 			\
-				|NULLOK const U8 *e			\
+				|NN const U8 *e 			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 Cp	|UV	|to_utf8_title_flags_					\
 				|NN const U8 *p 			\
-				|NULLOK const U8 *e			\
+				|NN const U8 *e 			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 Cp	|UV	|to_utf8_upper_flags_					\
 				|NN const U8 *p 			\
-				|NULLOK const U8 *e			\
+				|NN const U8 *e 			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
