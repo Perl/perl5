@@ -6126,7 +6126,7 @@ PERL_CALLCONV bool
 Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_ISSCRIPT_RUN          \
-        assert(s); assert(send)
+        assert(s); assert(send); assert(s <= send)
 
 # if defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
      defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \

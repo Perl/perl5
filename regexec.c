@@ -11761,6 +11761,8 @@ it are from the Inherited or Common scripts.
 bool
 Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 {
+    PERL_ARGS_ASSERT_ISSCRIPT_RUN;
+
     /* Basically, it looks at each character in the sequence to see if the
      * above conditions are met; if not it fails.  It uses an inversion map to
      * find the enum corresponding to the script of each character.  But this
