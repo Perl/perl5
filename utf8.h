@@ -574,6 +574,11 @@ regen/charset_translations.pl. */
      + (pos) + ((UTF_CONTINUATION_BYTE_INFO_BITS - 1) - 1))  /* Step fcn */ \
    / (UTF_CONTINUATION_BYTE_INFO_BITS - 1))             /* take floor of */
 
+
+/* The maximum number of bytes required to represent any Unicode code point
+ * 0..0x10FFFF */
+#define MAX_UNICODE_UTF8_BYTES  UNISKIP_BY_MSB_(20)
+
 /* Compute the number of UTF-8 bytes required for representing the input uv,
  * which must be a Unicode, not native value.
  *
@@ -728,7 +733,7 @@ uppercase/lowercase/titlecase/fold into.
 =cut
 */
 #define UTF8_MAXBYTES_CASE                                                  \
-        MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * UNISKIP_BY_MSB_(20))
+        MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * MAX_UNICODE_UTF8_BYTES)
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
  * encoding, or happen to be the same in both ASCII and EBCDIC (at least at
@@ -1090,7 +1095,7 @@ this macro matches
           || NATIVE_UTF8_TO_I8(s[1]) >= UTF_FIRST_CONT_BYTE_110000_))
 
 #define UTF8_IS_SUPER(s, e)                                                 \
-    ((((e) - (s)) >= UNISKIP_BY_MSB_(20) && UTF8_IS_SUPER_NO_CHECK_(s))     \
+    ((((e) - (s)) >= MAX_UNICODE_UTF8_BYTES && UTF8_IS_SUPER_NO_CHECK_(s))  \
      ? isUTF8_CHAR(s, e)                                                    \
      : 0)
 
