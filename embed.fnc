@@ -4300,8 +4300,8 @@ ep	|void	|Slab_to_rw	|NN OPSLAB * const slab
 # endif
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
-ERXdp	|bool	|isSCRIPT_RUN	|NN const U8 *s 			\
-				|NN const U8 *send			\
+ERXdp	|bool	|isSCRIPT_RUN	|SPTR const U8 *s			\
+				|EPTRge const U8 *send			\
 				|const bool utf8_target
 ERTXdip |bool	|is_utf8_non_invariant_string				\
 				|NN const U8 * const s			\
