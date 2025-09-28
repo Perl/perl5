@@ -8142,6 +8142,7 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * e6a18fa91f8f6a6f8e534b1d3f128c21ada45bfe152eb6b1bcc5e15fd8ac92e6 lib/unicore/LineBreak.txt
  * 793f6f1e4d15fd90f05ae66460191dc4d75d1fea90136a25f30dd6a4cb950eac lib/unicore/NameAliases.txt
  * 360dac27d5abafdcd8c03a8597f47acf92e8ebf7f6ee28020c173ed8b2ed0cc5 lib/unicore/NamedSequences.txt
+ * 5019ffd530751a741900c849c0e010332f142a3612234639bd200b82138a87db lib/unicore/NormTest.txt
  * 130dcddcaadaf071008bdfce1e7743e04fdfbc910886f017d9f9ac931d8c64dd lib/unicore/PropList.txt
  * 670d2bebb48649c04fabfbf033308073dcff47946324a8033237254c048b3b01 lib/unicore/PropValueAliases.txt
  * 4441f573caf952ffece1d7c892e7715bd7136dfc26f96eb6f268bf1e474715fb lib/unicore/PropertyAliases.txt
