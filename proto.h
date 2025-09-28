@@ -9474,9 +9474,9 @@ S_scan_heredoc(pTHX_ char *s)
         assert(s)
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni);
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 ck_uni);
 # define PERL_ARGS_ASSERT_SCAN_IDENT            \
-        assert(s); assert(dest)
+        assert(s); assert(dest); assert(dest_end)
 
 STATIC char *
 S_scan_inputsymbol(pTHX_ char *start)

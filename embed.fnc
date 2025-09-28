@@ -6110,7 +6110,7 @@ RS	|char * |scan_formline	|NN char *s
 RS	|char * |scan_heredoc	|NN char *s
 S	|char * |scan_ident	|NN char *s				\
 				|NN char *dest				\
-				|STRLEN destlen 			\
+				|NN char *dest_end			\
 				|I32 ck_uni
 RS	|char * |scan_inputsymbol					\
 				|NN char *start
