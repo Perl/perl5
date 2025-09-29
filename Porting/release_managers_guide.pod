@@ -1379,6 +1379,12 @@ At this point you may want to compare the commit with a previous bump to
 see if they look similar.  See commit ba03bc34a4 for an example of a
 previous version bump.
 
+=head3 Push commits
+
+Finally, push any commits done above.
+
+ $ git push origin ....
+
 =for checklist skip BLEAD-POINT RC MAINT
 
 =head3 Bump the feature bundles
@@ -1501,12 +1507,6 @@ Following the instructions output by F<t/porting/podcheck.t> on how to
 update its exceptions database.
 
 =back
-
-=head3 Push commits
-
-Finally, push any commits done above.
-
- $ git push origin ....
 
 =for checklist skip BLEAD-POINT MAINT RC
 
