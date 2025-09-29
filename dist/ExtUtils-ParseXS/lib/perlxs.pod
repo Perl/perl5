@@ -4536,25 +4536,41 @@ This class might be used like this:
 
 =head2 Safely Storing Static Data in XS
 
-Starting with Perl 5.8, a macro framework has been defined to allow
-static data to be safely stored in XS modules that will be accessed from
-a multi-threaded Perl.
+You should generally avoid declaring static variables and data within an
+XS file. The Perl interpreter binary is commonly configured to allow
+multiple interpreter structures, with a complete set of interpreter state
+per interpreter struct. In this case, you usually need your "static" data
+to be per-interpreter rather than a single shared per-process value.
 
-Although primarily designed for use with multi-threaded Perl, the macros
-have been designed so that they will work with non-threaded Perl as well.
+This becomes more important in the presence of multiple threads; either
+via C<use threads> or where the Perl interpreter is embedded within
+another application (such as a web server) which may manage its own
+threads and allocate interpreters to threads as it sees fit.
 
-It is therefore strongly recommended that these macros be used by all
-XS modules that make use of static data.
+A macro framework is available to XS code to allow a single C struct to be
+declared and safely accessed. Behind the scenes, the struct will be
+allocated per interpreter or thread; on non-threaded Perl interpreter
+builds, the macros gracefully degrade to a single global instance. These
+macros have C<MY_CXT> ("my context") as part of their names.
 
-The easiest way to get a template set of macros to use is by specifying
-the C<-g> (C<--global>) option with h2xs (see L<h2xs>).
+It is therefore strongly recommended that these macros be used by all XS
+modules that make use of static data.
 
-Below is an example module that makes use of the macros.
+When creating a new skeleton F<Foo.xs> file, you can use the C<--global>
+option of F<h2xs> to also include a skeleton set of macros, e.g.
+
+    h2xs -A --global -n Foo::Bar
+
+Below is a complete example module that makes use of the macros. It tracks
+the names of up to three blind mice.
 
     #define PERL_NO_GET_CONTEXT
     #include "EXTERN.h"
     #include "perl.h"
     #include "XSUB.h"
+    #include "ppport.h"
+
+    #define MAX_NAME_LEN 100
 
     /* Global Data */
 
@@ -4562,27 +4578,29 @@ Below is an example module that makes use of the macros.
 
     typedef struct {
         int count;
-        char name[3][100];
+        char name[3][MAX_NAME_LEN+1];
     } my_cxt_t;
 
     START_MY_CXT
 
     MODULE = BlindMice  PACKAGE = BlindMice
 
+    PROTOTYPES: DISABLE
+
     BOOT:
     {
         MY_CXT_INIT;
         MY_CXT.count = 0;
-        strcpy(MY_CXT.name[0], "None");
-        strcpy(MY_CXT.name[1], "None");
-        strcpy(MY_CXT.name[2], "None");
     }
 
     int
-    newMouse(char *name)
+    AddMouse(char *name)
       PREINIT:
         dMY_CXT;
       CODE:
+        if (strlen(name) > MAX_NAME_LEN)
+            croak("Mouse name too long\n");
+
         if (MY_CXT.count >= 3) {
             warn("Already have 3 blind mice");
             RETVAL = 0;
@@ -4595,13 +4613,12 @@ Below is an example module that makes use of the macros.
         RETVAL
 
     char *
-    get_mouse_name(index)
-        int index
+    get_mouse_name(int index)
       PREINIT:
         dMY_CXT;
       CODE:
         if (index > MY_CXT.count)
-            croak("There are only 3 blind mice.");
+            croak("There are only %d blind mice.", MY_CXT.count);
         else
             RETVAL = MY_CXT.name[index - 1];
       OUTPUT:
@@ -4612,43 +4629,78 @@ Below is an example module that makes use of the macros.
       CODE:
         MY_CXT_CLONE;
 
-=head3 MY_CXT REFERENCE
+The main points from this example are:
+
+=over
+
+=item *
+
+The C<my_cxt_t> struct will hold all your "static" data.
+
+=item *
+
+The C<MY_CXT_KEY> and C<START_MY_CXT> are boilerplate to make the macro
+system work. The former is a string which should be unique to your module.
+
+=item *
+
+The C<MY_CXT_INIT> in the C<BOOT> section allocates the struct when the
+module is loaded. You can add further boot code which does any
+initialisation you require (such as setting C<count>). C<BOOT> is called
+at most once per interpreter, when code in that interpreter instance first
+does C<use BlindMice>.
+
+=item *
+
+Each XSUB includes a C<dMY_CXT> declaration, which retrieves a pointer to
+the struct associated with the current interpreter and saves it in a
+hidden auto variable; C<MY_CXT> allows you to access fields within this
+structure.
+
+=item *
+
+C<MY_CXT_CLONE> creates a byte-for-byte copy of the current struct. This
+is called from the special C<CLONE> XSUB, to ensure that each new thread
+gets its own copy of the data which is otherwise shared by default.
+
+=back
+
+=head3 MY_CXT macros reference
 
 =over 5
 
 =item MY_CXT_KEY
 
-This macro is used to define a unique key to refer to the static data
-for an XS module. The suggested naming scheme, as used by h2xs, is to
-use a string that consists of the module name, the string "::_guts"
-and the module version number.
+This macro is used to define a unique key to refer to the static data for
+an XS module. The suggested naming scheme, as used by F<h2xs>, is to use a
+string that consists of a concatenation of the module name, the string
+C<::_guts> and the module version number:
 
     #define MY_CXT_KEY "MyModule::_guts" XS_VERSION
 
-=item typedef my_cxt_t
+=item my_cxt_t
 
-This struct typedef I<must> always be called C<my_cxt_t>. The other
-C<CXT*> macros assume the existence of the C<my_cxt_t> typedef name.
-
-Declare a typedef named C<my_cxt_t> that is a structure that contains
-all the data that needs to be interpreter-local.
+The "static" values should be stored within a struct typedef which I<must>
+always be called C<my_cxt_t>. The other C<*MY_CXT*> macros assume the
+existence of the C<my_cxt_t> typedef name. For example:
 
     typedef struct {
         int some_value;
+        int some_other_value;
     } my_cxt_t;
 
 =item START_MY_CXT
 
-Always place the START_MY_CXT macro directly after the declaration
-of C<my_cxt_t>.
+This macro contains hidden boilerplate code. Always place the
+C<START_MY_CXT> macro directly after the declaration of C<my_cxt_t>.
 
 =for apidoc Amnh||START_MY_CXT
 
 =item MY_CXT_INIT
 
-The MY_CXT_INIT macro initializes storage for the C<my_cxt_t> struct.
+The C<MY_CXT_INIT> macro initializes storage for the C<my_cxt_t> struct.
 
-It I<must> be called exactly once, typically in a BOOT: section. If you
+It must be called I<exactly once>, typically in a BOOT: section. If you
 are maintaining multiple interpreters, it should be called once in each
 interpreter instance, except for interpreters cloned from existing ones.
 (But see L</MY_CXT_CLONE> below.)
@@ -4657,21 +4709,21 @@ interpreter instance, except for interpreters cloned from existing ones.
 
 =item dMY_CXT
 
-Use the dMY_CXT macro (a declaration) in all the functions that access
-MY_CXT.
+Use the C<dMY_CXT> macro (a declaration) at the start of all the XSUBs
+(and other functions) that access C<MY_CXT>.
 
 =for apidoc Amnh||dMY_CXT
 
 =item MY_CXT
 
-Use the MY_CXT macro to access members of the C<my_cxt_t> struct. For
+Use the C<MY_CXT> macro to access members of the C<my_cxt_t> struct. For
 example, if C<my_cxt_t> is
 
     typedef struct {
         int index;
     } my_cxt_t;
 
-then use this to access the C<index> member
+then use this to access the C<index> member:
 
     dMY_CXT;
     MY_CXT.index = 2;
@@ -4680,7 +4732,8 @@ then use this to access the C<index> member
 
 C<dMY_CXT> may be quite expensive to calculate, and to avoid the overhead
 of invoking it in each function it is possible to pass the declaration
-onto other functions using the C<aMY_CXT>/C<pMY_CXT> macros, eg
+onto other functions using the argument/parameter C<aMY_CXT>/C<pMY_CXT>
+macros, e.g.:
 
 =for apidoc Amnh||_aMY_CXT
 =for apidoc Amnh||aMY_CXT
@@ -4700,17 +4753,24 @@ onto other functions using the C<aMY_CXT>/C<pMY_CXT> macros, eg
         MY_CXT.index = 2;
     }
 
-Analogously to C<pTHX>, there are equivalent forms for when the macro is the
-first or last in multiple arguments, where an underscore represents a
-comma, i.e.  C<_aMY_CXT>, C<aMY_CXT_>, C<_pMY_CXT> and C<pMY_CXT_>.
+Analogously to C<pTHX>, there are equivalent forms for when the macro is
+the first or last in multiple arguments, where an underscore is expanded
+to a comma where appropriate, i.e. C<_aMY_CXT>, C<aMY_CXT_>, C<_pMY_CXT>
+and C<pMY_CXT_>. These allow for the possibility that those macros might
+optimise away any actual argument without leaving a stray comma.
 
 =item MY_CXT_CLONE
 
-By default, when a new interpreter is created as a copy of an existing one
-(eg via C<< threads->create() >>), both interpreters share the same physical
-my_cxt_t structure. Calling C<MY_CXT_CLONE> (typically via the package's
-C<CLONE()> function), causes a byte-for-byte copy of the structure to be
-taken, and any future dMY_CXT will cause the copy to be accessed instead.
+When a new interpreter is created as a copy of an existing one (e.g. via
+C<< threads->create() >>), then by default, both interpreters share the
+same physical my_cxt_t structure. Calling C<MY_CXT_CLONE> (typically via
+the package's C<CLONE()> function), causes a byte-for-byte copy of the
+structure to be taken (but not a deep copy) and any future C<dMY_CXT> will
+cause the copy to be accessed instead.
+
+This is typically used within the C<CLONE> method which is called each
+time an interpreter is copied (usually when creating a new thread). Other
+code can be added to C<CLONE()> to deep copy items within the structure.
 
 =for apidoc Amnh||MY_CXT_CLONE
 
@@ -4718,14 +4778,14 @@ taken, and any future dMY_CXT will cause the copy to be accessed instead.
 
 =item dMY_CXT_INTERP(my_perl)
 
-These are versions of the macros which take an explicit interpreter as an
-argument.
+These are variants of the C<MY_CXT_INIT> and C<dMY_CXT> macros which take
+an explicit perl interpreter as an argument.
 
 =back
 
 Note that these macros will only work together within the I<same> source
-file; that is, a dMY_CTX in one source file will access a different structure
-than a dMY_CTX in another source file.
+file; that is, a C<dMY_CXT> in one source file will access a different
+structure than a C<dMY_CXT> in another source file.
 
 =head1 EXAMPLES
 
