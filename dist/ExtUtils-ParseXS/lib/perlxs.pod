@@ -4789,77 +4789,44 @@ structure than a C<dMY_CXT> in another source file.
 
 =head1 EXAMPLES
 
-File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
+Fairly complete examples of XS files can be found elsewhere in this
+document:
 
-    #define PERL_NO_GET_CONTEXT
-    #include "EXTERN.h"
-    #include "perl.h"
-    #include "XSUB.h"
+=over
 
-    /* Note: On glibc 2.13 and earlier, this needs be <rpc/rpc.h> */
-    #include <tirpc/rpc.h>
+=item *
 
-    typedef struct netconfig Netconfig;
+L</T_PTROBJ and opaque handles>
 
-    MODULE = RPC  PACKAGE = RPC
+=item *
 
-    SV *
-    rpcb_gettime(host = "localhost")
-        char   *host
-      PREINIT:
-        time_t  timep;
-      CODE:
-        ST(0) = sv_newmortal();
-        if (rpcb_gettime(host, &timep))
-            sv_setnv(ST(0), (double)timep);
+L</A complete C++ example>
 
+=item *
 
-    Netconfig *
-    getnetconfigent(netid="udp")
-        char *netid
+L</Safely Storing Static Data in XS>
 
+=back
 
-    MODULE = RPC  PACKAGE = NetconfigPtr  PREFIX = rpcb_
+while L</SYNOPSIS> contains an overview of an XS file and L<perlxstut>
+contains various worked examples.
 
-    void
-    rpcb_DESTROY(netconf)
-        Netconfig *netconf
-      CODE:
-        printf("NetconfigPtr::DESTROY\n");
-        free(netconf);
+You can of course look at existing XS distributions on CPAN for
+inspiration, although bear in mind that many of these will have been
+created before this document was rewritten in 2025, and so may not follow
+current best practices.
 
-File C<typemap>: Custom typemap for RPC.xs. (cf. L<perlxstypemap>)
+Note that when wrapping a real library, you'll often need to add a line
+like this to the .xs file:
 
-     TYPEMAP
-     Netconfig * T_PTROBJ
+    #include <foobar.h>
 
-File C<RPC.pm>: Perl module for the RPC extension.
+and add entries like:
 
-    package RPC;
+    LIBS  => ['-lfoo', '-lbar'],
 
-    require Exporter;
-    require DynaLoader;
-    @ISA    = qw(Exporter DynaLoader);
-    @EXPORT = qw(rpcb_gettime getnetconfigent);
-
-    bootstrap RPC;
-    1;
-
-File C<rpctest.pl>: Perl test program for the RPC extension.
-
-    use RPC;
-
-    $netconf = getnetconfigent();
-    $a = rpcb_gettime();
-    print "time = $a\n";
-    print "netconf = $netconf\n";
-
-    $netconf = getnetconfigent("tcp");
-    $a = rpcb_gettime("poplar");
-    print "time = $a\n";
-    print "netconf = $netconf\n";
-
-In Makefile.PL add -ltirpc and -I/usr/include/tirpc.
+to F<Makefile.PL> or similar. And don't forget to add test scripts under
+t/.
 
 =head1 CAVEATS
 
