@@ -1671,7 +1671,7 @@
 #   endif
 #   if defined(PERL_IN_TOKE_C)
 #     define ao(a)                              S_ao(aTHX_ a)
-#     define check_uni()                        S_check_uni(aTHX)
+#     define check_unary()                      S_check_unary(aTHX)
 #     define checkcomma(a,b,c)                  S_checkcomma(aTHX_ a,b,c)
 #     define filter_gets(a,b)                   S_filter_gets(aTHX_ a,b)
 #     define find_in_my_stash(a,b)              S_find_in_my_stash(aTHX_ a,b)

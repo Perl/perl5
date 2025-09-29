@@ -9362,8 +9362,8 @@ S_ao(pTHX_ int toketype);
 # define PERL_ARGS_ASSERT_AO
 
 STATIC void
-S_check_uni(pTHX);
-# define PERL_ARGS_ASSERT_CHECK_UNI
+S_check_unary(pTHX);
+# define PERL_ARGS_ASSERT_CHECK_UNARY
 
 STATIC void
 S_checkcomma(pTHX_ const char *s, const char *name, const char *what);
@@ -9474,7 +9474,7 @@ S_scan_heredoc(pTHX_ char *s)
         assert(s)
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 ck_uni);
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary);
 # define PERL_ARGS_ASSERT_SCAN_IDENT            \
         assert(s); assert(dest); assert(dest_end)
 

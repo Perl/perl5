@@ -6054,7 +6054,7 @@ S	|int	|ao		|int toketype
 S	|void	|checkcomma	|NN const char *s			\
 				|NN const char *name			\
 				|NN const char *what
-S	|void	|check_uni
+S	|void	|check_unary
 RS	|char * |filter_gets	|NN SV *sv				\
 				|STRLEN append
 RS	|HV *	|find_in_my_stash					\
@@ -6111,7 +6111,7 @@ RS	|char * |scan_heredoc	|NN char *s
 S	|char * |scan_ident	|NN char *s				\
 				|NN char *dest				\
 				|NN char *dest_end			\
-				|I32 ck_uni
+				|bool chk_unary
 RS	|char * |scan_inputsymbol					\
 				|NN char *start
 RS	|char * |scan_pat	|NN char *start 			\
