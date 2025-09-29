@@ -10378,8 +10378,10 @@ Perl_scan_word(pTHX_ char *s, char *dest, char * dest_end, int allow_package, ST
  * specific variable name.
  */
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 chk_unary)
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
 {
+    PERL_ARGS_ASSERT_SCAN_IDENT;
+
     I32 herelines = PL_parser->herelines;
     SSize_t bracket = -1;
     char funny = *s++;
@@ -10387,8 +10389,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 chk_unary)
     char * const e = dest_end - 3;    /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
     line_t orig_copline = 0, tmp_copline = 0;
-
-    PERL_ARGS_ASSERT_SCAN_IDENT;
 
     if (isSPACE(*s) || !*s)
         s = skipspace(s);
