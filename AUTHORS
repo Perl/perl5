@@ -19,7 +19,7 @@
 # you wish to remove yourself. If you wish to register a new email
 # against one of these names you should update the .mailmap file
 # instead.
--- 
+--
 A. C. Yardley                  <yardley@tanet.net>
 A. Sinan Unur                  <nanis@cpan.org>
 Aaron B. Dossett               <aaron@iglou.com>
@@ -473,7 +473,7 @@ Erik                           <erik@cs.uni-jena.de>
 Erik Huelsmann                 <ehuels@gmail.com>
 Eryq                           <eryq@zeegee.com>
 Etienne Grossman               <etienne@isr.isr.ist.utl.pt>
-Eugen Konkov                   <kes-kes@yandex.ru>
+Eugen Konkov
 Eugene Alterman                <Eugene.Alterman@bremer-inc.com>
 Eugene Alvin Villar            <seav80@gmail.com>
 Evan Miller                    <eam@frap.net>
