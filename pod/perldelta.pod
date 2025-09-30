@@ -366,7 +366,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+We have long claimed to support identifiers up to about 255 characters
+long.  However this was actually true only for identifiers that
+consisted of only ASCII characters.  The real upper limit was as few as
+64 characters for identifiers written in other languages, for example,
+Chinese or Osage.  Now an identifier in any language may contain at
+least 255 characters.
 
 =back
 
