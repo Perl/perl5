@@ -3012,6 +3012,10 @@ SKIP:
     local $ENV{LANG} = "C";
     local $ENV{LC_MESSAGES} = "C";
     local $ENV{LC_ALL} = "C";
+    my $out = `/usr/bin/man --version`;
+    if ($out =~ /^This system has been minimized/) {
+        skip "No man. This system has been minimized...", 1;
+    }
     my $wrapper = DebugWrap->new(
         {
             cmds =>
