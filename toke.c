@@ -2070,7 +2070,7 @@ Perl_skipspace_flags(pTHX_ char *s, U32 flags)
 }
 
 /*
- * S_check_uni
+ * S_check_unary
  * Check the unary operators to ensure there's no ambiguity in how they're
  * used.  An ambiguous piece of code would be:
  *     rand + 5
@@ -2079,7 +2079,7 @@ Perl_skipspace_flags(pTHX_ char *s, U32 flags)
  */
 
 STATIC void
-S_check_uni(pTHX)
+S_check_unary(pTHX)
 {
     const char *s;
 
@@ -5998,7 +5998,7 @@ yyl_hyphen(pTHX_ char *s)
         }
         else {
             if (isSPACE(*s) || !isSPACE(*PL_bufptr))
-                check_uni();
+                check_unary();
             OPERATOR(PERLY_MINUS);              /* unary minus */
         }
     }
@@ -6027,7 +6027,7 @@ yyl_plus(pTHX_ char *s)
     }
     else {
         if (isSPACE(*s) || !isSPACE(*PL_bufptr))
-            check_uni();
+            check_unary();
         OPERATOR(PERLY_PLUS);
     }
 }
@@ -6762,7 +6762,7 @@ yyl_slash(pTHX_ char *s)
                 || memNE(PL_last_uni, "study", 5)
                 || isWORDCHAR_lazy_if_safe(PL_last_uni+5, PL_bufend, UTF)
          ))
-            check_uni();
+            check_unary();
         s = scan_pat(s,OP_MATCH);
         TERM(sublex_start());
     }
@@ -6853,7 +6853,7 @@ yyl_leftpointy(pTHX_ char *s)
 
     if (PL_expect != XOPERATOR) {
         if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
-            check_uni();
+            check_unary();
         if (s[1] == '<' && s[2] != '>')
             s = scan_heredoc(s);
         else
@@ -8901,7 +8901,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
             }
             Mop(OP_REPEAT);
         }
-        check_uni();
+        check_unary();
         return yyl_just_a_word(aTHX_ s, len, orig_keyword, c);
 
     case KEY_xor:
@@ -10378,7 +10378,7 @@ Perl_scan_word(pTHX_ char *s, char *dest, char * dest_end, int allow_package, ST
  * specific variable name.
  */
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 chk_unary)
 {
     I32 herelines = PL_parser->herelines;
     SSize_t bracket = -1;
@@ -10511,8 +10511,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, I32 ck_uni)
     /* Warn about ambiguous code after unary operators if {...} notation isn't
        used.  There's no difference in ambiguity; it's merely a heuristic
        about when not to warn.  */
-    else if (ck_uni && bracket == -1)
-        check_uni();
+    else if (chk_unary && bracket == -1)
+        check_unary();
 
     if (bracket != -1) {
         bool skip;
