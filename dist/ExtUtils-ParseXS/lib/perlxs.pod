@@ -4832,7 +4832,8 @@ t/.
 
 =head2 Use of standard C library functions
 
-See L<perlclib>.
+Often, the Perl API contains functions which you should use I<instead> of
+the standard C library ones. See L<perlclib>.
 
 =head2 Event loops and control flow
 
@@ -4853,17 +4854,20 @@ This document covers features supported by C<ExtUtils::ParseXS>
 
 =head1 AUTHOR DIAGNOSTICS
 
-As of version 3.49 certain warnings are disabled by default. While developing
-you can set C<$ENV{AUTHOR_WARNINGS}> to true in your environment or in your
-Makefile.PL, or set C<$ExtUtils::ParseXS::AUTHOR_WARNINGS> to true via code, or
-pass C<< author_warnings=>1 >> into process_file() explicitly.  Currently this will
-enable stricter alias checking but more warnings might be added in the future.
-The kind of warnings this will enable are only helpful to the author of the XS
-file, and the diagnostics produced will not include installation specific
-details so they are only useful to the maintainer of the XS code itself.
+As of version 3.49 a few parser warnings are disabled by default. While
+developing you can set C<$ENV{AUTHOR_WARNINGS}> to true in your
+environment or in your Makefile.PL, or set
+C<$ExtUtils::ParseXS::AUTHOR_WARNINGS> to true via code, or pass C<<
+author_warnings=>1 >> into process_file() explicitly.  Currently this will
+enable stricter alias checking but more warnings might be added in the
+future. The kind of warnings this will enable are only helpful to the
+author of the XS file, and the diagnostics produced will not include
+installation specific details so they are only useful to the maintainer of
+the XS code itself.
 
 =head1 AUTHOR
 
 Originally written by Dean Roehrich <F<roehrich@cray.com>>.
+Completely rewritten in 2025.
 
-Maintained since 1996 by The Perl Porters <F<perl5-porters@perl.org>>.
+Maintained since 1996 by The Perl Porters, <F<perl5-porters@perl.org>>.
