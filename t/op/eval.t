@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 172);
+plan(tests => 173);
 
 eval 'pass();';
 
@@ -837,3 +837,5 @@ pass("eval in freed package does not crash");
     }->();
     is($w, 0, "nested eval and closure");
 }
+
+fresh_perl_is('for$@(*0){eval}', '', undef, 'GH #16885 - isGV_with_GP(PL_errgv)');
