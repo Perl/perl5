@@ -94,6 +94,9 @@
 %token <ival> PHASER
 
 %type <ival> grammar remember mremember
+
+%type <opval> bare_statement_block
+
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
 %type <ival> mintro
@@ -239,6 +242,15 @@ grammar	:	GRAMPROG
 			}
 	;
 
+bare_statement_block
+	:	block
+		cont
+		{
+			/* a block is a loop that happens once */
+			$$ = newWHILEOP(0, 1, NULL, NULL, $block, $cont, 0);
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -352,6 +364,7 @@ labfullstmt:	LABEL barestmt
  */
 barestmt
 	:	PLUGSTMT
+	|	bare_statement_block
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -586,12 +599,6 @@ barestmt
 			  if($finally)
 			      $$ = op_wrap_finally($$, $finally);
 			  parser->copline = (line_t)$KW_TRY;
-			}
-	|	block cont
-			{
-			  /* a block is a loop that happens once */
-			  $$ = newWHILEOP(0, 1, NULL,
-				  NULL, $block, $cont, 0);
 			}
 	|	KW_PACKAGE BAREWORD[version] BAREWORD[package] PERLY_BRACE_OPEN remember
 			{
