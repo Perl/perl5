@@ -96,6 +96,7 @@
 %type <ival> grammar remember mremember
 
 %type <opval> bare_statement_block
+%type <opval> bare_statement_class_declaration
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -251,6 +252,24 @@ bare_statement_block
 		}
 	;
 
+bare_statement_class_declaration
+	:	KW_CLASS
+		BAREWORD[version]
+		BAREWORD[package]
+		subattrlist
+		PERLY_SEMICOLON
+		{
+			package($package);
+			if ($version)
+				package_version($version);
+			$$ = NULL;
+			class_setup_stash(PL_curstash);
+			if ($subattrlist) {
+				class_apply_attributes(PL_curstash, $subattrlist);
+			}
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -365,6 +384,7 @@ labfullstmt:	LABEL barestmt
 barestmt
 	:	PLUGSTMT
 	|	bare_statement_block
+	|	bare_statement_class_declaration
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -458,17 +478,6 @@ barestmt
 			  if ($version)
 			      package_version($version);
 			  $$ = NULL;
-			}
-	|	KW_CLASS BAREWORD[version] BAREWORD[package] subattrlist PERLY_SEMICOLON
-			{
-			  package($package);
-			  if ($version)
-			      package_version($version);
-			  $$ = NULL;
-			  class_setup_stash(PL_curstash);
-			  if ($subattrlist) {
-			      class_apply_attributes(PL_curstash, $subattrlist);
-			  }
 			}
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
