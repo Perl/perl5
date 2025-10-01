@@ -343,9 +343,15 @@ labfullstmt:	LABEL barestmt
 			}
 	;
 
-/* A bare statement, lacking label and other aspects of state op */
-barestmt:	PLUGSTMT
-			{ $$ = $PLUGSTMT; }
+/* A bare statement, lacking label and other aspects of state op
+ *
+ * Maintain rule as simple alternatives of single nonterminals,
+ * leveraging bison's default action: $$ = $1.
+ *
+ * Try to keep nonterminals alphabetically sorted.
+ */
+barestmt
+	:	PLUGSTMT
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
