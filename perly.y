@@ -98,6 +98,7 @@
 %type <opval> bare_statement_block
 %type <opval> bare_statement_class_declaration
 %type <opval> bare_statement_class_definition
+%type <opval> bare_statement_default
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -299,6 +300,14 @@ bare_statement_class_definition
 		}
 	;
 
+bare_statement_default
+	:	KW_DEFAULT
+		block
+		{
+			$$ = newWHENOP(0, op_scope($block));
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -415,6 +424,7 @@ barestmt
 	|	bare_statement_block
 	|	bare_statement_class_declaration
 	|	bare_statement_class_definition
+	|	bare_statement_default
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -539,8 +549,6 @@ barestmt
 			}
 	|	KW_WHEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
 			{ $$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock))); }
-	|	KW_DEFAULT block
-			{ $$ = newWHENOP(0, op_scope($block)); }
 	|	KW_WHILE PERLY_PAREN_OPEN remember texpr PERLY_PAREN_CLOSE mintro mblock cont
 			{
 			  $$ = block_end($remember,
