@@ -9661,7 +9661,7 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
 #   define PERL_ARGS_ASSERT_ISFF_OVERLONG       \
         assert(s)
 
-PERL_STATIC_INLINE int
+PERL_STATIC_INLINE SSize_t
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_IS_UTF8_OVERLONG    \
