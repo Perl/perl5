@@ -100,6 +100,7 @@
 %type <opval> bare_statement_class_definition
 %type <opval> bare_statement_default
 %type <opval> bare_statement_defer
+%type <opval> bare_statement_expression
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -316,6 +317,14 @@ bare_statement_defer
 		}
 	;
 
+bare_statement_expression
+	/* expression when used as a statement */
+	:	sideff PERLY_SEMICOLON
+		{
+			$$ = $sideff;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -434,6 +443,7 @@ barestmt
 	|	bare_statement_class_definition
 	|	bare_statement_default
 	|	bare_statement_defer
+	|	bare_statement_expression
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -674,10 +684,6 @@ barestmt
 	|	fielddecl PERLY_SEMICOLON
 			{
 			  $$ = $fielddecl;
-			}
-	|	sideff PERLY_SEMICOLON
-			{
-			  $$ = $sideff;
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{
