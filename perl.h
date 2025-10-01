@@ -1947,7 +1947,7 @@ any magic.
     SV ** const svp = &GvSV(PL_errgv);					\
     if (!*svp) {							\
         *svp = newSVpvs("");                                            \
-    } else if (SvREADONLY(*svp)) {					\
+    } else if (SvREADONLY(*svp) || isGV_with_GP(*svp)) {		\
         SvREFCNT_dec_NN(*svp);						\
         *svp = newSVpvs("");						\
     } else {								\
