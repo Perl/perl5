@@ -97,6 +97,7 @@
 
 %type <opval> bare_statement_block
 %type <opval> bare_statement_class_declaration
+%type <opval> bare_statement_class_definition
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -270,6 +271,34 @@ bare_statement_class_declaration
 		}
 	;
 
+bare_statement_class_definition
+	:	KW_CLASS
+		BAREWORD[version]
+		BAREWORD[package]
+		subattrlist
+		PERLY_BRACE_OPEN
+		remember
+		{
+			package($package);
+
+			if ($version) {
+				package_version($version);
+			}
+			class_setup_stash(PL_curstash);
+			if ($subattrlist) {
+				class_apply_attributes(PL_curstash, $subattrlist);
+			}
+		}
+		stmtseq
+		PERLY_BRACE_CLOSE
+		{
+			/* a block is a loop that happens once */
+			$$ = newWHILEOP(0, 1, NULL, NULL, block_end($remember, $stmtseq), NULL, 0);
+			if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+				parser->copline = (line_t)$PERLY_BRACE_OPEN;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -385,6 +414,7 @@ barestmt
 	:	PLUGSTMT
 	|	bare_statement_block
 	|	bare_statement_class_declaration
+	|	bare_statement_class_definition
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -614,26 +644,6 @@ barestmt
 			  package($package);
 			  if ($version) {
 			      package_version($version);
-			  }
-			}
-		stmtseq PERLY_BRACE_CLOSE
-			{
-			  /* a block is a loop that happens once */
-			  $$ = newWHILEOP(0, 1, NULL,
-				  NULL, block_end($remember, $stmtseq), NULL, 0);
-			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
-			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
-			}
-	|	KW_CLASS BAREWORD[version] BAREWORD[package] subattrlist PERLY_BRACE_OPEN remember
-			{
-			  package($package);
-
-			  if ($version) {
-			      package_version($version);
-			  }
-			  class_setup_stash(PL_curstash);
-			  if ($subattrlist) {
-			      class_apply_attributes(PL_curstash, $subattrlist);
 			  }
 			}
 		stmtseq PERLY_BRACE_CLOSE
