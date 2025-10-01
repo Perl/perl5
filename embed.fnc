@@ -6179,7 +6179,7 @@ RTi	|int	|does_utf8_overflow					\
 				|NN const U8 *e
 RTi	|int	|isFF_overlong	|NN const U8 * const s			\
 				|const STRLEN len
-RTi	|int	|is_utf8_overlong					\
+RTi	|SSize_t|is_utf8_overlong					\
 				|NN const U8 * const s			\
 				|const STRLEN len
 RS	|HV *	|new_msg_hv	|NN const char * const message		\

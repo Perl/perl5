@@ -461,7 +461,7 @@ The new names accurately describe the situation in all cases.
 =cut
 */
 
-PERL_STATIC_INLINE int
+PERL_STATIC_INLINE SSize_t
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
@@ -649,7 +649,7 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
   overflows_if_not_overlong: ;
 
     /* Here, the sequence overflows if not overlong.  Check for that */
-    int is_overlong = is_utf8_overlong(s, len);
+    SSize_t is_overlong = is_utf8_overlong(s, len);
     if (LIKELY(is_overlong == 0)) {
         return OVERFLOWS;
     }
@@ -2319,8 +2319,8 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                             malformed_text,
                             byte_dump_string_(s0, curlen, 0),
                             byte_dump_string_(s0,
-                                              MIN(avail_len,
-                                                  overlong_detect_length),
+                                              MIN((SSize_t) avail_len,
+                                                   overlong_detect_length),
                                               0));
                 }
                 else {
