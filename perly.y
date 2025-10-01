@@ -101,6 +101,7 @@
 %type <opval> bare_statement_default
 %type <opval> bare_statement_defer
 %type <opval> bare_statement_expression
+%type <opval> bare_statement_field_declaration
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -325,6 +326,14 @@ bare_statement_expression
 		}
 	;
 
+bare_statement_field_declaration
+	:	fielddecl
+		PERLY_SEMICOLON
+		{
+			$$ = $fielddecl;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -444,6 +453,7 @@ barestmt
 	|	bare_statement_default
 	|	bare_statement_defer
 	|	bare_statement_expression
+	|	bare_statement_field_declaration
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -680,10 +690,6 @@ barestmt
 				  NULL, block_end($remember, $stmtseq), NULL, 0);
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
-			}
-	|	fielddecl PERLY_SEMICOLON
-			{
-			  $$ = $fielddecl;
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{
