@@ -117,6 +117,7 @@
 %type <opval> bare_statement_until
 %type <opval> bare_statement_utilize
 %type <opval> bare_statement_when
+%type <opval> bare_statement_while
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -749,6 +750,21 @@ bare_statement_when
 		}
 	;
 
+bare_statement_while
+	:	KW_WHILE
+		PERLY_PAREN_OPEN
+		remember
+		texpr
+		PERLY_PAREN_CLOSE
+		mintro
+		mblock
+		cont
+		{
+			$$ = block_end($remember, newWHILEOP(0, 1, NULL, $texpr, $mblock, $cont, $mintro));
+			parser->copline = (line_t)$KW_WHILE;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -884,13 +900,7 @@ barestmt
 	|	bare_statement_until
 	|	bare_statement_utilize
 	|	bare_statement_when
-	|	KW_WHILE PERLY_PAREN_OPEN remember texpr PERLY_PAREN_CLOSE mintro mblock cont
-			{
-			  $$ = block_end($remember,
-				  newWHILEOP(0, 1, NULL,
-				      $texpr, $mblock, $cont, $mintro));
-			  parser->copline = (line_t)$KW_WHILE;
-			}
+	|	bare_statement_while
 	|	YADAYADA PERLY_SEMICOLON
 			{
                           /* diag_listed_as: Unimplemented */
