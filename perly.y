@@ -112,6 +112,7 @@
 %type <opval> bare_statement_phaser
 %type <opval> bare_statement_sub_signature
 %type <opval> bare_statement_sub_traditional
+%type <opval> bare_statement_try_catch
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -663,6 +664,28 @@ bare_statement_sub_traditional
 		}
 	;
 
+bare_statement_try_catch
+	:	KW_TRY
+		mblock[try]
+		KW_CATCH
+		remember
+		catch_paren[scalar]
+		{
+			if(!$scalar) {
+				yyerror("catch block requires a (VAR)");
+				YYERROR;
+			}
+		}
+		mblock[catch]
+		finally
+		{
+			$$ = newTRYCATCHOP(0, $try, $scalar, block_end($remember, op_scope($catch)));
+			if($finally)
+				$$ = op_wrap_finally($$, $finally);
+			parser->copline = (line_t)$KW_TRY;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -793,6 +816,7 @@ barestmt
 	|	bare_statement_phaser
 	|	bare_statement_sub_signature
 	|	bare_statement_sub_traditional
+	|	bare_statement_try_catch
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		BAREWORD[version] BAREWORD[module] optlistexpr PERLY_SEMICOLON
@@ -825,21 +849,6 @@ barestmt
 				  newWHILEOP(0, 1, NULL,
 				      $iexpr, $mblock, $cont, $mintro));
 			  parser->copline = (line_t)$KW_UNTIL;
-			}
-	|       KW_TRY mblock[try] KW_CATCH remember catch_paren[scalar]
-			{
-			  if(!$scalar) {
-			      yyerror("catch block requires a (VAR)");
-			      YYERROR;
-			  }
-			}
-		mblock[catch] finally
-			{
-			  $$ = newTRYCATCHOP(0,
-				  $try, $scalar, block_end($remember, op_scope($catch)));
-			  if($finally)
-			      $$ = op_wrap_finally($$, $finally);
-			  parser->copline = (line_t)$KW_TRY;
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{
