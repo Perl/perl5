@@ -106,6 +106,7 @@
 %type <opval> bare_statement_format
 %type <opval> bare_statement_given
 %type <opval> bare_statement_if
+%type <opval> bare_statement_null
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -521,6 +522,14 @@ bare_statement_if
 		}
 	;
 
+bare_statement_null
+	:	PERLY_SEMICOLON
+		{
+			$$ = NULL;
+			parser->copline = NOLINE;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -645,6 +654,7 @@ barestmt
 	|	bare_statement_format
 	|	bare_statement_given
 	|	bare_statement_if
+	|	bare_statement_null
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
@@ -797,11 +807,6 @@ barestmt
                           /* diag_listed_as: Unimplemented */
 			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
 				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
-			}
-	|	PERLY_SEMICOLON
-			{
-			  $$ = NULL;
-			  parser->copline = NOLINE;
 			}
 	;
 
