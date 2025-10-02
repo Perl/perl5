@@ -9446,6 +9446,11 @@ S_intuit_more(pTHX_ char *s, char *e);
 # define PERL_ARGS_ASSERT_INTUIT_MORE           \
         assert(s); assert(e)
 
+STATIC bool
+S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8);
+# define PERL_ARGS_ASSERT_IS_EXISTING_IDENTIFIER \
+        assert(s)
+
 STATIC I32
 S_lop(pTHX_ enum yytokentype t, I32 f, U8 x, char *s);
 # define PERL_ARGS_ASSERT_LOP                   \
