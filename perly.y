@@ -103,6 +103,7 @@
 %type <opval> bare_statement_expression
 %type <opval> bare_statement_field_declaration
 %type <opval> bare_statement_for
+%type <opval> bare_statement_format
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -475,6 +476,22 @@ bare_statement_for
 		}
 	;
 
+bare_statement_format
+	:	KW_FORMAT
+		startformsub
+		formname
+		formblock
+		{
+			CV *fmtcv = PL_compcv;
+			newFORM($startformsub, $formname, $formblock);
+			if (CvOUTSIDE(fmtcv) && !CvEVAL(CvOUTSIDE(fmtcv))) {
+				pad_add_weakref(fmtcv);
+			}
+			parser->parsed_sub = 1;
+			$$ = NULL;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -596,16 +613,7 @@ barestmt
 	|	bare_statement_expression
 	|	bare_statement_field_declaration
 	|	bare_statement_for
-	|	KW_FORMAT startformsub formname formblock
-			{
-			  CV *fmtcv = PL_compcv;
-			  newFORM($startformsub, $formname, $formblock);
-			  $$ = NULL;
-			  if (CvOUTSIDE(fmtcv) && !CvEVAL(CvOUTSIDE(fmtcv))) {
-			      pad_add_weakref(fmtcv);
-			  }
-			  parser->parsed_sub = 1;
-			}
+	|	bare_statement_format
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
