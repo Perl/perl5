@@ -4464,6 +4464,33 @@ S_scan_const(pTHX_ char *start)
     return s;
 }
 
+STATIC bool
+S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
+{
+    PERL_ARGS_ASSERT_IS_EXISTING_IDENTIFIER;
+
+    /* This returns a boolean indicating if a string represents an identifier
+     * known to the program.  'sigil' is the character indicating the type of
+     * the identifier to look for. (though '%' is currently not specially
+     * handled.) The string from 's + 1' to (s + len) is looked at.  s[0] is
+     * ignored, but must exist; the function overwrites it temporarily,
+     * restoring it before returning */
+
+    char save_sigil = s[0];
+    s[0] = sigil;
+    PADOFFSET slot = pad_findmy_pv(s, 0);
+    s[0] = save_sigil;
+
+    return   slot != NOT_IN_PAD
+          || gv_fetchpvn_flags(s + 1, len - 1,
+                             (is_utf8) ? SVf_UTF8 : 0,
+                             (sigil == '@')
+                              ? SVt_PVAV
+                              : (sigil == '&')
+                                 ? SVt_PVCV
+                                 : SVt_PV);
+}
+
 /* S_intuit_more
  * Returns TRUE if there's more to the expression (e.g., a subscript),
  * FALSE otherwise.

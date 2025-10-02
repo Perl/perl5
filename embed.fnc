@@ -6154,6 +6154,11 @@ S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK NOCHECK CV *cv
 S	|int	|intuit_more	|NN char *s				\
 				|NN char *e
+S	|bool	|is_existing_identifier 				\
+				|NN char *s				\
+				|Size_t len				\
+				|char sigil				\
+				|bool is_utf8
 S	|I32	|lop		|enum yytokentype t			\
 				|I32 f					\
 				|U8 x					\
