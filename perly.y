@@ -108,6 +108,7 @@
 %type <opval> bare_statement_if
 %type <opval> bare_statement_null
 %type <opval> bare_statement_package_declaration
+%type <opval> bare_statement_package_definition
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -549,6 +550,28 @@ bare_statement_package_declaration
 		}
 	;
 
+bare_statement_package_definition
+	:	KW_PACKAGE
+		BAREWORD[version]
+		BAREWORD[package]
+		PERLY_BRACE_OPEN
+		remember
+		{
+			package($package);
+			if ($version) {
+				package_version($version);
+			}
+		}
+		stmtseq
+		PERLY_BRACE_CLOSE
+		{
+			/* a block is a loop that happens once */
+			$$ = newWHILEOP(0, 1, NULL, NULL, block_end($remember, $stmtseq), NULL, 0);
+			if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+				parser->copline = (line_t)$PERLY_BRACE_OPEN;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -675,6 +698,7 @@ barestmt
 	|	bare_statement_if
 	|	bare_statement_null
 	|	bare_statement_package_declaration
+	|	bare_statement_package_definition
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
@@ -795,21 +819,6 @@ barestmt
 			  if($finally)
 			      $$ = op_wrap_finally($$, $finally);
 			  parser->copline = (line_t)$KW_TRY;
-			}
-	|	KW_PACKAGE BAREWORD[version] BAREWORD[package] PERLY_BRACE_OPEN remember
-			{
-			  package($package);
-			  if ($version) {
-			      package_version($version);
-			  }
-			}
-		stmtseq PERLY_BRACE_CLOSE
-			{
-			  /* a block is a loop that happens once */
-			  $$ = newWHILEOP(0, 1, NULL,
-				  NULL, block_end($remember, $stmtseq), NULL, 0);
-			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
-			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{
