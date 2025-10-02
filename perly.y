@@ -109,6 +109,7 @@
 %type <opval> bare_statement_null
 %type <opval> bare_statement_package_declaration
 %type <opval> bare_statement_package_definition
+%type <opval> bare_statement_phaser
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -572,6 +573,37 @@ bare_statement_package_definition
 		}
 	;
 
+bare_statement_phaser
+	:	PHASER
+		startsub
+		{
+			switch($PHASER) {
+				case KEY_ADJUST:
+					croak_kw_unless_class("ADJUST");
+					class_prepare_method_parse(PL_compcv);
+					break;
+				default:
+					NOT_REACHED;
+			}
+		}
+		optsubbody
+		{
+			OP *body = $optsubbody;
+			SvREFCNT_inc_simple_void(PL_compcv);
+
+			CV *cv;
+
+			switch($PHASER) {
+				case KEY_ADJUST:
+					cv = newATTRSUB($startsub, NULL, NULL, NULL, body);
+					class_add_ADJUST(PL_curstash, cv);
+					break;
+			}
+			$$ = NULL;
+			parser->parsed_sub = 1;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -699,6 +731,7 @@ barestmt
 	|	bare_statement_null
 	|	bare_statement_package_declaration
 	|	bare_statement_package_definition
+	|	bare_statement_phaser
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
@@ -743,33 +776,6 @@ barestmt
 			  ;
 			  $$ = NULL;
 			  intro_my();
-			  parser->parsed_sub = 1;
-			}
-	|	PHASER startsub
-			{
-			  switch($PHASER) {
-			      case KEY_ADJUST:
-			         croak_kw_unless_class("ADJUST");
-			         class_prepare_method_parse(PL_compcv);
-			         break;
-			      default:
-			         NOT_REACHED;
-			  }
-			}
-		    optsubbody
-			{
-			  OP *body = $optsubbody;
-			  SvREFCNT_inc_simple_void(PL_compcv);
-
-			  CV *cv;
-
-			  switch($PHASER) {
-			      case KEY_ADJUST:
-			          cv = newATTRSUB($startsub, NULL, NULL, NULL, body);
-			          class_add_ADJUST(PL_curstash, cv);
-			          break;
-			  }
-			  $$ = NULL;
 			  parser->parsed_sub = 1;
 			}
 	|	KW_USE_or_NO startsub
