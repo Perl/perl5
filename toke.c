@@ -101,6 +101,12 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #define XFAKEEOF   0x40
 #define XFAKEBRACK 0x80
 
+#define FROM_DOLLAR             1
+#define FROM_SNAIL              2
+#define FROM_PERCENT            3
+#define FROM_IDENT              4
+#define FROM_INTERDEPENDMAYBE   5
+
 #ifdef USE_UTF8_SCRIPTS
 #   define UTF cBOOL(!IN_BYTES)
 #else
@@ -4514,7 +4520,11 @@ S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 
 STATIC int
-S_intuit_more(pTHX_ char *s, char *e)
+S_intuit_more(pTHX_ char *s, char *e,
+              U8 caller_context,    /* Who's calling us? basically an enum */
+              char * caller_s,      /* If non-NULL, the name of the identifier
+                                       that resulted in this call */
+              Size_t caller_length) /* And the length of that name */
 {
     PERL_ARGS_ASSERT_INTUIT_MORE;
 
@@ -4585,28 +4595,51 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (s[0] == ']' || s[0] == '^')
         return FALSE;
 
-    /* khw: If the context of this call is $foo[...], we may be able to avoid
-     * the heuristics below.  The possibilities are:
-     *  strict    @foo    $foo
-     *   vars?   exists   exists
-     *    y         n       n      This is an error; return false now
-     *    y         n       y      must be a a charclass
-     *    y         y       n      must be a a subscript
-     *    y         y       y      ambiguous; do heuristics below
-     *    n         n       n      ambiguous; do heuristics below
-     *    n         n       y      ambiguous; do heuristics below, but I
-     *                             wonder if the initial bias should be a
-     *                             little towards charclass
-     *    n         y       n      ambiguous; do heuristics below, but I
-     *                             wonder if the initial bias should be a
-     *                             little towards subscript
-     *    n         y       y      ambiguous; do heuristics below
-     */
+    bool under_strict_vars = PL_hints & HINT_STRICT_VARS;
 
-    /* Find matching ']'.  khw: Actually it finds the next ']' and assumes it
-     * matches the '['.  In order to account for the possibility of the ']'
-     * being inside the scope of \Q or preceded by an even number of
-     * backslashes, this should be rewritten */
+    /* If the input is of the form '$foo[...', and there is a $foo scalar and
+     * no @foo array, then '...' is more likely to be a character class.
+     * (Under 'strict vars', we know at compile time all the accessible
+     * variables, so in that case it MUST be a character class.)  If the
+     * situation is reversed, it is more likely to be (or must be) a
+     * subscript.  */
+    if (caller_context == FROM_DOLLAR) {
+        assert (caller_s);
+
+        /* See if there is a known scalar for the input identifier */
+        bool has_scalar = is_existing_identifier(caller_s, caller_length,
+                                                 '$', UTF);
+
+        /* Repeat to see if there is a known array of the given name */
+        bool has_array = is_existing_identifier(caller_s, caller_length,
+                                                '@', UTF);
+
+        unsigned int count = has_scalar + has_array;
+
+        /* Under strict, we need some variable to be declared. */
+        if (under_strict_vars) {
+
+            /* If none are, is an error.  Return false to stop useless further
+             * parsing. */
+            if (count == 0) {
+                return false;
+            }
+
+            /* When just one variable is declared, the construct has to match
+             * what the variable is.  If it is an array, this must be a
+             * subscript which needs further processing; otherwise it is a
+             * character class needing nothing further. */
+            if (count == 1) {
+                return has_array;
+            }
+
+            /* Here have both an array and a scalar with the same name.  Drop
+             * down to use the heuristics to try to intuit which is meant */
+        }
+    }
+
+    /* Find matching ']'.  khw: This means any s[1] below is guaranteed to
+     * exist */
     const char * const send = (char *) memchr(s, ']', e - s);
     if (! send)		/* has to be an expression */
         return TRUE;
@@ -5591,7 +5624,9 @@ yyl_dollar(pTHX_ char *s)
         s = skipspace(s);
 
     if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
-        && intuit_more(s, PL_bufend)) {
+        && intuit_more(s, PL_bufend, FROM_DOLLAR,
+                       PL_tokenbuf, strlen(PL_tokenbuf)))
+    {
         if (*s == '[') {
             PL_tokenbuf[0] = '@';
             if (ckWARN(WARN_SYNTAX)) {
@@ -6295,7 +6330,9 @@ yyl_percent(pTHX_ char *s)
         PREREF(PERLY_PERCENT_SIGN);
     }
     if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
-        && intuit_more(s, PL_bufend)) {
+        && intuit_more(s, PL_bufend, FROM_PERCENT,
+                       PL_tokenbuf, strlen(PL_tokenbuf)))
+    {
         if (*s == '[')
             PL_tokenbuf[0] = '@';
     }
@@ -6918,7 +6955,8 @@ yyl_snail(pTHX_ char *s)
     if (PL_lex_state == LEX_NORMAL || PL_lex_brackets)
         s = skipspace(s);
     if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
-        && intuit_more(s, PL_bufend))
+        && intuit_more(s, PL_bufend, FROM_SNAIL,
+                       PL_tokenbuf, strlen(PL_tokenbuf)))
     {
         if (*s == '{')
             PL_tokenbuf[0] = '%';
@@ -10004,7 +10042,8 @@ Perl_yylex(pTHX)
         return yylex();
 
     case LEX_INTERPENDMAYBE:
-        if (intuit_more(PL_bufptr, PL_bufend)) {
+        if (intuit_more(PL_bufptr, PL_bufend, FROM_INTERDEPENDMAYBE, NULL, 0))
+        {
             PL_lex_state = LEX_INTERPNORMAL;	/* false alarm, more expr */
             break;
         }
@@ -10818,7 +10857,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
     }
     else if (   PL_lex_state == LEX_INTERPNORMAL
              && !PL_lex_brackets
-             && !intuit_more(s, PL_bufend))
+             && !intuit_more(s, PL_bufend, FROM_IDENT, NULL, 0))
         PL_lex_state = LEX_INTERPEND;
     return s;
 }

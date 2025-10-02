@@ -1684,7 +1684,7 @@
 #     define get_and_check_backslash_N_name_wrapper(a,b) S_get_and_check_backslash_N_name_wrapper(aTHX_ a,b)
 #     define incline(a,b)                       S_incline(aTHX_ a,b)
 #     define intuit_method(a,b,c)               S_intuit_method(aTHX_ a,b,c)
-#     define intuit_more(a,b)                   S_intuit_more(aTHX_ a,b)
+#     define intuit_more(a,b,c,d,e)             S_intuit_more(aTHX_ a,b,c,d,e)
 #     define is_existing_identifier(a,b,c,d)    S_is_existing_identifier(aTHX_ a,b,c,d)
 #     define lop(a,b,c,d)                       S_lop(aTHX_ a,b,c,d)
 #     define missingterm(a,b)                   S_missingterm(aTHX_ a,b)

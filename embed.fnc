@@ -6153,7 +6153,10 @@ S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK SV *ioname			\
 				|NULLOK NOCHECK CV *cv
 S	|int	|intuit_more	|NN char *s				\
-				|NN char *e
+				|NN char *e				\
+				|U8 caller_context			\
+				|NULLOK char *caller_s			\
+				|Size_t caller_length
 S	|bool	|is_existing_identifier 				\
 				|NN char *s				\
 				|Size_t len				\
