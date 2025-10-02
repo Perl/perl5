@@ -107,6 +107,7 @@
 %type <opval> bare_statement_given
 %type <opval> bare_statement_if
 %type <opval> bare_statement_null
+%type <opval> bare_statement_package_declaration
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -530,6 +531,24 @@ bare_statement_null
 		}
 	;
 
+bare_statement_package_declaration
+	:	KW_PACKAGE
+		BAREWORD[version]
+		BAREWORD[package]
+		PERLY_SEMICOLON
+		/* version and package appear in the reverse order to what may be
+		 * expected, because toke.c has already pushed both of them to a stack
+		 * by calling force_next() from within force_version().
+		 * When the parser pops them back out again they appear swapped
+		 */
+		{
+			package($package);
+			if ($version)
+				package_version($version);
+			$$ = NULL;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -655,6 +674,7 @@ barestmt
 	|	bare_statement_given
 	|	bare_statement_if
 	|	bare_statement_null
+	|	bare_statement_package_declaration
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
@@ -727,17 +747,6 @@ barestmt
 			  }
 			  $$ = NULL;
 			  parser->parsed_sub = 1;
-			}
-	|	KW_PACKAGE BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
-		    /* version and package appear in the reverse order to what may be
-		     * expected, because toke.c has already pushed both of them to a stack
-		     * by calling force_next() from within force_version().
-		     * When the parser pops them back out again they appear swapped */
-			{
-			  package($package);
-			  if ($version)
-			      package_version($version);
-			  $$ = NULL;
 			}
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
