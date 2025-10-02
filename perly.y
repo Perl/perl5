@@ -115,6 +115,7 @@
 %type <opval> bare_statement_try_catch
 %type <opval> bare_statement_unless
 %type <opval> bare_statement_until
+%type <opval> bare_statement_utilize
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -717,6 +718,24 @@ bare_statement_until
 		}
 	;
 
+bare_statement_utilize
+	:	KW_USE_or_NO
+		startsub
+		{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
+		BAREWORD[version]
+		BAREWORD[module]
+		optlistexpr
+		PERLY_SEMICOLON
+		/* version and package appear in reverse order for the same reason as
+		 * KW_PACKAGE; see comment above */
+		{
+			SvREFCNT_inc_simple_void(PL_compcv);
+			utilize($KW_USE_or_NO, $startsub, $version, $module, $optlistexpr);
+			parser->parsed_sub = 1;
+			$$ = NULL;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -850,17 +869,7 @@ barestmt
 	|	bare_statement_try_catch
 	|	bare_statement_unless
 	|	bare_statement_until
-	|	KW_USE_or_NO startsub
-			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
-		BAREWORD[version] BAREWORD[module] optlistexpr PERLY_SEMICOLON
-		    /* version and package appear in reverse order for the same reason as
-		     * KW_PACKAGE; see comment above */
-			{
-			  SvREFCNT_inc_simple_void(PL_compcv);
-			  utilize($KW_USE_or_NO, $startsub, $version, $module, $optlistexpr);
-			  parser->parsed_sub = 1;
-			  $$ = NULL;
-			}
+	|	bare_statement_utilize
 	|	KW_WHEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
 			{ $$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock))); }
 	|	KW_WHILE PERLY_PAREN_OPEN remember texpr PERLY_PAREN_CLOSE mintro mblock cont
