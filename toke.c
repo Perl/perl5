@@ -707,9 +707,10 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
             }
 
             /* see if we can identify the cause of the warning */
-            if (isIDFIRST_lazy_if_safe(t,PL_bufend,UTF))
-            {
-                const char *t_start= t;
+            Size_t advance;
+            if ((advance = isIDFIRST_lazy_if_safe(t, PL_bufend, UTF))) {
+                const char *t_start = t;
+                t += advance;
                 for ( ;
                      (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF) || *t == ':');
                      t += UTF ? UTF8SKIP(t) : 1)
