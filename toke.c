@@ -701,13 +701,11 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
         }
         else if (PL_oldoldbufptr) {
             /* yyerror (via yywarn) would do this itself, so we should too */
-            const char *t;
-            for (t = PL_oldoldbufptr;
-                 t < PL_bufptr && isSPACE(*t);
-                 t += UTF ? UTF8SKIP(t) : 1)
-            {
-                NOOP;
+            const char *t = PL_oldoldbufptr;
+            while (t < PL_bufptr && isSPACE(*t)) {
+                 t++;
             }
+
             /* see if we can identify the cause of the warning */
             if (isIDFIRST_lazy_if_safe(t,PL_bufend,UTF))
             {
