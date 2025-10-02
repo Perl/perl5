@@ -116,6 +116,7 @@
 %type <opval> bare_statement_unless
 %type <opval> bare_statement_until
 %type <opval> bare_statement_utilize
+%type <opval> bare_statement_when
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -736,6 +737,18 @@ bare_statement_utilize
 		}
 	;
 
+bare_statement_when
+	:	KW_WHEN
+		PERLY_PAREN_OPEN
+		remember
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		{
+			$$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock)));
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -870,8 +883,7 @@ barestmt
 	|	bare_statement_unless
 	|	bare_statement_until
 	|	bare_statement_utilize
-	|	KW_WHEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
-			{ $$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock))); }
+	|	bare_statement_when
 	|	KW_WHILE PERLY_PAREN_OPEN remember texpr PERLY_PAREN_CLOSE mintro mblock cont
 			{
 			  $$ = block_end($remember,
