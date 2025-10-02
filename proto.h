@@ -9442,7 +9442,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv);
         assert(start)
 
 STATIC int
-S_intuit_more(pTHX_ char *s, char *e);
+S_intuit_more(pTHX_ char *s, char *e, U8 caller_context, char *caller_s, Size_t caller_length);
 # define PERL_ARGS_ASSERT_INTUIT_MORE           \
         assert(s); assert(e)
 
