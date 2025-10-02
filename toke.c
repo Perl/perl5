@@ -4616,10 +4616,10 @@ S_intuit_more(pTHX_ char *s, char *e)
              * identifier already found in the program by that name.  If so,
              * strongly suspect this isn't a character class */
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
-                int len;
+                Size_t len;
                 char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 ];
                 scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), FALSE);
-                len = (int)strlen(tmpbuf);
+                len = strlen(tmpbuf);
                 if (   len > 1
                     && gv_fetchpvn_flags(tmpbuf,
                                          len,
