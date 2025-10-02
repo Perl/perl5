@@ -110,6 +110,7 @@
 %type <opval> bare_statement_package_declaration
 %type <opval> bare_statement_package_definition
 %type <opval> bare_statement_phaser
+%type <opval> bare_statement_sub_signature
 %type <opval> bare_statement_sub_traditional
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
@@ -605,6 +606,38 @@ bare_statement_phaser
 		}
 	;
 
+bare_statement_sub_signature
+	/* sub declaration or definition under 'use feature * "signatures"'.
+	 * (Note that a signature isn't * allowed in a declaration)
+	 */
+	:	sigsub_or_method_named
+		subname
+		startsub
+		{
+			init_named_cv(PL_compcv, $subname);
+			if($sigsub_or_method_named == KW_METHOD_named) {
+				croak_kw_unless_class("method");
+				class_prepare_method_parse(PL_compcv);
+			}
+			parser->in_my = 0;
+			parser->in_my_stash = NULL;
+		}
+		subattrlist
+		optsigsubbody
+		{
+			OP *body = $optsigsubbody;
+
+			SvREFCNT_inc_simple_void(PL_compcv);
+			$subname->op_type == OP_CONST
+				? newATTRSUB($startsub, $subname, NULL, $subattrlist, body)
+				: newMYSUB(  $startsub, $subname, NULL, $subattrlist, body)
+				;
+			intro_my();
+			parser->parsed_sub = 1;
+			$$ = NULL;
+		}
+	;
+
 bare_statement_sub_traditional
 	/* sub declaration or definition not within scope of 'use feature "signatures"'*/
 	:	KW_SUB_named
@@ -758,34 +791,8 @@ barestmt
 	|	bare_statement_package_declaration
 	|	bare_statement_package_definition
 	|	bare_statement_phaser
+	|	bare_statement_sub_signature
 	|	bare_statement_sub_traditional
-	|	sigsub_or_method_named subname startsub
-                    /* sub declaration or definition under 'use feature
-                     * "signatures"'. (Note that a signature isn't
-                     * allowed in a declaration)
-                     */
-			{
-                          init_named_cv(PL_compcv, $subname);
-			  if($sigsub_or_method_named == KW_METHOD_named) {
-			      croak_kw_unless_class("method");
-			      class_prepare_method_parse(PL_compcv);
-			  }
-			  parser->in_my = 0;
-			  parser->in_my_stash = NULL;
-			}
-                    subattrlist optsigsubbody
-			{
-			  OP *body = $optsigsubbody;
-
-			  SvREFCNT_inc_simple_void(PL_compcv);
-			  $subname->op_type == OP_CONST
-			      ? newATTRSUB($startsub, $subname, NULL, $subattrlist, body)
-			      : newMYSUB(  $startsub, $subname, NULL, $subattrlist, body)
-			  ;
-			  $$ = NULL;
-			  intro_my();
-			  parser->parsed_sub = 1;
-			}
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		BAREWORD[version] BAREWORD[module] optlistexpr PERLY_SEMICOLON
