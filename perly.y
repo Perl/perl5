@@ -118,6 +118,7 @@
 %type <opval> bare_statement_utilize
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
+%type <opval> bare_statement_yadayada
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -765,6 +766,14 @@ bare_statement_while
 		}
 	;
 
+bare_statement_yadayada
+	:	YADAYADA PERLY_SEMICOLON
+		{
+			/* diag_listed_as: Unimplemented */
+			$$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0), newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -901,12 +910,7 @@ barestmt
 	|	bare_statement_utilize
 	|	bare_statement_when
 	|	bare_statement_while
-	|	YADAYADA PERLY_SEMICOLON
-			{
-                          /* diag_listed_as: Unimplemented */
-			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
-				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
-			}
+	|	bare_statement_yadayada
 	;
 
 /* Format line */
