@@ -114,6 +114,7 @@
 %type <opval> bare_statement_sub_traditional
 %type <opval> bare_statement_try_catch
 %type <opval> bare_statement_unless
+%type <opval> bare_statement_until
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -701,6 +702,21 @@ bare_statement_unless
 		}
 	;
 
+bare_statement_until
+	:	KW_UNTIL
+		PERLY_PAREN_OPEN
+		remember
+		iexpr
+		PERLY_PAREN_CLOSE
+		mintro
+		mblock
+		cont
+		{
+			$$ = block_end($remember, newWHILEOP(0, 1, NULL, $iexpr, $mblock, $cont, $mintro));
+			parser->copline = (line_t)$KW_UNTIL;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -833,6 +849,7 @@ barestmt
 	|	bare_statement_sub_traditional
 	|	bare_statement_try_catch
 	|	bare_statement_unless
+	|	bare_statement_until
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		BAREWORD[version] BAREWORD[module] optlistexpr PERLY_SEMICOLON
@@ -852,13 +869,6 @@ barestmt
 				  newWHILEOP(0, 1, NULL,
 				      $texpr, $mblock, $cont, $mintro));
 			  parser->copline = (line_t)$KW_WHILE;
-			}
-	|	KW_UNTIL PERLY_PAREN_OPEN remember iexpr PERLY_PAREN_CLOSE mintro mblock cont
-			{
-			  $$ = block_end($remember,
-				  newWHILEOP(0, 1, NULL,
-				      $iexpr, $mblock, $cont, $mintro));
-			  parser->copline = (line_t)$KW_UNTIL;
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{
