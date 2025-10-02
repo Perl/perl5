@@ -105,6 +105,7 @@
 %type <opval> bare_statement_for
 %type <opval> bare_statement_format
 %type <opval> bare_statement_given
+%type <opval> bare_statement_if
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -506,6 +507,20 @@ bare_statement_given
 		}
 	;
 
+bare_statement_if
+	:	KW_IF
+		PERLY_PAREN_OPEN
+		remember
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		else
+		{
+			$$ = block_end($remember, newCONDOP(0, $mexpr, op_scope($mblock), $else));
+			parser->copline = (line_t)$KW_IF;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -629,6 +644,7 @@ barestmt
 	|	bare_statement_for
 	|	bare_statement_format
 	|	bare_statement_given
+	|	bare_statement_if
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
@@ -723,12 +739,6 @@ barestmt
 			  utilize($KW_USE_or_NO, $startsub, $version, $module, $optlistexpr);
 			  parser->parsed_sub = 1;
 			  $$ = NULL;
-			}
-	|	KW_IF PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock else
-			{
-			  $$ = block_end($remember,
-			      newCONDOP(0, $mexpr, op_scope($mblock), $else));
-			  parser->copline = (line_t)$KW_IF;
 			}
 	|	KW_UNLESS PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock else
 			{
