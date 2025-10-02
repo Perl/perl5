@@ -102,6 +102,7 @@
 %type <opval> bare_statement_defer
 %type <opval> bare_statement_expression
 %type <opval> bare_statement_field_declaration
+%type <opval> bare_statement_for
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -334,6 +335,146 @@ bare_statement_field_declaration
 		}
 	;
 
+bare_statement_for
+	:	KW_FOR
+		PERLY_PAREN_OPEN
+		remember
+		mnexpr[init_mnexpr]
+		PERLY_SEMICOLON
+		{
+			parser->expect = XTERM;
+		}
+		texpr
+		PERLY_SEMICOLON
+		{
+			parser->expect = XTERM;
+		}
+		mintro
+		mnexpr[iterate_mnexpr]
+		PERLY_PAREN_CLOSE
+		mblock
+		{
+			OP *initop = $init_mnexpr;
+			OP *forop = newWHILEOP(0, 1, NULL, scalar($texpr), $mblock, $iterate_mnexpr, $mintro);
+			if (initop) {
+				forop = op_prepend_elem(
+					OP_LINESEQ,
+					initop,
+					op_append_elem(OP_LINESEQ, newOP(OP_UNSTACK, OPf_SPECIAL), forop)
+				);
+			}
+			PL_hints |= HINT_BLOCK_SCOPE;
+			$$ = block_end($remember, forop);
+			parser->copline = (line_t)$KW_FOR;
+		}
+	|	KW_FOR
+		KW_MY
+		remember
+		my_scalar
+		PERLY_PAREN_OPEN
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		cont
+		{
+			$$ = block_end($remember, newFOROP(0, $my_scalar, $mexpr, $mblock, $cont));
+			parser->copline = (line_t)$KW_FOR;
+		}
+	|	KW_FOR
+		KW_MY
+		remember
+		PERLY_PAREN_OPEN
+		my_list_of_scalars
+		PERLY_PAREN_CLOSE
+		PERLY_PAREN_OPEN
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		cont
+		{
+			if ($my_list_of_scalars->op_type == OP_PADSV)
+				/* degenerate case of 1 var: for my ($x) ....
+				   Flag it so it can be special-cased in newFOROP */
+				$my_list_of_scalars->op_flags |= OPf_PARENS;
+			$$ = block_end($remember, newFOROP(0, $my_list_of_scalars, $mexpr, $mblock, $cont));
+			parser->copline = (line_t)$KW_FOR;
+		}
+	|	KW_FOR
+		scalar
+		PERLY_PAREN_OPEN
+		remember
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		cont
+		{
+			$$ = block_end($remember, newFOROP(0, op_lvalue($scalar, OP_ENTERLOOP), $mexpr, $mblock, $cont));
+			parser->copline = (line_t)$KW_FOR;
+		}
+	|	KW_FOR
+		my_refgen
+		remember
+		my_var
+		{
+			parser->in_my = 0;
+			$<opval>$ = my($my_var);
+		}[variable]
+		PERLY_PAREN_OPEN
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		cont
+		{
+			$$ = block_end(
+				$remember,
+				newFOROP(
+					0,
+					op_lvalue(
+						newUNOP(OP_REFGEN, 0, $<opval>variable),
+						OP_ENTERLOOP
+					),
+					$mexpr,
+					$mblock,
+					$cont
+				)
+			);
+			parser->copline = (line_t)$KW_FOR;
+		}
+	|	KW_FOR
+		REFGEN
+		refgen_topic
+		PERLY_PAREN_OPEN
+		remember
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		cont
+		{
+			$$ = block_end (
+				$remember,
+				newFOROP (
+					0,
+					op_lvalue (newUNOP(OP_REFGEN, 0, $refgen_topic), OP_ENTERLOOP),
+					$mexpr,
+					$mblock,
+					$cont
+				)
+			);
+			parser->copline = (line_t)$KW_FOR;
+		}
+	|	KW_FOR
+		PERLY_PAREN_OPEN
+		remember
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		cont
+		{
+			$$ = block_end($remember, newFOROP(0, NULL, $mexpr, $mblock, $cont));
+			parser->copline = (line_t)$KW_FOR;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -454,6 +595,7 @@ barestmt
 	|	bare_statement_defer
 	|	bare_statement_expression
 	|	bare_statement_field_declaration
+	|	bare_statement_for
 	|	KW_FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
@@ -591,75 +733,6 @@ barestmt
 				  newWHILEOP(0, 1, NULL,
 				      $iexpr, $mblock, $cont, $mintro));
 			  parser->copline = (line_t)$KW_UNTIL;
-			}
-	|	KW_FOR PERLY_PAREN_OPEN remember mnexpr[init_mnexpr] PERLY_SEMICOLON
-			{ parser->expect = XTERM; }
-		texpr PERLY_SEMICOLON
-			{ parser->expect = XTERM; }
-		mintro mnexpr[iterate_mnexpr] PERLY_PAREN_CLOSE
-		mblock
-			{
-			  OP *initop = $init_mnexpr;
-			  OP *forop = newWHILEOP(0, 1, NULL,
-				      scalar($texpr), $mblock, $iterate_mnexpr, $mintro);
-			  if (initop) {
-			      forop = op_prepend_elem(OP_LINESEQ, initop,
-				  op_append_elem(OP_LINESEQ,
-				      newOP(OP_UNSTACK, OPf_SPECIAL),
-				      forop));
-			  }
-			  PL_hints |= HINT_BLOCK_SCOPE;
-			  $$ = block_end($remember, forop);
-			  parser->copline = (line_t)$KW_FOR;
-			}
-	|	KW_FOR KW_MY remember my_scalar PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont
-			{
-			  $$ = block_end($remember, newFOROP(0, $my_scalar, $mexpr, $mblock, $cont));
-			  parser->copline = (line_t)$KW_FOR;
-			}
-	|	KW_FOR KW_MY remember PERLY_PAREN_OPEN my_list_of_scalars PERLY_PAREN_CLOSE PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont
-			{
-                          if ($my_list_of_scalars->op_type == OP_PADSV)
-                            /* degenerate case of 1 var: for my ($x) ....
-                               Flag it so it can be special-cased in newFOROP */
-                                $my_list_of_scalars->op_flags |= OPf_PARENS;
-			  $$ = block_end($remember, newFOROP(0, $my_list_of_scalars, $mexpr, $mblock, $cont));
-			  parser->copline = (line_t)$KW_FOR;
-			}
-	|	KW_FOR scalar PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock cont
-			{
-			  $$ = block_end($remember, newFOROP(0,
-				      op_lvalue($scalar, OP_ENTERLOOP), $mexpr, $mblock, $cont));
-			  parser->copline = (line_t)$KW_FOR;
-			}
-	|	KW_FOR my_refgen remember my_var
-			{ parser->in_my = 0; $<opval>$ = my($my_var); }[variable]
-		PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont
-			{
-			  $$ = block_end(
-				$remember,
-				newFOROP(0,
-					 op_lvalue(
-					    newUNOP(OP_REFGEN, 0,
-						    $<opval>variable),
-					    OP_ENTERLOOP),
-					 $mexpr, $mblock, $cont)
-			  );
-			  parser->copline = (line_t)$KW_FOR;
-			}
-	|	KW_FOR REFGEN refgen_topic PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock cont
-			{
-			  $$ = block_end($remember, newFOROP(
-				0, op_lvalue(newUNOP(OP_REFGEN, 0,
-						     $refgen_topic),
-					     OP_ENTERLOOP), $mexpr, $mblock, $cont));
-			  parser->copline = (line_t)$KW_FOR;
-			}
-	|	KW_FOR PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock cont
-			{
-			  $$ = block_end($remember,
-				  newFOROP(0, NULL, $mexpr, $mblock, $cont));
-			  parser->copline = (line_t)$KW_FOR;
 			}
 	|       KW_TRY mblock[try] KW_CATCH remember catch_paren[scalar]
 			{
