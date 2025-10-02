@@ -104,6 +104,7 @@
 %type <opval> bare_statement_field_declaration
 %type <opval> bare_statement_for
 %type <opval> bare_statement_format
+%type <opval> bare_statement_given
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -492,6 +493,19 @@ bare_statement_format
 		}
 	;
 
+bare_statement_given
+	:	KW_GIVEN
+		PERLY_PAREN_OPEN
+		remember
+		mexpr
+		PERLY_PAREN_CLOSE
+		mblock
+		{
+			$$ = block_end($remember, newGIVENOP($mexpr, op_scope($mblock), 0));
+			parser->copline = (line_t)$KW_GIVEN;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -614,6 +628,7 @@ barestmt
 	|	bare_statement_field_declaration
 	|	bare_statement_for
 	|	bare_statement_format
+	|	bare_statement_given
 	|	KW_SUB_named subname startsub
                     /* sub declaration or definition not within scope
                        of 'use feature "signatures"'*/
@@ -720,11 +735,6 @@ barestmt
 			  $$ = block_end($remember,
                               newCONDOP(0, $mexpr, $else, op_scope($mblock)));
 			  parser->copline = (line_t)$KW_UNLESS;
-			}
-	|	KW_GIVEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
-			{
-			  $$ = block_end($remember, newGIVENOP($mexpr, op_scope($mblock), 0));
-			  parser->copline = (line_t)$KW_GIVEN;
 			}
 	|	KW_WHEN PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock
 			{ $$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock))); }
