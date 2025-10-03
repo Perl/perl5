@@ -710,13 +710,14 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
             Size_t advance;
             if ((advance = isIDFIRST_lazy_if_safe(t, PL_bufend, UTF))) {
                 const char *t_start = t;
-                t += advance;
-                for ( ;
-                     (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF) || *t == ':');
-                     t += UTF ? UTF8SKIP(t) : 1)
-                {
-                    NOOP;
+                do {
+                    t += advance;
                 }
+                while (   (advance = (*t == ':'))
+                       || (advance = isWORDCHAR_lazy_if_safe((U8 *) t,
+                                                             (U8 *) PL_bufend,
+                                                             UTF)));
+
                 if (t < PL_bufptr && isSPACE(*t)) {
                     has_more = TRUE;
                     sv_catpvf( message,
