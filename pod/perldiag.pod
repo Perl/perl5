@@ -2867,8 +2867,9 @@ has since been undefined.
 S<<-- HERE> in m/%s/
 
 (F) Group names must follow the rules for perl identifiers, meaning
-they must start with a non-digit word character.  A common cause of
-this error is using (?&0) instead of (?0).  See L<perlre>.
+that ASCII-range ones must start with a non-digit word character.  A
+common cause of this error is using (?&0) instead of (?0).  See
+L<perlre> and L<perldata/Identifier parsing>.
 
 =item ()-group starts with a count
 
