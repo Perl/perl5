@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1296;  # Update this when adding/deleting tests.
+plan tests => 1298;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1387,6 +1387,28 @@ EOP
             utf8::encode($prog);
             fresh_perl_like($prog, qr!Group name must start with a non-digit word character!, {},
                         sprintf("'U+%04X not legal IDFirst'", ord($char)));
+        }
+
+        foreach my $char (chr(0x2115), chr(0x24B7)) {
+            my $prog = <<"EOP";
+use utf8;;
+no warnings 'utf8';
+print 0 + "abc" =~ qr/(?<a${char}b>abc)/;
+EOP
+            utf8::encode($prog);
+            if ($char =~ /\p{XID_Continue}/) {
+                fresh_perl_is($prog, 1,
+                                {},
+                                sprintf("U+%04X is legal IDCont",
+                                        ord($char)));
+            }
+            else {
+                fresh_perl_like($prog,
+                                qr/Sequence .* not terminated/,
+                                {},
+                                sprintf("U+%04X not legal IDCont",
+                                ord($char)));
+            }
         }
     }
 

@@ -373,6 +373,41 @@ consisted of only ASCII characters.  The real upper limit was as few as
 Chinese or Osage.  Now an identifier in any language may contain at
 least 255 characters.
 
+=item *
+
+The allowed characters for regular expression capture group names has
+been corrected to conform to Perl identifier syntax, which in turn is
+based on public Unicode rules.  The net result of this change is that,
+as of Unicode 17.0, about 160 characters that formerly were allowed to
+be in an identifier no longer are.  Only programs that do
+L<C<use utf8>|utf8> can be affected, and then only characters that
+appear in the 2nd or later positions of the name.  The characters that
+an identifier name can begin with are unchanged.
+
+130 of the now unacceptable characters are 5 sets of 26 Latin letters
+that are enclosed by some shape, such as CIRCLED LATIN CAPITAL LETTER N.
+Another 8 are generic modifiers that add shapes around other characters;
+5 are modifiers to Cyrillic numbers; and 16 are Arabic ligatures and
+isolated forms.  The other two are GREEK YPOGEGRAMMENI and VERTICAL
+TILDE.
+
+You can get a complete list of them by running the following program
+
+ perl -le 'use re qw(Debug COMPILE); qr/(?[ \w - \p{XIDC} ])/'
+
+Look near the final line.  The one that begins C<stclass> contains a
+list of 4 and 5 digit hexdecimal numbers.  These are the Unicode code
+points that were previously allowed, but no longer are.
+
+(Long after Perl identifier rules were formed, Unicode has added
+recommendations to further restrict legal identifier names.  These were
+added to counter cases where, for example, programmers snuck code past
+reviewers using characters that look like other ones.  The two
+properties are C<Identifier_Status> and C<Identifier_Type>.
+L<https://www.unicode.org/reports/tr39/>.  Perl currently doesn't do
+anything with these, except to furnish you the ability to use them in
+regular expressions.)
+
 =back
 
 =head1 Known Problems
