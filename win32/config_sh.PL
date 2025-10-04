@@ -148,6 +148,12 @@ my $ver = `ver 2>nul`;
 $opt{osvers} = $ver =~ /\b(\d+(?:\.\d+)+)\b/ ? $1 : '4.0';
 
 if (exists $opt{cc}) {
+    system "$opt{cc} -o have_stdckdint.exe configure/have_stdckdint.c 1>nul 2>&1";
+    if  (-e 'have_stdckdint.exe') {
+        $opt{i_stdckdint} = 'define' if `have_stdckdint` eq '0';
+        unlink 'have_stdckdint.exe'; # have_stdckdint.exe no longer needed
+    }
+
     # cl version detection borrowed from Test::Smoke's configsmoke.pl
     if ($opt{cc} =~ /\b(?:cl|icl)/) { #MSVC can come as clarm.exe, icl=Intel C
         my $output = `$opt{cc} 2>&1`;
