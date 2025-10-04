@@ -27,6 +27,9 @@
  * 1) A function has been replaced by a macro within a minor release,
  *    so XS modules compiled against an older release will expect to
  *    still be able to link against the function
+ * 2) A function is deprecated, and so placing it here will cause a compiler
+ *    warning to be generated (for participating compilers).
+ * 3) A few other reasons, documented with the functions below
  *
  * It used to be that this was the way to handle the case were a function
  * Perl_foo(...) had been replaced by a macro.  But see the 'm' flag discussion
