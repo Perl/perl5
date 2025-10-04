@@ -418,45 +418,49 @@ valid precomputed hash value, or 0 to ask for it to be computed.
 
 =for apidoc      hv_fetch
 =for apidoc_item hv_fetchs
+=for apidoc_item hv_fetch_ent
 
-These each return the SV which corresponds to the specified key in the hash.
-They differ only in how the key is specified.
+These each return the value entry in a hash which corresponds to the specified
+key.
+
+In all, if <hv> is NULL, NULL is returned.
+
+They differ principally in how the key is specified, and the form of the return.
 
 In C<hv_fetchs>, the key must be a C language string literal, enclosed in
 double quotes.  It is never treated as being in UTF-8.  There is no
 length_parameter.
 
-In C<hv_fetch>, the absolute value of C<klen> is the length of the key.  If
-C<klen> is negative the key is assumed to be in UTF-8-encoded Unicode.
-C<key> may contain embedded NUL characters.
+In C<hv_fetch>, C<key> is either NULL or points to the first byte of the string
+specifying the key, and its length in bytes is given by the absolute value of
+an additional parameter, C<klen>.  A NULL key indicates the key is to be
+treated as C<undef>, and C<klen> is ignored.  A non-NULL C<key> may contain
+embedded-NUL characters.  If C<klen> is negative, C<key> is treated as being
+encoded in UTF-8; otherwise not.
 
-In both, if C<lval> is set, then the fetch will be part of a store.  This means
-that if there is no value in the hash associated with the given key, then one
-is created and a pointer to it is returned.  The C<SV*> it points to can be
-assigned to.  But always check that the return value is non-null before
-dereferencing it to an C<SV*>.
+In C<hv_fetch_ent>, the key is stored in the SV C<keysv> which this function
+extracts using C<L</SvPV_const>>.  The key has the same UTF8ness as C<keysv>.
 
-See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
-information on how to use this function on tied hashes.
+The value entry returned by C<hv_fetch> and C<hv_fetchs> is an SV**.  Always
+check that the return value is non-null before dereferencing it to an C<SV*>.
 
-=cut
-*/
+The value entry returned by C<hv_fetch_ent> is a pointer to a
+L<C<HE>|perlguts/Working with HVs> structure with the all fields set.  When
+C<hv> is a tied hash, the HE structure is in a static location, so be sure to
+make a copy of the structure if you need to store it somewhere.  Also, for
+MAGICAL hashes, the C<hent_val> field in the returned HE structure will be a
+mortal sv.
 
-/* returns an HE * structure with the all fields set */
-/* note that hent_val will be a mortal sv for MAGICAL hashes */
-/*
-=for apidoc hv_fetch_ent
-
-Returns the hash entry which corresponds to the specified key in the hash.
-C<hash> must be a valid precomputed hash number for the given C<key>, or 0
-if you want the function to compute it.  IF C<lval> is set then the fetch
-will be part of a store.  Make sure the return value is non-null before
-accessing it.  The return value when C<hv> is a tied hash is a pointer to a
-static location, so be sure to make a copy of the structure if you need to
-store it somewhere.
+In all, if C<lval> is non-zero, then the fetch will be part of a store.  This
+means that if there is no value in the hash associated with the given key,
+then a SV* is created, accessible through the returned value.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
-information on how to use this function on tied hashes.
+information on how to use these functions on tied hashes.
+
+C<hv_fetch_ent> has an additional parameter, C<hash>.  It must be a valid
+precomputed hash number for the given C<key>, or 0 if you want the function to
+compute it.
 
 =cut
 */
