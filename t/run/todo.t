@@ -291,6 +291,12 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = 'GH 16665';
+    my $results = fresh_perl('sub f {[1,2,3]}; print sort f()->@*', {});
+    is($results, '123', 'function return value sorted before postfix dereference; GH 16665');
+}
+
+TODO: {
     todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
     local $::TODO = 'GH 16863';
     fresh_perl(<<~'HERE', { stderr => 'devnull' });
