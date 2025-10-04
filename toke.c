@@ -3713,10 +3713,7 @@ S_scan_const(pTHX_ char *start)
              * (@foo, @::foo, @'foo, @{foo}, @$foo, @+, @-)
              */
         else if (*s == '@' && s[1]) {
-            if (UTF
-               ? isIDFIRST_utf8_safe(s+1, send)
-               : isWORDCHAR_A(s[1]))
-            {
+            if (isDIGIT_A(s[1]) || isIDFIRST_lazy_if_safe(s+1, send, UTF)) {
                 break;
             }
             if (memCHRs(":'{$", s[1]))

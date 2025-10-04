@@ -5,7 +5,7 @@ BEGIN {
     require './test.pl';
     set_up_inc('../lib');
 }
-plan tests=>213;
+plan tests=>215;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -1041,6 +1041,14 @@ sub else119797 : lvalue {
 eval { (else119797(0)) = 1..3 };
 is $@, "", '$@ after writing to array returned by else';
 is "@119797", "1 2 3", 'writing to array returned by else';
+
+{   # Being in UTF-8 used to break this
+    use utf8;
+    eval { (else119797(0)) = 1..3 };
+    is $@, "", '$@ after writing to array returned by else';
+    is "@119797", "1 2 3", 'writing to array returned by else';
+}
+
 eval { (else119797(1)) = 4..6 };
 is $@, "", '$@ after writing to array returned by if (with else)';
 is "@119797", "4 5 6", 'writing to array returned by if (with else)';

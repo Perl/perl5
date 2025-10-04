@@ -392,6 +392,11 @@ consisted of only ASCII characters.  The real upper limit was as few as
 Chinese or Osage.  Now an identifier in any language may contain at
 least 255 characters.
 
+=item *
+
+Fixed parsing of array names starting with a digit in double-quotish
+context under C<use utf8;>.
+
 =back
 
 =head1 Known Problems
