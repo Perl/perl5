@@ -210,7 +210,7 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 #### End of system configuration section. ####
 
 c0 = $(MALLOC_C) av.c builtin.c caretx.c class.c deb.c doio.c doop.c dquote.c dump.c globals.c gv.c hv.c mro_core.c
-c1 = mg.c locale.c mathoms.c miniperlmain.c numeric.c op.c pad.c peep.c perl.c perlio.c
+c1 = mg.c locale.c long_names.c mathoms.c miniperlmain.c numeric.c op.c pad.c peep.c perl.c perlio.c
 c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regcomp_debug.c
 c3 = regcomp_invlist.c regcomp_study.c regcomp_trie.c regexec.c reentr.c
 c4 = run.c scope.c sv.c taint.c time64.c toke.c universal.c utf8.c util.c vms.c keywords.c
@@ -635,6 +635,8 @@ hv$(O) : hv.c $(h)
 keywords$(O) : keywords.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 locale$(O) : locale.c $(h)
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+long_names$(O) : long_names.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 malloc$(O) : malloc.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)

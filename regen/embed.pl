@@ -59,6 +59,8 @@ $has_compat_macro{$_} = 1 for @have_compatibility_macros;
 my $unflagged_pointers;
 my @az = ('a'..'z');
 
+my %need_longs;     # For long function names
+
 #
 # See database of global and static function prototypes in embed.fnc
 # This is used to generate prototype headers under various configurations,
@@ -156,7 +158,6 @@ sub generate_proto_h {
         }
 
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
@@ -195,6 +196,10 @@ sub generate_proto_h {
         else {
             die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
         }
+
+        # A macro only gets assertions for it if it is to get Perl_ added to
+        # it.
+        my $args_assert_line = ! $has_mflag || $flags =~ tr/mp// > 1;
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
@@ -344,7 +349,10 @@ sub generate_proto_h {
                     }
                     my $argname = $1;
 
-                    if (defined $argname && (! $has_mflag || $binarycompat)) {
+                    if (defined $argname && (   ! $has_mflag
+                                             || $binarycompat
+                                             || $args_assert_line))
+                    {
                         if ($nn||$nz) {
                             push @asserts, "assert($argname)";
                         }
@@ -436,7 +444,6 @@ sub generate_proto_h {
             $ret .= join( "\n", map { (" " x 8) . $_ } @attrs );
         }
         $ret .= ";";
-        $ret = "/* $ret */" if $has_mflag;
 
         # Hide the prototype from non-authorized code.  This acts kind of like
         # __attribute__visibility__("hidden") for cases where that can't be
@@ -473,6 +480,13 @@ sub generate_proto_h {
             }
         }
         $ret .= "\n";
+
+        # These become functions in this case.
+        if ($flags =~ tr/mp// > 1) {    # Has both m and p
+            $ret = "#${ind}if defined(PERL_NO_SHORT_NAMES)\n"
+                 . "$ret\n"
+                 . "#${ind}endif\n";
+        }
 
         $ret = "#${ind}ifndef PERL_NO_INLINE_FUNCTIONS\n$ret\n#${ind}endif"
             if $static_inline;
@@ -635,6 +649,15 @@ sub embed_h {
                      . "$ind  $no_thread_full_define" # No \n because no chomp
                      . "#${ind}endif\n";
             }
+
+            # These remain macros when short names are allowed
+            $ret = "#${ind}if !defined(PERL_NO_SHORT_NAMES)\n"
+                 . "$ind  $ret"
+                 . "#${ind}endif\n";
+
+            # And tell later code that this needs to be handled when short
+            # names are not allowed.
+            $need_longs{$full_name} = $embed;
         }
         elsif ($flags !~ /[omM]/) {
             my $argc = scalar @$args;
@@ -817,11 +840,72 @@ sub generate_embedvar_h {
         unless $error_count;
 }
 
+sub generate_long_names_c {
+    my $longs = shift;
+    my $fh = open_print_header("long_names.c");
+
+    print $fh <<~'EOT';
+
+        /* This file expands to (nearly) nothing unless PERL_NO_SHORT_NAMES is
+           #defined.  It contains function definitions for elements that are
+           otherwise macros */
+
+        #include "EXTERN.h"
+        #define PERL_IN_LONG_NAMES_C
+        #include "perl.h"
+
+        #if ! defined(PERL_NO_SHORT_NAMES)
+           /* ..." warning: ISO C forbids an empty source file"
+              So make sure we have something in here by processing the headers
+              anyway. */
+        #else
+        EOT
+
+    for my $full_name (sort keys %{$longs}) {
+        my $entry = $longs->{$full_name};
+        my $return_type = $entry->{return_type};
+
+        print $fh "\n", $entry->{return_type}, "\n";
+
+        print $fh $full_name, "(";
+        print $fh 'pTHX_ ' unless $entry->{flags} =~ /T/;
+        print $fh join ", ", @{$entry->{args}} if $entry->{args};
+        print $fh ")\n";
+
+        print $fh <<~EOT;
+            {
+                PERL_ARGS_ASSERT_\U$full_name;
+            EOT
+
+        # Now the definition, which is to just call the short name macro.
+        # Since this is compiled as part of the core, the short name is
+        # available
+        print $fh " " x 4;
+        print $fh "return " if $return_type ne 'void';
+        print $fh $entry->{name}, "(";
+
+        # This assumes the parameter name is the final \w+ chars
+        print $fh join ", ", map { s/ .*? (\w+) $ /$1/rx } @{$entry->{args}}
+                                                        if @{$entry->{args}};
+        print $fh ");\n";
+
+        print $fh "}\n";
+    }
+
+    print $fh <<~"EOF";
+
+        #endif
+        EOF
+
+    read_only_bottom_close_and_rename($fh) if ! $error_count;
+}
+
 sub update_headers {
     my ($all, $api, $ext, $core) = setup_embed(); # see regen/embed_lib.pl
     generate_proto_h($all);
     die_at_end "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
     generate_embed_h($all, $api, $ext, $core);
+    generate_long_names_c(\%need_longs);
     generate_embedvar_h();
     die "$error_count errors found" if $error_count;
 }

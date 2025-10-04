@@ -550,8 +550,8 @@ h = \
 
 c_base = \
     av.c builtin.c caretx.c class.c deb.c doio.c doop.c dquote.c dump.c \
-    globals.c gv.c hv.c keywords.c locale.c mathoms.c mg.c mro_core.c \
-    numeric.c op.c pad.c peep.c perl.c perlio.c perly.c \
+    globals.c gv.c hv.c keywords.c locale.c long_names.c mathoms.c mg.c \
+    mro_core.c numeric.c op.c pad.c peep.c perl.c perlio.c perly.c \
     pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c \
     reentr.c regcomp.c regcomp_debug.c regcomp_invlist.c regcomp_study.c \
     regcomp_trie.c regexec.c run.c scope.c sv.c taint.c time64.c toke.c \
