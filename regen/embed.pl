@@ -705,7 +705,7 @@ sub generate_embed_h {
 
     #if ! defined(PERL_NO_SHORT_NAMES) || defined(PERL_CORE)
 
-    /* Hide global symbols */
+    /* Create short name macros that hide any need for thread context */
 
     END
 

@@ -93,7 +93,7 @@
 #endif /* !defined(PERL_CORE) */
 #if defined(PERL_CORE) || !defined(PERL_NO_SHORT_NAMES)
 
-/* Hide global symbols */
+/* Create short name macros that hide any need for thread context */
 
 # define AvFILL_(a)                             Perl_AvFILL_(aTHX_ a)
 # define Gv_AMupdate(a,b)                       Perl_Gv_AMupdate(aTHX_ a,b)
