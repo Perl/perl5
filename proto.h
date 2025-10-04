@@ -791,9 +791,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 #define PERL_ARGS_ASSERT_DIE_UNWIND             \
         assert(msv)
 
-/* PERL_CALLCONV bool
-Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp); */
-
 PERL_CALLCONV bool
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp, int fd, int do_report)
         __attribute__visibility__("hidden");
@@ -2649,9 +2646,6 @@ PERL_CALLCONV Pid_t
 Perl_my_fork(void);
 #define PERL_ARGS_ASSERT_MY_FORK
 
-/* PERL_CALLCONV I32
-Perl_my_lstat(pTHX); */
-
 PERL_CALLCONV I32
 Perl_my_lstat_flags(pTHX_ const U32 flags);
 #define PERL_ARGS_ASSERT_MY_LSTAT_FLAGS
@@ -2688,9 +2682,6 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 PERL_CALLCONV int
 Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 #define PERL_ARGS_ASSERT_MY_SOCKETPAIR
-
-/* PERL_CALLCONV I32
-Perl_my_stat(pTHX); */
 
 PERL_CALLCONV I32
 Perl_my_stat_flags(pTHX_ const U32 flags);
@@ -6885,20 +6876,11 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
 # define PERL_ARGS_ASSERT__ADD_RANGE_TO_INVLIST
 
-/* PERL_CALLCONV void
-_invlist_intersection(pTHX_ SV * const a, SV * const b, SV **i); */
-
 # define PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND \
         assert(b); assert(i)
 
 # define PERL_ARGS_ASSERT__INVLIST_INVERT       \
         assert(invlist)
-
-/* PERL_CALLCONV void
-_invlist_subtract(pTHX_ SV * const a, SV * const b, SV **result); */
-
-/* PERL_CALLCONV void
-_invlist_union(pTHX_ SV * const a, SV * const b, SV **output); */
 
 # define PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND \
         assert(b); assert(output)
@@ -10716,9 +10698,6 @@ PERL_CALLCONV bool
 Perl_dump_c_backtrace(pTHX_ PerlIO *fp, int max_depth, int skip);
 # define PERL_ARGS_ASSERT_DUMP_C_BACKTRACE      \
         assert(fp)
-
-/* PERL_CALLCONV void
-free_c_backtrace(pTHX_ Perl_c_backtrace *bt); */
 
 PERL_CALLCONV Perl_c_backtrace *
 Perl_get_c_backtrace(pTHX_ int max_depth, int skip)

@@ -184,6 +184,10 @@ sub generate_proto_h {
             if ($flags =~ /S/) {
                 die_at_end "$plain_func: m and S flags are mutually exclusive";
             }
+
+            # Don't generate a prototype for a macro that is not usable by the
+            # outside world.
+            next unless $flags =~ /[ACE]/;
         }
         else {
             die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
