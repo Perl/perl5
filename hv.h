@@ -558,10 +558,12 @@ whether it is valid to call C<HvAUX()>.
 #define hv_exists(hv, key, klen)					\
     cBOOL(hv_common_key_len((hv), (key), (klen), HV_FETCH_ISEXISTS, NULL, 0))
 
-#define hv_fetch(hv, key, klen, lval)					\
-    ((SV**) hv_common_key_len((hv), (key), (klen), (lval)		\
-                              ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)	\
-                              : HV_FETCH_JUST_SV, NULL, 0))
+#define hv_fetch(hv, key, klen, lval)					    \
+    ((SV**) hv_common_key_len((hv), (key), (klen),                          \
+                              (HV_FETCH_JUST_SV | ((lval)                   \
+                                                   ? HV_FETCH_LVALUE        \
+                                                   : 0)),                   \
+                              NULL, 0))
 
 #define hv_delete(hv, key, klen, flags)					\
     (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),			\
