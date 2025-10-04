@@ -55,9 +55,6 @@ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 #define PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC   \
         assert(file)
 
-/* PERL_CALLCONV const XOP *
-Perl_custom_op_xop(pTHX_ const OP *o); */
-
 PERL_CALLCONV const char *
 Perl_langinfo(const nl_item item);
 #define PERL_ARGS_ASSERT_PERL_LANGINFO

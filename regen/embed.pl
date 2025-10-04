@@ -188,6 +188,9 @@ sub generate_proto_h {
             # Don't generate a prototype for a macro that is not usable by the
             # outside world.
             next unless $flags =~ /[ACE]/;
+
+            # Nor one that is weird, which would likely be a syntax error.
+            next if $flags =~ /u/;
         }
         else {
             die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/;
