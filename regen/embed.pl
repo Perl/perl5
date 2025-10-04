@@ -703,7 +703,7 @@ sub generate_embed_h {
      * BEWARE that a bunch of macros don't have long names, so either must be
      * added or don't use them if you define this symbol */
 
-    #ifndef PERL_NO_SHORT_NAMES
+    #if ! defined(PERL_NO_SHORT_NAMES) || defined(PERL_CORE)
 
     /* Hide global symbols */
 
@@ -715,7 +715,7 @@ sub generate_embed_h {
 
     print $em <<~'END';
 
-    #endif      /* #ifndef PERL_NO_SHORT_NAMES */
+    #endif      /* if !defined(PERL_NO_SHORT_NAMES) || defined(PERL_CORE) */
 
     #if !defined(PERL_CORE)
     /* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to

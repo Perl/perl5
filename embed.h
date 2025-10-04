@@ -91,7 +91,7 @@
              !defined(PERL_WANT_VARARGS) */
 # endif /* !defined(PERL_NOCOMPAT) */
 #endif /* !defined(PERL_CORE) */
-#if !defined(PERL_NO_SHORT_NAMES)
+#if defined(PERL_CORE) || !defined(PERL_NO_SHORT_NAMES)
 
 /* Hide global symbols */
 
@@ -2488,6 +2488,6 @@
 # else
 #   define get_context                          Perl_get_context
 # endif
-#endif /* !defined(PERL_NO_SHORT_NAMES) */
+#endif /* defined(PERL_CORE) || !defined(PERL_NO_SHORT_NAMES) */
 
 /* ex: set ro ft=c: */
