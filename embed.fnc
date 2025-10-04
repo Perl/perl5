@@ -1522,7 +1522,7 @@ Cp	|void * |hv_common	|NULLOK NOCHECK HV *hv			\
 				|int action				\
 				|NULLOK SV *val 			\
 				|U32 hash
-Cp	|void * |hv_common_key_len					\
+Cip	|void * |hv_common_key_len					\
 				|NULLOK HV *hv				\
 				|NN const char *key			\
 				|I32 klen_i32				\

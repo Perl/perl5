@@ -1536,11 +1536,6 @@ PERL_CALLCONV void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int flags, int action, SV *val, U32 hash);
 #define PERL_ARGS_ASSERT_HV_COMMON
 
-PERL_CALLCONV void *
-Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32, const int action, SV *val, const U32 hash);
-#define PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN      \
-        assert(!hv || SvTYPE(hv) == SVt_PVHV); assert(key)
-
 PERL_CALLCONV HV *
 Perl_hv_copy_hints_hv(pTHX_ HV * const ohv)
         __attribute__warn_unused_result__;
@@ -9936,6 +9931,11 @@ PERL_STATIC_INLINE MGVTBL *
 Perl_get_vtbl(pTHX_ int vtbl_id)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_GET_VTBL
+
+PERL_STATIC_INLINE void *
+Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32, const int action, SV *val, const U32 hash);
+# define PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN     \
+        assert(!hv || SvTYPE(hv) == SVt_PVHV); assert(key)
 
 PERL_STATIC_INLINE Size_t
 Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
