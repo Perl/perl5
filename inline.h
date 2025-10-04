@@ -291,6 +291,28 @@ S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
 }
 #endif
 
+/* ------------------------------- hv.c ------------------------------- */
+
+/* Common code for hv_delete()/hv_exists()/hv_fetch()/hv_store()  */
+PERL_STATIC_INLINE void *
+Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
+                       const int action, SV *val, const U32 hash)
+{
+    PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN;
+
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+        klen = -klen_i32;
+        flags = HVhek_UTF8;
+    } else {
+        klen = klen_i32;
+        flags = 0;
+    }
+    return hv_common(hv, NULL, key, klen, flags, action, val, hash);
+}
+
 /* ------------------------------- iperlsys.h ------------------------------- */
 #if ! defined(PERL_IMPLICIT_SYS) && defined(USE_ITHREADS)
 

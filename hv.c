@@ -465,26 +465,6 @@ compute it.
 =cut
 */
 
-/* Common code for hv_delete()/hv_exists()/hv_fetch()/hv_store()  */
-void *
-Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
-                       const int action, SV *val, const U32 hash)
-{
-    STRLEN klen;
-    int flags;
-
-    PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN;
-
-    if (klen_i32 < 0) {
-        klen = -klen_i32;
-        flags = HVhek_UTF8;
-    } else {
-        klen = klen_i32;
-        flags = 0;
-    }
-    return hv_common(hv, NULL, key, klen, flags, action, val, hash);
-}
-
 void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                int flags, int action, SV *val, U32 hash)
