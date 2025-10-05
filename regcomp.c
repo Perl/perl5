@@ -16328,7 +16328,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * were returned to us in the array 'algorithmic_names' from data in
      * lib/unicore/Name.pm.  'code_point' in the name is expressed in hex. */
     for (i = 0; i <= av_top_index((AV *) algorithmic_names); i++) {
-        IV j;
+        UV j;
 
         /* Each element of the array is a hash, giving the details for the
          * series of names it covers.  There is the base name of the characters
@@ -16337,8 +16337,8 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
          * characters that could possibly be in a name in this series. */
         HV * this_series = (HV *) SvRV(* av_fetch((AV *) algorithmic_names, i, 0));
         SV * prefix = * hv_fetchs(this_series, "name", 0);
-        IV low = SvIV(* hv_fetchs(this_series, "low", 0));
-        IV high = SvIV(* hv_fetchs(this_series, "high", 0));
+        UV low = SvUV(* hv_fetchs(this_series, "low", 0));
+        UV high = SvUV(* hv_fetchs(this_series, "high", 0));
         char * legal = SvPVX(* hv_fetchs(this_series, "legal", 0));
 
         /* Pre-allocate an SV with enough space */
@@ -16359,8 +16359,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
             for (j = low; j <= high; j++) { /* For each code point in the series */
 
                 /* Get its name, and see if it matches the subpattern */
-                sv_setpvf(algo_name, "%s-%X", SvPVX(prefix),
-                                     (unsigned) j);
+                sv_setpvf(algo_name, "%s-%" UVXf, SvPVX(prefix), j);
 
                 if (execute_wildcard(subpattern_re,
                                     SvPVX(algo_name),
