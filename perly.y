@@ -122,6 +122,7 @@
 %type <ival>  parse_bare_statement
 %type <ival>  parse_block
 %type <ival>  parse_expression
+%type <ival>  parse_full_statement
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -194,6 +195,7 @@ grammar
 	:	parse_bare_statement
 	|	parse_block
 	|	parse_expression
+	|	parse_full_statement
 	|	GRAMPROG
 			{
 			  parser->expect = XSTATE;
@@ -204,19 +206,6 @@ grammar
 			  newPROG(block_end($remember,$stmtseq));
 			  PL_compiling.cop_seq = 0;
 			  $$ = 0;
-			}
-	|	GRAMFULLSTMT
-			{
-			  parser->expect = XSTATE;
-                          $<ival>$ = 0;
-			}
-		fullstmt
-			{
-			  PL_pad_reset_pending = TRUE;
-			  PL_eval_root = $fullstmt;
-			  $$ = 0;
-			  yyunlex();
-			  parser->yychar = yytoken = YYEOF;
 			}
 	|	GRAMSTMTSEQ
 			{
@@ -777,6 +766,21 @@ parse_expression
 		{
 			PL_eval_root = $optexpr;
 			$$ = 0;
+		}
+	;
+
+parse_full_statement
+	:	GRAMFULLSTMT
+		{
+			parser->expect = XSTATE;
+		}
+		fullstmt
+		{
+			PL_pad_reset_pending = TRUE;
+			PL_eval_root = $fullstmt;
+			$$ = 0;
+			yyunlex();
+			parser->yychar = yytoken = YYEOF;
 		}
 	;
 
