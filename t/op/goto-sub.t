@@ -7,10 +7,10 @@ BEGIN {
 	require './charset_tools.pl';
 }
 
+use v5.16;
 use warnings;
-use strict;
 use Config;
-plan tests => 40;
+plan tests => 41;
 
 # Excerpts from 'perldoc -f goto' as of perl-5.40.1 (Aug 2025)
 #
@@ -357,6 +357,21 @@ SKIP:
     $f->();
 }
 
+
+# GH 23804 goto __SUB__
+{
+    my $fac = sub {
+        unshift @_, 1;
+        goto sub {
+            my ($acc, $i) = @_;
+            return $acc if $i < 2;
+            @_ = ($acc * $i, $i - 1);
+            goto __SUB__;
+        };
+    };
+
+    is $fac->(5), 120, 'recursion via goto __SUB__';
+}
 
 # Final test: ensure that we saw no deprecation warnings
 # ... but rework this to count fatalizations once work is more developed
