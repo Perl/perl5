@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use strict;
 use Config;
-plan tests => 95;
+plan tests => 97;
 
 our $TODO;
 
@@ -232,7 +232,7 @@ EOT
 close $f;
 
 $r = runperl(prog => 'BEGIN { unshift @INC, q[.] } use Op_goto01; print qq[DONE\n]');
-is($r, "OK\nDONE\n", "goto within use-d file"); 
+is($r, "OK\nDONE\n", "goto within use-d file");
 unlink_all "Op_goto01.pm";
 
 # test for [perl #24108]
@@ -300,8 +300,8 @@ moretests:
     }
 
     $z = 0;
-  L2: 
-    { 
+  L2:
+    {
 	$z += 10;
 	is($z, 10, 'prefer this scope (block body) to outer scope (block entry)');
 	goto L2 if $z == 10;
@@ -311,7 +311,7 @@ moretests:
     }
 
 
-    { 
+    {
 	$z = 0;
 	while (1) {
 	  L3: # not inner scope
@@ -326,7 +326,7 @@ moretests:
     }
 
   L4: # not outer scope
-    { 
+    {
 	$z = 0;
 	while (1) {
 	  L4: # not inner scope
@@ -342,10 +342,10 @@ moretests:
 
     {
 	my $loop = 0;
-	for my $x (0..1) { 
+	for my $x (0..1) {
 	  L2: # without this, fails 1 (middle) out of 3 iterations
 	    $z = 0;
-	  L2: 
+	  L2:
 	    $z += 10;
 	    is($z, 10,
 		"same label, multiple times in same scope (choose 1st) $loop");
@@ -586,7 +586,7 @@ TODO: {
     FASTCGI_NEXT_REQUEST:
     last;
   }
-  
+
   sub that_cgi_script {
     local $SIG{__DIE__} = sub { print "die handler\n"; exit; print "exit failed?\n"; };
     print "before\n";
@@ -683,3 +683,32 @@ eval {
 };
 is $@,'', 'goto the first parameter of a binary expression [perl #132854]';
 
+# [GH-23806]
+{
+    my $orig = "(A)";
+    my $exp = '(A)(B)(tobermory)';
+
+    my ($refoo, $sefoo) = ($orig x 2);
+    $refoo = $sefoo = "(A)";
+
+    if($refoo eq $refoo) {
+        goto ORINOCO;
+    }
+    $refoo .= "(X)";
+    ORINOCO:
+    sub pudley { return "tobermory"; }
+    $refoo .= "(B)";
+    $refoo .= "(".pudley().")";
+    is($refoo, $exp, "GH-23806: goto LABEL worked as expected");
+
+    if($sefoo eq $sefoo) {
+        goto ("AMA")."ZON";
+    }
+    $sefoo .= "(X)";
+    AMAZON:
+    sub canterbury { return "tobermory"; }
+    $sefoo .= "(B)";
+    $sefoo .= "(".canterbury().")";
+    is($sefoo, $refoo,
+        "GH-23806: goto EXPR exempt from 'looks like a function' rule; worked as expected");
+}
