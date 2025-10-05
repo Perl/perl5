@@ -61,7 +61,7 @@ our $foo;
 
 sub f1 {
     my $x;
-    goto sub { $x=0; ok(1,"don't prematurely free CV\n") }
+    goto sub { $x=0; ok(1, "don't prematurely free CV"); };
 }
 f1();
 
