@@ -1836,7 +1836,7 @@ sub warning_like {
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
 { # Closure
-    my $watchdog;
+    my $watchdog_process;
     my $watchdog_thread;
 
 sub watchdog ($;$)
@@ -1850,9 +1850,9 @@ sub watchdog ($;$)
         $watchdog_thread->kill('KILL');
         undef $watchdog_thread;
     }
-    elsif ($watchdog) {
-        kill('KILL', $watchdog);
-        undef $watchdog;
+    elsif ($watchdog_process) {
+        kill('KILL', $watchdog_process);
+        undef $watchdog_process;
     }
     else {
         alarm(0);
@@ -1862,7 +1862,7 @@ sub watchdog ($;$)
     }
 
     # Make sure these aren't defined.
-    undef $watchdog;
+    undef $watchdog_process;
     undef $watchdog_thread;
 
     my $method = shift || "";
@@ -1913,7 +1913,7 @@ sub watchdog ($;$)
             return if ($pid_to_kill <= 0);
 
             # Launch watchdog process
-            undef $watchdog;
+            undef $watchdog_process;
             eval {
                 local $SIG{'__WARN__'} = sub {
                                              _diag("Watchdog warning: $_[0]");
@@ -1940,37 +1940,38 @@ sub watchdog ($;$)
                     if ($runperl =~ m/\s/) {
                         $runperl = qq{"$runperl"};
                     }
-                    $watchdog = system({ $runperl } 1, $runperl, '-e', $prog);
+                    $watchdog_process =
+                                system({ $runperl } 1, $runperl, '-e', $prog);
                 }
                 else {
                     my $cmd = _create_runperl(prog => $prog);
-                    $watchdog = system(1, $cmd);
+                    $watchdog_process = system(1, $cmd);
                 }
             };
 
-            if ($@ || $watchdog <= 0) {
+            if ($@ || $watchdog_process <= 0) {
                 $@ = "\n$@" if $@;
                 _diag("Failed to start watchdog$@\nTrying alternate method");
-                undef($watchdog);
+                undef($watchdog_process);
                 goto WATCHDOG_VIA_ALARM;
             }
 
             # Add END block to parent to terminate and clean up watchdog
             # process
             eval("END { local \$! = 0; local \$? = 0;
-                        wait() if kill('KILL', $watchdog); };");
+                        wait() if kill('KILL', $watchdog_process); };");
             return;
         }
 
         # Try using fork() to generate a watchdog process
-        undef $watchdog;
-        eval { $watchdog = fork() };
-        if (defined($watchdog)) {
-            if ($watchdog) {   # Parent process
+        undef $watchdog_process;
+        eval { $watchdog_process = fork() };
+        if (defined($watchdog_process)) {
+            if ($watchdog_process) {   # Parent process
                 # Add END block to parent to terminate and clean up watchdog
                 # process
                 eval "END { local \$! = 0; local \$? = 0;
-                            wait() if kill('KILL', $watchdog); };";
+                            wait() if kill('KILL', $watchdog_process); };";
                 return;
             }
 
