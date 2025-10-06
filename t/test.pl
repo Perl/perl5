@@ -1840,6 +1840,9 @@ sub warning_like {
     my $watchdog_thread;
     my $watchdog_alarm;
 
+    # Add END block to terminate and clean up any watchdog
+    END { watchdog(0); };
+
 sub watchdog ($;$)
 {
     my $timeout = shift;
@@ -1953,23 +1956,13 @@ sub watchdog ($;$)
                 goto WATCHDOG_VIA_ALARM;
             }
 
-            # Add END block to parent to terminate and clean up watchdog
-            # process
-            eval("END { local \$! = 0; local \$? = 0;
-                        wait() if kill('KILL', $watchdog_process); };");
             return;
         }
 
         # Try using fork() to generate a watchdog process
         eval { $watchdog_process = fork() };
         if (defined($watchdog_process)) {
-            if ($watchdog_process) {   # Parent process
-                # Add END block to parent to terminate and clean up watchdog
-                # process
-                eval "END { local \$! = 0; local \$? = 0;
-                            wait() if kill('KILL', $watchdog_process); };";
-                return;
-            }
+            return if $watchdog_process;  # Parent process
 
             ### Watchdog process code
 
