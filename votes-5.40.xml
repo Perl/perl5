@@ -41,6 +41,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.40
      See https://github.com/Perl/perl5/pull/22635 for a fix
 -->
 
+<commit votes="jkeenan" id="53119a6d7b" issue="22710" pull="22938" desc="fix refassign in non-void context"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
