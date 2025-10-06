@@ -281,6 +281,8 @@ sub generate_proto_h {
                     "$plain_func: n flag is contradicted by having arguments"
                                                             if $flags =~ /n/;
             my $n;
+            my @bounded_strings;
+
             for my $arg ( @$args ) {
                 ++$n;
 
@@ -296,8 +298,29 @@ sub generate_proto_h {
                     die_at_end "$plain_func: func: m flag required for"
                              . '"literal" argument' unless $has_mflag;
                 }
-                else {
-                    my $nn =      ( $arg =~ s/\bNN\b// );
+                else {  # Look for constraints about this argument
+
+                    my $ptr_type;   # E, M, and S are the three types
+                                    # corresponding respectively to EPTR(Q)?,
+                                    # MPTR, and SPTR
+                    my $equal = ""; # EPTRQ is just an EPTR with this set to
+                                    # "="
+                    if ($arg =~ s/ \b ( [EMS] ) PTR (Q)? \b //x) {;
+                        $ptr_type = $1;
+                        if (defined $2) {
+                            die_at_end ": $func: Q only valid with EPTR"
+                                                          if $ptr_type ne 'E';
+                            $equal = "=";
+                        }
+                        elsif ($ptr_type eq 'M') {
+                            # A middle position always is <=
+                            $equal = "=";
+                        }
+                    }
+
+                    # A $ptr_type is a specialized 'nn'
+                    my $nn =  (defined $ptr_type) + ( $arg =~ s/\bNN\b// );
+
                     my $nz =      ( $arg =~ s/\bNZ\b// );
                     my $nullok =  ( $arg =~ s/\bNULLOK\b// );
                     my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
@@ -310,7 +333,8 @@ sub generate_proto_h {
                     # Note that we don't care if you say e.g., 'NN' multiple
                     # times
                     die_at_end
-                           ":$func: $arg Use only one of NN, NULLOK, and NZ"
+                           ":$func: $arg Use only one of NN (including"
+                         . " EPTR, EPTRQ, MPTR, SPTR), NULLOK, or NZ"
                                                if 0 + $nn + $nz + $nullok > 1;
 
                     push( @nonnull, $n ) if $nn;
@@ -322,7 +346,8 @@ sub generate_proto_h {
                     # pointer.
                     if ($args_assert_line && $arg =~ /\*/) {
                         if ($nn + $nullok == 0) {
-                            warn "$func: $arg needs NN or NULLOK\n";
+                            warn "$func: $arg needs one of: NN, EPTR, EPTRQ,"
+                               . " MPTR, SPTR, or NULLOK\n";
                             ++$unflagged_pointers;
                         }
 
@@ -358,9 +383,150 @@ sub generate_proto_h {
                                                                    if $nullok;
                             push @asserts, "assert($type_assert)";
                         }
+
+                        # If this is a pointer to a character string argument,
+                        # we need extra work.
+                        if ($ptr_type) {
+
+                            # For these, not only does the parameter have to
+                            # be non-NULL, but every dereference of it has to
+                            # too.
+                            #
+                            # First, get all the '*" derefs, except one.
+                            my $derefs = "*" x (($arg =~ tr/*//) - 1);
+
+                            # Then add the asserts that each dereferenced
+                            # layer is non-NULL.
+                            for (my $i = 1; $i <= length $derefs; $i++) {
+                                push @asserts, "assert("
+                                             . substr($derefs, 0, $i)
+                                             . "$argname)";
+                            }
+
+                            # Save the data we need later
+                            my %entry = (
+                                          argname => $argname,
+                                          equal   => $equal,
+                                          deref   => $derefs,
+                                        );
+
+                            # The motivation for all this is that some string
+                            # pointer parameters have constraints, such as
+                            # that the starting position can't be beyond the
+                            # ending one.  Unfortunately, the function's
+                            # parameters can be positioned in its prototype so
+                            # that the pointer to the ending position comes
+                            # before the pointer to the starting one, and this
+                            # can't be changed because they are API.  To cope
+                            # with this, we use the array below to save just
+                            # the crucial information about each while parsing
+                            # the parameters.  After all information is
+                            # gathered, we go through and handle it.  An entry
+                            # looks like this after all the parameters are
+                            # parsed:
+                            #   {
+                            #       'M' => {
+                            #               'equal' => '=',
+                            #               'argname' => 'curpos',
+                            #               'deref' => ''
+                            #               },
+                            #       'E' => {
+                            #               'equal' => '',
+                            #               'argname' => 'strend',
+                            #               'deref' => ''
+                            #               },
+                            #       'S' => {
+                            #               'equal' => '',
+                            #               'deref' => '',
+                            #               'argname' => 'strbeg'
+                            #               }
+                            #   }
+                            #
+                            # Only two of the keys need be present.
+                            # If the function has multiple string parameters,
+                            # the [0] entry in @bounded_strings will be for
+                            # the first string, [1] for the second, and so on.
+                            #
+                            # Here, we are in the middle of parsing the
+                            # parameters.  We add this parameter to the
+                            # current string's boundary constraints hash,
+                            # or create a new string if necessary.  The new
+                            # string's data is pushed as a new element onto
+                            # the array.
+                            #
+                            # A new element is created if the array is empty,
+                            # or if there is already an existing hash element
+                            # for the new key.  For example, you can't have
+                            # two EPTRs for the same string, so the second
+                            # must be for a new string.
+                            #
+                            # Otherwise we presume this hash value is for the
+                            # most recent string in the array.  If we have an
+                            # EPTR, and an MPTR comes along, assume that it is
+                            # for the same string as the EPTR.
+                            #
+                            # This hack works as long as all parameters for the
+                            # current string come before any of the next
+                            # string, which is the case for all existing
+                            # function calls, and any new ones can be
+                            # fashioned to conform.
+                            if (   @bounded_strings
+                                && ! defined $bounded_strings[-1]{$ptr_type})
+                            {
+                                $bounded_strings[-1]{$ptr_type} = \%entry;
+                            }
+                            else {
+                                push @bounded_strings,
+                                     { $ptr_type => \%entry };
+                            }
+                        }   # End of special handling of string bounds
                     }
                 }   # End of this argument
             }   # End of loop through all arguments
+
+            # We have looped through all arguments, and for any bounded string
+            # ones, we have saved the information needed to generate things
+            # like
+            #   assert(s < e)
+            foreach my $string (@bounded_strings) {
+
+                # We need at least two bounds
+                if (1 == (  (defined $string->{S})
+                          + (defined $string->{M})
+                          + (defined $string->{E})))
+                {
+                    my ($type, $object) = each %$string;
+                    die_at_end
+                           "$func: Missing PTR constraint for string given by "
+                         . $object->{argname};
+                    next;
+                }
+
+                # But three or any two bounds work.  We may need to generate
+                # two asserts, so loop to do so, skipping any missing one.
+                for my $i (["S", "E"], ["S", "M"], ["M", "E"]) {
+
+                    # We don't need an assert for the whole span if we have an
+                    # intermediate one.
+                    next if defined $string->{M} &&    $i->[0] eq 'S'
+                                                    && $i->[1] eq 'E';
+
+                    my $lower = $string->{$i->[0]} or next;
+                    my $upper = $string->{$i->[1]} or next;
+
+                    # This reduces to either;
+                    #   assert(lower < upper);
+                    # or
+                    #   assert(lower <= upper);
+                    #
+                    # There might also be some derefences, like **lower
+                    push @asserts, "assert("
+                                        . "$lower->{deref}$lower->{argname}"
+                                        . " <$upper->{equal} "
+                                        . "$upper->{deref}$upper->{argname}"
+                                        . ")";
+                }
+            }
 
             $ret .= join ", ", @$args;
         }

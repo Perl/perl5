@@ -182,20 +182,73 @@
 :	2)  the internal logic used by code that reads this file.
 :	3)  explicit asserts that you add in this file.
 :
-:   Sections below give more details of each item.
+:   Sections below give more details of each item.  For readability,
+:   constraints are split into two sections, one for pointer parameters, and
+:   one for the rest.
 :
 : *** Pointer Parameter Constraints
 :
-:   You must specify what checking is needed for all pointer arguments.  If the
-:   pointer is allowed to point to NULL, prefix that argument with 'NULLOK'
-:   (following the template of the many entries in this file that have that).
-:   If it can't be NULL, use 'NN' (again many entries herein do that).
-:   The reason for this requirement is to tell the maintainers that you have
-:   considered the question about the argument, and this is the answer.
+:   Every pointer parameter must have a constraint; one of the following:
+:
+:   NN	    means the called function is expecting this pointer parameter to be
+:	    non-NULL, and likely is not equipped to handle it being NULL.
+:   NULLOK  means the called function definitely can handle this parameter
+:	    being NULL.  The reason you need to specify this at all is to tell
+:	    future maintainers that you have considered the question about the
+:	    parameter, and this is the answer.
+:   SPTR    means that not only must this pointer parameter be non-NULL, it
+:	    points to a position in a character string, which the called
+:	    function is not to look behind.  If a parameter is marked with this
+:	    constraint, another parameter to the function must be marked with
+:	    one of the constraints below in this list.
+:   EPTR    means that not only must this pointer parameter be non-NULL, it
+:	    points to the position one byte beyond the end of a character
+:	    string.  The called function is not to look at the byte in that
+:	    position or any higher ones.  If a parameter is marked with this
+:	    constraint, another parameter to the function must be marked with
+:	    SPTR, or MPTR (described just below).  It also is fine to have
+:	    both an SPTR parameter and an MPTR one.
+:   MPTR    means that not only must this pointer parameter be non-NULL, it
+:	    points to a position somewhere in the middle of a character string.
+:	    If a parameter is marked with this constraint, another parameter to
+:	    the function must be marked with one of SPTR, EPTR, or EPTRQ
+:	    (described just below).  It also is fine to have both an SPTR
+:	    parameter and an EPTR (or EPTRQ) one.
+:   EPTRQ   is like EPTR, but the called function is equpped to handle the case
+:	    where the input SPTR and/or MPTR are equal to this parameter; they
+:	    don't have to be strictly less than it.  If a parameter is marked
+:	    with this constraint, no parameter may be marked as EPTR.
+:
+:   To summarize, either
+:	    SPTR <= MPTR <  EPTR
+:   or
+:	    SPTR <= MPTR <= EPTRQ
+:   In each equation all three or any two of the constraints must be present.
+:
+:   When only two constraints are present and one of them is either EPTR or
+:   EPTRQ, the difference between the remaining SPTR or MPTR becomes somewhat
+:   fuzzy; the generated assertion will be the same whichever constraint is
+:   used.  You should choose the one that makes the most sense for the
+:   semantics of the parameter.  For example, there are currently some
+:   functions with parameters named 'curpos', and no SPTR parameter exists.
+:   The name of the parameter clearly indicates it isn't necessarily the
+:   starting position of the string, so using MPTR as the constraint makes the
+:   most sense.
+:
+:   The parameters for the function can be in any order, except if a function
+:   has multiple different character strings, all the parameters for the first
+:   string must be positioned in the function call before any of the parameters
+:   for the second, and so forth.  (This accommodates the very few existing
+:   functions that have multiple strings passed to them, without needing to
+:   create a more general mechanism, like possibly SPTR1..EPTR1, SPTR2..EPTR2.)
 :
 : *** Non-pointer Parameter Constraints
 :
-:   For a numeric argument, you may specify that it can't be 0 by using 'NZ'
+:   Only a single constraint is currently available to you to use; it is for
+:   parameters that are some sort of integer
+:
+:   NZ	    means the called function is expecting this parameter to be
+:	    non-zero, and is not equipped to handle it being 0.
 :
 : *** Automatically generated checks
 :
