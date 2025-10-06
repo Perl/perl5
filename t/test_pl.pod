@@ -489,8 +489,8 @@ Note: currently only used by F<test.pl> itself.
 
 =item watchdog($timeout, $method);
 
-Start a watchdog timer for C<$timeout> seconds.  If C<$timeout> is
-zero then disables any existing watchdog timer.
+Start a watchdog timer for C<$timeout> seconds, while disabling any
+existing one.  If C<$timeout> is zero no new timer is created.
 
 The timeout may be scaled by setting C<PERL_TEST_TIME_OUT_FACTOR> or
 C<PERL_TEST_TIMEOUT_FACTOR> in the environment.  If C<PERL_VALGRIND>
