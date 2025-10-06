@@ -158,9 +158,33 @@
 :   that performs parameter sanity validation.  If the function is named
 :   'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.  You
 :   should place a call to that macro in foo() before any other code.  It will
-:   automatically expand to whatever checking is currently generated for foo
+:   automatically expand to whatever checking is currently generated for 'foo'
 :   (often none).  These are in the form of assert() calls, so they are only
 :   activated for DEBUGGING builds.
+:
+:   Currently, it is optional to include an empty ARGS_ASSERT macro in your
+:   functions.  But a porting test enforces that a non-empty one does get
+:   included.  The call should be at the top of your function so that the
+:   sanity checks have passed before anything tries to use an argument.  When
+:   writing a new function, add the macro even if not required, and you'll
+:   never have to go back and add one later when more checks do get added.
+:
+:   (Much of the perl core was written assuming the ARGS_ASSERT macro needed to
+:   be placed after any declarations because of the C89 Standard.  That is no
+:   longer true with C99; feel free when modifying code in the vicinity to move
+:   this call to the very beginning of the function.)
+:
+:   The contents of ARGS_ASSERT are determined by
+:	1)  constraints you give in this file.  Each such constraint is
+:	    positioned in the input between the '|' that marks the beginning of
+:	    a parameter definition, and the the definition itself, like
+:		|NN const char * const name
+:	2)  the internal logic used by code that reads this file.
+:	3)  explicit asserts that you add in this file.
+:
+:   Sections below give more details of each item.
+:
+: *** Pointer Parameter Constraints
 :
 :   You must specify what checking is needed for all pointer arguments.  If the
 :   pointer is allowed to point to NULL, prefix that argument with 'NULLOK'
@@ -169,17 +193,23 @@
 :   The reason for this requirement is to tell the maintainers that you have
 :   considered the question about the argument, and this is the answer.
 :
+: *** Non-pointer Parameter Constraints
+:
 :   For a numeric argument, you may specify that it can't be 0 by using 'NZ'
 :
-:   regen/embed.pl may automatically add further checking for any argument as
-:   it deems desirable.  You can override this by specifying 'NOCHECK'
+: *** Automatically generated checks
 :
-:	Currently this further checking is just for pointer parameters that
-:	point to AVs, CVs or HVs.  The check is that the SV being pointed to is
-:	of the intended type, by inspecting its SvTYPE(). For some functions
-:	this check may be inappropriate, as in rare cases the arguments passed
-:	may not be of the correct type. As already mentioned, NOCHECK
-:	suppresses this check.
+:   regen/embed.pl may automatically add further checking for any argument as
+:   it deems desirable.  You can disable this by specifying 'NOCHECK' for the
+:   parameter
+:
+:   Currently this further checking is just for pointer parameters that point
+:   to AVs, CVs or HVs.  The check is that the SV being pointed to is of the
+:   intended type, by inspecting its SvTYPE(). For some functions this check
+:   may be inappropriate, as in rare cases the arguments passed may not be of
+:   the correct type. As already mentioned, NOCHECK suppresses this check.
+:
+: *** Your custom checks
 :
 :   You can specify your own checking beyond these by adding any number of
 :   assert() calls to any given entry after its final argument.  Whatever you
@@ -189,18 +219,7 @@
 :   will make it less visible to a maintainer than keeping it in the function
 :   it applies to
 :
-:   Currently, it is optional to include an empty ARGS_ASSERT macro in your
-:   functions.  But a porting test enforces that a non-empty one is included.
-:   The call should be at the top of your function so that the sanity checks
-:   have passed before anything tries to use an argument.  When writing a new
-:   function, add the macro even if not required, and you'll never have to go
-:   back and add one later when more checks do get added
-:
 : AUTOMATIC DOCUMENTATION GENERATION
-:
-: Just below is a description of the relevant parts of the automatic
-: documentation generation system which heavily involves this file.  Below that
-: is a description of all the flags used in this file.
 :
 : Scattered around the perl source are lines of the form:
 :
