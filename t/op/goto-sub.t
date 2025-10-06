@@ -10,7 +10,7 @@ BEGIN {
 use v5.16;
 use warnings;
 use Config;
-plan tests => 41;
+plan tests => 44;
 
 # Excerpts from 'perldoc -f goto' as of perl-5.40.1 (Aug 2025)
 #
@@ -371,6 +371,33 @@ SKIP:
     };
 
     is $fac->(5), 120, 'recursion via goto __SUB__';
+}
+
+# GH 23811 goto &NAME where block evaluates to coderef
+{
+    local $@;
+    my $hw = 'hello world';
+
+    eval {
+        my $coderef = sub { return $hw; };
+        my $rv = goto &{ 1; $coderef; };
+    };
+    like($@, qr/^Can't goto subroutine from an eval-block/,
+        "Can't goto subroutine (block which evaluates to coderef) from an eval block");
+
+    eval {
+        sub helloworld { return $hw; }
+        my $rv = goto &helloworld;
+    };
+    like($@, qr/^Can't goto subroutine from an eval-block/,
+        "Can't goto named subroutine from an eval block");
+
+    eval {
+        my $coderef = sub { return $hw; };
+        my $rv = goto &$coderef;
+    };
+    like($@, qr/^Can't goto subroutine from an eval-block/,
+        "Can't goto subroutine (&coderef) from an eval block");
 }
 
 # Final test: ensure that we saw no deprecation warnings
