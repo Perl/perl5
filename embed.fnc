@@ -1346,8 +1346,8 @@ Adpx	|void	|forbid_outofblock_ops					\
 				|NN const char *blockname
 p	|void	|force_locale_unlock
 Cp	|void	|force_out_malformed_utf8_message_			\
-				|NN const U8 * const p			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const p		\
+				|EPTR const U8 * const e		\
 				|U32 flags				\
 				|const bool die_here
 Adfp	|char * |form		|NN const char *pat			\
@@ -1811,12 +1811,12 @@ ARTdip	|Size_t |isUTF8_CHAR_flags					\
 				|NN const U8 * const e			\
 				|const U32 flags
 CPRTp	|STRLEN |is_utf8_char_helper_					\
-				|NN const U8 * const s			\
-				|NN const U8 *e 			\
+				|SPTR const U8 * const s		\
+				|EPTR const U8 *e			\
 				|const U32 flags
 CPRTp	|Size_t |is_utf8_FF_helper_					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTR const U8 * const e		\
 				|const bool require_partial
 ATdmp	|bool	|is_utf8_fixed_width_buf_flags				\
 				|NN const U8 * const s			\
@@ -1834,18 +1834,18 @@ ATdip	|bool	|is_utf8_fixed_width_buf_loclen_flags			\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
 CRp	|Size_t |is_utf8_FOO_	|const U8 classnum			\
-				|NN const U8 *p 			\
-				|NN const U8 * const e
+				|SPTR const U8 *p			\
+				|EPTR const U8 * const e
 ARTdip	|bool	|is_utf8_invariant_string_loc				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep
 CRp	|Size_t |is_utf8_perl_idcont_					\
-				|NN const U8 *p 			\
-				|NN const U8 * const e
+				|SPTR const U8 *p			\
+				|EPTR const U8 * const e
 CRp	|Size_t |is_utf8_perl_idstart_					\
-				|NN const U8 *p 			\
-				|NN const U8 * const e
+				|SPTR const U8 *p			\
+				|EPTR const U8 * const e
 ARTdmp	|bool	|is_utf8_string |NN const U8 *s 			\
 				|STRLEN len
 ARTdip	|bool	|is_utf8_string_flags					\
@@ -1873,11 +1873,11 @@ ATdip	|bool	|is_utf8_string_loclen_flags				\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
 APTdmp	|bool	|is_utf8_valid_partial_char				\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e
+				|SPTR const U8 * const s0		\
+				|EPTR const U8 * const e
 ARTdip	|bool	|is_utf8_valid_partial_char_flags			\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTR const U8 * const e		\
 				|const U32 flags
 
 : Used in perly.y
@@ -3139,12 +3139,12 @@ Adp	|const char *|scan_version					\
 				|NN const char *s			\
 				|NN SV *rv				\
 				|bool qv
-Adp	|char * |scan_vstring	|NN const char *s			\
-				|NN const char * const e		\
+Adp	|char * |scan_vstring	|SPTR const char *s			\
+				|EPTR const char * const e		\
 				|NN SV *sv
 EXpx	|char * |scan_word	|NN char *s				\
-				|NN char *dest				\
-				|NN char *dest_end			\
+				|SPTR char *dest			\
+				|EPTR char *dest_end			\
 				|int allow_package			\
 				|NN STRLEN *slp
 Cp	|U32	|seed
@@ -3758,27 +3758,27 @@ Cp	|UV	|to_uni_upper	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
 Cp	|UV	|to_utf8_fold_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|U8 flags
 
 Cp	|UV	|to_utf8_lower_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 Cp	|UV	|to_utf8_title_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 Cp	|UV	|to_utf8_upper_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
@@ -5847,8 +5847,8 @@ Ei	|I32	|foldEQ_latin1_s2_folded				\
 ERS	|bool	|isFOO_lc	|const U8 classnum			\
 				|const U8 character
 ERS	|bool	|isFOO_utf8_lc	|const U8 classnum			\
-				|NN const U8 *character 		\
-				|NN const U8 *e
+				|SPTR const U8 *character		\
+				|EPTR const U8 *e
 ERS	|bool	|isGCB		|const GCB_enum before			\
 				|const GCB_enum after			\
 				|NN const U8 * const strbeg		\
@@ -5892,8 +5892,8 @@ ERST	|U8 *	|reghopmaybe3	|NN U8 *s				\
 				|NN const U8 * const lim
 ERS	|bool	|reginclass	|NULLOK regexp * const prog		\
 				|NN const regnode * const n		\
-				|NN const U8 * const p			\
-				|NN const U8 * const p_end		\
+				|SPTR const U8 * const p		\
+				|EPTR const U8 * const p_end		\
 				|bool const utf8_target
 ERS	|SSize_t|regmatch	|NN regmatch_info *reginfo		\
 				|NN char *startpos			\
@@ -6181,8 +6181,8 @@ RS	|char * |scan_const	|NN char *start
 RS	|char * |scan_formline	|NN char *s
 RS	|char * |scan_heredoc	|NN char *s
 S	|char * |scan_ident	|NN char *s				\
-				|NN char *dest				\
-				|NN char *dest_end			\
+				|SPTR char *dest			\
+				|EPTR char *dest_end			\
 				|bool chk_unary
 RS	|char * |scan_inputsymbol					\
 				|NN char *start
@@ -6247,8 +6247,8 @@ RS	|UV	|check_locale_boundary_crossing 			\
 				|NN U8 * const ustrp			\
 				|NN STRLEN *lenp
 RTi	|int	|does_utf8_overflow					\
-				|NN const U8 * const s			\
-				|NN const U8 *e
+				|SPTR const U8 * const s		\
+				|EPTR const U8 *e
 RTi	|int	|isFF_overlong	|NN const U8 * const s			\
 				|const STRLEN len
 RTi	|SSize_t|is_utf8_overlong					\
@@ -6278,16 +6278,16 @@ S	|UV	|to_utf8_case_	|const UV original				\
 				|NULLOK const U32 * const * const aux_tables	\
 				|NULLOK const U8 * const aux_table_lengths	\
 				|NN const char * const normal
-S	|UV	|turkic_fc	|NN const U8 * const p			\
-				|NN const U8 * const e			\
+S	|UV	|turkic_fc	|SPTR const U8 * const p		\
+				|EPTR const U8 * const e		\
 				|NN U8 *ustrp				\
 				|NN STRLEN *lenp
-S	|UV	|turkic_lc	|NN const U8 * const p0 		\
-				|NN const U8 * const e			\
+S	|UV	|turkic_lc	|SPTR const U8 * const p0		\
+				|EPTR const U8 * const e		\
 				|NN U8 *ustrp				\
 				|NN STRLEN *lenp
-S	|UV	|turkic_uc	|NN const U8 * const p			\
-				|NN const U8 * const e			\
+S	|UV	|turkic_uc	|SPTR const U8 * const p		\
+				|EPTR const U8 * const e		\
 				|NN U8 *ustrp				\
 				|NN STRLEN *lenp
 RS	|char * |unexpected_non_continuation_text			\
