@@ -1838,6 +1838,7 @@ sub warning_like {
 { # Closure
     my $watchdog_process;
     my $watchdog_thread;
+    my $watchdog_alarm;
 
 sub watchdog ($;$)
 {
@@ -1854,8 +1855,9 @@ sub watchdog ($;$)
         kill('KILL', $watchdog_process);
         undef $watchdog_process;
     }
-    else {
+    elsif ($watchdog_alarm) {
         alarm(0);
+        undef $watchdog_alarm;
     }
 
     return;
@@ -2060,6 +2062,7 @@ WATCHDOG_VIA_ALARM:
                              my $sig = ($is_vms) ? 'TERM' : 'KILL';
                              kill($sig, $pid_to_kill);
                            };
+        $watchdog_alarm = 1;
     }
 }
 } # End closure
