@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use strict;
 use Config;
-plan tests => 96;
+plan tests => 97;
 
 our $TODO;
 
@@ -691,3 +691,17 @@ is $@,'', 'goto the first parameter of a binary expression [perl #132854]';
     GH23806skip:
     is $x, "good", "goto EXPR exempt from 'looks like a function' rule";
 }
+
+# [GH #23810]
+{
+    local $@;
+    eval {
+        goto GH23810;
+        if (0) {
+            GH23810: ;
+        }
+    };
+    like($@, qr/^Can't find label GH23810/,
+        "goto LABEL can't be used to go into a construct that is optimized away");
+}
+
