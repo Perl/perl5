@@ -620,7 +620,7 @@ sub check_and_add_proto_defn {
     $flags .= "n" if $flags =~ /#/;    # No threads, arguments for #ifdef
 
     my @munged_args= $args_ref->@*;
-    s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
+    s/\b(?:NN|NULLOK|[SM]PTR|EPTRQ?)\b\s+//g for @munged_args;
 
     my $flags_sans_d = $flags;
     my $docs_expected = $flags_sans_d =~ s/d//g;
