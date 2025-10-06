@@ -654,7 +654,7 @@ Perl_delimcpy_no_escape(char *to, const char *to_end,
 Copy a source buffer to a destination buffer, stopping at (but not including)
 the first occurrence in the source of an unescaped (defined below) delimiter
 byte, C<delim>.  The source is the bytes between S<C<from> and C<from_end> -
-1>.  Similarly, the dest is C<to> up to C<to_end>.
+1> inclusive.  Similarly, the dest is C<to> up through C<to_end>.
 
 The number of bytes copied is written to C<*retlen>.
 
