@@ -1844,9 +1844,9 @@ sub watchdog ($;$)
 {
     my $timeout = shift;
 
-    # If cancelling, use the state variables to know which method was used to
-    # create the watchdog.
-    if ($timeout == 0) {
+    # Cancel any existing timer, so the caller can set multiple ones without
+    # cancelling first.  For safety, handle the case where somehow more than
+    # one type of watchdog got set.
     if ($watchdog_thread) {
         $watchdog_thread->kill('KILL');
         undef $watchdog_thread;
@@ -1860,12 +1860,8 @@ sub watchdog ($;$)
         undef $watchdog_alarm;
     }
 
-    return;
-    }
-
-    # Make sure these aren't defined.
-    undef $watchdog_process;
-    undef $watchdog_thread;
+    # We are done if this call was just to cancel
+    return if $timeout == 0;
 
     my $method = shift || "";
 
@@ -1915,7 +1911,6 @@ sub watchdog ($;$)
             return if ($pid_to_kill <= 0);
 
             # Launch watchdog process
-            undef $watchdog_process;
             eval {
                 local $SIG{'__WARN__'} = sub {
                                              _diag("Watchdog warning: $_[0]");
@@ -1966,7 +1961,6 @@ sub watchdog ($;$)
         }
 
         # Try using fork() to generate a watchdog process
-        undef $watchdog_process;
         eval { $watchdog_process = fork() };
         if (defined($watchdog_process)) {
             if ($watchdog_process) {   # Parent process
