@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 402;
+plan 404;
 
 for my $decl (qw< my CORE::state our local >) {
     for my $funny (qw< $ @ % >) {
@@ -106,7 +106,14 @@ for $decl ('my', 'state', 'our', 'local') {
     } # END 'for $sigl' loop
 } # END 'for $decl' loop
 
+
 use feature 'refaliasing'; no warnings "experimental::refaliasing";
+
+my \@bar = [];
+my $ref = my \@bar = [];
+ok defined $ref, 'GH-23816: declared_ref is defined';
+is ref($ref), 'ARRAY', 'GH-23816: identified array ref';
+
 for $decl ('my', 'state', 'our') {
     for $sigl ('$', '@', '%') {
         my $code = '#line ' . (__LINE__+1) . ' ' . __FILE__ . "\n" . <<~'ENE';
