@@ -1851,11 +1851,11 @@ sub watchdog ($;$)
         $watchdog_thread->kill('KILL');
         undef $watchdog_thread;
     }
-    elsif ($watchdog_process) {
+    if ($watchdog_process) {
         kill('KILL', $watchdog_process);
         undef $watchdog_process;
     }
-    elsif ($watchdog_alarm) {
+    if ($watchdog_alarm) {
         alarm(0);
         undef $watchdog_alarm;
     }
