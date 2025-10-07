@@ -626,13 +626,12 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
 STATIC U8 *
 S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 {
+    PERL_ARGS_ASSERT_FIND_SPAN_END;
+    assert(send >= s);
+
     /* Returns the position of the first byte in the sequence between 's' and
      * 'send-1' inclusive that isn't 'span_byte'; returns 'send' if none found.
      * */
-
-    PERL_ARGS_ASSERT_FIND_SPAN_END;
-
-    assert(send >= s);
 
     if ((STRLEN) (send - s) >= PERL_WORDSIZE
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
@@ -700,15 +699,14 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 STATIC U8 *
 S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 {
+    PERL_ARGS_ASSERT_FIND_NEXT_MASKED;
+    assert(send >= s);
+    assert((byte & mask) == byte);
+
     /* Returns the position of the first byte in the sequence between 's'
      * and 'send-1' inclusive that when ANDed with 'mask' yields 'byte';
      * returns 'send' if none found.  It uses word-level operations instead of
      * byte to speed up the process */
-
-    PERL_ARGS_ASSERT_FIND_NEXT_MASKED;
-
-    assert(send >= s);
-    assert((byte & mask) == byte);
 
 #ifndef EBCDIC
 
@@ -778,16 +776,15 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 STATIC U8 *
 S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
 {
+    PERL_ARGS_ASSERT_FIND_SPAN_END_MASK;
+    assert(send >= s);
+    assert((span_byte & mask) == span_byte);
+
     /* Returns the position of the first byte in the sequence between 's' and
      * 'send-1' inclusive that when ANDed with 'mask' isn't 'span_byte'.
      * 'span_byte' should have been ANDed with 'mask' in the call of this
      * function.  Returns 'send' if none found.  Works like find_span_end(),
      * except for the AND */
-
-    PERL_ARGS_ASSERT_FIND_SPAN_END_MASK;
-
-    assert(send >= s);
-    assert((span_byte & mask) == span_byte);
 
     if ((STRLEN) (send - s) >= PERL_WORDSIZE
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
@@ -11792,10 +11789,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
     bool retval = true;
     SCX_enum * ret_script = NULL;
-
-    assert(send >= s);
-
-    PERL_ARGS_ASSERT_ISSCRIPT_RUN;
 
     /* All code points in 0..255 are either Common or Latin, so must be a
      * script run.  We can return immediately unless we need to know which
