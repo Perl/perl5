@@ -291,6 +291,18 @@ S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
 }
 #endif
 
+/* ------------------------------- hv.h ------------------------------- */
+
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_PP_HOT_C)
+PERL_STATIC_INLINE bool
+S_hv_is_env(pTHX_ HV *hv)
+{
+    PERL_ARGS_ASSERT_HV_IS_ENV;
+
+    return SvRMAGICAL((SV *)hv) && (bool)mg_find((SV *)hv, PERL_MAGIC_env);
+}
+#endif
+
 /* ------------------------------- iperlsys.h ------------------------------- */
 #if ! defined(PERL_IMPLICIT_SYS) && defined(USE_ITHREADS)
 
